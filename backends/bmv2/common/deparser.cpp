@@ -21,12 +21,12 @@ limitations under the License.
 
 namespace BMV2 {
 
-void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* body,
-                                            Util::JsonArray* order, Util::JsonArray* primitives) {
+void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl> *body,
+                                            Util::JsonArray *order, Util::JsonArray *primitives) {
     ctxt->conv->simpleExpressionsOnly = true;
     for (auto s : *body) {
         auto isR = false;
-        IR::MethodCallExpression* mce2 = nullptr;
+        IR::MethodCallExpression *mce2 = nullptr;
         if (auto block = s->to<IR::BlockStatement>()) {
             convertDeparserBody(&block->components, order, primitives);
             continue;
@@ -45,7 +45,7 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* bo
                     if ((extmeth->method->name.name == "get" ||
                          extmeth->method->name.name == "get_state") &&
                         extmeth->originalExternType->name == "InternetChecksum") {
-                        const IR::Expression* l;
+                        const IR::Expression *l;
                         l = assign->left;
                         isR = true;
                         auto dest = new IR::Argument(l);
@@ -104,7 +104,7 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* bo
                             em->method->name.name == "get")) {
                     // PSA backend extern
                     ctxt->conv->simpleExpressionsOnly = false;
-                    Util::IJson* json;
+                    Util::IJson *json;
                     if (isR) {
                         json = ExternConverter::cvtExternObject(ctxt, em, mce2, s, true);
                     } else {
@@ -130,7 +130,7 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* bo
     ctxt->conv->simpleExpressionsOnly = false;
 }
 
-Util::IJson* DeparserConverter::convertDeparser(const IR::P4Control* ctrl) {
+Util::IJson *DeparserConverter::convertDeparser(const IR::P4Control *ctrl) {
     auto result = new Util::JsonObject();
     result->emplace("name", name);
     result->emplace("id", nextId("deparser"));
@@ -141,7 +141,7 @@ Util::IJson* DeparserConverter::convertDeparser(const IR::P4Control* ctrl) {
     return result;
 }
 
-bool DeparserConverter::preorder(const IR::P4Control* control) {
+bool DeparserConverter::preorder(const IR::P4Control *control) {
     auto deparserJson = convertDeparser(control);
     ctxt->json->deparsers->append(deparserJson);
     for (auto c : control->controlLocals) {

@@ -35,7 +35,7 @@ class BMV2Options : public CompilerOptions {
     BMV2Options() {
         registerOption(
             "--emit-externs", nullptr,
-            [this](const char*) {
+            [this](const char *) {
                 emitExterns = true;
                 return true;
             },
@@ -43,14 +43,14 @@ class BMV2Options : public CompilerOptions {
             "The generated code follows the BMv2 JSON specification.");
         registerOption(
             "-o", "outfile",
-            [this](const char* arg) {
+            [this](const char *arg) {
                 outputFile = arg;
                 return true;
             },
             "Write output to outfile");
         registerOption(
             "--fromJSON", "file",
-            [this](const char* arg) {
+            [this](const char *arg) {
                 loadIRFromJson = true;
                 file = arg;
                 return true;

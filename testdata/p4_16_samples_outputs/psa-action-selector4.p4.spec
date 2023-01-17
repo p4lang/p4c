@@ -121,53 +121,85 @@ selector as_sel {
 		m.local_metadata_data
 	}
 	member_id m.Ingress_as_member_id
-	n_groups_max 1024
-	n_members_per_group_max 65536
+	n_groups_max 0x400
+	n_members_per_group_max 0x10000
 }
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
+	mov m.Ingress_as_member_id 0x0
+	mov m.Ingress_as_group_id 0xFFFFFFFF
 	table tbl
 	jmpnh LABEL_END
+	jmpeq LABEL_FALSE_0 m.Ingress_as_group_id 0xFFFFFFFF
 	table as_sel
 	jmpnh LABEL_END
 	table as
 	jmpnh LABEL_END
 	table foo
-	LABEL_END :	table tbl
-	jmpnh LABEL_END_2
-	table as_sel
-	jmpnh LABEL_END_2
-	table as
-	jmpnh LABEL_END_2
+	jmp LABEL_END
+	jmp LABEL_END
+	LABEL_FALSE_0 :	table as
+	jmpnh LABEL_END
 	table foo
-	LABEL_END_2 :	table tbl
-	jmpnh LABEL_FALSE_5
+	LABEL_END :	mov m.Ingress_as_member_id 0x0
+	mov m.Ingress_as_group_id 0xFFFFFFFF
+	table tbl
+	jmpnh LABEL_END_4
+	jmpeq LABEL_FALSE_5 m.Ingress_as_group_id 0xFFFFFFFF
 	table as_sel
-	jmpnh LABEL_FALSE_6
+	jmpnh LABEL_END_4
 	table as
-	jmpnh LABEL_FALSE_7
-	jmp LABEL_END_5
-	LABEL_FALSE_7 :	table foo
-	jmp LABEL_END_5
-	LABEL_FALSE_6 :	table foo
-	jmp LABEL_END_5
-	LABEL_FALSE_5 :	table foo
-	LABEL_END_5 :	table tbl
-	jmpnh LABEL_FALSE_8
-	table as_sel
+	jmpnh LABEL_END_4
+	table foo
+	jmp LABEL_END_4
+	jmp LABEL_END_4
+	LABEL_FALSE_5 :	table as
+	jmpnh LABEL_END_4
+	table foo
+	LABEL_END_4 :	mov m.Ingress_as_member_id 0x0
+	mov m.Ingress_as_group_id 0xFFFFFFFF
+	table tbl
 	jmpnh LABEL_FALSE_9
+	jmpeq LABEL_FALSE_10 m.Ingress_as_group_id 0xFFFFFFFF
+	table as_sel
+	jmpnh LABEL_FALSE_11
 	table as
-	jmpnh LABEL_FALSE_10
-	jmp LABEL_END_8
-	LABEL_FALSE_10 :	table foo
-	jmp LABEL_END_8
+	jmpnh LABEL_FALSE_12
+	jmp LABEL_END_9
+	LABEL_FALSE_12 :	table foo
+	jmp LABEL_END_9
+	LABEL_FALSE_11 :	table foo
+	jmp LABEL_END_9
+	LABEL_FALSE_10 :	table as
+	jmpnh LABEL_FALSE_13
+	jmp LABEL_END_9
+	LABEL_FALSE_13 :	table foo
+	jmp LABEL_END_9
 	LABEL_FALSE_9 :	table foo
-	jmp LABEL_END_8
-	LABEL_FALSE_8 :	table foo
-	LABEL_END_8 :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	LABEL_END_9 :	mov m.Ingress_as_member_id 0x0
+	mov m.Ingress_as_group_id 0xFFFFFFFF
+	table tbl
+	jmpnh LABEL_FALSE_14
+	jmpeq LABEL_FALSE_15 m.Ingress_as_group_id 0xFFFFFFFF
+	table as_sel
+	jmpnh LABEL_FALSE_16
+	table as
+	jmpnh LABEL_FALSE_17
+	jmp LABEL_END_14
+	LABEL_FALSE_17 :	table foo
+	jmp LABEL_END_14
+	LABEL_FALSE_16 :	table foo
+	jmp LABEL_END_14
+	LABEL_FALSE_15 :	table as
+	jmpnh LABEL_FALSE_18
+	jmp LABEL_END_14
+	LABEL_FALSE_18 :	table foo
+	jmp LABEL_END_14
+	LABEL_FALSE_14 :	table foo
+	LABEL_END_14 :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP :	drop

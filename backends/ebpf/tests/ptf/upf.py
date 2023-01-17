@@ -22,7 +22,7 @@ from scapy.layers.l2 import Ether
 
 GTPU_UDP_PORT=2152
 
-#PTF
+# PTF
 N3_PTF_PORT=0
 N6_PTF_PORT=1
 N9_PTF_PORT=2
@@ -32,7 +32,7 @@ ACCESS = 0
 CORE= 1
 SGi_LAN = 2
 
-#MAC addresses
+# MAC addresses
 UPF_N3_MAC = "00:00:00:00:00:01"
 UPF_N6_MAC = "00:00:00:00:00:02"
 UPF_N9_MAC = "00:00:00:00:00:03"
@@ -61,15 +61,18 @@ SERVER1_IP="192.168.2.21"
 SERVER2_IP="5.5.5.5"
 SERVER2_UDP_PORT=6970
 
+
 def pkt_gtpu_encap(pkt,teid,ip_dst,ip_src):
     return Ether(src=pkt[Ether].src, dst=pkt[Ether].dst) / \
            IP(src=ip_src,dst=ip_dst)/UDP(dport=GTPU_UDP_PORT)/GTP_U_Header(teid=teid)/pkt[Ether].payload
+
 
 def pkt_route(pkt, mac_src, mac_dst):
     new_pkt = pkt.copy()
     new_pkt[Ether].src = mac_src
     new_pkt[Ether].dst = mac_dst
     return new_pkt
+
 
 class UPFTest(P4EbpfTest):
     p4_file_path = "../psa/examples/upf.p4"
@@ -79,10 +82,10 @@ class UPFTest(P4EbpfTest):
         self.table_add(table="ingress_upf_ingress_session_lookup_by_ue_ip", key=[ue_ip], action=1,data=[seid])
 
     def runTest(self):
-        #link number
-        N3_PORT=DP_PORTS[0]
-        N6_PORT=DP_PORTS[1]
-        N9_PORT=DP_PORTS[2]
+        # link number
+        N3_PORT = DP_PORTS[0]
+        N6_PORT = DP_PORTS[1]
+        N9_PORT = DP_PORTS[2]
         self.table_add(table="ingress_upf_ingress_source_interface_lookup_by_port", key=[N3_PORT], action=1, data=[ACCESS])
         self.table_add(table="ingress_upf_ingress_source_interface_lookup_by_port", key=[N9_PORT], action=1, data=[CORE])
         self.table_add(table="ingress_upf_ingress_source_interface_lookup_by_port", key=[N6_PORT], action=1, data=[SGi_LAN])

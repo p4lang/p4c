@@ -31,7 +31,7 @@ class PathName final {
     static const char pathSeparators[2];
     cstring str;
 
-    const char* findLastSeparator() const;
+    const char *findLastSeparator() const;
 
  public:
     static inline cstring separator() {
@@ -43,8 +43,8 @@ class PathName final {
     }
 
     PathName(cstring str) : str(str) {}             // NOLINT(runtime/explicit)
-    PathName(const char* str) : str(str) {}         // NOLINT(runtime/explicit)
-    PathName(const std::string& str) : str(str) {}  // NOLINT(runtime/explicit)
+    PathName(const char *str) : str(str) {}         // NOLINT(runtime/explicit)
+    PathName(const std::string &str) : str(str) {}  // NOLINT(runtime/explicit)
     // get the file name extension.  It starts at the last dot.
     // e.g, exe
     cstring getExtension() const;
@@ -59,8 +59,8 @@ class PathName final {
     PathName getFolder() const;
     cstring toString() const { return str; }
     bool isNullOrEmpty() const { return str.isNullOrEmpty(); }
-    bool operator==(const PathName& other) const { return str == other.str; }
-    bool operator!=(const PathName& other) const { return str != other.str; }
+    bool operator==(const PathName &other) const { return str == other.str; }
+    bool operator!=(const PathName &other) const { return str != other.str; }
     PathName join(cstring component) const;
 
     static PathName empty;

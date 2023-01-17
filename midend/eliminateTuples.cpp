@@ -4,7 +4,7 @@
 
 namespace P4 {
 
-const IR::Type* ReplacementMap::convertType(const IR::Type* type) {
+const IR::Type *ReplacementMap::convertType(const IR::Type *type) {
     auto it = replacement.find(type);
     if (it != replacement.end()) return it->second;
     if (auto st = type->to<IR::Type_Struct>()) {
@@ -44,14 +44,14 @@ const IR::Type* ReplacementMap::convertType(const IR::Type* type) {
     return type;
 }
 
-const IR::Type_Struct* ReplacementMap::getReplacement(const IR::Type_BaseList* tt) {
+const IR::Type_Struct *ReplacementMap::getReplacement(const IR::Type_BaseList *tt) {
     auto st = convertType(tt)->to<IR::Type_Struct>();
     CHECK_NULL(st);
     replacement.emplace(tt, st);
     return st;
 }
 
-IR::IndexedVector<IR::Node>* ReplacementMap::getNewReplacements() {
+IR::IndexedVector<IR::Node> *ReplacementMap::getNewReplacements() {
     auto retval = new IR::IndexedVector<IR::Node>();
     for (auto t : replacement) {
         if (inserted.find(t.second) == inserted.end()) {
@@ -63,7 +63,7 @@ IR::IndexedVector<IR::Node>* ReplacementMap::getNewReplacements() {
     return retval;
 }
 
-const IR::Node* DoReplaceTuples::postorder(IR::Type_BaseList* bl) {
+const IR::Node *DoReplaceTuples::postorder(IR::Type_BaseList *bl) {
     auto type = getOriginal<IR::Type_BaseList>();
     // If any of the arguments is a type variable leave the type unchanged
     for (auto arg : type->components) {
@@ -75,7 +75,7 @@ const IR::Node* DoReplaceTuples::postorder(IR::Type_BaseList* bl) {
     return st;
 }
 
-const IR::Node* DoReplaceTuples::insertReplacements(const IR::Node* before) {
+const IR::Node *DoReplaceTuples::insertReplacements(const IR::Node *before) {
     // Check that we are in the top-level P4Program list of declarations.
     if (!getParent<IR::P4Program>()) return before;
 
@@ -86,7 +86,7 @@ const IR::Node* DoReplaceTuples::insertReplacements(const IR::Node* before) {
     return result;
 }
 
-const IR::Node* DoReplaceTuples::postorder(IR::ArrayIndex* expression) {
+const IR::Node *DoReplaceTuples::postorder(IR::ArrayIndex *expression) {
     auto type = repl->typeMap->getType(expression->left);
     if (type->is<IR::Type_Tuple>()) {
         auto cst = expression->right->to<IR::Constant>();

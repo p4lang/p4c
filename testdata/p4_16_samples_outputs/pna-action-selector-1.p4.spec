@@ -112,8 +112,8 @@ selector as_sel {
 		m.local_metadata_data
 	}
 	member_id m.MainControlT_as_member_id
-	n_groups_max 400
-	n_members_per_group_max 10000
+	n_groups_max 0x400
+	n_members_per_group_max 0x10000
 }
 
 apply {
@@ -123,11 +123,13 @@ apply {
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	MAINPARSERIMPL_ACCEPT :	mov m.MainControlT_as_member_id 0x0
-	mov m.MainControlT_as_group_id 0x0
+	mov m.MainControlT_as_group_id 0xFFFFFFFF
 	table tbl
+	jmpnh LABEL_END
+	jmpeq LABEL_END_0 m.MainControlT_as_group_id 0xFFFFFFFF
 	table as_sel
-	table as
-	emit h.ethernet
+	LABEL_END_0 :	table as
+	LABEL_END :	emit h.ethernet
 	emit h.ipv4
 	tx m.pna_main_output_metadata_output_port
 }

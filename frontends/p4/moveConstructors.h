@@ -18,6 +18,7 @@ limitations under the License.
 #define _FRONTENDS_P4_MOVECONSTRUCTORS_H_
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "ir/pass_manager.h"
 
 namespace P4 {
 
@@ -51,7 +52,7 @@ namespace P4 {
  */
 class MoveConstructors : public PassManager {
  public:
-    explicit MoveConstructors(ReferenceMap* refMap);
+    explicit MoveConstructors(ReferenceMap *refMap);
 };
 
 }  // namespace P4

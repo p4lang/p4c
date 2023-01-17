@@ -1,0 +1,3 @@
+issue3750.p4(2): [--Werror=type-error] error: ct: not supported as a tuple field
+void f(tuple<ct> t)
+             ^^

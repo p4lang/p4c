@@ -18,6 +18,7 @@ limitations under the License.
 #define _FRONTENDS_P4_HIERARCHICALNAMES_H_
 
 #include "ir/ir.h"
+#include "ir/visitor.h"
 
 namespace P4 {
 
@@ -58,39 +59,39 @@ class HierarchicalNames : public Transform {
     std::vector<cstring> stack;
 
  public:
-    cstring getName(const IR::IDeclaration* decl);
+    cstring getName(const IR::IDeclaration *decl);
 
     HierarchicalNames() {
         setName("HierarchicalNames");
         visitDagOnce = false;
     }
-    const IR::Node* preorder(IR::P4Parser* parser) override {
+    const IR::Node *preorder(IR::P4Parser *parser) override {
         stack.push_back(getName(parser));
         return parser;
     }
-    const IR::Node* postorder(IR::P4Parser* parser) override {
+    const IR::Node *postorder(IR::P4Parser *parser) override {
         stack.pop_back();
         return parser;
     }
 
-    const IR::Node* preorder(IR::P4Control* control) override {
+    const IR::Node *preorder(IR::P4Control *control) override {
         stack.push_back(getName(control));
         return control;
     }
-    const IR::Node* postorder(IR::P4Control* control) override {
+    const IR::Node *postorder(IR::P4Control *control) override {
         stack.pop_back();
         return control;
     }
 
-    const IR::Node* preorder(IR::P4Table* table) override {
+    const IR::Node *preorder(IR::P4Table *table) override {
         visit(table->annotations);
         prune();
         return table;
     }
 
-    const IR::Node* postorder(IR::Annotation* annotation) override;
+    const IR::Node *postorder(IR::Annotation *annotation) override;
     // Do not change name annotations on parameters
-    const IR::Node* preorder(IR::Parameter* parameter) override {
+    const IR::Node *preorder(IR::Parameter *parameter) override {
         prune();
         return parameter;
     }

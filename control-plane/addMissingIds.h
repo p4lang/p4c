@@ -11,13 +11,13 @@ namespace P4 {
 class MissingIdAssigner : public Transform {
     /// The reference map. This is needed to identify the correct references for
     /// some extern constructs.
-    ReferenceMap* refMap;
+    ReferenceMap *refMap;
 
     /// The type map. This is needed to identify the correct types for some
     /// extern constructs.
     /// The typeMap is not constant because the flattenHeader pass inserts
     /// types.
-    TypeMap* typeMap;
+    TypeMap *typeMap;
 
     /// Specifies the width of the IDs.
     static constexpr int ID_BIT_WIDTH = 32;
@@ -25,28 +25,28 @@ class MissingIdAssigner : public Transform {
     /// The symbol table that contains all the ID information.
     /// This ID assigner first computes this table,
     /// then uses the results to assign missing IDs.
-    const ControlPlaneAPI::P4RuntimeSymbolTable* symbols = nullptr;
+    const ControlPlaneAPI::P4RuntimeSymbolTable *symbols = nullptr;
 
     /// The arch builder is necessary to compute the correct symbol table for a
     /// particular architecture.
-    const ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface& archBuilder;
+    const ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface &archBuilder;
 
-    const IR::P4Program* preorder(IR::P4Program* program) override;
-    const IR::Property* postorder(IR::Property* property) override;
-    const IR::P4Table* postorder(IR::P4Table* table) override;
-    const IR::Type_Header* postorder(IR::Type_Header* hdr) override;
-    const IR::P4ValueSet* postorder(IR::P4ValueSet* valueSet) override;
-    const IR::P4Action* postorder(IR::P4Action* action) override;
+    const IR::P4Program *preorder(IR::P4Program *program) override;
+    const IR::Property *postorder(IR::Property *property) override;
+    const IR::P4Table *postorder(IR::P4Table *table) override;
+    const IR::Type_Header *postorder(IR::Type_Header *hdr) override;
+    const IR::P4ValueSet *postorder(IR::P4ValueSet *valueSet) override;
+    const IR::P4Action *postorder(IR::P4Action *action) override;
 
  public:
     explicit MissingIdAssigner(
-        ReferenceMap* refMap, TypeMap* typeMap,
-        const ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface& archBuilder);
+        ReferenceMap *refMap, TypeMap *typeMap,
+        const ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface &archBuilder);
 
     explicit MissingIdAssigner(
-        ReferenceMap* refMap, TypeMap* typeMap,
-        const ControlPlaneAPI::P4RuntimeSymbolTable* symbols,
-        const ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface& archBuilder);
+        ReferenceMap *refMap, TypeMap *typeMap,
+        const ControlPlaneAPI::P4RuntimeSymbolTable *symbols,
+        const ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface &archBuilder);
 };
 
 /// Scans the P4 program, run the evaluator pass, and derives the P4Runtime Ids
@@ -55,8 +55,8 @@ class MissingIdAssigner : public Transform {
 /// computed ID to the node.
 class AddMissingIdAnnotations final : public PassManager {
  public:
-    AddMissingIdAnnotations(ReferenceMap* refMap, TypeMap* typeMap,
-                            const ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface* archBuilder);
+    AddMissingIdAnnotations(ReferenceMap *refMap, TypeMap *typeMap,
+                            const ControlPlaneAPI::P4RuntimeArchHandlerBuilderIface *archBuilder);
 };
 
 }  // namespace P4

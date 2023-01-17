@@ -36,23 +36,23 @@ namespace P4 {
  *       a single label is replaced with a direct transition
  */
 class DoSimplifySelectCases : public Transform {
-    const TypeMap* typeMap;
+    const TypeMap *typeMap;
     bool requireConstants;
 
-    void checkSimpleConstant(const IR::Expression* expr) const;
+    void checkSimpleConstant(const IR::Expression *expr) const;
 
  public:
-    DoSimplifySelectCases(const TypeMap* typeMap, bool requireConstants)
+    DoSimplifySelectCases(const TypeMap *typeMap, bool requireConstants)
         : typeMap(typeMap), requireConstants(requireConstants) {
         setName("DoSimplifySelectCases");
     }
-    const IR::Node* preorder(IR::SelectExpression* expression) override;
+    const IR::Node *preorder(IR::SelectExpression *expression) override;
 };
 
 class SimplifySelectCases : public PassManager {
  public:
-    SimplifySelectCases(ReferenceMap* refMap, TypeMap* typeMap, bool requireConstants,
-                        TypeChecking* typeChecking = nullptr) {
+    SimplifySelectCases(ReferenceMap *refMap, TypeMap *typeMap, bool requireConstants,
+                        TypeChecking *typeChecking = nullptr) {
         if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoSimplifySelectCases(typeMap, requireConstants));

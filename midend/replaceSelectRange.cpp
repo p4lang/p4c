@@ -21,8 +21,8 @@
 namespace P4 {
 
 // expands subranges that do not cross over zero
-static void expandRange(const IR::Range* r, std::vector<const IR::Mask*>* masks,
-                        const IR::Type* maskType, big_int min, big_int max) {
+static void expandRange(const IR::Range *r, std::vector<const IR::Mask *> *masks,
+                        const IR::Type *maskType, big_int min, big_int max) {
     int width = r->type->width_bits();
     BUG_CHECK(width > 0, "zero-width range is not allowed %1%", r->type);
     big_int size_mask = ((((big_int)1) << width) - 1);
@@ -61,8 +61,8 @@ static void expandRange(const IR::Range* r, std::vector<const IR::Mask*>* masks,
     }
 }
 
-std::vector<const IR::Mask*>* DoReplaceSelectRange::rangeToMasks(const IR::Range* r,
-                                                                 size_t keyIndex) {
+std::vector<const IR::Mask *> *DoReplaceSelectRange::rangeToMasks(const IR::Range *r,
+                                                                  size_t keyIndex) {
     auto l = r->left->to<IR::Constant>();
     if (!l) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
@@ -78,7 +78,7 @@ std::vector<const IR::Mask*>* DoReplaceSelectRange::rangeToMasks(const IR::Range
         return nullptr;
     }
 
-    auto masks = new std::vector<const IR::Mask*>();
+    auto masks = new std::vector<const IR::Mask *>();
     auto right = ri->value;
     if (right < left) {
         ::warning(ErrorType::WARN_INVALID,
@@ -108,8 +108,8 @@ std::vector<const IR::Mask*>* DoReplaceSelectRange::rangeToMasks(const IR::Range
 }
 
 std::vector<IR::Vector<IR::Expression>> DoReplaceSelectRange::cartesianAppend(
-    const std::vector<IR::Vector<IR::Expression>>& vecs,
-    const std::vector<const IR::Mask*>& masks) {
+    const std::vector<IR::Vector<IR::Expression>> &vecs,
+    const std::vector<const IR::Mask *> &masks) {
     std::vector<IR::Vector<IR::Expression>> newVecs;
 
     for (auto v : vecs) {
@@ -125,7 +125,7 @@ std::vector<IR::Vector<IR::Expression>> DoReplaceSelectRange::cartesianAppend(
 }
 
 std::vector<IR::Vector<IR::Expression>> DoReplaceSelectRange::cartesianAppend(
-    const std::vector<IR::Vector<IR::Expression>>& vecs, const IR::Expression* e) {
+    const std::vector<IR::Vector<IR::Expression>> &vecs, const IR::Expression *e) {
     std::vector<IR::Vector<IR::Expression>> newVecs;
 
     for (auto v : vecs) {
@@ -138,12 +138,12 @@ std::vector<IR::Vector<IR::Expression>> DoReplaceSelectRange::cartesianAppend(
     return newVecs;
 }
 
-const IR::Node* DoReplaceSelectRange::postorder(IR::SelectExpression* e) {
+const IR::Node *DoReplaceSelectRange::postorder(IR::SelectExpression *e) {
     BUG_CHECK(findContext<IR::SelectExpression>() == nullptr, "A select nested in select: %1%", e);
     if (!signedIndicesToReplace.empty()) {
         IR::Vector<IR::Expression> newSelectList;
         size_t idx = 0;
-        for (auto* expr : e->select->components) {
+        for (auto *expr : e->select->components) {
             if (signedIndicesToReplace.count(idx)) {
                 auto eType = expr->type->to<IR::Type_Bits>();
                 BUG_CHECK(eType,
@@ -166,7 +166,7 @@ const IR::Node* DoReplaceSelectRange::postorder(IR::SelectExpression* e) {
     return e;
 }
 
-const IR::Node* DoReplaceSelectRange::postorder(IR::SelectCase* sc) {
+const IR::Node *DoReplaceSelectRange::postorder(IR::SelectCase *sc) {
     BUG_CHECK(findContext<IR::SelectExpression>() != nullptr,
               "A lone select case not inside select: %1%", sc);
 

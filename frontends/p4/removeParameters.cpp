@@ -32,7 +32,7 @@ class RemoveMethodCallArguments : public Transform {
     explicit RemoveMethodCallArguments(int toRemove = -1) : argumentsToRemove(toRemove) {
         setName("RemoveMethodCallArguments");
     }
-    const IR::Node* postorder(IR::MethodCallExpression* expression) override {
+    const IR::Node *postorder(IR::MethodCallExpression *expression) override {
         if (argumentsToRemove == -1) {
             expression->arguments = new IR::Vector<IR::Argument>();
         } else {
@@ -48,7 +48,7 @@ class RemoveMethodCallArguments : public Transform {
 };
 }  // namespace
 
-void FindActionParameters::postorder(const IR::ActionListElement* element) {
+void FindActionParameters::postorder(const IR::ActionListElement *element) {
     auto path = element->getPath();
     auto decl = refMap->getDeclaration(path, true);
     BUG_CHECK(decl->is<IR::P4Action>(), "%1%: not an action", element);
@@ -58,7 +58,7 @@ void FindActionParameters::postorder(const IR::ActionListElement* element) {
                       false);
 }
 
-void FindActionParameters::postorder(const IR::MethodCallExpression* expression) {
+void FindActionParameters::postorder(const IR::MethodCallExpression *expression) {
     auto mi = MethodInstance::resolve(expression, refMap, typeMap);
     if (!mi->is<P4::ActionCall>()) return;
     auto ac = mi->to<P4::ActionCall>();
@@ -81,20 +81,20 @@ namespace {
 // Inserts a vector of operations before a return or exit
 // statement.
 class InsertBeforeExits : public Transform {
-    const IR::IndexedVector<IR::StatOrDecl>* toInsert;
+    const IR::IndexedVector<IR::StatOrDecl> *toInsert;
 
  public:
-    explicit InsertBeforeExits(const IR::IndexedVector<IR::StatOrDecl>* toInsert)
+    explicit InsertBeforeExits(const IR::IndexedVector<IR::StatOrDecl> *toInsert)
         : toInsert(toInsert) {
         setName("InsertBeforeExits");
     }
-    const IR::Node* postorder(IR::ReturnStatement* statement) override {
+    const IR::Node *postorder(IR::ReturnStatement *statement) override {
         auto vec = new IR::IndexedVector<IR::StatOrDecl>(*toInsert);
         vec->push_back(statement);
         return new IR::BlockStatement(statement->srcInfo, *vec);
     }
 
-    const IR::Node* postorder(IR::ExitStatement* statement) override {
+    const IR::Node *postorder(IR::ExitStatement *statement) override {
         auto vec = new IR::IndexedVector<IR::StatOrDecl>(*toInsert);
         vec->push_back(statement);
         return new IR::BlockStatement(statement->srcInfo, *vec);
@@ -103,7 +103,7 @@ class InsertBeforeExits : public Transform {
 
 }  // namespace
 
-const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
+const IR::Node *DoRemoveActionParameters::postorder(IR::P4Action *action) {
     LOG1("Visiting " << dbp(action));
     BUG_CHECK(getParent<IR::P4Control>() || getParent<IR::P4Program>(),
               "%1%: unexpected parent %2%", getOriginal(), getContext()->node);
@@ -162,14 +162,14 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
     return result;
 }
 
-const IR::Node* DoRemoveActionParameters::postorder(IR::ActionListElement* element) {
+const IR::Node *DoRemoveActionParameters::postorder(IR::ActionListElement *element) {
     RemoveMethodCallArguments rmca;
     rmca.setCalledBy(this);
     element->expression = element->expression->apply(rmca)->to<IR::Expression>();
     return element;
 }
 
-const IR::Node* DoRemoveActionParameters::postorder(IR::MethodCallExpression* expression) {
+const IR::Node *DoRemoveActionParameters::postorder(IR::MethodCallExpression *expression) {
     auto orig = getOriginal<IR::MethodCallExpression>();
     if (invocations->isCall(orig)) {
         RemoveMethodCallArguments rmca;
@@ -183,8 +183,8 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::MethodCallExpression* ex
     return expression;
 }
 
-RemoveActionParameters::RemoveActionParameters(ReferenceMap* refMap, TypeMap* typeMap,
-                                               TypeChecking* typeChecking) {
+RemoveActionParameters::RemoveActionParameters(ReferenceMap *refMap, TypeMap *typeMap,
+                                               TypeChecking *typeChecking) {
     setName("RemoveActionParameters");
     auto ai = new ActionInvocation();
     // MoveDeclarations() is needed because of this case:

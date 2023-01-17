@@ -21,7 +21,7 @@ limitations under the License.
 #include "lib/big_int_util.h"
 #include "lib/source_file.h"
 
-std::ostream& operator<<(std::ostream& out, const UnparsedConstant& constant) {
+std::ostream &operator<<(std::ostream &out, const UnparsedConstant &constant) {
     out << "UnparsedConstant(" << constant.text << ',' << constant.skip << ',' << constant.base
         << ',' << constant.hasWidth << ')';
     return out;
@@ -29,9 +29,9 @@ std::ostream& operator<<(std::ostream& out, const UnparsedConstant& constant) {
 
 /// A helper to parse constants which have an explicit width;
 /// @see UnparsedConstant for an explanation of the parameters.
-static IR::Constant* parseConstantWithWidth(Util::SourceInfo srcInfo, const char* text,
+static IR::Constant *parseConstantWithWidth(Util::SourceInfo srcInfo, const char *text,
                                             unsigned skip, unsigned base) {
-    char* sep;
+    char *sep;
     auto size = strtol(text, &sep, 10);
     sep += strspn(sep, " \t\r\n");
     if (sep == nullptr || !*sep) BUG("Expected to find separator %1%", text);
@@ -47,12 +47,12 @@ static IR::Constant* parseConstantWithWidth(Util::SourceInfo srcInfo, const char
     bool isSigned = *sep++ == 's';
     sep += strspn(sep, " \t\r\n");
     big_int value = Util::cvtInt(sep + skip, base);
-    const IR::Type* type = IR::Type_Bits::get(srcInfo, size, isSigned);
-    IR::Constant* result = new IR::Constant(srcInfo, type, value, base);
+    const IR::Type *type = IR::Type_Bits::get(srcInfo, size, isSigned);
+    IR::Constant *result = new IR::Constant(srcInfo, type, value, base);
     return result;
 }
 
-IR::Constant* parseConstant(const Util::SourceInfo& srcInfo, const UnparsedConstant& constant,
+IR::Constant *parseConstant(const Util::SourceInfo &srcInfo, const UnparsedConstant &constant,
                             long defaultValue) {
     if (!constant.hasWidth) {
         auto value = Util::cvtInt(constant.text.c_str() + constant.skip, constant.base);
@@ -65,7 +65,7 @@ IR::Constant* parseConstant(const Util::SourceInfo& srcInfo, const UnparsedConst
     return result;
 }
 
-int parseConstantChecked(const Util::SourceInfo& srcInfo, const UnparsedConstant& constant) {
+int parseConstantChecked(const Util::SourceInfo &srcInfo, const UnparsedConstant &constant) {
     auto cst = parseConstant(srcInfo, constant, 0);
     if (!cst->fitsInt()) {
         ::error(ErrorType::ERR_OVERLIMIT,

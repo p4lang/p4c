@@ -5,10 +5,10 @@
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
 
+#include "backends/p4tools/common/lib/trace_events.h"
 #include "ir/id.h"
 #include "ir/visitor.h"
 #include "lib/exceptions.h"
-#include "p4tools/common/lib/trace_events.h"
 
 #include "backends/p4tools/modules/testgen/lib/namespace_context.h"
 
@@ -16,22 +16,22 @@ namespace P4Tools {
 
 namespace P4Testgen {
 
-Continuation::Return::Return(const IR::Node* expr) : expr(expr) {}
+Continuation::Return::Return(const IR::Node *expr) : expr(expr) {}
 
-bool Continuation::Return::operator==(const Continuation::Return& other) const {
+bool Continuation::Return::operator==(const Continuation::Return &other) const {
     return expr ? other.expr && **expr == **other.expr : !other.expr;
 }
 
 Continuation::PropertyUpdate::PropertyUpdate(cstring propertyName, PropertyValue property)
     : propertyName(propertyName), property(property) {}
 
-bool Continuation::PropertyUpdate::operator==(const Continuation::PropertyUpdate& other) const {
+bool Continuation::PropertyUpdate::operator==(const Continuation::PropertyUpdate &other) const {
     return propertyName == other.propertyName && property == other.property;
 }
 
-Continuation::Guard::Guard(const IR::Expression* cond) : cond(cond) {}
+Continuation::Guard::Guard(const IR::Expression *cond) : cond(cond) {}
 
-bool Continuation::Guard::operator==(const Continuation::Guard& other) const {
+bool Continuation::Guard::operator==(const Continuation::Guard &other) const {
     return *cond == *other.cond;
 }
 
@@ -54,13 +54,13 @@ void Continuation::Body::pop() {
 
 void Continuation::Body::clear() { cmds.clear(); }
 
-bool Continuation::Body::operator==(const Continuation::Body& other) const {
+bool Continuation::Body::operator==(const Continuation::Body &other) const {
     return cmds == other.cmds;
 }
 
 Continuation::Body::Body(std::initializer_list<Command> cmds) : cmds(cmds) {}
 
-Continuation::Body::Body(const std::vector<Command>& cmds) {
+Continuation::Body::Body(const std::vector<Command> &cmds) {
     for (auto it = cmds.rbegin(); it != cmds.rend(); ++it) {
         push(*it);
     }
@@ -73,15 +73,15 @@ Continuation::Body::Body(const std::vector<Command>& cmds) {
 class VariableSubstitution : public Transform {
  private:
     /// The variable being substituted.
-    const IR::PathExpression* var;
+    const IR::PathExpression *var;
 
     /// The expression being substituted for. Expressions in the metalanguage include P4
     /// non-expressions, so this expression does not necessarily need to be an instance of
     /// IR::Expression.
-    const IR::Node* expr;
+    const IR::Node *expr;
 
  public:
-    const IR::Node* postorder(IR::PathExpression* pathExpr) override {
+    const IR::Node *postorder(IR::PathExpression *pathExpr) override {
         if (*var == *pathExpr) {
             return expr;
         }
@@ -89,11 +89,11 @@ class VariableSubstitution : public Transform {
     }
 
     /// Creates a pass that will substitute @expr for @var.
-    VariableSubstitution(const IR::PathExpression* var, const IR::Node* expr)
+    VariableSubstitution(const IR::PathExpression *var, const IR::Node *expr)
         : var(var), expr(expr) {}
 };
 
-Continuation::Body Continuation::apply(boost::optional<const IR::Node*> value_opt) const {
+Continuation::Body Continuation::apply(boost::optional<const IR::Node *> value_opt) const {
     BUG_CHECK(!(value_opt && !parameterOpt),
               "Supplied a value to a continuation with no parameters.");
     BUG_CHECK(!(!value_opt && parameterOpt),
@@ -105,9 +105,9 @@ Continuation::Body Continuation::apply(boost::optional<const IR::Node*> value_op
         return body;
     }
 
-    const auto* paramType = (*parameterOpt)->type;
-    const IR::Type* argType = nullptr;
-    if (const auto* valueExpr = (*value_opt)->to<IR::Expression>()) {
+    const auto *paramType = (*parameterOpt)->type;
+    const IR::Type *argType = nullptr;
+    if (const auto *valueExpr = (*value_opt)->to<IR::Expression>()) {
         argType = valueExpr->type;
     } else if ((*value_opt)->is<IR::ParserState>()) {
         argType = IR::Type_State::get();
@@ -135,9 +135,9 @@ Continuation::Body Continuation::apply(boost::optional<const IR::Node*> value_op
     struct SubstVisitor : public boost::static_visitor<Command> {
         VariableSubstitution subst;
 
-        Command operator()(const IR::Node* node) { return node->apply(subst); }
+        Command operator()(const IR::Node *node) { return node->apply(subst); }
 
-        Command operator()(const TraceEvent* event) { return event->apply(subst); }
+        Command operator()(const TraceEvent *event) { return event->apply(subst); }
 
         Command operator()(Return ret) {
             if (!ret.expr) {
@@ -154,19 +154,19 @@ Continuation::Body Continuation::apply(boost::optional<const IR::Node*> value_op
 
         /// Creates a visitor for Commands that substitutes the given value for the given
         /// parameter.
-        SubstVisitor(const IR::PathExpression* param, const IR::Node* value)
+        SubstVisitor(const IR::PathExpression *param, const IR::Node *value)
             : subst(param, value) {}
     } subst(*parameterOpt, *value_opt);
 
-    for (const auto& cmd : body.cmds) {
+    for (const auto &cmd : body.cmds) {
         result.cmds.push_back(boost::apply_visitor(subst, cmd));
     }
 
     return result;
 }
 
-const Continuation::Parameter* Continuation::genParameter(const IR::Type* type, cstring name,
-                                                          const NamespaceContext* ctx) {
+const Continuation::Parameter *Continuation::genParameter(const IR::Type *type, cstring name,
+                                                          const NamespaceContext *ctx) {
     auto varName = ctx->genName(name, '*');
     return new Parameter(new IR::PathExpression(type, new IR::Path(varName)));
 }

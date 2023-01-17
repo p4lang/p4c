@@ -7,13 +7,13 @@
 
 #include <boost/none.hpp>
 
+#include "backends/p4tools/common/lib/model.h"
+#include "backends/p4tools/common/lib/trace_events.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
-#include "p4tools/common/lib/model.h"
-#include "p4tools/common/lib/trace_events.h"
 
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
@@ -33,8 +33,8 @@ const big_int EBPFTestBackend::ZERO_PKT_VAL = 0x2000000;
 const big_int EBPFTestBackend::ZERO_PKT_MAX = 0xffffffff;
 const std::vector<std::string> EBPFTestBackend::SUPPORTED_BACKENDS = {"STF"};
 
-EBPFTestBackend::EBPFTestBackend(const ProgramInfo& programInfo, ExplorationStrategy& symbex,
-                                 const boost::filesystem::path& testPath,
+EBPFTestBackend::EBPFTestBackend(const ProgramInfo &programInfo, ExplorationStrategy &symbex,
+                                 const boost::filesystem::path &testPath,
                                  boost::optional<uint32_t> seed)
     : TestBackEnd(programInfo, symbex) {
     cstring testBackendString = TestgenOptions::get().testBackend;
@@ -43,7 +43,7 @@ EBPFTestBackend::EBPFTestBackend(const ProgramInfo& programInfo, ExplorationStra
     } else {
         std::stringstream supportedBackendString;
         bool isFirst = true;
-        for (const auto& backend : SUPPORTED_BACKENDS) {
+        for (const auto &backend : SUPPORTED_BACKENDS) {
             if (!isFirst) {
                 supportedBackendString << ", ";
             } else {
@@ -58,9 +58,9 @@ EBPFTestBackend::EBPFTestBackend(const ProgramInfo& programInfo, ExplorationStra
 }
 
 TestBackEnd::TestInfo EBPFTestBackend::produceTestInfo(
-    const ExecutionState* executionState, const Model* completedModel,
-    const IR::Expression* outputPacketExpr, const IR::Expression* outputPortExpr,
-    const std::vector<gsl::not_null<const TraceEvent*>>* programTraces) {
+    const ExecutionState *executionState, const Model *completedModel,
+    const IR::Expression *outputPacketExpr, const IR::Expression *outputPortExpr,
+    const std::vector<gsl::not_null<const TraceEvent *>> *programTraces) {
     auto testInfo = TestBackEnd::produceTestInfo(executionState, completedModel, outputPacketExpr,
                                                  outputPortExpr, programTraces);
     // This is a hack to deal with an virtual kernel interface quirk.
@@ -80,14 +80,14 @@ TestBackEnd::TestInfo EBPFTestBackend::produceTestInfo(
     return testInfo;
 }
 
-const TestSpec* EBPFTestBackend::createTestSpec(const ExecutionState* executionState,
-                                                const Model* completedModel,
-                                                const TestInfo& testInfo) {
+const TestSpec *EBPFTestBackend::createTestSpec(const ExecutionState *executionState,
+                                                const Model *completedModel,
+                                                const TestInfo &testInfo) {
     // Create a testSpec.
-    TestSpec* testSpec = nullptr;
+    TestSpec *testSpec = nullptr;
 
-    const auto* ingressPayload = testInfo.inputPacket;
-    const auto* ingressPayloadMask = IR::getConstant(IR::getBitType(1), 1);
+    const auto *ingressPayload = testInfo.inputPacket;
+    const auto *ingressPayloadMask = IR::getConstant(IR::getBitType(1), 1);
     const auto ingressPacket = Packet(testInfo.inputPort, ingressPayload, ingressPayloadMask);
 
     boost::optional<Packet> egressPacket = boost::none;
@@ -99,10 +99,10 @@ const TestSpec* EBPFTestBackend::createTestSpec(const ExecutionState* executionS
     const auto uninterpretedTableConfigs = executionState->getTestObjectCategory("tableconfigs");
     // Since these configurations are uninterpreted we need to convert them. We launch a
     // helper function to solve the variables involved in each table configuration.
-    for (const auto& tablePair : uninterpretedTableConfigs) {
+    for (const auto &tablePair : uninterpretedTableConfigs) {
         const auto tableName = tablePair.first;
-        const auto* uninterpretedTableConfig = tablePair.second->checkedTo<TableConfig>();
-        const auto* const tableConfig = uninterpretedTableConfig->evaluate(*completedModel);
+        const auto *uninterpretedTableConfig = tablePair.second->checkedTo<TableConfig>();
+        const auto *const tableConfig = uninterpretedTableConfig->evaluate(*completedModel);
         testSpec->addTestObject("tables", tableName, tableConfig);
     }
     return testSpec;

@@ -17,9 +17,8 @@ limitations under the License.
 #ifndef _LIB_STRINGREF_H_
 #define _LIB_STRINGREF_H_
 
-#include <stdlib.h>
-#include <string.h>
-
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
 #include <string>
 
@@ -27,9 +26,9 @@ limitations under the License.
 #include "cstring.h"
 
 #if !HAVE_MEMRCHR
-static inline void* memrchr(const char* s, int c, size_t n) {
-    for (auto* p = s + n - 1; p >= s; --p)
-        if (*p == c) return const_cast<char*>(p);
+static inline void *memrchr(const char *s, int c, size_t n) {
+    for (auto *p = s + n - 1; p >= s; --p)
+        if (*p == c) return const_cast<char *>(p);
     return nullptr;
 }
 #endif
@@ -40,31 +39,31 @@ static inline void* memrchr(const char* s, int c, size_t n) {
  * stored in other long-lived objects. */
 
 struct StringRef {
-    const char* p;
+    const char *p;
     size_t len;
     StringRef() : p(0), len(0) {}
-    StringRef(const char* str, size_t l) : p(str), len(l) {}
-    StringRef(const char* str) : p(str), len(str ? strlen(str) : 0) {}     // NOLINT
-    StringRef(const std::string& str) : p(str.data()), len(str.size()) {}  // NOLINT
+    StringRef(const char *str, size_t l) : p(str), len(l) {}
+    StringRef(const char *str) : p(str), len(str ? strlen(str) : 0) {}     // NOLINT
+    StringRef(const std::string &str) : p(str.data()), len(str.size()) {}  // NOLINT
     StringRef(cstring str) : p(str.c_str()), len(str.size()) {}            // NOLINT
     void clear() {
         p = 0;
         len = 0;
     }
-    StringRef(const StringRef& a) : p(a.p), len(a.len) {}
-    StringRef& operator=(const StringRef& a) {
+    StringRef(const StringRef &a) : p(a.p), len(a.len) {}
+    StringRef &operator=(const StringRef &a) {
         p = a.p;
         len = a.len;
         return *this;
     }
     explicit operator bool() const { return p != 0; }
 
-    bool operator==(const StringRef& a) const {
+    bool operator==(const StringRef &a) const {
         return p ? (a.p && len == a.len && (!len || !memcmp(p, a.p, len))) : !a.p;
     }
-    bool operator!=(const StringRef& a) const { return !operator==(a); }
-    bool operator==(const std::string& a) const { return operator==(StringRef(a)); }
-    bool operator==(const char* a) const {
+    bool operator!=(const StringRef &a) const { return !operator==(a); }
+    bool operator==(const std::string &a) const { return operator==(StringRef(a)); }
+    bool operator==(const char *a) const {
         return p ? (a && (!len || !strncmp(p, a, len)) && !a[len]) : !a;
     }
     bool operator==(cstring a) const { return operator==(a.c_str()); }
@@ -74,15 +73,15 @@ struct StringRef {
     }
     bool isNullOrEmpty() const { return p == 0 || len == 0; }
 
-    int compare(const StringRef& a) const {
+    int compare(const StringRef &a) const {
         if (!p) return a.p ? -1 : 0;
         if (!a.p) return 1;
         int rv = memcmp(p, a.p, std::min(len, a.len));
         if (!rv && len != a.len) rv = len < a.len ? -1 : 1;
         return rv;
     }
-    int compare(const std::string& a) const { return compare(StringRef(a)); }
-    int compare(const char* a) const {
+    int compare(const std::string &a) const { return compare(StringRef(a)); }
+    int compare(const char *a) const {
         if (!p) return a ? -1 : 0;
         if (!a) return 1;
         int rv = strncmp(p, a, len);
@@ -111,7 +110,7 @@ struct StringRef {
     operator cstring() const { return std::string(p, len); }
     cstring toString() const { return std::string(p, len); }
     std::string string() const { return std::string(p, len); }
-    StringRef& operator+=(size_t i) {
+    StringRef &operator+=(size_t i) {
         if (len < i) {
             p = 0;
             len = 0;
@@ -121,7 +120,7 @@ struct StringRef {
         }
         return *this;
     }
-    StringRef& operator++() {
+    StringRef &operator++() {
         p++;
         if (len)
             len--;
@@ -134,7 +133,7 @@ struct StringRef {
         ++*this;
         return rv;
     }
-    StringRef& operator--() {
+    StringRef &operator--() {
         if (len)
             len--;
         else
@@ -153,7 +152,7 @@ struct StringRef {
         rv += i;
         return rv;
     }
-    StringRef& trim(const char* white = " \t\r\n") {
+    StringRef &trim(const char *white = " \t\r\n") {
         while (len > 0 && strchr(white, *p)) {
             p++;
             len--;
@@ -171,36 +170,38 @@ struct StringRef {
         }
         return rv;
     }
-    StringRef trim(const char* white = " \t\r\n") const {
+    StringRef trim(const char *white = " \t\r\n") const {
         StringRef rv(*this);
         rv.trim(white);
         return rv;
     }
-    const char* begin() const { return p; }
-    const char* end() const { return p + len; }
-    const char* find(char ch) const { return p ? static_cast<const char*>(memchr(p, ch, len)) : p; }
-    const char* findlast(char ch) const {
-        return p ? static_cast<const char*>(memrchr(p, ch, len)) : p;
+    const char *begin() const { return p; }
+    const char *end() const { return p + len; }
+    const char *find(char ch) const {
+        return p ? static_cast<const char *>(memchr(p, ch, len)) : p;
     }
-    const char* find(const char* set) const {
+    const char *findlast(char ch) const {
+        return p ? static_cast<const char *>(memrchr(p, ch, len)) : p;
+    }
+    const char *find(const char *set) const {
         if (!p) return 0;
         size_t off = strcspn(p, set);
         return off >= len ? 0 : p + off;
     }
-    const char* findstr(StringRef sub) {
+    const char *findstr(StringRef sub) {
         if (sub.len < 1) return p;
         const char *s = begin(), *e = end();
-        while (s < e && (s = static_cast<const char*>(memchr(s, *sub.p, e - s)))) {
+        while (s < e && (s = static_cast<const char *>(memchr(s, *sub.p, e - s)))) {
             if (sub.len > (size_t)(e - s)) return nullptr;
             if (!memcmp(s, sub.p, sub.len)) return s;
             s++;
         }
         return nullptr;
     }
-    StringRef before(const char* s) const {
+    StringRef before(const char *s) const {
         return (size_t)(s - p) <= len ? StringRef(p, s - p) : StringRef();
     }
-    StringRef after(const char* s) const {
+    StringRef after(const char *s) const {
         return (size_t)(s - p) <= len ? StringRef(s, p + len - s) : StringRef();
     }
     StringRef substr(size_t start, size_t length) const {
@@ -210,71 +211,71 @@ struct StringRef {
     }
     class Split;
     Split split(char) const;
-    Split split(const char*) const;
+    Split split(const char *) const;
 };
 
 template <class T>
-inline auto operator==(T a, const StringRef& b) -> decltype(b.operator==(a)) {
+inline auto operator==(T a, const StringRef &b) -> decltype(b.operator==(a)) {
     return b == a;
 }
 template <class T>
-inline auto operator!=(T a, const StringRef& b) -> decltype(b.operator!=(a)) {
+inline auto operator!=(T a, const StringRef &b) -> decltype(b.operator!=(a)) {
     return b != a;
 }
 template <class T>
-inline auto operator>=(T a, const StringRef& b) -> decltype(b.operator<=(a)) {
+inline auto operator>=(T a, const StringRef &b) -> decltype(b.operator<=(a)) {
     return b <= a;
 }
 template <class T>
-inline auto operator>(T a, const StringRef& b) -> decltype(b.operator<(a)) {
+inline auto operator>(T a, const StringRef &b) -> decltype(b.operator<(a)) {
     return b < a;
 }
 template <class T>
-inline auto operator<=(T a, const StringRef& b) -> decltype(b.operator>=(a)) {
+inline auto operator<=(T a, const StringRef &b) -> decltype(b.operator>=(a)) {
     return b >= a;
 }
 template <class T>
-inline auto operator<(T a, const StringRef& b) -> decltype(b.operator>(a)) {
+inline auto operator<(T a, const StringRef &b) -> decltype(b.operator>(a)) {
     return b > a;
 }
 
-inline std::ostream& operator<<(std::ostream& os, const StringRef& a) {
+inline std::ostream &operator<<(std::ostream &os, const StringRef &a) {
     return a.len ? os.write(a.p, a.len) : os;
 }
-inline std::string& operator+=(std::string& s, const StringRef& a) {
+inline std::string &operator+=(std::string &s, const StringRef &a) {
     return a.len ? s.append(a.p, a.len) : s;
 }
-inline std::string operator+(const StringRef& s, const StringRef& a) {
+inline std::string operator+(const StringRef &s, const StringRef &a) {
     std::string rv(s);
     rv += a;
     return rv;
 }
-inline std::string operator+(const std::string& s, const StringRef& a) {
+inline std::string operator+(const std::string &s, const StringRef &a) {
     std::string rv(s);
     rv += a;
     return rv;
 }
-inline std::string operator+(const StringRef& s, const std::string& a) {
+inline std::string operator+(const StringRef &s, const std::string &a) {
     std::string rv(s);
     rv += a;
     return rv;
 }
-inline std::string operator+(const char* s, const StringRef& a) {
+inline std::string operator+(const char *s, const StringRef &a) {
     std::string rv(s);
     rv += a;
     return rv;
 }
-inline std::string operator+(const StringRef& s, const char* a) {
+inline std::string operator+(const StringRef &s, const char *a) {
     std::string rv(s);
     rv += a;
     return rv;
 }
-inline std::string operator+(cstring s, const StringRef& a) {
+inline std::string operator+(cstring s, const StringRef &a) {
     std::string rv(s);
     rv += a;
     return rv;
 }
-inline std::string operator+(const StringRef& s, cstring a) {
+inline std::string operator+(const StringRef &s, cstring a) {
     std::string rv(s);
     rv += a;
     return rv;
@@ -282,16 +283,16 @@ inline std::string operator+(const StringRef& s, cstring a) {
 
 class StringRef::Split {
     StringRef rest;
-    const char* set;
-    const char* ptr;
+    const char *set;
+    const char *ptr;
     friend struct StringRef;
-    Split(StringRef r, const char* s, const char* p) : rest(r), set(s), ptr(p) {}
+    Split(StringRef r, const char *s, const char *p) : rest(r), set(s), ptr(p) {}
 
  public:
     Split begin() const { return *this; }
     Split end() const { return Split(StringRef(), nullptr, nullptr); }
     StringRef operator*() const { return ptr ? rest.before(ptr) : rest; }
-    Split& operator++() {
+    Split &operator++() {
         if (ptr) {
             rest = rest.after(ptr + 1);
             ptr = set ? rest.find(set) : rest.find(*ptr);
@@ -300,11 +301,11 @@ class StringRef::Split {
         }
         return *this;
     }
-    bool operator==(const Split& a) const { return rest == a.rest && ptr == a.ptr; }
-    bool operator!=(const Split& a) const { return rest != a.rest || ptr != a.ptr; }
+    bool operator==(const Split &a) const { return rest == a.rest && ptr == a.ptr; }
+    bool operator!=(const Split &a) const { return rest != a.rest || ptr != a.ptr; }
 };
 
 inline StringRef::Split StringRef::split(char ch) const { return Split(*this, nullptr, find(ch)); }
-inline StringRef::Split StringRef::split(const char* s) const { return Split(*this, s, find(s)); }
+inline StringRef::Split StringRef::split(const char *s) const { return Split(*this, s, find(s)); }
 
 #endif /* _LIB_STRINGREF_H_ */

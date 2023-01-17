@@ -20,19 +20,6 @@ limitations under the License.
 #include "printUtils.h"
 namespace DPDK {
 
-unsigned DpdkContextGenerator::newTableHandle = 0;
-unsigned DpdkContextGenerator::newActionHandle = 0;
-
-// Returns a unique ID for table
-unsigned int DpdkContextGenerator::getNewTableHandle() {
-    return table_handle_prefix | newTableHandle++;
-}
-
-// Returns a unique ID for action
-unsigned int DpdkContextGenerator::getNewActionHandle() {
-    return action_handle_prefix | newActionHandle++;
-}
-
 // This function collects all tables in a vector and sets the table attributes required
 // by context json into a map.
 void DpdkContextGenerator::CollectTablesAndSetAttributes() {
@@ -51,7 +38,8 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                 tblAttr.direction = direction;
                 tblAttr.controlName = control->name.originalName;
                 tblAttr.externalName = tbl->controlPlaneName();
-                tblAttr.tableHandle = getNewTableHandle();
+                tblAttr.tableHandle =
+                    getHandleId(tblAttr.controlName + "." + tbl->name.originalName);
                 auto size = tbl->getSizeProperty();
                 tblAttr.size = dpdk_default_table_size;
                 if (size) tblAttr.size = size->asUnsigned();
@@ -165,10 +153,10 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
 }
 
 // This functions insert a single key field in the match keys array
-void DpdkContextGenerator::addKeyField(Util::JsonArray* keyJson, const cstring name,
-                                       const cstring nameAnnotation, const IR::KeyElement* key,
+void DpdkContextGenerator::addKeyField(Util::JsonArray *keyJson, const cstring name,
+                                       const cstring nameAnnotation, const IR::KeyElement *key,
                                        int position) {
-    auto* keyField = new Util::JsonObject();
+    auto *keyField = new Util::JsonObject();
     cstring fieldName = name.findlast('.');
     auto instanceName = name.replace(fieldName, "");
     fieldName = fieldName.trim(".\t\n\r");
@@ -184,9 +172,9 @@ void DpdkContextGenerator::addKeyField(Util::JsonArray* keyJson, const cstring n
 }
 
 // This function sets the common table properties
-Util::JsonObject* DpdkContextGenerator::initTableCommonJson(const cstring name,
-                                                            const struct TableAttributes& attr) {
-    auto* tableJson = new Util::JsonObject();
+Util::JsonObject *DpdkContextGenerator::initTableCommonJson(const cstring name,
+                                                            const struct TableAttributes &attr) {
+    auto *tableJson = new Util::JsonObject();
     cstring tableName = attr.controlName + "." + name;
     tableJson->emplace("name", attr.externalName);
     tableJson->emplace("target_name", tableName);
@@ -200,8 +188,36 @@ Util::JsonObject* DpdkContextGenerator::initTableCommonJson(const cstring name,
     return tableJson;
 }
 
+void DpdkContextGenerator::collectHandleId() {
+    for (auto table : p4info.tables()) {
+        const auto &pre_t = table.preamble();
+        context_handle_map[pre_t.name().c_str()] = pre_t.id();
+        for (auto &action_ref : table.action_refs()) {
+            auto *action = P4::BFRT::Standard::findAction(p4info, action_ref.id());
+            if (action == nullptr) {
+                ::error(ErrorType::ERR_INVALID, "Invalid action id '%1%'", action_ref.id());
+                continue;
+            }
+            const auto &pre_a = action->preamble();
+            context_handle_map[pre_a.name()] = pre_a.id();
+        }
+    }
+}
+
+size_t DpdkContextGenerator::getHandleId(cstring name) {
+    size_t id = 0;
+    for (auto x : context_handle_map) {
+        if (x.first.find(name.c_str())) {
+            id = context_handle_map[x.first];
+            break;
+        }
+    }
+    BUG_CHECK(id != 0, "unable to find id for %1%", name);
+    return id;
+}
+
 // This function sets action attributes for actions in a table.
-void DpdkContextGenerator::setActionAttributes(const IR::P4Table* tbl) {
+void DpdkContextGenerator::setActionAttributes(const IR::P4Table *tbl) {
     for (auto act : tbl->getActionList()->actionList) {
         struct actionAttributes attr;
         auto action_decl = refmap->getDeclaration(act->getPath())->to<IR::P4Action>();
@@ -260,7 +276,7 @@ void DpdkContextGenerator::setActionAttributes(const IR::P4Table* tbl) {
         attr.is_compiler_added_action = is_compiler_added_action;
         attr.allowed_as_hit_action = can_be_hit_action;
         attr.allowed_as_default_action = can_be_default_action;
-        attr.actionHandle = getNewActionHandle();
+        attr.actionHandle = getHandleId(action_decl->controlPlaneName());
         attr.externalName = action_decl->controlPlaneName();
         actionAttrMap.emplace(act->getName(), attr);
     }
@@ -268,7 +284,7 @@ void DpdkContextGenerator::setActionAttributes(const IR::P4Table* tbl) {
 
 // This functions updates the table attribute map entry with default action handle
 // for the specified table.
-void DpdkContextGenerator::setDefaultActionHandle(const IR::P4Table* table) {
+void DpdkContextGenerator::setDefaultActionHandle(const IR::P4Table *table) {
     cstring default_action_name = "";
     if (table->getDefaultAction()) default_action_name = toStr(table->getDefaultAction());
 
@@ -285,9 +301,9 @@ void DpdkContextGenerator::setDefaultActionHandle(const IR::P4Table* table) {
 }
 
 // This functions creates JSON object for immediate fields (action parameters)
-void DpdkContextGenerator::addImmediateField(Util::JsonArray* paramJson, const cstring name,
+void DpdkContextGenerator::addImmediateField(Util::JsonArray *paramJson, const cstring name,
                                              int dest_start, int dest_width) {
-    auto* oneParam = new Util::JsonObject();
+    auto *oneParam = new Util::JsonObject();
     oneParam->emplace("param_name", name);
     oneParam->emplace("dest_start", dest_start);
     oneParam->emplace("dest_width", dest_width);
@@ -295,15 +311,15 @@ void DpdkContextGenerator::addImmediateField(Util::JsonArray* paramJson, const c
 }
 
 // This functions creates JSON object for match attributes of a table.
-Util::JsonObject* DpdkContextGenerator::addMatchAttributes(const IR::P4Table* table,
+Util::JsonObject *DpdkContextGenerator::addMatchAttributes(const IR::P4Table *table,
                                                            const cstring ctrlName) {
     auto tableAttr = ::get(tableAttrmap, table->name.originalName);
-    auto* match_attributes = new Util::JsonObject();
-    auto* actFmtArray = new Util::JsonArray();
-    auto* stageTblArray = new Util::JsonArray();
-    auto* oneStageTbl = new Util::JsonObject();
+    auto *match_attributes = new Util::JsonObject();
+    auto *actFmtArray = new Util::JsonArray();
+    auto *stageTblArray = new Util::JsonArray();
+    auto *oneStageTbl = new Util::JsonObject();
     for (auto action : table->getActionList()->actionList) {
-        auto* oneAction = new Util::JsonObject();
+        auto *oneAction = new Util::JsonObject();
         struct actionAttributes attr = ::get(actionAttrMap, action->getName());
         auto name = action->externalName();
         if (name != "NoAction") {
@@ -311,7 +327,7 @@ Util::JsonObject* DpdkContextGenerator::addMatchAttributes(const IR::P4Table* ta
         }
         oneAction->emplace("action_name", name);
         oneAction->emplace("action_handle", attr.actionHandle);
-        auto* immFldArray = new Util::JsonArray();
+        auto *immFldArray = new Util::JsonArray();
         if (attr.params) {
             int index = 0;
             int position = 0;
@@ -337,9 +353,9 @@ Util::JsonObject* DpdkContextGenerator::addMatchAttributes(const IR::P4Table* ta
 }
 
 // This function adds a single parameter to the parameters array.
-void DpdkContextGenerator::addActionParam(Util::JsonArray* paramJson, const cstring name,
+void DpdkContextGenerator::addActionParam(Util::JsonArray *paramJson, const cstring name,
                                           int bitWidth, int position, int byte_array_index) {
-    auto* oneParam = new Util::JsonObject();
+    auto *oneParam = new Util::JsonObject();
     oneParam->emplace("name", name);
     oneParam->emplace("start_bit", 0);
     oneParam->emplace("bit_width", bitWidth);
@@ -349,14 +365,14 @@ void DpdkContextGenerator::addActionParam(Util::JsonArray* paramJson, const cstr
 }
 
 // This function creates JSON objects for  actions within a table.
-Util::JsonArray* DpdkContextGenerator::addActions(const IR::P4Table* table,
+Util::JsonArray *DpdkContextGenerator::addActions(const IR::P4Table *table,
                                                   const cstring controlName, bool isMatch) {
-    auto* actArray = new Util::JsonArray();
+    auto *actArray = new Util::JsonArray();
     for (auto action : table->getActionList()->actionList) {
         struct actionAttributes attr = ::get(actionAttrMap, action->getName());
         // Printing compiler added actions is curently not required
         if (!attr.is_compiler_added_action) {
-            auto* act = new Util::JsonObject();
+            auto *act = new Util::JsonObject();
             auto actName = toStr(action->expression);
             auto name = action->externalName();
             if (name != "NoAction") {
@@ -374,7 +390,7 @@ Util::JsonArray* DpdkContextGenerator::addActions(const IR::P4Table* table,
                 act->emplace("allowed_as_default_action", attr.allowed_as_default_action);
                 ;
             }
-            auto* paramJson = new Util::JsonArray();
+            auto *paramJson = new Util::JsonArray();
             if (attr.params) {
                 int index = 0;
                 int position = 0;
@@ -399,8 +415,8 @@ Util::JsonArray* DpdkContextGenerator::addActions(const IR::P4Table* table,
 }
 
 // This function adds the tables referred by this table.
-bool DpdkContextGenerator::addRefTables(const cstring tbl_name, const IR::P4Table** memberTable,
-                                        Util::JsonObject* tableJson) {
+bool DpdkContextGenerator::addRefTables(const cstring tbl_name, const IR::P4Table **memberTable,
+                                        Util::JsonObject *tableJson) {
     bool hasActionProfileSelector = false;
 
     // Below empty arrays are currently required by the control plane software.
@@ -411,10 +427,10 @@ bool DpdkContextGenerator::addRefTables(const cstring tbl_name, const IR::P4Tabl
 
     // Reference to compiler generated member table in case of action profile and action selector.
     if (structure->member_tables.count(tbl_name)) {
-        auto* actionDataJson = new Util::JsonArray();
+        auto *actionDataJson = new Util::JsonArray();
         hasActionProfileSelector = true;
         *memberTable = structure->member_tables.at(tbl_name);
-        auto* actionDataField = new Util::JsonObject();
+        auto *actionDataField = new Util::JsonObject();
         auto tableAttr = ::get(tableAttrmap, (*memberTable)->name.originalName);
         auto tableName = tableAttr.controlName + "." + (*memberTable)->name.originalName;
         actionDataField->emplace("name", tableName);
@@ -425,10 +441,10 @@ bool DpdkContextGenerator::addRefTables(const cstring tbl_name, const IR::P4Tabl
 
     // Reference to compiler generated group table in case of action selector
     if (structure->group_tables.count(tbl_name)) {
-        auto* selectionJson = new Util::JsonArray();
+        auto *selectionJson = new Util::JsonArray();
         hasActionProfileSelector = true;
         auto groupTable = structure->group_tables.at(tbl_name);
-        auto* selectField = new Util::JsonObject();
+        auto *selectField = new Util::JsonObject();
         auto tableAttr = ::get(tableAttrmap, groupTable->name.originalName);
         auto tableName = tableAttr.controlName + "." + groupTable->name.originalName;
         selectField->emplace("name", tableName);
@@ -444,20 +460,20 @@ bool DpdkContextGenerator::addRefTables(const cstring tbl_name, const IR::P4Tabl
 }
 
 // Add tables to the context json
-void DpdkContextGenerator::addMatchTables(Util::JsonArray* tablesJson) {
+void DpdkContextGenerator::addMatchTables(Util::JsonArray *tablesJson) {
     for (auto t : tables) {
         auto tbl = t->to<IR::P4Table>();
         auto tableAttr = ::get(tableAttrmap, tbl->name.originalName);
-        auto* tableJson = initTableCommonJson(tbl->name.originalName, tableAttr);
+        auto *tableJson = initTableCommonJson(tbl->name.originalName, tableAttr);
         bool hasActionProfileSelector = false;
         bool isMatchTable = tableAttr.tableType == "match";
-        const IR::P4Table* memberTable = nullptr;
+        const IR::P4Table *memberTable = nullptr;
         if (tableAttr.tableType != "selection") {
             if (isMatchTable) {
                 hasActionProfileSelector = addRefTables(tbl->name, &memberTable, tableJson);
                 auto match_keys = tbl->getKey();
                 if (match_keys) {
-                    auto* keyJson = new Util::JsonArray();
+                    auto *keyJson = new Util::JsonArray();
                     int position = 0;
                     for (auto matchKeyFromPrg : tableAttr.tableKeys) {
                         addKeyField(keyJson, matchKeyFromPrg.first, matchKeyFromPrg.second,
@@ -469,7 +485,7 @@ void DpdkContextGenerator::addMatchTables(Util::JsonArray* tablesJson) {
             }
             // If table implementation is action profile or action selector, all actions from member
             // table should be output for the base table.
-            const IR::P4Table* table = nullptr;
+            const IR::P4Table *table = nullptr;
             if (hasActionProfileSelector) {
                 table = memberTable;
             } else {
@@ -499,14 +515,14 @@ void DpdkContextGenerator::addMatchTables(Util::JsonArray* tablesJson) {
 }
 
 // Add extern information to the context json
-void DpdkContextGenerator::addExternInfo(Util::JsonArray* externsJson) {
+void DpdkContextGenerator::addExternInfo(Util::JsonArray *externsJson) {
     for (auto t : externs) {
         auto externAttr = ::get(externAttrMap, t->name.name);
-        auto* externJson = new Util::JsonObject();
+        auto *externJson = new Util::JsonObject();
         externJson->emplace("name", externAttr.externalName);
         externJson->emplace("target_name", t->name.name);
         externJson->emplace("type", externAttr.externType);
-        auto* attrJson = new Util::JsonObject();
+        auto *attrJson = new Util::JsonObject();
         if (externAttr.externType == "Counter" || externAttr.externType == "DirectCounter") {
             attrJson->emplace("type", externAttr.counterType);
         }
@@ -518,10 +534,10 @@ void DpdkContextGenerator::addExternInfo(Util::JsonArray* externsJson) {
     }
 }
 
-const Util::JsonObject* DpdkContextGenerator::genContextJsonObject() {
-    auto* json = new Util::JsonObject();
-    auto* tablesJson = new Util::JsonArray();
-    auto* externsJson = new Util::JsonArray();
+const Util::JsonObject *DpdkContextGenerator::genContextJsonObject() {
+    auto *json = new Util::JsonObject();
+    auto *tablesJson = new Util::JsonArray();
+    auto *externsJson = new Util::JsonArray();
     struct TopLevelCtxt tlinfo;
     tlinfo.initTopLevelCtxt(options);
     json->emplace("program_name", tlinfo.progName);
@@ -537,9 +553,10 @@ const Util::JsonObject* DpdkContextGenerator::genContextJsonObject() {
     return json;
 }
 
-void DpdkContextGenerator::serializeContextJson(std::ostream* destination) {
+void DpdkContextGenerator::serializeContextJson(std::ostream *destination) {
+    collectHandleId();
     CollectTablesAndSetAttributes();
-    auto* json = genContextJsonObject();
+    auto *json = genContextJsonObject();
     json->serialize(*destination);
     destination->flush();
 }

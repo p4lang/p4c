@@ -43,7 +43,24 @@ class DpdkTable {
     Expression default_action;
     TableProperties properties;
     inline ParameterList default_action_paraList;
-
+    Key getKey() const {
+        auto kp = properties->getProperty(TableProperties::keyPropertyName);
+        if (kp == nullptr)
+            return nullptr;
+        if (!kp->value->is<IR::Key>()) {
+            ::error(ErrorType::ERR_INVALID, "%1%: must be a key", kp);
+            return nullptr; }
+        return kp->value->to<IR::Key>(); }
+    EntriesList getEntries() const {
+        auto ep = properties->getProperty(TableProperties::entriesPropertyName);
+        if (ep == nullptr)
+            return nullptr;
+        if (!ep->value->is<IR::EntriesList>()) {
+            ::error(ErrorType::ERR_INVALID, "%1%: must be a list of entries", ep);
+            return nullptr;
+        }
+        return ep->value->to<IR::EntriesList>();
+    }
     std::ostream& toSpec(std::ostream& out) const;
 #nodbprint
 #novalidate

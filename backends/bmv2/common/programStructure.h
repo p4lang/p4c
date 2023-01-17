@@ -17,11 +17,13 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_COMMON_PROGRAMSTRUCTURE_H_
 #define BACKENDS_BMV2_COMMON_PROGRAMSTRUCTURE_H_
 
+#include "ir/visitor.h"
+#include "lib/ordered_set.h"
 #include "metermap.h"
 
 namespace BMV2 {
 
-using ResourceMap = ordered_map<const IR::Node*, const IR::CompileTimeValue*>;
+using ResourceMap = ordered_map<const IR::Node *, const IR::CompileTimeValue *>;
 
 enum class BlockConverted {
     None,
@@ -38,26 +40,26 @@ enum class BlockConverted {
 class ProgramStructure {
  public:
     /// Map action to parent control.
-    ordered_map<const IR::P4Action*, const IR::P4Control*> actions;
+    ordered_map<const IR::P4Action *, const IR::P4Control *> actions;
     /// Maps each Parameter of an action to its positional index.
     /// Needed to generate code for actions.
-    ordered_map<const IR::Parameter*, unsigned> index;
+    ordered_map<const IR::Parameter *, unsigned> index;
     /// Parameters of controls/parsers
-    ordered_set<const IR::Parameter*> nonActionParameters;
+    ordered_set<const IR::Parameter *> nonActionParameters;
     /// For each action its json id.
-    ordered_map<const IR::P4Action*, unsigned> ids;
+    ordered_map<const IR::P4Action *, unsigned> ids;
     /// All local variables.
-    std::vector<const IR::Declaration_Variable*> variables;
+    std::vector<const IR::Declaration_Variable *> variables;
     /// All error codes.
-    ordered_map<const IR::IDeclaration*, unsigned int> errorCodesMap;
+    ordered_map<const IR::IDeclaration *, unsigned int> errorCodesMap;
     // We place scalar user metadata fields (i.e., bit<>, bool)
     // in the scalarsName metadata object, so we may need to rename
     // these fields.  This map holds the new names.
-    std::map<const IR::StructField*, cstring> scalarMetadataFields;
+    std::map<const IR::StructField *, cstring> scalarMetadataFields;
     /// All the direct meters.
     DirectMeterMap directMeterMap;
     /// All the direct counters.
-    ordered_map<cstring, const IR::P4Table*> directCounterMap;
+    ordered_map<cstring, const IR::P4Table *> directCounterMap;
     /// All match kinds
     std::set<cstring> match_kinds;
     /// map IR node to compile-time allocated resource blocks.
@@ -68,16 +70,16 @@ class ProgramStructure {
 
 class DiscoverStructure : public Inspector {
  public:
-    ProgramStructure* structure;
+    ProgramStructure *structure;
 
-    explicit DiscoverStructure(ProgramStructure* structure) : structure(structure) {
+    explicit DiscoverStructure(ProgramStructure *structure) : structure(structure) {
         setName("DiscoverStructure");
     }
-    void postorder(const IR::ParameterList* paramList) override;
-    void postorder(const IR::P4Action* action) override;
-    void postorder(const IR::Declaration_Variable* decl) override;
-    void postorder(const IR::Type_Error* errors) override;
-    void postorder(const IR::Declaration_MatchKind* kind) override;
+    void postorder(const IR::ParameterList *paramList) override;
+    void postorder(const IR::P4Action *action) override;
+    void postorder(const IR::Declaration_Variable *decl) override;
+    void postorder(const IR::Type_Error *errors) override;
+    void postorder(const IR::Declaration_MatchKind *kind) override;
 };
 
 // The resource map represents the mapping from IR::Node to IR::Block. This
@@ -85,14 +87,14 @@ class DiscoverStructure : public Inspector {
 // The Evaluator pass generates a mapping from IR::Block to IR::Node. This pass
 // provides a reversed map.
 class BuildResourceMap : public Inspector {
-    ResourceMap* resourceMap;
+    ResourceMap *resourceMap;
 
  public:
-    explicit BuildResourceMap(ResourceMap* resourceMap) : resourceMap(resourceMap) {
+    explicit BuildResourceMap(ResourceMap *resourceMap) : resourceMap(resourceMap) {
         CHECK_NULL(resourceMap);
     }
 
-    bool preorder(const IR::ControlBlock* control) override {
+    bool preorder(const IR::ControlBlock *control) override {
         resourceMap->emplace(control->container, control);
         for (auto cv : control->constantValue) {
             resourceMap->emplace(cv.first, cv.second);
@@ -106,7 +108,7 @@ class BuildResourceMap : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::ParserBlock* parser) override {
+    bool preorder(const IR::ParserBlock *parser) override {
         resourceMap->emplace(parser->container, parser);
         for (auto cv : parser->constantValue) {
             resourceMap->emplace(cv.first, cv.second);
@@ -123,7 +125,7 @@ class BuildResourceMap : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::TableBlock* table) override {
+    bool preorder(const IR::TableBlock *table) override {
         resourceMap->emplace(table->container, table);
         for (auto cv : table->constantValue) {
             resourceMap->emplace(cv.first, cv.second);
@@ -134,7 +136,7 @@ class BuildResourceMap : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::PackageBlock* package) override {
+    bool preorder(const IR::PackageBlock *package) override {
         for (auto cv : package->constantValue) {
             if (cv.second->is<IR::Block>()) {
                 visit(cv.second->getNode());
@@ -143,7 +145,7 @@ class BuildResourceMap : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::ToplevelBlock* tlb) override {
+    bool preorder(const IR::ToplevelBlock *tlb) override {
         auto package = tlb->getMain();
         visit(package);
         return false;

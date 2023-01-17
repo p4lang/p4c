@@ -114,8 +114,8 @@ selector as_sel {
 		m.local_metadata_data2
 	}
 	member_id m.Ingress_as_member_id
-	n_groups_max 1024
-	n_members_per_group_max 65536
+	n_groups_max 0x400
+	n_members_per_group_max 0x10000
 }
 
 apply {
@@ -123,11 +123,13 @@ apply {
 	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
 	mov m.Ingress_as_member_id 0x0
-	mov m.Ingress_as_group_id 0x0
+	mov m.Ingress_as_group_id 0xFFFFFFFF
 	table tbl
+	jmpnh LABEL_END
+	jmpeq LABEL_END_0 m.Ingress_as_group_id 0xFFFFFFFF
 	table as_sel
-	table as
-	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	LABEL_END_0 :	table as
+	LABEL_END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP :	drop

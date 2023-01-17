@@ -7,13 +7,14 @@
 
 #include <boost/none.hpp>
 
+#include "backends/p4tools/common/lib/model.h"
+#include "backends/p4tools/common/lib/trace_events.h"
+#include "backends/p4tools/common/lib/util.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
-#include "p4tools/common/lib/model.h"
-#include "p4tools/common/lib/trace_events.h"
 
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
@@ -33,13 +34,20 @@ namespace Bmv2 {
 
 const big_int Bmv2TestBackend::ZERO_PKT_VAL = 0x2000000;
 const big_int Bmv2TestBackend::ZERO_PKT_MAX = 0xffffffff;
-const std::vector<std::string> Bmv2TestBackend::SUPPORTED_BACKENDS = {"PTF-P4", "STF", "PROTOBUF"};
+const std::set<std::string> Bmv2TestBackend::SUPPORTED_BACKENDS = {"PTF-P4", "STF", "PROTOBUF"};
 
-Bmv2TestBackend::Bmv2TestBackend(const ProgramInfo& programInfo, ExplorationStrategy& symbex,
-                                 const boost::filesystem::path& testPath,
+Bmv2TestBackend::Bmv2TestBackend(const ProgramInfo &programInfo, ExplorationStrategy &symbex,
+                                 const boost::filesystem::path &testPath,
                                  boost::optional<uint32_t> seed)
     : TestBackEnd(programInfo, symbex) {
     cstring testBackendString = TestgenOptions::get().testBackend;
+    if (testBackendString.isNullOrEmpty()) {
+        ::error(
+            "No test back end provided. Please provide a test back end using the --test-backend "
+            "parameter.");
+        exit(EXIT_FAILURE);
+    }
+
     if (testBackendString == "PTF-P4") {
         testWriter = new PTF(testPath.c_str(), seed);
     } else if (testBackendString == "STF") {
@@ -47,26 +55,16 @@ Bmv2TestBackend::Bmv2TestBackend(const ProgramInfo& programInfo, ExplorationStra
     } else if (testBackendString == "PROTOBUF") {
         testWriter = new Protobuf(testPath.c_str(), seed);
     } else {
-        std::stringstream supportedBackendString;
-        bool isFirst = true;
-        for (const auto& backend : SUPPORTED_BACKENDS) {
-            if (!isFirst) {
-                supportedBackendString << ", ";
-            } else {
-                isFirst = false;
-            }
-            supportedBackendString << backend;
-        }
         P4C_UNIMPLEMENTED(
             "Test back end %1% not implemented for this target. Supported back ends are %2%.",
-            testBackendString, supportedBackendString.str());
+            testBackendString, Utils::containerToString(SUPPORTED_BACKENDS));
     }
 }
 
 TestBackEnd::TestInfo Bmv2TestBackend::produceTestInfo(
-    const ExecutionState* executionState, const Model* completedModel,
-    const IR::Expression* outputPacketExpr, const IR::Expression* outputPortExpr,
-    const std::vector<gsl::not_null<const TraceEvent*>>* programTraces) {
+    const ExecutionState *executionState, const Model *completedModel,
+    const IR::Expression *outputPacketExpr, const IR::Expression *outputPortExpr,
+    const std::vector<gsl::not_null<const TraceEvent *>> *programTraces) {
     auto testInfo = TestBackEnd::produceTestInfo(executionState, completedModel, outputPacketExpr,
                                                  outputPortExpr, programTraces);
     // This is a hack to deal with a behavioral model quirk.
@@ -81,14 +79,14 @@ TestBackEnd::TestInfo Bmv2TestBackend::produceTestInfo(
     return testInfo;
 }
 
-const TestSpec* Bmv2TestBackend::createTestSpec(const ExecutionState* executionState,
-                                                const Model* completedModel,
-                                                const TestInfo& testInfo) {
+const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionState,
+                                                const Model *completedModel,
+                                                const TestInfo &testInfo) {
     // Create a testSpec.
-    TestSpec* testSpec = nullptr;
+    TestSpec *testSpec = nullptr;
 
-    const auto* ingressPayload = testInfo.inputPacket;
-    const auto* ingressPayloadMask = IR::getConstant(IR::getBitType(1), 1);
+    const auto *ingressPayload = testInfo.inputPacket;
+    const auto *ingressPayloadMask = IR::getConstant(IR::getBitType(1), 1);
     const auto ingressPacket = Packet(testInfo.inputPort, ingressPayload, ingressPayloadMask);
 
     boost::optional<Packet> egressPacket = boost::none;
@@ -100,34 +98,34 @@ const TestSpec* Bmv2TestBackend::createTestSpec(const ExecutionState* executionS
     const auto uninterpretedTableConfigs = executionState->getTestObjectCategory("tableconfigs");
     // Since these configurations are uninterpreted we need to convert them. We launch a
     // helper function to solve the variables involved in each table configuration.
-    for (const auto& tablePair : uninterpretedTableConfigs) {
+    for (const auto &tablePair : uninterpretedTableConfigs) {
         const auto tableName = tablePair.first;
-        const auto* uninterpretedTableConfig = tablePair.second->checkedTo<TableConfig>();
-        const auto* const tableConfig = uninterpretedTableConfig->evaluate(*completedModel);
+        const auto *uninterpretedTableConfig = tablePair.second->checkedTo<TableConfig>();
+        const auto *const tableConfig = uninterpretedTableConfig->evaluate(*completedModel);
         testSpec->addTestObject("tables", tableName, tableConfig);
     }
 
     const auto actionProfiles = executionState->getTestObjectCategory("action_profile");
-    for (const auto& testObject : actionProfiles) {
+    for (const auto &testObject : actionProfiles) {
         const auto profileName = testObject.first;
-        const auto* actionProfile = testObject.second->checkedTo<Bmv2_V1ModelActionProfile>();
-        const auto* evaluatedProfile = actionProfile->evaluate(*completedModel);
+        const auto *actionProfile = testObject.second->checkedTo<Bmv2_V1ModelActionProfile>();
+        const auto *evaluatedProfile = actionProfile->evaluate(*completedModel);
         testSpec->addTestObject("action_profiles", profileName, evaluatedProfile);
     }
 
     const auto actionSelectors = executionState->getTestObjectCategory("action_selector");
-    for (const auto& testObject : actionSelectors) {
+    for (const auto &testObject : actionSelectors) {
         const auto selectorName = testObject.first;
-        const auto* actionSelector = testObject.second->checkedTo<Bmv2_V1ModelActionSelector>();
-        const auto* evaluatedSelector = actionSelector->evaluate(*completedModel);
+        const auto *actionSelector = testObject.second->checkedTo<Bmv2_V1ModelActionSelector>();
+        const auto *evaluatedSelector = actionSelector->evaluate(*completedModel);
         testSpec->addTestObject("action_selectors", selectorName, evaluatedSelector);
     }
 
     const auto cloneInfos = executionState->getTestObjectCategory("clone_infos");
-    for (const auto& testObject : cloneInfos) {
+    for (const auto &testObject : cloneInfos) {
         const auto sessionId = testObject.first;
-        const auto* cloneInfo = testObject.second->checkedTo<Bmv2_CloneInfo>();
-        const auto* evaluatedInfo = cloneInfo->evaluate(*completedModel);
+        const auto *cloneInfo = testObject.second->checkedTo<Bmv2_CloneInfo>();
+        const auto *evaluatedInfo = cloneInfo->evaluate(*completedModel);
         testSpec->addTestObject("clone_infos", sessionId, evaluatedInfo);
     }
 

@@ -72,7 +72,7 @@ Also convert PSA_PacketPath_t to bit<32>
 class PsaEnumOn32Bits : public P4::ChooseEnumRepresentation {
     cstring filename;
 
-    bool convert(const IR::Type_Enum* type) const override {
+    bool convert(const IR::Type_Enum *type) const override {
         if (type->name == "PSA_PacketPath_t") return true;
         if (type->name == "PSA_MeterColor_t") return true;
         if (type->srcInfo.isValid()) {
@@ -89,12 +89,12 @@ class PsaEnumOn32Bits : public P4::ChooseEnumRepresentation {
     explicit PsaEnumOn32Bits(cstring filename) : filename(filename) {}
 };
 
-PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions& options, std::ostream* outStream)
+PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStream)
     : MidEnd(options) {
     auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new PsaEnumOn32Bits("psa.p4"));
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
-    std::function<bool(const Context*, const IR::Expression*)> policy =
-        [=](const Context*, const IR::Expression* e) -> bool {
+    std::function<bool(const Context *, const IR::Expression *)> policy =
+        [=](const Context *, const IR::Expression *e) -> bool {
         auto mce = e->to<IR::MethodCallExpression>();
         if (mce == nullptr) return true;
         auto mi = P4::MethodInstance::resolve(mce, &refMap, &typeMap);

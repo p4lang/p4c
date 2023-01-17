@@ -36,20 +36,20 @@ class Bmv2TestBackend : public TestBackEnd {
     static const big_int ZERO_PKT_VAL;
     static const big_int ZERO_PKT_MAX;
     /// List of the supported back ends.
-    static const std::vector<std::string> SUPPORTED_BACKENDS;
+    static const std::set<std::string> SUPPORTED_BACKENDS;
 
  public:
-    explicit Bmv2TestBackend(const ProgramInfo& programInfo, ExplorationStrategy& symbex,
-                             const boost::filesystem::path& testPath,
+    explicit Bmv2TestBackend(const ProgramInfo &programInfo, ExplorationStrategy &symbex,
+                             const boost::filesystem::path &testPath,
                              boost::optional<uint32_t> seed);
 
     TestBackEnd::TestInfo produceTestInfo(
-        const ExecutionState* executionState, const Model* completedModel,
-        const IR::Expression* outputPacketExpr, const IR::Expression* outputPortExpr,
-        const std::vector<gsl::not_null<const TraceEvent*>>* programTraces) override;
+        const ExecutionState *executionState, const Model *completedModel,
+        const IR::Expression *outputPacketExpr, const IR::Expression *outputPortExpr,
+        const std::vector<gsl::not_null<const TraceEvent *>> *programTraces) override;
 
-    const TestSpec* createTestSpec(const ExecutionState* executionState,
-                                   const Model* completedModel, const TestInfo& testInfo) override;
+    const TestSpec *createTestSpec(const ExecutionState *executionState,
+                                   const Model *completedModel, const TestInfo &testInfo) override;
 };
 
 }  // namespace Bmv2

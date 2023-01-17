@@ -37,7 +37,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
      {&NamedType::Bool(),
       {},
       CONST + IN_IMPL + INCL_NESTED + OVERRIDE + CLASSREF,
-      [](IrClass* cl, Util::SourceInfo, cstring) -> cstring {
+      [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
           std::stringstream buf;
           buf << "{" << std::endl << cl->indent << cl->indent << "return ";
           bool first = true;
@@ -54,7 +54,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
               if (*f->type == NamedType::SourceInfo()) continue;  // FIXME -- deal with SourcInfo
               if (!first) buf << std::endl << cl->indent << cl->indent << "&& ";
               first = false;
-              if (auto* arr = dynamic_cast<const ArrayType*>(f->type)) {
+              if (auto *arr = dynamic_cast<const ArrayType *>(f->type)) {
                   for (int i = 0; i < arr->size; ++i) {
                       if (i != 0) buf << std::endl << cl->indent << cl->indent << "&& ";
                       buf << f->name << "[" << i << "] == a." << f->name << "[" << i << "]";
@@ -74,7 +74,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
      {&NamedType::Bool(),
       {new IrField(new ReferenceType(new NamedType(IrClass::nodeClass()), true), "a_")},
       EXTEND + CONST + IN_IMPL + OVERRIDE,
-      [](IrClass* cl, Util::SourceInfo srcInfo, cstring body) -> cstring {
+      [](IrClass *cl, Util::SourceInfo srcInfo, cstring body) -> cstring {
           std::stringstream buf;
           buf << "{" << std::endl;
           buf << cl->indent << cl->indent
@@ -129,7 +129,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
      {&ReferenceType::OstreamRef,
       {new IrField(&ReferenceType::OstreamRef, "out")},
       EXTEND + IN_IMPL + NOT_DEFAULT + INCL_NESTED + CLASSREF + FRIEND,
-      [](IrClass* cl, Util::SourceInfo srcInfo, cstring body) -> cstring {
+      [](IrClass *cl, Util::SourceInfo srcInfo, cstring body) -> cstring {
           std::stringstream buf;
           buf << "{";
           if (body) buf << LineDirective(srcInfo, true) << body;
@@ -140,7 +140,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
      {&NamedType::Void(),
       {new IrField(&ReferenceType::VisitorRef, "v")},
       IN_IMPL + OVERRIDE,
-      [](IrClass* cl, Util::SourceInfo, cstring) -> cstring {
+      [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
           bool needed = false;
           std::stringstream buf;
           buf << "{" << std::endl;
@@ -165,7 +165,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
      {&NamedType::Void(),
       {},
       CONST + IN_IMPL + EXTEND + OVERRIDE,
-      [](IrClass* cl, Util::SourceInfo srcInfo, cstring body) -> cstring {
+      [](IrClass *cl, Util::SourceInfo srcInfo, cstring body) -> cstring {
           bool needed = false;
           std::stringstream buf;
           buf << "{" << LineDirective(true);
@@ -192,7 +192,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
      {&NamedType::Cstring(),
       {},
       CONST + OVERRIDE,
-      [](IrClass* cl, Util::SourceInfo, cstring) -> cstring {
+      [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
           std::stringstream buf;
           buf << "{ return \"" << cl->containedIn << cl->name << "\"; }";
           return buf.str();
@@ -201,12 +201,12 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
      {&NamedType::Void(),
       {new IrField(&ReferenceType::OstreamRef, "out")},
       CONST + IN_IMPL + OVERRIDE + CONCRETE_ONLY,
-      [](IrClass*, Util::SourceInfo, cstring) -> cstring { return ""; }}},
+      [](IrClass *, Util::SourceInfo, cstring) -> cstring { return ""; }}},
     {"dump_fields",
      {&NamedType::Void(),
       {new IrField(&ReferenceType::OstreamRef, "out")},
       CONST + IN_IMPL + OVERRIDE,
-      [](IrClass* cl, Util::SourceInfo, cstring) -> cstring {
+      [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
           std::stringstream buf;
           buf << "{" << std::endl;
           if (auto parent = cl->getParent())
@@ -216,7 +216,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
           for (auto f : *cl->getFields()) {
               if (*f->type == NamedType::SourceInfo()) continue;  // FIXME -- deal with SourcInfo
               if (f->type->resolve(cl->containedIn) == nullptr &&
-                  !dynamic_cast<const TemplateInstantiation*>(f->type)) {
+                  !dynamic_cast<const TemplateInstantiation *>(f->type)) {
                   // not an IR pointer
                   buf << cl->indent << cl->indent << "out << \" " << f->name << "=\" << " << f->name
                       << ";" << std::endl;
@@ -230,7 +230,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
      {&NamedType::Void(),
       {new IrField(new ReferenceType(&NamedType::JSONGenerator()), "json")},
       CONST + IN_IMPL + OVERRIDE + INCL_NESTED,
-      [](IrClass* cl, Util::SourceInfo, cstring) -> cstring {
+      [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
           std::stringstream buf;
           buf << "{" << std::endl;
           if (auto parent = cl->getParent())
@@ -251,7 +251,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
      {nullptr,
       {new IrField(new ReferenceType(&NamedType::JSONLoader()), "json")},
       IN_IMPL + CONSTRUCTOR + INCL_NESTED,
-      [](IrClass* cl, Util::SourceInfo, cstring) -> cstring {
+      [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
           std::stringstream buf;
           if (auto parent = cl->getParent())
               buf << ": " << parent->qualified_name(cl->containedIn) << "(json)";
@@ -270,7 +270,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
           new IrField(new ReferenceType(&NamedType::JSONLoader()), "json"),
       },
       FACTORY + IN_IMPL + CONCRETE_ONLY + INCL_NESTED,
-      [](IrClass* cl, Util::SourceInfo, cstring) -> cstring {
+      [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
           std::stringstream buf;
           buf << "{ return new " << cl->name << "(json); }";
           return buf.str();
@@ -279,25 +279,25 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
      {&NamedType::Cstring(),
       {},
       CONST + IN_IMPL + OVERRIDE + NOT_DEFAULT,
-      [](IrClass*, Util::SourceInfo, cstring) -> cstring { return cstring(); }}},
+      [](IrClass *, Util::SourceInfo, cstring) -> cstring { return cstring(); }}},
 };
 
 void IrClass::generateMethods() {
     if (this == nodeClass() || this == vectorClass()) return;
     if (kind != NodeKind::Interface) {
-        for (auto& def : IrMethod::Generate) {
+        for (auto &def : IrMethod::Generate) {
             if (def.second.flags & NOT_DEFAULT) continue;
             if (kind == NodeKind::Nested && !(def.second.flags & INCL_NESTED)) continue;
             if ((def.second.flags & CONCRETE_ONLY) && kind == NodeKind::Abstract) continue;
-            if (Util::Enumerator<IrElement*>::createEnumerator(elements)
-                    ->where([](IrElement* el) { return el->is<IrNo>(); })
-                    ->where([&def](IrElement* el) { return el->to<IrNo>()->text == def.first; })
+            if (Util::Enumerator<IrElement *>::createEnumerator(elements)
+                    ->where([](IrElement *el) { return el->is<IrNo>(); })
+                    ->where([&def](IrElement *el) { return el->to<IrNo>()->text == def.first; })
                     ->any())
                 continue;
-            IrMethod* exist = dynamic_cast<IrMethod*>(
-                Util::Enumerator<IrElement*>::createEnumerator(elements)
-                    ->where([](IrElement* el) { return el->is<IrMethod>(); })
-                    ->where([&def](IrElement* el) { return el->to<IrMethod>()->name == def.first; })
+            IrMethod *exist = dynamic_cast<IrMethod *>(
+                Util::Enumerator<IrElement *>::createEnumerator(elements)
+                    ->where([](IrElement *el) { return el->is<IrMethod>(); })
+                    ->where([&def](IrElement *el) { return el->to<IrMethod>()->name == def.first; })
                     ->nextOrDefault());
             if (exist && !(def.second.flags & EXTEND)) continue;
             cstring body;
@@ -311,14 +311,14 @@ void IrClass::generateMethods() {
                     exist->body = body;
                     if (def.second.flags & FRIEND) exist->isFriend = true;
                 } else {
-                    auto* m = new IrMethod(def.first, body);
+                    auto *m = new IrMethod(def.first, body);
                     if (def.second.flags & FRIEND) m->isFriend = true;
                     m->clss = this;
                     elements.push_back(m);
                 }
             }
         }
-        for (auto* parent = getParent(); parent; parent = parent->getParent()) {
+        for (auto *parent = getParent(); parent; parent = parent->getParent()) {
             auto eq_overload = new IrMethod("operator==", "{ return a == *this; }");
             eq_overload->clss = this;
             eq_overload->isOverride = true;
@@ -329,7 +329,7 @@ void IrClass::generateMethods() {
             elements.push_back(eq_overload);
         }
     }
-    IrMethod* ctor = nullptr;
+    IrMethod *ctor = nullptr;
     bool user_defined_default_ctor = false;
     for (auto m : *getUserMethods()) {
         if (m->rtype) {
@@ -346,7 +346,7 @@ void IrClass::generateMethods() {
         }
         if (!IrMethod::Generate.count(m->name))
             throw Util::CompilationError("Unrecognized predefined method %1%", m->name);
-        auto& info = IrMethod::Generate.at(m->name);
+        auto &info = IrMethod::Generate.at(m->name);
         if (m->name) {
             if (info.rtype) {
                 // This predefined method has an explicit return type.

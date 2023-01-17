@@ -4,7 +4,7 @@
 
 namespace P4 {
 
-void SimplifyBitwise::assignSlices(const IR::Expression* expr, big_int mask) {
+void SimplifyBitwise::assignSlices(const IR::Expression *expr, big_int mask) {
     int one_pos = Util::scan1(mask, 0);
 
     // Calculate the slices for this particular mask
@@ -18,7 +18,7 @@ void SimplifyBitwise::assignSlices(const IR::Expression* expr, big_int mask) {
     }
 }
 
-const IR::Node* SimplifyBitwise::preorder(IR::AssignmentStatement* as) {
+const IR::Node *SimplifyBitwise::preorder(IR::AssignmentStatement *as) {
     Pattern::Match<IR::Expression> a, b;
     Pattern::Match<IR::Constant> maskA, maskB;
 

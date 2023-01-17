@@ -9,14 +9,14 @@ message InputPacketAtPort {
     // The raw bytes of the test packet.
     bytes packet = 1;
     // The raw bytes of the port associated with the packet.
-    bytes port = 2;
+    int32 port = 2;
 }
 
 message OutputPacketAtPort {
     // The raw bytes of the test packet.
     bytes packet = 1;
     // The raw bytes of the port associated with the packet.
-    bytes port = 2;
+    int32 port = 2;
     // The don't care mask of the packet.
     bytes packet_mask = 3;
 }

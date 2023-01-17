@@ -60,7 +60,7 @@ bool UBPFProgram::build() {
     return success;
 }
 
-void UBPFProgram::emitC(UbpfCodeBuilder* builder, cstring headerFile) {
+void UBPFProgram::emitC(UbpfCodeBuilder *builder, cstring headerFile) {
     emitGeneratedComment(builder);
 
     builder->appendFormat("#include \"%s\"", headerFile);
@@ -126,7 +126,7 @@ void UBPFProgram::emitC(UbpfCodeBuilder* builder, cstring headerFile) {
     builder->blockEnd(true);
 }
 
-void UBPFProgram::emitH(EBPF::CodeBuilder* builder, cstring) {
+void UBPFProgram::emitH(EBPF::CodeBuilder *builder, cstring) {
     emitGeneratedComment(builder);
     builder->appendLine("#ifndef _P4_GEN_HEADER_");
     builder->appendLine("#define _P4_GEN_HEADER_");
@@ -149,7 +149,7 @@ void UBPFProgram::emitH(EBPF::CodeBuilder* builder, cstring) {
     builder->appendLine("#endif");
 }
 
-void UBPFProgram::emitPreamble(EBPF::CodeBuilder* builder) {
+void UBPFProgram::emitPreamble(EBPF::CodeBuilder *builder) {
     builder->emitIndent();
     builder->appendLine("#define BPF_MASK(t, w) ((((t)(1)) << (w)) - (t)1)");
     builder->appendLine("#define BYTES(w) ((w) / 8)");
@@ -158,7 +158,7 @@ void UBPFProgram::emitPreamble(EBPF::CodeBuilder* builder) {
     builder->newline();
 }
 
-void UBPFProgram::emitTypes(EBPF::CodeBuilder* builder) {
+void UBPFProgram::emitTypes(EBPF::CodeBuilder *builder) {
     for (auto d : program->objects) {
         if (d->is<IR::Type>() && !d->is<IR::IContainer>() && !d->is<IR::Type_Extern>() &&
             !d->is<IR::Type_Parser>() && !d->is<IR::Type_Control>() && !d->is<IR::Type_Typedef>() &&
@@ -172,7 +172,7 @@ void UBPFProgram::emitTypes(EBPF::CodeBuilder* builder) {
     }
 }
 
-void UBPFProgram::emitTableDefinition(EBPF::CodeBuilder* builder) const {
+void UBPFProgram::emitTableDefinition(EBPF::CodeBuilder *builder) const {
     builder->append("enum ");
     builder->append("ubpf_map_type");
     builder->spc();
@@ -223,31 +223,31 @@ void UBPFProgram::emitTableDefinition(EBPF::CodeBuilder* builder) const {
     builder->endOfStatement(true);
 }
 
-void UBPFProgram::emitPktVariable(UbpfCodeBuilder* builder) const {
+void UBPFProgram::emitPktVariable(UbpfCodeBuilder *builder) const {
     builder->emitIndent();
     builder->appendFormat("void *%s = ", packetStartVar.c_str());
     builder->target->emitGetPacketData(builder, contextVar);
     builder->endOfStatement(true);
 }
 
-void UBPFProgram::emitPacketLengthVariable(UbpfCodeBuilder* builder) const {
+void UBPFProgram::emitPacketLengthVariable(UbpfCodeBuilder *builder) const {
     builder->emitIndent();
     builder->appendFormat("uint32_t %s = ", lengthVar.c_str());
     builder->target->emitGetFromStandardMetadata(builder, stdMetadataVar, "packet_length");
     builder->endOfStatement(true);
 }
 
-void UBPFProgram::emitHeaderInstances(EBPF::CodeBuilder* builder) {
+void UBPFProgram::emitHeaderInstances(EBPF::CodeBuilder *builder) {
     builder->emitIndent();
     parser->headerType->declare(builder, parser->headers->name.name, false);
 }
 
-void UBPFProgram::emitMetadataInstance(EBPF::CodeBuilder* builder) const {
+void UBPFProgram::emitMetadataInstance(EBPF::CodeBuilder *builder) const {
     builder->emitIndent();
     parser->metadataType->declare(builder, parser->metadata->name.name, false);
 }
 
-void UBPFProgram::emitLocalVariables(EBPF::CodeBuilder* builder) {
+void UBPFProgram::emitLocalVariables(EBPF::CodeBuilder *builder) {
     builder->emitIndent();
     builder->appendFormat("int %s = 0;", offsetVar.c_str());
     builder->newline();
@@ -273,7 +273,7 @@ void UBPFProgram::emitLocalVariables(EBPF::CodeBuilder* builder) {
     builder->newline();
 }
 
-void UBPFProgram::emitPipeline(EBPF::CodeBuilder* builder) {
+void UBPFProgram::emitPipeline(EBPF::CodeBuilder *builder) {
     builder->emitIndent();
     builder->append(IR::ParserState::accept);
     builder->append(":");

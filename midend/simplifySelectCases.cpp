@@ -20,7 +20,7 @@ limitations under the License.
 
 namespace P4 {
 
-void DoSimplifySelectCases::checkSimpleConstant(const IR::Expression* expr) const {
+void DoSimplifySelectCases::checkSimpleConstant(const IR::Expression *expr) const {
     CHECK_NULL(expr);
     if (expr->is<IR::DefaultExpression>()) return;
     if (expr->is<IR::Constant>()) return;
@@ -49,7 +49,7 @@ void DoSimplifySelectCases::checkSimpleConstant(const IR::Expression* expr) cons
     ::error(ErrorType::ERR_INVALID, "%1%: must be a compile-time constant", expr);
 }
 
-const IR::Node* DoSimplifySelectCases::preorder(IR::SelectExpression* expression) {
+const IR::Node *DoSimplifySelectCases::preorder(IR::SelectExpression *expression) {
     IR::Vector<IR::SelectCase> cases;
 
     bool seenDefault = false;

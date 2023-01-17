@@ -18,6 +18,6 @@ limitations under the License.
 #define _LIB_CRASH_H_
 
 void setup_signals();
-const char* addr2line(void* addr, const char* text);
+const char *addr2line(void *addr, const char *text);
 
 #endif /* _LIB_CRASH_H_ */

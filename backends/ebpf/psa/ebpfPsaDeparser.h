@@ -28,10 +28,10 @@ class EBPFDeparserPSA;
 
 class DeparserBodyTranslatorPSA : public DeparserBodyTranslator {
  public:
-    explicit DeparserBodyTranslatorPSA(const EBPFDeparserPSA* deparser);
+    explicit DeparserBodyTranslatorPSA(const EBPFDeparserPSA *deparser);
 
-    void processFunction(const P4::ExternFunction* function) override;
-    void processMethod(const P4::ExternMethod* method) override;
+    void processFunction(const P4::ExternFunction *function) override;
+    void processMethod(const P4::ExternMethod *method) override;
 };
 
 class EBPFDeparserPSA : public EBPFDeparser {
@@ -41,22 +41,22 @@ class EBPFDeparserPSA : public EBPFDeparser {
     int maxDigestQueueSize = 128;
 
  public:
-    const IR::Parameter* user_metadata;
-    const IR::Parameter* istd;
-    const IR::Parameter* resubmit_meta;
-    std::map<cstring, EBPFChecksumPSA*> checksums;
-    std::map<cstring, const IR::Type*> digests;
+    const IR::Parameter *user_metadata;
+    const IR::Parameter *istd;
+    const IR::Parameter *resubmit_meta;
+    std::map<cstring, EBPFChecksumPSA *> checksums;
+    std::map<cstring, const IR::Type *> digests;
 
-    EBPFDeparserPSA(const EBPFProgram* program, const IR::ControlBlock* control,
-                    const IR::Parameter* parserHeaders, const IR::Parameter* istd)
+    EBPFDeparserPSA(const EBPFProgram *program, const IR::ControlBlock *control,
+                    const IR::Parameter *parserHeaders, const IR::Parameter *istd)
         : EBPFDeparser(program, control, parserHeaders), istd(istd) {
         codeGen = new DeparserBodyTranslatorPSA(this);
     }
 
-    void emitDigestInstances(CodeBuilder* builder) const;
-    void emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl) override;
+    void emitDigestInstances(CodeBuilder *builder) const;
+    void emitDeclaration(CodeBuilder *builder, const IR::Declaration *decl) override;
 
-    EBPFChecksumPSA* getChecksum(cstring name) const {
+    EBPFChecksumPSA *getChecksum(cstring name) const {
         auto result = ::get(checksums, name);
         BUG_CHECK(result != nullptr, "No checksum named %1%", name);
         return result;
@@ -65,8 +65,8 @@ class EBPFDeparserPSA : public EBPFDeparser {
 
 class IngressDeparserPSA : public EBPFDeparserPSA {
  public:
-    IngressDeparserPSA(const EBPFProgram* program, const IR::ControlBlock* control,
-                       const IR::Parameter* parserHeaders, const IR::Parameter* istd)
+    IngressDeparserPSA(const EBPFProgram *program, const IR::ControlBlock *control,
+                       const IR::Parameter *parserHeaders, const IR::Parameter *istd)
         : EBPFDeparserPSA(program, control, parserHeaders, istd) {}
 
     bool build() override;
@@ -74,8 +74,8 @@ class IngressDeparserPSA : public EBPFDeparserPSA {
 
 class EgressDeparserPSA : public EBPFDeparserPSA {
  public:
-    EgressDeparserPSA(const EBPFProgram* program, const IR::ControlBlock* control,
-                      const IR::Parameter* parserHeaders, const IR::Parameter* istd)
+    EgressDeparserPSA(const EBPFProgram *program, const IR::ControlBlock *control,
+                      const IR::Parameter *parserHeaders, const IR::Parameter *istd)
         : EBPFDeparserPSA(program, control, parserHeaders, istd) {}
 
     bool build() override;
@@ -83,19 +83,52 @@ class EgressDeparserPSA : public EBPFDeparserPSA {
 
 class TCIngressDeparserPSA : public IngressDeparserPSA {
  public:
-    TCIngressDeparserPSA(const EBPFProgram* program, const IR::ControlBlock* control,
-                         const IR::Parameter* parserHeaders, const IR::Parameter* istd)
+    TCIngressDeparserPSA(const EBPFProgram *program, const IR::ControlBlock *control,
+                         const IR::Parameter *parserHeaders, const IR::Parameter *istd)
         : IngressDeparserPSA(program, control, parserHeaders, istd) {}
 
-    void emitPreDeparser(CodeBuilder* builder) override;
+    void emitPreDeparser(CodeBuilder *builder) override;
 };
 
 class TCEgressDeparserPSA : public EgressDeparserPSA {
  public:
-    TCEgressDeparserPSA(const EBPFProgram* program, const IR::ControlBlock* control,
-                        const IR::Parameter* parserHeaders, const IR::Parameter* istd)
+    TCEgressDeparserPSA(const EBPFProgram *program, const IR::ControlBlock *control,
+                        const IR::Parameter *parserHeaders, const IR::Parameter *istd)
         : EgressDeparserPSA(program, control, parserHeaders, istd) {}
 };
+
+class TCIngressDeparserForTrafficManagerPSA : public TCIngressDeparserPSA {
+ public:
+    TCIngressDeparserForTrafficManagerPSA(const EBPFProgram *program,
+                                          const IR::ControlBlock *control,
+                                          const IR::Parameter *parserHeaders,
+                                          const IR::Parameter *istd)
+        : TCIngressDeparserPSA(program, control, parserHeaders, istd) {}
+    void emitPreDeparser(CodeBuilder *builder) override;
+    void emitDeparserExternCalls(CodeBuilder *builder) override {
+        (void)builder;
+        // do not emit deparser extern calls for TCIngressDeparserForTrafficManagerPSA
+    }
+};
+
+class XDPIngressDeparserPSA : public IngressDeparserPSA {
+ public:
+    XDPIngressDeparserPSA(const EBPFProgram *program, const IR::ControlBlock *control,
+                          const IR::Parameter *parserHeaders, const IR::Parameter *istd)
+        : IngressDeparserPSA(program, control, parserHeaders, istd) {}
+
+    void emitPreDeparser(CodeBuilder *builder) override;
+};
+
+class XDPEgressDeparserPSA : public EgressDeparserPSA {
+ public:
+    XDPEgressDeparserPSA(const EBPFProgram *program, const IR::ControlBlock *control,
+                         const IR::Parameter *parserHeaders, const IR::Parameter *istd)
+        : EgressDeparserPSA(program, control, parserHeaders, istd) {}
+
+    void emitPreDeparser(CodeBuilder *builder) override;
+};
+
 }  // namespace EBPF
 
 #endif /* BACKENDS_EBPF_PSA_EBPFPSADEPARSER_H_ */

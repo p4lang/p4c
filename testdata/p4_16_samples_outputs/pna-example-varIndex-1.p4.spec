@@ -62,9 +62,8 @@ action execute_1 args none {
 	mov m.MainControlT_tmp_1 m.local_metadata_depth
 	add m.MainControlT_tmp_1 0x3
 	and m.MainControlT_tmp_1 0x3
-	jmpneq LABEL_FALSE_3 m.MainControlT_tmp_1 0x0
-	jmp LABEL_END_3
-	LABEL_FALSE_3 :	mov m.MainControlT_tmp_0 m.local_metadata_depth
+	jmpeq LABEL_END_3 m.MainControlT_tmp_1 0x0
+	mov m.MainControlT_tmp_0 m.local_metadata_depth
 	add m.MainControlT_tmp_0 0x3
 	and m.MainControlT_tmp_0 0x3
 	jmpneq LABEL_FALSE_4 m.MainControlT_tmp_0 0x1
@@ -96,6 +95,7 @@ action execute_1 args none {
 	mov h.vlan_tag_0.pcp_cfi_vid m.MainControlT_tmp_13
 	or h.vlan_tag_0.pcp_cfi_vid m.MainControlT_tmp_16
 	jmp LABEL_END_3
+	jmp LABEL_END_3
 	LABEL_FALSE_2 :	jmpneq LABEL_END_3 m.local_metadata_depth 0x1
 	mov m.MainControlT_tmp_4 m.local_metadata_depth
 	add m.MainControlT_tmp_4 0x3
@@ -119,9 +119,8 @@ action execute_1 args none {
 	LABEL_FALSE_7 :	mov m.MainControlT_tmp_3 m.local_metadata_depth
 	add m.MainControlT_tmp_3 0x3
 	and m.MainControlT_tmp_3 0x3
-	jmpneq LABEL_FALSE_8 m.MainControlT_tmp_3 0x1
-	jmp LABEL_END_3
-	LABEL_FALSE_8 :	mov m.MainControlT_tmp_2 m.local_metadata_depth
+	jmpeq LABEL_END_3 m.MainControlT_tmp_3 0x1
+	mov m.MainControlT_tmp_2 m.local_metadata_depth
 	add m.MainControlT_tmp_2 0x3
 	and m.MainControlT_tmp_2 0x3
 	jmplt LABEL_END_3 m.MainControlT_tmp_2 0x1

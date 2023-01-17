@@ -47,7 +47,7 @@ bool EBPFPipeline::isEmpty() const {
     return true;
 }
 
-void EBPFPipeline::emitLocalVariables(CodeBuilder* builder) {
+void EBPFPipeline::emitLocalVariables(CodeBuilder *builder) {
     builder->emitIndent();
     builder->appendFormat("unsigned %s = 0;", offsetVar.c_str());
     builder->newline();
@@ -87,9 +87,14 @@ void EBPFPipeline::emitLocalVariables(CodeBuilder* builder) {
         emitTimestamp(builder);
         builder->endOfStatement(true);
     }
+
+    builder->emitIndent();
+    builder->appendFormat("u32 %s = %s;", inputPortVar.c_str(), ifindexVar.c_str());
+    builder->newline();
+    emitInputPortMapping(builder);
 }
 
-void EBPFPipeline::emitUserMetadataInstance(CodeBuilder* builder) {
+void EBPFPipeline::emitUserMetadataInstance(CodeBuilder *builder) {
     builder->emitIndent();
     auto user_md_type = typeMap->getType(control->user_metadata);
     if (user_md_type == nullptr) {
@@ -100,32 +105,32 @@ void EBPFPipeline::emitUserMetadataInstance(CodeBuilder* builder) {
     builder->endOfStatement(true);
 }
 
-void EBPFPipeline::emitLocalHeaderInstancesAsPointers(CodeBuilder* builder) {
+void EBPFPipeline::emitLocalHeaderInstancesAsPointers(CodeBuilder *builder) {
     builder->emitIndent();
     builder->appendFormat("struct %s *%s;", parser->headerType->to<EBPFStructType>()->name,
                           parser->headers->name.name);
     builder->newline();
 }
 
-void EBPFPipeline::emitCPUMAPHeadersInitializers(CodeBuilder* builder) {
+void EBPFPipeline::emitCPUMAPHeadersInitializers(CodeBuilder *builder) {
     builder->emitIndent();
     builder->appendLine("struct hdr_md *hdrMd;");
 }
 
-void EBPFPipeline::emitHeaderInstances(CodeBuilder* builder) {
+void EBPFPipeline::emitHeaderInstances(CodeBuilder *builder) {
     emitCPUMAPHeadersInitializers(builder);
     builder->emitIndent();
     parser->headerType->declare(builder, parser->headers->name.name, true);
     builder->endOfStatement(false);
 }
 
-void EBPFPipeline::emitCPUMAPLookup(CodeBuilder* builder) {
+void EBPFPipeline::emitCPUMAPLookup(CodeBuilder *builder) {
     builder->emitIndent();
     builder->target->emitTableLookup(builder, "hdr_md_cpumap", zeroKey.c_str(), "hdrMd");
     builder->endOfStatement(true);
 }
 
-void EBPFPipeline::emitCPUMAPInitializers(CodeBuilder* builder) {
+void EBPFPipeline::emitCPUMAPInitializers(CodeBuilder *builder) {
     emitCPUMAPLookup(builder);
     builder->emitIndent();
     builder->append("if (!hdrMd)");
@@ -138,17 +143,17 @@ void EBPFPipeline::emitCPUMAPInitializers(CodeBuilder* builder) {
     builder->appendLine("__builtin_memset(hdrMd, 0, sizeof(struct hdr_md));");
 }
 
-void EBPFPipeline::emitHeadersFromCPUMAP(CodeBuilder* builder) {
+void EBPFPipeline::emitHeadersFromCPUMAP(CodeBuilder *builder) {
     builder->emitIndent();
     builder->appendFormat("%s = &(hdrMd->cpumap_hdr);", parser->headers->name.name);
 }
 
-void EBPFPipeline::emitMetadataFromCPUMAP(CodeBuilder* builder) {
+void EBPFPipeline::emitMetadataFromCPUMAP(CodeBuilder *builder) {
     builder->emitIndent();
     builder->appendFormat("%s = &(hdrMd->cpumap_usermeta);", control->user_metadata->name.name);
 }
 
-void EBPFPipeline::emitGlobalMetadataInitializer(CodeBuilder* builder) {
+void EBPFPipeline::emitGlobalMetadataInitializer(CodeBuilder *builder) {
     builder->emitIndent();
     builder->appendFormat(
         "struct psa_global_metadata *%s = (struct psa_global_metadata *) skb->cb;",
@@ -156,22 +161,38 @@ void EBPFPipeline::emitGlobalMetadataInitializer(CodeBuilder* builder) {
     builder->newline();
 }
 
-void EBPFPipeline::emitPacketLength(CodeBuilder* builder) {
-    builder->appendFormat("%s->len", this->contextVar.c_str());
+void EBPFPipeline::emitPacketLength(CodeBuilder *builder) {
+    if (this->is<XDPIngressPipeline>() || this->is<XDPEgressPipeline>()) {
+        builder->appendFormat("%s->data_end - %s->data", this->contextVar.c_str(),
+                              this->contextVar.c_str());
+    } else {
+        builder->appendFormat("%s->len", this->contextVar.c_str());
+    }
 }
 
-void EBPFPipeline::emitTimestamp(CodeBuilder* builder) {
+void EBPFPipeline::emitTimestamp(CodeBuilder *builder) {
     builder->appendFormat("bpf_ktime_get_ns()");
 }
 
+void EBPFPipeline::emitInputPortMapping(CodeBuilder *builder) {
+    builder->emitIndent();
+    builder->appendFormat("if (%s == PSA_PORT_RECIRCULATE) ", inputPortVar.c_str());
+    builder->blockStart();
+    builder->emitIndent();
+    // To be conformant with psa.p4, where PSA_PORT_RECIRCULATE is constant
+    builder->appendFormat("%s = P4C_PSA_PORT_RECIRCULATE", inputPortVar.c_str());
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
+}
+
 // =====================EBPFIngressPipeline===========================
-void EBPFIngressPipeline::emitSharedMetadataInitializer(CodeBuilder* builder) {
+void EBPFIngressPipeline::emitSharedMetadataInitializer(CodeBuilder *builder) {
     auto type = EBPFTypeFactory::instance->create(this->deparser->resubmit_meta->type);
     type->declare(builder, deparser->resubmit_meta->name.name, false);
     builder->endOfStatement(true);
 }
 
-void EBPFIngressPipeline::emitPSAControlInputMetadata(CodeBuilder* builder) {
+void EBPFIngressPipeline::emitPSAControlInputMetadata(CodeBuilder *builder) {
     builder->emitIndent();
     builder->appendFormat(
         "struct psa_ingress_input_metadata_t %s = {\n"
@@ -179,7 +200,7 @@ void EBPFIngressPipeline::emitPSAControlInputMetadata(CodeBuilder* builder) {
         "            .packet_path = %s,\n"
         "            .parser_error = %s,\n"
         "    };",
-        control->inputStandardMetadata->name.name, ifindexVar.c_str(), packetPathVar.c_str(),
+        control->inputStandardMetadata->name.name, inputPortVar.c_str(), packetPathVar.c_str(),
         errorVar.c_str());
     builder->newline();
     if (shouldEmitTimestamp()) {
@@ -190,7 +211,7 @@ void EBPFIngressPipeline::emitPSAControlInputMetadata(CodeBuilder* builder) {
     }
 }
 
-void EBPFIngressPipeline::emitPSAControlOutputMetadata(CodeBuilder* builder) {
+void EBPFIngressPipeline::emitPSAControlOutputMetadata(CodeBuilder *builder) {
     builder->emitIndent();
 
     builder->appendFormat(
@@ -202,7 +223,7 @@ void EBPFIngressPipeline::emitPSAControlOutputMetadata(CodeBuilder* builder) {
     builder->newline();
 }
 
-void EBPFIngressPipeline::emit(CodeBuilder* builder) {
+void EBPFIngressPipeline::emit(CodeBuilder *builder) {
     cstring msgStr, varStr;
 
     // firstly emit process() in-lined function and then the actual BPF section.
@@ -237,10 +258,13 @@ void EBPFIngressPipeline::emit(CodeBuilder* builder) {
     emitMetadataFromCPUMAP(builder);
     builder->newline();
 
-    msgStr =
-        Util::printf_format("%s parser: parsing new packet, path=%%d, pkt_len=%%d", sectionName);
+    msgStr = Util::printf_format(
+        "%s parser: parsing new packet, input_port=%%d, path=%%d, "
+        "pkt_len=%%d",
+        sectionName);
     varStr = Util::printf_format("%s->packet_path", compilerGlobalMetadata);
-    builder->target->emitTraceMessage(builder, msgStr.c_str(), 2, varStr, lengthVar.c_str());
+    builder->target->emitTraceMessage(builder, msgStr.c_str(), 3, inputPortVar.c_str(), varStr,
+                                      lengthVar.c_str());
 
     // PARSER
     parser->emit(builder);
@@ -335,7 +359,7 @@ void EBPFIngressPipeline::emit(CodeBuilder* builder) {
 }
 
 // =====================EBPFEgressPipeline============================
-void EBPFEgressPipeline::emitPSAControlInputMetadata(CodeBuilder* builder) {
+void EBPFEgressPipeline::emitPSAControlInputMetadata(CodeBuilder *builder) {
     builder->emitIndent();
     builder->appendFormat(
         "struct psa_egress_input_metadata_t %s = {\n"
@@ -345,7 +369,7 @@ void EBPFEgressPipeline::emitPSAControlInputMetadata(CodeBuilder* builder) {
         "            .instance = %s,\n"
         "            .parser_error = %s,\n"
         "        };",
-        control->inputStandardMetadata->name.name, priorityVar.c_str(), ifindexVar.c_str(),
+        control->inputStandardMetadata->name.name, priorityVar.c_str(), inputPortVar.c_str(),
         packetPathVar.c_str(), pktInstanceVar.c_str(), errorVar.c_str());
     builder->newline();
     if (shouldEmitTimestamp()) {
@@ -354,19 +378,9 @@ void EBPFEgressPipeline::emitPSAControlInputMetadata(CodeBuilder* builder) {
                               timestampVar.c_str());
         builder->endOfStatement(true);
     }
-    builder->emitIndent();
-    builder->appendFormat("if (%s.egress_port == PSA_PORT_RECIRCULATE) ",
-                          control->inputStandardMetadata->name.name);
-    builder->blockStart();
-    builder->emitIndent();
-    // To be conformant with psa.p4, where PSA_PORT_RECIRCULATE is constant
-    builder->appendFormat("%s.egress_port = P4C_PSA_PORT_RECIRCULATE",
-                          control->inputStandardMetadata->name.name);
-    builder->endOfStatement(true);
-    builder->blockEnd(true);
 }
 
-void EBPFEgressPipeline::emitPSAControlOutputMetadata(CodeBuilder* builder) {
+void EBPFEgressPipeline::emitPSAControlOutputMetadata(CodeBuilder *builder) {
     builder->emitIndent();
     builder->appendFormat("struct psa_egress_output_metadata_t %s = {\n",
                           control->outputStandardMetadata->name.name);
@@ -378,23 +392,25 @@ void EBPFEgressPipeline::emitPSAControlOutputMetadata(CodeBuilder* builder) {
     builder->newline();
 }
 
-void EBPFEgressPipeline::emitCPUMAPLookup(CodeBuilder* builder) {
+void EBPFEgressPipeline::emitCPUMAPLookup(CodeBuilder *builder) {
     builder->emitIndent();
     builder->target->emitTableLookup(builder, "hdr_md_cpumap", oneKey.c_str(), "hdrMd");
     builder->endOfStatement(true);
 }
 
-void EBPFEgressPipeline::emit(CodeBuilder* builder) {
+void EBPFEgressPipeline::emit(CodeBuilder *builder) {
     cstring msgStr, varStr;
 
     builder->newline();
-    builder->target->emitCodeSection(builder, sectionName);
+    progTarget->emitCodeSection(builder, sectionName);
     builder->emitIndent();
-    builder->target->emitMain(builder, functionName, model.CPacketName.str());
+    progTarget->emitMain(builder, functionName, model.CPacketName.str());
     builder->spc();
     builder->blockStart();
 
     emitGlobalMetadataInitializer(builder);
+    emitCheckPacketMarkMetadata(builder);
+
     emitLocalVariables(builder);
     emitUserMetadataInstance(builder);
     builder->newline();
@@ -412,10 +428,13 @@ void EBPFEgressPipeline::emit(CodeBuilder* builder) {
     emitPSAControlOutputMetadata(builder);
     emitPSAControlInputMetadata(builder);
 
-    msgStr =
-        Util::printf_format("%s parser: parsing new packet, path=%%d, pkt_len=%%d", sectionName);
+    msgStr = Util::printf_format(
+        "%s parser: parsing new packet, input_port=%%d, path=%%d, "
+        "pkt_len=%%d",
+        sectionName);
     varStr = Util::printf_format("%s->packet_path", compilerGlobalMetadata);
-    builder->target->emitTraceMessage(builder, msgStr.c_str(), 2, varStr, lengthVar.c_str());
+    builder->target->emitTraceMessage(builder, msgStr.c_str(), 3, inputPortVar.c_str(), varStr,
+                                      lengthVar.c_str());
 
     // PARSER
     parser->emit(builder);
@@ -455,14 +474,22 @@ void EBPFEgressPipeline::emit(CodeBuilder* builder) {
 }
 
 // =====================TCIngressPipeline=============================
-void TCIngressPipeline::emitGlobalMetadataInitializer(CodeBuilder* builder) {
+void TCIngressPipeline::emitGlobalMetadataInitializer(CodeBuilder *builder) {
     EBPFPipeline::emitGlobalMetadataInitializer(builder);
+
+    // if Traffic Manager decided to pass packet to the kernel stack earlier, send it up immediately
+    builder->emitIndent();
+    builder->append("if (compiler_meta__->pass_to_kernel == true) return TC_ACT_OK;");
+    builder->newline();
 
     // workaround to make TC protocol-independent, DO NOT REMOVE
     builder->emitIndent();
     // replace ether_type only if a packet comes from XDP
     builder->appendFormat("if (%s->packet_path == NORMAL) ", compilerGlobalMetadata);
     builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("compiler_meta__->mark = %u", packetMark);
+    builder->endOfStatement(true);
     builder->emitIndent();
     if (options.xdp2tcMode == XDP2TC_META) {
         emitTCWorkaroundUsingMeta(builder);
@@ -476,7 +503,7 @@ void TCIngressPipeline::emitGlobalMetadataInitializer(CodeBuilder* builder) {
     builder->blockEnd(true);
 }
 
-void TCIngressPipeline::emitTCWorkaroundUsingMeta(CodeBuilder* builder) {
+void TCIngressPipeline::emitTCWorkaroundUsingMeta(CodeBuilder *builder) {
     builder->append(
         "struct internal_metadata *md = "
         "(struct internal_metadata *)(unsigned long)skb->data_meta;\n"
@@ -490,7 +517,7 @@ void TCIngressPipeline::emitTCWorkaroundUsingMeta(CodeBuilder* builder) {
         "        }\n");
 }
 
-void TCIngressPipeline::emitTCWorkaroundUsingHead(CodeBuilder* builder) {
+void TCIngressPipeline::emitTCWorkaroundUsingHead(CodeBuilder *builder) {
     builder->append(
         "    void *data = (void *)(long)skb->data;\n"
         "    void *data_end = (void *)(long)skb->data_end;\n"
@@ -512,7 +539,7 @@ void TCIngressPipeline::emitTCWorkaroundUsingHead(CodeBuilder* builder) {
         "    eth->h_proto = original_ethtype;");
 }
 
-void TCIngressPipeline::emitTCWorkaroundUsingCPUMAP(CodeBuilder* builder) {
+void TCIngressPipeline::emitTCWorkaroundUsingCPUMAP(CodeBuilder *builder) {
     builder->append(
         "    void *data = (void *)(long)skb->data;\n"
         "    void *data_end = (void *)(long)skb->data_end;\n"
@@ -533,7 +560,7 @@ void TCIngressPipeline::emitTCWorkaroundUsingCPUMAP(CodeBuilder* builder) {
  * - Multicast handling
  * - send to port
  */
-void TCIngressPipeline::emitTrafficManager(CodeBuilder* builder) {
+void TCIngressPipeline::emitTrafficManager(CodeBuilder *builder) {
     cstring mcast_grp =
         Util::printf_format("%s.multicast_group", control->outputStandardMetadata->name.name);
     builder->emitIndent();
@@ -557,6 +584,27 @@ void TCIngressPipeline::emitTrafficManager(CodeBuilder* builder) {
                           control->outputStandardMetadata->name.name);
     builder->newline();
 
+    builder->emitIndent();
+    builder->appendFormat("if (!%s.drop && %s.egress_port == 0) ",
+                          control->outputStandardMetadata->name.name,
+                          control->outputStandardMetadata->name.name);
+    builder->blockStart();
+    builder->target->emitTraceMessage(builder, "IngressTM: Sending packet up to the kernel stack");
+
+    // Since XDP helper re-writes EtherType for packets other than IPv4 (e.g., ARP)
+    // we cannot simply return TC_ACT_OK to pass the packet up to the kernel stack,
+    // because the kernel stack would receive a malformed packet (with invalid skb->protocol).
+    // The workaround is to send the packet back to the same interface. If we redirect,
+    // the packet will be re-written back to the original format.
+    // At the beginning of the pipeline we check if pass_to_kernel is true and,
+    // if so, the program returns TC_ACT_OK.
+    builder->emitIndent();
+    builder->appendLine("compiler_meta__->pass_to_kernel = true;");
+    builder->emitIndent();
+    builder->append("return bpf_redirect(skb->ifindex, BPF_F_INGRESS)");
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
+
     cstring eg_port =
         Util::printf_format("%s.egress_port", control->outputStandardMetadata->name.name);
     cstring cos =
@@ -570,7 +618,7 @@ void TCIngressPipeline::emitTrafficManager(CodeBuilder* builder) {
 }
 
 // =====================TCEgressPipeline=============================
-void TCEgressPipeline::emitTrafficManager(CodeBuilder* builder) {
+void TCEgressPipeline::emitTrafficManager(CodeBuilder *builder) {
     cstring varStr;
     // clone support
     builder->emitIndent();
@@ -630,4 +678,221 @@ void TCEgressPipeline::emitTrafficManager(CodeBuilder* builder) {
     builder->appendFormat("return %s", forwardReturnCode());
     builder->endOfStatement(true);
 }
+
+void TCEgressPipeline::emitCheckPacketMarkMetadata(CodeBuilder *builder) {
+    builder->emitIndent();
+    builder->appendFormat("if (compiler_meta__->mark != %u) ", packetMark);
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("return %s", forwardReturnCode());
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
+}
+
+// =====================XDPIngressPipeline=============================
+void XDPIngressPipeline::emitGlobalMetadataInitializer(CodeBuilder *builder) {
+    builder->emitIndent();
+    builder->append("struct psa_global_metadata instance = {}");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("struct psa_global_metadata *%s = &instance;", compilerGlobalMetadata);
+    builder->newline();
+    builder->emitIndent();
+    builder->appendFormat("%s->packet_path = NORMAL", compilerGlobalMetadata);
+    builder->endOfStatement(true);
+}
+
+void XDPIngressPipeline::emitTrafficManager(CodeBuilder *builder) {
+    // do not handle multicast; it has been handled earlier by PreDeparser.
+    cstring portVar =
+        Util::printf_format("%s.egress_port", control->outputStandardMetadata->name.name);
+    builder->target->emitTraceMessage(builder, "IngressTM: Sending packet out of port %u", 1,
+                                      portVar);
+    builder->emitIndent();
+    builder->appendFormat("return bpf_redirect_map(&tx_port, %s.egress_port%s, 0);",
+                          control->outputStandardMetadata->name.name, "%DEVMAP_SIZE");
+    builder->newline();
+}
+
+// =====================XDPEgressPipeline=============================
+void XDPEgressPipeline::emitGlobalMetadataInitializer(CodeBuilder *builder) {
+    builder->emitIndent();
+    builder->append("struct psa_global_metadata instance = {}");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("struct psa_global_metadata *%s = &instance;", compilerGlobalMetadata);
+    builder->newline();
+    builder->emitIndent();
+    builder->appendFormat("%s->packet_path = NORMAL_UNICAST", compilerGlobalMetadata);
+    builder->endOfStatement(true);
+}
+
+void XDPEgressPipeline::emitTrafficManager(CodeBuilder *builder) {
+    cstring varStr;
+
+    builder->newline();
+    builder->emitIndent();
+    builder->appendFormat("if (%s.clone || %s.drop) ", control->outputStandardMetadata->name.name,
+                          control->outputStandardMetadata->name.name);
+    builder->blockStart();
+    builder->target->emitTraceMessage(builder, "EgressTM: Packet dropped due to metadata");
+    builder->emitIndent();
+    builder->appendFormat("return %s", dropReturnCode());
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
+
+    builder->newline();
+
+    // normal packet to port
+    varStr = Util::printf_format("%s.egress_port", control->inputStandardMetadata->name.name);
+    builder->target->emitTraceMessage(builder, "EgressTM: output packet to port %d", 1, varStr);
+    builder->emitIndent();
+    builder->appendFormat("return %s;", this->forwardReturnCode());
+    builder->newline();
+}
+
+void XDPEgressPipeline::emitCheckPacketMarkMetadata(CodeBuilder *builder) {
+    (void)builder;
+    // Global metadata in XDP is not preserved across ingress and egress so do not check packet
+    // mark. Anyway, in XDP egress can't be called without our ingress.
+}
+
+// =====================TCTrafficManagerForXDP=============================
+
+void TCTrafficManagerForXDP::emitGlobalMetadataInitializer(CodeBuilder *builder) {
+    EBPFPipeline::emitGlobalMetadataInitializer(builder);
+
+    // if Traffic Manager decided to pass packet to the kernel stack earlier, send it up immediately
+    builder->emitIndent();
+    builder->appendFormat("if (%s->pass_to_kernel) return %s;", compilerGlobalMetadata,
+                          progTarget->forwardReturnCode());
+    builder->newline();
+
+    // Mark packet for egress processing
+    builder->emitIndent();
+    builder->appendFormat("%s->mark = %u", compilerGlobalMetadata, packetMark);
+    builder->endOfStatement(true);
+}
+
+void TCTrafficManagerForXDP::emit(CodeBuilder *builder) {
+    cstring msgStr;
+    progTarget->emitCodeSection(builder, sectionName);
+    builder->emitIndent();
+    progTarget->emitMain(builder, functionName, model.CPacketName.str());
+    builder->spc();
+    builder->blockStart();
+    emitGlobalMetadataInitializer(builder);
+    emitLocalVariables(builder);
+
+    if (options.xdp2tcMode == XDP2TC_CPUMAP) {
+        emitReadXDP2TCMetadataFromCPUMAP(builder);
+    } else if (options.xdp2tcMode == XDP2TC_HEAD) {
+        emitReadXDP2TCMetadataFromHead(builder);
+    }
+
+    msgStr = Util::printf_format("%s deparser: packet deparsing started", sectionName);
+    builder->target->emitTraceMessage(builder, msgStr.c_str());
+    builder->emitIndent();
+    deparser->emit(builder);
+    msgStr = Util::printf_format("%s deparser: packet deparsing finished", sectionName);
+    builder->target->emitTraceMessage(builder, msgStr.c_str());
+    this->emitTrafficManager(builder);
+
+    builder->blockEnd(true);
+}
+
+void TCTrafficManagerForXDP::emitReadXDP2TCMetadataFromHead(CodeBuilder *builder) {
+    builder->emitIndent();
+    builder->append(
+        "    void *data = (void *)(long)skb->data;\n"
+        "    void *data_end = (void *)(long)skb->data_end;\n"
+        "    if (((char *) data + sizeof(struct ethhdr) + sizeof(struct xdp2tc_metadata)) > "
+        "(char *) data_end) {\n"
+        "        return TC_ACT_SHOT;\n"
+        "    }\n");
+    builder->emitIndent();
+    builder->appendLine("struct xdp2tc_metadata xdp2tc_md = {};");
+    builder->emitIndent();
+    builder->appendFormat(
+        "bpf_skb_load_bytes(%s, sizeof(struct ethhdr), &xdp2tc_md, "
+        "sizeof(struct xdp2tc_metadata))",
+        model.CPacketName.str());
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->append(
+        "    __u16 *ether_type = (__u16 *) ((void *) (long)skb->data + 12);\n"
+        "    if ((void *) ((__u16 *) ether_type + 1) > "
+        "    (void *) (long) skb->data_end) {\n"
+        "        return TC_ACT_SHOT;\n"
+        "    }\n"
+        "    *ether_type = xdp2tc_md.pkt_ether_type;\n");
+    builder->emitIndent();
+    builder->appendFormat("struct psa_ingress_output_metadata_t %s = xdp2tc_md.ostd;",
+                          control->outputStandardMetadata->name.name);
+    builder->newline();
+
+    builder->emitIndent();
+    emitLocalHeaderInstancesAsPointers(builder);
+
+    builder->emitIndent();
+    builder->appendFormat("%s = &(xdp2tc_md.headers);", parser->headers->name.name);
+    builder->newline();
+
+    builder->emitIndent();
+    builder->appendFormat("%s = xdp2tc_md.packetOffsetInBits;", offsetVar.c_str());
+
+    builder->newline();
+    builder->emitIndent();
+    builder->appendFormat("int ret = bpf_skb_adjust_room(%s, -(int)%s, 1, 0)",
+                          model.CPacketName.str(), "sizeof(struct xdp2tc_metadata)");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->append("if (ret) ");
+    builder->blockStart();
+    builder->target->emitTraceMessage(
+        builder, "Deparser: failed to remove XDP2TC metadata from packet, ret=%d", 1, "ret");
+    builder->emitIndent();
+    builder->appendFormat("return %s;", builder->target->abortReturnCode().c_str());
+    builder->newline();
+    builder->blockEnd(true);
+}
+
+void TCTrafficManagerForXDP::emitReadXDP2TCMetadataFromCPUMAP(CodeBuilder *builder) {
+    builder->emitIndent();
+    builder->target->emitTableLookup(builder, "xdp2tc_shared_map", this->zeroKey.c_str(),
+                                     "struct xdp2tc_metadata *md");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->append("if (!md) ");
+    builder->blockStart();
+    builder->appendFormat("return %s;", dropReturnCode());
+    builder->newline();
+    builder->blockEnd(true);
+    builder->emitIndent();
+
+    builder->emitIndent();
+    emitLocalHeaderInstancesAsPointers(builder);
+    builder->emitIndent();
+    builder->appendFormat("%s = &(md->headers);", parser->headers->name.name);
+    builder->newline();
+
+    builder->emitIndent();
+    builder->appendFormat("struct psa_ingress_output_metadata_t %s = md->ostd;",
+                          this->control->outputStandardMetadata->name.name);
+    builder->newline();
+    builder->emitIndent();
+    builder->appendFormat("%s = md->packetOffsetInBits;", offsetVar.c_str());
+
+    builder->emitIndent();
+    builder->append(
+        "    __u16 *ether_type = (__u16 *) ((void *) (long)skb->data + 12);\n"
+        "    if ((void *) ((__u16 *) ether_type + 1) > "
+        "    (void *) (long) skb->data_end) {\n"
+        "        return TC_ACT_SHOT;\n"
+        "    }\n"
+        "    *ether_type = md->pkt_ether_type;\n");
+
+    builder->emitIndent();
+}
+
 }  // namespace EBPF

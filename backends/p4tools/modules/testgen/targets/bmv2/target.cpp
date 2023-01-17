@@ -6,11 +6,11 @@
 #include <string>
 #include <vector>
 
+#include "backends/p4tools/common/core/solver.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/ordered_map.h"
-#include "p4tools/common/core/solver.h"
 
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
@@ -36,31 +36,31 @@ namespace Bmv2 {
 BMv2_V1ModelTestgenTarget::BMv2_V1ModelTestgenTarget() : TestgenTarget("bmv2", "v1model") {}
 
 void BMv2_V1ModelTestgenTarget::make() {
-    static BMv2_V1ModelTestgenTarget* INSTANCE = nullptr;
+    static BMv2_V1ModelTestgenTarget *INSTANCE = nullptr;
     if (INSTANCE == nullptr) {
         INSTANCE = new BMv2_V1ModelTestgenTarget();
     }
 }
 
-const BMv2_V1ModelProgramInfo* BMv2_V1ModelTestgenTarget::initProgram_impl(
-    const IR::P4Program* program, const IR::Declaration_Instance* mainDecl) const {
+const BMv2_V1ModelProgramInfo *BMv2_V1ModelTestgenTarget::initProgram_impl(
+    const IR::P4Program *program, const IR::Declaration_Instance *mainDecl) const {
     // The blocks in the main declaration are just the arguments in the constructor call.
     // Convert mainDecl->arguments into a vector of blocks, represented as constructor-call
     // expressions.
-    const auto* ns = NamespaceContext::Empty->push(program);
-    std::vector<const IR::Type_Declaration*> blocks;
+    const auto *ns = NamespaceContext::Empty->push(program);
+    std::vector<const IR::Type_Declaration *> blocks;
     argumentsToTypeDeclarations(ns, mainDecl->arguments, blocks);
 
     // We should have six arguments.
     BUG_CHECK(blocks.size() == 6, "%1%: The BMV2 architecture requires 6 pipes. Received %2%.",
               mainDecl, blocks.size());
 
-    ordered_map<cstring, const IR::Type_Declaration*> programmableBlocks;
+    ordered_map<cstring, const IR::Type_Declaration *> programmableBlocks;
     std::map<int, int> declIdToGress;
 
     // Add to parserDeclIdToGress, mauDeclIdToGress, and deparserDeclIdToGress.
     for (size_t idx = 0; idx < blocks.size(); ++idx) {
-        const auto* declType = blocks.at(idx);
+        const auto *declType = blocks.at(idx);
 
         auto canonicalName = archSpec.getArchMember(idx)->blockName;
         programmableBlocks.emplace(canonicalName, declType);
@@ -75,21 +75,21 @@ const BMv2_V1ModelProgramInfo* BMv2_V1ModelTestgenTarget::initProgram_impl(
     return new BMv2_V1ModelProgramInfo(program, programmableBlocks, declIdToGress);
 }
 
-Bmv2TestBackend* BMv2_V1ModelTestgenTarget::getTestBackend_impl(
-    const ProgramInfo& programInfo, ExplorationStrategy& symbex,
-    const boost::filesystem::path& testPath, boost::optional<uint32_t> seed) const {
+Bmv2TestBackend *BMv2_V1ModelTestgenTarget::getTestBackend_impl(
+    const ProgramInfo &programInfo, ExplorationStrategy &symbex,
+    const boost::filesystem::path &testPath, boost::optional<uint32_t> seed) const {
     return new Bmv2TestBackend(programInfo, symbex, testPath, seed);
 }
 
 int BMv2_V1ModelTestgenTarget::getPortNumWidth_bits_impl() const { return 9; }
 
-BMv2_V1ModelCmdStepper* BMv2_V1ModelTestgenTarget::getCmdStepper_impl(
-    ExecutionState& state, AbstractSolver& solver, const ProgramInfo& programInfo) const {
+BMv2_V1ModelCmdStepper *BMv2_V1ModelTestgenTarget::getCmdStepper_impl(
+    ExecutionState &state, AbstractSolver &solver, const ProgramInfo &programInfo) const {
     return new BMv2_V1ModelCmdStepper(state, solver, programInfo);
 }
 
-BMv2_V1ModelExprStepper* BMv2_V1ModelTestgenTarget::getExprStepper_impl(
-    ExecutionState& state, AbstractSolver& solver, const ProgramInfo& programInfo) const {
+BMv2_V1ModelExprStepper *BMv2_V1ModelTestgenTarget::getExprStepper_impl(
+    ExecutionState &state, AbstractSolver &solver, const ProgramInfo &programInfo) const {
     return new BMv2_V1ModelExprStepper(state, solver, programInfo);
 }
 
@@ -116,7 +116,7 @@ const ArchSpec BMv2_V1ModelTestgenTarget::archSpec =
                           // control Deparser<H>(packet_out b, in H hdr);
                           {"Deparser", {nullptr, "*hdr"}}});
 
-const ArchSpec* BMv2_V1ModelTestgenTarget::getArchSpecImpl() const { return &archSpec; }
+const ArchSpec *BMv2_V1ModelTestgenTarget::getArchSpecImpl() const { return &archSpec; }
 
 }  // namespace Bmv2
 

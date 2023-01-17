@@ -31,23 +31,23 @@ class EBPFTestgenTarget : public TestgenTarget {
     static void make();
 
  protected:
-    const EBPFProgramInfo* initProgram_impl(
-        const IR::P4Program* program, const IR::Declaration_Instance* mainDecl) const override;
+    const EBPFProgramInfo *initProgram_impl(
+        const IR::P4Program *program, const IR::Declaration_Instance *mainDecl) const override;
 
     int getPortNumWidth_bits_impl() const override;
 
-    EBPFTestBackend* getTestBackend_impl(const ProgramInfo& programInfo,
-                                         ExplorationStrategy& symbex,
-                                         const boost::filesystem::path& testPath,
+    EBPFTestBackend *getTestBackend_impl(const ProgramInfo &programInfo,
+                                         ExplorationStrategy &symbex,
+                                         const boost::filesystem::path &testPath,
                                          boost::optional<uint32_t> seed) const override;
 
-    EBPFCmdStepper* getCmdStepper_impl(ExecutionState& state, AbstractSolver& solver,
-                                       const ProgramInfo& programInfo) const override;
+    EBPFCmdStepper *getCmdStepper_impl(ExecutionState &state, AbstractSolver &solver,
+                                       const ProgramInfo &programInfo) const override;
 
-    EBPFExprStepper* getExprStepper_impl(ExecutionState& state, AbstractSolver& solver,
-                                         const ProgramInfo& programInfo) const override;
+    EBPFExprStepper *getExprStepper_impl(ExecutionState &state, AbstractSolver &solver,
+                                         const ProgramInfo &programInfo) const override;
 
-    const ArchSpec* getArchSpecImpl() const override;
+    const ArchSpec *getArchSpecImpl() const override;
 
  private:
     EBPFTestgenTarget();

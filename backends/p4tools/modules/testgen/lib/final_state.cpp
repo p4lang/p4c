@@ -2,10 +2,10 @@
 
 #include <vector>
 
+#include "backends/p4tools/common/core/solver.h"
+#include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
-#include "p4tools/common/core/solver.h"
-#include "p4tools/common/lib/model.h"
-#include "p4tools/common/lib/trace_events.h"
+#include "backends/p4tools/common/lib/trace_events.h"
 
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
@@ -13,46 +13,46 @@ namespace P4Tools {
 
 namespace P4Testgen {
 
-FinalState::FinalState(AbstractSolver* solver, const ExecutionState& inputState)
+FinalState::FinalState(AbstractSolver *solver, const ExecutionState &inputState)
     : solver(solver),
       state(ExecutionState(inputState)),
       completedModel(completeModel(inputState, solver->getModel())) {
-    for (const auto& event : inputState.getTrace()) {
+    for (const auto &event : inputState.getTrace()) {
         trace.emplace_back(event->evaluate(completedModel));
     }
     visitedStatements = inputState.getVisited();
 }
 
-Model FinalState::completeModel(const ExecutionState& executionState, const Model* model) {
+Model FinalState::completeModel(const ExecutionState &executionState, const Model *model) {
     // Complete the model based on the symbolic environment.
-    auto* completedModel = executionState.getSymbolicEnv().complete(*model);
+    auto *completedModel = executionState.getSymbolicEnv().complete(*model);
 
     // Also complete all the zombies that were collected in this state.
-    const auto& zombies = executionState.getZombies();
+    const auto &zombies = executionState.getZombies();
     completedModel->complete(zombies);
 
     // Now that the models initial values are completed evaluate the values that
     // are part of the constraints that have been added to the solver.
-    auto* evaluatedModel = executionState.getSymbolicEnv().evaluate(*completedModel);
+    auto *evaluatedModel = executionState.getSymbolicEnv().evaluate(*completedModel);
 
-    for (const auto& event : executionState.getTrace()) {
+    for (const auto &event : executionState.getTrace()) {
         event->complete(evaluatedModel);
     }
 
     return *evaluatedModel;
 }
 
-const Model* FinalState::getCompletedModel() const { return &completedModel; }
+const Model *FinalState::getCompletedModel() const { return &completedModel; }
 
-AbstractSolver* FinalState::getSolver() const { return solver; }
+AbstractSolver *FinalState::getSolver() const { return solver; }
 
-const ExecutionState* FinalState::getExecutionState() const { return &state; }
+const ExecutionState *FinalState::getExecutionState() const { return &state; }
 
-const std::vector<gsl::not_null<const TraceEvent*>>* FinalState::getTraces() const {
+const std::vector<gsl::not_null<const TraceEvent *>> *FinalState::getTraces() const {
     return &trace;
 }
 
-const std::vector<const IR::Statement*>& FinalState::getVisited() const {
+const std::vector<const IR::Statement *> &FinalState::getVisited() const {
     return visitedStatements;
 }
 

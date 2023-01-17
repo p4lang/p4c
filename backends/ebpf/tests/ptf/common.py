@@ -57,6 +57,14 @@ PTF_PORTS = [PORT0, PORT1, PORT2]
 # DP_PORTS corresponds to switch interfaces and are used as data plane port numbers inside P4 programs.
 DP_PORTS = dict()
 
+
+def tc_only(cls):
+    if cls.is_xdp_test(cls):
+        cls.skip = True
+        cls.skip_reason = "not supported by XDP"
+    return cls
+
+
 def xdp2tc_head_not_supported(cls):
     if cls.xdp2tc_mode(cls) == 'head':
         cls.skip = True
@@ -73,6 +81,7 @@ class P4EbpfTest(BaseTest):
     skip_reason = ''
     switch_ns = 'test'
     p4_file_path = ""
+    p4c_additional_args = ""
 
     def setUp(self):
         super(P4EbpfTest, self).setUp()
@@ -94,6 +103,13 @@ class P4EbpfTest(BaseTest):
             self.switch_ns = testutils.test_param_get("namespace")
         self.interfaces = testutils.test_param_get("interfaces").split(",")
 
+        # force rebuild *.o file if compiler option has been changed for the same P4 file
+        try:
+            os.remove(os.path.join("ptf_out", filename + ".c"))
+            os.remove(self.test_prog_image)
+        except OSError:
+            pass
+
         # fetch data plane ports from network namespace
         global DP_PORTS
         next_idx = 0
@@ -111,6 +127,10 @@ class P4EbpfTest(BaseTest):
 
         if "xdp2tc" in testutils.test_params_get():
             p4args += " --xdp2tc=" + self.xdp2tc_mode()
+        if self.is_xdp_test():
+            p4args += " --xdp"
+
+        p4args = p4args + " " + self.p4c_additional_args
 
         logger.info("P4ARGS=" + p4args)
         self.exec_cmd("make -f ../runtime/kernel.mk BPFOBJ={output} P4FILE={p4file} "
@@ -127,10 +147,16 @@ class P4EbpfTest(BaseTest):
         self.exec_ns_cmd("nikss-ctl pipeline load id {} {}".format(TEST_PIPELINE_ID, self.test_prog_image), "Can't load programs into eBPF subsystem")
 
         for intf in self.interfaces:
+            # Recirculation not supported yet in XDP mode
+            if intf == "psa_recirc" and self.is_xdp_test():
+                continue
             self.add_port(dev=intf)
 
     def tearDown(self):
         for intf in self.interfaces:
+            # Recirculation not supported yet in XDP mode
+            if intf == "psa_recirc" and self.is_xdp_test():
+                continue
             self.del_port(intf)
         self.exec_ns_cmd("nikss-ctl pipeline unload id {}".format(TEST_PIPELINE_ID))
         super(P4EbpfTest, self).tearDown()
@@ -166,6 +192,9 @@ class P4EbpfTest(BaseTest):
 
     def add_port(self, dev):
         self.exec_ns_cmd("nikss-ctl add-port pipe {} dev {}".format(TEST_PIPELINE_ID, dev))
+        # Add dummy XDP program on the second end of veth pair
+        if dev.startswith("eth") and self.is_xdp_test():
+            self.exec_cmd("ip link set dev s1-{} xdp pinned {}/{}".format(dev, TEST_PIPELINE_MOUNT_PATH, "xdp_redirect_dummy_sec"))
 
     def del_port(self, dev):
         self.exec_ns_cmd("nikss-ctl del-port pipe {} dev {}".format(TEST_PIPELINE_ID, dev))
@@ -199,6 +228,9 @@ class P4EbpfTest(BaseTest):
 
     def xdp2tc_mode(self):
         return testutils.test_param_get('xdp2tc')
+
+    def is_xdp_test(self):
+        return testutils.test_param_get('xdp') == 'True'
 
     def is_trace_logs_enabled(self):
         return testutils.test_param_get('trace') == 'True'
@@ -334,7 +366,7 @@ class P4EbpfTest(BaseTest):
         cmd = cmd + self._table_create_str_from_data(data=data, counters=counters, meters=meters)
         self.exec_ns_cmd(cmd, "Table set default entry failed")
 
-    def table_get(self, table, key, indirect=False):
+    def table_get(self, table, key=None, indirect=False):
         """ Returns JSON containing parsed table entry - action data, meters, counters.
             If table has an implementation, set param `indirect` to True.
         """
@@ -342,7 +374,8 @@ class P4EbpfTest(BaseTest):
         if indirect:
             # TODO: cmd = cmd + "ref "
             self.fail("support for indirect table is not implemented yet")
-        cmd = cmd + self._table_create_str_from_key(key=key)
+        if key:
+            cmd = cmd + self._table_create_str_from_key(key=key)
         _, stdout, _ = self.exec_ns_cmd(cmd, "Table get entry failed")
         return json.loads(stdout)[table]
 

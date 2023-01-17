@@ -14,12 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-
-#include <time.h>
-#include "ir.h"
-#include "lib/log.h"
-
 #include "visitor.h"
+
+#include <stdlib.h>
+#include <time.h>
+
+#if HAVE_LIBGC
+#include <gc/gc.h>
+#endif
+
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/ir.h"
+#include "ir/vector.h"
+#include "lib/algorithm.h"
+#include "lib/error_catalog.h"
+#include "lib/indent.h"
+#include "lib/log.h"
+#include "lib/map.h"
 
 /** @class Visitor::ChangeTracker
  *  @brief Assists visitors in traversing the IR.
@@ -31,12 +43,12 @@ limitations under the License.
  */
 class Visitor::ChangeTracker {
     struct visit_info_t {
-        bool            visit_in_progress;
-        bool            visitOnce;
-        const IR::Node  *result;
+        bool visit_in_progress;
+        bool visitOnce;
+        const IR::Node *result;
     };
-    typedef std::unordered_map<const IR::Node *, visit_info_t>  visited_t;
-    visited_t           visited;
+    typedef std::unordered_map<const IR::Node *, visit_info_t> visited_t;
+    visited_t visited;
 
  public:
     /** Begin tracking @n during a visiting pass.  Use `finish(@n)` to mark @n as
@@ -53,8 +65,7 @@ class Visitor::ChangeTracker {
         // Sanity check for IR loops
         bool already_present = !inserted;
         visit_info_t *visit_info = &(visited_it->second);
-        if (already_present && visit_info->visit_in_progress)
-            BUG("IR loop detected ");
+        if (already_present && visit_info->visit_in_progress) BUG("IR loop detected ");
     }
 
     /** Mark the process of visiting @orig as finished, with @final being the
@@ -72,8 +83,7 @@ class Visitor::ChangeTracker {
      */
     bool finish(const IR::Node *orig, const IR::Node *final) {
         auto it = visited.find(orig);
-        if (it == visited.end())
-            BUG("visitor state tracker corrupted");
+        if (it == visited.end()) BUG("visitor state tracker corrupted");
 
         visit_info_t *orig_visit_info = &(it->second);
         orig_visit_info->visit_in_progress = false;
@@ -93,13 +103,14 @@ class Visitor::ChangeTracker {
             // FIXME -- not safe if the visitor resurrects the node (which it shouldn't)
             // if (final && final->id == IR::Node::currentId - 1)
             //     --IR::Node::currentId;
-            return false; } }
+            return false;
+        }
+    }
 
     /** Return a pointer to the visitOnce flag for node @n so that it can be changed
      */
     bool *refVisitOnce(const IR::Node *n) {
-        if (!visited.count(n))
-            BUG("visitor state tracker corrupted");
+        if (!visited.count(n)) BUG("visitor state tracker corrupted");
         return &visited.at(n).visitOnce;
     }
 
@@ -110,7 +121,9 @@ class Visitor::ChangeTracker {
             if (!it->second.visit_in_progress)
                 it = visited.erase(it);
             else
-                ++it; } }
+                ++it;
+        }
+    }
 
     /** Determine whether @n is currently being visited and the visitor has not finished
      * That is, `start(@n)` has been invoked, and `finish(@n)` has not,
@@ -119,7 +132,8 @@ class Visitor::ChangeTracker {
      */
     bool busy(const IR::Node *n) const {
         auto it = visited.find(n);
-        return it != visited.end() && it->second.visit_in_progress; }
+        return it != visited.end() && it->second.visit_in_progress;
+    }
 
     /** Determine whether @n has been visited and the visitor has finished
      *  and we don't want to visit @n again the next time we see it.
@@ -140,14 +154,13 @@ class Visitor::ChangeTracker {
      * if `start(@n)` has not been invoked.
      */
     const IR::Node *result(const IR::Node *n) const {
-        if (!visited.count(n))
-            return n;
+        if (!visited.count(n)) return n;
         return visited.at(n).result;
     }
 };
 
 // static
-bool Visitor::warning_enabled(const Visitor* visitor, int warning_kind) {
+bool Visitor::warning_enabled(const Visitor *visitor, int warning_kind) {
     auto errorString = ErrorCatalog::getCatalog().getName(warning_kind);
     while (visitor != nullptr) {
         auto crt = visitor->ctxt;
@@ -156,8 +169,7 @@ bool Visitor::warning_enabled(const Visitor* visitor, int warning_kind) {
                 for (auto a : annotated->getAnnotations()->annotations) {
                     if (a->name.name == IR::Annotation::noWarnAnnotation) {
                         auto arg = a->getSingleString();
-                        if (arg == errorString)
-                            return false;
+                        if (arg == errorString) return false;
                     }
                 }
             }
@@ -181,17 +193,20 @@ Visitor::profile_t Visitor::init_apply(const IR::Node *root, const Context *pare
 Visitor::profile_t Modifier::init_apply(const IR::Node *root) {
     auto rv = Visitor::init_apply(root);
     visited = std::make_shared<ChangeTracker>();
-    return rv; }
+    return rv;
+}
 Visitor::profile_t Inspector::init_apply(const IR::Node *root) {
     auto rv = Visitor::init_apply(root);
     visited = std::make_shared<visited_t>();
-    return rv; }
+    return rv;
+}
 Visitor::profile_t Transform::init_apply(const IR::Node *root) {
     auto rv = Visitor::init_apply(root);
     visited = std::make_shared<ChangeTracker>();
-    return rv; }
+    return rv;
+}
 void Visitor::end_apply() {}
-void Visitor::end_apply(const IR::Node*) {}
+void Visitor::end_apply(const IR::Node *) {}
 
 static indent_t profile_indent;
 static uint64_t first_start = 0;
@@ -203,15 +218,15 @@ Visitor::profile_t::profile_t(Visitor &v_) : v(v_) {
     // FIXME -- figure out how to do this on OSX/Mach
     ts.tv_sec = ts.tv_nsec = 0;
 #endif
-    start = ts.tv_sec*1000000000UL + ts.tv_nsec + 1;
+    start = ts.tv_sec * 1000000000UL + ts.tv_nsec + 1;
     assert(start);
-    LOG3(profile_indent << v.name() << " statrting at +" <<
-         (first_start ? start - first_start : (first_start = start, 0UL))/1000000.0 << " msec");
+    LOG3(profile_indent << v.name() << " statrting at +"
+                        << (first_start ? start - first_start : (first_start = start, 0UL)) /
+                               1000000.0
+                        << " msec");
     ++profile_indent;
 }
-Visitor::profile_t::profile_t(profile_t &&a) : v(a.v), start(a.start) {
-    a.start = 0;
-}
+Visitor::profile_t::profile_t(profile_t &&a) : v(a.v), start(a.start) { a.start = 0; }
 Visitor::profile_t::~profile_t() {
     if (start) {
         v.end_apply();
@@ -223,8 +238,9 @@ Visitor::profile_t::~profile_t() {
         // FIXME -- figure out how to do this on OSX/Mach
         ts.tv_sec = ts.tv_nsec = 0;
 #endif
-        uint64_t end = ts.tv_sec*1000000000UL + ts.tv_nsec + 1;
-        LOG1(profile_indent << v.name() << ' ' << (end-start)/1000.0 << " usec"); }
+        uint64_t end = ts.tv_sec * 1000000000UL + ts.tv_nsec + 1;
+        LOG1(profile_indent << v.name() << ' ' << (end - start) / 1000.0 << " usec");
+    }
 }
 
 void Visitor::print_context() const {
@@ -242,14 +258,15 @@ void Visitor::print_context() const {
     }
 }
 
-void Visitor::visitor_const_error() {
-    BUG("const Visitor wants to change IR"); }
+void Visitor::visitor_const_error() { BUG("const Visitor wants to change IR"); }
 void Modifier::visitor_const_error() {
     BUG("Modifier called const visit function -- missing template "
-                            "instantiation in gen-tree-macro.h?"); }
+        "instantiation in gen-tree-macro.h?");
+}
 void Transform::visitor_const_error() {
     BUG("Transform called const visit function -- missing template "
-                            "instantiation in gen-tree-macro.h?"); }
+        "instantiation in gen-tree-macro.h?");
+}
 
 struct PushContext {
     Visitor::Context current;
@@ -259,9 +276,10 @@ struct PushContext {
         current.node = current.original = node;
         current.child_index = 0;
         current.child_name = "";
-        current.depth = stack ? stack->depth+1 : 1;
-        assert(current.depth < 10000);    // stack overflow?
-        stack = &current; }
+        current.depth = stack ? stack->depth + 1 : 1;
+        assert(current.depth < 10000);  // stack overflow?
+        stack = &current;
+    }
     ~PushContext() { stack = current.parent; }
 };
 
@@ -269,13 +287,14 @@ namespace {
 class ForwardChildren : public Visitor {
     const ChangeTracker &visited;
     const IR::Node *apply_visitor(const IR::Node *n, const char * = 0) {
-        if (visited.done(n))
-            return visited.result(n);
-        return n; }
+        if (visited.done(n)) return visited.result(n);
+        return n;
+    }
+
  public:
     explicit ForwardChildren(const ChangeTracker &v) : visited(v) {}
 };
-}    // namespace
+}  // namespace
 
 const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
     if (ctxt) ctxt->child_name = name;
@@ -294,14 +313,17 @@ const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
             local.current.node = copy;
             if (!dontForwardChildrenBeforePreorder) {
                 ForwardChildren forward_children(*visited);
-                copy->visit_children(forward_children); }
+                copy->visit_children(forward_children);
+            }
             visitCurrentOnce = visited->refVisitOnce(n);
             if (copy->apply_visitor_preorder(*this)) {
                 copy->visit_children(*this);
                 visitCurrentOnce = visited->refVisitOnce(n);
-                copy->apply_visitor_postorder(*this); }
-            if (visited->finish(n, copy))
-                (n = copy)->validate(); } }
+                copy->apply_visitor_postorder(*this);
+            }
+            if (visited->finish(n, copy)) (n = copy)->validate();
+        }
+    }
     if (ctxt)
         ctxt->child_index++;
     else
@@ -324,10 +346,12 @@ const IR::Node *Inspector::apply_visitor(const IR::Node *n, const char *name) {
             if (n->apply_visitor_preorder(*this)) {
                 n->visit_children(*this);
                 visitCurrentOnce = &vp.first->second.visitOnce;
-                n->apply_visitor_postorder(*this); }
-            if (vp.first != visited->find(n))
-                BUG("visitor state tracker corrupted");
-            vp.first->second.done = true; } }
+                n->apply_visitor_postorder(*this);
+            }
+            if (vp.first != visited->find(n)) BUG("visitor state tracker corrupted");
+            vp.first->second.done = true;
+        }
+    }
     if (ctxt)
         ctxt->child_index++;
     else {
@@ -353,7 +377,8 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
             local.current.node = copy;
             if (!dontForwardChildrenBeforePreorder) {
                 ForwardChildren forward_children(*visited);
-                copy->visit_children(forward_children); }
+                copy->visit_children(forward_children);
+            }
             bool save_prune_flag = prune_flag;
             prune_flag = false;
             visitCurrentOnce = visited->refVisitOnce(n);
@@ -373,20 +398,22 @@ const IR::Node *Transform::apply_visitor(const IR::Node *n, const char *name) {
                 } else {
                     extra_clone = true;
                     visited->start(preorder_result, *visitCurrentOnce);
-                    local.current.node = copy = preorder_result->clone(); } }
+                    local.current.node = copy = preorder_result->clone();
+                }
+            }
             if (!prune_flag) {
                 copy->visit_children(*this);
                 visitCurrentOnce = visited->refVisitOnce(n);
-                final_result = copy->apply_visitor_postorder(*this); }
+                final_result = copy->apply_visitor_postorder(*this);
+            }
             prune_flag = save_prune_flag;
-            if (final_result == copy
-                && final_result != preorder_result
-                && *final_result == *preorder_result)
+            if (final_result == copy && final_result != preorder_result &&
+                *final_result == *preorder_result)
                 final_result = preorder_result;
-            if (visited->finish(n, final_result) && (n = final_result))
-                final_result->validate();
-            if (extra_clone)
-                visited->finish(preorder_result, final_result); } }
+            if (visited->finish(n, final_result) && (n = final_result)) final_result->validate();
+            if (extra_clone) visited->finish(preorder_result, final_result);
+        }
+    }
     if (ctxt)
         ctxt->child_index++;
     else
@@ -399,47 +426,43 @@ void Inspector::revisit_visited() {
         if (it->second.done)
             it = visited->erase(it);
         else
-            ++it; }
+            ++it;
+    }
 }
-void Modifier::revisit_visited() {
-    visited->revisit_visited();
-}
-bool Modifier::visit_in_progress(const IR::Node *n) const {
-    return visited->busy(n);
-}
-void Transform::revisit_visited() {
-    visited->revisit_visited();
-}
-bool Transform::visit_in_progress(const IR::Node *n) const {
-    return visited->busy(n);
-}
+void Modifier::revisit_visited() { visited->revisit_visited(); }
+bool Modifier::visit_in_progress(const IR::Node *n) const { return visited->busy(n); }
+void Transform::revisit_visited() { visited->revisit_visited(); }
+bool Transform::visit_in_progress(const IR::Node *n) const { return visited->busy(n); }
 
-
-#define DEFINE_VISIT_FUNCTIONS(CLASS, BASE)                                             \
-bool Modifier::preorder(IR::CLASS *n) {                                                 \
-    return preorder(static_cast<IR::BASE *>(n)); }                                      \
-void Modifier::postorder(IR::CLASS *n) {                                                \
-    postorder(static_cast<IR::BASE *>(n)); }                                            \
-void Modifier::revisit(const IR::CLASS *o, const IR::CLASS *n) {                        \
-    revisit(static_cast<const IR::BASE *>(o), static_cast<const IR::BASE *>(n)); }      \
-void Modifier::loop_revisit(const IR::CLASS *o) {                                       \
-    loop_revisit(static_cast<const IR::BASE *>(o)); }                                   \
-bool Inspector::preorder(const IR::CLASS *n) {                                          \
-    return preorder(static_cast<const IR::BASE *>(n)); }                                \
-void Inspector::postorder(const IR::CLASS *n) {                                         \
-    postorder(static_cast<const IR::BASE *>(n)); }                                      \
-void Inspector::revisit(const IR::CLASS *n) {                                           \
-    revisit(static_cast<const IR::BASE *>(n)); }                                        \
-void Inspector::loop_revisit(const IR::CLASS *n) {                                      \
-    loop_revisit(static_cast<const IR::BASE *>(n)); }                                   \
-const IR::Node *Transform::preorder(IR::CLASS *n) {                                     \
-    return preorder(static_cast<IR::BASE *>(n)); }                                      \
-const IR::Node *Transform::postorder(IR::CLASS *n) {                                    \
-    return postorder(static_cast<IR::BASE *>(n)); }                                     \
-void Transform::revisit(const IR::CLASS *o, const IR::Node *n) {                        \
-    return revisit(static_cast<const IR::BASE *>(o), n); }                              \
-void Transform::loop_revisit(const IR::CLASS *o) {                                      \
-    return loop_revisit(static_cast<const IR::BASE *>(o)); }                            \
+#define DEFINE_VISIT_FUNCTIONS(CLASS, BASE)                                                        \
+    bool Modifier::preorder(IR::CLASS *n) { return preorder(static_cast<IR::BASE *>(n)); }         \
+    void Modifier::postorder(IR::CLASS *n) { postorder(static_cast<IR::BASE *>(n)); }              \
+    void Modifier::revisit(const IR::CLASS *o, const IR::CLASS *n) {                               \
+        revisit(static_cast<const IR::BASE *>(o), static_cast<const IR::BASE *>(n));               \
+    }                                                                                              \
+    void Modifier::loop_revisit(const IR::CLASS *o) {                                              \
+        loop_revisit(static_cast<const IR::BASE *>(o));                                            \
+    }                                                                                              \
+    bool Inspector::preorder(const IR::CLASS *n) {                                                 \
+        return preorder(static_cast<const IR::BASE *>(n));                                         \
+    }                                                                                              \
+    void Inspector::postorder(const IR::CLASS *n) { postorder(static_cast<const IR::BASE *>(n)); } \
+    void Inspector::revisit(const IR::CLASS *n) { revisit(static_cast<const IR::BASE *>(n)); }     \
+    void Inspector::loop_revisit(const IR::CLASS *n) {                                             \
+        loop_revisit(static_cast<const IR::BASE *>(n));                                            \
+    }                                                                                              \
+    const IR::Node *Transform::preorder(IR::CLASS *n) {                                            \
+        return preorder(static_cast<IR::BASE *>(n));                                               \
+    }                                                                                              \
+    const IR::Node *Transform::postorder(IR::CLASS *n) {                                           \
+        return postorder(static_cast<IR::BASE *>(n));                                              \
+    }                                                                                              \
+    void Transform::revisit(const IR::CLASS *o, const IR::Node *n) {                               \
+        return revisit(static_cast<const IR::BASE *>(o), n);                                       \
+    }                                                                                              \
+    void Transform::loop_revisit(const IR::CLASS *o) {                                             \
+        return loop_revisit(static_cast<const IR::BASE *>(o));                                     \
+    }
 
 IRNODE_ALL_SUBCLASSES(DEFINE_VISIT_FUNCTIONS)
 #undef DEFINE_VISIT_FUNCTIONS
@@ -452,8 +475,8 @@ void ControlFlowVisitor::init_join_flows(const IR::Node *root) {
     else
         flow_join_points = new std::remove_reference<decltype(*flow_join_points)>::type;
     root->apply(SetupJoinPoints(*flow_join_points));
-    erase_if(*flow_join_points, [this](flow_join_points_t::value_type &el) {
-                return filter_join_point(el.first); });
+    erase_if(*flow_join_points,
+             [this](flow_join_points_t::value_type &el) { return filter_join_point(el.first); });
 }
 
 bool ControlFlowVisitor::join_flows(const IR::Node *n) {
@@ -484,7 +507,9 @@ bool ControlFlowVisitor::join_flows(const IR::Node *n) {
             // Clone this visitor and store it as the initial accumulator
             // value.
             status.first = clone();
-            return true; } }
+            return true;
+        }
+    }
     return false;
 }
 
@@ -512,29 +537,32 @@ ControlFlowVisitor &ControlFlowVisitor::flow_clone() {
 
 IRNODE_ALL_NON_TEMPLATE_CLASSES(DEFINE_APPLY_FUNCTIONS, , , )
 
-#define DEFINE_VISIT_FUNCTIONS(CLASS, BASE)                                             \
+#define DEFINE_VISIT_FUNCTIONS(CLASS, BASE)                                      \
     void Visitor::visit(const IR::CLASS *&n, const char *name) {                 \
-        auto t = apply_visitor(n, name);                                                \
-        n = dynamic_cast<const IR::CLASS *>(t);                                         \
-        if (t && !n)                                                                    \
-            BUG("visitor returned non-" #CLASS " type: %1%", t); }                      \
+        auto t = apply_visitor(n, name);                                         \
+        n = dynamic_cast<const IR::CLASS *>(t);                                  \
+        if (t && !n) BUG("visitor returned non-" #CLASS " type: %1%", t);        \
+    }                                                                            \
     void Visitor::visit(const IR::CLASS *const &n, const char *name) {           \
-        /* This function needed solely due to order of declaration issues */            \
-        visit(static_cast<const IR::Node *const &>(n), name); }                         \
+        /* This function needed solely due to order of declaration issues */     \
+        visit(static_cast<const IR::Node *const &>(n), name);                    \
+    }                                                                            \
     void Visitor::visit(const IR::CLASS *&n, const char *name, int cidx) {       \
-        ctxt->child_index = cidx;                                                       \
-        auto t = apply_visitor(n, name);                                                \
-        n = dynamic_cast<const IR::CLASS *>(t);                                         \
-        if (t && !n)                                                                    \
-            BUG("visitor returned non-" #CLASS " type: %1%", t); }                      \
+        ctxt->child_index = cidx;                                                \
+        auto t = apply_visitor(n, name);                                         \
+        n = dynamic_cast<const IR::CLASS *>(t);                                  \
+        if (t && !n) BUG("visitor returned non-" #CLASS " type: %1%", t);        \
+    }                                                                            \
     void Visitor::visit(const IR::CLASS *const &n, const char *name, int cidx) { \
-        /* This function needed solely due to order of declaration issues */            \
-        visit(static_cast<const IR::Node *const &>(n), name, cidx); }
-    IRNODE_ALL_SUBCLASSES(DEFINE_VISIT_FUNCTIONS)
+        /* This function needed solely due to order of declaration issues */     \
+        visit(static_cast<const IR::Node *const &>(n), name, cidx);              \
+    }
+IRNODE_ALL_SUBCLASSES(DEFINE_VISIT_FUNCTIONS)
 #undef DEFINE_VISIT_FUNCTIONS
 
 std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> *v) {
-    return v ? out << *v : out << "<null>"; }
+    return v ? out << *v : out << "<null>";
+}
 
 #include <config.h>
 #if HAVE_CXXABI_H
@@ -553,9 +581,7 @@ cstring Visitor::demangle(const char *str) {
 }
 #else
 #warning "No name demangling available; class names in logs will be mangled"
-cstring Visitor::demangle(const char *str) {
-    return str;
-}
+cstring Visitor::demangle(const char *str) { return str; }
 #endif
 
 #if HAVE_LIBGC
@@ -577,9 +603,9 @@ static std::map<const Backtrack::trigger *, size_t> trigger_gc_roots;
 
 void Backtrack::trigger::register_for_gc(size_t
 #if HAVE_LIBGC
-                                         sz
+                                             sz
 #endif /* HAVE_LIBGC */
-                                         ) {
+) {
 #if HAVE_LIBGC
     if (!GC_is_heap_ptr(this)) {
         trigger_gc_roots[this] = sz;

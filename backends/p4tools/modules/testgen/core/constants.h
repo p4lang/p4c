@@ -26,11 +26,11 @@ class P4Constants {
     /// not supported by the implementation.
     static constexpr int PARSER_ERROR_INVALID_ARGUMENT = 0x0020;
     /// Match bits exactly.
-    static constexpr const char* MATCH_KIND_EXACT = "exact";
+    static constexpr const char *MATCH_KIND_EXACT = "exact";
     /// Ternary match, using a mask.
-    static constexpr const char* MATCH_KIND_TERNARY = "ternary";
+    static constexpr const char *MATCH_KIND_TERNARY = "ternary";
     /// Longest-prefix match.
-    static constexpr const char* MATCH_KIND_LPM = "lpm";
+    static constexpr const char *MATCH_KIND_LPM = "lpm";
 };
 
 }  // namespace P4Testgen

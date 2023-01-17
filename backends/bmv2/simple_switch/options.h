@@ -27,7 +27,7 @@ class SimpleSwitchOptions : public BMV2Options {
     SimpleSwitchOptions() {
         registerOption(
             "--listMidendPasses", nullptr,
-            [this](const char*) {
+            [this](const char *) {
                 listMidendPasses = true;
                 loadIRFromJson = false;
                 SimpleSwitchMidEnd midEnd(*this, outStream);

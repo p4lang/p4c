@@ -53,9 +53,9 @@ below.
 */
 class MethodInstance : public InstanceBase {
  protected:
-    MethodInstance(const IR::MethodCallExpression* mce, const IR::IDeclaration* decl,
-                   const IR::Type_MethodBase* originalMethodType,
-                   const IR::Type_MethodBase* actualMethodType)
+    MethodInstance(const IR::MethodCallExpression *mce, const IR::IDeclaration *decl,
+                   const IR::Type_MethodBase *originalMethodType,
+                   const IR::Type_MethodBase *actualMethodType)
         : expr(mce),
           object(decl),
           originalMethodType(originalMethodType),
@@ -71,16 +71,16 @@ class MethodInstance : public InstanceBase {
     }
 
  public:
-    const IR::MethodCallExpression* expr;
+    const IR::MethodCallExpression *expr;
     /** Declaration of object that method is applied to.
         May be null for plain functions. */
-    const IR::IDeclaration* object;
+    const IR::IDeclaration *object;
     /** The type of the *original* called method,
         without instantiated type parameters. */
-    const IR::Type_MethodBase* originalMethodType;
+    const IR::Type_MethodBase *originalMethodType;
     /** Type of called method,
         with instantiated type parameters. */
-    const IR::Type_MethodBase* actualMethodType;
+    const IR::Type_MethodBase *actualMethodType;
     virtual bool isApply() const { return false; }
 
     /** @param useExpressionType If true, the typeMap can be nullptr,
@@ -89,37 +89,37 @@ class MethodInstance : public InstanceBase {
      *  @param incomplete        If true we do not expect to have
      *                           all type arguments.
      */
-    static MethodInstance* resolve(const IR::MethodCallExpression* mce, DeclarationLookup* refMap,
-                                   TypeMap* typeMap, bool useExpressionType = false,
-                                   const Visitor::Context* ctxt = nullptr, bool incomplete = false);
-    static MethodInstance* resolve(const IR::MethodCallExpression* mce, DeclarationLookup* refMap,
-                                   TypeMap* typeMap, const Visitor::Context* ctxt,
+    static MethodInstance *resolve(const IR::MethodCallExpression *mce, DeclarationLookup *refMap,
+                                   TypeMap *typeMap, bool useExpressionType = false,
+                                   const Visitor::Context *ctxt = nullptr, bool incomplete = false);
+    static MethodInstance *resolve(const IR::MethodCallExpression *mce, DeclarationLookup *refMap,
+                                   TypeMap *typeMap, const Visitor::Context *ctxt,
                                    bool incomplete = false) {
         return resolve(mce, refMap, typeMap, false, ctxt, incomplete);
     }
-    static MethodInstance* resolve(const IR::MethodCallStatement* mcs, DeclarationLookup* refMap,
-                                   TypeMap* typeMap, const Visitor::Context* ctxt = nullptr) {
+    static MethodInstance *resolve(const IR::MethodCallStatement *mcs, DeclarationLookup *refMap,
+                                   TypeMap *typeMap, const Visitor::Context *ctxt = nullptr) {
         return resolve(mcs->methodCall, refMap, typeMap, false, ctxt, false);
     }
-    static MethodInstance* resolve(const IR::MethodCallExpression* mce, DeclarationLookup* refMap,
-                                   const Visitor::Context* ctxt = nullptr) {
+    static MethodInstance *resolve(const IR::MethodCallExpression *mce, DeclarationLookup *refMap,
+                                   const Visitor::Context *ctxt = nullptr) {
         return resolve(mce, refMap, nullptr, true, ctxt, false);
     }
-    static MethodInstance* resolve(const IR::MethodCallStatement* mcs, DeclarationLookup* refMap,
-                                   const Visitor::Context* ctxt = nullptr) {
+    static MethodInstance *resolve(const IR::MethodCallStatement *mcs, DeclarationLookup *refMap,
+                                   const Visitor::Context *ctxt = nullptr) {
         return resolve(mcs->methodCall, refMap, nullptr, true, ctxt, false);
     }
-    const IR::ParameterList* getOriginalParameters() const {
+    const IR::ParameterList *getOriginalParameters() const {
         return originalMethodType->parameters;
     }
-    const IR::ParameterList* getActualParameters() const { return actualMethodType->parameters; }
+    const IR::ParameterList *getActualParameters() const { return actualMethodType->parameters; }
 };
 
 /** Represents the call of an Apply method on an object that implements IApply:
     a table, control or parser */
 class ApplyMethod final : public MethodInstance {
-    ApplyMethod(const IR::MethodCallExpression* expr, const IR::IDeclaration* decl,
-                const IR::IApply* applyObject)
+    ApplyMethod(const IR::MethodCallExpression *expr, const IR::IDeclaration *decl,
+                const IR::IApply *applyObject)
         : MethodInstance(expr, decl, applyObject->getApplyMethodType(),
                          applyObject->getApplyMethodType()),
           applyObject(applyObject) {
@@ -129,17 +129,17 @@ class ApplyMethod final : public MethodInstance {
     friend class MethodInstance;
 
  public:
-    const IR::IApply* applyObject;
+    const IR::IApply *applyObject;
     bool isApply() const { return true; }
     bool isTableApply() const { return object->is<IR::P4Table>(); }
 };
 
 /** Represents a method call on an extern object */
 class ExternMethod final : public MethodInstance {
-    ExternMethod(const IR::MethodCallExpression* expr, const IR::IDeclaration* decl,
-                 const IR::Method* method, const IR::Type_Extern* originalExternType,
-                 const IR::Type_Method* originalMethodType, const IR::Type_Extern* actualExternType,
-                 const IR::Type_Method* actualMethodType, bool incomplete)
+    ExternMethod(const IR::MethodCallExpression *expr, const IR::IDeclaration *decl,
+                 const IR::Method *method, const IR::Type_Extern *originalExternType,
+                 const IR::Type_Method *originalMethodType, const IR::Type_Extern *actualExternType,
+                 const IR::Type_Method *actualMethodType, bool incomplete)
         : MethodInstance(expr, decl, originalMethodType, actualMethodType),
           method(method),
           originalExternType(originalExternType),
@@ -154,21 +154,21 @@ class ExternMethod final : public MethodInstance {
     friend class MethodInstance;
 
  public:
-    const IR::Method* method;
-    const IR::Type_Extern* originalExternType;  // type of object method is applied to
-    const IR::Type_Extern* actualExternType;    // with type variables substituted
+    const IR::Method *method;
+    const IR::Type_Extern *originalExternType;  // type of object method is applied to
+    const IR::Type_Extern *actualExternType;    // with type variables substituted
 
     /// Set of IR::Method and IR::Function objects that may be called by this method.
     // If this method is abstract, will consist of (just) the concrete implementation,
     // otherwise will consist of those methods that are @synchronous with this
-    std::vector<const IR::IDeclaration*> mayCall() const;
+    std::vector<const IR::IDeclaration *> mayCall() const;
 };
 
 /** Represents the call of an extern function */
 class ExternFunction final : public MethodInstance {
-    ExternFunction(const IR::MethodCallExpression* expr, const IR::Method* method,
-                   const IR::Type_Method* originalMethodType,
-                   const IR::Type_Method* actualMethodType, bool incomplete)
+    ExternFunction(const IR::MethodCallExpression *expr, const IR::Method *method,
+                   const IR::Type_Method *originalMethodType,
+                   const IR::Type_Method *actualMethodType, bool incomplete)
         : MethodInstance(expr, nullptr, originalMethodType, actualMethodType), method(method) {
         CHECK_NULL(method);
         bindParameters();
@@ -178,7 +178,7 @@ class ExternFunction final : public MethodInstance {
     friend class MethodInstance;
 
  public:
-    const IR::Method* method;
+    const IR::Method *method;
 };
 
 /** Represents the direct call of an action; This also works for
@@ -186,8 +186,8 @@ class ExternFunction final : public MethodInstance {
     action instantiations such as the default_action or the list of
     table entries */
 class ActionCall final : public MethodInstance {
-    ActionCall(const IR::MethodCallExpression* expr, const IR::P4Action* action,
-               const IR::Type_Action* actionType)
+    ActionCall(const IR::MethodCallExpression *expr, const IR::P4Action *action,
+               const IR::Type_Action *actionType)
         :  // Actions are never generic
           MethodInstance(expr, nullptr, actionType, actionType),
           action(action) {
@@ -197,18 +197,18 @@ class ActionCall final : public MethodInstance {
     friend class MethodInstance;
 
  public:
-    const IR::P4Action* action;
+    const IR::P4Action *action;
     /// Generate a version of the action where the parameters in the
     /// substitution have been replaced with the arguments.
-    const IR::P4Action* specialize(ReferenceMap* refMap) const;
+    const IR::P4Action *specialize(ReferenceMap *refMap) const;
 };
 
 /**
   Represents the call of a function.
 */
 class FunctionCall final : public MethodInstance {
-    FunctionCall(const IR::MethodCallExpression* expr, const IR::Function* function,
-                 const IR::Type_Method* originalMethodType, const IR::Type_Method* actualMethodType,
+    FunctionCall(const IR::MethodCallExpression *expr, const IR::Function *function,
+                 const IR::Type_Method *originalMethodType, const IR::Type_Method *actualMethodType,
                  bool incomplete)
         : MethodInstance(expr, nullptr, originalMethodType, actualMethodType), function(function) {
         CHECK_NULL(function);
@@ -220,7 +220,7 @@ class FunctionCall final : public MethodInstance {
     friend class MethodInstance;
 
  public:
-    const IR::Function* function;
+    const IR::Function *function;
 };
 
 /** This class represents the call of a built-in method:
@@ -234,8 +234,8 @@ These methods are:
 */
 class BuiltInMethod final : public MethodInstance {
     friend class MethodInstance;
-    BuiltInMethod(const IR::MethodCallExpression* expr, IR::ID name,
-                  const IR::Expression* appliedTo, const IR::Type_Method* methodType)
+    BuiltInMethod(const IR::MethodCallExpression *expr, IR::ID name,
+                  const IR::Expression *appliedTo, const IR::Type_Method *methodType)
         : MethodInstance(expr, nullptr, methodType, methodType), name(name), appliedTo(appliedTo) {
         CHECK_NULL(appliedTo);
         bindParameters();
@@ -243,7 +243,7 @@ class BuiltInMethod final : public MethodInstance {
 
  public:
     const IR::ID name;
-    const IR::Expression* appliedTo;  // object is an expression
+    const IR::Expression *appliedTo;  // object is an expression
 };
 
 ////////////////////////////////////////////////////
@@ -257,22 +257,22 @@ class BuiltInMethod final : public MethodInstance {
 class ConstructorCall : public InstanceBase {
  protected:
     virtual ~ConstructorCall() {}
-    explicit ConstructorCall(const IR::ConstructorCallExpression* cce) : cce(cce) {
+    explicit ConstructorCall(const IR::ConstructorCallExpression *cce) : cce(cce) {
         CHECK_NULL(cce);
     }
 
  public:
-    const IR::ConstructorCallExpression* cce = nullptr;
-    const IR::Vector<IR::Type>* typeArguments = nullptr;
-    const IR::ParameterList* constructorParameters = nullptr;
-    static ConstructorCall* resolve(const IR::ConstructorCallExpression* cce,
-                                    DeclarationLookup* refMap, TypeMap* typeMap);
+    const IR::ConstructorCallExpression *cce = nullptr;
+    const IR::Vector<IR::Type> *typeArguments = nullptr;
+    const IR::ParameterList *constructorParameters = nullptr;
+    static ConstructorCall *resolve(const IR::ConstructorCallExpression *cce,
+                                    DeclarationLookup *refMap, TypeMap *typeMap);
 };
 
 /** Represents a constructor call that allocates an Extern object */
 class ExternConstructorCall : public ConstructorCall {
-    explicit ExternConstructorCall(const IR::ConstructorCallExpression* cce,
-                                   const IR::Type_Extern* type, const IR::Method* constructor)
+    explicit ExternConstructorCall(const IR::ConstructorCallExpression *cce,
+                                   const IR::Type_Extern *type, const IR::Method *constructor)
         : ConstructorCall(cce), type(type), constructor(constructor) {
         CHECK_NULL(type);
         CHECK_NULL(constructor);
@@ -280,22 +280,22 @@ class ExternConstructorCall : public ConstructorCall {
     friend class ConstructorCall;
 
  public:
-    const IR::Type_Extern* type;    // actual extern declaration in program IR
-    const IR::Method* constructor;  // that is being invoked
+    const IR::Type_Extern *type;    // actual extern declaration in program IR
+    const IR::Method *constructor;  // that is being invoked
 };
 
 /** Represents a constructor call that allocates an object that implements IContainer.
     These can be package, control or parser */
 class ContainerConstructorCall : public ConstructorCall {
-    explicit ContainerConstructorCall(const IR::ConstructorCallExpression* cce,
-                                      const IR::IContainer* cont)
+    explicit ContainerConstructorCall(const IR::ConstructorCallExpression *cce,
+                                      const IR::IContainer *cont)
         : ConstructorCall(cce), container(cont) {
         CHECK_NULL(cont);
     }
     friend class ConstructorCall;
 
  public:
-    const IR::IContainer* container;  // actual container in program IR
+    const IR::IContainer *container;  // actual container in program IR
 };
 
 /////////////////////////////////////////////
@@ -309,27 +309,27 @@ class Instantiation : public InstanceBase {
     }
 
  public:
-    Instantiation(const IR::Declaration_Instance* instance,
-                  const IR::Vector<IR::Type>* typeArguments)
+    Instantiation(const IR::Declaration_Instance *instance,
+                  const IR::Vector<IR::Type> *typeArguments)
         : instance(instance), typeArguments(typeArguments) {
         CHECK_NULL(instance);
         constructorArguments = instance->arguments;
     }
 
-    const IR::Declaration_Instance* instance;
-    const IR::Vector<IR::Type>* typeArguments;
-    const IR::Vector<IR::Argument>* constructorArguments;
-    const IR::ParameterList* constructorParameters;
-    const IR::TypeParameters* typeParameters;
+    const IR::Declaration_Instance *instance;
+    const IR::Vector<IR::Type> *typeArguments;
+    const IR::Vector<IR::Argument> *constructorArguments;
+    const IR::ParameterList *constructorParameters = nullptr;
+    const IR::TypeParameters *typeParameters = nullptr;
 
-    static Instantiation* resolve(const IR::Declaration_Instance* instance,
-                                  DeclarationLookup* refMap, TypeMap* typeMap);
+    static Instantiation *resolve(const IR::Declaration_Instance *instance,
+                                  DeclarationLookup *refMap, TypeMap *typeMap);
 };
 
 class ExternInstantiation : public Instantiation {
  public:
-    ExternInstantiation(const IR::Declaration_Instance* instance,
-                        const IR::Vector<IR::Type>* typeArguments, const IR::Type_Extern* type)
+    ExternInstantiation(const IR::Declaration_Instance *instance,
+                        const IR::Vector<IR::Type> *typeArguments, const IR::Type_Extern *type)
         : Instantiation(instance, typeArguments), type(type) {
         auto constructor = type->lookupConstructor(constructorArguments);
         BUG_CHECK(constructor, "%1%: could not find constructor", type);
@@ -337,43 +337,43 @@ class ExternInstantiation : public Instantiation {
         typeParameters = type->typeParameters;
         substitute();
     }
-    const IR::Type_Extern* type;
+    const IR::Type_Extern *type;
 };
 
 class PackageInstantiation : public Instantiation {
  public:
-    PackageInstantiation(const IR::Declaration_Instance* instance,
-                         const IR::Vector<IR::Type>* typeArguments, const IR::Type_Package* package)
+    PackageInstantiation(const IR::Declaration_Instance *instance,
+                         const IR::Vector<IR::Type> *typeArguments, const IR::Type_Package *package)
         : Instantiation(instance, typeArguments), package(package) {
         constructorParameters = package->getConstructorParameters();
         typeParameters = package->typeParameters;
         substitute();
     }
-    const IR::Type_Package* package;
+    const IR::Type_Package *package;
 };
 
 class ParserInstantiation : public Instantiation {
  public:
-    ParserInstantiation(const IR::Declaration_Instance* instance,
-                        const IR::Vector<IR::Type>* typeArguments, const IR::P4Parser* parser)
+    ParserInstantiation(const IR::Declaration_Instance *instance,
+                        const IR::Vector<IR::Type> *typeArguments, const IR::P4Parser *parser)
         : Instantiation(instance, typeArguments), parser(parser) {
         typeParameters = parser->type->typeParameters;
         constructorParameters = parser->getConstructorParameters();
         substitute();
     }
-    const IR::P4Parser* parser;
+    const IR::P4Parser *parser;
 };
 
 class ControlInstantiation : public Instantiation {
  public:
-    ControlInstantiation(const IR::Declaration_Instance* instance,
-                         const IR::Vector<IR::Type>* typeArguments, const IR::P4Control* control)
+    ControlInstantiation(const IR::Declaration_Instance *instance,
+                         const IR::Vector<IR::Type> *typeArguments, const IR::P4Control *control)
         : Instantiation(instance, typeArguments), control(control) {
         typeParameters = control->type->typeParameters;
         constructorParameters = control->getConstructorParameters();
         substitute();
     }
-    const IR::P4Control* control;
+    const IR::P4Control *control;
 };
 
 }  // namespace P4

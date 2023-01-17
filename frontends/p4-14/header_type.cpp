@@ -16,9 +16,9 @@ limitations under the License.
 
 #include "header_type.h"
 
-bool HeaderTypeMaxLengthCalculator::preorder(IR::Type_StructLike* hdr_type) {
-    IR::Annotations* annot = nullptr;
-    auto* max_length = hdr_type->getAnnotation("max_length");
+bool HeaderTypeMaxLengthCalculator::preorder(IR::Type_StructLike *hdr_type) {
+    IR::Annotations *annot = nullptr;
+    auto *max_length = hdr_type->getAnnotation("max_length");
     if (!max_length) {
         unsigned len = 0;
         for (auto field : hdr_type->fields) len += field->type->width_bits();
@@ -26,7 +26,7 @@ bool HeaderTypeMaxLengthCalculator::preorder(IR::Type_StructLike* hdr_type) {
         if (!annot) annot = hdr_type->annotations->clone();
         annot->annotations.push_back(max_length);
     }
-    auto* length = hdr_type->getAnnotation("length");
+    auto *length = hdr_type->getAnnotation("length");
     if (!length) {
         if (!annot) annot = hdr_type->annotations->clone();
         length = new IR::Annotation("length", max_length->expr);

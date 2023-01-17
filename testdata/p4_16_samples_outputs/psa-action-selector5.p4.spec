@@ -47,6 +47,7 @@ struct user_meta_t {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<16> local_metadata_data
+	bit<32> Ingress_switchExprTmp
 	bit<32> Ingress_as_group_id
 	bit<32> Ingress_as_member_id
 }
@@ -59,11 +60,13 @@ action NoAction args none {
 }
 
 action a1 args instanceof a1_arg_t {
+	mov m.Ingress_switchExprTmp 0x0
 	mov h.ethernet.dstAddr t.param
 	return
 }
 
 action a2 args instanceof a2_arg_t {
+	mov m.Ingress_switchExprTmp 0x1
 	mov h.ethernet.etherType t.param
 	return
 }
@@ -130,19 +133,24 @@ selector as_sel {
 		m.local_metadata_data
 	}
 	member_id m.Ingress_as_member_id
-	n_groups_max 1024
-	n_members_per_group_max 65536
+	n_groups_max 0x400
+	n_members_per_group_max 0x10000
 }
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
+	mov m.Ingress_as_member_id 0x0
+	mov m.Ingress_as_group_id 0xFFFFFFFF
+	mov m.Ingress_switchExprTmp 0xFFFFFFFF
 	table tbl
+	jmpnh LABEL_END
+	jmpeq LABEL_END_0 m.Ingress_as_group_id 0xFFFFFFFF
 	table as_sel
-	table as
-	jmpa LABEL_SWITCH a1
-	jmpa LABEL_SWITCH_0 a2
+	LABEL_END_0 :	table as
+	LABEL_END :	jmpeq LABEL_SWITCH m.Ingress_switchExprTmp 0x0
+	jmpeq LABEL_SWITCH_0 m.Ingress_switchExprTmp 0x1
 	jmp LABEL_ENDSWITCH
 	LABEL_SWITCH :	table foo
 	jmp LABEL_ENDSWITCH

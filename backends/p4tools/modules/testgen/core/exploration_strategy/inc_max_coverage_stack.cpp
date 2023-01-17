@@ -7,12 +7,12 @@
 
 #include <boost/none.hpp>
 
-#include "backends/p4tools/common/lib/coverage.h"
+#include "backends/p4tools/common/core/solver.h"
+#include "backends/p4tools/common/lib/formulae.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "lib/error.h"
-#include "p4tools/common/core/solver.h"
-#include "p4tools/common/lib/formulae.h"
+#include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
@@ -25,7 +25,7 @@ namespace P4Tools {
 
 namespace P4Testgen {
 
-void IncrementalMaxCoverageStack::run(const Callback& callback) {
+void IncrementalMaxCoverageStack::run(const Callback &callback) {
     // Loop until we reach terminate, or until there are no more
     // branches to produce tests.
     while (true) {
@@ -45,13 +45,13 @@ void IncrementalMaxCoverageStack::run(const Callback& callback) {
                 // in the state before the step was taken - we copy the current symbolic state.
                 StepResult successors = step(*executionState);
                 bool guaranteeViability = successors->size() > 1;
-                ExecutionState* next = chooseBranch(*successors, guaranteeViability);
+                ExecutionState *next = chooseBranch(*successors, guaranteeViability);
                 if (next != nullptr) {
                     executionState = next;
                     continue;
                 }
             }
-        } catch (TestgenUnimplemented& e) {
+        } catch (TestgenUnimplemented &e) {
             // If strict is enabled, bubble the exception up.
             if (TestgenOptions::get().strict) {
                 throw;
@@ -72,7 +72,7 @@ void IncrementalMaxCoverageStack::run(const Callback& callback) {
             // Remove the map entry accordingly.
             auto coverageKey = unexploredBranches.rbegin()->first;
             unexploredBranches.erase(coverageKey);
-            ExecutionState* next = chooseBranch(successors, guaranteeViability);
+            ExecutionState *next = chooseBranch(successors, guaranteeViability);
             if (next != nullptr) {
                 executionState = next;
                 break;
@@ -81,21 +81,19 @@ void IncrementalMaxCoverageStack::run(const Callback& callback) {
     }
 }
 
-IncrementalMaxCoverageStack::IncrementalMaxCoverageStack(AbstractSolver& solver,
-                                                         const ProgramInfo& programInfo,
-                                                         boost::optional<uint32_t> seed)
-    : ExplorationStrategy(solver, programInfo, seed) {}
+IncrementalMaxCoverageStack::IncrementalMaxCoverageStack(AbstractSolver &solver,
+                                                         const ProgramInfo &programInfo)
+    : ExplorationStrategy(solver, programInfo) {}
 
-void IncrementalMaxCoverageStack::sortBranchesByCoverage(std::vector<Branch>& branches) {
+void IncrementalMaxCoverageStack::sortBranchesByCoverage(std::vector<Branch> &branches) {
     // Transfers branches to rankedBranches and sorts them by coverage
-    for (uint64_t i = 0; i < branches.size(); i++) {
-        auto localBranch = branches.at(i);
-        ExecutionState* branchState = localBranch.nextState;
+    for (const auto &localBranch : branches) {
+        ExecutionState *branchState = localBranch.nextState;
         // Calculate coverage for each branch:
         uint64_t coverage = 0;
-        if (branchState) {
+        if (branchState != nullptr) {
             uint64_t lookAheadCoverage = 0;
-            for (const auto& stmt : branchState->getVisited()) {
+            for (const auto &stmt : branchState->getVisited()) {
                 // We need to take into account the set of visitedStatements.
                 // We also need to ensure the statement is in allStatements.
                 if (visitedStatements.count(stmt) == 0U && allStatements.count(stmt) != 0U) {
@@ -113,7 +111,7 @@ void IncrementalMaxCoverageStack::sortBranchesByCoverage(std::vector<Branch>& br
         // we calculate, we'll insert a new key at unexploredBranches
         auto rankedBranches = unexploredBranches.find(coverage);
         if (rankedBranches != unexploredBranches.end()) {
-            auto& localBranches = rankedBranches->second;
+            auto &localBranches = rankedBranches->second;
             localBranches.push_back(localBranch);
             unexploredBranches.emplace(coverage, localBranches);
         } else {
@@ -127,7 +125,7 @@ void IncrementalMaxCoverageStack::sortBranchesByCoverage(std::vector<Branch>& br
     branches.clear();
 }
 
-ExecutionState* IncrementalMaxCoverageStack::chooseBranch(std::vector<Branch>& branches,
+ExecutionState *IncrementalMaxCoverageStack::chooseBranch(std::vector<Branch> &branches,
                                                           bool guaranteeViability) {
     uint64_t localCoverage = 0;
     // If branches is not empty, we will arrange them by coverage.
@@ -158,7 +156,7 @@ ExecutionState* IncrementalMaxCoverageStack::chooseBranch(std::vector<Branch>& b
 
         // Do not bother invoking the solver for a trivial case.
         // In either case (true or false), we do not need to add the assertion and check.
-        if (const auto* boolLiteral = branch.constraint->to<IR::BoolLiteral>()) {
+        if (const auto *boolLiteral = branch.constraint->to<IR::BoolLiteral>()) {
             guaranteeViability = false;
             if (!boolLiteral->value) {
                 continue;
@@ -178,7 +176,7 @@ ExecutionState* IncrementalMaxCoverageStack::chooseBranch(std::vector<Branch>& b
             }
         }
         // Push the new set of branches if the remaining vector is not empty.
-        if (branches.size() > 0) {
+        if (!branches.empty()) {
             auto coverageKey = unexploredBranches.find(localCoverage);
             coverageKey->second = branches;
         } else {

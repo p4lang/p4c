@@ -95,7 +95,7 @@ static uint32_t table_crc32[256] = {
     0x89B8FD09, 0x8D79E0BE, 0x803AC667, 0x84FBDBD0, 0x9ABC8BD5, 0x9E7D9662, 0x933EB0BB, 0x97FFAD0C,
     0xAFB010B1, 0xAB710D06, 0xA6322BDF, 0xA2F33668, 0xBCB4666D, 0xB8757BDA, 0xB5365D03, 0xB1F740B4};
 
-uint16_t BMv2Hash::crc16(const char* buf, size_t len) {
+uint16_t BMv2Hash::crc16(const char *buf, size_t len) {
     uint16_t remainder = 0x0000;
     uint16_t final_xor_value = 0x0000;
     for (unsigned int byte = 0; byte < len; byte++) {
@@ -105,7 +105,7 @@ uint16_t BMv2Hash::crc16(const char* buf, size_t len) {
     return reflect<uint16_t>(remainder, 16) ^ final_xor_value;
 }
 
-uint32_t BMv2Hash::crc32(const char* buf, size_t len) {
+uint32_t BMv2Hash::crc32(const char *buf, size_t len) {
     uint32_t remainder = 0xFFFFFFFF;
     uint32_t final_xor_value = 0xFFFFFFFF;
     for (unsigned int byte = 0; byte < len; byte++) {
@@ -115,7 +115,7 @@ uint32_t BMv2Hash::crc32(const char* buf, size_t len) {
     return reflect<uint32_t>(remainder, 32) ^ final_xor_value;
 }
 
-uint16_t BMv2Hash::crcCCITT(const char* buf, size_t len) {
+uint16_t BMv2Hash::crcCCITT(const char *buf, size_t len) {
     uint16_t remainder = 0xFFFF;
     uint16_t final_xor_value = 0x0000;
     for (unsigned int byte = 0; byte < len; byte++) {
@@ -125,12 +125,12 @@ uint16_t BMv2Hash::crcCCITT(const char* buf, size_t len) {
     return remainder ^ final_xor_value;
 }
 
-uint16_t BMv2Hash::csum16(const char* buf, size_t len) {
+uint16_t BMv2Hash::csum16(const char *buf, size_t len) {
     uint64_t sum = 0;
-    const uint64_t* b = reinterpret_cast<const uint64_t*>(buf);
+    const uint64_t *b = reinterpret_cast<const uint64_t *>(buf);
     uint32_t t1, t2;
     uint16_t t3, t4;
-    const uint8_t* tail;
+    const uint8_t *tail;
     /* Main loop - 8 bytes at a time */
     while (len >= sizeof(uint64_t)) {
         uint64_t s = *b++;
@@ -139,21 +139,21 @@ uint16_t BMv2Hash::csum16(const char* buf, size_t len) {
         len -= 8;
     }
     /* Handle tail less than 8-bytes long */
-    tail = reinterpret_cast<const uint8_t*>(b);
+    tail = reinterpret_cast<const uint8_t *>(b);
     if (len & 4) {
-        uint32_t s = *reinterpret_cast<const uint32_t*>(tail);
+        uint32_t s = *reinterpret_cast<const uint32_t *>(tail);
         sum += s;
         if (sum < s) sum++;
         tail += 4;
     }
     if (len & 2) {
-        uint16_t s = *reinterpret_cast<const uint16_t*>(tail);
+        uint16_t s = *reinterpret_cast<const uint16_t *>(tail);
         sum += s;
         if (sum < s) sum++;
         tail += 2;
     }
     if (len & 1) {
-        uint8_t s = *reinterpret_cast<const uint8_t*>(tail);
+        uint8_t s = *reinterpret_cast<const uint8_t *>(tail);
         sum += s;
         if (sum < s) sum++;
     }
@@ -169,7 +169,7 @@ uint16_t BMv2Hash::csum16(const char* buf, size_t len) {
     return ntohs(~t3);
 }
 
-uint16_t BMv2Hash::xor16(const char* buf, size_t len) {
+uint16_t BMv2Hash::xor16(const char *buf, size_t len) {
     uint16_t mask = 0x00ff;
     uint16_t final_xor_value = 0x0000;
     unsigned int byte = 0;
@@ -189,7 +189,7 @@ uint16_t BMv2Hash::xor16(const char* buf, size_t len) {
     return final_xor_value;
 }
 
-uint64_t BMv2Hash::identity(const char* buf, size_t len) {
+uint64_t BMv2Hash::identity(const char *buf, size_t len) {
     uint64_t res = 0ULL;
     for (size_t i = 0; i < std::min(sizeof(res), len); i++) {
         if (i > 0) res <<= 8;

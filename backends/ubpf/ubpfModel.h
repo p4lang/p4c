@@ -20,6 +20,7 @@ limitations under the License.
 #include "frontends/common/model.h"
 #include "frontends/p4/coreLibrary.h"
 #include "ir/ir.h"
+#include "ir/pass_manager.h"
 #include "lib/cstring.h"
 
 namespace UBPF {
@@ -100,17 +101,17 @@ class UBPFModel : public ::Model::Model {
     int numberOfControlBlockArguments() const { return version >= 20200515 ? 3 : 2; }
 
     class getUBPFModelVersion : public Inspector {
-        bool preorder(const IR::Declaration_Constant* dc) override {
+        bool preorder(const IR::Declaration_Constant *dc) override {
             if (dc->name == "__ubpf_model_version") {
                 auto val = dc->initializer->to<IR::Constant>();
                 UBPFModel::instance.version = static_cast<unsigned>(val->value);
             }
             return false;
         }
-        bool preorder(const IR::Declaration*) override { return false; }
+        bool preorder(const IR::Declaration *) override { return false; }
     };
 
-    const IR::P4Program* run(const IR::P4Program* program) {
+    const IR::P4Program *run(const IR::P4Program *program) {
         if (program == nullptr) return nullptr;
 
         PassManager passes({
@@ -119,7 +120,7 @@ class UBPFModel : public ::Model::Model {
 
         passes.setName("UBPFFrontEnd");
         passes.setStopOnError(true);
-        const IR::P4Program* result = program->apply(passes);
+        const IR::P4Program *result = program->apply(passes);
         return result;
     }
 };

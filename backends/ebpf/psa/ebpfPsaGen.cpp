@@ -30,12 +30,12 @@ limitations under the License.
 namespace EBPF {
 
 class PSAErrorCodesGen : public Inspector {
-    CodeBuilder* builder;
+    CodeBuilder *builder;
 
  public:
-    explicit PSAErrorCodesGen(CodeBuilder* builder) : builder(builder) {}
+    explicit PSAErrorCodesGen(CodeBuilder *builder) : builder(builder) {}
 
-    bool preorder(const IR::Type_Error* errors) override {
+    bool preorder(const IR::Type_Error *errors) override {
         int id = -1;
         for (auto decl : errors->members) {
             ++id;
@@ -61,13 +61,13 @@ class PSAErrorCodesGen : public Inspector {
 };
 
 // =====================PSAEbpfGenerator=============================
-void PSAEbpfGenerator::emitPSAIncludes(CodeBuilder* builder) const {
+void PSAEbpfGenerator::emitPSAIncludes(CodeBuilder *builder) const {
     builder->appendLine("#include <stdbool.h>");
     builder->appendLine("#include <linux/if_ether.h>");
     builder->appendLine("#include \"psa.h\"");
 }
 
-void PSAEbpfGenerator::emitPreamble(CodeBuilder* builder) const {
+void PSAEbpfGenerator::emitPreamble(CodeBuilder *builder) const {
     emitCommonPreamble(builder);
     builder->newline();
 
@@ -86,7 +86,7 @@ void PSAEbpfGenerator::emitPreamble(CodeBuilder* builder) const {
     builder->newline();
 }
 
-void PSAEbpfGenerator::emitCommonPreamble(CodeBuilder* builder) const {
+void PSAEbpfGenerator::emitCommonPreamble(CodeBuilder *builder) const {
     builder->newline();
     builder->appendLine("#define EBPF_MASK(t, w) ((((t)(1)) << (w)) - (t)1)");
     builder->appendLine("#define BYTES(w) ((w) / 8)");
@@ -100,7 +100,7 @@ void PSAEbpfGenerator::emitCommonPreamble(CodeBuilder* builder) const {
     builder->target->emitPreamble(builder);
 }
 
-void PSAEbpfGenerator::emitInternalStructures(CodeBuilder* builder) const {
+void PSAEbpfGenerator::emitInternalStructures(CodeBuilder *builder) const {
     builder->appendLine(
         "struct internal_metadata {\n"
         "    __u16 pkt_ether_type;\n"
@@ -123,7 +123,7 @@ void PSAEbpfGenerator::emitInternalStructures(CodeBuilder* builder) const {
 }
 
 /* Generate headers and structs in p4 prog */
-void PSAEbpfGenerator::emitTypes(CodeBuilder* builder) const {
+void PSAEbpfGenerator::emitTypes(CodeBuilder *builder) const {
     PSAErrorCodesGen errorGen(builder);
     ingress->program->apply(errorGen);
 
@@ -142,16 +142,8 @@ void PSAEbpfGenerator::emitTypes(CodeBuilder* builder) const {
     emitCRC32LookupTableTypes(builder);
     builder->newline();
 }
-void PSAEbpfGenerator::emitCRC32LookupTableTypes(CodeBuilder* builder) const {
-    builder->append("struct lookup_tbl_val ");
-    builder->blockStart();
-    builder->emitIndent();
-    builder->append("u32 table[2048]");
-    builder->endOfStatement(true);
-    builder->blockEnd(true);
-    builder->endOfStatement(true);
-}
-void PSAEbpfGenerator::emitGlobalHeadersMetadata(CodeBuilder* builder) const {
+
+void PSAEbpfGenerator::emitGlobalHeadersMetadata(CodeBuilder *builder) const {
     builder->append("struct hdr_md ");
     builder->blockStart();
     builder->emitIndent();
@@ -175,7 +167,7 @@ void PSAEbpfGenerator::emitGlobalHeadersMetadata(CodeBuilder* builder) const {
     builder->newline();
 }
 
-void PSAEbpfGenerator::emitPacketReplicationTables(CodeBuilder* builder) const {
+void PSAEbpfGenerator::emitPacketReplicationTables(CodeBuilder *builder) const {
     builder->target->emitMapInMapDecl(builder, "clone_session_tbl_inner", TableHash, "elem_t",
                                       "struct element", MaxClones, "clone_session_tbl", TableArray,
                                       "__u32", MaxCloneSessions);
@@ -184,7 +176,7 @@ void PSAEbpfGenerator::emitPacketReplicationTables(CodeBuilder* builder) const {
                                       "__u32", MaxCloneSessions);
 }
 
-void PSAEbpfGenerator::emitPipelineInstances(CodeBuilder* builder) const {
+void PSAEbpfGenerator::emitPipelineInstances(CodeBuilder *builder) const {
     ingress->parser->emitValueSetInstances(builder);
     ingress->control->emitTableInstances(builder);
     ingress->deparser->emitDigestInstances(builder);
@@ -196,7 +188,7 @@ void PSAEbpfGenerator::emitPipelineInstances(CodeBuilder* builder) const {
                                    "struct hdr_md", 2);
 }
 
-void PSAEbpfGenerator::emitInitializer(CodeBuilder* builder) const {
+void PSAEbpfGenerator::emitInitializer(CodeBuilder *builder) const {
     emitInitializerSection(builder);
     builder->appendFormat("int %s()", "map_initializer");
     builder->spc();
@@ -213,7 +205,7 @@ void PSAEbpfGenerator::emitInitializer(CodeBuilder* builder) const {
     builder->blockEnd(true);
 }
 
-void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder* builder) const {
+void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder *builder) const {
     EBPFHashAlgorithmTypeFactoryPSA::instance()->emitGlobals(builder);
 
     cstring forEachFunc =
@@ -335,99 +327,22 @@ void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder* builder) const {
     builder->newline();
 }
 
-// =====================PSAArchTC=============================
-void PSAArchTC::emit(CodeBuilder* builder) const {
-    /**
-     * How the structure of a single C program for PSA should look like?
-     * 1. Automatically generated comment
-     * 2. Includes
-     * 3. Macro definitions (it's called "preamble")
-     * 4. Headers, structs, types, PSA-specific data types.
-     * 5. BPF map definitions.
-     * 6. BPF map initialization
-     * 7. XDP helper program.
-     * 8. Helper functions
-     * 9. TC Ingress program.
-     * 10. TC Egress program.
-     */
-
-    // 1. Automatically generated comment.
-    // Note we use inherited function from EBPFProgram.
-    xdp->emitGeneratedComment(builder);
-
-    /*
-     * 2. Includes.
-     */
-    builder->target->emitIncludes(builder);
-    emitPSAIncludes(builder);
-
-    /*
-     * 3. Macro definitions (it's called "preamble")
-     */
-    emitPreamble(builder);
-
-    /*
-     * 4. Headers, structs, types, PSA-specific data types.
-     */
-    emitInternalStructures(builder);
-    emitTypes(builder);
-    emitGlobalHeadersMetadata(builder);
-
-    /*
-     * 5. BPF map definitions.
-     */
-    emitInstances(builder);
-
-    /*
-     * 6. Helper functions for ingress and egress program.
-     */
-    emitHelperFunctions(builder);
-
-    /*
-     * 7. BPF map initialization.
-     */
-    emitInitializer(builder);
-    builder->newline();
-
-    /*
-     * 8. XDP helper program.
-     */
-    xdp->emit(builder);
-
-    /*
-     * 9. TC Ingress program.
-     */
-    ingress->emit(builder);
-
-    /*
-     * 10. TC Egress program.
-     */
-    if (!egress->isEmpty()) {
-        // Do not generate TC Egress program if PSA egress pipeline is not used (empty).
-        egress->emit(builder);
-    }
-
-    builder->target->emitLicense(builder, ingress->license);
+void PSAEbpfGenerator::emitCRC32LookupTableTypes(CodeBuilder *builder) const {
+    builder->append("struct lookup_tbl_val ");
+    builder->blockStart();
+    builder->emitIndent();
+    builder->append("u32 table[2048]");
+    builder->endOfStatement(true);
+    builder->blockEnd(false);
+    builder->endOfStatement(true);
 }
 
-void PSAArchTC::emitInstances(CodeBuilder* builder) const {
-    builder->appendLine("REGISTER_START()");
-
-    if (options.xdp2tcMode == XDP2TC_CPUMAP) {
-        builder->target->emitTableDecl(builder, "xdp2tc_cpumap", TablePerCPUArray, "u32", "u16", 1);
-    }
-
-    emitPacketReplicationTables(builder);
-    emitPipelineInstances(builder);
-    emitCRC32LookupTableInstance(builder);
-    builder->appendLine("REGISTER_END()");
-    builder->newline();
-}
-void PSAArchTC::emitCRC32LookupTableInstance(CodeBuilder* builder) const {
+void PSAEbpfGenerator::emitCRC32LookupTableInstance(CodeBuilder *builder) const {
     builder->target->emitTableDecl(builder, cstring("crc_lookup_tbl"), TableArray, "u32",
                                    cstring("struct lookup_tbl_val"), 1);
 }
-void PSAEbpfGenerator::emitCRC32LookupTableInitializer(CodeBuilder* builder) const {
+
+void PSAEbpfGenerator::emitCRC32LookupTableInitializer(CodeBuilder *builder) const {
     cstring keyName = "lookup_tbl_key";
     cstring valueName = "lookup_tbl_value";
     cstring instanceName = "crc_lookup_tbl";
@@ -508,16 +423,205 @@ void PSAEbpfGenerator::emitCRC32LookupTableInitializer(CodeBuilder* builder) con
     builder->blockEnd(true);
 }
 
-void PSAArchTC::emitInitializerSection(CodeBuilder* builder) const {
+// =====================PSAArchTC=============================
+void PSAArchTC::emit(CodeBuilder *builder) const {
+    /**
+     * How the structure of a single C program for PSA should look like?
+     * 1. Automatically generated comment
+     * 2. Includes
+     * 3. Macro definitions (it's called "preamble")
+     * 4. Headers, structs, types, PSA-specific data types.
+     * 5. BPF map definitions.
+     * 6. BPF map initialization
+     * 7. XDP helper program.
+     * 8. Helper functions
+     * 9. TC Ingress program.
+     * 10. TC Egress program.
+     */
+
+    // 1. Automatically generated comment.
+    // Note we use inherited function from EBPFProgram.
+    xdp->emitGeneratedComment(builder);
+
+    /*
+     * 2. Includes.
+     */
+    builder->target->emitIncludes(builder);
+    emitPSAIncludes(builder);
+
+    /*
+     * 3. Macro definitions (it's called "preamble")
+     */
+    emitPreamble(builder);
+
+    /*
+     * 4. Headers, structs, types, PSA-specific data types.
+     */
+    emitInternalStructures(builder);
+    emitTypes(builder);
+    emitGlobalHeadersMetadata(builder);
+
+    /*
+     * 5. BPF map definitions.
+     */
+    emitInstances(builder);
+
+    /*
+     * 6. Helper functions for ingress and egress program.
+     */
+    emitHelperFunctions(builder);
+
+    /*
+     * 7. BPF map initialization.
+     */
+    emitInitializer(builder);
+    builder->newline();
+
+    /*
+     * 8. XDP helper program.
+     */
+    xdp->emit(builder);
+
+    /*
+     * 9. TC Ingress program.
+     */
+    ingress->emit(builder);
+
+    /*
+     * 10. TC Egress program.
+     */
+    if (!egress->isEmpty()) {
+        // Do not generate TC Egress program if PSA egress pipeline is not used (empty).
+        egress->emit(builder);
+    }
+
+    builder->target->emitLicense(builder, ingress->license);
+}
+
+void PSAArchTC::emitInstances(CodeBuilder *builder) const {
+    builder->appendLine("REGISTER_START()");
+
+    if (options.xdp2tcMode == XDP2TC_CPUMAP) {
+        builder->target->emitTableDecl(builder, "xdp2tc_cpumap", TablePerCPUArray, "u32", "u16", 1);
+    }
+
+    emitPacketReplicationTables(builder);
+    emitPipelineInstances(builder);
+    emitCRC32LookupTableInstance(builder);
+    builder->appendLine("REGISTER_END()");
+    builder->newline();
+}
+
+void PSAArchTC::emitInitializerSection(CodeBuilder *builder) const {
     builder->appendLine("SEC(\"classifier/map-initializer\")");
 }
 
+// =====================PSAArchXDP=============================
+void PSAArchXDP::emit(CodeBuilder *builder) const {
+    builder->target->emitIncludes(builder);
+    emitPSAIncludes(builder);
+
+    emitPreamble(builder);
+
+    emitInternalStructures(builder);
+    emitTypes(builder);
+    emitGlobalHeadersMetadata(builder);
+
+    emitXDP2TCInternalStructures(builder);
+
+    emitInstances(builder);
+
+    emitHelperFunctions(builder);
+
+    emitInitializer(builder);
+
+    ingress->emit(builder);
+
+    if (!egress->isEmpty()) {
+        egress->emit(builder);
+    }
+
+    builder->newline();
+
+    emitDummyProgram(builder);
+    builder->newline();
+
+    tcIngressForXDP->emit(builder);
+    builder->newline();
+
+    if (!tcEgressForXDP->isEmpty()) {
+        tcEgressForXDP->emit(builder);
+    }
+
+    builder->target->emitLicense(builder, ingress->license);
+}
+
+void PSAArchXDP::emitPreamble(CodeBuilder *builder) const {
+    PSAEbpfGenerator::emitPreamble(builder);
+    builder->appendFormat("#define DEVMAP_SIZE %u", egressDevmapSize);
+    builder->newline();
+    builder->newline();
+}
+
+void PSAArchXDP::emitInstances(CodeBuilder *builder) const {
+    builder->newline();
+
+    builder->appendLine("REGISTER_START()");
+    emitPacketReplicationTables(builder);
+    emitPipelineInstances(builder);
+
+    tcEgressForXDP->control->tables.insert(egress->control->tables.begin(),
+                                           egress->control->tables.end());
+
+    builder->target->emitTableDecl(builder, "xdp2tc_shared_map", TablePerCPUArray, "u32",
+                                   "struct xdp2tc_metadata", 1);
+
+    builder->target->emitTableDecl(builder, "tx_port", TableDevmap, "u32", "struct bpf_devmap_val",
+                                   egressDevmapSize);
+
+    emitCRC32LookupTableInstance(builder);
+
+    builder->appendLine("REGISTER_END()");
+    builder->newline();
+}
+
+void PSAArchXDP::emitInitializerSection(CodeBuilder *builder) const {
+    builder->appendLine("SEC(\"xdp/map-initializer\")");
+}
+
+void PSAArchXDP::emitXDP2TCInternalStructures(CodeBuilder *builder) const {
+    builder->appendFormat(
+        "struct xdp2tc_metadata {\n"
+        "    struct %s headers;\n"
+        "    struct psa_ingress_output_metadata_t ostd;\n"
+        "    __u32 packetOffsetInBits;\n"
+        "    __u16 pkt_ether_type;\n"
+        "} __attribute__((aligned(4)));",
+        tcIngressForXDP->parser->headerType->to<EBPFStructType>()->name);
+    builder->newline();
+}
+
+void PSAArchXDP::emitDummyProgram(CodeBuilder *builder) const {
+    // In some cases (like veth pair on some kernels) XDP program must be present on the both ends
+    // of the pair. This program, which passes all the packets to TC layer, can be used in such case
+    // on the second end.
+    builder->appendLine("SEC(\"xdp_redirect_dummy_sec\")");
+    builder->append("int xdp_redirect_dummy(struct xdp_md *skb)");
+    builder->spc();
+    builder->blockStart();
+    builder->emitIndent();
+
+    builder->appendLine("return XDP_PASS;");
+
+    builder->blockEnd(true);  // end of function
+}
+
 // =====================ConvertToEbpfPSA=============================
-const PSAEbpfGenerator* ConvertToEbpfPSA::build(const IR::ToplevelBlock* tlb) {
+const PSAEbpfGenerator *ConvertToEbpfPSA::build(const IR::ToplevelBlock *tlb) {
     /*
      * TYPES
      */
-    std::vector<EBPFType*> ebpfTypes;
+    std::vector<EBPFType *> ebpfTypes;
     for (auto d : tlb->getProgram()->objects) {
         if (d->is<IR::Type>() && !d->is<IR::IContainer>() && !d->is<IR::Type_Extern>() &&
             !d->is<IR::Type_Parser>() && !d->is<IR::Type_Control>() && !d->is<IR::Type_Typedef>() &&
@@ -558,28 +662,68 @@ const PSAEbpfGenerator* ConvertToEbpfPSA::build(const IR::ToplevelBlock* tlb) {
     auto egressDeparser = egress->getParameterValue("ed");
     BUG_CHECK(egressDeparser != nullptr, "No egress deparser block found");
 
-    auto xdp = new XDPHelpProgram(options);
+    if (!options.generateToXDP) {
+        auto xdp = new XDPHelpProgram(options);
 
-    auto ingress_pipeline_converter = new ConvertToEbpfPipeline(
-        "tc-ingress", TC_INGRESS, options, ingressParser->to<IR::ParserBlock>(),
-        ingressControl->to<IR::ControlBlock>(), ingressDeparser->to<IR::ControlBlock>(), refmap,
-        typemap);
-    ingress->apply(*ingress_pipeline_converter);
-    tlb->getProgram()->apply(*ingress_pipeline_converter);
-    auto tcIngress = ingress_pipeline_converter->getEbpfPipeline();
+        auto ingress_pipeline_converter = new ConvertToEbpfPipeline(
+            "tc-ingress", TC_INGRESS, options, ingressParser->to<IR::ParserBlock>(),
+            ingressControl->to<IR::ControlBlock>(), ingressDeparser->to<IR::ControlBlock>(), refmap,
+            typemap);
+        ingress->apply(*ingress_pipeline_converter);
+        tlb->getProgram()->apply(*ingress_pipeline_converter);
+        auto tcIngress = ingress_pipeline_converter->getEbpfPipeline();
 
-    auto egress_pipeline_converter = new ConvertToEbpfPipeline(
-        "tc-egress", TC_EGRESS, options, egressParser->to<IR::ParserBlock>(),
-        egressControl->to<IR::ControlBlock>(), egressDeparser->to<IR::ControlBlock>(), refmap,
-        typemap);
-    egress->apply(*egress_pipeline_converter);
-    tlb->getProgram()->apply(*egress_pipeline_converter);
-    auto tcEgress = egress_pipeline_converter->getEbpfPipeline();
+        auto egress_pipeline_converter = new ConvertToEbpfPipeline(
+            "tc-egress", TC_EGRESS, options, egressParser->to<IR::ParserBlock>(),
+            egressControl->to<IR::ControlBlock>(), egressDeparser->to<IR::ControlBlock>(), refmap,
+            typemap);
+        egress->apply(*egress_pipeline_converter);
+        tlb->getProgram()->apply(*egress_pipeline_converter);
+        auto tcEgress = egress_pipeline_converter->getEbpfPipeline();
 
-    return new PSAArchTC(options, ebpfTypes, xdp, tcIngress, tcEgress);
+        return new PSAArchTC(options, ebpfTypes, xdp, tcIngress, tcEgress);
+    } else {
+        auto ingress_pipeline_converter = new ConvertToEbpfPipeline(
+            "xdp-ingress", XDP_INGRESS, options, ingressParser->to<IR::ParserBlock>(),
+            ingressControl->to<IR::ControlBlock>(), ingressDeparser->to<IR::ControlBlock>(), refmap,
+            typemap);
+        ingress->apply(*ingress_pipeline_converter);
+        tlb->getProgram()->apply(*ingress_pipeline_converter);
+        auto xdpIngress = ingress_pipeline_converter->getEbpfPipeline();
+        BUG_CHECK(xdpIngress != nullptr, "Cannot create xdpIngress block.");
+
+        auto egress_pipeline_converter = new ConvertToEbpfPipeline(
+            "xdp-egress", XDP_EGRESS, options, egressParser->to<IR::ParserBlock>(),
+            egressControl->to<IR::ControlBlock>(), egressDeparser->to<IR::ControlBlock>(), refmap,
+            typemap);
+        egress->apply(*egress_pipeline_converter);
+        tlb->getProgram()->apply(*egress_pipeline_converter);
+        auto xdpEgress = egress_pipeline_converter->getEbpfPipeline();
+        BUG_CHECK(xdpEgress != nullptr, "Cannot create xdpEgress block.");
+
+        auto tc_trafficmanager_converter = new ConvertToEbpfPipeline(
+            "tc-ingress", TC_TRAFFIC_MANAGER, options, ingressParser->to<IR::ParserBlock>(),
+            ingressControl->to<IR::ControlBlock>(), ingressDeparser->to<IR::ControlBlock>(), refmap,
+            typemap);
+        ingress->apply(*tc_trafficmanager_converter);
+        auto tcTrafficManager = tc_trafficmanager_converter->getEbpfPipeline();
+        BUG_CHECK(tcTrafficManager != nullptr, "Cannot create tcTrafficManager block.");
+
+        auto tc_egress_pipeline_converter = new ConvertToEbpfPipeline(
+            "tc-egress", TC_EGRESS, options, egressParser->to<IR::ParserBlock>(),
+            egressControl->to<IR::ControlBlock>(), egressDeparser->to<IR::ControlBlock>(), refmap,
+            typemap);
+        egress->apply(*tc_egress_pipeline_converter);
+        tlb->getProgram()->apply(*tc_egress_pipeline_converter);
+        auto tcEgress = tc_egress_pipeline_converter->getEbpfPipeline();
+        BUG_CHECK(tcEgress != nullptr, "Cannot create TC Egress for XDP block.");
+
+        return new PSAArchXDP(options, ebpfTypes, xdpIngress, xdpEgress, tcTrafficManager,
+                              tcEgress);
+    }
 }
 
-const IR::Node* ConvertToEbpfPSA::preorder(IR::ToplevelBlock* tlb) {
+const IR::Node *ConvertToEbpfPSA::preorder(IR::ToplevelBlock *tlb) {
     ebpf_psa_arch = build(tlb);
     ebpf_psa_arch->ingress->program = tlb->getProgram();
     ebpf_psa_arch->egress->program = tlb->getProgram();
@@ -587,12 +731,18 @@ const IR::Node* ConvertToEbpfPSA::preorder(IR::ToplevelBlock* tlb) {
 }
 
 // =====================EbpfPipeline=============================
-bool ConvertToEbpfPipeline::preorder(const IR::PackageBlock* block) {
+bool ConvertToEbpfPipeline::preorder(const IR::PackageBlock *block) {
     (void)block;
     if (type == TC_INGRESS) {
         pipeline = new TCIngressPipeline(name, options, refmap, typemap);
     } else if (type == TC_EGRESS) {
         pipeline = new TCEgressPipeline(name, options, refmap, typemap);
+    } else if (type == XDP_INGRESS) {
+        pipeline = new XDPIngressPipeline(name, options, refmap, typemap);
+    } else if (type == XDP_EGRESS) {
+        pipeline = new XDPEgressPipeline(name, options, refmap, typemap);
+    } else if (type == TC_TRAFFIC_MANAGER) {
+        pipeline = new TCTrafficManagerForXDP(name, options, refmap, typemap);
     } else {
         ::error(ErrorType::ERR_INVALID, "unknown type of pipeline");
         return false;
@@ -620,14 +770,14 @@ bool ConvertToEbpfPipeline::preorder(const IR::PackageBlock* block) {
 }
 
 // =====================EBPFParser=============================
-bool ConvertToEBPFParserPSA::preorder(const IR::ParserBlock* prsr) {
+bool ConvertToEBPFParserPSA::preorder(const IR::ParserBlock *prsr) {
     auto pl = prsr->container->type->applyParams;
 
     parser = new EBPFPsaParser(program, prsr, typemap);
 
     // ingress parser
     unsigned numOfParams = 6;
-    if (type == TC_EGRESS) {
+    if (type == TC_EGRESS || type == XDP_EGRESS) {
         // egress parser
         numOfParams = 7;
     }
@@ -644,7 +794,10 @@ bool ConvertToEBPFParserPSA::preorder(const IR::ParserBlock* prsr) {
     parser->headers = *it;
     ++it;
     parser->user_metadata = *it;
-    auto resubmit_meta = *(it + 2);
+    ++it;
+    parser->inputMetadata = *it;
+    ++it;
+    auto resubmit_meta = *it;
 
     for (auto state : prsr->container->states) {
         auto ps = new EBPFParserState(state, parser);
@@ -662,7 +815,7 @@ bool ConvertToEBPFParserPSA::preorder(const IR::ParserBlock* prsr) {
     return true;
 }
 
-bool ConvertToEBPFParserPSA::preorder(const IR::P4ValueSet* pvs) {
+bool ConvertToEBPFParserPSA::preorder(const IR::P4ValueSet *pvs) {
     cstring extName = EBPFObject::externalName(pvs);
     auto instance = new EBPFValueSet(program, pvs, extName, parser->visitor);
     parser->valueSets.emplace(pvs->name.name, instance);
@@ -671,7 +824,7 @@ bool ConvertToEBPFParserPSA::preorder(const IR::P4ValueSet* pvs) {
 }
 
 // =====================EBPFControl=============================
-bool ConvertToEBPFControlPSA::preorder(const IR::ControlBlock* ctrl) {
+bool ConvertToEBPFControlPSA::preorder(const IR::ControlBlock *ctrl) {
     control = new EBPFControlPSA(program, ctrl, parserHeaders);
     program->control = control;
     program->to<EBPFPipeline>()->control = control;
@@ -689,7 +842,7 @@ bool ConvertToEBPFControlPSA::preorder(const IR::ControlBlock* ctrl) {
     auto codegen = new ControlBodyTranslatorPSA(control);
     codegen->substitute(control->headers, parserHeaders);
 
-    if (type != TC_EGRESS) {
+    if (type != TC_EGRESS && type != XDP_EGRESS) {
         codegen->useAsPointerVariable(control->outputStandardMetadata->name.name);
     }
 
@@ -707,13 +860,13 @@ bool ConvertToEBPFControlPSA::preorder(const IR::ControlBlock* ctrl) {
     return true;
 }
 
-bool ConvertToEBPFControlPSA::preorder(const IR::TableBlock* tblblk) {
-    EBPFTablePSA* table = new EBPFTablePSA(program, tblblk, control->codeGen);
+bool ConvertToEBPFControlPSA::preorder(const IR::TableBlock *tblblk) {
+    EBPFTablePSA *table = new EBPFTablePSA(program, tblblk, control->codeGen);
     control->tables.emplace(tblblk->container->name, table);
     return true;
 }
 
-bool ConvertToEBPFControlPSA::preorder(const IR::Member* m) {
+bool ConvertToEBPFControlPSA::preorder(const IR::Member *m) {
     // the condition covers both ingress and egress timestamp
     if (m->member.name.endsWith("timestamp")) {
         control->timestampIsUsed = true;
@@ -722,7 +875,7 @@ bool ConvertToEBPFControlPSA::preorder(const IR::Member* m) {
     return true;
 }
 
-bool ConvertToEBPFControlPSA::preorder(const IR::IfStatement* ifState) {
+bool ConvertToEBPFControlPSA::preorder(const IR::IfStatement *ifState) {
     if (ifState->condition->is<IR::Equ>()) {
         auto i = ifState->condition->to<IR::Equ>();
         if (i->right->toString().endsWith("timestamp") ||
@@ -733,8 +886,8 @@ bool ConvertToEBPFControlPSA::preorder(const IR::IfStatement* ifState) {
     return true;
 }
 
-bool ConvertToEBPFControlPSA::preorder(const IR::Declaration_Variable* decl) {
-    if (type == TC_INGRESS) {
+bool ConvertToEBPFControlPSA::preorder(const IR::Declaration_Variable *decl) {
+    if (type == TC_INGRESS || type == XDP_INGRESS) {
         if (decl->type->is<IR::Type_Name>() &&
             decl->type->to<IR::Type_Name>()->path->name.name == "psa_ingress_output_metadata_t") {
             control->codeGen->useAsPointerVariable(decl->name.name);
@@ -743,7 +896,7 @@ bool ConvertToEBPFControlPSA::preorder(const IR::Declaration_Variable* decl) {
     return true;
 }
 
-bool ConvertToEBPFControlPSA::preorder(const IR::ExternBlock* instance) {
+bool ConvertToEBPFControlPSA::preorder(const IR::ExternBlock *instance) {
     auto di = instance->node->to<IR::Declaration_Instance>();
     if (di == nullptr) return false;
     cstring name = EBPFObject::externalName(di);
@@ -781,11 +934,17 @@ bool ConvertToEBPFControlPSA::preorder(const IR::ExternBlock* instance) {
 }
 
 // =====================EBPFDeparser=============================
-bool ConvertToEBPFDeparserPSA::preorder(const IR::ControlBlock* ctrl) {
+bool ConvertToEBPFDeparserPSA::preorder(const IR::ControlBlock *ctrl) {
     if (pipelineType == TC_INGRESS) {
         deparser = new TCIngressDeparserPSA(program, ctrl, parserHeaders, istd);
     } else if (pipelineType == TC_EGRESS) {
         deparser = new TCEgressDeparserPSA(program, ctrl, parserHeaders, istd);
+    } else if (pipelineType == XDP_INGRESS) {
+        deparser = new XDPIngressDeparserPSA(program, ctrl, parserHeaders, istd);
+    } else if (pipelineType == XDP_EGRESS) {
+        deparser = new XDPEgressDeparserPSA(program, ctrl, parserHeaders, istd);
+    } else if (pipelineType == TC_TRAFFIC_MANAGER) {
+        deparser = new TCIngressDeparserForTrafficManagerPSA(program, ctrl, parserHeaders, istd);
     } else {
         BUG("undefined pipeline type, cannot build deparser");
     }
@@ -797,7 +956,7 @@ bool ConvertToEBPFDeparserPSA::preorder(const IR::ControlBlock* ctrl) {
     deparser->codeGen->substitute(deparser->headers, parserHeaders);
     deparser->codeGen->useAsPointerVariable(deparser->headers->name.name);
 
-    if (pipelineType == TC_INGRESS) {
+    if (pipelineType == TC_INGRESS || pipelineType == XDP_INGRESS) {
         deparser->codeGen->useAsPointerVariable(deparser->resubmit_meta->name.name);
         deparser->codeGen->useAsPointerVariable(deparser->user_metadata->name.name);
     }
@@ -807,13 +966,13 @@ bool ConvertToEBPFDeparserPSA::preorder(const IR::ControlBlock* ctrl) {
     return false;
 }
 
-bool ConvertToEBPFDeparserPSA::preorder(const IR::Declaration_Instance* di) {
+bool ConvertToEBPFDeparserPSA::preorder(const IR::Declaration_Instance *di) {
     if (auto typeSpec = di->type->to<IR::Type_Specialized>()) {
         auto baseType = typeSpec->baseType;
         auto typeName = baseType->to<IR::Type_Name>();
         auto digest = typeName->path->name.name;
         if (digest == "Digest") {
-            if (pipelineType == TC_EGRESS) {
+            if (pipelineType == TC_EGRESS || pipelineType == XDP_EGRESS) {
                 ::error(ErrorType::ERR_UNEXPECTED,
                         "Digests are only supported at ingress, got an instance at egress");
             }

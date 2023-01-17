@@ -20,7 +20,7 @@ namespace P4 {
 
 /// convert an expression into a string that uniqely identifies the lvalue referenced
 /// return null cstring if not a reference to a lvalue.
-static cstring predication_lvalue_name(const IR::Expression* exp) {
+static cstring predication_lvalue_name(const IR::Expression *exp) {
     if (auto p = exp->to<IR::PathExpression>()) return p->path->name;
     if (auto m = exp->to<IR::Member>()) {
         if (auto base = predication_lvalue_name(m->expr)) return base + "." + m->member;
@@ -41,17 +41,17 @@ static cstring predication_lvalue_name(const IR::Expression* exp) {
     return cstring();
 }
 
-const IR::Node* Predication::EmptyStatementRemover::postorder(IR::EmptyStatement*) {
+const IR::Node *Predication::EmptyStatementRemover::postorder(IR::EmptyStatement *) {
     return nullptr;
 }
 
-const IR::Node* Predication::EmptyStatementRemover::postorder(IR::BlockStatement* statement) {
+const IR::Node *Predication::EmptyStatementRemover::postorder(IR::BlockStatement *statement) {
     if (statement->components.empty()) return nullptr;
     return statement;
 }
 
 /// Allows nesting of Mux expressions
-const IR::Mux* Predication::ExpressionReplacer::preorder(IR::Mux* mux) {
+const IR::Mux *Predication::ExpressionReplacer::preorder(IR::Mux *mux) {
     ++currentNestingLevel;
     LOG1("Visiting Mux expression: " << *mux << " on level: " << currentNestingLevel);
     bool thenElsePass = traversalPath[currentNestingLevel - 1];
@@ -71,7 +71,7 @@ void Predication::ExpressionReplacer::setVisitingIndex(bool val) { visitingIndex
 
 /// Right side of the statement is emplaced into the appropriate part of
 /// the Mux expression, according to the IF/ELSE branch currently visited
-void Predication::ExpressionReplacer::emplaceExpression(IR::Mux* mux) {
+void Predication::ExpressionReplacer::emplaceExpression(IR::Mux *mux) {
     auto condition = conditions[conditions.size() - currentNestingLevel];
     bool thenElsePass = traversalPath[currentNestingLevel - 1];
     mux->e0 = condition;
@@ -84,7 +84,7 @@ void Predication::ExpressionReplacer::emplaceExpression(IR::Mux* mux) {
 
 /// Here "visit" is recursively called on nested Mux expressions,
 /// according to the current nesting level and also the structure of the 'mux' variable
-void Predication::ExpressionReplacer::visitBranch(IR::Mux* mux, bool then) {
+void Predication::ExpressionReplacer::visitBranch(IR::Mux *mux, bool then) {
     auto condition = conditions[conditions.size() - currentNestingLevel - 1];
     auto leftName = predication_lvalue_name(statement->left);
     auto thenExprName = predication_lvalue_name(mux->e1);
@@ -131,7 +131,7 @@ void Predication::ExpressionReplacer::visitBranch(IR::Mux* mux, bool then) {
     }
 }
 
-const IR::Expression* Predication::clone(const IR::Expression* expression) {
+const IR::Expression *Predication::clone(const IR::Expression *expression) {
     // Expressions often need to be cloned. This is necessary because
     // in the end different code will be generated for the different clones of
     // an expression. This is most obvious if one clone is on the LHS and one
@@ -141,7 +141,7 @@ const IR::Expression* Predication::clone(const IR::Expression* expression) {
     return expression->apply(cloner);
 }
 
-const IR::Node* Predication::clone(const IR::AssignmentStatement* statement) {
+const IR::Node *Predication::clone(const IR::AssignmentStatement *statement) {
     // Expressions often need to be cloned. This is necessary because
     // in the end different code will be generated for the different clones of
     // an expression.
@@ -151,13 +151,13 @@ const IR::Node* Predication::clone(const IR::AssignmentStatement* statement) {
 }
 
 /// expressionReplacer is applied here and the assignment is stored in liveAssigns vector
-const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
+const IR::Node *Predication::preorder(IR::AssignmentStatement *statement) {
     if (findContext<IR::P4Action>() == nullptr || ifNestingLevel == 0) {
         return statement;
     }
     LOG1("In preorder for statement: " << *statement);
-    const Context* ctxt = nullptr;
-    std::vector<const IR::Expression*> conditions;
+    const Context *ctxt = nullptr;
+    std::vector<const IR::Expression *> conditions;
     while (auto ifs = findContext<IR::IfStatement>(ctxt)) {
         conditions.push_back(ifs->condition);
     }
@@ -234,20 +234,20 @@ const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
     return new IR::EmptyStatement();
 }
 
-const IR::Node* Predication::preorder(IR::PathExpression* pathExpr) {
+const IR::Node *Predication::preorder(IR::PathExpression *pathExpr) {
     dependencies.push_back(predication_lvalue_name(pathExpr));
     return pathExpr;
 }
-const IR::Node* Predication::preorder(IR::Member* member) {
+const IR::Node *Predication::preorder(IR::Member *member) {
     visit(member->expr);
     dependencies.push_back(predication_lvalue_name(member));
     return member;
 }
-const IR::Node* Predication::preorder(IR::ArrayIndex* arrInd) {
+const IR::Node *Predication::preorder(IR::ArrayIndex *arrInd) {
     visit(arrInd->left);
     // Collect conditions from IF-ELSE blocks surrounding this ArrayIndex
-    const Context* ctxt = nullptr;
-    std::vector<const IR::Expression*> conditions;
+    const Context *ctxt = nullptr;
+    std::vector<const IR::Expression *> conditions;
     while (auto ifs = findContext<IR::IfStatement>(ctxt)) {
         conditions.push_back(ifs->condition);
     }
@@ -278,7 +278,7 @@ const IR::Node* Predication::preorder(IR::ArrayIndex* arrInd) {
     return arrInd;
 }
 
-const IR::Node* Predication::preorder(IR::IfStatement* statement) {
+const IR::Node *Predication::preorder(IR::IfStatement *statement) {
     if (findContext<IR::P4Action>() == nullptr) {
         return statement;
     }
@@ -334,12 +334,12 @@ const IR::Node* Predication::preorder(IR::IfStatement* statement) {
     return rv->apply(remover);
 }
 
-const IR::Node* Predication::preorder(IR::P4Action* action) {
+const IR::Node *Predication::preorder(IR::P4Action *action) {
     inside_action = true;
     return action;
 }
 
-const IR::Node* Predication::postorder(IR::P4Action* action) {
+const IR::Node *Predication::postorder(IR::P4Action *action) {
     inside_action = false;
     return action;
 }

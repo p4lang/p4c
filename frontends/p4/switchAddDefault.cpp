@@ -16,9 +16,11 @@ limitations under the License.
 
 #include "switchAddDefault.h"
 
+#include "lib/ordered_set.h"
+
 namespace P4 {
 
-void SwitchAddDefault::postorder(IR::SwitchStatement* sw) {
+void SwitchAddDefault::postorder(IR::SwitchStatement *sw) {
     ordered_set<cstring> case_tags;
     for (auto sc : sw->cases) {
         if (sc->label->is<IR::DefaultExpression>()) {

@@ -3,7 +3,7 @@
 #include "ir/ir.h"
 #include "options.h"
 
-bool ParseDpdkArchitecture::preorder(const IR::ToplevelBlock* block) {
+bool ParseDpdkArchitecture::preorder(const IR::ToplevelBlock *block) {
     /// Blocks are not in IR tree, use a custom visitor to traverse
     for (auto it : block->constantValue) {
         if (it.second->is<IR::Block>()) visit(it.second->getNode());
@@ -11,7 +11,7 @@ bool ParseDpdkArchitecture::preorder(const IR::ToplevelBlock* block) {
     return false;
 }
 
-void ParseDpdkArchitecture::parse_pna_block(const IR::PackageBlock* block) {
+void ParseDpdkArchitecture::parse_pna_block(const IR::PackageBlock *block) {
     structure->p4arch = "pna";
     auto p = block->findParameterValue("main_parser");
     if (p == nullptr) {
@@ -33,7 +33,7 @@ void ParseDpdkArchitecture::parse_pna_block(const IR::PackageBlock* block) {
     structure->non_pipeline_controls.emplace(deparser->container->name);
 }
 
-void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock* block) {
+void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
     structure->p4arch = "psa";
     auto pkg = block->findParameterValue("ingress");
     if (pkg == nullptr) {
@@ -99,8 +99,8 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock* block) {
     }
 }
 
-bool ParseDpdkArchitecture::preorder(const IR::PackageBlock* block) {
-    auto& options = DPDK::DpdkContext::get().options();
+bool ParseDpdkArchitecture::preorder(const IR::PackageBlock *block) {
+    auto &options = DPDK::DpdkContext::get().options();
     if (options.arch == "psa" ||
         block->instanceType->to<IR::Type_Package>()->name == "PSA_Switch") {
         parse_psa_block(block);
@@ -113,7 +113,7 @@ bool ParseDpdkArchitecture::preorder(const IR::PackageBlock* block) {
     return false;
 }
 
-bool InspectDpdkProgram::isHeaders(const IR::Type_StructLike* st) {
+bool InspectDpdkProgram::isHeaders(const IR::Type_StructLike *st) {
     bool result = false;
     for (auto f : st->fields) {
         if (f->type->is<IR::Type_Header>() || f->type->is<IR::Type_Stack>()) {
@@ -123,7 +123,7 @@ bool InspectDpdkProgram::isHeaders(const IR::Type_StructLike* st) {
     return result;
 }
 
-void InspectDpdkProgram::addHeaderType(const IR::Type_StructLike* st) {
+void InspectDpdkProgram::addHeaderType(const IR::Type_StructLike *st) {
     LOG5("In addHeaderType with struct " << st->toString());
     if (st->is<IR::Type_HeaderUnion>()) {
         LOG5("Struct is Type_HeaderUnion");
@@ -144,7 +144,7 @@ void InspectDpdkProgram::addHeaderType(const IR::Type_StructLike* st) {
     }
 }
 
-void InspectDpdkProgram::addHeaderInstance(const IR::Type_StructLike* st, cstring name) {
+void InspectDpdkProgram::addHeaderInstance(const IR::Type_StructLike *st, cstring name) {
     auto inst = new IR::Declaration_Variable(name, st);
     if (st->is<IR::Type_Header>())
         structure->headers.emplace(name, inst);
@@ -154,7 +154,7 @@ void InspectDpdkProgram::addHeaderInstance(const IR::Type_StructLike* st, cstrin
         structure->header_unions.emplace(name, inst);
 }
 
-void InspectDpdkProgram::addTypesAndInstances(const IR::Type_StructLike* type, bool isHeader) {
+void InspectDpdkProgram::addTypesAndInstances(const IR::Type_StructLike *type, bool isHeader) {
     LOG5("Adding type " << type->toString() << " and isHeader " << isHeader);
     for (auto f : type->fields) {
         LOG5("Iterating through field " << f->toString());
@@ -246,7 +246,7 @@ bool InspectDpdkProgram::isStandardMetadata(cstring ptName) {
             !strcmp(ptName, "psa_egress_output_metadata_t"));
 }
 
-bool InspectDpdkProgram::preorder(const IR::Declaration_Variable* dv) {
+bool InspectDpdkProgram::preorder(const IR::Declaration_Variable *dv) {
     auto ft = typeMap->getType(dv->getNode(), true);
     cstring scalarsName = refMap->newName("scalars");
 
@@ -264,7 +264,7 @@ bool InspectDpdkProgram::preorder(const IR::Declaration_Variable* dv) {
 }
 
 // This visitor only visits the parameter in the statement from architecture.
-bool InspectDpdkProgram::preorder(const IR::Parameter* param) {
+bool InspectDpdkProgram::preorder(const IR::Parameter *param) {
     auto ft = typeMap->getType(param->getNode(), true);
     LOG3("add param " << ft);
     // only convert parameters that are IR::Type_StructLike
@@ -291,7 +291,7 @@ bool InspectDpdkProgram::preorder(const IR::Parameter* param) {
     return false;
 }
 
-bool InspectDpdkProgram::preorder(const IR::P4Action* action) {
+bool InspectDpdkProgram::preorder(const IR::P4Action *action) {
     structure->actions.emplace(action->name, action);
     return false;
 }

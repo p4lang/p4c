@@ -41,7 +41,7 @@ parser p(packet_in packet, out O o) {
         bb = bb && (b == 0);
 
         a = (E1) b; // OK
-        a = (E1)(E1.e1 + 1); // Final explicit casting makes the assinment legal
+        a = (E1)(E1.e1 + 1); // Final explicit casting makes the assignment legal
         a = (E1)(E2.e1 + E2.e2); //  Final explicit casting makes the assignment legal
 
         packet.extract(o.b);

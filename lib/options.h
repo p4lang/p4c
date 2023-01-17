@@ -48,37 +48,37 @@ class Options {
     };
 
     // return true if processing is successful
-    typedef std::function<bool(const char* optarg)> OptionProcessor;
+    typedef std::function<bool(const char *optarg)> OptionProcessor;
 
  protected:
     struct Option {
         cstring option;
-        const char* argName;  // nullptr if argument is not required
-        const char* description;
+        const char *argName;  // nullptr if argument is not required
+        const char *description;
         OptionProcessor processor;
         OptionFlags flags;
     };
-    const char* binaryName;
+    const char *binaryName;
     cstring message;
     // Build date and compile command required in couple runtime files
     cstring compileCommand;
     cstring buildDate;
-    std::ostream* outStream = &std::cerr;
+    std::ostream *outStream = &std::cerr;
 
-    std::map<cstring, const Option*> options;
+    std::map<cstring, const Option *> options;
     std::vector<cstring> optionOrder;
-    std::vector<const char*> additionalUsage;
-    std::vector<const char*> remainingOptions;  // produced as output
+    std::vector<const char *> additionalUsage;
+    std::vector<const char *> remainingOptions;  // produced as output
     // if true unknown options are collected in remainingOptions
     bool collectUnknownOptions = false;
 
-    void setOutStream(std::ostream* out) { outStream = out; }
-    void registerUsage(const char* msg) { additionalUsage.push_back(msg); }
-    void registerOption(const char* option,         // option to register, e.g., -c or --version
-                        const char* argName,        // name of option argument;
+    void setOutStream(std::ostream *out) { outStream = out; }
+    void registerUsage(const char *msg) { additionalUsage.push_back(msg); }
+    void registerOption(const char *option,         // option to register, e.g., -c or --version
+                        const char *argName,        // name of option argument;
                                                     // nullptr if no argument expected
                         OptionProcessor processor,  // function to execute when option matches
-                        const char* description,    // option help message
+                        const char *description,    // option help message
                         OptionFlags flags = OptionFlags::Default);  // additional flags
 
     explicit Options(cstring message) : binaryName(nullptr), message(message), compileCommand("") {}
@@ -92,9 +92,9 @@ class Options {
      *
      * @return 'nullptr' if an error is signaled.
      */
-    virtual std::vector<const char*>* process(int argc, char* const argv[]);
+    virtual std::vector<const char *> *process(int argc, char *const argv[]);
 
-    virtual const char* getIncludePath() = 0;
+    virtual const char *getIncludePath() = 0;
     cstring getCompileCommand() { return compileCommand; }
     cstring getBuildDate() { return buildDate; }
     cstring getBinaryName() { return cstring(binaryName); }

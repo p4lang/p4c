@@ -21,7 +21,7 @@ limitations under the License.
 
 namespace P4 {
 
-Visitor::profile_t Evaluator::init_apply(const IR::Node* node) {
+Visitor::profile_t Evaluator::init_apply(const IR::Node *node) {
     BUG_CHECK(node->is<IR::P4Program>(), "Evaluation should be invoked on a program, not a %1%",
               node);
     // In fact, some passes are intentionally run with stale maps...
@@ -30,17 +30,17 @@ Visitor::profile_t Evaluator::init_apply(const IR::Node* node) {
     return Inspector::init_apply(node);
 }
 
-IR::Block* Evaluator::currentBlock() const {
+IR::Block *Evaluator::currentBlock() const {
     BUG_CHECK(!blockStack.empty(), "Empty stack");
     return blockStack.back();
 }
 
-void Evaluator::pushBlock(IR::Block* block) {
+void Evaluator::pushBlock(IR::Block *block) {
     LOG2("Set current block to " << dbp(block));
     blockStack.push_back(block);
 }
 
-void Evaluator::popBlock(IR::Block* block) {
+void Evaluator::popBlock(IR::Block *block) {
     LOG2("Remove current block " << dbp(block));
     BUG_CHECK(!blockStack.empty(), "Empty stack");
     BUG_CHECK(blockStack.back() == block, "%1%: incorrect block popped from stack: %2%", block,
@@ -48,23 +48,23 @@ void Evaluator::popBlock(IR::Block* block) {
     blockStack.pop_back();
 }
 
-void Evaluator::setValue(const IR::Node* node, const IR::CompileTimeValue* constant) {
+void Evaluator::setValue(const IR::Node *node, const IR::CompileTimeValue *constant) {
     CHECK_NULL(node);
     auto block = currentBlock();
     LOG3("Set " << dbp(node) << " to " << dbp(constant) << " in " << dbp(block));
     block->setValue(node, constant);
 }
 
-bool Evaluator::hasValue(const IR::Node* node) const {
+bool Evaluator::hasValue(const IR::Node *node) const {
     CHECK_NULL(node);
     auto block = currentBlock();
     return block->hasValue(node) || toplevelBlock->hasValue(node);
 }
 
-const IR::CompileTimeValue* Evaluator::getValue(const IR::Node* node) const {
+const IR::CompileTimeValue *Evaluator::getValue(const IR::Node *node) const {
     CHECK_NULL(node);
     auto block = currentBlock();
-    const IR::CompileTimeValue* result = nullptr;
+    const IR::CompileTimeValue *result = nullptr;
 
     if (block->hasValue(node)) {
         result = block->getValue(node);
@@ -79,7 +79,7 @@ const IR::CompileTimeValue* Evaluator::getValue(const IR::Node* node) const {
 
 ////////////////////////////// visitor methods ////////////////////////////////////
 
-bool Evaluator::preorder(const IR::P4Program* program) {
+bool Evaluator::preorder(const IR::P4Program *program) {
     LOG2("Evaluating " << dbp(program));
     toplevelBlock = new IR::ToplevelBlock(program->srcInfo, program);
 
@@ -97,7 +97,7 @@ bool Evaluator::preorder(const IR::P4Program* program) {
     return false;
 }
 
-bool Evaluator::preorder(const IR::Declaration_Constant* decl) {
+bool Evaluator::preorder(const IR::Declaration_Constant *decl) {
     LOG2("Evaluating " << dbp(decl));
     visit(decl->initializer);
     auto value = getValue(decl->initializer);
@@ -105,12 +105,12 @@ bool Evaluator::preorder(const IR::Declaration_Constant* decl) {
     return false;
 }
 
-std::vector<const IR::CompileTimeValue*>* Evaluator::evaluateArguments(
-    const IR::ParameterList* parameters, const IR::Vector<IR::Argument>* arguments,
-    IR::Block* context) {
+std::vector<const IR::CompileTimeValue *> *Evaluator::evaluateArguments(
+    const IR::ParameterList *parameters, const IR::Vector<IR::Argument> *arguments,
+    IR::Block *context) {
     LOG2("Evaluating arguments in " << dbp(context));
     P4::DoConstantFolding cf(refMap, nullptr);
-    auto values = new std::vector<const IR::CompileTimeValue*>();
+    auto values = new std::vector<const IR::CompileTimeValue *>();
     pushBlock(context);
 
     ParameterSubstitution substitution;
@@ -141,15 +141,15 @@ std::vector<const IR::CompileTimeValue*>* Evaluator::evaluateArguments(
     return values;
 }
 
-const IR::Block* Evaluator::processConstructor(
-    const IR::Node* node,  // Node that invokes constructor:
+const IR::Block *Evaluator::processConstructor(
+    const IR::Node *node,  // Node that invokes constructor:
                            // could be a Declaration_Instance or a ConstructorCallExpression.
-    const IR::Type* type,  // Type that appears in the program that is instantiated.
-    const IR::Type* instanceType,                 // Actual canonical type of generated instance.
-    const IR::Vector<IR::Argument>* arguments) {  // Constructor arguments
+    const IR::Type *type,  // Type that appears in the program that is instantiated.
+    const IR::Type *instanceType,                 // Actual canonical type of generated instance.
+    const IR::Vector<IR::Argument> *arguments) {  // Constructor arguments
     LOG2("Evaluating constructor " << dbp(type));
     if (type->is<IR::Type_Specialized>()) type = type->to<IR::Type_Specialized>()->baseType;
-    const IR::IDeclaration* decl;
+    const IR::IDeclaration *decl;
     if (type->is<IR::Type_Name>()) {
         auto tn = type->to<IR::Type_Name>();
         decl = refMap->getDeclaration(tn->path, true);
@@ -213,10 +213,10 @@ const IR::Block* Evaluator::processConstructor(
     return nullptr;
 }
 
-bool Evaluator::preorder(const IR::Member* expression) {
+bool Evaluator::preorder(const IR::Member *expression) {
     LOG2("Evaluating " << dbp(expression));
     auto type = typeMap->getType(expression->expr, true);
-    const IR::IDeclaration* decl = nullptr;
+    const IR::IDeclaration *decl = nullptr;
     if (type->is<IR::Type_Type>()) type = type->to<IR::Type_Type>()->type;
     if (type->is<IR::IGeneralNamespace>()) {
         auto ns = type->to<IR::IGeneralNamespace>();
@@ -236,7 +236,7 @@ bool Evaluator::preorder(const IR::Member* expression) {
     return false;
 }
 
-bool Evaluator::preorder(const IR::PathExpression* expression) {
+bool Evaluator::preorder(const IR::PathExpression *expression) {
     LOG2("Evaluating " << dbp(expression));
     auto decl = refMap->getDeclaration(expression->path, true);
     if (hasValue(decl->getNode())) {
@@ -246,7 +246,7 @@ bool Evaluator::preorder(const IR::PathExpression* expression) {
     return false;
 }
 
-bool Evaluator::preorder(const IR::Declaration_Instance* inst) {
+bool Evaluator::preorder(const IR::Declaration_Instance *inst) {
     LOG2("Evaluating " << dbp(inst));
     auto type = typeMap->getType(inst, true);
     auto block = processConstructor(inst, inst->type, type, inst->arguments);
@@ -254,7 +254,7 @@ bool Evaluator::preorder(const IR::Declaration_Instance* inst) {
     return false;
 }
 
-bool Evaluator::preorder(const IR::ConstructorCallExpression* expr) {
+bool Evaluator::preorder(const IR::ConstructorCallExpression *expr) {
     LOG2("Evaluating " << dbp(expr));
     auto type = typeMap->getType(expr, true);
     auto block = processConstructor(expr, expr->constructedType, type, expr->arguments);
@@ -262,7 +262,7 @@ bool Evaluator::preorder(const IR::ConstructorCallExpression* expr) {
     return false;
 }
 
-bool Evaluator::preorder(const IR::MethodCallExpression* expr) {
+bool Evaluator::preorder(const IR::MethodCallExpression *expr) {
     // Experimental: extern function or method call with constant arguments that
     // returns an extern instance as a factory method
     LOG2("Evaluating " << dbp(expr));
@@ -270,7 +270,7 @@ bool Evaluator::preorder(const IR::MethodCallExpression* expr) {
     return false;
 }
 
-bool Evaluator::preorder(const IR::P4Table* table) {
+bool Evaluator::preorder(const IR::P4Table *table) {
     LOG2("Evaluating " << dbp(table));
     auto block = new IR::TableBlock(table->srcInfo, table, table);
     setValue(table, block);
@@ -280,7 +280,7 @@ bool Evaluator::preorder(const IR::P4Table* table) {
     return false;
 }
 
-bool Evaluator::preorder(const IR::Property* prop) {
+bool Evaluator::preorder(const IR::Property *prop) {
     LOG2("Evaluating " << dbp(prop));
     visit(prop->value);
     if (hasValue(prop->value)) {
@@ -290,7 +290,7 @@ bool Evaluator::preorder(const IR::Property* prop) {
     return false;
 }
 
-bool Evaluator::preorder(const IR::ListExpression* list) {
+bool Evaluator::preorder(const IR::ListExpression *list) {
     LOG2("Evaluating " << list);
     visit(list->components);
     IR::Vector<IR::Node> comp;
@@ -306,7 +306,7 @@ bool Evaluator::preorder(const IR::ListExpression* list) {
     return false;
 }
 
-bool Evaluator::preorder(const IR::P4ListExpression* list) {
+bool Evaluator::preorder(const IR::P4ListExpression *list) {
     LOG2("Evaluating " << list);
     visit(list->components);
     IR::Vector<IR::Node> comp;
@@ -322,7 +322,7 @@ bool Evaluator::preorder(const IR::P4ListExpression* list) {
     return false;
 }
 
-bool Evaluator::preorder(const IR::StructExpression* se) {
+bool Evaluator::preorder(const IR::StructExpression *se) {
     LOG2("Evaluating " << se);
     visit(se->components);
     IR::Vector<IR::Node> comp;
@@ -340,7 +340,7 @@ bool Evaluator::preorder(const IR::StructExpression* se) {
 
 //////////////////////////////////////
 
-EvaluatorPass::EvaluatorPass(ReferenceMap* refMap, TypeMap* typeMap) {
+EvaluatorPass::EvaluatorPass(ReferenceMap *refMap, TypeMap *typeMap) {
     setName("EvaluatorPass");
     evaluator = new P4::Evaluator(refMap, typeMap);
     passes.emplace_back(new P4::TypeChecking(refMap, typeMap));

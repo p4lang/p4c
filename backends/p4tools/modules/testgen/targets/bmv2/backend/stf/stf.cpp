@@ -43,20 +43,7 @@ STF::STF(cstring testName, boost::optional<unsigned int> seed = boost::none) : T
     cstring testNameOnly(testFile.stem().c_str());
 }
 
-inja::json STF::getTrace(const TestSpec* testSpec) {
-    inja::json traceList = inja::json::array();
-    const auto* traces = testSpec->getTraces();
-    if ((traces != nullptr) && !traces->empty()) {
-        for (const auto& trace : *traces) {
-            std::stringstream ss;
-            ss << *trace;
-            traceList.push_back(ss.str());
-        }
-    }
-    return traceList;
-}
-
-inja::json STF::getControlPlane(const TestSpec* testSpec) {
+inja::json STF::getControlPlane(const TestSpec *testSpec) {
     inja::json controlPlaneJson = inja::json::object();
 
     // Map of actionProfiles and actionSelectors for easy reference.
@@ -66,17 +53,17 @@ inja::json STF::getControlPlane(const TestSpec* testSpec) {
     if (!tables.empty()) {
         controlPlaneJson["tables"] = inja::json::array();
     }
-    for (const auto& testObject : tables) {
+    for (const auto &testObject : tables) {
         inja::json tblJson;
         tblJson["table_name"] = testObject.first.c_str();
-        const auto* const tblConfig = testObject.second->checkedTo<TableConfig>();
-        const auto* tblRules = tblConfig->getRules();
+        const auto *const tblConfig = testObject.second->checkedTo<TableConfig>();
+        const auto *tblRules = tblConfig->getRules();
         tblJson["rules"] = inja::json::array();
-        for (const auto& tblRule : *tblRules) {
+        for (const auto &tblRule : *tblRules) {
             inja::json rule;
-            const auto* matches = tblRule.getMatches();
-            const auto* actionCall = tblRule.getActionCall();
-            const auto* actionArgs = actionCall->getArgs();
+            const auto *matches = tblRule.getMatches();
+            const auto *actionCall = tblRule.getActionCall();
+            const auto *actionArgs = actionCall->getArgs();
             rule["action_name"] = actionCall->getActionName().c_str();
             auto j = getControlPlaneForTable(*matches, *actionArgs);
             rule["rules"] = std::move(j);
@@ -101,40 +88,40 @@ inja::json STF::getControlPlane(const TestSpec* testSpec) {
     return controlPlaneJson;
 }
 
-inja::json STF::getControlPlaneForTable(const std::map<cstring, const FieldMatch>& matches,
-                                        const std::vector<ActionArg>& args) {
+inja::json STF::getControlPlaneForTable(const std::map<cstring, const FieldMatch> &matches,
+                                        const std::vector<ActionArg> &args) {
     inja::json rulesJson;
 
     rulesJson["matches"] = inja::json::array();
     rulesJson["act_args"] = inja::json::array();
     rulesJson["needs_priority"] = false;
 
-    for (const auto& match : matches) {
+    for (const auto &match : matches) {
         const auto fieldName = match.first;
-        const auto& fieldMatch = match.second;
+        const auto &fieldMatch = match.second;
 
         // Iterate over the match fields and segregate them.
         struct GetRange : public boost::static_visitor<void> {
             cstring fieldName;
-            inja::json& rulesJson;
+            inja::json &rulesJson;
 
-            GetRange(inja::json& rulesJson, cstring fieldName)
+            GetRange(inja::json &rulesJson, cstring fieldName)
                 : fieldName(fieldName), rulesJson(rulesJson) {}
 
-            void operator()(const Exact& elem) const {
+            void operator()(const Exact &elem) const {
                 inja::json j;
                 j["field_name"] = fieldName;
                 j["value"] = formatHexExpr(elem.getEvaluatedValue());
                 rulesJson["matches"].push_back(j);
             }
-            void operator()(const Range& /*elem*/) const {
+            void operator()(const Range & /*elem*/) const {
                 TESTGEN_UNIMPLEMENTED("Match type range not implemented.");
             }
-            void operator()(const Ternary& elem) const {
+            void operator()(const Ternary &elem) const {
                 inja::json j;
                 j["field_name"] = fieldName;
-                const auto* dataValue = elem.getEvaluatedValue();
-                const auto* maskField = elem.getEvaluatedMask();
+                const auto *dataValue = elem.getEvaluatedValue();
+                const auto *maskField = elem.getEvaluatedMask();
                 BUG_CHECK(dataValue->type->width_bits() == maskField->type->width_bits(),
                           "Data value and its mask should have the same bit width.");
                 // Using the width from mask - should be same as data
@@ -153,14 +140,14 @@ inja::json STF::getControlPlaneForTable(const std::map<cstring, const FieldMatch
                 // If the rule has a ternary match we need to add the priority.
                 rulesJson["needs_priority"] = true;
             }
-            void operator()(const LPM& elem) const {
+            void operator()(const LPM &elem) const {
                 inja::json j;
                 j["field_name"] = fieldName;
-                const auto* dataValue = elem.getEvaluatedValue();
+                const auto *dataValue = elem.getEvaluatedValue();
                 auto prefixLen = elem.getEvaluatedPrefixLength()->asInt();
                 auto fieldWidth = dataValue->type->width_bits();
                 auto maxVal = IR::getMaxBvVal(prefixLen);
-                const auto* maskField =
+                const auto *maskField =
                     IR::getConstant(dataValue->type, maxVal << (fieldWidth - prefixLen));
                 BUG_CHECK(dataValue->type->width_bits() == maskField->type->width_bits(),
                           "Data value and its mask should have the same bit width.");
@@ -184,7 +171,7 @@ inja::json STF::getControlPlaneForTable(const std::map<cstring, const FieldMatch
         boost::apply_visitor(GetRange(rulesJson, fieldName), fieldMatch);
     }
 
-    for (const auto& actArg : args) {
+    for (const auto &actArg : args) {
         inja::json j;
         j["param"] = actArg.getActionParamName().c_str();
         j["value"] = formatHexExpr(actArg.getEvaluatedValue());
@@ -194,9 +181,9 @@ inja::json STF::getControlPlaneForTable(const std::map<cstring, const FieldMatch
     return rulesJson;
 }
 
-inja::json STF::getSend(const TestSpec* testSpec) {
-    const auto* iPacket = testSpec->getIngressPacket();
-    const auto* payload = iPacket->getEvaluatedPayload();
+inja::json STF::getSend(const TestSpec *testSpec) {
+    const auto *iPacket = testSpec->getIngressPacket();
+    const auto *payload = iPacket->getEvaluatedPayload();
     inja::json sendJson;
     sendJson["ig_port"] = iPacket->getPort();
     auto dataStr = formatHexExpr(payload, false, true, false);
@@ -205,13 +192,13 @@ inja::json STF::getSend(const TestSpec* testSpec) {
     return sendJson;
 }
 
-inja::json STF::getVerify(const TestSpec* testSpec) {
+inja::json STF::getVerify(const TestSpec *testSpec) {
     inja::json verifyData = inja::json::object();
     if (testSpec->getEgressPacket() != boost::none) {
-        const auto& packet = **testSpec->getEgressPacket();
+        const auto &packet = **testSpec->getEgressPacket();
         verifyData["eg_port"] = packet.getPort();
-        const auto* payload = packet.getEvaluatedPayload();
-        const auto* payloadMask = packet.getEvaluatedPayloadMask();
+        const auto *payload = packet.getEvaluatedPayload();
+        const auto *payloadMask = packet.getEvaluatedPayloadMask();
         auto dataStr = formatHexExpr(payload, false, true, false);
         if (payloadMask != nullptr) {
             // If a mask is present, construct the packet data  with wildcard `*` where there are
@@ -235,11 +222,11 @@ inja::json STF::getVerify(const TestSpec* testSpec) {
     return verifyData;
 }
 
-inja::json::array_t STF::getClone(const std::map<cstring, const TestObject*>& cloneInfos) {
+inja::json::array_t STF::getClone(const std::map<cstring, const TestObject *> &cloneInfos) {
     auto cloneJson = inja::json::array_t();
     for (auto cloneInfoTuple : cloneInfos) {
         inja::json cloneInfoJson;
-        const auto* cloneInfo = cloneInfoTuple.second->checkedTo<Bmv2_CloneInfo>();
+        const auto *cloneInfo = cloneInfoTuple.second->checkedTo<Bmv2_CloneInfo>();
         cloneInfoJson["session_id"] = cloneInfo->getEvaluatedSessionId()->asUint64();
         cloneInfoJson["clone_port"] = cloneInfo->getEvaluatedClonePort()->asInt();
         cloneInfoJson["cloned"] = cloneInfo->isClonedPacket();
@@ -250,7 +237,7 @@ inja::json::array_t STF::getClone(const std::map<cstring, const TestObject*>& cl
 
 static std::string getTestCase() {
     static std::string TEST_CASE(
-        R"""(# p4testgen seed: '{{ default(seed, '"none"') }}'
+        R"""(# p4testgen seed: {{ default(seed, "none") }}
 # Date generated: {{timestamp}}
 ## if length(selected_branches) > 0
     # {{selected_branches}}
@@ -302,8 +289,8 @@ expect {{verify.eg_port}} {{verify.exp_pkt}}$
     return TEST_CASE;
 }
 
-void STF::emitTestcase(const TestSpec* testSpec, cstring selectedBranches, size_t testId,
-                       const std::string& testCase, float currentCoverage) {
+void STF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
+                       const std::string &testCase, float currentCoverage) {
     inja::json dataJson;
     if (selectedBranches != nullptr) {
         dataJson["selected_branches"] = selectedBranches.c_str();
@@ -336,7 +323,7 @@ void STF::emitTestcase(const TestSpec* testSpec, cstring selectedBranches, size_
     stfFile.flush();
 }
 
-void STF::outputTest(const TestSpec* testSpec, cstring selectedBranches, size_t testIdx,
+void STF::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testIdx,
                      float currentCoverage) {
     auto incrementedTestName = testName + "_" + std::to_string(testIdx);
 

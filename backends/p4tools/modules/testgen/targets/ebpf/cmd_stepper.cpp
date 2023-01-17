@@ -29,51 +29,51 @@ namespace P4Testgen {
 
 namespace EBPF {
 
-EBPFCmdStepper::EBPFCmdStepper(ExecutionState& state, AbstractSolver& solver,
-                               const ProgramInfo& programInfo)
+EBPFCmdStepper::EBPFCmdStepper(ExecutionState &state, AbstractSolver &solver,
+                               const ProgramInfo &programInfo)
     : CmdStepper(state, solver, programInfo) {}
 
-const EBPFProgramInfo& EBPFCmdStepper::getProgramInfo() const {
+const EBPFProgramInfo &EBPFCmdStepper::getProgramInfo() const {
     return *CmdStepper::getProgramInfo().to<EBPFProgramInfo>();
 }
 
-void EBPFCmdStepper::initializeTargetEnvironment(ExecutionState* nextState) const {
+void EBPFCmdStepper::initializeTargetEnvironment(ExecutionState *nextState) const {
     auto programInfo = getProgramInfo();
-    const auto* archSpec = TestgenTarget::getArchSpec();
-    const auto* programmableBlocks = programInfo.getProgrammableBlocks();
+    const auto *archSpec = TestgenTarget::getArchSpec();
+    const auto *programmableBlocks = programInfo.getProgrammableBlocks();
 
     // eBPF initializes all metadata to zero. To avoid unnecessary taint, we retrieve the type and
     // initialize all the relevant metadata variables to zero.
     size_t blockIdx = 0;
-    for (const auto& blockTuple : *programmableBlocks) {
-        const auto* typeDecl = blockTuple.second;
-        const auto* archMember = archSpec->getArchMember(blockIdx);
+    for (const auto &blockTuple : *programmableBlocks) {
+        const auto *typeDecl = blockTuple.second;
+        const auto *archMember = archSpec->getArchMember(blockIdx);
         initializeBlockParams(typeDecl, &archMember->blockParams, nextState);
         blockIdx++;
     }
 
-    const auto* nineBitType = IR::getBitType(9);
+    const auto *nineBitType = IR::getBitType(9);
     // Set the input ingress port to 0.
     nextState->set(programInfo.getTargetInputPortVar(), IR::getConstant(nineBitType, 0));
     // eBPF implicitly sets the output port to 0. In reality, there is no output port.
     nextState->set(programInfo.getTargetOutputPortVar(), IR::getConstant(nineBitType, 0));
     // We need to explicitly set the parser error. There is no eBPF metadata.
-    const auto* errVar = new IR::Member(new IR::PathExpression("*"), "parser_err");
+    const auto *errVar = new IR::Member(new IR::PathExpression("*"), "parser_err");
     nextState->setParserErrorLabel(errVar);
 }
 
-boost::optional<const Constraint*> EBPFCmdStepper::startParser_impl(
-    const IR::P4Parser* /*parser*/, ExecutionState* /*nextState*/) const {
+boost::optional<const Constraint *> EBPFCmdStepper::startParser_impl(
+    const IR::P4Parser * /*parser*/, ExecutionState * /*nextState*/) const {
     return boost::none;
 }
 
 std::map<Continuation::Exception, Continuation> EBPFCmdStepper::getExceptionHandlers(
-    const IR::P4Parser* /*parser*/, Continuation::Body /*normalContinuation*/,
-    const ExecutionState* /*nextState*/) const {
+    const IR::P4Parser * /*parser*/, Continuation::Body /*normalContinuation*/,
+    const ExecutionState * /*nextState*/) const {
     std::map<Continuation::Exception, Continuation> result;
     auto programInfo = getProgramInfo();
 
-    auto* exitCall =
+    auto *exitCall =
         new IR::MethodCallStatement(Utils::generateInternalMethodCall("drop_and_exit", {}));
     result.emplace(Continuation::Exception::Reject, Continuation::Body({exitCall}));
     result.emplace(Continuation::Exception::PacketTooShort, Continuation::Body({exitCall}));

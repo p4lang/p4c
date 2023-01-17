@@ -32,48 +32,56 @@ class Pattern {
     } *pattern;
     Pattern(Base *p) : pattern(p) {}  // NOLINT(runtime/explicit)
 
-    template<class T> class MatchExt : public Base {
+    template <class T>
+    class MatchExt : public Base {
         const T *&m;
+
      public:
         bool match(const IR::Node *n) override { return (m = n->to<T>()); }
         MatchExt(const T *&m) : m(m) {}  // NOLINT(runtime/explicit)
     };
 
     class Const : public Base {
-        big_int       value;
+        big_int value;
+
      public:
         bool match(const IR::Node *n) override {
-            if (auto k = n->to<IR::Constant>())
-                return k->value == value;
-            return false; }
+            if (auto k = n->to<IR::Constant>()) return k->value == value;
+            return false;
+        }
         Const(big_int v) : value(v) {}  // NOLINT(runtime/explicit)
-        Const(int v) : value(v) {}  // NOLINT(runtime/explicit)
+        Const(int v) : value(v) {}      // NOLINT(runtime/explicit)
     };
-    template<class T> class Unary : public Base {
+    template <class T>
+    class Unary : public Base {
         Base *expr;
+
      public:
         bool match(const IR::Node *n) override {
-            if (auto b = n->to<T>())
-                return expr->match(b->expr);
-            return false; }
+            if (auto b = n->to<T>()) return expr->match(b->expr);
+            return false;
+        }
         Unary(Base *e) : expr(e) {}  // NOLINT(runtime/explicit)
     };
-    template<class T> class Binary : public Base {
-        Base    *left, *right;
-        bool    commutative;
+    template <class T>
+    class Binary : public Base {
+        Base *left, *right;
+        bool commutative;
+
      public:
         bool match(const IR::Node *n) override {
             if (auto b = n->to<T>()) {
-                if (left->match(b->left) && right->match(b->right))
-                    return true;
-                if (commutative && left->match(b->right) && right->match(b->left))
-                    return true; }
-            return false; }
+                if (left->match(b->left) && right->match(b->right)) return true;
+                if (commutative && left->match(b->right) && right->match(b->left)) return true;
+            }
+            return false;
+        }
         Binary(Base *l, Base *r, bool commute = false) : left(l), right(r), commutative(commute) {}
     };
 
  public:
-    template<class T> class Match : public Base {
+    template <class T>
+    class Match : public Base {
         const T *m;
 
      public:
@@ -107,49 +115,68 @@ class Pattern {
     };
 
     template <class T>
-    Pattern(const T*& m) : pattern(new MatchExt<T>(m)) {}  // NOLINT(runtime/explicit)
-    template <class T> Pattern(Match<T> &m) : pattern(&m) {}  // NOLINT(runtime/explicit)
+    Pattern(const T *&m) : pattern(new MatchExt<T>(m)) {}  // NOLINT(runtime/explicit)
+    template <class T>
+    Pattern(Match<T> &m) : pattern(&m) {}                   // NOLINT(runtime/explicit)
     explicit Pattern(big_int v) : pattern(new Const(v)) {}  // NOLINT(runtime/explicit)
-    explicit Pattern(int v) : pattern(new Const(v)) {}  // NOLINT(runtime/explicit)
+    explicit Pattern(int v) : pattern(new Const(v)) {}      // NOLINT(runtime/explicit)
     Pattern operator-() const { return Pattern(new Unary<IR::Neg>(pattern)); }
     Pattern operator~() const { return Pattern(new Unary<IR::Cmpl>(pattern)); }
     Pattern operator!() const { return Pattern(new Unary<IR::LNot>(pattern)); }
     Pattern operator*(const Pattern &r) const {
-        return Pattern(new Binary<IR::Mul>(pattern, r.pattern, true)); }
+        return Pattern(new Binary<IR::Mul>(pattern, r.pattern, true));
+    }
     Pattern operator/(const Pattern &r) const {
-        return Pattern(new Binary<IR::Div>(pattern, r.pattern)); }
+        return Pattern(new Binary<IR::Div>(pattern, r.pattern));
+    }
     Pattern operator%(const Pattern &r) const {
-        return Pattern(new Binary<IR::Mod>(pattern, r.pattern)); }
+        return Pattern(new Binary<IR::Mod>(pattern, r.pattern));
+    }
     Pattern operator+(const Pattern &r) const {
-        return Pattern(new Binary<IR::Add>(pattern, r.pattern, true)); }
+        return Pattern(new Binary<IR::Add>(pattern, r.pattern, true));
+    }
     Pattern operator-(const Pattern &r) const {
-        return Pattern(new Binary<IR::Sub>(pattern, r.pattern)); }
+        return Pattern(new Binary<IR::Sub>(pattern, r.pattern));
+    }
     Pattern operator<<(const Pattern &r) const {
-        return Pattern(new Binary<IR::Shl>(pattern, r.pattern)); }
+        return Pattern(new Binary<IR::Shl>(pattern, r.pattern));
+    }
     Pattern operator>>(const Pattern &r) const {
-        return Pattern(new Binary<IR::Shr>(pattern, r.pattern)); }
+        return Pattern(new Binary<IR::Shr>(pattern, r.pattern));
+    }
     Pattern operator==(const Pattern &r) const {
-        return Pattern(new Binary<IR::Equ>(pattern, r.pattern, true)); }
+        return Pattern(new Binary<IR::Equ>(pattern, r.pattern, true));
+    }
     Pattern operator!=(const Pattern &r) const {
-        return Pattern(new Binary<IR::Neq>(pattern, r.pattern, true)); }
+        return Pattern(new Binary<IR::Neq>(pattern, r.pattern, true));
+    }
     Pattern operator<(const Pattern &r) const {
-        return Pattern(new Binary<IR::Lss>(pattern, r.pattern)); }
+        return Pattern(new Binary<IR::Lss>(pattern, r.pattern));
+    }
     Pattern operator<=(const Pattern &r) const {
-        return Pattern(new Binary<IR::Leq>(pattern, r.pattern)); }
+        return Pattern(new Binary<IR::Leq>(pattern, r.pattern));
+    }
     Pattern operator>(const Pattern &r) const {
-        return Pattern(new Binary<IR::Grt>(pattern, r.pattern)); }
+        return Pattern(new Binary<IR::Grt>(pattern, r.pattern));
+    }
     Pattern operator>=(const Pattern &r) const {
-        return Pattern(new Binary<IR::Geq>(pattern, r.pattern)); }
+        return Pattern(new Binary<IR::Geq>(pattern, r.pattern));
+    }
     Pattern operator&(const Pattern &r) const {
-        return Pattern(new Binary<IR::BAnd>(pattern, r.pattern, true)); }
+        return Pattern(new Binary<IR::BAnd>(pattern, r.pattern, true));
+    }
     Pattern operator|(const Pattern &r) const {
-        return Pattern(new Binary<IR::BOr>(pattern, r.pattern, true)); }
+        return Pattern(new Binary<IR::BOr>(pattern, r.pattern, true));
+    }
     Pattern operator^(const Pattern &r) const {
-        return Pattern(new Binary<IR::BXor>(pattern, r.pattern, true)); }
+        return Pattern(new Binary<IR::BXor>(pattern, r.pattern, true));
+    }
     Pattern operator&&(const Pattern &r) const {
-        return Pattern(new Binary<IR::LAnd>(pattern, r.pattern)); }
+        return Pattern(new Binary<IR::LAnd>(pattern, r.pattern));
+    }
     Pattern operator||(const Pattern &r) const {
-        return Pattern(new Binary<IR::LOr>(pattern, r.pattern)); }
+        return Pattern(new Binary<IR::LOr>(pattern, r.pattern));
+    }
 
     bool match(const IR::Node *n) { return pattern->match(n); }
 };
@@ -172,6 +199,5 @@ inline Pattern operator|(int v, const Pattern &a) { return Pattern(v) | a; }
 inline Pattern operator^(int v, const Pattern &a) { return Pattern(v) ^ a; }
 inline Pattern operator&&(int v, const Pattern &a) { return Pattern(v) && a; }
 inline Pattern operator||(int v, const Pattern &a) { return Pattern(v) || a; }
-
 
 #endif /* IR_PATTERN_H_ */

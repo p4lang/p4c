@@ -26,8 +26,8 @@ namespace UBPF {
 class MidEnd : public EBPF::MidEnd {
  public:
     MidEnd() : EBPF::MidEnd() {}
-    const IR::ToplevelBlock* run(EbpfOptions& options, const IR::P4Program* program,
-                                 std::ostream* outStream = nullptr);
+    const IR::ToplevelBlock *run(EbpfOptions &options, const IR::P4Program *program,
+                                 std::ostream *outStream = nullptr);
 };
 
 }  // namespace UBPF

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ class DefaultP4CConfiguration : public P4CConfiguration {
     int maximumArraySize() const { return 256; }
 
     /// @return the singleton instance.
-    static const DefaultP4CConfiguration& get() {
+    static const DefaultP4CConfiguration &get() {
         static DefaultP4CConfiguration instance;
         return instance;
     }

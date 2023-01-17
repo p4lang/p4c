@@ -60,12 +60,12 @@ table ipv4_da_lpm {
 
 apply {
 	rx m.pna_main_input_metadata_input_port
+	regrd m.pna_main_input_metadata_direction direction m.pna_main_input_metadata_input_port
 	extract h.ethernet
 	jmpeq MAINPARSERIMPL_PARSE_IPV4 h.ethernet.etherType 0x800
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	MAINPARSERIMPL_ACCEPT :	jmpnv LABEL_END h.ipv4
-	regrd m.pna_main_input_metadata_direction direction m.pna_main_input_metadata_input_port
 	jmpeq LABEL_TRUE_0 m.pna_main_input_metadata_direction 0x0
 	mov m.MainControlT_key h.ipv4.dstAddr
 	jmp LABEL_END_0

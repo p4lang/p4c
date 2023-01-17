@@ -19,14 +19,14 @@ limitations under the License.
 
 namespace EBPF {
 
-DeparserBodyTranslator::DeparserBodyTranslator(const EBPFDeparser* deparser)
+DeparserBodyTranslator::DeparserBodyTranslator(const EBPFDeparser *deparser)
     : CodeGenInspector(deparser->program->refMap, deparser->program->typeMap),
       ControlBodyTranslator(deparser),
       deparser(deparser) {
     setName("DeparserBodyTranslator");
 }
 
-bool DeparserBodyTranslator::preorder(const IR::MethodCallExpression* expression) {
+bool DeparserBodyTranslator::preorder(const IR::MethodCallExpression *expression) {
     auto mi = P4::MethodInstance::resolve(expression, control->program->refMap,
                                           control->program->typeMap);
     auto ext = mi->to<P4::ExternMethod>();
@@ -38,14 +38,14 @@ bool DeparserBodyTranslator::preorder(const IR::MethodCallExpression* expression
     return ControlBodyTranslator::preorder(expression);
 }
 
-DeparserPrepareBufferTranslator::DeparserPrepareBufferTranslator(const EBPFDeparser* deparser)
+DeparserPrepareBufferTranslator::DeparserPrepareBufferTranslator(const EBPFDeparser *deparser)
     : CodeGenInspector(deparser->program->refMap, deparser->program->typeMap),
       ControlBodyTranslator(deparser),
       deparser(deparser) {
     setName("DeparserPrepareBufferTranslator");
 }
 
-bool DeparserPrepareBufferTranslator::preorder(const IR::BlockStatement* s) {
+bool DeparserPrepareBufferTranslator::preorder(const IR::BlockStatement *s) {
     for (auto a : s->components) {
         if (a->is<IR::MethodCallStatement>()) {
             visit(a);
@@ -55,7 +55,7 @@ bool DeparserPrepareBufferTranslator::preorder(const IR::BlockStatement* s) {
     return false;
 }
 
-bool DeparserPrepareBufferTranslator::preorder(const IR::MethodCallExpression* expression) {
+bool DeparserPrepareBufferTranslator::preorder(const IR::MethodCallExpression *expression) {
     auto mi = P4::MethodInstance::resolve(expression, control->program->refMap,
                                           control->program->typeMap);
     auto ext = mi->to<P4::ExternMethod>();
@@ -67,7 +67,7 @@ bool DeparserPrepareBufferTranslator::preorder(const IR::MethodCallExpression* e
     return false;
 }
 
-void DeparserPrepareBufferTranslator::processMethod(const P4::ExternMethod* method) {
+void DeparserPrepareBufferTranslator::processMethod(const P4::ExternMethod *method) {
     if (method->method->name.name == p4lib.packetOut.emit.name) {
         auto decl = method->object;
         if (decl == deparser->packet_out) {
@@ -99,14 +99,14 @@ void DeparserPrepareBufferTranslator::processMethod(const P4::ExternMethod* meth
     }
 }
 
-DeparserHdrEmitTranslator::DeparserHdrEmitTranslator(const EBPFDeparser* deparser)
+DeparserHdrEmitTranslator::DeparserHdrEmitTranslator(const EBPFDeparser *deparser)
     : CodeGenInspector(deparser->program->refMap, deparser->program->typeMap),
       DeparserPrepareBufferTranslator(deparser),
       deparser(deparser) {
     setName("DeparserHdrEmitTranslator");
 }
 
-void DeparserHdrEmitTranslator::processMethod(const P4::ExternMethod* method) {
+void DeparserHdrEmitTranslator::processMethod(const P4::ExternMethod *method) {
     // This method handles packet_out.emit() only and is intended to skip other externs
     if (method->method->name.name == p4lib.packetOut.emit.name) {
         auto decl = method->object;
@@ -149,7 +149,7 @@ void DeparserHdrEmitTranslator::processMethod(const P4::ExternMethod* method) {
             for (auto f : headerToEmit->fields) {
                 auto ftype = deparser->program->typeMap->getType(f);
                 auto etype = EBPFTypeFactory::instance->create(ftype);
-                auto et = dynamic_cast<EBPF::IHasWidth*>(etype);
+                auto et = dynamic_cast<EBPF::IHasWidth *>(etype);
                 if (et == nullptr) {
                     ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                             "Only headers with fixed widths supported %1%", f);
@@ -166,12 +166,12 @@ void DeparserHdrEmitTranslator::processMethod(const P4::ExternMethod* method) {
     }
 }
 
-void DeparserHdrEmitTranslator::emitField(CodeBuilder* builder, cstring field,
-                                          const IR::Expression* hdrExpr, unsigned int alignment,
-                                          EBPF::EBPFType* type) {
+void DeparserHdrEmitTranslator::emitField(CodeBuilder *builder, cstring field,
+                                          const IR::Expression *hdrExpr, unsigned int alignment,
+                                          EBPF::EBPFType *type) {
     auto program = deparser->program;
 
-    auto et = dynamic_cast<EBPF::IHasWidth*>(type);
+    auto et = dynamic_cast<EBPF::IHasWidth *>(type);
     if (et == nullptr) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                 "Only headers with fixed widths supported %1%", hdrExpr);
@@ -212,7 +212,6 @@ void DeparserHdrEmitTranslator::emitField(CodeBuilder* builder, cstring field,
         swap = "htonll";
         emitSize = 64;
     }
-    unsigned bytes = ROUNDUP(widthToEmit, 8);
     unsigned shift =
         widthToEmit < 8 ? (emitSize - alignment - widthToEmit) : (emitSize - widthToEmit);
 
@@ -242,19 +241,17 @@ void DeparserHdrEmitTranslator::emitField(CodeBuilder* builder, cstring field,
         BUG_CHECK((bitsToWrite > 0) && (bitsToWrite <= 8), "invalid bitsToWrite %d", bitsToWrite);
         builder->emitIndent();
         if (alignment == 0 && bitsToWrite == 8) {  // write whole byte
-            builder->appendFormat(
-                "write_byte(%s, BYTES(%s) + %d, (%s))", program->packetStartVar.c_str(),
-                program->offsetVar.c_str(),
-                widthToEmit > 64 ? bytes - i - 1 : i,  // reversed order for wider fields
-                program->byteVar.c_str());
+            builder->appendFormat("write_byte(%s, BYTES(%s) + %d, (%s))",
+                                  program->packetStartVar.c_str(), program->offsetVar.c_str(),
+                                  i,  // do not reverse byte order
+                                  program->byteVar.c_str());
         } else {  // write partial
             shift = (8 - alignment - bitsToWrite);
-            builder->appendFormat(
-                "write_partial(%s + BYTES(%s) + %d, %d, %d, (%s >> %d))",
-                program->packetStartVar.c_str(), program->offsetVar.c_str(),
-                widthToEmit > 64 ? bytes - i - 1 : i,  // reversed order for wider fields
-                bitsToWrite, shift, program->byteVar.c_str(),
-                widthToEmit > freeBits ? alignment == 0 ? shift : alignment : 0);
+            builder->appendFormat("write_partial(%s + BYTES(%s) + %d, %d, %d, (%s >> %d))",
+                                  program->packetStartVar.c_str(), program->offsetVar.c_str(),
+                                  i,  // do not reverse byte order
+                                  bitsToWrite, shift, program->byteVar.c_str(),
+                                  widthToEmit > freeBits ? alignment == 0 ? shift : alignment : 0);
         }
         builder->endOfStatement(true);
         left -= bitsToWrite;
@@ -264,17 +261,16 @@ void DeparserHdrEmitTranslator::emitField(CodeBuilder* builder, cstring field,
         if (bitsInCurrentByte > 0) {
             builder->emitIndent();
             if (bitsToWrite == 8) {
-                builder->appendFormat(
-                    "write_byte(%s, BYTES(%s) + %d + 1, (%s << %d))",
-                    program->packetStartVar.c_str(), program->offsetVar.c_str(),
-                    widthToEmit > 64 ? bytes - i - 1 : i,  // reversed order for wider fields
-                    program->byteVar.c_str(), 8 - alignment % 8);
+                builder->appendFormat("write_byte(%s, BYTES(%s) + %d + 1, (%s << %d))",
+                                      program->packetStartVar.c_str(), program->offsetVar.c_str(),
+                                      i,  // do not reverse byte order
+                                      program->byteVar.c_str(), 8 - alignment % 8);
             } else {
-                builder->appendFormat(
-                    "write_partial(%s + BYTES(%s) + %d + 1, %d, %d, (%s))",
-                    program->packetStartVar.c_str(), program->offsetVar.c_str(),
-                    widthToEmit > 64 ? bytes - i - 1 : i,  // reversed order for wider fields
-                    bitsToWrite, 8 + alignment - bitsToWrite, program->byteVar.c_str());
+                builder->appendFormat("write_partial(%s + BYTES(%s) + %d + 1, %d, %d, (%s))",
+                                      program->packetStartVar.c_str(), program->offsetVar.c_str(),
+                                      i,  // do not reverse byte order
+                                      bitsToWrite, 8 + alignment - bitsToWrite,
+                                      program->byteVar.c_str());
             }
             builder->endOfStatement(true);
             left -= bitsToWrite;
@@ -287,7 +283,7 @@ void DeparserHdrEmitTranslator::emitField(CodeBuilder* builder, cstring field,
     builder->newline();
 }
 
-void EBPFDeparser::emitBufferAdjusts(CodeBuilder* builder) const {
+void EBPFDeparser::emitBufferAdjusts(CodeBuilder *builder) const {
     builder->newline();
     builder->emitIndent();
 
@@ -305,7 +301,8 @@ void EBPFDeparser::emitBufferAdjusts(CodeBuilder* builder) const {
     builder->endOfStatement(true);
     builder->emitIndent();
     builder->appendFormat("%s = ", returnCode.c_str());
-    builder->target->emitResizeBuffer(builder, program->model.CPacketName.str(), outerHdrOffsetVar);
+    program->progTarget->emitResizeBuffer(builder, program->model.CPacketName.str(),
+                                          outerHdrOffsetVar);
     builder->endOfStatement(true);
 
     builder->emitIndent();
@@ -322,7 +319,7 @@ void EBPFDeparser::emitBufferAdjusts(CodeBuilder* builder) const {
     builder->blockEnd(true);
 }
 
-void EBPFDeparser::emit(CodeBuilder* builder) {
+void EBPFDeparser::emit(CodeBuilder *builder) {
     codeGen->setBuilder(builder);
 
     for (auto a : controlBlock->container->controlLocals) emitDeclaration(builder, a);

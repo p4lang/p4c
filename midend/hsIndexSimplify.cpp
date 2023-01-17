@@ -7,7 +7,7 @@
 
 namespace P4 {
 
-void HSIndexFinder::postorder(const IR::ArrayIndex* curArrayIndex) {
+void HSIndexFinder::postorder(const IR::ArrayIndex *curArrayIndex) {
     if (arrayIndex == nullptr && !curArrayIndex->right->is<IR::Constant>()) {
         arrayIndex = curArrayIndex;
         addNewVariable();
@@ -29,9 +29,9 @@ void HSIndexFinder::addNewVariable() {
             newVariable = arrayIndex->right->to<IR::PathExpression>();
         } else if (generatedVariables->count(indexString) == 0) {
             // Generate new temporary variable.
-            auto type = typeMap->getTypeType(arrayIndex->right->type, true);
+            const auto *type = typeMap->getTypeType(arrayIndex->right->type, true);
             auto name = refMap->newName("hsiVar");
-            auto decl = new IR::Declaration_Variable(name, type);
+            auto *decl = new IR::Declaration_Variable(name, type);
             locals->push_back(decl);
             typeMap->setType(decl, type);
             newVariable = new IR::PathExpression(arrayIndex->srcInfo, type, new IR::Path(name));
@@ -42,24 +42,24 @@ void HSIndexFinder::addNewVariable() {
     }
 }
 
-const IR::Node* HSIndexTransform::postorder(IR::ArrayIndex* curArrayIndex) {
+const IR::Node *HSIndexTransform::postorder(IR::ArrayIndex *curArrayIndex) {
     if (hsIndexFinder.arrayIndex != nullptr && curArrayIndex->equiv(*hsIndexFinder.arrayIndex)) {
         // Translating current array index.
-        auto* newArrayIndex = hsIndexFinder.arrayIndex->clone();
+        auto *newArrayIndex = hsIndexFinder.arrayIndex->clone();
         newArrayIndex->right = new IR::Constant(newArrayIndex->right->type, index);
         return newArrayIndex;
     }
     return curArrayIndex;
 }
 
-IR::Node* HSIndexContretizer::eliminateArrayIndexes(HSIndexFinder& aiFinder,
-                                                    IR::Statement* statement,
-                                                    const IR::Expression* expr) {
+IR::Node *HSIndexContretizer::eliminateArrayIndexes(HSIndexFinder &aiFinder,
+                                                    IR::Statement *statement,
+                                                    const IR::Expression *expr) {
     if (aiFinder.arrayIndex == nullptr) {
         return statement;
     }
-    const IR::Statement* elseBody = nullptr;
-    auto* curIf = statement->to<IR::IfStatement>();
+    const IR::Statement *elseBody = nullptr;
+    auto *curIf = statement->to<IR::IfStatement>();
     if (curIf != nullptr) {
         elseBody = curIf->ifFalse;
     }
@@ -70,16 +70,16 @@ IR::Node* HSIndexContretizer::eliminateArrayIndexes(HSIndexFinder& aiFinder,
                 aiFinder.arrayIndex->srcInfo, aiFinder.newVariable, aiFinder.arrayIndex->right));
         }
     }
-    IR::IfStatement* result = nullptr;
-    IR::IfStatement* curResult = nullptr;
-    IR::IfStatement* newIf = nullptr;
-    const auto* typeStack = aiFinder.arrayIndex->left->type->checkedTo<IR::Type_Stack>();
+    IR::IfStatement *result = nullptr;
+    IR::IfStatement *curResult = nullptr;
+    IR::IfStatement *newIf = nullptr;
+    const auto *typeStack = aiFinder.arrayIndex->left->type->checkedTo<IR::Type_Stack>();
     size_t sz = typeStack->getSize();
     for (size_t i = 0; i < sz; i++) {
         HSIndexTransform aiRewriter(aiFinder, i);
-        auto* newStatement = statement->apply(aiRewriter)->to<IR::Statement>();
-        auto* newIndex = new IR::Constant(aiFinder.arrayIndex->right->type, i);
-        auto* newCondition = new IR::Equ(aiFinder.newVariable, newIndex);
+        const auto *newStatement = statement->apply(aiRewriter)->to<IR::Statement>();
+        auto *newIndex = new IR::Constant(aiFinder.arrayIndex->right->type, i);
+        auto *newCondition = new IR::Equ(aiFinder.newVariable, newIndex);
         if (curIf != nullptr) {
             newIf = newStatement->checkedTo<IR::IfStatement>()->clone();
             newIf->condition = new IR::LAnd(newCondition, newIf->condition);
@@ -96,11 +96,11 @@ IR::Node* HSIndexContretizer::eliminateArrayIndexes(HSIndexFinder& aiFinder,
     if (expr != nullptr && locals != nullptr) {
         // Add case for write out of bound.
         cstring typeString = expr->type->toString();
-        const IR::PathExpression* pathExpr = nullptr;
+        const IR::PathExpression *pathExpr = nullptr;
         if (generatedVariables->count(typeString) == 0) {
-            // Add assigment of undefined header.
+            // Add assignment of undefined header.
             auto name = refMap->newName("hsVar");
-            auto decl = new IR::Declaration_Variable(name, expr->type);
+            auto *decl = new IR::Declaration_Variable(name, expr->type);
             locals->push_back(decl);
             typeMap->setType(decl, expr->type);
             pathExpr = new IR::PathExpression(aiFinder.arrayIndex->srcInfo, expr->type,
@@ -109,9 +109,9 @@ IR::Node* HSIndexContretizer::eliminateArrayIndexes(HSIndexFinder& aiFinder,
         } else {
             pathExpr = generatedVariables->at(typeString);
         }
-        auto* newStatement =
+        auto *newStatement =
             new IR::AssignmentStatement(aiFinder.arrayIndex->srcInfo, expr, pathExpr);
-        auto* newCondition = new IR::Geq(
+        auto *newCondition = new IR::Geq(
             aiFinder.newVariable, new IR::Constant(aiFinder.arrayIndex->right->type, sz - 1));
         newIf = new IR::IfStatement(newCondition, newStatement, nullptr);
         curResult->ifFalse = newIf;
@@ -121,15 +121,14 @@ IR::Node* HSIndexContretizer::eliminateArrayIndexes(HSIndexFinder& aiFinder,
     return new IR::BlockStatement(newComponents);
 }
 
-IR::Node* HSIndexContretizer::preorder(IR::AssignmentStatement* assignmentStatement) {
+IR::Node *HSIndexContretizer::preorder(IR::AssignmentStatement *assignmentStatement) {
     HSIndexFinder aiFinder(locals, refMap, typeMap, generatedVariables);
     assignmentStatement->left->apply(aiFinder);
     if (aiFinder.arrayIndex == nullptr) {
         assignmentStatement->right->apply(aiFinder);
         return eliminateArrayIndexes(aiFinder, assignmentStatement, assignmentStatement->left);
-    } else {
-        return eliminateArrayIndexes(aiFinder, assignmentStatement, nullptr);
     }
+    return eliminateArrayIndexes(aiFinder, assignmentStatement, nullptr);
 }
 
 /**
@@ -137,36 +136,36 @@ IR::Node* HSIndexContretizer::preorder(IR::AssignmentStatement* assignmentStatem
  */
 class IsNonConstantArrayIndex : public KeyIsSimple, public Inspector {
  protected:
-    bool simple;
+    bool simple = false;
 
  public:
     IsNonConstantArrayIndex() { setName("IsNonConstantArrayIndex"); }
 
-    void postorder(const IR::ArrayIndex* arrayIndex) override {
+    void postorder(const IR::ArrayIndex *arrayIndex) override {
         if (simple) {
             simple = arrayIndex->right->is<IR::Constant>();
         }
     }
-    profile_t init_apply(const IR::Node* root) override {
+    profile_t init_apply(const IR::Node *root) override {
         simple = true;
         return Inspector::init_apply(root);
     }
 
-    bool isSimple(const IR::Expression* expression, const Visitor::Context*) override {
+    bool isSimple(const IR::Expression *expression, const Visitor::Context * /*ctx*/) override {
         (void)expression->apply(*this);
         return simple;
     }
 };
 
-IR::Node* HSIndexContretizer::preorder(IR::P4Control* control) {
+IR::Node *HSIndexContretizer::preorder(IR::P4Control *control) {
     DoSimplifyKey keySimplifier(refMap, typeMap, new IsNonConstantArrayIndex());
-    const auto* controlKeySimplified = control->apply(keySimplifier)->to<IR::P4Control>();
-    auto* newControl = controlKeySimplified->clone();
+    const auto *controlKeySimplified = control->apply(keySimplifier)->to<IR::P4Control>();
+    auto *newControl = controlKeySimplified->clone();
     IR::IndexedVector<IR::Declaration> newControlLocals;
     GeneratedVariablesMap blockGeneratedVariables;
     HSIndexContretizer hsSimplifier(refMap, typeMap, &newControlLocals, &blockGeneratedVariables);
     newControl->body = newControl->body->apply(hsSimplifier)->to<IR::BlockStatement>();
-    for (auto* declaration : controlKeySimplified->controlLocals) {
+    for (const auto *declaration : controlKeySimplified->controlLocals) {
         if (declaration->is<IR::P4Action>()) {
             newControlLocals.push_back(declaration->apply(hsSimplifier)->to<IR::Declaration>());
         } else {
@@ -177,24 +176,24 @@ IR::Node* HSIndexContretizer::preorder(IR::P4Control* control) {
     return newControl;
 }
 
-IR::Node* HSIndexContretizer::preorder(IR::P4Parser* parser) {
+IR::Node *HSIndexContretizer::preorder(IR::P4Parser *parser) {
     prune();
     return parser;
 }
 
-IR::Node* HSIndexContretizer::preorder(IR::BlockStatement* blockStatement) {
+IR::Node *HSIndexContretizer::preorder(IR::BlockStatement *blockStatement) {
     HSIndexFinder aiFinder(locals, refMap, typeMap, generatedVariables);
     blockStatement->apply(aiFinder);
     if (aiFinder.arrayIndex == nullptr) {
         return blockStatement;
     }
     HSIndexContretizer hsSimplifier(refMap, typeMap, locals, generatedVariables);
-    auto* newBlock = blockStatement->clone();
+    auto *newBlock = blockStatement->clone();
     IR::IndexedVector<IR::StatOrDecl> newComponents;
-    for (auto& component : blockStatement->components) {
-        const auto* newComponent = component->apply(hsSimplifier)->to<IR::StatOrDecl>();
-        if (const auto* newComponentBlock = newComponent->to<IR::BlockStatement>()) {
-            for (auto& blockComponent : newComponentBlock->components) {
+    for (auto &component : blockStatement->components) {
+        const auto *newComponent = component->apply(hsSimplifier)->to<IR::StatOrDecl>();
+        if (const auto *newComponentBlock = newComponent->to<IR::BlockStatement>()) {
+            for (const auto &blockComponent : newComponentBlock->components) {
                 newComponents.push_back(blockComponent);
             }
         } else {
@@ -205,13 +204,13 @@ IR::Node* HSIndexContretizer::preorder(IR::BlockStatement* blockStatement) {
     return newBlock;
 }
 
-IR::Node* HSIndexContretizer::preorder(IR::IfStatement* ifStatement) {
+IR::Node *HSIndexContretizer::preorder(IR::IfStatement *ifStatement) {
     HSIndexFinder aiFinder(locals, refMap, typeMap, generatedVariables);
     ifStatement->condition->apply(aiFinder);
     return eliminateArrayIndexes(aiFinder, ifStatement, nullptr);
 }
 
-IR::Node* HSIndexContretizer::preorder(IR::MethodCallStatement* methodCallStatement) {
+IR::Node *HSIndexContretizer::preorder(IR::MethodCallStatement *methodCallStatement) {
     HSIndexFinder aiFinder(locals, refMap, typeMap, generatedVariables);
     methodCallStatement->apply(aiFinder);
     // Here we mean that in/out parameter will be replaced by correspondent assignments.
@@ -219,7 +218,7 @@ IR::Node* HSIndexContretizer::preorder(IR::MethodCallStatement* methodCallStatem
     return eliminateArrayIndexes(aiFinder, methodCallStatement, nullptr);
 }
 
-IR::Node* HSIndexContretizer::preorder(IR::SwitchStatement* switchStatement) {
+IR::Node *HSIndexContretizer::preorder(IR::SwitchStatement *switchStatement) {
     HSIndexFinder aiFinder(locals, refMap, typeMap, generatedVariables);
     switchStatement->expression->apply(aiFinder);
     return eliminateArrayIndexes(aiFinder, switchStatement, nullptr);

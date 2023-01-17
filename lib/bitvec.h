@@ -120,7 +120,7 @@ class bitvec {
     size_t size;
     union {
         uintptr_t data;
-        uintptr_t* ptr;
+        uintptr_t *ptr;
     };
     uintptr_t word(size_t i) const { return i < size ? size > 1 ? ptr[i] : data : 0; }
 
@@ -136,14 +136,14 @@ class bitvec {
         bitref(T s, int i) : self(s), idx(i) {}
 
      public:
-        bitref(const bitref& a) = default;
-        bitref(bitref&& a) = default;
+        bitref(const bitref &a) = default;
+        bitref(bitref &&a) = default;
         operator bool() const { return self.getbit(idx); }
-        bool operator==(const bitref& a) const { return &self == &a.self && idx == a.idx; }
-        bool operator!=(const bitref& a) const { return &self != &a.self || idx != a.idx; }
+        bool operator==(const bitref &a) const { return &self == &a.self && idx == a.idx; }
+        bool operator!=(const bitref &a) const { return &self != &a.self || idx != a.idx; }
         int index() const { return idx; }
         int operator*() const { return idx; }
-        bitref& operator++() {
+        bitref &operator++() {
             while ((size_t)++idx < self.size * bitvec::bits_per_unit) {
                 if (auto w =
                         self.word(idx / bitvec::bits_per_unit) >> (idx % bitvec::bits_per_unit)) {
@@ -156,7 +156,7 @@ class bitvec {
             idx = -1;
             return *this;
         }
-        bitref& operator--() {
+        bitref &operator--() {
             if (idx < 0) idx = self.size * bitvec::bits_per_unit;
             while (--idx >= 0) {
                 if (auto w = self.word(idx / bitvec::bits_per_unit)
@@ -171,14 +171,14 @@ class bitvec {
     };
 
  public:
-    class nonconst_bitref : public bitref<bitvec&> {
+    class nonconst_bitref : public bitref<bitvec &> {
         friend class bitvec;
-        nonconst_bitref(bitvec& s, int i) : bitref(s, i) {}
+        nonconst_bitref(bitvec &s, int i) : bitref(s, i) {}
 
      public:
-        nonconst_bitref(const bitref<bitvec&>& a) : bitref(a) {}  // NOLINT(runtime/explicit)
-        nonconst_bitref(const nonconst_bitref& a) = default;
-        nonconst_bitref(nonconst_bitref&& a) = default;
+        nonconst_bitref(const bitref<bitvec &> &a) : bitref(a) {}  // NOLINT(runtime/explicit)
+        nonconst_bitref(const nonconst_bitref &a) = default;
+        nonconst_bitref(nonconst_bitref &&a) = default;
         bool operator=(bool b) const {
             assert(idx >= 0);
             return b ? self.setbit(idx) : self.clrbit(idx);
@@ -191,24 +191,24 @@ class bitvec {
         }
         using difference_type = std::ptrdiff_t;
         using value_type = const bitvec;
-        using pointer = const bitvec*;
-        using reference = const bool&;
+        using pointer = const bitvec *;
+        using reference = const bool &;
         using iterator_category = std::bidirectional_iterator_tag;
     };
     typedef nonconst_bitref iterator;
 
-    class const_bitref : public bitref<const bitvec&> {
+    class const_bitref : public bitref<const bitvec &> {
         friend class bitvec;
-        const_bitref(const bitvec& s, int i) : bitref(s, i) {}
+        const_bitref(const bitvec &s, int i) : bitref(s, i) {}
 
      public:
-        const_bitref(const bitref<const bitvec&>& a) : bitref(a) {}  // NOLINT(runtime/explicit)
-        const_bitref(const const_bitref& a) = default;
-        const_bitref(const_bitref&& a) = default;
+        const_bitref(const bitref<const bitvec &> &a) : bitref(a) {}  // NOLINT(runtime/explicit)
+        const_bitref(const const_bitref &a) = default;
+        const_bitref(const_bitref &&a) = default;
         using difference_type = std::ptrdiff_t;
         using value_type = const bitvec;
-        using pointer = const bitvec*;
-        using reference = const bool&;
+        using pointer = const bitvec *;
+        using reference = const bool &;
         using iterator_category = std::bidirectional_iterator_tag;
     };
     typedef const_bitref const_iterator;
@@ -233,7 +233,7 @@ class bitvec {
         }
     }
     bitvec(size_t lo, size_t cnt) : size(1), data(0) { setrange(lo, cnt); }
-    bitvec(const bitvec& a) : size(a.size) {
+    bitvec(const bitvec &a) : size(a.size) {
         if (size > 1) {
             ptr = new IF_HAVE_LIBGC((PointerFreeGC)) uintptr_t[size];
             memcpy(ptr, a.ptr, size * sizeof(*ptr));
@@ -241,8 +241,8 @@ class bitvec {
             data = a.data;
         }
     }
-    bitvec(bitvec&& a) : size(a.size), data(a.data) { a.size = 1; }
-    bitvec& operator=(const bitvec& a) {
+    bitvec(bitvec &&a) : size(a.size), data(a.data) { a.size = 1; }
+    bitvec &operator=(const bitvec &a) {
         if (this == &a) return *this;
         if (size > 1) delete[] ptr;
         if ((size = a.size) > 1) {
@@ -253,7 +253,7 @@ class bitvec {
         }
         return *this;
     }
-    bitvec& operator=(bitvec&& a) {
+    bitvec &operator=(bitvec &&a) {
         std::swap(size, a.size);
         std::swap(data, a.data);
         return *this;
@@ -310,7 +310,7 @@ class bitvec {
             raw >>= bits_per_unit;
         }
     }
-    void setraw(uintptr_t* raw, size_t sz) {
+    void setraw(uintptr_t *raw, size_t sz) {
         if (sz > size) expand(sz);
         if (size == 1) {
             data = raw[0];
@@ -321,7 +321,7 @@ class bitvec {
     }
     template <typename T, typename = typename std::enable_if<std::is_integral<T>::value &&
                                                              (sizeof(T) > sizeof(uintptr_t))>::type>
-    void setraw(T* raw, size_t sz) {
+    void setraw(T *raw, size_t sz) {
         constexpr size_t m = sizeof(T) / sizeof(uintptr_t);
         if (m * sz > size) expand(m * sz);
         size_t i = 0;
@@ -406,10 +406,10 @@ class bitvec {
     bool operator[](int idx) const { return getbit(idx); }
     int ffs(unsigned start = 0) const;
     unsigned ffz(unsigned start = 0) const;
-    const_bitref min() const& { return const_bitref(*this, ffs()); }
-    const_bitref max() const& { return --const_bitref(*this, size * bits_per_unit); }
-    const_bitref begin() const& { return min(); }
-    const_bitref end() const& { return const_bitref(*this, -1); }
+    const_bitref min() const & { return const_bitref(*this, ffs()); }
+    const_bitref max() const & { return --const_bitref(*this, size * bits_per_unit); }
+    const_bitref begin() const & { return min(); }
+    const_bitref end() const & { return const_bitref(*this, -1); }
     // not safe to keep a ref to a temp bitvec -- need to make a copy.
     copy_bitref min() &&;
     copy_bitref max() &&;
@@ -425,7 +425,7 @@ class bitvec {
         return true;
     }
     explicit operator bool() const { return !empty(); }
-    bool operator&=(const bitvec& a) {
+    bool operator&=(const bitvec &a) {
         bool rv = false;
         if (size > 1) {
             if (a.size > 1) {
@@ -456,7 +456,7 @@ class bitvec {
         }
         return rv;
     }
-    bitvec operator&(const bitvec& a) const {
+    bitvec operator&(const bitvec &a) const {
         if (size <= a.size) {
             bitvec rv(*this);
             rv &= a;
@@ -467,7 +467,7 @@ class bitvec {
             return rv;
         }
     }
-    bool operator|=(const bitvec& a) {
+    bool operator|=(const bitvec &a) {
         bool rv = false;
         if (size < a.size) expand(a.size);
         if (size > 1) {
@@ -498,7 +498,7 @@ class bitvec {
     bool operator|=(T a) {
         return (*this) |= bitvec(a);
     }
-    bitvec operator|(const bitvec& a) const {
+    bitvec operator|(const bitvec &a) const {
         bitvec rv(*this);
         rv |= a;
         return rv;
@@ -515,7 +515,7 @@ class bitvec {
         rv |= bitvec(a);
         return rv;
     }
-    bitvec& operator^=(const bitvec& a) {
+    bitvec &operator^=(const bitvec &a) {
         if (size < a.size) expand(a.size);
         if (size > 1) {
             if (a.size > 1) {
@@ -528,12 +528,12 @@ class bitvec {
         }
         return *this;
     }
-    bitvec operator^(const bitvec& a) const {
+    bitvec operator^(const bitvec &a) const {
         bitvec rv(*this);
         rv ^= a;
         return rv;
     }
-    bool operator-=(const bitvec& a) {
+    bool operator-=(const bitvec &a) {
         bool rv = false;
         if (size > 1) {
             if (a.size > 1) {
@@ -554,18 +554,18 @@ class bitvec {
         }
         return rv;
     }
-    bitvec operator-(const bitvec& a) const {
+    bitvec operator-(const bitvec &a) const {
         bitvec rv(*this);
         rv -= a;
         return rv;
     }
-    bool operator==(const bitvec& a) const {
+    bool operator==(const bitvec &a) const {
         for (size_t i = 0; i < size || i < a.size; i++)
             if (word(i) != a.word(i)) return false;
         return true;
     }
-    bool operator!=(const bitvec& a) const { return !(*this == a); }
-    bool operator<(const bitvec& a) const {
+    bool operator!=(const bitvec &a) const { return !(*this == a); }
+    bool operator<(const bitvec &a) const {
         size_t i = std::max(size, a.size);
         while (i--) {
             if (word(i) < a.word(i)) return true;
@@ -573,23 +573,23 @@ class bitvec {
         }
         return false;
     }
-    bool operator>(const bitvec& a) const { return a < *this; }
-    bool operator>=(const bitvec& a) const { return !(*this < a); }
-    bool operator<=(const bitvec& a) const { return !(a < *this); }
-    bool intersects(const bitvec& a) const {
+    bool operator>(const bitvec &a) const { return a < *this; }
+    bool operator>=(const bitvec &a) const { return !(*this < a); }
+    bool operator<=(const bitvec &a) const { return !(a < *this); }
+    bool intersects(const bitvec &a) const {
         for (size_t i = 0; i < size && i < a.size; i++)
             if (word(i) & a.word(i)) return true;
         return false;
     }
-    bool contains(const bitvec& a) const {  // is 'a' a subset or equal to 'this'?
+    bool contains(const bitvec &a) const {  // is 'a' a subset or equal to 'this'?
         for (size_t i = 0; i < size && i < a.size; i++)
             if ((word(i) & a.word(i)) != a.word(i)) return false;
         for (size_t i = size; i < a.size; i++)
             if (a.word(i)) return false;
         return true;
     }
-    bitvec& operator>>=(size_t count);
-    bitvec& operator<<=(size_t count);
+    bitvec &operator>>=(size_t count);
+    bitvec &operator<<=(size_t count);
     bitvec operator>>(size_t count) const {
         bitvec rv(*this);
         rv >>= count;
@@ -622,7 +622,7 @@ class bitvec {
             newsize = (newsize + m) & ~m;
         }
         if (size > 1) {
-            uintptr_t* old = ptr;
+            uintptr_t *old = ptr;
             ptr = new IF_HAVE_LIBGC((PointerFreeGC)) uintptr_t[newsize];
             memcpy(ptr, old, size * sizeof(*ptr));
             memset(ptr + size, 0, (newsize - size) * sizeof(*ptr));
@@ -639,43 +639,43 @@ class bitvec {
     bitvec rotate_right_helper(size_t start_bit, size_t rotation_idx, size_t end_bit) const;
 
  public:
-    friend std::ostream& operator<<(std::ostream&, const bitvec&);
-    friend std::istream& operator>>(std::istream&, bitvec&);
-    friend bool operator>>(const char*, bitvec&);
+    friend std::ostream &operator<<(std::ostream &, const bitvec &);
+    friend std::istream &operator>>(std::istream &, bitvec &);
+    friend bool operator>>(const char *, bitvec &);
 };
 
 class bitvec::copy_bitref : public bitvec::bitref<const bitvec> {
     friend class bitvec;
-    copy_bitref(const bitvec& s, int i) : bitref(s, i) {}
+    copy_bitref(const bitvec &s, int i) : bitref(s, i) {}
 
  public:
-    copy_bitref(const bitref<const bitvec>& a) : bitref(a) {}  // NOLINT(runtime/explicit)
-    copy_bitref(const copy_bitref& a) = default;
-    copy_bitref(copy_bitref&& a) = default;
-    bool operator==(const bitref& a) const { return idx == a.idx && self == a.self; }
-    bool operator!=(const bitref& a) const { return idx != a.idx || self != a.self; }
+    copy_bitref(const bitref<const bitvec> &a) : bitref(a) {}  // NOLINT(runtime/explicit)
+    copy_bitref(const copy_bitref &a) = default;
+    copy_bitref(copy_bitref &&a) = default;
+    bool operator==(const bitref &a) const { return idx == a.idx && self == a.self; }
+    bool operator!=(const bitref &a) const { return idx != a.idx || self != a.self; }
 };
 inline bitvec::copy_bitref bitvec::min() && { return copy_bitref(*this, ffs()); }
 inline bitvec::copy_bitref bitvec::max() && { return --copy_bitref(*this, size * bits_per_unit); }
 inline bitvec::copy_bitref bitvec::begin() && { return copy_bitref(*this, ffs()); }
 inline bitvec::copy_bitref bitvec::end() && { return copy_bitref(*this, -1); }
 
-inline bitvec operator|(bitvec&& a, const bitvec& b) {
+inline bitvec operator|(bitvec &&a, const bitvec &b) {
     bitvec rv(std::move(a));
     rv |= b;
     return rv;
 }
-inline bitvec operator&(bitvec&& a, const bitvec& b) {
+inline bitvec operator&(bitvec &&a, const bitvec &b) {
     bitvec rv(std::move(a));
     rv &= b;
     return rv;
 }
-inline bitvec operator^(bitvec&& a, const bitvec& b) {
+inline bitvec operator^(bitvec &&a, const bitvec &b) {
     bitvec rv(std::move(a));
     rv ^= b;
     return rv;
 }
-inline bitvec operator-(bitvec&& a, const bitvec& b) {
+inline bitvec operator-(bitvec &&a, const bitvec &b) {
     bitvec rv(std::move(a));
     rv -= b;
     return rv;

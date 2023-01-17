@@ -24,14 +24,14 @@ namespace P4Testgen {
 
 namespace EBPF {
 
-EBPFExprStepper::EBPFExprStepper(ExecutionState& state, AbstractSolver& solver,
-                                 const ProgramInfo& programInfo)
+EBPFExprStepper::EBPFExprStepper(ExecutionState &state, AbstractSolver &solver,
+                                 const ProgramInfo &programInfo)
     : ExprStepper(state, solver, programInfo) {}
 
-void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
-                                           const IR::Expression* receiver, IR::ID name,
-                                           const IR::Vector<IR::Argument>* args,
-                                           ExecutionState& state) {
+void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
+                                           const IR::Expression *receiver, IR::ID name,
+                                           const IR::Vector<IR::Argument> *args,
+                                           ExecutionState &state) {
     // Provides implementations of eBPF externs.
     static const ExternMethodImpls EXTERN_METHOD_IMPLS({
         /* ======================================================================================
@@ -47,11 +47,11 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
         // TODO: Count currently has no effect in the symbolic interpreter.
         {"CounterArray.add",
          {"index", "value"},
-         [](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-            IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* /*args*/,
-            const ExecutionState& state, SmallStepEvaluator::Result& result) {
+         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
+            const ExecutionState &state, SmallStepEvaluator::Result &result) {
              ::warning("CounterArray.add not fully implemented.");
-             auto* nextState = new ExecutionState(state);
+             auto *nextState = new ExecutionState(state);
              nextState->popBody();
              result->emplace_back(nextState);
          }},
@@ -68,11 +68,11 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
         // TODO: Count currently has no effect in the symbolic interpreter.
         {"CounterArray.increment",
          {"index"},
-         [](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-            IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* /*args*/,
-            const ExecutionState& state, SmallStepEvaluator::Result& result) {
+         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
+            const ExecutionState &state, SmallStepEvaluator::Result &result) {
              ::warning("CounterArray.increment not fully implemented.");
-             auto* nextState = new ExecutionState(state);
+             auto *nextState = new ExecutionState(state);
              nextState->popBody();
              result->emplace_back(nextState);
          }},
@@ -87,10 +87,10 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
          * ====================================================================================== */
         {"*method.verify_ipv4_checksum",
          {"iphdr"},
-         [](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-            IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
-            const ExecutionState& state, SmallStepEvaluator::Result& result) {
-             const auto* ipHdrRef = args->at(0)->expression;
+         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+            const ExecutionState &state, SmallStepEvaluator::Result &result) {
+             const auto *ipHdrRef = args->at(0)->expression;
              if (!(ipHdrRef->is<IR::Member>() || ipHdrRef->is<IR::PathExpression>())) {
                  TESTGEN_UNIMPLEMENTED("IP header input %1% of type %2% not supported", ipHdrRef,
                                        ipHdrRef->type);
@@ -98,37 +98,37 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
              // Input must be an IPv4 header.
              ipHdrRef->type->checkedTo<IR::Type_Header>();
 
-             const auto& validVar = state.get(Utils::getHeaderValidity(ipHdrRef));
+             const auto &validVar = state.get(Utils::getHeaderValidity(ipHdrRef));
              // Check whether the validity bit of the header is false.
              // If yes, do not bother evaluating the checksum.
              auto emitIsTainted = state.hasTaint(validVar);
              if (emitIsTainted || !validVar->checkedTo<IR::BoolLiteral>()->value) {
-                 auto* nextState = new ExecutionState(state);
+                 auto *nextState = new ExecutionState(state);
                  nextState->replaceTopBody(Continuation::Return(IR::getBoolLiteral(false)));
                  result->emplace_back(nextState);
                  return;
              }
              // Define a series of short-hand variables. These are hardcoded just like the extern.
-             const auto* version = state.get(new IR::Member(ipHdrRef, "version"));
-             const auto* ihl = state.get(new IR::Member(ipHdrRef, "ihl"));
-             const auto* diffserv = state.get(new IR::Member(ipHdrRef, "diffserv"));
-             const auto* totalLen = state.get(new IR::Member(ipHdrRef, "totalLen"));
-             const auto* identification = state.get(new IR::Member(ipHdrRef, "identification"));
-             const auto* flags = state.get(new IR::Member(ipHdrRef, "flags"));
-             const auto* fragOffset = state.get(new IR::Member(ipHdrRef, "fragOffset"));
-             const auto* ttl = state.get(new IR::Member(ipHdrRef, "ttl"));
-             const auto* protocol = state.get(new IR::Member(ipHdrRef, "protocol"));
-             const auto* hdrChecksum = state.get(new IR::Member(ipHdrRef, "hdrChecksum"));
-             const auto* srcAddr = state.get(new IR::Member(ipHdrRef, "srcAddr"));
-             const auto* dstAddr = state.get(new IR::Member(ipHdrRef, "dstAddr"));
-             const auto* bt8 = IR::getBitType(8);
-             const auto* bt16 = IR::getBitType(16);
-             const auto* bt32 = IR::getBitType(32);
+             const auto *version = state.get(new IR::Member(ipHdrRef, "version"));
+             const auto *ihl = state.get(new IR::Member(ipHdrRef, "ihl"));
+             const auto *diffserv = state.get(new IR::Member(ipHdrRef, "diffserv"));
+             const auto *totalLen = state.get(new IR::Member(ipHdrRef, "totalLen"));
+             const auto *identification = state.get(new IR::Member(ipHdrRef, "identification"));
+             const auto *flags = state.get(new IR::Member(ipHdrRef, "flags"));
+             const auto *fragOffset = state.get(new IR::Member(ipHdrRef, "fragOffset"));
+             const auto *ttl = state.get(new IR::Member(ipHdrRef, "ttl"));
+             const auto *protocol = state.get(new IR::Member(ipHdrRef, "protocol"));
+             const auto *hdrChecksum = state.get(new IR::Member(ipHdrRef, "hdrChecksum"));
+             const auto *srcAddr = state.get(new IR::Member(ipHdrRef, "srcAddr"));
+             const auto *dstAddr = state.get(new IR::Member(ipHdrRef, "dstAddr"));
+             const auto *bt8 = IR::getBitType(8);
+             const auto *bt16 = IR::getBitType(16);
+             const auto *bt32 = IR::getBitType(32);
 
              // The checksum is computed as a series of 16-bit additions.
              // We need to widen to 32 bits to handle overflows.
              // These overflows are added to the checksum at the end.
-             const IR::Expression* checksum = new IR::Cast(
+             const IR::Expression *checksum = new IR::Cast(
                  bt32, new IR::Concat(bt16, new IR::Concat(bt8, version, ihl), diffserv));
              checksum = new IR::Add(bt32, checksum, new IR::Cast(bt32, totalLen));
              checksum = new IR::Add(bt32, checksum, new IR::Cast(bt32, identification));
@@ -147,9 +147,9 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
                  new IR::Add(bt32, checksum, new IR::Cast(bt32, new IR::Slice(dstAddr, 15, 0)));
              checksum =
                  new IR::Add(bt16, new IR::Slice(checksum, 31, 16), new IR::Slice(checksum, 15, 0));
-             const auto* calcResult = new IR::Cmpl(bt16, checksum);
-             const auto* comparison = new IR::Equ(calcResult, IR::getConstant(bt16, 0));
-             auto* nextState = new ExecutionState(state);
+             const auto *calcResult = new IR::Cmpl(bt16, checksum);
+             const auto *comparison = new IR::Equ(calcResult, IR::getConstant(bt16, 0));
+             auto *nextState = new ExecutionState(state);
              nextState->replaceTopBody(Continuation::Return(comparison));
              result->emplace_back(nextState);
          }},
@@ -164,25 +164,25 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
          * ====================================================================================== */
         {"*method.tcp_conntrack",
          {"hdrs"},
-         [](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-            IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
-            const ExecutionState& state, SmallStepEvaluator::Result& result) {
-             const auto* headers = args->at(0)->expression;
+         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+            const ExecutionState &state, SmallStepEvaluator::Result &result) {
+             const auto *headers = args->at(0)->expression;
              if (!(headers->is<IR::Member>() || headers->is<IR::PathExpression>())) {
                  TESTGEN_UNIMPLEMENTED("IP header input %1% of type %2% not supported", headers,
                                        headers->type);
              }
              // Input must be the headers struct.
              headers->type->checkedTo<IR::Type_Struct>();
-             const auto* tcpRef = new IR::Member(headers, "tcp");
-             const auto* syn = state.get(new IR::Member(tcpRef, "syn"));
-             const auto* ack = state.get(new IR::Member(tcpRef, "ack"));
+             const auto *tcpRef = new IR::Member(headers, "tcp");
+             const auto *syn = state.get(new IR::Member(tcpRef, "syn"));
+             const auto *ack = state.get(new IR::Member(tcpRef, "ack"));
 
              // Implement the simple conntrack case since we do not support multiple packets here
              // yet.
              // TODO: We need custom test objects to implement richer, stateful testing here.
-             auto* nextState = new ExecutionState(state);
-             const auto* cond = new IR::LAnd(new IR::Equ(syn, IR::getConstant(syn->type, 1)),
+             auto *nextState = new ExecutionState(state);
+             const auto *cond = new IR::LAnd(new IR::Equ(syn, IR::getConstant(syn->type, 1)),
                                              new IR::Equ(ack, IR::getConstant(ack->type, 0)));
              nextState->replaceTopBody(Continuation::Return(cond));
              result->emplace_back(nextState);
@@ -194,7 +194,7 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
     }
 }  // NOLINT
 
-bool EBPFExprStepper::preorder(const IR::P4Table* table) {
+bool EBPFExprStepper::preorder(const IR::P4Table *table) {
     // Delegate to the tableStepper.
     EBPFTableStepper tableStepper(this, table);
 

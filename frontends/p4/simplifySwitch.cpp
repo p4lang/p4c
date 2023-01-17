@@ -18,7 +18,7 @@ limitations under the License.
 
 namespace P4 {
 
-bool DoSimplifySwitch::matches(const IR::Expression* left, const IR::Expression* right) const {
+bool DoSimplifySwitch::matches(const IR::Expression *left, const IR::Expression *right) const {
     // We know that left and right have matching types
     if (left->is<IR::DefaultExpression>()) return true;
     auto type = typeMap->getType(right);
@@ -35,7 +35,7 @@ bool DoSimplifySwitch::matches(const IR::Expression* left, const IR::Expression*
     return false;
 }
 
-const IR::Node* DoSimplifySwitch::postorder(IR::SwitchStatement* stat) {
+const IR::Node *DoSimplifySwitch::postorder(IR::SwitchStatement *stat) {
     if (!typeMap->isCompileTimeConstant(stat->expression)) return stat;
     bool foundMatch = false;
     for (auto ss : stat->cases) {

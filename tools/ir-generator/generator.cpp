@@ -23,7 +23,7 @@ limitations under the License.
 #include "irclass.h"
 #include "lib/nullstream.h"
 
-void usage(const char* progname) {
+void usage(const char *progname) {
     fprintf(stderr,
             "%s: generate C++ classes for representing\n"
             "the P4 compiler intermediate representation\n",
@@ -38,10 +38,10 @@ void usage(const char* progname) {
     fprintf(stderr, "     -P: don't generate #line directives\n");
 }
 
-int main(int argc, char* argv[]) {
-    std::ostream* t = new nullstream();
-    std::ostream* header = new nullstream();
-    std::ostream* impl = new nullstream();
+int main(int argc, char *argv[]) {
+    std::ostream *t = new nullstream();
+    std::ostream *header = new nullstream();
+    std::ostream *impl = new nullstream();
 
     while (true) {
         int opt = getopt(argc, argv, "o:i:t:hP");
@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    IrDefinitions* defs = parse(argv + optind, argc - optind);
+    IrDefinitions *defs = parse(argv + optind, argc - optind);
     if (defs == nullptr) return 1;
 
     defs->resolve();

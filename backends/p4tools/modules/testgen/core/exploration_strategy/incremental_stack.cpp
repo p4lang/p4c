@@ -4,11 +4,11 @@
 
 #include <boost/none.hpp>
 
+#include "backends/p4tools/common/core/solver.h"
+#include "backends/p4tools/common/lib/formulae.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "lib/error.h"
-#include "p4tools/common/core/solver.h"
-#include "p4tools/common/lib/formulae.h"
 
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
@@ -21,7 +21,7 @@ namespace P4Tools {
 
 namespace P4Testgen {
 
-void IncrementalStack::run(const Callback& callback) {
+void IncrementalStack::run(const Callback &callback) {
     while (true) {
         try {
             if (executionState->isTerminal()) {
@@ -39,13 +39,13 @@ void IncrementalStack::run(const Callback& callback) {
                 // in the state before the step was taken - we copy the current symbolic state.
                 StepResult successors = step(*executionState);
                 bool guaranteeViability = successors->size() > 1;
-                ExecutionState* next = chooseBranch(*successors, guaranteeViability);
+                ExecutionState *next = chooseBranch(*successors, guaranteeViability);
                 if (next != nullptr) {
                     executionState = next;
                     continue;
                 }
             }
-        } catch (TestgenUnimplemented& e) {
+        } catch (TestgenUnimplemented &e) {
             // If strict is enabled, bubble the exception up.
             if (TestgenOptions::get().strict) {
                 throw;
@@ -62,8 +62,8 @@ void IncrementalStack::run(const Callback& callback) {
                 return;
             }
             bool guaranteeViability = true;
-            auto* successors = unexploredBranches.pop();
-            ExecutionState* next = chooseBranch(*successors, guaranteeViability);
+            auto *successors = unexploredBranches.pop();
+            ExecutionState *next = chooseBranch(*successors, guaranteeViability);
             if (next != nullptr) {
                 executionState = next;
                 break;
@@ -72,11 +72,10 @@ void IncrementalStack::run(const Callback& callback) {
     }
 }
 
-IncrementalStack::IncrementalStack(AbstractSolver& solver, const ProgramInfo& programInfo,
-                                   boost::optional<uint32_t> seed)
-    : ExplorationStrategy(solver, programInfo, seed) {}
+IncrementalStack::IncrementalStack(AbstractSolver &solver, const ProgramInfo &programInfo)
+    : ExplorationStrategy(solver, programInfo) {}
 
-ExecutionState* IncrementalStack::chooseBranch(std::vector<Branch>& branches,
+ExecutionState *IncrementalStack::chooseBranch(std::vector<Branch> &branches,
                                                bool guaranteeViability) {
     while (true) {
         // Fail if we've run out of branches.
@@ -96,7 +95,7 @@ ExecutionState* IncrementalStack::chooseBranch(std::vector<Branch>& branches,
 
         // Do not bother invoking the solver for a trivial case.
         // In either case (true or false), we do not need to add the assertion and check.
-        if (const auto* boolLiteral = branch.constraint->to<IR::BoolLiteral>()) {
+        if (const auto *boolLiteral = branch.constraint->to<IR::BoolLiteral>()) {
             guaranteeViability = false;
             if (!boolLiteral->value) {
                 unexploredBranches.pop();
@@ -130,7 +129,7 @@ void IncrementalStack::UnexploredBranches::push(IncrementalStack::StepResult bra
 }
 
 IncrementalStack::StepResult IncrementalStack::UnexploredBranches::pop() {
-    auto* result = unexploredBranches.top();
+    auto *result = unexploredBranches.top();
     unexploredBranches.pop();
     return result;
 }

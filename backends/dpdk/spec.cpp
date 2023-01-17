@@ -7,20 +7,20 @@
 using namespace DBPrint;
 
 ordered_map<cstring, int> DPDK::CollectDirectCounterMeter::directMeterCounterSizeMap = {};
-auto& directMeterCounterSizeMap = DPDK::CollectDirectCounterMeter::directMeterCounterSizeMap;
+auto &directMeterCounterSizeMap = DPDK::CollectDirectCounterMeter::directMeterCounterSizeMap;
 
 ordered_map<cstring, cstring> DPDK::ShortenTokenLength::origNameMap = {};
-auto& origNameMap = DPDK::ShortenTokenLength::origNameMap;
+auto &origNameMap = DPDK::ShortenTokenLength::origNameMap;
 
-void add_space(std::ostream& out, int size) { out << std::setfill(' ') << std::setw(size) << " "; }
+void add_space(std::ostream &out, int size) { out << std::setfill(' ') << std::setw(size) << " "; }
 
-void add_comment(std::ostream& out, cstring str, cstring sep = "") {
+void add_comment(std::ostream &out, cstring str, cstring sep = "") {
     if (origNameMap.count(str)) {
         out << sep << ";oldname:" << origNameMap.at(str) << "\n";
     }
 }
 
-std::ostream& IR::DpdkAsmProgram::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkAsmProgram::toSpec(std::ostream &out) const {
     for (auto l : globals) {
         l->toSpec(out) << std::endl;
     }
@@ -59,17 +59,17 @@ std::ostream& IR::DpdkAsmProgram::toSpec(std::ostream& out) const {
     return out;
 }
 
-std::ostream& IR::DpdkAsmStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkAsmStatement::toSpec(std::ostream &out) const {
     BUG("asm statement %1% not implemented", this);
     return out;
 }
 
-std::ostream& IR::DpdkDeclaration::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkDeclaration::toSpec(std::ostream &out) const {
     // TBD
     return out;
 }
 
-std::ostream& IR::DpdkExternDeclaration::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
     if (DPDK::toStr(getType()) == "Register") {
         auto args = arguments;
         if (args->size() == 0) {
@@ -114,7 +114,7 @@ std::ostream& IR::DpdkExternDeclaration::toSpec(std::ostream& out) const {
             ::error(ErrorType::ERR_INVALID,
                     "Counter extern declaration %1% must contain 1 parameters\n", Name());
         } else {
-            IR::Expression* n_counters = nullptr;
+            IR::Expression *n_counters = nullptr;
             if (directMeterCounterSizeMap.count(Name())) {
                 n_counters = new IR::Constant(directMeterCounterSizeMap.at(Name()));
             } else {
@@ -159,7 +159,7 @@ std::ostream& IR::DpdkExternDeclaration::toSpec(std::ostream& out) const {
                     "meter type parameter",
                     Name());
         } else {
-            IR::Expression* n_meters = nullptr;
+            IR::Expression *n_meters = nullptr;
             if (directMeterCounterSizeMap.count(Name())) {
                 n_meters = new IR::Constant(directMeterCounterSizeMap.at(Name()));
             } else {
@@ -172,7 +172,7 @@ std::ostream& IR::DpdkExternDeclaration::toSpec(std::ostream& out) const {
     return out;
 }
 
-std::ostream& IR::DpdkHeaderType::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkHeaderType::toSpec(std::ostream &out) const {
     out << "struct " << name << " {" << std::endl;
     for (auto it = fields.begin(); it != fields.end(); ++it) {
         add_comment(out, (*it)->name.toString(), "\t");
@@ -194,7 +194,7 @@ std::ostream& IR::DpdkHeaderType::toSpec(std::ostream& out) const {
     return out;
 }
 
-std::ostream& IR::DpdkStructType::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkStructType::toSpec(std::ostream &out) const {
     if (getAnnotations()->getSingle("__packet_data__")) {
         for (auto it = fields.begin(); it != fields.end(); ++it) {
             add_comment(out, (*it)->name.toString());
@@ -249,7 +249,7 @@ std::ostream& IR::DpdkStructType::toSpec(std::ostream& out) const {
     return out;
 }
 
-std::ostream& IR::DpdkListStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkListStatement::toSpec(std::ostream &out) const {
     out << "apply {" << std::endl;
     for (auto s : statements) {
         out << "\t";
@@ -260,60 +260,60 @@ std::ostream& IR::DpdkListStatement::toSpec(std::ostream& out) const {
     return out;
 }
 
-std::ostream& IR::DpdkApplyStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkApplyStatement::toSpec(std::ostream &out) const {
     out << "table " << table;
     return out;
 }
 
-std::ostream& IR::DpdkMirrorStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkMirrorStatement::toSpec(std::ostream &out) const {
     out << "mirror " << DPDK::toStr(slotId) << " " << DPDK::toStr(sessionId);
     return out;
 }
 
-std::ostream& IR::DpdkLearnStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkLearnStatement::toSpec(std::ostream &out) const {
     out << "learn " << action << " ";
     if (argument) out << DPDK::toStr(argument) << " ";
     out << DPDK::toStr(timeout);
     return out;
 }
 
-std::ostream& IR::DpdkEmitStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkEmitStatement::toSpec(std::ostream &out) const {
     out << "emit " << DPDK::toStr(header);
     return out;
 }
 
-std::ostream& IR::DpdkExtractStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkExtractStatement::toSpec(std::ostream &out) const {
     out << "extract " << DPDK::toStr(header);
     if (length) out << " " << DPDK::toStr(length);
     return out;
 }
 
-std::ostream& IR::DpdkLookaheadStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkLookaheadStatement::toSpec(std::ostream &out) const {
     out << "lookahead " << DPDK::toStr(header);
     return out;
 }
 
-std::ostream& IR::DpdkJmpStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkJmpStatement::toSpec(std::ostream &out) const {
     out << instruction << " " << label;
     return out;
 }
 
-std::ostream& IR::DpdkJmpHeaderStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkJmpHeaderStatement::toSpec(std::ostream &out) const {
     out << instruction << " " << label << " " << DPDK::toStr(header);
     return out;
 }
 
-std::ostream& IR::DpdkJmpActionStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkJmpActionStatement::toSpec(std::ostream &out) const {
     out << instruction << " " << label << " " << action;
     return out;
 }
 
-std::ostream& IR::DpdkJmpCondStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkJmpCondStatement::toSpec(std::ostream &out) const {
     out << instruction << " " << label << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2);
     return out;
 }
 
-std::ostream& IR::DpdkBinaryStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkBinaryStatement::toSpec(std::ostream &out) const {
     BUG_CHECK(dst->equiv(*src1),
               "The first source field %1% in a binary operation"
               "must be the same as the destination field %2% to be supported by DPDK",
@@ -322,58 +322,58 @@ std::ostream& IR::DpdkBinaryStatement::toSpec(std::ostream& out) const {
     return out;
 }
 
-std::ostream& IR::DpdkUnaryStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkUnaryStatement::toSpec(std::ostream &out) const {
     out << instruction << " " << DPDK::toStr(dst) << " " << DPDK::toStr(src);
     return out;
 }
 
-std::ostream& IR::DpdkRxStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkRxStatement::toSpec(std::ostream &out) const {
     out << "rx " << DPDK::toStr(port);
     return out;
 }
 
-std::ostream& IR::DpdkTxStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkTxStatement::toSpec(std::ostream &out) const {
     out << "tx " << DPDK::toStr(port);
     return out;
 }
 
-std::ostream& IR::DpdkExternObjStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkExternObjStatement::toSpec(std::ostream &out) const {
     out << "extern_obj ";
     return out;
 }
 
-std::ostream& IR::DpdkExternFuncStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkExternFuncStatement::toSpec(std::ostream &out) const {
     out << "extern_func ";
     return out;
 }
 
-std::ostream& IR::DpdkReturnStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkReturnStatement::toSpec(std::ostream &out) const {
     out << "return ";
     return out;
 }
 
-std::ostream& IR::DpdkRearmStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkRearmStatement::toSpec(std::ostream &out) const {
     out << "rearm";
     if (timeout) out << " " << DPDK::toStr(timeout);
     return out;
 }
 
-std::ostream& IR::DpdkRecirculateStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkRecirculateStatement::toSpec(std::ostream &out) const {
     out << "recirculate";
     return out;
 }
 
-std::ostream& IR::DpdkRecircidStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkRecircidStatement::toSpec(std::ostream &out) const {
     out << "recircid " << DPDK::toStr(pass);
     return out;
 }
 
-std::ostream& IR::DpdkLabelStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkLabelStatement::toSpec(std::ostream &out) const {
     out << label << " :";
     return out;
 }
 
-std::ostream& IR::DpdkTable::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
     out << "table " << name << " {" << std::endl;
     if (match_keys) {
         out << "\tkey {" << std::endl;
@@ -453,7 +453,7 @@ std::ostream& IR::DpdkTable::toSpec(std::ostream& out) const {
     return out;
 }
 
-std::ostream& IR::DpdkSelector::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkSelector::toSpec(std::ostream &out) const {
     out << "selector " << name << " {" << std::endl;
     out << "\tgroup_id " << DPDK::toStr(group_id) << std::endl;
     if (selectors) {
@@ -464,13 +464,14 @@ std::ostream& IR::DpdkSelector::toSpec(std::ostream& out) const {
         out << "\t}" << std::endl;
     }
     out << "\tmember_id " << DPDK::toStr(member_id) << std::endl;
-    out << "\tn_groups_max " << n_groups_max << std::endl;
-    out << "\tn_members_per_group_max " << n_members_per_group_max << std::endl;
+    out << "\tn_groups_max 0x" << std::hex << std::uppercase << n_groups_max << std::endl;
+    out << "\tn_members_per_group_max 0x" << std::hex << std::uppercase << n_members_per_group_max
+        << std::endl;
     out << "}" << std::endl;
     return out;
 }
 
-std::ostream& IR::DpdkLearner::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkLearner::toSpec(std::ostream &out) const {
     out << "learner " << name << " {" << std::endl;
     if (match_keys) {
         out << "\tkey {" << std::endl;
@@ -511,7 +512,7 @@ std::ostream& IR::DpdkLearner::toSpec(std::ostream& out) const {
     return out;
 }
 
-std::ostream& IR::DpdkAction::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkAction::toSpec(std::ostream &out) const {
     out << "action " << name.toString() << " args ";
 
     if (para.parameters.size() == 0) out << "none ";
@@ -532,26 +533,26 @@ std::ostream& IR::DpdkAction::toSpec(std::ostream& out) const {
     return out;
 }
 
-std::ostream& IR::DpdkChecksumAddStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkChecksumAddStatement::toSpec(std::ostream &out) const {
     out << "ckadd "
         << "h.cksum_state." << intermediate_value << " " << DPDK::toStr(field);
     return out;
 }
 
-std::ostream& IR::DpdkChecksumSubStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkChecksumSubStatement::toSpec(std::ostream &out) const {
     out << "cksub "
         << "h.cksum_state." << intermediate_value << " " << DPDK::toStr(field);
     return out;
 }
 
-std::ostream& IR::DpdkChecksumClearStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkChecksumClearStatement::toSpec(std::ostream &out) const {
     out << "mov "
         << "h.cksum_state." << intermediate_value << " "
         << "0x0";
     return out;
 }
 
-std::ostream& IR::DpdkGetHashStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkGetHashStatement::toSpec(std::ostream &out) const {
     out << "hash " << hash << " " << DPDK::toStr(dst) << " ";
     if (auto l = fields->to<IR::ListExpression>()) {
         if (l->components.size() == 1) {
@@ -567,29 +568,29 @@ std::ostream& IR::DpdkGetHashStatement::toSpec(std::ostream& out) const {
     return out;
 }
 
-std::ostream& IR::DpdkGetChecksumStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkGetChecksumStatement::toSpec(std::ostream &out) const {
     out << "mov " << DPDK::toStr(dst) << " "
         << "h.cksum_state." << intermediate_value;
     return out;
 }
 
-std::ostream& IR::DpdkCastStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkCastStatement::toSpec(std::ostream &out) const {
     out << "mov " << DPDK::toStr(dst) << " " << DPDK::toStr(src);
     return out;
 }
 
-std::ostream& IR::DpdkVerifyStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkVerifyStatement::toSpec(std::ostream &out) const {
     out << "verify " << DPDK::toStr(condition) << " " << DPDK::toStr(error);
     return out;
 }
 
-std::ostream& IR::DpdkMeterDeclStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkMeterDeclStatement::toSpec(std::ostream &out) const {
     add_comment(out, meter);
     out << "metarray " << meter << " size " << DPDK::toStr(size);
     return out;
 }
 
-std::ostream& IR::DpdkMeterExecuteStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkMeterExecuteStatement::toSpec(std::ostream &out) const {
     out << "meter " << meter << " " << DPDK::toStr(index) << " " << DPDK::toStr(length);
     out << " " << DPDK::toStr(color_in) << " " << DPDK::toStr(color_out);
     return out;
@@ -598,7 +599,7 @@ std::ostream& IR::DpdkMeterExecuteStatement::toSpec(std::ostream& out) const {
 /* DPDK target uses Registers for implementing using Counters, atomic register add instruction
    is used for incrementing the counter. Packet counters are incremented by packet length
    specified as parameter and byte counters are incremente by 1 */
-std::ostream& IR::DpdkCounterCountStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkCounterCountStatement::toSpec(std::ostream &out) const {
     add_comment(out, counter);
     out << "regadd " << counter << " " << DPDK::toStr(index) << " ";
     if (incr)
@@ -608,12 +609,12 @@ std::ostream& IR::DpdkCounterCountStatement::toSpec(std::ostream& out) const {
     return out;
 }
 
-std::ostream& IR::DpdkGetTableEntryIndex::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkGetTableEntryIndex::toSpec(std::ostream &out) const {
     out << "entryid " << DPDK::toStr(index) << " ";
     return out;
 }
 
-std::ostream& IR::DpdkRegisterDeclStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkRegisterDeclStatement::toSpec(std::ostream &out) const {
     add_comment(out, reg);
     out << "regarray " << reg << " size " << DPDK::toStr(size) << " initval ";
     if (init_val)
@@ -623,27 +624,27 @@ std::ostream& IR::DpdkRegisterDeclStatement::toSpec(std::ostream& out) const {
     return out;
 }
 
-std::ostream& IR::DpdkRegisterReadStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkRegisterReadStatement::toSpec(std::ostream &out) const {
     out << "regrd " << DPDK::toStr(dst) << " " << reg << " " << DPDK::toStr(index);
     return out;
 }
 
-std::ostream& IR::DpdkRegisterWriteStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkRegisterWriteStatement::toSpec(std::ostream &out) const {
     out << "regwr " << reg << " " << DPDK::toStr(index) << " " << DPDK::toStr(src);
     return out;
 }
 
-std::ostream& IR::DpdkValidateStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkValidateStatement::toSpec(std::ostream &out) const {
     out << "validate " << DPDK::toStr(header);
     return out;
 }
 
-std::ostream& IR::DpdkInvalidateStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkInvalidateStatement::toSpec(std::ostream &out) const {
     out << "invalidate " << DPDK::toStr(header);
     return out;
 }
 
-std::ostream& IR::DpdkDropStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkDropStatement::toSpec(std::ostream &out) const {
     out << "drop";
     return out;
 }

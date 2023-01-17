@@ -28,16 +28,16 @@ struct FunctionSpecialization {
     /// Name to use for specialized function.
     cstring name;
     /// Function that is being specialized
-    const IR::Function* original;
+    const IR::Function *original;
     /// Result of specialization
-    const IR::Function* specialized;
+    const IR::Function *specialized;
     /// Invocation which causes this specialization.
-    const IR::MethodCallExpression* invocation;
+    const IR::MethodCallExpression *invocation;
     /// Point in IR tree where to insert the function
-    const IR::Node* insertBefore;
+    const IR::Node *insertBefore;
 
-    FunctionSpecialization(cstring name, const IR::MethodCallExpression* invocation,
-                           const IR::Function* function, const IR::Node* insert)
+    FunctionSpecialization(cstring name, const IR::MethodCallExpression *invocation,
+                           const IR::Function *function, const IR::Node *insert)
         : name(name),
           original(function),
           specialized(nullptr),
@@ -50,24 +50,24 @@ struct FunctionSpecialization {
 };
 
 struct FunctionSpecializationMap {
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
-    ordered_map<const IR::MethodCallExpression*, FunctionSpecialization*> map;
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
+    ordered_map<const IR::MethodCallExpression *, FunctionSpecialization *> map;
     // Keep track of the values in the above map which are already
     // inserted in the program.
-    std::set<FunctionSpecialization*> inserted;
+    std::set<FunctionSpecialization *> inserted;
 
-    void add(const IR::MethodCallExpression* mce, const IR::Function* func,
-             const IR::Node* insert) {
+    void add(const IR::MethodCallExpression *mce, const IR::Function *func,
+             const IR::Node *insert) {
         cstring name = refMap->newName(func->name);
-        FunctionSpecialization* fs = new FunctionSpecialization(name, mce, func, insert);
+        FunctionSpecialization *fs = new FunctionSpecialization(name, mce, func, insert);
         map.emplace(mce, fs);
     }
-    FunctionSpecialization* get(const IR::MethodCallExpression* mce) const {
+    FunctionSpecialization *get(const IR::MethodCallExpression *mce) const {
         return ::get(map, mce);
     }
-    IR::Vector<IR::Node>* getInsertions(const IR::Node* insertionPoint) {
-        IR::Vector<IR::Node>* result = nullptr;
+    IR::Vector<IR::Node> *getInsertions(const IR::Node *insertionPoint) {
+        IR::Vector<IR::Node> *result = nullptr;
         for (auto s : map) {
             if (inserted.find(s.second) != inserted.end()) continue;
             if (s.second->insertBefore == insertionPoint) {
@@ -86,15 +86,15 @@ struct FunctionSpecializationMap {
  * Find all generic function invocations and their type arguments.
  */
 class FindFunctionSpecializations : public Inspector {
-    FunctionSpecializationMap* specMap;
+    FunctionSpecializationMap *specMap;
 
  public:
-    explicit FindFunctionSpecializations(FunctionSpecializationMap* specMap) : specMap(specMap) {
+    explicit FindFunctionSpecializations(FunctionSpecializationMap *specMap) : specMap(specMap) {
         CHECK_NULL(specMap);
         setName("FindFunctionSpecializations");
     }
 
-    bool preorder(const IR::MethodCallExpression* call) override;
+    bool preorder(const IR::MethodCallExpression *call) override;
 };
 
 /** @brief Specializes each generic function by substituting type parameters.
@@ -117,26 +117,26 @@ bit<32> b = f_0(32w0);
  * A different specialization is made for each function invocation.
  */
 class SpecializeFunctions : public Transform {
-    FunctionSpecializationMap* specMap;
+    FunctionSpecializationMap *specMap;
 
  public:
-    explicit SpecializeFunctions(FunctionSpecializationMap* specMap) : specMap(specMap) {
+    explicit SpecializeFunctions(FunctionSpecializationMap *specMap) : specMap(specMap) {
         CHECK_NULL(specMap);
         setName("SpecializeFunctions");
     }
-    const IR::Node* postorder(IR::Function* function) override;
-    const IR::Node* postorder(IR::MethodCallExpression*) override;
-    const IR::Node* insert(const IR::Node* before);
-    const IR::Node* preorder(IR::P4Control* control) override { return insert(control); }
-    const IR::Node* preorder(IR::P4Parser* parser) override { return insert(parser); }
-    const IR::Node* preorder(IR::Function* function) override { return insert(function); }
+    const IR::Node *postorder(IR::Function *function) override;
+    const IR::Node *postorder(IR::MethodCallExpression *) override;
+    const IR::Node *insert(const IR::Node *before);
+    const IR::Node *preorder(IR::P4Control *control) override { return insert(control); }
+    const IR::Node *preorder(IR::P4Parser *parser) override { return insert(parser); }
+    const IR::Node *preorder(IR::Function *function) override { return insert(function); }
 };
 
 class SpecializeGenericFunctions : public PassManager {
     FunctionSpecializationMap specMap;
 
  public:
-    SpecializeGenericFunctions(ReferenceMap* refMap, TypeMap* typeMap) {
+    SpecializeGenericFunctions(ReferenceMap *refMap, TypeMap *typeMap) {
         passes.emplace_back(new TypeChecking(refMap, typeMap));
         passes.emplace_back(new FindFunctionSpecializations(&specMap));
         passes.emplace_back(new SpecializeFunctions(&specMap));

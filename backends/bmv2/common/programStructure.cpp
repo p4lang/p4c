@@ -16,9 +16,11 @@ limitations under the License.
 
 #include "programStructure.h"
 
+#include "lib/log.h"
+
 namespace BMV2 {
 
-void DiscoverStructure::postorder(const IR::ParameterList* paramList) {
+void DiscoverStructure::postorder(const IR::ParameterList *paramList) {
     bool inAction = findContext<IR::P4Action>() != nullptr;
     unsigned index = 0;
     for (auto p : *paramList->getEnumerator()) {
@@ -28,25 +30,25 @@ void DiscoverStructure::postorder(const IR::ParameterList* paramList) {
     }
 }
 
-void DiscoverStructure::postorder(const IR::P4Action* action) {
+void DiscoverStructure::postorder(const IR::P4Action *action) {
     LOG2("discovered action " << action);
     auto control = findContext<IR::P4Control>();
     structure->actions.emplace(action, control);
 }
 
-void DiscoverStructure::postorder(const IR::Declaration_Variable* decl) {
+void DiscoverStructure::postorder(const IR::Declaration_Variable *decl) {
     structure->variables.push_back(decl);
 }
 
-void DiscoverStructure::postorder(const IR::Type_Error* errors) {
-    auto& map = structure->errorCodesMap;
+void DiscoverStructure::postorder(const IR::Type_Error *errors) {
+    auto &map = structure->errorCodesMap;
     for (auto m : *errors->getDeclarations()) {
         BUG_CHECK(map.find(m) == map.end(), "Duplicate error");
         map[m] = map.size();
     }
 }
 
-void DiscoverStructure::postorder(const IR::Declaration_MatchKind* kind) {
+void DiscoverStructure::postorder(const IR::Declaration_MatchKind *kind) {
     for (auto member : kind->members) {
         structure->match_kinds.insert(member->name);
     }

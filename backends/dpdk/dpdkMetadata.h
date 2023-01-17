@@ -17,45 +17,64 @@ limitations under the License.
 #ifndef BACKENDS_DPDK_DPDKMETADATA_H_
 #define BACKENDS_DPDK_DPDKMETADATA_H_
 
+#include "dpdkUtils.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "ir/ir.h"
 
 namespace DPDK {
 
+class IsDirectionMetadataUsed : public Inspector {
+    bool &is_direction_used;
+
+ public:
+    explicit IsDirectionMetadataUsed(bool &is_direction_used)
+        : is_direction_used(is_direction_used) {}
+    bool preorder(const IR::Member *m) override {
+        if (!is_direction_used && isDirection(m)) {
+            is_direction_used = true;
+        }
+        return false;
+    }
+};
+
 // This pass adds decl instance of Register extern in dpdk pna program which will
 // be used by dpdk backend for initializing the mask for calculating packet direction
-// and all the use point of istd.direction will follow below calculation and assignment
-// istd.direction = direction.read(istd.input_port)
+// at beginning of pipeline
 class DirectionToRegRead : public Transform {
-    ordered_map<cstring, cstring> dirToInput;
-    ordered_map<cstring, bool> isInitialized;
-    IR::IndexedVector<IR::DpdkAsmStatement> newStmts;
+    ordered_map<cstring, cstring> dirToDirMapping;
+    ordered_map<cstring, cstring> inputToInputPortMapping;
     ordered_set<cstring> usedNames;
     cstring registerInstanceName;
 
  public:
     DirectionToRegRead() {
-        // direction to input metadata field name mapping
-        dirToInput.insert(std::make_pair(cstring("pna_main_input_metadata_direction"),
-                                         cstring("pna_main_input_metadata_input_port")));
-        dirToInput.insert(std::make_pair(cstring("pna_pre_input_metadata_direction"),
-                                         cstring("pna_pre_input_metadata_input_port")));
-        dirToInput.insert(std::make_pair(cstring("pna_main_parser_input_metadata_direction"),
-                                         cstring("pna_main_parser_input_metadata_input_port")));
-        isInitialized.insert(std::make_pair(cstring("pna_main_input_metadata_direction"), false));
-        isInitialized.insert(std::make_pair(cstring("pna_pre_input_metadata_direction"), false));
-        isInitialized.insert(
-            std::make_pair(cstring("pna_main_parser_input_metadata_direction"), false));
+        // dpdk currently only uses pna_main_input_metadata_direction
+        // and pna_main_input_metadata_input_port
+        // so even when we use any other direction or input port metadata we
+        // replace it like below
+        dirToDirMapping.insert(std::make_pair(cstring("pna_main_input_metadata_direction"),
+                                              cstring("pna_main_input_metadata_direction")));
+        dirToDirMapping.insert(std::make_pair(cstring("pna_pre_input_metadata_direction"),
+                                              cstring("pna_main_input_metadata_direction")));
+        dirToDirMapping.insert(std::make_pair(cstring("pna_main_parser_input_metadata_direction"),
+                                              cstring("pna_main_input_metadata_direction")));
+        inputToInputPortMapping.insert(
+            std::make_pair(cstring("pna_main_input_metadata_input_port"),
+                           cstring("pna_main_input_metadata_input_port")));
+        inputToInputPortMapping.insert(
+            std::make_pair(cstring("pna_pre_input_metadata_direction"),
+                           cstring("pna_main_input_metadata_input_port")));
+        inputToInputPortMapping.insert(
+            std::make_pair(cstring("pna_main_parser_input_metadata_direction"),
+                           cstring("pna_main_input_metadata_input_port")));
     }
-    const IR::Node* preorder(IR::DpdkAsmProgram* p) override;
-    const IR::Node* postorder(IR::DpdkAction* l) override;
+    const IR::Node *preorder(IR::DpdkAsmProgram *p) override;
+    const IR::Node *preorder(IR::Member *m) override;
 
-    void uniqueNames(IR::DpdkAsmProgram* p);
-    IR::DpdkExternDeclaration* addRegDeclInstance(cstring instanceName);
-    bool isDirection(const IR::Member* m);
-    IR::DpdkListStatement* replaceDirection(IR::DpdkListStatement* l);
-    void replaceDirection(const IR::Member* m);
-    IR::IndexedVector<IR::DpdkAsmStatement> replaceDirectionWithRegRead(
+    void uniqueNames(IR::DpdkAsmProgram *p);
+    IR::DpdkExternDeclaration *addRegDeclInstance(cstring instanceName);
+    IR::DpdkListStatement *replaceDirection(IR::DpdkListStatement *l);
+    IR::IndexedVector<IR::DpdkAsmStatement> addRegReadStmtForDirection(
         IR::IndexedVector<IR::DpdkAsmStatement> stmts);
 };
 
@@ -67,9 +86,9 @@ class PrependPassRecircId : public Transform {
 
  public:
     PrependPassRecircId() {}
-    bool isPass(const IR::Member* m);
-    const IR::Node* postorder(IR::DpdkAction* a) override;
-    const IR::Node* postorder(IR::DpdkListStatement* l) override;
+    bool isPass(const IR::Member *m);
+    const IR::Node *postorder(IR::DpdkAction *a) override;
+    const IR::Node *postorder(IR::DpdkListStatement *l) override;
     IR::IndexedVector<IR::DpdkAsmStatement> prependPassWithRecircid(
         IR::IndexedVector<IR::DpdkAsmStatement> stmts);
 };

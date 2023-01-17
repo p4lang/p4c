@@ -18,6 +18,7 @@ limitations under the License.
 #define FRONTENDS_P4_SWITCHADDDEFAULT_H_
 
 #include "ir/ir.h"
+#include "ir/visitor.h"
 
 namespace P4 {
 
@@ -28,7 +29,7 @@ namespace P4 {
  */
 class SwitchAddDefault : public Modifier {
  public:
-    void postorder(IR::SwitchStatement*) override;
+    void postorder(IR::SwitchStatement *) override;
 };
 
 }  // namespace P4

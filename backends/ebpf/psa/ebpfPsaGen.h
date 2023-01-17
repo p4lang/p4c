@@ -27,88 +27,115 @@ limitations under the License.
 
 namespace EBPF {
 
-enum pipeline_type { TC_INGRESS, TC_EGRESS };
+enum pipeline_type { TC_INGRESS, TC_EGRESS, XDP_INGRESS, XDP_EGRESS, TC_TRAFFIC_MANAGER };
 
 class PSAEbpfGenerator {
  public:
     static const unsigned MaxClones = 64;
     static const unsigned MaxCloneSessions = 1024;
 
-    const EbpfOptions& options;
-    std::vector<EBPFType*> ebpfTypes;
+    const EbpfOptions &options;
+    std::vector<EBPFType *> ebpfTypes;
 
-    EBPFPipeline* ingress;
-    EBPFPipeline* egress;
+    EBPFPipeline *ingress;
+    EBPFPipeline *egress;
 
-    PSAEbpfGenerator(const EbpfOptions& options, std::vector<EBPFType*>& ebpfTypes,
-                     EBPFPipeline* ingress, EBPFPipeline* egress)
+    PSAEbpfGenerator(const EbpfOptions &options, std::vector<EBPFType *> &ebpfTypes,
+                     EBPFPipeline *ingress, EBPFPipeline *egress)
         : options(options), ebpfTypes(ebpfTypes), ingress(ingress), egress(egress) {}
 
-    virtual void emit(CodeBuilder* builder) const = 0;
+    virtual void emit(CodeBuilder *builder) const = 0;
 
-    void emitPSAIncludes(CodeBuilder* builder) const;
-    virtual void emitPreamble(CodeBuilder* builder) const;
-    void emitCommonPreamble(CodeBuilder* builder) const;
-    void emitInternalStructures(CodeBuilder* pBuilder) const;
-    void emitTypes(CodeBuilder* builder) const;
-    void emitGlobalHeadersMetadata(CodeBuilder* builder) const;
-    virtual void emitInstances(CodeBuilder* builder) const = 0;
-    void emitPacketReplicationTables(CodeBuilder* builder) const;
-    void emitPipelineInstances(CodeBuilder* builder) const;
-    void emitInitializer(CodeBuilder* builder) const;
-    virtual void emitInitializerSection(CodeBuilder* builder) const = 0;
-    void emitHelperFunctions(CodeBuilder* builder) const;
-    void emitCRC32LookupTableTypes(CodeBuilder* builder) const;
-    void emitCRC32LookupTableInitializer(CodeBuilder* builder) const;
+    void emitPSAIncludes(CodeBuilder *builder) const;
+    virtual void emitPreamble(CodeBuilder *builder) const;
+    void emitCommonPreamble(CodeBuilder *builder) const;
+    void emitInternalStructures(CodeBuilder *pBuilder) const;
+    void emitTypes(CodeBuilder *builder) const;
+    void emitGlobalHeadersMetadata(CodeBuilder *builder) const;
+    virtual void emitInstances(CodeBuilder *builder) const = 0;
+    void emitPacketReplicationTables(CodeBuilder *builder) const;
+    void emitPipelineInstances(CodeBuilder *builder) const;
+    void emitInitializer(CodeBuilder *builder) const;
+    virtual void emitInitializerSection(CodeBuilder *builder) const = 0;
+    void emitHelperFunctions(CodeBuilder *builder) const;
+
+    // TODO: move them to the externs/ebpfPsaHashAlgorithm.cpp file
+    void emitCRC32LookupTableTypes(CodeBuilder *builder) const;
+    void emitCRC32LookupTableInitializer(CodeBuilder *builder) const;
+    void emitCRC32LookupTableInstance(CodeBuilder *builder) const;
 };
 
 class PSAArchTC : public PSAEbpfGenerator {
  public:
-    XDPHelpProgram* xdp;
+    XDPHelpProgram *xdp;
 
-    PSAArchTC(const EbpfOptions& options, std::vector<EBPFType*>& ebpfTypes, XDPHelpProgram* xdp,
-              EBPFPipeline* tcIngress, EBPFPipeline* tcEgress)
+    PSAArchTC(const EbpfOptions &options, std::vector<EBPFType *> &ebpfTypes, XDPHelpProgram *xdp,
+              EBPFPipeline *tcIngress, EBPFPipeline *tcEgress)
         : PSAEbpfGenerator(options, ebpfTypes, tcIngress, tcEgress), xdp(xdp) {}
 
-    void emit(CodeBuilder* builder) const override;
+    void emit(CodeBuilder *builder) const override;
 
-    void emitInstances(CodeBuilder* builder) const override;
-    void emitInitializerSection(CodeBuilder* builder) const override;
-    void emitCRC32LookupTableInstance(CodeBuilder* builder) const;
+    void emitInstances(CodeBuilder *builder) const override;
+    void emitInitializerSection(CodeBuilder *builder) const override;
+};
+
+class PSAArchXDP : public PSAEbpfGenerator {
+ public:
+    // TC Ingress program used to support packet cloning in the XDP mode.
+    EBPFPipeline *tcIngressForXDP;
+    // If the XDP mode is used, we need to have TC Egress pipeline to handle cloned packets.
+    EBPFPipeline *tcEgressForXDP;
+    static const unsigned egressDevmapSize = 256;
+
+    PSAArchXDP(const EbpfOptions &options, std::vector<EBPFType *> &ebpfTypes,
+               EBPFPipeline *xdpIngress, EBPFPipeline *xdpEgress, EBPFPipeline *tcTrafficManager,
+               EBPFPipeline *tcEgress)
+        : PSAEbpfGenerator(options, ebpfTypes, xdpIngress, xdpEgress),
+          tcIngressForXDP(tcTrafficManager),
+          tcEgressForXDP(tcEgress) {}
+
+    void emit(CodeBuilder *builder) const override;
+
+    void emitPreamble(CodeBuilder *builder) const override;
+    void emitInstances(CodeBuilder *builder) const override;
+    void emitInitializerSection(CodeBuilder *builder) const override;
+
+    void emitXDP2TCInternalStructures(CodeBuilder *builder) const;
+    void emitDummyProgram(CodeBuilder *builder) const;
 };
 
 class ConvertToEbpfPSA : public Transform {
-    const EbpfOptions& options;
-    P4::TypeMap* typemap;
-    P4::ReferenceMap* refmap;
-    const PSAEbpfGenerator* ebpf_psa_arch;
+    const EbpfOptions &options;
+    P4::TypeMap *typemap;
+    P4::ReferenceMap *refmap;
+    const PSAEbpfGenerator *ebpf_psa_arch;
 
  public:
-    ConvertToEbpfPSA(const EbpfOptions& options, P4::ReferenceMap* refmap, P4::TypeMap* typemap)
+    ConvertToEbpfPSA(const EbpfOptions &options, P4::ReferenceMap *refmap, P4::TypeMap *typemap)
         : options(options), typemap(typemap), refmap(refmap), ebpf_psa_arch(nullptr) {}
 
-    const PSAEbpfGenerator* build(const IR::ToplevelBlock* prog);
-    const IR::Node* preorder(IR::ToplevelBlock* p) override;
+    const PSAEbpfGenerator *build(const IR::ToplevelBlock *prog);
+    const IR::Node *preorder(IR::ToplevelBlock *p) override;
 
-    const PSAEbpfGenerator* getPSAArchForEBPF() { return ebpf_psa_arch; }
+    const PSAEbpfGenerator *getPSAArchForEBPF() { return ebpf_psa_arch; }
 };
 
 class ConvertToEbpfPipeline : public Inspector {
     const cstring name;
     const pipeline_type type;
-    const EbpfOptions& options;
-    const IR::ParserBlock* parserBlock;
-    const IR::ControlBlock* controlBlock;
-    const IR::ControlBlock* deparserBlock;
-    P4::TypeMap* typemap;
-    P4::ReferenceMap* refmap;
-    EBPFPipeline* pipeline;
+    const EbpfOptions &options;
+    const IR::ParserBlock *parserBlock;
+    const IR::ControlBlock *controlBlock;
+    const IR::ControlBlock *deparserBlock;
+    P4::TypeMap *typemap;
+    P4::ReferenceMap *refmap;
+    EBPFPipeline *pipeline;
 
  public:
-    ConvertToEbpfPipeline(cstring name, pipeline_type type, const EbpfOptions& options,
-                          const IR::ParserBlock* parserBlock, const IR::ControlBlock* controlBlock,
-                          const IR::ControlBlock* deparserBlock, P4::ReferenceMap* refmap,
-                          P4::TypeMap* typemap)
+    ConvertToEbpfPipeline(cstring name, pipeline_type type, const EbpfOptions &options,
+                          const IR::ParserBlock *parserBlock, const IR::ControlBlock *controlBlock,
+                          const IR::ControlBlock *deparserBlock, P4::ReferenceMap *refmap,
+                          P4::TypeMap *typemap)
         : name(name),
           type(type),
           options(options),
@@ -119,65 +146,65 @@ class ConvertToEbpfPipeline : public Inspector {
           refmap(refmap),
           pipeline(nullptr) {}
 
-    bool preorder(const IR::PackageBlock* block) override;
-    EBPFPipeline* getEbpfPipeline() { return pipeline; }
+    bool preorder(const IR::PackageBlock *block) override;
+    EBPFPipeline *getEbpfPipeline() { return pipeline; }
 };
 
 class ConvertToEBPFParserPSA : public Inspector {
-    EBPF::EBPFProgram* program;
+    EBPF::EBPFProgram *program;
     pipeline_type type;
 
-    P4::TypeMap* typemap;
-    EBPF::EBPFPsaParser* parser;
+    P4::TypeMap *typemap;
+    EBPF::EBPFPsaParser *parser;
 
  public:
-    ConvertToEBPFParserPSA(EBPF::EBPFProgram* program, P4::TypeMap* typemap, pipeline_type type)
+    ConvertToEBPFParserPSA(EBPF::EBPFProgram *program, P4::TypeMap *typemap, pipeline_type type)
         : program(program), type(type), typemap(typemap), parser(nullptr) {}
 
-    bool preorder(const IR::ParserBlock* prsr) override;
-    bool preorder(const IR::P4ValueSet* pvs) override;
-    EBPF::EBPFParser* getEBPFParser() { return parser; }
+    bool preorder(const IR::ParserBlock *prsr) override;
+    bool preorder(const IR::P4ValueSet *pvs) override;
+    EBPF::EBPFParser *getEBPFParser() { return parser; }
 };
 
 class ConvertToEBPFControlPSA : public Inspector {
-    EBPF::EBPFProgram* program;
+    EBPF::EBPFProgram *program;
     pipeline_type type;
-    EBPF::EBPFControlPSA* control;
+    EBPF::EBPFControlPSA *control;
 
-    const IR::Parameter* parserHeaders;
-    P4::ReferenceMap* refmap;
+    const IR::Parameter *parserHeaders;
+    P4::ReferenceMap *refmap;
 
  public:
-    ConvertToEBPFControlPSA(EBPF::EBPFProgram* program, const IR::Parameter* parserHeaders,
-                            P4::ReferenceMap* refmap, pipeline_type type)
+    ConvertToEBPFControlPSA(EBPF::EBPFProgram *program, const IR::Parameter *parserHeaders,
+                            P4::ReferenceMap *refmap, pipeline_type type)
         : program(program),
           type(type),
           control(nullptr),
           parserHeaders(parserHeaders),
           refmap(refmap) {}
 
-    bool preorder(const IR::TableBlock*) override;
-    bool preorder(const IR::ControlBlock*) override;
-    bool preorder(const IR::Declaration_Variable*) override;
-    bool preorder(const IR::Member* m) override;
-    bool preorder(const IR::IfStatement* a) override;
-    bool preorder(const IR::ExternBlock* instance) override;
+    bool preorder(const IR::TableBlock *) override;
+    bool preorder(const IR::ControlBlock *) override;
+    bool preorder(const IR::Declaration_Variable *) override;
+    bool preorder(const IR::Member *m) override;
+    bool preorder(const IR::IfStatement *a) override;
+    bool preorder(const IR::ExternBlock *instance) override;
 
-    EBPF::EBPFControlPSA* getEBPFControl() { return control; }
+    EBPF::EBPFControlPSA *getEBPFControl() { return control; }
 };
 
 class ConvertToEBPFDeparserPSA : public Inspector {
-    EBPF::EBPFProgram* program;
+    EBPF::EBPFProgram *program;
     pipeline_type pipelineType;
 
-    const IR::Parameter* parserHeaders;
-    const IR::Parameter* istd;
-    P4::TypeMap* typemap;
-    EBPF::EBPFDeparserPSA* deparser;
+    const IR::Parameter *parserHeaders;
+    const IR::Parameter *istd;
+    P4::TypeMap *typemap;
+    EBPF::EBPFDeparserPSA *deparser;
 
  public:
-    ConvertToEBPFDeparserPSA(EBPFProgram* program, const IR::Parameter* parserHeaders,
-                             const IR::Parameter* istd, P4::TypeMap* typemap, pipeline_type type)
+    ConvertToEBPFDeparserPSA(EBPFProgram *program, const IR::Parameter *parserHeaders,
+                             const IR::Parameter *istd, P4::TypeMap *typemap, pipeline_type type)
         : program(program),
           pipelineType(type),
           parserHeaders(parserHeaders),
@@ -185,9 +212,9 @@ class ConvertToEBPFDeparserPSA : public Inspector {
           typemap(typemap),
           deparser(nullptr) {}
 
-    bool preorder(const IR::ControlBlock*) override;
-    bool preorder(const IR::Declaration_Instance*) override;
-    EBPF::EBPFDeparserPSA* getEBPFDeparser() { return deparser; }
+    bool preorder(const IR::ControlBlock *) override;
+    bool preorder(const IR::Declaration_Instance *) override;
+    EBPF::EBPFDeparserPSA *getEBPFDeparser() { return deparser; }
 };
 
 }  // namespace EBPF

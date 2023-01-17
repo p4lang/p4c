@@ -77,22 +77,22 @@ state s_join {
  */
 
 class DoRemoveParserControlFlow : public Transform {
-    ReferenceMap* refMap;
+    ReferenceMap *refMap;
 
  public:
-    explicit DoRemoveParserControlFlow(ReferenceMap* refMap) : refMap(refMap) {
+    explicit DoRemoveParserControlFlow(ReferenceMap *refMap) : refMap(refMap) {
         CHECK_NULL(refMap);
         setName("DoRemoveParserControlFlow");
     }
-    const IR::Node* postorder(IR::ParserState* state) override;
-    Visitor::profile_t init_apply(const IR::Node* node) override;
+    const IR::Node *postorder(IR::ParserState *state) override;
+    Visitor::profile_t init_apply(const IR::Node *node) override;
 };
 
 /// Iterates DoRemoveParserControlFlow and SimplifyControlFlow until
 /// convergence.
 class RemoveParserControlFlow : public PassRepeated {
  public:
-    RemoveParserControlFlow(ReferenceMap* refMap, TypeMap* typeMap) : PassRepeated({}) {
+    RemoveParserControlFlow(ReferenceMap *refMap, TypeMap *typeMap) : PassRepeated({}) {
         passes.emplace_back(new DoRemoveParserControlFlow(refMap));
         passes.emplace_back(new SimplifyControlFlow(refMap, typeMap));
         setName("RemoveParserControlFlow");
@@ -101,14 +101,14 @@ class RemoveParserControlFlow : public PassRepeated {
 
 /// Detect whether the program contains an 'if' statement in a parser
 class IfInParser : public Inspector {
-    bool* found;
+    bool *found;
 
  public:
-    explicit IfInParser(bool* found) : found(found) {
+    explicit IfInParser(bool *found) : found(found) {
         CHECK_NULL(found);
         setName("IfInParser");
     }
-    void postorder(const IR::IfStatement*) override {
+    void postorder(const IR::IfStatement *) override {
         if (findContext<IR::P4Parser>()) *found = true;
     }
 };
@@ -119,7 +119,7 @@ class RemoveParserIfs : public PassManager {
     bool found = false;
 
  public:
-    RemoveParserIfs(ReferenceMap* refMap, TypeMap* typeMap) {
+    RemoveParserIfs(ReferenceMap *refMap, TypeMap *typeMap) {
         passes.push_back(new IfInParser(&found));
         passes.push_back(new PassIf(
             [this] { return found; },

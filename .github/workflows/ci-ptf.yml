@@ -28,25 +28,30 @@ concurrency:
 
 jobs:
   ptf-linux:
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-20.04
     env:
-      UNIFIED: ON
-    runs-on: ubuntu-latest
+      CTEST_PARALLEL_LEVEL: 4
+      IMAGE_TYPE: test
+      ENABLE_UNIFIED_COMPILATION: ON
+      MAKEFLAGS: -j8
+      INSTALL_PTF_EBPF_DEPENDENCIES: ON
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
 
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1
         with:
-          key: test-${{ env.UNIFIED }}-${{ runner.os }}
+          key: test-ptf-${{ runner.os }}
           max-size: 1000M
 
-      - name: Build (Linux)
+      - name: Build (Ubuntu 20.04)
         run: |
-          docker build --network host -t p4c --build-arg MAKEFLAGS=-j8 --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=$UNIFIED --build-arg INSTALL_PTF_EBPF_DEPENDENCIES=ON .
-          ./tools/export_ccache.sh
+          tools/ci-build.sh
 
-      - name: Run PTF tests for eBPF backend (Linux)
-        run: |
-          sudo docker run --privileged -v /sys/fs/bpf:/sys/fs/bpf -w /p4c/backends/ebpf/tests p4c ./test.sh
+      - name: Run PTF tests for eBPF backend (Ubuntu 20.04)
+        run: sudo -E ./test.sh
+        working-directory: ./backends/ebpf/tests

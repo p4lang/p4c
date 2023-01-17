@@ -33,6 +33,7 @@ struct main_metadata_t {
 	bit<32> local_metadata_meta
 	bit<32> pna_main_output_metadata_output_port
 	bit<32> MainControlImpl_ipv4_da_ipv4_srcAddr
+	bit<32> MainControlImpl_ipv4_da_local_metadata_meta
 	bit<32> MainControlT_tmp
 	bit<32> MainControlT_tmp_0
 	bit<32> learnArg
@@ -71,7 +72,7 @@ action add_on_miss_action2 args none {
 learner ipv4_da {
 	key {
 		m.MainControlImpl_ipv4_da_ipv4_srcAddr
-		m.local_metadata_meta
+		m.MainControlImpl_ipv4_da_local_metadata_meta
 	}
 	actions {
 		next_hop @tableonly
@@ -123,6 +124,7 @@ apply {
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	MAINPARSERIMPL_ACCEPT :	jmpnv LABEL_END h.ipv4
 	mov m.MainControlImpl_ipv4_da_ipv4_srcAddr h.ipv4.srcAddr
+	mov m.MainControlImpl_ipv4_da_local_metadata_meta m.local_metadata_meta
 	table ipv4_da
 	table ipv4_da2
 	LABEL_END :	emit h.ethernet

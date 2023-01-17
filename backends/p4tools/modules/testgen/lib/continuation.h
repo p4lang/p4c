@@ -54,7 +54,7 @@ class Continuation {
     /// A helper function to print the string values of the exception enum. Unfortunately, this
     /// is a little clunky to use an maintain because we have to add new enum fields manually.
     /// TODO: Find a better implementation to print enums. Also use constexpr instead.
-    friend std::ostream& operator<<(std::ostream& out, const Exception value) {
+    friend std::ostream &operator<<(std::ostream &out, const Exception value) {
         static std::map<Exception, std::string> strings;
         if (strings.empty()) {
 #define INSERT_ELEMENT(p) strings[p] = #p
@@ -75,18 +75,18 @@ class Continuation {
     /// of IR::Expression; other IR nodes may be treated as expressions in the metalanguage, even
     /// though they are not P4 expressions.
     struct Return {
-        boost::optional<const IR::Node*> expr;
+        boost::optional<const IR::Node *> expr;
 
         /// Delegates to IR equality.
-        bool operator==(const Return& other) const;
+        bool operator==(const Return &other) const;
 
         Return() : expr(boost::none) {}
-        explicit Return(const IR::Node* expr);
+        explicit Return(const IR::Node *expr);
     };
 
     /// Alias for various property types that can be set. We restrict these to keep the feature
     /// simple.
-    using PropertyValue = boost::variant<cstring, uint64_t, int64_t, bool, const IR::Expression*>;
+    using PropertyValue = boost::variant<cstring, uint64_t, int64_t, bool, const IR::Expression *>;
 
     struct PropertyUpdate {
         /// The name of the property that is being set.
@@ -95,7 +95,7 @@ class Continuation {
         PropertyValue property;
 
         /// Delegates to the equality of the property.
-        bool operator==(const PropertyUpdate& other) const;
+        bool operator==(const PropertyUpdate &other) const;
 
         explicit PropertyUpdate(cstring propertyName, PropertyValue property);
     };
@@ -106,19 +106,19 @@ class Continuation {
     /// For example, specific port values are not supported in a hardware target guards can enforce
     /// that only the appropriate port variables are chosen. Any other possible path is discarded.
     struct Guard {
-        const IR::Expression* cond;
+        const IR::Expression *cond;
 
         /// Delegates to IR equality.
-        bool operator==(const Guard& other) const;
+        bool operator==(const Guard &other) const;
 
-        explicit Guard(const IR::Expression* cond);
+        explicit Guard(const IR::Expression *cond);
     };
 
     using Command = boost::variant<
         /// Executes a statement-like IR node.
-        const IR::Node*,
+        const IR::Node *,
         /// Registers a trace event.
-        const TraceEvent*,
+        const TraceEvent *,
         /// Invokes the topmost continuation on the continuation stack. Execution halts if the
         /// stack is empty. It is a BUG to return a value with an empty continuation stack.
         Return,
@@ -154,14 +154,14 @@ class Continuation {
         /// Removes all commands in this body.
         void clear();
 
-        bool operator==(const Body&) const;
+        bool operator==(const Body &) const;
 
         /// Allows the command stack to be initialized with a list initializer.
         Body(std::initializer_list<Command> cmds);
 
         /// Allow deque initialization with a vector. We iterate and push through the vector in
         /// reverse.
-        explicit Body(const std::vector<Command>& cmds);
+        explicit Body(const std::vector<Command> &cmds);
 
      private:
         Body() = default;
@@ -173,16 +173,16 @@ class Continuation {
         friend Continuation;
 
      public:
-        const IR::PathExpression* param;
+        const IR::PathExpression *param;
 
      private:
-        explicit Parameter(const IR::PathExpression* param) : param(param) {}
+        explicit Parameter(const IR::PathExpression *param) : param(param) {}
     };
 
     /// Represents the continuation's parameter.
     //
     // Invariant: this parameter is uniquely named.
-    boost::optional<const IR::PathExpression*> parameterOpt;
+    boost::optional<const IR::PathExpression *> parameterOpt;
     Body body;
 
     /// @returns a body that is equivalent to applying this continuation to the given value (or
@@ -191,19 +191,19 @@ class Continuation {
     ///
     /// Expressions in the metalanguage include P4 non-expressions. Because of this, the value (if
     /// provided) does not necessarily need to be an instance of IR::Expression.
-    Body apply(boost::optional<const IR::Node*> value_opt) const;
+    Body apply(boost::optional<const IR::Node *> value_opt) const;
 
     /// @returns a parameter for use in building continuations. The parameter will be fresh in the
     /// given @ctx.
-    static const Parameter* genParameter(const IR::Type* type, cstring name,
-                                         const NamespaceContext* ctx);
+    static const Parameter *genParameter(const IR::Type *type, cstring name,
+                                         const NamespaceContext *ctx);
 
     /// Creates a parameterless continuation.
     explicit Continuation(Body body) : Continuation(boost::none, body) {}
 
     /// Creates a continuation. The continuation will have the given parameter, if one is provided;
     /// otherwise, the continuation will have no parameters.
-    Continuation(boost::optional<const Parameter*> parameterOpt, Body body)
+    Continuation(boost::optional<const Parameter *> parameterOpt, Body body)
         : parameterOpt(parameterOpt ? boost::make_optional((*parameterOpt)->param) : boost::none),
           body(body) {}
 };

@@ -16,18 +16,18 @@ namespace P4Tools {
 namespace AssertsParser {
 
 class AssertsParser : public Transform {
-    std::vector<std::vector<const IR::Expression*>>& restrictionsVec;
+    std::vector<std::vector<const IR::Expression *>> &restrictionsVec;
 
  public:
-    explicit AssertsParser(std::vector<std::vector<const IR::Expression*>>& output);
+    explicit AssertsParser(std::vector<std::vector<const IR::Expression *>> &output);
     /// A function that calls the beginning of the transformation of restrictions from a string into
     /// an IR::Expression. Internally calls all other necessary functions, for example
     /// combineTokensToNames and the like, to eventually get an IR expression that meets the string
     /// constraint
-    static std::vector<const IR::Expression*> genIRStructs(
+    static std::vector<const IR::Expression *> genIRStructs(
         cstring tableName, cstring restrictionString,
-        const IR::Vector<IR::KeyElement>& keyElements);
-    const IR::Node* postorder(IR::P4Table* node) override;
+        const IR::Vector<IR::KeyElement> &keyElements);
+    const IR::Node *postorder(IR::P4Table *node) override;
 };
 
 class Token {
@@ -74,10 +74,10 @@ class Token {
     std::string_view m_lexeme{};
     explicit Token(Kind kind) noexcept : m_kind{kind} {}
 
-    Token(Kind kind, const char* beg, std::size_t len) noexcept
+    Token(Kind kind, const char *beg, std::size_t len) noexcept
         : m_kind{kind}, m_lexeme(beg, len) {}
 
-    Token(Kind kind, const char* beg, const char* end) noexcept
+    Token(Kind kind, const char *beg, const char *end) noexcept
         : m_kind{kind}, m_lexeme(beg, std::distance(beg, end)) {}
 
     Kind kind() const noexcept;
@@ -100,10 +100,10 @@ class Token {
 
 class Lexer {
  public:
-    explicit Lexer(const char* beg) noexcept : m_beg{beg} {}
+    explicit Lexer(const char *beg) noexcept : m_beg{beg} {}
 
     Token next() noexcept;
-    const char* m_beg = nullptr;
+    const char *m_beg = nullptr;
 
  private:
     Token atom(Token::Kind) noexcept;

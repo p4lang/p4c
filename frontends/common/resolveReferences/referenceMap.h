@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "frontends/common/programMap.h"
 #include "ir/ir.h"
+#include "ir/visitor.h"
 #include "lib/cstring.h"
 #include "lib/map.h"
 
@@ -34,14 +35,14 @@ class MinimalNameGenerator : public NameGenerator, public Inspector {
     /// All names used in the program. Key is a name, value represents how many times
     /// this name was used as a base for newly generated unique names.
     std::unordered_map<cstring, int> usedNames;
-    void postorder(const IR::Path* p) override { usedName(p->name.name); }
-    void postorder(const IR::Type_Declaration* t) override { usedName(t->name.name); }
-    void postorder(const IR::Declaration* d) override { usedName(d->name.name); }
+    void postorder(const IR::Path *p) override { usedName(p->name.name); }
+    void postorder(const IR::Type_Declaration *t) override { usedName(t->name.name); }
+    void postorder(const IR::Declaration *d) override { usedName(d->name.name); }
 
  public:
     MinimalNameGenerator();
     void usedName(cstring name) { usedNames.insert({name, 0}); }
-    explicit MinimalNameGenerator(const IR::Node* root) : MinimalNameGenerator() {
+    explicit MinimalNameGenerator(const IR::Node *root) : MinimalNameGenerator() {
         root->apply(*this);
     }
 
@@ -53,8 +54,10 @@ class MinimalNameGenerator : public NameGenerator, public Inspector {
 // interchangeably when looking up declarations.  This should go away once the refMap does
 class DeclarationLookup {
  public:
-    virtual const IR::IDeclaration* getDeclaration(const IR::Path*, bool notNull = false) const = 0;
-    virtual const IR::IDeclaration* getDeclaration(const IR::This*, bool notNull = false) const = 0;
+    virtual const IR::IDeclaration *getDeclaration(const IR::Path *,
+                                                   bool notNull = false) const = 0;
+    virtual const IR::IDeclaration *getDeclaration(const IR::This *,
+                                                   bool notNull = false) const = 0;
 };
 
 /// Class used to encode maps from paths to declarations.
@@ -64,13 +67,13 @@ class ReferenceMap final : public ProgramMap, public NameGenerator, public Decla
     bool isv1;
 
     /// Maps paths in the program to declarations.
-    ordered_map<const IR::Path*, const IR::IDeclaration*> pathToDeclaration;
+    ordered_map<const IR::Path *, const IR::IDeclaration *> pathToDeclaration;
 
     /// Set containing all declarations in the program.
-    std::set<const IR::IDeclaration*> used;
+    std::set<const IR::IDeclaration *> used;
 
     /// Map from `This` to declarations (an experimental feature).
-    std::map<const IR::This*, const IR::IDeclaration*> thisToDeclaration;
+    std::map<const IR::This *, const IR::IDeclaration *> thisToDeclaration;
 
     /// All names used in the program. Key is a name, value represents how many times
     /// this name was used as a base for newly generated unique names.
@@ -80,21 +83,21 @@ class ReferenceMap final : public ProgramMap, public NameGenerator, public Decla
     ReferenceMap();
     /// Looks up declaration for @p path. If @p notNull is false, then
     /// failure to find a declaration is an error.
-    const IR::IDeclaration* getDeclaration(const IR::Path* path,
+    const IR::IDeclaration *getDeclaration(const IR::Path *path,
                                            bool notNull = false) const override;
 
     /// Sets declaration for @p path to @p decl.
-    void setDeclaration(const IR::Path* path, const IR::IDeclaration* decl);
+    void setDeclaration(const IR::Path *path, const IR::IDeclaration *decl);
 
     /// Looks up declaration for @p pointer. If @p notNull is false,
     /// then failure to find a declaration is an error.
-    const IR::IDeclaration* getDeclaration(const IR::This* pointer,
+    const IR::IDeclaration *getDeclaration(const IR::This *pointer,
                                            bool notNull = false) const override;
 
     /// Sets declaration for @p pointer to @p decl.
-    void setDeclaration(const IR::This* pointer, const IR::IDeclaration* decl);
+    void setDeclaration(const IR::This *pointer, const IR::IDeclaration *decl);
 
-    void dbprint(std::ostream& cout) const override;
+    void dbprint(std::ostream &cout) const override;
 
     /// Set boolean indicating whether map is for a P4_14 program to @p isV1.
     void setIsV1(bool isv1) { this->isv1 = isv1; }
@@ -110,7 +113,7 @@ class ReferenceMap final : public ProgramMap, public NameGenerator, public Decla
     bool isV1() const { return isv1; }
 
     /// @returns @true if @p decl is used in the program.
-    bool isUsed(const IR::IDeclaration* decl) const { return used.count(decl) > 0; }
+    bool isUsed(const IR::IDeclaration *decl) const { return used.count(decl) > 0; }
 
     /// Indicate that @p name is used in the program.
     void usedName(cstring name) { usedNames.insert({name, 0}); }

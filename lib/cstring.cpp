@@ -45,13 +45,13 @@ class table_entry {
     table_entry_flags m_flags = table_entry_flags::none;
 
     union {
-        const char* m_string;
-        char m_inplace_string[sizeof(const char*)];
+        const char *m_string;
+        char m_inplace_string[sizeof(const char *)];
     };
 
  public:
     // entry ctor, makes copy of passed string
-    table_entry(const char* string, std::size_t length, table_entry_flags flags)
+    table_entry(const char *string, std::size_t length, table_entry_flags flags)
         : m_length(length) {
         if ((flags & table_entry_flags::no_need_copy) == table_entry_flags::no_need_copy) {
             // No need to copy object, it's view of string, string literal or string allocated
@@ -64,7 +64,7 @@ class table_entry {
             return;
         }
 
-        if (length < sizeof(const char*)) {
+        if (length < sizeof(const char *)) {
             // String with length less than size of pointer store directly
             // in pointer, that hint allows reduce stack fragmentation.
             // We can make such optimization because std::unordered_set never
@@ -85,9 +85,9 @@ class table_entry {
     }
 
     // table_entry moveable only
-    table_entry(const table_entry&) = delete;
+    table_entry(const table_entry &) = delete;
 
-    table_entry(table_entry&& other) : m_length(other.m_length), m_flags(other.m_flags) {
+    table_entry(table_entry &&other) : m_length(other.m_length), m_flags(other.m_flags) {
         // this object for internal usage only, length will never be accessed
         // if object was moved, so do not zero other.m_length here
 
@@ -111,7 +111,7 @@ class table_entry {
 
     std::size_t length() const { return m_length; }
 
-    const char* string() const {
+    const char *string() const {
         if (is_inplace()) {
             return m_inplace_string;
         }
@@ -119,7 +119,7 @@ class table_entry {
         return m_string;
     }
 
-    bool operator==(const table_entry& other) const {
+    bool operator==(const table_entry &other) const {
         return length() == other.length() && std::memcmp(string(), other.string(), length()) == 0;
     }
 
@@ -133,20 +133,20 @@ class table_entry {
 namespace std {
 template <>
 struct hash<table_entry> {
-    std::size_t operator()(const table_entry& entry) const {
+    std::size_t operator()(const table_entry &entry) const {
         return Util::Hash::murmur(entry.string(), entry.length());
     }
 };
 }  // namespace std
 
 namespace {
-std::unordered_set<table_entry>& cache() {
+std::unordered_set<table_entry> &cache() {
     static std::unordered_set<table_entry> g_cache;
 
     return g_cache;
 }
 
-const char* save_to_cache(const char* string, std::size_t length, table_entry_flags flags) {
+const char *save_to_cache(const char *string, std::size_t length, table_entry_flags flags) {
     if ((flags & table_entry_flags::no_need_copy) == table_entry_flags::no_need_copy) {
         return cache().emplace(string, length, flags).first->string();
     }
@@ -163,39 +163,41 @@ const char* save_to_cache(const char* string, std::size_t length, table_entry_fl
 
 }  // namespace
 
-void cstring::construct_from_shared(const char* string, std::size_t length) {
+void cstring::construct_from_shared(const char *string, std::size_t length) {
     str = save_to_cache(string, length, table_entry_flags::none);
 }
 
-void cstring::construct_from_unique(const char* string, std::size_t length) {
+void cstring::construct_from_unique(const char *string, std::size_t length) {
     str = save_to_cache(string, length,
                         table_entry_flags::no_need_copy | table_entry_flags::require_destruction);
 }
 
-void cstring::construct_from_literal(const char* string, std::size_t length) {
+void cstring::construct_from_literal(const char *string, std::size_t length) {
     str = save_to_cache(string, length, table_entry_flags::no_need_copy);
 }
 
-size_t cstring::cache_size(size_t& count) {
+size_t cstring::cache_size(size_t &count) {
     size_t rv = 0;
     count = cache().size();
-    for (auto& s : cache()) rv += sizeof(s) + s.length();
+    for (auto &s : cache()) rv += sizeof(s) + s.length();
     return rv;
 }
 
 cstring cstring::newline = cstring("\n");
 cstring cstring::empty = cstring("");
 
-bool cstring::startsWith(const cstring& prefix) const {
+bool cstring::startsWith(const cstring &prefix) const {
+    if (prefix.isNullOrEmpty()) return true;
     return size() >= prefix.size() && memcmp(str, prefix.str, prefix.size()) == 0;
 }
 
-bool cstring::endsWith(const cstring& suffix) const {
+bool cstring::endsWith(const cstring &suffix) const {
+    if (suffix.isNullOrEmpty()) return true;
     return size() >= suffix.size() &&
            memcmp(str + size() - suffix.size(), suffix.str, suffix.size()) == 0;
 }
 
-cstring cstring::before(const char* at) const { return substr(0, at - str); }
+cstring cstring::before(const char *at) const { return substr(0, at - str); }
 
 cstring cstring::substr(size_t start, size_t length) const {
     if (size() <= start) return cstring::empty;
@@ -204,8 +206,8 @@ cstring cstring::substr(size_t start, size_t length) const {
 }
 
 cstring cstring::replace(char c, char with) const {
-    char* dup = strdup(c_str());
-    for (char* p = dup; *p; ++p)
+    char *dup = strdup(c_str());
+    for (char *p = dup; *p; ++p)
         if (*p == c) *p = with;
     return cstring(dup);
 }

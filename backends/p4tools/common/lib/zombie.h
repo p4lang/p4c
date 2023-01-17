@@ -21,26 +21,26 @@ class Zombie {
  public:
     /// Determines whether the given member expression represents a symbolic constant. Symbolic
     /// constants are references to fields under the nested struct p4t*zombie.const.
-    static bool isSymbolicConst(const IR::Member*);
+    static bool isSymbolicConst(const IR::Member *);
 
     /// @returns the zombie variable with the given @type, @incarnation, and @name.
     ///
     /// A BUG occurs if this was previously called with the same @name and @incarnation, but with a
     /// different @type.
-    static const StateVariable& getVar(const IR::Type* type, int incarnation, cstring name);
+    static const StateVariable &getVar(const IR::Type *type, int incarnation, cstring name);
 
     /// @returns the zombie symbolic constant with the given @type, @incarnation, and @name.
     ///
     /// A BUG occurs if this was previously called with the same @name and @incarnation, but with a
     /// different @type.
-    static const StateVariable& getConst(const IR::Type* type, int incarnation, cstring name);
+    static const StateVariable &getConst(const IR::Type *type, int incarnation, cstring name);
 
  private:
     /// @see getVar and getConst.
-    static const StateVariable& getZombie(const IR::Type* type, bool isConst, int incarnation,
+    static const StateVariable &getZombie(const IR::Type *type, bool isConst, int incarnation,
                                           cstring name);
 
-    static const StateVariable* mkZombie(const IR::Type* type, bool isConst, int incarnation,
+    static const StateVariable *mkZombie(const IR::Type *type, bool isConst, int incarnation,
                                          cstring name);
 };
 

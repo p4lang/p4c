@@ -26,20 +26,20 @@ class BMv2_V1ModelCmdStepper : public CmdStepper {
  protected:
     std::string getClassName() override { return "BMv2_V1ModelCmdStepper"; }
 
-    const BMv2_V1ModelProgramInfo& getProgramInfo() const override;
+    const BMv2_V1ModelProgramInfo &getProgramInfo() const override;
 
-    void initializeTargetEnvironment(ExecutionState* nextState) const override;
+    void initializeTargetEnvironment(ExecutionState *nextState) const override;
 
-    boost::optional<const Constraint*> startParser_impl(const IR::P4Parser* parser,
-                                                        ExecutionState* state) const override;
+    boost::optional<const Constraint *> startParser_impl(const IR::P4Parser *parser,
+                                                         ExecutionState *state) const override;
 
     std::map<Continuation::Exception, Continuation> getExceptionHandlers(
-        const IR::P4Parser* parser, Continuation::Body normalContinuation,
-        const ExecutionState* state) const override;
+        const IR::P4Parser *parser, Continuation::Body normalContinuation,
+        const ExecutionState *state) const override;
 
  public:
-    BMv2_V1ModelCmdStepper(ExecutionState& state, AbstractSolver& solver,
-                           const ProgramInfo& programInfo);
+    BMv2_V1ModelCmdStepper(ExecutionState &state, AbstractSolver &solver,
+                           const ProgramInfo &programInfo);
 };
 
 }  // namespace Bmv2

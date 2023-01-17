@@ -16,12 +16,13 @@ limitations under the License.
 #include "expression.h"
 
 #include "helpers.h"
+#include "lib/algorithm.h"
 
 namespace BMV2 {
 
 class ArithmeticFixup;
 
-const IR::Expression* ArithmeticFixup::fix(const IR::Expression* expr, const IR::Type_Bits* type) {
+const IR::Expression *ArithmeticFixup::fix(const IR::Expression *expr, const IR::Type_Bits *type) {
     unsigned width = type->size;
     if (!type->isSigned) {
         auto mask = new IR::Constant(type, Util::mask(width), 16);
@@ -37,7 +38,7 @@ const IR::Expression* ArithmeticFixup::fix(const IR::Expression* expr, const IR:
     return expr;
 }
 
-const IR::Node* ArithmeticFixup::updateType(const IR::Expression* expression) {
+const IR::Node *ArithmeticFixup::updateType(const IR::Expression *expression) {
     if (*expression != *getOriginal()) {
         auto type = typeMap->getType(getOriginal(), true);
         typeMap->setType(expression, type);
@@ -45,11 +46,11 @@ const IR::Node* ArithmeticFixup::updateType(const IR::Expression* expression) {
     return expression;
 }
 
-const IR::Node* ArithmeticFixup::postorder(IR::Expression* expression) {
+const IR::Node *ArithmeticFixup::postorder(IR::Expression *expression) {
     return updateType(expression);
 }
 
-const IR::Node* ArithmeticFixup::postorder(IR::Operation_Binary* expression) {
+const IR::Node *ArithmeticFixup::postorder(IR::Operation_Binary *expression) {
     auto type = typeMap->getType(getOriginal(), true);
     if (expression->is<IR::BAnd>() || expression->is<IR::BOr>() || expression->is<IR::BXor>() ||
         expression->is<IR::AddSat>() || expression->is<IR::SubSat>())
@@ -59,30 +60,30 @@ const IR::Node* ArithmeticFixup::postorder(IR::Operation_Binary* expression) {
     return updateType(expression);
 }
 
-const IR::Node* ArithmeticFixup::postorder(IR::Neg* expression) {
+const IR::Node *ArithmeticFixup::postorder(IR::Neg *expression) {
     auto type = typeMap->getType(getOriginal(), true);
     if (type->is<IR::Type_Bits>()) return fix(expression, type->to<IR::Type_Bits>());
     return updateType(expression);
 }
 
-const IR::Node* ArithmeticFixup::postorder(IR::Cmpl* expression) {
+const IR::Node *ArithmeticFixup::postorder(IR::Cmpl *expression) {
     auto type = typeMap->getType(getOriginal(), true);
     if (type->is<IR::Type_Bits>()) return fix(expression, type->to<IR::Type_Bits>());
     return updateType(expression);
 }
 
-const IR::Node* ArithmeticFixup::postorder(IR::Cast* expression) {
+const IR::Node *ArithmeticFixup::postorder(IR::Cast *expression) {
     auto type = typeMap->getType(getOriginal(), true);
     if (type->is<IR::Type_Bits>()) return fix(expression, type->to<IR::Type_Bits>());
     return updateType(expression);
 }
 
-void ExpressionConverter::mapExpression(const IR::Expression* expression, Util::IJson* json) {
+void ExpressionConverter::mapExpression(const IR::Expression *expression, Util::IJson *json) {
     map.emplace(expression, json);
     LOG3("Mapping " << dbp(expression) << " to " << json->toString());
 }
 
-Util::IJson* ExpressionConverter::get(const IR::Expression* expression) const {
+Util::IJson *ExpressionConverter::get(const IR::Expression *expression) const {
     auto result = ::get(map, expression);
     if (result == nullptr) {
         LOG3("Looking up " << expression);
@@ -96,14 +97,14 @@ Util::IJson* ExpressionConverter::get(const IR::Expression* expression) const {
     return result;
 }
 
-void ExpressionConverter::postorder(const IR::BoolLiteral* expression) {
+void ExpressionConverter::postorder(const IR::BoolLiteral *expression) {
     auto result = new Util::JsonObject();
     result->emplace("type", "bool");
     result->emplace("value", expression->value);
     mapExpression(expression, result);
 }
 
-void ExpressionConverter::postorder(const IR::MethodCallExpression* expression) {
+void ExpressionConverter::postorder(const IR::MethodCallExpression *expression) {
     auto instance = P4::MethodInstance::resolve(expression, refMap, typeMap);
     if (auto em = instance->to<P4::ExternMethod>()) {
         if (em->originalExternType->name == corelib.packetIn.name &&
@@ -165,14 +166,14 @@ void ExpressionConverter::postorder(const IR::MethodCallExpression* expression) 
     ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: not supported", expression);
 }
 
-void ExpressionConverter::postorder(const IR::Cast* expression) {
+void ExpressionConverter::postorder(const IR::Cast *expression) {
     // nothing to do for casts - the ArithmeticFixup pass should have handled them already
     auto j = get(expression->expr);
     if (!j) return;
     mapExpression(expression, j);
 }
 
-void ExpressionConverter::postorder(const IR::Constant* expression) {
+void ExpressionConverter::postorder(const IR::Constant *expression) {
     auto result = new Util::JsonObject();
     result->emplace("type", "hexstr");
     auto bitwidth = expression->type->width_bits();
@@ -182,7 +183,7 @@ void ExpressionConverter::postorder(const IR::Constant* expression) {
     mapExpression(expression, result);
 }
 
-void ExpressionConverter::postorder(const IR::ArrayIndex* expression) {
+void ExpressionConverter::postorder(const IR::ArrayIndex *expression) {
     auto result = new Util::JsonObject();
     cstring elementAccess;
 
@@ -202,7 +203,7 @@ void ExpressionConverter::postorder(const IR::ArrayIndex* expression) {
     }
 
     if (!expression->right->is<IR::Constant>()) {
-        const IR::Expression* ex = expression->right;
+        const IR::Expression *ex = expression->right;
         auto fresult = ::get(map, ex);
         if (fresult == nullptr) {
             LOG2("Looking up " << ex);
@@ -211,7 +212,7 @@ void ExpressionConverter::postorder(const IR::ArrayIndex* expression) {
             }
         }
         BUG_CHECK(fresult, "%1%: Runtime array index json generation failed", ex);
-        Util::JsonObject* fres = fresult->to<Util::JsonObject>();
+        Util::JsonObject *fres = fresult->to<Util::JsonObject>();
         result->emplace("type", "expression");
 
         auto e = new Util::JsonObject();
@@ -232,8 +233,8 @@ void ExpressionConverter::postorder(const IR::ArrayIndex* expression) {
 }
 
 /// Non-null if the expression refers to a parameter from the enclosing control
-const IR::Parameter* ExpressionConverter::enclosingParamReference(
-    const IR::Expression* expression) {
+const IR::Parameter *ExpressionConverter::enclosingParamReference(
+    const IR::Expression *expression) {
     CHECK_NULL(expression);
     if (!expression->is<IR::PathExpression>()) return nullptr;
 
@@ -245,7 +246,7 @@ const IR::Parameter* ExpressionConverter::enclosingParamReference(
     return nullptr;
 }
 
-void ExpressionConverter::postorder(const IR::Member* expression) {
+void ExpressionConverter::postorder(const IR::Member *expression) {
     auto result = new Util::JsonObject();
     int index_pos = 0;
 
@@ -400,8 +401,8 @@ void ExpressionConverter::postorder(const IR::Member* expression) {
             e->emplace("left", Util::JsonValue::null);
             e->emplace("right", l);
         } else {
-            const char* fieldRef = parentType->is<IR::Type_Stack>() ? "stack_field" : "field";
-            Util::JsonArray* e = nullptr;
+            const char *fieldRef = parentType->is<IR::Type_Stack>() ? "stack_field" : "field";
+            Util::JsonArray *e = nullptr;
             bool st = isArrayIndexRuntime(expression);
             if (!st) {
                 result->emplace("type", fieldRef);
@@ -465,7 +466,7 @@ void ExpressionConverter::postorder(const IR::Member* expression) {
     mapExpression(expression, result);
 }
 
-Util::IJson* ExpressionConverter::fixLocal(Util::IJson* json) {
+Util::IJson *ExpressionConverter::fixLocal(Util::IJson *json) {
     if (!json) return new Util::JsonValue();  // null
     if (auto jo = json->to<Util::JsonObject>()) {
         auto to = jo->get("type");
@@ -480,7 +481,7 @@ Util::IJson* ExpressionConverter::fixLocal(Util::IJson* json) {
     return json;
 }
 
-void ExpressionConverter::postorder(const IR::Mux* expression) {
+void ExpressionConverter::postorder(const IR::Mux *expression) {
     auto result = new Util::JsonObject();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
@@ -504,7 +505,7 @@ void ExpressionConverter::postorder(const IR::Mux* expression) {
     e->emplace("cond", fixLocal(c));
 }
 
-void ExpressionConverter::postorder(const IR::IntMod* expression) {
+void ExpressionConverter::postorder(const IR::IntMod *expression) {
     auto result = new Util::JsonObject();
     mapExpression(expression, result);
     result->emplace("type", "expression");
@@ -521,9 +522,9 @@ void ExpressionConverter::postorder(const IR::IntMod* expression) {
     e->emplace("right", r);
 }
 
-void ExpressionConverter::postorder(const IR::Operation_Binary* expression) { binary(expression); }
+void ExpressionConverter::postorder(const IR::Operation_Binary *expression) { binary(expression); }
 
-void ExpressionConverter::binary(const IR::Operation_Binary* expression) {
+void ExpressionConverter::binary(const IR::Operation_Binary *expression) {
     auto result = new Util::JsonObject();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
@@ -549,7 +550,7 @@ void ExpressionConverter::binary(const IR::Operation_Binary* expression) {
     e->emplace("right", fixLocal(r));
 }
 
-void ExpressionConverter::saturated_binary(const IR::Operation_Binary* expression) {
+void ExpressionConverter::saturated_binary(const IR::Operation_Binary *expression) {
     // This should never happen if we correctly typecheck the program
     BUG_CHECK(expression->type->is<IR::Type_Bits>(), "saturated arithmetic requires bit types");
 
@@ -581,7 +582,7 @@ void ExpressionConverter::saturated_binary(const IR::Operation_Binary* expressio
     e->emplace("right", r);
 }
 
-void ExpressionConverter::postorder(const IR::ListExpression* expression) {
+void ExpressionConverter::postorder(const IR::ListExpression *expression) {
     auto result = new Util::JsonArray();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
@@ -597,7 +598,7 @@ void ExpressionConverter::postorder(const IR::ListExpression* expression) {
     }
 }
 
-void ExpressionConverter::postorder(const IR::StructExpression* expression) {
+void ExpressionConverter::postorder(const IR::StructExpression *expression) {
     // Handle like a ListExpression
     auto result = new Util::JsonArray();
     mapExpression(expression, result);
@@ -614,7 +615,7 @@ void ExpressionConverter::postorder(const IR::StructExpression* expression) {
     }
 }
 
-void ExpressionConverter::postorder(const IR::Operation_Unary* expression) {
+void ExpressionConverter::postorder(const IR::Operation_Unary *expression) {
     auto result = new Util::JsonObject();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
@@ -635,7 +636,7 @@ void ExpressionConverter::postorder(const IR::Operation_Unary* expression) {
     e->emplace("right", fixLocal(r));
 }
 
-void ExpressionConverter::postorder(const IR::PathExpression* expression) {
+void ExpressionConverter::postorder(const IR::PathExpression *expression) {
     // This is useful for action bodies mostly
     auto decl = refMap->getDeclaration(expression->path, true);
     if (auto param = decl->to<IR::Parameter>()) {
@@ -715,16 +716,16 @@ void ExpressionConverter::postorder(const IR::PathExpression* expression) {
     }
 }
 
-void ExpressionConverter::postorder(const IR::StringLiteral* expression) {
+void ExpressionConverter::postorder(const IR::StringLiteral *expression) {
     auto result = new Util::JsonObject();
     result->emplace("type", "string");
     result->emplace("value", expression->value);
     mapExpression(expression, result);
 }
 
-void ExpressionConverter::postorder(const IR::TypeNameExpression* expression) { (void)expression; }
+void ExpressionConverter::postorder(const IR::TypeNameExpression *expression) { (void)expression; }
 
-void ExpressionConverter::postorder(const IR::Slice* expression) {
+void ExpressionConverter::postorder(const IR::Slice *expression) {
     auto result = new Util::JsonObject();
     auto expr = expression->e0;
     int h = expression->getH();
@@ -745,11 +746,11 @@ void ExpressionConverter::postorder(const IR::Slice* expression) {
     mapExpression(expression, result);
 }
 
-void ExpressionConverter::postorder(const IR::Expression* expression) {
+void ExpressionConverter::postorder(const IR::Expression *expression) {
     BUG("%1%: Unhandled case", expression);
 }
 
-bool ExpressionConverter::isArrayIndexRuntime(const IR::Expression* e) {
+bool ExpressionConverter::isArrayIndexRuntime(const IR::Expression *e) {
     if (auto mem = e->to<IR::Member>()) {
         if (auto ai = mem->expr->to<IR::ArrayIndex>()) {
             auto right = ai->right;
@@ -763,9 +764,9 @@ bool ExpressionConverter::isArrayIndexRuntime(const IR::Expression* e) {
 
 // doFixup = true -> insert masking operations for proper arithmetic implementation
 // see below for wrap
-Util::IJson* ExpressionConverter::convert(const IR::Expression* e, bool doFixup, bool wrap,
+Util::IJson *ExpressionConverter::convert(const IR::Expression *e, bool doFixup, bool wrap,
                                           bool convertBool) {
-    const IR::Expression* expr = e;
+    const IR::Expression *expr = e;
     if (doFixup) {
         ArithmeticFixup af(typeMap);
         auto r = e->apply(af);
@@ -814,9 +815,9 @@ Util::IJson* ExpressionConverter::convert(const IR::Expression* e, bool doFixup,
     return result;
 }
 
-Util::IJson* ExpressionConverter::convertLeftValue(const IR::Expression* e) {
+Util::IJson *ExpressionConverter::convertLeftValue(const IR::Expression *e) {
     leftValue = true;
-    const IR::Expression* expr = e;
+    const IR::Expression *expr = e;
     ArithmeticFixup af(typeMap);
     auto r = e->apply(af);
     CHECK_NULL(r);
@@ -829,7 +830,7 @@ Util::IJson* ExpressionConverter::convertLeftValue(const IR::Expression* e) {
     return result;
 }
 
-Util::IJson* ExpressionConverter::convertWithConstantWidths(const IR::Expression* e) {
+Util::IJson *ExpressionConverter::convertWithConstantWidths(const IR::Expression *e) {
     withConstantWidths = true;
     auto result = convert(e);
     withConstantWidths = false;

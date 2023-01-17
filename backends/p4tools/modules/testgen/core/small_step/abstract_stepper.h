@@ -38,22 +38,22 @@ class AbstractStepper : public Inspector {
     ///
     /// The given node is assumed to be derived from the command at the top of the current
     /// continuation body. No checks are done to enforce this assumption.
-    Result step(const IR::Node*);
+    Result step(const IR::Node *);
 
     /// Provides generic handling of unsupported nodes.
-    bool preorder(const IR::Node*) override;
+    bool preorder(const IR::Node *) override;
 
-    AbstractStepper(ExecutionState& state, AbstractSolver& solver, const ProgramInfo& programInfo);
+    AbstractStepper(ExecutionState &state, AbstractSolver &solver, const ProgramInfo &programInfo);
 
  protected:
     /// Target-specific information about the P4 program being evaluated.
-    const ProgramInfo& programInfo;
+    const ProgramInfo &programInfo;
 
     /// The state being evaluated.
-    ExecutionState& state;
+    ExecutionState &state;
 
     /// The solver backing the state being executed.
-    AbstractSolver& solver;
+    AbstractSolver &solver;
 
     /// The output of the evaluation.
     Result result;
@@ -61,16 +61,16 @@ class AbstractStepper : public Inspector {
     /// @returns the name of the dynamic type of this object.
     virtual std::string getClassName() = 0;
 
-    virtual const ProgramInfo& getProgramInfo() const;
+    virtual const ProgramInfo &getProgramInfo() const;
 
     /// Helper function for debugging execution of small stepper.
-    void logStep(const IR::Node* node);
+    void logStep(const IR::Node *node);
 
     /// Checks our assumption that chains of Member expressions terminate in a PathExpression.
     /// Throws a BUG if @a node is not a chain of one or more Member expressions terminating in a
     /// PathExpression.
     /// if @a node is local variable then returns created member for it.
-    static void checkMemberInvariant(const IR::Node* node);
+    static void checkMemberInvariant(const IR::Node *node);
 
     /* *****************************************************************************************
      * Transition helper functions
@@ -81,7 +81,7 @@ class AbstractStepper : public Inspector {
     /// instance of IR::Expression.
     ///
     /// @returns false
-    bool stepSymbolicValue(const IR::Node*);
+    bool stepSymbolicValue(const IR::Node *);
 
     /// Transitions to an exception.
     /// @returns false
@@ -95,9 +95,9 @@ class AbstractStepper : public Inspector {
     ///
     /// @returns false
     static bool stepToSubexpr(
-        const IR::Expression* subexpr, SmallStepEvaluator::Result& result,
-        const ExecutionState& state,
-        std::function<const Continuation::Command(const Continuation::Parameter*)> rebuildCmd);
+        const IR::Expression *subexpr, SmallStepEvaluator::Result &result,
+        const ExecutionState &state,
+        std::function<const Continuation::Command(const Continuation::Parameter *)> rebuildCmd);
 
     /// Transitions to a subexpression of the topmost command in the current continuation body. The
     /// subexpression is expected to be a ListExpression. This is a specialized version of
@@ -110,17 +110,17 @@ class AbstractStepper : public Inspector {
     ///
     /// @returns false
     static bool stepToListSubexpr(
-        const IR::ListExpression* subexpr, SmallStepEvaluator::Result& result,
-        const ExecutionState& state,
-        std::function<const Continuation::Command(const IR::ListExpression*)> rebuildCmd);
+        const IR::ListExpression *subexpr, SmallStepEvaluator::Result &result,
+        const ExecutionState &state,
+        std::function<const Continuation::Command(const IR::ListExpression *)> rebuildCmd);
 
     /// @see stepToListSubexpr.IR::StructExpression differs slightly from IR::ListExpression in that
     /// the components are IR::NamedExpression instead of just IR::Expression.  To keep things
     /// simple, and to avoid excessive type casting, these two functions are kept separate.
     static bool stepToStructSubexpr(
-        const IR::StructExpression* subexpr, SmallStepEvaluator::Result& result,
-        const ExecutionState& state,
-        std::function<const Continuation::Command(const IR::StructExpression*)> rebuildCmd);
+        const IR::StructExpression *subexpr, SmallStepEvaluator::Result &result,
+        const ExecutionState &state,
+        std::function<const Continuation::Command(const IR::StructExpression *)> rebuildCmd);
 
     /// Transition function for isValid calls.
     ///
@@ -128,11 +128,11 @@ class AbstractStepper : public Inspector {
     ///     either Members or PathExpressions.
     ///
     /// @returns false
-    bool stepGetHeaderValidity(const IR::Expression* headerRef);
+    bool stepGetHeaderValidity(const IR::Expression *headerRef);
 
     /// Sets validity for a header if @a expr is a header. if @a expr is a part of a header union
     /// then it sets invalid for other headers in the union. Otherwise it generates an exception.
-    void setHeaderValidity(const IR::Expression* expr, bool validity, ExecutionState* state);
+    void setHeaderValidity(const IR::Expression *expr, bool validity, ExecutionState *state);
 
     /// Transition function for setValid and setInvalid calls.
     ///
@@ -141,7 +141,7 @@ class AbstractStepper : public Inspector {
     /// @param validity the validity state being assigned to the header instance.
     ///
     /// @returns false
-    bool stepSetHeaderValidity(const IR::Expression* headerRef, bool validity);
+    bool stepSetHeaderValidity(const IR::Expression *headerRef, bool validity);
 
     /// Transition function for push_front/pop_front calls.
     ///
@@ -151,33 +151,33 @@ class AbstractStepper : public Inspector {
     /// @param isPush is true for push_front and false otherwise.
     ///
     /// @returns false
-    bool stepStackPushPopFront(const IR::Expression* stackRef, const IR::Vector<IR::Argument>* args,
+    bool stepStackPushPopFront(const IR::Expression *stackRef, const IR::Vector<IR::Argument> *args,
                                bool isPush = true);
 
     /// Evaluates an expression by invoking the solver under the current collected constraints.
     /// Optionally, a condition can be provided that is temporarily added to the list of assertions.
     /// If the solver can find a solution, it @returns the assigned value to the expression.
     /// If not, this function @returns nullptr.
-    const Value* evaluateExpression(const IR::Expression* expr,
-                                    boost::optional<const IR::Expression*> cond) const;
+    const Value *evaluateExpression(const IR::Expression *expr,
+                                    boost::optional<const IR::Expression *> cond) const;
 
     /// Reset the given reference to an  uninitialized value. If the reference has a
     /// Type_StructLike, unroll the reference and reset each member.
     /// If forceTaint is active, all references are set tainted. Otherwise a target-specific
     /// mechanism is used.
-    void setTargetUninitialized(ExecutionState* nextState, const IR::Member* ref,
+    void setTargetUninitialized(ExecutionState *nextState, const IR::Member *ref,
                                 bool forceTaint) const;
 
     /// This is a helper function to declare structlike data structures.
     /// This also is used to declare the members of a stack. This function is primarily used by the
     /// Declaration_Variable preorder function.
-    void declareStructLike(ExecutionState* nextState, const IR::Expression* parentExpr,
-                           const IR::Type_StructLike* structType) const;
+    void declareStructLike(ExecutionState *nextState, const IR::Expression *parentExpr,
+                           const IR::Type_StructLike *structType, bool forceTaint = false) const;
 
     /// This is a helper function to declare base type variables. Because all variables need to be a
     /// member in the execution state environment, this helper function suffixes a "*".
-    void declareBaseType(ExecutionState* nextState, const IR::Expression* paramPath,
-                         const IR::Type_Base* baseType) const;
+    void declareBaseType(ExecutionState *nextState, const IR::Expression *paramPath,
+                         const IR::Type_Base *baseType) const;
 };
 
 }  // namespace P4Testgen

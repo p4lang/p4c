@@ -4,11 +4,11 @@
 
 #include <boost/none.hpp>
 
+#include "backends/p4tools/common/core/solver.h"
+#include "backends/p4tools/common/lib/formulae.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "lib/error.h"
-#include "p4tools/common/core/solver.h"
-#include "p4tools/common/lib/formulae.h"
 
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
@@ -21,7 +21,7 @@ namespace P4Tools {
 
 namespace P4Testgen {
 
-void LinearEnumeration::run(const Callback& callback) {
+void LinearEnumeration::run(const Callback &callback) {
     // Loop until we reach terminate, or until there are no more
     // branches to produce tests.
     while (true) {
@@ -37,13 +37,13 @@ void LinearEnumeration::run(const Callback& callback) {
 
             // Retrieve the next state (which is guaranteed to be a terminal state)
             // from the branch and invoke handleTerminalState to produce a test.
-            ExecutionState* branchState = branch.nextState;
+            ExecutionState *branchState = branch.nextState;
             bool terminate = handleTerminalState(callback, *branchState);
             // This flag indicates we reached maxTests.
             if (terminate) {
                 return;
             }
-        } catch (TestgenUnimplemented& e) {
+        } catch (TestgenUnimplemented &e) {
             // If strict is enabled, bubble the exception up.
             if (TestgenOptions::get().strict) {
                 throw;
@@ -54,9 +54,9 @@ void LinearEnumeration::run(const Callback& callback) {
     }
 }
 
-LinearEnumeration::LinearEnumeration(AbstractSolver& solver, const ProgramInfo& programInfo,
-                                     boost::optional<uint32_t> seed, int linearEnumeration)
-    : ExplorationStrategy(solver, programInfo, seed), maxBound(linearEnumeration) {
+LinearEnumeration::LinearEnumeration(AbstractSolver &solver, const ProgramInfo &programInfo,
+                                     uint64_t maxBound)
+    : ExplorationStrategy(solver, programInfo), maxBound(maxBound) {
     // The constructor populates the initial vector of branches holding a terminal state.
     // It fill the vector with a recursive call to mapBranch and stops at maxBound.
     StepResult initialSuccessors = step(*executionState);
@@ -66,7 +66,7 @@ LinearEnumeration::LinearEnumeration(AbstractSolver& solver, const ProgramInfo& 
     }
 }
 
-void LinearEnumeration::mapBranch(Branch& branch) {
+void LinearEnumeration::mapBranch(Branch &branch) {
     // Ensure we don't explore more than maxBound.
     if (exploredBranches.size() >= maxBound) {
         return;
@@ -74,7 +74,7 @@ void LinearEnumeration::mapBranch(Branch& branch) {
 
     // Do not bother invoking the solver for a trivial case.
     // In either case (true or false), we do not need to add the assertion and check.
-    if (const auto* boolLiteral = branch.constraint->to<IR::BoolLiteral>()) {
+    if (const auto *boolLiteral = branch.constraint->to<IR::BoolLiteral>()) {
         if (!boolLiteral->value) {
             return;
         }
@@ -92,7 +92,7 @@ void LinearEnumeration::mapBranch(Branch& branch) {
     }
 
     // Get branch's next state, if it's terminal, save it in exploredBranches.
-    ExecutionState* state = branch.nextState;
+    ExecutionState *state = branch.nextState;
     if (state != nullptr) {
         if (state->isTerminal()) {
             // We put the state back so it can be used by handleTerminalState.
@@ -101,7 +101,7 @@ void LinearEnumeration::mapBranch(Branch& branch) {
         } else {
             // If the state is not terminal, take a step and
             // keep collecting branches.
-            auto* successors = step(*state);
+            auto *successors = step(*state);
 
             // If the list of successors is not empty, invoke mapBranch recursively.
             if (!successors->empty()) {

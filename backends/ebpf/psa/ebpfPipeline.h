@@ -47,14 +47,19 @@ class EBPFPipeline : public EBPFProgram {
     cstring compilerGlobalMetadata;
     // A variable name storing "1" value. Used to access BPF array map index.
     cstring oneKey;
+    // A unique mark used to differentiate packets processed by P4/eBPF from others.
+    unsigned packetMark;
+    // A variable to store ifindex after mapping (e.g. due to recirculation)
+    cstring inputPortVar;
 
-    EBPFControlPSA* control;
-    EBPFDeparserPSA* deparser;
+    EBPFControlPSA *control;
+    EBPFDeparserPSA *deparser;
 
-    EBPFPipeline(cstring name, const EbpfOptions& options, P4::ReferenceMap* refMap,
-                 P4::TypeMap* typeMap)
+    EBPFPipeline(cstring name, const EbpfOptions &options, P4::ReferenceMap *refMap,
+                 P4::TypeMap *typeMap)
         : EBPFProgram(options, nullptr, refMap, typeMap, nullptr),
           name(name),
+          packetMark(0x99),
           control(nullptr),
           deparser(nullptr) {
         sectionName = "classifier/" + name;
@@ -71,6 +76,8 @@ class EBPFPipeline : public EBPFProgram {
         pktInstanceVar = compilerGlobalMetadata + cstring("->instance");
         priorityVar = cstring("skb->priority");
         oneKey = EBPFModel::reserved("one");
+        inputPortVar = cstring("ebpf_input_port");
+        progTarget = new KernelSamplesTarget(options.emitTraceMessages);
     }
 
     /* Check if pipeline does any processing.
@@ -94,39 +101,40 @@ class EBPFPipeline : public EBPFProgram {
         return "TC_ACT_OK";
     }
 
-    virtual void emit(CodeBuilder* builder) = 0;
-    virtual void emitTrafficManager(CodeBuilder* builder) = 0;
-    virtual void emitPSAControlInputMetadata(CodeBuilder* builder) = 0;
-    virtual void emitPSAControlOutputMetadata(CodeBuilder* builder) = 0;
+    virtual void emit(CodeBuilder *builder) = 0;
+    virtual void emitTrafficManager(CodeBuilder *builder) = 0;
+    virtual void emitPSAControlInputMetadata(CodeBuilder *builder) = 0;
+    virtual void emitPSAControlOutputMetadata(CodeBuilder *builder) = 0;
 
     /* Generates a pointer to struct Headers_t and puts it on the BPF program's stack. */
-    void emitLocalHeaderInstancesAsPointers(CodeBuilder* builder);
+    void emitLocalHeaderInstancesAsPointers(CodeBuilder *builder);
     /* Generates a pointer to struct hdr_md. The pointer is used to access data from per-CPU map. */
-    void emitCPUMAPHeadersInitializers(CodeBuilder* builder);
+    void emitCPUMAPHeadersInitializers(CodeBuilder *builder);
     /* Generates an instance of struct Headers_t,
      * allocated in the per-CPU map. */
-    void emitHeaderInstances(CodeBuilder* builder) override;
+    void emitHeaderInstances(CodeBuilder *builder) override;
     /* Generates a set of helper variables that are used during packet processing. */
-    void emitLocalVariables(CodeBuilder* builder) override;
+    void emitLocalVariables(CodeBuilder *builder) override;
 
     /* Generates and instance of user metadata for a pipeline,
      * allocated in the per-CPU map. */
-    void emitUserMetadataInstance(CodeBuilder* builder);
+    void emitUserMetadataInstance(CodeBuilder *builder);
 
-    virtual void emitCPUMAPInitializers(CodeBuilder* builder);
-    virtual void emitCPUMAPLookup(CodeBuilder* builder);
+    virtual void emitCPUMAPInitializers(CodeBuilder *builder);
+    virtual void emitCPUMAPLookup(CodeBuilder *builder);
     /* Generates a pointer to skb->cb and maps it to
      * psa_global_metadata to access global metadata shared between pipelines. */
-    virtual void emitGlobalMetadataInitializer(CodeBuilder* builder);
-    virtual void emitPacketLength(CodeBuilder* builder);
-    virtual void emitTimestamp(CodeBuilder* builder);
+    virtual void emitGlobalMetadataInitializer(CodeBuilder *builder);
+    virtual void emitPacketLength(CodeBuilder *builder);
+    virtual void emitTimestamp(CodeBuilder *builder);
+    void emitInputPortMapping(CodeBuilder *builder);
 
-    void emitHeadersFromCPUMAP(CodeBuilder* builder);
-    void emitMetadataFromCPUMAP(CodeBuilder* builder);
+    void emitHeadersFromCPUMAP(CodeBuilder *builder);
+    void emitMetadataFromCPUMAP(CodeBuilder *builder);
 
     bool hasAnyMeter() const {
         auto directMeter = std::find_if(control->tables.begin(), control->tables.end(),
-                                        [](std::pair<const cstring, EBPFTable*> elem) {
+                                        [](std::pair<const cstring, EBPFTable *> elem) {
                                             return !elem.second->to<EBPFTablePSA>()->meters.empty();
                                         });
         bool anyDirectMeter = directMeter != control->tables.end();
@@ -153,8 +161,8 @@ class EBPFIngressPipeline : public EBPFPipeline {
     // It's returned from eBPF program is PSA-eBPF doesn't make any forwarding/drop decision.
     int actUnspecCode;
 
-    EBPFIngressPipeline(cstring name, const EbpfOptions& options, P4::ReferenceMap* refMap,
-                        P4::TypeMap* typeMap)
+    EBPFIngressPipeline(cstring name, const EbpfOptions &options, P4::ReferenceMap *refMap,
+                        P4::TypeMap *typeMap)
         : EBPFPipeline(name, options, refMap, typeMap) {
         // FIXME: hardcoded
         maxResubmitDepth = 4;
@@ -163,11 +171,11 @@ class EBPFIngressPipeline : public EBPFPipeline {
         actUnspecCode = -1;
     }
 
-    void emitSharedMetadataInitializer(CodeBuilder* builder);
+    void emitSharedMetadataInitializer(CodeBuilder *builder);
 
-    void emit(CodeBuilder* builder) override;
-    void emitPSAControlInputMetadata(CodeBuilder* builder) override;
-    void emitPSAControlOutputMetadata(CodeBuilder* builder) override;
+    void emit(CodeBuilder *builder) override;
+    void emitPSAControlInputMetadata(CodeBuilder *builder) override;
+    void emitPSAControlOutputMetadata(CodeBuilder *builder) override;
 };
 
 /*
@@ -176,39 +184,91 @@ class EBPFIngressPipeline : public EBPFPipeline {
  */
 class EBPFEgressPipeline : public EBPFPipeline {
  public:
-    EBPFEgressPipeline(cstring name, const EbpfOptions& options, P4::ReferenceMap* refMap,
-                       P4::TypeMap* typeMap)
+    EBPFEgressPipeline(cstring name, const EbpfOptions &options, P4::ReferenceMap *refMap,
+                       P4::TypeMap *typeMap)
         : EBPFPipeline(name, options, refMap, typeMap) {}
 
-    void emit(CodeBuilder* builder) override;
-    void emitPSAControlInputMetadata(CodeBuilder* builder) override;
-    void emitPSAControlOutputMetadata(CodeBuilder* builder) override;
-    void emitCPUMAPLookup(CodeBuilder* builder) override;
+    void emit(CodeBuilder *builder) override;
+    void emitPSAControlInputMetadata(CodeBuilder *builder) override;
+    void emitPSAControlOutputMetadata(CodeBuilder *builder) override;
+    void emitCPUMAPLookup(CodeBuilder *builder) override;
+
+    virtual void emitCheckPacketMarkMetadata(CodeBuilder *builder) = 0;
 };
 
 class TCIngressPipeline : public EBPFIngressPipeline {
  public:
-    TCIngressPipeline(cstring name, const EbpfOptions& options, P4::ReferenceMap* refMap,
-                      P4::TypeMap* typeMap)
+    TCIngressPipeline(cstring name, const EbpfOptions &options, P4::ReferenceMap *refMap,
+                      P4::TypeMap *typeMap)
         : EBPFIngressPipeline(name, options, refMap, typeMap) {}
 
-    void emitGlobalMetadataInitializer(CodeBuilder* builder) override;
-    void emitTrafficManager(CodeBuilder* builder) override;
+    void emitGlobalMetadataInitializer(CodeBuilder *builder) override;
+    void emitTrafficManager(CodeBuilder *builder) override;
 
  private:
-    void emitTCWorkaroundUsingMeta(CodeBuilder* builder);
-    void emitTCWorkaroundUsingHead(CodeBuilder* builder);
-    void emitTCWorkaroundUsingCPUMAP(CodeBuilder* builder);
+    void emitTCWorkaroundUsingMeta(CodeBuilder *builder);
+    void emitTCWorkaroundUsingHead(CodeBuilder *builder);
+    void emitTCWorkaroundUsingCPUMAP(CodeBuilder *builder);
 };
 
 class TCEgressPipeline : public EBPFEgressPipeline {
  public:
-    TCEgressPipeline(cstring name, const EbpfOptions& options, P4::ReferenceMap* refMap,
-                     P4::TypeMap* typeMap)
+    TCEgressPipeline(cstring name, const EbpfOptions &options, P4::ReferenceMap *refMap,
+                     P4::TypeMap *typeMap)
         : EBPFEgressPipeline(name, options, refMap, typeMap) {}
 
-    void emitTrafficManager(CodeBuilder* builder) override;
+    void emitTrafficManager(CodeBuilder *builder) override;
+    void emitCheckPacketMarkMetadata(CodeBuilder *builder) override;
 };
+
+class XDPIngressPipeline : public EBPFIngressPipeline {
+ public:
+    XDPIngressPipeline(cstring name, const EbpfOptions &options, P4::ReferenceMap *refMap,
+                       P4::TypeMap *typeMap)
+        : EBPFIngressPipeline(name, options, refMap, typeMap) {
+        sectionName = "xdp_ingress/" + name;
+        ifindexVar = cstring("skb->ingress_ifindex");
+        packetPathVar = cstring(compilerGlobalMetadata + "->packet_path");
+        progTarget = new XdpTarget(options.emitTraceMessages);
+    }
+
+    void emitGlobalMetadataInitializer(CodeBuilder *builder) override;
+    void emitTrafficManager(CodeBuilder *builder) override;
+};
+
+class XDPEgressPipeline : public EBPFEgressPipeline {
+ public:
+    XDPEgressPipeline(cstring name, const EbpfOptions &options, P4::ReferenceMap *refMap,
+                      P4::TypeMap *typeMap)
+        : EBPFEgressPipeline(name, options, refMap, typeMap) {
+        sectionName = "xdp_devmap/" + name;
+        ifindexVar = cstring("skb->egress_ifindex");
+        // we do not support packet path, instance & priority in the XDP egress.
+        packetPathVar = cstring("0");
+        pktInstanceVar = cstring("0");
+        priorityVar = cstring("0");
+        progTarget = new XdpTarget(options.emitTraceMessages);
+    }
+
+    void emitGlobalMetadataInitializer(CodeBuilder *builder) override;
+    void emitTrafficManager(CodeBuilder *builder) override;
+    void emitCheckPacketMarkMetadata(CodeBuilder *builder) override;
+};
+
+class TCTrafficManagerForXDP : public TCIngressPipeline {
+ public:
+    TCTrafficManagerForXDP(cstring name, const EbpfOptions &options, P4::ReferenceMap *refMap,
+                           P4::TypeMap *typeMap)
+        : TCIngressPipeline(name, options, refMap, typeMap) {}
+
+    void emitGlobalMetadataInitializer(CodeBuilder *builder) override;
+    void emit(CodeBuilder *builder) override;
+
+ private:
+    void emitReadXDP2TCMetadataFromHead(CodeBuilder *builder);
+    void emitReadXDP2TCMetadataFromCPUMAP(CodeBuilder *builder);
+};
+
 }  // namespace EBPF
 
 #endif /* BACKENDS_EBPF_PSA_EBPFPIPELINE_H_ */

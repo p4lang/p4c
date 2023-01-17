@@ -34,7 +34,7 @@ class ActionSynthesisPolicy {
        If the policy returns true the control block is processed,
        otherwise it is left unchanged.
     */
-    virtual bool convert(const Visitor::Context* ctxt, const IR::P4Control* control) = 0;
+    virtual bool convert(const Visitor::Context *ctxt, const IR::P4Control *control) = 0;
 
     /**
        Called for each statement that may be put into an action when there are preceeding
@@ -46,8 +46,8 @@ class ActionSynthesisPolicy {
             true  statement should be added to the same action
             false statement should start a new action
     */
-    virtual bool can_combine(const Visitor::Context*, const IR::BlockStatement*,
-                             const IR::StatOrDecl*) {
+    virtual bool can_combine(const Visitor::Context *, const IR::BlockStatement *,
+                             const IR::StatOrDecl *) {
         return true;
     }
 };
@@ -74,31 +74,31 @@ control c() {
 For this to work all variable declarations must have been moved to the beginning.
 */
 class DoMoveActionsToTables : public Transform {
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
-    std::vector<const IR::P4Table*> tables;  // inserted tables
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
+    std::vector<const IR::P4Table *> tables;  // inserted tables
 
  public:
-    DoMoveActionsToTables(ReferenceMap* refMap, TypeMap* typeMap)
+    DoMoveActionsToTables(ReferenceMap *refMap, TypeMap *typeMap)
         : refMap(refMap), typeMap(typeMap) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
         setName("DoMoveActionsToTables");
     }
-    const IR::Node* preorder(IR::P4Parser* parser) override {
+    const IR::Node *preorder(IR::P4Parser *parser) override {
         prune();
         return parser;
     }
-    const IR::Node* postorder(IR::P4Control* control) override;
-    const IR::Node* preorder(IR::P4Control* control) override {
+    const IR::Node *postorder(IR::P4Control *control) override;
+    const IR::Node *preorder(IR::P4Control *control) override {
         tables.clear();
         return control;
     }
-    const IR::Node* preorder(IR::P4Action* action) override {
+    const IR::Node *preorder(IR::P4Action *action) override {
         prune();
         return action;
     }
-    const IR::Node* postorder(IR::MethodCallStatement* statement) override;
+    const IR::Node *postorder(IR::MethodCallStatement *statement) override;
 };
 
 /**
@@ -119,52 +119,52 @@ control c(inout bit x) {
 For this to work all variable declarations must have been moved to the beginning.
 */
 class DoSynthesizeActions : public Transform {
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
-    std::vector<const IR::P4Action*> actions;  // inserted actions
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
+    std::vector<const IR::P4Action *> actions;  // inserted actions
     bool changes = false;
-    ActionSynthesisPolicy* policy;
+    ActionSynthesisPolicy *policy;
 
  public:
     // If true the statement must be moved to an action
-    bool mustMove(const IR::MethodCallStatement* statement);
-    bool mustMove(const IR::AssignmentStatement* statement);
+    bool mustMove(const IR::MethodCallStatement *statement);
+    bool mustMove(const IR::AssignmentStatement *statement);
 
-    DoSynthesizeActions(ReferenceMap* refMap, TypeMap* typeMap, ActionSynthesisPolicy* policy)
+    DoSynthesizeActions(ReferenceMap *refMap, TypeMap *typeMap, ActionSynthesisPolicy *policy)
         : refMap(refMap), typeMap(typeMap), policy(policy) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
         setName("DoSynthesizeActions");
     }
-    const IR::Node* preorder(IR::P4Parser* parser) override {
+    const IR::Node *preorder(IR::P4Parser *parser) override {
         prune();
         return parser;
     }
-    const IR::Node* postorder(IR::P4Control* control) override;
-    const IR::Node* preorder(IR::P4Control* control) override;
-    const IR::Node* preorder(IR::P4Action* action) override {
+    const IR::Node *postorder(IR::P4Control *control) override;
+    const IR::Node *preorder(IR::P4Control *control) override;
+    const IR::Node *preorder(IR::P4Action *action) override {
         prune();
         return action;
     }  // skip actions
     // We do not handle return: this pass should be called after it has been removed
-    const IR::Node* preorder(IR::BlockStatement* statement) override;
-    const IR::Node* preorder(IR::AssignmentStatement* statement) override;
-    const IR::Node* preorder(IR::MethodCallStatement* statement) override;
-    const IR::Node* preorder(IR::ExitStatement* statement) override;
-    const IR::Node* preorder(IR::Function* function) override {
+    const IR::Node *preorder(IR::BlockStatement *statement) override;
+    const IR::Node *preorder(IR::AssignmentStatement *statement) override;
+    const IR::Node *preorder(IR::MethodCallStatement *statement) override;
+    const IR::Node *preorder(IR::ExitStatement *statement) override;
+    const IR::Node *preorder(IR::Function *function) override {
         prune();
         return function;
     }
 
  protected:
-    const IR::Statement* createAction(const IR::Statement* body);
+    const IR::Statement *createAction(const IR::Statement *body);
 };
 
 class SynthesizeActions : public PassManager {
  public:
-    SynthesizeActions(ReferenceMap* refMap, TypeMap* typeMap,
-                      ActionSynthesisPolicy* policy = nullptr,
-                      TypeChecking* typeChecking = nullptr) {
+    SynthesizeActions(ReferenceMap *refMap, TypeMap *typeMap,
+                      ActionSynthesisPolicy *policy = nullptr,
+                      TypeChecking *typeChecking = nullptr) {
         if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoSynthesizeActions(refMap, typeMap, policy));
@@ -174,8 +174,8 @@ class SynthesizeActions : public PassManager {
 
 class MoveActionsToTables : public PassManager {
  public:
-    MoveActionsToTables(ReferenceMap* refMap, TypeMap* typeMap,
-                        TypeChecking* typeChecking = nullptr) {
+    MoveActionsToTables(ReferenceMap *refMap, TypeMap *typeMap,
+                        TypeChecking *typeChecking = nullptr) {
         if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoMoveActionsToTables(refMap, typeMap));

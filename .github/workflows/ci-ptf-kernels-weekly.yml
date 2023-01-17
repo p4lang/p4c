@@ -52,14 +52,14 @@ jobs:
       DOCKER_VOLUME_IMAGE: /var/lib/libvirt/images/docker_disk.qcow2
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: recursive
 
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1
         with:
-          key: test-${{ env.UNIFIED }}-${{ runner.os }}
+          key: test-ptf-kernels-${{ runner.os }}
           max-size: 1000M
 
       - name: Cache VM image

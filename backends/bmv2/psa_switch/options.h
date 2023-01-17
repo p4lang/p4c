@@ -27,7 +27,7 @@ class PsaSwitchOptions : public BMV2Options {
     PsaSwitchOptions() {
         registerOption(
             "--listMidendPasses", nullptr,
-            [this](const char*) {
+            [this](const char *) {
                 listMidendPasses = true;
                 loadIRFromJson = false;
                 PsaSwitchMidEnd midEnd(*this, outStream);
@@ -38,7 +38,7 @@ class PsaSwitchOptions : public BMV2Options {
     }
 
     /// Process the command line arguments and set options accordingly.
-    std::vector<const char*>* process(int argc, char* const argv[]) override;
+    std::vector<const char *> *process(int argc, char *const argv[]) override;
 };
 
 using PsaSwitchContext = P4CContextWithOptions<PsaSwitchOptions>;

@@ -24,27 +24,27 @@ namespace P4 {
 
 /// Converts some list expressions into struct initializers.
 class CreateStructInitializers : public Transform {
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
 
  public:
-    CreateStructInitializers(ReferenceMap* refMap, TypeMap* typeMap)
+    CreateStructInitializers(ReferenceMap *refMap, TypeMap *typeMap)
         : refMap(refMap), typeMap(typeMap) {
         setName("CreateStructInitializers");
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
     }
 
-    const IR::Node* postorder(IR::AssignmentStatement* statement) override;
-    const IR::Node* postorder(IR::MethodCallExpression* expression) override;
-    const IR::Node* postorder(IR::Operation_Relation* expression) override;
-    const IR::Node* postorder(IR::Declaration_Variable* statement) override;
-    const IR::Node* postorder(IR::ReturnStatement* statement) override;
+    const IR::Node *postorder(IR::AssignmentStatement *statement) override;
+    const IR::Node *postorder(IR::MethodCallExpression *expression) override;
+    const IR::Node *postorder(IR::Operation_Relation *expression) override;
+    const IR::Node *postorder(IR::Declaration_Variable *statement) override;
+    const IR::Node *postorder(IR::ReturnStatement *statement) override;
 };
 
 class StructInitializers : public PassManager {
  public:
-    StructInitializers(ReferenceMap* refMap, TypeMap* typeMap) {
+    StructInitializers(ReferenceMap *refMap, TypeMap *typeMap) {
         setName("StructInitializers");
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new CreateStructInitializers(refMap, typeMap));

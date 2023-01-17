@@ -7,7 +7,6 @@
 #include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
-#include "backends/p4tools/common/lib/saturation_elim.h"
 #include "gtest/gtest-message.h"
 #include "gtest/gtest-test-part.h"
 #include "gtest/gtest.h"
@@ -17,6 +16,7 @@
 #include "ir/node.h"
 #include "ir/visitor.h"
 #include "lib/enumerator.h"
+#include "midend/saturationElim.h"
 #include "test/gtest/helpers.h"
 
 #include "backends/p4tools/modules/testgen/core/target.h"
@@ -24,14 +24,14 @@
 
 namespace Test {
 
+using P4::SaturationElim;
 using P4Tools::Model;
-using P4Tools::SaturationElim;
 using P4Tools::Z3Solver;
 using P4Tools::P4Testgen::TestgenTarget;
 
 class Z3SolverSatTests : public ::testing::Test {
  protected:
-    Z3SolverSatTests(const char* condition, const char* equation)
+    Z3SolverSatTests(const char *condition, const char *equation)
         : condition(condition), equation(equation) {}
     void SetUp() override {
         expression = nullptr;
@@ -84,26 +84,26 @@ class Z3SolverSatTests : public ::testing::Test {
         }
 
         // Produce a ProgramInfo, which is needed to create a SmallStepEvaluator.
-        const auto* progInfo = TestgenTarget::initProgram(test->program);
+        const auto *progInfo = TestgenTarget::initProgram(test->program);
         if (progInfo == nullptr) {
             return;
         }
 
         // Extract the binary operation from the P4Program
-        auto* const declVector = test->program->getDeclsByName("mau")->toVector();
-        const auto* decl = (*declVector)[0];
-        const auto* control = decl->to<IR::P4Control>();
-        for (const auto* st : control->body->components) {
-            if (const auto* as = st->to<IR::IfStatement>()) {
+        auto *const declVector = test->program->getDeclsByName("mau")->toVector();
+        const auto *decl = (*declVector)[0];
+        const auto *control = decl->to<IR::P4Control>();
+        for (const auto *st : control->body->components) {
+            if (const auto *as = st->to<IR::IfStatement>()) {
                 expression = as->condition;
-                if (const auto* op = as->ifTrue->to<IR::AssignmentStatement>()) {
+                if (const auto *op = as->ifTrue->to<IR::AssignmentStatement>()) {
                     variableValue = op;
                 }
             }
         }
     }
-    const IR::Expression* expression = nullptr;
-    const IR::AssignmentStatement* variableValue = nullptr;
+    const IR::Expression *expression = nullptr;
+    const IR::AssignmentStatement *variableValue = nullptr;
     std::string condition;
     std::string equation;
 };
@@ -114,13 +114,13 @@ namespace {
 class SaturationTransform : public Transform {
  public:
     /// transforms saturation adding
-    const IR::Node* postorder(IR::AddSat* add) override { return SaturationElim::eliminate(add); }
+    const IR::Node *postorder(IR::AddSat *add) override { return SaturationElim::eliminate(add); }
 
     /// transforms saturation substraction
-    const IR::Node* postorder(IR::SubSat* sub) override { return SaturationElim::eliminate(sub); }
+    const IR::Node *postorder(IR::SubSat *sub) override { return SaturationElim::eliminate(sub); }
 };
 
-void test(const IR::Expression* expression, const IR::AssignmentStatement* variableValue) {
+void test(const IR::Expression *expression, const IR::AssignmentStatement *variableValue) {
     // checking initial data
     ASSERT_TRUE(expression);
     ASSERT_TRUE(variableValue);
@@ -141,13 +141,13 @@ void test(const IR::Expression* expression, const IR::AssignmentStatement* varia
 
     ASSERT_EQ(model.count(variableValue->left), 1u);
 
-    const auto* value = model.at(variableValue->left);
+    const auto *value = model.at(variableValue->left);
 
     ASSERT_TRUE(variableValue->right->is<IR::Constant>());
     ASSERT_TRUE(value->is<IR::Constant>());
 
-    const auto* valueP4 = variableValue->right->to<IR::Constant>();
-    const auto* valueZ3 = value->to<IR::Constant>();
+    const auto *valueP4 = variableValue->right->to<IR::Constant>();
+    const auto *valueZ3 = value->to<IR::Constant>();
 
     ASSERT_EQ(valueZ3->value, valueP4->value);
 }

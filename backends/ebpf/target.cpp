@@ -20,50 +20,50 @@ limitations under the License.
 
 namespace EBPF {
 
-void Target::emitPreamble(Util::SourceCodeBuilder* builder) const { (void)builder; }
+void Target::emitPreamble(Util::SourceCodeBuilder *builder) const { (void)builder; }
 
-void Target::emitTraceMessage(Util::SourceCodeBuilder* builder, const char* format, int argc,
+void Target::emitTraceMessage(Util::SourceCodeBuilder *builder, const char *format, int argc,
                               ...) const {
     (void)builder;
     (void)format;
     (void)argc;
 }
 
-void Target::emitTraceMessage(Util::SourceCodeBuilder* builder, const char* format) const {
+void Target::emitTraceMessage(Util::SourceCodeBuilder *builder, const char *format) const {
     emitTraceMessage(builder, format, 0);
 }
 
 //////////////////////////////////////////////////////////////
 
-void KernelSamplesTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
+void KernelSamplesTarget::emitIncludes(Util::SourceCodeBuilder *builder) const {
     builder->append("#include \"ebpf_kernel.h\"\n");
     builder->newline();
 }
 
-void KernelSamplesTarget::emitResizeBuffer(Util::SourceCodeBuilder* builder, cstring buffer,
+void KernelSamplesTarget::emitResizeBuffer(Util::SourceCodeBuilder *builder, cstring buffer,
                                            cstring offsetVar) const {
     builder->appendFormat("bpf_skb_adjust_room(%s, %s, 1, 0)", buffer, offsetVar);
 }
 
-void KernelSamplesTarget::emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName,
+void KernelSamplesTarget::emitTableLookup(Util::SourceCodeBuilder *builder, cstring tblName,
                                           cstring key, cstring value) const {
     if (!value.isNullOrEmpty()) builder->appendFormat("%s = ", value.c_str());
     builder->appendFormat("BPF_MAP_LOOKUP_ELEM(%s, &%s)", tblName.c_str(), key.c_str());
 }
 
-void KernelSamplesTarget::emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
+void KernelSamplesTarget::emitTableUpdate(Util::SourceCodeBuilder *builder, cstring tblName,
                                           cstring key, cstring value) const {
     builder->appendFormat("BPF_MAP_UPDATE_ELEM(%s, &%s, &%s, BPF_ANY);", tblName.c_str(),
                           key.c_str(), value.c_str());
 }
 
-void KernelSamplesTarget::emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
+void KernelSamplesTarget::emitUserTableUpdate(Util::SourceCodeBuilder *builder, cstring tblName,
                                               cstring key, cstring value) const {
     builder->appendFormat("BPF_USER_MAP_UPDATE_ELEM(%s, &%s, &%s, BPF_ANY);", tblName.c_str(),
                           key.c_str(), value.c_str());
 }
 
-void KernelSamplesTarget::emitTableDecl(Util::SourceCodeBuilder* builder, cstring tblName,
+void KernelSamplesTarget::emitTableDecl(Util::SourceCodeBuilder *builder, cstring tblName,
                                         TableKind tableKind, cstring keyType, cstring valueType,
                                         unsigned size) const {
     cstring kind, flags;
@@ -102,7 +102,7 @@ void KernelSamplesTarget::emitTableDecl(Util::SourceCodeBuilder* builder, cstrin
     annotateTableWithBTF(builder, tblName, keyType, valueType);
 }
 
-void KernelSamplesTarget::emitTableDeclSpinlock(Util::SourceCodeBuilder* builder, cstring tblName,
+void KernelSamplesTarget::emitTableDeclSpinlock(Util::SourceCodeBuilder *builder, cstring tblName,
                                                 TableKind tableKind, cstring keyType,
                                                 cstring valueType, unsigned size) const {
     if (tableKind == TableHash || tableKind == TableArray) {
@@ -112,7 +112,7 @@ void KernelSamplesTarget::emitTableDeclSpinlock(Util::SourceCodeBuilder* builder
     }
 }
 
-void KernelSamplesTarget::emitMapInMapDecl(Util::SourceCodeBuilder* builder, cstring innerName,
+void KernelSamplesTarget::emitMapInMapDecl(Util::SourceCodeBuilder *builder, cstring innerName,
                                            TableKind innerTableKind, cstring innerKeyType,
                                            cstring innerValueType, unsigned int innerSize,
                                            cstring outerName, TableKind outerTableKind,
@@ -140,23 +140,23 @@ void KernelSamplesTarget::emitMapInMapDecl(Util::SourceCodeBuilder* builder, cst
     annotateTableWithBTF(builder, outerName, keyType, "__u32");
 }
 
-void KernelSamplesTarget::emitLicense(Util::SourceCodeBuilder* builder, cstring license) const {
+void KernelSamplesTarget::emitLicense(Util::SourceCodeBuilder *builder, cstring license) const {
     builder->emitIndent();
     builder->appendFormat("char _license[] SEC(\"license\") = \"%s\";", license.c_str());
     builder->newline();
 }
 
-void KernelSamplesTarget::emitCodeSection(Util::SourceCodeBuilder* builder,
+void KernelSamplesTarget::emitCodeSection(Util::SourceCodeBuilder *builder,
                                           cstring sectionName) const {
     builder->appendFormat("SEC(\"%s\")\n", sectionName.c_str());
 }
 
-void KernelSamplesTarget::emitMain(Util::SourceCodeBuilder* builder, cstring functionName,
+void KernelSamplesTarget::emitMain(Util::SourceCodeBuilder *builder, cstring functionName,
                                    cstring argName) const {
     builder->appendFormat("int %s(SK_BUFF *%s)", functionName.c_str(), argName.c_str());
 }
 
-void KernelSamplesTarget::emitPreamble(Util::SourceCodeBuilder* builder) const {
+void KernelSamplesTarget::emitPreamble(Util::SourceCodeBuilder *builder) const {
     cstring macro;
     if (emitTraceMessages) {
         macro =
@@ -174,7 +174,7 @@ void KernelSamplesTarget::emitPreamble(Util::SourceCodeBuilder* builder) const {
     builder->newline();
 }
 
-void KernelSamplesTarget::emitTraceMessage(Util::SourceCodeBuilder* builder, const char* format,
+void KernelSamplesTarget::emitTraceMessage(Util::SourceCodeBuilder *builder, const char *format,
                                            int argc, ...) const {
     if (!emitTraceMessages) return;
 
@@ -189,7 +189,7 @@ void KernelSamplesTarget::emitTraceMessage(Util::SourceCodeBuilder* builder, con
     msg = cstring("\"") + msg + "\"";
     va_start(ap, argc);
     for (int i = 0; i < argc; ++i) {
-        auto arg = va_arg(ap, const char*);
+        auto arg = va_arg(ap, const char *);
         if (!arg) break;
         msg = msg + ", " + cstring(arg);
     }
@@ -200,7 +200,7 @@ void KernelSamplesTarget::emitTraceMessage(Util::SourceCodeBuilder* builder, con
     builder->newline();
 }
 
-void KernelSamplesTarget::annotateTableWithBTF(Util::SourceCodeBuilder* builder, cstring name,
+void KernelSamplesTarget::annotateTableWithBTF(Util::SourceCodeBuilder *builder, cstring name,
                                                cstring keyType, cstring valueType) const {
     builder->appendFormat("BPF_ANNOTATE_KV_PAIR(%s, %s, %s)", name.c_str(), keyType.c_str(),
                           valueType.c_str());
@@ -208,13 +208,19 @@ void KernelSamplesTarget::annotateTableWithBTF(Util::SourceCodeBuilder* builder,
 }
 
 //////////////////////////////////////////////////////////////
+void XdpTarget::emitResizeBuffer(Util::SourceCodeBuilder *builder, cstring buffer,
+                                 cstring offsetVar) const {
+    builder->appendFormat("bpf_xdp_adjust_head(%s, -%s)", buffer, offsetVar);
+}
 
-void TestTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
+//////////////////////////////////////////////////////////////
+
+void TestTarget::emitIncludes(Util::SourceCodeBuilder *builder) const {
     builder->append("#include \"ebpf_test.h\"\n");
     builder->newline();
 }
 
-void TestTarget::emitTableDecl(Util::SourceCodeBuilder* builder, cstring tblName, TableKind,
+void TestTarget::emitTableDecl(Util::SourceCodeBuilder *builder, cstring tblName, TableKind,
                                cstring keyType, cstring valueType, unsigned size) const {
     builder->appendFormat("REGISTER_TABLE(%s, 0 /* unused */,", tblName.c_str());
     builder->appendFormat("sizeof(%s), sizeof(%s), %d)", keyType.c_str(), valueType.c_str(), size);
@@ -223,24 +229,24 @@ void TestTarget::emitTableDecl(Util::SourceCodeBuilder* builder, cstring tblName
 
 //////////////////////////////////////////////////////////////
 
-void BccTarget::emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName, cstring key,
+void BccTarget::emitTableLookup(Util::SourceCodeBuilder *builder, cstring tblName, cstring key,
                                 cstring value) const {
     if (!value.isNullOrEmpty()) builder->appendFormat("%s = ", value.c_str());
     builder->appendFormat("%s.lookup(&%s)", tblName.c_str(), key.c_str());
 }
 
-void BccTarget::emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName, cstring key,
+void BccTarget::emitTableUpdate(Util::SourceCodeBuilder *builder, cstring tblName, cstring key,
                                 cstring value) const {
     builder->appendFormat("%s.update(&%s, &%s);", tblName.c_str(), key.c_str(), value.c_str());
 }
 
-void BccTarget::emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName, cstring key,
+void BccTarget::emitUserTableUpdate(Util::SourceCodeBuilder *builder, cstring tblName, cstring key,
                                     cstring value) const {
     builder->appendFormat("bpf_update_elem(%s, &%s, &%s, BPF_ANY);", tblName.c_str(), key.c_str(),
                           value.c_str());
 }
 
-void BccTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
+void BccTarget::emitIncludes(Util::SourceCodeBuilder *builder) const {
     builder->append(
         "#include <uapi/linux/bpf.h>\n"
         "#include <uapi/linux/if_ether.h>\n"
@@ -250,7 +256,7 @@ void BccTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
         "#include <linux/netdevice.h>\n");
 }
 
-void BccTarget::emitTableDecl(Util::SourceCodeBuilder* builder, cstring tblName,
+void BccTarget::emitTableDecl(Util::SourceCodeBuilder *builder, cstring tblName,
                               TableKind tableKind, cstring keyType, cstring valueType,
                               unsigned size) const {
     cstring kind;
@@ -268,7 +274,7 @@ void BccTarget::emitTableDecl(Util::SourceCodeBuilder* builder, cstring tblName,
     builder->newline();
 }
 
-void BccTarget::emitMain(Util::SourceCodeBuilder* builder, cstring functionName,
+void BccTarget::emitMain(Util::SourceCodeBuilder *builder, cstring functionName,
                          cstring argName) const {
     builder->appendFormat("int %s(struct __sk_buff* %s)", functionName.c_str(), argName.c_str());
 }

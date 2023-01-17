@@ -23,16 +23,16 @@ namespace P4 {
 
 class FillEnumMap : public Transform {
  public:
-    std::map<const IR::Type_Enum*, EnumRepresentation*> repr;
-    ChooseEnumRepresentation* policy;
-    TypeMap* typeMap;
-    FillEnumMap(ChooseEnumRepresentation* policy, TypeMap* typeMap)
+    std::map<const IR::Type_Enum *, EnumRepresentation *> repr;
+    ChooseEnumRepresentation *policy;
+    TypeMap *typeMap;
+    FillEnumMap(ChooseEnumRepresentation *policy, TypeMap *typeMap)
         : policy(policy), typeMap(typeMap) {
         CHECK_NULL(policy);
         CHECK_NULL(typeMap);
         setName("FillEnumMap");
     }
-    const IR::Node* preorder(IR::Type_Enum* type) override;
+    const IR::Node *preorder(IR::Type_Enum *type) override;
 };
 
 }  // namespace P4

@@ -26,6 +26,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "helpers.h"
 #include "ir/ir.h"
+#include "lib/algorithm.h"
 #include "lib/json.h"
 #include "midend/convertEnums.h"
 #include "sharedActionSelectorCheck.h"
@@ -36,13 +37,13 @@ static constexpr unsigned INVALID_ACTION_ID = 0xffffffff;
 
 template <Standard::Arch arch>
 class ControlConverter : public Inspector {
-    ConversionContext* ctxt;
+    ConversionContext *ctxt;
     cstring name;
-    P4::P4CoreLibrary& corelib;
+    P4::P4CoreLibrary &corelib;
 
  protected:
-    Util::IJson* convertTable(const CFG::TableNode* node, Util::JsonArray* action_profiles,
-                              BMV2::SharedActionSelectorCheck<arch>* selector_check) {
+    Util::IJson *convertTable(const CFG::TableNode *node, Util::JsonArray *action_profiles,
+                              BMV2::SharedActionSelectorCheck<arch> *selector_check) {
         auto table = node->table;
         LOG3("Processing " << dbp(table));
         auto result = new Util::JsonObject();
@@ -316,8 +317,8 @@ class ControlConverter : public Inspector {
 
         auto next_tables = new Util::JsonObject();
 
-        CFG::Node* nextDestination = nullptr;          // if no action is executed
-        CFG::Node* defaultLabelDestination = nullptr;  // if the "default" label is executed
+        CFG::Node *nextDestination = nullptr;          // if no action is executed
+        CFG::Node *defaultLabelDestination = nullptr;  // if the "default" label is executed
         // Note: the "default" label is not the default_action.
         bool hitMiss = false;
         for (auto s : node->successors.edges) {
@@ -333,7 +334,7 @@ class ControlConverter : public Inspector {
             }
         }
 
-        Util::IJson* nextLabel = nullptr;
+        Util::IJson *nextLabel = nullptr;
         if (!hitMiss) {
             BUG_CHECK(nextDestination, "Could not find default destination for %1%",
                       node->invocation);
@@ -389,8 +390,8 @@ class ControlConverter : public Inspector {
                 return result;
             }
             auto expr = defact->value->to<IR::ExpressionValue>()->expression;
-            const IR::P4Action* action = nullptr;
-            const IR::Vector<IR::Argument>* args = nullptr;
+            const IR::P4Action *action = nullptr;
+            const IR::Vector<IR::Argument> *args = nullptr;
 
             if (expr->is<IR::PathExpression>()) {
                 auto path = expr->to<IR::PathExpression>()->path;
@@ -432,7 +433,7 @@ class ControlConverter : public Inspector {
         convertTableEntries(table, result);
         return result;
     }
-    void convertTableEntries(const IR::P4Table* table, Util::JsonObject* jsonTable) {
+    void convertTableEntries(const IR::P4Table *table, Util::JsonObject *jsonTable) {
         auto entriesList = table->getEntries();
         if (entriesList == nullptr) return;
 
@@ -587,7 +588,7 @@ class ControlConverter : public Inspector {
             entries->append(entry);
         }
     }
-    cstring getKeyMatchType(const IR::KeyElement* ke) {
+    cstring getKeyMatchType(const IR::KeyElement *ke) {
         auto path = ke->matchType->path;
         auto mt = ctxt->refMap->getDeclaration(path, true)->to<IR::Declaration_ID>();
         BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
@@ -602,9 +603,9 @@ class ControlConverter : public Inspector {
         return "invalid";
     }
     /// Return 'true' if the table is 'simple'
-    bool handleTableImplementation(const IR::Property* implementation, const IR::Key* key,
-                                   Util::JsonObject* table, Util::JsonArray* action_profiles,
-                                   BMV2::SharedActionSelectorCheck<arch>*) {
+    bool handleTableImplementation(const IR::Property *implementation, const IR::Key *key,
+                                   Util::JsonObject *table, Util::JsonArray *action_profiles,
+                                   BMV2::SharedActionSelectorCheck<arch> *) {
         if (implementation == nullptr) {
             table->emplace("type", "simple");
             return true;
@@ -618,7 +619,7 @@ class ControlConverter : public Inspector {
         auto propv = implementation->value->to<IR::ExpressionValue>();
 
         bool isSimpleTable = true;
-        Util::JsonObject* action_profile;
+        Util::JsonObject *action_profile;
         cstring apname;
 
         if (propv->expression->is<IR::ConstructorCallExpression>()) {
@@ -731,7 +732,7 @@ class ControlConverter : public Inspector {
         return isSimpleTable;
     }
 
-    Util::IJson* convertIf(const CFG::IfNode* node, cstring prefix) {
+    Util::IJson *convertIf(const CFG::IfNode *node, cstring prefix) {
         (void)prefix;
         auto result = new Util::JsonObject();
         result->emplace("name", node->name);
@@ -741,7 +742,7 @@ class ControlConverter : public Inspector {
         CHECK_NULL(j);
         result->emplace("expression", j);
         for (auto e : node->successors.edges) {
-            Util::IJson* dest = nodeName(e->endpoint);
+            Util::IJson *dest = nodeName(e->endpoint);
             cstring label = Util::toString(e->getBool());
             label += "_next";
             result->emplace(label, dest);
@@ -751,7 +752,7 @@ class ControlConverter : public Inspector {
 
  public:
     const bool emitExterns;
-    bool preorder(const IR::P4Control* cont) override {
+    bool preorder(const IR::P4Control *cont) override {
         auto result = new Util::JsonObject();
 
         result->emplace("name", name);
@@ -780,7 +781,7 @@ class ControlConverter : public Inspector {
         auto selector_check = new BMV2::SharedActionSelectorCheck<arch>(ctxt);
         cont->apply(*selector_check);
 
-        std::set<const IR::P4Table*> done;
+        std::set<const IR::P4Table *> done;
 
         // Tables are created prior to the other local declarations
         for (auto node : cfg->allNodes) {
@@ -826,7 +827,7 @@ class ControlConverter : public Inspector {
         return false;
     }
 
-    explicit ControlConverter(ConversionContext* ctxt, cstring name, const bool& emitExterns_)
+    explicit ControlConverter(ConversionContext *ctxt, cstring name, const bool &emitExterns_)
         : ctxt(ctxt), name(name), corelib(P4::P4CoreLibrary::instance), emitExterns(emitExterns_) {
         setName("ControlConverter");
     }

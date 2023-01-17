@@ -21,7 +21,7 @@ limitations under the License.
 
 namespace P4 {
 
-void DoCheckCoreMethods::checkEmitType(const IR::Expression* emit, const IR::Type* type) const {
+void DoCheckCoreMethods::checkEmitType(const IR::Expression *emit, const IR::Type *type) const {
     if (type->is<IR::Type_Header>() || type->is<IR::Type_Stack>() ||
         type->is<IR::Type_HeaderUnion>())
         return;
@@ -48,8 +48,8 @@ void DoCheckCoreMethods::checkEmitType(const IR::Expression* emit, const IR::Typ
               emit);
 }
 
-void DoCheckCoreMethods::checkCorelibMethods(const ExternMethod* em) const {
-    P4CoreLibrary& corelib = P4CoreLibrary::instance;
+void DoCheckCoreMethods::checkCorelibMethods(const ExternMethod *em) const {
+    P4CoreLibrary &corelib = P4CoreLibrary::instance;
     auto et = em->actualExternType;
     auto mce = em->expr;
     unsigned argCount = mce->arguments->size();
@@ -111,7 +111,7 @@ void DoCheckCoreMethods::checkCorelibMethods(const ExternMethod* em) const {
     }
 }
 
-void DoCheckCoreMethods::postorder(const IR::MethodCallExpression* expression) {
+void DoCheckCoreMethods::postorder(const IR::MethodCallExpression *expression) {
     auto mi = MethodInstance::resolve(expression, refMap, typeMap, nullptr, true);
     if (mi->is<ExternMethod>()) checkCorelibMethods(mi->to<ExternMethod>());
 

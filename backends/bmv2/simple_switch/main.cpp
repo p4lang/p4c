@@ -14,8 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <stdio.h>
-
+#include <cstdio>
 #include <iostream>
 #include <string>
 
@@ -30,18 +29,20 @@ limitations under the License.
 #include "frontends/p4/frontend.h"
 #include "fstream"
 #include "ir/ir.h"
+#include "ir/json_generator.h"
 #include "ir/json_loader.h"
+#include "lib/algorithm.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/gc.h"
 #include "lib/log.h"
 #include "lib/nullstream.h"
 
-int main(int argc, char* const argv[]) {
+int main(int argc, char *const argv[]) {
     setup_gc_logging();
 
     AutoCompileContext autoBMV2Context(new BMV2::SimpleSwitchContext);
-    auto& options = BMV2::SimpleSwitchContext::get().options();
+    auto &options = BMV2::SimpleSwitchContext::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.compilerVersion = BMV2_SIMPLESWITCH_VERSION_STRING;
 
@@ -55,8 +56,8 @@ int main(int argc, char* const argv[]) {
     // BMV2 is required for compatibility with the previous compiler.
     options.preprocessor_options += " -D__TARGET_BMV2__";
 
-    const IR::P4Program* program = nullptr;
-    const IR::ToplevelBlock* toplevel = nullptr;
+    const IR::P4Program *program = nullptr;
+    const IR::ToplevelBlock *toplevel = nullptr;
 
     if (options.loadIRFromJson == false) {
         program = P4::parseP4File(options);
@@ -69,7 +70,7 @@ int main(int argc, char* const argv[]) {
             P4::FrontEnd frontend;
             frontend.addDebugHook(hook);
             program = frontend.run(options, program);
-        } catch (const std::exception& bug) {
+        } catch (const std::exception &bug) {
             std::cerr << bug.what() << std::endl;
             return 1;
         }
@@ -100,7 +101,7 @@ int main(int argc, char* const argv[]) {
         if (::errorCount() > 1 || toplevel == nullptr || toplevel->getMain() == nullptr) return 1;
         if (options.dumpJsonFile && !options.loadIRFromJson)
             JSONGenerator(*openFile(options.dumpJsonFile, true), true) << program << std::endl;
-    } catch (const std::exception& bug) {
+    } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
     }
@@ -113,14 +114,14 @@ int main(int argc, char* const argv[]) {
     AutoCompileContext autoContext(new BMV2::BMV2Context(BMV2::SimpleSwitchContext::get()));
     try {
         backend->convert(toplevel);
-    } catch (const std::exception& bug) {
+    } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
     }
     if (::errorCount() > 0) return 1;
 
     if (!options.outputFile.isNullOrEmpty()) {
-        std::ostream* out = openFile(options.outputFile, false);
+        std::ostream *out = openFile(options.outputFile, false);
         if (out != nullptr) {
             backend->serialize(*out);
             out->flush();

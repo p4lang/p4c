@@ -26,11 +26,11 @@ namespace P4 {
  *  state, and put them in redundantParsers.
  */
 class FindRedundantParsers : public Inspector {
-    std::set<const IR::P4Parser*>& redundantParsers;
-    bool preorder(const IR::P4Parser* parser) override;
+    std::set<const IR::P4Parser *> &redundantParsers;
+    bool preorder(const IR::P4Parser *parser) override;
 
  public:
-    explicit FindRedundantParsers(std::set<const IR::P4Parser*>& redundantParsers)
+    explicit FindRedundantParsers(std::set<const IR::P4Parser *> &redundantParsers)
         : redundantParsers(redundantParsers) {}
 };
 
@@ -38,22 +38,22 @@ class FindRedundantParsers : public Inspector {
  *  eliminate them.
  */
 class EliminateSubparserCalls : public Transform {
-    const std::set<const IR::P4Parser*>& redundantParsers;
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
-    const IR::Node* postorder(IR::MethodCallStatement* methodCallStmt) override;
+    const std::set<const IR::P4Parser *> &redundantParsers;
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
+    const IR::Node *postorder(IR::MethodCallStatement *methodCallStmt) override;
 
  public:
-    EliminateSubparserCalls(const std::set<const IR::P4Parser*>& redundantParsers,
-                            ReferenceMap* refMap, TypeMap* typeMap)
+    EliminateSubparserCalls(const std::set<const IR::P4Parser *> &redundantParsers,
+                            ReferenceMap *refMap, TypeMap *typeMap)
         : redundantParsers(redundantParsers), refMap(refMap), typeMap(typeMap) {}
 };
 
 class RemoveRedundantParsers : public PassManager {
-    std::set<const IR::P4Parser*> redundantParsers;
+    std::set<const IR::P4Parser *> redundantParsers;
 
  public:
-    RemoveRedundantParsers(ReferenceMap* refMap, TypeMap* typeMap)
+    RemoveRedundantParsers(ReferenceMap *refMap, TypeMap *typeMap)
         : PassManager{new TypeChecking(refMap, typeMap, true),
                       new FindRedundantParsers(redundantParsers),
                       new EliminateSubparserCalls(redundantParsers, refMap, typeMap)} {

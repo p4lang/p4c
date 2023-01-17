@@ -28,12 +28,12 @@ cstring toString(bool value) {
 
 cstring toString(std::string value) { return value; }
 
-cstring toString(const char* value) {
+cstring toString(const char *value) {
     if (value == nullptr) return cstring::literal("<nullptr>");
     return cstring(value);
 }
 
-cstring toString(const void* value) {
+cstring toString(const void *value) {
     if (value == nullptr) return cstring::literal("<nullptr>");
     std::stringstream result;
     result << value;
@@ -124,7 +124,7 @@ cstring toString(cstring value) {
 
 cstring toString(StringRef value) { return value; }
 
-cstring printf_format(const char* fmt_str, ...) {
+cstring printf_format(const char *fmt_str, ...) {
     if (fmt_str == nullptr) throw std::runtime_error("Null format string");
     va_list ap;
     va_start(ap, fmt_str);
@@ -134,7 +134,7 @@ cstring printf_format(const char* fmt_str, ...) {
 }
 
 // printf into a string
-cstring vprintf_format(const char* fmt_str, va_list ap) {
+cstring vprintf_format(const char *fmt_str, va_list ap) {
     static char buf[128];
     va_list ap_copy;
     va_copy(ap_copy, ap);
@@ -143,7 +143,7 @@ cstring vprintf_format(const char* fmt_str, va_list ap) {
     int size = vsnprintf(buf, sizeof(buf), fmt_str, ap);
     if (size < 0) throw std::runtime_error("Error in vsnprintf");
     if (static_cast<size_t>(size) >= sizeof(buf)) {
-        char* formatted = new char[size + 1];
+        char *formatted = new char[size + 1];
         vsnprintf(formatted, size + 1, fmt_str, ap_copy);
         return cstring::own(formatted, size);
     }

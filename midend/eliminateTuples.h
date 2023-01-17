@@ -28,20 +28,20 @@ namespace P4 {
  * corresponding struct replacement.
  */
 class ReplacementMap {
-    ordered_map<const IR::Type*, const IR::Type_Struct*> replacement;
-    std::set<const IR::Type_Struct*> inserted;
-    const IR::Type* convertType(const IR::Type* type);
+    ordered_map<const IR::Type *, const IR::Type_Struct *> replacement;
+    std::set<const IR::Type_Struct *> inserted;
+    const IR::Type *convertType(const IR::Type *type);
 
  public:
-    P4::NameGenerator* ng;
-    P4::TypeMap* typeMap;
+    P4::NameGenerator *ng;
+    P4::TypeMap *typeMap;
 
-    ReplacementMap(NameGenerator* ng, TypeMap* typeMap) : ng(ng), typeMap(typeMap) {
+    ReplacementMap(NameGenerator *ng, TypeMap *typeMap) : ng(ng), typeMap(typeMap) {
         CHECK_NULL(ng);
         CHECK_NULL(typeMap);
     }
-    const IR::Type_Struct* getReplacement(const IR::Type_BaseList* tt);
-    IR::IndexedVector<IR::Node>* getNewReplacements();
+    const IR::Type_Struct *getReplacement(const IR::Type_BaseList *tt);
+    IR::IndexedVector<IR::Node> *getNewReplacements();
 };
 
 /**
@@ -76,45 +76,45 @@ class ReplacementMap {
  *         is needed for that.
  */
 class DoReplaceTuples final : public Transform {
-    ReplacementMap* repl;
+    ReplacementMap *repl;
 
  public:
-    DoReplaceTuples(ReferenceMap* refMap, TypeMap* typeMap)
+    DoReplaceTuples(ReferenceMap *refMap, TypeMap *typeMap)
         : repl(new ReplacementMap(refMap, typeMap)) {
         setName("DoReplaceTuples");
     }
-    const IR::Node* skip(const IR::Node* node) {
+    const IR::Node *skip(const IR::Node *node) {
         prune();
         return node;
     }
-    const IR::Node* postorder(IR::Type_BaseList* type) override;
-    const IR::Node* insertReplacements(const IR::Node* before);
-    const IR::Node* postorder(IR::Type_Struct* type) override { return insertReplacements(type); }
-    const IR::Node* postorder(IR::ArrayIndex* expression) override;
-    const IR::Node* postorder(IR::Type_Typedef* type) override { return insertReplacements(type); }
-    const IR::Node* postorder(IR::Type_Newtype* type) override { return insertReplacements(type); }
-    const IR::Node* postorder(IR::P4Parser* parser) override { return insertReplacements(parser); }
-    const IR::Node* postorder(IR::P4Control* control) override {
+    const IR::Node *postorder(IR::Type_BaseList *type) override;
+    const IR::Node *insertReplacements(const IR::Node *before);
+    const IR::Node *postorder(IR::Type_Struct *type) override { return insertReplacements(type); }
+    const IR::Node *postorder(IR::ArrayIndex *expression) override;
+    const IR::Node *postorder(IR::Type_Typedef *type) override { return insertReplacements(type); }
+    const IR::Node *postorder(IR::Type_Newtype *type) override { return insertReplacements(type); }
+    const IR::Node *postorder(IR::P4Parser *parser) override { return insertReplacements(parser); }
+    const IR::Node *postorder(IR::P4Control *control) override {
         return insertReplacements(control);
     }
-    const IR::Node* postorder(IR::Method* method) override { return insertReplacements(method); }
-    const IR::Node* postorder(IR::Type_Extern* ext) override { return insertReplacements(ext); }
-    const IR::Node* postorder(IR::Declaration_Instance* decl) override {
+    const IR::Node *postorder(IR::Method *method) override { return insertReplacements(method); }
+    const IR::Node *postorder(IR::Type_Extern *ext) override { return insertReplacements(ext); }
+    const IR::Node *postorder(IR::Declaration_Instance *decl) override {
         return insertReplacements(decl);
     }
-    const IR::Node* preorder(IR::P4ValueSet* set) override {
+    const IR::Node *preorder(IR::P4ValueSet *set) override {
         // Disable substitution of type parameters for value sets.
         // We want to keep these as tuples.
         return skip(set);
     }
-    const IR::Node* preorder(IR::P4ListExpression* expression) override { return skip(expression); }
-    const IR::Node* preorder(IR::Type_P4List* list) override { return skip(list); }
+    const IR::Node *preorder(IR::P4ListExpression *expression) override { return skip(expression); }
+    const IR::Node *preorder(IR::Type_P4List *list) override { return skip(list); }
 };
 
 class EliminateTuples final : public PassManager {
  public:
-    EliminateTuples(ReferenceMap* refMap, TypeMap* typeMap, TypeChecking* typeChecking = nullptr,
-                    TypeInference* typeInference = nullptr) {
+    EliminateTuples(ReferenceMap *refMap, TypeMap *typeMap, TypeChecking *typeChecking = nullptr,
+                    TypeInference *typeInference = nullptr) {
         if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoReplaceTuples(refMap, typeMap));
