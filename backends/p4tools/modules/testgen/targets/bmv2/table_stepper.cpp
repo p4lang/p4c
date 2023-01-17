@@ -92,7 +92,7 @@ void BMv2_V1ModelTableStepper::evalTableActionProfile(
         // We get the control plane name of the action we are calling.
         cstring actionName = actionType->controlPlaneName();
         // Copy the previous action profile.
-        auto* actionProfile = new Bmv2_V1ModelActionProfile(*bmv2_V1ModelProperties.actionProfile);
+        auto *actionProfile = new Bmv2_V1ModelActionProfile(*bmv2_V1ModelProperties.actionProfile);
         // Synthesize arguments for the call based on the action parameters.
         const auto &parameters = actionType->parameters;
         auto *arguments = new IR::Vector<IR::Argument>();

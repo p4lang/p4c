@@ -43,7 +43,7 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
     : ProgramInfo(program),
       programmableBlocks(std::move(inputBlocks)),
       declIdToGress(declIdToGress) {
-    const auto& options = TestgenOptions::get();
+    const auto &options = TestgenOptions::get();
     concolicMethodImpls.add(*Bmv2Concolic::getBmv2ConcolicMethodImpls());
 
     // Just concatenate everything together.
@@ -60,7 +60,7 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
     /// individual component instantiations.
     int pipeIdx = 0;
 
-    for (const auto& declTuple : programmableBlocks) {
+    for (const auto &declTuple : programmableBlocks) {
         // Iterate through the (ordered) pipes of the target architecture.
         auto subResult = processDeclaration(declTuple.second, pipeIdx);
         pipelineSequence.insert(pipelineSequence.end(), subResult.begin(), subResult.end());
@@ -73,7 +73,7 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
     if (options.testBackend == "PTF") {
         minPktSize = BMv2Constants::ETH_HDR_SIZE;
     }
-    const IR::Operation_Binary* constraint =
+    const IR::Operation_Binary *constraint =
         new IR::Grt(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
                     IR::getConstant(ExecutionState::getPacketSizeVarType(), minPktSize));
     /// Vector containing pairs of restrictions and nodes to which these restrictions apply.
@@ -145,7 +145,7 @@ std::vector<Continuation::Command> BMv2_V1ModelProgramInfo::processDeclaration(
         /// Set the restriction on the output port,
         /// this is necessary since ptf tests use ports from 0 to 7
         cmds.emplace_back(Continuation::Guard(getPortConstraint(getTargetOutputPortVar())));
-        auto* portStmt = new IR::AssignmentStatement(egressPortVar, getTargetOutputPortVar());
+        auto *portStmt = new IR::AssignmentStatement(egressPortVar, getTargetOutputPortVar());
         cmds.emplace_back(portStmt);
         // TODO: We have not implemented multi cast yet.
         // Drop the packet if the multicast group is set.
@@ -176,8 +176,8 @@ const IR::Member *BMv2_V1ModelProgramInfo::getTargetInputPortVar() const {
                           new IR::PathExpression("*standard_metadata"), "ingress_port");
 }
 
-const IR::Expression* BMv2_V1ModelProgramInfo::getPortConstraint(const IR::Member* portVar) const {
-    const IR::Operation_Binary* portConstraint =
+const IR::Expression *BMv2_V1ModelProgramInfo::getPortConstraint(const IR::Member *portVar) const {
+    const IR::Operation_Binary *portConstraint =
         new IR::Leq(portVar, new IR::Constant(portVar->type, 7));
     return portConstraint;
 }
