@@ -34,6 +34,9 @@ class BMv2Constants {
     // Clone type is derived from v1model.p4
     static constexpr int CLONE_TYPE_I2E = 0x0000;
     static constexpr int CLONE_TYPE_E2E = 0x0001;
+
+    static constexpr int STF_MIN_PKT_SIZE = 22;
+    static constexpr int ETH_HDR_SIZE = 112;
 };
 
 }  // namespace Bmv2

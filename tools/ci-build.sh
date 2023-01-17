@@ -94,7 +94,6 @@ P4C_RUNTIME_DEPS="cpp \
                   libgmp-dev \
                   python3"
 
-
 # TODO: Remove this check once 18.04 is deprecated.
 if [[ "${DISTRIB_RELEASE}" == "18.04" ]] || [[ "$(which simple_switch 2> /dev/null)" != "" ]] ; then
   P4C_DEPS+=" libprotobuf-dev protobuf-compiler"
