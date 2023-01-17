@@ -62,9 +62,6 @@ class PTF : public TF {
     void emitTestcase(const TestSpec* testSpec, cstring selectedBranches, size_t testId,
                       const std::string& testCase, float currentCoverage);
 
-    /// Converts all the counter objects into Inja format.
-    static inja::json getCounters(const TestSpec* testSpec);
-
     /// Converts all the control plane objects into Inja format.
     static inja::json getControlPlane(const TestSpec* testSpec);
 

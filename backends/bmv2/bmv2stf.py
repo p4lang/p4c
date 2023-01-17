@@ -386,27 +386,6 @@ class RunBMV2(object):
         self.cli_stdin.write(bytes(cmd + "\n", encoding='utf8'))
         self.cli_stdin.flush()
         self.packetDelay = 1
-    def compareCounterResult(self, cmd):
-        name, index = nextWord(cmd)
-        arrayIndex = name + "[" + index + "]"
-        out, err = self.cli.communicate()
-        out = str(out).split("\\n")
-        for element in out:
-            print(element)
-            if self.p4toolCounterName == name and self.p4toolCounterIndex == index:
-                if element.find(arrayIndex + "=") != -1:
-                    strParts = element.split(arrayIndex + "=")
-                    strParts = strParts[1].replace("(", "")
-                    strParts = strParts.replace(")", "")
-                    strParts = strParts.split(" ")
-                    bytes = strParts[1]
-                    packets = strParts[3]
-                    if packets != self.p4toolCounterValue :
-                        raise ValueError("The results of counter "+name+
-                             " at index "+index+" are different.\nP4tool counter = " +
-                             self.p4toolCounterValue+"\ncounter_read = " + packets + "\n")
-        if (err != None):
-            print(err)
     def do_command(self, cmd):
         if self.options.verbose and cmd != "":
             print("STF Command:", cmd)
@@ -425,18 +404,10 @@ class RunBMV2(object):
             # Pass through multicast group commands unchanged, with
             # same arguments as expected by simple_switch_CLI
             self.do_cli_command(first + " " + cmd)
-        elif first == "p4toolCounter":
-            p4toolCounter = nextWord(cmd)
-            self.p4toolCounterName = p4toolCounter[0]
-            data = p4toolCounter[1].split()
-            self.p4toolCounterIndex = data[0]
-            self.p4toolCounterValue = data[1]
         elif first == "counter_read" or first == "counter_write":
             # Pass through counter commands unchanged, with
             # same arguments as expected by simple_switch_CLI
             self.do_cli_command(first + " " + cmd)
-            if (first == "counter_read"):
-                self.compareCounterResult(cmd)
         elif first == "register_read" or first == "register_write" or first == "register_reset":
             # Pass through register commands unchanged, with
             # same arguments as expected by simple_switch_CLI
@@ -676,9 +647,8 @@ class RunBMV2(object):
                 print("Running", " ".join(runcli))
 
             try:
-                cli = subprocess.Popen(runcli, cwd=self.folder, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+                cli = subprocess.Popen(runcli, cwd=self.folder, stdin=subprocess.PIPE)
                 self.cli_stdin = cli.stdin
-                self.cli = cli
                 with open(self.stffile) as i:
                     for line in i:
                         line, comment = nextWord(line, "#")

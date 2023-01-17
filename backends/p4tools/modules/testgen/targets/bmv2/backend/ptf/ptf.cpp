@@ -61,32 +61,6 @@ std::vector<std::pair<size_t, size_t>> PTF::getIgnoreMasks(const IR::Constant* m
     return ignoreMasks;
 }
 
-inja::json PTF::getCounters(const TestSpec* testSpec) {
-    inja::json counterList = inja::json::object();
-
-    auto counters = testSpec->getTestObjectCategory("countervalues");
-    if (!counters.empty()) {
-        counterList["counter_arrays"] = inja::json::array();
-    }
-    for (auto const& testObject : counters) {
-        const auto* const counter = testObject.second->checkedTo<Bmv2CounterValue>();
-        inja::json j;
-        j["name"] = testObject.first;
-        j["action"] = "count";
-        j["size"] = static_cast<int>(counter->getEvaluatedSize()->value);
-        j["type"] = std::to_string(counter->getType());
-        j["conditions"] = inja::json::array();
-        for (auto const condition : counter->getCounterConditions()) {
-            inja::json a;
-            a["index"] = static_cast<int>(condition.getEvaluatedIndex()->value);
-            a["value"] = static_cast<int>(condition.getEvaluatedValue()->value);
-            j["conditions"].push_back(a);
-        }
-        counterList["counter_arrays"].push_back(j);
-    }
-    return counterList;
-}
-
 inja::json PTF::getControlPlane(const TestSpec* testSpec) {
     inja::json controlPlaneJson = inja::json::object();
 
@@ -412,7 +386,6 @@ void PTF::emitTestcase(const TestSpec* testSpec, cstring selectedBranches, size_
     dataJson["test_id"] = testId + 1;
     dataJson["trace"] = getTrace(testSpec);
     dataJson["control_plane"] = getControlPlane(testSpec);
-    dataJson["counters"] = getCounters(testSpec);
     dataJson["send"] = getSend(testSpec);
     dataJson["verify"] = getVerify(testSpec);
     dataJson["timestamp"] = Utils::getTimeStamp();
