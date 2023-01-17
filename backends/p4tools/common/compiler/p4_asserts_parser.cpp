@@ -146,14 +146,17 @@ std::vector<const IR::Expression*> AssertsParser::genIRStructs(
         }
         types.emplace(keyName, type);
     }
-
+    std::cout << "ALL : " << restr << std::endl;
     MemberToVariable memberToVariable(tableName, types);
     if (const auto* listExpression = restr->to<IR::ListExpression>()) {
         for (const auto* component : listExpression->components) {
+            std::cout << "BEFORE : " << component << std::endl;
             result.push_back(component->apply(memberToVariable)->to<IR::Expression>());
+            std::cout << "AFTER : " << result[result.size() - 1] << std::endl;
         }
     } else {
         result.push_back(restr->apply(memberToVariable)->to<IR::Expression>());
+        std::cout << "AFTER : " << result[result.size() - 1] << std::endl;
     }
     return result;
 }

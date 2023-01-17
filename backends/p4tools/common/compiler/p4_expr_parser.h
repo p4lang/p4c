@@ -133,8 +133,7 @@ class Parser {
     const IR::Node* createSemi();
     const IR::Node* createQuestion();
     const IR::Node* createColon();
-    const IR::Node* createListExpressions(const IR::Node*, const char*, Token::Kind,
-                                          createFuncType func);
+    const IR::Node* createListExpressions(const char*, Token::Kind, createFuncType func);
     const IR::Node* createImplication();
     const IR::Node* createDisjunction();
     const IR::Node* createConjunction();
@@ -168,9 +167,6 @@ class Parser {
     const IR::Node* createBinaryExpression(const char* msg, Token::Kind kind,
                                            createFuncType funcLeft,
                                            createFuncType funcRight);
-    const IR::Node* createListExpression(const char* msg, Token::Kind kind,
-                                         createFuncType funcLeft,
-                                         createFuncType funcRight);
     std::pair<const IR::Node*, IR::ID> getDefinedType(cstring txt, const IR::Node* nd);
     const IR::Type* ndToType(const IR::Node* nd);
 };

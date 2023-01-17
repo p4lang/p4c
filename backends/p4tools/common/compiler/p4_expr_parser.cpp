@@ -274,6 +274,7 @@ const IR::Node* Parser::createConstantOp() {
             index++;
         }
     }
+
     if (tokens[index].is(Token::Kind::Text)) {
         cstring txt = "";
         do {
@@ -318,6 +319,7 @@ const IR::Node* Parser::createConstantOp() {
         }
         return expression;
     }
+
     BUG("Unimplemented literal %1%", tokens[index].lexeme());
 }
 
@@ -710,58 +712,48 @@ const IR::Node* Parser::createBinaryExpression(const char* msg, Token::Kind kind
 }
 
 const IR::Node* Parser::createColon() {
-    return createListExpression("createColon", Token::Kind::Colon,
-                                &Parser::createImplication, &Parser::createColon);
+    return createListExpressions("createColon", Token::Kind::Colon,
+                                &Parser::createImplication);
 }
 
 const IR::Node* Parser::createQuestion() {
-    return createListExpression("createQuestion", Token::Kind::Question,
-                                &Parser::createColon, &Parser::createQuestion);
+    return createListExpressions("createQuestion", Token::Kind::Question,
+                                &Parser::createColon);
 }
 
 const IR::Node* Parser::createSemi() {
-    return createListExpression("createSemi", Token::Kind::Semicolon,
-                                &Parser::createQuestion, &Parser::createSemi);
+    return createListExpressions("createSemi", Token::Kind::Semicolon,
+                                &Parser::createQuestion);
 }
 
 const IR::Node* Parser::createPunctuationMarks() {
-    return createListExpression("createPunctuationMarks", Token::Kind::Comma,
-                                &Parser::createSemi, &Parser::createPunctuationMarks);
+    return createListExpressions("createPunctuationMarks", Token::Kind::Comma,
+                                &Parser::createSemi);
 }
 
-const IR::Node* Parser::createListExpressions(const IR::Node* first, const char* name,
-                                              Token::Kind kind, createFuncType func) {
+const IR::Node* Parser::createListExpressions(const char* name, Token::Kind kind,
+                                              createFuncType func) {
     IR::Vector<IR::Expression> components;
-    components.push_back(first->to<IR::Expression>());
     prevFunc = func;
     do {
-        index++;
-        components.push_back((this->*func)()->to<IR::Expression>());
+        const auto* res = (this->*func)();
+        if (const auto* namedExpr = res->to<IR::NamedExpression>()) {
+            res = namedExpr->expression;
+        }
+        components.push_back(res->to<IR::Expression>());
+        if (tokens[index].kind() == kind) {
+            index++;
+        } else {
+            break;
+        }
         if (index >= tokens.size()) {
             break;
         }
-    } while (tokens[index].kind() == kind);
+    } while (true);
+    if (components.size() == 1) {
+        return components[0];
+    }
     return new IR::NamedExpression(name, new IR::ListExpression(components));
-}
-
-const IR::Node* Parser::createListExpression(const char* msg, Token::Kind kind,
-                                             createFuncType funcLeft, createFuncType funcRight) {
-    LOG1(msg << " : " << tokens[index].lexeme());
-    const auto* mainArgument = (this->*funcLeft)();
-    if (index >= tokens.size()) {
-        return mainArgument;
-    }
-    if (kind == Token::Kind::Semicolon && index + 1 == tokens.size()) {
-        // Skip last semicolon
-        index++;
-        return mainArgument;
-    }
-    if (tokens[index].is(kind)) {
-        return createListExpressions(mainArgument,
-                                     NAMES[static_cast<size_t>(tokens[index].kind())].c_str(),
-                                     tokens[index].kind(), funcRight);
-    }
-    return mainArgument;
 }
 
 const IR::Node* Parser::getIR() {
