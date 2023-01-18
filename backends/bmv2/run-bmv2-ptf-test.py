@@ -43,11 +43,11 @@ def is_port_in_use(port: int) -> bool:
 
 class Options:
     def __init__(self):
-        self.p4_file: Path = None  # File that is being compiled
-        self.testfile: Path = None  # path to ptf test file that is used
+        self.p4_file = None  # File that is being compiled
+        self.testfile = None  # path to ptf test file that is used
         # Actual location of the test framework
-        self.testdir: Path = None
-        self.rootDir: Path = "."
+        self.testdir = None
+        self.rootDir = "."
 
 
 def create_bridge():
@@ -59,7 +59,7 @@ def create_bridge():
     outputs = {}
     outputs["stdout"] = sys.stdout
     outputs["stderr"] = sys.stderr
-    bridge = Bridge(random.random(), outputs, True)
+    bridge = Bridge(random.randint(0, sys.maxsize), outputs, True)
     result = bridge.create_virtual_env(8)
     if result != testutils.SUCCESS:
         bridge.ns_del()

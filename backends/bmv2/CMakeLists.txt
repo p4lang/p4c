@@ -124,6 +124,7 @@ add_dependencies(p4c_driver linkbmv2)
 # Tests
 
 set(BMV2_DRIVER ${CMAKE_CURRENT_SOURCE_DIR}/run-bmv2-test.py)
+set(BMV2_PTF_DRIVER "sudo -E ${CMAKE_CURRENT_SOURCE_DIR}/run-bmv2-ptf-test.py")
 
 set (V1_INCLUDE_PATTERNS "include.*v1model.p4")
 set (P4TESTS_FOR_V1MODEL "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*-bmv2.p4")
@@ -145,7 +146,12 @@ p4c_find_tests("${P4TESTS_FOR_PSA}" psa_tests INCLUDE "${PSA_INCLUDE_PATTERNS}" 
 
 set (BMV2_PSA_TEST_SUITES
   ${psa_tests}
-  )
+)
+
+# Execute PTF tests for these files.
+set (BMV2_PTF_TEST_SUITES
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/ternary2-bmv2.p4"
+)
 
 # -p to use psa switch model
 # -a to pass flags to compiler
@@ -197,11 +203,15 @@ if (HAVE_SIMPLE_SWITCH)
     p4c_add_test_with_args("bmv2" ${BMV2_DRIVER} FALSE "bmv2_emit_externs" "testdata/p4_16_samples/extern-funcs-bmv2.p4" "-a=--emit-externs --target-specific-switch-arg=\"--load-modules ${CMAKE_CURRENT_BINARY_DIR}/libextern_func_module.so\" --init=\"make extern_func_module\"" "")
     p4c_add_tests("bmv2-parser-inline-opt-disabled" ${BMV2_DRIVER} "${BMV2_PARSER_INLINE_TESTS}" "")
     p4c_add_tests("bmv2-parser-inline-opt-enabled" ${BMV2_DRIVER} "${BMV2_PARSER_INLINE_TESTS}" "" "-a=--parser-inline-opt")
-
-    p4c_add_test_with_args("bmv2-ptf" "sudo -E ${CMAKE_CURRENT_SOURCE_DIR}/run-bmv2-ptf-test.py" FALSE "ternary2-bmv2.p4" testdata/p4_16_samples/ternary2-bmv2.p4 "" "")
   endif()
 else()
   MESSAGE(WARNING "BMv2 simple switch is not available, not adding v1model BMv2 tests")
+endif()
+
+if (HAVE_SIMPLE_SWITCH_GRPC)
+    p4c_add_tests("bmv2-ptf" ${BMV2_PTF_DRIVER} "${BMV2_PTF_TEST_SUITES}" "")
+else()
+  MESSAGE(WARNING "BMv2 simple switch grpc is not available, not adding v1model BMv2 PTF tests")
 endif()
 
 if (HAVE_PSA_SWITCH)

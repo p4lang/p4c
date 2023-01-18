@@ -1,4 +1,3 @@
-
 set(BMV2_SIMPLE_SWITCH_SEARCH_PATHS
   ${CMAKE_INSTALL_PREFIX}/bin
   ${P4C_SOURCE_DIR}/../behavioral-model/build/targets/simple_switch
@@ -18,8 +17,25 @@ endif(SIMPLE_SWITCH_CLI)
 mark_as_advanced(SIMPLE_SWITCH SIMPLE_SWITCH_CLI)
 
 find_package_handle_standard_args ("BMV2"
-  "Program 'simple_switch_CLI' (https://github.com/p4lang/behavioral-model.git) not found;\nSearched ${BMV2_SEARCH_PATHS}.\nWill not run BMv2 tests."
+  "Program 'simple_switch_CLI' (https://github.com/p4lang/behavioral-model.git) not found;\nSearched ${BMV2_SIMPLE_SWITCH_SEARCH_PATHS}.\nWill not run BMv2 tests."
   SIMPLE_SWITCH SIMPLE_SWITCH_CLI)
+
+set(BMV2_SIMPLE_SWITCH_GRPC_SEARCH_PATHS
+  ${CMAKE_INSTALL_PREFIX}/bin
+  ${P4C_SOURCE_DIR}/../behavioral-model/build/targets/simple_switch_grpc
+  ${P4C_SOURCE_DIR}/../../behavioral-model/build/targets/simple_switch_grpc)
+
+# check for simple_switch_grpc
+find_program (SIMPLE_SWITCH_GRPC simple_switch_grpc PATHS ${BMV2_SIMPLE_SWITCH_GRPC_SEARCH_PATHS} )
+if (SIMPLE_SWITCH_GRPC)
+  set (HAVE_SIMPLE_SWITCH_GRPC 1)
+endif(SIMPLE_SWITCH_GRPC)
+mark_as_advanced(SIMPLE_SWITCH_GRPC)
+
+find_package_handle_standard_args ("BMV2"
+  "Program 'simple_switch_grpc' (https://github.com/p4lang/behavioral-model.git) not found;\nSearched ${BMV2_SIMPLE_SWITCH_GRPC_SEARCH_PATHS}.\nWill not run BMv2 PTF tests."
+  SIMPLE_SWITCH_GRPC)
+
 
 set(BMV2_PSA_SWITCH_SEARCH_PATHS
   ${CMAKE_INSTALL_PREFIX}/bin
@@ -40,5 +56,5 @@ endif(PSA_SWITCH_CLI)
 mark_as_advanced(PSA_SWITCH PSA_SWITCH_CLI)
 
 find_package_handle_standard_args ("BMV2"
-  "Program 'psa_switch_CLI' (https://github.com/p4lang/behavioral-model.git) not found;\nSearched ${BMV2_SEARCH_PATHS}.\nWill not run PSA BMv2 tests."
+  "Program 'psa_switch_CLI' (https://github.com/p4lang/behavioral-model.git) not found;\nSearched ${BMV2_PSA_SWITCH_SEARCH_PATHS}.\nWill not run PSA BMv2 tests."
   PSA_SWITCH PSA_SWITCH_CLI)
