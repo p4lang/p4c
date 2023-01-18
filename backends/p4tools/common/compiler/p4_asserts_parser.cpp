@@ -44,13 +44,13 @@ namespace ExpressionParser {
 /// 0(Number)] -> [tableName_key_Name01(Text), ==(Equal) , 0(Number)]
 class MemberToVariable : public Transform {
     cstring tableName;
-    const std::map<cstring, const IR::Type*>& types;
+    const std::map<cstring, const IR::Type*> types;
 
  public:
     explicit MemberToVariable(cstring tableName, const std::map<cstring, const IR::Type*> types)
         : tableName(tableName), types(types) {};
 
-    const IR::Node* preorder(IR::MethodCallExpression* methodCall) override {
+    const IR::Node* postorder(IR::MethodCallExpression* methodCall) override {
         if (const auto* member = methodCall->method->to<IR::Member>()) {
             if (member->member.name == "isValid") {
                 return Utils::getZombieConst(getType(member), 0,
@@ -61,8 +61,20 @@ class MemberToVariable : public Transform {
     };
 
     const IR::Node* preorder(IR::Member* member) override {
-        return Utils::getZombieConst(getType(member), 0,
-                                     std::string(memberToString(member->expr)));
+        std::string name = memberToString(member).c_str();
+        if (name.length() && name.find("*zombie") == std::string::npos) {
+            return Utils::getZombieConst(getType(member), 0, name);
+        }
+        return member;
+    }
+
+    const IR::Node* preorder(IR::PathExpression* path) override {
+        auto i = types.find(path->path->name.name);
+        if (i != types.end()) {
+            cstring name = tableName + "_key_" + path->path->name.name;
+            return Utils::getZombieConst(i->second, 0, name);
+        }
+        return path;
     }
 
  protected:
@@ -70,15 +82,15 @@ class MemberToVariable : public Transform {
         cstring name;
         if (const auto* member = expr->to<IR::Member>()) {
             name = member->member.name;
-            if (name == "mask" && member->type == nullptr) {
+            if (name == "mask") {
                 name = toString(member->expr);
                 return tableName + "_mask_" + name;
             }
-            if (name == "prefix_length" && member->type == nullptr) {
+            if (name == "prefix_length") {
                 name = toString(member->expr);
                 return tableName + "_lpm_prefix_" + name;
             }
-            if (name == "priority" && member->type == nullptr) {
+            if (name == "priority") {
                 name = toString(member->expr);
                 return tableName + "_priority" + name;
             }
@@ -105,14 +117,23 @@ class MemberToVariable : public Transform {
         auto name = member->member.name;
         auto typeName = types.find(name);
         if (typeName != types.end()) {
+            std::cout << typeName->second << std::endl;
             return typeName->second;
         }
         if (name == "isValid") {
             return IR::Type_Bits::get(1);
         }
-        if (name == "mask" || name == "prefix_length" || name == "priority") {
+        if (name == "mask" || name == "prefix_length") {
+            cstring name = toString(member->expr);
+            auto i = types.find(name);
+            if (i != types.end()) {
+                std::cout << i->second << std::endl;
+                return i->second;
+            } 
+            std::cout << member->expr->type << std::endl;
             return member->expr->type;
         }
+        std::cout << member->type << std::endl;
         return member->type;
     }
 };
@@ -127,6 +148,7 @@ std::vector<const IR::Expression*> AssertsParser::genIRStructs(
     const auto* restr = ExpressionParser::Parser::getIR(restrictionString, p4Program, true);
     std::vector<const IR::Expression*> result;
     std::map<cstring, const IR::Type*> types;
+    types.emplace("priority", IR::Type_Bits::get(32));
     for (const auto* key : keyElements) {
         cstring keyName;
         if (const auto* annotation = key->getAnnotation(IR::Annotation::nameAnnotation)) {
