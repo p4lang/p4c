@@ -202,6 +202,12 @@ void DpdkContextGenerator::collectHandleId() {
         const auto &pre_a = action_prof.preamble();
         context_handle_map[pre_a.name()] = pre_a.id();
     }
+    for (const auto &externType : p4info.externs()) {
+        for (const auto &externInstance : externType.instances()) {
+            const auto &pre_a = externInstance.preamble();
+            context_handle_map[pre_a.name()] = pre_a.id();
+        }
+    }
 }
 
 size_t DpdkContextGenerator::getHandleId(cstring name) {
@@ -210,9 +216,6 @@ size_t DpdkContextGenerator::getHandleId(cstring name) {
         if (x.first.find(name.c_str())) {
             id = context_handle_map[x.first];
             break;
-        } else if (name.find(x.first.c_str()) && name.endsWith("_sel")) {
-            id = P4::BFRT::makeBFRuntimeId(context_handle_map[x.first],
-                                           ::dpdk::P4Ids::ACTION_SELECTOR);
         }
     }
     BUG_CHECK(id != 0, "unable to find id for %1%", name);
