@@ -56,48 +56,7 @@ class AbstractTest(bt.P4RuntimeTest):
 
 class Test1(AbstractTest):
     # Date generated: 2023-01-17-17:00:00.528
-    '''
     # Current statement coverage: 0.5
-    p: [Parser] p
-    [State] start
-    [Event]: Extract: Succeeded
-    [Extract] hdrs.data.f1; = 0xBFD6_1FB2
-    [Extract] hdrs.data.f2; = 0x0000_0000
-    [Extract] hdrs.data.h1; = 0x0000
-    [Extract] hdrs.data.b1; = 0x00
-    [Extract] hdrs.data.b2; = 0x00
-    [Event]: Extract Condition: p4t*zombie.const.0.*packetLen_bits >= 96; | Extract Size: 96
-    [State] extra
-    [Event]: Extract: Succeeded
-    [Extract] hdrs.extra.0.h; = 0xA3B7
-    [Extract] hdrs.extra.0.b1; = 0x00
-    [Extract] hdrs.extra.0.b2; = 0x77
-    [Event]: Extract Condition: p4t*zombie.const.0.*packetLen_bits >= 128; | Extract Size: 32
-    [State] accept
-    [Event]: Control vrfy start
-    [Event]: Control ingress start
-    [Event]: Table Branch: ingress.test1 | Key(s): p4t*zombie.const.2.pktVar;| Chosen action: ingress.setb1
-    [Event]: Table Branch: ingress.ex1 | Key(s): p4t*zombie.const.7.pktVar;| Chosen action: ingress.setbyte
-    [Expression]: If Statement false: 0 != 0; = 0;
-    [Event]: Control egress start
-    [Event]: Control update start
-    [Event]: Control deparser start
-    [Emit] hdrs.data.f1; = 0xBFD6_1FB2
-    [Emit] hdrs.data.f2; = 0x0000_0000
-    [Emit] hdrs.data.h1; = 0x0000
-    [Emit] hdrs.data.b1; = 0x00
-    [Emit] hdrs.data.b2; = 0x00
-    [Emit] hdrs.data.*valid; = 1;
-    [Emit] hdrs.extra.0.h; = 0xA3B7
-    [Emit] hdrs.extra.0.b1; = 0x00
-    [Emit] hdrs.extra.0.b2; = 0x77
-    [Emit] hdrs.extra.0.*valid; = 1;
-    [Expression]: Invalid emit: hdrs.extra.1.*valid;:  = 0;
-    [Expression]: Invalid emit: hdrs.extra.2.*valid;:  = 0;
-    [Expression]: Invalid emit: hdrs.extra.3.*valid;:  = 0;
-    [Event]: Prepending the emit buffer to the program packet.
-    [Expression]: If Statement false: 511 == p4t*zombie.const.0.ingress.test1_arg_ingress.setb10; = 0;
-    '''
 
     def setupCtrlPlane(self):
         self.table_add(
@@ -142,42 +101,7 @@ class Test1(AbstractTest):
 
 class Test2(AbstractTest):
     # Date generated: 2023-01-17-17:00:00.537
-    '''
     # Current statement coverage: 0.67
-    p: [Parser] p
-    [State] start
-    [Event]: Extract: Succeeded
-    [Extract] hdrs.data.f1; = 0x0000_0000
-    [Extract] hdrs.data.f2; = 0x3F8E_BBE2
-    [Extract] hdrs.data.h1; = 0x0000
-    [Extract] hdrs.data.b1; = 0x00
-    [Extract] hdrs.data.b2; = 0x00
-    [Event]: Extract Condition: p4t*zombie.const.0.*packetLen_bits >= 96; | Extract Size: 96
-    [State] extra
-    [Event]: Extract: Packet too short
-    [Event]: Extract Failure Condition: !(p4t*zombie.const.0.*packetLen_bits >= 128); | Extract Size: 32
-    [Event]: Control vrfy start
-    [Event]: Control ingress start
-    [Event]: Table Branch: ingress.test1 Choosing default action: noop;
-    [Event]: Table Branch: ingress.ex1 | Key(s): TaintedExpression(bit<16>)| Chosen action: ingress.act3
-    [Event]: Table Branch: ingress.tbl3 | Key(s): p4t*zombie.const.3.pktVar;| Chosen action: ingress.setbyte
-    [Expression]: If Statement false: 0 != 0; = 0;
-    [Event]: Control egress start
-    [Event]: Control update start
-    [Event]: Control deparser start
-    [Emit] hdrs.data.f1; = 0x0000_0000
-    [Emit] hdrs.data.f2; = 0x3F8E_BBE2
-    [Emit] hdrs.data.h1; = 0x0000
-    [Emit] hdrs.data.b1; = 0x00
-    [Emit] hdrs.data.b2; = 0x00
-    [Emit] hdrs.data.*valid; = 1;
-    [Expression]: Invalid emit: hdrs.extra.0.*valid;:  = 0;
-    [Expression]: Invalid emit: hdrs.extra.1.*valid;:  = 0;
-    [Expression]: Invalid emit: hdrs.extra.2.*valid;:  = 0;
-    [Expression]: Invalid emit: hdrs.extra.3.*valid;:  = 0;
-    [Event]: Prepending the emit buffer to the program packet.
-    [Expression]: If Statement false: 511 == 0; = 0;
-    '''
 
     def setupCtrlPlane(self):
         self.table_add(
@@ -221,50 +145,7 @@ class Test2(AbstractTest):
 
 class Test3(AbstractTest):
     # Date generated: 2023-01-17-17:00:00.547
-    '''
     # Current statement coverage: 0.67
-    p: [Parser] p
-    [State] start
-    [Event]: Extract: Succeeded
-    [Extract] hdrs.data.f1; = 0xBCBE_946F
-    [Extract] hdrs.data.f2; = 0x0000_0000
-    [Extract] hdrs.data.h1; = 0x0000
-    [Extract] hdrs.data.b1; = 0x00
-    [Extract] hdrs.data.b2; = 0x00
-    [Event]: Extract Condition: p4t*zombie.const.0.*packetLen_bits >= 96; | Extract Size: 96
-    [State] extra
-    [Event]: Extract: Succeeded
-    [Extract] hdrs.extra.0.h; = 0x0000
-    [Extract] hdrs.extra.0.b1; = 0x00
-    [Extract] hdrs.extra.0.b2; = 0xA5
-    [Event]: Extract Condition: p4t*zombie.const.0.*packetLen_bits >= 128; | Extract Size: 32
-    [State] extra1
-    [Event]: Extract: Packet too short
-    [Event]: Extract Failure Condition: !(p4t*zombie.const.0.*packetLen_bits >= 160); | Extract Size: 32
-    [Event]: Control vrfy start
-    [Event]: Control ingress start
-    [Event]: Table Branch: ingress.test1 | Key(s): p4t*zombie.const.2.pktVar;| Chosen action: ingress.setb1
-    [Event]: Table Branch: ingress.ex1 Choosing default action: noop_1/noop;
-    [Expression]: If Statement false: 0 != 0; = 0;
-    [Event]: Control egress start
-    [Event]: Control update start
-    [Event]: Control deparser start
-    [Emit] hdrs.data.f1; = 0xBCBE_946F
-    [Emit] hdrs.data.f2; = 0x0000_0000
-    [Emit] hdrs.data.h1; = 0x0000
-    [Emit] hdrs.data.b1; = 0x00
-    [Emit] hdrs.data.b2; = 0x00
-    [Emit] hdrs.data.*valid; = 1;
-    [Emit] hdrs.extra.0.h; = 0x0000
-    [Emit] hdrs.extra.0.b1; = 0x00
-    [Emit] hdrs.extra.0.b2; = 0xA5
-    [Emit] hdrs.extra.0.*valid; = 1;
-    [Expression]: Invalid emit: hdrs.extra.1.*valid;:  = 0;
-    [Expression]: Invalid emit: hdrs.extra.2.*valid;:  = 0;
-    [Expression]: Invalid emit: hdrs.extra.3.*valid;:  = 0;
-    [Event]: Prepending the emit buffer to the program packet.
-    [Expression]: If Statement false: 511 == p4t*zombie.const.0.ingress.test1_arg_ingress.setb10; = 0;
-    '''
 
     def setupCtrlPlane(self):
         self.table_add(
@@ -296,122 +177,8 @@ class Test3(AbstractTest):
 
 
 class Test4(AbstractTest):
-    # Date generated: 2023-01-17-17:00:00.558
-    '''
-    # Current statement coverage: 0.67
-    p: [Parser] p
-    [State] start
-    [Event]: Extract: Succeeded
-    [Extract] hdrs.data.f1; = 0xD3FF_EFEB
-    [Extract] hdrs.data.f2; = 0x0000_0000
-    [Extract] hdrs.data.h1; = 0x0000
-    [Extract] hdrs.data.b1; = 0x00
-    [Extract] hdrs.data.b2; = 0x00
-    [Event]: Extract Condition: p4t*zombie.const.0.*packetLen_bits >= 96; | Extract Size: 96
-    [State] extra
-    [Event]: Extract: Succeeded
-    [Extract] hdrs.extra.0.h; = 0x0000
-    [Extract] hdrs.extra.0.b1; = 0x00
-    [Extract] hdrs.extra.0.b2; = 0x42
-    [Event]: Extract Condition: p4t*zombie.const.0.*packetLen_bits >= 128; | Extract Size: 32
-    [State] accept
-    [Event]: Control vrfy start
-    [Event]: Control ingress start
-    [Event]: Table Branch: ingress.test1 | Key(s): p4t*zombie.const.2.pktVar;| Chosen action: ingress.noop
-    [Event]: Table Branch: ingress.ex1 Choosing default action: noop_1/noop;
-    [Expression]: If Statement false: 0 != 0; = 0;
-    [Event]: Control egress start
-    [Event]: Control update start
-    [Event]: Control deparser start
-    [Emit] hdrs.data.f1; = 0xD3FF_EFEB
-    [Emit] hdrs.data.f2; = 0x0000_0000
-    [Emit] hdrs.data.h1; = 0x0000
-    [Emit] hdrs.data.b1; = 0x00
-    [Emit] hdrs.data.b2; = 0x00
-    [Emit] hdrs.data.*valid; = 1;
-    [Emit] hdrs.extra.0.h; = 0x0000
-    [Emit] hdrs.extra.0.b1; = 0x00
-    [Emit] hdrs.extra.0.b2; = 0x42
-    [Emit] hdrs.extra.0.*valid; = 1;
-    [Expression]: Invalid emit: hdrs.extra.1.*valid;:  = 0;
-    [Expression]: Invalid emit: hdrs.extra.2.*valid;:  = 0;
-    [Expression]: Invalid emit: hdrs.extra.3.*valid;:  = 0;
-    [Event]: Prepending the emit buffer to the program packet.
-    [Expression]: If Statement false: 511 == 0; = 0;
-    '''
-
-    def setupCtrlPlane(self):
-        self.table_add(
-            ('ingress.test1',
-            [
-                self.Ternary('hdrs.data.f1', 0x7BFB6FFB, 0x45F17FEB),
-            ]),
-            ('ingress.noop',
-            [
-            ])
-            , 1
-            
-        )
-
-    def sendPacket(self):
-        ig_port = 0
-        pkt = b'\xD3\xFF\xEF\xEB\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x42\x55\x64\x9F\xDE\x0A\xB9\x5D\x1D\xEB\xFB\x8C\xEA\x46\x5D\xBD\x7F\x7D\x61\xC1\x70\x05\xC5\x15\x9D\xB7\x52\xB5\x30\x6F\xD2\x75\x24\x27\xE4\x8B\x7B\xD4\xA2\x21\xD0\x57\xB0\x2C\xBB\x9F\x3B\x57\x8C\x99\xC4\x98\x71\x8C\xB3\xE5\xC3\x57\x20\x2D\x85\x2A\x7B\x18\xEC\x15\xDD\x2D\x07\xA6\x89\xD3\x6A\x95\xEB\xAB\x3C\x65\xC7\x4A\xA1\x47\xC7\xAD\xAD\x93\xCC\x8C\x32\xF4\x52\xF6\xB0\xFA\xC4\x20\xD1\x43\x5B\xC1\xE9\xCC\x2B\xA5\x3E\x87\x64\x4A\x86\x05\x4D\x0A\xAE\x8D\x5A\xCB\xD7\x6A\xF3\xC6\x9E\x09\x48\xBF\x41\x54\xEA\xC9\xCE\x9A\xC0\xC5\xBF\xCF\xFA\x37\x21\xB0\xBF\x76\xB8\xE0\x36\x4C\xB8\xAC\x7F\x4A\xAE\x17\x75\xAF\xA5\x58\xB3\xB8\x9F\x9B\x59\x8B\xAC\x98\x02\x7C\x03\x96\xB1\x58\x1D\xC4\x85\x54\xE2\x4C\x31\x83\x55\x04\xA0\xDB\x80\x45\x3A\x65\xA3\xEF\x78\xB8\x65\xA7\xC4\x43\xDF\x88\xB8\x31\x98\xCF\x11\xAF\xBA\x9F\x29\xC6\x38\xFB\xBD\xDB\xD7\x32\x90\xC6\xD7\x3E\xDC\xB6\x33\xC7\x6F\xC6\x8B\xCB\xFA\x27\x67\x35\xAE\x9A\x77\xDB\xC3\x95\x75\x6D\xAD\x36\x73\x40\x54\x2E\x2B\x5D\x39\x94\x06\x0A\x78\x3F\x99\xAA\x3F\xD8\x43\x58\x1C\x49\x23\x2D\x9C\xAB\x29\xA3\xCA\x81\xE7\x0F\xE5\x52\xD4\xC4\x9D\x85\x9B\x69\xEA\x58\x00\x82\x22\x19\x65\x7A\xB0\x68\xDC\x0C\x83\x9D\xD8\xB7\x5F\x7E\x59\x65\x22\xBF\x16\xDF\x67\x15\xC8\xCD\x4B\x06\xBA\xBF\x07\x75\x5A\x7A\x6A\x24\x3D\x2C\x1A\x6C\x8E\xE9\xAC\xFB\x49\x52\x7D\x32\x63\x92\x31\xCA\x21\xA9\x7E\xC1\xBE\xF1\x05\xAB\xC1\xA5\xED\x95\x4F\x35\x8B\xFF\xD0\x66\x17\x5C\xCB\x8A\xA3\xF2\x2B\x9F\x53\x4B\x91\x7F\x7E\x87\xEF\xD0\xA5\xE8\xEF\xD6\x35\x6C\xAB\x0E\xC0\x5D\xC0\xAB\x03\x85\x74\x42\xFC\x2D\x30\x91\x31\xD3\xA9\x29\xDE\x8B\xBE\x5C\x36\xA3\x8F\xCE\x8E\xE7\x20\x52\x46\x42\x83\x66\x08\xF9\x51\x7D\xA1\xC6\xBA\x5F\x86\x27\xD9\xFB\x71\xA1\x3D\xD9\x38\x5A\x5E\x2B\x2F\x6D\xBC\xC0\x37\x56\x7F\x78\x33\xFC\xF3\x73\x50\x4C\xC6\x1E\x63\x96\x7F\xBA\x9A\x28\xDD\x0F\x92\xE7\xC8\x06\x12\xC3\xB5\xA4\x8D\x1B\x1B\xF1\xC7\x0D\x2D\xC8\xFE\xC6\x62\x7B\x69\xEF\x87\xCA\x04\x0D\x10\xDD\x9C\x32\xE9\x8D\x64\xE1\xF0\x27\x53\x3F\xC5\x24\xF6\xEB\xFC\xC9\x22\x61\xD4\x24\x1F\xF3\x0A\xAB\xA3\x03\x06\xA1\xF4\x2A\x1B\x5B\xDE\xFD\x55\x43\x3D\x84\x87\x49\x17\xA6\x4C\x7D\xDB\xBE\x50\xA3\xC0\x02\x53\x24\xDF\xF8\x1C\x56\x2F\x19\x92\x81\x2F\xF8\xA8\xC6\x4D\x16\x88\x2B\x3F\x52\x6C\x77\xC0\x4E\x66\x55\x49\x63\xEB\x4D\xF5\x82\xFA\xC8\xA0\x18\x70\xBD\x11\x39\x68\xEF\x20\xA1\xCC\xD1\xC7\xE5\xB0\xDD\xD2\x6B\x3F\x90\xB2\x1D\x78\xB3\x3B\x3F\x21\x46\x58\x86\x20\xF9\x61\x1D\xBF\xA8\xB7\x19\x15\xA0\x48\xB3\xF6\xA3\xD7\x42\xE7\xCE\x44\xF3\x2B\x78\xDB\x2B\xA0\x19\xC6\xC7\x16\x00\x35\x9C\x41\xD2\x26\x93\x0E\x07\x18\xFC\xCF\x04\x60\x03\x6B\x21\x38\xEA\x66\xC8\xD5\x9E\x4E\xFC\x11\x6C\xF2\xAE\x72\x9D\x18\x64\x91\xAE\x2C\xE7\x67\x57\xEC\x02\xEF\xF6\xF4\x5E\xDB\x58\x37\x5F\xAD\xE6\xBB\x81\x77\xFD\x16\xB7\x2E\x3A\x92\x9E\xD3\x60\x36\x41\xC5\x29\x9E\x4F\xA1\x4C\x58\xDE\x75\xEA\x22\x9F\xB2\xA4\x35\xE8\xD7\x07\x84\x03\xB2\xBF\x20\x1D\x9D\x00\x1B\xAB\xE6\x26\x33\x86\x16\x81\x3C\x8E\xBF\xA8\xCA\xB9\xC4\xD0\x89\x36\x4C\xA4\xCB\xAF\xC2\x7A\x75\xA6\x9B\xBE\x0E\x9A\x20\xA4\x66\x14\xB5\x67\xCB\xDB\xDD\x97\xC5\xA1\x97\x8B\x3F\xE0\x1E\x99\xA7\xDF\x04\x7D\xAF\x39\x9A\xE9\xB0\x45\xFF\x3D\xE5\x4F\x3F\xA4\x97\x46\x62\x51\x1A\x52\x85\x92\xCC\x3B\xB3\x2B\x7E\x73\xD8\xDA\x35\x22\xE0\xE9\xAC\x36\x24\x3F\x5A\x8D\x5E\xDF\xA3\x1B\x3E\x69\xDB\x7F\x8F\xF7\xF7\x5E\xF2\x8F\xF4\xEF\xC2\x50\xCF\xA2\x37\xE7\x27\x4E\x0A\x15\xAA\xDE\xA4\x55\x0E\xEC\xD1\x98\xF3\x0F\x73\x9C\xF4\x60\xE8\x02\xAC\x17\x5D\x14\xFD\x48\xAE\x02\x0C\x81\xD0\x50\x38\x9E\x0D\x2D\x71\x0E\xBD\x2F\x92\x73\x24\x55\xB0\x7A\x37\xCC\xEB\x7A\x81\x5A\xFE\x4E\xB9\x8A\x20\xB4\xA5\x11\x56\x80\x73\x31\xF5\x2B\xA9\xA8\xD3\x6A\x88\x82\x52\x57\xBB\xA0\x64\x3A\xEE\x2B\xF9\xA8\xAF\x4A\x45\x6E\x62\xEC\x1F\x2B\x42\x9A\xE1\xA2\x13\x13\x89\x8F\x1E\x20\x5A\xEA\xDD\x27\x88\xDC\xD9\xEE\x40\xC8\x91\x80\x0F\xAD\x1C\x1C\x07\x3C\x93\x23\x02\x90\x52\x40\xF9\x92\xF3\x6A\x38\x7F\x16\xC9\x6E\xA3\x8F\xBF\x80\x5C\x41\x67\x10\x15\x05\x49\x07\x33\x8E\x31\x13\xF5\x0F\x0D\x93\xF6\xAB\x22\xAB\xE0\x9E\x99\xD8\x7B\x8E\xC7\x4A\x08\xE9\xBD\x05\x5A\x93\x55\x76\x0B\xAF\xAB\xCF\x51\x3E\x82\xFB\x08\x4C\x15\x15\x24\x0F\xA5\xE0\xA7\x08\x24\xA7\x81\xD8\x6B\x44\x8E\x48\xAC\x26\x89\x28\x33\xC0\x63\x1A\x05\xE6\x79\x14\xE2\x9B\x01\x78\x47\xCF\xD0\x2D\x67\x20\xFE\xAC\x43\x53\x32\x21\x60\x9F\xF5\x80\xC9\x49\x8E\x0F\x35\xEA\x61\xC3\x68\xC9\xFD\xD1\x31\xD6\x32\x46\x6E\x44\x77\x11\xE9\x53\xBD\xF9\xA5\xF2\x44\x9E\xCC\xFC\xEB\x27\xDF\xAB\xA1\x67\x11\xE3\x3D\xAA\x8C\x0C\x26\x94\x4F\xF1\xD8\x11\x21\xC3\xD8\xD0\x99\x80\xA4\xB2\x3C\x75\xBF\xCA\x9C\x5D\xD9\xF5\x86\x8E\x08\xA2\x98\x82\x8A\x71\xE0\x10\x24\x5F\x62\x9D\x94\x60\xEA\x33\x9B\x4A\xA4\x96\xCE\xDA\x51\x90\x84\xC2\x01\x83\x46\x94\x0C\x2D\xF4\xA5\xEB\x7C\x43\xA6\xB0\x55\xC8\xDF\xE6\x6D\x2E\xC4\xB2\x17\xB1\x7E\x00\xD7\x7A\xE1\x17\x5A\x24\xC0\xB0\x5D\x90\x5D'
-        ptfutils.send_packet(self, ig_port, pkt)
-
-    def verifyPackets(self):
-        eg_port = 0
-        exp_pkt = Mask(b'\xD3\xFF\xEF\xEB\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x42\x55\x64\x9F\xDE\x0A\xB9\x5D\x1D\xEB\xFB\x8C\xEA\x46\x5D\xBD\x7F\x7D\x61\xC1\x70\x05\xC5\x15\x9D\xB7\x52\xB5\x30\x6F\xD2\x75\x24\x27\xE4\x8B\x7B\xD4\xA2\x21\xD0\x57\xB0\x2C\xBB\x9F\x3B\x57\x8C\x99\xC4\x98\x71\x8C\xB3\xE5\xC3\x57\x20\x2D\x85\x2A\x7B\x18\xEC\x15\xDD\x2D\x07\xA6\x89\xD3\x6A\x95\xEB\xAB\x3C\x65\xC7\x4A\xA1\x47\xC7\xAD\xAD\x93\xCC\x8C\x32\xF4\x52\xF6\xB0\xFA\xC4\x20\xD1\x43\x5B\xC1\xE9\xCC\x2B\xA5\x3E\x87\x64\x4A\x86\x05\x4D\x0A\xAE\x8D\x5A\xCB\xD7\x6A\xF3\xC6\x9E\x09\x48\xBF\x41\x54\xEA\xC9\xCE\x9A\xC0\xC5\xBF\xCF\xFA\x37\x21\xB0\xBF\x76\xB8\xE0\x36\x4C\xB8\xAC\x7F\x4A\xAE\x17\x75\xAF\xA5\x58\xB3\xB8\x9F\x9B\x59\x8B\xAC\x98\x02\x7C\x03\x96\xB1\x58\x1D\xC4\x85\x54\xE2\x4C\x31\x83\x55\x04\xA0\xDB\x80\x45\x3A\x65\xA3\xEF\x78\xB8\x65\xA7\xC4\x43\xDF\x88\xB8\x31\x98\xCF\x11\xAF\xBA\x9F\x29\xC6\x38\xFB\xBD\xDB\xD7\x32\x90\xC6\xD7\x3E\xDC\xB6\x33\xC7\x6F\xC6\x8B\xCB\xFA\x27\x67\x35\xAE\x9A\x77\xDB\xC3\x95\x75\x6D\xAD\x36\x73\x40\x54\x2E\x2B\x5D\x39\x94\x06\x0A\x78\x3F\x99\xAA\x3F\xD8\x43\x58\x1C\x49\x23\x2D\x9C\xAB\x29\xA3\xCA\x81\xE7\x0F\xE5\x52\xD4\xC4\x9D\x85\x9B\x69\xEA\x58\x00\x82\x22\x19\x65\x7A\xB0\x68\xDC\x0C\x83\x9D\xD8\xB7\x5F\x7E\x59\x65\x22\xBF\x16\xDF\x67\x15\xC8\xCD\x4B\x06\xBA\xBF\x07\x75\x5A\x7A\x6A\x24\x3D\x2C\x1A\x6C\x8E\xE9\xAC\xFB\x49\x52\x7D\x32\x63\x92\x31\xCA\x21\xA9\x7E\xC1\xBE\xF1\x05\xAB\xC1\xA5\xED\x95\x4F\x35\x8B\xFF\xD0\x66\x17\x5C\xCB\x8A\xA3\xF2\x2B\x9F\x53\x4B\x91\x7F\x7E\x87\xEF\xD0\xA5\xE8\xEF\xD6\x35\x6C\xAB\x0E\xC0\x5D\xC0\xAB\x03\x85\x74\x42\xFC\x2D\x30\x91\x31\xD3\xA9\x29\xDE\x8B\xBE\x5C\x36\xA3\x8F\xCE\x8E\xE7\x20\x52\x46\x42\x83\x66\x08\xF9\x51\x7D\xA1\xC6\xBA\x5F\x86\x27\xD9\xFB\x71\xA1\x3D\xD9\x38\x5A\x5E\x2B\x2F\x6D\xBC\xC0\x37\x56\x7F\x78\x33\xFC\xF3\x73\x50\x4C\xC6\x1E\x63\x96\x7F\xBA\x9A\x28\xDD\x0F\x92\xE7\xC8\x06\x12\xC3\xB5\xA4\x8D\x1B\x1B\xF1\xC7\x0D\x2D\xC8\xFE\xC6\x62\x7B\x69\xEF\x87\xCA\x04\x0D\x10\xDD\x9C\x32\xE9\x8D\x64\xE1\xF0\x27\x53\x3F\xC5\x24\xF6\xEB\xFC\xC9\x22\x61\xD4\x24\x1F\xF3\x0A\xAB\xA3\x03\x06\xA1\xF4\x2A\x1B\x5B\xDE\xFD\x55\x43\x3D\x84\x87\x49\x17\xA6\x4C\x7D\xDB\xBE\x50\xA3\xC0\x02\x53\x24\xDF\xF8\x1C\x56\x2F\x19\x92\x81\x2F\xF8\xA8\xC6\x4D\x16\x88\x2B\x3F\x52\x6C\x77\xC0\x4E\x66\x55\x49\x63\xEB\x4D\xF5\x82\xFA\xC8\xA0\x18\x70\xBD\x11\x39\x68\xEF\x20\xA1\xCC\xD1\xC7\xE5\xB0\xDD\xD2\x6B\x3F\x90\xB2\x1D\x78\xB3\x3B\x3F\x21\x46\x58\x86\x20\xF9\x61\x1D\xBF\xA8\xB7\x19\x15\xA0\x48\xB3\xF6\xA3\xD7\x42\xE7\xCE\x44\xF3\x2B\x78\xDB\x2B\xA0\x19\xC6\xC7\x16\x00\x35\x9C\x41\xD2\x26\x93\x0E\x07\x18\xFC\xCF\x04\x60\x03\x6B\x21\x38\xEA\x66\xC8\xD5\x9E\x4E\xFC\x11\x6C\xF2\xAE\x72\x9D\x18\x64\x91\xAE\x2C\xE7\x67\x57\xEC\x02\xEF\xF6\xF4\x5E\xDB\x58\x37\x5F\xAD\xE6\xBB\x81\x77\xFD\x16\xB7\x2E\x3A\x92\x9E\xD3\x60\x36\x41\xC5\x29\x9E\x4F\xA1\x4C\x58\xDE\x75\xEA\x22\x9F\xB2\xA4\x35\xE8\xD7\x07\x84\x03\xB2\xBF\x20\x1D\x9D\x00\x1B\xAB\xE6\x26\x33\x86\x16\x81\x3C\x8E\xBF\xA8\xCA\xB9\xC4\xD0\x89\x36\x4C\xA4\xCB\xAF\xC2\x7A\x75\xA6\x9B\xBE\x0E\x9A\x20\xA4\x66\x14\xB5\x67\xCB\xDB\xDD\x97\xC5\xA1\x97\x8B\x3F\xE0\x1E\x99\xA7\xDF\x04\x7D\xAF\x39\x9A\xE9\xB0\x45\xFF\x3D\xE5\x4F\x3F\xA4\x97\x46\x62\x51\x1A\x52\x85\x92\xCC\x3B\xB3\x2B\x7E\x73\xD8\xDA\x35\x22\xE0\xE9\xAC\x36\x24\x3F\x5A\x8D\x5E\xDF\xA3\x1B\x3E\x69\xDB\x7F\x8F\xF7\xF7\x5E\xF2\x8F\xF4\xEF\xC2\x50\xCF\xA2\x37\xE7\x27\x4E\x0A\x15\xAA\xDE\xA4\x55\x0E\xEC\xD1\x98\xF3\x0F\x73\x9C\xF4\x60\xE8\x02\xAC\x17\x5D\x14\xFD\x48\xAE\x02\x0C\x81\xD0\x50\x38\x9E\x0D\x2D\x71\x0E\xBD\x2F\x92\x73\x24\x55\xB0\x7A\x37\xCC\xEB\x7A\x81\x5A\xFE\x4E\xB9\x8A\x20\xB4\xA5\x11\x56\x80\x73\x31\xF5\x2B\xA9\xA8\xD3\x6A\x88\x82\x52\x57\xBB\xA0\x64\x3A\xEE\x2B\xF9\xA8\xAF\x4A\x45\x6E\x62\xEC\x1F\x2B\x42\x9A\xE1\xA2\x13\x13\x89\x8F\x1E\x20\x5A\xEA\xDD\x27\x88\xDC\xD9\xEE\x40\xC8\x91\x80\x0F\xAD\x1C\x1C\x07\x3C\x93\x23\x02\x90\x52\x40\xF9\x92\xF3\x6A\x38\x7F\x16\xC9\x6E\xA3\x8F\xBF\x80\x5C\x41\x67\x10\x15\x05\x49\x07\x33\x8E\x31\x13\xF5\x0F\x0D\x93\xF6\xAB\x22\xAB\xE0\x9E\x99\xD8\x7B\x8E\xC7\x4A\x08\xE9\xBD\x05\x5A\x93\x55\x76\x0B\xAF\xAB\xCF\x51\x3E\x82\xFB\x08\x4C\x15\x15\x24\x0F\xA5\xE0\xA7\x08\x24\xA7\x81\xD8\x6B\x44\x8E\x48\xAC\x26\x89\x28\x33\xC0\x63\x1A\x05\xE6\x79\x14\xE2\x9B\x01\x78\x47\xCF\xD0\x2D\x67\x20\xFE\xAC\x43\x53\x32\x21\x60\x9F\xF5\x80\xC9\x49\x8E\x0F\x35\xEA\x61\xC3\x68\xC9\xFD\xD1\x31\xD6\x32\x46\x6E\x44\x77\x11\xE9\x53\xBD\xF9\xA5\xF2\x44\x9E\xCC\xFC\xEB\x27\xDF\xAB\xA1\x67\x11\xE3\x3D\xAA\x8C\x0C\x26\x94\x4F\xF1\xD8\x11\x21\xC3\xD8\xD0\x99\x80\xA4\xB2\x3C\x75\xBF\xCA\x9C\x5D\xD9\xF5\x86\x8E\x08\xA2\x98\x82\x8A\x71\xE0\x10\x24\x5F\x62\x9D\x94\x60\xEA\x33\x9B\x4A\xA4\x96\xCE\xDA\x51\x90\x84\xC2\x01\x83\x46\x94\x0C\x2D\xF4\xA5\xEB\x7C\x43\xA6\xB0\x55\xC8\xDF\xE6\x6D\x2E\xC4\xB2\x17\xB1\x7E\x00\xD7\x7A\xE1\x17\x5A\x24\xC0\xB0\x5D\x90\x5D')
-        ptfutils.verify_packet(self, exp_pkt, eg_port)
-
-    def runTest(self):
-        self.runTestImpl()
-
-
-class Test5(AbstractTest):
     # Date generated: 2023-01-17-17:00:00.567
-    '''
     # Current statement coverage: 0.83
-    p: [Parser] p
-    [State] start
-    [Event]: Extract: Succeeded
-    [Extract] hdrs.data.f1; = 0x27E4_C6F4
-    [Extract] hdrs.data.f2; = 0xFDB8_A2C6
-    [Extract] hdrs.data.h1; = 0x0000
-    [Extract] hdrs.data.b1; = 0x00
-    [Extract] hdrs.data.b2; = 0x00
-    [Event]: Extract Condition: p4t*zombie.const.0.*packetLen_bits >= 96; | Extract Size: 96
-    [State] extra
-    [Event]: Extract: Succeeded
-    [Extract] hdrs.extra.0.h; = 0xB5F6
-    [Extract] hdrs.extra.0.b1; = 0x00
-    [Extract] hdrs.extra.0.b2; = 0x59
-    [Event]: Extract Condition: p4t*zombie.const.0.*packetLen_bits >= 128; | Extract Size: 32
-    [State] accept
-    [Event]: Control vrfy start
-    [Event]: Control ingress start
-    [Event]: Table Branch: ingress.test1 | Key(s): p4t*zombie.const.2.pktVar;| Chosen action: ingress.setb1
-    [Event]: Table Branch: ingress.ex1 | Key(s): p4t*zombie.const.7.pktVar;| Chosen action: ingress.act2
-    [Event]: Table Branch: ingress.tbl2 | Key(s): p4t*zombie.const.3.pktVar;| Chosen action: ingress.setbyte
-    [Expression]: If Statement false: 0 != 0; = 0;
-    [Event]: Control egress start
-    [Event]: Control update start
-    [Event]: Control deparser start
-    [Emit] hdrs.data.f1; = 0x27E4_C6F4
-    [Emit] hdrs.data.f2; = 0xFDB8_A2C6
-    [Emit] hdrs.data.h1; = 0x0000
-    [Emit] hdrs.data.b1; = 0x00
-    [Emit] hdrs.data.b2; = 0x00
-    [Emit] hdrs.data.*valid; = 1;
-    [Emit] hdrs.extra.0.h; = 0xB5F6
-    [Emit] hdrs.extra.0.b1; = 0x00
-    [Emit] hdrs.extra.0.b2; = 0x59
-    [Emit] hdrs.extra.0.*valid; = 1;
-    [Expression]: Invalid emit: hdrs.extra.1.*valid;:  = 0;
-    [Expression]: Invalid emit: hdrs.extra.2.*valid;:  = 0;
-    [Expression]: Invalid emit: hdrs.extra.3.*valid;:  = 0;
-    [Event]: Prepending the emit buffer to the program packet.
-    [Expression]: If Statement false: 511 == p4t*zombie.const.0.ingress.test1_arg_ingress.setb10; = 0;
-    '''
 
     def setupCtrlPlane(self):
         self.table_add(
@@ -466,43 +233,9 @@ class Test5(AbstractTest):
         self.runTestImpl()
 
 
-class Test6(AbstractTest):
+class Test5(AbstractTest):
     # Date generated: 2023-01-17-17:00:00.574
-    '''
     # Current statement coverage: 0.83
-    p: [Parser] p
-    [State] start
-    [Event]: Extract: Succeeded
-    [Extract] hdrs.data.f1; = 0xC2FF_F5F3
-    [Extract] hdrs.data.f2; = 0x0000_0000
-    [Extract] hdrs.data.h1; = 0x0000
-    [Extract] hdrs.data.b1; = 0x00
-    [Extract] hdrs.data.b2; = 0x00
-    [Event]: Extract Condition: p4t*zombie.const.0.*packetLen_bits >= 96; | Extract Size: 96
-    [State] extra
-    [Event]: Extract: Packet too short
-    [Event]: Extract Failure Condition: !(p4t*zombie.const.0.*packetLen_bits >= 128); | Extract Size: 32
-    [Event]: Control vrfy start
-    [Event]: Control ingress start
-    [Event]: Table Branch: ingress.test1 | Key(s): p4t*zombie.const.2.pktVar;| Chosen action: ingress.setb1
-    [Event]: Table Branch: ingress.ex1 | Key(s): TaintedExpression(bit<16>)| Chosen action: ingress.noop
-    [Expression]: If Statement false: 0 != 0; = 0;
-    [Event]: Control egress start
-    [Event]: Control update start
-    [Event]: Control deparser start
-    [Emit] hdrs.data.f1; = 0xC2FF_F5F3
-    [Emit] hdrs.data.f2; = 0x0000_0000
-    [Emit] hdrs.data.h1; = 0x0000
-    [Emit] hdrs.data.b1; = 0x00
-    [Emit] hdrs.data.b2; = 0x00
-    [Emit] hdrs.data.*valid; = 1;
-    [Expression]: Invalid emit: hdrs.extra.0.*valid;:  = 0;
-    [Expression]: Invalid emit: hdrs.extra.1.*valid;:  = 0;
-    [Expression]: Invalid emit: hdrs.extra.2.*valid;:  = 0;
-    [Expression]: Invalid emit: hdrs.extra.3.*valid;:  = 0;
-    [Event]: Prepending the emit buffer to the program packet.
-    [Expression]: If Statement false: 511 == p4t*zombie.const.0.ingress.test1_arg_ingress.setb10; = 0;
-    '''
 
     def setupCtrlPlane(self):
         self.table_add(
@@ -544,44 +277,9 @@ class Test6(AbstractTest):
         self.runTestImpl()
 
 
-class Test7(AbstractTest):
+class Test6(AbstractTest):
     # Date generated: 2023-01-17-17:00:00.579
-    '''
     # Current statement coverage: 1
-    p: [Parser] p
-    [State] start
-    [Event]: Extract: Succeeded
-    [Extract] hdrs.data.f1; = 0x0000_0000
-    [Extract] hdrs.data.f2; = 0xBB6D_5F57
-    [Extract] hdrs.data.h1; = 0x0000
-    [Extract] hdrs.data.b1; = 0x00
-    [Extract] hdrs.data.b2; = 0x00
-    [Event]: Extract Condition: p4t*zombie.const.0.*packetLen_bits >= 96; | Extract Size: 96
-    [State] extra
-    [Event]: Extract: Packet too short
-    [Event]: Extract Failure Condition: !(p4t*zombie.const.0.*packetLen_bits >= 128); | Extract Size: 32
-    [Event]: Control vrfy start
-    [Event]: Control ingress start
-    [Event]: Table Branch: ingress.test1 Choosing default action: noop;
-    [Event]: Table Branch: ingress.ex1 | Key(s): TaintedExpression(bit<16>)| Chosen action: ingress.act1
-    [Event]: Table Branch: ingress.tbl1 | Key(s): p4t*zombie.const.3.pktVar;| Chosen action: ingress.setbyte
-    [Expression]: If Statement false: 0 != 0; = 0;
-    [Event]: Control egress start
-    [Event]: Control update start
-    [Event]: Control deparser start
-    [Emit] hdrs.data.f1; = 0x0000_0000
-    [Emit] hdrs.data.f2; = 0xBB6D_5F57
-    [Emit] hdrs.data.h1; = 0x0000
-    [Emit] hdrs.data.b1; = 0x00
-    [Emit] hdrs.data.b2; = 0x00
-    [Emit] hdrs.data.*valid; = 1;
-    [Expression]: Invalid emit: hdrs.extra.0.*valid;:  = 0;
-    [Expression]: Invalid emit: hdrs.extra.1.*valid;:  = 0;
-    [Expression]: Invalid emit: hdrs.extra.2.*valid;:  = 0;
-    [Expression]: Invalid emit: hdrs.extra.3.*valid;:  = 0;
-    [Event]: Prepending the emit buffer to the program packet.
-    [Expression]: If Statement false: 511 == 0; = 0;
-    '''
 
     def setupCtrlPlane(self):
         self.table_add(
