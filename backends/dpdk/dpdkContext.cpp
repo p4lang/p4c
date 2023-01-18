@@ -18,6 +18,7 @@ limitations under the License.
 
 #include "backend.h"
 #include "printUtils.h"
+#include "control-plane/bfruntime_ext.h"
 namespace DPDK {
 
 // This function collects all tables in a vector and sets the table attributes required
@@ -190,17 +191,16 @@ Util::JsonObject *DpdkContextGenerator::initTableCommonJson(const cstring name,
 
 void DpdkContextGenerator::collectHandleId() {
     for (auto table : p4info.tables()) {
-        const auto &pre_t = table.preamble();
-        context_handle_map[pre_t.name().c_str()] = pre_t.id();
-        for (auto &action_ref : table.action_refs()) {
-            auto *action = P4::BFRT::Standard::findAction(p4info, action_ref.id());
-            if (action == nullptr) {
-                ::error(ErrorType::ERR_INVALID, "Invalid action id '%1%'", action_ref.id());
-                continue;
-            }
-            const auto &pre_a = action->preamble();
-            context_handle_map[pre_a.name()] = pre_a.id();
-        }
+        const auto& pre_t = table.preamble();
+        context_handle_map[pre_t.name()] = pre_t.id();
+    }
+    for( auto action : p4info.actions()) {
+    const auto& pre_a = action.preamble();
+    context_handle_map[pre_a.name()] = pre_a.id();
+    }
+    for (auto& action_prof : p4info.action_profiles()) {
+        const auto& pre_a = action_prof.preamble();
+        context_handle_map[pre_a.name()] = pre_a.id();
     }
 }
 
@@ -210,6 +210,8 @@ size_t DpdkContextGenerator::getHandleId(cstring name) {
         if (x.first.find(name.c_str())) {
             id = context_handle_map[x.first];
             break;
+        } else if (name.find(x.first.c_str()) && name.endsWith("_sel")) {
+        id = P4::BFRT::makeBFRuntimeId(context_handle_map[x.first], ::dpdk::P4Ids::ACTION_SELECTOR);
         }
     }
     BUG_CHECK(id != 0, "unable to find id for %1%", name);
