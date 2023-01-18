@@ -3092,6 +3092,10 @@ const IR::Node *TypeInference::postorder(IR::Member *expression) {
 
         auto fieldType = getTypeType(field->type);
         if (fieldType == nullptr) return expression;
+        if (fieldType->is<IR::Type_ActionEnum>() && !getParent<IR::SwitchStatement>()) {
+            typeError("%1%: only allowed in switch statements", expression);
+            return expression;
+        }
         setType(getOriginal(), fieldType);
         setType(expression, fieldType);
         if (isLeftValue(expression->expr)) {
