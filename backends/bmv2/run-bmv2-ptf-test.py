@@ -32,7 +32,7 @@ PARSER.add_argument(
     "-td",
     "--testdir",
     dest="testdir",
-    help="The location of the test directory. ",
+    help="The location of the test directory.",
 )
 
 
