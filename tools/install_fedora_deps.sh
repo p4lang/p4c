@@ -37,6 +37,7 @@ sudo dnf install -y -q \
     net-tools \
     openssl-devel \
     pkg-config \
+    procps-ng \
     protobuf-devel \
     protobuf-static \
     python3 \
