@@ -192,6 +192,7 @@ class TypeInference : public Transform {
     /// or for actions in the entries list.  Returns the action list element
     /// on success.
     const IR::ActionListElement *validateActionInitializer(const IR::Expression *actionCall);
+    bool containsActionEnum(const IR::Type *type) const;
 
     //////////////////////////////////////////////////////////////
 
