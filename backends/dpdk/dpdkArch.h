@@ -1320,5 +1320,91 @@ class CollectProgramStructure : public PassManager {
         }));
     }
 };
+
+/* Helper class to detect use of IPSec accelerator */
+class IsIPSecUsed : public Inspector {
+    bool &is_ipsec_used;
+    int &sa_id_width;
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
+
+ public:
+    IsIPSecUsed(bool &is_ipsec_used, int &sa_id_width, P4::ReferenceMap *refMap,
+                P4::TypeMap *typeMap)
+        : is_ipsec_used(is_ipsec_used),
+          sa_id_width(sa_id_width),
+          refMap(refMap),
+          typeMap(typeMap) {}
+    bool preorder(const IR::MethodCallStatement *mcs) override {
+        auto mi = P4::MethodInstance::resolve(mcs->methodCall, refMap, typeMap);
+        if (auto a = mi->to<P4::ExternMethod>()) {
+            if (a->originalExternType->getName().name == "ipsec_accelerator") {
+                if (a->method->getName().name == "enable") {
+                    is_ipsec_used = true;
+                } else if (a->method->getName().name == "set_sa_index") {
+                    auto typeArgs = a->expr->typeArguments;
+                    if (typeArgs->size() != 1) {
+                        ::error(ErrorType::ERR_UNEXPECTED,
+                                "Unexpected number of type arguments for %1%", a->method->name);
+                        return false;
+                    }
+                    auto width = typeArgs->at(0);
+                    if (!width->is<IR::Type_Bits>()) {
+                        ::error("Unexpected width type %1% for sa_index", width);
+                        return false;
+                    }
+                    sa_id_width = width->to<IR::Type_Bits>()->width_bits();
+                }
+            }
+        }
+        return false;
+    }
+};
+
+/* DPDK uses some fixed registers to hold the ipsec inbound/outbound input and output ports and a
+ * pseudo compiler inserted header which shall be emitted in front of all headers. This class helps
+ * insert required registers and a pseudo header for enabling IPSec encryption and decryption. It
+ * also handles setting of output port in the deparser.
+ */
+class InsertReqDeclForIPSec : public Transform {
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
+    DpdkProgramStructure *structure;
+    cstring newHeaderName = "platform_hdr_t";
+    IR::Type_Header *ipsecHeader = nullptr;
+    cstring registerInstanceNames[4];
+    bool is_ipsec_used = false;
+    int sa_id_width = 32;
+
+ public:
+    InsertReqDeclForIPSec(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                          DpdkProgramStructure *structure)
+        : refMap(refMap), typeMap(typeMap), structure(structure) {
+        setName("InsertReqDeclForIPSec");
+    }
+
+    const IR::Node *preorder(IR::P4Program *program) override;
+    const IR::Node *preorder(IR::Type_Struct *s) override;
+    const IR::Node *preorder(IR::P4Control *c) override;
+    void uniqueNames();
+    IR::Declaration_Instance *addRegDeclInstance(cstring instanceName);
+};
+
+struct DpdkHandleIPSec : public PassManager {
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
+    DpdkProgramStructure *structure;
+
+ public:
+    DpdkHandleIPSec(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, DpdkProgramStructure *structure)
+        : refMap(refMap), typeMap(typeMap), structure(structure) {
+        passes.push_back(new InsertReqDeclForIPSec(refMap, typeMap, structure));
+        passes.push_back(new P4::ClearTypeMap(typeMap));
+        passes.push_back(new P4::ResolveReferences(refMap));
+        passes.push_back(new P4::TypeInference(refMap, typeMap, false));
+        passes.push_back(new P4::TypeChecking(refMap, typeMap));
+    }
+};
+
 };     // namespace DPDK
 #endif /* BACKENDS_DPDK_DPDKARCH_H_ */

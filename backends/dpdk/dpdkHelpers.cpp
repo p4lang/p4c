@@ -416,6 +416,57 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                 if (e->method->getName().name == "lookahead") {
                     i = new IR::DpdkLookaheadStatement(left);
                 }
+            } else if (e->originalExternType->getName().name == "ipsec_accelerator") {
+                if (e->method->getName().name == "from_ipsec") {
+                    auto argSize = e->expr->arguments->size();
+                    if (argSize != 1) {
+                        ::error(ErrorType::ERR_UNEXPECTED,
+                                "Expected 1 argument for status of ipsec encryption",
+                                e->object->getName());
+                        return false;
+                    }
+                    auto status = (*e->expr->arguments)[0]->expression;
+                    // For DPDK, the status is always SUCCESS
+                    add_instr(new IR::DpdkMovStatement(status, new IR::Constant(IPSEC_SUCCESS)));
+                    BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
+                    IR::ID portInInbound(refmap->newName("ipsec_port_inbound"));
+                    IR::ID portInOutbound(refmap->newName("ipsec_port_outbound"));
+                    auto port_in_inbound =
+                        new IR::Member(new IR::PathExpression("m"), portInInbound);
+                    auto port_in_outbound =
+                        new IR::Member(new IR::PathExpression("m"), portInOutbound);
+                    metadataStruct->fields.push_back(
+                        new IR::StructField(portInInbound, IR::Type_Bits::get(32)));
+                    metadataStruct->fields.push_back(
+                        new IR::StructField(portInOutbound, IR::Type_Bits::get(32)));
+                    add_instr(new IR::DpdkRegisterReadStatement(
+                        port_in_inbound, "ipsec_port_in_inbound", new IR::Constant(0)));
+                    add_instr(new IR::DpdkRegisterReadStatement(
+                        port_in_outbound, "ipsec_port_out_inbound", new IR::Constant(0)));
+                    add_instr(new IR::DpdkMovStatement(left, new IR::Constant(false)));
+                    auto true_label = refmap->newName("label_true");
+                    auto end_label = refmap->newName("label_end");
+
+                    // left = (port_in == ipsec_port_in_inbound) || (port_in ==
+                    // ipsec_port_in_outbound)
+                    add_instr(new IR::DpdkJmpEqualStatement(
+                        true_label,
+                        new IR::Member(new IR::PathExpression(IR::ID("m")),
+                                       IR::ID("pna_main_input_metadata_input_port")),
+                        port_in_inbound));
+                    add_instr(new IR::DpdkJmpEqualStatement(
+                        true_label,
+                        new IR::Member(new IR::PathExpression(IR::ID("m")),
+                                       IR::ID("pna_main_input_metadata_input_port")),
+                        port_in_outbound));
+                    add_instr(new IR::DpdkJmpLabelStatement(end_label));
+                    add_instr(new IR::DpdkLabelStatement(true_label));
+                    add_instr(new IR::DpdkMovStatement(left, new IR::Constant(true)));
+                    i = new IR::DpdkLabelStatement(end_label);
+                } else {
+                    BUG("ipsec_accelerator function %1% not implemented",
+                        e->method->getName().name);
+                }
             } else {
                 BUG("%1% Not implemented", e->originalExternType->name);
             }
@@ -1142,6 +1193,24 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 auto src = args->at(1)->expression;
                 auto reg = a->object->getName();
                 add_instr(new IR::DpdkRegisterWriteStatement(reg, index, src));
+            }
+        } else if (a->originalExternType->getName().name == "ipsec_accelerator") {
+            if (a->method->getName().name == "enable") {
+                add_instr(new IR::DpdkValidateStatement(structure->ipsec_header));
+            } else if (a->method->getName().name == "set_sa_index") {
+                auto args = a->expr->arguments;
+                if (args->size() != 1) {
+                    ::error(ErrorType::ERR_UNEXPECTED, "Unexpected number of arguments for %1%",
+                            a->method->name);
+                    return false;
+                }
+                auto index = args->at(0)->expression;
+                add_instr(new IR::DpdkMovStatement(
+                    new IR::Member(structure->ipsec_header, IR::ID("sa_id")), index));
+            } else if (a->method->getName().name == "disable") {
+                add_instr(new IR::DpdkInvalidateStatement(structure->ipsec_header));
+            } else {
+                BUG("ipsec_accelerator function %1% not implemented", a->method->getName().name);
             }
         } else {
             ::error(ErrorType::ERR_UNKNOWN, "%1%: Unknown extern function.", s);

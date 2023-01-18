@@ -83,6 +83,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::ClearTypeMap(typeMap),
         new P4::TypeChecking(refMap, typeMap, true),
         new P4::ResolveReferences(refMap),
+        new DpdkHandleIPSec(refMap, typeMap, &structure),
         new StatementUnroll(refMap, &structure),
         new IfStatementUnroll(refMap),
         new P4::ClearTypeMap(typeMap),
