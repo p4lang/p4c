@@ -60,6 +60,9 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
     /// individual component instantiations.
     int pipeIdx = 0;
 
+    /// Set the restriction on the input port,
+    /// this is necessary since ptf tests use ports from 0 to 7
+    pipelineSequence.emplace_back(Continuation::Guard(getPortConstraint(getTargetInputPortVar())));
     for (const auto &declTuple : programmableBlocks) {
         // Iterate through the (ordered) pipes of the target architecture.
         auto subResult = processDeclaration(declTuple.second, pipeIdx);
@@ -89,10 +92,6 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
             constraint = new IR::LAnd(constraint, restriction);
         }
     }
-
-    /// Set the restriction on the input port,
-    /// this is necessary since ptf tests use ports from 0 to 7
-    constraint = new IR::LAnd(constraint, getPortConstraint(getTargetInputPortVar()));
 
     targetConstraints = constraint;
 }
