@@ -144,7 +144,7 @@ def run_timeout(verbose, args, timeout, outputs, errmsg):
 def check_root():
     """ This function returns False if the user does not have root privileges.
         Caution: Only works on Unix systems """
-    return (os.getuid() == 0)
+    return os.getuid() == 0
 
 
 class PathError(RuntimeError):
@@ -182,6 +182,18 @@ def check_if_dir(input_path):
         sys.exit(1)
     return Path(input_path.absolute())
 
+
+def check_and_create_dir(directory):
+    # create the folder if it does not exit
+    if not directory == "" and not os.path.exists(directory):
+        report_output(sys.stdout, f"Folder {directory} does not exist! Creating...")
+        directory.mkdir(parents=True, exist_ok=True)
+
+def del_dir(directory):
+    try:
+        shutil.rmtree(directory, ignore_errors=True)
+    except OSError as e:
+        report_err(sys.stderr, f"Could not delete directory, reason:\n{e.filename} - {e.strerror}.")
 
 def copy_file(src, dst):
     try:
