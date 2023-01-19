@@ -18,7 +18,6 @@
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
-#include "frontends/p4/optimizeExpressions.h"
 #include "ir/declaration.h"
 #include "ir/indexed_vector.h"
 #include "ir/ir-inline.h"
