@@ -18,6 +18,7 @@
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "frontends/p4/optimizeExpressions.h"
 #include "ir/declaration.h"
 #include "ir/indexed_vector.h"
 #include "ir/ir-inline.h"
@@ -659,19 +660,56 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  nextState->addTestObject("countervalues", externInstance, counterValue);
              }
              const IR::Expression *baseExpr = counterValue->getCurrentValue(index);
+             if (auto mux = baseExpr->to<IR::Mux>()) {
+                 auto muxCond = new IR::LAnd(cond, mux->e0);
+                 {
+                     auto *muxState = new ExecutionState(state);
+                     muxState->popBody();
+                     const IR::Expression *increasedExpr =
+                         new IR::Add(mux->e1, IR::getConstant(IR::Type::Bits::get(32), 1));
+                     counterValue->addCounterCondition(Bmv2CounterCondition{index, increasedExpr});
 
-             const IR::Expression *increasedExpr =
-                 new IR::Add(baseExpr, IR::getConstant(IR::Type::Bits::get(32), 1));
-             counterValue->addCounterCondition(Bmv2CounterCondition{index, increasedExpr});
+                     muxState->addTestObject("countervalues", externInstance, counterValue);
 
-             nextState->addTestObject("countervalues", externInstance, counterValue);
+                     // TODO: Find a better way to model a trace of this event.
+                     std::stringstream counterStream;
+                     counterStream << "CounterCount: Index ";
+                     index->dbprint(counterStream);
+                     muxState->add(new TraceEvent::Generic(counterStream.str()));
+                     result->emplace_back(muxCond, state, muxState);
+                 }
 
-             // TODO: Find a better way to model a trace of this event.
-             std::stringstream counterStream;
-             counterStream << "CounterCount: Index ";
-             index->dbprint(counterStream);
-             nextState->add(new TraceEvent::Generic(counterStream.str()));
-             result->emplace_back(cond, state, nextState);
+                 {
+                     auto *muxState = new ExecutionState(state);
+                     muxState->popBody();
+                     const IR::Expression *increasedExpr =
+                         new IR::Add(mux->e2, IR::getConstant(IR::Type::Bits::get(32), 1));
+                     counterValue->addCounterCondition(Bmv2CounterCondition{index, increasedExpr});
+
+                     muxState->addTestObject("countervalues", externInstance, counterValue);
+
+                     // TODO: Find a better way to model a trace of this event.
+                     std::stringstream counterStream;
+                     counterStream << "CounterCount: Index ";
+                     index->dbprint(counterStream);
+                     muxState->add(new TraceEvent::Generic(counterStream.str()));
+                     result->emplace_back(new IR::LNot(muxCond), state, muxState);
+                 }
+
+             } else {
+                 const IR::Expression *increasedExpr =
+                     new IR::Add(baseExpr, IR::getConstant(IR::Type::Bits::get(32), 1));
+                 counterValue->addCounterCondition(Bmv2CounterCondition{index, increasedExpr});
+
+                 nextState->addTestObject("countervalues", externInstance, counterValue);
+
+                 // TODO: Find a better way to model a trace of this event.
+                 std::stringstream counterStream;
+                 counterStream << "CounterCount: Index ";
+                 index->dbprint(counterStream);
+                 nextState->add(new TraceEvent::Generic(counterStream.str()));
+                 result->emplace_back(cond, state, nextState);
+             }
          }},
         /* ======================================================================================
          *  direct_counter.count
