@@ -153,10 +153,7 @@ void EBPFRegisterPSA::emitInstance(CodeBuilder *builder) {
 void EBPFRegisterPSA::emitRegisterRead(CodeBuilder *builder, const P4::ExternMethod *method,
                                        ControlBodyTranslatorPSA *translator,
                                        const IR::Expression *leftExpression) {
-    auto indexArg = method->expr->arguments->at(0)->expression->to<IR::PathExpression>();
-    cstring indexParamName = translator->getParamName(indexArg);
-    BUG_CHECK(!indexParamName.isNullOrEmpty(), "Index param cannot be empty");
-
+    auto index = method->expr->arguments->at(0)->expression;
     cstring valueName = program->refMap->newName("value");
 
     builder->emitIndent();
@@ -167,16 +164,22 @@ void EBPFRegisterPSA::emitRegisterRead(CodeBuilder *builder, const P4::ExternMet
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 
     builder->emitIndent();
-    builder->target->emitTableLookup(builder, dataMapName, indexParamName, valueName);
+    builder->appendFormat("%s = BPF_MAP_LOOKUP_ELEM(%s, &", valueName.c_str(),
+                          instanceName.c_str());
+    translator->visit(index);
+    builder->append(")");
     builder->endOfStatement(true);
 
     builder->emitIndent();
     builder->appendFormat("if (%s != NULL) ", valueName.c_str());
     builder->blockStart();
-    builder->emitIndent();
     if (leftExpression != nullptr) {
+        // Data have to be copied into local variable to avoid side effects in multicore
+        // environment. memcpy will work for any data type
+        builder->emitIndent();
+        builder->append("__builtin_memcpy(&");
         codeGen->visit(leftExpression);
-        builder->appendFormat(" = *%s", valueName);
+        builder->appendFormat(", %s, sizeof(%s))", valueName.c_str(), valueTypeName.c_str());
         builder->endOfStatement(true);
     }
     builder->target->emitTraceMessage(builder, "Register: Entry found!");
@@ -186,17 +189,24 @@ void EBPFRegisterPSA::emitRegisterRead(CodeBuilder *builder, const P4::ExternMet
     builder->emitIndent();
 
     if (leftExpression != nullptr) {
-        codeGen->visit(leftExpression);
-        builder->append(" = ");
-        if (this->initialValue != nullptr) {
-            builder->append(this->initialValue->value.str());
-        } else {
-            builder->append("(");
+        if (initialValue != nullptr || leftExpression->type->is<IR::Type_Bits>()) {
+            // let's create fake assigment statement and use it to generate valid code
+            const IR::Expression *right =
+                initialValue != nullptr ? initialValue : new IR::Constant(leftExpression->type, 0);
+            const auto *assigment = new IR::AssignmentStatement(leftExpression, right);
+            ControlBodyTranslatorPSA cg(*translator);
+            assigment->apply(cg);
+            builder->newline();
+        } else if (leftExpression->type->is<IR::Type_StructLike>()) {
+            translator->visit(leftExpression);
+            builder->append(" = (");
             this->valueType->declare(builder, cstring::empty, false);
             builder->append(")");
             this->valueType->emitInitializer(builder);
+            builder->endOfStatement(true);
+        } else {
+            BUG("%1%: unsupported type for register read", leftExpression);
         }
-        builder->endOfStatement(true);
     }
 
     builder->target->emitTraceMessage(builder, "Register: Entry not found, using default value");
@@ -205,21 +215,17 @@ void EBPFRegisterPSA::emitRegisterRead(CodeBuilder *builder, const P4::ExternMet
 
 void EBPFRegisterPSA::emitRegisterWrite(CodeBuilder *builder, const P4::ExternMethod *method,
                                         ControlBodyTranslatorPSA *translator) {
-    auto indexArgExpr = method->expr->arguments->at(0)->expression->to<IR::PathExpression>();
-    cstring indexParamName = translator->getParamName(indexArgExpr);
-    auto valueArgExpr = method->expr->arguments->at(1)->expression->to<IR::PathExpression>();
-    cstring valueParamName = translator->getParamName(valueArgExpr);
-    BUG_CHECK(!indexParamName.isNullOrEmpty(), "Index param cannot be empty");
-    BUG_CHECK(!valueParamName.isNullOrEmpty(), "Value param cannot be empty");
-
     cstring msgStr = Util::printf_format("Register: writing %s", instanceName.c_str());
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 
     builder->emitIndent();
     auto ret = program->refMap->newName("ret");
-    builder->appendFormat("int %s = ", ret.c_str());
-    builder->target->emitTableUpdate(builder, instanceName, indexParamName, valueParamName);
-    builder->newline();
+    builder->appendFormat("int %s = BPF_MAP_UPDATE_ELEM(%s, &", ret.c_str(), instanceName.c_str());
+    translator->visit(method->expr->arguments->at(0)->expression);
+    builder->append(", &");
+    translator->visit(method->expr->arguments->at(1)->expression);
+    builder->append(", BPF_ANY)");
+    builder->endOfStatement(true);
 
     builder->emitIndent();
     builder->appendFormat("if (%s) ", ret.c_str());

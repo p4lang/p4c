@@ -619,7 +619,8 @@ table caching pass `--table-caching` to the compiler.
 
 We list the known bugs/limitations below. Refer to the Roadmap section for features planned in the near future.
 
-- Larger bit fields (e.g. IPv6 addresses) may not work properly.
+- Fields wider than 64 bits must have size multiply of 8 bits, otherwise they may have unexpected value in the LSB byte.
+  These fields may not work with all the externs and not all the operations on them are possible.
 - We noticed that `bpf_xdp_adjust_meta()` isn't implemented by some NIC drivers, so the `meta` XDP2TC mode may not work 
 with some NICs. So far, we have verified the correct behavior with Intel 82599ES. If a NIC doesn't support the `meta` XDP2TC mode you can use `head` or `cpumap` modes.
 - `lookahead()` with bit fields (e.g., `bit<16>`) doesn't work.

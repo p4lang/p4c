@@ -137,32 +137,6 @@ class EBPFTablePSAImplementationPropertyVisitor : public EBPFTablePsaPropertyVis
     }
 };
 
-class EBPFTablePSAInitializerUtils {
- public:
-    // return *real* number of bits required by type
-    static unsigned ebpfTypeWidth(P4::TypeMap *typeMap, const IR::Expression *expr) {
-        auto type = typeMap->getType(expr);
-        auto ebpfType = EBPFTypeFactory::instance->create(type);
-        if (auto scalar = ebpfType->to<EBPFScalarType>()) {
-            unsigned width = scalar->implementationWidthInBits();
-            unsigned alignment = scalar->alignment() * 8;
-            unsigned units = ROUNDUP(width, alignment);
-            return units * alignment;
-        }
-        return 8;  // assume 1 byte if not available such information
-    }
-
-    // Generate hex string and prepend it with zeroes when shorter than required width
-    static cstring genHexStr(const big_int &value, unsigned width, const IR::Expression *expr) {
-        // the required length of hex string, must be an even number
-        unsigned nibbles = 2 * ROUNDUP(width, 8);
-        auto str = value.str(0, std::ios_base::hex);
-        if (str.size() < nibbles) str = std::string(nibbles - str.size(), '0') + str;
-        BUG_CHECK(str.size() == nibbles, "%1%: value size does not match %2% bits", expr, width);
-        return str;
-    }
-};
-
 // Generator for table key/value initializer value (const entries). Can't be used during table
 // lookup because this inspector expects only constant values as initializer.
 class EBPFTablePSAInitializerCodeGen : public CodeGenInspector {
@@ -191,22 +165,8 @@ class EBPFTablePSAInitializerCodeGen : public CodeGenInspector {
         expr->apply(*this);
     }
 
-    bool preorder(const IR::Constant *expr) override {
-        unsigned width = EBPFTablePSAInitializerUtils::ebpfTypeWidth(typeMap, expr);
-
-        if (EBPFScalarType::generatesScalar(width)) return CodeGenInspector::preorder(expr);
-
-        cstring str = EBPFTablePSAInitializerUtils::genHexStr(expr->value, width, expr);
-        builder->append("{ ");
-        for (size_t i = 0; i < str.size() / 2; ++i)
-            builder->appendFormat("0x%s, ", str.substr(2 * i, 2));
-        builder->append("}");
-
-        return false;
-    }
-
     bool preorder(const IR::Mask *expr) override {
-        unsigned width = EBPFTablePSAInitializerUtils::ebpfTypeWidth(typeMap, expr->left);
+        unsigned width = EBPFInitializerUtils::ebpfTypeWidth(typeMap, expr->left);
 
         if (EBPFScalarType::generatesScalar(width)) {
             visit(expr->left);
@@ -217,8 +177,8 @@ class EBPFTablePSAInitializerCodeGen : public CodeGenInspector {
             auto rc = expr->right->to<IR::Constant>();
             BUG_CHECK(lc != nullptr, "%1%: expected a constant value", expr->left);
             BUG_CHECK(rc != nullptr, "%1%: expected a constant value", expr->right);
-            cstring value = EBPFTablePSAInitializerUtils::genHexStr(lc->value, width, expr->left);
-            cstring mask = EBPFTablePSAInitializerUtils::genHexStr(rc->value, width, expr->right);
+            cstring value = EBPFInitializerUtils::genHexStr(lc->value, width, expr->left);
+            cstring mask = EBPFInitializerUtils::genHexStr(rc->value, width, expr->right);
             builder->append("{ ");
             for (size_t i = 0; i < value.size() / 2; ++i)
                 builder->appendFormat("(0x%s & 0x%s), ", value.substr(2 * i, 2),
@@ -241,7 +201,7 @@ class EBPFTablePSAInitializerCodeGen : public CodeGenInspector {
         cstring fieldName = ::get(table->keyFieldNames, key);
         cstring matchType = key->matchType->path->name.name;
         auto expr = currentEntry->keys->components[currentKeyEntryIndex];
-        unsigned width = EBPFTablePSAInitializerUtils::ebpfTypeWidth(typeMap, key->expression);
+        unsigned width = EBPFInitializerUtils::ebpfTypeWidth(typeMap, key->expression);
         bool isLPMMatch = matchType == P4::P4CoreLibrary::instance.lpmMatch.name;
         bool genPrefixLen = !tableHasTernaryMatch && isLPMMatch;
         bool doSwapBytes = genPrefixLen && EBPFScalarType::generatesScalar(width);
@@ -341,7 +301,7 @@ class EBPFTablePSATernaryTableMaskGenerator : public Inspector {
 
     bool preorder(const IR::Constant *expr) override {
         // exact match, set all bits as 'care'
-        unsigned bytes = ROUNDUP(EBPFTablePSAInitializerUtils::ebpfTypeWidth(typeMap, expr), 8);
+        unsigned bytes = ROUNDUP(EBPFInitializerUtils::ebpfTypeWidth(typeMap, expr), 8);
         for (unsigned i = 0; i < bytes; ++i) mask += "ff";
         return false;
     }
@@ -349,8 +309,8 @@ class EBPFTablePSATernaryTableMaskGenerator : public Inspector {
         // Available value and mask, so use only this mask
         BUG_CHECK(expr->right->is<IR::Constant>(), "%1%: Expected a constant value", expr->right);
         auto &value = expr->right->to<IR::Constant>()->value;
-        unsigned width = EBPFTablePSAInitializerUtils::ebpfTypeWidth(typeMap, expr->right);
-        mask += EBPFTablePSAInitializerUtils::genHexStr(value, width, expr->right);
+        unsigned width = EBPFInitializerUtils::ebpfTypeWidth(typeMap, expr->right);
+        mask += EBPFInitializerUtils::genHexStr(value, width, expr->right);
         return false;
     }
 };
@@ -365,7 +325,7 @@ class EBPFTablePSATernaryKeyMaskGenerator : public EBPFTablePSAInitializerCodeGe
         // MidEnd transforms 0xffff... masks into exact match
         // So we receive there a Constant same as exact match
         // So we have to create 0xffff... mask on our own
-        unsigned width = EBPFTablePSAInitializerUtils::ebpfTypeWidth(typeMap, expr);
+        unsigned width = EBPFInitializerUtils::ebpfTypeWidth(typeMap, expr);
         unsigned bytes = ROUNDUP(width, 8);
 
         if (EBPFScalarType::generatesScalar(width)) {
@@ -383,7 +343,7 @@ class EBPFTablePSATernaryKeyMaskGenerator : public EBPFTablePSAInitializerCodeGe
     bool preorder(const IR::Mask *expr) override {
         // Mask value is our value which we want to generate
         BUG_CHECK(expr->right->is<IR::Constant>(), "%1%: expected constant value", expr->right);
-        EBPFTablePSAInitializerCodeGen::preorder(expr->right->to<IR::Constant>());
+        CodeGenInspector::preorder(expr->right->to<IR::Constant>());
         return false;
     }
 };
