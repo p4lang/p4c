@@ -19,6 +19,7 @@ namespace ExpressionParser {
 class AssertsParser : public Transform {
     std::vector<std::vector<const IR::Expression*>>& restrictionsVec;
     const IR::P4Program* p4Program;
+
  public:
     explicit AssertsParser(std::vector<std::vector<const IR::Expression*>>& output);
     const IR::Node* preorder(IR::P4Program* program) override;

@@ -191,6 +191,11 @@ std::pair<const IR::Node*, IR::ID> Parser::getDefinedType(cstring txt, const IR:
     } else if (const auto* typeName = nd->to<IR::Type_Name>()) {
         return getDefinedType(txt, getDefinedType(typeName->path->name, nullptr).first);
     } else {
+        auto i = types.find(txt);
+        if (i != types.end()) {
+            std::cout << i->second << std::endl;
+            return std::make_pair(i->second, txt);
+        }
         const IR::IDeclaration *decl = nullptr;
         if (nd->is<IR::P4Program>()) {
             auto* decls = program->getDeclsByName(txt);
@@ -481,6 +486,7 @@ const IR::Node* Parser::createFunctionCallOrConstantOp() {
             index++;
         } else {
             res = (this->*prevFunc)();
+            lastType = castType;
             return new IR::Cast(castType, res->to<IR::Expression>());
         }
         return new IR::NamedExpression("Paren", res->to<IR::Expression>());
@@ -500,7 +506,8 @@ const IR::Node* Parser::createFunctionCallOrConstantOp() {
                 isNoTypes = true;
                 mainArgument = new IR::PathExpression(new IR::Path(res.second));    
             } else {
-                mainArgument = new IR::PathExpression(ndToType(res.first), new IR::Path(res.second));
+                lastType = ndToType(res.first);
+                mainArgument = new IR::PathExpression(lastType, new IR::Path(res.second));
             }
         }
     }
@@ -522,7 +529,11 @@ const IR::Node* Parser::createFunctionCallOrConstantOp() {
             nd = res.first;
             const IR::Type* type = nullptr;
             if (!isNoTypes) {
-                type = ndToType(res.first);
+                if (name == "mask") {
+                    type = mainArgument->to<IR::Expression>()->type;
+                } else {
+                    type = ndToType(res.first);
+                }
             }
             if (!isNoTypes && res.second.originalName == "isValid") {
                 type = mainArgument->to<IR::Expression>()->type;
@@ -531,12 +542,14 @@ const IR::Node* Parser::createFunctionCallOrConstantOp() {
                 if (type == nullptr) {
                     mainArgument = new IR::PathExpression(new IR::Path(res.second));
                 } else {
+                    lastType = type;
                     mainArgument = new IR::PathExpression(type, new IR::Path(res.second));
                 }
             } else {
                 if (type == nullptr) {
                     mainArgument = new IR::Member(mainArgument->to<IR::Expression>(), res.second);
                 } else {
+                    lastType = type;
                     mainArgument = new IR::Member(type, mainArgument->to<IR::Expression>(), res.second);
                 }
             }
@@ -693,6 +706,30 @@ const IR::Node* Parser::createImplication() {
                                   &Parser::createDisjunction,  &Parser::createImplication);
 }
 
+bool isLogicMark(Token::Kind kind) {
+    switch (kind) {
+        case Token::Kind::Conjunction: case Token::Kind::Disjunction:
+        case Token::Kind::Implication: return true;
+        default: return false;
+    }
+}
+
+class ConstantTypeSetter : public Transform {
+ const IR::Type* type;
+
+ public:
+    ConstantTypeSetter(const IR::Type* type) : type(type) {
+        setName("ConstantTypeSetter");
+        CHECK_NULL(type);
+    }
+    const IR::Node* postorder(IR::Constant* c) override {
+        std::cout << c << " : " << c->type << " : " << c << std::endl;
+        auto* newConst = c->clone();
+        newConst->type = type;
+        return newConst;
+    }
+};
+
 const IR::Node* Parser::createBinaryExpression(const char* msg, Token::Kind kind,
                                                createFuncType funcLeft,
                                                createFuncType funcRight) {
@@ -706,7 +743,17 @@ const IR::Node* Parser::createBinaryExpression(const char* msg, Token::Kind kind
     if (tokens[index].is(kind)) {
         index++;
         prevFunc = funcRight;
-        return createIR(kind, mainArgument, (this->*funcRight)());
+        const auto* res =
+            createIR(kind, mainArgument, (this->*funcRight)())->to<IR::Operation_Binary>();
+        std::cout << res << std::endl;
+        if (!isLogicMark(kind) && lastType) {
+            std::cout << res << ":" << lastType << std::endl;
+            ConstantTypeSetter constantTypeSetter(lastType);
+            return res->apply(constantTypeSetter);
+        } else {
+            lastType = nullptr;
+        }
+        return res;
     }
     return mainArgument;
 }
@@ -766,6 +813,7 @@ const IR::Node* Parser::getIR() {
 }
 
 const IR::Node* Parser::getIR(const char* str, const IR::P4Program* program, bool addFA,
+                              const std::map<cstring, const IR::Type*> types,
                               TokensSet skippedTokens) {
     std::cout << "Parsing string : " << str << std::endl;
     Lexer lex(str);
@@ -776,12 +824,13 @@ const IR::Node* Parser::getIR(const char* str, const IR::P4Program* program, boo
             tmp.push_back(token);
         }
     }
-    Parser parser(program, tmp, addFA);
+    Parser parser(program, tmp, addFA, types);
     return parser.getIR();
 }
 
-Parser::Parser(const IR::P4Program* program, std::vector<Token> &tokens, bool addFA)
-    : program(program), tokens(tokens), addFA(addFA) {
+Parser::Parser(const IR::P4Program* program, std::vector<Token> &tokens, bool addFA,
+               const std::map<cstring, const IR::Type*> types)
+    : program(program), tokens(tokens), addFA(addFA), lastType(nullptr), types(types) {
 }
 
 Token Lexer::atom(Token::Kind kind) noexcept { return {kind, m_beg++, 1}; }

@@ -119,11 +119,16 @@ class Parser {
     bool addFA;
     typedef const IR::Node* (Parser::*createFuncType)();
     createFuncType prevFunc;
+    const IR::Type* lastType;
+    const std::map<cstring, const IR::Type*> types;
 
  public:
-    Parser(const IR::P4Program* program, std::vector<Token> &tokens, bool addFA);
+    Parser(const IR::P4Program* program, std::vector<Token> &tokens, bool addFA,
+           const std::map<cstring, const IR::Type*> types = std::map<cstring, const IR::Type*>());
     static const IR::Node* getIR(const char* str, const IR::P4Program* program, bool addFA = false,
-                                       TokensSet skippedTokens = {Token::Kind::Comment,
+                                 const std::map<cstring, const IR::Type*> types =
+                                 std::map<cstring, const IR::Type*>(),
+                                 TokensSet skippedTokens = {Token::Kind::Comment,
                                                                   Token::Kind::EndString});
     char prev() noexcept;
 

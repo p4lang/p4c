@@ -15,6 +15,7 @@
 
 #include "backends/p4tools/common/compiler/p4_expr_parser.h"
 #include "backends/p4tools/common/core/z3_solver.h"
+#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
@@ -27,7 +28,6 @@
 #include "lib/log.h"
 #include "lib/ordered_map.h"
 #include "lib/safe_vector.h"
-#include "backends/p4tools/common/lib/formulae.h"
 
 namespace P4Tools {
 
@@ -145,7 +145,6 @@ AssertsParser::AssertsParser(std::vector<std::vector<const IR::Expression*>>& ou
 
 std::vector<const IR::Expression*> AssertsParser::genIRStructs(
     cstring tableName, cstring restrictionString, const IR::Vector<IR::KeyElement>& keyElements) {
-    const auto* restr = ExpressionParser::Parser::getIR(restrictionString, p4Program, true);
     std::vector<const IR::Expression*> result;
     std::map<cstring, const IR::Type*> types;
     types.emplace("priority", IR::Type_Bits::get(32));
@@ -168,6 +167,7 @@ std::vector<const IR::Expression*> AssertsParser::genIRStructs(
         }
         types.emplace(keyName, type);
     }
+    const auto* restr = ExpressionParser::Parser::getIR(restrictionString, p4Program, true, types);
     std::cout << "ALL : " << restr << std::endl;
     MemberToVariable memberToVariable(tableName, types);
     if (const auto* listExpression = restr->to<IR::ListExpression>()) {
