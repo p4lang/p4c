@@ -26,6 +26,7 @@
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/concolic.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/constants.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_refers_to_parser.h"
 
 namespace P4Tools {
