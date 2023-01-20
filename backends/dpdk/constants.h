@@ -54,6 +54,8 @@ const unsigned initial_group_id = 0xFFFFFFFF;
 #define IPSEC_SUCCESS 0
 #define IPSEC_PORT_REG_INDEX 0
 #define IPSEC_PORT_REG_SIZE 1
+#define IPSEC_PORT_REG_INDEX_BITWIDTH 32
+#define IPSEC_PORT_REG_INITVAL_BITWIDTH 32
 #define NET_TO_HOST 0
 
 #endif /* BACKENDS_DPDK_CONSTANTS_H_ */

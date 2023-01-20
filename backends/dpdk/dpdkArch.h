@@ -1325,7 +1325,7 @@ class CollectProgramStructure : public PassManager {
 };
 
 /* Helper class to detect use of IPSec accelerator */
-class IsIPSecUsed : public Inspector {
+class CollectIPSecInfo : public Inspector {
     bool &is_ipsec_used;
     int &sa_id_width;
     P4::ReferenceMap *refMap;
@@ -1333,8 +1333,8 @@ class IsIPSecUsed : public Inspector {
     DpdkProgramStructure *structure;
 
  public:
-    IsIPSecUsed(bool &is_ipsec_used, int &sa_id_width, P4::ReferenceMap *refMap,
-                P4::TypeMap *typeMap, DpdkProgramStructure *structure)
+    CollectIPSecInfo(bool &is_ipsec_used, int &sa_id_width, P4::ReferenceMap *refMap,
+                     P4::TypeMap *typeMap, DpdkProgramStructure *structure)
         : is_ipsec_used(is_ipsec_used),
           sa_id_width(sa_id_width),
           refMap(refMap),
@@ -1383,7 +1383,9 @@ class InsertReqDeclForIPSec : public Transform {
     DpdkProgramStructure *structure;
     cstring newHeaderName = "platform_hdr_t";
     IR::Type_Header *ipsecHeader = nullptr;
-    cstring registerInstanceNames[4];
+    std::vector<cstring> registerInstanceNames = {
+        "ipsec_port_out_inbound", "ipsec_port_out_outbound", "ipsec_port_in_inbound",
+        "ipsec_port_in_outbound"};
     bool is_ipsec_used = false;
     int sa_id_width = 32;
 
@@ -1397,8 +1399,7 @@ class InsertReqDeclForIPSec : public Transform {
     const IR::Node *preorder(IR::P4Program *program) override;
     const IR::Node *preorder(IR::Type_Struct *s) override;
     const IR::Node *preorder(IR::P4Control *c) override;
-    void uniqueNames();
-    IR::Declaration_Instance *addRegDeclInstance(cstring instanceName);
+    IR::IndexedVector<IR::StatOrDecl> *addRegDeclInstance(std::vector<cstring> portRegs);
 };
 
 struct DpdkHandleIPSec : public PassManager {

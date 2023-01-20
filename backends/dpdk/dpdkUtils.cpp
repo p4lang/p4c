@@ -86,4 +86,33 @@ bool isDirection(const IR::Member *m) {
            m->member.name == "pna_pre_input_metadata_direction" ||
            m->member.name == "pna_main_parser_input_metadata_direction";
 }
+
+// Creates Register extern declaration for holding persistent information
+IR::Declaration_Instance *getRegDeclarationInstance(cstring instanceName, int regSize,
+                                                    int indexBitWidth, int initValBitWidth) {
+    auto typepath = new IR::Path("Register");
+    auto type = new IR::Type_Name(typepath);
+    auto typeargs = new IR::Vector<IR::Type>(
+        {IR::Type::Bits::get(indexBitWidth), IR::Type::Bits::get(initValBitWidth)});
+    auto spectype = new IR::Type_Specialized(type, typeargs);
+    auto args = new IR::Vector<IR::Argument>();
+    args->push_back(new IR::Argument(new IR::Constant(IR::Type::Bits::get(32), regSize)));
+    auto annot = IR::Annotations::empty;
+    annot->addAnnotationIfNew(IR::Annotation::nameAnnotation, new IR::StringLiteral(instanceName));
+    auto decl = new IR::Declaration_Instance(instanceName, annot, spectype, args, nullptr);
+    return decl;
+}
+
+// Check for reserved names for DPDK target
+bool uniqueNames(P4::ReferenceMap *refMap, std::vector<cstring> names, cstring &resName) {
+    for (auto name : names) {
+        auto newname = refMap->newName(name);
+        if (newname != name) {
+            resName = name;
+            return false;
+        }
+    }
+    return true;
+}
+
 }  // namespace DPDK
