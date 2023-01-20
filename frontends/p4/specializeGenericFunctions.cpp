@@ -18,7 +18,7 @@ limitations under the License.
 
 namespace P4 {
 
-bool FindFunctionSpecializations::preorder(const IR::MethodCallExpression* mce) {
+bool FindFunctionSpecializations::preorder(const IR::MethodCallExpression *mce) {
     if (!mce->typeArguments->size()) return false;
     // We only specialize if the type arguments are not type variables
     for (auto arg : *mce->typeArguments) {
@@ -26,14 +26,14 @@ bool FindFunctionSpecializations::preorder(const IR::MethodCallExpression* mce) 
         if (type->is<IR::ITypeVar>()) return false;
     }
 
-    const IR::Node* insert = findContext<IR::P4Parser>();
+    const IR::Node *insert = findContext<IR::P4Parser>();
     if (!insert) insert = findContext<IR::Function>();
     if (!insert) insert = findContext<IR::P4Control>();
     if (!insert) insert = findContext<IR::Declaration_Constant>();
     if (!insert) insert = findContext<IR::Declaration_Instance>();
     if (!insert) insert = findContext<IR::P4Action>();
     CHECK_NULL(insert);
-    MethodInstance* mi = MethodInstance::resolve(mce, specMap->refMap, specMap->typeMap);
+    MethodInstance *mi = MethodInstance::resolve(mce, specMap->refMap, specMap->typeMap);
     if (auto func = mi->to<FunctionCall>()) {
         LOG3("Will specialize " << mce);
         specMap->add(mce, func->function, insert);
@@ -41,7 +41,7 @@ bool FindFunctionSpecializations::preorder(const IR::MethodCallExpression* mce) 
     return false;
 }
 
-const IR::Node* SpecializeFunctions::insert(const IR::Node* before) {
+const IR::Node *SpecializeFunctions::insert(const IR::Node *before) {
     auto specs = specMap->getInsertions(getOriginal());
     if (specs == nullptr) return before;
     LOG2(specs->size() << " instantiations before " << dbp(before));
@@ -49,7 +49,7 @@ const IR::Node* SpecializeFunctions::insert(const IR::Node* before) {
     return specs;
 }
 
-const IR::Node* SpecializeFunctions::postorder(IR::Function* function) {
+const IR::Node *SpecializeFunctions::postorder(IR::Function *function) {
     for (auto it : specMap->map) {
         if (it.second->original == getOriginal()) {
             auto methodCall = it.first;
@@ -68,7 +68,7 @@ const IR::Node* SpecializeFunctions::postorder(IR::Function* function) {
     return function;
 }
 
-const IR::Node* SpecializeFunctions::postorder(IR::MethodCallExpression* mce) {
+const IR::Node *SpecializeFunctions::postorder(IR::MethodCallExpression *mce) {
     if (auto fs = specMap->get(getOriginal<IR::MethodCallExpression>())) {
         LOG3("Substituting call to " << mce->method << " with " << fs->name);
         mce->method = new IR::PathExpression(new IR::Path(mce->srcInfo, fs->name));

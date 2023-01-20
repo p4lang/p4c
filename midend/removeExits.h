@@ -32,35 +32,35 @@ if (t1.apply().hit && t2.apply().hit) { ... }
 It also assumes that there are no global actions and that action calls have been inlined.
 */
 class DoRemoveExits : public DoRemoveReturns {
-    TypeMap* typeMap;
+    TypeMap *typeMap;
     // In this class "Return" (inherited from RemoveReturns) should be read as "Exit"
-    std::set<const IR::Node*> callsExit;  // actions, tables
-    void callExit(const IR::Node* node);
+    std::set<const IR::Node *> callsExit;  // actions, tables
+    void callExit(const IR::Node *node);
 
  public:
-    DoRemoveExits(ReferenceMap* refMap, TypeMap* typeMap)
+    DoRemoveExits(ReferenceMap *refMap, TypeMap *typeMap)
         : DoRemoveReturns(refMap, "hasExited"), typeMap(typeMap) {
         visitDagOnce = false;
         CHECK_NULL(typeMap);
         setName("DoRemoveExits");
     }
 
-    const IR::Node* preorder(IR::ExitStatement* action) override;
-    const IR::Node* preorder(IR::P4Table* table) override;
+    const IR::Node *preorder(IR::ExitStatement *action) override;
+    const IR::Node *preorder(IR::P4Table *table) override;
 
-    const IR::Node* preorder(IR::BlockStatement* statement) override;
-    const IR::Node* preorder(IR::IfStatement* statement) override;
-    const IR::Node* preorder(IR::SwitchStatement* statement) override;
-    const IR::Node* preorder(IR::AssignmentStatement* statement) override;
-    const IR::Node* preorder(IR::MethodCallStatement* statement) override;
+    const IR::Node *preorder(IR::BlockStatement *statement) override;
+    const IR::Node *preorder(IR::IfStatement *statement) override;
+    const IR::Node *preorder(IR::SwitchStatement *statement) override;
+    const IR::Node *preorder(IR::AssignmentStatement *statement) override;
+    const IR::Node *preorder(IR::MethodCallStatement *statement) override;
 
-    const IR::Node* preorder(IR::P4Action* action) override;
-    const IR::Node* preorder(IR::P4Control* control) override;
+    const IR::Node *preorder(IR::P4Action *action) override;
+    const IR::Node *preorder(IR::P4Control *control) override;
 };
 
 class RemoveExits : public PassManager {
  public:
-    RemoveExits(ReferenceMap* refMap, TypeMap* typeMap, TypeChecking* typeChecking = nullptr) {
+    RemoveExits(ReferenceMap *refMap, TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
         if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoRemoveExits(refMap, typeMap));

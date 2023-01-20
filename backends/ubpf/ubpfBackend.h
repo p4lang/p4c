@@ -23,9 +23,9 @@ limitations under the License.
 
 namespace UBPF {
 
-void run_ubpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* toplevel,
-                      P4::ReferenceMap* refMap, P4::TypeMap* typeMap);
-std::string extract_file_name(const std::string& fullPath);
+void run_ubpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *toplevel,
+                      P4::ReferenceMap *refMap, P4::TypeMap *typeMap);
+std::string extract_file_name(const std::string &fullPath);
 
 }  // namespace UBPF
 

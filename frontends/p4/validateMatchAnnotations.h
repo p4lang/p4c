@@ -27,13 +27,13 @@ namespace P4 {
  * Checks that match annotations only have 1 argument which is of type match_kind.
  */
 class ValidateMatchAnnotations final : public Inspector {
-    TypeMap* typeMap;
+    TypeMap *typeMap;
 
  public:
-    explicit ValidateMatchAnnotations(TypeMap* typeMap) : typeMap(typeMap) {
+    explicit ValidateMatchAnnotations(TypeMap *typeMap) : typeMap(typeMap) {
         setName("ValidateMatchAnnotations");
     }
-    void postorder(const IR::Annotation* annotation) override {
+    void postorder(const IR::Annotation *annotation) override {
         if (annotation->name != IR::Annotation::matchAnnotation) return;
         if (!findContext<IR::StructField>()) return;
         if (annotation->expr.size() != 1)

@@ -22,21 +22,21 @@ limitations under the License.
 
 class InlineControlFlow : public Transform {
  public:
-    explicit InlineControlFlow(const IR::V1Program* gl) : global(gl) {
+    explicit InlineControlFlow(const IR::V1Program *gl) : global(gl) {
         setName("InlineControlFlow");
     }
 
  private:
-    const IR::V1Program* global;
+    const IR::V1Program *global;
 
-    const IR::Node* preorder(IR::Apply* a) override {
+    const IR::Node *preorder(IR::Apply *a) override {
         if (global && !global->get<IR::V1Table>(a->name))
             error("%s: No table named %s", a->srcInfo, a->name);
         return a;
     }
-    const IR::Node* preorder(IR::Primitive* p) override {
+    const IR::Node *preorder(IR::Primitive *p) override {
         if (auto cf = global ? global->get<IR::V1Control>(p->name) : 0) {
-            const IR::V1Control* control;
+            const IR::V1Control *control;
             if (auto act = findContext<IR::ActionFunction>())
                 error("%s: Trying to call control flow %s in action %s", p->srcInfo, p->name,
                       act->name);

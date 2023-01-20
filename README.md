@@ -264,7 +264,7 @@ libfl-dev libboost-dev libboost-iostreams-dev \
 libboost-graph-dev llvm pkg-config python3 python3-pip \
 tcpdump
 
-pip3 install ipaddr scapy ply "clang-format>=15.0.4"
+pip3 install --user -r requirements.txt
 ```
 
 For documentation building:
@@ -292,7 +292,7 @@ sudo dnf install -y cmake g++ git automake libtool gc-devel bison flex \
 libfl-devel gmp-devel boost-devel boost-iostreams boost-graph llvm pkg-config \
 python3 python3-pip tcpdump protobuf-devel protobuf-static
 
-sudo pip3 install scapy ply
+sudo pip3 install -r requirements.txt
 ```
 
 For documentation building:

@@ -26,24 +26,24 @@ namespace P4 {
 /// arguments have constant arguments (e.g., push_front).
 /// Checks that table sizes are constant integers.
 class DoCheckConstants : public Inspector {
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
 
  public:
-    DoCheckConstants(ReferenceMap* refMap, TypeMap* typeMap) : refMap(refMap), typeMap(typeMap) {
+    DoCheckConstants(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
         setName("DoCheckConstants");
     }
 
-    void postorder(const IR::MethodCallExpression* expr) override;
-    void postorder(const IR::KeyElement* expr) override;
-    void postorder(const IR::P4Table* table) override;
+    void postorder(const IR::MethodCallExpression *expr) override;
+    void postorder(const IR::KeyElement *expr) override;
+    void postorder(const IR::P4Table *table) override;
 };
 
 class CheckConstants : public PassManager {
  public:
-    CheckConstants(ReferenceMap* refMap, TypeMap* typeMap) {
+    CheckConstants(ReferenceMap *refMap, TypeMap *typeMap) {
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DoCheckConstants(refMap, typeMap));
         setName("CheckConstants");

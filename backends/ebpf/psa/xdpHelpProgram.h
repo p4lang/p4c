@@ -95,13 +95,13 @@ class XDPHelpProgram : public EBPFProgram {
 
  public:
     cstring sectionName;
-    explicit XDPHelpProgram(const EbpfOptions& options)
+    explicit XDPHelpProgram(const EbpfOptions &options)
         : EBPFProgram(options, nullptr, nullptr, nullptr, nullptr) {
         sectionName = "xdp/xdp-ingress";
         functionName = "xdp_func";
     }
 
-    void emit(CodeBuilder* builder) {
+    void emit(CodeBuilder *builder) {
         builder->target->emitCodeSection(builder, sectionName);
         builder->emitIndent();
         builder->appendFormat("int %s(struct xdp_md *%s)", functionName, model.CPacketName.str());

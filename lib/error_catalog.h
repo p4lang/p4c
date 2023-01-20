@@ -81,7 +81,7 @@ class ErrorType {
 class ErrorCatalog {
  public:
     /// Return the singleton object
-    static ErrorCatalog& getCatalog() {
+    static ErrorCatalog &getCatalog() {
         static ErrorCatalog instance;
         return instance;
     }
@@ -91,7 +91,7 @@ class ErrorCatalog {
     /// @param errorCode - integer value for the error/warning
     /// @param name      - name for the error. Used to enable/disable all errors of that type
     /// @param forceReplace - override an existing error type in the catalog
-    bool add(int errorCode, const char* name, bool forceReplace = false) {
+    bool add(int errorCode, const char *name, bool forceReplace = false) {
         if (forceReplace) errorCatalog.erase(errorCode);
         auto it = errorCatalog.emplace(errorCode, name);
         return it.second;

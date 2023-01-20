@@ -180,13 +180,14 @@ if __name__ == '__main__':
     # Parse options and process argv
     args, argv = PARSER.parse_known_args()
     options = Options()
-    options.compiler = check_if_file(args.compiler)
-    options.p4filename = check_if_file(args.p4filename)
+    # TODO: Convert these paths to pathlib's Path.
+    options.compiler = check_if_file(args.compiler).as_posix()
+    options.p4filename = check_if_file(args.p4filename).as_posix()
     options.verbose = args.verbose
     options.replace = args.replace
     options.cleanupTmp = args.nocleanup
     if args.testfile:
-        options.testfile = check_if_file(args.testfile)
+        options.testfile = check_if_file(args.testfile).as_posix()
     options.target = args.target
     options.extern = args.extern
 

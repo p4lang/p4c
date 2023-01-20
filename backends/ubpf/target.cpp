@@ -18,7 +18,7 @@ limitations under the License.
 
 namespace UBPF {
 
-void UbpfTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
+void UbpfTarget::emitIncludes(Util::SourceCodeBuilder *builder) const {
     builder->append(
         "#include <stdint.h>\n"
         "#include <stdbool.h>\n"
@@ -27,29 +27,29 @@ void UbpfTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
         "\n");
 }
 
-void UbpfTarget::emitMain(Util::SourceCodeBuilder* builder, cstring functionName, cstring argName,
+void UbpfTarget::emitMain(Util::SourceCodeBuilder *builder, cstring functionName, cstring argName,
                           cstring standardMetdata) const {
     builder->appendFormat("uint64_t %s(void *%s, struct standard_metadata *%s)",
                           functionName.c_str(), argName.c_str(), standardMetdata.c_str());
 }
 
-void UbpfTarget::emitResizeBuffer(Util::SourceCodeBuilder* builder, cstring buffer,
+void UbpfTarget::emitResizeBuffer(Util::SourceCodeBuilder *builder, cstring buffer,
                                   cstring offsetVar) const {
     builder->appendFormat("ubpf_adjust_head(%s, %s)", buffer.c_str(), offsetVar.c_str());
 }
 
-void UbpfTarget::emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName, cstring key,
+void UbpfTarget::emitTableLookup(Util::SourceCodeBuilder *builder, cstring tblName, cstring key,
                                  UNUSED cstring value) const {
     builder->appendFormat("ubpf_map_lookup(&%s, &%s)", tblName.c_str(), key.c_str());
 }
 
-void UbpfTarget::emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName, cstring key,
+void UbpfTarget::emitTableUpdate(Util::SourceCodeBuilder *builder, cstring tblName, cstring key,
                                  cstring value) const {
     builder->appendFormat("ubpf_map_update(&%s, &%s, %s)", tblName.c_str(), key.c_str(),
                           value.c_str());
 }
 
-void UbpfTarget::emitTableDecl(Util::SourceCodeBuilder* builder, cstring tblName,
+void UbpfTarget::emitTableDecl(Util::SourceCodeBuilder *builder, cstring tblName,
                                EBPF::TableKind tableKind, cstring keyType, cstring valueType,
                                unsigned size) const {
     builder->append("struct ");
@@ -93,16 +93,16 @@ void UbpfTarget::emitTableDecl(Util::SourceCodeBuilder* builder, cstring tblName
     builder->endOfStatement(true);
 }
 
-void UbpfTarget::emitGetPacketData(Util::SourceCodeBuilder* builder, cstring ctxVar) const {
+void UbpfTarget::emitGetPacketData(Util::SourceCodeBuilder *builder, cstring ctxVar) const {
     builder->appendFormat("ubpf_packet_data(%s)", ctxVar.c_str());
 }
 
-void UbpfTarget::emitGetFromStandardMetadata(Util::SourceCodeBuilder* builder,
+void UbpfTarget::emitGetFromStandardMetadata(Util::SourceCodeBuilder *builder,
                                              cstring stdMetadataVar, cstring metadataField) const {
     builder->appendFormat("%s->%s", stdMetadataVar.c_str(), metadataField.c_str());
 }
 
-void UbpfTarget::emitUbpfHelpers(EBPF::CodeBuilder* builder) const {
+void UbpfTarget::emitUbpfHelpers(EBPF::CodeBuilder *builder) const {
     builder->append(
         "static void *(*ubpf_map_lookup)(const void *, const void *) = (void *)1;\n"
         "static int (*ubpf_map_update)(void *, const void *, void *) = (void *)2;\n"
@@ -144,7 +144,7 @@ void UbpfTarget::emitUbpfHelpers(EBPF::CodeBuilder* builder) const {
     builder->newline();
 }
 
-void UbpfTarget::emitChecksumHelpers(EBPF::CodeBuilder* builder) const {
+void UbpfTarget::emitChecksumHelpers(EBPF::CodeBuilder *builder) const {
     builder->appendLine(
         "inline uint16_t csum16_add(uint16_t csum, uint16_t addend) {\n"
         "    uint16_t res = csum;\n"

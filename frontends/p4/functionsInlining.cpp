@@ -24,12 +24,12 @@ limitations under the License.
 
 namespace P4 {
 
-void DiscoverFunctionsInlining::postorder(const IR::MethodCallExpression* mce) {
+void DiscoverFunctionsInlining::postorder(const IR::MethodCallExpression *mce) {
     auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
     CHECK_NULL(mi);
     auto ac = mi->to<P4::FunctionCall>();
     if (ac == nullptr) return;
-    const IR::Node* caller = findContext<IR::Function>();
+    const IR::Node *caller = findContext<IR::Function>();
     if (caller == nullptr) caller = findContext<IR::P4Action>();
     if (caller == nullptr) caller = findContext<IR::P4Control>();
     if (caller == nullptr) caller = findContext<IR::P4Parser>();
@@ -43,11 +43,11 @@ void DiscoverFunctionsInlining::postorder(const IR::MethodCallExpression* mce) {
     toInline->add(aci);
 }
 
-void FunctionsInliner::end_apply(const IR::Node*) {
+void FunctionsInliner::end_apply(const IR::Node *) {
     BUG_CHECK(replacementStack.empty(), "Non-empty replacement stack");
 }
 
-Visitor::profile_t FunctionsInliner::init_apply(const IR::Node* node) {
+Visitor::profile_t FunctionsInliner::init_apply(const IR::Node *node) {
     P4::ResolveReferences solver(refMap, true);
     node->apply(solver);
     LOG2("FunctionsInliner " << toInline);
@@ -65,7 +65,7 @@ bool FunctionsInliner::preCaller() {
     return true;
 }
 
-const IR::Node* FunctionsInliner::postCaller(const IR::Node* node) {
+const IR::Node *FunctionsInliner::postCaller(const IR::Node *node) {
     LOG2("Ending: " << dbp(getOriginal()));
     if (toInline->sites.count(getOriginal()) > 0) list->replace(getOriginal(), node);
     BUG_CHECK(!replacementStack.empty(), "Empty replacement stack");
@@ -73,7 +73,7 @@ const IR::Node* FunctionsInliner::postCaller(const IR::Node* node) {
     return node;
 }
 
-const IR::Node* FunctionsInliner::preorder(IR::MethodCallStatement* statement) {
+const IR::Node *FunctionsInliner::preorder(IR::MethodCallStatement *statement) {
     auto orig = getOriginal<IR::MethodCallStatement>();
     LOG2("Visiting " << dbp(orig));
     auto replMap = getReplacementMap();
@@ -84,7 +84,7 @@ const IR::Node* FunctionsInliner::preorder(IR::MethodCallStatement* statement) {
     return inlineBefore(callee, statement->methodCall, statement);
 }
 
-const FunctionsInliner::ReplacementMap* FunctionsInliner::getReplacementMap() const {
+const FunctionsInliner::ReplacementMap *FunctionsInliner::getReplacementMap() const {
     if (replacementStack.empty()) return nullptr;
     return replacementStack.back();
 }
@@ -96,7 +96,7 @@ void FunctionsInliner::dumpReplacementMap() const {
     for (auto it : *replMap) LOG2("\t" << it.first << " with " << it.second);
 }
 
-const IR::Node* FunctionsInliner::preorder(IR::AssignmentStatement* statement) {
+const IR::Node *FunctionsInliner::preorder(IR::AssignmentStatement *statement) {
     auto orig = getOriginal<IR::AssignmentStatement>();
     LOG2("Visiting " << dbp(orig));
     auto replMap = getReplacementMap();
@@ -109,7 +109,7 @@ const IR::Node* FunctionsInliner::preorder(IR::AssignmentStatement* statement) {
     return inlineBefore(callee, call, statement);
 }
 
-const IR::Node* FunctionsInliner::preorder(IR::P4Parser* parser) {
+const IR::Node *FunctionsInliner::preorder(IR::P4Parser *parser) {
     if (preCaller()) {
         parser->visit_children(*this);
         return postCaller(parser);
@@ -118,7 +118,7 @@ const IR::Node* FunctionsInliner::preorder(IR::P4Parser* parser) {
     }
 }
 
-const IR::Node* FunctionsInliner::preorder(IR::P4Control* control) {
+const IR::Node *FunctionsInliner::preorder(IR::P4Control *control) {
     bool hasWork = preCaller();
     // We always visit the children: there may be function calls in
     // actions within the control
@@ -127,7 +127,7 @@ const IR::Node* FunctionsInliner::preorder(IR::P4Control* control) {
     return control;
 }
 
-const IR::Node* FunctionsInliner::preorder(IR::Function* function) {
+const IR::Node *FunctionsInliner::preorder(IR::Function *function) {
     if (preCaller()) {
         function->visit_children(*this);
         return postCaller(function);
@@ -136,7 +136,7 @@ const IR::Node* FunctionsInliner::preorder(IR::Function* function) {
     }
 }
 
-const IR::Node* FunctionsInliner::preorder(IR::P4Action* action) {
+const IR::Node *FunctionsInliner::preorder(IR::P4Action *action) {
     if (preCaller()) {
         action->visit_children(*this);
         return postCaller(action);
@@ -145,9 +145,9 @@ const IR::Node* FunctionsInliner::preorder(IR::P4Action* action) {
     }
 }
 
-const IR::Expression* FunctionsInliner::cloneBody(const IR::IndexedVector<IR::StatOrDecl>& src,
-                                                  IR::IndexedVector<IR::StatOrDecl>& dest) {
-    const IR::Expression* retVal = nullptr;
+const IR::Expression *FunctionsInliner::cloneBody(const IR::IndexedVector<IR::StatOrDecl> &src,
+                                                  IR::IndexedVector<IR::StatOrDecl> &dest) {
+    const IR::Expression *retVal = nullptr;
     for (auto s : src) {
         if (auto rs = s->to<IR::ReturnStatement>())
             retVal = rs->expression;
@@ -157,9 +157,9 @@ const IR::Expression* FunctionsInliner::cloneBody(const IR::IndexedVector<IR::St
     return retVal;
 }
 
-const IR::Node* FunctionsInliner::inlineBefore(const IR::Node* calleeNode,
-                                               const IR::MethodCallExpression* mce,
-                                               const IR::Statement* statement) {
+const IR::Node *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
+                                               const IR::MethodCallExpression *mce,
+                                               const IR::Statement *statement) {
     LOG2("Inlining: " << dbp(calleeNode) << " before " << dbp(statement));
 
     auto callee = calleeNode->to<IR::Function>();
@@ -169,7 +169,7 @@ const IR::Node* FunctionsInliner::inlineBefore(const IR::Node* calleeNode,
     ParameterSubstitution subst;
     TypeVariableSubstitution tvs;  // empty
 
-    std::map<const IR::Parameter*, cstring> paramRename;
+    std::map<const IR::Parameter *, cstring> paramRename;
     ParameterSubstitution substitution;
     substitution.populate(callee->type->parameters, mce->arguments);
 

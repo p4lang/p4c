@@ -34,9 +34,9 @@ namespace P4 {
 
 namespace ControlPlaneAPI {
 
-boost::optional<std::string> stringRepr(const IR::Constant* constant, int width);
+boost::optional<std::string> stringRepr(const IR::Constant *constant, int width);
 
-boost::optional<std::string> stringRepr(const IR::BoolLiteral* constant, int width);
+boost::optional<std::string> stringRepr(const IR::BoolLiteral *constant, int width);
 
 boost::optional<std::string> stringReprConstant(big_int value, int width);
 

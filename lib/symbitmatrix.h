@@ -48,13 +48,13 @@ class SymBitMatrix : private bitvec {
     template <class T>
     class rowref {
         friend class SymBitMatrix;
-        T& self;
+        T &self;
         unsigned row;
-        rowref(T& s, unsigned r) : self(s), row(r) {}
+        rowref(T &s, unsigned r) : self(s), row(r) {}
 
      public:
-        rowref(const rowref&) = default;
-        rowref(rowref&&) = default;
+        rowref(const rowref &) = default;
+        rowref(rowref &&) = default;
         explicit operator bool() const {
             if (row < bits_per_unit) {
                 if (self.getrange((row * row + row) / 2, row + 1) != 0) return true;
@@ -96,9 +96,9 @@ class SymBitMatrix : private bitvec {
     nonconst_rowref operator[](unsigned r) { return nonconst_rowref(*this, r); }
     const_rowref operator[](unsigned r) const { return const_rowref(*this, r); }
 
-    bool operator==(const SymBitMatrix& a) const { return bitvec::operator==(a); }
-    bool operator!=(const SymBitMatrix& a) const { return bitvec::operator!=(a); }
-    bool operator|=(const SymBitMatrix& a) { return bitvec::operator|=(a); }
+    bool operator==(const SymBitMatrix &a) const { return bitvec::operator==(a); }
+    bool operator!=(const SymBitMatrix &a) const { return bitvec::operator!=(a); }
+    bool operator|=(const SymBitMatrix &a) { return bitvec::operator|=(a); }
 };
 
 #endif /* _LIB_SYMBITMATRIX_H_ */

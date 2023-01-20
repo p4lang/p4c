@@ -21,7 +21,7 @@ limitations under the License.
 
 namespace P4 {
 
-bool IsValid::isSimple(const IR::Expression* expression, const Visitor::Context*) {
+bool IsValid::isSimple(const IR::Expression *expression, const Visitor::Context *) {
     if (!expression->is<IR::MethodCallExpression>()) return false;
     auto mi = MethodInstance::resolve(expression->to<IR::MethodCallExpression>(), refMap, typeMap);
     if (!mi->is<BuiltInMethod>()) return false;
@@ -35,14 +35,14 @@ bool IsValid::isSimple(const IR::Expression* expression, const Visitor::Context*
     return false;
 }
 
-const IR::Node* DoSimplifyKey::postorder(IR::KeyElement* element) {
+const IR::Node *DoSimplifyKey::postorder(IR::KeyElement *element) {
     LOG1("Key element " << element);
     bool simple = key_policy->isSimple(element->expression, getContext());
     if (simple) return element;
 
     auto table = findOrigCtxt<IR::P4Table>();
     CHECK_NULL(table);
-    TableInsertions* insertions;
+    TableInsertions *insertions;
     auto it = toInsert.find(table);
     if (it == toInsert.end()) {
         insertions = new TableInsertions();
@@ -67,7 +67,7 @@ const IR::Node* DoSimplifyKey::postorder(IR::KeyElement* element) {
     return element;
 }
 
-const IR::Node* DoSimplifyKey::postorder(IR::P4Table* table) {
+const IR::Node *DoSimplifyKey::postorder(IR::P4Table *table) {
     auto insertions = ::get(toInsert, getOriginal<IR::P4Table>());
     if (insertions == nullptr) return table;
 
@@ -77,8 +77,8 @@ const IR::Node* DoSimplifyKey::postorder(IR::P4Table* table) {
     return result;
 }
 
-const IR::Node* DoSimplifyKey::doStatement(const IR::Statement* statement,
-                                           const IR::Expression* expression) {
+const IR::Node *DoSimplifyKey::doStatement(const IR::Statement *statement,
+                                           const IR::Expression *expression) {
     LOG3("Visiting " << getOriginal());
     HasTableApply hta(refMap, typeMap);
     hta.setCalledBy(this);

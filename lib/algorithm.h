@@ -28,17 +28,17 @@ limitations under the License.
 /* these should all be in <algorithm>, but are missing... */
 
 template <class C, class T>
-inline bool contains(C& c, const T& val) {
+inline bool contains(C &c, const T &val) {
     return std::find(c.begin(), c.end(), val) != c.end();
 }
 
 template <class C, class Pred>
-inline bool contains_if(C& c, Pred pred) {
+inline bool contains_if(C &c, Pred pred) {
     return std::find_if(c.begin(), c.end(), pred) != c.end();
 }
 
 template <class C, class Pred>
-inline void erase_if(C& c, Pred pred) {
+inline void erase_if(C &c, Pred pred) {
     for (auto it = c.begin(); it != c.end();) {
         if (pred(*it))
             it = c.erase(it);
@@ -48,12 +48,12 @@ inline void erase_if(C& c, Pred pred) {
 }
 
 template <class C, class Pred>
-inline void remove_if(C& c, Pred pred) {
+inline void remove_if(C &c, Pred pred) {
     c.erase(std::remove_if(c.begin(), c.end(), pred), c.end());
 }
 
 template <class C, class T>
-inline typename C::iterator find(C& c, const T& val) {
+inline typename C::iterator find(C &c, const T &val) {
     return std::find(c.begin(), c.end(), val);
 }
 
@@ -61,20 +61,20 @@ using std::max_element;
 using std::min_element;
 
 template <class C>
-inline typename C::const_iterator min_element(const C& c) {
+inline typename C::const_iterator min_element(const C &c) {
     return min_element(c.begin(), c.end());
 }
 template <class C, class Compare>
-inline typename C::const_iterator min_element(const C& c, Compare comp) {
+inline typename C::const_iterator min_element(const C &c, Compare comp) {
     return min_element(c.begin(), c.end(), comp);
 }
 
 template <class C>
-inline typename C::const_iterator max_element(const C& c) {
+inline typename C::const_iterator max_element(const C &c) {
     return max_element(c.begin(), c.end());
 }
 template <class C, class Compare>
-inline typename C::const_iterator max_element(const C& c, Compare comp) {
+inline typename C::const_iterator max_element(const C &c, Compare comp) {
     return max_element(c.begin(), c.end(), comp);
 }
 

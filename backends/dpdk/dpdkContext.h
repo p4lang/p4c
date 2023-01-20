@@ -66,7 +66,7 @@ struct actionAttributes {
     bool allowed_as_default_action;
     unsigned actionHandle;
     cstring externalName;
-    IR::IndexedVector<IR::Parameter>* params;
+    IR::IndexedVector<IR::Parameter> *params;
 };
 
 struct externAttributes {
@@ -82,7 +82,7 @@ struct TopLevelCtxt {
     cstring buildDate;
     cstring compileCommand;
     cstring compilerVersion;
-    void initTopLevelCtxt(DpdkOptions& options) {
+    void initTopLevelCtxt(DpdkOptions &options) {
         buildDate = options.getBuildDate();
         compileCommand = options.getCompileCommand();
         progName = options.file;
@@ -102,8 +102,8 @@ struct SelectionTable {
     unsigned max_n_groups;
     unsigned max_n_members_per_group;
     unsigned bound_to_action_data_table_handle;
-    void setAttributes(const IR::P4Table* tbl,
-                       const std::map<const cstring, struct TableAttributes>& tableAttrmap) {
+    void setAttributes(const IR::P4Table *tbl,
+                       const std::map<const cstring, struct TableAttributes> &tableAttrmap) {
         max_n_groups = 0;
         max_n_members_per_group = 0;
         auto n_groups = tbl->properties->getProperty("n_groups_max");
@@ -126,13 +126,13 @@ struct SelectionTable {
 
 // This pass generates context JSON into user specified file
 class DpdkContextGenerator : public Inspector {
-    P4::ReferenceMap* refmap;
-    DpdkProgramStructure* structure;
-    const p4configv1::P4Info& p4info;
-    DpdkOptions& options;
+    P4::ReferenceMap *refmap;
+    DpdkProgramStructure *structure;
+    const p4configv1::P4Info &p4info;
+    DpdkOptions &options;
     // All tables are collected into this vector
     IR::IndexedVector<IR::Declaration> tables;
-    std::vector<const IR::Declaration_Instance*> externs;
+    std::vector<const IR::Declaration_Instance *> externs;
 
     // Maps holding table, extern and action attributes needed for context JSON
     std::map<const cstring, struct TableAttributes> tableAttrmap;
@@ -143,29 +143,29 @@ class DpdkContextGenerator : public Inspector {
     std::map<cstring, size_t> context_handle_map;
 
  public:
-    DpdkContextGenerator(P4::ReferenceMap* refmap, DpdkProgramStructure* structure,
-                         const p4configv1::P4Info& p4info, DpdkOptions& options)
+    DpdkContextGenerator(P4::ReferenceMap *refmap, DpdkProgramStructure *structure,
+                         const p4configv1::P4Info &p4info, DpdkOptions &options)
         : refmap(refmap), structure(structure), p4info(p4info), options(options) {}
 
-    void serializeContextJson(std::ostream* destination);
-    const Util::JsonObject* genContextJsonObject();
-    void addMatchTables(Util::JsonArray* tablesJson);
+    void serializeContextJson(std::ostream *destination);
+    const Util::JsonObject *genContextJsonObject();
+    void addMatchTables(Util::JsonArray *tablesJson);
     size_t getHandleId(cstring name);
     void collectHandleId();
-    void addExternInfo(Util::JsonArray* externsJson);
-    Util::JsonObject* initTableCommonJson(const cstring name, const struct TableAttributes& attr);
-    void addKeyField(Util::JsonArray* keyJson, const cstring name, const cstring annon,
-                     const IR::KeyElement* key, int position);
-    Util::JsonArray* addActions(const IR::P4Table* table, const cstring ctrlName, bool isMatch);
-    bool addRefTables(const cstring tbl_name, const IR::P4Table** memberTable,
-                      Util::JsonObject* tableJson);
-    void addImmediateField(Util::JsonArray* paramJson, const cstring name, int dest_start,
+    void addExternInfo(Util::JsonArray *externsJson);
+    Util::JsonObject *initTableCommonJson(const cstring name, const struct TableAttributes &attr);
+    void addKeyField(Util::JsonArray *keyJson, const cstring name, const cstring annon,
+                     const IR::KeyElement *key, int position);
+    Util::JsonArray *addActions(const IR::P4Table *table, const cstring ctrlName, bool isMatch);
+    bool addRefTables(const cstring tbl_name, const IR::P4Table **memberTable,
+                      Util::JsonObject *tableJson);
+    void addImmediateField(Util::JsonArray *paramJson, const cstring name, int dest_start,
                            int dest_Width);
-    void addActionParam(Util::JsonArray* paramJson, const cstring name, int bitWidth, int position,
+    void addActionParam(Util::JsonArray *paramJson, const cstring name, int bitWidth, int position,
                         int byte_array_index);
-    Util::JsonObject* addMatchAttributes(const IR::P4Table* table, const cstring ctrlName);
-    void setActionAttributes(const IR::P4Table* table);
-    void setDefaultActionHandle(const IR::P4Table* table);
+    Util::JsonObject *addMatchAttributes(const IR::P4Table *table, const cstring ctrlName);
+    void setActionAttributes(const IR::P4Table *table);
+    void setDefaultActionHandle(const IR::P4Table *table);
     void CollectTablesAndSetAttributes();
 };
 

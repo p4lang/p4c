@@ -22,7 +22,7 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Node* CreateBuiltins::preorder(IR::P4Program* program) {
+const IR::Node *CreateBuiltins::preorder(IR::P4Program *program) {
     auto decls = program->getDeclsByName(P4::P4CoreLibrary::instance.noAction.str());
     auto vec = decls->toVector();
     if (vec->empty()) return program;
@@ -69,13 +69,13 @@ void CreateBuiltins::checkGlobalAction() {
     }
 }
 
-const IR::Node* CreateBuiltins::postorder(IR::P4Parser* parser) {
+const IR::Node *CreateBuiltins::postorder(IR::P4Parser *parser) {
     parser->states.push_back(new IR::ParserState(IR::ParserState::accept, nullptr));
     parser->states.push_back(new IR::ParserState(IR::ParserState::reject, nullptr));
     return parser;
 }
 
-const IR::Node* CreateBuiltins::postorder(IR::ActionListElement* element) {
+const IR::Node *CreateBuiltins::postorder(IR::ActionListElement *element) {
     // convert path expressions to method calls
     // actions = { a; b; }
     // becomes
@@ -87,7 +87,7 @@ const IR::Node* CreateBuiltins::postorder(IR::ActionListElement* element) {
     return element;
 }
 
-const IR::Node* CreateBuiltins::postorder(IR::ExpressionValue* expression) {
+const IR::Node *CreateBuiltins::postorder(IR::ExpressionValue *expression) {
     // convert a default_action = a; into
     // default_action = a();
     auto prop = findContext<IR::Property>();
@@ -99,7 +99,7 @@ const IR::Node* CreateBuiltins::postorder(IR::ExpressionValue* expression) {
     return expression;
 }
 
-const IR::Node* CreateBuiltins::postorder(IR::Entry* entry) {
+const IR::Node *CreateBuiltins::postorder(IR::Entry *entry) {
     // convert a const table entry with action "a;" into "a();"
     if (entry->action->is<IR::PathExpression>())
         entry->action = new IR::MethodCallExpression(entry->action->srcInfo, entry->action,
@@ -108,7 +108,7 @@ const IR::Node* CreateBuiltins::postorder(IR::Entry* entry) {
     return entry;
 }
 
-const IR::Node* CreateBuiltins::postorder(IR::ParserState* state) {
+const IR::Node *CreateBuiltins::postorder(IR::ParserState *state) {
     if (state->selectExpression == nullptr) {
         warn(ErrorType::WARN_PARSER_TRANSITION, "%1%: implicit transition to `reject'", state);
         state->selectExpression = new IR::PathExpression(IR::ParserState::reject);
@@ -116,7 +116,7 @@ const IR::Node* CreateBuiltins::postorder(IR::ParserState* state) {
     return state;
 }
 
-const IR::Node* CreateBuiltins::postorder(IR::ActionList* actions) {
+const IR::Node *CreateBuiltins::postorder(IR::ActionList *actions) {
     if (!addNoAction) return actions;
     auto decl = actions->getDeclaration(P4::P4CoreLibrary::instance.noAction.str());
     if (decl != nullptr) return actions;
@@ -129,13 +129,13 @@ const IR::Node* CreateBuiltins::postorder(IR::ActionList* actions) {
     return actions;
 }
 
-const IR::Node* CreateBuiltins::preorder(IR::P4Table* table) {
+const IR::Node *CreateBuiltins::preorder(IR::P4Table *table) {
     addNoAction = false;
     if (table->getDefaultAction() == nullptr) addNoAction = true;
     return table;
 }
 
-const IR::Node* CreateBuiltins::postorder(IR::Property* property) {
+const IR::Node *CreateBuiltins::postorder(IR::Property *property) {
     // Spec: a table with an empty key is the same
     // as a table with no key.
     if (property->name != IR::TableProperties::keyPropertyName) return property;
@@ -148,7 +148,7 @@ const IR::Node* CreateBuiltins::postorder(IR::Property* property) {
     return property;
 }
 
-const IR::Node* CreateBuiltins::postorder(IR::TableProperties* properties) {
+const IR::Node *CreateBuiltins::postorder(IR::TableProperties *properties) {
     if (!addNoAction) return properties;
     checkGlobalAction();
     auto act = new IR::PathExpression(P4::P4CoreLibrary::instance.noAction.Id(properties->srcInfo));

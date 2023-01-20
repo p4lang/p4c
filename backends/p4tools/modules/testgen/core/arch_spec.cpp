@@ -9,7 +9,7 @@ namespace P4Tools {
 
 namespace P4Testgen {
 
-ArchSpec::ArchSpec(cstring packageName, const std::vector<ArchMember>& archVectorInput)
+ArchSpec::ArchSpec(cstring packageName, const std::vector<ArchMember> &archVectorInput)
     : packageName(packageName) {
     for (size_t idx = 0; idx < archVectorInput.size(); ++idx) {
         auto archMember = archVectorInput.at(idx);
@@ -44,7 +44,7 @@ cstring ArchSpec::getParamName(size_t blockIndex, size_t paramIndex) const {
     return params.at(paramIndex);
 }
 
-const ArchSpec::ArchMember* ArchSpec::getArchMember(size_t blockIndex) const {
+const ArchSpec::ArchMember *ArchSpec::getArchMember(size_t blockIndex) const {
     BUG_CHECK(blockIndex < archVector.size(), "Index %s out of range. Vector size: %s", blockIndex,
               archVector.size());
     return &archVector.at(blockIndex);

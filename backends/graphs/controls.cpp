@@ -30,8 +30,8 @@ namespace graphs {
 
 using Graph = ControlGraphs::Graph;
 
-Graph* ControlGraphs::ControlStack::pushBack(Graph& currentSubgraph, const cstring& name) {
-    auto& newSubgraph = currentSubgraph.create_subgraph();
+Graph *ControlGraphs::ControlStack::pushBack(Graph &currentSubgraph, const cstring &name) {
+    auto &newSubgraph = currentSubgraph.create_subgraph();
     auto fullName = getName(name);
     boost::get_property(newSubgraph, boost::graph_name) = "cluster" + fullName;
     boost::get_property(newSubgraph, boost::graph_graph_attribute)["label"] =
@@ -44,19 +44,19 @@ Graph* ControlGraphs::ControlStack::pushBack(Graph& currentSubgraph, const cstri
     return getSubgraph();
 }
 
-Graph* ControlGraphs::ControlStack::popBack() {
+Graph *ControlGraphs::ControlStack::popBack() {
     names.pop_back();
     subgraphs.pop_back();
     return getSubgraph();
 }
 
-Graph* ControlGraphs::ControlStack::getSubgraph() const {
+Graph *ControlGraphs::ControlStack::getSubgraph() const {
     return subgraphs.empty() ? nullptr : subgraphs.back();
 }
 
-cstring ControlGraphs::ControlStack::getName(const cstring& name) const {
+cstring ControlGraphs::ControlStack::getName(const cstring &name) const {
     std::stringstream sstream;
-    for (auto& n : names) {
+    for (auto &n : names) {
         if (n != "") sstream << n << ".";
     }
     sstream << name;
@@ -67,20 +67,20 @@ bool ControlGraphs::ControlStack::isEmpty() const { return subgraphs.empty(); }
 
 using vertex_t = ControlGraphs::vertex_t;
 
-ControlGraphs::ControlGraphs(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                             const cstring& graphsDir)
+ControlGraphs::ControlGraphs(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                             const cstring &graphsDir)
     : refMap(refMap), typeMap(typeMap), graphsDir(graphsDir) {
     visitDagOnce = false;
 }
 
-bool ControlGraphs::preorder(const IR::PackageBlock* block) {
+bool ControlGraphs::preorder(const IR::PackageBlock *block) {
     for (auto it : block->constantValue) {
         if (!it.second) continue;
         if (it.second->is<IR::ControlBlock>()) {
             auto name = it.second->to<IR::ControlBlock>()->container->name;
             LOG1("Generating graph for top-level control " << name);
 
-            Graph* g_ = new Graph();
+            Graph *g_ = new Graph();
             g = g_;
             instanceName = boost::none;
             boost::get_property(*g_, boost::graph_name) = name;
@@ -104,12 +104,12 @@ bool ControlGraphs::preorder(const IR::PackageBlock* block) {
     return false;
 }
 
-bool ControlGraphs::preorder(const IR::ControlBlock* block) {
+bool ControlGraphs::preorder(const IR::ControlBlock *block) {
     visit(block->container);
     return false;
 }
 
-bool ControlGraphs::preorder(const IR::P4Control* cont) {
+bool ControlGraphs::preorder(const IR::P4Control *cont) {
     bool doPop = false;
     // instanceName == boost::none <=> top level
     if (instanceName != boost::none) {
@@ -126,14 +126,14 @@ bool ControlGraphs::preorder(const IR::P4Control* cont) {
     return false;
 }
 
-bool ControlGraphs::preorder(const IR::BlockStatement* statement) {
+bool ControlGraphs::preorder(const IR::BlockStatement *statement) {
     for (const auto component : statement->components) visit(component);
     merge_other_statements_into_vertex();
 
     return false;
 }
 
-bool ControlGraphs::preorder(const IR::IfStatement* statement) {
+bool ControlGraphs::preorder(const IR::IfStatement *statement) {
     std::stringstream sstream;
     statement->condition->dbprint(sstream);
     auto v = add_and_connect_vertex(cstring(sstream), VertexType::CONDITION);
@@ -154,7 +154,7 @@ bool ControlGraphs::preorder(const IR::IfStatement* statement) {
     return false;
 }
 
-bool ControlGraphs::preorder(const IR::SwitchStatement* statement) {
+bool ControlGraphs::preorder(const IR::SwitchStatement *statement) {
     auto tbl = P4::TableApplySolver::isActionRun(statement->expression, refMap, typeMap);
     vertex_t v;
     // special case for action_run
@@ -193,7 +193,7 @@ bool ControlGraphs::preorder(const IR::SwitchStatement* statement) {
     return false;
 }
 
-bool ControlGraphs::preorder(const IR::MethodCallStatement* statement) {
+bool ControlGraphs::preorder(const IR::MethodCallStatement *statement) {
     auto instance = P4::MethodInstance::resolve(statement->methodCall, refMap, typeMap);
 
     if (instance->is<P4::ApplyMethod>()) {
@@ -225,12 +225,12 @@ bool ControlGraphs::preorder(const IR::MethodCallStatement* statement) {
     return false;
 }
 
-bool ControlGraphs::preorder(const IR::AssignmentStatement* statement) {
+bool ControlGraphs::preorder(const IR::AssignmentStatement *statement) {
     statementsStack.push_back(statement);
     return false;
 }
 
-bool ControlGraphs::preorder(const IR::ReturnStatement*) {
+bool ControlGraphs::preorder(const IR::ReturnStatement *) {
     merge_other_statements_into_vertex();
 
     return_parents.insert(return_parents.end(), parents.begin(), parents.end());
@@ -238,7 +238,7 @@ bool ControlGraphs::preorder(const IR::ReturnStatement*) {
     return false;
 }
 
-bool ControlGraphs::preorder(const IR::ExitStatement*) {
+bool ControlGraphs::preorder(const IR::ExitStatement *) {
     merge_other_statements_into_vertex();
 
     for (auto parent : parents) add_edge(parent.first, exit_v, parent.second->label());
@@ -246,7 +246,7 @@ bool ControlGraphs::preorder(const IR::ExitStatement*) {
     return false;
 }
 
-bool ControlGraphs::preorder(const IR::Key* key) {
+bool ControlGraphs::preorder(const IR::Key *key) {
     std::stringstream sstream;
 
     // Build key
@@ -271,12 +271,12 @@ bool ControlGraphs::preorder(const IR::Key* key) {
     return false;
 }
 
-bool ControlGraphs::preorder(const IR::P4Action* action) {
+bool ControlGraphs::preorder(const IR::P4Action *action) {
     visit(action->body);
     return false;
 }
 
-bool ControlGraphs::preorder(const IR::P4Table* table) {
+bool ControlGraphs::preorder(const IR::P4Table *table) {
     auto name = table->getName();
 
     auto v = add_and_connect_vertex(name, VertexType::TABLE);

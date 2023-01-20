@@ -28,11 +28,11 @@ class indent_t {
     static int tabsz;
     indent_t() : indent(0) {}
     explicit indent_t(int i) : indent(i) {}
-    indent_t& operator++() {
+    indent_t &operator++() {
         ++indent;
         return *this;
     }
-    indent_t& operator--() {
+    indent_t &operator--() {
         --indent;
         return *this;
     }
@@ -46,7 +46,7 @@ class indent_t {
         --indent;
         return rv;
     }
-    friend std::ostream& operator<<(std::ostream& os, indent_t i);
+    friend std::ostream &operator<<(std::ostream &os, indent_t i);
     indent_t operator+(int v) {
         indent_t rv = *this;
         rv.indent += v;
@@ -57,48 +57,48 @@ class indent_t {
         rv.indent -= v;
         return rv;
     }
-    indent_t& operator+=(int v) {
+    indent_t &operator+=(int v) {
         indent += v;
         return *this;
     }
-    indent_t& operator-=(int v) {
+    indent_t &operator-=(int v) {
         indent -= v;
         return *this;
     }
-    static indent_t& getindent(std::ostream&);
+    static indent_t &getindent(std::ostream &);
 };
 
-inline std::ostream& operator<<(std::ostream& os, indent_t i) {
+inline std::ostream &operator<<(std::ostream &os, indent_t i) {
     os << std::setw(i.indent * i.tabsz) << "";
     return os;
 }
 
 namespace IndentCtl {
-inline std::ostream& endl(std::ostream& out) {
+inline std::ostream &endl(std::ostream &out) {
     return out << std::endl << indent_t::getindent(out);
 }
-inline std::ostream& indent(std::ostream& out) {
+inline std::ostream &indent(std::ostream &out) {
     ++indent_t::getindent(out);
     return out;
 }
-inline std::ostream& unindent(std::ostream& out) {
+inline std::ostream &unindent(std::ostream &out) {
     --indent_t::getindent(out);
     return out;
 }
 
 class TempIndent {
     // an indent that can be added to any stream and unrolls when the object is destroyed
-    std::vector<std::ostream*> streams;      // streams that have been indented
-    TempIndent(const TempIndent&) = delete;  // not copyable
+    std::vector<std::ostream *> streams;      // streams that have been indented
+    TempIndent(const TempIndent &) = delete;  // not copyable
 
  public:
     TempIndent() = default;
-    friend std::ostream& operator<<(std::ostream& out, TempIndent& ti) {
+    friend std::ostream &operator<<(std::ostream &out, TempIndent &ti) {
         ti.streams.push_back(&out);
         return out << indent;
     }
     ~TempIndent() {
-        for (auto* out : streams) *out << unindent;
+        for (auto *out : streams) *out << unindent;
     }
 };
 

@@ -20,8 +20,8 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Node* RemoveAliases::postorder(IR::AssignmentStatement* statement) {
-    const auto* type = typeMap->getType(statement->left);
+const IR::Node *RemoveAliases::postorder(IR::AssignmentStatement *statement) {
+    const auto *type = typeMap->getType(statement->left);
     if (!type->is<IR::Type_StructLike>()) {
         return statement;
     }
@@ -31,9 +31,9 @@ const IR::Node* RemoveAliases::postorder(IR::AssignmentStatement* statement) {
         return statement;
     }
     auto tmp = refMap->newName("tmp");
-    auto* decl = new IR::Declaration_Variable(IR::ID(tmp), type->getP4Type(), nullptr);
+    auto *decl = new IR::Declaration_Variable(IR::ID(tmp), type->getP4Type(), nullptr);
     declarations.push_back(decl);
-    auto* result = new IR::IndexedVector<IR::StatOrDecl>();
+    auto *result = new IR::IndexedVector<IR::StatOrDecl>();
     result->push_back(new IR::AssignmentStatement(statement->srcInfo, new IR::PathExpression(tmp),
                                                   statement->right));
     result->push_back(new IR::AssignmentStatement(statement->srcInfo, statement->left,
@@ -42,7 +42,7 @@ const IR::Node* RemoveAliases::postorder(IR::AssignmentStatement* statement) {
     return new IR::BlockStatement(statement->srcInfo, *result);
 }
 
-const IR::Node* RemoveAliases::postorder(IR::P4Parser* parser) {
+const IR::Node *RemoveAliases::postorder(IR::P4Parser *parser) {
     if (!declarations.empty()) {
         parser->parserLocals.append(declarations);
         declarations.clear();
@@ -50,7 +50,7 @@ const IR::Node* RemoveAliases::postorder(IR::P4Parser* parser) {
     return parser;
 }
 
-const IR::Node* RemoveAliases::postorder(IR::P4Control* control) {
+const IR::Node *RemoveAliases::postorder(IR::P4Control *control) {
     if (!declarations.empty()) {
         // prepend declarations: they must come before any actions
         // that may have been modified
@@ -60,8 +60,8 @@ const IR::Node* RemoveAliases::postorder(IR::P4Control* control) {
     return control;
 }
 
-const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) {
-    const auto* ltype = typeMap->getType(statement->left, true);
+const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) {
+    const auto *ltype = typeMap->getType(statement->left, true);
 
     // If the left type is not a struct like or a header stack, return.
     if (!(ltype->is<IR::Type_StructLike>() || ltype->is<IR::Type_Stack>())) {
@@ -79,52 +79,52 @@ const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) 
         return statement;
     }
 
-    const auto& srcInfo = statement->srcInfo;
-    auto* retval = new IR::IndexedVector<IR::StatOrDecl>();
-    if (const auto* si = statement->right->to<IR::StructExpression>()) {
-        const auto* strct = ltype->checkedTo<IR::Type_StructLike>();
-        for (const auto* f : strct->fields) {
-            const auto* right = si->components.getDeclaration<IR::NamedExpression>(f->name);
-            const auto* left = new IR::Member(statement->left, f->name);
+    const auto &srcInfo = statement->srcInfo;
+    auto *retval = new IR::IndexedVector<IR::StatOrDecl>();
+    if (const auto *si = statement->right->to<IR::StructExpression>()) {
+        const auto *strct = ltype->checkedTo<IR::Type_StructLike>();
+        for (const auto *f : strct->fields) {
+            const auto *right = si->components.getDeclaration<IR::NamedExpression>(f->name);
+            const auto *left = new IR::Member(statement->left, f->name);
             retval->push_back(
                 new IR::AssignmentStatement(statement->srcInfo, left, right->expression));
         }
     } else if (copyHeaders && ltype->is<IR::Type_Header>()) {
-        const auto* header = ltype->checkedTo<IR::Type_Header>();
+        const auto *header = ltype->checkedTo<IR::Type_Header>();
         // Build a "src.isValid()" call.
-        const auto* isSrcValidCall = new IR::MethodCallExpression(
+        const auto *isSrcValidCall = new IR::MethodCallExpression(
             srcInfo, IR::Type::Boolean::get(),
             new IR::Member(srcInfo, statement->right, IR::Type_Header::isValid),
             new IR::Vector<IR::Argument>());
         // Build a "dst.setValid()" call.
-        const auto* setDstValidCall = new IR::MethodCallExpression(
+        const auto *setDstValidCall = new IR::MethodCallExpression(
             srcInfo, IR::Type::Void::get(),
             new IR::Member(srcInfo, statement->left, IR::Type_Header::setValid),
             new IR::Vector<IR::Argument>());
 
         // Build a "dst.setInvalid()" call.
-        const auto* setDstInvalidCall = new IR::MethodCallExpression(
+        const auto *setDstInvalidCall = new IR::MethodCallExpression(
             srcInfo, IR::Type::Void::get(),
             new IR::Member(srcInfo, statement->left, IR::Type_Header::setInvalid),
             new IR::Vector<IR::Argument>());
         // Build the "then" branch: set the validity bit and copy the fields.
         IR::IndexedVector<IR::StatOrDecl> thenStmts;
         thenStmts.push_back(new IR::MethodCallStatement(srcInfo, setDstValidCall));
-        for (const auto* field : header->fields) {
-            const auto* left = new IR::Member(field->type, statement->left, field->name);
-            const auto* right = new IR::Member(field->type, statement->right, field->name);
+        for (const auto *field : header->fields) {
+            const auto *left = new IR::Member(field->type, statement->left, field->name);
+            const auto *right = new IR::Member(field->type, statement->right, field->name);
             thenStmts.push_back(new IR::AssignmentStatement(srcInfo, left, right));
         }
 
         // Build the "else" branch: clear the validity bit.
-        auto* elseStmt = new IR::MethodCallStatement(srcInfo, setDstInvalidCall);
+        auto *elseStmt = new IR::MethodCallStatement(srcInfo, setDstInvalidCall);
 
         // Finish up.
         return new IR::IfStatement(srcInfo, isSrcValidCall,
                                    new IR::BlockStatement(srcInfo, thenStmts), elseStmt);
     } else if (copyHeaders && ltype->is<IR::Type_Stack>()) {
-        const auto* stack = ltype->checkedTo<IR::Type_Stack>();
-        const auto* stackSize = stack->size->to<IR::Constant>();
+        const auto *stack = ltype->checkedTo<IR::Type_Stack>();
+        const auto *stackSize = stack->size->to<IR::Constant>();
         BUG_CHECK(stackSize && stackSize->value > 0, "Size of stack %s is not a positive constant",
                   ltype);
         BUG_CHECK(statement->right->is<IR::PathExpression>() ||
@@ -134,9 +134,9 @@ const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) 
 
         // Copy each stack element.
         for (int i = 0; i < stackSize->asInt(); ++i) {
-            const auto* left =
+            const auto *left =
                 new IR::ArrayIndex(stack->elementType, statement->left, new IR::Constant(i));
-            const auto* right =
+            const auto *right =
                 new IR::ArrayIndex(stack->elementType, statement->right, new IR::Constant(i));
             retval->push_back(new IR::AssignmentStatement(srcInfo, left, right));
         }
@@ -145,13 +145,13 @@ const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) 
             // Leave headers as they are -- copy_header will also copy the valid bit
             return statement;
         }
-        const auto* strct = ltype->checkedTo<IR::Type_StructLike>();
+        const auto *strct = ltype->checkedTo<IR::Type_StructLike>();
         BUG_CHECK(statement->right->is<IR::PathExpression>() ||
                       statement->right->is<IR::Member>() || statement->right->is<IR::ArrayIndex>(),
                   "%1%: Unexpected operation when eliminating struct copying", statement->right);
-        for (const auto* f : strct->fields) {
-            const auto* right = new IR::Member(statement->right, f->name);
-            const auto* left = new IR::Member(statement->left, f->name);
+        for (const auto *f : strct->fields) {
+            const auto *right = new IR::Member(statement->right, f->name);
+            const auto *left = new IR::Member(statement->left, f->name);
             retval->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
         }
     }

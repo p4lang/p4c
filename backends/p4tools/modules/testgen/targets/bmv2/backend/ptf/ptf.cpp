@@ -37,7 +37,7 @@ PTF::PTF(cstring testName, boost::optional<unsigned int> seed = boost::none) : T
     cstring testNameOnly(testFile.stem().c_str());
 }
 
-std::vector<std::pair<size_t, size_t>> PTF::getIgnoreMasks(const IR::Constant* mask) {
+std::vector<std::pair<size_t, size_t>> PTF::getIgnoreMasks(const IR::Constant *mask) {
     std::vector<std::pair<size_t, size_t>> ignoreMasks;
     if (mask == nullptr) {
         return ignoreMasks;
@@ -61,7 +61,7 @@ std::vector<std::pair<size_t, size_t>> PTF::getIgnoreMasks(const IR::Constant* m
     return ignoreMasks;
 }
 
-inja::json PTF::getControlPlane(const TestSpec* testSpec) {
+inja::json PTF::getControlPlane(const TestSpec *testSpec) {
     inja::json controlPlaneJson = inja::json::object();
 
     // Map of actionProfiles and actionSelectors for easy reference.
@@ -71,17 +71,17 @@ inja::json PTF::getControlPlane(const TestSpec* testSpec) {
     if (!tables.empty()) {
         controlPlaneJson["tables"] = inja::json::array();
     }
-    for (const auto& testObject : tables) {
+    for (const auto &testObject : tables) {
         inja::json tblJson;
         tblJson["table_name"] = testObject.first.c_str();
-        const auto* const tblConfig = testObject.second->checkedTo<TableConfig>();
-        const auto* tblRules = tblConfig->getRules();
+        const auto *const tblConfig = testObject.second->checkedTo<TableConfig>();
+        const auto *tblRules = tblConfig->getRules();
         tblJson["rules"] = inja::json::array();
-        for (const auto& tblRule : *tblRules) {
+        for (const auto &tblRule : *tblRules) {
             inja::json rule;
-            const auto* matches = tblRule.getMatches();
-            const auto* actionCall = tblRule.getActionCall();
-            const auto* actionArgs = actionCall->getArgs();
+            const auto *matches = tblRule.getMatches();
+            const auto *actionCall = tblRule.getActionCall();
+            const auto *actionArgs = actionCall->getArgs();
             rule["action_name"] = actionCall->getActionName().c_str();
             auto j = getControlPlaneForTable(*matches, *actionArgs);
             rule["rules"] = std::move(j);
@@ -106,8 +106,8 @@ inja::json PTF::getControlPlane(const TestSpec* testSpec) {
     return controlPlaneJson;
 }
 
-inja::json PTF::getControlPlaneForTable(const std::map<cstring, const FieldMatch>& matches,
-                                        const std::vector<ActionArg>& args) {
+inja::json PTF::getControlPlaneForTable(const std::map<cstring, const FieldMatch> &matches,
+                                        const std::vector<ActionArg> &args) {
     inja::json rulesJson;
 
     rulesJson["single_exact_matches"] = inja::json::array();
@@ -117,40 +117,43 @@ inja::json PTF::getControlPlaneForTable(const std::map<cstring, const FieldMatch
     rulesJson["lpm_matches"] = inja::json::array();
 
     rulesJson["act_args"] = inja::json::array();
+    rulesJson["needs_priority"] = false;
 
-    for (const auto& match : matches) {
+    for (const auto &match : matches) {
         const auto fieldName = match.first;
-        const auto& fieldMatch = match.second;
+        const auto &fieldMatch = match.second;
 
         // Iterate over the match fields and segregate them.
         struct GetRange : public boost::static_visitor<void> {
             cstring fieldName;
-            inja::json& rulesJson;
+            inja::json &rulesJson;
 
-            GetRange(inja::json& rulesJson, cstring fieldName)
+            GetRange(inja::json &rulesJson, cstring fieldName)
                 : fieldName(fieldName), rulesJson(rulesJson) {}
 
-            void operator()(const Exact& elem) const {
+            void operator()(const Exact &elem) const {
                 inja::json j;
                 j["field_name"] = fieldName;
                 j["value"] = formatHexExpr(elem.getEvaluatedValue()).c_str();
                 rulesJson["single_exact_matches"].push_back(j);
             }
-            void operator()(const Range& elem) const {
+            void operator()(const Range &elem) const {
                 inja::json j;
                 j["field_name"] = fieldName;
                 j["lo"] = formatHexExpr(elem.getEvaluatedLow()).c_str();
                 j["hi"] = formatHexExpr(elem.getEvaluatedHigh()).c_str();
                 rulesJson["range_matches"].push_back(j);
             }
-            void operator()(const Ternary& elem) const {
+            void operator()(const Ternary &elem) const {
                 inja::json j;
                 j["field_name"] = fieldName;
                 j["value"] = formatHexExpr(elem.getEvaluatedValue()).c_str();
                 j["mask"] = formatHexExpr(elem.getEvaluatedMask()).c_str();
                 rulesJson["ternary_matches"].push_back(j);
+                // If the rule has a ternary match we need to add the priority.
+                rulesJson["needs_priority"] = true;
             }
-            void operator()(const LPM& elem) const {
+            void operator()(const LPM &elem) const {
                 inja::json j;
                 j["field_name"] = fieldName;
                 j["value"] = formatHexExpr(elem.getEvaluatedValue()).c_str();
@@ -162,7 +165,7 @@ inja::json PTF::getControlPlaneForTable(const std::map<cstring, const FieldMatch
         boost::apply_visitor(GetRange(rulesJson, fieldName), fieldMatch);
     }
 
-    for (const auto& actArg : args) {
+    for (const auto &actArg : args) {
         inja::json j;
         j["param"] = actArg.getActionParamName().c_str();
         j["value"] = formatHexExpr(actArg.getEvaluatedValue()).c_str();
@@ -172,9 +175,9 @@ inja::json PTF::getControlPlaneForTable(const std::map<cstring, const FieldMatch
     return rulesJson;
 }
 
-inja::json PTF::getSend(const TestSpec* testSpec) {
-    const auto* iPacket = testSpec->getIngressPacket();
-    const auto* payload = iPacket->getEvaluatedPayload();
+inja::json PTF::getSend(const TestSpec *testSpec) {
+    const auto *iPacket = testSpec->getIngressPacket();
+    const auto *payload = iPacket->getEvaluatedPayload();
     inja::json sendJson;
     sendJson["ig_port"] = iPacket->getPort();
     auto dataStr = formatHexExpr(payload, false, true, false);
@@ -183,13 +186,13 @@ inja::json PTF::getSend(const TestSpec* testSpec) {
     return sendJson;
 }
 
-inja::json PTF::getVerify(const TestSpec* testSpec) {
+inja::json PTF::getVerify(const TestSpec *testSpec) {
     inja::json verifyData = inja::json::object();
     if (testSpec->getEgressPacket() != boost::none) {
-        const auto& packet = **testSpec->getEgressPacket();
+        const auto &packet = **testSpec->getEgressPacket();
         verifyData["eg_port"] = packet.getPort();
-        const auto* payload = packet.getEvaluatedPayload();
-        const auto* payloadMask = packet.getEvaluatedPayloadMask();
+        const auto *payload = packet.getEvaluatedPayload();
+        const auto *payloadMask = packet.getEvaluatedPayloadMask();
         verifyData["ignore_masks"] = getIgnoreMasks(payloadMask);
 
         auto dataStr = formatHexExpr(payload, false, true, false);
@@ -204,38 +207,39 @@ static std::string getPreamble() {
 # p4testgen seed: {{ default(seed, "none") }}
 
 import logging
-import itertools
+import sys
+import os
 
+from functools import wraps
 from ptf import config
 from ptf.thriftutils import *
 from ptf.mask import Mask
-from ptf.testutils import send_packet
-from ptf.testutils import verify_packet
-from ptf.testutils import verify_no_other_packets
-from ptf.packet import *
+from p4.v1 import p4runtime_pb2_grpc
 
-from p4.v1 import p4runtime_pb2
-from p4runtime_base_tests import P4RuntimeTest, autocleanup, stringify, ipv4_to_binary, mac_to_binary
+from ptf.packet import *
+from ptf import testutils as ptfutils
+
+
+directory = os.getcwd()
+directory = directory.split("/")
+workspaceFolder = ""
+for i in range(len(directory)-1):
+    workspaceFolder += directory[i] +"/"
+sys.path.insert(1,workspaceFolder+'backends/p4tools/modules/testgen/targets/bmv2/backend/ptf')
+import base_test as bt
 
 logger = logging.getLogger('{{test_name}}')
 logger.addHandler(logging.StreamHandler())
 
-class AbstractTest(P4RuntimeTest):
-    @autocleanup
+class AbstractTest(bt.P4RuntimeTest):
+    @bt.autocleanup
     def setUp(self):
-        super(AbstractTest, self).setUp()
-        self.req = p4runtime_pb2.WriteRequest()
-        self.req.device_id = self.device_id
+        bt.P4RuntimeTest.setUp(self)
+        success = bt.P4RuntimeTest.updateConfig(self)
+        assert success
 
     def tearDown(self):
-        # TODO: Figure this out
-        pass
-
-    def insertTableEntry(self, table_name, key_fields = None,
-            action_name = None, data_fields = []):
-        self.push_update_add_entry_to_action(
-            self.req, table_name, key_fields, action_name, data_fields)
-        self.write_request(req)
+        bt.P4RuntimeTest.tearDown(self)
 
     def setupCtrlPlane(self):
         pass
@@ -253,12 +257,12 @@ class AbstractTest(P4RuntimeTest):
         logger.info("Verifying Packet ...")
         self.verifyPackets()
         logger.info("Verifying no other packets ...")
-        verify_no_other_packets(self, self.dev_id, timeout=2)
+        ptfutils.verify_no_other_packets(self, self.device_id, timeout=2)
 )""");
     return PREAMBLE;
 }
 
-void PTF::emitPreamble(const std::string& preamble) {
+void PTF::emitPreamble(const std::string &preamble) {
     boost::filesystem::path testFile(testName + ".py");
     cstring testNameOnly(testFile.stem().c_str());
     inja::json dataJson;
@@ -288,28 +292,10 @@ class Test{{test_id}}(AbstractTest):
 
     def setupCtrlPlane(self):
 ## if control_plane
-## if existsIn(control_plane, "action_profiles")
-## for ap in control_plane.action_profiles
-## for action in ap.actions
-        self.insertTableEntry(
-            '{{ap.profile}}',
-            [
-                gc.KeyTuple('$ACTION_MEMBER_ID', {{action.action_idx}}),
-            ],
-            '{{action.action_name}}',
-            [
-## for act_param in action.act_args
-                gc.DataTuple('{{act_param.param}}', {{act_param.value}}),
-## endfor
-            ]
-        )
-## endfor
-## endfor
-## endif
 ## for table in control_plane.tables
 ## for rule in table.rules
-        self.insertTableEntry(
-            '{{table.table_name}}',
+        self.table_add(
+            ('{{table.table_name}}',
             [
 ## for r in rule.rules.single_exact_matches
                 self.Exact('{{r.field_name}}', {{r.value}}),
@@ -324,24 +310,17 @@ class Test{{test_id}}(AbstractTest):
 ## for r in rule.rules.lpm_matches
                 self.Lpm('{{r.field_name}}', {{r.value}}, {{r.prefix_len}}),
 ## endfor
-## if existsIn(table, "has_ap")
-            ],
-            None,
-            [
-                ('$ACTION_MEMBER_ID', {{rule.action_name}}),
-            ]
-        )
-## else
-            ],
-            '{{rule.action_name}}',
+            ]),
+            ('{{rule.action_name}}',
             [
 ## for act_param in rule.rules.act_args
                 ('{{act_param.param}}', {{act_param.value}}),
 ## endfor
-            ]
+            ])
+            , {% if rule.rules.needs_priority %}{{rule.priority}}{% else %}None{% endif %}
+            {% if existsIn(table, "has_ap") %}, {"oneshot": True}{% endif %}
         )
 ## endfor
-## endif
 ## endfor
 ## else
         pass
@@ -351,7 +330,7 @@ class Test{{test_id}}(AbstractTest):
 ## if send
         ig_port = {{send.ig_port}}
         pkt = b'{{send.pkt}}'
-        send_packet(self, ig_port, pkt)
+        ptfutils.send_packet(self, ig_port, pkt)
 ## else
         pass
 ## endif
@@ -359,12 +338,11 @@ class Test{{test_id}}(AbstractTest):
     def verifyPackets(self):
 ## if verify
         eg_port = {{verify.eg_port}}
-        exp_pkt = b'{{verify.exp_pkt}}'
-        exp_pkt = Mask(exp_pkt)
+        exp_pkt = Mask(b'{{verify.exp_pkt}}')
 ## for ignore_mask in verify.ignore_masks
         exp_pkt.set_do_not_care({{ignore_mask.0}}, {{ignore_mask.1}})
 ## endfor
-        verify_packet(self, exp_pkt, eg_port)
+        ptfutils.verify_packet(self, exp_pkt, eg_port)
 ## else
         pass
 ## endif
@@ -376,8 +354,8 @@ class Test{{test_id}}(AbstractTest):
     return TEST_CASE;
 }
 
-void PTF::emitTestcase(const TestSpec* testSpec, cstring selectedBranches, size_t testId,
-                       const std::string& testCase, float currentCoverage) {
+void PTF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
+                       const std::string &testCase, float currentCoverage) {
     inja::json dataJson;
     if (selectedBranches != nullptr) {
         dataJson["selected_branches"] = selectedBranches.c_str();
@@ -401,7 +379,7 @@ void PTF::emitTestcase(const TestSpec* testSpec, cstring selectedBranches, size_
     ptfFile.flush();
 }
 
-void PTF::outputTest(const TestSpec* testSpec, cstring selectedBranches, size_t testIdx,
+void PTF::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testIdx,
                      float currentCoverage) {
     if (!preambleEmitted) {
         ptfFile = std::ofstream(testName + ".py");

@@ -23,7 +23,7 @@ limitations under the License.
 namespace P4 {
 
 /// Unifies a call with a prototype.
-bool TypeUnification::unifyCall(const BinaryConstraint* constraint) {
+bool TypeUnification::unifyCall(const BinaryConstraint *constraint) {
     // These are canonical types.
     auto dest = constraint->left->to<IR::Type_MethodBase>();
     auto src = constraint->right->to<IR::Type_MethodCall>();
@@ -55,13 +55,13 @@ bool TypeUnification::unifyCall(const BinaryConstraint* constraint) {
 
     auto paramIt = dest->parameters->begin();
     // keep track of parameters that have not been matched yet
-    std::map<cstring, const IR::Parameter*> left;
+    std::map<cstring, const IR::Parameter *> left;
     for (auto p : dest->parameters->parameters) left.emplace(p->name, p);
 
     for (auto arg : *src->arguments) {
         cstring argName = arg->argument->name.name;
         bool named = !argName.isNullOrEmpty();
-        const IR::Parameter* param;
+        const IR::Parameter *param;
 
         if (named) {
             param = dest->parameters->getParameter(argName);
@@ -102,7 +102,7 @@ bool TypeUnification::unifyCall(const BinaryConstraint* constraint) {
                                            param);
         }
 
-        P4::BinaryConstraint* c;
+        P4::BinaryConstraint *c;
         if (!param->hasOut())
             c = new CanBeImplicitlyCastConstraint(param->type, arg->type, constraint);
         else
@@ -145,7 +145,7 @@ bool TypeUnification::unifyCall(const BinaryConstraint* constraint) {
 
 // skipReturnValues is needed because the return type of a package
 // is the package itself, so checking it gets into an infinite loop.
-bool TypeUnification::unifyFunctions(const BinaryConstraint* constraint, bool skipReturnValues) {
+bool TypeUnification::unifyFunctions(const BinaryConstraint *constraint, bool skipReturnValues) {
     auto dest = constraint->left->to<IR::Type_MethodBase>();
     auto src = constraint->right->to<IR::Type_MethodBase>();
     CHECK_NULL(dest);
@@ -198,7 +198,7 @@ bool TypeUnification::unifyFunctions(const BinaryConstraint* constraint, bool sk
     return true;
 }
 
-bool TypeUnification::unifyBlocks(const BinaryConstraint* constraint) {
+bool TypeUnification::unifyBlocks(const BinaryConstraint *constraint) {
     // These are canonical types.
     auto dest = constraint->left->to<IR::Type_ArchBlock>();
     auto src = constraint->right->to<IR::Type_ArchBlock>();
@@ -228,7 +228,7 @@ bool TypeUnification::unifyBlocks(const BinaryConstraint* constraint) {
     return constraint->reportError(constraints->getCurrentSubstitution());
 }
 
-bool TypeUnification::unify(const BinaryConstraint* constraint) {
+bool TypeUnification::unify(const BinaryConstraint *constraint) {
     auto dest = constraint->left;
     auto src = constraint->right;
     // These are canonical types.
@@ -308,9 +308,9 @@ bool TypeUnification::unify(const BinaryConstraint* constraint) {
                     "than number of fields %3% in '%4%'",
                     tpl->components.size(), tpl, strct->fields.size(), strct);
             int index = 0;
-            for (const IR::StructField* f : strct->fields) {
-                const IR::Type* tplField = tpl->components.at(index);
-                const IR::Type* destt = f->type;
+            for (const IR::StructField *f : strct->fields) {
+                const IR::Type *tplField = tpl->components.at(index);
+                const IR::Type *destt = f->type;
                 constraints->add(constraint->create(destt, tplField));
                 index++;
             }
@@ -329,7 +329,7 @@ bool TypeUnification::unify(const BinaryConstraint* constraint) {
                                                "than number of fields in structure %2%: %3% to %4%",
                                                st->fields.size(), strct->fields.size(), st, strct);
 
-            for (const IR::StructField* f : strct->fields) {
+            for (const IR::StructField *f : strct->fields) {
                 auto stField = st->getField(f->name);
                 if (stField == nullptr)
                     return constraint->reportError(constraints->getCurrentSubstitution(),

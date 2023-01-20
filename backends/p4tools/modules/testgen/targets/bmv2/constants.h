@@ -14,11 +14,11 @@ enum bmv2_gress_t { BMV2_INGRESS, BMV2_EGRESS };
 class BMv2Constants {
  public:
     /// Match bits exactly or not at all.
-    static constexpr const char* MATCH_KIND_OPT = "optional";
+    static constexpr const char *MATCH_KIND_OPT = "optional";
     /// A match that is used as an argument for the selector.
-    static constexpr const char* MATCH_KIND_SELECTOR = "selector";
+    static constexpr const char *MATCH_KIND_SELECTOR = "selector";
     /// Entries that can match a range.
-    static constexpr const char* MATCH_KIND_RANGE = "range";
+    static constexpr const char *MATCH_KIND_RANGE = "range";
 
     // These definitions are derived from the numerical values of the enum
     // named "PktInstanceType" in the p4lang/behavioral-model source file
@@ -34,6 +34,9 @@ class BMv2Constants {
     // Clone type is derived from v1model.p4
     static constexpr int CLONE_TYPE_I2E = 0x0000;
     static constexpr int CLONE_TYPE_E2E = 0x0001;
+
+    static constexpr int STF_MIN_PKT_SIZE = 22;
+    static constexpr int ETH_HDR_SIZE = 112;
 };
 
 }  // namespace Bmv2

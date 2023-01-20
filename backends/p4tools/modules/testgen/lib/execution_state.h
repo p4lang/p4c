@@ -68,13 +68,13 @@ class ExecutionState {
 
         Continuation normalContinuation;
         ExceptionHandlers exceptionHandlers;
-        const NamespaceContext* namespaces = nullptr;
+        const NamespaceContext *namespaces = nullptr;
 
-        StackFrame(Continuation normalContinuation, const NamespaceContext* namespaces)
+        StackFrame(Continuation normalContinuation, const NamespaceContext *namespaces)
             : StackFrame(normalContinuation, {}, namespaces) {}
 
         StackFrame(Continuation normalContinuation, ExceptionHandlers exceptionHandlers,
-                   const NamespaceContext* namespaces)
+                   const NamespaceContext *namespaces)
             : normalContinuation(normalContinuation),
               exceptionHandlers(exceptionHandlers),
               namespaces(namespaces) {}
@@ -83,7 +83,7 @@ class ExecutionState {
  private:
     /// The namespace context in the IR for the current state. The innermost element is the P4
     /// program, representing the top-level namespace.
-    const NamespaceContext* namespaces;
+    const NamespaceContext *namespaces;
 
     /// The symbolic environment. Maps program variables to their symbolic values.
     SymbolicEnv env;
@@ -93,10 +93,10 @@ class ExecutionState {
     std::set<StateVariable> allocatedZombies;
 
     /// The program trace for the current program point (i.e., how we got to the current state).
-    std::vector<gsl::not_null<const TraceEvent*>> trace;
+    std::vector<gsl::not_null<const TraceEvent *>> trace;
 
     /// List of visited statements. Used for code coverage.
-    std::vector<const IR::Statement*> visitedStatements;
+    std::vector<const IR::Statement *> visitedStatements;
 
     /// The remaining body of the current function being executed.
     ///
@@ -110,7 +110,7 @@ class ExecutionState {
     /// becomes the top of the stack.
     ///
     // Invariant: if the @body is empty, then so is this, and this state is terminal.
-    std::stack<gsl::not_null<const StackFrame*>> stack;
+    std::stack<gsl::not_null<const StackFrame *>> stack;
 
     /// State properties are bools, integers, or strings that can be set and propagated across
     /// execution state. They are used to influence execution along a particular continuation path.
@@ -126,11 +126,11 @@ class ExecutionState {
     // which defines control plane match action entries. Once the interpreter has solved for the
     // variables used by these test objects and concretized the values, they can be used to generate
     // a test. Test objects are not constant because they may be manipulated by a target back end.
-    std::map<cstring, std::map<cstring, const TestObject*>> testObjects;
+    std::map<cstring, std::map<cstring, const TestObject *>> testObjects;
 
     /// The parserErrorLabel is set by the parser to indicate the variable corresponding to the
     /// parser error that is set by various built-in functions such as verify or extract.
-    const IR::Member* parserErrorLabel = nullptr;
+    const IR::Member *parserErrorLabel = nullptr;
 
     /// This variable tracks how much of the input packet has been parsed.
     /// Typically, this is equivalent to the size of the input packet. However, there may be
@@ -140,13 +140,13 @@ class ExecutionState {
 
     /// List of path constraints - expressions that must all evaluate to true to reach this
     /// execution state.
-    std::vector<const IR::Expression*> pathConstraint;
+    std::vector<const IR::Expression *> pathConstraint;
 
     /// List of branch decisions leading into this state.
     std::vector<uint64_t> selectedBranches;
 
     /// State that is needed to track reachability of statements given a query.
-    ReachabilityEngineState* reachabilityEngineState = nullptr;
+    ReachabilityEngineState *reachabilityEngineState = nullptr;
 
     /* =========================================================================================
      *  Accessors
@@ -156,13 +156,13 @@ class ExecutionState {
     bool isTerminal() const;
 
     /// @returns list of paths constraints.
-    const std::vector<const IR::Expression*>& getPathConstraint() const { return pathConstraint; }
+    const std::vector<const IR::Expression *> &getPathConstraint() const { return pathConstraint; }
 
     /// @returns list of branch decisions leading into this state.
-    const std::vector<uint64_t>& getSelectedBranches() const { return selectedBranches; }
+    const std::vector<uint64_t> &getSelectedBranches() const { return selectedBranches; }
 
     /// Adds path constraint.
-    void pushPathConstraint(const IR::Expression* e);
+    void pushPathConstraint(const IR::Expression *e);
 
     /// Adds branch decision identifier. Must be called for all branches with more than one
     /// successor. These branch decision identifiers are then used by track branches and
@@ -174,38 +174,38 @@ class ExecutionState {
     boost::optional<const Continuation::Command> getNextCmd() const;
 
     /// @returns the symbolic value of the given state variable.
-    const IR::Expression* get(const StateVariable& var) const;
+    const IR::Expression *get(const StateVariable &var) const;
 
     /// Checks whether the statement has been visited in this state.
-    void markVisited(const IR::Statement* stmt);
+    void markVisited(const IR::Statement *stmt);
 
     /// @returns list of all statements visited before reaching this state.
-    const std::vector<const IR::Statement*>& getVisited() const;
+    const std::vector<const IR::Statement *> &getVisited() const;
 
     /// Sets the symbolic value of the given state variable to the given value. Constant folding
     /// is done on the given value before updating the symbolic state.
-    void set(const StateVariable& var, const IR::Expression* value);
+    void set(const StateVariable &var, const IR::Expression *value);
 
     /// Checks whether the given variable exists in the symbolic environment of this state.
-    bool exists(const StateVariable& var) const;
+    bool exists(const StateVariable &var) const;
 
     /// @see Taint::hasTaint
-    bool hasTaint(const IR::Expression* expr) const;
+    bool hasTaint(const IR::Expression *expr) const;
 
     /// @returns the current symbolic environment.
-    const SymbolicEnv& getSymbolicEnv() const;
+    const SymbolicEnv &getSymbolicEnv() const;
 
     /// Produce a formatted output of the current symbolic environment.
-    void printSymbolicEnv(std::ostream& out = std::cout) const;
+    void printSymbolicEnv(std::ostream &out = std::cout) const;
 
     /// @returns the current event trace.
-    const std::vector<gsl::not_null<const TraceEvent*>>& getTrace() const;
+    const std::vector<gsl::not_null<const TraceEvent *>> &getTrace() const;
 
     /// @returns the current body.
-    const Continuation::Body& getBody() const;
+    const Continuation::Body &getBody() const;
 
     /// @returns the current stack.
-    const std::stack<gsl::not_null<const StackFrame*>>& getStack() const;
+    const std::stack<gsl::not_null<const StackFrame *>> &getStack() const;
 
     /// Set the property with @arg propertyName to @arg property.
     void setProperty(cstring propertyName, Continuation::PropertyValue property);
@@ -220,7 +220,7 @@ class ExecutionState {
         auto iterator = stateProperties.find(propertyName);
         if (iterator != stateProperties.end()) {
             auto val = iterator->second;
-            auto* resolvedVal = boost::relaxed_get<T>(&val);
+            auto *resolvedVal = boost::relaxed_get<T>(&val);
             if (resolvedVal == nullptr) {
                 BUG("Expected property value type does not correspond to value type stored in the "
                     "property map.");
@@ -232,53 +232,53 @@ class ExecutionState {
 
     /// Add a test object. Create the category and label, if necessary.
     /// Overrides the object label if it already exists in the object map.
-    void addTestObject(cstring category, cstring objectLabel, const TestObject* object);
+    void addTestObject(cstring category, cstring objectLabel, const TestObject *object);
 
     /// @returns the uninterpreted test object using the provided category and object label. If
     /// @param checked is enabled, a BUG is thrown if the object label does not exist.
-    const TestObject* getTestObject(cstring category, cstring objectLabel, bool checked) const;
+    const TestObject *getTestObject(cstring category, cstring objectLabel, bool checked) const;
 
     /// @returns the uninterpreted test object using the provided category and object label. If
     /// @param checked is enabled, a BUG is thrown if the object label does not exist.
     /// Also casts the test object to the specified type. If the type does not match, a BUG is
     /// thrown.
     template <class T>
-    T* getTestObject(cstring category, cstring objectLabel, bool checked) const {
-        const auto* testObject = getTestObject(category, objectLabel, checked);
+    T *getTestObject(cstring category, cstring objectLabel, bool checked) const {
+        const auto *testObject = getTestObject(category, objectLabel, checked);
         return testObject->checkedTo<T>();
     }
 
     /// @returns the map of uninterpreted test objects for a specific test category. For example,
     /// all the table entries saved under "tableconfigs".
-    std::map<cstring, const TestObject*> getTestObjectCategory(cstring category) const;
+    std::map<cstring, const TestObject *> getTestObjectCategory(cstring category) const;
 
     /* =========================================================================================
      *  Trace events.
      * ========================================================================================= */
  public:
-    void add(const TraceEvent* event);
+    void add(const TraceEvent *event);
 
     /* =========================================================================================
      *  Namespaces and declarations
      * ========================================================================================= */
  public:
     /// Looks up a declaration from a path. A BUG occurs if no declaration is found.
-    const IR::IDeclaration* findDecl(const IR::Path* path) const;
+    const IR::IDeclaration *findDecl(const IR::Path *path) const;
 
     /// Looks up a declaration from a path expression. A BUG occurs if no declaration is found.
-    const IR::IDeclaration* findDecl(const IR::PathExpression* pathExpr) const;
+    const IR::IDeclaration *findDecl(const IR::PathExpression *pathExpr) const;
 
     /// Resolves a Type in the current environment.
-    const IR::Type* resolveType(const IR::Type* type) const;
+    const IR::Type *resolveType(const IR::Type *type) const;
 
     /// @returns the current namespace context.
-    const NamespaceContext* getNamespaceContext() const;
+    const NamespaceContext *getNamespaceContext() const;
 
     /// Replaces the namespace context in the current state with the given context.
-    void setNamespaceContext(const NamespaceContext* namespaces);
+    void setNamespaceContext(const NamespaceContext *namespaces);
 
     /// Enters a namespace of declarations.
-    void pushNamespace(const IR::INamespace* ns);
+    void pushNamespace(const IR::INamespace *ns);
 
     /* =========================================================================================
      *  Body operations
@@ -289,7 +289,7 @@ class ExecutionState {
 
     /// Replaces the topmost command in @body with the contents of @cmds. A BUG occurs if @body
     /// is empty or @cmds is empty.
-    void replaceTopBody(const std::vector<Continuation::Command>* cmds);
+    void replaceTopBody(const std::vector<Continuation::Command> *cmds);
 
     /// Replaces the topmost command in @body with the contents of @cmds. A BUG occurs if @body
     /// is empty or @cmds is empty.
@@ -301,7 +301,7 @@ class ExecutionState {
     //
     // Needs to be implemented here because of limitations with templates.
     template <class N>
-    void replaceTopBody(const std::vector<const N*>* nodes) {
+    void replaceTopBody(const std::vector<const N *> *nodes) {
         BUG_CHECK(!nodes->empty(), "Replaced top of execution stack with empty list");
         body.pop();
         for (auto it = nodes->rbegin(); it != nodes->rend(); ++it) {
@@ -314,14 +314,14 @@ class ExecutionState {
     void popBody();
 
     /// Replaces @body with the given argument.
-    void replaceBody(const Continuation::Body& body);
+    void replaceBody(const Continuation::Body &body);
 
     /* =========================================================================================
      *  Continuation-stack operations
      * ========================================================================================= */
  public:
     /// Pushes a new frame onto the continuation stack.
-    void pushContinuation(gsl::not_null<const StackFrame*> frame);
+    void pushContinuation(gsl::not_null<const StackFrame *> frame);
 
     /// Pushes the current body and namespace context as a new frame on the continuation stack. The
     /// new frame will have a parameterless continuation, and will use the given set of exception
@@ -332,7 +332,7 @@ class ExecutionState {
     /// new frame will use the given set of exception handlers. If @parameterType_opt is given,
     /// then the continuation in the new frame will have a function parameter, with the given type,
     /// that is ignored by the body.
-    void pushCurrentContinuation(boost::optional<const IR::Type*> parameterType_opt = boost::none,
+    void pushCurrentContinuation(boost::optional<const IR::Type *> parameterType_opt = boost::none,
                                  StackFrame::ExceptionHandlers = {});
 
     /// Pops the topmost frame in the stack of continuations. From the popped frame, the
@@ -341,7 +341,7 @@ class ExecutionState {
     ///
     /// Expressions in the metalanguage include P4 non-expressions. Because of this, the argument
     /// (if provided) does not necessarily need to be an instance of IR::Expression.
-    void popContinuation(boost::optional<const IR::Node*> argument_opt = boost::none);
+    void popContinuation(boost::optional<const IR::Node *> argument_opt = boost::none);
 
     /// Invokes first handler for e found on the stack
     void handleException(Continuation::Exception e);
@@ -351,33 +351,33 @@ class ExecutionState {
      * ========================================================================================= */
  public:
     /// @returns the bit type of the parser cursor.
-    static const IR::Type_Bits* getPacketSizeVarType();
+    static const IR::Type_Bits *getPacketSizeVarType();
 
     /// @returns the symbolic constant representing the length of the input to the current parser,
     /// in bits.
-    static const StateVariable& getInputPacketSizeVar();
+    static const StateVariable &getInputPacketSizeVar();
 
     /// @returns the maximum length, in bits, of the packet in the current packet buffer. This is
     /// the network's MTU.
     static int getMaxPacketLength();
 
     /// @returns the current version of the packet that is intended as input.
-    const IR::Expression* getInputPacket() const;
+    const IR::Expression *getInputPacket() const;
 
     /// @returns the current size of the input packet.
     int getInputPacketSize() const;
 
     /// Append data to the input packet.
-    void appendToInputPacket(const IR::Expression* expr);
+    void appendToInputPacket(const IR::Expression *expr);
 
     /// Prepend data to the input packet.
-    void prependToInputPacket(const IR::Expression* expr);
+    void prependToInputPacket(const IR::Expression *expr);
 
     /// @returns how much of the current input packet has been parsed.
     int getInputPacketCursor() const;
 
     /// @returns the current packet buffer.
-    const IR::Expression* getPacketBuffer() const;
+    const IR::Expression *getPacketBuffer() const;
 
     /// @returns the current size of the packet buffer.
     int getPacketBufferSize() const;
@@ -385,41 +385,41 @@ class ExecutionState {
     /// Consumes and @returns a slice from the available packet buffer. If the buffer is empty, this
     /// will produce zombie constants that are appended to the input packet. This means we generate
     /// packet content as
-    const IR::Expression* slicePacketBuffer(int amount);
+    const IR::Expression *slicePacketBuffer(int amount);
 
     /// Peeks ahead into the packet buffer. Works similarly to slicePacketBuffer but does NOT
     /// advance the parser cursor or removes content from the packet buffer. However, because
     /// functions such as lookahead may still produce a parser error, this function can also enlarge
     /// the minimum input packet required.
-    const IR::Expression* peekPacketBuffer(int amount);
+    const IR::Expression *peekPacketBuffer(int amount);
 
     /// Append data to the packet buffer.
-    void appendToPacketBuffer(const IR::Expression* expr);
+    void appendToPacketBuffer(const IR::Expression *expr);
 
     /// Prepend data to the packet buffer.
-    void prependToPacketBuffer(const IR::Expression* expr);
+    void prependToPacketBuffer(const IR::Expression *expr);
 
     /// Reset the packet buffer to zero.
     void resetPacketBuffer();
 
     /// @returns the current emit buffer
-    const IR::Expression* getEmitBuffer() const;
+    const IR::Expression *getEmitBuffer() const;
 
     /// Reset the emit buffer to zero.
     void resetEmitBuffer();
 
     /// Append data to the emit buffer.
-    void appendToEmitBuffer(const IR::Expression* expr);
+    void appendToEmitBuffer(const IR::Expression *expr);
 
     /// @returns the label associated with the payload and sets the type according to the @param.
     /// TODO: Consider moving this to a separate utility class?
-    static const IR::Member* getPayloadLabel(const IR::Type* t);
+    static const IR::Member *getPayloadLabel(const IR::Type *t);
 
     /// Set the parser error label to the @param parserError.
-    void setParserErrorLabel(const IR::Member* parserError);
+    void setParserErrorLabel(const IR::Member *parserError);
 
     /// @returns the current parser error label. Throws a BUG if the label is a nullptr.
-    const IR::Member* getCurrentParserErrorLabel() const;
+    const IR::Member *getCurrentParserErrorLabel() const;
 
     /* =========================================================================================
      *  Variables and symbolic constants.
@@ -429,11 +429,11 @@ class ExecutionState {
      */
  public:
     /// @returns the zombies that were allocated in this state
-    const std::set<StateVariable>& getZombies() const;
+    const std::set<StateVariable> &getZombies() const;
 
     /// @see Utils::getZombieConst.
     /// We also place the zombies in the set of allocated zombies of this state.
-    const StateVariable& createZombieConst(const IR::Type* type, cstring name,
+    const StateVariable &createZombieConst(const IR::Type *type, cstring name,
                                            uint64_t instanceID = 0);
 
     /* =========================================================================================
@@ -446,30 +446,30 @@ class ExecutionState {
     /// "prefix.h.ethernet.src_address", ...}).
     /// If @arg validVector is provided, this function also collects the validity bits of the
     /// headers.
-    std::vector<const IR::Member*> getFlatFields(
-        const IR::Expression* parent, const IR::Type_StructLike* ts,
-        std::vector<const IR::Member*>* validVector = nullptr) const;
+    std::vector<const IR::Member *> getFlatFields(
+        const IR::Expression *parent, const IR::Type_StructLike *ts,
+        std::vector<const IR::Member *> *validVector = nullptr) const;
 
     /// Gets table type from a member.
     /// @returns nullptr is member type is not a IR::P4Table.
-    const IR::P4Table* getTableType(const IR::Expression* expression) const;
+    const IR::P4Table *getTableType(const IR::Expression *expression) const;
 
     /// Gets action type from an expression.
-    const IR::P4Action* getActionDecl(const IR::Expression* expression) const;
+    const IR::P4Action *getActionDecl(const IR::Expression *expression) const;
 
     /// @returns a translation of the path expression into a member.
     /// This function looks up the path expression in the namespace and tries to find the
     /// corresponding declaration. It then converts the name of the declaration into a zombie
     /// constant and returns. This is necessary because we sometimes
     /// get flat declarations without members (e.g., bit<8> tmp;)
-    const StateVariable& convertPathExpr(const IR::PathExpression* path) const;
+    const StateVariable &convertPathExpr(const IR::PathExpression *path) const;
 
     /* =========================================================================================
      *  Constructors
      * ========================================================================================= */
  public:
     /// Creates an initial execution state for the given program.
-    explicit ExecutionState(const IR::P4Program* program);
+    explicit ExecutionState(const IR::P4Program *program);
 
  private:
     /// Create an initial execution state with @param body for testing.

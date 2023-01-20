@@ -12,7 +12,7 @@ namespace P4Tools {
 class Z3SolverAccessor {
  public:
     /// Default constructor.
-    explicit Z3SolverAccessor(gsl::not_null<Z3Solver*> solver) : solver(solver) {}
+    explicit Z3SolverAccessor(gsl::not_null<Z3Solver *> solver) : solver(solver) {}
 
     /// Gets all assertions. Used by GTests only.
     z3::expr_vector getAssertions(boost::optional<bool> assertionType = boost::none) {
@@ -25,17 +25,17 @@ class Z3SolverAccessor {
     }
 
     /// Gets all P4 assertions. Used by GTests only.
-    safe_vector<const Constraint*> getP4Assertions() { return solver->p4Assertions; }
+    safe_vector<const Constraint *> getP4Assertions() { return solver->p4Assertions; }
 
     /// Get Z3 context. Used by GTests only.
-    z3::context& getContext() { return solver->z3context; }
+    z3::context &getContext() { return solver->z3context; }
 
     /// Gets checkpoints that have been made. Used by GTests only.
-    std::vector<size_t>& getCheckpoints() { return solver->checkpoints; }
+    std::vector<size_t> &getCheckpoints() { return solver->checkpoints; }
 
  private:
     /// Pointer to a solver.
-    gsl::not_null<Z3Solver*> solver;
+    gsl::not_null<Z3Solver *> solver;
 };
 
 }  // namespace P4Tools

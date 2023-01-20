@@ -27,7 +27,7 @@ limitations under the License.
 using namespace DBPrint;
 using namespace IndentCtl;
 
-void IR::ReturnStatement::dbprint(std::ostream& out) const {
+void IR::ReturnStatement::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     out << "return";
     if (expression) {
@@ -36,26 +36,26 @@ void IR::ReturnStatement::dbprint(std::ostream& out) const {
     if (!prec) out << ';';
 }
 
-void IR::AssignmentStatement::dbprint(std::ostream& out) const {
+void IR::AssignmentStatement::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     out << Prec_Low << left << " = " << right << setprec(prec);
     if (!prec) out << ';';
 }
 
-void IR::IfStatement::dbprint(std::ostream& out) const {
+void IR::IfStatement::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     out << Prec_Low << "if (" << condition << ") {" << indent << setprec(0) << Log::endl << ifTrue;
     if (ifFalse) out << unindent << Log::endl << "} else {" << indent << Log::endl << ifFalse;
     out << " }" << unindent << setprec(prec);
 }
 
-void IR::MethodCallStatement::dbprint(std::ostream& out) const {
+void IR::MethodCallStatement::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     out << Prec_Low << methodCall << setprec(prec);
     if (!prec) out << ';';
 }
 
-void IR::Function::dbprint(std::ostream& out) const {
+void IR::Function::dbprint(std::ostream &out) const {
     if (type->returnType) out << type->returnType << ' ';
     out << name;
     if (type->typeParameters && !type->typeParameters->empty()) out << type->typeParameters;
@@ -64,7 +64,7 @@ void IR::Function::dbprint(std::ostream& out) const {
     out << unindent << " }";
 }
 
-void IR::SwitchStatement::dbprint(std::ostream& out) const {
+void IR::SwitchStatement::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     out << Prec_Low << "switch (" << expression << ") {" << indent;
     bool fallthrough = false;

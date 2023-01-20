@@ -43,14 +43,14 @@ namespace ControlPlaneAPI {
 const p4rt_id_t INVALID_ID = ::p4::config::v1::P4Ids::UNSPECIFIED;
 
 /// @return true if @type has an @controller_header annotation.
-bool isControllerHeader(const IR::Type_Header* type);
+bool isControllerHeader(const IR::Type_Header *type);
 
 /// @return true if @node has an @hidden annotation.
-bool isHidden(const IR::Node* node);
+bool isHidden(const IR::Node *node);
 
 /// @return the id allocated to the object through the @id annotation if any, or
 /// boost::none.
-boost::optional<p4rt_id_t> getIdAnnotation(const IR::IAnnotated* node);
+boost::optional<p4rt_id_t> getIdAnnotation(const IR::IAnnotated *node);
 
 /**
  * Stores a set of P4 symbol suffixes. Symbols consist of path components
@@ -60,9 +60,9 @@ boost::optional<p4rt_id_t> getIdAnnotation(const IR::IAnnotated* node);
  */
 struct P4SymbolSuffixSet {
     /// Adds @symbol's suffixes to the set if it's not already present.
-    void addSymbol(const cstring& symbol);
+    void addSymbol(const cstring &symbol);
 
-    cstring shortestUniqueSuffix(const cstring& symbol) const;
+    cstring shortestUniqueSuffix(const cstring &symbol) const;
 
  private:
     // All symbols in the set. We store these separately to make sure that no
@@ -80,12 +80,12 @@ struct P4SymbolSuffixSet {
         unsigned instances = 0;
 
         // Outgoing edges from this node. The SuffixNode should never be null.
-        std::map<cstring, SuffixNode*> edges;
+        std::map<cstring, SuffixNode *> edges;
     };
 
     // The root of our tree of suffixes. Note that this is *not* the data
     // structure known as a suffix tree.
-    SuffixNode* suffixesRoot = new SuffixNode;
+    SuffixNode *suffixesRoot = new SuffixNode;
 };
 
 /// A table which tracks the symbols which are visible to P4Runtime and their
@@ -106,28 +106,28 @@ class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
      * assignment has access to a non-const reference to the symbol table.
      */
     template <typename Func>
-    static P4RuntimeSymbolTable* create(Func function) {
+    static P4RuntimeSymbolTable *create(Func function) {
         // Create and initialize the symbol table. At this stage, ids aren't
         // available, because computing ids requires global knowledge of all the
         // P4Runtime symbols in the program.
-        auto* symbols = new P4RuntimeSymbolTable();
+        auto *symbols = new P4RuntimeSymbolTable();
         function(*symbols);
 
         // Now that the symbol table is initialized, we can compute ids.
-        for (auto& table : symbols->symbolTables) {
+        for (auto &table : symbols->symbolTables) {
             symbols->computeIdsForSymbols(table.first);
         }
 
         return symbols;
     }
 
-    static P4RuntimeSymbolTable* generateSymbols(const IR::P4Program* program,
-                                                 const IR::ToplevelBlock* evaluatedProgram,
-                                                 ReferenceMap* refMap, TypeMap* typeMap,
-                                                 P4RuntimeArchHandlerIface* archHandler);
+    static P4RuntimeSymbolTable *generateSymbols(const IR::P4Program *program,
+                                                 const IR::ToplevelBlock *evaluatedProgram,
+                                                 ReferenceMap *refMap, TypeMap *typeMap,
+                                                 P4RuntimeArchHandlerIface *archHandler);
 
     /// Add a @type symbol, extracting the name and id from @declaration.
-    void add(P4RuntimeSymbolType type, const IR::IDeclaration* declaration) override;
+    void add(P4RuntimeSymbolType type, const IR::IDeclaration *declaration) override;
 
     /// Add a @type symbol with @name and possibly an explicit P4 '@id'.
     void add(P4RuntimeSymbolType type, cstring name,
@@ -135,7 +135,7 @@ class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
 
     /// @return the P4Runtime id for the symbol of @type corresponding to
     /// @declaration.
-    p4rt_id_t getId(P4RuntimeSymbolType type, const IR::IDeclaration* declaration) const override;
+    p4rt_id_t getId(P4RuntimeSymbolType type, const IR::IDeclaration *declaration) const override;
 
     /// @return the P4Runtime id for the symbol of @type with name @name.
     p4rt_id_t getId(P4RuntimeSymbolType type, cstring name) const override;
@@ -189,7 +189,7 @@ class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
 
     // The hash function used for resource names.
     // Taken from: https://en.wikipedia.org/wiki/Jenkins_hash_function
-    static uint32_t jenkinsOneAtATimeHash(const char* key, size_t length);
+    static uint32_t jenkinsOneAtATimeHash(const char *key, size_t length);
 
     // All the ids we've assigned so far. Used to avoid id collisions; this is
     // especially crucial since ids can be set manually via the '@id'
@@ -206,17 +206,17 @@ class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
     P4SymbolSuffixSet suffixSet;
 };
 
-void collectControlSymbols(P4RuntimeSymbolTable& symbols, P4RuntimeArchHandlerIface* archHandler,
-                           const IR::ControlBlock* controlBlock, ReferenceMap* refMap,
-                           TypeMap* typeMap);
+void collectControlSymbols(P4RuntimeSymbolTable &symbols, P4RuntimeArchHandlerIface *archHandler,
+                           const IR::ControlBlock *controlBlock, ReferenceMap *refMap,
+                           TypeMap *typeMap);
 
-void collectExternSymbols(P4RuntimeSymbolTable& symbols, P4RuntimeArchHandlerIface* archHandler,
-                          const IR::ExternBlock* externBlock);
+void collectExternSymbols(P4RuntimeSymbolTable &symbols, P4RuntimeArchHandlerIface *archHandler,
+                          const IR::ExternBlock *externBlock);
 
-void collectTableSymbols(P4RuntimeSymbolTable& symbols, P4RuntimeArchHandlerIface* archHandler,
-                         const IR::TableBlock* tableBlock);
+void collectTableSymbols(P4RuntimeSymbolTable &symbols, P4RuntimeArchHandlerIface *archHandler,
+                         const IR::TableBlock *tableBlock);
 
-void collectParserSymbols(P4RuntimeSymbolTable& symbols, const IR::ParserBlock* parserBlock);
+void collectParserSymbols(P4RuntimeSymbolTable &symbols, const IR::ParserBlock *parserBlock);
 
 }  // namespace ControlPlaneAPI
 

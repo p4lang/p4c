@@ -22,12 +22,12 @@ namespace Util {
 
 using namespace boost::multiprecision;
 
-big_int shift_left(const big_int& v, unsigned bits) { return v << bits; }
-big_int shift_right(const big_int& v, unsigned bits) { return v >> bits; }
+big_int shift_left(const big_int &v, unsigned bits) { return v << bits; }
+big_int shift_right(const big_int &v, unsigned bits) { return v >> bits; }
 
 // Returns last 'bits' of value
 // value is shifted right by this many bits
-big_int ripBits(big_int& value, int bits) {
+big_int ripBits(big_int &value, int bits) {
     big_int rv = 1;
     rv <<= bits;
     rv -= 1;
@@ -49,7 +49,7 @@ big_int maskFromSlice(unsigned m, unsigned l) {
 }
 
 /// Find a consecutive scan of 1 bits
-BitRange findOnes(const big_int& value) {
+BitRange findOnes(const big_int &value) {
     BitRange result;
     if (value != 0) {
         result.lowIndex = scan1(value, 0);
@@ -63,7 +63,7 @@ BitRange findOnes(const big_int& value) {
     return result;
 }
 
-big_int cvtInt(const char* s, unsigned base) {
+big_int cvtInt(const char *s, unsigned base) {
     big_int rv;
 
     while (*s) {

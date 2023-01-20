@@ -20,8 +20,8 @@ namespace UBPF {
 
 static cstring last_key_name;
 
-UBPFRegister::UBPFRegister(const UBPFProgram* program, const IR::ExternBlock* block, cstring name,
-                           EBPF::CodeGenInspector* codeGen)
+UBPFRegister::UBPFRegister(const UBPFProgram *program, const IR::ExternBlock *block, cstring name,
+                           EBPF::CodeGenInspector *codeGen)
     : UBPFTableBase(program, name, codeGen) {
     auto di = block->node->to<IR::Declaration_Instance>();
     auto type = program->typeMap->getType(di, true)->to<IR::Type_SpecializedCanonical>();
@@ -57,12 +57,12 @@ UBPFRegister::UBPFRegister(const UBPFProgram* program, const IR::ExternBlock* bl
     }
 }
 
-void UBPFRegister::emitInstance(EBPF::CodeBuilder* builder) {
+void UBPFRegister::emitInstance(EBPF::CodeBuilder *builder) {
     UBPFTableBase::emitInstance(builder, EBPF::TableHash);
 }
 
-void UBPFRegister::emitMethodInvocation(EBPF::CodeBuilder* builder,
-                                        const P4::ExternMethod* method) {
+void UBPFRegister::emitMethodInvocation(EBPF::CodeBuilder *builder,
+                                        const P4::ExternMethod *method) {
     if (method->method->name.name == program->model.registerModel.read.name) {
         emitRegisterRead(builder, method->expr);
         return;
@@ -74,12 +74,12 @@ void UBPFRegister::emitMethodInvocation(EBPF::CodeBuilder* builder,
           program->model.registerModel.read.name);
 }
 
-void UBPFRegister::emitRegisterWrite(EBPF::CodeBuilder* builder,
-                                     const IR::MethodCallExpression* expression) {
+void UBPFRegister::emitRegisterWrite(EBPF::CodeBuilder *builder,
+                                     const IR::MethodCallExpression *expression) {
     BUG_CHECK(expression->arguments->size() == 2, "Expected just 2 argument for %1%", expression);
 
     auto arg_value = expression->arguments->at(1);
-    auto target = reinterpret_cast<const UbpfTarget*>(builder->target);
+    auto target = reinterpret_cast<const UbpfTarget *>(builder->target);
 
     cstring valueVariableName = emitValueInstanceIfNeeded(builder, arg_value);
     if (valueVariableName == nullptr) {
@@ -88,8 +88,8 @@ void UBPFRegister::emitRegisterWrite(EBPF::CodeBuilder* builder,
     target->emitTableUpdate(builder, dataMapName, last_key_name, "&" + valueVariableName);
 }
 
-cstring UBPFRegister::emitValueInstanceIfNeeded(EBPF::CodeBuilder* builder,
-                                                const IR::Argument* arg_value) {
+cstring UBPFRegister::emitValueInstanceIfNeeded(EBPF::CodeBuilder *builder,
+                                                const IR::Argument *arg_value) {
     cstring valueVariableName = nullptr;
 
     if (arg_value->expression->is<IR::Constant>() ||
@@ -107,16 +107,16 @@ cstring UBPFRegister::emitValueInstanceIfNeeded(EBPF::CodeBuilder* builder,
     return valueVariableName;
 }
 
-void UBPFRegister::emitRegisterRead(EBPF::CodeBuilder* builder,
-                                    const IR::MethodCallExpression* expression) {
+void UBPFRegister::emitRegisterRead(EBPF::CodeBuilder *builder,
+                                    const IR::MethodCallExpression *expression) {
     BUG_CHECK(expression->arguments->size() == 1, "Expected 1 argument for %1%", expression);
     auto target = builder->target;
 
     target->emitTableLookup(builder, dataMapName, last_key_name, "");
 }
 
-void UBPFRegister::emitKeyInstance(EBPF::CodeBuilder* builder,
-                                   const IR::MethodCallExpression* expression) {
+void UBPFRegister::emitKeyInstance(EBPF::CodeBuilder *builder,
+                                   const IR::MethodCallExpression *expression) {
     auto arg_key = expression->arguments->at(0);
 
     cstring keyName = "";

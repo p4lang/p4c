@@ -38,7 +38,7 @@ limitations under the License.
 #include "hex.h"
 #include "log.h"
 
-static const char* signames[] = {
+static const char *signames[] = {
     "NONE", "HUP",  "INT",  "QUIT", "ILL",    "TRAP",   "ABRT",  "BUS",  "FPE",  "KILL", "USR1",
     "SEGV", "USR2", "PIPE", "ALRM", "TERM",   "STKFLT", "CHLD",  "CONT", "STOP", "TSTP", "TTIN",
     "TTOU", "URG",  "XCPU", "XFSZ", "VTALRM", "PROF",   "WINCH", "POLL", "PWR",  "SYS"};
@@ -63,7 +63,7 @@ void register_thread() {
 
 static MTONLY(__thread) int shutdown_loop = 0;  // avoid infinite loop if shutdown crashes
 
-static void sigint_shutdown(int sig, siginfo_t*, void*) {
+static void sigint_shutdown(int sig, siginfo_t *, void *) {
     if (shutdown_loop++) _exit(-1);
     LOG1("Exiting with SIG" << signames[sig]);
     _exit(sig + 0x80);
@@ -73,13 +73,13 @@ static void sigint_shutdown(int sig, siginfo_t*, void*) {
  * call external program addr2line WITHOUT using malloc or stdio or anything
  * else that might be problematic if there's memory corruption or exhaustion
  */
-const char* addr2line(void* addr, const char* text) {
+const char *addr2line(void *addr, const char *text) {
     MTONLY(static std::mutex lock; std::lock_guard<std::mutex> acquire(lock);)
     static pid_t child = 0;
     static int to_child, from_child;
     static char binary[PATH_MAX];
     static char buffer[PATH_MAX];
-    const char* t;
+    const char *t;
 
     if (!text || !(t = strchr(text, '('))) {
         text = exename();
@@ -96,8 +96,8 @@ const char* addr2line(void* addr, const char* text) {
     text = binary;
     if (!child) {
         int pfd1[2], pfd2[2];
-        char* p = buffer;
-        const char* argv[4] = {"/bin/sh", "-c", buffer, 0};
+        char *p = buffer;
+        const char *argv[4] = {"/bin/sh", "-c", buffer, 0};
         strcpy(p, "addr2line ");  // NOLINT
         p += strlen(p);
         strcpy(p, " -Cfspe ");  // NOLINT
@@ -130,7 +130,7 @@ const char* addr2line(void* addr, const char* text) {
             dup2(pfd1[1], 1);
             dup2(pfd1[1], 2);
             dup2(pfd2[0], 0);
-            execvp(argv[0], (char* const*)argv);
+            execvp(argv[0], (char *const *)argv);
             _exit(-1);
         }
         close(pfd1[1]);
@@ -139,7 +139,7 @@ const char* addr2line(void* addr, const char* text) {
         to_child = pfd2[1];
     }
     if (child == -1) return 0;
-    char* p = buffer;
+    char *p = buffer;
     uintptr_t a = (uintptr_t)addr;
     int shift = (CHAR_BIT * sizeof(uintptr_t) - 1) & ~3;
     while (shift > 0 && (a >> shift) == 0) shift -= 4;
@@ -170,7 +170,7 @@ const char* addr2line(void* addr, const char* text) {
 #define REGNAME(regname) mc_##regname
 #endif
 
-static void dumpregs(mcontext_t* mctxt) {
+static void dumpregs(mcontext_t *mctxt) {
 #if defined(REG_EAX)
     LOG1(" eax=" << hex(mctxt->gregs[REG_EAX], 8, '0')
                  << " ebx=" << hex(mctxt->gregs[REG_EBX], 8, '0')
@@ -226,7 +226,7 @@ static void dumpregs(mcontext_t* mctxt) {
 }
 #endif
 
-static void crash_shutdown(int sig, siginfo_t* info, void* uctxt) {
+static void crash_shutdown(int sig, siginfo_t *info, void *uctxt) {
     if (shutdown_loop++) _exit(-1);
     MTONLY(static std::recursive_mutex lock; static int threads_dumped = 0;
            static bool killed_all_threads = false; lock.lock(); if (!killed_all_threads) {
@@ -240,18 +240,18 @@ static void crash_shutdown(int sig, siginfo_t* info, void* uctxt) {
     if (sig == SIGILL || sig == SIGFPE || sig == SIGSEGV || sig == SIGBUS || sig == SIGTRAP)
         LOG1("  address = " << hex(info->si_addr));
 #if HAVE_UCONTEXT_H
-    dumpregs(&(static_cast<ucontext_t*>(uctxt)->uc_mcontext));
+    dumpregs(&(static_cast<ucontext_t *>(uctxt)->uc_mcontext));
 #else
     (void)uctxt;  // Suppress unused parameter warning.
 #endif
 #if HAVE_EXECINFO_H
     if (LOGGING(1)) {
-        static void* buffer[64];
+        static void *buffer[64];
         int size = backtrace(buffer, 64);
-        char** strings = backtrace_symbols(buffer, size);
+        char **strings = backtrace_symbols(buffer, size);
         for (int i = 1; i < size; i++) {
             if (strings) LOG1("  " << strings[i]);
-            if (const char* line = addr2line(buffer[i], strings ? strings[i] : 0))
+            if (const char *line = addr2line(buffer[i], strings ? strings[i] : 0))
                 LOG1("    " << line);
         }
         if (size < 1) LOG1("backtrace failed");

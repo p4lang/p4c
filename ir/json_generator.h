@@ -35,7 +35,7 @@ limitations under the License.
 
 class JSONGenerator {
     std::unordered_set<int> node_refs;
-    std::ostream& out;
+    std::ostream &out;
     bool dumpSourceInfo;
 
     template <typename T>
@@ -57,11 +57,11 @@ class JSONGenerator {
  public:
     indent_t indent;
 
-    explicit JSONGenerator(std::ostream& out, bool dumpSourceInfo = false)
+    explicit JSONGenerator(std::ostream &out, bool dumpSourceInfo = false)
         : out(out), dumpSourceInfo(dumpSourceInfo) {}
 
     template <typename T>
-    void generate(const safe_vector<T>& v) {
+    void generate(const safe_vector<T> &v) {
         out << "[";
         if (v.size() > 0) {
             out << std::endl << ++indent;
@@ -76,7 +76,7 @@ class JSONGenerator {
     }
 
     template <typename T>
-    void generate(const std::vector<T>& v) {
+    void generate(const std::vector<T> &v) {
         out << "[";
         if (v.size() > 0) {
             out << std::endl << ++indent;
@@ -91,7 +91,7 @@ class JSONGenerator {
     }
 
     template <typename T, typename U>
-    void generate(const std::pair<T, U>& v) {
+    void generate(const std::pair<T, U> &v) {
         ++indent;
         out << "{" << std::endl;
         toJSON(v);
@@ -99,7 +99,7 @@ class JSONGenerator {
     }
 
     template <typename T, typename U>
-    void toJSON(const std::pair<T, U>& v) {
+    void toJSON(const std::pair<T, U> &v) {
         out << indent << "\"first\" : ";
         generate(v.first);
         out << "," << std::endl << indent << "\"second\" : ";
@@ -107,7 +107,7 @@ class JSONGenerator {
     }
 
     template <typename T>
-    void generate(const boost::optional<T>& v) {
+    void generate(const boost::optional<T> &v) {
         if (!v) {
             out << "{ \"valid\" : false }";
             return;
@@ -120,7 +120,7 @@ class JSONGenerator {
     }
 
     template <typename T>
-    void generate(const std::set<T>& v) {
+    void generate(const std::set<T> &v) {
         out << "[" << std::endl;
         if (v.size() > 0) {
             auto it = v.begin();
@@ -136,7 +136,7 @@ class JSONGenerator {
     }
 
     template <typename T>
-    void generate(const ordered_set<T>& v) {
+    void generate(const ordered_set<T> &v) {
         out << "[" << std::endl;
         if (v.size() > 0) {
             auto it = v.begin();
@@ -152,7 +152,7 @@ class JSONGenerator {
     }
 
     template <typename K, typename V>
-    void generate(const std::map<K, V>& v) {
+    void generate(const std::map<K, V> &v) {
         out << "[" << std::endl;
         if (v.size() > 0) {
             auto it = v.begin();
@@ -168,7 +168,7 @@ class JSONGenerator {
     }
 
     template <typename K, typename V>
-    void generate(const ordered_map<K, V>& v) {
+    void generate(const ordered_map<K, V> &v) {
         out << "[" << std::endl;
         if (v.size() > 0) {
             auto it = v.begin();
@@ -190,7 +190,7 @@ class JSONGenerator {
     }
     void generate(double v) { out << std::to_string(v); }
     template <typename T>
-    typename std::enable_if<std::is_same<T, big_int>::value>::type generate(const T& v) {
+    typename std::enable_if<std::is_same<T, big_int>::value>::type generate(const T &v) {
         out << v;
     }
 
@@ -206,9 +206,9 @@ class JSONGenerator {
         out << "\"" << v << "\"";
     }
 
-    void generate(const bitvec& v) { out << "\"" << v << "\""; }
+    void generate(const bitvec &v) { out << "\"" << v << "\""; }
 
-    void generate(const match_t& v) {
+    void generate(const match_t &v) {
         out << "{" << std::endl
             << (indent + 1) << "\"word0\" : " << v.word0 << "," << std::endl
             << (indent + 1) << "\"word1\" : " << v.word1 << std::endl
@@ -217,14 +217,14 @@ class JSONGenerator {
 
     template <typename T>
     typename std::enable_if<has_toJSON<T>::value && !std::is_base_of<IR::Node, T>::value>::type
-    generate(const T& v) {
+    generate(const T &v) {
         ++indent;
         out << "{" << std::endl;
         v.toJSON(*this);
         out << std::endl << --indent << "}";
     }
 
-    void generate(const IR::Node& v) {
+    void generate(const IR::Node &v) {
         out << "{" << std::endl;
         ++indent;
         if (node_refs.find(v.id) != node_refs.end()) {
@@ -264,24 +264,24 @@ class JSONGenerator {
         out << "]";
     }
 
-    JSONGenerator& operator<<(char ch) {
+    JSONGenerator &operator<<(char ch) {
         out << ch;
         return *this;
     }
-    JSONGenerator& operator<<(const char* s) {
+    JSONGenerator &operator<<(const char *s) {
         out << s;
         return *this;
     }
-    JSONGenerator& operator<<(indent_t i) {
+    JSONGenerator &operator<<(indent_t i) {
         out << i;
         return *this;
     }
-    JSONGenerator& operator<<(std::ostream& (*fn)(std::ostream&)) {
+    JSONGenerator &operator<<(std::ostream &(*fn)(std::ostream &)) {
         out << fn;
         return *this;
     }
     template <typename T>
-    JSONGenerator& operator<<(const T& v) {
+    JSONGenerator &operator<<(const T &v) {
         generate(v);
         return *this;
     }

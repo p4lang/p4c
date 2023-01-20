@@ -26,22 +26,22 @@ namespace P4 {
  * Replaces serializable enum constants with their values.
  */
 class DoEliminateSerEnums final : public Transform {
-    const TypeMap* typeMap;
+    const TypeMap *typeMap;
 
  public:
-    explicit DoEliminateSerEnums(const TypeMap* typeMap) : typeMap(typeMap) {
+    explicit DoEliminateSerEnums(const TypeMap *typeMap) : typeMap(typeMap) {
         setName("DoEliminateSerEnums");
         visitDagOnce = false;
     }
-    const IR::Node* preorder(IR::Type_SerEnum* type) override;
-    const IR::Node* postorder(IR::Type_Name* type) override;
-    const IR::Node* postorder(IR::Member* expression) override;
+    const IR::Node *preorder(IR::Type_SerEnum *type) override;
+    const IR::Node *postorder(IR::Type_Name *type) override;
+    const IR::Node *postorder(IR::Member *expression) override;
 };
 
 class EliminateSerEnums final : public PassManager {
  public:
-    EliminateSerEnums(ReferenceMap* refMap, TypeMap* typeMap,
-                      TypeChecking* typeChecking = nullptr) {
+    EliminateSerEnums(ReferenceMap *refMap, TypeMap *typeMap,
+                      TypeChecking *typeChecking = nullptr) {
         if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoEliminateSerEnums(typeMap));

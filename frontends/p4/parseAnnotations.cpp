@@ -51,9 +51,9 @@ ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
     };
 }
 
-bool ParseAnnotations::parseSkip(IR::Annotation*) { return false; }
+bool ParseAnnotations::parseSkip(IR::Annotation *) { return false; }
 
-bool ParseAnnotations::parseEmpty(IR::Annotation* annotation) {
+bool ParseAnnotations::parseEmpty(IR::Annotation *annotation) {
     if (!annotation->body.empty()) {
         ::error(ErrorType::ERR_OVERLIMIT, "%1% should not have any arguments", annotation);
         return false;
@@ -62,8 +62,8 @@ bool ParseAnnotations::parseEmpty(IR::Annotation* annotation) {
     return true;
 }
 
-bool ParseAnnotations::parseExpressionList(IR::Annotation* annotation) {
-    const IR::Vector<IR::Expression>* parsed =
+bool ParseAnnotations::parseExpressionList(IR::Annotation *annotation) {
+    const IR::Vector<IR::Expression> *parsed =
         P4::P4ParserDriver::parseExpressionList(annotation->srcInfo, annotation->body);
     if (parsed != nullptr) {
         annotation->expr.append(*parsed);
@@ -72,8 +72,8 @@ bool ParseAnnotations::parseExpressionList(IR::Annotation* annotation) {
     return parsed != nullptr;
 }
 
-bool ParseAnnotations::parseKvList(IR::Annotation* annotation) {
-    const IR::IndexedVector<IR::NamedExpression>* parsed =
+bool ParseAnnotations::parseKvList(IR::Annotation *annotation) {
+    const IR::IndexedVector<IR::NamedExpression> *parsed =
         P4::P4ParserDriver::parseKvList(annotation->srcInfo, annotation->body);
     if (parsed != nullptr) {
         annotation->kv.append(*parsed);
@@ -82,8 +82,8 @@ bool ParseAnnotations::parseKvList(IR::Annotation* annotation) {
     return parsed != nullptr;
 }
 
-bool ParseAnnotations::parseConstantList(IR::Annotation* annotation) {
-    const IR::Vector<IR::Expression>* parsed =
+bool ParseAnnotations::parseConstantList(IR::Annotation *annotation) {
+    const IR::Vector<IR::Expression> *parsed =
         P4::P4ParserDriver::parseConstantList(annotation->srcInfo, annotation->body);
     if (parsed != nullptr) {
         annotation->expr.append(*parsed);
@@ -92,8 +92,8 @@ bool ParseAnnotations::parseConstantList(IR::Annotation* annotation) {
     return parsed != nullptr;
 }
 
-bool ParseAnnotations::parseConstantOrStringLiteralList(IR::Annotation* annotation) {
-    const IR::Vector<IR::Expression>* parsed =
+bool ParseAnnotations::parseConstantOrStringLiteralList(IR::Annotation *annotation) {
+    const IR::Vector<IR::Expression> *parsed =
         P4::P4ParserDriver::parseConstantOrStringLiteralList(annotation->srcInfo, annotation->body);
     if (parsed != nullptr) {
         annotation->expr.append(*parsed);
@@ -102,8 +102,8 @@ bool ParseAnnotations::parseConstantOrStringLiteralList(IR::Annotation* annotati
     return parsed != nullptr;
 }
 
-bool ParseAnnotations::parseStringLiteralList(IR::Annotation* annotation) {
-    const IR::Vector<IR::Expression>* parsed =
+bool ParseAnnotations::parseStringLiteralList(IR::Annotation *annotation) {
+    const IR::Vector<IR::Expression> *parsed =
         P4::P4ParserDriver::parseStringLiteralList(annotation->srcInfo, annotation->body);
     if (parsed != nullptr) {
         annotation->expr.append(*parsed);
@@ -112,8 +112,8 @@ bool ParseAnnotations::parseStringLiteralList(IR::Annotation* annotation) {
     return parsed != nullptr;
 }
 
-bool ParseAnnotations::parseP4rtTranslationAnnotation(IR::Annotation* annotation) {
-    const IR::Vector<IR::Expression>* parsed =
+bool ParseAnnotations::parseP4rtTranslationAnnotation(IR::Annotation *annotation) {
+    const IR::Vector<IR::Expression> *parsed =
         P4::P4ParserDriver::parseP4rtTranslationAnnotation(annotation->srcInfo, annotation->body);
     if (parsed != nullptr) {
         annotation->expr.append(*parsed);
@@ -121,7 +121,7 @@ bool ParseAnnotations::parseP4rtTranslationAnnotation(IR::Annotation* annotation
     return parsed != nullptr;
 }
 
-void ParseAnnotations::postorder(IR::Annotation* annotation) {
+void ParseAnnotations::postorder(IR::Annotation *annotation) {
     if (!annotation->needsParsing) {
         return;
     }

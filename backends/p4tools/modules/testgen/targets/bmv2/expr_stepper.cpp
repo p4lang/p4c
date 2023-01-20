@@ -55,10 +55,10 @@ namespace Bmv2 {
 
 std::string BMv2_V1ModelExprStepper::getClassName() { return "BMv2_V1ModelExprStepper"; }
 
-bool BMv2_V1ModelExprStepper::isPartOfFieldList(const IR::StructField* field,
+bool BMv2_V1ModelExprStepper::isPartOfFieldList(const IR::StructField *field,
                                                 uint64_t recirculateIndex) {
     // Check whether the field has a "field_list" annotation associated with it.
-    const auto* annotation = field->getAnnotation("field_list");
+    const auto *annotation = field->getAnnotation("field_list");
     if (annotation != nullptr) {
         // Grab the index of the annotation.
         auto annoExprs = annotation->expr;
@@ -74,42 +74,42 @@ bool BMv2_V1ModelExprStepper::isPartOfFieldList(const IR::StructField* field,
     return false;
 }
 
-void BMv2_V1ModelExprStepper::resetPreservingFieldList(ExecutionState* nextState,
-                                                       const IR::PathExpression* ref,
+void BMv2_V1ModelExprStepper::resetPreservingFieldList(ExecutionState *nextState,
+                                                       const IR::PathExpression *ref,
                                                        uint64_t recirculateIndex) const {
-    const auto* ts = ref->type->checkedTo<IR::Type_StructLike>();
-    for (const auto* field : ts->fields) {
+    const auto *ts = ref->type->checkedTo<IR::Type_StructLike>();
+    for (const auto *field : ts->fields) {
         // Check whether the field has a "field_list" annotation associated with it.
         if (isPartOfFieldList(field, recirculateIndex)) {
             continue;
         }
         // If there is no annotation, reset the user metadata.
-        const auto* fieldType = nextState->resolveType(field->type);
-        auto* fieldLabel = new IR::Member(fieldType, ref, field->name);
+        const auto *fieldType = nextState->resolveType(field->type);
+        auto *fieldLabel = new IR::Member(fieldType, ref, field->name);
         // Reset the variable.
         setTargetUninitialized(nextState, fieldLabel, false);
     }
 }
 
-BMv2_V1ModelExprStepper::BMv2_V1ModelExprStepper(ExecutionState& state, AbstractSolver& solver,
-                                                 const ProgramInfo& programInfo)
+BMv2_V1ModelExprStepper::BMv2_V1ModelExprStepper(ExecutionState &state, AbstractSolver &solver,
+                                                 const ProgramInfo &programInfo)
     : ExprStepper(state, solver, programInfo) {}
 
-void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression* call,
-                                                   const IR::Expression* receiver, IR::ID name,
-                                                   const IR::Vector<IR::Argument>* args,
-                                                   ExecutionState& state) {
+void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
+                                                   const IR::Expression *receiver, IR::ID name,
+                                                   const IR::Vector<IR::Argument> *args,
+                                                   ExecutionState &state) {
     const ExternMethodImpls::MethodImpl AssertAssumeExecute =
-        [](const IR::MethodCallExpression* call, const IR::Expression* /*receiver*/,
-           IR::ID& methodName, const IR::Vector<IR::Argument>* args, const ExecutionState& state,
-           SmallStepEvaluator::Result& result) {
-            const auto* cond = args->at(0)->expression;
+        [](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
+           IR::ID &methodName, const IR::Vector<IR::Argument> *args, const ExecutionState &state,
+           SmallStepEvaluator::Result &result) {
+            const auto *cond = args->at(0)->expression;
 
             if (!SymbolicEnv::isSymbolicValue(cond)) {
                 // Evaluate the condition.
-                stepToSubexpr(cond, result, state, [call](const Continuation::Parameter* v) {
-                    auto* clonedCall = call->clone();
-                    auto* arguments = new IR::Vector<IR::Argument>();
+                stepToSubexpr(cond, result, state, [call](const Continuation::Parameter *v) {
+                    auto *clonedCall = call->clone();
+                    auto *arguments = new IR::Vector<IR::Argument>();
                     arguments->push_back(new IR::Argument(v->param));
                     clonedCall->arguments = arguments;
                     return Continuation::Return(clonedCall);
@@ -129,7 +129,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
             cond->dbprint(condStream);
             // Handle the case where the condition is true.
             {
-                auto* nextState = new ExecutionState(state);
+                auto *nextState = new ExecutionState(state);
                 nextState->popBody();
                 nextState->add(new TraceEvent::Generic(upCasename + ": true condition "));
                 nextState->add(new TraceEvent::Generic(condStream.str()));
@@ -137,7 +137,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
             }
             // Handle the case where the condition is false.
             {
-                auto* falseState = new ExecutionState(state);
+                auto *falseState = new ExecutionState(state);
                 falseState->add(new TraceEvent::Generic(upCasename + ": false condition"));
                 falseState->add(new TraceEvent::Generic(condStream.str()));
                 falseState->replaceTopBody(Continuation::Exception::Abort);
@@ -155,20 +155,20 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
         // TODO: Implement extern path expression calls.
         {"*method.mark_to_drop",
          {"standard_metadata"},
-         [](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-            IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
-            const ExecutionState& state, SmallStepEvaluator::Result& result) {
-             auto* nextState = new ExecutionState(state);
-             const auto* nineBitType =
+         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+            const ExecutionState &state, SmallStepEvaluator::Result &result) {
+             auto *nextState = new ExecutionState(state);
+             const auto *nineBitType =
                  IR::getBitType(BMv2_V1ModelTestgenTarget::getPortNumWidth_bits());
-             const auto* metadataLabel = args->at(0)->expression;
+             const auto *metadataLabel = args->at(0)->expression;
              if (!(metadataLabel->is<IR::Member>() || metadataLabel->is<IR::PathExpression>())) {
                  TESTGEN_UNIMPLEMENTED("Drop input %1% of type %2% not supported", metadataLabel,
                                        metadataLabel->type);
              }
              // Use an assignment to set egress_spec to true.
              // This variable will be processed in the deparser.
-             const auto* portVar = new IR::Member(nineBitType, metadataLabel, "egress_spec");
+             const auto *portVar = new IR::Member(nineBitType, metadataLabel, "egress_spec");
              nextState->set(portVar, IR::getConstant(nineBitType, 511));
              nextState->add(new TraceEvent::Generic("mark_to_drop executed."));
              nextState->popBody();
@@ -181,19 +181,19 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          * ====================================================================================== */
         {"*method.random",
          {"result", "lo", "hi"},
-         [this](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-                IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
-                const ExecutionState& state, SmallStepEvaluator::Result& result) {
+         [this](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+                IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+                const ExecutionState &state, SmallStepEvaluator::Result &result) {
              BUG_CHECK(args->at(1)->expression->to<IR::Constant>(), "Expected a constant.");
              BUG_CHECK(args->at(2)->expression->to<IR::Constant>(), "Expected a constant.");
-             const auto* lo = args->at(1)->expression->to<IR::Constant>();
-             const auto* hi = args->at(2)->expression->to<IR::Constant>();
+             const auto *lo = args->at(1)->expression->to<IR::Constant>();
+             const auto *hi = args->at(2)->expression->to<IR::Constant>();
              BUG_CHECK(lo->value <= hi->value,
                        "Low value ( %1% ) must be less than high value ( %2% ).", lo, hi);
-             auto* nextState = new ExecutionState(state);
-             const auto* resultField = args->at(0)->expression;
-             const IR::Member* fieldRef = nullptr;
-             if (const auto* pathRef = resultField->to<IR::PathExpression>()) {
+             auto *nextState = new ExecutionState(state);
+             const auto *resultField = args->at(0)->expression;
+             const IR::Member *fieldRef = nullptr;
+             if (const auto *pathRef = resultField->to<IR::PathExpression>()) {
                  fieldRef = state.convertPathExpr(pathRef);
              } else {
                  fieldRef = resultField->to<IR::Member>();
@@ -282,12 +282,12 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          * ====================================================================================== */
         {"*method.log_msg",
          {"msg", "args"},
-         [](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-            IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
-            const ExecutionState& state, SmallStepEvaluator::Result& result) {
+         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+            const ExecutionState &state, SmallStepEvaluator::Result &result) {
              auto msg = args->at(0)->expression->checkedTo<IR::StringLiteral>()->value;
              std::stringstream totalStream;
-             if (const auto* structExpr = args->at(1)->expression->to<IR::StructExpression>()) {
+             if (const auto *structExpr = args->at(1)->expression->to<IR::StructExpression>()) {
                  int exprNumber = 0;
                  for (size_t i = 0; i < msg.size(); i++) {
                      if (i + 1 < msg.size() && msg.get(i) == '{' && msg.get(i + 1) == '}') {
@@ -303,18 +303,18 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  totalStream << msg;
              }
 
-             auto* nextState = new ExecutionState(state);
+             auto *nextState = new ExecutionState(state);
              nextState->add(new TraceEvent::Generic(totalStream.str()));
              nextState->popBody();
              result->emplace_back(nextState);
          }},
         {"*method.log_msg",
          {"msg"},
-         [](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-            IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
-            const ExecutionState& state, SmallStepEvaluator::Result& result) {
+         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+            const ExecutionState &state, SmallStepEvaluator::Result &result) {
              auto msg = args->at(0)->expression->checkedTo<IR::StringLiteral>()->value;
-             auto* nextState = new ExecutionState(state);
+             auto *nextState = new ExecutionState(state);
              nextState->add(new TraceEvent::Generic(msg));
              nextState->popBody();
              result->emplace_back(nextState);
@@ -336,23 +336,23 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          * ====================================================================================== */
         {"*method.hash",
          {"result", "algo", "base", "data", "max"},
-         [this](const IR::MethodCallExpression* call, const IR::Expression* receiver, IR::ID& name,
-                const IR::Vector<IR::Argument>* args, const ExecutionState& state,
-                SmallStepEvaluator::Result& result) {
+         [this](const IR::MethodCallExpression *call, const IR::Expression *receiver, IR::ID &name,
+                const IR::Vector<IR::Argument> *args, const ExecutionState &state,
+                SmallStepEvaluator::Result &result) {
              bool argsAreTainted = false;
              // If any of the input arguments is tainted, the entire extern is unreliable.
              for (size_t idx = 1; idx < args->size(); ++idx) {
-                 const auto* arg = args->at(idx);
-                 const auto* argExpr = arg->expression;
+                 const auto *arg = args->at(idx);
+                 const auto *argExpr = arg->expression;
 
                  // TODO: Frontload this in the expression stepper for method call expressions.
                  if (!SymbolicEnv::isSymbolicValue(argExpr)) {
                      // Evaluate the condition.
                      stepToSubexpr(argExpr, result, state,
-                                   [call, idx](const Continuation::Parameter* v) {
-                                       auto* clonedCall = call->clone();
-                                       auto* arguments = clonedCall->arguments->clone();
-                                       auto* arg = arguments->at(idx)->clone();
+                                   [call, idx](const Continuation::Parameter *v) {
+                                       auto *clonedCall = call->clone();
+                                       auto *arguments = clonedCall->arguments->clone();
+                                       auto *arg = arguments->at(idx)->clone();
                                        arg->expression = v->param;
                                        (*arguments)[idx] = arg;
                                        clonedCall->arguments = arguments;
@@ -362,19 +362,19 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  }
                  argsAreTainted = argsAreTainted || state.hasTaint(arg->expression);
              }
-             const auto* hashOutput = args->at(0)->expression;
+             const auto *hashOutput = args->at(0)->expression;
 
-             const auto* declInstance = state.findDecl(new IR::PathExpression(name));
+             const auto *declInstance = state.findDecl(new IR::PathExpression(name));
              IR::IndexedVector<IR::Node> decls({declInstance->checkedTo<IR::Declaration>()});
 
              // TODO: Find a better way to classify identifiers.
              // We should be using a new IR type instead.
              // This type is defined in an ir.def file.
              auto externName = receiver->toString() + "_" + declInstance->controlPlaneName();
-             auto* nextState = new ExecutionState(state);
+             auto *nextState = new ExecutionState(state);
              if (hashOutput->type->is<IR::Type_Bits>()) {
-                 const IR::Member* fieldRef = nullptr;
-                 if (const auto* pathRef = hashOutput->to<IR::PathExpression>()) {
+                 const IR::Member *fieldRef = nullptr;
+                 if (const auto *pathRef = hashOutput->to<IR::PathExpression>()) {
                      fieldRef = state.convertPathExpr(pathRef);
                  } else {
                      fieldRef = hashOutput->to<IR::Member>();
@@ -387,7 +387,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                      nextState->set(fieldRef,
                                     programInfo.createTargetUninitialized(fieldRef->type, false));
                  } else {
-                     const auto* concolicVar = new IR::ConcolicVariable(
+                     const auto *concolicVar = new IR::ConcolicVariable(
                          fieldRef->type, externName, args, call->clone_id, 0, decls);
                      nextState->set(fieldRef, concolicVar);
                  }
@@ -418,21 +418,21 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          * ====================================================================================== */
         {"register.read",
          {"result", "index"},
-         [this](const IR::MethodCallExpression* call, const IR::Expression* receiver,
-                IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
-                const ExecutionState& state, SmallStepEvaluator::Result& result) {
+         [this](const IR::MethodCallExpression *call, const IR::Expression *receiver,
+                IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+                const ExecutionState &state, SmallStepEvaluator::Result &result) {
              for (size_t idx = 1; idx < args->size(); ++idx) {
-                 const auto* arg = args->at(idx);
-                 const auto* argExpr = arg->expression;
+                 const auto *arg = args->at(idx);
+                 const auto *argExpr = arg->expression;
 
                  // TODO: Frontload this in the expression stepper for method call expressions.
                  if (!SymbolicEnv::isSymbolicValue(argExpr)) {
                      // Evaluate the condition.
                      stepToSubexpr(argExpr, result, state,
-                                   [call, idx](const Continuation::Parameter* v) {
-                                       auto* clonedCall = call->clone();
-                                       auto* arguments = clonedCall->arguments->clone();
-                                       auto* arg = arguments->at(idx)->clone();
+                                   [call, idx](const Continuation::Parameter *v) {
+                                       auto *clonedCall = call->clone();
+                                       auto *arguments = clonedCall->arguments->clone();
+                                       auto *arg = arguments->at(idx)->clone();
                                        arg->expression = v->param;
                                        (*arguments)[idx] = arg;
                                        clonedCall->arguments = arguments;
@@ -441,30 +441,30 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                      return;
                  }
              }
-             const auto* readOutput = args->at(0)->expression;
-             const auto* index = args->at(1)->expression;
-             auto* nextState = new ExecutionState(state);
+             const auto *readOutput = args->at(0)->expression;
+             const auto *index = args->at(1)->expression;
+             auto *nextState = new ExecutionState(state);
              std::vector<Continuation::Command> replacements;
 
-             const auto* receiverPath = receiver->checkedTo<IR::PathExpression>();
-             const auto& externInstance = state.convertPathExpr(receiverPath);
+             const auto *receiverPath = receiver->checkedTo<IR::PathExpression>();
+             const auto &externInstance = state.convertPathExpr(receiverPath);
 
              // Retrieve the register state from the object store. If it is already present, just
              // cast the object to the correct class and retrieve the current value according to the
              // index. If the register has not been added had, create a new register object.
-             const auto* registerState =
+             const auto *registerState =
                  state.getTestObject("registervalues", externInstance->toString(), false);
-             const Bmv2RegisterValue* registerValue = nullptr;
+             const Bmv2RegisterValue *registerValue = nullptr;
              if (registerState != nullptr) {
                  registerValue = registerState->checkedTo<Bmv2RegisterValue>();
              } else {
-                 const auto* inputValue =
+                 const auto *inputValue =
                      programInfo.createTargetUninitialized(readOutput->type, false);
                  registerValue = new Bmv2RegisterValue(inputValue);
                  nextState->addTestObject("registervalues", externInstance->toString(),
                                           registerValue);
              }
-             const IR::Expression* baseExpr = registerValue->getCurrentValue(index);
+             const IR::Expression *baseExpr = registerValue->getCurrentValue(index);
 
              if (readOutput->type->is<IR::Type_Bits>()) {
                  // We need an assignment statement (and the inefficient copy) here because we need
@@ -513,28 +513,28 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          * ====================================================================================== */
         {"register.write",
          {"index", "value"},
-         [this](const IR::MethodCallExpression* call, const IR::Expression* receiver,
-                IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
-                const ExecutionState& state, SmallStepEvaluator::Result& result) {
-             const auto* index = args->at(0)->expression;
-             const auto* inputValue = args->at(1)->expression;
+         [this](const IR::MethodCallExpression *call, const IR::Expression *receiver,
+                IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+                const ExecutionState &state, SmallStepEvaluator::Result &result) {
+             const auto *index = args->at(0)->expression;
+             const auto *inputValue = args->at(1)->expression;
              if (!(inputValue->type->is<IR::Type_InfInt>() ||
                    inputValue->type->is<IR::Type_Bits>())) {
                  TESTGEN_UNIMPLEMENTED(
                      "Only registers with bit or int types are currently supported for v1model.");
              }
              for (size_t idx = 0; idx < args->size(); ++idx) {
-                 const auto* arg = args->at(idx);
-                 const auto* argExpr = arg->expression;
+                 const auto *arg = args->at(idx);
+                 const auto *argExpr = arg->expression;
 
                  // TODO: Frontload this in the expression stepper for method call expressions.
                  if (!SymbolicEnv::isSymbolicValue(argExpr)) {
                      // Evaluate the condition.
                      stepToSubexpr(argExpr, result, state,
-                                   [call, idx](const Continuation::Parameter* v) {
-                                       auto* clonedCall = call->clone();
-                                       auto* arguments = clonedCall->arguments->clone();
-                                       auto* arg = arguments->at(idx)->clone();
+                                   [call, idx](const Continuation::Parameter *v) {
+                                       auto *clonedCall = call->clone();
+                                       auto *arguments = clonedCall->arguments->clone();
+                                       auto *arg = arguments->at(idx)->clone();
                                        arg->expression = v->param;
                                        (*arguments)[idx] = arg;
                                        clonedCall->arguments = arguments;
@@ -543,9 +543,9 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                      return;
                  }
              }
-             const auto* receiverPath = receiver->checkedTo<IR::PathExpression>();
-             const auto& externInstance = state.convertPathExpr(receiverPath);
-             auto* nextState = new ExecutionState(state);
+             const auto *receiverPath = receiver->checkedTo<IR::PathExpression>();
+             const auto &externInstance = state.convertPathExpr(receiverPath);
+             auto *nextState = new ExecutionState(state);
              // TODO: Find a better way to model a trace of this event.
              std::stringstream registerStream;
              registerStream << "RegisterWrite: Value ";
@@ -556,15 +556,15 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
 
              // "Write" to the register by update the internal test object state. If the register
              // did not exist previously, update it with the value to write as initial value.
-             const auto* registerState =
+             const auto *registerState =
                  nextState->getTestObject("registervalues", externInstance->toString(), false);
-             Bmv2RegisterValue* registerValue = nullptr;
+             Bmv2RegisterValue *registerValue = nullptr;
              if (registerState != nullptr) {
                  registerValue =
                      new Bmv2RegisterValue(*registerState->checkedTo<Bmv2RegisterValue>());
                  registerValue->addRegisterCondition(Bmv2RegisterCondition{index, inputValue});
              } else {
-                 const auto& writeValue =
+                 const auto &writeValue =
                      programInfo.createTargetUninitialized(inputValue->type, false);
                  registerValue = new Bmv2RegisterValue(writeValue);
                  registerValue->addRegisterCondition(Bmv2RegisterCondition{index, inputValue});
@@ -602,11 +602,11 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
         // TODO: Count currently has no effect in the symbolic interpreter.
         {"counter.count",
          {"index"},
-         [](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-            IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* /*args*/,
-            const ExecutionState& state, SmallStepEvaluator::Result& result) {
+         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
+            const ExecutionState &state, SmallStepEvaluator::Result &result) {
              ::warning("counter.count not fully implemented.");
-             auto* nextState = new ExecutionState(state);
+             auto *nextState = new ExecutionState(state);
              nextState->popBody();
              result->emplace_back(nextState);
          }},
@@ -639,11 +639,11 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
         // TODO: Count currently has no effect in the symbolic interpreter.
         {"direct_counter.count",
          {},
-         [](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-            IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* /*args*/,
-            const ExecutionState& state, SmallStepEvaluator::Result& result) {
+         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
+            const ExecutionState &state, SmallStepEvaluator::Result &result) {
              ::warning("direct_counter.count not fully implemented.");
-             auto* nextState = new ExecutionState(state);
+             auto *nextState = new ExecutionState(state);
              nextState->popBody();
              result->emplace_back(nextState);
          }},
@@ -681,11 +681,11 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
         // TODO: Read currently has no effect in the symbolic interpreter.
         {"meter.execute_meter",
          {"index", "result"},
-         [](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-            IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* /*args*/,
-            const ExecutionState& state, SmallStepEvaluator::Result& result) {
+         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
+            const ExecutionState &state, SmallStepEvaluator::Result &result) {
              ::warning("meter.execute_meter not fully implemented.");
-             auto* nextState = new ExecutionState(state);
+             auto *nextState = new ExecutionState(state);
              nextState->popBody();
              result->emplace_back(nextState);
          }},
@@ -722,11 +722,11 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
         // TODO: Read currently has no effect in the symbolic interpreter.
         {"direct_meter.read",
          {"result"},
-         [](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-            IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* /*args*/,
-            const ExecutionState& state, SmallStepEvaluator::Result& result) {
+         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
+            const ExecutionState &state, SmallStepEvaluator::Result &result) {
              ::warning("direct_meter.read not fully implemented.");
-             auto* nextState = new ExecutionState(state);
+             auto *nextState = new ExecutionState(state);
              nextState->popBody();
              result->emplace_back(nextState);
          }},
@@ -757,11 +757,11 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          * ====================================================================================== */
         {"*method.digest",
          {"receiver", "data"},
-         [](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-            IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* /*args*/,
-            const ExecutionState& state, SmallStepEvaluator::Result& result) {
+         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
+            const ExecutionState &state, SmallStepEvaluator::Result &result) {
              ::warning("digest not fully implemented.");
-             auto* nextState = new ExecutionState(state);
+             auto *nextState = new ExecutionState(state);
              nextState->popBody();
              result->emplace_back(nextState);
          }},
@@ -802,9 +802,9 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          * ====================================================================================== */
         {"*method.clone_preserving_field_list",
          {"type", "session", "data"},
-         [this](const IR::MethodCallExpression* call, const IR::Expression* /*receiver*/,
-                IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
-                const ExecutionState& state, SmallStepEvaluator::Result& result) {
+         [this](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
+                IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+                const ExecutionState &state, SmallStepEvaluator::Result &result) {
              uint64_t recirculateCount = 0;
              // Grab the recirculate count. Stop after more than 1 circulation loop to avoid
              // infinite recirculation loops.
@@ -812,9 +812,9 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              if (state.hasProperty("recirculate_count")) {
                  recirculateCount = state.getProperty<uint64_t>("recirculate_count");
                  if (recirculateCount > 1) {
-                     auto* nextState = new ExecutionState(state);
+                     auto *nextState = new ExecutionState(state);
                      ::warning("Only single recirculation supported for now. Dropping packet.");
-                     auto* dropStmt = new IR::MethodCallStatement(
+                     auto *dropStmt = new IR::MethodCallStatement(
                          Utils::generateInternalMethodCall("drop_and_exit", {}));
                      nextState->replaceTopBody(dropStmt);
                      result->emplace_back(nextState);
@@ -823,17 +823,17 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              }
              bool argsAreTainted = false;
              for (size_t idx = 0; idx < args->size(); ++idx) {
-                 const auto* arg = args->at(idx);
-                 const auto* argExpr = arg->expression;
+                 const auto *arg = args->at(idx);
+                 const auto *argExpr = arg->expression;
 
                  // TODO: Frontload this in the expression stepper for method call expressions.
                  if (!SymbolicEnv::isSymbolicValue(argExpr)) {
                      // Evaluate the condition.
                      stepToSubexpr(argExpr, result, state,
-                                   [call, idx](const Continuation::Parameter* v) {
-                                       auto* clonedCall = call->clone();
-                                       auto* arguments = clonedCall->arguments->clone();
-                                       auto* arg = arguments->at(idx)->clone();
+                                   [call, idx](const Continuation::Parameter *v) {
+                                       auto *clonedCall = call->clone();
+                                       auto *arguments = clonedCall->arguments->clone();
+                                       auto *arg = arguments->at(idx)->clone();
                                        arg->expression = v->param;
                                        (*arguments)[idx] = arg;
                                        clonedCall->arguments = arguments;
@@ -846,61 +846,62 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              // If any of the input arguments is tainted, the entire extern is unreliable.
              if (argsAreTainted) {
                  ::warning("clone args are tainted and not predictable. Skipping clone execution.");
-                 auto* nextState = new ExecutionState(state);
+                 auto *nextState = new ExecutionState(state);
                  nextState->popBody();
                  result->emplace_back(nextState);
                  return;
              }
 
              auto cloneType = args->at(0)->expression->checkedTo<IR::Constant>()->asUint64();
-             const auto* sessionIdExpr = args->at(1)->expression;
+             const auto *sessionIdExpr = args->at(1)->expression;
              auto recirculateIndex = args->at(2)->expression->checkedTo<IR::Constant>()->asUint64();
-             boost::optional<const Constraint*> cond = boost::none;
+             boost::optional<const Constraint *> cond = boost::none;
 
              if (cloneType == BMv2Constants::CLONE_TYPE_I2E) {
                  // Pick a clone port var. For now, pick a random value from 0-511.
-                 const auto* rndConst =
-                     Utils::getRandConstantForWidth(TestgenTarget::getPortNumWidth_bits());
-                 const auto* clonePortVar = rndConst;
+                 const auto *egressPortVar = programInfo.getTargetOutputPortVar();
+                 const auto &clonePortVar = Utils::getZombieConst(
+                     egressPortVar->type, 0, "clone_port_var" + std::to_string(call->clone_id));
+                 cond = new IR::Neq(egressPortVar, clonePortVar);
                  // clone_preserving_field_list has a default state where the packet continues as
                  // is.
                  {
-                     auto* defaultState = new ExecutionState(state);
-                     const auto* cloneInfo = new Bmv2_CloneInfo(sessionIdExpr, clonePortVar, false);
+                     auto *defaultState = new ExecutionState(state);
+                     const auto *cloneInfo = new Bmv2_CloneInfo(sessionIdExpr, clonePortVar, false);
                      defaultState->addTestObject(
                          "clone_infos", std::to_string(sessionIdExpr->clone_id), cloneInfo);
                      defaultState->popBody();
                      result->emplace_back(cond, state, defaultState);
                  }
                  // This is the clone state.
-                 auto* nextState = new ExecutionState(state);
+                 auto *nextState = new ExecutionState(state);
 
                  // We need to reset everything to the state before the ingress call. We use a trick
                  // by calling copyIn on the entire state again. We need a little bit of information
                  // for that, including the exact parameter names of the ingress block we are in.
                  // Just grab the ingress from the programmable blocks.
-                 auto progInfo = getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
-                 const auto* programmableBlocks = progInfo->getProgrammableBlocks();
-                 const auto* typeDecl = programmableBlocks->at("Ingress");
-                 const auto* applyBlock = typeDecl->checkedTo<IR::P4Control>();
-                 const auto* params = applyBlock->getApplyParameters();
+                 const auto *progInfo = getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
+                 const auto *programmableBlocks = progInfo->getProgrammableBlocks();
+                 const auto *typeDecl = programmableBlocks->at("Ingress");
+                 const auto *applyBlock = typeDecl->checkedTo<IR::P4Control>();
+                 const auto *params = applyBlock->getApplyParameters();
                  auto blockIndex = 2;
-                 const auto* archSpec = TestgenTarget::getArchSpec();
-                 const auto* archMember = archSpec->getArchMember(blockIndex);
+                 const auto *archSpec = TestgenTarget::getArchSpec();
+                 const auto *archMember = archSpec->getArchMember(blockIndex);
                  std::vector<Continuation::Command> cmds;
                  for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
-                     const auto* param = params->getParameter(paramIdx);
+                     const auto *param = params->getParameter(paramIdx);
                      // Skip the second parameter (metadata) since we do want to preserve it.
                      if (paramIdx == 1) {
                          // This program segment resets the user metadata of the v1model program to
                          // 0. However, fields in the user metadata that have the field_list
                          // annotation and the appropriate index will not be reset.
                          // The user metadata is the second parameter of the ingress control.
-                         const auto* paramType = param->type;
-                         if (const auto* tn = paramType->to<IR::Type_Name>()) {
+                         const auto *paramType = param->type;
+                         if (const auto *tn = paramType->to<IR::Type_Name>()) {
                              paramType = nextState->resolveType(tn);
                          }
-                         const auto* paramRef =
+                         const auto *paramRef =
                              new IR::PathExpression(paramType, new IR::Path(param->name));
                          resetPreservingFieldList(nextState, paramRef, recirculateIndex);
                          continue;
@@ -910,13 +911,13 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  // We then exit, which will copy out all the state that we have just reset.
                  cmds.emplace_back(new IR::ExitStatement());
 
-                 const auto* cloneInfo = new Bmv2_CloneInfo(sessionIdExpr, clonePortVar, true);
+                 const auto *cloneInfo = new Bmv2_CloneInfo(sessionIdExpr, clonePortVar, true);
                  nextState->addTestObject("clone_infos", std::to_string(sessionIdExpr->clone_id),
                                           cloneInfo);
                  // Reset the packet buffer, which corresponds to the output packet.
                  nextState->resetPacketBuffer();
-                 const auto* bitType = IR::getBitType(32);
-                 const auto* instanceTypeVar = new IR::Member(
+                 const auto *bitType = IR::getBitType(32);
+                 const auto *instanceTypeVar = new IR::Member(
                      bitType, new IR::PathExpression("*standard_metadata"), "instance_type");
                  nextState->set(
                      instanceTypeVar,
@@ -927,7 +928,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              }
 
              if (cloneType == BMv2Constants::CLONE_TYPE_E2E) {
-                 auto* nextState = new ExecutionState(state);
+                 auto *nextState = new ExecutionState(state);
                  // Increment the recirculation count.
                  nextState->setProperty("recirculate_count", ++recirculateCount);
                  // Recirculate is now active and "check_recirculate" will be triggered.
@@ -986,11 +987,11 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          * ====================================================================================== */
         {"*method.resubmit_preserving_field_list",
          {"data"},
-         [](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-            IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
-            const ExecutionState& state, SmallStepEvaluator::Result& result) {
+         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+            const ExecutionState &state, SmallStepEvaluator::Result &result) {
              uint64_t recirculateCount = 0;
-             auto* nextState = new ExecutionState(state);
+             auto *nextState = new ExecutionState(state);
              // Grab the recirculate count. Stop after more than 1 circulation loop to avoid
              // infinite recirculation loops.
              // TODO: Determine the exact count.
@@ -998,7 +999,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  recirculateCount = state.getProperty<uint64_t>("recirculate_count");
                  if (recirculateCount > 1) {
                      ::warning("Only single resubmit supported for now. Dropping packet.");
-                     auto* dropStmt = new IR::MethodCallStatement(
+                     auto *dropStmt = new IR::MethodCallStatement(
                          Utils::generateInternalMethodCall("drop_and_exit", {}));
                      nextState->replaceTopBody(dropStmt);
                      result->emplace_back(nextState);
@@ -1044,11 +1045,11 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          * ====================================================================================== */
         {"*method.recirculate_preserving_field_list",
          {"index"},
-         [](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-            IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
-            const ExecutionState& state, SmallStepEvaluator::Result& result) {
+         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+            const ExecutionState &state, SmallStepEvaluator::Result &result) {
              uint64_t recirculateCount = 0;
-             auto* nextState = new ExecutionState(state);
+             auto *nextState = new ExecutionState(state);
              // Grab the recirculate count. Stop after more than 1 circulation loop to avoid
              // infinite recirculation loops.
              // TODO: Determine the exact count.
@@ -1056,7 +1057,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  recirculateCount = state.getProperty<uint64_t>("recirculate_count");
                  if (recirculateCount > 1) {
                      ::warning("Only single recirculation supported for now. Dropping packet.");
-                     auto* dropStmt = new IR::MethodCallStatement(
+                     auto *dropStmt = new IR::MethodCallStatement(
                          Utils::generateInternalMethodCall("drop_and_exit", {}));
                      nextState->replaceTopBody(dropStmt);
                      result->emplace_back(nextState);
@@ -1086,9 +1087,9 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          * ====================================================================================== */
         {"*method.clone",
          {"type", "session"},
-         [this](const IR::MethodCallExpression* call, const IR::Expression* /*receiver*/,
-                IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
-                const ExecutionState& state, SmallStepEvaluator::Result& result) {
+         [this](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
+                IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+                const ExecutionState &state, SmallStepEvaluator::Result &result) {
              uint64_t recirculateCount = 0;
              // Grab the recirculate count. Stop after more than 1 circulation loop to avoid
              // infinite recirculation loops.
@@ -1096,9 +1097,9 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              if (state.hasProperty("recirculate_count")) {
                  recirculateCount = state.getProperty<uint64_t>("recirculate_count");
                  if (recirculateCount > 1) {
-                     auto* nextState = new ExecutionState(state);
+                     auto *nextState = new ExecutionState(state);
                      ::warning("Only single recirculation supported for now. Dropping packet.");
-                     auto* dropStmt = new IR::MethodCallStatement(
+                     auto *dropStmt = new IR::MethodCallStatement(
                          Utils::generateInternalMethodCall("drop_and_exit", {}));
                      nextState->replaceTopBody(dropStmt);
                      result->emplace_back(nextState);
@@ -1107,17 +1108,17 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              }
              bool argsAreTainted = false;
              for (size_t idx = 0; idx < args->size(); ++idx) {
-                 const auto* arg = args->at(idx);
-                 const auto* argExpr = arg->expression;
+                 const auto *arg = args->at(idx);
+                 const auto *argExpr = arg->expression;
 
                  // TODO: Frontload this in the expression stepper for method call expressions.
                  if (!SymbolicEnv::isSymbolicValue(argExpr)) {
                      // Evaluate the condition.
                      stepToSubexpr(argExpr, result, state,
-                                   [call, idx](const Continuation::Parameter* v) {
-                                       auto* clonedCall = call->clone();
-                                       auto* arguments = clonedCall->arguments->clone();
-                                       auto* arg = arguments->at(idx)->clone();
+                                   [call, idx](const Continuation::Parameter *v) {
+                                       auto *clonedCall = call->clone();
+                                       auto *arguments = clonedCall->arguments->clone();
+                                       auto *arg = arguments->at(idx)->clone();
                                        arg->expression = v->param;
                                        (*arguments)[idx] = arg;
                                        clonedCall->arguments = arguments;
@@ -1130,63 +1131,64 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              // If any of the input arguments is tainted, the entire extern is unreliable.
              if (argsAreTainted) {
                  ::warning("clone args are tainted and not predictable. Skipping clone execution.");
-                 auto* nextState = new ExecutionState(state);
+                 auto *nextState = new ExecutionState(state);
                  nextState->popBody();
                  result->emplace_back(nextState);
                  return;
              }
 
              auto cloneType = args->at(0)->expression->checkedTo<IR::Constant>()->asUint64();
-             const auto* sessionIdExpr = args->at(1)->expression;
+             const auto *sessionIdExpr = args->at(1)->expression;
              uint64_t sessionId = 0;
-             boost::optional<const Constraint*> cond = boost::none;
+             boost::optional<const Constraint *> cond = boost::none;
 
              if (cloneType == BMv2Constants::CLONE_TYPE_I2E) {
                  // Pick a clone port var. For now, pick a random value from 0-511.
-                 const auto* rndConst =
-                     Utils::getRandConstantForWidth(TestgenTarget::getPortNumWidth_bits());
-                 const auto* clonePortVar = rndConst;
+                 const auto *egressPortVar = programInfo.getTargetOutputPortVar();
+                 const auto &clonePortVar = Utils::getZombieConst(
+                     egressPortVar->type, 0, "clone_port_var" + std::to_string(call->clone_id));
+                 cond = new IR::Neq(egressPortVar, clonePortVar);
                  // clone_preserving_field_list has a default state where the packet continues as
                  // is.
                  {
-                     auto* defaultState = new ExecutionState(state);
-                     const auto* cloneInfo = new Bmv2_CloneInfo(sessionIdExpr, clonePortVar, false);
+                     auto *defaultState = new ExecutionState(state);
+                     const auto *cloneInfo = new Bmv2_CloneInfo(sessionIdExpr, clonePortVar, false);
                      defaultState->addTestObject(
                          "clone_infos", std::to_string(sessionIdExpr->clone_id), cloneInfo);
                      defaultState->popBody();
                      result->emplace_back(cond, state, defaultState);
                  }
                  // This is the clone state.
-                 auto* nextState = new ExecutionState(state);
+                 auto *nextState = new ExecutionState(state);
                  auto progInfo = getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
 
                  // We need to reset everything to the state before the ingress call. We use a trick
                  // by calling copyIn on the entire state again. We need a little bit of information
                  // for that, including the exact parameter names of the ingress block we are in.
                  // Just grab the ingress from the programmable blocks.
-                 const auto* programmableBlocks = progInfo->getProgrammableBlocks();
-                 const auto* typeDecl = programmableBlocks->at("Ingress");
-                 const auto* applyBlock = typeDecl->checkedTo<IR::P4Control>();
-                 const auto* params = applyBlock->getApplyParameters();
+                 const auto *programmableBlocks = progInfo->getProgrammableBlocks();
+                 const auto *typeDecl = programmableBlocks->at("Ingress");
+                 const auto *applyBlock = typeDecl->checkedTo<IR::P4Control>();
+                 const auto *params = applyBlock->getApplyParameters();
                  auto blockIndex = 2;
-                 const auto* archSpec = TestgenTarget::getArchSpec();
-                 const auto* archMember = archSpec->getArchMember(blockIndex);
+                 const auto *archSpec = TestgenTarget::getArchSpec();
+                 const auto *archMember = archSpec->getArchMember(blockIndex);
                  std::vector<Continuation::Command> cmds;
                  for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
-                     const auto* param = params->getParameter(paramIdx);
+                     const auto *param = params->getParameter(paramIdx);
                      programInfo.produceCopyInOutCall(param, paramIdx, archMember, &cmds, nullptr);
                  }
 
                  // We then exit, which will copy out all the state that we have just reset.
                  cmds.emplace_back(new IR::ExitStatement());
 
-                 const auto* cloneInfo = new Bmv2_CloneInfo(sessionIdExpr, clonePortVar, true);
+                 const auto *cloneInfo = new Bmv2_CloneInfo(sessionIdExpr, clonePortVar, true);
                  nextState->addTestObject("clone_infos", std::to_string(sessionIdExpr->clone_id),
                                           cloneInfo);
                  // Reset the packet buffer, which corresponds to the output packet.
                  nextState->resetPacketBuffer();
-                 const auto* bitType = IR::getBitType(32);
-                 const auto* instanceTypeVar = new IR::Member(
+                 const auto *bitType = IR::getBitType(32);
+                 const auto *instanceTypeVar = new IR::Member(
                      bitType, new IR::PathExpression("*standard_metadata"), "instance_type");
                  nextState->set(
                      instanceTypeVar,
@@ -1197,7 +1199,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              }
 
              if (cloneType == BMv2Constants::CLONE_TYPE_E2E) {
-                 auto* nextState = new ExecutionState(state);
+                 auto *nextState = new ExecutionState(state);
                  // Increment the recirculation count.
                  nextState->setProperty("recirculate_count", ++recirculateCount);
                  // Recirculate is now active and "check_recirculate" will be triggered.
@@ -1223,10 +1225,10 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
         /// externs. This extern assumes it is executed at the end of the deparser.
         {"*.check_recirculate",
          {},
-         [this](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-                IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* /*args*/,
-                const ExecutionState& state, SmallStepEvaluator::Result& result) {
-             auto* recState = new ExecutionState(state);
+         [this](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
+                IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
+                const ExecutionState &state, SmallStepEvaluator::Result &result) {
+             auto *recState = new ExecutionState(state);
              // Check whether recirculate is even active, if not, skip.
              if (!state.hasProperty("recirculate_active") ||
                  !state.getProperty<bool>("recirculate_active")) {
@@ -1247,14 +1249,14 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
 
              // We need to update the size of the packet when recirculating. Do not forget to divide
              // by 8.
-             const auto* pktSizeType = ExecutionState::getPacketSizeVarType();
-             const auto* packetSizeVar = new IR::Member(
+             const auto *pktSizeType = ExecutionState::getPacketSizeVarType();
+             const auto *packetSizeVar = new IR::Member(
                  pktSizeType, new IR::PathExpression("*standard_metadata"), "packet_length");
-             const auto* packetSizeConst =
+             const auto *packetSizeConst =
                  IR::getConstant(pktSizeType, recState->getPacketBufferSize() / 8);
              recState->set(packetSizeVar, packetSizeConst);
 
-             auto progInfo = getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
+             const auto *progInfo = getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
              if (recState->hasProperty("recirculate_index")) {
                  // Get the index set by the recirculate/resubmit function. Will fail if no index is
                  // set.
@@ -1263,15 +1265,15 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  // However, fields in the user metadata that have the field_list annotation and the
                  // appropriate index will not be reset.
                  // The user metadata is the third parameter of the parser control.
-                 const auto* paramPath = progInfo->getBlockParam("Parser", 2);
+                 const auto *paramPath = progInfo->getBlockParam("Parser", 2);
                  resetPreservingFieldList(recState, paramPath, recirculateIndex);
              }
 
              // Update the metadata variable to the correct instance type as provided by
              // recirculation.
              auto instanceType = state.getProperty<uint64_t>("recirculate_instance_type");
-             const auto* bitType = IR::getBitType(32);
-             const auto* instanceTypeVar = new IR::Member(
+             const auto *bitType = IR::getBitType(32);
+             const auto *instanceTypeVar = new IR::Member(
                  bitType, new IR::PathExpression("*standard_metadata"), "instance_type");
              recState->set(instanceTypeVar, IR::getConstant(bitType, instanceType));
 
@@ -1284,32 +1286,33 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  state.hasProperty("clone_active") && state.getProperty<bool>("clone_active");
              if (cloneActive) {
                  // Pick a clone port var. For now, pick a random value from 0-511.
-                 const auto* rndConst =
-                     Utils::getRandConstantForWidth(TestgenTarget::getPortNumWidth_bits());
-                 const auto* clonePortVar = rndConst;
-                 const auto* sessionIdExpr =
-                     state.getProperty<const IR::Expression*>("clone_session_id");
+                 const auto *egressPortVar = programInfo.getTargetOutputPortVar();
+                 const auto &clonePortVar = Utils::getZombieConst(
+                     egressPortVar->type, 0, "clone_port_var" + std::to_string(call->clone_id));
+                 const auto *cond = new IR::Neq(egressPortVar, clonePortVar);
+                 const auto *sessionIdExpr =
+                     state.getProperty<const IR::Expression *>("clone_session_id");
                  // clone_preserving_field_list has a default state where the packet continues as
                  // is.
                  {
-                     auto* defaultState = new ExecutionState(state);
+                     auto *defaultState = new ExecutionState(state);
                      defaultState->setProperty("clone_active", false);
-                     const auto* cloneInfo = new Bmv2_CloneInfo(sessionIdExpr, clonePortVar, false);
+                     const auto *cloneInfo = new Bmv2_CloneInfo(sessionIdExpr, clonePortVar, false);
                      defaultState->addTestObject(
                          "clone_infos", std::to_string(sessionIdExpr->clone_id), cloneInfo);
                      defaultState->popBody();
-                     result->emplace_back(defaultState);
+                     result->emplace_back(cond, state, defaultState);
                  }
                  // In the other state, we start processing from the egress.
-                 const auto* topLevelBlocks = progInfo->getPipelineSequence();
+                 const auto *topLevelBlocks = progInfo->getPipelineSequence();
                  size_t egressDelim = 0;
                  for (; egressDelim < topLevelBlocks->size(); ++egressDelim) {
                      auto block = topLevelBlocks->at(egressDelim);
-                     const auto* p4Node = boost::get<const IR::Node*>(&block);
+                     const auto *p4Node = boost::get<const IR::Node *>(&block);
                      if (p4Node == nullptr) {
                          continue;
                      }
-                     if (const auto* ctrl = (*p4Node)->to<IR::P4Control>()) {
+                     if (const auto *ctrl = (*p4Node)->to<IR::P4Control>()) {
                          if (progInfo->getGress(ctrl) == BMV2_EGRESS) {
                              break;
                          }
@@ -1318,18 +1321,18 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  const std::vector<Continuation::Command> blocks = {
                      topLevelBlocks->begin() + egressDelim - 2, topLevelBlocks->end()};
                  recState->replaceTopBody(&blocks);
-                 const auto* cloneInfo = new Bmv2_CloneInfo(sessionIdExpr, clonePortVar, true);
+                 const auto *cloneInfo = new Bmv2_CloneInfo(sessionIdExpr, clonePortVar, true);
                  recState->addTestObject("clone_infos", std::to_string(sessionIdExpr->clone_id),
                                          cloneInfo);
                  recState->setProperty("clone_active", false);
                  // Reset the packet buffer, which corresponds to the output packet.
                  recState->resetPacketBuffer();
-                 result->emplace_back(recState);
+                 result->emplace_back(cond, state, recState);
                  return;
              }
              // "Recirculate" by attaching the sequence again.
              // Does NOT initialize state or adds new conditions.
-             const auto* topLevelBlocks = progInfo->getPipelineSequence();
+             const auto *topLevelBlocks = progInfo->getPipelineSequence();
              recState->replaceTopBody(topLevelBlocks);
              result->emplace_back(recState);
          }},
@@ -1338,9 +1341,9 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          * ====================================================================================== */
         {"Checksum16.get",
          {"data"},
-         [](const IR::MethodCallExpression* /*call*/, const IR::Expression* /*receiver*/,
-            IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* /*args*/,
-            const ExecutionState& /*state*/, SmallStepEvaluator::Result& /*result*/) {
+         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
+            const ExecutionState & /*state*/, SmallStepEvaluator::Result & /*result*/) {
              P4C_UNIMPLEMENTED("Checksum16.get is deprecated and not supported.");
          }},
         /* ======================================================================================
@@ -1369,23 +1372,23 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          */
         {"*method.verify_checksum",
          {"condition", "data", "checksum", "algo"},
-         [this](const IR::MethodCallExpression* call, const IR::Expression* /*receiver*/,
-                IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
-                const ExecutionState& state, SmallStepEvaluator::Result& result) {
+         [this](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
+                IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+                const ExecutionState &state, SmallStepEvaluator::Result &result) {
              bool argsAreTainted = false;
              // If any of the input arguments is tainted, the entire extern is unreliable.
              for (size_t idx = 0; idx < args->size(); ++idx) {
-                 const auto* arg = args->at(idx);
-                 const auto* argExpr = arg->expression;
+                 const auto *arg = args->at(idx);
+                 const auto *argExpr = arg->expression;
 
                  // TODO: Frontload this in the expression stepper for method call expressions.
                  if (!SymbolicEnv::isSymbolicValue(argExpr)) {
                      // Evaluate the condition.
                      stepToSubexpr(argExpr, result, state,
-                                   [call, idx](const Continuation::Parameter* v) {
-                                       auto* clonedCall = call->clone();
-                                       auto* arguments = clonedCall->arguments->clone();
-                                       auto* arg = arguments->at(idx)->clone();
+                                   [call, idx](const Continuation::Parameter *v) {
+                                       auto *clonedCall = call->clone();
+                                       auto *arguments = clonedCall->arguments->clone();
+                                       auto *arg = arguments->at(idx)->clone();
                                        arg->expression = v->param;
                                        (*arguments)[idx] = arg;
                                        clonedCall->arguments = arguments;
@@ -1396,18 +1399,18 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  argsAreTainted = argsAreTainted || state.hasTaint(arg->expression);
              }
 
-             const auto* verifyCond = args->at(0)->expression;
-             const auto* data = args->at(1)->expression;
-             const auto* checksumValue = args->at(2)->expression;
-             const auto* checksumValueType = checksumValue->type;
-             const auto* algo = args->at(3)->expression;
-             const auto* oneBitType = IR::getBitType(1);
+             const auto *verifyCond = args->at(0)->expression;
+             const auto *data = args->at(1)->expression;
+             const auto *checksumValue = args->at(2)->expression;
+             const auto *checksumValueType = checksumValue->type;
+             const auto *algo = args->at(3)->expression;
+             const auto *oneBitType = IR::getBitType(1);
 
              // If the condition is tainted or the input data is tainted, the checksum error will
              // not be reliable.
              if (argsAreTainted) {
-                 auto* taintedState = new ExecutionState(state);
-                 const auto* checksumErr = new IR::Member(
+                 auto *taintedState = new ExecutionState(state);
+                 const auto *checksumErr = new IR::Member(
                      oneBitType, new IR::PathExpression("*standard_metadata"), "checksum_error");
                  taintedState->set(checksumErr,
                                    programInfo.createTargetUninitialized(checksumErr->type, true));
@@ -1419,7 +1422,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              // Handle the case where the condition is true.
 
              // Generate the checksum arguments.
-             auto* checksumArgs = new IR::Vector<IR::Argument>();
+             auto *checksumArgs = new IR::Vector<IR::Argument>();
              checksumArgs->push_back(new IR::Argument(checksumValue));
              checksumArgs->push_back(new IR::Argument(algo));
              checksumArgs->push_back(new IR::Argument(data));
@@ -1427,12 +1430,12 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              // The condition is true and the checksum matches.
              {
                  // Try to force the checksum expression to be equal to the result.
-                 auto* nextState = new ExecutionState(state);
-                 const auto* concolicVar = new IR::ConcolicVariable(
+                 auto *nextState = new ExecutionState(state);
+                 const auto *concolicVar = new IR::ConcolicVariable(
                      checksumValueType, "*method_checksum", checksumArgs, call->clone_id, 0);
                  std::vector<Continuation::Command> replacements;
                  // We use a guard to enforce that the match condition after the call is true.
-                 auto* checksumMatchCond = new IR::Equ(concolicVar, checksumValue);
+                 auto *checksumMatchCond = new IR::Equ(concolicVar, checksumValue);
                  nextState->popBody();
                  result->emplace_back(new IR::LAnd(checksumMatchCond, verifyCond), state,
                                       nextState);
@@ -1440,17 +1443,17 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
 
              // The condition is true and the checksum does not match.
              {
-                 auto* nextState = new ExecutionState(state);
-                 auto* concolicVar = new IR::ConcolicVariable(checksumValueType, "*method_checksum",
+                 auto *nextState = new ExecutionState(state);
+                 auto *concolicVar = new IR::ConcolicVariable(checksumValueType, "*method_checksum",
                                                               checksumArgs, call->clone_id, 0);
                  std::vector<Continuation::Command> replacements;
-                 auto* checksumMatchCond = new IR::Neq(concolicVar, checksumValue);
+                 auto *checksumMatchCond = new IR::Neq(concolicVar, checksumValue);
 
-                 const auto* checksumErr = new IR::Member(
+                 const auto *checksumErr = new IR::Member(
                      oneBitType, new IR::PathExpression("*standard_metadata"), "checksum_error");
-                 const auto* assign =
+                 const auto *assign =
                      new IR::AssignmentStatement(checksumErr, IR::getConstant(oneBitType, 1));
-                 auto* errorCond = new IR::LAnd(verifyCond, checksumMatchCond);
+                 auto *errorCond = new IR::LAnd(verifyCond, checksumMatchCond);
                  replacements.emplace_back(assign);
                  nextState->replaceTopBody(&replacements);
                  result->emplace_back(errorCond, state, nextState);
@@ -1458,7 +1461,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
 
              // Handle the case where the condition is false.
              {
-                 auto* nextState = new ExecutionState(state);
+                 auto *nextState = new ExecutionState(state);
                  nextState->popBody();
                  result->emplace_back(new IR::LNot(IR::Type::Boolean::get(), verifyCond), state,
                                       nextState);
@@ -1485,23 +1488,23 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          */
         {"*method.update_checksum",
          {"condition", "data", "checksum", "algo"},
-         [this](const IR::MethodCallExpression* call, const IR::Expression* /*receiver*/,
-                IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
-                const ExecutionState& state, SmallStepEvaluator::Result& result) {
+         [this](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
+                IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+                const ExecutionState &state, SmallStepEvaluator::Result &result) {
              bool argsAreTainted = false;
              // If any of the input arguments is tainted, the entire extern is unreliable.
              for (size_t idx = 0; idx < args->size() - 2; ++idx) {
-                 const auto* arg = args->at(idx);
-                 const auto* argExpr = arg->expression;
+                 const auto *arg = args->at(idx);
+                 const auto *argExpr = arg->expression;
 
                  // TODO: Frontload this in the expression stepper for method call expressions.
                  if (!SymbolicEnv::isSymbolicValue(argExpr)) {
                      // Evaluate the condition.
                      stepToSubexpr(argExpr, result, state,
-                                   [call, idx](const Continuation::Parameter* v) {
-                                       auto* clonedCall = call->clone();
-                                       auto* arguments = clonedCall->arguments->clone();
-                                       auto* arg = arguments->at(idx)->clone();
+                                   [call, idx](const Continuation::Parameter *v) {
+                                       auto *clonedCall = call->clone();
+                                       auto *arguments = clonedCall->arguments->clone();
+                                       auto *arg = arguments->at(idx)->clone();
                                        arg->expression = v->param;
                                        (*arguments)[idx] = arg;
                                        clonedCall->arguments = arguments;
@@ -1512,19 +1515,19 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  argsAreTainted = argsAreTainted || state.hasTaint(arg->expression);
              }
 
-             const auto* checksumVar = args->at(2)->expression;
+             const auto *checksumVar = args->at(2)->expression;
              if (!(checksumVar->is<IR::Member>() || checksumVar->is<IR::PathExpression>())) {
                  TESTGEN_UNIMPLEMENTED("Checksum input %1% of type %2% not supported", checksumVar,
                                        checksumVar->node_type_name());
              }
-             const auto* updateCond = args->at(0)->expression;
-             const auto* checksumVarType = checksumVar->type;
-             const auto* data = args->at(1)->expression;
-             const auto* algo = args->at(3)->expression;
+             const auto *updateCond = args->at(0)->expression;
+             const auto *checksumVarType = checksumVar->type;
+             const auto *data = args->at(1)->expression;
+             const auto *algo = args->at(3)->expression;
              // If the condition is tainted or the input data is tainted.
              // The checksum will also be tainted.
              if (argsAreTainted) {
-                 auto* taintedState = new ExecutionState(state);
+                 auto *taintedState = new ExecutionState(state);
                  taintedState->set(checksumVar,
                                    programInfo.createTargetUninitialized(checksumVarType, true));
                  taintedState->popBody();
@@ -1535,13 +1538,13 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              // Handle the case where the condition is true.
              {
                  // Generate the checksum arguments.
-                 auto* checksumArgs = new IR::Vector<IR::Argument>();
+                 auto *checksumArgs = new IR::Vector<IR::Argument>();
                  checksumArgs->push_back(new IR::Argument(checksumVar));
                  checksumArgs->push_back(new IR::Argument(algo));
                  checksumArgs->push_back(new IR::Argument(data));
 
-                 auto* nextState = new ExecutionState(state);
-                 const auto* concolicVar = new IR::ConcolicVariable(
+                 auto *nextState = new ExecutionState(state);
+                 const auto *concolicVar = new IR::ConcolicVariable(
                      checksumVarType, "*method_checksum", checksumArgs, call->clone_id, 0);
                  nextState->set(checksumVar, concolicVar);
                  nextState->popBody();
@@ -1549,7 +1552,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              }
              // Handle the case where the condition is false. No change here.
              {
-                 auto* nextState = new ExecutionState(state);
+                 auto *nextState = new ExecutionState(state);
                  nextState->popBody();
                  result->emplace_back(new IR::LNot(IR::Type::Boolean::get(), updateCond), state,
                                       nextState);
@@ -1567,23 +1570,23 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          */
         {"*method.update_checksum_with_payload",
          {"condition", "data", "checksum", "algo"},
-         [this](const IR::MethodCallExpression* call, const IR::Expression* /*receiver*/,
-                IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
-                const ExecutionState& state, SmallStepEvaluator::Result& result) {
+         [this](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
+                IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+                const ExecutionState &state, SmallStepEvaluator::Result &result) {
              bool argsAreTainted = false;
              // If any of the input arguments is tainted, the entire extern is unreliable.
              for (size_t idx = 0; idx < args->size() - 2; ++idx) {
-                 const auto* arg = args->at(idx);
-                 const auto* argExpr = arg->expression;
+                 const auto *arg = args->at(idx);
+                 const auto *argExpr = arg->expression;
 
                  // TODO: Frontload this in the expression stepper for method call expressions.
                  if (!SymbolicEnv::isSymbolicValue(argExpr)) {
                      // Evaluate the condition.
                      stepToSubexpr(argExpr, result, state,
-                                   [call, idx](const Continuation::Parameter* v) {
-                                       auto* clonedCall = call->clone();
-                                       auto* arguments = clonedCall->arguments->clone();
-                                       auto* arg = arguments->at(idx)->clone();
+                                   [call, idx](const Continuation::Parameter *v) {
+                                       auto *clonedCall = call->clone();
+                                       auto *arguments = clonedCall->arguments->clone();
+                                       auto *arg = arguments->at(idx)->clone();
                                        arg->expression = v->param;
                                        (*arguments)[idx] = arg;
                                        clonedCall->arguments = arguments;
@@ -1594,19 +1597,19 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  argsAreTainted = argsAreTainted || state.hasTaint(arg->expression);
              }
 
-             const auto* checksumVar = args->at(2)->expression;
+             const auto *checksumVar = args->at(2)->expression;
              if (!(checksumVar->is<IR::Member>() || checksumVar->is<IR::PathExpression>())) {
                  TESTGEN_UNIMPLEMENTED("Checksum input %1% of type %2% not supported", checksumVar,
                                        checksumVar->node_type_name());
              }
-             const auto* updateCond = args->at(0)->expression;
-             const auto* checksumVarType = checksumVar->type;
-             const auto* data = args->at(1)->expression;
-             const auto* algo = args->at(3)->expression;
+             const auto *updateCond = args->at(0)->expression;
+             const auto *checksumVarType = checksumVar->type;
+             const auto *data = args->at(1)->expression;
+             const auto *algo = args->at(3)->expression;
              // If the condition is tainted or the input data is tainted.
              // The checksum will also be tainted.
              if (argsAreTainted) {
-                 auto* taintedState = new ExecutionState(state);
+                 auto *taintedState = new ExecutionState(state);
                  taintedState->set(checksumVar,
                                    programInfo.createTargetUninitialized(checksumVarType, true));
                  taintedState->popBody();
@@ -1617,13 +1620,13 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              // Handle the case where the condition is true.
              {
                  // Generate the checksum arguments.
-                 auto* checksumArgs = new IR::Vector<IR::Argument>();
+                 auto *checksumArgs = new IR::Vector<IR::Argument>();
                  checksumArgs->push_back(new IR::Argument(checksumVar));
                  checksumArgs->push_back(new IR::Argument(algo));
                  checksumArgs->push_back(new IR::Argument(data));
 
-                 auto* nextState = new ExecutionState(state);
-                 const auto* concolicVar =
+                 auto *nextState = new ExecutionState(state);
+                 const auto *concolicVar =
                      new IR::ConcolicVariable(checksumVarType, "*method_checksum_with_payload",
                                               checksumArgs, call->clone_id, 0);
                  nextState->set(checksumVar, concolicVar);
@@ -1632,7 +1635,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              }
              // Handle the case where the condition is false. No change here.
              {
-                 auto* nextState = new ExecutionState(state);
+                 auto *nextState = new ExecutionState(state);
                  nextState->popBody();
                  result->emplace_back(new IR::LNot(IR::Type::Boolean::get(), updateCond), state,
                                       nextState);
@@ -1650,23 +1653,23 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          */
         {"*method.verify_checksum_with_payload",
          {"condition", "data", "checksum", "algo"},
-         [this](const IR::MethodCallExpression* call, const IR::Expression* /*receiver*/,
-                IR::ID& /*methodName*/, const IR::Vector<IR::Argument>* args,
-                const ExecutionState& state, SmallStepEvaluator::Result& result) {
+         [this](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
+                IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+                const ExecutionState &state, SmallStepEvaluator::Result &result) {
              bool argsAreTainted = false;
              // If any of the input arguments is tainted, the entire extern is unreliable.
              for (size_t idx = 0; idx < args->size(); ++idx) {
-                 const auto* arg = args->at(idx);
-                 const auto* argExpr = arg->expression;
+                 const auto *arg = args->at(idx);
+                 const auto *argExpr = arg->expression;
 
                  // TODO: Frontload this in the expression stepper for method call expressions.
                  if (!SymbolicEnv::isSymbolicValue(argExpr)) {
                      // Evaluate the condition.
                      stepToSubexpr(argExpr, result, state,
-                                   [call, idx](const Continuation::Parameter* v) {
-                                       auto* clonedCall = call->clone();
-                                       auto* arguments = clonedCall->arguments->clone();
-                                       auto* arg = arguments->at(idx)->clone();
+                                   [call, idx](const Continuation::Parameter *v) {
+                                       auto *clonedCall = call->clone();
+                                       auto *arguments = clonedCall->arguments->clone();
+                                       auto *arg = arguments->at(idx)->clone();
                                        arg->expression = v->param;
                                        (*arguments)[idx] = arg;
                                        clonedCall->arguments = arguments;
@@ -1677,17 +1680,17 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  argsAreTainted = argsAreTainted || state.hasTaint(arg->expression);
              }
 
-             const auto* verifyCond = args->at(0)->expression;
-             const auto* data = args->at(1)->expression;
-             const auto* checksumValue = args->at(2)->expression;
-             const auto* checksumValueType = checksumValue->type;
-             const auto* algo = args->at(3)->expression;
-             const auto* oneBitType = IR::getBitType(1);
+             const auto *verifyCond = args->at(0)->expression;
+             const auto *data = args->at(1)->expression;
+             const auto *checksumValue = args->at(2)->expression;
+             const auto *checksumValueType = checksumValue->type;
+             const auto *algo = args->at(3)->expression;
+             const auto *oneBitType = IR::getBitType(1);
              // If the condition is tainted or the input data is tainted, the checksum error will
              // not be reliable.
              if (argsAreTainted) {
-                 auto* taintedState = new ExecutionState(state);
-                 const auto* checksumErr = new IR::Member(
+                 auto *taintedState = new ExecutionState(state);
+                 const auto *checksumErr = new IR::Member(
                      oneBitType, new IR::PathExpression("*standard_metadata"), "checksum_error");
                  taintedState->set(checksumErr,
                                    programInfo.createTargetUninitialized(checksumErr->type, true));
@@ -1697,7 +1700,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              }
 
              // Generate the checksum arguments.
-             auto* checksumArgs = new IR::Vector<IR::Argument>();
+             auto *checksumArgs = new IR::Vector<IR::Argument>();
              checksumArgs->push_back(new IR::Argument(checksumValue));
              checksumArgs->push_back(new IR::Argument(algo));
              checksumArgs->push_back(new IR::Argument(data));
@@ -1705,12 +1708,12 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              // The condition is true and the checksum matches.
              {
                  // Try to force the checksum expression to be equal to the result.
-                 auto* nextState = new ExecutionState(state);
-                 const auto* concolicVar =
+                 auto *nextState = new ExecutionState(state);
+                 const auto *concolicVar =
                      new IR::ConcolicVariable(checksumValueType, "*method_checksum_with_payload",
                                               checksumArgs, call->clone_id, 0);
                  // We use a guard to enforce that the match condition after the call is true.
-                 auto* checksumMatchCond = new IR::Equ(concolicVar, checksumValue);
+                 auto *checksumMatchCond = new IR::Equ(concolicVar, checksumValue);
                  nextState->popBody();
                  result->emplace_back(new IR::LAnd(checksumMatchCond, verifyCond), state,
                                       nextState);
@@ -1718,25 +1721,25 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
 
              // The condition is true and the checksum does not match.
              {
-                 auto* nextState = new ExecutionState(state);
-                 auto* concolicVar =
+                 auto *nextState = new ExecutionState(state);
+                 auto *concolicVar =
                      new IR::ConcolicVariable(checksumValueType, "*method_checksum_with_payload",
                                               checksumArgs, call->clone_id, 0);
                  std::vector<Continuation::Command> replacements;
-                 auto* checksumMatchCond = new IR::Neq(concolicVar, checksumValue);
+                 auto *checksumMatchCond = new IR::Neq(concolicVar, checksumValue);
 
-                 const auto* checksumErr = new IR::Member(
+                 const auto *checksumErr = new IR::Member(
                      oneBitType, new IR::PathExpression("*standard_metadata"), "checksum_error");
-                 const auto* assign =
+                 const auto *assign =
                      new IR::AssignmentStatement(checksumErr, IR::getConstant(oneBitType, 1));
-                 auto* errorCond = new IR::LAnd(verifyCond, checksumMatchCond);
+                 auto *errorCond = new IR::LAnd(verifyCond, checksumMatchCond);
                  replacements.emplace_back(assign);
                  nextState->replaceTopBody(&replacements);
                  result->emplace_back(errorCond, state, nextState);
              }
              // Handle the case where the condition is false. No change here.
              {
-                 auto* nextState = new ExecutionState(state);
+                 auto *nextState = new ExecutionState(state);
                  nextState->popBody();
                  result->emplace_back(new IR::LNot(IR::Type::Boolean::get(), verifyCond), state,
                                       nextState);
@@ -1749,7 +1752,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
     }
 }  // NOLINT
 
-bool BMv2_V1ModelExprStepper::preorder(const IR::P4Table* table) {
+bool BMv2_V1ModelExprStepper::preorder(const IR::P4Table *table) {
     // Delegate to the tableStepper.
     BMv2_V1ModelTableStepper tableStepper(this, table);
 

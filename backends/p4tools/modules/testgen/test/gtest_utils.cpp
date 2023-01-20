@@ -15,7 +15,7 @@ namespace Test {
 
 boost::optional<const P4ToolsTestCase> P4ToolsTestCase::create(
     std::string deviceName, std::string archName, CompilerOptions::FrontendVersion langVersion,
-    const std::string& source) {
+    const std::string &source) {
     // Initialize the target.
     ensureInit();
     BUG_CHECK(P4Tools::Target::init(deviceName, archName), "Target %1%/%2% not supported",
@@ -34,13 +34,13 @@ boost::optional<const P4ToolsTestCase> P4ToolsTestCase::create(
 
 boost::optional<const P4ToolsTestCase> P4ToolsTestCase::create_14(std::string deviceName,
                                                                   std::string archName,
-                                                                  const std::string& source) {
+                                                                  const std::string &source) {
     return create(deviceName, archName, CompilerOptions::FrontendVersion::P4_14, source);
 }
 
 boost::optional<const P4ToolsTestCase> P4ToolsTestCase::create_16(std::string deviceName,
                                                                   std::string archName,
-                                                                  const std::string& source) {
+                                                                  const std::string &source) {
     return create(deviceName, archName, CompilerOptions::FrontendVersion::P4_16, source);
 }
 

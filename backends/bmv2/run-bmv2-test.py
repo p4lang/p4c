@@ -364,8 +364,9 @@ if __name__ == "__main__":
     args, argv = parse_args()
     options = Options()
     options.binary = ""
-    options.p4filename = check_if_file(args.p4filename)
-    options.compilerSrcDir = check_if_dir(args.rootdir)
+    # TODO: Convert these paths to pathlib's Path.
+    options.p4filename = check_if_file(args.p4filename).as_posix()
+    options.compilerSrcDir = check_if_dir(args.rootdir).as_posix()
 
     # If no build directory is provided, append build to the compiler src dir.
     if args.builddir:

@@ -33,7 +33,7 @@ limitations under the License.
 #include "lib/exceptions.h"
 #include "lib/log.h"
 
-const IR::Expression* IR::Slice::make(const IR::Expression* e, unsigned lo, unsigned hi) {
+const IR::Expression *IR::Slice::make(const IR::Expression *e, unsigned lo, unsigned hi) {
     if (auto k = e->to<IR::Constant>()) {
         auto rv = ((*k >> lo) & IR::Constant((1U << (hi - lo + 1)) - 1)).clone();
         rv->type = IR::Type::Bits::get(hi - lo + 1);
@@ -60,7 +60,7 @@ int IR::Member::offset_bits() const {
 
 int IR::Member::lsb() const {
     int rv = 0;
-    auto header_type = dynamic_cast<const IR::Type_StructLike*>(expr->type);
+    auto header_type = dynamic_cast<const IR::Type_StructLike *>(expr->type);
     auto field_iter = header_type->fields.rbegin();
     // This assumes little-endian number for bits.
     while ((*field_iter)->name != member) {
@@ -116,27 +116,27 @@ void IR::Constant::handleOverflow(bool noWarning) {
     }
 }
 
-IR::Constant IR::Constant::operator<<(const unsigned& shift) const {
+IR::Constant IR::Constant::operator<<(const unsigned &shift) const {
     return IR::Constant(value << shift);
 }
 
-IR::Constant IR::Constant::operator>>(const unsigned& shift) const {
+IR::Constant IR::Constant::operator>>(const unsigned &shift) const {
     return IR::Constant(value >> shift);
 }
 
-IR::Constant IR::Constant::operator&(const IR::Constant& c) const {
+IR::Constant IR::Constant::operator&(const IR::Constant &c) const {
     return IR::Constant(value & c.value);
 }
 
-IR::Constant IR::Constant::operator|(const IR::Constant& c) const {
+IR::Constant IR::Constant::operator|(const IR::Constant &c) const {
     return IR::Constant(value | c.value);
 }
 
-IR::Constant IR::Constant::operator^(const IR::Constant& c) const {
+IR::Constant IR::Constant::operator^(const IR::Constant &c) const {
     return IR::Constant(value ^ c.value);
 }
 
-IR::Constant IR::Constant::operator-(const IR::Constant& c) const {
+IR::Constant IR::Constant::operator-(const IR::Constant &c) const {
     return IR::Constant(value - c.value);
 }
 

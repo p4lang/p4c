@@ -34,7 +34,7 @@ limitations under the License.
 #include "midend/simplifyKey.h"
 namespace DPDK {
 
-void DpdkBackend::convert(const IR::ToplevelBlock* tlb) {
+void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
     CHECK_NULL(tlb);
     DpdkProgramStructure structure;
     auto parseDpdkArch = new ParseDpdkArchitecture(&structure);
@@ -45,7 +45,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock* tlb) {
     auto hook = options.getDebugHook();
     auto program = tlb->getProgram();
 
-    std::set<const IR::P4Table*> invokedInKey;
+    std::set<const IR::P4Table *> invokedInKey;
     auto convertToDpdk = new ConvertToDpdkProgram(refMap, typeMap, &structure, options);
     auto genContextJson = new DpdkContextGenerator(refMap, &structure, p4info, options);
     bool is_all_args_header_fields = true;
@@ -113,7 +113,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock* tlb) {
         new VisitFunctor([this, genContextJson] {
             // Serialize context json object into user specified file
             if (!options.ctxtFile.isNullOrEmpty()) {
-                std::ostream* out = openFile(options.ctxtFile, false);
+                std::ostream *out = openFile(options.ctxtFile, false);
                 if (out != nullptr) {
                     genContextJson->serializeContextJson(out);
                 }
@@ -150,5 +150,5 @@ void DpdkBackend::convert(const IR::ToplevelBlock* tlb) {
     dpdk_program = dpdk_program->apply(post_code_gen)->to<IR::DpdkAsmProgram>();
 }
 
-void DpdkBackend::codegen(std::ostream& out) const { dpdk_program->toSpec(out) << std::endl; }
+void DpdkBackend::codegen(std::ostream &out) const { dpdk_program->toSpec(out) << std::endl; }
 }  // namespace DPDK

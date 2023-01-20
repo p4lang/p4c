@@ -23,17 +23,17 @@ namespace EBPF {
 
 class PSASwitchBackend {
  public:
-    const EbpfOptions& options;
-    P4::ReferenceMap* refMap;
-    P4::TypeMap* typeMap;
-    P4::P4CoreLibrary& corelib;
-    const IR::ToplevelBlock* toplevel = nullptr;
+    const EbpfOptions &options;
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
+    P4::P4CoreLibrary &corelib;
+    const IR::ToplevelBlock *toplevel = nullptr;
 
-    Target* target;
-    const PSAEbpfGenerator* ebpf_program = nullptr;
+    Target *target;
+    const PSAEbpfGenerator *ebpf_program = nullptr;
 
-    PSASwitchBackend(const EbpfOptions& options, Target* target, P4::ReferenceMap* refMap,
-                     P4::TypeMap* typeMap)
+    PSASwitchBackend(const EbpfOptions &options, Target *target, P4::ReferenceMap *refMap,
+                     P4::TypeMap *typeMap)
         : options(options),
           refMap(refMap),
           typeMap(typeMap),
@@ -42,8 +42,8 @@ class PSASwitchBackend {
         refMap->setIsV1(options.isv1());
     }
 
-    void convert(const IR::ToplevelBlock* tlb);
-    void codegen(std::ostream& cstream) const {
+    void convert(const IR::ToplevelBlock *tlb);
+    void codegen(std::ostream &cstream) const {
         CodeBuilder c(target);
         // instead of generating two files, put all the code in a single file
         ebpf_program->emit(&c);

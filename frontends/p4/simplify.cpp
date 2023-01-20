@@ -21,7 +21,7 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Node* DoSimplifyControlFlow::postorder(IR::BlockStatement* statement) {
+const IR::Node *DoSimplifyControlFlow::postorder(IR::BlockStatement *statement) {
     LOG3("Visiting " << dbp(getOriginal()));
     if (statement->annotations->size() > 0) return statement;
     auto parent = getContext()->node;
@@ -54,7 +54,7 @@ const IR::Node* DoSimplifyControlFlow::postorder(IR::BlockStatement* statement) 
     return statement;
 }
 
-const IR::Node* DoSimplifyControlFlow::postorder(IR::IfStatement* statement) {
+const IR::Node *DoSimplifyControlFlow::postorder(IR::IfStatement *statement) {
     LOG3("Visiting " << dbp(getOriginal()));
     if (auto lnot = statement->condition->to<IR::LNot>()) {
         // swap branches
@@ -72,7 +72,7 @@ const IR::Node* DoSimplifyControlFlow::postorder(IR::IfStatement* statement) {
     return statement;
 }
 
-const IR::Node* DoSimplifyControlFlow::postorder(IR::EmptyStatement* statement) {
+const IR::Node *DoSimplifyControlFlow::postorder(IR::EmptyStatement *statement) {
     LOG3("Visiting " << dbp(getOriginal()));
     auto parent = findContext<IR::Statement>();
     if (parent == nullptr ||  // in a ParserState or P4Action
@@ -82,7 +82,7 @@ const IR::Node* DoSimplifyControlFlow::postorder(IR::EmptyStatement* statement) 
     return statement;
 }
 
-const IR::Node* DoSimplifyControlFlow::postorder(IR::SwitchStatement* statement) {
+const IR::Node *DoSimplifyControlFlow::postorder(IR::SwitchStatement *statement) {
     LOG3("Visiting " << dbp(getOriginal()));
     if (statement->cases.empty()) {
         // If this is a table application remove the switch altogether but keep

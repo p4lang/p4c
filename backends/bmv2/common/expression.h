@@ -37,24 +37,24 @@ namespace BMV2 {
    unbounded arithmetic, as in BMv2, it could produce a 33-bit value.
  */
 class ArithmeticFixup : public Transform {
-    P4::TypeMap* typeMap;
+    P4::TypeMap *typeMap;
 
  public:
-    const IR::Expression* fix(const IR::Expression* expr, const IR::Type_Bits* type);
-    const IR::Node* updateType(const IR::Expression* expression);
-    const IR::Node* postorder(IR::Expression* expression) override;
-    const IR::Node* postorder(IR::Operation_Binary* expression) override;
-    const IR::Node* postorder(IR::Neg* expression) override;
-    const IR::Node* postorder(IR::Cmpl* expression) override;
-    const IR::Node* postorder(IR::Cast* expression) override;
-    explicit ArithmeticFixup(P4::TypeMap* typeMap) : typeMap(typeMap) { CHECK_NULL(typeMap); }
+    const IR::Expression *fix(const IR::Expression *expr, const IR::Type_Bits *type);
+    const IR::Node *updateType(const IR::Expression *expression);
+    const IR::Node *postorder(IR::Expression *expression) override;
+    const IR::Node *postorder(IR::Operation_Binary *expression) override;
+    const IR::Node *postorder(IR::Neg *expression) override;
+    const IR::Node *postorder(IR::Cmpl *expression) override;
+    const IR::Node *postorder(IR::Cast *expression) override;
+    explicit ArithmeticFixup(P4::TypeMap *typeMap) : typeMap(typeMap) { CHECK_NULL(typeMap); }
 };
 
 class ExpressionConverter : public Inspector {
-    P4::ReferenceMap* refMap;
-    P4::TypeMap* typeMap;
-    ProgramStructure* structure;
-    P4::P4CoreLibrary& corelib;
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
+    ProgramStructure *structure;
+    P4::P4CoreLibrary &corelib;
     cstring scalarsName;
 
     /// After translating an Expression to JSON, save the result to 'map'.
@@ -62,7 +62,7 @@ class ExpressionConverter : public Inspector {
     /// translation in any context, but this is not true in general.
     /// For this pass to work correctly, the IR tree must be converted
     /// from a DAG to a TREE.
-    std::map<const IR::Expression*, Util::IJson*> map;
+    std::map<const IR::Expression *, Util::IJson *> map;
     bool leftValue;  // true if converting a left value
     // in some cases the bmv2 JSON requires a 'bitwidth' attribute for hex
     // strings (e.g. for constants in calculation inputs). When this flag is set
@@ -70,7 +70,7 @@ class ExpressionConverter : public Inspector {
     bool withConstantWidths{false};
 
  public:
-    ExpressionConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, ProgramStructure* structure,
+    ExpressionConverter(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, ProgramStructure *structure,
                         cstring scalarsName)
         : refMap(refMap),
           typeMap(typeMap),
@@ -84,17 +84,17 @@ class ExpressionConverter : public Inspector {
     bool simpleExpressionsOnly;
 
     /// Non-null if the expression refers to a parameter from the enclosing control
-    const IR::Parameter* enclosingParamReference(const IR::Expression* expression);
+    const IR::Parameter *enclosingParamReference(const IR::Expression *expression);
 
     // Each architecture typically has some special parameters that requires
     // special handling. The examples are standard_metadata in the v1model and
     // packet path related metadata in PSA. Each target should subclass the
     // ExpressionConverter and implement this function with target-specific
     // handling code to deal with the special parameters.
-    virtual Util::IJson* convertParam(const IR::Parameter* param, cstring fieldName) = 0;
+    virtual Util::IJson *convertParam(const IR::Parameter *param, cstring fieldName) = 0;
 
-    Util::IJson* get(const IR::Expression* expression) const;
-    Util::IJson* fixLocal(Util::IJson* json);
+    Util::IJson *get(const IR::Expression *expression) const;
+    Util::IJson *fixLocal(Util::IJson *json);
 
     /**
      * Convert an expression into JSON
@@ -106,36 +106,36 @@ class ExpressionConverter : public Inspector {
      *                 See the BMv2 JSON spec.
      * @param convertBool  Wrap the result into a cast from boolean to data (b2d JSON).
      */
-    Util::IJson* convert(const IR::Expression* e, bool doFixup = true, bool wrap = true,
+    Util::IJson *convert(const IR::Expression *e, bool doFixup = true, bool wrap = true,
                          bool convertBool = false);
-    Util::IJson* convertLeftValue(const IR::Expression* e);
-    Util::IJson* convertWithConstantWidths(const IR::Expression* e);
-    bool isArrayIndexRuntime(const IR::Expression* e);
+    Util::IJson *convertLeftValue(const IR::Expression *e);
+    Util::IJson *convertWithConstantWidths(const IR::Expression *e);
+    bool isArrayIndexRuntime(const IR::Expression *e);
 
-    void postorder(const IR::BoolLiteral* expression) override;
-    void postorder(const IR::MethodCallExpression* expression) override;
-    void postorder(const IR::Cast* expression) override;
-    void postorder(const IR::Slice* expression) override;
-    void postorder(const IR::AddSat* expression) override { saturated_binary(expression); }
-    void postorder(const IR::SubSat* expression) override { saturated_binary(expression); }
-    void postorder(const IR::Constant* expression) override;
-    void postorder(const IR::ArrayIndex* expression) override;
-    void postorder(const IR::Member* expression) override;
-    void postorder(const IR::Mux* expression) override;
-    void postorder(const IR::IntMod* expression) override;
-    void postorder(const IR::Operation_Binary* expression) override;
-    void postorder(const IR::ListExpression* expression) override;
-    void postorder(const IR::StructExpression* expression) override;
-    void postorder(const IR::Operation_Unary* expression) override;
-    void postorder(const IR::PathExpression* expression) override;
-    void postorder(const IR::StringLiteral* expression) override;
-    void postorder(const IR::TypeNameExpression* expression) override;
-    void postorder(const IR::Expression* expression) override;
-    void mapExpression(const IR::Expression* expression, Util::IJson* json);
+    void postorder(const IR::BoolLiteral *expression) override;
+    void postorder(const IR::MethodCallExpression *expression) override;
+    void postorder(const IR::Cast *expression) override;
+    void postorder(const IR::Slice *expression) override;
+    void postorder(const IR::AddSat *expression) override { saturated_binary(expression); }
+    void postorder(const IR::SubSat *expression) override { saturated_binary(expression); }
+    void postorder(const IR::Constant *expression) override;
+    void postorder(const IR::ArrayIndex *expression) override;
+    void postorder(const IR::Member *expression) override;
+    void postorder(const IR::Mux *expression) override;
+    void postorder(const IR::IntMod *expression) override;
+    void postorder(const IR::Operation_Binary *expression) override;
+    void postorder(const IR::ListExpression *expression) override;
+    void postorder(const IR::StructExpression *expression) override;
+    void postorder(const IR::Operation_Unary *expression) override;
+    void postorder(const IR::PathExpression *expression) override;
+    void postorder(const IR::StringLiteral *expression) override;
+    void postorder(const IR::TypeNameExpression *expression) override;
+    void postorder(const IR::Expression *expression) override;
+    void mapExpression(const IR::Expression *expression, Util::IJson *json);
 
  private:
-    void binary(const IR::Operation_Binary* expression);
-    void saturated_binary(const IR::Operation_Binary* expression);
+    void binary(const IR::Operation_Binary *expression);
+    void saturated_binary(const IR::Operation_Binary *expression);
 };
 
 }  // namespace BMV2

@@ -20,7 +20,7 @@ limitations under the License.
 
 namespace EBPF {
 
-void PSASwitchBackend::convert(const IR::ToplevelBlock* tlb) {
+void PSASwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     CHECK_NULL(tlb);
     BMV2::PsaProgramStructure structure(refMap, typeMap);
     auto parsePsaArch = new BMV2::ParsePsaArchitecture(&structure);

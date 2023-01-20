@@ -31,30 +31,30 @@ namespace graphs {
 class ParserGraphs : public Graphs {
  protected:
     struct TransitionEdge {
-        const IR::ParserState* sourceState;
-        const IR::ParserState* destState;
+        const IR::ParserState *sourceState;
+        const IR::ParserState *destState;
         cstring label;
 
-        TransitionEdge(const IR::ParserState* source, const IR::ParserState* dest, cstring label)
+        TransitionEdge(const IR::ParserState *source, const IR::ParserState *dest, cstring label)
             : sourceState(source), destState(dest), label(label) {}
     };
 
-    std::map<const IR::P4Parser*, safe_vector<const TransitionEdge*>> transitions;
-    std::map<const IR::P4Parser*, safe_vector<const IR::ParserState*>> states;
+    std::map<const IR::P4Parser *, safe_vector<const TransitionEdge *>> transitions;
+    std::map<const IR::P4Parser *, safe_vector<const IR::ParserState *>> states;
 
  public:
-    ParserGraphs(P4::ReferenceMap* refMap, const cstring& graphsDir);
+    ParserGraphs(P4::ReferenceMap *refMap, const cstring &graphsDir);
 
-    Graph* CreateSubGraph(Graph& currentSubgraph, const cstring& name);
-    void postorder(const IR::P4Parser* parser) override;
-    void postorder(const IR::ParserState* state) override;
-    void postorder(const IR::PathExpression* expression) override;
-    void postorder(const IR::SelectExpression* expression) override;
+    Graph *CreateSubGraph(Graph &currentSubgraph, const cstring &name);
+    void postorder(const IR::P4Parser *parser) override;
+    void postorder(const IR::ParserState *state) override;
+    void postorder(const IR::PathExpression *expression) override;
+    void postorder(const IR::SelectExpression *expression) override;
 
-    std::vector<Graph*> parserGraphsArray{};
+    std::vector<Graph *> parserGraphsArray{};
 
  private:
-    P4::ReferenceMap* refMap;
+    P4::ReferenceMap *refMap;
     const cstring graphsDir;
     boost::optional<cstring> instanceName{};
 };

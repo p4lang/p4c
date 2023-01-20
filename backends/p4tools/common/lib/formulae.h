@@ -17,17 +17,17 @@ namespace P4Tools {
 template <class Self, class Node = IR::Expression>
 class AbstractRepCheckedNode {
  protected:
-    gsl::not_null<const Node*> node;
+    gsl::not_null<const Node *> node;
 
     // Implicit conversions to allow implementations to be treated like a Node*.
-    operator const Node*() const { return node; }
-    const Node& operator*() const { return *node; }
-    const Node* operator->() const { return node; }
+    operator const Node *() const { return node; }
+    const Node &operator*() const { return *node; }
+    const Node *operator->() const { return node; }
 
     /// Performs a checked cast. A BUG occurs if the cast fails.
     template <class T>
-    static const T* checkedTo(const IR::Node* n) {
-        const T* result = n->to<T>();
+    static const T *checkedTo(const IR::Node *n) {
+        const T *result = n->to<T>();
         BUG_CHECK(result, "Cast failed: %1% is not a %2%. It is a %3% instead.", n,
                   T::static_type_name(), n->node_type_name());
         return result;
@@ -35,7 +35,7 @@ class AbstractRepCheckedNode {
 
     /// @param classDesc a user-friendly description of the class, for reporting errors to the
     ///     user.
-    explicit AbstractRepCheckedNode(const Node* node, std::string classDesc) : node(node) {
+    explicit AbstractRepCheckedNode(const Node *node, std::string classDesc) : node(node) {
         BUG_CHECK(Self::repOk(node), "%1%: Not a valid %2%.", node, classDesc);
     }
 };
@@ -50,16 +50,16 @@ class AbstractRepCheckedNode {
 class StateVariable : private AbstractRepCheckedNode<StateVariable, IR::Member> {
  public:
     /// Determines whether @expr can represent a StateVariable.
-    static bool repOk(const IR::Expression* expr);
+    static bool repOk(const IR::Expression *expr);
 
     // Implicit conversions.
-    using AbstractRepCheckedNode::operator const IR::Member*;
+    using AbstractRepCheckedNode::operator const IR::Member *;
     using AbstractRepCheckedNode::operator*;
     using AbstractRepCheckedNode::operator->;
 
     // Implements comparisons so that StateVariables can be used as map keys.
-    bool operator<(const StateVariable& other) const;
-    bool operator==(const StateVariable& other) const;
+    bool operator<(const StateVariable &other) const;
+    bool operator==(const StateVariable &other) const;
 
  private:
     // Returns a negative value if e1 < e2, zero if e1 == e2, and a positive value otherwise.
@@ -67,15 +67,15 @@ class StateVariable : private AbstractRepCheckedNode<StateVariable, IR::Member> 
     //   * PathExpressions < Members.
     //   * PathExpressions are ordered on the name contained in their Paths.
     //   * Members are ordered first by their expressions, then by their member.
-    static int compare(const IR::Expression* e1, const IR::Expression* e2);
-    static int compare(const IR::Member* m1, const IR::Expression* e2);
-    static int compare(const IR::Member* m1, const IR::Member* m2);
-    static int compare(const IR::PathExpression* p1, const IR::Expression* e2);
-    static int compare(const IR::PathExpression* p1, const IR::PathExpression* p2);
+    static int compare(const IR::Expression *e1, const IR::Expression *e2);
+    static int compare(const IR::Member *m1, const IR::Expression *e2);
+    static int compare(const IR::Member *m1, const IR::Member *m2);
+    static int compare(const IR::PathExpression *p1, const IR::Expression *e2);
+    static int compare(const IR::PathExpression *p1, const IR::PathExpression *p2);
 
  public:
     /// Implicitly converts IR::Expression* to a StateVariable.
-    StateVariable(const IR::Expression* expr);  // NOLINT(runtime/explicit)
+    StateVariable(const IR::Expression *expr);  // NOLINT(runtime/explicit)
 };
 
 /// Represents a constraint that can be shipped to and asserted within a solver.

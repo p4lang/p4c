@@ -49,7 +49,7 @@ static inline int floor_log2(unsigned v) {
 
 static inline int ceil_log2(unsigned v) { return v ? floor_log2(v - 1) + 1 : -1; }
 
-static inline unsigned bitmask2bytemask(const bitvec& a) {
+static inline unsigned bitmask2bytemask(const bitvec &a) {
     int max = a.max().index();
     if (max < 0) return 0;
     unsigned rv = 0;

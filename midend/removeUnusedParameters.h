@@ -48,15 +48,15 @@ namespace P4 {
  */
 class RemoveUnusedActionParameters : public Transform {
  public:
-    explicit RemoveUnusedActionParameters(ReferenceMap* refMap) : refMap(refMap) {
+    explicit RemoveUnusedActionParameters(ReferenceMap *refMap) : refMap(refMap) {
         CHECK_NULL(refMap);
         setName("RemoveUnusedActionParameters");
     }
 
-    const IR::Node* postorder(IR::P4Action* action) override;
+    const IR::Node *postorder(IR::P4Action *action) override;
 
  private:
-    ReferenceMap* refMap;
+    ReferenceMap *refMap;
 };
 
 }  // namespace P4

@@ -27,7 +27,7 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Type_Declaration* SpecializationInfo::synthesize(ReferenceMap* refMap) const {
+const IR::Type_Declaration *SpecializationInfo::synthesize(ReferenceMap *refMap) const {
     TypeVariableSubstitution tvs;
     ParameterSubstitution subst;
 
@@ -36,7 +36,7 @@ const IR::Type_Declaration* SpecializationInfo::synthesize(ReferenceMap* refMap)
     SubstituteParameters sp(refMap, &subst, &tvs);
     auto clone = specialized->getNode()->apply(sp);
     CHECK_NULL(clone);
-    const IR::Type_Declaration* result = nullptr;
+    const IR::Type_Declaration *result = nullptr;
     if (auto parser = clone->to<IR::P4Parser>()) {
         auto newtype = new IR::Type_Parser(name, parser->type->annotations,
                                            new IR::TypeParameters(), parser->getApplyParameters());
@@ -58,9 +58,9 @@ const IR::Type_Declaration* SpecializationInfo::synthesize(ReferenceMap* refMap)
     return result;
 }
 
-const IR::Argument* SpecializationMap::convertArgument(const IR::Argument* arg,
-                                                       SpecializationInfo* spec,
-                                                       const IR::Parameter* param) {
+const IR::Argument *SpecializationMap::convertArgument(const IR::Argument *arg,
+                                                       SpecializationInfo *spec,
+                                                       const IR::Parameter *param) {
     if (arg->expression->is<IR::ConstructorCallExpression>()) {
         auto cce = arg->expression->to<IR::ConstructorCallExpression>();
         cstring nName = refMap->newName(param->name);
@@ -75,8 +75,8 @@ const IR::Argument* SpecializationMap::convertArgument(const IR::Argument* arg,
     }
 }
 
-void SpecializationMap::addSpecialization(const IR::ConstructorCallExpression* invocation,
-                                          const IR::IContainer* cont, const IR::Node* insertion) {
+void SpecializationMap::addSpecialization(const IR::ConstructorCallExpression *invocation,
+                                          const IR::IContainer *cont, const IR::Node *insertion) {
     LOG2("Will specialize " << dbp(invocation) << " of " << dbp(cont->getNode()) << " "
                             << cont->getNode() << " inserted after " << insertion);
 
@@ -98,8 +98,8 @@ void SpecializationMap::addSpecialization(const IR::ConstructorCallExpression* i
     specializations.emplace(invocation, spec);
 }
 
-void SpecializationMap::addSpecialization(const IR::Declaration_Instance* invocation,
-                                          const IR::IContainer* cont, const IR::Node* insertion) {
+void SpecializationMap::addSpecialization(const IR::Declaration_Instance *invocation,
+                                          const IR::IContainer *cont, const IR::Node *insertion) {
     LOG2("Will specialize " << dbp(invocation) << " of " << dbp(cont->getNode())
                             << " inserted after " << insertion);
 
@@ -107,8 +107,8 @@ void SpecializationMap::addSpecialization(const IR::Declaration_Instance* invoca
     auto declaration = cont->to<IR::IDeclaration>();
     CHECK_NULL(declaration);
     spec->name = refMap->newName(declaration->getName());
-    const IR::Type_Name* type;
-    const IR::Vector<IR::Type>* typeArgs;
+    const IR::Type_Name *type;
+    const IR::Vector<IR::Type> *typeArgs;
     if (invocation->type->is<IR::Type_Specialized>()) {
         auto ts = invocation->type->to<IR::Type_Specialized>();
         type = ts->baseType;
@@ -117,7 +117,7 @@ void SpecializationMap::addSpecialization(const IR::Declaration_Instance* invoca
         type = invocation->type->to<IR::Type_Name>();
         typeArgs = new IR::Vector<IR::Type>();
     }
-    Instantiation* inst = Instantiation::resolve(invocation, refMap, typeMap);
+    Instantiation *inst = Instantiation::resolve(invocation, refMap, typeMap);
 
     spec->typeArguments = typeArgs;
     CHECK_NULL(type);
@@ -130,8 +130,8 @@ void SpecializationMap::addSpecialization(const IR::Declaration_Instance* invoca
     specializations.emplace(invocation, spec);
 }
 
-IR::Vector<IR::Node>* SpecializationMap::getSpecializations(const IR::Node* insertionPoint) const {
-    IR::Vector<IR::Node>* result = nullptr;
+IR::Vector<IR::Node> *SpecializationMap::getSpecializations(const IR::Node *insertionPoint) const {
+    IR::Vector<IR::Node> *result = nullptr;
     for (auto s : specializations) {
         if (s.second->insertBefore == insertionPoint) {
             if (result == nullptr) result = new IR::Vector<IR::Node>();
@@ -145,26 +145,26 @@ IR::Vector<IR::Node>* SpecializationMap::getSpecializations(const IR::Node* inse
 
 namespace {
 class IsConcreteType : public Inspector {
-    const TypeMap* typeMap;
+    const TypeMap *typeMap;
 
  public:
     bool hasTypeVariables = false;
 
-    explicit IsConcreteType(const TypeMap* typeMap) : typeMap(typeMap) { CHECK_NULL(typeMap); }
-    void postorder(const IR::Type_Var*) override { hasTypeVariables = true; }
-    void postorder(const IR::Type_Name* type) override {
+    explicit IsConcreteType(const TypeMap *typeMap) : typeMap(typeMap) { CHECK_NULL(typeMap); }
+    void postorder(const IR::Type_Var *) override { hasTypeVariables = true; }
+    void postorder(const IR::Type_Name *type) override {
         auto t = typeMap->getType(type, true);
         if (t->is<IR::Type_Var>()) hasTypeVariables = true;
     }
 
-    bool isConcrete(const IR::Type* type) {
+    bool isConcrete(const IR::Type *type) {
         type->apply(*this);
         return hasTypeVariables;
     }
 };
 }  // namespace
 
-bool FindSpecializations::isSimpleConstant(const IR::Expression* expr) const {
+bool FindSpecializations::isSimpleConstant(const IR::Expression *expr) const {
     CHECK_NULL(expr);
     if (expr->is<IR::Constant>()) return true;
     if (expr->is<IR::BoolLiteral>()) return true;
@@ -185,15 +185,15 @@ bool FindSpecializations::isSimpleConstant(const IR::Expression* expr) const {
     return false;
 }
 
-bool FindSpecializations::noParameters(const IR::IContainer* container) {
+bool FindSpecializations::noParameters(const IR::IContainer *container) {
     return container->getTypeParameters()->empty() &&
            container->getConstructorParameters()->empty();
 }
 
-const IR::Node* FindSpecializations::findInsertionPoint() const {
+const IR::Node *FindSpecializations::findInsertionPoint() const {
     // Find location where the specialization is to be inserted.
     // This can be before a Parser, Control, or a toplevel instance declaration
-    const IR::Node* insert = findContext<IR::P4Parser>();
+    const IR::Node *insert = findContext<IR::P4Parser>();
     if (insert != nullptr) return insert;
     insert = findContext<IR::P4Control>();
     if (insert != nullptr) return insert;
@@ -201,7 +201,7 @@ const IR::Node* FindSpecializations::findInsertionPoint() const {
     return insert;
 }
 
-void FindSpecializations::postorder(const IR::ConstructorCallExpression* expression) {
+void FindSpecializations::postorder(const IR::ConstructorCallExpression *expression) {
     if (expression->arguments->size() == 0 &&
         !expression->constructedType->is<IR::Type_Specialized>())
         return;  // nothing to specialize
@@ -218,7 +218,7 @@ void FindSpecializations::postorder(const IR::ConstructorCallExpression* express
     specMap->addSpecialization(expression, decl, insert);
 }
 
-void FindSpecializations::postorder(const IR::Declaration_Instance* decl) {
+void FindSpecializations::postorder(const IR::Declaration_Instance *decl) {
     if (decl->arguments->size() == 0 && !decl->type->is<IR::Type_Specialized>()) return;
 
     auto type = specMap->typeMap->getType(decl, true);
@@ -233,7 +233,7 @@ void FindSpecializations::postorder(const IR::Declaration_Instance* decl) {
         if (!isSimpleConstant(arg->expression)) return;
     }
 
-    const IR::Type_Name* contDecl;
+    const IR::Type_Name *contDecl;
     if (decl->type->is<IR::Type_Name>()) {
         contDecl = decl->type->to<IR::Type_Name>();
     } else {
@@ -247,7 +247,7 @@ void FindSpecializations::postorder(const IR::Declaration_Instance* decl) {
     specMap->addSpecialization(decl, cont->to<IR::IContainer>(), insert);
 }
 
-const IR::Node* Specialize::instantiate(const IR::Node* node) {
+const IR::Node *Specialize::instantiate(const IR::Node *node) {
     auto specs = specMap->getSpecializations(getOriginal());
     if (specs == nullptr) return node;
     LOG2(specs->size() << " instantiations before " << node);
@@ -255,7 +255,7 @@ const IR::Node* Specialize::instantiate(const IR::Node* node) {
     return specs;
 }
 
-const IR::Node* Specialize::postorder(IR::ConstructorCallExpression* expression) {
+const IR::Node *Specialize::postorder(IR::ConstructorCallExpression *expression) {
     auto name = specMap->getName(getOriginal());
     if (name.isNullOrEmpty()) return expression;
     auto typeRef = new IR::Type_Name(IR::ID(name, nullptr));
@@ -264,9 +264,9 @@ const IR::Node* Specialize::postorder(IR::ConstructorCallExpression* expression)
     return result;
 }
 
-const IR::Node* Specialize::postorder(IR::Declaration_Instance* decl) {
+const IR::Node *Specialize::postorder(IR::Declaration_Instance *decl) {
     // replace instance with invocation of new type
-    const IR::Node* replacement = decl;
+    const IR::Node *replacement = decl;
     auto name = specMap->getName(getOriginal());
     if (!name.isNullOrEmpty()) {
         auto typeRef = new IR::Type_Name(IR::ID(name, nullptr));
@@ -279,7 +279,7 @@ const IR::Node* Specialize::postorder(IR::Declaration_Instance* decl) {
     return instantiate(replacement);
 }
 
-SpecializeAll::SpecializeAll(ReferenceMap* refMap, TypeMap* typeMap) : PassRepeated({}) {
+SpecializeAll::SpecializeAll(ReferenceMap *refMap, TypeMap *typeMap) : PassRepeated({}) {
     passes.emplace_back(new ConstantFolding(refMap, typeMap));
     passes.emplace_back(new TypeChecking(refMap, typeMap));
     passes.emplace_back(new FindSpecializations(&specMap));

@@ -20,7 +20,7 @@ limitations under the License.
 
 namespace P4 {
 
-void DoCheckConstants::postorder(const IR::MethodCallExpression* expression) {
+void DoCheckConstants::postorder(const IR::MethodCallExpression *expression) {
     auto mi = MethodInstance::resolve(expression, refMap, typeMap);
     if (auto bi = mi->to<BuiltInMethod>()) {
         if (bi->name == IR::Type_Stack::push_front || bi->name == IR::Type_Stack::pop_front) {
@@ -33,12 +33,12 @@ void DoCheckConstants::postorder(const IR::MethodCallExpression* expression) {
     }
 }
 
-void DoCheckConstants::postorder(const IR::KeyElement* key) {
+void DoCheckConstants::postorder(const IR::KeyElement *key) {
     if (key->expression->is<IR::Literal>())
         warn(ErrorType::WARN_MISMATCH, "%1%: Constant key field", key->expression);
 }
 
-void DoCheckConstants::postorder(const IR::P4Table* table) {
+void DoCheckConstants::postorder(const IR::P4Table *table) {
     // This will print an error if the property exists and is not an integer
     (void)table->getSizeProperty();
 }

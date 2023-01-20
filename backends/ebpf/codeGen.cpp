@@ -24,21 +24,21 @@ limitations under the License.
 
 namespace EBPF {
 
-void CodeGenInspector::substitute(const IR::Parameter* p, const IR::Parameter* with) {
+void CodeGenInspector::substitute(const IR::Parameter *p, const IR::Parameter *with) {
     substitution.emplace(p, with);
 }
 
-bool CodeGenInspector::preorder(const IR::Constant* expression) {
+bool CodeGenInspector::preorder(const IR::Constant *expression) {
     builder->append(Util::toString(expression->value, 0, false, expression->base));
     return true;
 }
 
-bool CodeGenInspector::preorder(const IR::StringLiteral* expression) {
+bool CodeGenInspector::preorder(const IR::StringLiteral *expression) {
     builder->appendFormat("\"%s\"", expression->toString());
     return true;
 }
 
-bool CodeGenInspector::preorder(const IR::Declaration_Variable* decl) {
+bool CodeGenInspector::preorder(const IR::Declaration_Variable *decl) {
     auto type = EBPFTypeFactory::instance->create(decl->type);
     type->declare(builder, decl->name.name, false);
     if (decl->initializer != nullptr) {
@@ -49,7 +49,7 @@ bool CodeGenInspector::preorder(const IR::Declaration_Variable* decl) {
     return false;
 }
 
-static cstring getMask(P4::TypeMap* typeMap, const IR::Node* node) {
+static cstring getMask(P4::TypeMap *typeMap, const IR::Node *node) {
     auto type = typeMap->getType(node, true);
     cstring mask = "";
     if (auto tb = type->to<IR::Type_Bits>()) {
@@ -59,7 +59,7 @@ static cstring getMask(P4::TypeMap* typeMap, const IR::Node* node) {
     return mask;
 }
 
-bool CodeGenInspector::preorder(const IR::Operation_Binary* b) {
+bool CodeGenInspector::preorder(const IR::Operation_Binary *b) {
     if (!b->is<IR::BOr>() && !b->is<IR::BAnd>() && !b->is<IR::BXor>() && !b->is<IR::Equ>() &&
         !b->is<IR::Neq>())
         widthCheck(b);
@@ -81,7 +81,7 @@ bool CodeGenInspector::preorder(const IR::Operation_Binary* b) {
     return false;
 }
 
-bool CodeGenInspector::comparison(const IR::Operation_Relation* b) {
+bool CodeGenInspector::comparison(const IR::Operation_Relation *b) {
     auto type = typeMap->getType(b->left);
     auto et = EBPFTypeFactory::instance->create(type);
 
@@ -111,7 +111,7 @@ bool CodeGenInspector::comparison(const IR::Operation_Relation* b) {
     return false;
 }
 
-bool CodeGenInspector::preorder(const IR::Mux* b) {
+bool CodeGenInspector::preorder(const IR::Mux *b) {
     int prec = expressionPrecedence;
     bool useParens = prec >= b->getPrecedence();
     if (useParens) builder->append("(");
@@ -128,7 +128,7 @@ bool CodeGenInspector::preorder(const IR::Mux* b) {
     return false;
 }
 
-bool CodeGenInspector::preorder(const IR::Operation_Unary* u) {
+bool CodeGenInspector::preorder(const IR::Operation_Unary *u) {
     widthCheck(u);
     int prec = expressionPrecedence;
     cstring mask = getMask(typeMap, u);
@@ -145,7 +145,7 @@ bool CodeGenInspector::preorder(const IR::Operation_Unary* u) {
     return false;
 }
 
-bool CodeGenInspector::preorder(const IR::ArrayIndex* a) {
+bool CodeGenInspector::preorder(const IR::ArrayIndex *a) {
     int prec = expressionPrecedence;
     bool useParens = prec > a->getPrecedence();
     if (useParens) builder->append("(");
@@ -160,7 +160,7 @@ bool CodeGenInspector::preorder(const IR::ArrayIndex* a) {
     return false;
 }
 
-bool CodeGenInspector::preorder(const IR::Cast* c) {
+bool CodeGenInspector::preorder(const IR::Cast *c) {
     widthCheck(c);
     int prec = expressionPrecedence;
     bool useParens = prec > c->getPrecedence();
@@ -176,7 +176,7 @@ bool CodeGenInspector::preorder(const IR::Cast* c) {
     return false;
 }
 
-bool CodeGenInspector::preorder(const IR::Member* expression) {
+bool CodeGenInspector::preorder(const IR::Member *expression) {
     bool isErrorAccess = false;
     if (auto tne = expression->expr->to<IR::TypeNameExpression>()) {
         if (auto tn = tne->typeName->to<IR::Type_Name>()) {
@@ -201,18 +201,18 @@ bool CodeGenInspector::preorder(const IR::Member* expression) {
     return false;
 }
 
-bool CodeGenInspector::preorder(const IR::PathExpression* expression) {
+bool CodeGenInspector::preorder(const IR::PathExpression *expression) {
     visit(expression->path);
     return false;
 }
 
-bool CodeGenInspector::preorder(const IR::Path* p) {
+bool CodeGenInspector::preorder(const IR::Path *p) {
     if (p->absolute) ::error(ErrorType::ERR_EXPECTED, "%1%: Unexpected absolute path", p);
     builder->append(p->name);
     return false;
 }
 
-bool CodeGenInspector::preorder(const IR::StructExpression* expr) {
+bool CodeGenInspector::preorder(const IR::StructExpression *expr) {
     builder->append("(struct ");
     CHECK_NULL(expr->structType);
     visit(expr->structType);
@@ -232,12 +232,12 @@ bool CodeGenInspector::preorder(const IR::StructExpression* expr) {
     return false;
 }
 
-bool CodeGenInspector::preorder(const IR::BoolLiteral* b) {
+bool CodeGenInspector::preorder(const IR::BoolLiteral *b) {
     builder->append(b->toString());
     return false;
 }
 
-bool CodeGenInspector::preorder(const IR::ListExpression* expression) {
+bool CodeGenInspector::preorder(const IR::ListExpression *expression) {
     bool first = true;
     int prec = expressionPrecedence;
     expressionPrecedence = DBPrint::Prec_Low;
@@ -250,7 +250,7 @@ bool CodeGenInspector::preorder(const IR::ListExpression* expression) {
     return false;
 }
 
-bool CodeGenInspector::preorder(const IR::MethodCallExpression* expression) {
+bool CodeGenInspector::preorder(const IR::MethodCallExpression *expression) {
     auto mi = P4::MethodInstance::resolve(expression, refMap, typeMap);
     auto bim = mi->to<P4::BuiltInMethod>();
     if (bim != nullptr) {
@@ -292,7 +292,7 @@ bool CodeGenInspector::preorder(const IR::MethodCallExpression* expression) {
 
 /////////////////////////////////////////
 
-bool CodeGenInspector::preorder(const IR::Type_Typedef* type) {
+bool CodeGenInspector::preorder(const IR::Type_Typedef *type) {
     auto et = EBPFTypeFactory::instance->create(type->type);
     builder->append("typedef ");
     et->emit(builder);
@@ -302,7 +302,7 @@ bool CodeGenInspector::preorder(const IR::Type_Typedef* type) {
     return false;
 }
 
-bool CodeGenInspector::preorder(const IR::Type_Enum* type) {
+bool CodeGenInspector::preorder(const IR::Type_Enum *type) {
     builder->append("enum ");
     builder->append(type->name);
     builder->spc();
@@ -316,11 +316,11 @@ bool CodeGenInspector::preorder(const IR::Type_Enum* type) {
     return false;
 }
 
-bool CodeGenInspector::preorder(const IR::AssignmentStatement* a) {
+bool CodeGenInspector::preorder(const IR::AssignmentStatement *a) {
     auto ltype = typeMap->getType(a->left);
     auto ebpfType = EBPFTypeFactory::instance->create(ltype);
     bool memcpy = false;
-    EBPFScalarType* scalar = nullptr;
+    EBPFScalarType *scalar = nullptr;
     unsigned width = 0;
     if (ebpfType->is<EBPFScalarType>()) {
         scalar = ebpfType->to<EBPFScalarType>();
@@ -343,7 +343,7 @@ bool CodeGenInspector::preorder(const IR::AssignmentStatement* a) {
     return false;
 }
 
-bool CodeGenInspector::preorder(const IR::BlockStatement* s) {
+bool CodeGenInspector::preorder(const IR::BlockStatement *s) {
     builder->blockStart();
     bool first = true;
     for (auto a : s->components) {
@@ -360,24 +360,24 @@ bool CodeGenInspector::preorder(const IR::BlockStatement* s) {
 }
 
 // This is correct only after inlining
-bool CodeGenInspector::preorder(const IR::ExitStatement*) {
+bool CodeGenInspector::preorder(const IR::ExitStatement *) {
     builder->append("return");
     builder->endOfStatement();
     return false;
 }
 
-bool CodeGenInspector::preorder(const IR::ReturnStatement*) {
+bool CodeGenInspector::preorder(const IR::ReturnStatement *) {
     builder->append("return");
     builder->endOfStatement();
     return false;
 }
 
-bool CodeGenInspector::preorder(const IR::EmptyStatement*) {
+bool CodeGenInspector::preorder(const IR::EmptyStatement *) {
     builder->endOfStatement();
     return false;
 }
 
-bool CodeGenInspector::preorder(const IR::IfStatement* s) {
+bool CodeGenInspector::preorder(const IR::IfStatement *s) {
     builder->append("if (");
     visit(s->condition);
     builder->append(") ");
@@ -403,13 +403,13 @@ bool CodeGenInspector::preorder(const IR::IfStatement* s) {
     return false;
 }
 
-bool CodeGenInspector::preorder(const IR::MethodCallStatement* s) {
+bool CodeGenInspector::preorder(const IR::MethodCallStatement *s) {
     visit(s->methodCall);
     builder->endOfStatement();
     return false;
 }
 
-void CodeGenInspector::widthCheck(const IR::Node* node) const {
+void CodeGenInspector::widthCheck(const IR::Node *node) const {
     // This is a temporary solution.
     // Rather than generate incorrect results, we reject programs that
     // do not perform arithmetic on machine-supported widths.

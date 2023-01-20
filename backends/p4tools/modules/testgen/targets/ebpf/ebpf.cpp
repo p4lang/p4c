@@ -15,13 +15,13 @@ namespace EBPF {
 EBPFCompilerTarget::EBPFCompilerTarget() : CompilerTarget("ebpf", "ebpf") {}
 
 void EBPFCompilerTarget::make() {
-    static EBPFCompilerTarget* INSTANCE = nullptr;
+    static EBPFCompilerTarget *INSTANCE = nullptr;
     if (INSTANCE == nullptr) {
         INSTANCE = new EBPFCompilerTarget();
     }
 }
 
-MidEnd EBPFCompilerTarget::mkMidEnd(const CompilerOptions& options) const {
+MidEnd EBPFCompilerTarget::mkMidEnd(const CompilerOptions &options) const {
     MidEnd midEnd(options);
     midEnd.addPasses({});
     midEnd.addDefaultPasses();

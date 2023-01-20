@@ -4,7 +4,7 @@ namespace P4 {
 
 /// Convert an expression into a string that uniqely identifies the lvalue referenced.
 /// Return null cstring if not a reference to a lvalue.
-static cstring lvalue_name(const IR::Expression* exp) {
+static cstring lvalue_name(const IR::Expression *exp) {
     if (auto p = exp->to<IR::PathExpression>()) return p->path->name;
     if (auto m = exp->to<IR::Member>()) {
         if (auto base = lvalue_name(m->expr)) return base + "." + m->member;
@@ -28,9 +28,9 @@ bool names_overlap(cstring name1, cstring name2) {
 }
 
 // Removes outdated values for variables.
-void removeVarsContaining(std::map<cstring, const IR::Expression*>* vars, cstring name) {
+void removeVarsContaining(std::map<cstring, const IR::Expression *> *vars, cstring name) {
     LOG6("removeVarsContaining(" << name << ")");
-    for (auto& var : *vars) {
+    for (auto &var : *vars) {
         LOG7("  checking entry: " << var.first << " = " << var.second);
         if (names_overlap(var.first, name)) {
             LOG4("  dropping the value for '" << var.first << "' as '" << name
@@ -41,8 +41,8 @@ void removeVarsContaining(std::map<cstring, const IR::Expression*>* vars, cstrin
 }
 
 // Removes values if they have changed
-void compareValuesInMaps(std::map<cstring, const IR::Expression*>* oldValues,
-                         std::map<cstring, const IR::Expression*>* newValues) {
+void compareValuesInMaps(std::map<cstring, const IR::Expression *> *oldValues,
+                         std::map<cstring, const IR::Expression *> *newValues) {
     for (auto it : *newValues) {
         auto oldValue = (*oldValues)[it.first];
         if (((it.second == nullptr) ^ (oldValue == nullptr)) ||
@@ -52,37 +52,37 @@ void compareValuesInMaps(std::map<cstring, const IR::Expression*>* oldValues,
 }
 
 // Removes values if they are used as Out/InOut parameter
-void checkParametersForMap(const IR::ParameterList* params,
-                           std::map<cstring, const IR::Expression*>* vars) {
+void checkParametersForMap(const IR::ParameterList *params,
+                           std::map<cstring, const IR::Expression *> *vars) {
     for (auto param : params->parameters)
         if (param->hasOut()) removeVarsContaining(vars, param->name.name);
 }
 
-bool FindVariableValues::preorder(const IR::P4Control* ctrl) {
+bool FindVariableValues::preorder(const IR::P4Control *ctrl) {
     LOG2("FindVariableValues working on control: " << ctrl->name);
     working = true;
 
     return true;
 }
 
-void FindVariableValues::postorder(const IR::P4Control* ctrl) {
+void FindVariableValues::postorder(const IR::P4Control *ctrl) {
     LOG2("FindVariableValues finished working on control: " << ctrl->name);
     // Clear map as the pass works on every control block separately
     vars.clear();
     working = false;
 }
 
-bool FindVariableValues::preorder(const IR::P4Action*) { return false; }
+bool FindVariableValues::preorder(const IR::P4Action *) { return false; }
 
-bool FindVariableValues::preorder(const IR::P4Table*) { return false; }
+bool FindVariableValues::preorder(const IR::P4Table *) { return false; }
 
 // When visiting IfStatement nodes the literal values assigned to variables in those
 // 'ifTrue' and 'ifFalse' blocks can't be retained in the 'vars' container since the
 // path taken can't be determined in compile time. Therefore a copy is made to preserve
 // the state of the map before those blocks, and all variables that are possibly changed
 // in these blocks are removed from the original map.
-bool FindVariableValues::preorder(const IR::IfStatement* stat) {
-    std::map<cstring, const IR::Expression*> copyOfVars(vars);
+bool FindVariableValues::preorder(const IR::IfStatement *stat) {
+    std::map<cstring, const IR::Expression *> copyOfVars(vars);
     LOG3("Working on 'IfStatement->ifTrue' block: " << stat->ifTrue);
     visit(stat->ifTrue);
     // Check if some variables had their values changed when visiting 'ifTrue' block.
@@ -103,8 +103,8 @@ bool FindVariableValues::preorder(const IR::IfStatement* stat) {
 
 // Switch statement is equivalent to a series of If stataments
 // That's why implementation for visiting SwitchStatement is the same as for visiting IfStatement
-bool FindVariableValues::preorder(const IR::SwitchStatement* stat) {
-    std::map<cstring, const IR::Expression*> copyOfVars(vars);
+bool FindVariableValues::preorder(const IR::SwitchStatement *stat) {
+    std::map<cstring, const IR::Expression *> copyOfVars(vars);
     for (auto caseStatement : stat->cases) {
         LOG3("Working on case: " << caseStatement->label->toString()
                                  << " block: " << caseStatement->statement);
@@ -119,7 +119,7 @@ bool FindVariableValues::preorder(const IR::SwitchStatement* stat) {
 }
 
 // Update the value for the 'stat->left' variable.
-bool FindVariableValues::preorder(const IR::AssignmentStatement* stat) {
+bool FindVariableValues::preorder(const IR::AssignmentStatement *stat) {
     if (!working || lvalue_name(stat->left).isNullOrEmpty()) return false;
 
     LOG5("Working on statement: " << stat);
@@ -147,11 +147,11 @@ bool FindVariableValues::preorder(const IR::AssignmentStatement* stat) {
 // the body of the action using the pointer acquired by resolving the 'MethodCallExpression'.
 // An entry in the 'actions' map is set for the action node that was acquired by resolving
 // the 'ActionCall'.
-void FindVariableValues::postorder(const IR::MethodCallExpression* mc) {
+void FindVariableValues::postorder(const IR::MethodCallExpression *mc) {
     if (!working || mc->method->is<IR::Member>()) return;
 
     LOG5("Working on 'MethodCallexpression': " << mc);
-    auto* mi = MethodInstance::resolve(mc, refMap, typeMap, true);
+    auto *mi = MethodInstance::resolve(mc, refMap, typeMap, true);
     // Remove entries in the 'vars' map for variables that are used as 'Out' or 'InOut' parameters.
     if (auto aCall = mi->to<ActionCall>()) {
         // Check to see if an entry already exists for this action, this should not happen
@@ -159,7 +159,7 @@ void FindVariableValues::postorder(const IR::MethodCallExpression* mc) {
         if (actions->find(aCall->action) == actions->end()) {
             // Add an entry in the 'actions' map for the action being called.
             LOG6("  Is 'ActionCall'. Adding entry for action: " << aCall->action);
-            (*actions)[aCall->action] = new std::map<cstring, const IR::Expression*>(vars);
+            (*actions)[aCall->action] = new std::map<cstring, const IR::Expression *>(vars);
             visit(aCall->action->body);
         } else {
             LOG6("  Is 'ActionCall'. Entry already exists for this action: " << aCall->action);
@@ -176,20 +176,20 @@ void FindVariableValues::postorder(const IR::MethodCallExpression* mc) {
 
 // Returns value stored for variable denoted with 'name'.
 // Returns nullptr if nothing is stored.
-const IR::Expression* DoGlobalCopyPropagation::copyprop_name(cstring name) {
+const IR::Expression *DoGlobalCopyPropagation::copyprop_name(cstring name) {
     if (name.isNullOrEmpty() || !performRewrite) return nullptr;
     LOG6("Propagating value: " << (*vars)[name] << " for variable: " << name);
     return (*vars)[name];
 }
 
-const IR::Expression* DoGlobalCopyPropagation::postorder(IR::PathExpression* path) {
+const IR::Expression *DoGlobalCopyPropagation::postorder(IR::PathExpression *path) {
     if (!performRewrite) return path;
 
     auto ret = copyprop_name(path->path->name);
     return ret ? ret : path;
 }
 
-const IR::Expression* DoGlobalCopyPropagation::preorder(IR::Member* member) {
+const IR::Expression *DoGlobalCopyPropagation::preorder(IR::Member *member) {
     if (!performRewrite) return member;
 
     if (auto name = lvalue_name(member)) {
@@ -199,7 +199,7 @@ const IR::Expression* DoGlobalCopyPropagation::preorder(IR::Member* member) {
     return member;
 }
 
-const IR::Expression* DoGlobalCopyPropagation::preorder(IR::ArrayIndex* arr) {
+const IR::Expression *DoGlobalCopyPropagation::preorder(IR::ArrayIndex *arr) {
     if (!performRewrite) return arr;
 
     if (auto name = lvalue_name(arr)) {
@@ -212,7 +212,7 @@ const IR::Expression* DoGlobalCopyPropagation::preorder(IR::ArrayIndex* arr) {
 }
 
 // If information for this action is available work on action body and propagate values.
-const IR::P4Action* DoGlobalCopyPropagation::preorder(IR::P4Action* act) {
+const IR::P4Action *DoGlobalCopyPropagation::preorder(IR::P4Action *act) {
     if (actions->find(getOriginal()) != actions->end()) {
         performRewrite = true;
         vars = actions->find(getOriginal())->second;
@@ -224,16 +224,16 @@ const IR::P4Action* DoGlobalCopyPropagation::preorder(IR::P4Action* act) {
     return act;
 }
 
-const IR::P4Action* DoGlobalCopyPropagation::postorder(IR::P4Action* act) {
+const IR::P4Action *DoGlobalCopyPropagation::postorder(IR::P4Action *act) {
     performRewrite = false;
     LOG2("DoGlobalCopyPropagation finished action: " << act->name);
     return act;
 }
 
-IR::MethodCallExpression* DoGlobalCopyPropagation::postorder(IR::MethodCallExpression* mc) {
+IR::MethodCallExpression *DoGlobalCopyPropagation::postorder(IR::MethodCallExpression *mc) {
     if (!performRewrite || mc->method->is<IR::Member>()) return mc;
 
-    auto* mi = MethodInstance::resolve(mc, refMap, typeMap, true);
+    auto *mi = MethodInstance::resolve(mc, refMap, typeMap, true);
     LOG5("Working on 'MethodCallExpression' : " << mc);
     // Remove entries in the 'vars' map for variables that are used as 'Out' or 'InOut' parameters.
     if (auto eFun = mi->to<ExternFunction>()) {
@@ -253,10 +253,10 @@ IR::MethodCallExpression* DoGlobalCopyPropagation::postorder(IR::MethodCallExpre
 // path taken can't be determined in compile time. Therefore a copy is made to preserve
 // the state of the map before those blocks, and all variables that are possibly changed
 // in these blocks are removed from the original map.
-IR::IfStatement* DoGlobalCopyPropagation::preorder(IR::IfStatement* stat) {
+IR::IfStatement *DoGlobalCopyPropagation::preorder(IR::IfStatement *stat) {
     if (!performRewrite) return stat;
 
-    std::map<cstring, const IR::Expression*> copyOfVars(*vars);
+    std::map<cstring, const IR::Expression *> copyOfVars(*vars);
     LOG3("Working on 'IfStatement->ifTrue' block: " << stat->ifTrue);
     visit(stat->ifTrue);
     // Check if some variables had their values changed when visiting 'ifTrue' block.
@@ -278,7 +278,7 @@ IR::IfStatement* DoGlobalCopyPropagation::preorder(IR::IfStatement* stat) {
 
 // Propagate values for variables on the right side of the statement
 // and update value for 'stat->left' variable if needed.
-const IR::Node* DoGlobalCopyPropagation::preorder(IR::AssignmentStatement* stat) {
+const IR::Node *DoGlobalCopyPropagation::preorder(IR::AssignmentStatement *stat) {
     if (!performRewrite) return stat;
 
     LOG5("Working on statement: " << stat);

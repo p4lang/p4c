@@ -13,7 +13,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """ Defines helper functions for a general testing framework. Used by multiple
     Python testing scripts in the backends folder."""
 
@@ -23,6 +22,7 @@ from threading import Timer
 from pathlib import Path
 import sys
 import os
+import shutil
 from scapy.packet import Raw
 
 TIMEOUT = 10 * 60
@@ -90,16 +90,18 @@ def compare_pkt(outputs, expected, received):
 def open_process(verbose, args, outputs):
     """ Run the given arguments as a subprocess. Time out after TIMEOUT
         seconds and report failures or stdout. """
-    report_output(outputs["stdout"],
-                  verbose, "Writing", args)
+    report_output(outputs["stdout"], verbose, "Writing", args)
     proc = None
 
     try:
-        proc = Popen(args, stdout=subprocess.PIPE, shell=True,
-                stdin=subprocess.PIPE, stderr=subprocess.PIPE,
-                universal_newlines=True)
+        proc = Popen(args,
+                     stdout=subprocess.PIPE,
+                     shell=True,
+                     stdin=subprocess.PIPE,
+                     stderr=subprocess.PIPE,
+                     universal_newlines=True)
     except OSError as e:
-       report_err(outputs["stderr"], "Failed executing: ", e)
+        report_err(outputs["stderr"], "Failed executing: ", e)
     if proc is None:
         # Never even started
         report_err(outputs["stderr"], "Process failed to start")
@@ -107,8 +109,10 @@ def open_process(verbose, args, outputs):
 
 
 def run_process(verbose, proc, timeout, outputs, errmsg):
+
     def kill(process):
         process.kill()
+
     timer = Timer(TIMEOUT, kill, [proc])
     try:
         timer.start()
@@ -120,8 +124,8 @@ def run_process(verbose, proc, timeout, outputs, errmsg):
                "%s########### PROCESS OUTPUT END\n" % out)
         report_output(outputs["stdout"], verbose, msg)
     if proc.returncode != SUCCESS:
-        report_err(outputs["stderr"], "Error %d: %s\n%s" %
-                   (proc.returncode, errmsg, err))
+        report_err(outputs["stderr"],
+                   "Error %d: %s\n%s" % (proc.returncode, errmsg, err))
     else:
         # Also report non fatal warnings in stdout
         if err:
@@ -133,8 +137,7 @@ def run_timeout(verbose, args, timeout, outputs, errmsg):
     proc = open_process(verbose, args, outputs)
     if proc is None:
         return FAILURE
-    report_output(outputs["stdout"],
-                  verbose, "Executing", args)
+    report_output(outputs["stdout"], verbose, "Executing", args)
     return run_process(verbose, proc, timeout, outputs, errmsg)
 
 
@@ -147,30 +150,46 @@ def check_root():
 class PathError(RuntimeError):
     pass
 
+
 def check_if_file(input_path):
     """Checks if a path is a file and converts the input
         to an absolute path"""
+    if not input_path:
+        report_err(sys.stderr, "input_path is None")
+        sys.exit(1)
     input_path = Path(input_path)
     if not input_path.exists():
-        msg = "{0} does not exist".format(input_path)
-        report_err(sys.stderr, msg)
+        report_err(sys.stderr, f"{input_path} does not exist")
         sys.exit(1)
     if not input_path.is_file():
-        msg = "{0} is not a file".format(input_path)
-        report_err(sys.stderr, msg)
+        report_err(sys.stderr, f"{input_path} is not a file")
         sys.exit(1)
-    return str(input_path.absolute())
+    return Path(input_path.absolute())
+
 
 def check_if_dir(input_path):
     """Checks if a path is an actual directory and converts the input
         to an absolute path"""
+    if not input_path:
+        report_err(sys.stderr, "input_path is None")
+        sys.exit(1)
     input_path = Path(input_path)
     if not input_path.exists():
-        msg = "{0} does not exist".format(input_path)
-        report_err(sys.stderr, msg)
+        report_err(sys.stderr, f"{input_path} does not exist")
         sys.exit(1)
     if not input_path.is_dir():
-        msg = "{0} is not a directory".format(input_path)
-        report_err(sys.stderr, msg)
+        report_err(sys.stderr, f"{input_path} is not a directory")
         sys.exit(1)
-    return str(input_path.absolute())
+    return Path(input_path.absolute())
+
+
+def copy_file(src, dst):
+    try:
+        if isinstance(src, list):
+            for src_file in src:
+                shutil.copy2(src_file, dst)
+        else:
+            shutil.copy2(src, dst)
+    except shutil.SameFileError:
+        # this is fine
+        pass

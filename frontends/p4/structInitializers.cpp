@@ -21,7 +21,7 @@ namespace P4 {
 /// Given an expression and a destination type, convert ListExpressions
 /// that occur within expression to StructExpression if the
 /// destination type matches.
-const IR::Expression* convert(const IR::Expression* expression, const IR::Type* type) {
+const IR::Expression *convert(const IR::Expression *expression, const IR::Type *type) {
     bool modified = false;
     CHECK_NULL(type);
     if (auto st = type->to<IR::Type_StructLike>()) {
@@ -77,13 +77,13 @@ const IR::Expression* convert(const IR::Expression* expression, const IR::Type* 
     return expression;
 }
 
-const IR::Node* CreateStructInitializers::postorder(IR::AssignmentStatement* statement) {
+const IR::Node *CreateStructInitializers::postorder(IR::AssignmentStatement *statement) {
     auto type = typeMap->getType(getOriginal<IR::AssignmentStatement>()->left);
     statement->right = convert(statement->right, type);
     return statement;
 }
 
-const IR::Node* CreateStructInitializers::postorder(IR::ReturnStatement* statement) {
+const IR::Node *CreateStructInitializers::postorder(IR::ReturnStatement *statement) {
     if (statement->expression == nullptr) return statement;
     auto func = findOrigCtxt<IR::Function>();
     if (func == nullptr) return statement;
@@ -98,14 +98,14 @@ const IR::Node* CreateStructInitializers::postorder(IR::ReturnStatement* stateme
     return statement;
 }
 
-const IR::Node* CreateStructInitializers::postorder(IR::Declaration_Variable* decl) {
+const IR::Node *CreateStructInitializers::postorder(IR::Declaration_Variable *decl) {
     if (decl->initializer == nullptr) return decl;
     auto type = typeMap->getTypeType(decl->type, true);
     decl->initializer = convert(decl->initializer, type);
     return decl;
 }
 
-const IR::Node* CreateStructInitializers::postorder(IR::MethodCallExpression* expression) {
+const IR::Node *CreateStructInitializers::postorder(IR::MethodCallExpression *expression) {
     auto mi = MethodInstance::resolve(expression, refMap, typeMap);
     auto result = expression;
     auto convertedArgs = new IR::Vector<IR::Argument>();
@@ -135,7 +135,7 @@ const IR::Node* CreateStructInitializers::postorder(IR::MethodCallExpression* ex
     return expression;
 }
 
-const IR::Node* CreateStructInitializers::postorder(IR::Operation_Relation* expression) {
+const IR::Node *CreateStructInitializers::postorder(IR::Operation_Relation *expression) {
     auto orig = getOriginal<IR::Operation_Relation>();
     auto ltype = typeMap->getType(orig->left, true);
     auto rtype = typeMap->getType(orig->right, true);

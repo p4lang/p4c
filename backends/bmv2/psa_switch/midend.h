@@ -28,7 +28,7 @@ namespace BMV2 {
 class PsaSwitchMidEnd : public MidEnd {
  public:
     // If p4c is run with option '--listMidendPasses', outStream is used for printing passes names
-    explicit PsaSwitchMidEnd(CompilerOptions& options, std::ostream* outStream = nullptr);
+    explicit PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStream = nullptr);
 };
 
 }  // namespace BMV2

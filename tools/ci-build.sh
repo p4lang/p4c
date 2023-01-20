@@ -94,15 +94,6 @@ P4C_RUNTIME_DEPS="cpp \
                   libgmp-dev \
                   python3"
 
-# use scapy 2.4.5, which is the version on which ptf depends
-P4C_PIP_PACKAGES="ipaddr \
-                  pyroute2 \
-                  ply==3.8 \
-                  ptf \
-                  scapy==2.4.5 \
-                  clang-format>=15.0.4"
-
-
 # TODO: Remove this check once 18.04 is deprecated.
 if [[ "${DISTRIB_RELEASE}" == "18.04" ]] || [[ "$(which simple_switch 2> /dev/null)" != "" ]] ; then
   P4C_DEPS+=" libprotobuf-dev protobuf-compiler"
@@ -119,14 +110,22 @@ sudo apt-get install -y --no-install-recommends \
   ${P4C_EBPF_DEPS} \
   ${P4C_RUNTIME_DEPS}
 
+# TODO: Remove this check once 18.04 is deprecated.
 if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
   ccache --set-config cache_dir=.ccache
 fi
 ccache --set-config max_size=1G
 
 sudo pip3 install --upgrade pip
-sudo pip3 install wheel
-sudo pip3 install $P4C_PIP_PACKAGES
+sudo pip3 install -r ${P4C_DIR}/requirements.txt
+
+# Install add-ons to communicate with simple_switch_grpc via P4Runtime.
+# These packages are necessary because of a protobuf version mismatch in more recent Ubuntu distributions.
+if [[ "${DISTRIB_RELEASE}" == "22.04" ]] ; then
+  sudo pip3 install --upgrade protobuf==3.20.1
+  sudo pip3 install --upgrade googleapis-common-protos==1.50.0
+  sudo pip3 install --upgrade grpcio==1.51.1
+fi
 
 # Build libbpf for eBPF tests.
 pushd ${P4C_DIR}

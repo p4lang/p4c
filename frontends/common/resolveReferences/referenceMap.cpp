@@ -23,7 +23,7 @@ limitations under the License.
 namespace P4 {
 
 MinimalNameGenerator::MinimalNameGenerator() {
-    for (auto& reserved : P4::reservedWords) usedNames.insert({reserved, 0});
+    for (auto &reserved : P4::reservedWords) usedNames.insert({reserved, 0});
 }
 
 ReferenceMap::ReferenceMap() : ProgramMap("ReferenceMap"), isv1(false) { clear(); }
@@ -34,11 +34,11 @@ void ReferenceMap::clear() {
     usedNames.clear();
     used.clear();
     thisToDeclaration.clear();
-    for (auto& reserved : P4::reservedWords) usedNames.insert({reserved, 0});
+    for (auto &reserved : P4::reservedWords) usedNames.insert({reserved, 0});
     ProgramMap::clear();
 }
 
-void ReferenceMap::setDeclaration(const IR::Path* path, const IR::IDeclaration* decl) {
+void ReferenceMap::setDeclaration(const IR::Path *path, const IR::IDeclaration *decl) {
     CHECK_NULL(path);
     CHECK_NULL(decl);
     LOG3("Resolved " << dbp(path) << " to " << dbp(decl));
@@ -51,7 +51,7 @@ void ReferenceMap::setDeclaration(const IR::Path* path, const IR::IDeclaration* 
     used.insert(decl);
 }
 
-void ReferenceMap::setDeclaration(const IR::This* pointer, const IR::IDeclaration* decl) {
+void ReferenceMap::setDeclaration(const IR::This *pointer, const IR::IDeclaration *decl) {
     CHECK_NULL(pointer);
     CHECK_NULL(decl);
     LOG3("Resolved " << dbp(pointer) << " to " << dbp(decl));
@@ -61,7 +61,7 @@ void ReferenceMap::setDeclaration(const IR::This* pointer, const IR::IDeclaratio
     thisToDeclaration.emplace(pointer, decl);
 }
 
-const IR::IDeclaration* ReferenceMap::getDeclaration(const IR::This* pointer, bool notNull) const {
+const IR::IDeclaration *ReferenceMap::getDeclaration(const IR::This *pointer, bool notNull) const {
     CHECK_NULL(pointer);
     auto result = get(thisToDeclaration, pointer);
 
@@ -74,7 +74,7 @@ const IR::IDeclaration* ReferenceMap::getDeclaration(const IR::This* pointer, bo
     return result;
 }
 
-const IR::IDeclaration* ReferenceMap::getDeclaration(const IR::Path* path, bool notNull) const {
+const IR::IDeclaration *ReferenceMap::getDeclaration(const IR::Path *path, bool notNull) const {
     CHECK_NULL(path);
     auto result = get(pathToDeclaration, path);
 
@@ -87,7 +87,7 @@ const IR::IDeclaration* ReferenceMap::getDeclaration(const IR::Path* path, bool 
     return result;
 }
 
-void ReferenceMap::dbprint(std::ostream& out) const {
+void ReferenceMap::dbprint(std::ostream &out) const {
     if (pathToDeclaration.empty()) out << "Empty" << std::endl;
     for (auto e : pathToDeclaration) out << dbp(e.first) << "->" << dbp(e.second) << std::endl;
 }
@@ -101,7 +101,7 @@ cstring ReferenceMap::newName(cstring base) {
     // This will not impact correctness.
     unsigned len = base.size();
     const char digits[] = "0123456789";
-    const char* s = base.c_str();
+    const char *s = base.c_str();
     while (len > 0 && strchr(digits, s[len - 1])) len--;
     if (len > 0 && base[len - 1] == '_') base = base.substr(0, len - 1);
 
@@ -120,7 +120,7 @@ cstring MinimalNameGenerator::newName(cstring base) {
     // This will not impact correctness.
     unsigned len = base.size();
     const char digits[] = "0123456789";
-    const char* s = base.c_str();
+    const char *s = base.c_str();
     while (len > 0 && strchr(digits, s[len - 1])) len--;
     if (len > 0 && base[len - 1] == '_') base = base.substr(0, len - 1);
 

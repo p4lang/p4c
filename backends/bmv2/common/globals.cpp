@@ -21,7 +21,7 @@ limitations under the License.
 
 namespace BMV2 {
 
-bool ConvertGlobals::preorder(const IR::ExternBlock* block) {
+bool ConvertGlobals::preorder(const IR::ExternBlock *block) {
     LOG2("Converting " << block);
     // This object will be lost, but we don't care about
     // global action profiles here; they are synthesized also

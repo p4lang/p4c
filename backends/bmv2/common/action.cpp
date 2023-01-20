@@ -20,7 +20,7 @@ limitations under the License.
 
 namespace BMV2 {
 
-cstring ActionConverter::jsonAssignment(const IR::Type* type, bool inParser) {
+cstring ActionConverter::jsonAssignment(const IR::Type *type, bool inParser) {
     if (!inParser && type->is<IR::Type_Varbits>()) return "assign_VL";
     if (type->is<IR::Type_HeaderUnion>()) return "assign_union";
     if (type->is<IR::Type_Header>() || type->is<IR::Type_Struct>()) return "assign_header";
@@ -39,14 +39,14 @@ cstring ActionConverter::jsonAssignment(const IR::Type* type, bool inParser) {
         return "assign";
 }
 
-void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
-                                        Util::JsonArray* result) {
+void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
+                                        Util::JsonArray *result) {
     for (auto s : *body) {
         // TODO(jafingerhut) - add line/col at all individual cases below,
         // or perhaps it can be done as a common case above or below
         // for all of them?
 
-        IR::MethodCallExpression* mce2 = nullptr;
+        IR::MethodCallExpression *mce2 = nullptr;
         auto isR = false;
         if (s->is<IR::AssignmentStatement>()) {
             auto assign = s->to<IR::AssignmentStatement>();
@@ -118,7 +118,7 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
             auto parameters = mkParameters(primitive);
             primitive->emplace_non_null("source_info", assign->sourceInfoJsonObj());
             bool convertBool = type->is<IR::Type_Boolean>();
-            Util::IJson* left;
+            Util::IJson *left;
             if (ctxt->conv->isArrayIndexRuntime(l)) {
                 left = ctxt->conv->convert(l, true, true, convertBool);
             } else {
@@ -169,7 +169,7 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
             } else if (mi->is<P4::ExternMethod>()) {
                 auto em = mi->to<P4::ExternMethod>();
                 LOG3("P4V1:: convert " << s);
-                Util::IJson* json;
+                Util::IJson *json;
                 if (isR) {
                     json = ExternConverter::cvtExternObject(ctxt, em, mce2, s, emitExterns);
                 } else {
@@ -188,8 +188,8 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
     }
 }
 
-void ActionConverter::convertActionParams(const IR::ParameterList* parameters,
-                                          Util::JsonArray* params) {
+void ActionConverter::convertActionParams(const IR::ParameterList *parameters,
+                                          Util::JsonArray *params) {
     for (auto p : *parameters->getEnumerator()) {
         if (!ctxt->refMap->isUsed(p))
             warn(ErrorType::WARN_UNUSED, "Unused action parameter %1%", p);
@@ -207,7 +207,7 @@ void ActionConverter::convertActionParams(const IR::ParameterList* parameters,
     }
 }
 
-void ActionConverter::postorder(const IR::P4Action* action) {
+void ActionConverter::postorder(const IR::P4Action *action) {
     cstring name = action->controlPlaneName();
     auto params = new Util::JsonArray();
     convertActionParams(action->parameters, params);

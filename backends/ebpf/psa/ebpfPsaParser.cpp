@@ -22,7 +22,7 @@ limitations under the License.
 
 namespace EBPF {
 
-void PsaStateTranslationVisitor::processMethod(const P4::ExternMethod* ext) {
+void PsaStateTranslationVisitor::processMethod(const P4::ExternMethod *ext) {
     auto externName = ext->originalExternType->name.name;
 
     if (externName == "Checksum" || externName == "InternetChecksum") {
@@ -36,13 +36,13 @@ void PsaStateTranslationVisitor::processMethod(const P4::ExternMethod* ext) {
 }
 
 // =====================EBPFPsaParser=============================
-EBPFPsaParser::EBPFPsaParser(const EBPFProgram* program, const IR::ParserBlock* block,
-                             const P4::TypeMap* typeMap)
+EBPFPsaParser::EBPFPsaParser(const EBPFProgram *program, const IR::ParserBlock *block,
+                             const P4::TypeMap *typeMap)
     : EBPFParser(program, block, typeMap), inputMetadata(nullptr) {
     visitor = new PsaStateTranslationVisitor(program->refMap, program->typeMap, this);
 }
 
-void EBPFPsaParser::emit(CodeBuilder* builder) {
+void EBPFPsaParser::emit(CodeBuilder *builder) {
     builder->emitIndent();
     builder->blockStart();
     emitParserInputMetadata(builder);
@@ -50,7 +50,7 @@ void EBPFPsaParser::emit(CodeBuilder* builder) {
     builder->blockEnd(true);
 }
 
-void EBPFPsaParser::emitParserInputMetadata(CodeBuilder* builder) {
+void EBPFPsaParser::emitParserInputMetadata(CodeBuilder *builder) {
     bool isIngress = program->is<EBPFIngressPipeline>();
 
     builder->emitIndent();
@@ -79,7 +79,7 @@ void EBPFPsaParser::emitParserInputMetadata(CodeBuilder* builder) {
     builder->endOfStatement(true);
 }
 
-void EBPFPsaParser::emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl) {
+void EBPFPsaParser::emitDeclaration(CodeBuilder *builder, const IR::Declaration *decl) {
     if (auto di = decl->to<IR::Declaration_Instance>()) {
         cstring name = di->name.name;
         if (EBPFObject::getSpecializedTypeName(di) == "Checksum") {
@@ -98,7 +98,7 @@ void EBPFPsaParser::emitDeclaration(CodeBuilder* builder, const IR::Declaration*
     EBPFParser::emitDeclaration(builder, decl);
 }
 
-void EBPFPsaParser::emitRejectState(CodeBuilder* builder) {
+void EBPFPsaParser::emitRejectState(CodeBuilder *builder) {
     builder->emitIndent();
     builder->appendFormat("if (%s == 0) ", program->errorVar.c_str());
     builder->blockStart();

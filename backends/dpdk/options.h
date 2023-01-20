@@ -38,7 +38,7 @@ class DpdkOptions : public CompilerOptions {
     DpdkOptions() {
         registerOption(
             "--listMidendPasses", nullptr,
-            [this](const char*) {
+            [this](const char *) {
                 listMidendPasses = true;
                 DPDK::DpdkMidEnd midEnd(*this, outStream);
                 exit(0);
@@ -47,7 +47,7 @@ class DpdkOptions : public CompilerOptions {
             "[Dpdk back-end] Lists exact name of all midend passes.\n");
         registerOption(
             "--enableEgress", nullptr,
-            [this](const char*) {
+            [this](const char *) {
                 enableEgress = true;
                 return true;
             },
@@ -55,35 +55,35 @@ class DpdkOptions : public CompilerOptions {
 
         registerOption(
             "--bf-rt-schema", "file",
-            [this](const char* arg) {
+            [this](const char *arg) {
                 bfRtSchema = arg;
                 return true;
             },
             "Generate and write BF-RT JSON schema to the specified file");
         registerOption(
             "-o", "outfile",
-            [this](const char* arg) {
+            [this](const char *arg) {
                 outputFile = arg;
                 return true;
             },
             "Write output to outfile");
         registerOption(
             "--tdi", "file",
-            [this](const char* arg) {
+            [this](const char *arg) {
                 tdiFile = arg;
                 return true;
             },
             "Generate and write TDI JSON to the specified file");
         registerOption(
             "--context", "file",
-            [this](const char* arg) {
+            [this](const char *arg) {
                 ctxtFile = arg;
                 return true;
             },
             "Generate and write context JSON to the specified file");
         registerOption(
             "--fromJSON", "file",
-            [this](const char* arg) {
+            [this](const char *arg) {
                 loadIRFromJson = true;
                 file = arg;
                 return true;
@@ -93,9 +93,9 @@ class DpdkOptions : public CompilerOptions {
     }
 
     /// Process the command line arguments and set options accordingly.
-    std::vector<const char*>* process(int argc, char* const argv[]) override;
+    std::vector<const char *> *process(int argc, char *const argv[]) override;
 
-    const char* getIncludePath() override;
+    const char *getIncludePath() override;
 };
 
 using DpdkContext = P4CContextWithOptions<DpdkOptions>;

@@ -17,8 +17,8 @@ limitations under the License.
 
 namespace EBPF {
 
-EBPFMeterPSA::EBPFMeterPSA(const EBPFProgram* program, cstring instanceName,
-                           const IR::Declaration_Instance* di, CodeGenInspector* codeGen)
+EBPFMeterPSA::EBPFMeterPSA(const EBPFProgram *program, cstring instanceName,
+                           const IR::Declaration_Instance *di, CodeGenInspector *codeGen)
     : EBPFTableBase(program, instanceName, codeGen) {
     CHECK_NULL(di);
     auto typeName = di->type->toString();
@@ -45,19 +45,19 @@ EBPFMeterPSA::EBPFMeterPSA(const EBPFProgram* program, cstring instanceName,
     this->type = toType(typeExpr->asInt());
 }
 
-EBPFType* EBPFMeterPSA::getBaseValueType(P4::ReferenceMap* refMap) {
+EBPFType *EBPFMeterPSA::getBaseValueType(P4::ReferenceMap *refMap) {
     IR::IndexedVector<IR::StructField> vec = getValueFields();
     auto valueStructType = new IR::Type_Struct(IR::ID(getBaseStructName(refMap)), vec);
     return EBPFTypeFactory::instance->create(valueStructType);
 }
 
-EBPFType* EBPFMeterPSA::getIndirectValueType() const {
+EBPFType *EBPFMeterPSA::getIndirectValueType() const {
     auto vec = IR::IndexedVector<IR::StructField>();
 
     auto baseValue = new IR::Type_Struct(IR::ID(getBaseStructName(program->refMap)));
     vec.push_back(new IR::StructField(IR::ID(indirectValueField), baseValue));
 
-    IR::Type_Struct* spinLock = createSpinlockStruct();
+    IR::Type_Struct *spinLock = createSpinlockStruct();
     vec.push_back(new IR::StructField(IR::ID(spinlockField), spinLock));
 
     auto valueType = new IR::Type_Struct(IR::ID(getIndirectStructName()), vec);
@@ -66,7 +66,7 @@ EBPFType* EBPFMeterPSA::getIndirectValueType() const {
     return meterType;
 }
 
-cstring EBPFMeterPSA::getBaseStructName(P4::ReferenceMap* refMap) {
+cstring EBPFMeterPSA::getBaseStructName(P4::ReferenceMap *refMap) {
     static cstring valueBaseStructName;
 
     if (valueBaseStructName.isNullOrEmpty()) {
@@ -111,12 +111,12 @@ IR::IndexedVector<IR::StructField> EBPFMeterPSA::getValueFields() {
     return vec;
 }
 
-IR::Type_Struct* EBPFMeterPSA::createSpinlockStruct() {
+IR::Type_Struct *EBPFMeterPSA::createSpinlockStruct() {
     auto spinLock = new IR::Type_Struct(IR::ID("bpf_spin_lock"));
     return spinLock;
 }
 
-void EBPFMeterPSA::emitSpinLockField(CodeBuilder* builder) const {
+void EBPFMeterPSA::emitSpinLockField(CodeBuilder *builder) const {
     auto spinlockStruct = createSpinlockStruct();
     auto spinlockType = EBPFTypeFactory::instance->create(spinlockStruct);
     builder->emitIndent();
@@ -124,18 +124,18 @@ void EBPFMeterPSA::emitSpinLockField(CodeBuilder* builder) const {
     builder->endOfStatement(true);
 }
 
-void EBPFMeterPSA::emitKeyType(CodeBuilder* builder) const {
+void EBPFMeterPSA::emitKeyType(CodeBuilder *builder) const {
     builder->emitIndent();
     builder->append("typedef ");
     this->keyType->declare(builder, keyTypeName, false);
     builder->endOfStatement(true);
 }
 
-void EBPFMeterPSA::emitValueStruct(CodeBuilder* builder, P4::ReferenceMap* refMap) {
+void EBPFMeterPSA::emitValueStruct(CodeBuilder *builder, P4::ReferenceMap *refMap) {
     builder->emitIndent();
     getBaseValueType(refMap)->emit(builder);
 }
-void EBPFMeterPSA::emitValueType(CodeBuilder* builder) const {
+void EBPFMeterPSA::emitValueType(CodeBuilder *builder) const {
     if (isDirect) {
         builder->emitIndent();
         getBaseValueType(program->refMap)->declare(builder, instanceName, false);
@@ -145,7 +145,7 @@ void EBPFMeterPSA::emitValueType(CodeBuilder* builder) const {
     }
 }
 
-void EBPFMeterPSA::emitInstance(CodeBuilder* builder) const {
+void EBPFMeterPSA::emitInstance(CodeBuilder *builder) const {
     if (!isDirect) {
         builder->target->emitTableDeclSpinlock(builder, instanceName, TableHash, this->keyTypeName,
                                                "struct " + getIndirectStructName(), size);
@@ -156,9 +156,9 @@ void EBPFMeterPSA::emitInstance(CodeBuilder* builder) const {
     }
 }
 
-void EBPFMeterPSA::emitExecute(CodeBuilder* builder, const P4::ExternMethod* method,
-                               ControlBodyTranslatorPSA* translator) const {
-    auto pipeline = dynamic_cast<const EBPFPipeline*>(program);
+void EBPFMeterPSA::emitExecute(CodeBuilder *builder, const P4::ExternMethod *method,
+                               ControlBodyTranslatorPSA *translator) const {
+    auto pipeline = dynamic_cast<const EBPFPipeline *>(program);
     CHECK_NULL(pipeline);
 
     cstring functionNameSuffix;
@@ -186,8 +186,8 @@ void EBPFMeterPSA::emitExecute(CodeBuilder* builder, const P4::ExternMethod* met
     builder->append(")");
 }
 
-void EBPFMeterPSA::emitIndex(CodeBuilder* builder, const P4::ExternMethod* method,
-                             ControlBodyTranslatorPSA* translator) const {
+void EBPFMeterPSA::emitIndex(CodeBuilder *builder, const P4::ExternMethod *method,
+                             ControlBodyTranslatorPSA *translator) const {
     BUG_CHECK(translator != nullptr, "Index translator is nullptr!");
     auto argument = method->expr->arguments->at(0);
     builder->append("&");
@@ -200,9 +200,9 @@ void EBPFMeterPSA::emitIndex(CodeBuilder* builder, const P4::ExternMethod* metho
     translator->visit(argument);
 }
 
-void EBPFMeterPSA::emitDirectExecute(CodeBuilder* builder, const P4::ExternMethod* method,
+void EBPFMeterPSA::emitDirectExecute(CodeBuilder *builder, const P4::ExternMethod *method,
                                      cstring valuePtr) const {
-    auto pipeline = dynamic_cast<const EBPFPipeline*>(program);
+    auto pipeline = dynamic_cast<const EBPFPipeline *>(program);
     CHECK_NULL(pipeline);
 
     cstring functionNameSuffix;
@@ -230,7 +230,7 @@ void EBPFMeterPSA::emitDirectExecute(CodeBuilder* builder, const P4::ExternMetho
     builder->append(")");
 }
 
-cstring EBPFMeterPSA::meterExecuteFunc(bool trace, P4::ReferenceMap* refMap) {
+cstring EBPFMeterPSA::meterExecuteFunc(bool trace, P4::ReferenceMap *refMap) {
     cstring meterExecuteFunc =
         "static __always_inline\n"
         "enum PSA_MeterColor_t meter_execute(%meter_struct% *value, "

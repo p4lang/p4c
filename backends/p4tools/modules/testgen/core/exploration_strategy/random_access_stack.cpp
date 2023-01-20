@@ -18,7 +18,7 @@ namespace P4Tools {
 
 namespace P4Testgen {
 
-void RandomAccessStack::run(const Callback& callback) {
+void RandomAccessStack::run(const Callback &callback) {
     while (true) {
         try {
             if (executionState->isTerminal()) {
@@ -36,13 +36,13 @@ void RandomAccessStack::run(const Callback& callback) {
                 // in the state before the step was taken - we copy the current symbolic state.
                 StepResult successors = step(*executionState);
                 bool guaranteeViability = successors->size() > 1;
-                ExecutionState* next = chooseBranch(*successors, guaranteeViability);
+                ExecutionState *next = chooseBranch(*successors, guaranteeViability);
                 if (next != nullptr) {
                     executionState = next;
                     continue;
                 }
             }
-        } catch (TestgenUnimplemented& e) {
+        } catch (TestgenUnimplemented &e) {
             // If strict is enabled, bubble the exception up.
             if (TestgenOptions::get().strict) {
                 throw;
@@ -59,18 +59,18 @@ void RandomAccessStack::run(const Callback& callback) {
                 return;
             }
             bool guaranteeViability = true;
-            ExecutionState* next = nullptr;
+            ExecutionState *next = nullptr;
             // Here we restore unexploredBranches from the local buffer
             if (unexploredBranches.empty() && !bufferUnexploredBranches.empty()) {
                 for (size_t i = 0; i < bufferUnexploredBranches.size(); i++) {
-                    auto* branches = bufferUnexploredBranches.front();
+                    auto *branches = bufferUnexploredBranches.front();
                     bufferUnexploredBranches.pop_front();
                     unexploredBranches.push(branches);
                 }
-                auto* successors = unexploredBranches.pop();
+                auto *successors = unexploredBranches.pop();
                 next = chooseBranch(*successors, guaranteeViability);
             } else {
-                auto* successors = multiPop(unexploredBranches);
+                auto *successors = multiPop(unexploredBranches);
                 next = chooseBranch(*successors, guaranteeViability);
             }
             if (next != nullptr) {
@@ -81,22 +81,22 @@ void RandomAccessStack::run(const Callback& callback) {
     }
 }
 
-RandomAccessStack::RandomAccessStack(AbstractSolver& solver, const ProgramInfo& programInfo,
-                                     boost::optional<uint32_t> seed, int popLevel)
-    : IncrementalStack(solver, programInfo, seed), popLevel(popLevel) {}
+RandomAccessStack::RandomAccessStack(AbstractSolver &solver, const ProgramInfo &programInfo,
+                                     uint64_t popLevel)
+    : IncrementalStack(solver, programInfo), popLevel(popLevel) {}
 
 RandomAccessStack::StepResult RandomAccessStack::multiPop(
-    IncrementalStack::UnexploredBranches& unexploredBranches) {
+    IncrementalStack::UnexploredBranches &unexploredBranches) {
     // A good spot seems to be 10 per cent of the paths. Needs better stats.
-    size_t unexploredRange = unexploredBranches.size() / popLevel;
-    uint64_t popLevels = Utils::getRandInt(unexploredRange) + 1;
+    auto unexploredRange = unexploredBranches.size() / popLevel;
+    auto popLevels = Utils::getRandInt(unexploredRange) + 1;
     // Saves unexploredBranches in the buffer if we are popping more
     // than one level to revist them later.
     if (popLevels == 1) {
         return unexploredBranches.pop();
     }
     for (uint64_t index = 0; index < (popLevels - 1); index++) {
-        auto* unexploredSuccessors = unexploredBranches.pop();
+        auto *unexploredSuccessors = unexploredBranches.pop();
         if (!(unexploredSuccessors->empty())) {
             bufferUnexploredBranches.push_back(unexploredSuccessors);
         }

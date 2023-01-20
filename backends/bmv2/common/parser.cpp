@@ -25,7 +25,7 @@ limitations under the License.
 
 namespace BMV2 {
 
-cstring ParserConverter::jsonAssignment(const IR::Type* type, bool inParser) {
+cstring ParserConverter::jsonAssignment(const IR::Type *type, bool inParser) {
     if (!inParser && type->is<IR::Type_Varbits>()) return "assign_VL";
     if (type->is<IR::Type_HeaderUnion>()) return "assign_union";
     if (type->is<IR::Type_Header>() || type->is<IR::Type_Struct>()) return "assign_header";
@@ -44,11 +44,11 @@ cstring ParserConverter::jsonAssignment(const IR::Type* type, bool inParser) {
         return "assign";
 }
 
-Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat) {
+Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat) {
     auto result = new Util::JsonObject();
     auto params = mkArrayField(result, "parameters");
     auto isR = false;
-    IR::MethodCallExpression* mce2 = nullptr;
+    IR::MethodCallExpression *mce2 = nullptr;
     if (stat->is<IR::AssignmentStatement>()) {
         auto assign = stat->to<IR::AssignmentStatement>();
         if (assign->right->is<IR::MethodCallExpression>()) {
@@ -60,7 +60,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                 if ((extmeth->method->name.name == "get" ||
                      extmeth->method->name.name == "get_state") &&
                     extmeth->originalExternType->name == "InternetChecksum") {
-                    const IR::Expression* l;
+                    const IR::Expression *l;
                     l = assign->left;
                     isR = true;
                     auto dest = new IR::Argument(l);
@@ -75,7 +75,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                    (assign->right->to<IR::Equ>()->right->is<IR::MethodCallExpression>() ||
                     assign->right->to<IR::Equ>()->left->is<IR::MethodCallExpression>())) {
             auto equ = assign->right->to<IR::Equ>();
-            const IR::MethodCallExpression* mce = nullptr;
+            const IR::MethodCallExpression *mce = nullptr;
             const IR::Expression *l, *r;
             if (assign->right->to<IR::Equ>()->right->is<IR::MethodCallExpression>()) {
                 mce = equ->right->to<IR::MethodCallExpression>();
@@ -151,7 +151,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                 auto param = new Util::JsonObject();
                 params->append(param);
                 cstring type;
-                Util::IJson* j = nullptr;
+                Util::IJson *j = nullptr;
 
                 if (auto mem = arg->expression->to<IR::Member>()) {
                     auto baseType = ctxt->typeMap->getType(mem->expr, true);
@@ -172,7 +172,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                                 if (parent->member == IR::Type_Stack::next) {
                                     type = "union_stack";
                                     j = ctxt->conv->convert(parent->expr);
-                                    Util::JsonArray* a;
+                                    Util::JsonArray *a;
                                     if (j->is<Util::JsonArray>()) {
                                         a = j->to<Util::JsonArray>()->clone();
                                     } else if (j->is<Util::JsonObject>()) {
@@ -233,7 +233,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                          extmeth->method->name.name == "set_state" ||
                          extmeth->method->name.name == "get"))) {
                 // PSA backend extern
-                Util::IJson* json;
+                Util::IJson *json;
                 if (isR) {
                     json = ExternConverter::cvtExternObject(ctxt, extmeth, mce2, stat, true);
                 } else {
@@ -335,8 +335,8 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
 }
 
 // Operates on a select keyset
-void ParserConverter::convertSimpleKey(const IR::Expression* keySet, big_int& value,
-                                       big_int& mask) const {
+void ParserConverter::convertSimpleKey(const IR::Expression *keySet, big_int &value,
+                                       big_int &mask) const {
     if (keySet->is<IR::Mask>()) {
         auto mk = keySet->to<IR::Mask>();
         if (!mk->left->is<IR::Constant>()) {
@@ -367,9 +367,9 @@ void ParserConverter::convertSimpleKey(const IR::Expression* keySet, big_int& va
     }
 }
 
-unsigned ParserConverter::combine(const IR::Expression* keySet, const IR::ListExpression* select,
-                                  big_int& value, big_int& mask, bool& is_vset,
-                                  cstring& vset_name) const {
+unsigned ParserConverter::combine(const IR::Expression *keySet, const IR::ListExpression *select,
+                                  big_int &value, big_int &mask, bool &is_vset,
+                                  cstring &vset_name) const {
     // From the BMv2 spec: For values and masks, make sure that you
     // use the correct format. They need to be the concatenation (in
     // the right order) of all byte padded fields (padded with 0
@@ -442,7 +442,7 @@ unsigned ParserConverter::combine(const IR::Expression* keySet, const IR::ListEx
     }
 }
 
-Util::IJson* ParserConverter::stateName(IR::ID state) {
+Util::IJson *ParserConverter::stateName(IR::ID state) {
     if (state.name == IR::ParserState::accept) {
         return Util::JsonValue::null;
     } else if (state.name == IR::ParserState::reject) {
@@ -454,9 +454,9 @@ Util::IJson* ParserConverter::stateName(IR::ID state) {
     }
 }
 
-std::vector<Util::IJson*> ParserConverter::convertSelectExpression(
-    const IR::SelectExpression* expr) {
-    std::vector<Util::IJson*> result;
+std::vector<Util::IJson *> ParserConverter::convertSelectExpression(
+    const IR::SelectExpression *expr) {
+    std::vector<Util::IJson *> result;
     auto se = expr->to<IR::SelectExpression>();
     for (auto sc : se->selectCases) {
         auto trans = new Util::JsonObject();
@@ -490,14 +490,14 @@ std::vector<Util::IJson*> ParserConverter::convertSelectExpression(
     return result;
 }
 
-Util::IJson* ParserConverter::convertSelectKey(const IR::SelectExpression* expr) {
+Util::IJson *ParserConverter::convertSelectKey(const IR::SelectExpression *expr) {
     auto se = expr->to<IR::SelectExpression>();
     CHECK_NULL(se);
     auto key = ctxt->conv->convert(se->select, false);
     return key;
 }
 
-Util::IJson* ParserConverter::convertPathExpression(const IR::PathExpression* pe) {
+Util::IJson *ParserConverter::convertPathExpression(const IR::PathExpression *pe) {
     auto trans = new Util::JsonObject();
     trans->emplace("type", "default");
     trans->emplace("value", Util::JsonValue::null);
@@ -506,7 +506,7 @@ Util::IJson* ParserConverter::convertPathExpression(const IR::PathExpression* pe
     return trans;
 }
 
-Util::IJson* ParserConverter::createDefaultTransition() {
+Util::IJson *ParserConverter::createDefaultTransition() {
     auto trans = new Util::JsonObject();
     trans->emplace("type", "default");
     trans->emplace("value", Util::JsonValue::null);
@@ -515,8 +515,8 @@ Util::IJson* ParserConverter::createDefaultTransition() {
     return trans;
 }
 
-void ParserConverter::addValueSets(const IR::P4Parser* parser) {
-    auto isExactMatch = [this](const IR::StructField* sf) {
+void ParserConverter::addValueSets(const IR::P4Parser *parser) {
+    auto isExactMatch = [this](const IR::StructField *sf) {
         auto matchAnnotation = sf->getAnnotation(IR::Annotation::matchAnnotation);
         if (!matchAnnotation) return true;  // default (missing annotation) is exact
         auto matchPathExpr = matchAnnotation->expr[0]->to<IR::PathExpression>();
@@ -551,7 +551,7 @@ void ParserConverter::addValueSets(const IR::P4Parser* parser) {
     }
 }
 
-bool ParserConverter::preorder(const IR::P4Parser* parser) {
+bool ParserConverter::preorder(const IR::P4Parser *parser) {
     auto parser_id = ctxt->json->add_parser(name);
 
     addValueSets(parser);

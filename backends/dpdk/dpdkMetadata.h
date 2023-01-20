@@ -24,12 +24,12 @@ limitations under the License.
 namespace DPDK {
 
 class IsDirectionMetadataUsed : public Inspector {
-    bool& is_direction_used;
+    bool &is_direction_used;
 
  public:
-    explicit IsDirectionMetadataUsed(bool& is_direction_used)
+    explicit IsDirectionMetadataUsed(bool &is_direction_used)
         : is_direction_used(is_direction_used) {}
-    bool preorder(const IR::Member* m) override {
+    bool preorder(const IR::Member *m) override {
         if (!is_direction_used && isDirection(m)) {
             is_direction_used = true;
         }
@@ -68,12 +68,12 @@ class DirectionToRegRead : public Transform {
             std::make_pair(cstring("pna_main_parser_input_metadata_direction"),
                            cstring("pna_main_input_metadata_input_port")));
     }
-    const IR::Node* preorder(IR::DpdkAsmProgram* p) override;
-    const IR::Node* preorder(IR::Member* m) override;
+    const IR::Node *preorder(IR::DpdkAsmProgram *p) override;
+    const IR::Node *preorder(IR::Member *m) override;
 
-    void uniqueNames(IR::DpdkAsmProgram* p);
-    IR::DpdkExternDeclaration* addRegDeclInstance(cstring instanceName);
-    IR::DpdkListStatement* replaceDirection(IR::DpdkListStatement* l);
+    void uniqueNames(IR::DpdkAsmProgram *p);
+    IR::DpdkExternDeclaration *addRegDeclInstance(cstring instanceName);
+    IR::DpdkListStatement *replaceDirection(IR::DpdkListStatement *l);
     IR::IndexedVector<IR::DpdkAsmStatement> addRegReadStmtForDirection(
         IR::IndexedVector<IR::DpdkAsmStatement> stmts);
 };
@@ -86,9 +86,9 @@ class PrependPassRecircId : public Transform {
 
  public:
     PrependPassRecircId() {}
-    bool isPass(const IR::Member* m);
-    const IR::Node* postorder(IR::DpdkAction* a) override;
-    const IR::Node* postorder(IR::DpdkListStatement* l) override;
+    bool isPass(const IR::Member *m);
+    const IR::Node *postorder(IR::DpdkAction *a) override;
+    const IR::Node *postorder(IR::DpdkListStatement *l) override;
     IR::IndexedVector<IR::DpdkAsmStatement> prependPassWithRecircid(
         IR::IndexedVector<IR::DpdkAsmStatement> stmts);
 };

@@ -31,23 +31,23 @@ class BMv2_V1ModelTestgenTarget : public TestgenTarget {
     static void make();
 
  protected:
-    const BMv2_V1ModelProgramInfo* initProgram_impl(
-        const IR::P4Program* program, const IR::Declaration_Instance* mainDecl) const override;
+    const BMv2_V1ModelProgramInfo *initProgram_impl(
+        const IR::P4Program *program, const IR::Declaration_Instance *mainDecl) const override;
 
     int getPortNumWidth_bits_impl() const override;
 
-    Bmv2TestBackend* getTestBackend_impl(const ProgramInfo& programInfo,
-                                         ExplorationStrategy& symbex,
-                                         const boost::filesystem::path& testPath,
+    Bmv2TestBackend *getTestBackend_impl(const ProgramInfo &programInfo,
+                                         ExplorationStrategy &symbex,
+                                         const boost::filesystem::path &testPath,
                                          boost::optional<uint32_t> seed) const override;
 
-    BMv2_V1ModelCmdStepper* getCmdStepper_impl(ExecutionState& state, AbstractSolver& solver,
-                                               const ProgramInfo& programInfo) const override;
+    BMv2_V1ModelCmdStepper *getCmdStepper_impl(ExecutionState &state, AbstractSolver &solver,
+                                               const ProgramInfo &programInfo) const override;
 
-    BMv2_V1ModelExprStepper* getExprStepper_impl(ExecutionState& state, AbstractSolver& solver,
-                                                 const ProgramInfo& programInfo) const override;
+    BMv2_V1ModelExprStepper *getExprStepper_impl(ExecutionState &state, AbstractSolver &solver,
+                                                 const ProgramInfo &programInfo) const override;
 
-    const ArchSpec* getArchSpecImpl() const override;
+    const ArchSpec *getArchSpecImpl() const override;
 
  private:
     BMv2_V1ModelTestgenTarget();

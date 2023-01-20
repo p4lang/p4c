@@ -32,18 +32,18 @@ namespace EBPF {
 
 class CodeBuilder : public Util::SourceCodeBuilder {
  public:
-    const Target* target;
-    explicit CodeBuilder(const Target* target) : target(target) {}
+    const Target *target;
+    explicit CodeBuilder(const Target *target) : target(target) {}
 };
 
 // Visitor for generating C for EBPF
 // This visitor is invoked on various subtrees
 class CodeGenInspector : public Inspector {
  protected:
-    CodeBuilder* builder;
-    P4::ReferenceMap* refMap;
-    P4::TypeMap* typeMap;
-    std::map<const IR::Parameter*, const IR::Parameter*> substitution;
+    CodeBuilder *builder;
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
+    std::map<const IR::Parameter *, const IR::Parameter *> substitution;
     // asPointerVariables stores the list of string expressions that
     // should be emitted as pointer variables.
     std::set<cstring> asPointerVariables;
@@ -54,7 +54,7 @@ class CodeGenInspector : public Inspector {
 
  public:
     int expressionPrecedence;  /// precedence of current IR::Operation
-    CodeGenInspector(P4::ReferenceMap* refMap, P4::TypeMap* typeMap)
+    CodeGenInspector(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
         : builder(nullptr),
           refMap(refMap),
           typeMap(typeMap),
@@ -64,66 +64,66 @@ class CodeGenInspector : public Inspector {
         visitDagOnce = false;
     }
 
-    void setBuilder(CodeBuilder* builder) {
+    void setBuilder(CodeBuilder *builder) {
         CHECK_NULL(builder);
         this->builder = builder;
     }
 
-    void substitute(const IR::Parameter* p, const IR::Parameter* with);
-    void copySubstitutions(CodeGenInspector* other) {
+    void substitute(const IR::Parameter *p, const IR::Parameter *with);
+    void copySubstitutions(CodeGenInspector *other) {
         for (auto s : other->substitution) substitute(s.first, s.second);
     }
 
     void useAsPointerVariable(cstring name) { this->asPointerVariables.insert(name); }
-    void copyPointerVariables(CodeGenInspector* other) {
+    void copyPointerVariables(CodeGenInspector *other) {
         for (auto s : other->asPointerVariables) {
             this->asPointerVariables.insert(s);
         }
     }
     bool isPointerVariable(cstring name) { return asPointerVariables.count(name) > 0; }
 
-    bool notSupported(const IR::Expression* expression) {
+    bool notSupported(const IR::Expression *expression) {
         ::error(ErrorType::ERR_UNSUPPORTED, "%1%: not yet implemented", expression);
         return false;
     }
 
-    bool preorder(const IR::Expression* expression) override { return notSupported(expression); }
-    bool preorder(const IR::Range* expression) override { return notSupported(expression); }
-    bool preorder(const IR::Mask* expression) override { return notSupported(expression); }
-    bool preorder(const IR::Slice* expression) override  // should not happen
+    bool preorder(const IR::Expression *expression) override { return notSupported(expression); }
+    bool preorder(const IR::Range *expression) override { return notSupported(expression); }
+    bool preorder(const IR::Mask *expression) override { return notSupported(expression); }
+    bool preorder(const IR::Slice *expression) override  // should not happen
     {
         return notSupported(expression);
     }
-    bool preorder(const IR::StringLiteral* expression) override;
-    bool preorder(const IR::ListExpression* expression) override;
-    bool preorder(const IR::PathExpression* expression) override;
-    bool preorder(const IR::Constant* expression) override;
-    bool preorder(const IR::Declaration_Variable* decl) override;
-    bool preorder(const IR::BoolLiteral* b) override;
-    bool preorder(const IR::Cast* c) override;
-    bool preorder(const IR::Operation_Binary* b) override;
-    bool preorder(const IR::Operation_Unary* u) override;
-    bool preorder(const IR::ArrayIndex* a) override;
-    bool preorder(const IR::Mux* a) override;
-    bool preorder(const IR::Member* e) override;
-    bool preorder(const IR::MethodCallExpression* expression) override;
-    bool comparison(const IR::Operation_Relation* comp);
-    bool preorder(const IR::Equ* e) override { return comparison(e); }
-    bool preorder(const IR::Neq* e) override { return comparison(e); }
-    bool preorder(const IR::Path* path) override;
-    bool preorder(const IR::StructExpression* expr) override;
+    bool preorder(const IR::StringLiteral *expression) override;
+    bool preorder(const IR::ListExpression *expression) override;
+    bool preorder(const IR::PathExpression *expression) override;
+    bool preorder(const IR::Constant *expression) override;
+    bool preorder(const IR::Declaration_Variable *decl) override;
+    bool preorder(const IR::BoolLiteral *b) override;
+    bool preorder(const IR::Cast *c) override;
+    bool preorder(const IR::Operation_Binary *b) override;
+    bool preorder(const IR::Operation_Unary *u) override;
+    bool preorder(const IR::ArrayIndex *a) override;
+    bool preorder(const IR::Mux *a) override;
+    bool preorder(const IR::Member *e) override;
+    bool preorder(const IR::MethodCallExpression *expression) override;
+    bool comparison(const IR::Operation_Relation *comp);
+    bool preorder(const IR::Equ *e) override { return comparison(e); }
+    bool preorder(const IR::Neq *e) override { return comparison(e); }
+    bool preorder(const IR::Path *path) override;
+    bool preorder(const IR::StructExpression *expr) override;
 
-    bool preorder(const IR::Type_Typedef* type) override;
-    bool preorder(const IR::Type_Enum* type) override;
-    bool preorder(const IR::AssignmentStatement* s) override;
-    bool preorder(const IR::BlockStatement* s) override;
-    bool preorder(const IR::MethodCallStatement* s) override;
-    bool preorder(const IR::EmptyStatement* s) override;
-    bool preorder(const IR::ReturnStatement* s) override;
-    bool preorder(const IR::ExitStatement* s) override;
-    bool preorder(const IR::IfStatement* s) override;
+    bool preorder(const IR::Type_Typedef *type) override;
+    bool preorder(const IR::Type_Enum *type) override;
+    bool preorder(const IR::AssignmentStatement *s) override;
+    bool preorder(const IR::BlockStatement *s) override;
+    bool preorder(const IR::MethodCallStatement *s) override;
+    bool preorder(const IR::EmptyStatement *s) override;
+    bool preorder(const IR::ReturnStatement *s) override;
+    bool preorder(const IR::ExitStatement *s) override;
+    bool preorder(const IR::IfStatement *s) override;
 
-    void widthCheck(const IR::Node* node) const;
+    void widthCheck(const IR::Node *node) const;
 };
 
 }  // namespace EBPF

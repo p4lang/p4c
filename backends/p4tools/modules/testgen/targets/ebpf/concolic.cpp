@@ -10,7 +10,7 @@ namespace EBPF {
 
 const ConcolicMethodImpls::ImplList EBPFConcolic::EBPFConcolicMethodImpls{};
 
-const ConcolicMethodImpls::ImplList* EBPFConcolic::getEBPFConcolicMethodImpls() {
+const ConcolicMethodImpls::ImplList *EBPFConcolic::getEBPFConcolicMethodImpls() {
     return &EBPFConcolicMethodImpls;
 }
 

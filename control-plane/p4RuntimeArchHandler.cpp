@@ -39,11 +39,11 @@ namespace ControlPlaneAPI {
 
 namespace Helpers {
 
-boost::optional<ExternInstance> getExternInstanceFromProperty(const IR::P4Table* table,
-                                                              const cstring& propertyName,
-                                                              ReferenceMap* refMap,
-                                                              TypeMap* typeMap,
-                                                              bool* isConstructedInPlace) {
+boost::optional<ExternInstance> getExternInstanceFromProperty(const IR::P4Table *table,
+                                                              const cstring &propertyName,
+                                                              ReferenceMap *refMap,
+                                                              TypeMap *typeMap,
+                                                              bool *isConstructedInPlace) {
     auto property = table->properties->getProperty(propertyName);
     if (property == nullptr) return boost::none;
     if (!property->value->is<IR::ExpressionValue>()) {
@@ -76,7 +76,7 @@ boost::optional<ExternInstance> getExternInstanceFromProperty(const IR::P4Table*
     return externInstance;
 }
 
-bool isExternPropertyConstructedInPlace(const IR::P4Table* table, const cstring& propertyName) {
+bool isExternPropertyConstructedInPlace(const IR::P4Table *table, const cstring &propertyName) {
     auto property = table->properties->getProperty(propertyName);
     if (property == nullptr) return false;
     if (!property->value->is<IR::ExpressionValue>()) {
@@ -90,7 +90,7 @@ bool isExternPropertyConstructedInPlace(const IR::P4Table* table, const cstring&
     return expr->is<IR::ConstructorCallExpression>();
 }
 
-int64_t getTableSize(const IR::P4Table* table) {
+int64_t getTableSize(const IR::P4Table *table) {
     // TODO(antonin): we should not be referring to v1model in this
     // architecture-independent code; each architecture may have a different
     // default table size.
@@ -118,7 +118,7 @@ int64_t getTableSize(const IR::P4Table* table) {
     return tableSize == 0 ? defaultTableSize : tableSize;
 }
 
-std::string serializeOneAnnotation(const IR::Annotation* annotation) {
+std::string serializeOneAnnotation(const IR::Annotation *annotation) {
     // we do not need custom serialization logic here: the P4Info should include
     // the annotation as it was in P4.
     std::ostringstream oss;
@@ -128,11 +128,11 @@ std::string serializeOneAnnotation(const IR::Annotation* annotation) {
     return serializedAnnnotation;
 }
 
-void serializeStructuredExpression(const IR::Expression* expr, p4configv1::Expression* sExpr) {
+void serializeStructuredExpression(const IR::Expression *expr, p4configv1::Expression *sExpr) {
     BUG_CHECK(expr->is<IR::Literal>(), "%1%: structured annotation expression should be a literal",
               expr);
     if (expr->is<IR::Constant>()) {
-        auto* constant = expr->to<IR::Constant>();
+        auto *constant = expr->to<IR::Constant>();
         if (!constant->fitsInt64()) {
             ::error(ErrorType::ERR_OVERLIMIT,
                     "%1%: integer literal in structured annotation must fit in int64, "
@@ -151,26 +151,26 @@ void serializeStructuredExpression(const IR::Expression* expr, p4configv1::Expre
     }
 }
 
-void serializeStructuredKVPair(const IR::NamedExpression* kv, p4configv1::KeyValuePair* sKV) {
+void serializeStructuredKVPair(const IR::NamedExpression *kv, p4configv1::KeyValuePair *sKV) {
     sKV->set_key(kv->name.name);
     serializeStructuredExpression(kv->expression, sKV->mutable_value());
 }
 
-void serializeOneStructuredAnnotation(const IR::Annotation* annotation,
-                                      p4configv1::StructuredAnnotation* structuredAnnotation) {
+void serializeOneStructuredAnnotation(const IR::Annotation *annotation,
+                                      p4configv1::StructuredAnnotation *structuredAnnotation) {
     structuredAnnotation->set_name(annotation->name.name);
     switch (annotation->annotationKind()) {
         case IR::Annotation::Kind::StructuredEmpty:
             // nothing to do, body oneof should be empty.
             return;
         case IR::Annotation::Kind::StructuredExpressionList:
-            for (auto* expr : annotation->expr) {
+            for (auto *expr : annotation->expr) {
                 serializeStructuredExpression(
                     expr, structuredAnnotation->mutable_expression_list()->add_expressions());
             }
             return;
         case IR::Annotation::Kind::StructuredKVList:
-            for (auto* kv : annotation->kv) {
+            for (auto *kv : annotation->kv) {
                 serializeStructuredKVPair(
                     kv, structuredAnnotation->mutable_kv_pair_list()->add_kv_pairs());
             }

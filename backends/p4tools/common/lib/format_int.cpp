@@ -17,7 +17,7 @@
 
 namespace P4Tools {
 
-std::string formatBin(const big_int& value, int width, bool useSep, bool pad, bool usePrefix) {
+std::string formatBin(const big_int &value, int width, bool useSep, bool pad, bool usePrefix) {
     std::stringstream out;
     // Ensure we output at least _something_.
     if (width == 0) {
@@ -54,7 +54,7 @@ std::string formatBin(const big_int& value, int width, bool useSep, bool pad, bo
     return returnString;
 }
 
-std::string formatOctal(const big_int& value, int width, bool useSep, bool pad, bool usePrefix) {
+std::string formatOctal(const big_int &value, int width, bool useSep, bool pad, bool usePrefix) {
     std::stringstream out;
     // Ensure we output at least _something_.
     if (width == 0) {
@@ -89,7 +89,7 @@ std::string formatOctal(const big_int& value, int width, bool useSep, bool pad, 
     return returnString;
 }
 
-std::string formatHex(const big_int& value, int width, bool useSep, bool pad, bool usePrefix) {
+std::string formatHex(const big_int &value, int width, bool useSep, bool pad, bool usePrefix) {
     std::stringstream out;
     // Ensure we output at least _something_.
     if (width == 0) {
@@ -124,10 +124,10 @@ std::string formatHex(const big_int& value, int width, bool useSep, bool pad, bo
     return returnString;
 }
 
-std::string formatBinExpr(const IR::Expression* expr, bool useSep, bool pad, bool usePrefix) {
-    if (const auto* constant = expr->to<IR::Constant>()) {
+std::string formatBinExpr(const IR::Expression *expr, bool useSep, bool pad, bool usePrefix) {
+    if (const auto *constant = expr->to<IR::Constant>()) {
         auto val = constant->value;
-        if (const auto* type = constant->type->to<IR::Type::Bits>()) {
+        if (const auto *type = constant->type->to<IR::Type::Bits>()) {
             if (type->isSigned && val < 0) {
                 // Invert a negative value by subtracting it from the maximum possible value
                 // respective to the width.
@@ -139,7 +139,7 @@ std::string formatBinExpr(const IR::Expression* expr, bool useSep, bool pad, boo
         }
     }
 
-    if (const auto* boolExpr = expr->to<IR::BoolLiteral>()) {
+    if (const auto *boolExpr = expr->to<IR::BoolLiteral>()) {
         std::stringstream out;
         if (usePrefix) {
             out << "0b";
@@ -148,7 +148,7 @@ std::string formatBinExpr(const IR::Expression* expr, bool useSep, bool pad, boo
         return out.str();
     }
 
-    if (const auto* stringExpr = expr->to<IR::StringLiteral>()) {
+    if (const auto *stringExpr = expr->to<IR::StringLiteral>()) {
         // TODO: Include the quotes here?
         return stringExpr->value.c_str();
     }
@@ -157,10 +157,10 @@ std::string formatBinExpr(const IR::Expression* expr, bool useSep, bool pad, boo
                       expr->type);
 }
 
-std::string formatOctalExpr(const IR::Expression* expr, bool useSep, bool pad, bool usePrefix) {
-    if (const auto* constant = expr->to<IR::Constant>()) {
+std::string formatOctalExpr(const IR::Expression *expr, bool useSep, bool pad, bool usePrefix) {
+    if (const auto *constant = expr->to<IR::Constant>()) {
         auto val = constant->value;
-        if (const auto* type = constant->type->to<IR::Type::Bits>()) {
+        if (const auto *type = constant->type->to<IR::Type::Bits>()) {
             if (type->isSigned && val < 0) {
                 // Invert a negative value by subtracting it from the maximum possible value
                 // respective to the width.
@@ -172,7 +172,7 @@ std::string formatOctalExpr(const IR::Expression* expr, bool useSep, bool pad, b
         }
     }
 
-    if (const auto* boolExpr = expr->to<IR::BoolLiteral>()) {
+    if (const auto *boolExpr = expr->to<IR::BoolLiteral>()) {
         std::stringstream out;
         if (usePrefix) {
             out << "0";
@@ -181,7 +181,7 @@ std::string formatOctalExpr(const IR::Expression* expr, bool useSep, bool pad, b
         return out.str();
     }
 
-    if (const auto* stringExpr = expr->to<IR::StringLiteral>()) {
+    if (const auto *stringExpr = expr->to<IR::StringLiteral>()) {
         // TODO: Include the quotes here?
         return stringExpr->value.c_str();
     }
@@ -190,10 +190,10 @@ std::string formatOctalExpr(const IR::Expression* expr, bool useSep, bool pad, b
                       expr->type);
 }
 
-std::string formatHexExpr(const IR::Expression* expr, bool useSep, bool pad, bool usePrefix) {
-    if (const auto* constant = expr->to<IR::Constant>()) {
+std::string formatHexExpr(const IR::Expression *expr, bool useSep, bool pad, bool usePrefix) {
+    if (const auto *constant = expr->to<IR::Constant>()) {
         auto val = constant->value;
-        if (const auto* type = constant->type->to<IR::Type::Bits>()) {
+        if (const auto *type = constant->type->to<IR::Type::Bits>()) {
             if (type->isSigned && val < 0) {
                 // Invert a negative value by subtracting it from the maximum possible value
                 // respective to the width.
@@ -205,7 +205,7 @@ std::string formatHexExpr(const IR::Expression* expr, bool useSep, bool pad, boo
         }
     }
 
-    if (const auto* boolExpr = expr->to<IR::BoolLiteral>()) {
+    if (const auto *boolExpr = expr->to<IR::BoolLiteral>()) {
         std::stringstream out;
         if (usePrefix) {
             out << "0x";
@@ -214,7 +214,7 @@ std::string formatHexExpr(const IR::Expression* expr, bool useSep, bool pad, boo
         return out.str();
     }
 
-    if (const auto* stringExpr = expr->to<IR::StringLiteral>()) {
+    if (const auto *stringExpr = expr->to<IR::StringLiteral>()) {
         // TODO: Include the quotes here?
         return stringExpr->value.c_str();
     }
@@ -223,15 +223,15 @@ std::string formatHexExpr(const IR::Expression* expr, bool useSep, bool pad, boo
                       expr->type);
 }
 
-std::string formatBinOrHex(const big_int& value, int width, bool useSep, bool pad, bool usePrefix) {
+std::string formatBinOrHex(const big_int &value, int width, bool useSep, bool pad, bool usePrefix) {
     return width % 4 == 0 ? formatHex(value, width, useSep, pad, usePrefix)
                           : formatBin(value, width, useSep, pad, usePrefix);
 }
 
-std::string formatBinOrHexExpr(const IR::Expression* expr, bool useSep, bool pad, bool usePrefix) {
-    if (const auto* constant = expr->to<IR::Constant>()) {
+std::string formatBinOrHexExpr(const IR::Expression *expr, bool useSep, bool pad, bool usePrefix) {
+    if (const auto *constant = expr->to<IR::Constant>()) {
         auto val = constant->value;
-        if (const auto* type = constant->type->to<IR::Type::Bits>()) {
+        if (const auto *type = constant->type->to<IR::Type::Bits>()) {
             if (type->isSigned && val < 0) {
                 // Invert a negative value by subtracting it from the maximum possible value
                 // respective to the width.
@@ -251,7 +251,7 @@ std::string formatBinOrHexExpr(const IR::Expression* expr, bool useSep, bool pad
     return out.str();
 }
 
-std::string insertSeparators(const std::string& dataStr, const std::string& separator,
+std::string insertSeparators(const std::string &dataStr, const std::string &separator,
                              size_t stride, bool skipFirst) {
     size_t stringWidth = dataStr.size();
     // Nothing to do if we skip the first character and the stride is as wide as the string itself.
@@ -279,11 +279,11 @@ std::string insertSeparators(const std::string& dataStr, const std::string& sepa
     return formatStr.str();
 }
 
-std::string insertOctalSeparators(const std::string& dataStr) {
+std::string insertOctalSeparators(const std::string &dataStr) {
     return insertSeparators(dataStr, "\\", 3, false);
 }
 
-std::string insertHexSeparators(const std::string& dataStr) {
+std::string insertHexSeparators(const std::string &dataStr) {
     return insertSeparators(dataStr, "\\x", 2, false);
 }
 

@@ -19,14 +19,14 @@ limitations under the License.
 
 namespace EBPF {
 
-DeparserBodyTranslator::DeparserBodyTranslator(const EBPFDeparser* deparser)
+DeparserBodyTranslator::DeparserBodyTranslator(const EBPFDeparser *deparser)
     : CodeGenInspector(deparser->program->refMap, deparser->program->typeMap),
       ControlBodyTranslator(deparser),
       deparser(deparser) {
     setName("DeparserBodyTranslator");
 }
 
-bool DeparserBodyTranslator::preorder(const IR::MethodCallExpression* expression) {
+bool DeparserBodyTranslator::preorder(const IR::MethodCallExpression *expression) {
     auto mi = P4::MethodInstance::resolve(expression, control->program->refMap,
                                           control->program->typeMap);
     auto ext = mi->to<P4::ExternMethod>();
@@ -38,14 +38,14 @@ bool DeparserBodyTranslator::preorder(const IR::MethodCallExpression* expression
     return ControlBodyTranslator::preorder(expression);
 }
 
-DeparserPrepareBufferTranslator::DeparserPrepareBufferTranslator(const EBPFDeparser* deparser)
+DeparserPrepareBufferTranslator::DeparserPrepareBufferTranslator(const EBPFDeparser *deparser)
     : CodeGenInspector(deparser->program->refMap, deparser->program->typeMap),
       ControlBodyTranslator(deparser),
       deparser(deparser) {
     setName("DeparserPrepareBufferTranslator");
 }
 
-bool DeparserPrepareBufferTranslator::preorder(const IR::BlockStatement* s) {
+bool DeparserPrepareBufferTranslator::preorder(const IR::BlockStatement *s) {
     for (auto a : s->components) {
         if (a->is<IR::MethodCallStatement>()) {
             visit(a);
@@ -55,7 +55,7 @@ bool DeparserPrepareBufferTranslator::preorder(const IR::BlockStatement* s) {
     return false;
 }
 
-bool DeparserPrepareBufferTranslator::preorder(const IR::MethodCallExpression* expression) {
+bool DeparserPrepareBufferTranslator::preorder(const IR::MethodCallExpression *expression) {
     auto mi = P4::MethodInstance::resolve(expression, control->program->refMap,
                                           control->program->typeMap);
     auto ext = mi->to<P4::ExternMethod>();
@@ -67,7 +67,7 @@ bool DeparserPrepareBufferTranslator::preorder(const IR::MethodCallExpression* e
     return false;
 }
 
-void DeparserPrepareBufferTranslator::processMethod(const P4::ExternMethod* method) {
+void DeparserPrepareBufferTranslator::processMethod(const P4::ExternMethod *method) {
     if (method->method->name.name == p4lib.packetOut.emit.name) {
         auto decl = method->object;
         if (decl == deparser->packet_out) {
@@ -99,14 +99,14 @@ void DeparserPrepareBufferTranslator::processMethod(const P4::ExternMethod* meth
     }
 }
 
-DeparserHdrEmitTranslator::DeparserHdrEmitTranslator(const EBPFDeparser* deparser)
+DeparserHdrEmitTranslator::DeparserHdrEmitTranslator(const EBPFDeparser *deparser)
     : CodeGenInspector(deparser->program->refMap, deparser->program->typeMap),
       DeparserPrepareBufferTranslator(deparser),
       deparser(deparser) {
     setName("DeparserHdrEmitTranslator");
 }
 
-void DeparserHdrEmitTranslator::processMethod(const P4::ExternMethod* method) {
+void DeparserHdrEmitTranslator::processMethod(const P4::ExternMethod *method) {
     // This method handles packet_out.emit() only and is intended to skip other externs
     if (method->method->name.name == p4lib.packetOut.emit.name) {
         auto decl = method->object;
@@ -149,7 +149,7 @@ void DeparserHdrEmitTranslator::processMethod(const P4::ExternMethod* method) {
             for (auto f : headerToEmit->fields) {
                 auto ftype = deparser->program->typeMap->getType(f);
                 auto etype = EBPFTypeFactory::instance->create(ftype);
-                auto et = dynamic_cast<EBPF::IHasWidth*>(etype);
+                auto et = dynamic_cast<EBPF::IHasWidth *>(etype);
                 if (et == nullptr) {
                     ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                             "Only headers with fixed widths supported %1%", f);
@@ -166,12 +166,12 @@ void DeparserHdrEmitTranslator::processMethod(const P4::ExternMethod* method) {
     }
 }
 
-void DeparserHdrEmitTranslator::emitField(CodeBuilder* builder, cstring field,
-                                          const IR::Expression* hdrExpr, unsigned int alignment,
-                                          EBPF::EBPFType* type) {
+void DeparserHdrEmitTranslator::emitField(CodeBuilder *builder, cstring field,
+                                          const IR::Expression *hdrExpr, unsigned int alignment,
+                                          EBPF::EBPFType *type) {
     auto program = deparser->program;
 
-    auto et = dynamic_cast<EBPF::IHasWidth*>(type);
+    auto et = dynamic_cast<EBPF::IHasWidth *>(type);
     if (et == nullptr) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                 "Only headers with fixed widths supported %1%", hdrExpr);
@@ -283,7 +283,7 @@ void DeparserHdrEmitTranslator::emitField(CodeBuilder* builder, cstring field,
     builder->newline();
 }
 
-void EBPFDeparser::emitBufferAdjusts(CodeBuilder* builder) const {
+void EBPFDeparser::emitBufferAdjusts(CodeBuilder *builder) const {
     builder->newline();
     builder->emitIndent();
 
@@ -319,7 +319,7 @@ void EBPFDeparser::emitBufferAdjusts(CodeBuilder* builder) const {
     builder->blockEnd(true);
 }
 
-void EBPFDeparser::emit(CodeBuilder* builder) {
+void EBPFDeparser::emit(CodeBuilder *builder) {
     codeGen->setBuilder(builder);
 
     for (auto a : controlBlock->container->controlLocals) emitDeclaration(builder, a);

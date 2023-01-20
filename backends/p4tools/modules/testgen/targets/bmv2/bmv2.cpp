@@ -21,16 +21,16 @@ namespace Bmv2 {
 BMv2_V1ModelCompilerTarget::BMv2_V1ModelCompilerTarget() : CompilerTarget("bmv2", "v1model") {}
 
 void BMv2_V1ModelCompilerTarget::make() {
-    static BMv2_V1ModelCompilerTarget* INSTANCE = nullptr;
+    static BMv2_V1ModelCompilerTarget *INSTANCE = nullptr;
     if (INSTANCE == nullptr) {
         INSTANCE = new BMv2_V1ModelCompilerTarget();
     }
 }
 
-MidEnd BMv2_V1ModelCompilerTarget::mkMidEnd(const CompilerOptions& options) const {
+MidEnd BMv2_V1ModelCompilerTarget::mkMidEnd(const CompilerOptions &options) const {
     MidEnd midEnd(options);
-    auto* refMap = midEnd.getRefMap();
-    auto* typeMap = midEnd.getTypeMap();
+    auto *refMap = midEnd.getRefMap();
+    auto *typeMap = midEnd.getTypeMap();
     midEnd.addPasses({
         // Parse BMv2-specific annotations.
         new BMV2::ParseAnnotations(),

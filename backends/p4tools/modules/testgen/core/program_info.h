@@ -27,10 +27,10 @@ namespace P4Testgen {
 /// Stores target-specific information about a P4 program.
 class ProgramInfo : public ICastable {
  private:
-    const NamespaceContext* globalNameSpaceContext;
+    const NamespaceContext *globalNameSpaceContext;
 
  protected:
-    explicit ProgramInfo(const IR::P4Program* program);
+    explicit ProgramInfo(const IR::P4Program *program);
 
     /// The list of concolic methods implemented by the target. This list is assembled during
     /// initialization.
@@ -41,73 +41,73 @@ class ProgramInfo : public ICastable {
 
     std::vector<Continuation::Command> pipelineSequence;
 
-    boost::optional<const Constraint*> targetConstraints = boost::none;
+    boost::optional<const Constraint *> targetConstraints = boost::none;
 
  public:
-    ProgramInfo(const ProgramInfo&) = default;
+    ProgramInfo(const ProgramInfo &) = default;
 
-    ProgramInfo(ProgramInfo&&) = default;
+    ProgramInfo(ProgramInfo &&) = default;
 
-    ProgramInfo& operator=(const ProgramInfo&) = default;
+    ProgramInfo &operator=(const ProgramInfo &) = default;
 
-    ProgramInfo& operator=(ProgramInfo&&) = default;
+    ProgramInfo &operator=(ProgramInfo &&) = default;
 
     virtual ~ProgramInfo() = default;
 
     /// The P4 program from which this object is derived.
-    const IR::P4Program* program;
+    const IR::P4Program *program;
 
     /// The generated dcg.
-    const NodesCallGraph* dcg;
+    const NodesCallGraph *dcg;
 
     /// @returns the series of nodes that has been computed by this particular target.
-    const std::vector<Continuation::Command>* getPipelineSequence() const;
+    const std::vector<Continuation::Command> *getPipelineSequence() const;
 
     /// @returns the constraints of this target.
     /// These constraints can influence the execution of the interpreter
-    boost::optional<const Constraint*> getTargetConstraints() const;
+    boost::optional<const Constraint *> getTargetConstraints() const;
 
     /// @returns the metadata member corresponding to the ingress port
-    virtual const IR::Member* getTargetInputPortVar() const = 0;
+    virtual const IR::Member *getTargetInputPortVar() const = 0;
 
     /// @returns the metadata member corresponding to the final output port
-    virtual const IR::Member* getTargetOutputPortVar() const = 0;
+    virtual const IR::Member *getTargetOutputPortVar() const = 0;
 
     /// @returns an expression that checks whether the packet is to be dropped.
     /// The computation is target specific.
-    virtual const IR::Expression* dropIsActive() const = 0;
+    virtual const IR::Expression *dropIsActive() const = 0;
 
     /// @returns the default value for uninitialized variables for this particular target. This can
     /// be a taint variable or simply 0 (bits) or false (booleans).
     /// If @param forceTaint is active, this function always returns a taint variable.
-    virtual const IR::Expression* createTargetUninitialized(const IR::Type* type,
+    virtual const IR::Expression *createTargetUninitialized(const IR::Type *type,
                                                             bool forceTaint) const = 0;
 
     /// Getter to access allStatements.
-    const P4::Coverage::CoverageSet& getAllStatements() const;
+    const P4::Coverage::CoverageSet &getAllStatements() const;
 
     /// @returns the list of implemented concolic methods for this particular program.
-    const ConcolicMethodImpls* getConcolicMethodImpls() const;
+    const ConcolicMethodImpls *getConcolicMethodImpls() const;
 
     // @returns the width of the parser error for this specific target.
-    virtual const IR::Type_Bits* getParserErrorType() const = 0;
+    virtual const IR::Type_Bits *getParserErrorType() const = 0;
 
     /// @returns the Member variable corresponding to the parameter index for the given parameter.
     /// The Member variable uses the parameter struct label as parent and the @param paramLabel as
     /// member. @param type is the type of the member. If the parser does not have this parameter
     /// (meaning we are dealing with optional parameters) return the canonical name of this
     /// variable.
-    virtual const IR::Member* getParserParamVar(const IR::P4Parser* parser, const IR::Type* type,
+    virtual const IR::Member *getParserParamVar(const IR::P4Parser *parser, const IR::Type *type,
                                                 size_t paramIndex, cstring paramLabel) const = 0;
 
     /// Looks up a declaration from a path. A BUG occurs if no declaration is found.
-    const IR::IDeclaration* findProgramDecl(const IR::Path* path) const;
+    const IR::IDeclaration *findProgramDecl(const IR::Path *path) const;
 
     /// Looks up a declaration from a path expression. A BUG occurs if no declaration is found.
-    const IR::IDeclaration* findProgramDecl(const IR::PathExpression* pathExpr) const;
+    const IR::IDeclaration *findProgramDecl(const IR::PathExpression *pathExpr) const;
 
     /// Resolves a Type_Name in the current environment.
-    const IR::Type_Declaration* resolveProgramType(const IR::Type_Name* type) const;
+    const IR::Type_Declaration *resolveProgramType(const IR::Type_Name *type) const;
 
     /// Helper function to produce copy-in and copy-out helper calls.
     /// Copy-in and copy-out is needed to correctly model the value changes of data when it is
@@ -115,10 +115,10 @@ class ProgramInfo : public ICastable {
     /// copied.
     /// TODO: Find a more efficient way to implement copy-in/copy-out. These functions are very
     /// expensive.
-    void produceCopyInOutCall(const IR::Parameter* param, size_t paramIdx,
-                              const ArchSpec::ArchMember* archMember,
-                              std::vector<Continuation::Command>* copyIns,
-                              std::vector<Continuation::Command>* copyOuts) const;
+    void produceCopyInOutCall(const IR::Parameter *param, size_t paramIdx,
+                              const ArchSpec::ArchMember *archMember,
+                              std::vector<Continuation::Command> *copyIns,
+                              std::vector<Continuation::Command> *copyOuts) const;
 };
 
 }  // namespace P4Testgen

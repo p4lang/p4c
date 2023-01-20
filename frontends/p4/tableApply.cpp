@@ -20,8 +20,8 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::P4Table* TableApplySolver::isHit(const IR::Expression* expression, ReferenceMap* refMap,
-                                           TypeMap* typeMap) {
+const IR::P4Table *TableApplySolver::isHit(const IR::Expression *expression, ReferenceMap *refMap,
+                                           TypeMap *typeMap) {
     if (!expression->is<IR::Member>()) return nullptr;
     auto mem = expression->to<IR::Member>();
     if (!mem->expr->is<IR::MethodCallExpression>()) return nullptr;
@@ -35,8 +35,8 @@ const IR::P4Table* TableApplySolver::isHit(const IR::Expression* expression, Ref
     return am->object->to<IR::P4Table>();
 }
 
-const IR::P4Table* TableApplySolver::isMiss(const IR::Expression* expression, ReferenceMap* refMap,
-                                            TypeMap* typeMap) {
+const IR::P4Table *TableApplySolver::isMiss(const IR::Expression *expression, ReferenceMap *refMap,
+                                            TypeMap *typeMap) {
     if (!expression->is<IR::Member>()) return nullptr;
     auto mem = expression->to<IR::Member>();
     if (!mem->expr->is<IR::MethodCallExpression>()) return nullptr;
@@ -50,8 +50,8 @@ const IR::P4Table* TableApplySolver::isMiss(const IR::Expression* expression, Re
     return am->object->to<IR::P4Table>();
 }
 
-const IR::P4Table* TableApplySolver::isActionRun(const IR::Expression* expression,
-                                                 ReferenceMap* refMap, TypeMap* typeMap) {
+const IR::P4Table *TableApplySolver::isActionRun(const IR::Expression *expression,
+                                                 ReferenceMap *refMap, TypeMap *typeMap) {
     auto mem = expression->to<IR::Member>();
     if (mem == nullptr) return nullptr;
     if (mem->member.name != IR::Type_Table::action_run) return nullptr;

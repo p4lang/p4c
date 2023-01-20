@@ -6,33 +6,33 @@
 
 namespace P4 {
 
-bool SaturationElim::isSaturationOperation(const IR::Expression* expr) {
+bool SaturationElim::isSaturationOperation(const IR::Expression *expr) {
     CHECK_NULL(expr);
     return expr->is<IR::AddSat>() || expr->is<IR::SubSat>();
 }
 
-const IR::Mux* SaturationElim::eliminate(const IR::Operation_Binary* binary) {
+const IR::Mux *SaturationElim::eliminate(const IR::Operation_Binary *binary) {
     BUG_CHECK(isSaturationOperation(binary),
               "Can't do saturation elimination on a non-saturating operation: %1%", binary);
 
-    const auto* bitType = binary->type->to<IR::Type_Bits>();
+    const auto *bitType = binary->type->to<IR::Type_Bits>();
     BUG_CHECK(bitType, "Unsupported type for conversion %1%", binary->type);
 
     // overflowNumber is the largest value that can be represented before overflowing.
     // This is 2^(bits->size) - 1 for unsigned and 2^(bits->size - 1) - 1 for signed.
-    const auto* overflowNumber = IR::getConstant(bitType, IR::getMaxBvVal(bitType));
+    const auto *overflowNumber = IR::getConstant(bitType, IR::getMaxBvVal(bitType));
 
-    const IR::Constant* zero = IR::getConstant(bitType, 0);
+    const IR::Constant *zero = IR::getConstant(bitType, 0);
 
     // underflowNumber is the smallest value that can be represented before underflowing.
     // This is 0 for unsigned and -(2^(bits->size - 1)) for signed.
-    const auto* underflowNumber =
+    const auto *underflowNumber =
         (bitType->isSigned) ? IR::getConstant(bitType, IR::getMinBvVal(bitType)) : zero;
 
-    const auto* boolType = IR::Type::Boolean::get();
-    const IR::Expression* expr = nullptr;
-    const IR::Expression* overflowCondition = nullptr;
-    const IR::Expression* underflowCondition = nullptr;
+    const auto *boolType = IR::Type::Boolean::get();
+    const IR::Expression *expr = nullptr;
+    const IR::Expression *overflowCondition = nullptr;
+    const IR::Expression *underflowCondition = nullptr;
 
     if (binary->is<IR::AddSat>()) {
         expr = new IR::Add(bitType, binary->left, binary->right);
@@ -45,9 +45,9 @@ const IR::Mux* SaturationElim::eliminate(const IR::Operation_Binary* binary) {
             // !((x > 0 && y > 0) => (x + y > 0))
             //   <=> !(!(x > 0 && y > 0) || (x + y > 0))
             //   <=> x > 0 && y > 0 && x + y <= 0
-            const auto* leftPositive = new IR::Grt(boolType, binary->left, zero);
-            const auto* rightPositive = new IR::Grt(boolType, binary->right, zero);
-            const auto* exprNonPositive = new IR::Leq(boolType, expr, zero);
+            const auto *leftPositive = new IR::Grt(boolType, binary->left, zero);
+            const auto *rightPositive = new IR::Grt(boolType, binary->right, zero);
+            const auto *exprNonPositive = new IR::Leq(boolType, expr, zero);
             overflowCondition = new IR::LAnd(
                 boolType, leftPositive, new IR::LAnd(boolType, rightPositive, exprNonPositive));
 
@@ -58,9 +58,9 @@ const IR::Mux* SaturationElim::eliminate(const IR::Operation_Binary* binary) {
             // !((x < 0 && y < 0) => (x + y < 0))
             //   <=> !(!(x < 0 && y < 0) || (x + y < 0))
             //   <=> x < 0 && y < 0 && x + y >= 0
-            const auto* leftNegative = new IR::Lss(boolType, binary->left, zero);
-            const auto* rightNegative = new IR::Lss(boolType, binary->right, zero);
-            const auto* exprNonNegative = new IR::Geq(boolType, expr, zero);
+            const auto *leftNegative = new IR::Lss(boolType, binary->left, zero);
+            const auto *rightNegative = new IR::Lss(boolType, binary->right, zero);
+            const auto *exprNonNegative = new IR::Geq(boolType, expr, zero);
             underflowCondition = new IR::LAnd(boolType, exprNonNegative,
                                               new IR::LAnd(boolType, leftNegative, rightNegative));
         } else {
@@ -82,9 +82,9 @@ const IR::Mux* SaturationElim::eliminate(const IR::Operation_Binary* binary) {
             //
             //   x > 0 && -y > 0 && x - y <= 0
             //     <=> x > 0 && y <= 0 && x - y <= 0
-            const auto* leftPositive = new IR::Grt(boolType, binary->left, zero);
-            const auto* rightNonPositive = new IR::Leq(boolType, binary->right, zero);
-            const auto* exprNonPositive = new IR::Leq(boolType, expr, zero);
+            const auto *leftPositive = new IR::Grt(boolType, binary->left, zero);
+            const auto *rightNonPositive = new IR::Leq(boolType, binary->right, zero);
+            const auto *exprNonPositive = new IR::Leq(boolType, expr, zero);
             overflowCondition = new IR::LAnd(
                 boolType, leftPositive, new IR::LAnd(boolType, rightNonPositive, exprNonPositive));
 
@@ -94,9 +94,9 @@ const IR::Mux* SaturationElim::eliminate(const IR::Operation_Binary* binary) {
             //
             //   x < 0 && -y < 0 && x - y >= 0
             //     <=> x < 0 && y >= 0 && x - y >= 0
-            const auto* leftNegative = new IR::Lss(boolType, binary->left, zero);
-            const auto* rightNonNegative = new IR::Geq(boolType, binary->right, zero);
-            const auto* exprNonNegative = new IR::Geq(boolType, expr, zero);
+            const auto *leftNegative = new IR::Lss(boolType, binary->left, zero);
+            const auto *rightNonNegative = new IR::Geq(boolType, binary->right, zero);
+            const auto *exprNonNegative = new IR::Geq(boolType, expr, zero);
             underflowCondition = new IR::LAnd(
                 boolType, leftNegative, new IR::LAnd(boolType, rightNonNegative, exprNonNegative));
         } else {

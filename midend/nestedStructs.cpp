@@ -4,7 +4,7 @@
 
 namespace P4 {
 
-bool ComplexValues::isNestedStruct(const IR::Type* type) {
+bool ComplexValues::isNestedStruct(const IR::Type *type) {
     if (!type->is<IR::Type_Struct>()) return false;
     auto st = type->to<IR::Type_Struct>();
     for (auto f : st->fields) {
@@ -19,8 +19,8 @@ bool ComplexValues::isNestedStruct(const IR::Type* type) {
 }
 
 template <class T>
-void ComplexValues::explode(cstring prefix, const IR::Type_Struct* type, FieldsMap* map,
-                            IR::Vector<T>* result) {
+void ComplexValues::explode(cstring prefix, const IR::Type_Struct *type, FieldsMap *map,
+                            IR::Vector<T> *result) {
     CHECK_NULL(type);
     for (auto f : type->fields) {
         cstring fname = prefix + "_" + f->name;
@@ -40,7 +40,7 @@ void ComplexValues::explode(cstring prefix, const IR::Type_Struct* type, FieldsM
     }
 }
 
-const IR::Node* RemoveNestedStructs::postorder(IR::Declaration_Variable* decl) {
+const IR::Node *RemoveNestedStructs::postorder(IR::Declaration_Variable *decl) {
     auto type = values->typeMap->getType(getOriginal(), true);
     if (!values->isNestedStruct(type)) return decl;
 
@@ -61,7 +61,7 @@ const IR::Node* RemoveNestedStructs::postorder(IR::Declaration_Variable* decl) {
     }
 }
 
-const IR::Node* RemoveNestedStructs::postorder(IR::Member* expression) {
+const IR::Node *RemoveNestedStructs::postorder(IR::Member *expression) {
     LOG3("Visiting " << dbp(getOriginal()));
     auto parent = getContext()->node;
     auto left = values->getTranslation(expression->expr);
@@ -80,7 +80,7 @@ const IR::Node* RemoveNestedStructs::postorder(IR::Member* expression) {
     return e;
 }
 
-const IR::Node* RemoveNestedStructs::postorder(IR::MethodCallExpression* expression) {
+const IR::Node *RemoveNestedStructs::postorder(IR::MethodCallExpression *expression) {
     auto mi = MethodInstance::resolve(getOriginal<IR::MethodCallExpression>(), values->refMap,
                                       values->typeMap);
     if (!mi->is<ExternMethod>() && !mi->is<ExternFunction>()) return expression;
@@ -95,7 +95,7 @@ const IR::Node* RemoveNestedStructs::postorder(IR::MethodCallExpression* express
     return expression;
 }
 
-const IR::Node* RemoveNestedStructs::postorder(IR::PathExpression* expression) {
+const IR::Node *RemoveNestedStructs::postorder(IR::PathExpression *expression) {
     LOG3("Visiting " << dbp(getOriginal()));
     auto decl = values->refMap->getDeclaration(expression->path, true);
     auto comp = values->getTranslation(decl);

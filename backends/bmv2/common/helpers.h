@@ -249,43 +249,43 @@ struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::PSA>> {
 
 }  // namespace Helpers
 
-using BlockTypeMap = std::map<const IR::Block*, const IR::Type*>;
+using BlockTypeMap = std::map<const IR::Block *, const IR::Type *>;
 
 // XXX(hanw): This convenience class stores pointers to the data structures
 // that are commonly used during the program translation. Due to the limitation
 // of current IR structure, these data structure are only refreshed by the
 // evaluator pass. In the long term, integrating these data structures as part
 // of the IR tree would simplify this kind of bookkeeping effort.
-using SelectorInput = std::vector<const IR::Expression*>;
+using SelectorInput = std::vector<const IR::Expression *>;
 
 struct ConversionContext {
     // context
-    P4::ReferenceMap* refMap;
-    P4::TypeMap* typeMap;
-    const IR::ToplevelBlock* toplevel;
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
+    const IR::ToplevelBlock *toplevel;
     // Block currently being converted
     BlockConverted blockConverted;
     //
-    ProgramStructure* structure;
+    ProgramStructure *structure;
     // expression converter is used in many places.
-    ExpressionConverter* conv;
+    ExpressionConverter *conv;
     // final json output.
-    BMV2::JsonObjects* json;
+    BMV2::JsonObjects *json;
 
     // for action profile conversion
-    Util::JsonArray* action_profiles = nullptr;
+    Util::JsonArray *action_profiles = nullptr;
 
-    std::map<const IR::Declaration_Instance*, SelectorInput> selector_input_map;
+    std::map<const IR::Declaration_Instance *, SelectorInput> selector_input_map;
 
-    const SelectorInput* get_selector_input(const IR::Declaration_Instance* selector) {
+    const SelectorInput *get_selector_input(const IR::Declaration_Instance *selector) {
         auto it = selector_input_map.find(selector);
         if (it == selector_input_map.end()) return nullptr;  // selector never used
         return &it->second;
     }
 
-    ConversionContext(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                      const IR::ToplevelBlock* toplevel, ProgramStructure* structure,
-                      ExpressionConverter* conv, JsonObjects* json)
+    ConversionContext(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                      const IR::ToplevelBlock *toplevel, ProgramStructure *structure,
+                      ExpressionConverter *conv, JsonObjects *json)
         : refMap(refMap),
           typeMap(typeMap),
           toplevel(toplevel),
@@ -294,22 +294,22 @@ struct ConversionContext {
           conv(conv),
           json(json) {}
 
-    void addToFieldList(const IR::Expression* expr, Util::JsonArray* fl);
-    int createFieldList(const IR::Expression* expr, cstring listName, bool learn = false);
-    cstring createCalculation(cstring algo, const IR::Expression* fields,
-                              Util::JsonArray* calculations, bool usePayload, const IR::Node* node);
-    static void modelError(const char* format, const IR::Node* place);
+    void addToFieldList(const IR::Expression *expr, Util::JsonArray *fl);
+    int createFieldList(const IR::Expression *expr, cstring listName, bool learn = false);
+    cstring createCalculation(cstring algo, const IR::Expression *fields,
+                              Util::JsonArray *calculations, bool usePayload, const IR::Node *node);
+    static void modelError(const char *format, const IR::Node *place);
 };
 
-Util::IJson* nodeName(const CFG::Node* node);
-Util::JsonArray* mkArrayField(Util::JsonObject* parent, cstring name);
-Util::JsonArray* mkParameters(Util::JsonObject* object);
-Util::JsonObject* mkPrimitive(cstring name, Util::JsonArray* appendTo);
-Util::JsonObject* mkPrimitive(cstring name);
+Util::IJson *nodeName(const CFG::Node *node);
+Util::JsonArray *mkArrayField(Util::JsonObject *parent, cstring name);
+Util::JsonArray *mkParameters(Util::JsonObject *object);
+Util::JsonObject *mkPrimitive(cstring name, Util::JsonArray *appendTo);
+Util::JsonObject *mkPrimitive(cstring name);
 cstring stringRepr(big_int value, unsigned bytes = 0);
 unsigned nextId(cstring group);
 /// Converts expr into a ListExpression or returns nullptr if not possible
-const IR::ListExpression* convertToList(const IR::Expression* expr, P4::TypeMap* typeMap);
+const IR::ListExpression *convertToList(const IR::Expression *expr, P4::TypeMap *typeMap);
 
 }  // namespace BMV2
 

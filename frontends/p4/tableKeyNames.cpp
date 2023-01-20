@@ -18,14 +18,14 @@ limitations under the License.
 
 namespace P4 {
 
-void KeyNameGenerator::error(const IR::Expression* expression) {
+void KeyNameGenerator::error(const IR::Expression *expression) {
     ::error(ErrorType::ERR_EXPECTED, "%1%: Complex key expression requires a @name annotation",
             expression);
 }
 
-void KeyNameGenerator::postorder(const IR::Expression* expression) { error(expression); }
+void KeyNameGenerator::postorder(const IR::Expression *expression) { error(expression); }
 
-void KeyNameGenerator::postorder(const IR::PathExpression* expression) {
+void KeyNameGenerator::postorder(const IR::PathExpression *expression) {
     name.emplace(expression, expression->path->toString());
 }
 
@@ -33,12 +33,12 @@ namespace {
 
 /// @return a canonicalized string representation of the given Member
 /// expression's right-hand side, suitable for use as part of a key name.
-cstring keyComponentNameForMember(const IR::Member* expression, const P4::TypeMap* typeMap) {
+cstring keyComponentNameForMember(const IR::Member *expression, const P4::TypeMap *typeMap) {
     cstring fname = expression->member.name;
 
     // Without type information, we can't do any deeper analysis.
     if (!typeMap) return fname;
-    auto* type = typeMap->getType(expression->expr, true);
+    auto *type = typeMap->getType(expression->expr, true);
 
     // Use `$valid$` to represent `isValid()` calls on headers and header
     // unions; this is what P4Runtime expects.
@@ -50,8 +50,8 @@ cstring keyComponentNameForMember(const IR::Member* expression, const P4::TypeMa
 
     // If this Member represents a field which has an @name annotation, use it.
     if (type->is<IR::Type_StructLike>()) {
-        auto* st = type->to<IR::Type_StructLike>();
-        auto* field = st->getField(expression->member);
+        auto *st = type->to<IR::Type_StructLike>();
+        auto *field = st->getField(expression->member);
         if (field != nullptr) return field->externalName();
     }
 
@@ -60,7 +60,7 @@ cstring keyComponentNameForMember(const IR::Member* expression, const P4::TypeMa
 
 }  // namespace
 
-void KeyNameGenerator::postorder(const IR::Member* expression) {
+void KeyNameGenerator::postorder(const IR::Member *expression) {
     cstring fname = keyComponentNameForMember(expression, typeMap);
 
     // If the member name begins with `.`, it's a global name, and we can
@@ -76,18 +76,18 @@ void KeyNameGenerator::postorder(const IR::Member* expression) {
     if (cstring n = getName(expression->expr)) name.emplace(expression, n + "." + fname);
 }
 
-void KeyNameGenerator::postorder(const IR::ArrayIndex* expression) {
+void KeyNameGenerator::postorder(const IR::ArrayIndex *expression) {
     cstring l = getName(expression->left);
     cstring r = getName(expression->right);
     if (!l || !r) return;
     name.emplace(expression, l + "[" + r + "]");
 }
 
-void KeyNameGenerator::postorder(const IR::Constant* expression) {
+void KeyNameGenerator::postorder(const IR::Constant *expression) {
     name.emplace(expression, Util::toString(expression->value, 0, false, expression->base));
 }
 
-void KeyNameGenerator::postorder(const IR::Slice* expression) {
+void KeyNameGenerator::postorder(const IR::Slice *expression) {
     cstring e0 = getName(expression->e0);
     cstring e1 = getName(expression->e1);
     cstring e2 = getName(expression->e2);
@@ -95,7 +95,7 @@ void KeyNameGenerator::postorder(const IR::Slice* expression) {
     name.emplace(expression, e0 + "[" + e1 + ":" + e2 + "]");
 }
 
-void KeyNameGenerator::postorder(const IR::BAnd* expression) {
+void KeyNameGenerator::postorder(const IR::BAnd *expression) {
     cstring left = getName(expression->left);
     if (!left) return;
     cstring right = getName(expression->right);
@@ -103,7 +103,7 @@ void KeyNameGenerator::postorder(const IR::BAnd* expression) {
     name.emplace(expression, left + " & " + right);
 }
 
-void KeyNameGenerator::postorder(const IR::MethodCallExpression* expression) {
+void KeyNameGenerator::postorder(const IR::MethodCallExpression *expression) {
     cstring m = getName(expression->method);
     if (!m) return;
 
@@ -116,7 +116,7 @@ void KeyNameGenerator::postorder(const IR::MethodCallExpression* expression) {
     error(expression);
 }
 
-const IR::Node* DoTableKeyNames::postorder(IR::KeyElement* keyElement) {
+const IR::Node *DoTableKeyNames::postorder(IR::KeyElement *keyElement) {
     LOG3("Visiting " << getOriginal());
     if (keyElement->getAnnotation(IR::Annotation::nameAnnotation) != nullptr)
         // already present: no changes

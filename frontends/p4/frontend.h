@@ -39,9 +39,9 @@ class FrontEnd {
     }
     void addDebugHook(DebugHook hook) { hooks.push_back(hook); }
     // If p4c is run with option '--listFrontendPasses', outStream is used for printing passes names
-    const IR::P4Program* run(const CompilerOptions& options, const IR::P4Program* program,
+    const IR::P4Program *run(const CompilerOptions &options, const IR::P4Program *program,
                              bool skipSideEffectOrdering = false,
-                             std::ostream* outStream = nullptr);
+                             std::ostream *outStream = nullptr);
 };
 
 }  // namespace P4

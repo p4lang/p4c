@@ -29,22 +29,22 @@ namespace P4 {
  *  In an if statement it actually inverts the branches.
  */
 class DoRemoveMiss : public Transform {
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
 
  public:
-    DoRemoveMiss(ReferenceMap* refMap, TypeMap* typeMap) : refMap(refMap), typeMap(typeMap) {
+    DoRemoveMiss(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
         visitDagOnce = false;
         CHECK_NULL(typeMap);
         setName("DoRemoveMiss");
     }
-    const IR::Node* preorder(IR::Member* expression) override;
-    const IR::Node* preorder(IR::IfStatement* statement) override;
+    const IR::Node *preorder(IR::Member *expression) override;
+    const IR::Node *preorder(IR::IfStatement *statement) override;
 };
 
 class RemoveMiss : public PassManager {
  public:
-    RemoveMiss(ReferenceMap* refMap, TypeMap* typeMap, TypeChecking* typeChecking = nullptr) {
+    RemoveMiss(ReferenceMap *refMap, TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
         if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoRemoveMiss(refMap, typeMap));

@@ -51,47 +51,47 @@ namespace SmallStepUtil {
 
 /// Creates a test case with the given header fields for
 /// stepping on a given expression.
-boost::optional<const P4ToolsTestCase> createSmallStepExprTest(const std::string&,
-                                                               const std::string&);
+boost::optional<const P4ToolsTestCase> createSmallStepExprTest(const std::string &,
+                                                               const std::string &);
 
 /// Extract the expression from the P4Program.
 template <class T>
-const T* extractExpr(const IR::P4Program* program) {
+const T *extractExpr(const IR::P4Program *program) {
     // Get the mau declarations in the P4Program.
-    const auto* decls = program->getDeclsByName("mau")->toVector();
+    const auto *decls = program->getDeclsByName("mau")->toVector();
     if (decls->size() != 1) return nullptr;
 
     // Convert the mau declaration to a control and ensure that
     // there is a single statement in the body.
-    const auto* control = (*decls)[0]->to<IR::P4Control>();
+    const auto *control = (*decls)[0]->to<IR::P4Control>();
     if (control->body->components.size() != 1) return nullptr;
 
     // Ensure that the control body statement is a method call statement.
-    auto* mcStmt = control->body->components[0]->to<IR::MethodCallStatement>();
+    auto *mcStmt = control->body->components[0]->to<IR::MethodCallStatement>();
     if (!mcStmt) return nullptr;
 
     // Ensure that there is only one argument to the method call and return it.
-    auto* mcArgs = mcStmt->methodCall->arguments;
+    auto *mcArgs = mcStmt->methodCall->arguments;
     if (mcArgs->size() != 1) return nullptr;
     return (*mcArgs)[0]->expression->to<T>();
 }
 
 /// Step on the @value, and examine the resulting state in the @program.
 template <class T>
-void stepAndExamineValue(const T* value, const IR::P4Program* program) {
+void stepAndExamineValue(const T *value, const IR::P4Program *program) {
     // Produce a ProgramInfo, which is needed to create a SmallStepEvaluator.
-    const auto* progInfo = TestgenTarget::initProgram(program);
+    const auto *progInfo = TestgenTarget::initProgram(program);
     ASSERT_TRUE(progInfo);
 
     // Create a base state with a parameter continuation to apply the value on.
-    const auto* v = Continuation::genParameter(value->type, "v", NamespaceContext::Empty);
+    const auto *v = Continuation::genParameter(value->type, "v", NamespaceContext::Empty);
     Body bodyBase({Return(v->param)});
     Continuation continuationBase(v, bodyBase);
     ExecutionState esBase = SmallStepTest::mkState(bodyBase);
 
     // Step on the value.
     Z3Solver solver;
-    auto* testState = new ExecutionState(esBase);
+    auto *testState = new ExecutionState(esBase);
     Body body({Return(value)});
     testState->replaceBody(body);
     testState->pushContinuation(
@@ -121,10 +121,11 @@ void stepAndExamineValue(const T* value, const IR::P4Program* program) {
 /// @param rebuildNode
 ///     Rebuilds the pushed continuation body with the given parameter.
 template <class T>
-void stepAndExamineOp(const T* op, const IR::Expression* subexpr, const IR::P4Program* program,
-                      std::function<const IR::Expression*(const IR::PathExpression*)> rebuildNode) {
+void stepAndExamineOp(
+    const T *op, const IR::Expression *subexpr, const IR::P4Program *program,
+    std::function<const IR::Expression *(const IR::PathExpression *)> rebuildNode) {
     // Produce a ProgramInfo, which is needed to create a SmallStepEvaluator.
-    const auto* progInfo = TestgenTarget::initProgram(program);
+    const auto *progInfo = TestgenTarget::initProgram(program);
     ASSERT_TRUE(progInfo);
 
     // Step on the operation.

@@ -35,7 +35,7 @@ limitations under the License.
 
 namespace P4V1 {
 
-static const IR::IDeclaration* getFirstDeclaration(const IR::Vector<IR::Node>* nodes,
+static const IR::IDeclaration *getFirstDeclaration(const IR::Vector<IR::Node> *nodes,
                                                    cstring name) {
     for (auto node : *nodes) {
         auto decl = node->to<IR::IDeclaration>();
@@ -85,14 +85,14 @@ ProgramStructure::ProgramStructure()
     for (auto c : P4::reservedWords) allNames.insert({c, 0});
 }
 
-const IR::Annotations* ProgramStructure::addNameAnnotation(cstring name,
-                                                           const IR::Annotations* annos) {
+const IR::Annotations *ProgramStructure::addNameAnnotation(cstring name,
+                                                           const IR::Annotations *annos) {
     if (annos == nullptr) annos = IR::Annotations::empty;
     return annos->addAnnotationIfNew(IR::Annotation::nameAnnotation, new IR::StringLiteral(name));
 }
 
-const IR::Annotations* ProgramStructure::addGlobalNameAnnotation(cstring name,
-                                                                 const IR::Annotations* annos) {
+const IR::Annotations *ProgramStructure::addGlobalNameAnnotation(cstring name,
+                                                                 const IR::Annotations *annos) {
     return addNameAnnotation(cstring(".") + name, annos);
 }
 
@@ -103,7 +103,7 @@ cstring ProgramStructure::makeUniqueName(cstring base) {
     return name;
 }
 
-bool ProgramStructure::isHeader(const IR::ConcreteHeaderRef* nhr) const {
+bool ProgramStructure::isHeader(const IR::ConcreteHeaderRef *nhr) const {
     cstring name = nhr->ref->name.name;
     auto hdr = headers.get(name);
     if (hdr != nullptr) return true;
@@ -114,7 +114,7 @@ bool ProgramStructure::isHeader(const IR::ConcreteHeaderRef* nhr) const {
     BUG("Unexpected reference %1%", nhr);
 }
 
-void ProgramStructure::checkHeaderType(const IR::Type_StructLike* hdr, bool metadata) {
+void ProgramStructure::checkHeaderType(const IR::Type_StructLike *hdr, bool metadata) {
     LOG3("Checking " << hdr << " " << (metadata ? "M" : "H"));
     for (auto f : hdr->fields) {
         if (f->type->is<IR::Type_Varbits>()) {
@@ -127,7 +127,7 @@ void ProgramStructure::checkHeaderType(const IR::Type_StructLike* hdr, bool meta
     }
 }
 
-bool ProgramStructure::isFieldInList(cstring type, cstring field, const IR::FieldList* fl) const {
+bool ProgramStructure::isFieldInList(cstring type, cstring field, const IR::FieldList *fl) const {
     LOG3("Checking " << type << "." << field << " in " << fl);
     for (auto e : fl->fields) {
         if (auto mem = e->to<IR::Member>()) {
@@ -155,8 +155,8 @@ bool ProgramStructure::isFieldInList(cstring type, cstring field, const IR::Fiel
     return false;
 }
 
-const IR::Vector<IR::Expression>* ProgramStructure::listIndexes(cstring type, cstring field) const {
-    IR::Vector<IR::Expression>* result = nullptr;
+const IR::Vector<IR::Expression> *ProgramStructure::listIndexes(cstring type, cstring field) const {
+    IR::Vector<IR::Expression> *result = nullptr;
     for (auto f : allFieldLists) {
         if (isFieldInList(type, field, f)) {
             if (result == nullptr) result = new IR::Vector<IR::Expression>();
@@ -166,7 +166,7 @@ const IR::Vector<IR::Expression>* ProgramStructure::listIndexes(cstring type, cs
     return result;
 }
 
-const IR::Expression* ProgramStructure::listIndex(const IR::Expression* expression) const {
+const IR::Expression *ProgramStructure::listIndex(const IR::Expression *expression) const {
     auto pe = expression->to<IR::PathExpression>();
     if (pe == nullptr) {
         ::error(ErrorType::ERR_EXPECTED, "%1%: Expected a field list", expression);
@@ -177,8 +177,8 @@ const IR::Expression* ProgramStructure::listIndex(const IR::Expression* expressi
                         new IR::Member(new IR::TypeNameExpression(fieldListsEnum), pe->path->name));
 }
 
-cstring ProgramStructure::createType(const IR::Type_StructLike* type, bool header,
-                                     std::unordered_set<const IR::Type*>* converted) {
+cstring ProgramStructure::createType(const IR::Type_StructLike *type, bool header,
+                                     std::unordered_set<const IR::Type *> *converted) {
     if (converted->count(type)) return type->name;
     converted->emplace(type);
     auto type_name = types.get(type);
@@ -219,7 +219,7 @@ void ProgramStructure::createTypes() {
         declarations->push_back(fieldLists);
     }
 
-    std::unordered_set<const IR::Type*> converted;
+    std::unordered_set<const IR::Type *> converted;
     // Metadata first
     for (auto it : metadata) {
         auto type = it.first->type;
@@ -269,7 +269,7 @@ void ProgramStructure::createTypes() {
     }
 }
 
-const IR::Type_Struct* ProgramStructure::createFieldListType(const IR::Expression* expression) {
+const IR::Type_Struct *ProgramStructure::createFieldListType(const IR::Expression *expression) {
     if (!expression->is<IR::PathExpression>()) {
         ::error(ErrorType::ERR_EXPECTED, "%1%: expected a field list", expression);
         return nullptr;
@@ -367,7 +367,7 @@ void ProgramStructure::createExterns() {
     }
 }
 
-const IR::Expression* ProgramStructure::paramReference(const IR::Parameter* param) {
+const IR::Expression *ProgramStructure::paramReference(const IR::Parameter *param) {
     auto result = new IR::PathExpression(param->name);
     auto tn = param->type->to<IR::Type_Name>();
     cstring name = tn->path->toString();
@@ -379,10 +379,10 @@ const IR::Expression* ProgramStructure::paramReference(const IR::Parameter* para
     return result;
 }
 
-const IR::AssignmentStatement* ProgramStructure::assign(Util::SourceInfo srcInfo,
-                                                        const IR::Expression* left,
-                                                        const IR::Expression* right,
-                                                        const IR::Type* type) {
+const IR::AssignmentStatement *ProgramStructure::assign(Util::SourceInfo srcInfo,
+                                                        const IR::Expression *left,
+                                                        const IR::Expression *right,
+                                                        const IR::Type *type) {
     if (type != nullptr && type != right->type) {
         auto t1 = right->type->to<IR::Type::Bits>();
         auto t2 = type->to<IR::Type::Bits>();
@@ -396,7 +396,7 @@ const IR::AssignmentStatement* ProgramStructure::assign(Util::SourceInfo srcInfo
     return new IR::AssignmentStatement(srcInfo, left, right);
 }
 
-const IR::Statement* ProgramStructure::convertParserStatement(const IR::Expression* expr) {
+const IR::Statement *ProgramStructure::convertParserStatement(const IR::Expression *expr) {
     ExpressionConverter conv(this);
 
     if (expr->is<IR::Primitive>()) {
@@ -424,7 +424,7 @@ const IR::Statement* ProgramStructure::convertParserStatement(const IR::Expressi
             conv.replaceNextWithLast = true;
             this->latest = conv.convert(primitive->operands.at(0));
             conv.replaceNextWithLast = false;
-            const IR::Expression* method =
+            const IR::Expression *method =
                 new IR::Member(paramReference(parserPacketIn), p4lib.packetIn.extract.Id());
             auto result =
                 new IR::MethodCallStatement(expr->srcInfo, method, {new IR::Argument(dest)});
@@ -443,7 +443,7 @@ const IR::Statement* ProgramStructure::convertParserStatement(const IR::Expressi
     BUG("Unhandled expression %1%", expr);
 }
 
-const IR::PathExpression* ProgramStructure::getState(IR::ID dest) {
+const IR::PathExpression *ProgramStructure::getState(IR::ID dest) {
     auto ps = parserStates.get(dest.name);
     if (ps != nullptr) {
         return new IR::PathExpression(dest);
@@ -467,9 +467,9 @@ const IR::PathExpression* ProgramStructure::getState(IR::ID dest) {
     }
 }
 
-const IR::Expression* ProgramStructure::explodeLabel(
-    const IR::Constant* value, const IR::Constant* mask,
-    const std::vector<const IR::Type::Bits*>& fieldTypes) {
+const IR::Expression *ProgramStructure::explodeLabel(
+    const IR::Constant *value, const IR::Constant *mask,
+    const std::vector<const IR::Type::Bits *> &fieldTypes) {
     if (mask->value == 0) return new IR::DefaultExpression(value->srcInfo);
     bool useMask = mask->value != -1;
 
@@ -480,7 +480,7 @@ const IR::Expression* ProgramStructure::explodeLabel(
     for (auto it = fieldTypes.rbegin(); it != fieldTypes.rend(); ++it) {
         int sz = (*it)->width_bits();
         auto bits = Util::ripBits(v, sz);
-        const IR::Expression* expr = new IR::Constant(value->srcInfo, *it, bits, value->base);
+        const IR::Expression *expr = new IR::Constant(value->srcInfo, *it, bits, value->base);
         if (useMask) {
             auto maskbits = Util::ripBits(m, sz);
             auto maskcst = new IR::Constant(mask->srcInfo, *it, maskbits, mask->base);
@@ -492,8 +492,8 @@ const IR::Expression* ProgramStructure::explodeLabel(
     return rv;
 }
 
-const IR::Type* ProgramStructure::explodeType(
-    const std::vector<const IR::Type::Bits*>& fieldTypes) {
+const IR::Type *ProgramStructure::explodeType(
+    const std::vector<const IR::Type::Bits *> &fieldTypes) {
     auto rv = new IR::Vector<IR::Type>();
     for (auto it = fieldTypes.begin(); it != fieldTypes.end(); ++it) {
         rv->push_back(*it);
@@ -508,8 +508,8 @@ const IR::Type* ProgramStructure::explodeType(
  * @param stateful   If any declaration is created during the conversion, save to 'stateful'
  * @returns          The P4-16 parser state corresponding to the P4-14 parser
  */
-const IR::ParserState* ProgramStructure::convertParser(
-    const IR::V1Parser* parser, IR::IndexedVector<IR::Declaration>* stateful) {
+const IR::ParserState *ProgramStructure::convertParser(
+    const IR::V1Parser *parser, IR::IndexedVector<IR::Declaration> *stateful) {
     ExpressionConverter conv(this);
 
     latest = nullptr;
@@ -518,14 +518,14 @@ const IR::ParserState* ProgramStructure::convertParser(
         auto stmt = convertParserStatement(e);
         if (stmt) components.push_back(stmt);
     }
-    const IR::Expression* select = nullptr;
+    const IR::Expression *select = nullptr;
     if (parser->select != nullptr) {
         auto list = new IR::ListExpression(parser->select->srcInfo, {});
-        std::vector<const IR::Type::Bits*> fieldTypes;
+        std::vector<const IR::Type::Bits *> fieldTypes;
         for (auto e : *parser->select) {
             auto c = conv.convert(e);
             list->components.push_back(c);
-            if (auto* t = c->type->to<IR::Type::Bits>()) {
+            if (auto *t = c->type->to<IR::Type::Bits>()) {
                 fieldTypes.push_back(t);
             } else {
                 auto w = c->type->width_bits();
@@ -559,7 +559,7 @@ const IR::ParserState* ProgramStructure::convertParser(
 
                 auto type = explodeType(fieldTypes);
                 auto sizeAnnotation = value_set->annotations->getSingle("parser_value_set_size");
-                const IR::Constant* sizeConstant;
+                const IR::Constant *sizeConstant;
                 if (sizeAnnotation) {
                     if (sizeAnnotation->expr.size() != 1) {
                         ::error(ErrorType::ERR_INVALID,
@@ -669,7 +669,7 @@ void ProgramStructure::include(cstring filename, cstring ppoptions) {
     // the p4c driver sets environment variables for include
     // paths.  check the environment and add these to the command
     // line for the preporicessor
-    char* drvP4IncludePath = getenv("P4C_16_INCLUDE_PATH");
+    char *drvP4IncludePath = getenv("P4C_16_INCLUDE_PATH");
     Util::PathName path(drvP4IncludePath ? drvP4IncludePath : p4includePath);
     path = path.join(filename);
 
@@ -681,7 +681,7 @@ void ProgramStructure::include(cstring filename, cstring ppoptions) {
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.file = path.toString();
     if (!::errorCount()) {
-        if (FILE* file = options.preprocess()) {
+        if (FILE *file = options.preprocess()) {
             auto code = P4::P4ParserDriver::parse(file, options.file);
             if (code && !::errorCount())
                 for (auto decl : code->objects) declarations->push_back(decl);
@@ -708,21 +708,21 @@ namespace {
 // If a header appears twice this must return the SAME expression.
 class HeaderRepresentation {
  private:
-    const IR::Expression* hdrsParam;  // reference to headers parameter in deparser
-    std::map<cstring, const IR::Expression*> header;
+    const IR::Expression *hdrsParam;  // reference to headers parameter in deparser
+    std::map<cstring, const IR::Expression *> header;
     /// This is for parsers that have no extracts
-    std::map<cstring, const IR::Expression*> fakeHeader;
+    std::map<cstring, const IR::Expression *> fakeHeader;
     /// One expression for each constant stack index
-    std::map<const IR::Expression*, std::map<int, const IR::Expression*>> stackElement;
+    std::map<const IR::Expression *, std::map<int, const IR::Expression *>> stackElement;
     /// One expression for each each stack[next]
-    std::map<const IR::Expression*, const IR::Expression*> stackNextElement;
+    std::map<const IR::Expression *, const IR::Expression *> stackNextElement;
 
  public:
-    explicit HeaderRepresentation(const IR::Expression* hdrsParam) : hdrsParam(hdrsParam) {
+    explicit HeaderRepresentation(const IR::Expression *hdrsParam) : hdrsParam(hdrsParam) {
         CHECK_NULL(hdrsParam);
     }
 
-    const IR::Expression* getHeader(const IR::Expression* expression) {
+    const IR::Expression *getHeader(const IR::Expression *expression) {
         CHECK_NULL(expression);
         // expression is a reference to a header in an 'extract' statement
         if (expression->is<IR::ConcreteHeaderRef>()) {
@@ -754,7 +754,7 @@ class HeaderRepresentation {
         }
         BUG("%1%: Unexpected expression in 'extract'", expression);
     }
-    const IR::Expression* getFakeHeader(cstring state) {
+    const IR::Expression *getFakeHeader(cstring state) {
         if (fakeHeader.find(state) == fakeHeader.end())
             fakeHeader[state] = new IR::StringLiteral(state);
         return fakeHeader[state];
@@ -763,20 +763,20 @@ class HeaderRepresentation {
 }  // namespace
 
 void ProgramStructure::createDeparserInternal(
-    IR::ID deparserId, IR::Parameter* packetOut, IR::Parameter* headers,
-    std::vector<IR::Parameter*> extraParams = {},
+    IR::ID deparserId, IR::Parameter *packetOut, IR::Parameter *headers,
+    std::vector<IR::Parameter *> extraParams = {},
     IR::IndexedVector<IR::Declaration> controlLocals = {},
-    std::function<IR::BlockStatement*(IR::BlockStatement*)> fn = [](IR::BlockStatement* b) {
+    std::function<IR::BlockStatement *(IR::BlockStatement *)> fn = [](IR::BlockStatement *b) {
         return b;
     }) {
     auto hdrsParam = paramReference(headers);
     HeaderRepresentation hr(hdrsParam);
 
-    P4::CallGraph<const IR::Expression*> headerOrder("headerOrder");
+    P4::CallGraph<const IR::Expression *> headerOrder("headerOrder");
     for (auto it : parsers) {
         cstring caller = it.first;
 
-        const IR::Expression* lastExtract = nullptr;
+        const IR::Expression *lastExtract = nullptr;
         if (extracts.count(caller) == 0) {
             lastExtract = hr.getFakeHeader(caller);
         } else {
@@ -792,7 +792,7 @@ void ProgramStructure::createDeparserInternal(
             }
         }
         for (auto callee : *it.second) {
-            const IR::Expression* firstExtract;
+            const IR::Expression *firstExtract;
             if (extracts.count(callee) == 0) {
                 firstExtract = hr.getFakeHeader(callee);
             } else {
@@ -810,7 +810,7 @@ void ProgramStructure::createDeparserInternal(
     }
 
     cstring start = IR::ParserState::start;
-    const IR::Expression* startHeader;
+    const IR::Expression *startHeader;
     // find starting point
     if (extracts.count(start) != 0) {
         auto e = extracts[start].at(0);
@@ -819,7 +819,7 @@ void ProgramStructure::createDeparserInternal(
         startHeader = hr.getFakeHeader(start);
     }
 
-    std::vector<const IR::Expression*> sortedHeaders;
+    std::vector<const IR::Expression *> sortedHeaders;
     bool loop = headerOrder.sccSort(startHeader, sortedHeaders);
     if (loop)
         ::warning(ErrorType::WARN_ORDERING,
@@ -849,7 +849,7 @@ void ProgramStructure::createDeparserInternal(
 
         auto args = new IR::Vector<IR::Argument>();
         args->push_back(new IR::Argument(exp));
-        const IR::Expression* method =
+        const IR::Expression *method =
             new IR::Member(paramReference(packetOut), p4lib.packetOut.emit.Id());
         auto mce = new IR::MethodCallExpression(method, args);
         auto stat = new IR::MethodCallStatement(mce);
@@ -878,13 +878,13 @@ void ProgramStructure::createDeparser() {
     createDeparserInternal(v1model.deparser.Id(), packetOut, headers);
 }
 
-const IR::Declaration_Instance* ProgramStructure::convertActionProfile(
-    const IR::ActionProfile* action_profile, cstring newName) {
-    auto* action_selector = action_selectors.get(action_profile->selector.name);
+const IR::Declaration_Instance *ProgramStructure::convertActionProfile(
+    const IR::ActionProfile *action_profile, cstring newName) {
+    auto *action_selector = action_selectors.get(action_profile->selector.name);
     if (!action_profile->selector.name.isNullOrEmpty() && !action_selector)
         ::error(ErrorType::ERR_NOT_FOUND, "Cannot locate action selector %1%",
                 action_profile->selector);
-    const IR::Type* type = nullptr;
+    const IR::Type *type = nullptr;
     auto args = new IR::Vector<IR::Argument>();
     auto annos = addGlobalNameAnnotation(action_profile->name);
     if (action_selector) {
@@ -917,20 +917,20 @@ const IR::Declaration_Instance* ProgramStructure::convertActionProfile(
     return decl;
 }
 
-const IR::P4Table* ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
-                                                  IR::IndexedVector<IR::Declaration>& stateful,
-                                                  std::map<cstring, cstring>& mapNames) {
+const IR::P4Table *ProgramStructure::convertTable(const IR::V1Table *table, cstring newName,
+                                                  IR::IndexedVector<IR::Declaration> &stateful,
+                                                  std::map<cstring, cstring> &mapNames) {
     ExpressionConverter conv(this);
     auto props = new IR::TableProperties(table->properties.properties);
     auto actionList = new IR::ActionList({});
 
     cstring profile = table->action_profile.name;
-    auto* action_profile = action_profiles.get(profile);
-    auto* action_selector =
+    auto *action_profile = action_profiles.get(profile);
+    auto *action_selector =
         action_profile ? action_selectors.get(action_profile->selector.name) : nullptr;
     auto mtr = get(directMeters, table->name);
     auto ctr = get(directCounters, table->name);
-    const std::vector<IR::ID>& actionsToDo =
+    const std::vector<IR::ID> &actionsToDo =
         action_profile ? action_profile->actions : table->actions;
     cstring default_action = table->default_action;
     for (auto a : actionsToDo) {
@@ -969,7 +969,7 @@ const IR::P4Table* ProgramStructure::convertTable(const IR::V1Table* table, cstr
             if (rt.name == "valid") rt.name = p4lib.exactMatch.Id();
             auto ce = conv.convert(e);
 
-            const IR::Annotations* annos = IR::Annotations::empty;
+            const IR::Annotations *annos = IR::Annotations::empty;
             // Generate a name annotation for the key if it contains a mask.
             if (auto bin = e->to<IR::Mask>()) {
                 // This is a bit heuristic, but P4-14 does not allow arbitrary expressions for keys
@@ -1081,7 +1081,7 @@ const IR::P4Table* ProgramStructure::convertTable(const IR::V1Table* table, cstr
     return result;
 }
 
-const IR::Expression* ProgramStructure::convertHashAlgorithm(Util::SourceInfo srcInfo,
+const IR::Expression *ProgramStructure::convertHashAlgorithm(Util::SourceInfo srcInfo,
                                                              IR::ID algorithm) {
     IR::ID result;
     if (algorithm == "crc32") {
@@ -1109,7 +1109,7 @@ const IR::Expression* ProgramStructure::convertHashAlgorithm(Util::SourceInfo sr
     return mem;
 }
 
-const IR::Expression* ProgramStructure::convertHashAlgorithms(const IR::NameList* algorithm) {
+const IR::Expression *ProgramStructure::convertHashAlgorithms(const IR::NameList *algorithm) {
     if (!algorithm || algorithm->names.empty()) return nullptr;
     if (algorithm->names.size() > 1) {
 #if 1
@@ -1119,15 +1119,15 @@ const IR::Expression* ProgramStructure::convertHashAlgorithms(const IR::NameList
                   algorithm->names[0].srcInfo);
 #else
         auto rv = new IR::ListExpression({});
-        for (auto& alg : algorithm->names) rv->push_back(convertHashAlgorithm(alg));
+        for (auto &alg : algorithm->names) rv->push_back(convertHashAlgorithm(alg));
         return rv;
 #endif
     }
     return convertHashAlgorithm(algorithm->srcInfo, algorithm->names[0]);
 }
 
-static bool sameBitsType(const IR::Node* errorPosition, const IR::Type* left,
-                         const IR::Type* right) {
+static bool sameBitsType(const IR::Node *errorPosition, const IR::Type *left,
+                         const IR::Type *right) {
     if (typeid(*left) != typeid(*right)) return false;
     if (left->is<IR::Type_Bits>())
         return left->to<IR::Type_Bits>()->operator==(*right->to<IR::Type_Bits>());
@@ -1136,10 +1136,10 @@ static bool sameBitsType(const IR::Node* errorPosition, const IR::Type* left,
     return true;  // to prevent inserting a cast
 }
 
-static bool isSaturatedField(const IR::Expression* expr) {
+static bool isSaturatedField(const IR::Expression *expr) {
     auto member = expr->to<IR::Member>();
     if (!member) return false;
-    auto header_type = dynamic_cast<const IR::Type_StructLike*>(member->expr->type);
+    auto header_type = dynamic_cast<const IR::Type_StructLike *>(member->expr->type);
     if (!header_type) return false;
     auto field = header_type->getField(member->member.name);
     if (field && field->getAnnotation("saturating")) {
@@ -1149,10 +1149,10 @@ static bool isSaturatedField(const IR::Expression* expr) {
 }
 
 // Implement modify_field(left, right, mask)
-const IR::Statement* ProgramStructure::sliceAssign(const IR::Primitive* primitive,
-                                                   const IR::Expression* left,
-                                                   const IR::Expression* right,
-                                                   const IR::Expression* mask) {
+const IR::Statement *ProgramStructure::sliceAssign(const IR::Primitive *primitive,
+                                                   const IR::Expression *left,
+                                                   const IR::Expression *right,
+                                                   const IR::Expression *mask) {
     if (mask->is<IR::Constant>()) {
         auto cst = mask->to<IR::Constant>();
         if (cst->value < 0) {
@@ -1181,7 +1181,7 @@ const IR::Statement* ProgramStructure::sliceAssign(const IR::Primitive* primitiv
     return assign(primitive->srcInfo, left, result, type);
 }
 
-const IR::Expression* ProgramStructure::convertFieldList(const IR::Expression* expression) {
+const IR::Expression *ProgramStructure::convertFieldList(const IR::Expression *expression) {
     ExpressionConverter conv(this);
 
     if (!expression->is<IR::PathExpression>()) {
@@ -1198,15 +1198,15 @@ const IR::Expression* ProgramStructure::convertFieldList(const IR::Expression* e
     return result;
 }
 
-const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* primitive) {
+const IR::Statement *ProgramStructure::convertPrimitive(const IR::Primitive *primitive) {
     ExpressionConverter conv(this);
-    const IR::GlobalRef* glob = nullptr;
-    const IR::Declaration_Instance* extrn = nullptr;
+    const IR::GlobalRef *glob = nullptr;
+    const IR::Declaration_Instance *extrn = nullptr;
     if (primitive->operands.size() >= 1) glob = primitive->operands[0]->to<IR::GlobalRef>();
     if (glob) extrn = glob->obj->to<IR::Declaration_Instance>();
 
     if (extrn) return ExternConverter::cvtExternCall(this, extrn, primitive);
-    if (auto* st = PrimitiveConverter::cvtPrimitive(this, primitive)) return st;
+    if (auto *st = PrimitiveConverter::cvtPrimitive(this, primitive)) return st;
     // If everything else failed maybe we are invoking an action
     auto action = actions.get(primitive->name);
     if (action != nullptr) {
@@ -1293,7 +1293,7 @@ CONVERT_PRIMITIVE(add) {
     for (auto a : args) isSaturated = isSaturated || isSaturatedField(a);  // any of the fields
     if (!sameBitsType(primitive, args[1]->type, args[2]->type))
         args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
-    IR::Operation_Binary* op = nullptr;
+    IR::Operation_Binary *op = nullptr;
     if (isSaturated)
         op = new IR::AddSat(primitive->srcInfo, args[1], args[2]);
     else
@@ -1372,7 +1372,7 @@ CONVERT_PRIMITIVE(subtract) {
     for (auto a : args) isSaturated = isSaturated || isSaturatedField(a);
     if (!sameBitsType(primitive, args[1]->type, args[2]->type))
         args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
-    IR::Operation_Binary* op = nullptr;
+    IR::Operation_Binary *op = nullptr;
     if (isSaturated)
         op = new IR::SubSat(primitive->srcInfo, args[1], args[2]);
     else
@@ -1416,7 +1416,7 @@ CONVERT_PRIMITIVE(add_to_field) {
     // convert twice, so we have different expression trees on RHS and LHS
     auto right = primitive->operands.at(1);
     bool isSaturated = isSaturatedField(left) || isSaturatedField(right);
-    IR::Operation_Binary* op = nullptr;
+    IR::Operation_Binary *op = nullptr;
     if (auto k = primitive->operands.at(1)->to<IR::Constant>()) {
         if (k->value < 0 && !k->type->to<IR::Type::Bits>()->isSigned) {
             // adding a negative value to an unsigned field -- want to turn this into a
@@ -1447,7 +1447,7 @@ CONVERT_PRIMITIVE(subtract_from_field) {
     // convert twice, so we have different expression trees on RHS and LHS
     auto right = conv.convert(primitive->operands.at(1));
     bool isSaturated = isSaturatedField(left) || isSaturatedField(right);
-    IR::Operation_Binary* op = nullptr;
+    IR::Operation_Binary *op = nullptr;
     if (isSaturated)
         op = new IR::SubSat(primitive->srcInfo, left, right);
     else
@@ -1492,7 +1492,7 @@ CONVERT_PRIMITIVE(mark_for_drop) {
         {new IR::Argument(structure->conversionContext->standardMetadata->clone())});
 }
 
-static const IR::Constant* push_pop_size(ExpressionConverter& conv, const IR::Primitive* prim) {
+static const IR::Constant *push_pop_size(ExpressionConverter &conv, const IR::Primitive *prim) {
     if (prim->operands.size() == 1) return new IR::Constant(1);
     auto op1 = prim->operands.at(1);
     auto count = conv.convert(op1);
@@ -1546,7 +1546,7 @@ CONVERT_PRIMITIVE(count) {
     ExpressionConverter conv(structure);
     OPS_CK(primitive, 2);
     auto ref = primitive->operands.at(0);
-    const IR::Counter* counter = nullptr;
+    const IR::Counter *counter = nullptr;
     if (auto gr = ref->to<IR::GlobalRef>())
         counter = gr->obj->to<IR::Counter>();
     else if (auto nr = ref->to<IR::PathExpression>())
@@ -1571,7 +1571,7 @@ CONVERT_PRIMITIVE(modify_field_from_rng) {
     auto field = conv.convert(primitive->operands.at(0));
     auto dest = field;
     auto logRange = conv.convert(primitive->operands.at(1));
-    const IR::Expression* mask = nullptr;
+    const IR::Expression *mask = nullptr;
     auto block = new IR::BlockStatement;
     if (primitive->operands.size() == 3) {
         mask = conv.convert(primitive->operands.at(2));
@@ -1633,8 +1633,8 @@ CONVERT_PRIMITIVE(recirculate) {
     return new IR::MethodCallStatement(mc->srcInfo, mc);
 }
 
-static const IR::Statement* convertClone(ProgramStructure* structure,
-                                         const IR::Primitive* primitive, Model::Elem kind) {
+static const IR::Statement *convertClone(ProgramStructure *structure,
+                                         const IR::Primitive *primitive, Model::Elem kind) {
     unsigned opcount = primitive->operands.size();
     BUG_CHECK(opcount == 1 || opcount == 2, "Expected 1 or 2 operands for %1%", primitive);
     ExpressionConverter conv(structure);
@@ -1697,7 +1697,7 @@ CONVERT_PRIMITIVE(execute_meter) {
     ExpressionConverter conv(structure);
     OPS_CK(primitive, 3);
     auto ref = primitive->operands.at(0);
-    const IR::Meter* meter = nullptr;
+    const IR::Meter *meter = nullptr;
     if (auto gr = ref->to<IR::GlobalRef>())
         meter = gr->obj->to<IR::Meter>();
     else if (auto nr = ref->to<IR::PathExpression>())
@@ -1807,7 +1807,7 @@ CONVERT_PRIMITIVE(register_read) {
     OPS_CK(primitive, 3);
     auto left = conv.convert(primitive->operands.at(0));
     auto ref = primitive->operands.at(1);
-    const IR::Register* reg = nullptr;
+    const IR::Register *reg = nullptr;
     if (auto gr = ref->to<IR::GlobalRef>())
         reg = gr->obj->to<IR::Register>();
     else if (auto nr = ref->to<IR::PathExpression>())
@@ -1833,7 +1833,7 @@ CONVERT_PRIMITIVE(register_write) {
     ExpressionConverter conv(structure);
     OPS_CK(primitive, 3);
     auto ref = primitive->operands.at(0);
-    const IR::Register* reg = nullptr;
+    const IR::Register *reg = nullptr;
     if (auto gr = ref->to<IR::GlobalRef>())
         reg = gr->obj->to<IR::Register>();
     else if (auto nr = ref->to<IR::PathExpression>())
@@ -1843,7 +1843,7 @@ CONVERT_PRIMITIVE(register_write) {
         return nullptr;
     }
 
-    const IR::Type* castType = nullptr;
+    const IR::Type *castType = nullptr;
     int width = reg->width;
     if (width > 0) castType = IR::Type_Bits::get(width);
     // Else this is a structured type, so no cast is inserted below.
@@ -1856,7 +1856,7 @@ CONVERT_PRIMITIVE(register_write) {
     auto arg0 =
         new IR::Cast(primitive->operands.at(1)->srcInfo, IR::Type::Bits::get(reg->index_width()),
                      conv.convert(primitive->operands.at(1)));
-    const IR::Expression* arg1 = conv.convert(primitive->operands.at(2));
+    const IR::Expression *arg1 = conv.convert(primitive->operands.at(2));
     if (castType != nullptr)
         arg1 = new IR::Cast(primitive->operands.at(2)->srcInfo, castType, arg1);
     args->push_back(new IR::Argument(arg0));
@@ -1896,7 +1896,7 @@ CONVERT_PRIMITIVE(funnel_shift_right) {
     return structure->assign(primitive->srcInfo, dest, src, primitive->operands.at(0)->type);
 }
 
-const IR::Statement* ProgramStructure::convertMeterCall(const IR::Meter* meterToAccess) {
+const IR::Statement *ProgramStructure::convertMeterCall(const IR::Meter *meterToAccess) {
     ExpressionConverter conv(this);
     // add a writeback to the meter field
     auto decl = get(meterMap, meterToAccess);
@@ -1911,7 +1911,7 @@ const IR::Statement* ProgramStructure::convertMeterCall(const IR::Meter* meterTo
     return stat;
 }
 
-const IR::Statement* ProgramStructure::convertCounterCall(cstring counterToAccess) {
+const IR::Statement *ProgramStructure::convertCounterCall(cstring counterToAccess) {
     ExpressionConverter conv(this);
     auto decl = get(counterMap, counterToAccess);
     CHECK_NULL(decl);
@@ -1922,8 +1922,8 @@ const IR::Statement* ProgramStructure::convertCounterCall(cstring counterToAcces
     return stat;
 }
 
-const IR::P4Action* ProgramStructure::convertAction(const IR::ActionFunction* action,
-                                                    cstring newName, const IR::Meter* meterToAccess,
+const IR::P4Action *ProgramStructure::convertAction(const IR::ActionFunction *action,
+                                                    cstring newName, const IR::Meter *meterToAccess,
                                                     cstring counterToAccess) {
     LOG3("Converting action " << action->name);
     auto body = new IR::BlockStatement;
@@ -1970,7 +1970,7 @@ const IR::P4Action* ProgramStructure::convertAction(const IR::ActionFunction* ac
     return result;
 }
 
-const IR::Type_Control* ProgramStructure::controlType(IR::ID name) {
+const IR::Type_Control *ProgramStructure::controlType(IR::ID name) {
     auto params = new IR::ParameterList;
 
     auto headpath = new IR::Path(v1model.headersType.Id());
@@ -1999,7 +1999,7 @@ const IR::Type_Control* ProgramStructure::controlType(IR::ID name) {
     return type;
 }
 
-const IR::Expression* ProgramStructure::counterType(const IR::CounterOrMeter* cm) {
+const IR::Expression *ProgramStructure::counterType(const IR::CounterOrMeter *cm) {
     IR::ID kind;
     IR::ID enumName;
     if (cm->is<IR::Counter>()) {
@@ -2026,8 +2026,8 @@ const IR::Expression* ProgramStructure::counterType(const IR::CounterOrMeter* cm
     return new IR::Member(cm->srcInfo, enumref, kind);
 }
 
-const IR::Declaration_Instance* ProgramStructure::convert(const IR::Register* reg, cstring newName,
-                                                          const IR::Type* regElementType) {
+const IR::Declaration_Instance *ProgramStructure::convert(const IR::Register *reg, cstring newName,
+                                                          const IR::Type *regElementType) {
     LOG3("Synthesizing " << reg);
     if (regElementType) {
         if (auto str = regElementType->to<IR::Type_StructLike>())
@@ -2065,7 +2065,7 @@ const IR::Declaration_Instance* ProgramStructure::convert(const IR::Register* re
     return decl;
 }
 
-const IR::Declaration_Instance* ProgramStructure::convert(const IR::CounterOrMeter* cm,
+const IR::Declaration_Instance *ProgramStructure::convert(const IR::CounterOrMeter *cm,
                                                           cstring newName) {
     LOG3("Synthesizing " << cm);
     IR::ID ext;
@@ -2083,7 +2083,7 @@ const IR::Declaration_Instance* ProgramStructure::convert(const IR::CounterOrMet
     auto kindarg = counterType(cm);
     args->push_back(new IR::Argument(kindarg));
     auto annos = addGlobalNameAnnotation(cm->name, cm->annotations);
-    if (auto* c = cm->to<IR::Counter>()) {
+    if (auto *c = cm->to<IR::Counter>()) {
         if (c->min_width >= 0)
             annos = annos->addAnnotation("min_width", new IR::Constant(c->min_width));
         if (c->max_width >= 0)
@@ -2093,7 +2093,7 @@ const IR::Declaration_Instance* ProgramStructure::convert(const IR::CounterOrMet
     return decl;
 }
 
-const IR::Declaration_Instance* ProgramStructure::convertDirectMeter(const IR::Meter* m,
+const IR::Declaration_Instance *ProgramStructure::convertDirectMeter(const IR::Meter *m,
                                                                      cstring newName) {
     LOG3("Synthesizing " << m);
     auto meterOutput = m->result;
@@ -2122,7 +2122,7 @@ const IR::Declaration_Instance* ProgramStructure::convertDirectMeter(const IR::M
     return decl;
 }
 
-const IR::Declaration_Instance* ProgramStructure::convertDirectCounter(const IR::Counter* c,
+const IR::Declaration_Instance *ProgramStructure::convertDirectCounter(const IR::Counter *c,
                                                                        cstring newName) {
     LOG3("Synthesizing " << c);
 
@@ -2141,7 +2141,7 @@ const IR::Declaration_Instance* ProgramStructure::convertDirectCounter(const IR:
     return decl;
 }
 
-IR::Vector<IR::Argument>* ProgramStructure::createApplyArguments(cstring /* name unused */) {
+IR::Vector<IR::Argument> *ProgramStructure::createApplyArguments(cstring /* name unused */) {
     auto args = new IR::Vector<IR::Argument>();
     args->push_back(new IR::Argument(conversionContext->header->clone()));
     args->push_back(new IR::Argument(conversionContext->userMetadata->clone()));
@@ -2149,7 +2149,7 @@ IR::Vector<IR::Argument>* ProgramStructure::createApplyArguments(cstring /* name
     return args;
 }
 
-const IR::P4Control* ProgramStructure::convertControl(const IR::V1Control* control,
+const IR::P4Control *ProgramStructure::convertControl(const IR::V1Control *control,
                                                       cstring newName) {
     LOG3("Converting frontend " << control->name);
     IR::ID name = newName;
@@ -2157,7 +2157,7 @@ const IR::P4Control* ProgramStructure::convertControl(const IR::V1Control* contr
     std::vector<cstring> actionsInTables;
     IR::IndexedVector<IR::Declaration> locals;
 
-    std::vector<const IR::V1Table*> usedTables;
+    std::vector<const IR::V1Table *> usedTables;
     tablesReferred(control, usedTables);
     for (auto t : usedTables) {
         for (auto a : t->actions) actionsInTables.push_back(a.name);
@@ -2403,11 +2403,11 @@ void ProgramStructure::createMain() {
 }
 
 // Get a field_list_calculation from a name
-const IR::FieldListCalculation* ProgramStructure::getFieldListCalculation(const IR::Expression* e) {
-    if (auto* pe = e->to<IR::PathExpression>()) {
+const IR::FieldListCalculation *ProgramStructure::getFieldListCalculation(const IR::Expression *e) {
+    if (auto *pe = e->to<IR::PathExpression>()) {
         return field_list_calculations.get(pe->path->name);
     }
-    if (auto* gref = e->to<IR::GlobalRef>()) {
+    if (auto *gref = e->to<IR::GlobalRef>()) {
         // an instance of a global object, but in P4_14, there might be a field_list_calculation
         // with the same name
         return field_list_calculations.get(gref->toString());
@@ -2417,7 +2417,7 @@ const IR::FieldListCalculation* ProgramStructure::getFieldListCalculation(const 
 
 // if a FieldListCalculation contains multiple field lists concatenate them all
 // into a temporary field list
-const IR::FieldList* ProgramStructure::getFieldLists(const IR::FieldListCalculation* flc) {
+const IR::FieldList *ProgramStructure::getFieldLists(const IR::FieldListCalculation *flc) {
     // FIXME -- this duplicates P4_14::TypeCheck.  Why not just use flc->input_fields?
     if (flc->input->names.size() == 0) {
         ::error(ErrorType::ERR_UNSUPPORTED, "%1%: field_list_calculation with zero inputs", flc);
@@ -2431,7 +2431,7 @@ const IR::FieldList* ProgramStructure::getFieldLists(const IR::FieldListCalculat
         return result;
     }
 
-    IR::FieldList* result = new IR::FieldList();
+    IR::FieldList *result = new IR::FieldList();
     result->payload = false;
     for (auto name : flc->input->names) {
         auto fl = field_lists.get(name);
@@ -2485,7 +2485,7 @@ void ProgramStructure::createChecksumVerifications() {
                                             : v1model.verify_checksum.Id();
             auto method = new IR::PathExpression(methodName);
             auto args = new IR::Vector<IR::Argument>();
-            const IR::Expression* condition;
+            const IR::Expression *condition;
             if (uov.cond != nullptr)
                 condition = conv.convert(uov.cond);
             else
@@ -2550,7 +2550,7 @@ void ProgramStructure::createChecksumUpdates() {
                                             : v1model.update_checksum.Id();
             auto method = new IR::PathExpression(methodName);
             auto args = new IR::Vector<IR::Argument>();
-            const IR::Expression* condition;
+            const IR::Expression *condition;
             if (uov.cond != nullptr)
                 condition = conv.convert(uov.cond);
             else
@@ -2592,7 +2592,7 @@ void ProgramStructure::createChecksumUpdates() {
     conversionContext->clear();
 }
 
-const IR::P4Program* ProgramStructure::create(Util::SourceInfo info) {
+const IR::P4Program *ProgramStructure::create(Util::SourceInfo info) {
     createTypes();
     createStructures();
     createExterns();
@@ -2609,20 +2609,20 @@ const IR::P4Program* ProgramStructure::create(Util::SourceInfo info) {
     return program;
 }
 
-void ProgramStructure::tablesReferred(const IR::V1Control* control,
-                                      std::vector<const IR::V1Table*>& out) {
+void ProgramStructure::tablesReferred(const IR::V1Control *control,
+                                      std::vector<const IR::V1Table *> &out) {
     LOG3("Inspecting " << control->name);
     for (auto it : tableMapping) {
         if (it.second == control) out.push_back(it.first);
     }
     // sort alphabetically to have a deterministic order
-    std::sort(out.begin(), out.end(), [](const IR::V1Table* left, const IR::V1Table* right) {
+    std::sort(out.begin(), out.end(), [](const IR::V1Table *left, const IR::V1Table *right) {
         return left->name.name < right->name.name;
     });
 }
 
 void ProgramStructure::populateOutputNames() {
-    static const char* used_names[] = {
+    static const char *used_names[] = {
         // core.p4
         "packet_in", "packet_out", "NoAction", "exact", "ternary", "lpm",
         // v1model.p4
@@ -2639,7 +2639,7 @@ void ProgramStructure::populateOutputNames() {
         "DeparserImpl",
         // parameters
         "packet", "hdr", "meta", nullptr};
-    for (const char** c = used_names; *c != nullptr; ++c) allNames.insert({*c, 0});
+    for (const char **c = used_names; *c != nullptr; ++c) allNames.insert({*c, 0});
     ;
 }
 

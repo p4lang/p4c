@@ -58,10 +58,10 @@ enum dbprint_flags {
     Brief = 0x20,
 };
 
-int dbgetflags(std::ostream& out);
-int dbsetflags(std::ostream& out, int val, int mask = ~0U);
+int dbgetflags(std::ostream &out);
+int dbsetflags(std::ostream &out, int val, int mask = ~0U);
 
-inline int getprec(std::ostream& out) { return dbgetflags(out) & DBPrint::Precedence; }
+inline int getprec(std::ostream &out) { return dbgetflags(out) & DBPrint::Precedence; }
 class setflags_helper {
     int val, mask;
     setflags_helper() = delete;
@@ -70,7 +70,7 @@ class setflags_helper {
     setflags_helper(int v, int m) : val(v), mask(m) { assert((val & ~mask) == 0); }
 
  public:
-    void set(std::ostream& out) const { dbsetflags(out, val, mask); }
+    void set(std::ostream &out) const { dbsetflags(out, val, mask); }
 };
 struct setprec : public setflags_helper {
     explicit setprec(int prec) : setflags_helper(prec, DBPrint::Precedence) {}
@@ -82,12 +82,12 @@ struct clrflag : public setflags_helper {
     explicit clrflag(int fl) : setflags_helper(0, fl) {}
 };
 
-inline std::ostream& operator<<(std::ostream& out, const DBPrint::setflags_helper& p) {
+inline std::ostream &operator<<(std::ostream &out, const DBPrint::setflags_helper &p) {
     p.set(out);
     return out;
 }
 
-inline std::ostream& operator<<(std::ostream& out, const DBPrint::dbprint_flags fl) {
+inline std::ostream &operator<<(std::ostream &out, const DBPrint::dbprint_flags fl) {
     DBPrint::dbsetflags(out, fl, fl ? fl : ~0);
     return out;
 }

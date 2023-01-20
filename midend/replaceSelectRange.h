@@ -47,20 +47,20 @@ class DoReplaceSelectRange : public Transform {
 
     explicit DoReplaceSelectRange(uint max) : MAX_CASES(max) { setName("DoReplaceSelectRange"); }
 
-    const IR::Node* postorder(IR::SelectExpression* e) override;
-    const IR::Node* postorder(IR::SelectCase* p) override;
+    const IR::Node *postorder(IR::SelectExpression *e) override;
+    const IR::Node *postorder(IR::SelectCase *p) override;
 
-    std::vector<const IR::Mask*>* rangeToMasks(const IR::Range*, size_t);
+    std::vector<const IR::Mask *> *rangeToMasks(const IR::Range *, size_t);
     std::vector<IR::Vector<IR::Expression>> cartesianAppend(
-        const std::vector<IR::Vector<IR::Expression>>& vecs,
-        const std::vector<const IR::Mask*>& masks);
+        const std::vector<IR::Vector<IR::Expression>> &vecs,
+        const std::vector<const IR::Mask *> &masks);
     std::vector<IR::Vector<IR::Expression>> cartesianAppend(
-        const std::vector<IR::Vector<IR::Expression>>& vecs, const IR::Expression* e);
+        const std::vector<IR::Vector<IR::Expression>> &vecs, const IR::Expression *e);
 };
 
 class ReplaceSelectRange final : public PassManager {
  public:
-    ReplaceSelectRange(ReferenceMap* refMap, TypeMap* typeMap) {
+    ReplaceSelectRange(ReferenceMap *refMap, TypeMap *typeMap) {
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DoReplaceSelectRange(100));
         setName("ReplaceSelectRange");
