@@ -188,7 +188,7 @@ def main(args):
     config = {
         "INCREMENTAL_STACK": "",
         "RANDOM_ACCESS_STACK": "--pop-level 3",
-        "RANDOM_ACCESS_MAX_COVERAGE": "--saddle-point 3",
+        "RANDOM_ACCESS_MAX_COVERAGE": "--saddle-point 5",
     }
     # csv results file path
     for strategy in strategies:
