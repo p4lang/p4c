@@ -117,7 +117,6 @@ class MemberToVariable : public Transform {
         auto name = member->member.name;
         auto typeName = types.find(name);
         if (typeName != types.end()) {
-            std::cout << typeName->second << std::endl;
             return typeName->second;
         }
         if (name == "isValid") {
@@ -127,13 +126,10 @@ class MemberToVariable : public Transform {
             cstring name = toString(member->expr);
             auto i = types.find(name);
             if (i != types.end()) {
-                std::cout << i->second << std::endl;
                 return i->second;
-            } 
-            std::cout << member->expr->type << std::endl;
+            }
             return member->expr->type;
         }
-        std::cout << member->type << std::endl;
         return member->type;
     }
 };
@@ -168,17 +164,13 @@ std::vector<const IR::Expression*> AssertsParser::genIRStructs(
         types.emplace(keyName, type);
     }
     const auto* restr = ExpressionParser::Parser::getIR(restrictionString, p4Program, true, types);
-    std::cout << "ALL : " << restr << std::endl;
     MemberToVariable memberToVariable(tableName, types);
     if (const auto* listExpression = restr->to<IR::ListExpression>()) {
         for (const auto* component : listExpression->components) {
-            std::cout << "BEFORE : " << component << std::endl;
             result.push_back(component->apply(memberToVariable)->to<IR::Expression>());
-            std::cout << "AFTER : " << result[result.size() - 1] << std::endl;
         }
     } else {
         result.push_back(restr->apply(memberToVariable)->to<IR::Expression>());
-        std::cout << "AFTER : " << result[result.size() - 1] << std::endl;
     }
     return result;
 }

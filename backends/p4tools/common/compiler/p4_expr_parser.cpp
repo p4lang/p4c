@@ -193,7 +193,6 @@ std::pair<const IR::Node*, IR::ID> Parser::getDefinedType(cstring txt, const IR:
     } else {
         auto i = types.find(txt);
         if (i != types.end()) {
-            std::cout << i->second << std::endl;
             return std::make_pair(i->second, txt);
         }
         const IR::IDeclaration *decl = nullptr;
@@ -504,7 +503,7 @@ const IR::Node* Parser::createFunctionCallOrConstantOp() {
             nd = res.first;
             if (res.first == nullptr) {
                 isNoTypes = true;
-                mainArgument = new IR::PathExpression(new IR::Path(res.second));    
+                mainArgument = new IR::PathExpression(new IR::Path(res.second));
             } else {
                 lastType = ndToType(res.first);
                 mainArgument = new IR::PathExpression(lastType, new IR::Path(res.second));
@@ -550,7 +549,8 @@ const IR::Node* Parser::createFunctionCallOrConstantOp() {
                     mainArgument = new IR::Member(mainArgument->to<IR::Expression>(), res.second);
                 } else {
                     lastType = type;
-                    mainArgument = new IR::Member(type, mainArgument->to<IR::Expression>(), res.second);
+                    mainArgument =
+                        new IR::Member(type, mainArgument->to<IR::Expression>(), res.second);
                 }
             }
         } while (tokens[index].is(Token::Kind::Dot) || tokens[index].is(Token::Kind::FieldAccess));
@@ -715,15 +715,14 @@ bool isLogicMark(Token::Kind kind) {
 }
 
 class ConstantTypeSetter : public Transform {
- const IR::Type* type;
+    const IR::Type* type;
 
  public:
-    ConstantTypeSetter(const IR::Type* type) : type(type) {
+    explicit ConstantTypeSetter(const IR::Type* type) : type(type) {
         setName("ConstantTypeSetter");
         CHECK_NULL(type);
     }
     const IR::Node* postorder(IR::Constant* c) override {
-        std::cout << c << " : " << c->type << " : " << c << std::endl;
         auto* newConst = c->clone();
         newConst->type = type;
         return newConst;
@@ -745,9 +744,7 @@ const IR::Node* Parser::createBinaryExpression(const char* msg, Token::Kind kind
         prevFunc = funcRight;
         const auto* res =
             createIR(kind, mainArgument, (this->*funcRight)())->to<IR::Operation_Binary>();
-        std::cout << res << std::endl;
         if (!isLogicMark(kind) && lastType) {
-            std::cout << res << ":" << lastType << std::endl;
             ConstantTypeSetter constantTypeSetter(lastType);
             return res->apply(constantTypeSetter);
         } else {
@@ -815,7 +812,6 @@ const IR::Node* Parser::getIR() {
 const IR::Node* Parser::getIR(const char* str, const IR::P4Program* program, bool addFA,
                               const std::map<cstring, const IR::Type*> types,
                               TokensSet skippedTokens) {
-    std::cout << "Parsing string : " << str << std::endl;
     Lexer lex(str);
     std::vector<Token> tmp;
     for (auto token = lex.next(); !token.is_one_of(Token::Kind::End, Token::Kind::Unknown);
