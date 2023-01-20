@@ -47,6 +47,7 @@ class ErrorType {
     static const int ERR_IO;                     // IO error
     static const int ERR_UNREACHABLE;            // unreachable parser state
     static const int ERR_MODEL;                  // something is wrong with the target model
+    static const int ERR_RESERVED;               // Reserved for target use
 
     // If we specialize for 1000 error types we're good!
     static const int ERR_MAX_ERRORS;

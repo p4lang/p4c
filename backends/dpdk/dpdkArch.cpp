@@ -3046,7 +3046,8 @@ void InsertReqDeclForIPSec::uniqueNames() {
     for (unsigned i = 0; i < 4; i++) {
         name = refMap->newName(registerInstanceNames[i]);
         if (name != registerInstanceNames[i])
-            ::error("%1% name is reserved for DPDK IPSec port register", registerInstanceNames[i]);
+            ::error(ErrorType::ERR_RESERVED, "%1% name is reserved for DPDK IPSec port register",
+                    registerInstanceNames[i]);
     }
 }
 
@@ -3066,7 +3067,7 @@ IR::Declaration_Instance *InsertReqDeclForIPSec::addRegDeclInstance(cstring inst
 }
 
 const IR::Node *InsertReqDeclForIPSec::preorder(IR::P4Program *program) {
-    auto IsIpSecUsed = new IsIPSecUsed(is_ipsec_used, sa_id_width, refMap, typeMap);
+    auto IsIpSecUsed = new IsIPSecUsed(is_ipsec_used, sa_id_width, refMap, typeMap, structure);
     IsIpSecUsed->setCalledBy(this);
     program->apply(*IsIpSecUsed);
     if (is_ipsec_used) {
@@ -3082,7 +3083,8 @@ const IR::Node *InsertReqDeclForIPSec::preorder(IR::P4Program *program) {
             new IR::StructField(newHeaderFieldName, IR::Type_Bits::get(sa_id_width)));
         auto newHeaderName1 = refMap->newName(newHeaderName);
         if (newHeaderName1 != newHeaderName) {
-            ::error("%1% type name is reserved for DPDK platform header", newHeaderName);
+            ::error(ErrorType::ERR_RESERVED, "%1% type name is reserved for DPDK platform header",
+                    newHeaderName);
             return program;
         }
         ipsecHeader = new IR::Type_Header(IR::ID(newHeaderName), newHeaderFields);

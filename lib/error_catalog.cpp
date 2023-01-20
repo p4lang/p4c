@@ -37,6 +37,7 @@ const int ErrorType::ERR_DUPLICATE = 13;
 const int ErrorType::ERR_IO = 14;
 const int ErrorType::ERR_UNREACHABLE = 15;
 const int ErrorType::ERR_MODEL = 16;
+const int ErrorType::ERR_RESERVED = 17;
 // If we specialize for 1000 error types we're good!
 const int ErrorType::ERR_MAX_ERRORS = 999;
 
@@ -83,6 +84,7 @@ std::map<int, cstring> ErrorCatalog::errorCatalog = {
     {ErrorType::ERR_DUPLICATE, "duplicate"},
     {ErrorType::ERR_IO, "I/O error"},
     {ErrorType::ERR_MODEL, "Target model error"},
+    {ErrorType::ERR_RESERVED, "reserved"},
 
     // Warnings
     {ErrorType::LEGACY_WARNING, "legacy"},

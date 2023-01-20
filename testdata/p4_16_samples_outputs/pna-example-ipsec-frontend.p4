@@ -36,6 +36,7 @@ struct headers_t {
 
 struct metadata_t {
     bit<32> next_hop_id;
+    bool    bypass;
 }
 
 ipsec_accelerator() ipsec;
@@ -90,9 +91,11 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
         hdrs.ethernet.setInvalid();
     }
     @name("MainControlImpl.ipsec_bypass") action ipsec_bypass() {
+        meta.bypass = true;
         ipsec.disable();
     }
     @name("MainControlImpl.ipsec_bypass") action ipsec_bypass_1() {
+        meta.bypass = true;
         ipsec.disable();
     }
     @name("MainControlImpl.drop") action drop() {
@@ -176,8 +179,10 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
                 if (hdrs.esp.isValid()) {
                     inbound_table_0.apply();
                 }
-                routing_table_0.apply();
-                next_hop_table_0.apply();
+                if (!hdrs.esp.isValid() || meta.bypass) {
+                    routing_table_0.apply();
+                    next_hop_table_0.apply();
+                }
             } else {
                 drop_packet();
             }

@@ -66,6 +66,7 @@ struct headers_t {
 //
 struct metadata_t {
 	bit<32> next_hop_id;
+        bool bypass;
 }
 
 //
@@ -142,6 +143,7 @@ control MainControlImpl(
 	}
 
 	action ipsec_bypass() {
+                meta.bypass = true;
 		ipsec.disable();
 	}
 
@@ -225,12 +227,14 @@ control MainControlImpl(
 			if (!ipsec.from_ipsec(status)) {
 				// Pre-decrypt processing.
 				if (hdrs.ipv4.isValid()) {
-					if (hdrs.esp.isValid() ) {
-						inbound_table.apply();
-					}
-
-					routing_table.apply();
-					next_hop_table.apply();
+					if (hdrs.esp.isValid()) {
+                                            inbound_table.apply();
+					} 
+					
+                                        if (!hdrs.esp.isValid() || meta.bypass) {
+                                        	routing_table.apply();
+						next_hop_table.apply();
+                                        }
 				} else
 					drop_packet();
 			} else {

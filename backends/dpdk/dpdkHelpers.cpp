@@ -442,7 +442,7 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                     add_instr(new IR::DpdkRegisterReadStatement(
                         port_in_inbound, "ipsec_port_in_inbound", new IR::Constant(0)));
                     add_instr(new IR::DpdkRegisterReadStatement(
-                        port_in_outbound, "ipsec_port_out_inbound", new IR::Constant(0)));
+                        port_in_outbound, "ipsec_port_in_outbound", new IR::Constant(0)));
                     add_instr(new IR::DpdkMovStatement(left, new IR::Constant(false)));
                     auto true_label = refmap->newName("label_true");
                     auto end_label = refmap->newName("label_end");

@@ -36,6 +36,7 @@ struct headers_t {
 
 struct metadata_t {
     bit<32> next_hop_id;
+    bool    bypass;
 }
 
 ipsec_accelerator() ipsec;
@@ -50,21 +51,21 @@ parser MainParserImpl(packet_in pkt, out headers_t hdrs, inout metadata_t meta, 
         }
     }
     state parse_ethernet {
-        pkt.extract<ethernet_t>(hdrs.ethernet);
+        pkt.extract(hdrs.ethernet);
         transition select(hdrs.ethernet.ether_type) {
-            16w0x800: parse_ipv4;
+            0x800: parse_ipv4;
             default: accept;
         }
     }
     state parse_ipv4 {
-        pkt.extract<ipv4_t>(hdrs.ipv4);
+        pkt.extract(hdrs.ipv4);
         transition select(hdrs.ipv4.protocol) {
-            8w0x32: parse_esp;
+            0x32: parse_esp;
             default: accept;
         }
     }
     state parse_esp {
-        pkt.extract<esp_t>(hdrs.esp);
+        pkt.extract(hdrs.esp);
         transition accept;
     }
 }
@@ -81,6 +82,7 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
         hdrs.ethernet.setInvalid();
     }
     action ipsec_bypass() {
+        meta.bypass = true;
         ipsec.disable();
     }
     action drop() {
@@ -88,26 +90,26 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
     }
     table inbound_table {
         key = {
-            hdrs.ipv4.src_addr: exact @name("hdrs.ipv4.src_addr");
-            hdrs.ipv4.dst_addr: exact @name("hdrs.ipv4.dst_addr");
-            hdrs.esp.spi      : exact @name("hdrs.esp.spi");
+            hdrs.ipv4.src_addr: exact;
+            hdrs.ipv4.dst_addr: exact;
+            hdrs.esp.spi      : exact;
         }
         actions = {
-            ipsec_enable();
-            ipsec_bypass();
-            drop();
+            ipsec_enable;
+            ipsec_bypass;
+            drop;
         }
-        const default_action = drop();
+        const default_action = drop;
     }
     table outbound_table {
         key = {
-            hdrs.ipv4.src_addr: exact @name("hdrs.ipv4.src_addr");
-            hdrs.ipv4.dst_addr: exact @name("hdrs.ipv4.dst_addr");
+            hdrs.ipv4.src_addr: exact;
+            hdrs.ipv4.dst_addr: exact;
         }
         actions = {
-            ipsec_enable();
-            ipsec_bypass();
-            drop();
+            ipsec_enable;
+            ipsec_bypass;
+            drop;
         }
         default_action = ipsec_bypass();
     }
@@ -116,13 +118,13 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
     }
     table routing_table {
         key = {
-            hdrs.ipv4.dst_addr: lpm @name("hdrs.ipv4.dst_addr");
+            hdrs.ipv4.dst_addr: lpm;
         }
         actions = {
-            next_hop_id_set();
-            drop();
+            next_hop_id_set;
+            drop;
         }
-        default_action = next_hop_id_set(32w0);
+        default_action = next_hop_id_set(0);
     }
     action next_hop_set(bit<48> dst_addr, bit<48> src_addr, bit<16> ether_type, bit<32> port_id) {
         hdrs.ethernet.setValid();
@@ -133,46 +135,52 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
     }
     table next_hop_table {
         key = {
-            meta.next_hop_id: exact @name("meta.next_hop_id");
+            meta.next_hop_id: exact;
         }
         actions = {
-            next_hop_set();
-            drop();
+            next_hop_set;
+            drop;
         }
-        default_action = drop();
+        default_action = drop;
     }
     apply {
         if (istd.direction == PNA_Direction_t.NET_TO_HOST) {
             ipsec_status status;
-            if (ipsec.from_ipsec(status)) {
+            if (!ipsec.from_ipsec(status)) {
+                if (hdrs.ipv4.isValid()) {
+                    if (hdrs.esp.isValid()) {
+                        inbound_table.apply();
+                    }
+                    if (!hdrs.esp.isValid() || meta.bypass) {
+                        routing_table.apply();
+                        next_hop_table.apply();
+                    }
+                } else {
+                    drop_packet();
+                }
+            } else {
                 if (status == ipsec_status.IPSEC_SUCCESS) {
                     routing_table.apply();
                     next_hop_table.apply();
                 } else {
                     drop_packet();
                 }
-            } else if (hdrs.ipv4.isValid()) {
-                if (hdrs.esp.isValid()) {
-                    inbound_table.apply();
-                }
-                routing_table.apply();
-                next_hop_table.apply();
-            } else {
-                drop_packet();
             }
         } else {
             ipsec_status status;
-            if (ipsec.from_ipsec(status)) {
+            if (!ipsec.from_ipsec(status)) {
+                if (hdrs.ipv4.isValid()) {
+                    outbound_table.apply();
+                } else {
+                    drop_packet();
+                }
+            } else {
                 if (status == ipsec_status.IPSEC_SUCCESS) {
                     routing_table.apply();
                     next_hop_table.apply();
                 } else {
                     drop_packet();
                 }
-            } else if (hdrs.ipv4.isValid()) {
-                outbound_table.apply();
-            } else {
-                drop_packet();
             }
         }
     }
@@ -180,10 +188,10 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdrs, in metadata_t meta, in pna_main_output_metadata_t ostd) {
     apply {
-        pkt.emit<ethernet_t>(hdrs.ethernet);
-        pkt.emit<ipv4_t>(hdrs.ipv4);
-        pkt.emit<esp_t>(hdrs.esp);
+        pkt.emit(hdrs.ethernet);
+        pkt.emit(hdrs.ipv4);
+        pkt.emit(hdrs.esp);
     }
 }
 
-PNA_NIC<headers_t, metadata_t, headers_t, metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
+PNA_NIC(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;

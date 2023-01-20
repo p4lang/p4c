@@ -36,6 +36,7 @@ struct headers_t {
 
 struct metadata_t {
     bit<32> next_hop_id;
+    bool    bypass;
 }
 
 ipsec_accelerator() ipsec;
@@ -90,9 +91,11 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
         hdrs.ethernet.setInvalid();
     }
     @name("MainControlImpl.ipsec_bypass") action ipsec_bypass() {
+        meta.bypass = true;
         ipsec.disable();
     }
     @name("MainControlImpl.ipsec_bypass") action ipsec_bypass_1() {
+        meta.bypass = true;
         ipsec.disable();
     }
     @name("MainControlImpl.drop") action drop() {
@@ -162,19 +165,19 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
         }
         default_action = drop_3();
     }
-    @hidden action pnaexampleipsecaccelerator242() {
+    @hidden action pnaexampleipsec246() {
         drop_packet();
     }
-    @hidden action pnaexampleipsecaccelerator235() {
+    @hidden action pnaexampleipsec239() {
         drop_packet();
     }
     @hidden action act() {
         tmp = ipsec.from_ipsec(status_1);
     }
-    @hidden action pnaexampleipsecaccelerator259() {
+    @hidden action pnaexampleipsec263() {
         drop_packet();
     }
-    @hidden action pnaexampleipsecaccelerator252() {
+    @hidden action pnaexampleipsec256() {
         drop_packet();
     }
     @hidden action act_0() {
@@ -186,17 +189,17 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
         }
         const default_action = act();
     }
-    @hidden table tbl_pnaexampleipsecaccelerator242 {
+    @hidden table tbl_pnaexampleipsec246 {
         actions = {
-            pnaexampleipsecaccelerator242();
+            pnaexampleipsec246();
         }
-        const default_action = pnaexampleipsecaccelerator242();
+        const default_action = pnaexampleipsec246();
     }
-    @hidden table tbl_pnaexampleipsecaccelerator235 {
+    @hidden table tbl_pnaexampleipsec239 {
         actions = {
-            pnaexampleipsecaccelerator235();
+            pnaexampleipsec239();
         }
-        const default_action = pnaexampleipsecaccelerator235();
+        const default_action = pnaexampleipsec239();
     }
     @hidden table tbl_act_0 {
         actions = {
@@ -204,17 +207,17 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
         }
         const default_action = act_0();
     }
-    @hidden table tbl_pnaexampleipsecaccelerator259 {
+    @hidden table tbl_pnaexampleipsec263 {
         actions = {
-            pnaexampleipsecaccelerator259();
+            pnaexampleipsec263();
         }
-        const default_action = pnaexampleipsecaccelerator259();
+        const default_action = pnaexampleipsec263();
     }
-    @hidden table tbl_pnaexampleipsecaccelerator252 {
+    @hidden table tbl_pnaexampleipsec256 {
         actions = {
-            pnaexampleipsecaccelerator252();
+            pnaexampleipsec256();
         }
-        const default_action = pnaexampleipsecaccelerator252();
+        const default_action = pnaexampleipsec256();
     }
     apply {
         if (istd.direction == PNA_Direction_t.NET_TO_HOST) {
@@ -224,16 +227,18 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
                     routing_table_0.apply();
                     next_hop_table_0.apply();
                 } else {
-                    tbl_pnaexampleipsecaccelerator242.apply();
+                    tbl_pnaexampleipsec246.apply();
                 }
             } else if (hdrs.ipv4.isValid()) {
                 if (hdrs.esp.isValid()) {
                     inbound_table_0.apply();
                 }
-                routing_table_0.apply();
-                next_hop_table_0.apply();
+                if (!hdrs.esp.isValid() || meta.bypass) {
+                    routing_table_0.apply();
+                    next_hop_table_0.apply();
+                }
             } else {
-                tbl_pnaexampleipsecaccelerator235.apply();
+                tbl_pnaexampleipsec239.apply();
             }
         } else {
             tbl_act_0.apply();
@@ -242,31 +247,31 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
                     routing_table_0.apply();
                     next_hop_table_0.apply();
                 } else {
-                    tbl_pnaexampleipsecaccelerator259.apply();
+                    tbl_pnaexampleipsec263.apply();
                 }
             } else if (hdrs.ipv4.isValid()) {
                 outbound_table_0.apply();
             } else {
-                tbl_pnaexampleipsecaccelerator252.apply();
+                tbl_pnaexampleipsec256.apply();
             }
         }
     }
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdrs, in metadata_t meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaexampleipsecaccelerator275() {
+    @hidden action pnaexampleipsec279() {
         pkt.emit<ethernet_t>(hdrs.ethernet);
         pkt.emit<ipv4_t>(hdrs.ipv4);
         pkt.emit<esp_t>(hdrs.esp);
     }
-    @hidden table tbl_pnaexampleipsecaccelerator275 {
+    @hidden table tbl_pnaexampleipsec279 {
         actions = {
-            pnaexampleipsecaccelerator275();
+            pnaexampleipsec279();
         }
-        const default_action = pnaexampleipsecaccelerator275();
+        const default_action = pnaexampleipsec279();
     }
     apply {
-        tbl_pnaexampleipsecaccelerator275.apply();
+        tbl_pnaexampleipsec279.apply();
     }
 }
 
