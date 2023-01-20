@@ -142,11 +142,13 @@ std::vector<Continuation::Command> BMv2_V1ModelProgramInfo::processDeclaration(
         auto *egressPortVar =
             new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidth_bits()),
                            new IR::PathExpression("*standard_metadata"), "egress_port");
-        /// Set the restriction on the output port,
-        /// this is necessary since ptf tests use ports from 0 to 7
-        cmds.emplace_back(Continuation::Guard(getPortConstraint(getTargetOutputPortVar())));
         auto *portStmt = new IR::AssignmentStatement(egressPortVar, getTargetOutputPortVar());
         cmds.emplace_back(portStmt);
+        if (TestgenOptions::get().testBackend == "PTF") {
+            /// Set the restriction on the output port,
+            /// this is necessary since ptf tests use ports from 0 to 7
+            cmds.emplace_back(Continuation::Guard(getPortConstraint(getTargetOutputPortVar())));
+        }
         // TODO: We have not implemented multi cast yet.
         // Drop the packet if the multicast group is set.
         const IR::Expression *mcastGroupVar = new IR::Member(
