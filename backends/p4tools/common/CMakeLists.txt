@@ -6,7 +6,7 @@ include(common)
 project(p4tools-common)
 
 # We need a fairly recent version of Z3.
-set(Z3_MIN_VERSION "4.8.12")
+set(Z3_MIN_VERSION "4.8.14")
 find_package(Z3 ${Z3_MIN_VERSION} REQUIRED)
 
 if(NOT DEFINED Z3_VERSION_STRING OR ${Z3_VERSION_STRING} VERSION_LESS ${Z3_MIN_VERSION})
