@@ -44,14 +44,14 @@ namespace ExpressionParser {
 /// 0(Number)] -> [tableName_key_Name01(Text), ==(Equal) , 0(Number)]
 class MemberToVariable : public Transform {
     cstring tableName;
-    const std::map<cstring, const IR::Type*> types;
+    const std::map<cstring, const IR::Type *> types;
 
  public:
-    explicit MemberToVariable(cstring tableName, const std::map<cstring, const IR::Type*> types)
-        : tableName(tableName), types(types) {};
+    explicit MemberToVariable(cstring tableName, const std::map<cstring, const IR::Type *> types)
+        : tableName(tableName), types(types){};
 
-    const IR::Node* postorder(IR::MethodCallExpression* methodCall) override {
-        if (const auto* member = methodCall->method->to<IR::Member>()) {
+    const IR::Node *postorder(IR::MethodCallExpression *methodCall) override {
+        if (const auto *member = methodCall->method->to<IR::Member>()) {
             if (member->member.name == "isValid") {
                 return Utils::getZombieConst(getType(member), 0,
                                              std::string(memberToString(member)));
@@ -60,7 +60,7 @@ class MemberToVariable : public Transform {
         return methodCall;
     };
 
-    const IR::Node* preorder(IR::Member* member) override {
+    const IR::Node *preorder(IR::Member *member) override {
         std::string name = memberToString(member).c_str();
         if (name.length() && name.find("*zombie") == std::string::npos) {
             return Utils::getZombieConst(getType(member), 0, name);
@@ -68,7 +68,7 @@ class MemberToVariable : public Transform {
         return member;
     }
 
-    const IR::Node* preorder(IR::PathExpression* path) override {
+    const IR::Node *preorder(IR::PathExpression *path) override {
         auto i = types.find(path->path->name.name);
         if (i != types.end()) {
             cstring name = tableName + "_key_" + path->path->name.name;
@@ -78,9 +78,9 @@ class MemberToVariable : public Transform {
     }
 
  protected:
-    cstring memberToString(const IR::Expression* expr) {
+    cstring memberToString(const IR::Expression *expr) {
         cstring name;
-        if (const auto* member = expr->to<IR::Member>()) {
+        if (const auto *member = expr->to<IR::Member>()) {
             name = member->member.name;
             if (name == "mask") {
                 name = toString(member->expr);
@@ -102,17 +102,17 @@ class MemberToVariable : public Transform {
         return tableName + "_key_" + toString(expr);
     }
 
-    cstring toString(const IR::Expression* expr) {
-        if (const auto* member = expr->to<IR::Member>()) {
+    cstring toString(const IR::Expression *expr) {
+        if (const auto *member = expr->to<IR::Member>()) {
             return toString(member->expr) + member->member.name;
         }
-        if (const auto* pathExpression = expr->to<IR::PathExpression>()) {
+        if (const auto *pathExpression = expr->to<IR::PathExpression>()) {
             return pathExpression->path->name.name;
         }
         BUG("Unimplemented format of the name %1%", expr);
     }
 
-    const IR::Type* getType(const IR::Member* member) {
+    const IR::Type *getType(const IR::Member *member) {
         CHECK_NULL(member);
         auto name = member->member.name;
         auto typeName = types.find(name);
@@ -134,27 +134,27 @@ class MemberToVariable : public Transform {
     }
 };
 
-AssertsParser::AssertsParser(std::vector<std::vector<const IR::Expression*>>& output)
+AssertsParser::AssertsParser(std::vector<std::vector<const IR::Expression *>> &output)
     : restrictionsVec(output) {
     setName("Restrictions");
 }
 
-std::vector<const IR::Expression*> AssertsParser::genIRStructs(
-    cstring tableName, cstring restrictionString, const IR::Vector<IR::KeyElement>& keyElements) {
-    std::vector<const IR::Expression*> result;
-    std::map<cstring, const IR::Type*> types;
+std::vector<const IR::Expression *> AssertsParser::genIRStructs(
+    cstring tableName, cstring restrictionString, const IR::Vector<IR::KeyElement> &keyElements) {
+    std::vector<const IR::Expression *> result;
+    std::map<cstring, const IR::Type *> types;
     types.emplace("priority", IR::Type_Bits::get(32));
-    for (const auto* key : keyElements) {
+    for (const auto *key : keyElements) {
         cstring keyName;
-        if (const auto* annotation = key->getAnnotation(IR::Annotation::nameAnnotation)) {
+        if (const auto *annotation = key->getAnnotation(IR::Annotation::nameAnnotation)) {
             keyName = annotation->getName();
         }
         BUG_CHECK(keyName.size() > 0, "Key does not have a name annotation.");
-        const auto* keyType = key->expression->type;
-        const IR::Type* type = nullptr;
-        if (const auto* bit = keyType->to<IR::Type_Bits>()) {
+        const auto *keyType = key->expression->type;
+        const IR::Type *type = nullptr;
+        if (const auto *bit = keyType->to<IR::Type_Bits>()) {
             type = bit;
-        } else if (const auto* varbit = keyType->to<IR::Extracted_Varbits>()) {
+        } else if (const auto *varbit = keyType->to<IR::Extracted_Varbits>()) {
             type = varbit;
         } else if (keyType->is<IR::Type_Boolean>()) {
             type = IR::Type_Bits::get(1);
@@ -163,10 +163,10 @@ std::vector<const IR::Expression*> AssertsParser::genIRStructs(
         }
         types.emplace(keyName, type);
     }
-    const auto* restr = ExpressionParser::Parser::getIR(restrictionString, p4Program, true, types);
+    const auto *restr = ExpressionParser::Parser::getIR(restrictionString, p4Program, true, types);
     MemberToVariable memberToVariable(tableName, types);
-    if (const auto* listExpression = restr->to<IR::ListExpression>()) {
-        for (const auto* component : listExpression->components) {
+    if (const auto *listExpression = restr->to<IR::ListExpression>()) {
+        for (const auto *component : listExpression->components) {
             result.push_back(component->apply(memberToVariable)->to<IR::Expression>());
         }
     } else {
@@ -175,18 +175,18 @@ std::vector<const IR::Expression*> AssertsParser::genIRStructs(
     return result;
 }
 
-const IR::Node* AssertsParser::preorder(IR::P4Program* program) {
+const IR::Node *AssertsParser::preorder(IR::P4Program *program) {
     p4Program = program;
     return program;
 }
 
-const IR::Node* AssertsParser::postorder(IR::P4Table* table) {
-    const auto* annotation = table->getAnnotation("entry_restriction");
-    const auto* key = table->getKey();
+const IR::Node *AssertsParser::postorder(IR::P4Table *table) {
+    const auto *annotation = table->getAnnotation("entry_restriction");
+    const auto *key = table->getKey();
     if (annotation == nullptr || key == nullptr) {
         return table;
     }
-    for (const auto* restrStr : annotation->body) {
+    for (const auto *restrStr : annotation->body) {
         auto restrictions =
             genIRStructs(table->controlPlaneName(), restrStr->text, key->keyElements);
         /// Using Z3Solver, we check the feasibility of restrictions, if they are not
@@ -197,10 +197,10 @@ const IR::Node* AssertsParser::postorder(IR::P4Table* table) {
             restrictionsVec.push_back(restrictions);
             continue;
         }
-        auto* cloneTable = table->clone();
-        auto* cloneProperties = table->properties->clone();
+        auto *cloneTable = table->clone();
+        auto *cloneProperties = table->properties->clone();
         IR::IndexedVector<IR::Property> properties;
-        for (const auto* property : cloneProperties->properties) {
+        for (const auto *property : cloneProperties->properties) {
             if (property->name.name != "key" || property->name.name != "entries") {
                 properties.push_back(property);
             }
@@ -212,7 +212,6 @@ const IR::Node* AssertsParser::postorder(IR::P4Table* table) {
     return table;
 }
 
-
-}  // namespace AssertsParser
+}  // namespace ExpressionParser
 
 }  // namespace P4Tools

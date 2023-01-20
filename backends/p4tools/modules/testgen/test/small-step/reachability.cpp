@@ -328,7 +328,7 @@ TEST_F(P4CReachability, testReacabilityEngine) {
     std::string strBehavior = "ingress.MyAction1 + ingress.MyAction2;";
     strBehavior += "ingress.table2";
     P4Tools::ReachabilityEngine engine(dcg, strBehavior, program);
-    auto* engineState = P4Tools::ReachabilityEngineState::getInitial();
+    auto *engineState = P4Tools::ReachabilityEngineState::getInitial();
     // Initialize engine.
     const auto *ingress = getFromHash(hash, "ingress");
     ASSERT_TRUE(ingress);
@@ -458,7 +458,8 @@ TEST_F(P4CReachability, testReacabilityEngineNegTable2) {
 TEST_F(P4CReachability, testReacabilityEngineRestriction1) {
     callTestgen("backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4",
                 "ingress(ingress::h.h.isValid() && ingress::h.eth_hdr.isValid());\
-                 egress(ingress::d != egress::h.h.b)", "tmp", 10);
+                 egress(ingress::d != egress::h.h.b)",
+                "tmp", 10);
     std::list<std::list<std::string>> ids = {{"Extract: Succeeded", "Extract: Succeeded"}};
     ASSERT_TRUE(checkResultingSTF(ids, "tmp"));
 }
@@ -466,9 +467,10 @@ TEST_F(P4CReachability, testReacabilityEngineRestriction1) {
 TEST_F(P4CReachability, testReacabilityEngineRestriction2) {
     callTestgen("backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4",
                 "ingress(ingress::h.h.isValid() && ingress::h.eth_hdr.isValid());\
-                 egress(egress::h.h.b == 5)", "tmp", 10);
-    std::list<std::list<std::string>> ids =
-        {{"Extract: Succeeded", "Extract: Succeeded","h.h.b; = 0x05"}};
+                 egress(egress::h.h.b == 5)",
+                "tmp", 10);
+    std::list<std::list<std::string>> ids = {
+        {"Extract: Succeeded", "Extract: Succeeded", "h.h.b; = 0x05"}};
     ASSERT_TRUE(checkResultingSTF(ids, "tmp"));
 }
 

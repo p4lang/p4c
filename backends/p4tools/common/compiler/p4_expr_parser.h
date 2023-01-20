@@ -27,8 +27,8 @@ class Token {
         StringLiteral,       // "String"
         LeftParen,           // (
         RightParen,          // )
-        LeftSParen,         // [
-        RightSParen,        // ]
+        LeftSParen,          // [
+        RightSParen,         // ]
         Dot,                 // .
         FieldAccess,         // ::
         LNot,                // !
@@ -67,10 +67,10 @@ class Token {
     std::string_view m_lexeme{};
     explicit Token(Kind kind) noexcept : m_kind{kind} {}
 
-    Token(Kind kind, const char* beg, std::size_t len) noexcept
+    Token(Kind kind, const char *beg, std::size_t len) noexcept
         : m_kind{kind}, m_lexeme(beg, len) {}
 
-    Token(Kind kind, const char* beg, const char* end) noexcept
+    Token(Kind kind, const char *beg, const char *end) noexcept
         : m_kind{kind}, m_lexeme(beg, std::distance(beg, end)) {}
 
     Kind kind() const noexcept;
@@ -95,10 +95,10 @@ class Token {
 
 class Lexer {
  public:
-    explicit Lexer(const char* beg) noexcept : m_beg{beg} {}
+    explicit Lexer(const char *beg) noexcept : m_beg{beg} {}
 
     Token next() noexcept;
-    const char* m_beg = nullptr;
+    const char *m_beg = nullptr;
 
  private:
     Token atom(Token::Kind) noexcept;
@@ -109,71 +109,69 @@ class Lexer {
 };
 
 using TokensSet = std::set<Token::Kind>;
-using NodesPair = std::pair<const IR::Node*, const IR::Node*>;
+using NodesPair = std::pair<const IR::Node *, const IR::Node *>;
 
 class Parser {
  private:
-    const IR::P4Program* program;
+    const IR::P4Program *program;
     const std::vector<Token> tokens;
     size_t index;
     bool addFA;
-    typedef const IR::Node* (Parser::*createFuncType)();
+    typedef const IR::Node *(Parser::*createFuncType)();
     createFuncType prevFunc;
-    const IR::Type* lastType;
-    const std::map<cstring, const IR::Type*> types;
+    const IR::Type *lastType;
+    const std::map<cstring, const IR::Type *> types;
 
  public:
-    Parser(const IR::P4Program* program, std::vector<Token> &tokens, bool addFA,
-           const std::map<cstring, const IR::Type*> types = std::map<cstring, const IR::Type*>());
-    static const IR::Node* getIR(const char* str, const IR::P4Program* program, bool addFA = false,
-                                 const std::map<cstring, const IR::Type*> types =
-                                 std::map<cstring, const IR::Type*>(),
-                                 TokensSet skippedTokens = {Token::Kind::Comment,
-                                                                  Token::Kind::EndString});
+    Parser(const IR::P4Program *program, std::vector<Token> &tokens, bool addFA,
+           const std::map<cstring, const IR::Type *> types = std::map<cstring, const IR::Type *>());
+    static const IR::Node *getIR(
+        const char *str, const IR::P4Program *program, bool addFA = false,
+        const std::map<cstring, const IR::Type *> types = std::map<cstring, const IR::Type *>(),
+        TokensSet skippedTokens = {Token::Kind::Comment, Token::Kind::EndString});
     char prev() noexcept;
 
  protected:
-    const IR::Node* getIR();
-    const IR::Node* createPunctuationMarks();
-    const IR::Node* createSemi();
-    const IR::Node* createQuestion();
-    const IR::Node* createColon();
-    const IR::Node* createListExpressions(const char*, Token::Kind, createFuncType func);
-    const IR::Node* createImplication();
-    const IR::Node* createDisjunction();
-    const IR::Node* createConjunction();
-    const IR::Node* createIR(Token::Kind, const IR::Node*, const IR::Node*);
-    NodesPair makeLeftTree(Token::Kind, const IR::Node*, const IR::Node*);
-    const IR::Node* removeBrackets(const IR::Node*);
-    const IR::Node* createBor();
-    const IR::Node* createXor();
-    const IR::Node* createBAnd();
-    const IR::Node* createEqual();
-    const IR::Node* createNotEqual();
-    const IR::Node* createGreaterThan();
-    const IR::Node* createShr();
-    const IR::Node* createGreaterEqual();
-    const IR::Node* createShl();
-    const IR::Node* createLessEqual();
-    const IR::Node* createLessThan();
-    const IR::Node* createSaturationAdd();
-    const IR::Node* createPlus();
-    const IR::Node* createSaturationSub();
-    const IR::Node* createMinus();
-    const IR::Node* createSlash();
-    const IR::Node* createPercent();
-    const IR::Node* createMul();
-    const IR::Node* createUnaryOp();
-    const IR::Type* getCastType();
-    const IR::Node* createFunctionCallOrConstantOp();
-    const IR::Node* createApplicationOp(const IR::Node*);
-    const IR::Node* createConstantOp();
-    const IR::Node* createSliceOrArrayOp(const IR::Node*);
-    const IR::Node* createBinaryExpression(const char* msg, Token::Kind kind,
-                                           createFuncType funcLeft,
-                                           createFuncType funcRight);
-    std::pair<const IR::Node*, IR::ID> getDefinedType(cstring txt, const IR::Node* nd);
-    const IR::Type* ndToType(const IR::Node* nd);
+    const IR::Node *getIR();
+    const IR::Node *createPunctuationMarks();
+    const IR::Node *createSemi();
+    const IR::Node *createQuestion();
+    const IR::Node *createColon();
+    const IR::Node *createListExpressions(const char *, Token::Kind, createFuncType func);
+    const IR::Node *createImplication();
+    const IR::Node *createDisjunction();
+    const IR::Node *createConjunction();
+    const IR::Node *createIR(Token::Kind, const IR::Node *, const IR::Node *);
+    NodesPair makeLeftTree(Token::Kind, const IR::Node *, const IR::Node *);
+    const IR::Node *removeBrackets(const IR::Node *);
+    const IR::Node *createBor();
+    const IR::Node *createXor();
+    const IR::Node *createBAnd();
+    const IR::Node *createEqual();
+    const IR::Node *createNotEqual();
+    const IR::Node *createGreaterThan();
+    const IR::Node *createShr();
+    const IR::Node *createGreaterEqual();
+    const IR::Node *createShl();
+    const IR::Node *createLessEqual();
+    const IR::Node *createLessThan();
+    const IR::Node *createSaturationAdd();
+    const IR::Node *createPlus();
+    const IR::Node *createSaturationSub();
+    const IR::Node *createMinus();
+    const IR::Node *createSlash();
+    const IR::Node *createPercent();
+    const IR::Node *createMul();
+    const IR::Node *createUnaryOp();
+    const IR::Type *getCastType();
+    const IR::Node *createFunctionCallOrConstantOp();
+    const IR::Node *createApplicationOp(const IR::Node *);
+    const IR::Node *createConstantOp();
+    const IR::Node *createSliceOrArrayOp(const IR::Node *);
+    const IR::Node *createBinaryExpression(const char *msg, Token::Kind kind,
+                                           createFuncType funcLeft, createFuncType funcRight);
+    std::pair<const IR::Node *, IR::ID> getDefinedType(cstring txt, const IR::Node *nd);
+    const IR::Type *ndToType(const IR::Node *nd);
 };
 
 }  // namespace ExpressionParser

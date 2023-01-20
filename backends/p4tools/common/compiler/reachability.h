@@ -117,7 +117,7 @@ class P4ProgramDCGCreator : public Inspector {
     bool preorder(const IR::SwitchStatement *switchStatement) override;
     bool preorder(const IR::StatOrDecl *statOrDecl) override;
 
-    inline const IR::P4Program* getP4Program() const { return p4program; };
+    inline const IR::P4Program *getP4Program() const { return p4program; };
 
  protected:
     /// Function add edge to current @vertex in DCG.
@@ -164,20 +164,21 @@ using ReachabilityResult = std::pair<bool, const IR::Expression *>;
 /// <p4c condition> - any conditions p4c in syntax, whcih should be returned by the
 //                    Engine if corresponded <p4c node name> was reached.
 class ReachabilityEngine {
-    gsl::not_null<const NodesCallGraph*> dcg;
-    const ReachabilityHashType& hash;
-    std::unordered_map<const DCGVertexType*, std::list<const DCGVertexType*>> userTransitions;
-    std::unordered_map<const DCGVertexType*, const IR::Expression*> conditions;
-    std::unordered_set<const DCGVertexType*> forbiddenVertexes;
-    const IR::P4Program* program;
+    gsl::not_null<const NodesCallGraph *> dcg;
+    const ReachabilityHashType &hash;
+    std::unordered_map<const DCGVertexType *, std::list<const DCGVertexType *>> userTransitions;
+    std::unordered_map<const DCGVertexType *, const IR::Expression *> conditions;
+    std::unordered_set<const DCGVertexType *> forbiddenVertexes;
+    const IR::P4Program *program;
 
  public:
     /// Default constructor, where dcg is a control flow graph builded by P4ProgramDCGCreator,
     /// reachabilityExpression is a user's pattern wrote in the syntax presented above,
     /// eliminateAnnotations is true if after detection of the annotations it should to store
     /// corresponding parent IR::Node in a  reachability engine state.
-    ReachabilityEngine(gsl::not_null<const NodesCallGraph*> dcg, std::string reachabilityExpression,
-                       const IR::P4Program* program, bool eliminateAnnotations = false);
+    ReachabilityEngine(gsl::not_null<const NodesCallGraph *> dcg,
+                       std::string reachabilityExpression, const IR::P4Program *program,
+                       bool eliminateAnnotations = false);
     /// Moves the next statement in a engine state. It returns a pair where the first argument
     /// is a flag for the possibility of such a movement and the second argument is an condition
     /// which should be checked additionally. If engine state is reachable from current node
@@ -202,7 +203,7 @@ class ReachabilityEngine {
                                        const DCGVertexType *currentState);
     /// Translates a string representation into an IR::Expression.
     /// Not implemented yet.
-    const IR::Expression* stringToNode(std::string name);
+    const IR::Expression *stringToNode(std::string name);
 
  protected:
     /// Adds an edge to the current @vertex in DCG.

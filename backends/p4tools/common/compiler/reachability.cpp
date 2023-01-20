@@ -13,7 +13,6 @@
 
 #include "backends/p4tools/common/compiler/p4_asserts_parser.h"
 #include "backends/p4tools/common/compiler/p4_expr_parser.h"
-
 #include "ir/declaration.h"
 #include "ir/indexed_vector.h"
 #include "ir/vector.h"
@@ -391,12 +390,11 @@ size_t getCorrectAddIndex(std::string s, size_t prefix = 0) {
     return prefix + i;
 }
 
-ReachabilityEngine::ReachabilityEngine(gsl::not_null<const NodesCallGraph*> dcg,
+ReachabilityEngine::ReachabilityEngine(gsl::not_null<const NodesCallGraph *> dcg,
                                        std::string reachabilityExpression,
-                                       const IR::P4Program* program,
-                                       bool eliminateAnnotations)
+                                       const IR::P4Program *program, bool eliminateAnnotations)
     : dcg(dcg), hash(dcg->getHash()), program(program) {
-    std::list<const DCGVertexType*> start;
+    std::list<const DCGVertexType *> start;
     start.push_back(nullptr);
     size_t i = 0;
     size_t j = 0;
@@ -404,7 +402,7 @@ ReachabilityEngine::ReachabilityEngine(gsl::not_null<const NodesCallGraph*> dcg,
     while ((i = reachabilityExpression.find(';')) != std::string::npos) {
         auto addSubExpr = reachabilityExpression.substr(0, i);
         addSubExpr += "+";
-        std::list<const DCGVertexType*> newStart;
+        std::list<const DCGVertexType *> newStart;
         while ((j = getCorrectAddIndex(addSubExpr)) != std::string::npos) {
             auto dotSubExpr = addSubExpr.substr(0, j);
             while (dotSubExpr[0] == ' ') {
@@ -568,7 +566,7 @@ ReachabilityResult ReachabilityEngine::next(ReachabilityEngineState *state,
                         state->clear();
                         return std::make_pair(true, expr);
                     }
-                    for (const auto* n : m->second) {
+                    for (const auto *n : m->second) {
                         newState.push_back(n);
                     }
                 } else if (dcg->isReachable(next, k)) {
@@ -587,7 +585,7 @@ ReachabilityResult ReachabilityEngine::next(ReachabilityEngineState *state,
                 state->clear();
                 return std::make_pair(true, expr);
             }
-            for (const auto* n : m->second) {
+            for (const auto *n : m->second) {
                 newState.push_back(n);
             }
         } else if (dcg->isReachable(next, i)) {
@@ -608,7 +606,7 @@ const IR::Expression *ReachabilityEngine::getCondition(const DCGVertexType *n) {
     return nullptr;
 }
 
-const IR::Expression* ReachabilityEngine::stringToNode(std::string name) {
+const IR::Expression *ReachabilityEngine::stringToNode(std::string name) {
     LOG1("Parse restriction  - " << name);
     return ExpressionParser::Parser::getIR(name.c_str(), program)->to<IR::Expression>();
 }
