@@ -26,24 +26,22 @@
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace Bmv2 {
+namespace P4Tools::P4Testgen::Bmv2 {
 
 PTF::PTF(cstring testName, boost::optional<unsigned int> seed = boost::none) : TF(testName, seed) {
     boost::filesystem::path testFile(testName + ".py");
     cstring testNameOnly(testFile.stem().c_str());
 }
 
-inja::json PTF::getCloneInfo(const TestSpec *testSpec) {
-    inja::json cloneJson = inja::json::object();
-    auto cloneMethod = testSpec->getTestObjectCategory("clone_infos");
-    if (!cloneMethod.empty()) {
-        cloneJson["clone"] = "F";
-    } else {
-        cloneJson["clone"] = "T";
+inja::json::array_t PTF::getClone(const std::map<cstring, const TestObject *> &cloneInfos) {
+    auto cloneJson = inja::json::array_t();
+    for (auto cloneInfoTuple : cloneInfos) {
+        inja::json cloneInfoJson;
+        const auto *cloneInfo = cloneInfoTuple.second->checkedTo<Bmv2_CloneInfo>();
+        cloneInfoJson["session_id"] = cloneInfo->getEvaluatedSessionId()->asUint64();
+        cloneInfoJson["clone_port"] = cloneInfo->getEvaluatedClonePort()->asInt();
+        cloneInfoJson["cloned"] = cloneInfo->isClonedPacket();
+        cloneJson.push_back(cloneInfoJson);
     }
     return cloneJson;
 }
@@ -267,8 +265,6 @@ class AbstractTest(bt.P4RuntimeTest):
         self.sendPacket()
         logger.info("Verifying Packet ...")
         self.verifyPackets()
-        logger.info("Verifying no other packets ...")
-        ptfutils.verify_no_other_packets(self, self.device_id, timeout=2)
 )""");
     return PREAMBLE;
 }
@@ -302,6 +298,8 @@ class Test{{test_id}}(AbstractTest):
     '''
 
     def setupCtrlPlane(self):
+        # Simple noop that is always called as filler.
+        pass
 ## if control_plane
 ## for table in control_plane.tables
 ## for rule in table.rules
@@ -333,8 +331,11 @@ class Test{{test_id}}(AbstractTest):
         )
 ## endfor
 ## endfor
-## else
-        pass
+## endif
+## if exists("clone_infos")
+## for clone_info in clone_infos
+        self.insert_pre_clone_session({{clone_info.session_id}}, [{{clone_info.clone_port}}])
+## endfor
 ## endif
 
     def sendPacket(self):
@@ -353,7 +354,19 @@ class Test{{test_id}}(AbstractTest):
 ## for ignore_mask in verify.ignore_masks
         exp_pkt.set_do_not_care({{ignore_mask.0}}, {{ignore_mask.1}})
 ## endfor
+## if exists("clone_infos")
+## for clone_info in clone_infos
+## if clone_info.cloned
+        ptfutils.verify_packet(self, exp_pkt, {{clone_info.clone_port}})
+## else
         ptfutils.verify_packet(self, exp_pkt, eg_port)
+##endfor
+##endif
+##endif
+## else 
+        ptfutils.verify_packet(self, exp_pkt, eg_port)
+        logger.info("Verifying no other packets ...")
+        ptfutils.verify_no_other_packets(self, self.device_id, timeout=2)
 ## else
         pass
 ## endif
@@ -376,12 +389,19 @@ void PTF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
     dataJson["trace"] = getTrace(testSpec);
     dataJson["control_plane"] = getControlPlane(testSpec);
     dataJson["send"] = getSend(testSpec);
-    dataJson["clone"] = getCloneInfo(testSpec);
     dataJson["verify"] = getVerify(testSpec);
     dataJson["timestamp"] = Utils::getTimeStamp();
     std::stringstream coverageStr;
     coverageStr << std::setprecision(2) << currentCoverage;
     dataJson["coverage"] = coverageStr.str();
+
+    // Check whether this test has a clone configuration.
+    // These are special because they require additional instrumentation and produce two output
+    // packets.
+    auto cloneInfos = testSpec->getTestObjectCategory("clone_infos");
+    if (!cloneInfos.empty()) {
+        dataJson["clone_infos"] = getClone(cloneInfos);
+    }
 
     LOG5("PTF backend: emitting testcase:" << std::setw(4) << dataJson);
 
@@ -403,8 +423,4 @@ void PTF::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t 
     emitTestcase(testSpec, selectedBranches, testIdx, testCase, currentCoverage);
 }
 
-}  // namespace Bmv2
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::Bmv2

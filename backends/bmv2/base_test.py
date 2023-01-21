@@ -989,6 +989,22 @@ class P4RuntimeTest(BaseTest):
             replica.instance = x[1]
         return req, self.write_request(req, store=False)
 
+    def insert_pre_clone_session(self, session_id, ports, cos=0, packet_length_bytes=0):
+        req = self.get_new_write_request()
+        update = req.updates.add()
+        update.type = p4runtime_pb2.Update.INSERT
+        pre_entry = update.entity.packet_replication_engine_entry
+        clone_entry = pre_entry.clone_session_entry
+        clone_entry.session_id = session_id
+        clone_entry.class_of_service = cos
+        clone_entry.packet_length_bytes = packet_length_bytes
+        for port in ports:
+            replica = clone_entry.replicas.add()
+            replica.egress_port = port
+            replica.instance = 1
+        return req, self.write_request(req)
+
+
     def response_dump_helper(self, request):
         for response in self.stub.Read(request, timeout=2):
             yield response

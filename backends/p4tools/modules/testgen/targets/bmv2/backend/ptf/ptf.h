@@ -18,11 +18,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace Bmv2 {
+namespace P4Tools::P4Testgen::Bmv2 {
 
 /// Extracts information from the @testSpec to emit a PTF test case.
 class PTF : public TF {
@@ -62,9 +58,6 @@ class PTF : public TF {
     void emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
                       const std::string &testCase, float currentCoverage);
 
-    /// Adds a label about the clone function to the Inja format object.
-    static inja::json getCloneInfo(const TestSpec *testSpec);
-
     /// Converts all the control plane objects into Inja format.
     static inja::json getControlPlane(const TestSpec *testSpec);
 
@@ -73,6 +66,9 @@ class PTF : public TF {
 
     /// Converts the output packet, port, and mask into Inja format.
     static inja::json getVerify(const TestSpec *testSpec);
+
+    /// Returns the configuration for a cloned packet configuration.
+    static inja::json::array_t getClone(const std::map<cstring, const TestObject *> &cloneInfos);
 
     /// Helper function for @getVerify. Matches the mask value against the input packet value and
     /// generates the appropriate ignore ranges.
@@ -83,10 +79,6 @@ class PTF : public TF {
                                               const std::vector<ActionArg> &args);
 };
 
-}  // namespace Bmv2
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_BACKEND_PTF_PTF_H_ */

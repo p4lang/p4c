@@ -246,8 +246,6 @@ p4tools_add_xfail_reason(
   parser-unroll-test2.p4
   v1model-p4runtime-enumint-types1.p4
   xor_test.p4
-  bmv2_clone_preserving_field_list_eg.p4
-  bmv2_clone_preserving_field_list_ig.p4
   bmv2_lookahead_2.p4
   bmv2_parse_1.p4
   fabric.p4
