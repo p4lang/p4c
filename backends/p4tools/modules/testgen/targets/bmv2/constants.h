@@ -37,6 +37,7 @@ class BMv2Constants {
 
     static constexpr int STF_MIN_PKT_SIZE = 22;
     static constexpr int ETH_HDR_SIZE = 112;
+    static constexpr int DROP_PORT = 511;
 };
 
 }  // namespace Bmv2

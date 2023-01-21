@@ -100,9 +100,7 @@ def create_runtime(options, json_name, info_name):
         f"{options.rootDir}/build/p4c-bm2-ss --target bmv2 --arch v1model "
         f"--p4runtime-files {info_name} {options.p4_file} -o {json_name}"
     )
-    p = subprocess.Popen(
-        p4c_bm2_ss, shell=True, stdin=subprocess.PIPE, universal_newlines=True
-    )
+    p = subprocess.Popen(p4c_bm2_ss, shell=True, stdin=subprocess.PIPE, universal_newlines=True)
 
     p.communicate()
     if p.returncode != 0:
@@ -113,11 +111,9 @@ def create_runtime(options, json_name, info_name):
         raise SystemExit("p4c-bm2-ss ended with errors")
 
 
-def _run_proc_in_background(bridge, cmd):
+def run_proc_in_background(bridge, cmd):
     namedCmd = bridge.get_ns_prefix() + " " + cmd
-    return subprocess.Popen(
-        namedCmd, shell=True, stdin=subprocess.PIPE, universal_newlines=True
-    )
+    return subprocess.Popen(namedCmd, shell=True, stdin=subprocess.PIPE, universal_newlines=True)
 
 
 def run_simple_switch_grpc(bridge, thrift_port, grpc_port):
@@ -130,16 +126,17 @@ def run_simple_switch_grpc(bridge, thrift_port, grpc_port):
         sys.stdout,
         "---------------------- Start simple_switch_grpc ----------------------",
     )
-
+    log = options.testdir.joinpath("simple_switch_grpc.log")
     simple_switch_grpc = (
-        f"simple_switch_grpc --thrift-port {thrift_port} --log-console -i 0@0 "
+        f"simple_switch_grpc --thrift-port {thrift_port} --log-file {log} --log-flush -i 0@0 "
         f"-i 1@1 -i 2@2 -i 3@3 -i 4@4 -i 5@5 -i 6@6 -i 7@7 --no-p4 "
         f"-- --grpc-server-addr localhost:{grpc_port}"
     )
-
-    switchProc = _run_proc_in_background(bridge, simple_switch_grpc)
+    switchProc = run_proc_in_background(bridge, simple_switch_grpc)
     if switchProc.poll() is not None:
         kill_process(switchProc)
+        print("HIIIIIII")
+        exit(1)
         testutils.report_err(
             sys.stderr,
             "---------------------- End simple_switch_grpc with errors ----------------------",
@@ -150,9 +147,7 @@ def run_simple_switch_grpc(bridge, thrift_port, grpc_port):
 
 
 def run_ptf(bridge, grpc_port, json_name, info_name):
-    testutils.report_output(
-        sys.stdout, "---------------------- Start ptf ----------------------"
-    )
+    testutils.report_output(sys.stdout, "---------------------- Start ptf ----------------------")
     # Add the file location to the python path.
     pypath = FILE_DIR
     # Show list of the tests
@@ -160,9 +155,7 @@ def run_ptf(bridge, grpc_port, json_name, info_name):
     bridge.ns_exec(testLostCmd)
 
     ifaces = "-i 0@br_0 -i 1@br_1 -i 2@br_2 -i 3@br_3 -i 4@br_4 -i 5@br_5 -i 6@br_6 -i 7@br_7"
-    test_params = (
-        f"grpcaddr='localhost:{grpc_port}';p4info='{info_name}';config='{json_name}';"
-    )
+    test_params = f"grpcaddr='localhost:{grpc_port}';p4info='{info_name}';config='{json_name}';"
     ptf = f'ptf --verbose --pypath {pypath} {ifaces} --test-params=\\"{test_params}\\" --test-dir {options.testdir}'
     return bridge.ns_exec(ptf)
 
@@ -215,9 +208,7 @@ if __name__ == "__main__":
     options.p4_file = Path(testutils.check_if_file(args.p4_file))
     testfile = args.testfile
     if not testfile:
-        testutils.report_output(
-            sys.stdout, "No test file provided. Checking for file in folder."
-        )
+        testutils.report_output(sys.stdout, "No test file provided. Checking for file in folder.")
         testfile = options.p4_file.with_suffix(".py")
     options.testfile = Path(testutils.check_if_file(testfile))
     testdir = args.testdir
@@ -226,7 +217,7 @@ if __name__ == "__main__":
             sys.stdout, "No test directory provided. Generating temporary folder."
         )
         testdir = tempfile.mkdtemp(dir=os.path.abspath("./"))
-        os.chmod(testdir, 0o744)
+        os.chmod(testdir, 0o755)
     options.testdir = Path(testdir)
     options.rootDir = Path(args.rootdir)
     # Run the test with the extracted options

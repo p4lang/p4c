@@ -340,9 +340,8 @@ class P4RuntimeTest(BaseTest):
             response = self.stub.SetForwardingPipelineConfig(request)
             logging.debug(f"Response {response}")
         except Exception as e:
-            logging.error("Error during SetForwardingPipelineConfig",
-                          file=sys.stderr)
-            logging.error(str(e), file=sys.stderr)
+            logging.error("Error during SetForwardingPipelineConfig")
+            logging.error(str(e))
             return False
         return True
 

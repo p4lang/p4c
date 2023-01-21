@@ -362,11 +362,11 @@ class Test{{test_id}}(AbstractTest):
         ptfutils.verify_packet(self, exp_pkt, eg_port)
 ##endfor
 ##endif
-##endif
 ## else 
         ptfutils.verify_packet(self, exp_pkt, eg_port)
         logger.info("Verifying no other packets ...")
         ptfutils.verify_no_other_packets(self, self.device_id, timeout=2)
+## endif
 ## else
         pass
 ## endif

@@ -60,9 +60,6 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
     /// individual component instantiations.
     int pipeIdx = 0;
 
-    /// Set the restriction on the input port,
-    /// this is necessary since ptf tests use ports from 0 to 7
-    pipelineSequence.emplace_back(Continuation::Guard(getPortConstraint(getTargetInputPortVar())));
     for (const auto &declTuple : programmableBlocks) {
         // Iterate through the (ordered) pipes of the target architecture.
         auto subResult = processDeclaration(declTuple.second, pipeIdx);
@@ -93,6 +90,11 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
         }
     }
 
+    /// Set the restriction on the input port for PTF tests.
+    /// This is necessary since the PTF framework only allows a specific port range.
+    if (options.testBackend == "PTF") {
+        constraint = new IR::LAnd(constraint, getPortConstraint(getTargetInputPortVar()));
+    }
     targetConstraints = constraint;
 }
 
@@ -177,9 +179,10 @@ const IR::Member *BMv2_V1ModelProgramInfo::getTargetInputPortVar() const {
                           new IR::PathExpression("*standard_metadata"), "ingress_port");
 }
 
-const IR::Expression *BMv2_V1ModelProgramInfo::getPortConstraint(const IR::Member *portVar) const {
+const IR::Expression *BMv2_V1ModelProgramInfo::getPortConstraint(const IR::Member *portVar) {
     const IR::Operation_Binary *portConstraint =
-        new IR::Leq(portVar, new IR::Constant(portVar->type, 7));
+        new IR::LOr(new IR::Equ(portVar, new IR::Constant(portVar->type, BMv2Constants::DROP_PORT)),
+                    new IR::Lss(portVar, new IR::Constant(portVar->type, 8)));
     return portConstraint;
 }
 
@@ -190,7 +193,8 @@ const IR::Member *BMv2_V1ModelProgramInfo::getTargetOutputPortVar() const {
 
 const IR::Expression *BMv2_V1ModelProgramInfo::dropIsActive() const {
     const auto *egressPortVar = getTargetOutputPortVar();
-    return new IR::Equ(IR::getConstant(egressPortVar->type, 511), egressPortVar);
+    return new IR::Equ(IR::getConstant(egressPortVar->type, BMv2Constants::DROP_PORT),
+                       egressPortVar);
 }
 
 const IR::Expression *BMv2_V1ModelProgramInfo::createTargetUninitialized(const IR::Type *type,
