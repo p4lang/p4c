@@ -34,6 +34,13 @@ PARSER.add_argument(
     dest="testdir",
     help="The location of the test directory.",
 )
+PARSER.add_argument(
+    "-b",
+    "--nocleanup",
+    action="store_true",
+    dest="nocleanup",
+    help="Do not remove temporary results for failing tests.",
+)
 
 
 def is_port_in_use(port: int) -> bool:
@@ -47,7 +54,7 @@ class Options:
         self.testfile = None  # path to ptf test file that is used
         # Actual location of the test framework
         self.testdir = None
-        self.rootDir = "."
+        self.rootdir = "."
 
 
 def create_bridge():
@@ -86,23 +93,15 @@ def open_proc(bridge):
     return proc
 
 
-def kill_process(proc):
-    # kill process
-    os.kill(proc.pid, 15)
-    os.kill(proc.pid, 9)
-
-
 def create_runtime(options, json_name, info_name):
     testutils.report_output(
         sys.stdout, "---------------------- Start p4c-bm2-ss ----------------------"
     )
     p4c_bm2_ss = (
-        f"{options.rootDir}/build/p4c-bm2-ss --target bmv2 --arch v1model "
+        f"{options.rootdir}/build/p4c-bm2-ss --target bmv2 --arch v1model "
         f"--p4runtime-files {info_name} {options.p4_file} -o {json_name}"
     )
-    p = subprocess.Popen(
-        p4c_bm2_ss, shell=True, stdin=subprocess.PIPE, universal_newlines=True
-    )
+    p = subprocess.Popen(p4c_bm2_ss, shell=True, stdin=subprocess.PIPE, universal_newlines=True)
 
     p.communicate()
     if p.returncode != 0:
@@ -113,46 +112,40 @@ def create_runtime(options, json_name, info_name):
         raise SystemExit("p4c-bm2-ss ended with errors")
 
 
-def _run_proc_in_background(bridge, cmd):
+def run_proc_in_background(bridge, cmd):
     namedCmd = bridge.get_ns_prefix() + " " + cmd
-    return subprocess.Popen(
-        namedCmd, shell=True, stdin=subprocess.PIPE, universal_newlines=True
-    )
+    return subprocess.Popen(namedCmd, shell=True, stdin=subprocess.PIPE, universal_newlines=True)
 
 
 def run_simple_switch_grpc(bridge, thrift_port, grpc_port):
-    proc = open_proc(bridge)
-    # Remove the log file.
-    removeLogFileCmd = "/bin/rm -f ss-log.txt"
-    bridge.ns_exec(removeLogFileCmd)
-
     testutils.report_output(
         sys.stdout,
         "---------------------- Start simple_switch_grpc ----------------------",
     )
-
+    switch_log = options.testdir.joinpath("simple_switch_grpc.log")
     simple_switch_grpc = (
         f"simple_switch_grpc --thrift-port {thrift_port} --log-console -i 0@0 "
         f"-i 1@1 -i 2@2 -i 3@3 -i 4@4 -i 5@5 -i 6@6 -i 7@7 --no-p4 "
         f"-- --grpc-server-addr localhost:{grpc_port}"
     )
-
-    switchProc = _run_proc_in_background(bridge, simple_switch_grpc)
+    switchProc = run_proc_in_background(bridge, simple_switch_grpc)
     if switchProc.poll() is not None:
-        kill_process(switchProc)
         testutils.report_err(
             sys.stderr,
-            "---------------------- End simple_switch_grpc with errors ----------------------",
+            "---------------------- simple_switch_grpc terminated with an error ----------------------",
         )
+        with switch_log.open("r", encoding="utf8") as simple_switch_log_file:
+            testutils.report_err(
+                sys.stderr,
+                simple_switch_log_file.read(),
+            )
         raise SystemExit("simple_switch_grpc ended with errors")
 
     return switchProc
 
 
 def run_ptf(bridge, grpc_port, json_name, info_name):
-    testutils.report_output(
-        sys.stdout, "---------------------- Start ptf ----------------------"
-    )
+    testutils.report_output(sys.stdout, "---------------------- Start ptf ----------------------")
     # Add the file location to the python path.
     pypath = FILE_DIR
     # Show list of the tests
@@ -160,9 +153,7 @@ def run_ptf(bridge, grpc_port, json_name, info_name):
     bridge.ns_exec(testLostCmd)
 
     ifaces = "-i 0@br_0 -i 1@br_1 -i 2@br_2 -i 3@br_3 -i 4@br_4 -i 5@br_5 -i 6@br_6 -i 7@br_7"
-    test_params = (
-        f"grpcaddr='localhost:{grpc_port}';p4info='{info_name}';config='{json_name}';"
-    )
+    test_params = f"grpcaddr='localhost:{grpc_port}';p4info='{info_name}';config='{json_name}';"
     ptf = f'ptf --verbose --pypath {pypath} {ifaces} --test-params=\\"{test_params}\\" --test-dir {options.testdir}'
     return bridge.ns_exec(ptf)
 
@@ -215,9 +206,7 @@ if __name__ == "__main__":
     options.p4_file = Path(testutils.check_if_file(args.p4_file))
     testfile = args.testfile
     if not testfile:
-        testutils.report_output(
-            sys.stdout, "No test file provided. Checking for file in folder."
-        )
+        testutils.report_output(sys.stdout, "No test file provided. Checking for file in folder.")
         testfile = options.p4_file.with_suffix(".py")
     options.testfile = Path(testutils.check_if_file(testfile))
     testdir = args.testdir
@@ -225,9 +214,14 @@ if __name__ == "__main__":
         testutils.report_output(
             sys.stdout, "No test directory provided. Generating temporary folder."
         )
-        testdir = tempfile.mkdtemp(dir=os.path.abspath("./"))
-        os.chmod(testdir, 0o744)
+        testdir = tempfile.mkdtemp(dir=Path(".").absolute())
+        # Generous permissions because the program is usually edited by sudo.
+        os.chmod(testdir, 0o755)
     options.testdir = Path(testdir)
-    options.rootDir = Path(args.rootdir)
+    options.rootdir = Path(args.rootdir)
     # Run the test with the extracted options
-    sys.exit(run_test(options))
+    result = run_test(options)
+    if not (args.nocleanup or result != testutils.SUCCESS):
+        testutils.report_output(sys.stdout, "Removing temporary test directory.")
+        testutils.del_dir(options.testdir)
+    sys.exit(result)

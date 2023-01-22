@@ -211,8 +211,8 @@ p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
   "headers: the type should be a struct of headers, stacks, or unions"
   parser-unroll-test3.p4
-  parser-unroll-test5.p4
   parser-unroll-test4.p4
+  parser-unroll-test5.p4
 )
 
 p4tools_add_xfail_reason(
@@ -236,28 +236,15 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
   "Expected packet was not received on device"
-  issue1653-complex-bmv2.p4
   issue2314.p4
-  issue3702-bmv2.p4
-  parser-if.p4
+  issue281.p4
+  bmv2_lookahead_2.p4
+  xor_test.p4
   parser-unroll-issue3537-1.p4
   parser-unroll-issue3537.p4
   parser-unroll-t1-cond.p4
   parser-unroll-test2.p4
-  v1model-p4runtime-enumint-types1.p4
-  xor_test.p4
-  bmv2_clone_preserving_field_list_eg.p4
-  bmv2_clone_preserving_field_list_ig.p4
-  bmv2_lookahead_2.p4
-  bmv2_parse_1.p4
-  fabric.p4
   header-stack-ops-bmv2.p4
-  basic_routing-bmv2.p4
-  issue914-bmv2.p4
-  v1model-special-ops-bmv2.p4
-  up4.p4
-  same_name_for_table_and_action.p4
-  issue1478-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
@@ -267,17 +254,27 @@ p4tools_add_xfail_reason(
   issue1062-1-bmv2.p4
   v1model-p4runtime-most-types1.p4
   pins_fabric.p4
-  pins_middleblock.p4
   pins_wbb.p4
+  v1model-p4runtime-enumint-types1.p4
 
   # At index 0: INVALID_ARGUMENT, 'Bytestring provided does not fit within 0 bits'
+  pins_middleblock.p4
   issue2283_1-bmv2.p4
+
+  # At index 0: INVALID_ARGUMENT, 'Unexpected number of action parameters'
+  up4.p4
+  # At index 0: INVALID_ARGUMENT, '0 is not a valid session id'
+  issue1642-bmv2.p4
+  issue1653-bmv2.p4
+  issue1653-complex-bmv2.p4
+  issue1660-bmv2.p4
+  issue562-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
-  "TypeError: _log()"
-  # TypeError: _log() got an unexpected keyword argument 'file'
+  "Unexpected error in RPC handling"
+  # Unexpected error in RPC handling
   issue3374.p4
   control-hs-index-test6.p4
   parser-unroll-test1.p4

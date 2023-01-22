@@ -195,6 +195,7 @@ def del_dir(directory):
     except OSError as e:
         report_err(sys.stderr, f"Could not delete directory, reason:\n{e.filename} - {e.strerror}.")
 
+
 def copy_file(src, dst):
     try:
         if isinstance(src, list):

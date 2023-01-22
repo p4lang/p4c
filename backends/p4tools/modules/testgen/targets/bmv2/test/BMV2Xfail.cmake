@@ -34,12 +34,15 @@ p4tools_add_xfail_reason(
   # terminate called after throwing an instance of 'std::runtime_error'
   # in Json::Value::operator[](ArrayIndex)const: requires arrayValue
   control-hs-index-test6.p4
+  control-hs-index-test6.p4
   issue3374.p4
 
   # terminate called after throwing an instance of 'std::runtime_error'
   # Type is not convertible to string
   control-hs-index-test3.p4
   parser-unroll-test1.p4
+  # terminate called after throwing an instance of 'std::out_of_range'
+  control-hs-index-test2.p4
 )
 
 p4tools_add_xfail_reason(
@@ -53,7 +56,6 @@ p4tools_add_xfail_reason(
   "Exception"
   #  Running simple_switch_CLI: Exception  Unexpected key field &
   match-on-exprs2-bmv2.p4
-  v1model-special-ops-bmv2.p4
 )
 
 p4tools_add_xfail_reason(

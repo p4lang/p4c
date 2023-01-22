@@ -73,7 +73,7 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
     if (options.testBackend == "PTF") {
         minPktSize = BMv2Constants::ETH_HDR_SIZE;
     }
-    const IR::Operation_Binary *constraint =
+    const IR::Expression *constraint =
         new IR::Grt(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
                     IR::getConstant(ExecutionState::getPacketSizeVarType(), minPktSize));
     /// Vector containing pairs of restrictions and nodes to which these restrictions apply.
@@ -89,10 +89,6 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
             constraint = new IR::LAnd(constraint, restriction);
         }
     }
-
-    /// Set the restriction on the input port,
-    /// this is necessary since ptf tests use ports from 0 to 7
-    constraint = new IR::LAnd(constraint, getPortConstraint(getTargetInputPortVar()));
 
     targetConstraints = constraint;
 }
@@ -178,9 +174,10 @@ const IR::Member *BMv2_V1ModelProgramInfo::getTargetInputPortVar() const {
                           new IR::PathExpression("*standard_metadata"), "ingress_port");
 }
 
-const IR::Expression *BMv2_V1ModelProgramInfo::getPortConstraint(const IR::Member *portVar) const {
+const IR::Expression *BMv2_V1ModelProgramInfo::getPortConstraint(const IR::Member *portVar) {
     const IR::Operation_Binary *portConstraint =
-        new IR::Leq(portVar, new IR::Constant(portVar->type, 7));
+        new IR::LOr(new IR::Equ(portVar, new IR::Constant(portVar->type, BMv2Constants::DROP_PORT)),
+                    new IR::Lss(portVar, new IR::Constant(portVar->type, 8)));
     return portConstraint;
 }
 
@@ -191,7 +188,8 @@ const IR::Member *BMv2_V1ModelProgramInfo::getTargetOutputPortVar() const {
 
 const IR::Expression *BMv2_V1ModelProgramInfo::dropIsActive() const {
     const auto *egressPortVar = getTargetOutputPortVar();
-    return new IR::Equ(IR::getConstant(egressPortVar->type, 511), egressPortVar);
+    return new IR::Equ(IR::getConstant(egressPortVar->type, BMv2Constants::DROP_PORT),
+                       egressPortVar);
 }
 
 const IR::Expression *BMv2_V1ModelProgramInfo::createTargetUninitialized(const IR::Type *type,
