@@ -66,7 +66,7 @@ inja::json Metadata::getVerify(const TestSpec *testSpec) {
     inja::json verifyData = inja::json::object();
     auto egressPacket = testSpec->getEgressPacket();
     if (egressPacket.has_value()) {
-        const auto *const packet = egressPacket.value();
+        const auto *packet = egressPacket.value();
         verifyData["eg_port"] = packet->getPort();
         const auto *payload = packet->getEvaluatedPayload();
         const auto *payloadMask = packet->getEvaluatedPayloadMask();
@@ -94,7 +94,7 @@ statement_coverage: {{coverage}}
 ## endfor
 
 # The input packet in hexadecimal.
-input_packet: \"{{send.pkt}}\"
+input_packet: "{{send.pkt}}"
 
 # Parsed headers and their offsets.
 header_offsets:
@@ -105,7 +105,7 @@ header_offsets:
 # Metadata results after this test has completed.
 metadata:
 ## for metadata_field in metadata_fields
-  {{metadata_field.name}}: [value: \"{{metadata_field.value}}\", offset: {{metadata_field.offset}}]
+  {{metadata_field.name}}: [value: "{{metadata_field.value}}", offset: {{metadata_field.offset}}]
 ## endfor
 )""");
     return TEST_CASE;

@@ -3,10 +3,11 @@
 # repository. This file in turn was a modified version of
 # https://github.com/p4lang/PI/blob/ec6865edc770b42f22fea15e6da17ca58a83d3a6/proto/ptf/base_test.py.
 
+from collections import Counter
+from functools import wraps, partialmethod
 import logging
 import queue
 import re
-import socket
 import sys
 import threading
 import time
@@ -28,16 +29,6 @@ FILE_DIR = Path(__file__).resolve().parent
 TOOLS_PATH = FILE_DIR.joinpath("../../tools")
 sys.path.append(str(TOOLS_PATH))
 import testutils
-
-
-# See https://gist.github.com/carymrobbins/8940382
-# functools.partialmethod is introduced in Python 3.4
-class partialmethod(partial):
-    def __get__(self, instance, owner):
-        if instance is None:
-            return self
-        return partial(self.func, instance, *(self.args or ()), **(self.keywords or {}))
-
 
 def stringify(n, length=0):
     """Take a non-negative integer 'n' as the first parameter, and a
@@ -61,77 +52,6 @@ def stringify(n, length=0):
             length = n_size_bytes
     s = n.to_bytes(length, byteorder="big")
     return s
-
-
-def ipv4_to_binary(addr):
-    """Take an argument 'addr' containing an IPv4 address written as a
-    string in dotted decimal notation, e.g. '10.1.2.3', and convert it
-    to a string with binary contents expected by the Python P4Runtime
-    client operations."""
-    bytes_ = [int(b, 10) for b in addr.split(".")]
-    assert len(bytes_) == 4
-    # Note: The bytes() call below will throw exception if any
-    # elements of bytes_ is outside of the range [0, 255]], so no need
-    # to add a separate check for that here.
-    return bytes(bytes_)
-
-
-def ipv4_to_int(addr):
-    """Take an argument 'addr' containing an IPv4 address written as a
-    string in dotted decimal notation, e.g. '10.1.2.3', and convert it
-    to an integer."""
-    bytes_ = [int(b, 10) for b in addr.split(".")]
-    assert len(bytes_) == 4
-    # Note: The bytes() call below will throw exception if any
-    # elements of bytes_ is outside of the range [0, 255]], so no need
-    # to add a separate check for that here.
-    return int.from_bytes(bytes(bytes_), byteorder="big")
-
-
-def ipv6_to_binary(addr):
-    """Take an argument 'addr' containing an IPv6 address written in
-    standard syntax, e.g. '2001:0db8::3210', and convert it to a
-    string with binary contents expected by the Python P4Runtime
-    client operations."""
-    return socket.inet_pton(socket.AF_INET6, addr)
-
-
-def ipv6_to_int(addr):
-    """Take an argument 'addr' containing an IPv6 address written in
-    standard syntax, e.g. '2001:0db8::3210', and convert it to an
-    integer."""
-    bytes_ = socket.inet_pton(socket.AF_INET6, addr)
-    # Note: The bytes() call below will throw exception if any
-    # elements of bytes_ is outside of the range [0, 255]], so no need
-    # to add a separate check for that here.
-    return int.from_bytes(bytes_, byteorder="big")
-
-
-def mac_to_binary(addr):
-    """Take an argument 'addr' containing an Ethernet MAC address written
-    as a string in hexadecimal notation, with each byte separated by a
-    colon, e.g. '00:de:ad:be:ef:ff', and convert it to a string with
-    binary contents expected by the Python P4Runtime client
-    operations."""
-    bytes_ = [int(b, 16) for b in addr.split(":")]
-    assert len(bytes_) == 6
-    # Note: The bytes() call below will throw exception if any
-    # elements of bytes_ is outside of the range [0, 255]], so no need
-    # to add a separate check for that here.
-    return bytes(bytes_)
-
-
-def mac_to_int(addr):
-    """Take an argument 'addr' containing an Ethernet MAC address written
-    as a string in hexadecimal notation, with each byte separated by a
-    colon, e.g. '00:de:ad:be:ef:ff', and convert it to an integer."""
-    bytes_ = [int(b, 16) for b in addr.split(":")]
-    assert len(bytes_) == 6
-    # Note: The bytes() call below will throw exception if any
-    # elements of bytes_ is outside of the range [0, 255]], so no need
-    # to add a separate check for that here.
-    return int.from_bytes(bytes(bytes_), byteorder="big")
-
 
 # Used to indicate that the gRPC error Status object returned by the server has
 # an incorrect format.
@@ -283,6 +203,7 @@ class P4RuntimeTest(BaseTest):
         self.dataplane = ptf.dataplane_instance
         self.dataplane.flush()
 
+        self.p4info_obj_map = {}
         self._swports = []
         for _, port, _ in config["interfaces"]:
             self._swports.append(port)
@@ -344,15 +265,10 @@ class P4RuntimeTest(BaseTest):
     # In order to make writing tests easier, we accept any suffix that uniquely
     # identifies the object among p4info objects of the same type.
     def import_p4info_names(self):
-        self.p4info_obj_map = {}
         suffix_count = Counter()
         for obj_type in [
-            "tables",
-            "action_profiles",
-            "actions",
-            "counters",
-            "direct_counters",
-            "controller_packet_metadata",
+                "tables", "action_profiles", "actions", "counters", "direct_counters",
+                "controller_packet_metadata", "meters", "direct_meters",
         ]:
             for obj in getattr(self.p4info, obj_type):
                 pre = obj.preamble
@@ -834,7 +750,7 @@ class P4RuntimeTest(BaseTest):
         req = p4runtime_pb2.WriteRequest()
         req.device_id = self.device_id
         self.push_update_add_entry_to_action(req, t_name, mk, a_name, params, priority)
-        return req, self.write_request(req, store=(mk is not None))
+        return req, self.write_request(req, store=mk is not None)
 
     def check_table_name_and_key(self, table_name_and_key):
         assert isinstance(table_name_and_key, tuple)
@@ -893,7 +809,7 @@ class P4RuntimeTest(BaseTest):
         if key is None:
             update.type = p4runtime_pb2.Update.MODIFY
         testutils.log.info(f"table_add: req={req}")
-        return req, self.write_request(req, store=(key is not None))
+        return req, self.write_request(req, store=key is not None)
 
     def pre_add_mcast_group(self, mcast_grp_id, port_instance_pair_list):
         """When a packet is sent from ingress to the packet buffer with
@@ -985,6 +901,25 @@ class P4RuntimeTest(BaseTest):
                 counter_entries.append(entry)
         return counter_entries
 
+    def meter_write(self, meter_name, index, meter_config, direct):
+        req = self.get_new_write_request()
+        update = req.updates.add()
+        update.type = p4runtime_pb2.Update.MODIFY
+        entity = update.entity
+        if direct:
+            meter_write = entity.direct_meter_entry
+            meter_obj = self.get_obj("direct_meters", meter_name)
+            meter_write.table_entry.table_id = meter_obj.direct_table_id
+        else:
+            meter_write = entity.meter_entry
+            meter_write.meter_id = self.get_meter_id(meter_name)
+            meter_write.index.index = index
+        meter_write.config.cir = meter_config.cir
+        meter_write.config.cburst = meter_config.cburst
+        meter_write.config.pir = meter_config.pir
+        meter_write.config.pburst = meter_config.pburst
+        return req, self.write_request(req)
+
     def make_table_read_request(self, table_name):
         req = p4runtime_pb2.ReadRequest()
         req.device_id = self.device_id
@@ -1043,7 +978,7 @@ class P4RuntimeTest(BaseTest):
         req = p4runtime_pb2.WriteRequest()
         req.device_id = self.device_id
         self.push_update_add_entry_to_member(req, t_name, mk, mbr_id)
-        return req, self.write_request(req, store=(mk is not None))
+        return req, self.write_request(req, store=mk is not None)
 
     def push_update_add_entry_to_group(self, req, t_name, mk, grp_id):
         update = req.updates.add()
@@ -1060,7 +995,7 @@ class P4RuntimeTest(BaseTest):
         req = p4runtime_pb2.WriteRequest()
         req.device_id = self.device_id
         self.push_update_add_entry_to_group(req, t_name, mk, grp_id)
-        return req, self.write_request(req, store=(mk is not None))
+        return req, self.write_request(req, store=mk is not None)
 
     # iterates over all requests in reverse order; if they are INSERT updates,
     # replay them as DELETE updates; this is a convenient way to clean-up a lot
@@ -1097,14 +1032,10 @@ class P4RuntimeTest(BaseTest):
 # wrappers around P4RuntimeTest.get_obj and P4RuntimeTest.get_obj_id.
 # For example: get_table(x) and get_table_id(x) respectively call
 # get_obj("tables", x) and get_obj_id("tables", x)
-for obj_type, nickname in [
-    ("tables", "table"),
-    ("action_profiles", "ap"),
-    ("actions", "action"),
-    ("counters", "counter"),
-    ("direct_counters", "direct_counter"),
-    ("controller_packet_metadata", "controller_packet_metadata"),
-]:
+for obj_type, nickname in [("tables", "table"), ("action_profiles", "ap"), ("actions", "action"),
+                           ("counters", "counter"), ("direct_counters", "direct_counter"),
+                           ("meters", "meter"), ("direct_meters", "direct_meter"),
+                           ("controller_packet_metadata", "controller_packet_metadata")]:
     name = "_".join(["get", nickname])
     setattr(P4RuntimeTest, name, partialmethod(P4RuntimeTest.get_obj, obj_type))
     name = "_".join(["get", nickname, "id"])
@@ -1151,7 +1082,7 @@ def update_config(config_path, p4info_path, grpc_addr, device_id):
     """
     channel = grpc.insecure_channel(grpc_addr)
     stub = p4runtime_pb2_grpc.P4RuntimeStub(channel)
-    testutils.log.info(f"Sending P4 config from file {config_path} with P4info {p4info_path}")
+    testutils.log.info("Sending P4 config from file %s with P4info %s", config_path, p4info_path)
     request = p4runtime_pb2.SetForwardingPipelineConfigRequest()
     request.device_id = device_id
     config = request.config
@@ -1162,7 +1093,7 @@ def update_config(config_path, p4info_path, grpc_addr, device_id):
     request.action = p4runtime_pb2.SetForwardingPipelineConfigRequest.VERIFY_AND_COMMIT
     try:
         response = stub.SetForwardingPipelineConfig(request)
-        logging.debug(f"Response {response}")
+        logging.debug("Response %s", response)
     except Exception as e:
         logging.error("Error during SetForwardingPipelineConfig")
         logging.error(e)

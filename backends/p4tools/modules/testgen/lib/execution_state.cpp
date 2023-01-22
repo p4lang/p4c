@@ -169,7 +169,7 @@ const std::stack<std::reference_wrapper<const ExecutionState::StackFrame>>
 }
 
 void ExecutionState::setProperty(cstring propertyName, Continuation::PropertyValue property) {
-    stateProperties[propertyName] = std::move(property);
+    stateProperties[propertyName] = property;
 }
 
 bool ExecutionState::hasProperty(cstring propertyName) const {

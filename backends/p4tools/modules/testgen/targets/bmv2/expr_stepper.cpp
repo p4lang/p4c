@@ -18,6 +18,7 @@
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/declaration.h"
 #include "ir/indexed_vector.h"
+#include "ir/ir-generated.h"
 #include "ir/irutils.h"
 #include "ir/node.h"
 #include "lib/cstring.h"
@@ -654,25 +655,25 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              std::vector<Continuation::Command> replacements;
 
              const auto *receiverPath = receiver->checkedTo<IR::PathExpression>();
-             const auto &externInstance = state.convertPathExpr(receiverPath);
+             const auto &externInstance = nextState.findDecl(receiverPath);
 
              // Retrieve the register state from the object store. If it is already present,
              // just cast the object to the correct class and retrieve the current value
              // according to the index. If the register has not been added had, create a new
              // register object.
              const auto *registerState =
-                 state.getTestObject("registervalues", externInstance->toString(), false);
-             const Bmv2RegisterValue *registerValue = nullptr;
+                 state.getTestObject("registervalues", externInstance->controlPlaneName(), false);
+             const Bmv2V1ModelRegisterValue *registerValue = nullptr;
              if (registerState != nullptr) {
-                 registerValue = registerState->checkedTo<Bmv2RegisterValue>();
+                 registerValue = registerState->checkedTo<Bmv2V1ModelRegisterValue>();
              } else {
                  const auto *inputValue =
                      programInfo.createTargetUninitialized(readOutput->type, false);
-                 registerValue = new Bmv2RegisterValue(inputValue);
-                 nextState.addTestObject("registervalues", externInstance->toString(),
+                 registerValue = new Bmv2V1ModelRegisterValue(inputValue);
+                 nextState.addTestObject("registervalues", externInstance->controlPlaneName(),
                                          registerValue);
              }
-             const IR::Expression *baseExpr = registerValue->getCurrentValue(index);
+             const IR::Expression *baseExpr = registerValue->getValueAtIndex(index);
 
              if (readOutput->type->is<IR::Type_Bits>()) {
                  // We need an assignment statement (and the inefficient copy) here because we
@@ -753,9 +754,9 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                      return;
                  }
              }
-             const auto *receiverPath = receiver->checkedTo<IR::PathExpression>();
-             const auto &externInstance = state.convertPathExpr(receiverPath);
              auto &nextState = state.clone();
+             const auto *receiverPath = receiver->checkedTo<IR::PathExpression>();
+             const auto &externInstance = nextState.findDecl(receiverPath);
              // TODO: Find a better way to model a trace of this event.
              std::stringstream registerStream;
              registerStream << "RegisterWrite: Value ";
@@ -764,23 +765,23 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              index->dbprint(registerStream);
              nextState.add(*new TraceEvents::Generic(registerStream.str()));
 
-             // "Write" to the register by update the internal test object state. If the
-             // register did not exist previously, update it with the value to write as initial
-             // value.
-             const auto *registerState =
-                 nextState.getTestObject("registervalues", externInstance->toString(), false);
-             Bmv2RegisterValue *registerValue = nullptr;
+             // "Write" to the register by update the internal test object state. If the register
+             // did not exist previously, update it with the value to write as initial value.
+             const auto *registerState = nextState.getTestObject(
+                 "registervalues", externInstance->controlPlaneName(), false);
+             Bmv2V1ModelRegisterValue *registerValue = nullptr;
              if (registerState != nullptr) {
-                 registerValue =
-                     new Bmv2RegisterValue(*registerState->checkedTo<Bmv2RegisterValue>());
-                 registerValue->addRegisterCondition(Bmv2RegisterCondition{index, inputValue});
+                 registerValue = new Bmv2V1ModelRegisterValue(
+                     *registerState->checkedTo<Bmv2V1ModelRegisterValue>());
+                 registerValue->writeToIndex(index, inputValue);
              } else {
                  const auto &writeValue =
                      programInfo.createTargetUninitialized(inputValue->type, false);
-                 registerValue = new Bmv2RegisterValue(writeValue);
-                 registerValue->addRegisterCondition(Bmv2RegisterCondition{index, inputValue});
+                 registerValue = new Bmv2V1ModelRegisterValue(writeValue);
+                 registerValue->writeToIndex(index, inputValue);
              }
-             nextState.addTestObject("registervalues", externInstance->toString(), registerValue);
+             nextState.addTestObject("registervalues", externInstance->controlPlaneName(),
+                                     registerValue);
              nextState.popBody();
              result->emplace_back(nextState);
          }},
@@ -861,7 +862,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              result->emplace_back(nextState);
          }},
         /* ======================================================================================
-         *  meter.read
+         *  meter.execute_meter
          *  A meter object is created by calling its constructor.  This
          *  creates an array of meter states, with the number of meter
          *  states specified by the size parameter.  The array indices are
@@ -890,21 +891,84 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          *               meaning of these colors).  When index is out of
          *               range, the final value of result is not specified,
          *  and should be ignored by the caller.
-         * ======================================================================================
-         */
-        // TODO: Read currently has no effect in the symbolic interpreter.
+         * ====================================================================================== */
         {"meter.execute_meter",
          {"index", "result"},
-         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
-            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
+         [](const IR::MethodCallExpression *call, const IR::Expression *receiver,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
-             ::warning("meter.execute_meter not fully implemented.");
+             auto testBackend = TestgenOptions::get().testBackend;
+             if (testBackend != "PTF") {
+                 ::warning("meter.execute_meter not implemented for %1%.", testBackend);
+                 auto &nextState = state.clone();
+                 nextState.popBody();
+                 result->emplace_back(nextState);
+                 return;
+             }
+             // TODO: Frontload this in the expression stepper for method call expressions.
+             const auto *index = args->at(0)->expression;
+             if (!SymbolicEnv::isSymbolicValue(index)) {
+                 // Evaluate the condition.
+                 stepToSubexpr(index, result, state, [call](const Continuation::Parameter *v) {
+                     auto *clonedCall = call->clone();
+                     auto *arguments = clonedCall->arguments->clone();
+                     auto *arg = arguments->at(0)->clone();
+                     arg->expression = v->param;
+                     (*arguments)[0] = arg;
+                     clonedCall->arguments = arguments;
+                     return Continuation::Return(clonedCall);
+                 });
+                 return;
+             }
+             const auto *meterResult = args->at(1)->expression;
              auto &nextState = state.clone();
-             nextState.popBody();
-             result->emplace_back(nextState);
+             std::vector<Continuation::Command> replacements;
+
+             const auto *receiverPath = receiver->checkedTo<IR::PathExpression>();
+             const auto &externInstance = nextState.findDecl(receiverPath);
+
+             // Retrieve the meter state from the object store. If it is already present, just
+             // cast the object to the correct class and retrieve the current value according to the
+             // index. If the meter has not been added had, create a new meter object.
+             const auto *meterState =
+                 state.getTestObject("meter_values", externInstance->controlPlaneName(), false);
+             Bmv2V1ModelMeterValue *meterValue = nullptr;
+             const auto &inputValue = nextState.createZombieConst(
+                 meterResult->type, "meter_value" + std::to_string(call->clone_id));
+             // Make sure we do not accidentally get "3" as enum assignment...
+             auto *cond = new IR::Lss(inputValue, IR::getConstant(meterResult->type, 3));
+             if (meterState != nullptr) {
+                 meterValue =
+                     new Bmv2V1ModelMeterValue(*meterState->checkedTo<Bmv2V1ModelMeterValue>());
+             } else {
+                 meterValue = new Bmv2V1ModelMeterValue(inputValue, false);
+             }
+             meterValue->writeToIndex(index, inputValue);
+             nextState.addTestObject("meter_values", externInstance->controlPlaneName(),
+                                     meterValue);
+
+             if (meterResult->type->is<IR::Type_Bits>()) {
+                 // We need an assignment statement (and the inefficient copy) here because we need
+                 // to immediately resolve the generated mux into multiple branches.
+                 // This is only possible because meters do not return a value.
+                 replacements.emplace_back(new IR::AssignmentStatement(meterResult, inputValue));
+
+             } else {
+                 TESTGEN_UNIMPLEMENTED("Read extern output %1% of type %2% not supported",
+                                       meterResult, meterResult->type);
+             }
+             // TODO: Find a better way to model a trace of this event.
+             std::stringstream meterStream;
+             meterStream << "MeterExecute: Index ";
+             index->dbprint(meterStream);
+             meterStream << " into field ";
+             meterResult->dbprint(meterStream);
+             nextState.add(*new TraceEvents::Generic(meterStream.str()));
+             nextState.replaceTopBody(&replacements);
+             result->emplace_back(cond, state, nextState);
          }},
         /* ======================================================================================
-         *  direct_meter.count
+         *  direct_meter.read
          *  A direct_meter object is created by calling its constructor.
          *  You must provide a choice of whether to meter based on the
          *  number of packets, regardless of their size
@@ -932,18 +996,68 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          *               result will be assigned 0 for color GREEN, 1 for
          *               color YELLOW, and 2 for color RED (see RFC 2697
          *               and RFC 2698 for the meaning of these colors).
-         * ======================================================================================
-         */
-        // TODO: Read currently has no effect in the symbolic interpreter.
+         * ====================================================================================== */
         {"direct_meter.read",
          {"result"},
-         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
-            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
+         [](const IR::MethodCallExpression *call, const IR::Expression *receiver,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
-             ::warning("direct_meter.read not fully implemented.");
+             auto testBackend = TestgenOptions::get().testBackend;
+             if (testBackend != "PTF") {
+                 ::warning("direct_meter.read not implemented for %1%.", testBackend);
+                 auto &nextState = state.clone();
+                 nextState.popBody();
+                 result->emplace_back(nextState);
+                 return;
+             }
+
+             const auto *meterResult = args->at(0)->expression;
              auto &nextState = state.clone();
-             nextState.popBody();
-             result->emplace_back(nextState);
+             std::vector<Continuation::Command> replacements;
+
+             const auto *receiverPath = receiver->checkedTo<IR::PathExpression>();
+             const auto &externInstance = nextState.findDecl(receiverPath);
+
+             // Retrieve the meter state from the object store. If it is already present, just
+             // cast the object to the correct class and retrieve the current value according to the
+             // index. If the meter has not been added had, create a new meter object.
+             const auto *index = IR::getConstant(IR::getBitType(1), 0);
+             const auto *meterState =
+                 state.getTestObject("meter_values", externInstance->controlPlaneName(), false);
+             Bmv2V1ModelMeterValue *meterValue = nullptr;
+             const auto &inputValue = nextState.createZombieConst(
+                 meterResult->type, "meter_value" + std::to_string(call->clone_id));
+             // Make sure we do not accidentally get "3" as enum assignment...
+             auto *cond = new IR::Lss(inputValue, IR::getConstant(meterResult->type, 3));
+             if (meterState != nullptr) {
+                 meterValue =
+                     new Bmv2V1ModelMeterValue(*meterState->checkedTo<Bmv2V1ModelMeterValue>());
+             } else {
+                 meterValue = new Bmv2V1ModelMeterValue(inputValue, true);
+             }
+             meterValue->writeToIndex(index, inputValue);
+             nextState.addTestObject("meter_values", externInstance->controlPlaneName(),
+                                     meterValue);
+
+             const IR::Expression *baseExpr = meterValue->getValueAtIndex(index);
+
+             if (meterResult->type->is<IR::Type_Bits>()) {
+                 // We need an assignment statement (and the inefficient copy) here because we need
+                 // to immediately resolve the generated mux into multiple branches.
+                 // This is only possible because meters do not return a value.
+                 replacements.emplace_back(new IR::AssignmentStatement(meterResult, baseExpr));
+
+             } else {
+                 TESTGEN_UNIMPLEMENTED("Read extern output %1% of type %2% not supported",
+                                       meterResult, meterResult->type);
+             }
+             // TODO: Find a better way to model a trace of this event.
+             std::stringstream meterStream;
+             meterStream << "DirectMeterRead into field ";
+             meterResult->dbprint(meterStream);
+             nextState.add(*new TraceEvents::Generic(meterStream.str()));
+             nextState.replaceTopBody(&replacements);
+             result->emplace_back(cond, state, nextState);
          }},
 
         /* ======================================================================================

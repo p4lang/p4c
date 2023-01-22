@@ -155,6 +155,14 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
         testSpec->addTestObject("clone_specs", sessionId, evaluatedInfo);
     }
 
+    const auto meterInfos = executionState->getTestObjectCategory("meter_values");
+    for (const auto &testObject : meterInfos) {
+        const auto meterName = testObject.first;
+        const auto *meterInfo = testObject.second->checkedTo<Bmv2V1ModelMeterValue>();
+        const auto *evaluateMeterValue = meterInfo->evaluate(*completedModel);
+        testSpec->addTestObject("meter_values", meterName, evaluateMeterValue);
+    }
+
     return testSpec;
 }
 
