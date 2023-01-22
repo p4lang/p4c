@@ -73,7 +73,7 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
     if (options.testBackend == "PTF") {
         minPktSize = BMv2Constants::ETH_HDR_SIZE;
     }
-    const IR::Operation_Binary *constraint =
+    const IR::Expression *constraint =
         new IR::Grt(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
                     IR::getConstant(ExecutionState::getPacketSizeVarType(), minPktSize));
     /// Vector containing pairs of restrictions and nodes to which these restrictions apply.
@@ -90,11 +90,6 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
         }
     }
 
-    /// Set the restriction on the input port for PTF tests.
-    /// This is necessary since the PTF framework only allows a specific port range.
-    if (options.testBackend == "PTF") {
-        constraint = new IR::LAnd(constraint, getPortConstraint(getTargetInputPortVar()));
-    }
     targetConstraints = constraint;
 }
 

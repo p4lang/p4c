@@ -236,17 +236,10 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
   "Expected packet was not received on device"
-  issue1642-bmv2.p4
-  issue1653-bmv2.p4
-  issue1653-complex-bmv2.p4
-  issue1660-bmv2.p4
-  issue1755-1-bmv2.p4
   issue2314.p4
   issue281.p4
-  issue562-bmv2.p4
   bmv2_lookahead_2.p4
   xor_test.p4
-  v1model-special-ops-bmv2.p4
   parser-unroll-issue3537-1.p4
   parser-unroll-issue3537.p4
   parser-unroll-t1-cond.p4
@@ -267,6 +260,15 @@ p4tools_add_xfail_reason(
   # At index 0: INVALID_ARGUMENT, 'Bytestring provided does not fit within 0 bits'
   pins_middleblock.p4
   issue2283_1-bmv2.p4
+
+  # At index 0: INVALID_ARGUMENT, 'Unexpected number of action parameters'
+  up4.p4
+  # At index 0: INVALID_ARGUMENT, '0 is not a valid session id'
+  issue1642-bmv2.p4
+  issue1653-bmv2.p4
+  issue1653-complex-bmv2.p4
+  issue1660-bmv2.p4
+  issue562-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
