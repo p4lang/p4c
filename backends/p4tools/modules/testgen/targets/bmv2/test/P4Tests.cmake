@@ -20,7 +20,7 @@ else()
 endif()
 
 set(V1_SEARCH_PATTERNS "include.*v1model.p4" "main|common_v1_test")
-set(P4TESTDATA ${P4C_SOURCE_DIR}/../p4c/testdata)
+set(P4TESTDATA ${P4C_SOURCE_DIR}/testdata)
 set(P4TESTS_FOR_BMV2 "${P4TESTDATA}/p4_16_samples/*.p4")
 p4c_find_tests("${P4TESTS_FOR_BMV2}" P4_16_V1_TESTS INCLUDE "${V1_SEARCH_PATTERNS}" EXCLUDE "")
 p4tools_find_tests("${P4_16_V1_TESTS}" v1tests EXCLUDE "")
