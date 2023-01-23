@@ -408,7 +408,7 @@ class LogicalExpressionUnroll : public Inspector {
     static bool is_logical(const IR::Operation_Binary *bin) {
         if (bin->is<IR::LAnd>() || bin->is<IR::LOr>() || bin->is<IR::Leq>() || bin->is<IR::Equ>() ||
             bin->is<IR::Neq>() || bin->is<IR::Grt>() || bin->is<IR::Lss>() || bin->is<IR::Geq>() ||
-            bin->is<IR::Leq>() || bin->is<IR::LNot>())
+            bin->is<IR::Leq>())
             return true;
         else
             return false;
@@ -702,8 +702,7 @@ class BreakLogicalExpressionParenthesis : public Transform {
         } else if (!land->left->is<IR::LOr>() && !land->left->is<IR::Equ>() &&
                    !land->left->is<IR::Neq>() && !land->left->is<IR::Leq>() &&
                    !land->left->is<IR::Geq>() && !land->left->is<IR::Lss>() &&
-                   !land->left->is<IR::Grt>() && !land->left->is<IR::LNot>() &&
-                   !land->left->is<IR::MethodCallExpression>() &&
+                   !land->left->is<IR::Grt>() && !land->left->is<IR::MethodCallExpression>() &&
                    !land->left->is<IR::PathExpression>() && !land->left->is<IR::Member>()) {
             BUG("Logical Expression Unroll pass failed");
         }
@@ -715,8 +714,7 @@ class BreakLogicalExpressionParenthesis : public Transform {
             return new IR::LOr(lor2->left, sub);
         } else if (!lor->left->is<IR::LAnd>() && !lor->left->is<IR::Equ>() &&
                    !lor->left->is<IR::Neq>() && !lor->left->is<IR::Lss>() &&
-                   !lor->left->is<IR::Grt>() && !lor->left->is<IR::LNot>() &&
-                   !lor->left->is<IR::MethodCallExpression>() &&
+                   !lor->left->is<IR::Grt>() && !lor->left->is<IR::MethodCallExpression>() &&
                    !lor->left->is<IR::PathExpression>() && !lor->left->is<IR::Member>()) {
             BUG("Logical Expression Unroll pass failed");
         }
@@ -731,9 +729,8 @@ class BreakLogicalExpressionParenthesis : public Transform {
 class SwapSimpleExpressionToFrontOfLogicalExpression : public Transform {
     bool is_simple(const IR::Node *n) {
         if (n->is<IR::Equ>() || n->is<IR::Neq>() || n->is<IR::Lss>() || n->is<IR::Grt>() ||
-            n->is<IR::Geq>() || n->is<IR::Leq>() || n->is<IR::LNot>() ||
-            n->is<IR::MethodCallExpression>() || n->is<IR::PathExpression>() ||
-            n->is<IR::Member>()) {
+            n->is<IR::Geq>() || n->is<IR::Leq>() || n->is<IR::MethodCallExpression>() ||
+            n->is<IR::PathExpression>() || n->is<IR::Member>()) {
             return true;
         } else if (!n->is<IR::LAnd>() && !n->is<IR::LOr>()) {
             BUG("Logical Expression Unroll pass failed");

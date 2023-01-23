@@ -243,15 +243,14 @@ apply {
 	LABEL_FALSE_2 :	drop
 	jmp LABEL_END_1
 	LABEL_FALSE_1 :	jmpnv LABEL_FALSE_3 h.ipv4
-	jmpnv LABEL_END_6 h.esp
+	jmpnv LABEL_FALSE_4 h.esp
 	mov m.MainControlImpl_inbound_table_ipv4_src_addr h.ipv4.src_addr
 	mov m.MainControlImpl_inbound_table_ipv4_dst_addr h.ipv4.dst_addr
 	mov m.MainControlImpl_inbound_table_esp_spi h.esp.spi
 	table inbound_table
-	LABEL_END_6 :	jmpv LABEL_END_1 h.esp
-	jmpeq LABEL_TRUE_7 m.local_metadata_bypass 0x1
 	jmp LABEL_END_1
-	LABEL_TRUE_7 :	table routing_table
+	LABEL_FALSE_4 :	jmpneq LABEL_END_1 m.local_metadata_bypass 0x1
+	table routing_table
 	table next_hop_table
 	jmp LABEL_END_1
 	LABEL_FALSE_3 :	drop

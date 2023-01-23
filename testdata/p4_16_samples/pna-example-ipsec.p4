@@ -231,9 +231,11 @@ control MainControlImpl(
                                             inbound_table.apply();
 					} 
 					
-                                        if (!hdrs.esp.isValid() || meta.bypass) {
-                                        	routing_table.apply();
-						next_hop_table.apply();
+                                        else {
+						if (meta.bypass) {
+                                        		routing_table.apply();
+							next_hop_table.apply();
+                                        	}
                                         }
 				} else
 					drop_packet();
