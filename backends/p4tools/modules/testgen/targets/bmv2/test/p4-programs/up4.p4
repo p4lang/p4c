@@ -736,7 +736,9 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
                 }
             }
         }
-        Routing.apply(hdr, local_meta, std_meta);
+        if (hdr.ipv4.isValid()) {
+            Routing.apply(hdr, local_meta, std_meta);
+        }
         Acl.apply(hdr, local_meta, std_meta);
     }
 }
