@@ -16,14 +16,6 @@
 
 from common import *
 
-from scapy.layers.l2 import Ether
-from scapy.layers.inet import IP, UDP
-
-PORT0 = 0
-PORT1 = 1
-PORT2 = 2
-ALL_PORTS = [PORT0, PORT1, PORT2]
-
 
 class RegisterActionPSATest(P4EbpfTest):
     """
@@ -140,3 +132,34 @@ class RegisterStructsPSATest(P4EbpfTest):
         testutils.send_packet(self, PORT0, pkt)
         self.register_verify(name="ingress_reg", index=["0x5", "0xffffffffffff"],
                              expected_value=["0xDA", "0x55", "0x0D"])
+
+
+class RegisterWideIndexData(P4EbpfTest):
+    """
+    Test Register with index and value types wider than 64 bits. The test is executed twice - when Register entry
+    doesn't exist and when it exists. Only 104 MSB bits of IPv6 address are modified.
+    1. Send packet.
+    2. P4 program will swap IPv6 src address with value stored in Register entry at IPv6 dst address.
+    3. Validate values.
+    """
+    p4_file_path = "p4testdata/wide-field-register.p4"
+
+    def runTest(self):
+        addr = "0000:1111:2222:3333:4444:5555:6767:7676"
+        reg_key = "0x1111222233334444555567"
+        pkt = testutils.simple_ipv6ip_packet(ipv6_dst=addr, ipv6_src="1:1111::0")
+
+        # Test default value
+        exp_pkt = testutils.simple_ipv6ip_packet(ipv6_dst=addr, ipv6_src="0::0")
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet_any_port(self, exp_pkt, PTF_PORTS)
+        self.register_verify(name="ingress_reg", index=[reg_key],
+                             expected_value=["0x1_1111_0000_0000_0000_0000_00"])
+
+        # Test with register set
+        self.register_set(name="ingress_reg", index=[reg_key], value=[0x1_0000_0000_0000_0000_0011_22])
+        exp_pkt = testutils.simple_ipv6ip_packet(ipv6_dst=addr, ipv6_src="1::11:2200:0")
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet_any_port(self, exp_pkt, PTF_PORTS)
+        self.register_verify(name="ingress_reg", index=[reg_key],
+                             expected_value=["0x1_1111_0000_0000_0000_0000_00"])

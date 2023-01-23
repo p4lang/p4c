@@ -483,6 +483,13 @@ class P4EbpfTest(BaseTest):
         entry = entries[0]
         self._do_counter_verify(bytes=bytes, packets=packets, entry_value=entry["value"], counter_type=counter["type"])
 
+    def meter_get(self, name, index=None):
+        cmd = "nikss-ctl meter get pipe {} {}".format(TEST_PIPELINE_ID, name)
+        if index:
+            cmd = cmd + " index {}".format(index)
+        _, stdout, _ = self.exec_ns_cmd(cmd, "Meter get failed")
+        return json.loads(stdout)[name]['entries']
+
     def meter_update(self, name, index, pir, pbs, cir, cbs):
         cmd = "nikss-ctl meter update pipe {} {} " \
               "index {} {}:{} {}:{}".format(TEST_PIPELINE_ID, name,

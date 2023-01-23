@@ -112,7 +112,7 @@ class EBPFScalarType : public EBPFType, public IHasWidth {
     void emit(CodeBuilder *builder) override;
     void declare(CodeBuilder *builder, cstring id, bool asPointer) override;
     void declareInit(CodeBuilder *builder, cstring id, bool asPointer) override;
-    void emitInitializer(CodeBuilder *builder) override { builder->append("0"); }
+    void emitInitializer(CodeBuilder *builder) override;
     unsigned widthInBits() override { return width; }
     unsigned implementationWidthInBits() override { return bytesRequired() * 8; }
     // True if this width is small enough to store in a machine scalar
