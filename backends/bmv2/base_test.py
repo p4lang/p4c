@@ -1022,6 +1022,51 @@ class P4RuntimeTest(BaseTest):
                     entry = entity.counter_entry
                 counter_entries.append(entry)
         return counter_entries
+    
+    def verify_counter(self, counter_array, direct=False):
+        for counter_from_testgen in counter_array:
+            counters_from_switch = self.counter_dump_data(
+                counter_from_testgen["counter_name"], direct
+            )
+            counter_id = self.get_counter_id(counter_from_testgen["counter_name"])
+            for value in counter_from_testgen["counter_values"]:
+                for counter_from_switch in counters_from_switch:
+                    if (
+                        counter_id == counter_from_switch.counter_id
+                        and value["index"] == counter_from_switch.index.index
+                    ):
+                        if counter_from_testgen["counter_type"] == 0:
+                            if value["value"] != counter_from_switch.data.packet_count:
+                                e = "Expected {0} counter entry at index {1} with value {2} for type PACKETS , came value {3} ".format(
+                                    counter_from_testgen["counter_name"],
+                                    value["index"],
+                                    value["value"],
+                                    counter_from_switch.data.packet_count,
+                                )
+                                logging.error(e)
+                        if counter_from_testgen["counter_type"] == 1:
+                            if value["value"] != counter_from_switch.data.byte_count:
+                                e = "Expected {0} counter entry at index {1} with value {2} for type BYTES , came value {3} ".format(
+                                    counter_from_testgen["counter_name"],
+                                    value["index"],
+                                    value["value"],
+                                    counter_from_switch.data.byte_count,
+                                )
+                                logging.error(e)
+                        if counter_from_testgen["counter_type"] == 2:
+                            if (
+                                value["value"] != counter_from_switch.data.byte_count
+                                or value["value"]
+                                != counter_from_switch.data.packet_count
+                            ):
+                                e = "Expected {0} counter entry at index {1} with value {2} for type PACKETS_AND_BYTES , came packet value {3} nad bytes value {4} ".format(
+                                    counter_from_testgen["counter_name"],
+                                    value["index"],
+                                    value["value"],
+                                    counter_from_switch.data.packet_count,
+                                    counter_from_switch.data.byte_count,
+                                )
+                                logging.error(e)
 
     def make_table_read_request(self, table_name):
         req = p4runtime_pb2.ReadRequest()
