@@ -1330,14 +1330,11 @@ class CollectProgramStructure : public PassManager {
 // Add collected local variable decls as a field in metadata
 // struct
 class MoveCollectedStructLocalVariableToMetadata : public Transform {
-    P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
-    DpdkProgramStructure *structure;
 
  public:
-    MoveCollectedStructLocalVariableToMetadata(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-                                               DpdkProgramStructure *structure)
-        : refMap(refMap), typeMap(typeMap), structure(structure) {}
+    explicit MoveCollectedStructLocalVariableToMetadata(P4::TypeMap *typeMap)
+        : typeMap(typeMap) {}
     const IR::Node *preorder(IR::Type_Struct *s) override;
     const IR::Node *postorder(IR::P4Control *c) override;
     const IR::Node *postorder(IR::P4Program *p) override;
@@ -1361,15 +1358,15 @@ class CollectStructLocalVariables : public Transform {
 
 class CollectLocalStructAndFlatten : public PassManager {
  public:
-    CollectLocalStructAndFlatten(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-                                 DpdkProgramStructure *structure) {
+    CollectLocalStructAndFlatten(P4::ReferenceMap *refMap,
+            P4::TypeMap *typeMap) {
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::ResolveReferences(refMap));
         passes.push_back(new P4::TypeInference(refMap, typeMap, false));
         passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
         passes.push_back(new CollectStructLocalVariables(refMap, typeMap));
         passes.push_back(
-            new MoveCollectedStructLocalVariableToMetadata(refMap, typeMap, structure));
+            new MoveCollectedStructLocalVariableToMetadata(typeMap));
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::ResolveReferences(refMap));
         passes.push_back(new P4::TypeInference(refMap, typeMap, false));

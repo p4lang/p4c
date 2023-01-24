@@ -51,7 +51,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
     bool is_all_args_header_fields = true;
     PassManager simplify = {
         new DpdkArchFirst(),
-        new CollectLocalStructAndFlatten(refMap, typeMap, &structure),
+        new CollectLocalStructAndFlatten(refMap, typeMap),
         new P4::EliminateTypedef(refMap, typeMap),
         new P4::ClearTypeMap(typeMap),
         new P4::TypeChecking(refMap, typeMap),
