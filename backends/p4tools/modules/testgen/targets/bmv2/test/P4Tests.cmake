@@ -29,6 +29,7 @@ set(
   TESTGEN_BMV2_P416_TESTS
   "${CMAKE_CURRENT_LIST_DIR}/p4-programs/*.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pins/*.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/omec/*.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/fabric_*/fabric.p4"
 )
 

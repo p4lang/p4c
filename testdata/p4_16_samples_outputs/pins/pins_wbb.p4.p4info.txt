@@ -20,6 +20,7 @@ tables {
   match_fields {
     id: 2
     name: "in_port"
+    bitwidth: 9
     match_type: OPTIONAL
     type_name {
       name: "port_id_t"
@@ -48,6 +49,7 @@ tables {
     id: 1
     name: "router_interface_id"
     annotations: "@refers_to(router_interface_table , router_interface_id)"
+    bitwidth: 10
     match_type: EXACT
     type_name {
       name: "router_interface_id_t"
@@ -82,6 +84,7 @@ tables {
   match_fields {
     id: 1
     name: "router_interface_id"
+    bitwidth: 10
     match_type: EXACT
     type_name {
       name: "router_interface_id_t"
@@ -109,6 +112,7 @@ tables {
   match_fields {
     id: 1
     name: "nexthop_id"
+    bitwidth: 10
     match_type: EXACT
     type_name {
       name: "nexthop_id_t"
@@ -141,6 +145,7 @@ tables {
   match_fields {
     id: 1
     name: "wcmp_group_id"
+    bitwidth: 12
     match_type: EXACT
     type_name {
       name: "wcmp_group_id_t"
@@ -170,6 +175,7 @@ tables {
   match_fields {
     id: 1
     name: "vrf_id"
+    bitwidth: 10
     match_type: EXACT
     type_name {
       name: "vrf_id_t"
@@ -193,6 +199,7 @@ tables {
     id: 1
     name: "vrf_id"
     annotations: "@refers_to(vrf_table , vrf_id)"
+    bitwidth: 10
     match_type: EXACT
     type_name {
       name: "vrf_id_t"
@@ -243,6 +250,7 @@ tables {
     id: 1
     name: "vrf_id"
     annotations: "@refers_to(vrf_table , vrf_id)"
+    bitwidth: 10
     match_type: EXACT
     type_name {
       name: "vrf_id_t"
@@ -354,6 +362,7 @@ tables {
   match_fields {
     id: 1
     name: "mirror_session_id"
+    bitwidth: 10
     match_type: EXACT
     type_name {
       name: "mirror_session_id_t"
@@ -381,6 +390,7 @@ tables {
   match_fields {
     id: 1
     name: "mirror_port"
+    bitwidth: 9
     match_type: EXACT
     type_name {
       name: "port_id_t"
@@ -435,6 +445,7 @@ actions {
   params {
     id: 1
     name: "port"
+    bitwidth: 9
     type_name {
       name: "port_id_t"
     }
@@ -457,6 +468,7 @@ actions {
     name: "router_interface_id"
     annotations: "@refers_to(router_interface_table , router_interface_id)"
     annotations: "@refers_to(neighbor_table , router_interface_id)"
+    bitwidth: 10
     type_name {
       name: "router_interface_id_t"
     }
@@ -481,6 +493,7 @@ actions {
     name: "router_interface_id"
     annotations: "@refers_to(router_interface_table , router_interface_id)"
     annotations: "@refers_to(neighbor_table , router_interface_id)"
+    bitwidth: 10
     type_name {
       name: "router_interface_id_t"
     }
@@ -503,6 +516,7 @@ actions {
     id: 1
     name: "nexthop_id"
     annotations: "@refers_to(nexthop_table , nexthop_id)"
+    bitwidth: 10
     type_name {
       name: "nexthop_id_t"
     }
@@ -518,6 +532,7 @@ actions {
     id: 1
     name: "nexthop_id"
     annotations: "@refers_to(nexthop_table , nexthop_id)"
+    bitwidth: 10
     type_name {
       name: "nexthop_id_t"
     }
@@ -552,6 +567,7 @@ actions {
     id: 1
     name: "wcmp_group_id"
     annotations: "@refers_to(wcmp_group_table , wcmp_group_id)"
+    bitwidth: 12
     type_name {
       name: "wcmp_group_id_t"
     }
@@ -567,6 +583,7 @@ actions {
     id: 1
     name: "wcmp_group_id"
     annotations: "@refers_to(wcmp_group_table , wcmp_group_id)"
+    bitwidth: 12
     type_name {
       name: "wcmp_group_id_t"
     }
@@ -609,6 +626,7 @@ actions {
   params {
     id: 1
     name: "port"
+    bitwidth: 9
     type_name {
       name: "port_id_t"
     }
@@ -703,6 +721,7 @@ controller_packet_metadata {
   metadata {
     id: 1
     name: "ingress_port"
+    bitwidth: 9
     type_name {
       name: "port_id_t"
     }
@@ -710,6 +729,7 @@ controller_packet_metadata {
   metadata {
     id: 2
     name: "target_egress_port"
+    bitwidth: 9
     type_name {
       name: "port_id_t"
     }
@@ -725,6 +745,7 @@ controller_packet_metadata {
   metadata {
     id: 1
     name: "egress_port"
+    bitwidth: 9
     type_name {
       name: "port_id_t"
     }
@@ -744,8 +765,11 @@ type_info {
   new_types {
     key: "mirror_session_id_t"
     value {
-      translated_type {
-        sdn_string {
+      original_type {
+        bitstring {
+          bit {
+            bitwidth: 10
+          }
         }
       }
     }
@@ -753,8 +777,11 @@ type_info {
   new_types {
     key: "nexthop_id_t"
     value {
-      translated_type {
-        sdn_string {
+      original_type {
+        bitstring {
+          bit {
+            bitwidth: 10
+          }
         }
       }
     }
@@ -762,8 +789,11 @@ type_info {
   new_types {
     key: "port_id_t"
     value {
-      translated_type {
-        sdn_string {
+      original_type {
+        bitstring {
+          bit {
+            bitwidth: 9
+          }
         }
       }
     }
@@ -771,8 +801,11 @@ type_info {
   new_types {
     key: "router_interface_id_t"
     value {
-      translated_type {
-        sdn_string {
+      original_type {
+        bitstring {
+          bit {
+            bitwidth: 10
+          }
         }
       }
     }
@@ -780,8 +813,11 @@ type_info {
   new_types {
     key: "vrf_id_t"
     value {
-      translated_type {
-        sdn_string {
+      original_type {
+        bitstring {
+          bit {
+            bitwidth: 10
+          }
         }
       }
     }
@@ -789,8 +825,11 @@ type_info {
   new_types {
     key: "wcmp_group_id_t"
     value {
-      translated_type {
-        sdn_string {
+      original_type {
+        bitstring {
+          bit {
+            bitwidth: 12
+          }
         }
       }
     }

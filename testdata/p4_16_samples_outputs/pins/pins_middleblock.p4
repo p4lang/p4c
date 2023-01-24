@@ -96,6 +96,15 @@ enum bit<8> PreservedFieldList {
     CLONE_I2E = 8w1
 }
 
+type bit<10> nexthop_id_t;
+type bit<10> tunnel_id_t;
+type bit<12> wcmp_group_id_t;
+type bit<10> vrf_id_t;
+const vrf_id_t kDefaultVrf = 0;
+type bit<10> router_interface_id_t;
+type bit<9> port_id_t;
+type bit<10> mirror_session_id_t;
+type bit<8> qos_queue_t;
 typedef bit<6> route_metadata_t;
 enum bit<2> MeterColor_t {
     GREEN = 0,
