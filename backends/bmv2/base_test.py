@@ -1044,6 +1044,7 @@ class P4RuntimeTest(BaseTest):
                                     counter_from_switch.data.packet_count,
                                 )
                                 logging.error(e)
+                                raise RuntimeError(e)
                         if counter_from_testgen["counter_type"] == 1:
                             if value["value"] != counter_from_switch.data.byte_count:
                                 e = "Expected {0} counter entry at index {1} with value {2} for type BYTES , came value {3} ".format(
@@ -1053,6 +1054,7 @@ class P4RuntimeTest(BaseTest):
                                     counter_from_switch.data.byte_count,
                                 )
                                 logging.error(e)
+                                raise RuntimeError(e)
                         if counter_from_testgen["counter_type"] == 2:
                             if (
                                 value["value"] != counter_from_switch.data.byte_count
@@ -1067,6 +1069,7 @@ class P4RuntimeTest(BaseTest):
                                     counter_from_switch.data.byte_count,
                                 )
                                 logging.error(e)
+                                raise RuntimeError(e)
 
     def make_table_read_request(self, table_name):
         req = p4runtime_pb2.ReadRequest()
