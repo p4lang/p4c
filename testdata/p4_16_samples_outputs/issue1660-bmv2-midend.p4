@@ -21,7 +21,7 @@ parser parse(packet_in pk, out parsed_packet_t h, inout local_metadata_t local_m
 
 control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     @hidden action issue1660bmv2l23() {
-        clone_preserving_field_list(CloneType.I2E, 32w0, 8w0);
+        clone_preserving_field_list(CloneType.I2E, 32w1, 8w0);
     }
     @hidden table tbl_issue1660bmv2l23 {
         actions = {
