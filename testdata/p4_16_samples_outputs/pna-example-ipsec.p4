@@ -150,11 +150,13 @@ control MainControlImpl(inout headers_t hdrs, inout metadata_t meta, in pna_main
                 if (hdrs.ipv4.isValid()) {
                     if (hdrs.esp.isValid()) {
                         inbound_table.apply();
-                    } else {
                         if (meta.bypass) {
                             routing_table.apply();
                             next_hop_table.apply();
                         }
+                    } else {
+                        routing_table.apply();
+                        next_hop_table.apply();
                     }
                 } else {
                     drop_packet();

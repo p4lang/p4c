@@ -228,10 +228,12 @@ control MainControlImpl(
 				// Pre-decrypt processing.
 				if (hdrs.ipv4.isValid()) {
 					if (hdrs.esp.isValid()) {
-                                            inbound_table.apply();
-					} 
-					
-                                        if (!hdrs.esp.isValid() || meta.bypass) {
+                                        	inbound_table.apply();
+	                                         if (meta.bypass) {
+        			                 	routing_table.apply();
+						     	next_hop_table.apply();
+        			                 }
+					} else { 
                                         	routing_table.apply();
 						next_hop_table.apply();
                                         }

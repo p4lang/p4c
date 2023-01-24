@@ -248,9 +248,12 @@ apply {
 	mov m.MainControlImpl_inbound_table_ipv4_dst_addr h.ipv4.dst_addr
 	mov m.MainControlImpl_inbound_table_esp_spi h.esp.spi
 	table inbound_table
-	jmp LABEL_END_1
-	LABEL_FALSE_4 :	jmpneq LABEL_END_1 m.local_metadata_bypass 0x1
+	jmpneq LABEL_END_1 m.local_metadata_bypass 0x1
 	table routing_table
+	table next_hop_table
+	jmp LABEL_END_1
+	jmp LABEL_END_1
+	LABEL_FALSE_4 :	table routing_table
 	table next_hop_table
 	jmp LABEL_END_1
 	LABEL_FALSE_3 :	drop
