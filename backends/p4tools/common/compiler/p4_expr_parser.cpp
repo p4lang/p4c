@@ -199,10 +199,10 @@ std::pair<const IR::Node *, IR::ID> Parser::getDefinedType(cstring txt, const IR
         if (nd->is<IR::P4Program>()) {
             auto *decls = program->getDeclsByName(txt);
             BUG_CHECK(decls != nullptr, "Can't find type for %1%", txt);
-            if (decls->stateName() == "NotStarted") {
-                return std::make_pair(nullptr, txt);
+            const auto *vec = decls->toVector();
+            if (vec->size() == 1) {
+                decl = vec->at(0);
             }
-            decl = decls->single();
         } else if (const auto *ns = nd->to<IR::ISimpleNamespace>()) {
             decl = ns->getDeclByName(txt);
             if (decl == nullptr) {
@@ -249,8 +249,11 @@ std::pair<const IR::Node *, IR::ID> Parser::getDefinedType(cstring txt, const IR
                     return std::make_pair(field->type, IR::ID(txt));
                 }
             }
-            BUG_CHECK(!nd->is<IR::P4Control>() && !nd->is<IR::P4Action>() && !nd->is<IR::P4Table>(),
-                      "Can't find %1% in %2%", txt, nd);
+            // Try with nearest CTX
+            if (currentNS != nullptr) {
+                Parser p(program, tokens, addFA, types, nullptr);
+                return p.getDefinedType(txt, currentNS->to<IR::Node>());
+            }
             // Retrun Boolean type by default.
             return std::make_pair(IR::Type_Boolean::get(), IR::ID(txt));
         }
@@ -334,11 +337,8 @@ const IR::Node *Parser::createSliceOrArrayOp(const IR::Node *base) {
     const auto slice = createPunctuationMarks();
     BUG_CHECK(tokens[index].is(Token::Kind::RightSParen), "Expected ']'");
     index++;
-    if (slice->is<IR::NamedExpression>()) {
-        const auto *namedExpr = slice->to<IR::NamedExpression>();
-        BUG_CHECK(namedExpr != nullptr, "Unexpected expression %1%", namedExpr);
-        BUG_CHECK(namedExpr->name == "Colon", "Expected colon expression %1%", namedExpr);
-        const auto *listExpr = namedExpr->expression->to<IR::ListExpression>();
+    if (slice->is<IR::ListExpression>()) {
+        const auto *listExpr = slice->to<IR::ListExpression>();
         BUG_CHECK(listExpr->size() < 3 && listExpr->size() != 0, "Expected one or two arguments",
                   listExpr);
         // Create a slice.
@@ -531,11 +531,12 @@ const IR::Node *Parser::createFunctionCallOrConstantOp() {
             nd = res.first;
             const IR::Type *type = nullptr;
             if (!isNoTypes) {
-                if (name == "mask") {
+                if (name == "mask" || name == "prefix_length") {
                     type = mainArgument->to<IR::Expression>()->type;
                 } else {
                     type = ndToType(res.first);
                 }
+                lastType = type;
             }
             if (!isNoTypes && res.second.originalName == "isValid") {
                 type = mainArgument->to<IR::Expression>()->type;
@@ -544,14 +545,12 @@ const IR::Node *Parser::createFunctionCallOrConstantOp() {
                 if (type == nullptr) {
                     mainArgument = new IR::PathExpression(new IR::Path(res.second));
                 } else {
-                    lastType = type;
                     mainArgument = new IR::PathExpression(type, new IR::Path(res.second));
                 }
             } else {
                 if (type == nullptr) {
                     mainArgument = new IR::Member(mainArgument->to<IR::Expression>(), res.second);
                 } else {
-                    lastType = type;
                     mainArgument =
                         new IR::Member(type, mainArgument->to<IR::Expression>(), res.second);
                 }
@@ -793,6 +792,7 @@ const IR::Node *Parser::createListExpressions(const char *name, Token::Kind kind
         if (index >= tokens.size()) {
             break;
         }
+        lastType = nullptr;
     } while (true);
     if (components.size() == 1) {
         return components[0];
@@ -811,7 +811,7 @@ const IR::Node *Parser::getIR() {
 
 const IR::Node *Parser::getIR(const char *str, const IR::P4Program *program, bool addFA,
                               const std::map<cstring, const IR::Type *> types,
-                              TokensSet skippedTokens) {
+                              const IR::ISimpleNamespace *currentNS, TokensSet skippedTokens) {
     Lexer lex(str);
     std::vector<Token> tmp;
     for (auto token = lex.next(); !token.is_one_of(Token::Kind::End, Token::Kind::Unknown);
@@ -820,13 +820,19 @@ const IR::Node *Parser::getIR(const char *str, const IR::P4Program *program, boo
             tmp.push_back(token);
         }
     }
-    Parser parser(program, tmp, addFA, types);
+    Parser parser(program, tmp, addFA, types, currentNS);
     return parser.getIR();
 }
 
-Parser::Parser(const IR::P4Program *program, std::vector<Token> &tokens, bool addFA,
-               const std::map<cstring, const IR::Type *> types)
-    : program(program), tokens(tokens), addFA(addFA), lastType(nullptr), types(types) {}
+Parser::Parser(const IR::P4Program *program, const std::vector<Token> &tokens, bool addFA,
+               const std::map<cstring, const IR::Type *> types,
+               const IR::ISimpleNamespace *currentNS)
+    : program(program),
+      tokens(tokens),
+      addFA(addFA),
+      lastType(nullptr),
+      types(types),
+      currentNS(currentNS) {}
 
 Token Lexer::atom(Token::Kind kind) noexcept { return {kind, m_beg++, 1}; }
 

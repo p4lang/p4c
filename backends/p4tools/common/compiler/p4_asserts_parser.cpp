@@ -163,7 +163,8 @@ std::vector<const IR::Expression *> AssertsParser::genIRStructs(
         }
         types.emplace(keyName, type);
     }
-    const auto *restr = ExpressionParser::Parser::getIR(restrictionString, p4Program, true, types);
+    const auto *restr = ExpressionParser::Parser::getIR(restrictionString, p4Program, true, types,
+                                                        findOrigCtxt<IR::ISimpleNamespace>());
     MemberToVariable memberToVariable(tableName, types);
     if (const auto *listExpression = restr->to<IR::ListExpression>()) {
         for (const auto *component : listExpression->components) {

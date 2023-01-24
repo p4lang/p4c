@@ -101,10 +101,11 @@ const IR::Expression *parseExpression(const char *str, const IR::P4Program *p) {
 
 TEST_F(P4ExpressionParserTest, SimpleExpressions) {
     const auto *program =
-        loadExample("backends/p4tools/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4");
+        loadExample("backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4");
     // Check local variable
     const auto *expr = parseExpression("ingress::d", program);
     ASSERT_TRUE(expr->is<IR::PathExpression>());
+    std::cout << expr << std::endl;
     ASSERT_TRUE(expr->to<IR::PathExpression>()->path->name.originalName == "d");
     ASSERT_TRUE(expr->to<IR::PathExpression>()->path->name.name == "d_0");
     ASSERT_TRUE(expr->type->is<IR::Type_Bits>());
