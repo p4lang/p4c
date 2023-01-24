@@ -26,6 +26,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "lib/error.h"
 #include "lib/ordered_map.h"
+#include "midend/flattenInterfaceStructs.h"
 #include "midend/removeLeftSlices.h"
 
 namespace DPDK {
@@ -1323,6 +1324,57 @@ class CollectProgramStructure : public PassManager {
             }
             main->apply(*parseDpdk);
         }));
+    }
+};
+
+// Add collected local variable decls as a field in metadata
+// struct
+class MoveCollectedStructLocalVariableToMetadata : public Transform {
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
+    DpdkProgramStructure *structure;
+
+ public:
+    MoveCollectedStructLocalVariableToMetadata(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                                               DpdkProgramStructure *structure)
+        : refMap(refMap), typeMap(typeMap), structure(structure) {}
+    const IR::Node *preorder(IR::Type_Struct *s) override;
+    const IR::Node *postorder(IR::P4Control *c) override;
+    const IR::Node *postorder(IR::P4Program *p) override;
+    const IR::Node *postorder(IR::P4Parser *c) override;
+};
+
+// collect all local struct variable and metadata struct type
+class CollectStructLocalVariables : public Transform {
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
+
+ public:
+    CollectStructLocalVariables(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
+        : refMap(refMap), typeMap(typeMap) {}
+    const IR::Node *postorder(IR::P4Parser *c) override;
+    const IR::Node *preorder(IR::PathExpression *path) override;
+    static const IR::Type_Struct *metadataStrct;
+    static std::map<cstring, const IR::Type *> fieldNameType;
+    static IR::Vector<IR::Node> type_tobe_moved_at_top;
+};
+
+class CollectLocalStructAndFlatten : public PassManager {
+ public:
+    CollectLocalStructAndFlatten(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                                 DpdkProgramStructure *structure) {
+        passes.push_back(new P4::ClearTypeMap(typeMap));
+        passes.push_back(new P4::ResolveReferences(refMap));
+        passes.push_back(new P4::TypeInference(refMap, typeMap, false));
+        passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
+        passes.push_back(new CollectStructLocalVariables(refMap, typeMap));
+        passes.push_back(
+            new MoveCollectedStructLocalVariableToMetadata(refMap, typeMap, structure));
+        passes.push_back(new P4::ClearTypeMap(typeMap));
+        passes.push_back(new P4::ResolveReferences(refMap));
+        passes.push_back(new P4::TypeInference(refMap, typeMap, false));
+        passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
+        passes.push_back(new P4::FlattenInterfaceStructs(refMap, typeMap));
     }
 };
 

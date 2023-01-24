@@ -1,0 +1,6 @@
+[--Wwarn=uninitialized_use] warning: retval may be uninitialized
+[--Wwarn=uninitialized_use] warning: retval_0 may be uninitialized
+[--Wwarn=uninitialized_use] warning: retval may be uninitialized
+[--Wwarn=uninitialized_use] warning: retval_0 may be uninitialized
+[--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table tcp_ct_state_table. Copying all match fields to metadata
+[--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table tcp_ct_table. Copying all match fields to metadata

@@ -3035,6 +3035,105 @@ std::vector<std::pair<cstring, const IR::Type *>>
 cstring DpdkAddPseudoHeaderDecl::pseudoHeaderInstanceName;
 cstring DpdkAddPseudoHeaderDecl::pseudoHeaderTypeName;
 
+const IR::Node *MoveCollectedStructLocalVariableToMetadata::preorder(IR::Type_Struct *s) {
+    if (s->toString() == CollectStructLocalVariables::metadataStrct->toString()) {
+        for (auto kv : CollectStructLocalVariables::fieldNameType) {
+            s->fields.push_back(new IR::StructField(kv.first, kv.second));
+        }
+        CollectStructLocalVariables::fieldNameType.clear();
+    }
+    return s;
+}
+
+const IR::Node *MoveCollectedStructLocalVariableToMetadata::postorder(IR::P4Program *p) {
+    auto objs = p->objects;
+
+    IR::Vector<IR::Node> old_objs;
+    for (auto obj : objs) {
+        bool is_found = false;
+        for (auto obj1 : CollectStructLocalVariables::fieldNameType) {
+            if (obj->toString() == obj1.second->toString()) {
+                is_found = true;
+                break;
+            }
+        }
+        if (!is_found) old_objs.push_back(obj);
+    }
+    IR::Vector<IR::Node> newobjs;
+    for (auto obj1 : CollectStructLocalVariables::fieldNameType) newobjs.push_back(obj1.second);
+    newobjs.append(old_objs);
+    p->objects = newobjs;
+    return p;
+}
+
+const IR::Node *MoveCollectedStructLocalVariableToMetadata::postorder(IR::P4Control *c) {
+    IR::IndexedVector<IR::Declaration> decls;
+    for (auto d : c->controlLocals) {
+        if (d->is<IR::Declaration_Variable>()) {
+            if (!typeMap->getType(d, true)->to<IR::Type_Struct>()) decls.push_back(d);
+        } else
+            decls.push_back(d);
+    }
+    c->controlLocals = decls;
+    return c;
+}
+
+const IR::Node *MoveCollectedStructLocalVariableToMetadata::postorder(IR::P4Parser *p) {
+    IR::IndexedVector<IR::Declaration> decls;
+    for (auto d : p->parserLocals) {
+        if (d->is<IR::Declaration_Variable>()) {
+            if (!typeMap->getType(d, true)->to<IR::Type_Struct>()) decls.push_back(d);
+        } else
+            decls.push_back(d);
+    }
+    p->parserLocals = decls;
+    return p;
+}
+
+IR::Vector<IR::Node> CollectStructLocalVariables::type_tobe_moved_at_top;
+std::map<cstring, const IR::Type *> CollectStructLocalVariables::fieldNameType{};
+
+const IR::Node *CollectStructLocalVariables::preorder(IR::PathExpression *path) {
+    auto parser = findContext<IR::P4Parser>();
+    auto control = findContext<IR::P4Control>();
+    auto program = findContext<IR::P4Program>();
+    cstring metdataParamname;
+    if (parser) {
+        metdataParamname = parser->type->applyParams->parameters.at(2)->name;
+    } else if (control) {
+        metdataParamname = control->type->applyParams->parameters.at(1)->name;
+    } else if (program) {
+        return path;
+    } else {
+        BUG(" Unexpected context");
+    }
+
+    if (refMap->getDeclaration(path->path))
+        if (auto decl = refMap->getDeclaration(path->path)->to<IR::Declaration_Variable>()) {
+            if (auto type = typeMap->getType(decl, true)->to<IR::Type_Struct>()) {
+                type_tobe_moved_at_top.push_back(type);
+                fieldNameType.insert(
+                    std::pair<cstring, const IR::Type *>(path->path->name.name, type));
+                return new IR::Member(new IR::PathExpression(metdataParamname),
+                                      path->path->name.name);
+            }
+        }
+    return path;
+}
+
+const IR::Node *CollectStructLocalVariables::postorder(IR::P4Parser *p) {
+    if (metadataStrct) return p;
+    auto ctrl = getOriginal<IR::P4Parser>();
+    auto pr = ctrl->type->applyParams->parameters.at(2);
+    if (auto tn = pr->type->to<IR::Type_Name>()) {
+        auto decl = typeMap->getTypeType(tn, true);
+        auto ty = decl->to<IR::Type_Struct>();
+        metadataStrct = ty;
+    }
+    return p;
+}
+const IR::Type_Struct *CollectStructLocalVariables::metadataStrct = nullptr;
+
 // create and add register declaration instance to program
 IR::IndexedVector<IR::StatOrDecl> *InsertReqDeclForIPSec::addRegDeclInstance(
     std::vector<cstring> portRegs) {

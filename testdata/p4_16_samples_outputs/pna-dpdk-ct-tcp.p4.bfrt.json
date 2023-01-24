@@ -1,0 +1,366 @@
+{
+  "schema_version" : "1.0.0",
+  "tables" : [
+    {
+      "name" : "pipe.MainControlImpl.tcp_ct_state_table",
+      "id" : 50316847,
+      "table_type" : "MatchAction_Direct",
+      "size" : 1024,
+      "annotations" : [],
+      "depends_on" : [],
+      "has_const_default_action" : true,
+      "key" : [
+        {
+          "id" : 1,
+          "name" : "meta.dir",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : false,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "bytes",
+            "width" : 8
+          }
+        },
+        {
+          "id" : 2,
+          "name" : "meta.tcpFlagsSet",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : false,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "bytes",
+            "width" : 8
+          }
+        },
+        {
+          "id" : 3,
+          "name" : "meta.currentState",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : false,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "bytes",
+            "width" : 8
+          }
+        }
+      ],
+      "action_specs" : [
+        {
+          "id" : 24740121,
+          "name" : "MainControlImpl.drop",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        },
+        {
+          "id" : 18140562,
+          "name" : "MainControlImpl.tcp_ct_syn_sent",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        },
+        {
+          "id" : 22932522,
+          "name" : "MainControlImpl.tcp_ct_syn_recv",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        },
+        {
+          "id" : 30801361,
+          "name" : "MainControlImpl.tcp_ct_established",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        },
+        {
+          "id" : 26253712,
+          "name" : "MainControlImpl.tcp_ct_fin_wait",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        },
+        {
+          "id" : 30702213,
+          "name" : "MainControlImpl.tcp_ct_close_wait",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        },
+        {
+          "id" : 28371327,
+          "name" : "MainControlImpl.tcp_ct_last_ack",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        },
+        {
+          "id" : 26136851,
+          "name" : "MainControlImpl.tcp_ct_time_wait",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        },
+        {
+          "id" : 25176578,
+          "name" : "MainControlImpl.tcp_ct_close",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        },
+        {
+          "id" : 29749592,
+          "name" : "MainControlImpl.tcp_ct_syn_sent2",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        },
+        {
+          "id" : 28205960,
+          "name" : "MainControlImpl.tcp_ct_ignore",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        }
+      ],
+      "data" : [],
+      "supported_operations" : [],
+      "attributes" : ["EntryScope"]
+    },
+    {
+      "name" : "pipe.MainControlImpl.tcp_ct_table",
+      "id" : 42491994,
+      "table_type" : "MatchAction_Direct",
+      "size" : 1024,
+      "annotations" : [],
+      "depends_on" : [],
+      "has_const_default_action" : true,
+      "key" : [
+        {
+          "id" : 1,
+          "name" : "ipv4_addr_0",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : false,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "bytes",
+            "width" : 32
+          }
+        },
+        {
+          "id" : 2,
+          "name" : "ipv4_addr_1",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : false,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "bytes",
+            "width" : 32
+          }
+        },
+        {
+          "id" : 3,
+          "name" : "hdr.ipv4.protocol",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : false,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "bytes",
+            "width" : 8
+          }
+        },
+        {
+          "id" : 4,
+          "name" : "tcp_port_0",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : false,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "bytes",
+            "width" : 16
+          }
+        },
+        {
+          "id" : 5,
+          "name" : "tcp_port_1",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : false,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "bytes",
+            "width" : 16
+          }
+        }
+      ],
+      "action_specs" : [
+        {
+          "id" : 17461975,
+          "name" : "MainControlImpl.tcp_ct_table_hit",
+          "action_scope" : "TableOnly",
+          "annotations" : [
+            {
+              "name" : "@tableonly"
+            }
+          ],
+          "data" : []
+        },
+        {
+          "id" : 32054372,
+          "name" : "MainControlImpl.tcp_ct_table_miss",
+          "action_scope" : "DefaultOnly",
+          "annotations" : [
+            {
+              "name" : "@defaultonly"
+            }
+          ],
+          "data" : []
+        }
+      ],
+      "data" : [],
+      "supported_operations" : [],
+      "attributes" : ["EntryScope"]
+    },
+    {
+      "name" : "pipe.MainControlImpl.ip_packet_fwd",
+      "id" : 44802727,
+      "table_type" : "MatchAction_Direct",
+      "size" : 4096,
+      "annotations" : [],
+      "depends_on" : [],
+      "has_const_default_action" : true,
+      "key" : [
+        {
+          "id" : 1,
+          "name" : "hdr.ipv4.dstAddr",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : false,
+          "match_type" : "LPM",
+          "type" : {
+            "type" : "bytes",
+            "width" : 32
+          }
+        }
+      ],
+      "action_specs" : [
+        {
+          "id" : 24740121,
+          "name" : "MainControlImpl.drop",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        },
+        {
+          "id" : 22742608,
+          "name" : "MainControlImpl.send",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : [
+            {
+              "id" : 1,
+              "name" : "port",
+              "repeated" : false,
+              "mandatory" : true,
+              "read_only" : false,
+              "annotations" : [],
+              "type" : {
+                "type" : "bytes",
+                "width" : 32
+              }
+            }
+          ]
+        }
+      ],
+      "data" : [],
+      "supported_operations" : [],
+      "attributes" : ["EntryScope"]
+    },
+    {
+      "name" : "pipe.tcpCtCurrentStateReg",
+      "id" : 380540784,
+      "table_type" : "Register",
+      "size" : 65536,
+      "annotations" : [],
+      "depends_on" : [],
+      "key" : [
+        {
+          "id" : 65557,
+          "name" : "$REGISTER_INDEX",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : true,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "uint32"
+          }
+        }
+      ],
+      "data" : [
+        {
+          "mandatory" : false,
+          "read_only" : false,
+          "singleton" : {
+            "id" : 65557,
+            "name" : "$REGISTER_INDEX",
+            "repeated" : false,
+            "annotations" : [],
+            "type" : {
+              "type" : "bytes",
+              "width" : 8
+            }
+          }
+        }
+      ],
+      "supported_operations" : ["Sync"],
+      "attributes" : []
+    },
+    {
+      "name" : "pipe.tcpCtDirReg",
+      "id" : 376288818,
+      "table_type" : "Register",
+      "size" : 65536,
+      "annotations" : [],
+      "depends_on" : [],
+      "key" : [
+        {
+          "id" : 65557,
+          "name" : "$REGISTER_INDEX",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : true,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "uint32"
+          }
+        }
+      ],
+      "data" : [
+        {
+          "mandatory" : false,
+          "read_only" : false,
+          "singleton" : {
+            "id" : 65557,
+            "name" : "$REGISTER_INDEX",
+            "repeated" : false,
+            "annotations" : [],
+            "type" : {
+              "type" : "bytes",
+              "width" : 8
+            }
+          }
+        }
+      ],
+      "supported_operations" : ["Sync"],
+      "attributes" : []
+    }
+  ],
+  "learn_filters" : []
+}
