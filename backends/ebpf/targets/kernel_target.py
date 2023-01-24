@@ -113,10 +113,8 @@ class Target(EBPFTarget):
 
         # Add the qdisc. MUST be clsact layer.
         bridge.ns_exec(f"tc qdisc add dev {port_name} clsact")
-        cmd = (
-            f"tc filter add dev {port_name} egress"
-            f" bpf da obj {self.template}.o section prog verbose"
-        )
+        cmd = (f"tc filter add dev {port_name} egress"
+               f" bpf da obj {self.template}.o section prog verbose")
         return bridge.ns_proc_write(proc, cmd)
 
     def _attach_filters(self, bridge, proc):

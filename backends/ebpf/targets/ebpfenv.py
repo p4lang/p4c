@@ -26,12 +26,14 @@ FILE_DIR = Path(__file__).resolve().parent
 sys.path.append(str(FILE_DIR.joinpath("../../../tools")))
 import testutils
 
+
 class Bridge:
+
     def __init__(self, namespace):
-        self.ns_name = namespace  # identifier of the namespace
-        self.br_name = "core"  # name of the central bridge
-        self.br_ports = []  # list of the veth pair bridge ports
-        self.edge_ports = []  # list of the veth pair edge ports
+        self.ns_name = namespace # identifier of the namespace
+        self.br_name = "core"    # name of the central bridge
+        self.br_ports = []       # list of the veth pair bridge ports
+        self.edge_ports = []     # list of the veth pair edge ports
 
     def ns_init(self):
         """Initialize the namespace."""

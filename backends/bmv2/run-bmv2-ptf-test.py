@@ -20,7 +20,9 @@ from ebpfenv import Bridge
 import testutils
 
 PARSER = argparse.ArgumentParser()
-PARSER.add_argument("rootdir", help="the root directory of " "the compiler source tree")
+PARSER.add_argument(
+    "rootdir", help="the root directory of "
+    "the compiler source tree")
 PARSER.add_argument("p4_file", help="the p4 file to process")
 PARSER.add_argument(
     "-tf",
@@ -59,6 +61,7 @@ PARSER.add_argument(
 
 
 class Options:
+
     def __init__(self):
         # File that is being compiled.
         self.p4_file = None
@@ -73,17 +76,14 @@ class Options:
 
 
 def create_bridge(num_ifaces):
-    testutils.log.info(
-        "---------------------- Start creating of bridge ----------------------",
-    )
+    testutils.log.info("---------------------- Start creating of bridge ----------------------",)
     random.seed(datetime.now().timestamp())
     bridge = Bridge(random.randint(0, sys.maxsize))
     result = bridge.create_virtual_env(num_ifaces)
     if result != testutils.SUCCESS:
         bridge.ns_del()
         testutils.log.error(
-            "---------------------- End creating of bridge with errors ----------------------",
-        )
+            "---------------------- End creating of bridge with errors ----------------------",)
         raise SystemExit("Unable to create the namespace environment.")
     testutils.log.info("---------------------- Bridge created ----------------------")
     return bridge
@@ -91,26 +91,20 @@ def create_bridge(num_ifaces):
 
 def compile_program(options, json_name, info_name):
     testutils.log.info("---------------------- Start p4c-bm2-ss ----------------------")
-    compilation_cmd = (
-        f"{options.rootdir}/build/p4c-bm2-ss --target bmv2 --arch v1model "
-        f"--p4runtime-files {info_name} {options.p4_file} -o {json_name}"
-    )
+    compilation_cmd = (f"{options.rootdir}/build/p4c-bm2-ss --target bmv2 --arch v1model "
+                       f"--p4runtime-files {info_name} {options.p4_file} -o {json_name}")
     _, returncode = testutils.exec_process(
-        compilation_cmd, "Could not compile the P4 program", timeout=30
-    )
+        compilation_cmd, "Could not compile the P4 program", timeout=30)
     return returncode
 
 
 def run_simple_switch_grpc(bridge, switchlog, grpc_port):
     thrift_port = testutils.pick_tcp_port(22000)
-    testutils.log.info(
-        "---------------------- Start simple_switch_grpc ----------------------",
-    )
+    testutils.log.info("---------------------- Start simple_switch_grpc ----------------------",)
     simple_switch_grpc = (
         f"simple_switch_grpc --thrift-port {thrift_port} --log-file {switchlog} --log-flush -i 0@0 "
         f"-i 1@1 -i 2@2 -i 3@3 -i 4@4 -i 5@5 -i 6@6 -i 7@7 --no-p4 "
-        f"-- --grpc-server-addr localhost:{grpc_port}"
-    )
+        f"-- --grpc-server-addr localhost:{grpc_port}")
     bridge_cmd = bridge.get_ns_prefix() + " " + simple_switch_grpc
     switchProc = testutils.open_process(bridge_cmd)
     if switchProc is None:
@@ -160,8 +154,7 @@ def run_test(options: Options) -> int:
         # Terminate the switch process and emit its output in case of failure.
         testutils.kill_proc_group(switch_proc)
         testutils.log.error(
-            f"######## Switch log ########\n{switchlog.with_suffix('.txt').read_text()}"
-        )
+            f"######## Switch log ########\n{switchlog.with_suffix('.txt').read_text()}")
         if switch_proc.stdout:
             testutils.log.error(f"######## Switch output ######## \n{switch_proc.stdout.read()}")
         if switch_proc.stderr:

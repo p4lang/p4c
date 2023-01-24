@@ -23,7 +23,9 @@ FILE_DIR = Path(__file__).resolve().parent
 sys.path.append(str(FILE_DIR.joinpath("../../../tools")))
 import testutils
 
+
 class Target(EBPFTarget):
+
     def __init__(self, tmpdir, options, template):
         EBPFTarget.__init__(self, tmpdir, options, template)
 

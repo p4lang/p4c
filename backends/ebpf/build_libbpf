@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """ This programs builds a libbpf static library and places it in the runtime
     folder. The library and its headers are required by the kernel target.
 """
@@ -24,6 +23,7 @@ FILE_DIR = Path(__file__).resolve().parent
 # Append tools to the import path.
 sys.path.append(str(FILE_DIR.joinpath("../../tools")))
 import testutils
+
 
 def create_dir(directory):
     """Create the folder, if it does not exit yet"""

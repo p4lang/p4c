@@ -13,7 +13,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """ Contains different eBPF models and specifies their individual behavior
     Currently five phases are defined:
    1. Invokes the specified compiler on a provided p4 file.
@@ -35,7 +34,9 @@ sys.path.append(str(FILE_DIR.joinpath("../../tools")))
 import testutils
 
 PARSER = argparse.ArgumentParser()
-PARSER.add_argument("rootdir", help="the root directory of " "the compiler source tree")
+PARSER.add_argument(
+    "rootdir", help="the root directory of "
+    "the compiler source tree")
 PARSER.add_argument("p4filename", help="the p4 file to process")
 PARSER.add_argument(
     "-b",
@@ -48,7 +49,8 @@ PARSER.add_argument(
     "--compiler",
     dest="compiler",
     default="p4c-ebpf",
-    help="Specify the path to the compiler binary, " "default is p4c-ebpf",
+    help="Specify the path to the compiler binary, "
+    "default is p4c-ebpf",
 )
 PARSER.add_argument(
     "-f",
@@ -61,7 +63,8 @@ PARSER.add_argument(
     "--target",
     dest="target",
     default="test",
-    help="Specify the compiler backend target, " "default is test",
+    help="Specify the compiler backend target, "
+    "default is test",
 )
 PARSER.add_argument(
     "-e",
@@ -113,19 +116,20 @@ class EBPFFactory:
 
 
 class Options:
+
     def __init__(self):
-        self.binary = ""  # This program's name.
-        self.cleanupTmp = True  # Remove tmp folder?
-        self.compiler = ""  # Path to the P4 compiler binary.
-        self.p4filename = ""  # File that is being compiled.
-        self.testfile = ""  # path to stf test file that is used.
-        self.replace = False  # Replace previous outputs.
-        self.target = "test"  # The name of the target compiler.
-        # Actual location of the test framework.
+        self.binary = ""       # This program's name.
+        self.cleanupTmp = True # Remove tmp folder?
+        self.compiler = ""     # Path to the P4 compiler binary.
+        self.p4filename = ""   # File that is being compiled.
+        self.testfile = ""     # path to stf test file that is used.
+        self.replace = False   # Replace previous outputs.
+        self.target = "test"   # The name of the target compiler.
+                               # Actual location of the test framework.
         self.testdir = str(FILE_DIR)
-        # The location of the eBPF runtime, some targets may overwrite this.
+                               # The location of the eBPF runtime, some targets may overwrite this.
         self.runtimedir = str(FILE_DIR.joinpath("runtime"))
-        self.extern = ""  # Path to C file with extern definition.
+        self.extern = ""       # Path to C file with extern definition.
 
 
 def run_model(ebpf, testfile):
@@ -152,9 +156,9 @@ def run_test(options, argv):
     Optional: Run the generated model"""
     assert isinstance(options, Options)
 
-    basename = os.path.basename(options.p4filename)  # Name of the p4 test
-    base, _ = os.path.splitext(basename)  # Name without the type
-    dirname = os.path.dirname(options.p4filename)  # Directory of the file
+    basename = os.path.basename(options.p4filename) # Name of the p4 test
+    base, _ = os.path.splitext(basename)            # Name without the type
+    dirname = os.path.dirname(options.p4filename)   # Directory of the file
 
     testfile = options.testfile
     # If no test file is provided, try to find it in the folder.

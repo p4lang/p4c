@@ -13,7 +13,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """ Contains different eBPF models and specifies their individual behavior
     Currently five phases are defined:
    1. Invokes the specified compiler on a provided p4 file.
@@ -38,7 +37,7 @@ sys.path.append(str(FILE_DIR.joinpath("../../../tools")))
 import testutils
 
 PCAP_PREFIX = "pcap"  # match pattern
-PCAP_SUFFIX = ".pcap"  # could also be ".pcapng"
+PCAP_SUFFIX = ".pcap" # could also be ".pcapng"
 
 
 class EBPFTarget:
@@ -46,13 +45,13 @@ class EBPFTarget:
     Defines common functions and variables"""
 
     def __init__(self, tmpdir, options, template):
-        self.tmpdir = tmpdir  # dir in which all files are stored
-        self.options = options  # contains meta information
-        self.template = template  # template to generate a filter
-        self.expected = {}  # expected packets per interface
-        # location of the runtime folder
+        self.tmpdir = tmpdir     # dir in which all files are stored
+        self.options = options   # contains meta information
+        self.template = template # template to generate a filter
+        self.expected = {}       # expected packets per interface
+                                 # location of the runtime folder
         self.runtimedir = options.runtimedir
-        # location of the p4c compiler binary
+                                 # location of the p4c compiler binary
         self.compiler = self.options.compiler
 
     def get_make_args(self, runtimedir, target):
@@ -188,14 +187,12 @@ class EBPFTarget:
                 if self.expected[interface]["any"]:
                     if self.expected[interface]["pkts"]:
                         testutils.log.error(
-                            (f"Interface {interface} has both expected with packets and without")
-                        )
+                            (f"Interface {interface} has both expected with packets and without"))
                     continue
                 expected = self.expected[interface]["pkts"]
             if len(expected) != len(packets):
                 testutils.log.error(
-                    f"Expected {len(expected)} packets on port {interface} got {len(packets)}"
-                )
+                    f"Expected {len(expected)} packets on port {interface} got {len(packets)}")
                 return testutils.FAILURE
             for idx, expected_pkt in enumerate(expected):
                 cmp = testutils.compare_pkt(expected_pkt, packets[idx])

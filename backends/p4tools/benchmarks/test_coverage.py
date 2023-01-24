@@ -80,21 +80,22 @@ PARSER.add_argument(
 
 
 class Options:
+
     def __init__(self):
-        self.p4testgen_bin = None  # The P4Testgen binary.
-        self.p4_program = None  # P4 Program that is being measured.
-        self.out_dir = None  # The output directory.
-        self.seed = None  # Program seed.
-        self.max_tests = None  # The max tests parameter.
+        self.p4testgen_bin = None # The P4Testgen binary.
+        self.p4_program = None    # P4 Program that is being measured.
+        self.out_dir = None       # The output directory.
+        self.seed = None          # Program seed.
+        self.max_tests = None     # The max tests parameter.
         self.test_backend = None  # The test back end to generate tests for.
 
-
 class TestArgs:
+
     def __init__(self):
-        self.seed = None  # The seed for this particular run.
-        self.extra_args = None  # Extra arguments for P4Testgen execution.
-        self.test_dir = None  # The testing directory associated with this test run.
-        self.strategy = None  # The exploration strategy to execute.
+        self.seed = None       # The seed for this particular run.
+        self.extra_args = None # Extra arguments for P4Testgen execution.
+        self.test_dir = None   # The testing directory associated with this test run.
+        self.strategy = None   # The exploration strategy to execute.
 
 
 def get_test_files(input_dir, extension):
@@ -130,13 +131,11 @@ def parse_timestamp(test_file):
 
 def run_strategies_for_max_tests(data_row, options, test_args):
 
-    cmd = (
-        f"{options.p4testgen_bin} --target bmv2 --arch v1model --std p4-16"
-        f" -I/p4/p4c/build/p4include --test-backend {options.test_backend} --seed {test_args.seed} "
-        f"--max-tests {options.max_tests}  --out-dir {test_args.test_dir}"
-        f" --exploration-strategy {test_args.strategy} --stop-metric MAX_STATEMENT_COVERAGE "
-        f" {test_args.extra_args} {options.p4_program}"
-    )
+    cmd = (f"{options.p4testgen_bin} --target bmv2 --arch v1model --std p4-16"
+           f" -I/p4/p4c/build/p4include --test-backend {options.test_backend} --seed {test_args.seed} "
+           f"--max-tests {options.max_tests}  --out-dir {test_args.test_dir}"
+           f" --exploration-strategy {test_args.strategy} --stop-metric MAX_STATEMENT_COVERAGE "
+           f" {test_args.extra_args} {options.p4_program}")
     start_timestamp = datetime.datetime.now()
     try:
         # TODO: Use result
