@@ -25,7 +25,7 @@ set(
 )
 
 set(EBPF_SEARCH_PATTERNS "include.*ebpf_model.p4")
-set(P4TESTDATA ${P4C_SOURCE_DIR}/../p4c/testdata)
+set(P4TESTDATA ${P4C_SOURCE_DIR}/testdata)
 set(P4TESTS_FOR_EBPF "${P4TESTDATA}/p4_16_samples/*.p4")
 p4c_find_tests("${P4TESTS_FOR_EBPF}" EBPF_TESTS INCLUDE "${EBPF_SEARCH_PATTERNS}" EXCLUDE "")
 p4tools_find_tests("${EBPF_TESTS}" ebpftests EXCLUDE "${P4TESTGEN_EBPF_EXCLUDES}")
