@@ -246,7 +246,7 @@ p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
   "At index"
   # At index 0: UNKNOWN, 'Error when adding match entry to target'
-  # enums are not supported in P4Runtime yey https://github.com/p4lang/behavioral-model/issues/1178
+  # enums are not supported in P4Runtime yet https://github.com/p4lang/behavioral-model/issues/1178
   issue1062-1-bmv2.p4
   v1model-p4runtime-most-types1.p4
   pins_fabric.p4
