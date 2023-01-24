@@ -323,7 +323,7 @@ def main(argv):
     try:
         result = process_file(options, argv)
     except Exception as e:
-        print(f"There was a problem parsing STF file {options.testFile}:")
+        print(f"There was a problem executing the STF test {options.testFile}:")
         raise e
 
     if result != SUCCESS:

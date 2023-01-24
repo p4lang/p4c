@@ -12,11 +12,12 @@ import sys
 import threading
 import time
 import queue
+from pathlib import Path
 
 import ptf
 from ptf.base_tests import BaseTest
 from ptf import config
-from ptf import testutils
+from ptf import testutils as ptfutils
 
 import grpc
 
@@ -24,6 +25,11 @@ from google.rpc import status_pb2, code_pb2
 from p4.v1 import p4runtime_pb2, p4runtime_pb2_grpc
 from p4.config.v1 import p4info_pb2
 import google.protobuf.text_format
+
+FILE_DIR = Path(__file__).resolve().parent
+TOOLS_PATH = FILE_DIR.joinpath("../../tools")
+sys.path.append(str(TOOLS_PATH))
+import testutils
 
 
 # See https://gist.github.com/carymrobbins/8940382
@@ -283,15 +289,15 @@ class P4RuntimeTest(BaseTest):
         for _, port, _ in config["interfaces"]:
             self._swports.append(port)
 
-        grpc_addr = testutils.test_param_get("grpcaddr")
+        grpc_addr = ptfutils.test_param_get("grpcaddr")
         if grpc_addr is None:
             grpc_addr = 'localhost:28000'
 
         self.channel = grpc.insecure_channel(grpc_addr)
         self.stub = p4runtime_pb2_grpc.P4RuntimeStub(self.channel)
 
-        proto_txt_path = testutils.test_param_get("p4info")
-        logging.info(f"Reading p4info from {proto_txt_path}")
+        proto_txt_path = ptfutils.test_param_get("p4info")
+        testutils.log.info(f"Reading p4info from {proto_txt_path}")
         self.p4info = p4info_pb2.P4Info()
         with open(proto_txt_path, "rb") as fin:
             google.protobuf.text_format.Merge(fin.read(), self.p4info)
@@ -320,11 +326,11 @@ class P4RuntimeTest(BaseTest):
         # self.p4info as saved when executing the setUp() method
         # above.  The following commented-out assignment does not work.
         # config.p4info = self.p4info
-        proto_txt_path = testutils.test_param_get("p4info")
+        proto_txt_path = ptfutils.test_param_get("p4info")
         with open(proto_txt_path, 'r', encoding="utf-8") as fin:
             google.protobuf.text_format.Merge(fin.read(), config.p4info)
-        config_path = testutils.test_param_get("config")
-        logging.info(f"Reading config (compiled P4 program) from {config_path}")
+        config_path = ptfutils.test_param_get("config")
+        testutils.log.info(f"Reading config (compiled P4 program) from {config_path}")
         with open(config_path, 'rb') as config_f:
             config.p4_device_config = config_f.read()
         request.action = p4runtime_pb2.SetForwardingPipelineConfigRequest.VERIFY_AND_COMMIT
@@ -874,7 +880,7 @@ class P4RuntimeTest(BaseTest):
     def table_add(self, table_name_and_key, action_name_and_params, priority=None, options=None):
         table_entry = self.make_table_entry(table_name_and_key, action_name_and_params, priority,
                                             options)
-        logging.info(f"table_add: table_entry={table_entry}")
+        testutils.log.info(f"table_add: table_entry={table_entry}")
         req = p4runtime_pb2.WriteRequest()
         req.device_id = self.device_id
         update = req.updates.add()
@@ -883,7 +889,7 @@ class P4RuntimeTest(BaseTest):
         key = table_name_and_key[1]
         if key is None:
             update.type = p4runtime_pb2.Update.MODIFY
-        logging.info(f"table_add: req={req}")
+        testutils.log.info(f"table_add: req={req}")
         return req, self.write_request(req, store=(key is not None))
 
     def pre_add_mcast_group(self, mcast_grp_id, port_instance_pair_list):
@@ -989,13 +995,13 @@ class P4RuntimeTest(BaseTest):
         table_entries = []
         for response in self.response_dump_helper(req):
             for entity in response.entities:
-                #logging.info('entity.WhichOneof("entity")="%s"'
+                #testutils.log.info('entity.WhichOneof("entity")="%s"'
                 #      '' % (entity.WhichOneof('entity')))
                 assert entity.WhichOneof('entity') == 'table_entry'
                 entry = entity.table_entry
                 table_entries.append(entry)
-                #logging.info(entry)
-                #logging.info('----')
+                #testutils.log.info(entry)
+                #testutils.log.info('----')
 
         # Now try to get the default action.  I say 'try' because as
         # of 2019-Mar-21, this is not yet implemented in the open
@@ -1008,14 +1014,14 @@ class P4RuntimeTest(BaseTest):
         try:
             for response in self.response_dump_helper(req):
                 for entity in response.entities:
-                    #logging.info('entity.WhichOneof("entity")="%s"'
+                    #testutils.log.info('entity.WhichOneof("entity")="%s"'
                     #      '' % (entity.WhichOneof('entity')))
                     assert entity.WhichOneof('entity') == 'table_entry'
                     entry = entity.table_entry
                     table_default_entry = entity
         except grpc._channel._Rendezvous as e:
-            logging.info("Caught exception:")
-            logging.info(e)
+            testutils.log.info("Caught exception:")
+            testutils.log.info(e)
 
         return table_entries, table_default_entry
 
@@ -1138,7 +1144,7 @@ def update_config(config_path, p4info_path, grpc_addr, device_id):
     '''
     channel = grpc.insecure_channel(grpc_addr)
     stub = p4runtime_pb2_grpc.P4RuntimeStub(channel)
-    logging.info(f"Sending P4 config from file {config_path} with P4info {p4info_path}")
+    testutils.log.info(f"Sending P4 config from file {config_path} with P4info {p4info_path}")
     request = p4runtime_pb2.SetForwardingPipelineConfigRequest()
     request.device_id = device_id
     config = request.config
