@@ -446,11 +446,11 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
         local_metadata._route_metadata20 = route_metadata_5;
     }
     @id(0x0100000F) @name("ingress.routing.trap") action routing_trap_0() {
-        clone(CloneType.I2E, 32w1024);
+        clone(CloneType.I2E, 32w511);
         mark_to_drop(standard_metadata);
     }
     @id(0x0100000F) @name("ingress.routing.trap") action routing_trap_1() {
-        clone(CloneType.I2E, 32w1024);
+        clone(CloneType.I2E, 32w511);
         mark_to_drop(standard_metadata);
     }
     @p4runtime_role("sdn_controller") @id(0x02000044) @name("ingress.routing.ipv4_table") table routing_ipv4_table {
@@ -489,12 +489,12 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
     @id(0x13000103) @name("ingress.acl_wbb_ingress.acl_wbb_ingress_counter") direct_counter(CounterType.packets_and_bytes) acl_wbb_ingress_acl_wbb_ingress_counter;
     @id(0x01000107) @sai_action(SAI_PACKET_ACTION_COPY) @name("ingress.acl_wbb_ingress.acl_wbb_ingress_copy") action acl_wbb_ingress_acl_wbb_ingress_copy_0() {
         acl_wbb_ingress_acl_wbb_ingress_meter.read(local_metadata._color18);
-        clone(CloneType.I2E, 32w1024);
+        clone(CloneType.I2E, 32w511);
         acl_wbb_ingress_acl_wbb_ingress_counter.count();
     }
     @id(0x01000108) @sai_action(SAI_PACKET_ACTION_TRAP) @name("ingress.acl_wbb_ingress.acl_wbb_ingress_trap") action acl_wbb_ingress_acl_wbb_ingress_trap_0() {
         acl_wbb_ingress_acl_wbb_ingress_meter.read(local_metadata._color18);
-        clone(CloneType.I2E, 32w1024);
+        clone(CloneType.I2E, 32w511);
         mark_to_drop(standard_metadata);
         acl_wbb_ingress_acl_wbb_ingress_counter.count();
     }

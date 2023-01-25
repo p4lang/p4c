@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <iomanip>
+#include <list>
 #include <map>
 #include <optional>
 #include <string>
@@ -26,17 +27,22 @@ namespace P4Tools::P4Testgen::Bmv2 {
 PTF::PTF(std::filesystem::path basePath, std::optional<unsigned int> seed = std::nullopt)
     : TF(std::move(basePath), seed) {}
 
-inja::json::array_t PTF::getClone(const std::map<cstring, const TestObject *> &cloneInfos) {
-    auto cloneJson = inja::json::array_t();
-    for (auto cloneInfoTuple : cloneInfos) {
-        inja::json cloneInfoJson;
-        const auto *cloneInfo = cloneInfoTuple.second->checkedTo<Bmv2_CloneInfo>();
-        cloneInfoJson["session_id"] = cloneInfo->getEvaluatedSessionId()->asUint64();
-        cloneInfoJson["clone_port"] = cloneInfo->getEvaluatedClonePort()->asInt();
-        cloneInfoJson["cloned"] = cloneInfo->isClonedPacket();
-        cloneJson.push_back(cloneInfoJson);
+inja::json PTF::getClone(const TestObjectMap &cloneSpecs) {
+    auto cloneSpec = inja::json::object();
+    auto cloneJsons = inja::json::array_t();
+    auto hasClone = false;
+    for (auto cloneSpecTuple : cloneSpecs) {
+        inja::json cloneSpecJson;
+        const auto *cloneSpec = cloneSpecTuple.second->checkedTo<Bmv2V1ModelCloneSpec>();
+        cloneSpecJson["session_id"] = cloneSpec->getEvaluatedSessionId()->asUint64();
+        cloneSpecJson["clone_port"] = cloneSpec->getEvaluatedClonePort()->asInt();
+        cloneSpecJson["cloned"] = cloneSpec->isClonedPacket();
+        hasClone = hasClone || cloneSpec->isClonedPacket();
+        cloneJsons.push_back(cloneSpecJson);
     }
-    return cloneJson;
+    cloneSpec["clone_pkts"] = cloneJsons;
+    cloneSpec["has_clone"] = hasClone;
+    return cloneSpec;
 }
 
 std::vector<std::pair<size_t, size_t>> PTF::getIgnoreMasks(const IR::Constant *mask) {
@@ -308,9 +314,9 @@ class Test{{test_id}}(AbstractTest):
 ## endfor
 ## endfor
 ## endif
-## if exists("clone_infos")
-## for clone_info in clone_infos
-        self.insert_pre_clone_session({{clone_info.session_id}}, [{{clone_info.clone_port}}])
+## if exists("clone_specs")
+## for clone_pkt in clone_specs.clone_pkts
+        self.insert_pre_clone_session({{clone_pkt.session_id}}, [{{clone_pkt.clone_port}}])
 ## endfor
 ## endif
 
@@ -330,13 +336,14 @@ class Test{{test_id}}(AbstractTest):
 ## for ignore_mask in verify.ignore_masks
         exp_pkt.set_do_not_care({{ignore_mask.0}}, {{ignore_mask.1}})
 ## endfor
-## if exists("clone_infos")
-## for clone_info in clone_infos
-## if clone_info.cloned
-        ptfutils.verify_packet(self, exp_pkt, {{clone_info.clone_port}})
-## else
-        ptfutils.verify_packet(self, exp_pkt, eg_port)
+## if exists("clone_specs")
+## for clone_pkt in clone_specs.clone_pkts
+## if clone_pkt.cloned
+        ptfutils.verify_packet(self, exp_pkt, {{clone_pkt.clone_port}})
+##endif
 ##endfor
+## if not clone_specs.has_clone
+        ptfutils.verify_packet(self, exp_pkt, eg_port)
 ##endif
 ## else 
         ptfutils.verify_packet(self, exp_pkt, eg_port)
@@ -374,9 +381,9 @@ void PTF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
     // Check whether this test has a clone configuration.
     // These are special because they require additional instrumentation and produce two output
     // packets.
-    auto cloneInfos = testSpec->getTestObjectCategory("clone_infos");
-    if (!cloneInfos.empty()) {
-        dataJson["clone_infos"] = getClone(cloneInfos);
+    auto cloneSpecs = testSpec->getTestObjectCategory("clone_specs");
+    if (!cloneSpecs.empty()) {
+        dataJson["clone_specs"] = getClone(cloneSpecs);
     }
 
     LOG5("PTF backend: emitting testcase:" << std::setw(4) << dataJson);

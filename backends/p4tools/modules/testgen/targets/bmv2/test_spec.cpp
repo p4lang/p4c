@@ -134,40 +134,65 @@ const Bmv2V1ModelActionSelector *Bmv2V1ModelActionSelector::evaluate(const Model
 }
 
 /* =========================================================================================
- *  Bmv2_CloneInfo
+ *  Bmv2V1ModelCloneInfo
  * ========================================================================================= */
 
-Bmv2_CloneInfo::Bmv2_CloneInfo(const IR::Expression *sessionId, const IR::Expression *clonePort,
-                               bool isClone)
+Bmv2V1ModelCloneInfo::Bmv2V1ModelCloneInfo(const IR::Expression *sessionId,
+                                           BMv2Constants::CloneType cloneType,
+                                           const ExecutionState &clonedState,
+                                           std::optional<int> preserveIndex)
+    : sessionId(sessionId),
+      cloneType(cloneType),
+      clonedState(clonedState),
+      preserveIndex(preserveIndex) {}
+
+cstring Bmv2V1ModelCloneInfo::getObjectName() const { return "Bmv2V1ModelCloneInfo"; }
+
+BMv2Constants::CloneType Bmv2V1ModelCloneInfo::getCloneType() const { return cloneType; }
+
+const IR::Expression *Bmv2V1ModelCloneInfo::getSessionId() const { return sessionId; }
+
+const ExecutionState &Bmv2V1ModelCloneInfo::getClonedState() const { return clonedState; }
+
+std::optional<int> Bmv2V1ModelCloneInfo::getPreserveIndex() const { return preserveIndex; }
+
+const Bmv2V1ModelCloneInfo *Bmv2V1ModelCloneInfo::evaluate(const Model & /*model*/) const {
+    P4C_UNIMPLEMENTED("Evaluate is not implemented for this test object.");
+}
+
+/* =========================================================================================
+ *  Bmv2V1ModelCloneSpec
+ * ========================================================================================= */
+
+Bmv2V1ModelCloneSpec::Bmv2V1ModelCloneSpec(const IR::Expression *sessionId,
+                                           const IR::Expression *clonePort, bool isClone)
     : sessionId(sessionId), clonePort(clonePort), isClone(isClone) {}
 
-cstring Bmv2_CloneInfo::getObjectName() const { return "Bmv2_CloneInfo"; }
+cstring Bmv2V1ModelCloneSpec::getObjectName() const { return "Bmv2V1ModelCloneSpec"; }
 
-const IR::Expression *Bmv2_CloneInfo::getClonePort() const { return clonePort; }
+const IR::Expression *Bmv2V1ModelCloneSpec::getClonePort() const { return clonePort; }
 
-const IR::Expression *Bmv2_CloneInfo::getSessionId() const { return sessionId; }
+const IR::Expression *Bmv2V1ModelCloneSpec::getSessionId() const { return sessionId; }
 
-const IR::Constant *Bmv2_CloneInfo::getEvaluatedClonePort() const {
+const IR::Constant *Bmv2V1ModelCloneSpec::getEvaluatedClonePort() const {
     const auto *constant = clonePort->to<IR::Constant>();
     BUG_CHECK(constant, "Variable is not a constant, has the test object %1% been evaluated?",
               getObjectName());
     return constant;
 }
 
-const IR::Constant *Bmv2_CloneInfo::getEvaluatedSessionId() const {
+const IR::Constant *Bmv2V1ModelCloneSpec::getEvaluatedSessionId() const {
     const auto *constant = sessionId->to<IR::Constant>();
     BUG_CHECK(constant, "Variable is not a constant, has the test object %1% been evaluated?",
               getObjectName());
     return constant;
 }
 
-const Bmv2_CloneInfo *Bmv2_CloneInfo::evaluate(const Model &model) const {
-    const auto *evaluatedClonePort = model.evaluate(clonePort);
-    const auto *evaluatedSessionId = model.evaluate(sessionId);
-    return new Bmv2_CloneInfo(evaluatedSessionId, evaluatedClonePort, isClone);
+const Bmv2V1ModelCloneSpec *Bmv2V1ModelCloneSpec::evaluate(const Model &model) const {
+    return new Bmv2V1ModelCloneSpec(model.evaluate(sessionId), model.evaluate(clonePort), isClone);
 }
 
-bool Bmv2_CloneInfo::isClonedPacket() const { return isClone; }
+bool Bmv2V1ModelCloneSpec::isClonedPacket() const { return isClone; }
 
 /* =========================================================================================
  * Table Key Match Types

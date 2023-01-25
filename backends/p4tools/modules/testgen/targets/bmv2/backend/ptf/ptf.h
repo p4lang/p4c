@@ -4,7 +4,6 @@
 #include <cstddef>
 #include <filesystem>
 #include <fstream>
-#include <map>
 #include <optional>
 #include <string>
 #include <utility>
@@ -16,6 +15,7 @@
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
+#include "backends/p4tools/modules/testgen/lib/test_object.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 
@@ -72,7 +72,7 @@ class PTF : public TF {
     static inja::json getVerify(const TestSpec *testSpec);
 
     /// Returns the configuration for a cloned packet configuration.
-    static inja::json::array_t getClone(const std::map<cstring, const TestObject *> &cloneInfos);
+    static inja::json getClone(const TestObjectMap &cloneSpecs);
 
     /// Helper function for @getVerify. Matches the mask value against the input packet value and
     /// generates the appropriate ignore ranges.

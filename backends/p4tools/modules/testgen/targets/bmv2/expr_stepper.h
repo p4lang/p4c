@@ -11,6 +11,7 @@
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/expr_stepper.h"
+#include "backends/p4tools/modules/testgen/core/small_step/small_step.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
@@ -30,6 +31,13 @@ class Bmv2V1ModelExprStepper : public ExprStepper {
     /// reference is not reset.
     void resetPreservingFieldList(ExecutionState &nextState, const IR::PathExpression *ref,
                                   uint64_t recirculateIndex) const;
+
+    /// Helper function, which is triggered when clone was called in the P4 program.
+    void processClone(const ExecutionState &state, SmallStepEvaluator::Result &result);
+
+    /// Helper function, which is triggered when resubmit or recirculate was called in the P4
+    /// program.
+    void processRecirculate(const ExecutionState &state, SmallStepEvaluator::Result &result);
 
  public:
     Bmv2V1ModelExprStepper(ExecutionState &state, AbstractSolver &solver,

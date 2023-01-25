@@ -372,7 +372,7 @@ control routing(in headers_t headers, inout local_metadata_t local_metadata, ino
         local_metadata.route_metadata = route_metadata;
     }
     @id(0x0100000F) action trap() {
-        clone(CloneType.I2E, 1024);
+        clone(CloneType.I2E, 511);
         mark_to_drop(standard_metadata);
     }
     @p4runtime_role("sdn_controller") @id(0x02000044) table ipv4_table {
@@ -547,12 +547,12 @@ control acl_wbb_ingress(in headers_t headers, inout local_metadata_t local_metad
     @id(0x13000103) direct_counter(CounterType.packets_and_bytes) acl_wbb_ingress_counter;
     @id(0x01000107) @sai_action(SAI_PACKET_ACTION_COPY) action acl_wbb_ingress_copy() {
         acl_wbb_ingress_meter.read(local_metadata.color);
-        clone(CloneType.I2E, 1024);
+        clone(CloneType.I2E, 511);
         acl_wbb_ingress_counter.count();
     }
     @id(0x01000108) @sai_action(SAI_PACKET_ACTION_TRAP) action acl_wbb_ingress_trap() {
         acl_wbb_ingress_meter.read(local_metadata.color);
-        clone(CloneType.I2E, 1024);
+        clone(CloneType.I2E, 511);
         mark_to_drop(standard_metadata);
         acl_wbb_ingress_counter.count();
     }

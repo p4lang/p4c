@@ -25,7 +25,7 @@
 #include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
-#include "backends/p4tools/modules/testgen/lib/test_spec.h"
+#include "backends/p4tools/modules/testgen/lib/test_object.h"
 
 namespace P4Tools::P4Testgen {
 
@@ -103,7 +103,7 @@ class ExecutionState {
     // which defines control plane match action entries. Once the interpreter has solved for the
     // variables used by these test objects and concretized the values, they can be used to generate
     // a test. Test objects are not constant because they may be manipulated by a target back end.
-    std::map<cstring, std::map<cstring, const TestObject *>> testObjects;
+    std::map<cstring, TestObjectMap> testObjects;
 
     /// The parserErrorLabel is set by the parser to indicate the variable corresponding to the
     /// parser error that is set by various built-in functions such as verify or extract.
@@ -217,29 +217,37 @@ class ExecutionState {
     [[nodiscard]] const TestObject *getTestObject(cstring category, cstring objectLabel,
                                                   bool checked) const;
 
+    /// Remove a test object from a category.
+    void deleteTestObject(cstring category, cstring objectLabel);
+
+    /// Remove a test category entirely.
+    void deleteTestObjectCategory(cstring category);
+
     /// @returns the uninterpreted test object using the provided category and object label. If
     /// @param checked is enabled, a BUG is thrown if the object label does not exist.
     /// Also casts the test object to the specified type. If the type does not match, a BUG is
     /// thrown.
     template <class T>
-    [[nodiscard]] T *getTestObject(cstring category, cstring objectLabel, bool checked) const {
-        const auto *testObject = getTestObject(category, objectLabel, checked);
+    [[nodiscard]] const T *getTestObject(cstring category, cstring objectLabel) const {
+        const auto *testObject = getTestObject(category, objectLabel, true);
         return testObject->checkedTo<T>();
     }
 
     /// @returns the map of uninterpreted test objects for a specific test category. For example,
     /// all the table entries saved under "tableconfigs".
-    [[nodiscard]] std::map<cstring, const TestObject *> getTestObjectCategory(
-        cstring category) const;
+    [[nodiscard]] TestObjectMap getTestObjectCategory(cstring category) const;
 
+    /// Get the current state of the reachability engine.
     [[nodiscard]] ReachabilityEngineState *getReachabilityEngineState() const;
 
+    /// Update the reachability engine state.
     void setReachabilityEngineState(ReachabilityEngineState *newEngineState);
 
     /* =========================================================================================
      *  Trace events.
      * ========================================================================================= */
  public:
+    /// Add a new trace event to the state.
     void add(const TraceEvent &event);
 
     /* =========================================================================================

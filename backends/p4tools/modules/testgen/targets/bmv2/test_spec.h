@@ -2,7 +2,9 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_SPEC_H_
 
 #include <cstddef>
+#include <functional>
 #include <map>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -11,7 +13,10 @@
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
+#include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/lib/test_object.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/constants.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
@@ -138,9 +143,49 @@ class Bmv2V1ModelActionSelector : public TestObject {
 };
 
 /* =========================================================================================
- *  Bmv2_CloneInfo
+ *  Bmv2V1ModelCloneInfo
  * ========================================================================================= */
-class Bmv2_CloneInfo : public TestObject {
+class Bmv2V1ModelCloneInfo : public TestObject {
+ private:
+    /// The session ID associated with this clone information.
+    const IR::Expression *sessionId;
+
+    /// The type of clone associated with this object.
+    BMv2Constants::CloneType cloneType;
+
+    /// The state at the point of time time this object was created.
+    std::reference_wrapper<const ExecutionState> clonedState;
+
+    /// Whether to preserve a particular field list of metadata. This is optional.
+    std::optional<int> preserveIndex;
+
+ public:
+    explicit Bmv2V1ModelCloneInfo(const IR::Expression *sessionId,
+                                  BMv2Constants::CloneType cloneType,
+                                  const ExecutionState &clonedState,
+                                  std::optional<int> preserveIndex);
+
+    [[nodiscard]] cstring getObjectName() const override;
+
+    [[nodiscard]] const Bmv2V1ModelCloneInfo *evaluate(const Model &model) const override;
+
+    /// @returns the associated session ID with this cloned packet.
+    [[nodiscard]] const IR::Expression *getSessionId() const;
+
+    /// @returns the type of clone.
+    [[nodiscard]] BMv2Constants::CloneType getCloneType() const;
+
+    /// @returns the index marking the field list to be preserved when cloning. Optional.
+    [[nodiscard]] std::optional<int> getPreserveIndex() const;
+
+    /// @returns the state that was cloned at the time of generation of this object.
+    [[nodiscard]] const ExecutionState &getClonedState() const;
+};
+
+/* =========================================================================================
+ *  Bmv2V1ModelCloneSpec
+ * ========================================================================================= */
+class Bmv2V1ModelCloneSpec : public TestObject {
  private:
     /// The session ID associated with this clone information.
     const IR::Expression *sessionId;
@@ -153,12 +198,12 @@ class Bmv2_CloneInfo : public TestObject {
     bool isClone;
 
  public:
-    explicit Bmv2_CloneInfo(const IR::Expression *sessionId, const IR::Expression *clonePort,
-                            bool isClone);
+    explicit Bmv2V1ModelCloneSpec(const IR::Expression *sessionId, const IR::Expression *clonePort,
+                                  bool isClone);
 
     [[nodiscard]] cstring getObjectName() const override;
 
-    [[nodiscard]] const Bmv2_CloneInfo *evaluate(const Model &model) const override;
+    [[nodiscard]] const Bmv2V1ModelCloneSpec *evaluate(const Model &model) const override;
 
     /// @returns the associated session ID with this cloned packet.
     [[nodiscard]] const IR::Expression *getSessionId() const;
@@ -183,6 +228,7 @@ class Bmv2_CloneInfo : public TestObject {
  * ========================================================================================= */
 class MetadataCollection : public TestObject {
  private:
+    /// A list of metadata fields (must be literals).
     std::map<cstring, const IR::Literal *> metadataFields;
 
  public:
@@ -192,11 +238,13 @@ class MetadataCollection : public TestObject {
 
     [[nodiscard]] const MetadataCollection *evaluate(const Model & /*model*/) const override;
 
-    /// @returns the clone port expression.
+    /// @returns the list of metadata fields.
     [[nodiscard]] const std::map<cstring, const IR::Literal *> &getMetadataFields() const;
 
+    /// Add a metadata field to the collection.
     void addMetaDataField(cstring name, const IR::Literal *metadataField);
 
+    /// @returns a metadata field from the collection.
     const IR::Literal *getMetadataField(cstring name);
 };
 
@@ -215,16 +263,16 @@ class Optional : public TableMatch {
  public:
     explicit Optional(const IR::KeyElement *key, const IR::Expression *value, bool addMatch);
 
-    const Optional *evaluate(const Model &model) const override;
+    [[nodiscard]] const Optional *evaluate(const Model &model) const override;
 
-    cstring getObjectName() const override;
+    [[nodiscard]] cstring getObjectName() const override;
 
     /// @returns the match value. It is expected to be a constant at this point.
     /// A BUG is thrown otherwise.
-    const IR::Constant *getEvaluatedValue() const;
+    [[nodiscard]] const IR::Constant *getEvaluatedValue() const;
 
     /// @returns whether to add this optional match as an exact match.
-    bool addAsExactMatch() const;
+    [[nodiscard]] bool addAsExactMatch() const;
 };
 
 class Range : public TableMatch {
@@ -239,17 +287,17 @@ class Range : public TableMatch {
     explicit Range(const IR::KeyElement *key, const IR::Expression *low,
                    const IR::Expression *high);
 
-    const Range *evaluate(const Model &model) const override;
+    [[nodiscard]] const Range *evaluate(const Model &model) const override;
 
-    cstring getObjectName() const override;
+    [[nodiscard]] cstring getObjectName() const override;
 
     /// @returns the inclusive start of the range. It is expected to be a constant at this point.
     /// A BUG is thrown otherwise.
-    const IR::Constant *getEvaluatedLow() const;
+    [[nodiscard]] const IR::Constant *getEvaluatedLow() const;
 
     /// @returns the inclusive end of the range. It is expected to be a constant at this point.
     /// A BUG is thrown otherwise.
-    const IR::Constant *getEvaluatedHigh() const;
+    [[nodiscard]] const IR::Constant *getEvaluatedHigh() const;
 };
 
 }  // namespace P4Tools::P4Testgen::Bmv2

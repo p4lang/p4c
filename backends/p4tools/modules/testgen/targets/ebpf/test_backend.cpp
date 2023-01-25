@@ -1,6 +1,6 @@
 #include "backends/p4tools/modules/testgen/targets/ebpf/test_backend.h"
 
-#include <map>
+#include <list>
 #include <optional>
 #include <ostream>
 #include <string>
@@ -19,6 +19,7 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/test_backend.h"
+#include "backends/p4tools/modules/testgen/lib/test_object.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/backend/stf/stf.h"

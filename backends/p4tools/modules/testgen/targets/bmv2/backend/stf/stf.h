@@ -12,6 +12,7 @@
 
 #include "lib/cstring.h"
 
+#include "backends/p4tools/modules/testgen/lib/test_object.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 
@@ -58,7 +59,7 @@ class STF : public TF {
     static inja::json getVerify(const TestSpec *testSpec);
 
     /// Returns the configuration for a cloned packet configuration.
-    static inja::json::array_t getClone(const std::map<cstring, const TestObject *> &cloneInfos);
+    static inja::json::array_t getClone(const TestObjectMap &cloneSpecs);
 
     /// Helper function for the control plane table inja objects.
     static inja::json getControlPlaneForTable(const TableMatchMap &matches,

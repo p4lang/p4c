@@ -372,7 +372,7 @@ control routing(in headers_t headers, inout local_metadata_t local_metadata, ino
         local_metadata.route_metadata = route_metadata;
     }
     @id(0x0100000F) action trap() {
-        clone(CloneType.I2E, 1024);
+        clone(CloneType.I2E, 511);
         mark_to_drop(standard_metadata);
     }
     @p4runtime_role("sdn_controller") @id(0x02000044) table ipv4_table {
@@ -592,7 +592,7 @@ control acl_ingress(in headers_t headers, inout local_metadata_t local_metadata,
     @id(0x01000101) @sai_action(SAI_PACKET_ACTION_COPY , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_YELLOW) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_RED) action acl_copy(@sai_action_param(QOS_QUEUE) @id(1) qos_queue_t qos_queue) {
         acl_ingress_counter.count();
         acl_ingress_meter.read(local_metadata.color);
-        clone(CloneType.I2E, 1024);
+        clone(CloneType.I2E, 511);
     }
     @id(0x01000102) @sai_action(SAI_PACKET_ACTION_TRAP , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_DROP , SAI_PACKET_COLOR_YELLOW) @sai_action(SAI_PACKET_ACTION_DROP , SAI_PACKET_COLOR_RED) action acl_trap(@sai_action_param(QOS_QUEUE) @id(1) qos_queue_t qos_queue) {
         acl_copy(qos_queue);
