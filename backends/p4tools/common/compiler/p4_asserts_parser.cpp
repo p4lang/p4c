@@ -104,7 +104,7 @@ class MemberToVariable : public Transform {
 
     cstring toString(const IR::Expression *expr) {
         if (const auto *member = expr->to<IR::Member>()) {
-            return toString(member->expr) + member->member.name;
+            return toString(member->expr) + cstring(".") + member->member.name;
         }
         if (const auto *pathExpression = expr->to<IR::PathExpression>()) {
             return pathExpression->path->name.name;

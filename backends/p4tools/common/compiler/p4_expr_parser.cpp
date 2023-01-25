@@ -115,8 +115,16 @@ const IR::Node *Parser::removeBrackets(const IR::Node *expr) {
     if (const auto *namedExpr = expr->to<IR::NamedExpression>()) {
         BUG_CHECK(namedExpr->name == "Paren", "Invalid format %1%", namedExpr);
         if (const auto *listExpr = namedExpr->expression->to<IR::ListExpression>()) {
-            BUG_CHECK(listExpr->size() == 1, "");
-            return listExpr->components.at(0);
+            if (listExpr->size() == 1) {
+                return listExpr->components.at(0);
+            } else {
+                // Make conjunction
+                const auto* res = listExpr->components.at(listExpr->components.size() - 1);
+                for (int i = listExpr->components.size() - 2; i >= 0; i--) {
+                    res = new IR::BOr(IR::Type_Boolean::get(), listExpr->components.at(0), res);
+                }
+                return res;
+            }
         }
         return namedExpr->expression;
     }
