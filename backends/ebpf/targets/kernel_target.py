@@ -40,34 +40,34 @@ class Target(EBPFTarget):
         # Use clang to compile the generated C code to a LLVM IR
         args = "make "
         # target makefile
-        args += "-f " + self.options.target + ".mk "
+        args += f"-f {self.options.target}.mk "
         # Source folder of the makefile
-        args += "-C " + str(self.runtimedir) + " "
+        args += f"-C {self.runtimedir} "
         # Input eBPF byte code
-        args += self.template + ".o "
+        args += f"{self.template}.o "
         # The bpf program to attach to the interface
-        args += "BPFOBJ=" + self.template + ".o"
+        args += f"BPFOBJ={self.template}.o "
         # add the folder local to the P4 file to the list of includes
-        args += " INCLUDES+=-I" + os.path.dirname(self.options.p4filename)
+        args += f" INCLUDES+=-I{os.path.dirname(self.options.p4filename)}"
         if self.options.extern:
             # we inline the extern so we need a direct include
-            args += " INCLUDES+=-include" + self.options.extern + " "
+            args += f" INCLUDES+=-include{self.options.extern} "
             # need to include the temporary dir because of the tmp import
-            args += " INCLUDES+=-I" + self.tmpdir + " "
+            args += f" INCLUDES+=-I{self.tmpdir} "
         errmsg = "Failed to compile the eBPF byte code:"
         return testutils.exec_process(args, errmsg).returncode
 
     def _create_runtime(self):
         args = self.get_make_args(self.runtimedir, self.options.target)
         # List of bpf programs to attach to the interface
-        args += "BPFOBJ=" + self.template + " "
+        args += f"BPFOBJ={self.template} "
         args += "CFLAGS+=-DCONTROL_PLANE "
         # add the folder local to the P4 file to the list of includes
-        args += "INCLUDES+=-I%s " % os.path.dirname(self.options.p4filename)
+        args += f"INCLUDES+=-I{os.path.dirname(self.options.p4filename)} "
         # some kernel specific includes for libbpf
-        args += "INCLUDES+=-I%s/usr/include " % self.runtimedir
-        args += "INCLUDES+=-I%s/contrib/libbpf/include/uapi " % self.runtimedir
-        args += "LIBS+=%s/usr/lib64/libbpf.a " % self.runtimedir
+        args += f"INCLUDES+=-I{self.runtimedir}/usr/include "
+        args += f"INCLUDES+=-I{self.runtimedir}/contrib/libbpf/include/uapi "
+        args += f"LIBS+={self.runtimedir}/usr/lib64/libbpf.a "
         args += "LIBS+=-lz "
         args += "LIBS+=-lelf "
         errmsg = "Failed to build the filter:"

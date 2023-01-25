@@ -35,19 +35,19 @@ class Target(EBPFTarget):
     def compile_dataplane(self):
         args = self.get_make_args(self.runtimedir, self.options.target)
         # List of bpf programs to attach to the interface
-        args += "BPFOBJ=" + self.template + " "
+        args += f"BPFOBJ={self.template} "
         args += "CFLAGS+=-DCONTROL_PLANE "
         # these files are specific to the test target
-        args += "SOURCES+=%s/ebpf_registry.c " % self.runtimedir
-        args += "SOURCES+=%s/ebpf_map.c " % self.runtimedir
-        args += "SOURCES+=%s.c " % self.template
+        args += f"SOURCES+={ self.runtimedir}/ebpf_registry.c "
+        args += f"SOURCES+={ self.runtimedir}/ebpf_map.c "
+        args += f"SOURCES+={self.template}.c "
         # include the src of libbpf directly, does not require installation
-        args += "INCLUDES+=-I%s/contrib/libbpf/src " % self.runtimedir
+        args += f"INCLUDES+=-I{self.runtimedir}/contrib/libbpf/src "
         if self.options.extern:
             # we inline the extern so we need a direct include
-            args += "INCLUDES+=-include" + self.options.extern + " "
+            args += f"INCLUDES+=-include{self.options.extern} "
             # need to include the temporary dir because of the tmp import
-            args += "INCLUDES+=-I" + self.tmpdir + " "
+            args +=f"INCLUDES+=-I{self.tmpdir} "
         errmsg = "Failed to build the filter:"
         return testutils.exec_process(args, errmsg).returncode
 
@@ -58,11 +58,11 @@ class Target(EBPFTarget):
         num_files = len(glob(self.filename("*", direction)))
         testutils.log.info(f"Input file: {pcap_pattern}")
         # Main executable
-        args = self.template + " "
+        args = f"{self.template} "
         # Input pcap pattern
-        args += "-f " + pcap_pattern + " "
+        args += f"-f {pcap_pattern} "
         # Number of input interfaces
-        args += "-n " + str(num_files) + " "
+        args += f"-n {num_files} "
         # Debug flag (verbose output)
         args += "-d"
         errmsg = "Failed to execute the filter:"

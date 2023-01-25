@@ -82,15 +82,15 @@ class EBPFTarget:
         # name of the makefile target
         args += self.template + ".c "
         # name of the output source file
-        args += "BPFOBJ=" + self.template + ".c "
+        args += f"BPFOBJ={self.template}.c "
         # location of the P4 input file
-        args += "P4FILE=" + self.options.p4filename + " "
+        args += f"P4FILE={self.options.p4filename} "
         # location of the P4 compiler
-        args += "P4C=" + self.compiler
+        args += f"P4C={self.compiler}"
         p4_args = " ".join(map(str, argv))
         if p4_args:
             # Remaining arguments
-            args += ' P4ARGS="' + p4_args + '" '
+            args += f" P4ARGS=\"{p4_args}\" "
         errmsg = "Failed to compile P4:"
         out, returncode = testutils.exec_process(args, errmsg)
         if returncode != testutils.SUCCESS:
