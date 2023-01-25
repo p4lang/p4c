@@ -16,6 +16,7 @@ import testutils
 
 
 class Target(EBPFTarget):
+
     def __init__(self, tmpdir, options, template):
         EBPFTarget.__init__(self, tmpdir, options, template)
         # We use a different compiler, override the inherited default
@@ -57,9 +58,8 @@ class Target(EBPFTarget):
         tables = {cmd.table for cmd in cmds}
         for tbl in tables:
             generated += (
-                'INIT_UBPF_TABLE("%s", sizeof(struct %s_key), sizeof(struct %s_value));\n\t'
-                % (tbl, tbl, tbl)
-            )
+                'INIT_UBPF_TABLE("%s", sizeof(struct %s_key), sizeof(struct %s_value));\n\t' %
+                (tbl, tbl, tbl))
 
         for index, cmd in enumerate(cmds):
             key_name = "key_%s%d" % (cmd.table, index)

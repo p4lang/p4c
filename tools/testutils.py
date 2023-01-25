@@ -24,7 +24,6 @@ import random
 import os
 import shutil
 import signal
-from threading import Timer
 from pathlib import Path
 from typing import NamedTuple
 
@@ -34,7 +33,7 @@ log = logging.getLogger(__name__)
 TIMEOUT = 10 * 60
 SUCCESS = 0
 FAILURE = 1
-SKIPPED = 999  # used occasionally to indicate that a test was not executed
+SKIPPED = 999 # used occasionally to indicate that a test was not executed
 
 
 class ProcessResult(NamedTuple):
@@ -54,7 +53,7 @@ def hex_to_byte(hex_str):
     byte_vals = []
     hex_str = "".join(hex_str.split(" "))
     for i in range(0, len(hex_str), 2):
-        byte_vals.append(chr(int(hex_str[i : i + 2], 16)))
+        byte_vals.append(chr(int(hex_str[i:i + 2], 16)))
     return "".join(byte_vals)
 
 
@@ -72,8 +71,7 @@ def compare_pkt(expected, received):
         if val != received[idx]:
             log.error(f"Received packet\n {received} ")
             log.error(
-                f"Packet different at position {idx}: expected\n{val}\n\nreceived\n{received[idx]}"
-            )
+                f"Packet different at position {idx}: expected\n{val}\n\nreceived\n{received[idx]}")
             log.error(f"Expected packet {expected}")
             return FAILURE
     return SUCCESS
@@ -119,15 +117,12 @@ def open_process(args):
 
 
 def run_process(proc, timeout, errmsg):
-    def kill(process):
-        process.kill()
-
-    timer = Timer(timeout, kill, [proc])
     try:
-        timer.start()
-        out, err = proc.communicate()
-    finally:
-        timer.cancel()
+        out, err = proc.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired as e:
+        log.error(f"Command '{e.cmd}' timed out.")
+        out = e.stdout
+        err = e.stderr
     if out:
         msg = "\n########### PROCESS OUTPUT BEGIN:\n" f"{out}########### PROCESS OUTPUT END\n"
         log.info(msg)
@@ -149,18 +144,17 @@ def exec_process(args, errmsg, timeout=TIMEOUT):
         output_args = {"stdout": subprocess.PIPE, "stderr": sys.stdout}
     try:
         result = subprocess.run(
-            args, shell=True, timeout=timeout, universal_newlines=True, check=True, **output_args
-        )
+            args, shell=True, timeout=timeout, universal_newlines=True, check=True, **output_args)
+        out = result.stdout
+        returncode = result.returncode
     except subprocess.CalledProcessError as e:
         out = e.stdout
         returncode = e.returncode
         log.error(f"Error {returncode} when executing {e.cmd}:\n{errmsg}\n{out}")
-    else:
-        out = result.stdout
-        returncode = result.returncode
     if log.getEffectiveLevel() <= logging.INFO:
         if out:
-            log.info("########### PROCESS OUTPUT BEGIN:\n" f"{out}########### PROCESS OUTPUT END")
+            log.info("########### PROCESS OUTPUT BEGIN:\n"
+                     f"{out}########### PROCESS OUTPUT END")
     return ProcessResult(out, returncode)
 
 

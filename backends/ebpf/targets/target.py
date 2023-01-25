@@ -45,22 +45,20 @@ class EBPFTarget:
     Defines common functions and variables"""
 
     def __init__(self, tmpdir, options, template):
-        self.tmpdir = tmpdir     # dir in which all files are stored
-        self.options = options   # contains meta information
-        self.template = template # template to generate a filter
-        self.expected = {}       # expected packets per interface
-                                 # location of the runtime folder
-        self.runtimedir = options.runtimedir
-                                 # location of the p4c compiler binary
-        self.compiler = self.options.compiler
+        self.tmpdir = tmpdir                  # dir in which all files are stored
+        self.options = options                # contains meta information
+        self.template = template              # template to generate a filter
+        self.expected = {}                    # expected packets per interface
+        self.runtimedir = options.runtimedir  # location of the runtime folder
+        self.compiler = self.options.compiler # location of the p4c compiler binary
 
     def get_make_args(self, runtimedir, target):
         args = "make "
         # target makefile
         args += "-f runtime.mk "
         # Source folder of the makefile
-        args += "-C " + str(runtimedir) + " "
-        args += "TARGET=" + target + " "
+        args += f"-C {runtimedir} "
+        args += f"TARGET={target} "
         return args
 
     def filename(self, interface, direction):
@@ -97,7 +95,7 @@ class EBPFTarget:
         out, returncode = testutils.exec_process(args, errmsg)
         if returncode != testutils.SUCCESS:
             # If the compiler crashed fail the test
-            if "Compiler Bug" in str(out):
+            if "Compiler Bug" in out:
                 sys.exit(testutils.FAILURE)
 
         # Check if we expect the p4 compilation of the p4 file to fail

@@ -203,7 +203,6 @@ def run_test(options, argv):
 
 
 if __name__ == "__main__":
-    """main"""
     # Parse options and process argv
     args, argv = PARSER.parse_known_args()
     options = Options()
