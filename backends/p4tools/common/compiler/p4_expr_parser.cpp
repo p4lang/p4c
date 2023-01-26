@@ -119,7 +119,7 @@ const IR::Node *Parser::removeBrackets(const IR::Node *expr) {
                 return listExpr->components.at(0);
             } else {
                 // Make conjunction
-                const auto* res = listExpr->components.at(listExpr->components.size() - 1);
+                const auto *res = listExpr->components.at(listExpr->components.size() - 1);
                 for (int i = listExpr->components.size() - 2; i >= 0; i--) {
                     res = new IR::BOr(IR::Type_Boolean::get(), listExpr->components.at(0), res);
                 }
