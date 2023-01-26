@@ -134,6 +134,7 @@ set (BMV2_V1MODEL_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_bmv_errors/*-bmv2.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/fabric_*/fabric.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pins/*.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/omec/*.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_14_samples/switch_*/switch.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_14_samples/*.p4"
   ${v1tests}

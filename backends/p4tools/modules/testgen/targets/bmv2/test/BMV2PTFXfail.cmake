@@ -261,8 +261,6 @@ p4tools_add_xfail_reason(
   pins_middleblock.p4
   issue2283_1-bmv2.p4
 
-  # At index 0: INVALID_ARGUMENT, 'Unexpected number of action parameters'
-  up4.p4
   # At index 0: INVALID_ARGUMENT, '0 is not a valid session id'
   issue1642-bmv2.p4
   issue1653-bmv2.p4

@@ -134,5 +134,4 @@ p4tools_add_xfail_reason(
   issue2345-multiple_dependencies.p4
   issue2345-with_nested_if.p4
   issue2345.p4
-  up4.p4
 )

@@ -20,6 +20,7 @@ OUTPUT_DIR = FILE_DIR.joinpath("../../../build/results")
 # generate random seeds, increase the number for extra sampling
 ITERATIONS = 1
 MAX_TESTS = 0
+TEST_BACKEND = "PROTOBUF"
 
 PARSER = argparse.ArgumentParser()
 PARSER.add_argument(
@@ -67,6 +68,14 @@ PARSER.add_argument(
     default=TESTGEN_BIN,
     help="Specifies the testgen binary.",
 )
+PARSER.add_argument(
+    "-t",
+    "--test-backend",
+    dest="test_backend",
+    default=TEST_BACKEND,
+    type=str,
+    help="Which test back end to generate tests for.",
+)
 
 
 class Options:
@@ -76,6 +85,7 @@ class Options:
         self.out_dir = None  # The output directory.
         self.seed = None  # Program seed.
         self.max_tests = None  # The max tests parameter.
+        self.test_backend = None  # The test back end to generate tests for.
 
 
 class TestArgs:
@@ -121,7 +131,7 @@ def run_strategies_for_max_tests(data_row, options, test_args):
 
     cmd = (
         f"{options.p4testgen_bin} --target bmv2 --arch v1model --std p4-16"
-        f" -I/p4/p4c/build/p4include --test-backend PROTOBUF --seed {test_args.seed} "
+        f" -I/p4/p4c/build/p4include --test-backend {options.test_backend} --seed {test_args.seed} "
         f"--max-tests {options.max_tests}  --out-dir {test_args.test_dir}"
         f" --exploration-strategy {test_args.strategy} --stop-metric MAX_STATEMENT_COVERAGE "
         f" {test_args.extra_args} {options.p4_program}"
@@ -166,6 +176,7 @@ def main(args):
     options.out_dir = Path(args.out_dir).absolute()
     options.seed = args.seed
     options.p4testgen_bin = Path(testutils.check_if_file(args.p4testgen_bin))
+    options.test_backend = args.test_backend.upper()
 
     # 7189 is an example of a good seed, which gets cov 1 with less than 100 tests
     # in random access stack.
@@ -205,7 +216,7 @@ def main(args):
                 )
                 test_args = TestArgs()
                 test_args.seed = seed
-                test_args.test_dir = Path(tempfile.mkdtemp(dir=test_args.test_dir))
+                test_args.test_dir = Path(tempfile.mkdtemp(dir=test_dir))
                 test_args.strategy = strategy
                 test_args.extra_args = config[strategy]
                 data_row = run_strategies_for_max_tests(data_row, options, test_args)

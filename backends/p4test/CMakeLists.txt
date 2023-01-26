@@ -63,6 +63,7 @@ set (P4TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/fabric_*/fabric.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pins/*.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/omec/*.p4"
   )
 
 # Builds a list of tests for which P4Info generation is not supported. It makes

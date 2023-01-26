@@ -84,6 +84,7 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
   "Match type range not implemented for table keys"
+  up4.p4
 )
 
 p4tools_add_xfail_reason(
@@ -264,5 +265,4 @@ p4tools_add_xfail_reason(
   issue2345-multiple_dependencies.p4
   issue2345-with_nested_if.p4
   issue2345.p4
-  up4.p4
 )
