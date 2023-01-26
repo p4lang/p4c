@@ -132,7 +132,7 @@ void BMv2_V1ModelTableStepper::evalTableActionProfile(
         setTableAction(nextState, tableAction);
 
         // Finally, add all the new rules to the execution state.
-        const ActionCall ctrlPlaneActionCall(actionName, actionType, {});
+        const ActionCall ctrlPlaneActionCall(actionName, actionType, ctrlPlaneArgs);
         auto tableRule =
             TableRule(matches, TestSpec::LOW_PRIORITY, ctrlPlaneActionCall, TestSpec::TTL);
         auto *tableConfig = new TableConfig(table, {tableRule});
@@ -222,7 +222,7 @@ void BMv2_V1ModelTableStepper::evalTableActionSelector(
         setTableAction(nextState, tableAction);
 
         // Finally, add all the new rules to the execution state.
-        ActionCall ctrlPlaneActionCall(actionName, actionType, {});
+        ActionCall ctrlPlaneActionCall(actionName, actionType, ctrlPlaneArgs);
         auto tableRule =
             TableRule(matches, TestSpec::LOW_PRIORITY, ctrlPlaneActionCall, TestSpec::TTL);
         auto *tableConfig = new TableConfig(table, {tableRule});
