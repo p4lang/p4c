@@ -260,7 +260,7 @@ struct PSAArchHandlerBuilder : public P4RuntimeArchHandlerBuilderIface {
                                           const IR::ToplevelBlock *evaluatedProgram) const override;
 };
 
-/// The architecture handler builder implementation for PSA.
+/// The architecture handler builder implementation for PNA.
 struct PNAArchHandlerBuilder : public P4RuntimeArchHandlerBuilderIface {
     P4RuntimeArchHandlerIface *operator()(ReferenceMap *refMap, TypeMap *typeMap,
                                           const IR::ToplevelBlock *evaluatedProgram) const override;
@@ -926,6 +926,129 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
 
     /// The extern instances we've serialized so far. Used for deduplication.
     std::set<p4rt_id_t> serializedInstances;
+};
+
+/// Implements  a common @ref P4RuntimeArchHandlerIface for the PSA and PNA architecture. The
+/// overridden methods will be called by the @P4RuntimeSerializer to collect and
+/// serialize PSA and PNA specific symbols which are exposed to the control-plane.
+template <Arch arch>
+class P4RuntimeArchHandlerPSAPNA : public P4RuntimeArchHandlerCommon<arch> {
+ public:
+    P4RuntimeArchHandlerPSAPNA(ReferenceMap *refMap, TypeMap *typeMap,
+                               const IR::ToplevelBlock *evaluatedProgram)
+        : P4RuntimeArchHandlerCommon<arch>(refMap, typeMap, evaluatedProgram) {}
+
+    void collectExternInstance(P4RuntimeSymbolTableIface *symbols,
+                               const IR::ExternBlock *externBlock) override {
+        P4RuntimeArchHandlerCommon<arch>::collectExternInstance(symbols, externBlock);
+
+        auto decl = externBlock->node->to<IR::IDeclaration>();
+        if (decl == nullptr) return;
+        if (externBlock->type->name == "Digest") {
+            symbols->add(SymbolType::DIGEST(), decl);
+        }
+    }
+
+    void addTableProperties(const P4RuntimeSymbolTableIface &symbols, p4configv1::P4Info *p4info,
+                            p4configv1::Table *table, const IR::TableBlock *tableBlock) override {
+        P4RuntimeArchHandlerCommon<arch>::addTableProperties(symbols, p4info, table, tableBlock);
+
+        auto tableDeclaration = tableBlock->container;
+        bool supportsTimeout = getSupportsTimeout(tableDeclaration);
+        if (supportsTimeout) {
+            table->set_idle_timeout_behavior(p4configv1::Table::NOTIFY_CONTROL);
+        } else {
+            table->set_idle_timeout_behavior(p4configv1::Table::NO_TIMEOUT);
+        }
+    }
+
+    void addExternInstance(const P4RuntimeSymbolTableIface &symbols, p4configv1::P4Info *p4info,
+                           const IR::ExternBlock *externBlock) override {
+        P4RuntimeArchHandlerCommon<arch>::addExternInstance(symbols, p4info, externBlock);
+
+        auto decl = externBlock->node->to<IR::Declaration_Instance>();
+        if (decl == nullptr) return;
+        auto p4RtTypeInfo = p4info->mutable_type_info();
+        if (externBlock->type->name == "Digest") {
+            auto digest = getDigest(decl, p4RtTypeInfo);
+            if (digest) this->addDigest(symbols, p4info, *digest);
+        }
+    }
+
+    /// @return serialization information for the Digest extern instacne @decl
+    boost::optional<Digest> getDigest(const IR::Declaration_Instance *decl,
+                                      p4configv1::P4TypeInfo *p4RtTypeInfo) {
+        BUG_CHECK(decl->type->is<IR::Type_Specialized>(), "%1%: expected Type_Specialized",
+                  decl->type);
+        auto type = decl->type->to<IR::Type_Specialized>();
+        BUG_CHECK(type->arguments->size() == 1, "%1%: expected one type argument", decl);
+        auto typeArg = type->arguments->at(0);
+        auto typeSpec =
+            TypeSpecConverter::convert(this->refMap, this->typeMap, typeArg, p4RtTypeInfo);
+        BUG_CHECK(typeSpec != nullptr,
+                  "P4 type %1% could not be converted to P4Info P4DataTypeSpec");
+
+        return Digest{decl->controlPlaneName(), typeSpec, decl->to<IR::IAnnotated>()};
+    }
+
+    /// @return true if @table's 'psa_idle_timeout' property exists and is true. This
+    /// indicates that @table supports entry ageing.
+    static bool getSupportsTimeout(const IR::P4Table *table) {
+        auto timeout = table->properties->getProperty("psa_idle_timeout");
+
+        if (timeout == nullptr) return false;
+
+        if (auto exprValue = timeout->value->to<IR::ExpressionValue>()) {
+            if (auto expr = exprValue->expression) {
+                if (auto member = expr->to<IR::Member>()) {
+                    if (member->member == "NOTIFY_CONTROL") {
+                        return true;
+                    } else if (member->member == "NO_TIMEOUT") {
+                        return false;
+                    }
+                } else if (expr->is<IR::PathExpression>()) {
+                    ::error(ErrorType::ERR_UNEXPECTED,
+                            "Unresolved value %1% for psa_idle_timeout "
+                            "property on table %2%. Must be a constant and one of "
+                            "{ NOTIFY_CONTROL, NO_TIMEOUT }",
+                            timeout, table);
+                    return false;
+                }
+            }
+        }
+
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "Unexpected value %1% for psa_idle_timeout "
+                "property on table %2%. Supported values are "
+                "{ NOTIFY_CONTROL, NO_TIMEOUT }",
+                timeout, table);
+        return false;
+    }
+};
+
+/// Implements @ref P4RuntimeArchHandlerIface for the UBPF architecture.
+/// We re-use PSA to handle externs.
+/// Rationale: The only configurable extern object in ubpf_model.p4 is Register.
+/// The Register is defined exactly the same as for PSA. Therefore, we can re-use PSA.
+class P4RuntimeArchHandlerUBPF final : public P4RuntimeArchHandlerCommon<Arch::PSA> {
+ public:
+    P4RuntimeArchHandlerUBPF(ReferenceMap *refMap, TypeMap *typeMap,
+                             const IR::ToplevelBlock *evaluatedProgram)
+        : P4RuntimeArchHandlerCommon<Arch::PSA>(refMap, typeMap, evaluatedProgram) {}
+};
+
+class P4RuntimeArchHandlerPSA final : public P4RuntimeArchHandlerPSAPNA<Arch::PSA> {
+ public:
+    P4RuntimeArchHandlerPSA(ReferenceMap *refMap, TypeMap *typeMap,
+                            const IR::ToplevelBlock *evaluatedProgram)
+        : P4RuntimeArchHandlerPSAPNA(refMap, typeMap, evaluatedProgram) {}
+};
+
+class P4RuntimeArchHandlerPNA final : public P4RuntimeArchHandlerPSAPNA<Arch::PNA> {
+ public:
+    P4RuntimeArchHandlerPNA(ReferenceMap *refMap, TypeMap *typeMap,
+                            const IR::ToplevelBlock *evaluatedProgram)
+        : P4RuntimeArchHandlerPSAPNA(refMap, typeMap, evaluatedProgram) {}
 };
 
 }  // namespace Standard
