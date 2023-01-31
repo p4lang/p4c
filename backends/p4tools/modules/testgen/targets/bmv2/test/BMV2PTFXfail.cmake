@@ -40,7 +40,8 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
-  "Invalid reference to object of type"
+  "Segmentation fault"
+  # The error here is unclear.
   extract_for_header_union.p4
 )
 
@@ -226,12 +227,6 @@ p4tools_add_xfail_reason(
 # 5. PTF tests
 # These are failures in PTF test that need to be fixed.
 ####################################################################################################
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-ptf"
-  "Address family not supported by protocol"
-  pvs-struct-2-bmv2.p4
-)
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
