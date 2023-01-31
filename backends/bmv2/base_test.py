@@ -1030,21 +1030,11 @@ class P4RuntimeTest(BaseTest):
             )
             counter_id = self.get_counter_id(counter_from_testgen["counter_name"])
             for value in counter_from_testgen["counter_values"]:
-                if counter_from_testgen["counter_type"] == 0:
-                    counters_from_switch = [
-                        x for x in counters_from_switch if x.data.packet_count != 0
-                    ]
-                if counter_from_testgen["counter_type"] == 1:
-                    counters_from_switch = [
-                        x for x in counters_from_switch if x.data.byte_count != 0
-                    ]
-                if counter_from_testgen["counter_type"] == 2:
-                    counters_from_switch = [
-                        x
-                        for x in counters_from_switch
-                        if x.data.byte_count != 0 or x.data.packet_count != 0
-                    ]
-
+                counters_from_switch = [
+                    x
+                    for x in counters_from_switch
+                    if x.data.byte_count != 0 or x.data.packet_count != 0
+                ]
                 if (len(counters_from_switch)>0):
                     counter = next(
                         item
@@ -1052,7 +1042,8 @@ class P4RuntimeTest(BaseTest):
                         if counter_id == item.counter_id
                         and value["index"] == item.index.index
                     )
-
+                else:
+                    continue
                 if counter_from_testgen["counter_type"] == 0:
                     if value["value"] != counter.data.packet_count:
                         e = "Expected {0} counter entry at index {1} with value {2} for type PACKETS , came value {3} ".format(

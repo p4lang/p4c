@@ -73,7 +73,7 @@ inja::json PTF::getCounters(const TestSpec *testSpec) {
         countJson["counter_values"] = inja::json::array();
         std::map<big_int, big_int> valuesMap;
         for (auto cond : counter->getCounterConditions()) {
-            if (valuesMap[cond.getEvaluatedIndex()->value] < cond.getEvaluatedValue()->value) {
+            if (cond.getEvaluatedValue()->value != 0) {
                 valuesMap[cond.getEvaluatedIndex()->value] = cond.getEvaluatedValue()->value;
                 continue;
             }

@@ -681,17 +681,6 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  {
                      auto *muxState = new ExecutionState(state);
                      muxState->popBody();
-                     const IR::Expression *increasedExpr =
-                         new IR::Add(mux->e2, IR::getConstant(IR::Type::Bits::get(32), 1));
-                     counterValue->addCounterCondition(Bmv2CounterCondition{index, increasedExpr});
-
-                     muxState->addTestObject("countervalues", externInstance, counterValue);
-
-                     // TODO: Find a better way to model a trace of this event.
-                     std::stringstream counterStream;
-                     counterStream << "CounterCount: Index ";
-                     index->dbprint(counterStream);
-                     muxState->add(new TraceEvent::Generic(counterStream.str()));
                      result->emplace_back(new IR::LNot(muxCond), state, muxState);
                  }
 
