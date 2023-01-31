@@ -15,7 +15,6 @@
 
 # Runs the compiler on a sample P4-16 program
 
-
 from subprocess import Popen, PIPE
 from threading import Thread
 import errno
@@ -34,13 +33,14 @@ FAILURE = 1
 
 
 class Options(object):
+
     def __init__(self):
-        self.binary = ""                # this program's name
-        self.cleanupTmp = True          # if false do not remote tmp folder created
-        self.p4filename = ""            # file that is being compiled
-        self.compilerSrcDir = ""        # path to compiler source tree
+        self.binary = ""          # this program's name
+        self.cleanupTmp = True    # if false do not remote tmp folder created
+        self.p4filename = ""      # file that is being compiled
+        self.compilerSrcDir = ""  # path to compiler source tree
         self.verbose = False
-        self.replace = False            # replace previous outputs
+        self.replace = False      # replace previous outputs
         self.dumpToJson = False
         self.compilerOptions = []
         self.runDebugger = False
@@ -82,7 +82,7 @@ class Local(object):
 
 def run_timeout(options, args, timeout, stderr):
     if options.verbose:
-        print(args[0], args[len(args) - 1])  # handy for manual cut-and-paste
+        print(args[0], args[len(args) - 1])      # handy for manual cut-and-paste
     print(" ".join(args))
     local = Local()
     local.process = None
@@ -99,15 +99,19 @@ def run_timeout(options, args, timeout, stderr):
             # sed. BSD sed's character class support is not great; for some
             # reason, even some character classes that the man page claims are
             # available don't seem to actually work.
-            local.filter = Popen(['sed', '-E',
-                                  r's|^[-[:alnum:][:punct:][:space:]_/]*/([-[:alnum:][:punct:][:space:]_]+\.[ph]4?[:(][[:digit:]]+)|\1|'],
-                                 stdin=PIPE, stdout=outfile)
+            local.filter = Popen([
+                'sed', '-E',
+                r's|^[-[:alnum:][:punct:][:space:]_/]*/([-[:alnum:][:punct:][:space:]_]+\.[ph]4?[:(][[:digit:]]+)|\1|'
+            ],
+                                 stdin=PIPE,
+                                 stdout=outfile)
             procstderr = local.filter.stdin
         local.process = Popen(args, stderr=procstderr)
         local.process.wait()
         if local.filter is not None:
             local.filter.stdin.close()
             local.filter.wait()
+
     thread = Thread(target=target)
     thread.start()
     thread.join(timeout)
@@ -187,10 +191,10 @@ def check_generated_files(options, tmpdir, expecteddir):
         elif not os.path.isfile(expected):
             # The file is missing and we do not replace. This is an error.
             print(
-                "Missing reference for file %s. Please rerun the test with the -f option turned on or rerun all tests using \"P4TEST_REPLACE=True make check\"." % expected)
+                "Missing reference for file %s. Please rerun the test with the -f option turned on or rerun all tests using \"P4TEST_REPLACE=True make check\"."
+                % expected)
             return FAILURE
-        result = compare_files(
-            options, produced, expected, file[-7:] == "-stderr")
+        result = compare_files(options, produced, expected, file[-7:] == "-stderr")
         if result != SUCCESS and (file[-7:] != "-stderr" or not ignoreStderr(options)):
             return result
     return SUCCESS
@@ -228,13 +232,11 @@ def process_file(options, argv):
         os.makedirs(expected_dirname)
 
     # We rely on the fact that these keys are in alphabetical order.
-    rename = {"FrontEndDump": "first",
-              "FrontEndLast": "frontend",
-              "MidEndLast": "midend"}
+    rename = {"FrontEndDump": "first", "FrontEndLast": "frontend", "MidEndLast": "midend"}
 
     if options.verbose:
         print("Writing temporary files into ", tmpdir)
-    ppfile = tmpdir + "/" + basename                  # after parsing
+    ppfile = tmpdir + "/" + basename   # after parsing
     referenceOutputs = ",".join(list(rename.keys()))
     stderr = tmpdir + "/" + basename + "-stderr"
     p4runtimeFile = tmpdir + "/" + basename + ".p4info.txt"
@@ -274,8 +276,8 @@ def process_file(options, argv):
 
     if not os.path.isfile(options.p4filename):
         raise Exception("No such file " + options.p4filename)
-    args = ["./p4test", "--pp", ppfile, "--dump", tmpdir, "--top4", referenceOutputs,
-            "--testJson"] + options.compilerOptions
+    args = ["./p4test", "--pp", ppfile, "--dump", tmpdir, "--top4", referenceOutputs, "--testJson"
+           ] + options.compilerOptions
     arch = getArch(options.p4filename)
     if arch is not None and arch != "pna":
         # Arch 'pna' is currently not supported by P4Runtime serializer
@@ -328,7 +330,9 @@ def process_file(options, argv):
         result = check_generated_files(options, tmpdir, expected_dirname)
     if (result == SUCCESS) and (not expected_error):
         result = recompile_file(options, ppfile, False)
-    if (result == SUCCESS) and (not expected_error) and (lastFile is not None) and (arch not in ["psa", "pna"]):
+    if (result == SUCCESS) and (not expected_error) and (lastFile is not None) and (arch not in [
+            "psa", "pna"
+    ]):
         # Unfortunately compilation and pretty-printing of lastFile is
         # not idempotent: For example a constant such as 8s128 is
         # converted by the compiler to -8s128.

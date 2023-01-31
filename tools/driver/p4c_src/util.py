@@ -16,15 +16,17 @@ import inspect
 import os
 import sys
 
+
 # get the directory the python program is running from
 def get_script_dir(follow_symlinks=True):
-    if getattr(sys, 'frozen', False): # py2exe, PyInstaller, cx_Freeze
+    if getattr(sys, 'frozen', False):  # py2exe, PyInstaller, cx_Freeze
         path = os.path.abspath(sys.executable)
     else:
         path = inspect.getabsfile(get_script_dir)
     if follow_symlinks:
         path = os.path.realpath(path)
     return os.path.dirname(path)
+
 
 # recursive find, good for developer
 def rec_find_bin(cwd, exe):
@@ -38,15 +40,18 @@ def rec_find_bin(cwd, exe):
         found = rec_find_bin(cwd, exe)
     return found
 
+
 def use_rec_find(exe):
     cwd = os.getcwd()
     return rec_find_bin(cwd, exe)
+
 
 def getLocalCfg(config):
     """
     Search bottom-up for p4c.site.cfg
     """
     return use_rec_find(config)
+
 
 # top-down find, good for deployment
 def find_bin(exe):
@@ -58,6 +63,7 @@ def find_bin(exe):
                     found_path = os.path.join(pp, ff)
     return found_path
 
+
 def find_file(directory, filename, binary=True):
     """
     Searches up the directory hierarchy for filename with prefix directory
@@ -65,10 +71,12 @@ def find_file(directory, filename, binary=True):
     If directory is an absolute path, just check for the file.
     If binary == true, then check permissions that the file is executable
     """
+
     def check_file(f):
         if os.path.isfile(f):
             if binary:
-                if os.access(f, os.X_OK): return True
+                if os.access(f, os.X_OK):
+                    return True
             else:
                 return True
         return False
@@ -76,7 +84,8 @@ def find_file(directory, filename, binary=True):
     executable = ""
     if directory.startswith('/'):
         executable = os.path.normpath(os.path.join(directory, filename))
-        if check_file(executable): return executable
+        if check_file(executable):
+            return executable
 
     # find the file up the hierarchy
     dir = os.path.abspath(get_script_dir())
@@ -89,7 +98,8 @@ def find_file(directory, filename, binary=True):
             files = os.listdir(path_to_file)
             if filename in files:
                 executable = os.path.join(path_to_file, filename)
-                if check_file(executable): return executable
+                if check_file(executable):
+                    return executable
 
         dir = os.path.dirname(dir)
     print('File {} not found'.format(filename))

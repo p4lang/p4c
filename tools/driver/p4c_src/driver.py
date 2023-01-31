@@ -20,6 +20,7 @@ import traceback
 
 import p4c_src.util as util
 
+
 class BackendDriver:
     """A class that has a list of passes that need to be run.  Each
     backend configures the commands that wants to be run.
@@ -33,7 +34,7 @@ class BackendDriver:
 
     """
 
-    def __init__(self, target, arch, argParser = None):
+    def __init__(self, target, arch, argParser=None):
         self._target = target
         self._arch = arch
         self._backend = target + '-' + arch
@@ -77,8 +78,7 @@ class BackendDriver:
     def add_command_line_options(self):
         """ Method for derived classes to add options to the parser
         """
-        self._argGroup = self._argParser.add_argument_group(title = self._backend)
-
+        self._argGroup = self._argParser.add_argument_group(title=self._backend)
 
     def process_command_line_options(self, opts):
         """ Process all command line options
@@ -117,8 +117,8 @@ class BackendDriver:
 
         # append to the list of defines
         for d in opts.preprocessor_defines:
-            self.add_command_option('preprocessor', "-D"+d)
-            self.add_command_option('compiler', "-D"+d)
+            self.add_command_option('preprocessor', "-D" + d)
+            self.add_command_option('compiler', "-D" + d)
 
         # Preserve comments: -C
         # Unix and std C keywords should be allowed in P4 (-undef and -nostdinc)
@@ -128,14 +128,12 @@ class BackendDriver:
         # default search path
         if opts.language == 'p4-16':
             self.add_command_option('preprocessor',
-                                        "-I {}".format(os.environ['P4C_16_INCLUDE_PATH']))
-            self.add_command_option('compiler',
                                     "-I {}".format(os.environ['P4C_16_INCLUDE_PATH']))
+            self.add_command_option('compiler', "-I {}".format(os.environ['P4C_16_INCLUDE_PATH']))
         else:
             self.add_command_option('preprocessor',
-                                   "-I {}".format(os.environ['P4C_14_INCLUDE_PATH']))
-            self.add_command_option('compiler',
-                                   "-I {}".format(os.environ['P4C_14_INCLUDE_PATH']))
+                                    "-I {}".format(os.environ['P4C_14_INCLUDE_PATH']))
+            self.add_command_option('compiler', "-I {}".format(os.environ['P4C_14_INCLUDE_PATH']))
 
         # append search path
         for path in opts.search_path:
@@ -154,14 +152,12 @@ class BackendDriver:
         if opts.p4runtime_file:
             print("'--p4runtime-file' and '--p4runtime-format'", \
                 "are deprecated, consider using '--p4runtime-files'", file=sys.stderr)
-            self.add_command_option('compiler',
-                                    "--p4runtime-file {}".format(opts.p4runtime_file))
+            self.add_command_option('compiler', "--p4runtime-file {}".format(opts.p4runtime_file))
             self.add_command_option('compiler',
                                     "--p4runtime-format {}".format(opts.p4runtime_format))
 
         if opts.p4runtime_files:
-            self.add_command_option('compiler',
-                                    "--p4runtime-files {}".format(opts.p4runtime_files))
+            self.add_command_option('compiler', "--p4runtime-files {}".format(opts.p4runtime_files))
 
         # disable annotations
         if opts.disabled_annos is not None:
@@ -193,7 +189,7 @@ class BackendDriver:
 
         if (os.environ['P4C_BUILD_TYPE'] == "DEVELOPER") and \
            'assembler' in self._commands and opts.debug:
-                self.add_command_option('assembler', "-vvv")
+            self.add_command_option('assembler', "-vvv")
 
         # handle mode flags
         if opts.run_preprocessor_only:
@@ -252,7 +248,8 @@ class BackendDriver:
             print(traceback.format_exc(), file=sys.stderr)
             return 1
 
-        if self._verbose: print('running {}'.format(' '.join(cmd)))
+        if self._verbose:
+            print('running {}'.format(' '.join(cmd)))
         # Wait for the process, if we get CTRL+C during that time, forward it
         # to the process and continue waiting (leave the program to resolve
         # it), if we get other error kill the process:
@@ -264,14 +261,14 @@ class BackendDriver:
             while True:
                 try:
                     p.communicate()
-                    break  # done waiting, process ended
+                    break    # done waiting, process ended
                 except KeyboardInterrupt:
                     p.send_signal(signal.SIGINT)
         except:
-            p.terminate()  # don't leave process possibly running
+            p.terminate()    # don't leave process possibly running
             try:
                 p.communicate(timeout=0.1)
-            except:  # on timeout or other error
+            except:          # on timeout or other error
                 p.kill()
             print("error running {}".format(" ".join(cmd)), file=sys.stderr)
             print(traceback.format_exc(), file=sys.stderr)
@@ -279,13 +276,12 @@ class BackendDriver:
 
         return p.returncode
 
-
     def preRun(self, cmd_name):
         """
         Preamble to a command to setup anything needed
         """
         if cmd_name not in self._preCmds:
-            return # nothing to do
+            return      # nothing to do
 
         cmds = self._preCmds[cmd_name]
         for c in cmds:
@@ -298,7 +294,7 @@ class BackendDriver:
         Postamble to a command to cleanup
         """
         if cmd_name not in self._postCmds:
-            return # nothing to do
+            return      # nothing to do
 
         cmds = self._postCmds[cmd_name]
         rc = 0
@@ -306,7 +302,7 @@ class BackendDriver:
             rc += self.runCmd(cmd_name, c)
             # we will continue to run post commands even if some fail
             # so that we do all the cleanup
-        return rc # \TODO should we fail on this or not?
+        return rc  # \TODO should we fail on this or not?
 
     def run(self):
         """

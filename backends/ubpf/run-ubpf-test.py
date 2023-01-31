@@ -25,6 +25,7 @@ sys.path.append(str(FILE_DIR.joinpath("../../tools")))
 # path to the framework repository of the compiler
 sys.path.append(str(FILE_DIR.joinpath("../ebpf")))
 import testutils
+
 run_ebpf_test = importlib.import_module('run-ebpf-test')
 
 arg_parser = run_ebpf_test.PARSER
@@ -54,7 +55,6 @@ if __name__ == "__main__":
     stderr_log = logging.StreamHandler()
     stderr_log.setFormatter(logging.Formatter("%(levelname)s:%(message)s"))
     logging.getLogger().addHandler(stderr_log)
-
 
     # All args after '--' are intended for the p4 compiler
     argv = argv[1:]

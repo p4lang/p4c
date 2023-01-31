@@ -19,17 +19,20 @@
 
 import logging
 
+
 class STFNamedEntry:
     """
     A class that encapsulates a named table entry stored in an 'env var'
     used mainly for counters.
     """
+
     def __init__(self, tableName, fieldName, value, mask, priority):
         self._tableName = tableName
         self._fieldName = fieldName
         self._value = value
         self._mask = mask
         self._priority = priority
+
 
 class STFRunner(object):
     """
@@ -38,8 +41,8 @@ class STFRunner(object):
 
     def __init__(self, ast, testname):
         testNameEscapeChars = "-"
-        testNameEscapes = "_"*len(testNameEscapeChars)
-        self._transTable = str.maketrans(testNameEscapeChars,testNameEscapes)
+        testNameEscapes = "_" * len(testNameEscapeChars)
+        self._transTable = str.maketrans(testNameEscapeChars, testNameEscapes)
         self._testname = testname.translate(self._transTable)
         logging.basicConfig(level=logging.INFO)
         self._logger = logging.getLogger(self._testname)
@@ -76,20 +79,18 @@ class STFRunner(object):
         else:
             # flush the queue of expects
             for e in pkt_expects:
-                 self.genExpectPacket(e, None)
+                self.genExpectPacket(e, None)
             pkt_expects = []
             self.testEnd()
         finally:
             self.testCleanup()
             self._logger.info("End STF Test")
 
-
     def genAddTableEntry(self, entry):
         """
             Generate a table entry
         """
         return
-
 
     def genAddDefaultAction(self, set_default):
         """
@@ -115,7 +116,8 @@ class STFRunner(object):
         """
         if pkt_pair[0] is not None:
             self.genSendPacket(pkt_pair[0])
-            if pkt_pair[1] is not None: self.genExpectPacket(pkt_pair[1], pkt_pair[0])
+            if pkt_pair[1] is not None:
+                self.genExpectPacket(pkt_pair[1], pkt_pair[0])
 
     def genCheckCounter(self, chk):
         """
@@ -149,6 +151,8 @@ class STFRunner(object):
         """
         val = ''
         for e, p in zip(expect, packet):
-            if e == '*': val += p
-            else: val += e
+            if e == '*':
+                val += p
+            else:
+                val += e
         return val

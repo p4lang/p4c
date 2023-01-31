@@ -28,7 +28,9 @@ import unittest
 from .stf_parser import STFParser
 from .stf_runner import STFRunner
 
-class STFTest (STFRunner):
+
+class STFTest(STFRunner):
+
     def __init__(self, ast, testname):
         super(STFTest, self).__init__(ast, testname)
 
@@ -43,8 +45,10 @@ class STFTest (STFRunner):
 
         # bookeeping for aliases (mainly used to name counters)
         if entry[5] is not None:
-            match_name, match, mask, hasMask = self.match2spec(table, match_list[0][0], match_list[0][1])
-            self._namedEntries[entry[5]] = STFNamedEntry(table, match_list[0][0], match_list[0][1], 0, priority)
+            match_name, match, mask, hasMask = self.match2spec(table, match_list[0][0],
+                                                               match_list[0][1])
+            self._namedEntries[entry[5]] = STFNamedEntry(table, match_list[0][0], match_list[0][1],
+                                                         0, priority)
 
     def genAddDefaultAction(self, set_default):
         """
@@ -69,7 +73,7 @@ class STFTest (STFRunner):
             Generate a check_packet statement
         """
         if (expect[1] is None):
-             # expect no_packet
+            # expect no_packet
             self._logger.info("Expect no packet")
             return
 
@@ -104,12 +108,11 @@ class STFTest (STFRunner):
         """
         self._logger.info("wait")
 
+
 def get_arg_parser():
     parser = argparse.ArgumentParser(description='Tests STF parsing')
-    parser.add_argument('stftest', help='name of STF input file',
-                        type=str, action='store')
+    parser.add_argument('stftest', help='name of STF input file', type=str, action='store')
     return parser
-
 
 
 def main():

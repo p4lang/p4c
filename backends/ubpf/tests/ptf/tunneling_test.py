@@ -28,8 +28,8 @@ class TunnelingTest(P4rtOVSBaseTest):
         self.del_flows()
         self.unload_bpf_program()
         self.load_bpf_program(path_to_program="build/test-tunneling.o")
-        self.add_bpf_prog_flow(1,2)
-        self.add_bpf_prog_flow(2,1)
+        self.add_bpf_prog_flow(1, 2)
+        self.add_bpf_prog_flow(2, 1)
 
 
 class MplsDownstreamTest(TunnelingTest):
@@ -41,8 +41,8 @@ class MplsDownstreamTest(TunnelingTest):
 
     def runTest(self):
         pkt = Ether(dst="11:11:11:11:11:11") / simple_ip_only_packet(ip_dst="192.168.1.1")
-        exp_pkt = Ether(dst="11:11:11:11:11:11") / MPLS(label=20, cos=5, s=1, ttl=64) / simple_ip_only_packet(
-            ip_dst="192.168.1.1")
+        exp_pkt = Ether(dst="11:11:11:11:11:11") / MPLS(
+            label=20, cos=5, s=1, ttl=64) / simple_ip_only_packet(ip_dst="192.168.1.1")
 
         send_packet(self, (0, 1), pkt)
         verify_packets(self, exp_pkt, device_number=0, ports=[2])
@@ -56,8 +56,8 @@ class MplsUpstreamTest(TunnelingTest):
         self.update_bpf_map(map_id=0, key="20 0 0 0", value="0 0 0 0")
 
     def runTest(self):
-        pkt = Ether(dst="11:11:11:11:11:11") / MPLS(label=20, cos=5, s=1, ttl=64) / simple_ip_only_packet(
-            ip_dst="192.168.1.1")
+        pkt = Ether(dst="11:11:11:11:11:11") / MPLS(
+            label=20, cos=5, s=1, ttl=64) / simple_ip_only_packet(ip_dst="192.168.1.1")
         exp_pkt = Ether(dst="11:11:11:11:11:11") / simple_ip_only_packet(ip_dst="192.168.1.1")
 
         send_packet(self, (0, 1), pkt)

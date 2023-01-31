@@ -21,7 +21,9 @@
 import ply.lex as lex
 from ply.lex import TOKEN
 
+
 class STFLexer:
+
     def __init__(self):
         self.filename = ''
         # Keeps track of the last token returned from self.token()
@@ -58,7 +60,7 @@ class STFLexer:
         return token.lexpos - last_cr
 
     # Build the lexer
-    def build(self,**kwargs):
+    def build(self, **kwargs):
         self.lexer = lex.lex(module=self, **kwargs)
         # start the lexer looking for keywords
         self.lexer.begin('keyword')
@@ -68,27 +70,16 @@ class STFLexer:
         self.errors_cnt += 1
 
     states = (
-        # add a state to lex only keywords. By default, all keywords
-        # are IDs. Fortunately, in the current grammar all keywords
-        # are commands at the beginning of a line (except for packets and bytes!).
+                                       # add a state to lex only keywords. By default, all keywords
+                                       # are IDs. Fortunately, in the current grammar all keywords
+                                       # are commands at the beginning of a line (except for packets and bytes!).
         ('keyword', 'inclusive'),
-        # lex only packet data
+                                       # lex only packet data
         ('packetdata', 'exclusive'),
     )
 
-    keywords = (
-        'ADD',
-        'ALL',
-        'BYTES',
-        'CHECK_COUNTER',
-        'EXPECT',
-        'NO_PACKET',
-        'PACKET',
-        'PACKETS',
-        'REMOVE',
-        'SETDEFAULT',
-        'WAIT'
-    )
+    keywords = ('ADD', 'ALL', 'BYTES', 'CHECK_COUNTER', 'EXPECT', 'NO_PACKET', 'PACKET', 'PACKETS',
+                'REMOVE', 'SETDEFAULT', 'WAIT')
 
     keywords_map = {}
     for keyword in keywords:
@@ -97,63 +88,41 @@ class STFLexer:
         else:
             keywords_map[keyword.lower()] = keyword
 
-    tokens = (
-        'COLON',
-        'COMMA',
-        'DATA_DEC',
-        'DATA_HEX',
-        'DATA_TERN',
-        'DOT',
-        'ID',
-        'INT_CONST_BIN',
-        'INT_CONST_DEC',
-        'TERN_CONST_HEX',
-        'INT_CONST_HEX',
-        'LBRACKET',
-        'RBRACKET',
-        'LPAREN',
-        'RPAREN',
-        'SLASH',
-        'EQUAL',
-        'EQEQ',
-        'LE',
-        'LEQ',
-        'GT',
-        'GEQ',
-        'NEQ'
-    ) + keywords
+    tokens = ('COLON', 'COMMA', 'DATA_DEC', 'DATA_HEX', 'DATA_TERN', 'DOT', 'ID', 'INT_CONST_BIN',
+              'INT_CONST_DEC', 'TERN_CONST_HEX', 'INT_CONST_HEX', 'LBRACKET', 'RBRACKET', 'LPAREN',
+              'RPAREN', 'SLASH', 'EQUAL', 'EQEQ', 'LE', 'LEQ', 'GT', 'GEQ', 'NEQ') + keywords
 
     t_ignore_COMMENT = r'\#.*'
-    t_COLON     = r':'
-    t_COMMA     = r','
-    t_DOT       = r'\.'
-    t_LBRACKET  = r'\['
-    t_RBRACKET  = r'\]'
-    t_LPAREN    = r'\('
-    t_RPAREN    = r'\)'
-    t_EQUAL     = r'='
-    t_EQEQ      = r'=='
-    t_NEQ       = r'!='
-    t_LE        = r'<'
-    t_LEQ       = r'<='
-    t_GT        = r'>'
-    t_GEQ       = r'>='
-    t_SLASH     = r'/'
+    t_COLON = r':'
+    t_COMMA = r','
+    t_DOT = r'\.'
+    t_LBRACKET = r'\['
+    t_RBRACKET = r'\]'
+    t_LPAREN = r'\('
+    t_RPAREN = r'\)'
+    t_EQUAL = r'='
+    t_EQEQ = r'=='
+    t_NEQ = r'!='
+    t_LE = r'<'
+    t_LEQ = r'<='
+    t_GT = r'>'
+    t_GEQ = r'>='
+    t_SLASH = r'/'
 
     # binary constants with ternary (don't care) bits
-    binary_constant     = r'(0[bB][*01]+)'
+    binary_constant = r'(0[bB][*01]+)'
 
-    hex_prefix          = r'0[xX]'
-    hex_digits          = r'[0-9a-fA-F]'
-    hex_constant_body   = r'(' + hex_digits + r'+)'
-    hex_constant        = r'(' + hex_prefix + hex_constant_body + r')'
+    hex_prefix = r'0[xX]'
+    hex_digits = r'[0-9a-fA-F]'
+    hex_constant_body = r'(' + hex_digits + r'+)'
+    hex_constant = r'(' + hex_prefix + hex_constant_body + r')'
 
-    hex_tern            = r'([0-9a-fA-F\*]+)'
-    hex_tern_constant   = r'(' + hex_prefix + hex_tern + r')'
+    hex_tern = r'([0-9a-fA-F\*]+)'
+    hex_tern_constant = r'(' + hex_prefix + hex_tern + r')'
 
-    dec_constant        = r'([0-9]+)'
+    dec_constant = r'([0-9]+)'
 
-    identifier          = r'([a-z$A-Z_][a-z$A-Z_0-9]*)'
+    identifier = r'([a-z$A-Z_][a-z$A-Z_0-9]*)'
 
     @TOKEN(hex_tern_constant)
     def t_TERN_CONST_HEX(self, t):

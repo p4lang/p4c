@@ -29,8 +29,8 @@ class Ipv4Test(P4rtOVSBaseTest):
         self.del_flows()
         self.unload_bpf_program()
         self.load_bpf_program(path_to_program="build/test-ipv4-actions.o")
-        self.add_bpf_prog_flow(1,2)
-        self.add_bpf_prog_flow(2,1)
+        self.add_bpf_prog_flow(1, 2)
+        self.add_bpf_prog_flow(2, 1)
 
 
 class Ipv4SetVersionTest(Ipv4Test):
@@ -290,7 +290,8 @@ class Ipv4SetFragOffsetSrcTest(Ipv4Test):
     def setUp(self):
         Ipv4Test.setUp(self)
 
-        self.update_bpf_map(map_id=0, key="1 1 168 192", value="14 0 0 0 255 31 0 0 255 255 255 255")
+        self.update_bpf_map(
+            map_id=0, key="1 1 168 192", value="14 0 0 0 255 31 0 0 255 255 255 255")
 
     def runTest(self):
         pkt = Ether() / IP(src="192.168.1.1", frag=0) / TCP() / "Ala ma kota"

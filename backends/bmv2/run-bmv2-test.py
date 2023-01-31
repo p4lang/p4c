@@ -28,69 +28,59 @@ from scapy.layers.all import *
 from scapy.utils import *
 from bmv2stf import RunBMV2
 
-sys.path.insert(0,
-                os.path.dirname(os.path.realpath(__file__)) + '/../../tools')
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '/../../tools')
 from testutils import SUCCESS, FAILURE, check_if_dir, check_if_file
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("rootdir",
-                        help="the root directory of "
-                        "the compiler source tree")
+    parser.add_argument(
+        "rootdir", help="the root directory of "
+        "the compiler source tree")
     parser.add_argument("p4filename", help="the p4 file to process")
     parser.add_argument(
         "-b",
         "--nocleanup",
         action="store_false",
         help="do not remove temporary results for failing tests")
-    parser.add_argument("-bd",
-                        "--buildir",
-                        dest="builddir",
-                        help="The path to the compiler build directory, "
-                        "default is \"build\".")
-    parser.add_argument("-v",
-                        "--verbose",
-                        action="store_true",
-                        help="verbose operation")
+    parser.add_argument(
+        "-bd",
+        "--buildir",
+        dest="builddir",
+        help="The path to the compiler build directory, "
+        "default is \"build\".")
+    parser.add_argument("-v", "--verbose", action="store_true", help="verbose operation")
     parser.add_argument(
         "-f",
         "--replace",
         action="store_true",
         help="replace reference outputs with newly generated ones")
-    parser.add_argument("-p",
-                        "--usePsa",
-                        dest="use_psa",
-                        action="store_true",
-                        help="Use psa switch")
-    parser.add_argument("-pp",
-                        dest="pp",
-                        help="pass this option to the compiler")
-    parser.add_argument("-gdb",
-                        "--gdb",
-                        action="store_true",
-                        help="Run the compiler under gdb.")
-    parser.add_argument("-a",
-                        dest="compiler_options",
-                        default=[],
-                        action='append',
-                        nargs="?",
-                        help="Pass this option string to the compiler")
-    parser.add_argument("--target-specific-switch-arg",
-                        dest="switch_options",
-                        default=[],
-                        action='append',
-                        nargs="?",
-                        help="Pass this target-specific option to the switch")
-    parser.add_argument("--init",
-                        dest="init_cmds",
-                        default=[],
-                        action='append',
-                        nargs="?",
-                        help="Run <cmd> before the start of the test")
-    parser.add_argument("--observation-log",
-                        dest="obs_log",
-                        help="save packet output to <file>")
+    parser.add_argument(
+        "-p", "--usePsa", dest="use_psa", action="store_true", help="Use psa switch")
+    parser.add_argument("-pp", dest="pp", help="pass this option to the compiler")
+    parser.add_argument("-gdb", "--gdb", action="store_true", help="Run the compiler under gdb.")
+    parser.add_argument(
+        "-a",
+        dest="compiler_options",
+        default=[],
+        action='append',
+        nargs="?",
+        help="Pass this option string to the compiler")
+    parser.add_argument(
+        "--target-specific-switch-arg",
+        dest="switch_options",
+        default=[],
+        action='append',
+        nargs="?",
+        help="Pass this target-specific option to the switch")
+    parser.add_argument(
+        "--init",
+        dest="init_cmds",
+        default=[],
+        action='append',
+        nargs="?",
+        help="Run <cmd> before the start of the test")
+    parser.add_argument("--observation-log", dest="obs_log", help="save packet output to <file>")
     parser.add_argument(
         "-tf",
         "--testFile",
@@ -104,21 +94,21 @@ def parse_args():
 class Options():
 
     def __init__(self):
-        self.binary = ""  # this program's name
-        self.cleanupTmp = True  # if false do not remote tmp folder created
-        self.p4filename = ""  # file that is being compiled
-        self.compilerSrcDir = ""  # path to compiler source tree
-        self.compilerBuildDir = ""  # path to compiler build directory
-        self.testFile = ""  # path to stf test file that is used
-        self.testName = None  # Name of the test
+        self.binary = ""               # this program's name
+        self.cleanupTmp = True         # if false do not remote tmp folder created
+        self.p4filename = ""           # file that is being compiled
+        self.compilerSrcDir = ""       # path to compiler source tree
+        self.compilerBuildDir = ""     # path to compiler build directory
+        self.testFile = ""             # path to stf test file that is used
+        self.testName = None           # Name of the test
         self.verbose = False
-        self.replace = False  # replace previous outputs
+        self.replace = False           # replace previous outputs
         self.compilerOptions = []
         self.switchTargetSpecificOptions = []
-        self.hasBMv2 = False  # Is the behavioral model installed?
-        self.usePsa = False  # Use the psa switch behavioral model?
+        self.hasBMv2 = False           # Is the behavioral model installed?
+        self.usePsa = False            # Use the psa switch behavioral model?
         self.runDebugger = False
-        # Log packets produced by the BMV2 model if path to log is supplied
+                                       # Log packets produced by the BMV2 model if path to log is supplied
         self.observationLog = None
         self.initCommands = []
 

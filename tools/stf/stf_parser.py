@@ -82,6 +82,7 @@ from .stf_lexer import STFLexer
 
 
 class STFParser:
+
     def __init__(self):
         self.lexer = STFLexer()
         self.lexer.build()
@@ -100,29 +101,25 @@ class STFParser:
 
         self.lexer.filename = filename
         self.lexer.reset_lineno()
-        stf_ast = self.parser.parse(input=data,
-                                    lexer=self.lexer)
+        stf_ast = self.parser.parse(input=data, lexer=self.lexer)
         self.errors_cnt += self.lexer.errors_cnt
         return stf_ast, self.errors_cnt
 
     def print_error(self, lineno, lexpos, msg):
         self.errors_cnt += 1
-        print("parse error (%s%s:%s): %s" % (
-            '%s:' % self.lexer.filename if self.lexer.filename else '',
-            lineno,
-            lexpos,
-            msg))
+        print("parse error (%s%s:%s): %s" %
+              ('%s:' % self.lexer.filename if self.lexer.filename else '', lineno, lexpos, msg))
 
     def get_filename(self):
         return self.lexer.filename
 
     def p_error(self, p):
         if p is None:
-            self.print_error(self.lexer.get_lineno(), 0,
-                             "Unexpected end-of-file.  Missing paren?")
+            self.print_error(self.lexer.get_lineno(), 0, "Unexpected end-of-file.  Missing paren?")
         else:
-            self.print_error(p.lineno, self.lexer.get_colno(),
-                             "Syntax error while parsing at token '%s' (of type %s)." % (p.value, p.type))
+            self.print_error(
+                p.lineno, self.lexer.get_colno(),
+                "Syntax error while parsing at token '%s' (of type %s)." % (p.value, p.type))
             # Skip to the next statement.
             while True:
                 tok = self.parser.token()

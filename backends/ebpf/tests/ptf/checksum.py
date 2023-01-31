@@ -50,11 +50,12 @@ class InternetChecksumPSATest(P4EbpfTest):
     def runTest(self):
         for _ in range(1):
             # test checksum computation
-            pkt = testutils.simple_udp_packet(pktlen=random.randint(100, 512),
-                                              ip_src=self.random_ip(),
-                                              ip_dst=self.random_ip(),
-                                              ip_ttl=random.randint(3, 255),
-                                              ip_id=random.randint(0, 0xFFFF))
+            pkt = testutils.simple_udp_packet(
+                pktlen=random.randint(100, 512),
+                ip_src=self.random_ip(),
+                ip_dst=self.random_ip(),
+                ip_ttl=random.randint(3, 255),
+                ip_id=random.randint(0, 0xFFFF))
 
             pkt[IP].flags = random.randint(0, 7)
             pkt[IP].frag = random.randint(0, 0x1FFF)
@@ -118,8 +119,8 @@ class HashWideField(P4EbpfTest):
     def runTest(self):
         #      data0          data1        data2
         data = "1234567890" + "abcdefgh" + "XZ"
-        pkt = Ether() / data / (" " * 50)  # data + room for check values
-        #                                         crc32    crc16 ones_compl range
+        pkt = Ether() / data / (" " * 50)   # data + room for check values
+                                            #                                         crc32    crc16 ones_compl range
         exp_pkt = Ether() / data / bytes.fromhex("6f7bf033 12e9  0c0b       5b") / (" " * 41)
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet_any_port(self, exp_pkt, PTF_PORTS)
