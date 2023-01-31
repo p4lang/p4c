@@ -109,3 +109,17 @@ class HashRangePSATest(P4EbpfTest):
         exp_pkt = Ether() / bytes.fromhex('313233343536373839 {}'.format(format(res, 'x')))
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet_any_port(self, exp_pkt, PTF_PORTS)
+
+
+class HashWideField(P4EbpfTest):
+    # Tests support for fields wider than 64 bits
+    p4_file_path = "p4testdata/hash-wide-field.p4"
+
+    def runTest(self):
+        #      data0          data1        data2
+        data = "1234567890" + "abcdefgh" + "XZ"
+        pkt = Ether() / data / (" " * 50)  # data + room for check values
+        #                                         crc32    crc16 ones_compl range
+        exp_pkt = Ether() / data / bytes.fromhex("6f7bf033 12e9  0c0b       5b") / (" " * 41)
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet_any_port(self, exp_pkt, PTF_PORTS)

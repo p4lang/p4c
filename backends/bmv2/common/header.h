@@ -33,7 +33,7 @@ namespace BMV2 {
 class Backend;
 
 class HeaderConverter : public Inspector {
-    ConversionContext* ctxt;
+    ConversionContext *ctxt;
     cstring scalarsName;
     cstring scalarsTypeName;
     std::set<cstring> visitedHeaders;
@@ -43,22 +43,22 @@ class HeaderConverter : public Inspector {
     unsigned scalars_width = 0;
 
  protected:
-    Util::JsonArray* pushNewArray(Util::JsonArray* parent);
-    void addHeaderType(const IR::Type_StructLike* st);
-    void addHeaderField(const cstring& header, const cstring& name, int size, bool is_signed);
-    Util::JsonArray* addHeaderUnionFields(cstring hdrName, const IR::Type_HeaderUnion* type);
+    Util::JsonArray *pushNewArray(Util::JsonArray *parent);
+    void addHeaderType(const IR::Type_StructLike *st);
+    void addHeaderField(const cstring &header, const cstring &name, int size, bool is_signed);
+    Util::JsonArray *addHeaderUnionFields(cstring hdrName, const IR::Type_HeaderUnion *type);
 
  public:
-    void addTypesAndInstances(const IR::Type_StructLike* type, bool meta);
-    void addHeaderStacks(const IR::Type_Struct* type);
-    bool isHeaders(const IR::Type_StructLike* st);
+    void addTypesAndInstances(const IR::Type_StructLike *type, bool meta);
+    void addHeaderStacks(const IR::Type_Struct *type);
+    bool isHeaders(const IR::Type_StructLike *st);
 
-    Visitor::profile_t init_apply(const IR::Node* node) override;
-    void end_apply(const IR::Node* node) override;
+    Visitor::profile_t init_apply(const IR::Node *node) override;
+    void end_apply(const IR::Node *node) override;
 
-    bool preorder(const IR::Parameter* param) override;
+    bool preorder(const IR::Parameter *param) override;
 
-    HeaderConverter(ConversionContext* ctxt, cstring scalarsName);
+    HeaderConverter(ConversionContext *ctxt, cstring scalarsName);
 };
 
 }  // namespace BMV2

@@ -36,18 +36,18 @@ class UBPFType;
 
 class UBPFProgram : public EBPF::EBPFProgram {
  public:
-    UBPFParser* parser{};
-    UBPFControl* control{};
-    UBPFDeparser* deparser{};
-    UBPFModel& model;
+    UBPFParser *parser{};
+    UBPFControl *control{};
+    UBPFDeparser *deparser{};
+    UBPFModel &model;
 
     cstring contextVar, outerHdrOffsetVar, outerHdrLengthVar;
     cstring stdMetadataVar;
     cstring packetTruncatedSizeVar;
     cstring arrayIndexType = "uint32_t";
 
-    UBPFProgram(const EbpfOptions& options, const IR::P4Program* program, P4::ReferenceMap* refMap,
-                P4::TypeMap* typeMap, const IR::ToplevelBlock* toplevel)
+    UBPFProgram(const EbpfOptions &options, const IR::P4Program *program, P4::ReferenceMap *refMap,
+                P4::TypeMap *typeMap, const IR::ToplevelBlock *toplevel)
         : EBPF::EBPFProgram(options, program, refMap, typeMap, toplevel),
           model(UBPFModel::instance) {
         packetStartVar = cstring("pkt");
@@ -62,17 +62,17 @@ class UBPFProgram : public EBPF::EBPFProgram {
     }
 
     bool build() override;
-    void emitC(UbpfCodeBuilder* builder, cstring headerFile);
-    void emitH(EBPF::CodeBuilder* builder, cstring headerFile) override;
-    void emitPreamble(EBPF::CodeBuilder* builder) override;
-    void emitTypes(EBPF::CodeBuilder* builder) override;
-    void emitTableDefinition(EBPF::CodeBuilder* builder) const;
-    void emitPktVariable(UbpfCodeBuilder* builder) const;
-    void emitPacketLengthVariable(UbpfCodeBuilder* builder) const;
-    void emitHeaderInstances(EBPF::CodeBuilder* builder) override;
-    void emitMetadataInstance(EBPF::CodeBuilder* builder) const;
-    void emitLocalVariables(EBPF::CodeBuilder* builder) override;
-    void emitPipeline(EBPF::CodeBuilder* builder) override;
+    void emitC(UbpfCodeBuilder *builder, cstring headerFile);
+    void emitH(EBPF::CodeBuilder *builder, cstring headerFile) override;
+    void emitPreamble(EBPF::CodeBuilder *builder) override;
+    void emitTypes(EBPF::CodeBuilder *builder) override;
+    void emitTableDefinition(EBPF::CodeBuilder *builder) const;
+    void emitPktVariable(UbpfCodeBuilder *builder) const;
+    void emitPacketLengthVariable(UbpfCodeBuilder *builder) const;
+    void emitHeaderInstances(EBPF::CodeBuilder *builder) override;
+    void emitMetadataInstance(EBPF::CodeBuilder *builder) const;
+    void emitLocalVariables(EBPF::CodeBuilder *builder) override;
+    void emitPipeline(EBPF::CodeBuilder *builder) override;
 };
 
 }  // namespace UBPF

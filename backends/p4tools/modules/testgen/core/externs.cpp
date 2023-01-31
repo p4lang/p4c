@@ -18,16 +18,16 @@ namespace P4Tools {
 
 namespace P4Testgen {
 
-bool ExternMethodImpls::exec(const IR::MethodCallExpression* call, const IR::Expression* receiver,
-                             IR::ID& name, const IR::Vector<IR::Argument>* args,
-                             const ExecutionState& state,
-                             SmallStepEvaluator::Result& result) const {
+bool ExternMethodImpls::exec(const IR::MethodCallExpression *call, const IR::Expression *receiver,
+                             IR::ID &name, const IR::Vector<IR::Argument> *args,
+                             const ExecutionState &state,
+                             SmallStepEvaluator::Result &result) const {
     // We have to check the extern type here. We may receive a specialized canonical type, which we
     // need to unpack.
-    const IR::Type_Extern* externType = nullptr;
-    if (const auto* type = receiver->type->to<IR::Type_Extern>()) {
+    const IR::Type_Extern *externType = nullptr;
+    if (const auto *type = receiver->type->to<IR::Type_Extern>()) {
         externType = type;
-    } else if (const auto* specType = receiver->type->to<IR::Type_SpecializedCanonical>()) {
+    } else if (const auto *specType = receiver->type->to<IR::Type_SpecializedCanonical>()) {
         CHECK_NULL(specType->substituted);
         externType = specType->substituted->checkedTo<IR::Type_Extern>();
     }
@@ -39,16 +39,16 @@ bool ExternMethodImpls::exec(const IR::MethodCallExpression* call, const IR::Exp
         return false;
     }
 
-    const auto& submap = impls.at(qualifiedMethodName);
+    const auto &submap = impls.at(qualifiedMethodName);
     if (submap.count(args->size()) == 0) {
         return false;
     }
 
     // Find matching methods: if any arguments are named, then the parameter name must match.
     boost::optional<MethodImpl> matchingImpl;
-    for (const auto& pair : submap.at(args->size())) {
-        const auto& paramNames = pair.first;
-        const auto& methodImpl = pair.second;
+    for (const auto &pair : submap.at(args->size())) {
+        const auto &paramNames = pair.first;
+        const auto &methodImpl = pair.second;
 
         if (matches(paramNames, args)) {
             BUG_CHECK(!matchingImpl, "Ambiguous extern method call: %1%", name);
@@ -63,8 +63,8 @@ bool ExternMethodImpls::exec(const IR::MethodCallExpression* call, const IR::Exp
     return true;
 }
 
-bool ExternMethodImpls::matches(const std::vector<cstring>& paramNames,
-                                const IR::Vector<IR::Argument>* args) {
+bool ExternMethodImpls::matches(const std::vector<cstring> &paramNames,
+                                const IR::Vector<IR::Argument> *args) {
     CHECK_NULL(args);
 
     // Number of parameters should match the number of arguments.
@@ -73,8 +73,8 @@ bool ExternMethodImpls::matches(const std::vector<cstring>& paramNames,
     }
     // Any named argument should match the name of the corresponding parameter.
     for (size_t idx = 0; idx < paramNames.size(); idx++) {
-        const auto& paramName = paramNames.at(idx);
-        const auto& arg = args->at(idx);
+        const auto &paramName = paramNames.at(idx);
+        const auto &arg = args->at(idx);
 
         if (arg->name.name == nullptr) {
             continue;
@@ -87,19 +87,19 @@ bool ExternMethodImpls::matches(const std::vector<cstring>& paramNames,
     return true;
 }
 
-ExternMethodImpls::ExternMethodImpls(const ImplList& inputImplList) {
-    for (const auto& implSpec : inputImplList) {
+ExternMethodImpls::ExternMethodImpls(const ImplList &inputImplList) {
+    for (const auto &implSpec : inputImplList) {
         cstring name;
         std::vector<cstring> paramNames;
         MethodImpl impl;
         std::tie(name, paramNames, impl) = implSpec;
 
-        auto& tmpImplList = impls[name][paramNames.size()];
+        auto &tmpImplList = impls[name][paramNames.size()];
 
         // Make sure that we have at most one implementation for each set of parameter names.
         // This is a quadratic-time algorithm, but should be fine, since we expect the number of
         // overloads to be small in practice.
-        for (auto& pair : tmpImplList) {
+        for (auto &pair : tmpImplList) {
             BUG_CHECK(pair.first != paramNames, "Multiple implementations of %1%(%2%)", name,
                       paramNames);
         }

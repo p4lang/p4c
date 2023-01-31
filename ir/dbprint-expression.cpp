@@ -62,7 +62,7 @@ using namespace DBPrint;
 using namespace IndentCtl;
 
 #define UNOP_DBPRINT(NAME, OP)                                       \
-    void IR::NAME::dbprint(std::ostream& out) const {                \
+    void IR::NAME::dbprint(std::ostream &out) const {                \
         int prec = getprec(out);                                     \
         if (prec > Prec_Prefix) out << '(';                          \
         out << #OP << setprec(Prec_Prefix) << expr << setprec(prec); \
@@ -72,7 +72,7 @@ using namespace IndentCtl;
 ALL_UNARY_OPS(UNOP_DBPRINT)
 
 #define BINOP_DBPRINT(NAME, BASE, OP)                                                           \
-    void IR::NAME::dbprint(std::ostream& out) const {                                           \
+    void IR::NAME::dbprint(std::ostream &out) const {                                           \
         int prec = getprec(out);                                                                \
         if (prec > Prec_##NAME) out << '(';                                                     \
         out << setprec(Prec_##NAME) << left << " " #OP " " << setprec(Prec_##NAME + 1) << right \
@@ -82,15 +82,15 @@ ALL_UNARY_OPS(UNOP_DBPRINT)
     }
 ALL_BINARY_OPS(BINOP_DBPRINT)
 
-void IR::Slice::dbprint(std::ostream& out) const {
+void IR::Slice::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     out << setprec(Prec_Postfix) << e0 << "[" << setprec(Prec_Low) << e1 << ":" << setprec(Prec_Low)
         << e2 << setprec(prec) << ']';
     if (prec == 0) out << ';';
 }
 
-void IR::Primitive::dbprint(std::ostream& out) const {
-    const char* sep = "";
+void IR::Primitive::dbprint(std::ostream &out) const {
+    const char *sep = "";
     int prec = getprec(out);
     out << name << '(' << setprec(Prec_Low);
     for (auto a : operands) {
@@ -101,27 +101,27 @@ void IR::Primitive::dbprint(std::ostream& out) const {
     if (prec == 0) out << ';';
 }
 
-void IR::Constant::dbprint(std::ostream& out) const {
+void IR::Constant::dbprint(std::ostream &out) const {
     // Node::dbprint(out);
     out << value;
     // if (getprec(out) == 0) out << ';';
 }
 
-void IR::NamedExpression::dbprint(std::ostream& out) const { out << name << ":" << expression; }
+void IR::NamedExpression::dbprint(std::ostream &out) const { out << name << ":" << expression; }
 
-void IR::StructExpression::dbprint(std::ostream& out) const {
+void IR::StructExpression::dbprint(std::ostream &out) const {
     out << "{" << indent;
-    for (auto& field : components) out << Log::endl << field << ';';
+    for (auto &field : components) out << Log::endl << field << ';';
     out << " }" << unindent;
 }
 
-void IR::Member::dbprint(std::ostream& out) const {
+void IR::Member::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     out << setprec(Prec_Postfix) << expr << setprec(prec) << '.' << member;
     if (prec == 0) out << ';';
 }
 
-void IR::If::dbprint(std::ostream& out) const {
+void IR::If::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     if (prec) {
         if (prec > Prec_Cond) out << '(';
@@ -138,7 +138,7 @@ void IR::If::dbprint(std::ostream& out) const {
     }
 }
 
-void IR::Apply::dbprint(std::ostream& out) const {
+void IR::Apply::dbprint(std::ostream &out) const {
     out << "apply(" << name << ")";
     int prec = getprec(out);
     if (!actions.empty()) {
@@ -151,17 +151,17 @@ void IR::Apply::dbprint(std::ostream& out) const {
     }
 }
 
-void IR::BoolLiteral::dbprint(std::ostream& out) const {
+void IR::BoolLiteral::dbprint(std::ostream &out) const {
     out << value;
     if (getprec(out) == 0) out << ';';
 }
 
-void IR::PathExpression::dbprint(std::ostream& out) const {
+void IR::PathExpression::dbprint(std::ostream &out) const {
     out << path;
     if (getprec(out) == 0) out << ';';
 }
 
-void IR::Mux::dbprint(std::ostream& out) const {
+void IR::Mux::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     if (prec > Prec_Cond) out << '(';
     out << setprec(Prec_Cond + 1) << e0 << " ? " << setprec(Prec_Low) << e1 << " : "
@@ -170,7 +170,7 @@ void IR::Mux::dbprint(std::ostream& out) const {
     if (prec == 0) out << ';';
 }
 
-void IR::Concat::dbprint(std::ostream& out) const {
+void IR::Concat::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     if (prec > Prec_Add) out << '(';
     out << setprec(Prec_Add) << left << " ++ " << setprec(Prec_Add + 1) << right << setprec(prec);
@@ -178,14 +178,14 @@ void IR::Concat::dbprint(std::ostream& out) const {
     if (prec == 0) out << ';';
 }
 
-void IR::ArrayIndex::dbprint(std::ostream& out) const {
+void IR::ArrayIndex::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     out << setprec(Prec_Postfix) << left << "[" << setprec(Prec_Low) << right << "]"
         << setprec(prec);
     if (prec == 0) out << ';';
 }
 
-void IR::Range::dbprint(std::ostream& out) const {
+void IR::Range::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     if (prec > Prec_Low) out << '(';
     out << setprec(Prec_Low) << left << " .. " << setprec(Prec_Low + 1) << right << setprec(prec);
@@ -193,7 +193,7 @@ void IR::Range::dbprint(std::ostream& out) const {
     if (prec == 0) out << ';';
 }
 
-void IR::Mask::dbprint(std::ostream& out) const {
+void IR::Mask::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     if (prec > Prec_Low) out << '(';
     out << setprec(Prec_Low) << left << " &&& " << setprec(Prec_Low + 1) << right << setprec(prec);
@@ -201,7 +201,7 @@ void IR::Mask::dbprint(std::ostream& out) const {
     if (prec == 0) out << ';';
 }
 
-void IR::Cast::dbprint(std::ostream& out) const {
+void IR::Cast::dbprint(std::ostream &out) const {
     int flags = dbgetflags(out);
     int prec = flags & Precedence;
     if (prec > Prec_Prefix) out << '(';
@@ -211,14 +211,14 @@ void IR::Cast::dbprint(std::ostream& out) const {
     dbsetflags(out, flags);
 }
 
-void IR::MethodCallExpression::dbprint(std::ostream& out) const {
+void IR::MethodCallExpression::dbprint(std::ostream &out) const {
     int flags = dbgetflags(out);
     int prec = flags & Precedence;
     if (prec > Prec_Postfix) out << '(';
     out << Brief << setprec(Prec_Postfix) << method;
     if (typeArguments->size() > 0) {
         out << "<";
-        const char* sep = "";
+        const char *sep = "";
         for (auto a : *typeArguments) {
             out << sep << a;
             sep = ", ";
@@ -226,7 +226,7 @@ void IR::MethodCallExpression::dbprint(std::ostream& out) const {
         out << ">";
     }
     out << "(" << setprec(Prec_Low);
-    const char* sep = "";
+    const char *sep = "";
     for (auto a : *arguments) {
         out << sep << setprec(Prec_Low) << a;
         sep = ", ";
@@ -237,10 +237,10 @@ void IR::MethodCallExpression::dbprint(std::ostream& out) const {
     dbsetflags(out, flags);
 }
 
-void IR::ConstructorCallExpression::dbprint(std::ostream& out) const {
+void IR::ConstructorCallExpression::dbprint(std::ostream &out) const {
     int flags = dbgetflags(out);
     out << Brief << setprec(Prec_Low) << type << "(";
-    const char* sep = "";
+    const char *sep = "";
     for (auto e : *arguments) {
         out << sep << e;
         sep = ", ";
@@ -250,12 +250,11 @@ void IR::ConstructorCallExpression::dbprint(std::ostream& out) const {
     dbsetflags(out, flags);
 }
 
-void IR::InvalidHeader::dbprint(std::ostream& out) const {
-    out << "(" << type << "){#}"
-        << ";";
-}
+void IR::InvalidHeader::dbprint(std::ostream &out) const { out << "(" << type << "){#}"; }
 
-void IR::ListExpression::dbprint(std::ostream& out) const {
+void IR::Invalid::dbprint(std::ostream &out) const { out << "{#}"; }
+
+void IR::ListExpression::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     if (prec > Prec_Postfix) out << '(';
     out << setprec(Prec_Postfix) << "{" << setprec(Prec_Low);
@@ -270,7 +269,7 @@ void IR::ListExpression::dbprint(std::ostream& out) const {
     if (prec == 0) out << ';';
 }
 
-void IR::P4ListExpression::dbprint(std::ostream& out) const {
+void IR::P4ListExpression::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     if (prec > Prec_Postfix) out << '(';
     out << setprec(Prec_Postfix) << "list<" << elementType << ">{" << setprec(Prec_Low);
@@ -285,12 +284,12 @@ void IR::P4ListExpression::dbprint(std::ostream& out) const {
     if (prec == 0) out << ';';
 }
 
-void IR::DefaultExpression::dbprint(std::ostream& out) const { out << "default"; }
-void IR::This::dbprint(std::ostream& out) const { out << "this"; }
+void IR::DefaultExpression::dbprint(std::ostream &out) const { out << "default"; }
+void IR::This::dbprint(std::ostream &out) const { out << "this"; }
 
-void IR::StringLiteral::dbprint(std::ostream& out) const { out << '"' << value << '"'; }
+void IR::StringLiteral::dbprint(std::ostream &out) const { out << '"' << value << '"'; }
 
-void IR::SelectExpression::dbprint(std::ostream& out) const {
+void IR::SelectExpression::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     out << "select" << setprec(Prec_Low) << select << " {" << indent;
     for (auto c : selectCases) out << Log::endl << c;

@@ -29,22 +29,22 @@ namespace P4 {
 /// state s { transition select (e) { ... default: noMatch; }}
 /// state noMatch { verify(false, error.NoMatch); transition reject; }
 class DoHandleNoMatch : public Transform {
-    NameGenerator* nameGen;
+    NameGenerator *nameGen;
 
  public:
-    const IR::ParserState* noMatch = nullptr;
-    explicit DoHandleNoMatch(NameGenerator* ng) : nameGen(ng) {
+    const IR::ParserState *noMatch = nullptr;
+    explicit DoHandleNoMatch(NameGenerator *ng) : nameGen(ng) {
         CHECK_NULL(ng);
         setName("DoHandleNoMatch");
     }
-    const IR::Node* postorder(IR::SelectExpression* expression) override;
-    const IR::Node* postorder(IR::P4Parser* parser) override;
-    const IR::Node* postorder(IR::P4Program* program) override;
+    const IR::Node *postorder(IR::SelectExpression *expression) override;
+    const IR::Node *postorder(IR::P4Parser *parser) override;
+    const IR::Node *postorder(IR::P4Program *program) override;
 };
 
 class HandleNoMatch : public PassManager {
  public:
-    explicit HandleNoMatch(ReferenceMap* refMap) {
+    explicit HandleNoMatch(ReferenceMap *refMap) {
         passes.push_back(new ResolveReferences(refMap));
         passes.push_back(new DoHandleNoMatch(refMap));
         setName("HandleNoMatch");

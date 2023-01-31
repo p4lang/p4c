@@ -63,17 +63,17 @@ limitations under the License.
 namespace P4Test {
 
 class SkipControls : public P4::ActionSynthesisPolicy {
-    const std::set<cstring>* skip;
+    const std::set<cstring> *skip;
 
  public:
-    explicit SkipControls(const std::set<cstring>* skip) : skip(skip) { CHECK_NULL(skip); }
-    bool convert(const Visitor::Context*, const IR::P4Control* control) override {
+    explicit SkipControls(const std::set<cstring> *skip) : skip(skip) { CHECK_NULL(skip); }
+    bool convert(const Visitor::Context *, const IR::P4Control *control) override {
         if (skip->find(control->name) != skip->end()) return false;
         return true;
     }
 };
 
-MidEnd::MidEnd(CompilerOptions& options, std::ostream* outStream) {
+MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
     refMap.setIsV1(isv1);
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
@@ -124,7 +124,7 @@ MidEnd::MidEnd(CompilerOptions& options, std::ostream* outStream) {
          new P4::TableHit(&refMap, &typeMap),
          new P4::EliminateSwitch(&refMap, &typeMap),
          evaluator,
-         [v1controls, evaluator](const IR::Node* root) -> const IR::Node* {
+         [v1controls, evaluator](const IR::Node *root) -> const IR::Node * {
              auto toplevel = evaluator->getToplevelBlock();
              auto main = toplevel->getMain();
              if (main == nullptr)

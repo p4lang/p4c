@@ -22,8 +22,8 @@ limitations under the License.
 
 namespace EBPF {
 
-EBPFCounterPSA::EBPFCounterPSA(const EBPFProgram* program, const IR::Declaration_Instance* di,
-                               cstring name, CodeGenInspector* codeGen)
+EBPFCounterPSA::EBPFCounterPSA(const EBPFProgram *program, const IR::Declaration_Instance *di,
+                               cstring name, CodeGenInspector *codeGen)
     : EBPFCounterTable(program, name, codeGen, 1, false) {
     CHECK_NULL(di);
     if (!di->type->is<IR::Type_Specialized>()) {
@@ -127,12 +127,12 @@ EBPFCounterPSA::CounterType EBPFCounterPSA::toCounterType(const int type) {
     BUG("Unknown counter type %1%", type);
 }
 
-void EBPFCounterPSA::emitTypes(CodeBuilder* builder) {
+void EBPFCounterPSA::emitTypes(CodeBuilder *builder) {
     emitKeyType(builder);
     emitValueType(builder);
 }
 
-void EBPFCounterPSA::emitKeyType(CodeBuilder* builder) {
+void EBPFCounterPSA::emitKeyType(CodeBuilder *builder) {
     if (indexWidthType == nullptr) return;
 
     if (indexWidthType->is<EBPFStructType>()) {
@@ -142,7 +142,7 @@ void EBPFCounterPSA::emitKeyType(CodeBuilder* builder) {
     }
 }
 
-void EBPFCounterPSA::emitValueType(CodeBuilder* builder) {
+void EBPFCounterPSA::emitValueType(CodeBuilder *builder) {
     builder->emitIndent();
     builder->append("struct ");
     if (!isDirect) builder->appendFormat("%s ", valueTypeName.c_str());
@@ -165,14 +165,14 @@ void EBPFCounterPSA::emitValueType(CodeBuilder* builder) {
     builder->endOfStatement(true);
 }
 
-void EBPFCounterPSA::emitInstance(CodeBuilder* builder) {
+void EBPFCounterPSA::emitInstance(CodeBuilder *builder) {
     TableKind kind = isHash ? TableHash : TableArray;
     builder->target->emitTableDecl(builder, dataMapName, kind, keyTypeName,
                                    "struct " + valueTypeName, size);
 }
 
-void EBPFCounterPSA::emitMethodInvocation(CodeBuilder* builder, const P4::ExternMethod* method,
-                                          CodeGenInspector* codeGen) {
+void EBPFCounterPSA::emitMethodInvocation(CodeBuilder *builder, const P4::ExternMethod *method,
+                                          CodeGenInspector *codeGen) {
     if (method->method->name.name != "count") {
         ::error(ErrorType::ERR_UNSUPPORTED, "Unexpected method %1%", method->expr);
         return;
@@ -186,8 +186,8 @@ void EBPFCounterPSA::emitMethodInvocation(CodeBuilder* builder, const P4::Extern
     builder->blockEnd(false);
 }
 
-void EBPFCounterPSA::emitDirectMethodInvocation(CodeBuilder* builder,
-                                                const P4::ExternMethod* method, cstring valuePtr) {
+void EBPFCounterPSA::emitDirectMethodInvocation(CodeBuilder *builder,
+                                                const P4::ExternMethod *method, cstring valuePtr) {
     if (method->method->name.name != "count") {
         ::error(ErrorType::ERR_UNSUPPORTED, "Unexpected method %1%", method->expr);
         return;
@@ -196,7 +196,7 @@ void EBPFCounterPSA::emitDirectMethodInvocation(CodeBuilder* builder,
     BUG_CHECK(method->expr->arguments->size() == 0, "Expected no arguments for %1%", method->expr);
 
     cstring target = valuePtr + "->" + instanceName;
-    auto pipeline = dynamic_cast<const EBPFPipeline*>(program);
+    auto pipeline = dynamic_cast<const EBPFPipeline *>(program);
     CHECK_NULL(pipeline);
 
     cstring msgStr =
@@ -210,8 +210,8 @@ void EBPFCounterPSA::emitDirectMethodInvocation(CodeBuilder* builder,
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 }
 
-void EBPFCounterPSA::emitCount(CodeBuilder* builder, const IR::MethodCallExpression* expression,
-                               CodeGenInspector* codeGen) {
+void EBPFCounterPSA::emitCount(CodeBuilder *builder, const IR::MethodCallExpression *expression,
+                               CodeGenInspector *codeGen) {
     BUG_CHECK(codeGen != nullptr, "Index codeGen is nullptr!");
     cstring keyName = program->refMap->newName("key");
     cstring valueName = program->refMap->newName("value");
@@ -246,7 +246,7 @@ void EBPFCounterPSA::emitCount(CodeBuilder* builder, const IR::MethodCallExpress
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 }
 
-void EBPFCounterPSA::emitCounterUpdate(CodeBuilder* builder, const cstring target,
+void EBPFCounterPSA::emitCounterUpdate(CodeBuilder *builder, const cstring target,
                                        const cstring keyName) {
     cstring varStr;
     cstring targetWAccess = target + (isDirect ? "." : "->");
@@ -300,7 +300,7 @@ void EBPFCounterPSA::emitCounterUpdate(CodeBuilder* builder, const cstring targe
     }
 }
 
-void EBPFCounterPSA::emitCounterInitializer(CodeBuilder* builder) {
+void EBPFCounterPSA::emitCounterInitializer(CodeBuilder *builder) {
     builder->blockStart();
     if (type == CounterType::BYTES || type == CounterType::PACKETS_AND_BYTES) {
         builder->emitIndent();

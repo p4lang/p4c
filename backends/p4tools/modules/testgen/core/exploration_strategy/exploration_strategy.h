@@ -27,18 +27,18 @@ class ExplorationStrategy {
  public:
     virtual ~ExplorationStrategy() = default;
 
-    ExplorationStrategy(const ExplorationStrategy&) = default;
+    ExplorationStrategy(const ExplorationStrategy &) = default;
 
-    ExplorationStrategy(ExplorationStrategy&&) = delete;
+    ExplorationStrategy(ExplorationStrategy &&) = delete;
 
-    ExplorationStrategy& operator=(const ExplorationStrategy&) = delete;
+    ExplorationStrategy &operator=(const ExplorationStrategy &) = delete;
 
-    ExplorationStrategy& operator=(ExplorationStrategy&&) = delete;
+    ExplorationStrategy &operator=(ExplorationStrategy &&) = delete;
 
     /// Callbacks are invoked when the P4 program terminates. If the callback returns true,
     /// execution halts. Otherwise, execution of the P4 program continues on a different random
     /// path.
-    using Callback = std::function<bool(const FinalState&)>;
+    using Callback = std::function<bool(const FinalState &)>;
 
     using Branch = SmallStepEvaluator::Branch;
     using StepResult = SmallStepEvaluator::Result;
@@ -47,41 +47,40 @@ class ExplorationStrategy {
     /// given callback is invoked. If the callback returns true, then the executor terminates.
     /// Otherwise, execution of the P4 program continues on a different random path.
     /// TODO there is a lot of code repetition in subclasses. Refactor and extract duplicates.
-    virtual void run(const Callback& callBack) = 0;
+    virtual void run(const Callback &callBack) = 0;
 
-    explicit ExplorationStrategy(AbstractSolver& solver, const ProgramInfo& programInfo,
-                                 boost::optional<uint32_t> seed);
+    explicit ExplorationStrategy(AbstractSolver &solver, const ProgramInfo &programInfo);
 
     /// Writes a list of the selected branches into @param out.
-    void printCurrentTraceAndBranches(std::ostream& out);
+    void printCurrentTraceAndBranches(std::ostream &out);
 
     /// Getter to access visitedStatements
-    const P4::Coverage::CoverageSet& getVisitedStatements();
+    const P4::Coverage::CoverageSet &getVisitedStatements();
 
  protected:
     /// Target-specific information about the P4 program.
-    const ProgramInfo& programInfo;
+    const ProgramInfo &programInfo;
 
     /// The SMT solver backing this executor.
-    AbstractSolver& solver;
+    AbstractSolver &solver;
 
     /// @returns a pseudorandom integer in the range of [0, branches.size() - 1]
-    uint64_t selectBranch(const std::vector<Branch>& branches);
+    uint64_t selectBranch(const std::vector<Branch> &branches);
 
     /// Handles processing at the end of a P4 program.
     ///
     /// @returns true if symbolic execution should end; false if symbolic execution should continue
     /// on a different path.
-    bool handleTerminalState(const Callback& callback, const ExecutionState& terminalState);
+    bool handleTerminalState(const Callback &callback, const ExecutionState &terminalState);
 
     /// Take one step in the program and return list of possible branches.
-    StepResult step(ExecutionState& state);
+    StepResult step(ExecutionState &state);
 
     /// The current execution state.
-    ExecutionState* executionState = nullptr;
+    ExecutionState *executionState = nullptr;
 
     /// Set of all stetements, to be retrieved from programInfo.
-    const P4::Coverage::CoverageSet& allStatements;
+    const P4::Coverage::CoverageSet &allStatements;
 
     /// Set of all statements executed in any testcase that has been outputted.
     P4::Coverage::CoverageSet visitedStatements;

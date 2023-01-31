@@ -10,6 +10,7 @@
 
 #include "backends/p4tools/common/compiler/compiler_target.h"
 #include "backends/p4tools/common/core/target.h"
+#include "backends/p4tools/common/lib/util.h"
 #include "backends/p4tools/common/version.h"
 #include "frontends/common/parser_options.h"
 #include "lib/error.h"
@@ -17,23 +18,24 @@
 
 namespace P4Tools {
 
-std::tuple<int, char**> AbstractP4cToolOptions::convertArgs(const std::vector<const char*>& args) {
+std::tuple<int, char **> AbstractP4cToolOptions::convertArgs(
+    const std::vector<const char *> &args) {
     int argc = 0;
-    char** argv = new char*[args.size()];
-    for (const char* arg : args) {
+    char **argv = new char *[args.size()];
+    for (const char *arg : args) {
         argv[argc++] = strdup(arg);
     }
     return {argc, argv};
 }
 
-boost::optional<ICompileContext*> AbstractP4cToolOptions::process(
-    const std::vector<const char*>& args) {
+boost::optional<ICompileContext *> AbstractP4cToolOptions::process(
+    const std::vector<const char *> &args) {
     // Compiler expects path to executable as first element in argument list.
     compilerArgs.push_back(args.at(0));
 
     // Convert to the standard (argc, argv) pair.
     int argc = 0;
-    char** argv = nullptr;
+    char **argv = nullptr;
     std::tie(argc, argv) = convertArgs(args);
 
     // Establish a dummy compilation context so that we can use ::error to report errors while
@@ -43,18 +45,18 @@ boost::optional<ICompileContext*> AbstractP4cToolOptions::process(
     AutoCompileContext autoDummyContext(&dummyContext);
 
     // Delegate to the hook.
-    auto* remainingArgs = process(argc, argv);
+    auto *remainingArgs = process(argc, argv);
     if ((remainingArgs == nullptr) || ::errorCount() > 0) {
         return boost::none;
     }
 
     // Establish the real compilation context.
-    auto* compilerContext = P4Tools::CompilerTarget::makeContext();
+    auto *compilerContext = P4Tools::CompilerTarget::makeContext();
     AutoCompileContext autoContext(compilerContext);
 
     // Initialize the compiler, forwarding any compiler-specific options.
     std::tie(argc, argv) = convertArgs(compilerArgs);
-    auto* unprocessedCompilerArgs = P4Tools::CompilerTarget::initCompiler(argc, argv);
+    auto *unprocessedCompilerArgs = P4Tools::CompilerTarget::initCompiler(argc, argv);
 
     if ((unprocessedCompilerArgs == nullptr) || ::errorCount() > 0) {
         return boost::none;
@@ -80,7 +82,7 @@ boost::optional<ICompileContext*> AbstractP4cToolOptions::process(
     return boost::make_optional(::errorCount() == 0, compilerContext);
 }
 
-std::vector<const char*>* AbstractP4cToolOptions::process(int argc, char* const argv[]) {
+std::vector<const char *> *AbstractP4cToolOptions::process(int argc, char *const argv[]) {
     return Util::Options::process(argc, argv);
 }
 
@@ -88,26 +90,26 @@ std::vector<const char*>* AbstractP4cToolOptions::process(int argc, char* const 
 /// option.
 struct InheritedCompilerOptionSpec {
     /// The name of the command-line option. For example, "--target".
-    const char* option;
+    const char *option;
 
     /// A descriptive name for the parameter to the option, or nullptr if the option has no
     /// parameters.
-    const char* argName;
+    const char *argName;
 
     /// A description of the option.
-    const char* description;
+    const char *description;
 
     /// An optional handler for the option. If provided, this is executed before the option is
     /// forwarded to the compiler. Any argument to the option is provided to the handler. The
     /// handler should return true on successful processing, and false otherwise.
-    boost::optional<std::function<bool(const char*)>> handler;
+    boost::optional<std::function<bool(const char *)>> handler;
 };
 
 AbstractP4cToolOptions::AbstractP4cToolOptions(cstring message) : Options(message) {
     // Register some common options.
     registerOption(
         "--help", nullptr,
-        [this](const char*) {
+        [this](const char *) {
             usage();
             exit(0);
             return false;
@@ -116,53 +118,12 @@ AbstractP4cToolOptions::AbstractP4cToolOptions(cstring message) : Options(messag
 
     registerOption(
         "--version", nullptr,
-        [this](const char*) {
+        [this](const char *) {
             printVersion(binaryName);
             exit(0);
             return false;
         },
         "Prints version information and exits");
-
-    registerOption(
-        "--packet-size-range", "packetSizeRange",
-        [this](const char* arg) {
-            auto rangeStr = std::string(arg);
-            size_t packetLenStr = rangeStr.find_first_of(':');
-            try {
-                auto minPacketLenStr = rangeStr.substr(0, packetLenStr);
-                minPktSize = std::stoi(minPacketLenStr);
-                if (minPktSize < 0) {
-                    ::error(
-                        "Invalid minimum packet size %1%. Minimum packet size must be at least 0.",
-                        minPktSize);
-                }
-                auto maxPacketLenStr = rangeStr.substr(packetLenStr + 1);
-                maxPktSize = std::stoi(maxPacketLenStr);
-                if (maxPktSize < minPktSize) {
-                    ::error(
-                        "Invalid packet size range %1%:%2%.  The maximum packet size must be at "
-                        "least the size of the minimum packet size.",
-                        minPktSize, maxPktSize);
-                }
-            } catch (std::invalid_argument&) {
-                ::error(
-                    "Invalid packet size range %1%. Expected format is [min]:[max], where [min] "
-                    "and [max] are integers.",
-                    arg);
-                return false;
-            }
-            return true;
-        },
-        "Specify the possible range of the input packet size in bits. The format is [min]:[max]. "
-        "The default values are \"0:72000\". The maximum is set to jumbo frame size (9000 bytes).");
-
-    registerOption(
-        "--seed", "seed",
-        [this](const char* arg) {
-            seed = std::stoul(arg);
-            return true;
-        },
-        "Provides a randomization seed");
 
     // Inherit some compiler options, setting them up to be forwarded to the compiler.
     std::vector<InheritedCompilerOptionSpec> inheritedCompilerOptions = {
@@ -182,7 +143,7 @@ AbstractP4cToolOptions::AbstractP4cToolOptions(cstring message) : Options(messag
         {"--std", "{p4-14|p4-16}", "Specifies source language version.", {}},
         {"-T", "loglevel", "Adjusts logging level per file.", {}},
         {"--target", "target", "Specifies the device targeted by the program.",
-         boost::optional<std::function<bool(const char*)>>{[](const char* arg) {
+         boost::optional<std::function<bool(const char *)>>{[](const char *arg) {
              if (!P4Tools::Target::setDevice(arg)) {
                  ::error("Unsupported target device: %s", arg);
                  return false;
@@ -190,7 +151,7 @@ AbstractP4cToolOptions::AbstractP4cToolOptions(cstring message) : Options(messag
              return true;
          }}},
         {"--arch", "arch", "Specifies the architecture targeted by the program.",
-         boost::optional<std::function<bool(const char*)>>{[](const char* arg) {
+         boost::optional<std::function<bool(const char *)>>{[](const char *arg) {
              if (!P4Tools::Target::setArch(arg)) {
                  ::error("Unsupported architecture: %s", arg);
                  return false;
@@ -207,10 +168,20 @@ AbstractP4cToolOptions::AbstractP4cToolOptions(cstring message) : Options(messag
         {"-v", nullptr, "Increase verbosity level (can be repeated)", {}},
     };
 
-    for (const auto& optionSpec : inheritedCompilerOptions) {
+    registerOption(
+        "--seed", "seed",
+        [this](const char *arg) {
+            seed = std::stoul(arg);
+            // Initialize the global seed for randomness.
+            Utils::setRandomSeed(*seed);
+            return true;
+        },
+        "Provides a randomization seed");
+
+    for (const auto &optionSpec : inheritedCompilerOptions) {
         registerOption(
             optionSpec.option, optionSpec.argName,
-            [this, optionSpec](const char* arg) {
+            [this, optionSpec](const char *arg) {
                 // Add to the list of arguments being forwarded to the compiler.
                 compilerArgs.push_back(optionSpec.option);
                 if (optionSpec.argName != nullptr) {

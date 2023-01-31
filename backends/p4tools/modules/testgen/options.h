@@ -11,14 +11,21 @@ namespace P4Tools {
 /// Encapsulates and processes command-line options for p4testgen.
 class TestgenOptions : public AbstractP4cToolOptions {
  public:
-    /// Whether to produce just the input packet for each test.
-    bool inputPacketOnly = false;
-
     /// Maximum number of tests to be generated. Defaults to 1.
-    int maxTests = 1;
+    int64_t maxTests = 1;
+
+    /// List of the supported exploration strategies.
+    static const std::set<cstring> SUPPORTED_EXPLORATION_STRATEGIES;
 
     /// Selects the exploration strategy for test generation
-    std::string explorationStrategy;
+    cstring explorationStrategy;
+
+    /// List of the supported stop metrics.
+    static const std::set<cstring> SUPPORTED_STOP_METRICS;
+
+    // Stops generating tests when a particular metric is satisifed. Currently supported options are
+    // listed in @var SUPPORTED_STOP_METRICS.
+    cstring stopMetric;
 
     /// Level of multiPop step. A good value is 10, namely, 10 per cent of
     /// the size of the unexploredBranches. The smaller the number,
@@ -26,21 +33,21 @@ class TestgenOptions : public AbstractP4cToolOptions {
     /// then this variable calculates 100/10 or 100/2 for the pop level.
     /// Defaults to 3, which maximizes exploration of exploration. Minimum
     /// level is 2, for max randomness.
-    int popLevel = 3;
+    uint64_t popLevel = 3;
 
     /// Max bound of the buffer vector collecting all terminal branches.
     /// Defaults to 2, which means only two terminal paths are populated
     /// by default.
-    int linearEnumeration = 2;
+    uint64_t linearEnumeration = 2;
 
     /// To be used with randomAccessMaxCoverage. It specifies after how many
     /// tests (saddle point) we should randomly explore the program and pick
     /// a random branch ranked by how many unique non-visited statements it
     /// has.
-    int saddlePoint = 5;
+    uint64_t saddlePoint = 5;
 
     /// @returns the singleton instance of this class.
-    static TestgenOptions& get();
+    static TestgenOptions &get();
 
     /// Directory for generated tests. Defaults to PWD.
     cstring outputDir = nullptr;
@@ -65,7 +72,10 @@ class TestgenOptions : public AbstractP4cToolOptions {
     /// for statement reachability analysis.
     bool dcg = false;
 
-    const char* getIncludePath() override;
+    /// Enforces the test generation of tests with mandatory output packet.
+    bool withOutputPacket = false;
+
+    const char *getIncludePath() override;
 
  private:
     TestgenOptions();

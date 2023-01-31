@@ -18,8 +18,8 @@ limitations under the License.
 
 namespace P4 {
 
-void DoSetHeaders::generateSetValid(const IR::Expression* dest, const IR::Expression* src,
-                                    const IR::Type* destType, IR::Vector<IR::StatOrDecl>* insert) {
+void DoSetHeaders::generateSetValid(const IR::Expression *dest, const IR::Expression *src,
+                                    const IR::Type *destType, IR::Vector<IR::StatOrDecl> *insert) {
     auto structType = destType->to<IR::Type_StructLike>();
     if (structType == nullptr) return;
 
@@ -62,7 +62,7 @@ void DoSetHeaders::generateSetValid(const IR::Expression* dest, const IR::Expres
     }
 }
 
-const IR::Node* DoSetHeaders::postorder(IR::AssignmentStatement* statement) {
+const IR::Node *DoSetHeaders::postorder(IR::AssignmentStatement *statement) {
     auto vec = new IR::IndexedVector<IR::StatOrDecl>();
     auto destType = typeMap->getType(statement->left, true);
     generateSetValid(statement->left, statement->right, destType, vec);

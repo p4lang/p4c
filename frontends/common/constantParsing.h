@@ -67,7 +67,7 @@ struct UnparsedConstant {
     bool hasWidth;  /// If true, a bitwidth and separator are present.
 };
 
-std::ostream& operator<<(std::ostream& out, const UnparsedConstant& constant);
+std::ostream &operator<<(std::ostream &out, const UnparsedConstant &constant);
 
 /**
  * Parses an UnparsedConstant @constant into an IR::Constant object, with
@@ -77,13 +77,13 @@ std::ostream& operator<<(std::ostream& out, const UnparsedConstant& constant);
  * @return an IR::Constant parsed from @constant. If parsing fails, returns
  * either a default value.
  */
-IR::Constant* parseConstant(const Util::SourceInfo& srcInfo, const UnparsedConstant& constant,
+IR::Constant *parseConstant(const Util::SourceInfo &srcInfo, const UnparsedConstant &constant,
                             long defaultValue);
 
 /**
  * Parses a constant that should fit in an int value.
  * Reports an error if it does not.
  */
-int parseConstantChecked(const Util::SourceInfo& srcInfo, const UnparsedConstant& constant);
+int parseConstantChecked(const Util::SourceInfo &srcInfo, const UnparsedConstant &constant);
 
 #endif /* _FRONTENDS_COMMON_CONSTANTPARSING_H_ */

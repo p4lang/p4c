@@ -54,25 +54,25 @@ state X {
  * statements that invalidate those headers.
  */
 class DoResetHeaders : public Transform {
-    const TypeMap* typeMap;
+    const TypeMap *typeMap;
     IR::IndexedVector<IR::StatOrDecl> insert;
 
  public:
-    static void generateResets(const TypeMap* typeMap, const IR::Type* type,
-                               const IR::Expression* expr, IR::Vector<IR::StatOrDecl>* resets);
-    explicit DoResetHeaders(const TypeMap* typeMap) : typeMap(typeMap) {
+    static void generateResets(const TypeMap *typeMap, const IR::Type *type,
+                               const IR::Expression *expr, IR::Vector<IR::StatOrDecl> *resets);
+    explicit DoResetHeaders(const TypeMap *typeMap) : typeMap(typeMap) {
         CHECK_NULL(typeMap);
         setName("DoResetHeaders");
     }
-    const IR::Node* postorder(IR::Declaration_Variable* decl) override;
-    const IR::Node* postorder(IR::P4Control* control) override;
-    const IR::Node* postorder(IR::ParserState* state) override;
+    const IR::Node *postorder(IR::Declaration_Variable *decl) override;
+    const IR::Node *postorder(IR::P4Control *control) override;
+    const IR::Node *postorder(IR::ParserState *state) override;
 };
 
 /// Invokes TypeChecking followed by DoResetHeaders.
 class ResetHeaders : public PassManager {
  public:
-    ResetHeaders(ReferenceMap* refMap, TypeMap* typeMap) {
+    ResetHeaders(ReferenceMap *refMap, TypeMap *typeMap) {
         passes.push_back(new P4::TypeChecking(refMap, typeMap));
         passes.push_back(new P4::DoResetHeaders(typeMap));
         setName("ResetHeaders");

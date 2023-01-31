@@ -20,7 +20,7 @@ limitations under the License.
 
 namespace P4 {
 
-static IR::Vector<IR::Argument>* reorder(const ParameterSubstitution& substitution) {
+static IR::Vector<IR::Argument> *reorder(const ParameterSubstitution &substitution) {
     auto reordered = new IR::Vector<IR::Argument>();
 
     bool foundOptional = false;
@@ -39,19 +39,19 @@ static IR::Vector<IR::Argument>* reorder(const ParameterSubstitution& substituti
     return reordered;
 }
 
-const IR::Node* DoOrderArguments::postorder(IR::MethodCallExpression* expression) {
+const IR::Node *DoOrderArguments::postorder(IR::MethodCallExpression *expression) {
     auto mi = MethodInstance::resolve(expression, refMap, typeMap);
     expression->arguments = reorder(mi->substitution);
     return expression;
 }
 
-const IR::Node* DoOrderArguments::postorder(IR::ConstructorCallExpression* expression) {
-    ConstructorCall* ccd = ConstructorCall::resolve(expression, refMap, typeMap);
+const IR::Node *DoOrderArguments::postorder(IR::ConstructorCallExpression *expression) {
+    ConstructorCall *ccd = ConstructorCall::resolve(expression, refMap, typeMap);
     expression->arguments = reorder(ccd->substitution);
     return expression;
 }
 
-const IR::Node* DoOrderArguments::postorder(IR::Declaration_Instance* instance) {
+const IR::Node *DoOrderArguments::postorder(IR::Declaration_Instance *instance) {
     auto inst = Instantiation::resolve(instance, refMap, typeMap);
     instance->arguments = reorder(inst->substitution);
     return instance;

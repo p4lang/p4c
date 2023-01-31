@@ -26,8 +26,8 @@ limitations under the License.
 
 namespace UBPF {
 
-void run_ubpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* toplevel,
-                      P4::ReferenceMap* refMap, P4::TypeMap* typeMap) {
+void run_ubpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *toplevel,
+                      P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
     if (toplevel == nullptr) return;
 
     auto main = toplevel->getMain();
@@ -37,7 +37,7 @@ void run_ubpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* tople
         return;
     }
 
-    UbpfTarget* target;
+    UbpfTarget *target;
     if (options.target.isNullOrEmpty() || options.target == "ubpf") {
         target = new UbpfTarget();
     } else {
@@ -58,7 +58,7 @@ void run_ubpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* tople
     if (cstream == nullptr) return;
 
     cstring hfile;
-    const char* dot = cfile.findlast('.');
+    const char *dot = cfile.findlast('.');
     if (dot == nullptr)
         hfile = cfile + ".h";
     else
@@ -78,7 +78,7 @@ void run_ubpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* tople
     hstream->flush();
 }
 
-std::string extract_file_name(const std::string& fullPath) {
+std::string extract_file_name(const std::string &fullPath) {
     const size_t lastSlashIndex = fullPath.find_last_of("/\\");
     return fullPath.substr(lastSlashIndex + 1);
 }

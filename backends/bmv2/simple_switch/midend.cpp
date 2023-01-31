@@ -66,11 +66,11 @@ limitations under the License.
 
 namespace BMV2 {
 
-SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions& options, std::ostream* outStream)
+SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *outStream)
     : MidEnd(options) {
-    auto* evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
-    if (!BMV2::SimpleSwitchContext::get().options().loadIRFromJson) {
-        auto* convertEnums =
+    auto *evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
+    if (BMV2::SimpleSwitchContext::get().options().loadIRFromJson == false) {
+        auto *convertEnums =
             new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits("v1model.p4"));
         addPasses({options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
                    new P4::CheckTableSize(),
@@ -138,7 +138,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions& options, std::ostream* o
             removePasses(options.passesToExcludeMidend);
         }
     } else {
-        auto* fillEnumMap = new P4::FillEnumMap(new EnumOn32Bits("v1model.p4"), &typeMap);
+        auto *fillEnumMap = new P4::FillEnumMap(new EnumOn32Bits("v1model.p4"), &typeMap);
         addPasses({
             new P4::ResolveReferences(&refMap),
             new P4::TypeChecking(&refMap, &typeMap),

@@ -58,17 +58,17 @@ class ExpressionConverter;
 // Backend is a the base class for SimpleSwitchBackend and PortableSwitchBackend.
 class Backend {
  public:
-    BMV2Options& options;
-    P4::ReferenceMap* refMap;
-    P4::TypeMap* typeMap;
-    P4::ConvertEnums::EnumMapping* enumMap;
-    P4::P4CoreLibrary& corelib;
-    BMV2::JsonObjects* json;
-    const IR::ToplevelBlock* toplevel = nullptr;
+    BMV2Options &options;
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
+    P4::ConvertEnums::EnumMapping *enumMap;
+    P4::P4CoreLibrary &corelib;
+    BMV2::JsonObjects *json;
+    const IR::ToplevelBlock *toplevel = nullptr;
 
  public:
-    Backend(BMV2Options& options, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-            P4::ConvertEnums::EnumMapping* enumMap)
+    Backend(BMV2Options &options, P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+            P4::ConvertEnums::EnumMapping *enumMap)
         : options(options),
           refMap(refMap),
           typeMap(typeMap),
@@ -77,8 +77,8 @@ class Backend {
           json(new BMV2::JsonObjects()) {
         refMap->setIsV1(options.isv1());
     }
-    void serialize(std::ostream& out) const { json->toplevel->serialize(out); }
-    virtual void convert(const IR::ToplevelBlock* block) = 0;
+    void serialize(std::ostream &out) const { json->toplevel->serialize(out); }
+    virtual void convert(const IR::ToplevelBlock *block) = 0;
 };
 
 /**
@@ -90,11 +90,11 @@ tables or actions.
 */
 class SkipControls : public P4::ActionSynthesisPolicy {
     // set of controls where actions are not synthesized
-    const std::set<cstring>* skip;
+    const std::set<cstring> *skip;
 
  public:
-    explicit SkipControls(const std::set<cstring>* skip) : skip(skip) { CHECK_NULL(skip); }
-    bool convert(const Visitor::Context*, const IR::P4Control* control) override {
+    explicit SkipControls(const std::set<cstring> *skip) : skip(skip) { CHECK_NULL(skip); }
+    bool convert(const Visitor::Context *, const IR::P4Control *control) override {
         if (skip->find(control->name) != skip->end()) return false;
         return true;
     }
@@ -108,13 +108,13 @@ For example, we expect that the code in ingress and egress will have complex
 expression removed.
 */
 class ProcessControls : public P4::RemoveComplexExpressionsPolicy {
-    const std::set<cstring>* process;
+    const std::set<cstring> *process;
 
  public:
-    explicit ProcessControls(const std::set<cstring>* process) : process(process) {
+    explicit ProcessControls(const std::set<cstring> *process) : process(process) {
         CHECK_NULL(process);
     }
-    bool convert(const IR::P4Control* control) const {
+    bool convert(const IR::P4Control *control) const {
         if (process->find(control->name) != process->end()) return true;
         return false;
     }
@@ -127,15 +127,15 @@ structure.  This is necessary because both of them become global
 objects in the output json.
 */
 class RenameUserMetadata : public Transform {
-    P4::ReferenceMap* refMap;
-    const IR::Type_Struct* userMetaType;
+    P4::ReferenceMap *refMap;
+    const IR::Type_Struct *userMetaType;
     // Used as a prefix for the fields of the userMetadata structure
     // and also as a name for the userMetadata type clone.
     cstring namePrefix;
     bool renamed = false;
 
  public:
-    RenameUserMetadata(P4::ReferenceMap* refMap, const IR::Type_Struct* userMetaType,
+    RenameUserMetadata(P4::ReferenceMap *refMap, const IR::Type_Struct *userMetaType,
                        cstring namePrefix)
         : refMap(refMap), userMetaType(userMetaType), namePrefix(namePrefix) {
         setName("RenameUserMetadata");
@@ -143,7 +143,7 @@ class RenameUserMetadata : public Transform {
         visitDagOnce = false;
     }
 
-    const IR::Node* postorder(IR::Type_Struct* type) override {
+    const IR::Node *postorder(IR::Type_Struct *type) override {
         // Clone the user metadata type
         auto orig = getOriginal<IR::Type_Struct>();
         if (userMetaType->name != orig->name) return type;
@@ -186,7 +186,7 @@ class RenameUserMetadata : public Transform {
         return vec;
     }
 
-    const IR::Node* preorder(IR::Type_Name* type) override {
+    const IR::Node *preorder(IR::Type_Name *type) override {
         // Find any reference to the user metadata type that is used and replace them
         auto decl = refMap->getDeclaration(type->path);
         if (decl == userMetaType)
@@ -195,7 +195,7 @@ class RenameUserMetadata : public Transform {
         return type;
     }
 
-    void end_apply(const IR::Node*) override {
+    void end_apply(const IR::Node *) override {
         BUG_CHECK(renamed, "Could not identify user metadata type declaration %1%", userMetaType);
     }
 };

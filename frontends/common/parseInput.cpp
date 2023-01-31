@@ -30,8 +30,8 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::P4Program* parseP4String(const char* sourceFile, unsigned sourceLine,
-                                   const std::string& input,
+const IR::P4Program *parseP4String(const char *sourceFile, unsigned sourceLine,
+                                   const std::string &input,
                                    CompilerOptions::FrontendVersion version) {
     std::istringstream stream(input);
     auto result =
@@ -48,7 +48,7 @@ const IR::P4Program* parseP4String(const char* sourceFile, unsigned sourceLine,
     return result;
 }
 
-const IR::P4Program* parseP4String(const std::string& input,
+const IR::P4Program *parseP4String(const std::string &input,
                                    CompilerOptions::FrontendVersion version) {
     return parseP4String("(string)", 1, input, version);
 }

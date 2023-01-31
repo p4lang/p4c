@@ -19,7 +19,7 @@ class AbstractP4cTool {
     /// Provides the implementation of the tool.
     ///
     /// @param program The P4 program after mid-end processing.
-    virtual int mainImpl(const IR::P4Program* program) = 0;
+    virtual int mainImpl(const IR::P4Program *program) = 0;
 
     virtual void registerTarget() = 0;
 
@@ -27,7 +27,7 @@ class AbstractP4cTool {
     /// @param args
     ///     Contains the path to the executable, followed by the command-line arguments for this
     ///     tool.
-    int main(const std::vector<const char*>& args) {
+    int main(const std::vector<const char *> &args) {
         // Register supported compiler targets.
         registerTarget();
 

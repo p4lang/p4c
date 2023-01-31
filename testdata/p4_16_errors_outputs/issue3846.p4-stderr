@@ -1,0 +1,6 @@
+issue3846.p4(9): [--Werror=type-error] error: tt.apply and tt.apply: table application results cannot be compared
+    if (tt.apply() == tt.apply()) {
+        ^^^^^^^^^^
+issue3846.p4(9)
+    if (tt.apply() == tt.apply()) {
+                      ^^^^^^^^^^

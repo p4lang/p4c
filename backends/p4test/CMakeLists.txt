@@ -63,6 +63,7 @@ set (P4TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/fabric_*/fabric.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pins/*.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/omec/*.p4"
   )
 
 # Builds a list of tests for which P4Info generation is not supported. It makes
@@ -136,3 +137,5 @@ set (P4_14_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_14_samples/*.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_14_samples/switch_*/switch.p4")
 p4c_add_tests("p14_to_16" ${P4TEST_DRIVER} "${P4_14_SUITES}" "")
+
+set_tests_properties("p14_to_16/testdata/p4_14_samples/switch_20160512/switch.p4" PROPERTIES TIMEOUT 500)

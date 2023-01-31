@@ -28,26 +28,29 @@ class EBPFPsaParser;
 
 class PsaStateTranslationVisitor : public StateTranslationVisitor {
  public:
-    EBPFPsaParser* parser;
+    EBPFPsaParser *parser;
 
-    explicit PsaStateTranslationVisitor(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                                        EBPFPsaParser* prsr)
+    explicit PsaStateTranslationVisitor(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                                        EBPFPsaParser *prsr)
         : StateTranslationVisitor(refMap, typeMap), parser(prsr) {}
 
-    void processMethod(const P4::ExternMethod* ext) override;
+    void processMethod(const P4::ExternMethod *ext) override;
 };
 
 class EBPFPsaParser : public EBPFParser {
  public:
-    std::map<cstring, EBPFChecksumPSA*> checksums;
+    std::map<cstring, EBPFChecksumPSA *> checksums;
+    const IR::Parameter *inputMetadata;
 
-    EBPFPsaParser(const EBPFProgram* program, const IR::ParserBlock* block,
-                  const P4::TypeMap* typeMap);
+    EBPFPsaParser(const EBPFProgram *program, const IR::ParserBlock *block,
+                  const P4::TypeMap *typeMap);
 
-    void emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl) override;
-    void emitRejectState(CodeBuilder* builder) override;
+    void emit(CodeBuilder *builder) override;
+    void emitParserInputMetadata(CodeBuilder *builder);
+    void emitDeclaration(CodeBuilder *builder, const IR::Declaration *decl) override;
+    void emitRejectState(CodeBuilder *builder) override;
 
-    EBPFChecksumPSA* getChecksum(cstring name) const {
+    EBPFChecksumPSA *getChecksum(cstring name) const {
         auto result = ::get(checksums, name);
         BUG_CHECK(result != nullptr, "No checksum named %1%", name);
         return result;

@@ -8,7 +8,12 @@ on:
 
 jobs:
   p4c-lint:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-20.04
+    env:
+      IMAGE_TYPE: test
+      CMAKE_ONLY: ON
     steps:
     - uses: actions/checkout@v3
       with:
@@ -18,7 +23,7 @@ jobs:
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1
       with:
-        key: apply-linters
+        key: apply-linters-${{ runner.os }}
         max-size: 1000M
 
     # TODO: This check is disabled because git on the Github serves behaves differently. Unclear why.
@@ -26,14 +31,12 @@ jobs:
     #   run: |
     #     ./tools/check-git-submodules.sh
 
-    - name: Build
+    - name: Build (Ubuntu 20.04)
       run: |
-        docker build -t p4c --build-arg IMAGE_TYPE=test --build-arg CMAKE_ONLY=ON .
+       tools/ci-build.sh
 
     - name: Run cpplint.
-      run: |
-        docker run p4c make cpplint -C build
+      run: make cpplint -C build
 
     - name: Run clang-format.
-      run: |
-        docker run p4c make clang-format -C build
+      run: make clang-format -C build

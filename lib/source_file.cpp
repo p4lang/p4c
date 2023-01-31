@@ -39,7 +39,7 @@ cstring SourcePosition::toString() const {
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
-SourceInfo::SourceInfo(const InputSources* sources, SourcePosition start, SourcePosition end)
+SourceInfo::SourceInfo(const InputSources *sources, SourcePosition start, SourcePosition end)
     : sources(sources), start(start), end(end) {
     BUG_CHECK(sources != nullptr, "Invalid InputSources in SourceInfo");
     if (!start.isValid() || !end.isValid())
@@ -102,12 +102,12 @@ void InputSources::appendNewline(StringRef newline) {
     contents.push_back("");  // start a new line
 }
 
-void InputSources::appendText(const char* text) {
+void InputSources::appendText(const char *text) {
     if (text == nullptr) BUG("Null text being appended");
     StringRef ref = text;
 
     while (ref.len > 0) {
-        const char* nl = ref.find("\r\n");
+        const char *nl = ref.find("\r\n");
         if (nl == nullptr) {
             appendToLastLine(ref);
             break;
@@ -179,7 +179,7 @@ SourcePosition InputSources::getCurrentPosition() const {
     return SourcePosition(line, column);
 }
 
-cstring InputSources::getSourceFragment(const SourcePosition& position) const {
+cstring InputSources::getSourceFragment(const SourcePosition &position) const {
     SourceInfo info(this, position, position);
     return getSourceFragment(info);
 }
@@ -202,7 +202,7 @@ cstring carets(cstring source, unsigned start, unsigned end) {
     return builder.str();
 }
 
-cstring InputSources::getSourceFragment(const SourceInfo& position) const {
+cstring InputSources::getSourceFragment(const SourceInfo &position) const {
     if (!position.isValid()) return "";
 
     // If the position spans multiple lines, truncate to just the first line
@@ -219,7 +219,7 @@ cstring InputSources::getSourceFragment(const SourceInfo& position) const {
     return result + toadd + marker + cstring::newline;
 }
 
-cstring InputSources::getBriefSourceFragment(const SourceInfo& position) const {
+cstring InputSources::getBriefSourceFragment(const SourceInfo &position) const {
     if (!position.isValid()) return "";
 
     cstring result = getLine(position.getStart().getLineNumber());
@@ -275,7 +275,7 @@ cstring SourceInfo::toPositionString() const {
     return position.toString();
 }
 
-cstring SourceInfo::toSourcePositionData(unsigned* outLineNumber, unsigned* outColumnNumber) const {
+cstring SourceInfo::toSourcePositionData(unsigned *outLineNumber, unsigned *outColumnNumber) const {
     SourceFileLine position = sources->getSourceLine(start.getLineNumber());
     if (outLineNumber != nullptr) {
         *outLineNumber = position.sourceLine;

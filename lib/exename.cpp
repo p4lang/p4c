@@ -27,14 +27,14 @@ limitations under the License.
 #include "exceptions.h"
 
 template <size_t N>
-static void convertToAbsPath(const char* const relPath, char (&output)[N]) {
+static void convertToAbsPath(const char *const relPath, char (&output)[N]) {
     output[0] = '\0';  // Default to the empty string, indicating failure.
 
     char cwd[PATH_MAX];
     if (!getcwd(cwd, sizeof(cwd))) return;
     const size_t cwdLen = strlen(cwd);
     if (cwdLen == 0) return;
-    const char* separator = cwd[cwdLen - 1] == '/' ? "" : "/";
+    const char *separator = cwd[cwdLen - 1] == '/' ? "" : "/";
 
     // Construct an absolute path. We're assuming that @relPath is relative to
     // the current working directory.
@@ -42,7 +42,7 @@ static void convertToAbsPath(const char* const relPath, char (&output)[N]) {
     BUG_CHECK(n >= 0, "Pathname too long");
 }
 
-const char* exename(const char* argv0) {
+const char *exename(const char *argv0) {
     // Leave 1 extra char for the \0
     static char buffer[PATH_MAX + 1];
     if (buffer[0]) return buffer;  // done already

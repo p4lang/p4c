@@ -61,36 +61,37 @@ The main situation that this pass optimizes is given below:
  * be propagated, each action node has it's own map of information.
  */
 class FindVariableValues final : public Inspector {
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
     // Container for storing constant values for variables, is used as a representation of
     // the current state of the variables in the program. Keys are variable names and values
     // are pointers to 'Expression' nodes that represent a literal value for that variable.
-    std::map<cstring, const IR::Expression*>& vars;
+    std::map<cstring, const IR::Expression *> &vars;
     // Container used to store information needed for later propagating by the Transformer pass.
     // Keys for outer map are pointers to action nodes whose bodies need to be rewritten by the
     // Transformer pass and values are maps that store literal values for variables.
     // This inner map uses the name of the variable as a key and the pointer to the 'Expression'
     // node, that represents a literal, as a value.
-    std::map<const IR::Node*, std::map<cstring, const IR::Expression*>*>* actions;
+    std::map<const IR::Node *, std::map<cstring, const IR::Expression *> *> *actions;
     // Flag for controlling which IR nodes this pass operates on
     bool working = false;
 
-    bool preorder(const IR::IfStatement*) override;
-    bool preorder(const IR::SwitchStatement*) override;
-    void postorder(const IR::P4Control*) override;
-    bool preorder(const IR::P4Control*) override;
-    bool preorder(const IR::P4Table*) override;
-    bool preorder(const IR::P4Action*) override;
-    bool preorder(const IR::AssignmentStatement*) override;
-    void postorder(const IR::MethodCallExpression*) override;
+    bool preorder(const IR::IfStatement *) override;
+    bool preorder(const IR::SwitchStatement *) override;
+    void postorder(const IR::P4Control *) override;
+    bool preorder(const IR::P4Control *) override;
+    bool preorder(const IR::P4Table *) override;
+    bool preorder(const IR::P4Action *) override;
+    bool preorder(const IR::AssignmentStatement *) override;
+    void postorder(const IR::MethodCallExpression *) override;
 
  public:
-    FindVariableValues(ReferenceMap* refMap, TypeMap* typeMap,
-                       std::map<const IR::Node*, std::map<cstring, const IR::Expression*>*>* acts)
+    FindVariableValues(
+        ReferenceMap *refMap, TypeMap *typeMap,
+        std::map<const IR::Node *, std::map<cstring, const IR::Expression *> *> *acts)
         : refMap(refMap),
           typeMap(typeMap),
-          vars(*new std::map<cstring, const IR::Expression*>),
+          vars(*new std::map<cstring, const IR::Expression *>),
           actions(acts) {}
 };
 
@@ -100,45 +101,45 @@ class FindVariableValues final : public Inspector {
  * before the action call.
  */
 class DoGlobalCopyPropagation final : public Transform {
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
     // Container for storing constant values for variables, used as a representation of
     // the current state of the variables in the program. Keys are variable names and values
     // are pointers to 'Expression' nodes that represent a literal value for that variable.
-    std::map<cstring, const IR::Expression*>* vars = nullptr;
+    std::map<cstring, const IR::Expression *> *vars = nullptr;
     // Container used to store information needed for propagating.
     // Keys for outer map are pointers to action nodes whose bodies need to be rewritten by this
     // pass and values represent maps that store literal values for variables. This inner map uses
     // the name of the variable as a key and the pointer to the 'Expression' node, that represents a
     // literal, as a value.
-    std::map<const IR::Node*, std::map<cstring, const IR::Expression*>*>* actions;
+    std::map<const IR::Node *, std::map<cstring, const IR::Expression *> *> *actions;
     // Flag for controlling which IR nodes this pass operates on
     bool performRewrite = false;
 
  public:
     explicit DoGlobalCopyPropagation(
-        ReferenceMap* rM, TypeMap* tM,
-        std::map<const IR::Node*, std::map<cstring, const IR::Expression*>*>* acts)
+        ReferenceMap *rM, TypeMap *tM,
+        std::map<const IR::Node *, std::map<cstring, const IR::Expression *> *> *acts)
         : refMap(rM), typeMap(tM), actions(acts) {}
 
     // Returns the stored value for the used variable
-    const IR::Expression* copyprop_name(cstring name);
+    const IR::Expression *copyprop_name(cstring name);
 
-    IR::IfStatement* preorder(IR::IfStatement*) override;
-    const IR::Expression* postorder(IR::PathExpression*) override;
-    const IR::Expression* preorder(IR::ArrayIndex*) override;
-    const IR::Expression* preorder(IR::Member*) override;
-    const IR::Node* preorder(IR::AssignmentStatement*) override;
-    const IR::P4Action* preorder(IR::P4Action*) override;
-    const IR::P4Action* postorder(IR::P4Action*) override;
-    IR::MethodCallExpression* postorder(IR::MethodCallExpression*) override;
+    IR::IfStatement *preorder(IR::IfStatement *) override;
+    const IR::Expression *postorder(IR::PathExpression *) override;
+    const IR::Expression *preorder(IR::ArrayIndex *) override;
+    const IR::Expression *preorder(IR::Member *) override;
+    const IR::Node *preorder(IR::AssignmentStatement *) override;
+    const IR::P4Action *preorder(IR::P4Action *) override;
+    const IR::P4Action *postorder(IR::P4Action *) override;
+    IR::MethodCallExpression *postorder(IR::MethodCallExpression *) override;
 };
 
 class GlobalCopyPropagation : public PassManager {
  public:
-    GlobalCopyPropagation(ReferenceMap* rM, TypeMap* tM) {
+    GlobalCopyPropagation(ReferenceMap *rM, TypeMap *tM) {
         passes.push_back(new TypeChecking(rM, tM, true));
-        auto acts = new std::map<const IR::Node*, std::map<cstring, const IR::Expression*>*>;
+        auto acts = new std::map<const IR::Node *, std::map<cstring, const IR::Expression *> *>;
         passes.push_back(new FindVariableValues(rM, tM, acts));
         passes.push_back(new DoGlobalCopyPropagation(rM, tM, acts));
         setName("GlobalCopyPropagation");

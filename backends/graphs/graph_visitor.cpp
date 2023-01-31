@@ -22,7 +22,7 @@
 
 namespace graphs {
 
-void Graph_visitor::writeGraphToFile(const Graph& g, const cstring& name) {
+void Graph_visitor::writeGraphToFile(const Graph &g, const cstring &name) {
     auto path = Util::PathName(graphsDir).join(name + ".dot");
     auto out = openFile(path.toString(), false);
     if (out == nullptr) {
@@ -34,7 +34,7 @@ void Graph_visitor::writeGraphToFile(const Graph& g, const cstring& name) {
     boost::write_graphviz(*out, g);
 }
 
-const char* Graph_visitor::getType(const VertexType& v_type) {
+const char *Graph_visitor::getType(const VertexType &v_type) {
     switch (v_type) {
         case VertexType::TABLE:
             return "table";
@@ -67,7 +67,7 @@ const char* Graph_visitor::getType(const VertexType& v_type) {
     }
 }
 
-const char* Graph_visitor::getPrevType(const PrevType& prev_type) {
+const char *Graph_visitor::getPrevType(const PrevType &prev_type) {
     switch (prev_type) {
         case PrevType::Control:
             return "control";
@@ -79,7 +79,7 @@ const char* Graph_visitor::getPrevType(const PrevType& prev_type) {
     }
 }
 
-void Graph_visitor::forLoopJson(std::vector<Graph*>& graphsArray, PrevType node_type) {
+void Graph_visitor::forLoopJson(std::vector<Graph *> &graphsArray, PrevType node_type) {
     for (auto g : graphsArray) {
         auto block = new Util::JsonObject();
         programBlocks->emplace_back(block);
@@ -96,12 +96,12 @@ void Graph_visitor::forLoopJson(std::vector<Graph*>& graphsArray, PrevType node_
         auto subg = *g;
 
         auto vertices = boost::vertices(subg);
-        for (auto& vit = vertices.first; vit != vertices.second; ++vit) {
+        for (auto &vit = vertices.first; vit != vertices.second; ++vit) {
             auto node = new Util::JsonObject();
             nodesArray->emplace_back(node);
             node->emplace("node_nmb", *vit);
 
-            const auto& vinfo = subg[*vit];
+            const auto &vinfo = subg[*vit];
 
             node->emplace("name", vinfo.name.escapeJson());
             node->emplace("type", getType(vinfo.type));
@@ -109,7 +109,7 @@ void Graph_visitor::forLoopJson(std::vector<Graph*>& graphsArray, PrevType node_
         }
 
         auto edges = boost::edges(subg);
-        for (auto& eit = edges.first; eit != edges.second; ++eit) {
+        for (auto &eit = edges.first; eit != edges.second; ++eit) {
             auto edge = new Util::JsonObject();
             parserEdges->emplace_back(edge);
 
@@ -125,12 +125,12 @@ void Graph_visitor::forLoopJson(std::vector<Graph*>& graphsArray, PrevType node_
     }
 }
 
-void Graph_visitor::forLoopFullGraph(std::vector<Graph*>& graphsArray, fullGraphOpts* opts,
+void Graph_visitor::forLoopFullGraph(std::vector<Graph *> &graphsArray, fullGraphOpts *opts,
                                      PrevType prev_type) {
     unsigned long t_prev_adder = opts->node_i;
 
     for (auto g_ : graphsArray) {
-        auto& subfg = opts->fg.create_subgraph();
+        auto &subfg = opts->fg.create_subgraph();
         g = &subfg;
 
         // set subg properties
@@ -169,8 +169,8 @@ void Graph_visitor::forLoopFullGraph(std::vector<Graph*>& graphsArray, fullGraph
     }
 }
 
-void Graph_visitor::process(std::vector<Graph*>& controlGraphsArray,
-                            std::vector<Graph*>& parserGraphsArray) {
+void Graph_visitor::process(std::vector<Graph *> &controlGraphsArray,
+                            std::vector<Graph *> &parserGraphsArray) {
     if (graphs) {
         for (auto g : controlGraphsArray) {
             GraphAttributeSetter()(*g);
@@ -203,7 +203,7 @@ void Graph_visitor::process(std::vector<Graph*>& controlGraphsArray,
         auto file_without_p4 = (filename.findlast('.') == nullptr)
                                    ? filename
                                    : filename.before(filename.findlast('.'));
-        const char* file_without_path = file_without_p4;
+        const char *file_without_path = file_without_p4;
         if (file_without_p4.findlast('/') != nullptr) {
             file_without_path = file_without_p4.findlast('/') + 1;  // char* without '/'
         }

@@ -72,11 +72,11 @@ class P4RuntimeSymbolType {
         return P4RuntimeSymbolType(::p4::config::v1::P4Ids::CONTROLLER_HEADER);
     }
 
-    bool operator==(const P4RuntimeSymbolType& other) const { return id == other.id; }
+    bool operator==(const P4RuntimeSymbolType &other) const { return id == other.id; }
 
-    bool operator!=(const P4RuntimeSymbolType& other) const { return !(*this == other); }
+    bool operator!=(const P4RuntimeSymbolType &other) const { return !(*this == other); }
 
-    bool operator<(const P4RuntimeSymbolType& other) const { return id < other.id; }
+    bool operator<(const P4RuntimeSymbolType &other) const { return id < other.id; }
 
  protected:
     static P4RuntimeSymbolType make(p4rt_id_t id) { return P4RuntimeSymbolType(id); }
@@ -96,14 +96,14 @@ class P4RuntimeSymbolTableIface {
  public:
     virtual ~P4RuntimeSymbolTableIface() {}
     /// Add a @type symbol, extracting the name and id from @declaration.
-    virtual void add(P4RuntimeSymbolType type, const IR::IDeclaration* declaration) = 0;
+    virtual void add(P4RuntimeSymbolType type, const IR::IDeclaration *declaration) = 0;
     /// Add a @type symbol with @name and possibly an explicit P4 '@id'.
     virtual void add(P4RuntimeSymbolType type, cstring name,
                      boost::optional<p4rt_id_t> id = boost::none) = 0;
     /// @return the P4Runtime id for the symbol of @type corresponding to
     /// @declaration.
     virtual p4rt_id_t getId(P4RuntimeSymbolType type,
-                            const IR::IDeclaration* declaration) const = 0;
+                            const IR::IDeclaration *declaration) const = 0;
     /// @return the P4Runtime id for the symbol of @type with name @name.
     virtual p4rt_id_t getId(P4RuntimeSymbolType type, cstring name) const = 0;
     /// @return the alias for the given fully qualified external name. P4Runtime
@@ -126,47 +126,47 @@ class P4RuntimeArchHandlerIface {
  public:
     virtual ~P4RuntimeArchHandlerIface() {}
     /// Get control plane name for @block
-    virtual cstring getControlPlaneName(const IR::Block* block) {
+    virtual cstring getControlPlaneName(const IR::Block *block) {
         auto decl = block->getContainer();
         return decl ? decl->controlPlaneName() : "";
     }
     /// Collects architecture-specific properties for @tableBlock in @symbols
     /// table.
-    virtual void collectTableProperties(P4RuntimeSymbolTableIface* symbols,
-                                        const IR::TableBlock* tableBlock) = 0;
+    virtual void collectTableProperties(P4RuntimeSymbolTableIface *symbols,
+                                        const IR::TableBlock *tableBlock) = 0;
     /// Collects architecture-specific @externBlock instance in @symbols table.
-    virtual void collectExternInstance(P4RuntimeSymbolTableIface* symbols,
-                                       const IR::ExternBlock* externBlock) = 0;
+    virtual void collectExternInstance(P4RuntimeSymbolTableIface *symbols,
+                                       const IR::ExternBlock *externBlock) = 0;
     /// Collects extern method call @externFunction in @symbols table in case it
     /// needs to be exposed to the control-plane (e.g. digest call for v1model).
-    virtual void collectExternFunction(P4RuntimeSymbolTableIface* symbols,
-                                       const P4::ExternFunction* externFunction) = 0;
+    virtual void collectExternFunction(P4RuntimeSymbolTableIface *symbols,
+                                       const P4::ExternFunction *externFunction) = 0;
     /// Collects any extra symbols you may want to include in the symbol table
     /// and that are not covered by the above collection methods.
-    virtual void collectExtra(P4RuntimeSymbolTableIface* symbols) = 0;
+    virtual void collectExtra(P4RuntimeSymbolTableIface *symbols) = 0;
     /// This method is called between the two passes (collect and add) in case
     /// the architecture requires some logic to be performed then.
-    virtual void postCollect(const P4RuntimeSymbolTableIface& symbols) = 0;
+    virtual void postCollect(const P4RuntimeSymbolTableIface &symbols) = 0;
     /// Adds architecture-specific properties for @tableBlock to the @table
     /// Protobuf message.
-    virtual void addTableProperties(const P4RuntimeSymbolTableIface& symbols,
-                                    ::p4::config::v1::P4Info* p4info,
-                                    ::p4::config::v1::Table* table,
-                                    const IR::TableBlock* tableBlock) = 0;
+    virtual void addTableProperties(const P4RuntimeSymbolTableIface &symbols,
+                                    ::p4::config::v1::P4Info *p4info,
+                                    ::p4::config::v1::Table *table,
+                                    const IR::TableBlock *tableBlock) = 0;
     /// Adds relevant information about @externBlock instance to the @p4info
     /// message.
-    virtual void addExternInstance(const P4RuntimeSymbolTableIface& symbols,
-                                   ::p4::config::v1::P4Info* p4info,
-                                   const IR::ExternBlock* externBlock) = 0;
+    virtual void addExternInstance(const P4RuntimeSymbolTableIface &symbols,
+                                   ::p4::config::v1::P4Info *p4info,
+                                   const IR::ExternBlock *externBlock) = 0;
     /// Adds relevant information about @externFunction method call - if it
     /// needs to be exposed to the control-plane - to @p4info message.
-    virtual void addExternFunction(const P4RuntimeSymbolTableIface& symbols,
-                                   ::p4::config::v1::P4Info* p4info,
-                                   const P4::ExternFunction* externFunction) = 0;
+    virtual void addExternFunction(const P4RuntimeSymbolTableIface &symbols,
+                                   ::p4::config::v1::P4Info *p4info,
+                                   const P4::ExternFunction *externFunction) = 0;
     /// This method is called after the add pass in case the architecture
     /// requires some logic to be performed then.
-    virtual void postAdd(const P4RuntimeSymbolTableIface& symbols,
-                         ::p4::config::v1::P4Info* p4info) = 0;
+    virtual void postAdd(const P4RuntimeSymbolTableIface &symbols,
+                         ::p4::config::v1::P4Info *p4info) = 0;
 };
 
 /// A functor interface that needs to be implemented for each
@@ -179,9 +179,9 @@ struct P4RuntimeArchHandlerBuilderIface {
     /// appropriate @ref P4RuntimeArchHandlerIface implementation for the
     /// architecture, with the appropriate @refMap, @typeMap and
     /// @evaluatedProgram.
-    virtual P4RuntimeArchHandlerIface* operator()(
-        ReferenceMap* refMap, TypeMap* typeMap,
-        const IR::ToplevelBlock* evaluatedProgram) const = 0;
+    virtual P4RuntimeArchHandlerIface *operator()(
+        ReferenceMap *refMap, TypeMap *typeMap,
+        const IR::ToplevelBlock *evaluatedProgram) const = 0;
 };
 
 /// A collection of helper functions which can be used to implement @ref
@@ -190,22 +190,22 @@ namespace Helpers {
 
 /// @return an extern instance defined or referenced by the value of @table's
 /// @propertyName property, or boost::none if no extern was referenced.
-boost::optional<ExternInstance> getExternInstanceFromProperty(const IR::P4Table* table,
-                                                              const cstring& propertyName,
-                                                              ReferenceMap* refMap,
-                                                              TypeMap* typeMap,
-                                                              bool* isConstructedInPlace = nullptr);
+boost::optional<ExternInstance> getExternInstanceFromProperty(const IR::P4Table *table,
+                                                              const cstring &propertyName,
+                                                              ReferenceMap *refMap,
+                                                              TypeMap *typeMap,
+                                                              bool *isConstructedInPlace = nullptr);
 
 /// @return true if the extern instance assigned to property @propertyName for
 /// the @table was constructed in-place or outside of teh @table declaration.
-bool isExternPropertyConstructedInPlace(const IR::P4Table* table, const cstring& propertyName);
+bool isExternPropertyConstructedInPlace(const IR::P4Table *table, const cstring &propertyName);
 
 /// Visit evaluated blocks under the provided block. Guarantees that each
 /// block is visited only once, even if multiple paths to reach it exist.
 template <typename Func>
-void forAllEvaluatedBlocks(const IR::Block* block, Func function) {
-    std::set<const IR::Block*> visited;
-    ordered_set<const IR::Block*> frontier{block};
+void forAllEvaluatedBlocks(const IR::Block *block, Func function) {
+    std::set<const IR::Block *> visited;
+    ordered_set<const IR::Block *> frontier{block};
 
     while (!frontier.empty()) {
         // Pop a block off the frontier of blocks we haven't yet visited.
@@ -228,11 +228,11 @@ void forAllEvaluatedBlocks(const IR::Block* block, Func function) {
 }
 
 /// Serialize an unstructured @annotation to a string.
-std::string serializeOneAnnotation(const IR::Annotation* annotation);
+std::string serializeOneAnnotation(const IR::Annotation *annotation);
 
 /// Serialize a structured @annotation to the appropriate Protobuf message.
-void serializeOneStructuredAnnotation(const IR::Annotation* annotation,
-                                      ::p4::config::v1::StructuredAnnotation* structuredAnnotation);
+void serializeOneStructuredAnnotation(const IR::Annotation *annotation,
+                                      ::p4::config::v1::StructuredAnnotation *structuredAnnotation);
 
 /// Serialize @annotated's P4 annotations and attach them to a P4Info message
 /// with an 'annotations' and a 'structured_annotations" field. All structured
@@ -240,13 +240,13 @@ void serializeOneStructuredAnnotation(const IR::Annotation* annotation,
 /// annotations are ignored, as well as annotations whose name satisfies
 /// predicate @p.
 template <typename Message, typename UnaryPredicate>
-void addAnnotations(Message* message, const IR::IAnnotated* annotated, UnaryPredicate p) {
+void addAnnotations(Message *message, const IR::IAnnotated *annotated, UnaryPredicate p) {
     CHECK_NULL(message);
 
     // Synthesized resources may have no annotations.
     if (annotated == nullptr) return;
 
-    for (const IR::Annotation* annotation : annotated->getAnnotations()->annotations) {
+    for (const IR::Annotation *annotation : annotated->getAnnotations()->annotations) {
         // Always add all structured annotations.
         if (annotation->annotationKind() != IR::Annotation::Kind::Unstructured) {
             serializeOneStructuredAnnotation(annotation, message->add_structured_annotations());
@@ -269,14 +269,14 @@ void addAnnotations(Message* message, const IR::IAnnotated* annotated, UnaryPred
 
 /// calls addAnnotations with a unconditionally false predicate.
 template <typename Message>
-void addAnnotations(Message* message, const IR::IAnnotated* annotated) {
+void addAnnotations(Message *message, const IR::IAnnotated *annotated) {
     addAnnotations(message, annotated, [](cstring) { return false; });
 }
 
 /// Set the 'doc' field for a P4Info message, using the '@brief' and
 /// '@description' annotations if present.
 template <typename Message>
-void addDocumentation(Message* message, const IR::IAnnotated* annotated) {
+void addDocumentation(Message *message, const IR::IAnnotated *annotated) {
     CHECK_NULL(message);
 
     // Synthesized resources may have no annotations.
@@ -288,7 +288,7 @@ void addDocumentation(Message* message, const IR::IAnnotated* annotated) {
     // we iterate over all annotations looking for '@brief' and / or
     // '@description'. As per the P4Runtime spec, we only set the 'doc' field in
     // the message if at least one of them is present.
-    for (const IR::Annotation* annotation : annotated->getAnnotations()->annotations) {
+    for (const IR::Annotation *annotation : annotated->getAnnotations()->annotations) {
         if (annotation->name == "brief") {
             auto brief = annotation->expr[0]->to<IR::StringLiteral>();
             // guaranteed by ParseAnnotations pass
@@ -314,8 +314,8 @@ void addDocumentation(Message* message, const IR::IAnnotated* annotated) {
 /// fields. '@name', '@id' and documentation annotations are ignored, as well as
 /// annotations whose name satisfies predicate @p.
 template <typename UnaryPredicate>
-void setPreamble(::p4::config::v1::Preamble* preamble, p4rt_id_t id, cstring name, cstring alias,
-                 const IR::IAnnotated* annotated, UnaryPredicate p) {
+void setPreamble(::p4::config::v1::Preamble *preamble, p4rt_id_t id, cstring name, cstring alias,
+                 const IR::IAnnotated *annotated, UnaryPredicate p) {
     CHECK_NULL(preamble);
     preamble->set_id(id);
     preamble->set_name(name);
@@ -326,14 +326,14 @@ void setPreamble(::p4::config::v1::Preamble* preamble, p4rt_id_t id, cstring nam
 
 /// Calls setPreamble with a unconditionally false predicate (no annotation
 /// filtered out).
-inline void setPreamble(::p4::config::v1::Preamble* preamble, p4rt_id_t id, cstring name,
-                        cstring alias, const IR::IAnnotated* annotated) {
+inline void setPreamble(::p4::config::v1::Preamble *preamble, p4rt_id_t id, cstring name,
+                        cstring alias, const IR::IAnnotated *annotated) {
     setPreamble(preamble, id, name, alias, annotated, [](cstring) { return false; });
 }
 
 /// @return @table's size property if available, falling back to the
 /// architecture's default size.
-int64_t getTableSize(const IR::P4Table* table);
+int64_t getTableSize(const IR::P4Table *table);
 
 /// A traits class describing the properties of "counterlike" things.
 template <typename Kind>
@@ -349,7 +349,7 @@ struct Counterlike {
     /// The name of the instance.
     const cstring name;
     /// If non-null, the instance's annotations.
-    const IR::IAnnotated* annotations;
+    const IR::IAnnotated *annotations;
     /// The units parameter to the instance; valid values vary depending on @Kind.
     const cstring unit;
     /// The size parameter to the instance.
@@ -362,9 +362,9 @@ struct Counterlike {
 
     /// @return the information required to serialize an explicit @instance of
     /// @Kind, which is defined inside a control block.
-    static boost::optional<Counterlike<Kind>> from(const IR::ExternBlock* instance,
-                                                   const ReferenceMap* refMap, P4::TypeMap* typeMap,
-                                                   ::p4::config::v1::P4TypeInfo* p4RtTypeInfo) {
+    static boost::optional<Counterlike<Kind>> from(const IR::ExternBlock *instance,
+                                                   const ReferenceMap *refMap, P4::TypeMap *typeMap,
+                                                   ::p4::config::v1::P4TypeInfo *p4RtTypeInfo) {
         CHECK_NULL(instance);
         auto declaration = instance->node->to<IR::Declaration_Instance>();
 
@@ -421,8 +421,8 @@ struct Counterlike {
     /// @return the information required to serialize an @instance of @Kind which
     /// is either defined in or referenced by a property value of @table. (This
     /// implies that @instance is a direct resource of @table.)
-    static boost::optional<Counterlike<Kind>> fromDirect(const ExternInstance& instance,
-                                                         const IR::P4Table* table) {
+    static boost::optional<Counterlike<Kind>> fromDirect(const ExternInstance &instance,
+                                                         const IR::P4Table *table) {
         CHECK_NULL(table);
         BUG_CHECK(instance.name != boost::none, "Caller should've ensured we have a name");
 
@@ -459,8 +459,8 @@ struct Counterlike {
 /// @return the direct counter associated with @table, if it has one, or
 /// boost::none otherwise.
 template <typename Kind>
-boost::optional<Counterlike<Kind>> getDirectCounterlike(const IR::P4Table* table,
-                                                        ReferenceMap* refMap, TypeMap* typeMap) {
+boost::optional<Counterlike<Kind>> getDirectCounterlike(const IR::P4Table *table,
+                                                        ReferenceMap *refMap, TypeMap *typeMap) {
     auto propertyName = CounterlikeTraits<Kind>::directPropertyName();
     auto instance = getExternInstanceFromProperty(table, propertyName, refMap, typeMap);
     if (!instance) return boost::none;

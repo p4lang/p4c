@@ -33,7 +33,7 @@ class ArchSpec {
     std::map<cstring, size_t> blockIndices;
 
  public:
-    explicit ArchSpec(cstring packageName, const std::vector<ArchMember>& archVectorInput);
+    explicit ArchSpec(cstring packageName, const std::vector<ArchMember> &archVectorInput);
 
     /// @returns the index that corresponds to the given name in this architecture specification.
     /// A bug is thrown if the index does not exist.
@@ -41,7 +41,7 @@ class ArchSpec {
 
     /// @returns the architecture member that corresponds to the given index in this architecture
     /// specification. A bug is thrown if the index does not exist.
-    const ArchMember* getArchMember(size_t blockIndex) const;
+    const ArchMember *getArchMember(size_t blockIndex) const;
 
     /// @returns name of the parameter for the given block and parameter index in this architecture
     /// specification. A bug is thrown if the indices are out of range.

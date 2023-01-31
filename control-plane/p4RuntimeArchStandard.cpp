@@ -43,18 +43,18 @@ namespace Standard {
 /// serialize v1model-specific symbols which are exposed to the control-plane.
 class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch::V1MODEL> {
  public:
-    P4RuntimeArchHandlerV1Model(ReferenceMap* refMap, TypeMap* typeMap,
-                                const IR::ToplevelBlock* evaluatedProgram)
+    P4RuntimeArchHandlerV1Model(ReferenceMap *refMap, TypeMap *typeMap,
+                                const IR::ToplevelBlock *evaluatedProgram)
         : P4RuntimeArchHandlerCommon<Arch::V1MODEL>(refMap, typeMap, evaluatedProgram) {}
 
-    void collectExternFunction(P4RuntimeSymbolTableIface* symbols,
-                               const P4::ExternFunction* externFunction) override {
+    void collectExternFunction(P4RuntimeSymbolTableIface *symbols,
+                               const P4::ExternFunction *externFunction) override {
         auto digest = getDigestCall(externFunction, refMap, typeMap, nullptr);
         if (digest) symbols->add(SymbolType::DIGEST(), digest->name);
     }
 
-    void addTableProperties(const P4RuntimeSymbolTableIface& symbols, p4configv1::P4Info* p4info,
-                            p4configv1::Table* table, const IR::TableBlock* tableBlock) override {
+    void addTableProperties(const P4RuntimeSymbolTableIface &symbols, p4configv1::P4Info *p4info,
+                            p4configv1::Table *table, const IR::TableBlock *tableBlock) override {
         P4RuntimeArchHandlerCommon<Arch::V1MODEL>::addTableProperties(symbols, p4info, table,
                                                                       tableBlock);
         auto tableDeclaration = tableBlock->container;
@@ -67,8 +67,8 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
         }
     }
 
-    void addExternFunction(const P4RuntimeSymbolTableIface& symbols, p4configv1::P4Info* p4info,
-                           const P4::ExternFunction* externFunction) override {
+    void addExternFunction(const P4RuntimeSymbolTableIface &symbols, p4configv1::P4Info *p4info,
+                           const P4::ExternFunction *externFunction) override {
         auto p4RtTypeInfo = p4info->mutable_type_info();
         auto digest = getDigestCall(externFunction, refMap, typeMap, p4RtTypeInfo);
         if (digest) addDigest(symbols, p4info, *digest);
@@ -76,9 +76,9 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
 
     /// @return serialization information for the digest() call represented by
     /// @call, or boost::none if @call is not a digest() call or is invalid.
-    static boost::optional<Digest> getDigestCall(const P4::ExternFunction* function,
-                                                 ReferenceMap* refMap, P4::TypeMap* typeMap,
-                                                 p4configv1::P4TypeInfo* p4RtTypeInfo) {
+    static boost::optional<Digest> getDigestCall(const P4::ExternFunction *function,
+                                                 ReferenceMap *refMap, P4::TypeMap *typeMap,
+                                                 p4configv1::P4TypeInfo *p4RtTypeInfo) {
         if (function->method->name != P4V1::V1Model::instance.digest_receiver.name)
             return boost::none;
 
@@ -93,16 +93,16 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
         // be able to annotate the digest method call with a @name annotation in the
         // P4 but annotations are not supported on expressions.
         cstring controlPlaneName;
-        auto* typeArg = call->typeArguments->at(0);
+        auto *typeArg = call->typeArguments->at(0);
         if (typeArg->is<IR::Type_StructLike>()) {
             auto structType = typeArg->to<IR::Type_StructLike>();
             controlPlaneName = structType->controlPlaneName();
-        } else if (auto* typeName = typeArg->to<IR::Type_Name>()) {
-            auto* referencedType = refMap->getDeclaration(typeName->path, true);
+        } else if (auto *typeName = typeArg->to<IR::Type_Name>()) {
+            auto *referencedType = refMap->getDeclaration(typeName->path, true);
             CHECK_NULL(referencedType);
             controlPlaneName = referencedType->controlPlaneName();
         } else {
-            static std::unordered_map<const IR::MethodCallExpression*, cstring> autoNames;
+            static std::unordered_map<const IR::MethodCallExpression *, cstring> autoNames;
             auto it = autoNames.find(call);
             if (it == autoNames.end()) {
                 controlPlaneName = "digest_" + cstring::to_cstring(autoNames.size());
@@ -117,7 +117,7 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
         }
 
         // Convert the generic type for the digest method call to a P4DataTypeSpec
-        auto* typeSpec = TypeSpecConverter::convert(refMap, typeMap, typeArg, p4RtTypeInfo);
+        auto *typeSpec = TypeSpecConverter::convert(refMap, typeMap, typeArg, p4RtTypeInfo);
         BUG_CHECK(typeSpec != nullptr,
                   "P4 type %1% could not "
                   "be converted to P4Info P4DataTypeSpec");
@@ -126,7 +126,7 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
 
     /// @return true if @table's 'support_timeout' property exists and is true. This
     /// indicates that @table supports entry ageing.
-    static bool getSupportsTimeout(const IR::P4Table* table) {
+    static bool getSupportsTimeout(const IR::P4Table *table) {
         auto timeout = table->properties->getProperty(
             P4V1::V1Model::instance.tableAttributes.supportTimeout.name);
         if (timeout == nullptr) return false;
@@ -149,8 +149,8 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
     }
 };
 
-P4RuntimeArchHandlerIface* V1ModelArchHandlerBuilder::operator()(
-    ReferenceMap* refMap, TypeMap* typeMap, const IR::ToplevelBlock* evaluatedProgram) const {
+P4RuntimeArchHandlerIface *V1ModelArchHandlerBuilder::operator()(
+    ReferenceMap *refMap, TypeMap *typeMap, const IR::ToplevelBlock *evaluatedProgram) const {
     return new P4RuntimeArchHandlerV1Model(refMap, typeMap, evaluatedProgram);
 }
 
@@ -160,12 +160,12 @@ P4RuntimeArchHandlerIface* V1ModelArchHandlerBuilder::operator()(
 template <Arch arch>
 class P4RuntimeArchHandlerPSAPNA : public P4RuntimeArchHandlerCommon<arch> {
  public:
-    P4RuntimeArchHandlerPSAPNA(ReferenceMap* refMap, TypeMap* typeMap,
-                               const IR::ToplevelBlock* evaluatedProgram)
+    P4RuntimeArchHandlerPSAPNA(ReferenceMap *refMap, TypeMap *typeMap,
+                               const IR::ToplevelBlock *evaluatedProgram)
         : P4RuntimeArchHandlerCommon<arch>(refMap, typeMap, evaluatedProgram) {}
 
-    void collectExternInstance(P4RuntimeSymbolTableIface* symbols,
-                               const IR::ExternBlock* externBlock) override {
+    void collectExternInstance(P4RuntimeSymbolTableIface *symbols,
+                               const IR::ExternBlock *externBlock) override {
         P4RuntimeArchHandlerCommon<arch>::collectExternInstance(symbols, externBlock);
 
         auto decl = externBlock->node->to<IR::IDeclaration>();
@@ -175,8 +175,8 @@ class P4RuntimeArchHandlerPSAPNA : public P4RuntimeArchHandlerCommon<arch> {
         }
     }
 
-    void addTableProperties(const P4RuntimeSymbolTableIface& symbols, p4configv1::P4Info* p4info,
-                            p4configv1::Table* table, const IR::TableBlock* tableBlock) override {
+    void addTableProperties(const P4RuntimeSymbolTableIface &symbols, p4configv1::P4Info *p4info,
+                            p4configv1::Table *table, const IR::TableBlock *tableBlock) override {
         P4RuntimeArchHandlerCommon<arch>::addTableProperties(symbols, p4info, table, tableBlock);
 
         auto tableDeclaration = tableBlock->container;
@@ -188,8 +188,8 @@ class P4RuntimeArchHandlerPSAPNA : public P4RuntimeArchHandlerCommon<arch> {
         }
     }
 
-    void addExternInstance(const P4RuntimeSymbolTableIface& symbols, p4configv1::P4Info* p4info,
-                           const IR::ExternBlock* externBlock) override {
+    void addExternInstance(const P4RuntimeSymbolTableIface &symbols, p4configv1::P4Info *p4info,
+                           const IR::ExternBlock *externBlock) override {
         P4RuntimeArchHandlerCommon<arch>::addExternInstance(symbols, p4info, externBlock);
 
         auto decl = externBlock->node->to<IR::Declaration_Instance>();
@@ -202,8 +202,8 @@ class P4RuntimeArchHandlerPSAPNA : public P4RuntimeArchHandlerCommon<arch> {
     }
 
     /// @return serialization information for the Digest extern instacne @decl
-    boost::optional<Digest> getDigest(const IR::Declaration_Instance* decl,
-                                      p4configv1::P4TypeInfo* p4RtTypeInfo) {
+    boost::optional<Digest> getDigest(const IR::Declaration_Instance *decl,
+                                      p4configv1::P4TypeInfo *p4RtTypeInfo) {
         BUG_CHECK(decl->type->is<IR::Type_Specialized>(), "%1%: expected Type_Specialized",
                   decl->type);
         auto type = decl->type->to<IR::Type_Specialized>();
@@ -219,7 +219,7 @@ class P4RuntimeArchHandlerPSAPNA : public P4RuntimeArchHandlerCommon<arch> {
 
     /// @return true if @table's 'psa_idle_timeout' property exists and is true. This
     /// indicates that @table supports entry ageing.
-    static bool getSupportsTimeout(const IR::P4Table* table) {
+    static bool getSupportsTimeout(const IR::P4Table *table) {
         auto timeout = table->properties->getProperty("psa_idle_timeout");
 
         if (timeout == nullptr) return false;
@@ -254,25 +254,25 @@ class P4RuntimeArchHandlerPSAPNA : public P4RuntimeArchHandlerCommon<arch> {
 
 class P4RuntimeArchHandlerPSA final : public P4RuntimeArchHandlerPSAPNA<Arch::PSA> {
  public:
-    P4RuntimeArchHandlerPSA(ReferenceMap* refMap, TypeMap* typeMap,
-                            const IR::ToplevelBlock* evaluatedProgram)
+    P4RuntimeArchHandlerPSA(ReferenceMap *refMap, TypeMap *typeMap,
+                            const IR::ToplevelBlock *evaluatedProgram)
         : P4RuntimeArchHandlerPSAPNA(refMap, typeMap, evaluatedProgram) {}
 };
 
-P4RuntimeArchHandlerIface* PSAArchHandlerBuilder::operator()(
-    ReferenceMap* refMap, TypeMap* typeMap, const IR::ToplevelBlock* evaluatedProgram) const {
+P4RuntimeArchHandlerIface *PSAArchHandlerBuilder::operator()(
+    ReferenceMap *refMap, TypeMap *typeMap, const IR::ToplevelBlock *evaluatedProgram) const {
     return new P4RuntimeArchHandlerPSA(refMap, typeMap, evaluatedProgram);
 }
 
 class P4RuntimeArchHandlerPNA final : public P4RuntimeArchHandlerPSAPNA<Arch::PNA> {
  public:
-    P4RuntimeArchHandlerPNA(ReferenceMap* refMap, TypeMap* typeMap,
-                            const IR::ToplevelBlock* evaluatedProgram)
+    P4RuntimeArchHandlerPNA(ReferenceMap *refMap, TypeMap *typeMap,
+                            const IR::ToplevelBlock *evaluatedProgram)
         : P4RuntimeArchHandlerPSAPNA(refMap, typeMap, evaluatedProgram) {}
 };
 
-P4RuntimeArchHandlerIface* PNAArchHandlerBuilder::operator()(
-    ReferenceMap* refMap, TypeMap* typeMap, const IR::ToplevelBlock* evaluatedProgram) const {
+P4RuntimeArchHandlerIface *PNAArchHandlerBuilder::operator()(
+    ReferenceMap *refMap, TypeMap *typeMap, const IR::ToplevelBlock *evaluatedProgram) const {
     return new P4RuntimeArchHandlerPNA(refMap, typeMap, evaluatedProgram);
 }
 
@@ -282,13 +282,13 @@ P4RuntimeArchHandlerIface* PNAArchHandlerBuilder::operator()(
 /// The Register is defined exactly the same as for PSA. Therefore, we can re-use PSA.
 class P4RuntimeArchHandlerUBPF final : public P4RuntimeArchHandlerCommon<Arch::PSA> {
  public:
-    P4RuntimeArchHandlerUBPF(ReferenceMap* refMap, TypeMap* typeMap,
-                             const IR::ToplevelBlock* evaluatedProgram)
+    P4RuntimeArchHandlerUBPF(ReferenceMap *refMap, TypeMap *typeMap,
+                             const IR::ToplevelBlock *evaluatedProgram)
         : P4RuntimeArchHandlerCommon<Arch::PSA>(refMap, typeMap, evaluatedProgram) {}
 };
 
-P4RuntimeArchHandlerIface* UBPFArchHandlerBuilder::operator()(
-    ReferenceMap* refMap, TypeMap* typeMap, const IR::ToplevelBlock* evaluatedProgram) const {
+P4RuntimeArchHandlerIface *UBPFArchHandlerBuilder::operator()(
+    ReferenceMap *refMap, TypeMap *typeMap, const IR::ToplevelBlock *evaluatedProgram) const {
     return new P4RuntimeArchHandlerUBPF(refMap, typeMap, evaluatedProgram);
 }
 

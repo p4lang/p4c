@@ -18,29 +18,29 @@ limitations under the License.
 
 namespace P4 {
 
-bool SameExpression::sameType(const IR::Type* left, const IR::Type* right) const {
+bool SameExpression::sameType(const IR::Type *left, const IR::Type *right) const {
     auto lt = typeMap->getType(left, true);
     auto rt = typeMap->getType(right, true);
     return typeMap->equivalent(lt, rt);
 }
 
-bool SameExpression::sameExpressions(const IR::Vector<IR::Expression>* left,
-                                     const IR::Vector<IR::Expression>* right) const {
+bool SameExpression::sameExpressions(const IR::Vector<IR::Expression> *left,
+                                     const IR::Vector<IR::Expression> *right) const {
     if (left->size() != right->size()) return false;
     for (unsigned i = 0; i < left->size(); i++)
         if (!sameExpression(left->at(i), right->at(i))) return false;
     return true;
 }
 
-bool SameExpression::sameExpressions(const IR::Vector<IR::Argument>* left,
-                                     const IR::Vector<IR::Argument>* right) const {
+bool SameExpression::sameExpressions(const IR::Vector<IR::Argument> *left,
+                                     const IR::Vector<IR::Argument> *right) const {
     if (left->size() != right->size()) return false;
     for (unsigned i = 0; i < left->size(); i++)
         if (!sameExpression(left->at(i)->expression, right->at(i)->expression)) return false;
     return true;
 }
 
-bool SameExpression::sameExpression(const IR::Expression* left, const IR::Expression* right) const {
+bool SameExpression::sameExpression(const IR::Expression *left, const IR::Expression *right) const {
     CHECK_NULL(left);
     CHECK_NULL(right);
     if (left->node_type_name() != right->node_type_name()) return false;

@@ -92,33 +92,33 @@ class Z3SolverTest : public P4ToolsTest {
         }
 
         // Produce a ProgramInfo, which is needed to create a SmallStepEvaluator.
-        const auto* progInfo = TestgenTarget::initProgram(test->program);
+        const auto *progInfo = TestgenTarget::initProgram(test->program);
         if (progInfo == nullptr) {
             return;
         }
 
         // Extract the binary operation from the P4Program
-        auto* const declVector = test->program->getDeclsByName("mau")->toVector();
-        const auto* decl = (*declVector)[0];
-        const auto* control = decl->to<IR::P4Control>();
-        for (const auto* st : control->body->components) {
-            if (const auto* as = st->to<IR::IfStatement>()) {
-                const auto* asExpr = as->condition;
+        auto *const declVector = test->program->getDeclsByName("mau")->toVector();
+        const auto *decl = (*declVector)[0];
+        const auto *control = decl->to<IR::P4Control>();
+        for (const auto *st : control->body->components) {
+            if (const auto *as = st->to<IR::IfStatement>()) {
+                const auto *asExpr = as->condition;
                 if (asExpr->is<IR::Lss>()) {
                     opLss = asExpr->to<IR::Lss>();
                 }
             }
         }
     }
-    const IR::Lss* opLss;
+    const IR::Lss *opLss;
 };
 
 namespace {
 
-void getNumeric(const Value* value, big_int& intValue, bool& flag) {
-    if (const auto* constant = value->to<IR::Constant>()) {
+void getNumeric(const Value *value, big_int &intValue, bool &flag) {
+    if (const auto *constant = value->to<IR::Constant>()) {
         intValue = constant->value;
-    } else if (const auto* boolLiteral = value->to<IR::BoolLiteral>()) {
+    } else if (const auto *boolLiteral = value->to<IR::BoolLiteral>()) {
         intValue = big_int(boolLiteral->value);
     } else {
         flag = true;
@@ -133,7 +133,7 @@ TEST_F(Z3SolverTest, Assertion2Model) {
     Z3Solver solver;
     Z3SolverAccessor solverAccessor(&solver);
 
-    std::vector<const P4Tools::Constraint*> asserts;
+    std::vector<const P4Tools::Constraint *> asserts;
     asserts.push_back(opLss);
 
     // getting right variable
@@ -142,11 +142,11 @@ TEST_F(Z3SolverTest, Assertion2Model) {
 
     // getting numeric and left variable
     ASSERT_TRUE(opLss->left->is<IR::Add>());
-    const auto* opAdd = opLss->left->to<IR::Add>();
+    const auto *opAdd = opLss->left->to<IR::Add>();
     ASSERT_TRUE(opAdd->left->is<IR::Member>());
     const StateVariable varA = opAdd->left->to<IR::Member>();
     ASSERT_TRUE(opAdd->right->is<IR::Constant>());
-    const auto* addToA = opAdd->right->to<IR::Constant>();
+    const auto *addToA = opAdd->right->to<IR::Constant>();
 
     // getting model without check satisfiable
     EXPECT_THROW(solver.getModel(), Util::CompilerBug);
@@ -159,8 +159,8 @@ TEST_F(Z3SolverTest, Assertion2Model) {
     // checking variables
     ASSERT_GT(model2.count(varA), 0u);
     ASSERT_GT(model2.count(varB), 0u);
-    const auto* valueA = model2.at(varA)->to<IR::Literal>();
-    const auto* valueB = model2.at(varB)->to<IR::Literal>();
+    const auto *valueA = model2.at(varA)->to<IR::Literal>();
+    const auto *valueB = model2.at(varB)->to<IR::Literal>();
 
     // input expression was hdr.h.a + 4w15 < hdr.h.b
     // lets calculate it: valueA + addToA < valueB

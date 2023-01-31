@@ -30,7 +30,7 @@ class AbstractSolver {
     /// @return true if the given assertions are consistent.
     /// @return false if the given assertions are inconsistent.
     /// @return boost::none if the solver times out, or is otherwise unable to provide an answer.
-    virtual boost::optional<bool> checkSat(const std::vector<const Constraint*>& asserts) = 0;
+    virtual boost::optional<bool> checkSat(const std::vector<const Constraint *> &asserts) = 0;
 
     /// Obtains the first solution found by the solver in the last call to @checkSat.
     ///
@@ -38,10 +38,10 @@ class AbstractSolver {
     /// @checkSat returned anything other than true, if there was no such previous call, or if the
     /// state in the solver has changed since the last such call (e.g., more assertions have been
     /// made).
-    virtual const Model* getModel() const = 0;
+    virtual const Model *getModel() const = 0;
 
     /// Saves solver state to the given JSON generator.
-    virtual void toJSON(JSONGenerator&) const = 0;
+    virtual void toJSON(JSONGenerator &) const = 0;
 
     /// @returns whether this solver is incremental.
     virtual bool isInIncrementalMode() const = 0;
@@ -50,8 +50,8 @@ class AbstractSolver {
     /// Casts involving "const" have to explicit in this case. This is necessary because abstract
     /// solvers have no straightforward mechanism to support clone operations.
     template <typename T>
-    T* to() {
-        return dynamic_cast<T*>(this);
+    T *to() {
+        return dynamic_cast<T *>(this);
     }
 };
 

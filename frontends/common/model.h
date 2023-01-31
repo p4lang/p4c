@@ -35,7 +35,7 @@ struct Elem {
     IR::ID Id(Util::SourceInfo srcInfo, cstring originalName) const {
         return IR::ID(srcInfo, name, originalName);
     }
-    const char* str() const { return name.c_str(); }
+    const char *str() const { return name.c_str(); }
     cstring toString() const { return name; }
 };
 

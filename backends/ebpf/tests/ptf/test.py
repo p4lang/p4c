@@ -20,7 +20,8 @@ import copy
 
 from scapy.fields import ShortField, IntField
 from scapy.layers.l2 import Ether, ARP
-from scapy.layers.inet import IP, UDP, ICMP
+from scapy.layers.inet import IP, UDP
+from scapy.layers.inet6 import IPv6
 from scapy.packet import Packet, bind_layers, split_layers
 from ptf.packet import MPLS
 from ptf.mask import Mask
@@ -710,3 +711,46 @@ class TernaryTableCachePSATest(P4EbpfTest):
         self.table_delete(table="ingress_tbl_ternary", key=["00:11:22:33:44:55"])
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
+
+
+class WideFieldTableSupport(P4EbpfTest):
+    """
+    Test support for fields wider than 64 bits in tables using IPv6 protocol.
+    """
+    p4_file_path = "p4testdata/wide-field-tables.p4"
+
+    def runTest(self):
+        tests = [
+            {"case": "exact match", "table": "ingress_tbl_exact", "priority": None,
+             "match": ["0000:1111:2222:3333:4444:5555:6666:7777"],
+             "test_ipv6": "0000:1111:2222:3333:4444:5555:6666:7777", "exp_ipv6": "ffff:1111:2222:3333:4444:5555:6666:0000"},
+            {"case": "LPM match", "table": "ingress_tbl_lpm", "priority": None,
+             "match": ["0001:1111:2222:3333:4444:5555:6666:0000/112"],
+             "test_ipv6": "0001:1111:2222:3333:4444:5555:6666:7777", "exp_ipv6": "ffff:1111:2222:3333:4444:5555:6666:0001"},
+            {"case": "ternary match", "table": "ingress_tbl_ternary", "priority": 1,
+             "match": ["0002:1111:2222:3333:4444:5555:0000:7777^ffff:ffff:ffff:ffff:ffff:ffff:0000:ffff"],
+             "test_ipv6": "0002:1111:2222:3333:4444:5555:6666:7777", "exp_ipv6": "ffff:1111:2222:3333:4444:5555:6666:0002"},
+            {"case": "exact const entry", "table": None,
+             "test_ipv6": "0003:1111:2222:3333:4444:5555:6666:7777", "exp_ipv6": "ffff:1111:2222:3333:4444:5555:6666:0003"},
+            {"case": "LPM const entry", "table": None,
+             "test_ipv6": "0004:1111:2222:3333:4444:5555:6666:7777", "exp_ipv6": "ffff:1111:2222:3333:4444:5555:6666:0004"},
+            {"case": "ternary const entry", "table": None,
+             "test_ipv6": "0005:1111:2222:3333:4444:5555:6666:7777", "exp_ipv6": "ffff:1111:2222:3333:4444:5555:6666:0005"},
+            {"case": "ternary const entry - exact match", "table": None,
+             "test_ipv6": "0006:1111:2222:3333:4444:5555:6666:7777", "exp_ipv6": "ffff:1111:2222:3333:4444:5555:6666:0006"},
+            {"case": "default action", "table": None,  # defined by P4 program
+             "no_table_matches": 1,  # default to 2 matches - one for default and one for any table above
+             "test_ipv6": "aaaa:1111:2222:3333:4444:5555:6666:7777", "exp_ipv6": "ffff:1111:2222:3333:4444:5555:6666:aaaa"}
+        ]
+        for t in tests:
+            if t["table"]:
+                self.table_add(table=t["table"], key=t["match"], action=1, data=[t["exp_ipv6"]], priority=t["priority"])
+
+        for t in tests:
+            logger.info("Testing {}...".format(t["case"]))
+            pkt = testutils.simple_ipv6ip_packet(ipv6_src=t["test_ipv6"], ipv6_dst="::1", ipv6_hlim=64)
+            exp_pkt = pkt.copy()
+            exp_pkt[IPv6].dst = t["exp_ipv6"]
+            exp_pkt[IPv6].hlim = exp_pkt[IPv6].hlim - t.get("no_table_matches", 2)
+            testutils.send_packet(self, PORT0, pkt)
+            testutils.verify_packet_any_port(self, exp_pkt, PTF_PORTS)

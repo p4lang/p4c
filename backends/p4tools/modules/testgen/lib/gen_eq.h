@@ -13,24 +13,24 @@ namespace P4Testgen {
 /// attempting to generate the equality.
 class GenEq {
  public:
-    static const IR::Expression* equate(const IR::Expression* target, const IR::Expression* keyset);
+    static const IR::Expression *equate(const IR::Expression *target, const IR::Expression *keyset);
 
-    static const IR::Expression* equate(const IR::Expression* target,
-                                        const IR::DefaultExpression* keyset);
+    static const IR::Expression *equate(const IR::Expression *target,
+                                        const IR::DefaultExpression *keyset);
 
-    static const IR::Expression* equate(const IR::Expression* target,
-                                        const IR::ListExpression* keyset);
+    static const IR::Expression *equate(const IR::Expression *target,
+                                        const IR::ListExpression *keyset);
 
-    static const IR::Expression* equate(const IR::Expression* target, const IR::Mask* keyset);
+    static const IR::Expression *equate(const IR::Expression *target, const IR::Mask *keyset);
 
-    static const IR::Expression* equate(const IR::Expression* target, const IR::Range* keyset);
+    static const IR::Expression *equate(const IR::Expression *target, const IR::Range *keyset);
 
-    static const IR::Expression* equate(const IR::ListExpression* target,
-                                        const IR::ListExpression* keyset);
+    static const IR::Expression *equate(const IR::ListExpression *target,
+                                        const IR::ListExpression *keyset);
 
  private:
     /// Convenience method for producing a typed Eq node on the given expressions.
-    static const IR::Equ* mkEq(const IR::Expression* e1, const IR::Expression* e2);
+    static const IR::Equ *mkEq(const IR::Expression *e1, const IR::Expression *e2);
 };
 
 }  // namespace P4Testgen

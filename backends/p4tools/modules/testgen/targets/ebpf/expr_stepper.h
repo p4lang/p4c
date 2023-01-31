@@ -23,16 +23,16 @@ class EBPFExprStepper : public ExprStepper {
     std::string getClassName() override { return "EBPFExprStepper"; }
 
  public:
-    EBPFExprStepper(ExecutionState& state, AbstractSolver& solver, const ProgramInfo& programInfo);
+    EBPFExprStepper(ExecutionState &state, AbstractSolver &solver, const ProgramInfo &programInfo);
 
-    void evalExternMethodCall(const IR::MethodCallExpression* call, const IR::Expression* receiver,
-                              IR::ID name, const IR::Vector<IR::Argument>* args,
-                              ExecutionState& state) override;
+    void evalExternMethodCall(const IR::MethodCallExpression *call, const IR::Expression *receiver,
+                              IR::ID name, const IR::Vector<IR::Argument> *args,
+                              ExecutionState &state) override;
 
-    bool preorder(const IR::P4Table* /*table*/) override;
+    bool preorder(const IR::P4Table * /*table*/) override;
 
     /// @returns a method call statement that calls packet_out.emit on the provided input label.
-    static const IR::MethodCallStatement* produceEmitCall(const IR::Member* fieldLabel);
+    static const IR::MethodCallStatement *produceEmitCall(const IR::Member *fieldLabel);
 };
 }  // namespace EBPF
 

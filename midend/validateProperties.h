@@ -43,9 +43,9 @@ class ValidateTableProperties : public Inspector {
             legalProperties.emplace(l);
         }
     }
-    void postorder(const IR::Property* property) override;
+    void postorder(const IR::Property *property) override;
     // don't check properties in externs (Declaration_Instances)
-    bool preorder(const IR::Declaration_Instance* /*instance*/) override { return false; }
+    bool preorder(const IR::Declaration_Instance * /*instance*/) override { return false; }
 };
 
 }  // namespace P4

@@ -34,7 +34,11 @@ struct metadata_t {
 	bit<32> pna_main_input_metadata_direction
 	bit<32> pna_main_input_metadata_input_port
 	bit<32> pna_main_output_metadata_output_port
+	bit<32> MainControlImpl_ct_tcp_table_key
+	bit<32> MainControlImpl_ct_tcp_table_key_0
 	bit<8> MainControlImpl_ct_tcp_table_ipv4_protocol
+	bit<16> MainControlImpl_ct_tcp_table_key_1
+	bit<16> MainControlImpl_ct_tcp_table_key_2
 	bit<8> MainControlT_do_add_on_miss
 	bit<8> MainControlT_update_aging_info
 	bit<8> MainControlT_update_expire_time
@@ -107,11 +111,11 @@ table set_ct_options {
 
 learner ct_tcp_table {
 	key {
-		m.MainControlT_key
-		m.MainControlT_key_0
+		m.MainControlImpl_ct_tcp_table_key
+		m.MainControlImpl_ct_tcp_table_key_0
 		m.MainControlImpl_ct_tcp_table_ipv4_protocol
-		m.MainControlT_key_1
-		m.MainControlT_key_2
+		m.MainControlImpl_ct_tcp_table_key_1
+		m.MainControlImpl_ct_tcp_table_key_2
 	}
 	actions {
 		ct_tcp_table_hit @tableonly
@@ -134,6 +138,7 @@ learner ct_tcp_table {
 
 apply {
 	rx m.pna_main_input_metadata_input_port
+	regrd m.pna_main_input_metadata_direction direction m.pna_main_input_metadata_input_port
 	extract h.eth
 	jmpeq MAINPARSERIMPL_PARSE_IPV4 h.eth.etherType 0x800
 	jmp MAINPARSERIMPL_ACCEPT
@@ -143,7 +148,6 @@ apply {
 	MAINPARSERIMPL_PARSE_TCP :	extract h.tcp
 	MAINPARSERIMPL_ACCEPT :	mov m.MainControlT_do_add_on_miss 0
 	mov m.MainControlT_update_expire_time 0
-	regrd m.pna_main_input_metadata_direction direction m.pna_main_input_metadata_input_port
 	jmpneq LABEL_END m.pna_main_input_metadata_direction 0x1
 	jmpnv LABEL_END h.ipv4
 	jmpnv LABEL_END h.tcp
@@ -166,7 +170,11 @@ apply {
 	mov m.MainControlT_key_2 h.tcp.srcPort
 	jmp LABEL_END_4
 	LABEL_TRUE_4 :	mov m.MainControlT_key_2 h.tcp.dstPort
-	LABEL_END_4 :	mov m.MainControlImpl_ct_tcp_table_ipv4_protocol h.ipv4.protocol
+	LABEL_END_4 :	mov m.MainControlImpl_ct_tcp_table_key m.MainControlT_key
+	mov m.MainControlImpl_ct_tcp_table_key_0 m.MainControlT_key_0
+	mov m.MainControlImpl_ct_tcp_table_ipv4_protocol h.ipv4.protocol
+	mov m.MainControlImpl_ct_tcp_table_key_1 m.MainControlT_key_1
+	mov m.MainControlImpl_ct_tcp_table_key_2 m.MainControlT_key_2
 	table ct_tcp_table
 	LABEL_END_0 :	emit h.eth
 	tx m.pna_main_output_metadata_output_port

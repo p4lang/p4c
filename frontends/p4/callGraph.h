@@ -34,24 +34,24 @@ namespace P4 {
 // I could not get Util::toString() to work properly
 cstring cgMakeString(cstring s);
 cstring cgMakeString(char c);
-cstring cgMakeString(const IR::Node* node);
-cstring cgMakeString(const IR::INode* node);
+cstring cgMakeString(const IR::Node *node);
+cstring cgMakeString(const IR::INode *node);
 
 template <class T>
 class CallGraph {
  protected:
     cstring name;
     // Use an ordered map to make this deterministic
-    ordered_map<T, std::vector<T>*> out_edges;  // map caller to list of callees
-    ordered_map<T, std::vector<T>*> in_edges;
+    ordered_map<T, std::vector<T> *> out_edges;  // map caller to list of callees
+    ordered_map<T, std::vector<T> *> in_edges;
 
  public:
     ordered_set<T> nodes;  // all nodes; do not modify this directly
-    typedef typename ordered_map<T, std::vector<T>*>::const_iterator const_iterator;
+    typedef typename ordered_map<T, std::vector<T> *>::const_iterator const_iterator;
 
     explicit CallGraph(cstring name) : name(name) {}
 
-    const cstring& getName() const { return name; }
+    const cstring &getName() const { return name; }
 
     // Graph construction.
 
@@ -112,15 +112,15 @@ class CallGraph {
     // Iterators over the out_edges
     const_iterator begin() const { return out_edges.cbegin(); }
     const_iterator end() const { return out_edges.cend(); }
-    std::vector<T>* getCallees(T caller) { return out_edges[caller]; }
-    std::vector<T>* getCallers(T callee) { return in_edges[callee]; }
+    std::vector<T> *getCallees(T caller) { return out_edges[caller]; }
+    std::vector<T> *getCallers(T callee) { return in_edges[callee]; }
     // Callees are appended to 'toAppend'
-    void getCallees(T caller, std::set<T>& toAppend) {
+    void getCallees(T caller, std::set<T> &toAppend) {
         if (isCaller(caller)) toAppend.insert(out_edges[caller]->begin(), out_edges[caller]->end());
     }
     size_t size() const { return nodes.size(); }
     // out will contain all nodes reachable from start
-    void reachable(T start, std::set<T>& out) const {
+    void reachable(T start, std::set<T> &out) const {
         std::set<T> work;
         work.emplace(start);
         while (!work.empty()) {
@@ -134,7 +134,7 @@ class CallGraph {
         }
     }
     // remove all nodes not in 'to'
-    void restrict(const std::set<T>& to) {
+    void restrict(const std::set<T> &to) {
         std::vector<T> toRemove;
         for (auto n : nodes)
             if (to.find(n) == to.end()) toRemove.push_back(n);
@@ -147,7 +147,7 @@ class CallGraph {
     // Node d dominates node n if all paths from the start to n go through d
     // Result is deposited in 'dominators'.
     // 'dominators' should be empty when calling this function.
-    void dominators(T start, std::map<T, Set>& dominators) {
+    void dominators(T start, std::map<T, Set> &dominators) {
         // initialize
         for (auto n : nodes) {
             if (n == start)
@@ -183,7 +183,7 @@ class CallGraph {
 
     // All natural loops in a call-graph.
     struct Loops {
-        std::vector<Loop*> loops;
+        std::vector<Loop *> loops;
 
         // Return loop index if 'node' is a loop entry point
         // else return -1
@@ -201,12 +201,12 @@ class CallGraph {
         }
     };
 
-    Loops* compute_loops(T start) {
+    Loops *compute_loops(T start) {
         auto result = new Loops();
         std::map<T, Set> dom;
         dominators(start, dom);
 
-        std::map<T, Loop*> entryToLoop;
+        std::map<T, Loop *> entryToLoop;
 
         for (auto e : nodes) {
             auto next = out_edges[e];
@@ -241,7 +241,7 @@ class CallGraph {
 
  protected:
     // intersect in place
-    static void insersectWith(Set& set, Set& with) {
+    static void insersectWith(Set &set, Set &with) {
         std::vector<T> toRemove;
         for (auto e : set)
             if (with.find(e) == with.end()) toRemove.push_back(e);
@@ -282,7 +282,7 @@ class CallGraph {
     };
 
     // helper for scSort
-    bool strongConnect(T node, sccInfo& helper, std::vector<T>& out) {
+    bool strongConnect(T node, sccInfo &helper, std::vector<T> &out) {
         bool loop = false;
 
         LOG1("scc " << cgMakeString(node));
@@ -327,11 +327,11 @@ class CallGraph {
     // a strongly-connected components will be consecutive in the
     // sort.  Returns true if the graph contains at least one
     // cycle.  Ignores nodes not reachable from 'start'.
-    bool sccSort(T start, std::vector<T>& out) {
+    bool sccSort(T start, std::vector<T> &out) {
         sccInfo helper;
         return strongConnect(start, helper, out);
     }
-    bool sort(std::vector<T>& start, std::vector<T>& out) {
+    bool sort(std::vector<T> &start, std::vector<T> &out) {
         sccInfo helper;
         bool cycles = false;
         for (auto n : start) {
@@ -342,7 +342,7 @@ class CallGraph {
         }
         return cycles;
     }
-    bool sort(std::vector<T>& out) {
+    bool sort(std::vector<T> &out) {
         sccInfo helper;
         bool cycles = false;
         for (auto n : nodes) {

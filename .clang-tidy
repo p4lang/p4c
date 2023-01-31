@@ -18,6 +18,7 @@ google-*,
 -bugprone-easily-swappable-parameters,
 -llvm-header-guard,
 -misc-no-recursion'
+FormatStyle: file
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
 AnalyzeTemporaryDtors: false

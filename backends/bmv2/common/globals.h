@@ -23,17 +23,17 @@ limitations under the License.
 namespace BMV2 {
 
 class ConvertGlobals : public Inspector {
-    ConversionContext* ctxt;
+    ConversionContext *ctxt;
     const bool emitExterns;
 
  public:
-    explicit ConvertGlobals(ConversionContext* ctxt, const bool& emitExterns_)
+    explicit ConvertGlobals(ConversionContext *ctxt, const bool &emitExterns_)
         : ctxt(ctxt), emitExterns(emitExterns_) {
         setName("ConvertGlobals");
     }
 
-    bool preorder(const IR::ExternBlock* block) override;
-    bool preorder(const IR::ToplevelBlock* block) override {
+    bool preorder(const IR::ExternBlock *block) override;
+    bool preorder(const IR::ToplevelBlock *block) override {
         /// Blocks are not in IR tree, use a custom visitor to traverse
         for (auto it : block->constantValue) {
             if (it.second->is<IR::Block>()) visit(it.second->getNode());

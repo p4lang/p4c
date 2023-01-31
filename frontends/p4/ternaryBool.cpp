@@ -18,7 +18,7 @@ limitations under the License.
 
 namespace P4 {
 
-cstring toString(const TernaryBool& c) {
+cstring toString(const TernaryBool &c) {
     switch (c) {
         case TernaryBool::Yes:
             return "Yes";

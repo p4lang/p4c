@@ -15,7 +15,7 @@ limitations under the License.
 
 namespace EBPF {
 
-EBPFRandomPSA::EBPFRandomPSA(const IR::Declaration_Instance* di)
+EBPFRandomPSA::EBPFRandomPSA(const IR::Declaration_Instance *di)
     : minValue(0), maxValue(0), range(0) {
     CHECK_NULL(di);
 
@@ -71,7 +71,7 @@ EBPFRandomPSA::EBPFRandomPSA(const IR::Declaration_Instance* di)
     }
 }
 
-void EBPFRandomPSA::processMethod(CodeBuilder* builder, const P4::ExternMethod* method) const {
+void EBPFRandomPSA::processMethod(CodeBuilder *builder, const P4::ExternMethod *method) const {
     if (method->method->type->name == "read") {
         emitRead(builder);
     } else {
@@ -79,7 +79,7 @@ void EBPFRandomPSA::processMethod(CodeBuilder* builder, const P4::ExternMethod* 
     }
 }
 
-void EBPFRandomPSA::emitRead(CodeBuilder* builder) const {
+void EBPFRandomPSA::emitRead(CodeBuilder *builder) const {
     if (minValue == maxValue || range == 0) {
         builder->append(minValue);
         return;

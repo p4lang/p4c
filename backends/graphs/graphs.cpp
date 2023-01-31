@@ -25,19 +25,19 @@ limitations under the License.
 
 namespace graphs {
 
-Graphs::vertex_t Graphs::add_vertex(const cstring& name, VertexType type) {
+Graphs::vertex_t Graphs::add_vertex(const cstring &name, VertexType type) {
     auto v = boost::add_vertex(*g);
     boost::put(&Vertex::name, *g, v, name);
     boost::put(&Vertex::type, *g, v, type);
     return g->local_to_global(v);
 }
 
-void Graphs::add_edge(const vertex_t& from, const vertex_t& to, const cstring& name) {
+void Graphs::add_edge(const vertex_t &from, const vertex_t &to, const cstring &name) {
     auto ep = boost::add_edge(from, to, g->root());
     boost::put(boost::edge_name, g->root(), ep.first, name);
 }
 
-void Graphs::add_edge(const vertex_t& from, const vertex_t& to, const cstring& name,
+void Graphs::add_edge(const vertex_t &from, const vertex_t &to, const cstring &name,
                       unsigned cluster_id) {
     auto ep = boost::add_edge(from, to, g->root());
     boost::put(boost::edge_name, g->root(), ep.first, name);
@@ -48,7 +48,7 @@ void Graphs::add_edge(const vertex_t& from, const vertex_t& to, const cstring& n
     attrs[ep.first]["lhead"] = "cluster" + Util::toString(cluster_id - 1);
 }
 
-void Graphs::limitStringSize(std::stringstream& sstream, std::stringstream& helper_sstream) {
+void Graphs::limitStringSize(std::stringstream &sstream, std::stringstream &helper_sstream) {
     if (helper_sstream.str().size() > 25) {
         sstream << helper_sstream.str().substr(0, 25) << "...";
     } else {
@@ -86,7 +86,7 @@ boost::optional<Graphs::vertex_t> Graphs::merge_other_statements_into_vertex() {
     return v;
 }
 
-Graphs::vertex_t Graphs::add_and_connect_vertex(const cstring& name, VertexType type) {
+Graphs::vertex_t Graphs::add_and_connect_vertex(const cstring &name, VertexType type) {
     merge_other_statements_into_vertex();
     auto v = add_vertex(name, type);
     for (auto parent : parents) add_edge(parent.first, v, parent.second->label());

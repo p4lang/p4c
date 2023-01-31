@@ -49,11 +49,11 @@ namespace P4 {
  * @pre An up-to-date ReferenceMap and TypeMap.
  */
 class DoSimplifyControlFlow : public Transform {
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
 
  public:
-    DoSimplifyControlFlow(ReferenceMap* refMap, TypeMap* typeMap)
+    DoSimplifyControlFlow(ReferenceMap *refMap, TypeMap *typeMap)
         : refMap(refMap), typeMap(typeMap) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
@@ -62,18 +62,18 @@ class DoSimplifyControlFlow : public Transform {
         // in different places.
         visitDagOnce = false;
     }
-    const IR::Node* postorder(IR::BlockStatement* statement) override;
-    const IR::Node* postorder(IR::IfStatement* statement) override;
-    const IR::Node* postorder(IR::EmptyStatement* statement) override;
-    const IR::Node* postorder(IR::SwitchStatement* statement) override;
+    const IR::Node *postorder(IR::BlockStatement *statement) override;
+    const IR::Node *postorder(IR::IfStatement *statement) override;
+    const IR::Node *postorder(IR::EmptyStatement *statement) override;
+    const IR::Node *postorder(IR::SwitchStatement *statement) override;
 };
 
 /// Repeatedly simplify control flow until convergence, as some simplification
 /// steps enable further simplification.
 class SimplifyControlFlow : public PassRepeated {
  public:
-    SimplifyControlFlow(ReferenceMap* refMap, TypeMap* typeMap,
-                        TypeChecking* typeChecking = nullptr) {
+    SimplifyControlFlow(ReferenceMap *refMap, TypeMap *typeMap,
+                        TypeChecking *typeChecking = nullptr) {
         if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoSimplifyControlFlow(refMap, typeMap));

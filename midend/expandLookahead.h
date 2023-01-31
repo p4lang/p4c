@@ -38,8 +38,8 @@ namespace P4 {
 /// Default value for the flag (when optional constructor argument is not used) is
 /// true, which means that by default headers are expanded.
 class DoExpandLookahead : public Transform {
-    P4::ReferenceMap* refMap;
-    P4::TypeMap* typeMap;
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
     IR::IndexedVector<IR::Declaration> newDecls;
     /**
      * Some targets may support lookahead with header type argument directly without
@@ -49,34 +49,34 @@ class DoExpandLookahead : public Transform {
     bool expandHeader = true;
 
     struct ExpansionInfo {
-        const IR::Statement* statement;
+        const IR::Statement *statement;
         unsigned width;
-        const IR::Type* origType;
-        const IR::PathExpression* tmp;  // temporary used for result
+        const IR::Type *origType;
+        const IR::PathExpression *tmp;  // temporary used for result
     };
 
-    void expand(const IR::PathExpression* bitvector, const IR::Type* type, unsigned* offset,
-                const IR::Expression* destination, IR::IndexedVector<IR::StatOrDecl>* output);
-    ExpansionInfo* convertLookahead(const IR::MethodCallExpression* expression);
+    void expand(const IR::PathExpression *bitvector, const IR::Type *type, unsigned *offset,
+                const IR::Expression *destination, IR::IndexedVector<IR::StatOrDecl> *output);
+    ExpansionInfo *convertLookahead(const IR::MethodCallExpression *expression);
 
  public:
-    DoExpandLookahead(ReferenceMap* refMap, TypeMap* typeMap, bool expandHeader = true)
+    DoExpandLookahead(ReferenceMap *refMap, TypeMap *typeMap, bool expandHeader = true)
         : refMap(refMap), typeMap(typeMap), expandHeader(expandHeader) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
         setName("DoExpandLookahead");
     }
-    const IR::Node* postorder(IR::AssignmentStatement* statement) override;
-    const IR::Node* postorder(IR::MethodCallStatement* statement) override;
-    const IR::Node* preorder(IR::P4Control* control) override {
+    const IR::Node *postorder(IR::AssignmentStatement *statement) override;
+    const IR::Node *postorder(IR::MethodCallStatement *statement) override;
+    const IR::Node *preorder(IR::P4Control *control) override {
         prune();
         return control;
     }
-    const IR::Node* preorder(IR::P4Parser* parser) override {
+    const IR::Node *preorder(IR::P4Parser *parser) override {
         newDecls.clear();
         return parser;
     }
-    const IR::Node* postorder(IR::P4Parser* parser) override {
+    const IR::Node *postorder(IR::P4Parser *parser) override {
         if (!newDecls.empty()) parser->parserLocals.append(newDecls);
         return parser;
     }
@@ -87,7 +87,7 @@ class DoExpandLookahead : public Transform {
 /// See also description in class DoExpandLookahead.
 class ExpandLookahead : public PassManager {
  public:
-    ExpandLookahead(ReferenceMap* refMap, TypeMap* typeMap, TypeChecking* typeChecking = nullptr,
+    ExpandLookahead(ReferenceMap *refMap, TypeMap *typeMap, TypeChecking *typeChecking = nullptr,
                     bool expandHeader = true) {
         if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);

@@ -68,10 +68,10 @@ def nextWord(text, sep = None):
         return spl[0].strip(), spl[1].strip()
 
 def ByteToHex(byteStr):
-    return ''.join( [ "%02X " % ord( x ) for x in byteStr ] ).strip()
+    return ''.join( [ ("%02X" % x) for x in byteStr ] )
 
 def convert_packet_bin2hexstr(pkt_bin):
-    return pkt_bin.convert_to(Raw).load.hex().upper()
+    return ByteToHex(bytes(pkt_bin))
 
 def convert_packet_stf2hexstr(pkt_stf_text):
     return ''.join(pkt_stf_text.split()).upper()

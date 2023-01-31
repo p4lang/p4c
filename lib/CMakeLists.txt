@@ -34,6 +34,7 @@ set (LIBP4CTOOLKIT_SRCS
     path.cpp
     source_file.cpp
     stringify.cpp
+    timer.cpp
 )
 
 set (LIBP4CTOOLKIT_HDRS
@@ -77,6 +78,7 @@ set (LIBP4CTOOLKIT_HDRS
     stringify.h
     stringref.h
     symbitmatrix.h
+    timer.h
 )
 
 build_unified(LIBP4CTOOLKIT_SRCS ALL)

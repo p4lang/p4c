@@ -20,8 +20,8 @@ limitations under the License.
 
 namespace P4 {
 
-bool TypeSpecializationMap::same(const TypeSpecialization* spec,
-                                 const IR::Type_Specialized* right) const {
+bool TypeSpecializationMap::same(const TypeSpecialization *spec,
+                                 const IR::Type_Specialized *right) const {
     if (!spec->specialized->baseType->equiv(*right->baseType)) return false;
     BUG_CHECK(spec->argumentTypes->size() == right->arguments->size(),
               "Type %1% and %2% specialized with different number of arguments?", spec->specialized,
@@ -34,8 +34,8 @@ bool TypeSpecializationMap::same(const TypeSpecialization* spec,
     return true;
 }
 
-void TypeSpecializationMap::add(const IR::Type_Specialized* t, const IR::Type_StructLike* decl,
-                                const IR::Node* insertion) {
+void TypeSpecializationMap::add(const IR::Type_Specialized *t, const IR::Type_StructLike *decl,
+                                const IR::Node *insertion) {
     auto it = map.find(t);
     if (it != map.end()) return;
 
@@ -54,11 +54,11 @@ void TypeSpecializationMap::add(const IR::Type_Specialized* t, const IR::Type_St
                                  << " insert before " << dbp(insertion));
     auto argTypes = new IR::Vector<IR::Type>();
     for (auto a : *t->arguments) argTypes->push_back(typeMap->getType(a, true));
-    TypeSpecialization* s = new TypeSpecialization(name, t, decl, insertion, argTypes);
+    TypeSpecialization *s = new TypeSpecialization(name, t, decl, insertion, argTypes);
     map.emplace(t, s);
 }
 
-TypeSpecialization* TypeSpecializationMap::get(const IR::Type_Specialized* type) const {
+TypeSpecialization *TypeSpecializationMap::get(const IR::Type_Specialized *type) const {
     for (auto it : map) {
         if (same(it.second, type)) return it.second;
     }
@@ -71,16 +71,16 @@ class ContainsTypeVariable : public Inspector {
     bool contains = false;
 
  public:
-    bool preorder(const IR::TypeParameters*) override { return false; }
-    bool preorder(const IR::Type_Var*) override {
+    bool preorder(const IR::TypeParameters *) override { return false; }
+    bool preorder(const IR::Type_Var *) override {
         contains = true;
         return false;
     }
-    bool preorder(const IR::Type_Specialized*) override {
+    bool preorder(const IR::Type_Specialized *) override {
         contains = true;
         return false;
     }
-    static bool inspect(const IR::Node* node) {
+    static bool inspect(const IR::Node *node) {
         ContainsTypeVariable ctv;
         node->apply(ctv);
         return ctv.contains;
@@ -89,7 +89,7 @@ class ContainsTypeVariable : public Inspector {
 
 }  // namespace
 
-void FindTypeSpecializations::postorder(const IR::Type_Specialized* type) {
+void FindTypeSpecializations::postorder(const IR::Type_Specialized *type) {
     auto baseType = specMap->typeMap->getTypeType(type->baseType, true);
     auto st = baseType->to<IR::Type_StructLike>();
     if (st == nullptr || st->typeParameters->size() == 0)
@@ -108,7 +108,7 @@ void FindTypeSpecializations::postorder(const IR::Type_Specialized* type) {
     }
     // Find location where the specialization is to be inserted.
     // This can be before a Parser, Control, or a toplevel instance declaration
-    const IR::Node* insert = findContext<IR::P4Parser>();
+    const IR::Node *insert = findContext<IR::P4Parser>();
     if (!insert) insert = findContext<IR::Function>();
     if (!insert) insert = findContext<IR::P4Control>();
     if (!insert) insert = findContext<IR::Type_Declaration>();
@@ -122,7 +122,7 @@ void FindTypeSpecializations::postorder(const IR::Type_Specialized* type) {
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-const IR::Node* CreateSpecializedTypes::postorder(IR::Type_Declaration* type) {
+const IR::Node *CreateSpecializedTypes::postorder(IR::Type_Declaration *type) {
     for (auto it : specMap->map) {
         if (it.second->declaration->name == type->name) {
             auto specialized = it.first;
@@ -143,7 +143,7 @@ const IR::Node* CreateSpecializedTypes::postorder(IR::Type_Declaration* type) {
     return insert(type);
 }
 
-const IR::Node* CreateSpecializedTypes::insert(const IR::Node* before) {
+const IR::Node *CreateSpecializedTypes::insert(const IR::Node *before) {
     auto specs = specMap->getSpecializations(getOriginal());
     if (specs == nullptr) return before;
     LOG2(specs->size() << " instantiations before " << dbp(before));
@@ -151,7 +151,7 @@ const IR::Node* CreateSpecializedTypes::insert(const IR::Node* before) {
     return specs;
 }
 
-const IR::Node* ReplaceTypeUses::postorder(IR::Type_Specialized* type) {
+const IR::Node *ReplaceTypeUses::postorder(IR::Type_Specialized *type) {
     auto t = specMap->get(getOriginal<IR::Type_Specialized>());
     if (!t) return type;
     CHECK_NULL(t->replacement);
@@ -159,7 +159,7 @@ const IR::Node* ReplaceTypeUses::postorder(IR::Type_Specialized* type) {
     return t->replacement->getP4Type();
 }
 
-const IR::Node* ReplaceTypeUses::postorder(IR::StructExpression* expression) {
+const IR::Node *ReplaceTypeUses::postorder(IR::StructExpression *expression) {
     auto st = getOriginal<IR::StructExpression>()->structType;
     if (!st) {
         ::error(ErrorType::ERR_TYPE_ERROR,

@@ -25,7 +25,7 @@ limitations under the License.
 namespace P4 {
 
 /* helper function to get the 'outermost' containing expression in an lvalue */
-static const IR::Expression* lvalue_out(const IR::Expression* exp) {
+static const IR::Expression *lvalue_out(const IR::Expression *exp) {
     if (auto ai = exp->to<IR::ArrayIndex>()) return lvalue_out(ai->left);
     if (auto hsr = exp->to<IR::HeaderStackItemRef>()) return lvalue_out(hsr->base());
     if (auto sl = exp->to<IR::Slice>()) return lvalue_out(sl->e0);
@@ -34,7 +34,7 @@ static const IR::Expression* lvalue_out(const IR::Expression* exp) {
 }
 
 /* helper function to extract the side effects from an expression as a statement */
-static const IR::Statement* makeSideEffectStatement(const IR::Expression* exp) {
+static const IR::Statement *makeSideEffectStatement(const IR::Expression *exp) {
     while (auto unary = exp->to<IR::Operation_Unary>()) exp = unary->expr;
     if (auto mc = exp->to<IR::MethodCallExpression>()) return new IR::MethodCallStatement(mc);
     BUG("Unhandled expression in makeSideEffectStatement");
@@ -43,7 +43,7 @@ static const IR::Statement* makeSideEffectStatement(const IR::Expression* exp) {
 
 /// convert an expression into a string that uniqely identifies the value referenced
 /// return null cstring if not a reference to a constant thing.
-static cstring expr_name(const IR::Expression* exp) {
+static cstring expr_name(const IR::Expression *exp) {
     if (auto p = exp->to<IR::PathExpression>()) return p->path->name;
     if (auto m = exp->to<IR::Member>()) {
         if (auto base = expr_name(m->expr)) return base + "." + m->member;
@@ -64,8 +64,8 @@ class DoLocalCopyPropagation::ElimDead : public Transform {
     /* Traversal to eliminate dead locals in a block after copyprop
      * we run this over just the block (body and declarations) after copyprop
      * of the block, so it only removes those vars declared in the block */
-    DoLocalCopyPropagation& self;
-    const IR::Node* preorder(IR::Declaration_Variable* var) override {
+    DoLocalCopyPropagation &self;
+    const IR::Node *preorder(IR::Declaration_Variable *var) override {
         if (auto local = ::getref(self.available, var->name)) {
             if (local->local && !local->live) {
                 LOG3("  removing dead local " << var->name);
@@ -74,7 +74,7 @@ class DoLocalCopyPropagation::ElimDead : public Transform {
         }
         return var;
     }
-    const IR::Statement* postorder(IR::AssignmentStatement* as) override {
+    const IR::Statement *postorder(IR::AssignmentStatement *as) override {
         if (auto dest = lvalue_out(as->left)->to<IR::PathExpression>()) {
             if (auto var = ::getref(self.available, dest->path->name)) {
                 if (var->local && !var->live) {
@@ -90,7 +90,7 @@ class DoLocalCopyPropagation::ElimDead : public Transform {
         }
         return as;
     }
-    IR::IfStatement* postorder(IR::IfStatement* s) override {
+    IR::IfStatement *postorder(IR::IfStatement *s) override {
         if (s->ifTrue == nullptr) {
             /* can't leave ifTrue == nullptr, as that will fail validation -- fold away
              * the if statement as needed */
@@ -108,20 +108,20 @@ class DoLocalCopyPropagation::ElimDead : public Transform {
         }
         return s;
     }
-    IR::BlockStatement* postorder(IR::BlockStatement* blk) override {
+    IR::BlockStatement *postorder(IR::BlockStatement *blk) override {
         if (!blk->components.empty()) return blk;
         if (getParent<IR::BlockStatement>() || getParent<IR::IndexedVector<IR::StatOrDecl>>())
             return nullptr;
         return blk;
     }
-    IR::P4Table* preorder(IR::P4Table* tbl) override {
+    IR::P4Table *preorder(IR::P4Table *tbl) override {
         if (self.tables.count(tbl->name) && self.tables.at(tbl->name).apply_count == 0) {
             LOG3("  removing dead local table " << tbl->name);
             return nullptr;
         }
         return tbl;
     }
-    IR::P4Action* preorder(IR::P4Action* act) override {
+    IR::P4Action *preorder(IR::P4Action *act) override {
         if (self.actions.count(act->name) && self.actions.at(act->name).apply_count == 0) {
             LOG3("  removing dead local action " << act->name);
             return nullptr;
@@ -130,7 +130,7 @@ class DoLocalCopyPropagation::ElimDead : public Transform {
     }
 
  public:
-    explicit ElimDead(DoLocalCopyPropagation& self) : self(self) { setCalledBy(&self); }
+    explicit ElimDead(DoLocalCopyPropagation &self) : self(self) { setCalledBy(&self); }
 };
 
 class DoLocalCopyPropagation::RewriteTableKeys : public Transform {
@@ -140,24 +140,24 @@ class DoLocalCopyPropagation::RewriteTableKeys : public Transform {
      * the control apply body, so we record the need for it in the TableInfo, and then
      * after finishing the control apply body, we call this pass to re-transform the
      * local tables in the control based on what is in their TableInfo. */
-    DoLocalCopyPropagation& self;
-    TableInfo* table = nullptr;
-    IR::P4Table* preorder(IR::P4Table* tbl) {
+    DoLocalCopyPropagation &self;
+    TableInfo *table = nullptr;
+    IR::P4Table *preorder(IR::P4Table *tbl) {
         BUG_CHECK(table == nullptr, "corrupt internal state");
         table = &self.tables[tbl->name];
         LOG3("RewriteTableKeys for table " << tbl->name);
         return tbl;
     }
-    IR::P4Table* postorder(IR::P4Table* tbl) {
+    IR::P4Table *postorder(IR::P4Table *tbl) {
         BUG_CHECK(table == &self.tables[tbl->name], "corrupt internal state");
         table = nullptr;
         return tbl;
     }
-    const IR::Expression* preorder(IR::Expression* exp) {
+    const IR::Expression *preorder(IR::Expression *exp) {
         visitAgain();
         if (!table) return exp;
         if (auto name = expr_name(exp)) {
-            const Visitor::Context* ctxt = nullptr;
+            const Visitor::Context *ctxt = nullptr;
             if (findContext<IR::KeyElement>(ctxt) && ctxt->child_index == 1) {
                 if (table->key_remap.count(name)) {
                     LOG4("  rewriting key " << name << " : " << table->key_remap.at(name));
@@ -169,13 +169,13 @@ class DoLocalCopyPropagation::RewriteTableKeys : public Transform {
     }
 
  public:
-    explicit RewriteTableKeys(DoLocalCopyPropagation& self) : self(self) { setCalledBy(&self); }
+    explicit RewriteTableKeys(DoLocalCopyPropagation &self) : self(self) { setCalledBy(&self); }
 };
 
-void DoLocalCopyPropagation::flow_merge(Visitor& a_) {
-    auto& a = dynamic_cast<DoLocalCopyPropagation&>(a_);
+void DoLocalCopyPropagation::flow_merge(Visitor &a_) {
+    auto &a = dynamic_cast<DoLocalCopyPropagation &>(a_);
     BUG_CHECK(working == a.working, "inconsitent DoLocalCopyPropagation state on merge");
-    for (auto& var : available) {
+    for (auto &var : available) {
         if (auto merge = ::getref(a.available, var.first)) {
             if (merge->val != var.second.val) var.second.val = nullptr;
             if (merge->live) var.second.live = true;
@@ -195,8 +195,8 @@ bool DoLocalCopyPropagation::name_overlap(cstring name1, cstring name2) {
 }
 
 void DoLocalCopyPropagation::forOverlapAvail(cstring name,
-                                             std::function<void(cstring, VarInfo*)> fn) {
-    for (const char* pfx = name.c_str(); *pfx; pfx += strspn(pfx, ".[")) {
+                                             std::function<void(cstring, VarInfo *)> fn) {
+    for (const char *pfx = name.c_str(); *pfx; pfx += strspn(pfx, ".[")) {
         pfx += strcspn(pfx, ".[");
         auto it = available.find(name.before(pfx));
         if (it != available.end()) fn(it->first, &it->second);
@@ -209,7 +209,7 @@ void DoLocalCopyPropagation::forOverlapAvail(cstring name,
 
 void DoLocalCopyPropagation::dropValuesUsing(cstring name) {
     LOG6("dropValuesUsing(" << name << ")");
-    for (auto& var : available) {
+    for (auto &var : available) {
         LOG7("  checking " << var.first << " = " << var.second.val);
         if (name_overlap(var.first, name)) {
             LOG4("   dropping " << (var.second.val ? "" : "(nop) ") << "as " << name
@@ -223,10 +223,10 @@ void DoLocalCopyPropagation::dropValuesUsing(cstring name) {
     }
 }
 
-void DoLocalCopyPropagation::visit_local_decl(const IR::Declaration_Variable* var) {
+void DoLocalCopyPropagation::visit_local_decl(const IR::Declaration_Variable *var) {
     LOG4("Visiting " << var);
     if (available.count(var->name)) BUG("duplicate var declaration for %s", var->name);
-    auto& local = available[var->name];
+    auto &local = available[var->name];
     local.local = true;
     if (var->initializer) {
         if (!hasSideEffects(var->initializer)) {
@@ -238,7 +238,7 @@ void DoLocalCopyPropagation::visit_local_decl(const IR::Declaration_Variable* va
     }
 }
 
-const IR::Node* DoLocalCopyPropagation::postorder(IR::Declaration_Variable* var) {
+const IR::Node *DoLocalCopyPropagation::postorder(IR::Declaration_Variable *var) {
     if (working)
         visit_local_decl(var);
     else
@@ -246,16 +246,16 @@ const IR::Node* DoLocalCopyPropagation::postorder(IR::Declaration_Variable* var)
     return var;
 }
 
-IR::Expression* DoLocalCopyPropagation::preorder(IR::Expression* exp) {
+IR::Expression *DoLocalCopyPropagation::preorder(IR::Expression *exp) {
     visitAgain();
     return exp;
 }
 
-const IR::Expression* DoLocalCopyPropagation::copyprop_name(cstring name,
-                                                            const Util::SourceInfo& srcInfo) {
+const IR::Expression *DoLocalCopyPropagation::copyprop_name(cstring name,
+                                                            const Util::SourceInfo &srcInfo) {
     if (!name) return nullptr;
     if (inferForTable) {
-        const Visitor::Context* ctxt = nullptr;
+        const Visitor::Context *ctxt = nullptr;
         if (findContext<IR::KeyElement>(ctxt) && ctxt->child_index == 1)
             inferForTable->keyreads.insert(name);
     }
@@ -271,7 +271,7 @@ const IR::Expression* DoLocalCopyPropagation::copyprop_name(cstring name,
              * read, but we can't dead-code eliminate it without eliminating the entire
              * call, so we mark it as live.  Unfortunate as we then won't dead-code
              * remove other assignmnents. */
-            forOverlapAvail(name, [name](cstring, VarInfo* var) {
+            forOverlapAvail(name, [name](cstring, VarInfo *var) {
                 LOG4("  using " << name << " in read-write");
                 var->live = true;
             });
@@ -292,7 +292,7 @@ const IR::Expression* DoLocalCopyPropagation::copyprop_name(cstring name,
         }
         var->live = true;
     }
-    forOverlapAvail(name, [name](cstring, VarInfo* var) {
+    forOverlapAvail(name, [name](cstring, VarInfo *var) {
         LOG4("  using part of " << name);
         var->live = true;
     });
@@ -300,12 +300,12 @@ const IR::Expression* DoLocalCopyPropagation::copyprop_name(cstring name,
     return nullptr;
 }
 
-const IR::Expression* DoLocalCopyPropagation::postorder(IR::PathExpression* path) {
+const IR::Expression *DoLocalCopyPropagation::postorder(IR::PathExpression *path) {
     auto rv = copyprop_name(path->path->name, path->srcInfo);
     return rv ? rv : path;
 }
 
-const IR::Expression* DoLocalCopyPropagation::preorder(IR::Member* member) {
+const IR::Expression *DoLocalCopyPropagation::preorder(IR::Member *member) {
     visitAgain();
     if (auto name = expr_name(member)) {
         prune();
@@ -314,7 +314,7 @@ const IR::Expression* DoLocalCopyPropagation::preorder(IR::Member* member) {
     return member;
 }
 
-const IR::Expression* DoLocalCopyPropagation::preorder(IR::ArrayIndex* arr) {
+const IR::Expression *DoLocalCopyPropagation::preorder(IR::ArrayIndex *arr) {
     visitAgain();
     if (auto name = expr_name(arr)) {
         prune();
@@ -323,12 +323,12 @@ const IR::Expression* DoLocalCopyPropagation::preorder(IR::ArrayIndex* arr) {
     return arr;
 }
 
-IR::Statement* DoLocalCopyPropagation::preorder(IR::Statement* s) {
+IR::Statement *DoLocalCopyPropagation::preorder(IR::Statement *s) {
     visitAgain();
     return s;
 }
 
-IR::AssignmentStatement* DoLocalCopyPropagation::preorder(IR::AssignmentStatement* as) {
+IR::AssignmentStatement *DoLocalCopyPropagation::preorder(IR::AssignmentStatement *as) {
     visitAgain();
     if (!working) return as;
     // visit the source subtree first, before the destination subtree
@@ -344,7 +344,7 @@ IR::AssignmentStatement* DoLocalCopyPropagation::preorder(IR::AssignmentStatemen
     return postorder(as);
 }
 
-IR::AssignmentStatement* DoLocalCopyPropagation::postorder(IR::AssignmentStatement* as) {
+IR::AssignmentStatement *DoLocalCopyPropagation::postorder(IR::AssignmentStatement *as) {
     if (as->left->equiv(*as->right)) {
         LOG3("  removing noop assignment " << *as);
         if (inferForFunc && inferForFunc->is_first_write_insert) {
@@ -382,7 +382,7 @@ IR::AssignmentStatement* DoLocalCopyPropagation::postorder(IR::AssignmentStateme
     return as;
 }
 
-IR::IfStatement* DoLocalCopyPropagation::postorder(IR::IfStatement* s) {
+IR::IfStatement *DoLocalCopyPropagation::postorder(IR::IfStatement *s) {
     if (s->ifTrue == nullptr) {
         /* can't leave ifTrue == nullptr, as that will fail validation -- fold away
          * the if statement as needed. We do not apply ElimDead as we don't want to
@@ -404,7 +404,7 @@ IR::IfStatement* DoLocalCopyPropagation::postorder(IR::IfStatement* s) {
 
 bool isAsync(const IR::Vector<IR::Method> methods, cstring callee, cstring caller) {
     if (callee[0] == '.') callee = callee.substr(1);
-    for (auto* m : methods) {
+    for (auto *m : methods) {
         if (m->name != callee) continue;
         auto sync = m->getAnnotation(IR::Annotation::synchronousAnnotation);
         if (!sync) return true;
@@ -417,9 +417,9 @@ bool isAsync(const IR::Vector<IR::Method> methods, cstring callee, cstring calle
     return false;  // can't find the method, so assume synchronous
 }
 
-IR::MethodCallExpression* DoLocalCopyPropagation::postorder(IR::MethodCallExpression* mc) {
+IR::MethodCallExpression *DoLocalCopyPropagation::postorder(IR::MethodCallExpression *mc) {
     if (!working) return mc;
-    auto* mi = MethodInstance::resolve(mc, refMap, typeMap, true);
+    auto *mi = MethodInstance::resolve(mc, refMap, typeMap, true);
     if (auto mem = mc->method->to<IR::Member>()) {
         if (auto obj = expr_name(mem->expr)) {
             if (tables.count(obj)) {
@@ -444,8 +444,8 @@ IR::MethodCallExpression* DoLocalCopyPropagation::postorder(IR::MethodCallExpres
                     // global values?  Not clear -- we probably need a hook for backends
                     // to provide per-extern flow info to this (and other) frontend passes.
                     LOG3("extern method call " << name);
-                    for (auto* n : em->mayCall()) {
-                        if (auto* method = ::getref(methods, obj + '.' + n->getName())) {
+                    for (auto *n : em->mayCall()) {
+                        if (auto *method = ::getref(methods, obj + '.' + n->getName())) {
                             LOG4("  might call " << obj << '.' << n->getName());
                             apply_function(method);
                         }
@@ -454,7 +454,7 @@ IR::MethodCallExpression* DoLocalCopyPropagation::postorder(IR::MethodCallExpres
                 }
             } else if (mem->expr->type->is<IR::Type_Header>()) {
                 if (mem->member == "isValid") {
-                    forOverlapAvail(obj, [obj](cstring, VarInfo* var) {
+                    forOverlapAvail(obj, [obj](cstring, VarInfo *var) {
                         LOG4("  using " << obj << " (isValid)");
                         var->live = true;
                     });
@@ -471,7 +471,7 @@ IR::MethodCallExpression* DoLocalCopyPropagation::postorder(IR::MethodCallExpres
                 BUG_CHECK(mem->member == "push_front" || mem->member == "pop_front",
                           "Unexpected stack method %s", mem->member);
                 dropValuesUsing(obj);
-                forOverlapAvail(obj, [obj](cstring, VarInfo* var) {
+                forOverlapAvail(obj, [obj](cstring, VarInfo *var) {
                     LOG4("  using " << obj << " (push/pop)");
                     var->live = true;
                 });
@@ -495,7 +495,7 @@ IR::MethodCallExpression* DoLocalCopyPropagation::postorder(IR::MethodCallExpres
         }
     }
     LOG3("unknown method call " << mc->method << " clears all nonlocal saved values");
-    for (auto& var : available) {
+    for (auto &var : available) {
         if (!var.second.local) {
             LOG7("    may access non-local " << var.first);
             var.second.val = nullptr;
@@ -509,7 +509,7 @@ IR::MethodCallExpression* DoLocalCopyPropagation::postorder(IR::MethodCallExpres
     return mc;
 }
 
-IR::P4Action* DoLocalCopyPropagation::preorder(IR::P4Action* act) {
+IR::P4Action *DoLocalCopyPropagation::preorder(IR::P4Action *act) {
     visitOnce();
     BUG_CHECK(!working && !inferForFunc && available.empty(), "corrupt internal data struct");
     working = true;
@@ -519,7 +519,7 @@ IR::P4Action* DoLocalCopyPropagation::preorder(IR::P4Action* act) {
     return act;
 }
 
-IR::P4Action* DoLocalCopyPropagation::postorder(IR::P4Action* act) {
+IR::P4Action *DoLocalCopyPropagation::postorder(IR::P4Action *act) {
     LOG5("DoLocalCopyPropagation before ElimDead " << act->name);
     LOG5(act);
     BUG_CHECK(inferForFunc == &actions[act->name], "corrupt internal data struct");
@@ -533,7 +533,7 @@ IR::P4Action* DoLocalCopyPropagation::postorder(IR::P4Action* act) {
     return act;
 }
 
-IR::Function* DoLocalCopyPropagation::preorder(IR::Function* fn) {
+IR::Function *DoLocalCopyPropagation::preorder(IR::Function *fn) {
     visitOnce();
     BUG_CHECK(!working && !inferForFunc && available.empty(), "corrupt internal data struct");
     cstring name;
@@ -549,7 +549,7 @@ IR::Function* DoLocalCopyPropagation::preorder(IR::Function* fn) {
     return fn;
 }
 
-IR::Function* DoLocalCopyPropagation::postorder(IR::Function* fn) {
+IR::Function *DoLocalCopyPropagation::postorder(IR::Function *fn) {
     cstring name;
     if (auto decl = findContext<IR::Declaration_Instance>())
         // abstract function implementation
@@ -569,7 +569,7 @@ IR::Function* DoLocalCopyPropagation::postorder(IR::Function* fn) {
     return fn;
 }
 
-IR::P4Control* DoLocalCopyPropagation::preorder(IR::P4Control* ctrl) {
+IR::P4Control *DoLocalCopyPropagation::preorder(IR::P4Control *ctrl) {
     visitOnce();
     BUG_CHECK(!working && available.empty(), "corrupt internal data struct");
     visit(ctrl->type, "type");
@@ -586,14 +586,14 @@ IR::P4Control* DoLocalCopyPropagation::preorder(IR::P4Control* ctrl) {
     if (need_key_rewrite) ctrl->controlLocals = *ctrl->controlLocals.apply(RewriteTableKeys(*this));
     if (!elimUnusedTables) {
         for (auto local : ctrl->controlLocals) {
-            if (auto* act = local->to<IR::P4Action>()) {
-                auto& act_info = actions.at(act->name);
+            if (auto *act = local->to<IR::P4Action>()) {
+                auto &act_info = actions.at(act->name);
                 if (act_info.apply_count == 0) {
                     // unused action -- preserve any unused locals it references
                     apply_function(&act_info);
                 }
-            } else if (auto* tbl = local->to<IR::P4Table>()) {
-                auto& tbl_info = tables.at(tbl->name);
+            } else if (auto *tbl = local->to<IR::P4Table>()) {
+                auto &tbl_info = tables.at(tbl->name);
                 if (tbl_info.apply_count == 0) {
                     // unused table -- preserve any unused locals it references
                     apply_table(&tbl_info);
@@ -613,23 +613,23 @@ IR::P4Control* DoLocalCopyPropagation::preorder(IR::P4Control* ctrl) {
     return ctrl;
 }
 
-void DoLocalCopyPropagation::apply_function(DoLocalCopyPropagation::FuncInfo* act) {
+void DoLocalCopyPropagation::apply_function(DoLocalCopyPropagation::FuncInfo *act) {
     LOG7("apply_function reads=" << act->reads << " writes=" << act->writes);
     ++act->apply_count;
     for (auto write : act->writes) dropValuesUsing(write);
     for (auto read : act->reads)
-        forOverlapAvail(read, [](cstring, VarInfo* var) { var->live = true; });
+        forOverlapAvail(read, [](cstring, VarInfo *var) { var->live = true; });
     if (inferForFunc) {
         inferForFunc->writes.insert(act->writes.begin(), act->writes.end());
         inferForFunc->reads.insert(act->reads.begin(), act->reads.end());
     }
 }
 
-void DoLocalCopyPropagation::apply_table(DoLocalCopyPropagation::TableInfo* tbl) {
+void DoLocalCopyPropagation::apply_table(DoLocalCopyPropagation::TableInfo *tbl) {
     ++tbl->apply_count;
     std::unordered_set<cstring> remaps_seen;
     for (auto key : tbl->keyreads) {
-        forOverlapAvail(key, [&remaps_seen, key, tbl, this](cstring vname, VarInfo* var) {
+        forOverlapAvail(key, [&remaps_seen, key, tbl, this](cstring vname, VarInfo *var) {
             remaps_seen.insert(vname);
             if (var->val && lvalue_out(var->val)->is<IR::PathExpression>()) {
                 if (tbl->apply_count > 1 &&
@@ -666,7 +666,7 @@ void DoLocalCopyPropagation::apply_table(DoLocalCopyPropagation::TableInfo* tbl)
     for (auto action : tbl->actions) apply_function(&actions[action]);
 }
 
-IR::P4Table* DoLocalCopyPropagation::preorder(IR::P4Table* tbl) {
+IR::P4Table *DoLocalCopyPropagation::preorder(IR::P4Table *tbl) {
     visitOnce();
     BUG_CHECK(!inferForTable, "corrupt internal data struct");
     inferForTable = &tables[tbl->name];
@@ -676,7 +676,7 @@ IR::P4Table* DoLocalCopyPropagation::preorder(IR::P4Table* tbl) {
     return tbl;
 }
 
-IR::P4Table* DoLocalCopyPropagation::postorder(IR::P4Table* tbl) {
+IR::P4Table *DoLocalCopyPropagation::postorder(IR::P4Table *tbl) {
     BUG_CHECK(inferForTable == &tables[tbl->name], "corrupt internal data struct");
     LOG4("table " << tbl->name << " reads=" << inferForTable->keyreads
                   << " actions=" << inferForTable->actions);
@@ -684,19 +684,19 @@ IR::P4Table* DoLocalCopyPropagation::postorder(IR::P4Table* tbl) {
     return tbl;
 }
 
-const IR::P4Parser* DoLocalCopyPropagation::postorder(IR::P4Parser* parser) {
+const IR::P4Parser *DoLocalCopyPropagation::postorder(IR::P4Parser *parser) {
     BUG_CHECK(!working && available.empty(), "corrupt internal data struct");
     working = true;
     LOG2("DoLocalCopyPropagation working on parser " << parser->name);
     visit(parser->parserLocals, "parserLocals");  // visit these again with working==true
-    for (auto* state : parser->states) apply_function(&states[state->name]);
-    auto* rv = parser->apply(ElimDead(*this));
+    for (auto *state : parser->states) apply_function(&states[state->name]);
+    auto *rv = parser->apply(ElimDead(*this));
     working = false;
     available.clear();
     return rv;
 }
 
-IR::ParserState* DoLocalCopyPropagation::preorder(IR::ParserState* state) {
+IR::ParserState *DoLocalCopyPropagation::preorder(IR::ParserState *state) {
     visitOnce();
     BUG_CHECK(!working && available.empty(), "corrupt internal data struct");
     working = true;
@@ -706,7 +706,7 @@ IR::ParserState* DoLocalCopyPropagation::preorder(IR::ParserState* state) {
     return state;
 }
 
-IR::ParserState* DoLocalCopyPropagation::postorder(IR::ParserState* state) {
+IR::ParserState *DoLocalCopyPropagation::postorder(IR::ParserState *state) {
     BUG_CHECK(working && inferForFunc == &states[state->name], "corrupt internal data struct");
     LOG5("DoLocalCopyPropagation before ElimDead " << state->name);
     LOG5(state);
@@ -721,7 +721,7 @@ IR::ParserState* DoLocalCopyPropagation::postorder(IR::ParserState* state) {
 
 // Reset the state of internal data structures after traversing IR,
 // needed for this pass to function correctly when used in a PassRepeated
-Visitor::profile_t DoLocalCopyPropagation::init_apply(const IR::Node* node) {
+Visitor::profile_t DoLocalCopyPropagation::init_apply(const IR::Node *node) {
     // clear maps
     available.clear();
     tables.clear();

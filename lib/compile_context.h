@@ -41,10 +41,10 @@ struct CompileContextStack final {
     /// compilation context is of the wrong type, or the stack is empty, an
     /// assertion fires.
     template <typename CompileContextType>
-    static CompileContextType& top() {
-        auto& stack = getStack();
+    static CompileContextType &top() {
+        auto &stack = getStack();
         if (stack.empty()) reportNoContext();
-        auto* current = dynamic_cast<CompileContextType*>(stack.back());
+        auto *current = dynamic_cast<CompileContextType *>(stack.back());
         if (!current) reportContextMismatch(typeid(CompileContextType).name());
         return *current;
     }
@@ -54,16 +54,16 @@ struct CompileContextStack final {
  private:
     friend struct AutoCompileContext;
 
-    using StackType = std::vector<ICompileContext*>;
+    using StackType = std::vector<ICompileContext *>;
 
     /// Error reporting helpers.
     static void reportNoContext();
-    static void reportContextMismatch(const char* desiredContextType);
+    static void reportContextMismatch(const char *desiredContextType);
 
     /// Stack manipulation functions.
-    static void push(ICompileContext* context);
+    static void push(ICompileContext *context);
     static void pop();
-    static StackType& getStack();
+    static StackType &getStack();
 
     CompileContextStack() = delete;
 };
@@ -73,7 +73,7 @@ struct CompileContextStack final {
 /// is always nested correctly, this is the only interface for pushing or popping
 /// compilation contexts.
 struct AutoCompileContext {
-    explicit AutoCompileContext(ICompileContext* context);
+    explicit AutoCompileContext(ICompileContext *context);
     ~AutoCompileContext();
 };
 
@@ -83,15 +83,15 @@ struct AutoCompileContext {
 class BaseCompileContext : public ICompileContext {
  protected:
     BaseCompileContext();
-    BaseCompileContext(const BaseCompileContext& other);
+    BaseCompileContext(const BaseCompileContext &other);
 
  public:
     /// @return the current compilation context, which must inherit from
     /// BaseCompileContext.
-    static BaseCompileContext& get();
+    static BaseCompileContext &get();
 
     /// @return the error reporter for this compilation context.
-    virtual ErrorReporter& errorReporter();
+    virtual ErrorReporter &errorReporter();
 
     /// @return the default diagnostic action for calls to `::warning()`.
     virtual DiagnosticAction getDefaultWarningDiagnosticAction();

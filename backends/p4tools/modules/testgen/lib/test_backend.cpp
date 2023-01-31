@@ -17,7 +17,6 @@
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/taint.h"
-#include "backends/p4tools/common/lib/timer.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "frontends/p4/optimizeExpressions.h"
@@ -25,6 +24,7 @@
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/null.h"
+#include "lib/timer.h"
 #include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
@@ -41,10 +41,10 @@ namespace P4Tools {
 
 namespace P4Testgen {
 
-const Model* TestBackEnd::computeConcolicVariables(const ExecutionState* executionState,
-                                                   const Model* completedModel, Z3Solver* solver,
-                                                   const IR::Expression* outputPacketExpr,
-                                                   const IR::Expression* outputPortExpr) const {
+const Model *TestBackEnd::computeConcolicVariables(const ExecutionState *executionState,
+                                                   const Model *completedModel, Z3Solver *solver,
+                                                   const IR::Expression *outputPacketExpr,
+                                                   const IR::Expression *outputPortExpr) const {
     // Execute concolic functions that may occur in the output packet, the output port,
     // or any path conditions.
     auto concolicResolver =
@@ -52,28 +52,28 @@ const Model* TestBackEnd::computeConcolicVariables(const ExecutionState* executi
 
     outputPacketExpr->apply(concolicResolver);
     outputPortExpr->apply(concolicResolver);
-    for (const auto* assert : executionState->getPathConstraint()) {
+    for (const auto *assert : executionState->getPathConstraint()) {
         CHECK_NULL(assert);
         assert->apply(concolicResolver);
     }
-    const auto* resolvedConcolicVariables = concolicResolver.getResolvedConcolicVariables();
+    const auto *resolvedConcolicVariables = concolicResolver.getResolvedConcolicVariables();
 
     // If we resolved concolic variables and substitute them, check the solver again under
     // the new constraints.
     if (!resolvedConcolicVariables->empty()) {
-        std::vector<const Constraint*> asserts = executionState->getPathConstraint();
+        std::vector<const Constraint *> asserts = executionState->getPathConstraint();
 
-        for (const auto& resolvedConcolicVariable : *resolvedConcolicVariables) {
-            const auto& concolicVariable = resolvedConcolicVariable.first;
-            const auto* concolicAssignment = resolvedConcolicVariable.second;
-            const IR::Expression* pathConstraint = nullptr;
+        for (const auto &resolvedConcolicVariable : *resolvedConcolicVariables) {
+            const auto &concolicVariable = resolvedConcolicVariable.first;
+            const auto *concolicAssignment = resolvedConcolicVariable.second;
+            const IR::Expression *pathConstraint = nullptr;
             // We need to differentiate between state variables and expressions here.
             auto concolicType = concolicVariable.which();
             if (concolicType == 0) {
                 pathConstraint = new IR::Equ(boost::get<const StateVariable>(concolicVariable),
                                              concolicAssignment);
             } else if (concolicType == 1) {
-                pathConstraint = new IR::Equ(boost::get<const IR::Expression*>(concolicVariable),
+                pathConstraint = new IR::Equ(boost::get<const IR::Expression *>(concolicVariable),
                                              concolicAssignment);
             }
             CHECK_NULL(pathConstraint);
@@ -91,37 +91,47 @@ const Model* TestBackEnd::computeConcolicVariables(const ExecutionState* executi
             ::warning("Concolic constraints for this path are unsatisfiable.");
             return nullptr;
         }
-        const auto* concolicFinalState = new FinalState(solver, *executionState);
+        const auto *concolicFinalState = new FinalState(solver, *executionState);
         completedModel = concolicFinalState->getCompletedModel();
     }
     return completedModel;
 }
 
-bool TestBackEnd::run(const FinalState& state) {
+bool TestBackEnd::run(const FinalState &state) {
     {
         // Evaluate the model and extract the input and output packets.
-        const auto* executionState = state.getExecutionState();
-        const auto* outputPacketExpr = executionState->getPacketBuffer();
-        const auto* completedModel = state.getCompletedModel();
-        const auto* outputPortExpr = executionState->get(programInfo.getTargetOutputPortVar());
-        const auto& allStatements = programInfo.getAllStatements();
-        const P4::Coverage::CoverageSet& visitedStatements = symbex.getVisitedStatements();
+        const auto *executionState = state.getExecutionState();
+        const auto *outputPacketExpr = executionState->getPacketBuffer();
+        const auto *completedModel = state.getCompletedModel();
+        const auto *outputPortExpr = executionState->get(programInfo.getTargetOutputPortVar());
+        const auto &allStatements = programInfo.getAllStatements();
+        const P4::Coverage::CoverageSet &visitedStatements = symbex.getVisitedStatements();
 
-        auto* solver = state.getSolver()->to<Z3Solver>();
+        auto *solver = state.getSolver()->to<Z3Solver>();
         CHECK_NULL(solver);
 
+        // Don't increase the test count if --with-output-packet is enabled and we don't
+        // produce a test with an output packet.
+        if (TestgenOptions::get().withOutputPacket) {
+            auto outputPacketSize = executionState->getPacketBufferSize();
+            bool packetIsDropped = executionState->getProperty<bool>("drop");
+            if (outputPacketSize <= 0 || packetIsDropped) {
+                return needsToTerminate(testCount);
+            }
+        }
+
         bool abort = false;
-        const auto* concolicModel = computeConcolicVariables(executionState, completedModel, solver,
+        const auto *concolicModel = computeConcolicVariables(executionState, completedModel, solver,
                                                              outputPacketExpr, outputPortExpr);
         if (concolicModel == nullptr) {
             testCount++;
             P4::Coverage::coverageReportFinal(allStatements, visitedStatements);
             printPerformanceReport();
-            return testCount > maxTests - 1;
+            return needsToTerminate(testCount);
         }
         completedModel = concolicModel;
 
-        const auto* programTraces = state.getTraces();
+        const auto *programTraces = state.getTraces();
         auto testInfo = produceTestInfo(executionState, completedModel, outputPacketExpr,
                                         outputPortExpr, programTraces);
 
@@ -131,49 +141,54 @@ bool TestBackEnd::run(const FinalState& state) {
             symbex.printCurrentTraceAndBranches(selectedBranches);
         }
 
-        abort = printTestInfo(executionState, testInfo, testCount, outputPortExpr);
+        abort = printTestInfo(executionState, testInfo, outputPortExpr);
         if (abort) {
             testCount++;
             P4::Coverage::coverageReportFinal(allStatements, visitedStatements);
             printPerformanceReport();
-            return testCount > maxTests - 1;
+            return needsToTerminate(testCount);
         }
-
-        const auto* testSpec = createTestSpec(executionState, completedModel, testInfo);
-
+        const auto *testSpec = createTestSpec(executionState, completedModel, testInfo);
         float coverage = static_cast<float>(visitedStatements.size()) / allStatements.size();
+
         printFeature("test_info", 4,
                      "============ Test %1%: Statements covered: %2% (%3%/%4%) ============",
                      testCount, coverage, visitedStatements.size(), allStatements.size());
         P4::Coverage::logCoverage(allStatements, visitedStatements, executionState->getVisited());
 
         // Output the test.
-        withTimer("backend",
-                  [&] { testWriter->outputTest(testSpec, selectedBranches, testCount, coverage); });
+        Util::withTimer("backend", [&] {
+            testWriter->outputTest(testSpec, selectedBranches, testCount, coverage);
+        });
 
         printTraces("============ End Test %1% ============\n", testCount);
         testCount++;
         P4::Coverage::coverageReportFinal(allStatements, visitedStatements);
         printPerformanceReport();
-        return testCount > maxTests - 1;
+
+        // If MAX_STATEMENT_COVERAGE is enabled, terminate early if we hit max coverage already.
+        if (TestgenOptions::get().stopMetric == "MAX_STATEMENT_COVERAGE" && coverage == 1.0) {
+            return true;
+        }
+        return needsToTerminate(testCount);
     }
 }
 
 TestBackEnd::TestInfo TestBackEnd::produceTestInfo(
-    const ExecutionState* executionState, const Model* completedModel,
-    const IR::Expression* outputPacketExpr, const IR::Expression* outputPortExpr,
-    const std::vector<gsl::not_null<const TraceEvent*>>* programTraces) {
+    const ExecutionState *executionState, const Model *completedModel,
+    const IR::Expression *outputPacketExpr, const IR::Expression *outputPortExpr,
+    const std::vector<gsl::not_null<const TraceEvent *>> *programTraces) {
     // Evaluate all the important expressions necessary for program execution by using the
     // completed model.
     int calculatedPacketSize =
         IR::getIntFromLiteral(completedModel->evaluate(ExecutionState::getInputPacketSizeVar()));
-    const auto* inputPacketExpr = executionState->getInputPacket();
+    const auto *inputPacketExpr = executionState->getInputPacket();
     // The payload fills the space between the minimum input size needed and the symbolically
     // calculated packet size.
     int payloadSize = calculatedPacketSize - inputPacketExpr->type->width_bits();
     if (payloadSize > 0) {
-        const auto* payloadType = IR::getBitType(payloadSize);
-        const auto* payloadExpr =
+        const auto *payloadType = IR::getBitType(payloadSize);
+        const auto *payloadExpr =
             completedModel->get(ExecutionState::getPayloadLabel(payloadType), false);
         if (payloadExpr == nullptr) {
             payloadExpr = Utils::getRandConstantForType(payloadType);
@@ -188,13 +203,13 @@ TestBackEnd::TestInfo TestBackEnd::produceTestInfo(
             new IR::Concat(IR::getBitType(outputPacketExpr->type->width_bits() + payloadSize),
                            outputPacketExpr, payloadExpr);
     }
-    const auto* inputPacket = completedModel->evaluate(inputPacketExpr);
-    const auto* outputPacket = completedModel->evaluate(outputPacketExpr);
-    const auto* inputPort = completedModel->evaluate(programInfo.getTargetInputPortVar());
+    const auto *inputPacket = completedModel->evaluate(inputPacketExpr);
+    const auto *outputPacket = completedModel->evaluate(outputPacketExpr);
+    const auto *inputPort = completedModel->evaluate(programInfo.getTargetInputPortVar());
 
-    const auto* outputPortVar = completedModel->evaluate(outputPortExpr);
+    const auto *outputPortVar = completedModel->evaluate(outputPortExpr);
     // Build the taint mask by dissecting the program packet variable
-    const auto* evalMask = Taint::buildTaintMask(executionState->getSymbolicEnv().getInternalMap(),
+    const auto *evalMask = Taint::buildTaintMask(executionState->getSymbolicEnv().getInternalMap(),
                                                  completedModel, outputPacketExpr);
 
     // Get the input/output port integers.
@@ -207,11 +222,11 @@ TestBackEnd::TestInfo TestBackEnd::produceTestInfo(
             executionState->getProperty<bool>("drop")};
 }
 
-bool TestBackEnd::printTestInfo(const ExecutionState* executionState, const TestInfo& testInfo,
-                                int testCount, const IR::Expression* outputPortExpr) {
+bool TestBackEnd::printTestInfo(const ExecutionState *executionState, const TestInfo &testInfo,
+                                const IR::Expression *outputPortExpr) {
     // Print all the important variables and properties of this test.
     printTraces("============ Program trace for Test %1% ============\n", testCount);
-    for (const auto& event : testInfo.programTraces) {
+    for (const auto &event : testInfo.programTraces) {
         printTraces("%1%", *event);
     }
 
@@ -257,7 +272,7 @@ bool TestBackEnd::printTestInfo(const ExecutionState* executionState, const Test
 
 void TestBackEnd::printPerformanceReport() {
     printFeature("performance", 4, "============ Timers ============");
-    for (const auto& c : getTimers()) {
+    for (const auto &c : Util::getTimers()) {
         if (c.timerName.empty()) {
             printFeature("performance", 4, "Total: %i ms", c.milliseconds);
         } else {
@@ -266,6 +281,8 @@ void TestBackEnd::printPerformanceReport() {
         }
     }
 }
+
+int64_t TestBackEnd::getTestCount() const { return testCount; }
 
 }  // namespace P4Testgen
 

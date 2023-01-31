@@ -45,15 +45,15 @@ class V1ProgramStructure : public ProgramStructure {
     std::set<cstring> pipeline_controls;
     std::set<cstring> non_pipeline_controls;
 
-    const IR::P4Parser* parser = nullptr;
-    const IR::P4Control* ingress = nullptr;
-    const IR::P4Control* egress = nullptr;
-    const IR::P4Control* compute_checksum = nullptr;
-    const IR::P4Control* verify_checksum = nullptr;
-    const IR::P4Control* deparser = nullptr;
+    const IR::P4Parser *parser = nullptr;
+    const IR::P4Control *ingress = nullptr;
+    const IR::P4Control *egress = nullptr;
+    const IR::P4Control *compute_checksum = nullptr;
+    const IR::P4Control *verify_checksum = nullptr;
+    const IR::P4Control *deparser = nullptr;
 
     V1ProgramStructure() {}
-    BlockConverted blockKind(const IR::Node* node) const {
+    BlockConverted blockKind(const IR::Node *node) const {
         if (node == parser)
             return BlockConverted::Parser;
         else if (node == ingress)
@@ -71,20 +71,20 @@ class V1ProgramStructure : public ProgramStructure {
 };
 
 class SimpleSwitchExpressionConverter : public ExpressionConverter {
-    V1ProgramStructure* structure;
+    V1ProgramStructure *structure;
 
  public:
-    SimpleSwitchExpressionConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                                    V1ProgramStructure* structure, cstring scalarsName)
+    SimpleSwitchExpressionConverter(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                                    V1ProgramStructure *structure, cstring scalarsName)
         : ExpressionConverter(refMap, typeMap, structure, scalarsName), structure(structure) {}
 
-    void modelError(const char* format, const IR::Node* node) {
+    void modelError(const char *format, const IR::Node *node) {
         ::error(ErrorType::ERR_MODEL,
                 (cstring(format) + "\nAre you using an up-to-date v1model.p4?").c_str(), node);
     }
 
-    bool isStandardMetadataParameter(const IR::Parameter* param) {
-        auto st = dynamic_cast<V1ProgramStructure*>(structure);
+    bool isStandardMetadataParameter(const IR::Parameter *param) {
+        auto st = dynamic_cast<V1ProgramStructure *>(structure);
         auto params = st->parser->getApplyParameters();
         if (params->size() != 4) {
             modelError("%1%: Expected 4 parameter for parser", st->parser);
@@ -109,7 +109,7 @@ class SimpleSwitchExpressionConverter : public ExpressionConverter {
         return false;
     }
 
-    Util::IJson* convertParam(const IR::Parameter* param, cstring fieldName) override {
+    Util::IJson *convertParam(const IR::Parameter *param, cstring fieldName) override {
         if (isStandardMetadataParameter(param)) {
             auto result = new Util::JsonObject();
             if (fieldName != "") {
@@ -128,37 +128,37 @@ class SimpleSwitchExpressionConverter : public ExpressionConverter {
 };
 
 class ParseV1Architecture : public Inspector {
-    V1ProgramStructure* structure;
-    P4V1::V1Model& v1model;
+    V1ProgramStructure *structure;
+    P4V1::V1Model &v1model;
 
  public:
-    explicit ParseV1Architecture(V1ProgramStructure* structure)
+    explicit ParseV1Architecture(V1ProgramStructure *structure)
         : structure(structure), v1model(P4V1::V1Model::instance) {}
-    void modelError(const char* format, const IR::Node* node);
-    bool preorder(const IR::PackageBlock* block) override;
+    void modelError(const char *format, const IR::Node *node);
+    bool preorder(const IR::PackageBlock *block) override;
 };
 
 class SimpleSwitchBackend : public Backend {
-    BMV2Options& options;
-    P4V1::V1Model& v1model;
-    V1ProgramStructure* structure = nullptr;
-    ExpressionConverter* conv = nullptr;
+    BMV2Options &options;
+    P4V1::V1Model &v1model;
+    V1ProgramStructure *structure = nullptr;
+    ExpressionConverter *conv = nullptr;
 
  protected:
-    void createRecirculateFieldsList(ConversionContext* ctxt, const IR::ToplevelBlock* tlb,
+    void createRecirculateFieldsList(ConversionContext *ctxt, const IR::ToplevelBlock *tlb,
                                      cstring scalarName);
-    cstring createCalculation(cstring algo, const IR::Expression* fields,
-                              Util::JsonArray* calculations, bool usePayload, const IR::Node* node);
+    cstring createCalculation(cstring algo, const IR::Expression *fields,
+                              Util::JsonArray *calculations, bool usePayload, const IR::Node *node);
 
  public:
-    void modelError(const char* format, const IR::Node* place) const;
-    void convertChecksum(const IR::BlockStatement* body, Util::JsonArray* checksums,
-                         Util::JsonArray* calculations, bool verify);
-    void createActions(ConversionContext* ctxt, V1ProgramStructure* structure);
+    void modelError(const char *format, const IR::Node *place) const;
+    void convertChecksum(const IR::BlockStatement *body, Util::JsonArray *checksums,
+                         Util::JsonArray *calculations, bool verify);
+    void createActions(ConversionContext *ctxt, V1ProgramStructure *structure);
 
-    void convert(const IR::ToplevelBlock* tlb) override;
-    SimpleSwitchBackend(BMV2Options& options, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                        P4::ConvertEnums::EnumMapping* enumMap)
+    void convert(const IR::ToplevelBlock *tlb) override;
+    SimpleSwitchBackend(BMV2Options &options, P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                        P4::ConvertEnums::EnumMapping *enumMap)
         : Backend(options, refMap, typeMap, enumMap),
           options(options),
           v1model(P4V1::V1Model::instance) {}

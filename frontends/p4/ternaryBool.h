@@ -22,7 +22,7 @@ limitations under the License.
 namespace P4 {
 enum class TernaryBool { Yes, No, Maybe };
 
-cstring toString(const TernaryBool& c);
+cstring toString(const TernaryBool &c);
 
 }  // namespace P4
 

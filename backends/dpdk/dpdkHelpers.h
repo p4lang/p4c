@@ -33,7 +33,7 @@ limitations under the License.
 #include "lib/json.h"
 #include "midend/removeComplexExpressions.h"
 
-#define TOSTR_DECLA(NAME) std::ostream& toStr(std::ostream&, IR::NAME*)
+#define TOSTR_DECLA(NAME) std::ostream &toStr(std::ostream &, IR::NAME *)
 
 namespace DPDK {
 
@@ -117,9 +117,9 @@ const char DirectResourceTableEntryIndex[] = "table_entry_index";
  * optmized.
  */
 class BranchingInstructionGeneration {
-    P4::ReferenceMap* refMap;
-    P4::TypeMap* typeMap;
-    bool nested(const IR::Node* n) {
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
+    bool nested(const IR::Node *n) {
         if (n->is<IR::LAnd>() || n->is<IR::LOr>()) {
             return true;
         } else {
@@ -129,13 +129,13 @@ class BranchingInstructionGeneration {
 
  public:
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
-    BranchingInstructionGeneration(P4::ReferenceMap* refMap, P4::TypeMap* typeMap)
+    BranchingInstructionGeneration(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
         : refMap(refMap), typeMap(typeMap) {}
-    bool generate(const IR::Expression*, cstring, cstring, bool);
+    bool generate(const IR::Expression *, cstring, cstring, bool);
 };
 
 class TypeWidthValidator : public Inspector {
-    void postorder(const IR::Type_Varbits* type) override {
+    void postorder(const IR::Type_Varbits *type) override {
         LOG3("Validating Type_Varbits: " << type);
         if (type->size % 8 != 0) {
             ::error(ErrorType::ERR_UNSUPPORTED, "%1% varbit width (%2%) not aligned to 8 bits",
@@ -146,58 +146,58 @@ class TypeWidthValidator : public Inspector {
 
 class ConvertStatementToDpdk : public Inspector {
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
-    P4::TypeMap* typemap;
-    P4::ReferenceMap* refmap;
-    DpdkProgramStructure* structure;
-    const IR::P4Parser* parser = nullptr;
-    IR::Type_Struct* metadataStruct = nullptr;
+    P4::TypeMap *typemap;
+    P4::ReferenceMap *refmap;
+    DpdkProgramStructure *structure;
+    const IR::P4Parser *parser = nullptr;
+    IR::Type_Struct *metadataStruct = nullptr;
 
  private:
-    void processHashParams(const IR::Argument* field, IR::Vector<IR::Expression>& components);
-    bool checkIfBelongToSameHdrMdStructure(const IR::Argument* field);
-    void updateMdStrAndGenInstr(const IR::Argument* field, IR::Vector<IR::Expression>& components);
-    cstring getHdrMdStrName(const IR::Member* mem);
-    bool checkIfConsecutiveHdrMdfields(const IR::Argument* field);
+    void processHashParams(const IR::Argument *field, IR::Vector<IR::Expression> &components);
+    bool checkIfBelongToSameHdrMdStructure(const IR::Argument *field);
+    void updateMdStrAndGenInstr(const IR::Argument *field, IR::Vector<IR::Expression> &components);
+    cstring getHdrMdStrName(const IR::Member *mem);
+    bool checkIfConsecutiveHdrMdfields(const IR::Argument *field);
 
  public:
-    ConvertStatementToDpdk(P4::ReferenceMap* refmap, P4::TypeMap* typemap,
-                           DpdkProgramStructure* structure)
+    ConvertStatementToDpdk(P4::ReferenceMap *refmap, P4::TypeMap *typemap,
+                           DpdkProgramStructure *structure)
         : typemap(typemap), refmap(refmap), structure(structure) {
         visitDagOnce = false;
     }
-    ConvertStatementToDpdk(P4::ReferenceMap* refmap, P4::TypeMap* typemap,
-                           DpdkProgramStructure* structure, IR::Type_Struct* metadataStruct)
+    ConvertStatementToDpdk(P4::ReferenceMap *refmap, P4::TypeMap *typemap,
+                           DpdkProgramStructure *structure, IR::Type_Struct *metadataStruct)
         : typemap(typemap), refmap(refmap), structure(structure), metadataStruct(metadataStruct) {
         visitDagOnce = false;
     }
     IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() { return instructions; }
     void branchingInstructionGeneration(cstring true_label, cstring false_label,
-                                        const IR::Expression* expr);
-    bool preorder(const IR::AssignmentStatement* a) override;
-    bool preorder(const IR::IfStatement* a) override;
-    bool preorder(const IR::MethodCallStatement* a) override;
-    bool preorder(const IR::SwitchStatement* a) override;
+                                        const IR::Expression *expr);
+    bool preorder(const IR::AssignmentStatement *a) override;
+    bool preorder(const IR::IfStatement *a) override;
+    bool preorder(const IR::MethodCallStatement *a) override;
+    bool preorder(const IR::SwitchStatement *a) override;
 
-    void add_instr(const IR::DpdkAsmStatement* s) { instructions.push_back(s); }
-    IR::IndexedVector<IR::DpdkAsmStatement>& get_instr() { return instructions; }
-    void process_logical_operation(const IR::Expression*, const IR::Operation_Binary*);
-    void process_relation_operation(const IR::Expression*, const IR::Operation_Relation*);
-    cstring append_parser_name(const IR::P4Parser* p, cstring);
-    void set_parser(const IR::P4Parser* p) { parser = p; }
-    bool handleConstSwitch(const IR::SwitchStatement* a);
+    void add_instr(const IR::DpdkAsmStatement *s) { instructions.push_back(s); }
+    IR::IndexedVector<IR::DpdkAsmStatement> &get_instr() { return instructions; }
+    void process_logical_operation(const IR::Expression *, const IR::Operation_Binary *);
+    void process_relation_operation(const IR::Expression *, const IR::Operation_Relation *);
+    cstring append_parser_name(const IR::P4Parser *p, cstring);
+    void set_parser(const IR::P4Parser *p) { parser = p; }
+    bool handleConstSwitch(const IR::SwitchStatement *a);
 };
 
 /**
  * only simplify complex expression in ingress/egress
  */
 class ProcessControls : public P4::RemoveComplexExpressionsPolicy {
-    const std::set<cstring>* process;
+    const std::set<cstring> *process;
 
  public:
-    explicit ProcessControls(const std::set<cstring>* process) : process(process) {
+    explicit ProcessControls(const std::set<cstring> *process) : process(process) {
         CHECK_NULL(process);
     }
-    bool convert(const IR::P4Control* control) const {
+    bool convert(const IR::P4Control *control) const {
         if (process->find(control->name) != process->end()) return true;
         return false;
     }

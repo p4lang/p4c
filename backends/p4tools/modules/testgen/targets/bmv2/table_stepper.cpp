@@ -37,10 +37,10 @@ namespace P4Testgen {
 
 namespace Bmv2 {
 
-const IR::Expression* BMv2_V1ModelTableStepper::computeTargetMatchType(
-    ExecutionState* nextState, const KeyProperties& keyProperties,
-    std::map<cstring, const FieldMatch>* matches, const IR::Expression* hitCondition) {
-    const IR::Expression* keyExpr = keyProperties.key->expression;
+const IR::Expression *BMv2_V1ModelTableStepper::computeTargetMatchType(
+    ExecutionState *nextState, const KeyProperties &keyProperties,
+    std::map<cstring, const FieldMatch> *matches, const IR::Expression *hitCondition) {
+    const IR::Expression *keyExpr = keyProperties.key->expression;
 
     // TODO: We consider optional match types to be a no-op, but we could make them exact matches.
     if (keyProperties.matchType == BMv2Constants::MATCH_KIND_OPT) {
@@ -57,8 +57,8 @@ const IR::Expression* BMv2_V1ModelTableStepper::computeTargetMatchType(
         cstring minName = properties.tableName + "_range_min_" + keyProperties.name;
         cstring maxName = properties.tableName + "_range_max_" + keyProperties.name;
         // We can recover from taint by matching on the entire possible range.
-        const IR::Expression* minKey = nullptr;
-        const IR::Expression* maxKey = nullptr;
+        const IR::Expression *minKey = nullptr;
+        const IR::Expression *maxKey = nullptr;
         if (keyProperties.isTainted) {
             minKey = IR::getConstant(keyExpr->type, 0);
             maxKey = IR::getConstant(keyExpr->type, IR::getMaxBvVal(keyExpr->type));
@@ -77,38 +77,36 @@ const IR::Expression* BMv2_V1ModelTableStepper::computeTargetMatchType(
 }
 
 void BMv2_V1ModelTableStepper::evalTableActionProfile(
-    const std::vector<const IR::ActionListElement*>& tableActionList) {
-    const auto* state = getExecutionState();
+    const std::vector<const IR::ActionListElement *> &tableActionList) {
+    const auto *state = getExecutionState();
 
     for (size_t idx = 0; idx < tableActionList.size(); idx++) {
-        const auto* action = tableActionList.at(idx);
+        const auto *action = tableActionList.at(idx);
         // Grab the path from the method call.
-        const auto* tableAction = action->expression->checkedTo<IR::MethodCallExpression>();
+        const auto *tableAction = action->expression->checkedTo<IR::MethodCallExpression>();
         // Try to find the action declaration corresponding to the path reference in the table.
-        const auto* actionType = state->getActionDecl(tableAction->method);
+        const auto *actionType = state->getActionDecl(tableAction->method);
         CHECK_NULL(actionType);
 
-        auto* nextState = new ExecutionState(*state);
+        auto *nextState = new ExecutionState(*state);
         // We get the control plane name of the action we are calling.
         cstring actionName = actionType->controlPlaneName();
         // Copy the previous action profile.
-        auto* actionProfile = new Bmv2_V1ModelActionProfile(*bmv2_V1ModelProperties.actionProfile);
-        // The entry we are inserting using an index instead of the action name.
-        cstring actionIndex = std::to_string(actionProfile->getActionMapSize());
+        auto *actionProfile = new Bmv2_V1ModelActionProfile(*bmv2_V1ModelProperties.actionProfile);
         // Synthesize arguments for the call based on the action parameters.
-        const auto& parameters = actionType->parameters;
-        auto* arguments = new IR::Vector<IR::Argument>();
+        const auto &parameters = actionType->parameters;
+        auto *arguments = new IR::Vector<IR::Argument>();
         std::vector<ActionArg> ctrlPlaneArgs;
         for (size_t argIdx = 0; argIdx < parameters->size(); ++argIdx) {
-            const auto* parameter = parameters->getParameter(argIdx);
+            const auto *parameter = parameters->getParameter(argIdx);
             // Synthesize a zombie constant here that corresponds to a control plane argument.
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
-            const auto& actionDataVar =
+            const auto &actionDataVar =
                 Utils::getZombieTableVar(parameter->type, table, "*actionData", idx, argIdx);
             cstring keyName =
                 properties.tableName + "_param_" + actionName + std::to_string(argIdx);
-            const auto& actionArg = nextState->createZombieConst(parameter->type, keyName);
+            const auto &actionArg = nextState->createZombieConst(parameter->type, keyName);
             nextState->set(actionDataVar, actionArg);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
@@ -122,22 +120,22 @@ void BMv2_V1ModelTableStepper::evalTableActionProfile(
         nextState->addTestObject("action_profile", actionProfile->getObjectName(), actionProfile);
 
         // We add the arguments to our action call, effectively creating a const entry call.
-        auto* synthesizedAction = tableAction->clone();
+        auto *synthesizedAction = tableAction->clone();
         synthesizedAction->arguments = arguments;
 
         // Now we compute the hit condition to trigger this particular action call.
         std::map<cstring, const FieldMatch> matches;
-        const auto* hitCondition = computeHit(nextState, &matches);
+        const auto *hitCondition = computeHit(nextState, &matches);
 
         // We need to set the table action in the state for eventual switch action_run hits.
         // We also will need it for control plane table entries.
         setTableAction(nextState, tableAction);
 
         // Finally, add all the new rules to the execution state.
-        const ActionCall ctrlPlaneActionCall(actionIndex, actionType, {});
+        const ActionCall ctrlPlaneActionCall(actionName, actionType, {});
         auto tableRule =
             TableRule(matches, TestSpec::LOW_PRIORITY, ctrlPlaneActionCall, TestSpec::TTL);
-        auto* tableConfig = new TableConfig(table, {tableRule});
+        auto *tableConfig = new TableConfig(table, {tableRule});
 
         // Add the action profile to the table.
         // This implies a slightly different implementation to usual control plane table behavior.
@@ -160,40 +158,38 @@ void BMv2_V1ModelTableStepper::evalTableActionProfile(
 }
 
 void BMv2_V1ModelTableStepper::evalTableActionSelector(
-    const std::vector<const IR::ActionListElement*>& tableActionList) {
-    const auto* state = getExecutionState();
+    const std::vector<const IR::ActionListElement *> &tableActionList) {
+    const auto *state = getExecutionState();
 
     for (size_t idx = 0; idx < tableActionList.size(); idx++) {
-        const auto* action = tableActionList.at(idx);
+        const auto *action = tableActionList.at(idx);
         // Grab the path from the method call.
-        const auto* tableAction = action->expression->checkedTo<IR::MethodCallExpression>();
+        const auto *tableAction = action->expression->checkedTo<IR::MethodCallExpression>();
         // Try to find the action declaration corresponding to the path reference in the table.
-        const auto* actionType = state->getActionDecl(tableAction->method);
+        const auto *actionType = state->getActionDecl(tableAction->method);
         CHECK_NULL(actionType);
 
-        auto* nextState = new ExecutionState(*state);
+        auto *nextState = new ExecutionState(*state);
         // We get the control plane name of the action we are calling.
         cstring actionName = actionType->controlPlaneName();
 
         // Copy the previous action profile.
-        auto* actionProfile = new Bmv2_V1ModelActionProfile(
+        auto *actionProfile = new Bmv2_V1ModelActionProfile(
             bmv2_V1ModelProperties.actionSelector->getActionProfile()->getProfileDecl());
-        // The entry we are inserting using an index instead of the action name.
-        cstring actionIndex = std::to_string(actionProfile->getActionMapSize());
         // Synthesize arguments for the call based on the action parameters.
-        const auto& parameters = actionType->parameters;
-        auto* arguments = new IR::Vector<IR::Argument>();
+        const auto &parameters = actionType->parameters;
+        auto *arguments = new IR::Vector<IR::Argument>();
         std::vector<ActionArg> ctrlPlaneArgs;
         for (size_t argIdx = 0; argIdx < parameters->size(); ++argIdx) {
-            const auto* parameter = parameters->getParameter(argIdx);
+            const auto *parameter = parameters->getParameter(argIdx);
             // Synthesize a zombie constant here that corresponds to a control plane argument.
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
-            const auto& actionDataVar =
+            const auto &actionDataVar =
                 Utils::getZombieTableVar(parameter->type, table, "*actionData", idx, argIdx);
             cstring keyName =
                 properties.tableName + "_param_" + actionName + std::to_string(argIdx);
-            const auto& actionArg = nextState->createZombieConst(parameter->type, keyName);
+            const auto &actionArg = nextState->createZombieConst(parameter->type, keyName);
             nextState->set(actionDataVar, actionArg);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
@@ -204,7 +200,7 @@ void BMv2_V1ModelTableStepper::evalTableActionSelector(
         // TODO: Should we check if we exceed the maximum number of possible profile entries?
         actionProfile->addToActionMap(actionName, ctrlPlaneArgs);
 
-        auto* actionSelector = new Bmv2_V1ModelActionSelector(
+        auto *actionSelector = new Bmv2_V1ModelActionSelector(
             bmv2_V1ModelProperties.actionSelector->getSelectorDecl(), actionProfile);
 
         // Update the action profile in the execution state.
@@ -214,22 +210,22 @@ void BMv2_V1ModelTableStepper::evalTableActionSelector(
                                  actionSelector);
 
         // We add the arguments to our action call, effectively creating a const entry call.
-        auto* synthesizedAction = tableAction->clone();
+        auto *synthesizedAction = tableAction->clone();
         synthesizedAction->arguments = arguments;
 
         // Now we compute the hit condition to trigger this particular action call.
         std::map<cstring, const FieldMatch> matches;
-        const auto* hitCondition = computeHit(nextState, &matches);
+        const auto *hitCondition = computeHit(nextState, &matches);
 
         // We need to set the table action in the state for eventual switch action_run hits.
         // We also will need it for control plane table entries.
         setTableAction(nextState, tableAction);
 
         // Finally, add all the new rules to the execution state.
-        ActionCall ctrlPlaneActionCall(actionIndex, actionType, {});
+        ActionCall ctrlPlaneActionCall(actionName, actionType, {});
         auto tableRule =
             TableRule(matches, TestSpec::LOW_PRIORITY, ctrlPlaneActionCall, TestSpec::TTL);
-        auto* tableConfig = new TableConfig(table, {tableRule});
+        auto *tableConfig = new TableConfig(table, {tableRule});
 
         // Add the action profile to the table. This signifies a slightly different implementation.
         tableConfig->addTableProperty("action_profile", actionProfile);
@@ -254,22 +250,22 @@ void BMv2_V1ModelTableStepper::evalTableActionSelector(
 }
 
 bool BMv2_V1ModelTableStepper::checkForActionProfile() {
-    const auto* impl = table->properties->getProperty("implementation");
+    const auto *impl = table->properties->getProperty("implementation");
     if (impl == nullptr) {
         return false;
     }
 
-    const auto* state = getExecutionState();
-    const auto* implExpr = impl->value->checkedTo<IR::ExpressionValue>();
-    const IR::IDeclaration* implDecl = nullptr;
-    const IR::Type_Extern* implExtern = nullptr;
-    if (const auto* implCall = implExpr->expression->to<IR::ConstructorCallExpression>()) {
-        const auto* implDeclType = state->resolveType(implCall->constructedType);
+    const auto *state = getExecutionState();
+    const auto *implExpr = impl->value->checkedTo<IR::ExpressionValue>();
+    const IR::IDeclaration *implDecl = nullptr;
+    const IR::Type_Extern *implExtern = nullptr;
+    if (const auto *implCall = implExpr->expression->to<IR::ConstructorCallExpression>()) {
+        const auto *implDeclType = state->resolveType(implCall->constructedType);
         implExtern = implDeclType->checkedTo<IR::Type_Extern>();
         implDecl = implExtern;
-    } else if (const auto* implPath = implExpr->expression->to<IR::PathExpression>()) {
-        const auto* declInst = state->findDecl(implPath)->checkedTo<IR::Declaration_Instance>();
-        const auto* implDeclType = state->resolveType(declInst->type);
+    } else if (const auto *implPath = implExpr->expression->to<IR::PathExpression>()) {
+        const auto *declInst = state->findDecl(implPath)->checkedTo<IR::Declaration_Instance>();
+        const auto *implDeclType = state->resolveType(declInst->type);
         implExtern = implDeclType->checkedTo<IR::Type_Extern>();
         implDecl = declInst;
     } else {
@@ -281,7 +277,7 @@ bool BMv2_V1ModelTableStepper::checkForActionProfile() {
         return false;
     }
 
-    const auto* testObject =
+    const auto *testObject =
         state->getTestObject("action_profile", implExtern->controlPlaneName(), false);
     if (testObject == nullptr) {
         // This means, for every possible control plane entry (and with that, new execution state)
@@ -296,22 +292,22 @@ bool BMv2_V1ModelTableStepper::checkForActionProfile() {
 }
 
 bool BMv2_V1ModelTableStepper::checkForActionSelector() {
-    const auto* impl = table->properties->getProperty("implementation");
+    const auto *impl = table->properties->getProperty("implementation");
     if (impl == nullptr) {
         return false;
     }
 
-    const auto* state = getExecutionState();
-    const auto* selectorExpr = impl->value->checkedTo<IR::ExpressionValue>();
-    const IR::IDeclaration* selectorDecl = nullptr;
-    const IR::Type_Extern* selectorExtern = nullptr;
-    if (const auto* implCall = selectorExpr->expression->to<IR::ConstructorCallExpression>()) {
-        const auto* selectorDeclType = state->resolveType(implCall->constructedType);
+    const auto *state = getExecutionState();
+    const auto *selectorExpr = impl->value->checkedTo<IR::ExpressionValue>();
+    const IR::IDeclaration *selectorDecl = nullptr;
+    const IR::Type_Extern *selectorExtern = nullptr;
+    if (const auto *implCall = selectorExpr->expression->to<IR::ConstructorCallExpression>()) {
+        const auto *selectorDeclType = state->resolveType(implCall->constructedType);
         selectorExtern = selectorDeclType->checkedTo<IR::Type_Extern>();
         selectorDecl = selectorExtern;
-    } else if (const auto* implPath = selectorExpr->expression->to<IR::PathExpression>()) {
-        const auto* declInst = state->findDecl(implPath)->checkedTo<IR::Declaration_Instance>();
-        const auto* selectorDeclType = state->resolveType(declInst->type);
+    } else if (const auto *implPath = selectorExpr->expression->to<IR::PathExpression>()) {
+        const auto *declInst = state->findDecl(implPath)->checkedTo<IR::Declaration_Instance>();
+        const auto *selectorDeclType = state->resolveType(declInst->type);
         selectorExtern = selectorDeclType->checkedTo<IR::Type_Extern>();
         selectorDecl = declInst;
     } else {
@@ -324,7 +320,7 @@ bool BMv2_V1ModelTableStepper::checkForActionSelector() {
     }
     // Treat action selectors like action profiles for now.
     // The behavioral model P4Runtime is unclear how to configure action selectors.
-    const auto* testObject =
+    const auto *testObject =
         state->getTestObject("action_profile", selectorExtern->controlPlaneName(), false);
     if (testObject == nullptr) {
         // This means, for every possible control plane entry (and with that, new execution state)
@@ -339,10 +335,10 @@ bool BMv2_V1ModelTableStepper::checkForActionSelector() {
 }
 
 void BMv2_V1ModelTableStepper::checkTargetProperties(
-    const std::vector<const IR::ActionListElement*>& /*tableActionList*/) {
+    const std::vector<const IR::ActionListElement *> & /*tableActionList*/) {
     // Iterate over the table keys and check whether we can mitigate taint.
     for (auto keyProperties : properties.resolvedKeys) {
-        const auto* keyElement = keyProperties.key;
+        const auto *keyElement = keyProperties.key;
         auto keyIsTainted =
             (keyProperties.isTainted &&
              (properties.tableIsImmutable || keyElement->matchType->toString() == "exact"));
@@ -369,8 +365,8 @@ void BMv2_V1ModelTableStepper::checkTargetProperties(
 }
 
 void BMv2_V1ModelTableStepper::evalTargetTable(
-    const std::vector<const IR::ActionListElement*>& tableActionList) {
-    const auto* keys = table->getKey();
+    const std::vector<const IR::ActionListElement *> &tableActionList) {
+    const auto *keys = table->getKey();
     // If we have no keys, there is nothing to match.
     if (keys == nullptr) {
         // Either override the default action or fall back to executing it.
@@ -389,7 +385,7 @@ void BMv2_V1ModelTableStepper::evalTargetTable(
 
     // If the table is not constant, the default action can always be executed.
     // This is because we can simply not enter any table entry.
-    boost::optional<const IR::Expression*> tableMissCondition = boost::none;
+    boost::optional<const IR::Expression *> tableMissCondition = boost::none;
 
     // If the table is not immutable, we synthesize control plane entries and follow the paths.
     if (properties.tableIsImmutable) {
@@ -441,8 +437,8 @@ void BMv2_V1ModelTableStepper::evalTargetTable(
     addDefaultAction(tableMissCondition);
 }
 
-BMv2_V1ModelTableStepper::BMv2_V1ModelTableStepper(BMv2_V1ModelExprStepper* stepper,
-                                                   const IR::P4Table* table)
+BMv2_V1ModelTableStepper::BMv2_V1ModelTableStepper(BMv2_V1ModelExprStepper *stepper,
+                                                   const IR::P4Table *table)
     : TableStepper(stepper, table) {}
 
 }  // namespace Bmv2

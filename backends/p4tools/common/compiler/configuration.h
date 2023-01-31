@@ -15,7 +15,7 @@ class CompilerConfiguration : public DefaultP4CConfiguration {
     int maximumWidthSupported() const override { return INT_MAX; }
 
     /// @return the singleton instance.
-    static const CompilerConfiguration& get() {
+    static const CompilerConfiguration &get() {
         static CompilerConfiguration instance;
         return instance;
     }

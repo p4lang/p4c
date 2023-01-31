@@ -47,11 +47,11 @@ class DoConstantFolding : public Transform {
  protected:
     /// Used to resolve IR nodes to declarations.
     /// If `nullptr`, then `const` values cannot be resolved.
-    const ReferenceMap* refMap;
+    const ReferenceMap *refMap;
 
     /// Used to resolve nodes to their types.
     /// If `nullptr`, then type information is not available.
-    const TypeMap* typeMap;
+    const TypeMap *typeMap;
 
     /// Set to `true` iff `typeMap` is not `nullptr`.
     bool typesKnown;
@@ -60,28 +60,28 @@ class DoConstantFolding : public Transform {
     bool warnings;
 
     /// Maps declaration constants to constant expressions
-    std::map<const IR::Declaration_Constant*, const IR::Expression*> constants;
+    std::map<const IR::Declaration_Constant *, const IR::Expression *> constants;
     // True if we are processing a left side of an assignment; we should not
     // we substituting constants there.
     bool assignmentTarget;
 
  protected:
     /// @returns a constant equivalent to @p expr or `nullptr`
-    const IR::Expression* getConstant(const IR::Expression* expr) const;
+    const IR::Expression *getConstant(const IR::Expression *expr) const;
 
     /// Statically cast constant @p node to @p type represented in the specified @p base.
-    const IR::Constant* cast(const IR::Constant* node, unsigned base,
-                             const IR::Type_Bits* type) const;
+    const IR::Constant *cast(const IR::Constant *node, unsigned base,
+                             const IR::Type_Bits *type) const;
 
     /// Statically evaluate binary operation @p e implemented by @p func.
-    const IR::Node* binary(const IR::Operation_Binary* op,
+    const IR::Node *binary(const IR::Operation_Binary *op,
                            std::function<big_int(big_int, big_int)> func, bool saturating = false);
     /// Statically evaluate comparison operation @p e.
     /// Note that this only handles the case where @p e represents `==` or `!=`.
-    const IR::Node* compare(const IR::Operation_Binary* op);
+    const IR::Node *compare(const IR::Operation_Binary *op);
 
     /// Statically evaluate shift operation @p e.
-    const IR::Node* shift(const IR::Operation_Binary* op);
+    const IR::Node *shift(const IR::Operation_Binary *op);
 
     /// Result type for @ref setContains.
     enum class Result { Yes, No, DontKnow };
@@ -95,54 +95,54 @@ class DoConstantFolding : public Transform {
      *
      *  depending on whether @p constant is contained in @p keyset.
      */
-    Result setContains(const IR::Expression* keySet, const IR::Expression* constant) const;
+    Result setContains(const IR::Expression *keySet, const IR::Expression *constant) const;
 
  public:
-    DoConstantFolding(const ReferenceMap* refMap, TypeMap* typeMap, bool warnings = true)
+    DoConstantFolding(const ReferenceMap *refMap, TypeMap *typeMap, bool warnings = true)
         : refMap(refMap), typeMap(typeMap), typesKnown(typeMap != nullptr), warnings(warnings) {
         visitDagOnce = true;
         setName("DoConstantFolding");
         assignmentTarget = false;
     }
 
-    const IR::Node* postorder(IR::Declaration_Constant* d) override;
-    const IR::Node* postorder(IR::PathExpression* e) override;
-    const IR::Node* postorder(IR::Cmpl* e) override;
-    const IR::Node* postorder(IR::Neg* e) override;
-    const IR::Node* postorder(IR::UPlus* e) override;
-    const IR::Node* postorder(IR::LNot* e) override;
-    const IR::Node* postorder(IR::LAnd* e) override;
-    const IR::Node* postorder(IR::LOr* e) override;
-    const IR::Node* postorder(IR::Slice* e) override;
-    const IR::Node* postorder(IR::Add* e) override;
-    const IR::Node* postorder(IR::AddSat* e) override;
-    const IR::Node* postorder(IR::Sub* e) override;
-    const IR::Node* postorder(IR::SubSat* e) override;
-    const IR::Node* postorder(IR::Mul* e) override;
-    const IR::Node* postorder(IR::Div* e) override;
-    const IR::Node* postorder(IR::Mod* e) override;
-    const IR::Node* postorder(IR::BXor* e) override;
-    const IR::Node* postorder(IR::BAnd* e) override;
-    const IR::Node* postorder(IR::BOr* e) override;
-    const IR::Node* postorder(IR::Equ* e) override;
-    const IR::Node* postorder(IR::Neq* e) override;
-    const IR::Node* postorder(IR::Lss* e) override;
-    const IR::Node* postorder(IR::Grt* e) override;
-    const IR::Node* postorder(IR::Leq* e) override;
-    const IR::Node* postorder(IR::Geq* e) override;
-    const IR::Node* postorder(IR::Shl* e) override;
-    const IR::Node* postorder(IR::Shr* e) override;
-    const IR::Node* postorder(IR::Concat* e) override;
-    const IR::Node* postorder(IR::Member* e) override;
-    const IR::Node* postorder(IR::Cast* e) override;
-    const IR::Node* postorder(IR::Mux* e) override;
-    const IR::Node* postorder(IR::Type_Bits* type) override;
-    const IR::Node* postorder(IR::Type_Varbits* type) override;
-    const IR::Node* postorder(IR::SelectExpression* e) override;
-    const IR::Node* postorder(IR::IfStatement* statement) override;
-    const IR::Node* preorder(IR::AssignmentStatement* statement) override;
-    const IR::Node* preorder(IR::ArrayIndex* e) override;
-    const IR::BlockStatement* preorder(IR::BlockStatement* bs) override {
+    const IR::Node *postorder(IR::Declaration_Constant *d) override;
+    const IR::Node *postorder(IR::PathExpression *e) override;
+    const IR::Node *postorder(IR::Cmpl *e) override;
+    const IR::Node *postorder(IR::Neg *e) override;
+    const IR::Node *postorder(IR::UPlus *e) override;
+    const IR::Node *postorder(IR::LNot *e) override;
+    const IR::Node *postorder(IR::LAnd *e) override;
+    const IR::Node *postorder(IR::LOr *e) override;
+    const IR::Node *postorder(IR::Slice *e) override;
+    const IR::Node *postorder(IR::Add *e) override;
+    const IR::Node *postorder(IR::AddSat *e) override;
+    const IR::Node *postorder(IR::Sub *e) override;
+    const IR::Node *postorder(IR::SubSat *e) override;
+    const IR::Node *postorder(IR::Mul *e) override;
+    const IR::Node *postorder(IR::Div *e) override;
+    const IR::Node *postorder(IR::Mod *e) override;
+    const IR::Node *postorder(IR::BXor *e) override;
+    const IR::Node *postorder(IR::BAnd *e) override;
+    const IR::Node *postorder(IR::BOr *e) override;
+    const IR::Node *postorder(IR::Equ *e) override;
+    const IR::Node *postorder(IR::Neq *e) override;
+    const IR::Node *postorder(IR::Lss *e) override;
+    const IR::Node *postorder(IR::Grt *e) override;
+    const IR::Node *postorder(IR::Leq *e) override;
+    const IR::Node *postorder(IR::Geq *e) override;
+    const IR::Node *postorder(IR::Shl *e) override;
+    const IR::Node *postorder(IR::Shr *e) override;
+    const IR::Node *postorder(IR::Concat *e) override;
+    const IR::Node *postorder(IR::Member *e) override;
+    const IR::Node *postorder(IR::Cast *e) override;
+    const IR::Node *postorder(IR::Mux *e) override;
+    const IR::Node *postorder(IR::Type_Bits *type) override;
+    const IR::Node *postorder(IR::Type_Varbits *type) override;
+    const IR::Node *postorder(IR::SelectExpression *e) override;
+    const IR::Node *postorder(IR::IfStatement *statement) override;
+    const IR::Node *preorder(IR::AssignmentStatement *statement) override;
+    const IR::Node *preorder(IR::ArrayIndex *e) override;
+    const IR::BlockStatement *preorder(IR::BlockStatement *bs) override {
         if (bs->annotations->getSingle("disable_optimization")) prune();
         return bs;
     }
@@ -153,8 +153,8 @@ class DoConstantFolding : public Transform {
  */
 class ConstantFolding : public PassManager {
  public:
-    ConstantFolding(ReferenceMap* refMap, TypeMap* typeMap, bool warnings = true,
-                    TypeChecking* typeChecking = nullptr) {
+    ConstantFolding(ReferenceMap *refMap, TypeMap *typeMap, bool warnings = true,
+                    TypeChecking *typeChecking = nullptr) {
         if (typeMap != nullptr) {
             if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
             passes.push_back(typeChecking);

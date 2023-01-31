@@ -1,0 +1,12 @@
+issue3787.p4(3): [--Werror=type-error] error: x: a parameter with type Y cannot have a direction
+control c1(in Y x);
+                ^
+issue3787.p4(2)
+extern Y {}
+       ^
+issue3787.p4(4): [--Werror=type-error] error: x: a parameter with type X cannot have a direction
+control c2(in X<bit> x);
+                     ^
+issue3787.p4(1)
+extern X<T> {}
+       ^

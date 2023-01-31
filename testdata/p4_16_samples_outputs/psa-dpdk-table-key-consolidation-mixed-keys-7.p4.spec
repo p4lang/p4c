@@ -58,7 +58,7 @@ struct metadata {
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<16> local_metadata_data
 	bit<16> ingress_tbl_local_metadata_data
-	bit<8> key_1
+	bit<8> ingress_tbl_key
 	bit<16> ingress_tbl_tcp_dstPort
 	bit<16> tmpMask
 	bit<8> tmpMask_0
@@ -81,7 +81,7 @@ action execute_1 args none {
 table tbl {
 	key {
 		m.ingress_tbl_local_metadata_data exact
-		m.key_1 exact
+		m.ingress_tbl_key exact
 		m.ingress_tbl_tcp_dstPort exact
 	}
 	actions {
@@ -109,7 +109,7 @@ apply {
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
 	INGRESSPARSERIMPL_ACCEPT :	mov m.ingress_tbl_local_metadata_data m.local_metadata_data
-	mov m.key_1 0x48
+	mov m.ingress_tbl_key 0x48
 	mov m.ingress_tbl_tcp_dstPort h.tcp.dstPort
 	table tbl
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0

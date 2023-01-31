@@ -30,18 +30,18 @@ if the reference occurs in a select expression.  This should be run
 after tuple elimination, so we only need to deal with structs.
 */
 class SubstituteStructures : public Transform {
-    TypeMap* typeMap;
+    TypeMap *typeMap;
 
-    void explode(const IR::Expression* expression, const IR::Type* type,
-                 IR::Vector<IR::Expression>* components);
+    void explode(const IR::Expression *expression, const IR::Type *type,
+                 IR::Vector<IR::Expression> *components);
 
  public:
-    explicit SubstituteStructures(TypeMap* typeMap) : typeMap(typeMap) {
+    explicit SubstituteStructures(TypeMap *typeMap) : typeMap(typeMap) {
         CHECK_NULL(typeMap);
         setName("SubstituteStructures");
     }
 
-    const IR::Node* postorder(IR::PathExpression* expression) override;
+    const IR::Node *postorder(IR::PathExpression *expression) override;
 };
 
 /**
@@ -66,15 +66,15 @@ class UnnestSelectList : public Transform {
     // E.g.: [__[__]_] for two nested lists.
     cstring nesting;
 
-    void flatten(const IR::Expression* expression, IR::Vector<IR::Expression>* output);
-    void flatten(const IR::Expression* expression, unsigned* nestingIndex,
-                 IR::Vector<IR::Expression>* output);
+    void flatten(const IR::Expression *expression, IR::Vector<IR::Expression> *output);
+    void flatten(const IR::Expression *expression, unsigned *nestingIndex,
+                 IR::Vector<IR::Expression> *output);
 
  public:
     UnnestSelectList() { setName("UnnestSelectList"); }
 
-    const IR::Node* preorder(IR::SelectExpression* expression) override;
-    const IR::Node* preorder(IR::P4Control* control) override {
+    const IR::Node *preorder(IR::SelectExpression *expression) override;
+    const IR::Node *preorder(IR::P4Control *control) override {
         prune();
         return control;
     }
@@ -82,8 +82,8 @@ class UnnestSelectList : public Transform {
 
 class SimplifySelectList : public PassManager {
  public:
-    SimplifySelectList(ReferenceMap* refMap, TypeMap* typeMap,
-                       TypeChecking* typeChecking = nullptr) {
+    SimplifySelectList(ReferenceMap *refMap, TypeMap *typeMap,
+                       TypeChecking *typeChecking = nullptr) {
         if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new SubstituteStructures(typeMap));

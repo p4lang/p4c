@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-void printVersion(const char* binaryName) {
+void printVersion(const char *binaryName) {
     std::cout << binaryName << std::endl
               << "Version"
               << " " << P4TOOLS_VERSION_MAJOR << "." << P4TOOLS_VERSION_MINOR << "."

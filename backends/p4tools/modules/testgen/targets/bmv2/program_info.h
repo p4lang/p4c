@@ -23,7 +23,7 @@ class BMv2_V1ModelProgramInfo : public ProgramInfo {
  private:
     /// The program's top level blocks: the parser, the checksum verifier, the MAU pipeline, the
     /// checksum calculator, and the deparser.
-    const ordered_map<cstring, const IR::Type_Declaration*> programmableBlocks;
+    const ordered_map<cstring, const IR::Type_Declaration *> programmableBlocks;
 
     /// The declid of each top-level parser type, mapped to its corresponding gress.
     const std::map<int, int> declIdToGress;
@@ -33,36 +33,39 @@ class BMv2_V1ModelProgramInfo : public ProgramInfo {
 
     /// This function contains an imperative specification of the inter-pipe interaction in the
     /// target.
-    std::vector<Continuation::Command> processDeclaration(const IR::Type_Declaration* typeDecl,
+    std::vector<Continuation::Command> processDeclaration(const IR::Type_Declaration *typeDecl,
                                                           size_t blockIdx) const;
 
  public:
-    BMv2_V1ModelProgramInfo(const IR::P4Program* program,
-                            ordered_map<cstring, const IR::Type_Declaration*> inputBlocks,
+    BMv2_V1ModelProgramInfo(const IR::P4Program *program,
+                            ordered_map<cstring, const IR::Type_Declaration *> inputBlocks,
                             const std::map<int, int> declIdToGress);
 
     /// @returns the gress associated with the given parser.
-    int getGress(const IR::Type_Declaration*) const;
+    int getGress(const IR::Type_Declaration *) const;
 
     /// @returns the programmable blocks of the program. Should be 6.
-    const ordered_map<cstring, const IR::Type_Declaration*>* getProgrammableBlocks() const;
+    const ordered_map<cstring, const IR::Type_Declaration *> *getProgrammableBlocks() const;
 
     /// @returns the name of the parameter for a given programmable-block label and the parameter
     /// index. This is the name of the parameter that is used in the P4 program.
-    const IR::PathExpression* getBlockParam(cstring blockLabel, size_t paramIndex) const;
+    const IR::PathExpression *getBlockParam(cstring blockLabel, size_t paramIndex) const;
 
-    const IR::Member* getTargetInputPortVar() const override;
+    const IR::Member *getTargetInputPortVar() const override;
 
-    const IR::Member* getTargetOutputPortVar() const override;
+    /// @returns the constraint expression for a given port variable.
+    static const IR::Expression *getPortConstraint(const IR::Member *portVar);
 
-    const IR::Expression* dropIsActive() const override;
+    const IR::Member *getTargetOutputPortVar() const override;
 
-    const IR::Expression* createTargetUninitialized(const IR::Type* type,
+    const IR::Expression *dropIsActive() const override;
+
+    const IR::Expression *createTargetUninitialized(const IR::Type *type,
                                                     bool forceTaint) const override;
 
-    const IR::Type_Bits* getParserErrorType() const override;
+    const IR::Type_Bits *getParserErrorType() const override;
 
-    const IR::Member* getParserParamVar(const IR::P4Parser* parser, const IR::Type* type,
+    const IR::Member *getParserParamVar(const IR::P4Parser *parser, const IR::Type *type,
                                         size_t paramIndex, cstring paramLabel) const override;
 };
 

@@ -19,7 +19,7 @@ Target::Spec::Spec(std::string deviceName, std::string archName)
                    ::tolower);
 }
 
-bool Target::Spec::operator<(const Spec& other) const {
+bool Target::Spec::operator<(const Spec &other) const {
     if (deviceName != other.deviceName) {
         return deviceName < other.deviceName;
     }
@@ -31,7 +31,7 @@ bool Target::Spec::operator<(const Spec& other) const {
  * ============================================================================================= */
 
 boost::optional<Target::Spec> Target::curTarget = boost::none;
-std::map<Target::Spec, std::map<std::string, const Target*>> Target::registry = {};
+std::map<Target::Spec, std::map<std::string, const Target *>> Target::registry = {};
 std::map<std::string, std::string> Target::defaultArchByDevice = {};
 std::map<std::string, std::string> Target::defaultDeviceByArch = {};
 

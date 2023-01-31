@@ -20,7 +20,7 @@ limitations under the License.
 
 #include "hex.h"
 
-std::ostream& operator<<(std::ostream& os, const bitvec& bv) {
+std::ostream &operator<<(std::ostream &os, const bitvec &bv) {
     if (bv.size == 1) {
         os << hex(bv.data);
     } else {
@@ -39,7 +39,7 @@ std::ostream& operator<<(std::ostream& os, const bitvec& bv) {
     return os;
 }
 
-std::istream& operator>>(std::istream& is, bitvec& bv) {
+std::istream &operator>>(std::istream &is, bitvec &bv) {
     char ch;
     while (is && isspace((ch = is.get()))) {
     }
@@ -61,7 +61,7 @@ std::istream& operator>>(std::istream& is, bitvec& bv) {
     return is;
 }
 
-bool operator>>(const char* s, bitvec& bv) {
+bool operator>>(const char *s, bitvec &bv) {
     bv.clear();
     while (*s) {
         if (!isxdigit(*s)) return false;
@@ -74,7 +74,7 @@ bool operator>>(const char* s, bitvec& bv) {
     return true;
 }
 
-bitvec& bitvec::operator>>=(size_t count) {
+bitvec &bitvec::operator>>=(size_t count) {
     if (size == 1) {
         if (count >= bits_per_unit)
             data = 0;
@@ -100,7 +100,7 @@ bitvec& bitvec::operator>>=(size_t count) {
     return *this;
 }
 
-bitvec& bitvec::operator<<=(size_t count) {
+bitvec &bitvec::operator<<=(size_t count) {
     size_t needsize = (max().index() + count + bits_per_unit) / bits_per_unit;
     if (needsize > size) expand(needsize);
     if (size == 1) {

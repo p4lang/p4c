@@ -44,13 +44,13 @@ struct ErrorMessage {
 
     ErrorMessage() {}
     // Invoked from backwards compatible error_helper
-    ErrorMessage(const std::string& prefix, const Util::SourceInfo& info, const std::string& suffix)
+    ErrorMessage(const std::string &prefix, const Util::SourceInfo &info, const std::string &suffix)
         : prefix(prefix), locations({info}), suffix(suffix) {}
     // Invoked from error_reporter
-    ErrorMessage(MessageType type, const std::string& prefix, const std::string& suffix)
+    ErrorMessage(MessageType type, const std::string &prefix, const std::string &suffix)
         : type(type), prefix(prefix), suffix(suffix) {}
-    ErrorMessage(MessageType type, const std::string& prefix, const std::string& message,
-                 const std::vector<Util::SourceInfo>& locations, const std::string& suffix)
+    ErrorMessage(MessageType type, const std::string &prefix, const std::string &message,
+                 const std::vector<Util::SourceInfo> &locations, const std::string &suffix)
         : type(type), prefix(prefix), message(message), locations(locations), suffix(suffix) {}
 
     std::string getPrefix() const;
@@ -65,7 +65,7 @@ struct ParserErrorMessage {
     Util::SourceInfo location;
     cstring message;
 
-    ParserErrorMessage(const Util::SourceInfo& loc, const cstring& msg)
+    ParserErrorMessage(const Util::SourceInfo &loc, const cstring &msg)
         : location(loc), message(msg) {}
 
     std::string toString() const;

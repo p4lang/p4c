@@ -28,7 +28,7 @@ using Value = IR::Literal;
 
 class Z3SolverTests : public ::testing::Test {
  protected:
-    Z3SolverTests(const char* condition, const char* equation)
+    Z3SolverTests(const char *condition, const char *equation)
         : condition(condition), equation(equation) {}
     virtual void SetUp() {
         expression = nullptr;
@@ -86,33 +86,33 @@ class Z3SolverTests : public ::testing::Test {
         }
 
         // Produce a ProgramInfo, which is needed to create a SmallStepEvaluator.
-        const auto* progInfo = TestgenTarget::initProgram(test->program);
+        const auto *progInfo = TestgenTarget::initProgram(test->program);
         if (progInfo == nullptr) {
             return;
         }
 
         // Extract the binary operation from the P4Program
-        auto* const declVector = test->program->getDeclsByName("mau")->toVector();
-        const auto* decl = (*declVector)[0];
-        const auto* control = decl->to<IR::P4Control>();
-        for (const auto* st : control->body->components) {
-            if (const auto* as = st->to<IR::IfStatement>()) {
+        auto *const declVector = test->program->getDeclsByName("mau")->toVector();
+        const auto *decl = (*declVector)[0];
+        const auto *control = decl->to<IR::P4Control>();
+        for (const auto *st : control->body->components) {
+            if (const auto *as = st->to<IR::IfStatement>()) {
                 expression = as->condition;
-                if (const auto* op = as->ifTrue->to<IR::AssignmentStatement>()) {
+                if (const auto *op = as->ifTrue->to<IR::AssignmentStatement>()) {
                     variableValue = op;
                 }
             }
         }
     }
-    const IR::Expression* expression = nullptr;
-    const IR::AssignmentStatement* variableValue = nullptr;
+    const IR::Expression *expression = nullptr;
+    const IR::AssignmentStatement *variableValue = nullptr;
     std::string condition;
     std::string equation;
 };
 
 namespace {
 
-void test(const IR::Expression* expression, const IR::AssignmentStatement* variableValue) {
+void test(const IR::Expression *expression, const IR::AssignmentStatement *variableValue) {
     // checking initial data
     ASSERT_TRUE(expression);
     ASSERT_TRUE(variableValue);
@@ -129,20 +129,20 @@ void test(const IR::Expression* expression, const IR::AssignmentStatement* varia
 
     ASSERT_EQ(model.count(variableValue->left), 1u);
 
-    const auto* value = model.at(variableValue->left);
+    const auto *value = model.at(variableValue->left);
 
     if (variableValue->right->is<IR::BoolLiteral>()) {
         ASSERT_TRUE(variableValue->right->is<IR::BoolLiteral>());
-        const auto* valueP4bool = variableValue->right->to<IR::BoolLiteral>();
+        const auto *valueP4bool = variableValue->right->to<IR::BoolLiteral>();
         ASSERT_TRUE(value->is<IR::BoolLiteral>());
-        const auto* valueZ3 = value->to<IR::BoolLiteral>();
+        const auto *valueZ3 = value->to<IR::BoolLiteral>();
         ASSERT_EQ(valueZ3->value, valueP4bool->value);
     }
     if (variableValue->right->is<IR::Constant>()) {
         ASSERT_TRUE(variableValue->right->is<IR::Constant>());
-        const auto* valueP4const = variableValue->right->to<IR::Constant>();
+        const auto *valueP4const = variableValue->right->to<IR::Constant>();
         ASSERT_TRUE(value->is<IR::Constant>());
-        const auto* valueZ3 = value->to<IR::Constant>();
+        const auto *valueZ3 = value->to<IR::Constant>();
         ASSERT_EQ(valueZ3->value, valueP4const->value);
     }
 }

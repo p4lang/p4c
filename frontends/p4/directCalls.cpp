@@ -2,28 +2,28 @@
 
 namespace P4 {
 
-const IR::Node* DoInstantiateCalls::postorder(IR::P4Parser* parser) {
+const IR::Node *DoInstantiateCalls::postorder(IR::P4Parser *parser) {
     insert.append(parser->parserLocals);
     parser->parserLocals = insert;
     insert.clear();
     return parser;
 }
 
-const IR::Node* DoInstantiateCalls::postorder(IR::P4Control* control) {
+const IR::Node *DoInstantiateCalls::postorder(IR::P4Control *control) {
     insert.append(control->controlLocals);
     control->controlLocals = insert;
     insert.clear();
     return control;
 }
 
-const IR::Node* DoInstantiateCalls::postorder(IR::MethodCallExpression* expression) {
+const IR::Node *DoInstantiateCalls::postorder(IR::MethodCallExpression *expression) {
     // Identify type.apply(...) methods
     auto mem = expression->method->to<IR::Member>();
     if (mem == nullptr) return expression;
     auto tn = mem->expr->to<IR::TypeNameExpression>();
     if (tn == nullptr) return expression;
 
-    const IR::Type_Name* tname;
+    const IR::Type_Name *tname;
     if (auto ts = tn->typeName->to<IR::Type_Specialized>()) {
         tname = ts->baseType;
     } else {

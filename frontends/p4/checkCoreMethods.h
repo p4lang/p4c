@@ -24,25 +24,25 @@ namespace P4 {
 
 /// Check types for arguments of core.p4 methods
 class DoCheckCoreMethods : public Inspector {
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
 
-    void checkEmitType(const IR::Expression* emit, const IR::Type* type) const;
-    void checkCorelibMethods(const ExternMethod* em) const;
+    void checkEmitType(const IR::Expression *emit, const IR::Type *type) const;
+    void checkCorelibMethods(const ExternMethod *em) const;
 
  public:
-    DoCheckCoreMethods(ReferenceMap* refMap, TypeMap* typeMap) : refMap(refMap), typeMap(typeMap) {
+    DoCheckCoreMethods(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
         setName("DoCheckCoreMethods");
     }
 
-    void postorder(const IR::MethodCallExpression* expr) override;
+    void postorder(const IR::MethodCallExpression *expr) override;
 };
 
 class CheckCoreMethods : public PassManager {
  public:
-    CheckCoreMethods(ReferenceMap* refMap, TypeMap* typeMap) {
+    CheckCoreMethods(ReferenceMap *refMap, TypeMap *typeMap) {
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DoCheckCoreMethods(refMap, typeMap));
         setName("CheckCoreMethods");

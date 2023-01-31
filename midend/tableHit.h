@@ -33,21 +33,21 @@ else
 This may be needed by some back-ends which only support hit test in conditionals
 */
 class DoTableHit : public Transform {
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
 
  public:
-    DoTableHit(ReferenceMap* refMap, TypeMap* typeMap) : refMap(refMap), typeMap(typeMap) {
+    DoTableHit(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
         setName("DoTableHit");
     }
-    const IR::Node* postorder(IR::AssignmentStatement* statement) override;
+    const IR::Node *postorder(IR::AssignmentStatement *statement) override;
 };
 
 class TableHit : public PassManager {
  public:
-    TableHit(ReferenceMap* refMap, TypeMap* typeMap, TypeChecking* typeChecking = nullptr) {
+    TableHit(ReferenceMap *refMap, TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
         if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoTableHit(refMap, typeMap));

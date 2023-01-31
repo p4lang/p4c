@@ -1,0 +1,3 @@
+issue3814.p4(6): [--Werror=invalid] error: tt: optional parameter not allowed here
+control g(in bit t)(@optional bit tt)
+                                  ^^

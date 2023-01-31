@@ -82,7 +82,7 @@ namespace {
 /* Base class for inspectors that do not really visit the program. */
 class NoVisit : public Inspector {
     // prune visit
-    bool preorder(const IR::P4Program*) override { return false; }
+    bool preorder(const IR::P4Program *) override { return false; }
 };
 
 /**
@@ -95,15 +95,15 @@ class PrettyPrint : public Inspector {
     cstring inputfile;
 
  public:
-    explicit PrettyPrint(const CompilerOptions& options) {
+    explicit PrettyPrint(const CompilerOptions &options) {
         setName("PrettyPrint");
         ppfile = options.prettyPrintFile;
         inputfile = options.file;
     }
-    bool preorder(const IR::P4Program* program) override {
+    bool preorder(const IR::P4Program *program) override {
         if (!ppfile.isNullOrEmpty()) {
             Util::PathName path(ppfile);
-            std::ostream* ppStream = openFile(path.toString(), true);
+            std::ostream *ppStream = openFile(path.toString(), true);
             P4::ToP4 top4(ppStream, false, inputfile);
             (void)program->apply(top4);
         }
@@ -132,12 +132,12 @@ class FrontEndDump : public NoVisit {
 
 /** Changes the value of strictStruct in the typeMap */
 class SetStrictStruct : public NoVisit {
-    TypeMap* typeMap;
+    TypeMap *typeMap;
     bool strictStruct;
 
  public:
-    SetStrictStruct(TypeMap* typeMap, bool strict) : typeMap(typeMap), strictStruct(strict) {}
-    Visitor::profile_t init_apply(const IR::Node* node) override {
+    SetStrictStruct(TypeMap *typeMap, bool strict) : typeMap(typeMap), strictStruct(strict) {}
+    Visitor::profile_t init_apply(const IR::Node *node) override {
         typeMap->setStrictStruct(strictStruct);
         return Inspector::init_apply(node);
     }
@@ -146,8 +146,8 @@ class SetStrictStruct : public NoVisit {
 }  // namespace
 
 // TODO: remove skipSideEffectOrdering flag
-const IR::P4Program* FrontEnd::run(const CompilerOptions& options, const IR::P4Program* program,
-                                   bool skipSideEffectOrdering, std::ostream* outStream) {
+const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4Program *program,
+                                   bool skipSideEffectOrdering, std::ostream *outStream) {
     if (program == nullptr && options.listFrontendPasses == 0) return nullptr;
 
     bool isv1 = options.isv1();
@@ -260,7 +260,7 @@ const IR::P4Program* FrontEnd::run(const CompilerOptions& options, const IR::P4P
     passes.setName("FrontEnd");
     passes.setStopOnError(true);
     passes.addDebugHooks(hooks, true);
-    const IR::P4Program* result = program->apply(passes);
+    const IR::P4Program *result = program->apply(passes);
     return result;
 }
 

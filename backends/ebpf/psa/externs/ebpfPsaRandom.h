@@ -24,10 +24,10 @@ class EBPFRandomPSA : public EBPFObject {
     long range;
 
  public:
-    explicit EBPFRandomPSA(const IR::Declaration_Instance* di);
+    explicit EBPFRandomPSA(const IR::Declaration_Instance *di);
 
-    void processMethod(CodeBuilder* builder, const P4::ExternMethod* method) const;
-    void emitRead(CodeBuilder* builder) const;
+    void processMethod(CodeBuilder *builder, const P4::ExternMethod *method) const;
+    void emitRead(CodeBuilder *builder) const;
 };
 
 }  // namespace EBPF

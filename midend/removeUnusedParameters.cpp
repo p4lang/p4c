@@ -22,11 +22,11 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Node* RemoveUnusedActionParameters::postorder(IR::P4Action* action) {
+const IR::Node *RemoveUnusedActionParameters::postorder(IR::P4Action *action) {
     auto params = action->parameters;
 
     // If all of the parameters to this action are used, there's nothing to do.
-    auto isUsed = [&](const IR::Parameter* p) { return refMap->isUsed(p); };
+    auto isUsed = [&](const IR::Parameter *p) { return refMap->isUsed(p); };
     if (std::all_of(params->begin(), params->end(), isUsed)) return action;
 
     // Some parameters are unused; filter them out.

@@ -28,11 +28,11 @@ class hex {
 
  public:
     explicit hex(intmax_t v, int w = 0, char f = ' ') : val(v), width(w), fill(f) {}
-    explicit hex(void* v, int w = 0, char f = ' ') : val((intmax_t)v), width(w), fill(f) {}
-    friend std::ostream& operator<<(std::ostream& os, const hex& h);
+    explicit hex(void *v, int w = 0, char f = ' ') : val((intmax_t)v), width(w), fill(f) {}
+    friend std::ostream &operator<<(std::ostream &os, const hex &h);
 };
 
-inline std::ostream& operator<<(std::ostream& os, const hex& h) {
+inline std::ostream &operator<<(std::ostream &os, const hex &h) {
     auto save = os.flags();
     auto save_fill = os.fill();
     os << std::hex << std::setw(h.width) << std::setfill(h.fill) << h.val;
@@ -42,21 +42,21 @@ inline std::ostream& operator<<(std::ostream& os, const hex& h) {
 }
 
 class hexvec {
-    void* data;
+    void *data;
     size_t elsize, len;
     int width;
     char fill;
 
  public:
     template <typename I>
-    hexvec(I* d, size_t l, int w = 0, char f = ' ')
+    hexvec(I *d, size_t l, int w = 0, char f = ' ')
         : data(d), elsize(sizeof(I)), len(l), width(w), fill(f) {}
     template <typename T>
-    explicit hexvec(std::vector<T>& d, int w = 0, char f = ' ')
+    explicit hexvec(std::vector<T> &d, int w = 0, char f = ' ')
         : data(d.data()), elsize(sizeof(T)), len(d.size()), width(w), fill(f) {}
-    friend std::ostream& operator<<(std::ostream& os, const hexvec& h);
+    friend std::ostream &operator<<(std::ostream &os, const hexvec &h);
 };
 
-std::ostream& operator<<(std::ostream& os, const hexvec& h);
+std::ostream &operator<<(std::ostream &os, const hexvec &h);
 
 #endif /* _LIB_HEX_H_ */

@@ -39,7 +39,7 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/nullstream.h"
 
-void generateTDIBfrtJson(bool isTDI, const IR::P4Program* program, DPDK::DpdkOptions& options) {
+void generateTDIBfrtJson(bool isTDI, const IR::P4Program *program, DPDK::DpdkOptions &options) {
     auto p4RuntimeSerializer = P4::P4RuntimeSerializer::get();
     if (options.arch == "psa")
         p4RuntimeSerializer->registerArch(
@@ -51,7 +51,7 @@ void generateTDIBfrtJson(bool isTDI, const IR::P4Program* program, DPDK::DpdkOpt
 
     cstring filename = isTDI ? options.tdiFile : options.bfRtSchema;
     auto p4rt = new P4::BFRT::BFRuntimeSchemaGenerator(*p4Runtime.p4Info, isTDI, options);
-    std::ostream* out = openFile(filename, false);
+    std::ostream *out = openFile(filename, false);
     if (!out) {
         ::error(ErrorType::ERR_IO, "Could not open file: %1%", filename);
         return;
@@ -59,11 +59,11 @@ void generateTDIBfrtJson(bool isTDI, const IR::P4Program* program, DPDK::DpdkOpt
     p4rt->serializeBFRuntimeSchema(out);
 }
 
-int main(int argc, char* const argv[]) {
+int main(int argc, char *const argv[]) {
     setup_gc_logging();
 
     AutoCompileContext autoDpdkContext(new DPDK::DpdkContext);
-    auto& options = DPDK::DpdkContext::get().options();
+    auto &options = DPDK::DpdkContext::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.compilerVersion = DPDK_VERSION_STRING;
 
@@ -74,8 +74,8 @@ int main(int argc, char* const argv[]) {
 
     auto hook = options.getDebugHook();
 
-    const IR::P4Program* program = nullptr;
-    const IR::ToplevelBlock* toplevel = nullptr;
+    const IR::P4Program *program = nullptr;
+    const IR::ToplevelBlock *toplevel = nullptr;
 
     if (options.loadIRFromJson == false) {
         program = P4::parseP4File(options);
@@ -88,7 +88,7 @@ int main(int argc, char* const argv[]) {
             P4::FrontEnd frontend;
             frontend.addDebugHook(hook);
             program = frontend.run(options, program);
-        } catch (const std::exception& bug) {
+        } catch (const std::exception &bug) {
             std::cerr << bug.what() << std::endl;
             return 1;
         }
@@ -120,7 +120,7 @@ int main(int argc, char* const argv[]) {
     }
 
     if (::errorCount() > 0) return 1;
-
+    auto p4info = *P4::generateP4Runtime(program, options.arch).p4Info;
     DPDK::DpdkMidEnd midEnd(options);
     midEnd.addDebugHook(hook);
     try {
@@ -128,19 +128,19 @@ int main(int argc, char* const argv[]) {
         if (::errorCount() > 1 || toplevel == nullptr || toplevel->getMain() == nullptr) return 1;
         if (options.dumpJsonFile)
             JSONGenerator(*openFile(options.dumpJsonFile, true), true) << program << std::endl;
-    } catch (const std::exception& bug) {
+    } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
     }
     if (::errorCount() > 0) return 1;
 
-    auto backend = new DPDK::DpdkBackend(options, &midEnd.refMap, &midEnd.typeMap);
+    auto backend = new DPDK::DpdkBackend(options, &midEnd.refMap, &midEnd.typeMap, p4info);
 
     backend->convert(toplevel);
     if (::errorCount() > 0) return 1;
 
     if (!options.outputFile.isNullOrEmpty()) {
-        std::ostream* out = openFile(options.outputFile, false);
+        std::ostream *out = openFile(options.outputFile, false);
         if (out != nullptr) {
             backend->codegen(*out);
             out->flush();

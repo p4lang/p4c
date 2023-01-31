@@ -92,7 +92,7 @@ struct MeterType_Model : public ::Model::Enum_Model {
 struct ActionProfile_Model : public ::Model::Extern_Model {
     ActionProfile_Model()
         : Extern_Model("action_profile"), sizeType(IR::Type_Bits::get(32)), sizeParam("size") {}
-    const IR::Type* sizeType;
+    const IR::Type *sizeType;
     ::Model::Elem sizeParam;
 };
 
@@ -103,9 +103,9 @@ struct ActionSelector_Model : public ::Model::Extern_Model {
           sizeParam("size"),
           widthType(IR::Type_Bits::get(32)),
           algorithmParam("algorithm") {}
-    const IR::Type* sizeType;
+    const IR::Type *sizeType;
     ::Model::Elem sizeParam;
-    const IR::Type* widthType;
+    const IR::Type *widthType;
     ::Model::Elem algorithmParam;
 };
 
@@ -117,7 +117,7 @@ struct Random_Model : public ::Model::Elem {
 class Truncate : public Model::Extern_Model {
  public:
     Truncate() : Extern_Model("truncate"), length_type(IR::Type::Bits::get(32)) {}
-    const IR::Type* length_type;
+    const IR::Type *length_type;
 };
 
 struct CounterOrMeter_Model : public ::Model::Extern_Model {
@@ -129,7 +129,7 @@ struct CounterOrMeter_Model : public ::Model::Extern_Model {
           counterType() {}
     ::Model::Elem sizeParam;
     ::Model::Elem typeParam;
-    const IR::Type* size_type;
+    const IR::Type *size_type;
     CounterType_Model counterType;
     MeterType_Model meterType;
 };
@@ -144,12 +144,12 @@ struct Register_Model : public ::Model::Extern_Model {
     ::Model::Elem sizeParam;
     ::Model::Elem read;
     ::Model::Elem write;
-    const IR::Type* size_type;
+    const IR::Type *size_type;
 };
 
 struct DigestReceiver_Model : public ::Model::Elem {
     DigestReceiver_Model() : Elem("digest"), receiverType(IR::Type_Bits::get(32)) {}
-    const IR::Type* receiverType;
+    const IR::Type *receiverType;
 };
 
 struct Counter_Model : public CounterOrMeter_Model {
@@ -222,7 +222,7 @@ struct Cloner_Model : public ::Model::Extern_Model {
           sessionType(IR::Type_Bits::get(32)) {}
     ::Model::Elem clone3;
     CloneType_Model cloneType;
-    const IR::Type* sessionType;
+    const IR::Type *sessionType;
 };
 
 struct Switch_Model : public ::Model::Elem {
@@ -345,21 +345,21 @@ class V1Model : public ::Model::Model {
 
     static V1Model instance;
     // The following match constants appearing in v1model.p4
-    static const char* versionInitial;  // 20180101
-    static const char* versionCurrent;  // 20200408
+    static const char *versionInitial;  // 20180101
+    static const char *versionCurrent;  // 20200408
 };
 
 /// Stores the version of the global constant __v1model_version used
 /// in the 'version' public instance variable.
 class getV1ModelVersion : public Inspector {
-    bool preorder(const IR::Declaration_Constant* dc) override {
+    bool preorder(const IR::Declaration_Constant *dc) override {
         if (dc->name == "__v1model_version") {
             auto val = dc->initializer->to<IR::Constant>();
             version = static_cast<unsigned>(val->value);
         }
         return false;
     }
-    bool preorder(const IR::Declaration*) override { return false; }
+    bool preorder(const IR::Declaration *) override { return false; }
 
  public:
     unsigned version = 0;

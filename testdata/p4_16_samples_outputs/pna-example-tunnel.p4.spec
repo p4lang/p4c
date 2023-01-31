@@ -94,12 +94,12 @@ table tunnel_encap_set_tunnel_encap {
 
 apply {
 	rx m.pna_main_input_metadata_input_port
+	regrd m.pna_main_input_metadata_direction direction m.pna_main_input_metadata_input_port
 	extract h.outer_ethernet
 	jmpeq PACKET_PARSER_PARSE_IPV4_OTR h.outer_ethernet.ether_type 0x800
 	jmp PACKET_PARSER_ACCEPT
 	PACKET_PARSER_PARSE_IPV4_OTR :	extract h.outer_ipv4
-	PACKET_PARSER_ACCEPT :	regrd m.pna_main_input_metadata_direction direction m.pna_main_input_metadata_input_port
-	jmpneq LABEL_FALSE m.pna_main_input_metadata_direction 0x0
+	PACKET_PARSER_ACCEPT :	jmpneq LABEL_FALSE m.pna_main_input_metadata_direction 0x0
 	mov m.main_control_tunnel_decap_ipv4_tunnel_term_table_outer_ipv41 h.outer_ipv4.src_addr
 	mov m.main_control_tunnel_decap_ipv4_tunnel_term_table_outer_ipv42 h.outer_ipv4.dst_addr
 	mov m.main_control_tunnel_decap_ipv4_tunnel_term_table_local_meta3 m.local_metadata__tunnel_tun_type3

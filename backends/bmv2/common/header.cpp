@@ -22,13 +22,13 @@ limitations under the License.
 namespace BMV2 {
 
 // TODO(hanw): remove
-Util::JsonArray* HeaderConverter::pushNewArray(Util::JsonArray* parent) {
+Util::JsonArray *HeaderConverter::pushNewArray(Util::JsonArray *parent) {
     auto result = new Util::JsonArray();
     parent->append(result);
     return result;
 }
 
-HeaderConverter::HeaderConverter(ConversionContext* ctxt, cstring scalarsName)
+HeaderConverter::HeaderConverter(ConversionContext *ctxt, cstring scalarsName)
     : ctxt(ctxt), scalarsName(scalarsName) {
     setName("HeaderConverter");
     CHECK_NULL(ctxt);
@@ -39,7 +39,7 @@ HeaderConverter::HeaderConverter(ConversionContext* ctxt, cstring scalarsName)
  *
  * @param meta this boolean indicates if the struct is a metadata or header.
  */
-void HeaderConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool meta) {
+void HeaderConverter::addTypesAndInstances(const IR::Type_StructLike *type, bool meta) {
     LOG2("Adding " << type);
     for (auto f : type->fields) {
         auto ft = ctxt->typeMap->getType(f, true);
@@ -70,7 +70,7 @@ void HeaderConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool
                     // We have to add separately a header instance for all
                     // headers in the union.  Each instance will be named with
                     // a prefix including the union name, e.g., "u.h"
-                    Util::JsonArray* fields = new Util::JsonArray();
+                    Util::JsonArray *fields = new Util::JsonArray();
                     for (auto uf : ft->to<IR::Type_HeaderUnion>()->fields) {
                         auto uft = ctxt->typeMap->getType(uf, true);
                         auto h_name = header_name + "." + uf->controlPlaneName();
@@ -126,8 +126,8 @@ void HeaderConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool
     }
 }
 
-Util::JsonArray* HeaderConverter::addHeaderUnionFields(cstring hdrName,
-                                                       const IR::Type_HeaderUnion* type) {
+Util::JsonArray *HeaderConverter::addHeaderUnionFields(cstring hdrName,
+                                                       const IR::Type_HeaderUnion *type) {
     auto result = new Util::JsonArray();
     for (auto uf : type->fields) {
         auto uft = ctxt->typeMap->getType(uf, true);
@@ -139,7 +139,7 @@ Util::JsonArray* HeaderConverter::addHeaderUnionFields(cstring hdrName,
     return result;
 }
 
-void HeaderConverter::addHeaderStacks(const IR::Type_Struct* headersStruct) {
+void HeaderConverter::addHeaderStacks(const IR::Type_Struct *headersStruct) {
     LOG2("Creating stack " << headersStruct);
     for (auto f : headersStruct->fields) {
         auto ft = ctxt->typeMap->getType(f, true);
@@ -178,7 +178,7 @@ void HeaderConverter::addHeaderStacks(const IR::Type_Struct* headersStruct) {
     }
 }
 
-bool HeaderConverter::isHeaders(const IR::Type_StructLike* st) {
+bool HeaderConverter::isHeaders(const IR::Type_StructLike *st) {
     bool result = false;
     for (auto f : st->fields) {
         if (f->type->is<IR::Type_Header>() || f->type->is<IR::Type_Stack>()) {
@@ -188,16 +188,16 @@ bool HeaderConverter::isHeaders(const IR::Type_StructLike* st) {
     return result;
 }
 
-void HeaderConverter::addHeaderField(const cstring& header, const cstring& name, int size,
+void HeaderConverter::addHeaderField(const cstring &header, const cstring &name, int size,
                                      bool is_signed) {
-    Util::JsonArray* field = new Util::JsonArray();
+    Util::JsonArray *field = new Util::JsonArray();
     field->append(name);
     field->append(size);
     field->append(is_signed);
     ctxt->json->add_header_field(header, field);
 }
 
-void HeaderConverter::addHeaderType(const IR::Type_StructLike* st) {
+void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
     cstring name = st->controlPlaneName();
     auto fields = new Util::JsonArray();
     unsigned max_length = 0;  // for variable-sized headers
@@ -320,7 +320,7 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike* st) {
  * We synthesize a "header_type" for each local which has a struct type
  * and we pack all the scalar-typed locals into a 'scalar' type
  */
-Visitor::profile_t HeaderConverter::init_apply(const IR::Node* node) {
+Visitor::profile_t HeaderConverter::init_apply(const IR::Node *node) {
     scalarsTypeName = ctxt->refMap->newName("scalars");
     ctxt->json->add_header_type(scalarsTypeName);
     // bit<n>, bool, error are packed into scalars type,
@@ -358,7 +358,7 @@ Visitor::profile_t HeaderConverter::init_apply(const IR::Node* node) {
                 cstring union_type = ut->controlPlaneName();
                 std::vector<unsigned> union_ids;
                 for (unsigned i = 0; i < stack->getSize(); i++) {
-                    Util::JsonArray* result = new Util::JsonArray();
+                    Util::JsonArray *result = new Util::JsonArray();
                     cstring name = v->name + "[" + Util::toString(i) + "]";
                     auto fields = addHeaderUnionFields(name, ut);
                     result->concatenate(fields);
@@ -408,7 +408,7 @@ Visitor::profile_t HeaderConverter::init_apply(const IR::Node* node) {
     return Inspector::init_apply(node);
 }
 
-void HeaderConverter::end_apply(const IR::Node*) {
+void HeaderConverter::end_apply(const IR::Node *) {
     // pad scalars to byte boundary
     unsigned padding = scalars_width % 8;
     if (padding != 0) {
@@ -437,7 +437,7 @@ void HeaderConverter::end_apply(const IR::Node*) {
  * @pre assumes no nested struct in parameters.
  * @post none
  */
-bool HeaderConverter::preorder(const IR::Parameter* param) {
+bool HeaderConverter::preorder(const IR::Parameter *param) {
     LOG3("convert param " << param);
     // keep track of which headers we've already generated in ctxt->json
     auto ft = ctxt->typeMap->getType(param->getNode(), true);

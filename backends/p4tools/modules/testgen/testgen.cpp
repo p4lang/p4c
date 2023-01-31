@@ -44,12 +44,12 @@ void Testgen::registerTarget() {
     registerCompilerTargets();
 }
 
-int Testgen::mainImpl(const IR::P4Program* program) {
+int Testgen::mainImpl(const IR::P4Program *program) {
     // Register all available testgen targets.
     // These are discovered by CMAKE, which fills out the register.h.in file.
     registerTestgenTargets();
 
-    const auto* programInfo = TestgenTarget::initProgram(program);
+    const auto *programInfo = TestgenTarget::initProgram(program);
     if (programInfo == nullptr) {
         ::error("Program not supported by target device and architecture.");
         return EXIT_FAILURE;
@@ -63,8 +63,12 @@ int Testgen::mainImpl(const IR::P4Program* program) {
     enableInformationLogging();
 
     auto const inputFile = P4CContext::get().options().file;
-    cstring testDirStr = TestgenOptions::get().outputDir;
-    auto seed = TestgenOptions::get().seed;
+    const auto &testgenOptions = TestgenOptions::get();
+    cstring testDirStr = testgenOptions.outputDir;
+    auto seed = Utils::getCurrentSeed();
+    if (seed) {
+        printFeature("test_info", 4, "============ Program seed %1% =============\n", *seed);
+    }
 
     // Get the basename of the input file and remove the extension
     // This assumes that inputFile is not null.
@@ -77,57 +81,37 @@ int Testgen::mainImpl(const IR::P4Program* program) {
         testPath = fs::path(testDir) / testPath;
     }
 
-    if (seed != boost::none) {
-        // Initialize the global seed for randomness.
-        Utils::setRandomSeed(*seed);
-        printFeature("test_info", 4, "============ Program seed %1% =============\n", *seed);
-    }
-
     Z3Solver solver;
 
-    auto symExec = [&solver, &programInfo, seed]() -> ExplorationStrategy* {
-        std::string explorationStrategy = TestgenOptions::get().explorationStrategy;
-        if (explorationStrategy.compare("randomAccessStack") == 0) {
+    auto *symExec = [&solver, &programInfo, &testgenOptions]() -> ExplorationStrategy * {
+        auto explorationStrategy = testgenOptions.explorationStrategy;
+        if (explorationStrategy == "RANDOM_ACCESS_STACK") {
             // If the user mistakenly specifies an invalid popLevel, we set it to 3.
-            int popLevel = TestgenOptions::get().popLevel;
+            auto popLevel = testgenOptions.popLevel;
             if (popLevel <= 1) {
                 ::warning("--pop-level must be greater than 1; using default value of 3.\n");
                 popLevel = 3;
             }
-            return new RandomAccessStack(solver, *programInfo, seed, popLevel);
+            return new RandomAccessStack(solver, *programInfo, popLevel);
         }
-        if (explorationStrategy.compare("linearEnumeration") == 0) {
-            // If the user mistakenly specifies an invalid bound, we set it to 2
-            // to generate at least 2 tests.
-            int linearBound = TestgenOptions::get().linearEnumeration;
-            if (linearBound <= 1) {
-                ::warning(
-                    "--linear-enumeration must be greater than 1; using default value of 2.\n");
-                linearBound = 2;
-            }
-            return new LinearEnumeration(solver, *programInfo, seed, linearBound);
+        if (explorationStrategy == "LINEAR_ENUMERATION") {
+            return new LinearEnumeration(solver, *programInfo, testgenOptions.linearEnumeration);
         }
-        if (explorationStrategy.compare("maxCoverage") == 0) {
-            return new IncrementalMaxCoverageStack(solver, *programInfo, seed);
+        if (explorationStrategy == "MAX_COVERAGE") {
+            return new IncrementalMaxCoverageStack(solver, *programInfo);
         }
-        if (explorationStrategy.compare("randomAccessMaxCoverage") == 0) {
-            // If the user mistakenly sets an invalid saddlePoint, we set it to 5.
-            int saddlePoint = TestgenOptions::get().saddlePoint;
-            if (saddlePoint <= 1) {
-                ::warning("--saddle-point must be greater than 1; using default value of 5.\n");
-                saddlePoint = 5;
-            }
-            return new RandomAccessMaxCoverage(solver, *programInfo, seed, saddlePoint);
+        if (explorationStrategy == "RANDOM_ACCESS_MAX_COVERAGE") {
+            return new RandomAccessMaxCoverage(solver, *programInfo, testgenOptions.saddlePoint);
         }
-        if (!TestgenOptions::get().selectedBranches.empty()) {
-            std::string selectedBranchesStr = TestgenOptions::get().selectedBranches;
-            return new SelectedBranches(solver, *programInfo, seed, selectedBranchesStr);
+        if (!testgenOptions.selectedBranches.empty()) {
+            std::string selectedBranchesStr = testgenOptions.selectedBranches;
+            return new SelectedBranches(solver, *programInfo, selectedBranchesStr);
         }
-        return new IncrementalStack(solver, *programInfo, seed);
+        return new IncrementalStack(solver, *programInfo);
     }();
 
     // Define how to handle the final state for each test. This is target defined.
-    auto* testBackend = TestgenTarget::getTestBackend(*programInfo, *symExec, testPath, seed);
+    auto *testBackend = TestgenTarget::getTestBackend(*programInfo, *symExec, testPath, seed);
     ExplorationStrategy::Callback callBack =
         std::bind(&TestBackEnd::run, testBackend, std::placeholders::_1);
 
@@ -135,7 +119,7 @@ int Testgen::mainImpl(const IR::P4Program* program) {
         // Run the symbolic executor with given exploration strategy.
         symExec->run(callBack);
     } catch (...) {
-        if (TestgenOptions::get().trackBranches) {
+        if (testgenOptions.trackBranches) {
             // Print list of the selected branches and store all information into
             // dumpFolder/selectedBranches.txt file.
             // This printed list could be used for repeat this bug in arguments of --input-branches
@@ -143,6 +127,12 @@ int Testgen::mainImpl(const IR::P4Program* program) {
             symExec->printCurrentTraceAndBranches(std::cerr);
         }
         throw;
+    }
+
+    if (testBackend->getTestCount() == 0) {
+        ::warning(
+            "Unable to generate tests with given inputs. Double-check provided options and "
+            "parameters.\n");
     }
 
     return ::errorCount() == 0 ? EXIT_SUCCESS : EXIT_FAILURE;

@@ -37,7 +37,7 @@ limitations under the License.
 #include "ubpfBackend.h"
 #include "ubpfModel.h"
 
-void compile(EbpfOptions& options) {
+void compile(EbpfOptions &options) {
     auto hook = options.getDebugHook();
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
     if (isv1) {
@@ -64,12 +64,12 @@ void compile(EbpfOptions& options) {
     UBPF::run_ubpf_backend(options, toplevel, &midend.refMap, &midend.typeMap);
 }
 
-int main(int argc, char* const argv[]) {
+int main(int argc, char *const argv[]) {
     setup_gc_logging();
     setup_signals();
 
     AutoCompileContext autoEbpfContext(new EbpfContext);
-    auto& options = EbpfContext::get().options();
+    auto &options = EbpfContext::get().options();
     options.compilerVersion = P4C_UBPF_VERSION_STRING;
 
     if (options.process(argc, argv) != nullptr) {
@@ -80,7 +80,7 @@ int main(int argc, char* const argv[]) {
 
     try {
         compile(options);
-    } catch (const std::exception& bug) {
+    } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
     }

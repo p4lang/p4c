@@ -30,12 +30,12 @@ limitations under the License.
 namespace EBPF {
 
 class PSAErrorCodesGen : public Inspector {
-    CodeBuilder* builder;
+    CodeBuilder *builder;
 
  public:
-    explicit PSAErrorCodesGen(CodeBuilder* builder) : builder(builder) {}
+    explicit PSAErrorCodesGen(CodeBuilder *builder) : builder(builder) {}
 
-    bool preorder(const IR::Type_Error* errors) override {
+    bool preorder(const IR::Type_Error *errors) override {
         int id = -1;
         for (auto decl : errors->members) {
             ++id;
@@ -61,13 +61,13 @@ class PSAErrorCodesGen : public Inspector {
 };
 
 // =====================PSAEbpfGenerator=============================
-void PSAEbpfGenerator::emitPSAIncludes(CodeBuilder* builder) const {
+void PSAEbpfGenerator::emitPSAIncludes(CodeBuilder *builder) const {
     builder->appendLine("#include <stdbool.h>");
     builder->appendLine("#include <linux/if_ether.h>");
     builder->appendLine("#include \"psa.h\"");
 }
 
-void PSAEbpfGenerator::emitPreamble(CodeBuilder* builder) const {
+void PSAEbpfGenerator::emitPreamble(CodeBuilder *builder) const {
     emitCommonPreamble(builder);
     builder->newline();
 
@@ -86,7 +86,7 @@ void PSAEbpfGenerator::emitPreamble(CodeBuilder* builder) const {
     builder->newline();
 }
 
-void PSAEbpfGenerator::emitCommonPreamble(CodeBuilder* builder) const {
+void PSAEbpfGenerator::emitCommonPreamble(CodeBuilder *builder) const {
     builder->newline();
     builder->appendLine("#define EBPF_MASK(t, w) ((((t)(1)) << (w)) - (t)1)");
     builder->appendLine("#define BYTES(w) ((w) / 8)");
@@ -100,7 +100,7 @@ void PSAEbpfGenerator::emitCommonPreamble(CodeBuilder* builder) const {
     builder->target->emitPreamble(builder);
 }
 
-void PSAEbpfGenerator::emitInternalStructures(CodeBuilder* builder) const {
+void PSAEbpfGenerator::emitInternalStructures(CodeBuilder *builder) const {
     builder->appendLine(
         "struct internal_metadata {\n"
         "    __u16 pkt_ether_type;\n"
@@ -123,7 +123,7 @@ void PSAEbpfGenerator::emitInternalStructures(CodeBuilder* builder) const {
 }
 
 /* Generate headers and structs in p4 prog */
-void PSAEbpfGenerator::emitTypes(CodeBuilder* builder) const {
+void PSAEbpfGenerator::emitTypes(CodeBuilder *builder) const {
     PSAErrorCodesGen errorGen(builder);
     ingress->program->apply(errorGen);
 
@@ -143,7 +143,7 @@ void PSAEbpfGenerator::emitTypes(CodeBuilder* builder) const {
     builder->newline();
 }
 
-void PSAEbpfGenerator::emitGlobalHeadersMetadata(CodeBuilder* builder) const {
+void PSAEbpfGenerator::emitGlobalHeadersMetadata(CodeBuilder *builder) const {
     builder->append("struct hdr_md ");
     builder->blockStart();
     builder->emitIndent();
@@ -167,7 +167,7 @@ void PSAEbpfGenerator::emitGlobalHeadersMetadata(CodeBuilder* builder) const {
     builder->newline();
 }
 
-void PSAEbpfGenerator::emitPacketReplicationTables(CodeBuilder* builder) const {
+void PSAEbpfGenerator::emitPacketReplicationTables(CodeBuilder *builder) const {
     builder->target->emitMapInMapDecl(builder, "clone_session_tbl_inner", TableHash, "elem_t",
                                       "struct element", MaxClones, "clone_session_tbl", TableArray,
                                       "__u32", MaxCloneSessions);
@@ -176,7 +176,7 @@ void PSAEbpfGenerator::emitPacketReplicationTables(CodeBuilder* builder) const {
                                       "__u32", MaxCloneSessions);
 }
 
-void PSAEbpfGenerator::emitPipelineInstances(CodeBuilder* builder) const {
+void PSAEbpfGenerator::emitPipelineInstances(CodeBuilder *builder) const {
     ingress->parser->emitValueSetInstances(builder);
     ingress->control->emitTableInstances(builder);
     ingress->deparser->emitDigestInstances(builder);
@@ -188,7 +188,7 @@ void PSAEbpfGenerator::emitPipelineInstances(CodeBuilder* builder) const {
                                    "struct hdr_md", 2);
 }
 
-void PSAEbpfGenerator::emitInitializer(CodeBuilder* builder) const {
+void PSAEbpfGenerator::emitInitializer(CodeBuilder *builder) const {
     emitInitializerSection(builder);
     builder->appendFormat("int %s()", "map_initializer");
     builder->spc();
@@ -205,7 +205,7 @@ void PSAEbpfGenerator::emitInitializer(CodeBuilder* builder) const {
     builder->blockEnd(true);
 }
 
-void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder* builder) const {
+void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder *builder) const {
     EBPFHashAlgorithmTypeFactoryPSA::instance()->emitGlobals(builder);
 
     cstring forEachFunc =
@@ -327,7 +327,7 @@ void PSAEbpfGenerator::emitHelperFunctions(CodeBuilder* builder) const {
     builder->newline();
 }
 
-void PSAEbpfGenerator::emitCRC32LookupTableTypes(CodeBuilder* builder) const {
+void PSAEbpfGenerator::emitCRC32LookupTableTypes(CodeBuilder *builder) const {
     builder->append("struct lookup_tbl_val ");
     builder->blockStart();
     builder->emitIndent();
@@ -337,12 +337,12 @@ void PSAEbpfGenerator::emitCRC32LookupTableTypes(CodeBuilder* builder) const {
     builder->endOfStatement(true);
 }
 
-void PSAEbpfGenerator::emitCRC32LookupTableInstance(CodeBuilder* builder) const {
+void PSAEbpfGenerator::emitCRC32LookupTableInstance(CodeBuilder *builder) const {
     builder->target->emitTableDecl(builder, cstring("crc_lookup_tbl"), TableArray, "u32",
                                    cstring("struct lookup_tbl_val"), 1);
 }
 
-void PSAEbpfGenerator::emitCRC32LookupTableInitializer(CodeBuilder* builder) const {
+void PSAEbpfGenerator::emitCRC32LookupTableInitializer(CodeBuilder *builder) const {
     cstring keyName = "lookup_tbl_key";
     cstring valueName = "lookup_tbl_value";
     cstring instanceName = "crc_lookup_tbl";
@@ -424,7 +424,7 @@ void PSAEbpfGenerator::emitCRC32LookupTableInitializer(CodeBuilder* builder) con
 }
 
 // =====================PSAArchTC=============================
-void PSAArchTC::emit(CodeBuilder* builder) const {
+void PSAArchTC::emit(CodeBuilder *builder) const {
     /**
      * How the structure of a single C program for PSA should look like?
      * 1. Automatically generated comment
@@ -498,7 +498,7 @@ void PSAArchTC::emit(CodeBuilder* builder) const {
     builder->target->emitLicense(builder, ingress->license);
 }
 
-void PSAArchTC::emitInstances(CodeBuilder* builder) const {
+void PSAArchTC::emitInstances(CodeBuilder *builder) const {
     builder->appendLine("REGISTER_START()");
 
     if (options.xdp2tcMode == XDP2TC_CPUMAP) {
@@ -512,12 +512,12 @@ void PSAArchTC::emitInstances(CodeBuilder* builder) const {
     builder->newline();
 }
 
-void PSAArchTC::emitInitializerSection(CodeBuilder* builder) const {
+void PSAArchTC::emitInitializerSection(CodeBuilder *builder) const {
     builder->appendLine("SEC(\"classifier/map-initializer\")");
 }
 
 // =====================PSAArchXDP=============================
-void PSAArchXDP::emit(CodeBuilder* builder) const {
+void PSAArchXDP::emit(CodeBuilder *builder) const {
     builder->target->emitIncludes(builder);
     emitPSAIncludes(builder);
 
@@ -556,14 +556,14 @@ void PSAArchXDP::emit(CodeBuilder* builder) const {
     builder->target->emitLicense(builder, ingress->license);
 }
 
-void PSAArchXDP::emitPreamble(CodeBuilder* builder) const {
+void PSAArchXDP::emitPreamble(CodeBuilder *builder) const {
     PSAEbpfGenerator::emitPreamble(builder);
     builder->appendFormat("#define DEVMAP_SIZE %u", egressDevmapSize);
     builder->newline();
     builder->newline();
 }
 
-void PSAArchXDP::emitInstances(CodeBuilder* builder) const {
+void PSAArchXDP::emitInstances(CodeBuilder *builder) const {
     builder->newline();
 
     builder->appendLine("REGISTER_START()");
@@ -585,11 +585,11 @@ void PSAArchXDP::emitInstances(CodeBuilder* builder) const {
     builder->newline();
 }
 
-void PSAArchXDP::emitInitializerSection(CodeBuilder* builder) const {
+void PSAArchXDP::emitInitializerSection(CodeBuilder *builder) const {
     builder->appendLine("SEC(\"xdp/map-initializer\")");
 }
 
-void PSAArchXDP::emitXDP2TCInternalStructures(CodeBuilder* builder) const {
+void PSAArchXDP::emitXDP2TCInternalStructures(CodeBuilder *builder) const {
     builder->appendFormat(
         "struct xdp2tc_metadata {\n"
         "    struct %s headers;\n"
@@ -601,7 +601,7 @@ void PSAArchXDP::emitXDP2TCInternalStructures(CodeBuilder* builder) const {
     builder->newline();
 }
 
-void PSAArchXDP::emitDummyProgram(CodeBuilder* builder) const {
+void PSAArchXDP::emitDummyProgram(CodeBuilder *builder) const {
     // In some cases (like veth pair on some kernels) XDP program must be present on the both ends
     // of the pair. This program, which passes all the packets to TC layer, can be used in such case
     // on the second end.
@@ -617,11 +617,11 @@ void PSAArchXDP::emitDummyProgram(CodeBuilder* builder) const {
 }
 
 // =====================ConvertToEbpfPSA=============================
-const PSAEbpfGenerator* ConvertToEbpfPSA::build(const IR::ToplevelBlock* tlb) {
+const PSAEbpfGenerator *ConvertToEbpfPSA::build(const IR::ToplevelBlock *tlb) {
     /*
      * TYPES
      */
-    std::vector<EBPFType*> ebpfTypes;
+    std::vector<EBPFType *> ebpfTypes;
     for (auto d : tlb->getProgram()->objects) {
         if (d->is<IR::Type>() && !d->is<IR::IContainer>() && !d->is<IR::Type_Extern>() &&
             !d->is<IR::Type_Parser>() && !d->is<IR::Type_Control>() && !d->is<IR::Type_Typedef>() &&
@@ -723,7 +723,7 @@ const PSAEbpfGenerator* ConvertToEbpfPSA::build(const IR::ToplevelBlock* tlb) {
     }
 }
 
-const IR::Node* ConvertToEbpfPSA::preorder(IR::ToplevelBlock* tlb) {
+const IR::Node *ConvertToEbpfPSA::preorder(IR::ToplevelBlock *tlb) {
     ebpf_psa_arch = build(tlb);
     ebpf_psa_arch->ingress->program = tlb->getProgram();
     ebpf_psa_arch->egress->program = tlb->getProgram();
@@ -731,7 +731,7 @@ const IR::Node* ConvertToEbpfPSA::preorder(IR::ToplevelBlock* tlb) {
 }
 
 // =====================EbpfPipeline=============================
-bool ConvertToEbpfPipeline::preorder(const IR::PackageBlock* block) {
+bool ConvertToEbpfPipeline::preorder(const IR::PackageBlock *block) {
     (void)block;
     if (type == TC_INGRESS) {
         pipeline = new TCIngressPipeline(name, options, refmap, typemap);
@@ -770,7 +770,7 @@ bool ConvertToEbpfPipeline::preorder(const IR::PackageBlock* block) {
 }
 
 // =====================EBPFParser=============================
-bool ConvertToEBPFParserPSA::preorder(const IR::ParserBlock* prsr) {
+bool ConvertToEBPFParserPSA::preorder(const IR::ParserBlock *prsr) {
     auto pl = prsr->container->type->applyParams;
 
     parser = new EBPFPsaParser(program, prsr, typemap);
@@ -794,7 +794,10 @@ bool ConvertToEBPFParserPSA::preorder(const IR::ParserBlock* prsr) {
     parser->headers = *it;
     ++it;
     parser->user_metadata = *it;
-    auto resubmit_meta = *(it + 2);
+    ++it;
+    parser->inputMetadata = *it;
+    ++it;
+    auto resubmit_meta = *it;
 
     for (auto state : prsr->container->states) {
         auto ps = new EBPFParserState(state, parser);
@@ -812,7 +815,7 @@ bool ConvertToEBPFParserPSA::preorder(const IR::ParserBlock* prsr) {
     return true;
 }
 
-bool ConvertToEBPFParserPSA::preorder(const IR::P4ValueSet* pvs) {
+bool ConvertToEBPFParserPSA::preorder(const IR::P4ValueSet *pvs) {
     cstring extName = EBPFObject::externalName(pvs);
     auto instance = new EBPFValueSet(program, pvs, extName, parser->visitor);
     parser->valueSets.emplace(pvs->name.name, instance);
@@ -821,7 +824,7 @@ bool ConvertToEBPFParserPSA::preorder(const IR::P4ValueSet* pvs) {
 }
 
 // =====================EBPFControl=============================
-bool ConvertToEBPFControlPSA::preorder(const IR::ControlBlock* ctrl) {
+bool ConvertToEBPFControlPSA::preorder(const IR::ControlBlock *ctrl) {
     control = new EBPFControlPSA(program, ctrl, parserHeaders);
     program->control = control;
     program->to<EBPFPipeline>()->control = control;
@@ -857,13 +860,13 @@ bool ConvertToEBPFControlPSA::preorder(const IR::ControlBlock* ctrl) {
     return true;
 }
 
-bool ConvertToEBPFControlPSA::preorder(const IR::TableBlock* tblblk) {
-    EBPFTablePSA* table = new EBPFTablePSA(program, tblblk, control->codeGen);
+bool ConvertToEBPFControlPSA::preorder(const IR::TableBlock *tblblk) {
+    EBPFTablePSA *table = new EBPFTablePSA(program, tblblk, control->codeGen);
     control->tables.emplace(tblblk->container->name, table);
     return true;
 }
 
-bool ConvertToEBPFControlPSA::preorder(const IR::Member* m) {
+bool ConvertToEBPFControlPSA::preorder(const IR::Member *m) {
     // the condition covers both ingress and egress timestamp
     if (m->member.name.endsWith("timestamp")) {
         control->timestampIsUsed = true;
@@ -872,7 +875,7 @@ bool ConvertToEBPFControlPSA::preorder(const IR::Member* m) {
     return true;
 }
 
-bool ConvertToEBPFControlPSA::preorder(const IR::IfStatement* ifState) {
+bool ConvertToEBPFControlPSA::preorder(const IR::IfStatement *ifState) {
     if (ifState->condition->is<IR::Equ>()) {
         auto i = ifState->condition->to<IR::Equ>();
         if (i->right->toString().endsWith("timestamp") ||
@@ -883,7 +886,7 @@ bool ConvertToEBPFControlPSA::preorder(const IR::IfStatement* ifState) {
     return true;
 }
 
-bool ConvertToEBPFControlPSA::preorder(const IR::Declaration_Variable* decl) {
+bool ConvertToEBPFControlPSA::preorder(const IR::Declaration_Variable *decl) {
     if (type == TC_INGRESS || type == XDP_INGRESS) {
         if (decl->type->is<IR::Type_Name>() &&
             decl->type->to<IR::Type_Name>()->path->name.name == "psa_ingress_output_metadata_t") {
@@ -893,7 +896,7 @@ bool ConvertToEBPFControlPSA::preorder(const IR::Declaration_Variable* decl) {
     return true;
 }
 
-bool ConvertToEBPFControlPSA::preorder(const IR::ExternBlock* instance) {
+bool ConvertToEBPFControlPSA::preorder(const IR::ExternBlock *instance) {
     auto di = instance->node->to<IR::Declaration_Instance>();
     if (di == nullptr) return false;
     cstring name = EBPFObject::externalName(di);
@@ -931,7 +934,7 @@ bool ConvertToEBPFControlPSA::preorder(const IR::ExternBlock* instance) {
 }
 
 // =====================EBPFDeparser=============================
-bool ConvertToEBPFDeparserPSA::preorder(const IR::ControlBlock* ctrl) {
+bool ConvertToEBPFDeparserPSA::preorder(const IR::ControlBlock *ctrl) {
     if (pipelineType == TC_INGRESS) {
         deparser = new TCIngressDeparserPSA(program, ctrl, parserHeaders, istd);
     } else if (pipelineType == TC_EGRESS) {
@@ -963,7 +966,7 @@ bool ConvertToEBPFDeparserPSA::preorder(const IR::ControlBlock* ctrl) {
     return false;
 }
 
-bool ConvertToEBPFDeparserPSA::preorder(const IR::Declaration_Instance* di) {
+bool ConvertToEBPFDeparserPSA::preorder(const IR::Declaration_Instance *di) {
     if (auto typeSpec = di->type->to<IR::Type_Specialized>()) {
         auto baseType = typeSpec->baseType;
         auto typeName = baseType->to<IR::Type_Name>();

@@ -37,11 +37,11 @@ namespace IR {
  */
 template <class T>
 class IndexedVector : public Vector<T> {
-    ordered_map<cstring, const IDeclaration*> declarations;
+    ordered_map<cstring, const IDeclaration *> declarations;
     bool invalid = false;  // set when an error occurs; then we don't
                            // expect the validity check to succeed.
 
-    void insertInMap(const T* a) {
+    void insertInMap(const T *a) {
         if (a == nullptr || !a->template is<IDeclaration>()) return;
         auto decl = a->template to<IDeclaration>();
         auto name = decl->getName().name;
@@ -54,7 +54,7 @@ class IndexedVector : public Vector<T> {
             declarations[name] = decl;
         }
     }
-    void removeFromMap(const T* a) {
+    void removeFromMap(const T *a) {
         if (a == nullptr) return;
         auto decl = a->template to<IDeclaration>();
         if (decl == nullptr) return;
@@ -69,21 +69,19 @@ class IndexedVector : public Vector<T> {
     using Vector<T>::end;
 
     IndexedVector() = default;
-    IndexedVector(const IndexedVector&) = default;
-    IndexedVector(IndexedVector&&) = default;
-    IndexedVector(const std::initializer_list<const T*>& a) : Vector<T>(a) {
+    IndexedVector(const IndexedVector &) = default;
+    IndexedVector(IndexedVector &&) = default;
+    IndexedVector(const std::initializer_list<const T *> &a) : Vector<T>(a) {
         for (auto el : *this) insertInMap(el);
     }
-    IndexedVector& operator=(const IndexedVector&) = default;
-    IndexedVector& operator=(IndexedVector&&) = default;
-    explicit IndexedVector(const T* a) { push_back(std::move(a)); }
-    explicit IndexedVector(const safe_vector<const T*>& a) {
-        insert(typename Vector<T>::end(), a.begin(), a.end());
+    IndexedVector &operator=(const IndexedVector &) = default;
+    IndexedVector &operator=(IndexedVector &&) = default;
+    explicit IndexedVector(const T *a) { push_back(std::move(a)); }
+    explicit IndexedVector(const safe_vector<const T *> &a) {
+        insert(Vector<T>::end(), a.begin(), a.end());
     }
-    explicit IndexedVector(const Vector<T>& a) {
-        insert(typename Vector<T>::end(), a.begin(), a.end());
-    }
-    explicit IndexedVector(JSONLoader& json);
+    explicit IndexedVector(const Vector<T> &a) { insert(Vector<T>::end(), a.begin(), a.end()); }
+    explicit IndexedVector(JSONLoader &json);
 
     void clear() {
         IR::Vector<T>::clear();
@@ -94,20 +92,20 @@ class IndexedVector : public Vector<T> {
     // how to enforce this property, though.
     typedef typename Vector<T>::iterator iterator;
 
-    const IDeclaration* getDeclaration(cstring name) const {
+    const IDeclaration *getDeclaration(cstring name) const {
         auto it = declarations.find(name);
         if (it == declarations.end()) return nullptr;
         return it->second;
     }
     template <class U>
-    const U* getDeclaration(cstring name) const {
+    const U *getDeclaration(cstring name) const {
         auto it = declarations.find(name);
         if (it == declarations.end()) return nullptr;
         return it->second->template to<U>();
     }
-    Util::Enumerator<const IDeclaration*>* getDeclarations() const {
-        return Util::Enumerator<const IDeclaration*>::createEnumerator(Values(declarations).begin(),
-                                                                       Values(declarations).end());
+    Util::Enumerator<const IDeclaration *> *getDeclarations() const {
+        return Util::Enumerator<const IDeclaration *>::createEnumerator(
+            Values(declarations).begin(), Values(declarations).end());
     }
     iterator erase(iterator i) {
         removeFromMap(*i);
@@ -118,28 +116,28 @@ class IndexedVector : public Vector<T> {
         for (auto it = b; it != e; ++it) insertInMap(*it);
         return Vector<T>::insert(i, b, e);
     }
-    iterator replace(iterator i, const T* v) {
+    iterator replace(iterator i, const T *v) {
         removeFromMap(*i);
         *i = v;
         insertInMap(v);
         return ++i;
     }
     template <typename Container>
-    iterator append(const Container& toAppend) {
+    iterator append(const Container &toAppend) {
         return insert(Vector<T>::end(), toAppend.begin(), toAppend.end());
     }
     template <typename Container>
-    iterator prepend(const Container& toAppend) {
+    iterator prepend(const Container &toAppend) {
         return insert(Vector<T>::begin(), toAppend.begin(), toAppend.end());
     }
-    iterator insert(iterator i, const T* v) {
+    iterator insert(iterator i, const T *v) {
         insertInMap(v);
         return Vector<T>::insert(i, v);
     }
     template <class... Args>
-    void emplace_back(Args&&... args) {
+    void emplace_back(Args &&...args) {
         auto el = new T(std::forward<Args>(args)...);
-        insert(el);
+        push_back(el);
     }
     bool removeByName(cstring name) {
         for (auto it = begin(); it != end(); ++it) {
@@ -151,34 +149,34 @@ class IndexedVector : public Vector<T> {
         }
         return false;
     }
-    void push_back(T* a) {
+    void push_back(T *a) {
         CHECK_NULL(a);
         Vector<T>::push_back(a);
         insertInMap(a);
     }
-    void push_back(const T* a) {
+    void push_back(const T *a) {
         CHECK_NULL(a);
         Vector<T>::push_back(a);
         insertInMap(a);
     }
     void pop_back() {
-        if (typename Vector<T>::empty()) BUG("pop_back from empty IndexedVector");
-        auto last = typename Vector<T>::back();
+        if (Vector<T>::empty()) BUG("pop_back from empty IndexedVector");
+        auto last = Vector<T>::back();
         removeFromMap(last);
-        typename Vector<T>::pop_back();
+        Vector<T>::pop_back();
     }
     template <class U>
-    void push_back(U& a) {
+    void push_back(U &a) {
         Vector<T>::push_back(a);
         insertInMap(a);
     }
 
     IRNODE_SUBCLASS(IndexedVector)
     IRNODE_DECLARE_APPLY_OVERLOAD(IndexedVector)
-    bool operator==(const Node& a) const override { return a == *this; }
-    bool operator==(const Vector<T>& a) const override { return a == *this; }
-    bool operator==(const IndexedVector& a) const override {
-        return Vector<T>::operator==(static_cast<const Vector<T>&>(a));
+    bool operator==(const Node &a) const override { return a == *this; }
+    bool operator==(const Vector<T> &a) const override { return a == *this; }
+    bool operator==(const IndexedVector &a) const override {
+        return Vector<T>::operator==(static_cast<const Vector<T> &>(a));
     }
     /* DANGER -- if you get an error on one of the above lines
      *       operator== ... marked ‘override’, but does not override
@@ -199,11 +197,11 @@ class IndexedVector : public Vector<T> {
         return "IndexedVector<" + T::static_type_name() + ">";
     }
     static cstring static_type_name() { return "IndexedVector<" + T::static_type_name() + ">"; }
-    void visit_children(Visitor& v) override;
-    void visit_children(Visitor& v) const override;
+    void visit_children(Visitor &v) override;
+    void visit_children(Visitor &v) const override;
 
-    void toJSON(JSONGenerator& json) const override;
-    static IndexedVector<T>* fromJSON(JSONLoader& json);
+    void toJSON(JSONGenerator &json) const override;
+    static IndexedVector<T> *fromJSON(JSONLoader &json);
     void validate() const override {
         if (invalid) return;  // don't crash the compiler because an error happened
         for (auto el : *this) {

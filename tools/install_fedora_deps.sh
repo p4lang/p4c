@@ -37,6 +37,7 @@ sudo dnf install -y -q \
     net-tools \
     openssl-devel \
     pkg-config \
+    procps-ng \
     protobuf-devel \
     protobuf-static \
     python3 \
@@ -49,6 +50,11 @@ sudo dnf install -y -q \
     zlib-devel
 
 sudo pip3 install ipaddr ply ptf scapy==2.4.5 wheel
+
+# Install dependencies for the BMv2 PTF runner and P4Runtime.
+sudo pip3 install --upgrade protobuf==3.20.1
+sudo pip3 install --upgrade googleapis-common-protos==1.50.0
+sudo pip3 install --upgrade grpcio==1.51.1
 
 MAKEFLAGS="-j$(nproc)"
 export MAKEFLAGS

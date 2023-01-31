@@ -20,18 +20,18 @@ namespace P4Testgen {
 
 namespace EBPF {
 
-const IR::Expression* EBPFTableStepper::computeTargetMatchType(
-    ExecutionState* nextState, const KeyProperties& keyProperties,
-    std::map<cstring, const FieldMatch>* matches, const IR::Expression* hitCondition) {
+const IR::Expression *EBPFTableStepper::computeTargetMatchType(
+    ExecutionState *nextState, const KeyProperties &keyProperties,
+    std::map<cstring, const FieldMatch> *matches, const IR::Expression *hitCondition) {
     // If the custom match type does not match, delete to the core match types.
     return TableStepper::computeTargetMatchType(nextState, keyProperties, matches, hitCondition);
 }
 
 void EBPFTableStepper::checkTargetProperties(
-    const std::vector<const IR::ActionListElement*>& /*tableActionList*/) {
+    const std::vector<const IR::ActionListElement *> & /*tableActionList*/) {
     // Iterate over the table keys and check whether we can mitigate taint.
     for (auto keyProperties : properties.resolvedKeys) {
-        const auto* keyElement = keyProperties.key;
+        const auto *keyElement = keyProperties.key;
         auto keyIsTainted =
             (keyProperties.isTainted &&
              (properties.tableIsImmutable || keyElement->matchType->toString() == "exact"));
@@ -45,8 +45,8 @@ void EBPFTableStepper::checkTargetProperties(
 }
 
 void EBPFTableStepper::evalTargetTable(
-    const std::vector<const IR::ActionListElement*>& tableActionList) {
-    const auto* keys = table->getKey();
+    const std::vector<const IR::ActionListElement *> &tableActionList) {
+    const auto *keys = table->getKey();
     // If we have no keys, there is nothing to match.
     if (keys == nullptr) {
         addDefaultAction(boost::none);
@@ -55,7 +55,7 @@ void EBPFTableStepper::evalTargetTable(
 
     // If the table is not constant, the default action can always be executed.
     // This is because we can simply not enter any table entry.
-    boost::optional<const IR::Expression*> tableMissCondition = boost::none;
+    boost::optional<const IR::Expression *> tableMissCondition = boost::none;
 
     // If the table is not immutable, we synthesize control plane entries and follow the paths.
     if (properties.tableIsImmutable) {
@@ -81,7 +81,7 @@ void EBPFTableStepper::evalTargetTable(
     addDefaultAction(tableMissCondition);
 }
 
-EBPFTableStepper::EBPFTableStepper(EBPFExprStepper* stepper, const IR::P4Table* table)
+EBPFTableStepper::EBPFTableStepper(EBPFExprStepper *stepper, const IR::P4Table *table)
     : TableStepper(stepper, table) {}
 
 }  // namespace EBPF

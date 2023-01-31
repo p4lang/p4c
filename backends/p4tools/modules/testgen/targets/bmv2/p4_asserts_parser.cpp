@@ -40,7 +40,7 @@ static std::vector<std::string> NAMES{
     "Mul",         "Comment",        "Unknown",      "EndString",   "End",
 };
 
-AssertsParser::AssertsParser(std::vector<std::vector<const IR::Expression*>>& output)
+AssertsParser::AssertsParser(std::vector<std::vector<const IR::Expression *>> &output)
     : restrictionsVec(output) {
     setName("Restrictions");
 }
@@ -95,7 +95,7 @@ bool isSpace(char c) noexcept {
     }
 }
 
-std::ostream& operator<<(std::ostream& os, const Token::Kind& kind) {
+std::ostream &operator<<(std::ostream &os, const Token::Kind &kind) {
     return os << NAMES.at(static_cast<size_t>(kind));
 }
 
@@ -105,8 +105,8 @@ std::ostream& operator<<(std::ostream& os, const Token::Kind& kind) {
 /// expression. For example, at the input we have a vector of expressions: [IR::Expression, IR::LOr
 /// with name "(tmp", IR::Expression, IR::LAnd, IR::Expression] The result will be an IR::Expression
 /// equal to !IR::Expression || (IR::Expression && IR::Expression)
-const IR::Expression* makeSingleExpr(std::vector<const IR::Expression*> input) {
-    const IR::Expression* expr = nullptr;
+const IR::Expression *makeSingleExpr(std::vector<const IR::Expression *> input) {
+    const IR::Expression *expr = nullptr;
     for (uint64_t idx = 0; idx < input.size(); idx++) {
         if (input[idx]->is<IR::LOr>()) {
             if (idx + 1 == input.size()) {
@@ -134,15 +134,15 @@ const IR::Expression* makeSingleExpr(std::vector<const IR::Expression*> input) {
 }
 
 /// Determines the token type according to the table key and generates a zombie constant for it.
-const IR::Expression* makeConstant(Token input, const IR::Vector<IR::KeyElement>& keyElements,
-                                   const IR::Type* leftType) {
-    const IR::Type_Base* type = nullptr;
-    const IR::Expression* result = nullptr;
+const IR::Expression *makeConstant(Token input, const IR::Vector<IR::KeyElement> &keyElements,
+                                   const IR::Type *leftType) {
+    const IR::Type_Base *type = nullptr;
+    const IR::Expression *result = nullptr;
     auto inputStr = input.lexeme();
     if (input.is(Token::Kind::Text)) {
-        for (const auto* key : keyElements) {
+        for (const auto *key : keyElements) {
             cstring keyName;
-            if (const auto* annotation = key->getAnnotation(IR::Annotation::nameAnnotation)) {
+            if (const auto *annotation = key->getAnnotation(IR::Annotation::nameAnnotation)) {
                 keyName = annotation->getName();
             }
             BUG_CHECK(keyName.size() > 0, "Key does not have a name annotation.");
@@ -151,10 +151,10 @@ const IR::Expression* makeConstant(Token input, const IR::Vector<IR::KeyElement>
             if (inputStr.find(keyName, tokenLength - annoSize) == std::string::npos) {
                 continue;
             }
-            const auto* keyType = key->expression->type;
-            if (const auto* bit = keyType->to<IR::Type_Bits>()) {
+            const auto *keyType = key->expression->type;
+            if (const auto *bit = keyType->to<IR::Type_Bits>()) {
                 type = bit;
-            } else if (const auto* varbit = keyType->to<IR::Extracted_Varbits>()) {
+            } else if (const auto *varbit = keyType->to<IR::Extracted_Varbits>()) {
                 type = varbit;
             } else if (keyType->is<IR::Type_Boolean>()) {
                 type = IR::Type_Bits::get(1);
@@ -205,8 +205,8 @@ std::pair<std::vector<Token>, size_t> findRightPart(std::vector<Token> tokens, s
 }
 
 /// Chose a binary expression that correlates to the token kind.
-const IR::Expression* pickBinaryExpr(const Token& token, const IR::Expression* leftL,
-                                     const IR::Expression* rightL) {
+const IR::Expression *pickBinaryExpr(const Token &token, const IR::Expression *leftL,
+                                     const IR::Expression *rightL) {
     if (token.is(Token::Kind::Minus)) {
         return new IR::Sub(leftL, rightL);
     }
@@ -256,9 +256,9 @@ const IR::Expression* pickBinaryExpr(const Token& token, const IR::Expression* l
 /// For example, at the input we have a vector of tokens:
 /// [key1(Text), ->(Implication), key2(Text), &&(Conjunction), key3(Text)] The result will be an
 /// IR::Expression equal to !IR::Expression || (IR::Expression && IR::Expression)
-const IR::Expression* getIR(std::vector<Token> tokens,
-                            const IR::Vector<IR::KeyElement>& keyElements) {
-    std::vector<const IR::Expression*> exprVec;
+const IR::Expression *getIR(std::vector<Token> tokens,
+                            const IR::Vector<IR::KeyElement> &keyElements) {
+    std::vector<const IR::Expression *> exprVec;
 
     for (size_t idx = 0; idx < tokens.size(); idx++) {
         auto token = tokens.at(idx);
@@ -267,13 +267,13 @@ const IR::Expression* getIR(std::vector<Token> tokens,
                 Token::Kind::GreaterThan, Token::Kind::GreaterEqual, Token::Kind::LessThan,
                 Token::Kind::LessEqual, Token::Kind::Slash, Token::Kind::Percent, Token::Kind::Shr,
                 Token::Kind::Shl, Token::Kind::Mul, Token::Kind::NotEqual)) {
-            const IR::Expression* leftL = nullptr;
-            const IR::Expression* rightL = nullptr;
+            const IR::Expression *leftL = nullptr;
+            const IR::Expression *rightL = nullptr;
             leftL = makeConstant(tokens[idx - 1], keyElements, nullptr);
             if (tokens[idx + 1].is_one_of(Token::Kind::Text, Token::Kind::Number)) {
                 rightL = makeConstant(tokens[idx + 1], keyElements, leftL->type);
-                if (const auto* constant = leftL->to<IR::Constant>()) {
-                    auto* clone = constant->clone();
+                if (const auto *constant = leftL->to<IR::Constant>()) {
+                    auto *clone = constant->clone();
                     clone->type = rightL->type;
                     leftL = clone;
                 }
@@ -290,22 +290,22 @@ const IR::Expression* getIR(std::vector<Token> tokens,
         } else if (token.is(Token::Kind::LNot)) {
             if (!tokens[idx + 1].is_one_of(Token::Kind::Text, Token::Kind::Number)) {
                 auto rightPart = findRightPart(tokens, idx);
-                const IR::Expression* exprLNot = getIR(rightPart.first, keyElements);
+                const IR::Expression *exprLNot = getIR(rightPart.first, keyElements);
                 idx = rightPart.second;
                 exprVec.push_back(new IR::LNot(exprLNot));
             }
         } else if (token.is_one_of(Token::Kind::Disjunction, Token::Kind::Implication)) {
             if (token.is(Token::Kind::Implication)) {
-                const auto* tmp = exprVec[exprVec.size() - 1];
+                const auto *tmp = exprVec[exprVec.size() - 1];
                 exprVec.pop_back();
                 exprVec.push_back(new IR::LNot(tmp));
             }
-            const IR::Expression* expr1 = new IR::PathExpression(new IR::Path("tmp"));
-            const IR::Expression* expr2 = new IR::PathExpression(new IR::Path("tmp"));
+            const IR::Expression *expr1 = new IR::PathExpression(new IR::Path("tmp"));
+            const IR::Expression *expr2 = new IR::PathExpression(new IR::Path("tmp"));
             exprVec.push_back(new IR::LOr(expr1, expr2));
         } else if (token.is(Token::Kind::Conjunction)) {
-            const IR::Expression* expr1 = new IR::PathExpression(new IR::Path("tmp"));
-            const IR::Expression* expr2 = new IR::PathExpression(new IR::Path("tmp"));
+            const IR::Expression *expr1 = new IR::PathExpression(new IR::Path("tmp"));
+            const IR::Expression *expr2 = new IR::PathExpression(new IR::Path("tmp"));
             exprVec.push_back(new IR::LAnd(expr1, expr2));
         }
     }
@@ -321,11 +321,11 @@ const IR::Expression* getIR(std::vector<Token> tokens,
 /// For example, at the input we have a vector of tokens:
 /// [a(Text),c(Text),b(text), +(Plus), 1(Number),2(number)]
 /// The result will be [acb(Text), +(Plus), 1(Number),2(number)]
-std::vector<Token> combineTokensToNames(const std::vector<Token>& inputVector) {
+std::vector<Token> combineTokensToNames(const std::vector<Token> &inputVector) {
     std::vector<Token> result;
     Token prevToken = Token(Token::Kind::Unknown, " ", 1);
     cstring txt = "";
-    for (const auto& input : inputVector) {
+    for (const auto &input : inputVector) {
         if (prevToken.is(Token::Kind::Text) && input.is(Token::Kind::Number)) {
             txt += std::string(input.lexeme());
             continue;
@@ -459,10 +459,10 @@ std::vector<Token> combineTokensToTableKeys(std::vector<Token> input, cstring ta
 /// Removes comment lines from the input array.
 /// For example, at the input we have a vector of tokens:
 /// [//(Comment), CommentText(Text) , (EndString) , 28(Number), .....] -> [28(Number), .....]
-std::vector<Token> removeComments(const std::vector<Token>& input) {
+std::vector<Token> removeComments(const std::vector<Token> &input) {
     std::vector<Token> result;
     bool flag = true;
-    for (const auto& i : input) {
+    for (const auto &i : input) {
         if (i.is(Token::Kind::Comment)) {
             flag = false;
             continue;
@@ -481,8 +481,8 @@ std::vector<Token> removeComments(const std::vector<Token>& input) {
 /// A function that calls the beginning of the transformation of restrictions from a string into an
 /// IR::Expression. Internally calls all other necessary functions, for example combineTokensToNames
 /// and the like, to eventually get an IR expression that meets the string constraint
-std::vector<const IR::Expression*> AssertsParser::genIRStructs(
-    cstring tableName, cstring restrictionString, const IR::Vector<IR::KeyElement>& keyElements) {
+std::vector<const IR::Expression *> AssertsParser::genIRStructs(
+    cstring tableName, cstring restrictionString, const IR::Vector<IR::KeyElement> &keyElements) {
     Lexer lex(restrictionString);
     std::vector<Token> tmp;
     for (auto token = lex.next(); !token.is_one_of(Token::Kind::End, Token::Kind::Unknown);
@@ -490,7 +490,7 @@ std::vector<const IR::Expression*> AssertsParser::genIRStructs(
         tmp.push_back(token);
     }
 
-    std::vector<const IR::Expression*> result;
+    std::vector<const IR::Expression *> result;
 
     tmp = combineTokensToNames(tmp);
     tmp = combineTokensToNumbers(tmp);
@@ -499,12 +499,12 @@ std::vector<const IR::Expression*> AssertsParser::genIRStructs(
     std::vector<Token> tokens;
     for (uint64_t i = 0; i < tmp.size(); i++) {
         if (tmp[i].is(Token::Kind::Semicolon)) {
-            const auto* expr = getIR(tokens, keyElements);
+            const auto *expr = getIR(tokens, keyElements);
             result.push_back(expr);
             tokens.clear();
         } else if (i == tmp.size() - 1) {
             tokens.push_back(tmp[i]);
-            const auto* expr = getIR(tokens, keyElements);
+            const auto *expr = getIR(tokens, keyElements);
             result.push_back(expr);
             tokens.clear();
         } else {
@@ -515,14 +515,14 @@ std::vector<const IR::Expression*> AssertsParser::genIRStructs(
     return result;
 }
 
-const IR::Node* AssertsParser::postorder(IR::P4Table* node) {
-    const auto* annotation = node->getAnnotation("entry_restriction");
-    const auto* key = node->getKey();
+const IR::Node *AssertsParser::postorder(IR::P4Table *node) {
+    const auto *annotation = node->getAnnotation("entry_restriction");
+    const auto *key = node->getKey();
     if (annotation == nullptr || key == nullptr) {
         return node;
     }
 
-    for (const auto* restrStr : annotation->body) {
+    for (const auto *restrStr : annotation->body) {
         auto restrictions =
             genIRStructs(node->controlPlaneName(), restrStr->text, key->keyElements);
         /// Using Z3Solver, we check the feasibility of restrictions, if they are not
@@ -533,10 +533,10 @@ const IR::Node* AssertsParser::postorder(IR::P4Table* node) {
             restrictionsVec.push_back(restrictions);
             continue;
         }
-        auto* cloneTable = node->clone();
-        auto* cloneProperties = node->properties->clone();
+        auto *cloneTable = node->clone();
+        auto *cloneProperties = node->properties->clone();
         IR::IndexedVector<IR::Property> properties;
-        for (const auto* property : cloneProperties->properties) {
+        for (const auto *property : cloneProperties->properties) {
             if (property->name.name != "key" || property->name.name != "entries") {
                 properties.push_back(property);
             }

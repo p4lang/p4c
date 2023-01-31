@@ -25,11 +25,11 @@ namespace Util {
 PathName PathName::empty = PathName("");
 const char PathName::pathSeparators[2] = {'/', '\\'};
 
-const char* PathName::findLastSeparator() const {
-    const char* found = nullptr;
+const char *PathName::findLastSeparator() const {
+    const char *found = nullptr;
     // Not the most efficient, but should be fine for short strings
     for (char c : pathSeparators) {
-        const char* f = str.findlast(c);
+        const char *f = str.findlast(c);
         if (f == nullptr) continue;
         if (found == nullptr)
             found = f;
@@ -42,7 +42,7 @@ const char* PathName::findLastSeparator() const {
 PathName PathName::getFilename() const {
     if (str.isNullOrEmpty()) return *this;
 
-    const char* lastSeparator = findLastSeparator();
+    const char *lastSeparator = findLastSeparator();
     if (lastSeparator == 0) return *this;
 
     return PathName(lastSeparator + 1);
@@ -52,7 +52,7 @@ cstring PathName::getExtension() const {
     PathName filename = getFilename();
     if (filename.isNullOrEmpty()) return filename.str;
 
-    const char* dot = filename.str.findlast('.');
+    const char *dot = filename.str.findlast('.');
     if (dot == nullptr) return cstring::empty;
     return dot + 1;
 }
@@ -60,7 +60,7 @@ cstring PathName::getExtension() const {
 PathName PathName::getFolder() const {
     if (str.isNullOrEmpty()) return *this;
 
-    const char* lastSeparator = findLastSeparator();
+    const char *lastSeparator = findLastSeparator();
     if (lastSeparator == 0) return PathName::empty;
 
     return PathName(str.before(lastSeparator));
@@ -68,7 +68,7 @@ PathName PathName::getFolder() const {
 
 cstring PathName::getBasename() const {
     PathName file = getFilename();
-    const char* dot = file.str.findlast('.');
+    const char *dot = file.str.findlast('.');
     if (dot == nullptr) return file.str;
     return file.str.before(dot);
 }

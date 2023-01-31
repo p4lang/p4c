@@ -34,16 +34,16 @@ namespace P4 {
  *  - and ```s2``` does not have annotations.
  */
 class DoSimplifyParsers : public Transform {
-    ReferenceMap* refMap;
+    ReferenceMap *refMap;
 
  public:
-    explicit DoSimplifyParsers(ReferenceMap* refMap) : refMap(refMap) {
+    explicit DoSimplifyParsers(ReferenceMap *refMap) : refMap(refMap) {
         CHECK_NULL(refMap);
         setName("DoSimplifyParsers");
     }
 
-    const IR::Node* preorder(IR::P4Parser* parser) override;
-    const IR::Node* preorder(IR::P4Control* control) override {
+    const IR::Node *preorder(IR::P4Parser *parser) override;
+    const IR::Node *preorder(IR::P4Control *control) override {
         prune();
         return control;
     }
@@ -51,7 +51,7 @@ class DoSimplifyParsers : public Transform {
 
 class SimplifyParsers : public PassManager {
  public:
-    explicit SimplifyParsers(ReferenceMap* refMap) {
+    explicit SimplifyParsers(ReferenceMap *refMap) {
         passes.push_back(new ResolveReferences(refMap));
         passes.push_back(new DoSimplifyParsers(refMap));
         setName("SimplifyParsers");

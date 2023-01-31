@@ -27,43 +27,43 @@ namespace Util {
 class NamedSymbol {
  protected:
     Util::SourceInfo sourceInfo;
-    Namespace* parent;
+    Namespace *parent;
     cstring name;
 
  public:
     NamedSymbol(cstring name, Util::SourceInfo si) : sourceInfo(si), parent(nullptr), name(name) {}
     virtual ~NamedSymbol() {}
 
-    void setParent(Namespace* ns) {
+    void setParent(Namespace *ns) {
         BUG_CHECK(parent == nullptr, "Parent already set");
         parent = ns;
     }
 
-    Namespace* getParent() const { return parent; }
+    Namespace *getParent() const { return parent; }
     SourceInfo getSourceInfo() const { return sourceInfo; }
     cstring getName() const { return name; }
     virtual cstring toString() const { return getName(); }
-    virtual void dump(std::stringstream& into, unsigned indent) const {
+    virtual void dump(std::stringstream &into, unsigned indent) const {
         std::string s(indent, ' ');
         into << s << toString() << std::endl;
     }
-    virtual bool sameType(const NamedSymbol* other) const {
+    virtual bool sameType(const NamedSymbol *other) const {
         return typeid(*this) == typeid(*other);
     }
-    virtual const Namespace* symNamespace() const;
+    virtual const Namespace *symNamespace() const;
 
     bool template_args = false;  // does the symbol expect template args
 };
 
 class Namespace : public NamedSymbol {
  protected:
-    std::unordered_map<cstring, NamedSymbol*> contents;
+    std::unordered_map<cstring, NamedSymbol *> contents;
     bool allowDuplicates;
 
  public:
     Namespace(cstring name, Util::SourceInfo si, bool allowDuplicates)
         : NamedSymbol(name, si), allowDuplicates(allowDuplicates) {}
-    void declare(NamedSymbol* symbol) {
+    void declare(NamedSymbol *symbol) {
         cstring symname = symbol->getName();
         if (symname.isNullOrEmpty()) return;
 
@@ -86,13 +86,13 @@ class Namespace : public NamedSymbol {
         }
         contents.emplace(symbol->getName(), symbol);
     }
-    NamedSymbol* lookup(cstring name) const {
+    NamedSymbol *lookup(cstring name) const {
         auto it = contents.find(name);
         if (it == contents.end()) return nullptr;
         return it->second;
     }
     cstring toString() const override { return cstring("Namespace ") + getName(); }
-    void dump(std::stringstream& into, unsigned indent) const override {
+    void dump(std::stringstream &into, unsigned indent) const override {
         std::string s(indent, ' ');
         into << s;
         into << toString() << "{" << std::endl;
@@ -105,16 +105,16 @@ class Namespace : public NamedSymbol {
 };
 
 const Namespace Namespace::empty("<empty>", Util::SourceInfo(), false);
-const Namespace* NamedSymbol::symNamespace() const { return &Namespace::empty; }
+const Namespace *NamedSymbol::symNamespace() const { return &Namespace::empty; }
 
 class Object : public NamedSymbol {
-    const Namespace* typeNamespace = &Namespace::empty;
+    const Namespace *typeNamespace = &Namespace::empty;
 
  public:
     Object(cstring name, Util::SourceInfo si) : NamedSymbol(name, si) {}
     cstring toString() const override { return cstring("Object ") + getName(); }
-    const Namespace* symNamespace() const override { return typeNamespace; }
-    void setNamespace(const Namespace* ns) { typeNamespace = ns; }
+    const Namespace *symNamespace() const override { return typeNamespace; }
+    void setNamespace(const Namespace *ns) { typeNamespace = ns; }
 };
 
 class SimpleType : public NamedSymbol {
@@ -142,7 +142,7 @@ ProgramStructure::ProgramStructure()
     debugStream = stderr;
 }
 
-void ProgramStructure::push(Namespace* ns) {
+void ProgramStructure::push(Namespace *ns) {
     CHECK_NULL(ns);
     if (debug) fprintf(debugStream, "ProgramStructure: pushing %s\n", ns->toString().c_str());
     LOG4("ProgramStructure: pushing " << ns->toString());
@@ -164,7 +164,7 @@ void ProgramStructure::pushContainerType(IR::ID id, bool allowDuplicates) {
 }
 
 void ProgramStructure::pop() {
-    Namespace* parent = currentNamespace->getParent();
+    Namespace *parent = currentNamespace->getParent();
     BUG_CHECK(parent != nullptr, "Popping root namespace");
     if (debug)
         fprintf(debugStream, "ProgramStructure: popping %s\n",
@@ -187,7 +187,7 @@ void ProgramStructure::declareObject(IR::ID id, cstring type) {
     LOG3("ProgramStructure: adding object " << id << " with type " << type);
     auto type_sym = lookup(type);
     auto o = new Object(id.name, id.srcInfo);
-    if (auto tns = dynamic_cast<const Namespace*>(type_sym)) o->setNamespace(tns);
+    if (auto tns = dynamic_cast<const Namespace *>(type_sym)) o->setNamespace(tns);
     currentNamespace->declare(o);
 }
 
@@ -211,14 +211,14 @@ void ProgramStructure::clearPath() {
     identifierContext.lookupContext = nullptr;
 }
 
-NamedSymbol* ProgramStructure::lookup(cstring identifier) {
-    const Namespace* parent = identifierContext.lookupContext;
-    NamedSymbol* rv = nullptr;
+NamedSymbol *ProgramStructure::lookup(cstring identifier) {
+    const Namespace *parent = identifierContext.lookupContext;
+    NamedSymbol *rv = nullptr;
     if (parent == nullptr) {
         // We don't have a parent, try lookup up the stack
         parent = currentNamespace;
         while (parent != nullptr) {
-            NamedSymbol* symbol = parent->lookup(identifier);
+            NamedSymbol *symbol = parent->lookup(identifier);
             if (symbol != nullptr) {
                 rv = symbol;
                 break;
@@ -234,13 +234,13 @@ NamedSymbol* ProgramStructure::lookup(cstring identifier) {
 }
 
 ProgramStructure::SymbolKind ProgramStructure::lookupIdentifier(cstring identifier) {
-    NamedSymbol* ns = lookup(identifier);
-    if (ns == nullptr || dynamic_cast<Object*>(ns) != nullptr) {
+    NamedSymbol *ns = lookup(identifier);
+    if (ns == nullptr || dynamic_cast<Object *>(ns) != nullptr) {
         LOG2("Identifier " << identifier);
         if (ns && ns->template_args) return ProgramStructure::SymbolKind::TemplateIdentifier;
         return ProgramStructure::SymbolKind::Identifier;
     }
-    if (dynamic_cast<SimpleType*>(ns) != nullptr || dynamic_cast<ContainerType*>(ns) != nullptr) {
+    if (dynamic_cast<SimpleType *>(ns) != nullptr || dynamic_cast<ContainerType *>(ns) != nullptr) {
         if (ns && ns->template_args) return ProgramStructure::SymbolKind::TemplateType;
         return ProgramStructure::SymbolKind::Type;
         LOG2("Type " << identifier);
@@ -248,12 +248,12 @@ ProgramStructure::SymbolKind ProgramStructure::lookupIdentifier(cstring identifi
     BUG("Should be unreachable");
 }
 
-void ProgramStructure::declareTypes(const IR::IndexedVector<IR::Type_Var>* typeVars) {
+void ProgramStructure::declareTypes(const IR::IndexedVector<IR::Type_Var> *typeVars) {
     if (typeVars == nullptr) return;
     for (auto tv : *typeVars) declareType(tv->name);
 }
 
-void ProgramStructure::declareParameters(const IR::IndexedVector<IR::Parameter>* params) {
+void ProgramStructure::declareParameters(const IR::IndexedVector<IR::Parameter> *params) {
     if (params == nullptr) return;
     for (auto param : *params) declareObject(param->name, param->type->toString());
 }

@@ -32,7 +32,7 @@ Use 32-bit values for all enums.
 class EnumOn32Bits : public P4::ChooseEnumRepresentation {
     cstring filename;
 
-    bool convert(const IR::Type_Enum* type) const override {
+    bool convert(const IR::Type_Enum *type) const override {
         if (type->srcInfo.isValid()) {
             auto sourceFile = type->srcInfo.getSourceFile();
             if (sourceFile.endsWith(filename))
@@ -54,15 +54,15 @@ class MidEnd : public PassManager {
     // These will be accurate when the mid-end completes evaluation
     P4::ReferenceMap refMap;
     P4::TypeMap typeMap;
-    const IR::ToplevelBlock* toplevel = nullptr;
+    const IR::ToplevelBlock *toplevel = nullptr;
     P4::ConvertEnums::EnumMapping enumMap;
     bool isv1;
 
-    explicit MidEnd(CompilerOptions& options) {
+    explicit MidEnd(CompilerOptions &options) {
         isv1 = options.isv1();
         refMap.setIsV1(isv1);  // must be done BEFORE creating passes
     }
-    const IR::ToplevelBlock* process(const IR::P4Program*& program) {
+    const IR::ToplevelBlock *process(const IR::P4Program *&program) {
         program = program->apply(*this);
         return toplevel;
     }

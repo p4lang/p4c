@@ -112,8 +112,8 @@ selector as_sel {
 		m.local_metadata_data
 	}
 	member_id m.MainControlT_as_member_id
-	n_groups_max 400
-	n_members_per_group_max 10000
+	n_groups_max 0x400
+	n_members_per_group_max 0x10000
 }
 
 apply {

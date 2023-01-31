@@ -40,8 +40,8 @@ class TypeMap;
  */
 class CheckExternInvocationCommon : public Inspector {
  protected:
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
     std::map<cstring /* extType */, bitvec> pipeConstraints;
 
     /**
@@ -72,7 +72,7 @@ class CheckExternInvocationCommon : public Inspector {
      * @param extMethod Pointer to object representing extern method.
      * @param expr Pointer to method call expression.
      */
-    virtual void checkExtern(const ExternMethod* extMethod, const IR::MethodCallExpression* expr) {
+    virtual void checkExtern(const ExternMethod *extMethod, const IR::MethodCallExpression *expr) {
         (void)extMethod;
         (void)expr;
     }
@@ -86,8 +86,8 @@ class CheckExternInvocationCommon : public Inspector {
      * @param extMethod Pointer to object representing extern function.
      * @param expr Pointer to function call expression.
      */
-    virtual void checkExtern(const ExternFunction* extFunction,
-                             const IR::MethodCallExpression* expr) {
+    virtual void checkExtern(const ExternFunction *extFunction,
+                             const IR::MethodCallExpression *expr) {
         (void)extFunction;
         (void)expr;
     }
@@ -117,7 +117,7 @@ class CheckExternInvocationCommon : public Inspector {
         if (!pipeConstraints.count(extType)) {
             pipeConstraints.emplace(extType, vec);
         } else {
-            auto& cons = pipeConstraints.at(extType);
+            auto &cons = pipeConstraints.at(extType);
             cons |= vec;
         }
     }
@@ -135,7 +135,7 @@ class CheckExternInvocationCommon : public Inspector {
      * @param pipe Name of the parser or control block in which the method or the function
      *             is invoked.
      */
-    void checkPipeConstraints(cstring extType, bitvec bv, const IR::MethodCallExpression* expr,
+    void checkPipeConstraints(cstring extType, bitvec bv, const IR::MethodCallExpression *expr,
                               cstring extName, cstring pipe) {
         BUG_CHECK(pipeConstraints.count(extType), "pipe constraints not defined for %1%", extType);
         auto constraint = pipeConstraints.at(extType) & bv;
@@ -149,11 +149,11 @@ class CheckExternInvocationCommon : public Inspector {
         }
     }
 
-    CheckExternInvocationCommon(ReferenceMap* refMap, TypeMap* typeMap)
+    CheckExternInvocationCommon(ReferenceMap *refMap, TypeMap *typeMap)
         : refMap(refMap), typeMap(typeMap) {}
 
  public:
-    bool preorder(const IR::MethodCallExpression* expr) override {
+    bool preorder(const IR::MethodCallExpression *expr) override {
         auto mi = MethodInstance::resolve(expr, refMap, typeMap);
         if (auto extMethod = mi->to<ExternMethod>()) {
             checkExtern(extMethod, expr);

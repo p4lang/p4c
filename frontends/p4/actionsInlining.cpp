@@ -24,7 +24,7 @@ limitations under the License.
 
 namespace P4 {
 
-void DiscoverActionsInlining::postorder(const IR::MethodCallStatement* mcs) {
+void DiscoverActionsInlining::postorder(const IR::MethodCallStatement *mcs) {
     auto mi = P4::MethodInstance::resolve(mcs, refMap, typeMap);
     CHECK_NULL(mi);
     auto ac = mi->to<P4::ActionCall>();
@@ -44,28 +44,28 @@ void DiscoverActionsInlining::postorder(const IR::MethodCallStatement* mcs) {
     toInline->add(aci);
 }
 
-Visitor::profile_t ActionsInliner::init_apply(const IR::Node* node) {
+Visitor::profile_t ActionsInliner::init_apply(const IR::Node *node) {
     P4::ResolveReferences solver(refMap, true);
     node->apply(solver);
     LOG2("ActionsInliner " << toInline);
     return Transform::init_apply(node);
 }
 
-const IR::Node* ActionsInliner::preorder(IR::P4Action* action) {
+const IR::Node *ActionsInliner::preorder(IR::P4Action *action) {
     if (toInline->sites.count(getOriginal<IR::P4Action>()) == 0) prune();
     replMap = &toInline->sites[getOriginal<IR::P4Action>()];
     LOG2("Visiting: " << getOriginal());
     return action;
 }
 
-const IR::Node* ActionsInliner::postorder(IR::P4Action* action) {
+const IR::Node *ActionsInliner::postorder(IR::P4Action *action) {
     if (toInline->sites.count(getOriginal<IR::P4Action>()) > 0)
         list->replace(getOriginal<IR::P4Action>(), action);
     replMap = nullptr;
     return action;
 }
 
-const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
+const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
     auto orig = getOriginal<IR::MethodCallStatement>();
     LOG2("Visiting " << orig);
     if (replMap == nullptr) return statement;
@@ -78,7 +78,7 @@ const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
     ParameterSubstitution subst;
     TypeVariableSubstitution tvs;  // empty
 
-    std::map<const IR::Parameter*, cstring> paramRename;
+    std::map<const IR::Parameter *, cstring> paramRename;
     ParameterSubstitution substitution;
     substitution.populate(callee->parameters, statement->methodCall->arguments);
 
@@ -131,7 +131,7 @@ const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
         }
     }
 
-    auto annotations = callee->annotations->where([&](const IR::Annotation* a) {
+    auto annotations = callee->annotations->where([&](const IR::Annotation *a) {
         return !(a->name == IR::Annotation::nameAnnotation ||
                  (a->name == IR::Annotation::noWarnAnnotation && a->getSingleString() == "unused"));
     });

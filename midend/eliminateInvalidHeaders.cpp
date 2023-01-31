@@ -18,7 +18,7 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Node* DoEliminateInvalidHeaders::postorder(IR::P4Control* control) {
+const IR::Node *DoEliminateInvalidHeaders::postorder(IR::P4Control *control) {
     control->controlLocals.prepend(variables);
     auto vec = new IR::IndexedVector<IR::StatOrDecl>();
     vec->srcInfo = control->body->srcInfo;
@@ -31,7 +31,7 @@ const IR::Node* DoEliminateInvalidHeaders::postorder(IR::P4Control* control) {
     return control;
 }
 
-const IR::Node* DoEliminateInvalidHeaders::postorder(IR::ParserState* state) {
+const IR::Node *DoEliminateInvalidHeaders::postorder(IR::ParserState *state) {
     state->components.prepend(statements);
     state->components.prepend(variables);
     variables.clear();
@@ -39,7 +39,7 @@ const IR::Node* DoEliminateInvalidHeaders::postorder(IR::ParserState* state) {
     return state;
 }
 
-const IR::Node* DoEliminateInvalidHeaders::postorder(IR::P4Action* action) {
+const IR::Node *DoEliminateInvalidHeaders::postorder(IR::P4Action *action) {
     auto vec = new IR::IndexedVector<IR::StatOrDecl>();
     vec->append(variables);
     vec->append(statements);
@@ -50,7 +50,7 @@ const IR::Node* DoEliminateInvalidHeaders::postorder(IR::P4Action* action) {
     return action;
 }
 
-const IR::Node* DoEliminateInvalidHeaders::postorder(IR::InvalidHeader* expression) {
+const IR::Node *DoEliminateInvalidHeaders::postorder(IR::InvalidHeader *expression) {
     if (!findContext<IR::BlockStatement>() && !findContext<IR::P4Action>() &&
         !findContext<IR::ParserState>()) {
         // We need some place to insert the setInvalid call.

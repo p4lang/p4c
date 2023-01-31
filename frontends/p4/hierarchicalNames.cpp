@@ -20,9 +20,9 @@ limitations under the License.
 
 namespace P4 {
 
-cstring HierarchicalNames::getName(const IR::IDeclaration* decl) { return decl->getName(); }
+cstring HierarchicalNames::getName(const IR::IDeclaration *decl) { return decl->getName(); }
 
-const IR::Node* HierarchicalNames::postorder(IR::Annotation* annotation) {
+const IR::Node *HierarchicalNames::postorder(IR::Annotation *annotation) {
     if (annotation->name != IR::Annotation::nameAnnotation) return annotation;
 
     cstring name = annotation->getName();

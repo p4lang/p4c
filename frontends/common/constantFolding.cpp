@@ -26,12 +26,12 @@ namespace P4 {
 class CloneConstants : public Transform {
  public:
     CloneConstants() = default;
-    const IR::Node* postorder(IR::Constant* constant) override {
+    const IR::Node *postorder(IR::Constant *constant) override {
         // We clone the constant.  This is necessary because the same
         // the type associated with the constant may participate in
         // type unification, and thus we want to have different type
         // objects for different constant instances.
-        const IR::Type* type = constant->type;
+        const IR::Type *type = constant->type;
         if (type->is<IR::Type_Bits>()) {
             type = constant->type->clone();
         } else if (auto ii = type->to<IR::Type_InfInt>()) {
@@ -43,14 +43,14 @@ class CloneConstants : public Transform {
         }
         return new IR::Constant(constant->srcInfo, type, constant->value, constant->base);
     }
-    static const IR::Expression* clone(const IR::Expression* expression, const Visitor* calledBy) {
+    static const IR::Expression *clone(const IR::Expression *expression, const Visitor *calledBy) {
         CloneConstants cc;
         cc.setCalledBy(calledBy);
         return expression->apply(cc)->to<IR::Expression>();
     }
 };
 
-const IR::Expression* DoConstantFolding::getConstant(const IR::Expression* expr) const {
+const IR::Expression *DoConstantFolding::getConstant(const IR::Expression *expr) const {
     CHECK_NULL(expr);
     if (expr->is<IR::Constant>()) return expr;
     if (expr->is<IR::BoolLiteral>()) return expr;
@@ -86,7 +86,7 @@ const IR::Expression* DoConstantFolding::getConstant(const IR::Expression* expr)
     return nullptr;
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::PathExpression* e) {
+const IR::Node *DoConstantFolding::postorder(IR::PathExpression *e) {
     if (refMap == nullptr || assignmentTarget) return e;
     auto decl = refMap->getDeclaration(e->path);
     if (decl == nullptr) return e;
@@ -104,7 +104,7 @@ const IR::Node* DoConstantFolding::postorder(IR::PathExpression* e) {
     return e;
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::Type_Bits* type) {
+const IR::Node *DoConstantFolding::postorder(IR::Type_Bits *type) {
     if (type->expression != nullptr) {
         if (auto cst = type->expression->to<IR::Constant>()) {
             type->size = cst->asInt();
@@ -122,7 +122,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Type_Bits* type) {
     return type;
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::Type_Varbits* type) {
+const IR::Node *DoConstantFolding::postorder(IR::Type_Varbits *type) {
     if (type->expression != nullptr) {
         if (auto cst = type->expression->to<IR::Constant>()) {
             type->size = cst->asInt();
@@ -135,7 +135,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Type_Varbits* type) {
     return type;
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::Declaration_Constant* d) {
+const IR::Node *DoConstantFolding::postorder(IR::Declaration_Constant *d) {
     auto init = getConstant(d->initializer);
     if (init == nullptr) {
         if (typesKnown)
@@ -185,7 +185,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Declaration_Constant* d) {
     return d;
 }
 
-const IR::Node* DoConstantFolding::preorder(IR::AssignmentStatement* statement) {
+const IR::Node *DoConstantFolding::preorder(IR::AssignmentStatement *statement) {
     assignmentTarget = true;
     visit(statement->left);
     assignmentTarget = false;
@@ -194,7 +194,7 @@ const IR::Node* DoConstantFolding::preorder(IR::AssignmentStatement* statement) 
     return statement;
 }
 
-const IR::Node* DoConstantFolding::preorder(IR::ArrayIndex* e) {
+const IR::Node *DoConstantFolding::preorder(IR::ArrayIndex *e) {
     visit(e->left);
     bool save = assignmentTarget;
     assignmentTarget = false;
@@ -236,7 +236,7 @@ const IR::Node* DoConstantFolding::preorder(IR::ArrayIndex* e) {
     return e;
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::Cmpl* e) {
+const IR::Node *DoConstantFolding::postorder(IR::Cmpl *e) {
     auto op = getConstant(e->expr);
     if (op == nullptr) return e;
 
@@ -245,7 +245,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Cmpl* e) {
         ::error(ErrorType::ERR_EXPECTED, "%1%: expected an integer value", op);
         return e;
     }
-    const IR::Type* t = op->type;
+    const IR::Type *t = op->type;
     if (t->is<IR::Type_InfInt>()) {
         ::error(ErrorType::ERR_INVALID,
                 "%1%: Operation cannot be applied to values with unknown width;\n"
@@ -263,7 +263,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Cmpl* e) {
     return new IR::Constant(cst->srcInfo, t, value, cst->base, true);
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::Neg* e) {
+const IR::Node *DoConstantFolding::postorder(IR::Neg *e) {
     auto op = getConstant(e->expr);
     if (op == nullptr) return e;
 
@@ -272,7 +272,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Neg* e) {
         ::error(ErrorType::ERR_EXPECTED, "%1%: expected an integer value", op);
         return e;
     }
-    const IR::Type* t = op->type;
+    const IR::Type *t = op->type;
     if (t->is<IR::Type_InfInt>()) return new IR::Constant(cst->srcInfo, t, -cst->value, cst->base);
 
     auto tb = t->to<IR::Type_Bits>();
@@ -285,7 +285,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Neg* e) {
     return new IR::Constant(cst->srcInfo, t, value, cst->base, true);
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::UPlus* e) {
+const IR::Node *DoConstantFolding::postorder(IR::UPlus *e) {
     auto op = getConstant(e->expr);
     if (op == nullptr) return e;
 
@@ -297,66 +297,66 @@ const IR::Node* DoConstantFolding::postorder(IR::UPlus* e) {
     return cst;
 }
 
-const IR::Constant* DoConstantFolding::cast(const IR::Constant* node, unsigned base,
-                                            const IR::Type_Bits* type) const {
+const IR::Constant *DoConstantFolding::cast(const IR::Constant *node, unsigned base,
+                                            const IR::Type_Bits *type) const {
     return new IR::Constant(node->srcInfo, type, node->value, base);
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::Add* e) {
+const IR::Node *DoConstantFolding::postorder(IR::Add *e) {
     return binary(e, [](big_int a, big_int b) -> big_int { return a + b; });
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::AddSat* e) {
+const IR::Node *DoConstantFolding::postorder(IR::AddSat *e) {
     return binary(
         e, [](big_int a, big_int b) -> big_int { return a + b; }, true);
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::Sub* e) {
+const IR::Node *DoConstantFolding::postorder(IR::Sub *e) {
     return binary(e, [](big_int a, big_int b) -> big_int { return a - b; });
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::SubSat* e) {
+const IR::Node *DoConstantFolding::postorder(IR::SubSat *e) {
     return binary(
         e, [](big_int a, big_int b) -> big_int { return a - b; }, true);
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::Mul* e) {
+const IR::Node *DoConstantFolding::postorder(IR::Mul *e) {
     return binary(e, [](big_int a, big_int b) -> big_int { return a * b; });
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::BXor* e) {
+const IR::Node *DoConstantFolding::postorder(IR::BXor *e) {
     return binary(e, [](big_int a, big_int b) -> big_int { return a ^ b; });
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::BAnd* e) {
+const IR::Node *DoConstantFolding::postorder(IR::BAnd *e) {
     return binary(e, [](big_int a, big_int b) -> big_int { return a & b; });
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::BOr* e) {
+const IR::Node *DoConstantFolding::postorder(IR::BOr *e) {
     return binary(e, [](big_int a, big_int b) -> big_int { return a | b; });
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::Equ* e) { return compare(e); }
+const IR::Node *DoConstantFolding::postorder(IR::Equ *e) { return compare(e); }
 
-const IR::Node* DoConstantFolding::postorder(IR::Neq* e) { return compare(e); }
+const IR::Node *DoConstantFolding::postorder(IR::Neq *e) { return compare(e); }
 
-const IR::Node* DoConstantFolding::postorder(IR::Lss* e) {
+const IR::Node *DoConstantFolding::postorder(IR::Lss *e) {
     return binary(e, [](big_int a, big_int b) -> big_int { return a < b; });
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::Grt* e) {
+const IR::Node *DoConstantFolding::postorder(IR::Grt *e) {
     return binary(e, [](big_int a, big_int b) -> big_int { return a > b; });
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::Leq* e) {
+const IR::Node *DoConstantFolding::postorder(IR::Leq *e) {
     return binary(e, [](big_int a, big_int b) -> big_int { return a <= b; });
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::Geq* e) {
+const IR::Node *DoConstantFolding::postorder(IR::Geq *e) {
     return binary(e, [](big_int a, big_int b) -> big_int { return a >= b; });
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::Div* e) {
+const IR::Node *DoConstantFolding::postorder(IR::Div *e) {
     return binary(e, [e](big_int a, big_int b) -> big_int {
         if (a < 0 || b < 0) {
             ::error(ErrorType::ERR_INVALID, "%1%: Division is not defined for negative numbers", e);
@@ -370,7 +370,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Div* e) {
     });
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::Mod* e) {
+const IR::Node *DoConstantFolding::postorder(IR::Mod *e) {
     return binary(e, [e](big_int a, big_int b) -> big_int {
         if (a < 0 || b < 0) {
             ::error(ErrorType::ERR_INVALID, "%1%: Modulo is not defined for negative numbers", e);
@@ -384,11 +384,11 @@ const IR::Node* DoConstantFolding::postorder(IR::Mod* e) {
     });
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::Shr* e) { return shift(e); }
+const IR::Node *DoConstantFolding::postorder(IR::Shr *e) { return shift(e); }
 
-const IR::Node* DoConstantFolding::postorder(IR::Shl* e) { return shift(e); }
+const IR::Node *DoConstantFolding::postorder(IR::Shl *e) { return shift(e); }
 
-const IR::Node* DoConstantFolding::compare(const IR::Operation_Binary* e) {
+const IR::Node *DoConstantFolding::compare(const IR::Operation_Binary *e) {
     auto eleft = getConstant(e->left);
     auto eright = getConstant(e->right);
     if (eleft == nullptr || eright == nullptr) return e;
@@ -423,7 +423,7 @@ const IR::Node* DoConstantFolding::compare(const IR::Operation_Binary* e) {
             for (size_t i = 0; i < llist->components.size(); i++) {
                 auto li = llist->components.at(i);
                 auto ri = rlist->components.at(i);
-                const IR::Operation_Binary* tmp;
+                const IR::Operation_Binary *tmp;
                 if (eqTest)
                     tmp = new IR::Equ(li, ri);
                 else
@@ -443,7 +443,7 @@ const IR::Node* DoConstantFolding::compare(const IR::Operation_Binary* e) {
         return binary(e, [](big_int a, big_int b) -> big_int { return a != b; });
 }
 
-const IR::Node* DoConstantFolding::binary(const IR::Operation_Binary* e,
+const IR::Node *DoConstantFolding::binary(const IR::Operation_Binary *e,
                                           std::function<big_int(big_int, big_int)> func,
                                           bool saturating) {
     auto eleft = getConstant(e->left);
@@ -461,15 +461,15 @@ const IR::Node* DoConstantFolding::binary(const IR::Operation_Binary* e,
         return e;
     }
 
-    const IR::Type* lt = left->type;
-    const IR::Type* rt = right->type;
+    const IR::Type *lt = left->type;
+    const IR::Type *rt = right->type;
     bool lunk = lt->is<IR::Type_InfInt>();
     bool runk = rt->is<IR::Type_InfInt>();
 
-    const IR::Type* resultType;
+    const IR::Type *resultType;
 
-    const IR::Type_Bits* ltb = nullptr;
-    const IR::Type_Bits* rtb = nullptr;
+    const IR::Type_Bits *ltb = nullptr;
+    const IR::Type_Bits *rtb = nullptr;
     if (!lunk) {
         ltb = lt->to<IR::Type_Bits>();
         if (ltb == nullptr) {
@@ -528,7 +528,7 @@ const IR::Node* DoConstantFolding::binary(const IR::Operation_Binary* e,
         return new IR::Constant(e->srcInfo, resultType, value, left->base, true);
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::LAnd* e) {
+const IR::Node *DoConstantFolding::postorder(IR::LAnd *e) {
     auto left = getConstant(e->left);
     if (left == nullptr) return e;
 
@@ -543,7 +543,7 @@ const IR::Node* DoConstantFolding::postorder(IR::LAnd* e) {
     return new IR::BoolLiteral(left->srcInfo, IR::Type_Boolean::get(), false);
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::LOr* e) {
+const IR::Node *DoConstantFolding::postorder(IR::LOr *e) {
     auto left = getConstant(e->left);
     if (left == nullptr) return e;
 
@@ -558,7 +558,7 @@ const IR::Node* DoConstantFolding::postorder(IR::LOr* e) {
     return new IR::BoolLiteral(left->srcInfo, IR::Type_Boolean::get(), true);
 }
 
-static bool overflowWidth(const IR::Node* node, int width) {
+static bool overflowWidth(const IR::Node *node, int width) {
     if (width > P4CContext::getConfig().maximumWidthSupported()) {
         ::error(ErrorType::ERR_UNSUPPORTED, "%1%: Compiler only supports widths up to %2%", node,
                 P4CContext::getConfig().maximumWidthSupported());
@@ -567,9 +567,9 @@ static bool overflowWidth(const IR::Node* node, int width) {
     return false;
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::Slice* e) {
-    const IR::Expression* msb = getConstant(e->e1);
-    const IR::Expression* lsb = getConstant(e->e2);
+const IR::Node *DoConstantFolding::postorder(IR::Slice *e) {
+    const IR::Expression *msb = getConstant(e->e1);
+    const IR::Expression *lsb = getConstant(e->e2);
     if (msb == nullptr) {
         if (typesKnown)
             ::error(ErrorType::ERR_EXPECTED, "%1%: slice indexes must be compile-time constants",
@@ -617,50 +617,54 @@ const IR::Node* DoConstantFolding::postorder(IR::Slice* e) {
     return new IR::Constant(e->srcInfo, resultType, value, cbase->base, true);
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::Member* e) {
+const IR::Node *DoConstantFolding::postorder(IR::Member *e) {
     if (!typesKnown) return e;
     auto orig = getOriginal<IR::Member>();
     auto type = typeMap->getType(orig->expr, true);
     auto origtype = typeMap->getType(orig);
 
-    const IR::Expression* result = e;
     if (type->is<IR::Type_Stack>() && e->member == IR::Type_Stack::arraySize) {
         auto st = type->to<IR::Type_Stack>();
         auto size = st->getSize();
-        result = new IR::Constant(st->size->srcInfo, origtype, size);
-    } else {
-        auto expr = getConstant(e->expr);
-        if (expr == nullptr) return e;
-
-        auto structType = type->to<IR::Type_StructLike>();
-        if (structType == nullptr) BUG("Expected a struct type, got %1%", type);
-        if (auto list = expr->to<IR::ListExpression>()) {
-            bool found = false;
-            int index = 0;
-            for (auto f : structType->fields) {
-                if (f->name.name == e->member.name) {
-                    found = true;
-                    break;
-                }
-                index++;
-            }
-
-            if (!found) BUG("Could not find field %1% in type %2%", e->member, type);
-            result = CloneConstants::clone(list->components.at(index), this);
-        } else if (auto si = expr->to<IR::StructExpression>()) {
-            if (origtype->is<IR::Type_Header>() && e->member.name == IR::Type_Header::isValid)
-                return e;
-            auto ne = si->components.getDeclaration<IR::NamedExpression>(e->member.name);
-            BUG_CHECK(ne != nullptr, "Could not find field %1% in initializer %2%", e->member, si);
-            return CloneConstants::clone(ne->expression, this);
-        } else {
-            BUG("Unexpected initializer: %1%", expr);
-        }
+        return new IR::Constant(st->size->srcInfo, origtype, size);
     }
-    return result;
+
+    auto expr = getConstant(e->expr);
+    if (expr == nullptr) return e;
+
+    auto structType = type->to<IR::Type_StructLike>();
+    if (structType == nullptr) BUG("Expected a struct type, got %1%", type);
+
+    if (auto list = expr->to<IR::ListExpression>()) {
+        bool found = false;
+        int index = 0;
+        for (auto f : structType->fields) {
+            if (f->name.name == e->member.name) {
+                found = true;
+                break;
+            }
+            index++;
+        }
+
+        if (!found) BUG("Could not find field %1% in type %2%", e->member, type);
+        return CloneConstants::clone(list->components.at(index), this);
+    }
+
+    if (auto si = expr->to<IR::StructExpression>()) {
+        if (type->is<IR::Type_Header>() && e->member.name == IR::Type_Header::isValid) return e;
+        auto ne = si->components.getDeclaration<IR::NamedExpression>(e->member.name);
+        BUG_CHECK(ne != nullptr, "Could not find field %1% in initializer %2%", e->member, si);
+        return CloneConstants::clone(ne->expression, this);
+    }
+
+    if (expr->is<IR::InvalidHeader>() && e->member.name == IR::Type_Header::isValid) {
+        return e;
+    }
+
+    BUG("Unexpected initializer: %1%", expr);
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::Concat* e) {
+const IR::Node *DoConstantFolding::postorder(IR::Concat *e) {
     auto eleft = getConstant(e->left);
     auto eright = getConstant(e->right);
     if (eleft == nullptr || eright == nullptr) return e;
@@ -690,7 +694,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Concat* e) {
     return new IR::Constant(e->srcInfo, resultType, value, left->base);
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::LNot* e) {
+const IR::Node *DoConstantFolding::postorder(IR::LNot *e) {
     auto op = getConstant(e->expr);
     if (op == nullptr) return e;
 
@@ -702,7 +706,7 @@ const IR::Node* DoConstantFolding::postorder(IR::LNot* e) {
     return new IR::BoolLiteral(cst->srcInfo, IR::Type_Boolean::get(), !cst->value);
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::Mux* e) {
+const IR::Node *DoConstantFolding::postorder(IR::Mux *e) {
     if (!typesKnown)
         // We want the typechecker to look at the expression first
         return e;
@@ -719,11 +723,11 @@ const IR::Node* DoConstantFolding::postorder(IR::Mux* e) {
         return e->e2;
 }
 
-const IR::Node* DoConstantFolding::shift(const IR::Operation_Binary* e) {
+const IR::Node *DoConstantFolding::shift(const IR::Operation_Binary *e) {
     auto right = getConstant(e->right);
     if (right == nullptr) return e;
 
-    const IR::Constant* shift_amt = nullptr;
+    const IR::Constant *shift_amt = nullptr;
     if (right->is<IR::Constant>()) {
         shift_amt = right->to<IR::Constant>();
     } else if (typesKnown) {
@@ -774,11 +778,11 @@ const IR::Node* DoConstantFolding::shift(const IR::Operation_Binary* e) {
     return new IR::Constant(e->srcInfo, left->type, value, cl->base);
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::Cast* e) {
+const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
     auto expr = getConstant(e->expr);
     if (expr == nullptr) return e;
 
-    const IR::Type* etype;
+    const IR::Type *etype;
     if (typesKnown)
         etype = typeMap->getType(getOriginal(), true);
     else
@@ -834,8 +838,8 @@ const IR::Node* DoConstantFolding::postorder(IR::Cast* e) {
     return e;
 }
 
-DoConstantFolding::Result DoConstantFolding::setContains(const IR::Expression* keySet,
-                                                         const IR::Expression* select) const {
+DoConstantFolding::Result DoConstantFolding::setContains(const IR::Expression *keySet,
+                                                         const IR::Expression *select) const {
     if (keySet->is<IR::DefaultExpression>()) return Result::Yes;
     if (auto list = select->to<IR::ListExpression>()) {
         if (auto klist = keySet->to<IR::ListExpression>()) {
@@ -925,7 +929,7 @@ DoConstantFolding::Result DoConstantFolding::setContains(const IR::Expression* k
     return Result::DontKnow;
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::SelectExpression* expression) {
+const IR::Node *DoConstantFolding::postorder(IR::SelectExpression *expression) {
     if (!typesKnown) return expression;
     auto sel = getConstant(expression->select);
     if (sel == nullptr) return expression;
@@ -934,7 +938,7 @@ const IR::Node* DoConstantFolding::postorder(IR::SelectExpression* expression) {
     bool someUnknown = false;
     bool changes = false;
     bool finished = false;
-    const IR::Expression* result = expression;
+    const IR::Expression *result = expression;
 
     for (auto c : expression->selectCases) {
         if (finished) {
@@ -969,7 +973,7 @@ const IR::Node* DoConstantFolding::postorder(IR::SelectExpression* expression) {
     return result;
 }
 
-const IR::Node* DoConstantFolding::postorder(IR::IfStatement* ifstmt) {
+const IR::Node *DoConstantFolding::postorder(IR::IfStatement *ifstmt) {
     if (auto cond = ifstmt->condition->to<IR::BoolLiteral>()) {
         if (cond->value) {
             return ifstmt->ifTrue;

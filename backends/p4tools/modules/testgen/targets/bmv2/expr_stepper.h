@@ -27,24 +27,24 @@ class BMv2_V1ModelExprStepper : public ExprStepper {
  private:
     // Helper function that checks whether the given structure filed has a 'field_list' annotation
     // and the recirculate index matches. @returns true if that is the case.
-    static bool isPartOfFieldList(const IR::StructField* field, uint64_t recirculateIndex);
+    static bool isPartOfFieldList(const IR::StructField *field, uint64_t recirculateIndex);
 
     /// This is a utility function for recirculation externs. This function resets all the values
     /// associated with @ref unless a value contained in the Type_StructLike type of ref has an
     /// annotation associated with it. If the annotation index matches @param recirculateIndex, the
     /// reference is not reset.
-    void resetPreservingFieldList(ExecutionState* nextState, const IR::PathExpression* ref,
+    void resetPreservingFieldList(ExecutionState *nextState, const IR::PathExpression *ref,
                                   uint64_t recirculateIndex) const;
 
  public:
-    BMv2_V1ModelExprStepper(ExecutionState& state, AbstractSolver& solver,
-                            const ProgramInfo& programInfo);
+    BMv2_V1ModelExprStepper(ExecutionState &state, AbstractSolver &solver,
+                            const ProgramInfo &programInfo);
 
-    void evalExternMethodCall(const IR::MethodCallExpression* call, const IR::Expression* receiver,
-                              IR::ID name, const IR::Vector<IR::Argument>* args,
-                              ExecutionState& state) override;
+    void evalExternMethodCall(const IR::MethodCallExpression *call, const IR::Expression *receiver,
+                              IR::ID name, const IR::Vector<IR::Argument> *args,
+                              ExecutionState &state) override;
 
-    bool preorder(const IR::P4Table* /*table*/) override;
+    bool preorder(const IR::P4Table * /*table*/) override;
 };
 }  // namespace Bmv2
 

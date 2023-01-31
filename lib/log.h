@@ -38,33 +38,33 @@ extern int verbosity;
 extern int maximumLogLevel;
 
 // Look up the log level of @file.
-int fileLogLevel(const char* file);
-std::ostream& fileLogOutput(const char* file);
+int fileLogLevel(const char *file);
+std::ostream &fileLogOutput(const char *file);
 
 // A utility class used to prepend file and log level information to logging output.
 // also controls indent control and locking for multithreaded use
 class OutputLogPrefix {
-    const char* fn;
+    const char *fn;
     int level;
     static int ostream_xalloc;
-    static void setup_ostream_xalloc(std::ostream&);
-    friend std::ostream& operator<<(std::ostream&, const OutputLogPrefix&);
-    friend std::ostream& clearPrefix(std::ostream& out);
+    static void setup_ostream_xalloc(std::ostream &);
+    friend std::ostream &operator<<(std::ostream &, const OutputLogPrefix &);
+    friend std::ostream &clearPrefix(std::ostream &out);
 #ifdef MULTITHREAD
     struct lock_t;
-    mutable lock_t* lock = nullptr;
+    mutable lock_t *lock = nullptr;
 #endif  // MULTITHREAD
  public:
-    OutputLogPrefix(const char* f, int l) : fn(f), level(l) {}
+    OutputLogPrefix(const char *f, int l) : fn(f), level(l) {}
     ~OutputLogPrefix();
-    static void indent(std::ostream& out);
+    static void indent(std::ostream &out);
 };
 
 void addInvalidateCallback(void (*)(void));
-std::ostream& clearPrefix(std::ostream& out);
+std::ostream &clearPrefix(std::ostream &out);
 }  // namespace Detail
 
-inline std::ostream& endl(std::ostream& out) {
+inline std::ostream &endl(std::ostream &out) {
     out << std::endl;
     Detail::OutputLogPrefix::indent(out);
     return out;
@@ -73,7 +73,7 @@ using IndentCtl::indent;
 using IndentCtl::TempIndent;
 using IndentCtl::unindent;
 
-inline bool fileLogLevelIsAtLeast(const char* file, int level) {
+inline bool fileLogLevelIsAtLeast(const char *file, int level) {
     // If there's no file with a log level of at least @level, we don't need to do
     // the more expensive per-file check.
     if (Detail::maximumLogLevel < level) {
@@ -84,7 +84,7 @@ inline bool fileLogLevelIsAtLeast(const char* file, int level) {
 }
 
 // Process @spec and update the log level requested for the appropriate file.
-void addDebugSpec(const char* spec);
+void addDebugSpec(const char *spec);
 
 inline bool verbose() { return Detail::verbosity > 0; }
 inline int verbosity() { return Detail::verbosity; }
@@ -135,19 +135,19 @@ void increaseVerbosity();
 #define P4C_WARNING(X) (::Log::verbose() ? std::clog << "WARNING: " << X << std::endl : std::clog)
 #define ERRWARN(C, X) ((C) ? P4C_ERROR(X) : P4C_WARNING(X))
 
-static inline std::ostream& operator<<(std::ostream& out,
-                                       std::function<std::ostream&(std::ostream&)> fn) {
+static inline std::ostream &operator<<(std::ostream &out,
+                                       std::function<std::ostream &(std::ostream &)> fn) {
     return fn(out);
 }
 
 template <class T>
-inline auto operator<<(std::ostream& out, const T& obj) -> decltype((void)obj.dbprint(out), out) {
+inline auto operator<<(std::ostream &out, const T &obj) -> decltype((void)obj.dbprint(out), out) {
     obj.dbprint(out);
     return out;
 }
 
 template <class T>
-inline auto operator<<(std::ostream& out, const T* obj) -> decltype((void)obj->dbprint(out), out) {
+inline auto operator<<(std::ostream &out, const T *obj) -> decltype((void)obj->dbprint(out), out) {
     if (obj)
         obj->dbprint(out);
     else
@@ -156,10 +156,10 @@ inline auto operator<<(std::ostream& out, const T* obj) -> decltype((void)obj->d
 }
 
 template <class T>
-std::ostream& operator<<(std::ostream& out, const std::vector<T>& vec) {
-    const char* sep = " ";
+std::ostream &operator<<(std::ostream &out, const std::vector<T> &vec) {
+    const char *sep = " ";
     out << '[';
-    for (auto& el : vec) {
+    for (auto &el : vec) {
         out << sep << el;
         sep = ", ";
     }
@@ -168,10 +168,10 @@ std::ostream& operator<<(std::ostream& out, const std::vector<T>& vec) {
 }
 
 template <class T>
-std::ostream& operator<<(std::ostream& out, const std::set<T>& vec) {
-    const char* sep = " ";
+std::ostream &operator<<(std::ostream &out, const std::set<T> &vec) {
+    const char *sep = " ";
     out << '(';
-    for (auto& el : vec) {
+    for (auto &el : vec) {
         out << sep << el;
         sep = ", ";
     }

@@ -40,27 +40,27 @@
 
 namespace P4Tools {
 
-MidEnd::MidEnd(const CompilerOptions& options) {
+MidEnd::MidEnd(const CompilerOptions &options) {
     setName("MidEnd");
     refMap.setIsV1(options.langVersion == CompilerOptions::FrontendVersion::P4_14);
 }
 
-Visitor* MidEnd::mkConvertEnums() {
+Visitor *MidEnd::mkConvertEnums() {
     return new P4::ConvertEnums(&refMap, &typeMap, mkConvertEnumsPolicy());
 }
 
-Visitor* MidEnd::mkConvertErrors() {
+Visitor *MidEnd::mkConvertErrors() {
     return new P4::ConvertErrors(&refMap, &typeMap, mkConvertErrorPolicy());
 }
 
-Visitor* MidEnd::mkConvertKeys() {
+Visitor *MidEnd::mkConvertKeys() {
     return new P4::SimplifyKey(&refMap, &typeMap, new P4::IsLikeLeftValue());
 }
 
-P4::ChooseEnumRepresentation* MidEnd::mkConvertEnumsPolicy() {
+P4::ChooseEnumRepresentation *MidEnd::mkConvertEnumsPolicy() {
     /// Implements the default enum-conversion policy, which converts all enums to bit<32>.
     class EnumOn32Bits : public P4::ChooseEnumRepresentation {
-        bool convert(const IR::Type_Enum* /*type*/) const override { return true; }
+        bool convert(const IR::Type_Enum * /*type*/) const override { return true; }
 
         unsigned enumSize(unsigned) const override { return 32; }
     };
@@ -68,10 +68,10 @@ P4::ChooseEnumRepresentation* MidEnd::mkConvertEnumsPolicy() {
     return new EnumOn32Bits();
 }
 
-P4::ChooseErrorRepresentation* MidEnd::mkConvertErrorPolicy() {
+P4::ChooseErrorRepresentation *MidEnd::mkConvertErrorPolicy() {
     /// Implements the default enum-conversion policy, which converts all enums to bit<32>.
     class ErrorOn32Bits : public P4::ChooseErrorRepresentation {
-        bool convert(const IR::Type_Error* /*type*/) const override { return true; }
+        bool convert(const IR::Type_Error * /*type*/) const override { return true; }
 
         unsigned errorSize(unsigned) const override { return 32; }
     };
@@ -79,13 +79,14 @@ P4::ChooseErrorRepresentation* MidEnd::mkConvertErrorPolicy() {
     return new ErrorOn32Bits();
 }
 
-bool MidEnd::localCopyPropPolicy(const Visitor::Context* /*ctx*/, const IR::Expression* /*expr*/) {
+bool MidEnd::localCopyPropPolicy(const Visitor::Context * /*ctx*/,
+                                 const IR::Expression * /*expr*/) {
     return true;
 }
 
-P4::ReferenceMap* MidEnd::getRefMap() { return &refMap; }
+P4::ReferenceMap *MidEnd::getRefMap() { return &refMap; }
 
-P4::TypeMap* MidEnd::getTypeMap() { return &typeMap; }
+P4::TypeMap *MidEnd::getTypeMap() { return &typeMap; }
 
 void MidEnd::addDefaultPasses() {
     addPasses({
@@ -141,7 +142,7 @@ void MidEnd::addDefaultPasses() {
         // Local copy propagation and dead-code elimination.
         new P4::LocalCopyPropagation(
             &refMap, &typeMap, nullptr,
-            [this](const Visitor::Context* context, const IR::Expression* expr) {
+            [this](const Visitor::Context *context, const IR::Expression *expr) {
                 return localCopyPropPolicy(context, expr);
             }),
         new P4::ConstantFolding(&refMap, &typeMap),
