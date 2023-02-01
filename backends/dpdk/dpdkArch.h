@@ -1376,7 +1376,6 @@ class CollectIPSecInfo : public Inspector {
  */
 class InsertReqDeclForIPSec : public Transform {
     P4::ReferenceMap *refMap;
-    P4::TypeMap *typeMap;
     DpdkProgramStructure *structure;
     bool &is_ipsec_used;
     int &sa_id_width;
@@ -1387,10 +1386,9 @@ class InsertReqDeclForIPSec : public Transform {
         "ipsec_port_in_outbound"};
 
  public:
-    InsertReqDeclForIPSec(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-                          DpdkProgramStructure *structure, bool &is_ipsec_used, int &sa_id_width)
+    InsertReqDeclForIPSec(P4::ReferenceMap *refMap, DpdkProgramStructure *structure,
+                          bool &is_ipsec_used, int &sa_id_width)
         : refMap(refMap),
-          typeMap(typeMap),
           structure(structure),
           is_ipsec_used(is_ipsec_used),
           sa_id_width(sa_id_width) {
@@ -1415,8 +1413,7 @@ struct DpdkHandleIPSec : public PassManager {
         : refMap(refMap), typeMap(typeMap), structure(structure) {
         passes.push_back(
             new CollectIPSecInfo(is_ipsec_used, sa_id_width, refMap, typeMap, structure));
-        passes.push_back(
-            new InsertReqDeclForIPSec(refMap, typeMap, structure, is_ipsec_used, sa_id_width));
+        passes.push_back(new InsertReqDeclForIPSec(refMap, structure, is_ipsec_used, sa_id_width));
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::ResolveReferences(refMap));
         passes.push_back(new P4::TypeInference(refMap, typeMap, false));
