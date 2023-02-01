@@ -88,8 +88,8 @@ bool isDirection(const IR::Member *m) {
 }
 
 // Creates Register extern declaration for holding persistent information
-IR::Declaration_Instance *getRegDeclarationInstance(cstring instanceName, int regSize,
-                                                    int indexBitWidth, int initValBitWidth) {
+IR::Declaration_Instance *createRegDeclarationInstance(cstring instanceName, int regSize,
+                                                       int indexBitWidth, int initValBitWidth) {
     auto typepath = new IR::Path("Register");
     auto type = new IR::Type_Name(typepath);
     auto typeargs = new IR::Vector<IR::Type>(
@@ -104,7 +104,7 @@ IR::Declaration_Instance *getRegDeclarationInstance(cstring instanceName, int re
 }
 
 // Check for reserved names for DPDK target
-bool uniqueNames(P4::ReferenceMap *refMap, std::vector<cstring> names, cstring &resName) {
+bool reservedNames(P4::ReferenceMap *refMap, std::vector<cstring> names, cstring &resName) {
     for (auto name : names) {
         auto newname = refMap->newName(name);
         if (newname != name) {

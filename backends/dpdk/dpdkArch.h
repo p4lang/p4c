@@ -1351,13 +1351,13 @@ class CollectIPSecInfo : public Inspector {
                 } else if (a->method->getName().name == "set_sa_index") {
                     auto typeArgs = a->expr->typeArguments;
                     if (typeArgs->size() != 1) {
-                        ::error(ErrorType::ERR_UNEXPECTED,
-                                "Unexpected number of type arguments for %1%", a->method->name);
+                        ::error(ErrorType::ERR_MODEL, "Unexpected number of type arguments for %1%",
+                                a->method->name);
                         return false;
                     }
                     auto width = typeArgs->at(0);
                     if (!width->is<IR::Type_Bits>()) {
-                        ::error(ErrorType::ERR_UNEXPECTED, "Unexpected width type %1% for sa_index",
+                        ::error(ErrorType::ERR_MODEL, "Unexpected width type %1% for sa_index",
                                 width);
                         return false;
                     }
@@ -1378,18 +1378,22 @@ class InsertReqDeclForIPSec : public Transform {
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
     DpdkProgramStructure *structure;
+    bool &is_ipsec_used;
+    int &sa_id_width;
     cstring newHeaderName = "platform_hdr_t";
     IR::Type_Header *ipsecHeader = nullptr;
     std::vector<cstring> registerInstanceNames = {
         "ipsec_port_out_inbound", "ipsec_port_out_outbound", "ipsec_port_in_inbound",
         "ipsec_port_in_outbound"};
-    bool is_ipsec_used = false;
-    int sa_id_width = 32;
 
  public:
     InsertReqDeclForIPSec(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-                          DpdkProgramStructure *structure)
-        : refMap(refMap), typeMap(typeMap), structure(structure) {
+                          DpdkProgramStructure *structure, bool &is_ipsec_used, int &sa_id_width)
+        : refMap(refMap),
+          typeMap(typeMap),
+          structure(structure),
+          is_ipsec_used(is_ipsec_used),
+          sa_id_width(sa_id_width) {
         setName("InsertReqDeclForIPSec");
     }
 
@@ -1403,15 +1407,19 @@ struct DpdkHandleIPSec : public PassManager {
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
     DpdkProgramStructure *structure;
+    bool is_ipsec_used = false;
+    int sa_id_width = 32;
 
  public:
     DpdkHandleIPSec(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, DpdkProgramStructure *structure)
         : refMap(refMap), typeMap(typeMap), structure(structure) {
-        passes.push_back(new InsertReqDeclForIPSec(refMap, typeMap, structure));
+        passes.push_back(
+            new CollectIPSecInfo(is_ipsec_used, sa_id_width, refMap, typeMap, structure));
+        passes.push_back(
+            new InsertReqDeclForIPSec(refMap, typeMap, structure, is_ipsec_used, sa_id_width));
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::ResolveReferences(refMap));
         passes.push_back(new P4::TypeInference(refMap, typeMap, false));
-        passes.push_back(new P4::TypeChecking(refMap, typeMap));
     }
 };
 

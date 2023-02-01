@@ -420,7 +420,7 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                 if (e->method->getName().name == "from_ipsec") {
                     auto argSize = e->expr->arguments->size();
                     if (argSize != 1) {
-                        ::error(ErrorType::ERR_UNEXPECTED,
+                        ::error(ErrorType::ERR_MODEL,
                                 "Expected 1 argument for status of ipsec encryption",
                                 e->object->getName());
                         return false;

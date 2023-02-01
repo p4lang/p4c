@@ -3040,21 +3040,20 @@ IR::IndexedVector<IR::StatOrDecl> *InsertReqDeclForIPSec::addRegDeclInstance(
     std::vector<cstring> portRegs) {
     auto decls = new IR::IndexedVector<IR::StatOrDecl>;
     for (auto reg : portRegs)
-        decls->push_back(getRegDeclarationInstance(reg, IPSEC_PORT_REG_SIZE,
-                                                   IPSEC_PORT_REG_INDEX_BITWIDTH,
-                                                   IPSEC_PORT_REG_INITVAL_BITWIDTH));
+        decls->push_back(createRegDeclarationInstance(reg, IPSEC_PORT_REG_SIZE,
+                                                      IPSEC_PORT_REG_INDEX_BITWIDTH,
+                                                      IPSEC_PORT_REG_INITVAL_BITWIDTH));
     return decls;
 }
 
 const IR::Node *InsertReqDeclForIPSec::preorder(IR::P4Program *program) {
-    auto ipsecInfo = new CollectIPSecInfo(is_ipsec_used, sa_id_width, refMap, typeMap, structure);
-    ipsecInfo->setCalledBy(this);
-    program->apply(*ipsecInfo);
     if (!is_ipsec_used) return program;
     cstring resName = "";
-    if (!uniqueNames(refMap, registerInstanceNames, resName))
+    if (!reservedNames(refMap, registerInstanceNames, resName)) {
         ::error(ErrorType::ERR_RESERVED, "%1% name is reserved for DPDK IPSec port register",
                 resName);
+        return program;
+    }
     bool ipsecHdrAdded = false;
     bool ipsecPortRegAdded = false;
     auto new_objs = new IR::Vector<IR::Node>;
@@ -3064,7 +3063,7 @@ const IR::Node *InsertReqDeclForIPSec::preorder(IR::P4Program *program) {
     IR::IndexedVector<IR::StructField> newHeaderFields;
     newHeaderFields.push_back(
         new IR::StructField(newHeaderFieldName, IR::Type_Bits::get(sa_id_width)));
-    if (!uniqueNames(refMap, {newHeaderName}, resName)) {
+    if (!reservedNames(refMap, {newHeaderName}, resName)) {
         ::error(ErrorType::ERR_RESERVED, "%1% type name is reserved for DPDK platform header",
                 newHeaderName);
         return program;
