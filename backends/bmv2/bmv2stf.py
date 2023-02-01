@@ -748,7 +748,7 @@ class RunBMV2(object):
             # Check for expected packets.
             if interface in self.expectedAny:
                 if interface in self.expected:
-                    reportError("Interface " + interface + " has both expected with packets and without")
+                    reportError(f"Interface {interface} has both expected with packets and without")
                 continue
             if interface not in self.expected:
                 expected = []

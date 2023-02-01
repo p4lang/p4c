@@ -17,81 +17,81 @@
 import os
 import sys
 import time
+import subprocess
+from pathlib import Path
 from glob import glob
 from .ebpfenv import Bridge
 from .target import EBPFTarget
 # path to the tools folder of the compiler
-sys.path.insert(0, os.path.dirname(
-    os.path.realpath(__file__)) + '/../../../tools')
-from testutils import *
+# Append tools to the import path.
+FILE_DIR = Path(__file__).resolve().parent
+# Append tools to the import path.
+sys.path.append(str(FILE_DIR.joinpath("../../../tools")))
+import testutils
 
 
 class Target(EBPFTarget):
     EBPF_MAP_PATH = "/sys/fs/bpf/tc/globals"
 
-    def __init__(self, tmpdir, options, template, outputs):
-        EBPFTarget.__init__(self, tmpdir, options, template, outputs)
+    def __init__(self, tmpdir, options, template):
+        EBPFTarget.__init__(self, tmpdir, options, template)
 
     def compile_dataplane(self):
         # Use clang to compile the generated C code to a LLVM IR
         args = "make "
         # target makefile
-        args += "-f " + self.options.target + ".mk "
+        args += f"-f {self.options.target}.mk "
         # Source folder of the makefile
-        args += "-C " + self.runtimedir + " "
+        args += f"-C {self.runtimedir} "
         # Input eBPF byte code
-        args += self.template + ".o "
+        args += f"{self.template}.o "
         # The bpf program to attach to the interface
-        args += "BPFOBJ=" + self.template + ".o"
+        args += f"BPFOBJ={self.template}.o "
         # add the folder local to the P4 file to the list of includes
-        args += " INCLUDES+=-I" + os.path.dirname(self.options.p4filename)
+        args += f" INCLUDES+=-I{os.path.dirname(self.options.p4filename)}"
         if self.options.extern:
             # we inline the extern so we need a direct include
-            args += " INCLUDES+=-include" + self.options.extern + " "
+            args += f" INCLUDES+=-include{self.options.extern} "
             # need to include the temporary dir because of the tmp import
-            args += " INCLUDES+=-I" + self.tmpdir + " "
+            args += f" INCLUDES+=-I{self.tmpdir} "
         errmsg = "Failed to compile the eBPF byte code:"
-        return run_timeout(self.options.verbose, args, TIMEOUT,
-                           self.outputs, errmsg)
+        return testutils.exec_process(args, errmsg).returncode
 
     def _create_runtime(self):
         args = self.get_make_args(self.runtimedir, self.options.target)
         # List of bpf programs to attach to the interface
-        args += "BPFOBJ=" + self.template + " "
+        args += f"BPFOBJ={self.template} "
         args += "CFLAGS+=-DCONTROL_PLANE "
         # add the folder local to the P4 file to the list of includes
-        args += "INCLUDES+=-I%s " % os.path.dirname(self.options.p4filename)
+        args += f"INCLUDES+=-I{os.path.dirname(self.options.p4filename)} "
         # some kernel specific includes for libbpf
-        args += "INCLUDES+=-I%s/usr/include " % self.runtimedir
-        args += "INCLUDES+=-I%s/contrib/libbpf/include/uapi " % self.runtimedir
-        args += "LIBS+=%s/usr/lib64/libbpf.a " % self.runtimedir
+        args += f"INCLUDES+=-I{self.runtimedir}/usr/include "
+        args += f"INCLUDES+=-I{self.runtimedir}/contrib/libbpf/include/uapi "
+        args += f"LIBS+={self.runtimedir}/usr/lib64/libbpf.a "
         args += "LIBS+=-lz "
         args += "LIBS+=-lelf "
         errmsg = "Failed to build the filter:"
-        return run_timeout(self.options.verbose, args, TIMEOUT,
-                           self.outputs, errmsg)
+        return testutils.exec_process(args, errmsg).returncode
 
     def _create_bridge(self):
         # The namespace is the id of the process
         namespace = str(os.getpid())
         # Number of input files
-        direction = 'in'
-        num_files = len(glob(self.filename('*', direction)))
+        direction = "in"
+        num_files = len(glob(self.filename("*", direction)))
         # Create the namespace and the bridge with all its ports
-        br = Bridge(namespace, self.outputs, self.options.verbose)
+        br = Bridge(namespace)
         result = br.create_virtual_env(num_files)
-        if result != SUCCESS:
+        if result != testutils.SUCCESS:
             br.ns_del()
             return None
         return br
 
     def _get_run_cmd(self):
         direction = "in"
-        pcap_pattern = self.filename('', direction)
-        num_files = len(glob(self.filename('*', direction)))
-        report_output(self.outputs["stdout"],
-                      self.options.verbose,
-                      "Input file: %s" % pcap_pattern)
+        pcap_pattern = self.filename("", direction)
+        num_files = len(glob(self.filename("*", direction)))
+        testutils.log.info(f"Input file: {pcap_pattern}")
         # Main executable
         cmd = self.template + " "
         # Input pcap pattern
@@ -112,10 +112,9 @@ class Target(EBPFTarget):
         # As a side-effect, this may create maps in /sys/fs/bpf/
 
         # Add the qdisc. MUST be clsact layer.
-        bridge.ns_exec("tc qdisc add dev %s clsact" % port_name)
-        cmd = ("tc filter add dev %s egress"
-               " bpf da obj %s section prog "
-               "verbose" % (port_name, self.template + ".o"))
+        bridge.ns_exec(f"tc qdisc add dev {port_name} clsact")
+        cmd = (f"tc filter add dev {port_name} egress"
+               f" bpf da obj {self.template}.o section prog verbose")
         return bridge.ns_proc_write(proc, cmd)
 
     def _attach_filters(self, bridge, proc):
@@ -128,19 +127,19 @@ class Target(EBPFTarget):
             # No ports attached (no pcap files), load to bridge instead
             result = self._load_filter(bridge, proc, bridge.br_name)
             bridge.ns_proc_append(proc, "")
-        if result != SUCCESS:
+        if result != testutils.SUCCESS:
             return result
-        return SUCCESS
+        return testutils.SUCCESS
 
     def _run_tcpdump(self, bridge, filename, port):
-        cmd = bridge.get_ns_prefix() + " tcpdump -w %s -i %s" % (filename, port)
+        cmd = f"{bridge.get_ns_prefix()} tcpdump -w {filename} -i {port}"
         return subprocess.Popen(cmd.split())
 
     def _init_tcpdump_listeners(self, bridge):
         # Listen to packets with tcpdump on all the ports of the bridge
         dump_procs = []
         for i, port in enumerate(bridge.br_ports):
-            outfile_name = self.filename(i, 'out')
+            outfile_name = self.filename(i, "out")
             dump_procs.append(self._run_tcpdump(bridge, outfile_name, port))
         # Wait for tcpdump to initialise
         time.sleep(2)
@@ -150,19 +149,18 @@ class Target(EBPFTarget):
         # Open a process in the new namespace
         proc = bridge.ns_proc_open()
         if not proc:
-            return FAILURE
+            return testutils.FAILURE
         dump_procs = self._init_tcpdump_listeners(bridge)
         result = self._attach_filters(bridge, proc)
-        if result != SUCCESS:
+        if result != testutils.SUCCESS:
             return result
         # Check if eBPF maps have actually been created
-        result = bridge.ns_proc_write(proc,
-                                      "ls -1 %s" % self.EBPF_MAP_PATH)
-        if result != SUCCESS:
+        result = bridge.ns_proc_write(proc, f"ls -1 {self.EBPF_MAP_PATH}")
+        if result != testutils.SUCCESS:
             return result
         # Finally, append the actual runtime command to the process
         result = bridge.ns_proc_append(proc, self._get_run_cmd())
-        if result != SUCCESS:
+        if result != testutils.SUCCESS:
             return result
         # Execute the command queue and close the process, retrieve result
         result = bridge.ns_proc_close(proc)
@@ -173,17 +171,16 @@ class Target(EBPFTarget):
 
     def run(self):
         # Root is necessary to load ebpf into the kernel
-        if not check_root():
-            errmsg = "This test requires root privileges; skipping execution."
-            report_err(self.outputs["stderr"], errmsg)
-            return SKIPPED
+        if not testutils.check_root():
+            testutils.log.warning("This test requires root privileges; skipping execution.")
+            return testutils.SKIPPED
         result = self._create_runtime()
-        if result != SUCCESS:
+        if result != testutils.SUCCESS:
             return result
         # Create the namespace and the central testing bridge
         bridge = self._create_bridge()
         if not bridge:
-            return FAILURE
+            return testutils.FAILURE
         # Run the program in the generated namespace
         result = self._run_in_namespace(bridge)
         bridge.ns_del()
