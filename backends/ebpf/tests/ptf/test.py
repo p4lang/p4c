@@ -363,6 +363,24 @@ class DigestPSATest(P4EbpfTest):
             if d["srcAddr"] != "0xfafbfcfdfef0" or int(d["ingress_port"], 0) != DP_PORTS[0]:
                 self.fail("Digest map stored wrong values: mac->{}, port->{}".format(d["srcAddr"], d["ingress_port"]))
 
+
+class WideFieldDigest(P4EbpfTest):
+
+    p4_file_path = "p4testdata/wide-field-digest.p4"
+
+    def runTest(self):
+        pkt = testutils.simple_ipv6ip_packet(ipv6_src="::2", ipv6_dst="::1", ipv6_hlim=64)
+        exp_pkt = pkt.copy()
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet_any_port(self, exp_pkt, PTF_PORTS)
+
+        digests = self.digest_get("IngressDeparserImpl_d")
+        if len(digests) != 1:
+            self.fail("Expected 1 digest messages, got {}".format(len(digests)))
+        for d in digests:
+            if int(d["srcAddr"], 0) != 2 or int(d["info"], 0) != 1023:
+                self.fail("Digest map stored wrong values: addr->{}, info->{}".format(d["srcAddr"], d["info"]))
+
                 
 class CountersPSATest(P4EbpfTest):
     p4_file_path = "p4testdata/counters.p4"

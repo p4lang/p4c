@@ -199,17 +199,15 @@ class ConvertToEBPFDeparserPSA : public Inspector {
 
     const IR::Parameter *parserHeaders;
     const IR::Parameter *istd;
-    P4::TypeMap *typemap;
     EBPF::EBPFDeparserPSA *deparser;
 
  public:
     ConvertToEBPFDeparserPSA(EBPFProgram *program, const IR::Parameter *parserHeaders,
-                             const IR::Parameter *istd, P4::TypeMap *typemap, pipeline_type type)
+                             const IR::Parameter *istd, pipeline_type type)
         : program(program),
           pipelineType(type),
           parserHeaders(parserHeaders),
           istd(istd),
-          typemap(typemap),
           deparser(nullptr) {}
 
     bool preorder(const IR::ControlBlock *) override;

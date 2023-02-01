@@ -39,34 +39,32 @@ void DeparserBodyTranslatorPSA::processMethod(const P4::ExternMethod *method) {
     auto dprs = deparser->to<EBPFDeparserPSA>();
     CHECK_NULL(dprs);
     auto externName = method->originalExternType->name.name;
+    auto instance = method->object->getName().name;
+    auto methodName = method->method->getName().name;
+    cstring externalName = EBPFObject::externalName(method->object);
+
     if (externName == "Checksum" || externName == "InternetChecksum") {
-        auto instance = method->object->getName().name;
-        auto methodName = method->method->getName().name;
         dprs->getChecksum(instance)->processMethod(builder, methodName, method->expr, this);
         return;
-    } else if (method->method->name.name == "pack") {
-        // Emit digest pack method
-        auto obj = method->object;
-        auto di = obj->to<IR::Declaration_Instance>();
-        cstring digestMapName = EBPFObject::externalName(di);
-        auto arg = method->expr->arguments->front();
-        builder->appendFormat("bpf_map_push_elem(&%s, &", digestMapName);
-        this->visit(arg);
-        builder->appendFormat(", BPF_EXIST)");
+    }
+
+    if (externName == "Digest") {
+        dprs->getDigest(externalName)->processMethod(builder, methodName, method->expr, this);
         return;
     }
 
     DeparserBodyTranslator::processMethod(method);
 }
 
+void EBPFDeparserPSA::emitTypes(CodeBuilder *builder) const {
+    for (auto digest : digests) {
+        digest.second->emitTypes(builder);
+    }
+}
+
 void EBPFDeparserPSA::emitDigestInstances(CodeBuilder *builder) const {
     for (auto digest : digests) {
-        builder->appendFormat("REGISTER_TABLE_NO_KEY_TYPE(%s, %s, 0, ", digest.first,
-                              "BPF_MAP_TYPE_QUEUE");
-        auto type = EBPFTypeFactory::instance->create(digest.second->to<IR::Type_Type>()->type);
-        type->declare(builder, "", false);
-        builder->appendFormat(", %d)", maxDigestQueueSize);
-        builder->newline();
+        digest.second->emitInstance(builder);
     }
 }
 
