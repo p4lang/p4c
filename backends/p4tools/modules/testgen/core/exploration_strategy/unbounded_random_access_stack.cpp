@@ -81,7 +81,8 @@ void UnboundedRandomAccessStack::run(const Callback &callback) {
     }
 }
 
-UnboundedRandomAccessStack::UnboundedRandomAccessStack(AbstractSolver &solver, const ProgramInfo &programInfo)
+UnboundedRandomAccessStack::UnboundedRandomAccessStack(AbstractSolver &solver,
+                                                       const ProgramInfo &programInfo)
     : IncrementalStack(solver, programInfo) {}
 
 UnboundedRandomAccessStack::StepResult UnboundedRandomAccessStack::multiPop(

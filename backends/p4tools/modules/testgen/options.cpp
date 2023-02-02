@@ -22,8 +22,8 @@ const char *TestgenOptions::getIncludePath() {
 
 const std::set<cstring> TestgenOptions::SUPPORTED_STOP_METRICS = {"MAX_STATEMENT_COVERAGE"};
 const std::set<cstring> TestgenOptions::SUPPORTED_EXPLORATION_STRATEGIES = {
-    "INCREMENTAL_STACK", "RANDOM_ACCESS_STACK", "LINEAR_ENUMERATION", "MAX_COVERAGE",
-    "RANDOM_ACCESS_MAX_COVERAGE", "UNBOUNDED_RANDOM_ACCESS_STACK"};
+    "INCREMENTAL_STACK", "RANDOM_ACCESS_STACK",        "LINEAR_ENUMERATION",
+    "MAX_COVERAGE",      "RANDOM_ACCESS_MAX_COVERAGE", "UNBOUNDED_RANDOM_ACCESS_STACK"};
 
 TestgenOptions::TestgenOptions()
     : AbstractP4cToolOptions("Generate packet tests for a P4 program.") {
