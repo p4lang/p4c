@@ -13,7 +13,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """ Contains different eBPF models and specifies their individual behavior
     Currently five phases are defined:
    1. Invokes the specified compiler on a provided p4 file.
@@ -25,96 +24,93 @@
 
 import os
 import sys
+from pathlib import Path
 from glob import glob
 import scapy.utils as scapy_util
 from .ebpfstf import create_table_file, parse_stf_file
+
 # path to the tools folder of the compiler
-sys.path.insert(0, os.path.dirname(
-    os.path.realpath(__file__)) + '/../../../tools')
-from testutils import *
+# Append tools to the import path.
+FILE_DIR = Path(__file__).resolve().parent
+# Append tools to the import path.
+sys.path.append(str(FILE_DIR.joinpath("../../../tools")))
+import testutils
 
-PCAP_PREFIX = "pcap"    # match pattern
-PCAP_SUFFIX = ".pcap"    # could also be ".pcapng"
+PCAP_PREFIX = "pcap"  # match pattern
+PCAP_SUFFIX = ".pcap" # could also be ".pcapng"
 
 
-class EBPFTarget(object):
-    """ Parent Object of the EBPF Targets
-     Defines common functions and variables"""
+class EBPFTarget:
+    """Parent Object of the EBPF Targets
+    Defines common functions and variables"""
 
-    def __init__(self, tmpdir, options, template, outputs):
-        self.tmpdir = tmpdir        # dir in which all files are stored
-        self.options = options      # contains meta information
-        self.template = template    # template to generate a filter
-        self.outputs = outputs      # contains standard and error output
-        self.expected = {}          # expected packets per interface
-        # location of the runtime folder
-        self.runtimedir = self.options.testdir + "/runtime"
-        # location of the p4c compiler binary
-        self.compiler = self.options.compiler
+    def __init__(self, tmpdir, options, template):
+        self.tmpdir = tmpdir                  # dir in which all files are stored
+        self.options = options                # contains meta information
+        self.template = template              # template to generate a filter
+        self.expected = {}                    # expected packets per interface
+        self.runtimedir = options.runtimedir  # location of the runtime folder
+        self.compiler = self.options.compiler # location of the p4c compiler binary
 
     def get_make_args(self, runtimedir, target):
         args = "make "
         # target makefile
         args += "-f runtime.mk "
         # Source folder of the makefile
-        args += "-C " + runtimedir + " "
-        args += "TARGET=" + target + " "
+        args += f"-C {runtimedir} "
+        args += f"TARGET={target} "
         return args
 
     def filename(self, interface, direction):
-        """ Constructs the pcap filename from the given interface and
-            packet stream direction. For example "pcap1_out.pcap" implies
-            that the given stream contains tx packets from interface 1 """
-        return (self.tmpdir + "/" + PCAP_PREFIX +
-                str(interface) + "_" + direction + PCAP_SUFFIX)
+        """Constructs the pcap filename from the given interface and
+        packet stream direction. For example "pcap1_out.pcap" implies
+        that the given stream contains tx packets from interface 1"""
+        return self.tmpdir + "/" + PCAP_PREFIX + str(interface) + "_" + direction + PCAP_SUFFIX
 
     def interface_of_filename(self, f):
-        """ Extracts the interface name out of a pcap filename"""
-        return int(os.path.basename(f).rstrip(PCAP_SUFFIX).
-                   lstrip(PCAP_PREFIX).rsplit('_', 1)[0])
+        """Extracts the interface name out of a pcap filename"""
+        return int(os.path.basename(f).rstrip(PCAP_SUFFIX).lstrip(PCAP_PREFIX).rsplit("_", 1)[0])
 
     def compile_p4(self, argv):
         # To override
-        """ Compile the p4 target """
+        """Compile the p4 target"""
         if not os.path.isfile(self.options.p4filename):
-            report_err(self.outputs["stderr"],
-                       ("No such file " + self.options.p4filename))
-            sys.exit(FAILURE)
+            testutils.log.error(f"No such file {self.options.p4filename}")
+            sys.exit(testutils.FAILURE)
         # Initialize arguments for the makefile
         args = self.get_make_args(self.runtimedir, self.options.target)
         # name of the makefile target
         args += self.template + ".c "
         # name of the output source file
-        args += "BPFOBJ=" + self.template + ".c "
+        args += f"BPFOBJ={self.template}.c "
         # location of the P4 input file
-        args += "P4FILE=" + self.options.p4filename + " "
+        args += f"P4FILE={self.options.p4filename} "
         # location of the P4 compiler
-        args += "P4C=" + self.compiler
-        p4_args = ' '.join(map(str, argv))
-        if (p4_args):
+        args += f"P4C={self.compiler}"
+        p4_args = " ".join(map(str, argv))
+        if p4_args:
             # Remaining arguments
-            args += " P4ARGS=\"" + p4_args + "\" "
+            args += f" P4ARGS=\"{p4_args}\" "
         errmsg = "Failed to compile P4:"
-        result = run_timeout(self.options.verbose, args, TIMEOUT,
-                             self.outputs, errmsg)
-        if result != SUCCESS:
+        out, returncode = testutils.exec_process(args, errmsg)
+        if returncode != testutils.SUCCESS:
             # If the compiler crashed fail the test
-            if 'Compiler Bug' in open(self.outputs["stderr"]).readlines():
-                sys.exit(FAILURE)
+            if "Compiler Bug" in out:
+                sys.exit(testutils.FAILURE)
 
         # Check if we expect the p4 compilation of the p4 file to fail
-        expected_error = is_err(self.options.p4filename)
+        expected_error = testutils.is_err(self.options.p4filename)
         if expected_error:
             # We do, so invert the result
-            if result == SUCCESS:
-                result = FAILURE
+            if returncode == testutils.SUCCESS:
+                returncode = testutils.FAILURE
             else:
-                result = SUCCESS
-        return result, expected_error
+                returncode = testutils.SUCCESS
+        return returncode, expected_error
 
     def _write_pcap_files(self, iface_pkts_map):
-        """ Writes the collected packets to their respective interfaces.
-        This is done by creating a pcap file with the corresponding name. """
+        """Writes the collected packets to their respective interfaces.
+        This is done by creating a pcap file with the corresponding name."""
         for iface, pkts in iface_pkts_map.items():
             direction = "in"
             infile = self.filename(iface, direction)
@@ -125,9 +121,8 @@ class EBPFTarget(object):
                 try:
                     fp._write_packet(pkt_data)
                 except ValueError:
-                    report_err(self.outputs["stderr"],
-                               "Invalid packet data", pkt_data)
-                    return FAILURE
+                    testutils.log.error(f"Invalid packet data {pkt_data}")
+                    return testutils.FAILURE
             fp.flush()
             fp.close()
             # debug -- the bytes in the pcap file should be identical to the
@@ -136,45 +131,42 @@ class EBPFTarget(object):
             # for p in packets:
             #     print(p.convert_to(Raw).show())
 
-        return SUCCESS
+        return testutils.SUCCESS
 
     def generate_model_inputs(self, stffile):
         # To override
-        """ Parses the stf file and creates a .pcap file with input packets.
-            It also adds the expected output packets per interface to a global
-            dictionary.
-            After parsing the necessary information, it creates a control
-            header for the runtime, which contains the extracted control
-             plane commands """
+        """Parses the stf file and creates a .pcap file with input packets.
+        It also adds the expected output packets per interface to a global
+        dictionary.
+        After parsing the necessary information, it creates a control
+        header for the runtime, which contains the extracted control
+         plane commands"""
         with open(stffile) as raw_stf:
-            input_pkts, cmds, self.expected = parse_stf_file(
-                raw_stf)
-            result, err = create_table_file(cmds, self.tmpdir, "control.h")
-            if result != SUCCESS:
+            input_pkts, cmds, self.expected = parse_stf_file(raw_stf)
+            result, _ = create_table_file(cmds, self.tmpdir, "control.h")
+            if result != testutils.SUCCESS:
                 return result
             result = self._write_pcap_files(input_pkts)
-            if result != SUCCESS:
+            if result != testutils.SUCCESS:
                 return result
-        return SUCCESS
+        return testutils.SUCCESS
 
     def compile_dataplane(self, argv=""):
         # To override
-        """ Compiles a filter from the previously generated template """
+        """Compiles a filter from the previously generated template"""
         raise NotImplementedError("Method create_filter not implemented!")
 
     def run(self, argv=""):
         # To override
-        """ Runs the filter and feeds attached interfaces with packets """
+        """Runs the filter and feeds attached interfaces with packets"""
         raise NotImplementedError("Method run() not implemented!")
 
     def check_outputs(self):
-        """ Checks if the output of the filter matches expectations """
-        report_output(self.outputs["stdout"],
-                      self.options.verbose, "Comparing outputs")
+        """Checks if the output of the filter matches expectations"""
+        testutils.log.info("Comparing outputs")
         direction = "out"
-        for file in glob(self.filename('*', direction)):
-            report_output(self.outputs["stdout"],
-                          self.options.verbose, "Checking file %s" % file)
+        for file in glob(self.filename("*", direction)):
+            testutils.log.info(f"Checking file {file}")
             interface = self.interface_of_filename(file)
             if os.stat(file).st_size == 0:
                 packets = []
@@ -182,10 +174,9 @@ class EBPFTarget(object):
                 try:
                     packets = scapy_util.rdpcap(file)
                 except Exception as e:
-                    report_err(self.outputs["stderr"],
-                               "Corrupt pcap file", file, e)
+                    testutils.log.error(f"Corrupt pcap file {file}\n{e}")
                     self.showLog()
-                    return FAILURE
+                    return testutils.FAILURE
 
             if interface not in self.expected:
                 expected = []
@@ -193,32 +184,25 @@ class EBPFTarget(object):
                 # Check for expected packets.
                 if self.expected[interface]["any"]:
                     if self.expected[interface]["pkts"]:
-                        report_err(self.outputs["stderr"],
-                                   ("Interface " + interface +
-                                    " has both expected with"
-                                    " packets and without"))
+                        testutils.log.error(
+                            (f"Interface {interface} has both expected with packets and without"))
                     continue
                 expected = self.expected[interface]["pkts"]
             if len(expected) != len(packets):
-                report_err(self.outputs["stderr"], "Expected", len(
-                    expected), "packets on port",
-                    str(interface), "got", len(packets))
-                return FAILURE
-            for i in range(0, len(expected)):
-                cmp = compare_pkt(
-                    self.outputs, expected[i], packets[i])
-                if cmp != SUCCESS:
-                    report_err(self.outputs["stderr"], "Packet", i, "on port",
-                               str(interface), "differs")
+                testutils.log.error(
+                    f"Expected {len(expected)} packets on port {interface} got {len(packets)}")
+                return testutils.FAILURE
+            for idx, expected_pkt in enumerate(expected):
+                cmp = testutils.compare_pkt(expected_pkt, packets[idx])
+                if cmp != testutils.SUCCESS:
+                    testutils.log.error(f"Packet {idx} on port {interface} differs")
                     return cmp
             # Remove successfully checked interfaces
             if interface in self.expected:
                 del self.expected[interface]
         if len(self.expected) != 0:
             # Didn't find all the expects we were expecting
-            report_err(self.outputs["stderr"], "Expected packets on port(s)",
-                       list(self.expected.keys()), "not received")
-            return FAILURE
-        report_output(self.outputs["stdout"],
-                      self.options.verbose, "All went well.")
-        return SUCCESS
+            testutils.log.error(f"Expected packets on port(s) {self.expected.keys()} not received")
+            return testutils.FAILURE
+        testutils.log.info("All went well.")
+        return testutils.SUCCESS

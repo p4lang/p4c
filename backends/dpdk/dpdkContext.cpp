@@ -17,6 +17,7 @@ limitations under the License.
 #include "dpdkContext.h"
 
 #include "backend.h"
+#include "control-plane/bfruntime_ext.h"
 #include "printUtils.h"
 namespace DPDK {
 
@@ -189,16 +190,21 @@ Util::JsonObject *DpdkContextGenerator::initTableCommonJson(const cstring name,
 }
 
 void DpdkContextGenerator::collectHandleId() {
-    for (auto table : p4info.tables()) {
+    for (auto &table : p4info.tables()) {
         const auto &pre_t = table.preamble();
-        context_handle_map[pre_t.name().c_str()] = pre_t.id();
-        for (auto &action_ref : table.action_refs()) {
-            auto *action = P4::BFRT::Standard::findAction(p4info, action_ref.id());
-            if (action == nullptr) {
-                ::error(ErrorType::ERR_INVALID, "Invalid action id '%1%'", action_ref.id());
-                continue;
-            }
-            const auto &pre_a = action->preamble();
+        context_handle_map[pre_t.name()] = pre_t.id();
+    }
+    for (auto &action : p4info.actions()) {
+        const auto &pre_a = action.preamble();
+        context_handle_map[pre_a.name()] = pre_a.id();
+    }
+    for (auto &action_prof : p4info.action_profiles()) {
+        const auto &pre_a = action_prof.preamble();
+        context_handle_map[pre_a.name()] = pre_a.id();
+    }
+    for (const auto &externType : p4info.externs()) {
+        for (const auto &externInstance : externType.instances()) {
+            const auto &pre_a = externInstance.preamble();
             context_handle_map[pre_a.name()] = pre_a.id();
         }
     }

@@ -497,6 +497,50 @@ extern Digest<T> {
 }
 // END:Digest_extern
 
+// PNA extern for IPsec:
+// IPsec accelerator result for the current packet
+enum ipsec_status {
+	IPSEC_SUCCESS,
+	IPSEC_ERROR
+}
+
+// IPsec accelerator extern definition
+extern ipsec_accelerator {
+	// IPsec accelerator constructor.
+	ipsec_accelerator();
+
+	// Set the security association (SA) index for the current packet.
+	//
+	// When not invoked, the SA index to be used is undefined, leading to taget dependent
+	// behavior.
+	void set_sa_index<T>(in T sa_index);
+
+	// Set the offset to the IPv4/IPv6 header for the current packet.
+	//
+	// When not invoked, the default value set for the IPv4/IPv6 header offset is 0.
+	void set_ip_header_offset<T>(in T offset);
+
+	// Enable the IPsec operation to be performed on the current packet.
+	//
+	// The type of the operation (i.e. encrypt/decrypt) and its associated parameters (such as
+	// the crypto cipher and/or authentication parameters, the tunnel/transport mode headers,
+	// etc) are completely specified by the SA that was set for the current packet.
+	//
+	// When enabled, this operation takes place once the deparser operation is completed.
+	void enable();
+
+	// Disable any IPsec operation that might have been previously enabled for the current
+	// packet.
+	void disable();
+
+	// Returns true when the current packet has been processed by the IPsec accelerator and
+	// reinjected back into the pipeline, and false otherwise.
+	bool from_ipsec(out ipsec_status status);
+}
+//END:IPSec extern
+
+
+
 enum PNA_Direction_t {
     NET_TO_HOST,
     HOST_TO_NET

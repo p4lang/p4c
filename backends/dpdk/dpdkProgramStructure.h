@@ -56,8 +56,9 @@ struct DpdkProgramStructure {
     std::set<cstring> non_pipeline_controls;
 
     IR::Type_Struct *metadataStruct;
-    cstring local_metadata_type;
-    cstring header_type;
+    IR::Expression *ipsec_header;
+    cstring local_metadata_type = "";
+    cstring header_type = "";
     IR::IndexedVector<IR::StructField> compiler_added_fields;
     IR::IndexedVector<IR::StructField> key_fields;
     IR::Vector<IR::Type> used_metadata;

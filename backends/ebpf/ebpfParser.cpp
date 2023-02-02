@@ -242,13 +242,15 @@ bool StateTranslationVisitor::preorder(const IR::SelectCase *selectCase) {
     return false;
 }
 
-void StateTranslationVisitor::compileExtractField(const IR::Expression *expr, cstring field,
-                                                  unsigned alignment, EBPFType *type) {
+void StateTranslationVisitor::compileExtractField(const IR::Expression *expr,
+                                                  const IR::StructField *field, unsigned alignment,
+                                                  EBPFType *type) {
     unsigned widthToExtract = dynamic_cast<IHasWidth *>(type)->widthInBits();
     auto program = state->parser->program;
     cstring msgStr;
+    cstring fieldName = field->name.name;
 
-    msgStr = Util::printf_format("Parser: extracting field %s", field);
+    msgStr = Util::printf_format("Parser: extracting field %s", fieldName);
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 
     if (widthToExtract <= 64) {
@@ -277,7 +279,7 @@ void StateTranslationVisitor::compileExtractField(const IR::Expression *expr, cs
         unsigned shift = loadSize - alignment - widthToExtract;
         builder->emitIndent();
         visit(expr);
-        builder->appendFormat(".%s = (", field.c_str());
+        builder->appendFormat(".%s = (", fieldName.c_str());
         type->emit(builder);
         builder->appendFormat(")((%s(%s, BYTES(%s))", helper, program->packetStartVar.c_str(),
                               program->offsetVar.c_str());
@@ -293,6 +295,23 @@ void StateTranslationVisitor::compileExtractField(const IR::Expression *expr, cs
         builder->append(")");
         builder->endOfStatement(true);
     } else {
+        if (program->options.arch == "psa" && widthToExtract % 8 != 0) {
+            // To explain the problem in error lets assume that we have bit<68> field with value:
+            //   0x11223344556677889
+            //                     ^ this digit will be parsed into a half of byte
+            // Such fields are parsed into a table of bytes in network byte order, so possible
+            // values in dataplane are (note the position of additional '0' at the end):
+            //   0x112233445566778809
+            //   0x112233445566778890
+            // To correctly insert that padding, the length of field must be known, but tools like
+            // nikss-ctl (and the nikss library) don't consume P4info.txt to have such knowledge.
+            // There is also a bug in (de)parser causing such fields to be deparsed incorrectly.
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "%1%: fields wider than 64 bits must have a size multiple of 8 bits (1 byte) "
+                    "due to ambiguous padding in the LSB byte when the condition is not met",
+                    field);
+        }
+
         // wide values; read all bytes one by one.
         unsigned shift;
         if (alignment == 0)
@@ -310,7 +329,7 @@ void StateTranslationVisitor::compileExtractField(const IR::Expression *expr, cs
         for (unsigned i = 0; i < bytes; i++) {
             builder->emitIndent();
             visit(expr);
-            builder->appendFormat(".%s[%d] = (", field.c_str(), i);
+            builder->appendFormat(".%s[%d] = (", fieldName.c_str(), i);
             bt->emit(builder);
             builder->appendFormat(")((%s(%s, BYTES(%s) + %d) >> %d)", helper,
                                   program->packetStartVar.c_str(), program->offsetVar.c_str(), i,
@@ -343,13 +362,13 @@ void StateTranslationVisitor::compileExtractField(const IR::Expression *expr, cs
                 expr->to<IR::Member>()->expr->to<IR::PathExpression>()->path->name.name)) {
             exprStr = exprStr.replace(".", "->");
         }
-        cstring tmp = Util::printf_format("(unsigned long long) %s.%s", exprStr, field);
+        cstring tmp = Util::printf_format("(unsigned long long) %s.%s", exprStr, fieldName);
 
-        msgStr =
-            Util::printf_format("Parser: extracted %s=0x%%llx (%u bits)", field, widthToExtract);
+        msgStr = Util::printf_format("Parser: extracted %s=0x%%llx (%u bits)", fieldName,
+                                     widthToExtract);
         builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, tmp.c_str());
     } else {
-        msgStr = Util::printf_format("Parser: extracted %s (%u bits)", field, widthToExtract);
+        msgStr = Util::printf_format("Parser: extracted %s (%u bits)", fieldName, widthToExtract);
         builder->target->emitTraceMessage(builder, msgStr.c_str());
     }
 
@@ -428,7 +447,7 @@ void StateTranslationVisitor::compileExtract(const IR::Expression *destination) 
                     "Only headers with fixed widths supported %1%", f);
             return;
         }
-        compileExtractField(destination, f->name, alignment, etype);
+        compileExtractField(destination, f, alignment, etype);
         alignment += et->widthInBits();
         alignment %= 8;
     }

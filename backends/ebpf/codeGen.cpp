@@ -29,8 +29,20 @@ void CodeGenInspector::substitute(const IR::Parameter *p, const IR::Parameter *w
 }
 
 bool CodeGenInspector::preorder(const IR::Constant *expression) {
-    builder->append(Util::toString(expression->value, 0, false, expression->base));
-    return true;
+    unsigned width = EBPFInitializerUtils::ebpfTypeWidth(typeMap, expression);
+
+    if (EBPFScalarType::generatesScalar(width)) {
+        builder->append(Util::toString(expression->value, 0, false, expression->base));
+        return true;
+    }
+
+    cstring str = EBPFInitializerUtils::genHexStr(expression->value, width, expression);
+    builder->append("{ ");
+    for (size_t i = 0; i < str.size() / 2; ++i)
+        builder->appendFormat("0x%s, ", str.substr(2 * i, 2));
+    builder->append("}");
+
+    return false;
 }
 
 bool CodeGenInspector::preorder(const IR::StringLiteral *expression) {
@@ -329,9 +341,12 @@ bool CodeGenInspector::preorder(const IR::AssignmentStatement *a) {
     }
 
     if (memcpy) {
-        builder->append("memcpy(&");
+        builder->append("__builtin_memcpy(&");
         visit(a->left);
         builder->append(", &");
+        if (a->right->is<IR::Constant>()) {
+            builder->appendFormat("(u8[%u])", scalar->bytesRequired());
+        }
         visit(a->right);
         builder->appendFormat(", %d)", scalar->bytesRequired());
     } else {
@@ -427,6 +442,30 @@ void CodeGenInspector::widthCheck(const IR::Node *node) const {
     }
     ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: Computations on %2% bits not supported",
             node, tb->size);
+}
+
+unsigned EBPFInitializerUtils::ebpfTypeWidth(P4::TypeMap *typeMap, const IR::Expression *expr) {
+    auto type = typeMap->getType(expr);
+    if (type == nullptr) type = expr->type;
+    if (type->is<IR::Type_InfInt>()) return 32;  // let's assume 32 bit for int type
+    auto ebpfType = EBPFTypeFactory::instance->create(type);
+    if (auto scalar = ebpfType->to<EBPFScalarType>()) {
+        unsigned width = scalar->implementationWidthInBits();
+        unsigned alignment = scalar->alignment() * 8;
+        unsigned units = ROUNDUP(width, alignment);
+        return units * alignment;
+    }
+    return 8;  // assume 1 byte if not available such information
+}
+
+cstring EBPFInitializerUtils::genHexStr(const big_int &value, unsigned width,
+                                        const IR::Expression *expr) {
+    // the required length of hex string, must be an even number
+    unsigned nibbles = 2 * ROUNDUP(width, 8);
+    auto str = value.str(0, std::ios_base::hex);
+    if (str.size() < nibbles) str = std::string(nibbles - str.size(), '0') + str;
+    BUG_CHECK(str.size() == nibbles, "%1%: value size does not match %2% bits", expr, width);
+    return str;
 }
 
 }  // namespace EBPF

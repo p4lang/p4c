@@ -13,13 +13,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 from common import *
 import math
-
-PORT0 = 0
-PORT1 = 1
-PORT2 = 2
-ALL_PORTS = [PORT0, PORT1, PORT2]
 
 
 def get_meter_value_mask(with_spin_lock=True, add_hex_prefix=True):
@@ -372,3 +368,26 @@ class DirectAndCounterMeterPSATest(P4EbpfTest):
         self.verify_map_entry(name="ingress_tbl_fwd", key="hex {:02x} 00 00 00".format(DP_PORTS[0]),
                               expected_value=expected_value,
                               mask=get_meter_value_mask())
+
+
+class MeterWideBitIndex(P4EbpfTest):
+    p4_file_path = "p4testdata/wide-field-meters.p4"
+
+    def validate_meter_get(self, index):
+        value = self.meter_get(name="ingress_meter1", index=index)
+        if len(value) != 1 or value[0]['index']['field0'] != "0x11112222333344445555666677778888":
+            self.fail("Expected one meter entry at index, but got: {}".format(value))
+
+    def runTest(self):
+        index = "1111:2222:3333:4444:5555:6666:7777:8888"
+        pkt = testutils.simple_ipv6ip_packet(ipv6_src=index)
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
+        # This configuration should drop all packets
+        self.meter_update(name="ingress_meter1", index=index, pir=1, pbs=1, cir=1, cbs=1)
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_no_other_packets(self)
+        # Verify that nikss-ctl returns right value
+        self.validate_meter_get(None)
+        self.validate_meter_get(index)
+        self.validate_meter_get("0x11112222333344445555666677778888")

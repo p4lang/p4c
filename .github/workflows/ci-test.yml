@@ -149,6 +149,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: registry.fedoraproject.org/fedora:latest
+      options: --privileged
     env:
       CTEST_PARALLEL_LEVEL: 4
     steps:

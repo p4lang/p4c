@@ -50,4 +50,12 @@ const cstring tdiSchemaVersion = "0.1";
 const unsigned initial_member_id = 0;
 const unsigned initial_group_id = 0xFFFFFFFF;
 
+// Ipsec related constants
+#define IPSEC_SUCCESS 0
+#define IPSEC_PORT_REG_INDEX 0
+#define IPSEC_PORT_REG_SIZE 1
+#define IPSEC_PORT_REG_INDEX_BITWIDTH 32
+#define IPSEC_PORT_REG_INITVAL_BITWIDTH 32
+#define NET_TO_HOST 0
+
 #endif /* BACKENDS_DPDK_CONSTANTS_H_ */

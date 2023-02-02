@@ -126,6 +126,15 @@ class CodeGenInspector : public Inspector {
     void widthCheck(const IR::Node *node) const;
 };
 
+class EBPFInitializerUtils {
+ public:
+    // return *real* number of bits required by type
+    static unsigned ebpfTypeWidth(P4::TypeMap *typeMap, const IR::Expression *expr);
+
+    // Generate hex string and prepend it with zeroes when shorter than required width
+    static cstring genHexStr(const big_int &value, unsigned width, const IR::Expression *expr);
+};
+
 }  // namespace EBPF
 
 #endif /* _BACKENDS_EBPF_CODEGEN_H_ */

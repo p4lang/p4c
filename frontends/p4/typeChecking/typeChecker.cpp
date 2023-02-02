@@ -1699,6 +1699,16 @@ const IR::Node *TypeInference::postorder(IR::BoolLiteral *expression) {
     return expression;
 }
 
+bool TypeInference::containsActionEnum(const IR::Type *type) const {
+    if (auto st = type->to<IR::Type_Struct>()) {
+        if (auto field = st->getField(IR::Type_Table::action_run)) {
+            auto ft = getTypeType(field->type);
+            if (ft->is<IR::Type_ActionEnum>()) return true;
+        }
+    }
+    return false;
+}
+
 // Returns false on error
 bool TypeInference::compare(const IR::Node *errorPosition, const IR::Type *ltype,
                             const IR::Type *rtype, Comparison *compare) {
@@ -1713,6 +1723,11 @@ bool TypeInference::compare(const IR::Node *errorPosition, const IR::Type *ltype
     }
     if (ltype->is<IR::Type_Extern>() || rtype->is<IR::Type_Extern>()) {
         typeError("%1% and %2%: externs cannot be compared", compare->left, compare->right);
+        return false;
+    }
+    if (containsActionEnum(ltype) || containsActionEnum(rtype)) {
+        typeError("%1% and %2%: table application results cannot be compared", compare->left,
+                  compare->right);
         return false;
     }
 
@@ -3077,6 +3092,10 @@ const IR::Node *TypeInference::postorder(IR::Member *expression) {
 
         auto fieldType = getTypeType(field->type);
         if (fieldType == nullptr) return expression;
+        if (fieldType->is<IR::Type_ActionEnum>() && !getParent<IR::SwitchStatement>()) {
+            typeError("%1%: only allowed in switch statements", expression);
+            return expression;
+        }
         setType(getOriginal(), fieldType);
         setType(expression, fieldType);
         if (isLeftValue(expression->expr)) {

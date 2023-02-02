@@ -951,7 +951,9 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  const auto *egressPortVar = programInfo.getTargetOutputPortVar();
                  const auto &clonePortVar = Utils::getZombieConst(
                      egressPortVar->type, 0, "clone_port_var" + std::to_string(call->clone_id));
-                 cond = new IR::Neq(egressPortVar, clonePortVar);
+                 cond = new IR::LAnd(
+                     new IR::Neq(egressPortVar, clonePortVar),
+                     new IR::Lss(clonePortVar, IR::getConstant(clonePortVar->type, 8)));
                  // clone_preserving_field_list has a default state where the packet continues as
                  // is.
                  {
@@ -1236,7 +1238,9 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  const auto *egressPortVar = programInfo.getTargetOutputPortVar();
                  const auto &clonePortVar = Utils::getZombieConst(
                      egressPortVar->type, 0, "clone_port_var" + std::to_string(call->clone_id));
-                 cond = new IR::Neq(egressPortVar, clonePortVar);
+                 cond = new IR::LAnd(
+                     new IR::Neq(egressPortVar, clonePortVar),
+                     new IR::Lss(clonePortVar, IR::getConstant(clonePortVar->type, 8)));
                  // clone_preserving_field_list has a default state where the packet continues as
                  // is.
                  {
@@ -1378,7 +1382,9 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  const auto *egressPortVar = programInfo.getTargetOutputPortVar();
                  const auto &clonePortVar = Utils::getZombieConst(
                      egressPortVar->type, 0, "clone_port_var" + std::to_string(call->clone_id));
-                 const auto *cond = new IR::Neq(egressPortVar, clonePortVar);
+                 const auto *cond = new IR::LAnd(
+                     new IR::Neq(egressPortVar, clonePortVar),
+                     new IR::Lss(clonePortVar, IR::getConstant(clonePortVar->type, 8)));
                  const auto *sessionIdExpr =
                      state.getProperty<const IR::Expression *>("clone_session_id");
                  // clone_preserving_field_list has a default state where the packet continues as
