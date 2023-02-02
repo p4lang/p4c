@@ -3125,10 +3125,12 @@ const IR::Node *InsertReqDeclForIPSec::preorder(IR::P4Control *c) {
         regRdArgs->push_back(
             new IR::Argument(new IR::Constant(IR::Type::Bits::get(32), IPSEC_PORT_REG_INDEX)));
         /*  Set the ipsec output port based on packet direction and emit ipsec_hdr
-         *  if (ipsec_hdr.isValid())
-                 port_out = (direction == NET_TO_HOST) ?
-                            ipsec_inbound_port_out: ipsec_outbound_port_out;
-                 emit(ipsec_hdr);
+            if (ipsec_hdr.isValid())
+                if (direction == NET_TO_HOST)
+                    port_out = ipsec_inbound_port_out.read(0);
+                else
+                    port_out = ipsec_outbound_port_out.read(0);
+                emit(ipsec_hdr);
         */
         auto regRdOutInbound = new IR::MethodCallExpression(
             new IR::Member(new IR::PathExpression(IR::ID("ipsec_port_out_inbound")),
@@ -3138,17 +3140,12 @@ const IR::Node *InsertReqDeclForIPSec::preorder(IR::P4Control *c) {
             new IR::Member(new IR::PathExpression(IR::ID("ipsec_port_out_outbound")),
                            IR::ID("read")),
             regRdArgs);
-
-        auto portOutInBound = new IR::AssignmentStatement(
-            c->body->srcInfo,
-            new IR::Member(new IR::PathExpression(IR::ID("m")),
-                           IR::ID("pna_main_output_metadata_output_port")),
-            regRdOutInbound);
-        auto portOutOutBound = new IR::AssignmentStatement(
-            c->body->srcInfo,
-            new IR::Member(new IR::PathExpression(IR::ID("m")),
-                           IR::ID("pna_main_output_metadata_output_port")),
-            regRdOutOutbound);
+        auto port_out = new IR::Member(new IR::PathExpression(IR::ID("m")),
+                                       IR::ID("pna_main_output_metadata_output_port"));
+        auto portOutInBound =
+            new IR::AssignmentStatement(c->body->srcInfo, port_out, regRdOutInbound);
+        auto portOutOutBound =
+            new IR::AssignmentStatement(c->body->srcInfo, port_out, regRdOutOutbound);
         auto isNetToHost = new IR::Equ(c->body->srcInfo,
                                        new IR::Member(new IR::PathExpression(IR::ID("m")),
                                                       IR::ID("pna_main_input_metadata_direction")),
