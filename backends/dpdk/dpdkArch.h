@@ -712,7 +712,7 @@ class BreakLogicalExpressionParenthesis : public Transform {
         if (auto lor2 = lor->left->to<IR::LOr>()) {
             auto sub = new IR::LOr(lor2->right, lor->right);
             return new IR::LOr(lor2->left, sub);
-        } else if (!lor->left->is<IR::LOr>() && !lor->left->is<IR::Equ>() &&
+        } else if (!lor->left->is<IR::LAnd>() && !lor->left->is<IR::Equ>() &&
                    !lor->left->is<IR::Neq>() && !lor->left->is<IR::Lss>() &&
                    !lor->left->is<IR::Grt>() && !lor->left->is<IR::MethodCallExpression>() &&
                    !lor->left->is<IR::PathExpression>() && !lor->left->is<IR::Member>()) {
@@ -1320,5 +1320,105 @@ class CollectProgramStructure : public PassManager {
         }));
     }
 };
+
+/* Helper class to detect use of IPSec accelerator */
+class CollectIPSecInfo : public Inspector {
+    bool &is_ipsec_used;
+    int &sa_id_width;
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
+    DpdkProgramStructure *structure;
+
+ public:
+    CollectIPSecInfo(bool &is_ipsec_used, int &sa_id_width, P4::ReferenceMap *refMap,
+                     P4::TypeMap *typeMap, DpdkProgramStructure *structure)
+        : is_ipsec_used(is_ipsec_used),
+          sa_id_width(sa_id_width),
+          refMap(refMap),
+          typeMap(typeMap),
+          structure(structure) {}
+    bool preorder(const IR::MethodCallStatement *mcs) override {
+        auto mi = P4::MethodInstance::resolve(mcs->methodCall, refMap, typeMap);
+        if (auto a = mi->to<P4::ExternMethod>()) {
+            if (a->originalExternType->getName().name == "ipsec_accelerator") {
+                if (structure->isPSA()) {
+                    ::error(ErrorType::ERR_MODEL, "%1% is not available for PSA programs",
+                            a->originalExternType->getName().name);
+                    return false;
+                }
+                if (a->method->getName().name == "enable") {
+                    is_ipsec_used = true;
+                } else if (a->method->getName().name == "set_sa_index") {
+                    auto typeArgs = a->expr->typeArguments;
+                    if (typeArgs->size() != 1) {
+                        ::error(ErrorType::ERR_MODEL, "Unexpected number of type arguments for %1%",
+                                a->method->name);
+                        return false;
+                    }
+                    auto width = typeArgs->at(0);
+                    if (!width->is<IR::Type_Bits>()) {
+                        ::error(ErrorType::ERR_MODEL, "Unexpected width type %1% for sa_index",
+                                width);
+                        return false;
+                    }
+                    sa_id_width = width->to<IR::Type_Bits>()->width_bits();
+                }
+            }
+        }
+        return false;
+    }
+};
+
+/* DPDK uses some fixed registers to hold the ipsec inbound/outbound input and output ports and a
+ * pseudo compiler inserted header which shall be emitted in front of all headers. This class helps
+ * insert required registers and a pseudo header for enabling IPSec encryption and decryption. It
+ * also handles setting of output port in the deparser.
+ */
+class InsertReqDeclForIPSec : public Transform {
+    P4::ReferenceMap *refMap;
+    DpdkProgramStructure *structure;
+    bool &is_ipsec_used;
+    int &sa_id_width;
+    cstring newHeaderName = "platform_hdr_t";
+    IR::Type_Header *ipsecHeader = nullptr;
+    std::vector<cstring> registerInstanceNames = {
+        "ipsec_port_out_inbound", "ipsec_port_out_outbound", "ipsec_port_in_inbound",
+        "ipsec_port_in_outbound"};
+
+ public:
+    InsertReqDeclForIPSec(P4::ReferenceMap *refMap, DpdkProgramStructure *structure,
+                          bool &is_ipsec_used, int &sa_id_width)
+        : refMap(refMap),
+          structure(structure),
+          is_ipsec_used(is_ipsec_used),
+          sa_id_width(sa_id_width) {
+        setName("InsertReqDeclForIPSec");
+    }
+
+    const IR::Node *preorder(IR::P4Program *program) override;
+    const IR::Node *preorder(IR::Type_Struct *s) override;
+    const IR::Node *preorder(IR::P4Control *c) override;
+    IR::IndexedVector<IR::StatOrDecl> *addRegDeclInstance(std::vector<cstring> portRegs);
+};
+
+struct DpdkHandleIPSec : public PassManager {
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
+    DpdkProgramStructure *structure;
+    bool is_ipsec_used = false;
+    int sa_id_width = 32;
+
+ public:
+    DpdkHandleIPSec(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, DpdkProgramStructure *structure)
+        : refMap(refMap), typeMap(typeMap), structure(structure) {
+        passes.push_back(
+            new CollectIPSecInfo(is_ipsec_used, sa_id_width, refMap, typeMap, structure));
+        passes.push_back(new InsertReqDeclForIPSec(refMap, structure, is_ipsec_used, sa_id_width));
+        passes.push_back(new P4::ClearTypeMap(typeMap));
+        passes.push_back(new P4::ResolveReferences(refMap));
+        passes.push_back(new P4::TypeInference(refMap, typeMap, false));
+    }
+};
+
 };     // namespace DPDK
 #endif /* BACKENDS_DPDK_DPDKARCH_H_ */

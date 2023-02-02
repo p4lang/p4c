@@ -16,6 +16,7 @@ limitations under the License.
 #ifndef BACKENDS_DPDK_DPDKUTILS_H_
 #define BACKENDS_DPDK_DPDKUTILS_H_
 
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "ir/ir.h"
 
 namespace DPDK {
@@ -29,5 +30,11 @@ bool isEightBitAligned(const IR::Expression *e);
 bool isDirection(const IR::Member *m);
 bool isHeadersStruct(const IR::Type_Struct *st);
 const IR::Type_Bits *getEightBitAlignedType(const IR::Type_Bits *tb);
+
+// Check for reserved names for DPDK target
+bool reservedNames(P4::ReferenceMap *refMap, std::vector<cstring> names, cstring &resName);
+// Creates Register extern declaration for holding persistent information
+IR::Declaration_Instance *createRegDeclarationInstance(cstring instanceName, int regSize,
+                                                       int indexBitWidth, int initValBitwidth);
 }  // namespace DPDK
 #endif /* BACKENDS_DPDK_DPDKUTILS_H_ */

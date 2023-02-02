@@ -540,7 +540,7 @@ const IR::Node *AlignHdrMetaField::preorder(IR::Type_StructLike *st) {
                         }
                         Here, for "flags", information saved are :
                             ModifiedName = flags_fragOffset;
-                            header str   =  ipv4_t; [This is used if multiple headers
+                            header str   = ipv4_t; [This is used if multiple headers
                                                         have field with same name]
                             width        = 16;
                             offset       = 3;
@@ -3034,5 +3034,150 @@ std::vector<std::pair<cstring, const IR::Type *>>
     MoveNonHeaderFieldsToPseudoHeader::pseudoFieldNameType;
 cstring DpdkAddPseudoHeaderDecl::pseudoHeaderInstanceName;
 cstring DpdkAddPseudoHeaderDecl::pseudoHeaderTypeName;
+
+// create and add register declaration instance to program
+IR::IndexedVector<IR::StatOrDecl> *InsertReqDeclForIPSec::addRegDeclInstance(
+    std::vector<cstring> portRegs) {
+    auto decls = new IR::IndexedVector<IR::StatOrDecl>;
+    for (auto reg : portRegs)
+        decls->push_back(createRegDeclarationInstance(reg, IPSEC_PORT_REG_SIZE,
+                                                      IPSEC_PORT_REG_INDEX_BITWIDTH,
+                                                      IPSEC_PORT_REG_INITVAL_BITWIDTH));
+    return decls;
+}
+
+const IR::Node *InsertReqDeclForIPSec::preorder(IR::P4Program *program) {
+    if (!is_ipsec_used) return program;
+    cstring resName = "";
+    if (!reservedNames(refMap, registerInstanceNames, resName)) {
+        ::error(ErrorType::ERR_RESERVED, "%1% name is reserved for DPDK IPSec port register",
+                resName);
+        return program;
+    }
+    bool ipsecHdrAdded = false;
+    bool ipsecPortRegAdded = false;
+    auto new_objs = new IR::Vector<IR::Node>;
+
+    // Create platform_hdr structure with just one field to hold the security association index
+    IR::ID newHeaderFieldName("sa_id");
+    IR::IndexedVector<IR::StructField> newHeaderFields;
+    newHeaderFields.push_back(
+        new IR::StructField(newHeaderFieldName, IR::Type_Bits::get(sa_id_width)));
+    if (!reservedNames(refMap, {newHeaderName}, resName)) {
+        ::error(ErrorType::ERR_RESERVED, "%1% type name is reserved for DPDK platform header",
+                newHeaderName);
+        return program;
+    }
+    ipsecHeader = new IR::Type_Header(IR::ID(newHeaderName), newHeaderFields);
+
+    // Programs using ipsec accelerator must contain ethernet and ipv4 headers, hence a struct
+    // containing headerinstances for all headers must be present
+    BUG_CHECK(structure->header_type != "",
+              "Encapsulating struct containing all headers used in the program is missing");
+    for (auto obj : program->objects) {
+        if (auto st = obj->to<IR::Type_Struct>()) {
+            // Add new platform header before the encapsulating header struct
+            if (st->name.name == structure->header_type && !ipsecHdrAdded) {
+                ipsecHdrAdded = true;
+                new_objs->push_back(ipsecHeader);
+            }
+        } else if (obj->is<IR::P4Parser>()) {
+            if (!ipsecPortRegAdded) {
+                ipsecPortRegAdded = true;
+                // Add all 4 ipsec port register declarations before parser
+                auto decls = addRegDeclInstance(registerInstanceNames);
+                for (auto d : *decls) new_objs->push_back(d);
+            }
+        }
+        new_objs->push_back(obj);
+    }
+    if (!(ipsecHdrAdded && ipsecPortRegAdded))
+        BUG("Missing platform header/IPSec port Registers needed for IPSec accelerator");
+    program->objects = *new_objs;
+    return program;
+}
+
+// Create an instance of ipsec_hdr in the header struct
+const IR::Node *InsertReqDeclForIPSec::preorder(IR::Type_Struct *s) {
+    if (!is_ipsec_used) return s;
+    if (s->name.name == structure->header_type) {
+        s->fields.push_back(
+            new IR::StructField(IR::ID("ipsec_hdr"), new IR::Type_Name(IR::ID("platform_hdr_t"))));
+    }
+    return s;
+}
+
+const IR::Node *InsertReqDeclForIPSec::preorder(IR::P4Control *c) {
+    if (!is_ipsec_used) return c;
+
+    auto insertIpsecHeader = [this](IR::P4Control *c) {
+        IR::IndexedVector<IR::StatOrDecl> stmt;
+        auto pkt_out = c->type->applyParams->parameters.at(0);
+        auto args = new IR::Vector<IR::Argument>();
+        structure->ipsec_header =
+            new IR::Member(new IR::PathExpression(IR::ID("h")), IR::ID("ipsec_hdr"));
+        args->push_back(new IR::Argument(structure->ipsec_header));
+        auto typeArgs = new IR::Vector<IR::Type>();
+        typeArgs->push_back(new IR::Type_Name(IR::ID(newHeaderName)));
+        auto regRdArgs = new IR::Vector<IR::Argument>();
+
+        // Register index is always 0 as the ipsec port registers are all single location registers
+        regRdArgs->push_back(
+            new IR::Argument(new IR::Constant(IR::Type::Bits::get(32), IPSEC_PORT_REG_INDEX)));
+        /*  Set the ipsec output port based on packet direction and emit ipsec_hdr
+            if (ipsec_hdr.isValid())
+                if (direction == NET_TO_HOST)
+                    port_out = ipsec_inbound_port_out.read(0);
+                else
+                    port_out = ipsec_outbound_port_out.read(0);
+                emit(ipsec_hdr);
+        */
+        auto regRdOutInbound = new IR::MethodCallExpression(
+            new IR::Member(new IR::PathExpression(IR::ID("ipsec_port_out_inbound")),
+                           IR::ID("read")),
+            regRdArgs);
+        auto regRdOutOutbound = new IR::MethodCallExpression(
+            new IR::Member(new IR::PathExpression(IR::ID("ipsec_port_out_outbound")),
+                           IR::ID("read")),
+            regRdArgs);
+        auto port_out = new IR::Member(new IR::PathExpression(IR::ID("m")),
+                                       IR::ID("pna_main_output_metadata_output_port"));
+        auto portOutInBound =
+            new IR::AssignmentStatement(c->body->srcInfo, port_out, regRdOutInbound);
+        auto portOutOutBound =
+            new IR::AssignmentStatement(c->body->srcInfo, port_out, regRdOutOutbound);
+        auto isNetToHost = new IR::Equ(c->body->srcInfo,
+                                       new IR::Member(new IR::PathExpression(IR::ID("m")),
+                                                      IR::ID("pna_main_input_metadata_direction")),
+                                       new IR::Constant(NET_TO_HOST));
+        auto isValid =
+            new IR::Member(c->body->srcInfo,
+                           new IR::Member(new IR::PathExpression(IR::ID("h")), IR::ID("ipsec_hdr")),
+                           IR::ID(IR::Type_Header::isValid));
+
+        auto ipsecIsValid =
+            new IR::MethodCallExpression(c->body->srcInfo, IR::Type::Boolean::get(), isValid);
+        auto ifTrue =
+            new IR::IfStatement(c->body->srcInfo, isNetToHost, portOutInBound, portOutOutBound);
+        IR::Statement *fillIpsecPortOut = new IR::IfStatement(ipsecIsValid, ifTrue, nullptr);
+        IR::Statement *ipsecEmit = new IR::MethodCallStatement(new IR::MethodCallExpression(
+            new IR::Member(new IR::PathExpression(pkt_out->name), IR::ID("emit")), typeArgs, args));
+        stmt.push_back(fillIpsecPortOut);
+        stmt.push_back(ipsecEmit);
+        return stmt;
+    };
+
+    for (auto kv : structure->deparsers) {
+        if (kv.second->type->name == c->name) {
+            auto body = new IR::BlockStatement(c->body->srcInfo);
+            auto ipsecEmit = insertIpsecHeader(c);
+            for (auto s : ipsecEmit) body->push_back(s);
+            for (auto s : c->body->components) body->push_back(s);
+            c->body = body;
+            break;
+        }
+    }
+    return c;
+}
 
 }  // namespace DPDK
