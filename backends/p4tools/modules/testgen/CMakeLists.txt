@@ -26,6 +26,7 @@ set(
   core/exploration_strategy/linear_enumeration.cpp
   core/exploration_strategy/rnd_access_max_coverage.cpp
   core/exploration_strategy/inc_max_coverage_stack.cpp
+  core/exploration_strategy/unbounded_random_access_stack.cpp
   core/exploration_strategy/exploration_strategy.cpp
   core/target.cpp
 

@@ -25,6 +25,7 @@
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/random_access_stack.h"
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/rnd_access_max_coverage.h"
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/selected_branches.h"
+#include "backends/p4tools/modules/testgen/core/exploration_strategy/unbounded_random_access_stack.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/logging.h"
@@ -93,6 +94,9 @@ int Testgen::mainImpl(const IR::P4Program *program) {
                 popLevel = 3;
             }
             return new RandomAccessStack(solver, *programInfo, popLevel);
+        }
+        if (explorationStrategy == "UNBOUNDED_RANDOM_ACCESS_STACK") {
+            return new UnboundedRandomAccessStack(solver, *programInfo);
         }
         if (explorationStrategy == "LINEAR_ENUMERATION") {
             return new LinearEnumeration(solver, *programInfo, testgenOptions.linearEnumeration);
