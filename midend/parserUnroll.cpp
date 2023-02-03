@@ -161,6 +161,9 @@ class ParserStateRewriter : public Transform {
 
     /// Updates indexes of a header stack.
     IR::Node *preorder(IR::ArrayIndex *expression) {
+        if (expression->right->is<IR::Constant>()) {
+            return expression;
+        }
         ParserStateRewriter rewriter(parserStructure, state, valueMap, refMap, typeMap, afterExec,
                                      visitedStates);
         auto basetype = getTypeArray(expression->left);
@@ -168,9 +171,7 @@ class ParserStateRewriter : public Transform {
         IR::ArrayIndex *newExpression = expression->clone();
         ExpressionEvaluator ev(refMap, typeMap, valueMap);
         auto *value = ev.evaluate(expression->right, false);
-        if (!value->is<SymbolicInteger>() || expression->right->is<IR::Constant>()) {
-            return expression;
-        }
+        if (!value->is<SymbolicInteger>()) return expression;
         auto *res = value->to<SymbolicInteger>()->constant->clone();
         newExpression->right = res;
         if (!res->fitsInt64()) {
