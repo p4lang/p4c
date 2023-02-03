@@ -168,7 +168,9 @@ class ParserStateRewriter : public Transform {
         IR::ArrayIndex *newExpression = expression->clone();
         ExpressionEvaluator ev(refMap, typeMap, valueMap);
         auto *value = ev.evaluate(expression->right, false);
-        if (!value->is<SymbolicInteger>()) return expression;
+        if (!value->is<SymbolicInteger>() || expression->right->is<IR::Constant>()) {
+            return expression;
+        }
         auto *res = value->to<SymbolicInteger>()->constant->clone();
         newExpression->right = res;
         if (!res->fitsInt64()) {
