@@ -14,10 +14,12 @@ bool CollectStatements::preorder(const IR::AssignmentStatement *stmt) {
     statements.insert(stmt);
     return true;
 }
+
 bool CollectStatements::preorder(const IR::MethodCallStatement *stmt) {
     statements.insert(stmt);
     return true;
 }
+
 bool CollectStatements::preorder(const IR::ExitStatement *stmt) {
     statements.insert(stmt);
     return true;
@@ -27,12 +29,14 @@ void coverageReportFinal(const CoverageSet &all, const CoverageSet &visited) {
     LOG_FEATURE("coverage", 4, "Not covered statements:");
     for (const IR::Statement *stmt : all) {
         if (visited.count(stmt) == 0) {
-            LOG2('\t' << *stmt);
+            LOG_FEATURE("coverage", 4,
+                        '\t' << stmt->getSourceInfo().toPosition().sourceLine << ": " << *stmt);
         }
     }
     LOG_FEATURE("coverage", 4, "Covered statements:");
     for (const IR::Statement *stmt : visited) {
-        LOG_FEATURE("coverage", 4, '\t' << *stmt);
+        LOG_FEATURE("coverage", 4,
+                    '\t' << stmt->getSourceInfo().toPosition().sourceLine << ": " << *stmt);
     }
 }
 
