@@ -1,4 +1,4 @@
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/unbounded_random_access_stack.h"
+#include "backends/p4tools/modules/testgen/core/exploration_strategy/unbounded_rnd_ac_stack.h"
 
 #include <ctime>
 #include <vector>
