@@ -19,6 +19,7 @@
 #include "lib/error.h"
 
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
+#include "backends/p4tools/modules/testgen/core/exploration_strategy/greedy_potential.h"
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/inc_max_coverage_stack.h"
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/incremental_stack.h"
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/linear_enumeration.h"
@@ -94,6 +95,9 @@ int Testgen::mainImpl(const IR::P4Program *program) {
                 popLevel = 3;
             }
             return new RandomAccessStack(solver, *programInfo, popLevel);
+        }
+        if (explorationStrategy == "GREEDY_POTENTIAL") {
+            return new GreedyPotential(solver, *programInfo);
         }
         if (explorationStrategy == "UNBOUNDED_RANDOM_ACCESS_STACK") {
             return new UnboundedRandomAccessStack(solver, *programInfo);

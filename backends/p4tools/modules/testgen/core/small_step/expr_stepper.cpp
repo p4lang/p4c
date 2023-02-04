@@ -49,7 +49,7 @@ void ExprStepper::handleHitMissActionRun(const IR::Member *member) {
     std::vector<Continuation::Command> replacements;
     const auto *method = member->expr->to<IR::MethodCallExpression>();
     BUG_CHECK(method->method->is<IR::Member>(), "Method apply has unexpected format: %1%", method);
-    replacements.emplace_back(new IR::MethodCallStatement(method));
+    replacements.emplace_back(new IR::MethodCallStatement(Util::SourceInfo(), method));
     const auto *methodName = method->method->to<IR::Member>();
     const auto *table = state.getTableType(methodName);
     CHECK_NULL(table);
@@ -238,8 +238,10 @@ bool ExprStepper::preorder(const IR::Mux *mux) {
         const auto *expr = entry.second;
 
         auto *nextState = new ExecutionState(state);
+        P4::Coverage::CoverageSet coveredStmts;
+        expr->apply(CollectStatements2(coveredStmts, state));
         nextState->replaceTopBody(Continuation::Return(expr));
-        result->emplace_back(cond, state, nextState);
+        result->emplace_back(cond, state, nextState, coveredStmts);
     }
 
     return false;
@@ -333,13 +335,13 @@ bool ExprStepper::preorder(const IR::Operation_Unary *unary) {
 bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
     logStep(selectExpression);
 
+    auto selectCases = selectExpression->selectCases;
     // If there are no select cases, then the select expression has failed to match on anything.
     // Delegate to stepNoMatch.
-    if (selectExpression->selectCases.empty()) {
+    if (selectCases.empty()) {
         stepNoMatch();
         return false;
     }
-    const auto selectCases = selectExpression->selectCases;
     for (size_t idx = 0; idx < selectCases.size(); ++idx) {
         const auto *selectCase = selectCases.at(idx);
         // Getting P4ValueSet from PathExpression , to highlight a particular case of processing
@@ -349,12 +351,8 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
             // Until we have test support for value set, we simply remove them from the match list.
             // TODO: Implement value sets.
             if (decl->is<IR::P4ValueSet>()) {
-                auto *newSelectExpression = selectExpression->clone();
-                newSelectExpression->selectCases.erase(newSelectExpression->selectCases.begin());
-                auto *nextState = new ExecutionState(state);
-                nextState->replaceTopBody(Continuation::Return(newSelectExpression));
-                result->emplace_back(nextState);
-                return false;
+                selectCases.erase(selectCases.begin() + idx);
+                continue;
             }
         }
         if (!SymbolicEnv::isSymbolicValue(selectCase->keyset)) {
@@ -373,7 +371,7 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
     }
 
     const IR::Expression *missCondition = IR::getBoolLiteral(true);
-    for (const auto *selectCase : selectExpression->selectCases) {
+    for (const auto *selectCase : selectCases) {
         auto *nextState = new ExecutionState(state);
 
         if (!SymbolicEnv::isSymbolicValue(selectExpression->select)) {
@@ -399,9 +397,13 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
                 " P4Testgen currently does not support this case.",
                 selectExpression);
         }
+        const auto *decl = state.findDecl(selectCase->state)->getNode();
 
         nextState->replaceTopBody(Continuation::Return(selectCase->state));
-        result->emplace_back(new IR::LAnd(missCondition, matchCondition), state, nextState);
+        P4::Coverage::CoverageSet coveredStmts;
+        decl->apply(CollectStatements2(coveredStmts, state));
+        result->emplace_back(new IR::LAnd(missCondition, matchCondition), state, nextState,
+                             coveredStmts);
         missCondition = new IR::LAnd(new IR::LNot(matchCondition), missCondition);
     }
 

@@ -105,6 +105,8 @@ bool TestBackEnd::run(const FinalState &state) {
         const auto *completedModel = state.getCompletedModel();
         const auto *outputPortExpr = executionState->get(programInfo.getTargetOutputPortVar());
         const auto &allStatements = programInfo.getAllStatements();
+        // Update the visited statements.
+        symbex.updateVisitedStatements(state.getVisited());
         const P4::Coverage::CoverageSet &visitedStatements = symbex.getVisitedStatements();
 
         auto *solver = state.getSolver()->to<Z3Solver>();
@@ -259,6 +261,8 @@ bool TestBackEnd::printTestInfo(const ExecutionState *executionState, const Test
     printTraces("=======================================");
 
     if (testInfo.packetIsDropped) {
+        // Update the visited statements.
+        symbex.updateVisitedStatements(executionState->getVisited());
         printTraces("============ Output packet dropped for Test %1% ============", testCount);
         return false;
     }

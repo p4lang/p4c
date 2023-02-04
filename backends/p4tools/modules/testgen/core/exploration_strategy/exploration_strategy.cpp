@@ -32,25 +32,6 @@ namespace P4Tools {
 
 namespace P4Testgen {
 
-ExplorationStrategy::Branch::Branch(gsl::not_null<ExecutionState *> nextState)
-    : constraint(IR::getBoolLiteral(true)), nextState(std::move(nextState)) {}
-
-ExplorationStrategy::Branch::Branch(boost::optional<const Constraint *> c,
-                                    const ExecutionState &prevState,
-                                    gsl::not_null<ExecutionState *> nextState)
-    : constraint(IR::getBoolLiteral(true)), nextState(nextState) {
-    if (c) {
-        // Evaluate the branch constraint in the current state of symbolic environment.
-        // Substitutes all variables to their symbolic value (expression on the program's initial
-        // state).
-        constraint = prevState.getSymbolicEnv().subst(*c);
-        constraint = P4::optimizeExpression(constraint);
-        // Append the evaluated and optimized constraint to the next execution state's list of
-        // path constraints.
-        nextState->pushPathConstraint(constraint);
-    }
-}
-
 ExplorationStrategy::StepResult ExplorationStrategy::step(ExecutionState &state) {
     Util::ScopedTimer st("step");
     StepResult successors = evaluator.step(state);
@@ -72,12 +53,6 @@ uint64_t ExplorationStrategy::selectBranch(const std::vector<Branch> &branches) 
 
 bool ExplorationStrategy::handleTerminalState(const Callback &callback,
                                               const ExecutionState &terminalState) {
-    // We update the set of visitedStatements in every terminal state.
-    for (const auto &stmt : terminalState.getVisited()) {
-        if (allStatements.count(stmt) != 0U) {
-            visitedStatements.insert(stmt);
-        }
-    }
     // Check the solver for satisfiability. If it times out or reports non-satisfiability, issue
     // a warning and continue on a different path.
     auto solverResult = solver.checkSat(terminalState.getPathConstraint());
@@ -109,6 +84,10 @@ ExplorationStrategy::ExplorationStrategy(AbstractSolver &solver, const ProgramIn
         this->solver.seed(*seed);
     }
     executionState = new ExecutionState(programInfo.program);
+}
+
+void ExplorationStrategy::updateVisitedStatements(const P4::Coverage::CoverageSet &newStatements) {
+    visitedStatements.insert(newStatements.begin(), newStatements.end());
 }
 
 const P4::Coverage::CoverageSet &ExplorationStrategy::getVisitedStatements() {

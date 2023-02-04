@@ -18,6 +18,28 @@ namespace P4Tools {
 
 namespace P4Testgen {
 
+/// CollectStatements2 iterates across all assignment, method call, and exit statements in the P4
+/// program and collects them in a "CoverageSet".
+class CollectStatements2 : public Inspector {
+    P4::Coverage::CoverageSet &statements;
+    const ExecutionState &state;
+    std::set<int> seenParserIds;
+
+ public:
+    explicit CollectStatements2(P4::Coverage::CoverageSet &output, const ExecutionState &state);
+
+    explicit CollectStatements2(P4::Coverage::CoverageSet &output, const ExecutionState &state,
+                                const std::set<int> &seenParserIds);
+
+    bool preorder(const IR::ParserState *parserState) override;
+
+    bool preorder(const IR::AssignmentStatement *stmt) override;
+
+    bool preorder(const IR::MethodCallStatement *stmt) override;
+
+    bool preorder(const IR::ExitStatement *stmt) override;
+};
+
 /// The main class that implements small-step operational semantics. Delegates to implementations
 /// of AbstractStepper.
 class SmallStepEvaluator {
@@ -29,6 +51,8 @@ class SmallStepEvaluator {
 
         gsl::not_null<ExecutionState *> nextState;
 
+        P4::Coverage::CoverageSet potentialStatements;
+
         /// Simple branch without any constraint.
         explicit Branch(gsl::not_null<ExecutionState *> nextState);
 
@@ -36,6 +60,12 @@ class SmallStepEvaluator {
         /// is later evaluated.
         Branch(boost::optional<const Constraint *> c, const ExecutionState &prevState,
                gsl::not_null<ExecutionState *> nextState);
+
+        /// Branch constrained by a condition. prevState is the state in which the condition
+        /// is later evaluated.
+        Branch(boost::optional<const Constraint *> c, const ExecutionState &prevState,
+               gsl::not_null<ExecutionState *> nextState,
+               const P4::Coverage::CoverageSet &potentialStatements);
     };
 
     using Result = std::vector<Branch> *;

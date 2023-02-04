@@ -20,7 +20,6 @@ FinalState::FinalState(AbstractSolver *solver, const ExecutionState &inputState)
     for (const auto &event : inputState.getTrace()) {
         trace.emplace_back(event->evaluate(completedModel));
     }
-    visitedStatements = inputState.getVisited();
 }
 
 Model FinalState::completeModel(const ExecutionState &executionState, const Model *model) {
@@ -52,9 +51,7 @@ const std::vector<gsl::not_null<const TraceEvent *>> *FinalState::getTraces() co
     return &trace;
 }
 
-const std::vector<const IR::Statement *> &FinalState::getVisited() const {
-    return visitedStatements;
-}
+const P4::Coverage::CoverageSet &FinalState::getVisited() const { return state.getVisited(); }
 
 }  // namespace P4Testgen
 

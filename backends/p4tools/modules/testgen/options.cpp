@@ -22,8 +22,13 @@ const char *TestgenOptions::getIncludePath() {
 
 const std::set<cstring> TestgenOptions::SUPPORTED_STOP_METRICS = {"MAX_STATEMENT_COVERAGE"};
 const std::set<cstring> TestgenOptions::SUPPORTED_EXPLORATION_STRATEGIES = {
-    "INCREMENTAL_STACK", "RANDOM_ACCESS_STACK",        "LINEAR_ENUMERATION",
-    "MAX_COVERAGE",      "RANDOM_ACCESS_MAX_COVERAGE", "UNBOUNDED_RANDOM_ACCESS_STACK"};
+    "INCREMENTAL_STACK",
+    "RANDOM_ACCESS_STACK",
+    "GREEDY_POTENTIAL",
+    "LINEAR_ENUMERATION",
+    "MAX_COVERAGE",
+    "RANDOM_ACCESS_MAX_COVERAGE",
+    "UNBOUNDED_RANDOM_ACCESS_STACK"};
 
 TestgenOptions::TestgenOptions()
     : AbstractP4cToolOptions("Generate packet tests for a P4 program.") {
@@ -182,9 +187,9 @@ TestgenOptions::TestgenOptions()
             return true;
         },
         "Selects a specific exploration strategy for test generation. Options are: "
-        "INCREMENTAL_STACK, RANDOM_ACCESS_STACK, LINEAR_ENUMERATION, MAX_COVERAGE, and "
-        "RANDOM_ACCESS_MAX_COVERAGE, UNBOUNDED_RANDOM_ACCESS_STACK. Defaults to "
-        "INCREMENTAL_STACK.");
+        "INCREMENTAL_STACK, RANDOM_ACCESS_STACK, LINEAR_ENUMERATION, MAX_COVERAGE, "
+        "GREEDY_POTENTIAL, RANDOM_ACCESS_MAX_COVERAGE, and UNBOUNDED_RANDOM_ACCESS_STACK. "
+        "Defaults to INCREMENTAL_STACK.");
 
     registerOption(
         "--pop-level", "popLevel",

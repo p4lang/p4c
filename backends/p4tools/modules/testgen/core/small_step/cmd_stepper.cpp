@@ -28,6 +28,7 @@
 #include "lib/exceptions.h"
 #include "lib/null.h"
 #include "lib/safe_vector.h"
+#include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen//lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
@@ -306,7 +307,10 @@ bool CmdStepper::preorder(const IR::IfStatement *ifStatement) {
             new TraceEvent::PreEvalExpression(ifStatement->condition, "If Statement true"));
         cmds.emplace_back(ifStatement->ifTrue);
         nextState->replaceTopBody(&cmds);
-        result->emplace_back(ifStatement->condition, state, nextState);
+        P4::Coverage::CoverageSet coveredStmts;
+        ifStatement->ifTrue->apply(CollectStatements2(coveredStmts, state));
+
+        result->emplace_back(ifStatement->condition, state, nextState, coveredStmts);
     }
 
     // Handle case for else body.
@@ -318,7 +322,9 @@ bool CmdStepper::preorder(const IR::IfStatement *ifStatement) {
 
         nextState->replaceTopBody((ifStatement->ifFalse == nullptr) ? new IR::BlockStatement()
                                                                     : ifStatement->ifFalse);
-        result->emplace_back(negation, state, nextState);
+        P4::Coverage::CoverageSet coveredStmts;
+        ifStatement->ifFalse->apply(CollectStatements2(coveredStmts, state));
+        result->emplace_back(negation, state, nextState, coveredStmts);
     }
 
     return false;
@@ -567,6 +573,7 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
     std::vector<Continuation::Command> cmds;
     // If the switch expression is tainted, we can not predict which case will be chosen. We taint
     // the program counter and execute all of the statements.
+    P4::Coverage::CoverageSet coveredStmts;
     if (state.hasTaint(switchStatement->expression)) {
         auto currentTaint = state.getProperty<bool>("inUndefinedState");
         cmds.emplace_back(Continuation::PropertyUpdate("inUndefinedState", true));
@@ -581,6 +588,7 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
 
         bool hasMatched = false;
         for (const auto *switchCase : switchStatement->cases) {
+            switchCase->statement->apply(CollectStatements2(coveredStmts, state));
             // We have either matched already, or still need to match.
             hasMatched = hasMatched || switchStatement->expression->equiv(*switchCase->label);
             // Nothing to do with this statement. Fall through to the next case.
@@ -602,10 +610,9 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
             }
         }
     }
-
     BUG_CHECK(!cmds.empty(), "Switch statements should have at least one case (default).");
     nextState->replaceTopBody(&cmds);
-    result->emplace_back(nextState);
+    result->emplace_back(boost::none, state, nextState, coveredStmts);
 
     return false;
 }

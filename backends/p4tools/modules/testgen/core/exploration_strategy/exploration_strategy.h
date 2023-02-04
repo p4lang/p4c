@@ -54,8 +54,11 @@ class ExplorationStrategy {
     /// Writes a list of the selected branches into @param out.
     void printCurrentTraceAndBranches(std::ostream &out);
 
-    /// Getter to access visitedStatements
+    /// Getter to access visitedStatements.
     const P4::Coverage::CoverageSet &getVisitedStatements();
+
+    /// Update the set of visited statements.
+    void updateVisitedStatements(const P4::Coverage::CoverageSet &newStatements);
 
  protected:
     /// Target-specific information about the P4 program.

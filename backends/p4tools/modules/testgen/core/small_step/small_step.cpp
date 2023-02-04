@@ -36,6 +36,44 @@ namespace P4Tools {
 
 namespace P4Testgen {
 
+SmallStepEvaluator::Branch::Branch(gsl::not_null<ExecutionState *> nextState)
+    : constraint(IR::getBoolLiteral(true)), nextState(std::move(nextState)) {}
+
+SmallStepEvaluator::Branch::Branch(boost::optional<const Constraint *> c,
+                                   const ExecutionState &prevState,
+                                   gsl::not_null<ExecutionState *> nextState)
+    : constraint(IR::getBoolLiteral(true)), nextState(nextState) {
+    if (c) {
+        // Evaluate the branch constraint in the current state of symbolic environment.
+        // Substitutes all variables to their symbolic value (expression on the program's initial
+        // state).
+        constraint = prevState.getSymbolicEnv().subst(*c);
+        constraint = P4::optimizeExpression(constraint);
+        // Append the evaluated and optimized constraint to the next execution state's list of
+        // path constraints.
+        nextState->pushPathConstraint(constraint);
+    }
+}
+
+SmallStepEvaluator::Branch::Branch(boost::optional<const Constraint *> c,
+                                   const ExecutionState &prevState,
+                                   gsl::not_null<ExecutionState *> nextState,
+                                   const P4::Coverage::CoverageSet &potentialStatements)
+    : constraint(IR::getBoolLiteral(true)),
+      nextState(nextState),
+      potentialStatements(potentialStatements) {
+    if (c) {
+        // Evaluate the branch constraint in the current state of symbolic environment.
+        // Substitutes all variables to their symbolic value (expression on the program's initial
+        // state).
+        constraint = prevState.getSymbolicEnv().subst(*c);
+        constraint = P4::optimizeExpression(constraint);
+        // Append the evaluated and optimized constraint to the next execution state's list of
+        // path constraints.
+        nextState->pushPathConstraint(constraint);
+    }
+}
+
 SmallStepEvaluator::SmallStepEvaluator(AbstractSolver &solver, const ProgramInfo &programInfo)
     : programInfo(programInfo), solver(solver) {
     if (!TestgenOptions::get().pattern.empty()) {
@@ -156,9 +194,9 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState &state) {
 
             Result operator()(const Continuation::Guard &guard) {
                 // Check whether we exceed the number of maximum permitted guard violations.
-                // This usually indicates that we have many branches that produce an invalid state.
-                // The P4 program should be fixed in that case, because we can not generate useful
-                // tests.
+                // This usually indicates that we have many branches that produce an invalid
+                // state. The P4 program should be fixed in that case, because we can not
+                // generate useful tests.
                 if (self.violatedGuardConditions > SmallStepEvaluator::MAX_GUARD_VIOLATIONS) {
                     BUG("Condition %1% exceeded the maximum number of permitted guard "
                         "violations for this run."
@@ -176,7 +214,8 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState &state) {
                 if (!state.hasTaint(cond)) {
                     cond = state.getSymbolicEnv().subst(cond);
                     cond = P4::optimizeExpression(cond);
-                    // Check whether the condition is satisfiable in the current execution state.
+                    // Check whether the condition is satisfiable in the current execution
+                    // state.
                     auto pathConstraints = state.getPathConstraint();
                     pathConstraints.push_back(cond);
                     solverResult = self.solver.checkSat(pathConstraints);
@@ -184,9 +223,9 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState &state) {
 
                 auto *nextState = new ExecutionState(state);
                 nextState->popBody();
-                // If we can not solve the guard (either we time out or the solver can not solve the
-                // problem) we increment the count of violatedGuardConditions and stop executing
-                // this branch.
+                // If we can not solve the guard (either we time out or the solver can not solve
+                // the problem) we increment the count of violatedGuardConditions and stop
+                // executing this branch.
                 if (solverResult == boost::none || !solverResult.get()) {
                     std::stringstream condStream;
                     guard.cond->dbprint(condStream);
@@ -212,6 +251,68 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState &state) {
     state.popContinuation();
     return new std::vector<Branch>({Branch(&state)});
 }
+
+bool CollectStatements2::preorder(const IR::ParserState *parserState) {
+    // Only bother looking up cases that are not accept or reject.
+    if (parserState->name == IR::ParserState::accept ||
+        parserState->name == IR::ParserState::reject) {
+        return true;
+    }
+
+    // Already have seen this state. We might be in a loop.
+    if (seenParserIds.count(parserState->clone_id) != 0) {
+        return true;
+    }
+
+    seenParserIds.emplace(parserState->clone_id);
+    CHECK_NULL(parserState->selectExpression);
+
+    parserState->components.apply(CollectStatements2(statements, state, seenParserIds));
+
+    if (const auto *selectExpr = parserState->selectExpression->to<IR::SelectExpression>()) {
+        for (const auto *selectCase : selectExpr->selectCases) {
+            const auto *decl = state.findDecl(selectCase->state)->getNode();
+            decl->apply(CollectStatements2(statements, state, seenParserIds));
+        }
+    } else if (const auto *pathExpression =
+                   parserState->selectExpression->to<IR::PathExpression>()) {
+        // Only bother looking up cases that are not accept or reject.
+        // If we are referencing a parser state, step into the state.
+        const auto *decl = state.findDecl(pathExpression)->getNode();
+        decl->apply(CollectStatements2(statements, state, seenParserIds));
+    }
+    return true;
+}
+
+bool CollectStatements2::preorder(const IR::AssignmentStatement *stmt) {
+    if (stmt->getSourceInfo().isValid()) {
+        statements.insert(stmt);
+    }
+    return true;
+}
+
+bool CollectStatements2::preorder(const IR::MethodCallStatement *stmt) {
+    if (stmt->getSourceInfo().isValid()) {
+        statements.insert(stmt);
+    }
+    return true;
+}
+
+bool CollectStatements2::preorder(const IR::ExitStatement *stmt) {
+    if (stmt->getSourceInfo().isValid()) {
+        statements.insert(stmt);
+    }
+    return true;
+}
+
+CollectStatements2::CollectStatements2(P4::Coverage::CoverageSet &output,
+                                       const ExecutionState &state)
+    : statements(output), state(state) {}
+
+CollectStatements2::CollectStatements2(P4::Coverage::CoverageSet &output,
+                                       const ExecutionState &state,
+                                       const std::set<int> &seenParserIds)
+    : statements(output), state(state), seenParserIds(seenParserIds) {}
 
 }  // namespace P4Testgen
 

@@ -24,6 +24,7 @@
 #include "ir/node.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
+#include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/namespace_context.h"
@@ -95,8 +96,8 @@ class ExecutionState {
     /// The program trace for the current program point (i.e., how we got to the current state).
     std::vector<gsl::not_null<const TraceEvent *>> trace;
 
-    /// List of visited statements. Used for code coverage.
-    std::vector<const IR::Statement *> visitedStatements;
+    /// Set of visited statements. Used for code coverage.
+    P4::Coverage::CoverageSet visitedStatements;
 
     /// The remaining body of the current function being executed.
     ///
@@ -180,7 +181,7 @@ class ExecutionState {
     void markVisited(const IR::Statement *stmt);
 
     /// @returns list of all statements visited before reaching this state.
-    const std::vector<const IR::Statement *> &getVisited() const;
+    const P4::Coverage::CoverageSet &getVisited() const;
 
     /// Sets the symbolic value of the given state variable to the given value. Constant folding
     /// is done on the given value before updating the symbolic state.

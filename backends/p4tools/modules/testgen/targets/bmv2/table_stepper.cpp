@@ -153,7 +153,11 @@ void BMv2_V1ModelTableStepper::evalTableActionProfile(
 
         // Update all the tracking variables for tables.
         std::vector<Continuation::Command> replacements;
-        replacements.emplace_back(new IR::MethodCallStatement(synthesizedAction));
+        replacements.emplace_back(
+            new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
+        P4::Coverage::CoverageSet coveredStmts;
+        nextState->getActionDecl(tableAction->method)
+            ->apply(CollectStatements2(coveredStmts, *state));
 
         nextState->set(getTableHitVar(table), IR::getBoolLiteral(true));
         nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
@@ -162,7 +166,7 @@ void BMv2_V1ModelTableStepper::evalTableActionProfile(
         tableStream << " Chosen action: " << actionName;
         nextState->add(new TraceEvent::Generic(tableStream.str()));
         nextState->replaceTopBody(&replacements);
-        getResult()->emplace_back(hitCondition, *state, nextState);
+        getResult()->emplace_back(hitCondition, *state, nextState, coveredStmts);
     }
 }
 
@@ -245,7 +249,11 @@ void BMv2_V1ModelTableStepper::evalTableActionSelector(
 
         // Update all the tracking variables for tables.
         std::vector<Continuation::Command> replacements;
-        replacements.emplace_back(new IR::MethodCallStatement(synthesizedAction));
+        replacements.emplace_back(
+            new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
+        P4::Coverage::CoverageSet coveredStmts;
+        nextState->getActionDecl(tableAction->method)
+            ->apply(CollectStatements2(coveredStmts, *state));
 
         nextState->set(getTableHitVar(table), IR::getBoolLiteral(true));
         nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
@@ -254,7 +262,7 @@ void BMv2_V1ModelTableStepper::evalTableActionSelector(
         tableStream << " Chosen action: " << actionName;
         nextState->add(new TraceEvent::Generic(tableStream.str()));
         nextState->replaceTopBody(&replacements);
-        getResult()->emplace_back(hitCondition, *state, nextState);
+        getResult()->emplace_back(hitCondition, *state, nextState, coveredStmts);
     }
 }
 

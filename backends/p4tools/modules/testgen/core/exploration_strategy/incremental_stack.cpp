@@ -98,7 +98,6 @@ ExecutionState *IncrementalStack::chooseBranch(std::vector<Branch> &branches,
         if (const auto *boolLiteral = branch.constraint->to<IR::BoolLiteral>()) {
             guaranteeViability = false;
             if (!boolLiteral->value) {
-                unexploredBranches.pop();
                 continue;
             }
         }
@@ -112,7 +111,6 @@ ExecutionState *IncrementalStack::chooseBranch(std::vector<Branch> &branches,
             if (solverResult == boost::none || !solverResult.get()) {
                 // Solver timed out or path constraints were not satisfiable. Need to choose a
                 // different branch. Roll back our branch selection and try again.
-                unexploredBranches.pop();
                 continue;
             }
         }

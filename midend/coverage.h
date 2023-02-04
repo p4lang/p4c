@@ -43,8 +43,7 @@ class CollectStatements : public Inspector {
 void coverageReportFinal(const CoverageSet &all, const CoverageSet &visited);
 
 /// Logs statements from @p new_ which have not yet been visited (are not members of @p visited).
-void logCoverage(const CoverageSet &all, const CoverageSet &visited,
-                 const std::vector<const IR::Statement *> &new_);
+void logCoverage(const CoverageSet &all, const CoverageSet &visited, const CoverageSet &new_);
 
 }  // namespace Coverage
 

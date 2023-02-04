@@ -266,9 +266,12 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
 
         // Update all the tracking variables for tables.
         std::vector<Continuation::Command> replacements;
-        replacements.emplace_back(new IR::MethodCallStatement(tableAction));
+        replacements.emplace_back(new IR::MethodCallStatement(Util::SourceInfo(), tableAction));
         nextState->set(getTableHitVar(table), IR::getBoolLiteral(true));
         nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
+        P4::Coverage::CoverageSet coveredStmts;
+        nextState->getActionDecl(tableAction->method)
+            ->apply(CollectStatements2(coveredStmts, stepper->state));
 
         // Add some tracing information.
         std::stringstream tableStream;
@@ -303,7 +306,7 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
         // The default condition can only be triggered, if we do not hit this match.
         // We encode this constraint in this expression.
         stepper->result->emplace_back(new IR::LAnd(tableMissCondition, hitCondition),
-                                      stepper->state, nextState);
+                                      stepper->state, nextState, coveredStmts);
         tableMissCondition = new IR::LAnd(new IR::LNot(hitCondition), tableMissCondition);
     }
     return tableMissCondition;
@@ -361,8 +364,11 @@ void TableStepper::setTableDefaultEntries(
 
         // Update all the tracking variables for tables.
         std::vector<Continuation::Command> replacements;
-        replacements.emplace_back(new IR::MethodCallStatement(synthesizedAction));
-
+        replacements.emplace_back(
+            new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
+        P4::Coverage::CoverageSet coveredStmts;
+        nextState->getActionDecl(tableAction->method)
+            ->apply(CollectStatements2(coveredStmts, stepper->state));
         nextState->set(getTableHitVar(table), IR::getBoolLiteral(false));
         nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
         std::stringstream tableStream;
@@ -370,7 +376,7 @@ void TableStepper::setTableDefaultEntries(
         tableStream << "| Overriding default action: " << actionName;
         nextState->add(new TraceEvent::Generic(tableStream.str()));
         nextState->replaceTopBody(&replacements);
-        stepper->result->emplace_back(nextState);
+        stepper->result->emplace_back(boost::none, stepper->state, nextState, coveredStmts);
     }
 }
 
@@ -433,7 +439,11 @@ void TableStepper::evalTableControlEntries(
 
         // Update all the tracking variables for tables.
         std::vector<Continuation::Command> replacements;
-        replacements.emplace_back(new IR::MethodCallStatement(synthesizedAction));
+        replacements.emplace_back(
+            new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
+        P4::Coverage::CoverageSet coveredStmts;
+        nextState->getActionDecl(tableAction->method)
+            ->apply(CollectStatements2(coveredStmts, stepper->state));
 
         nextState->set(getTableHitVar(table), IR::getBoolLiteral(true));
         nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
@@ -454,7 +464,7 @@ void TableStepper::evalTableControlEntries(
         tableStream << "| Chosen action: " << actionName;
         nextState->add(new TraceEvent::Generic(tableStream.str()));
         nextState->replaceTopBody(&replacements);
-        stepper->result->emplace_back(hitCondition, stepper->state, nextState);
+        stepper->result->emplace_back(hitCondition, stepper->state, nextState, coveredStmts);
     }
 }
 
@@ -485,7 +495,7 @@ void TableStepper::evalTaintedTable() {
                   "Unknown format of an action '%1%' in the table '%2%'", action, table);
         const auto *tableAction = action->to<IR::MethodCallExpression>();
         BUG_CHECK(tableAction, "Invalid action '%1%' in the table '%2%'", action, table);
-        replacements.emplace_back(new IR::MethodCallStatement(tableAction));
+        replacements.emplace_back(new IR::MethodCallStatement(Util::SourceInfo(), tableAction));
     }
     // Since we do not know which table action was selected because of the tainted key, we also
     // set the selected action variable tainted.
@@ -623,11 +633,14 @@ void TableStepper::addDefaultAction(boost::optional<const IR::Expression *> tabl
     tableStream << "Table Branch: " << properties.tableName;
     tableStream << " Choosing default action: " << actionPath;
     nextState->add(new TraceEvent::Generic(tableStream.str()));
-    replacements.emplace_back(new IR::MethodCallStatement(tableAction));
+    replacements.emplace_back(new IR::MethodCallStatement(Util::SourceInfo(), tableAction));
+    P4::Coverage::CoverageSet coveredStmts;
+    nextState->getActionDecl(tableAction->method)
+        ->apply(CollectStatements2(coveredStmts, stepper->state));
     nextState->set(getTableHitVar(table), IR::getBoolLiteral(false));
     nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
     nextState->replaceTopBody(&replacements);
-    stepper->result->emplace_back(tableMissCondition, stepper->state, nextState);
+    stepper->result->emplace_back(tableMissCondition, stepper->state, nextState, coveredStmts);
 }
 
 void TableStepper::checkTargetProperties(
