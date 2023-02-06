@@ -155,28 +155,29 @@ inline auto operator<<(std::ostream &out, const T *obj) -> decltype((void)obj->d
     return out;
 }
 
-template <class T>
-std::ostream &operator<<(std::ostream &out, const std::vector<T> &vec) {
+/// Serializes the @p container into the stream @p out, delimining it by bracketing it with
+/// @p lbrace and @p rbrace. This is mostly a helper for writing operator<< fur custom container
+/// classes.
+template <class Cont>
+std::ostream &format_container(std::ostream &out, const Cont &container, char lbrace, char rbrace) {
     const char *sep = " ";
-    out << '[';
-    for (auto &el : vec) {
+    out << lbrace;
+    for (auto &el : container) {
         out << sep << el;
         sep = ", ";
     }
-    out << (sep + 1) << ']';
+    out << (sep + 1) << rbrace;
     return out;
 }
 
 template <class T>
-std::ostream &operator<<(std::ostream &out, const std::set<T> &vec) {
-    const char *sep = " ";
-    out << '(';
-    for (auto &el : vec) {
-        out << sep << el;
-        sep = ", ";
-    }
-    out << (sep + 1) << ')';
-    return out;
+std::ostream &operator<<(std::ostream &out, const std::vector<T> &vec) {
+    return format_container(out, vec, '[', ']');
+}
+
+template <class T>
+std::ostream &operator<<(std::ostream &out, const std::set<T> &set) {
+    return format_container(out, set, '(', ')');
 }
 
 #endif /* _LIB_LOG_H_ */
