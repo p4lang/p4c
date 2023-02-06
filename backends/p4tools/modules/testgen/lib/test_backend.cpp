@@ -283,17 +283,7 @@ bool TestBackEnd::printTestInfo(const ExecutionState *executionState, const Test
     return false;
 }
 
-void TestBackEnd::printPerformanceReport() {
-    printFeature("performance", 4, "============ Timers ============");
-    for (const auto &c : Util::getTimers()) {
-        if (c.timerName.empty()) {
-            printFeature("performance", 4, "Total: %i ms", c.milliseconds);
-        } else {
-            printFeature("performance", 4, "%s: %i ms (%0.2f %% of parent)", c.timerName,
-                         c.milliseconds, c.relativeToParent * 100);
-        }
-    }
-}
+void TestBackEnd::printPerformanceReport() const { testWriter->printPerformanceReport(); }
 
 int64_t TestBackEnd::getTestCount() const { return testCount; }
 

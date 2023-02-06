@@ -136,6 +136,10 @@ class TF {
     // attaches arbitrary string data to the test preamble.
     virtual void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testIdx,
                             float currentCoverage) = 0;
+
+    /// Log performance numbers to a separate file in the test folder.
+    /// Also print out some performance numbers if logging feature "performance" is enabled.
+    void printPerformanceReport() const;
 };
 
 }  // namespace P4Testgen

@@ -114,7 +114,7 @@ class TestBackEnd {
     virtual bool run(const FinalState &state);
 
     /// Print out some performance numbers if logging feature "performance" is enabled.
-    static void printPerformanceReport();
+    void printPerformanceReport() const;
 
     /// Accessors.
     [[nodiscard]] int64_t getTestCount() const;
