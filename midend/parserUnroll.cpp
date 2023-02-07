@@ -161,6 +161,9 @@ class ParserStateRewriter : public Transform {
 
     /// Updates indexes of a header stack.
     IR::Node *preorder(IR::ArrayIndex *expression) {
+        if (expression->right->is<IR::Constant>()) {
+            return expression;
+        }
         ParserStateRewriter rewriter(parserStructure, state, valueMap, refMap, typeMap, afterExec,
                                      visitedStates);
         auto basetype = getTypeArray(expression->left);
