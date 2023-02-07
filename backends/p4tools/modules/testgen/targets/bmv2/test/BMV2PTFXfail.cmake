@@ -34,12 +34,6 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
-  "Unsupported type argument for Value Set"
-  pvs-nested-struct.p4
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-ptf"
   "Segmentation fault"
   # The error here is unclear.
   extract_for_header_union.p4
@@ -86,6 +80,12 @@ p4tools_add_xfail_reason(
   "Assume error"
   # Assert/Assume error: assert/assume(false).
   bmv2_assume.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Unsupported type argument for Value Set"
+  pvs-nested-struct.p4
 )
 
 p4tools_add_xfail_reason(
@@ -246,6 +246,7 @@ p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
   "At index"
   # At index 0: UNKNOWN, 'Error when adding match entry to target'
+  # enums are not supported in P4Runtime yet https://github.com/p4lang/behavioral-model/issues/1178
   issue1062-1-bmv2.p4
   v1model-p4runtime-most-types1.p4
   pins_fabric.p4
@@ -255,13 +256,6 @@ p4tools_add_xfail_reason(
   # At index 0: INVALID_ARGUMENT, 'Bytestring provided does not fit within 0 bits'
   pins_middleblock.p4
   issue2283_1-bmv2.p4
-
-  # At index 0: INVALID_ARGUMENT, '0 is not a valid session id'
-  issue1642-bmv2.p4
-  issue1653-bmv2.p4
-  issue1653-complex-bmv2.p4
-  issue1660-bmv2.p4
-  issue562-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
@@ -279,11 +273,4 @@ p4tools_add_xfail_reason(
   "Error when importing p4info"
   v1model-digest-containing-ser-enum.p4
   v1model-digest-custom-type.p4
-)
-
-# Using a wildcard because the actual error is not shown. It is a packet mismatch.
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-ptf"
-  "ATTENTION: SOME TESTS DID NOT PASS!!!"
-  issue383-bmv2.p4
 )

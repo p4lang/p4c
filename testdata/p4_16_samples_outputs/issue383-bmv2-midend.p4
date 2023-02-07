@@ -100,7 +100,7 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
         local_metadata._row0_alt0_port1 = local_metadata._row1_alt1_port7;
         local_metadata._row1_alt0_valid4 = 1w1;
         local_metadata._row1_alt1_port7 = local_metadata._row0_alt1_port3 + 7w1;
-        clone_preserving_field_list(CloneType.I2E, 32w0, 8w0);
+        clone_preserving_field_list(CloneType.I2E, 32w1, 8w0);
     }
     @hidden table tbl_issue383bmv2l75 {
         actions = {

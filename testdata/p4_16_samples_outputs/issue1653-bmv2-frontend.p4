@@ -26,7 +26,7 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
     @name("ingress.bh") bitvec_hdr bh_0;
     apply {
         bh_0.setInvalid();
-        clone_preserving_field_list(CloneType.I2E, 32w0, 8w0);
+        clone_preserving_field_list(CloneType.I2E, 32w1, 8w0);
     }
 }
 

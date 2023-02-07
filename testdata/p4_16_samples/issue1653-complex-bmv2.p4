@@ -96,7 +96,7 @@ control ingress(inout parsed_packet_t h,
         h.bvh0.row.alt1.type = bh.row.alt1.type;
 
         local_metadata.row0.alt0.useHash = true;
-        clone_preserving_field_list(CloneType.I2E, 0, 0);
+        clone_preserving_field_list(CloneType.I2E, 1, 0);
     }
 }
 
