@@ -3,85 +3,87 @@
 header ethernet_t {
     bit<48> dst_addr;
     bit<48> src_addr;
-    bit<16> eth_type;
+    bit<16>         ether_type;
 }
 
-header H {
-    bit<8> a;
-    bit<8> a1;
-    bit<8> b;
+header ipv4_t {
+    bit<4>      version;
+    bit<4>      ihl;
+    bit<6>      dscp;
+    bit<2>      ecn;
+    bit<16>     total_len;
+    bit<16>     identification;
+    bit<1>      reserved;
+    bit<1>      do_not_fragment;
+    bit<1>      more_fragments;
+    bit<13>     frag_offset;
+    bit<8>      ttl;
+    bit<8>      protocol;
+    bit<16>     header_checksum;
+    bit<32> src_addr;
+    bit<32> dst_addr;
+}
+
+struct local_metadata_t {
+    bit<16>             l4_dst_port;
 }
 
 struct Headers {
-    ethernet_t eth_hdr;
-    H          h;
+    ethernet_t ethernet;
+    ipv4_t     ipv4;
 }
 
-struct Meta { }
+action acl_drop(inout standard_metadata_t standard_metadata) {
+    mark_to_drop(standard_metadata);
+}
 
-parser p(packet_in pkt, out Headers h, inout Meta meta, inout standard_metadata_t stdmeta) {
+parser p(packet_in pkt, out Headers h, inout local_metadata_t local_metadata, inout standard_metadata_t stdmeta) {
     state start {
-        pkt.extract(h.eth_hdr);
-        transition parse_h;
-    }
-    state parse_h {
-        pkt.extract(h.h);
+        local_metadata.l4_dst_port = 0;
+        pkt.extract(h.ethernet);
+        pkt.extract(h.ipv4);
         transition accept;
     }
+
 }
 
-control vrfy(inout Headers h, inout Meta meta) {
+control vrfy(inout Headers h, inout local_metadata_t local_metadata) {
     apply { }
 }
 
 
-control ingress(inout Headers h, inout Meta m, inout standard_metadata_t s) {
+control ingress(inout Headers h, inout local_metadata_t local_metadata, inout standard_metadata_t s) {
 
-    action MyAction1() {
-        h.h.b = 1;
-    }
-
-    action MyAction2() {
-        h.h.b = 2;
-    }
-
-    action MyAction3() {
-        h.h.b = 3;
-    }
-
-    table ternary_table {
+    table acl_ingress_table {
         key = {
-            h.h.a : exact;
-            h.h.a1 : ternary;
+            h.ipv4.isValid()                          : optional @name("is_ipv4");
+            h.ethernet.ether_type                     : ternary @name("ether_type");
+            h.ethernet.dst_addr                       : ternary @name("dst_mac");
+            h.ipv4.src_addr                           : ternary @name("src_ip");
+            h.ipv4.dst_addr                           : ternary @name("dst_ip");
+            h.ipv4.ttl                                : ternary @name("ttl");
+            h.ipv4.dscp                               : ternary @name("dscp");
+            h.ipv4.ecn                                : ternary @name("ecn");
+            h.ipv4.protocol                           : ternary @name("ip_protocol");
+            local_metadata.l4_dst_port                : ternary @name("l4_dst_port");
         }
-
         actions = {
-            NoAction;
-            MyAction1;
-            MyAction2;
-            MyAction3;
+            acl_drop(s);
+            @defaultonly NoAction;
         }
-
-        const entries = {
-            (0x03, 0x1111 &&& 0xF000) : MyAction1();
-            (0x02, 0x1181           ) : MyAction2();
-            (0x01, 0x1111 &&& 0xF   ) : MyAction3();
-        }
-
-        size = 1024;
-        default_action = NoAction();
+        const default_action = NoAction;
     }
-
     apply {
-      ternary_table.apply();
+        acl_ingress_table.apply();
     }
+
 }
 
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t s) {
+control egress(inout Headers h, inout local_metadata_t local_metadata, inout standard_metadata_t s) {
     apply { }
 }
 
-control update(inout Headers h, inout Meta m) {
+control update(inout Headers h, inout local_metadata_t local_metadata) {
     apply { }
 }
 
