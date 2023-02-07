@@ -172,24 +172,16 @@ void RandomAccessMaxCoverage::updateBufferRankings() {
 void RandomAccessMaxCoverage::sortBranchesByCoverage(std::vector<Branch> &branches) {
     // Transfers branches to rankedBranches and sorts them by coverage
     for (const auto &localBranch : branches) {
-        ExecutionState *branchState = localBranch.nextState;
         // Calculate coverage for each branch:
-        uint64_t coverage = 0;
-        if (branchState != nullptr) {
-            uint64_t lookAheadCoverage = 0;
-            for (const auto &stmt : branchState->getVisited()) {
-                // We need to take into account the set of visitedStatements.
-                // We also need to ensure the statement is in allStatements.
-                if (visitedStatements.count(stmt) == 0U && allStatements.count(stmt) != 0U) {
-                    lookAheadCoverage++;
-                }
+        uint64_t lookAheadCoverage = 0;
+        for (const auto &stmt : localBranch.potentialStatements) {
+            // We need to take into account the set of visitedStatements.
+            // We also need to ensure the statement is in allStatements.
+            if (visitedStatements.count(stmt) == 0U && stmt->getSourceInfo().isValid()) {
+                lookAheadCoverage++;
             }
-            coverage = lookAheadCoverage + visitedStatements.size();
-        } else {
-            // If the branch does not have a nextState, then don't look ahead
-            // and use other existing information for ranking.
-            coverage = visitedStatements.size();
         }
+        auto coverage = lookAheadCoverage + visitedStatements.size();
 
         // If there's no element in bufferUnexploredBranches with the particular coverage
         // we calculate, we'll insert a new key at bufferUnexploredBranches.
