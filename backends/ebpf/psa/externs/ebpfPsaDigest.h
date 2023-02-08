@@ -42,6 +42,10 @@ class EBPFDigestPSA : public EBPFObject {
     void emitInstance(CodeBuilder *builder) const;
     void processMethod(CodeBuilder *builder, cstring method, const IR::MethodCallExpression *expr,
                        DeparserBodyTranslatorPSA *visitor);
+
+    void emitPushElement(CodeBuilder *builder, const IR::Expression *elem,
+                         Inspector *codegen) const;
+    void emitPushElement(CodeBuilder *builder, cstring elem) const;
 };
 
 }  // namespace EBPF

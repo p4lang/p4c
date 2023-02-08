@@ -23,37 +23,28 @@ namespace EBPF {
 
 class EBPFDigestPSAValueVisitor : public CodeGenInspector {
  protected:
-    cstring digestMapInstance;
+    EBPFDigestPSA *digest;
     CodeGenInspector *codegen;
     EBPFType *valueType;
 
  public:
-    EBPFDigestPSAValueVisitor(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-                              cstring digestMapInstance, CodeGenInspector *codegen,
-                              EBPFType *valueType)
+    EBPFDigestPSAValueVisitor(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, EBPFDigestPSA *digest,
+                              CodeGenInspector *codegen, EBPFType *valueType)
         : CodeGenInspector(refMap, typeMap),
-          digestMapInstance(digestMapInstance),
+          digest(digest),
           codegen(codegen),
           valueType(valueType) {}
 
-    void pushExistingElem(const IR::Expression *expr) {
-        builder->emitIndent();
-        builder->appendFormat("bpf_map_push_elem(&%s, &", digestMapInstance);
-        codegen->visit(expr);
-        builder->append(", BPF_EXIST)");
-        builder->endOfStatement(true);
-    }
-
     // handle expression like: "digest.pack(msg)", where "msg" is an existing variable
     bool preorder(const IR::PathExpression *pe) override {
-        pushExistingElem(pe);
+        digest->emitPushElement(builder, pe, codegen);
         return false;
     }
 
     // handle expression like: "digest.pack(metadata.msg)", where "metadata.msg" is a member from an
     // instance of struct or header
     bool preorder(const IR::Member *member) override {
-        pushExistingElem(member);
+        digest->emitPushElement(builder, member, codegen);
         return false;
     }
 
@@ -71,9 +62,7 @@ class EBPFDigestPSAValueVisitor : public CodeGenInspector {
         codegen->visit(c);
         builder->endOfStatement(true);
 
-        builder->emitIndent();
-        builder->appendFormat("bpf_map_push_elem(&%s, &%s, BPF_EXIST)", digestMapInstance, tmpVar);
-        builder->endOfStatement(true);
+        digest->emitPushElement(builder, tmpVar);
 
         builder->blockEnd(true);
         return false;
@@ -113,9 +102,7 @@ class EBPFDigestPSAValueVisitor : public CodeGenInspector {
             builder->endOfStatement(true);
         }
 
-        builder->emitIndent();
-        builder->appendFormat("bpf_map_push_elem(&%s, &%s, BPF_EXIST)", digestMapInstance, tmpVar);
-        builder->endOfStatement(true);
+        digest->emitPushElement(builder, tmpVar);
 
         builder->blockEnd(true);
         return false;
@@ -167,14 +154,28 @@ void EBPFDigestPSA::processMethod(CodeBuilder *builder, cstring method,
                                   DeparserBodyTranslatorPSA *visitor) {
     if (method == "pack") {
         auto arg = expr->arguments->front();
-        EBPFDigestPSAValueVisitor dg(program->refMap, program->typeMap, instanceName, visitor,
-                                     valueType);
+        EBPFDigestPSAValueVisitor dg(program->refMap, program->typeMap, this, visitor, valueType);
         dg.setBuilder(builder);
         arg->apply(dg);
     } else {
         ::error(ErrorType::ERR_UNSUPPORTED, "%1%: unsupported method call for Digest",
                 expr->method);
     }
+}
+
+void EBPFDigestPSA::emitPushElement(CodeBuilder *builder, const IR::Expression *elem,
+                                    Inspector *codegen) const {
+    builder->emitIndent();
+    builder->appendFormat("bpf_map_push_elem(&%s, &", instanceName);
+    codegen->visit(elem);
+    builder->append(", BPF_EXIST)");
+    builder->endOfStatement(true);
+}
+
+void EBPFDigestPSA::emitPushElement(CodeBuilder *builder, cstring elem) const {
+    builder->emitIndent();
+    builder->appendFormat("bpf_map_push_elem(&%s, &%s, BPF_EXIST)", instanceName, elem);
+    builder->endOfStatement(true);
 }
 
 }  // namespace EBPF
