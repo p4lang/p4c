@@ -40,8 +40,8 @@ macro(p4tools_add_tests)
       "${TOOLS_TESTS_UNPARSED_ARGUMENTS}"
     )
   endforeach() # __tests
-  set(TEST_TAGS ${TEST_TAGS} ${tag} CACHE INTERNAL "test tags")
-  message(STATUS "Added ${__nTests} tests to '${tag}'.")
+  set(TEST_TAGS ${TEST_TAGS} ${TOOLS_TESTS_TAG} CACHE INTERNAL "test tags")
+  message(STATUS "Added ${__nTests} tests to '${TOOLS_TESTS_TAG}'.")
 endmacro(p4tools_add_tests)
 
 # Used to add a label to the test like xfail

@@ -120,6 +120,15 @@ bool TestBackEnd::run(const FinalState &state) {
             }
         }
 
+        // If assertion mode is active, ignore any test that does not trigger an assertion.
+        if (TestgenOptions::get().assertionModeEnabled) {
+            if (!executionState->getProperty<bool>("assertionTriggered")) {
+                return needsToTerminate(testCount);
+            }
+            printFeature("test_info", 4,
+                         "AssertionMode: Found an input that triggers an assertion.");
+        }
+
         bool abort = false;
         const auto *concolicModel = computeConcolicVariables(executionState, completedModel, solver,
                                                              outputPacketExpr, outputPortExpr);

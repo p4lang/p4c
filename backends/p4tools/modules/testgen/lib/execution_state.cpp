@@ -67,6 +67,10 @@ ExecutionState::ExecutionState(const IR::P4Program *program)
     if (!TestgenOptions::get().pattern.empty()) {
         reachabilityEngineState = ReachabilityEngineState::getInitial();
     }
+    // If assertion mode is enabled, set the assertion property to false.
+    if (TestgenOptions::get().assertionModeEnabled) {
+        setProperty("assertionTriggered", false);
+    }
 }
 
 ExecutionState::ExecutionState(Continuation::Body body)

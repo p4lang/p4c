@@ -27,6 +27,7 @@
 #include "backends/p4tools/modules/testgen/core/small_step/small_step.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4Tools {
 
@@ -955,6 +956,116 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                              IR::getConstant(programInfo.getParserErrorType(), error->value));
              falseState->replaceTopBody(Continuation::Exception::Reject);
              result->emplace_back(new IR::LNot(IR::Type::Boolean::get(), cond), state, falseState);
+         }},
+        /* ======================================================================================
+         *  assume
+         * ====================================================================================== */
+        {"*method.testgen_assume",
+         {"check"},
+         [](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+            const ExecutionState &state, SmallStepEvaluator::Result &result) {
+             // Do nothing if assumption mode is not active.
+             if (!TestgenOptions::get().enforceAssumptions) {
+                 auto *nextState = new ExecutionState(state);
+                 nextState->popBody();
+                 result->emplace_back(nextState);
+                 return;
+             }
+             const auto *cond = args->at(0)->expression;
+
+             // If assumption mode is active, add the condition to the required path conditions.
+             if (!SymbolicEnv::isSymbolicValue(cond)) {
+                 // Evaluate the condition.
+                 stepToSubexpr(cond, result, state, [call](const Continuation::Parameter *v) {
+                     auto *clonedCall = call->clone();
+                     auto *arguments = new IR::Vector<IR::Argument>();
+                     arguments->push_back(new IR::Argument(v->param));
+                     clonedCall->arguments = arguments;
+                     return Continuation::Return(clonedCall);
+                 });
+                 return;
+             }
+
+             // If the assert/assume condition is tainted, we do not know whether we abort.
+             // For now, throw an exception.
+             if (state.hasTaint(cond)) {
+                 TESTGEN_UNIMPLEMENTED(
+                     "Assert/assume can not be executed under a tainted condition.");
+             }
+
+             auto *nextState = new ExecutionState(state);
+             nextState->popBody();
+             // Record the condition we evaluate as string.
+             std::stringstream condStream;
+             condStream << "Assume: applying condition: ";
+             cond->dbprint(condStream);
+             nextState->add(new TraceEvent::Generic(condStream.str()));
+             result->emplace_back(cond, state, nextState);
+         }},
+        /* ======================================================================================
+         *  assert
+         * ====================================================================================== */
+        {"*method.testgen_assert",
+         {"check"},
+         [](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+            const ExecutionState &state, SmallStepEvaluator::Result &result) {
+             // Do nothing if assumption or assertion mode is not active.
+             auto enforceAssumptions = TestgenOptions::get().enforceAssumptions;
+             auto assertionModeEnabled = TestgenOptions::get().assertionModeEnabled;
+             if (!(enforceAssumptions || assertionModeEnabled)) {
+                 auto *nextState = new ExecutionState(state);
+                 nextState->popBody();
+                 result->emplace_back(nextState);
+                 return;
+             }
+             const auto *cond = args->at(0)->expression;
+
+             // If assumption mode is active, add the condition to the required path conditions.
+             if (!SymbolicEnv::isSymbolicValue(cond)) {
+                 // Evaluate the condition.
+                 stepToSubexpr(cond, result, state, [call](const Continuation::Parameter *v) {
+                     auto *clonedCall = call->clone();
+                     auto *arguments = new IR::Vector<IR::Argument>();
+                     arguments->push_back(new IR::Argument(v->param));
+                     clonedCall->arguments = arguments;
+                     return Continuation::Return(clonedCall);
+                 });
+                 return;
+             }
+
+             // If the assert/assume condition is tainted, we do not know whether we abort.
+             // For now, throw an exception.
+             if (state.hasTaint(cond)) {
+                 TESTGEN_UNIMPLEMENTED(
+                     "Assert/assume can not be executed under a tainted condition.");
+             }
+
+             // If assertion mode is active, invert the condition.
+             // Only generate tests that violate the condition.
+             // If assertionModeEnabled is false, just add the condition to the path conditions.
+             if (assertionModeEnabled) {
+                 auto *nextState = new ExecutionState(state);
+                 // Record the condition we evaluate as string.
+                 std::stringstream condStream;
+                 condStream << "Assert condition violated: ";
+                 cond->dbprint(condStream);
+                 nextState->add(new TraceEvent::Generic(condStream.str()));
+                 // Do not bother executing further. We have triggered an assertion.
+                 nextState->setProperty("assertionTriggered", true);
+                 nextState->replaceTopBody(Continuation::Exception::Abort);
+                 result->emplace_back(new IR::LNot(cond), state, nextState);
+             }
+
+             auto *passState = new ExecutionState(state);
+             passState->popBody();
+             // If enforceAssumptions is active. Add the condition to the path conditions.
+             if (enforceAssumptions) {
+                 result->emplace_back(cond, state, passState);
+             } else {
+                 result->emplace_back(passState);
+             }
          }},
     });
 

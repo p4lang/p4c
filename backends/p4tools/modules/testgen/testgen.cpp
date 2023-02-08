@@ -133,7 +133,8 @@ int Testgen::mainImpl(const IR::P4Program *program) {
         throw;
     }
 
-    if (testBackend->getTestCount() == 0) {
+    // Do not print this warning if assertion mode is enabled.
+    if (testBackend->getTestCount() == 0 && !testgenOptions.assertionModeEnabled) {
         ::warning(
             "Unable to generate tests with given inputs. Double-check provided options and "
             "parameters.\n");
