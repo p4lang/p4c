@@ -80,7 +80,7 @@ endfunction(check_empty_folder)
 # Sets the timeout on tests at 300s. For the slow CI machines.
 function(p4tools_add_test_with_args)
   # Parse arguments.
-  set(options ENABLE_RUNNER VALIDATE_PROTOBUF P416_PTF USE_ASSERT_MODE USE_ASSUME_MODE CHECK_EMPTY)
+  set(options ENABLE_RUNNER VALIDATE_PROTOBUF P416_PTF USE_ASSERT_MODE DISABLE_ASSUME_MODE CHECK_EMPTY)
   set(oneValueArgs TAG DRIVER ALIAS P4TEST TARGET ARCH)
   set(multiValueArgs TEST_ARGS CMAKE_ARGS)
   cmake_parse_arguments(
@@ -111,8 +111,8 @@ function(p4tools_add_test_with_args)
   if(${TOOLS_BMV2_TESTS_USE_ASSERT_MODE})
     set(test_args "${test_args} --assertion-mode")
   endif()
-  if(${TOOLS_BMV2_TESTS_USE_ASSUME_MODE})
-    set(test_args "${test_args} --assumption-mode")
+  if(${TOOLS_BMV2_TESTS_DISABLE_ASSUME_MODE})
+    set(test_args "${test_args} --disable-assumption-mode")
   endif()
 
   file(
@@ -120,7 +120,7 @@ function(p4tools_add_test_with_args)
     "--std p4-16 ${test_args} --out-dir ${__testfolder} \"$@\" ${P4C_SOURCE_DIR}/${p4test}\n"
   )
 
-  if(${TOOLS_BMV2_TESTS_USE_ASSERT_MODE} OR ${TOOLS_BMV2_TESTS_USE_ASSUME_MODE})
+  if(${TOOLS_BMV2_TESTS_USE_ASSERT_MODE} OR ${TOOLS_BMV2_TESTS_DISABLE_ASSUME_MODE})
     # Check whether the folder is empty.
     if(${TOOLS_BMV2_TESTS_CHECK_EMPTY})
       file(APPEND ${__testfile} "[ \"$(ls -A ${__testfolder})\" ] && exit 1 || exit 0")

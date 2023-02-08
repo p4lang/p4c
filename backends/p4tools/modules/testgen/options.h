@@ -76,8 +76,8 @@ class TestgenOptions : public AbstractP4cToolOptions {
     bool withOutputPacket = false;
 
     /// Add conditions defined in assert/assume to the path conditions.
-    /// Only tests which satisfy these conditions can be generated.
-    bool enforceAssumptions = false;
+    /// Only tests which satisfy these conditions can be generated. This is active by default.
+    bool enforceAssumptions = true;
 
     /// Produce only tests that violate the condition defined in assert calls.
     /// This will either produce no tests or only tests that contain counter examples.

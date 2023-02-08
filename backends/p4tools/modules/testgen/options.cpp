@@ -308,13 +308,13 @@ TestgenOptions::TestgenOptions()
         "List of the selected branches which should be chosen for selection.");
 
     registerOption(
-        "--assumption-mode", nullptr,
+        "--disable-assumption-mode", nullptr,
         [this](const char * /*arg*/) {
-            enforceAssumptions = true;
+            enforceAssumptions = false;
             return true;
         },
-        "Add conditions defined in assert/assume to the path conditions. Only tests which satisfy "
-        "these conditions can be generated.");
+        "Do not apply the conditions defined within \"testgen_assume\" extern calls in P4 programs."
+        "They will have no effect on P4Testgen's path exploration.");
 
     registerOption(
         "--assertion-mode", nullptr,
