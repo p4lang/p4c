@@ -328,8 +328,8 @@ bool CodeGenInspector::preorder(const IR::Type_Enum *type) {
     return false;
 }
 
-bool CodeGenInspector::preorder(const IR::AssignmentStatement *a) {
-    auto ltype = typeMap->getType(a->left);
+void CodeGenInspector::emitAssignStatement(const IR::Type *ltype, const IR::Expression *lexpr,
+                                           cstring lpath, const IR::Expression *rexpr) {
     auto ebpfType = EBPFTypeFactory::instance->create(ltype);
     bool memcpy = false;
     EBPFScalarType *scalar = nullptr;
@@ -340,21 +340,35 @@ bool CodeGenInspector::preorder(const IR::AssignmentStatement *a) {
         memcpy = !EBPFScalarType::generatesScalar(width);
     }
 
+    builder->emitIndent();
     if (memcpy) {
         builder->append("__builtin_memcpy(&");
-        visit(a->left);
+        if (lexpr != nullptr) {
+            visit(lexpr);
+        } else {
+            builder->append(lpath);
+        }
         builder->append(", &");
-        if (a->right->is<IR::Constant>()) {
+        if (rexpr->is<IR::Constant>()) {
             builder->appendFormat("(u8[%u])", scalar->bytesRequired());
         }
-        visit(a->right);
+        visit(rexpr);
         builder->appendFormat(", %d)", scalar->bytesRequired());
     } else {
-        visit(a->left);
+        if (lexpr != nullptr) {
+            visit(lexpr);
+        } else {
+            builder->append(lpath);
+        }
         builder->append(" = ");
-        visit(a->right);
+        visit(rexpr);
     }
     builder->endOfStatement();
+}
+
+bool CodeGenInspector::preorder(const IR::AssignmentStatement *a) {
+    auto ltype = typeMap->getType(a->left);
+    emitAssignStatement(ltype, a->left, nullptr, a->right);
     return false;
 }
 

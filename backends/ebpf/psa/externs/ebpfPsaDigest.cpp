@@ -81,25 +81,10 @@ class EBPFDigestPSAValueVisitor : public CodeGenInspector {
         builder->endOfStatement(true);
 
         for (const auto *f : se->components) {
-            unsigned width = EBPFInitializerUtils::ebpfTypeWidth(typeMap, f->expression);
-            builder->emitIndent();
-
-            if (EBPFScalarType::generatesScalar(width)) {
-                builder->appendFormat("%s.", tmpVar);
-                builder->append(f->name);
-                builder->append(" = ");
-                codegen->visit(f->expression);
-            } else {
-                builder->appendFormat("__builtin_memcpy(%s.", tmpVar);
-                builder->append(f->name);
-                builder->append(", ");
-                if (f->expression->is<IR::Constant>()) {
-                    builder->appendFormat("&(u8[%u])", width / 8);
-                }
-                codegen->visit(f->expression);
-                builder->appendFormat(", %u)", width / 8);
-            }
-            builder->endOfStatement(true);
+            auto type = typeMap->getType(f->expression);
+            cstring path = Util::printf_format("%s.%s", tmpVar, f->name.name);
+            codegen->emitAssignStatement(type, nullptr, path, f->expression);
+            builder->newline();
         }
 
         digest->emitPushElement(builder, tmpVar);
