@@ -79,7 +79,8 @@ class P4TestOptions : public CompilerOptions {
                 return true;
             },
             "Turn off LOGN() statements in the compiler.\n"
-            "Use '@__debug' annotation to enable LOGN on the annotated P4 object within the source code.\n");
+            "Use '@__debug' annotation to enable LOGN on "
+            "the annotated P4 object within the source code.\n");
     }
 };
 

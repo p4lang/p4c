@@ -106,7 +106,7 @@ void increaseVerbosity();
 
 #define LOGGING(N)                                                            \
     ((N) <= MAX_LOGGING_LEVEL && ::Log::fileLogLevelIsAtLeast(__FILE__, N) && \
-    ::Log::enableLogging())
+     ::Log::enableLogging())
 #define LOGN(N, X)                                                        \
     (LOGGING(N) ? ::Log::Detail::fileLogOutput(__FILE__)                  \
                       << ::Log::Detail::OutputLogPrefix(__FILE__, N) << X \
