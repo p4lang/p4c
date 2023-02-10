@@ -52,7 +52,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     action ipv4_forward() {
     }
-    table ipv4_lpm {
+    @__debug table ipv4_lpm {
         key = {
             hdr.ipv4.dstAddr: ternary @name("hdr.ipv4.dstAddr");
             hdr.ipv4.srcAddr: lpm @name("hdr.ipv4.srcAddr");

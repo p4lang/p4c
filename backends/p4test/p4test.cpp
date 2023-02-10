@@ -72,6 +72,15 @@ class P4TestOptions : public CompilerOptions {
                 return true;
             },
             "read previously dumped json instead of P4 source code");
+        registerOption(
+            "--turn-off-logn", nullptr,
+            [](const char *) {
+                ::Log::Detail::enableLoggingGlobally = false;
+                return true;
+            },
+            "Turn off LOGN() statements in the compiler.\n"
+            "Use '@__debug' annotation to enable LOGN on "
+            "the annotated P4 object within the source code.\n");
     }
 };
 

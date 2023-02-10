@@ -37,6 +37,10 @@ extern int verbosity;
 // A cache of the maximum log level requested for any file.
 extern int maximumLogLevel;
 
+// Used to restrict logging to a specific IR context.
+extern bool enableLoggingGlobally;
+extern bool enableLoggingInContext;  // if enableLoggingGlobally is true, this is ignored.
+
 // Look up the log level of @file.
 int fileLogLevel(const char *file);
 std::ostream &fileLogOutput(const char *file);
@@ -88,6 +92,9 @@ void addDebugSpec(const char *spec);
 
 inline bool verbose() { return Detail::verbosity > 0; }
 inline int verbosity() { return Detail::verbosity; }
+inline bool enableLogging() {
+    return Detail::enableLoggingGlobally || Detail::enableLoggingInContext;
+}
 void increaseVerbosity();
 
 }  // namespace Log
@@ -97,7 +104,9 @@ void increaseVerbosity();
 #define MAX_LOGGING_LEVEL 10
 #endif
 
-#define LOGGING(N) ((N) <= MAX_LOGGING_LEVEL && ::Log::fileLogLevelIsAtLeast(__FILE__, N))
+#define LOGGING(N)                                                            \
+    ((N) <= MAX_LOGGING_LEVEL && ::Log::fileLogLevelIsAtLeast(__FILE__, N) && \
+     ::Log::enableLogging())
 #define LOGN(N, X)                                                        \
     (LOGGING(N) ? ::Log::Detail::fileLogOutput(__FILE__)                  \
                       << ::Log::Detail::OutputLogPrefix(__FILE__, N) << X \

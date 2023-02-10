@@ -6,6 +6,7 @@ tables {
     id: 37375156
     name: "MyIngress.ipv4_lpm"
     alias: "ipv4_lpm"
+    annotations: "@__debug"
   }
   match_fields {
     id: 1
