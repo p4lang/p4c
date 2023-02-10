@@ -756,6 +756,10 @@ class WideFieldTableSupport(P4EbpfTest):
              "test_ipv6": "0005:1111:2222:3333:4444:5555:6666:7777", "exp_ipv6": "ffff:1111:2222:3333:4444:5555:6666:0005"},
             {"case": "ternary const entry - exact match", "table": None,
              "test_ipv6": "0006:1111:2222:3333:4444:5555:6666:7777", "exp_ipv6": "ffff:1111:2222:3333:4444:5555:6666:0006"},
+            {"case": "ActionProfile", "table": None,
+             "test_ipv6": "0007:1111:2222:3333:4444:5555:6666:7777", "exp_ipv6": "ffff:1111:2222:3333:4444:5555:6666:0007"},
+            {"case": "ActionSelector", "table": None,
+             "test_ipv6": "0008:1111:2222:3333:4444:5555:6666:7777", "exp_ipv6": "ffff:1111:2222:3333:4444:5555:6666:0008"},
             {"case": "default action", "table": None,  # defined by P4 program
              "no_table_matches": 1,  # default to 2 matches - one for default and one for any table above
              "test_ipv6": "aaaa:1111:2222:3333:4444:5555:6666:7777", "exp_ipv6": "ffff:1111:2222:3333:4444:5555:6666:aaaa"}
@@ -763,6 +767,18 @@ class WideFieldTableSupport(P4EbpfTest):
         for t in tests:
             if t["table"]:
                 self.table_add(table=t["table"], key=t["match"], action=1, data=[t["exp_ipv6"]], priority=t["priority"])
+
+        # Add rules for ActionProfile
+        mid = self.action_profile_add_action(ap="ingress_ap", action=1, data=["ffff:1111:2222:3333:4444:5555:6666:0007"])
+        self.table_add(table="ingress_tbl_exact_ap", key=["0007:1111:2222:3333:4444:5555:6666:7777"], references=[mid])
+
+        # Add rules for ActionSelector
+        gid = self.action_selector_create_empty_group(selector="ingress_as")
+        self.table_add(table="ingress_tbl_exact_as", key=["0008:1111:2222:3333:4444:5555:6666:7777"],
+                       references=["group {}".format(gid)])
+        for _ in range(0, 3):
+            mid = self.action_selector_add_action(selector="ingress_as", action=1, data=["ffff:1111:2222:3333:4444:5555:6666:0008"])
+            self.action_selector_add_member_to_group(selector="ingress_as", group_ref=gid, member_ref=mid)
 
         for t in tests:
             logger.info("Testing {}...".format(t["case"]))

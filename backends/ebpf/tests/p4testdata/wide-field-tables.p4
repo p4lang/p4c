@@ -144,6 +144,25 @@ control ingress(inout headers hdr,
         }
     }
 
+    ActionProfile(100) ap;
+    table tbl_exact_ap {
+        key = {
+            hdr.ipv6.srcAddr : exact;
+        }
+        actions = { set_dst; NoAction; }
+        psa_implementation = ap;
+    }
+
+    ActionSelector(PSA_HashAlgorithm_t.CRC32, 128, 32w16) as;
+    table tbl_exact_as {
+        key = {
+            hdr.ipv6.srcAddr : exact;
+            hdr.ipv6.srcAddr : selector;
+        }
+        actions = { set_dst; NoAction; }
+        psa_implementation = as;
+    }
+
     apply {
         tbl_default.apply();
 
@@ -154,6 +173,9 @@ control ingress(inout headers hdr,
         tbl_const_exact.apply();
         tbl_const_lpm.apply();
         tbl_const_ternary.apply();
+
+        tbl_exact_ap.apply();
+        tbl_exact_as.apply();
 
         send_to_port(ostd, (PortId_t) PORT0);
     }
