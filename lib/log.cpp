@@ -43,6 +43,8 @@ namespace Detail {
 
 int verbosity = 0;
 int maximumLogLevel = 0;
+bool enableLoggingGlobally = true;
+bool enableLoggingInContext = false;
 
 // The time at which logging was initialized; used so that log messages can have
 // relative rather than absolute timestamps.

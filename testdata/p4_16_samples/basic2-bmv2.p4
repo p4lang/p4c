@@ -78,6 +78,7 @@ control MyIngress(inout headers hdr,
     action ipv4_forward() {
     }
     
+    @__debug
     table ipv4_lpm {
         key = {
             hdr.ipv4.dstAddr: ternary;

@@ -19,6 +19,9 @@ limitations under the License.
 #include <stdlib.h>
 #include <time.h>
 
+#include "ir/ir-generated.h"
+#include "lib/source_file.h"
+
 #if HAVE_LIBGC
 #include <gc/gc.h>
 #endif
@@ -271,7 +274,11 @@ void Transform::visitor_const_error() {
 struct PushContext {
     Visitor::Context current;
     const Visitor::Context *&stack;
+    bool saved_logging_disable;
     PushContext(const Visitor::Context *&stck, const IR::Node *node) : stack(stck) {
+        saved_logging_disable = Log::Detail::enableLoggingInContext;
+        if (node->getAnnotation(IR::Annotation::debugLoggingAnnotation))
+            Log::Detail::enableLoggingInContext = true;
         current.parent = stack;
         current.node = current.original = node;
         current.child_index = 0;
@@ -280,7 +287,10 @@ struct PushContext {
         assert(current.depth < 10000);  // stack overflow?
         stack = &current;
     }
-    ~PushContext() { stack = current.parent; }
+    ~PushContext() {
+        stack = current.parent;
+        Log::Detail::enableLoggingInContext = saved_logging_disable;
+    }
 };
 
 namespace {

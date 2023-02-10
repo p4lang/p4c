@@ -289,6 +289,7 @@ class Annotation {
     static const cstring noWarnAnnotation;  /// noWarn annotation.
     static const cstring matchAnnotation;  /// Match annotation (for value sets).
     static const cstring fieldListAnnotation;  /// Used for recirculate, etc.
+    static const cstring debugLoggingAnnotation;  /// Used by compiler implementer to limit debug log to the annotated IR context.
     toString{ return cstring("@") + name; }
     validate{
         BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name");

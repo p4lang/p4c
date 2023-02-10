@@ -70,6 +70,7 @@ const cstring IR::Annotation::noSideEffectsAnnotation = "noSideEffects";
 const cstring IR::Annotation::noWarnAnnotation = "noWarn";
 const cstring IR::Annotation::matchAnnotation = "match";
 const cstring IR::Annotation::fieldListAnnotation = "field_list";
+const cstring IR::Annotation::debugLoggingAnnotation = "__debug";
 
 int Type_Declaration::nextId = 0;
 int Type_InfInt::nextId = 0;
