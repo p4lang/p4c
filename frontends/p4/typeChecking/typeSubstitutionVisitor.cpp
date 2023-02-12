@@ -58,8 +58,9 @@ const IR::Node *TypeVariableSubstitutionVisitor::replacement(const IR::ITypeVar 
         replacement = type;
         if (!type->is<IR::ITypeVar>()) break;
         current = type->to<IR::ITypeVar>();
+        if (type == current->getNode()) break;
     }
-    if (replacement == nullptr) return node;
+    if (replacement == nullptr || replacement == original->getNode()) return node;
     LOG2("Replacing " << getOriginal() << " with " << replacement);
     return replacement;
 }

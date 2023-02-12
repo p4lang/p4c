@@ -265,6 +265,8 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
 
     if (src->is<IR::Type_Dontcare>() || dest->is<IR::Type_Dontcare>()) return true;
 
+    if (src->is<IR::Type_InfInt>() && dest->is<IR::Type_InfInt>()) return true;
+
     if (dest->is<IR::Type_ArchBlock>()) {
         // This case handles the comparison of Type_Parser with P4Parser
         // (and similarly for controls).

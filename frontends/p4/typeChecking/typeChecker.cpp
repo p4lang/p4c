@@ -53,12 +53,12 @@ class ConstantTypeSubstitution : public Transform {
         auto repl = cstType;
         while (repl->is<IR::ITypeVar>()) {
             auto next = subst->get(repl->to<IR::ITypeVar>());
-            if (!next) break;
+            if (!next || next == repl) break;
             repl = next;
         }
         if (repl != cstType) {
             // We may replace a type variable with another one
-            LOG2("Inferred type " << repl << " for " << cst);
+            LOG2("Inferred type " << repl << " for " << cst << " (was " << cstType << ")");
             cst = new IR::Constant(cst->srcInfo, repl, cst->value, cst->base);
         } else {
             LOG2("No type inferred for " << cst << " repl is " << repl);
@@ -1059,6 +1059,7 @@ const IR::Node *TypeInference::preorder(IR::Declaration_Instance *decl) {
             prune();
             return decl;
         }
+        BUG_CHECK(!readOnly || newArgs == decl->arguments, "change in readOnly mode");
         // type can be Type_Extern or Type_SpecializedCanonical.  If it is already
         // specialized, the type arguments were specified explicitly.
         // Otherwise, we use the type received from checkExternConstructor, which
@@ -1093,8 +1094,14 @@ const IR::Node *TypeInference::preorder(IR::Declaration_Instance *decl) {
             prune();
             return decl;
         }
+        BUG_CHECK(!readOnly || (decl->arguments && args->equiv(*decl->arguments)),
+                  "change in readOnly mode");
         learn(type, this);
-        if (args != decl->arguments) decl->arguments = args;
+        if (!readOnly && args != decl->arguments) {
+            // HACK -- the readOnly check is for issue3886 -- don't want to infer a
+            // different Type_InfInt for a parameter when we're in readonly mode.
+            decl->arguments = args;
+        }
         setType(decl, type);
         setType(orig, type);
     } else {
