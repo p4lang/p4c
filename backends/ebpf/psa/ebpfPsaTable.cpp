@@ -882,10 +882,9 @@ EBPFTablePSA::EntriesGroupedByMask_t EBPFTablePSA::getConstEntriesGroupedByMask(
     unsigned priority = entries->entries.size() + 1;
     for (auto entry : entries->entries) {
         cstring mask = maskGenerator.getMaskStr(entry);
-        ConstTernaryEntryDesc desc = {
-            .entry = entry,
-            .priority = priority--,
-        };
+        ConstTernaryEntryDesc desc;
+        desc.entry = entry;
+        desc.priority = priority--;
         entriesGroupedByMask[mask].emplace_back(desc);
     }
 
