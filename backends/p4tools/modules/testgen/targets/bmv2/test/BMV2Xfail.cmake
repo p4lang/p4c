@@ -56,6 +56,8 @@ p4tools_add_xfail_reason(
   "Exception"
   #  Running simple_switch_CLI: Exception  Unexpected key field &
   match-on-exprs2-bmv2.p4
+  #  Running simple_switch_CLI: Exception  Unexpected key field :
+  dash-pipeline.p4
 )
 
 p4tools_add_xfail_reason(
