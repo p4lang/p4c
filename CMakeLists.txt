@@ -212,6 +212,10 @@ add_cxx_compiler_option ("-Wextra")
 add_cxx_compiler_option ("-Wno-overloaded-virtual")
 add_cxx_compiler_option ("-Wno-deprecated")
 add_cxx_compiler_option ("-Wno-deprecated-declarations")
+# Make compiler follow the standard and not be too lenient. The increases
+# likelyhood that compilation will not break with other compilers (mainly clang)
+# or in future versions of GCC.
+add_cxx_compiler_option ("-pedantic")
 
 if (ENABLE_SANITIZERS)
   append("-fsanitize=undefined,address" CMAKE_C_FLAGS CMAKE_CXX_FLAGS)
