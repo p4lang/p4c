@@ -267,13 +267,16 @@ const IR::Node *DoFlattenHeaderUnionStack::postorder(IR::ArrayIndex *e) {
             if (!e->right->is<IR::Constant>())
                 ::error(ErrorType::ERR_INVALID, "%1% is not a constant", e->right);
             unsigned cst = e->right->to<IR::Constant>()->asUnsigned();
-            if (cst >= stackSize) ::error(ErrorType::ERR_INVALID, "Invalid array index for %1%", e);
+            if (cst >= stackSize)
+                ::error(ErrorType::ERR_INVALID, "Array index out of bound for %1%", e);
             if (auto mem = e->left->to<IR::Member>()) {
                 auto uName = stackMap[mem->member.name];
+                BUG_CHECK(uName.size() > cst, "Header stack element mapping not found for %1", e);
                 auto member = new IR::Member(stack->elementType, mem->expr, IR::ID(uName[cst]));
                 return member;
             } else if (auto path = e->left->to<IR::PathExpression>()) {
                 auto uName = stackMap[path->path->name.name];
+                BUG_CHECK(uName.size() > cst, "Header stack element mapping not found for %1", e);
                 auto path1 =
                     new IR::PathExpression(stack->elementType, new IR::Path(IR::ID(uName[cst])));
                 return path1;

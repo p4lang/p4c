@@ -7,6 +7,10 @@ header ethernet_t {
     bit<16> etherType;
 }
 
+struct headers_t {
+    ethernet_t ethernet;
+}
+
 header h1_t {
     bit<8> f1;
     bit<8> f2;
@@ -20,12 +24,6 @@ header h2_t {
 header_union hu1_t {
     h1_t h1;
     h2_t h2;
-}
-
-struct headers_t {
-    ethernet_t ethernet;
-    hu1_t[2]   au1;
-    hu1_t[2]   au1b;
 }
 
 struct metadata_t {
@@ -43,48 +41,51 @@ control ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_input_me
     h2_t hu1_0_h2;
     h1_t hu1b_0_h1;
     h2_t hu1b_0_h2;
-    @hidden action pnadpdkwrongwarning53() {
+    @name("ingress.a1") h1_t[2] a1_0;
+    @name("ingress.a1b") h1_t[2] a1b_0;
+    @name("ingress.au1") hu1_t[2] au1_0;
+    @name("ingress.au1b") hu1_t[2] au1b_0;
+    @hidden action pnadpdkwrongwarning50() {
         hu1_0_h1.setInvalid();
         hu1_0_h2.setInvalid();
         hu1b_0_h1.setInvalid();
         hu1b_0_h2.setInvalid();
-        {
-            hdr.au1b[0].h1.setValid();
-            hdr.au1b[0].h2.setInvalid();
-        }
-        hdr.au1b[0].h1.f1 = hdr.ethernet.dstAddr[37:30];
-        hdr.au1b[0].h1.f2 = hdr.ethernet.dstAddr[36:29];
-        {
-            hdr.au1b[1].h2.setValid();
-            hdr.au1b[1].h1.setInvalid();
-        }
-        hdr.au1b[1].h2.f1 = hdr.ethernet.dstAddr[35:28];
-        hdr.au1b[1].h2.f2 = hdr.ethernet.dstAddr[34:27];
-        hdr.au1 = hdr.au1b;
+        a1_0[0].setInvalid();
+        a1_0[1].setInvalid();
+        a1b_0[0].setInvalid();
+        a1b_0[1].setInvalid();
+        au1_0[0].h1.setInvalid();
+        au1_0[0].h2.setInvalid();
+        au1_0[1].h1.setInvalid();
+        au1_0[1].h2.setInvalid();
+        au1b_0[0].h1.setInvalid();
+        au1b_0[0].h2.setInvalid();
+        au1b_0[1].h1.setInvalid();
+        au1b_0[1].h2.setInvalid();
     }
-    @hidden table tbl_pnadpdkwrongwarning53 {
+    @hidden table tbl_pnadpdkwrongwarning50 {
         actions = {
-            pnadpdkwrongwarning53();
+            pnadpdkwrongwarning50();
         }
-        const default_action = pnadpdkwrongwarning53();
+        const default_action = pnadpdkwrongwarning50();
     }
     apply {
-        tbl_pnadpdkwrongwarning53.apply();
+        tbl_pnadpdkwrongwarning50.apply();
     }
 }
 
 control DeparserImpl(packet_out packet, in headers_t hdr, in metadata_t meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdkwrongwarning93() {
+    @hidden action pnadpdkwrongwarning90() {
         packet.emit<ethernet_t>(hdr.ethernet);
     }
-    @hidden table tbl_pnadpdkwrongwarning93 {
+    @hidden table tbl_pnadpdkwrongwarning90 {
         actions = {
-            pnadpdkwrongwarning93();
+            pnadpdkwrongwarning90();
         }
-        const default_action = pnadpdkwrongwarning93();
+        const default_action = pnadpdkwrongwarning90();
     }
     apply {
-        tbl_pnadpdkwrongwarning93.apply();
+        tbl_pnadpdkwrongwarning90.apply();
     }
 }
 

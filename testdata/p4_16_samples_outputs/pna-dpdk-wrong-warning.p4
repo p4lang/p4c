@@ -8,6 +8,10 @@ header ethernet_t {
     bit<16>         etherType;
 }
 
+struct headers_t {
+    ethernet_t ethernet;
+}
+
 header h1_t {
     bit<8> f1;
     bit<8> f2;
@@ -21,12 +25,6 @@ header h2_t {
 header_union hu1_t {
     h1_t h1;
     h2_t h2;
-}
-
-struct headers_t {
-    ethernet_t ethernet;
-    hu1_t[2]   au1;
-    hu1_t[2]   au1b;
 }
 
 struct metadata_t {
@@ -45,12 +43,18 @@ control ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_input_me
     h2_t h2;
     hu1_t hu1;
     hu1_t hu1b;
+    h1_t[2] a1;
+    h1_t[2] a1b;
+    h2_t[2] a2;
+    hu1_t[2] au1;
+    hu1_t[2] au1b;
     apply {
         hu1b.h1 = { hdr.ethernet.dstAddr[45:38], hdr.ethernet.dstAddr[44:37] };
         hu1 = hu1b;
-        hdr.au1b[0].h1 = { hdr.ethernet.dstAddr[37:30], hdr.ethernet.dstAddr[36:29] };
-        hdr.au1b[1].h2 = { hdr.ethernet.dstAddr[35:28], hdr.ethernet.dstAddr[34:27] };
-        hdr.au1 = hdr.au1b;
+        au1b[0].h1 = { hdr.ethernet.dstAddr[37:30], hdr.ethernet.dstAddr[36:29] };
+        au1b[1].h2 = { hdr.ethernet.dstAddr[35:28], hdr.ethernet.dstAddr[34:27] };
+        au1 = au1b;
+        a1 = a1b;
     }
 }
 
