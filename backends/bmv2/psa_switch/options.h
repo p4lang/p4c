@@ -43,6 +43,6 @@ class PsaSwitchOptions : public BMV2Options {
 
 using PsaSwitchContext = P4CContextWithOptions<PsaSwitchOptions>;
 
-};  // namespace BMV2
+}  // namespace BMV2
 
 #endif /* BACKENDS_BMV2_PSA_SWITCH_OPTIONS_H_ */

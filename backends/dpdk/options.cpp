@@ -26,4 +26,4 @@ const char *DpdkOptions::getIncludePath() {
     return path.c_str();
 }
 
-};  // namespace DPDK
+}  // namespace DPDK
