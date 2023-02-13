@@ -63,11 +63,15 @@ control deparser(packet_out b, in Headers h) {
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @hidden action union2bmv2l75() {
         h.u_h2.setInvalid();
-        h.u_h1.setValid();
-        h.u_h2.setInvalid();
-        h.u_h1.setValid();
-        h.u_h1.a = 8w0xff;
-        h.u_h2.setInvalid();
+        {
+            h.u_h1.setValid();
+            h.u_h2.setInvalid();
+        }
+        {
+            h.u_h1.setValid();
+            h.u_h1.a = 8w0xff;
+            h.u_h2.setInvalid();
+        }
     }
     @hidden table tbl_union2bmv2l75 {
         actions = {

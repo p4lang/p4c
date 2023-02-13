@@ -8,10 +8,6 @@ header ethernet_t {
     bit<16>         etherType;
 }
 
-struct headers_t {
-    ethernet_t ethernet;
-}
-
 header h1_t {
     bit<8> f1;
     bit<8> f2;
@@ -27,6 +23,12 @@ header_union hu1_t {
     h2_t h2;
 }
 
+struct headers_t {
+    ethernet_t ethernet;
+    hu1_t[2]   au1;
+    hu1_t[2]   au1b;
+}
+
 struct metadata_t {
 }
 
@@ -40,27 +42,16 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout metadata_t m, in pn
 control ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
     @name("ingress.hu1") hu1_t hu1_0;
     @name("ingress.hu1b") hu1_t hu1b_0;
-    @name("ingress.a1") h1_t[2] a1_0;
-    @name("ingress.a1b") h1_t[2] a1b_0;
-    @name("ingress.au1") hu1_t[2] au1_0;
-    @name("ingress.au1b") hu1_t[2] au1b_0;
     apply {
         hu1_0.h1.setInvalid();
         hu1_0.h2.setInvalid();
         hu1b_0.h1.setInvalid();
         hu1b_0.h2.setInvalid();
-        a1_0[0].setInvalid();
-        a1_0[1].setInvalid();
-        a1b_0[0].setInvalid();
-        a1b_0[1].setInvalid();
-        au1_0[0].h1.setInvalid();
-        au1_0[0].h2.setInvalid();
-        au1_0[1].h1.setInvalid();
-        au1_0[1].h2.setInvalid();
-        au1b_0[0].h1.setInvalid();
-        au1b_0[0].h2.setInvalid();
-        au1b_0[1].h1.setInvalid();
-        au1b_0[1].h2.setInvalid();
+        hdr.au1b[0].h1.setValid();
+        hdr.au1b[0].h1 = (h1_t){f1 = hdr.ethernet.dstAddr[37:30],f2 = hdr.ethernet.dstAddr[36:29]};
+        hdr.au1b[1].h2.setValid();
+        hdr.au1b[1].h2 = (h2_t){f1 = hdr.ethernet.dstAddr[35:28],f2 = hdr.ethernet.dstAddr[34:27]};
+        hdr.au1 = hdr.au1b;
     }
 }
 

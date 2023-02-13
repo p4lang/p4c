@@ -140,17 +140,17 @@ control MyEC(inout EMPTY_H a, inout metadata b, in psa_egress_input_metadata_t c
 }
 
 control MyID(packet_out buffer, out clone_metadata_t a, out EMPTY_RESUB b, out EMPTY_BRIDGE c, inout ethernet_t d, in metadata e, in psa_ingress_output_metadata_t f) {
-    @hidden action psadpdkheaderuniontypedef125() {
+    @hidden @name("psadpdkheaderuniontypedef125") action psadpdkheaderuniontypedef125_0() {
         buffer.emit<ethernet_t>(d);
     }
-    @hidden table tbl_psadpdkheaderuniontypedef125 {
+    @hidden @name("tbl_psadpdkheaderuniontypedef125") table tbl_psadpdkheaderuniontypedef125_0 {
         actions = {
-            psadpdkheaderuniontypedef125();
+            psadpdkheaderuniontypedef125_0();
         }
-        const default_action = psadpdkheaderuniontypedef125();
+        const default_action = psadpdkheaderuniontypedef125_0();
     }
     apply {
-        tbl_psadpdkheaderuniontypedef125.apply();
+        tbl_psadpdkheaderuniontypedef125_0.apply();
     }
 }
 

@@ -46,6 +46,7 @@ namespace P4 {
  * }
  */
 class DoFlattenHeaderUnion : public Transform {
+ protected:
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
     std::map<cstring, std::map<cstring, cstring>> replacementMap;
@@ -62,6 +63,46 @@ class DoFlattenHeaderUnion : public Transform {
     const IR::Node *postorder(IR::P4Control *control) override;
     const IR::Node *postorder(IR::P4Action *action) override;
     bool hasHeaderUnionField(IR::Type_Struct *s);
+};
+
+/**
+ * Flatten header union stack variabls into its individual elements. All occurrences of the header
+ * union stack variables are replaced by the elements in the stack.
+ * For ex:
+ * header_union U {
+ *     Hdr1 h1;
+ *     Hdr2 h2;
+ * }
+ *
+ * struct Headers {
+ *     Hdr1 h1;
+ *     U[2] u;
+ * }
+ *
+ * is replaced by
+ * struct  Headers {
+ *     Hdr1 h1;
+ *     U u0;
+ *     U u1;
+ * }
+ * References to u[0] is replaced by u0. Likewise for all stack elements.
+ *
+ * This pass assumes that HSIndexSimplifier, ParsersUnroll passes are run before this and all
+ * indices for header union stack variables are constants.
+ *
+ */
+class DoFlattenHeaderUnionStack : public DoFlattenHeaderUnion {
+    std::map<cstring, std::vector<cstring>> stackMap;
+
+ public:
+    DoFlattenHeaderUnionStack(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
+        : DoFlattenHeaderUnion(refMap, typeMap) {
+        setName("DoFlattenHeaderUnionStack");
+    }
+    const IR::Node *postorder(IR::Type_Struct *sf) override;
+    const IR::Node *postorder(IR::ArrayIndex *e) override;
+    const IR::Node *postorder(IR::Declaration_Variable *dv) override;
+    bool hasHeaderUnionStackField(IR::Type_Struct *s);
 };
 
 /** This pass handles the validity semantics of header union.
@@ -103,7 +144,9 @@ class HandleValidityHeaderUnion : public Transform {
 
  public:
     HandleValidityHeaderUnion(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
-        : refMap(refMap), typeMap(typeMap) {}
+        : refMap(refMap), typeMap(typeMap) {
+        setName("HandleValidityHeaderUnion");
+    }
     const IR::Node *postorder(IR::AssignmentStatement *assn) override;
     const IR::Node *postorder(IR::IfStatement *a) override;
     const IR::Node *postorder(IR::SwitchStatement *a) override;
@@ -142,9 +185,20 @@ class RemoveUnusedHUDeclarations : public Transform {
  */
 class FlattenHeaderUnion : public PassManager {
  public:
-    FlattenHeaderUnion(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
+    FlattenHeaderUnion(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, bool loopsUnroll = true) {
         passes.push_back(new P4::TypeChecking(refMap, typeMap));
         passes.push_back(new HandleValidityHeaderUnion(refMap, typeMap));
+        // Stack flattening is only applicable if parser loops are unrolled and
+        // header union stack elements are accessed using [] notation. This pass does not handle
+        // .next .last etc accessors for stack elements.
+        if (loopsUnroll) {
+            passes.push_back(new DoFlattenHeaderUnionStack(refMap, typeMap));
+            passes.push_back(new P4::ClearTypeMap(typeMap));
+            passes.push_back(new P4::ResolveReferences(refMap));
+            passes.push_back(new P4::TypeInference(refMap, typeMap, false));
+            passes.push_back(new P4::TypeChecking(refMap, typeMap));
+            passes.push_back(new P4::RemoveAllUnusedDeclarations(refMap));
+        }
         passes.push_back(new DoFlattenHeaderUnion(refMap, typeMap));
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::TypeChecking(refMap, typeMap));

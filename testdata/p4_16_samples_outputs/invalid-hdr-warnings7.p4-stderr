@@ -52,9 +52,3 @@ invalid-hdr-warnings7.p4(56): [--Wwarn=invalid_header] warning: accessing a fiel
 invalid-hdr-warnings7.p4(57): [--Wwarn=invalid_header] warning: accessing a field of an invalid header us1[1].h1
                  ^ us1[0].h2.a ^ us1[1].h1.a ^ us1[1].h2.a;
                                  ^^^^^^^^^
-invalid-hdr-warnings7.p4(78): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u.h1
-        u.h1.a = 1;
-        ^^^^
-invalid-hdr-warnings7.p4(56): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u1.h1
-        result = u1.h1.a ^ u1.h2.a ^ hs1[0].a ^ hs1[1].a ^ us1[0].h1.a
-                 ^^^^^

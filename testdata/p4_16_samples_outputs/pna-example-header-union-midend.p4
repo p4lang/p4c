@@ -56,14 +56,18 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
         const default_action = NoAction_1();
     }
     @hidden action pnaexampleheaderunion66() {
-        hdr.u_short.setValid();
-        hdr.u_short.data = 16w0xffff;
-        hdr.u_byte.setInvalid();
+        {
+            hdr.u_short.setValid();
+            hdr.u_short.data = 16w0xffff;
+            hdr.u_byte.setInvalid();
+        }
     }
     @hidden action pnaexampleheaderunion68() {
-        hdr.u_byte.setValid();
-        hdr.u_byte.data = 8w0xff;
-        hdr.u_short.setInvalid();
+        {
+            hdr.u_byte.setValid();
+            hdr.u_byte.data = 8w0xff;
+            hdr.u_short.setInvalid();
+        }
     }
     @hidden table tbl_pnaexampleheaderunion66 {
         actions = {

@@ -57,7 +57,6 @@ const IR::Node *HandleValidityHeaderUnion::expandIsValid(
                 IR::PathExpression *tmpVar = new IR::PathExpression(IR::ID(tmp));
                 toInsert.push_back(
                     new IR::Declaration_Variable(IR::ID(tmp), IR::Type_Bits::get(32)));
-                std::cout << "Code " << code_block << std::endl;
                 code_block.push_back(new IR::AssignmentStatement(
                     a->srcInfo, tmpVar, new IR::Constant(IR::Type_Bits::get(32), 0)));
                 for (auto sfu : huType->fields) {
@@ -190,6 +189,103 @@ const IR::Node *HandleValidityHeaderUnion::postorder(IR::P4Control *control) {
     control->controlLocals.append(toInsert);
     toInsert.clear();
     return control;
+}
+
+bool DoFlattenHeaderUnionStack::hasHeaderUnionStackField(IR::Type_Struct *s) {
+    for (auto sf : s->fields) {
+        auto ftype = typeMap->getType(sf, true);
+        if (auto hus = ftype->to<IR::Type_Stack>()) {
+            if (hus->elementType->is<IR::Type_HeaderUnion>()) return true;
+        }
+    }
+    return false;
+}
+
+// Handle header union stack variable as struct field
+const IR::Node *DoFlattenHeaderUnionStack::postorder(IR::Type_Struct *s) {
+    if (hasHeaderUnionStackField(s)) {
+        IR::IndexedVector<IR::StructField> fields;
+        std::vector<cstring> indexVec;
+        for (auto sf : s->fields) {
+            auto ftype = typeMap->getType(sf, true);
+            if (auto hus = ftype->to<IR::Type_Stack>()) {
+                if (hus->elementType->is<IR::Type_HeaderUnion>()) {
+                    BUG_CHECK(hus->size->is<IR::Constant>(),
+                              "Header union stack size must be constant");
+                    unsigned stackSize = hus->size->to<IR::Constant>()->asUnsigned();
+                    for (unsigned i = 0; i < stackSize; i++) {
+                        cstring uName = refMap->newName(sf->name.name + Util::toString(i));
+                        fields.push_back(
+                            new IR::StructField(IR::ID(uName), hus->at(i)->getP4Type()));
+                        indexVec.push_back(uName);
+                    }
+                    stackMap.emplace(sf->name.name, indexVec);
+                    indexVec.clear();
+                } else {
+                    fields.push_back(sf);
+                }
+            } else {
+                fields.push_back(sf);
+            }
+        }
+        auto s1 = new IR::Type_Struct(s->name, s->annotations, fields);
+        return s1;
+    }
+    return s;
+}
+
+// Handle header union stack variable as local variable
+const IR::Node *DoFlattenHeaderUnionStack::postorder(IR::Declaration_Variable *dv) {
+    auto ftype = typeMap->getTypeType(dv->type, true);
+    IR::IndexedVector<IR::Declaration> toInsert;
+    std::vector<cstring> indexVec;
+    if (auto hus = ftype->to<IR::Type_Stack>()) {
+        if (hus->elementType->is<IR::Type_HeaderUnion>()) {
+            BUG_CHECK(hus->size->is<IR::Constant>(), "Header union stack size must be constant");
+            unsigned stackSize = hus->size->to<IR::Constant>()->asUnsigned();
+            for (unsigned i = 0; i < stackSize; i++) {
+                cstring uName = refMap->newName(dv->name.name + Util::toString(i));
+                indexVec.push_back(uName);
+                toInsert.push_back(
+                    new IR::Declaration_Variable(IR::ID(uName), hus->at(i)->getP4Type()));
+            }
+            stackMap.emplace(dv->name.name, indexVec);
+            replaceDVMap.emplace(dv, toInsert);
+            indexVec.clear();
+        }
+    }
+
+    return dv;
+}
+
+/* Replace all occurence of header union stack element references with the header union variables */
+const IR::Node *DoFlattenHeaderUnionStack::postorder(IR::ArrayIndex *e) {
+    auto ftype = typeMap->getType(e->left, true);
+    if (auto stack = ftype->to<IR::Type_Stack>()) {
+        unsigned stackSize = stack->size->to<IR::Constant>()->asUnsigned();
+        if (stack->elementType->is<IR::Type_HeaderUnion>()) {
+            if (!e->right->is<IR::Constant>())
+                ::error(ErrorType::ERR_INVALID, "%1% is not a constant", e->right);
+            unsigned cst = e->right->to<IR::Constant>()->asUnsigned();
+            if (cst >= stackSize) ::error(ErrorType::ERR_INVALID, "Invalid array index for %1%", e);
+            if (auto mem = e->left->to<IR::Member>()) {
+                auto uName = stackMap[mem->member.name];
+                auto member = new IR::Member(stack->elementType, mem->expr, IR::ID(uName[cst]));
+                return member;
+            } else if (auto path = e->left->to<IR::PathExpression>()) {
+                auto uName = stackMap[path->path->name.name];
+                auto path1 =
+                    new IR::PathExpression(stack->elementType, new IR::Path(IR::ID(uName[cst])));
+                return path1;
+            } else {
+                BUG("Unsupported node type for header union stack element %1%",
+                    e->left->to<IR::Node>()->node_type_name());
+            }
+        } else {
+            return e;
+        }
+    }
+    return e;
 }
 
 bool DoFlattenHeaderUnion::hasHeaderUnionField(IR::Type_Struct *s) {
