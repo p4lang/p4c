@@ -217,6 +217,12 @@ add_cxx_compiler_option ("-Wno-deprecated-declarations")
 # or in future versions of GCC.
 add_cxx_compiler_option ("-pedantic")
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  # The ##__VA_ARGS__ GNU extension is needed for IR. But clang compains about it.
+  # FIXME: with C++20 we would be able to use standard __VA_OPT__
+  add_cxx_compiler_option ("-Wno-gnu-zero-variadic-macro-arguments")
+endif()
+
 if (ENABLE_SANITIZERS)
   append("-fsanitize=undefined,address" CMAKE_C_FLAGS CMAKE_CXX_FLAGS)
 endif ()
