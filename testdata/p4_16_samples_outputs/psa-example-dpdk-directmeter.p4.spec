@@ -41,7 +41,6 @@ struct metadata_t {
 metadata instanceof metadata_t
 
 metarray meter0_0 size 0x10001
-
 action NoAction args none {
 	return
 }

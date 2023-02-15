@@ -509,7 +509,15 @@ class DpdkChecksumClearStatement : DpdkAsmStatement, IDPDKNode {
 #nodbprint
 }
 
+class DpdkHashDeclStatement: DpdkAsmStatement {
+    cstring hash;
+    std::ostream& toSpec(std::ostream& out) const override;
+#nodbprint
+}
+
+
 class DpdkGetHashStatement : DpdkAsmStatement, IDPDKNode {
+    cstring instr;
     cstring hash;
     Expression fields;
     Expression dst;

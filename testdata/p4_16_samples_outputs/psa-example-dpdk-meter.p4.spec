@@ -57,7 +57,6 @@ header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
 
 metarray meter0_0 size 0x400
-
 action NoAction args none {
 	return
 }

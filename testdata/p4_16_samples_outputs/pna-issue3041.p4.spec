@@ -55,7 +55,6 @@ header ipv4_option_timestamp instanceof ipv4_option_timestamp_t
 header option instanceof option_t
 
 regarray direction size 0x100 initval 0
-
 action NoAction args none {
 	return
 }

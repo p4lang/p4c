@@ -42,7 +42,6 @@ header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
 
 regarray direction size 0x100 initval 0
-
 action next_hop args instanceof next_hop_arg_t {
 	mov m.pna_main_output_metadata_output_port t.vport
 	return

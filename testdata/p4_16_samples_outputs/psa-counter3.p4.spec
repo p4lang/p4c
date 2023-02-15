@@ -37,9 +37,7 @@ metadata instanceof EMPTY
 header ethernet instanceof ethernet_t
 
 regarray counter0_0 size 0x400 initval 0x0
-
 regarray counter1_0 size 0x400 initval 0x0
-
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x1

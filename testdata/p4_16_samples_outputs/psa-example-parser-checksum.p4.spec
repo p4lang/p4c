@@ -121,7 +121,6 @@ header cksum_state instanceof cksum_state_t
 header dpdk_pseudo_header instanceof dpdk_pseudo_header_t
 
 regarray parser_error_counts_0 size 0x10001 initval 0x0
-
 action set_error_idx args instanceof set_error_idx_arg_t {
 	entryid m.table_entry_index 
 	regadd parser_error_counts_0 m.table_entry_index 1

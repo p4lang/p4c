@@ -40,7 +40,6 @@ metadata instanceof metadata_t
 header ethernet instanceof ethernet_t
 
 regarray counter_0 size 0x400 initval 0x0
-
 action execute_1 args none {
 	regadd counter_0 0x100 1
 	return

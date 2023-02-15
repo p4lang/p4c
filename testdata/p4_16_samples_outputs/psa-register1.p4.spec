@@ -40,7 +40,6 @@ metadata instanceof EMPTY
 header ethernet instanceof ethernet_t
 
 regarray reg_0 size 0x400 initval 0
-
 action NoAction args none {
 	return
 }
