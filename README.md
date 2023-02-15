@@ -230,8 +230,6 @@ use them, but YMMV.
 
 - `git` for version control
 
-- GNU autotools for the build process
-
 - CMake 3.10.2 or higher
 
 - Boehm-Weiser garbage-collector C++ library
@@ -240,7 +238,7 @@ use them, but YMMV.
 
 - Google Protocol Buffers 3.0 or higher for control plane API generation
 
-- C++ boost library (minimally used)
+- C++ boost library
 
 - Python 3 for scripting and running tests
 

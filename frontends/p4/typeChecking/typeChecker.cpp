@@ -47,12 +47,32 @@ class ConstantTypeSubstitution : public Transform {
         CHECK_NULL(tc);
         LOG3("ConstantTypeSubstitution " << subst);
     }
+
+#if 0
+    // If two Type_InfInt types have been unified, we replace
+    // one of them with the other.
+    const IR::Node *postorder(IR::Type_InfInt* type) override {
+        auto repl = subst->get(type);
+        if (!repl)
+            return type;
+        while (repl->is<IR::Type_Var>()) {
+            auto next = subst->get(repl->to<IR::ITypeVar>());
+            BUG_CHECK(next != repl, "Cycle in substitutions: %1%", next);
+            if (!next) break;
+            repl = next;
+        }
+        LOG2("Replacing " << type << " with " << repl);
+        return repl;
+    }
+#endif
+
     const IR::Node *postorder(IR::Constant *cst) override {
         auto cstType = typeMap->getType(getOriginal(), true);
         if (!cstType->is<IR::ITypeVar>()) return cst;
         auto repl = cstType;
         while (repl->is<IR::ITypeVar>()) {
             auto next = subst->get(repl->to<IR::ITypeVar>());
+            BUG_CHECK(next != repl, "Cycle in substitutions: %1%", next);
             if (!next) break;
             repl = next;
         }
@@ -1116,6 +1136,26 @@ std::pair<const IR::Type *, const IR::Vector<IR::Argument> *> TypeInference::con
     constructor = cloneWithFreshTypeVariables(constructor->to<IR::IMayBeGenericType>())
                       ->to<IR::Type_Method>();
     CHECK_NULL(constructor);
+
+    {
+        // Constructor parameters that are infint are also treated as type variables
+        TypeVariableSubstitution tvs;
+        auto params = constructor->parameters;
+        for (auto param : params->parameters) {
+            if (auto v = param->type->to<IR::Type_InfInt>()) {
+                auto tv = new IR::Type_InfInt(param->type->srcInfo);
+                bool b = tvs.setBinding(v, tv);
+                BUG_CHECK(b, "failed replacing %2% with %3%", v, tv);
+            }
+        }
+        TypeVariableSubstitutionVisitor sv(&tvs, true);
+        sv.setCalledBy(this);
+        constructor = constructor->apply(sv)->to<IR::Type_Method>();
+        CHECK_NULL(constructor);
+        learn(constructor, this);
+        LOG3("Cloned constructor arguments " << constructor);
+    }
+
     bool isPackage = container->is<IR::Type_Package>();
     auto params = constructor->parameters;
     checkParameters(params, !forbidModules, !isPackage);

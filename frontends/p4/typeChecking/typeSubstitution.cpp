@@ -47,7 +47,7 @@ cstring TypeVariableSubstitution::compose(const IR::ITypeVar *var, const IR::Typ
     // Check to see whether we already have a binding for this variable
     if (containsKey(var)) {
         const IR::Type *bound = lookup(var);
-        BUG("Two constraints on the same variable %1%: %2% and %3%", var->toString(),
+        BUG("Two bindings for the same variable %1%: %2% and %3%", var->toString(),
             substitution->toString(), bound->toString());
     }
 
@@ -57,18 +57,29 @@ cstring TypeVariableSubstitution::compose(const IR::ITypeVar *var, const IR::Typ
     if (!success) BUG("Cannot set binding");
 
     TypeVariableSubstitutionVisitor visitor(tvs);
+    bool cycle = false;  // set if we detect X -> V and V -> X substitutions.
     for (auto &bound : binding) {
         const IR::Type *type = bound.second;
         const IR::Node *newType = type->apply(visitor);
         if (newType == nullptr) return "Could not replace '%1%' with '%2%'";
         if (newType == type) continue;
 
-        LOG3("Refining subsitution for " << bound.first->getNode() << " to " << newType);
-        bound.second = newType->to<IR::Type>();
+        if (bound.first->asType() == newType) {
+            cycle = true;
+        } else {
+            LOG3("Refining substitution for " << bound.first->getNode() << " to " << newType);
+            bound.second = newType->to<IR::Type>();
+        }
     }
 
-    success = setBinding(var, substitution);
-    if (!success) BUG("Failed to insert binding");
+    if (cycle) {
+        LOG3("Ignoring substitution already implied " << var << "->" << substitution);
+    } else {
+        LOG3("Actual binding " << var << " " << dbp(var) << "->" << dbp(substitution) << "="
+                               << substitution);
+        success = setBinding(var, substitution);
+        if (!success) BUG("Failed to insert binding");
+    }
     return "";
 }
 
@@ -82,6 +93,7 @@ void TypeVariableSubstitution::simpleCompose(const TypeVariableSubstitution *oth
         LOG3("Setting substitution for " << v.first->getNode() << " to " << subst);
         binding[v.first] = subst;
     }
+    debugValidate();
 }
 
 bool TypeVariableSubstitution::setBindings(const IR::Node *errorLocation,
@@ -108,6 +120,19 @@ bool TypeVariableSubstitution::setBindings(const IR::Node *errorLocation,
     }
 
     return true;
+}
+
+void TypeVariableSubstitution::debugValidate() {
+#if 0
+    // Turn on only for debugging
+    for (auto v : binding) {
+        const IR::Type *subst = v.second;
+        TypeOccursVisitor occurs(v.first);
+        subst->apply(occurs);
+        BUG_CHECK(!occurs.occurs,
+                  "'%1%' occurs in '%2%' which replaces it", v.first, v.second);
+    }
+#endif
 }
 
 // to call from gdb
