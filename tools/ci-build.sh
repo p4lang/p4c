@@ -96,7 +96,12 @@ P4C_RUNTIME_DEPS="cpp \
 
 # TODO: Remove this check once 18.04 is deprecated.
 if [[ "${DISTRIB_RELEASE}" == "18.04" ]] || [[ "$(which simple_switch 2> /dev/null)" != "" ]] ; then
-  P4C_DEPS+=" libprotobuf-dev protobuf-compiler"
+  # Use GCC 9 from https://launchpad.net/~ubuntu-toolchain-r/+archive/ubuntu/test
+  sudo apt-get update && sudo apt-get install -y software-properties-common
+  sudo add-apt-repository -uy ppa:ubuntu-toolchain-r/test
+  P4C_DEPS+=" libprotobuf-dev protobuf-compiler gcc-9 g++-9"
+  export CC=gcc-9
+  export CXX=g++-9
 else
   sudo apt-get update && sudo apt-get install -y curl gnupg
   echo "deb https://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/ /" | sudo tee /etc/apt/sources.list.d/home:p4lang.list
