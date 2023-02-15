@@ -1420,5 +1420,5 @@ struct DpdkHandleIPSec : public PassManager {
     }
 };
 
-}     // namespace DPDK
+}  // namespace DPDK
 #endif /* BACKENDS_DPDK_DPDKARCH_H_ */
