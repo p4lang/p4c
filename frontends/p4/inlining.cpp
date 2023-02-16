@@ -203,7 +203,10 @@ class ComputeNewNames : public Inspector {
             extName = name;
         else
             extName = prefix + "." + name;
+        // Replace illegal characters with an underscore.
         cstring baseName = extName.replace('.', '_');
+        baseName = baseName.replace(':', '_');
+        baseName = baseName.replace('|', '_');
         cstring newName = refMap->newName(baseName);
         renameMap->setNewName(decl, newName, extName);
     }
