@@ -140,7 +140,7 @@ jobs:
     - name: Run tests (Ubuntu 18.04)
       run: |
         sudo -E docker run --privileged -w /p4c/build -e $CTEST_PARALLEL_LEVEL p4c ctest --output-on-failure --schedule-random
-  
+
   # Build and test p4c on Fedora.
   test-fedora-linux:
     strategy:
@@ -206,7 +206,8 @@ jobs:
 
     - name: Build (MacOS)
       run: |
-          ./bootstrap.sh -DENABLE_GC=ON -DCMAKE_BUILD_TYPE=RELEASE -DENABLE_UNIFIED_COMPILATION=ON && cd build && make -j2
+          PB_PREFIX="$(brew --prefix protobuf)"
+          ./bootstrap.sh -DENABLE_GC=ON -DCMAKE_BUILD_TYPE=RELEASE -DENABLE_UNIFIED_COMPILATION=ON -DProtobuf_LIBRARIES="${PB_PREFIX}/lib/" -DProtobuf_INCLUDE_DIR="${PB_PREFIX}/include/" -DProtobuf_LIBRARY="${PB_PREFIX}/lib/libprotobuf.dylib" -DENABLE_PROTOBUF_STATIC=OFF && cd build && make -j2
 
     - name: Run tests (MacOS)
       # TODO: Renable gtest. Unit tests currently fail on MacOS.
