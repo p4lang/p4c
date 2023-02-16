@@ -24,7 +24,7 @@ The code contains seven sample backends:
   https://doc.dpdk.org/guides/rel_notes/release_20_11.html,
 * p4c-ebpf: can be used to generate C code which can be compiled to [eBPF](https://en.wikipedia.org/wiki/Berkeley_Packet_Filter)
   and then loaded in the Linux kernel. The eBPF backend currently implements two architecture models:
-  [ebpf_model.p4 for packet filtering](./backends/ebpf/README.md) and [the fully-featured PSA (Portable Switch Architecture) model](./backends/ebpf/psa/README.md). 
+  [ebpf_model.p4 for packet filtering](./backends/ebpf/README.md) and [the fully-featured PSA (Portable Switch Architecture) model](./backends/ebpf/psa/README.md).
 * p4test: a source-to-source P4 translator which can be used for
   testing, learning compiler internals and debugging,
 * p4c-graphs: can be used to generate visual representations of a P4 program;
@@ -345,6 +345,18 @@ Installing on macOS:
   [here](https://github.com/google/protobuf/blob/master/src/README.md). Check
   out the newest tag in the 3.0 series (`v3.0.2` as of this writing) before you
   build.
+
+  The `protobuf` formula requires the following CMake variables to be set,
+  otherwise CMake does not find the libraries or fails in linking. It is likely
+  that manually installed Protobuf will require similar treatment.
+
+  ```
+  PB_PREFIX="$(brew --prefix --installed protobuf)"
+  ./bootstrap.sh \
+    -DProtobuf_INCLUDE_DIR="${PB_PREFIX}/include/" \
+    -DProtobuf_LIBRARY="${PB_PREFIX}/lib/libprotobuf.dylib" \
+    -DENABLE_PROTOBUF_STATIC=OFF
+  ```
 
 ## Garbage collector
 

@@ -140,7 +140,7 @@ jobs:
     - name: Run tests (Ubuntu 18.04)
       run: |
         sudo -E docker run --privileged -w /p4c/build -e $CTEST_PARALLEL_LEVEL p4c ctest --output-on-failure --schedule-random
-  
+
   # Build and test p4c on Fedora.
   test-fedora-linux:
     strategy:
@@ -205,8 +205,19 @@ jobs:
            echo "/usr/local/opt/bison/bin" >> $GITHUB_PATH
 
     - name: Build (MacOS)
+      # for some reason, brew does not install protobuf in a way cmake would be
+      # able to find it. Also, the library needs to be specified manually in
+      # order for the compiler to be correctly linked with protobuf.
+      # Also, there are no static protobuf libs in homebrew.
+      # See also https://github.com/Homebrew/homebrew-core/pull/122277
       run: |
-          ./bootstrap.sh -DENABLE_GC=ON -DCMAKE_BUILD_TYPE=RELEASE -DENABLE_UNIFIED_COMPILATION=ON && cd build && make -j2
+          PROTOBUF=`brew --prefix --installed protobuf`
+          ./bootstrap.sh -DENABLE_GC=ON -DCMAKE_BUILD_TYPE=RELEASE \
+              -DENABLE_UNIFIED_COMPILATION=ON \
+              -DProtobuf_INCLUDE_DIR=$PROTOBUF/include \
+              -DProtobuf_LIBRARY=$PROTOBUF/lib/libprotobuf.dylib \
+              -DENABLE_PROTOBUF_STATIC=OFF
+          make -Cbuild -j2
 
     - name: Run tests (MacOS)
       # TODO: Renable gtest. Unit tests currently fail on MacOS.
