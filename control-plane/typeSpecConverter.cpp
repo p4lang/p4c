@@ -62,16 +62,11 @@ bool hasTranslationAnnotation(const IR::Type *type, TranslationAnnotation *paylo
     // See p4rtControllerType in p4parser.ypp for an explanation of how the
     // second argument is encoded.
     if (second_arg->to<IR::StringLiteral>() != nullptr) {
-        payload->controller_type = ControllerType{
-            .type = ControllerType::kString,
-            .width = 0,
-        };
+        payload->controller_type = ControllerType{ControllerType::kString, 0};
         return true;
     } else if (second_arg->to<IR::Constant>() != nullptr) {
-        payload->controller_type = ControllerType{
-            .type = ControllerType::kBit,
-            .width = second_arg->to<IR::Constant>()->asInt(),
-        };
+        payload->controller_type =
+            ControllerType{ControllerType::kBit, second_arg->to<IR::Constant>()->asInt()};
         return true;
     }
     BUG("%1%: expected second argument to @p4runtime_translation to parse as an"

@@ -20,6 +20,7 @@ using Parser = V1::V1Parser;
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #pragma GCC diagnostic ignored "-Wtautological-undefined-compare"
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 #ifdef __clang__
 #pragma clang diagnostic ignored "-Wnull-conversion"
 #pragma clang diagnostic ignored "-Wregister"

@@ -40,6 +40,6 @@ class SimpleSwitchOptions : public BMV2Options {
 
 using SimpleSwitchContext = P4CContextWithOptions<SimpleSwitchOptions>;
 
-};  // namespace BMV2
+}  // namespace BMV2
 
 #endif /* BACKENDS_BMV2_SIMPLE_SWITCH_OPTIONS_H_ */

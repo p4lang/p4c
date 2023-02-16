@@ -355,7 +355,7 @@ void ReachabilityEngineState::setState(std::list<const DCGVertexType *> ls) { st
 
 const DCGVertexType *ReachabilityEngineState::getPrevNode() { return prevNode; }
 
-void ReachabilityEngineState::setPrevNode(const DCGVertexType *n) { prevNode = n; };
+void ReachabilityEngineState::setPrevNode(const DCGVertexType *n) { prevNode = n; }
 
 bool ReachabilityEngineState::isEmpty() { return state.empty(); }
 
