@@ -28,9 +28,10 @@ limitations under the License.
 namespace Util {
 
 // colors to pretty print messages
-constexpr char ANSI_RED[] = "\\e[31m";
-constexpr char ANSI_BLUE[] = "\\e[34m";
-constexpr char ANSI_CLR[] = "\\e[0m";
+// \e is non-standard escape sequence, use codepoint \33 instead
+constexpr char ANSI_RED[] = "\33[31m";
+constexpr char ANSI_BLUE[] = "\33[34m";
+constexpr char ANSI_CLR[] = "\33[0m";
 
 /// Checks if stderr is redirected to a file
 /// Check is done only once and then saved to a static variable
