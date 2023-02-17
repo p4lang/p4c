@@ -25,31 +25,21 @@ control c(out bit<32> x) {
         u2_0[1].h1.setInvalid();
         u2_0[1].h2.setInvalid();
         x = u_0_h1.f + u_0_h2.g;
-        {
-            u_0_h1.setValid();
-            u_0_h2.setInvalid();
-        }
-        {
-            u_0_h1.setValid();
-            u_0_h1.f = 32w0;
-            u_0_h2.setInvalid();
-        }
+        u_0_h1.setValid();
+        u_0_h2.setInvalid();
+        u_0_h1.setValid();
+        u_0_h1.f = 32w0;
+        u_0_h2.setInvalid();
         x = x;
-        {
-            u_0_h2.setValid();
-            u_0_h2.g = 32w0;
-            u_0_h1.setInvalid();
-        }
+        u_0_h2.setValid();
+        u_0_h2.g = 32w0;
+        u_0_h1.setInvalid();
         x = x;
-        {
-            u2_0[0].h1.setValid();
-            u2_0[0].h2.setInvalid();
-        }
-        {
-            u2_0[0].h1.setValid();
-            u2_0[0].h1.f = 32w2;
-            u2_0[0].h2.setInvalid();
-        }
+        u2_0[0].h1.setValid();
+        u2_0[0].h2.setInvalid();
+        u2_0[0].h1.setValid();
+        u2_0[0].h1.f = 32w2;
+        u2_0[0].h2.setInvalid();
         x = x + u2_0[1].h2.g + 32w2;
     }
     @hidden table tbl_issue561l29 {

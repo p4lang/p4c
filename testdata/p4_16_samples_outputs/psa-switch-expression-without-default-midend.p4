@@ -178,17 +178,15 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
     }
     apply {
         tbl_psaswitchexpressionwithoutdefault102.apply();
-        {
-            tbl_psaswitchexpressionwithoutdefault122.apply();
-            switch (switch_0_table.apply().action_run) {
-                switch_0_case: {
-                    tbl_psaswitchexpressionwithoutdefault124.apply();
-                }
-                switch_0_case_0: {
-                    tbl_psaswitchexpressionwithoutdefault125.apply();
-                }
-                switch_0_case_1: {
-                }
+        tbl_psaswitchexpressionwithoutdefault122.apply();
+        switch (switch_0_table.apply().action_run) {
+            switch_0_case: {
+                tbl_psaswitchexpressionwithoutdefault124.apply();
+            }
+            switch_0_case_0: {
+                tbl_psaswitchexpressionwithoutdefault125.apply();
+            }
+            switch_0_case_1: {
             }
         }
         switch (tbl_0.apply().action_run) {

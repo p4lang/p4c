@@ -66,10 +66,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @hidden action union4bmv2l77() {
         h.h2.setValid();
         h.h2.b = h.u_h2.b;
-        {
-            h.u_h1.setValid();
-            h.u_h2.setInvalid();
-        }
+        h.u_h1.setValid();
+        h.u_h2.setInvalid();
         h.u_h1.a = h.u_h2.b[7:0];
         h.u_h2.setInvalid();
     }

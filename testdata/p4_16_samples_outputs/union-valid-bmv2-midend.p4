@@ -71,16 +71,14 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @hidden action unionvalidbmv2l76() {
         bit<32> tmp;
-        {
-            tmp = 32w0;
-            if (h.u_h1.isValid()) {
-                tmp = tmp + 32w1;
-            }
-            if (h.u_h2.isValid()) {
-                tmp = tmp + 32w1;
-            }
-            key_0 = tmp == 32w1;
+        tmp = 32w0;
+        if (h.u_h1.isValid()) {
+            tmp = tmp + 32w1;
         }
+        if (h.u_h2.isValid()) {
+            tmp = tmp + 32w1;
+        }
+        key_0 = tmp == 32w1;
     }
     @hidden table tbl_unionvalidbmv2l76 {
         actions = {

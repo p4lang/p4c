@@ -35,46 +35,30 @@ control c(inout bit<32> x) {
     @name("c.hs1") H1[2] hs1_6;
     @name("c.us1") U[2] us1_6;
     @name("c.inout_action2") action inout_action2() {
-        {
-            u1_3_h1.setValid();
-            u1_3_h1.a = 32w1;
-            u1_3_h2.setInvalid();
-        }
-        {
-            u1_3_h2.setValid();
-            u1_3_h2.a = 32w1;
-            u1_3_h1.setInvalid();
-        }
+        u1_3_h1.setValid();
+        u1_3_h1.a = 32w1;
+        u1_3_h2.setInvalid();
+        u1_3_h2.setValid();
+        u1_3_h2.a = 32w1;
+        u1_3_h1.setInvalid();
         hs1_3[0].a = 32w1;
         hs1_3[1].a = 32w1;
-        {
-            us1_3[0].h1.setValid();
-            us1_3[0].h1.a = 32w1;
-            us1_3[0].h2.setInvalid();
-        }
-        {
-            us1_3[0].h2.setValid();
-            us1_3[0].h2.a = 32w1;
-            us1_3[0].h1.setInvalid();
-        }
-        {
-            u1_3_h1.setValid();
-            u1_3_h2.setInvalid();
-        }
-        {
-            u1_3_h2.setValid();
-            u1_3_h1.setInvalid();
-        }
+        us1_3[0].h1.setValid();
+        us1_3[0].h1.a = 32w1;
+        us1_3[0].h2.setInvalid();
+        us1_3[0].h2.setValid();
+        us1_3[0].h2.a = 32w1;
+        us1_3[0].h1.setInvalid();
+        u1_3_h1.setValid();
+        u1_3_h2.setInvalid();
+        u1_3_h2.setValid();
+        u1_3_h1.setInvalid();
         hs1_3[0].setValid();
         hs1_3[1].setValid();
-        {
-            us1_3[0].h1.setValid();
-            us1_3[0].h2.setInvalid();
-        }
-        {
-            us1_3[0].h2.setValid();
-            us1_3[0].h1.setInvalid();
-        }
+        us1_3[0].h1.setValid();
+        us1_3[0].h2.setInvalid();
+        us1_3[0].h2.setValid();
+        us1_3[0].h1.setInvalid();
         if (u1_3_h1.isValid()) {
             u1_2_h1.setValid();
             u1_2_h1 = u1_3_h1;
@@ -91,37 +75,25 @@ control c(inout bit<32> x) {
         }
         hs1_2 = hs1_3;
         us1_2 = us1_3;
-        {
-            u1_2_h1.setValid();
-            u1_2_h1.a = 32w1;
-            u1_2_h2.setInvalid();
-        }
-        {
-            u1_2_h2.setValid();
-            u1_2_h2.a = 32w1;
-            u1_2_h1.setInvalid();
-        }
+        u1_2_h1.setValid();
+        u1_2_h1.a = 32w1;
+        u1_2_h2.setInvalid();
+        u1_2_h2.setValid();
+        u1_2_h2.a = 32w1;
+        u1_2_h1.setInvalid();
         hs1_2[0].a = 32w1;
         hs1_2[1].a = 32w1;
-        {
-            us1_2[0].h1.setValid();
-            us1_2[0].h1.a = 32w1;
-            us1_2[0].h2.setInvalid();
-        }
-        {
-            us1_2[0].h2.setValid();
-            us1_2[0].h2.a = 32w1;
-            us1_2[0].h1.setInvalid();
-        }
+        us1_2[0].h1.setValid();
+        us1_2[0].h1.a = 32w1;
+        us1_2[0].h2.setInvalid();
+        us1_2[0].h2.setValid();
+        us1_2[0].h2.a = 32w1;
+        us1_2[0].h1.setInvalid();
         hs1_2[0].setInvalid();
-        {
-            u1_2_h1.setValid();
-            u1_2_h2.setInvalid();
-        }
-        {
-            us1_2[0].h1.setValid();
-            us1_2[0].h2.setInvalid();
-        }
+        u1_2_h1.setValid();
+        u1_2_h2.setInvalid();
+        us1_2[0].h1.setValid();
+        us1_2[0].h2.setInvalid();
         if (u1_2_h1.isValid()) {
             u1_5_h1.setValid();
             u1_5_h1 = u1_2_h1;
@@ -138,33 +110,23 @@ control c(inout bit<32> x) {
         }
         hs1_5 = hs1_2;
         us1_5 = us1_2;
-        {
-            u1_5_h1.setValid();
-            u1_5_h1.a = 32w1;
-            u1_5_h2.setInvalid();
-        }
-        {
-            u1_5_h2.setValid();
-            u1_5_h2.a = 32w1;
-            u1_5_h1.setInvalid();
-        }
+        u1_5_h1.setValid();
+        u1_5_h1.a = 32w1;
+        u1_5_h2.setInvalid();
+        u1_5_h2.setValid();
+        u1_5_h2.a = 32w1;
+        u1_5_h1.setInvalid();
         hs1_5[0].a = 32w1;
         hs1_5[1].a = 32w1;
-        {
-            us1_5[0].h1.setValid();
-            us1_5[0].h1.a = 32w1;
-            us1_5[0].h2.setInvalid();
-        }
-        {
-            us1_5[0].h2.setValid();
-            us1_5[0].h2.a = 32w1;
-            us1_5[0].h1.setInvalid();
-        }
+        us1_5[0].h1.setValid();
+        us1_5[0].h1.a = 32w1;
+        us1_5[0].h2.setInvalid();
+        us1_5[0].h2.setValid();
+        us1_5[0].h2.a = 32w1;
+        us1_5[0].h1.setInvalid();
         us1_5[1w1].h1.setInvalid();
-        {
-            us1_5[1w1].h2.setValid();
-            us1_5[1w1].h1.setInvalid();
-        }
+        us1_5[1w1].h2.setValid();
+        us1_5[1w1].h1.setInvalid();
         if (u1_5_h1.isValid()) {
             u_0_h1.setValid();
             u_0_h1 = u1_5_h1;
@@ -210,15 +172,11 @@ control c(inout bit<32> x) {
         us_0[0].h2.setInvalid();
         us_0[1].h1.setInvalid();
         us_0[1].h2.setInvalid();
-        {
-            u_0_h1.setValid();
-            u_0_h2.setInvalid();
-        }
+        u_0_h1.setValid();
+        u_0_h2.setInvalid();
         hs_0[0].setValid();
-        {
-            us_0[0].h1.setValid();
-            us_0[0].h2.setInvalid();
-        }
+        us_0[0].h1.setValid();
+        us_0[0].h2.setInvalid();
     }
     @hidden table tbl_invalidhdrwarnings8l13 {
         actions = {

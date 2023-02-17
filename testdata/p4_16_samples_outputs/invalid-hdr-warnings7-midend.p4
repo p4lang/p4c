@@ -32,46 +32,30 @@ control c(inout bit<32> x) {
     @name("c.hs1") H1[2] hs1_3;
     @name("c.us1") U[2] us1_3;
     @name("c.initialize") action initialize() {
-        {
-            u1_0_h1.setValid();
-            u1_0_h1.a = 32w1;
-            u1_0_h2.setInvalid();
-        }
-        {
-            u1_0_h2.setValid();
-            u1_0_h2.a = 32w1;
-            u1_0_h1.setInvalid();
-        }
+        u1_0_h1.setValid();
+        u1_0_h1.a = 32w1;
+        u1_0_h2.setInvalid();
+        u1_0_h2.setValid();
+        u1_0_h2.a = 32w1;
+        u1_0_h1.setInvalid();
         hs1_0[0].a = 32w1;
         hs1_0[1].a = 32w1;
-        {
-            us1_0[0].h1.setValid();
-            us1_0[0].h1.a = 32w1;
-            us1_0[0].h2.setInvalid();
-        }
-        {
-            us1_0[0].h2.setValid();
-            us1_0[0].h2.a = 32w1;
-            us1_0[0].h1.setInvalid();
-        }
-        {
-            u1_0_h1.setValid();
-            u1_0_h2.setInvalid();
-        }
-        {
-            u1_0_h2.setValid();
-            u1_0_h1.setInvalid();
-        }
+        us1_0[0].h1.setValid();
+        us1_0[0].h1.a = 32w1;
+        us1_0[0].h2.setInvalid();
+        us1_0[0].h2.setValid();
+        us1_0[0].h2.a = 32w1;
+        us1_0[0].h1.setInvalid();
+        u1_0_h1.setValid();
+        u1_0_h2.setInvalid();
+        u1_0_h2.setValid();
+        u1_0_h1.setInvalid();
         hs1_0[0].setValid();
         hs1_0[1].setValid();
-        {
-            us1_0[0].h1.setValid();
-            us1_0[0].h2.setInvalid();
-        }
-        {
-            us1_0[0].h2.setValid();
-            us1_0[0].h1.setInvalid();
-        }
+        us1_0[0].h1.setValid();
+        us1_0[0].h2.setInvalid();
+        us1_0[0].h2.setValid();
+        us1_0[0].h1.setInvalid();
         if (u1_0_h1.isValid()) {
             u_0_h1.setValid();
             u_0_h1 = u1_0_h1;
@@ -106,37 +90,25 @@ control c(inout bit<32> x) {
         }
         hs1_1 = hs_0;
         us1_1 = us_0;
-        {
-            u1_1_h1.setValid();
-            u1_1_h1.a = 32w1;
-            u1_1_h2.setInvalid();
-        }
-        {
-            u1_1_h2.setValid();
-            u1_1_h2.a = 32w1;
-            u1_1_h1.setInvalid();
-        }
+        u1_1_h1.setValid();
+        u1_1_h1.a = 32w1;
+        u1_1_h2.setInvalid();
+        u1_1_h2.setValid();
+        u1_1_h2.a = 32w1;
+        u1_1_h1.setInvalid();
         hs1_1[0].a = 32w1;
         hs1_1[1].a = 32w1;
-        {
-            us1_1[0].h1.setValid();
-            us1_1[0].h1.a = 32w1;
-            us1_1[0].h2.setInvalid();
-        }
-        {
-            us1_1[0].h2.setValid();
-            us1_1[0].h2.a = 32w1;
-            us1_1[0].h1.setInvalid();
-        }
+        us1_1[0].h1.setValid();
+        us1_1[0].h1.a = 32w1;
+        us1_1[0].h2.setInvalid();
+        us1_1[0].h2.setValid();
+        us1_1[0].h2.a = 32w1;
+        us1_1[0].h1.setInvalid();
         hs1_1[0].setInvalid();
-        {
-            u1_1_h1.setValid();
-            u1_1_h2.setInvalid();
-        }
-        {
-            us1_1[0].h1.setValid();
-            us1_1[0].h2.setInvalid();
-        }
+        u1_1_h1.setValid();
+        u1_1_h2.setInvalid();
+        us1_1[0].h1.setValid();
+        us1_1[0].h2.setInvalid();
         if (u1_1_h1.isValid()) {
             u_0_h1.setValid();
             u_0_h1 = u1_1_h1;
@@ -157,10 +129,8 @@ control c(inout bit<32> x) {
     @name("c.inout_action2") action inout_action2() {
         us1_2 = us_0;
         us1_2[1w1].h1.setInvalid();
-        {
-            us1_2[1w1].h2.setValid();
-            us1_2[1w1].h1.setInvalid();
-        }
+        us1_2[1w1].h2.setValid();
+        us1_2[1w1].h1.setInvalid();
         us_0 = us1_2;
     }
     @name("c.xor") action xor() {
@@ -191,63 +161,43 @@ control c(inout bit<32> x) {
         us_0[0].h2.setInvalid();
         us_0[1].h1.setInvalid();
         us_0[1].h2.setInvalid();
-        {
-            u_0_h1.setValid();
-            u_0_h2.setInvalid();
-        }
+        u_0_h1.setValid();
+        u_0_h2.setInvalid();
         hs_0[0].setValid();
-        {
-            us_0[0].h1.setValid();
-            us_0[0].h2.setInvalid();
-        }
+        us_0[0].h1.setValid();
+        us_0[0].h2.setInvalid();
     }
     @hidden action invalidhdrwarnings7l68() {
-        {
-            u_0_h1.setValid();
-            u_0_h1.a = 32w1;
-            u_0_h2.setInvalid();
-        }
-        {
-            u_0_h2.setValid();
-            u_0_h2.a = 32w1;
-            u_0_h1.setInvalid();
-        }
+        u_0_h1.setValid();
+        u_0_h1.a = 32w1;
+        u_0_h2.setInvalid();
+        u_0_h2.setValid();
+        u_0_h2.a = 32w1;
+        u_0_h1.setInvalid();
         hs_0[0].a = 32w1;
         hs_0[1].a = 32w1;
-        {
-            us_0[0].h1.setValid();
-            us_0[0].h1.a = 32w1;
-            us_0[0].h2.setInvalid();
-        }
-        {
-            us_0[0].h2.setValid();
-            us_0[0].h2.a = 32w1;
-            us_0[0].h1.setInvalid();
-        }
+        us_0[0].h1.setValid();
+        us_0[0].h1.a = 32w1;
+        us_0[0].h2.setInvalid();
+        us_0[0].h2.setValid();
+        us_0[0].h2.a = 32w1;
+        us_0[0].h1.setInvalid();
     }
     @hidden action invalidhdrwarnings7l78() {
-        {
-            u_0_h1.setValid();
-            u_0_h1.a = 32w1;
-            u_0_h2.setInvalid();
-        }
-        {
-            u_0_h2.setValid();
-            u_0_h2.a = 32w1;
-            u_0_h1.setInvalid();
-        }
+        u_0_h1.setValid();
+        u_0_h1.a = 32w1;
+        u_0_h2.setInvalid();
+        u_0_h2.setValid();
+        u_0_h2.a = 32w1;
+        u_0_h1.setInvalid();
         hs_0[0].a = 32w1;
         hs_0[1].a = 32w1;
-        {
-            us_0[0].h1.setValid();
-            us_0[0].h1.a = 32w1;
-            us_0[0].h2.setInvalid();
-        }
-        {
-            us_0[0].h2.setValid();
-            us_0[0].h2.a = 32w1;
-            us_0[0].h1.setInvalid();
-        }
+        us_0[0].h1.setValid();
+        us_0[0].h1.a = 32w1;
+        us_0[0].h2.setInvalid();
+        us_0[0].h2.setValid();
+        us_0[0].h2.a = 32w1;
+        us_0[0].h1.setInvalid();
     }
     @hidden table tbl_invalidhdrwarnings7l13 {
         actions = {

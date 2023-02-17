@@ -89,18 +89,14 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
         hdr.base.t = 8w3;
     }
     @hidden action pnaexampleheaderunion1l75() {
-        {
-            hdr.u_short.setValid();
-            hdr.u_short.data = 16w0xffff;
-            hdr.u_byte.setInvalid();
-        }
+        hdr.u_short.setValid();
+        hdr.u_short.data = 16w0xffff;
+        hdr.u_byte.setInvalid();
     }
     @hidden action pnaexampleheaderunion1l77() {
-        {
-            hdr.u_byte.setValid();
-            hdr.u_byte.data = 8w0xff;
-            hdr.u_short.setInvalid();
-        }
+        hdr.u_byte.setValid();
+        hdr.u_byte.data = 8w0xff;
+        hdr.u_short.setInvalid();
     }
     @hidden table tbl_act {
         actions = {

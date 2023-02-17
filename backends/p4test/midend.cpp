@@ -153,6 +153,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          evaluator,
          [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
          new P4::FlattenHeaderUnion(&refMap, &typeMap, options.loopsUnrolling),
+         new P4::SimplifyControlFlow(&refMap, &typeMap),
          new P4::MidEndLast()});
     if (options.listMidendPasses) {
         listPasses(*outStream, "\n");

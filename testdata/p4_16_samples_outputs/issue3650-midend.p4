@@ -107,33 +107,27 @@ control MyIngress(inout header_t hdr, inout metadata meta, inout standard_metada
         const default_action = issue3650l24_0();
     }
     apply {
-        {
-            tbl_issue3650l35.apply();
-            switch (switch_2_table.apply().action_run) {
-                switch_2_case: {
-                    {
-                        tbl_issue3650l24.apply();
-                        switch (switch_0_table.apply().action_run) {
-                            switch_0_case: {
-                            }
-                            switch_0_case_0: {
-                            }
-                        }
+        tbl_issue3650l35.apply();
+        switch (switch_2_table.apply().action_run) {
+            switch_2_case: {
+                tbl_issue3650l24.apply();
+                switch (switch_0_table.apply().action_run) {
+                    switch_0_case: {
+                    }
+                    switch_0_case_0: {
                     }
                 }
-                switch_2_case_0: {
-                    {
-                        tbl_issue3650l24_0.apply();
-                        switch (switch_1_table.apply().action_run) {
-                            switch_1_case: {
-                            }
-                            switch_1_case_0: {
-                            }
-                        }
+            }
+            switch_2_case_0: {
+                tbl_issue3650l24_0.apply();
+                switch (switch_1_table.apply().action_run) {
+                    switch_1_case: {
+                    }
+                    switch_1_case_0: {
                     }
                 }
-                switch_2_case_1: {
-                }
+            }
+            switch_2_case_1: {
             }
         }
     }

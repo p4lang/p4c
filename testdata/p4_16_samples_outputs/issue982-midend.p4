@@ -388,15 +388,11 @@ control IngressDeparserImpl(packet_out packet, inout headers hdr, in metadata me
     @hidden action issue982l416() {
         clone_md_0_data_h0.setInvalid();
         clone_md_0_data_h1.setInvalid();
-        {
-            clone_md_0_data_h1.setValid();
-            clone_md_0_data_h0.setInvalid();
-        }
-        {
-            clone_md_0_data_h1.setValid();
-            clone_md_0_data_h1.data = 32w0;
-            clone_md_0_data_h0.setInvalid();
-        }
+        clone_md_0_data_h1.setValid();
+        clone_md_0_data_h0.setInvalid();
+        clone_md_0_data_h1.setValid();
+        clone_md_0_data_h1.data = 32w0;
+        clone_md_0_data_h0.setInvalid();
     }
     @hidden action issue982l422() {
         packet.emit<ethernet_t>(hdr.ethernet);

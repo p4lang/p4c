@@ -203,35 +203,34 @@ bool DoFlattenHeaderUnionStack::hasHeaderUnionStackField(IR::Type_Struct *s) {
 
 // Handle header union stack variable as struct field
 const IR::Node *DoFlattenHeaderUnionStack::postorder(IR::Type_Struct *s) {
-    if (hasHeaderUnionStackField(s)) {
-        IR::IndexedVector<IR::StructField> fields;
-        std::vector<cstring> indexVec;
-        for (auto sf : s->fields) {
-            auto ftype = typeMap->getType(sf, true);
-            if (auto hus = ftype->to<IR::Type_Stack>()) {
-                if (hus->elementType->is<IR::Type_HeaderUnion>()) {
-                    BUG_CHECK(hus->size->is<IR::Constant>(),
-                              "Header union stack size must be constant");
-                    unsigned stackSize = hus->size->to<IR::Constant>()->asUnsigned();
-                    for (unsigned i = 0; i < stackSize; i++) {
-                        cstring uName = refMap->newName(sf->name.name + Util::toString(i));
-                        fields.push_back(
-                            new IR::StructField(IR::ID(uName), hus->at(i)->getP4Type()));
-                        indexVec.push_back(uName);
-                    }
-                    stackMap.emplace(sf->name.name, indexVec);
-                    indexVec.clear();
-                } else {
-                    fields.push_back(sf);
+    if (!hasHeaderUnionStackField(s)) {
+        return s;
+    }
+
+    IR::IndexedVector<IR::StructField> fields;
+    std::vector<cstring> indexVec;
+    for (auto sf : s->fields) {
+        auto ftype = typeMap->getType(sf, true);
+        if (auto hus = ftype->to<IR::Type_Stack>()) {
+            if (hus->elementType->is<IR::Type_HeaderUnion>()) {
+            size_t stackSize = hus->getSize();            
+            for (size_t i = 0; i < stackSize; i++) {
+                    cstring uName = refMap->newName(sf->name.name + Util::toString(i));
+                    fields.push_back(
+                        new IR::StructField(IR::ID(uName), hus->at(i)->getP4Type()));
+                    indexVec.push_back(uName);
                 }
+                stackMap.emplace(sf->name.name, indexVec);
+                indexVec.clear();
             } else {
                 fields.push_back(sf);
             }
+        } else {
+            fields.push_back(sf);
         }
-        auto s1 = new IR::Type_Struct(s->name, s->annotations, fields);
-        return s1;
     }
-    return s;
+    auto s1 = new IR::Type_Struct(s->name, s->annotations, fields);
+    return s1;
 }
 
 // Handle header union stack variable as local variable
@@ -241,9 +240,8 @@ const IR::Node *DoFlattenHeaderUnionStack::postorder(IR::Declaration_Variable *d
     std::vector<cstring> indexVec;
     if (auto hus = ftype->to<IR::Type_Stack>()) {
         if (hus->elementType->is<IR::Type_HeaderUnion>()) {
-            BUG_CHECK(hus->size->is<IR::Constant>(), "Header union stack size must be constant");
-            unsigned stackSize = hus->size->to<IR::Constant>()->asUnsigned();
-            for (unsigned i = 0; i < stackSize; i++) {
+            size_t stackSize = hus->getSize();            
+            for (size_t i = 0; i < stackSize; i++) {
                 cstring uName = refMap->newName(dv->name.name + Util::toString(i));
                 indexVec.push_back(uName);
                 toInsert.push_back(
@@ -265,10 +263,10 @@ const IR::Node *DoFlattenHeaderUnionStack::postorder(IR::ArrayIndex *e) {
         unsigned stackSize = stack->size->to<IR::Constant>()->asUnsigned();
         if (stack->elementType->is<IR::Type_HeaderUnion>()) {
             if (!e->right->is<IR::Constant>())
-                ::error(ErrorType::ERR_INVALID, "%1% is not a constant", e->right);
+                ::error(ErrorType::ERR_INVALID, "Target expects constant array indices for accessing header union stack elements, %1% is not a constant", e->right);
             unsigned cst = e->right->to<IR::Constant>()->asUnsigned();
             if (cst >= stackSize)
-                ::error(ErrorType::ERR_INVALID, "Array index out of bound for %1%", e);
+                ::error(ErrorType::ERR_OVERLIMIT, "Array index out of bound for %1%", e);
             if (auto mem = e->left->to<IR::Member>()) {
                 auto uName = stackMap[mem->member.name];
                 BUG_CHECK(uName.size() > cst, "Header stack element mapping not found for %1", e);
