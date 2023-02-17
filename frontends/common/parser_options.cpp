@@ -490,8 +490,8 @@ bool ParserOptions::isAnnotationDisabled(const IR::Annotation *a) const {
 }
 
 DebugHook ParserOptions::getDebugHook() const {
-    using namespace std::placeholders;
-    auto dp = std::bind(&ParserOptions::dumpPass, this, _1, _2, _3, _4);
+    auto dp = std::bind(&ParserOptions::dumpPass, this, std::placeholders::_1,
+                        std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
     return dp;
 }
 
