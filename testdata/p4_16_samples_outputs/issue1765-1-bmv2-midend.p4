@@ -106,13 +106,13 @@ struct metadata {
 }
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.ethertype) {
-            16w0x800: ipv4;
-            16w0x86dd: ipv6;
-            default: accept;
-        }
+    state icmp {
+        packet.extract<icmp_t>(hdr.icmp);
+        transition accept;
+    }
+    state icmp6 {
+        packet.extract<icmp6_t>(hdr.icmp6);
+        transition accept;
     }
     state ipv4 {
         packet.extract<ipv4_t>(hdr.ipv4);
@@ -134,20 +134,20 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
             default: accept;
         }
     }
+    state start {
+        packet.extract<ethernet_t>(hdr.ethernet);
+        transition select(hdr.ethernet.ethertype) {
+            16w0x800: ipv4;
+            16w0x86dd: ipv6;
+            default: accept;
+        }
+    }
     state tcp {
         packet.extract<tcp_t>(hdr.tcp);
         transition accept;
     }
     state udp {
         packet.extract<udp_t>(hdr.udp);
-        transition accept;
-    }
-    state icmp6 {
-        packet.extract<icmp6_t>(hdr.icmp6);
-        transition accept;
-    }
-    state icmp {
-        packet.extract<icmp_t>(hdr.icmp);
         transition accept;
     }
 }

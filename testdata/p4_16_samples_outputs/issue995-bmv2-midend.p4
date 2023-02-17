@@ -17,16 +17,6 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.srcAddr, hdr.ethernet.dstAddr) {
-            (48w0x12f0000, 48w0x456): a1;
-            (48w0x12f0000 &&& 48w0xffff0000, 48w0x456): a2;
-            (48w0x12f0000, 48w0x456 &&& 48w0xfff): a3;
-            (48w0x12f0000 &&& 48w0xffff0000, 48w0x456 &&& 48w0xfff): a4;
-            default: a5;
-        }
-    }
     state a1 {
         meta.transition_taken = 16w1;
         transition accept;
@@ -46,6 +36,16 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     state a5 {
         meta.transition_taken = 16w5;
         transition accept;
+    }
+    state start {
+        packet.extract<ethernet_t>(hdr.ethernet);
+        transition select(hdr.ethernet.srcAddr, hdr.ethernet.dstAddr) {
+            (48w0x12f0000, 48w0x456): a1;
+            (48w0x12f0000 &&& 48w0xffff0000, 48w0x456): a2;
+            (48w0x12f0000, 48w0x456 &&& 48w0xfff): a3;
+            (48w0x12f0000 &&& 48w0xffff0000, 48w0x456 &&& 48w0xfff): a4;
+            default: a5;
+        }
     }
 }
 

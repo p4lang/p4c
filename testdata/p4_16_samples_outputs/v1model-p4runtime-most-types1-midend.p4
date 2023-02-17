@@ -96,10 +96,15 @@ struct metadata_t {
 
 parser ParserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     @name("ParserImpl.valueset1") value_set<valueset1_t>(4) valueset1_0;
-    state start {
-        transition select(stdmeta.ingress_port) {
-            9w0: parse_packet_out_header;
-            default: parse_ethernet;
+    state parse_custom {
+        packet.extract<custom_t>(hdr.custom);
+        transition accept;
+    }
+    state parse_ethernet {
+        packet.extract<ethernet_t>(hdr.ethernet);
+        transition select(hdr.ethernet.etherType) {
+            16w0xdead: parse_custom;
+            default: accept;
         }
     }
     state parse_packet_out_header {
@@ -109,16 +114,11 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, in
             default: parse_ethernet;
         }
     }
-    state parse_ethernet {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0xdead: parse_custom;
-            default: accept;
+    state start {
+        transition select(stdmeta.ingress_port) {
+            9w0: parse_packet_out_header;
+            default: parse_ethernet;
         }
-    }
-    state parse_custom {
-        packet.extract<custom_t>(hdr.custom);
-        transition accept;
     }
 }
 

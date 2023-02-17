@@ -1,3 +1,7 @@
 gauntlet_parser_test_3.p4(17): [--Wwarn=uninitialized] warning: h.h1.next: reading uninitialized value
             h.h2[1] = h.h1.next;
                       ^^^^^^^^^
+gauntlet_parser_test_3.p4(17): [--Wwarn=expr] warning: h.h1.next: error StackOutOfBounds will be triggered
+Parser P state chain: start, start_true
+            h.h2[1] = h.h1.next;
+                      ^^^^^^^^^

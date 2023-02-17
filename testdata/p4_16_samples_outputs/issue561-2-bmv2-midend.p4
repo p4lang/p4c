@@ -24,14 +24,6 @@ struct metadata {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    state start {
-        packet.extract<S>(hdr.base);
-        transition select(hdr.base.t) {
-            8w0: parseO1;
-            8w1: parseO2;
-            default: skip;
-        }
-    }
     state parseO1 {
         packet.extract<O1>(hdr.u_byte);
         transition accept;
@@ -42,6 +34,14 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     state skip {
         transition accept;
+    }
+    state start {
+        packet.extract<S>(hdr.base);
+        transition select(hdr.base.t) {
+            8w0: parseO1;
+            8w1: parseO2;
+            default: skip;
+        }
     }
 }
 

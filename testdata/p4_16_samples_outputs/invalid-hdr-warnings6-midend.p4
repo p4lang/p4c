@@ -25,42 +25,6 @@ struct M {
 }
 
 parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t smeta) {
-    state start {
-        hdr.u[0].h1.setValid();
-        hdr.u[0].h2.setInvalid();
-        hdr.u[0].h3.setInvalid();
-        pkt.extract<Header1>(hdr.u[0].h3);
-        hdr.u[0].h3.setValid();
-        hdr.u[0].h3.data = 32w1;
-        hdr.u[0].h1.setInvalid();
-        hdr.u[0].h2.setInvalid();
-        transition select(hdr.u[0].h3.isValid()) {
-            true: start_true;
-            false: start_false;
-        }
-    }
-    state start_true {
-        hdr.u[0].h1.setValid();
-        hdr.u[0].h1 = hdr.u[0].h3;
-        hdr.u[0].h2.setInvalid();
-        hdr.u[0].h3.setInvalid();
-        transition start_join;
-    }
-    state start_false {
-        hdr.u[0].h1.setInvalid();
-        transition start_join;
-    }
-    state start_join {
-        hdr.u[0].h1.setValid();
-        hdr.u[0].h1.data = 32w1;
-        hdr.u[0].h2.setInvalid();
-        hdr.u[0].h3.setInvalid();
-        transition last;
-    }
-    state next {
-        pkt.extract<Header2>(hdr.u[0].h2);
-        transition last;
-    }
     state last {
         hdr.u[0].h1.setValid();
         hdr.u[0].h1.data = 32w1;
@@ -75,6 +39,38 @@ parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t
         hdr.u[0].h1.setInvalid();
         hdr.u[0].h2.setInvalid();
         transition accept;
+    }
+    state start {
+        hdr.u[0].h1.setValid();
+        hdr.u[0].h2.setInvalid();
+        hdr.u[0].h3.setInvalid();
+        pkt.extract<Header1>(hdr.u[0].h3);
+        hdr.u[0].h3.setValid();
+        hdr.u[0].h3.data = 32w1;
+        hdr.u[0].h1.setInvalid();
+        hdr.u[0].h2.setInvalid();
+        transition select(hdr.u[0].h3.isValid()) {
+            true: start_true;
+            false: start_false;
+        }
+    }
+    state start_false {
+        hdr.u[0].h1.setInvalid();
+        transition start_join;
+    }
+    state start_join {
+        hdr.u[0].h1.setValid();
+        hdr.u[0].h1.data = 32w1;
+        hdr.u[0].h2.setInvalid();
+        hdr.u[0].h3.setInvalid();
+        transition last;
+    }
+    state start_true {
+        hdr.u[0].h1.setValid();
+        hdr.u[0].h1 = hdr.u[0].h3;
+        hdr.u[0].h2.setInvalid();
+        hdr.u[0].h3.setInvalid();
+        transition start_join;
     }
 }
 

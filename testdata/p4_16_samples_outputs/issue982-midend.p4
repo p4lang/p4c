@@ -249,36 +249,6 @@ struct headers {
 }
 
 parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_egress_parser_input_metadata_t istd, out psa_parser_output_metadata_t ostd) {
-    state start {
-        transition select(istd.instance_type) {
-            InstanceType_t.CLONE: parse_clone_header;
-            InstanceType_t.NORMAL: parse_ethernet;
-            default: noMatch;
-        }
-    }
-    state parse_ethernet {
-        parsed_hdr.ethernet.setInvalid();
-        parsed_hdr.ipv4.setInvalid();
-        buffer.extract<ethernet_t>(parsed_hdr.ethernet);
-        transition select(parsed_hdr.ethernet.etherType) {
-            16w0x800: CommonParser_parse_ipv4;
-            default: parse_ethernet_0;
-        }
-    }
-    state CommonParser_parse_ipv4 {
-        buffer.extract<ipv4_t>(parsed_hdr.ipv4);
-        transition parse_ethernet_0;
-    }
-    state parse_ethernet_0 {
-        transition accept;
-    }
-    state parse_clone_header {
-        transition select(istd.clone_metadata.type) {
-            3w0: CloneParser_parse_clone_header;
-            3w1: CloneParser_parse_clone_header_0;
-            default: reject;
-        }
-    }
     state CloneParser_parse_clone_header {
         user_meta._custom_clone_id1 = istd.clone_metadata.type;
         user_meta._clone_02 = istd.clone_metadata.data_h0;
@@ -289,12 +259,42 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
         user_meta._clone_13 = istd.clone_metadata.data_h1;
         transition parse_clone_header_2;
     }
-    state parse_clone_header_2 {
-        transition parse_ethernet;
+    state CommonParser_parse_ipv4 {
+        buffer.extract<ipv4_t>(parsed_hdr.ipv4);
+        transition parse_ethernet_0;
     }
     state noMatch {
         verify(false, error.NoMatch);
         transition reject;
+    }
+    state parse_clone_header {
+        transition select(istd.clone_metadata.type) {
+            3w0: CloneParser_parse_clone_header;
+            3w1: CloneParser_parse_clone_header_0;
+            default: reject;
+        }
+    }
+    state parse_clone_header_2 {
+        transition parse_ethernet;
+    }
+    state parse_ethernet {
+        parsed_hdr.ethernet.setInvalid();
+        parsed_hdr.ipv4.setInvalid();
+        buffer.extract<ethernet_t>(parsed_hdr.ethernet);
+        transition select(parsed_hdr.ethernet.etherType) {
+            16w0x800: CommonParser_parse_ipv4;
+            default: parse_ethernet_0;
+        }
+    }
+    state parse_ethernet_0 {
+        transition accept;
+    }
+    state start {
+        transition select(istd.instance_type) {
+            InstanceType_t.CLONE: parse_clone_header;
+            InstanceType_t.NORMAL: parse_ethernet;
+            default: noMatch;
+        }
     }
 }
 
@@ -324,6 +324,10 @@ control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_
 }
 
 parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_ingress_parser_input_metadata_t istd, out psa_parser_output_metadata_t ostd) {
+    state CommonParser_parse_ipv4_0 {
+        buffer.extract<ipv4_t>(parsed_hdr.ipv4);
+        transition start_0;
+    }
     state start {
         parsed_hdr.ethernet.setInvalid();
         parsed_hdr.ipv4.setInvalid();
@@ -332,10 +336,6 @@ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadat
             16w0x800: CommonParser_parse_ipv4_0;
             default: start_0;
         }
-    }
-    state CommonParser_parse_ipv4_0 {
-        buffer.extract<ipv4_t>(parsed_hdr.ipv4);
-        transition start_0;
     }
     state start_0 {
         transition accept;

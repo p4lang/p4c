@@ -105,12 +105,112 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     @name("ParserImpl.Tcp_option_parser.tcp_hdr_bytes_left") bit<7> Tcp_option_parser_tcp_hdr_bytes_left;
     @name("ParserImpl.Tcp_option_parser.tmp_0") bit<8> Tcp_option_parser_tmp_0;
     bit<16> tmp;
-    state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
+    state stateOutOfBound {
+        verify(false, error.StackOutOfBounds);
+        transition reject;
+    }
+    state Tcp_option_parser_next_option {
+        transition select(Tcp_option_parser_tcp_hdr_bytes_left) {
+            7w0: parse_tcp_0;
+            default: Tcp_option_parser_next_option_part2;
         }
+    }
+    state Tcp_option_parser_next_option1 {
+        transition select(Tcp_option_parser_tcp_hdr_bytes_left) {
+            7w0: parse_tcp_0;
+            default: Tcp_option_parser_next_option_part21;
+        }
+    }
+    state Tcp_option_parser_next_option2 {
+        transition stateOutOfBound;
+    }
+    state Tcp_option_parser_next_option_part2 {
+        Tcp_option_parser_tmp_0 = packet.lookahead<bit<8>>();
+        transition select(Tcp_option_parser_tmp_0) {
+            8w0: Tcp_option_parser_parse_tcp_option_end;
+            8w1: Tcp_option_parser_parse_tcp_option_nop;
+            8w2: Tcp_option_parser_parse_tcp_option_ss;
+            8w3: Tcp_option_parser_parse_tcp_option_s;
+            8w5: Tcp_option_parser_parse_tcp_option_sack;
+            default: noMatch;
+        }
+    }
+    state Tcp_option_parser_next_option_part21 {
+        Tcp_option_parser_tmp_0 = packet.lookahead<bit<8>>();
+        transition select(Tcp_option_parser_tmp_0) {
+            8w0: Tcp_option_parser_parse_tcp_option_end1;
+            8w1: Tcp_option_parser_parse_tcp_option_nop1;
+            8w2: Tcp_option_parser_parse_tcp_option_ss1;
+            8w3: Tcp_option_parser_parse_tcp_option_s1;
+            8w5: Tcp_option_parser_parse_tcp_option_sack1;
+            default: noMatch;
+        }
+    }
+    state Tcp_option_parser_parse_tcp_option_end {
+        packet.extract<Tcp_option_end_h>(hdr.tcp_options_vec[32w0].end);
+        Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left + 7w127;
+        packet.extract<Tcp_option_padding_h>(hdr.tcp_options_padding, (bit<32>)((bit<9>)Tcp_option_parser_tcp_hdr_bytes_left << 3));
+        transition parse_tcp_0;
+    }
+    state Tcp_option_parser_parse_tcp_option_end1 {
+        packet.extract<Tcp_option_end_h>(hdr.tcp_options_vec[32w1].end);
+        Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left + 7w127;
+        packet.extract<Tcp_option_padding_h>(hdr.tcp_options_padding, (bit<32>)((bit<9>)Tcp_option_parser_tcp_hdr_bytes_left << 3));
+        transition parse_tcp_0;
+    }
+    state Tcp_option_parser_parse_tcp_option_nop {
+        packet.extract<Tcp_option_nop_h>(hdr.tcp_options_vec[32w0].nop);
+        Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left + 7w127;
+        transition Tcp_option_parser_next_option1;
+    }
+    state Tcp_option_parser_parse_tcp_option_nop1 {
+        packet.extract<Tcp_option_nop_h>(hdr.tcp_options_vec[32w1].nop);
+        Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left + 7w127;
+        transition Tcp_option_parser_next_option2;
+    }
+    state Tcp_option_parser_parse_tcp_option_s {
+        verify(Tcp_option_parser_tcp_hdr_bytes_left >= 7w4, error.TcpOptionTooLongForHeader);
+        Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left + 7w124;
+        packet.extract<Tcp_option_s_h>(hdr.tcp_options_vec[32w0].s);
+        transition Tcp_option_parser_next_option1;
+    }
+    state Tcp_option_parser_parse_tcp_option_s1 {
+        verify(Tcp_option_parser_tcp_hdr_bytes_left >= 7w4, error.TcpOptionTooLongForHeader);
+        Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left + 7w124;
+        packet.extract<Tcp_option_s_h>(hdr.tcp_options_vec[32w1].s);
+        transition Tcp_option_parser_next_option2;
+    }
+    state Tcp_option_parser_parse_tcp_option_sack {
+        tmp = packet.lookahead<bit<16>>();
+        verify(tmp[7:0] == 8w10 || tmp[7:0] == 8w18 || tmp[7:0] == 8w26 || tmp[7:0] == 8w34, error.TcpBadSackOptionLength);
+        verify(Tcp_option_parser_tcp_hdr_bytes_left >= (bit<7>)tmp[7:0], error.TcpOptionTooLongForHeader);
+        Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left - (bit<7>)tmp[7:0];
+        packet.extract<Tcp_option_sack_h>(hdr.tcp_options_vec[32w0].sack, (bit<32>)((tmp[7:0] << 3) + 8w240));
+        transition Tcp_option_parser_next_option1;
+    }
+    state Tcp_option_parser_parse_tcp_option_sack1 {
+        tmp = packet.lookahead<bit<16>>();
+        verify(tmp[7:0] == 8w10 || tmp[7:0] == 8w18 || tmp[7:0] == 8w26 || tmp[7:0] == 8w34, error.TcpBadSackOptionLength);
+        verify(Tcp_option_parser_tcp_hdr_bytes_left >= (bit<7>)tmp[7:0], error.TcpOptionTooLongForHeader);
+        Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left - (bit<7>)tmp[7:0];
+        packet.extract<Tcp_option_sack_h>(hdr.tcp_options_vec[32w1].sack, (bit<32>)((tmp[7:0] << 3) + 8w240));
+        transition Tcp_option_parser_next_option2;
+    }
+    state Tcp_option_parser_parse_tcp_option_ss {
+        verify(Tcp_option_parser_tcp_hdr_bytes_left >= 7w5, error.TcpOptionTooLongForHeader);
+        Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left + 7w123;
+        packet.extract<Tcp_option_ss_h>(hdr.tcp_options_vec[32w0].ss);
+        transition Tcp_option_parser_next_option1;
+    }
+    state Tcp_option_parser_parse_tcp_option_ss1 {
+        verify(Tcp_option_parser_tcp_hdr_bytes_left >= 7w5, error.TcpOptionTooLongForHeader);
+        Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left + 7w123;
+        packet.extract<Tcp_option_ss_h>(hdr.tcp_options_vec[32w1].ss);
+        transition Tcp_option_parser_next_option2;
+    }
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
     }
     state parse_ipv4 {
         packet.extract<ipv4_t>(hdr.ipv4);
@@ -176,60 +276,15 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         Tcp_option_parser_tcp_hdr_bytes_left = (bit<7>)(hdr.tcp.dataOffset + 4w11) << 2;
         transition Tcp_option_parser_next_option;
     }
-    state Tcp_option_parser_next_option {
-        transition select(Tcp_option_parser_tcp_hdr_bytes_left) {
-            7w0: parse_tcp_0;
-            default: Tcp_option_parser_next_option_part2;
-        }
-    }
-    state Tcp_option_parser_next_option_part2 {
-        Tcp_option_parser_tmp_0 = packet.lookahead<bit<8>>();
-        transition select(Tcp_option_parser_tmp_0) {
-            8w0: Tcp_option_parser_parse_tcp_option_end;
-            8w1: Tcp_option_parser_parse_tcp_option_nop;
-            8w2: Tcp_option_parser_parse_tcp_option_ss;
-            8w3: Tcp_option_parser_parse_tcp_option_s;
-            8w5: Tcp_option_parser_parse_tcp_option_sack;
-            default: noMatch;
-        }
-    }
-    state Tcp_option_parser_parse_tcp_option_end {
-        packet.extract<Tcp_option_end_h>(hdr.tcp_options_vec.next.end);
-        Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left + 7w127;
-        packet.extract<Tcp_option_padding_h>(hdr.tcp_options_padding, (bit<32>)((bit<9>)Tcp_option_parser_tcp_hdr_bytes_left << 3));
-        transition parse_tcp_0;
-    }
-    state Tcp_option_parser_parse_tcp_option_nop {
-        packet.extract<Tcp_option_nop_h>(hdr.tcp_options_vec.next.nop);
-        Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left + 7w127;
-        transition Tcp_option_parser_next_option;
-    }
-    state Tcp_option_parser_parse_tcp_option_ss {
-        verify(Tcp_option_parser_tcp_hdr_bytes_left >= 7w5, error.TcpOptionTooLongForHeader);
-        Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left + 7w123;
-        packet.extract<Tcp_option_ss_h>(hdr.tcp_options_vec.next.ss);
-        transition Tcp_option_parser_next_option;
-    }
-    state Tcp_option_parser_parse_tcp_option_s {
-        verify(Tcp_option_parser_tcp_hdr_bytes_left >= 7w4, error.TcpOptionTooLongForHeader);
-        Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left + 7w124;
-        packet.extract<Tcp_option_s_h>(hdr.tcp_options_vec.next.s);
-        transition Tcp_option_parser_next_option;
-    }
-    state Tcp_option_parser_parse_tcp_option_sack {
-        tmp = packet.lookahead<bit<16>>();
-        verify(tmp[7:0] == 8w10 || tmp[7:0] == 8w18 || tmp[7:0] == 8w26 || tmp[7:0] == 8w34, error.TcpBadSackOptionLength);
-        verify(Tcp_option_parser_tcp_hdr_bytes_left >= (bit<7>)tmp[7:0], error.TcpOptionTooLongForHeader);
-        Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left - (bit<7>)tmp[7:0];
-        packet.extract<Tcp_option_sack_h>(hdr.tcp_options_vec.next.sack, (bit<32>)((tmp[7:0] << 3) + 8w240));
-        transition Tcp_option_parser_next_option;
-    }
     state parse_tcp_0 {
         transition accept;
     }
-    state noMatch {
-        verify(false, error.NoMatch);
-        transition reject;
+    state start {
+        packet.extract<ethernet_t>(hdr.ethernet);
+        transition select(hdr.ethernet.etherType) {
+            16w0x800: parse_ipv4;
+            default: accept;
+        }
     }
 }
 

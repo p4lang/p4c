@@ -117,6 +117,14 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    state stateOutOfBound {
+        verify(false, error.StackOutOfBounds);
+        transition reject;
+    }
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
+    }
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -164,24 +172,59 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition accept;
     }
     @name(".parse_vlan") state parse_vlan {
-        packet.extract<vlan_tag_t>(hdr.vlan_tag_.next);
-        transition select(hdr.vlan_tag_.last.etherType) {
-            16w0x8100: parse_vlan;
-            16w0x9100: parse_vlan;
-            16w0x9200: parse_vlan;
-            16w0x9300: parse_vlan;
+        packet.extract<vlan_tag_t>(hdr.vlan_tag_[32w0]);
+        transition select(hdr.vlan_tag_[32w0].etherType) {
+            16w0x8100: parse_vlan1;
+            16w0x9100: parse_vlan1;
+            16w0x9200: parse_vlan1;
+            16w0x9300: parse_vlan1;
             16w0x800: parse_ipv4;
             16w0x86dd: parse_ipv6;
             default: noMatch;
         }
     }
+    state parse_vlan1 {
+        packet.extract<vlan_tag_t>(hdr.vlan_tag_[32w1]);
+        transition select(hdr.vlan_tag_[32w1].etherType) {
+            16w0x8100: parse_vlan2;
+            16w0x9100: parse_vlan2;
+            16w0x9200: parse_vlan2;
+            16w0x9300: parse_vlan2;
+            16w0x800: parse_ipv4;
+            16w0x86dd: parse_ipv6;
+            default: noMatch;
+        }
+    }
+    state parse_vlan2 {
+        packet.extract<vlan_tag_t>(hdr.vlan_tag_[32w2]);
+        transition select(hdr.vlan_tag_[32w2].etherType) {
+            16w0x8100: parse_vlan3;
+            16w0x9100: parse_vlan3;
+            16w0x9200: parse_vlan3;
+            16w0x9300: parse_vlan3;
+            16w0x800: parse_ipv4;
+            16w0x86dd: parse_ipv6;
+            default: noMatch;
+        }
+    }
+    state parse_vlan3 {
+        packet.extract<vlan_tag_t>(hdr.vlan_tag_[32w3]);
+        transition select(hdr.vlan_tag_[32w3].etherType) {
+            16w0x8100: parse_vlan4;
+            16w0x9100: parse_vlan4;
+            16w0x9200: parse_vlan4;
+            16w0x9300: parse_vlan4;
+            16w0x800: parse_ipv4;
+            16w0x86dd: parse_ipv6;
+            default: noMatch;
+        }
+    }
+    state parse_vlan4 {
+        transition stateOutOfBound;
+    }
     @name(".start") state start {
         meta._routing_metadata_drop0 = 1w0;
         transition parse_ethernet;
-    }
-    state noMatch {
-        verify(false, error.NoMatch);
-        transition reject;
     }
 }
 

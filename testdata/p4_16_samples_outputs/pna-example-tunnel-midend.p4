@@ -48,16 +48,16 @@ struct local_metadata_t {
 }
 
 parser packet_parser(packet_in packet, out headers_t headers, inout local_metadata_t local_metadata, in pna_main_parser_input_metadata_t istd) {
+    state parse_ipv4_otr {
+        packet.extract<ipv4_t>(headers.outer_ipv4);
+        transition select(headers.outer_ipv4.protocol) {
+            default: accept;
+        }
+    }
     state start {
         packet.extract<ethernet_t>(headers.outer_ethernet);
         transition select(headers.outer_ethernet.ether_type) {
             16w0x800: parse_ipv4_otr;
-            default: accept;
-        }
-    }
-    state parse_ipv4_otr {
-        packet.extract<ipv4_t>(headers.outer_ipv4);
-        transition select(headers.outer_ipv4.protocol) {
             default: accept;
         }
     }

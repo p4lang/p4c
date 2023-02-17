@@ -25,16 +25,44 @@ struct Meta {
 }
 
 parser p(packet_in b, out packet_t hdrs, inout Meta m, inout standard_metadata_t meta) {
+    state stateOutOfBound {
+        verify(false, error.StackOutOfBounds);
+        transition reject;
+    }
+    state extra {
+        b.extract<extra_h>(hdrs.extra[32w0]);
+        transition select(hdrs.extra[32w0].b2) {
+            8w0x80 &&& 8w0x80: extra1;
+            default: accept;
+        }
+    }
+    state extra1 {
+        b.extract<extra_h>(hdrs.extra[32w1]);
+        transition select(hdrs.extra[32w1].b2) {
+            8w0x80 &&& 8w0x80: extra2;
+            default: accept;
+        }
+    }
+    state extra2 {
+        b.extract<extra_h>(hdrs.extra[32w2]);
+        transition select(hdrs.extra[32w2].b2) {
+            8w0x80 &&& 8w0x80: extra3;
+            default: accept;
+        }
+    }
+    state extra3 {
+        b.extract<extra_h>(hdrs.extra[32w3]);
+        transition select(hdrs.extra[32w3].b2) {
+            8w0x80 &&& 8w0x80: extra4;
+            default: accept;
+        }
+    }
+    state extra4 {
+        transition stateOutOfBound;
+    }
     state start {
         b.extract<data_h>(hdrs.data);
         transition extra;
-    }
-    state extra {
-        b.extract<extra_h>(hdrs.extra.next);
-        transition select(hdrs.extra.last.b2) {
-            8w0x80 &&& 8w0x80: extra;
-            default: accept;
-        }
     }
 }
 

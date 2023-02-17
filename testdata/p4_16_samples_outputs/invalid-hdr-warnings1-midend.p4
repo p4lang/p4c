@@ -15,19 +15,12 @@ struct M {
 }
 
 parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t smeta) {
-    state start {
-        hdr.h2.data = 32w1;
-        transition next;
-    }
     state next {
         transition select((bit<1>)(hdr.h2.data == 32w1)) {
             1w1: next_true;
             1w0: next_join;
             default: noMatch;
         }
-    }
-    state next_true {
-        transition next_join;
     }
     state next_join {
         pkt.extract<Header>(hdr.h1);
@@ -37,6 +30,17 @@ parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t
             32w1: state1;
             default: accept;
         }
+    }
+    state next_true {
+        transition next_join;
+    }
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
+    }
+    state start {
+        hdr.h2.data = 32w1;
+        transition next;
     }
     state state0 {
         hdr.h1.setInvalid();
@@ -53,10 +57,6 @@ parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t
             32w2: state0;
             default: accept;
         }
-    }
-    state noMatch {
-        verify(false, error.NoMatch);
-        transition reject;
     }
 }
 

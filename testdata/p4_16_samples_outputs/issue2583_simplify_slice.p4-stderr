@@ -19,3 +19,12 @@ issue2583_simplify_slice.p4(32): [--Wwarn=invalid_header] warning: accessing a f
 issue2583_simplify_slice.p4(33): [--Wwarn=invalid_header] warning: accessing a field of an invalid header h
         h.data[31:16] = 5; // stays
         ^
+issue2583_simplify_slice.p4(29): [--Wwarn=ignore-prop] warning: Result of AssignmentStatement is not defined: Error: Reading field from invalid header
+        h.data = 7;
+               ^
+issue2583_simplify_slice.p4(32): [--Wwarn=ignore-prop] warning: Result of AssignmentStatement is not defined: Error: Reading field from invalid header
+        h.data[15:0] = 8; // stays
+                     ^
+issue2583_simplify_slice.p4(33): [--Wwarn=ignore-prop] warning: Result of AssignmentStatement is not defined: Error: Reading field from invalid header
+        h.data[31:16] = 5; // stays
+                      ^

@@ -27,7 +27,8 @@ struct metadata {
 
 parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     @name("prs.tmp_0") bit<8> tmp_0;
-    state start {
+    state parse_four {
+        p.extract<header_four>(headers.four);
         transition parse_headers;
     }
     state parse_headers {
@@ -47,8 +48,7 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
         p.extract<header_two>(headers.two);
         transition parse_headers;
     }
-    state parse_four {
-        p.extract<header_four>(headers.four);
+    state start {
         transition parse_headers;
     }
 }

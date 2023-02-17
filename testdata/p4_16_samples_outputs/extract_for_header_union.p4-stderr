@@ -13,3 +13,6 @@ extract_for_header_union.p4(43): [--Wwarn=invalid_header] warning: accessing a f
 extract_for_header_union.p4(37): [--Wwarn=parser-transition] warning: accept state in parser ProtParser is unreachable
 parser ProtParser(packet_in packet,
        ^^^^^^^^^^
+extract_for_header_union.p4(43): [--Wwarn=ignore-prop] warning: Result of AssignmentStatement is not defined: Error: Reading field from invalid header
+        hdr.addr_src1.ipv4.addr = hdr.addr_src2.ipv4.addr;
+                                ^

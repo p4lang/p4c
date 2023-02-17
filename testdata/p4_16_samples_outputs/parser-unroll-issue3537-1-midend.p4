@@ -11,9 +11,6 @@ struct M {
 parser ParserI(packet_in packet, out H hdr, inout M meta, inout standard_metadata_t smeta) {
     @name("ParserI.tmp_0") bit<16> tmp_0;
     @name("ParserI.tmp_2") bit<16> tmp_2;
-    state start {
-        transition s1;
-    }
     state s1 {
         packet.advance(32w16);
         tmp_0 = packet.lookahead<bit<16>>();
@@ -33,6 +30,9 @@ parser ParserI(packet_in packet, out H hdr, inout M meta, inout standard_metadat
     }
     state s4 {
         transition accept;
+    }
+    state start {
+        transition s1;
     }
 }
 

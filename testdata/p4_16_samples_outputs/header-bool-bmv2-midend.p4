@@ -21,13 +21,6 @@ struct Meta {
 }
 
 parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm) {
-    state start {
-        b.extract<Hdr1>(h.h1);
-        transition select(h.h1.a) {
-            7w0: getH1;
-            default: getH2;
-        }
-    }
     state getH1 {
         b.extract<Hdr1>(h.u_h1);
         transition accept;
@@ -35,6 +28,13 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
     state getH2 {
         b.extract<Hdr2>(h.u_h2);
         transition accept;
+    }
+    state start {
+        b.extract<Hdr1>(h.h1);
+        transition select(h.h1.a) {
+            7w0: getH1;
+            default: getH2;
+        }
     }
 }
 

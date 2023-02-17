@@ -41,25 +41,6 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800 &&& 16w0xfffc: parse_h0;
-            16w0x804 &&& 16w0xfffe: parse_h0;
-            16w0x806: parse_h0;
-            16w0x808: parse_h1;
-            16w0xfff1: parse_h2;
-            16w0xfff2 &&& 16w0xfffe: parse_h2;
-            16w0xfff4 &&& 16w0xfffc: parse_h2;
-            16w0xfff8 &&& 16w0xfffc: parse_h2;
-            16w0xfffc &&& 16w0xfffe: parse_h2;
-            16w0xfffe: parse_h2;
-            16w0x900: parse_h3;
-            16w0x8ff: parse_h4;
-            16w0x900 &&& 16w0xfffe: parse_h4;
-            default: accept;
-        }
-    }
     state parse_h0 {
         packet.extract<h0_t>(hdr.h0);
         transition accept;
@@ -79,6 +60,25 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     state parse_h4 {
         packet.extract<h4_t>(hdr.h4);
         transition accept;
+    }
+    state start {
+        packet.extract<ethernet_t>(hdr.ethernet);
+        transition select(hdr.ethernet.etherType) {
+            16w0x800 &&& 16w0xfffc: parse_h0;
+            16w0x804 &&& 16w0xfffe: parse_h0;
+            16w0x806: parse_h0;
+            16w0x808: parse_h1;
+            16w0xfff1: parse_h2;
+            16w0xfff2 &&& 16w0xfffe: parse_h2;
+            16w0xfff4 &&& 16w0xfffc: parse_h2;
+            16w0xfff8 &&& 16w0xfffc: parse_h2;
+            16w0xfffc &&& 16w0xfffe: parse_h2;
+            16w0xfffe: parse_h2;
+            16w0x900: parse_h3;
+            16w0x8ff: parse_h4;
+            16w0x900 &&& 16w0xfffe: parse_h4;
+            default: accept;
+        }
     }
 }
 

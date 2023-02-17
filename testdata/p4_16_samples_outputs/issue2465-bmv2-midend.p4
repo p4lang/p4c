@@ -17,6 +17,15 @@ struct m {
 parser MyParser(packet_in b, out h hdrs, inout m meta, inout standard_metadata_t std) {
     h1[3] l_0_h;
     bit<24> tmp;
+    state many {
+        meta.h_count = 8w255;
+        transition accept;
+    }
+    state one {
+        b.extract<h1>(hdrs.h[32w0]);
+        meta.h_count = 8w1;
+        transition accept;
+    }
     state start {
         l_0_h[0].setInvalid();
         l_0_h[1].setInvalid();
@@ -35,26 +44,17 @@ parser MyParser(packet_in b, out h hdrs, inout m meta, inout standard_metadata_t
             default: many;
         }
     }
-    state one {
-        b.extract<h1>(hdrs.h.next);
-        meta.h_count = 8w1;
+    state three {
+        b.extract<h1>(hdrs.h[32w0]);
+        b.extract<h1>(hdrs.h[32w1]);
+        b.extract<h1>(hdrs.h[32w2]);
+        meta.h_count = 8w2;
         transition accept;
     }
     state two {
-        b.extract<h1>(hdrs.h.next);
-        b.extract<h1>(hdrs.h.next);
+        b.extract<h1>(hdrs.h[32w0]);
+        b.extract<h1>(hdrs.h[32w1]);
         meta.h_count = 8w2;
-        transition accept;
-    }
-    state three {
-        b.extract<h1>(hdrs.h.next);
-        b.extract<h1>(hdrs.h.next);
-        b.extract<h1>(hdrs.h.next);
-        meta.h_count = 8w2;
-        transition accept;
-    }
-    state many {
-        meta.h_count = 8w255;
         transition accept;
     }
 }

@@ -43,12 +43,9 @@ ipsec_accelerator() ipsec;
 parser MainParserImpl(packet_in pkt, out headers_t hdrs, inout metadata_t meta, in pna_main_parser_input_metadata_t istd) {
     @name("MainParserImpl.from_ipsec") bool from_ipsec_0;
     @name("MainParserImpl.status") ipsec_status status_0;
-    state start {
-        from_ipsec_0 = ipsec.from_ipsec(status_0);
-        transition select((bit<1>)from_ipsec_0) {
-            1w1: parse_ipv4;
-            default: parse_ethernet;
-        }
+    state parse_esp {
+        pkt.extract<esp_t>(hdrs.esp);
+        transition accept;
     }
     state parse_ethernet {
         pkt.extract<ethernet_t>(hdrs.ethernet);
@@ -64,9 +61,12 @@ parser MainParserImpl(packet_in pkt, out headers_t hdrs, inout metadata_t meta, 
             default: accept;
         }
     }
-    state parse_esp {
-        pkt.extract<esp_t>(hdrs.esp);
-        transition accept;
+    state start {
+        from_ipsec_0 = ipsec.from_ipsec(status_0);
+        transition select((bit<1>)from_ipsec_0) {
+            1w1: parse_ipv4;
+            default: parse_ethernet;
+        }
     }
 }
 

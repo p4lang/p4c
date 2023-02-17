@@ -53,12 +53,9 @@ struct Parsed_packet {
 parser TopParser(packet_in b, out Parsed_packet p) {
     @name("TopParser.tmp") bit<16> tmp;
     @name("TopParser.ck") Ck16() ck_0;
-    state start {
-        b.extract<Ethernet_h>(p.ethernet);
-        transition select(p.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: noMatch;
-        }
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
     }
     state parse_ipv4 {
         b.extract<Ipv4_h>(p.ip);
@@ -70,9 +67,12 @@ parser TopParser(packet_in b, out Parsed_packet p) {
         verify(tmp == 16w0, error.IPv4ChecksumError);
         transition accept;
     }
-    state noMatch {
-        verify(false, error.NoMatch);
-        transition reject;
+    state start {
+        b.extract<Ethernet_h>(p.ethernet);
+        transition select(p.ethernet.etherType) {
+            16w0x800: parse_ipv4;
+            default: noMatch;
+        }
     }
 }
 

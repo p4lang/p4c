@@ -80,6 +80,14 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     @name("ParserImpl.tmp_hdr") ipv4_option_timestamp_t_1 tmp_hdr_0;
     @name("ParserImpl.tmp_1") bit<8> tmp_1;
     bit<16> tmp_2;
+    state stateOutOfBound {
+        verify(false, error.StackOutOfBounds);
+        transition reject;
+    }
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
+    }
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -96,19 +104,62 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name(".parse_ipv4_option_EOL") state parse_ipv4_option_EOL {
-        packet.extract<ipv4_option_EOL_t>(hdr.ipv4_option_EOL.next);
+        packet.extract<ipv4_option_EOL_t>(hdr.ipv4_option_EOL[32w0]);
         meta._my_metadata_parse_ipv4_counter0 = meta._my_metadata_parse_ipv4_counter0 + 8w255;
-        transition parse_ipv4_options;
+        transition parse_ipv4_options5;
+    }
+    state parse_ipv4_option_EOL2 {
+        packet.extract<ipv4_option_EOL_t>(hdr.ipv4_option_EOL[32w0]);
+        meta._my_metadata_parse_ipv4_counter0 = meta._my_metadata_parse_ipv4_counter0 + 8w255;
+        transition parse_ipv4_options6;
+    }
+    state parse_ipv4_option_EOL3 {
+        packet.extract<ipv4_option_EOL_t>(hdr.ipv4_option_EOL[32w0]);
+        meta._my_metadata_parse_ipv4_counter0 = meta._my_metadata_parse_ipv4_counter0 + 8w255;
+        transition parse_ipv4_options4;
+    }
+    state parse_ipv4_option_EOL1 {
+        packet.extract<ipv4_option_EOL_t>(hdr.ipv4_option_EOL[32w1]);
+        meta._my_metadata_parse_ipv4_counter0 = meta._my_metadata_parse_ipv4_counter0 + 8w255;
+        transition parse_ipv4_options5;
     }
     @name(".parse_ipv4_option_NOP") state parse_ipv4_option_NOP {
-        packet.extract<ipv4_option_NOP_t>(hdr.ipv4_option_NOP.next);
+        packet.extract<ipv4_option_NOP_t>(hdr.ipv4_option_NOP[32w0]);
         meta._my_metadata_parse_ipv4_counter0 = meta._my_metadata_parse_ipv4_counter0 + 8w255;
-        transition parse_ipv4_options;
+        transition parse_ipv4_options1;
+    }
+    state parse_ipv4_option_NOP1 {
+        packet.extract<ipv4_option_NOP_t>(hdr.ipv4_option_NOP[32w1]);
+        meta._my_metadata_parse_ipv4_counter0 = meta._my_metadata_parse_ipv4_counter0 + 8w255;
+        transition parse_ipv4_options2;
+    }
+    state parse_ipv4_option_NOP2 {
+        packet.extract<ipv4_option_NOP_t>(hdr.ipv4_option_NOP[32w2]);
+        meta._my_metadata_parse_ipv4_counter0 = meta._my_metadata_parse_ipv4_counter0 + 8w255;
+        transition parse_ipv4_options3;
+    }
+    state parse_ipv4_option_NOP3 {
+        transition stateOutOfBound;
     }
     @name(".parse_ipv4_option_security") state parse_ipv4_option_security {
         packet.extract<ipv4_option_security_t>(hdr.ipv4_option_security);
         meta._my_metadata_parse_ipv4_counter0 = meta._my_metadata_parse_ipv4_counter0 + 8w245;
         transition parse_ipv4_options;
+    }
+    state parse_ipv4_option_security1 {
+        packet.extract<ipv4_option_security_t>(hdr.ipv4_option_security);
+        meta._my_metadata_parse_ipv4_counter0 = meta._my_metadata_parse_ipv4_counter0 + 8w245;
+        transition parse_ipv4_options1;
+    }
+    state parse_ipv4_option_security2 {
+        packet.extract<ipv4_option_security_t>(hdr.ipv4_option_security);
+        meta._my_metadata_parse_ipv4_counter0 = meta._my_metadata_parse_ipv4_counter0 + 8w245;
+        transition parse_ipv4_options2;
+    }
+    state parse_ipv4_option_security3 {
+        packet.extract<ipv4_option_security_t>(hdr.ipv4_option_security);
+        meta._my_metadata_parse_ipv4_counter0 = meta._my_metadata_parse_ipv4_counter0 + 8w245;
+        transition parse_ipv4_options3;
     }
     @name(".parse_ipv4_option_timestamp") state parse_ipv4_option_timestamp {
         tmp_2 = packet.lookahead<bit<16>>();
@@ -118,6 +169,33 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         packet.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)tmp_2[7:0] << 3) + 32w4294967280);
         meta._my_metadata_parse_ipv4_counter0 = meta._my_metadata_parse_ipv4_counter0 - hdr.ipv4_option_timestamp.len;
         transition parse_ipv4_options;
+    }
+    state parse_ipv4_option_timestamp1 {
+        tmp_2 = packet.lookahead<bit<16>>();
+        tmp_hdr_0.setValid();
+        tmp_hdr_0.value = tmp_2[15:8];
+        tmp_hdr_0.len = tmp_2[7:0];
+        packet.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)tmp_2[7:0] << 3) + 32w4294967280);
+        meta._my_metadata_parse_ipv4_counter0 = meta._my_metadata_parse_ipv4_counter0 - hdr.ipv4_option_timestamp.len;
+        transition parse_ipv4_options1;
+    }
+    state parse_ipv4_option_timestamp2 {
+        tmp_2 = packet.lookahead<bit<16>>();
+        tmp_hdr_0.setValid();
+        tmp_hdr_0.value = tmp_2[15:8];
+        tmp_hdr_0.len = tmp_2[7:0];
+        packet.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)tmp_2[7:0] << 3) + 32w4294967280);
+        meta._my_metadata_parse_ipv4_counter0 = meta._my_metadata_parse_ipv4_counter0 - hdr.ipv4_option_timestamp.len;
+        transition parse_ipv4_options2;
+    }
+    state parse_ipv4_option_timestamp3 {
+        tmp_2 = packet.lookahead<bit<16>>();
+        tmp_hdr_0.setValid();
+        tmp_hdr_0.value = tmp_2[15:8];
+        tmp_hdr_0.len = tmp_2[7:0];
+        packet.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)tmp_2[7:0] << 3) + 32w4294967280);
+        meta._my_metadata_parse_ipv4_counter0 = meta._my_metadata_parse_ipv4_counter0 - hdr.ipv4_option_timestamp.len;
+        transition parse_ipv4_options3;
     }
     @name(".parse_ipv4_options") state parse_ipv4_options {
         tmp_1 = packet.lookahead<bit<8>>();
@@ -130,13 +208,75 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: noMatch;
         }
     }
+    state parse_ipv4_options1 {
+        tmp_1 = packet.lookahead<bit<8>>();
+        transition select(meta._my_metadata_parse_ipv4_counter0, tmp_1) {
+            (8w0x0, 8w0x0 &&& 8w0x0): accept;
+            (8w0x0 &&& 8w0x0, 8w0x0): parse_ipv4_option_EOL1;
+            (8w0x0 &&& 8w0x0, 8w0x1): parse_ipv4_option_NOP1;
+            (8w0x0 &&& 8w0x0, 8w0x82): parse_ipv4_option_security1;
+            (8w0x0 &&& 8w0x0, 8w0x44): parse_ipv4_option_timestamp1;
+            default: noMatch;
+        }
+    }
+    state parse_ipv4_options2 {
+        tmp_1 = packet.lookahead<bit<8>>();
+        transition select(meta._my_metadata_parse_ipv4_counter0, tmp_1) {
+            (8w0x0, 8w0x0 &&& 8w0x0): accept;
+            (8w0x0 &&& 8w0x0, 8w0x0): parse_ipv4_option_EOL2;
+            (8w0x0 &&& 8w0x0, 8w0x1): parse_ipv4_option_NOP2;
+            (8w0x0 &&& 8w0x0, 8w0x82): parse_ipv4_option_security2;
+            (8w0x0 &&& 8w0x0, 8w0x44): parse_ipv4_option_timestamp2;
+            default: noMatch;
+        }
+    }
+    state parse_ipv4_options3 {
+        tmp_1 = packet.lookahead<bit<8>>();
+        transition select(meta._my_metadata_parse_ipv4_counter0, tmp_1) {
+            (8w0x0, 8w0x0 &&& 8w0x0): accept;
+            (8w0x0 &&& 8w0x0, 8w0x0): parse_ipv4_option_EOL3;
+            (8w0x0 &&& 8w0x0, 8w0x1): parse_ipv4_option_NOP3;
+            (8w0x0 &&& 8w0x0, 8w0x82): parse_ipv4_option_security3;
+            (8w0x0 &&& 8w0x0, 8w0x44): parse_ipv4_option_timestamp3;
+            default: noMatch;
+        }
+    }
+    state parse_ipv4_options4 {
+        tmp_1 = packet.lookahead<bit<8>>();
+        transition select(meta._my_metadata_parse_ipv4_counter0, tmp_1) {
+            (8w0x0, 8w0x0 &&& 8w0x0): accept;
+            (8w0x0 &&& 8w0x0, 8w0x0): parse_ipv4_option_EOL1;
+            (8w0x0 &&& 8w0x0, 8w0x1): parse_ipv4_option_NOP1;
+            (8w0x0 &&& 8w0x0, 8w0x82): parse_ipv4_option_security1;
+            (8w0x0 &&& 8w0x0, 8w0x44): parse_ipv4_option_timestamp1;
+            default: noMatch;
+        }
+    }
+    state parse_ipv4_options5 {
+        tmp_1 = packet.lookahead<bit<8>>();
+        transition select(meta._my_metadata_parse_ipv4_counter0, tmp_1) {
+            (8w0x0, 8w0x0 &&& 8w0x0): accept;
+            (8w0x0 &&& 8w0x0, 8w0x0): parse_ipv4_option_EOL1;
+            (8w0x0 &&& 8w0x0, 8w0x1): parse_ipv4_option_NOP1;
+            (8w0x0 &&& 8w0x0, 8w0x82): parse_ipv4_option_security1;
+            (8w0x0 &&& 8w0x0, 8w0x44): parse_ipv4_option_timestamp1;
+            default: noMatch;
+        }
+    }
+    state parse_ipv4_options6 {
+        tmp_1 = packet.lookahead<bit<8>>();
+        transition select(meta._my_metadata_parse_ipv4_counter0, tmp_1) {
+            (8w0x0, 8w0x0 &&& 8w0x0): accept;
+            (8w0x0 &&& 8w0x0, 8w0x0): parse_ipv4_option_EOL1;
+            (8w0x0 &&& 8w0x0, 8w0x1): parse_ipv4_option_NOP1;
+            (8w0x0 &&& 8w0x0, 8w0x82): parse_ipv4_option_security1;
+            (8w0x0 &&& 8w0x0, 8w0x44): parse_ipv4_option_timestamp1;
+            default: noMatch;
+        }
+    }
     @header_ordering("ethernet", "ipv4_base", "ipv4_option_security", "ipv4_option_NOP", "ipv4_option_timestamp", "ipv4_option_EOL") @name(".start") state start {
         tmp_hdr_0.setInvalid();
         transition parse_ethernet;
-    }
-    state noMatch {
-        verify(false, error.NoMatch);
-        transition reject;
     }
 }
 

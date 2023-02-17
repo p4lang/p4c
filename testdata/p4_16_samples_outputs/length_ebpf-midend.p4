@@ -16,6 +16,10 @@ struct Headers_t {
 
 parser prs(packet_in p, out Headers_t headers) {
     @name("prs.tmp_0") bit<32> tmp_0;
+    state parse_next {
+        p.extract<next_header>(headers.next);
+        transition accept;
+    }
     state start {
         p.extract<first_header>(headers.first);
         tmp_0 = p.length();
@@ -23,10 +27,6 @@ parser prs(packet_in p, out Headers_t headers) {
             32w16: parse_next;
             default: reject;
         }
-    }
-    state parse_next {
-        p.extract<next_header>(headers.next);
-        transition accept;
     }
 }
 

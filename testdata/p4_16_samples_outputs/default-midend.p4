@@ -6,15 +6,6 @@ header Header {
 
 parser p0(packet_in p, out Header h) {
     @name("p0.b") bool b_0;
-    state start {
-        b_0 = true;
-        p.extract<Header>(h);
-        transition select(h.data, 1w1) {
-            (default, 1w1): next;
-            (default, default): reject;
-            default: noMatch;
-        }
-    }
     state next {
         p.extract<Header>(h);
         transition select(h.data, (bit<1>)b_0) {
@@ -26,6 +17,15 @@ parser p0(packet_in p, out Header h) {
     state noMatch {
         verify(false, error.NoMatch);
         transition reject;
+    }
+    state start {
+        b_0 = true;
+        p.extract<Header>(h);
+        transition select(h.data, 1w1) {
+            (default, 1w1): next;
+            (default, default): reject;
+            default: noMatch;
+        }
     }
 }
 

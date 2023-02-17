@@ -32,17 +32,9 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
-        }
-    }
-    state parse_ipv4 {
-        packet.extract<ipv4_t>(hdr.ipv4);
-        transition select(hdr.ipv4.version) {
-            4w4: check_ipv4_ihl;
+    state check_ipv4_frag_offset {
+        transition select(hdr.ipv4.fragOffset) {
+            13w0x1fff: check_ipv4_protocol;
             default: accept;
         }
     }
@@ -52,14 +44,22 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             default: accept;
         }
     }
-    state check_ipv4_frag_offset {
-        transition select(hdr.ipv4.fragOffset) {
-            13w0x1fff: check_ipv4_protocol;
+    state check_ipv4_protocol {
+        transition accept;
+    }
+    state parse_ipv4 {
+        packet.extract<ipv4_t>(hdr.ipv4);
+        transition select(hdr.ipv4.version) {
+            4w4: check_ipv4_ihl;
             default: accept;
         }
     }
-    state check_ipv4_protocol {
-        transition accept;
+    state start {
+        packet.extract<ethernet_t>(hdr.ethernet);
+        transition select(hdr.ethernet.etherType) {
+            16w0x800: parse_ipv4;
+            default: accept;
+        }
     }
 }
 

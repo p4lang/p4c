@@ -72,62 +72,63 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
     if (BMV2::SimpleSwitchContext::get().options().loadIRFromJson == false) {
         auto *convertEnums =
             new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits("v1model.p4"));
-        addPasses(
-            {options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
-             new P4::CheckTableSize(),
-             new P4::RemoveMiss(&refMap, &typeMap),
-             new P4::EliminateNewtype(&refMap, &typeMap),
-             new P4::EliminateInvalidHeaders(&refMap, &typeMap),
-             new P4::EliminateSerEnums(&refMap, &typeMap),
-             convertEnums,
-             [this, convertEnums]() { enumMap = convertEnums->getEnumMapping(); },
-             new P4::OrderArguments(&refMap, &typeMap),
-             new P4::TypeChecking(&refMap, &typeMap),
-             new P4::SimplifyKey(
-                 &refMap, &typeMap,
-                 new P4::OrPolicy(new P4::IsValid(&refMap, &typeMap), new P4::IsMask())),
-             new P4::ConstantFolding(&refMap, &typeMap),
-             new P4::StrengthReduction(&refMap, &typeMap),
-             new P4::SimplifySelectCases(&refMap, &typeMap, true),  // require constant keysets
-             new P4::ExpandLookahead(&refMap, &typeMap),
-             new P4::ExpandEmit(&refMap, &typeMap),
-             new P4::SimplifyParsers(&refMap),
-             new P4::StrengthReduction(&refMap, &typeMap),
-             new P4::EliminateTuples(&refMap, &typeMap),
-             new P4::SimplifyComparisons(&refMap, &typeMap),
-             new P4::CopyStructures(&refMap, &typeMap),
-             new P4::NestedStructs(&refMap, &typeMap),
-             new P4::SimplifySelectList(&refMap, &typeMap),
-             new P4::RemoveSelectBooleans(&refMap, &typeMap),
-             new P4::FlattenHeaders(&refMap, &typeMap),
-             new P4::FlattenInterfaceStructs(&refMap, &typeMap),
-             new P4::ReplaceSelectRange(&refMap, &typeMap),
-             new P4::Predication(&refMap),
-             new P4::MoveDeclarations(),  // more may have been introduced
-             new P4::ConstantFolding(&refMap, &typeMap),
-             new P4::LocalCopyPropagation(&refMap, &typeMap),
-             new PassRepeated({new P4::ConstantFolding(&refMap, &typeMap),
-                               new P4::StrengthReduction(&refMap, &typeMap)}),
-             new P4::SimplifyKey(
-                 &refMap, &typeMap,
-                 new P4::OrPolicy(new P4::IsValid(&refMap, &typeMap), new P4::IsMask())),
-             new P4::MoveDeclarations(),
-             new P4::ValidateTableProperties(
-                 {"implementation", "size", "counters", "meters", "support_timeout"}),
-             new P4::SimplifyControlFlow(&refMap, &typeMap),
-             new P4::EliminateTypedef(&refMap, &typeMap),
-             new P4::CompileTimeOperations(),
-             new P4::TableHit(&refMap, &typeMap),
-             new P4::EliminateSwitch(&refMap, &typeMap),
-             new P4::RemoveLeftSlices(&refMap, &typeMap),
-             // p4c-bm removed unused action parameters. To produce a compatible
-             // control plane API, we remove them as well for P4-14 programs.
-             {isv1 ? new P4::RemoveUnusedActionParameters(&refMap) : nullptr},
-             new P4::TypeChecking(&refMap, &typeMap),
-             {options.loopsUnrolling ? new P4::ParsersUnroll(true, &refMap, &typeMap) : nullptr},
-             evaluator,
-             [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
-             new P4::MidEndLast()});
+        addPasses({options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
+                   new P4::CheckTableSize(),
+                   new P4::RemoveMiss(&refMap, &typeMap),
+                   new P4::EliminateNewtype(&refMap, &typeMap),
+                   new P4::EliminateInvalidHeaders(&refMap, &typeMap),
+                   new P4::EliminateSerEnums(&refMap, &typeMap),
+                   convertEnums,
+                   [this, convertEnums]() { enumMap = convertEnums->getEnumMapping(); },
+                   new P4::OrderArguments(&refMap, &typeMap),
+                   new P4::TypeChecking(&refMap, &typeMap),
+                   new P4::SimplifyKey(
+                       &refMap, &typeMap,
+                       new P4::OrPolicy(new P4::IsValid(&refMap, &typeMap), new P4::IsMask())),
+                   new P4::ConstantFolding(&refMap, &typeMap),
+                   new P4::StrengthReduction(&refMap, &typeMap),
+                   // require constant keysets
+                   new P4::SimplifySelectCases(&refMap, &typeMap, true),
+                   new P4::ExpandLookahead(&refMap, &typeMap),
+                   new P4::ExpandEmit(&refMap, &typeMap),
+                   new P4::SimplifyParsers(&refMap),
+                   new P4::StrengthReduction(&refMap, &typeMap),
+                   new P4::EliminateTuples(&refMap, &typeMap),
+                   new P4::SimplifyComparisons(&refMap, &typeMap),
+                   new P4::CopyStructures(&refMap, &typeMap),
+                   new P4::NestedStructs(&refMap, &typeMap),
+                   new P4::SimplifySelectList(&refMap, &typeMap),
+                   new P4::RemoveSelectBooleans(&refMap, &typeMap),
+                   new P4::FlattenHeaders(&refMap, &typeMap),
+                   new P4::FlattenInterfaceStructs(&refMap, &typeMap),
+                   new P4::ReplaceSelectRange(&refMap, &typeMap),
+                   new P4::Predication(&refMap),
+                   new P4::MoveDeclarations(),  // more may have been introduced
+                   new P4::ConstantFolding(&refMap, &typeMap),
+                   new P4::LocalCopyPropagation(&refMap, &typeMap),
+                   new PassRepeated({new P4::ConstantFolding(&refMap, &typeMap),
+                                     new P4::StrengthReduction(&refMap, &typeMap)}),
+                   new P4::SimplifyKey(
+                       &refMap, &typeMap,
+                       new P4::OrPolicy(new P4::IsValid(&refMap, &typeMap), new P4::IsMask())),
+                   new P4::MoveDeclarations(),
+                   new P4::ValidateTableProperties(
+                       {"implementation", "size", "counters", "meters", "support_timeout"}),
+                   new P4::SimplifyControlFlow(&refMap, &typeMap),
+                   new P4::EliminateTypedef(&refMap, &typeMap),
+                   new P4::CompileTimeOperations(),
+                   new P4::TableHit(&refMap, &typeMap),
+                   new P4::EliminateSwitch(&refMap, &typeMap),
+                   new P4::RemoveLeftSlices(&refMap, &typeMap),
+                   // p4c-bm removed unused action parameters. To produce a compatible
+                   // control plane API, we remove them as well for P4-14 programs.
+                   {(isv1 ? new P4::RemoveUnusedActionParameters(&refMap) : nullptr)},
+                   new P4::TypeChecking(&refMap, &typeMap),
+                   // Try to unroll all parser loops.
+                   new P4::ParsersUnroll(true, &refMap, &typeMap),
+                   evaluator,
+                   [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
+                   new P4::MidEndLast()});
         if (options.listMidendPasses) {
             listPasses(*outStream, "\n");
             *outStream << std::endl;

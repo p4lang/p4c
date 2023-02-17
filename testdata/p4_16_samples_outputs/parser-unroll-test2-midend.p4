@@ -38,23 +38,44 @@ struct headers {
 }
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    state stateOutOfBound {
+        verify(false, error.StackOutOfBounds);
+        transition reject;
+    }
+    state parse_ipv4 {
+        packet.extract<ipv4_t>(hdr.ipv4);
+        transition accept;
+    }
+    state parse_srcRouting {
+        packet.extract<srcRoute_t>(hdr.srcRoutes[32w0]);
+        transition select(hdr.srcRoutes[32w0].bos) {
+            1w1: parse_ipv4;
+            default: parse_srcRouting1;
+        }
+    }
+    state parse_srcRouting1 {
+        packet.extract<srcRoute_t>(hdr.srcRoutes[32w1]);
+        transition select(hdr.srcRoutes[32w1].bos) {
+            1w1: parse_ipv4;
+            default: parse_srcRouting2;
+        }
+    }
+    state parse_srcRouting2 {
+        packet.extract<srcRoute_t>(hdr.srcRoutes[32w2]);
+        transition select(hdr.srcRoutes[32w2].bos) {
+            1w1: parse_ipv4;
+            default: parse_srcRouting3;
+        }
+    }
+    state parse_srcRouting3 {
+        transition stateOutOfBound;
+    }
     state start {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             16w0x1234: parse_srcRouting;
             default: accept;
         }
-    }
-    state parse_srcRouting {
-        packet.extract<srcRoute_t>(hdr.srcRoutes.next);
-        transition select(hdr.srcRoutes.last.bos) {
-            1w1: parse_ipv4;
-            default: parse_srcRouting;
-        }
-    }
-    state parse_ipv4 {
-        packet.extract<ipv4_t>(hdr.ipv4);
-        transition accept;
     }
 }
 

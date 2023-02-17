@@ -54,6 +54,10 @@ parser MyIP(packet_in buffer, out ethernet_t h, inout metadata b, in psa_ingress
 parser MyEP(packet_in buffer, out EMPTY_H a, inout metadata b, in psa_egress_parser_input_metadata_t c, in EMPTY_BRIDGE d, in clone_metadata_t e, in clone_metadata_t f) {
     @name("clone_md_data_h0") clone_0_t clone_md_data_h0_0;
     @name("clone_md_data_h1") clone_1_t clone_md_data_h1_0;
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
+    }
     state start {
         clone_md_data_h0_0.setInvalid();
         clone_md_data_h1_0.setInvalid();
@@ -68,21 +72,23 @@ parser MyEP(packet_in buffer, out EMPTY_H a, inout metadata b, in psa_egress_par
             default: noMatch;
         }
     }
+    state start_join {
+        b.meta1 = clone_md_data_h1_0.data;
+        transition accept;
+    }
     state start_true {
         transition select(e.data_h0.isValid()) {
             true: start_true_true;
             false: start_true_false;
         }
     }
-    state start_true_true {
-        clone_md_data_h0_0.setValid();
-        clone_md_data_h0_0 = e.data_h0;
-        clone_md_data_h1_0.setInvalid();
-        transition start_true_join;
-    }
     state start_true_false {
         clone_md_data_h0_0.setInvalid();
         transition start_true_join;
+    }
+    state start_true_false_0 {
+        clone_md_data_h1_0.setInvalid();
+        transition start_true_join_0;
     }
     state start_true_join {
         transition select(e.data_h1.isValid()) {
@@ -90,26 +96,20 @@ parser MyEP(packet_in buffer, out EMPTY_H a, inout metadata b, in psa_egress_par
             false: start_true_false_0;
         }
     }
+    state start_true_join_0 {
+        transition start_join;
+    }
+    state start_true_true {
+        clone_md_data_h0_0.setValid();
+        clone_md_data_h0_0 = e.data_h0;
+        clone_md_data_h1_0.setInvalid();
+        transition start_true_join;
+    }
     state start_true_true_0 {
         clone_md_data_h1_0.setValid();
         clone_md_data_h1_0 = e.data_h1;
         clone_md_data_h0_0.setInvalid();
         transition start_true_join_0;
-    }
-    state start_true_false_0 {
-        clone_md_data_h1_0.setInvalid();
-        transition start_true_join_0;
-    }
-    state start_true_join_0 {
-        transition start_join;
-    }
-    state start_join {
-        b.meta1 = clone_md_data_h1_0.data;
-        transition accept;
-    }
-    state noMatch {
-        verify(false, error.NoMatch);
-        transition reject;
     }
 }
 

@@ -152,22 +152,64 @@ parser ParserImpl(packet_in packet, out parsed_headers_t hdr, inout local_metada
     @name("ParserImpl.gtpu") gtpu_t gtpu_0;
     @name("ParserImpl.gtpu_ext_len") bit<8> gtpu_ext_len_0;
     bit<64> tmp;
-    state start {
-        transition select(std_meta.ingress_port) {
-            9w255: parse_packet_out;
-            default: parse_ethernet;
-        }
-    }
-    state parse_packet_out {
-        packet.extract<packet_out_t>(hdr.packet_out);
-        transition parse_ethernet;
-    }
     state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.ether_type) {
             16w0x800: parse_ipv4;
             default: accept;
         }
+    }
+    state parse_gtpu {
+        packet.extract<gtpu_t>(hdr.gtpu);
+        local_meta.teid = hdr.gtpu.teid;
+        transition select(hdr.gtpu.ex_flag, hdr.gtpu.seq_flag, hdr.gtpu.npdu_flag) {
+            (1w0, 1w0, 1w0): parse_inner_ipv4;
+            default: parse_gtpu_options;
+        }
+    }
+    state parse_gtpu_ext_psc {
+        packet.extract<gtpu_ext_psc_t>(hdr.gtpu_ext_psc);
+        transition select(hdr.gtpu_ext_psc.next_ext) {
+            8w0x0: parse_inner_ipv4;
+            default: accept;
+        }
+    }
+    state parse_gtpu_options {
+        packet.extract<gtpu_options_t>(hdr.gtpu_options);
+        gtpu_ext_len_0 = packet.lookahead<bit<8>>();
+        transition select(hdr.gtpu_options.next_ext, gtpu_ext_len_0) {
+            (8w0x85, 8w1): parse_gtpu_ext_psc;
+            default: accept;
+        }
+    }
+    state parse_icmp {
+        packet.extract<icmp_t>(hdr.icmp);
+        transition accept;
+    }
+    state parse_inner_icmp {
+        packet.extract<icmp_t>(hdr.inner_icmp);
+        transition accept;
+    }
+    state parse_inner_ipv4 {
+        packet.extract<ipv4_t>(hdr.inner_ipv4);
+        transition select(hdr.inner_ipv4.proto) {
+            8w17: parse_inner_udp;
+            8w6: parse_inner_tcp;
+            8w1: parse_inner_icmp;
+            default: accept;
+        }
+    }
+    state parse_inner_tcp {
+        packet.extract<tcp_t>(hdr.inner_tcp);
+        local_meta.l4_sport = hdr.inner_tcp.sport;
+        local_meta.l4_dport = hdr.inner_tcp.dport;
+        transition accept;
+    }
+    state parse_inner_udp {
+        packet.extract<udp_t>(hdr.inner_udp);
+        local_meta.l4_sport = hdr.inner_udp.sport;
+        local_meta.l4_dport = hdr.inner_udp.dport;
+        transition accept;
     }
     state parse_ipv4 {
         packet.extract<ipv4_t>(hdr.ipv4);
@@ -177,6 +219,16 @@ parser ParserImpl(packet_in packet, out parsed_headers_t hdr, inout local_metada
             8w1: parse_icmp;
             default: accept;
         }
+    }
+    state parse_packet_out {
+        packet.extract<packet_out_t>(hdr.packet_out);
+        transition parse_ethernet;
+    }
+    state parse_tcp {
+        packet.extract<tcp_t>(hdr.tcp);
+        local_meta.l4_sport = hdr.tcp.sport;
+        local_meta.l4_dport = hdr.tcp.dport;
+        transition accept;
     }
     state parse_udp {
         packet.extract<udp_t>(hdr.udp);
@@ -199,63 +251,11 @@ parser ParserImpl(packet_in packet, out parsed_headers_t hdr, inout local_metada
             default: accept;
         }
     }
-    state parse_tcp {
-        packet.extract<tcp_t>(hdr.tcp);
-        local_meta.l4_sport = hdr.tcp.sport;
-        local_meta.l4_dport = hdr.tcp.dport;
-        transition accept;
-    }
-    state parse_icmp {
-        packet.extract<icmp_t>(hdr.icmp);
-        transition accept;
-    }
-    state parse_gtpu {
-        packet.extract<gtpu_t>(hdr.gtpu);
-        local_meta.teid = hdr.gtpu.teid;
-        transition select(hdr.gtpu.ex_flag, hdr.gtpu.seq_flag, hdr.gtpu.npdu_flag) {
-            (1w0, 1w0, 1w0): parse_inner_ipv4;
-            default: parse_gtpu_options;
+    state start {
+        transition select(std_meta.ingress_port) {
+            9w255: parse_packet_out;
+            default: parse_ethernet;
         }
-    }
-    state parse_gtpu_options {
-        packet.extract<gtpu_options_t>(hdr.gtpu_options);
-        gtpu_ext_len_0 = packet.lookahead<bit<8>>();
-        transition select(hdr.gtpu_options.next_ext, gtpu_ext_len_0) {
-            (8w0x85, 8w1): parse_gtpu_ext_psc;
-            default: accept;
-        }
-    }
-    state parse_gtpu_ext_psc {
-        packet.extract<gtpu_ext_psc_t>(hdr.gtpu_ext_psc);
-        transition select(hdr.gtpu_ext_psc.next_ext) {
-            8w0x0: parse_inner_ipv4;
-            default: accept;
-        }
-    }
-    state parse_inner_ipv4 {
-        packet.extract<ipv4_t>(hdr.inner_ipv4);
-        transition select(hdr.inner_ipv4.proto) {
-            8w17: parse_inner_udp;
-            8w6: parse_inner_tcp;
-            8w1: parse_inner_icmp;
-            default: accept;
-        }
-    }
-    state parse_inner_udp {
-        packet.extract<udp_t>(hdr.inner_udp);
-        local_meta.l4_sport = hdr.inner_udp.sport;
-        local_meta.l4_dport = hdr.inner_udp.dport;
-        transition accept;
-    }
-    state parse_inner_tcp {
-        packet.extract<tcp_t>(hdr.inner_tcp);
-        local_meta.l4_sport = hdr.inner_tcp.sport;
-        local_meta.l4_dport = hdr.inner_tcp.dport;
-        transition accept;
-    }
-    state parse_inner_icmp {
-        packet.extract<icmp_t>(hdr.inner_icmp);
-        transition accept;
     }
 }
 

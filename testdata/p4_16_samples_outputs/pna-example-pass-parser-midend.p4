@@ -48,12 +48,9 @@ control PreControlImpl(in headers_t hdr, inout main_metadata_t meta, in pna_pre_
 }
 
 parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t main_meta, in pna_main_parser_input_metadata_t istd) {
-    state start {
-        pkt.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
-        }
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
     }
     state parse_ipv4 {
         pkt.extract<ipv4_t>(hdr.ipv4);
@@ -64,16 +61,19 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
             default: noMatch;
         }
     }
+    state parse_udp_join {
+        transition accept;
+    }
     state parse_udp_true {
         main_meta.port = hdr.udp.src_port;
         transition parse_udp_join;
     }
-    state parse_udp_join {
-        transition accept;
-    }
-    state noMatch {
-        verify(false, error.NoMatch);
-        transition reject;
+    state start {
+        pkt.extract<ethernet_t>(hdr.ethernet);
+        transition select(hdr.ethernet.etherType) {
+            16w0x800: parse_ipv4;
+            default: accept;
+        }
     }
 }
 

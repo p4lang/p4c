@@ -26,21 +26,17 @@ parser p(packet_in pkt, out Headers hdr) {
         bound_0 = 3w2;
         transition start_true;
     }
+    state start_join {
+        tmp_6 = hdr.h[3w1];
+        extern_call(tmp_6);
+        hdr.h[3w1] = tmp_6;
+        pkt.extract<ethernet_t>(hdr.eth_hdr);
+        pkt.extract<H>(hdr.h[32w0]);
+        transition accept;
+    }
     state start_true {
         tmp_8 = val_0;
         transition start_join;
-    }
-    state start_false {
-        tmp_8 = bound_0;
-        transition start_join;
-    }
-    state start_join {
-        tmp_6 = hdr.h[tmp_8];
-        extern_call(tmp_6);
-        hdr.h[tmp_8] = tmp_6;
-        pkt.extract<ethernet_t>(hdr.eth_hdr);
-        pkt.extract<H>(hdr.h.next);
-        transition accept;
     }
 }
 

@@ -22,6 +22,13 @@ struct value_set_t {
 
 parser MyParser(packet_in b, out my_packet p, inout my_metadata m, inout standard_metadata_t s) {
     @name("MyParser.pvs") value_set<value_set_t>(4) pvs_0;
+    state foo {
+        transition accept;
+    }
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
+    }
     state start {
         b.extract<data_h>(p.data);
         transition select(p.data.da[15:0], p.data.db[7:5]) {
@@ -29,13 +36,6 @@ parser MyParser(packet_in b, out my_packet p, inout my_metadata m, inout standar
             (16w0x810, 3w0x1): foo;
             default: noMatch;
         }
-    }
-    state foo {
-        transition accept;
-    }
-    state noMatch {
-        verify(false, error.NoMatch);
-        transition reject;
     }
 }
 

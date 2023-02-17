@@ -44,13 +44,6 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
     @name("MainParserImpl.tmp_hdr") option_t tmp_hdr_0;
     @name("MainParserImpl.tmp_0") bit<8> tmp_0;
     bit<16> tmp_1;
-    state start {
-        pkt.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
-        }
-    }
     state parse_ipv4 {
         pkt.extract<ipv4_base_t>(hdr.ipv4_base);
         transition select(hdr.ipv4_base.version_ihl) {
@@ -70,6 +63,13 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
         tmp_0 = pkt.lookahead<bit<8>>();
         transition select(tmp_0) {
             8w0x44: parse_ipv4_option_timestamp;
+            default: accept;
+        }
+    }
+    state start {
+        pkt.extract<ethernet_t>(hdr.ethernet);
+        transition select(hdr.ethernet.etherType) {
+            16w0x800: parse_ipv4;
             default: accept;
         }
     }

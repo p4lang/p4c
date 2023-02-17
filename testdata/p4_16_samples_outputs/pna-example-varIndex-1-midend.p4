@@ -30,18 +30,33 @@ control PreControlImpl(in headers_t hdrs, inout main_metadata_t meta, in pna_pre
 }
 
 parser MainParserImpl(packet_in pkt, out headers_t hdrs, inout main_metadata_t meta, in pna_main_parser_input_metadata_t istd) {
+    state stateOutOfBound {
+        verify(false, error.StackOutOfBounds);
+        transition reject;
+    }
+    state parse_vlan_tag {
+        pkt.extract<vlan_tag_h>(hdrs.vlan_tag[32w0]);
+        meta.depth = meta.depth + 2w3;
+        transition select(hdrs.vlan_tag[32w0].ether_type) {
+            16w0x8100: parse_vlan_tag1;
+            default: accept;
+        }
+    }
+    state parse_vlan_tag1 {
+        pkt.extract<vlan_tag_h>(hdrs.vlan_tag[32w1]);
+        meta.depth = meta.depth + 2w3;
+        transition select(hdrs.vlan_tag[32w1].ether_type) {
+            16w0x8100: parse_vlan_tag2;
+            default: accept;
+        }
+    }
+    state parse_vlan_tag2 {
+        transition stateOutOfBound;
+    }
     state start {
         meta.depth = 2w1;
         pkt.extract<ethernet_t>(hdrs.ethernet);
         transition select(hdrs.ethernet.etherType) {
-            16w0x8100: parse_vlan_tag;
-            default: accept;
-        }
-    }
-    state parse_vlan_tag {
-        pkt.extract<vlan_tag_h>(hdrs.vlan_tag.next);
-        meta.depth = meta.depth + 2w3;
-        transition select(hdrs.vlan_tag.last.ether_type) {
             16w0x8100: parse_vlan_tag;
             default: accept;
         }

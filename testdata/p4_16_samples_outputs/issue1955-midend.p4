@@ -48,10 +48,6 @@ parser parserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, in
             default: start_0;
         }
     }
-    state subParser_parse_ipv4 {
-        packet.extract<ipv4_t>(hdr.ipv4_1);
-        transition start_0;
-    }
     state start_0 {
         packet.extract<ethernet_t>(hdr.ethernet_2);
         transition select(hdr.ethernet_2.etherType) {
@@ -59,12 +55,16 @@ parser parserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, in
             default: start_1;
         }
     }
+    state start_1 {
+        transition accept;
+    }
+    state subParser_parse_ipv4 {
+        packet.extract<ipv4_t>(hdr.ipv4_1);
+        transition start_0;
+    }
     state subParser_parse_ipv4_0 {
         packet.extract<ipv4_t>(hdr.ipv4_2);
         transition start_1;
-    }
-    state start_1 {
-        transition accept;
     }
 }
 

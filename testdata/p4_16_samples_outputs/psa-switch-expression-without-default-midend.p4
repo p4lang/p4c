@@ -52,14 +52,6 @@ struct headers_t {
 }
 
 parser MyIP(packet_in buffer, out headers_t hdr, inout user_meta_t b, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
-    state start {
-        buffer.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800 &&& 16w0xf00: parse_ipv4;
-            16w0xd00: parse_tcp;
-            default: accept;
-        }
-    }
     state parse_ipv4 {
         buffer.extract<ipv4_t>(hdr.ipv4);
         transition select(hdr.ipv4.protocol) {
@@ -70,6 +62,14 @@ parser MyIP(packet_in buffer, out headers_t hdr, inout user_meta_t b, in psa_ing
     state parse_tcp {
         buffer.extract<tcp_t>(hdr.tcp);
         transition accept;
+    }
+    state start {
+        buffer.extract<ethernet_t>(hdr.ethernet);
+        transition select(hdr.ethernet.etherType) {
+            16w0x800 &&& 16w0xf00: parse_ipv4;
+            16w0xd00: parse_tcp;
+            default: accept;
+        }
     }
 }
 
@@ -178,17 +178,15 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
     }
     apply {
         tbl_psaswitchexpressionwithoutdefault102.apply();
-        {
-            tbl_psaswitchexpressionwithoutdefault122.apply();
-            switch (switch_0_table.apply().action_run) {
-                switch_0_case: {
-                    tbl_psaswitchexpressionwithoutdefault124.apply();
-                }
-                switch_0_case_0: {
-                    tbl_psaswitchexpressionwithoutdefault125.apply();
-                }
-                switch_0_case_1: {
-                }
+        tbl_psaswitchexpressionwithoutdefault122.apply();
+        switch (switch_0_table.apply().action_run) {
+            switch_0_case: {
+                tbl_psaswitchexpressionwithoutdefault124.apply();
+            }
+            switch_0_case_0: {
+                tbl_psaswitchexpressionwithoutdefault125.apply();
+            }
+            switch_0_case_1: {
             }
         }
         switch (tbl_0.apply().action_run) {

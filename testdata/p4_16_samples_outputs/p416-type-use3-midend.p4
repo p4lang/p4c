@@ -36,16 +36,16 @@ struct headers_t {
 }
 
 parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
+    state parse_custom {
+        packet.extract<custom_t>(hdr.custom);
+        transition accept;
+    }
     state start {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             16w0xdead: parse_custom;
             default: accept;
         }
-    }
-    state parse_custom {
-        packet.extract<custom_t>(hdr.custom);
-        transition accept;
     }
 }
 

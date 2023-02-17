@@ -89,13 +89,6 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
     @name("parserI.tmp_4") tcp_upto_data_offset_only_h tmp_4;
     bit<8> tmp_9;
     bit<104> tmp_10;
-    state start {
-        pkt.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
-        }
-    }
     state parse_ipv4 {
         tmp_9 = pkt.lookahead<bit<8>>();
         tmp.setValid();
@@ -127,6 +120,13 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
     state parse_udp {
         pkt.extract<udp_t>(hdr.udp);
         transition accept;
+    }
+    state start {
+        pkt.extract<ethernet_t>(hdr.ethernet);
+        transition select(hdr.ethernet.etherType) {
+            16w0x800: parse_ipv4;
+            default: accept;
+        }
     }
 }
 

@@ -68,13 +68,6 @@ struct metadata {
 parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     @name("parserI.tmp") IPv4_up_to_ihl_only_h tmp;
     bit<8> tmp_4;
-    state start {
-        pkt.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
-        }
-    }
     state parse_ipv4 {
         tmp_4 = pkt.lookahead<bit<8>>();
         tmp.setValid();
@@ -91,6 +84,13 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
     state parse_tcp {
         pkt.extract<tcp_t>(hdr.tcp);
         transition accept;
+    }
+    state start {
+        pkt.extract<ethernet_t>(hdr.ethernet);
+        transition select(hdr.ethernet.etherType) {
+            16w0x800: parse_ipv4;
+            default: accept;
+        }
     }
 }
 

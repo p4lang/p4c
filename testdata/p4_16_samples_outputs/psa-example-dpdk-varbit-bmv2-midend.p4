@@ -38,13 +38,6 @@ struct EMPTY {
 parser MyIP(packet_in packet, out headers_t hdr, inout EMPTY b, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
     @name("MyIP.tmp16") bit<16> tmp16_0;
     @name("MyIP.tmp_0") bit<8> tmp_0;
-    state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
-        }
-    }
     state parse_ipv4 {
         packet.extract<ipv4_base_t>(hdr.ipv4_base);
         transition select(hdr.ipv4_base.version_ihl) {
@@ -61,6 +54,13 @@ parser MyIP(packet_in packet, out headers_t hdr, inout EMPTY b, in psa_ingress_p
         tmp_0 = packet.lookahead<bit<8>>();
         transition select(tmp_0) {
             8w0x44: parse_ipv4_option_timestamp;
+            default: accept;
+        }
+    }
+    state start {
+        packet.extract<ethernet_t>(hdr.ethernet);
+        transition select(hdr.ethernet.etherType) {
+            16w0x800: parse_ipv4;
             default: accept;
         }
     }

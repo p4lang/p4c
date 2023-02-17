@@ -7,6 +7,9 @@ header H {
 parser p(packet_in pk) {
     @name("p.h") H h_0;
     @name("p.vs") value_set<tuple<bit<32>, bit<2>>>(4) vs_0;
+    state next {
+        transition accept;
+    }
     state start {
         h_0.setInvalid();
         pk.extract<H>(h_0);
@@ -14,9 +17,6 @@ parser p(packet_in pk) {
             vs_0: next;
             default: reject;
         }
-    }
-    state next {
-        transition accept;
     }
 }
 

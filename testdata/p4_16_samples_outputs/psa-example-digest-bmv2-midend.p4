@@ -43,6 +43,10 @@ struct metadata {
 }
 
 parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
+    state CommonParser_parse_ipv4 {
+        buffer.extract<ipv4_t>(parsed_hdr.ipv4);
+        transition start_0;
+    }
     state start {
         parsed_hdr.ethernet.setInvalid();
         parsed_hdr.ipv4.setInvalid();
@@ -52,16 +56,16 @@ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadat
             default: start_0;
         }
     }
-    state CommonParser_parse_ipv4 {
-        buffer.extract<ipv4_t>(parsed_hdr.ipv4);
-        transition start_0;
-    }
     state start_0 {
         transition accept;
     }
 }
 
 parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata meta, in psa_egress_parser_input_metadata_t istd, in empty_metadata_t normal_meta, in empty_metadata_t clone_i2e_meta, in empty_metadata_t clone_e2e_meta) {
+    state CommonParser_parse_ipv4_0 {
+        buffer.extract<ipv4_t>(parsed_hdr.ipv4);
+        transition start_1;
+    }
     state start {
         parsed_hdr.ethernet.setInvalid();
         parsed_hdr.ipv4.setInvalid();
@@ -70,10 +74,6 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
             16w0x800: CommonParser_parse_ipv4_0;
             default: start_1;
         }
-    }
-    state CommonParser_parse_ipv4_0 {
-        buffer.extract<ipv4_t>(parsed_hdr.ipv4);
-        transition start_1;
     }
     state start_1 {
         transition accept;

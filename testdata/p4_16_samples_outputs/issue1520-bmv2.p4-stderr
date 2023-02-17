@@ -1,3 +1,6 @@
 issue1520-bmv2.p4(21): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.h
  hdr.h.x = 0;
  ^^^^^
+issue1520-bmv2.p4(21): [--Wwarn=ignore-prop] warning: Result of AssignmentStatement is not defined: Error: Reading field from invalid header
+ hdr.h.x = 0;
+         ^

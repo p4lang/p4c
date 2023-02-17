@@ -4,3 +4,12 @@ control c(out bit<32> v) { // uninitialized
 uninit-nowarnings.p4(73)
 control c(out bit<32> v) { // uninitialized
         ^
+uninit-nowarnings.p4(38): [--Wwarn=ignore-prop] warning: Result of AssignmentStatement is not defined: Error: Reading field from invalid header
+        h.data1 = 0;
+                ^
+[--Wwarn=ignore-prop] warning: Result of AssignmentStatement is not defined: Error: Reading field from invalid header
+[--Wwarn=ignore-prop] warning: Result of AssignmentStatement is not defined: Error: Reading field from invalid header
+[--Wwarn=ignore-prop] warning: Result of AssignmentStatement is not defined: Error: Reading field from invalid header
+uninit-nowarnings.p4(46): [--Wwarn=ignore-prop] warning: Result of AssignmentStatement is not defined: Error: Reading field from invalid header
+        h.data2 = h.data3 + 1; // uninitialized
+                ^

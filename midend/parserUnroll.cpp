@@ -167,7 +167,9 @@ class ParserStateRewriter : public Transform {
         ParserStateRewriter rewriter(parserStructure, state, valueMap, refMap, typeMap, afterExec,
                                      visitedStates);
         auto basetype = getTypeArray(expression->left);
-        if (!basetype->is<IR::Type_Stack>()) return expression;
+        if (!basetype->is<IR::Type_Stack>() || expression->right->is<IR::Constant>()) {
+            return expression;
+        }
         IR::ArrayIndex *newExpression = expression->clone();
         ExpressionEvaluator ev(refMap, typeMap, valueMap);
         auto *value = ev.evaluate(expression->right, false);
@@ -689,6 +691,19 @@ class ParserSymbolicInterpreter {
                     return true;
                 }
                 break;
+            }
+        }
+        return false;
+    }
+
+    /// Find previous state with the same and ad checks indexes.
+    bool hasTheSameIdexes(ParserStateInfo *state) {
+        const ParserStateInfo *crt = state;
+        while (true) {
+            crt = crt->predecessor;
+            if (crt == nullptr) return false;
+            if (crt->state == state->state) {
+                return equStackVariableMap(crt->statesIndexes, state->statesIndexes);
             }
         }
         return false;

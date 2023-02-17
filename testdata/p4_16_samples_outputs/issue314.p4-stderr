@@ -1,0 +1,4 @@
+issue314.p4(29): [--Wwarn=expr] warning: input.stack.lastIndex: error StackOutOfBounds will be triggered
+Parser Parser state chain: start
+        input.stack[input.stack.lastIndex].field = 8w1;
+                    ^^^^^^^^^^^^^^^^^^^^^

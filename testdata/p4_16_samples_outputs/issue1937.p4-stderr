@@ -10,3 +10,6 @@ issue1937.p4(14): [--Wwarn=invalid_header] warning: accessing a field of an inva
 issue1937.p4(15): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr
         foo.apply(hdr.f2);
                   ^^^
+issue1937.p4(7): [--Wwarn=ignore-prop] warning: Result of AssignmentStatement is not defined: Error: Reading field from invalid header
+        x = (y >> 2);
+          ^

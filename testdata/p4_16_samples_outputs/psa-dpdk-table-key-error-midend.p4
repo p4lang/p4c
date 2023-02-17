@@ -65,14 +65,6 @@ struct headers {
 }
 
 parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
-    state start {
-        buffer.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x800 &&& 16w0xf00: parse_ipv4;
-            16w0xd00: parse_tcp;
-            default: accept;
-        }
-    }
     state parse_ipv4 {
         buffer.extract<ipv4_t>(hdr.ipv4);
         transition select(hdr.ipv4.protocol) {
@@ -83,6 +75,14 @@ parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_
     state parse_tcp {
         buffer.extract<tcp_t>(hdr.tcp);
         transition accept;
+    }
+    state start {
+        buffer.extract<ethernet_t>(hdr.ethernet);
+        transition select(hdr.ethernet.etherType) {
+            16w0x800 &&& 16w0xf00: parse_ipv4;
+            16w0xd00: parse_tcp;
+            default: accept;
+        }
     }
 }
 

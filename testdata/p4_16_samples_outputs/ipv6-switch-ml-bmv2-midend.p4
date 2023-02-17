@@ -227,12 +227,9 @@ struct metadata_t {
 }
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
-    state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x86dd: ipv6;
-            default: accept;
-        }
+    state icmp6 {
+        packet.extract<icmp6_t>(hdr.icmp6);
+        transition accept;
     }
     state ipv6 {
         packet.extract<ipv6_t>(hdr.ipv6);
@@ -242,13 +239,16 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta, inout 
             default: accept;
         }
     }
-    state icmp6 {
-        packet.extract<icmp6_t>(hdr.icmp6);
-        transition accept;
-    }
     state parse_udp {
         packet.extract<udp_t>(hdr.udp);
         transition accept;
+    }
+    state start {
+        packet.extract<ethernet_t>(hdr.ethernet);
+        transition select(hdr.ethernet.etherType) {
+            16w0x86dd: ipv6;
+            default: accept;
+        }
     }
 }
 

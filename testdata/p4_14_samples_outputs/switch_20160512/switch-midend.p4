@@ -935,6 +935,14 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("ParserImpl.tmp_0") bit<4> tmp_0;
+    state stateOutOfBound {
+        verify(false, error.StackOutOfBounds);
+        transition reject;
+    }
+    state noMatch {
+        verify(false, error.NoMatch);
+        transition reject;
+    }
     @name(".parse_arp_rarp") state parse_arp_rarp {
         packet.extract<arp_rarp_t>(hdr.arp_rarp);
         transition select(hdr.arp_rarp.protoType) {
@@ -1128,12 +1136,199 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name(".parse_int_val") state parse_int_val {
-        packet.extract<int_value_t>(hdr.int_val.next);
-        transition select(hdr.int_val.last.bos) {
-            1w0: parse_int_val;
+        packet.extract<int_value_t>(hdr.int_val[32w0]);
+        transition select(hdr.int_val[32w0].bos) {
+            1w0: parse_int_val1;
             1w1: parse_inner_ethernet;
             default: noMatch;
         }
+    }
+    state parse_int_val1 {
+        packet.extract<int_value_t>(hdr.int_val[32w1]);
+        transition select(hdr.int_val[32w1].bos) {
+            1w0: parse_int_val2;
+            1w1: parse_inner_ethernet;
+            default: noMatch;
+        }
+    }
+    state parse_int_val2 {
+        packet.extract<int_value_t>(hdr.int_val[32w2]);
+        transition select(hdr.int_val[32w2].bos) {
+            1w0: parse_int_val3;
+            1w1: parse_inner_ethernet;
+            default: noMatch;
+        }
+    }
+    state parse_int_val3 {
+        packet.extract<int_value_t>(hdr.int_val[32w3]);
+        transition select(hdr.int_val[32w3].bos) {
+            1w0: parse_int_val4;
+            1w1: parse_inner_ethernet;
+            default: noMatch;
+        }
+    }
+    state parse_int_val4 {
+        packet.extract<int_value_t>(hdr.int_val[32w4]);
+        transition select(hdr.int_val[32w4].bos) {
+            1w0: parse_int_val5;
+            1w1: parse_inner_ethernet;
+            default: noMatch;
+        }
+    }
+    state parse_int_val5 {
+        packet.extract<int_value_t>(hdr.int_val[32w5]);
+        transition select(hdr.int_val[32w5].bos) {
+            1w0: parse_int_val6;
+            1w1: parse_inner_ethernet;
+            default: noMatch;
+        }
+    }
+    state parse_int_val6 {
+        packet.extract<int_value_t>(hdr.int_val[32w6]);
+        transition select(hdr.int_val[32w6].bos) {
+            1w0: parse_int_val7;
+            1w1: parse_inner_ethernet;
+            default: noMatch;
+        }
+    }
+    state parse_int_val7 {
+        packet.extract<int_value_t>(hdr.int_val[32w7]);
+        transition select(hdr.int_val[32w7].bos) {
+            1w0: parse_int_val8;
+            1w1: parse_inner_ethernet;
+            default: noMatch;
+        }
+    }
+    state parse_int_val8 {
+        packet.extract<int_value_t>(hdr.int_val[32w8]);
+        transition select(hdr.int_val[32w8].bos) {
+            1w0: parse_int_val9;
+            1w1: parse_inner_ethernet;
+            default: noMatch;
+        }
+    }
+    state parse_int_val9 {
+        packet.extract<int_value_t>(hdr.int_val[32w9]);
+        transition select(hdr.int_val[32w9].bos) {
+            1w0: parse_int_val10;
+            1w1: parse_inner_ethernet;
+            default: noMatch;
+        }
+    }
+    state parse_int_val10 {
+        packet.extract<int_value_t>(hdr.int_val[32w10]);
+        transition select(hdr.int_val[32w10].bos) {
+            1w0: parse_int_val11;
+            1w1: parse_inner_ethernet;
+            default: noMatch;
+        }
+    }
+    state parse_int_val11 {
+        packet.extract<int_value_t>(hdr.int_val[32w11]);
+        transition select(hdr.int_val[32w11].bos) {
+            1w0: parse_int_val12;
+            1w1: parse_inner_ethernet;
+            default: noMatch;
+        }
+    }
+    state parse_int_val12 {
+        packet.extract<int_value_t>(hdr.int_val[32w12]);
+        transition select(hdr.int_val[32w12].bos) {
+            1w0: parse_int_val13;
+            1w1: parse_inner_ethernet;
+            default: noMatch;
+        }
+    }
+    state parse_int_val13 {
+        packet.extract<int_value_t>(hdr.int_val[32w13]);
+        transition select(hdr.int_val[32w13].bos) {
+            1w0: parse_int_val14;
+            1w1: parse_inner_ethernet;
+            default: noMatch;
+        }
+    }
+    state parse_int_val14 {
+        packet.extract<int_value_t>(hdr.int_val[32w14]);
+        transition select(hdr.int_val[32w14].bos) {
+            1w0: parse_int_val15;
+            1w1: parse_inner_ethernet;
+            default: noMatch;
+        }
+    }
+    state parse_int_val15 {
+        packet.extract<int_value_t>(hdr.int_val[32w15]);
+        transition select(hdr.int_val[32w15].bos) {
+            1w0: parse_int_val16;
+            1w1: parse_inner_ethernet;
+            default: noMatch;
+        }
+    }
+    state parse_int_val16 {
+        packet.extract<int_value_t>(hdr.int_val[32w16]);
+        transition select(hdr.int_val[32w16].bos) {
+            1w0: parse_int_val17;
+            1w1: parse_inner_ethernet;
+            default: noMatch;
+        }
+    }
+    state parse_int_val17 {
+        packet.extract<int_value_t>(hdr.int_val[32w17]);
+        transition select(hdr.int_val[32w17].bos) {
+            1w0: parse_int_val18;
+            1w1: parse_inner_ethernet;
+            default: noMatch;
+        }
+    }
+    state parse_int_val18 {
+        packet.extract<int_value_t>(hdr.int_val[32w18]);
+        transition select(hdr.int_val[32w18].bos) {
+            1w0: parse_int_val19;
+            1w1: parse_inner_ethernet;
+            default: noMatch;
+        }
+    }
+    state parse_int_val19 {
+        packet.extract<int_value_t>(hdr.int_val[32w19]);
+        transition select(hdr.int_val[32w19].bos) {
+            1w0: parse_int_val20;
+            1w1: parse_inner_ethernet;
+            default: noMatch;
+        }
+    }
+    state parse_int_val20 {
+        packet.extract<int_value_t>(hdr.int_val[32w20]);
+        transition select(hdr.int_val[32w20].bos) {
+            1w0: parse_int_val21;
+            1w1: parse_inner_ethernet;
+            default: noMatch;
+        }
+    }
+    state parse_int_val21 {
+        packet.extract<int_value_t>(hdr.int_val[32w21]);
+        transition select(hdr.int_val[32w21].bos) {
+            1w0: parse_int_val22;
+            1w1: parse_inner_ethernet;
+            default: noMatch;
+        }
+    }
+    state parse_int_val22 {
+        packet.extract<int_value_t>(hdr.int_val[32w22]);
+        transition select(hdr.int_val[32w22].bos) {
+            1w0: parse_int_val23;
+            1w1: parse_inner_ethernet;
+            default: noMatch;
+        }
+    }
+    state parse_int_val23 {
+        packet.extract<int_value_t>(hdr.int_val[32w23]);
+        transition select(hdr.int_val[32w23].bos) {
+            1w0: parse_int_val24;
+            1w1: parse_inner_ethernet;
+            default: noMatch;
+        }
+    }
+    state parse_int_val24 {
+        transition stateOutOfBound;
     }
     @name(".parse_ipv4") state parse_ipv4 {
         packet.extract<ipv4_t>(hdr.ipv4);
@@ -1185,12 +1380,31 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name(".parse_mpls") state parse_mpls {
-        packet.extract<mpls_t>(hdr.mpls.next);
-        transition select(hdr.mpls.last.bos) {
-            1w0: parse_mpls;
+        packet.extract<mpls_t>(hdr.mpls[32w0]);
+        transition select(hdr.mpls[32w0].bos) {
+            1w0: parse_mpls1;
             1w1: parse_mpls_bos;
             default: accept;
         }
+    }
+    state parse_mpls1 {
+        packet.extract<mpls_t>(hdr.mpls[32w1]);
+        transition select(hdr.mpls[32w1].bos) {
+            1w0: parse_mpls2;
+            1w1: parse_mpls_bos;
+            default: accept;
+        }
+    }
+    state parse_mpls2 {
+        packet.extract<mpls_t>(hdr.mpls[32w2]);
+        transition select(hdr.mpls[32w2].bos) {
+            1w0: parse_mpls3;
+            1w1: parse_mpls_bos;
+            default: accept;
+        }
+    }
+    state parse_mpls3 {
+        transition stateOutOfBound;
     }
     @name(".parse_mpls_bos") state parse_mpls_bos {
         tmp_0 = packet.lookahead<bit<4>>();
@@ -1317,10 +1531,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".start") state start {
         transition parse_ethernet;
-    }
-    state noMatch {
-        verify(false, error.NoMatch);
-        transition reject;
     }
 }
 
