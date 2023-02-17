@@ -213,11 +213,10 @@ const IR::Node *DoFlattenHeaderUnionStack::postorder(IR::Type_Struct *s) {
         auto ftype = typeMap->getType(sf, true);
         if (auto hus = ftype->to<IR::Type_Stack>()) {
             if (hus->elementType->is<IR::Type_HeaderUnion>()) {
-            size_t stackSize = hus->getSize();            
-            for (size_t i = 0; i < stackSize; i++) {
+                size_t stackSize = hus->getSize();
+                for (size_t i = 0; i < stackSize; i++) {
                     cstring uName = refMap->newName(sf->name.name + Util::toString(i));
-                    fields.push_back(
-                        new IR::StructField(IR::ID(uName), hus->at(i)->getP4Type()));
+                    fields.push_back(new IR::StructField(IR::ID(uName), hus->at(i)->getP4Type()));
                     indexVec.push_back(uName);
                 }
                 stackMap.emplace(sf->name.name, indexVec);
@@ -240,7 +239,7 @@ const IR::Node *DoFlattenHeaderUnionStack::postorder(IR::Declaration_Variable *d
     std::vector<cstring> indexVec;
     if (auto hus = ftype->to<IR::Type_Stack>()) {
         if (hus->elementType->is<IR::Type_HeaderUnion>()) {
-            size_t stackSize = hus->getSize();            
+            size_t stackSize = hus->getSize();
             for (size_t i = 0; i < stackSize; i++) {
                 cstring uName = refMap->newName(dv->name.name + Util::toString(i));
                 indexVec.push_back(uName);
@@ -263,7 +262,10 @@ const IR::Node *DoFlattenHeaderUnionStack::postorder(IR::ArrayIndex *e) {
         unsigned stackSize = stack->size->to<IR::Constant>()->asUnsigned();
         if (stack->elementType->is<IR::Type_HeaderUnion>()) {
             if (!e->right->is<IR::Constant>())
-                ::error(ErrorType::ERR_INVALID, "Target expects constant array indices for accessing header union stack elements, %1% is not a constant", e->right);
+                ::error(ErrorType::ERR_INVALID,
+                        "Target expects constant array indices for accessing header union stack "
+                        "elements, %1% is not a constant",
+                        e->right);
             unsigned cst = e->right->to<IR::Constant>()->asUnsigned();
             if (cst >= stackSize)
                 ::error(ErrorType::ERR_OVERLIMIT, "Array index out of bound for %1%", e);
