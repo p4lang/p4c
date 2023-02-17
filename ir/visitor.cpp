@@ -26,6 +26,7 @@ limitations under the License.
 #include <gc/gc.h>
 #endif
 
+#include "dbprint.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"
@@ -486,6 +487,10 @@ void ControlFlowVisitor::init_join_flows(const IR::Node *root) {
     else
         flow_join_points = new std::remove_reference<decltype(*flow_join_points)>::type;
     applySetupJoinPoints(root);
+#if DEBUG_FLOW_JOIN
+    erase_if(*flow_join_points,
+             [this](flow_join_points_t::value_type &el) { return el.second.count == 0; });
+#endif
     erase_if(*flow_join_points,
              [this](flow_join_points_t::value_type &el) { return filter_join_point(el.first); });
 }
@@ -493,6 +498,9 @@ void ControlFlowVisitor::init_join_flows(const IR::Node *root) {
 bool ControlFlowVisitor::join_flows(const IR::Node *n) {
     if (!flow_join_points || !flow_join_points->count(n)) return false;  // not a flow join point
     auto &status = flow_join_points->at(n);
+#if DEBUG_FLOW_JOIN
+    status.parents[ctxt ? ctxt->original : nullptr].visited++;
+#endif
     // BUG_CHECK(status.count >= 0, "join point reached too many times");
     // FIXME -- this means that we calculated the wrong number of parents for a
     // join point, and completed the join sooner than we should have.  This can
@@ -535,7 +543,7 @@ bool ControlFlowVisitor::join_flows(const IR::Node *n) {
     while (delta && status.count >= 0) {
         delta = false;
         for (auto *sl = split_link; sl; sl = sl->prev) {
-            if (!sl->finished()) {
+            if (sl->ready()) {
                 sl->do_visit();  //  visit some parallel stuff;
                 delta = true;
                 break;
@@ -602,6 +610,8 @@ IRNODE_ALL_NON_TEMPLATE_CLASSES(DEFINE_APPLY_FUNCTIONS, , , )
 IRNODE_ALL_SUBCLASSES(DEFINE_VISIT_FUNCTIONS)
 #undef DEFINE_VISIT_FUNCTIONS
 
+// Everything after this is for debugging or cleaner logging
+
 std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> *v) {
     return v ? out << *v : out << "<null>";
 }
@@ -663,4 +673,46 @@ Backtrack::trigger::~trigger() {
         trigger_gc_roots.erase(this);
     }
 #endif /* HAVE_LIBGC */
+}
+
+std::ostream &operator<<(std::ostream &out, const ControlFlowVisitor::flow_join_info_t &info) {
+    if (info.vclone) out << Visitor::demangle(typeid(*info.vclone).name()) << " ";
+    out << "count=" << info.count << "  done=" << info.done;
+#if DEBUG_FLOW_JOIN
+    using namespace DBPrint;
+    auto flags = dbgetflags(out);
+    out << Brief;
+    for (auto &i : info.parents) {
+        out << Log::endl
+            << "  " << *i.first << " [" << i.first->id << "] "
+            << "exist=" << i.second.exist << " visited=" << i.second.visited;
+    }
+    dbsetflags(out, flags);
+#endif
+    return out;
+}
+
+std::ostream &operator<<(std::ostream &out, const ControlFlowVisitor::flow_join_points_t &fjp) {
+    using namespace DBPrint;
+    auto flags = dbgetflags(out);
+    out << Brief;
+    bool first = true;
+    for (auto &jp : fjp) {
+        if (!first) out << "\n";
+        out << "[" << jp.first->id << "] " << *jp.first << ": " << jp.second;
+        first = false;
+    }
+    dbsetflags(out, flags);
+    return out;
+}
+
+void dump(const ControlFlowVisitor::flow_join_info_t &info) { std::cout << info << std::endl; }
+void dump(const ControlFlowVisitor::flow_join_info_t *info) { std::cout << *info << std::endl; }
+void dump(const ControlFlowVisitor::flow_join_points_t &fjp) { std::cout << fjp << std::endl; }
+void dump(const ControlFlowVisitor::flow_join_points_t *fjp) { std::cout << *fjp << std::endl; }
+void dump(const SplitFlowVisit_base *split) {
+    while (split) {
+        std::cout << *split << std::endl;
+        split = split->prev;
+    }
 }

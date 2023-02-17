@@ -185,7 +185,9 @@ class Visitor {
 
     // Functions for IR visit_children to call for ControlFlowVisitors.
     virtual Visitor &flow_clone() { return *this; }
-    SplitFlowVisit_base *split_link = nullptr;
+    // all flow_clones share a split_link chain to allow stack walking
+    SplitFlowVisit_base *split_link_mem = nullptr, *&split_link;
+    Visitor() : split_link(split_link_mem) {}
 
     /** Merge the given visitor into this visitor at a joint point in the
      * control flow graph.  Should update @this and leave the other unchanged.
@@ -197,6 +199,7 @@ class Visitor {
     virtual void erase_global(cstring) {}
     virtual bool check_global(cstring) { return false; }
     virtual void clear_globals() {}
+    virtual bool has_flow_joins() const { return false; }
 
     static cstring demangle(const char *);
     virtual const char *name() const {
@@ -303,7 +306,9 @@ class Visitor {
     // children.  This only works for Inspector (not Modifier/Transform) currently.
     bool joinFlows = false;
 
-    virtual void init_join_flows(const IR::Node *) { assert(0); }
+    virtual void init_join_flows(const IR::Node *) {
+        BUG("joinFlows only supported in ControlFlowVisitor currently");
+    }
 
     /** If @n is a join point in the control flow graph (i.e. has multiple incoming
      * edges) and is not filtered out by `filter_join_point`, then:
@@ -432,6 +437,9 @@ class Transform : public virtual Visitor {
     }
 };
 
+// turn this on for extra info tracking control joinFlows for debugging
+#define DEBUG_FLOW_JOIN 0
+
 class ControlFlowVisitor : public virtual Visitor {
     std::map<cstring, ControlFlowVisitor &> &globals;
 
@@ -441,13 +449,40 @@ class ControlFlowVisitor : public virtual Visitor {
         ControlFlowVisitor *vclone = nullptr;  // a clone to accumulate info into
         int count = 0;                         // additional parents needed -1
         bool done = false;
+#if DEBUG_FLOW_JOIN
+        struct ctrs_t {
+            int exist = 0, visited = 0;
+        };
+        std::map<const IR::Node *, ctrs_t> parents;
+#endif
     };
     typedef std::map<const IR::Node *, flow_join_info_t> flow_join_points_t;
+    friend std::ostream &operator<<(std::ostream &, const flow_join_info_t &);
+    friend std::ostream &operator<<(std::ostream &, const flow_join_points_t &);
+    friend void dump(const flow_join_info_t &);
+    friend void dump(const flow_join_info_t *);
+    friend void dump(const flow_join_points_t &);
+    friend void dump(const flow_join_points_t *);
+
     flow_join_points_t *flow_join_points = 0;
     class SetupJoinPoints : public Inspector {
      protected:
         flow_join_points_t &join_points;
-        void revisit(const IR::Node *n) override { ++join_points[n].count; }
+        bool preorder(const IR::Node *n) override {
+            BUG_CHECK(join_points.count(n) == 0, "oops");
+#if DEBUG_FLOW_JOIN
+            auto *ctxt = getContext();
+            join_points[n].parents[ctxt ? ctxt->original : nullptr].exist++;
+#endif
+            return true;
+        }
+        void revisit(const IR::Node *n) override {
+            ++join_points[n].count;
+#if DEBUG_FLOW_JOIN
+            auto *ctxt = getContext();
+            join_points[n].parents[ctxt ? ctxt->original : nullptr].exist++;
+#endif
+        }
 
      public:
         explicit SetupJoinPoints(flow_join_points_t &fjp) : join_points(fjp) {}
@@ -498,37 +533,57 @@ class ControlFlowVisitor : public virtual Visitor {
         }
         ~GuardGlobal() { self.erase_global(key); }
     };
+
+    bool has_flow_joins() const override { return !!flow_join_points; }
+    const flow_join_info_t *flow_join_status(const IR::Node *n) const {
+        if (!flow_join_points || !flow_join_points->count(n)) return nullptr;
+        return &flow_join_points->at(n);
+    }
 };
 
+/** SplitFlowVisit_base is base class for doing coroutine-like processing of
+ * of flows in a visitor.  A visit_children method (or a preorder override) can
+ * instantiate a local SplitFlowVist subclass to record the various children that
+ * need to be visited, and the chain of currently in existence SplitFlowVisit objects
+ * will be recorded in split_link.  When flows need to be joined (to visit a Dag
+ * node with mulitple parents), processing of the node can be 'paused' and other
+ * children from the SplitFlowVist can be visited, in order to visit all parents
+ * before the child is visited. */
 class SplitFlowVisit_base {
  protected:
     Visitor &v;
     SplitFlowVisit_base *prev;
     std::vector<Visitor *> visitors;
-    int visit_next, start_index;
+    int visit_next = 0, start_index = 0;
+    bool paused = false;
     friend ControlFlowVisitor;
 
-    explicit SplitFlowVisit_base(Visitor &v) : v(v), visit_next(0) {
+    explicit SplitFlowVisit_base(Visitor &v) : v(v) {
         prev = v.split_link;
         v.split_link = this;
     }
     ~SplitFlowVisit_base() { v.split_link = prev; }
+    void *operator new(size_t);  // declared and not defined, as this class can
+    // only be instantiated on the stack.  Trying to allocate one on the heap will
+    // cause a linker error.
 
  public:
     bool finished() { return size_t(visit_next) >= visitors.size(); }
+    virtual bool ready() { return !finished() && !paused; }
+    void pause() { paused = true; }
+    void unpause() { paused = false; }
     virtual void do_visit() = 0;
     virtual void run_visit() {
         auto *ctxt = v.getChildContext();
         start_index = ctxt ? ctxt->child_index : 0;
+        paused = false;
         while (!finished()) do_visit();
-        bool first = true;
         for (auto *cl : visitors) {
-            if (first)
-                first = false;
-            else
-                v.flow_merge(*cl);
+            if (cl && cl != &v) v.flow_merge(*cl);
         }
     }
+    virtual void dbprint(std::ostream &) const = 0;
+    friend void dump(const SplitFlowVisit_base *);
 };
 
 template <class N>
@@ -563,12 +618,16 @@ class SplitFlowVisit : public SplitFlowVisit_base {
     }
     void do_visit() override {
         if (!finished()) {
+            BUG_CHECK(!paused, "trying to visit paused split_flow_visitor");
             int idx = visit_next++;
             if (nodes.empty())
                 visitors.at(idx)->visit(*const_nodes.at(idx), nullptr, start_index + idx);
             else
                 visitors.at(idx)->visit(*nodes.at(idx), nullptr, start_index + idx);
         }
+    }
+    void dbprint(std::ostream &out) const override {
+        out << "SplitFlowVisit processed " << visit_next << " of " << visitors.size();
     }
 };
 
@@ -593,6 +652,7 @@ class SplitFlowVisitVector : public SplitFlowVisit_base {
     }
     void do_visit() override {
         if (!finished()) {
+            BUG_CHECK(!paused, "trying to visit paused split_flow_visitor");
             int idx = visit_next++;
             if (vec)
                 result[idx] = visitors.at(idx)->apply_visitor(vec->at(idx));
@@ -636,6 +696,9 @@ class SplitFlowVisitVector : public SplitFlowVisit_base {
                 }
             }
         }
+    }
+    void dbprint(std::ostream &out) const override {
+        out << "SplitFlowVisitVector processed " << visit_next << " of " << visitors.size();
     }
 };
 
