@@ -195,7 +195,7 @@ if (LIBBPF)
 else()
   message(WARNING "Missing the libbpf dependency, disabling kernel tests."
   " You can install libbpf by running './build_libbpf' in the "
-  "${CMAKE_CURRENT_SOURCE_DIR}/runtime folder.")
+  "${CMAKE_CURRENT_SOURCE_DIR} folder.")
   set (SUPPORTS_KERNEL False)
 endif()
 

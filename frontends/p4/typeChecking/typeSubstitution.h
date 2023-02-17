@@ -44,7 +44,7 @@ class TypeSubstitution : public IHasDbPrint {
 
     /* This can fail if id is already bound.
      * @return true on success. */
-    bool setBinding(T id, const IR::Type *type) {
+    virtual bool setBinding(T id, const IR::Type *type) {
         CHECK_NULL(id);
         CHECK_NULL(type);
         auto it = binding.find(id);
@@ -61,7 +61,7 @@ class TypeSubstitution : public IHasDbPrint {
         bool first = true;
         for (auto it : binding) {
             if (!first) out << std::endl;
-            out << it.first << " -> " << dbp(it.second);
+            out << dbp(it.first) << " " << it.first << " -> " << dbp(it.second) << " " << it.second;
             first = false;
         }
     }
@@ -82,6 +82,12 @@ class TypeVariableSubstitution final : public TypeSubstitution<const IR::ITypeVa
     // In this variant of compose all variables in 'other' that are
     // assigned to are disjoint from all variables already in 'this'.
     void simpleCompose(const TypeVariableSubstitution *other);
+    void debugValidate();
+    bool setBinding(const IR::ITypeVar *id, const IR::Type *type) override {
+        auto result = TypeSubstitution::setBinding(id, type);
+        debugValidate();
+        return result;
+    }
 };
 
 }  // namespace P4
