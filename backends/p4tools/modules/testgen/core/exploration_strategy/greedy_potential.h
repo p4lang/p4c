@@ -34,6 +34,10 @@ class GreedyPotential : public ExplorationStrategy {
 
  protected:
     uint64_t threshold = 0;
+    /// This variable keeps track of how many branch decisions we have made without producing a
+    /// test. This is a safety guard in case the strategy gets stuck in parser loops because of its
+    /// greediness.
+    uint64_t stepsWithoutTest = 0;
     /// Encapsulates a stack of unexplored branches. This exists to help enforce the invariant that
     /// any push or pop operation on this stack should be paired with a corresponding push/pop
     /// operation on the solver.
@@ -42,7 +46,7 @@ class GreedyPotential : public ExplorationStrategy {
         [[nodiscard]] bool empty() const;
         void push(StepResult branches);
         Branch pop(uint64_t *threshold, const P4::Coverage::CoverageSet &coveredStatements,
-                   bool search);
+                   bool search, bool fallBackToRandom);
         size_t size();
 
         UnexploredBranches();
@@ -77,7 +81,8 @@ class GreedyPotential : public ExplorationStrategy {
     /// stack of unexplored branches and the solver's state will be unchanged.
     ///
     /// @returns next execution state to be examined on success, nullptr on failure.
-    ExecutionState *chooseBranch(bool guaranteeViability, bool search);
+    ExecutionState *chooseBranch(bool guaranteeViability, bool search,
+                                 bool fallBackToRandom = false);
 };
 
 }  // namespace P4Testgen
