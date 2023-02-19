@@ -271,6 +271,13 @@ match_kind {
 // BEGIN:Hash_algorithms
 enum PNA_HashAlgorithm_t {
   // TBD what this type's values will be for PNA
+  IDENTITY,
+  CRC32,
+  CRC32_CUSTOM,
+  CRC16,
+  CRC16_CUSTOM,
+  ONES_COMPLEMENT16,  /// One's complement 16-bit sum used for IPv4 headers,
+  TOEPLITZ,
   TARGET_DEFAULT      /// target implementation defined
 }
 // END:Hash_algorithms

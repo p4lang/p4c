@@ -58,7 +58,6 @@ header MainParserT_parser_tmp_hdr instanceof option_t
 header MainParserT_parser_lookahead_0 instanceof lookahead_tmp_hdr
 
 regarray direction size 0x100 initval 0
-
 action NoAction args none {
 	return
 }

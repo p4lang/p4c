@@ -52,7 +52,6 @@ header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
 
 regarray direction size 0x100 initval 0
-
 action a1 args instanceof a1_arg_t {
 	mov h.ethernet.dstAddr t.param
 	return

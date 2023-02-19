@@ -64,15 +64,10 @@ header ipv4 instanceof ipv4_t
 regarray counter0_0_packets size 0x400 initval 0x0
 
 regarray counter0_0_bytes size 0x400 initval 0x0
-
 regarray counter1_0 size 0x400 initval 0x0
-
 regarray counter2_0 size 0x400 initval 0x0
-
 regarray reg_0 size 0x400 initval 0
-
 metarray meter0_0 size 0x400
-
 action NoAction args none {
 	return
 }

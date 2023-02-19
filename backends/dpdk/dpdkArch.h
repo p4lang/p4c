@@ -679,6 +679,11 @@ class CollectExternDeclaration : public Inspector {
                     ::error(ErrorType::ERR_EXPECTED,
                             "%1%: expected size and optionally init_val as arguments", d);
                 }
+            } else if (externTypeName == "Hash") {
+                if (d->arguments->size() != 1) {
+                    ::error(ErrorType::ERR_EXPECTED,
+                            "%1%: expected hash algorithm as the only argument", d);
+                }
             } else {
                 // unsupported extern type
                 return false;

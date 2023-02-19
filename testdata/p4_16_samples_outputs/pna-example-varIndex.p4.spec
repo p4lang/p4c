@@ -62,7 +62,6 @@ struct main_metadata_t {
 metadata instanceof main_metadata_t
 
 regarray direction size 0x100 initval 0
-
 action execute_1 args none {
 	mov m.MainControlT_tmp_1 m.local_metadata_depth
 	add m.MainControlT_tmp_1 0x3

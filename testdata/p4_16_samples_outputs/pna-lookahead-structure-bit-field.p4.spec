@@ -26,7 +26,6 @@ header h2 instanceof header2_t
 header MainParserT_parser_lookahead_0 instanceof lookahead_tmp_hdr
 
 regarray direction size 0x100 initval 0
-
 apply {
 	rx m.pna_main_input_metadata_input_port
 	lookahead h.MainParserT_parser_lookahead_0

@@ -33,15 +33,11 @@ header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
 
 regarray per_prefix_bytes_count_0 size 0x401 initval 0x0
-
 regarray per_prefix_pkt_bytes_count_0_packets size 0x401 initval 0x0
 
 regarray per_prefix_pkt_bytes_count_0_bytes size 0x401 initval 0x0
-
 regarray per_prefix_pkt_count_0 size 0x401 initval 0x0
-
 regarray direction size 0x100 initval 0
-
 action count_1 args none {
 	jmpneq LABEL_END m.local_metadata_data 0x8
 	entryid m.table_entry_index 

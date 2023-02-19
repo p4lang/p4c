@@ -25,7 +25,6 @@ struct metadata {
 metadata instanceof metadata
 
 regarray direction size 0x100 initval 0
-
 action NoAction args none {
 	return
 }

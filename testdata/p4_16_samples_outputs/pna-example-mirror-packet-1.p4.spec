@@ -40,7 +40,6 @@ struct main_metadata_t {
 metadata instanceof main_metadata_t
 
 regarray direction size 0x100 initval 0
-
 action NoAction args none {
 	return
 }

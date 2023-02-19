@@ -45,9 +45,7 @@ header ipv4 instanceof ipv4_t
 regarray per_prefix_pkt_bytes_count_0_packets size 0x40001 initval 0x0
 
 regarray per_prefix_pkt_bytes_count_0_bytes size 0x40001 initval 0x0
-
 regarray direction size 0x100 initval 0
-
 action next_hop args instanceof next_hop_arg_t {
 	mov m.pna_main_output_metadata_output_port t.vport
 	return

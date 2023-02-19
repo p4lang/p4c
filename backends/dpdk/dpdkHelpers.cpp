@@ -239,19 +239,24 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                 auto di = e->object->to<IR::Declaration_Instance>();
                 auto declArgs = di->arguments;
                 if (declArgs->size() == 0) {
-                    ::error(ErrorType::ERR_UNEXPECTED, "Expected atleast 1 argument for %1%",
+                    ::error(ErrorType::ERR_UNEXPECTED, "Expected 1 argument for %1%",
                             e->object->getName());
                     return false;
                 }
                 auto hash_alg = declArgs->at(0)->expression;
-                unsigned hashAlgValue = 0;
+                unsigned hashAlgValue = CRC1;
+                cstring hashInstr = "hash";
                 if (hash_alg->is<IR::Constant>())
                     hashAlgValue = hash_alg->to<IR::Constant>()->asUnsigned();
-                cstring hashAlgName = "";
+                cstring hashAlgName = "crc32";
                 if (hashAlgValue == JHASH0 || hashAlgValue == JHASH5)
                     hashAlgName = "jhash";
                 else if (hashAlgValue >= CRC1 && hashAlgValue <= CRC4)
                     hashAlgName = "crc32";
+                else if (hashAlgValue == TOEPLITZ) {
+                    hashAlgName = e->object->getName().name;
+                    hashInstr = "rss";
+                }
 
                 IR::Vector<IR::Expression> components;
                 IR::ListExpression *listExp = nullptr;
@@ -287,7 +292,7 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                         processHashParams(field, components);
                     }
                     listExp = new IR::ListExpression(components);
-                    i = new IR::DpdkGetHashStatement(hashAlgName, listExp, left);
+                    i = new IR::DpdkGetHashStatement(hashInstr, hashAlgName, listExp, left);
                 } else if (e->expr->arguments->size() == 3) {
                     auto maxValue = 0;
                     auto base = (*e->expr->arguments)[0];
@@ -335,7 +340,7 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                     }
                     listExp = new IR::ListExpression(components);
                     auto bs = base->expression->to<IR::Expression>();
-                    add_instr(new IR::DpdkGetHashStatement(hashAlgName, listExp, left));
+                    add_instr(new IR::DpdkGetHashStatement(hashInstr, hashAlgName, listExp, left));
                     add_instr(new IR::DpdkAndStatement(left, left, new IR::Constant(maxValue - 1)));
                     i = new IR::DpdkAddStatement(left, left, bs);
                 }
@@ -706,6 +711,7 @@ bool ConvertStatementToDpdk::checkIfBelongToSameHdrMdStructure(const IR::Argumen
                     sName = getHdrMdStrName(exp);
                 }
             }
+
             if (hdrStrName == "")
                 hdrStrName = sName;
             else if (hdrStrName != sName)

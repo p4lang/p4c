@@ -35,7 +35,6 @@ header ipv4 instanceof ipv4_dddddddddddddddddddddddddddddddddddddddddd_t
 header ethernet1 instanceof ethernet_t
 
 regarray direction size 0x100 initval 0
-
 action next_hop args instanceof next_hop_arg_t {
 	jmpnv LABEL_FALSE_1 h.ethernet
 	validate h.ethernet1

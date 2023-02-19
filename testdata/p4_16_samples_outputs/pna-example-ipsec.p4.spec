@@ -77,15 +77,10 @@ struct metadata_t {
 metadata instanceof metadata_t
 
 regarray ipsec_port_out_inbound size 0x1 initval 0
-
 regarray ipsec_port_out_outbound size 0x1 initval 0
-
 regarray ipsec_port_in_inbound size 0x1 initval 0
-
 regarray ipsec_port_in_outbound size 0x1 initval 0
-
 regarray direction size 0x100 initval 0
-
 action ipsec_enable args instanceof ipsec_enable_arg_t {
 	validate h.ipsec_hdr
 	mov h.ipsec_hdr.sa_id t.sa_index

@@ -56,7 +56,6 @@ struct main_metadata_t {
 metadata instanceof main_metadata_t
 
 regarray direction size 0x100 initval 0
-
 action execute_1 args none {
 	jmpneq LABEL_FALSE_2 m.local_metadata_depth 0x0
 	mov m.MainControlT_tmp_1 m.local_metadata_depth

@@ -46,7 +46,6 @@ metadata instanceof metadata_t
 header ethernet instanceof ethernet_t
 
 regarray regfile_0 size 0x80 initval 0
-
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x1

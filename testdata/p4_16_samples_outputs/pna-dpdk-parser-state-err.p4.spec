@@ -70,7 +70,6 @@ header ipv4 instanceof ipv4_t
 header tcp instanceof tcp_t
 
 regarray direction size 0x100 initval 0
-
 action do_range_checks_1 args instanceof do_range_checks_1_arg_t {
 	jmpgt LABEL_FALSE_2 t.min1 h.tcp.srcPort
 	jmpgt LABEL_FALSE_2 h.tcp.srcPort t.max1

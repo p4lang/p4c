@@ -35,7 +35,7 @@ std::ostream &IR::DpdkAsmProgram::toSpec(std::ostream &out) const {
     }
     for (auto s : externDeclarations) {
         add_comment(out, s->name.toString());
-        s->toSpec(out) << std::endl;
+        s->toSpec(out);
     }
     for (auto a : actions) {
         add_comment(out, a->name.toString());
@@ -70,7 +70,23 @@ std::ostream &IR::DpdkDeclaration::toSpec(std::ostream &out) const {
 }
 
 std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
-    if (DPDK::toStr(getType()) == "Register") {
+    if (DPDK::toStr(getType()) == "Hash") {
+        auto args = arguments;
+        if (args->size() == 0) {
+            ::error(ErrorType::ERR_INVALID,
+                    "Hash extern declaration %1% must contain hash algorithm \n", Name());
+        } else {
+            auto hashAlg = args->at(0)->expression;
+            unsigned hashAlgValue = CRC1;
+            if (hashAlg->is<IR::Constant>())
+                hashAlgValue = hashAlg->to<IR::Constant>()->asUnsigned();
+            if (hashAlgValue == TOEPLITZ) {
+                auto hashDecl = new IR::DpdkHashDeclStatement(Name());
+                hashDecl->toSpec(out) << std::endl;
+            }
+        }
+
+    } else if (DPDK::toStr(getType()) == "Register") {
         auto args = arguments;
         if (args->size() == 0) {
             ::error(ErrorType::ERR_INVALID,
@@ -552,8 +568,14 @@ std::ostream &IR::DpdkChecksumClearStatement::toSpec(std::ostream &out) const {
     return out;
 }
 
+std::ostream &IR::DpdkHashDeclStatement::toSpec(std::ostream &out) const {
+    add_comment(out, hash);
+    out << "rss " << hash;
+    return out;
+}
+
 std::ostream &IR::DpdkGetHashStatement::toSpec(std::ostream &out) const {
-    out << "hash " << hash << " " << DPDK::toStr(dst) << " ";
+    out << instr << " " << hash << " " << DPDK::toStr(dst) << " ";
     if (auto l = fields->to<IR::ListExpression>()) {
         if (l->components.size() == 1) {
             out << " " << DPDK::toStr(l->components.at(0));

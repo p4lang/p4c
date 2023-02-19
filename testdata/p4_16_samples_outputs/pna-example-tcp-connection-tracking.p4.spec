@@ -55,7 +55,6 @@ header ipv4 instanceof ipv4_t
 header tcp instanceof tcp_t
 
 regarray direction size 0x100 initval 0
-
 action tcp_syn_packet args none {
 	mov m.MainControlT_do_add_on_miss 1
 	mov m.MainControlT_update_aging_info 1

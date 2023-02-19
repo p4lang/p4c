@@ -18,7 +18,6 @@ struct Meta {
 metadata instanceof Meta
 
 regarray direction size 0x100 initval 0
-
 apply {
 	rx m.pna_main_input_metadata_input_port
 	extract h.h1

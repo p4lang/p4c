@@ -68,7 +68,6 @@ struct metadata_t {
 metadata instanceof metadata_t
 
 regarray reg_0 size 0x6 initval 0
-
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x1

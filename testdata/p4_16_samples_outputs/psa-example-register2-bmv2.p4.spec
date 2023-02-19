@@ -64,7 +64,6 @@ header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
 
 regarray port_pkt_ip_bytes_in_0 size 0x200 initval 0
-
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x1

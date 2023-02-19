@@ -57,7 +57,6 @@ header ethernet instanceof ethernet_t
 header output_data instanceof output_data_t
 
 regarray egress_pkt_seen_0 size 0x100 initval 0
-
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x1

@@ -16,7 +16,6 @@ header h2 instanceof my_header_t
 header MainParserT_parser_local_hdr instanceof my_header_t
 
 regarray direction size 0x100 initval 0
-
 apply {
 	rx m.pna_main_input_metadata_input_port
 	invalidate h.MainParserT_parser_local_hdr
