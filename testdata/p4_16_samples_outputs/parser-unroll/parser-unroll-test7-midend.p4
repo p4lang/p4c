@@ -14,14 +14,12 @@ header O2 {
     bit<16> data;
 }
 
-header_union U {
-    O1 byte;
-    O2 short;
-}
-
 struct headers {
-    S    base;
-    U[2] u;
+    S  base;
+    O1 u0_byte;
+    O2 u0_short;
+    O1 u1_byte;
+    O2 u1_short;
 }
 
 struct metadata {
@@ -29,8 +27,8 @@ struct metadata {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
-        packet.extract<O1>(hdr.u[32w0].byte);
-        packet.extract<O2>(hdr.u[32w1].short);
+        packet.extract<O1>(hdr.u0_byte);
+        packet.extract<O2>(hdr.u1_short);
         transition accept;
     }
 }
@@ -47,10 +45,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<O1>(hdr.u[0].byte);
-        packet.emit<O2>(hdr.u[0].short);
-        packet.emit<O1>(hdr.u[1].byte);
-        packet.emit<O2>(hdr.u[1].short);
+        packet.emit<O1>(hdr.u0_byte);
+        packet.emit<O2>(hdr.u0_short);
+        packet.emit<O1>(hdr.u1_byte);
+        packet.emit<O2>(hdr.u1_short);
     }
 }
 

@@ -97,4 +97,3 @@ control c(inout bit<32> x) {
 }
 
 top(c()) main;
-

@@ -17,14 +17,6 @@ parser MyParser(packet_in b, out my_packet p, inout my_metadata m, inout standar
     state start {
         transition accept;
     }
-    state next {
-        b.extract<H>(p.h);
-        transition accept;
-    }
-    state noMatch {
-        verify(false, error.NoMatch);
-        transition reject;
-    }
 }
 
 control MyVerifyChecksum(inout my_packet hdr, inout my_metadata meta) {

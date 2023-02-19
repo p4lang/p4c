@@ -58,7 +58,6 @@ control deparser(packet_out b, in Headers h) {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bool key_0;
-    bit<32> tmp;
     @name("ingress.a") action a_1() {
     }
     @name("ingress.t") table t_0 {
@@ -71,50 +70,24 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         default_action = a_1();
     }
     @hidden action unionvalidbmv2l76() {
-        tmp = 32w1;
-    }
-    @hidden action unionvalidbmv2l76_0() {
+        bit<32> tmp;
         tmp = 32w0;
-    }
-    @hidden action unionvalidbmv2l76_1() {
-        tmp = tmp + 32w1;
-    }
-    @hidden action unionvalidbmv2l76_2() {
+        if (h.u_h1.isValid()) {
+            tmp = tmp + 32w1;
+        }
+        if (h.u_h2.isValid()) {
+            tmp = tmp + 32w1;
+        }
         key_0 = tmp == 32w1;
     }
     @hidden table tbl_unionvalidbmv2l76 {
-        actions = {
-            unionvalidbmv2l76_0();
-        }
-        const default_action = unionvalidbmv2l76_0();
-    }
-    @hidden table tbl_unionvalidbmv2l76_0 {
         actions = {
             unionvalidbmv2l76();
         }
         const default_action = unionvalidbmv2l76();
     }
-    @hidden table tbl_unionvalidbmv2l76_1 {
-        actions = {
-            unionvalidbmv2l76_1();
-        }
-        const default_action = unionvalidbmv2l76_1();
-    }
-    @hidden table tbl_unionvalidbmv2l76_2 {
-        actions = {
-            unionvalidbmv2l76_2();
-        }
-        const default_action = unionvalidbmv2l76_2();
-    }
     apply {
         tbl_unionvalidbmv2l76.apply();
-        if (h.u_h1.isValid()) {
-            tbl_unionvalidbmv2l76_0.apply();
-        }
-        if (h.u_h2.isValid()) {
-            tbl_unionvalidbmv2l76_1.apply();
-        }
-        tbl_unionvalidbmv2l76_2.apply();
         t_0.apply();
     }
 }

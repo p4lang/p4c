@@ -56,10 +56,6 @@ parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t
         hdr.u1_h3.setInvalid();
         transition last;
     }
-    state next {
-        pkt.extract<Header2>(hdr.u1_h2);
-        transition last;
-    }
     state last {
         hdr.u1_h1.setValid();
         hdr.u1_h1.data = 32w1;
@@ -84,16 +80,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     @name("u2_0_h1") Header1 u2_0_h1_0;
     @name("u2_0_h2") Header2 u2_0_h2_0;
     @name("u2_0_h3") Header1 u2_0_h3_0;
-    @hidden action invalidhdrwarnings5l67() {
-        u2_0_h1_0.setValid();
-        u2_0_h1_0 = u1_0_h1_0;
-        u2_0_h2_0.setInvalid();
-        u2_0_h3_0.setInvalid();
-    }
-    @hidden action invalidhdrwarnings5l67_0() {
-        u2_0_h1_0.setInvalid();
-    }
-    @hidden action invalidhdrwarnings5l58() {
+    @hidden @name("invalidhdrwarnings5l58") action invalidhdrwarnings5l58_0() {
         u1_0_h1_0.setInvalid();
         u1_0_h2_0.setInvalid();
         u1_0_h3_0.setInvalid();
@@ -110,26 +97,30 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         u1_0_h2_0.setValid();
         u1_0_h1_0.setInvalid();
         u1_0_h3_0.setInvalid();
-    }
-    @hidden action invalidhdrwarnings5l67_1() {
-        u2_0_h2_0.setValid();
-        u2_0_h2_0 = u1_0_h2_0;
-        u2_0_h1_0.setInvalid();
-        u2_0_h3_0.setInvalid();
-    }
-    @hidden action invalidhdrwarnings5l67_2() {
-        u2_0_h2_0.setInvalid();
-    }
-    @hidden action invalidhdrwarnings5l67_3() {
-        u2_0_h3_0.setValid();
-        u2_0_h3_0 = u1_0_h3_0;
-        u2_0_h1_0.setInvalid();
-        u2_0_h2_0.setInvalid();
-    }
-    @hidden action invalidhdrwarnings5l67_4() {
-        u2_0_h3_0.setInvalid();
-    }
-    @hidden action invalidhdrwarnings5l69() {
+        if (u1_0_h1_0.isValid()) {
+            u2_0_h1_0.setValid();
+            u2_0_h1_0 = u1_0_h1_0;
+            u2_0_h2_0.setInvalid();
+            u2_0_h3_0.setInvalid();
+        } else {
+            u2_0_h1_0.setInvalid();
+        }
+        if (u1_0_h2_0.isValid()) {
+            u2_0_h2_0.setValid();
+            u2_0_h2_0 = u1_0_h2_0;
+            u2_0_h1_0.setInvalid();
+            u2_0_h3_0.setInvalid();
+        } else {
+            u2_0_h2_0.setInvalid();
+        }
+        if (u1_0_h3_0.isValid()) {
+            u2_0_h3_0.setValid();
+            u2_0_h3_0 = u1_0_h3_0;
+            u2_0_h1_0.setInvalid();
+            u2_0_h2_0.setInvalid();
+        } else {
+            u2_0_h3_0.setInvalid();
+        }
         u2_0_h2_0.setValid();
         u2_0_h2_0.data = 16w1;
         u2_0_h1_0.setInvalid();
@@ -139,72 +130,14 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         u1_0_h3_0.setInvalid();
         u1_0_h3_0.setInvalid();
     }
-    @hidden table tbl_invalidhdrwarnings5l58 {
+    @hidden @name("tbl_invalidhdrwarnings5l58") table tbl_invalidhdrwarnings5l58_0 {
         actions = {
-            invalidhdrwarnings5l58();
+            invalidhdrwarnings5l58_0();
         }
-        const default_action = invalidhdrwarnings5l58();
-    }
-    @hidden table tbl_invalidhdrwarnings5l67 {
-        actions = {
-            invalidhdrwarnings5l67();
-        }
-        const default_action = invalidhdrwarnings5l67();
-    }
-    @hidden table tbl_invalidhdrwarnings5l67_0 {
-        actions = {
-            invalidhdrwarnings5l67_0();
-        }
-        const default_action = invalidhdrwarnings5l67_0();
-    }
-    @hidden table tbl_invalidhdrwarnings5l67_1 {
-        actions = {
-            invalidhdrwarnings5l67_1();
-        }
-        const default_action = invalidhdrwarnings5l67_1();
-    }
-    @hidden table tbl_invalidhdrwarnings5l67_2 {
-        actions = {
-            invalidhdrwarnings5l67_2();
-        }
-        const default_action = invalidhdrwarnings5l67_2();
-    }
-    @hidden table tbl_invalidhdrwarnings5l67_3 {
-        actions = {
-            invalidhdrwarnings5l67_3();
-        }
-        const default_action = invalidhdrwarnings5l67_3();
-    }
-    @hidden table tbl_invalidhdrwarnings5l67_4 {
-        actions = {
-            invalidhdrwarnings5l67_4();
-        }
-        const default_action = invalidhdrwarnings5l67_4();
-    }
-    @hidden table tbl_invalidhdrwarnings5l69 {
-        actions = {
-            invalidhdrwarnings5l69();
-        }
-        const default_action = invalidhdrwarnings5l69();
+        const default_action = invalidhdrwarnings5l58_0();
     }
     apply {
-        tbl_invalidhdrwarnings5l58.apply();
-        if (u1_0_h1_0.isValid()) {
-            tbl_invalidhdrwarnings5l67.apply();
-        } else {
-            tbl_invalidhdrwarnings5l67_0.apply();
-        }
-        if (u1_0_h2_0.isValid()) {
-            tbl_invalidhdrwarnings5l67_1.apply();
-        } else {
-            tbl_invalidhdrwarnings5l67_2.apply();
-        }
-        if (u1_0_h3_0.isValid()) {
-            tbl_invalidhdrwarnings5l67_3.apply();
-        } else {
-            tbl_invalidhdrwarnings5l67_4.apply();
-        }
-        tbl_invalidhdrwarnings5l69.apply();
+        tbl_invalidhdrwarnings5l58_0.apply();
     }
 }
 

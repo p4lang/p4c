@@ -8,11 +8,6 @@ header hdr {
     bit<32> c;
 }
 
-enum Choice {
-    First,
-    Second
-}
-
 struct Headers {
     hdr h;
 }

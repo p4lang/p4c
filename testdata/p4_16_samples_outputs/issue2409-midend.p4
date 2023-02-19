@@ -8,16 +8,8 @@ parser p(out bit<32> z) {
         z = 32w1;
         transition start_join;
     }
-    state start_false {
-        z = 32w2;
-        transition start_join;
-    }
     state start_join {
         transition accept;
-    }
-    state noMatch {
-        verify(false, error.NoMatch);
-        transition reject;
     }
 }
 

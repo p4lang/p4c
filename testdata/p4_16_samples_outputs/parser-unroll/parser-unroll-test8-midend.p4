@@ -10,18 +10,16 @@ header h_index2 {
     bit<8> index;
 }
 
-header_union h_stack {
-    h_index1 i1;
-    h_index2 i2;
-}
-
 header h_index {
     bit<8> index;
 }
 
 struct headers {
-    h_stack[2] h;
-    h_index    i;
+    h_index1 h0_i1;
+    h_index2 h0_i2;
+    h_index1 h1_i1;
+    h_index2 h1_i2;
+    h_index  i;
 }
 
 struct Meta {
@@ -29,9 +27,9 @@ struct Meta {
 
 parser p(packet_in pkt, out headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<h_index1>(hdr.h[0].i1);
+        pkt.extract<h_index1>(hdr.h0_i1);
         pkt.extract<h_index>(hdr.i);
-        hdr.i.index = hdr.h[0].i1.index;
+        hdr.i.index = hdr.h0_i1.index;
         transition accept;
     }
 }
@@ -58,7 +56,7 @@ control egress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out pkt, in headers h) {
     apply {
-        pkt.emit<h_index1>(h.h[0].i1);
+        pkt.emit<h_index1>(h.h0_i1);
         pkt.emit<h_index>(h.i);
     }
 }

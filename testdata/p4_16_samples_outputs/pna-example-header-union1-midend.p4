@@ -60,30 +60,26 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
         }
         const default_action = NoAction_1();
     }
-    @hidden action act() {
-        hdr_1_u_byte.setValid();
-        hdr_1_u_byte = hdr.u_byte;
-        hdr_1_u_short.setInvalid();
-    }
-    @hidden action act_0() {
-        hdr_1_u_byte.setInvalid();
-    }
-    @hidden action act_1() {
-        hdr_1_base = hdr.base;
-    }
-    @hidden action act_2() {
-        hdr_1_u_short.setValid();
-        hdr_1_u_short = hdr.u_short;
-        hdr_1_u_byte.setInvalid();
-    }
-    @hidden action act_3() {
-        hdr_1_u_short.setInvalid();
-    }
     @hidden action pnaexampleheaderunion1l51() {
         hasReturned = true;
         retval = true;
     }
-    @hidden action act_4() {
+    @hidden action act() {
+        hdr_1_base = hdr.base;
+        if (hdr.u_byte.isValid()) {
+            hdr_1_u_byte.setValid();
+            hdr_1_u_byte = hdr.u_byte;
+            hdr_1_u_short.setInvalid();
+        } else {
+            hdr_1_u_byte.setInvalid();
+        }
+        if (hdr.u_short.isValid()) {
+            hdr_1_u_short.setValid();
+            hdr_1_u_short = hdr.u_short;
+            hdr_1_u_byte.setInvalid();
+        } else {
+            hdr_1_u_short.setInvalid();
+        }
         hasReturned = false;
     }
     @hidden action pnaexampleheaderunion1l52() {
@@ -104,39 +100,9 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
     }
     @hidden table tbl_act {
         actions = {
-            act_1();
-        }
-        const default_action = act_1();
-    }
-    @hidden table tbl_act_0 {
-        actions = {
             act();
         }
         const default_action = act();
-    }
-    @hidden table tbl_act_1 {
-        actions = {
-            act_0();
-        }
-        const default_action = act_0();
-    }
-    @hidden table tbl_act_2 {
-        actions = {
-            act_2();
-        }
-        const default_action = act_2();
-    }
-    @hidden table tbl_act_3 {
-        actions = {
-            act_3();
-        }
-        const default_action = act_3();
-    }
-    @hidden table tbl_act_4 {
-        actions = {
-            act_4();
-        }
-        const default_action = act_4();
     }
     @hidden table tbl_pnaexampleheaderunion1l51 {
         actions = {
@@ -171,17 +137,6 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
     apply {
         debug_hdr_0.apply();
         tbl_act.apply();
-        if (hdr.u_byte.isValid()) {
-            tbl_act_0.apply();
-        } else {
-            tbl_act_1.apply();
-        }
-        if (hdr.u_short.isValid()) {
-            tbl_act_2.apply();
-        } else {
-            tbl_act_3.apply();
-        }
-        tbl_act_4.apply();
         if (hdr_1_base.isValid() && hdr_1_u_short.isValid()) {
             tbl_pnaexampleheaderunion1l51.apply();
         }

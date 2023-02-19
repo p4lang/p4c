@@ -75,7 +75,7 @@ parser ParserImpl(packet_in pkt, out H hdr, inout M meta, in pna_main_parser_inp
 
 control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
     @name("ingress.u") Union[2] u_1;
-    @hidden @name("pnadpdkinvalidhdrwarnings6l59") action pnadpdkinvalidhdrwarnings6l59_0() {
+    @hidden @name("pnadpdkheaderunionstack2l59") action pnadpdkheaderunionstack2l59_0() {
         u_1[0].h1.setInvalid();
         u_1[0].h2.setInvalid();
         u_1[0].h3.setInvalid();
@@ -89,6 +89,9 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
         u_1[0].h1.data = 32w1;
         u_1[0].h2.setInvalid();
         u_1[0].h3.setInvalid();
+        u_1[0].h2.setValid();
+        u_1[0].h1.setInvalid();
+        u_1[0].h3.setInvalid();
         if (u_1[0].h1.isValid()) {
             u_1[1].h1.setValid();
             u_1[1].h1 = u_1[0].h1;
@@ -97,32 +100,17 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
         } else {
             u_1[1].h1.setInvalid();
         }
-        u_1[1].h1.setValid();
-        u_1[1].h1.data = 32w1;
-        u_1[1].h2.setInvalid();
-        u_1[1].h3.setInvalid();
-        u_1[0].h2.setValid();
-        u_1[0].h1.setInvalid();
-        u_1[0].h3.setInvalid();
-        if (u_1[1w0].h1.isValid()) {
-            u_1[1].h1.setValid();
-            u_1[1].h1 = u_1[1w0].h1;
-            u_1[1].h2.setInvalid();
-            u_1[1].h3.setInvalid();
-        } else {
-            u_1[1].h1.setInvalid();
-        }
-        if (u_1[1w0].h2.isValid()) {
+        if (u_1[0].h2.isValid()) {
             u_1[1].h2.setValid();
-            u_1[1].h2 = u_1[1w0].h2;
+            u_1[1].h2 = u_1[0].h2;
             u_1[1].h1.setInvalid();
             u_1[1].h3.setInvalid();
         } else {
             u_1[1].h2.setInvalid();
         }
-        if (u_1[1w0].h3.isValid()) {
+        if (u_1[0].h3.isValid()) {
             u_1[1].h3.setValid();
-            u_1[1].h3 = u_1[1w0].h3;
+            u_1[1].h3 = u_1[0].h3;
             u_1[1].h1.setInvalid();
             u_1[1].h2.setInvalid();
         } else {
@@ -132,27 +120,23 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
         u_1[1].h2.data = 16w1;
         u_1[1].h1.setInvalid();
         u_1[1].h3.setInvalid();
-        u_1[1w0].h2.setValid();
-        u_1[1w0].h1.setInvalid();
-        u_1[1w0].h3.setInvalid();
-        u_1[1].h1.setInvalid();
-        u_1[1w0].h1.setInvalid();
-        u_1[1w0].h1.setValid();
-        u_1[1w0].h2.setInvalid();
-        u_1[1w0].h3.setInvalid();
+        u_1[0].h2.setValid();
+        u_1[0].h1.setInvalid();
+        u_1[0].h3.setInvalid();
+        u_1[0].h3.setInvalid();
     }
-    @hidden @name("tbl_pnadpdkinvalidhdrwarnings6l59") table tbl_pnadpdkinvalidhdrwarnings6l59_0 {
+    @hidden @name("tbl_pnadpdkheaderunionstack2l59") table tbl_pnadpdkheaderunionstack2l59_0 {
         actions = {
-            pnadpdkinvalidhdrwarnings6l59_0();
+            pnadpdkheaderunionstack2l59_0();
         }
-        const default_action = pnadpdkinvalidhdrwarnings6l59_0();
+        const default_action = pnadpdkheaderunionstack2l59_0();
     }
     apply {
-        tbl_pnadpdkinvalidhdrwarnings6l59_0.apply();
+        tbl_pnadpdkheaderunionstack2l59_0.apply();
     }
 }
 
-control DeparserImpl(packet_out pk, in H hdr, in M meta, in pna_main_output_metadata_t ostd) {
+control DeparserImpl(packet_out pk, in H hdr, in M m, in pna_main_output_metadata_t ostd) {
     apply {
     }
 }

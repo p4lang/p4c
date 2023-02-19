@@ -26,8 +26,6 @@ control c(inout bit<32> x) {
     H2 u1_1_h2;
     @name("c.hs1") H1[2] hs1_1;
     @name("c.us1") U[2] us1_1;
-    H1 u1_2_h1;
-    H2 u1_2_h2;
     @name("c.us1") U[2] us1_2;
     H1 u1_3_h1;
     H2 u1_3_h2;
@@ -129,38 +127,10 @@ control c(inout bit<32> x) {
         us_0 = us1_1;
     }
     @name("c.inout_action2") action inout_action2() {
-        if (u_0_h1.isValid()) {
-            u1_2_h1.setValid();
-            u1_2_h1 = u_0_h1;
-            u1_2_h2.setInvalid();
-        } else {
-            u1_2_h1.setInvalid();
-        }
-        if (u_0_h2.isValid()) {
-            u1_2_h2.setValid();
-            u1_2_h2 = u_0_h2;
-            u1_2_h1.setInvalid();
-        } else {
-            u1_2_h2.setInvalid();
-        }
         us1_2 = us_0;
         us1_2[1w1].h1.setInvalid();
         us1_2[1w1].h2.setValid();
         us1_2[1w1].h1.setInvalid();
-        if (u1_2_h1.isValid()) {
-            u_0_h1.setValid();
-            u_0_h1 = u1_2_h1;
-            u_0_h2.setInvalid();
-        } else {
-            u_0_h1.setInvalid();
-        }
-        if (u1_2_h2.isValid()) {
-            u_0_h2.setValid();
-            u_0_h2 = u1_2_h2;
-            u_0_h1.setInvalid();
-        } else {
-            u_0_h2.setInvalid();
-        }
         us_0 = us1_2;
     }
     @name("c.xor") action xor() {
@@ -283,4 +253,3 @@ control c(inout bit<32> x) {
 }
 
 top(c()) main;
-
