@@ -239,6 +239,7 @@ class TypeInference : public Transform {
     const IR::Node *postorder(IR::Method *method) override;
 
     const IR::Node *postorder(IR::Type_Type *type) override;
+    const IR::Node *postorder(IR::Type_Table *type) override;
     const IR::Node *postorder(IR::Type_Error *decl) override;
     const IR::Node *postorder(IR::Type_InfInt *type) override;
     const IR::Node *postorder(IR::Type_Method *type) override;
