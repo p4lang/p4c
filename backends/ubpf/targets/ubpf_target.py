@@ -31,8 +31,11 @@ class Target(EBPFTarget):
         args += "CFLAGS+=-DCONTROL_PLANE "
         args += "EXTERNOBJ=" + self.options.extern + " "
 
-        errmsg = "Failed to build the filter:"
-        return testutils.exec_process(args, errmsg).returncode
+        result = testutils.exec_process(args)
+        if result.returncode != testutils.SUCCESS:
+            testutils.log.error("Failed to build the filter")
+        return result.returncode
+
 
     def run(self):
         testutils.log.info("Running model")
@@ -48,9 +51,10 @@ class Target(EBPFTarget):
         args += "-n " + str(num_files) + " "
         # Debug flag (verbose output)
         args += "-d"
-        errmsg = "Failed to execute the filter:"
-        result = testutils.exec_process(args, errmsg).returncode
-        return result
+        result = testutils.exec_process(args)
+        if result.returncode != testutils.SUCCESS:
+            testutils.log.error("Failed to execute the filter")
+        return result.returncode
 
     def _generate_control_actions(self, cmds):
         generated = ""

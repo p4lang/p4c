@@ -64,69 +64,73 @@ class Options:
 
     def __init__(self):
         # File that is being compiled.
-        self.p4_file = None
+        self.p4_file: Path = None
         # Path to ptf test file that is used.
-        self.testfile = None
+        self.testfile: Path = None
         # Actual location of the test framework.
-        self.testdir = None
+        self.testdir: Path = None
         # The base directory where tests are executed.
-        self.rootdir = "."
+        self.rootdir: Path = Path(".")
         # The number of interfaces to create for this particular test.
         self.num_ifaces = 8
 
 
-def create_bridge(num_ifaces):
-    testutils.log.info("---------------------- Start creating of bridge ----------------------",)
+def create_bridge(num_ifaces: int) -> Bridge:
+    testutils.log.info("---------------------- Creating a namespace ----------------------",)
     random.seed(datetime.now().timestamp())
-    bridge = Bridge(random.randint(0, sys.maxsize))
+    bridge = Bridge(str(random.randint(0, sys.maxsize)))
     result = bridge.create_virtual_env(num_ifaces)
     if result != testutils.SUCCESS:
         bridge.ns_del()
         testutils.log.error(
-            "---------------------- End creating of bridge with errors ----------------------",)
+            "---------------------- Namespace creation failed ----------------------",)
         raise SystemExit("Unable to create the namespace environment.")
-    testutils.log.info("---------------------- Bridge created ----------------------")
+    testutils.log.info(
+        "---------------------- Namespace successfully created ----------------------")
     return bridge
 
 
-def compile_program(options, json_name, info_name):
-    testutils.log.info("---------------------- Start p4c-bm2-ss ----------------------")
+def compile_program(options: Options, json_name: Path, info_name: Path) -> int:
+    testutils.log.info("---------------------- Compile with p4c-bm2-ss ----------------------")
     compilation_cmd = (f"{options.rootdir}/build/p4c-bm2-ss --target bmv2 --arch v1model "
                        f"--p4runtime-files {info_name} {options.p4_file} -o {json_name}")
-    _, returncode = testutils.exec_process(
-        compilation_cmd, "Could not compile the P4 program", timeout=30)
+    _, returncode = testutils.exec_process(compilation_cmd, timeout=30)
+    if returncode != testutils.SUCCESS:
+        testutils.log.error("Failed to compile the P4 program %s.", options.p4_file)
     return returncode
 
 
-def run_simple_switch_grpc(bridge, switchlog, grpc_port):
+def run_simple_switch_grpc(bridge: Bridge, switchlog: Path,
+                           grpc_port: int) -> testutils.subprocess.Popen:
     thrift_port = testutils.pick_tcp_port(22000)
     testutils.log.info("---------------------- Start simple_switch_grpc ----------------------",)
     simple_switch_grpc = (
         f"simple_switch_grpc --thrift-port {thrift_port} --log-file {switchlog} --log-flush -i 0@0 "
         f"-i 1@1 -i 2@2 -i 3@3 -i 4@4 -i 5@5 -i 6@6 -i 7@7 --no-p4 "
-        f"-- --grpc-server-addr localhost:{grpc_port}")
+        f"-- --grpc-server-addr 0.0.0.0:{grpc_port}")
     bridge_cmd = bridge.get_ns_prefix() + " " + simple_switch_grpc
-    switchProc = testutils.open_process(bridge_cmd)
-    if switchProc is None:
+    switch_proc = testutils.open_process(bridge_cmd)
+    if switch_proc is None:
         bridge.ns_del()
         raise SystemExit("simple_switch_grpc ended with errors")
 
-    return switchProc
+    return switch_proc
 
 
-def run_ptf(bridge, grpc_port, testdir, json_name, info_name) -> int:
-    testutils.log.info("---------------------- Start ptf ----------------------")
+def run_ptf(bridge: Bridge, grpc_port: int, testdir, json_name: Path, info_name: Path) -> int:
+    testutils.log.info("---------------------- Run PTF test ----------------------")
     # Add the file location to the python path.
     pypath = FILE_DIR
     # Show list of the tests
-    testLostCmd = f"ptf --pypath {pypath} --test-dir {testdir} --list"
-    returncode = bridge.ns_exec(testLostCmd)
+    test_list_cmd = f"ptf --pypath {pypath} --test-dir {testdir} --list"
+    returncode = bridge.ns_exec(test_list_cmd)
     if returncode != testutils.SUCCESS:
         return returncode
     ifaces = "-i 0@br_0 -i 1@br_1 -i 2@br_2 -i 3@br_3 -i 4@br_4 -i 5@br_5 -i 6@br_6 -i 7@br_7"
-    test_params = f"grpcaddr='localhost:{grpc_port}';p4info='{info_name}';config='{json_name}';"
-    ptf = f'ptf --verbose --pypath {pypath} {ifaces} --test-params=\\"{test_params}\\" --test-dir {testdir}'
-    returncode = bridge.ns_exec(ptf)
+    test_params = f"grpcaddr='0.0.0.0:{grpc_port}';p4info='{info_name}';config='{json_name}';"
+    run_ptf_cmd = f"ptf --pypath {pypath} {ifaces}"
+    run_ptf_cmd += f" --test-params={test_params} --test-dir {testdir}"
+    returncode = bridge.ns_exec(run_ptf_cmd)
     return returncode
 
 
@@ -196,8 +200,7 @@ def create_options(test_args) -> Options:
 
 if __name__ == "__main__":
     if not testutils.check_root():
-        errmsg = "This script requires root privileges; Exiting."
-        testutils.log.error(errmsg)
+        testutils.log.error("This script requires root privileges; Exiting.")
         sys.exit(1)
     # Parse options and process argv
     args, argv = PARSER.parse_known_args()

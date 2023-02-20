@@ -29,66 +29,73 @@ import testutils
 
 class Bridge:
 
-    def __init__(self, namespace):
-        self.ns_name = namespace # identifier of the namespace
-        self.br_name = "core"    # name of the central bridge
-        self.br_ports = []       # list of the veth pair bridge ports
-        self.edge_ports = []     # list of the veth pair edge ports
+    def __init__(self, namespace: str):
+        self.ns_name = namespace  # identifier of the namespace
+        self.br_name = "core"     # name of the central bridge
+        self.br_ports = []        # list of the veth pair bridge ports
+        self.edge_ports = []      # list of the veth pair edge ports
 
-    def ns_init(self):
+    def ns_init(self) -> int:
         """Initialize the namespace."""
         cmd = f"ip netns add {self.ns_name}"
-        errmsg = f"Failed to create namespace {self.ns_name} :"
-        result = testutils.exec_process(cmd, errmsg).returncode
-        self.ns_exec("ip link set dev lo up")
-        return result
+        result = testutils.exec_process(cmd)
+        if result.returncode != testutils.SUCCESS:
+            testutils.log.error("Failed to create namespace %s", self.ns_name)
+            return result.returncode
+        return self.ns_exec("ip link set dev lo up")
 
-    def ns_del(self):
+    def ns_del(self) -> int:
         """Delete the namespace and with it all the process running in it."""
         cmd = f"ip netns pids {self.ns_name} | xargs -r kill; ip netns del {self.ns_name}"
-        errmsg = f"Failed to delete namespace {self.ns_name} :"
-        return testutils.exec_process(cmd, errmsg).returncode
+        result = testutils.exec_process(cmd, shell=True)
+        if result.returncode != testutils.SUCCESS:
+            testutils.log.error("Failed to delete namespace %s", self.ns_name)
+        return result.returncode
 
-    def get_ns_prefix(self):
+    def get_ns_prefix(self) -> str:
         """Return the command prefix for the namespace of this bridge class."""
         return f"ip netns exec {self.ns_name}"
 
-    def ns_exec(self, cmd_string):
+    def ns_exec(self, cmd_string: str) -> int:
         """Run and execute an isolated command in the namespace."""
-        prefix = self.get_ns_prefix()
+        cmd = self.get_ns_prefix() + " " + cmd_string
         # bash -c allows us to run multiple commands at once
-        cmd = f'{prefix} bash -c "{cmd_string}"'
-        errmsg = f"Failed to run command {cmd} in namespace {self.ns_name}:"
-        return testutils.exec_process(cmd, errmsg).returncode
+        result = testutils.exec_process(cmd)
+        if result.returncode != testutils.SUCCESS:
+            testutils.log.error("Failed to run command namespace %s", self.ns_name)
+        return result.returncode
 
-    def ns_proc_open(self):
+    def ns_proc_open(self) -> testutils.Optional[testutils.subprocess.Popen]:
         """Open a bash process in the namespace and return the handle"""
-        cmd = self.get_ns_prefix() + " /usr/bin/env bash "
+        cmd = self.get_ns_prefix() + " bash"
         return testutils.open_process(cmd)
 
-    def ns_proc_write(self, proc, cmd):
+    def ns_proc_write(self, proc: testutils.subprocess.Popen, cmd: str) -> int:
         """Allows writing of a command to a given process. The command is NOT
         yet executed."""
         testutils.log.info(f"Writing {cmd} ")
         try:
             proc.stdin.write(cmd)
-        except IOError as e:
-            testutils.log.error(f"Error while writing to process\n{e}")
+        except IOError as exception:
+            testutils.log.error(f"Error while writing to process\n{exception}")
             return testutils.FAILURE
         return testutils.SUCCESS
 
-    def ns_proc_append(self, proc, cmd):
+    def ns_proc_append(self, proc: testutils.subprocess.Popen, cmd: str) -> int:
         """Append a command to an open process."""
         return self.ns_proc_write(proc, " && " + cmd)
 
-    def ns_proc_close(self, proc):
+    def ns_proc_close(self, proc: testutils.subprocess.Popen) -> int:
         """Close and actually run the process in the namespace. Returns the
         exit code."""
         testutils.log.info("Executing command.")
-        errmsg = f"Failed to execute the command sequence in namespace {self.ns_name}"
-        return testutils.run_process(proc, testutils.TIMEOUT, errmsg)
+        result = testutils.run_process(proc, timeout=testutils.TIMEOUT)
+        if result.returncode != testutils.SUCCESS:
+            testutils.log.error("Failed to execute the command sequence in namespace %s",
+                                self.ns_name)
+        return result.returncode
 
-    def _configure_bridge(self, br_name):
+    def _configure_bridge(self, br_name: str) -> int:
         """Set the bridge active. We also disable IPv6 to
         avoid ICMPv6 spam."""
         # We do not care about failures here
@@ -101,20 +108,23 @@ class Bridge:
         self.ns_exec("iptables -w -A OUTPUT -p 2 -j DROP")
         return testutils.SUCCESS
 
-    def create_bridge(self):
+    def create_bridge(self) -> int:
         """Create the central bridge of the environment and configure it."""
         result = self.ns_exec(f"ip link add {self.br_name} type bridge")
         if result != testutils.SUCCESS:
             return result
         return self._configure_bridge(self.br_name)
 
-    def _configure_bridge_port(self, port_name):
+    def _configure_bridge_port(self, port_name: str):
         """Set a bridge port active."""
         cmd = f"ip link set dev {port_name} up"
-        cmd += f" && ip link set dev {port_name} mtu 9000"
+        result = self.ns_exec(cmd)
+        if result != testutils.SUCCESS:
+            return result
+        cmd = f"ip link set dev {port_name} mtu 9000"
         return self.ns_exec(cmd)
 
-    def attach_interfaces(self, num_ifaces):
+    def attach_interfaces(self, num_ifaces: int) -> int:
         """Attach and initialize n interfaces to the central bridge of the
         namespace."""
         for index in range(num_ifaces):
@@ -138,7 +148,7 @@ class Bridge:
             self.edge_ports.append(edge_veth)
         return testutils.SUCCESS
 
-    def create_virtual_env(self, num_ifaces):
+    def create_virtual_env(self, num_ifaces: int) -> int:
         """Create the namespace, the bridge, and attach interfaces all at
         once."""
         result = self.ns_init()
