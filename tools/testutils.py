@@ -21,6 +21,7 @@ import logging
 import socket
 import random
 import os
+import threading
 import shutil
 import signal
 from pathlib import Path
@@ -33,6 +34,40 @@ TIMEOUT: int = 10 * 60
 SUCCESS: int = 0
 FAILURE: int = 1
 SKIPPED: int = 999      # used occasionally to indicate that a test was not executed
+
+
+class LogPipe(threading.Thread):
+    """A log utility class that allows subprocesses to directly write into a log.
+    Derived from https://codereview.stackexchange.com/a/17959."""
+
+    def __init__(self, level: int):
+        """Setup the object with a logger and a loglevel
+        and start the thread
+        """
+        threading.Thread.__init__(self)
+        self.daemon = False
+        self.level = level
+        self.fd_read, self.fd_write = os.pipe()
+        self.pipe_reader = os.fdopen(self.fd_read)
+        self.start()
+
+    def fileno(self) -> int:
+        """Return the write file descriptor of the pipe
+        """
+        return self.fd_write
+
+    def run(self) -> None:
+        """Run the thread, logging everything.
+        """
+        for line in iter(self.pipe_reader.readline, ''):
+            log.log(self.level, line.strip('\n'))
+
+        self.pipe_reader.close()
+
+    def close(self) -> None:
+        """Close the write end of the pipe.
+        """
+        os.close(self.fd_write)
 
 
 class ProcessResult(NamedTuple):
@@ -159,24 +194,35 @@ def exec_process(args: str, **extra_args) -> ProcessResult:
         # Sanitize all empty strings.
         args = list(filter(None, args))
 
-    if log.getEffectiveLevel() > logging.INFO:
-        output_args["stdout"] = subprocess.PIPE
+    # Set up log pipes for both stdout and stderr.
+    outpipe = LogPipe(logging.INFO)
+    output_args["stdout"] = outpipe
+    errpipe = LogPipe(logging.WARNING)
+    output_args["stderr"] = errpipe
+
     try:
         result = subprocess.run(args, check=True, **output_args)
         out = result.stdout
         returncode = result.returncode
     except subprocess.CalledProcessError as exception:
-        out = exception.stdout
+        out = exception.stderr
         returncode = exception.returncode
-        log.error("Error %s when executing %s:\n%s", returncode, exception.cmd, out)
+        cmd = exception.cmd
+        # Rejoin the list for better readability.
+        if isinstance(cmd, list):
+            cmd = " ".join(cmd)
+        log.error("Error %s when executing \"%s\".", returncode, cmd)
     except subprocess.TimeoutExpired as exception:
-        out = exception.stdout
+        out = exception.stderr
         returncode = FAILURE
-        log.error("Timed out when executing %s.", exception.cmd)
-    if log.getEffectiveLevel() <= logging.INFO:
-        if out:
-            log.info("########### PROCESS OUTPUT BEGIN:\n"
-                     "%s########### PROCESS OUTPUT END", out)
+        cmd = exception.cmd
+        # Rejoin the list for better readability.
+        if isinstance(cmd, list):
+            cmd = " ".join(cmd)
+        log.error("Timed out when executing %s.", cmd)
+    finally:
+        outpipe.close()
+        errpipe.close()
     return ProcessResult(out, returncode)
 
 

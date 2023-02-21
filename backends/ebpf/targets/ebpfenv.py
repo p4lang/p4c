@@ -62,7 +62,7 @@ class Bridge:
         # bash -c allows us to run multiple commands at once
         result = testutils.exec_process(cmd)
         if result.returncode != testutils.SUCCESS:
-            testutils.log.error("Failed to run command namespace %s", self.ns_name)
+            testutils.log.error("Failed to run command in namespace %s", self.ns_name)
         return result.returncode
 
     def ns_proc_open(self) -> testutils.Optional[testutils.subprocess.Popen]:

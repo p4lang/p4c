@@ -128,7 +128,7 @@ def run_ptf(bridge: Bridge, grpc_port: int, testdir, json_name: Path, info_name:
         return returncode
     ifaces = "-i 0@br_0 -i 1@br_1 -i 2@br_2 -i 3@br_3 -i 4@br_4 -i 5@br_5 -i 6@br_6 -i 7@br_7"
     test_params = f"grpcaddr='0.0.0.0:{grpc_port}';p4info='{info_name}';config='{json_name}';"
-    run_ptf_cmd = f"ptf --pypath {pypath} {ifaces}"
+    run_ptf_cmd = f"ptf --pypath {pypath} {ifaces} --log-file {testdir.joinpath('ptf.log')}"
     run_ptf_cmd += f" --test-params={test_params} --test-dir {testdir}"
     returncode = bridge.ns_exec(run_ptf_cmd)
     return returncode
@@ -187,13 +187,13 @@ def create_options(test_args) -> Options:
 
     # Configure logging.
     logging.basicConfig(
-        filename=options.testdir.joinpath("testlog.log"),
-        format="%(levelname)s:%(message)s",
+        filename=options.testdir.joinpath("test.log"),
+        format="%(levelname)s: %(message)s",
         level=getattr(logging, test_args.log_level),
         filemode="w",
     )
     stderr_log = logging.StreamHandler()
-    stderr_log.setFormatter(logging.Formatter("%(levelname)s:%(message)s"))
+    stderr_log.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
     logging.getLogger().addHandler(stderr_log)
     return options
 
