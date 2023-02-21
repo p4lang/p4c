@@ -219,28 +219,17 @@ import logging
 import sys
 import os
 
-from functools import wraps
-from ptf import config
 from ptf.thriftutils import *
 from ptf.mask import Mask
-from p4.v1 import p4runtime_pb2_grpc
 
 from ptf.packet import *
 from ptf import testutils as ptfutils
 
 
-directory = os.getcwd()
-directory = directory.split("/")
-workspaceFolder = ""
-for i in range(len(directory)-1):
-    workspaceFolder += directory[i] +"/"
-sys.path.insert(1,workspaceFolder+'backends/p4tools/modules/testgen/targets/bmv2/backend/ptf')
 import base_test as bt
 
-logger = logging.getLogger('{{test_name}}')
-logger.addHandler(logging.StreamHandler())
-
 class AbstractTest(bt.P4RuntimeTest):
+
     @bt.autocleanup
     def setUp(self):
         bt.P4RuntimeTest.setUp(self)
@@ -260,11 +249,18 @@ class AbstractTest(bt.P4RuntimeTest):
         pass
 
     def runTestImpl(self):
-        self.setupCtrlPlane()
-        logger.info("Sending Packet ...")
-        self.sendPacket()
-        logger.info("Verifying Packet ...")
-        self.verifyPackets()
+        # TODO: This is a workaround for broken unit tests on Ubuntu 20.04. It can happen that,
+        # when the last test fails, the failure output of that test is swallowed by the unit test
+        # framework. Any CMake Xfail depending on this output will fail since it does not match.
+        try:
+            self.setupCtrlPlane()
+            bt.testutils.log.info("Sending Packet ...")
+            self.sendPacket()
+            bt.testutils.log.info("Verifying Packet ...")
+            self.verifyPackets()
+        except Exception as exception:
+            raise SystemExit(f"Test failed.\n") from exception
+
 )""");
     return PREAMBLE;
 }
@@ -364,7 +360,7 @@ class Test{{test_id}}(AbstractTest):
 ##endif
 ## else 
         ptfutils.verify_packet(self, exp_pkt, eg_port)
-        logger.info("Verifying no other packets ...")
+        bt.testutils.log.info("Verifying no other packets ...")
         ptfutils.verify_no_other_packets(self, self.device_id, timeout=2)
 ## endif
 ## else
