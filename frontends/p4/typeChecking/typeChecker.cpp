@@ -3597,7 +3597,10 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
             }
 
             if (param->type->is<IR::Type_Dontcare>())
-                typeError("%1%: Could not infer a type for parameter %2%", arg, param);
+                typeError(
+                    "%1%: Could not infer a type for parameter %2% "
+                    "(inferred type is don't care '_')",
+                    arg, param);
 
             // By calling generic functions with don't care parameters
             // we can force parameters to have illegal types.  Check here for this case.
