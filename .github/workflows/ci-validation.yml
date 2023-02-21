@@ -20,7 +20,6 @@ jobs:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
       VALIDATION: ON
-      BUILD_SUCCESS: true
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v3
@@ -35,15 +34,9 @@ jobs:
 
     - name: Build (Ubuntu 20.04)
       run: |
-        tools/ci-build.sh || echo "BUILD_SUCCESS=false" >> $GITHUB_ENV
+        tools/ci-build.sh
 
     - name: Validate
-      if: env.BUILD_SUCCESS == 'true'
       run: |
           ctest  -R toz3-validate-p4c --output-on-failure --schedule-random
       working-directory: ./build
-
-    - name: Build Failed
-      if: env.BUILD_SUCCESS == 'false'
-      run: |
-          echo "Building Gauntlet failed."
