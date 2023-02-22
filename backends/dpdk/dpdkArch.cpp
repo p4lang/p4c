@@ -3036,7 +3036,7 @@ cstring DpdkAddPseudoHeaderDecl::pseudoHeaderInstanceName;
 cstring DpdkAddPseudoHeaderDecl::pseudoHeaderTypeName;
 
 const IR::Node *MoveCollectedStructLocalVariableToMetadata::preorder(IR::Type_Struct *s) {
-    if (s->toString() == CollectStructLocalVariables::metadataStrct->toString()) {
+    if (s->equiv(*CollectStructLocalVariables::metadataStrct)) {
         for (auto kv : CollectStructLocalVariables::fieldNameType) {
             s->fields.push_back(new IR::StructField(kv.first, kv.second));
         }
@@ -3052,7 +3052,7 @@ const IR::Node *MoveCollectedStructLocalVariableToMetadata::postorder(IR::P4Prog
     for (auto obj : objs) {
         bool is_found = false;
         for (auto obj1 : CollectStructLocalVariables::fieldNameType) {
-            if (obj->toString() == obj1.second->toString()) {
+            if (obj->equiv(*obj1.second)) {
                 is_found = true;
                 break;
             }
@@ -3123,8 +3123,9 @@ const IR::Node *CollectStructLocalVariables::preorder(IR::PathExpression *path) 
 
 const IR::Node *CollectStructLocalVariables::postorder(IR::P4Parser *p) {
     if (metadataStrct) return p;
-    auto ctrl = getOriginal<IR::P4Parser>();
-    auto pr = ctrl->type->applyParams->parameters.at(2);
+    auto parser = getOriginal<IR::P4Parser>();
+    // 3rd Parameter in parser block is of metadata struct
+    auto pr = parser->type->applyParams->parameters.at(2);
     if (auto tn = pr->type->to<IR::Type_Name>()) {
         auto decl = typeMap->getTypeType(tn, true);
         auto ty = decl->to<IR::Type_Struct>();
