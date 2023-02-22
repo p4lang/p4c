@@ -336,7 +336,6 @@ Util::JsonObject *DpdkContextGenerator::addMatchAttributes(const IR::P4Table *ta
         auto *immFldArray = new Util::JsonArray();
         if (attr.params) {
             int index = 0;
-            int position = 0;
             int param_width = 8;  // Minimum width for dpdk action params
             for (auto param : *(attr.params)) {
                 if (param->type->is<IR::Type_Bits>()) {
@@ -346,7 +345,6 @@ Util::JsonObject *DpdkContextGenerator::addMatchAttributes(const IR::P4Table *ta
                 }
                 addImmediateField(immFldArray, param->name.originalName, index / 8, param_width);
                 index += param_width;
-                position++;
             }
         }
         oneAction->emplace("immediate_fields", immFldArray);
