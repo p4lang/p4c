@@ -25,7 +25,6 @@ namespace P4Testgen {
 namespace Bmv2 {
 
 using P4::ControlPlaneAPI::p4rt_id_t;
-using P4::ControlPlaneAPI::P4RuntimeSymbolType;
 using P4::ControlPlaneAPI::Standard::SymbolType;
 
 /// Extracts information from the @testSpec to emit a Protobuf test case.
@@ -90,8 +89,8 @@ class Protobuf : public TF {
     /// @return the value of any P4 '@id' annotation @declaration may have, and
     /// ensure that the value is correct with respect to the P4Runtime
     /// specification. The name 'externalId' is in analogy with externalName().
-    static boost::optional<p4rt_id_t> externalId(const P4RuntimeSymbolType &type,
-                                                 const IR::IDeclaration *declaration);
+    static boost::optional<p4rt_id_t> externalId(
+        const P4::ControlPlaneAPI::P4RuntimeSymbolType &type, const IR::IDeclaration *declaration);
 };
 
 }  // namespace Bmv2

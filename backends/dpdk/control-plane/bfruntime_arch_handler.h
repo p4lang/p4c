@@ -58,7 +58,7 @@ class SymbolTypeDPDK final : public SymbolType {
  public:
     SymbolTypeDPDK() = delete;
 
-    static P4RuntimeSymbolType ACTION_SELECTOR() {
+    static P4RuntimeSymbolType P4RT_ACTION_SELECTOR() {
         return P4RuntimeSymbolType::make(dpdk::P4Ids::ACTION_SELECTOR);
     }
 };
@@ -76,7 +76,7 @@ struct ActionSelector {
     static constexpr int64_t defaultMaxGroupSize = 120;
 
     p4rt_id_t getId(const P4RuntimeSymbolTableIface &symbols) const {
-        return symbols.getId(SymbolTypeDPDK::ACTION_SELECTOR(), name + "_sel");
+        return symbols.getId(SymbolTypeDPDK::P4RT_ACTION_SELECTOR(), name + "_sel");
     }
 };
 
@@ -184,16 +184,17 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
         auto tablesIt = this->actionProfilesRefs.find(actionSelector.name);
         if (tablesIt != this->actionProfilesRefs.end()) {
             for (const auto &table : tablesIt->second) {
-                profile.add_table_ids(symbols.getId(P4RuntimeSymbolType::TABLE(), table));
-                selector.add_table_ids(symbols.getId(P4RuntimeSymbolType::TABLE(), table));
+                profile.add_table_ids(symbols.getId(P4RuntimeSymbolType::P4RT_TABLE(), table));
+                selector.add_table_ids(symbols.getId(P4RuntimeSymbolType::P4RT_TABLE(), table));
             }
         }
         // We use the ActionSelector name for the action profile, and add a "_sel" suffix for
         // the action selector.
         cstring profileName = actionSelector.name;
-        selector.set_action_profile_id(symbols.getId(SymbolType::ACTION_PROFILE(), profileName));
+        selector.set_action_profile_id(
+            symbols.getId(SymbolType::P4RT_ACTION_PROFILE(), profileName));
         cstring selectorName = profileName + "_sel";
-        addP4InfoExternInstance(symbols, SymbolTypeDPDK::ACTION_SELECTOR(), "ActionSelector",
+        addP4InfoExternInstance(symbols, SymbolTypeDPDK::P4RT_ACTION_SELECTOR(), "ActionSelector",
                                 selectorName, actionSelector.annotations, selector, p4Info,
                                 pipeName);
     }
@@ -205,12 +206,12 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
         auto decl = externBlock->node->to<IR::IDeclaration>();
         if (decl == nullptr) return;
         if (externBlock->type->name == "Digest") {
-            symbols->add(SymbolType::DIGEST(), decl);
+            symbols->add(SymbolType::P4RT_DIGEST(), decl);
         } else if (externBlock->type->name == ActionSelectorTraits<arch>::typeName()) {
             auto selName = decl->controlPlaneName() + "_sel";
             auto profName = decl->controlPlaneName();
-            symbols->add(SymbolTypeDPDK::ACTION_SELECTOR(), selName);
-            symbols->add(SymbolType::ACTION_PROFILE(), profName);
+            symbols->add(SymbolTypeDPDK::P4RT_ACTION_SELECTOR(), selName);
+            symbols->add(SymbolType::P4RT_ACTION_PROFILE(), profName);
         }
     }
 

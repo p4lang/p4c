@@ -91,7 +91,7 @@ void collectControlSymbols(P4RuntimeSymbolTable &symbols, P4RuntimeArchHandlerIf
 
     forAllMatching<IR::P4Action>(&control->controlLocals, [&](const IR::P4Action *action) {
         // Collect the action itself.
-        symbols.add(P4RuntimeSymbolType::ACTION(), action);
+        symbols.add(P4RuntimeSymbolType::P4RT_ACTION(), action);
 
         // Collect any extern functions it may invoke.
         forAllMatching<IR::MethodCallExpression>(
@@ -124,8 +124,8 @@ void collectTableSymbols(P4RuntimeSymbolTable &symbols, P4RuntimeArchHandlerIfac
                          const IR::TableBlock *tableBlock) {
     CHECK_NULL(tableBlock);
     auto name = archHandler->getControlPlaneName(tableBlock);
-    auto id = externalId(P4RuntimeSymbolType::TABLE(), tableBlock->container);
-    symbols.add(P4RuntimeSymbolType::TABLE(), name, id);
+    auto id = externalId(P4RuntimeSymbolType::P4RT_TABLE(), tableBlock->container);
+    symbols.add(P4RuntimeSymbolType::P4RT_TABLE(), name, id);
     archHandler->collectTableProperties(&symbols, tableBlock);
 }
 
@@ -137,7 +137,7 @@ void collectParserSymbols(P4RuntimeSymbolTable &symbols, const IR::ParserBlock *
 
     for (const auto *s : parser->parserLocals) {
         if (const auto *inst = s->to<IR::P4ValueSet>()) {
-            symbols.add(P4RuntimeSymbolType::VALUE_SET(), inst);
+            symbols.add(P4RuntimeSymbolType::P4RT_VALUE_SET(), inst);
         }
     }
 }
@@ -161,7 +161,7 @@ P4::ControlPlaneAPI::P4RuntimeSymbolTable::generateSymbols(
         });
         forAllMatching<IR::Type_Header>(program, [&](const IR::Type_Header *type) {
             if (isControllerHeader(type)) {
-                symbols.add(P4RuntimeSymbolType::CONTROLLER_HEADER(), type);
+                symbols.add(P4RuntimeSymbolType::P4RT_CONTROLLER_HEADER(), type);
             }
         });
         archHandler->collectExtra(&symbols);

@@ -526,7 +526,7 @@ class P4RuntimeAnalyzer {
         if (isHidden(actionDeclaration)) return;
 
         auto name = actionDeclaration->controlPlaneName();
-        auto id = symbols.getId(P4RuntimeSymbolType::ACTION(), name);
+        auto id = symbols.getId(P4RuntimeSymbolType::P4RT_ACTION(), name);
         auto annotations = actionDeclaration->to<IR::IAnnotated>();
 
         // TODO(antonin): The compiler creates a new instance of an action for
@@ -599,7 +599,7 @@ class P4RuntimeAnalyzer {
         auto flattenedHeaderType = FlattenHeader::flatten(typeMap, type);
 
         auto name = type->controlPlaneName();
-        auto id = symbols.getId(P4RuntimeSymbolType::CONTROLLER_HEADER(), name);
+        auto id = symbols.getId(P4RuntimeSymbolType::P4RT_CONTROLLER_HEADER(), name);
         auto annotations = type->to<IR::IAnnotated>();
 
         auto controllerAnnotation = type->getAnnotation("controller_header");
@@ -665,17 +665,18 @@ class P4RuntimeAnalyzer {
         auto annotations = tableDeclaration->to<IR::IAnnotated>();
 
         auto table = p4Info->add_tables();
-        setPreamble(table->mutable_preamble(), symbols.getId(P4RuntimeSymbolType::TABLE(), name),
-                    name, symbols.getAlias(name), annotations);
+        setPreamble(table->mutable_preamble(),
+                    symbols.getId(P4RuntimeSymbolType::P4RT_TABLE(), name), name,
+                    symbols.getAlias(name), annotations);
         table->set_size(tableSize);
 
         if (defaultAction && defaultAction->isConst) {
-            auto id = symbols.getId(P4RuntimeSymbolType::ACTION(), defaultAction->name);
+            auto id = symbols.getId(P4RuntimeSymbolType::P4RT_ACTION(), defaultAction->name);
             table->set_const_default_action_id(id);
         }
 
         for (const auto &action : actions) {
-            auto id = symbols.getId(P4RuntimeSymbolType::ACTION(), action.name);
+            auto id = symbols.getId(P4RuntimeSymbolType::P4RT_ACTION(), action.name);
             auto action_ref = table->add_action_refs();
             action_ref->set_id(id);
             addAnnotations(action_ref, action.annotations);
@@ -778,7 +779,7 @@ class P4RuntimeAnalyzer {
         }
         size = static_cast<unsigned int>(sizeConstant->value);
 
-        auto id = symbols.getId(P4RuntimeSymbolType::VALUE_SET(), name);
+        auto id = symbols.getId(P4RuntimeSymbolType::P4RT_VALUE_SET(), name);
         setPreamble(vs->mutable_preamble(), id, name, symbols.getAlias(name),
                     inst->to<IR::IAnnotated>());
         vs->set_size(size);
@@ -1003,7 +1004,7 @@ class P4RuntimeEntriesConverter {
         if (entriesList == nullptr) return;
 
         auto tableName = archHandler->getControlPlaneName(tableBlock);
-        auto tableId = symbols.getId(P4RuntimeSymbolType::TABLE(), tableName);
+        auto tableId = symbols.getId(P4RuntimeSymbolType::P4RT_TABLE(), tableName);
 
         int entryPriority = entriesList->entries.size();
         auto needsPriority = tableNeedsPriority(table, refMap);
@@ -1060,7 +1061,7 @@ class P4RuntimeEntriesConverter {
         auto decl = refMap->getDeclaration(method, true);
         auto actionDecl = decl->to<IR::P4Action>();
         auto actionName = actionDecl->controlPlaneName();
-        auto actionId = symbols.getId(P4RuntimeSymbolType::ACTION(), actionName);
+        auto actionId = symbols.getId(P4RuntimeSymbolType::P4RT_ACTION(), actionName);
 
         auto protoAction = protoEntry->mutable_action()->mutable_action();
         protoAction->set_action_id(actionId);
