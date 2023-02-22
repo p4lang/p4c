@@ -246,7 +246,6 @@ void UBPFTable::emitKeyType(EBPF::CodeBuilder *builder) {
     if (keyGenerator != nullptr) {
         // Use this to order elements by size
         std::multimap<size_t, const IR::KeyElement *> ordered;
-        unsigned fieldNumber = 0;
         for (auto c : keyGenerator->keyElements) {
             auto type = program->typeMap->getType(c->expression);
             auto ebpfType = UBPFTypeFactory::instance->create(type);
@@ -259,7 +258,6 @@ void UBPFTable::emitKeyType(EBPF::CodeBuilder *builder) {
             ordered.emplace(width, c);
             keyTypes.emplace(c, ebpfType);
             keyFieldNames.emplace(c, fieldName);
-            fieldNumber++;
         }
 
         // Emit key in decreasing order size - this way there will be no gaps
