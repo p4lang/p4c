@@ -44,6 +44,12 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/source_file.h"
 
+#ifdef __clang__
+#if __clang_major__ >= 13
+#pragma clang diagnostic ignored "-Wunused-but-set-variable"
+#endif
+#endif
+
 namespace P4 {
 class AbstractP4Lexer;
 class P4ParserDriver;
