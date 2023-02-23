@@ -27,13 +27,14 @@ import signal
 from pathlib import Path
 from typing import NamedTuple, Optional
 
-# configure logging
+# Set up logging.
 log = logging.getLogger(__name__)
 
 TIMEOUT: int = 10 * 60
 SUCCESS: int = 0
 FAILURE: int = 1
-SKIPPED: int = 999      # used occasionally to indicate that a test was not executed
+# SKIPPED is used to indicate that a test was not executed.
+SKIPPED: int = 999
 
 
 class LogPipe(threading.Thread):
@@ -127,7 +128,8 @@ def pick_tcp_port(default_port: int) -> int:
 
 
 def open_process(args: str, **extra_args) -> Optional[subprocess.Popen]:
-    """Start the given argument string as a subprocess and return the handle to the process."""
+    """Start the given argument string as a subprocess and return the handle to the process.
+       @param extra_args is forwarded to the subprocess.communicate command"""
     log.info("Writing %s", " ".join(args))
     proc = None
     output_args = {
@@ -156,8 +158,8 @@ def open_process(args: str, **extra_args) -> Optional[subprocess.Popen]:
 
 
 def run_process(proc: subprocess.Popen, **extra_args) -> subprocess.Popen:
-    """Wait for the given process to finish. Time out after TIMEOUT
-    seconds and report failures or stdout."""
+    """Wait for the given process to finish. Report failures to stderr. @param extra_args is
+        forwarded to the subprocess.communicate command."""
     try:
         out, err = proc.communicate(**extra_args)
     except subprocess.TimeoutExpired as exception:
@@ -178,7 +180,7 @@ def run_process(proc: subprocess.Popen, **extra_args) -> subprocess.Popen:
 
 def exec_process(args: str, **extra_args) -> ProcessResult:
     """Run the given argument string as a subprocess. Time out after TIMEOUT
-    seconds and report failures or stdout. @param extra_args is forwarded to the subprocess.run
+    seconds and report failures to stderr. @param extra_args is forwarded to the subprocess.run
     command."""
     if not isinstance(args, str):
         log.error("Input must be a string. Received %s.", args)
@@ -277,7 +279,8 @@ def check_and_create_dir(directory: Path) -> None:
 
 
 def del_dir(directory: str) -> None:
-    """ Delete a directory and all its children. TODO: Convert to Path input. """
+    """ Delete a directory and all its children.
+        TODO: Convert to Path input. """
     try:
         shutil.rmtree(directory, ignore_errors=True)
     except OSError as exception:
@@ -294,5 +297,5 @@ def copy_file(src, dst):
         else:
             shutil.copy2(src, dst)
     except shutil.SameFileError:
-        # this is fine
+        # Exceptions are okay here.
         pass
