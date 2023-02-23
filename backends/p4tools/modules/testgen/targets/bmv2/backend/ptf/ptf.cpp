@@ -219,7 +219,6 @@ import logging
 import sys
 import os
 
-from ptf.thriftutils import *
 from ptf.mask import Mask
 
 from ptf.packet import *
