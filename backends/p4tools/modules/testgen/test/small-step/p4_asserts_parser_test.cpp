@@ -28,7 +28,7 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_refers_to_parser.h"
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"
 
-/// Variables are declared in "test/gtest/env.h" which is already included in reachablity.cpp
+/// Variables are declared in "test/gtest/env.h" which is already included in reachability.cpp
 extern const char *sourcePath;
 extern const char *buildPath;
 
@@ -131,7 +131,7 @@ TEST_F(P4AssertsParserTest, RestrictionMiddleblockReferToInTable) {
     Restrictions parsingResult = loadExample(
         "backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_restrictions_2.p4",
         false);
-    ASSERT_EQ(parsingResult.size(), (unsigned long)2);
+    ASSERT_EQ(parsingResult.size(), (unsigned long)3);
     const auto &expr1 =
         P4Tools::Utils::getZombieConst(IR::Type_Bits::get(8), 0, "ingress.table_1_key_h.h.a");
     const auto &expr2 =
@@ -144,7 +144,7 @@ TEST_F(P4AssertsParserTest, RestrictionMiddleblockReferToInAction) {
     Restrictions parsingResult = loadExample(
         "backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_restrictions_2.p4",
         false);
-    ASSERT_EQ(parsingResult.size(), (unsigned long)2);
+    ASSERT_EQ(parsingResult.size(), (unsigned long)3);
     auto expr1 = P4Tools::Utils::getZombieConst(IR::Type_Bits::get(8), 0,
                                                 "ingress.table_1_arg_ingress.MyAction10");
     auto expr2 =
