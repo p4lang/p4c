@@ -96,6 +96,29 @@ function(add_clang_format_files dir filelist)
   set_property(GLOBAL PROPERTY clang-format-files "${CLANG_FORMAT_FILES}")
 endfunction(add_clang_format_files)
 
+# Add files with the appropriate path to the list of yapf-linted files.
+function(add_yapf_files dir filelist)
+  if (NOT filelist)
+    message(WARNING "Input file list is empty. Returning.")
+    return()
+  endif()
+  # Initialize an empty list.
+  set (__yapfFileList "")
+  foreach(__f ${filelist})
+    string(REGEX MATCH "^/.*" abs_path "${__f}")
+    if (NOT ${abs_path} EQUAL "")
+      list (APPEND __yapfFileList "${__f}")
+    else()
+      list (APPEND __yapfFileList "${dir}/${__f}")
+    endif()
+  endforeach(__f)
+
+  # Get the global clang-format property and append to it.
+  get_property(YAPF_FILES GLOBAL PROPERTY yapf-files)
+  list (APPEND YAPF_FILES "${__yapfFileList}")
+  list(REMOVE_DUPLICATES YAPF_FILES)
+  set_property(GLOBAL PROPERTY yapf-files "${YAPF_FILES}")
+endfunction(add_yapf_files)
 
 macro(p4c_test_set_name name tag alias)
   set(${name} ${tag}/${alias})

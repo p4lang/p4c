@@ -467,27 +467,31 @@ Again, `MY_IR_SRCS` is a list of file names with absolute path.
 
 ### Source files
 
-Sources (.cpp and .h) should be added to the cpplint and clang_format target using the following rule:
+Sources (.cpp and .h) should be added to the cpplint and clang-format target using the following rule:
 
 ```
 add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${MY_SOURCES_AND_HEADERS}")
 add_clang_format_files (${CMAKE_CURRENT_SOURCE_DIR} "${MY_SOURCES_AND_HEADERS}")
 ```
 
-where `mybackend` is the name of the directory you added under extensions.
+Python files should be added to the yapf target using the following rule:
+```
+add_yapf_files (${CMAKE_CURRENT_SOURCE_DIR} "${MY_SOURCES_AND_HEADERS}")
+```
+
 The p4c CMakeLists.txt will use that name to figure the full path of the files to lint.
 
-Unlike cpplint, clang-format needs to be installed before the linter can be used. clang-format can be installed with the following command:
+Unlike cpplint, clang-format and yapf need to be installed before the linter can be used. They can be installed with the following command:
 ```
-pip3 install --user "clang-format>=15.0.4"
+pip3 install --user "clang-format==15.0.4" "yapf==0.32.0"
 ```
-clang-format can be checked using the `make clang-format` command. Complaints can be fixed by running `make clang-format-fix-errors`.
+clang-format can be checked using the `make clang-format` command. Complaints can be fixed by running `make clang-format-fix-errors`. yapf can be checked using the `make yapf` command. Complaints can be fixed by running `make yapf-fix-errors`.
 
-Both cpplint and clang-format run as checks as port of P4C's continuous integration process. To make sure that these tests pass, we recommend installing the appropriate git hooks. This can be done by running
+cpplint, clang-format, and yapf run as checks as port of P4C's continuous integration process. To make sure that these tests pass, we recommend installing the appropriate git hooks. This can be done by running
 ```
 ./tools/install_git_hooks.sh
 ```
-clang-format and cpplint checks will be enforced on every branch commit. In cases where checks are failing but the commit is sound, one can bypass the hook enforcement using `git commit --no-verify`.
+clang-format, cpplint, and yapf checks will be enforced on every branch commit. In cases where checks are failing but the commit is sound, one can bypass the hook enforcement using `git commit --no-verify`.
 
 ### Target
 

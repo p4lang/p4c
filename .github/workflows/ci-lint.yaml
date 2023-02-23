@@ -40,3 +40,6 @@ jobs:
 
     - name: Run clang-format.
       run: make clang-format -C build
+
+    - name: Run yapf.
+      run: make yapf -C build
