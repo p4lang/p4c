@@ -62,8 +62,8 @@ boost::optional<p4rt_id_t> Protobuf::getIdAnnotation(const IR::IAnnotated *node)
     return static_cast<p4rt_id_t>(idConstant->value);
 }
 
-boost::optional<p4rt_id_t> Protobuf::externalId(const P4RuntimeSymbolType &type,
-                                                const IR::IDeclaration *declaration) {
+boost::optional<p4rt_id_t> Protobuf::externalId(
+    const P4::ControlPlaneAPI::P4RuntimeSymbolType &type, const IR::IDeclaration *declaration) {
     CHECK_NULL(declaration);
     if (!declaration->is<IR::IAnnotated>()) {
         return boost::none;  // Assign an id later; see below.
@@ -129,7 +129,7 @@ inja::json Protobuf::getControlPlane(const TestSpec *testSpec) {
         const auto *const tblConfig = testObject.second->checkedTo<TableConfig>();
         const auto *table = tblConfig->getTable();
 
-        auto p4RuntimeId = externalId(SymbolType::TABLE(), table);
+        auto p4RuntimeId = externalId(SymbolType::P4RT_TABLE(), table);
         BUG_CHECK(p4RuntimeId, "Id not present for table %1%. Can not generate test.", table);
         tblJson["id"] = *p4RuntimeId;
 
@@ -142,7 +142,7 @@ inja::json Protobuf::getControlPlane(const TestSpec *testSpec) {
             const auto *actionDecl = actionCall->getAction();
             const auto *actionArgs = actionCall->getArgs();
             rule["action_name"] = actionCall->getActionName().c_str();
-            auto p4RuntimeId = externalId(SymbolType::ACTION(), actionDecl);
+            auto p4RuntimeId = externalId(SymbolType::P4RT_ACTION(), actionDecl);
             BUG_CHECK(p4RuntimeId, "Id not present for action %1%. Can not generate test.",
                       actionDecl);
             rule["action_id"] = *p4RuntimeId;
@@ -277,7 +277,7 @@ inja::json Protobuf::getVerify(const TestSpec *testSpec) {
     return verifyData;
 }
 
-static std::string getTestCase() {
+std::string Protobuf::getTestCaseTemplate() {
     static std::string TEST_CASE(
         R"""(# A P4TestGen-generated test case for {{test_name}}.p4
 metadata: "p4testgen seed: {{ default(seed, "none") }}"
@@ -429,7 +429,7 @@ void Protobuf::outputTest(const TestSpec *testSpec, cstring selectedBranches, si
     auto incrementedTestName = testName + "_" + std::to_string(testIdx);
 
     protobufFile = std::ofstream(incrementedTestName + ".proto");
-    std::string testCase = getTestCase();
+    std::string testCase = getTestCaseTemplate();
     emitTestcase(testSpec, selectedBranches, testIdx, testCase, currentCoverage);
 }
 

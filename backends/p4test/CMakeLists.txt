@@ -25,7 +25,7 @@ set (P4TEST_HDRS
   midend.h
   )
 
-build_unified(P4TEST_SRCS ALL)
+
 add_executable(p4test ${P4TEST_SRCS} ${EXTENSION_P4_14_CONV_SOURCES})
 target_link_libraries (p4test ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 add_dependencies(p4test genIR frontend)

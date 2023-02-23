@@ -41,7 +41,6 @@ jobs:
             kernel_version: 5.15.0-48
             os: ubuntu-20.04
     env:
-      UNIFIED: ON
       # Used by virt-builder and virt-install, for valid values see `virt-builder --list`.
       OS_TYPE: ${{ matrix.os }}
       # List of kernels to use in a single job
@@ -78,7 +77,7 @@ jobs:
 
       - name: Build (Linux)
         run: |
-          docker build --network host -t p4c --build-arg MAKEFLAGS=-j8 --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=$UNIFIED --build-arg INSTALL_PTF_EBPF_DEPENDENCIES=ON --build-arg KERNEL_VERSIONS="$KERNEL_VERSIONS" .
+          docker build --network host -t p4c --build-arg MAKEFLAGS=-j8 --build-arg IMAGE_TYPE=test --build-arg CMAKE_UNITY_BUILD=ON --build-arg INSTALL_PTF_EBPF_DEPENDENCIES=ON --build-arg KERNEL_VERSIONS="$KERNEL_VERSIONS" .
           ./tools/export_ccache.sh
 
       - name: Install VM

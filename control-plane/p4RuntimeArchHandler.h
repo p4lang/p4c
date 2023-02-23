@@ -59,16 +59,16 @@ class P4RuntimeSymbolType {
     /// p4info.proto file.
     explicit operator p4rt_id_t() const { return id; }
 
-    static P4RuntimeSymbolType ACTION() {
+    static P4RuntimeSymbolType P4RT_ACTION() {
         return P4RuntimeSymbolType(::p4::config::v1::P4Ids::ACTION);
     }
-    static P4RuntimeSymbolType TABLE() {
+    static P4RuntimeSymbolType P4RT_TABLE() {
         return P4RuntimeSymbolType(::p4::config::v1::P4Ids::TABLE);
     }
-    static P4RuntimeSymbolType VALUE_SET() {
+    static P4RuntimeSymbolType P4RT_VALUE_SET() {
         return P4RuntimeSymbolType(::p4::config::v1::P4Ids::VALUE_SET);
     }
-    static P4RuntimeSymbolType CONTROLLER_HEADER() {
+    static P4RuntimeSymbolType P4RT_CONTROLLER_HEADER() {
         return P4RuntimeSymbolType(::p4::config::v1::P4Ids::CONTROLLER_HEADER);
     }
 

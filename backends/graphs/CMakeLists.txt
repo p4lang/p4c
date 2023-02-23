@@ -30,7 +30,7 @@ set (GRAPHS_HDRS
   graph_visitor.h
   )
 
-build_unified(GRAPHS_SRCS ALL)
+
 add_executable(p4c-graphs ${GRAPHS_SRCS} ${EXTENSION_P4_14_CONV_SOURCES})
 target_link_libraries (p4c-graphs ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 add_dependencies(p4c-graphs genIR frontend)

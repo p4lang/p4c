@@ -2,22 +2,26 @@
 
 namespace P4 {
 
-/// Convert an expression into a string that uniqely identifies the lvalue referenced.
-/// Return null cstring if not a reference to a lvalue.
-static cstring lvalue_name(const IR::Expression *exp) {
+namespace GlobalCopyProp {
+
+/// Convert an expression into a string that uniqely identifies the lvalue
+/// referenced. Return null cstring if not a reference to a lvalue.
+static cstring lValueName(const IR::Expression *exp) {
     if (auto p = exp->to<IR::PathExpression>()) return p->path->name;
     if (auto m = exp->to<IR::Member>()) {
-        if (auto base = lvalue_name(m->expr)) return base + "." + m->member;
+        if (auto base = lValueName(m->expr)) return base + "." + m->member;
     } else if (auto a = exp->to<IR::ArrayIndex>()) {
         if (auto k = a->right->to<IR::Constant>()) {
-            if (auto base = lvalue_name(a->left))
+            if (auto base = lValueName(a->left))
                 return base + "[" + std::to_string(k->asInt()) + "]";
         }
     } else if (auto sl = exp->to<IR::Slice>()) {
-        if (auto e0 = lvalue_name(sl->e0)) return e0;
+        if (auto e0 = lValueName(sl->e0)) return e0;
     }
     return cstring();
 }
+
+}  // namespace GlobalCopyProp
 
 /// Test to see if names denote overlapping locations.
 bool names_overlap(cstring name1, cstring name2) {
@@ -120,23 +124,23 @@ bool FindVariableValues::preorder(const IR::SwitchStatement *stat) {
 
 // Update the value for the 'stat->left' variable.
 bool FindVariableValues::preorder(const IR::AssignmentStatement *stat) {
-    if (!working || lvalue_name(stat->left).isNullOrEmpty()) return false;
+    if (!working || GlobalCopyProp::lValueName(stat->left).isNullOrEmpty()) return false;
 
     LOG5("Working on statement: " << stat);
     // Remove old values
-    if (vars[lvalue_name(stat->left)] == nullptr ||
-        !(stat->right->equiv(*(vars[lvalue_name(stat->left)]))))
-        removeVarsContaining(&vars, lvalue_name(stat->left));
+    if (vars[GlobalCopyProp::lValueName(stat->left)] == nullptr ||
+        !(stat->right->equiv(*(vars[GlobalCopyProp::lValueName(stat->left)]))))
+        removeVarsContaining(&vars, GlobalCopyProp::lValueName(stat->left));
     // Set value
     if (auto lit = stat->right->to<IR::Literal>()) {
         if (stat->left->is<IR::Slice>()) return false;
-        vars[lvalue_name(stat->left)] = lit;
+        vars[GlobalCopyProp::lValueName(stat->left)] = lit;
         LOG5("  Setting value: " << lit << ", for: " << stat->left);
-    } else if (auto v = vars[lvalue_name(stat->right)]) {
+    } else if (auto v = vars[GlobalCopyProp::lValueName(stat->right)]) {
         auto lit = v->to<IR::Literal>();
         if (lit == nullptr) return false;
         if (stat->left->is<IR::Slice>() || stat->right->is<IR::Slice>()) return false;
-        vars[lvalue_name(stat->left)] = lit;
+        vars[GlobalCopyProp::lValueName(stat->left)] = lit;
         LOG5("  Setting value: " << lit << ", for: " << stat->left);
     }
 
@@ -192,7 +196,7 @@ const IR::Expression *DoGlobalCopyPropagation::postorder(IR::PathExpression *pat
 const IR::Expression *DoGlobalCopyPropagation::preorder(IR::Member *member) {
     if (!performRewrite) return member;
 
-    if (auto name = lvalue_name(member)) {
+    if (auto name = GlobalCopyProp::lValueName(member)) {
         prune();
         if (auto rv = copyprop_name(name)) return rv;
     }
@@ -202,7 +206,7 @@ const IR::Expression *DoGlobalCopyPropagation::preorder(IR::Member *member) {
 const IR::Expression *DoGlobalCopyPropagation::preorder(IR::ArrayIndex *arr) {
     if (!performRewrite) return arr;
 
-    if (auto name = lvalue_name(arr)) {
+    if (auto name = GlobalCopyProp::lValueName(arr)) {
         prune();
         if (auto rv = copyprop_name(name)) {
             return rv;
@@ -285,9 +289,9 @@ const IR::Node *DoGlobalCopyPropagation::preorder(IR::AssignmentStatement *stat)
     LOG6("  Visiting right side of statement");
     visit(stat->right);
     // Remove old values
-    if ((*vars)[lvalue_name(stat->left)] == nullptr ||
-        !(stat->right->equiv(*((*vars)[lvalue_name(stat->left)]))))
-        removeVarsContaining(vars, lvalue_name(stat->left));
+    if ((*vars)[GlobalCopyProp::lValueName(stat->left)] == nullptr ||
+        !(stat->right->equiv(*((*vars)[GlobalCopyProp::lValueName(stat->left)]))))
+        removeVarsContaining(vars, GlobalCopyProp::lValueName(stat->left));
     performRewrite = false;
     LOG6("  Visiting left side of statement");
     visit(stat->left);
@@ -297,9 +301,10 @@ const IR::Node *DoGlobalCopyPropagation::preorder(IR::AssignmentStatement *stat)
     // identical literal as already stored in the 'vars' container the statement is removed.
     if (auto lit = stat->right->to<IR::Literal>()) {
         if (stat->left->is<IR::Slice>()) return stat;
-        if ((*vars)[lvalue_name(stat->left)] && lit->equiv(*((*vars)[lvalue_name(stat->left)])))
+        if ((*vars)[GlobalCopyProp::lValueName(stat->left)] &&
+            lit->equiv(*((*vars)[GlobalCopyProp::lValueName(stat->left)])))
             return new IR::EmptyStatement(stat->srcInfo);
-        (*vars)[lvalue_name(stat->left)] = lit;
+        (*vars)[GlobalCopyProp::lValueName(stat->left)] = lit;
         LOG5("  Setting value: " << lit << ", for: " << stat->left);
     }
 

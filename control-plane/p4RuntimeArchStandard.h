@@ -278,25 +278,25 @@ class SymbolType : public P4RuntimeSymbolType {
  public:
     SymbolType() = delete;
 
-    static P4RuntimeSymbolType ACTION_PROFILE() {
+    static P4RuntimeSymbolType P4RT_ACTION_PROFILE() {
         return P4RuntimeSymbolType::make(p4configv1::P4Ids::ACTION_PROFILE);
     }
-    static P4RuntimeSymbolType COUNTER() {
+    static P4RuntimeSymbolType P4RT_COUNTER() {
         return P4RuntimeSymbolType::make(p4configv1::P4Ids::COUNTER);
     }
-    static P4RuntimeSymbolType DIGEST() {
+    static P4RuntimeSymbolType P4RT_DIGEST() {
         return P4RuntimeSymbolType::make(p4configv1::P4Ids::DIGEST);
     }
-    static P4RuntimeSymbolType DIRECT_COUNTER() {
+    static P4RuntimeSymbolType P4RT_DIRECT_COUNTER() {
         return P4RuntimeSymbolType::make(p4configv1::P4Ids::DIRECT_COUNTER);
     }
-    static P4RuntimeSymbolType DIRECT_METER() {
+    static P4RuntimeSymbolType P4RT_DIRECT_METER() {
         return P4RuntimeSymbolType::make(p4configv1::P4Ids::DIRECT_METER);
     }
-    static P4RuntimeSymbolType METER() {
+    static P4RuntimeSymbolType P4RT_METER() {
         return P4RuntimeSymbolType::make(p4configv1::P4Ids::METER);
     }
-    static P4RuntimeSymbolType REGISTER() {
+    static P4RuntimeSymbolType P4RT_REGISTER() {
         return P4RuntimeSymbolType::make(p4configv1::P4Ids::REGISTER);
     }
 };
@@ -553,7 +553,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
                             "Expected an action profile or action selector: %1%",
                             instance->expression);
                 } else if (isConstructedInPlace) {
-                    symbols->add(SymbolType::ACTION_PROFILE(), *instance->name);
+                    symbols->add(SymbolType::P4RT_ACTION_PROFILE(), *instance->name);
                 }
             }
         }
@@ -565,7 +565,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
                     ::error(ErrorType::ERR_EXPECTED, "Expected a direct counter: %1%",
                             instance->expression);
                 } else if (isConstructedInPlace) {
-                    symbols->add(SymbolType::DIRECT_COUNTER(), *instance->name);
+                    symbols->add(SymbolType::P4RT_DIRECT_COUNTER(), *instance->name);
                 }
             }
         }
@@ -577,7 +577,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
                     ::error(ErrorType::ERR_EXPECTED, "Expected a direct meter: %1%",
                             instance->expression);
                 } else if (isConstructedInPlace) {
-                    symbols->add(SymbolType::DIRECT_METER(), *instance->name);
+                    symbols->add(SymbolType::P4RT_DIRECT_METER(), *instance->name);
                 }
             }
         }
@@ -594,18 +594,18 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         if (decl == nullptr) return;
 
         if (externBlock->type->name == CounterTraits::typeName()) {
-            symbols->add(SymbolType::COUNTER(), decl);
+            symbols->add(SymbolType::P4RT_COUNTER(), decl);
         } else if (externBlock->type->name == CounterTraits::directTypeName()) {
-            symbols->add(SymbolType::DIRECT_COUNTER(), decl);
+            symbols->add(SymbolType::P4RT_DIRECT_COUNTER(), decl);
         } else if (externBlock->type->name == MeterTraits::typeName()) {
-            symbols->add(SymbolType::METER(), decl);
+            symbols->add(SymbolType::P4RT_METER(), decl);
         } else if (externBlock->type->name == MeterTraits::directTypeName()) {
-            symbols->add(SymbolType::DIRECT_METER(), decl);
+            symbols->add(SymbolType::P4RT_DIRECT_METER(), decl);
         } else if (externBlock->type->name == ActionProfileTraits<arch>::typeName() ||
                    externBlock->type->name == ActionSelectorTraits<arch>::typeName()) {
-            symbols->add(SymbolType::ACTION_PROFILE(), decl);
+            symbols->add(SymbolType::P4RT_ACTION_PROFILE(), decl);
         } else if (externBlock->type->name == RegisterTraits<arch>::typeName()) {
-            symbols->add(SymbolType::REGISTER(), decl);
+            symbols->add(SymbolType::P4RT_REGISTER(), decl);
         }
     }
 
@@ -648,7 +648,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
             Helpers::getDirectCounterlike<ArchMeterExtern>(tableDeclaration, refMap, typeMap);
 
         if (implementation) {
-            auto id = symbols.getId(SymbolType::ACTION_PROFILE(), implementation->name);
+            auto id = symbols.getId(SymbolType::P4RT_ACTION_PROFILE(), implementation->name);
             table->set_implementation_id(id);
             auto propertyName = ActionProfileTraits<arch>::propertyName();
             if (isExternPropertyConstructedInPlace(tableDeclaration, propertyName))
@@ -656,14 +656,14 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         }
 
         if (directCounter) {
-            auto id = symbols.getId(SymbolType::DIRECT_COUNTER(), directCounter->name);
+            auto id = symbols.getId(SymbolType::P4RT_DIRECT_COUNTER(), directCounter->name);
             table->add_direct_resource_ids(id);
             // no risk to add twice because direct counters cannot be shared
             addCounter(symbols, p4info, *directCounter);
         }
 
         if (directMeter) {
-            auto id = symbols.getId(SymbolType::DIRECT_METER(), directMeter->name);
+            auto id = symbols.getId(SymbolType::P4RT_DIRECT_METER(), directMeter->name);
             table->add_direct_resource_ids(id);
             // no risk to add twice because direct meters cannot be shared
             addMeter(symbols, p4info, *directMeter);
@@ -761,7 +761,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
     void addActionProfile(const P4RuntimeSymbolTableIface &symbols, p4configv1::P4Info *p4Info,
                           const ActionProfile &actionProfile) {
         auto profile = p4Info->add_action_profiles();
-        auto id = symbols.getId(SymbolType::ACTION_PROFILE(), actionProfile.name);
+        auto id = symbols.getId(SymbolType::P4RT_ACTION_PROFILE(), actionProfile.name);
         setPreamble(profile->mutable_preamble(), id, actionProfile.name,
                     symbols.getAlias(actionProfile.name), actionProfile.annotations,
                     // exclude @max_group_size if present
@@ -785,7 +785,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         auto tablesIt = actionProfilesRefs.find(actionProfile.name);
         if (tablesIt != actionProfilesRefs.end()) {
             for (const auto &table : tablesIt->second)
-                profile->add_table_ids(symbols.getId(P4RuntimeSymbolType::TABLE(), table));
+                profile->add_table_ids(symbols.getId(P4RuntimeSymbolType::P4RT_TABLE(), table));
         }
     }
 
@@ -803,13 +803,13 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
                     const Helpers::Counterlike<ArchCounterExtern> &counterInstance) {
         if (counterInstance.table) {
             auto counter = p4Info->add_direct_counters();
-            auto id = symbols.getId(SymbolType::DIRECT_COUNTER(), counterInstance.name);
+            auto id = symbols.getId(SymbolType::P4RT_DIRECT_COUNTER(), counterInstance.name);
             setCounterCommon(symbols, counter, id, counterInstance);
-            auto tableId = symbols.getId(P4RuntimeSymbolType::TABLE(), *counterInstance.table);
+            auto tableId = symbols.getId(P4RuntimeSymbolType::P4RT_TABLE(), *counterInstance.table);
             counter->set_direct_table_id(tableId);
         } else {
             auto counter = p4Info->add_counters();
-            auto id = symbols.getId(SymbolType::COUNTER(), counterInstance.name);
+            auto id = symbols.getId(SymbolType::P4RT_COUNTER(), counterInstance.name);
             setCounterCommon(symbols, counter, id, counterInstance);
             counter->set_size(counterInstance.size);
             if (counterInstance.index_type_name) {
@@ -832,13 +832,13 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
                   const Helpers::Counterlike<ArchMeterExtern> &meterInstance) {
         if (meterInstance.table) {
             auto meter = p4Info->add_direct_meters();
-            auto id = symbols.getId(SymbolType::DIRECT_METER(), meterInstance.name);
+            auto id = symbols.getId(SymbolType::P4RT_DIRECT_METER(), meterInstance.name);
             setMeterCommon(symbols, meter, id, meterInstance);
-            auto tableId = symbols.getId(P4RuntimeSymbolType::TABLE(), *meterInstance.table);
+            auto tableId = symbols.getId(P4RuntimeSymbolType::P4RT_TABLE(), *meterInstance.table);
             meter->set_direct_table_id(tableId);
         } else {
             auto meter = p4Info->add_meters();
-            auto id = symbols.getId(SymbolType::METER(), meterInstance.name);
+            auto id = symbols.getId(SymbolType::P4RT_METER(), meterInstance.name);
             setMeterCommon(symbols, meter, id, meterInstance);
             meter->set_size(meterInstance.size);
             if (meterInstance.index_type_name) {
@@ -850,7 +850,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
     void addRegister(const P4RuntimeSymbolTableIface &symbols, p4configv1::P4Info *p4Info,
                      const Register &registerInstance) {
         auto register_ = p4Info->add_registers();
-        auto id = symbols.getId(SymbolType::REGISTER(), registerInstance.name);
+        auto id = symbols.getId(SymbolType::P4RT_REGISTER(), registerInstance.name);
         setPreamble(register_->mutable_preamble(), id, registerInstance.name,
                     symbols.getAlias(registerInstance.name), registerInstance.annotations);
         register_->set_size(registerInstance.size);
@@ -866,7 +866,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         // Right now we only take the type of data included in the digest
         // (encoded in its name) into account, but it may be that we should also
         // consider the receiver.
-        auto id = symbols.getId(SymbolType::DIGEST(), digest.name);
+        auto id = symbols.getId(SymbolType::P4RT_DIGEST(), digest.name);
         if (serializedInstances.find(id) != serializedInstances.end()) return;
         serializedInstances.insert(id);
 
@@ -945,7 +945,7 @@ class P4RuntimeArchHandlerPSAPNA : public P4RuntimeArchHandlerCommon<arch> {
         auto decl = externBlock->node->to<IR::IDeclaration>();
         if (decl == nullptr) return;
         if (externBlock->type->name == "Digest") {
-            symbols->add(SymbolType::DIGEST(), decl);
+            symbols->add(SymbolType::P4RT_DIGEST(), decl);
         }
     }
 

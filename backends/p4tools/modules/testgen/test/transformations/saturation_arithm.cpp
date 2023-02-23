@@ -108,7 +108,7 @@ class Z3SolverSatTests : public ::testing::Test {
     std::string equation;
 };
 
-namespace {
+namespace ArithmTest {
 
 /// The main class for saturation transformation.
 class SaturationTransform : public Transform {
@@ -242,6 +242,6 @@ class Z3SolverSubSat05 : public Z3SolverSatTests {
 
 TEST_F(Z3SolverSubSat05, SubSat05) { test(expression, variableValue); }
 
-}  // anonymous namespace
+}  // namespace ArithmTest
 
 }  // namespace Test

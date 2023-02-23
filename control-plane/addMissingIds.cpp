@@ -59,7 +59,7 @@ const IR::P4Table *MissingIdAssigner::postorder(IR::P4Table *table) {
         const auto *annos = table->getAnnotations();
         auto *newAnnos = annos->clone();
         IR::Vector<IR::Expression> annoExprs;
-        auto symbolId = symbols->getId(ControlPlaneAPI::P4RuntimeSymbolType::TABLE(), table);
+        auto symbolId = symbols->getId(ControlPlaneAPI::P4RuntimeSymbolType::P4RT_TABLE(), table);
         const auto *idConst = new IR::Constant(new IR::Type_Bits(ID_BIT_WIDTH, false), symbolId);
         annoExprs.push_back(idConst);
         newAnnos->add(new IR::Annotation("id", annoExprs));
@@ -79,7 +79,7 @@ const IR::Type_Header *MissingIdAssigner::postorder(IR::Type_Header *hdr) {
         auto *newAnnos = annos->clone();
         IR::Vector<IR::Expression> annoExprs;
         auto symbolId =
-            symbols->getId(ControlPlaneAPI::P4RuntimeSymbolType::CONTROLLER_HEADER(), hdr);
+            symbols->getId(ControlPlaneAPI::P4RuntimeSymbolType::P4RT_CONTROLLER_HEADER(), hdr);
         const auto *idConst = new IR::Constant(new IR::Type_Bits(ID_BIT_WIDTH, false), symbolId);
         annoExprs.push_back(idConst);
         newAnnos->add(new IR::Annotation("id", annoExprs));
@@ -99,7 +99,8 @@ const IR::P4ValueSet *MissingIdAssigner::postorder(IR::P4ValueSet *valueSet) {
         const auto *annos = valueSet->getAnnotations();
         auto *newAnnos = annos->clone();
         IR::Vector<IR::Expression> annoExprs;
-        auto symbolId = symbols->getId(ControlPlaneAPI::P4RuntimeSymbolType::VALUE_SET(), valueSet);
+        auto symbolId =
+            symbols->getId(ControlPlaneAPI::P4RuntimeSymbolType::P4RT_VALUE_SET(), valueSet);
         const auto *idConst = new IR::Constant(new IR::Type_Bits(ID_BIT_WIDTH, false), symbolId);
         annoExprs.push_back(idConst);
         newAnnos->add(new IR::Annotation("id", annoExprs));
@@ -118,7 +119,7 @@ const IR::P4Action *MissingIdAssigner::postorder(IR::P4Action *action) {
         const auto *annos = action->getAnnotations();
         auto *newAnnos = annos->clone();
         IR::Vector<IR::Expression> annoExprs;
-        auto symbolId = symbols->getId(ControlPlaneAPI::P4RuntimeSymbolType::ACTION(), action);
+        auto symbolId = symbols->getId(ControlPlaneAPI::P4RuntimeSymbolType::P4RT_ACTION(), action);
         const auto *idConst = new IR::Constant(new IR::Type_Bits(ID_BIT_WIDTH, false), symbolId);
         annoExprs.push_back(idConst);
         newAnnos->add(new IR::Annotation("id", annoExprs));

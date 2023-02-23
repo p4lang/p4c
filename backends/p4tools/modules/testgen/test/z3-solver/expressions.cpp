@@ -110,7 +110,7 @@ class Z3SolverTests : public ::testing::Test {
     std::string equation;
 };
 
-namespace {
+namespace Z3Test {
 
 void test(const IR::Expression *expression, const IR::AssignmentStatement *variableValue) {
     // checking initial data
@@ -306,6 +306,6 @@ class Z3SolverCastBit2Bool : public Z3SolverTests {
 
 TEST_F(Z3SolverCastBit2Bool, Cast) { test(expression, variableValue); }
 
-}  // anonymous namespace
+}  // namespace Z3Test
 
 }  // namespace Test

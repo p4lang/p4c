@@ -52,6 +52,9 @@ class STF : public TF {
     void emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
                       const std::string &testCase, float currentCoverage);
 
+    /// @returns the inja test case template as a string.
+    static std::string getTestCaseTemplate();
+
     /// Converts all the control plane objects into Inja format.
     static inja::json getControlPlane(const TestSpec *testSpec);
 

@@ -20,7 +20,6 @@ jobs:
     env:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
-      ENABLE_UNIFIED_COMPILATION: ON
     steps:
     - uses: actions/checkout@v3
       with:
@@ -44,16 +43,16 @@ jobs:
 
   # Build with gcc and test p4c on Ubuntu 20.04.
   test-ubuntu20:
-    name: test-ubuntu20 (Unified ${{ matrix.unified }})
+    name: test-ubuntu20 (Unity ${{ matrix.unity }})
     strategy:
       fail-fast: false
       matrix:
-        unified: [ON, OFF]
+        unity: [ON, OFF]
     runs-on: ubuntu-20.04
     env:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
-      ENABLE_UNIFIED_COMPILATION: ${{ matrix.unified }}
+      CMAKE_UNITY_BUILD: ${{ matrix.unity }}
     steps:
     - uses: actions/checkout@v3
       with:
@@ -63,7 +62,7 @@ jobs:
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1
       with:
-        key: test-${{ matrix.unified }}-${{ runner.os }}-gcc
+        key: test-${{ matrix.unity }}-${{ runner.os }}-gcc
         max-size: 1000M
 
     - name: Build (Ubuntu 20.04, GCC)
@@ -74,7 +73,7 @@ jobs:
       # Need to use sudo for the eBPF kernel tests.
       run: sudo -E ctest --output-on-failure --schedule-random
       working-directory: ./build
-      if: matrix.unified == 'ON'
+      if: matrix.unity == 'ON'
 
   # Build with clang and test p4c on Ubuntu 20.04.
   test-ubuntu20-clang-sanitizers:
@@ -84,7 +83,6 @@ jobs:
     env:
       CTEST_PARALLEL_LEVEL: 2
       IMAGE_TYPE: test
-      ENABLE_UNIFIED_COMPILATION: ON
       COMPILE_WITH_CLANG: ON
       BUILD_AUTO_VAR_INIT_PATTERN: ON
       ENABLE_SANITIZERS: ON
@@ -117,7 +115,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       CTEST_PARALLEL_LEVEL: 4
-      ENABLE_UNIFIED_COMPILATION: ON
     steps:
     - uses: actions/checkout@v3
       with:
@@ -132,7 +129,7 @@ jobs:
 
     - name: Build (Ubuntu 18.04, GCC)
       run: |
-        docker build -t p4c --build-arg BASE_IMAGE=ubuntu:18.04 --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=ON .
+        docker build -t p4c --build-arg BASE_IMAGE=ubuntu:18.04 --build-arg IMAGE_TYPE=test .
         ./tools/export_ccache.sh
 
       # run with sudo (...) --privileged
@@ -172,9 +169,8 @@ jobs:
 
     - name: Build p4c (Fedora Linux)
       run: |
-        ./bootstrap.sh -DCMAKE_BUILD_TYPE=RELEASE -DENABLE_UNIFIED_COMPILATION=ON
-         make -j2 -C build
-
+        ./bootstrap.sh -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_UNITY_BUILD=ON
+        make -j2 -C build
 
     - name: Run p4c tests (Fedora Linux)
       # Need to use sudo for the eBPF kernel tests.
@@ -213,7 +209,7 @@ jobs:
       run: |
           PROTOBUF=`brew --prefix --installed protobuf`
           ./bootstrap.sh -DENABLE_GC=ON -DCMAKE_BUILD_TYPE=RELEASE \
-              -DENABLE_UNIFIED_COMPILATION=ON \
+              -DCMAKE_UNITY_BUILD=ON \
               -DProtobuf_INCLUDE_DIR=$PROTOBUF/include \
               -DProtobuf_LIBRARY=$PROTOBUF/lib/libprotobuf.dylib \
               -DENABLE_PROTOBUF_STATIC=OFF

@@ -69,16 +69,15 @@ set (GTEST_UNITTEST_HEADERS
   )
 
 # Combine the executable and the non-backend-specific unit tests into a single
-# unified compilation group.
+# unity compilation group.
 set (GTEST_BASE_SOURCES
   gtest/gtestp4c.cpp
   ${GTEST_UNITTEST_SOURCES}
 )
-build_unified(GTEST_BASE_SOURCES)
 
 # Merge the base sources with the tests added to GTEST_SOURCES by specific
 # backends or by extensions. We can't assume that one extension's GTests can be
-# unified with another's, so we can't handle unified compilation transparently
+# unity with another's, so we can't handle unity compilation transparently
 # for all GTests.
 # XXX(seth): The current approach is an awkward fit for cmake anyway. We should
 # restructure backend-specific GTests to live in their own libraries, and just

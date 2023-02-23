@@ -50,7 +50,7 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
     void collectExternFunction(P4RuntimeSymbolTableIface *symbols,
                                const P4::ExternFunction *externFunction) override {
         auto digest = getDigestCall(externFunction, refMap, typeMap, nullptr);
-        if (digest) symbols->add(SymbolType::DIGEST(), digest->name);
+        if (digest) symbols->add(SymbolType::P4RT_DIGEST(), digest->name);
     }
 
     void addTableProperties(const P4RuntimeSymbolTableIface &symbols, p4configv1::P4Info *p4info,

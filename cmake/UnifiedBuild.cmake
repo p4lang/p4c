@@ -1,6 +1,6 @@
 # Options to control unified compilation. More information is available in the
 # documentation for `build_unified`.
-OPTION (ENABLE_UNIFIED_COMPILATION "Merge source files to speed up compilation" ON)
+OPTION (ENABLE_UNIFIED_COMPILATION "Merge source files to speed up compilation" OFF)
 set(UNIFIED_SOURCE_CHUNK_SIZE "10" CACHE STRING "Target unified compilation chunk size (an integer or ALL)")
 
 # Helper function: compute `divided / divisor`, round up to the next highest

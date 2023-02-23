@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This is the CMake version supplied by Ubuntu 18.04.
-cmake_minimum_required (VERSION 3.10.2 FATAL_ERROR)
+# This is the CMake version supplied by Ubuntu 20.04.
+cmake_minimum_required (VERSION 3.16.3 FATAL_ERROR)
 
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
@@ -47,6 +47,8 @@ OPTION (ENABLE_SANITIZERS "Enable sanitizers" OFF)
 OPTION (BUILD_STATIC_RELEASE "Build a statically linked release binary" OFF)
 OPTION (BUILD_AUTO_VAR_INIT_PATTERN "Initialize variables with pattern during build" OFF)
 OPTION (ENABLE_IWYU "Enable checking includes with IWYU" OFF)
+# Support a legacy option. TODO: Remove?
+OPTION (ENABLE_UNIFIED_COMPILATION "Enable CMAKE_UNITY_BUILD" OFF)
 
 set (P4C_DRIVER_NAME "p4c" CACHE STRING "Customize the name of the driver script")
 
@@ -83,13 +85,26 @@ else()
   set (P4C_VERSION "${P4C_SEM_VERSION_STRING} (SHA: ${P4C_GIT_SHA} BUILD: ${CMAKE_BUILD_TYPE})")
 endif()
 include(P4CUtils)
-include(UnifiedBuild)
 
 # # search in /usr/local first
 # set (CMAKE_FIND_ROOT_PATH "/usr/local/bin" "${CMAKE_FIND_ROOT_PATH}")
 set (P4C_CXX_FLAGS "")
 set (P4C_LIB_DEPS)
 
+
+# Support the legacy unified build option.
+if(ENABLE_UNIFIED_COMPILATION)
+  message(
+    WARNING
+      "Using deprecated option \"ENABLE_UNIFIED_COMPILATION\". Please use \"CMAKE_UNITY_BUILD\" instead."
+  )
+  set(CMAKE_UNITY_BUILD ON)
+endif()
+
+# If unity builds are enabled, choose an aggressive batch size.
+if (CMAKE_UNITY_BUILD)
+  set(CMAKE_UNITY_BUILD_BATCH_SIZE 16 CACHE UNINITIALIZED "Set the unity build batch size.")
+endif ()
 # set the required options for a static release build
 if (BUILD_STATIC_RELEASE)
   message(STATUS "Building static release binaries")
