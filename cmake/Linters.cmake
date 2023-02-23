@@ -90,6 +90,8 @@ file(
   backends/*.py
   tools/*.py
 )
+list(FILTER P4C_PYTHON_LINT_LIST EXCLUDE REGEX "backends/p4tools/submodules")
+list(FILTER P4C_PYTHON_LINT_LIST EXCLUDE REGEX "control-plane/p4runtime")
 
 add_yapf_files(${P4C_SOURCE_DIR} "${P4C_PYTHON_LINT_LIST}")
 
