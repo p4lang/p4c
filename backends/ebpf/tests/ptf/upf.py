@@ -77,47 +77,29 @@ class UPFTest(P4EbpfTest):
     p4_file_path = "../psa/examples/upf.p4"
 
     def setup_pfcp_session(self, seid, teid, ue_ip):
-        self.table_add(
-            table="ingress_upf_ingress_session_lookup_by_teid", key=[teid], action=1, data=[seid])
-        self.table_add(
-            table="ingress_upf_ingress_session_lookup_by_ue_ip", key=[ue_ip], action=1, data=[seid])
+        self.table_add(table="ingress_upf_ingress_session_lookup_by_teid", key=[teid], action=1,
+                       data=[seid])
+        self.table_add(table="ingress_upf_ingress_session_lookup_by_ue_ip", key=[ue_ip], action=1,
+                       data=[seid])
 
     def runTest(self):
         # link number
         N3_PORT = DP_PORTS[0]
         N6_PORT = DP_PORTS[1]
         N9_PORT = DP_PORTS[2]
-        self.table_add(
-            table="ingress_upf_ingress_source_interface_lookup_by_port",
-            key=[N3_PORT],
-            action=1,
-            data=[ACCESS])
-        self.table_add(
-            table="ingress_upf_ingress_source_interface_lookup_by_port",
-            key=[N9_PORT],
-            action=1,
-            data=[CORE])
-        self.table_add(
-            table="ingress_upf_ingress_source_interface_lookup_by_port",
-            key=[N6_PORT],
-            action=1,
-            data=[SGi_LAN])
+        self.table_add(table="ingress_upf_ingress_source_interface_lookup_by_port", key=[N3_PORT],
+                       action=1, data=[ACCESS])
+        self.table_add(table="ingress_upf_ingress_source_interface_lookup_by_port", key=[N9_PORT],
+                       action=1, data=[CORE])
+        self.table_add(table="ingress_upf_ingress_source_interface_lookup_by_port", key=[N6_PORT],
+                       action=1, data=[SGi_LAN])
 
-        self.table_add(
-            table="ingress_ip_forward_ipv4_lpm",
-            key=[SGi_LAN, "0/0"],
-            action=1,
-            data=[UPF_N6_MAC, UPLINK_N6_ROUTER_MAC, N6_PORT])
-        self.table_add(
-            table="ingress_ip_forward_ipv4_lpm",
-            key=[ACCESS, "172.20.16.99/32"],
-            action=1,
-            data=[UPF_N3_MAC, DOWNLINK_N3_ROUTER_MAC, N3_PORT])
-        self.table_add(
-            table="ingress_ip_forward_ipv4_lpm",
-            key=[CORE, "0/0"],
-            action=1,
-            data=[UPF_N9_MAC, UPLINK_N9_ROUTER_MAC, N9_PORT])
+        self.table_add(table="ingress_ip_forward_ipv4_lpm", key=[SGi_LAN, "0/0"], action=1,
+                       data=[UPF_N6_MAC, UPLINK_N6_ROUTER_MAC, N6_PORT])
+        self.table_add(table="ingress_ip_forward_ipv4_lpm", key=[ACCESS, "172.20.16.99/32"],
+                       action=1, data=[UPF_N3_MAC, DOWNLINK_N3_ROUTER_MAC, N3_PORT])
+        self.table_add(table="ingress_ip_forward_ipv4_lpm", key=[CORE, "0/0"], action=1,
+                       data=[UPF_N9_MAC, UPLINK_N9_ROUTER_MAC, N9_PORT])
 
         # setup unique PFCP session
         self.setup_pfcp_session(SEID, UL_N6_TEID, UE_IP)
@@ -126,60 +108,38 @@ class UPFTest(P4EbpfTest):
         # PDR SDF filter set to passthrough: 'permit out ip from 0.0.0.0/0  to assigned'
         self.table_add(
             table="ingress_upf_ingress_pdr_lookup",
-            key=[SEID, "{}^0xffffffff".format(UE_IP), "0^0", "0^0", "0^0", "0^0", ACCESS],
-            action=1,
-            data=[UPLINK_N6_FAR_FORWARD_ID],
-            priority=1)
-        self.table_add(
-            table="ingress_upf_ingress_far_lookup",
-            key=[UPLINK_N6_FAR_FORWARD_ID],
-            action=1,
-            data=[SGi_LAN])
+            key=[SEID, "{}^0xffffffff".format(UE_IP), "0^0", "0^0", "0^0", "0^0",
+                 ACCESS], action=1, data=[UPLINK_N6_FAR_FORWARD_ID], priority=1)
+        self.table_add(table="ingress_upf_ingress_far_lookup", key=[UPLINK_N6_FAR_FORWARD_ID],
+                       action=1, data=[SGi_LAN])
 
         # add PDR+FAR rules for uplink N3->N9 traffic: decap N3 GTPU, encap N9 GTPU and forward to N9 (core UPF)
         # PDR SDF filter set to: 'permit out 17 from 5.5.5.5/32 6970 to assigned'
         # this PDR has higher priority than the previous one
+        self.table_add(table="ingress_upf_process_ingress_l4port_ingress_l4_dst_port",
+                       key=[SERVER2_UDP_PORT], action=2, data=[1])
+        self.table_add(table="ingress_upf_process_ingress_l4port_ingress_l4_src_port",
+                       key=[SERVER2_UDP_PORT], action=2, data=[1])
         self.table_add(
-            table="ingress_upf_process_ingress_l4port_ingress_l4_dst_port",
-            key=[SERVER2_UDP_PORT],
-            action=2,
-            data=[1])
-        self.table_add(
-            table="ingress_upf_process_ingress_l4port_ingress_l4_src_port",
-            key=[SERVER2_UDP_PORT],
-            action=2,
-            data=[1])
-        self.table_add(
-            table="ingress_upf_ingress_pdr_lookup",
-            key=[
+            table="ingress_upf_ingress_pdr_lookup", key=[
                 SEID, "{}^0xffffffff".format(UE_IP), "{}^0xffffffff".format(SERVER2_IP),
                 "0x11^0xff", "0^0", "0x01^0xff", ACCESS
-            ],
-            action=1,
-            data=[UPLINK_N9_FAR_FORWARD_ID],
-            priority=2)
-        self.table_add(
-            table="ingress_upf_ingress_far_lookup",
-            key=[UPLINK_N9_FAR_FORWARD_ID],
-            action=2,
-            data=[CORE, UL_N9_TEID, CORE_UPF_N9_IP, UPF_N9_IP])
+            ], action=1, data=[UPLINK_N9_FAR_FORWARD_ID], priority=2)
+        self.table_add(table="ingress_upf_ingress_far_lookup", key=[UPLINK_N9_FAR_FORWARD_ID],
+                       action=2, data=[CORE, UL_N9_TEID, CORE_UPF_N9_IP, UPF_N9_IP])
 
         # add PDR+FAR rules for downlink N6->N3 traffic: encap packet and forward it to basestation
         self.table_add(
             table="ingress_upf_ingress_pdr_lookup",
-            key=[SEID, "0^0", "{}^0xffffffff".format(UE_IP), "0^0", "0^0", "0^0", SGi_LAN],
-            action=1,
-            data=[DOWNLINK_FAR_ENCAP_FORWARD_ID])
-        self.table_add(
-            table="ingress_upf_ingress_far_lookup",
-            key=[DOWNLINK_FAR_ENCAP_FORWARD_ID],
-            action=2,
-            data=[ACCESS, DL_TEID, RAN_N3_IP, UPF_N3_IP])
+            key=[SEID, "0^0", "{}^0xffffffff".format(UE_IP), "0^0", "0^0", "0^0",
+                 SGi_LAN], action=1, data=[DOWNLINK_FAR_ENCAP_FORWARD_ID])
+        self.table_add(table="ingress_upf_ingress_far_lookup", key=[DOWNLINK_FAR_ENCAP_FORWARD_ID],
+                       action=2, data=[ACCESS, DL_TEID, RAN_N3_IP, UPF_N3_IP])
 
         # uplink Access(N3) -> SgiLAN(N6) test
         # send GTPU-encapped packet to N3, expect inner packet from N6
-        pkt = testutils.simple_udp_packet(
-            eth_dst=UPF_N3_MAC, ip_src=UE_IP, ip_dst=SERVER1_IP, pktlen=20)
+        pkt = testutils.simple_udp_packet(eth_dst=UPF_N3_MAC, ip_src=UE_IP, ip_dst=SERVER1_IP,
+                                          pktlen=20)
         exp_pkt = pkt_route(pkt, UPF_N6_MAC, UPLINK_N6_ROUTER_MAC)
         exp_pkt[IP].ttl -= 1
 
@@ -190,12 +150,8 @@ class UPFTest(P4EbpfTest):
 
         # uplink Access(N3) -> Core(N9) test
         # send GTPU-encapped packet to N3, expect re-encapped packet from N9
-        pkt = testutils.simple_udp_packet(
-            eth_dst=UPF_N3_MAC,
-            ip_src=UE_IP,
-            ip_dst=SERVER2_IP,
-            udp_dport=SERVER2_UDP_PORT,
-            pktlen=20)
+        pkt = testutils.simple_udp_packet(eth_dst=UPF_N3_MAC, ip_src=UE_IP, ip_dst=SERVER2_IP,
+                                          udp_dport=SERVER2_UDP_PORT, pktlen=20)
         exp_pkt = pkt.copy()
         exp_pkt[IP].ttl -= 1
         exp_pkt = pkt_gtpu_encap(exp_pkt, UL_N9_TEID, CORE_UPF_N9_IP, UPF_N9_IP)

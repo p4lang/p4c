@@ -38,10 +38,8 @@ class Ipv6ModifyDstAddrTest(Ipv6Test):
     def setUp(self):
         Ipv6Test.setUp(self)
 
-        self.update_bpf_map(
-            map_id=0,
-            key="1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 32",
-            value="0 0 0 0 3 0 0 0 0 0 0 0 0 0 0 0 0 0 1 32")
+        self.update_bpf_map(map_id=0, key="1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 32",
+                            value="0 0 0 0 3 0 0 0 0 0 0 0 0 0 0 0 0 0 1 32")
 
     def runTest(self):
         pkt = simple_tcpv6_packet(ipv6_src='2001::1', ipv6_dst='2001::2')
@@ -59,10 +57,8 @@ class Ipv6SwapAddrTest(Ipv6Test):
     def setUp(self):
         Ipv6Test.setUp(self)
 
-        self.update_bpf_map(
-            map_id=0,
-            key="1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 32",
-            value="1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0")
+        self.update_bpf_map(map_id=0, key="1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 32",
+                            value="1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0")
 
     def runTest(self):
         pkt = simple_tcpv6_packet(ipv6_src='2001::1', ipv6_dst='2001::2')
@@ -80,10 +76,8 @@ class Ipv6SetFlowLabelTest(Ipv6Test):
     def setUp(self):
         Ipv6Test.setUp(self)
 
-        self.update_bpf_map(
-            map_id=0,
-            key="1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 32",
-            value="2 0 0 0 5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0")
+        self.update_bpf_map(map_id=0, key="1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 32",
+                            value="2 0 0 0 5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0")
 
     def runTest(self):
         pkt = simple_tcpv6_packet(ipv6_src='2001::1', ipv6_dst='2001::2', ipv6_fl=0)
@@ -101,10 +95,8 @@ class Ipv6SetTrafficClassFlowLabelTest(Ipv6Test):
     def setUp(self):
         Ipv6Test.setUp(self)
 
-        self.update_bpf_map(
-            map_id=0,
-            key="1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 32",
-            value="3 0 0 0 3 0 0 0 5 0 0 0 0 0 0 0 0 0 0 0")
+        self.update_bpf_map(map_id=0, key="1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 32",
+                            value="3 0 0 0 3 0 0 0 5 0 0 0 0 0 0 0 0 0 0 0")
 
     def runTest(self):
         pkt = simple_tcpv6_packet(ipv6_src='2001::1', ipv6_dst='2001::2', ipv6_fl=0, ipv6_tc=0)
@@ -122,10 +114,8 @@ class Ipv6SetIPv6VersionTest(Ipv6Test):
     def setUp(self):
         Ipv6Test.setUp(self)
 
-        self.update_bpf_map(
-            map_id=0,
-            key="1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 32",
-            value="4 0 0 0 5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0")
+        self.update_bpf_map(map_id=0, key="1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 32",
+                            value="4 0 0 0 5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0")
 
     def runTest(self):
         pkt = Ether(dst='00:01:02:03:04:05', src='00:06:07:08:09:0a')
@@ -150,10 +140,8 @@ class Ipv6SetNextHeaderTest(Ipv6Test):
     def setUp(self):
         Ipv6Test.setUp(self)
 
-        self.update_bpf_map(
-            map_id=0,
-            key="1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 32",
-            value="5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0")
+        self.update_bpf_map(map_id=0, key="1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 32",
+                            value="5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0")
 
     def runTest(self):
         pkt = Ether(dst='00:01:02:03:04:05', src='00:06:07:08:09:0a')
@@ -178,10 +166,8 @@ class Ipv6SetHopLimitTest(Ipv6Test):
     def setUp(self):
         Ipv6Test.setUp(self)
 
-        self.update_bpf_map(
-            map_id=0,
-            key="1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 32",
-            value="6 0 0 0 7 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0")
+        self.update_bpf_map(map_id=0, key="1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 32",
+                            value="6 0 0 0 7 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0")
 
     def runTest(self):
         pkt = Ether(dst='00:01:02:03:04:05', src='00:06:07:08:09:0a')

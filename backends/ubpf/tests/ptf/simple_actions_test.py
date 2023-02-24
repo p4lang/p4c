@@ -60,15 +60,13 @@ class MplsModifyStackTest(SimpleActionsTest):
         self.update_bpf_map(map_id=0, key="1 1 168 192", value="5 0 0 0 1 0 0 0 0 0 0 0")
 
     def runTest(self):
-        pkt = simple_mpls_packet(
-            mpls_tags=[{
-                "s": 0
-            }], inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1"))
+        pkt = simple_mpls_packet(mpls_tags=[{
+            "s": 0
+        }], inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1"))
 
-        exp_pkt = simple_mpls_packet(
-            mpls_tags=[{
-                "s": 1
-            }], inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1"))
+        exp_pkt = simple_mpls_packet(mpls_tags=[{
+            "s": 1
+        }], inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1"))
 
         mask = Mask(exp_pkt)
         mask.set_do_not_care_scapy(IP, 'ttl')
@@ -85,15 +83,13 @@ class MplsDecrementTtlTest(SimpleActionsTest):
         self.update_bpf_map(map_id=0, key="1 1 168 192", value="0 0 0 0 0 0 0 0 0 0 0 0")
 
     def runTest(self):
-        pkt = simple_mpls_packet(
-            mpls_tags=[{
-                "ttl": 10
-            }], inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1"))
+        pkt = simple_mpls_packet(mpls_tags=[{
+            "ttl": 10
+        }], inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1"))
 
-        exp_pkt = simple_mpls_packet(
-            mpls_tags=[{
-                "ttl": 9
-            }], inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1"))
+        exp_pkt = simple_mpls_packet(mpls_tags=[{
+            "ttl": 9
+        }], inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1"))
 
         mask = Mask(exp_pkt)
         mask.set_do_not_care_scapy(IP, 'ttl')
@@ -110,15 +106,13 @@ class MplsSetLabelTest(SimpleActionsTest):
         self.update_bpf_map(map_id=0, key="1 1 168 192", value="1 0 0 0 1 0 0 0 0 0 0 0")
 
     def runTest(self):
-        pkt = simple_mpls_packet(
-            mpls_tags=[{
-                "label": 5
-            }], inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1"))
+        pkt = simple_mpls_packet(mpls_tags=[{
+            "label": 5
+        }], inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1"))
 
-        exp_pkt = simple_mpls_packet(
-            mpls_tags=[{
-                "label": 1
-            }], inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1"))
+        exp_pkt = simple_mpls_packet(mpls_tags=[{
+            "label": 1
+        }], inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1"))
 
         mask = Mask(exp_pkt)
         mask.set_do_not_care_scapy(IP, 'ttl')
@@ -135,19 +129,15 @@ class MplsSetLabelDecrementTtlTest(SimpleActionsTest):
         self.update_bpf_map(map_id=0, key="1 1 168 192", value="2 0 0 0 1 0 0 0 0 0 0 0")
 
     def runTest(self):
-        pkt = simple_mpls_packet(
-            mpls_tags=[{
-                "ttl": 10,
-                "label": 5
-            }],
-            inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1"))
+        pkt = simple_mpls_packet(mpls_tags=[{
+            "ttl": 10,
+            "label": 5
+        }], inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1"))
 
-        exp_pkt = simple_mpls_packet(
-            mpls_tags=[{
-                "ttl": 9,
-                "label": 1
-            }],
-            inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1"))
+        exp_pkt = simple_mpls_packet(mpls_tags=[{
+            "ttl": 9,
+            "label": 1
+        }], inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1"))
 
         mask = Mask(exp_pkt)
         mask.set_do_not_care_scapy(IP, 'ttl')
@@ -164,19 +154,15 @@ class MplsSetModifyTcTest(SimpleActionsTest):
         self.update_bpf_map(map_id=0, key="1 1 168 192", value="3 0 0 0 1 0 0 0 0 0 0 0")
 
     def runTest(self):
-        pkt = simple_mpls_packet(
-            mpls_tags=[{
-                "label": 5,
-                "tc": 5
-            }],
-            inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1"))
+        pkt = simple_mpls_packet(mpls_tags=[{
+            "label": 5,
+            "tc": 5
+        }], inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1"))
 
-        exp_pkt = simple_mpls_packet(
-            mpls_tags=[{
-                "label": 5,
-                "tc": 1
-            }],
-            inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1"))
+        exp_pkt = simple_mpls_packet(mpls_tags=[{
+            "label": 5,
+            "tc": 1
+        }], inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1"))
 
         mask = Mask(exp_pkt)
         mask.set_do_not_care_scapy(IP, 'ttl')
@@ -193,19 +179,15 @@ class MplsSetLabelTcTest(SimpleActionsTest):
         self.update_bpf_map(map_id=0, key="1 1 168 192", value="4 0 0 0 2 0 0 0 2 0 0 0")
 
     def runTest(self):
-        pkt = simple_mpls_packet(
-            mpls_tags=[{
-                "label": 5,
-                "tc": 5
-            }],
-            inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1"))
+        pkt = simple_mpls_packet(mpls_tags=[{
+            "label": 5,
+            "tc": 5
+        }], inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1"))
 
-        exp_pkt = simple_mpls_packet(
-            mpls_tags=[{
-                "label": 2,
-                "tc": 2
-            }],
-            inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1"))
+        exp_pkt = simple_mpls_packet(mpls_tags=[{
+            "label": 2,
+            "tc": 2
+        }], inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1"))
 
         mask = Mask(exp_pkt)
         mask.set_do_not_care_scapy(IP, 'ttl')
@@ -263,14 +245,12 @@ class NoActionPacketTest(SimpleActionsTest):
         pkt = simple_mpls_packet(
             mpls_tags=[{
                 "label": 1
-            }],
-            inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1", ip_src="192.168.1.2"))
+            }], inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1", ip_src="192.168.1.2"))
 
         exp_pkt = simple_mpls_packet(
             mpls_tags=[{
                 "label": 1
-            }],
-            inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1", ip_src="192.168.1.2"))
+            }], inner_frame=simple_ip_only_packet(ip_dst="192.168.1.1", ip_src="192.168.1.2"))
 
         mask = Mask(exp_pkt)
         mask.set_do_not_care_scapy(IP, 'ttl')

@@ -30,12 +30,12 @@ class eBPFCommand(object):
     """Defines a match-action command for eBPF programs"""
 
     def __init__(self, a_type, table, action, priority="", match=[], extra=""):
-        self.a_type = a_type      # dir in which all files are stored
-        self.table = table        # contains meta information
-        self.action = action      # contains meta information
+        self.a_type = a_type  # dir in which all files are stored
+        self.table = table  # contains meta information
+        self.action = action  # contains meta information
         self.priority = priority  # template to generate a filter
-        self.match = match        # contains standard and error output
-        self.extra = extra        # could also be "pcapng"
+        self.match = match  # contains standard and error output
+        self.extra = extra  # could also be "pcapng"
 
 
 def _generate_control_actions(cmds):

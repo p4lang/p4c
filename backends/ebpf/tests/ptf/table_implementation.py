@@ -165,10 +165,8 @@ class ActionSelectorTest(P4EbpfTest):
 
         if table:
             self.table_add(table=table, key=["02:22:33:44:55:66"], references=["0x2"])
-            self.table_add(
-                table=table,
-                key=["07:22:33:44:55:66"],
-                references=["group {}".format(self.group_id)])
+            self.table_add(table=table, key=["07:22:33:44:55:66"],
+                           references=["group {}".format(self.group_id)])
 
 
 class SimpleActionSelectorPSATest(ActionSelectorTest):
@@ -205,8 +203,8 @@ class SimpleActionSelectorPSATest(ActionSelectorTest):
 
         if "--table-caching" in self.p4c_additional_args:
             # modify cache directly and verify its usage
-            self.table_update(
-                table="MyIC_as_cache", key=[1, "22:33:44:55:66:78"], action=1, data=[DP_PORTS[1]])
+            self.table_update(table="MyIC_as_cache", key=[1, "22:33:44:55:66:78"], action=1,
+                              data=[DP_PORTS[1]])
             testutils.send_packet(self, PORT0, pkt)
             testutils.verify_packet(self, pkt, PORT1)
 
@@ -251,8 +249,8 @@ class ActionSelectorEmptyGroupActionPSATest(ActionSelectorTest):
         testutils.verify_no_other_packets(self)
 
         gid = self.action_selector_create_empty_group(selector="MyIC_as")
-        self.table_add(
-            table="MyIC_tbl", key=["08:22:33:44:55:66"], references=["group {}".format(gid)])
+        self.table_add(table="MyIC_tbl", key=["08:22:33:44:55:66"],
+                       references=["group {}".format(gid)])
 
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
@@ -273,10 +271,8 @@ class ActionSelectorMultipleSelectorsPSATest(ActionSelectorTest):
 
     def runTest(self):
         self.create_default_rule_set(table="MyIC_tbl", selector="MyIC_as")
-        self.table_add(
-            table="MyIC_tbl",
-            key=["07:22:33:44:55:67"],
-            references=["group {}".format(self.group_id)])
+        self.table_add(table="MyIC_tbl", key=["07:22:33:44:55:67"],
+                       references=["group {}".format(self.group_id)])
 
         allowed_ports = self.default_group_ports
         pkt = testutils.simple_ip_packet(eth_src="07:22:33:44:55:66", eth_dst="22:33:44:55:66:77")
@@ -309,10 +305,8 @@ class ActionSelectorMultipleSelectorsTwoTablesPSATest(ActionSelectorTest):
 
     def runTest(self):
         self.create_default_rule_set(table="MyIC_tbl", selector="MyIC_as")
-        self.table_add(
-            table="MyIC_tbl2",
-            key=["AA:BB:CC:DD:EE:FF"],
-            references=["group {}".format(self.group_id)])
+        self.table_add(table="MyIC_tbl2", key=["AA:BB:CC:DD:EE:FF"],
+                       references=["group {}".format(self.group_id)])
 
         pkt = testutils.simple_ip_packet(eth_src="07:22:33:44:55:66", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
@@ -334,10 +328,8 @@ class ActionSelectorLPMTablePSATest(ActionSelectorTest):
         # Match all 00:22:02:44:55:xx MAC addresses into action ref 2
         self.table_add(table="MyIC_tbl", key=["0x002202445500/40"], references=[2])
         # Match all 00:22:07:44:55:xx MAC addresses into group g7
-        self.table_add(
-            table="MyIC_tbl",
-            key=["0x2207445500/40"],
-            references=["group {}".format(self.group_id)])
+        self.table_add(table="MyIC_tbl", key=["0x2207445500/40"],
+                       references=["group {}".format(self.group_id)])
 
         pkt = testutils.simple_ip_packet(eth_src="00:22:07:44:55:66", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)

@@ -34,9 +34,8 @@ sys.path.append(str(FILE_DIR.joinpath("../../tools")))
 import testutils
 
 PARSER = argparse.ArgumentParser()
-PARSER.add_argument(
-    "rootdir", help="the root directory of "
-    "the compiler source tree")
+PARSER.add_argument("rootdir", help="the root directory of "
+                    "the compiler source tree")
 PARSER.add_argument("p4filename", help="the p4 file to process")
 PARSER.add_argument(
     "-b",
@@ -118,18 +117,18 @@ class EBPFFactory:
 class Options:
 
     def __init__(self):
-        self.binary = ""          # This program's name.
-        self.cleanupTmp = True    # Remove tmp folder?
-        self.compiler = ""        # Path to the P4 compiler binary.
-        self.p4filename = ""      # File that is being compiled.
-        self.testfile = ""        # path to stf test file that is used.
-        self.replace = False      # Replace previous outputs.
-        self.target = "test"      # The name of the target compiler.
-                                  # Actual location of the test framework.
+        self.binary = ""  # This program's name.
+        self.cleanupTmp = True  # Remove tmp folder?
+        self.compiler = ""  # Path to the P4 compiler binary.
+        self.p4filename = ""  # File that is being compiled.
+        self.testfile = ""  # path to stf test file that is used.
+        self.replace = False  # Replace previous outputs.
+        self.target = "test"  # The name of the target compiler.
+        # Actual location of the test framework.
         self.testdir = str(FILE_DIR)
-                                  # The location of the eBPF runtime, some targets may overwrite this.
+        # The location of the eBPF runtime, some targets may overwrite this.
         self.runtimedir = str(FILE_DIR.joinpath("runtime"))
-        self.extern = ""          # Path to C file with extern definition.
+        self.extern = ""  # Path to C file with extern definition.
 
 
 def run_model(ebpf, testfile):
@@ -156,9 +155,9 @@ def run_test(options, argv):
     Optional: Run the generated model"""
     assert isinstance(options, Options)
 
-    basename = os.path.basename(options.p4filename)   # Name of the p4 test
-    base, _ = os.path.splitext(basename)              # Name without the type
-    dirname = os.path.dirname(options.p4filename)     # Directory of the file
+    basename = os.path.basename(options.p4filename)  # Name of the p4 test
+    base, _ = os.path.splitext(basename)  # Name without the type
+    dirname = os.path.dirname(options.p4filename)  # Directory of the file
 
     testfile = options.testfile
     # If no test file is provided, try to find it in the folder.

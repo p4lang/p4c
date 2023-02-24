@@ -248,7 +248,7 @@ class _AssertP4RuntimeErrorContext():
         if not issubclass(exc_type, P4RuntimeWriteException):
             # let unexpected exceptions pass through
             return False
-        self.exception = exc_value     # store for later retrieval
+        self.exception = exc_value  # store for later retrieval
 
         if self.error_code is None:
             return True
@@ -493,7 +493,7 @@ class P4RuntimeTest(BaseTest):
                     return msginfo['message']
                 logging.debug(
                     "get_stream_packet msg={msginfo} has no field type_={type_} so discarding")
-        except:    # timeout expired
+        except:  # timeout expired
             pass
         return None
 
@@ -524,7 +524,7 @@ class P4RuntimeTest(BaseTest):
                     f"get_stream_packet msginfo['message'] has no field type_={type_} so discarding"
                 )
                 skipped_msginfos.append(msginfo)
-        except:    # timeout expired
+        except:  # timeout expired
             pass
         return None
 
@@ -840,10 +840,7 @@ class P4RuntimeTest(BaseTest):
         assert isinstance(action_name_and_params, tuple)
         assert len(action_name_and_params) == 2
 
-    def make_table_entry(self,
-                         table_name_and_key,
-                         action_name_and_params,
-                         priority=None,
+    def make_table_entry(self, table_name_and_key, action_name_and_params, priority=None,
                          options=None):
         self.check_table_name_and_key(table_name_and_key)
         table_name = table_name_and_key[0]

@@ -197,15 +197,15 @@ class SimpleLpmP4PSATest(P4EbpfTest):
 
     def runTest(self):
         # This command adds LPM entry 10.10.0.0/16 with action forwarding on port 6 (PORT2 in ptf)
-        self.table_add(
-            table="ingress_tbl_fwd_lpm", key=["10.10.0.0/16"], action=1, data=[DP_PORTS[2]])
+        self.table_add(table="ingress_tbl_fwd_lpm", key=["10.10.0.0/16"], action=1,
+                       data=[DP_PORTS[2]])
         self.table_add(table="ingress_tbl_fwd_lpm", key=["10.10.10.10/8"], action="_NoAction")
         pkt = testutils.simple_ip_packet(ip_src='1.1.1.1', ip_dst='10.10.11.11')
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT2)
 
-        self.table_add(
-            table="ingress_tbl_fwd_lpm", key=["192.168.2.1/24"], action=1, data=[DP_PORTS[1]])
+        self.table_add(table="ingress_tbl_fwd_lpm", key=["192.168.2.1/24"], action=1,
+                       data=[DP_PORTS[1]])
         pkt = testutils.simple_ip_packet(ip_src='1.1.1.1', ip_dst='192.168.2.1')
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
@@ -219,22 +219,16 @@ class SimpleLpmP4TwokeyPSATest(P4EbpfTest):
         pkt = testutils.simple_ip_packet(ip_src='1.2.3.4', ip_dst='10.10.11.11')
         # This command adds LPM entry 10.10.11.0/24 with action forwarding on PORT2
         # Note that prefix value has to be a sum of exact fields size and lpm prefix
-        self.table_add(
-            table="ingress_tbl_fwd_exact_lpm",
-            key=["1.2.3.4", "10.10.11.0/24"],
-            action=1,
-            data=[DP_PORTS[2]])
+        self.table_add(table="ingress_tbl_fwd_exact_lpm", key=["1.2.3.4", "10.10.11.0/24"],
+                       action=1, data=[DP_PORTS[2]])
 
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT2)
 
         pkt = testutils.simple_ip_packet(ip_src='1.2.3.4', ip_dst='192.168.2.1')
         # This command adds LPM entry 192.168.2.1/24 with action forwarding on PORT1
-        self.table_add(
-            table="ingress_tbl_fwd_exact_lpm",
-            key=["1.2.3.4", "192.168.2.1/24"],
-            action=1,
-            data=[DP_PORTS[1]])
+        self.table_add(table="ingress_tbl_fwd_exact_lpm", key=["1.2.3.4", "192.168.2.1/24"],
+                       action=1, data=[DP_PORTS[1]])
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
 
@@ -397,8 +391,8 @@ class CountersPSATest(P4EbpfTest):
     p4_file_path = "p4testdata/counters.p4"
 
     def runTest(self):
-        pkt = testutils.simple_ip_packet(
-            eth_dst='00:11:22:33:44:55', eth_src='00:AA:00:00:00:01', pktlen=100)
+        pkt = testutils.simple_ip_packet(eth_dst='00:11:22:33:44:55', eth_src='00:AA:00:00:00:01',
+                                         pktlen=100)
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
@@ -407,8 +401,8 @@ class CountersPSATest(P4EbpfTest):
         self.counter_verify(name="ingress_test3_cnt", key=[1], bytes=100, packets=1)
         self.counter_verify(name="ingress_action_cnt", key=[DP_PORTS[1]], bytes=100, packets=1)
 
-        pkt = testutils.simple_ip_packet(
-            eth_dst='00:11:22:33:44:55', eth_src='00:AA:00:00:01:FE', pktlen=199)
+        pkt = testutils.simple_ip_packet(eth_dst='00:11:22:33:44:55', eth_src='00:AA:00:00:01:FE',
+                                         pktlen=199)
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
@@ -431,19 +425,13 @@ class DirectCountersPSATest(P4EbpfTest):
             testutils.send_packet(self, PORT0, pkt)
             testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
+        self.table_verify(table="ingress_tbl1", key=["10.0.0.0"], action=1,
+                          counters={"ingress_test3_cnt": {
+                              "bytes": 100,
+                              "packets": 1
+                          }})
         self.table_verify(
-            table="ingress_tbl1",
-            key=["10.0.0.0"],
-            action=1,
-            counters={"ingress_test3_cnt": {
-                "bytes": 100,
-                "packets": 1
-            }})
-        self.table_verify(
-            table="ingress_tbl2",
-            key=["10.0.0.1"],
-            action=2,
-            counters={
+            table="ingress_tbl2", key=["10.0.0.1"], action=2, counters={
                 "ingress_test2_cnt": {
                     "packets": 1
                 },
@@ -453,10 +441,7 @@ class DirectCountersPSATest(P4EbpfTest):
                 }
             })
         self.table_verify(
-            table="ingress_tbl2",
-            key=["10.0.0.2"],
-            action=3,
-            counters={
+            table="ingress_tbl2", key=["10.0.0.2"], action=3, counters={
                 "ingress_test2_cnt": {
                     "packets": 1
                 },
@@ -550,10 +535,8 @@ class RandomPSATest(P4EbpfTest):
             testutils.send_packet(self, PORT0, pkt)
             (_, recv_pkt) = testutils.verify_packet_any_port(self, mask, PTF_PORTS)
             recv_pkt = Ether(recv_pkt)
-            self.verify_range(
-                value=recv_pkt[self.RandomHeader].f1,
-                min_value=0x80_00_00_01,
-                max_value=0x80_00_00_05)
+            self.verify_range(value=recv_pkt[self.RandomHeader].f1, min_value=0x80_00_00_01,
+                              max_value=0x80_00_00_05)
             sequence[0].append(recv_pkt[self.RandomHeader].f1)
             self.verify_range(value=recv_pkt[self.RandomHeader].f2, min_value=0, max_value=127)
             sequence[1].append(recv_pkt[self.RandomHeader].f2)
@@ -596,57 +579,45 @@ class PSATernaryTest(P4EbpfTest):
         # flow rules for 'tbl_ternary_0'
         # 1. ipv4.srcAddr=1.2.3.4/0xffffff00 => action 0 priority 1
         # 2. ipv4.srcAddr=1.2.3.4/0xffff00ff => action 1 priority 10
-        self.table_add(
-            table="ingress_tbl_ternary_0", key=["1.2.3.4^0xffffff00"], action=0, priority=1)
-        self.table_add(
-            table="ingress_tbl_ternary_0", key=["1.2.3.4^0xffff00ff"], action=1, priority=10)
+        self.table_add(table="ingress_tbl_ternary_0", key=["1.2.3.4^0xffffff00"], action=0,
+                       priority=1)
+        self.table_add(table="ingress_tbl_ternary_0", key=["1.2.3.4^0xffff00ff"], action=1,
+                       priority=10)
 
         # flow rules for 'tbl_ternary_1'
         # 1. ipv4.diffserv=0x00/0x00, ipv4.dstAddr=192.168.2.1/24 => action 0 priority 1
         # 2. ipv4.diffserv=0x00/0xff, ipv4.dstAddr=192.168.2.1/24 => action 1 priority 10
-        self.table_add(
-            table="ingress_tbl_ternary_1", key=["192.168.2.1/24", "0^0"], action=0, priority=1)
-        self.table_add(
-            table="ingress_tbl_ternary_1", key=["192.168.2.1/24", "0^0xFF"], action=1, priority=10)
+        self.table_add(table="ingress_tbl_ternary_1", key=["192.168.2.1/24", "0^0"], action=0,
+                       priority=1)
+        self.table_add(table="ingress_tbl_ternary_1", key=["192.168.2.1/24", "0^0xFF"], action=1,
+                       priority=10)
 
         # flow rules 'tbl_ternary_2':
         # 1. ipv4.protocol=0x11, ipv4.diffserv=0x00/0x00, ipv4.dstAddr=192.168.2.1/16 => action 0 priority 1
         # 2. ipv4.protocol=0x11, ipv4.diffserv=0x00/0xff, ipv4.dstAddr=192.168.2.1/16 => action 1 priority 10
-        self.table_add(
-            table="ingress_tbl_ternary_2",
-            key=["192.168.2.1/16", "0x11", "0^0"],
-            action=0,
-            priority=1)
-        self.table_add(
-            table="ingress_tbl_ternary_2",
-            key=["192.168.2.1/16", "0x11", "0^0xFF"],
-            action=1,
-            priority=10)
+        self.table_add(table="ingress_tbl_ternary_2", key=["192.168.2.1/16", "0x11", "0^0"],
+                       action=0, priority=1)
+        self.table_add(table="ingress_tbl_ternary_2", key=["192.168.2.1/16", "0x11", "0^0xFF"],
+                       action=1, priority=10)
 
         # flow rules 'tbl_ternary_3':
         # 1. ipv4.protocol=0x7, ipv4.diffserv=selector, ipv4.dstAddr=0xffffffff^0xffffffff => action 0 priority 1
         # 2. ipv4.protocol=0x7, ipv4.diffserv=selector, ipv4.dstAddr=0x0^0x0 => action 1 priority 10
         ref1 = self.action_selector_add_action(selector="ingress_as", action=0, data=[])
         ref2 = self.action_selector_add_action(selector="ingress_as", action=1, data=[])
-        self.table_add(
-            table="ingress_tbl_ternary_3",
-            key=["0xffffffff^0xffffffff", "0x7"],
-            references=[ref1],
-            priority=1)
-        self.table_add(
-            table="ingress_tbl_ternary_3", key=["0x0^0x0", "0x7"], references=[ref2], priority=10)
+        self.table_add(table="ingress_tbl_ternary_3", key=["0xffffffff^0xffffffff", "0x7"],
+                       references=[ref1], priority=1)
+        self.table_add(table="ingress_tbl_ternary_3", key=["0x0^0x0", "0x7"], references=[ref2],
+                       priority=10)
 
         # flow rules 'tbl_ternary_4':
         # 2. hdr.ethernet.srcAddr=00:00:33:44:55:00^00:00:FF:FF:FF:00 => action 1 priority 10
         ref3 = self.action_profile_add_action(ap="ingress_ap", action=1, data=[])
-        self.table_add(
-            table="ingress_tbl_ternary_4",
-            key=["00:00:33:44:55:00^00:00:FF:FF:FF:00"],
-            references=[ref3],
-            priority=10)
+        self.table_add(table="ingress_tbl_ternary_4", key=["00:00:33:44:55:00^00:00:FF:FF:FF:00"],
+                       references=[ref3], priority=10)
 
-        pkt = testutils.simple_udp_packet(
-            eth_src="11:22:33:44:55:66", ip_src='1.2.3.4', ip_dst='192.168.2.1')
+        pkt = testutils.simple_udp_packet(eth_src="11:22:33:44:55:66", ip_src='1.2.3.4',
+                                          ip_dst='192.168.2.1')
         testutils.send_packet(self, PORT0, pkt)
         pkt[Ether].type = 0x1122
         pkt[IP].proto = 0x7
@@ -679,12 +650,12 @@ class ConstEntryTernaryPSATest(P4EbpfTest):
         pkt[IP].src = 0x33333333
 
         # via ternary const entry
-        pkt[Ether].src = "55:55:55:55:55:11"     # mask is 0xFFFFFFFFFF00
-        pkt[IP].dst = 0x11229900                 # mask is 0xFFFF00FF
+        pkt[Ether].src = "55:55:55:55:55:11"  # mask is 0xFFFFFFFFFF00
+        pkt[IP].dst = 0x11229900  # mask is 0xFFFF00FF
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT2)
-        pkt[Ether].src = "77:77:77:77:11:11"     # mask is 0xFFFFFFFF0000
-        pkt[IP].dst = 0x11993355                 # mask is 0xFF00FFFF
+        pkt[Ether].src = "77:77:77:77:11:11"  # mask is 0xFFFFFFFF0000
+        pkt[IP].dst = 0x11993355  # mask is 0xFF00FFFF
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
 
@@ -712,19 +683,19 @@ class PassToKernelStackTest(P4EbpfTest):
 
     def runTest(self):
         # simple forward by Linux routing
-        pkt = testutils.simple_tcp_packet(
-            eth_dst="00:00:00:00:00:01", ip_src="10.0.0.2", ip_dst="20.0.0.15")
+        pkt = testutils.simple_tcp_packet(eth_dst="00:00:00:00:00:01", ip_src="10.0.0.2",
+                                          ip_dst="20.0.0.15")
         testutils.send_packet(self, PORT0, pkt)
         exp_pkt = pkt.copy()
-        exp_pkt[Ether].src = "00:00:00:00:00:02"      # MAC of eth1
+        exp_pkt[Ether].src = "00:00:00:00:00:02"  # MAC of eth1
         exp_pkt[Ether].dst = "00:00:00:00:00:aa"
-        exp_pkt[IP].ttl = 63                          # routed packet
+        exp_pkt[IP].ttl = 63  # routed packet
         testutils.verify_packet(self, exp_pkt, PORT1)
         self.counter_verify(name="egress_eg_packets", key=[0], packets=0)
 
         # ARP handling
-        pkt = testutils.simple_arp_packet(
-            pktlen=21, eth_dst="00:00:00:00:00:01", ip_snd="10.0.0.2", ip_tgt="10.0.0.1")
+        pkt = testutils.simple_arp_packet(pktlen=21, eth_dst="00:00:00:00:00:01", ip_snd="10.0.0.2",
+                                          ip_tgt="10.0.0.1")
         testutils.send_packet(self, PORT0, pkt)
         exp_pkt = pkt.copy()
         exp_pkt[ARP].op = 2
@@ -737,18 +708,18 @@ class PassToKernelStackTest(P4EbpfTest):
         testutils.verify_packet(self, exp_pkt, PORT0)
         self.counter_verify(name="egress_eg_packets", key=[0], packets=0)
 
-        pkt = testutils.simple_icmp_packet(
-            eth_dst="00:00:00:00:00:01", ip_src="10.0.0.2", ip_dst="10.0.0.1")
+        pkt = testutils.simple_icmp_packet(eth_dst="00:00:00:00:00:01", ip_src="10.0.0.2",
+                                           ip_dst="10.0.0.1")
         testutils.send_packet(self, PORT0, pkt)
         exp_pkt = testutils.simple_icmp_packet(
-            eth_src="00:00:00:00:00:01",         # MAC of eth1
+            eth_src="00:00:00:00:00:01",  # MAC of eth1
             eth_dst="00:00:00:00:00:cc",
             ip_src="10.0.0.1",
             ip_dst="10.0.0.2",
             icmp_type=0)
         mask = Mask(exp_pkt)
-                                                 # Linux can generate random IP identification number,
-                                                 # ignore ID and checksum in the validation
+        # Linux can generate random IP identification number,
+        # ignore ID and checksum in the validation
         mask.set_do_not_care_scapy(IP, "id")
         mask.set_do_not_care_scapy(IP, "chksum")
         testutils.verify_packet(self, mask, PORT0)
@@ -762,11 +733,8 @@ class LPMTableCachePSATest(P4EbpfTest):
     def runTest(self):
         # TODO: make this additional entry working
         # self.table_add(table="ingress_tbl_lpm", key=["00:11:22:33:44:50/44"], action=1, data=["11:22:33:44:55:67"])
-        self.table_add(
-            table="ingress_tbl_lpm",
-            key=["00:11:22:33:44:55/48"],
-            action=1,
-            data=["11:22:33:44:55:66"])
+        self.table_add(table="ingress_tbl_lpm", key=["00:11:22:33:44:55/48"], action=1,
+                       data=["11:22:33:44:55:66"])
         pkt = testutils.simple_ip_packet(eth_dst="00:11:22:33:44:50")
         exp_pkt = testutils.simple_ip_packet(eth_dst="11:22:33:44:55:66")
         exp_pkt[Ether].type = 0x8601
@@ -777,20 +745,15 @@ class LPMTableCachePSATest(P4EbpfTest):
         # Validate that cache entry is used during packet processing. By altering cache we get two different states
         # of a table entry with different executed actions. Based on this it is possible to detect which entry is in
         # use, table entry or cached entry. If we only read cache here then we couldn't test that it is used correctly.
-        self.table_update(
-            table="ingress_tbl_lpm_cache",
-            key=["32w0x60", "32w0", "64w0x5044332211000000"],
-            action=0,
-            data=["160w0"])
+        self.table_update(table="ingress_tbl_lpm_cache",
+                          key=["32w0x60", "32w0",
+                               "64w0x5044332211000000"], action=0, data=["160w0"])
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
 
         # Update table entry to test if NIKSS library invalidates cache
-        self.table_update(
-            table="ingress_tbl_lpm",
-            key=["00:11:22:33:44:55"],
-            action=1,
-            data=["11:22:33:44:55:66"])
+        self.table_update(table="ingress_tbl_lpm", key=["00:11:22:33:44:55"], action=1,
+                          data=["11:22:33:44:55:66"])
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, exp_pkt, PORT1)
 
@@ -800,11 +763,8 @@ class TernaryTableCachePSATest(P4EbpfTest):
     p4c_additional_args = "--table-caching"
 
     def runTest(self):
-        self.table_add(
-            table="ingress_tbl_ternary",
-            key=["00:11:22:33:44:55"],
-            action=1,
-            data=["11:22:33:44:55:66"])
+        self.table_add(table="ingress_tbl_ternary", key=["00:11:22:33:44:55"], action=1,
+                       data=["11:22:33:44:55:66"])
         pkt = testutils.simple_ip_packet(eth_dst="00:11:22:33:44:55")
         exp_pkt = testutils.simple_ip_packet(eth_dst="11:22:33:44:55:66")
         exp_pkt[Ether].type = 0x8601
@@ -815,11 +775,8 @@ class TernaryTableCachePSATest(P4EbpfTest):
         # Validate that cache entry is used during packet processing. By altering cache we get two different states
         # of a table entry with different executed actions. Based on this it is possible to detect which entry is in
         # use, table entry or cached entry. If we only read cache here then we couldn't test that it is used correctly.
-        self.table_update(
-            table="ingress_tbl_ternary_cache",
-            key=["00:11:22:33:44:55"],
-            action=1,
-            data=["32w0", "11:22:33:44:55:66", "16w0", "64w0"])
+        self.table_update(table="ingress_tbl_ternary_cache", key=["00:11:22:33:44:55"], action=1,
+                          data=["32w0", "11:22:33:44:55:66", "16w0", "64w0"])
         testutils.send_packet(self, PORT0, pkt)
         exp_pkt[Ether].type = 0x0800
         testutils.verify_packet(self, exp_pkt, PORT1)
@@ -865,12 +822,8 @@ class WideFieldTableSupport(P4EbpfTest):
         ]
         for t in tests:
             if t["table"]:
-                self.table_add(
-                    table=t["table"],
-                    key=t["match"],
-                    action=1,
-                    data=[t["exp_ipv6"]],
-                    priority=t["priority"])
+                self.table_add(table=t["table"], key=t["match"], action=1, data=[t["exp_ipv6"]],
+                               priority=t["priority"])
 
         # Add rules for ActionProfile
         mid = self.action_profile_add_action(ap="ingress_ap", action=1, data=["ffff:1111:2222:3333:4444:5555:6666:0007"])
@@ -886,8 +839,8 @@ class WideFieldTableSupport(P4EbpfTest):
 
         for t in tests:
             logger.info("Testing {}...".format(t["case"]))
-            pkt = testutils.simple_ipv6ip_packet(
-                ipv6_src=t["test_ipv6"], ipv6_dst="::1", ipv6_hlim=64)
+            pkt = testutils.simple_ipv6ip_packet(ipv6_src=t["test_ipv6"], ipv6_dst="::1",
+                                                 ipv6_hlim=64)
             exp_pkt = pkt.copy()
             exp_pkt[IPv6].dst = t["exp_ipv6"]
             exp_pkt[IPv6].hlim = exp_pkt[IPv6].hlim - t.get("no_table_matches", 2)

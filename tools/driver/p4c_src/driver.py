@@ -261,14 +261,14 @@ class BackendDriver:
             while True:
                 try:
                     p.communicate()
-                    break    # done waiting, process ended
+                    break  # done waiting, process ended
                 except KeyboardInterrupt:
                     p.send_signal(signal.SIGINT)
         except:
-            p.terminate()    # don't leave process possibly running
+            p.terminate()  # don't leave process possibly running
             try:
                 p.communicate(timeout=0.1)
-            except:          # on timeout or other error
+            except:  # on timeout or other error
                 p.kill()
             print("error running {}".format(" ".join(cmd)), file=sys.stderr)
             print(traceback.format_exc(), file=sys.stderr)
@@ -281,7 +281,7 @@ class BackendDriver:
         Preamble to a command to setup anything needed
         """
         if cmd_name not in self._preCmds:
-            return      # nothing to do
+            return  # nothing to do
 
         cmds = self._preCmds[cmd_name]
         for c in cmds:
@@ -294,7 +294,7 @@ class BackendDriver:
         Postamble to a command to cleanup
         """
         if cmd_name not in self._postCmds:
-            return      # nothing to do
+            return  # nothing to do
 
         cmds = self._postCmds[cmd_name]
         rc = 0

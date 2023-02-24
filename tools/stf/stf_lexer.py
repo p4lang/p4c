@@ -70,11 +70,11 @@ class STFLexer:
         self.errors_cnt += 1
 
     states = (
-                                       # add a state to lex only keywords. By default, all keywords
-                                       # are IDs. Fortunately, in the current grammar all keywords
-                                       # are commands at the beginning of a line (except for packets and bytes!).
+        # add a state to lex only keywords. By default, all keywords
+        # are IDs. Fortunately, in the current grammar all keywords
+        # are commands at the beginning of a line (except for packets and bytes!).
         ('keyword', 'inclusive'),
-                                       # lex only packet data
+        # lex only packet data
         ('packetdata', 'exclusive'),
     )
 

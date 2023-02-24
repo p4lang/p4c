@@ -135,11 +135,10 @@ class P4EbpfTest(BaseTest):
         self.exec_cmd(
             "make -f ../runtime/kernel.mk BPFOBJ={output} P4FILE={p4file} "
             "ARGS=\"{cargs}\" P4C=p4c-ebpf P4ARGS=\"{p4args}\" psa".format(
-                output=self.test_prog_image,
-                p4file=self.p4_file_path,
+                output=self.test_prog_image, p4file=self.p4_file_path,
                 cargs="-DPSA_PORT_RECIRCULATE={}".format(
-                    self.get_dataplane_port_number("psa_recirc")),
-                p4args=p4args), "Compilation error")
+                    self.get_dataplane_port_number("psa_recirc")), p4args=p4args),
+            "Compilation error")
 
         self.dataplane = ptf.dataplane_instance
         self.dataplane.flush()
@@ -318,16 +317,8 @@ class P4EbpfTest(BaseTest):
         else:
             return "action name {} ".format(action)
 
-    def table_write(self,
-                    method,
-                    table,
-                    key,
-                    action=0,
-                    data=None,
-                    priority=None,
-                    references=None,
-                    counters=None,
-                    meters=None):
+    def table_write(self, method, table, key, action=0, data=None, priority=None, references=None,
+                    counters=None, meters=None):
         """
         Use table_add or table_update instead of this method.
         """
@@ -343,15 +334,8 @@ class P4EbpfTest(BaseTest):
             cmd = cmd + "priority {}".format(priority)
         self.exec_ns_cmd(cmd, "Table {} failed".format(method))
 
-    def table_add(self,
-                  table,
-                  key,
-                  action=0,
-                  data=None,
-                  priority=None,
-                  references=None,
-                  counters=None,
-                  meters=None):
+    def table_add(self, table, key, action=0, data=None, priority=None, references=None,
+                  counters=None, meters=None):
         """ Adds a new entry to a table.
             :param table: Table name.
             :param key: List of key fields, each field must be convertible to string.
@@ -364,38 +348,15 @@ class P4EbpfTest(BaseTest):
             :param meters: Dictionary of meter's names (key) and dictionary of meter value (value).
                 Inner dictionary must have four entries: "pir", "pbs", "cir", "cbs"
         """
-        self.table_write(
-            method="add",
-            table=table,
-            key=key,
-            action=action,
-            data=data,
-            priority=priority,
-            references=references,
-            counters=counters,
-            meters=meters)
+        self.table_write(method="add", table=table, key=key, action=action, data=data,
+                         priority=priority, references=references, counters=counters, meters=meters)
 
-    def table_update(self,
-                     table,
-                     key,
-                     action=0,
-                     data=None,
-                     priority=None,
-                     references=None,
-                     counters=None,
-                     meters=None):
+    def table_update(self, table, key, action=0, data=None, priority=None, references=None,
+                     counters=None, meters=None):
         """ See documentation for table_add. This method updates existing entry instead of new one.
         """
-        self.table_write(
-            method="update",
-            table=table,
-            key=key,
-            action=action,
-            data=data,
-            priority=priority,
-            references=references,
-            counters=counters,
-            meters=meters)
+        self.table_write(method="update", table=table, key=key, action=action, data=data,
+                         priority=priority, references=references, counters=counters, meters=meters)
 
     def table_delete(self, table, key=None):
         """ Deletes existing table entry
@@ -426,15 +387,8 @@ class P4EbpfTest(BaseTest):
         _, stdout, _ = self.exec_ns_cmd(cmd, "Table get entry failed")
         return json.loads(stdout)[table]
 
-    def table_verify(self,
-                     table,
-                     key,
-                     action=0,
-                     priority=None,
-                     data=None,
-                     references=None,
-                     counters=None,
-                     meters=None):
+    def table_verify(self, table, key, action=0, priority=None, data=None, references=None,
+                     counters=None, meters=None):
         """ Verify that values in table entry fields are equal to provided arguments. For parameters
             documentation see `table_add` method. Field not referenced by any argument will not be tested.
         """
@@ -468,10 +422,8 @@ class P4EbpfTest(BaseTest):
                 type = json_data["DirectCounter"][k]["type"]
                 entry_value = entry["DirectCounter"][k]
                 self._do_counter_verify(
-                    bytes=v.get("bytes", None),
-                    packets=v.get("packets", None),
-                    entry_value=entry_value,
-                    counter_type=type)
+                    bytes=v.get("bytes", None), packets=v.get("packets", None),
+                    entry_value=entry_value, counter_type=type)
         if meters:
             self.fail(
                 "Support for DirectMeter is not implemented yet (nikss doesn't return internal state of meter if you need it)"
@@ -545,8 +497,8 @@ class P4EbpfTest(BaseTest):
         if len(entries) != 1:
             self.fail("expected one Counter entry")
         entry = entries[0]
-        self._do_counter_verify(
-            bytes=bytes, packets=packets, entry_value=entry["value"], counter_type=counter["type"])
+        self._do_counter_verify(bytes=bytes, packets=packets, entry_value=entry["value"],
+                                counter_type=counter["type"])
 
     def meter_get(self, name, index=None):
         cmd = "nikss-ctl meter get pipe {} {}".format(TEST_PIPELINE_ID, name)

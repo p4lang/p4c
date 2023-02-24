@@ -290,8 +290,8 @@ class Ipv4SetFragOffsetSrcTest(Ipv4Test):
     def setUp(self):
         Ipv4Test.setUp(self)
 
-        self.update_bpf_map(
-            map_id=0, key="1 1 168 192", value="14 0 0 0 255 31 0 0 255 255 255 255")
+        self.update_bpf_map(map_id=0, key="1 1 168 192",
+                            value="14 0 0 0 255 31 0 0 255 255 255 255")
 
     def runTest(self):
         pkt = Ether() / IP(src="192.168.1.1", frag=0) / TCP() / "Ala ma kota"

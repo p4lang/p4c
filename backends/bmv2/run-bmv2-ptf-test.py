@@ -20,9 +20,8 @@ from ebpfenv import Bridge
 import testutils
 
 PARSER = argparse.ArgumentParser()
-PARSER.add_argument(
-    "rootdir", help="the root directory of "
-    "the compiler source tree")
+PARSER.add_argument("rootdir", help="the root directory of "
+                    "the compiler source tree")
 PARSER.add_argument("p4_file", help="the p4 file to process")
 PARSER.add_argument(
     "-tf",

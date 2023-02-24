@@ -405,14 +405,14 @@ class RunBMV2(object):
         self.folder = folder
         self.pcapPrefix = "pcap"
         self.interfaces = {}
-        self.expected = {}                  # for each interface number of packets expected
-        self.expectedAny = []               # interface on which any number of packets is fine
+        self.expected = {}  # for each interface number of packets expected
+        self.expectedAny = []  # interface on which any number of packets is fine
         self.packetDelay = 0
         self.options = options
         self.json = None
         self.tables = []
         self.actions = []
-        self.switchLogFile = "switch.log"   # .txt is added by BMv2
+        self.switchLogFile = "switch.log"  # .txt is added by BMv2
         self.readJson()
         self.cmd_line_args = getattr(options, 'switchOptions', ())
         self.target_specific_cmd_line_args = getattr(options, 'switchTargetSpecificOptions', ())
@@ -631,7 +631,7 @@ class RunBMV2(object):
     def run(self):
         if self.options.verbose:
             print("Running model")
-        wait = 0   # Time to wait before model starts running
+        wait = 0  # Time to wait before model starts running
 
         if self.options.usePsa:
             switch = "psa_switch"
@@ -735,7 +735,7 @@ class RunBMV2(object):
                 raise e
             # This only works on Unix: negative returncode is
             # minus the signal number that killed the process.
-            if sw.returncode != 0 and sw.returncode != -15:     # 15 is SIGTERM
+            if sw.returncode != 0 and sw.returncode != -15:  # 15 is SIGTERM
                 reportError(switch, "died with return code", sw.returncode)
                 rv = FAILURE
             elif self.options.verbose:

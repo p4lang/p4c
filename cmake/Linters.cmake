@@ -92,6 +92,7 @@ file(
 )
 list(FILTER P4C_PYTHON_LINT_LIST EXCLUDE REGEX "backends/p4tools/submodules")
 list(FILTER P4C_PYTHON_LINT_LIST EXCLUDE REGEX "control-plane/p4runtime")
+list(FILTER P4C_PYTHON_LINT_LIST EXCLUDE REGEX "tools/cpplint.py")
 
 add_yapf_files(${P4C_SOURCE_DIR} "${P4C_PYTHON_LINT_LIST}")
 
@@ -115,7 +116,7 @@ if(NOT ${YAPF_CMD})
     )
     add_custom_target(
       yapf-fix-errors
-      COMMAND xargs -a ${YAPF_TXT_FILE} -r -d '\;' ${YAPF_CMD} -p -r --
+      COMMAND xargs -a ${YAPF_TXT_FILE} -r -d '\;' ${YAPF_CMD} -p -r -i --
       WORKING_DIRECTORY ${P4C_SOURCE_DIR}
       COMMENT "Formatting files using yapf."
     )

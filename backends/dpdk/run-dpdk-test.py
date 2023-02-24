@@ -37,12 +37,12 @@ FAILURE = 1
 class Options(object):
 
     def __init__(self):
-        self.binary = ""          # this program's name
-        self.cleanupTmp = True    # if false do not remote tmp folder created
-        self.p4filename = ""      # file that is being compiled
+        self.binary = ""  # this program's name
+        self.cleanupTmp = True  # if false do not remote tmp folder created
+        self.p4filename = ""  # file that is being compiled
         self.compilerSrcDir = ""  # path to compiler source tree
         self.verbose = False
-        self.replace = False      # replace previous outputs
+        self.replace = False  # replace previous outputs
         self.dumpToJson = False
         self.compilerOptions = []
         self.runDebugger = False
@@ -85,7 +85,7 @@ class Local(object):
 
 def run_timeout(options, args, timeout, stderr):
     if options.verbose:
-        print(args[0], args[len(args) - 1])      # handy for manual cut-and-paste
+        print(args[0], args[len(args) - 1])  # handy for manual cut-and-paste
     print(" ".join(args))
     local = Local()
     local.process = None
@@ -105,9 +105,7 @@ def run_timeout(options, args, timeout, stderr):
             local.filter = Popen([
                 'sed', '-E',
                 r's|^[-[:alnum:][:punct:][:space:]_/]*/([-[:alnum:][:punct:][:space:]_]+\.[ph]4?[:(][[:digit:]]+)|\1|'
-            ],
-                                 stdin=PIPE,
-                                 stdout=outfile)
+            ], stdin=PIPE, stdout=outfile)
             procstderr = local.filter.stdin
         local.process = Popen(args, stderr=procstderr)
         local.process.wait()
@@ -223,9 +221,7 @@ def check_generated_files(options, tmpdir, expecteddir):
                   " 1>" + dpdk_log)
             pipe = subprocess.Popen(
                 "exec " + environ.get('DPDK_PIPELINE') + " -n 4 -c 0x3 -- -s " + str(clifile) +
-                " 1>" + dpdk_log,
-                cwd=".",
-                shell=True)
+                " 1>" + dpdk_log, cwd=".", shell=True)
             timer = Timer(5, kill, [pipe])
             try:
                 timer.start()
