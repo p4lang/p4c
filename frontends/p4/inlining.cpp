@@ -198,17 +198,18 @@ class ComputeNewNames : public Inspector {
         BUG_CHECK(decl->is<IR::IAnnotated>(), "%1%: no annotations", decl);
         cstring name = decl->externalName();
         cstring extName;
-        if (name.startsWith("."))
+        if (name.startsWith(".")) {
             // Do not change the external name of objects starting with a leading dot
             extName = name;
-        else
+        } else {
             extName = prefix + "." + name;
-        // Replace illegal characters with an underscore.
-        cstring baseName = extName.replace('.', '_');
-        baseName = baseName.replace(':', '_');
-        baseName = baseName.replace('|', '_');
-        cstring newName = refMap->newName(baseName);
-        renameMap->setNewName(decl, newName, extName);
+        }
+        // Replace non-alphanumeric characters with an underscore.
+        std::string baseName = extName.c_str();
+        std::replace_if(
+            baseName.begin(), baseName.end(),
+            [](char ch) { return (::isalnum(ch) == 0) && ch != '_'; }, '_');
+        renameMap->setNewName(decl, refMap->newName(baseName), extName);
     }
     void postorder(const IR::P4Table *table) override { rename(table); }
     void postorder(const IR::P4ValueSet *set) override { rename(set); }

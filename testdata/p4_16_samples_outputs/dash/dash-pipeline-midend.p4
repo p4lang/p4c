@@ -557,7 +557,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         meta._dropped0 = true;
     }
     @name("dash_ingress.outbound.acl.stage1_counter") direct_counter(CounterType.packets_and_bytes) outbound_acl_stage1_counter;
-    @name("dash_ingress.outbound.acl.stage1:dash_acl_rule|dash_acl") table outbound_acl_stage1:dash_acl_rule|dash_acl {
+    @name("dash_ingress.outbound.acl.stage1:dash_acl_rule|dash_acl") table outbound_acl_stage1_dash_acl_rule_dash_acl {
         key = {
             meta._stage1_dash_acl_group_id29: exact @name("meta.dash_acl_group_id:dash_acl_group_id");
             meta._dst_ip_addr22             : optional @name("meta.dst_ip_addr:dip");
@@ -576,7 +576,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         counters = outbound_acl_stage1_counter;
     }
     @name("dash_ingress.outbound.acl.stage2_counter") direct_counter(CounterType.packets_and_bytes) outbound_acl_stage2_counter;
-    @name("dash_ingress.outbound.acl.stage2:dash_acl_rule|dash_acl") table outbound_acl_stage2:dash_acl_rule|dash_acl {
+    @name("dash_ingress.outbound.acl.stage2:dash_acl_rule|dash_acl") table outbound_acl_stage2_dash_acl_rule_dash_acl {
         key = {
             meta._stage2_dash_acl_group_id30: exact @name("meta.dash_acl_group_id:dash_acl_group_id");
             meta._dst_ip_addr22             : optional @name("meta.dst_ip_addr:dip");
@@ -595,7 +595,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         counters = outbound_acl_stage2_counter;
     }
     @name("dash_ingress.outbound.acl.stage3_counter") direct_counter(CounterType.packets_and_bytes) outbound_acl_stage3_counter;
-    @name("dash_ingress.outbound.acl.stage3:dash_acl_rule|dash_acl") table outbound_acl_stage3:dash_acl_rule|dash_acl {
+    @name("dash_ingress.outbound.acl.stage3:dash_acl_rule|dash_acl") table outbound_acl_stage3_dash_acl_rule_dash_acl {
         key = {
             meta._stage3_dash_acl_group_id31: exact @name("meta.dash_acl_group_id:dash_acl_group_id");
             meta._dst_ip_addr22             : optional @name("meta.dst_ip_addr:dip");
@@ -630,7 +630,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         meta._dropped0 = true;
     }
     @name("dash_ingress.outbound.routing_counter") direct_counter(CounterType.packets_and_bytes) outbound_routing_counter;
-    @name("dash_ingress.outbound.outbound_routing|dash_outbound_routing") table outbound_outbound_routing|dash_outbound_routing {
+    @name("dash_ingress.outbound.outbound_routing|dash_outbound_routing") table outbound_outbound_routing_dash_outbound_routing {
         key = {
             meta._eni_id12          : exact @name("meta.eni_id:eni_id");
             meta._is_overlay_ip_v619: exact @name("meta.is_overlay_ip_v6:is_destination_v4_or_v6");
@@ -651,7 +651,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         meta._encap_data_underlay_dip5 = underlay_dip_4;
     }
     @name("dash_ingress.outbound.ca_to_pa_counter") direct_counter(CounterType.packets_and_bytes) outbound_ca_to_pa_counter;
-    @name("dash_ingress.outbound.outbound_ca_to_pa|dash_outbound_ca_to_pa") table outbound_outbound_ca_to_pa|dash_outbound_ca_to_pa {
+    @name("dash_ingress.outbound.outbound_ca_to_pa|dash_outbound_ca_to_pa") table outbound_outbound_ca_to_pa_dash_outbound_ca_to_pa {
         key = {
             meta._dst_vnet_id11      : exact @name("meta.dst_vnet_id:dst_vnet_id");
             meta._is_lkup_dst_ip_v620: exact @name("meta.is_lkup_dst_ip_v6:is_dip_v4_or_v6");
@@ -667,7 +667,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
     @name("dash_ingress.outbound.set_vnet_attrs") action outbound_set_vnet_attrs_0(@name("vni") bit<24> vni_4) {
         meta._encap_data_vni2 = vni_4;
     }
-    @name("dash_ingress.outbound.vnet|dash_vnet") table outbound_vnet|dash_vnet {
+    @name("dash_ingress.outbound.vnet|dash_vnet") table outbound_vnet_dash_vnet {
         key = {
             meta._vnet_id10: exact @name("meta.vnet_id:vnet_id");
         }
@@ -708,7 +708,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         meta._dropped0 = true;
     }
     @name("dash_ingress.inbound.acl.stage1_counter") direct_counter(CounterType.packets_and_bytes) inbound_acl_stage1_counter;
-    @name("dash_ingress.inbound.acl.stage1:dash_acl_rule|dash_acl") table inbound_acl_stage1:dash_acl_rule|dash_acl {
+    @name("dash_ingress.inbound.acl.stage1:dash_acl_rule|dash_acl") table inbound_acl_stage1_dash_acl_rule_dash_acl {
         key = {
             meta._stage1_dash_acl_group_id29: exact @name("meta.dash_acl_group_id:dash_acl_group_id");
             meta._dst_ip_addr22             : optional @name("meta.dst_ip_addr:dip");
@@ -727,7 +727,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         counters = inbound_acl_stage1_counter;
     }
     @name("dash_ingress.inbound.acl.stage2_counter") direct_counter(CounterType.packets_and_bytes) inbound_acl_stage2_counter;
-    @name("dash_ingress.inbound.acl.stage2:dash_acl_rule|dash_acl") table inbound_acl_stage2:dash_acl_rule|dash_acl {
+    @name("dash_ingress.inbound.acl.stage2:dash_acl_rule|dash_acl") table inbound_acl_stage2_dash_acl_rule_dash_acl {
         key = {
             meta._stage2_dash_acl_group_id30: exact @name("meta.dash_acl_group_id:dash_acl_group_id");
             meta._dst_ip_addr22             : optional @name("meta.dst_ip_addr:dip");
@@ -746,7 +746,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         counters = inbound_acl_stage2_counter;
     }
     @name("dash_ingress.inbound.acl.stage3_counter") direct_counter(CounterType.packets_and_bytes) inbound_acl_stage3_counter;
-    @name("dash_ingress.inbound.acl.stage3:dash_acl_rule|dash_acl") table inbound_acl_stage3:dash_acl_rule|dash_acl {
+    @name("dash_ingress.inbound.acl.stage3:dash_acl_rule|dash_acl") table inbound_acl_stage3_dash_acl_rule_dash_acl {
         key = {
             meta._stage3_dash_acl_group_id31: exact @name("meta.dash_acl_group_id:dash_acl_group_id");
             meta._dst_ip_addr22             : optional @name("meta.dst_ip_addr:dip");
@@ -1228,7 +1228,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
             } else {
                 tbl_act.apply();
                 if (meta._stage1_dash_acl_group_id29 != 16w0) {
-                    switch (outbound_acl_stage1:dash_acl_rule|dash_acl.apply().action_run) {
+                    switch (outbound_acl_stage1_dash_acl_rule_dash_acl.apply().action_run) {
                         outbound_acl_permit_0: {
                             tbl_dashpipeline390.apply();
                         }
@@ -1242,7 +1242,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
                 if (outbound_acl_hasReturned) {
                     ;
                 } else if (meta._stage2_dash_acl_group_id30 != 16w0) {
-                    switch (outbound_acl_stage2:dash_acl_rule|dash_acl.apply().action_run) {
+                    switch (outbound_acl_stage2_dash_acl_rule_dash_acl.apply().action_run) {
                         outbound_acl_permit_1: {
                             tbl_dashpipeline400.apply();
                         }
@@ -1256,7 +1256,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
                 if (outbound_acl_hasReturned) {
                     ;
                 } else if (meta._stage3_dash_acl_group_id31 != 16w0) {
-                    switch (outbound_acl_stage3:dash_acl_rule|dash_acl.apply().action_run) {
+                    switch (outbound_acl_stage3_dash_acl_rule_dash_acl.apply().action_run) {
                         outbound_acl_permit_2: {
                         }
                         outbound_acl_deny_2: {
@@ -1267,11 +1267,11 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
                 }
             }
             tbl_dashpipeline486.apply();
-            switch (outbound_outbound_routing|dash_outbound_routing.apply().action_run) {
+            switch (outbound_outbound_routing_dash_outbound_routing.apply().action_run) {
                 outbound_route_vnet_direct_0: 
                 outbound_route_vnet_0: {
-                    outbound_outbound_ca_to_pa|dash_outbound_ca_to_pa.apply();
-                    outbound_vnet|dash_vnet.apply();
+                    outbound_outbound_ca_to_pa_dash_outbound_ca_to_pa.apply();
+                    outbound_vnet_dash_vnet.apply();
                     tbl_vxlan_encap.apply();
                 }
                 default: {
@@ -1283,7 +1283,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
             } else {
                 tbl_act_0.apply();
                 if (meta._stage1_dash_acl_group_id29 != 16w0) {
-                    switch (inbound_acl_stage1:dash_acl_rule|dash_acl.apply().action_run) {
+                    switch (inbound_acl_stage1_dash_acl_rule_dash_acl.apply().action_run) {
                         inbound_acl_permit_0: {
                             tbl_dashpipeline390_0.apply();
                         }
@@ -1297,7 +1297,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
                 if (inbound_acl_hasReturned) {
                     ;
                 } else if (meta._stage2_dash_acl_group_id30 != 16w0) {
-                    switch (inbound_acl_stage2:dash_acl_rule|dash_acl.apply().action_run) {
+                    switch (inbound_acl_stage2_dash_acl_rule_dash_acl.apply().action_run) {
                         inbound_acl_permit_1: {
                             tbl_dashpipeline400_0.apply();
                         }
@@ -1311,7 +1311,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
                 if (inbound_acl_hasReturned) {
                     ;
                 } else if (meta._stage3_dash_acl_group_id31 != 16w0) {
-                    switch (inbound_acl_stage3:dash_acl_rule|dash_acl.apply().action_run) {
+                    switch (inbound_acl_stage3_dash_acl_rule_dash_acl.apply().action_run) {
                         inbound_acl_permit_2: {
                         }
                         inbound_acl_deny_2: {
