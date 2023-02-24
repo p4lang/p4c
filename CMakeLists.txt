@@ -103,7 +103,7 @@ endif()
 
 # If unity builds are enabled, choose an aggressive batch size.
 if (CMAKE_UNITY_BUILD)
-  set(CMAKE_UNITY_BUILD_BATCH_SIZE 16 CACHE UNINITIALIZED "Set the unity build batch size.")
+  set(CMAKE_UNITY_BUILD_BATCH_SIZE 10 CACHE UNINITIALIZED "Set the unity build batch size.")
 endif ()
 # set the required options for a static release build
 if (BUILD_STATIC_RELEASE)
