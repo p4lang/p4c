@@ -456,14 +456,12 @@ set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
 # tree when small changes to the .def files affect only the .cpp file and
 # not the headers.
 set (fixup_file "${CMAKE_CURRENT_BINARY_DIR}/irgen-fixup.awk")
-set_source_files_properties (${fixup_file} PROPERTIES GENERATED TRUE)
 file(WRITE "${fixup_file}" "/^#\$/ { printf \"#line %d \\\"${CMAKE_CURRENT_BINARY_DIR}/ir/%s\\\"\\n\", NR+1, name; next; } 1\n")
 set(temp_ir_genfiles
   ir/ir-generated.cpp.tmp ir/ir-generated.cpp.fixup
   ir/ir-generated.h.tmp   ir/ir-generated.h.fixup
   ir/gen-tree-macro.h.tmp ir/gen-tree-macro.h.fixup
   )
-set_source_files_properties (${temp_ir_genfiles} PROPERTIES GENERATED TRUE)
 
 add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
   COMMAND ${IR_GENERATOR} -i ir/ir-generated.cpp.tmp -o ir/ir-generated.h.tmp -t ir/gen-tree-macro.h.tmp ${IR_DEF_FILES}

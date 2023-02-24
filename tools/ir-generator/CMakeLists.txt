@@ -37,7 +37,6 @@ set (IRGENERATOR_GEN_SRCS
   )
 
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
-set_source_files_properties(${IRGENERATOR_GEN_SRCS} PROPERTIES GENERATED TRUE)
 set_source_files_properties(${IRGENERATOR_GEN_SRCS} PROPERTIES OBJECT_DEPENDS ${FLEX_IRgenLexer_OUTPUTS})
 add_executable (irgenerator ${IRGENERATOR_SRCS} ${IRGENERATOR_GEN_SRCS})
 # Unconditionally set the output directory for the irgenerator to the path
