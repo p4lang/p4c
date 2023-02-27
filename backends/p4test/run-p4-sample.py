@@ -34,12 +34,17 @@ FAILURE = 1
 
 class Options(object):
     def __init__(self):
-        self.binary = ""  # this program's name
-        self.cleanupTmp = True  # if false do not remote tmp folder created
-        self.p4filename = ""  # file that is being compiled
-        self.compilerSrcDir = ""  # path to compiler source tree
+        # This program's name.
+        self.binary = ""
+        # If false do not remote tmp folder created.
+        self.cleanupTmp = True
+        # File that is being compiled.
+        self.p4filename = ""
+        # Path to compiler source tree.
+        self.compilerSrcDir = ""
         self.verbose = False
-        self.replace = False  # replace previous outputs
+        # Replace previous outputs.
+        self.replace = False
         self.dumpToJson = False
         self.compilerOptions = []
         self.runDebugger = False

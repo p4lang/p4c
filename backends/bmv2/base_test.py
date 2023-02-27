@@ -500,7 +500,8 @@ class P4RuntimeTest(BaseTest):
                 logging.debug(
                     "get_stream_packet msg={msginfo} has no field type_={type_} so discarding"
                 )
-        except:  # timeout expired
+        except:
+            # Timeout expired.
             pass
         return None
 
@@ -531,7 +532,8 @@ class P4RuntimeTest(BaseTest):
                     f"get_stream_packet msginfo['message'] has no field type_={type_} so discarding"
                 )
                 skipped_msginfos.append(msginfo)
-        except:  # timeout expired
+        except:
+            # Timeout expired.
             pass
         return None
 

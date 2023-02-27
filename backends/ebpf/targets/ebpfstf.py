@@ -27,15 +27,21 @@ from stf.stf_parser import STFParser
 
 
 class eBPFCommand(object):
-    """Defines a match-action command for eBPF programs"""
+    """Defines a match-action command for eBPF programs."""
 
     def __init__(self, a_type, table, action, priority="", match=[], extra=""):
-        self.a_type = a_type  # dir in which all files are stored
-        self.table = table  # contains meta information
-        self.action = action  # contains meta information
-        self.priority = priority  # template to generate a filter
-        self.match = match  # contains standard and error output
-        self.extra = extra  # could also be "pcapng"
+        # Dir in which all files are stored.
+        self.a_type = a_type
+        # Contains meta information.
+        self.table = table
+        # Contains meta information.
+        self.action = action
+        # Template to generate a filter.
+        self.priority = priority
+        # Contains standard and error output.
+        self.match = match
+        # Could also be "pcapng".
+        self.extra = extra
 
 
 def _generate_control_actions(cmds):

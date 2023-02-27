@@ -356,10 +356,12 @@ def main():
         "-x",
         dest="language",
         choices=[
+            ### dash separator
             "p4-14",
-            "p4-16",  ### dash separator
+            "p4-16",
+            ### underscore separator
             "p4_14",
-            "p4_16",  ### underscore separator
+            "p4_16",
             "P4₁₄",
             "P4₁₆",
         ],  ### Unicode, for fun
