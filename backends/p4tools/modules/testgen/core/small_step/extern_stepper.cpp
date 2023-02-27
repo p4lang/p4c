@@ -37,7 +37,7 @@ void ExprStepper::setFields(ExecutionState *nextState,
                             const std::vector<const IR::Member *> &flatFields,
                             int varBitFieldSize) {
     for (const auto *fieldRef : flatFields) {
-        const auto *fieldType = nextState->get(fieldRef)->type;
+        const auto *fieldType = fieldRef->type;
         // If the header had a varbit, the header needs to be updated.
         // We assign @param varbitFeldSize to the varbit field.
         if (const auto *varbit = fieldType->to<IR::Extracted_Varbits>()) {
