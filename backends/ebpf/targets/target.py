@@ -90,7 +90,7 @@ class EBPFTarget:
         p4_args = " ".join(map(str, argv))
         if p4_args:
             # Remaining arguments
-            args += f" P4ARGS=\"{p4_args}\" "
+            args += f' P4ARGS="{p4_args}" '
         out, returncode = testutils.exec_process(args)
         if returncode != testutils.SUCCESS:
             testutils.log.error("Failed to compile the P4 program.")
@@ -184,12 +184,20 @@ class EBPFTarget:
                 if self.expected[interface]["any"]:
                     if self.expected[interface]["pkts"]:
                         testutils.log.error(
-                            ("Interface %s has both expected with packets and without", interface))
+                            (
+                                "Interface %s has both expected with packets and without",
+                                interface,
+                            )
+                        )
                     continue
                 expected = self.expected[interface]["pkts"]
             if len(expected) != len(packets):
                 testutils.log.error(
-                    "Expected %s packets on port %s got %s", len(expected), interface, len(packets))
+                    "Expected %s packets on port %s got %s",
+                    len(expected),
+                    interface,
+                    len(packets),
+                )
                 return testutils.FAILURE
             for idx, expected_pkt in enumerate(expected):
                 cmp = testutils.compare_pkt(expected_pkt, packets[idx])

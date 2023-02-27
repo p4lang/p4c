@@ -28,7 +28,6 @@ import testutils
 
 
 class Target(EBPFTarget):
-
     def __init__(self, tmpdir, options, template):
         EBPFTarget.__init__(self, tmpdir, options, template)
 

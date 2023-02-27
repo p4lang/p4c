@@ -39,7 +39,7 @@ def get_version():
 
 
 def display_supported_targets(cfg):
-    ret = "Supported targets in \"target, arch\" tuple:\n"
+    ret = 'Supported targets in "target, arch" tuple:\n'
     for target in cfg.target:
         ret += str(target) + "\n"
     return ret
@@ -49,33 +49,59 @@ JSON_input_flag = "--fromJson"  ### DRY, i.e. Don`t Repeat Yourself
 
 
 def add_developer_options(parser):
-    parser.add_argument("-T", dest="log_levels", action="append", default=[],
-                        help="[Compiler debugging] Adjust logging level"
-                        " per file (see below)")
     parser.add_argument(
-        "--top4", dest="passes", action="append", default=[],
-        help="[Compiler debugging] Dump the P4 representation"
-        " after passes whose name contains one of 'passX'"
-        " substrings.  When '-v' is used this will"
-        " include the compiler IR.")
-    parser.add_argument("--dump", dest="dump_dir", default=None,
-                        help="[Compiler debugging] Folder where P4 programs"
-                        " are dumped.")
-    parser.add_argument("--toJson", dest="json", default=None,
-                        help="Dump IR to JSON in the specified file.")
+        "-T",
+        dest="log_levels",
+        action="append",
+        default=[],
+        help="[Compiler debugging] Adjust logging level per file (see below)",
+    )
     parser.add_argument(
-        JSON_input_flag, dest="json_source", default=None,
-        help="Use IR from JSON representation dumped"
-        " previously.  The compilation starts with a"
-        " reduced midEnd.  Only allowed/recognized in"
-        " developer builds.")
-    parser.add_argument("--pp", dest="pretty_print", default=None,
-                        help="Pretty-print the program in the specified file.")
+        "--top4",
+        dest="passes",
+        action="append",
+        default=[],
+        help=(
+            "[Compiler debugging] Dump the P4 representation"
+            " after passes whose name contains one of 'passX'"
+            " substrings.  When '-v' is used this will"
+            " include the compiler IR."
+        ),
+    )
+    parser.add_argument(
+        "--dump",
+        dest="dump_dir",
+        default=None,
+        help="[Compiler debugging] Folder where P4 programs are dumped.",
+    )
+    parser.add_argument(
+        "--toJson",
+        dest="json",
+        default=None,
+        help="Dump IR to JSON in the specified file.",
+    )
+    parser.add_argument(
+        JSON_input_flag,
+        dest="json_source",
+        default=None,
+        help=(
+            "Use IR from JSON representation dumped"
+            " previously.  The compilation starts with a"
+            " reduced midEnd.  Only allowed/recognized in"
+            " developer builds."
+        ),
+    )
+    parser.add_argument(
+        "--pp",
+        dest="pretty_print",
+        default=None,
+        help="Pretty-print the program in the specified file.",
+    )
 
 
 def s_and_were_or_just_was(parameter):
     """a utility function for grammatical correctness [and DRY, i.e. Don`t Repeat Yourself]"""
-    return ("s were" if parameter != 1 else " was")
+    return "s were" if parameter != 1 else " was"
 
 
 class OptionMAction(argparse.Action):
@@ -105,91 +131,226 @@ class PassThroughAction(argparse.Action):
 
 
 def main():
-    parser = argparse.ArgumentParser(conflict_handler='resolve')
-    parser.add_argument("-V", "--version", dest="show_version", help="show version and exit",
-                        action="store_true", default=False)
-    parser.add_argument("-v", "--debug", dest="debug", help="verbose", action="store_true",
-                        default=False)
-    parser.add_argument("-###", "--test-only", dest="dry_run",
-                        help="print (but do not run) the commands", action="store_true",
-                        default=False)
-    parser.add_argument("-Xpreprocessor", dest="preprocessor_options", metavar="<arg>",
-                        help="Pass <arg> to the preprocessor", action="append", default=[])
-    parser.add_argument("-Xp4c", dest="compiler_options", metavar="<arg>",
-                        help="Pass <arg> to the compiler", action="append", default=[])
-    parser.add_argument("-Xassembler", dest="assembler_options", metavar="<arg>",
-                        help="Pass <arg> to the assembler", action="append", default=[])
-    parser.add_argument("-Xlinker", dest="linker_options", metavar="<arg>",
-                        help="Pass <arg> to the linker", action="append", default=[])
-    parser.add_argument("-b", "--target", dest="target", help="specify target device",
-                        action="store", default="bmv2")
-    parser.add_argument("-a", "--arch", dest="arch", help="specify target architecture",
-                        action="store", default="v1model")
-    parser.add_argument("-c", "--compile", dest="run_all",
-                        help="Only run the preprocess, compile, and assemble"
-                        " steps", action="store_true", default=True)
-    parser.add_argument("-D", dest="preprocessor_defines",
-                        help="define a macro to be used by the preprocessor", action="append",
-                        default=[])
-    parser.add_argument("-E", dest="run_preprocessor_only", help="Only run the preprocessor",
-                        action="store_true", default=False)
-    parser.add_argument("-e", dest="skip_preprocessor", help="Skip the preprocessor",
-                        action="store_true", default=False)
-    parser.add_argument("-M", dest="preprocessor_options",
-                        help="Pass -M to preprocessor to output dependency rule only",
-                        action=OptionMAction)
-    for option, metavar, usage in (("-MD", None, "output dependencies as side effect"),
-                                   ("-MF", "<file>", "write dependencies to <file>"),
-                                   ("-MG", None, "suppress errors for missing headers"),
-                                   ("-MP", None, "add phony target for each dependency"),
-                                   ("-MT", "<target>", "override target of the output rule"),
-                                   ("-MQ", "<target>",
-                                    "override target and quote special characters")):
+    parser = argparse.ArgumentParser(conflict_handler="resolve")
+    parser.add_argument(
+        "-V",
+        "--version",
+        dest="show_version",
+        help="show version and exit",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
+        "-v",
+        "--debug",
+        dest="debug",
+        help="verbose",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
+        "-###",
+        "--test-only",
+        dest="dry_run",
+        help="print (but do not run) the commands",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
+        "-Xpreprocessor",
+        dest="preprocessor_options",
+        metavar="<arg>",
+        help="Pass <arg> to the preprocessor",
+        action="append",
+        default=[],
+    )
+    parser.add_argument(
+        "-Xp4c",
+        dest="compiler_options",
+        metavar="<arg>",
+        help="Pass <arg> to the compiler",
+        action="append",
+        default=[],
+    )
+    parser.add_argument(
+        "-Xassembler",
+        dest="assembler_options",
+        metavar="<arg>",
+        help="Pass <arg> to the assembler",
+        action="append",
+        default=[],
+    )
+    parser.add_argument(
+        "-Xlinker",
+        dest="linker_options",
+        metavar="<arg>",
+        help="Pass <arg> to the linker",
+        action="append",
+        default=[],
+    )
+    parser.add_argument(
+        "-b",
+        "--target",
+        dest="target",
+        help="specify target device",
+        action="store",
+        default="bmv2",
+    )
+    parser.add_argument(
+        "-a",
+        "--arch",
+        dest="arch",
+        help="specify target architecture",
+        action="store",
+        default="v1model",
+    )
+    parser.add_argument(
+        "-c",
+        "--compile",
+        dest="run_all",
+        help="Only run the preprocess, compile, and assemble steps",
+        action="store_true",
+        default=True,
+    )
+    parser.add_argument(
+        "-D",
+        dest="preprocessor_defines",
+        help="define a macro to be used by the preprocessor",
+        action="append",
+        default=[],
+    )
+    parser.add_argument(
+        "-E",
+        dest="run_preprocessor_only",
+        help="Only run the preprocessor",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
+        "-e",
+        dest="skip_preprocessor",
+        help="Skip the preprocessor",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
+        "-M",
+        dest="preprocessor_options",
+        help="Pass -M to preprocessor to output dependency rule only",
+        action=OptionMAction,
+    )
+    for option, metavar, usage in (
+        ("-MD", None, "output dependencies as side effect"),
+        ("-MF", "<file>", "write dependencies to <file>"),
+        ("-MG", None, "suppress errors for missing headers"),
+        ("-MP", None, "add phony target for each dependency"),
+        ("-MT", "<target>", "override target of the output rule"),
+        ("-MQ", "<target>", "override target and quote special characters"),
+    ):
         syntax = option
         if metavar is not None:
             syntax += " " + metavar
-        parser.add_argument(option, dest="preprocessor_options", metavar=metavar,
-                            nargs=0 if metavar is None else 1,
-                            help="Pass {} to preprocessor to {}".format(syntax, usage),
-                            action=PassThroughAction)
-    parser.add_argument("-g", dest="debug_info", help="Generate debug information",
-                        action="store_true", default=False)
-    parser.add_argument("-I", dest="search_path", help="Add directory to include search path",
-                        action="append", default=[])
-    parser.add_argument("-o", "--output", dest="output_directory",
-                        help="Write output to the provided path", action="store", metavar="PATH",
-                        default=".")
+        parser.add_argument(
+            option,
+            dest="preprocessor_options",
+            metavar=metavar,
+            nargs=0 if metavar is None else 1,
+            help="Pass {} to preprocessor to {}".format(syntax, usage),
+            action=PassThroughAction,
+        )
     parser.add_argument(
-        "--p4runtime-file", help="Write a P4Runtime control plane API description "
-        "to the specified file. "
-        "[Deprecated; use '--p4runtime-files' instead]", action="store", default=None)
+        "-g",
+        dest="debug_info",
+        help="Generate debug information",
+        action="store_true",
+        default=False,
+    )
     parser.add_argument(
-        "--p4runtime-files", help="Write the P4Runtime control plane API "
-        "description (P4Info) to the specified files "
-        "(comma-separated list); the format is detected based"
-        " on the filename suffix. "
-        ' Legal suffixes are ".txt", ".json", and ".bin".', action="store", default=None)
+        "-I",
+        dest="search_path",
+        help="Add directory to include search path",
+        action="append",
+        default=[],
+    )
     parser.add_argument(
-        "--p4runtime-format", choices=["binary", "json", "text"],
-        help="Choose output format for the P4Runtime API "
-        "description (default is binary). "
-        "[Deprecated; use '--p4runtime-files' instead]", action="store", default="binary")
+        "-o",
+        "--output",
+        dest="output_directory",
+        help="Write output to the provided path",
+        action="store",
+        metavar="PATH",
+        default=".",
+    )
     parser.add_argument(
-        "--help-pragmas", "--pragma-help", "--pragmas-help", "--help-annotations",
-        "--annotation-help", "--annotations-help", dest="help_pragmas", action="store_true",
-        default=False, help="Print the documentation about supported"
-        " annotations/pragmas and exit.")
-    parser.add_argument("--help-targets", "--target-help", "--targets-help",
-                        dest="show_target_help",
-                        help="Display target specific command line options.", action="store_true",
-                        default=False)
+        "--p4runtime-file",
+        help=(
+            "Write a P4Runtime control plane API description "
+            "to the specified file. "
+            "[Deprecated; use '--p4runtime-files' instead]"
+        ),
+        action="store",
+        default=None,
+    )
     parser.add_argument(
-        "--disable-annotations", "--disable-annotation", "--disable-pragmas", "--disable-pragma",
-        dest="disabled_annos", action="store", help="List of (comma-separated) annotations that"
-        " should be ignored by the compiler.")
-    parser.add_argument("-S", dest="run_till_assembler",
-                        help="Only run the preprocess and compilation steps", action="store_true",
-                        default=False)
+        "--p4runtime-files",
+        help=(
+            "Write the P4Runtime control plane API "
+            "description (P4Info) to the specified files "
+            "(comma-separated list); the format is detected based"
+            " on the filename suffix. "
+            " Legal suffixes are \".txt\", \".json\", and \".bin\"."
+        ),
+        action="store",
+        default=None,
+    )
+    parser.add_argument(
+        "--p4runtime-format",
+        choices=["binary", "json", "text"],
+        help=(
+            "Choose output format for the P4Runtime API "
+            "description (default is binary). "
+            "[Deprecated; use '--p4runtime-files' instead]"
+        ),
+        action="store",
+        default="binary",
+    )
+    parser.add_argument(
+        "--help-pragmas",
+        "--pragma-help",
+        "--pragmas-help",
+        "--help-annotations",
+        "--annotation-help",
+        "--annotations-help",
+        dest="help_pragmas",
+        action="store_true",
+        default=False,
+        help="Print the documentation about supported annotations/pragmas and exit.",
+    )
+    parser.add_argument(
+        "--help-targets",
+        "--target-help",
+        "--targets-help",
+        dest="show_target_help",
+        help="Display target specific command line options.",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
+        "--disable-annotations",
+        "--disable-annotation",
+        "--disable-pragmas",
+        "--disable-pragma",
+        dest="disabled_annos",
+        action="store",
+        help="List of (comma-separated) annotations that should be ignored by the compiler.",
+    )
+    parser.add_argument(
+        "-S",
+        dest="run_till_assembler",
+        help="Only run the preprocess and compilation steps",
+        action="store_true",
+        default=False,
+    )
     parser.add_argument(
         "--std",
         "-x",
@@ -200,44 +361,59 @@ def main():
             "p4_14",
             "p4_16",  ### underscore separator
             "P4₁₄",
-            "P4₁₆"
+            "P4₁₆",
         ],  ### Unicode, for fun
-        help="Treat subsequent input files as having contents "
-        "of the type indicated by "
-        "the parameter to this argument.",
+        help=(
+            "Treat subsequent input files as having contents "
+            "of the type indicated by "
+            "the parameter to this argument."
+        ),
         action="store",
-        default="p4-16")
-    parser.add_argument("--ndebug", dest="ndebug_mode", help="Compile program in non-debug mode.\n",
-                        action="store_true", default=False)
+        default="p4-16",
+    )
     parser.add_argument(
-        "--parser-inline-opt", dest="optimizeParserInlining",
-        help="Enable optimization of inlining of callee "
-        "parsers (subparsers). "
-        "The optimization is disabled by default. "
-        "When the optimization is disabled, "
-        "for each invocation of the subparser "
-        "all states of the subparser are inlined, "
-        "which means that the subparser "
-        "might be inlined multiple times even if "
-        "it is the same instance "
-        "which is invoked multiple times. "
-        "When the optimization is enabled, the compiler "
-        "tries to identify the cases where it can inline"
-        " the subparser's states only once for multiple "
-        "invocations of the same subparser instance.", action="store_true", default=False)
+        "--ndebug",
+        dest="ndebug_mode",
+        help="Compile program in non-debug mode.\n",
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
+        "--parser-inline-opt",
+        dest="optimizeParserInlining",
+        help=(
+            "Enable optimization of inlining of callee "
+            "parsers (subparsers). "
+            "The optimization is disabled by default. "
+            "When the optimization is disabled, "
+            "for each invocation of the subparser "
+            "all states of the subparser are inlined, "
+            "which means that the subparser "
+            "might be inlined multiple times even if "
+            "it is the same instance "
+            "which is invoked multiple times. "
+            "When the optimization is enabled, the compiler "
+            "tries to identify the cases where it can inline"
+            " the subparser's states only once for multiple "
+            "invocations of the same subparser instance."
+        ),
+        action="store_true",
+        default=False,
+    )
 
     ### DRYified “env_indicates_developer_build”
-    env_indicates_developer_build = os.environ['P4C_BUILD_TYPE'] == "DEVELOPER"
+    env_indicates_developer_build = os.environ["P4C_BUILD_TYPE"] == "DEVELOPER"
     if env_indicates_developer_build:
         add_developer_options(parser)
 
-    parser.add_argument("P4_source_files", nargs='*', help="P4 source files to compile.",
-                        default=None)
+    parser.add_argument(
+        "P4_source_files", nargs="*", help="P4 source files to compile.", default=None
+    )
 
     # load supported configuration.
     # We load these before we parse options, so that backends can register
     # proprietary options
-    cfg_files = glob.glob("{}/*.cfg".format(os.environ['P4C_CFG_PATH']))
+    cfg_files = glob.glob("{}/*.cfg".format(os.environ["P4C_CFG_PATH"]))
     cfg = config.Config(config_prefix="p4c")
     for cf in cfg_files:
         cfg.load_from_config(cf, parser)
@@ -254,7 +430,7 @@ def main():
     # parse the arguments
     opts = parser.parse_args()
 
-    user_defined_version = os.environ.get('P4C_DEFAULT_VERSION')
+    user_defined_version = os.environ.get("P4C_DEFAULT_VERSION")
     ### Note: the next line of real code _was_τhe clear and easy-to-understand
     ###       “if user_defined_version != None:”, but “pycodestyle”
     ###       complained about that idiom so I rewrote it to something
@@ -284,8 +460,8 @@ def main():
     ###   ... or, probably even better, providing that Python≥3.4
     ###   is an acceptable requirement:
     ###     <https://docs.python.org/3/library/enum.html>
-    if (len(opts.language) > 2) and ('_' == opts.language[2]):
-        opts.language = opts.language[:2] + '-' + opts.language[3:]
+    if (len(opts.language) > 2) and ("_" == opts.language[2]):
+        opts.language = opts.language[:2] + "-" + opts.language[3:]
 
     ### Support for specifying the P4 version using Unicode: map to what the
     ###   rest of the compiler expects/understands.
@@ -295,13 +471,13 @@ def main():
     if opts.language in Unicode_to_internal:
         opts.language = Unicode_to_internal[opts.language]
 
-    user_defined_target = os.environ.get('P4C_DEFAULT_TARGET')
+    user_defined_target = os.environ.get("P4C_DEFAULT_TARGET")
     ### Re the next line of real code: please see the 4-line comment, above,
     ###   about “pycodestyle”.
     if not (user_defined_target is None):
         opts.target = user_defined_target
 
-    user_defined_arch = os.environ.get('P4C_DEFAULT_ARCH')
+    user_defined_arch = os.environ.get("P4C_DEFAULT_ARCH")
     ### Re the next line of real code: please see the 4-line comment, above,
     ###   about “pycodestyle”.
     if not (user_defined_arch is None):
@@ -318,16 +494,17 @@ def main():
 
     # check that the tuple value is correct
     backend = (opts.target, opts.arch)
-    if (len(backend) != 2):
-        parser.error("Invalid target and arch tuple: {}\n{}".format(backend,
-                                                                    display_supported_targets(cfg)))
+    if len(backend) != 2:
+        parser.error(
+            "Invalid target and arch tuple: {}\n{}".format(backend, display_supported_targets(cfg))
+        )
 
     # find the backend
     backend = None
     for target in cfg.target:
-        regex = target._backend.replace('*', '[a-zA-Z0-9*]*')
+        regex = target._backend.replace("*", "[a-zA-Z0-9*]*")
         pattern = re.compile(regex)
-        if (pattern.match(opts.target + '-' + opts.arch)):
+        if pattern.match(opts.target + "-" + opts.arch):
             backend = target
             break
     if backend is None:
@@ -347,18 +524,20 @@ def main():
         ###       that will now fail whereas before the JSON input pathname
         ###       would silently override the other input pathname[s].
         print(
-            "\n"
-            "ERROR: it seems that both (firstly) a JSON input pathname "
-            'was specified via "' + JSON_input_flag + '"'
-            " _and_ (secondly) " + str(len(opts.P4_source_files)) + ""
+            "\nERROR: it seems that both (firstly) a JSON input pathname was specified via \""
+            + JSON_input_flag
+            + '" _and_ (secondly) '
+            + str(len(opts.P4_source_files))
+            + ""
             ###                                                     ^^
             ### The above nonsense is to get rid of a W504 in “pycodestyle”
             ###   [“W504 line break after binary operator”]
             ### The same goes for “"" +” two lines down.
             " other input pathname"
-            "" + s_and_were_or_just_was(len(opts.P4_source_files)) + ""
-            " specified.  A JSON input at the same time as a P4 input is"
-            " currently unsupported.")
+            ""
+            + s_and_were_or_just_was(len(opts.P4_source_files))
+            + " specified.  A JSON input at the same time as a P4 input is currently unsupported."
+        )
         error_count = 1
         ### Replace ↑ ‘=’ with “+=” if/when ever moving this line of code
         ###   to somewhere it might not be the first error detection.
@@ -387,10 +566,12 @@ def main():
                 "ERROR: sorry, but as of this writing, the P4 compiler "
                 "driver does _not_ support multiple top-level P4 source "
                 "files in a single invocation.  Multiple P4 source files at "
-                'a time are currently only supported via "#include"'
+                "a time are currently only supported via \"#include\""
                 "(i.e. additional non-top-level P4 source files).  "
                 "Number of top-level P4 source-file pathnames detected: "
-                "" + str(len(opts.P4_source_files)), file=sys.stderr)
+                "" + str(len(opts.P4_source_files)),
+                file=sys.stderr,
+            )
             ###   ^^ this nonsense is to get rid of a W504 in “pycodestyle”
             ###      [“W504 line break after binary operator”]
             error_count += 1
@@ -408,8 +589,10 @@ def main():
 
         for pathname in pathnames_to_check:
             if not os.path.isfile(pathname):
-                print('\nERROR: the input file "{}" does not exist.'.format(pathname),
-                      file=sys.stderr)
+                print(
+                    '\nERROR: the input file "{}" does not exist.'.format(pathname),
+                    file=sys.stderr,
+                )
                 error_count += 1
 
     elif not any_input_specified:
@@ -418,9 +601,11 @@ def main():
     if error_count != 0:
         print(
             "\nSorry; {} error{} found while analyzing the command inputs."
-            "  Aborting the P4 compiler driver.\n".format(error_count,
-                                                          s_and_were_or_just_was(error_count)),
-            file=sys.stderr)
+            "  Aborting the P4 compiler driver.\n".format(
+                error_count, s_and_were_or_just_was(error_count)
+            ),
+            file=sys.stderr,
+        )
         sys.exit(min(255, error_count))
         ### maximum of 255: being extra-careful here,
         ###                 just in case “error_count” is

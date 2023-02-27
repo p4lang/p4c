@@ -474,24 +474,24 @@ add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${MY_SOURCES_AND_HEADERS}")
 add_clang_format_files (${CMAKE_CURRENT_SOURCE_DIR} "${MY_SOURCES_AND_HEADERS}")
 ```
 
-Python files should be added to the yapf target using the following rule:
+Python files should be added to the black target using the following rule:
 ```
-add_yapf_files (${CMAKE_CURRENT_SOURCE_DIR} "${MY_SOURCES_AND_HEADERS}")
+add_black_files (${CMAKE_CURRENT_SOURCE_DIR} "${MY_SOURCES_AND_HEADERS}")
 ```
 
 The p4c CMakeLists.txt will use that name to figure the full path of the files to lint.
 
-Unlike cpplint, clang-format and yapf need to be installed before the linter can be used. They can be installed with the following command:
+Unlike cpplint, clang-format and black need to be installed before the linter can be used. They can be installed with the following command:
 ```
-pip3 install --user "clang-format==15.0.4" "yapf==0.32.0"
+pip3 install --user "clang-format==15.0.4" "black==23.1.0"
 ```
-clang-format can be checked using the `make clang-format` command. Complaints can be fixed by running `make clang-format-fix-errors`. yapf can be checked using the `make yapf` command. Complaints can be fixed by running `make yapf-fix-errors`.
+clang-format can be checked using the `make clang-format` command. Complaints can be fixed by running `make clang-format-fix-errors`. black can be checked using the `make black` command. Complaints can be fixed by running `make black-fix-errors`.
 
-cpplint, clang-format, and yapf run as checks as port of P4C's continuous integration process. To make sure that these tests pass, we recommend installing the appropriate git hooks. This can be done by running
+cpplint, clang-format, and black run as checks as port of P4C's continuous integration process. To make sure that these tests pass, we recommend installing the appropriate git hooks. This can be done by running
 ```
 ./tools/install_git_hooks.sh
 ```
-clang-format, cpplint, and yapf checks will be enforced on every branch commit. In cases where checks are failing but the commit is sound, one can bypass the hook enforcement using `git commit --no-verify`.
+clang-format, cpplint, and black checks will be enforced on every branch commit. In cases where checks are failing but the commit is sound, one can bypass the hook enforcement using `git commit --no-verify`.
 
 ### Target
 

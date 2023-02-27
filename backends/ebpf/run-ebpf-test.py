@@ -34,8 +34,7 @@ sys.path.append(str(FILE_DIR.joinpath("../../tools")))
 import testutils
 
 PARSER = argparse.ArgumentParser()
-PARSER.add_argument("rootdir", help="the root directory of "
-                    "the compiler source tree")
+PARSER.add_argument("rootdir", help="the root directory of the compiler source tree")
 PARSER.add_argument("p4filename", help="the p4 file to process")
 PARSER.add_argument(
     "-b",
@@ -48,8 +47,7 @@ PARSER.add_argument(
     "--compiler",
     dest="compiler",
     default="p4c-ebpf",
-    help="Specify the path to the compiler binary, "
-    "default is p4c-ebpf",
+    help="Specify the path to the compiler binary, default is p4c-ebpf",
 )
 PARSER.add_argument(
     "-f",
@@ -62,8 +60,7 @@ PARSER.add_argument(
     "--target",
     dest="target",
     default="test",
-    help="Specify the compiler backend target, "
-    "default is test",
+    help="Specify the compiler backend target, default is test",
 )
 PARSER.add_argument(
     "-e",
@@ -76,9 +73,11 @@ PARSER.add_argument(
     "-tf",
     "--testfile",
     dest="testfile",
-    help="Provide the path for the stf file for this test. "
-    "If no path is provided, the script will search for an"
-    " stf file in the same folder.",
+    help=(
+        "Provide the path for the stf file for this test. "
+        "If no path is provided, the script will search for an"
+        " stf file in the same folder."
+    ),
 )
 PARSER.add_argument(
     "-ll",
@@ -115,7 +114,6 @@ class EBPFFactory:
 
 
 class Options:
-
     def __init__(self):
         self.binary = ""  # This program's name.
         self.cleanupTmp = True  # Remove tmp folder?

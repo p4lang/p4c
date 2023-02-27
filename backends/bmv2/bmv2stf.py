@@ -33,6 +33,7 @@ import random
 import errno
 import socket
 from collections import OrderedDict
+
 try:
     from scapy.layers.all import *
     from scapy.utils import *
@@ -55,7 +56,6 @@ signal.signal(signal.SIGALRM, signal_handler)
 
 
 class Options(object):
-
     def __init__(self):
         self.binary = None
         self.verbose = False
@@ -70,15 +70,15 @@ def nextWord(text, sep=None):
     # Separator is discarded.
     spl = text.split(sep, 1)
     if len(spl) == 0:
-        return '', ''
+        return "", ""
     elif len(spl) == 1:
-        return spl[0].strip(), ''
+        return spl[0].strip(), ""
     else:
         return spl[0].strip(), spl[1].strip()
 
 
 def ByteToHex(byteStr):
-    return ''.join([("%02X" % x) for x in byteStr])
+    return "".join([("%02X" % x) for x in byteStr])
 
 
 def convert_packet_bin2hexstr(pkt_bin):
@@ -86,7 +86,7 @@ def convert_packet_bin2hexstr(pkt_bin):
 
 
 def convert_packet_stf2hexstr(pkt_stf_text):
-    return ''.join(pkt_stf_text.split()).upper()
+    return "".join(pkt_stf_text.split()).upper()
 
 
 def reportError(*message):
@@ -182,7 +182,6 @@ class ConcurrentInteger(object):
 
 
 class BMV2ActionArg(object):
-
     def __init__(self, name, width):
         # assert isinstance(name, str)
         # assert isinstance(width, int)
@@ -191,7 +190,6 @@ class BMV2ActionArg(object):
 
 
 class TableKey(object):
-
     def __init__(self):
         self.fields = OrderedDict()
 
@@ -208,7 +206,6 @@ class TableKey(object):
 
 
 class TableKeyInstance(object):
-
     def __init__(self, tableKey):
         assert isinstance(tableKey, TableKey)
         self.values = {}
@@ -234,11 +231,11 @@ class TableKeyInstance(object):
         found = False
         if key in self.key.fields:
             found = True
-        elif key + '$' in self.key.fields:
-            key = key + '$'
+        elif key + "$" in self.key.fields:
+            key = key + "$"
             found = True
-        elif key + '.$valid$' in self.key.fields:
-            key = key + '.$valid$'
+        elif key + ".$valid$" in self.key.fields:
+            key = key + ".$valid$"
             found = True
         elif key.endswith(".valid"):
             alt = key[:-5] + "$valid$"
@@ -291,7 +288,7 @@ class TableKeyInstance(object):
         return prefix + value.replace("*", "0") + "&&&" + prefix + m
 
     def makeLpm(self, value):
-        if value.find('/') >= 0:
+        if value.find("/") >= 0:
             return value
         if value.startswith("0x"):
             bits_per_digit = 4
@@ -302,8 +299,8 @@ class TableKeyInstance(object):
         else:
             value = "0x" + hex(int(value))
             bits_per_digit = 4
-        digits = len(value) - 2 - value.count('*')
-        return value.replace('*', '0') + "/" + str(digits * bits_per_digit)
+        digits = len(value) - 2 - value.count("*")
+        return value.replace("*", "0") + "/" + str(digits * bits_per_digit)
 
     def __str__(self):
         result = ""
@@ -315,7 +312,6 @@ class TableKeyInstance(object):
 
 
 class BMV2ActionArguments(object):
-
     def __init__(self, action):
         assert isinstance(action, BMV2Action)
         self.action = action
@@ -343,7 +339,6 @@ class BMV2ActionArguments(object):
 
 
 class BMV2Action(object):
-
     def __init__(self, jsonAction):
         self.name = jsonAction["name"]
         self.args = []
@@ -359,7 +354,6 @@ class BMV2Action(object):
 
 
 class BMV2Table(object):
-
     def __init__(self, jsonTable):
         self.match_type = jsonTable["match_type"]
         self.name = jsonTable["name"]
@@ -396,9 +390,7 @@ class BMV2Table(object):
 # able to invoke the BMV2 simulator, create a CLI file
 # and test packets in pcap files.
 class RunBMV2(object):
-
     def __init__(self, folder, options, jsonfile):
-
         self.clifile = folder + "/cli.txt"
         self.jsonfile = jsonfile
         self.stffile = None
@@ -414,8 +406,8 @@ class RunBMV2(object):
         self.actions = []
         self.switchLogFile = "switch.log"  # .txt is added by BMv2
         self.readJson()
-        self.cmd_line_args = getattr(options, 'switchOptions', ())
-        self.target_specific_cmd_line_args = getattr(options, 'switchTargetSpecificOptions', ())
+        self.cmd_line_args = getattr(options, "switchOptions", ())
+        self.target_specific_cmd_line_args = getattr(options, "switchTargetSpecificOptions", ())
 
     def readJson(self):
         with open(self.jsonfile) as jf:
@@ -431,12 +423,12 @@ class RunBMV2(object):
         return self.folder + "/" + self.pcapPrefix + str(interface) + "_" + direction + ".pcap"
 
     def interface_of_filename(self, f):
-        return int(os.path.basename(f).rstrip('.pcap').lstrip(self.pcapPrefix).rsplit('_', 1)[0])
+        return int(os.path.basename(f).rstrip(".pcap").lstrip(self.pcapPrefix).rsplit("_", 1)[0])
 
     def do_cli_command(self, cmd):
         if self.options.verbose:
             print(cmd)
-        self.cli_stdin.write(bytes(cmd + "\n", encoding='utf8'))
+        self.cli_stdin.write(bytes(cmd + "\n", encoding="utf8"))
         self.cli_stdin.flush()
         self.packetDelay = 1
 
@@ -450,7 +442,12 @@ class RunBMV2(object):
             self.do_cli_command(self.parse_table_add(cmd))
         elif first == "setdefault":
             self.do_cli_command(self.parse_table_set_default(cmd))
-        elif first == "mirroring_add" or first == "mirroring_add_mc" or first == "mirroring_delete" or first == "mirroring_get":
+        elif (
+            first == "mirroring_add"
+            or first == "mirroring_add_mc"
+            or first == "mirroring_delete"
+            or first == "mirroring_get"
+        ):
             # Pass through mirroring commands unchanged, with same
             # arguments as expected by simple_switch_CLI
             self.do_cli_command(first + " " + cmd)
@@ -466,14 +463,18 @@ class RunBMV2(object):
             # Pass through register commands unchanged, with
             # same arguments as expected by simple_switch_CLI
             self.do_cli_command(first + " " + cmd)
-        elif first == "meter_get_rates" or first == "meter_set_rates" or first == "meter_array_set_rates":
+        elif (
+            first == "meter_get_rates"
+            or first == "meter_set_rates"
+            or first == "meter_array_set_rates"
+        ):
             # Pass through meter commands unchanged, with
             # same arguments as expected by simple_switch_CLI
             self.do_cli_command(first + " " + cmd)
         elif first == "packet":
             interface, data = nextWord(cmd)
             interface = int(interface)
-            data = ''.join(data.split())
+            data = "".join(data.split())
             time.sleep(self.packetDelay)
             try:
                 self.interfaces[interface]._write_packet(bytes.fromhex(data))
@@ -485,8 +486,8 @@ class RunBMV2(object):
         elif first == "expect":
             interface, data = nextWord(cmd)
             interface = int(interface)
-            data = ''.join(data.split())
-            if data != '':
+            data = "".join(data.split())
+            if data != "":
                 self.expected.setdefault(interface, []).append(data)
             else:
                 self.expectedAny.append(interface)
@@ -549,8 +550,16 @@ class RunBMV2(object):
             # Priorities in BMV2 seem to be reversed with respect to the stf file
             # Hopefully 10000 is large enough
             prio = str(10000 - int(prio))
-        command = "table_add " + table.name + " " + action.name + " " + str(key) + " => " + str(
-            actionArgs)
+        command = (
+            "table_add "
+            + table.name
+            + " "
+            + action.name
+            + " "
+            + str(key)
+            + " => "
+            + str(actionArgs)
+        )
         if table.match_type == "ternary":
             command += " " + prio
         return command
@@ -586,8 +595,14 @@ class RunBMV2(object):
                 if candidate == None:
                     candidate = t
                 else:
-                    raise Exception("Table name " + tableName + " is ambiguous between " +
-                                    candidate.name + " and " + t.name)
+                    raise Exception(
+                        "Table name "
+                        + tableName
+                        + " is ambiguous between "
+                        + candidate.name
+                        + " and "
+                        + t.name
+                    )
         if candidate is not None:
             return candidate
         raise Exception("Could not find table " + tableName)
@@ -652,17 +667,27 @@ class RunBMV2(object):
         except OSError:
             pass
         try:
-            runswitch = [
-                FindExe("behavioral-model", switch), "--log-file", self.switchLogFile,
-                "--log-flush", "--use-files",
-                str(wait), "--thrift-port", thriftPort, "--device-id",
-                str(rand)
-            ] + self.interfaceArgs() + ["../" + self.jsonfile]
+            runswitch = (
+                [
+                    FindExe("behavioral-model", switch),
+                    "--log-file",
+                    self.switchLogFile,
+                    "--log-flush",
+                    "--use-files",
+                    str(wait),
+                    "--thrift-port",
+                    thriftPort,
+                    "--device-id",
+                    str(rand),
+                ]
+                + self.interfaceArgs()
+                + ["../" + self.jsonfile]
+            )
             if self.cmd_line_args:
                 runswitch += self.cmd_line_args
             if self.target_specific_cmd_line_args:
                 runswitch += [
-                    '--',
+                    "--",
                 ] + self.target_specific_cmd_line_args
             if self.options.verbose:
                 print("Running", " ".join(runswitch))
@@ -709,7 +734,11 @@ class RunBMV2(object):
                 return FAILURE
             time.sleep(0.1)
 
-            runcli = [FindExe("behavioral-model", switch_cli), "--thrift-port", thriftPort]
+            runcli = [
+                FindExe("behavioral-model", switch_cli),
+                "--thrift-port",
+                thriftPort,
+            ]
             if self.options.verbose:
                 print("Running", " ".join(runcli))
 
@@ -758,12 +787,17 @@ class RunBMV2(object):
         received = convert_packet_bin2hexstr(received)
         expected = convert_packet_stf2hexstr(expected)
         strict_length_check = False
-        if expected[-1] == '$':
+        if expected[-1] == "$":
             strict_length_check = True
             expected = expected[:-1]
         if len(received) < len(expected):
-            reportError("Received packet too short", len(received), "vs", len(expected),
-                        "(in units of hex digits)")
+            reportError(
+                "Received packet too short",
+                len(received),
+                "vs",
+                len(expected),
+                "(in units of hex digits)",
+            )
             reportError("Full expected packet is ", expected)
             reportError("Full received packet is ", received)
             return FAILURE
@@ -772,14 +806,25 @@ class RunBMV2(object):
                 continue
             if expected[i] != received[i]:
                 reportError("Received packet ", received)
-                reportError("Packet different at position", i, ": expected", expected[i],
-                            ", received", received[i])
+                reportError(
+                    "Packet different at position",
+                    i,
+                    ": expected",
+                    expected[i],
+                    ", received",
+                    received[i],
+                )
                 reportError("Full expected packet is ", expected)
                 reportError("Full received packet is ", received)
                 return FAILURE
         if strict_length_check and len(received) > len(expected):
-            reportError("Received packet too long", len(received), "vs", len(expected),
-                        "(in units of hex digits)")
+            reportError(
+                "Received packet too long",
+                len(received),
+                "vs",
+                len(expected),
+                "(in units of hex digits)",
+            )
             reportError("Full expected packet is ", expected)
             reportError("Full received packet is ", received)
             return FAILURE
@@ -795,7 +840,7 @@ class RunBMV2(object):
         if self.options.verbose:
             print("Comparing outputs")
         direction = "out"
-        for file in glob(self.filename('*', direction)):
+        for file in glob(self.filename("*", direction)):
             interface = self.interface_of_filename(file)
             if os.stat(file).st_size == 0:
                 packets = []
@@ -809,9 +854,9 @@ class RunBMV2(object):
 
             # Log packets.
             if self.options.observationLog:
-                observationLog = open(self.options.observationLog, 'w')
+                observationLog = open(self.options.observationLog, "w")
                 for pkt in packets:
-                    observationLog.write('%d %s\n' % (interface, convert_packet_bin2hexstr(pkt)))
+                    observationLog.write("%d %s\n" % (interface, convert_packet_bin2hexstr(pkt)))
                 observationLog.close()
 
             # Check for expected packets.
@@ -824,18 +869,28 @@ class RunBMV2(object):
             else:
                 expected = self.expected[interface]
             if len(expected) != len(packets):
-                reportError("Expected", len(expected), "packets on port", str(interface), "got",
-                            len(packets))
-                reportError("Full list of %d expected packets on port %d:"
-                            "" % (len(expected), interface))
+                reportError(
+                    "Expected",
+                    len(expected),
+                    "packets on port",
+                    str(interface),
+                    "got",
+                    len(packets),
+                )
+                reportError(
+                    "Full list of %d expected packets on port %d:" % (len(expected), interface)
+                )
                 for i in range(len(expected)):
-                    reportError("    packet #%2d: %s"
-                                "" % (i + 1, convert_packet_stf2hexstr(expected[i])))
-                reportError("Full list of %d received packets on port %d:"
-                            "" % (len(packets), interface))
+                    reportError(
+                        "    packet #%2d: %s" % (i + 1, convert_packet_stf2hexstr(expected[i]))
+                    )
+                reportError(
+                    "Full list of %d received packets on port %d:" % (len(packets), interface)
+                )
                 for i in range(len(packets)):
-                    reportError("    packet #%2d: %s"
-                                "" % (i + 1, convert_packet_bin2hexstr(packets[i])))
+                    reportError(
+                        "    packet #%2d: %s" % (i + 1, convert_packet_bin2hexstr(packets[i]))
+                    )
                 self.showLog()
                 return FAILURE
             for i in range(0, len(expected)):
@@ -870,21 +925,25 @@ def run_model(options, tmpdir, jsonfile, testfile):
 
 
 def usage(options):
-    print("usage:", options.binary, "[-v] [-p] [-observation-log <file>] <json file> <stf file>")
+    print(
+        "usage:",
+        options.binary,
+        "[-v] [-p] [-observation-log <file>] <json file> <stf file>",
+    )
 
 
 def main(argv):
     options = Options()
     options.binary = argv[0]
     argv = argv[1:]
-    while len(argv) > 0 and argv[0][0] == '-':
+    while len(argv) > 0 and argv[0][0] == "-":
         if argv[0] == "-b":
             options.preserveTmp = True
         elif argv[0] == "-v":
             options.verbose = True
         elif argv[0] == "-p":
             options.usePsa = True
-        elif argv[0] == '-observation-log':
+        elif argv[0] == "-observation-log":
             if len(argv) == 1:
                 reportError("Missing argument", argv[0])
                 usage(options)

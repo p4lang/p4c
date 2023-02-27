@@ -53,21 +53,18 @@ class LogPipe(threading.Thread):
         self.start()
 
     def fileno(self) -> int:
-        """Return the write file descriptor of the pipe
-        """
+        """Return the write file descriptor of the pipe"""
         return self.fd_write
 
     def run(self) -> None:
-        """Run the thread, logging everything.
-        """
-        for line in iter(self.pipe_reader.readline, ''):
-            log.log(self.level, line.strip('\n'))
+        """Run the thread, logging everything."""
+        for line in iter(self.pipe_reader.readline, ""):
+            log.log(self.level, line.strip("\n"))
 
         self.pipe_reader.close()
 
     def close(self) -> None:
-        """Close the write end of the pipe.
-        """
+        """Close the write end of the pipe."""
         os.close(self.fd_write)
 
 
@@ -88,7 +85,7 @@ def hex_to_byte(hex_str: str) -> str:
     byte_vals = []
     hex_str = "".join(hex_str.split(" "))
     for i in range(0, len(hex_str), 2):
-        byte_vals.append(chr(int(hex_str[i:i + 2], 16)))
+        byte_vals.append(chr(int(hex_str[i : i + 2], 16)))
     return "".join(byte_vals)
 
 
@@ -105,8 +102,12 @@ def compare_pkt(expected: str, received: str) -> int:
             continue
         if val != received[idx]:
             log.error("Received packet\n %s ", received)
-            log.error("Packet different at position %s: expected\n%s\n\nreceived\n%s", idx, val,
-                      received[idx])
+            log.error(
+                "Packet different at position %s: expected\n%s\n\nreceived\n%s",
+                idx,
+                val,
+                received[idx],
+            )
             log.error("Expected packet %s", expected)
             return FAILURE
     return SUCCESS
@@ -129,7 +130,7 @@ def pick_tcp_port(default_port: int) -> int:
 
 def open_process(args: str, **extra_args) -> Optional[subprocess.Popen]:
     """Start the given argument string as a subprocess and return the handle to the process.
-       @param extra_args is forwarded to the subprocess.communicate command"""
+    @param extra_args is forwarded to the subprocess.communicate command"""
     log.info("Writing %s", " ".join(args))
     proc = None
     output_args = {
@@ -159,7 +160,7 @@ def open_process(args: str, **extra_args) -> Optional[subprocess.Popen]:
 
 def run_process(proc: subprocess.Popen, **extra_args) -> subprocess.Popen:
     """Wait for the given process to finish. Report failures to stderr. @param extra_args is
-        forwarded to the subprocess.communicate command."""
+    forwarded to the subprocess.communicate command."""
     try:
         out, err = proc.communicate(**extra_args)
     except subprocess.TimeoutExpired as exception:
@@ -167,7 +168,7 @@ def run_process(proc: subprocess.Popen, **extra_args) -> subprocess.Popen:
         out = exception.stdout
         err = exception.stderr
     if out:
-        msg = "\n########### PROCESS OUTPUT BEGIN:\n" f"{out}########### PROCESS OUTPUT END\n"
+        msg = f"\n########### PROCESS OUTPUT BEGIN:\n{out}########### PROCESS OUTPUT END\n"
         log.info(msg)
     if proc.returncode != SUCCESS:
         log.error("Error %s:\n%s", proc.returncode, err)
@@ -215,7 +216,7 @@ def exec_process(args: str, **extra_args) -> ProcessResult:
         # Rejoin the list for better readability.
         if isinstance(cmd, list):
             cmd = " ".join(cmd)
-        log.error("Error %s when executing \"%s\".", returncode, cmd)
+        log.error('Error %s when executing "%s".', returncode, cmd)
     except subprocess.TimeoutExpired as exception:
         out = exception.stderr
         returncode = FAILURE
@@ -277,20 +278,23 @@ def check_if_dir(input_path_str: str) -> Optional[Path]:
 
 
 def check_and_create_dir(directory: Path) -> None:
-    """ Create the folder if it does not exit. """
+    """Create the folder if it does not exit."""
     if directory and not directory.exists():
         log.info("Folder %s does not exist! Creating...", directory)
         directory.mkdir(parents=True, exist_ok=True)
 
 
 def del_dir(directory: str) -> None:
-    """ Delete a directory and all its children.
-        TODO: Convert to Path input. """
+    """Delete a directory and all its children.
+    TODO: Convert to Path input."""
     try:
         shutil.rmtree(directory, ignore_errors=True)
     except OSError as exception:
-        log.error("Could not delete directory, reason:\n%s - %s.", exception.filename,
-                  exception.strerror)
+        log.error(
+            "Could not delete directory, reason:\n%s - %s.",
+            exception.filename,
+            exception.strerror,
+        )
 
 
 def copy_file(src, dst):

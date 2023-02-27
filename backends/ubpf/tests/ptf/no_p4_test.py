@@ -19,7 +19,6 @@ from ptf.testutils import send_packet, verify_packets, simple_icmp_packet
 
 
 class NormalOvsActionTest(P4rtOVSBaseTest):
-
     def setUp(self):
         P4rtOVSBaseTest.setUp(self)
 

@@ -19,7 +19,7 @@ import sys
 
 # get the directory the python program is running from
 def get_script_dir(follow_symlinks=True):
-    if getattr(sys, 'frozen', False):  # py2exe, PyInstaller, cx_Freeze
+    if getattr(sys, "frozen", False):  # py2exe, PyInstaller, cx_Freeze
         path = os.path.abspath(sys.executable)
     else:
         path = inspect.getabsfile(get_script_dir)
@@ -56,7 +56,7 @@ def getLocalCfg(config):
 # top-down find, good for deployment
 def find_bin(exe):
     found_path = None
-    for pp in os.environ['PATH'].split(':'):
+    for pp in os.environ["PATH"].split(":"):
         for root, dirs, files in os.walk(pp):
             for ff in files:
                 if ff == exe:
@@ -82,7 +82,7 @@ def find_file(directory, filename, binary=True):
         return False
 
     executable = ""
-    if directory.startswith('/'):
+    if directory.startswith("/"):
         executable = os.path.normpath(os.path.join(directory, filename))
         if check_file(executable):
             return executable
@@ -102,5 +102,5 @@ def find_file(directory, filename, binary=True):
                     return executable
 
         dir = os.path.dirname(dir)
-    print('File {} not found'.format(filename))
+    print("File {} not found".format(filename))
     sys.exit(1)

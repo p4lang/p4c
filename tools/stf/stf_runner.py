@@ -55,19 +55,19 @@ class STFRunner(object):
             pkt_expects = []
             for s in self._ast:
                 self._logger.info("Processing STF statement: %s", s)
-                if s[0] == 'packet':
+                if s[0] == "packet":
                     self.genSendPacket(s)
-                elif s[0] == 'expect':
+                elif s[0] == "expect":
                     pkt_expects.append(s)
-                elif s[0] == 'add':
+                elif s[0] == "add":
                     self.genAddTableEntry(s)
-                elif s[0] == 'wait':
+                elif s[0] == "wait":
                     self.genWaitStmt()
-                elif s[0] == 'setdefault':
+                elif s[0] == "setdefault":
                     self.genAddDefaultAction(s)
-                elif s[0] == 'check_counter':
+                elif s[0] == "check_counter":
                     self.genCheckCounter(s)
-                elif s[0] == 'remove':
+                elif s[0] == "remove":
                     self._logger.info("Flushing table entries")
                     self.undo_write_requests(self._requests)
                 else:
@@ -88,31 +88,31 @@ class STFRunner(object):
 
     def genAddTableEntry(self, entry):
         """
-            Generate a table entry
+        Generate a table entry
         """
         return
 
     def genAddDefaultAction(self, set_default):
         """
-            Generate a default action
+        Generate a default action
         """
         return
 
     def genSendPacket(self, packet):
         """
-            Generate a send_packet statement
+        Generate a send_packet statement
         """
         return
 
     def genExpectPacket(self, expect, orig_packet):
         """
-            Generate a check_packet statement
+        Generate a check_packet statement
         """
         return
 
     def genProcessPacket(self, pkt_pair):
         """
-            Generate a send_packet/check_packet pair.
+        Generate a send_packet/check_packet pair.
         """
         if pkt_pair[0] is not None:
             self.genSendPacket(pkt_pair[0])
@@ -121,7 +121,7 @@ class STFRunner(object):
 
     def genCheckCounter(self, chk):
         """
-           Generate a check counter request and verify
+        Generate a check counter request and verify
         """
         return
 
@@ -146,12 +146,12 @@ class STFRunner(object):
 
     def setExpectTern(self, expect, packet):
         """
-            Set the expect packet don't care to packet data since
-            the packet comparison looks byte-by-byte
+        Set the expect packet don't care to packet data since
+        the packet comparison looks byte-by-byte
         """
-        val = ''
+        val = ""
         for e, p in zip(expect, packet):
-            if e == '*':
+            if e == "*":
                 val += p
             else:
                 val += e

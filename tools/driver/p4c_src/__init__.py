@@ -16,7 +16,7 @@
 __author__ = "Barefoot Networks"
 __email__ = "p4c@barefootnetworks.com"
 __versioninfo__ = (0, 0, 1)
-__version__ = '.'.join(str(v) for v in __versioninfo__) + 'dev'
+__version__ = ".".join(str(v) for v in __versioninfo__) + "dev"
 
 __all__ = []
 

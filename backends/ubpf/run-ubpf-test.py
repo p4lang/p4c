@@ -26,7 +26,7 @@ sys.path.append(str(FILE_DIR.joinpath("../../tools")))
 sys.path.append(str(FILE_DIR.joinpath("../ebpf")))
 import testutils
 
-run_ebpf_test = importlib.import_module('run-ebpf-test')
+run_ebpf_test = importlib.import_module("run-ebpf-test")
 
 arg_parser = run_ebpf_test.PARSER
 

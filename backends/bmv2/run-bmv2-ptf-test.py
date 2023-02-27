@@ -20,8 +20,7 @@ from ebpfenv import Bridge
 import testutils
 
 PARSER = argparse.ArgumentParser()
-PARSER.add_argument("rootdir", help="the root directory of "
-                    "the compiler source tree")
+PARSER.add_argument("rootdir", help="the root directory of the compiler source tree")
 PARSER.add_argument("p4_file", help="the p4 file to process")
 PARSER.add_argument(
     "-tf",
@@ -64,6 +63,7 @@ THRIFT_PORT = 22000
 
 class Options:
     """Options for this testing script. Usually correspond to command line inputs."""
+
     # File that is being compiled.
     p4_file: Path = Path(".")
     # Path to ptf test file that is used.
@@ -78,25 +78,31 @@ class Options:
 
 def create_bridge(num_ifaces: int) -> Bridge:
     """Create a network namespace environment."""
-    testutils.log.info("---------------------- Creating a namespace ----------------------",)
+    testutils.log.info(
+        "---------------------- Creating a namespace ----------------------",
+    )
     random.seed(datetime.now().timestamp())
     bridge = Bridge(str(random.randint(0, sys.maxsize)))
     result = bridge.create_virtual_env(num_ifaces)
     if result != testutils.SUCCESS:
         bridge.ns_del()
         testutils.log.error(
-            "---------------------- Namespace creation failed ----------------------",)
+            "---------------------- Namespace creation failed ----------------------",
+        )
         raise SystemExit("Unable to create the namespace environment.")
     testutils.log.info(
-        "---------------------- Namespace successfully created ----------------------")
+        "---------------------- Namespace successfully created ----------------------"
+    )
     return bridge
 
 
 def compile_program(options: Options, json_name: Path, info_name: Path) -> int:
     """Compile the input P4 program using p4c-bm2-ss."""
     testutils.log.info("---------------------- Compile with p4c-bm2-ss ----------------------")
-    compilation_cmd = (f"{options.rootdir}/build/p4c-bm2-ss --target bmv2 --arch v1model "
-                       f"--p4runtime-files {info_name} {options.p4_file} -o {json_name}")
+    compilation_cmd = (
+        f"{options.rootdir}/build/p4c-bm2-ss --target bmv2 --arch v1model "
+        f"--p4runtime-files {info_name} {options.p4_file} -o {json_name}"
+    )
     _, returncode = testutils.exec_process(compilation_cmd, timeout=30)
     if returncode != testutils.SUCCESS:
         testutils.log.error("Failed to compile the P4 program %s.", options.p4_file)
@@ -104,23 +110,27 @@ def compile_program(options: Options, json_name: Path, info_name: Path) -> int:
 
 
 def get_iface_str(num_ifaces: int, prefix: str = "") -> str:
-    """ Produce the PTF interface arguments based on the number of interfaces the PTF test uses."""
+    """Produce the PTF interface arguments based on the number of interfaces the PTF test uses."""
     iface_str = ""
     for iface_num in range(num_ifaces):
         iface_str += f"-i {iface_num}@{prefix}{iface_num} "
     return iface_str
 
 
-def run_simple_switch_grpc(options: Options, bridge: Bridge, switchlog: Path,
-                           grpc_port: int) -> testutils.subprocess.Popen:
+def run_simple_switch_grpc(
+    options: Options, bridge: Bridge, switchlog: Path, grpc_port: int
+) -> testutils.subprocess.Popen:
     """Start simple_switch_grpc and return the process handle."""
     thrift_port = testutils.pick_tcp_port(THRIFT_PORT)
-    testutils.log.info("---------------------- Start simple_switch_grpc ----------------------",)
+    testutils.log.info(
+        "---------------------- Start simple_switch_grpc ----------------------",
+    )
     ifaces = get_iface_str(num_ifaces=options.num_ifaces)
     simple_switch_grpc = (
         f"simple_switch_grpc --thrift-port {thrift_port} --log-file {switchlog} --log-flush -i 0@0 "
         f"{ifaces} --no-p4 "
-        f"-- --grpc-server-addr 0.0.0.0:{grpc_port}")
+        f"-- --grpc-server-addr 0.0.0.0:{grpc_port}"
+    )
     bridge_cmd = bridge.get_ns_prefix() + " " + simple_switch_grpc
     switch_proc = testutils.open_process(bridge_cmd)
     if switch_proc is None:
@@ -130,8 +140,9 @@ def run_simple_switch_grpc(options: Options, bridge: Bridge, switchlog: Path,
     return switch_proc
 
 
-def run_ptf(options: Options, bridge: Bridge, grpc_port: int, json_name: Path,
-            info_name: Path) -> int:
+def run_ptf(
+    options: Options, bridge: Bridge, grpc_port: int, json_name: Path, info_name: Path
+) -> int:
     """Run the PTF test."""
     testutils.log.info("---------------------- Run PTF test ----------------------")
     # Add the file location to the python path.
@@ -172,7 +183,7 @@ def run_test(options: Options) -> int:
     if result != testutils.SUCCESS:
         # Terminate the switch process and emit its output in case of failure.
         testutils.kill_proc_group(switch_proc)
-        if switchlog.with_suffix('.txt').exists():
+        if switchlog.with_suffix(".txt").exists():
             switchout = switchlog.with_suffix(".txt").read_text()
             testutils.log.error("######## Switch log ########\n%s", switchout)
         if switch_proc.stdout:

@@ -29,7 +29,6 @@ import testutils
 
 
 class Bridge:
-
     def __init__(self, namespace: str):
         # Identifier of the namespace.
         self.ns_name: str = namespace
@@ -96,8 +95,9 @@ class Bridge:
         testutils.log.info("Executing command.")
         result = testutils.run_process(proc, timeout=testutils.TIMEOUT, **extra_args)
         if result.returncode != testutils.SUCCESS:
-            testutils.log.error("Failed to execute the command sequence in namespace %s",
-                                self.ns_name)
+            testutils.log.error(
+                "Failed to execute the command sequence in namespace %s", self.ns_name
+            )
         return result.returncode
 
     def _configure_bridge(self, br_name: str) -> int:

@@ -46,8 +46,11 @@ class RegisterActionPSATest(P4EbpfTest):
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
 
-        self.register_verify(name="ingress_reg", index=["{}".format(hex(DP_PORTS[1]))],
-                             expected_value=["0xf"])
+        self.register_verify(
+            name="ingress_reg",
+            index=["{}".format(hex(DP_PORTS[1]))],
+            expected_value=["0xf"],
+        )
 
 
 class RegisterApplyPSATest(P4EbpfTest):
@@ -61,6 +64,7 @@ class RegisterApplyPSATest(P4EbpfTest):
     5. P4 application will read a 5, add 10 and write it to the register
     6. Verify a value stored in register (15)
     """
+
     p4_file_path = "p4testdata/register-apply.p4"
 
     def runTest(self):
@@ -82,14 +86,18 @@ class RegisterDefaultPSATest(P4EbpfTest):
     add 10 and write it to the register
     3. Verify a value stored in register (16)
     """
+
     p4_file_path = "p4testdata/register-default.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
 
         testutils.send_packet(self, PORT0, pkt)
-        self.register_verify(name="ingress_reg", index=["{}".format(hex(DP_PORTS[1]))],
-                             expected_value=["0x10"])
+        self.register_verify(
+            name="ingress_reg",
+            index=["{}".format(hex(DP_PORTS[1]))],
+            expected_value=["0x10"],
+        )
 
 
 class RegisterBigKeyPSATest(P4EbpfTest):
@@ -100,6 +108,7 @@ class RegisterBigKeyPSATest(P4EbpfTest):
     add 10 and write it to the register
     3. Verify a value stored in register (16)
     """
+
     p4_file_path = "p4testdata/register-big-key.p4"
 
     def runTest(self):
@@ -119,21 +128,31 @@ class RegisterStructsPSATest(P4EbpfTest):
     4. Set register value to port (0xDA), srcAddr (0x55), dstAddr (0x0)
     5. Verify a dstAddr field change to 0x0D
     """
+
     p4_file_path = "p4testdata/register-structs.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
 
         testutils.send_packet(self, PORT0, pkt)
-        self.register_verify(name="ingress_reg", index=["0x5", "0xffffffffffff"],
-                             expected_value=["0x0", "0x5", "0x0"])
+        self.register_verify(
+            name="ingress_reg",
+            index=["0x5", "0xffffffffffff"],
+            expected_value=["0x0", "0x5", "0x0"],
+        )
 
-        self.register_set(name="ingress_reg", index=["0x5", "0xffffffffffff"],
-                          value=["0xDA", "0x55", "0x0"])
+        self.register_set(
+            name="ingress_reg",
+            index=["0x5", "0xffffffffffff"],
+            value=["0xDA", "0x55", "0x0"],
+        )
 
         testutils.send_packet(self, PORT0, pkt)
-        self.register_verify(name="ingress_reg", index=["0x5", "0xffffffffffff"],
-                             expected_value=["0xDA", "0x55", "0x0D"])
+        self.register_verify(
+            name="ingress_reg",
+            index=["0x5", "0xffffffffffff"],
+            expected_value=["0xDA", "0x55", "0x0D"],
+        )
 
 
 class RegisterWideIndexData(P4EbpfTest):
@@ -144,6 +163,7 @@ class RegisterWideIndexData(P4EbpfTest):
     2. P4 program will swap IPv6 src address with value stored in Register entry at IPv6 dst address.
     3. Validate values.
     """
+
     p4_file_path = "p4testdata/wide-field-register.p4"
 
     def runTest(self):
@@ -155,14 +175,21 @@ class RegisterWideIndexData(P4EbpfTest):
         exp_pkt = testutils.simple_ipv6ip_packet(ipv6_dst=addr, ipv6_src="0::0")
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet_any_port(self, exp_pkt, PTF_PORTS)
-        self.register_verify(name="ingress_reg", index=[reg_key],
-                             expected_value=["0x1_1111_0000_0000_0000_0000_00"])
+        self.register_verify(
+            name="ingress_reg",
+            index=[reg_key],
+            expected_value=["0x1_1111_0000_0000_0000_0000_00"],
+        )
 
         # Test with register set
-        self.register_set(name="ingress_reg", index=[reg_key],
-                          value=[0x1_0000_0000_0000_0000_0011_22])
+        self.register_set(
+            name="ingress_reg", index=[reg_key], value=[0x1_0000_0000_0000_0000_0011_22]
+        )
         exp_pkt = testutils.simple_ipv6ip_packet(ipv6_dst=addr, ipv6_src="1::11:2200:0")
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet_any_port(self, exp_pkt, PTF_PORTS)
-        self.register_verify(name="ingress_reg", index=[reg_key],
-                             expected_value=["0x1_1111_0000_0000_0000_0000_00"])
+        self.register_verify(
+            name="ingress_reg",
+            index=[reg_key],
+            expected_value=["0x1_1111_0000_0000_0000_0000_00"],
+        )

@@ -28,45 +28,77 @@ from scapy.layers.all import *
 from scapy.utils import *
 from bmv2stf import RunBMV2
 
-sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + '/../../tools')
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + "/../../tools")
 from testutils import SUCCESS, FAILURE, check_if_dir, check_if_file
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("rootdir", help="the root directory of "
-                        "the compiler source tree")
+    parser.add_argument("rootdir", help="the root directory of the compiler source tree")
     parser.add_argument("p4filename", help="the p4 file to process")
-    parser.add_argument("-b", "--nocleanup", action="store_false",
-                        help="do not remove temporary results for failing tests")
-    parser.add_argument("-bd", "--buildir", dest="builddir",
-                        help="The path to the compiler build directory, "
-                        "default is \"build\".")
+    parser.add_argument(
+        "-b",
+        "--nocleanup",
+        action="store_false",
+        help="do not remove temporary results for failing tests",
+    )
+    parser.add_argument(
+        "-bd",
+        "--buildir",
+        dest="builddir",
+        help="The path to the compiler build directory, default is \"build\".",
+    )
     parser.add_argument("-v", "--verbose", action="store_true", help="verbose operation")
-    parser.add_argument("-f", "--replace", action="store_true",
-                        help="replace reference outputs with newly generated ones")
-    parser.add_argument("-p", "--usePsa", dest="use_psa", action="store_true",
-                        help="Use psa switch")
+    parser.add_argument(
+        "-f",
+        "--replace",
+        action="store_true",
+        help="replace reference outputs with newly generated ones",
+    )
+    parser.add_argument(
+        "-p", "--usePsa", dest="use_psa", action="store_true", help="Use psa switch"
+    )
     parser.add_argument("-pp", dest="pp", help="pass this option to the compiler")
     parser.add_argument("-gdb", "--gdb", action="store_true", help="Run the compiler under gdb.")
-    parser.add_argument("-a", dest="compiler_options", default=[], action='append', nargs="?",
-                        help="Pass this option string to the compiler")
-    parser.add_argument("--target-specific-switch-arg", dest="switch_options", default=[],
-                        action='append', nargs="?",
-                        help="Pass this target-specific option to the switch")
-    parser.add_argument("--init", dest="init_cmds", default=[], action='append', nargs="?",
-                        help="Run <cmd> before the start of the test")
+    parser.add_argument(
+        "-a",
+        dest="compiler_options",
+        default=[],
+        action="append",
+        nargs="?",
+        help="Pass this option string to the compiler",
+    )
+    parser.add_argument(
+        "--target-specific-switch-arg",
+        dest="switch_options",
+        default=[],
+        action="append",
+        nargs="?",
+        help="Pass this target-specific option to the switch",
+    )
+    parser.add_argument(
+        "--init",
+        dest="init_cmds",
+        default=[],
+        action="append",
+        nargs="?",
+        help="Run <cmd> before the start of the test",
+    )
     parser.add_argument("--observation-log", dest="obs_log", help="save packet output to <file>")
     parser.add_argument(
-        "-tf", "--testFile", dest="testFile",
-        help="Provide the path for the stf file for this test. "
-        "If no path is provided, the script will search for an"
-        " stf file in the same folder.")
+        "-tf",
+        "--testFile",
+        dest="testFile",
+        help=(
+            "Provide the path for the stf file for this test. "
+            "If no path is provided, the script will search for an"
+            " stf file in the same folder."
+        ),
+    )
     return parser.parse_known_args()
 
 
-class Options():
-
+class Options:
     def __init__(self):
         self.binary = ""  # this program's name
         self.cleanupTmp = True  # if false do not remote tmp folder created
@@ -94,18 +126,18 @@ def nextWord(text, sep=" "):
     pos = text.find(sep)
     if pos < 0:
         return text, ""
-    l, r = text[0:pos].strip(), text[pos + len(sep):len(text)].strip()
+    l, r = text[0:pos].strip(), text[pos + len(sep) : len(text)].strip()
     # print(text, "/", sep, "->", l, "#", r)
     return l, r
 
 
-class ConfigH():
+class ConfigH:
     # Represents an autoconf config.h file
     # fortunately the structure of these files is very constrained
     def __init__(self, file):
         self.file = file
         self.vars = {}
-        with open(file, 'r', encoding="utf-8") as a:
+        with open(file, "r", encoding="utf-8") as a:
             self.text = a.read()
         self.ok = False
         self.parse()
@@ -118,7 +150,7 @@ class ConfigH():
                 if end < 1:
                     reportError("Unterminated comment in config file")
                     return
-                self.text = self.text[end + 2:len(self.text)]
+                self.text = self.text[end + 2 : len(self.text)]
             elif self.text.startswith("#define"):
                 _, self.text = nextWord(self.text)
                 macro, self.text = nextWord(self.text)
@@ -144,7 +176,7 @@ def reportError(*message):
     print("***", *message)
 
 
-class Local():
+class Local:
     # object to hold local vars accessible to nested functions
     process = None
 
@@ -259,10 +291,10 @@ def process_file(options, argv):
 
     if result != SUCCESS:
         print("Error compiling")
-        with open(stderr, mode='r', encoding="utf-8") as stderr_file:
+        with open(stderr, mode="r", encoding="utf-8") as stderr_file:
             print(stderr_file.read())
             # If the compiler crashed fail the test
-            if 'Compiler Bug' in stderr_file.read():
+            if "Compiler Bug" in stderr_file.read():
                 return FAILURE
 
     expected_error = isError(options.p4filename)
@@ -333,7 +365,7 @@ if __name__ == "__main__":
     options.observationLog = args.obs_log
     residual_argv = []
     for arg in argv:
-        if arg in ('-D', '-I', '-T'):
+        if arg in ("-D", "-I", "-T"):
             options.compilerOptions.append(arg)
         else:
             residual_argv.append(arg)
@@ -345,13 +377,12 @@ if __name__ == "__main__":
 
     options.hasBMv2 = "HAVE_SIMPLE_SWITCH" in config.vars
     if not options.hasBMv2:
-        reportError("config.h indicates that BMv2 is not installed"
-                    "will skip running BMv2 tests")
+        reportError("config.h indicates that BMv2 is not installedwill skip running BMv2 tests")
     if options.p4filename.startswith(options.compilerBuildDir):
-        options.testName = options.p4filename[len(options.compilerBuildDir):]
-        if options.testName.startswith('/'):
+        options.testName = options.p4filename[len(options.compilerBuildDir) :]
+        if options.testName.startswith("/"):
             options.testName = options.testName[1:]
-        if options.testName.endswith('.p4'):
+        if options.testName.endswith(".p4"):
             options.testName = options.testName[:-3]
         options.testName = "bmv2/" + options.testName
     if not options.observationLog:

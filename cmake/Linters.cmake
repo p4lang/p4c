@@ -83,7 +83,7 @@ else()
 endif()
 
 
-#################### YAPF
+#################### BLACK
 
 file(
   GLOB_RECURSE P4C_PYTHON_LINT_LIST  FOLLOW_SYMLINKS
@@ -94,33 +94,33 @@ list(FILTER P4C_PYTHON_LINT_LIST EXCLUDE REGEX "backends/p4tools/submodules")
 list(FILTER P4C_PYTHON_LINT_LIST EXCLUDE REGEX "control-plane/p4runtime")
 list(FILTER P4C_PYTHON_LINT_LIST EXCLUDE REGEX "tools/cpplint.py")
 
-add_yapf_files(${P4C_SOURCE_DIR} "${P4C_PYTHON_LINT_LIST}")
+add_black_files(${P4C_SOURCE_DIR} "${P4C_PYTHON_LINT_LIST}")
 
-find_program(YAPF_CMD yapf)
+find_program(BLACK_CMD black)
 
-if(NOT ${YAPF_CMD})
-  # Retrieve the global yapf property.
-  get_property(YAPF_FILES GLOBAL PROPERTY yapf-files)
-  if(DEFINED YAPF_FILES)
+if(NOT ${BLACK_CMD})
+  # Retrieve the global black property.
+  get_property(BLACK_FILES GLOBAL PROPERTY black-files)
+  if(DEFINED BLACK_FILES)
     # Write the list to a file.
     # We need to do this as too many files will reach the shell argument limit.
-    set(YAPF_TXT_FILE ${P4C_BINARY_DIR}/YAPF_files.txt)
-    list(SORT YAPF_FILES)
-    file(WRITE ${YAPF_TXT_FILE} "${YAPF_FILES}")
-    set(YAPF_CMD yapf)
+    set(BLACK_TXT_FILE ${P4C_BINARY_DIR}/BLACK_files.txt)
+    list(SORT BLACK_FILES)
+    file(WRITE ${BLACK_TXT_FILE} "${BLACK_FILES}")
+    set(BLACK_CMD black)
     add_custom_target(
-      yapf
-      COMMAND xargs -a ${YAPF_TXT_FILE} -r -d '\;' ${YAPF_CMD} -p -r -d --
+      black
+      COMMAND xargs -a ${BLACK_TXT_FILE} -r -d '\;' ${BLACK_CMD} --check --diff --
       WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-      COMMENT "Checking files for correct yapf formatting."
+      COMMENT "Checking files for correct black formatting."
     )
     add_custom_target(
-      yapf-fix-errors
-      COMMAND xargs -a ${YAPF_TXT_FILE} -r -d '\;' ${YAPF_CMD} -p -r -i --
+      black-fix-errors
+      COMMAND xargs -a ${BLACK_TXT_FILE} -r -d '\;' ${BLACK_CMD} --
       WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-      COMMENT "Formatting files using yapf."
+      COMMENT "Formatting files using black."
     )
   endif()
 else()
-  message(WARNING "yapf executable not found. Disabling yapf checks. yapf can be installed with \"pip3 install --user --upgrade yapf\"")
+  message(WARNING "black executable not found. Disabling black checks. black can be installed with \"pip3 install --user --upgrade black\"")
 endif()

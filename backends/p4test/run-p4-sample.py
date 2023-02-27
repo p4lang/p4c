@@ -33,7 +33,6 @@ FAILURE = 1
 
 
 class Options(object):
-
     def __init__(self):
         self.binary = ""  # this program's name
         self.cleanupTmp = True  # if false do not remote tmp folder created
@@ -59,7 +58,7 @@ def usage(options):
     print("          -b: do not remove temporary results for failing tests")
     print("          -v: verbose operation")
     print("          -f: replace reference outputs with newly generated ones")
-    print("          -a \"args\": pass args to the compiler")
+    print('          -a "args": pass args to the compiler')
     print("          --p4runtime: generate P4Info message in text format")
 
 
@@ -99,10 +98,15 @@ def run_timeout(options, args, timeout, stderr):
             # sed. BSD sed's character class support is not great; for some
             # reason, even some character classes that the man page claims are
             # available don't seem to actually work.
-            local.filter = Popen([
-                'sed', '-E',
-                r's|^[-[:alnum:][:punct:][:space:]_/]*/([-[:alnum:][:punct:][:space:]_]+\.[ph]4?[:(][[:digit:]]+)|\1|'
-            ], stdin=PIPE, stdout=outfile)
+            local.filter = Popen(
+                [
+                    "sed",
+                    "-E",
+                    r"s|^[-[:alnum:][:punct:][:space:]_/]*/([-[:alnum:][:punct:][:space:]_]+\.[ph]4?[:(][[:digit:]]+)|\1|",
+                ],
+                stdin=PIPE,
+                stdout=outfile,
+            )
             procstderr = local.filter.stdin
         local.process = Popen(args, stderr=procstderr)
         local.process.wait()
@@ -144,7 +148,7 @@ def compare_files(options, produced, expected, ignore_case):
     args = "-B -u -w"
     if ignore_case:
         args = args + " -i"
-    cmd = ("diff " + args + " " + expected + " " + produced + " >&2")
+    cmd = "diff " + args + " " + expected + " " + produced + " >&2"
     if options.verbose:
         print(cmd)
     exitcode = subprocess.call(cmd, shell=True)
@@ -157,8 +161,15 @@ def compare_files(options, produced, expected, ignore_case):
 def recompile_file(options, produced, mustBeIdentical):
     # Compile the generated file a second time
     secondFile = produced + "-x"
-    args = ["./p4test", "-I.", "--pp", secondFile, "--std", "p4-16", produced] + \
-        options.compilerOptions
+    args = [
+        "./p4test",
+        "-I.",
+        "--pp",
+        secondFile,
+        "--std",
+        "p4-16",
+        produced,
+    ] + options.compilerOptions
     if options.runDebugger:
         if options.runDebugger_skip > 0:
             options.runDebugger_skip = options.runDebugger_skip - 1
@@ -189,8 +200,9 @@ def check_generated_files(options, tmpdir, expecteddir):
         elif not os.path.isfile(expected):
             # The file is missing and we do not replace. This is an error.
             print(
-                "Missing reference for file %s. Please rerun the test with the -f option turned on or rerun all tests using \"P4TEST_REPLACE=True make check\"."
-                % expected)
+                'Missing reference for file %s. Please rerun the test with the -f option turned on'
+                ' or rerun all tests using "P4TEST_REPLACE=True make check".' % expected
+            )
             return FAILURE
         result = compare_files(options, produced, expected, file[-7:] == "-stderr")
         if result != SUCCESS and (file[-7:] != "-stderr" or not ignoreStderr(options)):
@@ -230,7 +242,11 @@ def process_file(options, argv):
         os.makedirs(expected_dirname)
 
     # We rely on the fact that these keys are in alphabetical order.
-    rename = {"FrontEndDump": "first", "FrontEndLast": "frontend", "MidEndLast": "midend"}
+    rename = {
+        "FrontEndDump": "first",
+        "FrontEndLast": "frontend",
+        "MidEndLast": "midend",
+    }
 
     if options.verbose:
         print("Writing temporary files into ", tmpdir)
@@ -256,11 +272,11 @@ def process_file(options, argv):
     # P4Info generation requires knowledge of the architecture, so we must
     # invoke the compiler with a valid --arch.
     def getArch(path):
-        v1Pattern = re.compile('include.*v1model\.p4')
-        pnaPattern = re.compile('include.*pna\.p4')
-        psaPattern = re.compile('include.*psa\.p4')
-        ubpfPattern = re.compile('include.*ubpf_model\.p4')
-        with open(path, 'r', encoding='utf-8') as f:
+        v1Pattern = re.compile("include.*v1model\.p4")
+        pnaPattern = re.compile("include.*pna\.p4")
+        psaPattern = re.compile("include.*psa\.p4")
+        ubpfPattern = re.compile("include.*ubpf_model\.p4")
+        with open(path, "r", encoding="utf-8") as f:
             for line in f:
                 if v1Pattern.search(line):
                     return "v1model"
@@ -274,8 +290,16 @@ def process_file(options, argv):
 
     if not os.path.isfile(options.p4filename):
         raise Exception("No such file " + options.p4filename)
-    args = ["./p4test", "--pp", ppfile, "--dump", tmpdir, "--top4", referenceOutputs, "--testJson"
-           ] + options.compilerOptions
+    args = [
+        "./p4test",
+        "--pp",
+        ppfile,
+        "--dump",
+        tmpdir,
+        "--top4",
+        referenceOutputs,
+        "--testJson",
+    ] + options.compilerOptions
     arch = getArch(options.p4filename)
     if arch is not None and arch != "pna":
         # Arch 'pna' is currently not supported by P4Runtime serializer
@@ -299,7 +323,7 @@ def process_file(options, argv):
         print("Error compiling")
         print(open(stderr).read())
         # If the compiler crashed fail the test
-        if 'Compiler Bug' in open(stderr).read():
+        if "Compiler Bug" in open(stderr).read():
             return FAILURE
 
     expected_error = isError(options.p4filename)
@@ -324,13 +348,16 @@ def process_file(options, argv):
                 os.rename(file, newName)
                 lastFile = newName
 
-    if (result == SUCCESS):
+    if result == SUCCESS:
         result = check_generated_files(options, tmpdir, expected_dirname)
     if (result == SUCCESS) and (not expected_error):
         result = recompile_file(options, ppfile, False)
-    if (result == SUCCESS) and (not expected_error) and (lastFile is not None) and (arch not in [
-            "psa", "pna"
-    ]):
+    if (
+        (result == SUCCESS)
+        and (not expected_error)
+        and (lastFile is not None)
+        and (arch not in ["psa", "pna"])
+    ):
         # Unfortunately compilation and pretty-printing of lastFile is
         # not idempotent: For example a constant such as 8s128 is
         # converted by the compiler to -8s128.
@@ -365,7 +392,7 @@ def main(argv):
         usage(options)
         sys.exit(FAILURE)
 
-    while argv[0][0] == '-':
+    while argv[0][0] == "-":
         if argv[0] == "-b":
             options.cleanupTmp = False
         elif argv[0] == "-v":
@@ -382,7 +409,7 @@ def main(argv):
             else:
                 options.compilerOptions += argv[1].split()
                 argv = argv[1:]
-        elif argv[0][1] == 'D' or argv[0][1] == 'I' or argv[0][1] == 'T':
+        elif argv[0][1] == "D" or argv[0][1] == "I" or argv[0][1] == "T":
             options.compilerOptions.append(argv[0])
         elif argv[0][0:4] == "-gdb":
             options.runDebugger = "gdb --args"
@@ -396,16 +423,16 @@ def main(argv):
             sys.exit(FAILURE)
         argv = argv[1:]
 
-    if 'P4TEST_REPLACE' in os.environ:
+    if "P4TEST_REPLACE" in os.environ:
         options.replace = True
 
     options.p4filename = argv[-1]
     options.testName = None
     if options.p4filename.startswith(options.compilerSrcdir):
-        options.testName = options.p4filename[len(options.compilerSrcdir):]
-        if options.testName.startswith('/'):
+        options.testName = options.p4filename[len(options.compilerSrcdir) :]
+        if options.testName.startswith("/"):
             options.testName = options.testName[1:]
-        if options.testName.endswith('.p4'):
+        if options.testName.endswith(".p4"):
             options.testName = options.testName[:-3]
 
     result = process_file(options, argv)
