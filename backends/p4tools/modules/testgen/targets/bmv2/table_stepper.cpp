@@ -399,13 +399,15 @@ void BMv2_V1ModelTableStepper::evalTargetTable(
         auto testBackend = TestgenOptions::get().testBackend;
         if (testBackend == "STF" && !properties.defaultIsImmutable) {
             setTableDefaultEntries(tableActionList);
-        } else {
-            ::warning(
-                "Overriding default actions not supported for test back end %1%. Choosing default "
-                "action",
-                testBackend);
-            addDefaultAction(boost::none);
+            return;
         }
+        if (!properties.defaultIsImmutable) {
+            ::warning(
+                "Table %1%: Overriding default actions not supported for test back end %2%. "
+                "Choosing default action",
+                properties.tableName, testBackend);
+        }
+        addDefaultAction(boost::none);
         return;
     }
 

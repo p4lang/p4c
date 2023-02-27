@@ -30,15 +30,15 @@ class Bmv2RegisterCondition : public TestObject {
 
     /// @returns the evaluated register index. This means it must be a constant.
     /// The function will throw a bug if this is not the case.
-    const IR::Constant *getEvaluatedIndex() const;
+    [[nodiscard]] const IR::Constant *getEvaluatedIndex() const;
 
     /// @returns the evaluated condition of the register. This means it must be a constant.
     /// The function will throw a bug if this is not the case.
-    const IR::Constant *getEvaluatedValue() const;
+    [[nodiscard]] const IR::Constant *getEvaluatedValue() const;
 
-    const Bmv2RegisterCondition *evaluate(const Model &model) const override;
+    [[nodiscard]] const Bmv2RegisterCondition *evaluate(const Model &model) const override;
 
-    cstring getObjectName() const override;
+    [[nodiscard]] cstring getObjectName() const override;
 };
 
 /// This object tracks the list of writes that have been performed to a particular register. The
@@ -60,13 +60,13 @@ class Bmv2RegisterValue : public TestObject {
  public:
     explicit Bmv2RegisterValue(const IR::Expression *initialValue);
 
-    cstring getObjectName() const override;
+    [[nodiscard]] cstring getObjectName() const override;
 
     /// Each element is an API name paired with a match rule.
     void addRegisterCondition(Bmv2RegisterCondition cond);
 
     /// @returns the value with which this register has been initialized.
-    const IR::Expression *getInitialValue() const;
+    [[nodiscard]] const IR::Expression *getInitialValue() const;
 
     /// @returns the current value of this register after writes have been performed according to a
     /// provided index.
@@ -74,9 +74,9 @@ class Bmv2RegisterValue : public TestObject {
 
     /// @returns the evaluated register value. This means it must be a constant.
     /// The function will throw a bug if this is not the case.
-    const IR::Constant *getEvaluatedValue() const;
+    [[nodiscard]] const IR::Constant *getEvaluatedValue() const;
 
-    const Bmv2RegisterValue *evaluate(const Model &model) const override;
+    [[nodiscard]] const Bmv2RegisterValue *evaluate(const Model &model) const override;
 };
 
 /* =========================================================================================
@@ -93,13 +93,13 @@ class Bmv2_V1ModelActionProfile : public TestObject {
  public:
     explicit Bmv2_V1ModelActionProfile(const IR::IDeclaration *profileDecl);
 
-    cstring getObjectName() const override;
+    [[nodiscard]] cstring getObjectName() const override;
 
     /// @returns the action map of this profile.
-    const std::vector<std::pair<cstring, std::vector<ActionArg>>> *getActions() const;
+    [[nodiscard]] const std::vector<std::pair<cstring, std::vector<ActionArg>>> *getActions() const;
 
     /// @returns the associated action profile declaration.
-    const IR::IDeclaration *getProfileDecl() const;
+    [[nodiscard]] const IR::IDeclaration *getProfileDecl() const;
 
     /// @returns the current amount of actions associated with this profile.
     size_t getActionMapSize() const;
@@ -107,7 +107,7 @@ class Bmv2_V1ModelActionProfile : public TestObject {
     /// Add an action (its name) and the arguments to the action map of this profile.
     void addToActionMap(cstring actionName, std::vector<ActionArg> actionArgs);
 
-    const Bmv2_V1ModelActionProfile *evaluate(const Model &model) const override;
+    [[nodiscard]] const Bmv2_V1ModelActionProfile *evaluate(const Model &model) const override;
 };
 
 /* =========================================================================================
@@ -125,15 +125,15 @@ class Bmv2_V1ModelActionSelector : public TestObject {
     explicit Bmv2_V1ModelActionSelector(const IR::IDeclaration *selectorDecl,
                                         const Bmv2_V1ModelActionProfile *actionProfile);
 
-    cstring getObjectName() const override;
+    [[nodiscard]] cstring getObjectName() const override;
 
     /// @returns the associated action selector declaration.
-    const IR::IDeclaration *getSelectorDecl() const;
+    [[nodiscard]] const IR::IDeclaration *getSelectorDecl() const;
 
     /// @returns the associated action profile.
-    const Bmv2_V1ModelActionProfile *getActionProfile() const;
+    [[nodiscard]] const Bmv2_V1ModelActionProfile *getActionProfile() const;
 
-    const Bmv2_V1ModelActionSelector *evaluate(const Model &model) const override;
+    [[nodiscard]] const Bmv2_V1ModelActionSelector *evaluate(const Model &model) const override;
 };
 
 /* =========================================================================================
@@ -155,26 +155,48 @@ class Bmv2_CloneInfo : public TestObject {
     explicit Bmv2_CloneInfo(const IR::Expression *sessionId, const IR::Expression *clonePort,
                             bool isClone);
 
-    cstring getObjectName() const override;
+    [[nodiscard]] cstring getObjectName() const override;
 
-    const Bmv2_CloneInfo *evaluate(const Model &model) const override;
+    [[nodiscard]] const Bmv2_CloneInfo *evaluate(const Model &model) const override;
 
     /// @returns the associated session ID with this cloned packet.
-    const IR::Expression *getSessionId() const;
+    [[nodiscard]] const IR::Expression *getSessionId() const;
 
     /// @returns the clone port expression.
-    const IR::Expression *getClonePort() const;
+    [[nodiscard]] const IR::Expression *getClonePort() const;
 
     /// @returns information whether we are dealing with the packet clone or the real output packet.
-    bool isClonedPacket() const;
+    [[nodiscard]] bool isClonedPacket() const;
 
     /// @returns the evaluated clone port. This means it must be a constant.
     /// The function will throw a bug if this is not the case.
-    const IR::Constant *getEvaluatedClonePort() const;
+    [[nodiscard]] const IR::Constant *getEvaluatedClonePort() const;
 
     /// @returns the evaluated session id. This means it must be a constant.
     /// The function will throw a bug if this is not the case.
-    const IR::Constant *getEvaluatedSessionId() const;
+    [[nodiscard]] const IR::Constant *getEvaluatedSessionId() const;
+};
+
+/* =========================================================================================
+ *  MetadataCollection
+ * ========================================================================================= */
+class MetadataCollection : public TestObject {
+ private:
+    std::map<cstring, const IR::Literal *> metadataFields;
+
+ public:
+    MetadataCollection();
+
+    [[nodiscard]] cstring getObjectName() const override;
+
+    [[nodiscard]] const MetadataCollection *evaluate(const Model & /*model*/) const override;
+
+    /// @returns the clone port expression.
+    [[nodiscard]] const std::map<cstring, const IR::Literal *> &getMetadataFields() const;
+
+    void addMetaDataField(cstring name, const IR::Literal *metadataField);
+
+    const IR::Literal *getMetadataField(cstring name);
 };
 
 /* =========================================================================================

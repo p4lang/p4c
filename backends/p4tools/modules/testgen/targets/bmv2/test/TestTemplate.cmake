@@ -1,5 +1,7 @@
 # This file defines how a test should be written for a particular target. This is used by testutils
 
+set(P4TOOLS_BINARY_DIR ${CMAKE_SOURCE_DIR}/build)
+set(P4TESTGEN_DIR ${CMAKE_SOURCE_DIR}/build/testgen)
 
 # Write the script to check BMv2 STF tests to the designated test file.
 # Arguments:
