@@ -23,7 +23,6 @@ struct M {
 metadata instanceof M
 
 regarray direction size 0x100 initval 0
-
 apply {
 	rx m.pna_main_input_metadata_input_port
 	validate h.u0_h1

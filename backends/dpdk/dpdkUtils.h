@@ -29,6 +29,9 @@ bool isMetadataField(const IR::Expression *e);
 bool isEightBitAligned(const IR::Expression *e);
 bool isDirection(const IR::Member *m);
 bool isHeadersStruct(const IR::Type_Struct *st);
+bool isLargeFieldOperand(const IR::Expression *e);
+bool isHeader(const IR::Expression *e);
+
 const IR::Type_Bits *getEightBitAlignedType(const IR::Type_Bits *tb);
 
 // Check for reserved names for DPDK target

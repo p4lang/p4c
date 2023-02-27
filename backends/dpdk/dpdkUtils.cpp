@@ -75,6 +75,24 @@ bool isEightBitAligned(const IR::Expression *e) {
     return true;
 }
 
+bool isLargeFieldOperand(const IR::Expression *e) {
+    auto expr = e;
+    if (auto base = e->to<IR::Cast>()) expr = base->expr;
+    if (auto type = expr->type->to<IR::Type_Bits>()) {
+        auto size = type->width_bits();
+        if (size > 64) return true;
+    }
+    return false;
+}
+
+bool isHeader(const IR::Expression *expr) {
+    auto e = expr;
+    if (auto base = expr->to<IR::Cast>()) e = base->expr;
+    if (!e->is<IR::Member>()) return false;
+    if (e->to<IR::Member>()->expr->type->is<IR::Type_Header>()) return true;
+    return false;
+}
+
 const IR::Type_Bits *getEightBitAlignedType(const IR::Type_Bits *tb) {
     auto width = (tb->width_bits() + 7) & (~7);
     return IR::Type_Bits::get(width);

@@ -1142,6 +1142,29 @@ class ElimHeaderCopy : public Transform {
     const IR::Node *postorder(IR::Member *m) override;
 };
 
+/// This pass checks whether an assignment statement has large operands (>64-bit).
+// If one operand is >64-bit and other is <= 64-bit, the smaller operand should be a header field
+// to maintain the endianness for copy. This pass detects if these conditions are satisfied or not.
+class HaveNonHeaderLargeOperandAssignment : public Inspector {
+    bool &is_all_arg_header_fields;
+
+ public:
+    explicit HaveNonHeaderLargeOperandAssignment(bool &is_all_arg_header_fields)
+        : is_all_arg_header_fields(is_all_arg_header_fields) {}
+    bool preorder(const IR::AssignmentStatement *assn) override {
+        if (!is_all_arg_header_fields) return false;
+        if ((isLargeFieldOperand(assn->left) && !isLargeFieldOperand(assn->right) &&
+             !isHeader(assn->right)) ||
+            (isLargeFieldOperand(assn->left) && assn->right->is<IR::Constant>()) ||
+            (!isLargeFieldOperand(assn->left) && isLargeFieldOperand(assn->right) &&
+             !isHeader(assn->left))) {
+            is_all_arg_header_fields &= false;
+            return false;
+        }
+        return false;
+    }
+};
+
 /// This pass checks whether program uses InternetChecksum and
 /// all arguments to the method add or sub have non header fields expression
 class HaveNonHeaderChecksumArgs : public Inspector {
@@ -1256,6 +1279,7 @@ class MoveNonHeaderFieldsToPseudoHeader : public Transform {
         return p;
     }
     const IR::Node *postorder(IR::MethodCallStatement *statement) override;
+    const IR::Node *postorder(IR::AssignmentStatement *statement) override;
 };
 
 /// @brief This pass finally adds all the collected fields to pseudo header
@@ -1285,6 +1309,7 @@ struct DpdkAddPseudoHeader : public PassManager {
                         bool &is_all_args_header_fields)
         : refMap(refMap), typeMap(typeMap), is_all_args_header(is_all_args_header_fields) {
         passes.push_back(new HaveNonHeaderChecksumArgs(typeMap, is_all_args_header));
+        passes.push_back(new HaveNonHeaderLargeOperandAssignment(is_all_args_header));
         passes.push_back(new DpdkAddPseudoHeaderDecl(refMap, typeMap, is_all_args_header));
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::TypeChecking(refMap, typeMap));
