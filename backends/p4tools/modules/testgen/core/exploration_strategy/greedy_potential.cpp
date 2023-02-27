@@ -89,8 +89,7 @@ ExecutionState *GreedyPotential::chooseBranch(bool guaranteeViability, bool sear
         if (unexploredBranches.empty()) {
             return nullptr;
         }
-        auto branch =
-            unexploredBranches.pop(&threshold, getVisitedStatements(), search, fallBackToRandom);
+        auto branch = unexploredBranches.pop(getVisitedStatements(), search, fallBackToRandom);
 
         // Do not bother invoking the solver for a trivial case.
         // In either case (true or false), we do not need to add the assertion and check.
@@ -125,11 +124,10 @@ void GreedyPotential::UnexploredBranches::push(GreedyPotential::StepResult branc
     unexploredBranches.emplace_back(branches);
 }
 
-int findBranch(std::vector<ExplorationStrategy::StepResult> &unexploredBranches,
-               uint64_t *threshold, const P4::Coverage::CoverageSet &coveredStatements,
-               bool search) {
+int GreedyPotential::UnexploredBranches::findBranch(
+    const P4::Coverage::CoverageSet &coveredStatements, bool search) {
     if (search) {
-        if (*threshold % 50 == 0) {
+        if (threshold % 50 == 0) {
             for (size_t jdx = 0; jdx < unexploredBranches.size(); ++jdx) {
                 auto *branches = unexploredBranches.at(jdx);
                 for (size_t idx = 0; idx < branches->size(); ++idx) {
@@ -139,7 +137,7 @@ int findBranch(std::vector<ExplorationStrategy::StepResult> &unexploredBranches,
                         // We also need to ensure the statement is in coveredStatements.
                         if (stmt->getSourceInfo().isValid() &&
                             coveredStatements.count(stmt) == 0U) {
-                            *threshold = 0;
+                            threshold = 0;
                             if (jdx != unexploredBranches.size() - 1) {
                                 std::swap(unexploredBranches[jdx], unexploredBranches.back());
                             }
@@ -151,7 +149,7 @@ int findBranch(std::vector<ExplorationStrategy::StepResult> &unexploredBranches,
                         // We also need to ensure the statement is in coveredStatements.
                         if (stmt->getSourceInfo().isValid() &&
                             coveredStatements.count(stmt) == 0U) {
-                            *threshold = 0;
+                            threshold = 0;
                             if (jdx != unexploredBranches.size() - 1) {
                                 std::swap(unexploredBranches[jdx], unexploredBranches.back());
                             }
@@ -165,7 +163,7 @@ int findBranch(std::vector<ExplorationStrategy::StepResult> &unexploredBranches,
         if (unexploredBranches.size() > 1) {
             std::swap(unexploredBranches[idx], unexploredBranches.back());
         }
-        (*threshold)++;
+        threshold++;
     } else {
         // TODO: This strategy can get stuck in a greedy parser loop. We should actually forbid
         // parser loops or develop a safety hatch for that case.
@@ -174,13 +172,13 @@ int findBranch(std::vector<ExplorationStrategy::StepResult> &unexploredBranches,
             auto branch = branches->at(idx);
             for (const auto &stmt : branch.nextState->getVisited()) {
                 if (stmt->getSourceInfo().isValid() && coveredStatements.count(stmt) == 0U) {
-                    *threshold = 0;
+                    threshold = 0;
                     return idx;
                 }
             }
             for (const auto &stmt : branch.potentialStatements) {
                 if (stmt->getSourceInfo().isValid() && coveredStatements.count(stmt) == 0U) {
-                    *threshold = 0;
+                    threshold = 0;
                     return idx;
                 }
             }
@@ -191,20 +189,17 @@ int findBranch(std::vector<ExplorationStrategy::StepResult> &unexploredBranches,
 }
 
 ExplorationStrategy::Branch GreedyPotential::UnexploredBranches::pop(
-    uint64_t *threshold, const P4::Coverage::CoverageSet &allStatements, bool search,
-    bool fallBackToRandom) {
+    const P4::Coverage::CoverageSet &allStatements, bool search, bool fallBackToRandom) {
     std::vector<Branch> *candidateBranches = nullptr;
 
     int branchIdx = 0;
     if (!fallBackToRandom) {
-        branchIdx = findBranch(unexploredBranches, threshold, allStatements, search);
+        branchIdx = findBranch(allStatements, search);
     } else {
         branchIdx = Utils::getRandInt(unexploredBranches.back()->size() - 1);
     }
     candidateBranches = unexploredBranches.back();
     auto branch = candidateBranches->at(branchIdx);
-    // Note: This could be improved, because we should remove only succeeded selection.
-    // Unsatisfiable branches could be covered in other tests after backtracking.
     candidateBranches->erase(candidateBranches->begin() + branchIdx);
 
     if (candidateBranches->empty()) {

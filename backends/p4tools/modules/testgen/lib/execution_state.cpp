@@ -128,6 +128,7 @@ const IR::Expression *ExecutionState::get(const StateVariable &var) const {
 }
 
 void ExecutionState::markVisited(const IR::Statement *stmt) {
+    // Only track statements, which have a valid source position in the P4 program.
     if (stmt->getSourceInfo().isValid()) {
         visitedStatements.emplace(stmt);
     }

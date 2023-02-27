@@ -34,13 +34,12 @@
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/abstract_stepper.h"
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
+#include "backends/p4tools/modules/testgen/lib/collect_latent_statements.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 CmdStepper::CmdStepper(ExecutionState &state, AbstractSolver &solver,
                        const ProgramInfo &programInfo)
@@ -308,7 +307,7 @@ bool CmdStepper::preorder(const IR::IfStatement *ifStatement) {
         cmds.emplace_back(ifStatement->ifTrue);
         nextState->replaceTopBody(&cmds);
         P4::Coverage::CoverageSet coveredStmts;
-        ifStatement->ifTrue->apply(CollectStatements2(coveredStmts, state));
+        ifStatement->ifTrue->apply(CollectLatentStatements(coveredStmts, state));
 
         result->emplace_back(ifStatement->condition, state, nextState, coveredStmts);
     }
@@ -323,7 +322,7 @@ bool CmdStepper::preorder(const IR::IfStatement *ifStatement) {
         nextState->replaceTopBody((ifStatement->ifFalse == nullptr) ? new IR::BlockStatement()
                                                                     : ifStatement->ifFalse);
         P4::Coverage::CoverageSet coveredStmts;
-        ifStatement->ifFalse->apply(CollectStatements2(coveredStmts, state));
+        ifStatement->ifFalse->apply(CollectLatentStatements(coveredStmts, state));
         result->emplace_back(negation, state, nextState, coveredStmts);
     }
 
@@ -588,7 +587,7 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
 
         bool hasMatched = false;
         for (const auto *switchCase : switchStatement->cases) {
-            switchCase->statement->apply(CollectStatements2(coveredStmts, state));
+            switchCase->statement->apply(CollectLatentStatements(coveredStmts, state));
             // We have either matched already, or still need to match.
             hasMatched = hasMatched || switchStatement->expression->equiv(*switchCase->label);
             // Nothing to do with this statement. Fall through to the next case.
@@ -617,6 +616,4 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
     return false;
 }
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen

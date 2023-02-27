@@ -27,6 +27,7 @@
 #include "backends/p4tools/modules/testgen/core/constants.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/expr_stepper.h"
+#include "backends/p4tools/modules/testgen/lib/collect_latent_statements.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
@@ -271,7 +272,7 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
         nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
         P4::Coverage::CoverageSet coveredStmts;
         nextState->getActionDecl(tableAction->method)
-            ->apply(CollectStatements2(coveredStmts, stepper->state));
+            ->apply(CollectLatentStatements(coveredStmts, stepper->state));
 
         // Add some tracing information.
         std::stringstream tableStream;
@@ -368,7 +369,7 @@ void TableStepper::setTableDefaultEntries(
             new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
         P4::Coverage::CoverageSet coveredStmts;
         nextState->getActionDecl(tableAction->method)
-            ->apply(CollectStatements2(coveredStmts, stepper->state));
+            ->apply(CollectLatentStatements(coveredStmts, stepper->state));
         nextState->set(getTableHitVar(table), IR::getBoolLiteral(false));
         nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
         std::stringstream tableStream;
@@ -443,7 +444,7 @@ void TableStepper::evalTableControlEntries(
             new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
         P4::Coverage::CoverageSet coveredStmts;
         nextState->getActionDecl(tableAction->method)
-            ->apply(CollectStatements2(coveredStmts, stepper->state));
+            ->apply(CollectLatentStatements(coveredStmts, stepper->state));
 
         nextState->set(getTableHitVar(table), IR::getBoolLiteral(true));
         nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
@@ -636,7 +637,7 @@ void TableStepper::addDefaultAction(boost::optional<const IR::Expression *> tabl
     replacements.emplace_back(new IR::MethodCallStatement(Util::SourceInfo(), tableAction));
     P4::Coverage::CoverageSet coveredStmts;
     nextState->getActionDecl(tableAction->method)
-        ->apply(CollectStatements2(coveredStmts, stepper->state));
+        ->apply(CollectLatentStatements(coveredStmts, stepper->state));
     nextState->set(getTableHitVar(table), IR::getBoolLiteral(false));
     nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
     nextState->replaceTopBody(&replacements);

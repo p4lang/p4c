@@ -37,9 +37,7 @@
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 const Model *TestBackEnd::computeConcolicVariables(const ExecutionState *executionState,
                                                    const Model *completedModel, Z3Solver *solver,
@@ -105,9 +103,6 @@ bool TestBackEnd::run(const FinalState &state) {
         const auto *completedModel = state.getCompletedModel();
         const auto *outputPortExpr = executionState->get(programInfo.getTargetOutputPortVar());
         const auto &allStatements = programInfo.getAllStatements();
-        // Update the visited statements.
-        symbex.updateVisitedStatements(state.getVisited());
-        const P4::Coverage::CoverageSet &visitedStatements = symbex.getVisitedStatements();
 
         auto *solver = state.getSolver()->to<Z3Solver>();
         CHECK_NULL(solver);
@@ -136,7 +131,6 @@ bool TestBackEnd::run(const FinalState &state) {
                                                              outputPacketExpr, outputPortExpr);
         if (concolicModel == nullptr) {
             testCount++;
-            P4::Coverage::coverageReportFinal(allStatements, visitedStatements);
             printPerformanceReport();
             return needsToTerminate(testCount);
         }
@@ -155,20 +149,24 @@ bool TestBackEnd::run(const FinalState &state) {
         abort = printTestInfo(executionState, testInfo, outputPortExpr);
         if (abort) {
             testCount++;
-            P4::Coverage::coverageReportFinal(allStatements, visitedStatements);
             printPerformanceReport();
             return needsToTerminate(testCount);
         }
         const auto *testSpec = createTestSpec(executionState, completedModel, testInfo);
-        float coverage = static_cast<float>(visitedStatements.size()) / allStatements.size();
 
+        // Commit an update to the visited statements.
+        // Only do this once we are sure we are generating a test.
+        symbex.updateVisitedStatements(state.getVisited());
+        const P4::Coverage::CoverageSet &visitedStatements = symbex.getVisitedStatements();
+        auto coverage =
+            static_cast<float>(visitedStatements.size()) / static_cast<float>(allStatements.size());
         printFeature("test_info", 4,
                      "============ Test %1%: Statements covered: %2% (%3%/%4%) ============",
                      testCount, coverage, visitedStatements.size(), allStatements.size());
         P4::Coverage::logCoverage(allStatements, visitedStatements, executionState->getVisited());
 
         // Output the test.
-        Util::withTimer("backend", [&] {
+        Util::withTimer("backend", [this, &testSpec, &selectedBranches, &coverage] {
             testWriter->outputTest(testSpec, selectedBranches, testCount, coverage);
         });
 
@@ -287,6 +285,4 @@ void TestBackEnd::printPerformanceReport() const { testWriter->printPerformanceR
 
 int64_t TestBackEnd::getTestCount() const { return testCount; }
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen

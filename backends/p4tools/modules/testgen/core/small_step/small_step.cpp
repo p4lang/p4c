@@ -32,9 +32,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 SmallStepEvaluator::Branch::Branch(gsl::not_null<ExecutionState *> nextState)
     : constraint(IR::getBoolLiteral(true)), nextState(std::move(nextState)) {}
@@ -252,68 +250,4 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState &state) {
     return new std::vector<Branch>({Branch(&state)});
 }
 
-bool CollectStatements2::preorder(const IR::ParserState *parserState) {
-    // Only bother looking up cases that are not accept or reject.
-    if (parserState->name == IR::ParserState::accept ||
-        parserState->name == IR::ParserState::reject) {
-        return true;
-    }
-
-    // Already have seen this state. We might be in a loop.
-    if (seenParserIds.count(parserState->clone_id) != 0) {
-        return true;
-    }
-
-    seenParserIds.emplace(parserState->clone_id);
-    CHECK_NULL(parserState->selectExpression);
-
-    parserState->components.apply(CollectStatements2(statements, state, seenParserIds));
-
-    if (const auto *selectExpr = parserState->selectExpression->to<IR::SelectExpression>()) {
-        for (const auto *selectCase : selectExpr->selectCases) {
-            const auto *decl = state.findDecl(selectCase->state)->getNode();
-            decl->apply(CollectStatements2(statements, state, seenParserIds));
-        }
-    } else if (const auto *pathExpression =
-                   parserState->selectExpression->to<IR::PathExpression>()) {
-        // Only bother looking up cases that are not accept or reject.
-        // If we are referencing a parser state, step into the state.
-        const auto *decl = state.findDecl(pathExpression)->getNode();
-        decl->apply(CollectStatements2(statements, state, seenParserIds));
-    }
-    return true;
-}
-
-bool CollectStatements2::preorder(const IR::AssignmentStatement *stmt) {
-    if (stmt->getSourceInfo().isValid()) {
-        statements.insert(stmt);
-    }
-    return true;
-}
-
-bool CollectStatements2::preorder(const IR::MethodCallStatement *stmt) {
-    if (stmt->getSourceInfo().isValid()) {
-        statements.insert(stmt);
-    }
-    return true;
-}
-
-bool CollectStatements2::preorder(const IR::ExitStatement *stmt) {
-    if (stmt->getSourceInfo().isValid()) {
-        statements.insert(stmt);
-    }
-    return true;
-}
-
-CollectStatements2::CollectStatements2(P4::Coverage::CoverageSet &output,
-                                       const ExecutionState &state)
-    : statements(output), state(state) {}
-
-CollectStatements2::CollectStatements2(P4::Coverage::CoverageSet &output,
-                                       const ExecutionState &state,
-                                       const std::set<int> &seenParserIds)
-    : statements(output), state(state), seenParserIds(seenParserIds) {}
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen

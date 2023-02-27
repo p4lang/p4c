@@ -22,6 +22,7 @@
 #include "lib/safe_vector.h"
 
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
+#include "backends/p4tools/modules/testgen/lib/collect_latent_statements.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
@@ -157,7 +158,7 @@ void BMv2_V1ModelTableStepper::evalTableActionProfile(
             new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
         P4::Coverage::CoverageSet coveredStmts;
         nextState->getActionDecl(tableAction->method)
-            ->apply(CollectStatements2(coveredStmts, *state));
+            ->apply(CollectLatentStatements(coveredStmts, *state));
 
         nextState->set(getTableHitVar(table), IR::getBoolLiteral(true));
         nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
@@ -253,7 +254,7 @@ void BMv2_V1ModelTableStepper::evalTableActionSelector(
             new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
         P4::Coverage::CoverageSet coveredStmts;
         nextState->getActionDecl(tableAction->method)
-            ->apply(CollectStatements2(coveredStmts, *state));
+            ->apply(CollectLatentStatements(coveredStmts, *state));
 
         nextState->set(getTableHitVar(table), IR::getBoolLiteral(true));
         nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));

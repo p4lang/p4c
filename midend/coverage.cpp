@@ -4,13 +4,12 @@
 
 #include "lib/log.h"
 
-namespace P4 {
-
-namespace Coverage {
+namespace P4::Coverage {
 
 CollectStatements::CollectStatements(CoverageSet &output) : statements(output) {}
 
 bool CollectStatements::preorder(const IR::AssignmentStatement *stmt) {
+    // Only track statements, which have a valid source position in the P4 program.
     if (stmt->getSourceInfo().isValid()) {
         statements.insert(stmt);
     }
@@ -18,6 +17,7 @@ bool CollectStatements::preorder(const IR::AssignmentStatement *stmt) {
 }
 
 bool CollectStatements::preorder(const IR::MethodCallStatement *stmt) {
+    // Only track statements, which have a valid source position in the P4 program.
     if (stmt->getSourceInfo().isValid()) {
         statements.insert(stmt);
     }
@@ -25,6 +25,7 @@ bool CollectStatements::preorder(const IR::MethodCallStatement *stmt) {
 }
 
 bool CollectStatements::preorder(const IR::ExitStatement *stmt) {
+    // Only track statements, which have a valid source position in the P4 program.
     if (stmt->getSourceInfo().isValid()) {
         statements.insert(stmt);
     }
@@ -35,27 +36,20 @@ void coverageReportFinal(const CoverageSet &all, const CoverageSet &visited) {
     LOG_FEATURE("coverage", 4, "Not covered statements:");
     for (const auto *stmt : all) {
         if (visited.count(stmt) == 0) {
-            int sourceLine = -1;
-            if (stmt->getSourceInfo().isValid()) {
-                sourceLine = stmt->getSourceInfo().toPosition().sourceLine;
-            }
+            auto sourceLine = stmt->getSourceInfo().toPosition().sourceLine;
             LOG_FEATURE("coverage", 4, '\t' << sourceLine << ": " << *stmt);
         }
     }
-    // LOG_FEATURE("coverage", 4, "Covered statements:");
-    // for (const IR::Statement *stmt : visited) {
-    //     LOG_FEATURE("coverage", 4,
-    //                 '\t' << stmt->getSourceInfo().toPosition().sourceLine << ": " << *stmt);
-    // }
+    // Do not really need to know which statements we have covered. Increase the log level here.
+    LOG_FEATURE("coverage", 5, "Covered statements:");
+    for (const IR::Statement *stmt : visited) {
+        auto sourceLine = stmt->getSourceInfo().toPosition().sourceLine;
+        LOG_FEATURE("coverage", 5, '\t' << sourceLine << ": " << *stmt);
+    }
 }
 
 void logCoverage(const CoverageSet &all, const CoverageSet &visited, const CoverageSet &new_) {
     for (const IR::Statement *stmt : new_) {
-        if (all.count(stmt) == 0) {
-            // Do not log internal statements, which don't correspond to any statement
-            // in the original P4 program.
-            continue;
-        }
         if (visited.count(stmt) == 0) {
             // Search for the original statement - `stmt` might have been transformed.
             const IR::Statement *originalStatement = *all.find(stmt);
@@ -66,6 +60,4 @@ void logCoverage(const CoverageSet &all, const CoverageSet &visited, const Cover
     }
 }
 
-}  // namespace Coverage
-
-}  // namespace P4
+}  // namespace P4::Coverage

@@ -14,31 +14,7 @@
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-/// CollectStatements2 iterates across all assignment, method call, and exit statements in the P4
-/// program and collects them in a "CoverageSet".
-class CollectStatements2 : public Inspector {
-    P4::Coverage::CoverageSet &statements;
-    const ExecutionState &state;
-    std::set<int> seenParserIds;
-
- public:
-    explicit CollectStatements2(P4::Coverage::CoverageSet &output, const ExecutionState &state);
-
-    explicit CollectStatements2(P4::Coverage::CoverageSet &output, const ExecutionState &state,
-                                const std::set<int> &seenParserIds);
-
-    bool preorder(const IR::ParserState *parserState) override;
-
-    bool preorder(const IR::AssignmentStatement *stmt) override;
-
-    bool preorder(const IR::MethodCallStatement *stmt) override;
-
-    bool preorder(const IR::ExitStatement *stmt) override;
-};
+namespace P4Tools::P4Testgen {
 
 /// The main class that implements small-step operational semantics. Delegates to implementations
 /// of AbstractStepper.
@@ -93,8 +69,6 @@ class SmallStepEvaluator {
     SmallStepEvaluator(AbstractSolver &solver, const ProgramInfo &programInfo);
 };
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SMALL_STEP_SMALL_STEP_H_ */

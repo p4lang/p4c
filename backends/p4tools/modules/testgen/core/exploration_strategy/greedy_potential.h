@@ -33,7 +33,6 @@ class GreedyPotential : public ExplorationStrategy {
     GreedyPotential(AbstractSolver &solver, const ProgramInfo &programInfo);
 
  protected:
-    uint64_t threshold = 0;
     /// This variable keeps track of how many branch decisions we have made without producing a
     /// test. This is a safety guard in case the strategy gets stuck in parser loops because of its
     /// greediness.
@@ -45,13 +44,16 @@ class GreedyPotential : public ExplorationStrategy {
      public:
         [[nodiscard]] bool empty() const;
         void push(StepResult branches);
-        Branch pop(uint64_t *threshold, const P4::Coverage::CoverageSet &coveredStatements,
-                   bool search, bool fallBackToRandom);
+        Branch pop(const P4::Coverage::CoverageSet &coveredStatements, bool search,
+                   bool fallBackToRandom);
         size_t size();
 
         UnexploredBranches();
 
      private:
+        /// The threshold increments every time we are in search modes, but can not find an
+        /// execution state with uncovered statements.
+        uint64_t threshold = 0;
         /// Each element on this stack represents a set of alternative choices that could have been
         /// made along the current execution path.
         ///
@@ -59,6 +61,8 @@ class GreedyPotential : public ExplorationStrategy {
         ///   - Each element of this stack is non-empty.
         ///   - Each time we push or pop this stack, we also push or pop on the SMT solver.
         std::vector<StepResult> unexploredBranches;
+
+        int findBranch(const P4::Coverage::CoverageSet &coveredStatements, bool search);
     };
 
     /// A stack, wherein each element represents a set of alternative choices that could have been

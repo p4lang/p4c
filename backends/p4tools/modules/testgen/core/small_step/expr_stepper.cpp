@@ -21,6 +21,7 @@
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/abstract_stepper.h"
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
+#include "backends/p4tools/modules/testgen/lib/collect_latent_statements.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
@@ -239,7 +240,7 @@ bool ExprStepper::preorder(const IR::Mux *mux) {
 
         auto *nextState = new ExecutionState(state);
         P4::Coverage::CoverageSet coveredStmts;
-        expr->apply(CollectStatements2(coveredStmts, state));
+        expr->apply(CollectLatentStatements(coveredStmts, state));
         nextState->replaceTopBody(Continuation::Return(expr));
         result->emplace_back(cond, state, nextState, coveredStmts);
     }
@@ -401,7 +402,7 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
 
         nextState->replaceTopBody(Continuation::Return(selectCase->state));
         P4::Coverage::CoverageSet coveredStmts;
-        decl->apply(CollectStatements2(coveredStmts, state));
+        decl->apply(CollectLatentStatements(coveredStmts, state));
         result->emplace_back(new IR::LAnd(missCondition, matchCondition), state, nextState,
                              coveredStmts);
         missCondition = new IR::LAnd(new IR::LNot(matchCondition), missCondition);

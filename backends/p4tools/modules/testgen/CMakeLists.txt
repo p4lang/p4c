@@ -31,6 +31,7 @@ set(
   core/exploration_strategy/exploration_strategy.cpp
   core/target.cpp
 
+  lib/collect_latent_statements.cpp
   lib/concolic.cpp
   lib/continuation.cpp
   lib/execution_state.cpp
