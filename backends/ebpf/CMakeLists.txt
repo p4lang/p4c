@@ -46,6 +46,7 @@ set (P4C_EBPF_SRCS
   psa/backend.cpp
   psa/externs/ebpfPsaCounter.cpp
   psa/externs/ebpfPsaChecksum.cpp
+  psa/externs/ebpfPsaDigest.cpp
   psa/externs/ebpfPsaHashAlgorithm.cpp
   psa/externs/ebpfPsaTableImplementation.cpp
   psa/externs/ebpfPsaRandom.cpp
@@ -81,6 +82,7 @@ set (P4C_EBPF_HDRS
   psa/ebpfPsaTable.h
   psa/externs/ebpfPsaCounter.h
   psa/externs/ebpfPsaChecksum.h
+  psa/externs/ebpfPsaDigest.h
   psa/externs/ebpfPsaHashAlgorithm.h
   psa/externs/ebpfPsaTableImplementation.h
   psa/externs/ebpfPsaRegister.h

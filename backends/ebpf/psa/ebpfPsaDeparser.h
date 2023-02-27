@@ -20,6 +20,7 @@ limitations under the License.
 #include "backends/ebpf/ebpfDeparser.h"
 #include "backends/ebpf/psa/ebpfPsaParser.h"
 #include "backends/ebpf/psa/externs/ebpfPsaChecksum.h"
+#include "backends/ebpf/psa/externs/ebpfPsaDigest.h"
 #include "ebpfPsaControl.h"
 
 namespace EBPF {
@@ -35,17 +36,12 @@ class DeparserBodyTranslatorPSA : public DeparserBodyTranslator {
 };
 
 class EBPFDeparserPSA : public EBPFDeparser {
- private:
-    // arbitrary value for max queue size
-    // TODO: make it configurable
-    int maxDigestQueueSize = 128;
-
  public:
     const IR::Parameter *user_metadata;
     const IR::Parameter *istd;
     const IR::Parameter *resubmit_meta;
     std::map<cstring, EBPFChecksumPSA *> checksums;
-    std::map<cstring, const IR::Type *> digests;
+    std::map<cstring, EBPFDigestPSA *> digests;
 
     EBPFDeparserPSA(const EBPFProgram *program, const IR::ControlBlock *control,
                     const IR::Parameter *parserHeaders, const IR::Parameter *istd)
@@ -53,12 +49,19 @@ class EBPFDeparserPSA : public EBPFDeparser {
         codeGen = new DeparserBodyTranslatorPSA(this);
     }
 
+    void emitTypes(CodeBuilder *builder) const;
     void emitDigestInstances(CodeBuilder *builder) const;
     void emitDeclaration(CodeBuilder *builder, const IR::Declaration *decl) override;
 
     EBPFChecksumPSA *getChecksum(cstring name) const {
         auto result = ::get(checksums, name);
         BUG_CHECK(result != nullptr, "No checksum named %1%", name);
+        return result;
+    }
+
+    EBPFDigestPSA *getDigest(cstring name) const {
+        auto result = ::get(digests, name);
+        BUG_CHECK(result != nullptr, "No digest named %1%", name);
         return result;
     }
 };

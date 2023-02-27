@@ -136,6 +136,7 @@ void PSAEbpfGenerator::emitTypes(CodeBuilder *builder) const {
 
     ingress->parser->emitTypes(builder);
     ingress->control->emitTableTypes(builder);
+    ingress->deparser->emitTypes(builder);
     egress->parser->emitTypes(builder);
     egress->control->emitTableTypes(builder);
     builder->newline();
@@ -759,9 +760,8 @@ bool ConvertToEbpfPipeline::preorder(const IR::PackageBlock *block) {
     pipeline->control = control_converter->getEBPFControl();
     CHECK_NULL(pipeline->control);
 
-    auto deparser_converter =
-        new ConvertToEBPFDeparserPSA(pipeline, pipeline->parser->headers,
-                                     pipeline->control->outputStandardMetadata, typemap, type);
+    auto deparser_converter = new ConvertToEBPFDeparserPSA(
+        pipeline, pipeline->parser->headers, pipeline->control->outputStandardMetadata, type);
     deparserBlock->apply(*deparser_converter);
     pipeline->deparser = deparser_converter->getEBPFDeparser();
     CHECK_NULL(pipeline->deparser);
@@ -969,17 +969,16 @@ bool ConvertToEBPFDeparserPSA::preorder(const IR::ControlBlock *ctrl) {
 bool ConvertToEBPFDeparserPSA::preorder(const IR::Declaration_Instance *di) {
     if (auto typeSpec = di->type->to<IR::Type_Specialized>()) {
         auto baseType = typeSpec->baseType;
-        auto typeName = baseType->to<IR::Type_Name>();
-        auto digest = typeName->path->name.name;
-        if (digest == "Digest") {
+        auto typeName = baseType->to<IR::Type_Name>()->path->name.name;
+
+        if (typeName == "Digest") {
             if (pipelineType == TC_EGRESS || pipelineType == XDP_EGRESS) {
                 ::error(ErrorType::ERR_UNEXPECTED,
                         "Digests are only supported at ingress, got an instance at egress");
             }
-            cstring digestMapName = EBPFObject::externalName(di);
-            auto messageArg = typeSpec->arguments->front();
-            auto messageType = typemap->getType(messageArg);
-            deparser->digests.emplace(digestMapName, messageType);
+            cstring instance = EBPFObject::externalName(di);
+            auto digest = new EBPFDigestPSA(program, di);
+            deparser->digests.emplace(instance, digest);
         }
     }
 

@@ -115,6 +115,8 @@ class CodeGenInspector : public Inspector {
 
     bool preorder(const IR::Type_Typedef *type) override;
     bool preorder(const IR::Type_Enum *type) override;
+    void emitAssignStatement(const IR::Type *ltype, const IR::Expression *lexpr, cstring lpath,
+                             const IR::Expression *rexpr);
     bool preorder(const IR::AssignmentStatement *s) override;
     bool preorder(const IR::BlockStatement *s) override;
     bool preorder(const IR::MethodCallStatement *s) override;
