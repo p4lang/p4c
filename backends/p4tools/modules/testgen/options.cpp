@@ -21,14 +21,6 @@ const char *TestgenOptions::getIncludePath() {
 }
 
 const std::set<cstring> TestgenOptions::SUPPORTED_STOP_METRICS = {"MAX_STATEMENT_COVERAGE"};
-const std::set<cstring> TestgenOptions::SUPPORTED_EXPLORATION_STRATEGIES = {
-    "INCREMENTAL_STACK",
-    "RANDOM_ACCESS_STACK",
-    "GREEDY_POTENTIAL",
-    "LINEAR_ENUMERATION",
-    "MAX_COVERAGE",
-    "RANDOM_ACCESS_MAX_COVERAGE",
-    "UNBOUNDED_RANDOM_ACCESS_STACK"};
 
 TestgenOptions::TestgenOptions()
     : AbstractP4cToolOptions("Generate packet tests for a P4 program.") {
@@ -173,20 +165,38 @@ TestgenOptions::TestgenOptions()
         "Produced tests must have an output packet.");
 
     registerOption(
-        "--exploration-strategy", "explorationStrategy",
+        "--path-selection", "pathSelectionPolicy",
         [this](const char *arg) {
-            explorationStrategy = cstring(arg).toUpper();
-            if (SUPPORTED_EXPLORATION_STRATEGIES.count(explorationStrategy) == 0) {
-                ::error(
-                    "Exploration strategy %1% not supported. Supported exploration strategies are "
-                    "%2%.",
-                    explorationStrategy,
-                    Utils::containerToString(SUPPORTED_EXPLORATION_STRATEGIES));
-                return false;
+            using P4Testgen::PathSelectionPolicy;
+
+            static std::map<cstring, PathSelectionPolicy> const PATH_SELECTION_OPTIONS = {
+                {"INCREMENTAL_STACK", PathSelectionPolicy::IncrementalStack},
+                {"RANDOM_ACCESS_STACK", PathSelectionPolicy::RandomAccessStack},
+                {"GREEDY_POTENTIAL", PathSelectionPolicy::GreedyPotential},
+                {"LINEAR_ENUMERATION", PathSelectionPolicy::LinearEnumeration},
+                {"MAX_COVERAGE", PathSelectionPolicy::MaxCoverage},
+                {"RANDOM_ACCESS_MAX_COVERAGE", PathSelectionPolicy::RandomAccessMaxCoverage},
+                {"UNBOUNDED_RANDOM_ACCESS_STACK", PathSelectionPolicy::UnboundedRandomAccessStack},
+            };
+            auto selectionString = cstring(arg).toUpper();
+            auto it = PATH_SELECTION_OPTIONS.find(selectionString);
+            if (it != PATH_SELECTION_OPTIONS.end()) {
+                pathSelectionPolicy = it->second;
+                return true;
             }
-            return true;
+            std::set<cstring> printSet;
+            std::transform(PATH_SELECTION_OPTIONS.cbegin(), PATH_SELECTION_OPTIONS.cend(),
+                           std::inserter(printSet, printSet.begin()),
+                           [](const std::pair<cstring, PathSelectionPolicy> &mapTuple) {
+                               return mapTuple.first;
+                           });
+            ::error(
+                "Path selection policy %1% not supported. Supported path selection policies are "
+                "%2%.",
+                pathSelectionPolicy, Utils::containerToString(printSet));
+            return false;
         },
-        "Selects a specific exploration strategy for test generation. Options are: "
+        "Selects a specific path selection strategy for test generation. Options are: "
         "INCREMENTAL_STACK, RANDOM_ACCESS_STACK, LINEAR_ENUMERATION, MAX_COVERAGE, "
         "GREEDY_POTENTIAL, RANDOM_ACCESS_MAX_COVERAGE, and UNBOUNDED_RANDOM_ACCESS_STACK. "
         "Defaults to INCREMENTAL_STACK.");

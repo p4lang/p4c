@@ -6,9 +6,7 @@
 
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 /// This is main implementation of the P4Testgen tool.
 class Testgen : public AbstractP4cTool<TestgenOptions> {
@@ -16,10 +14,11 @@ class Testgen : public AbstractP4cTool<TestgenOptions> {
     void registerTarget() override;
 
     int mainImpl(const IR::P4Program *program) override;
+
+ public:
+    virtual ~Testgen() = default;
 };
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TESTGEN_H_ */

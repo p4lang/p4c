@@ -6,24 +6,26 @@
 #include "backends/p4tools/common/options.h"
 #include "lib/cstring.h"
 
+#include "backends/p4tools/modules/testgen/core/exploration_strategy/path_selection.h"
+
 namespace P4Tools {
 
-/// Encapsulates and processes command-line options for p4testgen.
+/// Encapsulates and processes command-line options for P4Testgen.
 class TestgenOptions : public AbstractP4cToolOptions {
  public:
+    virtual ~TestgenOptions() = default;
+
     /// Maximum number of tests to be generated. Defaults to 1.
     int64_t maxTests = 1;
 
-    /// List of the supported exploration strategies.
-    static const std::set<cstring> SUPPORTED_EXPLORATION_STRATEGIES;
-
-    /// Selects the exploration strategy for test generation
-    cstring explorationStrategy;
+    /// Selects the path selection policy for test generation
+    P4Testgen::PathSelectionPolicy pathSelectionPolicy =
+        P4Testgen::PathSelectionPolicy::IncrementalStack;
 
     /// List of the supported stop metrics.
     static const std::set<cstring> SUPPORTED_STOP_METRICS;
 
-    // Stops generating tests when a particular metric is satisifed. Currently supported options are
+    // Stops generating tests when a particular metric is satisfied. Currently supported options are
     // listed in @var SUPPORTED_STOP_METRICS.
     cstring stopMetric;
 
@@ -55,7 +57,7 @@ class TestgenOptions : public AbstractP4cToolOptions {
     /// Fail on unimplemented features instead of trying the next branch
     bool strict = false;
 
-    /// The test back end that P4Testgen will generate test for. Examples, STF, PTF or Protobuf.
+    /// The test back end that P4Testgen will generate test for. Examples are STF, PTF or Protobuf.
     cstring testBackend;
 
     /// String of selected branches separated by comma.

@@ -28,9 +28,7 @@
 #include "backends/p4tools/modules/testgen/lib/final_state.h"
 #include "backends/p4tools/modules/testgen/lib/logging.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 ExplorationStrategy::StepResult ExplorationStrategy::step(ExecutionState &state) {
     Util::ScopedTimer st("step");
@@ -112,6 +110,4 @@ void ExplorationStrategy::printCurrentTraceAndBranches(std::ostream &out) {
     out << strBranches << ")";
 }
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen

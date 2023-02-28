@@ -32,6 +32,7 @@
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
+#include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4Tools::P4Testgen {
 
@@ -270,9 +271,13 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
         replacements.emplace_back(new IR::MethodCallStatement(Util::SourceInfo(), tableAction));
         nextState->set(getTableHitVar(table), IR::getBoolLiteral(true));
         nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
+        // Some path selection strategies depend on looking ahead and collecting potential
+        // statements. If that is the case, apply the CollectLatentStatements visitor.
         P4::Coverage::CoverageSet coveredStmts;
-        nextState->getActionDecl(tableAction->method)
-            ->apply(CollectLatentStatements(coveredStmts, stepper->state));
+        if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
+            nextState->getActionDecl(tableAction->method)
+                ->apply(CollectLatentStatements(coveredStmts, stepper->state));
+        }
 
         // Add some tracing information.
         std::stringstream tableStream;
@@ -367,9 +372,13 @@ void TableStepper::setTableDefaultEntries(
         std::vector<Continuation::Command> replacements;
         replacements.emplace_back(
             new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
+        // Some path selection strategies depend on looking ahead and collecting potential
+        // statements. If that is the case, apply the CollectLatentStatements visitor.
         P4::Coverage::CoverageSet coveredStmts;
-        nextState->getActionDecl(tableAction->method)
-            ->apply(CollectLatentStatements(coveredStmts, stepper->state));
+        if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
+            nextState->getActionDecl(tableAction->method)
+                ->apply(CollectLatentStatements(coveredStmts, stepper->state));
+        }
         nextState->set(getTableHitVar(table), IR::getBoolLiteral(false));
         nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
         std::stringstream tableStream;
@@ -442,9 +451,13 @@ void TableStepper::evalTableControlEntries(
         std::vector<Continuation::Command> replacements;
         replacements.emplace_back(
             new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
+        // Some path selection strategies depend on looking ahead and collecting potential
+        // statements. If that is the case, apply the CollectLatentStatements visitor.
         P4::Coverage::CoverageSet coveredStmts;
-        nextState->getActionDecl(tableAction->method)
-            ->apply(CollectLatentStatements(coveredStmts, stepper->state));
+        if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
+            nextState->getActionDecl(tableAction->method)
+                ->apply(CollectLatentStatements(coveredStmts, stepper->state));
+        }
 
         nextState->set(getTableHitVar(table), IR::getBoolLiteral(true));
         nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
@@ -635,9 +648,13 @@ void TableStepper::addDefaultAction(boost::optional<const IR::Expression *> tabl
     tableStream << " Choosing default action: " << actionPath;
     nextState->add(new TraceEvent::Generic(tableStream.str()));
     replacements.emplace_back(new IR::MethodCallStatement(Util::SourceInfo(), tableAction));
+    // Some path selection strategies depend on looking ahead and collecting potential
+    // statements.
     P4::Coverage::CoverageSet coveredStmts;
-    nextState->getActionDecl(tableAction->method)
-        ->apply(CollectLatentStatements(coveredStmts, stepper->state));
+    if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
+        nextState->getActionDecl(tableAction->method)
+            ->apply(CollectLatentStatements(coveredStmts, stepper->state));
+    }
     nextState->set(getTableHitVar(table), IR::getBoolLiteral(false));
     nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
     nextState->replaceTopBody(&replacements);

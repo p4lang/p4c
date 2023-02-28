@@ -26,10 +26,9 @@
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/gen_eq.h"
+#include "backends/p4tools/modules/testgen/options.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 ExprStepper::ExprStepper(ExecutionState &state, AbstractSolver &solver,
                          const ProgramInfo &programInfo)
@@ -239,8 +238,12 @@ bool ExprStepper::preorder(const IR::Mux *mux) {
         const auto *expr = entry.second;
 
         auto *nextState = new ExecutionState(state);
+        // Some path selection strategies depend on looking ahead and collecting potential
+        // statements. If that is the case, apply the CollectLatentStatements visitor.
         P4::Coverage::CoverageSet coveredStmts;
-        expr->apply(CollectLatentStatements(coveredStmts, state));
+        if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
+            expr->apply(CollectLatentStatements(coveredStmts, state));
+        }
         nextState->replaceTopBody(Continuation::Return(expr));
         result->emplace_back(cond, state, nextState, coveredStmts);
     }
@@ -398,11 +401,15 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
                 " P4Testgen currently does not support this case.",
                 selectExpression);
         }
-        const auto *decl = state.findDecl(selectCase->state)->getNode();
 
         nextState->replaceTopBody(Continuation::Return(selectCase->state));
+        // Some path selection strategies depend on looking ahead and collecting potential
+        // statements. If that is the case, apply the CollectLatentStatements visitor.
         P4::Coverage::CoverageSet coveredStmts;
-        decl->apply(CollectLatentStatements(coveredStmts, state));
+        if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
+            const auto *decl = state.findDecl(selectCase->state)->getNode();
+            decl->apply(CollectLatentStatements(coveredStmts, state));
+        }
         result->emplace_back(new IR::LAnd(missCondition, matchCondition), state, nextState,
                              coveredStmts);
         missCondition = new IR::LAnd(new IR::LNot(matchCondition), missCondition);
@@ -457,6 +464,4 @@ bool ExprStepper::preorder(const IR::Slice *slice) {
 
 void ExprStepper::stepNoMatch() { stepToException(Continuation::Exception::NoMatch); }
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen

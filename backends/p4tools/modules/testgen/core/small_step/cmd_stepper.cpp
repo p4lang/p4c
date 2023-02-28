@@ -306,9 +306,13 @@ bool CmdStepper::preorder(const IR::IfStatement *ifStatement) {
             new TraceEvent::PreEvalExpression(ifStatement->condition, "If Statement true"));
         cmds.emplace_back(ifStatement->ifTrue);
         nextState->replaceTopBody(&cmds);
-        P4::Coverage::CoverageSet coveredStmts;
-        ifStatement->ifTrue->apply(CollectLatentStatements(coveredStmts, state));
 
+        // Some path selection strategies depend on looking ahead and collecting potential
+        // statements. If that is the case, apply the CollectLatentStatements visitor.
+        P4::Coverage::CoverageSet coveredStmts;
+        if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
+            ifStatement->ifTrue->apply(CollectLatentStatements(coveredStmts, state));
+        }
         result->emplace_back(ifStatement->condition, state, nextState, coveredStmts);
     }
 
@@ -321,8 +325,12 @@ bool CmdStepper::preorder(const IR::IfStatement *ifStatement) {
 
         nextState->replaceTopBody((ifStatement->ifFalse == nullptr) ? new IR::BlockStatement()
                                                                     : ifStatement->ifFalse);
+        // Some path selection strategies depend on looking ahead and collecting potential
+        // statements. If that is the case, apply the CollectLatentStatements visitor.
         P4::Coverage::CoverageSet coveredStmts;
-        ifStatement->ifFalse->apply(CollectLatentStatements(coveredStmts, state));
+        if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
+            ifStatement->ifFalse->apply(CollectLatentStatements(coveredStmts, state));
+        }
         result->emplace_back(negation, state, nextState, coveredStmts);
     }
 
@@ -587,7 +595,11 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
 
         bool hasMatched = false;
         for (const auto *switchCase : switchStatement->cases) {
-            switchCase->statement->apply(CollectLatentStatements(coveredStmts, state));
+            if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
+                // Some path selection strategies depend on looking ahead and collecting potential
+                // statements. If that is the case, apply the CollectLatentStatements visitor.
+                switchCase->statement->apply(CollectLatentStatements(coveredStmts, state));
+            }
             // We have either matched already, or still need to match.
             hasMatched = hasMatched || switchStatement->expression->equiv(*switchCase->label);
             // Nothing to do with this statement. Fall through to the next case.

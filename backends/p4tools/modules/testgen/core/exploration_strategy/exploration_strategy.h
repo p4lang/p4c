@@ -16,9 +16,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/final_state.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 /// Base abstract class for exploration strategy. It requires the implementation of
 /// the run method, and carries the base Branch struct, to be reused in inherited
@@ -68,7 +66,7 @@ class ExplorationStrategy {
     AbstractSolver &solver;
 
     /// @returns a pseudorandom integer in the range of [0, branches.size() - 1]
-    uint64_t selectBranch(const std::vector<Branch> &branches);
+    static uint64_t selectBranch(const std::vector<Branch> &branches);
 
     /// Handles processing at the end of a P4 program.
     ///
@@ -92,8 +90,6 @@ class ExplorationStrategy {
     SmallStepEvaluator evaluator;
 };
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_EXPLORATION_STRATEGY_EXPLORATION_STRATEGY_H_ */

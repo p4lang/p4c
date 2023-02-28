@@ -156,9 +156,13 @@ void BMv2_V1ModelTableStepper::evalTableActionProfile(
         std::vector<Continuation::Command> replacements;
         replacements.emplace_back(
             new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
+        // Some path selection strategies depend on looking ahead and collecting potential
+        // statements. If that is the case, apply the CollectLatentStatements visitor.
         P4::Coverage::CoverageSet coveredStmts;
-        nextState->getActionDecl(tableAction->method)
-            ->apply(CollectLatentStatements(coveredStmts, *state));
+        if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
+            nextState->getActionDecl(tableAction->method)
+                ->apply(CollectLatentStatements(coveredStmts, *state));
+        }
 
         nextState->set(getTableHitVar(table), IR::getBoolLiteral(true));
         nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
@@ -252,9 +256,13 @@ void BMv2_V1ModelTableStepper::evalTableActionSelector(
         std::vector<Continuation::Command> replacements;
         replacements.emplace_back(
             new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
+        // Some path selection strategies depend on looking ahead and collecting potential
+        // statements. If that is the case, apply the CollectLatentStatements visitor.
         P4::Coverage::CoverageSet coveredStmts;
-        nextState->getActionDecl(tableAction->method)
-            ->apply(CollectLatentStatements(coveredStmts, *state));
+        if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
+            nextState->getActionDecl(tableAction->method)
+                ->apply(CollectLatentStatements(coveredStmts, *state));
+        }
 
         nextState->set(getTableHitVar(table), IR::getBoolLiteral(true));
         nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
