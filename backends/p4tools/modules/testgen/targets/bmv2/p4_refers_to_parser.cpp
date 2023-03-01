@@ -1,8 +1,7 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_refers_to_parser.h"
 
-#include <stdint.h>
-
 #include <algorithm>
+#include <cstdint>
 #include <iostream>
 #include <string>
 
@@ -15,9 +14,7 @@
 #include "lib/null.h"
 #include "lib/safe_vector.h"
 
-namespace P4Tools {
-
-namespace RefersToParser {
+namespace P4Tools::RefersToParser {
 
 RefersToParser::RefersToParser(std::vector<std::vector<const IR::Expression *>> &output)
     : restrictionsVec(output) {
@@ -55,44 +52,6 @@ void RefersToParser::createConstraint(bool table, cstring currentName, cstring c
     restrictionsVec.push_back(constraint);
 }
 
-void RefersToParser::postorder(const IR::Annotation *annotation) {
-    const IR::P4Action *prevAction = nullptr;
-    if (annotation->name.name != "refers_to") {
-        return;
-    }
-    if (const auto *action = findOrigCtxt<IR::P4Action>()) {
-        if (prevAction != action) {
-            actionVector.push_back(action);
-            prevAction = action;
-        }
-    } else if (const auto *keys = findOrigCtxt<IR::Key>()) {
-        const auto *table = findOrigCtxt<IR::P4Table>();
-        CHECK_NULL(table);
-        const auto *key = findOrigCtxt<IR::KeyElement>();
-        CHECK_NULL(key);
-        auto it = find(keys->keyElements.begin(), keys->keyElements.end(), key);
-        if (it != keys->keyElements.end()) {
-            int id = it - keys->keyElements.begin();
-            createRefersToConstraint(key->annotations->annotations, key->expression->type,
-                                     table->controlPlaneName(), id, false,
-                                     key->expression->toString());
-        }
-    } else {
-        BUG("refers_to annotation %1% is attached to unsupported element.", *annotation);
-    }
-}
-
-// Finds a P4Action in the actionVector according
-/// to the specified input argument which is an ActionListElement
-const IR::P4Action *RefersToParser::findAction(const IR::ActionListElement *input) {
-    for (const auto *element : actionVector) {
-        if (input->getName().name == element->name.name) {
-            return element;
-        }
-    }
-    return nullptr;
-}
-
 // Builds a variable name from the body of the "refers_to" annotation.
 // The build starts at index 2 because 0 is the table name and 1 is ",".
 cstring buildName(IR::Vector<IR::AnnotationToken> input) {
@@ -106,55 +65,69 @@ cstring buildName(IR::Vector<IR::AnnotationToken> input) {
 /// An intermediate function that determines the type for future variables and partially
 /// collects their names for them, after which it calls the createConstraint function,
 /// which completes the construction of the constraint
-void RefersToParser::createRefersToConstraint(const IR::Vector<IR::Annotation> &annotations,
+void RefersToParser::createRefersToConstraint(const IR::Annotation *annotation,
                                               const IR::Type *inputType, cstring controlPlaneName,
-                                              int id, bool isParameter, cstring inputName) {
-    cstring currentKeyName = inputName;
-    const IR::Type *type = nullptr;
-    for (const auto *annotation : annotations) {
-        if (annotation->name.name == "refers_to") {
-            cstring destTableName = annotation->body[0]->text;
-            cstring destKeyName = buildName(annotation->body);
-            if (const auto *bit = inputType->to<IR::Type_Bits>()) {
-                type = bit;
-            } else if (const auto *varbit = inputType->to<IR::Extracted_Varbits>()) {
-                type = varbit;
-            } else if (inputType->is<IR::Type_Boolean>()) {
-                type = IR::Type_Bits::get(1);
-            } else {
-                BUG("Unexpected key type %s.", inputType->node_type_name());
-            }
-            if (isParameter) {
-                currentKeyName = "_arg_" + inputName + std::to_string(id);
-                createConstraint(false, controlPlaneName, currentKeyName, destKeyName,
-                                 destTableName, type);
-            } else {
-                createConstraint(true, controlPlaneName, currentKeyName, destKeyName, destTableName,
-                                 type);
-            }
-        }
+                                              bool isParameter, cstring inputName) {
+    if (inputType->is<IR::Type_Boolean>()) {
+        inputType = IR::Type_Bits::get(1);
     }
+    createConstraint(!isParameter, controlPlaneName, inputName, buildName(annotation->body),
+                     annotation->body[0]->text, inputType);
 }
 
-void RefersToParser::postorder(const IR::ActionListElement *action) {
-    const auto *actionCall = findAction(action);
-    if (actionCall == nullptr) {
-        return;
+bool RefersToParser::preorder(const IR::P4Table *table) {
+    const auto *key = table->getKey();
+    if (key == nullptr) {
+        return false;
     }
-    if (const auto *table = findOrigCtxt<IR::P4Table>()) {
-        if (actionCall->parameters != nullptr) {
-            int id = 0;
-            for (const auto *parameter : actionCall->parameters->parameters) {
-                if (parameter->annotations != nullptr) {
-                    createRefersToConstraint(parameter->annotations->annotations, parameter->type,
-                                             table->controlPlaneName(), id, true,
-                                             actionCall->controlPlaneName());
+    const auto *ctrl = findOrigCtxt<IR::P4Control>();
+    CHECK_NULL(ctrl);
+
+    for (const auto *keyElement : key->keyElements) {
+        auto annotations = keyElement->annotations->annotations;
+        for (const auto *annotation : annotations) {
+            if (annotation->name.name == "refers_to") {
+                const auto *nameAnnot = keyElement->getAnnotation("name");
+                // Some hidden tables do not have any key name annotations.
+                BUG_CHECK(nameAnnot != nullptr, "Refers-to table key without a name annotation");
+                cstring fieldName;
+                if (nameAnnot != nullptr) {
+                    fieldName = nameAnnot->getName();
                 }
-                id++;
+                createRefersToConstraint(annotation, keyElement->expression->type,
+                                         table->controlPlaneName(), false, fieldName);
             }
         }
     }
-}
-}  // namespace RefersToParser
 
-}  // namespace P4Tools
+    const auto *actionList = table->getActionList();
+    if (actionList == nullptr) {
+        return false;
+    }
+    for (const auto *action : actionList->actionList) {
+        const auto *decl = ctrl->getDeclByName(action->getName().name);
+        if (decl == nullptr) {
+            return false;
+        }
+        const auto *actionCall = decl->checkedTo<IR::P4Action>();
+        const auto *params = actionCall->parameters;
+        if (params == nullptr) {
+            return false;
+        }
+        for (size_t idx = 0; idx < params->parameters.size(); ++idx) {
+            const auto *parameter = params->parameters.at(idx);
+            auto annotations = parameter->annotations->annotations;
+            for (const auto *annotation : annotations) {
+                if (annotation->name.name == "refers_to") {
+                    cstring inputName =
+                        "_arg_" + actionCall->controlPlaneName() + std::to_string(idx);
+                    createRefersToConstraint(annotation, parameter->type, table->controlPlaneName(),
+                                             true, inputName);
+                }
+            }
+        }
+    }
+    return false;
+}
+
+}  // namespace P4Tools::RefersToParser

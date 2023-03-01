@@ -36,18 +36,12 @@ control vrfy(inout Headers h, inout Meta meta) {
 
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t s) {
-
+    bit<8> switch_var = 0;
     action MyAction1(@refers_to(table_1 , h.h.a) bit<8> input_val) {
         h.h.b = input_val;
+        switch_var = 1;
     }
 
-    action MyAction2() {
-        h.h.b = 2;
-    }
-
-    action MyAction3() {
-        h.h.b = 3;
-    }
     table table_1 {
         key = {
             h.h.a : exact @refers_to(table_2 , h.h.b);
@@ -56,8 +50,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t s) {
         actions = {
             NoAction;
             MyAction1;
-            MyAction2;
-            MyAction3;
         }
 
         size = 1024;
@@ -72,8 +64,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t s) {
         actions = {
             NoAction;
             MyAction1;
-            MyAction2;
-            MyAction3;
         }
 
         size = 1024;
@@ -81,11 +71,16 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t s) {
     }
 
     apply {
-
-      table_1.apply();
-      if (h.h.a == 2) {
-        table_2.apply();
-      }
+        table_1.apply();
+        // This should not be possible with valid refers_to annotations.
+        if (h.h.isValid()) {
+            if (switch_var == 1 && h.h.b != h.h.a) {
+                h.h.b = 3;
+            }
+        }
+        if (h.h.a == 2) {
+            table_2.apply();
+        }
     }
 }
 
