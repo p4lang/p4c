@@ -248,17 +248,12 @@ class AbstractTest(bt.P4RuntimeTest):
         pass
 
     def runTestImpl(self):
-        # TODO: This is a workaround for broken unit tests on Ubuntu 20.04. It can happen that,
-        # when the last test fails, the failure output of that test is swallowed by the unit test
-        # framework. Any CMake Xfail depending on this output will fail since it does not match.
-        try:
-            self.setupCtrlPlane()
-            bt.testutils.log.info("Sending Packet ...")
-            self.sendPacket()
-            bt.testutils.log.info("Verifying Packet ...")
-            self.verifyPackets()
-        except Exception as exception:
-            raise SystemExit(f"Test failed.\n") from exception
+        self.setupCtrlPlane()
+        bt.testutils.log.info("Sending Packet ...")
+        self.sendPacket()
+        bt.testutils.log.info("Verifying Packet ...")
+        self.verifyPackets()
+
 
 )""");
     return PREAMBLE;

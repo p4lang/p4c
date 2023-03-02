@@ -119,7 +119,7 @@ class Bridge:
             return result
         return self._configure_bridge(self.br_name)
 
-    def _configure_bridge_port(self, port_name: str):
+    def _configure_bridge_port(self, port_name: str) -> int:
         """Set a bridge port active."""
         cmd = f"ip link set dev {port_name} up"
         result = self.ns_exec(cmd)

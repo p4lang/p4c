@@ -138,8 +138,8 @@ def run_ptf(options: Options, bridge: Bridge, grpc_port: int, json_name: Path,
     # Add the file location to the python path.
     pypath = FILE_DIR
     # Show list of the tests
-    test_list_cmd = f"ptf --pypath {pypath} --test-dir {options.testdir} --list"
-    returncode = bridge.ns_exec(test_list_cmd)
+    testListCmd = f"ptf --pypath {pypath} --test-dir {options.testdir} --list"
+    returncode = bridge.ns_exec(testListCmd)
     if returncode != testutils.SUCCESS:
         return returncode
     ifaces = get_iface_str(num_ifaces=options.num_ifaces, prefix="br_")
