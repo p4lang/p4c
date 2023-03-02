@@ -1,5 +1,5 @@
-#ifndef TESTGEN_TARGETS_EBPF_TEST_BACKEND_H_
-#define TESTGEN_TARGETS_EBPF_TEST_BACKEND_H_
+#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_EBPF_TEST_BACKEND_H_
+#define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_EBPF_TEST_BACKEND_H_
 
 #include <cstdint>
 #include <string>
@@ -14,8 +14,8 @@
 #include "ir/ir.h"
 #include "lib/big_int_util.h"
 
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/test_backend.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
@@ -39,7 +39,7 @@ class EBPFTestBackend : public TestBackEnd {
     static const std::vector<std::string> SUPPORTED_BACKENDS;
 
  public:
-    explicit EBPFTestBackend(const ProgramInfo &programInfo, ExplorationStrategy &symbex,
+    explicit EBPFTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
                              const boost::filesystem::path &testPath,
                              boost::optional<uint32_t> seed);
 
@@ -58,4 +58,4 @@ class EBPFTestBackend : public TestBackEnd {
 
 }  // namespace P4Tools
 
-#endif /* TESTGEN_TARGETS_EBPF_TEST_BACKEND_H_ */
+#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_EBPF_TEST_BACKEND_H_ */

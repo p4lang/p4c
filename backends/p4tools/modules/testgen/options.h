@@ -6,7 +6,7 @@
 #include "backends/p4tools/common/options.h"
 #include "lib/cstring.h"
 
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/path_selection.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
 
 namespace P4Tools {
 
@@ -19,8 +19,7 @@ class TestgenOptions : public AbstractP4cToolOptions {
     int64_t maxTests = 1;
 
     /// Selects the path selection policy for test generation
-    P4Testgen::PathSelectionPolicy pathSelectionPolicy =
-        P4Testgen::PathSelectionPolicy::IncrementalStack;
+    P4Testgen::PathSelectionPolicy pathSelectionPolicy = P4Testgen::PathSelectionPolicy::DepthFirst;
 
     /// List of the supported stop metrics.
     static const std::set<cstring> SUPPORTED_STOP_METRICS;

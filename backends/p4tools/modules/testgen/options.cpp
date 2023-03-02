@@ -170,13 +170,12 @@ TestgenOptions::TestgenOptions()
             using P4Testgen::PathSelectionPolicy;
 
             static std::map<cstring, PathSelectionPolicy> const PATH_SELECTION_OPTIONS = {
-                {"INCREMENTAL_STACK", PathSelectionPolicy::IncrementalStack},
-                {"RANDOM_ACCESS_STACK", PathSelectionPolicy::RandomAccessStack},
-                {"GREEDY_POTENTIAL", PathSelectionPolicy::GreedyPotential},
+                {"DEPTH_FIRST", PathSelectionPolicy::DepthFirst},
+                {"RANDOM_BACKTRACK", PathSelectionPolicy::RandomBacktrack},
+                {"GREEDY_STATEMENT_SEARCH", PathSelectionPolicy::GreedyStmtCoverage},
+                {"DETERMINISTIC_STATEMENT_SEARCH", PathSelectionPolicy::DetMaxStmtCoverage},
+                {"RANDOM_STATEMENT_SEARCH", PathSelectionPolicy::RandomMaxStmtCoverage},
                 {"LINEAR_ENUMERATION", PathSelectionPolicy::LinearEnumeration},
-                {"MAX_COVERAGE", PathSelectionPolicy::MaxCoverage},
-                {"RANDOM_ACCESS_MAX_COVERAGE", PathSelectionPolicy::RandomAccessMaxCoverage},
-                {"UNBOUNDED_RANDOM_ACCESS_STACK", PathSelectionPolicy::UnboundedRandomAccessStack},
             };
             auto selectionString = cstring(arg).toUpper();
             auto it = PATH_SELECTION_OPTIONS.find(selectionString);
@@ -197,9 +196,9 @@ TestgenOptions::TestgenOptions()
             return false;
         },
         "Selects a specific path selection strategy for test generation. Options are: "
-        "INCREMENTAL_STACK, RANDOM_ACCESS_STACK, LINEAR_ENUMERATION, MAX_COVERAGE, "
-        "GREEDY_POTENTIAL, RANDOM_ACCESS_MAX_COVERAGE, and UNBOUNDED_RANDOM_ACCESS_STACK. "
-        "Defaults to INCREMENTAL_STACK.");
+        "DEPTH_FIRST, RANDOM_BACKTRACK, GREEDY_STATEMENT_SEARCH, "
+        "DETERMINISTIC_STATEMENT_SEARCH, RANDOM_STATEMENT_SEARCH, and LINEAR_ENUMERATION. "
+        "Defaults to DEPTH_FIRST.");
 
     registerOption(
         "--pop-level", "popLevel",
@@ -209,14 +208,12 @@ TestgenOptions::TestgenOptions()
                 // Unfortunately, we can not use std::stoul because negative inputs are okay
                 // according to the C++ standard.
                 popLevelTmp = std::stoll(arg);
-                if (popLevelTmp <= 0) {
+                if (popLevelTmp < 2) {
                     throw std::invalid_argument("Invalid input.");
                 }
             } catch (std::invalid_argument &) {
-                ::error(
-                    "Invalid input value %1% for --pop-level. Expected positive, non-zero "
-                    "integer.",
-                    arg);
+                ::error("Invalid input value %1% for --pop-level. Expected integer greater than 1.",
+                        arg);
                 return false;
             }
             popLevel = popLevelTmp;

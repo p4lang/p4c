@@ -15,10 +15,10 @@
 #include "ir/vector.h"
 
 #include "backends/p4tools/modules/testgen/core/arch_spec.h"
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/cmd_stepper.h"
 #include "backends/p4tools/modules/testgen/core/small_step/expr_stepper.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/namespace_context.h"
 #include "backends/p4tools/modules/testgen/lib/test_backend.h"
@@ -40,9 +40,10 @@ class TestgenTarget : public Target {
     }
 
     /// Returns the test back end associated with this P4Testgen target.
-    static TestBackEnd *getTestBackend(const ProgramInfo &programInfo, ExplorationStrategy &symbex,
+    static TestBackEnd *getTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
                                        const boost::filesystem::path &testPath,
                                        boost::optional<uint32_t> seed) {
+        return get().getTestBackend_impl(programInfo, symbex, testPath, seed);
         return get().getTestBackend_impl(programInfo, symbex, testPath, seed);
     }
 
@@ -81,7 +82,7 @@ class TestgenTarget : public Target {
 
     /// @see getTestBackend.
     virtual TestBackEnd *getTestBackend_impl(const ProgramInfo &programInfo,
-                                             ExplorationStrategy &symbex,
+                                             SymbolicExecutor &symbex,
                                              const boost::filesystem::path &testPath,
                                              boost::optional<uint32_t> seed) const = 0;
 

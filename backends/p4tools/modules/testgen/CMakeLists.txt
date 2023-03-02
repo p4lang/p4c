@@ -20,15 +20,13 @@ set(
   core/small_step/extern_stepper.cpp
   core/small_step/table_stepper.cpp
   core/small_step/small_step.cpp
-  core/exploration_strategy/incremental_stack.cpp
-  core/exploration_strategy/selected_branches.cpp
-  core/exploration_strategy/random_access_stack.cpp
-  core/exploration_strategy/linear_enumeration.cpp
-  core/exploration_strategy/greedy_potential.cpp
-  core/exploration_strategy/rnd_access_max_coverage.cpp
-  core/exploration_strategy/inc_max_coverage_stack.cpp
-  core/exploration_strategy/unbounded_rnd_ac_stack.cpp
-  core/exploration_strategy/exploration_strategy.cpp
+  core/symbolic_executor/depth_first.cpp
+  core/symbolic_executor/selected_branches.cpp
+  core/symbolic_executor/random_backtrack.cpp
+  core/symbolic_executor/linear_enumeration.cpp
+  core/symbolic_executor/greedy_stmt_cov.cpp
+  core/symbolic_executor/max_stmt_cov.cpp
+  core/symbolic_executor/symbolic_executor.cpp
   core/target.cpp
 
   lib/collect_latent_statements.cpp

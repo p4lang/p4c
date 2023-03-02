@@ -1,5 +1,5 @@
-#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_EXPLORATION_STRATEGY_SELECTED_BRANCHES_H_
-#define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_EXPLORATION_STRATEGY_SELECTED_BRANCHES_H_
+#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SYMBOLIC_EXECUTOR_SELECTED_BRANCHES_H_
+#define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SYMBOLIC_EXECUTOR_SELECTED_BRANCHES_H_
 
 #include <cstdint>
 #include <list>
@@ -10,8 +10,8 @@
 
 #include "backends/p4tools/common/core/solver.h"
 
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
 namespace P4Tools {
@@ -19,7 +19,7 @@ namespace P4Tools {
 namespace P4Testgen {
 
 /// Explores one path described by a list of branches.
-class SelectedBranches : public ExplorationStrategy {
+class SelectedBranches : public SymbolicExecutor {
  public:
     /// Executes the P4 program along a randomly chosen path. When the program terminates, the
     /// given callback is invoked. If the callback returns true, then the executor terminates.
@@ -44,4 +44,4 @@ class SelectedBranches : public ExplorationStrategy {
 
 }  // namespace P4Tools
 
-#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_EXPLORATION_STRATEGY_SELECTED_BRANCHES_H_ */
+#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SYMBOLIC_EXECUTOR_SELECTED_BRANCHES_H_ */

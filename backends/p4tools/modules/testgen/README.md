@@ -8,7 +8,7 @@ P4Testgen uses symbolic execution to automatically generate input-output tests f
 testgen
  ├─ cmake                      ── common CMake modules
  ├─ core                       ── C++ source: testgen symbolic executor core
- │   ├─ exploration_strategy   ── exploration strategies for the testgen symbolic executor
+ │   ├─ symbolic_executor   ── exploration strategies for the testgen symbolic executor
  │   └─ small_step             ── code for the testgen symbolic generator and test case generation
  ├─ lib                        ── C++ source: testgen library files
  ├─ targets
@@ -55,10 +55,10 @@ These are the current usage flags:
 --input-branches selectedBranches            List of the selected branches which should be chosen for selection.
 --track-branches                             Track the branches that are chosen in the symbolic executor. This can be used for deterministic replay.
 --with-output-packet                         Produced tests must have an output packet.
---exploration-strategy explorationStrategy   Selects a specific exploration strategy for test generation. Options are: INCREMENTAL_STACK, RANDOM_ACCESS_STACK, LINEAR_ENUMERATION, MAX_COVERAGE, and RANDOM_ACCESS_MAX_COVERAGE. Defaults to INCREMENTAL_STACK.
+--exploration-strategy SymbolicExecutor   Selects a specific exploration strategy for test generation. Options are: DEPTH_FIRST, RANDOM_BACKTRACK, BOUNDED_RANDOM_BACKTRACK, GREEDY_STATEMENT_SEARCH, DETERMINISTIC_STATEMENT_SEARCH, RANDOM_STATEMENT_SEARCH, and LINEAR_ENUMERATION. Defaults to DEPTH_FIRST.
 --pop-level popLevel                         Sets the fraction for multiPop exploration; default is 3 when meaningful strategy is activated.
 --linear-enumeration linearEnumeration       Max bound for vector size in LINEAR_ENUMERATION; defaults to 2.
---saddle-point saddlePoint                   Threshold to invoke multiPop on RANDOM_ACCESS_MAX_COVERAGE.
+--saddle-point saddlePoint                   Threshold to invoke multiPop on RANDOM_STATEMENT_SEARCH.
 --print-traces                               Print the associated traces and test information for each generated test.
 --print-steps                                Print the representation of each program node while the stepper steps through the program.
 --print-coverage                             Print detailed statement coverage statistics the interpreter collects while stepping through the program.

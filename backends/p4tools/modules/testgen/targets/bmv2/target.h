@@ -10,8 +10,8 @@
 #include "ir/ir.h"
 
 #include "backends/p4tools/modules/testgen/core/arch_spec.h"
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/cmd_stepper.h"
@@ -36,8 +36,7 @@ class BMv2_V1ModelTestgenTarget : public TestgenTarget {
 
     int getPortNumWidth_bits_impl() const override;
 
-    Bmv2TestBackend *getTestBackend_impl(const ProgramInfo &programInfo,
-                                         ExplorationStrategy &symbex,
+    Bmv2TestBackend *getTestBackend_impl(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
                                          const boost::filesystem::path &testPath,
                                          boost::optional<uint32_t> seed) const override;
 

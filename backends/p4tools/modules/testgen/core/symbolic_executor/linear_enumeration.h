@@ -1,5 +1,5 @@
-#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_EXPLORATION_STRATEGY_LINEAR_ENUMERATION_H_
-#define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_EXPLORATION_STRATEGY_LINEAR_ENUMERATION_H_
+#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SYMBOLIC_EXECUTOR_LINEAR_ENUMERATION_H_
+#define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SYMBOLIC_EXECUTOR_LINEAR_ENUMERATION_H_
 
 #include <cstdint>
 #include <vector>
@@ -8,8 +8,8 @@
 
 #include "backends/p4tools/common/core/solver.h"
 
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 
 namespace P4Tools {
 
@@ -19,7 +19,7 @@ namespace P4Testgen {
 /// which will be picked randomly to produce a test. This feature is still
 /// *experimetnal* and it can take a long time to produce tests depending on
 // the chosen max bound.
-class LinearEnumeration : public ExplorationStrategy {
+class LinearEnumeration : public SymbolicExecutor {
  public:
     /// Executes the P4 program along a randomly chosen path. When the program terminates, the
     /// given callback is invoked. If the callback returns true, then the executor terminates.
@@ -49,4 +49,4 @@ class LinearEnumeration : public ExplorationStrategy {
 
 }  // namespace P4Tools
 
-#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_EXPLORATION_STRATEGY_LINEAR_ENUMERATION_H_ */
+#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SYMBOLIC_EXECUTOR_LINEAR_ENUMERATION_H_ */

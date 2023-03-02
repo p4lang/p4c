@@ -1,4 +1,4 @@
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 
 #include <algorithm>
 #include <fstream>
@@ -30,19 +30,19 @@
 
 namespace P4Tools::P4Testgen {
 
-ExplorationStrategy::StepResult ExplorationStrategy::step(ExecutionState &state) {
+SymbolicExecutor::StepResult SymbolicExecutor::step(ExecutionState &state) {
     Util::ScopedTimer st("step");
     StepResult successors = evaluator.step(state);
     return successors;
 }
 
-uint64_t ExplorationStrategy::selectBranch(const std::vector<Branch> &branches) {
+uint64_t SymbolicExecutor::selectBranch(const std::vector<Branch> &branches) {
     // Pick a branch at random.
     return Utils::getRandInt(branches.size() - 1);
 }
 
-bool ExplorationStrategy::handleTerminalState(const Callback &callback,
-                                              const ExecutionState &terminalState) {
+bool SymbolicExecutor::handleTerminalState(const Callback &callback,
+                                           const ExecutionState &terminalState) {
     // Check the solver for satisfiability. If it times out or reports non-satisfiability, issue
     // a warning and continue on a different path.
     auto solverResult = solver.checkSat(terminalState.getPathConstraint());
@@ -63,7 +63,7 @@ bool ExplorationStrategy::handleTerminalState(const Callback &callback,
     return callback(finalState);
 }
 
-ExplorationStrategy::ExplorationStrategy(AbstractSolver &solver, const ProgramInfo &programInfo)
+SymbolicExecutor::SymbolicExecutor(AbstractSolver &solver, const ProgramInfo &programInfo)
     : programInfo(programInfo),
       solver(solver),
       allStatements(programInfo.getAllStatements()),
@@ -76,15 +76,15 @@ ExplorationStrategy::ExplorationStrategy(AbstractSolver &solver, const ProgramIn
     executionState = new ExecutionState(programInfo.program);
 }
 
-void ExplorationStrategy::updateVisitedStatements(const P4::Coverage::CoverageSet &newStatements) {
+void SymbolicExecutor::updateVisitedStatements(const P4::Coverage::CoverageSet &newStatements) {
     visitedStatements.insert(newStatements.begin(), newStatements.end());
 }
 
-const P4::Coverage::CoverageSet &ExplorationStrategy::getVisitedStatements() {
+const P4::Coverage::CoverageSet &SymbolicExecutor::getVisitedStatements() {
     return visitedStatements;
 }
 
-void ExplorationStrategy::printCurrentTraceAndBranches(std::ostream &out) {
+void SymbolicExecutor::printCurrentTraceAndBranches(std::ostream &out) {
     if (executionState == nullptr) {
         return;
     }

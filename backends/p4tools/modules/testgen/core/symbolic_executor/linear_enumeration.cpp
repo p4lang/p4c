@@ -1,4 +1,4 @@
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/linear_enumeration.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/linear_enumeration.h"
 
 #include <vector>
 
@@ -10,9 +10,9 @@
 #include "ir/ir.h"
 #include "lib/error.h"
 
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/small_step.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/options.h"
@@ -56,7 +56,7 @@ void LinearEnumeration::run(const Callback &callback) {
 
 LinearEnumeration::LinearEnumeration(AbstractSolver &solver, const ProgramInfo &programInfo,
                                      uint64_t maxBound)
-    : ExplorationStrategy(solver, programInfo), maxBound(maxBound) {
+    : SymbolicExecutor(solver, programInfo), maxBound(maxBound) {
     // The constructor populates the initial vector of branches holding a terminal state.
     // It fill the vector with a recursive call to mapBranch and stops at maxBound.
     StepResult initialSuccessors = step(*executionState);

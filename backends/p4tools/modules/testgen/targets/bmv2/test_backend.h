@@ -14,8 +14,8 @@
 #include "ir/ir.h"
 #include "lib/big_int_util.h"
 
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/test_backend.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
@@ -39,7 +39,7 @@ class Bmv2TestBackend : public TestBackEnd {
     static const std::set<std::string> SUPPORTED_BACKENDS;
 
  public:
-    explicit Bmv2TestBackend(const ProgramInfo &programInfo, ExplorationStrategy &symbex,
+    explicit Bmv2TestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
                              const boost::filesystem::path &testPath,
                              boost::optional<uint32_t> seed);
 

@@ -1,5 +1,5 @@
-#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_EXPLORATION_STRATEGY_GREEDY_POTENTIAL_H_
-#define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_EXPLORATION_STRATEGY_GREEDY_POTENTIAL_H_
+#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SYMBOLIC_EXECUTOR_GREEDY_STMT_COV_H_
+#define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SYMBOLIC_EXECUTOR_GREEDY_STMT_COV_H_
 
 #include <cstdint>
 #include <ctime>
@@ -10,8 +10,8 @@
 
 #include "backends/p4tools/common/core/solver.h"
 
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
 namespace P4Tools::P4Testgen {
@@ -24,7 +24,7 @@ namespace P4Tools::P4Testgen {
 /// expression. If the strategy does not find a new statement, it falls back to
 /// random. Similarly, if the strategy cycles without a test for a specific threshold, it will
 /// fall back to random. This is to prevent getting caught in a parser cycle.
-class GreedyPotential : public ExplorationStrategy {
+class GreedyStmtSelection : public SymbolicExecutor {
  public:
     /// Executes the P4 program along a randomly chosen path. When the program terminates, the
     /// given callback is invoked. If the callback returns true, then the executor terminates.
@@ -32,7 +32,7 @@ class GreedyPotential : public ExplorationStrategy {
     void run(const Callback &callBack) override;
 
     /// Constructor for this strategy, considering inheritance
-    GreedyPotential(AbstractSolver &solver, const ProgramInfo &programInfo);
+    GreedyStmtSelection(AbstractSolver &solver, const ProgramInfo &programInfo);
 
  private:
     /// This variable keeps track of how many branch decisions we have made without producing a
@@ -66,20 +66,20 @@ class GreedyPotential : public ExplorationStrategy {
     /// Take a branch and a solver as input.
     /// Compute the branch's path conditions using the solver.
     /// Return true if the solver can find a solution and does not time out.
-    static bool evaluateBranch(const ExplorationStrategy::Branch &branch, AbstractSolver &solver);
+    static bool evaluateBranch(const SymbolicExecutor::Branch &branch, AbstractSolver &solver);
 
     /// Iterate over all the input branches in @param candidateBranches and try to find a branch
     /// which contains statements that are not in @param coveredStatements yet. Return the first
     /// branch that was found and remove that branch from the container of @param candidateBranches.
     /// Return none, if no branch was found.
-    static std::optional<ExplorationStrategy::Branch> popPotentialBranch(
+    static std::optional<SymbolicExecutor::Branch> popPotentialBranch(
         const P4::Coverage::CoverageSet &coveredStatements,
-        std::vector<ExplorationStrategy::Branch> &candidateBranches);
+        std::vector<SymbolicExecutor::Branch> &candidateBranches);
 
     /// Select a branch at random from the input @param candidateBranches.
     //  Remove the branch from the container.
-    static ExplorationStrategy::Branch popRandomBranch(
-        std::vector<ExplorationStrategy::Branch> &candidateBranches);
+    static SymbolicExecutor::Branch popRandomBranch(
+        std::vector<SymbolicExecutor::Branch> &candidateBranches);
 
     /// Try to pick a successor from the list of given successors. This involves three steps.
     /// 1. Filter out all the successors with unsatisfiable path conditions. If no successors are
@@ -92,4 +92,4 @@ class GreedyPotential : public ExplorationStrategy {
 
 }  // namespace P4Tools::P4Testgen
 
-#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_EXPLORATION_STRATEGY_GREEDY_POTENTIAL_H_ */
+#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SYMBOLIC_EXECUTOR_GREEDY_STMT_COV_H_ */

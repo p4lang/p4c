@@ -1,5 +1,5 @@
-#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_EXPLORATION_STRATEGY_EXPLORATION_STRATEGY_H_
-#define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_EXPLORATION_STRATEGY_EXPLORATION_STRATEGY_H_
+#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SYMBOLIC_EXECUTOR_SYMBOLIC_EXECUTOR_H_
+#define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SYMBOLIC_EXECUTOR_SYMBOLIC_EXECUTOR_H_
 
 #include <cstdint>
 #include <functional>
@@ -21,17 +21,17 @@ namespace P4Tools::P4Testgen {
 /// Base abstract class for exploration strategy. It requires the implementation of
 /// the run method, and carries the base Branch struct, to be reused in inherited
 /// classes. It also holds a default termination method, which can be overridden.
-class ExplorationStrategy {
+class SymbolicExecutor {
  public:
-    virtual ~ExplorationStrategy() = default;
+    virtual ~SymbolicExecutor() = default;
 
-    ExplorationStrategy(const ExplorationStrategy &) = default;
+    SymbolicExecutor(const SymbolicExecutor &) = default;
 
-    ExplorationStrategy(ExplorationStrategy &&) = delete;
+    SymbolicExecutor(SymbolicExecutor &&) = delete;
 
-    ExplorationStrategy &operator=(const ExplorationStrategy &) = delete;
+    SymbolicExecutor &operator=(const SymbolicExecutor &) = delete;
 
-    ExplorationStrategy &operator=(ExplorationStrategy &&) = delete;
+    SymbolicExecutor &operator=(SymbolicExecutor &&) = delete;
 
     /// Callbacks are invoked when the P4 program terminates. If the callback returns true,
     /// execution halts. Otherwise, execution of the P4 program continues on a different random
@@ -48,7 +48,7 @@ class ExplorationStrategy {
     /// TODO there is a lot of code repetition in subclasses. Refactor and extract duplicates.
     virtual void run(const Callback &callBack) = 0;
 
-    explicit ExplorationStrategy(AbstractSolver &solver, const ProgramInfo &programInfo);
+    explicit SymbolicExecutor(AbstractSolver &solver, const ProgramInfo &programInfo);
 
     /// Writes a list of the selected branches into @param out.
     void printCurrentTraceAndBranches(std::ostream &out);
@@ -93,4 +93,4 @@ class ExplorationStrategy {
 
 }  // namespace P4Tools::P4Testgen
 
-#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_EXPLORATION_STRATEGY_EXPLORATION_STRATEGY_H_ */
+#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SYMBOLIC_EXECUTOR_SYMBOLIC_EXECUTOR_H_ */
