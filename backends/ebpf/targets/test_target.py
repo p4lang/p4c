@@ -58,7 +58,7 @@ class Target(EBPFTarget):
         direction = "in"
         pcap_pattern = self.filename("", direction)
         num_files = len(glob(self.filename("*", direction)))
-        testutils.log.info(f"Input file: {pcap_pattern}")
+        testutils.log.info("Input file: %s", pcap_pattern)
         # Main executable
         args = f"{self.template} "
         # Input pcap pattern

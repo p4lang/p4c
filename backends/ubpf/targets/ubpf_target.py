@@ -22,7 +22,7 @@ class Target(EBPFTarget):
         # We use a different compiler, override the inherited default
         components = options.compiler.split("/")[0:-1]
         self.compiler = "/".join(components) + "/p4c-ubpf"
-        testutils.log.info(f"Compiler is {self.compiler}")
+        testutils.log.info("Compiler is %s", self.compiler)
 
     def compile_dataplane(self):
         args = self.get_make_args(self.runtimedir, self.options.target)
@@ -42,7 +42,7 @@ class Target(EBPFTarget):
         direction = "in"
         pcap_pattern = self.filename("", direction)
         num_files = len(glob(self.filename("*", direction)))
-        testutils.log.info(f"Input file: {pcap_pattern}")
+        testutils.log.info("Input file: %s", pcap_pattern)
         # Main executable
         args = self.template + " "
         # Input pcap pattern

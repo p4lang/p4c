@@ -166,7 +166,7 @@ class EBPFTarget:
         testutils.log.info("Comparing outputs")
         direction = "out"
         for file in glob(self.filename("*", direction)):
-            testutils.log.info(f"Checking file {file}")
+            testutils.log.info("Checking file %s", file)
             interface = self.interface_of_filename(file)
             if os.stat(file).st_size == 0:
                 packets = []
@@ -174,8 +174,7 @@ class EBPFTarget:
                 try:
                     packets = scapy_util.rdpcap(file)
                 except Exception as e:
-                    testutils.log.error(f"Corrupt pcap file {file}\n{e}")
-                    self.showLog()
+                    testutils.log.error("Corrupt pcap file %s\n%s", file, e)
                     return testutils.FAILURE
 
             if interface not in self.expected:
@@ -185,24 +184,24 @@ class EBPFTarget:
                 if self.expected[interface]["any"]:
                     if self.expected[interface]["pkts"]:
                         testutils.log.error(
-                            (f"Interface {interface} has both expected with packets and without"))
+                            ("Interface %s has both expected with packets and without", interface))
                     continue
                 expected = self.expected[interface]["pkts"]
             if len(expected) != len(packets):
                 testutils.log.error(
-                    f"Expected {len(expected)} packets on port {interface} got {len(packets)}")
+                    "Expected %s packets on port %s got %s", len(expected), interface, len(packets))
                 return testutils.FAILURE
             for idx, expected_pkt in enumerate(expected):
                 cmp = testutils.compare_pkt(expected_pkt, packets[idx])
                 if cmp != testutils.SUCCESS:
-                    testutils.log.error(f"Packet {idx} on port {interface} differs")
+                    testutils.log.error("Packet %s on port %s differs", idx, interface)
                     return cmp
             # Remove successfully checked interfaces
             if interface in self.expected:
                 del self.expected[interface]
         if len(self.expected) != 0:
             # Didn't find all the expects we were expecting
-            testutils.log.error(f"Expected packets on port(s) {self.expected.keys()} not received")
+            testutils.log.error("Expected packets on port(s) %s not received", self.expected.keys())
             return testutils.FAILURE
         testutils.log.info("All went well.")
         return testutils.SUCCESS

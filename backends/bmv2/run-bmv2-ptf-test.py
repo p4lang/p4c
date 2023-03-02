@@ -173,12 +173,14 @@ def run_test(options: Options) -> int:
     if result != testutils.SUCCESS:
         # Terminate the switch process and emit its output in case of failure.
         testutils.kill_proc_group(switch_proc)
-        testutils.log.error(
-            f"######## Switch log ########\n{switchlog.with_suffix('.txt').read_text()}")
+        switchout = switchlog.with_suffix(".txt").read_text()
+        testutils.log.error("######## Switch log ########\n%s", switchout)
         if switch_proc.stdout:
-            testutils.log.error(f"######## Switch output ######## \n{switch_proc.stdout.read()}")
+            out = switch_proc.stdout.read()
+            testutils.log.error("######## Switch output ######## \n%s", out)
         if switch_proc.stderr:
-            testutils.log.error(f"######## Switch errors ######## \n{switch_proc.stderr.read()}")
+            err = switch_proc.stderr.read()
+            testutils.log.error("######## Switch errors ######## \n%s", err)
     bridge.ns_del()
     return result
 

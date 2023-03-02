@@ -19,6 +19,7 @@
 import sys
 import logging
 from pathlib import Path
+from typing import List
 
 # Append tools to the import path.
 FILE_DIR = Path(__file__).resolve().parent
@@ -31,13 +32,13 @@ class Bridge:
 
     def __init__(self, namespace: str):
         # Identifier of the namespace.
-        self.ns_name = namespace
+        self.ns_name: str = namespace
         # Name of the central bridge.
-        self.br_name = "core"
+        self.br_name: str = "core"
         # List of the veth pair bridge ports.
-        self.br_ports = []
+        self.br_ports: List[str] = []
         # List of the veth pair edge ports.
-        self.edge_ports = []
+        self.edge_ports: List[str] = []
 
     def ns_init(self) -> int:
         """Initialize the namespace."""
@@ -77,11 +78,11 @@ class Bridge:
     def ns_proc_write(self, proc: testutils.subprocess.Popen, cmd: str) -> int:
         """Allows writing of a command to a given process. The command is NOT
         yet executed."""
-        testutils.log.info(f"Writing {cmd} ")
+        testutils.log.info("Writing %s ", cmd)
         try:
             proc.stdin.write(cmd)
         except IOError as exception:
-            testutils.log.error(f"Error while writing to process\n{exception}")
+            testutils.log.error("Error while writing to process\n%s", exception)
             return testutils.FAILURE
         return testutils.SUCCESS
 
@@ -161,7 +162,7 @@ class Bridge:
         result = self.create_bridge()
         if result != testutils.SUCCESS:
             return result
-        testutils.log.info(f"Attaching {num_ifaces} interfaces...")
+        testutils.log.info("Attaching %s interfaces...", num_ifaces)
         return self.attach_interfaces(num_ifaces)
 
 
