@@ -153,7 +153,7 @@ const IR::Node *LowerExpressions::postorder(IR::Concat *expression) {
     auto cast1 = new IR::Cast(expression->right->srcInfo, resulttype, expression->right);
     auto sizefb0 = new IR::Constant(new IR::Type_InfInt(), sizeofb);
     auto sh = new IR::Shl(cast0->srcInfo, cast0, sizefb0);
-    big_int m = Util::maskFromSlice(sizeofb, 0);
+    big_int m = Util::maskFromSlice(sizeofb - 1, 0);
     auto mask = new IR::Constant(expression->right->srcInfo, resulttype, m, 16);
     auto and0 = new IR::BAnd(expression->right->srcInfo, cast1, mask);
     auto result = new IR::BOr(expression->srcInfo, sh, and0);

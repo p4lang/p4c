@@ -32,6 +32,9 @@ struct metadata {
 	bit<32> local_metadata_meta6
 	bit<16> local_metadata_meta7
 	bit<16> Ingress_tmp
+	bit<32> Ingress_tmp_1
+	bit<16> Ingress_tmp_2
+	bit<32> Ingress_tmp_4
 }
 metadata instanceof metadata
 
@@ -80,6 +83,14 @@ apply {
 	mov h.dstAddr m.local_metadata_meta
 	mov h.srcAddr m.local_metadata_meta1
 	mov h.etherType m.local_metadata_meta2
+	mov m.Ingress_tmp_1 m.local_metadata_meta2
+	shl m.Ingress_tmp_1 0x10
+	mov m.Ingress_tmp_2 0xF0
+	add m.Ingress_tmp_2 m.local_metadata_meta2
+	mov m.Ingress_tmp_4 m.Ingress_tmp_2
+	and m.Ingress_tmp_4 0xFFFF
+	mov m.local_metadata_meta m.Ingress_tmp_1
+	or m.local_metadata_meta m.Ingress_tmp_4
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP :	drop
