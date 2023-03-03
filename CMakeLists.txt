@@ -85,6 +85,8 @@ else()
   set (P4C_VERSION "${P4C_SEM_VERSION_STRING} (SHA: ${P4C_GIT_SHA} BUILD: ${CMAKE_BUILD_TYPE})")
 endif()
 include(P4CUtils)
+# TODO: Remove this deprecated include.
+include(UnifiedBuild)
 
 # # search in /usr/local first
 # set (CMAKE_FIND_ROOT_PATH "/usr/local/bin" "${CMAKE_FIND_ROOT_PATH}")
