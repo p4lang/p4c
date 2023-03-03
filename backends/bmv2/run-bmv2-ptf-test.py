@@ -59,74 +59,94 @@ PARSER.add_argument(
     help="The log level to choose.",
 )
 
+GRPC_PORT = 28000
+THRIFT_PORT = 22000
+
 
 class Options:
+    """Options for this testing script. Usually correspond to command line inputs."""
+    # File that is being compiled.
+    p4_file: Path = Path(".")
+    # Path to ptf test file that is used.
+    testfile: Path = Path(".")
+    # Actual location of the test framework.
+    testdir: Path = Path(".")
+    # The base directory where tests are executed.
+    rootdir: Path = Path(".")
+    # The number of interfaces to create for this particular test.
+    num_ifaces = 8
 
-    def __init__(self):
-        # File that is being compiled.
-        self.p4_file = None
-        # Path to ptf test file that is used.
-        self.testfile = None
-        # Actual location of the test framework.
-        self.testdir = None
-        # The base directory where tests are executed.
-        self.rootdir = "."
-        # The number of interfaces to create for this particular test.
-        self.num_ifaces = 8
 
-
-def create_bridge(num_ifaces):
-    testutils.log.info("---------------------- Start creating of bridge ----------------------",)
+def create_bridge(num_ifaces: int) -> Bridge:
+    """Create a network namespace environment."""
+    testutils.log.info("---------------------- Creating a namespace ----------------------",)
     random.seed(datetime.now().timestamp())
-    bridge = Bridge(random.randint(0, sys.maxsize))
+    bridge = Bridge(str(random.randint(0, sys.maxsize)))
     result = bridge.create_virtual_env(num_ifaces)
     if result != testutils.SUCCESS:
         bridge.ns_del()
         testutils.log.error(
-            "---------------------- End creating of bridge with errors ----------------------",)
+            "---------------------- Namespace creation failed ----------------------",)
         raise SystemExit("Unable to create the namespace environment.")
-    testutils.log.info("---------------------- Bridge created ----------------------")
+    testutils.log.info(
+        "---------------------- Namespace successfully created ----------------------")
     return bridge
 
 
-def compile_program(options, json_name, info_name):
-    testutils.log.info("---------------------- Start p4c-bm2-ss ----------------------")
+def compile_program(options: Options, json_name: Path, info_name: Path) -> int:
+    """Compile the input P4 program using p4c-bm2-ss."""
+    testutils.log.info("---------------------- Compile with p4c-bm2-ss ----------------------")
     compilation_cmd = (f"{options.rootdir}/build/p4c-bm2-ss --target bmv2 --arch v1model "
                        f"--p4runtime-files {info_name} {options.p4_file} -o {json_name}")
-    _, returncode = testutils.exec_process(
-        compilation_cmd, "Could not compile the P4 program", timeout=30)
+    _, returncode = testutils.exec_process(compilation_cmd, timeout=30)
+    if returncode != testutils.SUCCESS:
+        testutils.log.error("Failed to compile the P4 program %s.", options.p4_file)
     return returncode
 
 
-def run_simple_switch_grpc(bridge, switchlog, grpc_port):
-    thrift_port = testutils.pick_tcp_port(22000)
+def get_iface_str(num_ifaces: int, prefix: str = "") -> str:
+    """ Produce the PTF interface arguments based on the number of interfaces the PTF test uses."""
+    iface_str = ""
+    for iface_num in range(num_ifaces):
+        iface_str += f"-i {iface_num}@{prefix}{iface_num} "
+    return iface_str
+
+
+def run_simple_switch_grpc(options: Options, bridge: Bridge, switchlog: Path,
+                           grpc_port: int) -> testutils.subprocess.Popen:
+    """Start simple_switch_grpc and return the process handle."""
+    thrift_port = testutils.pick_tcp_port(THRIFT_PORT)
     testutils.log.info("---------------------- Start simple_switch_grpc ----------------------",)
+    ifaces = get_iface_str(num_ifaces=options.num_ifaces)
     simple_switch_grpc = (
         f"simple_switch_grpc --thrift-port {thrift_port} --log-file {switchlog} --log-flush -i 0@0 "
-        f"-i 1@1 -i 2@2 -i 3@3 -i 4@4 -i 5@5 -i 6@6 -i 7@7 --no-p4 "
-        f"-- --grpc-server-addr localhost:{grpc_port}")
+        f"{ifaces} --no-p4 "
+        f"-- --grpc-server-addr 0.0.0.0:{grpc_port}")
     bridge_cmd = bridge.get_ns_prefix() + " " + simple_switch_grpc
-    switchProc = testutils.open_process(bridge_cmd)
-    if switchProc is None:
+    switch_proc = testutils.open_process(bridge_cmd)
+    if switch_proc is None:
         bridge.ns_del()
         raise SystemExit("simple_switch_grpc ended with errors")
 
-    return switchProc
+    return switch_proc
 
 
-def run_ptf(bridge, grpc_port, testdir, json_name, info_name) -> int:
-    testutils.log.info("---------------------- Start ptf ----------------------")
+def run_ptf(options: Options, bridge: Bridge, grpc_port: int, json_name: Path,
+            info_name: Path) -> int:
+    """Run the PTF test."""
+    testutils.log.info("---------------------- Run PTF test ----------------------")
     # Add the file location to the python path.
     pypath = FILE_DIR
     # Show list of the tests
-    testLostCmd = f"ptf --pypath {pypath} --test-dir {testdir} --list"
-    returncode = bridge.ns_exec(testLostCmd)
+    testListCmd = f"ptf --pypath {pypath} --test-dir {options.testdir} --list"
+    returncode = bridge.ns_exec(testListCmd)
     if returncode != testutils.SUCCESS:
         return returncode
-    ifaces = "-i 0@br_0 -i 1@br_1 -i 2@br_2 -i 3@br_3 -i 4@br_4 -i 5@br_5 -i 6@br_6 -i 7@br_7"
-    test_params = f"grpcaddr='localhost:{grpc_port}';p4info='{info_name}';config='{json_name}';"
-    ptf = f'ptf --verbose --pypath {pypath} {ifaces} --test-params=\\"{test_params}\\" --test-dir {testdir}'
-    returncode = bridge.ns_exec(ptf)
+    ifaces = get_iface_str(num_ifaces=options.num_ifaces, prefix="br_")
+    test_params = f"grpcaddr='0.0.0.0:{grpc_port}';p4info='{info_name}';config='{json_name}';"
+    run_ptf_cmd = f"ptf --pypath {pypath} {ifaces} --log-file {options.testdir.joinpath('ptf.log')}"
+    run_ptf_cmd += f" --test-params={test_params} --test-dir {options.testdir}"
+    returncode = bridge.ns_exec(run_ptf_cmd)
     return returncode
 
 
@@ -145,25 +165,28 @@ def run_test(options: Options) -> int:
     # Create the virtual environment for the test execution.
     bridge = create_bridge(options.num_ifaces)
     # Pick available ports for the gRPC switch.
-    grpc_port = testutils.pick_tcp_port(28000)
+    grpc_port = testutils.pick_tcp_port(GRPC_PORT)
     switchlog = options.testdir.joinpath("switchlog")
-    switch_proc = run_simple_switch_grpc(bridge, switchlog, grpc_port)
+    switch_proc = run_simple_switch_grpc(options, bridge, switchlog, grpc_port)
     # Run the PTF test and retrieve the result.
-    result = run_ptf(bridge, grpc_port, options.testdir, json_name, info_name)
+    result = run_ptf(options, bridge, grpc_port, json_name, info_name)
     if result != testutils.SUCCESS:
         # Terminate the switch process and emit its output in case of failure.
         testutils.kill_proc_group(switch_proc)
-        testutils.log.error(
-            f"######## Switch log ########\n{switchlog.with_suffix('.txt').read_text()}")
+        switchout = switchlog.with_suffix(".txt").read_text()
+        testutils.log.error("######## Switch log ########\n%s", switchout)
         if switch_proc.stdout:
-            testutils.log.error(f"######## Switch output ######## \n{switch_proc.stdout.read()}")
+            out = switch_proc.stdout.read()
+            testutils.log.error("######## Switch output ######## \n%s", out)
         if switch_proc.stderr:
-            testutils.log.error(f"######## Switch errors ######## \n{switch_proc.stderr.read()}")
+            err = switch_proc.stderr.read()
+            testutils.log.error("######## Switch errors ######## \n%s", err)
     bridge.ns_del()
     return result
 
 
 def create_options(test_args) -> Options:
+    """Parse the input arguments and create a processed options object."""
     options = Options()
     options.p4_file = Path(testutils.check_if_file(test_args.p4_file))
     testfile = test_args.testfile
@@ -183,21 +206,20 @@ def create_options(test_args) -> Options:
 
     # Configure logging.
     logging.basicConfig(
-        filename=options.testdir.joinpath("testlog.log"),
-        format="%(levelname)s:%(message)s",
+        filename=options.testdir.joinpath("test.log"),
+        format="%(levelname)s: %(message)s",
         level=getattr(logging, test_args.log_level),
         filemode="w",
     )
     stderr_log = logging.StreamHandler()
-    stderr_log.setFormatter(logging.Formatter("%(levelname)s:%(message)s"))
+    stderr_log.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
     logging.getLogger().addHandler(stderr_log)
     return options
 
 
 if __name__ == "__main__":
     if not testutils.check_root():
-        errmsg = "This script requires root privileges; Exiting."
-        testutils.log.error(errmsg)
+        testutils.log.error("This script requires root privileges; Exiting.")
         sys.exit(1)
     # Parse options and process argv
     args, argv = PARSER.parse_known_args()

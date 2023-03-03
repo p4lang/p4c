@@ -34,7 +34,7 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
-  "Segmentation fault"
+  "Exception in thread"
   # The error here is unclear.
   extract_for_header_union.p4
 )

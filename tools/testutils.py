@@ -18,22 +18,57 @@
 
 import subprocess
 import logging
-import sys
 import socket
 import random
 import os
+import threading
 import shutil
 import signal
 from pathlib import Path
-from typing import NamedTuple
+from typing import NamedTuple, Optional
 
-# configure logging
+# Set up logging.
 log = logging.getLogger(__name__)
 
-TIMEOUT = 10 * 60
-SUCCESS = 0
-FAILURE = 1
-SKIPPED = 999 # used occasionally to indicate that a test was not executed
+TIMEOUT: int = 10 * 60
+SUCCESS: int = 0
+FAILURE: int = 1
+# SKIPPED is used to indicate that a test was not executed.
+SKIPPED: int = 999
+
+
+class LogPipe(threading.Thread):
+    """A log utility class that allows subprocesses to directly write into a log.
+    Derived from https://codereview.stackexchange.com/a/17959."""
+
+    def __init__(self, level: int):
+        """Setup the object with a logger and a loglevel
+        and start the thread
+        """
+        threading.Thread.__init__(self)
+        self.daemon = False
+        self.level = level
+        self.fd_read, self.fd_write = os.pipe()
+        self.pipe_reader = os.fdopen(self.fd_read)
+        self.start()
+
+    def fileno(self) -> int:
+        """Return the write file descriptor of the pipe
+        """
+        return self.fd_write
+
+    def run(self) -> None:
+        """Run the thread, logging everything.
+        """
+        for line in iter(self.pipe_reader.readline, ''):
+            log.log(self.level, line.strip('\n'))
+
+        self.pipe_reader.close()
+
+    def close(self) -> None:
+        """Close the write end of the pipe.
+        """
+        os.close(self.fd_write)
 
 
 class ProcessResult(NamedTuple):
@@ -43,12 +78,12 @@ class ProcessResult(NamedTuple):
     returncode: int
 
 
-def is_err(p4filename):
+def is_err(p4filename: str) -> bool:
     """True if the filename represents a p4 program that should fail."""
     return "_errors" in p4filename
 
 
-def hex_to_byte(hex_str):
+def hex_to_byte(hex_str: str) -> str:
     """Convert hex strings to bytes."""
     byte_vals = []
     hex_str = "".join(hex_str.split(" "))
@@ -57,168 +92,204 @@ def hex_to_byte(hex_str):
     return "".join(byte_vals)
 
 
-def compare_pkt(expected, received):
+def compare_pkt(expected: str, received: str) -> int:
     """Compare two given byte sequences and check if they are the same.
     Report errors if this is not the case."""
     received = bytes(received).hex().upper()
     expected = "".join(expected.split()).upper()
     if len(received) < len(expected):
-        log.error(f"Received packet too short {len(received)} vs {len(expected)}")
+        log.error("Received packet too short %s vs %s", len(received), len(expected))
         return FAILURE
     for idx, val in enumerate(expected):
         if val == "*":
             continue
         if val != received[idx]:
-            log.error(f"Received packet\n {received} ")
-            log.error(
-                f"Packet different at position {idx}: expected\n{val}\n\nreceived\n{received[idx]}")
-            log.error(f"Expected packet {expected}")
+            log.error("Received packet\n %s ", received)
+            log.error("Packet different at position %s: expected\n%s\n\nreceived\n%s", idx, val,
+                      received[idx])
+            log.error("Expected packet %s", expected)
             return FAILURE
     return SUCCESS
 
 
 def is_tcp_port_in_use(port: int) -> bool:
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        return s.connect_ex(("localhost", port)) == 0
+    """Helper function to check whether a given TCP port number is in use on this system."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as tcp_socket:
+        return tcp_socket.connect_ex(("localhost", port)) == 0
 
 
 def pick_tcp_port(default_port: int) -> int:
-    # Pick an available port.
+    """Helper function to check pick a free TCP port."""
     port_used = True
     while port_used:
         default_port = random.randrange(1024, 65535)
         port_used = is_tcp_port_in_use(default_port)
-
     return default_port
 
 
-def open_process(args):
-    """Run the given arguments as a subprocess. Time out after TIMEOUT
-    seconds and report failures or stdout."""
-    log.info(f"Writing {args}")
+def open_process(args: str, **extra_args) -> Optional[subprocess.Popen]:
+    """Start the given argument string as a subprocess and return the handle to the process.
+       @param extra_args is forwarded to the subprocess.communicate command"""
+    log.info("Writing %s", " ".join(args))
     proc = None
+    output_args = {
+        "stdout": subprocess.PIPE,
+        "stdin": subprocess.PIPE,
+        "stderr": subprocess.PIPE,
+        "universal_newlines": True,
+        "preexec_fn": os.setsid,
+    }
+    output_args = {**output_args, **extra_args}
+
+    # Only split the arguments if the shell option is not present.
+    if not ("shell" in extra_args and extra_args["shell"]):
+        args = args.split()
+        # Sanitize all empty strings.
+        args = list(filter(None, args))
 
     try:
-        proc = subprocess.Popen(
-            args,
-            stdout=subprocess.PIPE,
-            shell=True,
-            stdin=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            universal_newlines=True,
-            preexec_fn=os.setsid,
-        )
-    except OSError as e:
-        log.error(f"Failed executing:\n{e}")
+        proc = subprocess.Popen(args, **output_args)
+    except OSError as exception:
+        log.error("Failed executing:\n%s", exception)
     if proc is None:
         # Never even started
         log.error("Process failed to start")
     return proc
 
 
-def run_process(proc, timeout, errmsg):
+def run_process(proc: subprocess.Popen, **extra_args) -> subprocess.Popen:
+    """Wait for the given process to finish. Report failures to stderr. @param extra_args is
+        forwarded to the subprocess.communicate command."""
     try:
-        out, err = proc.communicate(timeout=timeout)
-    except subprocess.TimeoutExpired as e:
-        log.error(f"Command '{e.cmd}' timed out.")
-        out = e.stdout
-        err = e.stderr
+        out, err = proc.communicate(**extra_args)
+    except subprocess.TimeoutExpired as exception:
+        log.error("Command '%s' timed out.", exception.cmd)
+        out = exception.stdout
+        err = exception.stderr
     if out:
         msg = "\n########### PROCESS OUTPUT BEGIN:\n" f"{out}########### PROCESS OUTPUT END\n"
         log.info(msg)
     if proc.returncode != SUCCESS:
-        log.error(f"Error {proc.returncode}: {errmsg}\n{err}")
+        log.error("Error %s:\n%s", proc.returncode, err)
     else:
         # Also report non fatal warnings in stdout
         if err:
             log.error(err)
-    return proc.returncode
+    return proc
 
 
-def exec_process(args, errmsg, timeout=TIMEOUT):
-    log.debug(f"Executing command: {args}")
-    output_args = {}
-    if log.getEffectiveLevel() <= logging.INFO:
-        output_args = {"stdout": sys.stdout, "stderr": sys.stdout}
-    else:
-        output_args = {"stdout": subprocess.PIPE, "stderr": sys.stdout}
+def exec_process(args: str, **extra_args) -> ProcessResult:
+    """Run the given argument string as a subprocess. Time out after TIMEOUT
+    seconds and report failures to stderr. @param extra_args is forwarded to the subprocess.run
+    command."""
+    if not isinstance(args, str):
+        log.error("Input must be a string. Received %s.", args)
+        return ProcessResult(f"Input must be a string. Received {args}.", FAILURE)
+
+    log.info("Executing command: %s", args)
+    output_args = {"timeout": TIMEOUT, "universal_newlines": True}
+    output_args = {**output_args, **extra_args}
+
+    # Only split the arguments if the shell option is not present.
+    if not ("shell" in extra_args and extra_args["shell"]):
+        args = args.split()
+        # Sanitize all empty strings.
+        args = list(filter(None, args))
+
+    # Set up log pipes for both stdout and stderr.
+    outpipe = LogPipe(logging.INFO)
+    output_args["stdout"] = outpipe
+    errpipe = LogPipe(logging.WARNING)
+    output_args["stderr"] = errpipe
+
     try:
-        result = subprocess.run(
-            args, shell=True, timeout=timeout, universal_newlines=True, check=True, **output_args)
+        result = subprocess.run(args, check=True, **output_args)
         out = result.stdout
         returncode = result.returncode
-    except subprocess.CalledProcessError as e:
-        out = e.stdout
-        returncode = e.returncode
-        log.error(f"Error {returncode} when executing {e.cmd}:\n{errmsg}\n{out}")
-    if log.getEffectiveLevel() <= logging.INFO:
-        if out:
-            log.info("########### PROCESS OUTPUT BEGIN:\n"
-                     f"{out}########### PROCESS OUTPUT END")
+    except subprocess.CalledProcessError as exception:
+        out = exception.stderr
+        returncode = exception.returncode
+        cmd = exception.cmd
+        # Rejoin the list for better readability.
+        if isinstance(cmd, list):
+            cmd = " ".join(cmd)
+        log.error("Error %s when executing \"%s\".", returncode, cmd)
+    except subprocess.TimeoutExpired as exception:
+        out = exception.stderr
+        returncode = FAILURE
+        cmd = exception.cmd
+        # Rejoin the list for better readability.
+        if isinstance(cmd, list):
+            cmd = " ".join(cmd)
+        log.error("Timed out when executing %s.", cmd)
+    finally:
+        outpipe.close()
+        errpipe.close()
     return ProcessResult(out, returncode)
 
 
-def kill_proc_group(proc):
+def kill_proc_group(proc: subprocess.Popen) -> None:
+    """Kill a process group and all processes associated with this group."""
     os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
 
 
-def check_root():
+def check_root() -> bool:
     """This function returns False if the user does not have root privileges.
     Caution: Only works on Unix systems"""
     return os.getuid() == 0
 
 
-class PathError(RuntimeError):
-    pass
-
-
-def check_if_file(input_path):
+def check_if_file(input_path_str: str) -> Optional[Path]:
     """Checks if a path is a file and converts the input
     to an absolute path"""
-    if not input_path:
-        log.error(sys.stderr, "input_path is None")
-        sys.exit(1)
-    input_path = Path(input_path)
+    if not input_path_str:
+        log.error("input_path is None")
+        return None
+    input_path = Path(input_path_str)
     if not input_path.exists():
-        log.error(sys.stderr, f"{input_path} does not exist")
-        sys.exit(1)
+        log.error("%s does not exist", input_path)
+        return None
     if not input_path.is_file():
-        log.error(sys.stderr, f"{input_path} is not a file")
-        sys.exit(1)
+        log.error("%s is not a file", input_path)
+        return None
     return Path(input_path.absolute())
 
 
-def check_if_dir(input_path):
+def check_if_dir(input_path_str: str) -> Optional[Path]:
     """Checks if a path is an actual directory and converts the input
     to an absolute path"""
-    if not input_path:
-        log.error(sys.stderr, "input_path is None")
-        sys.exit(1)
-    input_path = Path(input_path)
+    if not input_path_str:
+        log.error("input_path is None")
+        return None
+    input_path = Path(input_path_str)
     if not input_path.exists():
-        log.error(sys.stderr, f"{input_path} does not exist")
-        sys.exit(1)
+        log.error("%s does not exist", input_path)
+        return None
     if not input_path.is_dir():
-        log.error(sys.stderr, f"{input_path} is not a directory")
-        sys.exit(1)
+        log.error("%s is not a directory", input_path)
+        return None
     return Path(input_path.absolute())
 
 
-def check_and_create_dir(directory):
-    # create the folder if it does not exit
-    if not directory == "" and not os.path.exists(directory):
-        log.info(f"Folder {directory} does not exist! Creating...")
+def check_and_create_dir(directory: Path) -> None:
+    """ Create the folder if it does not exit. """
+    if directory and not directory.exists():
+        log.info("Folder %s does not exist! Creating...", directory)
         directory.mkdir(parents=True, exist_ok=True)
 
 
-def del_dir(directory):
+def del_dir(directory: str) -> None:
+    """ Delete a directory and all its children.
+        TODO: Convert to Path input. """
     try:
         shutil.rmtree(directory, ignore_errors=True)
-    except OSError as e:
-        log.error(f"Could not delete directory, reason:\n{e.filename} - {e.strerror}.")
+    except OSError as exception:
+        log.error("Could not delete directory, reason:\n%s - %s.", exception.filename,
+                  exception.strerror)
 
 
 def copy_file(src, dst):
+    """Copy a file or a list of files to a destination."""
     try:
         if isinstance(src, list):
             for src_file in src:
@@ -226,5 +297,5 @@ def copy_file(src, dst):
         else:
             shutil.copy2(src, dst)
     except shutil.SameFileError:
-        # this is fine
+        # Exceptions are okay here.
         pass

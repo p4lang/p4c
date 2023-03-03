@@ -22,7 +22,7 @@ class Target(EBPFTarget):
         # We use a different compiler, override the inherited default
         components = options.compiler.split("/")[0:-1]
         self.compiler = "/".join(components) + "/p4c-ubpf"
-        testutils.log.info(f"Compiler is {self.compiler}")
+        testutils.log.info("Compiler is %s", self.compiler)
 
     def compile_dataplane(self):
         args = self.get_make_args(self.runtimedir, self.options.target)
@@ -31,15 +31,18 @@ class Target(EBPFTarget):
         args += "CFLAGS+=-DCONTROL_PLANE "
         args += "EXTERNOBJ=" + self.options.extern + " "
 
-        errmsg = "Failed to build the filter:"
-        return testutils.exec_process(args, errmsg).returncode
+        result = testutils.exec_process(args)
+        if result.returncode != testutils.SUCCESS:
+            testutils.log.error("Failed to build the filter")
+        return result.returncode
+
 
     def run(self):
         testutils.log.info("Running model")
         direction = "in"
         pcap_pattern = self.filename("", direction)
         num_files = len(glob(self.filename("*", direction)))
-        testutils.log.info(f"Input file: {pcap_pattern}")
+        testutils.log.info("Input file: %s", pcap_pattern)
         # Main executable
         args = self.template + " "
         # Input pcap pattern
@@ -48,9 +51,10 @@ class Target(EBPFTarget):
         args += "-n " + str(num_files) + " "
         # Debug flag (verbose output)
         args += "-d"
-        errmsg = "Failed to execute the filter:"
-        result = testutils.exec_process(args, errmsg).returncode
-        return result
+        result = testutils.exec_process(args)
+        if result.returncode != testutils.SUCCESS:
+            testutils.log.error("Failed to execute the filter")
+        return result.returncode
 
     def _generate_control_actions(self, cmds):
         generated = ""

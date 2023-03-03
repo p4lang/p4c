@@ -54,8 +54,10 @@ class Target(EBPFTarget):
             args += f" INCLUDES+=-include{self.options.extern} "
             # need to include the temporary dir because of the tmp import
             args += f" INCLUDES+=-I{self.tmpdir} "
-        errmsg = "Failed to compile the eBPF byte code:"
-        return testutils.exec_process(args, errmsg).returncode
+        result = testutils.exec_process(args)
+        if result.returncode != testutils.SUCCESS:
+            testutils.log.error("Failed to compile the eBPF byte code")
+        return result.returncode
 
     def _create_runtime(self):
         args = self.get_make_args(self.runtimedir, self.options.target)
@@ -70,8 +72,10 @@ class Target(EBPFTarget):
         args += f"LIBS+={self.runtimedir}/usr/lib64/libbpf.a "
         args += "LIBS+=-lz "
         args += "LIBS+=-lelf "
-        errmsg = "Failed to build the filter:"
-        return testutils.exec_process(args, errmsg).returncode
+        result = testutils.exec_process(args)
+        if result.returncode != testutils.SUCCESS:
+            testutils.log.error("Failed to build the filter")
+        return result.returncode
 
     def _create_bridge(self):
         # The namespace is the id of the process
@@ -91,7 +95,7 @@ class Target(EBPFTarget):
         direction = "in"
         pcap_pattern = self.filename("", direction)
         num_files = len(glob(self.filename("*", direction)))
-        testutils.log.info(f"Input file: {pcap_pattern}")
+        testutils.log.info("Input file: %s", pcap_pattern)
         # Main executable
         cmd = self.template + " "
         # Input pcap pattern

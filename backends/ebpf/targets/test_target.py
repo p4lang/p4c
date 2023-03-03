@@ -47,16 +47,18 @@ class Target(EBPFTarget):
             # we inline the extern so we need a direct include
             args += f"INCLUDES+=-include{self.options.extern} "
             # need to include the temporary dir because of the tmp import
-            args +=f"INCLUDES+=-I{self.tmpdir} "
-        errmsg = "Failed to build the filter:"
-        return testutils.exec_process(args, errmsg).returncode
+            args += f"INCLUDES+=-I{self.tmpdir} "
+        result = testutils.exec_process(args)
+        if result.returncode != testutils.SUCCESS:
+            testutils.log.error("Failed to build the filter")
+        return result.returncode
 
     def run(self):
         testutils.log.info("Running model")
         direction = "in"
         pcap_pattern = self.filename("", direction)
         num_files = len(glob(self.filename("*", direction)))
-        testutils.log.info(f"Input file: {pcap_pattern}")
+        testutils.log.info("Input file: %s", pcap_pattern)
         # Main executable
         args = f"{self.template} "
         # Input pcap pattern
@@ -65,6 +67,7 @@ class Target(EBPFTarget):
         args += f"-n {num_files} "
         # Debug flag (verbose output)
         args += "-d"
-        errmsg = "Failed to execute the filter:"
-        result = testutils.exec_process(args, errmsg).returncode
-        return result
+        result = testutils.exec_process(args)
+        if result.returncode != testutils.SUCCESS:
+            testutils.log.error("Failed to execute the filter")
+        return result.returncode

@@ -14,7 +14,6 @@
     folder. The library and its headers are required by the kernel target.
 """
 
-import os
 import sys
 import logging
 from pathlib import Path
@@ -25,13 +24,7 @@ sys.path.append(str(FILE_DIR.joinpath("../../tools")))
 import testutils
 
 
-def create_dir(directory):
-    """Create the folder, if it does not exit yet"""
-    if not directory == "" and not os.path.exists(directory):
-        os.makedirs(directory)
-
-
-def main():
+def main() -> int:
     # Configure logging.
     logging.basicConfig(
         format="%(levelname)s:%(message)s",
@@ -45,21 +38,21 @@ def main():
     # Download submodule if it has not been initialized yet
     git_cmd = f"cd {FILE_DIR} && git submodule update --init {libbpf_dir}"
     # We ignore the error that is thrown here
-    testutils.exec_process(
-        args=git_cmd,
-        errmsg="Could not initialize libbpf submodule",
-        timeout=20,
-    )
+    result = testutils.exec_process(args=git_cmd, timeout=20, shell=True)
+    if result.returncode != testutils.SUCCESS:
+        testutils.log.error("Could not initialize libbpf submodule")
     # Create the libbpf build directory
-    create_dir(libbpf_build_dir)
+    testutils.check_and_create_dir(libbpf_build_dir)
     # Build libbpf
     mk_cmd = f"make -C {libbpf_src_dir} install "
     mk_cmd += "BUILD_STATIC_ONLY=y "
     mk_cmd += f"OBJDIR={libbpf_build_dir} "
     mk_cmd += f"DESTDIR={libbpf_target_dir} "
-    err = testutils.exec_process(args=mk_cmd, errmsg="Could not build libbpf")
-    return err
+    result = testutils.exec_process(args=mk_cmd)
+    if result.returncode != testutils.SUCCESS:
+        testutils.log.error("Could not build libbpf")
+    return result.returncode
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
