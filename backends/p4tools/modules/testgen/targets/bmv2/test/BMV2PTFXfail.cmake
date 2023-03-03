@@ -239,9 +239,16 @@ p4tools_add_xfail_reason(
   parser-unroll-test2.p4
   header-stack-ops-bmv2.p4
   # The packet is too short and is dropped by PTF.
-  issue914-bmv2.p4
   fabric.p4
+)
+
+# The test framework has a bug where it swallows the test output if the last test failed.
+# This issue only happens on CI.
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "ERROR: Error 1 when executing"
   parser-unroll-t1-cond.p4
+  issue914-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
