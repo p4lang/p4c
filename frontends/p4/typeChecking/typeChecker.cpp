@@ -347,7 +347,8 @@ const IR::Type *TypeInference::canonicalize(const IR::Type *type) {
     if (auto tt = type->to<IR::Type_Type>()) type = tt->type;
 
     if (type->is<IR::Type_SpecializedCanonical>() || type->is<IR::Type_InfInt>() ||
-        type->is<IR::Type_Action>() || type->is<IR::Type_Error>() || type->is<IR::Type_Newtype>()) {
+        type->is<IR::Type_Action>() || type->is<IR::Type_Error>() || type->is<IR::Type_Newtype>() ||
+        type->is<IR::Type_Table>()) {
         return type;
     } else if (type->is<IR::Type_Dontcare>()) {
         return IR::Type_Dontcare::get();
@@ -605,6 +606,11 @@ const IR::Node *TypeInference::postorder(IR::Declaration_MatchKind *decl) {
     if (done()) return decl;
     for (auto id : *decl->getDeclarations()) setType(id->getNode(), IR::Type_MatchKind::get());
     return decl;
+}
+
+const IR::Node *TypeInference::postorder(IR::Type_Table *type) {
+    (void)setTypeType(type);
+    return type;
 }
 
 const IR::Node *TypeInference::postorder(IR::P4Table *table) {
@@ -3589,6 +3595,20 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
             } else {
                 param = *paramIt;
             }
+
+            if (param->type->is<IR::Type_Dontcare>())
+                typeError(
+                    "%1%: Could not infer a type for parameter %2% "
+                    "(inferred type is don't care '_')",
+                    arg, param);
+
+            // By calling generic functions with don't care parameters
+            // we can force parameters to have illegal types.  Check here for this case.
+            // e.g., void f<T>(in T arg); table t { }; f(t);
+            if (param->type->is<IR::Type_Table>() || param->type->is<IR::Type_Action>() ||
+                param->type->is<IR::Type_Control>() || param->type->is<IR::Type_Package>() ||
+                param->type->is<IR::Type_Parser>())
+                typeError("%1%: argument cannot have type %2%", arg, param->type);
 
             auto newExpr = arg->expression;
             if (param->direction == IR::Direction::In) {
