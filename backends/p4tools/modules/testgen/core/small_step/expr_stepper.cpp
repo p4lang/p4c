@@ -11,6 +11,7 @@
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/declaration.h"
+#include "ir/irutils.h"
 #include "ir/node.h"
 #include "lib/exceptions.h"
 #include "lib/null.h"
@@ -338,77 +339,70 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
         stepNoMatch();
         return false;
     }
+    const auto selectCases = selectExpression->selectCases;
+    for (size_t idx = 0; idx < selectCases.size(); ++idx) {
+        const auto *selectCase = selectCases.at(idx);
+        // Getting P4ValueSet from PathExpression , to highlight a particular case of processing
+        // P4ValueSet.
+        if (const auto *pathExpr = selectCase->keyset->to<IR::PathExpression>()) {
+            const auto *decl = state.findDecl(pathExpr)->getNode();
+            // Until we have test support for value set, we simply remove them from the match list.
+            // TODO: Implement value sets.
+            if (decl->is<IR::P4ValueSet>()) {
+                auto *newSelectExpression = selectExpression->clone();
+                newSelectExpression->selectCases.erase(newSelectExpression->selectCases.begin());
+                auto *nextState = new ExecutionState(state);
+                nextState->replaceTopBody(Continuation::Return(newSelectExpression));
+                result->emplace_back(nextState);
+                return false;
+            }
+        }
+        if (!SymbolicEnv::isSymbolicValue(selectCase->keyset)) {
+            // Evaluate the keyset in the first select case.
+            return stepToSubexpr(
+                selectCase->keyset, result, state,
+                [selectExpression, selectCase, &idx](const Continuation::Parameter *v) {
+                    auto *newSelectCase = selectCase->clone();
+                    newSelectCase->keyset = v->param;
 
-    const auto *selectCase = selectExpression->selectCases.at(0);
-    // Getting P4ValueSet from PathExpression , to highlight a particular case of processing
-    // P4ValueSet.
-    if (const auto *pathExpr = selectCase->keyset->to<IR::PathExpression>()) {
-        const auto *decl = state.findDecl(pathExpr)->getNode();
-        // Until we have test support for value set, we simply remove them from the match list.
-        // TODO: Implement value sets.
-        if (decl->is<IR::P4ValueSet>()) {
-            auto *newSelectExpression = selectExpression->clone();
-            newSelectExpression->selectCases.erase(newSelectExpression->selectCases.begin());
-            auto *nextState = new ExecutionState(state);
-            nextState->replaceTopBody(Continuation::Return(newSelectExpression));
-            result->emplace_back(nextState);
-            return false;
+                    auto *result = selectExpression->clone();
+                    result->selectCases[idx] = newSelectCase;
+                    return Continuation::Return(result);
+                });
         }
     }
 
-    if (!SymbolicEnv::isSymbolicValue(selectCase->keyset)) {
-        // Evaluate the keyset in the first select case.
-        return stepToSubexpr(selectCase->keyset, result, state,
-                             [selectExpression, selectCase](const Continuation::Parameter *v) {
-                                 auto *newSelectCase = selectCase->clone();
-                                 newSelectCase->keyset = v->param;
-
-                                 auto *result = selectExpression->clone();
-                                 result->selectCases[0] = newSelectCase;
-                                 return Continuation::Return(result);
-                             });
-    }
-
-    if (!SymbolicEnv::isSymbolicValue(selectExpression->select)) {
-        // Evaluate the expression being selected.
-        return stepToListSubexpr(selectExpression->select, result, state,
-                                 [selectExpression](const IR::ListExpression *listExpr) {
-                                     auto *result = selectExpression->clone();
-                                     result->select = listExpr;
-                                     return Continuation::Return(result);
-                                 });
-    }
-
-    // Handle case where the first select case matches: proceed to the next parser state,
-    // guarded by its path condition.
-    const auto *equality = GenEq::equate(selectExpression->select, selectCase->keyset);
-
-    // TODO: Implement the taint case for select expressions.
-    // In the worst case, this means the entire parser is tainted.
-    if (state.hasTaint(equality)) {
-        TESTGEN_UNIMPLEMENTED(
-            "The SelectExpression %1% is trying to match on a tainted key set."
-            " This means it is matching on uninitialized data."
-            " P4Testgen currently does not support this case.",
-            selectExpression);
-    }
-    {
+    const IR::Expression *missCondition = IR::getBoolLiteral(true);
+    for (const auto *selectCase : selectExpression->selectCases) {
         auto *nextState = new ExecutionState(state);
+
+        if (!SymbolicEnv::isSymbolicValue(selectExpression->select)) {
+            // Evaluate the expression being selected.
+            return stepToListSubexpr(selectExpression->select, result, state,
+                                     [selectExpression](const IR::ListExpression *listExpr) {
+                                         auto *result = selectExpression->clone();
+                                         result->select = listExpr;
+                                         return Continuation::Return(result);
+                                     });
+        }
+
+        // Handle case where the first select case matches: proceed to the next parser state,
+        // guarded by its path condition.
+        const auto *matchCondition = GenEq::equate(selectExpression->select, selectCase->keyset);
+
+        // TODO: Implement the taint case for select expressions.
+        // In the worst case, this means the entire parser is tainted.
+        if (state.hasTaint(matchCondition)) {
+            TESTGEN_UNIMPLEMENTED(
+                "The SelectExpression %1% is trying to match on a tainted key set."
+                " This means it is matching on uninitialized data."
+                " P4Testgen currently does not support this case.",
+                selectExpression);
+        }
+
         nextState->replaceTopBody(Continuation::Return(selectCase->state));
-        result->emplace_back(equality, state, nextState);
-    }
-
-    // Handle case where the first select case doesn't match.
-    {
-        auto *inequality = new IR::LNot(IR::Type::Boolean::get(), equality);
-        auto *nextState = new ExecutionState(state);
-
-        // Remove the first select case from the select expression.
-        auto *nextSelectExpression = selectExpression->clone();
-        nextSelectExpression->selectCases.erase(nextSelectExpression->selectCases.begin());
-
-        nextState->replaceTopBody(Continuation::Return(nextSelectExpression));
-        result->emplace_back(inequality, state, nextState);
+        result->emplace_back(new IR::LAnd(missCondition, matchCondition), state, nextState);
+        missCondition = new IR::LAnd(new IR::LNot(matchCondition), missCondition);
     }
 
     return false;
