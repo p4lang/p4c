@@ -216,7 +216,6 @@ macro(add_parser pname)
 
   # regardless of the output name, flex puts out yy.lex.c, so we use a custom command to generate
   # the file to stdout and redirect to the desired name
-  # FLEX_TARGET (${pname}Lexer parsers/${pname}/${pname}lexer.ll ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname}/${pname}lexer.cc)
   set (FLEX_${pname}Lexer_OUTPUTS ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname}/${pname}lexer.cc)
   set (FLEX_${pname}_INPUT ${CMAKE_CURRENT_SOURCE_DIR}/parsers/${pname}/${pname}lexer.ll)
   add_custom_command (OUTPUT ${FLEX_${pname}Lexer_OUTPUTS}
@@ -228,19 +227,12 @@ macro(add_parser pname)
     ${FLEX_${pname}Lexer_OUTPUTS}
     ${BISON_${pname}Parser_OUTPUTS}
     )
-  set_source_files_properties(${pname}PARSER_GEN_SRCS PROPERTIES GENERATED TRUE)
+  set_source_files_properties(${${pname}PARSER_GEN_SRCS} PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
+
 endmacro(add_parser)
 
 add_parser(v1)
 add_parser(p4)
-
-# BUILT_SOURCES += \
-# 	parsers/p4/p4parser.hpp \
-# 	parsers/v1/v1parser.hpp
-
-# noinst_HEADERS += \
-# 	parsers/p4/p4lexer.hpp \
-# 	parsers/v1/v1lexer.hpp
 
 set (FRONTEND_SOURCES
   ${IR_GENERATED_SRCS}
@@ -251,9 +243,6 @@ set (FRONTEND_SOURCES
   ${p4PARSER_GEN_SRCS}
   ${v1PARSER_GEN_SRCS}
   )
-
-set_source_files_properties(${p4PARSER_GEN_SRCS} PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
-set_source_files_properties(${v1PARSER_GEN_SRCS} PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
 
 set_source_files_properties(${IR_GENERATED_SRCS} PROPERTIES GENERATED TRUE)
 
