@@ -43,6 +43,6 @@ void coverageReportFinal(const CoverageSet &all, const CoverageSet &visited);
 /// Logs statements from @p new_ which have not yet been visited (are not members of @p visited).
 void logCoverage(const CoverageSet &all, const CoverageSet &visited, const CoverageSet &new_);
 
-}  // namespace P4
+}  // namespace P4::Coverage
 
 #endif /* MIDEND_COVERAGE_H_ */

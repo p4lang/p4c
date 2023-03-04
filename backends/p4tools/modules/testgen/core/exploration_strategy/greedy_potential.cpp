@@ -21,6 +21,114 @@
 
 namespace P4Tools::P4Testgen {
 
+ExecutionState *evaluateBranch(const ExplorationStrategy::Branch &branch, bool guaranteeViability,
+                               AbstractSolver &solver) {
+    // Do not bother invoking the solver for a trivial case.
+    // In either case (true or false), we do not need to add the assertion and check.
+    if (const auto *boolLiteral = branch.constraint->to<IR::BoolLiteral>()) {
+        guaranteeViability = false;
+        if (!boolLiteral->value) {
+            return nullptr;
+        }
+    }
+
+    if (guaranteeViability) {
+        // Check the consistency of the path constraints asserted so far.
+        auto solverResult = solver.checkSat(branch.nextState->getPathConstraint());
+        if (solverResult == boost::none) {
+            ::warning("Solver timed out");
+        }
+        if (solverResult == boost::none || !solverResult.get()) {
+            // Solver timed out or path constraints were not satisfiable. Need to choose a
+            // different branch. Roll back our branch selection and try again.
+            return nullptr;
+        }
+    }
+
+    // Branch selection succeeded.
+    return branch.nextState;
+}
+
+GreedyPotential::GreedyPotential(AbstractSolver &solver, const ProgramInfo &programInfo)
+    : ExplorationStrategy(solver, programInfo) {}
+
+bool GreedyPotential::UnexploredBranches::empty() const { return unexploredBranches.empty(); }
+
+void GreedyPotential::UnexploredBranches::push(GreedyPotential::StepResult branches) {
+    unexploredBranches.insert(unexploredBranches.end(), branches->begin(), branches->end());
+}
+
+ExplorationStrategy::Branch GreedyPotential::UnexploredBranches::backtrackAndPop(
+    const P4::Coverage::CoverageSet &coveredStatements) {
+    if (threshold % GreedyPotential::MAX_RANDOM_THRESHOLD == 0) {
+        for (size_t idx = 0; idx < unexploredBranches.size(); ++idx) {
+            auto branch = unexploredBranches.at(idx);
+            // First check all the potential set of statements we can cover by looking ahead.
+            for (const auto &stmt : branch.potentialStatements) {
+                // We need to take into account the set of visitedStatements.
+                if (coveredStatements.count(stmt) == 0U) {
+                    threshold = 0;
+                    if (idx != unexploredBranches.size() - 1) {
+                        std::swap(unexploredBranches[idx], unexploredBranches.back());
+                    }
+                    return pop();
+                }
+            }
+            // If we did not find anything, check whether this state covers any new statements
+            // already.
+            for (const auto &stmt : branch.nextState->getVisited()) {
+                if (coveredStatements.count(stmt) == 0U) {
+                    threshold = 0;
+                    if (idx != unexploredBranches.size() - 1) {
+                        std::swap(unexploredBranches[idx], unexploredBranches.back());
+                    }
+                    return pop();
+                }
+            }
+        }
+    }
+    threshold++;
+    // If we did not find any new statements, fall back to random.
+    auto idx = Utils::getRandInt(unexploredBranches.size() - 1);
+    auto branch = unexploredBranches.at(idx);
+    if (unexploredBranches.size() > 1) {
+        std::swap(unexploredBranches[idx], unexploredBranches.back());
+    }
+    return pop();
+}
+
+ExplorationStrategy::Branch GreedyPotential::UnexploredBranches::pop() {
+    auto branch = unexploredBranches.back();
+    unexploredBranches.pop_back();
+    return branch;
+}
+
+size_t pickBranch(const P4::Coverage::CoverageSet &coveredStatements,
+                  const std::vector<ExplorationStrategy::Branch> &candidateBranches) {
+    for (size_t idx = 0; idx < candidateBranches.size(); ++idx) {
+        const auto &branch = candidateBranches.at(idx);
+        // First check all the potential set of statements we can cover by looking ahead.
+        for (const auto &stmt : branch.potentialStatements) {
+            if (coveredStatements.count(stmt) == 0U) {
+                return idx;
+            }
+        }
+        // If we did not find anything, check whether this state covers any new statements
+        // already.
+        for (const auto &stmt : branch.nextState->getVisited()) {
+            if (coveredStatements.count(stmt) == 0U) {
+                return idx;
+            }
+        }
+    }
+    // If we did not find any new statements, fall back to random.
+    return Utils::getRandInt(candidateBranches.size() - 1);
+}
+
+size_t GreedyPotential::UnexploredBranches::size() { return unexploredBranches.size(); }
+
+GreedyPotential::UnexploredBranches::UnexploredBranches() = default;
+
 void GreedyPotential::run(const Callback &callback) {
     while (true) {
         try {
@@ -48,12 +156,15 @@ void GreedyPotential::run(const Callback &callback) {
 
                 // If there are multiple successors, try to pick one.
                 if (successors->size() > 1) {
-                    unexploredBranches.push(successors);
                     //. In case the strategy gets stuck because of its greedy behavior, fall back to
                     // randomness after MAX_STEPS_WITHOUT_TEST branch decisions without a result.
-                    auto *next =
-                        chooseBranch(true, false, stepsWithoutTest > MAX_STEPS_WITHOUT_TEST);
                     stepsWithoutTest++;
+                    auto branchIdx = pickBranch(getVisitedStatements(), *successors);
+                    auto branch = successors->at(branchIdx);
+                    successors->erase(successors->begin() + branchIdx);
+                    unexploredBranches.push(successors);
+
+                    auto *next = evaluateBranch(branch, true, solver);
                     if (next != nullptr) {
                         executionState = next;
                         continue;
@@ -77,7 +188,8 @@ void GreedyPotential::run(const Callback &callback) {
                 return;
             }
             Util::ScopedTimer chooseBranchtimer("branch_selection");
-            ExecutionState *next = chooseBranch(true, true);
+            auto branch = unexploredBranches.backtrackAndPop(getVisitedStatements());
+            auto *next = evaluateBranch(branch, true, solver);
             if (next != nullptr) {
                 executionState = next;
                 break;
@@ -85,137 +197,5 @@ void GreedyPotential::run(const Callback &callback) {
         }
     }
 }
-
-GreedyPotential::GreedyPotential(AbstractSolver &solver, const ProgramInfo &programInfo)
-    : ExplorationStrategy(solver, programInfo) {}
-
-ExecutionState *GreedyPotential::chooseBranch(bool guaranteeViability, bool doBacktrack,
-                                              bool /*fallBackToRandom*/) {
-    while (true) {
-        if (unexploredBranches.empty()) {
-            return nullptr;
-        }
-        auto branch = unexploredBranches.pop(getVisitedStatements(), doBacktrack);
-
-        // Do not bother invoking the solver for a trivial case.
-        // In either case (true or false), we do not need to add the assertion and check.
-        if (const auto *boolLiteral = branch.constraint->to<IR::BoolLiteral>()) {
-            guaranteeViability = false;
-            if (!boolLiteral->value) {
-                continue;
-            }
-        }
-
-        if (guaranteeViability) {
-            // Check the consistency of the path constraints asserted so far.
-            auto solverResult = solver.checkSat(branch.nextState->getPathConstraint());
-            if (solverResult == boost::none) {
-                ::warning("Solver timed out");
-            }
-            if (solverResult == boost::none || !solverResult.get()) {
-                // Solver timed out or path constraints were not satisfiable. Need to choose a
-                // different branch. Roll back our branch selection and try again.
-                continue;
-            }
-        }
-
-        // Branch selection succeeded.
-        return branch.nextState;
-    }
-}
-
-bool GreedyPotential::UnexploredBranches::empty() const { return unexploredBranches.empty(); }
-
-void GreedyPotential::UnexploredBranches::push(GreedyPotential::StepResult branches) {
-    unexploredBranches.emplace_back(branches);
-}
-
-size_t GreedyPotential::UnexploredBranches::backtrack(
-    const P4::Coverage::CoverageSet &coveredStatements) {
-    if (threshold % GreedyPotential::MAX_RANDOM_THRESHOLD == 0) {
-        for (size_t jdx = 0; jdx < unexploredBranches.size(); ++jdx) {
-            auto *branches = unexploredBranches.at(jdx);
-            for (size_t idx = 0; idx < branches->size(); ++idx) {
-                auto branch = branches->at(idx);
-                // First check all the potential set of statements we can cover by looking ahead.
-                for (const auto &stmt : branch.potentialStatements) {
-                    // We need to take into account the set of visitedStatements.
-                    if (coveredStatements.count(stmt) == 0U) {
-                        threshold = 0;
-                        if (jdx != unexploredBranches.size() - 1) {
-                            std::swap(unexploredBranches[jdx], unexploredBranches.back());
-                        }
-                        return idx;
-                    }
-                }
-                // If we did not find anything, check whether this state covers any new statements
-                // already.
-                for (const auto &stmt : branch.nextState->getVisited()) {
-                    if (coveredStatements.count(stmt) == 0U) {
-                        threshold = 0;
-                        if (jdx != unexploredBranches.size() - 1) {
-                            std::swap(unexploredBranches[jdx], unexploredBranches.back());
-                        }
-                        return idx;
-                    }
-                }
-            }
-        }
-    }
-    // If we did not find any new statements, fall back to random.
-    auto idx = Utils::getRandInt(unexploredBranches.size() - 1);
-    if (unexploredBranches.size() > 1) {
-        std::swap(unexploredBranches[idx], unexploredBranches.back());
-    }
-    threshold++;
-    return Utils::getRandInt(unexploredBranches.back()->size() - 1);
-}
-
-size_t GreedyPotential::UnexploredBranches::pickBranch(
-    const P4::Coverage::CoverageSet &coveredStatements) {
-    auto *branches = unexploredBranches.back();
-    for (size_t idx = 0; idx < branches->size(); ++idx) {
-        auto branch = branches->at(idx);
-        // First check all the potential set of statements we can cover by looking ahead.
-        for (const auto &stmt : branch.potentialStatements) {
-            if (coveredStatements.count(stmt) == 0U) {
-                threshold = 0;
-                return idx;
-            }
-        }
-        // If we did not find anything, check whether this state covers any new statements
-        // already.
-        for (const auto &stmt : branch.nextState->getVisited()) {
-            if (coveredStatements.count(stmt) == 0U) {
-                threshold = 0;
-                return idx;
-            }
-        }
-    }
-    // If we did not find any new statements, fall back to random.
-    return Utils::getRandInt(unexploredBranches.back()->size() - 1);
-}
-
-ExplorationStrategy::Branch GreedyPotential::UnexploredBranches::pop(
-    const P4::Coverage::CoverageSet &coveredStatements, bool doBacktrack) {
-    size_t branchIdx = 0;
-    if (doBacktrack) {
-        branchIdx = backtrack(coveredStatements);
-    } else {
-        branchIdx = pickBranch(coveredStatements);
-    }
-    auto *candidateBranches = unexploredBranches.back();
-    auto branch = candidateBranches->at(branchIdx);
-    candidateBranches->erase(candidateBranches->begin() + branchIdx);
-
-    if (candidateBranches->empty()) {
-        unexploredBranches.pop_back();
-    }
-    return branch;
-}
-
-size_t GreedyPotential::UnexploredBranches::size() { return unexploredBranches.size(); }
-
-GreedyPotential::UnexploredBranches::UnexploredBranches() = default;
 
 }  // namespace P4Tools::P4Testgen

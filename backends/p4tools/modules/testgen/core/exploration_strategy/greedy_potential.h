@@ -53,8 +53,14 @@ class GreedyPotential : public ExplorationStrategy {
      public:
         [[nodiscard]] bool empty() const;
         void push(StepResult branches);
-        Branch pop(const P4::Coverage::CoverageSet &coveredStatements, bool doBacktrack);
+        Branch pop();
         size_t size();
+
+        /// Iterate over all unexplored branches and pick the first branch which may cover new
+        /// statements.
+        /// If no such branch is found, pick a branch at random.
+        ExplorationStrategy::Branch backtrackAndPop(
+            const P4::Coverage::CoverageSet &coveredStatements);
 
         UnexploredBranches();
 
@@ -68,35 +74,15 @@ class GreedyPotential : public ExplorationStrategy {
         /// Invariants:
         ///   - Each element of this stack is non-empty.
         ///   - Each time we push or pop this stack, we also push or pop on the SMT solver.
-        std::vector<StepResult> unexploredBranches;
+        std::vector<Branch> unexploredBranches;
 
-        size_t pickBranch(const P4::Coverage::CoverageSet &coveredStatements);
-
-        size_t backtrack(const P4::Coverage::CoverageSet &coveredStatements);
+        /// Pick the next branch from the back of the unexplored branches.
+        /// Prioritize branches that cover new statements.
     };
 
     /// A stack, wherein each element represents a set of alternative choices that could have been
     /// made along the current execution path.
     UnexploredBranches unexploredBranches;
-
-    /// Chooses a branch to take, sets the current execution state to be that branch, and asserts
-    /// the corresponding path constraint to the solver.
-    ///
-    /// If @arg guaranteeViability is true, then the cumulative path condition is guaranteed to be
-    /// satisfiable after taking into account the path constraint associated with the chosen
-    /// branch. Any unviable branches encountered during branch selection are discarded.
-    ///
-    /// Branch selection fails if the given set of branches is empty. It also fails if @arg
-    /// guaranteeViability is true, but none of the given branches are viable.
-    ///
-    /// On success, the remaining branches to explore are pushed onto the stack of unexplored
-    /// branches, and the solver's state before the branch selection is saved with a `push`
-    /// operation. This happens even if the set of remaining branches is empty. On failure, the
-    /// stack of unexplored branches and the solver's state will be unchanged.
-    ///
-    /// @returns next execution state to be examined on success, nullptr on failure.
-    ExecutionState *chooseBranch(bool guaranteeViability, bool doBacktrack,
-                                 bool fallBackToRandom = false);
 };
 
 }  // namespace P4Tools::P4Testgen
