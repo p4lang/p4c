@@ -14,14 +14,16 @@
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
-namespace P4Tools {
+namespace P4Tools::P4Testgen {
 
-namespace P4Testgen {
-
-/// Simple incremental stack strategy. It explores paths and stores them in a stack
-/// encapsulated in UnexploredBranches inner class. This strategy aims to match
-/// the solver incremental feature, which also uses a stack. We push and pop single
-/// elements accordingly.
+/// Greedy path selection strategy, which, at branch points, picks the first execution state which
+/// has covered or potentially will cover program statements which have not been visited yet.
+/// Potential statements are computed using the CollectLatentStatements visitor, which collects
+/// statements in the top-level statement of the execution state. These statements are latent
+/// because execution is not guaranteed. They may be guarded by an if condition or select
+/// expression. If the strategy does not find a new statement, it falls back to
+/// random for . Similarly, if the strategy cycles without a test for a specific threshold, it will
+/// fall back to random. This is to prevent getting caught in a parser cycle.
 class GreedyPotential : public ExplorationStrategy {
  public:
     /// Executes the P4 program along a randomly chosen path. When the program terminates, the
@@ -32,11 +34,18 @@ class GreedyPotential : public ExplorationStrategy {
     /// Constructor for this strategy, considering inheritance
     GreedyPotential(AbstractSolver &solver, const ProgramInfo &programInfo);
 
- protected:
+ private:
     /// This variable keeps track of how many branch decisions we have made without producing a
     /// test. This is a safety guard in case the strategy gets stuck in parser loops because of its
     /// greediness.
     uint64_t stepsWithoutTest = 0;
+
+    /// The maximum amount of steps the strategy will stay in the a random state.
+    static const uint64_t MAX_RANDOM_THRESHOLD = 10;
+
+    /// The maximum number of steps without generating a test before falling back to random.
+    static const uint64_t MAX_STEPS_WITHOUT_TEST = 1000;
+
     /// Encapsulates a stack of unexplored branches. This exists to help enforce the invariant that
     /// any push or pop operation on this stack should be paired with a corresponding push/pop
     /// operation on the solver.
@@ -44,8 +53,7 @@ class GreedyPotential : public ExplorationStrategy {
      public:
         [[nodiscard]] bool empty() const;
         void push(StepResult branches);
-        Branch pop(const P4::Coverage::CoverageSet &coveredStatements, bool search,
-                   bool fallBackToRandom);
+        Branch pop(const P4::Coverage::CoverageSet &coveredStatements, bool doBacktrack);
         size_t size();
 
         UnexploredBranches();
@@ -62,7 +70,9 @@ class GreedyPotential : public ExplorationStrategy {
         ///   - Each time we push or pop this stack, we also push or pop on the SMT solver.
         std::vector<StepResult> unexploredBranches;
 
-        int findBranch(const P4::Coverage::CoverageSet &coveredStatements, bool search);
+        size_t pickBranch(const P4::Coverage::CoverageSet &coveredStatements);
+
+        size_t backtrack(const P4::Coverage::CoverageSet &coveredStatements);
     };
 
     /// A stack, wherein each element represents a set of alternative choices that could have been
@@ -85,12 +95,10 @@ class GreedyPotential : public ExplorationStrategy {
     /// stack of unexplored branches and the solver's state will be unchanged.
     ///
     /// @returns next execution state to be examined on success, nullptr on failure.
-    ExecutionState *chooseBranch(bool guaranteeViability, bool search,
+    ExecutionState *chooseBranch(bool guaranteeViability, bool doBacktrack,
                                  bool fallBackToRandom = false);
 };
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_EXPLORATION_STRATEGY_GREEDY_POTENTIAL_H_ */

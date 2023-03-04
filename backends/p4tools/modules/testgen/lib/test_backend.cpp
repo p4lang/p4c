@@ -259,8 +259,6 @@ bool TestBackEnd::printTestInfo(const ExecutionState *executionState, const Test
     printTraces("=======================================");
 
     if (testInfo.packetIsDropped) {
-        // Update the visited statements.
-        symbex.updateVisitedStatements(executionState->getVisited());
         printTraces("============ Output packet dropped for Test %1% ============", testCount);
         return false;
     }

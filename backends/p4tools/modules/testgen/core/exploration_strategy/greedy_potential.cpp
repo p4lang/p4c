@@ -39,19 +39,25 @@ void GreedyPotential::run(const Callback &callback) {
                 // State successors are accompanied by branch constraint which should be evaluated
                 // in the state before the step was taken - we copy the current symbolic state.
                 StepResult successors = step(*executionState);
-                ExecutionState *next = nullptr;
+
+                // If there is only one successor, choose it and move on.
+                if (successors->size() == 1) {
+                    executionState = successors->at(0).nextState;
+                    continue;
+                }
+
+                // If there are multiple successors, try to pick one.
                 if (successors->size() > 1) {
                     unexploredBranches.push(successors);
                     //. In case the strategy gets stuck because of its greedy behavior, fall back to
-                    // randomness after 1000 branch decisions without a result.
-                    next = chooseBranch(true, false, stepsWithoutTest > 1000);
+                    // randomness after MAX_STEPS_WITHOUT_TEST branch decisions without a result.
+                    auto *next =
+                        chooseBranch(true, false, stepsWithoutTest > MAX_STEPS_WITHOUT_TEST);
                     stepsWithoutTest++;
-                } else if (successors->size() == 1) {
-                    next = successors->at(0).nextState;
-                }
-                if (next != nullptr) {
-                    executionState = next;
-                    continue;
+                    if (next != nullptr) {
+                        executionState = next;
+                        continue;
+                    }
                 }
             }
         } catch (TestgenUnimplemented &e) {
@@ -83,13 +89,13 @@ void GreedyPotential::run(const Callback &callback) {
 GreedyPotential::GreedyPotential(AbstractSolver &solver, const ProgramInfo &programInfo)
     : ExplorationStrategy(solver, programInfo) {}
 
-ExecutionState *GreedyPotential::chooseBranch(bool guaranteeViability, bool search,
-                                              bool fallBackToRandom) {
+ExecutionState *GreedyPotential::chooseBranch(bool guaranteeViability, bool doBacktrack,
+                                              bool /*fallBackToRandom*/) {
     while (true) {
         if (unexploredBranches.empty()) {
             return nullptr;
         }
-        auto branch = unexploredBranches.pop(getVisitedStatements(), search, fallBackToRandom);
+        auto branch = unexploredBranches.pop(getVisitedStatements(), doBacktrack);
 
         // Do not bother invoking the solver for a trivial case.
         // In either case (true or false), we do not need to add the assertion and check.
@@ -124,81 +130,81 @@ void GreedyPotential::UnexploredBranches::push(GreedyPotential::StepResult branc
     unexploredBranches.emplace_back(branches);
 }
 
-int GreedyPotential::UnexploredBranches::findBranch(
-    const P4::Coverage::CoverageSet &coveredStatements, bool search) {
-    if (search) {
-        if (threshold % 50 == 0) {
-            for (size_t jdx = 0; jdx < unexploredBranches.size(); ++jdx) {
-                auto *branches = unexploredBranches.at(jdx);
-                for (size_t idx = 0; idx < branches->size(); ++idx) {
-                    auto branch = branches->at(idx);
-                    for (const auto &stmt : branch.nextState->getVisited()) {
-                        // We need to take into account the set of visitedStatements.
-                        // We also need to ensure the statement is in coveredStatements.
-                        if (stmt->getSourceInfo().isValid() &&
-                            coveredStatements.count(stmt) == 0U) {
-                            threshold = 0;
-                            if (jdx != unexploredBranches.size() - 1) {
-                                std::swap(unexploredBranches[jdx], unexploredBranches.back());
-                            }
-                            return idx;
+size_t GreedyPotential::UnexploredBranches::backtrack(
+    const P4::Coverage::CoverageSet &coveredStatements) {
+    if (threshold % GreedyPotential::MAX_RANDOM_THRESHOLD == 0) {
+        for (size_t jdx = 0; jdx < unexploredBranches.size(); ++jdx) {
+            auto *branches = unexploredBranches.at(jdx);
+            for (size_t idx = 0; idx < branches->size(); ++idx) {
+                auto branch = branches->at(idx);
+                // First check all the potential set of statements we can cover by looking ahead.
+                for (const auto &stmt : branch.potentialStatements) {
+                    // We need to take into account the set of visitedStatements.
+                    if (coveredStatements.count(stmt) == 0U) {
+                        threshold = 0;
+                        if (jdx != unexploredBranches.size() - 1) {
+                            std::swap(unexploredBranches[jdx], unexploredBranches.back());
                         }
-                    }
-                    for (const auto &stmt : branch.potentialStatements) {
-                        // We need to take into account the set of visitedStatements.
-                        // We also need to ensure the statement is in coveredStatements.
-                        if (stmt->getSourceInfo().isValid() &&
-                            coveredStatements.count(stmt) == 0U) {
-                            threshold = 0;
-                            if (jdx != unexploredBranches.size() - 1) {
-                                std::swap(unexploredBranches[jdx], unexploredBranches.back());
-                            }
-                            return idx;
-                        }
+                        return idx;
                     }
                 }
-            }
-        }
-        auto idx = Utils::getRandInt(unexploredBranches.size() - 1);
-        if (unexploredBranches.size() > 1) {
-            std::swap(unexploredBranches[idx], unexploredBranches.back());
-        }
-        threshold++;
-    } else {
-        // TODO: This strategy can get stuck in a greedy parser loop. We should actually forbid
-        // parser loops or develop a safety hatch for that case.
-        auto *branches = unexploredBranches.back();
-        for (size_t idx = 0; idx < branches->size(); ++idx) {
-            auto branch = branches->at(idx);
-            for (const auto &stmt : branch.nextState->getVisited()) {
-                if (stmt->getSourceInfo().isValid() && coveredStatements.count(stmt) == 0U) {
-                    threshold = 0;
-                    return idx;
-                }
-            }
-            for (const auto &stmt : branch.potentialStatements) {
-                if (stmt->getSourceInfo().isValid() && coveredStatements.count(stmt) == 0U) {
-                    threshold = 0;
-                    return idx;
+                // If we did not find anything, check whether this state covers any new statements
+                // already.
+                for (const auto &stmt : branch.nextState->getVisited()) {
+                    if (coveredStatements.count(stmt) == 0U) {
+                        threshold = 0;
+                        if (jdx != unexploredBranches.size() - 1) {
+                            std::swap(unexploredBranches[jdx], unexploredBranches.back());
+                        }
+                        return idx;
+                    }
                 }
             }
         }
     }
+    // If we did not find any new statements, fall back to random.
+    auto idx = Utils::getRandInt(unexploredBranches.size() - 1);
+    if (unexploredBranches.size() > 1) {
+        std::swap(unexploredBranches[idx], unexploredBranches.back());
+    }
+    threshold++;
+    return Utils::getRandInt(unexploredBranches.back()->size() - 1);
+}
 
+size_t GreedyPotential::UnexploredBranches::pickBranch(
+    const P4::Coverage::CoverageSet &coveredStatements) {
+    auto *branches = unexploredBranches.back();
+    for (size_t idx = 0; idx < branches->size(); ++idx) {
+        auto branch = branches->at(idx);
+        // First check all the potential set of statements we can cover by looking ahead.
+        for (const auto &stmt : branch.potentialStatements) {
+            if (coveredStatements.count(stmt) == 0U) {
+                threshold = 0;
+                return idx;
+            }
+        }
+        // If we did not find anything, check whether this state covers any new statements
+        // already.
+        for (const auto &stmt : branch.nextState->getVisited()) {
+            if (coveredStatements.count(stmt) == 0U) {
+                threshold = 0;
+                return idx;
+            }
+        }
+    }
+    // If we did not find any new statements, fall back to random.
     return Utils::getRandInt(unexploredBranches.back()->size() - 1);
 }
 
 ExplorationStrategy::Branch GreedyPotential::UnexploredBranches::pop(
-    const P4::Coverage::CoverageSet &allStatements, bool search, bool fallBackToRandom) {
-    std::vector<Branch> *candidateBranches = nullptr;
-
-    int branchIdx = 0;
-    if (!fallBackToRandom) {
-        branchIdx = findBranch(allStatements, search);
+    const P4::Coverage::CoverageSet &coveredStatements, bool doBacktrack) {
+    size_t branchIdx = 0;
+    if (doBacktrack) {
+        branchIdx = backtrack(coveredStatements);
     } else {
-        branchIdx = Utils::getRandInt(unexploredBranches.back()->size() - 1);
+        branchIdx = pickBranch(coveredStatements);
     }
-    candidateBranches = unexploredBranches.back();
+    auto *candidateBranches = unexploredBranches.back();
     auto branch = candidateBranches->at(branchIdx);
     candidateBranches->erase(candidateBranches->begin() + branchIdx);
 
