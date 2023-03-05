@@ -178,30 +178,30 @@ class ToP4 : public Inspector {
     bool preorder(const IR::Declaration_MatchKind *d) override;
 
     // expressions
-    bool preorder(const IR::Constant* c) override;
-    bool preorder(const IR::Slice* slice) override;
-    bool preorder(const IR::BoolLiteral* b) override;
-    bool preorder(const IR::StringLiteral* s) override;
-    bool preorder(const IR::PathExpression* p) override;
-    bool preorder(const IR::Cast* c) override;
-    bool preorder(const IR::Operation_Binary* b) override;
-    bool preorder(const IR::Operation_Unary* u) override;
-    bool preorder(const IR::ArrayIndex* a) override;
-    bool preorder(const IR::TypeNameExpression* e) override;
-    bool preorder(const IR::Mux* a) override;
-    bool preorder(const IR::ConstructorCallExpression* e) override;
-    bool preorder(const IR::Member* e) override;
-    bool preorder(const IR::SelectCase* e) override;
-    bool preorder(const IR::SelectExpression* e) override;
-    bool preorder(const IR::ListExpression* e) override;
-    bool preorder(const IR::P4ListExpression* e) override;
-    bool preorder(const IR::StructExpression* e) override;
-    bool preorder(const IR::InvalidHeader* e) override;
-    bool preorder(const IR::InvalidHeaderUnion* e) override;
-    bool preorder(const IR::Invalid* e) override;
-    bool preorder(const IR::MethodCallExpression* e) override;
-    bool preorder(const IR::DefaultExpression* e) override;
-    bool preorder(const IR::This* e) override;
+    bool preorder(const IR::Constant *c) override;
+    bool preorder(const IR::Slice *slice) override;
+    bool preorder(const IR::BoolLiteral *b) override;
+    bool preorder(const IR::StringLiteral *s) override;
+    bool preorder(const IR::PathExpression *p) override;
+    bool preorder(const IR::Cast *c) override;
+    bool preorder(const IR::Operation_Binary *b) override;
+    bool preorder(const IR::Operation_Unary *u) override;
+    bool preorder(const IR::ArrayIndex *a) override;
+    bool preorder(const IR::TypeNameExpression *e) override;
+    bool preorder(const IR::Mux *a) override;
+    bool preorder(const IR::ConstructorCallExpression *e) override;
+    bool preorder(const IR::Member *e) override;
+    bool preorder(const IR::SelectCase *e) override;
+    bool preorder(const IR::SelectExpression *e) override;
+    bool preorder(const IR::ListExpression *e) override;
+    bool preorder(const IR::P4ListExpression *e) override;
+    bool preorder(const IR::StructExpression *e) override;
+    bool preorder(const IR::InvalidHeader *e) override;
+    bool preorder(const IR::InvalidHeaderUnion *e) override;
+    bool preorder(const IR::Invalid *e) override;
+    bool preorder(const IR::MethodCallExpression *e) override;
+    bool preorder(const IR::DefaultExpression *e) override;
+    bool preorder(const IR::This *e) override;
 
     // vectors
     bool preorder(const IR::Vector<IR::ActionListElement> *v) override;

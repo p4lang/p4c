@@ -523,22 +523,22 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     }
 
     // expressions
-    bool preorder(const IR::Literal* expression) override;
-    bool preorder(const IR::Slice* expression) override;
-    bool preorder(const IR::TypeNameExpression* expression) override;
-    bool preorder(const IR::PathExpression* expression) override;
-    bool preorder(const IR::Member* expression) override;
-    bool preorder(const IR::ArrayIndex* expression) override;
-    bool preorder(const IR::Operation_Binary* expression) override;
-    bool preorder(const IR::Mux* expression) override;
-    bool preorder(const IR::SelectExpression* expression) override;
-    bool preorder(const IR::ListExpression* expression) override;
-    bool preorder(const IR::Operation_Unary* expression) override;
-    bool preorder(const IR::MethodCallExpression* expression) override;
-    bool preorder(const IR::DefaultExpression* expression) override;
-    bool preorder(const IR::Expression* expression) override;
-    bool preorder(const IR::InvalidHeader* expression) override;
-    bool preorder(const IR::InvalidHeaderUnion* expression) override;
+    bool preorder(const IR::Literal *expression) override;
+    bool preorder(const IR::Slice *expression) override;
+    bool preorder(const IR::TypeNameExpression *expression) override;
+    bool preorder(const IR::PathExpression *expression) override;
+    bool preorder(const IR::Member *expression) override;
+    bool preorder(const IR::ArrayIndex *expression) override;
+    bool preorder(const IR::Operation_Binary *expression) override;
+    bool preorder(const IR::Mux *expression) override;
+    bool preorder(const IR::SelectExpression *expression) override;
+    bool preorder(const IR::ListExpression *expression) override;
+    bool preorder(const IR::Operation_Unary *expression) override;
+    bool preorder(const IR::MethodCallExpression *expression) override;
+    bool preorder(const IR::DefaultExpression *expression) override;
+    bool preorder(const IR::Expression *expression) override;
+    bool preorder(const IR::InvalidHeader *expression) override;
+    bool preorder(const IR::InvalidHeaderUnion *expression) override;
     // statements
     bool preorder(const IR::P4Parser *parser) override;
     bool preorder(const IR::P4Control *control) override;

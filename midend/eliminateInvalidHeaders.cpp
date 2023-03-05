@@ -70,7 +70,7 @@ const IR::Node *DoEliminateInvalidHeaders::postorder(IR::InvalidHeader *expressi
     return new IR::PathExpression(src, new IR::Path(name));
 }
 
-const IR::Node* DoEliminateInvalidHeaders::postorder(IR::InvalidHeaderUnion* expression) {
+const IR::Node *DoEliminateInvalidHeaders::postorder(IR::InvalidHeaderUnion *expression) {
     if (!findContext<IR::BlockStatement>() && !findContext<IR::P4Action>() &&
         !findContext<IR::ParserState>()) {
         // We need some place to insert the setInvalid call.

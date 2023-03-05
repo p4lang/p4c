@@ -38,11 +38,11 @@ class DoEliminateInvalidHeaders final : public Transform {
         setName("DoEliminateInvalidHeaders");
         CHECK_NULL(refMap);
     }
-    const IR::Node* postorder(IR::InvalidHeader* expression) override;
-    const IR::Node* postorder(IR::InvalidHeaderUnion* expression) override;
-    const IR::Node* postorder(IR::P4Control* control) override;
-    const IR::Node* postorder(IR::ParserState* parser) override;
-    const IR::Node* postorder(IR::P4Action* action) override;
+    const IR::Node *postorder(IR::InvalidHeader *expression) override;
+    const IR::Node *postorder(IR::InvalidHeaderUnion *expression) override;
+    const IR::Node *postorder(IR::P4Control *control) override;
+    const IR::Node *postorder(IR::ParserState *parser) override;
+    const IR::Node *postorder(IR::P4Action *action) override;
 };
 
 class EliminateInvalidHeaders final : public PassManager {

@@ -950,7 +950,7 @@ bool ToP4::preorder(const IR::InvalidHeader *e) {
     return false;
 }
 
-bool ToP4::preorder(const IR::InvalidHeaderUnion* e) {
+bool ToP4::preorder(const IR::InvalidHeaderUnion *e) {
     if (expressionPrecedence > DBPrint::Prec_Prefix) builder.append("(");
     builder.append("(");
     visit(e->headerUnionType);
@@ -960,7 +960,7 @@ bool ToP4::preorder(const IR::InvalidHeaderUnion* e) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Invalid*) {
+bool ToP4::preorder(const IR::Invalid *) {
     builder.append("{#}");
     return false;
 }

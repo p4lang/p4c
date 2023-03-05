@@ -2171,7 +2171,7 @@ const IR::Node *TypeInference::postorder(IR::InvalidHeader *expression) {
     return expression;
 }
 
-const IR::Node* TypeInference::postorder(IR::InvalidHeaderUnion* expression) {
+const IR::Node *TypeInference::postorder(IR::InvalidHeaderUnion *expression) {
     if (done()) return expression;
     auto type = getTypeType(expression->headerUnionType);
     BUG_CHECK(type->is<IR::Type_HeaderUnion>(), "%1%: does not have a header_union type `%2%`",
@@ -2183,7 +2183,7 @@ const IR::Node* TypeInference::postorder(IR::InvalidHeaderUnion* expression) {
     return expression;
 }
 
-const IR::Node* TypeInference::postorder(IR::P4ListExpression* expression) {
+const IR::Node *TypeInference::postorder(IR::P4ListExpression *expression) {
     if (done()) return expression;
     bool constant = true;
     auto elementType = getTypeType(expression->elementType);
