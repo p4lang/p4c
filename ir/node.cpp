@@ -21,6 +21,8 @@ limitations under the License.
 
 #include <memory>
 #include <ostream>
+// use in combination with "raise" below
+// #include <csignal>
 
 #include "ir/declaration.h"
 #include "ir/ir.h"
