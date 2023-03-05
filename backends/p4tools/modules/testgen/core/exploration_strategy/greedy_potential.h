@@ -46,43 +46,12 @@ class GreedyPotential : public ExplorationStrategy {
     /// The maximum number of steps without generating a test before falling back to random.
     static const uint64_t MAX_STEPS_WITHOUT_TEST = 1000;
 
-    /// Encapsulates a stack of unexplored branches. This exists to help enforce the invariant that
-    /// any push or pop operation on this stack should be paired with a corresponding push/pop
-    /// operation on the solver.
-    class UnexploredBranches {
-     public:
-        [[nodiscard]] bool empty() const;
-        void push(StepResult branches);
-        Branch pop();
-        size_t size();
-
-        /// Iterate over all unexplored branches and pick the first branch which may cover new
-        /// statements.
-        /// If no such branch is found, pick a branch at random.
-        ExplorationStrategy::Branch backtrackAndPop(
-            const P4::Coverage::CoverageSet &coveredStatements);
-
-        UnexploredBranches();
-
-     private:
-        /// The threshold increments every time we are in search modes, but can not find an
-        /// execution state with uncovered statements.
-        uint64_t threshold = 0;
-        /// Each element on this stack represents a set of alternative choices that could have been
-        /// made along the current execution path.
-        ///
-        /// Invariants:
-        ///   - Each element of this stack is non-empty.
-        ///   - Each time we push or pop this stack, we also push or pop on the SMT solver.
-        std::vector<Branch> unexploredBranches;
-
-        /// Pick the next branch from the back of the unexplored branches.
-        /// Prioritize branches that cover new statements.
-    };
-
-    /// A stack, wherein each element represents a set of alternative choices that could have been
+    /// Each element on this stack represents a set of alternative choices that could have been
     /// made along the current execution path.
-    UnexploredBranches unexploredBranches;
+    ///
+    /// Invariants:
+    ///   - Each element of this stack is non-empty.
+    std::vector<Branch> unexploredBranches;
 };
 
 }  // namespace P4Tools::P4Testgen

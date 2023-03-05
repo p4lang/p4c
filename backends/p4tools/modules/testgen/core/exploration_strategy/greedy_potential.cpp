@@ -49,85 +49,40 @@ ExecutionState *evaluateBranch(const ExplorationStrategy::Branch &branch, bool g
     return branch.nextState;
 }
 
-GreedyPotential::GreedyPotential(AbstractSolver &solver, const ProgramInfo &programInfo)
-    : ExplorationStrategy(solver, programInfo) {}
-
-bool GreedyPotential::UnexploredBranches::empty() const { return unexploredBranches.empty(); }
-
-void GreedyPotential::UnexploredBranches::push(GreedyPotential::StepResult branches) {
-    unexploredBranches.insert(unexploredBranches.end(), branches->begin(), branches->end());
-}
-
-ExplorationStrategy::Branch GreedyPotential::UnexploredBranches::backtrackAndPop(
-    const P4::Coverage::CoverageSet &coveredStatements) {
-    if (threshold % GreedyPotential::MAX_RANDOM_THRESHOLD == 0) {
-        for (size_t idx = 0; idx < unexploredBranches.size(); ++idx) {
-            auto branch = unexploredBranches.at(idx);
-            // First check all the potential set of statements we can cover by looking ahead.
-            for (const auto &stmt : branch.potentialStatements) {
-                // We need to take into account the set of visitedStatements.
-                if (coveredStatements.count(stmt) == 0U) {
-                    threshold = 0;
-                    if (idx != unexploredBranches.size() - 1) {
-                        std::swap(unexploredBranches[idx], unexploredBranches.back());
-                    }
-                    return pop();
-                }
-            }
-            // If we did not find anything, check whether this state covers any new statements
-            // already.
-            for (const auto &stmt : branch.nextState->getVisited()) {
-                if (coveredStatements.count(stmt) == 0U) {
-                    threshold = 0;
-                    if (idx != unexploredBranches.size() - 1) {
-                        std::swap(unexploredBranches[idx], unexploredBranches.back());
-                    }
-                    return pop();
-                }
-            }
-        }
-    }
-    threshold++;
-    // If we did not find any new statements, fall back to random.
-    auto idx = Utils::getRandInt(unexploredBranches.size() - 1);
-    auto branch = unexploredBranches.at(idx);
-    if (unexploredBranches.size() > 1) {
-        std::swap(unexploredBranches[idx], unexploredBranches.back());
-    }
-    return pop();
-}
-
-ExplorationStrategy::Branch GreedyPotential::UnexploredBranches::pop() {
-    auto branch = unexploredBranches.back();
-    unexploredBranches.pop_back();
-    return branch;
-}
-
-size_t pickBranch(const P4::Coverage::CoverageSet &coveredStatements,
-                  const std::vector<ExplorationStrategy::Branch> &candidateBranches) {
+ExplorationStrategy::Branch popBranch(const P4::Coverage::CoverageSet &coveredStatements,
+                                      std::vector<ExplorationStrategy::Branch> &candidateBranches) {
     for (size_t idx = 0; idx < candidateBranches.size(); ++idx) {
-        const auto &branch = candidateBranches.at(idx);
+        auto branch = candidateBranches.at(idx);
         // First check all the potential set of statements we can cover by looking ahead.
         for (const auto &stmt : branch.potentialStatements) {
+            // We need to take into account the set of visitedStatements.
             if (coveredStatements.count(stmt) == 0U) {
-                return idx;
+                candidateBranches[idx] = candidateBranches.back();
+                candidateBranches.pop_back();
+                return branch;
             }
         }
         // If we did not find anything, check whether this state covers any new statements
         // already.
         for (const auto &stmt : branch.nextState->getVisited()) {
             if (coveredStatements.count(stmt) == 0U) {
-                return idx;
+                candidateBranches[idx] = candidateBranches.back();
+                candidateBranches.pop_back();
+                return branch;
             }
         }
     }
+
     // If we did not find any new statements, fall back to random.
-    return Utils::getRandInt(candidateBranches.size() - 1);
+    auto branchIdx = Utils::getRandInt(candidateBranches.size() - 1);
+    auto branch = candidateBranches[branchIdx];
+    candidateBranches[branchIdx] = candidateBranches.back();
+    candidateBranches.pop_back();
+    return branch;
 }
 
-size_t GreedyPotential::UnexploredBranches::size() { return unexploredBranches.size(); }
-
-GreedyPotential::UnexploredBranches::UnexploredBranches() = default;
+GreedyPotential::GreedyPotential(AbstractSolver &solver, const ProgramInfo &programInfo)
+    : ExplorationStrategy(solver, programInfo) {}
 
 void GreedyPotential::run(const Callback &callback) {
     while (true) {
@@ -159,10 +114,9 @@ void GreedyPotential::run(const Callback &callback) {
                     //. In case the strategy gets stuck because of its greedy behavior, fall back to
                     // randomness after MAX_STEPS_WITHOUT_TEST branch decisions without a result.
                     stepsWithoutTest++;
-                    auto branchIdx = pickBranch(getVisitedStatements(), *successors);
-                    auto branch = successors->at(branchIdx);
-                    successors->erase(successors->begin() + branchIdx);
-                    unexploredBranches.push(successors);
+                    auto branch = popBranch(getVisitedStatements(), *successors);
+                    unexploredBranches.insert(unexploredBranches.end(), successors->begin(),
+                                              successors->end());
 
                     auto *next = evaluateBranch(branch, true, solver);
                     if (next != nullptr) {
@@ -188,7 +142,7 @@ void GreedyPotential::run(const Callback &callback) {
                 return;
             }
             Util::ScopedTimer chooseBranchtimer("branch_selection");
-            auto branch = unexploredBranches.backtrackAndPop(getVisitedStatements());
+            auto branch = popBranch(getVisitedStatements(), unexploredBranches);
             auto *next = evaluateBranch(branch, true, solver);
             if (next != nullptr) {
                 executionState = next;
