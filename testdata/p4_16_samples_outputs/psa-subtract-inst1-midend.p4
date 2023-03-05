@@ -48,11 +48,13 @@ control MyIngressControl(inout headers_t hdrs, inout user_meta_data_t meta, in p
     @name("MyIngressControl.var4") int<33> var4_0;
     @name("MyIngressControl.var5") int<33> var5_0;
     @name("MyIngressControl.nonDefAct") action nonDefAct() {
-        meta.depth3 = (var4_0 == 33s3 && var5_0 == 33s1 ? meta.depth3 + 5w29 : meta.depth3);
-        meta.depth4 = (var4_0 == 33s3 && var5_0 == 33s1 ? var1_0 + var2_0 : meta.depth4);
-        meta.depth5 = (var4_0 == 33s3 && var5_0 == 33s1 ? var1_0 ^ 5w2 : meta.depth5);
-        meta.depth6 = (var4_0 == 33s3 && var5_0 == 33s1 ? var2_0 + 5w31 : meta.depth6);
-        meta.depth7 = (var4_0 == 33s3 && var5_0 == 33s1 ? var2_0 + 5w3 : meta.depth7);
+        if (var4_0 == 33s3 && var5_0 == 33s1) {
+            meta.depth3 = meta.depth3 + 5w29;
+            meta.depth4 = var1_0 + var2_0;
+            meta.depth5 = var1_0 ^ 5w2;
+            meta.depth6 = var2_0 + 5w31;
+            meta.depth7 = var2_0 + 5w3;
+        }
     }
     @name("MyIngressControl.stub") table stub_0 {
         actions = {

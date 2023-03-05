@@ -35,10 +35,12 @@ control MyIngressControl(inout headers_t hdr, inout user_meta_data_t m, in psa_i
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyIngressControl.macswp") action macswp() {
-        m.x2 = (m.flg == 8w0x2 ? hdr.ethernet.x2 : m.x2);
-        m.addr = (m.flg == 8w0x2 ? hdr.ethernet.dst_addr : m.addr);
-        hdr.ethernet.dst_addr = (m.flg == 8w0x2 ? hdr.ethernet.src_addr : hdr.ethernet.dst_addr);
-        hdr.ethernet.src_addr = (m.flg == 8w0x2 ? m.addr : hdr.ethernet.src_addr);
+        if (m.flg == 8w0x2) {
+            m.x2 = hdr.ethernet.x2;
+            m.addr = hdr.ethernet.dst_addr;
+            hdr.ethernet.dst_addr = hdr.ethernet.src_addr;
+            hdr.ethernet.src_addr = m.addr;
+        }
     }
     @name("MyIngressControl.stub") table stub_0 {
         actions = {

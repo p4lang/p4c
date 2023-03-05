@@ -76,8 +76,14 @@ control packet_deparser(packet_out packet, out empty_metadata_t clone_i2e_meta, 
 }
 
 control ingress(inout headers_t headers, inout local_metadata_t local_metadata1, in psa_ingress_input_metadata_t standard_metadata, inout psa_ingress_output_metadata_t ostd) {
+    host_info_rx_bytes_t2 host_info_rx_bytes_0_flex_up_flex_up1;
     @name("ingress.action1") action action1(@name("field") bit<16> field, @name("field1") bit<16> field1) {
-        headers.outer_ethernet.ether_type = (field == 16w1 ? field : field1);
+        if (field == 16w1) {
+            host_info_rx_bytes_0_flex_up_flex_up1.flex_0 = field;
+        } else {
+            host_info_rx_bytes_0_flex_up_flex_up1.flex_0 = field1;
+        }
+        headers.outer_ethernet.ether_type = host_info_rx_bytes_0_flex_up_flex_up1.flex_0;
     }
     @name("ingress.drop") action drop_1() {
         ostd.egress_port = 32w4;

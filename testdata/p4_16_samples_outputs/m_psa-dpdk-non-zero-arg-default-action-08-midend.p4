@@ -32,8 +32,10 @@ control MyIngressControl(inout headers_t hdr, inout user_meta_data_t m, in psa_i
         hdr.ethernet.src_addr = m.addr;
     }
     @name("MyIngressControl.macswp") action macswp(@name("tmp2") bit<32> tmp2) {
-        m.addr = (hdr.ethernet.dst_addr == 48w0x1 && tmp2 == 32w0x2 ? hdr.ethernet.dst_addr : m.addr);
-        hdr.ethernet.src_addr = (hdr.ethernet.dst_addr == 48w0x1 && tmp2 == 32w0x2 ? m.addr : hdr.ethernet.src_addr);
+        if (hdr.ethernet.dst_addr == 48w0x1 && tmp2 == 32w0x2) {
+            m.addr = hdr.ethernet.dst_addr;
+            hdr.ethernet.src_addr = hdr.ethernet.dst_addr;
+        }
     }
     @name("MyIngressControl.stub") table stub_0 {
         actions = {

@@ -62,13 +62,19 @@ struct tuple_0 {
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
     @name("MainControlImpl.color_out") PNA_MeterColor_t color_out_0;
     @name("MainControlImpl.color_in") PNA_MeterColor_t color_in_0;
+    @name("MainControlImpl.tmp") bit<32> tmp_0;
     @name("MainControlImpl.meter0") DirectMeter(PNA_MeterType_t.PACKETS) meter0_0;
     @name("MainControlImpl.next_hop") action next_hop(@name("vport") bit<32> vport) {
         send_to_port(vport);
     }
     @name("MainControlImpl.add_on_miss_action") action add_on_miss_action() {
         color_out_0 = meter0_0.dpdk_execute(color_in_0, 32w1024);
-        user_meta.port_out = (color_out_0 == PNA_MeterColor_t.GREEN ? 32w1 : 32w0);
+        if (color_out_0 == PNA_MeterColor_t.GREEN) {
+            tmp_0 = 32w1;
+        } else {
+            tmp_0 = 32w0;
+        }
+        user_meta.port_out = tmp_0;
         add_entry<bit<32>>(action_name = "next_hop", action_params = 32w0, expire_time_profile_id = user_meta.timeout);
     }
     @name("MainControlImpl.ipv4_da") table ipv4_da_0 {
