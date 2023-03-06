@@ -21,32 +21,20 @@
 
 namespace P4Tools::P4Testgen {
 
-ExecutionState *evaluateBranch(const ExplorationStrategy::Branch &branch, bool guaranteeViability,
-                               AbstractSolver &solver) {
+bool evaluateBranch(const ExplorationStrategy::Branch &branch, AbstractSolver &solver) {
     // Do not bother invoking the solver for a trivial case.
     // In either case (true or false), we do not need to add the assertion and check.
     if (const auto *boolLiteral = branch.constraint->to<IR::BoolLiteral>()) {
-        guaranteeViability = false;
-        if (!boolLiteral->value) {
-            return nullptr;
-        }
+        return boolLiteral->value;
     }
 
-    if (guaranteeViability) {
-        // Check the consistency of the path constraints asserted so far.
-        auto solverResult = solver.checkSat(branch.nextState->getPathConstraint());
-        if (solverResult == boost::none) {
-            ::warning("Solver timed out");
-        }
-        if (solverResult == boost::none || !solverResult.get()) {
-            // Solver timed out or path constraints were not satisfiable. Need to choose a
-            // different branch. Roll back our branch selection and try again.
-            return nullptr;
-        }
+    // Check the consistency of the path constraints asserted so far.
+    auto solverResult = solver.checkSat(branch.nextState->getPathConstraint());
+    if (solverResult == boost::none) {
+        ::warning("Solver timed out");
     }
 
-    // Branch selection succeeded.
-    return branch.nextState;
+    return solverResult != boost::none && solverResult.get();
 }
 
 ExplorationStrategy::Branch popBranch(const P4::Coverage::CoverageSet &coveredStatements,
@@ -114,13 +102,16 @@ void GreedyPotential::run(const Callback &callback) {
                     //. In case the strategy gets stuck because of its greedy behavior, fall back to
                     // randomness after MAX_STEPS_WITHOUT_TEST branch decisions without a result.
                     stepsWithoutTest++;
-                    auto branch = popBranch(getVisitedStatements(), *successors);
-                    unexploredBranches.insert(unexploredBranches.end(), successors->begin(),
-                                              successors->end());
-
-                    auto *next = evaluateBranch(branch, true, solver);
-                    if (next != nullptr) {
-                        executionState = next;
+                    successors->erase(std::remove_if(successors->begin(), successors->end(),
+                                                     [this](const Branch &b) -> bool {
+                                                         return !evaluateBranch(b, solver);
+                                                     }),
+                                      successors->end());
+                    if (!successors->empty()) {
+                        auto branch = popBranch(getVisitedStatements(), *successors);
+                        executionState = branch.nextState;
+                        unexploredBranches.insert(unexploredBranches.end(), successors->begin(),
+                                                  successors->end());
                         continue;
                     }
                 }
@@ -143,9 +134,8 @@ void GreedyPotential::run(const Callback &callback) {
             }
             Util::ScopedTimer chooseBranchtimer("branch_selection");
             auto branch = popBranch(getVisitedStatements(), unexploredBranches);
-            auto *next = evaluateBranch(branch, true, solver);
-            if (next != nullptr) {
-                executionState = next;
+            if (evaluateBranch(branch, solver)) {
+                executionState = branch.nextState;
                 break;
             }
         }
