@@ -75,6 +75,7 @@ control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata
         a.dstAddr = (bit<48>)b.meta;
         a.srcAddr = (bit<48>)b.meta1;
         a.etherType = b.meta2;
+        b.meta = b.meta2 ++ b.meta7;
     }
 }
 
