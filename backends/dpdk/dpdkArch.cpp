@@ -2939,10 +2939,18 @@ const IR::Node *MoveNonHeaderFieldsToPseudoHeader::postorder(IR::AssignmentState
     if (is_all_args_header) return assn;
     auto result = new IR::IndexedVector<IR::StatOrDecl>();
     if ((isLargeFieldOperand(assn->left) && !isLargeFieldOperand(assn->right) &&
-         !isHeader(assn->right)) ||
+         !isInsideHeader(assn->right)) ||
         (isLargeFieldOperand(assn->left) && assn->right->is<IR::Constant>())) {
         auto expr = assn->right;
         if (auto base = assn->right->to<IR::Cast>()) expr = base->expr;
+        if (auto cst = assn->right->to<IR::Constant>()) {
+            if (!cst->fitsUint64()) {
+                ::error(ErrorType::ERR_OVERLIMIT,
+                        "DPDK target supports up-to 64-bit immediate values, %1% exceeds the limit",
+                        cst);
+                return assn;
+            }
+        }
         auto stm = addAssignmentStmt(expr);
         result->push_back(stm.first);
         if (auto base = assn->right->to<IR::Cast>()) {
@@ -2960,7 +2968,7 @@ const IR::Node *MoveNonHeaderFieldsToPseudoHeader::postorder(IR::AssignmentState
         return result;
     }
     if (!isLargeFieldOperand(assn->left) && isLargeFieldOperand(assn->right) &&
-        !isHeader(assn->left)) {
+        !isInsideHeader(assn->left)) {
         auto expr = assn->right;
         auto stm = addAssignmentStmt(expr);
         result->push_back(stm.first);

@@ -1154,10 +1154,10 @@ class HaveNonHeaderLargeOperandAssignment : public Inspector {
     bool preorder(const IR::AssignmentStatement *assn) override {
         if (!is_all_arg_header_fields) return false;
         if ((isLargeFieldOperand(assn->left) && !isLargeFieldOperand(assn->right) &&
-             !isHeader(assn->right)) ||
+             !isInsideHeader(assn->right)) ||
             (isLargeFieldOperand(assn->left) && assn->right->is<IR::Constant>()) ||
             (!isLargeFieldOperand(assn->left) && isLargeFieldOperand(assn->right) &&
-             !isHeader(assn->left))) {
+             !isInsideHeader(assn->left))) {
             is_all_arg_header_fields &= false;
             return false;
         }

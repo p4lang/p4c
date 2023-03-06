@@ -85,7 +85,7 @@ bool isLargeFieldOperand(const IR::Expression *e) {
     return false;
 }
 
-bool isHeader(const IR::Expression *expr) {
+bool isInsideHeader(const IR::Expression *expr) {
     auto e = expr;
     if (auto base = expr->to<IR::Cast>()) e = base->expr;
     if (!e->is<IR::Member>()) return false;
