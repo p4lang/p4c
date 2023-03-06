@@ -28,14 +28,6 @@ namespace P4Tools::P4Testgen {
 /// branches so those with more states to be explored are picked first.
 class DetMaxStmtCoverage : public SymbolicExecutor {
  public:
-    /// Callbacks are invoked when the P4 program terminates. If the callback returns true,
-    /// execution halts. Otherwise, execution of the P4 program continues on a different random
-    /// path.
-    using Callback = std::function<bool(const FinalState &)>;
-
-    using Branch = SymbolicExecutor::Branch;
-    using StepResult = SymbolicExecutor::StepResult;
-
     /// Executes the P4 program along a randomly chosen path. When the program terminates, the
     /// given callback is invoked. If the callback returns true, then the executor terminates.
     /// Otherwise, execution of the P4 program continues on a different random path.

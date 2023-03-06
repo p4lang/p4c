@@ -42,16 +42,6 @@ class RandomBacktrack : public SymbolicExecutor {
     ///   uncovered.
     std::vector<Branch> unexploredBranches;
 
-    /// Take a branch and a solver as input.
-    /// Compute the branch's path conditions using the solver.
-    /// Return true if the solver can find a solution and does not time out.
-    static bool evaluateBranch(const SymbolicExecutor::Branch &branch, AbstractSolver &solver);
-
-    /// Select a branch at random from the input @param candidateBranches.
-    //  Remove the branch from the container.
-    static SymbolicExecutor::Branch popRandomBranch(
-        std::vector<SymbolicExecutor::Branch> &candidateBranches);
-
     /// Try to pick a successor from the list of given successors. This involves three steps.
     /// 1. Filter out all the successors with unsatisfiable path conditions. If no successors are
     /// left, return false.

@@ -147,13 +147,9 @@ ExecutionState *DetMaxStmtCoverage::chooseBranch(std::vector<Branch> &branches,
             return nullptr;
         }
 
-        // Pick and remove a branch randomly. All branches in this vector will have the same
-        // coverage.
-        auto idx = selectBranch(branches);
-        auto branch = branches.at(idx);
-        // Note: This could be improved, because we should remove only succeeded selection.
-        // Unsatisfiable branches could be covered in other tests after backtracking.
-        branches.erase(branches.begin() + idx);
+        // Pick and remove a branch randomly.
+        // All branches in this vector will have the same coverage.
+        auto branch = popRandomBranch(branches);
 
         // Do not bother invoking the solver for a trivial case.
         // In either case (true or false), we do not need to add the assertion and check.
@@ -376,13 +372,9 @@ ExecutionState *RandomMaxStmtCoverage::chooseBranch(std::vector<Branch> &branche
             return nullptr;
         }
 
-        // Pick and remove a branch randomly. All branches in this vector will have the same
-        // coverage.
-        auto idx = selectBranch(branches);
-        auto branch = branches.at(idx);
-        // Note: This could be improved, because we should remove only succeeded selection.
-        // Unsatisfiable branches could be covered in other tests after backtracking.
-        branches.erase(branches.begin() + idx);
+        // Pick and remove a branch randomly.
+        // All branches in this vector will have the same coverage.
+        auto branch = popRandomBranch(branches);
 
         // Do not bother invoking the solver for a trivial case.
         // In either case (true or false), we do not need to add the assertion and check.

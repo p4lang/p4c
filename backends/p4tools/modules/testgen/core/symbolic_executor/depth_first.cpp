@@ -24,33 +24,6 @@ namespace P4Tools::P4Testgen {
 DepthFirstSearch::DepthFirstSearch(AbstractSolver &solver, const ProgramInfo &programInfo)
     : SymbolicExecutor(solver, programInfo) {}
 
-bool DepthFirstSearch::evaluateBranch(const SymbolicExecutor::Branch &branch,
-                                      AbstractSolver &solver) {
-    // Do not bother invoking the solver for a trivial case.
-    // In either case (true or false), we do not need to add the assertion and check.
-    if (const auto *boolLiteral = branch.constraint->to<IR::BoolLiteral>()) {
-        return boolLiteral->value;
-    }
-
-    // Check the consistency of the path constraints asserted so far.
-    auto solverResult = solver.checkSat(branch.nextState->getPathConstraint());
-    if (solverResult == boost::none) {
-        ::warning("Solver timed out");
-    }
-
-    return solverResult != boost::none && solverResult.get();
-}
-
-SymbolicExecutor::Branch DepthFirstSearch::popRandomBranch(
-    std::vector<SymbolicExecutor::Branch> &candidateBranches) {
-    // If we did not find any new statements, fall back to random.
-    auto branchIdx = Utils::getRandInt(candidateBranches.size() - 1);
-    auto branch = candidateBranches[branchIdx];
-    candidateBranches[branchIdx] = candidateBranches.back();
-    candidateBranches.pop_back();
-    return branch;
-}
-
 bool DepthFirstSearch::pickSuccessor(StepResult successors) {
     // If there is only one successor, choose it and move on.
     if (successors->size() == 1) {

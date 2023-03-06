@@ -18,7 +18,7 @@
 
 namespace P4Tools::P4Testgen {
 
-/// Base abstract class for exploration strategy. It requires the implementation of
+/// Base abstract class for symbolic execution. It requires the implementation of
 /// the run method, and carries the base Branch struct, to be reused in inherited
 /// classes. It also holds a default termination method, which can be overridden.
 class SymbolicExecutor {
@@ -66,8 +66,14 @@ class SymbolicExecutor {
     /// The SMT solver backing this executor.
     AbstractSolver &solver;
 
-    /// @returns a pseudorandom integer in the range of [0, branches.size() - 1]
-    static uint64_t selectBranch(const std::vector<Branch> &branches);
+    /// The current execution state.
+    ExecutionState *executionState = nullptr;
+
+    /// Set of all statements, to be retrieved from programInfo.
+    const P4::Coverage::CoverageSet &allStatements;
+
+    /// Set of all statements executed in any testcase that has been outputted.
+    P4::Coverage::CoverageSet visitedStatements;
 
     /// Handles processing at the end of a P4 program.
     ///
@@ -78,14 +84,15 @@ class SymbolicExecutor {
     /// Take one step in the program and return list of possible branches.
     StepResult step(ExecutionState &state);
 
-    /// The current execution state.
-    ExecutionState *executionState = nullptr;
+    /// Take a branch and a solver as input.
+    /// Compute the branch's path conditions using the solver.
+    /// Return true if the solver can find a solution and does not time out.
+    static bool evaluateBranch(const SymbolicExecutor::Branch &branch, AbstractSolver &solver);
 
-    /// Set of all statements, to be retrieved from programInfo.
-    const P4::Coverage::CoverageSet &allStatements;
-
-    /// Set of all statements executed in any testcase that has been outputted.
-    P4::Coverage::CoverageSet visitedStatements;
+    /// Select a branch at random from the input @param candidateBranches.
+    //  Remove the branch from the container.
+    static SymbolicExecutor::Branch popRandomBranch(
+        std::vector<SymbolicExecutor::Branch> &candidateBranches);
 
  private:
     SmallStepEvaluator evaluator;

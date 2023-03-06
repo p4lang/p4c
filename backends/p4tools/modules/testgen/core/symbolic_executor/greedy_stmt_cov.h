@@ -63,22 +63,12 @@ class GreedyStmtSelection : public SymbolicExecutor {
     ///   uncovered.
     std::vector<Branch> unexploredBranches;
 
-    /// Take a branch and a solver as input.
-    /// Compute the branch's path conditions using the solver.
-    /// Return true if the solver can find a solution and does not time out.
-    static bool evaluateBranch(const SymbolicExecutor::Branch &branch, AbstractSolver &solver);
-
     /// Iterate over all the input branches in @param candidateBranches and try to find a branch
     /// which contains statements that are not in @param coveredStatements yet. Return the first
     /// branch that was found and remove that branch from the container of @param candidateBranches.
     /// Return none, if no branch was found.
     static std::optional<SymbolicExecutor::Branch> popPotentialBranch(
         const P4::Coverage::CoverageSet &coveredStatements,
-        std::vector<SymbolicExecutor::Branch> &candidateBranches);
-
-    /// Select a branch at random from the input @param candidateBranches.
-    //  Remove the branch from the container.
-    static SymbolicExecutor::Branch popRandomBranch(
         std::vector<SymbolicExecutor::Branch> &candidateBranches);
 
     /// Try to pick a successor from the list of given successors. This involves three steps.

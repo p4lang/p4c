@@ -11,13 +11,11 @@
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 /// Visits all possible explorable branches and stores them in a list,
 /// which will be picked randomly to produce a test. This feature is still
-/// *experimetnal* and it can take a long time to produce tests depending on
+/// *experimental* and it can take a long time to produce tests depending on
 // the chosen max bound.
 class LinearEnumeration : public SymbolicExecutor {
  public:
@@ -45,8 +43,6 @@ class LinearEnumeration : public SymbolicExecutor {
     void mapBranch(Branch &branch);
 };
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SYMBOLIC_EXECUTOR_LINEAR_ENUMERATION_H_ */

@@ -36,11 +36,6 @@ SymbolicExecutor::StepResult SymbolicExecutor::step(ExecutionState &state) {
     return successors;
 }
 
-uint64_t SymbolicExecutor::selectBranch(const std::vector<Branch> &branches) {
-    // Pick a branch at random.
-    return Utils::getRandInt(branches.size() - 1);
-}
-
 bool SymbolicExecutor::handleTerminalState(const Callback &callback,
                                            const ExecutionState &terminalState) {
     // Check the solver for satisfiability. If it times out or reports non-satisfiability, issue
@@ -61,6 +56,33 @@ bool SymbolicExecutor::handleTerminalState(const Callback &callback,
     // final execution state, and finally delegate to the callback.
     const FinalState finalState(&solver, terminalState);
     return callback(finalState);
+}
+
+bool SymbolicExecutor::evaluateBranch(const SymbolicExecutor::Branch &branch,
+                                      AbstractSolver &solver) {
+    // Do not bother invoking the solver for a trivial case.
+    // In either case (true or false), we do not need to add the assertion and check.
+    if (const auto *boolLiteral = branch.constraint->to<IR::BoolLiteral>()) {
+        return boolLiteral->value;
+    }
+
+    // Check the consistency of the path constraints asserted so far.
+    auto solverResult = solver.checkSat(branch.nextState->getPathConstraint());
+    if (solverResult == boost::none) {
+        ::warning("Solver timed out");
+    }
+
+    return solverResult != boost::none && solverResult.get();
+}
+
+SymbolicExecutor::Branch SymbolicExecutor::popRandomBranch(
+    std::vector<SymbolicExecutor::Branch> &candidateBranches) {
+    // If we did not find any new statements, fall back to random.
+    auto branchIdx = Utils::getRandInt(candidateBranches.size() - 1);
+    auto branch = candidateBranches[branchIdx];
+    candidateBranches[branchIdx] = candidateBranches.back();
+    candidateBranches.pop_back();
+    return branch;
 }
 
 SymbolicExecutor::SymbolicExecutor(AbstractSolver &solver, const ProgramInfo &programInfo)

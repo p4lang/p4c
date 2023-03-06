@@ -17,9 +17,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 void LinearEnumeration::run(const Callback &callback) {
     // Loop until we reach terminate, or until there are no more
@@ -30,14 +28,11 @@ void LinearEnumeration::run(const Callback &callback) {
                 return;
             }
             // Select the branch in the vector to produce a test.
-            auto idx = selectBranch(exploredBranches);
-            auto branch = exploredBranches.at(idx);
-            // Erase the element once it produces a test.
-            exploredBranches.erase(exploredBranches.begin() + idx);
+            // Pick a state at random.
+            auto branchState = popRandomBranch(exploredBranches).nextState;
 
             // Retrieve the next state (which is guaranteed to be a terminal state)
             // from the branch and invoke handleTerminalState to produce a test.
-            ExecutionState *branchState = branch.nextState;
             bool terminate = handleTerminalState(callback, *branchState);
             // This flag indicates we reached maxTests.
             if (terminate) {
@@ -114,6 +109,4 @@ void LinearEnumeration::mapBranch(Branch &branch) {
     }
 }
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
