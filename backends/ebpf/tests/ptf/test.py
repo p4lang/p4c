@@ -455,6 +455,29 @@ class ParserValueSetPSATest(P4EbpfTest):
         testutils.verify_no_other_packets(self)
 
 
+class ParserValueSetPSAWideField(P4EbpfTest):
+    """
+    Test support for fields wider than 64 bits in value_set using IPv6 protocol.
+    """
+    p4_file_path = "p4testdata/wide-field-pvs.p4"
+
+    def runTest(self):
+        ip = "1111:2222:3333:4444:5555:6666:7777:8888"
+        pkt = testutils.simple_ipv6ip_packet(ipv6_dst=ip)
+
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_no_other_packets(self)
+
+        self.value_set_insert(name="IngressParserImpl_pvs", value=[ip])
+
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
+
+        pkt[IPv6].dst = '2::2'
+        testutils.send_packet(self, PORT0, pkt)
+        testutils.verify_no_other_packets(self)
+
+
 # xdp2tc=head is not supported because pkt_len of test packet (Ethernet+RandomHeader) < 34 B
 @xdp2tc_head_not_supported
 class RandomPSATest(P4EbpfTest):

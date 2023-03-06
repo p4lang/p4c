@@ -1192,7 +1192,7 @@ void EBPFValueSet::emitKeyInitializer(CodeBuilder *builder, const IR::SelectExpr
                 Util::printf_format("%s.%s", keyVarName.c_str(), fieldNames.at(i).first.c_str());
             builder->appendFormat("__builtin_memcpy(&%s, &(", dst.c_str());
             codeGen->visit(keyExpr);
-            builder->appendFormat("), sizeof(%s))", dst.c_str());
+            builder->appendFormat("[0]), sizeof(%s))", dst.c_str());
         } else {
             builder->appendFormat("%s.%s = ", keyVarName.c_str(), fieldNames.at(i).first.c_str());
             if (auto mask = keyExpr->to<IR::Mask>()) {

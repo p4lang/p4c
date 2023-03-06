@@ -187,10 +187,9 @@ bool StateTranslationVisitor::preorder(const IR::SelectExpression *expression) {
     builder->emitIndent();
     etype->declare(builder, selectValue, false);
     builder->endOfStatement(true);
-    builder->emitIndent();
-    builder->appendFormat("%s = ", selectValue);
-    visit(expression->select);
-    builder->endOfStatement(true);
+
+    emitAssignStatement(type, nullptr, selectValue, expression->select);
+    builder->newline();
 
     // Init value_sets
     for (auto e : expression->selectCases) {
@@ -214,6 +213,9 @@ bool StateTranslationVisitor::preorder(const IR::SelectExpression *expression) {
 }
 
 bool StateTranslationVisitor::preorder(const IR::SelectCase *selectCase) {
+    unsigned width = EBPFInitializerUtils::ebpfTypeWidth(typeMap, selectCase->keyset);
+    bool scalar = EBPFScalarType::generatesScalar(width);
+
     builder->emitIndent();
     if (auto pe = selectCase->keyset->to<IR::PathExpression>()) {
         builder->append("if (");
@@ -222,14 +224,34 @@ bool StateTranslationVisitor::preorder(const IR::SelectCase *selectCase) {
         if (pvs) pvs->emitLookup(builder);
         builder->append(" != NULL)");
     } else if (auto mask = selectCase->keyset->to<IR::Mask>()) {
-        builder->appendFormat("if ((%s", selectValue);
-        builder->append(" & ");
-        visit(mask->right);
-        builder->append(") == (");
-        visit(mask->left);
-        builder->append(" & ");
-        visit(mask->right);
-        builder->append("))");
+        if (scalar) {
+            builder->appendFormat("if ((%s", selectValue);
+            builder->append(" & ");
+            visit(mask->right);
+            builder->append(") == (");
+            visit(mask->left);
+            builder->append(" & ");
+            visit(mask->right);
+            builder->append("))");
+        } else {
+            unsigned bytes = ROUNDUP(width, 8);
+            bool first = true;
+            cstring hex = EBPFInitializerUtils::genHexStr(mask->right->to<IR::Constant>()->value,
+                                                          width, mask->right);
+            cstring value = EBPFInitializerUtils::genHexStr(mask->left->to<IR::Constant>()->value,
+                                                            width, mask->left);
+            builder->append("if (");
+            for (unsigned i = 0; i < bytes; ++i) {
+                if (!first) {
+                    builder->append(" && ");
+                }
+                builder->appendFormat("((%s[%u] & 0x%s)", selectValue, i, hex.substr(2 * i, 2));
+                builder->append(" == ");
+                builder->appendFormat("(%s & %s))", value.substr(2 * i, 2), hex.substr(2 * i, 2));
+                first = false;
+            }
+            builder->append(") ");
+        }
     } else {
         builder->appendFormat("if (%s", selectValue);
         builder->append(" == ");
