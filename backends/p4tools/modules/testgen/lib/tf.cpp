@@ -5,14 +5,12 @@
 #include "backends/p4tools/common/lib/util.h"
 #include "lib/timer.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 TF::TF(cstring testName, boost::optional<unsigned int> seed = boost::none)
     : testName(testName), seed(seed) {}
 
-void TF::printPerformanceReport() const {
+void TF::printPerformanceReport(bool write) const {
     // Do not emit a report if performance logging is not enabled.
     if (!Log::fileLogLevelIsAtLeast("performance", 4)) {
         return;
@@ -38,18 +36,18 @@ void TF::printPerformanceReport() const {
         }
         timerList.emplace_back(timerData);
     }
-    dataJson["timers"] = timerList;
-    static const std::string TEST_CASE(R"""(Timer,Total Time,Percentage
+    if (write) {
+        dataJson["timers"] = timerList;
+        static const std::string TEST_CASE(R"""(Timer,Total Time,Percentage
 ## for timer in timers
 {{timer.name}},{{timer.time}},{{timer.pct}}
 ## endfor
 )""");
 
-    auto perfFile = std::ofstream(testName + "_perf.csv");
-    inja::render_to(perfFile, TEST_CASE, dataJson);
-    perfFile.flush();
+        auto perfFile = std::ofstream(testName + "_perf.csv");
+        inja::render_to(perfFile, TEST_CASE, dataJson);
+        perfFile.flush();
+    }
 }
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen

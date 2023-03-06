@@ -11,9 +11,7 @@
 
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 /// THe default base class for the various test frameworks (TF). Every test framework has a test
 /// name and a seed associated with it. Also contains a variety of common utility functions.
@@ -137,13 +135,12 @@ class TF {
     virtual void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testIdx,
                             float currentCoverage) = 0;
 
-    /// Log performance numbers to a separate file in the test folder.
-    /// Also print out some performance numbers if logging feature "performance" is enabled.
-    void printPerformanceReport() const;
+    /// Print out some performance numbers if logging feature "performance" is enabled.
+    /// Also log performance numbers to a separate file in the test folder if @param write is
+    /// enabled.
+    void printPerformanceReport(bool write) const;
 };
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TF_H_ */

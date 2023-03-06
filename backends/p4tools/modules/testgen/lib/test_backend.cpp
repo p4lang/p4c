@@ -131,7 +131,7 @@ bool TestBackEnd::run(const FinalState &state) {
                                                              outputPacketExpr, outputPortExpr);
         if (concolicModel == nullptr) {
             testCount++;
-            printPerformanceReport();
+            printPerformanceReport(false);
             return needsToTerminate(testCount);
         }
         completedModel = concolicModel;
@@ -149,7 +149,7 @@ bool TestBackEnd::run(const FinalState &state) {
         abort = printTestInfo(executionState, testInfo, outputPortExpr);
         if (abort) {
             testCount++;
-            printPerformanceReport();
+            printPerformanceReport(false);
             return needsToTerminate(testCount);
         }
         const auto *testSpec = createTestSpec(executionState, completedModel, testInfo);
@@ -173,7 +173,7 @@ bool TestBackEnd::run(const FinalState &state) {
         printTraces("============ End Test %1% ============\n", testCount);
         testCount++;
         P4::Coverage::coverageReportFinal(allStatements, visitedStatements);
-        printPerformanceReport();
+        printPerformanceReport(false);
 
         // If MAX_STATEMENT_COVERAGE is enabled, terminate early if we hit max coverage already.
         if (TestgenOptions::get().stopMetric == "MAX_STATEMENT_COVERAGE" && coverage == 1.0) {
@@ -279,7 +279,9 @@ bool TestBackEnd::printTestInfo(const ExecutionState *executionState, const Test
     return false;
 }
 
-void TestBackEnd::printPerformanceReport() const { testWriter->printPerformanceReport(); }
+void TestBackEnd::printPerformanceReport(bool write) const {
+    testWriter->printPerformanceReport(write);
+}
 
 int64_t TestBackEnd::getTestCount() const { return testCount; }
 

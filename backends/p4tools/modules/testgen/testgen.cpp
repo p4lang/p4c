@@ -137,6 +137,8 @@ int Testgen::mainImpl(const IR::P4Program *program) {
         }
         throw;
     }
+    // Emit a performance report, if desired.
+    testBackend->printPerformanceReport(true);
 
     // Do not print this warning if assertion mode is enabled.
     if (testBackend->getTestCount() == 0 && !testgenOptions.assertionModeEnabled) {

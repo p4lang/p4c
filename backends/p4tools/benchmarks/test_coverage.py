@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 
 import argparse
-import subprocess
 import random
 import sys
 import re
-import time
+import os
 import logging
 import tempfile
 from pathlib import Path
@@ -34,9 +33,9 @@ PARSER.add_argument(
     "-p",
     "--p4-programs",
     dest="p4_programs",
-    nargs='+',
-    help='The P4 files to measure coverage on.',
-    required=True
+    nargs="+",
+    help="The P4 files to measure coverage on.",
+    required=True,
 )
 PARSER.add_argument(
     "-o",
@@ -111,28 +110,39 @@ PARSER.add_argument(
 
 
 class Options:
-
-    def __init__(self):
-        self.p4testgen_bin = None  # The P4Testgen binary.
-        self.p4_programs = None  # P4 Programs that are being measured.
-        self.out_dir = None  # The output directory.
-        self.seed = None  # Program seed.
-        self.max_tests = None  # The max tests parameter.
-        self.test_backend = None  # The test back end to generate tests for.
-        self.test_mode = "bmv2"  # Generic test config.
-        self.target = "bmv2"  # The target.
-        self.arch = "v1model"  # The architecture.
+    # The P4Testgen binary.
+    p4testgen_bin = None
+    # P4 Programs that are being measured.
+    p4_programs = None
+    # The output directory.
+    out_dir = None
+    # Program seed.
+    seed = None
+    # The max tests parameter.
+    max_tests = None
+    # The test back end to generate tests for.
+    test_backend = None
+    # Generic test config.
+    test_mode = "bmv2"
+    # The target.
+    target = "bmv2"
+    # The architecture.
+    arch = "v1model"
+    # Extra arguments for P4Testgen execution.
+    extra_args = None
 
 
 class TestArgs:
-
-    def __init__(self):
-        self.seed = None  # The seed for this particular run.
-        self.extra_args = None  # Extra arguments for P4Testgen execution.
-        # The testing directory associated with this test run.
-        self.test_dir = None
-        self.p4_program = None  # The P4 program to run tests on.
-        self.strategy = None  # The exploration strategy to execute.
+    # The seed for this particular run.
+    seed = None
+    # Extra arguments for P4Testgen execution.
+    extra_args = None
+    # The testing directory associated with this test run.
+    test_dir = None
+    # The P4 program to run tests on.
+    p4_program = None
+    # The exploration strategy to execute.
+    strategy = None
 
 
 def get_test_files(input_dir, extension):
@@ -153,8 +163,7 @@ def parse_coverage_and_timestamps(test_files, parse_type):
             for line in file_handle.readlines():
                 if "Date generated" in line:
                     if parse_type == "PROTOBUF":
-                        datestr = line.replace(
-                            'metadata: "Date generated: ', "")
+                        datestr = line.replace('metadata: "Date generated: ', "")
                         datestr = datestr.replace('"\n', "")
                     else:
                         datestr = line.replace("# Date generated: ", "")
@@ -164,11 +173,11 @@ def parse_coverage_and_timestamps(test_files, parse_type):
                 if "Current statement coverage:" in line:
                     if parse_type == "PROTOBUF":
                         covstr = line.replace(
-                            'metadata: "Current statement coverage: ', "")
+                            'metadata: "Current statement coverage: ', ""
+                        )
                         covstr = covstr.replace('"\n', "")
                     else:
-                        covstr = line.replace(
-                            "# Current statement coverage: ", "")
+                        covstr = line.replace("# Current statement coverage: ", "")
                     covstr = covstr.replace("\n", "")
                     cov_percentages.append(float(covstr))
     return cov_percentages, datestrs
@@ -192,25 +201,27 @@ def convert_timestamps_to_timedelta(timestamps):
 
 
 def run_strategies_for_max_tests(options, test_args):
-
-    cmd = [str(options.p4testgen_bin)]
-    sub_cmd = (
-        f"--target {options.target} --arch {options.arch} --std p4-16"
+    cmd = (
+        f"{options.p4testgen_bin} --target {options.target} --arch {options.arch} --std p4-16"
         f" -I/p4/p4c/build/p4include --test-backend {options.test_backend}"
         f" --seed {test_args.seed} --print-performance-report"
         f" --max-tests {options.max_tests} --out-dir {test_args.test_dir}"
-        f" --exploration-strategy {test_args.strategy} --stop-metric MAX_STATEMENT_COVERAGE"
+        f" --path-selection {test_args.strategy} --stop-metric MAX_STATEMENT_COVERAGE"
         f"{test_args.extra_args} {test_args.p4_program}"
-    ).split(" ")
-    cmd.extend(sub_cmd)
+    )
     start_timestamp = datetime.datetime.now()
 
     # TODO: Use result
-    testutils.exec_process(cmd, "Error executing", 3600)
+    custom_env = os.environ.copy()
+    # Some executions may need a lot of memory.
+    # custom_env["GC_INITIAL_HEAP_SIZE"] = "30G"
+    # custom_env["GC_MAXIMUM_HEAP_SIZE"] = "50G"
+    testutils.exec_process(cmd, env=custom_env, capture_output=True)
     end_timestamp = datetime.datetime.now()
 
     statements_cov, timestamps = collect_data_from_folder(
-        test_args.test_dir, options.test_backend)
+        test_args.test_dir, options.test_backend
+    )
     if not statements_cov:
         print("No errors found!")
         return [], [], []
@@ -222,17 +233,24 @@ def run_strategies_for_max_tests(options, test_args):
     )
 
     perf_file = test_args.test_dir.joinpath(
-        test_args.p4_program.stem + "_perf").with_suffix(".csv")
+        test_args.p4_program.stem + "_perf"
+    ).with_suffix(".csv")
     perf = pd.read_csv(perf_file, index_col=0)
-    summarized_data = [float(final_cov) * 100, num_tests, time_needed, perf["Percentage"]
-                       ["z3"], perf["Percentage"]["step"], perf["Percentage"]["backend"]]
+    summarized_data = [
+        float(final_cov) * 100,
+        num_tests,
+        time_needed,
+        perf["Percentage"]["z3"],
+        perf["Percentage"]["step"],
+        perf["Percentage"]["backend"],
+    ]
     return summarized_data, statements_cov, timestamps
 
 
 def plot_coverage(out_dir, coverage_pairs):
     df = pd.DataFrame()
 
-    for (label, coverage) in coverage_pairs.items():
+    for label, coverage in coverage_pairs.items():
         df_series = pd.Series(coverage, name="Coverage")
         df_series = df_series.to_frame()
         df[label] = df_series
@@ -248,7 +266,6 @@ def plot_coverage(out_dir, coverage_pairs):
 
 
 def main(args, extra_args):
-
     options = Options()
     options.p4_programs = args.p4_programs
     options.max_tests = args.max_tests
@@ -284,8 +301,12 @@ def main(args, extra_args):
         seeds.append(seed)
     print(f"Chosen seeds: {seeds}")
 
-    strategies = ["GREEDY_POTENTIAL", "UNBOUNDED_RANDOM_ACCESS",
-                  "RANDOM_ACCESS_MAX_COVERAGE", "INCREMENTAL_STACK"]
+    strategies = [
+        "GREEDY_POTENTIAL",
+        "UNBOUNDED_RANDOM_ACCESS_STACK",
+        "RANDOM_ACCESS_MAX_COVERAGE",
+        "INCREMENTAL_STACK",
+    ]
     config = {
         "INCREMENTAL_STACK": "",
         "RANDOM_ACCESS_STACK": " --pop-level 3",
@@ -294,24 +315,30 @@ def main(args, extra_args):
         "GREEDY_POTENTIAL": "",
     }
     p4_program = options.p4_programs[0]
+    p4_program =testutils.check_if_file(p4_program)
+    if not p4_program:
+        return
     p4_program = Path(testutils.check_if_file(p4_program))
     p4_program_name = p4_program.stem
     # csv results file path
     for strategy in strategies:
         test_dir = options.out_dir.joinpath(f"{strategy.lower()}")
         testutils.check_and_create_dir(test_dir)
-        summary_frame = pd.DataFrame(columns=["Program", "Seed",
-                                              "Coverage",
-                                              "Generated tests",
-                                              "Total time (s)",
-                                              "% Z3",
-                                              "% stepper",
-                                              "% test generation",
-                                              ])
+        summary_frame = pd.DataFrame(
+            columns=[
+                "Program",
+                "Seed",
+                "Coverage",
+                "Generated tests",
+                "Total time (s)",
+                "% Z3",
+                "% stepper",
+                "% test generation",
+            ]
+        )
         coverage_pairs = {}
         timeseries_data = {}
-        timeseries_frame = pd.DataFrame(columns=["Seed", "Time",
-                                                 "Coverage"])
+        timeseries_frame = pd.DataFrame(columns=["Seed", "Time", "Coverage"])
         for seed in seeds:
             data_row = [p4_program_name, seed]
             print(
@@ -326,7 +353,8 @@ def main(args, extra_args):
             if options.extra_args:
                 test_args.extra_args += " " + " ".join(options.extra_args[1:])
             summarized_data, statements_cov, timestamps = run_strategies_for_max_tests(
-                options, test_args)
+                options, test_args
+            )
             data_row.extend(summarized_data)
             summary_frame.loc[len(summary_frame)] = data_row
             coverage_pairs[str(seed)] = statements_cov
@@ -334,35 +362,40 @@ def main(args, extra_args):
             sub_frame["Seed"] = [seed] * len(statements_cov)
             sub_frame["Coverage"] = statements_cov
             sub_frame["Time"] = convert_timestamps_to_timedelta(timestamps)
-            sub_frame["Time"] = sub_frame["Time"] / \
-                pd.Timedelta(milliseconds=1)
+            sub_frame["Time"] = sub_frame["Time"] / pd.Timedelta(milliseconds=1)
 
             timeseries_frame = pd.concat([timeseries_frame, sub_frame])
         # timeseries_frame.set_index(["Seed"], inplace=True)
         summary_frame.set_index(["Program", "Seed"], inplace=True)
         timeseries_frame.set_index(["Seed"], inplace=True)
         sns.lineplot(x="Time", y="Coverage", data=timeseries_frame)
-        summary_frame["Time per test (s)"] = summary_frame["Total time (s)"] / \
-            summary_frame["Generated tests"]
+        summary_frame["Time per test (s)"] = (
+            summary_frame["Total time (s)"] / summary_frame["Generated tests"]
+        )
         summary_frame.loc["Mean"] = summary_frame.mean(
-            numeric_only=True, axis=0, skipna=True)
+            numeric_only=True, axis=0, skipna=True
+        )
         summary_frame.loc["Median"] = summary_frame.median(
-            numeric_only=True, axis=0, skipna=True)
+            numeric_only=True, axis=0, skipna=True
+        )
         summary_frame.loc["Min"] = summary_frame.min(
-            numeric_only=True, axis=0, skipna=True)
+            numeric_only=True, axis=0, skipna=True
+        )
         summary_frame.loc["Max"] = summary_frame.max(
-            numeric_only=True, axis=0, skipna=True)
+            numeric_only=True, axis=0, skipna=True
+        )
 
         summary_results_path = options.out_dir.joinpath(
-            f"{p4_program_name}_{strategy.lower()}_summary_results.csv")
+            f"{p4_program_name}_{strategy.lower()}_summary_results.csv"
+        )
         summary_frame.to_csv(summary_results_path)
         timeseries_results_path = options.out_dir.joinpath(
-            f"{p4_program_name}_{strategy.lower()}_coverage_over_time.csv")
+            f"{p4_program_name}_{strategy.lower()}_coverage_over_time.csv"
+        )
         timeseries_frame.to_csv(timeseries_results_path)
 
 
 if __name__ == "__main__":
     # Parse options and process argv
     arguments, argv = PARSER.parse_known_args()
-
     main(arguments, argv)

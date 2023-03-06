@@ -18,9 +18,7 @@
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 class TestBackEnd {
  private:
@@ -114,13 +112,14 @@ class TestBackEnd {
     virtual bool run(const FinalState &state);
 
     /// Print out some performance numbers if logging feature "performance" is enabled.
-    void printPerformanceReport() const;
+    /// Also log performance numbers to a separate file in the test folder if @param write is
+    /// enabled.
+    void printPerformanceReport(bool write) const;
 
     /// Accessors.
     [[nodiscard]] int64_t getTestCount() const;
 };
 
-}  // namespace P4Testgen
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TEST_BACKEND_H_ */

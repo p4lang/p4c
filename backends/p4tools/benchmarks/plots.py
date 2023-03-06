@@ -4,7 +4,6 @@ import argparse
 from pathlib import Path
 import sys
 import re
-from glob import glob
 from operator import attrgetter
 
 import pandas as pd
