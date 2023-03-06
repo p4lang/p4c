@@ -39,6 +39,7 @@ class ExplorationStrategy {
     using Callback = std::function<bool(const FinalState &)>;
 
     using Branch = SmallStepEvaluator::Branch;
+
     using StepResult = SmallStepEvaluator::Result;
 
     /// Executes the P4 program along a randomly chosen path. When the program terminates, the
@@ -80,7 +81,7 @@ class ExplorationStrategy {
     /// The current execution state.
     ExecutionState *executionState = nullptr;
 
-    /// Set of all stetements, to be retrieved from programInfo.
+    /// Set of all statements, to be retrieved from programInfo.
     const P4::Coverage::CoverageSet &allStatements;
 
     /// Set of all statements executed in any testcase that has been outputted.

@@ -33,14 +33,6 @@ namespace P4Tools::P4Testgen {
 ExplorationStrategy::StepResult ExplorationStrategy::step(ExecutionState &state) {
     Util::ScopedTimer st("step");
     StepResult successors = evaluator.step(state);
-    // Assign branch ids to the branches. These integer branch ids are used by track-branches
-    // and selected (input) branches features.
-    if (successors->size() > 1) {
-        for (uint64_t bIdx = 0; bIdx < successors->size(); ++bIdx) {
-            auto &succ = (*successors)[bIdx];
-            succ.nextState->pushBranchDecision(bIdx + 1);
-        }
-    }
     return successors;
 }
 

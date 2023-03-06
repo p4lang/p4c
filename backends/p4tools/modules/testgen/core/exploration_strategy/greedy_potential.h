@@ -22,7 +22,7 @@ namespace P4Tools::P4Testgen {
 /// statements in the top-level statement of the execution state. These statements are latent
 /// because execution is not guaranteed. They may be guarded by an if condition or select
 /// expression. If the strategy does not find a new statement, it falls back to
-/// random for . Similarly, if the strategy cycles without a test for a specific threshold, it will
+/// random. Similarly, if the strategy cycles without a test for a specific threshold, it will
 /// fall back to random. This is to prevent getting caught in a parser cycle.
 class GreedyPotential : public ExplorationStrategy {
  public:
@@ -40,18 +40,54 @@ class GreedyPotential : public ExplorationStrategy {
     /// greediness.
     uint64_t stepsWithoutTest = 0;
 
-    /// The maximum amount of steps the strategy will stay in the a random state.
-    static const uint64_t MAX_RANDOM_THRESHOLD = 10;
-
     /// The maximum number of steps without generating a test before falling back to random.
     static const uint64_t MAX_STEPS_WITHOUT_TEST = 1000;
 
-    /// Each element on this stack represents a set of alternative choices that could have been
+    /// Branches which have the potential to cover new statements in the program.
+    /// Each element on this vector represents a set of alternative choices that could have been
     /// made along the current execution path.
     ///
     /// Invariants:
-    ///   - Each element of this stack is non-empty.
+    ///   - Each element of this vector is non-empty.
+    ///   - Each element's path constraints are satisfiable.
+    std::vector<Branch> potentialBranches;
+
+    /// General unexplored branches.
+    // Each element on this vector represents a set of alternative choices that could have been
+    /// made along the current execution path.
+    ///
+    /// Invariants:
+    ///   - Each element of this vector is non-empty.
+    ///   - Each element's path constraints are satisfiable.
+    ///   - There are no statements associated with the element's execution state that are
+    ///   uncovered.
     std::vector<Branch> unexploredBranches;
+
+    /// Take a branch and a solver as input.
+    /// Compute the branch's path conditions using the solver.
+    /// Return true if the solver can find a solution and does not time out.
+    static bool evaluateBranch(const ExplorationStrategy::Branch &branch, AbstractSolver &solver);
+
+    /// Iterate over all the input branches in @param candidateBranches and try to find a branch
+    /// which contains statements that are not in @param coveredStatements yet. Return the first
+    /// branch that was found and remove that branch from the container of @param candidateBranches.
+    /// Return none, if no branch was found.
+    static std::optional<ExplorationStrategy::Branch> popPotentialBranch(
+        const P4::Coverage::CoverageSet &coveredStatements,
+        std::vector<ExplorationStrategy::Branch> &candidateBranches);
+
+    /// Select a branch at random from the input @param candidateBranches.
+    //  Remove the branch from the container.
+    static ExplorationStrategy::Branch popRandomBranch(
+        std::vector<ExplorationStrategy::Branch> &candidateBranches);
+
+    /// Try to pick a successor from the list of given successors. This involves three steps.
+    /// 1. Filter out all the successors with unsatisfiable path conditions. If no successors are
+    /// left, return false.
+    /// 2. If there are successors left, try to find a successor that covers new statements. Set the
+    /// nextState as this successors state.
+    /// 3. If no successor with new statements was found set a random successor.
+    [[nodiscard]] bool pickSuccessor(StepResult successors);
 };
 
 }  // namespace P4Tools::P4Testgen
