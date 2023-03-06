@@ -2917,14 +2917,72 @@ MoveNonHeaderFieldsToPseudoHeader::addAssignmentStmt(const IR::Expression *e) {
     } else {
         type = typeMap->getType(e, true)->to<IR::Type_Bits>();
     }
+    if (e->is<IR::Constant>() && (type->width_bits() > 64)) {
+        type = IR::Type_Bits::get(64);
+    }
     auto name = refMap->newName("pseudo");
     auto aligned_type = getEightBitAlignedType(type);
     pseudoFieldNameType.push_back(std::pair<cstring, const IR::Type *>(name, aligned_type));
     auto mem0 = new IR::Member(new IR::PathExpression(IR::ID("h")),
                                IR::ID(DpdkAddPseudoHeaderDecl::pseudoHeaderInstanceName));
     auto mem1 = new IR::Member(mem0, IR::ID(name));
-    auto cast1 = new IR::Cast(aligned_type, e);
+    if (auto cst = e->to<IR::Constant>()) {
+        return {new IR::AssignmentStatement(mem1, new IR::Constant(aligned_type, cst->value)),
+                mem1};
+    }
+    const IR::Expression *cast1 = e;
+    if (type->width_bits() != aligned_type->width_bits()) cast1 = new IR::Cast(aligned_type, e);
     return {new IR::AssignmentStatement(mem1, cast1), mem1};
+}
+
+const IR::Node *MoveNonHeaderFieldsToPseudoHeader::postorder(IR::AssignmentStatement *assn) {
+    if (is_all_args_header) return assn;
+    auto result = new IR::IndexedVector<IR::StatOrDecl>();
+    if ((isLargeFieldOperand(assn->left) && !isLargeFieldOperand(assn->right) &&
+         !isInsideHeader(assn->right)) ||
+        (isLargeFieldOperand(assn->left) && assn->right->is<IR::Constant>())) {
+        auto expr = assn->right;
+        if (auto base = assn->right->to<IR::Cast>()) expr = base->expr;
+        if (auto cst = assn->right->to<IR::Constant>()) {
+            if (!cst->fitsUint64()) {
+                ::error(ErrorType::ERR_OVERLIMIT,
+                        "DPDK target supports up-to 64-bit immediate values, %1% exceeds the limit",
+                        cst);
+                return assn;
+            }
+        }
+        auto stm = addAssignmentStmt(expr);
+        result->push_back(stm.first);
+        if (auto base = assn->right->to<IR::Cast>()) {
+            auto assn1 = new IR::AssignmentStatement(assn->srcInfo, assn->left,
+                                                     new IR::Cast(base->destType, stm.second));
+            result->push_back(assn1);
+        } else if (assn->right->is<IR::Constant>()) {
+            auto assn1 = new IR::AssignmentStatement(assn->srcInfo, assn->left,
+                                                     new IR::Cast(assn->left->type, stm.second));
+            result->push_back(assn1);
+        } else {
+            assn->right = stm.second;
+            result->push_back(assn);
+        }
+        return result;
+    }
+    if (!isLargeFieldOperand(assn->left) && isLargeFieldOperand(assn->right) &&
+        !isInsideHeader(assn->left)) {
+        auto expr = assn->right;
+        auto stm = addAssignmentStmt(expr);
+        result->push_back(stm.first);
+        if (auto base = assn->right->to<IR::Cast>()) {
+            auto assn1 = new IR::AssignmentStatement(assn->srcInfo, assn->left,
+                                                     new IR::Cast(base->destType, stm.second));
+            result->push_back(assn1);
+        } else {
+            assn->right = stm.second;
+            result->push_back(assn);
+        }
+        return result;
+    }
+    return assn;
 }
 
 const IR::Node *MoveNonHeaderFieldsToPseudoHeader::postorder(IR::MethodCallStatement *statement) {

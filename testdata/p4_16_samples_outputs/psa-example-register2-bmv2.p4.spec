@@ -19,6 +19,13 @@ struct ipv4_t {
 	bit<32> dstAddr
 }
 
+struct dpdk_pseudo_header_t {
+	bit<32> pseudo
+	bit<32> pseudo_0
+	bit<48> pseudo_1
+	bit<48> pseudo_2
+}
+
 struct psa_ingress_output_metadata_t {
 	bit<8> class_of_service
 	bit<8> clone
@@ -62,6 +69,7 @@ metadata instanceof metadata
 
 header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
+header dpdk_pseudo_header instanceof dpdk_pseudo_header_t
 
 regarray port_pkt_ip_bytes_in_0 size 0x200 initval 0
 apply {
@@ -85,8 +93,10 @@ apply {
 	and m.Ingress_tmp_1 0xFFFFFFFF
 	mov m.Ingress_tmp_2 m.Ingress_tmp_1
 	and m.Ingress_tmp_2 0xFFFFFFFF
+	mov h.dpdk_pseudo_header.pseudo m.Ingress_tmp_2
 	mov m.Ingress_tmp_4 m.Ingress_tmp_2
 	add m.Ingress_tmp_4 0x1
+	mov h.dpdk_pseudo_header.pseudo_0 m.Ingress_tmp_4
 	mov m.Ingress_tmp_6 m.Ingress_tmp_4
 	shl m.Ingress_tmp_6 0x30
 	mov m.Ingress_tmp_7 m.Ingress_tmp_6
@@ -99,8 +109,10 @@ apply {
 	and m.Ingress_tmp_9 0xFFFFFFFFFFFF
 	mov m.Ingress_tmp_10 m.Ingress_tmp_9
 	and m.Ingress_tmp_10 0xFFFFFFFFFFFF
+	mov h.dpdk_pseudo_header.pseudo_1 m.Ingress_tmp_10
 	mov m.Ingress_tmp_13 m.Ingress_tmp_10
 	add m.Ingress_tmp_13 h.ipv4.totalLen
+	mov h.dpdk_pseudo_header.pseudo_2 m.Ingress_tmp_13
 	mov m.Ingress_tmp_15 m.Ingress_tmp_13
 	and m.Ingress_tmp_15 0xFFFFFFFFFFFF
 	mov m.Ingress_s m.Ingress_tmp_8
