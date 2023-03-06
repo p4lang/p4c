@@ -37,6 +37,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name("ingress.tmp") bit<32> tmp;
+    @name("ingress.tmp_0") bit<32> tmp_0;
+    @name("ingress.tmp_1") int<32> tmp_1;
+    @name("ingress.tmp_2") int<32> tmp_2;
+    @name("ingress.tmp_3") int<32> tmp_3;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name(".action_0") action action_0() {
@@ -52,19 +57,44 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.pkt.field_a_32 = ~hdr.pkt.field_d_32;
     }
     @name(".action_4") action action_4(@name("param0") bit<32> param0_11) {
-        hdr.pkt.field_a_32 = (hdr.pkt.field_d_32 <= param0_11 ? hdr.pkt.field_d_32 : param0_11);
+        if (hdr.pkt.field_d_32 <= param0_11) {
+            tmp = hdr.pkt.field_d_32;
+        } else {
+            tmp = param0_11;
+        }
+        hdr.pkt.field_a_32 = tmp;
     }
     @name(".action_5") action action_5(@name("param0") bit<32> param0_12) {
-        hdr.pkt.field_a_32 = (param0_12 >= hdr.pkt.field_d_32 ? param0_12 : hdr.pkt.field_d_32);
+        if (param0_12 >= hdr.pkt.field_d_32) {
+            tmp_0 = param0_12;
+        } else {
+            tmp_0 = hdr.pkt.field_d_32;
+        }
+        hdr.pkt.field_a_32 = tmp_0;
     }
     @name(".action_6") action action_6() {
-        hdr.pkt.field_b_32 = ((int<32>)hdr.pkt.field_d_32 <= 32s7 ? (int<32>)hdr.pkt.field_d_32 : 32s7);
+        if ((int<32>)hdr.pkt.field_d_32 <= 32s7) {
+            tmp_1 = (int<32>)hdr.pkt.field_d_32;
+        } else {
+            tmp_1 = 32s7;
+        }
+        hdr.pkt.field_b_32 = tmp_1;
     }
     @name(".action_7") action action_7(@name("param0") int<32> param0_13) {
-        hdr.pkt.field_b_32 = (param0_13 >= (int<32>)hdr.pkt.field_d_32 ? param0_13 : (int<32>)hdr.pkt.field_d_32);
+        if (param0_13 >= (int<32>)hdr.pkt.field_d_32) {
+            tmp_2 = param0_13;
+        } else {
+            tmp_2 = (int<32>)hdr.pkt.field_d_32;
+        }
+        hdr.pkt.field_b_32 = tmp_2;
     }
     @name(".action_8") action action_8(@name("param0") int<32> param0_14) {
-        hdr.pkt.field_x_32 = (hdr.pkt.field_x_32 >= param0_14 ? hdr.pkt.field_x_32 : param0_14);
+        if (hdr.pkt.field_x_32 >= param0_14) {
+            tmp_3 = hdr.pkt.field_x_32;
+        } else {
+            tmp_3 = param0_14;
+        }
+        hdr.pkt.field_x_32 = tmp_3;
     }
     @name(".action_9") action action_9() {
         hdr.pkt.field_x_32 = hdr.pkt.field_x_32 >> 7;
