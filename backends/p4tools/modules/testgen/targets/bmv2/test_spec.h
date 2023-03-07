@@ -12,11 +12,7 @@
 
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace Bmv2 {
+namespace P4Tools::P4Testgen::Bmv2 {
 
 /* =========================================================================================
  *  Bmv2Register
@@ -181,10 +177,6 @@ class Bmv2_CloneInfo : public TestObject {
     const IR::Constant *getEvaluatedSessionId() const;
 };
 
-}  // namespace Bmv2
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_SPEC_H_ */

@@ -236,6 +236,13 @@ inja::json Protobuf::getControlPlaneForTable(const std::map<cstring, const Field
                 j["id"] = *p4RuntimeId;
                 rulesJson["lpm_matches"].push_back(j);
             }
+            void operator()(const Optional &elem) const {
+                inja::json j;
+                j["field_name"] = fieldName;
+                j["value"] = formatHexExpr(elem.getEvaluatedValue()).c_str();
+                rulesJson["needs_priority"] = true;
+                rulesJson["optional_matches"].push_back(j);
+            }
         };
         boost::apply_visitor(GetRange(rulesJson, fieldName), fieldMatch);
     }
@@ -323,6 +330,15 @@ entities : [
           value: "{{r.value}}"
         }
       }
+## endfor
+## for r in rule.rules.optional_matches
+    # Match field {{r.field_name}}
+    match {
+      field_id: {{r.id}}
+      optional {
+        value: "{{r.value}}"
+      }
+    }
 ## endfor
 ## for r in rule.rules.range_matches
       # Match field {{r.field_name}}

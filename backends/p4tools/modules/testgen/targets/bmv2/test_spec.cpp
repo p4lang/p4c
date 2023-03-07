@@ -5,11 +5,7 @@
 
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace Bmv2 {
+namespace P4Tools::P4Testgen::Bmv2 {
 
 /* =========================================================================================
  *  Bmv2Register
@@ -173,8 +169,4 @@ const Bmv2_CloneInfo *Bmv2_CloneInfo::evaluate(const Model &model) const {
 
 bool Bmv2_CloneInfo::isClonedPacket() const { return isClone; }
 
-}  // namespace Bmv2
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::Bmv2

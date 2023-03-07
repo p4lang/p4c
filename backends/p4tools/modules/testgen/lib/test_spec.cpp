@@ -214,6 +214,27 @@ const Exact *Exact::evaluate(const Model &model) const {
 
 cstring Exact::getObjectName() const { return "Exact"; }
 
+Optional::Optional(const IR::KeyElement *key, const IR::Expression *val, bool addMatch)
+    : TableMatch(key), value(val), addMatch(addMatch) {}
+
+const IR::Constant *Optional::getEvaluatedValue() const {
+    const auto *constant = value->to<IR::Constant>();
+    BUG_CHECK(constant,
+              "Variable is not a constant. It has type %1% instead. Has the test object %2% "
+              "been evaluated?",
+              value->type->node_type_name(), getObjectName());
+    return constant;
+}
+
+const Optional *Optional::evaluate(const Model &model) const {
+    const auto *evaluatedValue = model.evaluate(value);
+    return new Optional(getKey(), evaluatedValue, addMatch);
+}
+
+cstring Optional::getObjectName() const { return "Optional"; }
+
+bool Optional::addAsExactMatch() const { return addMatch; }
+
 TableRule::TableRule(std::map<cstring, const FieldMatch> matches, int priority, ActionCall action,
                      int ttl)
     : matches(std::move(matches)), priority(priority), action(std::move(action)), ttl(ttl) {}

@@ -31,11 +31,7 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/expr_stepper.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace Bmv2 {
+namespace P4Tools::P4Testgen::Bmv2 {
 
 const IR::Expression *BMv2_V1ModelTableStepper::computeTargetMatchType(
     ExecutionState *nextState, const KeyProperties &keyProperties,
@@ -44,6 +40,17 @@ const IR::Expression *BMv2_V1ModelTableStepper::computeTargetMatchType(
 
     // TODO: We consider optional match types to be a no-op, but we could make them exact matches.
     if (keyProperties.matchType == BMv2Constants::MATCH_KIND_OPT) {
+        // We can recover from taint by simply not adding the optional match.
+        // Create a new zombie constant that corresponds to the key expression.
+        cstring keyName = properties.tableName + "_key_" + keyProperties.name;
+        const auto ctrlPlaneKey = nextState->createZombieConst(keyExpr->type, keyName);
+        if (keyProperties.isTainted) {
+            matches->emplace(keyProperties.name, Optional(keyProperties.key, ctrlPlaneKey, false));
+        } else {
+            const IR::Expression *keyExpr = keyProperties.key->expression;
+            matches->emplace(keyProperties.name, Optional(keyProperties.key, ctrlPlaneKey, true));
+            hitCondition = new IR::LAnd(hitCondition, new IR::Equ(keyExpr, ctrlPlaneKey));
+        }
         return hitCondition;
     }
     // Action selector entries are not part of the match.
@@ -441,8 +448,4 @@ BMv2_V1ModelTableStepper::BMv2_V1ModelTableStepper(BMv2_V1ModelExprStepper *step
                                                    const IR::P4Table *table)
     : TableStepper(stepper, table) {}
 
-}  // namespace Bmv2
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::Bmv2

@@ -169,6 +169,18 @@ inja::json PTF::getControlPlaneForTable(const std::map<cstring, const FieldMatch
                 j["prefix_len"] = elem.getEvaluatedPrefixLength()->value.str();
                 rulesJson["lpm_matches"].push_back(j);
             }
+            void operator()(const Optional &elem) const {
+                inja::json j;
+                j["field_name"] = fieldName;
+                j["value"] = formatHexExpr(elem.getEvaluatedValue()).c_str();
+                if (elem.addAsExactMatch()) {
+                    j["use_exact"] = "True";
+                } else {
+                    j["use_exact"] = "False";
+                }
+                rulesJson["needs_priority"] = true;
+                rulesJson["optional_matches"].push_back(j);
+            }
         };
 
         boost::apply_visitor(GetRange(rulesJson, fieldName), fieldMatch);
@@ -299,8 +311,10 @@ class Test{{test_id}}(AbstractTest):
 ## for r in rule.rules.single_exact_matches
                 self.Exact('{{r.field_name}}', {{r.value}}),
 ## endfor
+## for r in rule.rules.optional_matches
+                self.Optional('{{r.field_name}}', {{r.value}}, {{r.use_exact}}),
+## endfor
 ## for r in rule.rules.range_matches
-                # TODO: p4Runtime doesn't have Range match - this would fail. Need to fix.
                 self.Range('{{r.field_name}}', {{r.lo}}, {{r.hi}}),
 ## endfor
 ## for r in rule.rules.ternary_matches

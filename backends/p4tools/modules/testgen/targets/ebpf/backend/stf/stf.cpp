@@ -164,6 +164,13 @@ inja::json STF::getControlPlaneForTable(const std::map<cstring, const FieldMatch
                 // If the rule has a ternary match we need to add the priority.
                 rulesJson["needs_priority"] = true;
             }
+            void operator()(const Optional &elem) const {
+                inja::json j;
+                j["field_name"] = fieldName;
+                j["value"] = formatHexExpr(elem.getEvaluatedValue()).c_str();
+                rulesJson["needs_priority"] = true;
+                rulesJson["optional_matches"].push_back(j);
+            }
         };
         boost::apply_visitor(GetRange(rulesJson, fieldName), fieldMatch);
     }

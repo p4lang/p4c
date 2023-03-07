@@ -244,7 +244,30 @@ class Exact : public TableMatch {
     const IR::Constant *getEvaluatedValue() const;
 };
 
-using FieldMatch = boost::variant<Exact, Ternary, LPM, Range>;
+class Optional : public TableMatch {
+ private:
+    /// The value the key is matched with.
+    const IR::Expression *value;
+
+    /// Whether to add this optional match as an exact match.
+    bool addMatch;
+
+ public:
+    explicit Optional(const IR::KeyElement *key, const IR::Expression *value, bool addMatch);
+
+    const Optional *evaluate(const Model &model) const override;
+
+    cstring getObjectName() const override;
+
+    /// @returns the match value. It is expected to be a constant at this point.
+    /// A BUG is thrown otherwise.
+    const IR::Constant *getEvaluatedValue() const;
+
+    /// @returns whether to add this optional match as an exact match.
+    bool addAsExactMatch() const;
+};
+
+using FieldMatch = boost::variant<Exact, Ternary, LPM, Range, Optional>;
 
 class TableRule : public TestObject {
  private:
