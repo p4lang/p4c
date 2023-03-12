@@ -129,6 +129,14 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
         testSpec->addTestObject("clone_infos", sessionId, evaluatedInfo);
     }
 
+    const auto counters = executionState->getTestObjectCategory("countervalues");
+    for (const auto &testObject : counters) {
+        const auto profileName = testObject.first;
+        const auto *counter = testObject.second->checkedTo<Bmv2CounterValue>();
+        const auto *evaluatedProfile = counter->evaluate(*completedModel);
+        testSpec->addTestObject("countervalues", profileName, evaluatedProfile);
+    }
+
     return testSpec;
 }
 

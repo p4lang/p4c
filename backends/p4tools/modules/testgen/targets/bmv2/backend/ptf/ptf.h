@@ -64,6 +64,8 @@ class PTF : public TF {
     /// Converts all the control plane objects into Inja format.
     static inja::json getControlPlane(const TestSpec *testSpec);
 
+    static inja::json getCounters(const TestSpec *testSpec);
+
     /// Converts the input packet and port into Inja format.
     static inja::json getSend(const TestSpec *testSpec);
 

@@ -602,13 +602,102 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
         // TODO: Count currently has no effect in the symbolic interpreter.
         {"counter.count",
          {"index"},
-         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
-            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
-            const ExecutionState &state, SmallStepEvaluator::Result &result) {
-             ::warning("counter.count not fully implemented.");
+         [this](const IR::MethodCallExpression *call, const IR::Expression *receiver,
+                IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+                const ExecutionState &state, SmallStepEvaluator::Result &result) {
+             const auto *arg = args->at(0);
+             const auto *index = arg->expression;
+             if (state.hasTaint(index)) {
+                 ::warning(
+                     "Count index arg are tainted and not predictable. Skipping count execution.");
+                 auto *nextState = new ExecutionState(state);
+                 nextState->popBody();
+                 result->emplace_back(nextState);
+                 return;
+             }
+             // TODO: Frontload this in the expression stepper for method call expressions.
+             if (!SymbolicEnv::isSymbolicValue(index)) {
+                 // Evaluate the condition.
+                 stepToSubexpr(index, result, state, [call](const Continuation::Parameter *v) {
+                     auto *clonedCall = call->clone();
+                     auto *arguments = clonedCall->arguments->clone();
+                     auto *arg = arguments->at(0)->clone();
+                     arg->expression = v->param;
+                     (*arguments)[0] = arg;
+                     clonedCall->arguments = arguments;
+                     return Continuation::Return(clonedCall);
+                 });
+                 return;
+             }
+
+             const auto *receiverPath = receiver->checkedTo<IR::PathExpression>();
+             const IR::Declaration_Instance *decl =
+                 state.findDecl(receiverPath)->checkedTo<IR::Declaration_Instance>();
+             const auto &externInstance = decl->controlPlaneName();
+             const IR::Expression *counterSizeExpr = decl->arguments[0].at(0)->expression;
+             const IR::Expression *counterTypeExpr = decl->arguments[0].at(1)->expression;
+             big_int countertype = counterTypeExpr->checkedTo<IR::Constant>()->value;
+             auto cond = new IR::Lss(index, counterSizeExpr);
              auto *nextState = new ExecutionState(state);
              nextState->popBody();
-             result->emplace_back(nextState);
+             // Retrieve the counter state from the object store. If it is already present, just
+             // cast the object to the correct class and retrieve the current value according to the
+             // index. If the counter has not been added had, create a new counter object.
+             // "Count" increment an entry by one. If index >= size, no counter state will be
+             // updated.
+             const auto *counterState = state.getTestObject("countervalues", externInstance, false);
+
+             Bmv2CounterValue *counterValue = nullptr;
+             if (counterState != nullptr) {
+                 counterValue = new Bmv2CounterValue(*counterState->checkedTo<Bmv2CounterValue>());
+
+             } else {
+                 const auto *inputValue =
+                     programInfo.createTargetUninitialized(IR::Type::Bits::get(32), false);
+                 counterValue = new Bmv2CounterValue(
+                     inputValue, counterSizeExpr, counterValue->getCounterTypeByIndex(countertype));
+                 nextState->addTestObject("countervalues", externInstance, counterValue);
+             }
+             const IR::Expression *baseExpr = counterValue->getCurrentValue(index);
+             if (auto mux = baseExpr->to<IR::Mux>()) {
+                 auto muxCond = new IR::LAnd(cond, mux->e0);
+                 {
+                     auto *muxState = new ExecutionState(state);
+                     muxState->popBody();
+                     const IR::Expression *increasedExpr =
+                         new IR::Add(mux->e1, IR::getConstant(IR::Type::Bits::get(32), 1));
+                     counterValue->addCounterCondition(Bmv2CounterCondition{index, increasedExpr});
+
+                     muxState->addTestObject("countervalues", externInstance, counterValue);
+
+                     // TODO: Find a better way to model a trace of this event.
+                     std::stringstream counterStream;
+                     counterStream << "CounterCount: Index ";
+                     index->dbprint(counterStream);
+                     muxState->add(new TraceEvent::Generic(counterStream.str()));
+                     result->emplace_back(muxCond, state, muxState);
+                 }
+
+                 {
+                     auto *muxState = new ExecutionState(state);
+                     muxState->popBody();
+                     result->emplace_back(new IR::LNot(muxCond), state, muxState);
+                 }
+
+             } else {
+                 const IR::Expression *increasedExpr =
+                     new IR::Add(baseExpr, IR::getConstant(IR::Type::Bits::get(32), 1));
+                 counterValue->addCounterCondition(Bmv2CounterCondition{index, increasedExpr});
+
+                 nextState->addTestObject("countervalues", externInstance, counterValue);
+
+                 // TODO: Find a better way to model a trace of this event.
+                 std::stringstream counterStream;
+                 counterStream << "CounterCount: Index ";
+                 index->dbprint(counterStream);
+                 nextState->add(new TraceEvent::Generic(counterStream.str()));
+                 result->emplace_back(cond, state, nextState);
+             }
          }},
         /* ======================================================================================
          *  direct_counter.count

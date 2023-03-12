@@ -70,6 +70,35 @@ std::vector<std::pair<size_t, size_t>> PTF::getIgnoreMasks(const IR::Constant *m
     return ignoreMasks;
 }
 
+inja::json PTF::getCounters(const TestSpec *testSpec) {
+    inja::json countersJson = inja::json::array();
+    auto counters = testSpec->getTestObjectCategory("countervalues");
+    for (const auto &testObject : counters) {
+        inja::json countJson;
+        countJson["counter_name"] = testObject.first;
+        const auto *counter = testObject.second->checkedTo<Bmv2CounterValue>();
+        countJson["counter_size"] = static_cast<int>(counter->getEvaluatedSize()->value);
+        countJson["counter_type"] = counter->getType();
+        countJson["counter_values"] = inja::json::array();
+        std::map<big_int, big_int> valuesMap;
+        for (auto cond : counter->getCounterConditions()) {
+            if (cond.getEvaluatedValue()->value != 0) {
+                valuesMap[cond.getEvaluatedIndex()->value] = cond.getEvaluatedValue()->value;
+                continue;
+            }
+        }
+
+        for (auto it = valuesMap.cbegin(); it != valuesMap.cend(); ++it) {
+            inja::json condition;
+            condition["index"] = static_cast<int>(it->first);
+            condition["value"] = static_cast<int>(it->second);
+            countJson["counter_values"].push_back(condition);
+        }
+        countersJson.push_back(countJson);
+    }
+    return countersJson;
+}
+
 inja::json PTF::getControlPlane(const TestSpec *testSpec) {
     inja::json controlPlaneJson = inja::json::object();
 
@@ -338,6 +367,10 @@ class Test{{test_id}}(AbstractTest):
 ## endif
 
     def verifyPackets(self):
+## if counters
+        exp_counters = {{counters}}
+        self.verify_counter(exp_counters, False)
+## endif
 ## if verify
         eg_port = {{verify.eg_port}}
         exp_pkt = Mask(b'{{verify.exp_pkt}}')
@@ -378,6 +411,7 @@ void PTF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
     dataJson["test_id"] = testId + 1;
     dataJson["trace"] = getTrace(testSpec);
     dataJson["control_plane"] = getControlPlane(testSpec);
+    dataJson["counters"] = getCounters(testSpec);
     dataJson["send"] = getSend(testSpec);
     dataJson["verify"] = getVerify(testSpec);
     dataJson["timestamp"] = Utils::getTimeStamp();
