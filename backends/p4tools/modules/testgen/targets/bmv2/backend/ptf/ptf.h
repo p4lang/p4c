@@ -78,7 +78,7 @@ class PTF : public TF {
     static std::vector<std::pair<size_t, size_t>> getIgnoreMasks(const IR::Constant *mask);
 
     /// Helper function for the control plane table inja objects.
-    static inja::json getControlPlaneForTable(const std::map<cstring, const FieldMatch> &matches,
+    static inja::json getControlPlaneForTable(const TableMatchMap &matches,
                                               const std::vector<ActionArg> &args);
 };
 

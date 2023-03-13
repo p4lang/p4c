@@ -15,11 +15,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace EBPF {
+namespace P4Tools::P4Testgen::EBPF {
 
 /// Extracts information from the @testSpec to emit a STF test case.
 class STF : public TF {
@@ -65,14 +61,10 @@ class STF : public TF {
     static inja::json getVerify(const TestSpec *testSpec);
 
     /// Helper function for the control plane table inja objects.
-    static inja::json getControlPlaneForTable(const std::map<cstring, const FieldMatch> &matches,
+    static inja::json getControlPlaneForTable(const TableMatchMap &matches,
                                               const std::vector<ActionArg> &args);
 };
 
-}  // namespace EBPF
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::EBPF
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_EBPF_BACKEND_STF_STF_H_ */

@@ -177,6 +177,58 @@ class Bmv2_CloneInfo : public TestObject {
     const IR::Constant *getEvaluatedSessionId() const;
 };
 
+/* =========================================================================================
+ * Table Key Match Types
+ * ========================================================================================= */
+
+class Optional : public TableMatch {
+ private:
+    /// The value the key is matched with.
+    const IR::Expression *value;
+
+    /// Whether to add this optional match as an exact match.
+    bool addMatch;
+
+ public:
+    explicit Optional(const IR::KeyElement *key, const IR::Expression *value, bool addMatch);
+
+    const Optional *evaluate(const Model &model) const override;
+
+    cstring getObjectName() const override;
+
+    /// @returns the match value. It is expected to be a constant at this point.
+    /// A BUG is thrown otherwise.
+    const IR::Constant *getEvaluatedValue() const;
+
+    /// @returns whether to add this optional match as an exact match.
+    bool addAsExactMatch() const;
+};
+
+class Range : public TableMatch {
+ private:
+    /// The inclusive start of the range.
+    const IR::Expression *low;
+
+    /// The inclusive end of the range.
+    const IR::Expression *high;
+
+ public:
+    explicit Range(const IR::KeyElement *key, const IR::Expression *low,
+                   const IR::Expression *high);
+
+    const Range *evaluate(const Model &model) const override;
+
+    cstring getObjectName() const override;
+
+    /// @returns the inclusive start of the range. It is expected to be a constant at this point.
+    /// A BUG is thrown otherwise.
+    const IR::Constant *getEvaluatedLow() const;
+
+    /// @returns the inclusive end of the range. It is expected to be a constant at this point.
+    /// A BUG is thrown otherwise.
+    const IR::Constant *getEvaluatedHigh() const;
+};
+
 }  // namespace P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_SPEC_H_ */

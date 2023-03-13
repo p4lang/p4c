@@ -14,9 +14,7 @@
 #include "lib/castable.h"
 #include "lib/cstring.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 /// This file defines a series of test objects which, in sum, produce an abstract test
 /// specification.
@@ -148,6 +146,8 @@ class TableMatch : public TestObject {
     const IR::KeyElement *getKey() const;
 };
 
+using TableMatchMap = std::map<cstring, const TableMatch *>;
+
 class Ternary : public TableMatch {
  private:
     /// The actual match value.
@@ -202,31 +202,6 @@ class LPM : public TableMatch {
     const IR::Constant *getEvaluatedPrefixLength() const;
 };
 
-class Range : public TableMatch {
- private:
-    /// The inclusive start of the range.
-    const IR::Expression *low;
-
-    /// The inclusive end of the range.
-    const IR::Expression *high;
-
- public:
-    explicit Range(const IR::KeyElement *key, const IR::Expression *low,
-                   const IR::Expression *high);
-
-    const Range *evaluate(const Model &model) const override;
-
-    cstring getObjectName() const override;
-
-    /// @returns the inclusive start of the range. It is expected to be a constant at this point.
-    /// A BUG is thrown otherwise.
-    const IR::Constant *getEvaluatedLow() const;
-
-    /// @returns the inclusive end of the range. It is expected to be a constant at this point.
-    /// A BUG is thrown otherwise.
-    const IR::Constant *getEvaluatedHigh() const;
-};
-
 class Exact : public TableMatch {
  private:
     /// The value the key is matched with.
@@ -244,35 +219,10 @@ class Exact : public TableMatch {
     const IR::Constant *getEvaluatedValue() const;
 };
 
-class Optional : public TableMatch {
- private:
-    /// The value the key is matched with.
-    const IR::Expression *value;
-
-    /// Whether to add this optional match as an exact match.
-    bool addMatch;
-
- public:
-    explicit Optional(const IR::KeyElement *key, const IR::Expression *value, bool addMatch);
-
-    const Optional *evaluate(const Model &model) const override;
-
-    cstring getObjectName() const override;
-
-    /// @returns the match value. It is expected to be a constant at this point.
-    /// A BUG is thrown otherwise.
-    const IR::Constant *getEvaluatedValue() const;
-
-    /// @returns whether to add this optional match as an exact match.
-    bool addAsExactMatch() const;
-};
-
-using FieldMatch = boost::variant<Exact, Ternary, LPM, Range, Optional>;
-
 class TableRule : public TestObject {
  private:
     /// Each element in the map is the control plane name of the key paired with its match rule.
-    const std::map<cstring, const FieldMatch> matches;
+    const TableMatchMap matches;
 
     /// The priority of this entry. This is required for STF back ends when matching ternary.
     int priority;
@@ -282,15 +232,14 @@ class TableRule : public TestObject {
     int ttl;
 
  public:
-    TableRule(std::map<cstring, const FieldMatch> matches, int priority, ActionCall action,
-              int ttl);
+    TableRule(TableMatchMap matches, int priority, ActionCall action, int ttl);
 
     const TableRule *evaluate(const Model &model) const override;
 
     cstring getObjectName() const override;
 
     /// @returns the list of keys that need to match to execute the action.
-    const std::map<cstring, const FieldMatch> *getMatches() const;
+    const TableMatchMap *getMatches() const;
 
     /// @returns the priority of this entry.
     int getPriority() const;
@@ -404,8 +353,6 @@ class TestSpec {
     static constexpr int TTL = 0;
 };
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TEST_SPEC_H_ */

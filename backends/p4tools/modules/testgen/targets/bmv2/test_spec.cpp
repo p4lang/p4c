@@ -169,4 +169,58 @@ const Bmv2_CloneInfo *Bmv2_CloneInfo::evaluate(const Model &model) const {
 
 bool Bmv2_CloneInfo::isClonedPacket() const { return isClone; }
 
+/* =========================================================================================
+ * Table Key Match Types
+ * ========================================================================================= */
+
+Optional::Optional(const IR::KeyElement *key, const IR::Expression *val, bool addMatch)
+    : TableMatch(key), value(val), addMatch(addMatch) {}
+
+const IR::Constant *Optional::getEvaluatedValue() const {
+    const auto *constant = value->to<IR::Constant>();
+    BUG_CHECK(constant,
+              "Variable is not a constant. It has type %1% instead. Has the test object %2% "
+              "been evaluated?",
+              value->type->node_type_name(), getObjectName());
+    return constant;
+}
+
+const Optional *Optional::evaluate(const Model &model) const {
+    const auto *evaluatedValue = model.evaluate(value);
+    return new Optional(getKey(), evaluatedValue, addMatch);
+}
+
+cstring Optional::getObjectName() const { return "Optional"; }
+
+bool Optional::addAsExactMatch() const { return addMatch; }
+
+Range::Range(const IR::KeyElement *key, const IR::Expression *low, const IR::Expression *high)
+    : TableMatch(key), low(low), high(high) {}
+
+const IR::Constant *Range::getEvaluatedLow() const {
+    const auto *constant = low->to<IR::Constant>();
+    BUG_CHECK(constant,
+              "Variable is not a constant. It has type %1% instead. Has the test object %2% "
+              "been evaluated?",
+              low->type->node_type_name(), getObjectName());
+    return constant;
+}
+
+const IR::Constant *Range::getEvaluatedHigh() const {
+    const auto *constant = high->to<IR::Constant>();
+    BUG_CHECK(constant,
+              "Variable is not a constant. It has type %1% instead. Has the test object %2% "
+              "been evaluated?",
+              high->type->node_type_name(), getObjectName());
+    return constant;
+}
+
+const Range *Range::evaluate(const Model &model) const {
+    const auto *evaluatedLow = model.evaluate(low);
+    const auto *evaluatedHigh = model.evaluate(high);
+    return new Range(getKey(), evaluatedLow, evaluatedHigh);
+}
+
+cstring Range::getObjectName() const { return "Range"; }
+
 }  // namespace P4Tools::P4Testgen::Bmv2

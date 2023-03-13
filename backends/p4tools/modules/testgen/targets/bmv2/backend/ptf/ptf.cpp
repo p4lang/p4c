@@ -23,6 +23,7 @@
 #include "lib/log.h"
 #include "nlohmann/json.hpp"
 
+#include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
@@ -115,7 +116,7 @@ inja::json PTF::getControlPlane(const TestSpec *testSpec) {
     return controlPlaneJson;
 }
 
-inja::json PTF::getControlPlaneForTable(const std::map<cstring, const FieldMatch> &matches,
+inja::json PTF::getControlPlaneForTable(const TableMatchMap &matches,
                                         const std::vector<ActionArg> &args) {
     inja::json rulesJson;
 
@@ -129,62 +130,43 @@ inja::json PTF::getControlPlaneForTable(const std::map<cstring, const FieldMatch
     rulesJson["act_args"] = inja::json::array();
     rulesJson["needs_priority"] = false;
 
+    // Iterate over the match fields and segregate them.
     for (const auto &match : matches) {
         const auto fieldName = match.first;
         const auto &fieldMatch = match.second;
 
-        // Iterate over the match fields and segregate them.
-        struct GetRange : public boost::static_visitor<void> {
-            cstring fieldName;
-            inja::json &rulesJson;
-
-            GetRange(inja::json &rulesJson, cstring fieldName)
-                : fieldName(fieldName), rulesJson(rulesJson) {}
-
-            void operator()(const Exact &elem) const {
-                inja::json j;
-                j["field_name"] = fieldName;
-                j["value"] = formatHexExpr(elem.getEvaluatedValue()).c_str();
-                rulesJson["single_exact_matches"].push_back(j);
+        inja::json j;
+        j["field_name"] = fieldName;
+        if (const auto *elem = fieldMatch->to<Exact>()) {
+            j["value"] = formatHexExpr(elem->getEvaluatedValue()).c_str();
+            rulesJson["single_exact_matches"].push_back(j);
+        } else if (const auto *elem = fieldMatch->to<Range>()) {
+            j["lo"] = formatHexExpr(elem->getEvaluatedLow()).c_str();
+            j["hi"] = formatHexExpr(elem->getEvaluatedHigh()).c_str();
+            rulesJson["range_matches"].push_back(j);
+        } else if (const auto *elem = fieldMatch->to<Ternary>()) {
+            j["value"] = formatHexExpr(elem->getEvaluatedValue()).c_str();
+            j["mask"] = formatHexExpr(elem->getEvaluatedMask()).c_str();
+            rulesJson["ternary_matches"].push_back(j);
+            // If the rule has a ternary match we need to add the priority.
+            rulesJson["needs_priority"] = true;
+        } else if (const auto *elem = fieldMatch->to<LPM>()) {
+            j["value"] = formatHexExpr(elem->getEvaluatedValue()).c_str();
+            j["prefix_len"] = elem->getEvaluatedPrefixLength()->value.str();
+            rulesJson["lpm_matches"].push_back(j);
+        } else if (const auto *elem = fieldMatch->to<Optional>()) {
+            j["value"] = formatHexExpr(elem->getEvaluatedValue()).c_str();
+            if (elem->addAsExactMatch()) {
+                j["use_exact"] = "True";
+            } else {
+                j["use_exact"] = "False";
             }
-            void operator()(const Range &elem) const {
-                inja::json j;
-                j["field_name"] = fieldName;
-                j["lo"] = formatHexExpr(elem.getEvaluatedLow()).c_str();
-                j["hi"] = formatHexExpr(elem.getEvaluatedHigh()).c_str();
-                rulesJson["range_matches"].push_back(j);
-            }
-            void operator()(const Ternary &elem) const {
-                inja::json j;
-                j["field_name"] = fieldName;
-                j["value"] = formatHexExpr(elem.getEvaluatedValue()).c_str();
-                j["mask"] = formatHexExpr(elem.getEvaluatedMask()).c_str();
-                rulesJson["ternary_matches"].push_back(j);
-                // If the rule has a ternary match we need to add the priority.
-                rulesJson["needs_priority"] = true;
-            }
-            void operator()(const LPM &elem) const {
-                inja::json j;
-                j["field_name"] = fieldName;
-                j["value"] = formatHexExpr(elem.getEvaluatedValue()).c_str();
-                j["prefix_len"] = elem.getEvaluatedPrefixLength()->value.str();
-                rulesJson["lpm_matches"].push_back(j);
-            }
-            void operator()(const Optional &elem) const {
-                inja::json j;
-                j["field_name"] = fieldName;
-                j["value"] = formatHexExpr(elem.getEvaluatedValue()).c_str();
-                if (elem.addAsExactMatch()) {
-                    j["use_exact"] = "True";
-                } else {
-                    j["use_exact"] = "False";
-                }
-                rulesJson["needs_priority"] = true;
-                rulesJson["optional_matches"].push_back(j);
-            }
-        };
-
-        boost::apply_visitor(GetRange(rulesJson, fieldName), fieldMatch);
+            rulesJson["needs_priority"] = true;
+            rulesJson["optional_matches"].push_back(j);
+        } else {
+            TESTGEN_UNIMPLEMENTED("Unsupported table key match type \"%1%\"",
+                                  fieldMatch->getObjectName());
+        }
     }
 
     for (const auto &actArg : args) {

@@ -32,9 +32,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 const ExecutionState *TableStepper::getExecutionState() { return &stepper->state; }
 
@@ -106,9 +104,10 @@ bool TableStepper::compareLPMEntries(const IR::Entry *leftIn, const IR::Entry *r
         left->node_type_name(), right, right->node_type_name());
 }
 
-const IR::Expression *TableStepper::computeTargetMatchType(
-    ExecutionState *nextState, const KeyProperties &keyProperties,
-    std::map<cstring, const FieldMatch> *matches, const IR::Expression *hitCondition) {
+const IR::Expression *TableStepper::computeTargetMatchType(ExecutionState *nextState,
+                                                           const KeyProperties &keyProperties,
+                                                           TableMatchMap *matches,
+                                                           const IR::Expression *hitCondition) {
     const IR::Expression *keyExpr = keyProperties.key->expression;
     // Create a new zombie constant that corresponds to the key expression.
     cstring keyName = properties.tableName + "_key_" + keyProperties.name;
@@ -116,7 +115,7 @@ const IR::Expression *TableStepper::computeTargetMatchType(
 
     if (keyProperties.matchType == P4Constants::MATCH_KIND_EXACT) {
         hitCondition = new IR::LAnd(hitCondition, new IR::Equ(keyExpr, ctrlPlaneKey));
-        matches->emplace(keyProperties.name, Exact(keyProperties.key, ctrlPlaneKey));
+        matches->emplace(keyProperties.name, new Exact(keyProperties.key, ctrlPlaneKey));
         return hitCondition;
     }
     if (keyProperties.matchType == P4Constants::MATCH_KIND_TERNARY) {
@@ -129,7 +128,8 @@ const IR::Expression *TableStepper::computeTargetMatchType(
         } else {
             ternaryMask = nextState->createZombieConst(keyExpr->type, maskName);
         }
-        matches->emplace(keyProperties.name, Ternary(keyProperties.key, ctrlPlaneKey, ternaryMask));
+        matches->emplace(keyProperties.name,
+                         new Ternary(keyProperties.key, ctrlPlaneKey, ternaryMask));
         return new IR::LAnd(hitCondition, new IR::Equ(new IR::BAnd(keyExpr, ternaryMask),
                                                       new IR::BAnd(ctrlPlaneKey, ternaryMask)));
     }
@@ -151,7 +151,7 @@ const IR::Expression *TableStepper::computeTargetMatchType(
         } else {
             lpmMask = new IR::Shl(IR::getConstant(keyType, maxReturn), prefix);
         }
-        matches->emplace(keyProperties.name, LPM(keyProperties.key, ctrlPlaneKey, maskVar));
+        matches->emplace(keyProperties.name, new LPM(keyProperties.key, ctrlPlaneKey, maskVar));
         return new IR::LAnd(
             hitCondition,
             new IR::LAnd(
@@ -164,8 +164,7 @@ const IR::Expression *TableStepper::computeTargetMatchType(
     TESTGEN_UNIMPLEMENTED("Match type %s not implemented for table keys.", keyProperties.matchType);
 }
 
-const IR::Expression *TableStepper::computeHit(ExecutionState *nextState,
-                                               std::map<cstring, const FieldMatch> *matches) {
+const IR::Expression *TableStepper::computeHit(ExecutionState *nextState, TableMatchMap *matches) {
     const IR::Expression *hitCondition = IR::getBoolLiteral(!properties.resolvedKeys.empty());
     for (auto keyProperties : properties.resolvedKeys) {
         hitCondition = computeTargetMatchType(nextState, keyProperties, matches, hitCondition);
@@ -391,7 +390,7 @@ void TableStepper::evalTableControlEntries(
         auto *nextState = new ExecutionState(stepper->state);
 
         // First, we compute the hit condition to trigger this particular action call.
-        std::map<cstring, const FieldMatch> matches;
+        TableMatchMap matches;
         const auto *hitCondition = computeHit(nextState, &matches);
 
         // We get the control plane name of the action we are calling.
@@ -683,6 +682,4 @@ TableStepper::TableStepper(ExprStepper *stepper, const IR::P4Table *table)
     properties.tableName = table->controlPlaneName();
 }
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen

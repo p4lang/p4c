@@ -265,8 +265,6 @@ p4tools_add_xfail_reason(
   # At index 0: INVALID_ARGUMENT, 'Bytestring provided does not fit within 0 bits'
   pins_middleblock.p4
   issue2283_1-bmv2.p4
-  # INVALID_ARGUMENT, 'Zero priority for ternary match'
-  dash-pipeline.p4
 )
 
 p4tools_add_xfail_reason(
