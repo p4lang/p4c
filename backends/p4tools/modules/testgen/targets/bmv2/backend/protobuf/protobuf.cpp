@@ -34,11 +34,7 @@
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace Bmv2 {
+namespace P4Tools::P4Testgen::Bmv2 {
 
 /// Wrapper helper function that automatically inserts separators for hex strings.
 std::string formatHexExprWithSep(const IR::Expression *expr) {
@@ -178,6 +174,7 @@ inja::json Protobuf::getControlPlaneForTable(const std::map<cstring, const Field
     rulesJson["range_matches"] = inja::json::array();
     rulesJson["ternary_matches"] = inja::json::array();
     rulesJson["lpm_matches"] = inja::json::array();
+    rulesJson["optional_matches"] = inja::json::array();
     rulesJson["act_args"] = inja::json::array();
     rulesJson["needs_priority"] = false;
 
@@ -240,6 +237,9 @@ inja::json Protobuf::getControlPlaneForTable(const std::map<cstring, const Field
                 inja::json j;
                 j["field_name"] = fieldName;
                 j["value"] = formatHexExpr(elem.getEvaluatedValue()).c_str();
+                auto p4RuntimeId = getIdAnnotation(elem.getKey());
+                BUG_CHECK(p4RuntimeId, "Id not present for key. Can not generate test.");
+                j["id"] = *p4RuntimeId;
                 rulesJson["needs_priority"] = true;
                 rulesJson["optional_matches"].push_back(j);
             }
@@ -449,8 +449,4 @@ void Protobuf::outputTest(const TestSpec *testSpec, cstring selectedBranches, si
     emitTestcase(testSpec, selectedBranches, testIdx, testCase, currentCoverage);
 }
 
-}  // namespace Bmv2
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::Bmv2

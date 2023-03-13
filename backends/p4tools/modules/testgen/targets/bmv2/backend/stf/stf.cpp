@@ -32,11 +32,7 @@
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace Bmv2 {
+namespace P4Tools::P4Testgen::Bmv2 {
 
 STF::STF(cstring testName, boost::optional<unsigned int> seed = boost::none) : TF(testName, seed) {
     boost::filesystem::path testFile(testName + ".stf");
@@ -339,8 +335,4 @@ void STF::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t 
     emitTestcase(testSpec, selectedBranches, testIdx, testCase, currentCoverage);
 }
 
-}  // namespace Bmv2
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::Bmv2

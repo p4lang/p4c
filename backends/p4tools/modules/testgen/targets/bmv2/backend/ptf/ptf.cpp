@@ -124,6 +124,7 @@ inja::json PTF::getControlPlaneForTable(const std::map<cstring, const FieldMatch
     rulesJson["range_matches"] = inja::json::array();
     rulesJson["ternary_matches"] = inja::json::array();
     rulesJson["lpm_matches"] = inja::json::array();
+    rulesJson["optional_matches"] = inja::json::array();
 
     rulesJson["act_args"] = inja::json::array();
     rulesJson["needs_priority"] = false;
