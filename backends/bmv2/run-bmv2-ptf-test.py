@@ -178,10 +178,14 @@ def run_test(options: Options) -> int:
             testutils.log.error("######## Switch log ########\n%s", switchout)
         if switch_proc.stdout:
             out = switch_proc.stdout.read()
-            testutils.log.error("######## Switch output ######## \n%s", out)
+            # Do not bother to print whitespace.
+            if out.strip():
+                testutils.log.error("######## Switch output ######## \n%s", out)
         if switch_proc.stderr:
             err = switch_proc.stderr.read()
-            testutils.log.error("######## Switch errors ######## \n%s", err)
+            # Do not bother to print whitespace.
+            if err.strip():
+                testutils.log.error("######## Switch errors ######## \n%s", err)
     bridge.ns_del()
     return result
 
