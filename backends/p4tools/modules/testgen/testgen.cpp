@@ -19,6 +19,7 @@
 #include "lib/error.h"
 
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
+#include "backends/p4tools/modules/testgen/core/exploration_strategy/greedy_potential.h"
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/inc_max_coverage_stack.h"
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/incremental_stack.h"
 #include "backends/p4tools/modules/testgen/core/exploration_strategy/linear_enumeration.h"
@@ -33,16 +34,46 @@
 #include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/register.h"
 
-namespace fs = boost::filesystem;
-
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 void Testgen::registerTarget() {
     // Register all available compiler targets.
     // These are discovered by CMAKE, which fills out the register.h.in file.
     registerCompilerTargets();
+}
+
+ExplorationStrategy *pickExecutionEngine(const TestgenOptions &testgenOptions,
+                                         const ProgramInfo *programInfo, AbstractSolver &solver) {
+    const auto &pathSelectionPolicy = testgenOptions.pathSelectionPolicy;
+    if (pathSelectionPolicy == PathSelectionPolicy::RandomAccessStack) {
+        // If the user mistakenly specifies an invalid popLevel, we set it to 3.
+        auto popLevel = testgenOptions.popLevel;
+        if (popLevel <= 1) {
+            ::warning("--pop-level must be greater than 1; using default value of 3.\n");
+            popLevel = 3;
+        }
+        return new RandomAccessStack(solver, *programInfo, popLevel);
+    }
+    if (pathSelectionPolicy == PathSelectionPolicy::GreedyPotential) {
+        return new GreedyPotential(solver, *programInfo);
+    }
+    if (pathSelectionPolicy == PathSelectionPolicy::UnboundedRandomAccessStack) {
+        return new UnboundedRandomAccessStack(solver, *programInfo);
+    }
+    if (pathSelectionPolicy == PathSelectionPolicy::LinearEnumeration) {
+        return new LinearEnumeration(solver, *programInfo, testgenOptions.linearEnumeration);
+    }
+    if (pathSelectionPolicy == PathSelectionPolicy::MaxCoverage) {
+        return new IncrementalMaxCoverageStack(solver, *programInfo);
+    }
+    if (pathSelectionPolicy == PathSelectionPolicy::RandomAccessMaxCoverage) {
+        return new RandomAccessMaxCoverage(solver, *programInfo, testgenOptions.saddlePoint);
+    }
+    if (!testgenOptions.selectedBranches.empty()) {
+        std::string selectedBranchesStr = testgenOptions.selectedBranches;
+        return new SelectedBranches(solver, *programInfo, selectedBranchesStr);
+    }
+    return new IncrementalStack(solver, *programInfo);
 }
 
 int Testgen::mainImpl(const IR::P4Program *program) {
@@ -73,51 +104,25 @@ int Testgen::mainImpl(const IR::P4Program *program) {
 
     // Get the basename of the input file and remove the extension
     // This assumes that inputFile is not null.
-    auto programName = fs::path(inputFile).filename().replace_extension("");
+    auto programName = boost::filesystem::path(inputFile).filename().replace_extension("");
     // Create the directory, if the directory string is valid and if it does not exist.
     auto testPath = programName;
     if (!testDirStr.isNullOrEmpty()) {
-        auto testDir = fs::path(testDirStr);
-        fs::create_directories(testDir);
-        testPath = fs::path(testDir) / testPath;
+        auto testDir = boost::filesystem::path(testDirStr);
+        boost::filesystem::create_directories(testDir);
+        testPath = boost::filesystem::path(testDir) / testPath;
     }
-
+    // Need to declare the solver here to ensure its lifetime.
     Z3Solver solver;
-
-    auto *symExec = [&solver, &programInfo, &testgenOptions]() -> ExplorationStrategy * {
-        auto explorationStrategy = testgenOptions.explorationStrategy;
-        if (explorationStrategy == "RANDOM_ACCESS_STACK") {
-            // If the user mistakenly specifies an invalid popLevel, we set it to 3.
-            auto popLevel = testgenOptions.popLevel;
-            if (popLevel <= 1) {
-                ::warning("--pop-level must be greater than 1; using default value of 3.\n");
-                popLevel = 3;
-            }
-            return new RandomAccessStack(solver, *programInfo, popLevel);
-        }
-        if (explorationStrategy == "UNBOUNDED_RANDOM_ACCESS_STACK") {
-            return new UnboundedRandomAccessStack(solver, *programInfo);
-        }
-        if (explorationStrategy == "LINEAR_ENUMERATION") {
-            return new LinearEnumeration(solver, *programInfo, testgenOptions.linearEnumeration);
-        }
-        if (explorationStrategy == "MAX_COVERAGE") {
-            return new IncrementalMaxCoverageStack(solver, *programInfo);
-        }
-        if (explorationStrategy == "RANDOM_ACCESS_MAX_COVERAGE") {
-            return new RandomAccessMaxCoverage(solver, *programInfo, testgenOptions.saddlePoint);
-        }
-        if (!testgenOptions.selectedBranches.empty()) {
-            std::string selectedBranchesStr = testgenOptions.selectedBranches;
-            return new SelectedBranches(solver, *programInfo, selectedBranchesStr);
-        }
-        return new IncrementalStack(solver, *programInfo);
-    }();
+    auto *symExec = pickExecutionEngine(testgenOptions, programInfo, solver);
 
     // Define how to handle the final state for each test. This is target defined.
     auto *testBackend = TestgenTarget::getTestBackend(*programInfo, *symExec, testPath, seed);
-    ExplorationStrategy::Callback callBack =
-        std::bind(&TestBackEnd::run, testBackend, std::placeholders::_1);
+    // Each test back end has a different run function.
+    // We delegate execution to the symbolic executor.
+    auto callBack = [testBackend](auto &&finalState) {
+        return testBackend->run(std::forward<decltype(finalState)>(finalState));
+    };
 
     try {
         // Run the symbolic executor with given exploration strategy.
@@ -132,6 +137,8 @@ int Testgen::mainImpl(const IR::P4Program *program) {
         }
         throw;
     }
+    // Emit a performance report, if desired.
+    testBackend->printPerformanceReport(true);
 
     // Do not print this warning if assertion mode is enabled.
     if (testBackend->getTestCount() == 0 && !testgenOptions.assertionModeEnabled) {
@@ -143,6 +150,4 @@ int Testgen::mainImpl(const IR::P4Program *program) {
     return ::errorCount() == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen

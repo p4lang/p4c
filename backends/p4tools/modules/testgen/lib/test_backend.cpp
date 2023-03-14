@@ -37,9 +37,7 @@
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 const Model *TestBackEnd::computeConcolicVariables(const ExecutionState *executionState,
                                                    const Model *completedModel, Z3Solver *solver,
@@ -105,7 +103,6 @@ bool TestBackEnd::run(const FinalState &state) {
         const auto *completedModel = state.getCompletedModel();
         const auto *outputPortExpr = executionState->get(programInfo.getTargetOutputPortVar());
         const auto &allStatements = programInfo.getAllStatements();
-        const P4::Coverage::CoverageSet &visitedStatements = symbex.getVisitedStatements();
 
         auto *solver = state.getSolver()->to<Z3Solver>();
         CHECK_NULL(solver);
@@ -134,8 +131,7 @@ bool TestBackEnd::run(const FinalState &state) {
                                                              outputPacketExpr, outputPortExpr);
         if (concolicModel == nullptr) {
             testCount++;
-            P4::Coverage::coverageReportFinal(allStatements, visitedStatements);
-            printPerformanceReport();
+            printPerformanceReport(false);
             return needsToTerminate(testCount);
         }
         completedModel = concolicModel;
@@ -153,27 +149,31 @@ bool TestBackEnd::run(const FinalState &state) {
         abort = printTestInfo(executionState, testInfo, outputPortExpr);
         if (abort) {
             testCount++;
-            P4::Coverage::coverageReportFinal(allStatements, visitedStatements);
-            printPerformanceReport();
+            printPerformanceReport(false);
             return needsToTerminate(testCount);
         }
         const auto *testSpec = createTestSpec(executionState, completedModel, testInfo);
-        float coverage = static_cast<float>(visitedStatements.size()) / allStatements.size();
 
+        // Commit an update to the visited statements.
+        // Only do this once we are sure we are generating a test.
+        symbex.updateVisitedStatements(state.getVisited());
+        const P4::Coverage::CoverageSet &visitedStatements = symbex.getVisitedStatements();
+        auto coverage =
+            static_cast<float>(visitedStatements.size()) / static_cast<float>(allStatements.size());
         printFeature("test_info", 4,
                      "============ Test %1%: Statements covered: %2% (%3%/%4%) ============",
                      testCount, coverage, visitedStatements.size(), allStatements.size());
         P4::Coverage::logCoverage(allStatements, visitedStatements, executionState->getVisited());
 
         // Output the test.
-        Util::withTimer("backend", [&] {
+        Util::withTimer("backend", [this, &testSpec, &selectedBranches, &coverage] {
             testWriter->outputTest(testSpec, selectedBranches, testCount, coverage);
         });
 
         printTraces("============ End Test %1% ============\n", testCount);
         testCount++;
         P4::Coverage::coverageReportFinal(allStatements, visitedStatements);
-        printPerformanceReport();
+        printPerformanceReport(false);
 
         // If MAX_STATEMENT_COVERAGE is enabled, terminate early if we hit max coverage already.
         if (TestgenOptions::get().stopMetric == "MAX_STATEMENT_COVERAGE" && coverage == 1.0) {
@@ -279,20 +279,10 @@ bool TestBackEnd::printTestInfo(const ExecutionState *executionState, const Test
     return false;
 }
 
-void TestBackEnd::printPerformanceReport() {
-    printFeature("performance", 4, "============ Timers ============");
-    for (const auto &c : Util::getTimers()) {
-        if (c.timerName.empty()) {
-            printFeature("performance", 4, "Total: %i ms", c.milliseconds);
-        } else {
-            printFeature("performance", 4, "%s: %i ms (%0.2f %% of parent)", c.timerName,
-                         c.milliseconds, c.relativeToParent * 100);
-        }
-    }
+void TestBackEnd::printPerformanceReport(bool write) const {
+    testWriter->printPerformanceReport(write);
 }
 
 int64_t TestBackEnd::getTestCount() const { return testCount; }
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen

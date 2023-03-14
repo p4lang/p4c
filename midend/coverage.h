@@ -13,9 +13,7 @@
 /// to walk the IR of the P4 program and track which percentage of statement they have visited. The
 /// p4tools (backends/p4tools) framework uses this coverage visitor.
 
-namespace P4 {
-
-namespace Coverage {
+namespace P4::Coverage {
 
 struct SourceIdCmp {
     bool operator()(const IR::Statement *s1, const IR::Statement *s2) const {
@@ -43,11 +41,8 @@ class CollectStatements : public Inspector {
 void coverageReportFinal(const CoverageSet &all, const CoverageSet &visited);
 
 /// Logs statements from @p new_ which have not yet been visited (are not members of @p visited).
-void logCoverage(const CoverageSet &all, const CoverageSet &visited,
-                 const std::vector<const IR::Statement *> &new_);
+void logCoverage(const CoverageSet &all, const CoverageSet &visited, const CoverageSet &new_);
 
-}  // namespace Coverage
-
-}  // namespace P4
+}  // namespace P4::Coverage
 
 #endif /* MIDEND_COVERAGE_H_ */

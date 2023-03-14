@@ -28,18 +28,18 @@
 #include "lib/exceptions.h"
 #include "lib/null.h"
 #include "lib/safe_vector.h"
+#include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen//lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/abstract_stepper.h"
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
+#include "backends/p4tools/modules/testgen/lib/collect_latent_statements.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 CmdStepper::CmdStepper(ExecutionState &state, AbstractSolver &solver,
                        const ProgramInfo &programInfo)
@@ -306,7 +306,14 @@ bool CmdStepper::preorder(const IR::IfStatement *ifStatement) {
             new TraceEvent::PreEvalExpression(ifStatement->condition, "If Statement true"));
         cmds.emplace_back(ifStatement->ifTrue);
         nextState->replaceTopBody(&cmds);
-        result->emplace_back(ifStatement->condition, state, nextState);
+
+        // Some path selection strategies depend on looking ahead and collecting potential
+        // statements. If that is the case, apply the CollectLatentStatements visitor.
+        P4::Coverage::CoverageSet coveredStmts;
+        if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
+            ifStatement->ifTrue->apply(CollectLatentStatements(coveredStmts, state));
+        }
+        result->emplace_back(ifStatement->condition, state, nextState, coveredStmts);
     }
 
     // Handle case for else body.
@@ -318,7 +325,13 @@ bool CmdStepper::preorder(const IR::IfStatement *ifStatement) {
 
         nextState->replaceTopBody((ifStatement->ifFalse == nullptr) ? new IR::BlockStatement()
                                                                     : ifStatement->ifFalse);
-        result->emplace_back(negation, state, nextState);
+        // Some path selection strategies depend on looking ahead and collecting potential
+        // statements. If that is the case, apply the CollectLatentStatements visitor.
+        P4::Coverage::CoverageSet coveredStmts;
+        if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
+            ifStatement->ifFalse->apply(CollectLatentStatements(coveredStmts, state));
+        }
+        result->emplace_back(negation, state, nextState, coveredStmts);
     }
 
     return false;
@@ -567,6 +580,7 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
     std::vector<Continuation::Command> cmds;
     // If the switch expression is tainted, we can not predict which case will be chosen. We taint
     // the program counter and execute all of the statements.
+    P4::Coverage::CoverageSet coveredStmts;
     if (state.hasTaint(switchStatement->expression)) {
         auto currentTaint = state.getProperty<bool>("inUndefinedState");
         cmds.emplace_back(Continuation::PropertyUpdate("inUndefinedState", true));
@@ -581,6 +595,11 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
 
         bool hasMatched = false;
         for (const auto *switchCase : switchStatement->cases) {
+            if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
+                // Some path selection strategies depend on looking ahead and collecting potential
+                // statements. If that is the case, apply the CollectLatentStatements visitor.
+                switchCase->statement->apply(CollectLatentStatements(coveredStmts, state));
+            }
             // We have either matched already, or still need to match.
             hasMatched = hasMatched || switchStatement->expression->equiv(*switchCase->label);
             // Nothing to do with this statement. Fall through to the next case.
@@ -602,14 +621,11 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
             }
         }
     }
-
     BUG_CHECK(!cmds.empty(), "Switch statements should have at least one case (default).");
     nextState->replaceTopBody(&cmds);
-    result->emplace_back(nextState);
+    result->emplace_back(boost::none, state, nextState, coveredStmts);
 
     return false;
 }
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen

@@ -173,8 +173,9 @@ def run_test(options: Options) -> int:
     if result != testutils.SUCCESS:
         # Terminate the switch process and emit its output in case of failure.
         testutils.kill_proc_group(switch_proc)
-        switchout = switchlog.with_suffix(".txt").read_text()
-        testutils.log.error("######## Switch log ########\n%s", switchout)
+        if switchlog.with_suffix('.txt').exists():
+            switchout = switchlog.with_suffix(".txt").read_text()
+            testutils.log.error("######## Switch log ########\n%s", switchout)
         if switch_proc.stdout:
             out = switch_proc.stdout.read()
             testutils.log.error("######## Switch output ######## \n%s", out)

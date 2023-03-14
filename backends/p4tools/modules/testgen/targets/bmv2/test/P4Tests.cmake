@@ -13,11 +13,7 @@ if(NOT P4TOOLS_BMV2_PATH)
   set(P4TOOLS_BMV2_PATH ${CMAKE_HOME_DIRECTORY}/build)
 endif()
 
-if(NOT NIGHTLY)
-  set(EXTRA_OPTS "--strict --print-traces --seed 1000 --max-tests 10")
-else()
-  set(EXTRA_OPTS "--strict --print-traces --max-tests 10")
-endif()
+set(EXTRA_OPTS "--strict --print-traces --seed 1000 --max-tests 10 ")
 
 set(V1_SEARCH_PATTERNS "include.*v1model.p4" "main|common_v1_test")
 set(P4TESTDATA ${P4C_SOURCE_DIR}/testdata)

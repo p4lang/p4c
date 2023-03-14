@@ -127,11 +127,14 @@ const IR::Expression *ExecutionState::get(const StateVariable &var) const {
     return expr;
 }
 
-void ExecutionState::markVisited(const IR::Statement *stmt) { visitedStatements.push_back(stmt); }
-
-const std::vector<const IR::Statement *> &ExecutionState::getVisited() const {
-    return visitedStatements;
+void ExecutionState::markVisited(const IR::Statement *stmt) {
+    // Only track statements, which have a valid source position in the P4 program.
+    if (stmt->getSourceInfo().isValid()) {
+        visitedStatements.emplace(stmt);
+    }
 }
+
+const P4::Coverage::CoverageSet &ExecutionState::getVisited() const { return visitedStatements; }
 
 bool ExecutionState::hasTaint(const IR::Expression *expr) const {
     return Taint::hasTaint(env.getInternalMap(), expr);

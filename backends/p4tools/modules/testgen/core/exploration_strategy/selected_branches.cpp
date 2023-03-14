@@ -15,13 +15,18 @@
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/small_step.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 void SelectedBranches::run(const Callback &callback) {
     while (!executionState->isTerminal()) {
         StepResult successors = step(*executionState);
+        // Assign branch ids to the branches. These integer branch ids are used by track-branches
+        // and selected (input) branches features.
+        // Also populates exploredBranches from the initial set of branches.
+        for (uint64_t bIdx = 0; bIdx < successors->size(); ++bIdx) {
+            auto &succ = (*successors)[bIdx];
+            succ.nextState->pushBranchDecision(bIdx + 1);
+        }
         if (successors->size() == 1) {
             // Non-branching states are not recorded by selected branches.
             executionState = (*successors)[0].nextState;
@@ -88,7 +93,7 @@ ExecutionState *SelectedBranches::chooseBranch(const std::vector<Branch> &branch
         }
     }
 
-    if (!next) {
+    if (next == nullptr) {
         // If not found, the input selected branch list is invalid.
         ::error("The selected branches string doesn't match any branch.");
     }
@@ -96,6 +101,4 @@ ExecutionState *SelectedBranches::chooseBranch(const std::vector<Branch> &branch
     return next;
 }
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen

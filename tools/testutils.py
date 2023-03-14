@@ -197,11 +197,13 @@ def exec_process(args: str, **extra_args) -> ProcessResult:
         args = list(filter(None, args))
 
     # Set up log pipes for both stdout and stderr.
-    outpipe = LogPipe(logging.INFO)
-    output_args["stdout"] = outpipe
-    errpipe = LogPipe(logging.WARNING)
-    output_args["stderr"] = errpipe
-
+    if "capture_output" not in extra_args:
+        if "stdout" not in extra_args:
+            outpipe = LogPipe(logging.INFO)
+            output_args["stdout"] = outpipe
+        if "stderr" not in extra_args:
+            errpipe = LogPipe(logging.WARNING)
+            output_args["stderr"] = errpipe
     try:
         result = subprocess.run(args, check=True, **output_args)
         out = result.stdout
@@ -223,8 +225,11 @@ def exec_process(args: str, **extra_args) -> ProcessResult:
             cmd = " ".join(cmd)
         log.error("Timed out when executing %s.", cmd)
     finally:
-        outpipe.close()
-        errpipe.close()
+        if "capture_output" not in extra_args:
+            if "stdout" not in extra_args:
+                outpipe.close()
+            if "stderr" not in extra_args:
+                errpipe.close()
     return ProcessResult(out, returncode)
 
 

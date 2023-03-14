@@ -14,9 +14,7 @@
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 /// The main class that implements small-step operational semantics. Delegates to implementations
 /// of AbstractStepper.
@@ -29,6 +27,8 @@ class SmallStepEvaluator {
 
         gsl::not_null<ExecutionState *> nextState;
 
+        P4::Coverage::CoverageSet potentialStatements;
+
         /// Simple branch without any constraint.
         explicit Branch(gsl::not_null<ExecutionState *> nextState);
 
@@ -36,6 +36,12 @@ class SmallStepEvaluator {
         /// is later evaluated.
         Branch(boost::optional<const Constraint *> c, const ExecutionState &prevState,
                gsl::not_null<ExecutionState *> nextState);
+
+        /// Branch constrained by a condition. prevState is the state in which the condition
+        /// is later evaluated.
+        Branch(boost::optional<const Constraint *> c, const ExecutionState &prevState,
+               gsl::not_null<ExecutionState *> nextState,
+               const P4::Coverage::CoverageSet &potentialStatements);
     };
 
     using Result = std::vector<Branch> *;
@@ -63,8 +69,6 @@ class SmallStepEvaluator {
     SmallStepEvaluator(AbstractSolver &solver, const ProgramInfo &programInfo);
 };
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SMALL_STEP_SMALL_STEP_H_ */

@@ -32,9 +32,45 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace P4Tools {
+namespace P4Tools::P4Testgen {
 
-namespace P4Testgen {
+SmallStepEvaluator::Branch::Branch(gsl::not_null<ExecutionState *> nextState)
+    : constraint(IR::getBoolLiteral(true)), nextState(std::move(nextState)) {}
+
+SmallStepEvaluator::Branch::Branch(boost::optional<const Constraint *> c,
+                                   const ExecutionState &prevState,
+                                   gsl::not_null<ExecutionState *> nextState)
+    : constraint(IR::getBoolLiteral(true)), nextState(nextState) {
+    if (c) {
+        // Evaluate the branch constraint in the current state of symbolic environment.
+        // Substitutes all variables to their symbolic value (expression on the program's initial
+        // state).
+        constraint = prevState.getSymbolicEnv().subst(*c);
+        constraint = P4::optimizeExpression(constraint);
+        // Append the evaluated and optimized constraint to the next execution state's list of
+        // path constraints.
+        nextState->pushPathConstraint(constraint);
+    }
+}
+
+SmallStepEvaluator::Branch::Branch(boost::optional<const Constraint *> c,
+                                   const ExecutionState &prevState,
+                                   gsl::not_null<ExecutionState *> nextState,
+                                   const P4::Coverage::CoverageSet &potentialStatements)
+    : constraint(IR::getBoolLiteral(true)),
+      nextState(nextState),
+      potentialStatements(potentialStatements) {
+    if (c) {
+        // Evaluate the branch constraint in the current state of symbolic environment.
+        // Substitutes all variables to their symbolic value (expression on the program's initial
+        // state).
+        constraint = prevState.getSymbolicEnv().subst(*c);
+        constraint = P4::optimizeExpression(constraint);
+        // Append the evaluated and optimized constraint to the next execution state's list of
+        // path constraints.
+        nextState->pushPathConstraint(constraint);
+    }
+}
 
 SmallStepEvaluator::SmallStepEvaluator(AbstractSolver &solver, const ProgramInfo &programInfo)
     : programInfo(programInfo), solver(solver) {
@@ -156,9 +192,9 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState &state) {
 
             Result operator()(const Continuation::Guard &guard) {
                 // Check whether we exceed the number of maximum permitted guard violations.
-                // This usually indicates that we have many branches that produce an invalid state.
-                // The P4 program should be fixed in that case, because we can not generate useful
-                // tests.
+                // This usually indicates that we have many branches that produce an invalid
+                // state. The P4 program should be fixed in that case, because we can not
+                // generate useful tests.
                 if (self.violatedGuardConditions > SmallStepEvaluator::MAX_GUARD_VIOLATIONS) {
                     BUG("Condition %1% exceeded the maximum number of permitted guard "
                         "violations for this run."
@@ -176,7 +212,8 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState &state) {
                 if (!state.hasTaint(cond)) {
                     cond = state.getSymbolicEnv().subst(cond);
                     cond = P4::optimizeExpression(cond);
-                    // Check whether the condition is satisfiable in the current execution state.
+                    // Check whether the condition is satisfiable in the current execution
+                    // state.
                     auto pathConstraints = state.getPathConstraint();
                     pathConstraints.push_back(cond);
                     solverResult = self.solver.checkSat(pathConstraints);
@@ -184,9 +221,9 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState &state) {
 
                 auto *nextState = new ExecutionState(state);
                 nextState->popBody();
-                // If we can not solve the guard (either we time out or the solver can not solve the
-                // problem) we increment the count of violatedGuardConditions and stop executing
-                // this branch.
+                // If we can not solve the guard (either we time out or the solver can not solve
+                // the problem) we increment the count of violatedGuardConditions and stop
+                // executing this branch.
                 if (solverResult == boost::none || !solverResult.get()) {
                     std::stringstream condStream;
                     guard.cond->dbprint(condStream);
@@ -213,6 +250,4 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState &state) {
     return new std::vector<Branch>({Branch(&state)});
 }
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen

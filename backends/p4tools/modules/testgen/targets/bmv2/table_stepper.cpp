@@ -22,6 +22,7 @@
 #include "lib/safe_vector.h"
 
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
+#include "backends/p4tools/modules/testgen/lib/collect_latent_statements.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
@@ -153,7 +154,15 @@ void BMv2_V1ModelTableStepper::evalTableActionProfile(
 
         // Update all the tracking variables for tables.
         std::vector<Continuation::Command> replacements;
-        replacements.emplace_back(new IR::MethodCallStatement(synthesizedAction));
+        replacements.emplace_back(
+            new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
+        // Some path selection strategies depend on looking ahead and collecting potential
+        // statements. If that is the case, apply the CollectLatentStatements visitor.
+        P4::Coverage::CoverageSet coveredStmts;
+        if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
+            nextState->getActionDecl(tableAction->method)
+                ->apply(CollectLatentStatements(coveredStmts, *state));
+        }
 
         nextState->set(getTableHitVar(table), IR::getBoolLiteral(true));
         nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
@@ -162,7 +171,7 @@ void BMv2_V1ModelTableStepper::evalTableActionProfile(
         tableStream << " Chosen action: " << actionName;
         nextState->add(new TraceEvent::Generic(tableStream.str()));
         nextState->replaceTopBody(&replacements);
-        getResult()->emplace_back(hitCondition, *state, nextState);
+        getResult()->emplace_back(hitCondition, *state, nextState, coveredStmts);
     }
 }
 
@@ -245,7 +254,15 @@ void BMv2_V1ModelTableStepper::evalTableActionSelector(
 
         // Update all the tracking variables for tables.
         std::vector<Continuation::Command> replacements;
-        replacements.emplace_back(new IR::MethodCallStatement(synthesizedAction));
+        replacements.emplace_back(
+            new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
+        // Some path selection strategies depend on looking ahead and collecting potential
+        // statements. If that is the case, apply the CollectLatentStatements visitor.
+        P4::Coverage::CoverageSet coveredStmts;
+        if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
+            nextState->getActionDecl(tableAction->method)
+                ->apply(CollectLatentStatements(coveredStmts, *state));
+        }
 
         nextState->set(getTableHitVar(table), IR::getBoolLiteral(true));
         nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
@@ -254,7 +271,7 @@ void BMv2_V1ModelTableStepper::evalTableActionSelector(
         tableStream << " Chosen action: " << actionName;
         nextState->add(new TraceEvent::Generic(tableStream.str()));
         nextState->replaceTopBody(&replacements);
-        getResult()->emplace_back(hitCondition, *state, nextState);
+        getResult()->emplace_back(hitCondition, *state, nextState, coveredStmts);
     }
 }
 
