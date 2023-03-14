@@ -13,9 +13,7 @@
 #include "ir/irutils.h"
 #include "lib/exceptions.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 /* =========================================================================================
  *  Test Specification Objects
@@ -167,35 +165,6 @@ const LPM *LPM::evaluate(const Model &model) const {
 
 cstring LPM::getObjectName() const { return "LPM"; }
 
-Range::Range(const IR::KeyElement *key, const IR::Expression *low, const IR::Expression *high)
-    : TableMatch(key), low(low), high(high) {}
-
-const IR::Constant *Range::getEvaluatedLow() const {
-    const auto *constant = low->to<IR::Constant>();
-    BUG_CHECK(constant,
-              "Variable is not a constant. It has type %1% instead. Has the test object %2% "
-              "been evaluated?",
-              low->type->node_type_name(), getObjectName());
-    return constant;
-}
-
-const IR::Constant *Range::getEvaluatedHigh() const {
-    const auto *constant = high->to<IR::Constant>();
-    BUG_CHECK(constant,
-              "Variable is not a constant. It has type %1% instead. Has the test object %2% "
-              "been evaluated?",
-              high->type->node_type_name(), getObjectName());
-    return constant;
-}
-
-const Range *Range::evaluate(const Model &model) const {
-    const auto *evaluatedLow = model.evaluate(low);
-    const auto *evaluatedHigh = model.evaluate(high);
-    return new Range(getKey(), evaluatedLow, evaluatedHigh);
-}
-
-cstring Range::getObjectName() const { return "Range"; }
-
 Exact::Exact(const IR::KeyElement *key, const IR::Expression *val) : TableMatch(key), value(val) {}
 
 const IR::Constant *Exact::getEvaluatedValue() const {
@@ -214,11 +183,10 @@ const Exact *Exact::evaluate(const Model &model) const {
 
 cstring Exact::getObjectName() const { return "Exact"; }
 
-TableRule::TableRule(std::map<cstring, const FieldMatch> matches, int priority, ActionCall action,
-                     int ttl)
+TableRule::TableRule(TableMatchMap matches, int priority, ActionCall action, int ttl)
     : matches(std::move(matches)), priority(priority), action(std::move(action)), ttl(ttl) {}
 
-const std::map<cstring, const FieldMatch> *TableRule::getMatches() const { return &matches; }
+const TableMatchMap *TableRule::getMatches() const { return &matches; }
 
 int TableRule::getPriority() const { return priority; }
 
@@ -229,14 +197,13 @@ int TableRule::getTTL() const { return ttl; }
 cstring TableRule::getObjectName() const { return "TableRule"; }
 
 const TableRule *TableRule::evaluate(const Model &model) const {
-    std::map<cstring, const FieldMatch> evaluatedMatches;
+    TableMatchMap evaluatedMatches;
     for (const auto &matchTuple : matches) {
         auto name = matchTuple.first;
-        auto match = matchTuple.second;
+        const auto &match = matchTuple.second;
         // This is a lambda function that applies the visitor to each variant.
-        const auto evaluatedMatch = boost::apply_visitor(
-            [model](auto const &obj) -> FieldMatch { return *obj.evaluate(model); }, match);
-        evaluatedMatches.insert({name, evaluatedMatch});
+        const auto *evaluatedMatch = match->evaluate(model)->checkedTo<TableMatch>();
+        evaluatedMatches[name] = evaluatedMatch;
     }
     const auto *evaluatedAction = action.evaluate(model);
     return new TableRule(evaluatedMatches, priority, *evaluatedAction, ttl);
@@ -340,6 +307,4 @@ std::map<cstring, const TestObject *> TestSpec::getTestObjectCategory(cstring ca
     return {};
 }
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen

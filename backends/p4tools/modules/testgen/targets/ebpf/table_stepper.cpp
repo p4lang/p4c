@@ -14,15 +14,12 @@
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/expr_stepper.h"
 
-namespace P4Tools {
+namespace P4Tools::P4Testgen::EBPF {
 
-namespace P4Testgen {
-
-namespace EBPF {
-
-const IR::Expression *EBPFTableStepper::computeTargetMatchType(
-    ExecutionState *nextState, const KeyProperties &keyProperties,
-    std::map<cstring, const FieldMatch> *matches, const IR::Expression *hitCondition) {
+const IR::Expression *EBPFTableStepper::computeTargetMatchType(ExecutionState *nextState,
+                                                               const KeyProperties &keyProperties,
+                                                               TableMatchMap *matches,
+                                                               const IR::Expression *hitCondition) {
     // If the custom match type does not match, delete to the core match types.
     return TableStepper::computeTargetMatchType(nextState, keyProperties, matches, hitCondition);
 }
@@ -84,8 +81,4 @@ void EBPFTableStepper::evalTargetTable(
 EBPFTableStepper::EBPFTableStepper(EBPFExprStepper *stepper, const IR::P4Table *table)
     : TableStepper(stepper, table) {}
 
-}  // namespace EBPF
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::EBPF

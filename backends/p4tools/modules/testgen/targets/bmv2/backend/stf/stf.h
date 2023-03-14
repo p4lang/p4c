@@ -68,7 +68,7 @@ class STF : public TF {
     static inja::json::array_t getClone(const std::map<cstring, const TestObject *> &cloneInfos);
 
     /// Helper function for the control plane table inja objects.
-    static inja::json getControlPlaneForTable(const std::map<cstring, const FieldMatch> &matches,
+    static inja::json getControlPlaneForTable(const TableMatchMap &matches,
                                               const std::vector<ActionArg> &args);
 };
 

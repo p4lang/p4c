@@ -32,11 +32,7 @@
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace Bmv2 {
+namespace P4Tools::P4Testgen::Bmv2 {
 
 STF::STF(cstring testName, boost::optional<unsigned int> seed = boost::none) : TF(testName, seed) {
     boost::filesystem::path testFile(testName + ".stf");
@@ -88,7 +84,7 @@ inja::json STF::getControlPlane(const TestSpec *testSpec) {
     return controlPlaneJson;
 }
 
-inja::json STF::getControlPlaneForTable(const std::map<cstring, const FieldMatch> &matches,
+inja::json STF::getControlPlaneForTable(const TableMatchMap &matches,
                                         const std::vector<ActionArg> &args) {
     inja::json rulesJson;
 
@@ -96,79 +92,65 @@ inja::json STF::getControlPlaneForTable(const std::map<cstring, const FieldMatch
     rulesJson["act_args"] = inja::json::array();
     rulesJson["needs_priority"] = false;
 
+    // Iterate over the match fields and segregate them.
     for (const auto &match : matches) {
         const auto fieldName = match.first;
         const auto &fieldMatch = match.second;
 
-        // Iterate over the match fields and segregate them.
-        struct GetRange : public boost::static_visitor<void> {
-            cstring fieldName;
-            inja::json &rulesJson;
-
-            GetRange(inja::json &rulesJson, cstring fieldName)
-                : fieldName(fieldName), rulesJson(rulesJson) {}
-
-            void operator()(const Exact &elem) const {
-                inja::json j;
-                j["field_name"] = fieldName;
-                j["value"] = formatHexExpr(elem.getEvaluatedValue());
-                rulesJson["matches"].push_back(j);
-            }
-            void operator()(const Range & /*elem*/) const {
-                TESTGEN_UNIMPLEMENTED("Match type range not implemented.");
-            }
-            void operator()(const Ternary &elem) const {
-                inja::json j;
-                j["field_name"] = fieldName;
-                const auto *dataValue = elem.getEvaluatedValue();
-                const auto *maskField = elem.getEvaluatedMask();
-                BUG_CHECK(dataValue->type->width_bits() == maskField->type->width_bits(),
-                          "Data value and its mask should have the same bit width.");
-                // Using the width from mask - should be same as data
-                auto dataStr = formatBinExpr(dataValue, false, true, false);
-                auto maskStr = formatBinExpr(maskField, false, true, false);
-                std::string data = "0b";
-                for (size_t dataPos = 0; dataPos < dataStr.size(); ++dataPos) {
-                    if (maskStr.at(dataPos) == '0') {
-                        data += "*";
-                    } else {
-                        data += dataStr.at(dataPos);
-                    }
+        inja::json j;
+        j["field_name"] = fieldName;
+        if (const auto *elem = fieldMatch->to<Exact>()) {
+            j["value"] = formatHexExpr(elem->getEvaluatedValue());
+        } else if (const auto *elem = fieldMatch->to<Ternary>()) {
+            const auto *dataValue = elem->getEvaluatedValue();
+            const auto *maskField = elem->getEvaluatedMask();
+            BUG_CHECK(dataValue->type->width_bits() == maskField->type->width_bits(),
+                      "Data value and its mask should have the same bit width.");
+            // Using the width from mask - should be same as data
+            auto dataStr = formatBinExpr(dataValue, false, true, false);
+            auto maskStr = formatBinExpr(maskField, false, true, false);
+            std::string data = "0b";
+            for (size_t dataPos = 0; dataPos < dataStr.size(); ++dataPos) {
+                if (maskStr.at(dataPos) == '0') {
+                    data += "*";
+                } else {
+                    data += dataStr.at(dataPos);
                 }
-                j["value"] = data;
-                rulesJson["matches"].push_back(j);
-                // If the rule has a ternary match we need to add the priority.
-                rulesJson["needs_priority"] = true;
             }
-            void operator()(const LPM &elem) const {
-                inja::json j;
-                j["field_name"] = fieldName;
-                const auto *dataValue = elem.getEvaluatedValue();
-                auto prefixLen = elem.getEvaluatedPrefixLength()->asInt();
-                auto fieldWidth = dataValue->type->width_bits();
-                auto maxVal = IR::getMaxBvVal(prefixLen);
-                const auto *maskField =
-                    IR::getConstant(dataValue->type, maxVal << (fieldWidth - prefixLen));
-                BUG_CHECK(dataValue->type->width_bits() == maskField->type->width_bits(),
-                          "Data value and its mask should have the same bit width.");
-                // Using the width from mask - should be same as data
-                auto dataStr = formatBinExpr(dataValue, false, true, false);
-                auto maskStr = formatBinExpr(maskField, false, true, false);
-                std::string data = "0b";
-                for (size_t dataPos = 0; dataPos < dataStr.size(); ++dataPos) {
-                    if (maskStr.at(dataPos) == '0') {
-                        data += "*";
-                    } else {
-                        data += dataStr.at(dataPos);
-                    }
+            j["value"] = data;
+            // If the rule has a ternary match we need to add the priority.
+            rulesJson["needs_priority"] = true;
+        } else if (const auto *elem = fieldMatch->to<LPM>()) {
+            const auto *dataValue = elem->getEvaluatedValue();
+            auto prefixLen = elem->getEvaluatedPrefixLength()->asInt();
+            auto fieldWidth = dataValue->type->width_bits();
+            auto maxVal = IR::getMaxBvVal(prefixLen);
+            const auto *maskField =
+                IR::getConstant(dataValue->type, maxVal << (fieldWidth - prefixLen));
+            BUG_CHECK(dataValue->type->width_bits() == maskField->type->width_bits(),
+                      "Data value and its mask should have the same bit width.");
+            // Using the width from mask - should be same as data
+            auto dataStr = formatBinExpr(dataValue, false, true, false);
+            auto maskStr = formatBinExpr(maskField, false, true, false);
+            std::string data = "0b";
+            for (size_t dataPos = 0; dataPos < dataStr.size(); ++dataPos) {
+                if (maskStr.at(dataPos) == '0') {
+                    data += "*";
+                } else {
+                    data += dataStr.at(dataPos);
                 }
-                j["value"] = data;
-                rulesJson["matches"].push_back(j);
-                // If the rule has a ternary match we need to add the priority.
-                rulesJson["needs_priority"] = true;
             }
-        };
-        boost::apply_visitor(GetRange(rulesJson, fieldName), fieldMatch);
+            j["value"] = data;
+            // If the rule has a ternary match we need to add the priority.
+            rulesJson["needs_priority"] = true;
+        } else if (const auto *elem = fieldMatch->to<Optional>()) {
+            j["value"] = formatHexExpr(elem->getEvaluatedValue()).c_str();
+            rulesJson["needs_priority"] = true;
+        } else {
+            TESTGEN_UNIMPLEMENTED("Unsupported table key match type \"%1%\"",
+                                  fieldMatch->getObjectName());
+        }
+        rulesJson["matches"].push_back(j);
     }
 
     for (const auto &actArg : args) {
@@ -332,8 +314,4 @@ void STF::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t 
     emitTestcase(testSpec, selectedBranches, testIdx, testCase, currentCoverage);
 }
 
-}  // namespace Bmv2
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::Bmv2

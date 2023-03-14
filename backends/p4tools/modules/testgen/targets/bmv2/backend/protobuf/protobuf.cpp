@@ -31,14 +31,11 @@
 #include "lib/null.h"
 #include "nlohmann/json.hpp"
 
+#include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace Bmv2 {
+namespace P4Tools::P4Testgen::Bmv2 {
 
 /// Wrapper helper function that automatically inserts separators for hex strings.
 std::string formatHexExprWithSep(const IR::Expression *expr) {
@@ -169,7 +166,7 @@ inja::json Protobuf::getControlPlane(const TestSpec *testSpec) {
     return controlPlaneJson;
 }
 
-inja::json Protobuf::getControlPlaneForTable(const std::map<cstring, const FieldMatch> &matches,
+inja::json Protobuf::getControlPlaneForTable(const TableMatchMap &matches,
                                              const std::vector<ActionArg> &args) {
     inja::json rulesJson;
 
@@ -178,6 +175,7 @@ inja::json Protobuf::getControlPlaneForTable(const std::map<cstring, const Field
     rulesJson["range_matches"] = inja::json::array();
     rulesJson["ternary_matches"] = inja::json::array();
     rulesJson["lpm_matches"] = inja::json::array();
+    rulesJson["optional_matches"] = inja::json::array();
     rulesJson["act_args"] = inja::json::array();
     rulesJson["needs_priority"] = false;
 
@@ -185,59 +183,39 @@ inja::json Protobuf::getControlPlaneForTable(const std::map<cstring, const Field
         auto const fieldName = match.first;
         auto const &fieldMatch = match.second;
 
+        inja::json j;
+        j["field_name"] = fieldName;
+        auto p4RuntimeId = getIdAnnotation(fieldMatch->getKey());
+        BUG_CHECK(p4RuntimeId, "Id not present for key. Can not generate test.");
+        j["id"] = *p4RuntimeId;
         // Iterate over the match fields and segregate them.
-        struct GetRange : public boost::static_visitor<void> {
-            cstring fieldName;
-            inja::json &rulesJson;
-
-            GetRange(inja::json &rulesJson, cstring fieldName)
-                : fieldName(fieldName), rulesJson(rulesJson) {}
-
-            void operator()(const Exact &elem) const {
-                inja::json j;
-                j["field_name"] = fieldName;
-                j["value"] = formatHexExprWithSep(elem.getEvaluatedValue());
-                auto p4RuntimeId = getIdAnnotation(elem.getKey());
-                BUG_CHECK(p4RuntimeId, "Id not present for key. Can not generate test.");
-                j["id"] = *p4RuntimeId;
-                rulesJson["single_exact_matches"].push_back(j);
-            }
-            void operator()(const Range &elem) const {
-                inja::json j;
-                j["field_name"] = fieldName;
-                j["lo"] = formatHexExprWithSep(elem.getEvaluatedLow());
-                j["hi"] = formatHexExprWithSep(elem.getEvaluatedHigh());
-                auto p4RuntimeId = getIdAnnotation(elem.getKey());
-                BUG_CHECK(p4RuntimeId, "Id not present for key. Can not generate test.");
-                j["id"] = *p4RuntimeId;
-                rulesJson["range_matches"].push_back(j);
-                // If the rule has a range match we need to add the priority.
-                rulesJson["needs_priority"] = true;
-            }
-            void operator()(const Ternary &elem) const {
-                inja::json j;
-                j["field_name"] = fieldName;
-                j["value"] = formatHexExprWithSep(elem.getEvaluatedValue());
-                j["mask"] = formatHexExprWithSep(elem.getEvaluatedMask());
-                auto p4RuntimeId = getIdAnnotation(elem.getKey());
-                BUG_CHECK(p4RuntimeId, "Id not present for key. Can not generate test.");
-                j["id"] = *p4RuntimeId;
-                rulesJson["ternary_matches"].push_back(j);
-                // If the rule has a range match we need to add the priority.
-                rulesJson["needs_priority"] = true;
-            }
-            void operator()(const LPM &elem) const {
-                inja::json j;
-                j["field_name"] = fieldName;
-                j["value"] = formatHexExprWithSep(elem.getEvaluatedValue());
-                j["prefix_len"] = elem.getEvaluatedPrefixLength()->value.str();
-                auto p4RuntimeId = getIdAnnotation(elem.getKey());
-                BUG_CHECK(p4RuntimeId, "Id not present for key. Can not generate test.");
-                j["id"] = *p4RuntimeId;
-                rulesJson["lpm_matches"].push_back(j);
-            }
-        };
-        boost::apply_visitor(GetRange(rulesJson, fieldName), fieldMatch);
+        if (const auto *elem = fieldMatch->to<Exact>()) {
+            j["value"] = formatHexExprWithSep(elem->getEvaluatedValue());
+            rulesJson["single_exact_matches"].push_back(j);
+        } else if (const auto *elem = fieldMatch->to<Range>()) {
+            j["lo"] = formatHexExprWithSep(elem->getEvaluatedLow());
+            j["hi"] = formatHexExprWithSep(elem->getEvaluatedHigh());
+            rulesJson["range_matches"].push_back(j);
+            // If the rule has a range match we need to add the priority.
+            rulesJson["needs_priority"] = true;
+        } else if (const auto *elem = fieldMatch->to<Ternary>()) {
+            j["value"] = formatHexExprWithSep(elem->getEvaluatedValue());
+            j["mask"] = formatHexExprWithSep(elem->getEvaluatedMask());
+            rulesJson["ternary_matches"].push_back(j);
+            // If the rule has a range match we need to add the priority.
+            rulesJson["needs_priority"] = true;
+        } else if (const auto *elem = fieldMatch->to<LPM>()) {
+            j["value"] = formatHexExprWithSep(elem->getEvaluatedValue());
+            j["prefix_len"] = elem->getEvaluatedPrefixLength()->value.str();
+            rulesJson["lpm_matches"].push_back(j);
+        } else if (const auto *elem = fieldMatch->to<Optional>()) {
+            j["value"] = formatHexExpr(elem->getEvaluatedValue()).c_str();
+            rulesJson["needs_priority"] = true;
+            rulesJson["optional_matches"].push_back(j);
+        } else {
+            TESTGEN_UNIMPLEMENTED("Unsupported table key match type \"%1%\"",
+                                  fieldMatch->getObjectName());
+        }
     }
 
     for (const auto &actArg : args) {
@@ -323,6 +301,15 @@ entities : [
           value: "{{r.value}}"
         }
       }
+## endfor
+## for r in rule.rules.optional_matches
+    # Match field {{r.field_name}}
+    match {
+      field_id: {{r.id}}
+      optional {
+        value: "{{r.value}}"
+      }
+    }
 ## endfor
 ## for r in rule.rules.range_matches
       # Match field {{r.field_name}}
@@ -433,8 +420,4 @@ void Protobuf::outputTest(const TestSpec *testSpec, cstring selectedBranches, si
     emitTestcase(testSpec, selectedBranches, testIdx, testCase, currentCoverage);
 }
 
-}  // namespace Bmv2
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::Bmv2

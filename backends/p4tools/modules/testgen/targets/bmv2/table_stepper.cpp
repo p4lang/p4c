@@ -31,19 +31,28 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/expr_stepper.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace Bmv2 {
+namespace P4Tools::P4Testgen::Bmv2 {
 
 const IR::Expression *BMv2_V1ModelTableStepper::computeTargetMatchType(
-    ExecutionState *nextState, const KeyProperties &keyProperties,
-    std::map<cstring, const FieldMatch> *matches, const IR::Expression *hitCondition) {
+    ExecutionState *nextState, const KeyProperties &keyProperties, TableMatchMap *matches,
+    const IR::Expression *hitCondition) {
     const IR::Expression *keyExpr = keyProperties.key->expression;
 
     // TODO: We consider optional match types to be a no-op, but we could make them exact matches.
     if (keyProperties.matchType == BMv2Constants::MATCH_KIND_OPT) {
+        // We can recover from taint by simply not adding the optional match.
+        // Create a new zombie constant that corresponds to the key expression.
+        cstring keyName = properties.tableName + "_key_" + keyProperties.name;
+        const auto ctrlPlaneKey = nextState->createZombieConst(keyExpr->type, keyName);
+        if (keyProperties.isTainted) {
+            matches->emplace(keyProperties.name,
+                             new Optional(keyProperties.key, ctrlPlaneKey, false));
+        } else {
+            const IR::Expression *keyExpr = keyProperties.key->expression;
+            matches->emplace(keyProperties.name,
+                             new Optional(keyProperties.key, ctrlPlaneKey, true));
+            hitCondition = new IR::LAnd(hitCondition, new IR::Equ(keyExpr, ctrlPlaneKey));
+        }
         return hitCondition;
     }
     // Action selector entries are not part of the match.
@@ -67,7 +76,7 @@ const IR::Expression *BMv2_V1ModelTableStepper::computeTargetMatchType(
             minKey = nextState->createZombieConst(keyExpr->type, minName);
             maxKey = nextState->createZombieConst(keyExpr->type, maxName);
         }
-        matches->emplace(keyProperties.name, Range(keyProperties.key, minKey, maxKey));
+        matches->emplace(keyProperties.name, new Range(keyProperties.key, minKey, maxKey));
         return new IR::LAnd(hitCondition, new IR::LAnd(new IR::LAnd(new IR::Lss(minKey, maxKey),
                                                                     new IR::Leq(minKey, keyExpr)),
                                                        new IR::Leq(keyExpr, maxKey)));
@@ -124,7 +133,7 @@ void BMv2_V1ModelTableStepper::evalTableActionProfile(
         synthesizedAction->arguments = arguments;
 
         // Now we compute the hit condition to trigger this particular action call.
-        std::map<cstring, const FieldMatch> matches;
+        TableMatchMap matches;
         const auto *hitCondition = computeHit(nextState, &matches);
 
         // We need to set the table action in the state for eventual switch action_run hits.
@@ -214,7 +223,7 @@ void BMv2_V1ModelTableStepper::evalTableActionSelector(
         synthesizedAction->arguments = arguments;
 
         // Now we compute the hit condition to trigger this particular action call.
-        std::map<cstring, const FieldMatch> matches;
+        TableMatchMap matches;
         const auto *hitCondition = computeHit(nextState, &matches);
 
         // We need to set the table action in the state for eventual switch action_run hits.
@@ -441,8 +450,4 @@ BMv2_V1ModelTableStepper::BMv2_V1ModelTableStepper(BMv2_V1ModelExprStepper *step
                                                    const IR::P4Table *table)
     : TableStepper(stepper, table) {}
 
-}  // namespace Bmv2
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::Bmv2

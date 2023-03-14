@@ -64,7 +64,7 @@ class BMv2_V1ModelTableStepper : public TableStepper {
  protected:
     const IR::Expression *computeTargetMatchType(ExecutionState *nextState,
                                                  const KeyProperties &keyProperties,
-                                                 std::map<cstring, const FieldMatch> *matches,
+                                                 TableMatchMap *matches,
                                                  const IR::Expression *hitCondition) override;
 
     void checkTargetProperties(

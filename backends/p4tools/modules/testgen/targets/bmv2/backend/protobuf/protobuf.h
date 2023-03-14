@@ -79,7 +79,7 @@ class Protobuf : public TF {
     static std::vector<std::pair<size_t, size_t>> getIgnoreMasks(const IR::Constant *mask);
 
     /// Helper function for the control plane table inja objects.
-    static inja::json getControlPlaneForTable(const std::map<cstring, const FieldMatch> &matches,
+    static inja::json getControlPlaneForTable(const TableMatchMap &matches,
                                               const std::vector<ActionArg> &args);
 
     /// @return the id allocated to the object through the @id annotation if any, or
