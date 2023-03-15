@@ -22,6 +22,7 @@ jobs:
       IMAGE_TYPE: test
       CMAKE_UNITY_BUILD: ON
       BUILD_STATIC_RELEASE: ON
+      ENABLE_TEST_TOOLS: ON
     steps:
     - uses: actions/checkout@v3
       with:

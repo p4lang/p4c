@@ -108,15 +108,6 @@ else
   P4C_DEPS+=" p4lang-bmv2"
 fi
 
-# Python3.8's unittest library has a bug, which suppresses the output of the last failed test.
-# This in turn causes some PTF XFails to not work since they can not capture the output.
-# (https://github.com/python/cpython/issues/57445)
-# To be able to run PTF tests reliably we need to use Python3.9 as the default.
-if [ "$ENABLE_TEST_TOOLS" == "ON" ]; then
-  P4C_DEPS+=" python3.9"
-fi
-
-
 # TODO: Remove this check once 18.04 is deprecated.
 if [[ "${DISTRIB_RELEASE}" != "18.04" ]] ; then
   P4C_DEPS+=" cmake"
@@ -127,13 +118,6 @@ sudo apt-get install -y --no-install-recommends \
   ${P4C_DEPS} \
   ${P4C_EBPF_DEPS} \
   ${P4C_RUNTIME_DEPS}
-
-if [ "$ENABLE_TEST_TOOLS" == "ON" ]; then
-  sudo ln -sf /usr/bin/python3.9 /usr/bin/python3
-  sudo pip3 install --upgrade protobuf==3.20.1
-  sudo pip3 install --upgrade googleapis-common-protos==1.50.0
-  sudo pip3 install --upgrade grpcio==1.51.1
-fi
 
 sudo pip3 install --upgrade pip
 sudo pip3 install -r ${P4C_DIR}/requirements.txt

@@ -12,11 +12,11 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  # Build and test p4tools on Ubuntu 20.04.
+  # Build and test p4tools on Ubuntu 22.04.
   build-and-test-tools:
     strategy:
       fail-fast: false
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
@@ -33,11 +33,11 @@ jobs:
         key: test-tools-${{ runner.os }}
         max-size: 1000M
 
-    - name: Build (Ubuntu 20.04)
+    - name: Build (Ubuntu 22.04)
       run: |
         tools/ci-build.sh
 
-    - name: Run tests (Ubuntu 20.04)
+    - name: Run tests (Ubuntu 22.04)
       # Need to use sudo for the eBPF kernel tests.
       run: sudo -E ctest -R testgen- --output-on-failure --schedule-random
       working-directory: ./build
