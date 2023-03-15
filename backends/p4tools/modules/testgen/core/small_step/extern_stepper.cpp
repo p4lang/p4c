@@ -29,9 +29,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 void ExprStepper::setFields(ExecutionState *nextState,
                             const std::vector<const IR::Member *> &flatFields,
@@ -103,18 +101,13 @@ ExprStepper::PacketCursorAdvanceInfo ExprStepper::calculateAdvanceExpression(
     // The packet size must be larger than the current parser cursor minus what is already
     // present in the buffer. The advance expression, i.e., the size of the advance can be freely
     // chosen.
-    auto *cond = new IR::LAnd(
-        new IR::Geq(IR::Type::Boolean::get(), advanceSum, bufferSizeConst),
-        new IR::Geq(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(), minSize));
+    auto *cond =
+        new IR::Geq(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(), minSize);
 
     // Compute the accept case.
     int advanceVal = 0;
     const auto *advanceCond = new IR::LAnd(cond, restrictions);
     const auto *advanceConst = evaluateExpression(advanceExpr, advanceCond);
-    // Compute the reject case.
-    int notAdvanceVal = 0;
-    const auto *notAdvanceCond = new IR::LAnd(new IR::LNot(cond), restrictions);
-    const auto *notAdvanceConst = evaluateExpression(advanceExpr, notAdvanceCond);
     // If we can not satisfy the advance, set the condition to nullptr.
     if (advanceConst == nullptr) {
         advanceCond = nullptr;
@@ -125,6 +118,10 @@ ExprStepper::PacketCursorAdvanceInfo ExprStepper::calculateAdvanceExpression(
         advanceVal = advanceConst->checkedTo<IR::Constant>()->asInt();
         advanceCond = new IR::LAnd(advanceCond, new IR::Equ(advanceConst, advanceExpr));
     }
+    // Compute the reject case.
+    int notAdvanceVal = 0;
+    const auto *notAdvanceCond = new IR::LAnd(new IR::LNot(cond), restrictions);
+    const auto *notAdvanceConst = evaluateExpression(advanceExpr, notAdvanceCond);
     // If we can not satisfy the reject, set the condition to nullptr.
     if (notAdvanceConst == nullptr) {
         notAdvanceCond = nullptr;
@@ -1075,6 +1072,4 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
     }
 }
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
