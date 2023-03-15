@@ -33,6 +33,11 @@ namespace P4Tools::P4Testgen {
 SymbolicExecutor::StepResult SymbolicExecutor::step(ExecutionState &state) {
     Util::ScopedTimer st("step");
     StepResult successors = evaluator.step(state);
+    // Remove any successors that are unsatisfiable.
+    successors->erase(
+        std::remove_if(successors->begin(), successors->end(),
+                       [this](const Branch &b) -> bool { return !evaluateBranch(b, solver); }),
+        successors->end());
     return successors;
 }
 

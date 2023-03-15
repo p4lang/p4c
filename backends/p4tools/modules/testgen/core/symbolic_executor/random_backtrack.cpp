@@ -25,22 +25,13 @@ RandomBacktrack::RandomBacktrack(AbstractSolver &solver, const ProgramInfo &prog
     : SymbolicExecutor(solver, programInfo) {}
 
 bool RandomBacktrack::pickSuccessor(StepResult successors) {
+    if (successors->empty()) {
+        return false;
+    }
     // If there is only one successor, choose it and move on.
     if (successors->size() == 1) {
         executionState = successors->at(0).nextState;
         return true;
-    }
-
-    // If there are multiple successors, try to pick one.
-    if (successors->size() > 1) {
-        successors->erase(
-            std::remove_if(successors->begin(), successors->end(),
-                           [this](const Branch &b) -> bool { return !evaluateBranch(b, solver); }),
-            successors->end());
-    }
-
-    if (successors->empty()) {
-        return false;
     }
     // Pick a branch at random.
     executionState = popRandomBranch(*successors).nextState;
