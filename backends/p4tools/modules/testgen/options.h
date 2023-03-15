@@ -28,19 +28,6 @@ class TestgenOptions : public AbstractP4cToolOptions {
     // listed in @var SUPPORTED_STOP_METRICS.
     cstring stopMetric;
 
-    /// Level of multiPop step. A good value is 10, namely, 10 per cent of
-    /// the size of the unexploredBranches. The smaller the number,
-    /// the bigger the step; e.g. unexploredBranches size == 100
-    /// then this variable calculates 100/10 or 100/2 for the pop level.
-    /// Defaults to 3, which maximizes exploration of exploration. Minimum
-    /// level is 2, for max randomness.
-    uint64_t popLevel = 3;
-
-    /// Max bound of the buffer vector collecting all terminal branches.
-    /// Defaults to 2, which means only two terminal paths are populated
-    /// by default.
-    uint64_t linearEnumeration = 2;
-
     /// To be used with randomAccessMaxCoverage. It specifies after how many
     /// tests (saddle point) we should randomly explore the program and pick
     /// a random branch ranked by how many unique non-visited statements it

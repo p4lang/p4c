@@ -173,9 +173,7 @@ TestgenOptions::TestgenOptions()
                 {"DEPTH_FIRST", PathSelectionPolicy::DepthFirst},
                 {"RANDOM_BACKTRACK", PathSelectionPolicy::RandomBacktrack},
                 {"GREEDY_STATEMENT_SEARCH", PathSelectionPolicy::GreedyStmtCoverage},
-                {"DETERMINISTIC_STATEMENT_SEARCH", PathSelectionPolicy::DetMaxStmtCoverage},
                 {"RANDOM_STATEMENT_SEARCH", PathSelectionPolicy::RandomMaxStmtCoverage},
-                {"LINEAR_ENUMERATION", PathSelectionPolicy::LinearEnumeration},
             };
             auto selectionString = cstring(arg).toUpper();
             auto it = PATH_SELECTION_OPTIONS.find(selectionString);
@@ -196,54 +194,8 @@ TestgenOptions::TestgenOptions()
             return false;
         },
         "Selects a specific path selection strategy for test generation. Options are: "
-        "DEPTH_FIRST, RANDOM_BACKTRACK, GREEDY_STATEMENT_SEARCH, "
-        "DETERMINISTIC_STATEMENT_SEARCH, RANDOM_STATEMENT_SEARCH, and LINEAR_ENUMERATION. "
+        "DEPTH_FIRST, RANDOM_BACKTRACK, GREEDY_STATEMENT_SEARCH, and RANDOM_STATEMENT_SEARCH. "
         "Defaults to DEPTH_FIRST.");
-
-    registerOption(
-        "--pop-level", "popLevel",
-        [this](const char *arg) {
-            int64_t popLevelTmp = 0;
-            try {
-                // Unfortunately, we can not use std::stoul because negative inputs are okay
-                // according to the C++ standard.
-                popLevelTmp = std::stoll(arg);
-                if (popLevelTmp < 2) {
-                    throw std::invalid_argument("Invalid input.");
-                }
-            } catch (std::invalid_argument &) {
-                ::error("Invalid input value %1% for --pop-level. Expected integer greater than 1.",
-                        arg);
-                return false;
-            }
-            popLevel = popLevelTmp;
-            return true;
-        },
-        "Sets the fraction for multiPop exploration; default is 3 when meaningful strategy is "
-        "activated.");
-
-    registerOption(
-        "--linear-enumeration", "linearEnumeration",
-        [this](const char *arg) {
-            int64_t linearEnumerationTmp = 0;
-            try {
-                // Unfortunately, we can not use std::stoul because negative inputs are okay
-                // according to the C++ standard.
-                linearEnumerationTmp = std::stoll(arg);
-                if (linearEnumerationTmp <= 1) {
-                    throw std::invalid_argument("Invalid input.");
-                }
-            } catch (std::invalid_argument &) {
-                ::error(
-                    "Invalid input value %1% for --linear-enumeration. Expected an integer greater "
-                    "than 1.",
-                    arg);
-                return false;
-            }
-            linearEnumeration = linearEnumerationTmp;
-            return true;
-        },
-        "Max bound for vector size in LINEAR_ENUMERATION; defaults to 2.");
 
     registerOption(
         "--saddle-point", "saddlePoint",

@@ -18,64 +18,13 @@
 
 namespace P4Tools::P4Testgen {
 
-/* =========================================================================================
- *  DetMaxStmtCoverage
- * ========================================================================================= */
-
-/// Strategy that tries to maximize coverage by getting new branches
-/// and sorting them by uncovered states. We "look-ahead" at the possible next execution
-/// states for each branch and identify the number of non-visited states. We rank the
-/// branches so those with more states to be explored are picked first.
-class DetMaxStmtCoverage : public SymbolicExecutor {
- public:
-    /// Executes the P4 program along a randomly chosen path. When the program terminates, the
-    /// given callback is invoked. If the callback returns true, then the executor terminates.
-    /// Otherwise, execution of the P4 program continues on a different random path.
-    void run(const Callback &callBack) override;
-
-    /// Constructor for this strategy, considering inheritance.
-    DetMaxStmtCoverage(AbstractSolver &solver, const ProgramInfo &programInfo);
-
- protected:
-    /// The main datastructure for exploration in this strategy. It is a map
-    /// of pairs, and each pair carries the potential coverage and a vector of
-    /// branches with that same coverage.
-    ordered_map<uint64_t, std::vector<Branch>> unexploredBranches;
-
-    /// Chooses a branch to take, sets the current execution state to be that branch, and asserts
-    /// the corresponding path constraint to the solver.
-    ///
-    /// If @arg guaranteeViability is true, then the cumulative path condition is guaranteed to be
-    /// satisfiable after taking into account the path constraint associated with the chosen
-    /// branch. Any unviable branches encountered during branch selection are discarded.
-    ///
-    /// Branch selection fails if the given set of branches is empty. It also fails if @arg
-    /// guaranteeViability is true, but none of the given branches are viable.
-    ///
-    /// On success, the remaining branches to explore are pushed onto the stack of unexplored
-    /// branches, and the solver's state before the branch selection is saved with a `push`
-    /// operation. This happens even if the set of remaining branches is empty. On failure, the
-    /// stack of unexplored branches and the solver's state will be unchanged.
-    ///
-    /// @returns next execution state to be examined on success, nullptr on failure.
-    ExecutionState *chooseBranch(std::vector<Branch> &branches, bool guaranteeViability);
-
-    /// Invoked in chooseBranch to sort the branches vector according to non-visited
-    /// states.
-    void sortBranchesByCoverage(std::vector<Branch> &branches);
-};
-
-/* =========================================================================================
- *  RandomMaxStmtCoverage
- * ========================================================================================= */
-
 /// Strategy that combines the incremental max coverage ("look-ahead") at the
 /// with random exploration. We rely on a sorted map containing rankings of unique
 /// non-visited statements and a vector, acting as a DFS, to direct a path to a
 /// terminating state. We keep track of coverage, and once we reach a saddle point,
 /// we pick a random branch. If we continue in the saddle point after for too long
 // i.e. 2* the saddle point, we try to stick with the highest ranked branches.
-class RandomMaxStmtCoverage : public DetMaxStmtCoverage {
+class RandomMaxStmtCoverage : public SymbolicExecutor {
  public:
     /// Executes the P4 program along a randomly chosen path. When the program terminates, the
     /// given callback is invoked. If the callback returns true, then the executor terminates.

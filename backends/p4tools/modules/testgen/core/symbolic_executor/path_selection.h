@@ -9,9 +9,7 @@ enum class PathSelectionPolicy {
     DepthFirst,
     RandomBacktrack,
     GreedyStmtCoverage,
-    DetMaxStmtCoverage,
     RandomMaxStmtCoverage,
-    LinearEnumeration,
 };
 
 inline bool requiresLookahead(PathSelectionPolicy &pathSelectionPolicy) {

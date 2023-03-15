@@ -55,9 +55,7 @@ These are the current usage flags:
 --input-branches selectedBranches            List of the selected branches which should be chosen for selection.
 --track-branches                             Track the branches that are chosen in the symbolic executor. This can be used for deterministic replay.
 --with-output-packet                         Produced tests must have an output packet.
---exploration-strategy SymbolicExecutor   Selects a specific exploration strategy for test generation. Options are: DEPTH_FIRST, RANDOM_BACKTRACK, BOUNDED_RANDOM_BACKTRACK, GREEDY_STATEMENT_SEARCH, DETERMINISTIC_STATEMENT_SEARCH, RANDOM_STATEMENT_SEARCH, and LINEAR_ENUMERATION. Defaults to DEPTH_FIRST.
---pop-level popLevel                         Sets the fraction for multiPop exploration; default is 3 when meaningful strategy is activated.
---linear-enumeration linearEnumeration       Max bound for vector size in LINEAR_ENUMERATION; defaults to 2.
+--exploration-strategy SymbolicExecutor   Selects a specific exploration strategy for test generation. Options are: DEPTH_FIRST, RANDOM_BACKTRACK, GREEDY_STATEMENT_SEARCH, and RANDOM_STATEMENT_SEARCH. Defaults to DEPTH_FIRST.
 --saddle-point saddlePoint                   Threshold to invoke multiPop on RANDOM_STATEMENT_SEARCH.
 --print-traces                               Print the associated traces and test information for each generated test.
 --print-steps                                Print the representation of each program node while the stepper steps through the program.
