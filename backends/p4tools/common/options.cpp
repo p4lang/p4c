@@ -169,13 +169,46 @@ AbstractP4cToolOptions::AbstractP4cToolOptions(cstring message) : Options(messag
 
     registerOption(
         "--seed", "seed",
-        [this](const char *arg) {
-            seed = std::stoul(arg);
-            // Initialize the global seed for randomness.
-            Utils::setRandomSeed(*seed);
+        [](const char *arg) {
+            int64_t seedTmp = 0;
+            try {
+                // Unfortunately, we can not use std::stoul because negative inputs are okay
+                // according to the C++ standard.
+                seedTmp = std::stoll(arg);
+                if (seedTmp < 0) {
+                    throw std::invalid_argument("Invalid input.");
+                }
+            } catch (std::invalid_argument &) {
+                ::error("Invalid input value %1% for --seed. Expected a non-negative value.", arg);
+                return false;
+            }
+            Utils::setRandomSeed(seedTmp);
             return true;
         },
         "Provides a randomization seed");
+
+    registerOption(
+        "--solver-timeout", "timeout",
+        [this](const char *arg) {
+            int64_t solverTimeoutTmp = 0;
+            try {
+                // Unfortunately, we can not use std::stoul because negative inputs are okay
+                // according to the C++ standard.
+                solverTimeoutTmp = std::stoll(arg);
+                if (solverTimeoutTmp < 0) {
+                    throw std::invalid_argument("Invalid input.");
+                }
+            } catch (std::invalid_argument &) {
+                ::error(
+                    "Invalid input value %1% for --solver-timeout. Expected a non-negative value.",
+                    arg);
+                return false;
+            }
+            solverTimeout = solverTimeoutTmp;
+            return true;
+        },
+        "The timeout for the SMT solver in milliseconds. The default is 60 seconds. 0 implies no "
+        "timeout.");
 
     for (const auto &optionSpec : inheritedCompilerOptions) {
         registerOption(

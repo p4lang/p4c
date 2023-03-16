@@ -50,7 +50,7 @@ std::string Utils::getTimeStamp() {
     return oss.str();
 }
 
-void Utils::setRandomSeed(int seed) {
+void Utils::setRandomSeed(uint32_t seed) {
     if (currentSeed.has_value()) {
         BUG("Seed already initialized with %1%.", currentSeed.value());
     }

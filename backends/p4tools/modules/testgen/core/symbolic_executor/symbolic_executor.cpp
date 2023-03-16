@@ -86,13 +86,7 @@ SymbolicExecutor::SymbolicExecutor(AbstractSolver &solver, const ProgramInfo &pr
       solver(solver),
       executionState(ExecutionState::create(programInfo.program)),
       allStatements(programInfo.getAllStatements()),
-      evaluator(solver, programInfo) {
-    // If there is no seed provided, do not randomize the solver.
-    auto seed = Utils::getCurrentSeed();
-    if (seed != std::nullopt) {
-        this->solver.seed(*seed);
-    }
-}
+      evaluator(solver, programInfo) {}
 
 void SymbolicExecutor::updateVisitedStatements(const P4::Coverage::CoverageSet &newStatements) {
     visitedStatements.insert(newStatements.begin(), newStatements.end());

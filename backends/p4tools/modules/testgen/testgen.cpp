@@ -74,16 +74,27 @@ int Testgen::mainImpl(const IR::P4Program *program) {
     enableInformationLogging();
 
     // Get the options and the seed.
+    const auto &parserOptions = P4CContext::get().options();
     const auto &testgenOptions = TestgenOptions::get();
+
+    // Need to declare the solver here to ensure its lifetime.
+    Z3Solver solver;
+    // Configure the solver.
     auto seed = Utils::getCurrentSeed();
-    if (seed) {
+    if (seed.has_value()) {
+        solver.seed(seed.value());
         printFeature("test_info", 4, "============ Program seed %1% =============\n", *seed);
     }
+    if (testgenOptions.solverTimeout != 0) {
+        // Set the internal solver timeout.
+        solver.timeout(testgenOptions.solverTimeout);
+    }
+    // Allocate a symbolic execution engine.
+    auto *symExec = pickExecutionEngine(testgenOptions, programInfo, solver);
 
     // Get the filename of the input file and remove the extension
     // This assumes that inputFile is not null.
-    auto const inputFile = P4CContext::get().options().file;
-    auto testPath = std::filesystem::path(inputFile.c_str()).stem();
+    auto testPath = std::filesystem::path(parserOptions.file.c_str()).stem();
     // Create the directory, if the directory string is valid and if it does not exist.
     cstring testDirStr = testgenOptions.outputDir;
     if (!testDirStr.isNullOrEmpty()) {
@@ -91,9 +102,6 @@ int Testgen::mainImpl(const IR::P4Program *program) {
         std::filesystem::create_directories(testDir);
         testPath = testDir / testPath;
     }
-    // Need to declare the solver here to ensure its lifetime.
-    Z3Solver solver;
-    auto *symExec = pickExecutionEngine(testgenOptions, programInfo, solver);
 
     // Define how to handle the final state for each test. This is target defined.
     auto *testBackend = TestgenTarget::getTestBackend(*programInfo, *symExec, testPath, seed);
