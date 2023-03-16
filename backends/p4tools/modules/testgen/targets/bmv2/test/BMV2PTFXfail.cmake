@@ -231,6 +231,7 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
   "Expected packet was not received on device"
+  # The packet is too short and is dropped by PTF.
   issue2314.p4
   issue281.p4
   bmv2_lookahead_2.p4
@@ -238,8 +239,8 @@ p4tools_add_xfail_reason(
   parser-unroll-issue3537.p4
   parser-unroll-test2.p4
   header-stack-ops-bmv2.p4
-  # The packet is too short and is dropped by PTF.
   fabric.p4
+  issue3702-bmv2.p4
 )
 
 # The test framework has a bug where it swallows the test output if the last test failed.
