@@ -156,9 +156,9 @@ endif()
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${CMAKE_THREAD_LIBS_INIT}")
-include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${PROTOBUF_INCLUDE_DIRS})
-include_directories(${LIBGC_INCLUDE_DIR})
+include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
+include_directories(SYSTEM ${PROTOBUF_INCLUDE_DIRS})
+include_directories(SYSTEM ${LIBGC_INCLUDE_DIR})
 set (HAVE_LIBBOOST_IOSTREAMS 1)
 set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_LIBRARIES}")
 if (ENABLE_GC)
@@ -322,9 +322,9 @@ endif()
 include_directories (
   ${P4C_SOURCE_DIR}/extensions
   ${P4C_SOURCE_DIR}
-  ${P4C_SOURCE_DIR}/test/frameworks/gtest/googletest/include
   ${P4C_BINARY_DIR}
   )
+include_directories(SYSTEM ${P4C_SOURCE_DIR}/test/frameworks/gtest/googletest/include)
 add_definitions (-DCONFIG_PREFIX="${CMAKE_INSTALL_PREFIX}")
 add_definitions (-DCONFIG_PKGDATADIR="${CMAKE_INSTALL_PREFIX}/${P4C_ARTIFACTS_OUTPUT_DIRECTORY}")
 
