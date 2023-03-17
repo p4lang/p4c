@@ -1,5 +1,5 @@
-#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_EXPLORATION_STRATEGY_RND_ACCESS_MAX_COVERAGE_H_
-#define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_EXPLORATION_STRATEGY_RND_ACCESS_MAX_COVERAGE_H_
+#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SYMBOLIC_EXECUTOR_MAX_STMT_COV_H_
+#define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SYMBOLIC_EXECUTOR_MAX_STMT_COV_H_
 
 #include <cstdint>
 #include <list>
@@ -12,13 +12,11 @@
 
 #include "backends/p4tools/common/core/solver.h"
 
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/inc_max_coverage_stack.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 /// Strategy that combines the incremental max coverage ("look-ahead") at the
 /// with random exploration. We rely on a sorted map containing rankings of unique
@@ -26,7 +24,7 @@ namespace P4Testgen {
 /// terminating state. We keep track of coverage, and once we reach a saddle point,
 /// we pick a random branch. If we continue in the saddle point after for too long
 // i.e. 2* the saddle point, we try to stick with the highest ranked branches.
-class RandomAccessMaxCoverage : public IncrementalMaxCoverageStack {
+class RandomMaxStmtCoverage : public SymbolicExecutor {
  public:
     /// Executes the P4 program along a randomly chosen path. When the program terminates, the
     /// given callback is invoked. If the callback returns true, then the executor terminates.
@@ -34,8 +32,8 @@ class RandomAccessMaxCoverage : public IncrementalMaxCoverageStack {
     void run(const Callback &callBack) override;
 
     /// Constructor for this strategy, considering inheritance.
-    RandomAccessMaxCoverage(AbstractSolver &solver, const ProgramInfo &programInfo,
-                            uint64_t saddlePoint);
+    RandomMaxStmtCoverage(AbstractSolver &solver, const ProgramInfo &programInfo,
+                          uint64_t saddlePoint);
 
  protected:
     // Saddle point indicates when we get stuck into a coverage and decides to take
@@ -86,8 +84,6 @@ class RandomAccessMaxCoverage : public IncrementalMaxCoverageStack {
     void updateBufferRankings();
 };
 
-}  // namespace P4Testgen
+}  // namespace P4Tools::P4Testgen
 
-}  // namespace P4Tools
-
-#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_EXPLORATION_STRATEGY_RND_ACCESS_MAX_COVERAGE_H_ */
+#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SYMBOLIC_EXECUTOR_MAX_STMT_COV_H_ */

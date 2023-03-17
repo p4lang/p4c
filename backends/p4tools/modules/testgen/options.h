@@ -6,7 +6,7 @@
 #include "backends/p4tools/common/options.h"
 #include "lib/cstring.h"
 
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/path_selection.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
 
 namespace P4Tools {
 
@@ -19,8 +19,7 @@ class TestgenOptions : public AbstractP4cToolOptions {
     int64_t maxTests = 1;
 
     /// Selects the path selection policy for test generation
-    P4Testgen::PathSelectionPolicy pathSelectionPolicy =
-        P4Testgen::PathSelectionPolicy::IncrementalStack;
+    P4Testgen::PathSelectionPolicy pathSelectionPolicy = P4Testgen::PathSelectionPolicy::DepthFirst;
 
     /// List of the supported stop metrics.
     static const std::set<cstring> SUPPORTED_STOP_METRICS;
@@ -28,19 +27,6 @@ class TestgenOptions : public AbstractP4cToolOptions {
     // Stops generating tests when a particular metric is satisfied. Currently supported options are
     // listed in @var SUPPORTED_STOP_METRICS.
     cstring stopMetric;
-
-    /// Level of multiPop step. A good value is 10, namely, 10 per cent of
-    /// the size of the unexploredBranches. The smaller the number,
-    /// the bigger the step; e.g. unexploredBranches size == 100
-    /// then this variable calculates 100/10 or 100/2 for the pop level.
-    /// Defaults to 3, which maximizes exploration of exploration. Minimum
-    /// level is 2, for max randomness.
-    uint64_t popLevel = 3;
-
-    /// Max bound of the buffer vector collecting all terminal branches.
-    /// Defaults to 2, which means only two terminal paths are populated
-    /// by default.
-    uint64_t linearEnumeration = 2;
 
     /// To be used with randomAccessMaxCoverage. It specifies after how many
     /// tests (saddle point) we should randomly explore the program and pick

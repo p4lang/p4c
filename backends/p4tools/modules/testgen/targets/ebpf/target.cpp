@@ -11,8 +11,8 @@
 #include "lib/exceptions.h"
 #include "lib/ordered_map.h"
 
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/namespace_context.h"
@@ -73,7 +73,7 @@ const EBPFProgramInfo *EBPFTestgenTarget::initProgram_impl(
 }
 
 EBPFTestBackend *EBPFTestgenTarget::getTestBackend_impl(const ProgramInfo &programInfo,
-                                                        ExplorationStrategy &symbex,
+                                                        SymbolicExecutor &symbex,
                                                         const boost::filesystem::path &testPath,
                                                         boost::optional<uint32_t> seed) const {
     return new EBPFTestBackend(programInfo, symbex, testPath, seed);

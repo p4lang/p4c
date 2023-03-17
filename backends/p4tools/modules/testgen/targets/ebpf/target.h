@@ -1,7 +1,7 @@
 #ifndef TESTGEN_TARGETS_EBPF_TARGET_H_
 #define TESTGEN_TARGETS_EBPF_TARGET_H_
 
-#include <stdint.h>
+#include <cstdint>
 
 #include <boost/filesystem.hpp>
 #include <boost/optional/optional.hpp>
@@ -10,8 +10,8 @@
 #include "ir/ir.h"
 
 #include "backends/p4tools/modules/testgen/core/arch_spec.h"
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/cmd_stepper.h"
@@ -36,8 +36,7 @@ class EBPFTestgenTarget : public TestgenTarget {
 
     int getPortNumWidth_bits_impl() const override;
 
-    EBPFTestBackend *getTestBackend_impl(const ProgramInfo &programInfo,
-                                         ExplorationStrategy &symbex,
+    EBPFTestBackend *getTestBackend_impl(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
                                          const boost::filesystem::path &testPath,
                                          boost::optional<uint32_t> seed) const override;
 

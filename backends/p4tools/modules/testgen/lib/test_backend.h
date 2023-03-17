@@ -10,8 +10,8 @@
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/final_state.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
@@ -34,12 +34,12 @@ class TestBackEnd {
 
     /// Pointer to the symbolic executor.
     /// TODO: Remove this.
-    ExplorationStrategy &symbex;
+    SymbolicExecutor &symbex;
 
     /// Test maximum number of tests that are to be produced.
     int64_t maxTests;
 
-    explicit TestBackEnd(const ProgramInfo &programInfo, ExplorationStrategy &symbex)
+    explicit TestBackEnd(const ProgramInfo &programInfo, SymbolicExecutor &symbex)
         : programInfo(programInfo), symbex(symbex), maxTests(TestgenOptions::get().maxTests) {
         // If we select a specific branch, the number of tests should be 1.
         if (!TestgenOptions::get().selectedBranches.empty()) {

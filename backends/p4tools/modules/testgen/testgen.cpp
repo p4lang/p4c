@@ -18,16 +18,13 @@
 #include "lib/cstring.h"
 #include "lib/error.h"
 
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/greedy_potential.h"
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/inc_max_coverage_stack.h"
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/incremental_stack.h"
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/linear_enumeration.h"
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/random_access_stack.h"
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/rnd_access_max_coverage.h"
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/selected_branches.h"
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/unbounded_rnd_ac_stack.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/depth_first.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/greedy_stmt_cov.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/max_stmt_cov.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/random_backtrack.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/selected_branches.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/logging.h"
 #include "backends/p4tools/modules/testgen/lib/test_backend.h"
@@ -42,38 +39,23 @@ void Testgen::registerTarget() {
     registerCompilerTargets();
 }
 
-ExplorationStrategy *pickExecutionEngine(const TestgenOptions &testgenOptions,
-                                         const ProgramInfo *programInfo, AbstractSolver &solver) {
+SymbolicExecutor *pickExecutionEngine(const TestgenOptions &testgenOptions,
+                                      const ProgramInfo *programInfo, AbstractSolver &solver) {
     const auto &pathSelectionPolicy = testgenOptions.pathSelectionPolicy;
-    if (pathSelectionPolicy == PathSelectionPolicy::RandomAccessStack) {
-        // If the user mistakenly specifies an invalid popLevel, we set it to 3.
-        auto popLevel = testgenOptions.popLevel;
-        if (popLevel <= 1) {
-            ::warning("--pop-level must be greater than 1; using default value of 3.\n");
-            popLevel = 3;
-        }
-        return new RandomAccessStack(solver, *programInfo, popLevel);
+    if (pathSelectionPolicy == PathSelectionPolicy::GreedyStmtCoverage) {
+        return new GreedyStmtSelection(solver, *programInfo);
     }
-    if (pathSelectionPolicy == PathSelectionPolicy::GreedyPotential) {
-        return new GreedyPotential(solver, *programInfo);
+    if (pathSelectionPolicy == PathSelectionPolicy::RandomBacktrack) {
+        return new RandomBacktrack(solver, *programInfo);
     }
-    if (pathSelectionPolicy == PathSelectionPolicy::UnboundedRandomAccessStack) {
-        return new UnboundedRandomAccessStack(solver, *programInfo);
-    }
-    if (pathSelectionPolicy == PathSelectionPolicy::LinearEnumeration) {
-        return new LinearEnumeration(solver, *programInfo, testgenOptions.linearEnumeration);
-    }
-    if (pathSelectionPolicy == PathSelectionPolicy::MaxCoverage) {
-        return new IncrementalMaxCoverageStack(solver, *programInfo);
-    }
-    if (pathSelectionPolicy == PathSelectionPolicy::RandomAccessMaxCoverage) {
-        return new RandomAccessMaxCoverage(solver, *programInfo, testgenOptions.saddlePoint);
+    if (pathSelectionPolicy == PathSelectionPolicy::RandomMaxStmtCoverage) {
+        return new RandomMaxStmtCoverage(solver, *programInfo, testgenOptions.saddlePoint);
     }
     if (!testgenOptions.selectedBranches.empty()) {
         std::string selectedBranchesStr = testgenOptions.selectedBranches;
         return new SelectedBranches(solver, *programInfo, selectedBranchesStr);
     }
-    return new IncrementalStack(solver, *programInfo);
+    return new DepthFirstSearch(solver, *programInfo);
 }
 
 int Testgen::mainImpl(const IR::P4Program *program) {

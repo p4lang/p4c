@@ -1,4 +1,4 @@
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/selected_branches.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/selected_branches.h"
 
 #include <cstdlib>
 #include <memory>
@@ -11,9 +11,9 @@
 #include "lib/error.h"
 #include "lib/exceptions.h"
 
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/small_step.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 
 namespace P4Tools::P4Testgen {
 
@@ -68,7 +68,7 @@ uint64_t getNumeric(const std::string &str) {
 
 SelectedBranches::SelectedBranches(AbstractSolver &solver, const ProgramInfo &programInfo,
                                    std::string selectedBranchesStr)
-    : ExplorationStrategy(solver, programInfo) {
+    : SymbolicExecutor(solver, programInfo) {
     size_t n = 0;
     auto str = std::move(selectedBranchesStr);
     while ((n = str.find(',')) != std::string::npos) {

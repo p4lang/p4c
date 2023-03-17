@@ -1,4 +1,4 @@
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 
 #include <algorithm>
 #include <fstream>
@@ -30,19 +30,19 @@
 
 namespace P4Tools::P4Testgen {
 
-ExplorationStrategy::StepResult ExplorationStrategy::step(ExecutionState &state) {
+SymbolicExecutor::StepResult SymbolicExecutor::step(ExecutionState &state) {
     Util::ScopedTimer st("step");
     StepResult successors = evaluator.step(state);
+    // Remove any successors that are unsatisfiable.
+    successors->erase(
+        std::remove_if(successors->begin(), successors->end(),
+                       [this](const Branch &b) -> bool { return !evaluateBranch(b, solver); }),
+        successors->end());
     return successors;
 }
 
-uint64_t ExplorationStrategy::selectBranch(const std::vector<Branch> &branches) {
-    // Pick a branch at random.
-    return Utils::getRandInt(branches.size() - 1);
-}
-
-bool ExplorationStrategy::handleTerminalState(const Callback &callback,
-                                              const ExecutionState &terminalState) {
+bool SymbolicExecutor::handleTerminalState(const Callback &callback,
+                                           const ExecutionState &terminalState) {
     // Check the solver for satisfiability. If it times out or reports non-satisfiability, issue
     // a warning and continue on a different path.
     auto solverResult = solver.checkSat(terminalState.getPathConstraint());
@@ -63,7 +63,34 @@ bool ExplorationStrategy::handleTerminalState(const Callback &callback,
     return callback(finalState);
 }
 
-ExplorationStrategy::ExplorationStrategy(AbstractSolver &solver, const ProgramInfo &programInfo)
+bool SymbolicExecutor::evaluateBranch(const SymbolicExecutor::Branch &branch,
+                                      AbstractSolver &solver) {
+    // Do not bother invoking the solver for a trivial case.
+    // In either case (true or false), we do not need to add the assertion and check.
+    if (const auto *boolLiteral = branch.constraint->to<IR::BoolLiteral>()) {
+        return boolLiteral->value;
+    }
+
+    // Check the consistency of the path constraints asserted so far.
+    auto solverResult = solver.checkSat(branch.nextState->getPathConstraint());
+    if (solverResult == boost::none) {
+        ::warning("Solver timed out");
+    }
+
+    return solverResult != boost::none && solverResult.get();
+}
+
+SymbolicExecutor::Branch SymbolicExecutor::popRandomBranch(
+    std::vector<SymbolicExecutor::Branch> &candidateBranches) {
+    // If we did not find any new statements, fall back to random.
+    auto branchIdx = Utils::getRandInt(candidateBranches.size() - 1);
+    auto branch = candidateBranches[branchIdx];
+    candidateBranches[branchIdx] = candidateBranches.back();
+    candidateBranches.pop_back();
+    return branch;
+}
+
+SymbolicExecutor::SymbolicExecutor(AbstractSolver &solver, const ProgramInfo &programInfo)
     : programInfo(programInfo),
       solver(solver),
       allStatements(programInfo.getAllStatements()),
@@ -76,15 +103,15 @@ ExplorationStrategy::ExplorationStrategy(AbstractSolver &solver, const ProgramIn
     executionState = new ExecutionState(programInfo.program);
 }
 
-void ExplorationStrategy::updateVisitedStatements(const P4::Coverage::CoverageSet &newStatements) {
+void SymbolicExecutor::updateVisitedStatements(const P4::Coverage::CoverageSet &newStatements) {
     visitedStatements.insert(newStatements.begin(), newStatements.end());
 }
 
-const P4::Coverage::CoverageSet &ExplorationStrategy::getVisitedStatements() {
+const P4::Coverage::CoverageSet &SymbolicExecutor::getVisitedStatements() {
     return visitedStatements;
 }
 
-void ExplorationStrategy::printCurrentTraceAndBranches(std::ostream &out) {
+void SymbolicExecutor::printCurrentTraceAndBranches(std::ostream &out) {
     if (executionState == nullptr) {
         return;
     }

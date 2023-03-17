@@ -15,8 +15,8 @@
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/test_backend.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
@@ -33,7 +33,7 @@ const big_int EBPFTestBackend::ZERO_PKT_VAL = 0x2000000;
 const big_int EBPFTestBackend::ZERO_PKT_MAX = 0xffffffff;
 const std::vector<std::string> EBPFTestBackend::SUPPORTED_BACKENDS = {"STF"};
 
-EBPFTestBackend::EBPFTestBackend(const ProgramInfo &programInfo, ExplorationStrategy &symbex,
+EBPFTestBackend::EBPFTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
                                  const boost::filesystem::path &testPath,
                                  boost::optional<uint32_t> seed)
     : TestBackEnd(programInfo, symbex) {

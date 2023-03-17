@@ -102,6 +102,8 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
   "differs|Expected ([0-9]+) packets on port ([0-9]+) got ([0-9]+)"
+  # Issue with the clone implementation.
+  v1model-special-ops-bmv2.p4
 )
 
 p4tools_add_xfail_reason(

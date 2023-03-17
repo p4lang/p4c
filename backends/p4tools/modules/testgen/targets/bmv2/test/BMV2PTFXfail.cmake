@@ -239,10 +239,9 @@ p4tools_add_xfail_reason(
   parser-unroll-issue3537.p4
   parser-unroll-test2.p4
   header-stack-ops-bmv2.p4
-  parser-unroll-t1-cond.p4
-  issue914-bmv2.p4
-  fabric.p4
   issue3702-bmv2.p4
+  issue914-bmv2.p4
+  xor_test.p4
 )
 
 p4tools_add_xfail_reason(

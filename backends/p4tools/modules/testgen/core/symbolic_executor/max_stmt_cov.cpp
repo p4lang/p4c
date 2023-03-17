@@ -1,4 +1,4 @@
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/rnd_access_max_coverage.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/max_stmt_cov.h"
 
 #include <ctime>
 #include <iterator>
@@ -15,18 +15,16 @@
 #include "lib/error.h"
 #include "midend/coverage.h"
 
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/inc_max_coverage_stack.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/small_step.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace P4Tools {
+namespace P4Tools::P4Testgen {
 
-namespace P4Testgen {
-
-void RandomAccessMaxCoverage::run(const Callback &callback) {
+void RandomMaxStmtCoverage::run(const Callback &callback) {
     // Loop until we reach terminate, or until there are no more
     // branches to produce tests.
     while (true) {
@@ -141,7 +139,7 @@ void RandomAccessMaxCoverage::run(const Callback &callback) {
     }
 }
 
-uint64_t RandomAccessMaxCoverage::getRandomUnexploredMapEntry() {
+uint64_t RandomMaxStmtCoverage::getRandomUnexploredMapEntry() {
     // Collect all the keys and select a random one.
     std::vector<uint64_t> unexploredCoverageKeys;
     unexploredCoverageKeys.reserve(bufferUnexploredBranches.size());
@@ -155,7 +153,7 @@ uint64_t RandomAccessMaxCoverage::getRandomUnexploredMapEntry() {
     return coverageKey;
 }
 
-void RandomAccessMaxCoverage::updateBufferRankings() {
+void RandomMaxStmtCoverage::updateBufferRankings() {
     // Collect all the keys
     std::vector<uint64_t> unexploredCoverageKeys;
     unexploredCoverageKeys.reserve(bufferUnexploredBranches.size());
@@ -169,7 +167,7 @@ void RandomAccessMaxCoverage::updateBufferRankings() {
     }
 }
 
-void RandomAccessMaxCoverage::sortBranchesByCoverage(std::vector<Branch> &branches) {
+void RandomMaxStmtCoverage::sortBranchesByCoverage(std::vector<Branch> &branches) {
     // Transfers branches to rankedBranches and sorts them by coverage
     for (const auto &localBranch : branches) {
         // Calculate coverage for each branch:
@@ -201,21 +199,17 @@ void RandomAccessMaxCoverage::sortBranchesByCoverage(std::vector<Branch> &branch
     branches.clear();
 }
 
-ExecutionState *RandomAccessMaxCoverage::chooseBranch(std::vector<Branch> &branches,
-                                                      bool guaranteeViability) {
+ExecutionState *RandomMaxStmtCoverage::chooseBranch(std::vector<Branch> &branches,
+                                                    bool guaranteeViability) {
     while (true) {
         // Fail if we've run out of ranked branches.
         if (branches.empty()) {
             return nullptr;
         }
 
-        // Pick and remove a branch randomly. All branches in this vector will have the same
-        // coverage.
-        auto idx = selectBranch(branches);
-        auto branch = branches.at(idx);
-        // Note: This could be improved, because we should remove only succeeded selection.
-        // Unsatisfiable branches could be covered in other tests after backtracking.
-        branches.erase(branches.begin() + idx);
+        // Pick and remove a branch randomly.
+        // All branches in this vector will have the same coverage.
+        auto branch = popRandomBranch(branches);
 
         // Do not bother invoking the solver for a trivial case.
         // In either case (true or false), we do not need to add the assertion and check.
@@ -247,11 +241,8 @@ ExecutionState *RandomAccessMaxCoverage::chooseBranch(std::vector<Branch> &branc
     }
 }
 
-RandomAccessMaxCoverage::RandomAccessMaxCoverage(AbstractSolver &solver,
-                                                 const ProgramInfo &programInfo,
-                                                 uint64_t saddlePoint)
-    : IncrementalMaxCoverageStack(solver, programInfo), saddlePoint(saddlePoint) {}
+RandomMaxStmtCoverage::RandomMaxStmtCoverage(AbstractSolver &solver, const ProgramInfo &programInfo,
+                                             uint64_t saddlePoint)
+    : SymbolicExecutor(solver, programInfo), saddlePoint(saddlePoint) {}
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen

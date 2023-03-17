@@ -105,6 +105,8 @@ else
   sudo apt-get update && sudo apt-get install -y curl gnupg
   echo "deb https://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/ /" | sudo tee /etc/apt/sources.list.d/home:p4lang.list
   curl -L "https://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/Release.key" | sudo apt-key add -
+  # Try to avoid certificate errors.
+  sudo apt install ca-certificates
   P4C_DEPS+=" p4lang-bmv2"
 fi
 

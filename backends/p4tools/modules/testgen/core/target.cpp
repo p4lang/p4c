@@ -13,9 +13,7 @@
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/lib/namespace_context.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 TestgenTarget::TestgenTarget(std::string deviceName, std::string archName)
     : Target("testgen", std::move(deviceName), std::move(archName)) {}
@@ -77,6 +75,4 @@ void TestgenTarget::argumentsToTypeDeclarations(
     }
 }
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen

@@ -1,4 +1,4 @@
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/greedy_potential.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/greedy_stmt_cov.h"
 
 #include <vector>
 
@@ -12,38 +12,21 @@
 #include "lib/error.h"
 #include "lib/timer.h"
 
-#include "backends/p4tools/modules/testgen/core/exploration_strategy/exploration_strategy.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/small_step.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4Tools::P4Testgen {
 
-GreedyPotential::GreedyPotential(AbstractSolver &solver, const ProgramInfo &programInfo)
-    : ExplorationStrategy(solver, programInfo) {}
+GreedyStmtSelection::GreedyStmtSelection(AbstractSolver &solver, const ProgramInfo &programInfo)
+    : SymbolicExecutor(solver, programInfo) {}
 
-bool GreedyPotential::evaluateBranch(const ExplorationStrategy::Branch &branch,
-                                     AbstractSolver &solver) {
-    // Do not bother invoking the solver for a trivial case.
-    // In either case (true or false), we do not need to add the assertion and check.
-    if (const auto *boolLiteral = branch.constraint->to<IR::BoolLiteral>()) {
-        return boolLiteral->value;
-    }
-
-    // Check the consistency of the path constraints asserted so far.
-    auto solverResult = solver.checkSat(branch.nextState->getPathConstraint());
-    if (solverResult == boost::none) {
-        ::warning("Solver timed out");
-    }
-
-    return solverResult != boost::none && solverResult.get();
-}
-
-std::optional<ExplorationStrategy::Branch> GreedyPotential::popPotentialBranch(
+std::optional<SymbolicExecutor::Branch> GreedyStmtSelection::popPotentialBranch(
     const P4::Coverage::CoverageSet &coveredStatements,
-    std::vector<ExplorationStrategy::Branch> &candidateBranches) {
+    std::vector<SymbolicExecutor::Branch> &candidateBranches) {
     for (size_t idx = 0; idx < candidateBranches.size(); ++idx) {
         auto branch = candidateBranches.at(idx);
         // First check all the potential set of statements we can cover by looking ahead.
@@ -67,34 +50,16 @@ std::optional<ExplorationStrategy::Branch> GreedyPotential::popPotentialBranch(
     return {};
 }
 
-ExplorationStrategy::Branch GreedyPotential::popRandomBranch(
-    std::vector<ExplorationStrategy::Branch> &candidateBranches) {
-    // If we did not find any new statements, fall back to random.
-    auto branchIdx = Utils::getRandInt(candidateBranches.size() - 1);
-    auto branch = candidateBranches[branchIdx];
-    candidateBranches[branchIdx] = candidateBranches.back();
-    candidateBranches.pop_back();
-    return branch;
-}
-
-bool GreedyPotential::pickSuccessor(StepResult successors) {
+bool GreedyStmtSelection::pickSuccessor(StepResult successors) {
+    if (successors->empty()) {
+        return false;
+    }
     // If there is only one successor, choose it and move on.
     if (successors->size() == 1) {
         executionState = successors->at(0).nextState;
         return true;
     }
 
-    // If there are multiple successors, try to pick one.
-    if (successors->size() > 1) {
-        successors->erase(
-            std::remove_if(successors->begin(), successors->end(),
-                           [this](const Branch &b) -> bool { return !evaluateBranch(b, solver); }),
-            successors->end());
-    }
-
-    if (successors->empty()) {
-        return false;
-    }
     stepsWithoutTest++;
     // Only perform a greedy search if we are still producing tests consistently.
     // This guard is necessary to avoid getting caught in parser loops.
@@ -117,7 +82,7 @@ bool GreedyPotential::pickSuccessor(StepResult successors) {
     return true;
 }
 
-void GreedyPotential::run(const Callback &callback) {
+void GreedyStmtSelection::run(const Callback &callback) {
     while (true) {
         try {
             if (executionState->isTerminal()) {

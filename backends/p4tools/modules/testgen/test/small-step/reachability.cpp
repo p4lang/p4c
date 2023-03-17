@@ -317,7 +317,7 @@ bool listEqu(std::list<const IR::Node *> &left, std::list<const IR::Node *> righ
     return true;
 }
 
-TEST_F(P4CReachability, testReacabilityEngine) {
+TEST_F(P4CReachability, testReachabilityEngine) {
     auto result = loadExampleForReachability(
         "backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4");
     const auto *program = get<0>(result);
@@ -434,21 +434,21 @@ TEST_F(P4CReachability, testReachabilityEngineActions) {
     ASSERT_TRUE(!checkResultingSTF(ids, "tmp"));
 }
 
-TEST_F(P4CReachability, testReacabilityEngineTables) {
+TEST_F(P4CReachability, testReachabilityEngineTables) {
     callTestgen("backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_action_run.p4",
                 "ingress.MyAction2", "tmp", 10);
     std::list<std::list<std::string>> ids = {{" MyAction2"}};
     ASSERT_TRUE(checkResultingSTF(ids, "tmp"));
 }
 
-TEST_F(P4CReachability, testReacabilityEngineTable2) {
+TEST_F(P4CReachability, testReachabilityEngineTable2) {
     callTestgen("backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4",
                 "ingress.MyAction1;ingress.table2", "tmp", 10);
     std::list<std::list<std::string>> ids = {{"ingress.table2"}};
     ASSERT_TRUE(checkResultingSTF(ids, "tmp"));
 }
 
-TEST_F(P4CReachability, testReacabilityEngineNegTable2) {
+TEST_F(P4CReachability, testReachabilityEngineNegTable2) {
     callTestgen("backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4",
                 "!ingress.MyAction1;!ingress.table2", "tmp", 10);
     std::list<std::list<std::string>> ids = {{"table2"}};
