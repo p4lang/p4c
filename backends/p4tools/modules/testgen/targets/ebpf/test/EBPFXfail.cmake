@@ -34,8 +34,6 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-ebpf"
   "Expected .* packets on port .* got .*"
-  # Potentially a bug in how constant entries are implemented for the kernel.
-  calc-ebpf.p4
 )
 
 p4tools_add_xfail_reason(

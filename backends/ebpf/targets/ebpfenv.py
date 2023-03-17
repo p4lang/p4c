@@ -61,11 +61,11 @@ class Bridge:
         """Return the command prefix for the namespace of this bridge class."""
         return f"ip netns exec {self.ns_name}"
 
-    def ns_exec(self, cmd_string: str) -> int:
+    def ns_exec(self, cmd_string: str, **extra_args) -> int:
         """Run and execute an isolated command in the namespace."""
         cmd = self.get_ns_prefix() + " " + cmd_string
         # bash -c allows us to run multiple commands at once
-        result = testutils.exec_process(cmd)
+        result = testutils.exec_process(cmd, **extra_args)
         if result.returncode != testutils.SUCCESS:
             testutils.log.error("Failed to run command in namespace %s", self.ns_name)
         return result.returncode
@@ -90,11 +90,11 @@ class Bridge:
         """Append a command to an open process."""
         return self.ns_proc_write(proc, " && " + cmd)
 
-    def ns_proc_close(self, proc: testutils.subprocess.Popen) -> int:
+    def ns_proc_close(self, proc: testutils.subprocess.Popen, **extra_args) -> int:
         """Close and actually run the process in the namespace. Returns the
         exit code."""
         testutils.log.info("Executing command.")
-        result = testutils.run_process(proc, timeout=testutils.TIMEOUT)
+        result = testutils.run_process(proc, timeout=testutils.TIMEOUT, **extra_args)
         if result.returncode != testutils.SUCCESS:
             testutils.log.error("Failed to execute the command sequence in namespace %s",
                                 self.ns_name)
