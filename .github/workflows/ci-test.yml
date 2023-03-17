@@ -142,6 +142,7 @@ jobs:
           ./bootstrap.sh -DENABLE_GC=ON -DCMAKE_BUILD_TYPE=RELEASE \
               -DCMAKE_UNITY_BUILD=ON
           make -Cbuild -j2
+          update_dyld_shared_cache
 
     - name: Run tests (MacOS)
       run: |

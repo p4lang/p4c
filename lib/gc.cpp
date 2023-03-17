@@ -13,11 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+#include "lib/gc.h"
 
 #include "config.h"
 #if HAVE_LIBGC
-#include <gc/gc_cpp.h>
-#include <gc/gc_mark.h>
+#include <gc.h>
+#include <gc_cpp.h>
+#include <gc_mark.h>
 #endif /* HAVE_LIBGC */
 #include <sys/mman.h>
 #if HAVE_EXECINFO_H
@@ -30,18 +32,13 @@ limitations under the License.
 
 #include "backtrace_exception.h"
 #include "cstring.h"
-#include "gc.h"
 #include "log.h"
 #include "n4.h"
 
-/* glibc++ requires defining global delete with this exception spec to avoid warnings.
- * If it's not defined, probably not using glibc++ and don't need anything */
-#ifndef _GLIBCXX_USE_NOEXCEPT
-#define _GLIBCXX_USE_NOEXCEPT _NOEXCEPT
-#endif
-
+// One can disable the GC, e.g., to run under Valgrind, by editing config.h
 #if HAVE_LIBGC
 static bool done_init, started_init;
+
 // emergency pool to allow a few extra allocations after a bad_alloc is thrown so we
 // can generate reasonable errors, a stack trace, etc
 static char emergency_pool[16 * 1024];
@@ -61,7 +58,8 @@ static bool tracing = false;
         tracing = false;                         \
     }
 
-// One can disable the GC, e.g., to run under Valgrind, by editing config.h
+// One can disable the GC, e.g., to run under Valgrind, by editing config.h or toggling
+// -DENABLE_GC=OFF in CMake.
 void *operator new(std::size_t size) {
     /* DANGER -- on OSX, can't safely call the garbage collector allocation
      * routines from a static global constructor without manually initializing
@@ -79,8 +77,8 @@ void *operator new(std::size_t size) {
         size += -size & 0xf;  // align to 16 bytes
         emergency_ptr += size;
     }
-    if (!rv) {
-        if (!emergency_ptr) emergency_ptr = emergency_pool;
+    if (rv == nullptr) {
+        if (emergency_ptr == nullptr) emergency_ptr = emergency_pool;
         throw backtrace_exception<std::bad_alloc>();
     }
     return rv;
@@ -100,24 +98,23 @@ alloc_trace_cb_t set_alloc_trace(void (*fn)(void *, void **, size_t), void *arg)
 }
 
 // clang-format off
-void operator delete(void* p) _GLIBCXX_USE_NOEXCEPT {
+void operator delete(void* p) noexcept {
     if (p >= emergency_pool && p < emergency_pool + sizeof(emergency_pool)) {
         return;
     }
     gc::operator delete(p);
 }
 
-void operator delete(void* p, std::size_t /*size*/) _GLIBCXX_USE_NOEXCEPT {
+void operator delete(void *p, std::size_t /*size*/) noexcept {
     if (p >= emergency_pool && p < emergency_pool + sizeof(emergency_pool)) {
         return;
     }
     gc::operator delete(p);
 }
-// clang-format on
 
 void *operator new[](std::size_t size) { return ::operator new(size); }
-void operator delete[](void *p) _GLIBCXX_USE_NOEXCEPT { ::operator delete(p); }
-void operator delete[](void *p, std::size_t) _GLIBCXX_USE_NOEXCEPT { ::operator delete(p); }
+void operator delete[](void *p) noexcept { ::operator delete(p); }
+void operator delete[](void *p, std::size_t) noexcept { ::operator delete(p); }
 
 namespace {
 
@@ -215,7 +212,8 @@ static int gc_logging_level;
 static void gc_callback() {
     if (gc_logging_level >= 1) {
         std::clog << "****** GC called ****** (heap size " << n4(GC_get_heap_size()) << ")";
-        size_t count, size = cstring::cache_size(count);
+        size_t count = 0;
+        size_t size = cstring::cache_size(count);
         std::clog << " cstring cache size " << n4(size) << " (count " << n4(count) << ")"
                   << std::endl;
     }
@@ -243,13 +241,18 @@ void setup_gc_logging() {
 
 size_t gc_mem_inuse(size_t *max) {
 #if HAVE_LIBGC
-    GC_word heapsize, heapfree;
+    GC_word heapsize = 0;
+    GC_word heapfree = 0;
     GC_gcollect();
-    GC_get_heap_usage_safe(&heapsize, &heapfree, 0, 0, 0);
-    if (max) *max = heapsize;
+    GC_get_heap_usage_safe(&heapsize, &heapfree, nullptr, nullptr, nullptr);
+    if (max != nullptr) {
+        *max = heapsize;
+    }
     return heapsize - heapfree;
 #else
-    if (max) *max = 0;
+    if (max) {
+        *max = 0;
+    }
     return 0;
 #endif
 }

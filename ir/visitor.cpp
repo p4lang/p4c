@@ -23,7 +23,7 @@ limitations under the License.
 #include "lib/source_file.h"
 
 #if HAVE_LIBGC
-#include <gc/gc.h>
+#include <gc.h>
 #endif
 
 #include "dbprint.h"

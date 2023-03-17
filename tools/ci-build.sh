@@ -69,7 +69,6 @@ P4C_DEPS="bison \
           libboost-graph-dev \
           libboost-iostreams-dev \
           libfl-dev \
-          libgc-dev \
           pkg-config \
           python3 \
           python3-pip \
@@ -254,6 +253,7 @@ cmake ${CMAKE_FLAGS} ..
 if [ "$CMAKE_ONLY" == "OFF" ]; then
   make
   sudo make install
+  sudo ldconfig
   # Print ccache statistics after building
   ccache -p -s
 fi

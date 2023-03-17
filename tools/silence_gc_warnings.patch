@@ -1,0 +1,13 @@
+diff --git a/misc.c b/misc.c
+index 134fee1b..d6e9be07 100644
+--- a/misc.c
++++ b/misc.c
+@@ -1923,7 +1923,7 @@ STATIC void GC_CALLBACK GC_default_warn_proc(char *msg, GC_word arg)
+     GC_warn_printf(msg, arg);
+ }
+ 
+-GC_INNER GC_warn_proc GC_current_warn_proc = GC_default_warn_proc;
++GC_INNER GC_warn_proc GC_current_warn_proc = GC_ignore_warn_proc;
+ 
+ /* This is recommended for production code (release). */
+ GC_API void GC_CALLBACK GC_ignore_warn_proc(char *msg, GC_word arg)
