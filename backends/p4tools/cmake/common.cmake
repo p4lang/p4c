@@ -7,9 +7,6 @@ if(CCACHE_PROGRAM)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
 endif()
 
-# Use libgc.
-find_package(LibGc 7.2.0 REQUIRED)
-
 # Helper for defining a p4tools executable target.
 function(add_p4tools_executable target source)
   add_executable(${target} ${source} ${ARGN})
