@@ -75,7 +75,6 @@ P4C_DEPS="bison \
           libboost-graph-dev \
           libboost-iostreams-dev \
           libfl-dev \
-          libgc-dev \
           pkg-config \
           python3 \
           python3-pip \
