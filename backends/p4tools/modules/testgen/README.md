@@ -8,7 +8,7 @@ P4Testgen uses symbolic execution to automatically generate input-output tests f
 testgen
  ├─ cmake                      ── common CMake modules
  ├─ core                       ── C++ source: testgen symbolic executor core
- │   ├─ symbolic_executor   ── exploration strategies for the testgen symbolic executor
+ │   ├─ symbolic_executor      ── path selection strategies for the testgen symbolic executor
  │   └─ small_step             ── code for the testgen symbolic generator and test case generation
  ├─ lib                        ── C++ source: testgen library files
  ├─ targets
