@@ -56,7 +56,7 @@ target_link_libraries(
   PUBLIC gsl-lite
   PUBLIC ${Boost_SYSTEM_LIBRARY}
   PUBLIC ${Boost_FILESYSTEM_LIBRARY}
-  PUBLIC ${Z3_LIBRARY}
+  PUBLIC z3::z3
 )
 
 target_include_directories(
