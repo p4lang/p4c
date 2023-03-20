@@ -34,6 +34,14 @@ project(P4TOOLS VERSION ${P4C_SEM_VERSION_STRING})
 # inherit FindLibGc.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
+# We need a fairly recent version of Z3.
+set(Z3_MIN_VERSION "4.8.14")
+find_package(Z3 ${Z3_MIN_VERSION} REQUIRED)
+
+if(NOT DEFINED Z3_VERSION_STRING OR ${Z3_VERSION_STRING} VERSION_LESS ${Z3_MIN_VERSION})
+  message(FATAL_ERROR "The minimum required Z3 version is ${Z3_MIN_VERSION}. Has ${Z3_VERSION_STRING}.")
+endif()
+
 # GSL-lite is needed for testgen.
 add_subdirectory(submodules/gsl-lite EXCLUDE_FROM_ALL)
 
