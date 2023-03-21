@@ -5,14 +5,6 @@ include(common)
 
 project(p4tools-common)
 
-# We need a fairly recent version of Z3.
-set(Z3_MIN_VERSION "4.8.14")
-find_package(Z3 ${Z3_MIN_VERSION} REQUIRED)
-
-if(NOT DEFINED Z3_VERSION_STRING OR ${Z3_VERSION_STRING} VERSION_LESS ${Z3_MIN_VERSION})
-  message(FATAL_ERROR "The minimum required Z3 version is ${Z3_MIN_VERSION}. Has ${Z3_VERSION_STRING}.")
-endif()
-
 # Boost filesystem is required for path handling.
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
@@ -64,7 +56,7 @@ target_link_libraries(
   PUBLIC gsl-lite
   PUBLIC ${Boost_SYSTEM_LIBRARY}
   PUBLIC ${Boost_FILESYSTEM_LIBRARY}
-  PUBLIC ${Z3_LIBRARY}
+  PUBLIC z3::z3
 )
 
 target_include_directories(

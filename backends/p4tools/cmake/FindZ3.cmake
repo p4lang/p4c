@@ -6,12 +6,14 @@ find_path(
   NAMES z3++.h
   HINTS ${PC_Z3_INCLUDEDIR} ${PC_Z3_INCLUDE_DIRS}
   PATH_SUFFIXES z3 Z3
+  DOC "A path to the directory that contain Z3 include files (e.g. z3.h & z3++.h)."
 )
 
 find_library(
   Z3_LIBRARY
   NAMES z3
   HINTS ${PC_Z3_LIBDIR} ${PC_Z3_LIBRARY_DIRS}
+  DOC "A path to the library file of Z3 (i.e. libz3). This can be dynamic or static library."
 )
 
 find_program(
@@ -51,7 +53,7 @@ if(Z3_FOUND)
 endif()
 
 message(STATUS "Z3 version: ${Z3_VERSION_STRING}")
-message(STATUS "Z3 lib dir: ${Z3_LIBRARY}")
+message(STATUS "Z3 library: ${Z3_LIBRARY}")
 message(STATUS "Z3 include dir: ${Z3_INCLUDE_DIR}")
 
 # create imported target z3::z3
