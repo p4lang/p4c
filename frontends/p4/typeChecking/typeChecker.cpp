@@ -690,6 +690,7 @@ const IR::Node *TypeInference::postorder(IR::Declaration_Variable *decl) {
 bool TypeInference::canCastBetween(const IR::Type *dest, const IR::Type *src) const {
     if (src->is<IR::Type_Action>()) return false;
     if (src == dest) return true;
+    if (typeMap->equivalent(src, dest)) return true;
 
     if (dest->is<IR::Type_Newtype>()) {
         auto dt = getTypeType(dest->to<IR::Type_Newtype>()->type);
