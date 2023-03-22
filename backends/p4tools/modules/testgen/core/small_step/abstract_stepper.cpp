@@ -210,8 +210,6 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::Expression *headerRef) {
         return false;
     }
     auto variable = Utils::getHeaderValidity(headerRef);
-    BUG_CHECK(state.exists(variable),
-              "At this point, the header validity bit should be initialized.");
     state.replaceTopBody(Continuation::Return(variable));
     result->emplace_back(&state);
     return false;

@@ -327,7 +327,7 @@ TEST_F(P4CReachability, testReachabilityEngine) {
     const auto hash = std::get<2>(result);
     std::string strBehavior = "ingress.MyAction1 + ingress.MyAction2;";
     strBehavior += "ingress.table2";
-    P4Tools::ReachabilityEngine engine(dcg, strBehavior);
+    P4Tools::ReachabilityEngine engine(dcg, strBehavior, program);
     auto *engineState = P4Tools::ReachabilityEngineState::getInitial();
     // Initialize engine.
     const auto *ingress = getFromHash(hash, "ingress");
@@ -375,7 +375,7 @@ void callTestgen(const char *inputFile, const char *behavior, const char *path, 
         BUG("Can't create folder - %1%", mkDir.str());
     }
     std::ostringstream cmdTestgen;
-    cmdTestgen << buildPath << "p4testgen ";
+    cmdTestgen << buildPath << "backends/p4tools/modules/testgen/p4testgen ";
     cmdTestgen << "-I \"" << buildPath << "p4include\" --target bmv2  --std p4-16 ";
     cmdTestgen << "--test-backend STF --arch v1model --seed 1000 --max-tests " << maxTests << "  ";
     cmdTestgen << "--pattern \"" << behavior << "\" ";
@@ -453,6 +453,25 @@ TEST_F(P4CReachability, testReachabilityEngineNegTable2) {
                 "!ingress.MyAction1;!ingress.table2", "tmp", 10);
     std::list<std::list<std::string>> ids = {{"table2"}};
     ASSERT_TRUE(!checkResultingSTF(ids, "tmp"));
+}
+
+TEST_F(P4CReachability, testReacabilityEngineRestriction1) {
+    callTestgen("backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4",
+                "ingress(ingress::h.h.isValid() && ingress::h.eth_hdr.isValid());\
+                 egress(ingress::d != egress::h.h.b)",
+                "tmp", 10);
+    std::list<std::list<std::string>> ids = {{"Extract: Succeeded", "Extract: Succeeded"}};
+    ASSERT_TRUE(checkResultingSTF(ids, "tmp"));
+}
+
+TEST_F(P4CReachability, testReacabilityEngineRestriction2) {
+    callTestgen("backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_if.p4",
+                "ingress(ingress::h.h.isValid() && ingress::h.eth_hdr.isValid());\
+                 egress(egress::h.h.b == 5)",
+                "tmp", 10);
+    std::list<std::list<std::string>> ids = {
+        {"Extract: Succeeded", "Extract: Succeeded", "h.h.b; = 0x05"}};
+    ASSERT_TRUE(checkResultingSTF(ids, "tmp"));
 }
 
 }  // namespace Test

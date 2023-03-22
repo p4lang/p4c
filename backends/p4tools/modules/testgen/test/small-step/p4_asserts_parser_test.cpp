@@ -1,4 +1,4 @@
-#include "backends/p4tools/modules/testgen/targets/bmv2/p4_asserts_parser.h"
+#include "backends/p4tools/common/compiler/p4_asserts_parser.h"
 
 #include <unistd.h>
 
@@ -80,7 +80,7 @@ Restrictions loadExample(const char *curFile, bool flag) {
     program = program->apply(midEnd);
     Restrictions result;
     if (flag) {
-        program->apply(P4Tools::AssertsParser::AssertsParser(result));
+        program->apply(P4Tools::ExpressionParser::AssertsParser(result));
     } else {
         program->apply(P4Tools::RefersToParser::RefersToParser(result));
     }

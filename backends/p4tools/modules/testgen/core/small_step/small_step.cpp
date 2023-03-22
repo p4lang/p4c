@@ -75,9 +75,48 @@ SmallStepEvaluator::Branch::Branch(boost::optional<const Constraint *> c,
 SmallStepEvaluator::SmallStepEvaluator(AbstractSolver &solver, const ProgramInfo &programInfo)
     : programInfo(programInfo), solver(solver) {
     if (!TestgenOptions::get().pattern.empty()) {
-        reachabilityEngine =
-            new ReachabilityEngine(programInfo.dcg, TestgenOptions::get().pattern, true);
+        reachabilityEngine = new ReachabilityEngine(programInfo.dcg, TestgenOptions::get().pattern,
+                                                    programInfo.program, true);
     }
+}
+
+const IR::Expression *SmallStepEvaluator::stepAndReturnValue(const IR::Expression *expr,
+                                                             ExecutionState &state) {
+    // Create a base state with a parameter continuation to apply the value on.
+    const auto *v = Continuation::genParameter(expr->type, "v", NamespaceContext::Empty);
+    Continuation::Body bodyBase({Continuation::Return(v->param)});
+    Continuation continuationBase(v, bodyBase);
+
+    auto *exprState = new ExecutionState(state);
+    Continuation::Body body({Continuation::Return(expr)});
+    exprState->replaceBody(body);
+    exprState->pushContinuation(
+        new ExecutionState::StackFrame(continuationBase, state.getNamespaceContext()));
+    while (!SymbolicEnv::isSymbolicValue(expr)) {
+        auto successors = step(*exprState);
+        BUG_CHECK(successors->size() == 1u,
+                  "Invalid size of a result of the expression evaluation");
+        const auto branch = (*successors)[0];
+        exprState = branch.nextState;
+        auto cmd = exprState->getBody().next();
+        auto *ret = boost::get<Continuation::Return>(&cmd);
+        BUG_CHECK(ret && ret->expr, "Invalid format for the return result");
+        expr = ret->expr.get()->to<IR::Expression>();
+        if (SymbolicEnv::isSymbolicValue(expr)) {
+            exprState->popContinuation(expr);
+            cmd = exprState->getBody().next();
+            ret = boost::get<Continuation::Return>(&cmd);
+            BUG_CHECK(ret && ret->expr, "Invalid format for the return result");
+            expr = ret->expr.get()->to<IR::Expression>();
+            if (!SymbolicEnv::isSymbolicValue(expr)) {
+                Continuation::Body body({Continuation::Return(expr)});
+                exprState->replaceBody(body);
+                exprState->pushContinuation(
+                    new ExecutionState::StackFrame(continuationBase, state.getNamespaceContext()));
+            }
+        }
+    }
+    return expr;
 }
 
 SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState &state) {
@@ -109,13 +148,25 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState &state) {
             }
 
             static void renginePostprocessing(ReachabilityResult &result,
-                                              std::vector<Branch> *branches) {
+                                              std::vector<Branch> *branches, AbstractSolver &solver,
+                                              ExecutionState &state) {
                 // All Reachability engine state for branch should be copied.
                 if (branches->size() > 1 || result.second != nullptr) {
                     for (auto &n : *branches) {
                         if (result.second != nullptr) {
                             n.constraint =
                                 new IR::BAnd(IR::Type_Boolean::get(), n.constraint, result.second);
+                            const auto *cond = n.nextState->getSymbolicEnv().subst(n.constraint);
+                            cond = P4::optimizeExpression(cond);
+                            // Check whether the condition is satisfiable in
+                            // the current execution state.
+                            auto pathConstraints = n.nextState->getPathConstraint();
+                            pathConstraints.push_back(cond);
+                            auto solverResult = solver.checkSat(pathConstraints);
+                            if (solverResult == boost::none || !solverResult.get()) {
+                                n.constraint = IR::getBoolLiteral(false);
+                            }
+                            state.pushPathConstraint(cond);
                         }
                         if (branches->size() > 1) {
                             // Copy reachability engine state
@@ -139,7 +190,10 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState &state) {
                 auto *stepper = TestgenTarget::getCmdStepper(state, self.solver, self.programInfo);
                 auto *result = stepper->step(node);
                 if (self.reachabilityEngine != nullptr) {
-                    renginePostprocessing(r.first, result);
+                    if (r.first.second != nullptr) {
+                        r.first.second = self.stepAndReturnValue(r.first.second, state);
+                    }
+                    renginePostprocessing(r.first, result, self.solver, state);
                 }
                 return result;
             }
@@ -168,7 +222,7 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState &state) {
                     auto *result = stepper->step(expr);
                     if (self.reachabilityEngine != nullptr) {
                         ReachabilityResult rresult = std::make_pair(true, nullptr);
-                        renginePostprocessing(rresult, result);
+                        renginePostprocessing(rresult, result, self.solver, state);
                     }
                     return result;
                 }

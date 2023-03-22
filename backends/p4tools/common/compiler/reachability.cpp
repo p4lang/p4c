@@ -6,10 +6,13 @@
 #include <iostream>
 #include <list>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <utility>
 #include <vector>
 
+#include "backends/p4tools/common/compiler/p4_asserts_parser.h"
+#include "backends/p4tools/common/compiler/p4_expr_parser.h"
 #include "ir/declaration.h"
 #include "ir/indexed_vector.h"
 #include "ir/vector.h"
@@ -361,10 +364,36 @@ bool ReachabilityEngineState::isEmpty() { return state.empty(); }
 
 void ReachabilityEngineState::clear() { state.clear(); }
 
+bool skipExpr(std::string s) {
+    int index = 0;
+    for (size_t i = 0; i < s.length(); i++) {
+        if (s[i] == '(') {
+            index++;
+        } else if (s[i] == ')') {
+            index--;
+        }
+    }
+    return index != 0;
+}
+
+size_t getCorrectAddIndex(std::string s, size_t prefix = 0) {
+    size_t i = s.find("+");
+    if (i == std::string::npos) {
+        return i;
+    }
+    std::string str = s.substr(0, i);
+    if (skipExpr(str)) {
+        if (prefix + i + 1 < s.length()) {
+            return getCorrectAddIndex(s.substr(i + 1), prefix + i + 1);
+        }
+    }
+    return prefix + i;
+}
+
 ReachabilityEngine::ReachabilityEngine(gsl::not_null<const NodesCallGraph *> dcg,
                                        std::string reachabilityExpression,
-                                       bool eliminateAnnotations)
-    : dcg(dcg), hash(dcg->getHash()) {
+                                       const IR::P4Program *program, bool eliminateAnnotations)
+    : dcg(dcg), hash(dcg->getHash()), program(program) {
     std::list<const DCGVertexType *> start;
     start.push_back(nullptr);
     size_t i = 0;
@@ -374,7 +403,7 @@ ReachabilityEngine::ReachabilityEngine(gsl::not_null<const NodesCallGraph *> dcg
         auto addSubExpr = reachabilityExpression.substr(0, i);
         addSubExpr += "+";
         std::list<const DCGVertexType *> newStart;
-        while ((j = addSubExpr.find('+')) != std::string::npos) {
+        while ((j = getCorrectAddIndex(addSubExpr)) != std::string::npos) {
             auto dotSubExpr = addSubExpr.substr(0, j);
             while (dotSubExpr[0] == ' ') {
                 dotSubExpr.erase(0, 1);
@@ -454,7 +483,10 @@ const IR::Expression *ReachabilityEngine::addCondition(const IR::Expression *pre
     if (newCond == nullptr) {
         return prev;
     }
-    return new IR::BOr(IR::Type_Boolean::get(), newCond, prev);
+    if (prev == nullptr) {
+        return newCond;
+    }
+    return new IR::BAnd(IR::Type_Boolean::get(), newCond, prev);
 }
 
 std::unordered_set<const DCGVertexType *> ReachabilityEngine::getName(std::string name) {
@@ -522,35 +554,41 @@ ReachabilityResult ReachabilityEngine::next(ReachabilityEngineState *state,
             }
             for (const auto *k : j->second) {
                 if (next == k) {
+                    if (expr == nullptr) {
+                        expr = getCondition(k);
+                    } else {
+                        expr = new IR::LOr(getCondition(k), expr);
+                    }
                     // Checking next states.
                     auto m = userTransitions.find(k);
                     if (m == userTransitions.end()) {
                         // No next state found.
                         state->clear();
-                        return std::make_pair(true, getCondition(k));
+                        return std::make_pair(true, expr);
                     }
                     for (const auto *n : m->second) {
-                        expr = addCondition(expr, n);
                         newState.push_back(n);
                     }
                 } else if (dcg->isReachable(next, k)) {
-                    expr = addCondition(expr, k);
                     newState.push_back(k);
                 }
             }
         } else if (i == next) {
+            if (expr == nullptr) {
+                expr = getCondition(i);
+            } else {
+                expr = new IR::LOr(getCondition(i), expr);
+            }
             auto m = userTransitions.find(i);
             if (m == userTransitions.end()) {
                 // No next state found.
                 state->clear();
-                return std::make_pair(true, getCondition(i));
+                return std::make_pair(true, expr);
             }
             for (const auto *n : m->second) {
-                expr = addCondition(expr, n);
                 newState.push_back(n);
             }
         } else if (dcg->isReachable(next, i)) {
-            expr = addCondition(expr, i);
             newState.push_back(i);
         }
     }
@@ -568,8 +606,9 @@ const IR::Expression *ReachabilityEngine::getCondition(const DCGVertexType *n) {
     return nullptr;
 }
 
-const IR::Expression *ReachabilityEngine::stringToNode(std::string /*name*/) {
-    P4C_UNIMPLEMENTED("Converting a string into an IR::Expression");
+const IR::Expression *ReachabilityEngine::stringToNode(std::string name) {
+    LOG1("Parse restriction  - " << name);
+    return ExpressionParser::Parser::getIR(name.c_str(), program)->to<IR::Expression>();
 }
 
 }  // namespace P4Tools

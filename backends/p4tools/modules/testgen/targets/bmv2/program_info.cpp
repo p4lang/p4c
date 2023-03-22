@@ -7,6 +7,7 @@
 
 #include <boost/optional/optional.hpp>
 
+#include "backends/p4tools/common/compiler/p4_asserts_parser.h"
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/id.h"
@@ -26,7 +27,6 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/concolic.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/constants.h"
-#include "backends/p4tools/modules/testgen/targets/bmv2/p4_asserts_parser.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_refers_to_parser.h"
 
 namespace P4Tools {
@@ -80,7 +80,7 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
     std::vector<std::vector<const IR::Expression *>> restrictionsVec;
     /// Defines all "entry_restriction" and then converts restrictions from string to IR
     /// expressions, and stores them in restrictionsVec to move targetConstraints further.
-    program->apply(AssertsParser::AssertsParser(restrictionsVec));
+    program->apply(ExpressionParser::AssertsParser(restrictionsVec));
     /// Defines all "refers_to" and then converts restrictions from string to IR expressions,
     /// and stores them in restrictionsVec to move targetConstraints further.
     program->apply(RefersToParser::RefersToParser(restrictionsVec));

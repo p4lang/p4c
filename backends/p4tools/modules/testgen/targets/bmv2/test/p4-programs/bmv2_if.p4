@@ -10,11 +10,15 @@ header H {
     bit<8> a;
     bit<8> b;
     bit<8> c;
+    bool b1;
+    bool b2;
+    bit<6> d;
 }
 
 struct Headers {
     ethernet_t eth_hdr;
     H          h;
+    H[2]       harray;
 }
 
 struct Meta {}
@@ -35,6 +39,7 @@ control vrfy(inout Headers h, inout Meta meta) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t s) {
+    bit<8> d;
 
     action MyAction1() {
         h.h.b = 1;
@@ -108,9 +113,12 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t s) {
         }
         if (h.h.c > 0) {
             table1.apply();
+            d = h.h.b;
         } else {
             table2.apply();
+            d = h.h.b + 1;
         }
+        h.h.c = d;
     }
 }
 
