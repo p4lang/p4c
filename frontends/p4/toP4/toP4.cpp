@@ -962,6 +962,11 @@ bool ToP4::preorder(const IR::HeaderStackExpression *e) {
     return false;
 }
 
+bool ToP4::preorder(const IR::Invalid *) {
+    builder.append("{#}");
+    return false;
+}
+
 bool ToP4::preorder(const IR::InvalidHeader *e) {
     if (expressionPrecedence > DBPrint::Prec_Prefix) builder.append("(");
     builder.append("(");

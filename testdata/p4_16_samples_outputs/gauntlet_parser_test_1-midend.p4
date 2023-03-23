@@ -24,8 +24,7 @@ parser P(packet_in p, out Headers h) {
         transition start_join;
     }
     state start_join {
-        h.h2[0] = h.h1[0];
-        h.h2[1] = h.h1[1];
+        h.h2 = h.h1;
         transition accept;
     }
     state noMatch {

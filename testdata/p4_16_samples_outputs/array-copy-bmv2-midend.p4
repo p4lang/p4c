@@ -18,8 +18,7 @@ parser P(packet_in p, out Headers h, inout Meta m, inout standard_metadata_t sm)
     state start {
         p.extract<Hdr>(h.h1.next);
         p.extract<Hdr>(h.h1.next);
-        h.h2[0] = h.h1[0];
-        h.h2[1] = h.h1[1];
+        h.h2 = h.h1;
         transition accept;
     }
 }

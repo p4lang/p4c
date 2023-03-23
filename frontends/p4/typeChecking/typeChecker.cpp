@@ -48,24 +48,6 @@ class ConstantTypeSubstitution : public Transform {
         LOG3("ConstantTypeSubstitution " << subst);
     }
 
-#if 0
-    // If two Type_InfInt types have been unified, we replace
-    // one of them with the other.
-    const IR::Node *postorder(IR::Type_InfInt* type) override {
-        auto repl = subst->get(type);
-        if (!repl)
-            return type;
-        while (repl->is<IR::Type_Var>()) {
-            auto next = subst->get(repl->to<IR::ITypeVar>());
-            BUG_CHECK(next != repl, "Cycle in substitutions: %1%", next);
-            if (!next) break;
-            repl = next;
-        }
-        LOG2("Replacing " << type << " with " << repl);
-        return repl;
-    }
-#endif
-
     const IR::Node *postorder(IR::Constant *cst) override {
         auto cstType = typeMap->getType(getOriginal(), true);
         if (!cstType->is<IR::ITypeVar>()) return cst;
@@ -2168,7 +2150,6 @@ const IR::Node *TypeInference::postorder(IR::InvalidHeader *expression) {
         typeError("%1%: invalid header expression has a non-header type `%2%`", expression, type);
         return expression;
     }
-    setType(getOriginal(), type);
     setType(expression, type);
     setType(getOriginal(), type);
     setCompileTimeConstant(expression);
