@@ -1,7 +1,6 @@
 #include "backends/p4tools/common/lib/taint.h"
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <vector>
 
 #include "backends/p4tools/common/lib/model.h"
