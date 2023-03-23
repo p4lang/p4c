@@ -21,6 +21,15 @@ limitations under the License.
 #include "printUtils.h"
 namespace DPDK {
 
+cstring DpdkContextGenerator::removePipePrefix(cstring tableName) {
+    if (!options.bfRtSchema.isNullOrEmpty() || !options.tdiFile.isNullOrEmpty()) {
+        cstring tablename = tableName.find('.');
+        tablename = tablename.trim(".\t\n\r");
+        return tablename;
+    }
+    return tableName;
+}
+
 // This function collects all tables in a vector and sets the table attributes required
 // by context json into a map.
 void DpdkContextGenerator::CollectTablesAndSetAttributes() {
@@ -39,8 +48,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                 tblAttr.direction = direction;
                 tblAttr.controlName = control->name.originalName;
                 tblAttr.externalName = tbl->controlPlaneName();
-                tblAttr.tableHandle =
-                    getHandleId(tblAttr.controlName + "." + tbl->name.originalName);
+                tblAttr.tableHandle = getHandleId(tblAttr.externalName);
                 auto size = tbl->getSizeProperty();
                 tblAttr.size = dpdk_default_table_size;
                 if (size) tblAttr.size = size->asUnsigned();
@@ -192,7 +200,7 @@ Util::JsonObject *DpdkContextGenerator::initTableCommonJson(const cstring name,
 void DpdkContextGenerator::collectHandleId() {
     for (auto &table : p4info.tables()) {
         const auto &pre_t = table.preamble();
-        context_handle_map[pre_t.name()] = pre_t.id();
+        context_handle_map[removePipePrefix(pre_t.name())] = pre_t.id();
     }
     for (auto &action : p4info.actions()) {
         const auto &pre_a = action.preamble();
@@ -200,24 +208,19 @@ void DpdkContextGenerator::collectHandleId() {
     }
     for (auto &action_prof : p4info.action_profiles()) {
         const auto &pre_a = action_prof.preamble();
-        context_handle_map[pre_a.name()] = pre_a.id();
+        context_handle_map[removePipePrefix(pre_a.name())] = pre_a.id();
     }
     for (const auto &externType : p4info.externs()) {
         for (const auto &externInstance : externType.instances()) {
             const auto &pre_a = externInstance.preamble();
-            context_handle_map[pre_a.name()] = pre_a.id();
+            context_handle_map[removePipePrefix(pre_a.name())] = pre_a.id();
         }
     }
 }
 
 size_t DpdkContextGenerator::getHandleId(cstring name) {
     size_t id = 0;
-    for (auto x : context_handle_map) {
-        if (x.first.find(name.c_str())) {
-            id = context_handle_map[x.first];
-            break;
-        }
-    }
+    if (context_handle_map.count(name)) id = context_handle_map[name];
     BUG_CHECK(id != 0, "unable to find id for %1%", name);
     return id;
 }

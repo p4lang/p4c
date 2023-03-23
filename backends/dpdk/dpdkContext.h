@@ -167,6 +167,7 @@ class DpdkContextGenerator : public Inspector {
     void setActionAttributes(const IR::P4Table *table);
     void setDefaultActionHandle(const IR::P4Table *table);
     void CollectTablesAndSetAttributes();
+    cstring removePipePrefix(cstring);
 };
 
 }  // namespace DPDK
