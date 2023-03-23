@@ -29,7 +29,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h_0_eth_hdr.dst_addr = 48w4;
         h_0_eth_hdr.dst_addr = 48w2;
         h_0_eth_hdr.src_addr = 48w3;
-        h_0_eth_hdr.dst_addr = 48w2;
         h.eth_hdr = h_0_eth_hdr;
     }
     @hidden table tbl_assign_addrs {

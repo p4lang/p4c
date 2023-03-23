@@ -23,8 +23,13 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    @name("ingress.target_addr") bit<48> target_addr_0;
     @name(".assign") action assign_0() {
-        h.eth_hdr.dst_addr = (16w0xdead != h.eth_hdr.eth_type ? 48w1 : h.eth_hdr.dst_addr);
+        target_addr_0 = h.eth_hdr.dst_addr;
+        if (16w0xdead != h.eth_hdr.eth_type) {
+            target_addr_0 = 48w1;
+        }
+        h.eth_hdr.dst_addr = target_addr_0;
     }
     @hidden table tbl_assign {
         actions = {

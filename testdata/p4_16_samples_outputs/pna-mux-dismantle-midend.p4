@@ -77,6 +77,7 @@ struct tuple_0 {
 }
 
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
+    @name("MainControlImpl.tmp") bit<1> tmp_0;
     @name("MainControlImpl.tmp_1") bit<1> tmp_1;
     tcp_t hdr_3_tcp;
     @name(".do_range_checks_0") action do_range_checks_1(@name("min1") bit<16> min1_2, @name("max1") bit<16> max1_2) {
@@ -90,8 +91,17 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         add_entry<bit<32>>(action_name = "next_hop", action_params = 32w0, expire_time_profile_id = user_meta.timeout);
     }
     @name("MainControlImpl.do_range_checks_1") action do_range_checks_2(@name("min1") bit<16> min1_3, @name("max1") bit<16> max1_3) {
-        tmp_1 = (min1_3 <= hdr.tcp.srcPort && hdr.tcp.srcPort <= max1_3 ? (16w50 <= hdr.tcp.srcPort && hdr.tcp.srcPort <= 16w100 ? user_meta.val1 : user_meta.val2) : tmp_1);
-        user_meta.rng_result1 = (min1_3 <= hdr.tcp.srcPort && hdr.tcp.srcPort <= max1_3 ? tmp_1 : user_meta.val1);
+        if (min1_3 <= hdr.tcp.srcPort && hdr.tcp.srcPort <= max1_3) {
+            if (16w50 <= hdr.tcp.srcPort && hdr.tcp.srcPort <= 16w100) {
+                tmp_1 = user_meta.val1;
+            } else {
+                tmp_1 = user_meta.val2;
+            }
+            tmp_0 = tmp_1;
+        } else {
+            tmp_0 = user_meta.val1;
+        }
+        user_meta.rng_result1 = tmp_0;
     }
     @name("MainControlImpl.ipv4_da") table ipv4_da_0 {
         key = {

@@ -26,6 +26,7 @@ struct empty_metadata_t {
 }
 
 struct main_metadata_t {
+    bit<32> data;
 }
 
 struct headers_t {
@@ -57,7 +58,9 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     @name("MainControlImpl.per_prefix_pkt_bytes_count") DirectCounter<bit<80>>(PNA_CounterType_t.PACKETS_AND_BYTES) per_prefix_pkt_bytes_count_0;
     @name("MainControlImpl.per_prefix_pkt_count") DirectCounter<bit<32>>(PNA_CounterType_t.PACKETS) per_prefix_pkt_count_0;
     @name("MainControlImpl.count") action count_1() {
-        per_prefix_pkt_count_0.count();
+        if (user_meta.data == 32w8) {
+            per_prefix_pkt_count_0.count();
+        }
     }
     @name("MainControlImpl.bytecount") action bytecount() {
         per_prefix_bytes_count_0.count(32w1024);
@@ -106,18 +109,18 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdkdirectcounter153() {
+    @hidden action pnadpdkdirectcounter157() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnadpdkdirectcounter153 {
+    @hidden table tbl_pnadpdkdirectcounter157 {
         actions = {
-            pnadpdkdirectcounter153();
+            pnadpdkdirectcounter157();
         }
-        const default_action = pnadpdkdirectcounter153();
+        const default_action = pnadpdkdirectcounter157();
     }
     apply {
-        tbl_pnadpdkdirectcounter153.apply();
+        tbl_pnadpdkdirectcounter157.apply();
     }
 }
 

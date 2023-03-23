@@ -32,28 +32,9 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.bool_val") bool bool_val_0;
-    @name("ingress.tmp_0") bit<1> tmp;
-    @name("ingress.tmp_1") bit<1> tmp_0;
-    @name("ingress.val_0") bit<1> val;
-    @name("ingress.bound_0") bit<1> bound;
-    @name("ingress.retval") bit<1> retval;
-    @name("ingress.tmp") bit<1> tmp_1;
-    bit<1> hsiVar;
     @name("ingress.perform_action") action perform_action() {
-        val = (bool_val_0 ? 1w0 : val);
-        bound = (bool_val_0 ? 1w1 : bound);
-        tmp_1 = (bool_val_0 ? (val < bound ? val : tmp_1) : tmp_1);
-        tmp_1 = (bool_val_0 ? (val < bound ? val : bound) : tmp_1);
-        retval = (bool_val_0 ? tmp_1 : retval);
-        tmp = (bool_val_0 ? retval : tmp);
-        tmp_0 = (bool_val_0 ? tmp : tmp_0);
-        hsiVar = (bool_val_0 ? tmp_0 : 1w0);
-        if (hsiVar == 1w0) {
-            h.h[1w0].a = (bool_val_0 ? 8w1 : h.h[1w0].a);
-        } else if (hsiVar == 1w1) {
-            h.h[1w1].a = (bool_val_0 ? 8w1 : h.h[1w1].a);
-        } else if (hsiVar == 1w0) {
-            h.h[1w0].a = (bool_val_0 ? 8w1 : h.h[1w0].a);
+        if (bool_val_0) {
+            h.h[1w0].a = 8w1;
         }
     }
     @hidden action predication_issue_4l39() {

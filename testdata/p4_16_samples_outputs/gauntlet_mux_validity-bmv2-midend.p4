@@ -29,8 +29,24 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    @name("ingress.b") bool b_0;
+    @name("ingress.tmp") bit<16> tmp;
     @name("ingress.dummy") action dummy_2() {
-        h.eth_hdr.eth_type = 16w1;
+        if (b_0) {
+            tmp = 16w1;
+        } else {
+            tmp = 16w1;
+        }
+        h.eth_hdr.eth_type = tmp;
+    }
+    @hidden action gauntlet_mux_validitybmv2l37() {
+        b_0 = false;
+    }
+    @hidden table tbl_gauntlet_mux_validitybmv2l37 {
+        actions = {
+            gauntlet_mux_validitybmv2l37();
+        }
+        const default_action = gauntlet_mux_validitybmv2l37();
     }
     @hidden table tbl_dummy {
         actions = {
@@ -39,6 +55,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = dummy_2();
     }
     apply {
+        tbl_gauntlet_mux_validitybmv2l37.apply();
         tbl_dummy.apply();
     }
 }

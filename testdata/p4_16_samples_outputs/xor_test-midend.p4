@@ -63,21 +63,25 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bool cond_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("MyIngress.forward_and_do_something") action forward_and_do_something(@name("port") bit<9> port) {
         standard_metadata.egress_spec = port;
-        meta.before1 = (hdr.ipv4.isValid() ? hdr.ipv4.srcAddr : meta.before1);
-        hdr.ipv4.srcAddr = (hdr.ipv4.isValid() ? hdr.ipv4.srcAddr ^ 32w0x12345678 : hdr.ipv4.srcAddr);
-        meta.after1 = (hdr.ipv4.isValid() ? hdr.ipv4.srcAddr : meta.after1);
-        cond_0 = hdr.ethernet.isValid();
-        hdr.ipv4.protocol = (hdr.ethernet.isValid() ? (hdr.ethernet.isValid() ? hdr.ipv4.protocol ^ 8w1 : hdr.ipv4.protocol) : hdr.ipv4.protocol);
-        meta.before2 = (cond_0 ? hdr.ipv4.dstAddr : meta.before2);
-        hdr.ipv4.dstAddr = (cond_0 ? hdr.ipv4.dstAddr ^ 32w0x12345678 : hdr.ipv4.dstAddr);
-        meta.after2 = (cond_0 ? hdr.ipv4.dstAddr : meta.after2);
+        if (hdr.ipv4.isValid()) {
+            meta.before1 = hdr.ipv4.srcAddr;
+            hdr.ipv4.srcAddr = hdr.ipv4.srcAddr ^ 32w0x12345678;
+            meta.after1 = hdr.ipv4.srcAddr;
+        }
+        if (hdr.ethernet.isValid()) {
+            if (hdr.ethernet.isValid()) {
+                hdr.ipv4.protocol = hdr.ipv4.protocol ^ 8w1;
+            }
+            meta.before2 = hdr.ipv4.dstAddr;
+            hdr.ipv4.dstAddr = hdr.ipv4.dstAddr ^ 32w0x12345678;
+            meta.after2 = hdr.ipv4.dstAddr;
+        }
         meta.before3 = hdr.ipv4.srcAddr;
         hdr.ipv4.srcAddr = hdr.ipv4.srcAddr ^ 32w0x12345678;
         meta.after3 = hdr.ipv4.srcAddr;

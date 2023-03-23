@@ -28,6 +28,7 @@ struct empty_metadata_t {
 }
 
 struct main_metadata_t {
+    bit<32> data;
 }
 
 struct headers_t {
@@ -64,7 +65,9 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
     DirectCounter<PacketByteCounter_t>(PNA_CounterType_t.PACKETS_AND_BYTES) per_prefix_pkt_bytes_count;
     DirectCounter<PacketCounter_t>(PNA_CounterType_t.PACKETS) per_prefix_pkt_count;
     action count() {
-        per_prefix_pkt_count.count();
+        if (user_meta.data == 32w8) {
+            per_prefix_pkt_count.count();
+        }
     }
     action bytecount() {
         per_prefix_bytes_count.count(32w1024);

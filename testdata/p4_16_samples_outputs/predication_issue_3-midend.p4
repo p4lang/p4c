@@ -30,8 +30,20 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    @name("ingress.bool_val") bool bool_val_0;
     @name("ingress.perform_action") action perform_action() {
-        h.h[3w0].a = 8w1;
+        if (bool_val_0) {
+            h.h[3w0].a = 8w1;
+        }
+    }
+    @hidden action predication_issue_3l38() {
+        bool_val_0 = true;
+    }
+    @hidden table tbl_predication_issue_3l38 {
+        actions = {
+            predication_issue_3l38();
+        }
+        const default_action = predication_issue_3l38();
     }
     @hidden table tbl_perform_action {
         actions = {
@@ -40,6 +52,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = perform_action();
     }
     apply {
+        tbl_predication_issue_3l38.apply();
         tbl_perform_action.apply();
     }
 }

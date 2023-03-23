@@ -58,6 +58,7 @@ parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata_t use
 control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     @name("ingress.color_out") PSA_MeterColor_t color_out_0;
     @name("ingress.color_in") PSA_MeterColor_t color_in_0;
+    @name("ingress.tmp") bit<32> tmp;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.counter0") Counter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.PACKETS_AND_BYTES) counter0_0;
@@ -68,13 +69,24 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
     @name("ingress.execute") action execute_1(@name("index") bit<12> index_1) {
         hdr.ipv4.ihl = 4w5;
         color_out_0 = meter0_0.dpdk_execute(index_1, color_in_0, (bit<32>)hdr.ipv4.totalLen);
-        user_meta.port_out = (color_out_0 == PSA_MeterColor_t.GREEN ? 32w1 : 32w0);
-        reg_0.write(index_1, (color_out_0 == PSA_MeterColor_t.GREEN ? 32w1 : 32w0));
-        hdr.ipv4.ihl = 4w5;
-        hdr.ipv4.ihl = (hdr.ipv4.version == 4w6 ? 4w6 : 4w5);
+        if (color_out_0 == PSA_MeterColor_t.GREEN) {
+            tmp = 32w1;
+        } else {
+            tmp = 32w0;
+        }
+        user_meta.port_out = tmp;
+        reg_0.write(index_1, tmp);
+        if (hdr.ipv4.hdrChecksum[5:0] == 6w6) {
+            hdr.ipv4.ihl = 4w5;
+        }
+        if (hdr.ipv4.version == 4w6) {
+            hdr.ipv4.ihl = 4w6;
+        }
     }
     @name("ingress.test") action test() {
-        hdr.ipv4.hdrChecksum[3:0] = (hdr.ipv4.version == 4w4 ? hdr.ipv4.version + 4w5 : hdr.ipv4.hdrChecksum[3:0]);
+        if (hdr.ipv4.version == 4w4) {
+            hdr.ipv4.hdrChecksum[3:0] = hdr.ipv4.version + 4w5;
+        }
     }
     @name("ingress.tbl") table tbl_0 {
         key = {

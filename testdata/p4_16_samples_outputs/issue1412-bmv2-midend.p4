@@ -30,7 +30,9 @@ control EgressImpl(inout headers_t hdr, inout metadata meta, inout standard_meta
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("EgressImpl.set_true") action set_true() {
-        meta.cond = (meta.field == 8w0 ? true : meta.cond);
+        if (meta.field == 8w0) {
+            meta.cond = true;
+        }
     }
     @name("EgressImpl.change_cond") table change_cond_0 {
         key = {

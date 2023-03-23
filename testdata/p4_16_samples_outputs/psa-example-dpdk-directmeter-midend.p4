@@ -35,12 +35,18 @@ parser MyEP(packet_in buffer, out EMPTY a, inout metadata_t b, in psa_egress_par
 control MyIC(inout headers_t hdr, inout metadata_t b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
     @name("MyIC.color_out") PSA_MeterColor_t color_out_0;
     @name("MyIC.color_in") PSA_MeterColor_t color_in_0;
+    @name("MyIC.tmp") bit<32> tmp;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyIC.meter0") DirectMeter(PSA_MeterType_t.PACKETS) meter0_0;
     @name("MyIC.execute_meter") action execute_meter() {
         color_out_0 = meter0_0.dpdk_execute(color_in_0, 32w1024);
-        b.port_out = (color_out_0 == PSA_MeterColor_t.GREEN ? 32w1 : 32w0);
+        if (color_out_0 == PSA_MeterColor_t.GREEN) {
+            tmp = 32w1;
+        } else {
+            tmp = 32w0;
+        }
+        b.port_out = tmp;
     }
     @name("MyIC.tbl") table tbl_0 {
         key = {

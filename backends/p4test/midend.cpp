@@ -49,7 +49,6 @@ limitations under the License.
 #include "midend/nestedStructs.h"
 #include "midend/noMatch.h"
 #include "midend/parserUnroll.h"
-#include "midend/predication.h"
 #include "midend/removeAssertAssume.h"
 #include "midend/removeExits.h"
 #include "midend/removeMiss.h"
@@ -108,7 +107,6 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          new P4::FlattenInterfaceStructs(&refMap, &typeMap),
          new P4::EliminateTypedef(&refMap, &typeMap),
          new P4::ReplaceSelectRange(&refMap, &typeMap),
-         new P4::Predication(&refMap),
          new P4::MoveDeclarations(),  // more may have been introduced
          new P4::ConstantFolding(&refMap, &typeMap),
          new P4::GlobalCopyPropagation(&refMap, &typeMap),

@@ -75,7 +75,11 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.execute") action execute_1() {
-        user_meta.data = (err_0 ? user_meta.data : 16w1);
+        if (err_0) {
+            ;
+        } else {
+            user_meta.data = 16w1;
+        }
     }
     @name("ingress.tbl") table tbl_0 {
         key = {
