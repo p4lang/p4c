@@ -21,20 +21,19 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/test_backend.h"
 #include "backends/p4tools/modules/testgen/options.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/backend/metadata/metadata.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/backend/protobuf/protobuf.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/backend/ptf/ptf.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/backend/stf/stf.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/program_info.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace Bmv2 {
+namespace P4Tools::P4Testgen::Bmv2 {
 
 const big_int Bmv2TestBackend::ZERO_PKT_VAL = 0x2000000;
 const big_int Bmv2TestBackend::ZERO_PKT_MAX = 0xffffffff;
-const std::set<std::string> Bmv2TestBackend::SUPPORTED_BACKENDS = {"PTF", "STF", "PROTOBUF"};
+const std::set<std::string> Bmv2TestBackend::SUPPORTED_BACKENDS = {"PTF", "STF", "PROTOBUF",
+                                                                   "METADATA"};
 
 Bmv2TestBackend::Bmv2TestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
                                  const boost::filesystem::path &testPath,
@@ -54,6 +53,8 @@ Bmv2TestBackend::Bmv2TestBackend(const ProgramInfo &programInfo, SymbolicExecuto
         testWriter = new STF(testPath.c_str(), seed);
     } else if (testBackendString == "PROTOBUF") {
         testWriter = new Protobuf(testPath.c_str(), seed);
+    } else if (testBackendString == "METADATA") {
+        testWriter = new Metadata(testPath.c_str(), seed);
     } else {
         P4C_UNIMPLEMENTED(
             "Test back end %1% not implemented for this target. Supported back ends are %2%.",
@@ -94,6 +95,24 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
         egressPacket = Packet(testInfo.outputPort, testInfo.outputPacket, testInfo.packetTaintMask);
     }
     testSpec = new TestSpec(ingressPacket, egressPacket, testInfo.programTraces);
+
+    // If metadata mode is enabled, gather the user metadata variable form the parser.
+    // Save the values of all the fields in it and return.
+    if (TestgenOptions::get().testBackend == "METADATA") {
+        auto *metadataCollection = new MetadataCollection();
+        auto bmv2ProgInfo = programInfo.checkedTo<BMv2_V1ModelProgramInfo>();
+        auto localMetadataVar = bmv2ProgInfo->getBlockParam("Parser", 2);
+        const auto *localMetadataType = executionState->resolveType(localMetadataVar->type);
+        auto flatFields = executionState->getFlatFields(
+            localMetadataVar, localMetadataType->checkedTo<IR::Type_Struct>(), {});
+        for (const auto *fieldRef : flatFields) {
+            const auto *fieldVal = completedModel->evaluate(executionState->get(fieldRef));
+            metadataCollection->addMetaDataField(fieldRef->toString(), fieldVal);
+        }
+        testSpec->addTestObject("metadata_collection", "metadata_collection", metadataCollection);
+        return testSpec;
+    }
+
     // We retrieve the individual table configurations from the execution state.
     const auto uninterpretedTableConfigs = executionState->getTestObjectCategory("tableconfigs");
     // Since these configurations are uninterpreted we need to convert them. We launch a
@@ -132,8 +151,4 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
     return testSpec;
 }
 
-}  // namespace Bmv2
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::Bmv2

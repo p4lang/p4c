@@ -2,9 +2,6 @@
 # from the testsuite patterns by calling p4c_find_test_names then pass the list
 # to p4tools_add_test_list
 # Arguments:
-#   - template_file The path to the extension/target file that implements
-#     the logic of the target test. "p4tools_add_tests" includes this file and then
-#     executes the logic defined "p4tools_add_test_with_args".
 #   - tag is a label for the set of test suite where this test belongs
 #     (for example, p4ctest)
 #   - driver is the script that is used to run the tests and compare the results
@@ -21,7 +18,7 @@
 #
 macro(p4tools_add_tests)
   set(options "")
-  set(oneValueArgs TEMPLATE_FILE TAG DRIVER)
+  set(oneValueArgs TAG DRIVER)
   set(multiValueArgs TESTSUITES)
   cmake_parse_arguments(
     TOOLS_TESTS "${options}" "${oneValueArgs}"
@@ -31,7 +28,6 @@ macro(p4tools_add_tests)
   set(__tests "")
   p4c_find_test_names("${TOOLS_TESTS_TESTSUITES}" __tests)
 
-  include(${TOOLS_TESTS_TEMPLATE_FILE})
   list(LENGTH __tests __nTests)
   foreach(t ${__tests})
     get_filename_component(p4name ${t} NAME)

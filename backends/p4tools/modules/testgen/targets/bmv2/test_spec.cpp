@@ -221,6 +221,30 @@ const Range *Range::evaluate(const Model &model) const {
     return new Range(getKey(), evaluatedLow, evaluatedHigh);
 }
 
+/* =========================================================================================
+ *  MetadataCollection
+ * ========================================================================================= */
+
+MetadataCollection::MetadataCollection() = default;
+
+cstring MetadataCollection::getObjectName() const { return "MetadataCollection"; }
+
+const MetadataCollection *MetadataCollection::evaluate(const Model & /*model*/) const {
+    P4C_UNIMPLEMENTED("%1% has no implementation for \"evaluate\".", getObjectName());
+}
+
+const std::map<cstring, const IR::Literal *> &MetadataCollection::getMetadataFields() const {
+    return metadataFields;
+}
+
+const IR::Literal *MetadataCollection::getMetadataField(cstring name) {
+    return metadataFields.at(name);
+}
+
+void MetadataCollection::addMetaDataField(cstring name, const IR::Literal *metadataField) {
+    metadataFields[name] = metadataField;
+}
+
 cstring Range::getObjectName() const { return "Range"; }
 
 }  // namespace P4Tools::P4Testgen::Bmv2
