@@ -11,99 +11,86 @@ header_union HU {
 }
 
 parser p(inout HU hu) {
-    HU ih;
+    @name("ih_e") E ih_e_0;
+    @name("ih_h") H ih_h_0;
     state start {
-        hu = ih;
+        transition select(ih_e_0.isValid()) {
+            true: start_true;
+            false: start_false;
+        }
+    }
+    state start_true {
+        hu.e.setValid();
+        hu.e = ih_e_0;
+        hu.h.setInvalid();
+        transition start_join;
+    }
+    state start_false {
+        hu.e.setInvalid();
+        transition start_join;
+    }
+    state start_join {
+        transition select(ih_h_0.isValid()) {
+            true: start_true_0;
+            false: start_false_0;
+        }
+    }
+    state start_true_0 {
+        hu.h.setValid();
+        hu.h = ih_h_0;
+        hu.e.setInvalid();
+        transition start_join_0;
+    }
+    state start_false_0 {
+        hu.h.setInvalid();
+        transition start_join_0;
+    }
+    state start_join_0 {
         transition accept;
     }
 }
 
 control c(inout HU hu) {
-    @name("c.h") H h_0;
-    bit<32> tmp;
-    @name("c.a") action a() {
+    @name("c.h") H h_1;
+    @name("c.a") action a_0() {
     }
-    @hidden action invalidunion24() {
-        tmp = 32w1;
-    }
-    @hidden action invalidunion24_0() {
-        tmp = 32w0;
-    }
-    @hidden action invalidunion24_1() {
-        tmp = tmp + 32w1;
-    }
-    @hidden action invalidunion27() {
-        hu.h.setValid();
-        hu.h = h_0;
-        hu.e.setInvalid();
-    }
-    @hidden action invalidunion27_0() {
-        hu.h.setInvalid();
-    }
-    @hidden action invalidunion25() {
-        h_0.setValid();
-        h_0.f = 32w0;
-    }
-    @hidden table tbl_a {
-        actions = {
-            a();
+    @hidden @name("invalidunion25") action invalidunion25_0() {
+        h_1.setValid();
+        h_1.f = 32w0;
+        if (h_1.isValid()) {
+            hu.h.setValid();
+            hu.h = h_1;
+            hu.e.setInvalid();
+        } else {
+            hu.h.setInvalid();
         }
-        const default_action = a();
     }
-    @hidden table tbl_invalidunion24 {
+    @hidden @name("tbl_a") table tbl_a_0 {
         actions = {
-            invalidunion24_0();
+            a_0();
         }
-        const default_action = invalidunion24_0();
+        const default_action = a_0();
     }
-    @hidden table tbl_invalidunion24_0 {
+    @hidden @name("tbl_invalidunion25") table tbl_invalidunion25_0 {
         actions = {
-            invalidunion24();
+            invalidunion25_0();
         }
-        const default_action = invalidunion24();
+        const default_action = invalidunion25_0();
     }
-    @hidden table tbl_invalidunion24_1 {
-        actions = {
-            invalidunion24_1();
-        }
-        const default_action = invalidunion24_1();
-    }
-    @hidden table tbl_invalidunion25 {
-        actions = {
-            invalidunion25();
-        }
-        const default_action = invalidunion25();
-    }
-    @hidden table tbl_invalidunion27 {
-        actions = {
-            invalidunion27();
-        }
-        const default_action = invalidunion27();
-    }
-    @hidden table tbl_invalidunion27_0 {
-        actions = {
-            invalidunion27_0();
-        }
-        const default_action = invalidunion27_0();
-    }
+    @name("tmp") bit<32> tmp_0;
     apply {
-        tbl_a.apply();
-        tbl_invalidunion24.apply();
+        tbl_a_0.apply();
+        tmp_0 = 32w0;
         if (hu.e.isValid()) {
-            tbl_invalidunion24_0.apply();
+            tmp_0 = tmp_0 + 32w1;
         }
         if (hu.h.isValid()) {
-            tbl_invalidunion24_1.apply();
+            tmp_0 = tmp_0 + 32w1;
         }
-        if (tmp == 32w1) {
+        if (tmp_0 == 32w1) {
             ;
         } else {
-            tbl_invalidunion25.apply();
-            if (h_0.isValid()) {
-                tbl_invalidunion27.apply();
-            } else {
-                tbl_invalidunion27_0.apply();
-            }
+            tbl_invalidunion25_0.apply();
         }
     }
 }
