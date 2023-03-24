@@ -149,6 +149,7 @@ void ValidateParsedProgram::postorder(const IR::Declaration_Instance *decl) {
         ::error(ErrorType::ERR_INVALID, "%1%: invalid instance name.", decl);
     if (findContext<IR::BlockStatement>() &&         // we're looking for the apply block
         findContext<IR::P4Control>() &&              // of a control
+	!findContext<IR::P4Action>() &&              // experimental: allow externs in actions
         !findContext<IR::Declaration_Instance>()) {  // but not in an instance initializer
         ::error(ErrorType::ERR_INVALID,
                 "%1%: invalid declaration. Instantiations cannot be in a control 'apply' block.",
@@ -161,10 +162,12 @@ void ValidateParsedProgram::postorder(const IR::Declaration_Instance *decl) {
         ::error(ErrorType::ERR_INVALID,
                 "%1%: invalid declaration. Instantiations cannot be in a function or method.",
                 decl);
+#if 0    
     auto inAction = findContext<IR::P4Action>();
     if (inAction != nullptr)
         ::error(ErrorType::ERR_INVALID, "%1%: declaration. Instantiations not allowed in actions.",
                 decl);
+#endif
 }
 
 /// Constant names cannot be underscore
