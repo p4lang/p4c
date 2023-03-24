@@ -1,3 +1,5 @@
+#include <core.p4>
+
 header E {
 }
 
@@ -54,7 +56,7 @@ control c(inout HU hu) {
     @name("c.h") H h_1;
     @name("c.a") action a_0() {
     }
-    @hidden @name("invalidunion25") action invalidunion25_0() {
+    @hidden @name("invalidunion27") action invalidunion27_0() {
         h_1.setValid();
         h_1.f = 32w0;
         if (h_1.isValid()) {
@@ -71,11 +73,11 @@ control c(inout HU hu) {
         }
         const default_action = a_0();
     }
-    @hidden @name("tbl_invalidunion25") table tbl_invalidunion25_0 {
+    @hidden @name("tbl_invalidunion27") table tbl_invalidunion27_0 {
         actions = {
-            invalidunion25_0();
+            invalidunion27_0();
         }
-        const default_action = invalidunion25_0();
+        const default_action = invalidunion27_0();
     }
     @name("tmp") bit<32> tmp_0;
     apply {
@@ -90,7 +92,7 @@ control c(inout HU hu) {
         if (tmp_0 == 32w1) {
             ;
         } else {
-            tbl_invalidunion25_0.apply();
+            tbl_invalidunion27_0.apply();
         }
     }
 }
