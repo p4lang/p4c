@@ -18,9 +18,7 @@
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/namespace_context.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 /// Stores target-specific information about a P4 program.
 class ProgramInfo : public ICastable {
@@ -90,14 +88,6 @@ class ProgramInfo : public ICastable {
     // @returns the width of the parser error for this specific target.
     virtual const IR::Type_Bits *getParserErrorType() const = 0;
 
-    /// @returns the Member variable corresponding to the parameter index for the given parameter.
-    /// The Member variable uses the parameter struct label as parent and the @param paramLabel as
-    /// member. @param type is the type of the member. If the parser does not have this parameter
-    /// (meaning we are dealing with optional parameters) return the canonical name of this
-    /// variable.
-    virtual const IR::Member *getParserParamVar(const IR::P4Parser *parser, const IR::Type *type,
-                                                size_t paramIndex, cstring paramLabel) const = 0;
-
     /// Looks up a declaration from a path. A BUG occurs if no declaration is found.
     const IR::IDeclaration *findProgramDecl(const IR::Path *path) const;
 
@@ -119,8 +109,6 @@ class ProgramInfo : public ICastable {
                               std::vector<Continuation::Command> *copyOuts) const;
 };
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_PROGRAM_INFO_H_ */

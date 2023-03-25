@@ -1,8 +1,7 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_PROGRAM_INFO_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_PROGRAM_INFO_H_
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <map>
 #include <vector>
 
@@ -25,7 +24,7 @@ class BMv2_V1ModelProgramInfo : public ProgramInfo {
     const std::map<int, int> declIdToGress;
 
     /// The bit width of standard_metadata.parser_error.
-    static const IR::Type_Bits parserErrBits;
+    static const IR::Type_Bits PARSER_ERR_BITS;
 
     /// This function contains an imperative specification of the inter-pipe interaction in the
     /// target.
@@ -41,28 +40,35 @@ class BMv2_V1ModelProgramInfo : public ProgramInfo {
     int getGress(const IR::Type_Declaration *) const;
 
     /// @returns the programmable blocks of the program. Should be 6.
-    const ordered_map<cstring, const IR::Type_Declaration *> *getProgrammableBlocks() const;
+    [[nodiscard]] const ordered_map<cstring, const IR::Type_Declaration *> *getProgrammableBlocks()
+        const;
 
     /// @returns the name of the parameter for a given programmable-block label and the parameter
     /// index. This is the name of the parameter that is used in the P4 program.
-    const IR::PathExpression *getBlockParam(cstring blockLabel, size_t paramIndex) const;
+    [[nodiscard]] const IR::PathExpression *getBlockParam(cstring blockLabel,
+                                                          size_t paramIndex) const;
 
-    const IR::Member *getTargetInputPortVar() const override;
+    [[nodiscard]] const IR::Member *getTargetInputPortVar() const override;
 
     /// @returns the constraint expression for a given port variable.
     static const IR::Expression *getPortConstraint(const IR::Member *portVar);
 
-    const IR::Member *getTargetOutputPortVar() const override;
+    [[nodiscard]] const IR::Member *getTargetOutputPortVar() const override;
 
-    const IR::Expression *dropIsActive() const override;
+    [[nodiscard]] const IR::Expression *dropIsActive() const override;
 
-    const IR::Expression *createTargetUninitialized(const IR::Type *type,
-                                                    bool forceTaint) const override;
+    [[nodiscard]] const IR::Expression *createTargetUninitialized(const IR::Type *type,
+                                                                  bool forceTaint) const override;
 
-    const IR::Type_Bits *getParserErrorType() const override;
+    [[nodiscard]] const IR::Type_Bits *getParserErrorType() const override;
 
-    const IR::Member *getParserParamVar(const IR::P4Parser *parser, const IR::Type *type,
-                                        size_t paramIndex, cstring paramLabel) const override;
+    /// @returns the Member variable corresponding to the parameter index for the given parameter.
+    /// The Member variable uses the parameter struct label as parent and the @param paramLabel as
+    /// member. @param type is the type of the member. If the parser does not have this parameter
+    /// (meaning we are dealing with optional parameters) return the canonical name of this
+    /// variable.
+    static const IR::Member *getParserParamVar(const IR::P4Parser *parser, const IR::Type *type,
+                                               size_t paramIndex, cstring paramLabel);
 };
 
 }  // namespace P4Tools::P4Testgen::Bmv2

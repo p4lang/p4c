@@ -25,11 +25,7 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/constants.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/program_info.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace Bmv2 {
+namespace P4Tools::P4Testgen::Bmv2 {
 
 BMv2_V1ModelCmdStepper::BMv2_V1ModelCmdStepper(ExecutionState &state, AbstractSolver &solver,
                                                const ProgramInfo &programInfo)
@@ -103,8 +99,8 @@ void BMv2_V1ModelCmdStepper::initializeTargetEnvironment(ExecutionState *nextSta
 std::optional<const Constraint *> BMv2_V1ModelCmdStepper::startParser_impl(
     const IR::P4Parser *parser, ExecutionState *nextState) const {
     // We need to explicitly map the parser error
-    const auto *errVar =
-        programInfo.getParserParamVar(parser, programInfo.getParserErrorType(), 3, "parser_error");
+    const auto *errVar = BMv2_V1ModelProgramInfo::getParserParamVar(
+        parser, programInfo.getParserErrorType(), 3, "parser_error");
     nextState->setParserErrorLabel(errVar);
 
     /// Set the restriction on the input port for PTF tests.
@@ -123,8 +119,8 @@ std::map<Continuation::Exception, Continuation> BMv2_V1ModelCmdStepper::getExcep
     auto programInfo = getProgramInfo();
     auto gress = programInfo.getGress(parser);
 
-    const auto *errVar =
-        programInfo.getParserParamVar(parser, programInfo.getParserErrorType(), 3, "parser_error");
+    const auto *errVar = BMv2_V1ModelProgramInfo::getParserParamVar(
+        parser, programInfo.getParserErrorType(), 3, "parser_error");
 
     switch (gress) {
         case BMV2_INGRESS:
@@ -155,8 +151,4 @@ std::map<Continuation::Exception, Continuation> BMv2_V1ModelCmdStepper::getExcep
     return result;
 }
 
-}  // namespace Bmv2
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::Bmv2

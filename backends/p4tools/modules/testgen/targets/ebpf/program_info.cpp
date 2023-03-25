@@ -23,13 +23,9 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/concolic.h"
 
-namespace P4Tools {
+namespace P4Tools::P4Testgen::EBPF {
 
-namespace P4Testgen {
-
-namespace EBPF {
-
-const IR::Type_Bits EBPFProgramInfo::parserErrBits = IR::Type_Bits(32, false);
+const IR::Type_Bits EBPFProgramInfo::PARSER_ERR_BITS = IR::Type_Bits(32, false);
 
 EBPFProgramInfo::EBPFProgramInfo(const IR::P4Program *program,
                                  ordered_map<cstring, const IR::Type_Declaration *> inputBlocks)
@@ -127,27 +123,6 @@ const IR::Expression *EBPFProgramInfo::createTargetUninitialized(const IR::Type 
     return IR::getDefaultValue(type);
 }
 
-const IR::Type_Bits *EBPFProgramInfo::getParserErrorType() const { return &parserErrBits; }
+const IR::Type_Bits *EBPFProgramInfo::getParserErrorType() const { return &PARSER_ERR_BITS; }
 
-const IR::Member *EBPFProgramInfo::getParserParamVar(const IR::P4Parser *parser,
-                                                     const IR::Type *type, size_t paramIndex,
-                                                     cstring paramLabel) const {
-    // If the optional parser parameter is not present, write directly to the
-    // global parser metadata state. Otherwise, we retrieve the parameter name.
-    auto parserApplyParams = parser->getApplyParameters()->parameters;
-    cstring structLabel = nullptr;
-    if (parserApplyParams.size() > paramIndex) {
-        const auto *paramString = parser->getApplyParameters()->parameters.at(paramIndex);
-        structLabel = paramString->name;
-    } else {
-        const auto *archSpec = TestgenTarget::getArchSpec();
-        structLabel = archSpec->getParamName("parse", paramIndex);
-    }
-    return new IR::Member(type, new IR::PathExpression(structLabel), paramLabel);
-}
-
-}  // namespace EBPF
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::EBPF

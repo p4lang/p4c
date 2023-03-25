@@ -1,11 +1,11 @@
 #include "backends/p4tools/modules/testgen/targets/pna/test_backend.h"
 
+#include <cstdlib>
 #include <map>
-#include <ostream>
 #include <string>
 #include <utility>
 
-#include <boost/none.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/trace_events.h"
@@ -14,7 +14,9 @@
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "lib/cstring.h"
+#include "lib/error.h"
 #include "lib/exceptions.h"
+#include "lib/log.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
@@ -22,7 +24,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_backend.h"
 #include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/pna/backend/metadata/metadata.h"
-#include "backends/p4tools/modules/testgen/targets/pna/program_info.h"
+#include "backends/p4tools/modules/testgen/targets/pna/dpdk/program_info.h"
 #include "backends/p4tools/modules/testgen/targets/pna/test_spec.h"
 
 namespace P4Tools::P4Testgen::Pna {
@@ -30,8 +32,7 @@ namespace P4Tools::P4Testgen::Pna {
 const std::set<std::string> PnaTestBackend::SUPPORTED_BACKENDS = {"METADATA"};
 
 PnaTestBackend::PnaTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                               const boost::filesystem::path &testPath,
-                               boost::optional<uint32_t> seed)
+                               const std::filesystem::path &testPath, std::optional<uint32_t> seed)
     : TestBackEnd(programInfo, symbex) {
     cstring testBackendString = TestgenOptions::get().testBackend;
     if (testBackendString.isNullOrEmpty()) {
@@ -69,7 +70,7 @@ const TestSpec *PnaTestBackend::createTestSpec(const ExecutionState *executionSt
     const auto *ingressPayloadMask = IR::getConstant(IR::getBitType(1), 1);
     const auto ingressPacket = Packet(testInfo.inputPort, ingressPayload, ingressPayloadMask);
 
-    boost::optional<Packet> egressPacket = boost::none;
+    std::optional<Packet> egressPacket = std::nullopt;
     if (!testInfo.packetIsDropped) {
         egressPacket = Packet(testInfo.outputPort, testInfo.outputPacket, testInfo.packetTaintMask);
     }

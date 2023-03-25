@@ -1,14 +1,6 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_CONCOLIC_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_CONCOLIC_H_
 
-#include <cstddef>
-#include <functional>
-#include <vector>
-
-#include "backends/p4tools/common/lib/model.h"
-#include "ir/ir.h"
-#include "lib/big_int_util.h"
-
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 
 namespace P4Tools::P4Testgen::Pna {

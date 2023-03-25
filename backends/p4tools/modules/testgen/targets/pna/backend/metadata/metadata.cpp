@@ -2,31 +2,16 @@
 
 #include <iomanip>
 #include <map>
-#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <boost/filesystem.hpp>
-#include <boost/format.hpp>
-#include <boost/none.hpp>
-#include <boost/variant/apply_visitor.hpp>
-#include <boost/variant/static_visitor.hpp>
 #include <inja/inja.hpp>
 
 #include "backends/p4tools/common/lib/format_int.h"
-#include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
-#include "gsl/gsl-lite.hpp"
-#include "ir/declaration.h"
 #include "ir/ir.h"
-#include "ir/vector.h"
-#include "lib/big_int_util.h"
-#include "lib/error.h"
-#include "lib/error_catalog.h"
-#include "lib/exceptions.h"
 #include "lib/log.h"
-#include "lib/null.h"
 #include "nlohmann/json.hpp"
 
 #include "backends/p4tools/modules/testgen/lib/tf.h"
@@ -34,7 +19,7 @@
 
 namespace P4Tools::P4Testgen::Pna {
 
-Metadata::Metadata(cstring testName, boost::optional<unsigned int> seed = boost::none)
+Metadata::Metadata(cstring testName, std::optional<unsigned int> seed = std::nullopt)
     : TF(testName, seed) {}
 
 std::vector<std::pair<size_t, size_t>> Metadata::getIgnoreMasks(const IR::Constant *mask) {
@@ -74,11 +59,12 @@ inja::json Metadata::getSend(const TestSpec *testSpec) {
 
 inja::json Metadata::getVerify(const TestSpec *testSpec) {
     inja::json verifyData = inja::json::object();
-    if (testSpec->getEgressPacket() != boost::none) {
-        const auto &packet = **testSpec->getEgressPacket();
-        verifyData["eg_port"] = packet.getPort();
-        const auto *payload = packet.getEvaluatedPayload();
-        const auto *payloadMask = packet.getEvaluatedPayloadMask();
+    auto egressPacket = testSpec->getEgressPacket();
+    if (egressPacket.has_value()) {
+        const auto *const packet = egressPacket.value();
+        verifyData["eg_port"] = packet->getPort();
+        const auto *payload = packet->getEvaluatedPayload();
+        const auto *payloadMask = packet->getEvaluatedPayloadMask();
         verifyData["ignore_mask"] = formatHexExpr(payloadMask);
         verifyData["exp_pkt"] = formatHexExpr(payload);
     }
@@ -123,7 +109,7 @@ void Metadata::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
     if (selectedBranches != nullptr) {
         dataJson["selected_branches"] = selectedBranches.c_str();
     }
-    boost::filesystem::path testFile(testName + ".proto");
+    std::filesystem::path testFile(testName + ".proto");
     cstring testNameOnly(testFile.stem().c_str());
     if (seed) {
         dataJson["seed"] = *seed;

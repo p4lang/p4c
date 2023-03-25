@@ -28,13 +28,9 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_asserts_parser.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_refers_to_parser.h"
 
-namespace P4Tools {
+namespace P4Tools::P4Testgen::Bmv2 {
 
-namespace P4Testgen {
-
-namespace Bmv2 {
-
-const IR::Type_Bits BMv2_V1ModelProgramInfo::parserErrBits = IR::Type_Bits(32, false);
+const IR::Type_Bits BMv2_V1ModelProgramInfo::PARSER_ERR_BITS = IR::Type_Bits(32, false);
 
 BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
     const IR::P4Program *program, ordered_map<cstring, const IR::Type_Declaration *> inputBlocks,
@@ -199,7 +195,9 @@ const IR::Expression *BMv2_V1ModelProgramInfo::createTargetUninitialized(const I
     return IR::getDefaultValue(type);
 }
 
-const IR::Type_Bits *BMv2_V1ModelProgramInfo::getParserErrorType() const { return &parserErrBits; }
+const IR::Type_Bits *BMv2_V1ModelProgramInfo::getParserErrorType() const {
+    return &PARSER_ERR_BITS;
+}
 
 const IR::PathExpression *BMv2_V1ModelProgramInfo::getBlockParam(cstring blockLabel,
                                                                  size_t paramIndex) const {
@@ -227,7 +225,7 @@ const IR::PathExpression *BMv2_V1ModelProgramInfo::getBlockParam(cstring blockLa
 const IR::Member *BMv2_V1ModelProgramInfo::getParserParamVar(const IR::P4Parser *parser,
                                                              const IR::Type *type,
                                                              size_t paramIndex,
-                                                             cstring paramLabel) const {
+                                                             cstring paramLabel) {
     // If the optional parser parameter is not present, write directly to the
     // global parser metadata state. Otherwise, we retrieve the parameter name.
     auto parserApplyParams = parser->getApplyParameters()->parameters;
@@ -242,8 +240,4 @@ const IR::Member *BMv2_V1ModelProgramInfo::getParserParamVar(const IR::P4Parser 
     return new IR::Member(type, new IR::PathExpression(structLabel), paramLabel);
 }
 
-}  // namespace Bmv2
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::Bmv2

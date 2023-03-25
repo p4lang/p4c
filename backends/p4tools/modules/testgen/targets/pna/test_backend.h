@@ -2,17 +2,17 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_TEST_BACKEND_H_
 
 #include <cstdint>
+#include <optional>
+#include <set>
 #include <string>
 #include <vector>
 
 #include <boost/filesystem.hpp>
-#include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
-#include "lib/big_int_util.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
@@ -29,8 +29,7 @@ class PnaTestBackend : public TestBackEnd {
 
  public:
     explicit PnaTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                            const boost::filesystem::path &testPath,
-                            boost::optional<uint32_t> seed);
+                            const std::filesystem::path &testPath, std::optional<uint32_t> seed);
 
     TestBackEnd::TestInfo produceTestInfo(
         const ExecutionState *executionState, const Model *completedModel,

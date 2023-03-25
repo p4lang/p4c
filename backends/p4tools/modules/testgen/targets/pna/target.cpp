@@ -1,9 +1,6 @@
 #include "backends/p4tools/modules/testgen/targets/pna/target.h"
 
-#include <stddef.h>
-
-#include <map>
-#include <string>
+#include <cstddef>
 #include <vector>
 
 #include "backends/p4tools/common/core/solver.h"
@@ -17,10 +14,9 @@
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/namespace_context.h"
-#include "backends/p4tools/modules/testgen/targets/pna/cmd_stepper.h"
-#include "backends/p4tools/modules/testgen/targets/pna/constants.h"
-#include "backends/p4tools/modules/testgen/targets/pna/expr_stepper.h"
-#include "backends/p4tools/modules/testgen/targets/pna/program_info.h"
+#include "backends/p4tools/modules/testgen/targets/pna/dpdk/cmd_stepper.h"
+#include "backends/p4tools/modules/testgen/targets/pna/dpdk/expr_stepper.h"
+#include "backends/p4tools/modules/testgen/targets/pna/dpdk/program_info.h"
 #include "backends/p4tools/modules/testgen/targets/pna/test_backend.h"
 
 namespace P4Tools::P4Testgen::Pna {
@@ -56,7 +52,7 @@ const PnaDpdkProgramInfo *PnaDpdkTestgenTarget::initProgram_impl(
     for (size_t idx = 0; idx < blocks.size(); ++idx) {
         const auto *declType = blocks.at(idx);
 
-        auto canonicalName = archSpec.getArchMember(idx)->blockName;
+        auto canonicalName = getArchSpec()->getArchMember(idx)->blockName;
         programmableBlocks.emplace(canonicalName, declType);
     }
 
@@ -65,8 +61,8 @@ const PnaDpdkProgramInfo *PnaDpdkTestgenTarget::initProgram_impl(
 
 PnaTestBackend *PnaDpdkTestgenTarget::getTestBackend_impl(const ProgramInfo &programInfo,
                                                           SymbolicExecutor &symbex,
-                                                          const boost::filesystem::path &testPath,
-                                                          boost::optional<uint32_t> seed) const {
+                                                          const std::filesystem::path &testPath,
+                                                          std::optional<uint32_t> seed) const {
     return new PnaTestBackend(programInfo, symbex, testPath, seed);
 }
 
@@ -83,7 +79,7 @@ PnaDpdkExprStepper *PnaDpdkTestgenTarget::getExprStepper_impl(
     return new PnaDpdkExprStepper(state, solver, programInfo);
 }
 
-const ArchSpec PnaDpdkTestgenTarget::archSpec = ArchSpec(
+const ArchSpec PnaDpdkTestgenTarget::ARCH_SPEC = ArchSpec(
     "PNA_NIC", {
                    // parser MainParserT<MH, MM>(
                    //     packet_in pkt,
@@ -91,7 +87,7 @@ const ArchSpec PnaDpdkTestgenTarget::archSpec = ArchSpec(
                    //     out   MH main_hdr,
                    //     inout MM main_user_meta,
                    //     in    pna_main_parser_input_metadata_t istd);
-                   {"MainParserT", {nullptr, "*main_hdr", "*main_user_meta", "*istd"}},
+                   {"MainParserT", {nullptr, "*main_hdr", "*main_user_meta", "*parser_istd"}},
                    // control PreControlT<PH, PM>(
                    //     in    PH pre_hdr,
                    //     inout PM pre_user_meta,
@@ -104,7 +100,7 @@ const ArchSpec PnaDpdkTestgenTarget::archSpec = ArchSpec(
                    //     inout MM main_user_meta,
                    //     in    pna_main_input_metadata_t  istd,
                    //     inout pna_main_output_metadata_t ostd);
-                   {"MainControlT", {"*main_hdr", "*main_user_meta", "*istd", "*ostd"}},
+                   {"MainControlT", {"*main_hdr", "*main_user_meta", "*main_istd", "*ostd"}},
                    // control MainDeparserT<MH, MM>(
                    //     packet_out pkt,
                    //     in    MH main_hdr,
@@ -113,6 +109,6 @@ const ArchSpec PnaDpdkTestgenTarget::archSpec = ArchSpec(
                    {"MainDeparserT", {nullptr, "*main_hdr", "*main_user_meta", "*ostd"}},
                });
 
-const ArchSpec *PnaDpdkTestgenTarget::getArchSpecImpl() const { return &archSpec; }
+const ArchSpec *PnaDpdkTestgenTarget::getArchSpecImpl() const { return &ARCH_SPEC; }
 
 }  // namespace P4Tools::P4Testgen::Pna

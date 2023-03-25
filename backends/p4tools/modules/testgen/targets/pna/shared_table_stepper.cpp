@@ -1,14 +1,12 @@
-#include "backends/p4tools/modules/testgen/targets/pna/table_stepper.h"
+#include "backends/p4tools/modules/testgen/targets/pna/shared_table_stepper.h"
 
 #include <cstddef>
-#include <map>
+#include <optional>
 #include <ostream>
 #include <string>
 #include <vector>
 
-#include <boost/format.hpp>
-#include <boost/none.hpp>
-#include <boost/optional/optional.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/trace_events.h"
@@ -17,11 +15,15 @@
 #include "ir/id.h"
 #include "ir/irutils.h"
 #include "ir/vector.h"
+#include "lib/cstring.h"
 #include "lib/error.h"
+#include "lib/log.h"
 #include "lib/null.h"
-#include "lib/safe_vector.h"
+#include "lib/source_file.h"
+#include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
 #include "backends/p4tools/modules/testgen/lib/collect_latent_statements.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
@@ -29,12 +31,12 @@
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/pna/constants.h"
-#include "backends/p4tools/modules/testgen/targets/pna/expr_stepper.h"
+#include "backends/p4tools/modules/testgen/targets/pna/shared_expr_stepper.h"
 #include "backends/p4tools/modules/testgen/targets/pna/test_spec.h"
 
 namespace P4Tools::P4Testgen::Pna {
 
-const IR::Expression *PnaDpdkTableStepper::computeTargetMatchType(
+const IR::Expression *SharedPnaTableStepper::computeTargetMatchType(
     ExecutionState *nextState, const KeyProperties &keyProperties, TableMatchMap *matches,
     const IR::Expression *hitCondition) {
     const IR::Expression *keyExpr = keyProperties.key->expression;
@@ -58,7 +60,7 @@ const IR::Expression *PnaDpdkTableStepper::computeTargetMatchType(
     }
     // Action selector entries are not part of the match.
     if (keyProperties.matchType == PnaConstants::MATCH_KIND_SELECTOR) {
-        PnaDpdkProperties.actionSelectorKeys.emplace_back(keyExpr);
+        SharedPnaProperties.actionSelectorKeys.emplace_back(keyExpr);
         return hitCondition;
     }
     // Ranges are not yet implemented for Pna STF tests.
@@ -86,7 +88,7 @@ const IR::Expression *PnaDpdkTableStepper::computeTargetMatchType(
     return TableStepper::computeTargetMatchType(nextState, keyProperties, matches, hitCondition);
 }
 
-void PnaDpdkTableStepper::evalTableActionProfile(
+void SharedPnaTableStepper::evalTableActionProfile(
     const std::vector<const IR::ActionListElement *> &tableActionList) {
     const auto *state = getExecutionState();
 
@@ -102,7 +104,7 @@ void PnaDpdkTableStepper::evalTableActionProfile(
         // We get the control plane name of the action we are calling.
         cstring actionName = actionType->controlPlaneName();
         // Copy the previous action profile.
-        auto *actionProfile = new PnaDpdkActionProfile(*PnaDpdkProperties.actionProfile);
+        auto *actionProfile = new PnaDpdkActionProfile(*SharedPnaProperties.actionProfile);
         // Synthesize arguments for the call based on the action parameters.
         const auto &parameters = actionType->parameters;
         auto *arguments = new IR::Vector<IR::Argument>();
@@ -175,7 +177,7 @@ void PnaDpdkTableStepper::evalTableActionProfile(
     }
 }
 
-void PnaDpdkTableStepper::evalTableActionSelector(
+void SharedPnaTableStepper::evalTableActionSelector(
     const std::vector<const IR::ActionListElement *> &tableActionList) {
     const auto *state = getExecutionState();
 
@@ -193,7 +195,7 @@ void PnaDpdkTableStepper::evalTableActionSelector(
 
         // Copy the previous action profile.
         auto *actionProfile = new PnaDpdkActionProfile(
-            PnaDpdkProperties.actionSelector->getActionProfile()->getProfileDecl());
+            SharedPnaProperties.actionSelector->getActionProfile()->getProfileDecl());
         // Synthesize arguments for the call based on the action parameters.
         const auto &parameters = actionType->parameters;
         auto *arguments = new IR::Vector<IR::Argument>();
@@ -219,7 +221,7 @@ void PnaDpdkTableStepper::evalTableActionSelector(
         actionProfile->addToActionMap(actionName, ctrlPlaneArgs);
 
         auto *actionSelector = new PnaDpdkActionSelector(
-            PnaDpdkProperties.actionSelector->getSelectorDecl(), actionProfile);
+            SharedPnaProperties.actionSelector->getSelectorDecl(), actionProfile);
 
         // Update the action profile in the execution state.
         nextState->addTestObject("action_profile", actionProfile->getObjectName(), actionProfile);
@@ -275,7 +277,7 @@ void PnaDpdkTableStepper::evalTableActionSelector(
     }
 }
 
-bool PnaDpdkTableStepper::checkForActionProfile() {
+bool SharedPnaTableStepper::checkForActionProfile() {
     const auto *impl = table->properties->getProperty("implementation");
     if (impl == nullptr) {
         return false;
@@ -308,16 +310,16 @@ bool PnaDpdkTableStepper::checkForActionProfile() {
     if (testObject == nullptr) {
         // This means, for every possible control plane entry (and with that, new execution state)
         // add the generated action profile.
-        PnaDpdkProperties.addProfileToState = true;
-        PnaDpdkProperties.actionProfile = new PnaDpdkActionProfile(implDecl);
+        SharedPnaProperties.addProfileToState = true;
+        SharedPnaProperties.actionProfile = new PnaDpdkActionProfile(implDecl);
         return true;
     }
-    PnaDpdkProperties.actionProfile = testObject->checkedTo<PnaDpdkActionProfile>();
-    PnaDpdkProperties.addProfileToState = false;
+    SharedPnaProperties.actionProfile = testObject->checkedTo<PnaDpdkActionProfile>();
+    SharedPnaProperties.addProfileToState = false;
     return true;
 }
 
-bool PnaDpdkTableStepper::checkForActionSelector() {
+bool SharedPnaTableStepper::checkForActionSelector() {
     const auto *impl = table->properties->getProperty("implementation");
     if (impl == nullptr) {
         return false;
@@ -351,16 +353,16 @@ bool PnaDpdkTableStepper::checkForActionSelector() {
     if (testObject == nullptr) {
         // This means, for every possible control plane entry (and with that, new execution state)
         // add the generated action profile.
-        PnaDpdkProperties.addProfileToState = true;
-        PnaDpdkProperties.actionProfile = new PnaDpdkActionProfile(selectorDecl);
+        SharedPnaProperties.addProfileToState = true;
+        SharedPnaProperties.actionProfile = new PnaDpdkActionProfile(selectorDecl);
         return true;
     }
-    PnaDpdkProperties.actionProfile = testObject->checkedTo<PnaDpdkActionProfile>();
-    PnaDpdkProperties.addProfileToState = false;
+    SharedPnaProperties.actionProfile = testObject->checkedTo<PnaDpdkActionProfile>();
+    SharedPnaProperties.addProfileToState = false;
     return true;
 }
 
-void PnaDpdkTableStepper::checkTargetProperties(
+void SharedPnaTableStepper::checkTargetProperties(
     const std::vector<const IR::ActionListElement *> & /*tableActionList*/) {
     // Iterate over the table keys and check whether we can mitigate taint.
     for (auto keyProperties : properties.resolvedKeys) {
@@ -378,19 +380,19 @@ void PnaDpdkTableStepper::checkTargetProperties(
 
     // Check whether the table has an action profile associated with it.
     if (checkForActionProfile()) {
-        PnaDpdkProperties.implementaton = TableImplementation::profile;
+        SharedPnaProperties.implementaton = TableImplementation::profile;
         return;
     }
 
     // Check whether the table has an action selector associated with it.
     if (checkForActionSelector()) {
         // TODO: This should be a selector. Implement.
-        PnaDpdkProperties.implementaton = TableImplementation::profile;
+        SharedPnaProperties.implementaton = TableImplementation::profile;
         return;
     }
 }
 
-void PnaDpdkTableStepper::evalTargetTable(
+void SharedPnaTableStepper::evalTargetTable(
     const std::vector<const IR::ActionListElement *> &tableActionList) {
     const auto *keys = table->getKey();
     // If we have no keys, there is nothing to match.
@@ -407,20 +409,20 @@ void PnaDpdkTableStepper::evalTargetTable(
                 "Choosing default action",
                 properties.tableName, testBackend);
         }
-        addDefaultAction(boost::none);
+        addDefaultAction(std::nullopt);
         return;
     }
 
     // If the table is not constant, the default action can always be executed.
     // This is because we can simply not enter any table entry.
-    boost::optional<const IR::Expression *> tableMissCondition = boost::none;
+    std::optional<const IR::Expression *> tableMissCondition = std::nullopt;
 
     // If the table is not immutable, we synthesize control plane entries and follow the paths.
     if (properties.tableIsImmutable) {
-        PnaDpdkProperties.implementaton = TableImplementation::constant;
+        SharedPnaProperties.implementaton = TableImplementation::constant;
     }
 
-    switch (PnaDpdkProperties.implementaton) {
+    switch (SharedPnaProperties.implementaton) {
         case TableImplementation::selector: {
             // If an action selector is attached to the table, do not assume normal control plane
             // behavior.
@@ -465,7 +467,8 @@ void PnaDpdkTableStepper::evalTargetTable(
     addDefaultAction(tableMissCondition);
 }
 
-PnaDpdkTableStepper::PnaDpdkTableStepper(PnaDpdkExprStepper *stepper, const IR::P4Table *table)
+SharedPnaTableStepper::SharedPnaTableStepper(SharedPnaExprStepper *stepper,
+                                             const IR::P4Table *table)
     : TableStepper(stepper, table) {}
 
 }  // namespace P4Tools::P4Testgen::Pna

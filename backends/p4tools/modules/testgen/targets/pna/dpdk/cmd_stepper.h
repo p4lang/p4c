@@ -1,37 +1,32 @@
-#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_CMD_STEPPER_H_
-#define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_CMD_STEPPER_H_
+#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_DPDK_CMD_STEPPER_H_
+#define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_DPDK_CMD_STEPPER_H_
 
 #include <map>
+#include <optional>
 #include <string>
-
-#include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
 #include "ir/ir.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
-#include "backends/p4tools/modules/testgen/core/small_step/cmd_stepper.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
-#include "backends/p4tools/modules/testgen/targets/pna/program_info.h"
+#include "backends/p4tools/modules/testgen/targets/pna/dpdk/program_info.h"
+#include "backends/p4tools/modules/testgen/targets/pna/shared_cmd_stepper.h"
 
-namespace P4Tools {
+namespace P4Tools::P4Testgen::Pna {
 
-namespace P4Testgen {
-
-namespace Pna {
-
-class PnaDpdkCmdStepper : public CmdStepper {
+class PnaDpdkCmdStepper : public SharedPnaCmdStepper {
  protected:
-    std::string getClassName() override { return "PnaDpdkCmdStepper"; }
+    std::string getClassName() override;
 
     const PnaDpdkProgramInfo &getProgramInfo() const override;
 
     void initializeTargetEnvironment(ExecutionState *nextState) const override;
 
-    boost::optional<const Constraint *> startParser_impl(const IR::P4Parser *parser,
-                                                         ExecutionState *state) const override;
+    std::optional<const Constraint *> startParser_impl(const IR::P4Parser *parser,
+                                                       ExecutionState *state) const override;
 
     std::map<Continuation::Exception, Continuation> getExceptionHandlers(
         const IR::P4Parser *parser, Continuation::Body normalContinuation,
@@ -42,10 +37,6 @@ class PnaDpdkCmdStepper : public CmdStepper {
                       const ProgramInfo &programInfo);
 };
 
-}  // namespace Pna
+}  // namespace P4Tools::P4Testgen::Pna
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
-
-#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_CMD_STEPPER_H_ */
+#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_DPDK_CMD_STEPPER_H_ */

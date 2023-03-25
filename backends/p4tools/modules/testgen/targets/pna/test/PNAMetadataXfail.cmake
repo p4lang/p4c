@@ -48,5 +48,4 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-pna-metadata"
   "Internal error: Can not shift by a negative value."
-  pna-example-varIndex-2.p4
 )

@@ -1,48 +1,20 @@
-#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_TABLE_STEPPER_H_
-#define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_TABLE_STEPPER_H_
+#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_SHARED_TABLE_STEPPER_H_
+#define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_SHARED_TABLE_STEPPER_H_
 
-#include <map>
 #include <vector>
 
 #include "ir/ir.h"
-#include "lib/cstring.h"
 
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
-#include "backends/p4tools/modules/testgen/targets/pna/expr_stepper.h"
+#include "backends/p4tools/modules/testgen/targets/pna/shared_expr_stepper.h"
 #include "backends/p4tools/modules/testgen/targets/pna/test_spec.h"
 
 namespace P4Tools::P4Testgen::Pna {
 
-class PnaDpdkTableStepper : public TableStepper {
- private:
-    /// Specifies the type of the table implementation:
-    /// standard: standard implementation - use normal control plane entries.
-    /// selector: ActionSelector implementation - also uses an action profile.
-    /// profile:  ACtionProfile implementation - normal entries are not valid
-    /// constant: The table is constant - no control entries are possible.
-    /// skip: Skip the implementation and just use the default entry (no entry at all).
-    enum class TableImplementation { standard, selector, profile, constant, skip };
-
-    /// PNA-DPDK specific table properties.
-    struct PnaDpdkProperties {
-        /// The table has an action profile associated with it.
-        const PnaDpdkActionProfile *actionProfile = nullptr;
-
-        /// The table has an action selector associated with it.
-        const PnaDpdkActionSelector *actionSelector = nullptr;
-
-        /// The selector keys that are part of the selector hash that is calculated.
-        std::vector<const IR::Expression *> actionSelectorKeys;
-
-        /// The current execution state does not have this profile added to it yet.
-        bool addProfileToState = false;
-
-        /// The type of the table implementation.
-        TableImplementation implementaton = TableImplementation::standard;
-    } PnaDpdkProperties;
-
+class SharedPnaTableStepper : public TableStepper {
+ protected:
     /// Check whether the table has an action profile implementation.
     bool checkForActionProfile();
 
@@ -57,7 +29,32 @@ class PnaDpdkTableStepper : public TableStepper {
     /// accordingly. Entries will use indices to refer to actions instead of their labels.
     void evalTableActionSelector(const std::vector<const IR::ActionListElement *> &tableActionList);
 
- protected:
+    /// Specifies the type of the table implementation:
+    /// standard: standard implementation - use normal control plane entries.
+    /// selector: ActionSelector implementation - also uses an action profile.
+    /// profile:  ACtionProfile implementation - normal entries are not valid
+    /// constant: The table is constant - no control entries are possible.
+    /// skip: Skip the implementation and just use the default entry (no entry at all).
+    enum class TableImplementation { standard, selector, profile, constant, skip };
+
+    /// Shared PNA table properties.
+    struct SharedPnaProperties {
+        /// The table has an action profile associated with it.
+        const PnaDpdkActionProfile *actionProfile = nullptr;
+
+        /// The table has an action selector associated with it.
+        const PnaDpdkActionSelector *actionSelector = nullptr;
+
+        /// The selector keys that are part of the selector hash that is calculated.
+        std::vector<const IR::Expression *> actionSelectorKeys;
+
+        /// The current execution state does not have this profile added to it yet.
+        bool addProfileToState = false;
+
+        /// The type of the table implementation.
+        TableImplementation implementaton = TableImplementation::standard;
+    } SharedPnaProperties;
+
     const IR::Expression *computeTargetMatchType(ExecutionState *nextState,
                                                  const KeyProperties &keyProperties,
                                                  TableMatchMap *matches,
@@ -70,9 +67,9 @@ class PnaDpdkTableStepper : public TableStepper {
         const std::vector<const IR::ActionListElement *> &tableActionList) override;
 
  public:
-    explicit PnaDpdkTableStepper(PnaDpdkExprStepper *stepper, const IR::P4Table *table);
+    explicit SharedPnaTableStepper(SharedPnaExprStepper *stepper, const IR::P4Table *table);
 };
 
 }  // namespace P4Tools::P4Testgen::Pna
 
-#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_TABLE_STEPPER_H_ */
+#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_SHARED_TABLE_STEPPER_H_ */
