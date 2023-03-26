@@ -2,12 +2,13 @@
 
 #include <stdint.h>
 
+#include <gtest/gtest.h>
+
 #include <string>
 
+#include <boost/multiprecision/cpp_int.hpp>
+
 #include "backends/p4tools/common/lib/format_int.h"
-#include "gtest/gtest-message.h"
-#include "gtest/gtest-test-part.h"
-#include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 

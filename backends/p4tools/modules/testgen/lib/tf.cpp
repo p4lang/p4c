@@ -1,8 +1,14 @@
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 
+#include <ctype.h>
+
+#include <algorithm>
 #include <optional>
+#include <ostream>
 
 #include "backends/p4tools/common/lib/util.h"
+#include "inja/inja.hpp"
+#include "lib/log.h"
 #include "lib/timer.h"
 
 namespace P4Tools::P4Testgen {

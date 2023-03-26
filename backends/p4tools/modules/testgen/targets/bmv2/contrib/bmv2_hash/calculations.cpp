@@ -1,6 +1,6 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/contrib/bmv2_hash/calculations.h"
 
-#include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include <algorithm>
 

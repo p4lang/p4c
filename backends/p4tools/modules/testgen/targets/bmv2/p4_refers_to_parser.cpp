@@ -1,18 +1,21 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_refers_to_parser.h"
 
-#include <algorithm>
+#include <stddef.h>
+
 #include <cstdint>
 #include <iostream>
 #include <string>
 
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "ir/declaration.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"
+#include "ir/vector.h"
 #include "lib/exceptions.h"
+#include "lib/log.h"
 #include "lib/null.h"
-#include "lib/safe_vector.h"
 
 namespace P4Tools::RefersToParser {
 

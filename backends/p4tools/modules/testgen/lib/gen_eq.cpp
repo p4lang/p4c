@@ -1,8 +1,11 @@
 #include "backends/p4tools/modules/testgen/lib/gen_eq.h"
 
 #include <cstddef>
+#include <string>
+#include <vector>
 
 #include "ir/vector.h"
+#include "lib/cstring.h"
 #include "lib/exceptions.h"
 
 namespace P4Tools {

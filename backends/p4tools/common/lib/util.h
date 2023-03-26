@@ -1,8 +1,11 @@
 #ifndef BACKENDS_P4TOOLS_COMMON_LIB_UTIL_H_
 #define BACKENDS_P4TOOLS_COMMON_LIB_UTIL_H_
 
+#include <algorithm>
 #include <cstdint>
+#include <iterator>
 #include <optional>
+#include <ostream>
 #include <string>
 #include <utility>
 #include <vector>

@@ -1,10 +1,8 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SYMBOLIC_EXECUTOR_SYMBOLIC_EXECUTOR_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SYMBOLIC_EXECUTOR_SYMBOLIC_EXECUTOR_H_
 
-#include <cstdint>
 #include <functional>
 #include <iosfwd>
-#include <optional>
 #include <vector>
 
 #include "backends/p4tools/common/core/solver.h"

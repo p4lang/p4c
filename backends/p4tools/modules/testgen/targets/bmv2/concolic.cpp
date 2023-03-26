@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <list>
 #include <map>
 #include <utility>
 #include <vector>
@@ -12,6 +13,7 @@
 #include <boost/multiprecision/detail/et_ops.hpp>
 #include <boost/multiprecision/number.hpp>
 #include <boost/multiprecision/traits/explicit_conversion.hpp>
+#include <boost/variant/variant.hpp>
 
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
@@ -20,6 +22,7 @@
 #include "ir/vector.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
+#include "lib/log.h"
 
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"

@@ -3,7 +3,6 @@
 #include "backends/p4tools/common/compiler/convert_varbits.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/options.h"
-#include "frontends/common/parser_options.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/parserControlFlow.h"

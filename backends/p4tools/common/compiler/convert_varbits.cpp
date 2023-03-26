@@ -1,5 +1,7 @@
 #include "backends/p4tools/common/compiler/convert_varbits.h"
 
+#include "lib/log.h"
+
 namespace P4Tools {
 
 const IR::Node *ConvertVarbits::postorder(IR::Type_Varbits *varbit) {

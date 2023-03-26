@@ -1,17 +1,16 @@
+#include <gtest/gtest.h>
+
 #include <optional>
 #include <sstream>
 #include <string>
 #include <vector>
 
 #include "backends/p4tools/common/core/z3_solver.h"
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
-#include "gtest/gtest-message.h"
-#include "gtest/gtest-test-part.h"
-#include "gtest/gtest.h"
 #include "ir/declaration.h"
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"
+#include "lib/cstring.h"
 #include "lib/enumerator.h"
 #include "test/gtest/helpers.h"
 

@@ -1,5 +1,7 @@
 #include "backends/p4tools/common/compiler/reachability.h"
 
+#include <gtest/gtest.h>
+
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
@@ -11,9 +13,6 @@
 #include "frontends/common/parseInput.h"
 #include "frontends/common/parser_options.h"
 #include "frontends/p4/frontend.h"
-#include "gtest/gtest-message.h"
-#include "gtest/gtest-test-part.h"
-#include "gtest/gtest.h"
 #include "ir/declaration.h"
 #include "ir/ir.h"
 #include "ir/node.h"

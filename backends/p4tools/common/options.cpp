@@ -1,6 +1,5 @@
 #include "backends/p4tools/common/options.h"
 
-#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <functional>

@@ -1,5 +1,17 @@
 #include "backends/p4tools/modules/testgen/lib/collect_latent_statements.h"
 
+#include <string>
+#include <vector>
+
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/node.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
+#include "lib/null.h"
+#include "lib/source_file.h"
+
 namespace P4Tools::P4Testgen {
 
 bool CollectLatentStatements::preorder(const IR::ParserState *parserState) {

@@ -2,16 +2,14 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SYMBOLIC_EXECUTOR_GREEDY_STMT_COV_H_
 
 #include <cstdint>
-#include <ctime>
 #include <optional>
-#include <stack>
 #include <vector>
 
 #include "backends/p4tools/common/core/solver.h"
+#include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
-#include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
 namespace P4Tools::P4Testgen {
 

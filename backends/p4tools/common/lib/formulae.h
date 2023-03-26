@@ -7,7 +7,6 @@
 #include "ir/ir.h"
 #include "ir/node.h"
 #include "lib/exceptions.h"
-#include "lib/log.h"
 
 namespace P4Tools {
 

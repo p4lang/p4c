@@ -1,10 +1,13 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend.h"
 
+#include <stdlib.h>
+
 #include <map>
 #include <optional>
-#include <ostream>
 #include <string>
 #include <utility>
+
+#include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/trace_events.h"
@@ -13,7 +16,9 @@
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "lib/cstring.h"
+#include "lib/error.h"
 #include "lib/exceptions.h"
+#include "lib/log.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"

@@ -2,13 +2,11 @@
 
 #include <cstddef>
 #include <functional>
-#include <list>
 #include <optional>
 #include <ostream>
 #include <vector>
 
-#include <boost/cstdint.hpp>
-#include <boost/format.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
 #include <boost/multiprecision/number.hpp>
 #include <boost/variant/get.hpp>
 
@@ -19,16 +17,13 @@
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/declaration.h"
 #include "ir/indexed_vector.h"
-#include "ir/ir-inline.h"
 #include "ir/irutils.h"
 #include "ir/node.h"
-#include "lib/big_int_util.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"
 #include "lib/ordered_map.h"
-#include "lib/safe_vector.h"
 
 #include "backends/p4tools/modules/testgen/core/arch_spec.h"
 #include "backends/p4tools/modules/testgen/core/externs.h"

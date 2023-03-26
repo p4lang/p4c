@@ -2,7 +2,6 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SMALL_STEP_TABLE_STEPPER_H_
 
 #include <cstddef>
-#include <map>
 #include <optional>
 #include <vector>
 
@@ -11,7 +10,6 @@
 #include "lib/cstring.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
-#include "backends/p4tools/modules/testgen/core/small_step/abstract_stepper.h"
 #include "backends/p4tools/modules/testgen/core/small_step/expr_stepper.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"

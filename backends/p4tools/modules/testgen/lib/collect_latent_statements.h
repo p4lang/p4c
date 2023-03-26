@@ -1,8 +1,11 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_COLLECT_LATENT_STATEMENTS_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_COLLECT_LATENT_STATEMENTS_H_
 
-#include <cstdint>
 #include <set>
+
+#include "ir/ir.h"
+#include "ir/visitor.h"
+#include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 

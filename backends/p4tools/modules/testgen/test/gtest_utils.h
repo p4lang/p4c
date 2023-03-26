@@ -5,7 +5,6 @@
 #include <string>
 
 #include "frontends/common/options.h"
-#include "frontends/common/parser_options.h"
 #include "ir/ir.h"
 #include "test/frameworks/gtest/googletest/include/gtest/gtest.h"
 

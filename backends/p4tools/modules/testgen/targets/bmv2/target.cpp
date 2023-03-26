@@ -3,7 +3,6 @@
 #include <stddef.h>
 
 #include <map>
-#include <string>
 #include <vector>
 
 #include "backends/p4tools/common/core/solver.h"

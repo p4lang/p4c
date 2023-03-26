@@ -1,20 +1,16 @@
 #include "backends/p4tools/common/lib/util.h"
 
-#include <cxxabi.h>
-
 #include <lib/null.h>
 
-#include <algorithm>
 #include <chrono>  // NOLINT cpplint throws a warning because Google has a similar library...
 #include <cstdint>
 #include <ctime>
 #include <iomanip>
 #include <map>
 #include <optional>
-#include <sstream>
+#include <ratio>
 #include <tuple>
 
-#include <boost/cstdint.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/multiprecision/cpp_int/add.hpp>
 #include <boost/multiprecision/detail/et_ops.hpp>
@@ -26,7 +22,7 @@
 #include "ir/id.h"
 #include "ir/irutils.h"
 #include "ir/vector.h"
-#include "lib/safe_vector.h"
+#include "lib/exceptions.h"
 
 namespace P4Tools {
 

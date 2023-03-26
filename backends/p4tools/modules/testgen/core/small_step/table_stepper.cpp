@@ -1,13 +1,13 @@
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
 
 #include <algorithm>
-#include <map>
 #include <optional>
 #include <ostream>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include <boost/multiprecision/cpp_int.hpp>
 #include <boost/multiprecision/number.hpp>
 
 #include "backends/p4tools/common/lib/formulae.h"
@@ -18,15 +18,16 @@
 #include "ir/indexed_vector.h"
 #include "ir/irutils.h"
 #include "ir/vector.h"
-#include "lib/big_int_util.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"
 #include "lib/null.h"
-#include "lib/safe_vector.h"
+#include "lib/source_file.h"
+#include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/core/constants.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/expr_stepper.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
 #include "backends/p4tools/modules/testgen/lib/collect_latent_statements.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"

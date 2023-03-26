@@ -5,7 +5,6 @@
 
 #include <functional>
 #include <list>
-#include <map>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -19,6 +18,7 @@
 #include "ir/vector.h"
 #include "ir/visitor.h"
 #include "lib/cstring.h"
+#include "lib/ordered_map.h"
 
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 

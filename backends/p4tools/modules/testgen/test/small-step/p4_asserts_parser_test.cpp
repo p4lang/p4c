@@ -2,10 +2,13 @@
 
 #include <unistd.h>
 
+#include <gtest/gtest.h>
+
 #include <cstdlib>
-#include <memory>
 #include <string>
 #include <vector>
+
+#include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4test/version.h"
 #include "backends/p4tools/common/compiler/midend.h"
@@ -17,9 +20,6 @@
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/frontend.h"
 #include "frontends/p4/typeMap.h"
-#include "gtest/gtest-message.h"
-#include "gtest/gtest-test-part.h"
-#include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "lib/compile_context.h"

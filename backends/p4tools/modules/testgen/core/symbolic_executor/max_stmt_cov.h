@@ -3,13 +3,11 @@
 
 #include <cstdint>
 #include <list>
-#include <map>
-#include <optional>
-#include <type_traits>
 #include <utility>
 #include <vector>
 
 #include "backends/p4tools/common/core/solver.h"
+#include "lib/ordered_map.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"

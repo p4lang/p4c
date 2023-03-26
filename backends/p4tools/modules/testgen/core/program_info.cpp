@@ -1,12 +1,11 @@
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 
-#include <string>
-
 #include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/id.h"
+#include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "midend/coverage.h"
 

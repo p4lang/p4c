@@ -1,6 +1,5 @@
 #include "backends/p4tools/modules/testgen/core/arch_spec.h"
 
-#include <memory>
 #include <utility>
 
 #include "lib/exceptions.h"

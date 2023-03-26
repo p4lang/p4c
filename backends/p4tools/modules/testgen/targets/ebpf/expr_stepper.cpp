@@ -3,11 +3,14 @@
 #include <functional>
 #include <vector>
 
+#include <boost/multiprecision/cpp_int.hpp>
+
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
+#include "lib/log.h"
 
 #include "backends/p4tools/modules/testgen/core/externs.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"

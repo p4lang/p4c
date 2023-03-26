@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+#include <filesystem>
 #include <optional>
 
 #include "backends/p4tools/common/core/solver.h"

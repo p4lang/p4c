@@ -2,6 +2,7 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_SPEC_H_
 
 #include <cstddef>
+#include <map>
 #include <utility>
 #include <vector>
 

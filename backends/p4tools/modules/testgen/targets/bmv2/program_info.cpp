@@ -3,8 +3,12 @@
 #include <list>
 #include <map>
 #include <optional>
+#include <string>
 #include <utility>
 #include <vector>
+
+#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/variant/variant.hpp>
 
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/util.h"
@@ -23,6 +27,7 @@
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/concolic.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/constants.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_asserts_parser.h"

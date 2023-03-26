@@ -1,7 +1,10 @@
 #include "backends/p4tools/common/lib/taint.h"
 
 #include <cstddef>
+#include <string>
 #include <vector>
+
+#include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
@@ -11,10 +14,10 @@
 #include "ir/node.h"
 #include "ir/vector.h"
 #include "ir/visitor.h"
-#include "lib/big_int_util.h"
 #include "lib/bitvec.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
+#include "lib/log.h"
 #include "lib/null.h"
 
 namespace P4Tools {
