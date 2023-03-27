@@ -9,6 +9,13 @@
 ####################################################################################################
 # These are failures in P4Testgen that need to be fixed.
 
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-metadata"
+  ""
+  # Crashes the compiler
+  array-copy-bmv2.p4
+)
+
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-metadata"

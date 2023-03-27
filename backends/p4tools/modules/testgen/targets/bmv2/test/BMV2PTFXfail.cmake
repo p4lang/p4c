@@ -7,6 +7,14 @@
 # These are issues either with the P4 compiler or the behavioral model executing the code.
 # These issues needed to be tracked and fixed in P4C.
 ####################################################################################################
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-metadata"
+  ""
+  # Crashes the compiler
+  array-copy-bmv2.p4
+)
+
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
   "Assertion"

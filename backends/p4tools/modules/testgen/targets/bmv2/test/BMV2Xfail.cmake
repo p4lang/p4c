@@ -9,6 +9,13 @@
 ####################################################################################################
 
 p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-metadata"
+  ""
+  # Crashes the compiler
+  array-copy-bmv2.p4
+)
+
+p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
   "simple_switch died with return code -6"
   # Assertion 'Default switch case should not be reachable' failed,

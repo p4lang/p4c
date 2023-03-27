@@ -987,11 +987,6 @@ bool ToP4::preorder(const IR::InvalidHeaderUnion *e) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Invalid *) {
-    builder.append("{#}");
-    return false;
-}
-
 bool ToP4::preorder(const IR::MethodCallExpression *e) {
     int prec = expressionPrecedence;
     bool useParens = (prec > DBPrint::Prec_Postfix) ||

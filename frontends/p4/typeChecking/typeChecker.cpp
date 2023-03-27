@@ -2160,10 +2160,11 @@ const IR::Node *TypeInference::postorder(IR::InvalidHeader *expression) {
 const IR::Node *TypeInference::postorder(IR::InvalidHeaderUnion *expression) {
     if (done()) return expression;
     auto type = getTypeType(expression->headerUnionType);
+    auto concreteType = type;
     if (auto ts = concreteType->to<IR::Type_SpecializedCanonical>()) concreteType = ts->substituted;
     if (!concreteType->is<IR::Type_HeaderUnion>()) {
-	typeError("%1%: does not have a header_union type `%2%`", expression, type);
-	return expression;
+        typeError("%1%: does not have a header_union type `%2%`", expression, type);
+        return expression;
     }
     setType(expression, type);
     setType(getOriginal(), type);
@@ -2811,12 +2812,15 @@ const IR::Node *TypeInference::postorder(IR::Cast *expression) {
             }
         } else if (auto ih = expression->expr->to<IR::Invalid>()) {
             auto type = castType->getP4Type();
-            if (castType->is<IR::Type_Header>()) {
+            auto concreteCastType = castType;
+            if (auto ts = castType->to<IR::Type_SpecializedCanonical>())
+                concreteCastType = ts->substituted;
+            if (concreteCastType->is<IR::Type_Header>()) {
                 setType(type, new IR::Type_Type(castType));
                 auto result = new IR::InvalidHeader(ih->srcInfo, type, type);
                 setType(result, castType);
                 return result;
-            } else if (castType->is<IR::Type_HeaderUnion>()) {
+            } else if (concreteCastType->is<IR::Type_HeaderUnion>()) {
                 setType(type, new IR::Type_Type(castType));
                 auto result = new IR::InvalidHeaderUnion(ih->srcInfo, type, type);
                 setType(result, castType);
