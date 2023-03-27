@@ -3,9 +3,8 @@
 #include <cstddef>
 #include <list>
 #include <map>
+#include <optional>
 #include <utility>
-
-#include <boost/none.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
@@ -62,9 +61,9 @@ void EBPFCmdStepper::initializeTargetEnvironment(ExecutionState *nextState) cons
     nextState->setParserErrorLabel(errVar);
 }
 
-boost::optional<const Constraint *> EBPFCmdStepper::startParser_impl(
+std::optional<const Constraint *> EBPFCmdStepper::startParser_impl(
     const IR::P4Parser * /*parser*/, ExecutionState * /*nextState*/) const {
-    return boost::none;
+    return std::nullopt;
 }
 
 std::map<Continuation::Exception, Continuation> EBPFCmdStepper::getExceptionHandlers(

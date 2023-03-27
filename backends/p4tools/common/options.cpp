@@ -28,7 +28,7 @@ std::tuple<int, char **> AbstractP4cToolOptions::convertArgs(
     return {argc, argv};
 }
 
-boost::optional<ICompileContext *> AbstractP4cToolOptions::process(
+std::optional<ICompileContext *> AbstractP4cToolOptions::process(
     const std::vector<const char *> &args) {
     // Compiler expects path to executable as first element in argument list.
     compilerArgs.push_back(args.at(0));
@@ -47,7 +47,7 @@ boost::optional<ICompileContext *> AbstractP4cToolOptions::process(
     // Delegate to the hook.
     auto *remainingArgs = process(argc, argv);
     if ((remainingArgs == nullptr) || ::errorCount() > 0) {
-        return boost::none;
+        return std::nullopt;
     }
 
     // Establish the real compilation context.
@@ -59,7 +59,7 @@ boost::optional<ICompileContext *> AbstractP4cToolOptions::process(
     auto *unprocessedCompilerArgs = P4Tools::CompilerTarget::initCompiler(argc, argv);
 
     if ((unprocessedCompilerArgs == nullptr) || ::errorCount() > 0) {
-        return boost::none;
+        return std::nullopt;
     }
     BUG_CHECK(unprocessedCompilerArgs->empty(), "Compiler did not process all of its arguments: %s",
               cstring::join(unprocessedCompilerArgs->begin(), unprocessedCompilerArgs->end(), " "));
@@ -70,16 +70,16 @@ boost::optional<ICompileContext *> AbstractP4cToolOptions::process(
         ::error("Only one input file can be specified. Duplicate args:\n%1%",
                 cstring::join(remainingArgs->begin(), remainingArgs->end(), "\n  "));
         usage();
-        return boost::none;
+        return std::nullopt;
     }
     if (remainingArgs->empty()) {
         ::error("No input files specified");
         usage();
-        return boost::none;
+        return std::nullopt;
     }
     P4CContext::get().options().file = remainingArgs->at(0);
 
-    return boost::make_optional(::errorCount() == 0, compilerContext);
+    return compilerContext;
 }
 
 std::vector<const char *> *AbstractP4cToolOptions::process(int argc, char *const argv[]) {
@@ -102,7 +102,7 @@ struct InheritedCompilerOptionSpec {
     /// An optional handler for the option. If provided, this is executed before the option is
     /// forwarded to the compiler. Any argument to the option is provided to the handler. The
     /// handler should return true on successful processing, and false otherwise.
-    boost::optional<std::function<bool(const char *)>> handler;
+    std::optional<std::function<bool(const char *)>> handler;
 };
 
 AbstractP4cToolOptions::AbstractP4cToolOptions(cstring message) : Options(message) {
@@ -143,7 +143,7 @@ AbstractP4cToolOptions::AbstractP4cToolOptions(cstring message) : Options(messag
         {"--std", "{p4-14|p4-16}", "Specifies source language version.", {}},
         {"-T", "loglevel", "Adjusts logging level per file.", {}},
         {"--target", "target", "Specifies the device targeted by the program.",
-         boost::optional<std::function<bool(const char *)>>{[](const char *arg) {
+         std::optional<std::function<bool(const char *)>>{[](const char *arg) {
              if (!P4Tools::Target::setDevice(arg)) {
                  ::error("Unsupported target device: %s", arg);
                  return false;
@@ -151,7 +151,7 @@ AbstractP4cToolOptions::AbstractP4cToolOptions(cstring message) : Options(messag
              return true;
          }}},
         {"--arch", "arch", "Specifies the architecture targeted by the program.",
-         boost::optional<std::function<bool(const char *)>>{[](const char *arg) {
+         std::optional<std::function<bool(const char *)>>{[](const char *arg) {
              if (!P4Tools::Target::setArch(arg)) {
                  ::error("Unsupported architecture: %s", arg);
                  return false;

@@ -2,8 +2,8 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TF_H_
 
 #include <cstddef>
+#include <optional>
 
-#include <boost/optional/optional.hpp>
 #include <inja/inja.hpp>
 
 #include "backends/p4tools/common/lib/format_int.h"
@@ -21,10 +21,10 @@ class TF {
     const cstring testName;
 
     /// The seed used by the testgen.
-    boost::optional<unsigned int> seed;
+    std::optional<unsigned int> seed;
 
     /// Creates a generic test framework.
-    explicit TF(cstring, boost::optional<unsigned int>);
+    explicit TF(cstring, std::optional<unsigned int>);
 
     /// Converts the traces of this test into a string representation and Inja object.
     static inja::json getTrace(const TestSpec *testSpec) {

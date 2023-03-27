@@ -1,10 +1,10 @@
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 
 #include <map>
+#include <optional>
 #include <utility>
 #include <vector>
 
-#include <boost/none.hpp>
 #include <boost/variant/apply_visitor.hpp>
 
 #include "backends/p4tools/common/lib/formulae.h"
@@ -262,17 +262,17 @@ const TableConfig *TableConfig::evaluate(const Model &model) const {
  * Test Specification Object
  * ========================================================================================= */
 
-TestSpec::TestSpec(Packet ingressPacket, boost::optional<Packet> egressPacket,
+TestSpec::TestSpec(Packet ingressPacket, std::optional<Packet> egressPacket,
                    std::vector<gsl::not_null<const TraceEvent *>> traces)
     : ingressPacket(std::move(ingressPacket)),
       egressPacket(std::move(egressPacket)),
       traces(std::move(traces)) {}
 
-boost::optional<const Packet *> TestSpec::getEgressPacket() const {
+std::optional<const Packet *> TestSpec::getEgressPacket() const {
     if (egressPacket) {
         return &(*egressPacket);
     }
-    return boost::none;
+    return std::nullopt;
 }
 
 const Packet *TestSpec::getIngressPacket() const { return &ingressPacket; }

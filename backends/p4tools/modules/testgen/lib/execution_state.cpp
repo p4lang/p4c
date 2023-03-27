@@ -96,9 +96,9 @@ ExecutionState::ExecutionState(Continuation::Body body)
 
 bool ExecutionState::isTerminal() const { return body.empty() && stack.empty(); }
 
-boost::optional<const Continuation::Command> ExecutionState::getNextCmd() const {
+std::optional<const Continuation::Command> ExecutionState::getNextCmd() const {
     if (body.empty()) {
-        return boost::none;
+        return std::nullopt;
     }
     return body.next();
 }
@@ -260,32 +260,32 @@ void ExecutionState::pushContinuation(gsl::not_null<const StackFrame *> frame) {
 }
 
 void ExecutionState::pushCurrentContinuation(StackFrame::ExceptionHandlers handlers) {
-    pushCurrentContinuation(boost::none, handlers);
+    pushCurrentContinuation(std::nullopt, std::move(handlers));
 }
 
-void ExecutionState::pushCurrentContinuation(boost::optional<const IR::Type *> parameterType_opt,
+void ExecutionState::pushCurrentContinuation(std::optional<const IR::Type *> parameterType_opt,
                                              StackFrame::ExceptionHandlers handlers) {
-    // If we were given a void parameter type, treat that the same as boost::none.
+    // If we were given a void parameter type, treat that the same as std::nullopt.
     if (parameterType_opt && IR::Type::Void::get()->equiv(**parameterType_opt)) {
-        parameterType_opt = boost::none;
+        parameterType_opt = std::nullopt;
     }
 
     // Create the optional parameter.
-    boost::optional<const Continuation::Parameter *> parameter_opt = boost::none;
+    std::optional<const Continuation::Parameter *> parameterOpt = std::nullopt;
     if (parameterType_opt) {
         const auto *parameter =
             Continuation::genParameter(*parameterType_opt, "_", getNamespaceContext());
-        parameter_opt = boost::make_optional(parameter);
+        parameterOpt = parameter;
     }
 
     // Actually push the current continuation.
-    Continuation k(parameter_opt, body);
-    const auto *frame = new StackFrame(k, handlers, namespaces);
+    Continuation k(parameterOpt, body);
+    const auto *frame = new StackFrame(k, std::move(handlers), namespaces);
     pushContinuation(frame);
     body.clear();
 }
 
-void ExecutionState::popContinuation(boost::optional<const IR::Node *> argument_opt) {
+void ExecutionState::popContinuation(std::optional<const IR::Node *> argument_opt) {
     BUG_CHECK(!stack.empty(), "Popped an empty continuation stack");
     auto frame = stack.top();
     stack.pop();
@@ -300,7 +300,7 @@ void ExecutionState::handleException(Continuation::Exception e) {
         auto frame = stack.top();
         if (frame->exceptionHandlers.count(e) > 0) {
             auto k = frame->exceptionHandlers.at(e);
-            auto newBody = k.apply(boost::none);
+            auto newBody = k.apply(std::nullopt);
             replaceBody(newBody);
             setNamespaceContext(frame->namespaces);
             return;

@@ -2,6 +2,7 @@
 
 #include <iomanip>
 #include <map>
+#include <optional>
 #include <regex>  // NOLINT
 #include <sstream>
 #include <stdexcept>
@@ -13,7 +14,6 @@
 #include <boost/multiprecision/detail/et_ops.hpp>
 #include <boost/multiprecision/number.hpp>
 #include <boost/multiprecision/traits/explicit_conversion.hpp>
-#include <boost/none.hpp>
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
 #include <inja/inja.hpp>
@@ -33,7 +33,7 @@
 
 namespace P4Tools::P4Testgen::EBPF {
 
-STF::STF(cstring testName, boost::optional<unsigned int> seed = boost::none) : TF(testName, seed) {
+STF::STF(cstring testName, std::optional<unsigned int> seed = std::nullopt) : TF(testName, seed) {
     std::filesystem::path testFile(testName + ".stf");
     cstring testNameOnly(testFile.stem().c_str());
 }
@@ -168,7 +168,7 @@ inja::json STF::getSend(const TestSpec *testSpec) {
 
 inja::json STF::getVerify(const TestSpec *testSpec) {
     inja::json verifyData = inja::json::object();
-    if (testSpec->getEgressPacket() != boost::none) {
+    if (testSpec->getEgressPacket() != std::nullopt) {
         const auto &packet = **testSpec->getEgressPacket();
         verifyData["eg_port"] = packet.getPort();
         const auto *payload = packet.getEvaluatedPayload();

@@ -2,10 +2,8 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_PROGRAM_INFO_H_
 
 #include <cstddef>
+#include <optional>
 #include <vector>
-
-#include <boost/none.hpp>
-#include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/lib/formulae.h"
@@ -41,7 +39,7 @@ class ProgramInfo : public ICastable {
 
     std::vector<Continuation::Command> pipelineSequence;
 
-    boost::optional<const Constraint *> targetConstraints = boost::none;
+    std::optional<const Constraint *> targetConstraints = std::nullopt;
 
  public:
     ProgramInfo(const ProgramInfo &) = default;
@@ -65,7 +63,7 @@ class ProgramInfo : public ICastable {
 
     /// @returns the constraints of this target.
     /// These constraints can influence the execution of the interpreter
-    boost::optional<const Constraint *> getTargetConstraints() const;
+    std::optional<const Constraint *> getTargetConstraints() const;
 
     /// @returns the metadata member corresponding to the ingress port
     virtual const IR::Member *getTargetInputPortVar() const = 0;

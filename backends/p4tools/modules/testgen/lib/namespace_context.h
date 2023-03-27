@@ -1,9 +1,8 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_NAMESPACE_CONTEXT_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_NAMESPACE_CONTEXT_H_
 
+#include <optional>
 #include <set>
-
-#include <boost/optional/optional.hpp>
 
 #include "ir/declaration.h"
 #include "ir/ir.h"
@@ -20,7 +19,7 @@ class NamespaceContext {
     const NamespaceContext *outer;
 
     /// All names that appear in this context and all outer contexts. Populated lazily.
-    mutable boost::optional<std::set<cstring>> usedNames;
+    mutable std::optional<std::set<cstring>> usedNames;
 
     NamespaceContext(const IR::INamespace *ns, const NamespaceContext *outer)
         : curNamespace(ns), outer(outer) {}

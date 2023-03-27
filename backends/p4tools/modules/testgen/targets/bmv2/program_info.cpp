@@ -2,10 +2,9 @@
 
 #include <list>
 #include <map>
+#include <optional>
 #include <utility>
 #include <vector>
-
-#include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/util.h"

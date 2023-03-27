@@ -23,6 +23,7 @@ limitations under the License.
 #include <algorithm>
 #include <iostream>
 #include <iterator>
+#include <optional>
 #include <set>
 #include <typeinfo>
 #include <unordered_map>
@@ -35,7 +36,6 @@ limitations under the License.
 #pragma GCC diagnostic pop
 
 #include <boost/algorithm/string.hpp>
-#include <boost/optional.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 
 #include "frontends/common/options.h"
@@ -83,17 +83,17 @@ using Helpers::setPreamble;
 /// @return the value of @item's explicit name annotation, if it has one. We use
 /// this rather than e.g. controlPlaneName() when we want to prevent any
 /// fallback.
-static boost::optional<cstring> explicitNameAnnotation(const IR::IAnnotated *item) {
+static std::optional<cstring> explicitNameAnnotation(const IR::IAnnotated *item) {
     auto *anno = item->getAnnotation(IR::Annotation::nameAnnotation);
-    if (!anno) return boost::none;
+    if (!anno) return std::nullopt;
     if (anno->expr.size() != 1) {
         ::error(ErrorType::ERR_INVALID, "A %1% annotation must have one argument", anno);
-        return boost::none;
+        return std::nullopt;
     }
     auto *str = anno->expr[0]->to<IR::StringLiteral>();
     if (!str) {
         ::error(ErrorType::ERR_INVALID, "An %1% annotation's argument must be a string", anno);
-        return boost::none;
+        return std::nullopt;
     }
     return str->value;
 }
@@ -251,17 +251,17 @@ class FieldIdAllocator {
     std::map<T, p4rt_id_t> idMapping;
 };
 
-/// @return @table's default action, if it has one, or boost::none otherwise.
-static boost::optional<DefaultAction> getDefaultAction(const IR::P4Table *table,
-                                                       ReferenceMap *refMap, TypeMap *typeMap) {
+/// @return @table's default action, if it has one, or std::nullopt otherwise.
+static std::optional<DefaultAction> getDefaultAction(const IR::P4Table *table, ReferenceMap *refMap,
+                                                     TypeMap *typeMap) {
     // not using getDefaultAction() here as I actually need the property IR node
     // to check if the default action is constant.
     auto defaultActionProperty =
         table->properties->getProperty(IR::TableProperties::defaultActionPropertyName);
-    if (defaultActionProperty == nullptr) return boost::none;
+    if (defaultActionProperty == nullptr) return std::nullopt;
     if (!defaultActionProperty->value->is<IR::ExpressionValue>()) {
         ::error(ErrorType::ERR_EXPECTED, "Expected an action: %1%", defaultActionProperty);
-        return boost::none;
+        return std::nullopt;
     }
 
     auto expr = defaultActionProperty->value->to<IR::ExpressionValue>()->expression;
@@ -279,7 +279,7 @@ static boost::optional<DefaultAction> getDefaultAction(const IR::P4Table *table,
         ::error(ErrorType::ERR_UNEXPECTED,
                 "Unexpected expression in default action for table %1%: %2%",
                 table->controlPlaneName(), expr);
-        return boost::none;
+        return std::nullopt;
     }
 
     return DefaultAction{actionName, defaultActionProperty->isConstant};
@@ -326,10 +326,10 @@ static cstring getMatchTypeName(const IR::PathExpression *matchPathExpr,
 
 /// maps the match type name to the corresponding P4Info MatchType enum
 /// member. If the match type should not be exposed to the control plane and
-/// should be ignored, boost::none is returned. If the match type does not
+/// should be ignored, std::nullopt is returned. If the match type does not
 /// correspond to any standard match type known to P4Info, default enum member
 /// UNSPECIFIED is returned.
-static boost::optional<MatchField::MatchType> getMatchType(cstring matchTypeName) {
+static std::optional<MatchField::MatchType> getMatchType(cstring matchTypeName) {
     if (matchTypeName == P4CoreLibrary::instance.exactMatch.name) {
         return MatchField::MatchTypes::EXACT;
     } else if (matchTypeName == P4CoreLibrary::instance.lpmMatch.name) {
@@ -342,7 +342,7 @@ static boost::optional<MatchField::MatchType> getMatchType(cstring matchTypeName
         return MatchField::MatchTypes::OPTIONAL;
     } else if (matchTypeName == P4V1::V1Model::instance.selectorMatchType.name) {
         // Nothing to do here, we cannot even perform some sanity-checking.
-        return boost::none;
+        return std::nullopt;
     } else {
         return MatchField::MatchTypes::UNSPECIFIED;
     }
@@ -380,7 +380,7 @@ static std::vector<MatchField> getMatchFields(const IR::P4Table *table, Referenc
     for (auto keyElement : key->keyElements) {
         auto matchTypeName = getMatchTypeName(keyElement->matchType, refMap);
         auto matchType = getMatchType(matchTypeName);
-        if (matchType == boost::none) continue;
+        if (matchType == std::nullopt) continue;
 
         auto id = idAllocator.getId(keyElement);
 
@@ -797,7 +797,7 @@ class P4RuntimeAnalyzer {
             CHECK_NULL(matchPathExpr);
             auto matchTypeName = getMatchTypeName(matchPathExpr, refMap);
             auto matchType = getMatchType(matchTypeName);
-            if (matchType == boost::none) {
+            if (matchType == std::nullopt) {
                 ::error(ErrorType::ERR_UNSUPPORTED,
                         "unsupported match type %1% for Value Set '@match' annotation",
                         matchAnnotation);
@@ -1122,9 +1122,9 @@ class P4RuntimeEntriesConverter {
 
     /// Convert a key expression to the P4Runtime bytes representation if the
     /// expression is simple (integer literal or boolean literal) or returns
-    /// boost::none otherwise.
-    boost::optional<std::string> convertSimpleKeyExpression(const IR::Expression *k, int keyWidth,
-                                                            TypeMap *typeMap) const {
+    /// std::nullopt otherwise.
+    std::optional<std::string> convertSimpleKeyExpression(const IR::Expression *k, int keyWidth,
+                                                          TypeMap *typeMap) const {
         if (k->is<IR::Constant>()) {
             return stringRepr(k->to<IR::Constant>(), keyWidth);
         } else if (k->is<IR::BoolLiteral>()) {
@@ -1133,7 +1133,7 @@ class P4RuntimeEntriesConverter {
             auto mem = k->to<IR::Member>();
             auto se = mem->type->to<IR::Type_SerEnum>();
             auto ei = EnumInstance::resolve(mem, typeMap);
-            if (!ei) return boost::none;
+            if (!ei) return std::nullopt;
             if (auto sei = ei->to<SerEnumInstance>()) {
                 auto type = sei->value->to<IR::Constant>();
                 auto w = se->type->width_bits();
@@ -1141,20 +1141,20 @@ class P4RuntimeEntriesConverter {
                 return stringRepr(type, w);
             }
             ::error(ErrorType::ERR_INVALID, "%1% invalid Member key expression", k);
-            return boost::none;
+            return std::nullopt;
         } else if (k->is<IR::Cast>()) {
             return convertSimpleKeyExpression(k->to<IR::Cast>()->expr, keyWidth, typeMap);
         } else {
             ::error(ErrorType::ERR_INVALID, "%1% invalid key expression", k);
-            return boost::none;
+            return std::nullopt;
         }
     }
 
     /// Convert a key expression to the big_int integer value if the
     /// expression is simple (integer literal or boolean literal) or returns
-    /// boost::none otherwise.
-    boost::optional<big_int> simpleKeyExpressionValue(const IR::Expression *k,
-                                                      TypeMap *typeMap) const {
+    /// std::nullopt otherwise.
+    std::optional<big_int> simpleKeyExpressionValue(const IR::Expression *k,
+                                                    TypeMap *typeMap) const {
         if (k->is<IR::Constant>()) {
             return k->to<IR::Constant>()->value;
         } else if (k->is<IR::BoolLiteral>()) {
@@ -1162,17 +1162,17 @@ class P4RuntimeEntriesConverter {
         } else if (k->is<IR::Member>()) {  // handle SerEnum members
             auto mem = k->to<IR::Member>();
             auto ei = EnumInstance::resolve(mem, typeMap);
-            if (!ei) return boost::none;
+            if (!ei) return std::nullopt;
             if (auto sei = ei->to<SerEnumInstance>()) {
                 return simpleKeyExpressionValue(sei->value, typeMap);
             }
             ::error(ErrorType::ERR_INVALID, "%1% invalid Member key expression", k);
-            return boost::none;
+            return std::nullopt;
         } else if (k->is<IR::Cast>()) {
             return simpleKeyExpressionValue(k->to<IR::Cast>()->expr, typeMap);
         } else {
             ::error(ErrorType::ERR_INVALID, "%1% invalid key expression", k);
-            return boost::none;
+            return std::nullopt;
         }
     }
 
@@ -1182,7 +1182,7 @@ class P4RuntimeEntriesConverter {
         protoMatch->set_field_id(fieldId);
         auto protoExact = protoMatch->mutable_exact();
         auto value = convertSimpleKeyExpression(k, keyWidth, typeMap);
-        if (value == boost::none) return;
+        if (value == std::nullopt) return;
         protoExact->set_value(*value);
     }
 
@@ -1191,11 +1191,11 @@ class P4RuntimeEntriesConverter {
         if (k->is<IR::DefaultExpression>())  // don't care, skip in P4Runtime message
             return;
         int prefixLen;
-        boost::optional<std::string> valueStr;
+        std::optional<std::string> valueStr;
         if (k->is<IR::Mask>()) {
             auto km = k->to<IR::Mask>();
             auto value = simpleKeyExpressionValue(km->left, typeMap);
-            if (value == boost::none) return;
+            if (value == std::nullopt) return;
             auto trailing_zeros = [keyWidth](const big_int &n) -> int {
                 return (n == 0) ? keyWidth : boost::multiprecision::lsb(n);
             };
@@ -1221,7 +1221,7 @@ class P4RuntimeEntriesConverter {
             prefixLen = keyWidth;
             valueStr = convertSimpleKeyExpression(k, keyWidth, typeMap);
         }
-        if (valueStr == boost::none) return;
+        if (valueStr == std::nullopt) return;
         auto protoMatch = protoEntry->add_match();
         protoMatch->set_field_id(fieldId);
         auto protoLpm = protoMatch->mutable_lpm();
@@ -1233,13 +1233,13 @@ class P4RuntimeEntriesConverter {
                     int keyWidth, TypeMap *typeMap) const {
         if (k->is<IR::DefaultExpression>())  // don't care, skip in P4Runtime message
             return;
-        boost::optional<std::string> valueStr;
-        boost::optional<std::string> maskStr;
+        std::optional<std::string> valueStr;
+        std::optional<std::string> maskStr;
         if (k->is<IR::Mask>()) {
             auto km = k->to<IR::Mask>();
             auto value = simpleKeyExpressionValue(km->left, typeMap);
             auto mask = simpleKeyExpressionValue(km->right, typeMap);
-            if (value == boost::none || mask == boost::none) return;
+            if (value == std::nullopt || mask == std::nullopt) return;
             if ((*value & *mask) != *value) {
                 ::warning(ErrorType::WARN_MISMATCH,
                           "P4Runtime requires that Ternary matches have masked-off bits set to 0, "
@@ -1255,7 +1255,7 @@ class P4RuntimeEntriesConverter {
             valueStr = convertSimpleKeyExpression(k, keyWidth, typeMap);
             maskStr = stringReprConstant(Util::mask(keyWidth), keyWidth);
         }
-        if (valueStr == boost::none || maskStr == boost::none) return;
+        if (valueStr == std::nullopt || maskStr == std::nullopt) return;
         auto protoMatch = protoEntry->add_match();
         protoMatch->set_field_id(fieldId);
         auto protoTernary = protoMatch->mutable_ternary();
@@ -1267,13 +1267,13 @@ class P4RuntimeEntriesConverter {
                   TypeMap *typeMap) const {
         if (k->is<IR::DefaultExpression>())  // don't care, skip in P4Runtime message
             return;
-        boost::optional<std::string> startStr;
-        boost::optional<std::string> endStr;
+        std::optional<std::string> startStr;
+        std::optional<std::string> endStr;
         if (k->is<IR::Range>()) {
             auto kr = k->to<IR::Range>();
             auto start = simpleKeyExpressionValue(kr->left, typeMap);
             auto end = simpleKeyExpressionValue(kr->right, typeMap);
-            if (start == boost::none || end == boost::none) return;
+            if (start == std::nullopt || end == std::nullopt) return;
             // Error on invalid range values
             big_int maxValue = (big_int(1) << keyWidth) - 1;
             // NOTE: If end value is > max allowed for keyWidth, value gets
@@ -1291,7 +1291,7 @@ class P4RuntimeEntriesConverter {
             startStr = convertSimpleKeyExpression(k, keyWidth, typeMap);
             endStr = startStr;
         }
-        if (startStr == boost::none || endStr == boost::none) return;
+        if (startStr == std::nullopt || endStr == std::nullopt) return;
         auto protoMatch = protoEntry->add_match();
         protoMatch->set_field_id(fieldId);
         auto protoRange = protoMatch->mutable_range();
@@ -1307,7 +1307,7 @@ class P4RuntimeEntriesConverter {
         protoMatch->set_field_id(fieldId);
         auto protoOptional = protoMatch->mutable_optional();
         auto value = convertSimpleKeyExpression(k, keyWidth, typeMap);
-        if (value == boost::none) return;
+        if (value == std::nullopt) return;
         protoOptional->set_value(*value);
     }
 

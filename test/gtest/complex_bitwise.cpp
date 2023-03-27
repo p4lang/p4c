@@ -1,5 +1,5 @@
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 
 #include "gtest/gtest.h"
 #include "ir/ir.h"
@@ -21,7 +21,7 @@ namespace Test {
 
 namespace {
 
-boost::optional<FrontendTestCase>
+std::optional<FrontendTestCase>
 createSimplifyBitwiseTestCase(const std::string &ingressSource) {
     std::string source = P4_SOURCE(P4Headers::V1MODEL, R"(
 header H

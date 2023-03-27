@@ -15,7 +15,7 @@ class Z3SolverAccessor {
     explicit Z3SolverAccessor(gsl::not_null<Z3Solver *> solver) : solver(solver) {}
 
     /// Gets all assertions. Used by GTests only.
-    z3::expr_vector getAssertions(boost::optional<bool> assertionType = boost::none) {
+    z3::expr_vector getAssertions(std::optional<bool> assertionType = std::nullopt) {
         if (!assertionType) {
             return solver->isIncremental ? solver->z3solver.assertions() : solver->z3Assertions;
         } else if (assertionType.value()) {

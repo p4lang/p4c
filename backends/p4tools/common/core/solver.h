@@ -1,9 +1,8 @@
 #ifndef BACKENDS_P4TOOLS_COMMON_CORE_SOLVER_H_
 #define BACKENDS_P4TOOLS_COMMON_CORE_SOLVER_H_
 
+#include <optional>
 #include <vector>
-
-#include <boost/optional.hpp>
 
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
@@ -29,8 +28,8 @@ class AbstractSolver {
     ///
     /// @return true if the given assertions are consistent.
     /// @return false if the given assertions are inconsistent.
-    /// @return boost::none if the solver times out, or is otherwise unable to provide an answer.
-    virtual boost::optional<bool> checkSat(const std::vector<const Constraint *> &asserts) = 0;
+    /// @return std::nullopt if the solver times out, or is otherwise unable to provide an answer.
+    virtual std::optional<bool> checkSat(const std::vector<const Constraint *> &asserts) = 0;
 
     /// Obtains the first solution found by the solver in the last call to @checkSat.
     ///

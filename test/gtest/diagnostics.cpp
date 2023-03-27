@@ -17,7 +17,7 @@ limitations under the License.
 #include <vector>
 
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 
 #include "gtest/gtest.h"
 
@@ -29,7 +29,7 @@ namespace Test {
 
 namespace {
 
-boost::optional<FrontendTestCase>
+std::optional<FrontendTestCase>
 createP4_16DiagnosticsTestCase(const std::string& pragmaSource) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
 %PRAGMA_SOURCE%
@@ -50,7 +50,7 @@ createP4_16DiagnosticsTestCase(const std::string& pragmaSource) {
     return FrontendTestCase::create(source);
 }
 
-boost::optional<FrontendTestCase>
+std::optional<FrontendTestCase>
 createP4_14DiagnosticsTestCase(const std::string& pragmaSource) {
     auto source = P4_SOURCE(R"(
 %PRAGMA_SOURCE%
@@ -165,7 +165,7 @@ TEST_F(Diagnostics, CompilerOptions) {
     using CommandLineOptions = P4::IOptionPragmaParser::CommandLineOptions;
 
     auto parseWithCompilerOptions = [](const CommandLineOptions& args)
-                                        -> boost::optional<FrontendTestCase> {
+                                        -> std::optional<FrontendTestCase> {
         auto& options = GTestContext::get().options();
         options.process(args.size(), const_cast<char* const*>(args.data()));
         return createP4_16DiagnosticsTestCase(P4_SOURCE(R"()"));

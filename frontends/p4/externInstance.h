@@ -17,7 +17,7 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_EXTERNINSTANCE_H_
 #define _FRONTENDS_P4_EXTERNINSTANCE_H_
 
-#include <boost/optional.hpp>
+#include <optional>
 
 #include "frontends/p4/parameterSubstitution.h"
 #include "lib/cstring.h"
@@ -49,7 +49,7 @@ class TypeMap;
  * expression which constructs an anonymous instance.
  */
 struct ExternInstance final {
-    const boost::optional<cstring> name;        // The instance's name, if any.
+    const std::optional<cstring> name;          // The instance's name, if any.
     const IR::Expression *expression;           // The original expression passed to resolve().
     const IR::Type_Extern *type;                // The type of the instance.
     const IR::Vector<IR::Type> *typeArguments;  // The instance's type arguments;
@@ -59,7 +59,7 @@ struct ExternInstance final {
 
     /**
      * @return the extern instance that @expr resolves to, if any, or
-     * boost::none otherwise.
+     * std::nullopt otherwise.
      *
      * @expr may either refer to a named extern instance (i.e., it may be a
      * PathExpression), or it may construct an anonymous instance directly
@@ -67,27 +67,27 @@ struct ExternInstance final {
      * instance will not have a name; @defaultName may optionally be used to
      * specify a default name to return.
      */
-    static boost::optional<ExternInstance> resolve(
+    static std::optional<ExternInstance> resolve(
         const IR::Expression *expr, ReferenceMap *refMap, TypeMap *typeMap,
-        const boost::optional<cstring> &defaultName = boost::none);
+        const std::optional<cstring> &defaultName = std::nullopt);
 
     /**
      * @return the extern instance that @path resolves to, if any, or
-     * boost::none otherwise.
+     * std::nullopt otherwise.
      */
-    static boost::optional<ExternInstance> resolve(const IR::PathExpression *path,
-                                                   ReferenceMap *refMap, TypeMap *typeMap);
+    static std::optional<ExternInstance> resolve(const IR::PathExpression *path,
+                                                 ReferenceMap *refMap, TypeMap *typeMap);
 
     /**
      * @return the extern instance that @constructorCallExpr resolves to, if any, or
-     * boost::none otherwise.
+     * std::nullopt otherwise.
      *
      * Anonymous instances do not have a name, but the caller may provide one
      * via @name if it has external information about what the name should be.
      */
-    static boost::optional<ExternInstance> resolve(
+    static std::optional<ExternInstance> resolve(
         const IR::ConstructorCallExpression *constructorCallExpr, ReferenceMap *refMap,
-        TypeMap *typeMap, const boost::optional<cstring> &name = boost::none);
+        TypeMap *typeMap, const std::optional<cstring> &name = std::nullopt);
 };
 
 }  // namespace P4

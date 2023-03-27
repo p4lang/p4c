@@ -2,9 +2,8 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SMALL_STEP_SMALL_STEP_H_
 
 #include <cstdint>
+#include <optional>
 #include <vector>
-
-#include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/core/solver.h"
@@ -34,12 +33,12 @@ class SmallStepEvaluator {
 
         /// Branch constrained by a condition. prevState is the state in which the condition
         /// is later evaluated.
-        Branch(boost::optional<const Constraint *> c, const ExecutionState &prevState,
+        Branch(std::optional<const Constraint *> c, const ExecutionState &prevState,
                gsl::not_null<ExecutionState *> nextState);
 
         /// Branch constrained by a condition. prevState is the state in which the condition
         /// is later evaluated.
-        Branch(boost::optional<const Constraint *> c, const ExecutionState &prevState,
+        Branch(std::optional<const Constraint *> c, const ExecutionState &prevState,
                gsl::not_null<ExecutionState *> nextState,
                const P4::Coverage::CoverageSet &potentialStatements);
     };

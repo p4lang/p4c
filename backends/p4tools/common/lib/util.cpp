@@ -10,6 +10,7 @@
 #include <ctime>
 #include <iomanip>
 #include <map>
+#include <optional>
 #include <sstream>
 #include <tuple>
 
@@ -18,7 +19,6 @@
 #include <boost/multiprecision/cpp_int/add.hpp>
 #include <boost/multiprecision/detail/et_ops.hpp>
 #include <boost/multiprecision/number.hpp>
-#include <boost/none.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
 
 #include "backends/p4tools/common/lib/formulae.h"
@@ -34,7 +34,7 @@ namespace P4Tools {
  *  Seeds, timestamps, randomness.
  * ========================================================================================= */
 
-boost::optional<uint32_t> Utils::currentSeed = boost::none;
+std::optional<uint32_t> Utils::currentSeed = std::nullopt;
 
 boost::random::mt19937 Utils::rng(0);
 
@@ -56,14 +56,14 @@ std::string Utils::getTimeStamp() {
 }
 
 void Utils::setRandomSeed(int seed) {
-    if (currentSeed) {
-        BUG("Seed already initialized with %1%.", currentSeed.get());
+    if (currentSeed.has_value()) {
+        BUG("Seed already initialized with %1%.", currentSeed.value());
     }
     currentSeed = seed;
     rng.seed(seed);
 }
 
-boost::optional<uint32_t> Utils::getCurrentSeed() { return currentSeed; }
+std::optional<uint32_t> Utils::getCurrentSeed() { return currentSeed; }
 
 uint64_t Utils::getRandInt(uint64_t max) {
     if (!currentSeed) {
@@ -101,8 +101,8 @@ const IR::Constant *Utils::getRandConstantForType(const IR::Type_Bits *type) {
 const cstring Utils::Valid = "*valid";
 
 const StateVariable &Utils::getZombieTableVar(const IR::Type *type, const IR::P4Table *table,
-                                              cstring name, boost::optional<int> idx1_opt,
-                                              boost::optional<int> idx2_opt) {
+                                              cstring name, std::optional<int> idx1_opt,
+                                              std::optional<int> idx2_opt) {
     // Mash the table name, the given name, and the optional indices together.
     // XXX To be nice, we should probably build a PathExpression, but that's annoying to do, and we
     // XXX can probably get away with this.

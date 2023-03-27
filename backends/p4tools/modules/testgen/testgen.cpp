@@ -4,12 +4,11 @@
 #include <cstdlib>
 #include <functional>
 #include <iostream>
+#include <optional>
 #include <string>
 
 #include <boost/cstdint.hpp>
 #include <boost/format.hpp>
-#include <boost/none.hpp>
-#include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/util.h"

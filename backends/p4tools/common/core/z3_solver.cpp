@@ -260,7 +260,7 @@ void Z3Solver::timeout(unsigned tm) {
     timeout_ = tm;
 }
 
-boost::optional<bool> Z3Solver::checkSat(const std::vector<const Constraint *> &asserts) {
+std::optional<bool> Z3Solver::checkSat(const std::vector<const Constraint *> &asserts) {
     if (isIncremental) {
         // Find common prefix with the previous invocation's list of assertions
         auto from = asserts.begin();
@@ -295,7 +295,7 @@ boost::optional<bool> Z3Solver::checkSat(const std::vector<const Constraint *> &
 
         default:  // unknown
             Z3_LOG("result:%s", "unknown");
-            return boost::none;
+            return std::nullopt;
     }
 }
 
@@ -418,16 +418,16 @@ const z3::context &Z3Solver::getZ3Ctx() const { return z3context; }
 
 bool Z3Solver::isInIncrementalMode() const { return isIncremental; }
 
-Z3Solver::Z3Solver(bool isIncremental, boost::optional<std::istream &> inOpt)
+Z3Solver::Z3Solver(bool isIncremental, std::optional<std::istream *> inOpt)
     : z3solver(z3context), isIncremental(isIncremental), z3Assertions(z3context) {
     // Add a top-level set to declaration vars that we can insert variables.
     // TODO: Think about whether this is necessary or it is not better to remove it.
     declaredVarsById.emplace_back();
-    if (inOpt == boost::none) {
+    if (inOpt == std::nullopt) {
         return;
     }
 
-    JSONLoader loader(inOpt.value());
+    JSONLoader loader(*inOpt.value());
 
     JSONLoader solverCheckpoints(loader, "checkpoints");
     BUG_CHECK(solverCheckpoints.json->is<JsonVector>(),

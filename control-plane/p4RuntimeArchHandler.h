@@ -17,9 +17,8 @@ limitations under the License.
 #ifndef CONTROL_PLANE_P4RUNTIMEARCHHANDLER_H_
 #define CONTROL_PLANE_P4RUNTIMEARCHHANDLER_H_
 
+#include <optional>
 #include <set>
-
-#include <boost/optional.hpp>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -99,7 +98,7 @@ class P4RuntimeSymbolTableIface {
     virtual void add(P4RuntimeSymbolType type, const IR::IDeclaration *declaration) = 0;
     /// Add a @type symbol with @name and possibly an explicit P4 '@id'.
     virtual void add(P4RuntimeSymbolType type, cstring name,
-                     boost::optional<p4rt_id_t> id = boost::none) = 0;
+                     std::optional<p4rt_id_t> id = std::nullopt) = 0;
     /// @return the P4Runtime id for the symbol of @type corresponding to
     /// @declaration.
     virtual p4rt_id_t getId(P4RuntimeSymbolType type,
@@ -189,12 +188,11 @@ struct P4RuntimeArchHandlerBuilderIface {
 namespace Helpers {
 
 /// @return an extern instance defined or referenced by the value of @table's
-/// @propertyName property, or boost::none if no extern was referenced.
-boost::optional<ExternInstance> getExternInstanceFromProperty(const IR::P4Table *table,
-                                                              const cstring &propertyName,
-                                                              ReferenceMap *refMap,
-                                                              TypeMap *typeMap,
-                                                              bool *isConstructedInPlace = nullptr);
+/// @propertyName property, or std::nullopt if no extern was referenced.
+std::optional<ExternInstance> getExternInstanceFromProperty(const IR::P4Table *table,
+                                                            const cstring &propertyName,
+                                                            ReferenceMap *refMap, TypeMap *typeMap,
+                                                            bool *isConstructedInPlace = nullptr);
 
 /// @return true if the extern instance assigned to property @propertyName for
 /// the @table was constructed in-place or outside of teh @table declaration.
@@ -355,16 +353,16 @@ struct Counterlike {
     /// The size parameter to the instance.
     const int64_t size;
     /// If not none, the instance is a direct resource associated with @table.
-    const boost::optional<cstring> table;
+    const std::optional<cstring> table;
     /// If the type of the index is a user-defined type, this is the name of the type. Otherwise it
     /// is nullptr.
     const cstring index_type_name;
 
     /// @return the information required to serialize an explicit @instance of
     /// @Kind, which is defined inside a control block.
-    static boost::optional<Counterlike<Kind>> from(const IR::ExternBlock *instance,
-                                                   const ReferenceMap *refMap, P4::TypeMap *typeMap,
-                                                   ::p4::config::v1::P4TypeInfo *p4RtTypeInfo) {
+    static std::optional<Counterlike<Kind>> from(const IR::ExternBlock *instance,
+                                                 const ReferenceMap *refMap, P4::TypeMap *typeMap,
+                                                 ::p4::config::v1::P4TypeInfo *p4RtTypeInfo) {
         CHECK_NULL(instance);
         auto declaration = instance->node->to<IR::Declaration_Instance>();
 
@@ -376,7 +374,7 @@ struct Counterlike {
             ::error(ErrorType::ERR_INVALID,
                     "%1% '%2%' has a unit type which is not an enum constant: %3%",
                     CounterlikeTraits<Kind>::name(), declaration, unit);
-            return boost::none;
+            return std::nullopt;
         }
 
         auto size = instance->getParameterValue(CounterlikeTraits<Kind>::sizeParamName());
@@ -389,13 +387,13 @@ struct Counterlike {
         } else {
             ::error(ErrorType::ERR_INVALID, "%1% '%2%' has a non-constant size: %3%",
                     CounterlikeTraits<Kind>::name(), declaration, size);
-            return boost::none;
+            return std::nullopt;
         }
 
         cstring index_type_name = nullptr;
         auto indexTypeParamIdx = CounterlikeTraits<Kind>::indexTypeParamIdx();
         // In v1model, the index is a bit<32>, in PSA it is determined by a type parameter.
-        if (indexTypeParamIdx != boost::none) {
+        if (indexTypeParamIdx != std::nullopt) {
             // retrieve type parameter for the index.
             BUG_CHECK(declaration->type->is<IR::Type_Specialized>(),
                       "%1%: expected Type_Specialized", declaration->type);
@@ -414,22 +412,22 @@ struct Counterlike {
                                  declaration->to<IR::IAnnotated>(),
                                  unit->to<IR::Declaration_ID>()->name,
                                  int(val),
-                                 boost::none,
+                                 std::nullopt,
                                  index_type_name};
     }
 
     /// @return the information required to serialize an @instance of @Kind which
     /// is either defined in or referenced by a property value of @table. (This
     /// implies that @instance is a direct resource of @table.)
-    static boost::optional<Counterlike<Kind>> fromDirect(const ExternInstance &instance,
-                                                         const IR::P4Table *table) {
+    static std::optional<Counterlike<Kind>> fromDirect(const ExternInstance &instance,
+                                                       const IR::P4Table *table) {
         CHECK_NULL(table);
-        BUG_CHECK(instance.name != boost::none, "Caller should've ensured we have a name");
+        BUG_CHECK(instance.name != std::nullopt, "Caller should've ensured we have a name");
 
         if (instance.type->name != CounterlikeTraits<Kind>::directTypeName()) {
             ::error(ErrorType::ERR_EXPECTED, "Expected a direct %1%: %2%",
                     CounterlikeTraits<Kind>::name(), instance.expression);
-            return boost::none;
+            return std::nullopt;
         }
 
         auto unitArgument = instance.substitution.lookupByName("type")->expression;
@@ -437,13 +435,13 @@ struct Counterlike {
             ::error(ErrorType::ERR_EXPECTED,
                     "Direct %1% instance %2% should take a constructor argument",
                     CounterlikeTraits<Kind>::name(), instance.expression);
-            return boost::none;
+            return std::nullopt;
         }
         if (!unitArgument->is<IR::Member>()) {
             ::error(ErrorType::ERR_UNEXPECTED,
                     "Direct %1% instance %2% has an unexpected constructor argument",
                     CounterlikeTraits<Kind>::name(), instance.expression);
-            return boost::none;
+            return std::nullopt;
         }
 
         auto unit = unitArgument->to<IR::Member>()->member.name;
@@ -457,13 +455,13 @@ struct Counterlike {
 };
 
 /// @return the direct counter associated with @table, if it has one, or
-/// boost::none otherwise.
+/// std::nullopt otherwise.
 template <typename Kind>
-boost::optional<Counterlike<Kind>> getDirectCounterlike(const IR::P4Table *table,
-                                                        ReferenceMap *refMap, TypeMap *typeMap) {
+std::optional<Counterlike<Kind>> getDirectCounterlike(const IR::P4Table *table,
+                                                      ReferenceMap *refMap, TypeMap *typeMap) {
     auto propertyName = CounterlikeTraits<Kind>::directPropertyName();
     auto instance = getExternInstanceFromProperty(table, propertyName, refMap, typeMap);
-    if (!instance) return boost::none;
+    if (!instance) return std::nullopt;
     return Counterlike<Kind>::fromDirect(*instance, table);
 }
 

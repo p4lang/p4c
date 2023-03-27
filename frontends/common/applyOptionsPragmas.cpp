@@ -47,14 +47,14 @@ void ApplyOptionsPragmas::end_apply() {
     compilerOptionsInstance.process(options.size(), const_cast<char *const *>(options.data()));
 }
 
-boost::optional<IOptionPragmaParser::CommandLineOptions> P4COptionPragmaParser::tryToParse(
+std::optional<IOptionPragmaParser::CommandLineOptions> P4COptionPragmaParser::tryToParse(
     const IR::Annotation *annotation) {
     auto pragmaName = annotation->name.name;
     if (pragmaName == "diagnostic") return parseDiagnostic(annotation);
-    return boost::none;
+    return std::nullopt;
 }
 
-boost::optional<IOptionPragmaParser::CommandLineOptions> P4COptionPragmaParser::parseDiagnostic(
+std::optional<IOptionPragmaParser::CommandLineOptions> P4COptionPragmaParser::parseDiagnostic(
     const IR::Annotation *annotation) {
     CommandLineOptions newOptions;
 
@@ -73,7 +73,7 @@ boost::optional<IOptionPragmaParser::CommandLineOptions> P4COptionPragmaParser::
 
     if (pragmaArgs->size() != 2) {
         ::warning(ErrorType::WARN_MISSING, "@diagnostic takes two arguments: %1%", annotation);
-        return boost::none;
+        return std::nullopt;
     }
 
     auto *diagnosticName = pragmaArgs->at(0)->to<IR::StringLiteral>();
@@ -81,7 +81,7 @@ boost::optional<IOptionPragmaParser::CommandLineOptions> P4COptionPragmaParser::
     if (!diagnosticName || !diagnosticAction) {
         ::warning(ErrorType::WARN_MISSING, "@diagnostic arguments must be strings: %1%",
                   annotation);
-        return boost::none;
+        return std::nullopt;
     }
 
     cstring diagnosticOption;
@@ -96,7 +96,7 @@ boost::optional<IOptionPragmaParser::CommandLineOptions> P4COptionPragmaParser::
                   "@diagnostic's second argument must be 'disable', "
                   "'warn', or 'error': %1%",
                   annotation);
-        return boost::none;
+        return std::nullopt;
     }
 
     diagnosticOption += diagnosticName->value;

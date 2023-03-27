@@ -1,11 +1,10 @@
 #include "backends/p4tools/modules/testgen/targets/ebpf/test_backend.h"
 
 #include <map>
+#include <optional>
 #include <ostream>
 #include <string>
 #include <utility>
-
-#include <boost/none.hpp>
 
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/trace_events.h"
@@ -23,11 +22,7 @@
 #include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/backend/stf/stf.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace EBPF {
+namespace P4Tools::P4Testgen::EBPF {
 
 const big_int EBPFTestBackend::ZERO_PKT_VAL = 0x2000000;
 const big_int EBPFTestBackend::ZERO_PKT_MAX = 0xffffffff;
@@ -35,7 +30,7 @@ const std::vector<std::string> EBPFTestBackend::SUPPORTED_BACKENDS = {"STF"};
 
 EBPFTestBackend::EBPFTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
                                  const std::filesystem::path &testPath,
-                                 boost::optional<uint32_t> seed)
+                                 std::optional<uint32_t> seed)
     : TestBackEnd(programInfo, symbex) {
     cstring testBackendString = TestgenOptions::get().testBackend;
     if (testBackendString == "STF") {
@@ -90,7 +85,7 @@ const TestSpec *EBPFTestBackend::createTestSpec(const ExecutionState *executionS
     const auto *ingressPayloadMask = IR::getConstant(IR::getBitType(1), 1);
     const auto ingressPacket = Packet(testInfo.inputPort, ingressPayload, ingressPayloadMask);
 
-    boost::optional<Packet> egressPacket = boost::none;
+    std::optional<Packet> egressPacket = std::nullopt;
     if (!testInfo.packetIsDropped) {
         egressPacket = Packet(testInfo.outputPort, testInfo.outputPacket, testInfo.packetTaintMask);
     }
@@ -108,8 +103,4 @@ const TestSpec *EBPFTestBackend::createTestSpec(const ExecutionState *executionS
     return testSpec;
 }
 
-}  // namespace EBPF
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::EBPF

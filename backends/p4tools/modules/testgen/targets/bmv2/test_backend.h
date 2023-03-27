@@ -2,10 +2,9 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_BACKEND_H_
 
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <vector>
-
-#include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/trace_events.h"
@@ -35,7 +34,7 @@ class Bmv2TestBackend : public TestBackEnd {
 
  public:
     explicit Bmv2TestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                             const std::filesystem::path &testPath, boost::optional<uint32_t> seed);
+                             const std::filesystem::path &testPath, std::optional<uint32_t> seed);
 
     TestBackEnd::TestInfo produceTestInfo(
         const ExecutionState *executionState, const Model *completedModel,

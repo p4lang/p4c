@@ -6,11 +6,11 @@
 #include <initializer_list>
 #include <iosfwd>
 #include <map>
+#include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
-#include <boost/none.hpp>
-#include <boost/optional/optional.hpp>
 #include <boost/variant/variant.hpp>
 
 #include "backends/p4tools/common/lib/trace_events.h"
@@ -75,12 +75,12 @@ class Continuation {
     /// of IR::Expression; other IR nodes may be treated as expressions in the metalanguage, even
     /// though they are not P4 expressions.
     struct Return {
-        boost::optional<const IR::Node *> expr;
+        std::optional<const IR::Node *> expr;
 
         /// Delegates to IR equality.
         bool operator==(const Return &other) const;
 
-        Return() : expr(boost::none) {}
+        Return() : expr(std::nullopt) {}
         explicit Return(const IR::Node *expr);
     };
 
@@ -182,16 +182,16 @@ class Continuation {
     /// Represents the continuation's parameter.
     //
     // Invariant: this parameter is uniquely named.
-    boost::optional<const IR::PathExpression *> parameterOpt;
+    std::optional<const IR::PathExpression *> parameterOpt;
     Body body;
 
     /// @returns a body that is equivalent to applying this continuation to the given value (or
-    /// unit, if no value is provided). A BUG occurs if parameterOpt is boost::none but value_opt
+    /// unit, if no value is provided). A BUG occurs if parameterOpt is std::nullopt but value_opt
     /// is not, or vice versa.
     ///
     /// Expressions in the metalanguage include P4 non-expressions. Because of this, the value (if
     /// provided) does not necessarily need to be an instance of IR::Expression.
-    Body apply(boost::optional<const IR::Node *> value_opt) const;
+    Body apply(std::optional<const IR::Node *> value_opt) const;
 
     /// @returns a parameter for use in building continuations. The parameter will be fresh in the
     /// given @ctx.
@@ -199,13 +199,13 @@ class Continuation {
                                          const NamespaceContext *ctx);
 
     /// Creates a parameterless continuation.
-    explicit Continuation(Body body) : Continuation(boost::none, body) {}
+    explicit Continuation(Body body) : Continuation(std::nullopt, std::move(body)) {}
 
     /// Creates a continuation. The continuation will have the given parameter, if one is provided;
     /// otherwise, the continuation will have no parameters.
-    Continuation(boost::optional<const Parameter *> parameterOpt, Body body)
-        : parameterOpt(parameterOpt ? boost::make_optional((*parameterOpt)->param) : boost::none),
-          body(body) {}
+    Continuation(std::optional<const Parameter *> parameterOpt, Body body)
+        : parameterOpt(parameterOpt ? std::make_optional((*parameterOpt)->param) : std::nullopt),
+          body(std::move(body)) {}
 };
 
 }  // namespace P4Testgen

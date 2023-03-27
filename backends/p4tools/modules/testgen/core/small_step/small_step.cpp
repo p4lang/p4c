@@ -1,13 +1,12 @@
 #include "backends/p4tools/modules/testgen/core/small_step/small_step.h"
 
 #include <iosfwd>
+#include <optional>
 #include <string>
 #include <type_traits>
 #include <utility>
 #include <vector>
 
-#include <boost/none.hpp>
-#include <boost/optional/optional.hpp>
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
 
@@ -37,7 +36,7 @@ namespace P4Tools::P4Testgen {
 SmallStepEvaluator::Branch::Branch(gsl::not_null<ExecutionState *> nextState)
     : constraint(IR::getBoolLiteral(true)), nextState(std::move(nextState)) {}
 
-SmallStepEvaluator::Branch::Branch(boost::optional<const Constraint *> c,
+SmallStepEvaluator::Branch::Branch(std::optional<const Constraint *> c,
                                    const ExecutionState &prevState,
                                    gsl::not_null<ExecutionState *> nextState)
     : constraint(IR::getBoolLiteral(true)), nextState(nextState) {
@@ -53,7 +52,7 @@ SmallStepEvaluator::Branch::Branch(boost::optional<const Constraint *> c,
     }
 }
 
-SmallStepEvaluator::Branch::Branch(boost::optional<const Constraint *> c,
+SmallStepEvaluator::Branch::Branch(std::optional<const Constraint *> c,
                                    const ExecutionState &prevState,
                                    gsl::not_null<ExecutionState *> nextState,
                                    const P4::Coverage::CoverageSet &potentialStatements)
@@ -205,7 +204,7 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState &state) {
 
                 // Evaluate the guard condition by directly using the solver.
                 const auto *cond = guard.cond;
-                boost::optional<bool> solverResult = boost::none;
+                std::optional<bool> solverResult = std::nullopt;
 
                 // If the guard condition is tainted, treat it equivalent to an invalid state.
                 if (!state.hasTaint(cond)) {
@@ -223,7 +222,7 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState &state) {
                 // If we can not solve the guard (either we time out or the solver can not solve
                 // the problem) we increment the count of violatedGuardConditions and stop
                 // executing this branch.
-                if (solverResult == boost::none || !solverResult.get()) {
+                if (solverResult == std::nullopt || !solverResult.value()) {
                     std::stringstream condStream;
                     guard.cond->dbprint(condStream);
                     ::warning(

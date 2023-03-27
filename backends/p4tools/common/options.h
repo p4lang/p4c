@@ -3,11 +3,9 @@
 
 // Boost
 #include <cstdint>
+#include <optional>
 #include <tuple>
 #include <vector>
-
-#include <boost/none.hpp>
-#include <boost/optional/optional.hpp>
 
 #include "lib/compile_context.h"
 #include "lib/cstring.h"
@@ -28,12 +26,12 @@ class AbstractP4cToolOptions : protected Util::Options {
     int minPktSize = 0;
 
     /// A seed for the PRNG.
-    boost::optional<uint32_t> seed = boost::none;
+    std::optional<uint32_t> seed = std::nullopt;
 
     /// Processes options.
     ///
-    /// @returns a compilation context on success, boost::none on error.
-    boost::optional<ICompileContext *> process(const std::vector<const char *> &args);
+    /// @returns a compilation context on success, std::nullopt on error.
+    std::optional<ICompileContext *> process(const std::vector<const char *> &args);
 
  protected:
     /// Command-line arguments to be sent to the compiler. Populated by @process.

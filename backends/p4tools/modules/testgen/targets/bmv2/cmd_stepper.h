@@ -2,9 +2,8 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_CMD_STEPPER_H_
 
 #include <map>
+#include <optional>
 #include <string>
-
-#include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
@@ -30,8 +29,8 @@ class BMv2_V1ModelCmdStepper : public CmdStepper {
 
     void initializeTargetEnvironment(ExecutionState *nextState) const override;
 
-    boost::optional<const Constraint *> startParser_impl(const IR::P4Parser *parser,
-                                                         ExecutionState *state) const override;
+    std::optional<const Constraint *> startParser_impl(const IR::P4Parser *parser,
+                                                       ExecutionState *state) const override;
 
     std::map<Continuation::Exception, Continuation> getExceptionHandlers(
         const IR::P4Parser *parser, Continuation::Body normalContinuation,

@@ -17,10 +17,10 @@ limitations under the License.
 #ifndef _TYPECHECKING_TYPECONSTRAINTS_H_
 #define _TYPECHECKING_TYPECONSTRAINTS_H_
 
+#include <optional>
 #include <sstream>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/optional.hpp>
 
 #include "ir/ir.h"
 #include "lib/castable.h"

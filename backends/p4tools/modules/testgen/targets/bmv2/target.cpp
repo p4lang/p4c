@@ -77,7 +77,7 @@ const BMv2_V1ModelProgramInfo *BMv2_V1ModelTestgenTarget::initProgram_impl(
 
 Bmv2TestBackend *BMv2_V1ModelTestgenTarget::getTestBackend_impl(
     const ProgramInfo &programInfo, SymbolicExecutor &symbex, const std::filesystem::path &testPath,
-    boost::optional<uint32_t> seed) const {
+    std::optional<uint32_t> seed) const {
     return new Bmv2TestBackend(programInfo, symbex, testPath, seed);
 }
 

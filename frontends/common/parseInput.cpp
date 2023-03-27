@@ -18,9 +18,8 @@ limitations under the License.
 
 #include <cstdio>
 #include <iostream>
+#include <optional>
 #include <sstream>
-
-#include <boost/optional.hpp>
 
 #include "frontends/p4/fromv1.0/converters.h"
 #include "frontends/p4/frontend.h"

@@ -3,9 +3,8 @@
 
 #include <cstddef>
 #include <map>
+#include <optional>
 #include <vector>
-
-#include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/lib/formulae.h"
 #include "ir/ir.h"
@@ -119,7 +118,7 @@ class TableStepper {
 
     /// Add the default action path to the expression stepper. If only hits if @param
     /// tableMissCondition is true.
-    void addDefaultAction(boost::optional<const IR::Expression *> tableMissCondition);
+    void addDefaultAction(std::optional<const IR::Expression *> tableMissCondition);
 
     /// Helper function that collects the list of actions contained in the table.
     std::vector<const IR::ActionListElement *> buildTableActionList();

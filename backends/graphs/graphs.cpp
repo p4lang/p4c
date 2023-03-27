@@ -58,8 +58,8 @@ void Graphs::limitStringSize(std::stringstream &sstream, std::stringstream &help
     helper_sstream.clear();
 }
 
-boost::optional<Graphs::vertex_t> Graphs::merge_other_statements_into_vertex() {
-    if (statementsStack.empty()) return boost::none;
+std::optional<Graphs::vertex_t> Graphs::merge_other_statements_into_vertex() {
+    if (statementsStack.empty()) return std::nullopt;
     std::stringstream sstream;
     std::stringstream helper_sstream;  // to limit line width
 

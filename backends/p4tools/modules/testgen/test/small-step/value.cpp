@@ -1,6 +1,5 @@
 #include <memory>
-
-#include <boost/optional/optional.hpp>
+#include <optional>
 
 #include "gtest/gtest-message.h"
 #include "gtest/gtest-test-part.h"

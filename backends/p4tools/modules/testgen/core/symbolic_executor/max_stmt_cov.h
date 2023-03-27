@@ -4,11 +4,10 @@
 #include <cstdint>
 #include <list>
 #include <map>
+#include <optional>
 #include <type_traits>
 #include <utility>
 #include <vector>
-
-#include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
 

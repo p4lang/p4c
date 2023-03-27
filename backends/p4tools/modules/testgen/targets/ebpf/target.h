@@ -2,8 +2,7 @@
 #define TESTGEN_TARGETS_EBPF_TARGET_H_
 
 #include <cstdint>
-
-#include <boost/optional/optional.hpp>
+#include <optional>
 
 #include "backends/p4tools/common/core/solver.h"
 #include "ir/ir.h"
@@ -37,7 +36,7 @@ class EBPFTestgenTarget : public TestgenTarget {
 
     EBPFTestBackend *getTestBackend_impl(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
                                          const std::filesystem::path &testPath,
-                                         boost::optional<uint32_t> seed) const override;
+                                         std::optional<uint32_t> seed) const override;
 
     EBPFCmdStepper *getCmdStepper_impl(ExecutionState &state, AbstractSolver &solver,
                                        const ProgramInfo &programInfo) const override;
