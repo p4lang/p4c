@@ -36,7 +36,7 @@ const std::set<std::string> Bmv2TestBackend::SUPPORTED_BACKENDS = {"PTF", "STF",
                                                                    "METADATA"};
 
 Bmv2TestBackend::Bmv2TestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                                 const boost::filesystem::path &testPath,
+                                 const std::filesystem::path &testPath,
                                  boost::optional<uint32_t> seed)
     : TestBackEnd(programInfo, symbex) {
     cstring testBackendString = TestgenOptions::get().testBackend;

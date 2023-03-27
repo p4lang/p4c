@@ -3,7 +3,6 @@
 
 #include <cstdint>
 
-#include <boost/filesystem.hpp>
 #include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
@@ -37,7 +36,7 @@ class EBPFTestgenTarget : public TestgenTarget {
     int getPortNumWidth_bits_impl() const override;
 
     EBPFTestBackend *getTestBackend_impl(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                                         const boost::filesystem::path &testPath,
+                                         const std::filesystem::path &testPath,
                                          boost::optional<uint32_t> seed) const override;
 
     EBPFCmdStepper *getCmdStepper_impl(ExecutionState &state, AbstractSolver &solver,

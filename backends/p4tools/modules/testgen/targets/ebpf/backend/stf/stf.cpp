@@ -10,7 +10,6 @@
 #include <vector>
 
 #include <boost/core/enable_if.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/multiprecision/detail/et_ops.hpp>
 #include <boost/multiprecision/number.hpp>
 #include <boost/multiprecision/traits/explicit_conversion.hpp>
@@ -35,7 +34,7 @@
 namespace P4Tools::P4Testgen::EBPF {
 
 STF::STF(cstring testName, boost::optional<unsigned int> seed = boost::none) : TF(testName, seed) {
-    boost::filesystem::path testFile(testName + ".stf");
+    std::filesystem::path testFile(testName + ".stf");
     cstring testNameOnly(testFile.stem().c_str());
 }
 
