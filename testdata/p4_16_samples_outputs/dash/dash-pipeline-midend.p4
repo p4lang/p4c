@@ -646,7 +646,9 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         counters = outbound_routing_counter;
     }
     @name("dash_ingress.outbound.set_tunnel_mapping") action outbound_set_tunnel_mapping_0(@name("underlay_dip") bit<32> underlay_dip_4, @name("overlay_dmac") bit<48> overlay_dmac_4, @name("use_dst_vnet_vni") bit<1> use_dst_vnet_vni) {
-        meta._vnet_id10 = (use_dst_vnet_vni == 1w1 ? meta._dst_vnet_id11 : meta._vnet_id10);
+        if (use_dst_vnet_vni == 1w1) {
+            meta._vnet_id10 = meta._dst_vnet_id11;
+        }
         meta._encap_data_overlay_dmac8 = overlay_dmac_4;
         meta._encap_data_underlay_dip5 = underlay_dip_4;
     }
@@ -835,26 +837,33 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         meta._encap_data_underlay_dip5 = vm_underlay_dip;
         meta._encap_data_vni2 = vm_vni;
         meta._vnet_id10 = vnet_id_1;
-        meta._stage1_dash_acl_group_id29 = (meta._is_overlay_ip_v619 == 1w1 ? (meta._direction1 == 16w1 ? outbound_v6_stage1_dash_acl_group_id : meta._stage1_dash_acl_group_id29) : meta._stage1_dash_acl_group_id29);
-        meta._stage2_dash_acl_group_id30 = (meta._is_overlay_ip_v619 == 1w1 ? (meta._direction1 == 16w1 ? outbound_v6_stage2_dash_acl_group_id : meta._stage2_dash_acl_group_id30) : meta._stage2_dash_acl_group_id30);
-        meta._stage3_dash_acl_group_id31 = (meta._is_overlay_ip_v619 == 1w1 ? (meta._direction1 == 16w1 ? outbound_v6_stage3_dash_acl_group_id : meta._stage3_dash_acl_group_id31) : meta._stage3_dash_acl_group_id31);
-        meta._stage4_dash_acl_group_id32 = (meta._is_overlay_ip_v619 == 1w1 ? (meta._direction1 == 16w1 ? outbound_v6_stage4_dash_acl_group_id : meta._stage4_dash_acl_group_id32) : meta._stage4_dash_acl_group_id32);
-        meta._stage5_dash_acl_group_id33 = (meta._is_overlay_ip_v619 == 1w1 ? (meta._direction1 == 16w1 ? outbound_v6_stage5_dash_acl_group_id : meta._stage5_dash_acl_group_id33) : meta._stage5_dash_acl_group_id33);
-        meta._stage1_dash_acl_group_id29 = (meta._is_overlay_ip_v619 == 1w1 ? (meta._direction1 == 16w1 ? outbound_v6_stage1_dash_acl_group_id : inbound_v6_stage1_dash_acl_group_id) : meta._stage1_dash_acl_group_id29);
-        meta._stage2_dash_acl_group_id30 = (meta._is_overlay_ip_v619 == 1w1 ? (meta._direction1 == 16w1 ? outbound_v6_stage2_dash_acl_group_id : inbound_v6_stage2_dash_acl_group_id) : meta._stage2_dash_acl_group_id30);
-        meta._stage3_dash_acl_group_id31 = (meta._is_overlay_ip_v619 == 1w1 ? (meta._direction1 == 16w1 ? outbound_v6_stage3_dash_acl_group_id : inbound_v6_stage3_dash_acl_group_id) : meta._stage3_dash_acl_group_id31);
-        meta._stage4_dash_acl_group_id32 = (meta._is_overlay_ip_v619 == 1w1 ? (meta._direction1 == 16w1 ? outbound_v6_stage4_dash_acl_group_id : inbound_v6_stage4_dash_acl_group_id) : meta._stage4_dash_acl_group_id32);
-        meta._stage5_dash_acl_group_id33 = (meta._is_overlay_ip_v619 == 1w1 ? (meta._direction1 == 16w1 ? outbound_v6_stage5_dash_acl_group_id : inbound_v6_stage5_dash_acl_group_id) : meta._stage5_dash_acl_group_id33);
-        meta._stage1_dash_acl_group_id29 = (meta._is_overlay_ip_v619 == 1w1 ? meta._stage1_dash_acl_group_id29 : (meta._direction1 == 16w1 ? outbound_v4_stage1_dash_acl_group_id : meta._stage1_dash_acl_group_id29));
-        meta._stage2_dash_acl_group_id30 = (meta._is_overlay_ip_v619 == 1w1 ? meta._stage2_dash_acl_group_id30 : (meta._direction1 == 16w1 ? outbound_v4_stage2_dash_acl_group_id : meta._stage2_dash_acl_group_id30));
-        meta._stage3_dash_acl_group_id31 = (meta._is_overlay_ip_v619 == 1w1 ? meta._stage3_dash_acl_group_id31 : (meta._direction1 == 16w1 ? outbound_v4_stage3_dash_acl_group_id : meta._stage3_dash_acl_group_id31));
-        meta._stage4_dash_acl_group_id32 = (meta._is_overlay_ip_v619 == 1w1 ? meta._stage4_dash_acl_group_id32 : (meta._direction1 == 16w1 ? outbound_v4_stage4_dash_acl_group_id : meta._stage4_dash_acl_group_id32));
-        meta._stage5_dash_acl_group_id33 = (meta._is_overlay_ip_v619 == 1w1 ? meta._stage5_dash_acl_group_id33 : (meta._direction1 == 16w1 ? outbound_v4_stage5_dash_acl_group_id : meta._stage5_dash_acl_group_id33));
-        meta._stage1_dash_acl_group_id29 = (meta._is_overlay_ip_v619 == 1w1 ? meta._stage1_dash_acl_group_id29 : (meta._direction1 == 16w1 ? outbound_v4_stage1_dash_acl_group_id : inbound_v4_stage1_dash_acl_group_id));
-        meta._stage2_dash_acl_group_id30 = (meta._is_overlay_ip_v619 == 1w1 ? meta._stage2_dash_acl_group_id30 : (meta._direction1 == 16w1 ? outbound_v4_stage2_dash_acl_group_id : inbound_v4_stage2_dash_acl_group_id));
-        meta._stage3_dash_acl_group_id31 = (meta._is_overlay_ip_v619 == 1w1 ? meta._stage3_dash_acl_group_id31 : (meta._direction1 == 16w1 ? outbound_v4_stage3_dash_acl_group_id : inbound_v4_stage3_dash_acl_group_id));
-        meta._stage4_dash_acl_group_id32 = (meta._is_overlay_ip_v619 == 1w1 ? meta._stage4_dash_acl_group_id32 : (meta._direction1 == 16w1 ? outbound_v4_stage4_dash_acl_group_id : inbound_v4_stage4_dash_acl_group_id));
-        meta._stage5_dash_acl_group_id33 = (meta._is_overlay_ip_v619 == 1w1 ? meta._stage5_dash_acl_group_id33 : (meta._direction1 == 16w1 ? outbound_v4_stage5_dash_acl_group_id : inbound_v4_stage5_dash_acl_group_id));
+        if (meta._is_overlay_ip_v619 == 1w1) {
+            if (meta._direction1 == 16w1) {
+                meta._stage1_dash_acl_group_id29 = outbound_v6_stage1_dash_acl_group_id;
+                meta._stage2_dash_acl_group_id30 = outbound_v6_stage2_dash_acl_group_id;
+                meta._stage3_dash_acl_group_id31 = outbound_v6_stage3_dash_acl_group_id;
+                meta._stage4_dash_acl_group_id32 = outbound_v6_stage4_dash_acl_group_id;
+                meta._stage5_dash_acl_group_id33 = outbound_v6_stage5_dash_acl_group_id;
+            } else {
+                meta._stage1_dash_acl_group_id29 = inbound_v6_stage1_dash_acl_group_id;
+                meta._stage2_dash_acl_group_id30 = inbound_v6_stage2_dash_acl_group_id;
+                meta._stage3_dash_acl_group_id31 = inbound_v6_stage3_dash_acl_group_id;
+                meta._stage4_dash_acl_group_id32 = inbound_v6_stage4_dash_acl_group_id;
+                meta._stage5_dash_acl_group_id33 = inbound_v6_stage5_dash_acl_group_id;
+            }
+        } else if (meta._direction1 == 16w1) {
+            meta._stage1_dash_acl_group_id29 = outbound_v4_stage1_dash_acl_group_id;
+            meta._stage2_dash_acl_group_id30 = outbound_v4_stage2_dash_acl_group_id;
+            meta._stage3_dash_acl_group_id31 = outbound_v4_stage3_dash_acl_group_id;
+            meta._stage4_dash_acl_group_id32 = outbound_v4_stage4_dash_acl_group_id;
+            meta._stage5_dash_acl_group_id33 = outbound_v4_stage5_dash_acl_group_id;
+        } else {
+            meta._stage1_dash_acl_group_id29 = inbound_v4_stage1_dash_acl_group_id;
+            meta._stage2_dash_acl_group_id30 = inbound_v4_stage2_dash_acl_group_id;
+            meta._stage3_dash_acl_group_id31 = inbound_v4_stage3_dash_acl_group_id;
+            meta._stage4_dash_acl_group_id32 = inbound_v4_stage4_dash_acl_group_id;
+            meta._stage5_dash_acl_group_id33 = inbound_v4_stage5_dash_acl_group_id;
+        }
     }
     @name("dash_ingress.eni|dash_eni") table eni_0 {
         key = {
@@ -922,8 +931,13 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         const default_action = deny_4();
     }
     @name("dash_ingress.set_acl_group_attrs") action set_acl_group_attrs(@name("ip_addr_family") bit<32> ip_addr_family) {
-        meta._dropped0 = (ip_addr_family == 32w0 ? (meta._is_overlay_ip_v619 == 1w1 ? true : meta._dropped0) : meta._dropped0);
-        meta._dropped0 = (ip_addr_family == 32w0 ? meta._dropped0 : (meta._is_overlay_ip_v619 == 1w0 ? true : meta._dropped0));
+        if (ip_addr_family == 32w0) {
+            if (meta._is_overlay_ip_v619 == 1w1) {
+                meta._dropped0 = true;
+            }
+        } else if (meta._is_overlay_ip_v619 == 1w0) {
+            meta._dropped0 = true;
+        }
     }
     @name("dash_ingress.dash_acl_group|dash_acl") table acl_group_0 {
         key = {
