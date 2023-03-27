@@ -308,6 +308,7 @@ class TypeInference : public Transform {
     const IR::Node *postorder(IR::TypeNameExpression *expression) override;
     const IR::Node *postorder(IR::ListExpression *expression) override;
     const IR::Node *postorder(IR::InvalidHeader *expression) override;
+    const IR::Node *postorder(IR::InvalidHeaderUnion *expression) override;
     const IR::Node *postorder(IR::Invalid *expression) override;
     const IR::Node *postorder(IR::P4ListExpression *expression) override;
     const IR::Node *postorder(IR::StructExpression *expression) override;

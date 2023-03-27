@@ -165,6 +165,10 @@ class ReadsWrites : public Inspector {
         rw.emplace(expression, new SetOfLocations());
     }
 
+    void postorder(const IR::InvalidHeaderUnion *expression) override {
+        rw.emplace(expression, new SetOfLocations());
+    }
+
     void postorder(const IR::TypeNameExpression *expression) override {
         rw.emplace(expression, new SetOfLocations());
     }

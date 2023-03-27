@@ -2162,8 +2162,20 @@ const IR::Node *TypeInference::postorder(IR::Invalid *expression) {
 const IR::Node *TypeInference::postorder(IR::InvalidHeader *expression) {
     if (done()) return expression;
     auto type = getTypeType(expression->headerType);
-    BUG_CHECK(type->is<IR::Type_Header>(), "%1%: does not have a header type %2%", expression,
+    BUG_CHECK(type->is<IR::Type_Header>(), "%1%: does not have a header type `%2%`", expression,
               type);
+    setType(expression, type);
+    setType(getOriginal(), type);
+    setCompileTimeConstant(expression);
+    setCompileTimeConstant(getOriginal<IR::Expression>());
+    return expression;
+}
+
+const IR::Node *TypeInference::postorder(IR::InvalidHeaderUnion *expression) {
+    if (done()) return expression;
+    auto type = getTypeType(expression->headerUnionType);
+    BUG_CHECK(type->is<IR::Type_HeaderUnion>(), "%1%: does not have a header_union type `%2%`",
+              expression, type);
     setType(expression, type);
     setType(getOriginal(), type);
     setCompileTimeConstant(expression);
@@ -2763,15 +2775,21 @@ const IR::Node *TypeInference::postorder(IR::Cast *expression) {
             }
         } else if (auto ih = expression->expr->to<IR::Invalid>()) {
             auto type = castType->getP4Type();
-            if (!castType->is<IR::Type_Header>()) {
-                typeError("%1%: invalid header expression has a non-header type `%2%`", expression,
-                          castType);
+            if (castType->is<IR::Type_Header>()) {
+                setType(type, new IR::Type_Type(castType));
+                auto result = new IR::InvalidHeader(ih->srcInfo, type, type);
+                setType(result, castType);
+                return result;
+            } else if (castType->is<IR::Type_HeaderUnion>()) {
+                setType(type, new IR::Type_Type(castType));
+                auto result = new IR::InvalidHeaderUnion(ih->srcInfo, type, type);
+                setType(result, castType);
+                return result;
+            } else {
+                typeError("%1%: 'invalid' expression type `%2%` must be a header or header union",
+                          expression, castType);
                 return expression;
             }
-            setType(type, new IR::Type_Type(castType));
-            auto result = new IR::InvalidHeader(ih->srcInfo, type, type);
-            setType(result, castType);
-            return result;
         }
     }
     if (auto lt = concreteType->to<IR::Type_P4List>()) {
@@ -3481,6 +3499,8 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
             if (mem->member == IR::Type_Header::isValid && type->is<IR::Type_Header>()) {
                 const IR::BoolLiteral *lit = nullptr;
                 if (mem->expr->is<IR::InvalidHeader>())
+                    lit = new IR::BoolLiteral(expression->srcInfo, false);
+                if (mem->expr->is<IR::InvalidHeaderUnion>())
                     lit = new IR::BoolLiteral(expression->srcInfo, false);
                 if (mem->expr->is<IR::StructExpression>())
                     lit = new IR::BoolLiteral(expression->srcInfo, true);

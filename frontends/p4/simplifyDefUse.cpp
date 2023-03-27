@@ -742,7 +742,9 @@ class FindUninitialized : public Inspector {
         }
 
         if (auto dst_headerunion = dst_type->to<IR::Type_HeaderUnion>()) {
-            if (src->is<IR::MethodCallExpression>()) {
+            if (src->is<IR::InvalidHeaderUnion>()) {
+                headerDefs->update(dst, TernaryBool::No);
+            } else if (src->is<IR::MethodCallExpression>()) {
                 auto storage = headerDefs->getStorageLocation(dst);
                 for (auto s : *storage) {
                     headerDefs->setValueToStorage(s, TernaryBool::Yes);

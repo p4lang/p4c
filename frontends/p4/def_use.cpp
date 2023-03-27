@@ -478,6 +478,11 @@ bool ComputeWriteSet::preorder(const IR::InvalidHeader *expression) {
     return false;
 }
 
+bool ComputeWriteSet::preorder(const IR::InvalidHeaderUnion *expression) {
+    expressionWrites(expression, LocationSet::empty);
+    return false;
+}
+
 bool ComputeWriteSet::preorder(const IR::Literal *expression) {
     expressionWrites(expression, LocationSet::empty);
     return false;

@@ -85,7 +85,7 @@ class DoFlattenHeaderUnion : public Transform {
  *     U u0;
  *     U u1;
  * }
- * References to u[0] is replaced by u0. Likewise for all stack elements.
+ * References to u[0] are replaced by u0. Likewise for all stack elements.
  *
  * This pass assumes that HSIndexSimplifier, ParsersUnroll passes are run before this and all
  * indices for header union stack variables are constants.

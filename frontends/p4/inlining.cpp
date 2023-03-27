@@ -570,7 +570,8 @@ void GeneralInliner::inline_subst(P4Block *caller,
                 } else {
                     // use a temporary variable
                     cstring newName = refMap->newName(param->name);
-                    auto path = new IR::PathExpression(newName);
+                    auto path = new IR::PathExpression(
+                        param->srcInfo, new IR::Path(param->srcInfo, IR::ID(newName)));
                     substs->paramSubst.add(param, new IR::Argument(path));
                     LOG3("Replacing " << param->name << " with " << newName);
                     auto vardecl =

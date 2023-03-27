@@ -67,6 +67,13 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
     if (!(ltype->is<IR::Type_StructLike>() || ltype->is<IR::Type_Stack>())) {
         return statement;
     }
+    /*
+       FIXME: this is not correct for header unions and should be fixed.
+       The fix bellow, commented-out, causes problems elsewhere.
+       https://github.com/p4lang/p4c/issues/3842
+    if (ltype->is<IR::Type_HeaderUnion>())
+        return statement;
+    */
 
     // Do not copy structures for method calls.
     if (statement->right->is<IR::MethodCallExpression>()) {
