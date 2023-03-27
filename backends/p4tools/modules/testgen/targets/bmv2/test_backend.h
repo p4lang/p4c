@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/filesystem.hpp>
 #include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/lib/model.h"
@@ -36,8 +35,7 @@ class Bmv2TestBackend : public TestBackEnd {
 
  public:
     explicit Bmv2TestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                             const boost::filesystem::path &testPath,
-                             boost::optional<uint32_t> seed);
+                             const std::filesystem::path &testPath, boost::optional<uint32_t> seed);
 
     TestBackEnd::TestInfo produceTestInfo(
         const ExecutionState *executionState, const Model *completedModel,

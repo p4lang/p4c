@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 
-#include <boost/filesystem.hpp>
 #include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
@@ -37,7 +36,7 @@ class BMv2_V1ModelTestgenTarget : public TestgenTarget {
     int getPortNumWidth_bits_impl() const override;
 
     Bmv2TestBackend *getTestBackend_impl(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                                         const boost::filesystem::path &testPath,
+                                         const std::filesystem::path &testPath,
                                          boost::optional<uint32_t> seed) const override;
 
     BMv2_V1ModelCmdStepper *getCmdStepper_impl(ExecutionState &state, AbstractSolver &solver,

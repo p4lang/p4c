@@ -7,7 +7,6 @@
 #include <utility>
 #include <vector>
 
-#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <boost/none.hpp>
 #include <boost/variant/apply_visitor.hpp>
@@ -387,12 +386,11 @@ void Protobuf::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
     if (selectedBranches != nullptr) {
         dataJson["selected_branches"] = selectedBranches.c_str();
     }
-    boost::filesystem::path testFile(testName + ".proto");
-    cstring testNameOnly(testFile.stem().c_str());
+    std::filesystem::path testFile(testName + ".proto");
     if (seed) {
         dataJson["seed"] = *seed;
     }
-    dataJson["test_name"] = testNameOnly.c_str();
+    dataJson["test_name"] = testFile.stem();
     dataJson["test_id"] = testId + 1;
     // TODO: Traces are disabled until we are able to escape illegal characters (e.g., '"').
     // dataJson["trace"] = getTrace(testSpec);

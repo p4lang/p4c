@@ -34,7 +34,7 @@ const big_int EBPFTestBackend::ZERO_PKT_MAX = 0xffffffff;
 const std::vector<std::string> EBPFTestBackend::SUPPORTED_BACKENDS = {"STF"};
 
 EBPFTestBackend::EBPFTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                                 const boost::filesystem::path &testPath,
+                                 const std::filesystem::path &testPath,
                                  boost::optional<uint32_t> seed)
     : TestBackEnd(programInfo, symbex) {
     cstring testBackendString = TestgenOptions::get().testBackend;
