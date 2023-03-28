@@ -89,7 +89,7 @@ struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MODEL>> {
             return CounterSpec::BOTH;
         return CounterSpec::UNSPECIFIED;
     }
-    static boost::optional<size_t> indexTypeParamIdx() { return boost::none; }
+    static std::optional<size_t> indexTypeParamIdx() { return std::nullopt; }
 };
 
 template <>
@@ -111,7 +111,7 @@ struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MODEL2020>> {
             return CounterSpec::BOTH;
         return CounterSpec::UNSPECIFIED;
     }
-    static boost::optional<size_t> indexTypeParamIdx() { return 0; }
+    static std::optional<size_t> indexTypeParamIdx() { return 0; }
 };
 
 /// @ref CounterlikeTraits<> specialization for @ref CounterExtern for PSA
@@ -134,7 +134,7 @@ struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::PSA>> {
     }
     // the index of the type parameter for the counter index, in the type
     // parameter list of the extern type declaration.
-    static boost::optional<size_t> indexTypeParamIdx() { return 1; }
+    static std::optional<size_t> indexTypeParamIdx() { return 1; }
 };
 
 /// @ref CounterlikeTraits<> specialization for @ref CounterExtern for PNA
@@ -157,7 +157,7 @@ struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::PNA>> {
     }
     // the index of the type parameter for the counter index, in the type
     // parameter list of the extern type declaration.
-    static boost::optional<size_t> indexTypeParamIdx() { return 1; }
+    static std::optional<size_t> indexTypeParamIdx() { return 1; }
 };
 
 /// @ref CounterlikeTraits<> specialization for @ref MeterExtern for v1model
@@ -178,7 +178,7 @@ struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODEL>> {
             return MeterSpec::BYTES;
         return MeterSpec::UNSPECIFIED;
     }
-    static boost::optional<size_t> indexTypeParamIdx() { return boost::none; }
+    static std::optional<size_t> indexTypeParamIdx() { return std::nullopt; }
 };
 
 template <>
@@ -198,7 +198,7 @@ struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODEL2020>> {
             return MeterSpec::BYTES;
         return MeterSpec::UNSPECIFIED;
     }
-    static boost::optional<size_t> indexTypeParamIdx() { return 0; }
+    static std::optional<size_t> indexTypeParamIdx() { return 0; }
 };
 
 /// @ref CounterlikeTraits<> specialization for @ref MeterExtern for PSA
@@ -219,7 +219,7 @@ struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::PSA>> {
     }
     // the index of the type parameter for the meter index, in the type
     // parameter list of the extern type declaration.
-    static boost::optional<size_t> indexTypeParamIdx() { return 0; }
+    static std::optional<size_t> indexTypeParamIdx() { return 0; }
 };
 
 /// @ref CounterlikeTraits<> specialization for @ref MeterExtern for PNA
@@ -240,7 +240,7 @@ struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::PNA>> {
     }
     // the index of the type parameter for the meter index, in the type
     // parameter list of the extern type declaration.
-    static boost::optional<size_t> indexTypeParamIdx() { return 0; }
+    static std::optional<size_t> indexTypeParamIdx() { return 0; }
 };
 
 }  // namespace Helpers
@@ -383,7 +383,7 @@ struct RegisterTraits<Arch::V1MODEL> {
     // the index of the type parameter for the data stored in the register, in
     // the type parameter list of the extern type declaration
     static size_t dataTypeParamIdx() { return 0; }
-    static boost::optional<size_t> indexTypeParamIdx() { return boost::none; }
+    static std::optional<size_t> indexTypeParamIdx() { return std::nullopt; }
 };
 
 template <>
@@ -394,7 +394,7 @@ struct RegisterTraits<Arch::V1MODEL2020> {
     // the index of the type parameter for the data stored in the register, in
     // the type parameter list of the extern type declaration
     static size_t dataTypeParamIdx() { return 0; }
-    static boost::optional<size_t> indexTypeParamIdx() { return 1; }
+    static std::optional<size_t> indexTypeParamIdx() { return 1; }
 };
 
 template <>
@@ -405,7 +405,7 @@ struct RegisterTraits<Arch::PSA> {
     static size_t dataTypeParamIdx() { return 0; }
     // the index of the type parameter for the register index, in the type
     // parameter list of the extern type declaration.
-    static boost::optional<size_t> indexTypeParamIdx() { return 1; }
+    static std::optional<size_t> indexTypeParamIdx() { return 1; }
 };
 
 template <>
@@ -416,7 +416,7 @@ struct RegisterTraits<Arch::PNA> {
     static size_t dataTypeParamIdx() { return 0; }
     // the index of the type parameter for the register index, in the type
     // parameter list of the extern type declaration.
-    static boost::optional<size_t> indexTypeParamIdx() { return 1; }
+    static std::optional<size_t> indexTypeParamIdx() { return 1; }
 };
 
 //// The information about a digest call which is needed to serialize it.
@@ -440,11 +440,11 @@ struct Register {
     const cstring index_type_name;
 
     /// @return the information required to serialize an @instance of register
-    /// or boost::none in case of error.
+    /// or std::nullopt in case of error.
     template <Arch arch>
-    static boost::optional<Register> from(const IR::ExternBlock *instance,
-                                          const ReferenceMap *refMap, P4::TypeMap *typeMap,
-                                          p4configv1::P4TypeInfo *p4RtTypeInfo) {
+    static std::optional<Register> from(const IR::ExternBlock *instance, const ReferenceMap *refMap,
+                                        P4::TypeMap *typeMap,
+                                        p4configv1::P4TypeInfo *p4RtTypeInfo) {
         CHECK_NULL(instance);
         auto declaration = instance->node->to<IR::Declaration_Instance>();
 
@@ -452,13 +452,13 @@ struct Register {
         if (!size->is<IR::Constant>()) {
             ::error(ErrorType::ERR_UNSUPPORTED, "Register '%1%' has a non-constant size: %2%",
                     declaration, size);
-            return boost::none;
+            return std::nullopt;
         }
         if (!size->to<IR::Constant>()->fitsInt()) {
             ::error(ErrorType::ERR_UNSUPPORTED,
                     "Register '%1%' has a size that doesn't fit in an integer: %2%", declaration,
                     size);
-            return boost::none;
+            return std::nullopt;
         }
 
         // retrieve type parameter for the register instance and convert it to P4DataTypeSpec
@@ -475,7 +475,7 @@ struct Register {
         cstring index_type_name = nullptr;
         auto indexTypeParamIdx = RegisterTraits<arch>::indexTypeParamIdx();
         // In v1model, the index is a bit<32>, in PSA it is determined by a type parameter.
-        if (indexTypeParamIdx != boost::none) {
+        if (indexTypeParamIdx != std::nullopt) {
             // retrieve type parameter for the index.
             BUG_CHECK(declaration->type->is<IR::Type_Specialized>(),
                       "%1%: expected Type_Specialized", declaration->type);
@@ -709,35 +709,34 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         (void)p4info;
     }
 
-    static boost::optional<ActionProfile> getActionProfile(cstring name,
-                                                           const IR::Type_Extern *type,
-                                                           int64_t size,
-                                                           const IR::IAnnotated *annotations) {
+    static std::optional<ActionProfile> getActionProfile(cstring name, const IR::Type_Extern *type,
+                                                         int64_t size,
+                                                         const IR::IAnnotated *annotations) {
         ActionProfileType actionProfileType;
         if (type->name == ActionSelectorTraits<arch>::typeName()) {
             actionProfileType = ActionProfileType::INDIRECT_WITH_SELECTOR;
         } else if (type->name == ActionProfileTraits<arch>::typeName()) {
             actionProfileType = ActionProfileType::INDIRECT;
         } else {
-            return boost::none;
+            return std::nullopt;
         }
 
         return ActionProfile{name, actionProfileType, size, annotations};
     }
 
     /// @return the action profile referenced in @table's implementation property,
-    /// if it has one, or boost::none otherwise.
-    static boost::optional<ActionProfile> getActionProfile(const IR::P4Table *table,
-                                                           ReferenceMap *refMap, TypeMap *typeMap) {
+    /// if it has one, or std::nullopt otherwise.
+    static std::optional<ActionProfile> getActionProfile(const IR::P4Table *table,
+                                                         ReferenceMap *refMap, TypeMap *typeMap) {
         auto propertyName = ActionProfileTraits<arch>::propertyName();
         auto instance = getExternInstanceFromProperty(table, propertyName, refMap, typeMap);
-        if (!instance) return boost::none;
+        if (!instance) return std::nullopt;
         auto size = instance->substitution.lookupByName(ActionProfileTraits<arch>::sizeParamName())
                         ->expression;
         if (!size->template is<IR::Constant>()) {
             ::error(ErrorType::ERR_INVALID, "Action profile '%1%' has non-constant size '%2%'",
                     *instance->name, size);
-            return boost::none;
+            return std::nullopt;
         }
         return getActionProfile(*instance->name, instance->type,
                                 size->template to<IR::Constant>()->asInt(),
@@ -745,13 +744,13 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
     }
 
     /// @return the action profile declared with @decl
-    static boost::optional<ActionProfile> getActionProfile(const IR::ExternBlock *instance) {
+    static std::optional<ActionProfile> getActionProfile(const IR::ExternBlock *instance) {
         auto decl = instance->node->to<IR::IDeclaration>();
         auto size = instance->getParameterValue(ActionProfileTraits<arch>::sizeParamName());
         if (!size->template is<IR::Constant>()) {
             ::error(ErrorType::ERR_INVALID, "Action profile '%1%' has non-constant size '%2%'",
                     decl->controlPlaneName(), size);
-            return boost::none;
+            return std::nullopt;
         }
         return getActionProfile(decl->controlPlaneName(), instance->type,
                                 size->template to<IR::Constant>()->asInt(),
@@ -899,15 +898,15 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         return nullptr;
     }
 
-    static boost::optional<cstring> getTableImplementationName(const IR::P4Table *table,
-                                                               ReferenceMap *refMap) {
+    static std::optional<cstring> getTableImplementationName(const IR::P4Table *table,
+                                                             ReferenceMap *refMap) {
         const IR::Property *impl = getTableImplementationProperty(table);
-        if (impl == nullptr) return boost::none;
+        if (impl == nullptr) return std::nullopt;
         if (!impl->value->is<IR::ExpressionValue>()) {
             ::error(ErrorType::ERR_EXPECTED,
                     "Expected implementation property value for table %1% to be an expression: %2%",
                     table->controlPlaneName(), impl);
-            return boost::none;
+            return std::nullopt;
         }
         auto expr = impl->value->to<IR::ExpressionValue>()->expression;
         if (expr->is<IR::ConstructorCallExpression>()) return impl->controlPlaneName();
@@ -915,7 +914,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
             auto decl = refMap->getDeclaration(expr->to<IR::PathExpression>()->path, true);
             return decl->controlPlaneName();
         }
-        return boost::none;
+        return std::nullopt;
     }
 
     ReferenceMap *refMap;
@@ -976,8 +975,8 @@ class P4RuntimeArchHandlerPSAPNA : public P4RuntimeArchHandlerCommon<arch> {
     }
 
     /// @return serialization information for the Digest extern instacne @decl
-    boost::optional<Digest> getDigest(const IR::Declaration_Instance *decl,
-                                      p4configv1::P4TypeInfo *p4RtTypeInfo) {
+    std::optional<Digest> getDigest(const IR::Declaration_Instance *decl,
+                                    p4configv1::P4TypeInfo *p4RtTypeInfo) {
         BUG_CHECK(decl->type->is<IR::Type_Specialized>(), "%1%: expected Type_Specialized",
                   decl->type);
         auto type = decl->type->to<IR::Type_Specialized>();

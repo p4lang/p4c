@@ -6,11 +6,9 @@
 
 #include <algorithm>
 #include <iosfwd>
+#include <optional>
 #include <string>
 #include <vector>
-
-#include <boost/none.hpp>
-#include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
@@ -38,7 +36,7 @@ class Z3Solver : public AbstractSolver {
     virtual ~Z3Solver() = default;
 
     explicit Z3Solver(bool isIncremental = true,
-                      boost::optional<std::istream &> inOpt = boost::none);
+                      std::optional<std::istream *> inOpt = std::nullopt);
 
     void comment(cstring comment) override;
 
@@ -46,7 +44,7 @@ class Z3Solver : public AbstractSolver {
 
     void timeout(unsigned tm) override;
 
-    boost::optional<bool> checkSat(const std::vector<const Constraint *> &asserts) override;
+    std::optional<bool> checkSat(const std::vector<const Constraint *> &asserts) override;
 
     const Model *getModel() const override;
 
@@ -128,10 +126,10 @@ class Z3Solver : public AbstractSolver {
     z3::expr_vector z3Assertions;
 
     /// Stores the RNG seed, as last set by @ref seed.
-    boost::optional<unsigned> seed_;
+    std::optional<unsigned> seed_;
 
     /// Stores the timeout, as last set by @ref timeout.
-    boost::optional<unsigned> timeout_;
+    std::optional<unsigned> timeout_;
 };
 
 }  // namespace P4Tools

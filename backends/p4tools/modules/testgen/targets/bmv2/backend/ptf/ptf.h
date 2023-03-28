@@ -4,11 +4,11 @@
 #include <cstddef>
 #include <fstream>
 #include <map>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <boost/optional/optional.hpp>
 #include <inja/inja.hpp>
 
 /// Inja
@@ -39,7 +39,7 @@ class PTF : public TF {
 
     PTF &operator=(PTF &&) = delete;
 
-    PTF(cstring testName, boost::optional<unsigned int> seed);
+    PTF(cstring testName, std::optional<unsigned int> seed);
 
     /// Produce a PTF test.
     void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testIdx,

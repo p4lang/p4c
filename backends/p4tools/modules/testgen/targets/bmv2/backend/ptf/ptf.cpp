@@ -2,12 +2,12 @@
 
 #include <iomanip>
 #include <map>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <boost/none.hpp>
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
 #include <inja/inja.hpp>
@@ -28,7 +28,7 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-PTF::PTF(cstring testName, boost::optional<unsigned int> seed = boost::none) : TF(testName, seed) {}
+PTF::PTF(cstring testName, std::optional<unsigned int> seed = std::nullopt) : TF(testName, seed) {}
 
 inja::json::array_t PTF::getClone(const std::map<cstring, const TestObject *> &cloneInfos) {
     auto cloneJson = inja::json::array_t();
@@ -188,7 +188,7 @@ inja::json PTF::getSend(const TestSpec *testSpec) {
 
 inja::json PTF::getVerify(const TestSpec *testSpec) {
     inja::json verifyData = inja::json::object();
-    if (testSpec->getEgressPacket() != boost::none) {
+    if (testSpec->getEgressPacket() != std::nullopt) {
         const auto &packet = **testSpec->getEgressPacket();
         verifyData["eg_port"] = packet.getPort();
         const auto *payload = packet.getEvaluatedPayload();

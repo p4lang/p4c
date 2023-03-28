@@ -1719,16 +1719,16 @@ const IR::Node *CopyMatchKeysToSingleStruct::doStatement(const IR::Statement *st
 
 namespace Helpers {
 
-boost::optional<P4::ExternInstance> getExternInstanceFromProperty(
+std::optional<P4::ExternInstance> getExternInstanceFromProperty(
     const IR::P4Table *table, const cstring &propertyName, P4::ReferenceMap *refMap,
     P4::TypeMap *typeMap, bool *isConstructedInPlace, cstring &externName) {
     auto property = table->properties->getProperty(propertyName);
-    if (property == nullptr) return boost::none;
+    if (property == nullptr) return std::nullopt;
     if (!property->value->is<IR::ExpressionValue>()) {
         ::error(ErrorType::ERR_EXPECTED,
                 "Expected %1% property value for table %2% to be an expression: %3%", propertyName,
                 table->controlPlaneName(), property);
-        return boost::none;
+        return std::nullopt;
     }
 
     auto expr = property->value->to<IR::ExpressionValue>()->expression;
@@ -1740,7 +1740,7 @@ boost::optional<P4::ExternInstance> getExternInstanceFromProperty(
                 "Table '%1%' has an anonymous table property '%2%' with no name annotation, "
                 "which is not supported by P4Runtime",
                 table->controlPlaneName(), propertyName);
-        return boost::none;
+        return std::nullopt;
     }
     auto name = property->controlPlaneName();
     auto externInstance = P4::ExternInstance::resolve(expr, refMap, typeMap, name);
@@ -1749,7 +1749,7 @@ boost::optional<P4::ExternInstance> getExternInstanceFromProperty(
                 "Expected %1% property value for table %2% to resolve to an "
                 "extern instance: %3%",
                 propertyName, table->controlPlaneName(), property);
-        return boost::none;
+        return std::nullopt;
     }
     return externInstance;
 }

@@ -1,10 +1,9 @@
 #include "backends/p4tools/modules/testgen/targets/ebpf/program_info.h"
 
 #include <list>
+#include <optional>
 #include <utility>
 #include <vector>
-
-#include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/util.h"

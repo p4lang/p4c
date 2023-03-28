@@ -4,10 +4,10 @@
 #include <cstddef>
 #include <fstream>
 #include <map>
+#include <optional>
 #include <string>
 #include <vector>
 
-#include <boost/optional/optional.hpp>
 #include <inja/inja.hpp>
 
 #include "lib/cstring.h"
@@ -33,7 +33,7 @@ class STF : public TF {
 
     STF &operator=(STF &&) = delete;
 
-    STF(cstring testName, boost::optional<unsigned int> seed);
+    STF(cstring testName, std::optional<unsigned int> seed);
 
     /// Produce an STF test.
     void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testIdx,

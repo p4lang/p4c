@@ -13,8 +13,8 @@ namespace Test {
 namespace SmallStepUtil {
 
 /// Creates a test case with the @hdrFields for stepping on an @expr.
-boost::optional<const P4ToolsTestCase> createSmallStepExprTest(const std::string &hdrFields,
-                                                               const std::string &expr) {
+std::optional<const P4ToolsTestCase> createSmallStepExprTest(const std::string &hdrFields,
+                                                             const std::string &expr) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
 header H {
   %HEADER_FIELDS%

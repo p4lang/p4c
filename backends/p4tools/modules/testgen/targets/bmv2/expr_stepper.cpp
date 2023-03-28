@@ -3,14 +3,13 @@
 #include <cstddef>
 #include <functional>
 #include <list>
+#include <optional>
 #include <ostream>
 #include <vector>
 
 #include <boost/cstdint.hpp>
 #include <boost/format.hpp>
 #include <boost/multiprecision/number.hpp>
-#include <boost/none.hpp>
-#include <boost/optional/optional.hpp>
 #include <boost/variant/get.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
@@ -855,7 +854,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              auto cloneType = args->at(0)->expression->checkedTo<IR::Constant>()->asUint64();
              const auto *sessionIdExpr = args->at(1)->expression;
              auto recirculateIndex = args->at(2)->expression->checkedTo<IR::Constant>()->asUint64();
-             boost::optional<const Constraint *> cond = boost::none;
+             std::optional<const Constraint *> cond = std::nullopt;
 
              if (cloneType == BMv2Constants::CLONE_TYPE_I2E) {
                  // Pick a clone port var. For now, pick a random value from 0-511.
@@ -1142,7 +1141,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              auto cloneType = args->at(0)->expression->checkedTo<IR::Constant>()->asUint64();
              const auto *sessionIdExpr = args->at(1)->expression;
              uint64_t sessionId = 0;
-             boost::optional<const Constraint *> cond = boost::none;
+             std::optional<const Constraint *> cond = std::nullopt;
 
              if (cloneType == BMv2Constants::CLONE_TYPE_I2E) {
                  // Pick a clone port var. For now, pick a random value from 0-511.

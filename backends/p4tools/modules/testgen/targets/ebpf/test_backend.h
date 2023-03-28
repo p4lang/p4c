@@ -2,11 +2,9 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_EBPF_TEST_BACKEND_H_
 
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <vector>
-
-#include <boost/filesystem.hpp>
-#include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/trace_events.h"
@@ -20,11 +18,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_backend.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace EBPF {
+namespace P4Tools::P4Testgen::EBPF {
 
 class EBPFTestBackend : public TestBackEnd {
  private:
@@ -40,7 +34,7 @@ class EBPFTestBackend : public TestBackEnd {
 
  public:
     explicit EBPFTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                             const std::filesystem::path &testPath, boost::optional<uint32_t> seed);
+                             const std::filesystem::path &testPath, std::optional<uint32_t> seed);
 
     TestBackEnd::TestInfo produceTestInfo(
         const ExecutionState *executionState, const Model *completedModel,
@@ -51,10 +45,6 @@ class EBPFTestBackend : public TestBackEnd {
                                    const Model *completedModel, const TestInfo &testInfo) override;
 };
 
-}  // namespace EBPF
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::EBPF
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_EBPF_TEST_BACKEND_H_ */

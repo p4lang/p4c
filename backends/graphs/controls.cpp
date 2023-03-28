@@ -82,7 +82,7 @@ bool ControlGraphs::preorder(const IR::PackageBlock *block) {
 
             Graph *g_ = new Graph();
             g = g_;
-            instanceName = boost::none;
+            instanceName = std::nullopt;
             boost::get_property(*g_, boost::graph_name) = name;
             BUG_CHECK(controlStack.isEmpty(), "Invalid control stack state");
             g = controlStack.pushBack(*g_, "");
@@ -111,9 +111,9 @@ bool ControlGraphs::preorder(const IR::ControlBlock *block) {
 
 bool ControlGraphs::preorder(const IR::P4Control *cont) {
     bool doPop = false;
-    // instanceName == boost::none <=> top level
-    if (instanceName != boost::none) {
-        g = controlStack.pushBack(*g, instanceName.get());
+    // instanceName == std::nullopt <=> top level
+    if (instanceName != std::nullopt) {
+        g = controlStack.pushBack(*g, instanceName.value());
         doPop = true;
     }
     return_parents.clear();

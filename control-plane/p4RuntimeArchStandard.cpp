@@ -16,10 +16,9 @@ limitations under the License.
 
 #include "p4RuntimeArchStandard.h"
 
+#include <optional>
 #include <set>
 #include <unordered_map>
-
-#include <boost/optional.hpp>
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/fromv1.0/v1model.h"
@@ -75,12 +74,12 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
     }
 
     /// @return serialization information for the digest() call represented by
-    /// @call, or boost::none if @call is not a digest() call or is invalid.
-    static boost::optional<Digest> getDigestCall(const P4::ExternFunction *function,
-                                                 ReferenceMap *refMap, P4::TypeMap *typeMap,
-                                                 p4configv1::P4TypeInfo *p4RtTypeInfo) {
+    /// @call, or std::nullopt if @call is not a digest() call or is invalid.
+    static std::optional<Digest> getDigestCall(const P4::ExternFunction *function,
+                                               ReferenceMap *refMap, P4::TypeMap *typeMap,
+                                               p4configv1::P4TypeInfo *p4RtTypeInfo) {
         if (function->method->name != P4V1::V1Model::instance.digest_receiver.name)
-            return boost::none;
+            return std::nullopt;
 
         auto call = function->expr;
         BUG_CHECK(call->typeArguments->size() == 1, "%1%: Expected one type argument", call);

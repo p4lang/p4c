@@ -26,11 +26,11 @@ namespace ControlPlaneAPI {
 /// Convert a bignum to the P4Runtime bytes representation. The value must fit
 /// within the provided @width expressed in bits. Padding will be added as
 /// necessary (as the most significant bits).
-boost::optional<std::string> stringReprConstant(big_int value, int width) {
+std::optional<std::string> stringReprConstant(big_int value, int width) {
     // TODO(antonin): support negative values
     if (value < 0) {
         ::error(ErrorType::ERR_UNSUPPORTED, "%1%: Negative values not supported yet", value);
-        return boost::none;
+        return std::nullopt;
     }
     BUG_CHECK(width > 0, "Unexpected width 0");
     size_t bitsRequired = floor_log2(value) + 1;
@@ -55,13 +55,13 @@ boost::optional<std::string> stringReprConstant(big_int value, int width) {
 
 /// Convert a Constant to the P4Runtime bytes representation by calling
 /// stringReprConstant.
-boost::optional<std::string> stringRepr(const IR::Constant *constant, int width) {
+std::optional<std::string> stringRepr(const IR::Constant *constant, int width) {
     return stringReprConstant(constant->value, width);
 }
 
 /// Convert a BoolLiteral to the P4Runtime bytes representation by calling
 /// stringReprConstant.
-boost::optional<std::string> stringRepr(const IR::BoolLiteral *constant, int width) {
+std::optional<std::string> stringRepr(const IR::BoolLiteral *constant, int width) {
     auto v = static_cast<big_int>(constant->value ? 1 : 0);
     return stringReprConstant(v, width);
 }

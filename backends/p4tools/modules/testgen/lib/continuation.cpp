@@ -93,7 +93,7 @@ class VariableSubstitution : public Transform {
         : var(var), expr(expr) {}
 };
 
-Continuation::Body Continuation::apply(boost::optional<const IR::Node *> value_opt) const {
+Continuation::Body Continuation::apply(std::optional<const IR::Node *> value_opt) const {
     BUG_CHECK(!(value_opt && !parameterOpt),
               "Supplied a value to a continuation with no parameters.");
     BUG_CHECK(!(!value_opt && parameterOpt),

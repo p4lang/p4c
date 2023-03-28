@@ -5,11 +5,11 @@
 #include <iostream>
 #include <list>
 #include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 
 #include <boost/format.hpp>
-#include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/formulae.h"

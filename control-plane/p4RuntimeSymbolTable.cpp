@@ -35,16 +35,16 @@ bool isControllerHeader(const IR::Type_Header *type) {
 
 bool isHidden(const IR::Node *node) { return node->getAnnotation("hidden") != nullptr; }
 
-boost::optional<p4rt_id_t> getIdAnnotation(const IR::IAnnotated *node) {
+std::optional<p4rt_id_t> getIdAnnotation(const IR::IAnnotated *node) {
     const auto *idAnnotation = node->getAnnotation("id");
     if (idAnnotation == nullptr) {
-        return boost::none;
+        return std::nullopt;
     }
     const auto *idConstant = idAnnotation->expr[0]->to<IR::Constant>();
     CHECK_NULL(idConstant);
     if (!idConstant->fitsUint()) {
         ::error(ErrorType::ERR_INVALID, "%1%: @id should be an unsigned integer", node);
-        return boost::none;
+        return std::nullopt;
     }
     return static_cast<p4rt_id_t>(idConstant->value);
 }
@@ -52,17 +52,17 @@ boost::optional<p4rt_id_t> getIdAnnotation(const IR::IAnnotated *node) {
 /// @return the value of any P4 '@id' annotation @declaration may have, and
 /// ensure that the value is correct with respect to the P4Runtime
 /// specification. The name 'externalId' is in analogy with externalName().
-static boost::optional<p4rt_id_t> externalId(const P4RuntimeSymbolType &type,
-                                             const IR::IDeclaration *declaration) {
+static std::optional<p4rt_id_t> externalId(const P4RuntimeSymbolType &type,
+                                           const IR::IDeclaration *declaration) {
     CHECK_NULL(declaration);
     if (!declaration->is<IR::IAnnotated>()) {
-        return boost::none;  // Assign an id later; see below.
+        return std::nullopt;  // Assign an id later; see below.
     }
 
     // If the user specified an @id annotation, use that.
     auto idOrNone = getIdAnnotation(declaration->to<IR::IAnnotated>());
     if (!idOrNone) {
-        return boost::none;  // the user didn't assign an id
+        return std::nullopt;  // the user didn't assign an id
     }
     auto id = *idOrNone;
 
@@ -72,7 +72,7 @@ static boost::optional<p4rt_id_t> externalId(const P4RuntimeSymbolType &type,
     const auto prefixMask = static_cast<p4rt_id_t>(0xff) << 24;
     if ((id & prefixMask) != 0 && (id & prefixMask) != typePrefix) {
         ::error(ErrorType::ERR_INVALID, "%1%: @id has the wrong 8-bit prefix", declaration);
-        return boost::none;
+        return std::nullopt;
     }
     id |= typePrefix;
 
@@ -175,7 +175,7 @@ void P4::ControlPlaneAPI::P4RuntimeSymbolTable::add(P4RuntimeSymbolType type,
 }
 
 void P4::ControlPlaneAPI::P4RuntimeSymbolTable::add(P4RuntimeSymbolType type, cstring name,
-                                                    boost::optional<p4rt_id_t> id) {
+                                                    std::optional<p4rt_id_t> id) {
     auto &symbolTable = symbolTables[type];
     if (symbolTable.find(name) != symbolTable.end()) {
         return;  // This is a duplicate, but that's OK.
@@ -210,7 +210,7 @@ cstring P4::ControlPlaneAPI::P4RuntimeSymbolTable::getAlias(cstring name) const 
 }
 
 P4::ControlPlaneAPI::p4rt_id_t P4::ControlPlaneAPI::P4RuntimeSymbolTable::tryToAssignId(
-    boost::optional<p4rt_id_t> id) {
+    std::optional<p4rt_id_t> id) {
     if (!id) {
         // The user didn't assign an id, so return the special value
         // INVALID_ID to indicate that computeIds() should assign one later.
@@ -255,7 +255,7 @@ void P4::ControlPlaneAPI::P4RuntimeSymbolTable::computeIdsForSymbols(P4RuntimeSy
         // to resolve hash collisions, the id that we select depends on the
         // order in which the names are hashed. This is why we sort the
         // names above.
-        boost::optional<p4rt_id_t> id = probeForId(
+        std::optional<p4rt_id_t> id = probeForId(
             nameId, [=](uint32_t nameId) { return (resourceType << 24) | (nameId & 0xffffff); });
 
         if (!id) {

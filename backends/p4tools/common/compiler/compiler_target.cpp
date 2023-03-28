@@ -3,8 +3,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/none.hpp>
-
 #include "backends/p4tools/common/compiler/configuration.h"
 #include "backends/p4tools/common/compiler/context.h"
 #include "backends/p4tools/common/compiler/convert_hs_index.h"
@@ -26,40 +24,40 @@ std::vector<const char *> *CompilerTarget::initCompiler(int argc, char **argv) {
     return get().initCompiler_impl(argc, argv);
 }
 
-boost::optional<const IR::P4Program *> CompilerTarget::runCompiler() {
+std::optional<const IR::P4Program *> CompilerTarget::runCompiler() {
     const auto *program = P4Tools::CompilerTarget::runParser();
     if (program == nullptr) {
-        return boost::none;
+        return std::nullopt;
     }
 
     return runCompiler(program);
 }
 
-boost::optional<const IR::P4Program *> CompilerTarget::runCompiler(const std::string &source) {
+std::optional<const IR::P4Program *> CompilerTarget::runCompiler(const std::string &source) {
     const auto *program = P4::parseP4String(source, P4CContext::get().options().langVersion);
     if (program == nullptr) {
-        return boost::none;
+        return std::nullopt;
     }
 
     return runCompiler(program);
 }
 
-boost::optional<const IR::P4Program *> CompilerTarget::runCompiler(const IR::P4Program *program) {
+std::optional<const IR::P4Program *> CompilerTarget::runCompiler(const IR::P4Program *program) {
     return get().runCompiler_impl(program);
 }
 
-boost::optional<const IR::P4Program *> CompilerTarget::runCompiler_impl(
+std::optional<const IR::P4Program *> CompilerTarget::runCompiler_impl(
     const IR::P4Program *program) const {
     const auto &self = get();
 
     program = self.runFrontend(program);
     if (program == nullptr) {
-        return boost::none;
+        return std::nullopt;
     }
 
     program = self.runMidEnd(program);
     if (program == nullptr) {
-        return boost::none;
+        return std::nullopt;
     }
 
     // Rewrite all occurrences of ArrayIndex to be members instead.

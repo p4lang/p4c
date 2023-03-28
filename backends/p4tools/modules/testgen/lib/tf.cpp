@@ -1,13 +1,13 @@
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 
-#include <boost/none.hpp>
+#include <optional>
 
 #include "backends/p4tools/common/lib/util.h"
 #include "lib/timer.h"
 
 namespace P4Tools::P4Testgen {
 
-TF::TF(cstring testName, boost::optional<unsigned int> seed = boost::none)
+TF::TF(cstring testName, std::optional<unsigned int> seed = std::nullopt)
     : testName(testName), seed(seed) {}
 
 void TF::printPerformanceReport(bool write) const {

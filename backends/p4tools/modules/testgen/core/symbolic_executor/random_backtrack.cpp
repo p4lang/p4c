@@ -1,8 +1,7 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/random_backtrack.h"
 
+#include <optional>
 #include <vector>
-
-#include <boost/none.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/formulae.h"

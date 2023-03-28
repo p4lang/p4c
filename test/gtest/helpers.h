@@ -19,7 +19,7 @@ limitations under the License.
 
 #include <string>
 
-#include <boost/optional.hpp>
+#include <optional>
 
 #include "frontends/common/options.h"
 #include "frontends/p4/parseAnnotations.h"
@@ -116,12 +116,12 @@ struct FrontendTestCase {
         CompilerOptions::FrontendVersion::P4_16;
 
     /// Create a test case that only requires the frontend to run.
-    static boost::optional<FrontendTestCase>
+    static std::optional<FrontendTestCase>
     create(const std::string& source,
            CompilerOptions::FrontendVersion langVersion = defaultVersion,
            P4::ParseAnnotations parseAnnotations = P4::ParseAnnotations());
 
-    static boost::optional<FrontendTestCase>
+    static std::optional<FrontendTestCase>
     create(const std::string& source, P4::ParseAnnotations parseAnnotations) {
         return create(source, defaultVersion, parseAnnotations);
     }

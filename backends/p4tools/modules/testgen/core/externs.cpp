@@ -1,11 +1,10 @@
 #include "backends/p4tools/modules/testgen/core/externs.h"
 
 #include <list>
+#include <optional>
 #include <string>
 #include <tuple>
 #include <vector>
-
-#include <boost/optional/optional.hpp>
 
 #include "ir/ir.h"
 #include "lib/exceptions.h"
@@ -45,7 +44,7 @@ bool ExternMethodImpls::exec(const IR::MethodCallExpression *call, const IR::Exp
     }
 
     // Find matching methods: if any arguments are named, then the parameter name must match.
-    boost::optional<MethodImpl> matchingImpl;
+    std::optional<MethodImpl> matchingImpl;
     for (const auto &pair : submap.at(args->size())) {
         const auto &paramNames = pair.first;
         const auto &methodImpl = pair.second;

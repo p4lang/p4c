@@ -146,7 +146,7 @@ P4CTestEnvironment::P4CTestEnvironment() {
 
 namespace Test {
 
-/* static */ boost::optional<FrontendTestCase>
+/* static */ std::optional<FrontendTestCase>
 FrontendTestCase::create(const std::string& source,
                          CompilerOptions::FrontendVersion langVersion
                             /* = CompilerOptions::FrontendVersion::P4_16 */,
@@ -155,12 +155,12 @@ FrontendTestCase::create(const std::string& source,
     auto* program = P4::parseP4String(source, langVersion);
     if (program == nullptr) {
         std::cerr << "Couldn't parse test case source" << std::endl;
-        return boost::none;
+        return std::nullopt;
     }
     if (::diagnosticCount() > 0) {
         std::cerr << "Encountered " << ::diagnosticCount()
                   << " errors while parsing test case" << std::endl;
-        return boost::none;
+        return std::nullopt;
     }
 
     P4::P4COptionPragmaParser optionsPragmaParser;
@@ -168,7 +168,7 @@ FrontendTestCase::create(const std::string& source,
     if (::errorCount() > 0) {
         std::cerr << "Encountered " << ::errorCount()
                   << " errors while collecting options pragmas" << std::endl;
-        return boost::none;
+        return std::nullopt;
     }
 
     CompilerOptions options;
@@ -176,18 +176,18 @@ FrontendTestCase::create(const std::string& source,
     program = P4::FrontEnd(parseAnnotations).run(options, program, true);
     if (program == nullptr) {
         std::cerr << "Frontend failed" << std::endl;
-        return boost::none;
+        return std::nullopt;
     }
     if (::errorCount() > 0) {
         std::cerr << "Encountered " << ::errorCount()
                   << " errors while executing frontend" << std::endl;
-        return boost::none;
+        return std::nullopt;
     }
 
     if (::errorCount() > 0) {
         std::cerr << "Encountered " << ::errorCount()
                   << " errors while parsing back-end annotations" << std::endl;
-        return boost::none;
+        return std::nullopt;
     }
 
     return FrontendTestCase{program};

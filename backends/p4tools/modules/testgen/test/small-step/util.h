@@ -2,11 +2,11 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TEST_SMALL_STEP_UTIL_H_
 
 #include <functional>
+#include <optional>
 #include <stack>
 #include <string>
 #include <vector>
 
-#include <boost/optional/optional.hpp>
 #include <boost/variant/variant.hpp>
 
 #include "backends/p4tools/common/core/z3_solver.h"
@@ -51,8 +51,8 @@ namespace SmallStepUtil {
 
 /// Creates a test case with the given header fields for
 /// stepping on a given expression.
-boost::optional<const P4ToolsTestCase> createSmallStepExprTest(const std::string &,
-                                                               const std::string &);
+std::optional<const P4ToolsTestCase> createSmallStepExprTest(const std::string &,
+                                                             const std::string &);
 
 /// Extract the expression from the P4Program.
 template <class T>

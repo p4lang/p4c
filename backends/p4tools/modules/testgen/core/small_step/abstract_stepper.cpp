@@ -1,11 +1,10 @@
 #include "backends/p4tools/modules/testgen/core/small_step/abstract_stepper.h"
 
 #include <cstddef>
+#include <optional>
 #include <ostream>
 #include <vector>
 
-#include <boost/none.hpp>
-#include <boost/optional/optional.hpp>
 #include <boost/variant/variant.hpp>
 
 #include "backends/p4tools/common/compiler/convert_hs_index.h"
@@ -329,8 +328,8 @@ bool AbstractStepper::stepStackPushPopFront(const IR::Expression *stackRef,
     return false;
 }
 
-const Value *AbstractStepper::evaluateExpression(
-    const IR::Expression *expr, boost::optional<const IR::Expression *> cond) const {
+const Value *AbstractStepper::evaluateExpression(const IR::Expression *expr,
+                                                 std::optional<const IR::Expression *> cond) const {
     BUG_CHECK(solver.isInIncrementalMode(),
               "Currently, expression valuation only supports an incremental solver.");
     auto constraints = state.getPathConstraint();
@@ -344,7 +343,7 @@ const Value *AbstractStepper::evaluateExpression(
     // If the solver can find a solution under the given condition, get the model and return the
     // value.
     const Value *result = nullptr;
-    if (solverResult != boost::none && *solverResult) {
+    if (solverResult != std::nullopt && *solverResult) {
         auto model = *solver.getModel();
         model.complete(expr);
         result = model.evaluate(expr);

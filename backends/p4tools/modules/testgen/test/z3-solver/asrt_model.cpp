@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <optional>
 #include <vector>
 
 #include <boost/core/enable_if.hpp>
@@ -6,7 +7,6 @@
 #include <boost/multiprecision/detail/et_ops.hpp>
 #include <boost/multiprecision/number.hpp>
 #include <boost/multiprecision/traits/explicit_conversion.hpp>
-#include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/formulae.h"

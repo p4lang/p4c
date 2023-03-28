@@ -1,11 +1,10 @@
 #include "backends/p4tools/modules/testgen/targets/ebpf/table_stepper.h"
 
 #include <map>
+#include <optional>
 #include <vector>
 
 #include <boost/format.hpp>
-#include <boost/none.hpp>
-#include <boost/optional/optional.hpp>
 
 #include "lib/error.h"
 
@@ -46,13 +45,13 @@ void EBPFTableStepper::evalTargetTable(
     const auto *keys = table->getKey();
     // If we have no keys, there is nothing to match.
     if (keys == nullptr) {
-        addDefaultAction(boost::none);
+        addDefaultAction(std::nullopt);
         return;
     }
 
     // If the table is not constant, the default action can always be executed.
     // This is because we can simply not enter any table entry.
-    boost::optional<const IR::Expression *> tableMissCondition = boost::none;
+    std::optional<const IR::Expression *> tableMissCondition = std::nullopt;
 
     // If the table is not immutable, we synthesize control plane entries and follow the paths.
     if (properties.tableIsImmutable) {

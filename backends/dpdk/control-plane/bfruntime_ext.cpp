@@ -30,14 +30,14 @@ struct BFRuntimeSchemaGenerator::ActionSelector {
     std::vector<P4Id> tableIds;
     Util::JsonArray *annotations;
 
-    static boost::optional<ActionSelector> fromDPDK(
+    static std::optional<ActionSelector> fromDPDK(
         const p4configv1::P4Info &p4info, const p4configv1::ExternInstance &externInstance) {
         const auto &pre = externInstance.preamble();
         ::dpdk::ActionSelector actionSelector;
         if (!externInstance.info().UnpackTo(&actionSelector)) {
             ::error(ErrorType::ERR_NOT_FOUND,
                     "Extern instance %1% does not pack an ActionSelector object", pre.name());
-            return boost::none;
+            return std::nullopt;
         }
         auto selectorId = makeBFRuntimeId(pre.id(), ::dpdk::P4Ids::ACTION_SELECTOR);
         auto selectorGetMemId =
@@ -163,7 +163,7 @@ bool BFRuntimeSchemaGenerator::addActionProfIds(const p4configv1::Table &table,
     auto actProfId = static_cast<P4Id>(0);
     if (implementationId > 0) {
         auto hasSelector = actProfHasSelector(implementationId);
-        if (hasSelector == boost::none) {
+        if (hasSelector == std::nullopt) {
             ::error(ErrorType::ERR_INVALID, "Invalid implementation id in p4info: %1%",
                     implementationId);
             return false;
@@ -187,20 +187,20 @@ bool BFRuntimeSchemaGenerator::addActionProfIds(const p4configv1::Table &table,
 void BFRuntimeSchemaGenerator::addActionProfs(Util::JsonArray *tablesJson) const {
     for (const auto &actionProf : p4info.action_profiles()) {
         auto actionProfInstance = ActionProf::from(p4info, actionProf);
-        if (actionProfInstance == boost::none) continue;
+        if (actionProfInstance == std::nullopt) continue;
         addActionProfCommon(tablesJson, *actionProfInstance);
     }
 }
 
-boost::optional<bool> BFRuntimeSchemaGenerator::actProfHasSelector(P4Id actProfId) const {
+std::optional<bool> BFRuntimeSchemaGenerator::actProfHasSelector(P4Id actProfId) const {
     if (isOfType(actProfId, p4configv1::P4Ids::ACTION_PROFILE)) {
         auto *actionProf = Standard::findActionProf(p4info, actProfId);
-        if (actionProf == nullptr) return boost::none;
+        if (actionProf == nullptr) return std::nullopt;
         return actionProf->with_selector();
     } else if (isOfType(actProfId, ::dpdk::P4Ids::ACTION_SELECTOR)) {
         return true;
     }
-    return boost::none;
+    return std::nullopt;
 }
 
 const Util::JsonObject *BFRuntimeSchemaGenerator::genSchema() const {
@@ -249,7 +249,7 @@ void BFRuntimeSchemaGenerator::addDPDKExterns(Util::JsonArray *tablesJson,
         if (externTypeId == ::dpdk::P4Ids::ACTION_SELECTOR) {
             for (const auto &externInstance : externType.instances()) {
                 auto actionSelector = ActionSelector::fromDPDK(p4info, externInstance);
-                if (actionSelector != boost::none) {
+                if (actionSelector != std::nullopt) {
                     addActionSelectorCommon(tablesJson, *actionSelector);
                     addActionSelectorGetMemberCommon(tablesJson, *actionSelector);
                 }

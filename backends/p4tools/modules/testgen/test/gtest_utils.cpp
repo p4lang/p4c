@@ -1,6 +1,6 @@
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"
 
-#include <boost/none.hpp>
+#include <optional>
 
 #include "backends/p4tools/common/compiler/compiler_target.h"
 #include "backends/p4tools/common/core/target.h"
@@ -13,7 +13,7 @@
 
 namespace Test {
 
-boost::optional<const P4ToolsTestCase> P4ToolsTestCase::create(
+std::optional<const P4ToolsTestCase> P4ToolsTestCase::create(
     std::string deviceName, std::string archName, CompilerOptions::FrontendVersion langVersion,
     const std::string &source) {
     // Initialize the target.
@@ -27,20 +27,20 @@ boost::optional<const P4ToolsTestCase> P4ToolsTestCase::create(
 
     auto program = P4Tools::CompilerTarget::runCompiler(source);
     if (!program) {
-        return boost::none;
+        return std::nullopt;
     }
     return P4ToolsTestCase{*program};
 }
 
-boost::optional<const P4ToolsTestCase> P4ToolsTestCase::create_14(std::string deviceName,
-                                                                  std::string archName,
-                                                                  const std::string &source) {
+std::optional<const P4ToolsTestCase> P4ToolsTestCase::create_14(std::string deviceName,
+                                                                std::string archName,
+                                                                const std::string &source) {
     return create(deviceName, archName, CompilerOptions::FrontendVersion::P4_14, source);
 }
 
-boost::optional<const P4ToolsTestCase> P4ToolsTestCase::create_16(std::string deviceName,
-                                                                  std::string archName,
-                                                                  const std::string &source) {
+std::optional<const P4ToolsTestCase> P4ToolsTestCase::create_16(std::string deviceName,
+                                                                std::string archName,
+                                                                const std::string &source) {
     return create(deviceName, archName, CompilerOptions::FrontendVersion::P4_16, source);
 }
 

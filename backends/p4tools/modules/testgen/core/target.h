@@ -2,10 +2,9 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_TARGET_H_
 
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <vector>
-
-#include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/core/target.h"
@@ -38,7 +37,7 @@ class TestgenTarget : public Target {
     /// Returns the test back end associated with this P4Testgen target.
     static TestBackEnd *getTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
                                        const std::filesystem::path &testPath,
-                                       boost::optional<uint32_t> seed) {
+                                       std::optional<uint32_t> seed) {
         return get().getTestBackend_impl(programInfo, symbex, testPath, seed);
     }
 
@@ -79,7 +78,7 @@ class TestgenTarget : public Target {
     virtual TestBackEnd *getTestBackend_impl(const ProgramInfo &programInfo,
                                              SymbolicExecutor &symbex,
                                              const std::filesystem::path &testPath,
-                                             boost::optional<uint32_t> seed) const = 0;
+                                             std::optional<uint32_t> seed) const = 0;
 
     /// @see getCmdStepper.
     virtual CmdStepper *getCmdStepper_impl(ExecutionState &state, AbstractSolver &solver,

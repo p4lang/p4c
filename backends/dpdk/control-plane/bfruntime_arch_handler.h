@@ -16,11 +16,10 @@ limitations under the License.
 #define DPDK_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_
 
 #include <iostream>
+#include <optional>
 #include <set>
 #include <unordered_map>
 #include <vector>
-
-#include <boost/optional.hpp>
 
 #include "control-plane/bfruntime.h"
 #include "control-plane/p4RuntimeArchHandler.h"
@@ -163,7 +162,7 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
         externInstance->mutable_info()->PackFrom(message);
     }
 
-    boost::optional<ActionSelector> getActionSelector(const IR::ExternBlock *instance) {
+    std::optional<ActionSelector> getActionSelector(const IR::ExternBlock *instance) {
         auto actionSelDecl = instance->node->to<IR::IDeclaration>();
         // to be deleted, used to support deprecated ActionSelector constructor.
         auto size = instance->getParameterValue("size");
@@ -295,8 +294,8 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
     }
 
     /// @return serialization information for the Digest extern instacne @decl
-    boost::optional<Digest> getDigest(const IR::Declaration_Instance *decl,
-                                      p4configv1::P4TypeInfo *p4RtTypeInfo) {
+    std::optional<Digest> getDigest(const IR::Declaration_Instance *decl,
+                                    p4configv1::P4TypeInfo *p4RtTypeInfo) {
         BUG_CHECK(decl->type->is<IR::Type_Specialized>(), "%1%: expected Type_Specialized",
                   decl->type);
         auto type = decl->type->to<IR::Type_Specialized>();

@@ -2,12 +2,12 @@
 
 #include <cstddef>
 #include <map>
+#include <optional>
 #include <ostream>
 #include <string>
 #include <vector>
 
 #include <boost/format.hpp>
-#include <boost/none.hpp>
 #include <boost/variant/get.hpp>
 #include <boost/variant/variant.hpp>
 
@@ -360,7 +360,7 @@ bool CmdStepper::preorder(const IR::P4Program * /*program*/) {
     // Don't invoke logStep for the top-level program, as that would be overly verbose.
 
     // Get the initial constraints of the target. These constraints influence branch selection.
-    boost::optional<const Constraint *> cond = programInfo.getTargetConstraints();
+    std::optional<const Constraint *> cond = programInfo.getTargetConstraints();
 
     // Have the target break apart the main declaration instance.
     auto *nextState = new ExecutionState(state);
@@ -374,7 +374,7 @@ bool CmdStepper::preorder(const IR::P4Program * /*program*/) {
         const auto *fixedSizeEqu =
             new IR::Equ(ExecutionState::getInputPacketSizeVar(),
                         IR::getConstant(ExecutionState::getPacketSizeVarType(), pktSize));
-        if (cond == boost::none) {
+        if (cond == std::nullopt) {
             cond = fixedSizeEqu;
         } else {
             cond = new IR::LAnd(*cond, fixedSizeEqu);
@@ -623,7 +623,7 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
     }
     BUG_CHECK(!cmds.empty(), "Switch statements should have at least one case (default).");
     nextState->replaceTopBody(&cmds);
-    result->emplace_back(boost::none, state, nextState, coveredStmts);
+    result->emplace_back(std::nullopt, state, nextState, coveredStmts);
 
     return false;
 }

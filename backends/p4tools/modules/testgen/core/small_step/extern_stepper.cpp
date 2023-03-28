@@ -1,11 +1,10 @@
 #include <algorithm>
 #include <cstddef>
 #include <functional>
+#include <optional>
 #include <ostream>
 #include <string>
 #include <vector>
-
-#include <boost/none.hpp>
 
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
@@ -807,7 +806,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                              IR::getConstant(lengthVar->type, 8));
              nextState->add(new TraceEvent::Expression(divVar, "Return packet length"));
              nextState->replaceTopBody(Continuation::Return(divVar));
-             result->emplace_back(boost::none, state, nextState);
+             result->emplace_back(std::nullopt, state, nextState);
          }},
         /* ======================================================================================
          *  packet_out.emit

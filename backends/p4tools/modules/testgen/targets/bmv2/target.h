@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include <boost/optional/optional.hpp>
+#include <optional>
 
 #include "backends/p4tools/common/core/solver.h"
 #include "ir/ir.h"
@@ -37,7 +37,7 @@ class BMv2_V1ModelTestgenTarget : public TestgenTarget {
 
     Bmv2TestBackend *getTestBackend_impl(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
                                          const std::filesystem::path &testPath,
-                                         boost::optional<uint32_t> seed) const override;
+                                         std::optional<uint32_t> seed) const override;
 
     BMv2_V1ModelCmdStepper *getCmdStepper_impl(ExecutionState &state, AbstractSolver &solver,
                                                const ProgramInfo &programInfo) const override;

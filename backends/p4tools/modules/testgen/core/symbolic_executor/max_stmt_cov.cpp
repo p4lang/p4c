@@ -2,10 +2,9 @@
 
 #include <ctime>
 #include <iterator>
+#include <optional>
 #include <type_traits>
 #include <vector>
-
-#include <boost/none.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
@@ -223,10 +222,10 @@ ExecutionState *RandomMaxStmtCoverage::chooseBranch(std::vector<Branch> &branche
         if (guaranteeViability) {
             // Check the consistency of the path constraints asserted so far.
             auto solverResult = solver.checkSat(branch.nextState->getPathConstraint());
-            if (solverResult == boost::none) {
+            if (solverResult == std::nullopt) {
                 ::warning("Solver timed out");
             }
-            if (solverResult == boost::none || !solverResult.get()) {
+            if (solverResult == std::nullopt || !solverResult.value()) {
                 // Solver timed out or path constraints were not satisfiable. Need to choose a
                 // different branch. Roll back our branch selection and try again.
                 continue;

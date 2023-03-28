@@ -2,13 +2,12 @@
 
 #include <cstddef>
 #include <map>
+#include <optional>
 #include <ostream>
 #include <string>
 #include <vector>
 
 #include <boost/format.hpp>
-#include <boost/none.hpp>
-#include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/trace_events.h"
@@ -407,13 +406,13 @@ void BMv2_V1ModelTableStepper::evalTargetTable(
                 "Choosing default action",
                 properties.tableName, testBackend);
         }
-        addDefaultAction(boost::none);
+        addDefaultAction(std::nullopt);
         return;
     }
 
     // If the table is not constant, the default action can always be executed.
     // This is because we can simply not enter any table entry.
-    boost::optional<const IR::Expression *> tableMissCondition = boost::none;
+    std::optional<const IR::Expression *> tableMissCondition = std::nullopt;
 
     // If the table is not immutable, we synthesize control plane entries and follow the paths.
     if (properties.tableIsImmutable) {

@@ -2,10 +2,8 @@
 #define BACKENDS_P4TOOLS_COMMON_CORE_TARGET_H_
 
 #include <map>
+#include <optional>
 #include <string>
-
-#include <boost/none.hpp>
-#include <boost/optional/optional.hpp>
 
 #include "lib/exceptions.h"
 
@@ -71,7 +69,7 @@ class Target {
     // Implemented here because of limitations of templates.
     template <class TargetImpl>
     static const TargetImpl &get(const std::string &toolName) {
-        if (curTarget == boost::none) {
+        if (curTarget == std::nullopt) {
             FATAL_ERROR(
                 "Target not initialized. Please provide a target using the --target option.");
         }
@@ -89,7 +87,7 @@ class Target {
 
  private:
     /// The active target, if any.
-    static boost::optional<Spec> curTarget;
+    static std::optional<Spec> curTarget;
 
     /// Maps supported target specs to Target implementations for each supported tool.
     static std::map<Spec, std::map<std::string, const Target *>> registry;

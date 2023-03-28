@@ -4,11 +4,11 @@
 #include <cstddef>
 #include <fstream>
 #include <map>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <boost/optional/optional.hpp>
 #include <inja/inja.hpp>
 
 #include "control-plane/p4RuntimeArchStandard.h"
@@ -43,7 +43,7 @@ class Protobuf : public TF {
 
     Protobuf &operator=(Protobuf &&) = delete;
 
-    Protobuf(cstring testName, boost::optional<unsigned int> seed);
+    Protobuf(cstring testName, std::optional<unsigned int> seed);
 
     /// Produce a Protobuf test.
     void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testIdx,
@@ -83,14 +83,14 @@ class Protobuf : public TF {
                                               const std::vector<ActionArg> &args);
 
     /// @return the id allocated to the object through the @id annotation if any, or
-    /// boost::none.
-    static boost::optional<p4rt_id_t> getIdAnnotation(const IR::IAnnotated *node);
+    /// std::nullopt.
+    static std::optional<p4rt_id_t> getIdAnnotation(const IR::IAnnotated *node);
 
     /// @return the value of any P4 '@id' annotation @declaration may have, and
     /// ensure that the value is correct with respect to the P4Runtime
     /// specification. The name 'externalId' is in analogy with externalName().
-    static boost::optional<p4rt_id_t> externalId(
-        const P4::ControlPlaneAPI::P4RuntimeSymbolType &type, const IR::IDeclaration *declaration);
+    static std::optional<p4rt_id_t> externalId(const P4::ControlPlaneAPI::P4RuntimeSymbolType &type,
+                                               const IR::IDeclaration *declaration);
 };
 
 }  // namespace Bmv2
