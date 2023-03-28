@@ -378,7 +378,7 @@ There is a variety of design and development documentation [here](docs/README.md
 We recommend using `clang++` with no optimizations for speeding up
 compilation and simplifying debugging.
 
-We recommend installing a new version of [gdb](http://ftp.gnu.org/gnu/gdb).,
+We recommend installing a new version of [gdb](http://ftp.gnu.org/gnu/gdb),
 because older gdb versions do not always handle C++11 or newer correctly.
 
 We recommend exuberant ctags for navigating source code in Emacs and vi.  `sudo
@@ -394,8 +394,12 @@ documentation. The HTML output is available in
 
 ## Git setup
 
-Occasionally formatting commits are applied to P4C. These pollute the git history. To ignore these commits in git blame, run this command
+Occasionally formatting commits are applied to p4c. These pollute the git history. To ignore these commits in git blame, run this command
 ```git config blame.ignoreRevsFile .git-blame-ignore-revs```
+
+The p4c code base is subject to a series of linter checks which are checked by CI. To avoid failing these checks and wasting unnecessary CI cycles and resources, you can install [git commit hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) by running
+```./tools/install_git_hooks.sh```
+These commit hooks will run on every commit and check the files you are planning to commit with cpplint and clang-format.
 
 # Docker
 
