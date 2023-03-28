@@ -2,17 +2,16 @@
 
 #include <iomanip>
 #include <map>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include <boost/core/enable_if.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/multiprecision/detail/et_ops.hpp>
 #include <boost/multiprecision/number.hpp>
 #include <boost/multiprecision/traits/explicit_conversion.hpp>
-#include <boost/none.hpp>
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
 #include <inja/inja.hpp>
@@ -34,10 +33,7 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-STF::STF(cstring testName, boost::optional<unsigned int> seed = boost::none) : TF(testName, seed) {
-    boost::filesystem::path testFile(testName + ".stf");
-    cstring testNameOnly(testFile.stem().c_str());
-}
+STF::STF(cstring testName, std::optional<unsigned int> seed = std::nullopt) : TF(testName, seed) {}
 
 inja::json STF::getControlPlane(const TestSpec *testSpec) {
     inja::json controlPlaneJson = inja::json::object();
@@ -176,7 +172,7 @@ inja::json STF::getSend(const TestSpec *testSpec) {
 
 inja::json STF::getVerify(const TestSpec *testSpec) {
     inja::json verifyData = inja::json::object();
-    if (testSpec->getEgressPacket() != boost::none) {
+    if (testSpec->getEgressPacket() != std::nullopt) {
         const auto &packet = **testSpec->getEgressPacket();
         verifyData["eg_port"] = packet.getPort();
         const auto *payload = packet.getEvaluatedPayload();

@@ -4,9 +4,8 @@
 #include <cstdint>
 #include <functional>
 #include <iosfwd>
+#include <optional>
 #include <vector>
-
-#include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
 #include "midend/coverage.h"

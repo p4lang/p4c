@@ -18,10 +18,9 @@ limitations under the License.
 #define _IR_JSON_GENERATOR_H_
 
 #include <cassert>
+#include <optional>
 #include <string>
 #include <unordered_set>
-
-#include <boost/optional.hpp>
 
 #include "ir/node.h"
 #include "lib/bitvec.h"
@@ -107,7 +106,7 @@ class JSONGenerator {
     }
 
     template <typename T>
-    void generate(const boost::optional<T> &v) {
+    void generate(const std::optional<T> &v) {
         if (!v) {
             out << "{ \"valid\" : false }";
             return;

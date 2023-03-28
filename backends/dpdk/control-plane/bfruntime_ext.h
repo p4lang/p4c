@@ -72,16 +72,16 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
     void addMatchActionData(const p4configv1::Table &table, Util::JsonObject *tableJson,
                             Util::JsonArray *dataJson, P4Id maxActionParamId) const;
 
-    boost::optional<bool> actProfHasSelector(P4Id actProfId) const override;
+    std::optional<bool> actProfHasSelector(P4Id actProfId) const override;
 
-    static boost::optional<ActionProf> fromDPDKActionProfile(
+    static std::optional<ActionProf> fromDPDKActionProfile(
         const p4configv1::P4Info &p4info, const p4configv1::ExternInstance &externInstance) {
         const auto &pre = externInstance.preamble();
         p4configv1::ActionProfile actionProfile;
         if (!externInstance.info().UnpackTo(&actionProfile)) {
             ::error(ErrorType::ERR_NOT_FOUND,
                     "Extern instance %1% does not pack an ActionProfile object", pre.name());
-            return boost::none;
+            return std::nullopt;
         }
         auto tableIds = collectTableIds(p4info, actionProfile.table_ids().begin(),
                                         actionProfile.table_ids().end());

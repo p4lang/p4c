@@ -2,13 +2,12 @@
 
 #include <iomanip>
 #include <map>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <boost/filesystem.hpp>
-#include <boost/none.hpp>
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
 #include <inja/inja.hpp>
@@ -29,10 +28,7 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-PTF::PTF(cstring testName, boost::optional<unsigned int> seed = boost::none) : TF(testName, seed) {
-    boost::filesystem::path testFile(testName + ".py");
-    cstring testNameOnly(testFile.stem().c_str());
-}
+PTF::PTF(cstring testName, std::optional<unsigned int> seed = std::nullopt) : TF(testName, seed) {}
 
 inja::json::array_t PTF::getClone(const std::map<cstring, const TestObject *> &cloneInfos) {
     auto cloneJson = inja::json::array_t();
@@ -192,7 +188,7 @@ inja::json PTF::getSend(const TestSpec *testSpec) {
 
 inja::json PTF::getVerify(const TestSpec *testSpec) {
     inja::json verifyData = inja::json::object();
-    if (testSpec->getEgressPacket() != boost::none) {
+    if (testSpec->getEgressPacket() != std::nullopt) {
         const auto &packet = **testSpec->getEgressPacket();
         verifyData["eg_port"] = packet.getPort();
         const auto *payload = packet.getEvaluatedPayload();
@@ -255,10 +251,9 @@ class AbstractTest(bt.P4RuntimeTest):
 }
 
 void PTF::emitPreamble(const std::string &preamble) {
-    boost::filesystem::path testFile(testName + ".py");
-    cstring testNameOnly(testFile.stem().c_str());
+    std::filesystem::path testFile(testName + ".py");
     inja::json dataJson;
-    dataJson["test_name"] = testNameOnly.c_str();
+    dataJson["test_name"] = testFile.stem();
     if (seed) {
         dataJson["seed"] = *seed;
     }
@@ -392,8 +387,7 @@ void PTF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
 
     LOG5("PTF backend: emitting testcase:" << std::setw(4) << dataJson);
 
-    boost::filesystem::path testFile(testName + ".py");
-    cstring testNameOnly(testFile.stem().c_str());
+    std::filesystem::path testFile(testName + ".py");
     inja::render_to(ptfFile, testCase, dataJson);
     ptfFile.flush();
 }

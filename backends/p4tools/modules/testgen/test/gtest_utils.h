@@ -1,9 +1,8 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TEST_GTEST_UTILS_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TEST_GTEST_UTILS_H_
 
+#include <optional>
 #include <string>
-
-#include <boost/optional/optional.hpp>
 
 #include "frontends/common/options.h"
 #include "frontends/common/parser_options.h"
@@ -16,19 +15,19 @@ namespace Test {
 class P4ToolsTestCase {
  public:
     /// Factory method for producing a test case from a P4 program source.
-    static boost::optional<const P4ToolsTestCase> create(
-        std::string deviceName, std::string archName, CompilerOptions::FrontendVersion langVersion,
-        const std::string &source);
+    static std::optional<const P4ToolsTestCase> create(std::string deviceName, std::string archName,
+                                                       CompilerOptions::FrontendVersion langVersion,
+                                                       const std::string &source);
 
     /// Factory method for producing a test case from a P4_14 program source.
-    static boost::optional<const P4ToolsTestCase> create_14(std::string deviceName,
-                                                            std::string archName,
-                                                            const std::string &source);
+    static std::optional<const P4ToolsTestCase> create_14(std::string deviceName,
+                                                          std::string archName,
+                                                          const std::string &source);
 
     /// Factory method for producing a test case from a P4_16 program source.
-    static boost::optional<const P4ToolsTestCase> create_16(std::string deviceName,
-                                                            std::string archName,
-                                                            const std::string &source);
+    static std::optional<const P4ToolsTestCase> create_16(std::string deviceName,
+                                                          std::string archName,
+                                                          const std::string &source);
 
     /// The output of the compiler's mid end.
     const IR::P4Program *program;

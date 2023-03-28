@@ -1,13 +1,10 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_TARGET_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_TARGET_H_
 
-#include <stdint.h>
-
+#include <cstdint>
+#include <optional>
 #include <string>
 #include <vector>
-
-#include <boost/filesystem.hpp>
-#include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/core/target.h"
@@ -23,9 +20,7 @@
 #include "backends/p4tools/modules/testgen/lib/namespace_context.h"
 #include "backends/p4tools/modules/testgen/lib/test_backend.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 class TestgenTarget : public Target {
  public:
@@ -41,9 +36,8 @@ class TestgenTarget : public Target {
 
     /// Returns the test back end associated with this P4Testgen target.
     static TestBackEnd *getTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                                       const boost::filesystem::path &testPath,
-                                       boost::optional<uint32_t> seed) {
-        return get().getTestBackend_impl(programInfo, symbex, testPath, seed);
+                                       const std::filesystem::path &testPath,
+                                       std::optional<uint32_t> seed) {
         return get().getTestBackend_impl(programInfo, symbex, testPath, seed);
     }
 
@@ -83,8 +77,8 @@ class TestgenTarget : public Target {
     /// @see getTestBackend.
     virtual TestBackEnd *getTestBackend_impl(const ProgramInfo &programInfo,
                                              SymbolicExecutor &symbex,
-                                             const boost::filesystem::path &testPath,
-                                             boost::optional<uint32_t> seed) const = 0;
+                                             const std::filesystem::path &testPath,
+                                             std::optional<uint32_t> seed) const = 0;
 
     /// @see getCmdStepper.
     virtual CmdStepper *getCmdStepper_impl(ExecutionState &state, AbstractSolver &solver,
@@ -110,8 +104,6 @@ class TestgenTarget : public Target {
  private:
 };
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_TARGET_H_ */

@@ -1,9 +1,8 @@
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 
+#include <optional>
 #include <utility>
 #include <vector>
-
-#include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
@@ -56,7 +55,7 @@ bool ConcolicMethodImpls::exec(cstring qualifiedMethodName, const IR::ConcolicVa
     }
 
     // Find matching methods: if any arguments are named, then the parameter name must match.
-    boost::optional<MethodImpl> matchingImpl;
+    std::optional<MethodImpl> matchingImpl;
     for (const auto &pair : submap.at(args->size())) {
         const auto &paramNames = pair.first;
         const auto &methodImpl = pair.second;

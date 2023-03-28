@@ -56,7 +56,7 @@ class ParserGraphs : public Graphs {
  private:
     P4::ReferenceMap *refMap;
     const cstring graphsDir;
-    boost::optional<cstring> instanceName{};
+    std::optional<cstring> instanceName{};
 };
 
 }  // namespace graphs

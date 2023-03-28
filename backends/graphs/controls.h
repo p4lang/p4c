@@ -63,7 +63,7 @@ class ControlGraphs : public Graphs {
     // new subgraph and push it to the stack; this new graph becomes the
     // "current graph" to which we add vertices (e.g. tables).
     ControlStack controlStack{};
-    boost::optional<cstring> instanceName{};
+    std::optional<cstring> instanceName{};
 };
 
 }  // namespace graphs

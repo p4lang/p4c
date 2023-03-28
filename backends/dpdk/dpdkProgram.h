@@ -122,8 +122,8 @@ class ConvertToDpdkControl : public Inspector {
     void add_table(const IR::DpdkLearner *s) { learners.push_back(s); }
     void add_action(const IR::DpdkAction *a) { actions.push_back(a); }
 
-    boost::optional<const IR::Member *> getMemExprFromProperty(const IR::P4Table *, cstring);
-    boost::optional<int> getNumberFromProperty(const IR::P4Table *, cstring);
+    std::optional<const IR::Member *> getMemExprFromProperty(const IR::P4Table *, cstring);
+    std::optional<int> getNumberFromProperty(const IR::P4Table *, cstring);
 };
 
 class CollectActionUses : public Inspector {

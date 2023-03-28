@@ -49,8 +49,8 @@ bool isControllerHeader(const IR::Type_Header *type);
 bool isHidden(const IR::Node *node);
 
 /// @return the id allocated to the object through the @id annotation if any, or
-/// boost::none.
-boost::optional<p4rt_id_t> getIdAnnotation(const IR::IAnnotated *node);
+/// std::nullopt.
+std::optional<p4rt_id_t> getIdAnnotation(const IR::IAnnotated *node);
 
 /**
  * Stores a set of P4 symbol suffixes. Symbols consist of path components
@@ -131,7 +131,7 @@ class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
 
     /// Add a @type symbol with @name and possibly an explicit P4 '@id'.
     void add(P4RuntimeSymbolType type, cstring name,
-             boost::optional<p4rt_id_t> id = boost::none) override;
+             std::optional<p4rt_id_t> id = std::nullopt) override;
 
     /// @return the P4Runtime id for the symbol of @type corresponding to
     /// @declaration.
@@ -153,7 +153,7 @@ class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
     /// @return an initial (possibly invalid) id for a resource, and if the id
     /// is not invalid, record the assignment. An initial @id typically comes
     /// from the P4 '@id' annotation.
-    p4rt_id_t tryToAssignId(boost::optional<p4rt_id_t> id);
+    p4rt_id_t tryToAssignId(std::optional<p4rt_id_t> id);
 
     /**
      * Assign an id to each resource of @type (ACTION, TABLE, etc..)  which does
@@ -174,13 +174,13 @@ class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
      * indicating a resource type, and those bits need to remain correct.
      */
     template <typename ConstructIdFunc>
-    boost::optional<p4rt_id_t> probeForId(const uint32_t sourceValue, ConstructIdFunc constructId) {
+    std::optional<p4rt_id_t> probeForId(const uint32_t sourceValue, ConstructIdFunc constructId) {
         uint32_t value = sourceValue;
         while (assignedIds.find(constructId(value)) != assignedIds.end()) {
             ++value;
             if (value == sourceValue) {
-                return boost::none;  // We wrapped around; there's no unassigned
-                                     // id left.
+                return std::nullopt;  // We wrapped around; there's no unassigned
+                                      // id left.
             }
         }
 

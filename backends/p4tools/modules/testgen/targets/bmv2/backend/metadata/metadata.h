@@ -4,11 +4,11 @@
 #include <cstddef>
 #include <fstream>
 #include <map>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <boost/optional/optional.hpp>
 #include <inja/inja.hpp>
 
 #include "ir/ir.h"
@@ -35,7 +35,7 @@ class Metadata : public TF {
 
     Metadata &operator=(Metadata &&) = delete;
 
-    Metadata(cstring testName, boost::optional<unsigned int> seed);
+    Metadata(cstring testName, std::optional<unsigned int> seed);
 
     /// Produce a Metadata test.
     void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testIdx,

@@ -2,13 +2,13 @@
 
 #include <algorithm>
 #include <map>
+#include <optional>
 #include <ostream>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include <boost/multiprecision/number.hpp>
-#include <boost/none.hpp>
 
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
@@ -386,7 +386,7 @@ void TableStepper::setTableDefaultEntries(
         tableStream << "| Overriding default action: " << actionName;
         nextState->add(new TraceEvent::Generic(tableStream.str()));
         nextState->replaceTopBody(&replacements);
-        stepper->result->emplace_back(boost::none, stepper->state, nextState, coveredStmts);
+        stepper->result->emplace_back(std::nullopt, stepper->state, nextState, coveredStmts);
     }
 }
 
@@ -485,7 +485,7 @@ void TableStepper::evalTableControlEntries(
 void TableStepper::evalTaintedTable() {
     // If the table is not immutable, we just do not add any entry and execute the default action.
     if (!properties.tableIsImmutable) {
-        addDefaultAction(boost::none);
+        addDefaultAction(std::nullopt);
         return;
     }
     std::vector<Continuation::Command> replacements;
@@ -628,7 +628,7 @@ std::vector<const IR::ActionListElement *> TableStepper::buildTableActionList() 
     return tableActionList;
 }
 
-void TableStepper::addDefaultAction(boost::optional<const IR::Expression *> tableMissCondition) {
+void TableStepper::addDefaultAction(std::optional<const IR::Expression *> tableMissCondition) {
     const auto *defaultAction = table->getDefaultAction();
     CHECK_NULL(defaultAction);
     BUG_CHECK(defaultAction->is<IR::MethodCallExpression>(),
@@ -668,7 +668,7 @@ void TableStepper::evalTargetTable(
     const std::vector<const IR::ActionListElement *> &tableActionList) {
     // If the table is not constant, the default action can always be executed.
     // This is because we can simply not enter any table entry.
-    boost::optional<const IR::Expression *> tableMissCondition = boost::none;
+    std::optional<const IR::Expression *> tableMissCondition = std::nullopt;
     // If the table is not immutable, we synthesize control plane entries and follow the paths.
     if (properties.tableIsImmutable) {
         // If the entries properties is constant it means the entries are fixed.

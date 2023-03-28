@@ -1,11 +1,10 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend.h"
 
 #include <map>
+#include <optional>
 #include <ostream>
 #include <string>
 #include <utility>
-
-#include <boost/none.hpp>
 
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/trace_events.h"
@@ -36,8 +35,8 @@ const std::set<std::string> Bmv2TestBackend::SUPPORTED_BACKENDS = {"PTF", "STF",
                                                                    "METADATA"};
 
 Bmv2TestBackend::Bmv2TestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                                 const boost::filesystem::path &testPath,
-                                 boost::optional<uint32_t> seed)
+                                 const std::filesystem::path &testPath,
+                                 std::optional<uint32_t> seed)
     : TestBackEnd(programInfo, symbex) {
     cstring testBackendString = TestgenOptions::get().testBackend;
     if (testBackendString.isNullOrEmpty()) {
@@ -90,7 +89,7 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
     const auto *ingressPayloadMask = IR::getConstant(IR::getBitType(1), 1);
     const auto ingressPacket = Packet(testInfo.inputPort, ingressPayload, ingressPayloadMask);
 
-    boost::optional<Packet> egressPacket = boost::none;
+    std::optional<Packet> egressPacket = std::nullopt;
     if (!testInfo.packetIsDropped) {
         egressPacket = Packet(testInfo.outputPort, testInfo.outputPacket, testInfo.packetTaintMask);
     }

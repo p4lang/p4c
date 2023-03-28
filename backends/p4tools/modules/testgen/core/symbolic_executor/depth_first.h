@@ -3,10 +3,9 @@
 
 #include <cstdint>
 #include <ctime>
+#include <optional>
 #include <stack>
 #include <vector>
-
-#include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
 

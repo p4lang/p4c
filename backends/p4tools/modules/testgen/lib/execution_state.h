@@ -5,13 +5,12 @@
 #include <initializer_list>
 #include <iostream>
 #include <map>
+#include <optional>
 #include <set>
 #include <stack>
 #include <utility>
 #include <vector>
 
-#include <boost/none.hpp>
-#include <boost/optional/optional.hpp>
 #include <boost/variant/get.hpp>
 
 #include "backends/p4tools/common/compiler/reachability.h"
@@ -171,8 +170,8 @@ class ExecutionState {
     void pushBranchDecision(uint64_t);
 
     /// @returns the next command to be evaluated, if any.
-    /// @returns boost::none if the current body is empty.
-    boost::optional<const Continuation::Command> getNextCmd() const;
+    /// @returns std::nullopt if the current body is empty.
+    std::optional<const Continuation::Command> getNextCmd() const;
 
     /// @returns the symbolic value of the given state variable.
     const IR::Expression *get(const StateVariable &var) const;
@@ -333,7 +332,7 @@ class ExecutionState {
     /// new frame will use the given set of exception handlers. If @parameterType_opt is given,
     /// then the continuation in the new frame will have a function parameter, with the given type,
     /// that is ignored by the body.
-    void pushCurrentContinuation(boost::optional<const IR::Type *> parameterType_opt = boost::none,
+    void pushCurrentContinuation(std::optional<const IR::Type *> parameterType_opt = std::nullopt,
                                  StackFrame::ExceptionHandlers = {});
 
     /// Pops the topmost frame in the stack of continuations. From the popped frame, the
@@ -342,7 +341,7 @@ class ExecutionState {
     ///
     /// Expressions in the metalanguage include P4 non-expressions. Because of this, the argument
     /// (if provided) does not necessarily need to be an instance of IR::Expression.
-    void popContinuation(boost::optional<const IR::Node *> argument_opt = boost::none);
+    void popContinuation(std::optional<const IR::Node *> argument_opt = std::nullopt);
 
     /// Invokes first handler for e found on the stack
     void handleException(Continuation::Exception e);

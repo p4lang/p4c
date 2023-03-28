@@ -2,11 +2,11 @@
 
 #include <iostream>
 #include <map>
+#include <optional>
 #include <set>
 #include <utility>
 
 #include <boost/format.hpp>
-#include <boost/optional/optional.hpp>
 #include <boost/variant/get.hpp>
 #include <boost/variant/variant.hpp>
 

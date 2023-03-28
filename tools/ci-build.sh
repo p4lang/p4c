@@ -207,9 +207,8 @@ fi
 
 # ! ------  BEGIN P4TESTGEN -----------------------------------------------
 function build_tools_deps() {
-  # This is needed for P4Testgen.
-  sudo apt-get install -y libboost-filesystem-dev libboost-system-dev wget zip
-
+  # This is needed to pull Z3.
+  sudo apt-get install -y wget zip
   # Install a recent version of Z3
   Z3_VERSION="z3-4.8.14"
   Z3_DIST="${Z3_VERSION}-x64-glibc-2.31"

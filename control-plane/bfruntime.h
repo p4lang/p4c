@@ -20,12 +20,11 @@ limitations under the License.
 #include <iosfwd>
 #include <iterator>
 #include <limits>
+#include <optional>
 #include <ostream>
 #include <regex>
 #include <sstream>
 #include <string>
-
-#include <boost/optional.hpp>
 
 #include "control-plane/p4RuntimeSerializer.h"
 #include "lib/big_int_util.h"
@@ -148,30 +147,30 @@ static inline Util::JsonObject *makeType(cstring type, T defaultValue) {
     return typeObj;
 }
 
-static inline Util::JsonObject *makeTypeBool(boost::optional<bool> defaultValue = boost::none) {
+static inline Util::JsonObject *makeTypeBool(std::optional<bool> defaultValue = std::nullopt) {
     auto *typeObj = new Util::JsonObject();
     typeObj->emplace("type", "bool");
-    if (defaultValue != boost::none) typeObj->emplace("default_value", *defaultValue);
+    if (defaultValue != std::nullopt) typeObj->emplace("default_value", *defaultValue);
     return typeObj;
 }
 
 static inline Util::JsonObject *makeTypeBytes(int width,
-                                              boost::optional<int64_t> defaultValue = boost::none) {
+                                              std::optional<int64_t> defaultValue = std::nullopt) {
     auto *typeObj = new Util::JsonObject();
     typeObj->emplace("type", "bytes");
     typeObj->emplace("width", width);
-    if (defaultValue != boost::none) typeObj->emplace("default_value", *defaultValue);
+    if (defaultValue != std::nullopt) typeObj->emplace("default_value", *defaultValue);
     return typeObj;
 }
 
 static inline Util::JsonObject *makeTypeEnum(const std::vector<cstring> &choices,
-                                             boost::optional<cstring> defaultValue = boost::none) {
+                                             std::optional<cstring> defaultValue = std::nullopt) {
     auto *typeObj = new Util::JsonObject();
     typeObj->emplace("type", "string");
     auto *choicesArray = new Util::JsonArray();
     for (auto choice : choices) choicesArray->append(choice);
     typeObj->emplace("choices", choicesArray);
-    if (defaultValue != boost::none) typeObj->emplace("default_value", *defaultValue);
+    if (defaultValue != std::nullopt) typeObj->emplace("default_value", *defaultValue);
     return typeObj;
 }
 
@@ -193,11 +192,11 @@ static inline void addOneOf(Util::JsonArray *dataJson, Util::JsonArray *choicesJ
     dataJson->append(oneOfJson);
 }
 
-static inline boost::optional<cstring> transformMatchType(
+static inline std::optional<cstring> transformMatchType(
     p4configv1::MatchField_MatchType matchType) {
     switch (matchType) {
         case p4configv1::MatchField_MatchType_UNSPECIFIED:
-            return boost::none;
+            return std::nullopt;
         case p4configv1::MatchField_MatchType_EXACT:
             return cstring("Exact");
         case p4configv1::MatchField_MatchType_LPM:
@@ -209,17 +208,17 @@ static inline boost::optional<cstring> transformMatchType(
         case p4configv1::MatchField_MatchType_OPTIONAL:
             return cstring("Optional");
         default:
-            return boost::none;
+            return std::nullopt;
     }
 }
 
-static inline boost::optional<cstring> transformOtherMatchType(std::string matchType) {
+static inline std::optional<cstring> transformOtherMatchType(std::string matchType) {
     if (matchType == "atcam_partition_index")
         return cstring("ATCAM");
     else if (matchType == "dleft_hash")
         return cstring("DLEFT_HASH");
     else
-        return boost::none;
+        return std::nullopt;
 }
 
 template <typename It>
@@ -330,9 +329,8 @@ class BFRuntimeGenerator {
         Unit unit;
         Util::JsonArray *annotations;
 
-        static boost::optional<Counter> from(const p4configv1::Counter &counterInstance);
-        static boost::optional<Counter> fromDirect(
-            const p4configv1::DirectCounter &counterInstance);
+        static std::optional<Counter> from(const p4configv1::Counter &counterInstance);
+        static std::optional<Counter> fromDirect(const p4configv1::DirectCounter &counterInstance);
     };
 
     /// Common meter representation between PSA and other architectures
@@ -345,8 +343,8 @@ class BFRuntimeGenerator {
         Unit unit;
         Util::JsonArray *annotations;
 
-        static boost::optional<Meter> from(const p4configv1::Meter &meterInstance);
-        static boost::optional<Meter> fromDirect(const p4configv1::DirectMeter &meterInstance);
+        static std::optional<Meter> from(const p4configv1::Meter &meterInstance);
+        static std::optional<Meter> fromDirect(const p4configv1::DirectMeter &meterInstance);
     };
 
     /// Common action profile / selector representation between PSA and other
@@ -358,8 +356,8 @@ class BFRuntimeGenerator {
         std::vector<P4Id> tableIds;
         Util::JsonArray *annotations;
         static P4Id makeActProfId(P4Id implementationId);
-        static boost::optional<ActionProf> from(const p4configv1::P4Info &p4info,
-                                                const p4configv1::ActionProfile &actionProfile);
+        static std::optional<ActionProf> from(const p4configv1::P4Info &p4info,
+                                              const p4configv1::ActionProfile &actionProfile);
     };
 
     /// Common digest representation between PSA and other architectures
@@ -369,7 +367,7 @@ class BFRuntimeGenerator {
         p4configv1::P4DataTypeSpec typeSpec;
         Util::JsonArray *annotations;
 
-        static boost::optional<Digest> from(const p4configv1::Digest &digest);
+        static std::optional<Digest> from(const p4configv1::Digest &digest);
     };
 
     /// Common register representation between PSA and other architectures
@@ -381,7 +379,7 @@ class BFRuntimeGenerator {
         p4configv1::P4DataTypeSpec typeSpec;
         Util::JsonArray *annotations;
 
-        static boost::optional<Register> from(const p4configv1::Register &regInstance);
+        static std::optional<Register> from(const p4configv1::Register &regInstance);
     };
 
     void addMatchTables(Util::JsonArray *tablesJson) const;
@@ -403,7 +401,7 @@ class BFRuntimeGenerator {
                                     Util::JsonArray *attributesJson,
                                     P4Id maxActionParamId = 0) const;
 
-    virtual boost::optional<bool> actProfHasSelector(P4Id actProfId) const;
+    virtual std::optional<bool> actProfHasSelector(P4Id actProfId) const;
     /// Generates the JSON array for table action specs. When the function
     /// returns normally and @maxActionParamId is not NULL, @maxActionParamId is
     /// set to the maximum assigned id for an action parameter across all
@@ -411,8 +409,8 @@ class BFRuntimeGenerator {
     /// fields) need to receive a distinct id in the same space.
     Util::JsonArray *makeActionSpecs(const p4configv1::Table &table,
                                      P4Id *maxActionParamId = nullptr) const;
-    virtual boost::optional<Counter> getDirectCounter(P4Id counterId) const;
-    virtual boost::optional<Meter> getDirectMeter(P4Id meterId) const;
+    virtual std::optional<Counter> getDirectCounter(P4Id counterId) const;
+    virtual std::optional<Meter> getDirectMeter(P4Id meterId) const;
 
     /// Transforms a P4Info @typeSpec to a list of JSON objects matching the
     /// BF-RT format. @instanceType and @instanceName are used for logging error

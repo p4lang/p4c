@@ -545,43 +545,43 @@ bool ConvertToDpdkControl::checkTableValid(const IR::P4Table *a) {
     return true;
 }
 
-boost::optional<const IR::Member *> ConvertToDpdkControl::getMemExprFromProperty(
+std::optional<const IR::Member *> ConvertToDpdkControl::getMemExprFromProperty(
     const IR::P4Table *table, cstring propertyName) {
     auto property = table->properties->getProperty(propertyName);
-    if (property == nullptr) return boost::none;
+    if (property == nullptr) return std::nullopt;
     if (!property->value->is<IR::ExpressionValue>()) {
         ::error(ErrorType::ERR_EXPECTED,
                 "Expected %1% property value for table %2% to be an expression: %3%", propertyName,
                 table->controlPlaneName(), property);
-        return boost::none;
+        return std::nullopt;
     }
     auto expr = property->value->to<IR::ExpressionValue>()->expression;
     if (!expr->is<IR::Member>()) {
         ::error(ErrorType::ERR_EXPECTED,
                 "Exprected %1% property value for table %2% to be a member", propertyName,
                 table->controlPlaneName());
-        return boost::none;
+        return std::nullopt;
     }
 
     return expr->to<IR::Member>();
 }
 
-boost::optional<int> ConvertToDpdkControl::getNumberFromProperty(const IR::P4Table *table,
-                                                                 cstring propertyName) {
+std::optional<int> ConvertToDpdkControl::getNumberFromProperty(const IR::P4Table *table,
+                                                               cstring propertyName) {
     auto property = table->properties->getProperty(propertyName);
-    if (property == nullptr) return boost::none;
+    if (property == nullptr) return std::nullopt;
     if (!property->value->is<IR::ExpressionValue>()) {
         ::error(ErrorType::ERR_EXPECTED,
                 "Expected %1% property value for table %2% to be an expression: %3%", propertyName,
                 table->controlPlaneName(), property);
-        return boost::none;
+        return std::nullopt;
     }
     auto expr = property->value->to<IR::ExpressionValue>()->expression;
     if (!expr->is<IR::Constant>()) {
         ::error(ErrorType::ERR_EXPECTED,
                 "Exprected %1% property value for table %2% to be a constant", propertyName,
                 table->controlPlaneName());
-        return boost::none;
+        return std::nullopt;
     }
 
     return expr->to<IR::Constant>()->asInt();
@@ -597,8 +597,8 @@ bool ConvertToDpdkControl::preorder(const IR::P4Table *t) {
         auto n_groups_max = getNumberFromProperty(t, "n_groups_max");
         auto n_members_per_group_max = getNumberFromProperty(t, "n_members_per_group_max");
 
-        if (group_id == boost::none || member_id == boost::none || n_groups_max == boost::none ||
-            n_members_per_group_max == boost::none)
+        if (group_id == std::nullopt || member_id == std::nullopt || n_groups_max == std::nullopt ||
+            n_members_per_group_max == std::nullopt)
             return false;
 
         auto selector = new IR::DpdkSelector(t->name, (*group_id)->clone(), (*member_id)->clone(),

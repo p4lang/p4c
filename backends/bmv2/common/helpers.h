@@ -126,12 +126,12 @@ struct RegisterTraits<Arch::V1MODEL> {
     // the index of the type parameter for the data stored in the register, in
     // the type parameter list of the extern type declaration
     static size_t dataTypeParamIdx() { return 0; }
-    static boost::optional<size_t> indexTypeParamIdx() { return boost::none; }
+    static std::optional<size_t> indexTypeParamIdx() { return std::nullopt; }
 };
 
 template <>
 struct RegisterTraits<Arch::V1MODEL2020> : public RegisterTraits<Arch::V1MODEL> {
-    static boost::optional<size_t> indexTypeParamIdx() { return 1; }
+    static std::optional<size_t> indexTypeParamIdx() { return 1; }
 };
 
 template <>
@@ -142,7 +142,7 @@ struct RegisterTraits<Arch::PSA> {
     static size_t dataTypeParamIdx() { return 0; }
     // the index of the type parameter for the register index, in the type
     // parameter list of the extern type declaration.
-    static boost::optional<size_t> indexTypeParamIdx() { return 1; }
+    static std::optional<size_t> indexTypeParamIdx() { return 1; }
 };
 
 template <Arch arch>
@@ -181,7 +181,7 @@ struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MODEL>> {
     static const cstring typeName() { return P4V1::V1Model::instance.counter.name; }
     static const cstring directTypeName() { return P4V1::V1Model::instance.directCounter.name; }
     static const cstring sizeParamName() { return "size"; }
-    static boost::optional<size_t> indexTypeParamIdx() { return boost::none; }
+    static std::optional<size_t> indexTypeParamIdx() { return std::nullopt; }
 };
 
 template <>
@@ -193,7 +193,7 @@ struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MODEL2020>> {
     static const cstring typeName() { return P4V1::V1Model::instance.counter.name; }
     static const cstring directTypeName() { return P4V1::V1Model::instance.directCounter.name; }
     static const cstring sizeParamName() { return "size"; }
-    static boost::optional<size_t> indexTypeParamIdx() { return 0; }
+    static std::optional<size_t> indexTypeParamIdx() { return 0; }
 };
 
 /// @ref CounterlikeTraits<> specialization for @ref CounterExtern for PSA
@@ -206,7 +206,7 @@ struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::PSA>> {
     static const cstring sizeParamName() { return "n_counters"; }
     // the index of the type parameter for the counter index, in the type
     // parameter list of the extern type declaration.
-    static boost::optional<size_t> indexTypeParamIdx() { return 1; }
+    static std::optional<size_t> indexTypeParamIdx() { return 1; }
 };
 
 /// @ref CounterlikeTraits<> specialization for @ref MeterExtern for v1model
@@ -219,7 +219,7 @@ struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODEL>> {
     static const cstring typeName() { return P4V1::V1Model::instance.meter.name; }
     static const cstring directTypeName() { return P4V1::V1Model::instance.directMeter.name; }
     static const cstring sizeParamName() { return "size"; }
-    static boost::optional<size_t> indexTypeParamIdx() { return boost::none; }
+    static std::optional<size_t> indexTypeParamIdx() { return std::nullopt; }
 };
 
 template <>
@@ -231,7 +231,7 @@ struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODEL2020>> {
     static const cstring typeName() { return P4V1::V1Model::instance.meter.name; }
     static const cstring directTypeName() { return P4V1::V1Model::instance.directMeter.name; }
     static const cstring sizeParamName() { return "size"; }
-    static boost::optional<size_t> indexTypeParamIdx() { return 0; }
+    static std::optional<size_t> indexTypeParamIdx() { return 0; }
 };
 
 /// @ref CounterlikeTraits<> specialization for @ref MeterExtern for PSA
@@ -244,7 +244,7 @@ struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::PSA>> {
     static const cstring sizeParamName() { return "n_meters"; }
     // the index of the type parameter for the meter index, in the type
     // parameter list of the extern type declaration.
-    static boost::optional<size_t> indexTypeParamIdx() { return 0; }
+    static std::optional<size_t> indexTypeParamIdx() { return 0; }
 };
 
 }  // namespace Helpers

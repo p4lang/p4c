@@ -2,9 +2,9 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TEST_SPEC_H_
 
 #include <map>
+#include <optional>
 #include <vector>
 
-#include <boost/optional/optional.hpp>
 #include <boost/variant/variant.hpp>
 
 #include "backends/p4tools/common/lib/model.h"
@@ -299,7 +299,7 @@ class TestSpec {
 
     /// The expected output packet of this test. Only single output packets are supported.
     /// Additional output packets need to be encoded as test objects.
-    const boost::optional<Packet> egressPacket;
+    const std::optional<Packet> egressPacket;
 
     /// The traces that have been collected while the interpreter stepped through the program.
     const std::vector<gsl::not_null<const TraceEvent *>> traces;
@@ -309,7 +309,7 @@ class TestSpec {
     std::map<cstring, std::map<cstring, const TestObject *>> testObjects;
 
  public:
-    TestSpec(Packet ingressPacket, boost::optional<Packet> egressPacket,
+    TestSpec(Packet ingressPacket, std::optional<Packet> egressPacket,
              std::vector<gsl::not_null<const TraceEvent *>> traces);
 
     /// Add a test object to the test specification with @param category as the object category
@@ -341,7 +341,7 @@ class TestSpec {
     const std::map<cstring, const TableConfig> *getTables() const;
 
     /// @returns the expected output packet for this test.
-    boost::optional<const Packet *> getEgressPacket() const;
+    std::optional<const Packet *> getEgressPacket() const;
 
     /// @returns the list of traces that has been executed
     const std::vector<gsl::not_null<const TraceEvent *>> *getTraces() const;

@@ -1,10 +1,9 @@
 #ifndef BACKENDS_P4TOOLS_COMMON_COMPILER_COMPILER_TARGET_H_
 #define BACKENDS_P4TOOLS_COMMON_COMPILER_COMPILER_TARGET_H_
 
+#include <optional>
 #include <string>
 #include <vector>
-
-#include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/compiler/midend.h"
 #include "backends/p4tools/common/core/target.h"
@@ -28,26 +27,26 @@ class CompilerTarget : public Target {
 
     /// Runs the P4 compiler to produce an IR.
     ///
-    /// @returns boost::none if an error occurs during compilation.
-    static boost::optional<const IR::P4Program *> runCompiler();
+    /// @returns std::nullopt if an error occurs during compilation.
+    static std::optional<const IR::P4Program *> runCompiler();
 
     /// Runs the P4 compiler to produce an IR for the given source code.
     ///
-    /// @returns boost::none if an error occurs during compilation.
-    static boost::optional<const IR::P4Program *> runCompiler(const std::string &source);
+    /// @returns std::nullopt if an error occurs during compilation.
+    static std::optional<const IR::P4Program *> runCompiler(const std::string &source);
 
  private:
     /// Runs the front and mid ends on the given parsed program.
     ///
-    /// @returns boost::none if an error occurs during compilation.
-    static boost::optional<const IR::P4Program *> runCompiler(const IR::P4Program *);
+    /// @returns std::nullopt if an error occurs during compilation.
+    static std::optional<const IR::P4Program *> runCompiler(const IR::P4Program *);
 
  protected:
     /// @see @makeContext.
     virtual ICompileContext *makeContext_impl() const;
 
     /// @see runCompiler.
-    virtual boost::optional<const IR::P4Program *> runCompiler_impl(const IR::P4Program *) const;
+    virtual std::optional<const IR::P4Program *> runCompiler_impl(const IR::P4Program *) const;
 
     /// This implementation just forwards the given arguments to the compiler.
     ///

@@ -3,12 +3,12 @@
 #include <algorithm>
 #include <fstream>
 #include <iterator>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include <boost/format.hpp>
-#include <boost/none.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
@@ -73,11 +73,10 @@ bool SymbolicExecutor::evaluateBranch(const SymbolicExecutor::Branch &branch,
 
     // Check the consistency of the path constraints asserted so far.
     auto solverResult = solver.checkSat(branch.nextState->getPathConstraint());
-    if (solverResult == boost::none) {
+    if (solverResult == std::nullopt) {
         ::warning("Solver timed out");
     }
-
-    return solverResult != boost::none && solverResult.get();
+    return solverResult.value_or(false);
 }
 
 SymbolicExecutor::Branch SymbolicExecutor::popRandomBranch(
@@ -97,7 +96,7 @@ SymbolicExecutor::SymbolicExecutor(AbstractSolver &solver, const ProgramInfo &pr
       evaluator(solver, programInfo) {
     // If there is no seed provided, do not randomize the solver.
     auto seed = Utils::getCurrentSeed();
-    if (seed != boost::none) {
+    if (seed != std::nullopt) {
         this->solver.seed(*seed);
     }
     executionState = new ExecutionState(programInfo.program);

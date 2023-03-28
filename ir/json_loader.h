@@ -20,11 +20,10 @@ limitations under the License.
 #include <assert.h>
 
 #include <map>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <utility>
-
-#include <boost/optional.hpp>
 
 #include "ir.h"
 #include "json_parser.h"
@@ -202,12 +201,12 @@ class JSONLoader {
     }
 
     template <typename T>
-    void unpack_json(boost::optional<T> &v) {
+    void unpack_json(std::optional<T> &v) {
         const JsonObject *obj = json->to<JsonObject>();
         bool isValid = false;
         load(::get(obj, "valid"), isValid);
         if (!isValid) {
-            v = boost::none;
+            v = std::nullopt;
             return;
         }
         T value;

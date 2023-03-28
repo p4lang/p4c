@@ -4,13 +4,11 @@
 #include <cstdlib>
 #include <functional>
 #include <iostream>
+#include <optional>
 #include <string>
 
 #include <boost/cstdint.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
-#include <boost/none.hpp>
-#include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/util.h"
@@ -84,15 +82,14 @@ int Testgen::mainImpl(const IR::P4Program *program) {
         printFeature("test_info", 4, "============ Program seed %1% =============\n", *seed);
     }
 
-    // Get the basename of the input file and remove the extension
+    // Get the filename of the input file and remove the extension
     // This assumes that inputFile is not null.
-    auto programName = boost::filesystem::path(inputFile).filename().replace_extension("");
+    auto testPath = std::filesystem::path(inputFile.c_str()).stem();
     // Create the directory, if the directory string is valid and if it does not exist.
-    auto testPath = programName;
     if (!testDirStr.isNullOrEmpty()) {
-        auto testDir = boost::filesystem::path(testDirStr);
-        boost::filesystem::create_directories(testDir);
-        testPath = boost::filesystem::path(testDir) / testPath;
+        auto testDir = std::filesystem::path(testDirStr.c_str());
+        std::filesystem::create_directories(testDir);
+        testPath = testDir / testPath;
     }
     // Need to declare the solver here to ensure its lifetime.
     Z3Solver solver;

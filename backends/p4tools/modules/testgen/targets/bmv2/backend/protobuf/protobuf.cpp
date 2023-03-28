@@ -2,14 +2,13 @@
 
 #include <iomanip>
 #include <map>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
-#include <boost/none.hpp>
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
 #include <inja/inja.hpp>
@@ -42,34 +41,34 @@ std::string formatHexExprWithSep(const IR::Expression *expr) {
     return insertHexSeparators(formatHexExpr(expr, false, true, false));
 }
 
-Protobuf::Protobuf(cstring testName, boost::optional<unsigned int> seed = boost::none)
+Protobuf::Protobuf(cstring testName, std::optional<unsigned int> seed = std::nullopt)
     : TF(testName, seed) {}
 
-boost::optional<p4rt_id_t> Protobuf::getIdAnnotation(const IR::IAnnotated *node) {
+std::optional<p4rt_id_t> Protobuf::getIdAnnotation(const IR::IAnnotated *node) {
     const auto *idAnnotation = node->getAnnotation("id");
     if (idAnnotation == nullptr) {
-        return boost::none;
+        return std::nullopt;
     }
     const auto *idConstant = idAnnotation->expr[0]->to<IR::Constant>();
     CHECK_NULL(idConstant);
     if (!idConstant->fitsUint()) {
         ::error(ErrorType::ERR_INVALID, "%1%: @id should be an unsigned integer", node);
-        return boost::none;
+        return std::nullopt;
     }
     return static_cast<p4rt_id_t>(idConstant->value);
 }
 
-boost::optional<p4rt_id_t> Protobuf::externalId(
-    const P4::ControlPlaneAPI::P4RuntimeSymbolType &type, const IR::IDeclaration *declaration) {
+std::optional<p4rt_id_t> Protobuf::externalId(const P4::ControlPlaneAPI::P4RuntimeSymbolType &type,
+                                              const IR::IDeclaration *declaration) {
     CHECK_NULL(declaration);
     if (!declaration->is<IR::IAnnotated>()) {
-        return boost::none;  // Assign an id later; see below.
+        return std::nullopt;  // Assign an id later; see below.
     }
 
     // If the user specified an @id annotation, use that.
     auto idOrNone = getIdAnnotation(declaration->to<IR::IAnnotated>());
     if (!idOrNone) {
-        return boost::none;  // the user didn't assign an id
+        return std::nullopt;  // the user didn't assign an id
     }
     auto id = *idOrNone;
 
@@ -79,7 +78,7 @@ boost::optional<p4rt_id_t> Protobuf::externalId(
     const auto prefixMask = static_cast<p4rt_id_t>(0xff) << 24;
     if ((id & prefixMask) != 0 && (id & prefixMask) != typePrefix) {
         ::error(ErrorType::ERR_INVALID, "%1%: @id has the wrong 8-bit prefix", declaration);
-        return boost::none;
+        return std::nullopt;
     }
     id |= typePrefix;
 
@@ -244,7 +243,7 @@ inja::json Protobuf::getSend(const TestSpec *testSpec) {
 
 inja::json Protobuf::getVerify(const TestSpec *testSpec) {
     inja::json verifyData = inja::json::object();
-    if (testSpec->getEgressPacket() != boost::none) {
+    if (testSpec->getEgressPacket() != std::nullopt) {
         const auto &packet = **testSpec->getEgressPacket();
         verifyData["eg_port"] = packet.getPort();
         const auto *payload = packet.getEvaluatedPayload();
@@ -387,12 +386,11 @@ void Protobuf::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
     if (selectedBranches != nullptr) {
         dataJson["selected_branches"] = selectedBranches.c_str();
     }
-    boost::filesystem::path testFile(testName + ".proto");
-    cstring testNameOnly(testFile.stem().c_str());
+    std::filesystem::path testFile(testName + ".proto");
     if (seed) {
         dataJson["seed"] = *seed;
     }
-    dataJson["test_name"] = testNameOnly.c_str();
+    dataJson["test_name"] = testFile.stem();
     dataJson["test_id"] = testId + 1;
     // TODO: Traces are disabled until we are able to escape illegal characters (e.g., '"').
     // dataJson["trace"] = getTrace(testSpec);

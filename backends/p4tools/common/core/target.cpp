@@ -4,10 +4,9 @@
 #include <algorithm>
 #include <cctype>
 #include <map>
+#include <optional>
 #include <string>
 #include <utility>
-
-#include <boost/none.hpp>
 
 namespace P4Tools {
 
@@ -30,7 +29,7 @@ bool Target::Spec::operator<(const Spec &other) const {
  *  Target implementation
  * ============================================================================================= */
 
-boost::optional<Target::Spec> Target::curTarget = boost::none;
+std::optional<Target::Spec> Target::curTarget = std::nullopt;
 std::map<Target::Spec, std::map<std::string, const Target *>> Target::registry = {};
 std::map<std::string, std::string> Target::defaultArchByDevice = {};
 std::map<std::string, std::string> Target::defaultDeviceByArch = {};

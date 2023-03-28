@@ -2,13 +2,12 @@
 #define BACKENDS_P4TOOLS_COMMON_LIB_UTIL_H_
 
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include <boost/format.hpp>
-#include <boost/none.hpp>
-#include <boost/optional/optional.hpp>
 #include <boost/random/mersenne_twister.hpp>
 
 #include "backends/p4tools/common/lib/formulae.h"
@@ -51,7 +50,7 @@ class Utils {
     static boost::random::mt19937 rng;
 
     /// Stores the state of the PRNG.
-    static boost::optional<uint32_t> currentSeed;
+    static std::optional<uint32_t> currentSeed;
 
  public:
     /// Return the current timestamp with millisecond accuracy.
@@ -64,7 +63,7 @@ class Utils {
     static void setRandomSeed(int seed);
 
     /// @returns currentSeed.
-    static boost::optional<uint32_t> getCurrentSeed();
+    static std::optional<uint32_t> getCurrentSeed();
 
     /// @returns a random integer in the range [0, @param max]. Always return 0 if no seed is set.
     static uint64_t getRandInt(uint64_t max);
@@ -111,8 +110,8 @@ class Utils {
     /// idx2 are given, respectively.
     static const StateVariable &getZombieTableVar(const IR::Type *type, const IR::P4Table *table,
                                                   cstring name,
-                                                  boost::optional<int> idx1_opt = boost::none,
-                                                  boost::optional<int> idx2_opt = boost::none);
+                                                  std::optional<int> idx1_opt = std::nullopt,
+                                                  std::optional<int> idx2_opt = std::nullopt);
 
     /// @returns the state variable for the validity of the given header instance. The resulting
     ///     variable will be boolean-typed.

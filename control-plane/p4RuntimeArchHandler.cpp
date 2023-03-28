@@ -14,9 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <optional>
 #include <sstream>  // for std::ostringstream
-
-#include <boost/optional.hpp>
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 // TODO(antonin): this include should go away when we cleanup getTableSize
@@ -39,18 +38,17 @@ namespace ControlPlaneAPI {
 
 namespace Helpers {
 
-boost::optional<ExternInstance> getExternInstanceFromProperty(const IR::P4Table *table,
-                                                              const cstring &propertyName,
-                                                              ReferenceMap *refMap,
-                                                              TypeMap *typeMap,
-                                                              bool *isConstructedInPlace) {
+std::optional<ExternInstance> getExternInstanceFromProperty(const IR::P4Table *table,
+                                                            const cstring &propertyName,
+                                                            ReferenceMap *refMap, TypeMap *typeMap,
+                                                            bool *isConstructedInPlace) {
     auto property = table->properties->getProperty(propertyName);
-    if (property == nullptr) return boost::none;
+    if (property == nullptr) return std::nullopt;
     if (!property->value->is<IR::ExpressionValue>()) {
         ::error(ErrorType::ERR_EXPECTED,
                 "Expected %1% property value for table %2% to be an expression: %3%", propertyName,
                 table->controlPlaneName(), property);
-        return boost::none;
+        return std::nullopt;
     }
 
     auto expr = property->value->to<IR::ExpressionValue>()->expression;
@@ -61,7 +59,7 @@ boost::optional<ExternInstance> getExternInstanceFromProperty(const IR::P4Table 
                 "Table '%1%' has an anonymous table property '%2%' with no name annotation, "
                 "which is not supported by P4Runtime",
                 table->controlPlaneName(), propertyName);
-        return boost::none;
+        return std::nullopt;
     }
     auto name = property->controlPlaneName();
     auto externInstance = ExternInstance::resolve(expr, refMap, typeMap, name);
@@ -70,7 +68,7 @@ boost::optional<ExternInstance> getExternInstanceFromProperty(const IR::P4Table 
                 "Expected %1% property value for table %2% to resolve to an "
                 "extern instance: %3%",
                 propertyName, table->controlPlaneName(), property);
-        return boost::none;
+        return std::nullopt;
     }
 
     return externInstance;

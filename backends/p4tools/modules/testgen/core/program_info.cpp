@@ -70,7 +70,7 @@ const std::vector<Continuation::Command> *ProgramInfo::getPipelineSequence() con
     return &pipelineSequence;
 }
 
-boost::optional<const Constraint *> ProgramInfo::getTargetConstraints() const {
+std::optional<const Constraint *> ProgramInfo::getTargetConstraints() const {
     return targetConstraints;
 }
 

@@ -2,9 +2,8 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SMALL_STEP_CMD_STEPPER_H_
 
 #include <map>
+#include <optional>
 #include <vector>
-
-#include <boost/optional/optional.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
@@ -47,8 +46,8 @@ class CmdStepper : public AbstractStepper {
 
     /// @see startParser. Implementations can assume that the parser has been registered, and the
     /// cursor position has been initialized.
-    virtual boost::optional<const Constraint *> startParser_impl(
-        const IR::P4Parser *parser, ExecutionState *nextState) const = 0;
+    virtual std::optional<const Constraint *> startParser_impl(const IR::P4Parser *parser,
+                                                               ExecutionState *nextState) const = 0;
 
     /// Initializes variables and adds constraints for the program initialization, which is target
     /// specific.

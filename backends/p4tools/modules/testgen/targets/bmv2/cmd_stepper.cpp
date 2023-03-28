@@ -4,9 +4,8 @@
 
 #include <list>
 #include <map>
+#include <optional>
 #include <utility>
-
-#include <boost/none.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
@@ -101,7 +100,7 @@ void BMv2_V1ModelCmdStepper::initializeTargetEnvironment(ExecutionState *nextSta
     nextState->set(packetSizeVar, packetSizeConst);
 }
 
-boost::optional<const Constraint *> BMv2_V1ModelCmdStepper::startParser_impl(
+std::optional<const Constraint *> BMv2_V1ModelCmdStepper::startParser_impl(
     const IR::P4Parser *parser, ExecutionState *nextState) const {
     // We need to explicitly map the parser error
     const auto *errVar =
@@ -114,7 +113,7 @@ boost::optional<const Constraint *> BMv2_V1ModelCmdStepper::startParser_impl(
         const auto &portVar = programInfo.getTargetInputPortVar();
         return new IR::Lss(portVar, new IR::Constant(portVar->type, 8));
     }
-    return boost::none;
+    return std::nullopt;
 }
 
 std::map<Continuation::Exception, Continuation> BMv2_V1ModelCmdStepper::getExceptionHandlers(

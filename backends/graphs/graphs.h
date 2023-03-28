@@ -26,13 +26,13 @@ limitations under the License.
 #endif
 
 #include <map>
+#include <optional>
 #include <utility>  // std::pair
 #include <vector>
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/graphviz.hpp>
-#include <boost/optional.hpp>
 
 #include "frontends/p4/parserCallGraph.h"
 #include "ir/ir.h"
@@ -135,7 +135,7 @@ class Graphs : public Inspector {
 
     // merge misc control statements (action calls, extern method calls,
     // assignments) into a single vertex to reduce graph complexity
-    boost::optional<vertex_t> merge_other_statements_into_vertex();
+    std::optional<vertex_t> merge_other_statements_into_vertex();
 
     vertex_t add_vertex(const cstring &name, VertexType type);
     vertex_t add_and_connect_vertex(const cstring &name, VertexType type);
