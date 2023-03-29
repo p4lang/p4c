@@ -773,11 +773,19 @@ class FindUninitialized : public Inspector {
             return;
         }
 
-        if (dst_type->is<IR::Type_Stack>()) {
-            if (src->is<IR::StructExpression>() || src->is<IR::MethodCallExpression>()) {
+        if (auto st = dst_type->to<IR::Type_Stack>()) {
+            if (src->is<IR::MethodCallExpression>()) {
                 auto locations = headerDefs->getStorageLocation(dst);
                 for (auto storage : *locations) {
                     headerDefs->setValueToStorage(storage, TernaryBool::Yes);
+                }
+            } else if (auto stack_exp = src->to<IR::HeaderStackExpression>()) {
+                for (size_t index = 0; index < st->getSize(); index++) {
+                    auto dst_elem = new IR::ArrayIndex(dst, new IR::Constant((uint64_t)index));
+                    auto source = stack_exp->components.at(index);
+                    auto src_type = typeMap->getType(source, true);
+                    typeMap->setType(dst_elem, st->elementType);
+                    processHeadersInAssignment(dst_elem, source, st->elementType, src_type);
                 }
             } else if (src_type->is<IR::Type_Stack>()) {
                 auto dst_locations = headerDefs->getStorageLocation(dst);
@@ -1427,6 +1435,12 @@ class FindUninitialized : public Inspector {
     void postorder(const IR::InvalidHeader *expression) override { otherExpression(expression); }
 
     void postorder(const IR::StructExpression *expression) override { otherExpression(expression); }
+
+    void postorder(const IR::P4ListExpression *expression) override { otherExpression(expression); }
+
+    void postorder(const IR::HeaderStackExpression *expression) override {
+        otherExpression(expression);
+    }
 
     void postorder(const IR::Operation_Unary *expression) override { otherExpression(expression); }
 

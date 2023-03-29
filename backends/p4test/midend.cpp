@@ -101,6 +101,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          new P4::SimplifyComparisons(&refMap, &typeMap),
          new P4::CopyStructures(&refMap, &typeMap, false),
          new P4::NestedStructs(&refMap, &typeMap),
+         new P4::StrengthReduction(&refMap, &typeMap),
          new P4::SimplifySelectList(&refMap, &typeMap),
          new P4::RemoveSelectBooleans(&refMap, &typeMap),
          new P4::FlattenHeaders(&refMap, &typeMap),

@@ -79,7 +79,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     @hidden action issue30011l50() {
         s_0[0].setInvalid();
-        tmp_3 = s_0;
+        tmp_3[0] = s_0[0];
     }
     @hidden table tbl_issue30011l84 {
         actions = {

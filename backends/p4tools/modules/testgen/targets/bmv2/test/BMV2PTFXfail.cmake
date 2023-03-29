@@ -7,6 +7,15 @@
 # These are issues either with the P4 compiler or the behavioral model executing the code.
 # These issues needed to be tracked and fixed in P4C.
 ####################################################################################################
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Non-numeric, non-boolean member expression: .* Type: Type_Stack"
+  # We can not expand stacks in parsers because information about .next is lost.
+  # P4Testgen needs to maintain its own internal .next variable for stacks.
+  array-copy-bmv2.p4
+)
+
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
   "Assertion"
@@ -15,7 +24,7 @@ p4tools_add_xfail_reason(
   issue1607-bmv2.p4
   bmv2_copy_headers.p4
 )
- 
+
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
   "terminate called after throwing an instance"

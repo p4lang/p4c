@@ -196,9 +196,10 @@ class ToP4 : public Inspector {
     bool preorder(const IR::ListExpression *e) override;
     bool preorder(const IR::P4ListExpression *e) override;
     bool preorder(const IR::StructExpression *e) override;
+    bool preorder(const IR::Invalid *e) override;
     bool preorder(const IR::InvalidHeader *e) override;
     bool preorder(const IR::InvalidHeaderUnion *e) override;
-    bool preorder(const IR::Invalid *e) override;
+    bool preorder(const IR::HeaderStackExpression *e) override;
     bool preorder(const IR::MethodCallExpression *e) override;
     bool preorder(const IR::DefaultExpression *e) override;
     bool preorder(const IR::This *e) override;

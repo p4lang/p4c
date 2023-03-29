@@ -940,6 +940,33 @@ bool ToP4::preorder(const IR::StructExpression *e) {
     return false;
 }
 
+bool ToP4::preorder(const IR::HeaderStackExpression *e) {
+    if (expressionPrecedence > DBPrint::Prec_Prefix) builder.append("(");
+    if (e->headerStackType != nullptr) {
+        builder.append("(");
+        visit(e->headerStackType);
+        builder.append(")");
+    }
+    builder.append("{");
+    int prec = expressionPrecedence;
+    expressionPrecedence = DBPrint::Prec_Low;
+    bool first = true;
+    for (auto c : e->components) {
+        if (!first) builder.append(",");
+        first = false;
+        visit(c);
+    }
+    expressionPrecedence = prec;
+    builder.append("}");
+    if (expressionPrecedence > DBPrint::Prec_Prefix) builder.append(")");
+    return false;
+}
+
+bool ToP4::preorder(const IR::Invalid *) {
+    builder.append("{#}");
+    return false;
+}
+
 bool ToP4::preorder(const IR::InvalidHeader *e) {
     if (expressionPrecedence > DBPrint::Prec_Prefix) builder.append("(");
     builder.append("(");
@@ -957,11 +984,6 @@ bool ToP4::preorder(const IR::InvalidHeaderUnion *e) {
     builder.append(")");
     builder.append("{#}");
     if (expressionPrecedence > DBPrint::Prec_Prefix) builder.append(")");
-    return false;
-}
-
-bool ToP4::preorder(const IR::Invalid *) {
-    builder.append("{#}");
     return false;
 }
 

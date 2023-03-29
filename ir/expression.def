@@ -464,6 +464,15 @@ class InvalidHeaderUnion : Expression {
     Type headerUnionType;
 }
 
+/// An expression that evaluates to a header stack
+class HeaderStackExpression : BaseListExpression {
+    /// May only be known after type checking; so it can be nullptr.
+    NullOK Type headerStackType;
+    validate {
+        components.check_null();
+    }
+}
+
 /// A ListExpression where all the components are compile-time values.
 /// This is used by the evaluator pass.
 class ListCompileTimeValue : CompileTimeValue {

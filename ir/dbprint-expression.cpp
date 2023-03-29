@@ -256,6 +256,22 @@ void IR::InvalidHeaderUnion::dbprint(std::ostream &out) const { out << "(" << ty
 
 void IR::Invalid::dbprint(std::ostream &out) const { out << "{#}"; }
 
+void IR::HeaderStackExpression::dbprint(std::ostream &out) const {
+    int prec = getprec(out);
+    if (prec > Prec_Postfix) out << '(';
+    out << setprec(Prec_Postfix) << "{" << setprec(Prec_Low);
+    out << "(" << type << "){";
+    bool first = true;
+    for (auto a : components) {
+        if (!first) out << ", ";
+        out << setprec(Prec_Low) << a;
+        first = false;
+    }
+    out << "}" << setprec(prec);
+    if (prec > Prec_Postfix) out << ')';
+    if (prec == 0) out << ';';
+}
+
 void IR::ListExpression::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     if (prec > Prec_Postfix) out << '(';
