@@ -169,13 +169,35 @@ inline auto operator<<(std::ostream &out, const T *obj) -> decltype((void)obj->d
 /// classes.
 template <class Cont>
 std::ostream &format_container(std::ostream &out, const Cont &container, char lbrace, char rbrace) {
-    const char *sep = " ";
-    out << lbrace;
+    std::vector<std::string> elems;
+    bool foundnl = false;
     for (auto &el : container) {
-        out << sep << el;
-        sep = ", ";
+        std::stringstream tmp;
+        tmp << el;
+        elems.emplace_back(tmp.str());
+        if (!foundnl) foundnl = elems.back().find('\n') != std::string::npos;
     }
-    out << (sep + 1) << rbrace;
+    if (foundnl) {
+        for (auto &el : elems) {
+            out << Log::endl << Log::indent;
+            for (auto &ch : el) {
+                if (ch == '\n')
+                    out << Log::endl;
+                else
+                    out << ch;
+            }
+            out << Log::unindent;
+        }
+    } else {
+        const char *sep = " ";
+        out << lbrace;
+        for (auto &el : elems) {
+            out << sep << el;
+            sep = ", ";
+        }
+        out << (sep + 1) << rbrace;
+    }
+
     return out;
 }
 
