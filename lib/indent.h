@@ -97,6 +97,22 @@ class TempIndent {
         ti.streams.push_back(&out);
         return out << indent;
     }
+    friend std::ostream &operator<<(std::ostream &out, TempIndent &&ti) {
+        ti.streams.push_back(&out);
+        return out << indent;
+    }
+    const char *pop_back() {
+        if (!streams.empty()) {
+            *streams.back() << unindent;
+            streams.pop_back();
+        }
+        return "";
+    }
+    const char *reset() {
+        for (auto *out : streams) *out << unindent;
+        streams.clear();
+        return "";
+    }
     ~TempIndent() {
         for (auto *out : streams) *out << unindent;
     }
