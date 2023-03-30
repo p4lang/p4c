@@ -20,6 +20,7 @@ limitations under the License.
 #include <functional>
 #include <iostream>
 #include <set>
+#include <sstream>
 #include <vector>
 
 #include "config.h"
