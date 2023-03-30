@@ -12,11 +12,7 @@
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace EBPF {
+namespace P4Tools::P4Testgen::EBPF {
 
 class EBPFProgramInfo : public ProgramInfo {
  private:
@@ -25,7 +21,7 @@ class EBPFProgramInfo : public ProgramInfo {
     const ordered_map<cstring, const IR::Type_Declaration *> programmableBlocks;
 
     /// The bit width of standard_metadata.parser_error.
-    static const IR::Type_Bits parserErrBits;
+    static const IR::Type_Bits PARSER_ERR_BITS;
 
     /// This function contains an imperative specification of the inter-pipe interaction in the
     /// target.
@@ -37,27 +33,21 @@ class EBPFProgramInfo : public ProgramInfo {
                     ordered_map<cstring, const IR::Type_Declaration *> inputBlocks);
 
     /// @returns the programmable blocks of the program. Should be 6.
-    const ordered_map<cstring, const IR::Type_Declaration *> *getProgrammableBlocks() const;
+    [[nodiscard]] const ordered_map<cstring, const IR::Type_Declaration *> *getProgrammableBlocks()
+        const;
 
-    const IR::Member *getTargetInputPortVar() const override;
+    [[nodiscard]] const IR::Member *getTargetInputPortVar() const override;
 
-    const IR::Member *getTargetOutputPortVar() const override;
+    [[nodiscard]] const IR::Member *getTargetOutputPortVar() const override;
 
-    const IR::Expression *dropIsActive() const override;
+    [[nodiscard]] const IR::Expression *dropIsActive() const override;
 
-    const IR::Expression *createTargetUninitialized(const IR::Type *type,
-                                                    bool forceTaint) const override;
+    [[nodiscard]] const IR::Expression *createTargetUninitialized(const IR::Type *type,
+                                                                  bool forceTaint) const override;
 
-    const IR::Type_Bits *getParserErrorType() const override;
-
-    const IR::Member *getParserParamVar(const IR::P4Parser *parser, const IR::Type *type,
-                                        size_t paramIndex, cstring paramLabel) const override;
+    [[nodiscard]] const IR::Type_Bits *getParserErrorType() const override;
 };
 
-}  // namespace EBPF
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::EBPF
 
 #endif /* TESTGEN_TARGETS_EBPF_PROGRAM_INFO_H_ */
