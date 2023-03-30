@@ -1,10 +1,8 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/backend/metadata/metadata.h"
 
 #include <algorithm>
-#include <filesystem>
 #include <iomanip>
 #include <map>
-#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -12,7 +10,10 @@
 #include <inja/inja.hpp>
 
 #include "backends/p4tools/common/lib/format_int.h"
+#include "backends/p4tools/common/lib/trace_event.h"
+#include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "lib/log.h"
 #include "nlohmann/json.hpp"
@@ -62,11 +63,12 @@ inja::json Metadata::getSend(const TestSpec *testSpec) {
 
 inja::json Metadata::getVerify(const TestSpec *testSpec) {
     inja::json verifyData = inja::json::object();
-    if (testSpec->getEgressPacket() != std::nullopt) {
-        const auto &packet = **testSpec->getEgressPacket();
-        verifyData["eg_port"] = packet.getPort();
-        const auto *payload = packet.getEvaluatedPayload();
-        const auto *payloadMask = packet.getEvaluatedPayloadMask();
+    auto egressPacket = testSpec->getEgressPacket();
+    if (egressPacket.has_value()) {
+        const auto *const packet = egressPacket.value();
+        verifyData["eg_port"] = packet->getPort();
+        const auto *payload = packet->getEvaluatedPayload();
+        const auto *payloadMask = packet->getEvaluatedPayloadMask();
         verifyData["ignore_mask"] = formatHexExpr(payloadMask);
         verifyData["exp_pkt"] = formatHexExpr(payload);
     }
@@ -84,7 +86,7 @@ std::string Metadata::getTestCaseTemplate() {
 # Current statement coverage: {{coverage}}
 
 ## for trace_item in trace
-# "{{trace_item}}"
+# {{trace_item}}
 ## endfor
 
 input_packet: {{send.pkt}}
@@ -96,13 +98,33 @@ output_port: {{verify.eg_port}}
 output_packet_mask: "{{verify.ignore_mask}}"
 ## endif
 
+Offsets: {% for o in offsets %}{{o.label}}@{{o.offset}}{% if not loop.is_last %},{% endif %}{% endfor %}
 
 ## for metadata_field in metadata_fields
-Metadata: {{metadata_field.name}}:{{metadata_field.value}}
+Metadata: {{metadata_field.name}}@{{metadata_field.value}}
 ## endfor
 
 )""");
     return TEST_CASE;
+}
+
+void Metadata::computeTraceData(const TestSpec *testSpec, inja::json &dataJson) {
+    dataJson["trace"] = inja::json::array();
+    dataJson["offsets"] = inja::json::array();
+    const auto *traces = testSpec->getTraces();
+    if (traces != nullptr) {
+        for (const auto &trace : *traces) {
+            if (const auto *successfulExtract = trace->to<TraceEvents::ExtractSuccess>()) {
+                inja::json j;
+                j["label"] = successfulExtract->getExtractedHeader()->toString();
+                j["offset"] = successfulExtract->getOffset();
+                dataJson["offsets"].push_back(j);
+            }
+            std::stringstream ss;
+            ss << *trace;
+            dataJson["trace"].push_back(ss.str());
+        }
+    }
 }
 
 void Metadata::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
@@ -111,13 +133,13 @@ void Metadata::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
     if (selectedBranches != nullptr) {
         dataJson["selected_branches"] = selectedBranches.c_str();
     }
-    std::filesystem::path testFile(testName + ".proto");
     if (seed) {
         dataJson["seed"] = *seed;
     }
-    dataJson["test_name"] = testFile.stem();
+    dataJson["test_name"] = testName;
     dataJson["test_id"] = testId + 1;
-    dataJson["trace"] = getTrace(testSpec);
+    computeTraceData(testSpec, dataJson);
+
     dataJson["send"] = getSend(testSpec);
     dataJson["verify"] = getVerify(testSpec);
     dataJson["timestamp"] = Utils::getTimeStamp();

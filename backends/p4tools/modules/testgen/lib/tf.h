@@ -13,7 +13,7 @@
 #include <inja/inja.hpp>
 
 #include "backends/p4tools/common/lib/format_int.h"
-#include "backends/p4tools/common/lib/trace_events.h"
+#include "backends/p4tools/common/lib/trace_event.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
@@ -38,7 +38,7 @@ class TF {
     static inja::json getTrace(const TestSpec *testSpec) {
         inja::json traceList = inja::json::array();
         const auto *traces = testSpec->getTraces();
-        if ((traces != nullptr) && !traces->empty()) {
+        if (traces != nullptr) {
             for (const auto &trace : *traces) {
                 std::stringstream ss;
                 ss << trace;

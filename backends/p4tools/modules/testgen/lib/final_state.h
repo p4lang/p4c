@@ -6,7 +6,7 @@
 
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/model.h"
-#include "backends/p4tools/common/lib/trace_events.h"
+#include "backends/p4tools/common/lib/trace_event.h"
 #include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"

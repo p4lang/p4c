@@ -9,7 +9,7 @@
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/lib/formulae.h"
-#include "backends/p4tools/common/lib/trace_events.h"
+#include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
@@ -171,10 +171,8 @@ void BMv2_V1ModelTableStepper::evalTableActionProfile(
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
         tableStream << " Chosen action: " << actionName;
-        nextState.add(
-
-            *new TraceEvent::Generic(tableStream.str()));
-        nextState.replaceTopBody(&replacements);
+        nextState->add(new TraceEvents::Generic(tableStream.str()));
+        nextState->replaceTopBody(&replacements);
         getResult()->emplace_back(hitCondition, *state, nextState, coveredStmts);
     }
 }
@@ -272,10 +270,8 @@ void BMv2_V1ModelTableStepper::evalTableActionSelector(
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
         tableStream << " Chosen action: " << actionName;
-        nextState.add(
-
-            *new TraceEvent::Generic(tableStream.str()));
-        nextState.replaceTopBody(&replacements);
+        nextState->add(new TraceEvents::Generic(tableStream.str()));
+        nextState->replaceTopBody(&replacements);
         getResult()->emplace_back(hitCondition, *state, nextState, coveredStmts);
     }
 }

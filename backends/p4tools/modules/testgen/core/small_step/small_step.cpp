@@ -10,7 +10,7 @@
 #include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
-#include "backends/p4tools/common/lib/trace_events.h"
+#include "backends/p4tools/common/lib/trace_event.h"
 #include "frontends/p4/optimizeExpressions.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"

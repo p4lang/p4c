@@ -14,7 +14,7 @@
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
-#include "backends/p4tools/common/lib/trace_events.h"
+#include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
@@ -172,13 +172,11 @@ bool CmdStepper::preorder(const IR::P4Parser *p4parser) {
 
     auto &nextState = state.clone();
 
-    auto blockName = p4parser->getName().name;
-
     // Register and do target-specific initialization of the parser.
     const auto *constraint = startParser(p4parser, nextState);
 
     // Add trace events.
-    nextState.add(*new TraceEvent::ParserStart(p4parser, blockName));
+    nextState->add(*new TraceEvents::ParserStart(p4parser));
 
     // Remove the invocation of the parser from the current body and push the resulting
     // continuation onto the continuation stack.
@@ -218,7 +216,7 @@ bool CmdStepper::preorder(const IR::P4Control *p4control) {
     // Add trace events.
     std::stringstream controlName;
     controlName << "Control " << blockName << " start";
-    nextState.add(*new TraceEvent::Generic(controlName));
+    nextState->add(*new TraceEvents::Generic(controlName));
 
     // Set the emit buffer to be zero for the current control pipeline.
     nextState.resetEmitBuffer();
@@ -284,8 +282,7 @@ bool CmdStepper::preorder(const IR::IfStatement *ifStatement) {
         auto &nextState = state.clone();
         std::vector<Continuation::Command> cmds;
         auto currentTaint = state.getProperty<bool>("inUndefinedState");
-        nextState.add(
-            *new TraceEvent::PreEvalExpression(ifStatement->condition, "Tainted If Statement"));
+        nextState->add(*new TraceEvents::IfStatementCondition(ifStatement->condition));
         cmds.emplace_back(Continuation::PropertyUpdate("inUndefinedState", true));
         cmds.emplace_back(ifStatement->ifTrue);
         if (ifStatement->ifFalse != nullptr) {
@@ -300,8 +297,7 @@ bool CmdStepper::preorder(const IR::IfStatement *ifStatement) {
     {
         auto &nextState = state.clone();
         std::vector<Continuation::Command> cmds;
-        nextState.add(
-            *new TraceEvent::PreEvalExpression(ifStatement->condition, "If Statement true"));
+        nextState->add(*new TraceEvents::IfStatementCondition(ifStatement->condition));
         cmds.emplace_back(ifStatement->ifTrue);
         nextState.replaceTopBody(&cmds);
 
@@ -317,9 +313,8 @@ bool CmdStepper::preorder(const IR::IfStatement *ifStatement) {
     // Handle case for else body.
     {
         auto *negation = new IR::LNot(IR::Type::Boolean::get(), ifStatement->condition);
-        auto &nextState = state.clone();
-        nextState.add(
-            *new TraceEvent::PreEvalExpression(ifStatement->condition, "If Statement false"));
+        auto *nextState = new ExecutionState(state);
+        nextState->add(*new TraceEvents::IfStatementCondition(ifStatement->condition));
 
         nextState.replaceTopBody((ifStatement->ifFalse == nullptr) ? new IR::BlockStatement()
                                                                    : ifStatement->ifFalse);
@@ -406,7 +401,7 @@ bool CmdStepper::preorder(const IR::ParserState *parserState) {
 
     auto &nextState = state.clone();
 
-    nextState.add(*new TraceEvent::ParserState(parserState));
+    nextState->add(*new TraceEvents::ParserState(parserState));
 
     if (parserState->name == IR::ParserState::accept) {
         nextState.popContinuation();

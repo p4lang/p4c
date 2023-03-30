@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "backends/p4tools/common/lib/model.h"
-#include "backends/p4tools/common/lib/trace_events.h"
+#include "backends/p4tools/common/lib/trace_event.h"
 #include "ir/ir.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"

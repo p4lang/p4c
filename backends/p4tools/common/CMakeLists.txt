@@ -44,7 +44,8 @@ set(
   lib/model.cpp
   lib/symbolic_env.cpp
   lib/taint.cpp
-  lib/trace_events.cpp
+  lib/trace_event.cpp
+  lib/trace_event_types.cpp
   lib/util.cpp
   lib/zombie.cpp
 )
