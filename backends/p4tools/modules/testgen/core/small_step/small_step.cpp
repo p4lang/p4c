@@ -2,13 +2,12 @@
 
 #include <iosfwd>
 #include <optional>
-#include <string>
-#include <type_traits>
 #include <utility>
 #include <vector>
 
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/variant/static_visitor.hpp>
+#include <boost/variant/variant.hpp>
 
 #include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/core/solver.h"

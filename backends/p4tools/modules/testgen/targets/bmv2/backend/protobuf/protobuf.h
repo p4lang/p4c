@@ -3,7 +3,6 @@
 
 #include <cstddef>
 #include <fstream>
-#include <map>
 #include <optional>
 #include <string>
 #include <utility>
@@ -11,7 +10,9 @@
 
 #include <inja/inja.hpp>
 
+#include "control-plane/p4RuntimeArchHandler.h"
 #include "control-plane/p4RuntimeArchStandard.h"
+#include "ir/declaration.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 

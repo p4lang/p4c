@@ -5,9 +5,8 @@
 #include <utility>
 #include <vector>
 
-#include <boost/variant/apply_visitor.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
 
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "ir/irutils.h"

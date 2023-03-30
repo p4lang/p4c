@@ -2,6 +2,7 @@
 #define TESTGEN_TARGETS_EBPF_TARGET_H_
 
 #include <cstdint>
+#include <filesystem>
 #include <optional>
 
 #include "backends/p4tools/common/core/solver.h"

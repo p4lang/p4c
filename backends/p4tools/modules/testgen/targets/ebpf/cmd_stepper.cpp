@@ -6,12 +6,15 @@
 #include <optional>
 #include <utility>
 
+#include <boost/multiprecision/cpp_int.hpp>
+
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/id.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
+#include "lib/cstring.h"
 #include "lib/ordered_map.h"
 
 #include "backends/p4tools/modules/testgen/core/arch_spec.h"

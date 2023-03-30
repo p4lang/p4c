@@ -2,11 +2,19 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TF_H_
 
 #include <cstddef>
+#include <iosfwd>
+#include <map>
 #include <optional>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include <inja/inja.hpp>
 
 #include "backends/p4tools/common/lib/format_int.h"
+#include "backends/p4tools/common/lib/trace_events.h"
+#include "gsl/gsl-lite.hpp"
+#include "ir/ir.h"
 #include "lib/cstring.h"
 
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"

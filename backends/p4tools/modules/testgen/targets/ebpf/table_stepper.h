@@ -1,11 +1,9 @@
 #ifndef TESTGEN_TARGETS_EBPF_TABLE_STEPPER_H_
 #define TESTGEN_TARGETS_EBPF_TABLE_STEPPER_H_
 
-#include <map>
 #include <vector>
 
 #include "ir/ir.h"
-#include "lib/cstring.h"
 
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"

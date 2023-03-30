@@ -3,24 +3,18 @@
 #include <iomanip>
 #include <map>
 #include <optional>
-#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <boost/core/enable_if.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
 #include <boost/multiprecision/detail/et_ops.hpp>
 #include <boost/multiprecision/number.hpp>
 #include <boost/multiprecision/traits/explicit_conversion.hpp>
-#include <boost/variant/apply_visitor.hpp>
-#include <boost/variant/static_visitor.hpp>
 #include <inja/inja.hpp>
 
 #include "backends/p4tools/common/lib/format_int.h"
-#include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
-#include "gsl/gsl-lite.hpp"
-#include "ir/declaration.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "lib/exceptions.h"

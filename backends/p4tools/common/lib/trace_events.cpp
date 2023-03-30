@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "backends/p4tools/common/lib/format_int.h"
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/taint.h"
@@ -13,7 +12,6 @@
 #include "ir/vector.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"
-#include "lib/safe_vector.h"
 
 namespace P4Tools {
 

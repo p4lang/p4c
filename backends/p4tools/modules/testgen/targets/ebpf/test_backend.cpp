@@ -6,6 +6,8 @@
 #include <string>
 #include <utility>
 
+#include <boost/multiprecision/cpp_int.hpp>
+
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "gsl/gsl-lite.hpp"

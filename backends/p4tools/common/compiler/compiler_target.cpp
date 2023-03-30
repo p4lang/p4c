@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 
-#include "backends/p4tools/common/compiler/configuration.h"
 #include "backends/p4tools/common/compiler/context.h"
 #include "backends/p4tools/common/compiler/convert_hs_index.h"
 #include "backends/p4tools/common/compiler/midend.h"

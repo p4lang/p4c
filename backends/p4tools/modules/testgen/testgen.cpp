@@ -1,15 +1,13 @@
 #include "backends/p4tools/modules/testgen/testgen.h"
 
-#include <cstdint>
 #include <cstdlib>
-#include <functional>
+#include <filesystem>
 #include <iostream>
 #include <optional>
 #include <string>
+#include <utility>
 
-#include <boost/cstdint.hpp>
-#include <boost/format.hpp>
-
+#include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "frontends/common/parser_options.h"
@@ -20,6 +18,7 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/depth_first.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/greedy_stmt_cov.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/max_stmt_cov.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/random_backtrack.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/selected_branches.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"

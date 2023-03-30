@@ -4,7 +4,6 @@
 #include <stddef.h>
 #include <z3++.h>
 
-#include <algorithm>
 #include <iosfwd>
 #include <optional>
 #include <string>

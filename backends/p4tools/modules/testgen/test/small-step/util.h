@@ -1,6 +1,8 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TEST_SMALL_STEP_UTIL_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TEST_SMALL_STEP_UTIL_H_
 
+#include <gtest/gtest.h>
+
 #include <functional>
 #include <optional>
 #include <stack>
@@ -10,17 +12,13 @@
 #include <boost/variant/variant.hpp>
 
 #include "backends/p4tools/common/core/z3_solver.h"
-#include "backends/p4tools/common/lib/formulae.h"
-#include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "gsl/gsl-lite.hpp"
-#include "gtest/gtest-message.h"
-#include "gtest/gtest-test-part.h"
-#include "gtest/gtest.h"
 #include "ir/declaration.h"
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"
 #include "ir/vector.h"
+#include "lib/cstring.h"
 #include "lib/enumerator.h"
 
 #include "backends/p4tools/modules/testgen/core/small_step/small_step.h"

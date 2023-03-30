@@ -2,6 +2,7 @@
 
 #include <z3_api.h>
 
+#include <algorithm>
 #include <cstdint>
 #include <exception>
 #include <iterator>
@@ -10,6 +11,8 @@
 #include <ostream>
 #include <string>
 #include <utility>
+
+#include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"

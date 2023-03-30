@@ -5,19 +5,12 @@
 #include <iterator>
 #include <optional>
 #include <string>
-#include <utility>
 #include <vector>
 
-#include <boost/format.hpp>
-
 #include "backends/p4tools/common/core/solver.h"
-#include "backends/p4tools/common/lib/formulae.h"
-#include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/util.h"
-#include "frontends/p4/optimizeExpressions.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
-#include "ir/irutils.h"
 #include "lib/error.h"
 #include "lib/timer.h"
 #include "midend/coverage.h"

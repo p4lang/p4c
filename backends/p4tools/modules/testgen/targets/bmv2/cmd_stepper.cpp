@@ -7,11 +7,14 @@
 #include <optional>
 #include <utility>
 
+#include <boost/multiprecision/cpp_int.hpp>
+
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
 #include "ir/id.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
+#include "lib/cstring.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/ordered_map.h"
@@ -22,6 +25,7 @@
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/constants.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/program_info.h"
 

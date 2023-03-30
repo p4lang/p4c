@@ -5,8 +5,6 @@
 #include <optional>
 #include <vector>
 
-#include <boost/variant/variant.hpp>
-
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "gsl/gsl-lite.hpp"

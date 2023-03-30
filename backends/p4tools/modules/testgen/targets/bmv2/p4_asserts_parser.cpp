@@ -3,28 +3,22 @@
 #include <stdint.h>
 
 #include <iostream>
-#include <list>
-#include <memory>
 #include <optional>
 #include <string>
 #include <utility>
 
-#include <boost/format.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
-#include "ir/ir-inline.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "lib/big_int_util.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
-#include "lib/log.h"
-#include "lib/ordered_map.h"
-#include "lib/safe_vector.h"
 
 namespace P4Tools {
 

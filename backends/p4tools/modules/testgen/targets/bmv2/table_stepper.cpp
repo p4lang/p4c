@@ -1,13 +1,12 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/table_stepper.h"
 
 #include <cstddef>
-#include <map>
 #include <optional>
 #include <ostream>
 #include <string>
 #include <vector>
 
-#include <boost/format.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/trace_events.h"
@@ -16,11 +15,15 @@
 #include "ir/id.h"
 #include "ir/irutils.h"
 #include "ir/vector.h"
+#include "lib/cstring.h"
 #include "lib/error.h"
+#include "lib/log.h"
 #include "lib/null.h"
-#include "lib/safe_vector.h"
+#include "lib/source_file.h"
+#include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
 #include "backends/p4tools/modules/testgen/lib/collect_latent_statements.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"

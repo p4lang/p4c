@@ -359,23 +359,12 @@ if(ENABLE_IWYU)
     -Xiwyu
     --no_fwd_decls
     -Xiwyu
+    --cxx17ns
+    -Xiwyu
     --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/p4c.imp
-    -Xiwyu
-    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/boost-1.75-all.imp
-    -Xiwyu
-    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/libcxx.imp
-    -Xiwyu
-    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/gcc.libc.imp
-    -Xiwyu
-    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/gcc.symbols.imp
-    -Xiwyu
-    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/gcc.stl.headers.imp
-    -Xiwyu
-    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/stl.c.headers.imp
   )
   message("IWYU command: ${iwyu_path}")
 endif()
-
 
 # the order of adding subdirectories matters because of target dependencies
 add_subdirectory (tools/driver)

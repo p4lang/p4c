@@ -1,21 +1,18 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/max_stmt_cov.h"
 
 #include <ctime>
-#include <iterator>
+#include <map>
 #include <optional>
-#include <type_traits>
 #include <vector>
 
 #include "backends/p4tools/common/core/solver.h"
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "lib/error.h"
-#include "midend/coverage.h"
+#include "lib/source_file.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
-#include "backends/p4tools/modules/testgen/core/small_step/small_step.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"

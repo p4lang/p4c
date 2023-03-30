@@ -10,7 +10,6 @@
 #include "ir/declaration.h"
 #include "ir/ir.h"
 #include "lib/castable.h"
-#include "lib/cstring.h"
 #include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/core/arch_spec.h"

@@ -1,8 +1,10 @@
+#include <gtest/gtest.h>
+
 #include <algorithm>
 #include <optional>
+#include <string>
 #include <vector>
 
-#include <boost/core/enable_if.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/multiprecision/detail/et_ops.hpp>
 #include <boost/multiprecision/number.hpp>
@@ -12,15 +14,14 @@
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "gsl/gsl-lite.hpp"
-#include "gtest/gtest-message.h"
-#include "gtest/gtest-test-part.h"
-#include "gtest/gtest.h"
 #include "ir/declaration.h"
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"
 #include "lib/big_int_util.h"
+#include "lib/cstring.h"
 #include "lib/enumerator.h"
 #include "lib/exceptions.h"
+#include "lib/log.h"
 #include "test/gtest/helpers.h"
 
 #include "backends/p4tools/modules/testgen/core/target.h"

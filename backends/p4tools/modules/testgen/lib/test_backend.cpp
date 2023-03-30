@@ -1,12 +1,10 @@
 #include "backends/p4tools/modules/testgen/lib/test_backend.h"
 
 #include <iostream>
-#include <map>
+#include <list>
 #include <optional>
-#include <set>
 #include <utility>
 
-#include <boost/format.hpp>
 #include <boost/variant/get.hpp>
 #include <boost/variant/variant.hpp>
 
@@ -21,8 +19,10 @@
 #include "backends/p4tools/common/lib/util.h"
 #include "frontends/p4/optimizeExpressions.h"
 #include "ir/irutils.h"
+#include "lib/cstring.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
+#include "lib/log.h"
 #include "lib/null.h"
 #include "lib/timer.h"
 #include "midend/coverage.h"

@@ -1,31 +1,20 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/backend/metadata/metadata.h"
 
+#include <algorithm>
+#include <filesystem>
 #include <iomanip>
 #include <map>
 #include <optional>
-#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <boost/format.hpp>
-#include <boost/variant/apply_visitor.hpp>
-#include <boost/variant/static_visitor.hpp>
 #include <inja/inja.hpp>
 
 #include "backends/p4tools/common/lib/format_int.h"
-#include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
-#include "gsl/gsl-lite.hpp"
-#include "ir/declaration.h"
 #include "ir/ir.h"
-#include "ir/vector.h"
-#include "lib/big_int_util.h"
-#include "lib/error.h"
-#include "lib/error_catalog.h"
-#include "lib/exceptions.h"
 #include "lib/log.h"
-#include "lib/null.h"
 #include "nlohmann/json.hpp"
 
 #include "backends/p4tools/modules/testgen/lib/tf.h"

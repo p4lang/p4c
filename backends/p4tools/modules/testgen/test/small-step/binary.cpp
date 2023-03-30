@@ -1,9 +1,8 @@
+#include <gtest/gtest.h>
+
 #include <memory>
 #include <optional>
 
-#include "gtest/gtest-message.h"
-#include "gtest/gtest-test-part.h"
-#include "gtest/gtest.h"
 #include "ir/ir.h"
 
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"

@@ -2,12 +2,11 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_TEST_BACKEND_H_
 
 #include <cstdint>
+#include <filesystem>
 #include <optional>
 #include <set>
 #include <string>
 #include <vector>
-
-#include <boost/filesystem.hpp>
 
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/trace_events.h"

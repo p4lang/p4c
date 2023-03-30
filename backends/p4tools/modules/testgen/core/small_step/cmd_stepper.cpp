@@ -7,8 +7,7 @@
 #include <string>
 #include <vector>
 
-#include <boost/format.hpp>
-#include <boost/variant/get.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
 #include <boost/variant/variant.hpp>
 
 #include "backends/p4tools/common/compiler/convert_hs_index.h"
@@ -21,19 +20,18 @@
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
 #include "ir/irutils.h"
-#include "ir/node.h"
 #include "ir/vector.h"
 #include "lib/cstring.h"
-#include "lib/error.h"
 #include "lib/exceptions.h"
+#include "lib/log.h"
 #include "lib/null.h"
-#include "lib/safe_vector.h"
 #include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen//lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/abstract_stepper.h"
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
 #include "backends/p4tools/modules/testgen/lib/collect_latent_statements.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"

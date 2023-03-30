@@ -1,7 +1,8 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TEST_BACKEND_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TEST_BACKEND_H_
 
-#include <string>
+#include <stdint.h>
+
 #include <vector>
 
 #include "backends/p4tools/common/core/z3_solver.h"

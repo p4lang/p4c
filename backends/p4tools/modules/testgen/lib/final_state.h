@@ -7,7 +7,7 @@
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "gsl/gsl-lite.hpp"
-#include "ir/ir.h"
+#include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 

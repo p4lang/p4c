@@ -1,11 +1,9 @@
 #include "backends/p4tools/modules/testgen/targets/ebpf/table_stepper.h"
 
-#include <map>
 #include <optional>
 #include <vector>
 
-#include <boost/format.hpp>
-
+#include "lib/cstring.h"
 #include "lib/error.h"
 
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
