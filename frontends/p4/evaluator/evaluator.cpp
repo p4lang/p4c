@@ -148,15 +148,24 @@ const IR::Block *Evaluator::processConstructor(
     const IR::Type *instanceType,                 // Actual canonical type of generated instance.
     const IR::Vector<IR::Argument> *arguments) {  // Constructor arguments
     LOG2("Evaluating constructor " << dbp(type));
-    if (type->is<IR::Type_Specialized>()) type = type->to<IR::Type_Specialized>()->baseType;
-    const IR::IDeclaration *decl;
-    if (type->is<IR::Type_Name>()) {
-        auto tn = type->to<IR::Type_Name>();
-        decl = refMap->getDeclaration(tn->path, true);
-    } else {
-        BUG_CHECK(type->is<IR::IDeclaration>(), "%1%: expected a type declaration", type);
-        decl = type->to<IR::IDeclaration>();
+
+    const IR::IDeclaration *decl = nullptr;
+    // Use this loop to eliminate intermediate typedefs.
+    while (decl == nullptr || decl->is<IR::Type_Typedef>()) {
+        if (decl != nullptr && decl->is<IR::Type_Typedef>()) {
+            LOG2("Eliminating typedef " << dbp(decl));
+            type = decl->to<IR::Type_Typedef>()->type;
+        }
+        if (type->is<IR::Type_Specialized>()) type = type->to<IR::Type_Specialized>()->baseType;
+        if (type->is<IR::Type_Name>()) {
+            auto tn = type->to<IR::Type_Name>();
+            decl = refMap->getDeclaration(tn->path, true);
+        } else {
+            BUG_CHECK(type->is<IR::IDeclaration>(), "%1%: expected a type declaration", type);
+            decl = type->to<IR::IDeclaration>();
+        }
     }
+    LOG2("Resolved constructor type declaration " << dbp(decl));
 
     auto current = currentBlock();
     if (decl->is<IR::Type_Extern>()) {
