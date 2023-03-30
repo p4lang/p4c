@@ -13,7 +13,7 @@
 
 namespace P4Tools::P4Testgen::EBPF {
 
-const IR::Expression *EBPFTableStepper::computeTargetMatchType(ExecutionState *nextState,
+const IR::Expression *EBPFTableStepper::computeTargetMatchType(ExecutionState &nextState,
                                                                const KeyProperties &keyProperties,
                                                                TableMatchMap *matches,
                                                                const IR::Expression *hitCondition) {

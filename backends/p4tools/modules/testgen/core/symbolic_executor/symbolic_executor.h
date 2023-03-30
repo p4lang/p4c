@@ -64,7 +64,7 @@ class SymbolicExecutor {
     AbstractSolver &solver;
 
     /// The current execution state.
-    ExecutionState *executionState = nullptr;
+    std::reference_wrapper<ExecutionState> executionState;
 
     /// Set of all statements, to be retrieved from programInfo.
     const P4::Coverage::CoverageSet &allStatements;

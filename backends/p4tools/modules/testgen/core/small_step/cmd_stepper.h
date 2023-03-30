@@ -42,16 +42,16 @@ class CmdStepper : public AbstractStepper {
     /// Initializes the given state for entry into the given parser.
     ///
     /// @returns constraints for associating packet data with program/zombie state.
-    const Constraint *startParser(const IR::P4Parser *parser, ExecutionState *nextState);
+    const Constraint *startParser(const IR::P4Parser *parser, ExecutionState &state);
 
     /// @see startParser. Implementations can assume that the parser has been registered, and the
     /// cursor position has been initialized.
     virtual std::optional<const Constraint *> startParser_impl(const IR::P4Parser *parser,
-                                                               ExecutionState *nextState) const = 0;
+                                                               ExecutionState &state) const = 0;
 
     /// Initializes variables and adds constraints for the program initialization, which is target
     /// specific.
-    virtual void initializeTargetEnvironment(ExecutionState *nextState) const = 0;
+    virtual void initializeTargetEnvironment(ExecutionState &state) const = 0;
 
     /// Provides exception-handler implementations for the given parser.
     ///
@@ -59,19 +59,19 @@ class CmdStepper : public AbstractStepper {
     ///     normally.
     virtual std::map<Continuation::Exception, Continuation> getExceptionHandlers(
         const IR::P4Parser *parser, Continuation::Body normalContinuation,
-        const ExecutionState *nextState) const = 0;
+        const ExecutionState &state) const = 0;
 
     /// Helper function that initializes a given type declaration using the given block parameter
     /// cstring list as prefixes.All the members of the Type_Declaration are initialized using the
     /// createTargetUninitialized of the respective target.
     void initializeBlockParams(const IR::Type_Declaration *typeDecl,
-                               const std::vector<cstring> *blockParams, ExecutionState *nextState,
+                               const std::vector<cstring> *blockParams, ExecutionState &state,
                                bool forceTaint = false) const;
 
     /// Add a variable to the symbolic interpreter. This looks up the full control-plane name of a
     /// variable defined in @param decl and declares in the symbolic environment of @param
     /// nextState.
-    void declareVariable(ExecutionState *nextState, const IR::Declaration_Variable *decl);
+    void declareVariable(ExecutionState &state, const IR::Declaration_Variable *decl);
 };
 
 }  // namespace P4Tools::P4Testgen

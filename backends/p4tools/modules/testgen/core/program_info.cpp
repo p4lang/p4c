@@ -2,8 +2,6 @@
 
 #include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/lib/util.h"
-#include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/typeMap.h"
 #include "ir/id.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
@@ -15,9 +13,7 @@
 #include "backends/p4tools/modules/testgen/lib/namespace_context.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 ProgramInfo::ProgramInfo(const IR::P4Program *program)
     : globalNameSpaceContext(NamespaceContext::Empty->push(program)),
@@ -26,10 +22,8 @@ ProgramInfo::ProgramInfo(const IR::P4Program *program)
     concolicMethodImpls.add(*Concolic::getCoreConcolicMethodImpls());
     if (TestgenOptions::get().dcg || !TestgenOptions::get().pattern.empty()) {
         // Create DCG.
-        P4::ReferenceMap refMap;
-        P4::TypeMap typeMap;
         auto *currentDCG = new NodesCallGraph("NodesCallGraph");
-        P4ProgramDCGCreator dcgCreator(&refMap, &typeMap, currentDCG);
+        P4ProgramDCGCreator dcgCreator(currentDCG);
         program->apply(dcgCreator);
         dcg = currentDCG;
     }
@@ -107,6 +101,4 @@ void ProgramInfo::produceCopyInOutCall(const IR::Parameter *param, size_t paramI
     }
 }
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen

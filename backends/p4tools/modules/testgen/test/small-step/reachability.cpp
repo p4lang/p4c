@@ -12,7 +12,9 @@
 #include "frontends/common/options.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/common/parser_options.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/frontend.h"
+#include "frontends/p4/typeMap.h"
 #include "ir/declaration.h"
 #include "ir/ir.h"
 #include "ir/node.h"
@@ -77,7 +79,7 @@ ReturnedInfo loadExampleForReachability(const char *curFile) {
     P4Tools::MidEnd midEnd(options);
     program = program->apply(midEnd);
     auto *currentDCG = new P4Tools::NodesCallGraph("NodesCallGraph");
-    P4Tools::P4ProgramDCGCreator dcgCreator(&refMap, &typeMap, currentDCG);
+    P4Tools::P4ProgramDCGCreator dcgCreator(currentDCG);
     program->apply(dcgCreator);
     return std::make_tuple(program, currentDCG, currentDCG->getHash());
 }
@@ -326,7 +328,7 @@ TEST_F(P4CReachability, testReachabilityEngine) {
     const auto hash = std::get<2>(result);
     std::string strBehavior = "ingress.MyAction1 + ingress.MyAction2;";
     strBehavior += "ingress.table2";
-    P4Tools::ReachabilityEngine engine(dcg, strBehavior);
+    P4Tools::ReachabilityEngine engine(*dcg, strBehavior);
     auto *engineState = P4Tools::ReachabilityEngineState::getInitial();
     // Initialize engine.
     const auto *ingress = getFromHash(hash, "ingress");

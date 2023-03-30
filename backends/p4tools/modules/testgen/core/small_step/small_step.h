@@ -2,13 +2,15 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SMALL_STEP_SMALL_STEP_H_
 
 #include <cstdint>
+#include <functional>
 #include <optional>
+#include <utility>
 #include <vector>
 
 #include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
-#include "gsl/gsl-lite.hpp"
+#include "ir/node.h"
 #include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
@@ -27,23 +29,22 @@ class SmallStepEvaluator {
     struct Branch {
         const Constraint *constraint;
 
-        gsl::not_null<ExecutionState *> nextState;
+        std::reference_wrapper<ExecutionState> nextState;
 
         P4::Coverage::CoverageSet potentialStatements;
 
         /// Simple branch without any constraint.
-        explicit Branch(gsl::not_null<ExecutionState *> nextState);
+        explicit Branch(ExecutionState &nextState);
 
         /// Branch constrained by a condition. prevState is the state in which the condition
         /// is later evaluated.
         Branch(std::optional<const Constraint *> c, const ExecutionState &prevState,
-               gsl::not_null<ExecutionState *> nextState);
+               ExecutionState &nextState);
 
         /// Branch constrained by a condition. prevState is the state in which the condition
         /// is later evaluated.
         Branch(std::optional<const Constraint *> c, const ExecutionState &prevState,
-               gsl::not_null<ExecutionState *> nextState,
-               const P4::Coverage::CoverageSet &potentialStatements);
+               ExecutionState &nextState, P4::Coverage::CoverageSet potentialStatements);
     };
 
     using Result = std::vector<Branch> *;

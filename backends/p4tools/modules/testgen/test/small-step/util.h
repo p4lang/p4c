@@ -7,12 +7,12 @@
 #include <optional>
 #include <stack>
 #include <string>
+#include <utility>
 #include <variant>
 #include <vector>
 
 #include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
-#include "gsl/gsl-lite.hpp"
 #include "ir/declaration.h"
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"
@@ -41,7 +41,7 @@ using Z3Solver = P4Tools::Z3Solver;
 class SmallStepTest : public P4ToolsTest {
  public:
     /// Creates an execution state out of a continuation body.
-    static ExecutionState mkState(Body body) { return ExecutionState(body); }
+    static ExecutionState mkState(Body body) { return ExecutionState(std::move(body)); }
 };
 
 namespace SmallStepUtil {
@@ -56,20 +56,28 @@ template <class T>
 const T *extractExpr(const IR::P4Program *program) {
     // Get the mau declarations in the P4Program.
     const auto *decls = program->getDeclsByName("mau")->toVector();
-    if (decls->size() != 1) return nullptr;
+    if (decls->size() != 1) {
+        return nullptr;
+    }
 
     // Convert the mau declaration to a control and ensure that
     // there is a single statement in the body.
     const auto *control = (*decls)[0]->to<IR::P4Control>();
-    if (control->body->components.size() != 1) return nullptr;
+    if (control->body->components.size() != 1) {
+        return nullptr;
+    }
 
     // Ensure that the control body statement is a method call statement.
-    auto *mcStmt = control->body->components[0]->to<IR::MethodCallStatement>();
-    if (!mcStmt) return nullptr;
+    const auto *mcStmt = control->body->components[0]->to<IR::MethodCallStatement>();
+    if (!mcStmt) {
+        return nullptr;
+    }
 
     // Ensure that there is only one argument to the method call and return it.
-    auto *mcArgs = mcStmt->methodCall->arguments;
-    if (mcArgs->size() != 1) return nullptr;
+    const auto *mcArgs = mcStmt->methodCall->arguments;
+    if (mcArgs->size() != 1) {
+        return nullptr;
+    }
     return (*mcArgs)[0]->expression->to<T>();
 }
 
@@ -88,29 +96,29 @@ void stepAndExamineValue(const T *value, const IR::P4Program *program) {
 
     // Step on the value.
     Z3Solver solver;
-    auto *testState = new ExecutionState(esBase);
+    auto &testState = esBase.clone();
     Body body({Return(value)});
-    testState->replaceBody(body);
-    testState->pushContinuation(
-        new ExecutionState::StackFrame(continuationBase, esBase.getNamespaceContext()));
+    testState.replaceBody(body);
+    testState.pushContinuation(
+        *new ExecutionState::StackFrame(continuationBase, esBase.getNamespaceContext()));
     SmallStepEvaluator eval(solver, *progInfo);
-    auto successors = eval.step(*testState);
+    auto *successors = eval.step(testState);
     ASSERT_EQ(successors->size(), 1u);
 
     // Examine the resulting execution state.
     const auto branch = (*successors)[0];
-    auto constraint = branch.constraint;
+    const auto *constraint = branch.constraint;
     auto executionState = branch.nextState;
     ASSERT_TRUE(constraint->checkedTo<IR::BoolLiteral>()->value);
-    ASSERT_EQ(executionState->getNamespaceContext(), NamespaceContext::Empty);
-    ASSERT_TRUE(executionState->getSymbolicEnv().getInternalMap().empty());
+    ASSERT_EQ(executionState.get().getNamespaceContext(), NamespaceContext::Empty);
+    ASSERT_TRUE(executionState.get().getSymbolicEnv().getInternalMap().empty());
 
     // Examine the resulting body.
-    Body finalBody = executionState->getBody();
+    Body finalBody = executionState.get().getBody();
     ASSERT_EQ(finalBody, Body({Return(value)}));
 
     // Examine the resulting stack.
-    ASSERT_EQ(executionState->getStack().empty(), true);
+    ASSERT_EQ(executionState.get().getStack().empty(), true);
 }
 
 /// Step on the @op, and examine the resulting state for the @subexpr
@@ -130,29 +138,29 @@ void stepAndExamineOp(
     Body body({Return(op)});
     ExecutionState es = SmallStepTest::mkState(body);
     SmallStepEvaluator eval(solver, *progInfo);
-    auto successors = eval.step(es);
-    ASSERT_EQ(successors->size(), 1u);
+    auto *successors = eval.step(es);
+    ASSERT_EQ(successors->size(), 1U);
 
     // Examine the resulting execution state.
     const auto branch = (*successors)[0];
-    auto constraint = branch.constraint;
+    const auto *constraint = branch.constraint;
     auto executionState = branch.nextState;
     ASSERT_TRUE(constraint->checkedTo<IR::BoolLiteral>()->value);
-    ASSERT_EQ(executionState->getNamespaceContext(), NamespaceContext::Empty);
-    ASSERT_TRUE(executionState->getSymbolicEnv().getInternalMap().empty());
+    ASSERT_EQ(executionState.get().getNamespaceContext(), NamespaceContext::Empty);
+    ASSERT_TRUE(executionState.get().getSymbolicEnv().getInternalMap().empty());
 
     // Examine the resulting body.
-    Body finalBody = executionState->getBody();
+    Body finalBody = executionState.get().getBody();
     ASSERT_EQ(finalBody, Body({Return(subexpr)}));
 
     // Examine the resulting stack.
-    ASSERT_EQ(executionState->getStack().size(), 1u);
-    const auto stackFrame = executionState->getStack().top();
-    ASSERT_TRUE(stackFrame->exceptionHandlers.empty());
-    ASSERT_EQ(stackFrame->namespaces, NamespaceContext::Empty);
+    ASSERT_EQ(executionState.get().getStack().size(), 1u);
+    const auto stackFrame = executionState.get().getStack().top();
+    ASSERT_TRUE(stackFrame.get().exceptionHandlers.empty());
+    ASSERT_EQ(stackFrame.get().namespaces, NamespaceContext::Empty);
 
     // Examine the pushed continuation.
-    Continuation pushedContinuation = stackFrame->normalContinuation;
+    Continuation pushedContinuation = stackFrame.get().normalContinuation;
     ASSERT_TRUE(pushedContinuation.parameterOpt);
     Body pushedBody = pushedContinuation.body;
     ASSERT_EQ(pushedBody, Body({Return(rebuildNode(*pushedContinuation.parameterOpt))}));

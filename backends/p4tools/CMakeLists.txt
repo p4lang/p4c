@@ -47,9 +47,6 @@ if (${Z3_VERSION_STRING} VERSION_GREATER_EQUAL ${Z3_MAX_VERSION_EXCL})
   message(FATAL_ERROR "The Z3 version has to be lower than ${Z3_MAX_VERSION_EXCL} (the latter currently does no work with libGC). Has ${Z3_VERSION_STRING}.")
 endif()
 
-# GSL-lite is needed for testgen.
-add_subdirectory(submodules/gsl-lite EXCLUDE_FROM_ALL)
-
 # Inja is needed to produce test templates.
 set(INJA_BUILD_TESTS OFF CACHE BOOL "Build unit tests when BUILD_TESTING is enabled.")
 set(BUILD_BENCHMARK OFF CACHE BOOL "Build benchmark.")

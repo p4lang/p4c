@@ -11,11 +11,7 @@
 
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace Bmv2 {
+namespace P4Tools::P4Testgen::Bmv2 {
 
 class Bmv2Concolic : public Concolic {
  private:
@@ -42,12 +38,12 @@ class Bmv2Concolic : public Concolic {
     };
 
     /// This is the list of concolic functions that are implemented in this class.
-    static const ConcolicMethodImpls::ImplList Bmv2ConcolicMethodImpls;
+    static const ConcolicMethodImpls::ImplList BMV2_CONCOLIC_METHOD_IMPLS;
 
     /// Call into a behavioral model helper function to compute the appropriate checksum. The
     /// checksum is determined by @param algo.
     static big_int computeChecksum(const std::vector<const IR::Expression *> &exprList,
-                                   const Model *completedModel, int algo,
+                                   const Model &completedModel, int algo,
                                    Model::ExpressionMap *resolvedExpressions);
 
     /// Compute a payload using the provided model and update the resolved concolic variables. Then
@@ -68,10 +64,6 @@ class Bmv2Concolic : public Concolic {
     static const ConcolicMethodImpls::ImplList *getBmv2ConcolicMethodImpls();
 };
 
-}  // namespace Bmv2
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_CONCOLIC_H_ */

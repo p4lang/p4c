@@ -3,12 +3,12 @@
 
 #include <stdint.h>
 
+#include <functional>
 #include <vector>
 
 #include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/trace_events.h"
-#include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
@@ -79,7 +79,7 @@ class TestBackEnd {
         const IR::Constant *packetTaintMask;
 
         /// The traces that have been collected during execution of this particular test path.
-        const std::vector<gsl::not_null<const TraceEvent *>> programTraces;
+        const std::vector<std::reference_wrapper<const TraceEvent>> programTraces;
 
         /// Indicates whether the packet is dropped.
         bool packetIsDropped = false;
@@ -107,7 +107,7 @@ class TestBackEnd {
     virtual TestInfo produceTestInfo(
         const ExecutionState *executionState, const Model *completedModel,
         const IR::Expression *outputPacketExpr, const IR::Expression *outputPortExpr,
-        const std::vector<gsl::not_null<const TraceEvent *>> *programTraces);
+        const std::vector<std::reference_wrapper<const TraceEvent>> *programTraces);
 
     /// The callback that is executed by the symbolic executor.
     virtual bool run(const FinalState &state);

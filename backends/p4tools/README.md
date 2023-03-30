@@ -9,8 +9,6 @@ p4tools
  ├─ modules     ── P4Tools extensions.
  │  └─ testgen  ── C++ source: P4Testgen.
  └─ submodules  ── External dependencies.
-    ├─ gsl-lite ── C++ Core Guidelines Support Library.
-    └─ inja     ── C++ template engine used for test generation.
 ```
 
 ## P4Tools
@@ -31,8 +29,8 @@ make
 
 ## Dependencies
 * [inja](https://github.com/pantor/inja) template engine for testcase generation.
-* [gsl-lite](https://github.com/gsl-lite/gsl-lite) C++ Core Guidelines Support Library, used to
-support and enforce C++ best practices.
+* [z3](https://github.com/Z3Prover/z3) SMT solver to compute path constraints.
+
 
 ## Development Style
 Currently, each C++ source directory has a few subdirectories, including:

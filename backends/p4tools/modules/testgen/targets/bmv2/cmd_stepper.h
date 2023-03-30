@@ -15,11 +15,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/program_info.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace Bmv2 {
+namespace P4Tools::P4Testgen::Bmv2 {
 
 class BMv2_V1ModelCmdStepper : public CmdStepper {
  protected:
@@ -27,24 +23,20 @@ class BMv2_V1ModelCmdStepper : public CmdStepper {
 
     const BMv2_V1ModelProgramInfo &getProgramInfo() const override;
 
-    void initializeTargetEnvironment(ExecutionState *nextState) const override;
+    void initializeTargetEnvironment(ExecutionState &nextState) const override;
 
     std::optional<const Constraint *> startParser_impl(const IR::P4Parser *parser,
-                                                       ExecutionState *state) const override;
+                                                       ExecutionState &nextState) const override;
 
     std::map<Continuation::Exception, Continuation> getExceptionHandlers(
         const IR::P4Parser *parser, Continuation::Body normalContinuation,
-        const ExecutionState *state) const override;
+        const ExecutionState &nextState) const override;
 
  public:
-    BMv2_V1ModelCmdStepper(ExecutionState &state, AbstractSolver &solver,
+    BMv2_V1ModelCmdStepper(ExecutionState &nextState, AbstractSolver &solver,
                            const ProgramInfo &programInfo);
 };
 
-}  // namespace Bmv2
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_CMD_STEPPER_H_ */

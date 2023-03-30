@@ -12,6 +12,7 @@
 #include "ir/ir.h"
 #include "ir/irutils.h"
 
+#include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/test/small-step/util.h"
 
 namespace Test {
@@ -31,7 +32,7 @@ using P4Tools::Utils;
 TEST_F(TaintTest, Taint01) {
     const auto *typeBits = IR::getBitType(8);
     // Create a base state with a parameter continuation to apply the value on.
-    auto state = ExecutionState(new IR::P4Program());
+    auto &state = ExecutionState::create(new IR::P4Program());
     const auto &env = state.getSymbolicEnv();
     {
         const auto *taintExpression = Utils::getTaintExpression(typeBits);
@@ -63,7 +64,7 @@ TEST_F(TaintTest, Taint01) {
 /// Expected output: 8w0 (since we replace values with zeroes)
 TEST_F(TaintTest, Taint02) {
     // Create a base state with a parameter continuation to apply the value on.
-    auto state = ExecutionState(new IR::P4Program());
+    auto &state = ExecutionState::create(new IR::P4Program());
     const auto &env = state.getSymbolicEnv();
 
     const auto *typeBits = IR::getBitType(8);
@@ -93,7 +94,7 @@ TEST_F(TaintTest, Taint02) {
 /// Expected output: taint<8>
 TEST_F(TaintTest, Taint03) {
     // Create a base state with a parameter continuation to apply the value on.
-    auto state = ExecutionState(new IR::P4Program());
+    auto &state = ExecutionState::create(new IR::P4Program());
     const auto &env = state.getSymbolicEnv();
 
     const auto *typeBits = IR::getBitType(8);
@@ -123,7 +124,7 @@ TEST_F(TaintTest, Taint03) {
 /// Expected output: taint<8>
 TEST_F(TaintTest, Taint04) {
     // Create a base state with a parameter continuation to apply the value on.
-    auto state = ExecutionState(new IR::P4Program());
+    auto &state = ExecutionState::create(new IR::P4Program());
     const auto &env = state.getSymbolicEnv();
 
     const auto *typeBits = IR::getBitType(8);
@@ -153,7 +154,7 @@ TEST_F(TaintTest, Taint04) {
 /// Expected output: taint<8>
 TEST_F(TaintTest, Taint05) {
     // Create a base state with a parameter continuation to apply the value on.
-    auto state = ExecutionState(new IR::P4Program());
+    auto &state = ExecutionState::create(new IR::P4Program());
     const auto &env = state.getSymbolicEnv();
 
     const auto *typeBits = IR::getBitType(8);
@@ -184,7 +185,7 @@ TEST_F(TaintTest, Taint05) {
 /// Expected output: taint<8>
 TEST_F(TaintTest, Taint06) {
     // Create a base state with a parameter continuation to apply the value on.
-    auto state = ExecutionState(new IR::P4Program());
+    auto &state = ExecutionState::create(new IR::P4Program());
     const auto &env = state.getSymbolicEnv();
 
     const auto *typeBits = IR::getBitType(8);
@@ -215,7 +216,7 @@ TEST_F(TaintTest, Taint06) {
 /// Expected output: 2w0
 TEST_F(TaintTest, Taint07) {
     // Create a base state with a parameter continuation to apply the value on.
-    auto state = ExecutionState(new IR::P4Program());
+    auto &state = ExecutionState::create(new IR::P4Program());
     const auto &env = state.getSymbolicEnv();
 
     const auto *typeBits = IR::getBitType(8);
@@ -248,7 +249,7 @@ TEST_F(TaintTest, Taint07) {
 /// Expected output: taint<3>
 TEST_F(TaintTest, Taint08) {
     // Create a base state with a parameter continuation to apply the value on.
-    auto state = ExecutionState(new IR::P4Program());
+    auto &state = ExecutionState::create(new IR::P4Program());
     const auto &env = state.getSymbolicEnv();
 
     const auto *typeBits = IR::getBitType(8);
@@ -318,7 +319,7 @@ TEST_F(TaintTest, Taint09) {
 TEST_F(TaintTest, Taint10) {
     const auto *typeBits = IR::getBitType(8);
     // Create a base state with a parameter continuation to apply the value on.
-    auto state = ExecutionState(new IR::P4Program());
+    auto &state = ExecutionState::create(new IR::P4Program());
     const auto &env = state.getSymbolicEnv();
     {
         const auto *constantVar1 = IR::getConstant(typeBits, 2);

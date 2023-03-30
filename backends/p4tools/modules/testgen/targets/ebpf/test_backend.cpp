@@ -10,7 +10,6 @@
 
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/trace_events.h"
-#include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "lib/cstring.h"
@@ -57,7 +56,7 @@ EBPFTestBackend::EBPFTestBackend(const ProgramInfo &programInfo, SymbolicExecuto
 TestBackEnd::TestInfo EBPFTestBackend::produceTestInfo(
     const ExecutionState *executionState, const Model *completedModel,
     const IR::Expression *outputPacketExpr, const IR::Expression *outputPortExpr,
-    const std::vector<gsl::not_null<const TraceEvent *>> *programTraces) {
+    const std::vector<std::reference_wrapper<const TraceEvent>> *programTraces) {
     auto testInfo = TestBackEnd::produceTestInfo(executionState, completedModel, outputPacketExpr,
                                                  outputPortExpr, programTraces);
     // This is a hack to deal with an virtual kernel interface quirk.

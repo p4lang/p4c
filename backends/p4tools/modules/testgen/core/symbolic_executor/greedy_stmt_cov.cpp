@@ -2,12 +2,12 @@
 
 #include <stddef.h>
 
+#include <functional>
 #include <map>
 #include <optional>
 #include <vector>
 
 #include "backends/p4tools/common/core/solver.h"
-#include "gsl/gsl-lite.hpp"
 #include "lib/error.h"
 #include "lib/timer.h"
 
@@ -37,7 +37,7 @@ std::optional<SymbolicExecutor::Branch> GreedyStmtSelection::popPotentialBranch(
         }
         // If we did not find anything, check whether this state covers any new statements
         // already.
-        for (const auto &stmt : branch.nextState->getVisited()) {
+        for (const auto &stmt : branch.nextState.get().getVisited()) {
             if (coveredStatements.count(stmt) == 0U) {
                 candidateBranches[idx] = candidateBranches.back();
                 candidateBranches.pop_back();
@@ -83,9 +83,9 @@ bool GreedyStmtSelection::pickSuccessor(StepResult successors) {
 void GreedyStmtSelection::run(const Callback &callback) {
     while (true) {
         try {
-            if (executionState->isTerminal()) {
+            if (executionState.get().isTerminal()) {
                 // We've reached the end of the program. Call back and (if desired) end execution.
-                bool terminate = handleTerminalState(callback, *executionState);
+                bool terminate = handleTerminalState(callback, executionState);
                 stepsWithoutTest = 0;
                 if (terminate) {
                     return;
@@ -97,7 +97,7 @@ void GreedyStmtSelection::run(const Callback &callback) {
                 // than one branch was produced.
                 // State successors are accompanied by branch constraint which should be evaluated
                 // in the state before the step was taken - we copy the current symbolic state.
-                StepResult successors = step(*executionState);
+                StepResult successors = step(executionState);
                 auto success = pickSuccessor(successors);
                 if (success) {
                     continue;

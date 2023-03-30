@@ -1,9 +1,10 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/depth_first.h"
 
+#include <functional>
+#include <iterator>
 #include <vector>
 
 #include "backends/p4tools/common/core/solver.h"
-#include "gsl/gsl-lite.hpp"
 #include "lib/error.h"
 #include "lib/timer.h"
 
@@ -32,17 +33,18 @@ bool DepthFirstSearch::pickSuccessor(StepResult successors) {
     // If there are multiple successors, try to pick one.
     // Pick a successor branch at random to preserve some non-determinism.
     executionState = popRandomBranch(*successors).nextState;
-    // Add the remaining tests to the unexplored branches.
-    unexploredBranches.insert(unexploredBranches.end(), successors->begin(), successors->end());
+    // Add the remaining tests to the unexplored branches. Consume the remainder.
+    unexploredBranches.insert(unexploredBranches.end(), make_move_iterator(successors->begin()),
+                              make_move_iterator(successors->end()));
     return true;
 }
 
 void DepthFirstSearch::run(const Callback &callback) {
     while (true) {
         try {
-            if (executionState->isTerminal()) {
+            if (executionState.get().isTerminal()) {
                 // We've reached the end of the program. Call back and (if desired) end execution.
-                bool terminate = handleTerminalState(callback, *executionState);
+                bool terminate = handleTerminalState(callback, executionState);
                 if (terminate) {
                     return;
                 }
@@ -53,7 +55,7 @@ void DepthFirstSearch::run(const Callback &callback) {
                 // than one branch was produced.
                 // State successors are accompanied by branch constraint which should be evaluated
                 // in the state before the step was taken - we copy the current symbolic state.
-                StepResult successors = step(*executionState);
+                StepResult successors = step(executionState);
                 auto success = pickSuccessor(successors);
                 if (success) {
                     continue;

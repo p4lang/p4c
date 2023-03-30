@@ -2,6 +2,7 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TF_H_
 
 #include <cstddef>
+#include <functional>
 #include <iosfwd>
 #include <map>
 #include <optional>
@@ -13,7 +14,6 @@
 
 #include "backends/p4tools/common/lib/format_int.h"
 #include "backends/p4tools/common/lib/trace_events.h"
-#include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
@@ -41,7 +41,7 @@ class TF {
         if ((traces != nullptr) && !traces->empty()) {
             for (const auto &trace : *traces) {
                 std::stringstream ss;
-                ss << *trace;
+                ss << trace;
                 traceList.push_back(ss.str());
             }
         }

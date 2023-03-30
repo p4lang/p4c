@@ -1,9 +1,9 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/random_backtrack.h"
 
+#include <functional>
 #include <vector>
 
 #include "backends/p4tools/common/core/solver.h"
-#include "gsl/gsl-lite.hpp"
 #include "lib/error.h"
 #include "lib/timer.h"
 
@@ -37,9 +37,9 @@ bool RandomBacktrack::pickSuccessor(StepResult successors) {
 void RandomBacktrack::run(const Callback &callback) {
     while (true) {
         try {
-            if (executionState->isTerminal()) {
+            if (executionState.get().isTerminal()) {
                 // We've reached the end of the program. Call back and (if desired) end execution.
-                bool terminate = handleTerminalState(callback, *executionState);
+                bool terminate = handleTerminalState(callback, executionState);
                 if (terminate) {
                     return;
                 }
@@ -50,7 +50,7 @@ void RandomBacktrack::run(const Callback &callback) {
                 // than one branch was produced.
                 // State successors are accompanied by branch constraint which should be evaluated
                 // in the state before the step was taken - we copy the current symbolic state.
-                StepResult successors = step(*executionState);
+                StepResult successors = step(executionState);
                 auto success = pickSuccessor(successors);
                 if (success) {
                     continue;

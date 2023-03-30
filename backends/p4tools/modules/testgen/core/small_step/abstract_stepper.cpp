@@ -26,9 +26,7 @@
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 AbstractStepper::AbstractStepper(ExecutionState &state, AbstractSolver &solver,
                                  const ProgramInfo &programInfo)
@@ -73,13 +71,13 @@ bool AbstractStepper::stepSymbolicValue(const IR::Node *expr) {
     BUG_CHECK(SymbolicEnv::isSymbolicValue(expr), "Not a symbolic value: %1% of type %2%", expr,
               expr->node_type_name());
     state.popContinuation(expr);
-    result->emplace_back(&state);
+    result->emplace_back(state);
     return false;
 }
 
 bool AbstractStepper::stepToException(Continuation::Exception exception) {
     state.replaceTopBody(exception);
-    result->emplace_back(&state);
+    result->emplace_back(state);
     return false;
 }
 
@@ -96,10 +94,10 @@ bool AbstractStepper::stepToSubexpr(
     Continuation k(v, kBody);
 
     // Create our new state.
-    auto *nextState = new ExecutionState(state);
+    auto &nextState = state.clone();
     Continuation::Body stateBody({Continuation::Return(subexpr)});
-    nextState->replaceBody(stateBody);
-    nextState->pushContinuation(new ExecutionState::StackFrame(k, state.getNamespaceContext()));
+    nextState.replaceBody(stateBody);
+    nextState.pushContinuation(*new ExecutionState::StackFrame(k, state.getNamespaceContext()));
 
     result->emplace_back(nextState);
     return false;
@@ -198,27 +196,27 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::Expression *headerRef) {
             if (res->value) {
                 state.replaceTopBody(
                     Continuation::Return(new IR::BoolLiteral(IR::Type::Boolean::get(), true)));
-                result->emplace_back(&state);
+                result->emplace_back(state);
                 return false;
             }
         }
         state.replaceTopBody(
             Continuation::Return(new IR::BoolLiteral(IR::Type::Boolean::get(), false)));
-        result->emplace_back(&state);
+        result->emplace_back(state);
         return false;
     }
     auto variable = Utils::getHeaderValidity(headerRef);
     BUG_CHECK(state.exists(variable),
               "At this point, the header validity bit should be initialized.");
     state.replaceTopBody(Continuation::Return(variable));
-    result->emplace_back(&state);
+    result->emplace_back(state);
     return false;
 }
 
 void AbstractStepper::setHeaderValidity(const IR::Expression *expr, bool validity,
-                                        ExecutionState *nextState) {
+                                        ExecutionState &nextState) {
     auto headerRefValidity = Utils::getHeaderValidity(expr);
-    nextState->set(headerRefValidity, IR::getBoolLiteral(validity));
+    nextState.set(headerRefValidity, IR::getBoolLiteral(validity));
 
     // In some cases, the header may be part of a union.
     if (validity) {
@@ -243,11 +241,11 @@ void AbstractStepper::setHeaderValidity(const IR::Expression *expr, bool validit
     }
     const auto *exprType = expr->type->checkedTo<IR::Type_StructLike>();
     std::vector<const IR::Member *> validityVector;
-    auto fieldsVector = nextState->getFlatFields(expr, exprType, &validityVector);
+    auto fieldsVector = nextState.getFlatFields(expr, exprType, &validityVector);
     // The header is going to be invalid. Set all fields to taint constants.
     // TODO: Should we make this target specific? Some targets set the header fields to 0.
     for (const auto *field : fieldsVector) {
-        nextState->set(field, programInfo.createTargetUninitialized(field->type, true));
+        nextState.set(field, programInfo.createTargetUninitialized(field->type, true));
     }
 }
 
@@ -255,9 +253,9 @@ bool AbstractStepper::stepSetHeaderValidity(const IR::Expression *headerRef, boo
     // The top of the body should be a Return command containing a call to setValid or setInvalid
     // on the given header ref. Update the symbolic environment to reflect the changed validity
     // bit, and replace the command with an expressionless Return.
-    setHeaderValidity(headerRef, validity, &state);
+    setHeaderValidity(headerRef, validity, state);
     state.replaceTopBody(Continuation::Return());
-    result->emplace_back(&state);
+    result->emplace_back(state);
     return false;
 }
 
@@ -272,7 +270,7 @@ const IR::MethodCallStatement *generateStacksetValid(const IR::Expression *stack
                        arrayIndex, name)));
 }
 
-void generateStackAssigmentStatement(ExecutionState *state,
+void generateStackAssigmentStatement(ExecutionState &nextState,
                                      std::vector<Continuation::Command> &replacements,
                                      const IR::Expression *stackRef, int leftIndex,
                                      int rightIndex) {
@@ -281,7 +279,7 @@ void generateStackAssigmentStatement(ExecutionState *state,
     const auto *rightArrIndex = HSIndexToMember::produceStackIndex(elemType, stackRef, rightIndex);
 
     // Check right header validity.
-    const auto *value = state->getSymbolicEnv().get(Utils::getHeaderValidity(rightArrIndex));
+    const auto *value = nextState.getSymbolicEnv().get(Utils::getHeaderValidity(rightArrIndex));
     if (!value->checkedTo<IR::BoolLiteral>()->value) {
         replacements.emplace_back(generateStacksetValid(stackRef, leftIndex, false));
         return;
@@ -290,8 +288,8 @@ void generateStackAssigmentStatement(ExecutionState *state,
 
     // Unfold fields.
     const auto *structType = elemType->checkedTo<IR::Type_StructLike>();
-    auto leftVector = state->getFlatFields(leftArIndex, structType);
-    auto rightVector = state->getFlatFields(rightArrIndex, structType);
+    auto leftVector = nextState.getFlatFields(leftArIndex, structType);
+    auto rightVector = nextState.getFlatFields(rightArrIndex, structType);
     for (size_t i = 0; i < leftVector.size(); i++) {
         replacements.emplace_back(new IR::AssignmentStatement(leftVector[i], rightVector[i]));
     }
@@ -304,7 +302,7 @@ bool AbstractStepper::stepStackPushPopFront(const IR::Expression *stackRef,
     BUG_CHECK(args->size() == 1, "Invalid size of arguments for %1%", stackRef);
     auto count = args->at(0)->expression->checkedTo<IR::Constant>()->asInt();
     std::vector<Continuation::Command> replacements;
-    auto *nextState = new ExecutionState(state);
+    auto &nextState = state.clone();
     if (isPush) {
         for (int i = sz - 1; i >= 0; i -= 1) {
             if (i >= count) {
@@ -322,7 +320,7 @@ bool AbstractStepper::stepStackPushPopFront(const IR::Expression *stackRef,
             }
         }
     }
-    nextState->replaceTopBody(&replacements);
+    nextState.replaceTopBody(&replacements);
     result->emplace_back(nextState);
     return false;
 }
@@ -350,52 +348,50 @@ const Value *AbstractStepper::evaluateExpression(const IR::Expression *expr,
     return result;
 }
 
-void AbstractStepper::setTargetUninitialized(ExecutionState *nextState, const IR::Member *ref,
+void AbstractStepper::setTargetUninitialized(ExecutionState &nextState, const IR::Member *ref,
                                              bool forceTaint) const {
     // Resolve the type of the left-and assignment, if it is a type name.
-    const auto *refType = nextState->resolveType(ref->type);
+    const auto *refType = nextState.resolveType(ref->type);
     if (const auto *structType = refType->to<const IR::Type_StructLike>()) {
         std::vector<const IR::Member *> validFields;
-        auto fields = nextState->getFlatFields(ref, structType, &validFields);
+        auto fields = nextState.getFlatFields(ref, structType, &validFields);
         // We also need to initialize the validity bits of the headers. These are false.
         for (const auto *validField : validFields) {
-            nextState->set(validField, IR::getBoolLiteral(false));
+            nextState.set(validField, IR::getBoolLiteral(false));
         }
         // For each field in the undefined struct, we create a new zombie variable.
         // If the variable does not have an initializer we need to create a new zombie for it.
         // For now we just use the name directly.
         for (const auto *field : fields) {
-            nextState->set(field, programInfo.createTargetUninitialized(field->type, forceTaint));
+            nextState.set(field, programInfo.createTargetUninitialized(field->type, forceTaint));
         }
     } else if (const auto *baseType = refType->to<const IR::Type_Base>()) {
-        nextState->set(ref, programInfo.createTargetUninitialized(baseType, forceTaint));
+        nextState.set(ref, programInfo.createTargetUninitialized(baseType, forceTaint));
     } else {
         P4C_UNIMPLEMENTED("Unsupported uninitialization type %1%", refType->node_type_name());
     }
 }
 
-void AbstractStepper::declareStructLike(ExecutionState *nextState, const IR::Expression *parentExpr,
+void AbstractStepper::declareStructLike(ExecutionState &nextState, const IR::Expression *parentExpr,
                                         const IR::Type_StructLike *structType,
                                         bool forceTaint) const {
     std::vector<const IR::Member *> validFields;
-    auto fields = nextState->getFlatFields(parentExpr, structType, &validFields);
+    auto fields = nextState.getFlatFields(parentExpr, structType, &validFields);
     // We also need to initialize the validity bits of the headers. These are false.
     for (const auto *validField : validFields) {
-        nextState->set(validField, IR::getBoolLiteral(false));
+        nextState.set(validField, IR::getBoolLiteral(false));
     }
     // For each field in the undefined struct, we create a new zombie variable.
     // If the variable does not have an initializer we need to create a new zombie for it.
     // For now we just use the name directly.
     for (const auto *field : fields) {
-        nextState->set(field, programInfo.createTargetUninitialized(field->type, forceTaint));
+        nextState.set(field, programInfo.createTargetUninitialized(field->type, forceTaint));
     }
 }
 
-void AbstractStepper::declareBaseType(ExecutionState *nextState, const IR::Expression *paramPath,
+void AbstractStepper::declareBaseType(ExecutionState &nextState, const IR::Expression *paramPath,
                                       const IR::Type_Base *baseType) const {
-    nextState->set(paramPath, programInfo.createTargetUninitialized(baseType, false));
+    nextState.set(paramPath, programInfo.createTargetUninitialized(baseType, false));
 }
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen

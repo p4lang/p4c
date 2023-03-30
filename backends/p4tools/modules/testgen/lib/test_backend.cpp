@@ -44,7 +44,7 @@ const Model *TestBackEnd::computeConcolicVariables(const ExecutionState *executi
     // Execute concolic functions that may occur in the output packet, the output port,
     // or any path conditions.
     auto concolicResolver =
-        ConcolicResolver(completedModel, *executionState, programInfo.getConcolicMethodImpls());
+        ConcolicResolver(*completedModel, *executionState, *programInfo.getConcolicMethodImpls());
 
     outputPacketExpr->apply(concolicResolver);
     outputPortExpr->apply(concolicResolver);
@@ -86,7 +86,7 @@ const Model *TestBackEnd::computeConcolicVariables(const ExecutionState *executi
             ::warning("Concolic constraints for this path are unsatisfiable.");
             return nullptr;
         }
-        const auto *concolicFinalState = new FinalState(solver, *executionState);
+        const auto *concolicFinalState = new FinalState(*solver, *executionState);
         completedModel = concolicFinalState->getCompletedModel();
     }
     return completedModel;
@@ -101,7 +101,7 @@ bool TestBackEnd::run(const FinalState &state) {
         const auto *outputPortExpr = executionState->get(programInfo.getTargetOutputPortVar());
         const auto &allStatements = programInfo.getAllStatements();
 
-        auto *solver = state.getSolver()->to<Z3Solver>();
+        auto *solver = state.getSolver().to<Z3Solver>();
         CHECK_NULL(solver);
 
         // Don't increase the test count if --with-output-packet is enabled and we don't
@@ -183,7 +183,7 @@ bool TestBackEnd::run(const FinalState &state) {
 TestBackEnd::TestInfo TestBackEnd::produceTestInfo(
     const ExecutionState *executionState, const Model *completedModel,
     const IR::Expression *outputPacketExpr, const IR::Expression *outputPortExpr,
-    const std::vector<gsl::not_null<const TraceEvent *>> *programTraces) {
+    const std::vector<std::reference_wrapper<const TraceEvent>> *programTraces) {
     // Evaluate all the important expressions necessary for program execution by using the
     // completed model.
     int calculatedPacketSize =
@@ -233,7 +233,7 @@ bool TestBackEnd::printTestInfo(const ExecutionState *executionState, const Test
     // Print all the important variables and properties of this test.
     printTraces("============ Program trace for Test %1% ============\n", testCount);
     for (const auto &event : testInfo.programTraces) {
-        printTraces("%1%", *event);
+        printTraces("%1%", event);
     }
 
     auto inputPacketSize = testInfo.inputPacket->type->width_bits();

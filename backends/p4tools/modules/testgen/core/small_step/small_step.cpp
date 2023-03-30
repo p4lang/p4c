@@ -1,5 +1,6 @@
 #include "backends/p4tools/modules/testgen/core/small_step/small_step.h"
 
+#include <functional>
 #include <iosfwd>
 #include <optional>
 #include <utility>
@@ -11,7 +12,6 @@
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "frontends/p4/optimizeExpressions.h"
-#include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "ir/node.h"
@@ -29,12 +29,11 @@
 
 namespace P4Tools::P4Testgen {
 
-SmallStepEvaluator::Branch::Branch(gsl::not_null<ExecutionState *> nextState)
-    : constraint(IR::getBoolLiteral(true)), nextState(std::move(nextState)) {}
+SmallStepEvaluator::Branch::Branch(ExecutionState &nextState)
+    : constraint(IR::getBoolLiteral(true)), nextState(nextState) {}
 
 SmallStepEvaluator::Branch::Branch(std::optional<const Constraint *> c,
-                                   const ExecutionState &prevState,
-                                   gsl::not_null<ExecutionState *> nextState)
+                                   const ExecutionState &prevState, ExecutionState &nextState)
     : constraint(IR::getBoolLiteral(true)), nextState(nextState) {
     if (c) {
         // Evaluate the branch constraint in the current state of symbolic environment.
@@ -44,17 +43,16 @@ SmallStepEvaluator::Branch::Branch(std::optional<const Constraint *> c,
         constraint = P4::optimizeExpression(constraint);
         // Append the evaluated and optimized constraint to the next execution state's list of
         // path constraints.
-        nextState->pushPathConstraint(constraint);
+        nextState.pushPathConstraint(constraint);
     }
 }
 
 SmallStepEvaluator::Branch::Branch(std::optional<const Constraint *> c,
-                                   const ExecutionState &prevState,
-                                   gsl::not_null<ExecutionState *> nextState,
-                                   const P4::Coverage::CoverageSet &potentialStatements)
+                                   const ExecutionState &prevState, ExecutionState &nextState,
+                                   P4::Coverage::CoverageSet potentialStatements)
     : constraint(IR::getBoolLiteral(true)),
       nextState(nextState),
-      potentialStatements(potentialStatements) {
+      potentialStatements(std::move(potentialStatements)) {
     if (c) {
         // Evaluate the branch constraint in the current state of symbolic environment.
         // Substitutes all variables to their symbolic value (expression on the program's initial
@@ -63,7 +61,7 @@ SmallStepEvaluator::Branch::Branch(std::optional<const Constraint *> c,
         constraint = P4::optimizeExpression(constraint);
         // Append the evaluated and optimized constraint to the next execution state's list of
         // path constraints.
-        nextState->pushPathConstraint(constraint);
+        nextState.pushPathConstraint(constraint);
     }
 }
 
@@ -71,7 +69,7 @@ SmallStepEvaluator::SmallStepEvaluator(AbstractSolver &solver, const ProgramInfo
     : programInfo(programInfo), solver(solver) {
     if (!TestgenOptions::get().pattern.empty()) {
         reachabilityEngine =
-            new ReachabilityEngine(programInfo.dcg, TestgenOptions::get().pattern, true);
+            new ReachabilityEngine(*programInfo.dcg, TestgenOptions::get().pattern, true);
     }
 }
 
@@ -85,8 +83,8 @@ void SmallStepEvaluator::renginePostprocessing(ReachabilityResult &result,
             }
             if (branches->size() > 1) {
                 // Copy reachability engine state
-                n.nextState->setReachabilityEngineState(
-                    n.nextState->getReachabilityEngineState()->copy());
+                n.nextState.get().setReachabilityEngineState(
+                    n.nextState.get().getReachabilityEngineState()->copy());
             }
         }
     }
@@ -97,7 +95,7 @@ SmallStepEvaluator::REngineType SmallStepEvaluator::renginePreprocessing(
     ReachabilityResult rresult = std::make_pair(true, nullptr);
     std::vector<SmallStepEvaluator::Branch> *branches = nullptr;
     // Current node should be inside DCG.
-    if (stepper.reachabilityEngine->getDCG()->isCaller(node)) {
+    if (stepper.reachabilityEngine->getDCG().isCaller(node)) {
         // Move reachability engine to next state.
         rresult = stepper.reachabilityEngine->next(nextState.getReachabilityEngineState(), node);
         if (!rresult.first) {
@@ -112,8 +110,8 @@ SmallStepEvaluator::REngineType SmallStepEvaluator::renginePreprocessing(
 
 class CommandVisitor {
  private:
-    SmallStepEvaluator &self;
-    ExecutionState &state;
+    std::reference_wrapper<SmallStepEvaluator> self;
+    std::reference_wrapper<ExecutionState> state;
     using Branch = SmallStepEvaluator::Branch;
     using Result = SmallStepEvaluator::Result;
 
@@ -122,15 +120,16 @@ class CommandVisitor {
         // Step on the given node as a command.
         BUG_CHECK(node, "Attempted to evaluate null node.");
         SmallStepEvaluator::REngineType r;
-        if (self.reachabilityEngine != nullptr) {
-            r = self.renginePreprocessing(self, state, node);
+        if (self.get().reachabilityEngine != nullptr) {
+            r = self.get().renginePreprocessing(self, state, node);
             if (r.second != nullptr) {
                 return r.second;
             }
         }
-        auto *stepper = TestgenTarget::getCmdStepper(state, self.solver, self.programInfo);
+        auto *stepper =
+            TestgenTarget::getCmdStepper(state, self.get().solver, self.get().programInfo);
         auto *result = stepper->step(node);
-        if (self.reachabilityEngine != nullptr) {
+        if (self.get().reachabilityEngine != nullptr) {
             SmallStepEvaluator::renginePostprocessing(r.first, result);
         }
         return result;
@@ -138,11 +137,11 @@ class CommandVisitor {
 
     Result operator()(const TraceEvent *event) {
         CHECK_NULL(event);
-        event = event->subst(state.getSymbolicEnv());
+        event = event->subst(state.get().getSymbolicEnv());
 
-        state.add(event);
-        state.popBody();
-        return new std::vector<Branch>({Branch(&state)});
+        state.get().add(*event);
+        state.get().popBody();
+        return new std::vector<Branch>({Branch(state)});
     }
 
     Result operator()(Continuation::Return ret) {
@@ -152,12 +151,13 @@ class CommandVisitor {
             BUG_CHECK(expr, "Attempted to evaluate null expr.");
             // Do not bother with the stepper, if the expression is already symbolic.
             if (SymbolicEnv::isSymbolicValue(expr)) {
-                state.popContinuation(expr);
-                return new std::vector<Branch>({Branch(&state)});
+                state.get().popContinuation(expr);
+                return new std::vector<Branch>({Branch(state)});
             }
-            auto *stepper = TestgenTarget::getExprStepper(state, self.solver, self.programInfo);
+            auto *stepper =
+                TestgenTarget::getExprStepper(state, self.get().solver, self.get().programInfo);
             auto *result = stepper->step(expr);
-            if (self.reachabilityEngine != nullptr) {
+            if (self.get().reachabilityEngine != nullptr) {
                 ReachabilityResult rresult = std::make_pair(true, nullptr);
                 SmallStepEvaluator::renginePostprocessing(rresult, result);
             }
@@ -165,27 +165,27 @@ class CommandVisitor {
         }
 
         // Step on valueless return.
-        state.popContinuation();
-        return new std::vector<Branch>({Branch(&state)});
+        state.get().popContinuation();
+        return new std::vector<Branch>({Branch(state)});
     }
 
     Result operator()(Continuation::Exception e) {
-        state.handleException(e);
-        return new std::vector<Branch>({Branch(&state)});
+        state.get().handleException(e);
+        return new std::vector<Branch>({Branch(state)});
     }
 
     Result operator()(const Continuation::PropertyUpdate &e) {
-        state.setProperty(e.propertyName, e.property);
-        state.popBody();
-        return new std::vector<Branch>({Branch(&state)});
+        state.get().setProperty(e.propertyName, e.property);
+        state.get().popBody();
+        return new std::vector<Branch>({Branch(state)});
     }
 
     Result operator()(const Continuation::Guard &guard) {
         // Check whether we exceed the number of maximum permitted guard violations.
         // This usually indicates that we have many branches that produce an invalid
-        // state. The P4 program should be fixed in that case, because we can not
+        // state.get(). The P4 program should be fixed in that case, because we can not
         // generate useful tests.
-        if (self.violatedGuardConditions > SmallStepEvaluator::MAX_GUARD_VIOLATIONS) {
+        if (self.get().violatedGuardConditions > SmallStepEvaluator::MAX_GUARD_VIOLATIONS) {
             BUG("Condition %1% exceeded the maximum number of permitted guard "
                 "violations for this run."
                 " This implies that the P4 program produces an output that violates"
@@ -198,19 +198,19 @@ class CommandVisitor {
         const auto *cond = guard.cond;
         std::optional<bool> solverResult = std::nullopt;
 
-        // If the guard condition is tainted, treat it equivalent to an invalid state.
-        if (!state.hasTaint(cond)) {
-            cond = state.getSymbolicEnv().subst(cond);
+        // If the guard condition is tainted, treat it equivalent to an invalid state.get().
+        if (!state.get().hasTaint(cond)) {
+            cond = state.get().getSymbolicEnv().subst(cond);
             cond = P4::optimizeExpression(cond);
             // Check whether the condition is satisfiable in the current execution
-            // state.
-            auto pathConstraints = state.getPathConstraint();
+            // state.get().
+            auto pathConstraints = state.get().getPathConstraint();
             pathConstraints.push_back(cond);
-            solverResult = self.solver.checkSat(pathConstraints);
+            solverResult = self.get().solver.checkSat(pathConstraints);
         }
 
-        auto *nextState = new ExecutionState(state);
-        nextState->popBody();
+        auto &nextState = state.get().clone();
+        nextState.popBody();
         // If we can not solve the guard (either we time out or the solver can not solve
         // the problem) we increment the count of violatedGuardConditions and stop
         // executing this branch.
@@ -221,7 +221,7 @@ class CommandVisitor {
                 "Guard %1% was not satisfiable."
                 " Incrementing number of guard violations.",
                 condStream.str().c_str());
-            self.violatedGuardConditions++;
+            self.get().violatedGuardConditions++;
             return new std::vector<Branch>({{IR::getBoolLiteral(false), state, nextState}});
         }
         // Otherwise, we proceed as usual.
@@ -240,7 +240,7 @@ SmallStepEvaluator::Result SmallStepEvaluator::step(ExecutionState &state) {
     }
     // State has an empty body. Pop the continuation stack.
     state.popContinuation();
-    return new std::vector<Branch>({Branch(&state)});
+    return new std::vector<Branch>({Branch(state)});
 }
 
 }  // namespace P4Tools::P4Testgen
