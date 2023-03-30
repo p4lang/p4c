@@ -127,10 +127,9 @@ def run_simple_switch_grpc(
     )
     ifaces = get_iface_str(num_ifaces=options.num_ifaces)
     simple_switch_grpc = (
-        f"simple_switch_grpc --thrift-port {thrift_port} --log-file {switchlog} --log-flush -i 0@0 "
-        f"{ifaces} --no-p4 "
-        f"-- --grpc-server-addr 0.0.0.0:{grpc_port}"
-    )
+        f"simple_switch_grpc --thrift-port {thrift_port} --device-id 0 --log-file {switchlog} --log-flush "
+        f"--packet-in ipc://{options.testdir}/bmv2_packets_1.ipc  --no-p4 "
+        f"-- --grpc-server-addr 0.0.0.0:{grpc_port}")
     bridge_cmd = bridge.get_ns_prefix() + " " + simple_switch_grpc
     switch_proc = testutils.open_process(bridge_cmd)
     if switch_proc is None:
@@ -154,7 +153,8 @@ def run_ptf(
         return returncode
     ifaces = get_iface_str(num_ifaces=options.num_ifaces, prefix="br_")
     test_params = f"grpcaddr='0.0.0.0:{grpc_port}';p4info='{info_name}';config='{json_name}';"
-    run_ptf_cmd = f"ptf --pypath {pypath} {ifaces} --log-file {options.testdir.joinpath('ptf.log')}"
+    tmp = "{0-8}"
+    run_ptf_cmd = f"ptf --platform nn --device-socket 0-{tmp}@ipc://{options.testdir}/bmv2_packets_1.ipc --pypath {pypath}  --log-file {options.testdir.joinpath('ptf.log')}"
     run_ptf_cmd += f" --test-params={test_params} --test-dir {options.testdir}"
     returncode = bridge.ns_exec(run_ptf_cmd)
     return returncode
