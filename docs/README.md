@@ -226,10 +226,10 @@ To add a new input test with a sample P4 code file (under `testdata/p4_16_sample
   * For example, [any P4 file under `testdata/p4_16_samples/`](https://github.com/p4lang/p4c/blob/de2eaa085152abd0690660fbe561eaf5db7b2bf7/backends/p4test/CMakeLists.txt#L63) belongs to the [`p4` test suite](https://github.com/p4lang/p4c/blob/de2eaa085152abd0690660fbe561eaf5db7b2bf7/backends/p4test/CMakeLists.txt#L113) (meaning it will run with `make check-p4`).
   * [File ending with `*-bmv2.p4`](https://github.com/p4lang/p4c/blob/de2eaa085152abd0690660fbe561eaf5db7b2bf7/backends/bmv2/CMakeLists.txt#L127) also belongs to the [`bmv2` test suite](https://github.com/p4lang/p4c/blob/de2eaa085152abd0690660fbe561eaf5db7b2bf7/backends/bmv2/CMakeLists.txt#L200) (meaning it will run with `make check-bmv2`).
 * Then generate reference outputs:
-  * For a frontend-only test, you can do `../backends/p4test/run-p4-sample.py . -f ../testdata/p4_16_samples/some_name.p4`. Note that this command needs to run under the `build/` directory.
+  * For a frontend-only test, you can run `../backends/p4test/run-p4-sample.py . -f ../testdata/p4_16_samples/some_name.p4`. Note that this command needs to run under the `build/` directory. The test will fail if the test output is missing or does not match with the existing reference outputs. Toggling the `-f` flag will force the script to produce new reference outputs, which can, and should be committed, along with the changes that caused the output change. 
   * For a test targeting bmv2 backend, the corresponding command is `../backends/bmv2/run-bmv2-test.py`.
   * If you have many reference outputs to add/update, you could also do `P4TEST_REPLACE=True make check` (or `make check-*`) to update all tests.
-* Now when you do testing, the new test case will be included.
+* The reference files for each test will be updated after running the tests.
 
 ## Coding conventions
 
