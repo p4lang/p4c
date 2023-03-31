@@ -218,6 +218,19 @@ tests are using at the link below:
 
 + [https://hub.docker.com/r/p4lang/behavioral-model/builds](https://hub.docker.com/r/p4lang/behavioral-model/builds)
 
+### Adding new test data
+
+To add a new input test with a sample P4 code file (under `testdata/p4_16_samples/` for example), one needs to:
+
+* Add the `*.p4` file to the `testdata/p4_16_samples/` directory. The file name might determine which test suite this test belongs to. Those are determined by cmake commands.
+  * For example, [any P4 file under `testdata/p4_16_samples/`](https://github.com/p4lang/p4c/blob/de2eaa085152abd0690660fbe561eaf5db7b2bf7/backends/p4test/CMakeLists.txt#L63) belongs to the [`p4` test suite](https://github.com/p4lang/p4c/blob/de2eaa085152abd0690660fbe561eaf5db7b2bf7/backends/p4test/CMakeLists.txt#L113) (meaning it will run with `make check-p4`).
+  * [File ending with `*-bmv2.p4`](https://github.com/p4lang/p4c/blob/de2eaa085152abd0690660fbe561eaf5db7b2bf7/backends/bmv2/CMakeLists.txt#L127) also belongs to the [`bmv2` test suite](https://github.com/p4lang/p4c/blob/de2eaa085152abd0690660fbe561eaf5db7b2bf7/backends/bmv2/CMakeLists.txt#L200) (meaning it will run with `make check-bmv2`).
+* Then generate reference outputs:
+  * For a frontend-only test, you can do `../backends/p4test/run-p4-sample.py . -f ../testdata/p4_16_samples/some_name.p4`. Note that this command needs to run under the `build/` directory.
+  * For a test targeting bmv2 backend, the corresponding command is `../backends/bmv2/run-bmv2-test.py`.
+  * If you have many reference outputs to add/update, you could also do `P4TEST_REPLACE=True make check` (or `make check-*`) to update all tests.
+* Now when you do testing, the new test case will be included.
+
 ## Coding conventions
 
 * Coding style is guided by the [following rules](CodingStandardPhilosophy.md).
