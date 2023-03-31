@@ -77,7 +77,7 @@
       ],
       "data" : [],
       "supported_operations" : [],
-      "attributes" : ["EntryScope", "ConstTable"]
+      "attributes" : ["EntryScope"]
     }
   ],
   "learn_filters" : []

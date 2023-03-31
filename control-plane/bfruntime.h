@@ -383,6 +383,8 @@ class BFRuntimeGenerator {
     };
 
     void addMatchTables(Util::JsonArray *tablesJson) const;
+    virtual bool addMatchTypePriority(std::optional<cstring> &matchType) const;
+    virtual void addConstTableAttr(Util::JsonArray *attrJson) const;
     virtual void addActionProfs(Util::JsonArray *tablesJson) const;
     virtual bool addActionProfIds(const p4configv1::Table &table,
                                   Util::JsonObject *tableJson) const;

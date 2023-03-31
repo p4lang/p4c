@@ -62,7 +62,7 @@
         }
       ],
       "supported_operations" : ["SyncCounters"],
-      "attributes" : ["EntryScope", "ConstTable"]
+      "attributes" : ["EntryScope"]
     }
   ],
   "learn_filters" : []

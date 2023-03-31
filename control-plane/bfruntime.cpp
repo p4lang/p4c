@@ -638,6 +638,17 @@ bool BFRuntimeGenerator::addActionProfIds(const p4configv1::Table &table,
     return true;
 }
 
+void BFRuntimeGenerator::addConstTableAttr(Util::JsonArray *attrJson) const {
+    attrJson->append("ConstTable");
+}
+
+bool BFRuntimeGenerator::addMatchTypePriority(std::optional<cstring> &matchType) const {
+    if (*matchType == "Ternary" || *matchType == "Range" || *matchType == "Optional") {
+        return true;
+    }
+    return false;
+}
+
 void BFRuntimeGenerator::addMatchTables(Util::JsonArray *tablesJson) const {
     for (const auto &table : p4info.tables()) {
         const auto &pre = table.preamble();
@@ -675,8 +686,7 @@ void BFRuntimeGenerator::addMatchTables(Util::JsonArray *tablesJson) const {
                         int(mf.match_type()));
                 continue;
             }
-            if (*matchType == "Ternary" || *matchType == "Range" || *matchType == "Optional")
-                needsPriority = true;
+            needsPriority |= addMatchTypePriority(matchType);
             auto *annotations =
                 transformAnnotations(mf.annotations().begin(), mf.annotations().end());
 
@@ -773,8 +783,7 @@ void BFRuntimeGenerator::addMatchTables(Util::JsonArray *tablesJson) const {
                                           "@dynamic_table_key_masks(1)");
         if (supportsDynMask) attributesJson->append("DynamicKeyMask");
 
-        if (table.is_const_table()) attributesJson->append("ConstTable");
-
+        if (table.is_const_table()) addConstTableAttr(attributesJson);
         if (table.idle_timeout_behavior() == p4configv1::Table::NOTIFY_CONTROL) {
             auto pollModeOnly = std::count(pre.annotations().begin(), pre.annotations().end(),
                                            "@idletime_precision(1)");
