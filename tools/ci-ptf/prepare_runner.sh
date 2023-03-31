@@ -34,3 +34,10 @@ virsh net-undefine default
 virsh net-define ./tools/ci-ptf/default_network.xml
 virsh net-autostart default
 virsh net-start default
+
+# Setup permissions to access repository from VM
+USER=$(stat -c '%U' "$(pwd)")
+GROUP=$(stat -c '%G' "$(pwd)")
+echo "user = \"$USER\"" >> /etc/libvirt/qemu.conf
+echo "group = \"$GROUP\"" >> /etc/libvirt/qemu.conf
+systemctl restart libvirtd
