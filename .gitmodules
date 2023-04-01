@@ -12,6 +12,3 @@
 [submodule "backends/p4tools/submodules/gsl-lite"]
 	path = backends/p4tools/submodules/gsl-lite
 	url = https://github.com/gsl-lite/gsl-lite.git
-[submodule "backends/p4tools/submodules/inja"]
-	path = backends/p4tools/submodules/inja
-	url = https://github.com/pantor/inja.git
