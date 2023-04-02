@@ -20,6 +20,7 @@ limitations under the License.
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
+#include "lib/castable.h"
 
 // Symbolic P4 program evaluation.
 
@@ -67,6 +68,12 @@ class SymbolicValue : public IHasDbPrint {
     virtual bool equals(const SymbolicValue *other) const = 0;
     // True if some parts of this value are definitely uninitialized
     virtual bool hasUninitializedParts() const = 0;
+
+    [[nodiscard]] cstring toString() const {
+        std::stringstream cstr;
+        dbprint(cstr);
+        return cstr.str();
+    }
 };
 
 // Creates values from type declarations

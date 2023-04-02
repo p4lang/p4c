@@ -1366,7 +1366,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             add_instr(new IR::DpdkRecirculateStatement());
         } else if (a->method->name == "send_to_port") {
             BUG_CHECK(a->expr->arguments->size() == 1,
-                      "%1%: expected one argument for send_to_port extern", a);
+                      "%1%: expected one argument for send_to_port extern", a->method);
             add_instr(new IR::DpdkMovStatement(
                 new IR::Member(new IR::PathExpression("m"), PnaMainOutputMetadataOutputPortName),
                 a->expr->arguments->at(0)->expression));

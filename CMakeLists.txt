@@ -147,6 +147,15 @@ if(BUILD_STATIC_RELEASE_SANS_GLIBC)
   add_definitions(-DP4C_STATIC_BUILD)
 endif()
 
+FetchContent_Declare(
+  fmt
+  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+  GIT_TAG        3b7f58a8b3e35cfee57558a41e3e897b0ba7106a
+  GIT_PROGRESS TRUE
+)
+FetchContent_MakeAvailable(fmt)
+include_directories(SYSTEM ${fmt_SOURCE_DIR}/include)
+
 # Required tools and libraries.
 find_package (PythonInterp 3 REQUIRED)
 find_package (FLEX 2.0 REQUIRED)
@@ -356,7 +365,7 @@ set (IR_GENERATOR_DIRECTORY ${P4C_BINARY_DIR}/tools/ir-generator)
 set (IR_GENERATOR ${IR_GENERATOR_DIRECTORY}/irgenerator)
 
 # Component libraries: must be defined before being used in the back end executables.
-set (P4C_LIBRARIES controlplane midend frontend ir p4ctoolkit ir-generated)
+set (P4C_LIBRARIES fmt controlplane midend frontend ir p4ctoolkit ir-generated)
 
 # If we enable GTest, install GoogleTest with the appropriate options.
 if (ENABLE_GTESTS)

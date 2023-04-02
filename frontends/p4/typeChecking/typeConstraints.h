@@ -25,7 +25,6 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/castable.h"
 #include "lib/error_helper.h"
-#include "typeConstraints.h"
 #include "typeSubstitution.h"
 #include "typeSubstitutionVisitor.h"
 #include "typeUnification.h"
@@ -82,11 +81,12 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
     }
     cstring localError(Explain *explainer) const {
         if (errFormat.isNullOrEmpty()) return "";
-        std::string message, explanation;
-        boost::format fmt = boost::format(errFormat);
+        std::string message;
+        std::string explanation;
+        FmtFormatter fmt(errFormat);
         switch (errArguments.size()) {
             case 0:
-                message = boost::str(fmt);
+                message = fmt.str();
                 break;
             case 1:
                 explanation += explain(0, explainer);
@@ -133,7 +133,7 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
         /// The top of the stack has no 'derivedFrom' field,
         /// and it contains the actual source position where
         /// the analysis started.
-        boost::format fmt(format);
+        FmtFormatter fmt(format);
         cstring message =
             cstring("  ---- Actual error:\n") + ::error_helper(fmt, args...).toString();
         auto o = origin;

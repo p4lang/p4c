@@ -17,8 +17,6 @@ limitations under the License.
 #include <string>
 #include <vector>
 
-#include <boost/format.hpp>
-
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"
 #include "ir/node.h"

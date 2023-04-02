@@ -315,6 +315,12 @@ class ProgramPoint : public IHasDbPrint {
     std::vector<const IR::Node *>::const_iterator end() const { return stack.end(); }
     ProgramPoint &operator=(const ProgramPoint &) = default;
     ProgramPoint &operator=(ProgramPoint &&) = default;
+
+    [[nodiscard]] cstring toString() const {
+        std::stringstream cstr;
+        dbprint(cstr);
+        return cstr.str();
+    }
 };
 }  // namespace P4
 

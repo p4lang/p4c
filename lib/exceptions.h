@@ -62,7 +62,7 @@ inline const char *cerr_clear_colors() {
 }
 
 /// Base class for all exceptions.
-/// The constructor uses boost::format for the format string, i.e.,
+/// The constructor uses FmtFormatter for the format string, i.e.,
 /// %1%, %2%, etc (starting at 1, not at 0)
 class P4CExceptionBase : public std::exception {
  protected:
@@ -73,7 +73,7 @@ class P4CExceptionBase : public std::exception {
     template <typename... T>
     P4CExceptionBase(const char *format, T... args) {
         traceCreation();
-        boost::format fmt(format);
+        FmtFormatter fmt(format);
         message = ::bug_helper(fmt, "", "", "", std::forward<T>(args)...);
     }
 

@@ -29,21 +29,21 @@ limitations under the License.
 
 // convert values to cstrings
 namespace Util {
-// Check whether type T has a method with signature
-// cstring toString() const
-template <typename T>
-class HasToString final {
-    template <typename U, cstring (U::*)() const>
-    struct Check;
-    template <typename U>
-    static char func(Check<U, &U::toString> *);
-    template <typename U>
-    static int func(...);
-
- public:
-    typedef HasToString type;
-    enum { value = sizeof(func<T>(0)) == sizeof(char) };
+template <typename T, typename Enabled = void>
+struct hastoString_s {
+    static constexpr bool value = false;
 };
+
+template <typename T>
+struct hastoString_s<T,
+                     std::enable_if_t<std::is_member_function_pointer_v<decltype(&T::toString)>>> {
+    static constexpr bool value = std::is_member_function_pointer_v<decltype(&T::toString)>;
+};
+
+template <typename T>
+constexpr bool hasToString() {
+    return hastoString_s<T>::value;
+}
 
 template <typename T, typename = decltype(std::to_string((T)0))>
 cstring toString(T value) {
@@ -51,22 +51,22 @@ cstring toString(T value) {
 }
 
 template <typename T>
-auto toString(const T &value) -> typename std::enable_if<HasToString<T>::value, cstring>::type {
+auto toString(const T &value) -> typename std::enable_if<hasToString<T>(), cstring>::type {
     return value.toString();
 }
 
 template <typename T>
-auto toString(T &value) -> typename std::enable_if<HasToString<T>::value, cstring>::type {
+auto toString(T &value) -> typename std::enable_if<hasToString<T>(), cstring>::type {
     return value.toString();
 }
 
 template <typename T>
-auto toString(const T *value) -> typename std::enable_if<HasToString<T>::value, cstring>::type {
+auto toString(const T *value) -> typename std::enable_if<hasToString<T>(), cstring>::type {
     return value->toString();
 }
 
 template <typename T>
-auto toString(T *value) -> typename std::enable_if<HasToString<T>::value, cstring>::type {
+auto toString(T *value) -> typename std::enable_if<hasToString<T>(), cstring>::type {
     return value->toString();
 }
 

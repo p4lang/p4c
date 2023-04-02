@@ -108,7 +108,7 @@ void KernelSamplesTarget::emitTableDeclSpinlock(Util::SourceCodeBuilder *builder
     if (tableKind == TableHash || tableKind == TableArray) {
         emitTableDecl(builder, tblName, tableKind, keyType, valueType, size);
     } else {
-        BUG("%1%: unsupported table kind with spinlock", tableKind);
+        BUG("unsupported table kind with spinlock");
     }
 }
 
@@ -267,7 +267,7 @@ void BccTarget::emitTableDecl(Util::SourceCodeBuilder *builder, cstring tblName,
     else if (tableKind == TableLPMTrie)
         kind = "lpm_trie";
     else
-        BUG("%1%: unsupported table kind", tableKind);
+        BUG("unsupported table kind");
 
     builder->appendFormat("BPF_TABLE(\"%s\", %s, %s, %s, %d);", kind.c_str(), keyType.c_str(),
                           valueType.c_str(), tblName.c_str(), size);
