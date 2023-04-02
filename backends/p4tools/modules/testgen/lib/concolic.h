@@ -7,9 +7,8 @@
 #include <list>
 #include <tuple>
 #include <utility>
+#include <variant>
 #include <vector>
-
-#include <boost/variant/variant.hpp>
 
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
@@ -22,17 +21,15 @@
 
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 /// TODO: This is a very ugly data structure. Essentially, you can store both state variables and
 /// entire expression as keys. State variables can actually compared, expressions are always unique
 /// keys. Using this map, you can look up particular state variables and check whether they actually
 /// are present, but not expressions. The reason expressions need to be keys is that sometimes
 /// entire expressions are mapped to a particular constant.
-using ConcolicVariableMap = ordered_map<boost::variant<const StateVariable, const IR::Expression *>,
-                                        const IR::Expression *>;
+using ConcolicVariableMap =
+    ordered_map<std::variant<const StateVariable, const IR::Expression *>, const IR::Expression *>;
 
 /// Encapsulates a set of concolic method implementations.
 class ConcolicMethodImpls {
@@ -93,8 +90,6 @@ class Concolic {
     static const ConcolicMethodImpls::ImplList *getCoreConcolicMethodImpls();
 };
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_CONCOLIC_H_ */

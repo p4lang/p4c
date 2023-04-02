@@ -3,9 +3,8 @@
 #include <cstddef>
 #include <optional>
 #include <ostream>
+#include <variant>
 #include <vector>
-
-#include <boost/variant/variant.hpp>
 
 #include "backends/p4tools/common/compiler/convert_hs_index.h"
 #include "backends/p4tools/common/core/solver.h"

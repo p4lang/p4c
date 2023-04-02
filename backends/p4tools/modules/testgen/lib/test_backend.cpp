@@ -4,9 +4,7 @@
 #include <list>
 #include <optional>
 #include <utility>
-
-#include <boost/variant/get.hpp>
-#include <boost/variant/variant.hpp>
+#include <variant>
 
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/core/z3_solver.h"
@@ -66,12 +64,11 @@ const Model *TestBackEnd::computeConcolicVariables(const ExecutionState *executi
             const auto *concolicAssignment = resolvedConcolicVariable.second;
             const IR::Expression *pathConstraint = nullptr;
             // We need to differentiate between state variables and expressions here.
-            auto concolicType = concolicVariable.which();
-            if (concolicType == 0) {
-                pathConstraint = new IR::Equ(boost::get<const StateVariable>(concolicVariable),
+            if (std::holds_alternative<const StateVariable>(concolicVariable)) {
+                pathConstraint = new IR::Equ(std::get<const StateVariable>(concolicVariable),
                                              concolicAssignment);
-            } else if (concolicType == 1) {
-                pathConstraint = new IR::Equ(boost::get<const IR::Expression *>(concolicVariable),
+            } else if (std::holds_alternative<const IR::Expression *>(concolicVariable)) {
+                pathConstraint = new IR::Equ(std::get<const IR::Expression *>(concolicVariable),
                                              concolicAssignment);
             }
             CHECK_NULL(pathConstraint);

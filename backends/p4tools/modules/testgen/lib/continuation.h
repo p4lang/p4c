@@ -9,9 +9,8 @@
 #include <optional>
 #include <string>
 #include <utility>
+#include <variant>
 #include <vector>
-
-#include <boost/variant/variant.hpp>
 
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "ir/ir.h"
@@ -86,7 +85,7 @@ class Continuation {
 
     /// Alias for various property types that can be set. We restrict these to keep the feature
     /// simple.
-    using PropertyValue = boost::variant<cstring, uint64_t, int64_t, bool, const IR::Expression *>;
+    using PropertyValue = std::variant<cstring, uint64_t, int64_t, bool, const IR::Expression *>;
 
     struct PropertyUpdate {
         /// The name of the property that is being set.
@@ -114,7 +113,7 @@ class Continuation {
         explicit Guard(const IR::Expression *cond);
     };
 
-    using Command = boost::variant<
+    using Command = std::variant<
         /// Executes a statement-like IR node.
         const IR::Node *,
         /// Registers a trace event.

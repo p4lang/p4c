@@ -2,9 +2,8 @@
 
 #include <list>
 #include <utility>
+#include <variant>
 #include <vector>
-
-#include <boost/variant/variant.hpp>
 
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/id.h"

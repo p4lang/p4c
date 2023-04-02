@@ -7,11 +7,10 @@
 #include <stack>
 #include <string>
 #include <utility>
+#include <variant>
 #include <vector>
 
-#include <boost/container/vector.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
-#include <boost/variant/variant.hpp>
 
 #include "backends/p4tools/common/compiler/convert_hs_index.h"
 #include "backends/p4tools/common/compiler/reachability.h"
@@ -32,9 +31,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 const IR::Member ExecutionState::inputPacketLabel =
     IR::Member(new IR::PathExpression("*"), "inputPacket");
@@ -209,6 +206,14 @@ std::map<cstring, const TestObject *> ExecutionState::getTestObjectCategory(
         return it->second;
     }
     return {};
+}
+
+void ExecutionState::setReachabilityEngineState(ReachabilityEngineState *newEngineState) {
+    reachabilityEngineState = newEngineState;
+}
+
+ReachabilityEngineState *ExecutionState::getReachabilityEngineState() const {
+    return reachabilityEngineState;
 }
 
 /* =============================================================================================
@@ -614,6 +619,4 @@ const StateVariable &ExecutionState::convertPathExpr(const IR::PathExpression *p
     BUG("Unsupported declaration %1% of type %2%.", decl, decl->node_type_name());
 }
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen

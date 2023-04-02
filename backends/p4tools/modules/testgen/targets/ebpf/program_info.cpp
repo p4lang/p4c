@@ -3,10 +3,10 @@
 #include <list>
 #include <optional>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include <boost/multiprecision/cpp_int.hpp>
-#include <boost/variant/variant.hpp>
 
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/util.h"
