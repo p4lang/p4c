@@ -184,12 +184,25 @@ bool BFRuntimeSchemaGenerator::addActionProfIds(const p4configv1::Table &table,
     return true;
 }
 
+void BFRuntimeSchemaGenerator::addConstTableAttr(Util::JsonArray *) const {
+    // Intentionally empty function body to skip attribute addition for const entries
+    return;
+}
+
 void BFRuntimeSchemaGenerator::addActionProfs(Util::JsonArray *tablesJson) const {
     for (const auto &actionProf : p4info.action_profiles()) {
         auto actionProfInstance = ActionProf::from(p4info, actionProf);
         if (actionProfInstance == std::nullopt) continue;
         addActionProfCommon(tablesJson, *actionProfInstance);
     }
+}
+
+bool BFRuntimeSchemaGenerator::addMatchTypePriority(std::optional<cstring> &matchType) const {
+    if (*matchType == "Ternary" || *matchType == "Range" || *matchType == "Optional") {
+        *matchType = "Ternary";
+        return true;
+    }
+    return false;
 }
 
 std::optional<bool> BFRuntimeSchemaGenerator::actProfHasSelector(P4Id actProfId) const {

@@ -66,6 +66,8 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
                                  const ActionSelector &actionProf) const;
     void addActionSelectorGetMemberCommon(Util::JsonArray *tablesJson,
                                           const ActionSelector &actionProf) const;
+    void addConstTableAttr(Util::JsonArray *attrJson) const override;
+    bool addMatchTypePriority(std::optional<cstring> &matchType) const override;
     void addActionProfs(Util::JsonArray *tablesJson) const override;
     bool addActionProfIds(const p4configv1::Table &table,
                           Util::JsonObject *tableJson) const override;

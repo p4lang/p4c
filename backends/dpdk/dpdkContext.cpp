@@ -172,7 +172,9 @@ void DpdkContextGenerator::addKeyField(Util::JsonArray *keyJson, const cstring n
     keyField->emplace("name", nameAnnotation);
     keyField->emplace("instance_name", instanceName);
     keyField->emplace("field_name", fieldName);
-    keyField->emplace("match_type", toStr(key->matchType));
+    auto match_kind = toStr(key->matchType);
+    if (match_kind == "optional" || match_kind == "range") match_kind = "ternary";
+    keyField->emplace("match_type", match_kind);
     keyField->emplace("start_bit", 0);
     keyField->emplace("bit_width", key->expression->type->width_bits());
     keyField->emplace("bit_width_full", key->expression->type->width_bits());

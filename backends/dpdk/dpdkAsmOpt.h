@@ -199,7 +199,7 @@ class ShortenTokenLength : public Transform {
     static ordered_map<cstring, cstring> origNameMap;
 
     const IR::Node *preorder(IR::Member *m) override {
-        if (m->toString().startsWith("m."))
+        if (m->toString().startsWith("m.") || m->toString().startsWith("t."))
             m->member = shortenString(m->member);
         else
             m->member = shortenString(m->member, 30);

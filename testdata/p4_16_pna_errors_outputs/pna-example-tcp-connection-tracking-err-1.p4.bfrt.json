@@ -59,7 +59,7 @@
       ],
       "data" : [],
       "supported_operations" : [],
-      "attributes" : ["EntryScope", "ConstTable"]
+      "attributes" : ["EntryScope"]
     },
     {
       "name" : "pipe.MainControlImpl.ct_tcp_table",
