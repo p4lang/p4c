@@ -84,8 +84,12 @@ else()
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
   set (P4C_VERSION "${P4C_SEM_VERSION_STRING} (SHA: ${P4C_GIT_SHA} BUILD: ${CMAKE_BUILD_TYPE})")
 endif()
+# P4 General Utilities
 include(P4CUtils)
-# TODO: Remove this deprecated include.
+# CMake Utilities to fetch dependencies.
+include(FetchContent)
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+# TODO: Remove this deprecated include eventually.
 include(UnifiedBuild)
 
 # # search in /usr/local first
