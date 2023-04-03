@@ -5,10 +5,10 @@
 #include <optional>
 #include <ostream>
 #include <string>
+#include <variant>
 #include <vector>
 
 #include <boost/multiprecision/cpp_int.hpp>
-#include <boost/variant/variant.hpp>
 
 #include "backends/p4tools/common/compiler/convert_hs_index.h"
 #include "backends/p4tools/common/core/solver.h"

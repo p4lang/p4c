@@ -11,8 +11,6 @@
 #include <utility>
 #include <vector>
 
-#include <boost/variant/get.hpp>
-
 #include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
@@ -29,13 +27,10 @@
 #include "backends/p4tools/modules/testgen/lib/namespace_context.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 /// Represents state of execution after having reached a program point.
 class ExecutionState {
-    friend class SmallStepEvaluator;
     friend class Test::SmallStepTest;
 
     /// Specifies the type of the packet size variable.
@@ -220,12 +215,13 @@ class ExecutionState {
         auto iterator = stateProperties.find(propertyName);
         if (iterator != stateProperties.end()) {
             auto val = iterator->second;
-            auto *resolvedVal = boost::relaxed_get<T>(&val);
-            if (resolvedVal == nullptr) {
+            try {
+                T resolvedVal = std::get<T>(val);
+                return resolvedVal;
+            } catch (std::bad_variant_access const &ex) {
                 BUG("Expected property value type does not correspond to value type stored in the "
                     "property map.");
             }
-            return *resolvedVal;
         }
         BUG("Property %s not found in configuration map.", propertyName);
     }
@@ -251,6 +247,10 @@ class ExecutionState {
     /// @returns the map of uninterpreted test objects for a specific test category. For example,
     /// all the table entries saved under "tableconfigs".
     std::map<cstring, const TestObject *> getTestObjectCategory(cstring category) const;
+
+    [[nodiscard]] ReachabilityEngineState *getReachabilityEngineState() const;
+
+    void setReachabilityEngineState(ReachabilityEngineState *newEngineState);
 
     /* =========================================================================================
      *  Trace events.
@@ -476,8 +476,6 @@ class ExecutionState {
     explicit ExecutionState(Continuation::Body body);
 };
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_EXECUTION_STATE_H_ */

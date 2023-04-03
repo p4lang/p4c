@@ -7,9 +7,8 @@
 #include <optional>
 #include <stack>
 #include <string>
+#include <variant>
 #include <vector>
-
-#include <boost/variant/variant.hpp>
 
 #include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"

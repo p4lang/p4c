@@ -19,6 +19,8 @@ namespace P4Tools::P4Testgen {
 /// The main class that implements small-step operational semantics. Delegates to implementations
 /// of AbstractStepper.
 class SmallStepEvaluator {
+    friend class CommandVisitor;
+
  public:
     /// A branch is an execution state paired with an optional path constraint representing the
     /// choice made to take the branch.
@@ -62,6 +64,14 @@ class SmallStepEvaluator {
 
     /// Reachability engine.
     ReachabilityEngine *reachabilityEngine = nullptr;
+
+    using REngineType = std::pair<ReachabilityResult, std::vector<SmallStepEvaluator::Branch> *>;
+
+    static void renginePostprocessing(ReachabilityResult &result,
+                                      std::vector<SmallStepEvaluator::Branch> *branches);
+
+    REngineType renginePreprocessing(SmallStepEvaluator &stepper, const ExecutionState &nextState,
+                                     const IR::Node *node);
 
  public:
     Result step(ExecutionState &state);

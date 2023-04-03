@@ -1,9 +1,7 @@
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 
+#include <variant>
 #include <vector>
-
-#include <boost/variant/apply_visitor.hpp>
-#include <boost/variant/static_visitor.hpp>
 
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "ir/id.h"
@@ -12,9 +10,7 @@
 
 #include "backends/p4tools/modules/testgen/lib/namespace_context.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 Continuation::Return::Return(const IR::Node *expr) : expr(expr) {}
 
@@ -132,7 +128,7 @@ Continuation::Body Continuation::apply(std::optional<const IR::Node *> value_opt
     // parameter.
     Body result;
 
-    struct SubstVisitor : public boost::static_visitor<Command> {
+    struct SubstVisitor {
         VariableSubstitution subst;
 
         Command operator()(const IR::Node *node) { return node->apply(subst); }
@@ -159,7 +155,7 @@ Continuation::Body Continuation::apply(std::optional<const IR::Node *> value_opt
     } subst(*parameterOpt, *value_opt);
 
     for (const auto &cmd : body.cmds) {
-        result.cmds.push_back(boost::apply_visitor(subst, cmd));
+        result.cmds.push_back(std::visit(subst, cmd));
     }
 
     return result;
@@ -171,6 +167,4 @@ const Continuation::Parameter *Continuation::genParameter(const IR::Type *type, 
     return new Parameter(new IR::PathExpression(type, new IR::Path(varName)));
 }
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
