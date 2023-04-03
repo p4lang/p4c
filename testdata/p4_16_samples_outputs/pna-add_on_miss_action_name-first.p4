@@ -83,7 +83,6 @@ control ct(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_inp
 }
 
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @name("ct") ct() ct_inst;
     action next_hop1(PortId_t vport) {
         send_to_port(vport);
     }
@@ -102,6 +101,7 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         add_on_miss = true;
         const default_action = add_on_miss_action();
     }
+    @name("ct") ct() ct_inst;
     apply {
         if (hdr.ipv4.isValid()) {
             ipv4_da.apply();

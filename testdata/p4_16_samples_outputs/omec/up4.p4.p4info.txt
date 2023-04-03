@@ -3,114 +3,6 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 39015874
-    name: "PreQosPipe.Routing.routes_v4"
-    alias: "routes_v4"
-  }
-  match_fields {
-    id: 1
-    name: "dst_prefix"
-    bitwidth: 32
-    match_type: LPM
-  }
-  action_refs {
-    id: 23965128
-  }
-  action_refs {
-    id: 21257015
-    annotations: "@defaultonly"
-    scope: DEFAULT_ONLY
-  }
-  implementation_id: 297808402
-  size: 1024
-}
-tables {
-  preamble {
-    id: 47204971
-    name: "PreQosPipe.Acl.acls"
-    alias: "Acl.acls"
-  }
-  match_fields {
-    id: 1
-    name: "inport"
-    bitwidth: 9
-    match_type: TERNARY
-  }
-  match_fields {
-    id: 2
-    name: "src_iface"
-    bitwidth: 8
-    match_type: TERNARY
-  }
-  match_fields {
-    id: 3
-    name: "eth_src"
-    bitwidth: 48
-    match_type: TERNARY
-  }
-  match_fields {
-    id: 4
-    name: "eth_dst"
-    bitwidth: 48
-    match_type: TERNARY
-  }
-  match_fields {
-    id: 5
-    name: "eth_type"
-    bitwidth: 16
-    match_type: TERNARY
-  }
-  match_fields {
-    id: 6
-    name: "ipv4_src"
-    bitwidth: 32
-    match_type: TERNARY
-  }
-  match_fields {
-    id: 7
-    name: "ipv4_dst"
-    bitwidth: 32
-    match_type: TERNARY
-  }
-  match_fields {
-    id: 8
-    name: "ipv4_proto"
-    bitwidth: 8
-    match_type: TERNARY
-  }
-  match_fields {
-    id: 9
-    name: "l4_sport"
-    bitwidth: 16
-    match_type: TERNARY
-  }
-  match_fields {
-    id: 10
-    name: "l4_dport"
-    bitwidth: 16
-    match_type: TERNARY
-  }
-  action_refs {
-    id: 30494847
-  }
-  action_refs {
-    id: 26495283
-  }
-  action_refs {
-    id: 21596798
-  }
-  action_refs {
-    id: 18812293
-  }
-  action_refs {
-    id: 21257015
-  }
-  const_default_action_id: 21257015
-  direct_resource_ids: 325583051
-  size: 1024
-}
-tables {
-  preamble {
     id: 40931612
     name: "PreQosPipe.my_station"
     alias: "my_station"
@@ -327,74 +219,120 @@ tables {
   }
   size: 1024
 }
+tables {
+  preamble {
+    id: 39015874
+    name: "PreQosPipe.Routing.routes_v4"
+    alias: "routes_v4"
+  }
+  match_fields {
+    id: 1
+    name: "dst_prefix"
+    bitwidth: 32
+    match_type: LPM
+  }
+  action_refs {
+    id: 23965128
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  implementation_id: 297808402
+  size: 1024
+}
+tables {
+  preamble {
+    id: 47204971
+    name: "PreQosPipe.Acl.acls"
+    alias: "Acl.acls"
+  }
+  match_fields {
+    id: 1
+    name: "inport"
+    bitwidth: 9
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "src_iface"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "eth_src"
+    bitwidth: 48
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
+    name: "eth_dst"
+    bitwidth: 48
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 5
+    name: "eth_type"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 6
+    name: "ipv4_src"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 7
+    name: "ipv4_dst"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 8
+    name: "ipv4_proto"
+    bitwidth: 8
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 9
+    name: "l4_sport"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 10
+    name: "l4_dport"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 30494847
+  }
+  action_refs {
+    id: 26495283
+  }
+  action_refs {
+    id: 21596798
+  }
+  action_refs {
+    id: 18812293
+  }
+  action_refs {
+    id: 21257015
+  }
+  const_default_action_id: 21257015
+  direct_resource_ids: 325583051
+  size: 1024
+}
 actions {
   preamble {
     id: 21257015
     name: "NoAction"
     alias: "NoAction"
     annotations: "@noWarn(\"unused\")"
-  }
-}
-actions {
-  preamble {
-    id: 31448256
-    name: "PreQosPipe.Routing.drop"
-    alias: "Routing.drop"
-  }
-}
-actions {
-  preamble {
-    id: 23965128
-    name: "PreQosPipe.Routing.route"
-    alias: "route"
-  }
-  params {
-    id: 1
-    name: "src_mac"
-    bitwidth: 48
-  }
-  params {
-    id: 2
-    name: "dst_mac"
-    bitwidth: 48
-  }
-  params {
-    id: 3
-    name: "egress_port"
-    bitwidth: 9
-  }
-}
-actions {
-  preamble {
-    id: 30494847
-    name: "PreQosPipe.Acl.set_port"
-    alias: "set_port"
-  }
-  params {
-    id: 1
-    name: "port"
-    bitwidth: 9
-  }
-}
-actions {
-  preamble {
-    id: 26495283
-    name: "PreQosPipe.Acl.punt"
-    alias: "punt"
-  }
-}
-actions {
-  preamble {
-    id: 21596798
-    name: "PreQosPipe.Acl.clone_to_cpu"
-    alias: "clone_to_cpu"
-  }
-}
-actions {
-  preamble {
-    id: 18812293
-    name: "PreQosPipe.Acl.drop"
-    alias: "Acl.drop"
   }
 }
 actions {
@@ -612,6 +550,68 @@ actions {
     id: 31713420
     name: "PreQosPipe.do_gtpu_tunnel_with_psc"
     alias: "do_gtpu_tunnel_with_psc"
+  }
+}
+actions {
+  preamble {
+    id: 31448256
+    name: "PreQosPipe.Routing.drop"
+    alias: "Routing.drop"
+  }
+}
+actions {
+  preamble {
+    id: 23965128
+    name: "PreQosPipe.Routing.route"
+    alias: "route"
+  }
+  params {
+    id: 1
+    name: "src_mac"
+    bitwidth: 48
+  }
+  params {
+    id: 2
+    name: "dst_mac"
+    bitwidth: 48
+  }
+  params {
+    id: 3
+    name: "egress_port"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 30494847
+    name: "PreQosPipe.Acl.set_port"
+    alias: "set_port"
+  }
+  params {
+    id: 1
+    name: "port"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 26495283
+    name: "PreQosPipe.Acl.punt"
+    alias: "punt"
+  }
+}
+actions {
+  preamble {
+    id: 21596798
+    name: "PreQosPipe.Acl.clone_to_cpu"
+    alias: "clone_to_cpu"
+  }
+}
+actions {
+  preamble {
+    id: 18812293
+    name: "PreQosPipe.Acl.drop"
+    alias: "Acl.drop"
   }
 }
 action_profiles {

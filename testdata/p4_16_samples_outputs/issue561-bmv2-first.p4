@@ -161,8 +161,8 @@ parser Tcp_option_parser(packet_in b, in bit<4> tcp_hdr_data_offset, out Tcp_opt
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("Tcp_option_parser") Tcp_option_parser() Tcp_option_parser_inst;
     const bit<16> ETHERTYPE_IPV4 = 16w0x800;
+    @name("Tcp_option_parser") Tcp_option_parser() Tcp_option_parser_inst;
     state start {
         transition parse_ethernet;
     }

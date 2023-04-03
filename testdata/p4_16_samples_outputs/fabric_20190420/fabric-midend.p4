@@ -364,38 +364,6 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     }
     @name(".nop") action nop_10() {
     }
-    @name("FabricIngress.spgw_ingress.ue_counter") direct_counter(CounterType.packets_and_bytes) spgw_ingress_ue_counter;
-    @hidden @name("FabricIngress.spgw_ingress.gtpu_decap") action spgw_ingress_gtpu_decap_0() {
-        hdr.gtpu_ipv4.setInvalid();
-        hdr.gtpu_udp.setInvalid();
-        hdr.gtpu.setInvalid();
-    }
-    @name("FabricIngress.spgw_ingress.set_dl_sess_info") action spgw_ingress_set_dl_sess_info_0(@name("teid") bit<32> teid_1, @name("s1u_enb_addr") bit<32> s1u_enb_addr_1, @name("s1u_sgw_addr") bit<32> s1u_sgw_addr_1) {
-        fabric_metadata._spgw_teid19 = teid_1;
-        fabric_metadata._spgw_s1u_enb_addr20 = s1u_enb_addr_1;
-        fabric_metadata._spgw_s1u_sgw_addr21 = s1u_sgw_addr_1;
-        spgw_ingress_ue_counter.count();
-    }
-    @name("FabricIngress.spgw_ingress.dl_sess_lookup") table spgw_ingress_dl_sess_lookup {
-        key = {
-            hdr.ipv4.dst_addr: exact @name("ipv4_dst");
-        }
-        actions = {
-            spgw_ingress_set_dl_sess_info_0();
-            @defaultonly nop_2();
-        }
-        const default_action = nop_2();
-        counters = spgw_ingress_ue_counter;
-    }
-    @name("FabricIngress.spgw_ingress.s1u_filter_table") table spgw_ingress_s1u_filter_table {
-        key = {
-            hdr.gtpu_ipv4.dst_addr: exact @name("gtp_ipv4_dst");
-        }
-        actions = {
-            nop_3();
-        }
-        const default_action = nop_3();
-    }
     @name("FabricIngress.filtering.ingress_port_vlan_counter") direct_counter(CounterType.packets_and_bytes) filtering_ingress_port_vlan_counter;
     @name("FabricIngress.filtering.deny") action filtering_deny_0() {
         fabric_metadata._skip_forwarding7 = true;
@@ -454,9 +422,9 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         }
         actions = {
             forwarding_set_next_id_bridging_0();
-            @defaultonly nop_4();
+            @defaultonly nop_2();
         }
-        const default_action = nop_4();
+        const default_action = nop_2();
         counters = forwarding_bridging_counter;
         size = 1024;
     }
@@ -472,9 +440,9 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         }
         actions = {
             forwarding_pop_mpls_and_next_0();
-            @defaultonly nop_5();
+            @defaultonly nop_3();
         }
-        const default_action = nop_5();
+        const default_action = nop_3();
         counters = forwarding_mpls_counter;
         size = 1024;
     }
@@ -493,9 +461,9 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         actions = {
             forwarding_set_next_id_routing_v4_0();
             forwarding_nop_routing_v4_0();
-            @defaultonly nop_6();
+            @defaultonly nop_4();
         }
-        const default_action = nop_6();
+        const default_action = nop_4();
         counters = forwarding_routing_v4_counter;
         size = 1024;
     }
@@ -558,9 +526,9 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         }
         actions = {
             next_set_vlan_0();
-            @defaultonly nop_7();
+            @defaultonly nop_5();
         }
-        const default_action = nop_7();
+        const default_action = nop_5();
         counters = next_next_vlan_counter;
         size = 1024;
     }
@@ -581,10 +549,10 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         actions = {
             next_output_xconnect_0();
             next_set_next_id_xconnect_0();
-            @defaultonly nop_8();
+            @defaultonly nop_6();
         }
         counters = next_xconnect_counter;
-        const default_action = nop_8();
+        const default_action = nop_6();
         size = 1024;
     }
     @max_group_size(16) @name("FabricIngress.next.hashed_selector") action_selector(HashAlgorithm.crc16, 32w1024, 32w16) next_hashed_selector;
@@ -619,11 +587,11 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
             next_output_hashed_0();
             next_routing_hashed_0();
             next_mpls_routing_hashed_0();
-            @defaultonly nop_9();
+            @defaultonly nop_7();
         }
         implementation = next_hashed_selector;
         counters = next_hashed_counter;
-        const default_action = nop_9();
+        const default_action = nop_7();
         size = 1024;
     }
     @name("FabricIngress.next.multicast_counter") direct_counter(CounterType.packets_and_bytes) next_multicast_counter;
@@ -638,14 +606,46 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         }
         actions = {
             next_set_mcast_group_id_0();
-            @defaultonly nop_10();
+            @defaultonly nop_8();
         }
         counters = next_multicast_counter;
-        const default_action = nop_10();
+        const default_action = nop_8();
         size = 1024;
     }
     @name("FabricIngress.port_counters_control.egress_port_counter") counter(32w511, CounterType.packets_and_bytes) port_counters_control_egress_port_counter;
     @name("FabricIngress.port_counters_control.ingress_port_counter") counter(32w511, CounterType.packets_and_bytes) port_counters_control_ingress_port_counter;
+    @name("FabricIngress.spgw_ingress.ue_counter") direct_counter(CounterType.packets_and_bytes) spgw_ingress_ue_counter;
+    @hidden @name("FabricIngress.spgw_ingress.gtpu_decap") action spgw_ingress_gtpu_decap_0() {
+        hdr.gtpu_ipv4.setInvalid();
+        hdr.gtpu_udp.setInvalid();
+        hdr.gtpu.setInvalid();
+    }
+    @name("FabricIngress.spgw_ingress.set_dl_sess_info") action spgw_ingress_set_dl_sess_info_0(@name("teid") bit<32> teid_1, @name("s1u_enb_addr") bit<32> s1u_enb_addr_1, @name("s1u_sgw_addr") bit<32> s1u_sgw_addr_1) {
+        fabric_metadata._spgw_teid19 = teid_1;
+        fabric_metadata._spgw_s1u_enb_addr20 = s1u_enb_addr_1;
+        fabric_metadata._spgw_s1u_sgw_addr21 = s1u_sgw_addr_1;
+        spgw_ingress_ue_counter.count();
+    }
+    @name("FabricIngress.spgw_ingress.dl_sess_lookup") table spgw_ingress_dl_sess_lookup {
+        key = {
+            hdr.ipv4.dst_addr: exact @name("ipv4_dst");
+        }
+        actions = {
+            spgw_ingress_set_dl_sess_info_0();
+            @defaultonly nop_9();
+        }
+        const default_action = nop_9();
+        counters = spgw_ingress_ue_counter;
+    }
+    @name("FabricIngress.spgw_ingress.s1u_filter_table") table spgw_ingress_s1u_filter_table {
+        key = {
+            hdr.gtpu_ipv4.dst_addr: exact @name("gtp_ipv4_dst");
+        }
+        actions = {
+            nop_10();
+        }
+        const default_action = nop_10();
+    }
     @hidden action spgw30() {
         spgw_normalizer_hasReturned = true;
     }
@@ -892,37 +892,6 @@ control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_
     bool hasExited_0;
     @name(".nop") action nop_11() {
     }
-    @hidden @name("FabricEgress.spgw_egress.gtpu_encap") action spgw_egress_gtpu_encap_0() {
-        hdr.gtpu_ipv4.setValid();
-        hdr.gtpu_ipv4.version = 4w4;
-        hdr.gtpu_ipv4.ihl = 4w5;
-        hdr.gtpu_ipv4.dscp = 6w0;
-        hdr.gtpu_ipv4.ecn = 2w0;
-        hdr.gtpu_ipv4.total_len = hdr.ipv4.total_len + 16w36;
-        hdr.gtpu_ipv4.identification = 16w0x1513;
-        hdr.gtpu_ipv4.flags = 3w0;
-        hdr.gtpu_ipv4.frag_offset = 13w0;
-        hdr.gtpu_ipv4.ttl = 8w64;
-        hdr.gtpu_ipv4.protocol = 8w17;
-        hdr.gtpu_ipv4.dst_addr = fabric_metadata._spgw_s1u_enb_addr20;
-        hdr.gtpu_ipv4.src_addr = fabric_metadata._spgw_s1u_sgw_addr21;
-        hdr.gtpu_ipv4.hdr_checksum = 16w0;
-        hdr.gtpu_udp.setValid();
-        hdr.gtpu_udp.sport = 16w2152;
-        hdr.gtpu_udp.dport = 16w2152;
-        hdr.gtpu_udp.len = fabric_metadata._spgw_ipv4_len18 + 16w16;
-        hdr.gtpu_udp.checksum = 16w0;
-        hdr.gtpu.setValid();
-        hdr.gtpu.version = 3w0x1;
-        hdr.gtpu.pt = 1w0x1;
-        hdr.gtpu.spare = 1w0;
-        hdr.gtpu.ex_flag = 1w0;
-        hdr.gtpu.seq_flag = 1w0;
-        hdr.gtpu.npdu_flag = 1w0;
-        hdr.gtpu.msgtype = 8w0xff;
-        hdr.gtpu.msglen = fabric_metadata._spgw_ipv4_len18;
-        hdr.gtpu.teid = fabric_metadata._spgw_teid19;
-    }
     @hidden @name("FabricEgress.egress_next.pop_mpls_if_present") action egress_next_pop_mpls_if_present_0() {
         hdr.mpls.setInvalid();
         fabric_metadata._eth_type0 = fabric_metadata._ip_eth_type1;
@@ -961,6 +930,37 @@ control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_
         const default_action = nop_11();
         counters = egress_next_egress_vlan_counter;
         size = 1024;
+    }
+    @hidden @name("FabricEgress.spgw_egress.gtpu_encap") action spgw_egress_gtpu_encap_0() {
+        hdr.gtpu_ipv4.setValid();
+        hdr.gtpu_ipv4.version = 4w4;
+        hdr.gtpu_ipv4.ihl = 4w5;
+        hdr.gtpu_ipv4.dscp = 6w0;
+        hdr.gtpu_ipv4.ecn = 2w0;
+        hdr.gtpu_ipv4.total_len = hdr.ipv4.total_len + 16w36;
+        hdr.gtpu_ipv4.identification = 16w0x1513;
+        hdr.gtpu_ipv4.flags = 3w0;
+        hdr.gtpu_ipv4.frag_offset = 13w0;
+        hdr.gtpu_ipv4.ttl = 8w64;
+        hdr.gtpu_ipv4.protocol = 8w17;
+        hdr.gtpu_ipv4.dst_addr = fabric_metadata._spgw_s1u_enb_addr20;
+        hdr.gtpu_ipv4.src_addr = fabric_metadata._spgw_s1u_sgw_addr21;
+        hdr.gtpu_ipv4.hdr_checksum = 16w0;
+        hdr.gtpu_udp.setValid();
+        hdr.gtpu_udp.sport = 16w2152;
+        hdr.gtpu_udp.dport = 16w2152;
+        hdr.gtpu_udp.len = fabric_metadata._spgw_ipv4_len18 + 16w16;
+        hdr.gtpu_udp.checksum = 16w0;
+        hdr.gtpu.setValid();
+        hdr.gtpu.version = 3w0x1;
+        hdr.gtpu.pt = 1w0x1;
+        hdr.gtpu.spare = 1w0;
+        hdr.gtpu.ex_flag = 1w0;
+        hdr.gtpu.seq_flag = 1w0;
+        hdr.gtpu.npdu_flag = 1w0;
+        hdr.gtpu.msgtype = 8w0xff;
+        hdr.gtpu.msglen = fabric_metadata._spgw_ipv4_len18;
+        hdr.gtpu.teid = fabric_metadata._spgw_teid19;
     }
     @hidden action packetio41() {
         hasExited_0 = true;

@@ -444,8 +444,6 @@ control Routing(inout parsed_headers_t hdr, inout local_metadata_t local_meta, i
 }
 
 control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta, inout standard_metadata_t std_meta) {
-    @name("Routing") Routing() Routing_inst;
-    @name("Acl") Acl() Acl_inst;
     counter<counter_index_t>(32w1024, CounterType.packets_and_bytes) pre_qos_counter;
     meter<app_meter_idx_t>(32w1024, MeterType.bytes) app_meter;
     meter<session_meter_idx_t>(32w1024, MeterType.bytes) session_meter;
@@ -684,6 +682,8 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
         hdr.gtpu_ext_psc.qfi = local_meta.tunnel_out_qfi;
         hdr.gtpu_ext_psc.next_ext = 8w0x0;
     }
+    @name("Routing") Routing() Routing_inst;
+    @name("Acl") Acl() Acl_inst;
     apply {
         _initialize_metadata();
         if (hdr.packet_out.isValid()) {
