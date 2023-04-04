@@ -73,7 +73,8 @@ control MyIC(inout header_t a, inout EMPTY_M b, in psa_ingress_input_metadata_t 
     }
     table tbl {
         key = {
-            a.ethernet.srcAddr: exact @name("a.ethernet.srcAddr");
+            a.ethernet.srcAddr      : exact @name("a.ethernet.srcAddr");
+            a.vlan_tag[0].ether_type: exact @name("a.vlan_tag[0].ether_type");
         }
         actions = {
             NoAction();

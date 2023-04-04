@@ -17,6 +17,8 @@ limitations under the License.
 #ifndef BACKENDS_DPDK_DPDKCONTEXT_H_
 #define BACKENDS_DPDK_DPDKCONTEXT_H_
 
+#include <regex>
+
 #include "constants.h"
 #include "control-plane/bfruntime.h"
 #include "dpdkProgramStructure.h"

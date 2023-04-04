@@ -65,7 +65,8 @@ control MyIC(inout header_t a, inout EMPTY_M b, in psa_ingress_input_metadata_t 
     }
     @name("MyIC.tbl") table tbl_0 {
         key = {
-            a.ethernet.srcAddr: exact @name("a.ethernet.srcAddr");
+            a.ethernet.srcAddr      : exact @name("a.ethernet.srcAddr");
+            a.vlan_tag[0].ether_type: exact @name("a.vlan_tag[0].ether_type");
         }
         actions = {
             NoAction_1();
@@ -87,19 +88,19 @@ control MyEC(inout EMPTY_H a, inout EMPTY_M b, in psa_egress_input_metadata_t c,
 }
 
 control MyID(packet_out buffer, out EMPTY_CLONE a, out EMPTY_RESUB b, out EMPTY_BRIDGE c, inout header_t d, in EMPTY_M e, in psa_ingress_output_metadata_t f) {
-    @hidden action psaheaderstack118() {
+    @hidden action psaheaderstack119() {
         buffer.emit<ethernet_t>(d.ethernet);
         buffer.emit<vlan_tag_h>(d.vlan_tag[0]);
         buffer.emit<vlan_tag_h>(d.vlan_tag[1]);
     }
-    @hidden table tbl_psaheaderstack118 {
+    @hidden table tbl_psaheaderstack119 {
         actions = {
-            psaheaderstack118();
+            psaheaderstack119();
         }
-        const default_action = psaheaderstack118();
+        const default_action = psaheaderstack119();
     }
     apply {
-        tbl_psaheaderstack118.apply();
+        tbl_psaheaderstack119.apply();
     }
 }
 
