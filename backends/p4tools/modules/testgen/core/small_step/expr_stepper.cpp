@@ -48,7 +48,7 @@ bool ExprStepper::preorder(const IR::Constant *constant) {
 }
 
 void ExprStepper::handleHitMissActionRun(const IR::Member *member) {
-    auto *nextState = new ExecutionState(state);
+    auto &nextState = state.clone();
     std::vector<Continuation::Command> replacements;
     const auto *method = member->expr->to<IR::MethodCallExpression>();
     BUG_CHECK(method->method->is<IR::Member>(), "Method apply has unexpected format: %1%", method);
@@ -64,7 +64,7 @@ void ExprStepper::handleHitMissActionRun(const IR::Member *member) {
     } else {
         replacements.emplace_back(Continuation::Return(TableStepper::getTableActionVar(table)));
     }
-    nextState->replaceTopBody(&replacements);
+    nextState.replaceTopBody(&replacements);
     result->emplace_back(nextState);
 }
 
@@ -100,7 +100,7 @@ bool ExprStepper::preorder(const IR::Member *member) {
 void ExprStepper::evalActionCall(const IR::P4Action *action, const IR::MethodCallExpression *call) {
     const auto *actionNameSpace = action->to<IR::INamespace>();
     BUG_CHECK(actionNameSpace, "Does not instantiate an INamespace: %1%", actionNameSpace);
-    auto *nextState = new ExecutionState(state);
+    auto &nextState = state.clone();
     // If the action has arguments, these are usually directionless control plane input.
     // We introduce a zombie variable that takes the argument value. This value is either
     // provided by a constant entry or synthesized by us.
@@ -114,11 +114,11 @@ void ExprStepper::evalActionCall(const IR::P4Action *action, const IR::MethodCal
                   action);
         const auto &tableActionDataVar = Utils::getZombieVar(paramType, 0, paramName);
         const auto *curArg = call->arguments->at(argIdx)->expression;
-        nextState->set(tableActionDataVar, curArg);
+        nextState.set(tableActionDataVar, curArg);
     }
-    nextState->replaceTopBody(action->body);
+    nextState.replaceTopBody(action->body);
     // Enter the action's namespace.
-    nextState->pushNamespace(actionNameSpace);
+    nextState.pushNamespace(actionNameSpace);
     result->emplace_back(nextState);
 }
 
@@ -147,8 +147,8 @@ bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
 
             // Handle table calls.
             if (const auto *table = state.getTableType(method)) {
-                auto *nextState = new ExecutionState(state);
-                nextState->replaceTopBody(Continuation::Return(table));
+                auto &nextState = state.clone();
+                nextState.replaceTopBody(Continuation::Return(table));
                 result->emplace_back(nextState);
                 return false;
             }
@@ -224,8 +224,8 @@ bool ExprStepper::preorder(const IR::Mux *mux) {
     }
     // If the Mux condition  is tainted, just return a taint constant.
     if (state.hasTaint(mux->e0)) {
-        auto *nextState = new ExecutionState(state);
-        nextState->replaceTopBody(
+        auto &nextState = state.clone();
+        nextState.replaceTopBody(
             Continuation::Return(programInfo.createTargetUninitialized(mux->type, true)));
         result->emplace_back(nextState);
         return false;
@@ -240,14 +240,14 @@ bool ExprStepper::preorder(const IR::Mux *mux) {
         const auto *cond = entry.first;
         const auto *expr = entry.second;
 
-        auto *nextState = new ExecutionState(state);
+        auto &nextState = state.clone();
         // Some path selection strategies depend on looking ahead and collecting potential
         // statements. If that is the case, apply the CollectLatentStatements visitor.
         P4::Coverage::CoverageSet coveredStmts;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
             expr->apply(CollectLatentStatements(coveredStmts, state));
         }
-        nextState->replaceTopBody(Continuation::Return(expr));
+        nextState.replaceTopBody(Continuation::Return(expr));
         result->emplace_back(cond, state, nextState, coveredStmts);
     }
 
@@ -262,17 +262,17 @@ bool ExprStepper::preorder(const IR::PathExpression *pathExpression) {
     if (decl->is<IR::ParserState>()) {
         return stepSymbolicValue(decl);
     }
-    auto *nextState = new ExecutionState(state);
+    auto &nextState = state.clone();
     // ValueSets can be declared in parsers and are usually set by the control plane.
     // We simply return the contained valueSet.
     if (const auto *valueSet = decl->to<IR::P4ValueSet>()) {
-        nextState->replaceTopBody(Continuation::Return(valueSet));
+        nextState.replaceTopBody(Continuation::Return(valueSet));
         result->emplace_back(nextState);
         return false;
     }
     // Otherwise convert the path expression into a qualified member and return it.
-    auto pathRef = nextState->convertPathExpr(pathExpression);
-    nextState->replaceTopBody(Continuation::Return(pathRef));
+    auto pathRef = nextState.convertPathExpr(pathExpression);
+    nextState.replaceTopBody(Continuation::Return(pathRef));
     result->emplace_back(nextState);
     return false;
 }
@@ -281,14 +281,14 @@ bool ExprStepper::preorder(const IR::P4ValueSet *valueSet) {
     logStep(valueSet);
 
     auto vsSize = valueSet->size->checkedTo<IR::Constant>()->value;
-    auto *nextState = new ExecutionState(state);
+    auto &nextState = state.clone();
     IR::Vector<IR::Expression> components;
     // TODO: Fill components with values when we have an API.
     const auto *pvsType = valueSet->elementType;
     pvsType = state.resolveType(pvsType);
     TESTGEN_UNIMPLEMENTED("Value Set not yet fully implemented");
 
-    nextState->popBody();
+    nextState.popBody();
     result->emplace_back(nextState);
     return false;
 }
@@ -316,8 +316,8 @@ bool ExprStepper::preorder(const IR::Operation_Binary *binary) {
 
     // Handle saturating arithmetic expressions by translating them into Mux expressions.
     if (P4::SaturationElim::isSaturationOperation(binary)) {
-        auto *nextState = new ExecutionState(state);
-        nextState->replaceTopBody(Continuation::Return(P4::SaturationElim::eliminate(binary)));
+        auto &nextState = state.clone();
+        nextState.replaceTopBody(Continuation::Return(P4::SaturationElim::eliminate(binary)));
         result->emplace_back(nextState);
         return false;
     }
@@ -379,7 +379,7 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
 
     const IR::Expression *missCondition = IR::getBoolLiteral(true);
     for (const auto *selectCase : selectCases) {
-        auto *nextState = new ExecutionState(state);
+        auto &nextState = state.clone();
 
         if (!SymbolicEnv::isSymbolicValue(selectExpression->select)) {
             // Evaluate the expression being selected.
@@ -405,7 +405,7 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
                 selectExpression);
         }
 
-        nextState->replaceTopBody(Continuation::Return(selectCase->state));
+        nextState.replaceTopBody(Continuation::Return(selectCase->state));
         // Some path selection strategies depend on looking ahead and collecting potential
         // statements. If that is the case, apply the CollectLatentStatements visitor.
         P4::Coverage::CoverageSet coveredStmts;

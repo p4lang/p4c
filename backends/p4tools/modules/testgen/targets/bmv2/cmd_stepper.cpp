@@ -1,7 +1,6 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/cmd_stepper.h"
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <list>
 #include <map>
 #include <optional>
@@ -39,7 +38,7 @@ const BMv2_V1ModelProgramInfo &BMv2_V1ModelCmdStepper::getProgramInfo() const {
     return *CmdStepper::getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
 }
 
-void BMv2_V1ModelCmdStepper::initializeTargetEnvironment(ExecutionState *nextState) const {
+void BMv2_V1ModelCmdStepper::initializeTargetEnvironment(ExecutionState &nextState) const {
     // Associate intrinsic metadata with the packet. The input packet is prefixed with
     // ingress intrinsic metadata and port metadata.
     //
@@ -78,34 +77,34 @@ void BMv2_V1ModelCmdStepper::initializeTargetEnvironment(ExecutionState *nextSta
 
     const auto *nineBitType = IR::getBitType(9);
     const auto *oneBitType = IR::getBitType(1);
-    nextState->set(programInfo.getTargetInputPortVar(),
-                   nextState->createZombieConst(nineBitType, "*bmv2_ingress_port"));
+    nextState.set(programInfo.getTargetInputPortVar(),
+                  nextState.createZombieConst(nineBitType, "*bmv2_ingress_port"));
     // BMv2 implicitly sets the output port to 0.
-    nextState->set(programInfo.getTargetOutputPortVar(), IR::getConstant(nineBitType, 0));
+    nextState.set(programInfo.getTargetOutputPortVar(), IR::getConstant(nineBitType, 0));
     // Initialize parser_err with no error.
     const auto *parserErrVar =
         new IR::Member(programInfo.getParserErrorType(),
                        new IR::PathExpression("*standard_metadata"), "parser_error");
-    nextState->set(parserErrVar, IR::getConstant(parserErrVar->type, 0));
+    nextState.set(parserErrVar, IR::getConstant(parserErrVar->type, 0));
     // Initialize checksum_error with no error.
     const auto *checksumErrVar =
         new IR::Member(oneBitType, new IR::PathExpression("*standard_metadata"), "checksum_error");
-    nextState->set(checksumErrVar, IR::getConstant(checksumErrVar->type, 0));
+    nextState.set(checksumErrVar, IR::getConstant(checksumErrVar->type, 0));
     // The packet size meta data is the testgen packet length variable divided by 8.
     const auto *pktSizeType = ExecutionState::getPacketSizeVarType();
     const auto *packetSizeVar =
         new IR::Member(pktSizeType, new IR::PathExpression("*standard_metadata"), "packet_length");
     const auto *packetSizeConst = new IR::Div(pktSizeType, ExecutionState::getInputPacketSizeVar(),
                                               IR::getConstant(pktSizeType, 8));
-    nextState->set(packetSizeVar, packetSizeConst);
+    nextState.set(packetSizeVar, packetSizeConst);
 }
 
 std::optional<const Constraint *> BMv2_V1ModelCmdStepper::startParser_impl(
-    const IR::P4Parser *parser, ExecutionState *nextState) const {
+    const IR::P4Parser *parser, ExecutionState &nextState) const {
     // We need to explicitly map the parser error
     const auto *errVar = BMv2_V1ModelProgramInfo::getParserParamVar(
         parser, programInfo.getParserErrorType(), 3, "parser_error");
-    nextState->setParserErrorLabel(errVar);
+    nextState.setParserErrorLabel(errVar);
 
     /// Set the restriction on the input port for PTF tests.
     /// This is necessary since the PTF framework only allows a specific port range.
@@ -118,7 +117,7 @@ std::optional<const Constraint *> BMv2_V1ModelCmdStepper::startParser_impl(
 
 std::map<Continuation::Exception, Continuation> BMv2_V1ModelCmdStepper::getExceptionHandlers(
     const IR::P4Parser *parser, Continuation::Body /*normalContinuation*/,
-    const ExecutionState * /*nextState*/) const {
+    const ExecutionState & /*nextState*/) const {
     std::map<Continuation::Exception, Continuation> result;
     auto programInfo = getProgramInfo();
     auto gress = programInfo.getGress(parser);

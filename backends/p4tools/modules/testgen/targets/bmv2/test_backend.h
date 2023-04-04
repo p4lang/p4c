@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <filesystem>
+#include <functional>
 #include <optional>
 #include <set>
 #include <string>
@@ -10,7 +11,6 @@
 
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/trace_events.h"
-#include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "lib/big_int_util.h"
 
@@ -41,7 +41,7 @@ class Bmv2TestBackend : public TestBackEnd {
     TestBackEnd::TestInfo produceTestInfo(
         const ExecutionState *executionState, const Model *completedModel,
         const IR::Expression *outputPacketExpr, const IR::Expression *outputPortExpr,
-        const std::vector<gsl::not_null<const TraceEvent *>> *programTraces) override;
+        const std::vector<std::reference_wrapper<const TraceEvent>> *programTraces) override;
 
     const TestSpec *createTestSpec(const ExecutionState *executionState,
                                    const Model *completedModel, const TestInfo &testInfo) override;

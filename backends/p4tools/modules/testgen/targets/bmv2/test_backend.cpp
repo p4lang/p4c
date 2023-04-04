@@ -12,7 +12,6 @@
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/trace_events.h"
 #include "backends/p4tools/common/lib/util.h"
-#include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "lib/cstring.h"
@@ -69,7 +68,7 @@ Bmv2TestBackend::Bmv2TestBackend(const ProgramInfo &programInfo, SymbolicExecuto
 TestBackEnd::TestInfo Bmv2TestBackend::produceTestInfo(
     const ExecutionState *executionState, const Model *completedModel,
     const IR::Expression *outputPacketExpr, const IR::Expression *outputPortExpr,
-    const std::vector<gsl::not_null<const TraceEvent *>> *programTraces) {
+    const std::vector<std::reference_wrapper<const TraceEvent>> *programTraces) {
     auto testInfo = TestBackEnd::produceTestInfo(executionState, completedModel, outputPacketExpr,
                                                  outputPortExpr, programTraces);
     // This is a hack to deal with a behavioral model quirk.

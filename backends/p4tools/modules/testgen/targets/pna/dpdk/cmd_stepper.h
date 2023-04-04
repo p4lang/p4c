@@ -23,14 +23,14 @@ class PnaDpdkCmdStepper : public SharedPnaCmdStepper {
 
     const PnaDpdkProgramInfo &getProgramInfo() const override;
 
-    void initializeTargetEnvironment(ExecutionState *nextState) const override;
+    void initializeTargetEnvironment(ExecutionState &nextState) const override;
 
     std::optional<const Constraint *> startParser_impl(const IR::P4Parser *parser,
-                                                       ExecutionState *state) const override;
+                                                       ExecutionState &state) const override;
 
     std::map<Continuation::Exception, Continuation> getExceptionHandlers(
         const IR::P4Parser *parser, Continuation::Body normalContinuation,
-        const ExecutionState *state) const override;
+        const ExecutionState &state) const override;
 
  public:
     PnaDpdkCmdStepper(ExecutionState &state, AbstractSolver &solver,

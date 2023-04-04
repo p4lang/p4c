@@ -12,7 +12,6 @@
 
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
-#include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "ir/vector.h"
 #include "ir/visitor.h"
@@ -36,7 +35,7 @@ class ConcolicMethodImpls {
  private:
     using MethodImpl = std::function<void(
         cstring concolicMethodName, const IR::ConcolicVariable *var, const ExecutionState &state,
-        const Model *completedModel, ConcolicVariableMap *resolvedConcolicVariables)>;
+        const Model &completedModel, ConcolicVariableMap *resolvedConcolicVariables)>;
 
     ordered_map<cstring, ordered_map<uint, std::list<std::pair<std::vector<cstring>, MethodImpl>>>>
         impls;
@@ -50,7 +49,7 @@ class ConcolicMethodImpls {
     explicit ConcolicMethodImpls(const ImplList &implList);
 
     bool exec(cstring concolicMethodName, const IR::ConcolicVariable *var,
-              const ExecutionState &state, const Model *completedModel,
+              const ExecutionState &state, const Model &completedModel,
               ConcolicVariableMap *resolvedConcolicVariables) const;
 
     void add(const ImplList &implList);
@@ -58,11 +57,11 @@ class ConcolicMethodImpls {
 
 class ConcolicResolver : public Inspector {
  public:
-    explicit ConcolicResolver(const Model *completedModel, const ExecutionState &state,
-                              const ConcolicMethodImpls *concolicMethodImpls);
+    explicit ConcolicResolver(const Model &completedModel, const ExecutionState &state,
+                              const ConcolicMethodImpls &concolicMethodImpls);
 
-    ConcolicResolver(const Model *completedModel, const ExecutionState &state,
-                     const ConcolicMethodImpls *concolicMethodImpls,
+    ConcolicResolver(const Model &completedModel, const ExecutionState &state,
+                     const ConcolicMethodImpls &concolicMethodImpls,
                      ConcolicVariableMap resolvedConcolicVariables);
 
     const ConcolicVariableMap *getResolvedConcolicVariables() const;
@@ -74,15 +73,15 @@ class ConcolicResolver : public Inspector {
     const ExecutionState &state;
 
     /// The completed model is queried to produce a (random) assignment for concolic inputs.
-    gsl::not_null<const Model *> completedModel;
+    const Model &completedModel;
 
     /// A map of the concolic variables and the assertion associated with the variable. These
     /// assertions are used to add constraints to the solver.
     ConcolicVariableMap resolvedConcolicVariables;
 
-    /// A pointer to the list of implemented concolic methods. This is assembled by the testgen
+    /// A reference to the list of implemented concolic methods. This is assembled by the testgen
     /// targets.
-    gsl::not_null<const ConcolicMethodImpls *> concolicMethodImpls;
+    const ConcolicMethodImpls &concolicMethodImpls;
 };
 
 class Concolic {

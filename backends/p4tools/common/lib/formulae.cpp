@@ -25,12 +25,12 @@ bool StateVariable::repOk(const IR::Expression *expr) {
 }
 
 bool StateVariable::operator<(const StateVariable &other) const {
-    return compare(node.get(), other.node.get()) < 0;
+    return compare(&node.get(), &other.node.get()) < 0;
 }
 
 bool StateVariable::operator==(const StateVariable &other) const {
     // Delegate to IR's notion of equality.
-    return *node == *other.node;
+    return &node.get() == &other.node.get();
 }
 
 int StateVariable::compare(const IR::Expression *e1, const IR::Expression *e2) {

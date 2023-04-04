@@ -14,9 +14,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 /// Implements small-step operational semantics for tables.
 class TableStepper {
@@ -123,7 +121,7 @@ class TableStepper {
 
     /// Sets the action taken by the given table. The arguments in the given MethodCallExpression
     /// are assumed to be symbolic values.
-    void setTableAction(ExecutionState *nextState, const IR::MethodCallExpression *actionCall);
+    void setTableAction(ExecutionState &nextState, const IR::MethodCallExpression *actionCall);
 
     /// A helper function to iteratively resolve table keys into symbolic values.
     /// This function returns false, if no key needs to be resolved.
@@ -135,7 +133,7 @@ class TableStepper {
     /// match or does not match at all. The table stepper first checks these custom match types. If
     /// these do not match it steps through the default implementation. If it does not match either,
     /// a P4C_UNIMPLEMENTED is thrown.
-    virtual const IR::Expression *computeTargetMatchType(ExecutionState *nextState,
+    virtual const IR::Expression *computeTargetMatchType(ExecutionState &nextState,
                                                          const KeyProperties &keyProperties,
                                                          TableMatchMap *matches,
                                                          const IR::Expression *hitCondition);
@@ -144,7 +142,7 @@ class TableStepper {
     /// handle constant entries, it is specialized for control plane entries.
     /// The function also tracks the list of field matches created to achieve a  hit. We later use
     /// this to insert table entries using the STF/PTF framework.
-    const IR::Expression *computeHit(ExecutionState *nextState, TableMatchMap *matches);
+    const IR::Expression *computeHit(ExecutionState &nextState, TableMatchMap *matches);
 
     /// Collects properties that may be set per table. Target back end may have different semantics
     /// for table execution that need to be collect before evaluation the table.
@@ -201,8 +199,6 @@ class TableStepper {
     virtual ~TableStepper() = default;
 };
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SMALL_STEP_TABLE_STEPPER_H_ */

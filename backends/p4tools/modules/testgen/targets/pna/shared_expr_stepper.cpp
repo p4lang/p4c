@@ -41,12 +41,14 @@ const ExternMethodImpls SharedPnaExprStepper::PNA_EXTERN_METHOD_IMPLS({
      [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
         IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
         const ExecutionState &state, SmallStepEvaluator::Result &result) {
-         auto *nextState = new ExecutionState(state);
+         auto &nextState = state.clone();
          // Use an assignment to set drop variable to true.
          // This variable will be processed in the deparser.
-         nextState->set(&PnaConstants::DROP_VAR, IR::getBoolLiteral(true));
-         nextState->add(new TraceEvent::Generic("drop_packet executed."));
-         nextState->popBody();
+         nextState.set(&PnaConstants::DROP_VAR, IR::getBoolLiteral(true));
+         nextState.add(
+
+             *new TraceEvent::Generic("drop_packet executed."));
+         nextState.popBody();
          result->emplace_back(nextState);
      }},
     /* ======================================================================================
@@ -59,7 +61,7 @@ const ExternMethodImpls SharedPnaExprStepper::PNA_EXTERN_METHOD_IMPLS({
      [](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
         IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args, const ExecutionState &state,
         SmallStepEvaluator::Result &result) {
-         auto *nextState = new ExecutionState(state);
+         auto &nextState = state.clone();
 
          const auto *destPort = args->at(0)->expression;
          // TODO: Frontload this in the expression stepper for method call expressions.
@@ -77,9 +79,11 @@ const ExternMethodImpls SharedPnaExprStepper::PNA_EXTERN_METHOD_IMPLS({
              return;
          }
          // Use an assignment to set the output port to the input.
-         nextState->set(&PnaConstants::OUTPUT_PORT_VAR, destPort);
-         nextState->add(new TraceEvent::Generic("send_to_port executed."));
-         nextState->popBody();
+         nextState.set(&PnaConstants::OUTPUT_PORT_VAR, destPort);
+         nextState.add(
+
+             *new TraceEvent::Generic("send_to_port executed."));
+         nextState.popBody();
          result->emplace_back(nextState);
      }},
     /* ======================================================================================
@@ -134,8 +138,8 @@ const ExternMethodImpls SharedPnaExprStepper::PNA_EXTERN_METHOD_IMPLS({
          const auto *n2hValue = args->at(1)->expression;
          const auto *h2nValue = args->at(2)->expression;
          if (state.hasTaint(directionVar)) {
-             auto *taintedState = new ExecutionState(state);
-             taintedState->replaceTopBody(
+             auto &taintedState = state.clone();
+             taintedState.replaceTopBody(
                  Continuation::Return(Utils::getTaintExpression(n2hValue->type)));
              result->emplace_back(taintedState);
              return;
@@ -144,13 +148,13 @@ const ExternMethodImpls SharedPnaExprStepper::PNA_EXTERN_METHOD_IMPLS({
              directionVar, IR::getConstant(directionVar->type, PacketDirection::NET_TO_HOST));
 
          // Return the NET_TO_HOST value.
-         auto *netToHostState = new ExecutionState(state);
-         netToHostState->replaceTopBody(Continuation::Return(n2hValue));
+         auto &netToHostState = state.clone();
+         netToHostState.replaceTopBody(Continuation::Return(n2hValue));
          result->emplace_back(cond, state, netToHostState);
 
          // Return the HOST_TO_NET value.
-         auto *hostToNetState = new ExecutionState(state);
-         hostToNetState->replaceTopBody(Continuation::Return(h2nValue));
+         auto &hostToNetState = state.clone();
+         hostToNetState.replaceTopBody(Continuation::Return(h2nValue));
          result->emplace_back(new IR::LNot(cond), state, netToHostState);
      }},
     /* ======================================================================================
@@ -165,9 +169,11 @@ const ExternMethodImpls SharedPnaExprStepper::PNA_EXTERN_METHOD_IMPLS({
      [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
         IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
         const ExecutionState &state, SmallStepEvaluator::Result &result) {
-         auto *nextState = new ExecutionState(state);
-         nextState->add(new TraceEvent::Generic("add_entry executed. Currently a no-op."));
-         nextState->replaceTopBody(Continuation::Return(IR::getBoolLiteral(true)));
+         auto &nextState = state.clone();
+         nextState.add(
+
+             *new TraceEvent::Generic("add_entry executed. Currently a no-op."));
+         nextState.replaceTopBody(Continuation::Return(IR::getBoolLiteral(true)));
          result->emplace_back(nextState);
      }},
 });

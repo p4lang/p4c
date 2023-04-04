@@ -1,13 +1,13 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/max_stmt_cov.h"
 
 #include <ctime>
+#include <functional>
 #include <map>
 #include <optional>
 #include <vector>
 
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/util.h"
-#include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "lib/error.h"
 #include "lib/source_file.h"
@@ -25,9 +25,9 @@ void RandomMaxStmtCoverage::run(const Callback &callback) {
     // branches to produce tests.
     while (true) {
         try {
-            if (executionState->isTerminal()) {
+            if (executionState.get().isTerminal()) {
                 // We've reached the end of the program. Call back and (if desired) end execution.
-                bool terminate = handleTerminalState(callback, *executionState);
+                bool terminate = handleTerminalState(callback, executionState);
                 uint64_t coverage = visitedStatements.size();
                 // We set the coverage saddle track accordingly.
                 if (coverage == coverageSaddleTrack.first) {
@@ -46,11 +46,11 @@ void RandomMaxStmtCoverage::run(const Callback &callback) {
                 // than one branch was produced.
                 // State successors are accompanied by branch constrain which should be evaluated
                 // in the state before the step was taken - we copy the current symbolic state.
-                StepResult successors = step(*executionState);
+                StepResult successors = step(executionState);
                 bool guaranteeViability = successors->size() > 1;
                 ExecutionState *next = chooseBranch(*successors, guaranteeViability);
                 if (next != nullptr) {
-                    executionState = next;
+                    executionState = *next;
                     continue;
                 }
             }
@@ -128,7 +128,7 @@ void RandomMaxStmtCoverage::run(const Callback &callback) {
                 }
             }
             if (next != nullptr) {
-                executionState = next;
+                executionState = *next;
                 break;
             }
         }
@@ -218,7 +218,7 @@ ExecutionState *RandomMaxStmtCoverage::chooseBranch(std::vector<Branch> &branche
 
         if (guaranteeViability) {
             // Check the consistency of the path constraints asserted so far.
-            auto solverResult = solver.checkSat(branch.nextState->getPathConstraint());
+            auto solverResult = solver.checkSat(branch.nextState.get().getPathConstraint());
             if (solverResult == std::nullopt) {
                 ::warning("Solver timed out");
             }
@@ -233,7 +233,7 @@ ExecutionState *RandomMaxStmtCoverage::chooseBranch(std::vector<Branch> &branche
             unexploredBranches.push_back(branches);
         }
 
-        return branch.nextState;
+        return &branch.nextState.get();
     }
 }
 

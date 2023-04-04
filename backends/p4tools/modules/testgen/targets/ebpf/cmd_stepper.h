@@ -15,11 +15,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/program_info.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace EBPF {
+namespace P4Tools::P4Testgen::EBPF {
 
 class EBPFCmdStepper : public CmdStepper {
  protected:
@@ -27,23 +23,20 @@ class EBPFCmdStepper : public CmdStepper {
 
     const EBPFProgramInfo &getProgramInfo() const override;
 
-    void initializeTargetEnvironment(ExecutionState *nextState) const override;
+    void initializeTargetEnvironment(ExecutionState &nextState) const override;
 
     std::optional<const Constraint *> startParser_impl(const IR::P4Parser *parser,
-                                                       ExecutionState *state) const override;
+                                                       ExecutionState &nextState) const override;
 
     std::map<Continuation::Exception, Continuation> getExceptionHandlers(
         const IR::P4Parser *parser, Continuation::Body normalContinuation,
-        const ExecutionState *state) const override;
+        const ExecutionState &nextState) const override;
 
  public:
-    EBPFCmdStepper(ExecutionState &state, AbstractSolver &solver, const ProgramInfo &programInfo);
+    EBPFCmdStepper(ExecutionState &nextState, AbstractSolver &solver,
+                   const ProgramInfo &programInfo);
 };
 
-}  // namespace EBPF
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::EBPF
 
 #endif /* TESTGEN_TARGETS_EBPF_CMD_STEPPER_H_ */

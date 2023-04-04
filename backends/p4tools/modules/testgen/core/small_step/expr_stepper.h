@@ -59,7 +59,7 @@ class ExprStepper : public AbstractStepper {
     /// Iterate over the fields in @param flatFields and set the corresponding values in
     /// @param nextState. If there is a varbit, assign the @param varbitFieldSize as size to
     /// it.
-    static void setFields(ExecutionState *nextState,
+    static void setFields(ExecutionState &nextState,
                           const std::vector<const IR::Member *> &flatFields, int varBitFieldSize);
     /// This function call is used in member expressions to cleanly resolve hit, miss, and action
     /// run expressions. These are return values of a table.apply() call, and fairly special in P4.
@@ -112,7 +112,7 @@ class ExprStepper : public AbstractStepper {
     /// If @param forceTaint is true, out will set the parameter to tainted.
     // Otherwise, the target default value is chosen.
     /// TODO: Consolidate this into the copy_in_out extern.
-    void generateCopyIn(ExecutionState *nextState, const IR::Expression *targetPath,
+    void generateCopyIn(ExecutionState &nextState, const IR::Expression *targetPath,
                         const IR::Expression *srcPath, cstring dir, bool forceTaint) const;
 
     /// Takes a step to reflect a "select" expression failing to match. The default implementation

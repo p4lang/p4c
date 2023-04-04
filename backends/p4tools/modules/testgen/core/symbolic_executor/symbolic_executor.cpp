@@ -9,7 +9,6 @@
 
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/util.h"
-#include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "lib/error.h"
 #include "lib/timer.h"
@@ -52,7 +51,7 @@ bool SymbolicExecutor::handleTerminalState(const Callback &callback,
     // Get the model from the solver, complete it with respect to the
     // final symbolic environment and trace, use it to evaluate the
     // final execution state, and finally delegate to the callback.
-    const FinalState finalState(&solver, terminalState);
+    const FinalState finalState(solver, terminalState);
     return callback(finalState);
 }
 
@@ -65,7 +64,7 @@ bool SymbolicExecutor::evaluateBranch(const SymbolicExecutor::Branch &branch,
     }
 
     // Check the consistency of the path constraints asserted so far.
-    auto solverResult = solver.checkSat(branch.nextState->getPathConstraint());
+    auto solverResult = solver.checkSat(branch.nextState.get().getPathConstraint());
     if (solverResult == std::nullopt) {
         ::warning("Solver timed out");
     }
@@ -85,6 +84,7 @@ SymbolicExecutor::Branch SymbolicExecutor::popRandomBranch(
 SymbolicExecutor::SymbolicExecutor(AbstractSolver &solver, const ProgramInfo &programInfo)
     : programInfo(programInfo),
       solver(solver),
+      executionState(ExecutionState::create(programInfo.program)),
       allStatements(programInfo.getAllStatements()),
       evaluator(solver, programInfo) {
     // If there is no seed provided, do not randomize the solver.
@@ -92,7 +92,6 @@ SymbolicExecutor::SymbolicExecutor(AbstractSolver &solver, const ProgramInfo &pr
     if (seed != std::nullopt) {
         this->solver.seed(*seed);
     }
-    executionState = new ExecutionState(programInfo.program);
 }
 
 void SymbolicExecutor::updateVisitedStatements(const P4::Coverage::CoverageSet &newStatements) {
@@ -104,10 +103,7 @@ const P4::Coverage::CoverageSet &SymbolicExecutor::getVisitedStatements() {
 }
 
 void SymbolicExecutor::printCurrentTraceAndBranches(std::ostream &out) {
-    if (executionState == nullptr) {
-        return;
-    }
-    const auto &branchesList = executionState->getSelectedBranches();
+    const auto &branchesList = executionState.get().getSelectedBranches();
     printTraces("Track branches:");
     out << "Selected " << branchesList.size() << " branches : (";
     printTraces("Selected %1% branches : (", branchesList.size());

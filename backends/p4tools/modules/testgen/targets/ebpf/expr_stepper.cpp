@@ -21,11 +21,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/table_stepper.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace EBPF {
+namespace P4Tools::P4Testgen::EBPF {
 
 EBPFExprStepper::EBPFExprStepper(ExecutionState &state, AbstractSolver &solver,
                                  const ProgramInfo &programInfo)
@@ -54,8 +50,8 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
              ::warning("CounterArray.add not fully implemented.");
-             auto *nextState = new ExecutionState(state);
-             nextState->popBody();
+             auto &nextState = state.clone();
+             nextState.popBody();
              result->emplace_back(nextState);
          }},
         /* ======================================================================================
@@ -75,8 +71,8 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
              ::warning("CounterArray.increment not fully implemented.");
-             auto *nextState = new ExecutionState(state);
-             nextState->popBody();
+             auto &nextState = state.clone();
+             nextState.popBody();
              result->emplace_back(nextState);
          }},
         /* ======================================================================================
@@ -106,8 +102,8 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
              // If yes, do not bother evaluating the checksum.
              auto emitIsTainted = state.hasTaint(validVar);
              if (emitIsTainted || !validVar->checkedTo<IR::BoolLiteral>()->value) {
-                 auto *nextState = new ExecutionState(state);
-                 nextState->replaceTopBody(Continuation::Return(IR::getBoolLiteral(false)));
+                 auto &nextState = state.clone();
+                 nextState.replaceTopBody(Continuation::Return(IR::getBoolLiteral(false)));
                  result->emplace_back(nextState);
                  return;
              }
@@ -152,8 +148,8 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  new IR::Add(bt16, new IR::Slice(checksum, 31, 16), new IR::Slice(checksum, 15, 0));
              const auto *calcResult = new IR::Cmpl(bt16, checksum);
              const auto *comparison = new IR::Equ(calcResult, IR::getConstant(bt16, 0));
-             auto *nextState = new ExecutionState(state);
-             nextState->replaceTopBody(Continuation::Return(comparison));
+             auto &nextState = state.clone();
+             nextState.replaceTopBody(Continuation::Return(comparison));
              result->emplace_back(nextState);
          }},
         /* ======================================================================================
@@ -184,10 +180,10 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
              // Implement the simple conntrack case since we do not support multiple packets here
              // yet.
              // TODO: We need custom test objects to implement richer, stateful testing here.
-             auto *nextState = new ExecutionState(state);
+             auto &nextState = state.clone();
              const auto *cond = new IR::LAnd(new IR::Equ(syn, IR::getConstant(syn->type, 1)),
                                              new IR::Equ(ack, IR::getConstant(ack->type, 0)));
-             nextState->replaceTopBody(Continuation::Return(cond));
+             nextState.replaceTopBody(Continuation::Return(cond));
              result->emplace_back(nextState);
          }},
     });
@@ -204,8 +200,4 @@ bool EBPFExprStepper::preorder(const IR::P4Table *table) {
     return tableStepper.eval();
 }
 
-}  // namespace EBPF
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::EBPF

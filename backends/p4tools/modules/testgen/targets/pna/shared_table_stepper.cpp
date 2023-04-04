@@ -37,7 +37,7 @@
 namespace P4Tools::P4Testgen::Pna {
 
 const IR::Expression *SharedPnaTableStepper::computeTargetMatchType(
-    ExecutionState *nextState, const KeyProperties &keyProperties, TableMatchMap *matches,
+    ExecutionState &nextState, const KeyProperties &keyProperties, TableMatchMap *matches,
     const IR::Expression *hitCondition) {
     const IR::Expression *keyExpr = keyProperties.key->expression;
 
@@ -46,7 +46,7 @@ const IR::Expression *SharedPnaTableStepper::computeTargetMatchType(
         // We can recover from taint by simply not adding the optional match.
         // Create a new zombie constant that corresponds to the key expression.
         cstring keyName = properties.tableName + "_key_" + keyProperties.name;
-        const auto ctrlPlaneKey = nextState->createZombieConst(keyExpr->type, keyName);
+        const auto ctrlPlaneKey = nextState.createZombieConst(keyExpr->type, keyName);
         if (keyProperties.isTainted) {
             matches->emplace(keyProperties.name,
                              new Optional(keyProperties.key, ctrlPlaneKey, false));
@@ -76,8 +76,8 @@ const IR::Expression *SharedPnaTableStepper::computeTargetMatchType(
             maxKey = IR::getConstant(keyExpr->type, IR::getMaxBvVal(keyExpr->type));
             keyExpr = minKey;
         } else {
-            minKey = nextState->createZombieConst(keyExpr->type, minName);
-            maxKey = nextState->createZombieConst(keyExpr->type, maxName);
+            minKey = nextState.createZombieConst(keyExpr->type, minName);
+            maxKey = nextState.createZombieConst(keyExpr->type, maxName);
         }
         matches->emplace(keyProperties.name, new Range(keyProperties.key, minKey, maxKey));
         return new IR::LAnd(hitCondition, new IR::LAnd(new IR::LAnd(new IR::Lss(minKey, maxKey),
@@ -100,7 +100,7 @@ void SharedPnaTableStepper::evalTableActionProfile(
         const auto *actionType = state->getActionDecl(tableAction->method);
         CHECK_NULL(actionType);
 
-        auto *nextState = new ExecutionState(*state);
+        auto &nextState = state->clone();
         // We get the control plane name of the action we are calling.
         cstring actionName = actionType->controlPlaneName();
         // Copy the previous action profile.
@@ -118,8 +118,8 @@ void SharedPnaTableStepper::evalTableActionProfile(
                 Utils::getZombieTableVar(parameter->type, table, "*actionData", idx, argIdx);
             cstring keyName =
                 properties.tableName + "_param_" + actionName + std::to_string(argIdx);
-            const auto &actionArg = nextState->createZombieConst(parameter->type, keyName);
-            nextState->set(actionDataVar, actionArg);
+            const auto &actionArg = nextState.createZombieConst(parameter->type, keyName);
+            nextState.set(actionDataVar, actionArg);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
             // Note how we use the control plane name for the parameter here.
@@ -129,7 +129,7 @@ void SharedPnaTableStepper::evalTableActionProfile(
         // TODO: Should we check if we exceed the maximum number of possible profile entries?
         actionProfile->addToActionMap(actionName, ctrlPlaneArgs);
         // Update the action profile in the execution state.
-        nextState->addTestObject("action_profile", actionProfile->getObjectName(), actionProfile);
+        nextState.addTestObject("action_profile", actionProfile->getObjectName(), actionProfile);
 
         // We add the arguments to our action call, effectively creating a const entry call.
         auto *synthesizedAction = tableAction->clone();
@@ -152,7 +152,7 @@ void SharedPnaTableStepper::evalTableActionProfile(
         // Add the action profile to the table.
         // This implies a slightly different implementation to usual control plane table behavior.
         tableConfig->addTableProperty("action_profile", actionProfile);
-        nextState->addTestObject("tableconfigs", table->controlPlaneName(), tableConfig);
+        nextState.addTestObject("tableconfigs", table->controlPlaneName(), tableConfig);
 
         // Update all the tracking variables for tables.
         std::vector<Continuation::Command> replacements;
@@ -162,17 +162,17 @@ void SharedPnaTableStepper::evalTableActionProfile(
         // statements. If that is the case, apply the CollectLatentStatements visitor.
         P4::Coverage::CoverageSet coveredStmts;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
-            nextState->getActionDecl(tableAction->method)
+            nextState.getActionDecl(tableAction->method)
                 ->apply(CollectLatentStatements(coveredStmts, *state));
         }
 
-        nextState->set(getTableHitVar(table), IR::getBoolLiteral(true));
-        nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
+        nextState.set(getTableHitVar(table), IR::getBoolLiteral(true));
+        nextState.set(getTableReachedVar(table), IR::getBoolLiteral(true));
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
         tableStream << " Chosen action: " << actionName;
-        nextState->add(new TraceEvent::Generic(tableStream.str()));
-        nextState->replaceTopBody(&replacements);
+        nextState.add(*new TraceEvent::Generic(tableStream.str()));
+        nextState.replaceTopBody(&replacements);
         getResult()->emplace_back(hitCondition, *state, nextState, coveredStmts);
     }
 }
@@ -189,7 +189,7 @@ void SharedPnaTableStepper::evalTableActionSelector(
         const auto *actionType = state->getActionDecl(tableAction->method);
         CHECK_NULL(actionType);
 
-        auto *nextState = new ExecutionState(*state);
+        auto &nextState = state->clone();
         // We get the control plane name of the action we are calling.
         cstring actionName = actionType->controlPlaneName();
 
@@ -209,8 +209,8 @@ void SharedPnaTableStepper::evalTableActionSelector(
                 Utils::getZombieTableVar(parameter->type, table, "*actionData", idx, argIdx);
             cstring keyName =
                 properties.tableName + "_param_" + actionName + std::to_string(argIdx);
-            const auto &actionArg = nextState->createZombieConst(parameter->type, keyName);
-            nextState->set(actionDataVar, actionArg);
+            const auto &actionArg = nextState.createZombieConst(parameter->type, keyName);
+            nextState.set(actionDataVar, actionArg);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
             // Note how we use the control plane name for the parameter here.
@@ -224,10 +224,9 @@ void SharedPnaTableStepper::evalTableActionSelector(
             SharedPnaProperties.actionSelector->getSelectorDecl(), actionProfile);
 
         // Update the action profile in the execution state.
-        nextState->addTestObject("action_profile", actionProfile->getObjectName(), actionProfile);
+        nextState.addTestObject("action_profile", actionProfile->getObjectName(), actionProfile);
         // Update the action selector in the execution state.
-        nextState->addTestObject("action_selector", actionSelector->getObjectName(),
-                                 actionSelector);
+        nextState.addTestObject("action_selector", actionSelector->getObjectName(), actionSelector);
 
         // We add the arguments to our action call, effectively creating a const entry call.
         auto *synthesizedAction = tableAction->clone();
@@ -252,7 +251,7 @@ void SharedPnaTableStepper::evalTableActionSelector(
         // Add the action selector to the table. This signifies a slightly different implementation.
         tableConfig->addTableProperty("action_selector", actionSelector);
 
-        nextState->addTestObject("tableconfigs", table->controlPlaneName(), tableConfig);
+        nextState.addTestObject("tableconfigs", table->controlPlaneName(), tableConfig);
 
         // Update all the tracking variables for tables.
         std::vector<Continuation::Command> replacements;
@@ -262,17 +261,19 @@ void SharedPnaTableStepper::evalTableActionSelector(
         // statements. If that is the case, apply the CollectLatentStatements visitor.
         P4::Coverage::CoverageSet coveredStmts;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
-            nextState->getActionDecl(tableAction->method)
+            nextState.getActionDecl(tableAction->method)
                 ->apply(CollectLatentStatements(coveredStmts, *state));
         }
 
-        nextState->set(getTableHitVar(table), IR::getBoolLiteral(true));
-        nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
+        nextState.set(getTableHitVar(table), IR::getBoolLiteral(true));
+        nextState.set(getTableReachedVar(table), IR::getBoolLiteral(true));
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
         tableStream << " Chosen action: " << actionName;
-        nextState->add(new TraceEvent::Generic(tableStream.str()));
-        nextState->replaceTopBody(&replacements);
+        nextState.add(
+
+            *new TraceEvent::Generic(tableStream.str()));
+        nextState.replaceTopBody(&replacements);
         getResult()->emplace_back(hitCondition, *state, nextState, coveredStmts);
     }
 }

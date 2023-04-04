@@ -29,11 +29,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/contrib/bmv2_hash/calculations.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace Bmv2 {
+namespace P4Tools::P4Testgen::Bmv2 {
 
 std::vector<char> Bmv2Concolic::convertBigIntToBytes(big_int &dataInt, int targetWidthBits) {
     std::vector<char> bytes;
@@ -73,7 +69,7 @@ const IR::Expression *Bmv2Concolic::setAndComputePayload(
 }
 
 big_int Bmv2Concolic::computeChecksum(const std::vector<const IR::Expression *> &exprList,
-                                      const Model *completedModel, int algo,
+                                      const Model &completedModel, int algo,
                                       Model::ExpressionMap *resolvedExpressions) {
     // Pick a checksum according to the algorithm value.
     ChecksumFunction checksumFun = nullptr;
@@ -128,13 +124,13 @@ big_int Bmv2Concolic::computeChecksum(const std::vector<const IR::Expression *> 
             concatExpr = new IR::Concat(IR::getBitType(concatWidth), concatExpr, remainderExpr);
         }
         auto dataInt =
-            IR::getBigIntFromLiteral(completedModel->evaluate(concatExpr, resolvedExpressions));
+            IR::getBigIntFromLiteral(completedModel.evaluate(concatExpr, resolvedExpressions));
         bytes = convertBigIntToBytes(dataInt, concatWidth);
     }
     return checksumFun(bytes.data(), bytes.size());
 }
 
-const ConcolicMethodImpls::ImplList Bmv2Concolic::Bmv2ConcolicMethodImpls{
+const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
     /* ======================================================================================
      *   method_hash
      * ====================================================================================== */
@@ -153,7 +149,7 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::Bmv2ConcolicMethodImpls{
     {"*method_hash",
      {"result", "algo", "base", "data", "max"},
      [](cstring /*concolicMethodName*/, const IR::ConcolicVariable *var,
-        const ExecutionState & /*state*/, const Model *completedModel,
+        const ExecutionState & /*state*/, const Model &completedModel,
         ConcolicVariableMap *resolvedConcolicVariables) {
          const auto *args = var->arguments;
          const auto *checksumVar = args->at(0)->expression;
@@ -164,11 +160,11 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::Bmv2ConcolicMethodImpls{
          // Assign arguments to concrete variables and perform type checking.
          auto algo = args->at(1)->expression->checkedTo<IR::Constant>()->asInt();
          Model::ExpressionMap resolvedExpressions;
-         const auto *base = completedModel->evaluate(args->at(2)->expression, &resolvedExpressions);
+         const auto *base = completedModel.evaluate(args->at(2)->expression, &resolvedExpressions);
          auto baseInt = IR::getBigIntFromLiteral(base);
          const auto *dataExpr = args->at(3)->expression;
          const auto *maxHash =
-             completedModel->evaluate(args->at(4)->expression, &resolvedExpressions);
+             completedModel.evaluate(args->at(4)->expression, &resolvedExpressions);
          auto maxHashInt = IR::getBigIntFromLiteral(maxHash);
 
          /// Flatten the data input and compute the byte array that will be used for
@@ -219,7 +215,7 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::Bmv2ConcolicMethodImpls{
     {"*method_checksum",
      {"result", "algo", "data"},
      [](cstring /*concolicMethodName*/, const IR::ConcolicVariable *var,
-        const ExecutionState & /*state*/, const Model *completedModel,
+        const ExecutionState & /*state*/, const Model &completedModel,
         ConcolicVariableMap *resolvedConcolicVariables) {
          // Assign arguments to concrete variables and perform type checking.
          const auto *args = var->arguments;
@@ -269,7 +265,7 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::Bmv2ConcolicMethodImpls{
     {"*method_checksum_with_payload",
      {"result", "algo", "data"},
      [](cstring /*concolicMethodName*/, const IR::ConcolicVariable *var,
-        const ExecutionState &state, const Model *completedModel,
+        const ExecutionState &state, const Model &completedModel,
         ConcolicVariableMap *resolvedConcolicVariables) {
          // Assign arguments to concrete variables and perform type checking.
          const auto *args = var->arguments;
@@ -291,7 +287,7 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::Bmv2ConcolicMethodImpls{
          // This is the maximum value this checksum can have.
          auto maxHashInt = IR::getMaxBvVal(checksumVarType);
          const auto &packetBitSizeVar = ExecutionState::getInputPacketSizeVar();
-         const auto *payloadSizeConst = completedModel->evaluate(packetBitSizeVar);
+         const auto *payloadSizeConst = completedModel.evaluate(packetBitSizeVar);
          int calculatedPacketSize = IR::getIntFromLiteral(payloadSizeConst);
 
          const auto *inputPacketExpr = state.getInputPacket();
@@ -299,7 +295,7 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::Bmv2ConcolicMethodImpls{
          // If the payload is not 0, we need to add it to our checksum calculation.
          if (payloadSize > 0) {
              const auto *payloadExpr =
-                 setAndComputePayload(*completedModel, resolvedConcolicVariables, payloadSize);
+                 setAndComputePayload(completedModel, resolvedConcolicVariables, payloadSize);
              // Fix the payload size only if is not fixed already.
              resolvedConcolicVariables->emplace(packetBitSizeVar, payloadSizeConst);
              exprList.push_back(payloadExpr);
@@ -333,11 +329,7 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::Bmv2ConcolicMethodImpls{
 };
 
 const ConcolicMethodImpls::ImplList *Bmv2Concolic::getBmv2ConcolicMethodImpls() {
-    return &Bmv2ConcolicMethodImpls;
+    return &BMV2_CONCOLIC_METHOD_IMPLS;
 }
 
-}  // namespace Bmv2
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::Bmv2

@@ -1,9 +1,9 @@
 #ifndef BACKENDS_P4TOOLS_COMMON_LIB_FORMULAE_H_
 #define BACKENDS_P4TOOLS_COMMON_LIB_FORMULAE_H_
 
+#include <functional>
 #include <string>
 
-#include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "ir/node.h"
 #include "lib/exceptions.h"
@@ -16,12 +16,12 @@ namespace P4Tools {
 template <class Self, class Node = IR::Expression>
 class AbstractRepCheckedNode {
  protected:
-    gsl::not_null<const Node *> node;
+    std::reference_wrapper<const Node> node;
 
     // Implicit conversions to allow implementations to be treated like a Node*.
-    operator const Node *() const { return node; }
-    const Node &operator*() const { return *node; }
-    const Node *operator->() const { return node; }
+    operator const Node *() const { return &node.get(); }
+    const Node &operator*() const { return node.get(); }
+    const Node *operator->() const { return &node.get(); }
 
     /// Performs a checked cast. A BUG occurs if the cast fails.
     template <class T>
@@ -34,7 +34,7 @@ class AbstractRepCheckedNode {
 
     /// @param classDesc a user-friendly description of the class, for reporting errors to the
     ///     user.
-    explicit AbstractRepCheckedNode(const Node *node, std::string classDesc) : node(node) {
+    explicit AbstractRepCheckedNode(const Node *node, std::string classDesc) : node(*node) {
         BUG_CHECK(Self::repOk(node), "%1%: Not a valid %2%.", node, classDesc);
     }
 };

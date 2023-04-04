@@ -1,12 +1,12 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/selected_branches.h"
 
 #include <cstdlib>
+#include <functional>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "backends/p4tools/common/core/solver.h"
-#include "gsl/gsl-lite.hpp"
 #include "lib/error.h"
 #include "lib/exceptions.h"
 
@@ -16,14 +16,14 @@
 namespace P4Tools::P4Testgen {
 
 void SelectedBranches::run(const Callback &callback) {
-    while (!executionState->isTerminal()) {
-        StepResult successors = step(*executionState);
+    while (!executionState.get().isTerminal()) {
+        StepResult successors = step(executionState);
         // Assign branch ids to the branches. These integer branch ids are used by track-branches
         // and selected (input) branches features.
         // Also populates exploredBranches from the initial set of branches.
         for (uint64_t bIdx = 0; bIdx < successors->size(); ++bIdx) {
             auto &succ = (*successors)[bIdx];
-            succ.nextState->pushBranchDecision(bIdx + 1);
+            succ.nextState.get().pushBranchDecision(bIdx + 1);
         }
         if (successors->size() == 1) {
             // Non-branching states are not recorded by selected branches.
@@ -39,15 +39,15 @@ void SelectedBranches::run(const Callback &callback) {
         // successor matching the given branch decision.
         uint64_t nextBranch = selectedBranches.front();
         selectedBranches.pop_front();
-        ExecutionState *next = chooseBranch(*successors, nextBranch);
+        auto *next = chooseBranch(*successors, nextBranch);
         if (next == nullptr) {
             break;
         }
-        executionState = next;
+        executionState = *next;
     }
-    if (executionState->isTerminal()) {
+    if (executionState.get().isTerminal()) {
         // We've reached the end of the program. Call back and (if desired) end execution.
-        handleTerminalState(callback, *executionState);
+        handleTerminalState(callback, executionState);
         if (!selectedBranches.empty()) {
             ::warning(
                 "Execution reached a final state before executing whole "
@@ -80,23 +80,18 @@ SelectedBranches::SelectedBranches(AbstractSolver &solver, const ProgramInfo &pr
 
 ExecutionState *SelectedBranches::chooseBranch(const std::vector<Branch> &branches,
                                                uint64_t nextBranch) {
-    ExecutionState *next = nullptr;
     for (const auto &branch : branches) {
-        const auto &selectedBranches = branch.nextState->getSelectedBranches();
+        const auto &selectedBranches = branch.nextState.get().getSelectedBranches();
         BUG_CHECK(!selectedBranches.empty(), "Corrupted selectedBranches in a execution state");
         // Find branch matching given branch identifier.
         if (selectedBranches.back() == nextBranch) {
-            next = branch.nextState;
-            break;
+            return &branch.nextState.get();
         }
     }
+    // If not found, the input selected branch list is invalid.
+    ::error("The selected branches string doesn't match any branch.");
 
-    if (next == nullptr) {
-        // If not found, the input selected branch list is invalid.
-        ::error("The selected branches string doesn't match any branch.");
-    }
-
-    return next;
+    return nullptr;
 }
 
 }  // namespace P4Tools::P4Testgen

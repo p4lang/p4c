@@ -262,7 +262,7 @@ const TableConfig *TableConfig::evaluate(const Model &model) const {
  * ========================================================================================= */
 
 TestSpec::TestSpec(Packet ingressPacket, std::optional<Packet> egressPacket,
-                   std::vector<gsl::not_null<const TraceEvent *>> traces)
+                   std::vector<std::reference_wrapper<const TraceEvent>> traces)
     : ingressPacket(std::move(ingressPacket)),
       egressPacket(std::move(egressPacket)),
       traces(std::move(traces)) {}
@@ -276,7 +276,7 @@ std::optional<const Packet *> TestSpec::getEgressPacket() const {
 
 const Packet *TestSpec::getIngressPacket() const { return &ingressPacket; }
 
-const std::vector<gsl::not_null<const TraceEvent *>> *TestSpec::getTraces() const {
+const std::vector<std::reference_wrapper<const TraceEvent>> *TestSpec::getTraces() const {
     return &traces;
 }
 

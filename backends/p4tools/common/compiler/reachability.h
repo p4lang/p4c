@@ -9,10 +9,7 @@
 #include <utility>
 #include <vector>
 
-#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/callGraph.h"
-#include "frontends/p4/typeMap.h"
-#include "gsl/gsl-lite.hpp"
 #include "ir/id.h"
 #include "ir/ir.h"
 #include "ir/node.h"
@@ -93,13 +90,11 @@ using NodesCallGraph = ExtendedCallGraph<DCGVertexType *>;
 class P4ProgramDCGCreator : public Inspector {
     NodesCallGraph *dcg;
     DCGVertexTypeSet prev;
-    P4::TypeMap *typeMap;
-    P4::ReferenceMap *refMap;
     std::unordered_set<const DCGVertexType *> visited;
     const IR::P4Program *p4program;
 
  public:
-    P4ProgramDCGCreator(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, NodesCallGraph *dcg);
+    explicit P4ProgramDCGCreator(NodesCallGraph *dcg);
 
     bool preorder(const IR::Annotation *annotation) override;
     bool preorder(const IR::ConstructorCallExpression *callExpr) override;
@@ -162,7 +157,7 @@ using ReachabilityResult = std::pair<bool, const IR::Expression *>;
 /// <p4c condition> - any conditions p4c in syntax, whcih should be returned by the
 //                    Engine if corresponded <p4c node name> was reached.
 class ReachabilityEngine {
-    gsl::not_null<const NodesCallGraph *> dcg;
+    const NodesCallGraph &dcg;
     const ReachabilityHashType &hash;
     std::unordered_map<const DCGVertexType *, std::list<const DCGVertexType *>> userTransitions;
     std::unordered_map<const DCGVertexType *, const IR::Expression *> conditions;
@@ -173,8 +168,8 @@ class ReachabilityEngine {
     /// reachabilityExpression is a user's pattern wrote in the syntax presented above,
     /// eliminateAnnotations is true if after detection of the annotations it should to store
     /// corresponding parent IR::Node in a  reachability engine state.
-    ReachabilityEngine(gsl::not_null<const NodesCallGraph *> dcg,
-                       std::string reachabilityExpression, bool eliminateAnnotations = false);
+    ReachabilityEngine(const NodesCallGraph &dcg, std::string reachabilityExpression,
+                       bool eliminateAnnotations = false);
     /// Moves the next statement in a engine state. It returns a pair where the first argument
     /// is a flag for the possibility of such a movement and the second argument is an condition
     /// which should be checked additionally. If engine state is reachable from current node
@@ -182,7 +177,7 @@ class ReachabilityEngine {
     /// in case if it was inputed by user and moves engine state to the next state.
     ReachabilityResult next(ReachabilityEngineState *, const DCGVertexType *);
     /// Returns current control flow graph.
-    gsl::not_null<const NodesCallGraph *> getDCG();
+    const NodesCallGraph &getDCG();
 
  protected:
     /// Translates current annotation into set of the parent nodes.

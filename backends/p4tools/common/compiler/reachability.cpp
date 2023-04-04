@@ -1,7 +1,6 @@
 #include "backends/p4tools/common/compiler/reachability.h"
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <functional>
 #include <iostream>
 #include <list>
@@ -18,9 +17,7 @@
 
 namespace P4Tools {
 
-P4ProgramDCGCreator::P4ProgramDCGCreator(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-                                         NodesCallGraph *dcg)
-    : dcg(dcg), typeMap(typeMap), refMap(refMap), p4program(nullptr) {
+P4ProgramDCGCreator::P4ProgramDCGCreator(NodesCallGraph *dcg) : dcg(dcg), p4program(nullptr) {
     CHECK_NULL(dcg);
     setName("P4ProgramDCGCreator");
     visitDagOnce = false;
@@ -360,10 +357,10 @@ bool ReachabilityEngineState::isEmpty() { return state.empty(); }
 
 void ReachabilityEngineState::clear() { state.clear(); }
 
-ReachabilityEngine::ReachabilityEngine(gsl::not_null<const NodesCallGraph *> dcg,
+ReachabilityEngine::ReachabilityEngine(const NodesCallGraph &dcg,
                                        std::string reachabilityExpression,
                                        bool eliminateAnnotations)
-    : dcg(dcg), hash(dcg->getHash()) {
+    : dcg(dcg), hash(dcg.getHash()) {
     std::list<const DCGVertexType *> start;
     start.push_back(nullptr);
     size_t i = 0;
@@ -413,7 +410,7 @@ ReachabilityEngine::ReachabilityEngine(gsl::not_null<const NodesCallGraph *> dcg
 void ReachabilityEngine::annotationToStatements(const DCGVertexType *node,
                                                 std::unordered_set<const DCGVertexType *> &s) {
     std::list<const DCGVertexType *> l = {node};
-    while (l.size()) {
+    while (!l.empty()) {
         const auto *nd = l.front();
         l.pop_front();
         if (nd->is<IR::Statement>() || nd->is<IR::P4Program>() || nd->is<IR::P4Control>() ||
@@ -421,7 +418,8 @@ void ReachabilityEngine::annotationToStatements(const DCGVertexType *node,
             s.insert(nd);
             continue;
         }
-        const auto *v = const_cast<NodesCallGraph *>(dcg.operator->())->getCallers(nd);
+        // TODO: This is nasty. I am not sure why a const cast should be allowed here.
+        const auto *v = const_cast<NodesCallGraph *>(&dcg)->getCallers(nd);
         if (v != nullptr) {
             if (!(*v->begin())->is<IR::MethodCallStatement>() &&
                 nd->is<IR::MethodCallExpression>()) {
@@ -501,7 +499,7 @@ ReachabilityResult ReachabilityEngine::next(ReachabilityEngineState *state,
     }
     if (state->getPrevNode() == nullptr) {
         state->setPrevNode(next);
-    } else if (dcg->isReachable(state->getPrevNode(), next)) {
+    } else if (dcg.isReachable(state->getPrevNode(), next)) {
         // Check to move in the same direction.
         state->setPrevNode(next);
     } else {
@@ -532,7 +530,7 @@ ReachabilityResult ReachabilityEngine::next(ReachabilityEngineState *state,
                         expr = addCondition(expr, n);
                         newState.push_back(n);
                     }
-                } else if (dcg->isReachable(next, k)) {
+                } else if (dcg.isReachable(next, k)) {
                     expr = addCondition(expr, k);
                     newState.push_back(k);
                 }
@@ -548,7 +546,7 @@ ReachabilityResult ReachabilityEngine::next(ReachabilityEngineState *state,
                 expr = addCondition(expr, n);
                 newState.push_back(n);
             }
-        } else if (dcg->isReachable(next, i)) {
+        } else if (dcg.isReachable(next, i)) {
             expr = addCondition(expr, i);
             newState.push_back(i);
         }
@@ -557,7 +555,7 @@ ReachabilityResult ReachabilityEngine::next(ReachabilityEngineState *state,
     return std::make_pair(!state->isEmpty(), expr);
 }
 
-gsl::not_null<const NodesCallGraph *> ReachabilityEngine::getDCG() { return dcg; }
+const NodesCallGraph &ReachabilityEngine::getDCG() { return dcg; }
 
 const IR::Expression *ReachabilityEngine::getCondition(const DCGVertexType *n) {
     auto i = conditions.find(n);

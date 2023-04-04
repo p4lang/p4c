@@ -9,16 +9,14 @@
 
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
-namespace P4Tools {
+namespace P4Tools::P4Testgen {
 
-namespace P4Testgen {
-
-FinalState::FinalState(AbstractSolver *solver, const ExecutionState &inputState)
+FinalState::FinalState(AbstractSolver &solver, const ExecutionState &inputState)
     : solver(solver),
-      state(ExecutionState(inputState)),
-      completedModel(completeModel(inputState, solver->getModel())) {
+      state(inputState),
+      completedModel(completeModel(inputState, solver.getModel())) {
     for (const auto &event : inputState.getTrace()) {
-        trace.emplace_back(event->evaluate(completedModel));
+        trace.emplace_back(*event.get().evaluate(completedModel));
     }
 }
 
@@ -35,7 +33,7 @@ Model FinalState::completeModel(const ExecutionState &executionState, const Mode
     auto *evaluatedModel = executionState.getSymbolicEnv().evaluate(*completedModel);
 
     for (const auto &event : executionState.getTrace()) {
-        event->complete(evaluatedModel);
+        event.get().complete(evaluatedModel);
     }
 
     return *evaluatedModel;
@@ -43,16 +41,14 @@ Model FinalState::completeModel(const ExecutionState &executionState, const Mode
 
 const Model *FinalState::getCompletedModel() const { return &completedModel; }
 
-AbstractSolver *FinalState::getSolver() const { return solver; }
+AbstractSolver &FinalState::getSolver() const { return solver; }
 
-const ExecutionState *FinalState::getExecutionState() const { return &state; }
+const ExecutionState *FinalState::getExecutionState() const { return &state.get(); }
 
-const std::vector<gsl::not_null<const TraceEvent *>> *FinalState::getTraces() const {
+const std::vector<std::reference_wrapper<const TraceEvent>> *FinalState::getTraces() const {
     return &trace;
 }
 
-const P4::Coverage::CoverageSet &FinalState::getVisited() const { return state.getVisited(); }
+const P4::Coverage::CoverageSet &FinalState::getVisited() const { return state.get().getVisited(); }
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen

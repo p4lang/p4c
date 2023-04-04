@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "backends/p4tools/common/core/z3_solver.h"
-#include "gsl/gsl-lite.hpp"
 
 namespace P4Tools {
 
@@ -12,30 +11,31 @@ namespace P4Tools {
 class Z3SolverAccessor {
  public:
     /// Default constructor.
-    explicit Z3SolverAccessor(gsl::not_null<Z3Solver *> solver) : solver(solver) {}
+    explicit Z3SolverAccessor(Z3Solver &solver) : solver(solver) {}
 
     /// Gets all assertions. Used by GTests only.
     z3::expr_vector getAssertions(std::optional<bool> assertionType = std::nullopt) {
         if (!assertionType) {
-            return solver->isIncremental ? solver->z3solver.assertions() : solver->z3Assertions;
-        } else if (assertionType.value()) {
-            return solver->z3solver.assertions();
+            return solver.isIncremental ? solver.z3solver.assertions() : solver.z3Assertions;
         }
-        return solver->z3Assertions;
+        if (assertionType.value()) {
+            return solver.z3solver.assertions();
+        }
+        return solver.z3Assertions;
     }
 
     /// Gets all P4 assertions. Used by GTests only.
-    safe_vector<const Constraint *> getP4Assertions() { return solver->p4Assertions; }
+    safe_vector<const Constraint *> getP4Assertions() { return solver.p4Assertions; }
 
     /// Get Z3 context. Used by GTests only.
-    z3::context &getContext() { return solver->z3context; }
+    z3::context &getContext() { return solver.z3context; }
 
     /// Gets checkpoints that have been made. Used by GTests only.
-    std::vector<size_t> &getCheckpoints() { return solver->checkpoints; }
+    std::vector<size_t> &getCheckpoints() { return solver.checkpoints; }
 
  private:
     /// Pointer to a solver.
-    gsl::not_null<Z3Solver *> solver;
+    Z3Solver &solver;
 };
 
 }  // namespace P4Tools

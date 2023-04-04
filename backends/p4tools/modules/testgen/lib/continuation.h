@@ -21,11 +21,9 @@
 
 namespace Test {
 class SmallStepTest;
-}
+}  // namespace Test
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 /// A continuation is a function that optionally takes an argument and executes a sequence of
 /// commands.
@@ -207,8 +205,6 @@ class Continuation {
           body(std::move(body)) {}
 };
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_CONTINUATION_H_ */

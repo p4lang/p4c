@@ -107,14 +107,14 @@ bool TableStepper::compareLPMEntries(const IR::Entry *leftIn, const IR::Entry *r
         left->node_type_name(), right, right->node_type_name());
 }
 
-const IR::Expression *TableStepper::computeTargetMatchType(ExecutionState *nextState,
+const IR::Expression *TableStepper::computeTargetMatchType(ExecutionState &nextState,
                                                            const KeyProperties &keyProperties,
                                                            TableMatchMap *matches,
                                                            const IR::Expression *hitCondition) {
     const IR::Expression *keyExpr = keyProperties.key->expression;
     // Create a new zombie constant that corresponds to the key expression.
     cstring keyName = properties.tableName + "_key_" + keyProperties.name;
-    const auto ctrlPlaneKey = nextState->createZombieConst(keyExpr->type, keyName);
+    const auto ctrlPlaneKey = nextState.createZombieConst(keyExpr->type, keyName);
 
     if (keyProperties.matchType == P4Constants::MATCH_KIND_EXACT) {
         hitCondition = new IR::LAnd(hitCondition, new IR::Equ(keyExpr, ctrlPlaneKey));
@@ -129,7 +129,7 @@ const IR::Expression *TableStepper::computeTargetMatchType(ExecutionState *nextS
             ternaryMask = IR::getConstant(keyExpr->type, 0);
             keyExpr = ternaryMask;
         } else {
-            ternaryMask = nextState->createZombieConst(keyExpr->type, maskName);
+            ternaryMask = nextState.createZombieConst(keyExpr->type, maskName);
         }
         matches->emplace(keyProperties.name,
                          new Ternary(keyProperties.key, ctrlPlaneKey, ternaryMask));
@@ -140,7 +140,7 @@ const IR::Expression *TableStepper::computeTargetMatchType(ExecutionState *nextS
         const auto *keyType = keyExpr->type->checkedTo<IR::Type_Bits>();
         auto keyWidth = keyType->width_bits();
         cstring maskName = properties.tableName + "_lpm_prefix_" + keyProperties.name;
-        const IR::Expression *maskVar = nextState->createZombieConst(keyExpr->type, maskName);
+        const IR::Expression *maskVar = nextState.createZombieConst(keyExpr->type, maskName);
         // The maxReturn is the maximum vale for the given bit width. This value is shifted by
         // the mask variable to create a mask (and with that, a prefix).
         auto maxReturn = IR::getMaxBvVal(keyWidth);
@@ -167,7 +167,7 @@ const IR::Expression *TableStepper::computeTargetMatchType(ExecutionState *nextS
     TESTGEN_UNIMPLEMENTED("Match type %s not implemented for table keys.", keyProperties.matchType);
 }
 
-const IR::Expression *TableStepper::computeHit(ExecutionState *nextState, TableMatchMap *matches) {
+const IR::Expression *TableStepper::computeHit(ExecutionState &nextState, TableMatchMap *matches) {
     const IR::Expression *hitCondition = IR::getBoolLiteral(!properties.resolvedKeys.empty());
     for (auto keyProperties : properties.resolvedKeys) {
         hitCondition = computeTargetMatchType(nextState, keyProperties, matches, hitCondition);
@@ -175,7 +175,7 @@ const IR::Expression *TableStepper::computeHit(ExecutionState *nextState, TableM
     return hitCondition;
 }
 
-void TableStepper::setTableAction(ExecutionState *nextState,
+void TableStepper::setTableAction(ExecutionState &nextState,
                                   const IR::MethodCallExpression *actionCall) {
     // Figure out the index of the selected action within the table's action list.
     // TODO: Simplify this. We really only need to work with indexes and names for the
@@ -199,7 +199,7 @@ void TableStepper::setTableAction(ExecutionState *nextState,
               table);
     // Store the selected action.
     const auto &tableActionVar = getTableActionVar(table);
-    nextState->set(tableActionVar, IR::getConstant(tableActionVar->type, actionIdx));
+    nextState.set(tableActionVar, IR::getConstant(tableActionVar->type, actionIdx));
 }
 
 const IR::Expression *TableStepper::evalTableConstEntries() {
@@ -232,7 +232,7 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
         const auto *action = entry->getAction();
         BUG_CHECK(action && action->is<IR::MethodCallExpression>(),
                   "Unknown format of an action '%1%' in the table '%2%'", action, table);
-        auto *nextState = new ExecutionState(stepper->state);
+        auto &nextState = stepper->state.clone();
         const auto *tableAction = action->to<IR::MethodCallExpression>();
         BUG_CHECK(tableAction, "Invalid action '%1%' in the table '%2%'", action, table);
         // We need to set the table action in the state for eventual switch action_run hits.
@@ -270,13 +270,13 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
         // Update all the tracking variables for tables.
         std::vector<Continuation::Command> replacements;
         replacements.emplace_back(new IR::MethodCallStatement(Util::SourceInfo(), tableAction));
-        nextState->set(getTableHitVar(table), IR::getBoolLiteral(true));
-        nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
+        nextState.set(getTableHitVar(table), IR::getBoolLiteral(true));
+        nextState.set(getTableReachedVar(table), IR::getBoolLiteral(true));
         // Some path selection strategies depend on looking ahead and collecting potential
         // statements. If that is the case, apply the CollectLatentStatements visitor.
         P4::Coverage::CoverageSet coveredStmts;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
-            nextState->getActionDecl(tableAction->method)
+            nextState.getActionDecl(tableAction->method)
                 ->apply(CollectLatentStatements(coveredStmts, stepper->state));
         }
 
@@ -307,8 +307,10 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
             tableStream << arg->expression;
             isFirstArg = false;
         }
-        nextState->add(new TraceEvent::Generic(tableStream.str()));
-        nextState->replaceTopBody(&replacements);
+        nextState.add(
+
+            *new TraceEvent::Generic(tableStream.str()));
+        nextState.replaceTopBody(&replacements);
         // Update the default condition.
         // The default condition can only be triggered, if we do not hit this match.
         // We encode this constraint in this expression.
@@ -329,7 +331,7 @@ void TableStepper::setTableDefaultEntries(
         const auto *actionType = stepper->state.getActionDecl(tableAction->method);
         CHECK_NULL(actionType);
 
-        auto *nextState = new ExecutionState(stepper->state);
+        auto &nextState = stepper->state.clone();
 
         // We get the control plane name of the action we are calling.
         cstring actionName = actionType->controlPlaneName();
@@ -346,8 +348,8 @@ void TableStepper::setTableDefaultEntries(
                 Utils::getZombieTableVar(parameter->type, table, "*actionData", idx, argIdx);
             cstring paramName =
                 properties.tableName + "_arg_" + actionName + std::to_string(argIdx);
-            const auto &actionArg = nextState->createZombieConst(parameter->type, paramName);
-            nextState->set(actionDataVar, actionArg);
+            const auto &actionArg = nextState.createZombieConst(parameter->type, paramName);
+            nextState.set(actionDataVar, actionArg);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
             // Note how we use the control plane name for the parameter here.
@@ -367,7 +369,7 @@ void TableStepper::setTableDefaultEntries(
         auto *tableConfig = new TableConfig(table, {});
         // Add the action selector to the table. This signifies a slightly different implementation.
         tableConfig->addTableProperty("overriden_default_action", ctrlPlaneActionCall);
-        nextState->addTestObject("tableconfigs", properties.tableName, tableConfig);
+        nextState.addTestObject("tableconfigs", properties.tableName, tableConfig);
 
         // Update all the tracking variables for tables.
         std::vector<Continuation::Command> replacements;
@@ -377,16 +379,18 @@ void TableStepper::setTableDefaultEntries(
         // statements. If that is the case, apply the CollectLatentStatements visitor.
         P4::Coverage::CoverageSet coveredStmts;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
-            nextState->getActionDecl(tableAction->method)
+            nextState.getActionDecl(tableAction->method)
                 ->apply(CollectLatentStatements(coveredStmts, stepper->state));
         }
-        nextState->set(getTableHitVar(table), IR::getBoolLiteral(false));
-        nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
+        nextState.set(getTableHitVar(table), IR::getBoolLiteral(false));
+        nextState.set(getTableReachedVar(table), IR::getBoolLiteral(true));
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
         tableStream << "| Overriding default action: " << actionName;
-        nextState->add(new TraceEvent::Generic(tableStream.str()));
-        nextState->replaceTopBody(&replacements);
+        nextState.add(
+
+            *new TraceEvent::Generic(tableStream.str()));
+        nextState.replaceTopBody(&replacements);
         stepper->result->emplace_back(std::nullopt, stepper->state, nextState, coveredStmts);
     }
 }
@@ -404,7 +408,7 @@ void TableStepper::evalTableControlEntries(
         const auto *actionType = stepper->state.getActionDecl(tableAction->method);
         CHECK_NULL(actionType);
 
-        auto *nextState = new ExecutionState(stepper->state);
+        auto &nextState = stepper->state.clone();
 
         // First, we compute the hit condition to trigger this particular action call.
         TableMatchMap matches;
@@ -425,8 +429,8 @@ void TableStepper::evalTableControlEntries(
                 Utils::getZombieTableVar(parameter->type, table, "*actionData", idx, argIdx);
             cstring paramName =
                 properties.tableName + "_arg_" + actionName + std::to_string(argIdx);
-            const auto &actionArg = nextState->createZombieConst(parameter->type, paramName);
-            nextState->set(actionDataVar, actionArg);
+            const auto &actionArg = nextState.createZombieConst(parameter->type, paramName);
+            nextState.set(actionDataVar, actionArg);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
             // Note how we use the control plane name for the parameter here.
@@ -446,7 +450,7 @@ void TableStepper::evalTableControlEntries(
         auto tableRule =
             TableRule(matches, TestSpec::LOW_PRIORITY, ctrlPlaneActionCall, TestSpec::TTL);
         auto *tableConfig = new TableConfig(table, {tableRule});
-        nextState->addTestObject("tableconfigs", properties.tableName, tableConfig);
+        nextState.addTestObject("tableconfigs", properties.tableName, tableConfig);
 
         // Update all the tracking variables for tables.
         std::vector<Continuation::Command> replacements;
@@ -456,12 +460,12 @@ void TableStepper::evalTableControlEntries(
         // statements. If that is the case, apply the CollectLatentStatements visitor.
         P4::Coverage::CoverageSet coveredStmts;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
-            nextState->getActionDecl(tableAction->method)
+            nextState.getActionDecl(tableAction->method)
                 ->apply(CollectLatentStatements(coveredStmts, stepper->state));
         }
 
-        nextState->set(getTableHitVar(table), IR::getBoolLiteral(true));
-        nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
+        nextState.set(getTableHitVar(table), IR::getBoolLiteral(true));
+        nextState.set(getTableReachedVar(table), IR::getBoolLiteral(true));
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
         bool isFirstKey = true;
@@ -477,8 +481,10 @@ void TableStepper::evalTableControlEntries(
             isFirstKey = false;
         }
         tableStream << "| Chosen action: " << actionName;
-        nextState->add(new TraceEvent::Generic(tableStream.str()));
-        nextState->replaceTopBody(&replacements);
+        nextState.add(
+
+            *new TraceEvent::Generic(tableStream.str()));
+        nextState.replaceTopBody(&replacements);
         stepper->result->emplace_back(hitCondition, stepper->state, nextState, coveredStmts);
     }
 }
@@ -490,7 +496,7 @@ void TableStepper::evalTaintedTable() {
         return;
     }
     std::vector<Continuation::Command> replacements;
-    auto *nextState = new ExecutionState(stepper->state);
+    auto &nextState = stepper->state.clone();
 
     // If the table is immutable, we execute all the constant entries in its list.
     // We get the current value of the inUndefinedState property.
@@ -515,15 +521,15 @@ void TableStepper::evalTaintedTable() {
     // Since we do not know which table action was selected because of the tainted key, we also
     // set the selected action variable tainted.
     const auto &tableActionVar = getTableActionVar(table);
-    nextState->set(tableActionVar,
-                   stepper->programInfo.createTargetUninitialized(tableActionVar->type, true));
+    nextState.set(tableActionVar,
+                  stepper->programInfo.createTargetUninitialized(tableActionVar->type, true));
     // We do not know whether this table was hit or not.
     auto hitVar = getTableHitVar(table);
-    nextState->set(hitVar, stepper->programInfo.createTargetUninitialized(hitVar->type, true));
+    nextState.set(hitVar, stepper->programInfo.createTargetUninitialized(hitVar->type, true));
 
     // Reset the property to its previous stepper->state.
     replacements.emplace_back(Continuation::PropertyUpdate("inUndefinedState", currentTaint));
-    nextState->replaceTopBody(&replacements);
+    nextState.replaceTopBody(&replacements);
     stepper->result->emplace_back(nextState);
 }
 
@@ -636,7 +642,7 @@ void TableStepper::addDefaultAction(std::optional<const IR::Expression *> tableM
               "Unknown format of default action in the table '%1%'", table);
     const auto *tableAction = defaultAction->to<IR::MethodCallExpression>();
     BUG_CHECK(tableAction, "Invalid action default action in the table '%1%'", table);
-    auto *nextState = new ExecutionState(stepper->state);
+    auto &nextState = stepper->state.clone();
     // We need to set the table action in the state for eventual switch action_run hits.
     // We also will need it for control plane table entries.
     setTableAction(nextState, tableAction);
@@ -647,18 +653,18 @@ void TableStepper::addDefaultAction(std::optional<const IR::Expression *> tableM
     std::stringstream tableStream;
     tableStream << "Table Branch: " << properties.tableName;
     tableStream << " Choosing default action: " << actionPath;
-    nextState->add(new TraceEvent::Generic(tableStream.str()));
+    nextState.add(*new TraceEvent::Generic(tableStream.str()));
     replacements.emplace_back(new IR::MethodCallStatement(Util::SourceInfo(), tableAction));
     // Some path selection strategies depend on looking ahead and collecting potential
     // statements.
     P4::Coverage::CoverageSet coveredStmts;
     if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
-        nextState->getActionDecl(tableAction->method)
+        nextState.getActionDecl(tableAction->method)
             ->apply(CollectLatentStatements(coveredStmts, stepper->state));
     }
-    nextState->set(getTableHitVar(table), IR::getBoolLiteral(false));
-    nextState->set(getTableReachedVar(table), IR::getBoolLiteral(true));
-    nextState->replaceTopBody(&replacements);
+    nextState.set(getTableHitVar(table), IR::getBoolLiteral(false));
+    nextState.set(getTableReachedVar(table), IR::getBoolLiteral(true));
+    nextState.replaceTopBody(&replacements);
     stepper->result->emplace_back(tableMissCondition, stepper->state, nextState, coveredStmts);
 }
 

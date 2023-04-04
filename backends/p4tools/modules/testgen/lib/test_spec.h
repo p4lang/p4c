@@ -1,13 +1,13 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TEST_SPEC_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TEST_SPEC_H_
 
+#include <functional>
 #include <map>
 #include <optional>
 #include <vector>
 
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/trace_events.h"
-#include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "lib/castable.h"
 #include "lib/cstring.h"
@@ -300,7 +300,7 @@ class TestSpec {
     const std::optional<Packet> egressPacket;
 
     /// The traces that have been collected while the interpreter stepped through the program.
-    const std::vector<gsl::not_null<const TraceEvent *>> traces;
+    const std::vector<std::reference_wrapper<const TraceEvent>> traces;
 
     /// A map of additional properties associated with this test specification.
     /// For example, tables, registers, or action profiles.
@@ -308,7 +308,7 @@ class TestSpec {
 
  public:
     TestSpec(Packet ingressPacket, std::optional<Packet> egressPacket,
-             std::vector<gsl::not_null<const TraceEvent *>> traces);
+             std::vector<std::reference_wrapper<const TraceEvent>> traces);
 
     /// Add a test object to the test specification with @param category as the object category
     /// (for example, "tables", "registers", "action_profiles") and objectLabel as the concrete,
@@ -342,7 +342,7 @@ class TestSpec {
     std::optional<const Packet *> getEgressPacket() const;
 
     /// @returns the list of traces that has been executed
-    const std::vector<gsl::not_null<const TraceEvent *>> *getTraces() const;
+    const std::vector<std::reference_wrapper<const TraceEvent>> *getTraces() const;
 
     /// Priority definitions for LPM and ternary entries.
     static constexpr int NO_PRIORITY = -1;

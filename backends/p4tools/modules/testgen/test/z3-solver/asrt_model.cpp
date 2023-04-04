@@ -13,7 +13,6 @@
 #include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
-#include "gsl/gsl-lite.hpp"
 #include "ir/declaration.h"
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"
@@ -39,7 +38,7 @@ using Value = IR::Literal;
 
 class Z3SolverTest : public P4ToolsTest {
  protected:
-    virtual void SetUp() {
+    void SetUp() override {
         opLss = nullptr;
         auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
       header H {
@@ -111,7 +110,7 @@ class Z3SolverTest : public P4ToolsTest {
             }
         }
     }
-    const IR::Lss *opLss;
+    const IR::Lss *opLss{};
 };
 
 namespace {
@@ -132,7 +131,7 @@ TEST_F(Z3SolverTest, Assertion2Model) {
 
     // adding asertion
     Z3Solver solver;
-    Z3SolverAccessor solverAccessor(&solver);
+    Z3SolverAccessor solverAccessor(solver);
 
     std::vector<const P4Tools::Constraint *> asserts;
     asserts.push_back(opLss);

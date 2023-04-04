@@ -10,6 +10,7 @@
 #include <variant>
 #include <vector>
 
+#include <boost/container/vector.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/compiler/convert_hs_index.h"
@@ -51,7 +52,7 @@ const IR::Type_Bits ExecutionState::packetSizeVarType = IR::Type_Bits(32, false)
 ExecutionState::ExecutionState(const IR::P4Program *program)
     : namespaces(NamespaceContext::Empty->push(program)),
       body({program}),
-      stack(*new std::stack<gsl::not_null<const StackFrame *>>()) {
+      stack(*(new std::stack<std::reference_wrapper<const StackFrame>>())) {
     // Insert the default zombies of the execution state.
     // This also makes the zombies present in the state explicit.
     allocatedZombies.insert(getInputPacketSizeVar());
@@ -74,7 +75,7 @@ ExecutionState::ExecutionState(const IR::P4Program *program)
 ExecutionState::ExecutionState(Continuation::Body body)
     : namespaces(NamespaceContext::Empty),
       body(std::move(body)),
-      stack(*new std::stack<gsl::not_null<const StackFrame *>>()) {
+      stack(*(new std::stack<std::reference_wrapper<const StackFrame>>())) {
     // Insert the default zombies of the execution state.
     // This also makes the zombies present in the state explicit.
     allocatedZombies.insert(getInputPacketSizeVar());
@@ -93,6 +94,14 @@ ExecutionState::ExecutionState(Continuation::Body body)
  * ============================================================================================= */
 
 bool ExecutionState::isTerminal() const { return body.empty() && stack.empty(); }
+
+const std::vector<uint64_t> &ExecutionState::getSelectedBranches() const {
+    return selectedBranches;
+}
+
+const std::vector<const IR::Expression *> &ExecutionState::getPathConstraint() const {
+    return pathConstraint;
+}
 
 std::optional<const Continuation::Command> ExecutionState::getNextCmd() const {
     if (body.empty()) {
@@ -153,22 +162,22 @@ const SymbolicEnv &ExecutionState::getSymbolicEnv() const { return env; }
 void ExecutionState::printSymbolicEnv(std::ostream &out) const {
     // TODO(fruffy): How do we do logging here?
     out << "##### Symbolic Environment Begin #####" << std::endl;
-    for (const auto &env_var : env.getInternalMap()) {
-        const auto var = env_var.first;
-        const auto *val = env_var.second;
+    for (const auto &envVar : env.getInternalMap()) {
+        const auto var = envVar.first;
+        const auto *val = envVar.second;
         out << "Variable: " << var->toString() << " Value: " << val << std::endl;
     }
     out << "##### Symbolic Environment End #####" << std::endl;
 }
 
-const std::vector<gsl::not_null<const TraceEvent *>> &ExecutionState::getTrace() const {
+const std::vector<std::reference_wrapper<const TraceEvent>> &ExecutionState::getTrace() const {
     return trace;
 }
 
 const Continuation::Body &ExecutionState::getBody() const { return body; }
 
-const std::stack<gsl::not_null<const ExecutionState::StackFrame *>> &ExecutionState::getStack()
-    const {
+const std::stack<std::reference_wrapper<const ExecutionState::StackFrame>>
+    &ExecutionState::getStack() const {
     return stack;
 }
 
@@ -220,10 +229,7 @@ ReachabilityEngineState *ExecutionState::getReachabilityEngineState() const {
  *  Trace events.
  * ============================================================================================= */
 
-void ExecutionState::add(const TraceEvent *event) {
-    CHECK_NULL(event);
-    trace.emplace_back(event);
-}
+void ExecutionState::add(const TraceEvent &event) { trace.emplace_back(event); }
 
 /* =============================================================================================
  *  Namespaces and declarations
@@ -261,9 +267,7 @@ void ExecutionState::popBody() { body.pop(); }
 
 void ExecutionState::replaceBody(const Continuation::Body &body) { this->body = body; }
 
-void ExecutionState::pushContinuation(gsl::not_null<const StackFrame *> frame) {
-    stack.push(frame);
-}
+void ExecutionState::pushContinuation(const StackFrame &frame) { stack.push(frame); }
 
 void ExecutionState::pushCurrentContinuation(StackFrame::ExceptionHandlers handlers) {
     pushCurrentContinuation(std::nullopt, std::move(handlers));
@@ -287,7 +291,7 @@ void ExecutionState::pushCurrentContinuation(std::optional<const IR::Type *> par
     // Actually push the current continuation.
     Continuation k(parameterOpt, body);
     const auto *frame = new StackFrame(k, std::move(handlers), namespaces);
-    pushContinuation(frame);
+    pushContinuation(*frame);
     body.clear();
 }
 
@@ -296,19 +300,19 @@ void ExecutionState::popContinuation(std::optional<const IR::Node *> argument_op
     auto frame = stack.top();
     stack.pop();
 
-    auto newBody = frame->normalContinuation.apply(argument_opt);
+    auto newBody = frame.get().normalContinuation.apply(argument_opt);
     replaceBody(newBody);
-    setNamespaceContext(frame->namespaces);
+    setNamespaceContext(frame.get().namespaces);
 }
 
 void ExecutionState::handleException(Continuation::Exception e) {
     while (!stack.empty()) {
         auto frame = stack.top();
-        if (frame->exceptionHandlers.count(e) > 0) {
-            auto k = frame->exceptionHandlers.at(e);
+        if (frame.get().exceptionHandlers.count(e) > 0) {
+            auto k = frame.get().exceptionHandlers.at(e);
             auto newBody = k.apply(std::nullopt);
             replaceBody(newBody);
-            setNamespaceContext(frame->namespaces);
+            setNamespaceContext(frame.get().namespaces);
             return;
         }
         stack.pop();
@@ -618,5 +622,11 @@ const StateVariable &ExecutionState::convertPathExpr(const IR::PathExpression *p
     }
     BUG("Unsupported declaration %1% of type %2%.", decl, decl->node_type_name());
 }
+
+ExecutionState &ExecutionState::create(const IR::P4Program *program) {
+    return *new ExecutionState(program);
+}
+
+ExecutionState &ExecutionState::clone() const { return *new ExecutionState(*this); }
 
 }  // namespace P4Tools::P4Testgen

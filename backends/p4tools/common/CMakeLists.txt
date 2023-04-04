@@ -53,7 +53,6 @@ add_p4tools_library(p4tools-common ${P4C_TOOLS_COMMON_SOURCES})
 
 target_link_libraries(
   p4tools-common
-  PUBLIC gsl-lite
   PUBLIC ${Boost_SYSTEM_LIBRARY}
   PUBLIC ${Boost_FILESYSTEM_LIBRARY}
   PUBLIC z3::z3

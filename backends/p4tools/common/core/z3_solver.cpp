@@ -16,7 +16,6 @@
 
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
-#include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "ir/json_loader.h"  // IWYU pragma: keep
@@ -32,7 +31,7 @@
 namespace P4Tools {
 
 /// Converts a Z3 expression to a string.
-const char *toString(z3::expr e) { return Z3_ast_to_string(e.ctx(), e); }
+const char *toString(const z3::expr &e) { return Z3_ast_to_string(e.ctx(), e); }
 
 #ifndef NDEBUG
 template <typename... Args>
@@ -59,7 +58,7 @@ class Z3Translator : public virtual Inspector {
  public:
     /// Creates a Z3 translator. Any variables encountered during translation will be declared to
     /// the Z3 instance encapsulated within the given solver.
-    explicit Z3Translator(const gsl::not_null<Z3Solver *> &solver);
+    explicit Z3Translator(Z3Solver &solver);
 
     /// Handles unexpected nodes.
     bool preorder(const IR::Node *node) override;
@@ -146,7 +145,7 @@ class Z3Translator : public virtual Inspector {
     z3::expr result;
 
     /// The Z3 solver instance, to which variables will be declared as they are encountered.
-    gsl::not_null<Z3Solver *> solver;
+    Z3Solver &solver;
 };
 
 z3::sort Z3Solver::toSort(const IR::Type *type) {
@@ -304,7 +303,7 @@ std::optional<bool> Z3Solver::checkSat(const std::vector<const Constraint *> &as
 
 void Z3Solver::asrt(const Constraint *assertion) {
     try {
-        Z3Translator z3translator(this);
+        Z3Translator z3translator(*this);
         assertion->apply(z3translator);
         auto expr = z3translator.getResult();
 
@@ -451,8 +450,7 @@ Z3Solver::Z3Solver(bool isIncremental, std::optional<std::istream *> inOpt)
     addZ3Pushes(chkIndex, assertions.size());
 }
 
-Z3Translator::Z3Translator(const gsl::not_null<Z3Solver *> &solver)
-    : result(solver->z3context), solver(solver) {}
+Z3Translator::Z3Translator(Z3Solver &solver) : result(solver.z3context), solver(solver) {}
 
 bool Z3Translator::preorder(const IR::Node *node) {
     BUG("%1%: Unhandled node type: %2%", node, node->node_type_name());
@@ -470,8 +468,8 @@ bool Z3Translator::preorder(const IR::Cast *cast) {
             exprSize = exprType->width_bits();
         } else if (castExtrType->is<IR::Type_Boolean>()) {
             exprSize = 1;
-            auto trueVal = solver->z3context.bv_val(1, exprSize);
-            auto falseVal = solver->z3context.bv_val(0, exprSize);
+            auto trueVal = solver.z3context.bv_val(1, exprSize);
+            auto falseVal = solver.z3context.bv_val(0, exprSize);
             castExpr = z3::ite(castExpr, trueVal, falseVal);
         } else if (const auto *exprType = castExtrType->to<IR::Extracted_Varbits>()) {
             exprSize = exprType->width_bits();
@@ -495,7 +493,7 @@ bool Z3Translator::preorder(const IR::Cast *cast) {
     if (cast->destType->is<IR::Type_Boolean>()) {
         if (const auto *exprType = castExtrType->to<IR::Type_Bits>()) {
             if (exprType->width_bits() == 1) {
-                castExpr = solver->z3context.bool_val(castExpr.bool_value() == Z3_L_TRUE);
+                castExpr = solver.z3context.bool_val(castExpr.bool_value() == Z3_L_TRUE);
             } else {
                 BUG("Cast expression type %1% is not bit<1> : %2%", exprType, castExpr);
             }
@@ -513,18 +511,18 @@ bool Z3Translator::preorder(const IR::Cast *cast) {
 bool Z3Translator::preorder(const IR::Constant *constant) {
     // Handle infinite-integer constants.
     if (constant->type->is<IR::Type_InfInt>()) {
-        result = solver->z3context.int_val(constant->value.str().c_str());
+        result = solver.z3context.int_val(constant->value.str().c_str());
         return false;
     }
 
     // Handle bit<n> constants.
     if (const auto *bits = constant->type->to<IR::Type_Bits>()) {
-        result = solver->z3context.bv_val(constant->value.str().c_str(), bits->size);
+        result = solver.z3context.bv_val(constant->value.str().c_str(), bits->size);
         return false;
     }
 
     if (const auto *bits = constant->type->to<IR::Extracted_Varbits>()) {
-        result = solver->z3context.bv_val(constant->value.str().c_str(), bits->width_bits());
+        result = solver.z3context.bv_val(constant->value.str().c_str(), bits->width_bits());
         return false;
     }
 
@@ -532,18 +530,18 @@ bool Z3Translator::preorder(const IR::Constant *constant) {
 }
 
 bool Z3Translator::preorder(const IR::BoolLiteral *boolLiteral) {
-    result = solver->z3context.bool_val(boolLiteral->value);
+    result = solver.z3context.bool_val(boolLiteral->value);
     return false;
 }
 
 bool Z3Translator::preorder(const IR::Member *member) {
-    result = solver->declareVar(member);
+    result = solver.declareVar(member);
     return false;
 }
 
 bool Z3Translator::preorder(const IR::ConcolicVariable *var) {
     /// Declare the member contained within the concolic variable
-    result = solver->declareVar(var->concolicMember);
+    result = solver.declareVar(var->concolicMember);
     return false;
 }
 
