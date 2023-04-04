@@ -171,8 +171,8 @@ void SharedPnaTableStepper::evalTableActionProfile(
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
         tableStream << " Chosen action: " << actionName;
-        nextState->add(new TraceEvents::Generic(tableStream.str()));
-        nextState->replaceTopBody(&replacements);
+        nextState.add(*new TraceEvents::Generic(tableStream.str()));
+        nextState.replaceTopBody(&replacements);
         getResult()->emplace_back(hitCondition, *state, nextState, coveredStmts);
     }
 }
@@ -270,8 +270,8 @@ void SharedPnaTableStepper::evalTableActionSelector(
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
         tableStream << " Chosen action: " << actionName;
-        nextState->add(new TraceEvents::Generic(tableStream.str()));
-        nextState->replaceTopBody(&replacements);
+        nextState.add(*new TraceEvents::Generic(tableStream.str()));
+        nextState.replaceTopBody(&replacements);
         getResult()->emplace_back(hitCondition, *state, nextState, coveredStmts);
     }
 }

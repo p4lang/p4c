@@ -74,7 +74,7 @@ std::vector<std::pair<const IR::Member *, const IR::Expression *>> ExprStepper::
             pktVar = new IR::Cast(boolType, pktVar);
         }
         // Update the field and add the field to the return list.
-        nextState->set(fieldRef, pktVar);
+        nextState.set(fieldRef, pktVar);
         fields.emplace_back(fieldRef, pktVar);
     }
     return fields;
@@ -251,10 +251,10 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
              auto &nextState = state.clone();
              const auto *emitBuffer = state.getEmitBuffer();
-             nextState->prependToPacketBuffer(emitBuffer);
-             nextState->add(
-                 new TraceEvents::Generic("Prepending the emit buffer to the program packet"));
-             nextState->popBody();
+             nextState.prependToPacketBuffer(emitBuffer);
+             nextState.add(
+                 *new TraceEvents::Generic("Prepending the emit buffer to the program packet"));
+             nextState.popBody();
              result->emplace_back(nextState);
          }},
         /* ======================================================================================
@@ -275,9 +275,9 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
                                programInfo.createTargetUninitialized(
                                    programInfo.getTargetOutputPortVar()->type, true));
              }
-             nextState->add(new TraceEvents::Generic("Packet marked dropped"));
-             nextState->setProperty("drop", true);
-             nextState->replaceTopBody(Continuation::Exception::Drop);
+             nextState.add(*new TraceEvents::Generic("Packet marked dropped"));
+             nextState.setProperty("drop", true);
+             nextState.replaceTopBody(Continuation::Exception::Drop);
              result->emplace_back(nextState);
          }},
         /* ======================================================================================
@@ -483,7 +483,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  condInfo.advanceCond->dbprint(condStream);
                  auto &nextState = state.clone();
                  // Peek into the buffer, we do NOT slice from it.
-                 const auto *lookaheadVar = nextState->peekPacketBuffer(lookaheadSize);
+                 const auto *lookaheadVar = nextState.peekPacketBuffer(lookaheadSize);
                  nextState.add(*new TraceEvents::Expression(lookaheadVar, "Lookahead result"));
                  // Record the condition we are passing at this at this point.
                  nextState.add(*new TraceEvents::Generic(condStream.str()));
@@ -576,8 +576,8 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                      nextState.slicePacketBuffer(condInfo.advanceSize);
 
                      // Record the condition we are passing at this at this point.
-                     nextState->add(new TraceEvents::Generic(condStream.str()));
-                     nextState->popBody();
+                     nextState.add(*new TraceEvents::Generic(condStream.str()));
+                     nextState.popBody();
                      result->emplace_back(condInfo.advanceCond, state, nextState);
                  }
              }
@@ -631,13 +631,13 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  // We only support flat assignments, so retrieve all fields from the input
                  // argument.
                  const std::vector<const IR::Member *> flatFields =
-                     nextState->getFlatFields(extractOutput, extractedType);
+                     nextState.getFlatFields(extractOutput, extractedType);
                  /// Iterate over all the fields that need to be set.
                  auto fields = setFields(nextState, flatFields, 0);
-                 nextState->add(new TraceEvents::ExtractSuccess(extractOutput, pktCursor,
+                 nextState.add(*new TraceEvents::ExtractSuccess(extractOutput, pktCursor,
                                                                 condInfo.advanceCond, fields));
 
-                 nextState->popBody();
+                 nextState.popBody();
                  result->emplace_back(condInfo.advanceCond, state, nextState);
              }
 
@@ -646,9 +646,9 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  auto &rejectState = state.clone();
                  // Add an event signifying that this extract failed.
                  // It also records the condition we are failing.
-                 rejectState->add(new TraceEvents::ExtractFailure(
+                 rejectState.add(*new TraceEvents::ExtractFailure(
                      extractOutput, state.getInputPacketCursor(), condInfo.advanceFailCond));
-                 rejectState->replaceTopBody(Continuation::Exception::PacketTooShort);
+                 rejectState.replaceTopBody(Continuation::Exception::PacketTooShort);
 
                  result->emplace_back(condInfo.advanceFailCond, state, rejectState);
              }
@@ -755,9 +755,9 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  // Record the condition we are passing at this at this point.
                  // Add an event signifying that this extract was successful.
                  // It also records the condition we are passing.
-                 nextState->add(new TraceEvents::ExtractSuccess(
+                 nextState.add(*new TraceEvents::ExtractSuccess(
                      extractOutput, state.getInputPacketCursor(), condInfo.advanceCond, fields));
-                 nextState->popBody();
+                 nextState.popBody();
                  result->emplace_back(condInfo.advanceCond, state, nextState);
              }
 
@@ -766,9 +766,9 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  auto &rejectState = state.clone();
                  // Add an event signifying that this extract failed.
                  // It also records the condition we are failing.
-                 rejectState->add(new TraceEvents::ExtractFailure(
+                 rejectState.add(*new TraceEvents::ExtractFailure(
                      extractOutput, state.getInputPacketCursor(), condInfo.advanceFailCond));
-                 rejectState->replaceTopBody(Continuation::Exception::PacketTooShort);
+                 rejectState.replaceTopBody(Continuation::Exception::PacketTooShort);
                  result->emplace_back(condInfo.advanceFailCond, state, rejectState);
              }
          }},
@@ -788,8 +788,8 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
              const auto *divVar =
                  new IR::Div(lengthVar->type, ExecutionState::getInputPacketSizeVar(),
                              IR::getConstant(lengthVar->type, 8));
-             nextState->add(new TraceEvents::Expression(divVar, "Return packet length"));
-             nextState->replaceTopBody(Continuation::Return(divVar));
+             nextState.add(*new TraceEvents::Expression(divVar, "Return packet length"));
+             nextState.replaceTopBody(Continuation::Return(divVar));
              result->emplace_back(std::nullopt, state, nextState);
          }},
         /* ======================================================================================
@@ -824,7 +824,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
              // This call assumes that the "expandEmit" midend pass is being used. expandEmit
              // unravels emit calls on structs into emit calls on the header members.
              {
-                 auto *nextState = new ExecutionState(state);
+                 auto &nextState = state.clone();
                  std::vector<std::pair<const IR::Member *, const IR::Expression *>> fields;
                  for (const auto *field : emitType->fields) {
                      const auto *fieldType = field->type;
@@ -861,8 +861,8 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                      // Append to the emit buffer.
                      nextState.appendToEmitBuffer(fieldExpr);
                  }
-                 nextState->add(new TraceEvents::Emit(emitOutput, fields));
-                 nextState->popBody();
+                 nextState.add(*new TraceEvents::Emit(emitOutput, fields));
+                 nextState.popBody();
                  // Only when the header is valid, the members are emitted and the packet
                  // delta is adjusted.
                  result->emplace_back(state.get(validVar), state, nextState);
@@ -871,8 +871,8 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  auto &invalidState = state.clone();
                  std::stringstream traceString;
                  traceString << "Invalid emit: " << emitOutput->toString();
-                 invalidState->add(new TraceEvents::Generic(traceString));
-                 invalidState->popBody();
+                 invalidState.add(*new TraceEvents::Generic(traceString));
+                 invalidState.popBody();
                  result->emplace_back(new IR::LNot(IR::Type::Boolean::get(), validVar), state,
                                       invalidState);
              }
@@ -914,7 +914,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  std::stringstream traceString;
                  traceString << "Tainted verify: ";
                  cond->dbprint(traceString);
-                 taintedState->add(new TraceEvents::Expression(cond, traceString));
+                 taintedState.add(*new TraceEvents::Expression(cond, traceString));
                  const auto *errVar = state.getCurrentParserErrorLabel();
                  taintedState.set(errVar, Utils::getTaintExpression(errVar->type));
                  taintedState.popBody();
@@ -977,7 +977,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
              std::stringstream condStream;
              condStream << "Assume: applying condition: ";
              cond->dbprint(condStream);
-             nextState->add(new TraceEvents::Generic(condStream.str()));
+             nextState.add(*new TraceEvents::Generic(condStream.str()));
              result->emplace_back(cond, state, nextState);
          }},
         /* ======================================================================================
@@ -1028,7 +1028,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  std::stringstream condStream;
                  condStream << "Assert condition violated: ";
                  cond->dbprint(condStream);
-                 nextState->add(new TraceEvents::Generic(condStream.str()));
+                 nextState.add(*new TraceEvents::Generic(condStream.str()));
                  // Do not bother executing further. We have triggered an assertion.
                  nextState.setProperty("assertionTriggered", true);
                  nextState.replaceTopBody(Continuation::Exception::Abort);

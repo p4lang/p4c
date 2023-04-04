@@ -44,9 +44,9 @@ const ExternMethodImpls SharedPnaExprStepper::PNA_EXTERN_METHOD_IMPLS({
          auto &nextState = state.clone();
          // Use an assignment to set drop variable to true.
          // This variable will be processed in the deparser.
-         nextState->set(&PnaConstants::DROP_VAR, IR::getBoolLiteral(true));
-         nextState->add(new TraceEvents::Generic("drop_packet executed."));
-         nextState->popBody();
+         nextState.set(&PnaConstants::DROP_VAR, IR::getBoolLiteral(true));
+         nextState.add(*new TraceEvents::Generic("drop_packet executed"));
+         nextState.popBody();
          result->emplace_back(nextState);
      }},
     /* ======================================================================================
@@ -77,9 +77,9 @@ const ExternMethodImpls SharedPnaExprStepper::PNA_EXTERN_METHOD_IMPLS({
              return;
          }
          // Use an assignment to set the output port to the input.
-         nextState->set(&PnaConstants::OUTPUT_PORT_VAR, destPort);
-         nextState->add(new TraceEvents::Generic("send_to_port executed."));
-         nextState->popBody();
+         nextState.set(&PnaConstants::OUTPUT_PORT_VAR, destPort);
+         nextState.add(*new TraceEvents::Generic("send_to_port executed"));
+         nextState.popBody();
          result->emplace_back(nextState);
      }},
     /* ======================================================================================
@@ -165,9 +165,9 @@ const ExternMethodImpls SharedPnaExprStepper::PNA_EXTERN_METHOD_IMPLS({
      [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
         IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
         const ExecutionState &state, SmallStepEvaluator::Result &result) {
-         auto *nextState = new ExecutionState(state);
-         nextState->add(new TraceEvents::Generic("add_entry executed. Currently a no-op."));
-         nextState->replaceTopBody(Continuation::Return(IR::getBoolLiteral(true)));
+         auto &nextState = state.clone();
+         nextState.add(*new TraceEvents::Generic("add_entry executed. Currently a no-op."));
+         nextState.replaceTopBody(Continuation::Return(IR::getBoolLiteral(true)));
          result->emplace_back(nextState);
      }},
 });

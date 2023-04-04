@@ -13,7 +13,6 @@
 #include "backends/p4tools/common/lib/trace_event.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/util.h"
-#include "gsl/gsl-lite.hpp"
 #include "ir/ir.h"
 #include "lib/log.h"
 #include "nlohmann/json.hpp"
@@ -114,14 +113,14 @@ void Metadata::computeTraceData(const TestSpec *testSpec, inja::json &dataJson) 
     const auto *traces = testSpec->getTraces();
     if (traces != nullptr) {
         for (const auto &trace : *traces) {
-            if (const auto *successfulExtract = trace->to<TraceEvents::ExtractSuccess>()) {
+            if (const auto *successfulExtract = trace.get().to<TraceEvents::ExtractSuccess>()) {
                 inja::json j;
                 j["label"] = successfulExtract->getExtractedHeader()->toString();
                 j["offset"] = successfulExtract->getOffset();
                 dataJson["offsets"].push_back(j);
             }
             std::stringstream ss;
-            ss << *trace;
+            ss << trace;
             dataJson["trace"].push_back(ss.str());
         }
     }

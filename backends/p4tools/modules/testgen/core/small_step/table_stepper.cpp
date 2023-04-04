@@ -307,8 +307,8 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
             tableStream << arg->expression;
             isFirstArg = false;
         }
-        nextState->add(new TraceEvents::Generic(tableStream.str()));
-        nextState->replaceTopBody(&replacements);
+        nextState.add(*new TraceEvents::Generic(tableStream.str()));
+        nextState.replaceTopBody(&replacements);
         // Update the default condition.
         // The default condition can only be triggered, if we do not hit this match.
         // We encode this constraint in this expression.
@@ -385,8 +385,8 @@ void TableStepper::setTableDefaultEntries(
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
         tableStream << "| Overriding default action: " << actionName;
-        nextState->add(new TraceEvents::Generic(tableStream.str()));
-        nextState->replaceTopBody(&replacements);
+        nextState.add(*new TraceEvents::Generic(tableStream.str()));
+        nextState.replaceTopBody(&replacements);
         stepper->result->emplace_back(std::nullopt, stepper->state, nextState, coveredStmts);
     }
 }
@@ -477,8 +477,8 @@ void TableStepper::evalTableControlEntries(
             isFirstKey = false;
         }
         tableStream << "| Chosen action: " << actionName;
-        nextState->add(new TraceEvents::Generic(tableStream.str()));
-        nextState->replaceTopBody(&replacements);
+        nextState.add(*new TraceEvents::Generic(tableStream.str()));
+        nextState.replaceTopBody(&replacements);
         stepper->result->emplace_back(hitCondition, stepper->state, nextState, coveredStmts);
     }
 }
@@ -647,7 +647,7 @@ void TableStepper::addDefaultAction(std::optional<const IR::Expression *> tableM
     std::stringstream tableStream;
     tableStream << "Table Branch: " << properties.tableName;
     tableStream << " Choosing default action: " << actionPath;
-    nextState->add(new TraceEvents::Generic(tableStream.str()));
+    nextState.add(*new TraceEvents::Generic(tableStream.str()));
     replacements.emplace_back(new IR::MethodCallStatement(Util::SourceInfo(), tableAction));
     // Some path selection strategies depend on looking ahead and collecting potential
     // statements.
