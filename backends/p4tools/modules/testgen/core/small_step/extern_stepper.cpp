@@ -14,7 +14,6 @@
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
-#include "ir/ir-generated.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "ir/vector.h"

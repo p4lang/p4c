@@ -77,30 +77,34 @@ inja::json Metadata::getVerify(const TestSpec *testSpec) {
 std::string Metadata::getTestCaseTemplate() {
     static std::string TEST_CASE(
         R"""(# A P4TestGen-generated test case for {{test_name}}.p4
-# p4testgen seed: {{ default(seed, "none") }}
-# Date generated: {{timestamp}}
-## if length(selected_branches) > 0
-# {{selected_branches}}
-## endif
-# Current statement coverage: {{coverage}}
 
+# Seed used to generate this test.
+Seed: {{ default(seed, "none") }}
+# Test timestamp.
+Date: {{timestamp}}
+# Percentage of statements covered at the time of this test.
+Statement Coverage: {{coverage}}
+
+# Trace associated with this test.
+#
 ## for trace_item in trace
 # {{trace_item}}
 ## endfor
 
-input_packet: {{send.pkt}}
-input_port: {{send.ig_port}}
+# The input packet.
+InputPacket: {{send.pkt}}
 
-## if verify
-output_packet: "{{verify.exp_pkt}}"
-output_port: {{verify.eg_port}}
-output_packet_mask: "{{verify.ignore_mask}}"
-## endif
+# Parsed headers and their offsets.
+HeaderOffsets:
+## for offset in offsets
+  {{offset.label}}: {{offset.offset}}
+## endfor
 
-Offsets: {% for o in offsets %}{{o.label}}@{{o.offset}}{% if not loop.is_last %},{% endif %}{% endfor %}
-
+# Metadata results once this test has finished.
+Metadata:
 ## for metadata_field in metadata_fields
-Metadata: {{metadata_field.name}}@{{metadata_field.value}}
+  {{metadata_field.name}}: {{metadata_field.value}}
+    offset: {{metadata_field.offset}}
 ## endfor
 
 )""");
@@ -149,10 +153,14 @@ void Metadata::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
     const auto *metadataCollection =
         testSpec->getTestObject("metadata_collection", "metadata_collection", true)
             ->checkedTo<MetadataCollection>();
+    auto offset = 0;
     for (auto const &metadataField : metadataCollection->getMetadataFields()) {
         inja::json jsonField;
         jsonField["name"] = metadataField.first;
         jsonField["value"] = formatHexExpr(metadataField.second);
+        // Keep track of the overall offset of the metadata field.
+        jsonField["offset"] = offset;
+        offset += metadataField.second->type->width_bits();
         dataJson["metadata_fields"].push_back(jsonField);
     }
 
@@ -165,8 +173,7 @@ void Metadata::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
 void Metadata::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testIdx,
                           float currentCoverage) {
     auto incrementedTestName = testName + "_" + std::to_string(testIdx);
-
-    metadataFile = std::ofstream(incrementedTestName + ".metadata");
+    metadataFile = std::ofstream(incrementedTestName + ".yml");
     std::string testCase = getTestCaseTemplate();
     emitTestcase(testSpec, selectedBranches, testIdx, testCase, currentCoverage);
 }
