@@ -51,13 +51,13 @@ Bmv2TestBackend::Bmv2TestBackend(const ProgramInfo &programInfo, SymbolicExecuto
     }
 
     if (testBackendString == "PTF") {
-        testWriter = new PTF(testPath.c_str(), seed);
+        testWriter = new PTF(testPath, seed);
     } else if (testBackendString == "STF") {
-        testWriter = new STF(testPath.c_str(), seed);
+        testWriter = new STF(testPath, seed);
     } else if (testBackendString == "PROTOBUF") {
-        testWriter = new Protobuf(testPath.c_str(), seed);
+        testWriter = new Protobuf(testPath, seed);
     } else if (testBackendString == "METADATA") {
-        testWriter = new Metadata(testPath.c_str(), seed);
+        testWriter = new Metadata(testPath, seed);
     } else {
         P4C_UNIMPLEMENTED(
             "Test back end %1% not implemented for this target. Supported back ends are %2%.",

@@ -19,9 +19,6 @@ namespace P4Tools::P4Testgen::Bmv2 {
 
 /// Extracts information from the @testSpec to emit a STF test case.
 class STF : public TF {
-    /// The output file.
-    std::ofstream stfFile;
-
  public:
     virtual ~STF() = default;
 
@@ -33,7 +30,7 @@ class STF : public TF {
 
     STF &operator=(STF &&) = delete;
 
-    STF(cstring testName, std::optional<unsigned int> seed);
+    STF(std::filesystem::path basePath, std::optional<unsigned int> seed);
 
     /// Produce an STF test.
     void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testIdx,
@@ -41,11 +38,11 @@ class STF : public TF {
 
  private:
     /// Emits a test case.
-    /// @param testId specifies the test name.
+    /// @param testIdx specifies the test name.
     /// @param selectedBranches enumerates the choices the interpreter made for this path.
     /// @param currentCoverage contains statistics  about the current coverage of this test and its
     /// preceding tests.
-    void emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
+    void emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testIdx,
                       const std::string &testCase, float currentCoverage);
 
     /// @returns the inja test case template as a string.

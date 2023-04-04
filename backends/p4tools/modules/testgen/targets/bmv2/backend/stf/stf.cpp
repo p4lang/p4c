@@ -27,7 +27,8 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-STF::STF(cstring testName, std::optional<unsigned int> seed = std::nullopt) : TF(testName, seed) {}
+STF::STF(std::filesystem::path basePath, std::optional<unsigned int> seed = std::nullopt)
+    : TF(std::move(basePath), seed) {}
 
 inja::json STF::getControlPlane(const TestSpec *testSpec) {
     inja::json controlPlaneJson = inja::json::object();
@@ -261,7 +262,7 @@ expect {{verify.eg_port}} {{verify.exp_pkt}}$
     return TEST_CASE;
 }
 
-void STF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
+void STF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testIdx,
                        const std::string &testCase, float currentCoverage) {
     inja::json dataJson;
     if (selectedBranches != nullptr) {
@@ -271,7 +272,7 @@ void STF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
         dataJson["seed"] = *seed;
     }
 
-    dataJson["test_id"] = testId + 1;
+    dataJson["test_id"] = testIdx + 1;
     dataJson["trace"] = getTrace(testSpec);
     dataJson["control_plane"] = getControlPlane(testSpec);
     dataJson["send"] = getSend(testSpec);
@@ -290,16 +291,15 @@ void STF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
     }
 
     LOG5("STF test back end: emitting testcase:" << std::setw(4) << dataJson);
-
-    inja::render_to(stfFile, testCase, dataJson);
-    stfFile.flush();
+    auto stfFile = basePath;
+    stfFile.replace_extension("_" + std::to_string(testIdx) + ".stf");
+    auto stfFileStream = std::ofstream(stfFile);
+    inja::render_to(stfFileStream, testCase, dataJson);
+    stfFileStream.flush();
 }
 
 void STF::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testIdx,
                      float currentCoverage) {
-    auto incrementedTestName = testName + "_" + std::to_string(testIdx);
-
-    stfFile = std::ofstream(incrementedTestName + ".stf");
     std::string testCase = getTestCaseTemplate();
     emitTestcase(testSpec, selectedBranches, testIdx, testCase, currentCoverage);
 }

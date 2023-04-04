@@ -34,7 +34,7 @@ class Metadata : public TF {
 
     Metadata &operator=(Metadata &&) = delete;
 
-    Metadata(cstring testName, std::optional<unsigned int> seed);
+    Metadata(std::filesystem::path basePath, std::optional<unsigned int> seed);
 
     /// Produce a Metadata test.
     void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testIdx,

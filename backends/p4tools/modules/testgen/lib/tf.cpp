@@ -1,10 +1,10 @@
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 
-#include <ctype.h>
-
 #include <algorithm>
+#include <cctype>
 #include <optional>
 #include <ostream>
+#include <utility>
 
 #include "backends/p4tools/common/lib/util.h"
 #include "inja/inja.hpp"
@@ -13,8 +13,8 @@
 
 namespace P4Tools::P4Testgen {
 
-TF::TF(cstring testName, std::optional<unsigned int> seed = std::nullopt)
-    : testName(testName), seed(seed) {}
+TF::TF(std::filesystem::path basePath, std::optional<unsigned int> seed = std::nullopt)
+    : basePath(std::move(basePath)), seed(seed) {}
 
 void TF::printPerformanceReport(bool write) const {
     // Do not emit a report if performance logging is not enabled.
@@ -49,8 +49,9 @@ void TF::printPerformanceReport(bool write) const {
 {{timer.name}},{{timer.time}},{{timer.pct}}
 ## endfor
 )""");
-
-        auto perfFile = std::ofstream(testName + "_perf.csv");
+        auto perfFilePath = basePath;
+        perfFilePath.replace_extension("_perf.csv");
+        auto perfFile = std::ofstream(perfFilePath);
         inja::render_to(perfFile, TEST_CASE, dataJson);
         perfFile.flush();
     }

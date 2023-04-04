@@ -22,8 +22,8 @@
 
 namespace P4Tools::P4Testgen::Pna {
 
-Metadata::Metadata(cstring testName, std::optional<unsigned int> seed = std::nullopt)
-    : TF(testName, seed) {}
+Metadata::Metadata(std::filesystem::path basePath, std::optional<unsigned int> seed = std::nullopt)
+    : TF(std::move(basePath), seed) {}
 
 std::vector<std::pair<size_t, size_t>> Metadata::getIgnoreMasks(const IR::Constant *mask) {
     std::vector<std::pair<size_t, size_t>> ignoreMasks;
@@ -76,14 +76,14 @@ inja::json Metadata::getVerify(const TestSpec *testSpec) {
 
 std::string Metadata::getTestCaseTemplate() {
     static std::string TEST_CASE(
-        R"""(# A P4TestGen-generated test case for {{test_name}}.p4
+        R"""(# A P4Testgen-generated test case for {{test_name}}.p4
 
 # Seed used to generate this test.
-Seed: {{ default(seed, "none") }}
+seed: {{ default(seed, "none") }}
 # Test timestamp.
-Date: {{timestamp}}
+data: {{timestamp}}
 # Percentage of statements covered at the time of this test.
-Statement Coverage: {{coverage}}
+statement_coverage: {{coverage}}
 
 # Trace associated with this test.
 #
@@ -91,22 +91,20 @@ Statement Coverage: {{coverage}}
 # {{trace_item}}
 ## endfor
 
-# The input packet.
-InputPacket: {{send.pkt}}
+# The input packet in hexadecimal.
+input_packet: \"{{send.pkt}}\"
 
 # Parsed headers and their offsets.
-HeaderOffsets:
+header_offsets:
 ## for offset in offsets
   {{offset.label}}: {{offset.offset}}
 ## endfor
 
-# Metadata results once this test has finished.
-Metadata:
+# Metadata results after this test has completed.
+metadata:
 ## for metadata_field in metadata_fields
-  {{metadata_field.name}}: {{metadata_field.value}}
-    offset: {{metadata_field.offset}}
+  {{metadata_field.name}}: [value: \"{{metadata_field.value}}\", offset: {{metadata_field.offset}}]
 ## endfor
-
 )""");
     return TEST_CASE;
 }
@@ -139,7 +137,7 @@ void Metadata::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
     if (seed) {
         dataJson["seed"] = *seed;
     }
-    dataJson["test_name"] = testName;
+    dataJson["test_name"] = basePath.stem();
     dataJson["test_id"] = testId + 1;
     computeTraceData(testSpec, dataJson);
 
@@ -172,8 +170,9 @@ void Metadata::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
 
 void Metadata::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testIdx,
                           float currentCoverage) {
-    auto incrementedTestName = testName + "_" + std::to_string(testIdx);
-    metadataFile = std::ofstream(incrementedTestName + ".yml");
+    auto incrementedbasePath = basePath;
+    incrementedbasePath.replace_extension("_" + std::to_string(testIdx) + ".yml");
+    metadataFile = std::ofstream(incrementedbasePath);
     std::string testCase = getTestCaseTemplate();
     emitTestcase(testSpec, selectedBranches, testIdx, testCase, currentCoverage);
 }

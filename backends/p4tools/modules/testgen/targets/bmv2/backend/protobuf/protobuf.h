@@ -19,20 +19,13 @@
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace Bmv2 {
+namespace P4Tools::P4Testgen::Bmv2 {
 
 using P4::ControlPlaneAPI::p4rt_id_t;
 using P4::ControlPlaneAPI::Standard::SymbolType;
 
 /// Extracts information from the @testSpec to emit a Protobuf test case.
 class Protobuf : public TF {
-    /// The output file.
-    std::ofstream protobufFile;
-
  public:
     virtual ~Protobuf() = default;
 
@@ -44,7 +37,7 @@ class Protobuf : public TF {
 
     Protobuf &operator=(Protobuf &&) = delete;
 
-    Protobuf(cstring testName, std::optional<unsigned int> seed);
+    Protobuf(std::filesystem::path basePath, std::optional<unsigned int> seed);
 
     /// Produce a Protobuf test.
     void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testIdx,
@@ -60,7 +53,7 @@ class Protobuf : public TF {
     /// @param selectedBranches enumerates the choices the interpreter made for this path.
     /// @param currentCoverage contains statistics  about the current coverage of this test and its
     /// preceding tests.
-    void emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
+    void emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testIdx,
                       const std::string &testCase, float currentCoverage);
 
     /// @returns the inja test case template as a string.
@@ -94,10 +87,6 @@ class Protobuf : public TF {
                                                const IR::IDeclaration *declaration);
 };
 
-}  // namespace Bmv2
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_BACKEND_PROTOBUF_PROTOBUF_H_ */
