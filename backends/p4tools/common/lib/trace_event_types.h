@@ -60,27 +60,6 @@ class Expression : public Generic {
 };
 
 /* =============================================================================================
- *   ListExpression
- * ============================================================================================= */
-
-/// Evaluates a list of expressions all at once.
-class ListExpression : public TraceEvent {
- private:
-    const IR::ListExpression *value;
-
- public:
-    [[nodiscard]] const ListExpression *subst(const SymbolicEnv &env) const override;
-    const ListExpression *apply(Transform &visitor) const override;
-    void complete(Model *model) const override;
-    [[nodiscard]] const ListExpression *evaluate(const Model &model) const override;
-
-    explicit ListExpression(const IR::ListExpression *value);
-
- protected:
-    void print(std::ostream &os) const override;
-};
-
-/* =============================================================================================
  *   IfStatementCondition
  * ============================================================================================= */
 
@@ -105,33 +84,6 @@ class IfStatementCondition : public TraceEvent {
 };
 
 /* =============================================================================================
- *   Extract
- * ============================================================================================= */
-
-/// A field being extracted by a parser.
-class Extract : public TraceEvent {
- private:
-    const IR::Member *fieldRef;
-    const IR::Expression *value;
-
- public:
-    [[nodiscard]] const Extract *subst(const SymbolicEnv &env) const override;
-    const Extract *apply(Transform &visitor) const override;
-    void complete(Model *model) const override;
-    [[nodiscard]] const Extract *evaluate(const Model &model) const override;
-
-    Extract(const Extract &) = default;
-    Extract(Extract &&) = default;
-    Extract &operator=(const Extract &) = default;
-    Extract &operator=(Extract &&) = default;
-    Extract(const IR::Member *fieldRef, const IR::Expression *value);
-    ~Extract() override = default;
-
- protected:
-    void print(std::ostream &os) const override;
-};
-
-/* =============================================================================================
  *   ExtractSuccess
  * ============================================================================================= */
 
@@ -149,12 +101,14 @@ class ExtractSuccess : public TraceEvent {
     /// The condition that allowed us to extract this header.
     const IR::Expression *condition;
 
-    /// The amount of bits we have extracted.
-    int extractSize;
+    /// The list of fields and their values of the emitted header.
+    std::vector<std::pair<const IR::Member *, const IR::Expression *>> fields;
 
  public:
-    ExtractSuccess(const IR::Expression *extractedHeader, int offset,
-                   const IR::Expression *condition, int extractSize);
+    [[nodiscard]] const ExtractSuccess *subst(const SymbolicEnv &env) const override;
+    const ExtractSuccess *apply(Transform &visitor) const override;
+    void complete(Model *model) const override;
+    [[nodiscard]] const ExtractSuccess *evaluate(const Model &model) const override;
 
     /// @returns the extracted header label stored in this class.
     [[nodiscard]] const IR::Expression *getExtractedHeader() const;
@@ -162,6 +116,9 @@ class ExtractSuccess : public TraceEvent {
     /// @returns the offset stored in this class.
     [[nodiscard]] int getOffset() const;
 
+    ExtractSuccess(const IR::Expression *extractedHeader, int offset,
+                   const IR::Expression *condition,
+                   std::vector<std::pair<const IR::Member *, const IR::Expression *>> fields);
     ExtractSuccess(const ExtractSuccess &) = default;
     ExtractSuccess(ExtractSuccess &&) = default;
     ExtractSuccess &operator=(const ExtractSuccess &) = default;
@@ -190,12 +147,9 @@ class ExtractFailure : public TraceEvent {
     /// The condition that forbade us to extract this header.
     const IR::Expression *condition;
 
-    /// The amount of bits we tried to extract.
-    int extractSize;
-
  public:
     ExtractFailure(const IR::Expression *extractedHeader, int offset,
-                   const IR::Expression *condition, int extractSize);
+                   const IR::Expression *condition);
 
     ExtractFailure(const ExtractFailure &) = default;
     ExtractFailure(ExtractFailure &&) = default;
@@ -214,8 +168,11 @@ class ExtractFailure : public TraceEvent {
 /// A field being emitted by a deparser.
 class Emit : public TraceEvent {
  private:
-    const IR::Member *fieldRef;
-    const IR::Expression *value;
+    /// The label of the emitted header. Either a PathExpression or a member.
+    const IR::Expression *emitHeader;
+
+    /// The list of fields and their values of the emitted header.
+    std::vector<std::pair<const IR::Member *, const IR::Expression *>> fields;
 
  public:
     [[nodiscard]] const Emit *subst(const SymbolicEnv &env) const override;
@@ -223,7 +180,8 @@ class Emit : public TraceEvent {
     void complete(Model *model) const override;
     [[nodiscard]] const Emit *evaluate(const Model &model) const override;
 
-    Emit(const IR::Member *fieldRef, const IR::Expression *value);
+    Emit(const IR::Expression *emitHeader,
+         std::vector<std::pair<const IR::Member *, const IR::Expression *>> fields);
     ~Emit() override = default;
     Emit(const Emit &) = default;
     Emit(Emit &&) = default;

@@ -229,26 +229,8 @@ std::string formatBinOrHex(const big_int &value, int width, bool useSep, bool pa
 }
 
 std::string formatBinOrHexExpr(const IR::Expression *expr, bool useSep, bool pad, bool usePrefix) {
-    if (const auto *constant = expr->to<IR::Constant>()) {
-        auto val = constant->value;
-        if (const auto *type = constant->type->to<IR::Type::Bits>()) {
-            if (type->isSigned && val < 0) {
-                // Invert a negative value by subtracting it from the maximum possible value
-                // respective to the width.
-                auto limit = big_int(1);
-                limit <<= type->width_bits();
-                val = limit + val;
-            }
-            if (type->width_bits() > 0) {
-                return formatBinOrHex(val, type->width_bits(), useSep, pad, usePrefix);
-            }
-        }
-    }
-
-    // If the precise format does not match, just emit the expression as is.
-    std::stringstream out;
-    out << expr;
-    return out.str();
+    return expr->type->width_bits() % 4 == 0 ? formatHexExpr(expr, useSep, pad, usePrefix)
+                                             : formatBinExpr(expr, useSep, pad, usePrefix);
 }
 
 std::string insertSeparators(const std::string &dataStr, const std::string &separator,

@@ -2,6 +2,7 @@
 
 #include <ostream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "backends/p4tools/common/lib/format_int.h"
@@ -49,49 +50,7 @@ const Expression *Expression::evaluate(const Model &model) const {
 
 void Expression::print(std::ostream &os) const {
     Generic::print(os);
-    os << " = " << formatBinOrHexExpr(value, true);
-}
-
-/* =============================================================================================
- *   ListExpression
- * ============================================================================================= */
-
-ListExpression::ListExpression(const IR::ListExpression *value) : value(value) {}
-
-const ListExpression *ListExpression::subst(const SymbolicEnv &env) const {
-    return new ListExpression(env.subst(value)->checkedTo<IR::ListExpression>());
-}
-
-const ListExpression *ListExpression::apply(Transform &visitor) const {
-    return new ListExpression(value->apply(visitor)->checkedTo<IR::ListExpression>());
-}
-
-void ListExpression::complete(Model *model) const { model->complete(value); }
-
-const ListExpression *ListExpression::evaluate(const Model &model) const {
-    IR::Vector<IR::Expression> evaluatedExpressions;
-    for (const auto *component : value->components) {
-        BUG_CHECK(!component->is<IR::ListExpression>(),
-                  "Nested ListExpressions are currently not supported.");
-        if (Taint::hasTaint(model, component)) {
-            evaluatedExpressions.push_back(&Taint::TAINTED_STRING_LITERAL);
-        } else {
-            evaluatedExpressions.push_back(model.evaluate(component));
-        }
-    }
-    return new ListExpression(new IR::ListExpression(evaluatedExpressions));
-}
-
-void ListExpression::print(std::ostream &os) const {
-    os << "[Expression]: ";
-    os << " = {";
-    for (const auto *component : value->components) {
-        os << formatBinOrHexExpr(component, true);
-        if (component != value->components.back()) {
-            os << ", ";
-        }
-    }
-    os << "}";
+    os << " = " << formatHexExpr(value, true);
 }
 
 /* =============================================================================================
@@ -134,9 +93,9 @@ void IfStatementCondition::print(std::ostream &os) const {
         return;
     }
     CHECK_NULL(preEvalCond);
-    const auto &srcInfo = postEvalCond->getSourceInfo();
+    const auto &srcInfo = preEvalCond->getSourceInfo();
     if (srcInfo.isValid()) {
-        os << "[If Statement]: " << postEvalCond->getSourceInfo().toBriefSourceFragment();
+        os << "[If Statement]: " << preEvalCond->getSourceInfo().toBriefSourceFragment();
     } else {
         os << "[Internal If Statement]: " << preEvalCond;
     }
@@ -146,98 +105,139 @@ void IfStatementCondition::print(std::ostream &os) const {
 }
 
 /* =============================================================================================
- *   Extract
- * ============================================================================================= */
-
-Extract::Extract(const IR::Member *fieldRef, const IR::Expression *value)
-    : fieldRef(fieldRef), value(value) {}
-
-const Extract *Extract::subst(const SymbolicEnv &env) const {
-    return new Extract(fieldRef, env.subst(value));
-}
-
-const Extract *Extract::apply(Transform &visitor) const {
-    return new Extract(fieldRef, value->apply(visitor));
-}
-
-void Extract::complete(Model *model) const { model->complete(value); }
-
-const Extract *Extract::evaluate(const Model &model) const {
-    if (Taint::hasTaint(model, value)) {
-        return new Extract(fieldRef, &Taint::TAINTED_STRING_LITERAL);
-    }
-    return new Extract(fieldRef, model.evaluate(value));
-}
-
-void Extract::print(std::ostream &os) const {
-    // Using toString produces cleaner output.
-    os << "[Extract] " << fieldRef->toString() << " = " << formatBinOrHexExpr(value, true);
-}
-
-/* =============================================================================================
  *   ExtractSuccess
  * ============================================================================================= */
 
-ExtractSuccess::ExtractSuccess(const IR::Expression *extractedHeader, int offset,
-                               const IR::Expression *condition, int extractSize)
+ExtractSuccess::ExtractSuccess(
+    const IR::Expression *extractedHeader, int offset, const IR::Expression *condition,
+    std::vector<std::pair<const IR::Member *, const IR::Expression *>> fields)
     : extractedHeader(extractedHeader),
       offset(offset),
       condition(condition),
-      extractSize(extractSize) {}
+      fields(std::move(fields)) {}
 
-int ExtractSuccess::getOffset() const { return offset; }
+const ExtractSuccess *ExtractSuccess::subst(const SymbolicEnv &env) const {
+    std::vector<std::pair<const IR::Member *, const IR::Expression *>> applyFields;
+    applyFields.reserve(fields.size());
+    for (const auto &field : fields) {
+        applyFields.emplace_back(field.first, env.subst(field.second));
+    }
+    return new ExtractSuccess(extractedHeader, offset, condition, applyFields);
+}
 
-const IR::Expression *ExtractSuccess::getExtractedHeader() const { return extractedHeader; }
+const ExtractSuccess *ExtractSuccess::apply(Transform &visitor) const {
+    std::vector<std::pair<const IR::Member *, const IR::Expression *>> applyFields;
+    applyFields.reserve(fields.size());
+    for (const auto &field : fields) {
+        applyFields.emplace_back(field.first, field.second->apply(visitor));
+    }
+    return new ExtractSuccess(extractedHeader, offset, condition, applyFields);
+}
+
+void ExtractSuccess::complete(Model *model) const {
+    for (const auto &field : fields) {
+        model->complete(field.second);
+    }
+}
+
+const ExtractSuccess *ExtractSuccess::evaluate(const Model &model) const {
+    std::vector<std::pair<const IR::Member *, const IR::Expression *>> applyFields;
+    applyFields.reserve(fields.size());
+    for (const auto &field : fields) {
+        if (Taint::hasTaint(model, field.second)) {
+            applyFields.emplace_back(field.first, &Taint::TAINTED_STRING_LITERAL);
+        } else {
+            applyFields.emplace_back(field.first, model.evaluate(field.second));
+        }
+    }
+    return new ExtractSuccess(extractedHeader, offset, condition, applyFields);
+}
 
 void ExtractSuccess::print(std::ostream &os) const {
     // Using toString produces cleaner output.
     os << "[ExtractSuccess] " << extractedHeader->toString() << "@" << offset
-       << " | Condition: " << condition << " | Extract Size: " << extractSize;
+       << " | Condition: " << condition
+       << " | Extract Size: " << extractedHeader->type->width_bits() << " -> ";
+    for (const auto &field : fields) {
+        os << field.first->toString() << " = " << formatHexExpr(field.second, true);
+        if (field != fields.back()) {
+            os << " | ";
+        }
+    }
 }
+
+int ExtractSuccess::getOffset() const { return offset; }
+
+const IR::Expression *ExtractSuccess::getExtractedHeader() const { return extractedHeader; }
 
 /* =============================================================================================
  *   ExtractFailure
  * ============================================================================================= */
 
 ExtractFailure::ExtractFailure(const IR::Expression *extractedHeader, int offset,
-                               const IR::Expression *condition, int extractSize)
-    : extractedHeader(extractedHeader),
-      offset(offset),
-      condition(condition),
-      extractSize(extractSize) {}
+                               const IR::Expression *condition)
+    : extractedHeader(extractedHeader), offset(offset), condition(condition) {}
 
 void ExtractFailure::print(std::ostream &os) const {
     // Using toString produces cleaner output.
     os << "[ExtractFailure] " << extractedHeader->toString() << "@" << offset
-       << " | Condition: " << condition << " | Extract Size: " << extractSize;
+       << " | Condition: " << condition
+       << " | Extract Size: " << extractedHeader->type->width_bits();
 }
 
 /* =============================================================================================
  *   Emit
  * ============================================================================================= */
 
-Emit::Emit(const IR::Member *fieldRef, const IR::Expression *value)
-    : fieldRef(fieldRef), value(value) {}
+Emit::Emit(const IR::Expression *emitHeader,
+           std::vector<std::pair<const IR::Member *, const IR::Expression *>> fields)
+    : emitHeader(emitHeader), fields(std::move(fields)) {}
 
 const Emit *Emit::subst(const SymbolicEnv &env) const {
-    return new Emit(fieldRef, env.subst(value));
+    std::vector<std::pair<const IR::Member *, const IR::Expression *>> applyFields;
+    applyFields.reserve(fields.size());
+    for (const auto &field : fields) {
+        applyFields.emplace_back(field.first, env.subst(field.second));
+    }
+    return new Emit(emitHeader, applyFields);
 }
 
 const Emit *Emit::apply(Transform &visitor) const {
-    return new Emit(fieldRef, value->apply(visitor));
+    std::vector<std::pair<const IR::Member *, const IR::Expression *>> applyFields;
+    applyFields.reserve(fields.size());
+    for (const auto &field : fields) {
+        applyFields.emplace_back(field.first, field.second->apply(visitor));
+    }
+    return new Emit(emitHeader, applyFields);
 }
 
-void Emit::complete(Model *model) const { model->complete(value); }
+void Emit::complete(Model *model) const {
+    for (const auto &field : fields) {
+        model->complete(field.second);
+    }
+}
 
 const Emit *Emit::evaluate(const Model &model) const {
-    if (Taint::hasTaint(model, value)) {
-        return new Emit(fieldRef, &Taint::TAINTED_STRING_LITERAL);
+    std::vector<std::pair<const IR::Member *, const IR::Expression *>> applyFields;
+    applyFields.reserve(fields.size());
+    for (const auto &field : fields) {
+        if (Taint::hasTaint(model, field.second)) {
+            applyFields.emplace_back(field.first, &Taint::TAINTED_STRING_LITERAL);
+        } else {
+            applyFields.emplace_back(field.first, model.evaluate(field.second));
+        }
     }
-    return new Emit(fieldRef, model.evaluate(value));
+    return new Emit(emitHeader, applyFields);
 }
 
 void Emit::print(std::ostream &os) const {
-    os << "[Emit] " << fieldRef->toString() << " = " << formatBinOrHexExpr(value, true);
+    os << "[Emit] " << emitHeader->toString() << " -> ";
+    for (const auto &field : fields) {
+        os << field.first->toString() << " = " << formatHexExpr(field.second, true);
+        if (field != fields.back()) {
+            os << " | ";
+        }
+    }
 }
 
 /* =============================================================================================
@@ -265,7 +265,7 @@ const Packet *Packet::evaluate(const Model &model) const {
 }
 
 void Packet::print(std::ostream &os) const {
-    os << "[Packet " << direction << "] " << formatBinOrHexExpr(packetValue, true);
+    os << "[Packet " << direction << "] " << formatHexExpr(packetValue, true);
 }
 
 std::ostream &operator<<(std::ostream &os, const Packet::Direction &direction) {

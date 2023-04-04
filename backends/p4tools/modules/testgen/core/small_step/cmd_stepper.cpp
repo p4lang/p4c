@@ -482,9 +482,10 @@ bool CmdStepper::preorder(const IR::BlockStatement *block) {
 
 bool CmdStepper::preorder(const IR::ExitStatement *e) {
     logStep(e);
-    auto &nextState = state.clone();
-    nextState.markVisited(e);
-    nextState.replaceTopBody(Continuation::Exception::Exit);
+    auto *nextState = new ExecutionState(state);
+    nextState->markVisited(e);
+    nextState->add(new TraceEvents::Generic("Exit"));
+    nextState->replaceTopBody(Continuation::Exception::Exit);
     result->emplace_back(nextState);
     return false;
 }

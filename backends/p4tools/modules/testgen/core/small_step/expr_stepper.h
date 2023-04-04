@@ -59,8 +59,9 @@ class ExprStepper : public AbstractStepper {
     /// Iterate over the fields in @param flatFields and set the corresponding values in
     /// @param nextState. If there is a varbit, assign the @param varbitFieldSize as size to
     /// it.
-    static void setFields(ExecutionState &nextState,
-                          const std::vector<const IR::Member *> &flatFields, int varBitFieldSize);
+    static std::vector<std::pair<const IR::Member *, const IR::Expression *>> setFields(
+        ExecutionState *nextState, const std::vector<const IR::Member *> &flatFields,
+        int varBitFieldSize);
     /// This function call is used in member expressions to cleanly resolve hit, miss, and action
     /// run expressions. These are return values of a table.apply() call, and fairly special in P4.
     /// We have to use this rewrite to execute the table, and then return the corresponding
