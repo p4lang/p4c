@@ -104,7 +104,8 @@ class CompilerBug final : public P4CExceptionBase {
 class CompilerUnimplemented final : public P4CExceptionBase {
  public:
     template <typename... T>
-    CompilerUnimplemented(const char *format, T... args) : P4CExceptionBase(format, args...) {
+    explicit CompilerUnimplemented(const char *format, T... args)
+        : P4CExceptionBase(format, args...) {
         // Do not add colors when redirecting to stderr
         message = cstring(cerr_colorize(ANSI_BLUE)) + "Not yet implemented" + cerr_clear_colors() +
                   ":\n" + message;
@@ -124,47 +125,52 @@ class CompilerUnimplemented final : public P4CExceptionBase {
 class CompilationError : public P4CExceptionBase {
  public:
     template <typename... T>
-    CompilationError(const char *format, T... args) : P4CExceptionBase(format, args...) {}
+    explicit CompilationError(const char *format, T... args) : P4CExceptionBase(format, args...) {}
 };
 
 }  // namespace Util
 
-template <class... Args>
-struct BUG {
-    [[noreturn]] explicit BUG(Args &&...args, const std::experimental::source_location &loc =
-                                                  std::experimental::source_location::current()) {
-        throw Util::CompilerBug(loc.line(), loc.file_name(), std::forward<Args>(args)...);
-    }
+/// A helper class to store the source location for templates with variadic arguments.
+/// Source: https://stackoverflow.com/a/66402319/3215972
+struct FormatWithLocation {
+    /// Ignore explicit warnings here, we need an implicit conversion.
+    // NOLINTNEXTLINE
+    FormatWithLocation(const char *formatString, const std::experimental::source_location &l =
+                                                     std::experimental::source_location::current())
+        : formatString(formatString), loc(l) {}
+    /// The string that is to be formatted.
+    const char *getFormatString() { return formatString; }
+
+    /// Return the line stored in the source location.
+    auto getSourceLocationLine() { return loc.line(); }
+
+    /// Return the file name stored in the source location.
+    auto getSourceLocationFileName() { return loc.file_name(); }
+
+ private:
+    const char *formatString;
+    std::experimental::source_location loc;
 };
 
 template <typename... Args>
-BUG(Args &&...) -> BUG<Args...>;
-
-template <class... Args>
-struct BUG_CHECK {
-    explicit BUG_CHECK(bool e, Args &&...args,
-                       const std::experimental::source_location &loc =
-                           std::experimental::source_location::current()) {
-        if (!e) {
-            throw Util::CompilerBug(loc.line(), loc.file_name(), std::forward<Args>(args)...);
-        }
-    }
-};
+[[noreturn]] inline void BUG(FormatWithLocation fmt, Args &&...args) {
+    throw Util::CompilerBug(fmt.getSourceLocationLine(), fmt.getSourceLocationFileName(),
+                            fmt.getFormatString(), std::forward<Args>(args)...);
+}
 
 template <typename... Args>
-BUG_CHECK(bool e, Args &&...) -> BUG_CHECK<Args...>;
-
-template <class... Args>
-struct P4C_UNIMPLEMENTED {
-    [[noreturn]] explicit P4C_UNIMPLEMENTED(Args &&...args,
-                                            const std::experimental::source_location &loc =
-                                                std::experimental::source_location::current()) {
-        throw Util::CompilerUnimplemented(loc.line(), loc.file_name(), std::forward<Args>(args)...);
+inline void BUG_CHECK(bool e, FormatWithLocation fmt, Args &&...args) {
+    if (!e) {
+        throw Util::CompilerBug(fmt.getSourceLocationLine(), fmt.getSourceLocationFileName(),
+                                fmt.getFormatString(), std::forward<Args>(args)...);
     }
-};
+}
 
 template <typename... Args>
-P4C_UNIMPLEMENTED(Args &&...) -> P4C_UNIMPLEMENTED<Args...>;
+[[noreturn]] inline void P4C_UNIMPLEMENTED(FormatWithLocation fmt, Args &&...args) {
+    throw Util::CompilerBug(fmt.getSourceLocationLine(), fmt.getSourceLocationFileName(),
+                            fmt.getFormatString(), std::forward<Args>(args)...);
+}
 
 /// Report an error and exit
 template <class... Args>
