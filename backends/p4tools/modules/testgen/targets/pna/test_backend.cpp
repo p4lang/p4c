@@ -8,7 +8,7 @@
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/lib/model.h"
-#include "backends/p4tools/common/lib/trace_events.h"
+#include "backends/p4tools/common/lib/trace_event.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
@@ -86,7 +86,11 @@ const TestSpec *PnaTestBackend::createTestSpec(const ExecutionState *executionSt
             localMetadataVar, localMetadataType->checkedTo<IR::Type_Struct>(), {});
         for (const auto *fieldRef : flatFields) {
             const auto *fieldVal = completedModel->evaluate(executionState->get(fieldRef));
-            metadataCollection->addMetaDataField(fieldRef->toString(), fieldVal);
+            // Try to remove the leading internal name for the metadata field.
+            // Thankfully, this string manipulation is safe if we are out of range.
+            auto fieldString = fieldRef->toString();
+            fieldString = fieldString.substr(fieldString.find('.') - fieldString.begin() + 1);
+            metadataCollection->addMetaDataField(fieldString, fieldVal);
         }
         testSpec->addTestObject("metadata_collection", "metadata_collection", metadataCollection);
         return testSpec;

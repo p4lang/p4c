@@ -13,7 +13,7 @@
 #include <inja/inja.hpp>
 
 #include "backends/p4tools/common/lib/format_int.h"
-#include "backends/p4tools/common/lib/trace_events.h"
+#include "backends/p4tools/common/lib/trace_event.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
@@ -25,20 +25,20 @@ namespace P4Tools::P4Testgen {
 /// name and a seed associated with it. Also contains a variety of common utility functions.
 class TF {
  protected:
-    /// The @testName to be used in test case generation.
-    const cstring testName;
+    /// The @basePath to be used in test case generation.
+    std::filesystem::path basePath;
 
     /// The seed used by the testgen.
     std::optional<unsigned int> seed;
 
     /// Creates a generic test framework.
-    explicit TF(cstring, std::optional<unsigned int>);
+    TF(std::filesystem::path basePath, std::optional<unsigned int> seed);
 
     /// Converts the traces of this test into a string representation and Inja object.
     static inja::json getTrace(const TestSpec *testSpec) {
         inja::json traceList = inja::json::array();
         const auto *traces = testSpec->getTraces();
-        if ((traces != nullptr) && !traces->empty()) {
+        if (traces != nullptr) {
             for (const auto &trace : *traces) {
                 std::stringstream ss;
                 ss << trace;

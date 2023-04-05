@@ -23,7 +23,8 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-PTF::PTF(cstring testName, std::optional<unsigned int> seed = std::nullopt) : TF(testName, seed) {}
+PTF::PTF(std::filesystem::path basePath, std::optional<unsigned int> seed = std::nullopt)
+    : TF(std::move(basePath), seed) {}
 
 inja::json::array_t PTF::getClone(const std::map<cstring, const TestObject *> &cloneInfos) {
     auto cloneJson = inja::json::array_t();
@@ -246,15 +247,14 @@ class AbstractTest(bt.P4RuntimeTest):
 }
 
 void PTF::emitPreamble(const std::string &preamble) {
-    std::filesystem::path testFile(testName + ".py");
     inja::json dataJson;
-    dataJson["test_name"] = testFile.stem();
+    dataJson["test_name"] = basePath.stem();
     if (seed) {
         dataJson["seed"] = *seed;
     }
 
-    inja::render_to(ptfFile, preamble, dataJson);
-    ptfFile.flush();
+    inja::render_to(ptfFileStream, preamble, dataJson);
+    ptfFileStream.flush();
 }
 
 std::string PTF::getTestCaseTemplate() {
@@ -355,14 +355,14 @@ class Test{{test_id}}(AbstractTest):
     return TEST_CASE;
 }
 
-void PTF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
+void PTF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testIdx,
                        const std::string &testCase, float currentCoverage) {
     inja::json dataJson;
     if (selectedBranches != nullptr) {
         dataJson["selected_branches"] = selectedBranches.c_str();
     }
 
-    dataJson["test_id"] = testId + 1;
+    dataJson["test_id"] = testIdx + 1;
     dataJson["trace"] = getTrace(testSpec);
     dataJson["control_plane"] = getControlPlane(testSpec);
     dataJson["send"] = getSend(testSpec);
@@ -382,15 +382,16 @@ void PTF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
 
     LOG5("PTF backend: emitting testcase:" << std::setw(4) << dataJson);
 
-    std::filesystem::path testFile(testName + ".py");
-    inja::render_to(ptfFile, testCase, dataJson);
-    ptfFile.flush();
+    inja::render_to(ptfFileStream, testCase, dataJson);
+    ptfFileStream.flush();
 }
 
 void PTF::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testIdx,
                      float currentCoverage) {
     if (!preambleEmitted) {
-        ptfFile = std::ofstream(testName + ".py");
+        auto ptfFile = basePath;
+        ptfFile.replace_extension(".py");
+        ptfFileStream = std::ofstream(ptfFile);
         std::string preamble = getPreamble();
         emitPreamble(preamble);
         preambleEmitted = true;

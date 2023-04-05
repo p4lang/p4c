@@ -10,7 +10,7 @@
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/lib/model.h"
-#include "backends/p4tools/common/lib/trace_events.h"
+#include "backends/p4tools/common/lib/trace_event.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
@@ -51,13 +51,13 @@ Bmv2TestBackend::Bmv2TestBackend(const ProgramInfo &programInfo, SymbolicExecuto
     }
 
     if (testBackendString == "PTF") {
-        testWriter = new PTF(testPath.c_str(), seed);
+        testWriter = new PTF(testPath, seed);
     } else if (testBackendString == "STF") {
-        testWriter = new STF(testPath.c_str(), seed);
+        testWriter = new STF(testPath, seed);
     } else if (testBackendString == "PROTOBUF") {
-        testWriter = new Protobuf(testPath.c_str(), seed);
+        testWriter = new Protobuf(testPath, seed);
     } else if (testBackendString == "METADATA") {
-        testWriter = new Metadata(testPath.c_str(), seed);
+        testWriter = new Metadata(testPath, seed);
     } else {
         P4C_UNIMPLEMENTED(
             "Test back end %1% not implemented for this target. Supported back ends are %2%.",
@@ -103,14 +103,18 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
     // Save the values of all the fields in it and return.
     if (TestgenOptions::get().testBackend == "METADATA") {
         auto *metadataCollection = new MetadataCollection();
-        auto bmv2ProgInfo = programInfo.checkedTo<BMv2_V1ModelProgramInfo>();
-        auto localMetadataVar = bmv2ProgInfo->getBlockParam("Parser", 2);
+        const auto *bmv2ProgInfo = programInfo.checkedTo<BMv2_V1ModelProgramInfo>();
+        const auto *localMetadataVar = bmv2ProgInfo->getBlockParam("Parser", 2);
         const auto *localMetadataType = executionState->resolveType(localMetadataVar->type);
         auto flatFields = executionState->getFlatFields(
             localMetadataVar, localMetadataType->checkedTo<IR::Type_Struct>(), {});
         for (const auto *fieldRef : flatFields) {
             const auto *fieldVal = completedModel->evaluate(executionState->get(fieldRef));
-            metadataCollection->addMetaDataField(fieldRef->toString(), fieldVal);
+            // Try to remove the leading internal name for the metadata field.
+            // Thankfully, this string manipulation is safe if we are out of range.
+            auto fieldString = fieldRef->toString();
+            fieldString = fieldString.substr(fieldString.find('.') - fieldString.begin() + 1);
+            metadataCollection->addMetaDataField(fieldString, fieldVal);
         }
         testSpec->addTestObject("metadata_collection", "metadata_collection", metadataCollection);
         return testSpec;

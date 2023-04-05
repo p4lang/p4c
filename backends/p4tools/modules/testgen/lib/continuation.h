@@ -12,7 +12,7 @@
 #include <variant>
 #include <vector>
 
-#include "backends/p4tools/common/lib/trace_events.h"
+#include "backends/p4tools/common/lib/trace_event.h"
 #include "ir/ir.h"
 #include "ir/node.h"
 #include "lib/cstring.h"

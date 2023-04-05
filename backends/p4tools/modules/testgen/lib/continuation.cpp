@@ -3,7 +3,7 @@
 #include <variant>
 #include <vector>
 
-#include "backends/p4tools/common/lib/trace_events.h"
+#include "backends/p4tools/common/lib/trace_event.h"
 #include "ir/id.h"
 #include "ir/visitor.h"
 #include "lib/exceptions.h"

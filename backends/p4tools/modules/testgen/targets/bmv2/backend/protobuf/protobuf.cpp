@@ -37,8 +37,8 @@ std::string formatHexExprWithSep(const IR::Expression *expr) {
     return insertHexSeparators(formatHexExpr(expr, false, true, false));
 }
 
-Protobuf::Protobuf(cstring testName, std::optional<unsigned int> seed = std::nullopt)
-    : TF(testName, seed) {}
+Protobuf::Protobuf(std::filesystem::path basePath, std::optional<unsigned int> seed = std::nullopt)
+    : TF(std::move(basePath), seed) {}
 
 std::optional<p4rt_id_t> Protobuf::getIdAnnotation(const IR::IAnnotated *node) {
     const auto *idAnnotation = node->getAnnotation("id");
@@ -376,18 +376,17 @@ entities : [
     return TEST_CASE;
 }
 
-void Protobuf::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
+void Protobuf::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testIdx,
                             const std::string &testCase, float currentCoverage) {
     inja::json dataJson;
     if (selectedBranches != nullptr) {
         dataJson["selected_branches"] = selectedBranches.c_str();
     }
-    std::filesystem::path testFile(testName + ".proto");
     if (seed) {
         dataJson["seed"] = *seed;
     }
-    dataJson["test_name"] = testFile.stem();
-    dataJson["test_id"] = testId + 1;
+    dataJson["test_name"] = basePath.stem();
+    dataJson["test_id"] = testIdx + 1;
     // TODO: Traces are disabled until we are able to escape illegal characters (e.g., '"').
     // dataJson["trace"] = getTrace(testSpec);
     dataJson["trace"] = inja::json::array();
@@ -399,17 +398,16 @@ void Protobuf::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
     coverageStr << std::setprecision(2) << currentCoverage;
     dataJson["coverage"] = coverageStr.str();
 
-    LOG5("Protobuf backend: emitting testcase:" << std::setw(4) << dataJson);
-
-    inja::render_to(protobufFile, testCase, dataJson);
-    protobufFile.flush();
+    LOG5("Protobuf test back end: emitting testcase:" << std::setw(4) << dataJson);
+    auto protobufFile = basePath;
+    protobufFile.replace_extension("_" + std::to_string(testIdx) + ".proto");
+    auto protobufFileStream = std::ofstream(protobufFile);
+    inja::render_to(protobufFileStream, testCase, dataJson);
+    protobufFileStream.flush();
 }
 
 void Protobuf::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testIdx,
                           float currentCoverage) {
-    auto incrementedTestName = testName + "_" + std::to_string(testIdx);
-
-    protobufFile = std::ofstream(incrementedTestName + ".proto");
     std::string testCase = getTestCaseTemplate();
     emitTestcase(testSpec, selectedBranches, testIdx, testCase, currentCoverage);
 }

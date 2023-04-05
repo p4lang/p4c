@@ -9,7 +9,7 @@
 
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
-#include "backends/p4tools/common/lib/trace_events.h"
+#include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/irutils.h"
 #include "lib/cstring.h"
@@ -45,9 +45,7 @@ const ExternMethodImpls SharedPnaExprStepper::PNA_EXTERN_METHOD_IMPLS({
          // Use an assignment to set drop variable to true.
          // This variable will be processed in the deparser.
          nextState.set(&PnaConstants::DROP_VAR, IR::getBoolLiteral(true));
-         nextState.add(
-
-             *new TraceEvent::Generic("drop_packet executed."));
+         nextState.add(*new TraceEvents::Generic("drop_packet executed"));
          nextState.popBody();
          result->emplace_back(nextState);
      }},
@@ -80,9 +78,7 @@ const ExternMethodImpls SharedPnaExprStepper::PNA_EXTERN_METHOD_IMPLS({
          }
          // Use an assignment to set the output port to the input.
          nextState.set(&PnaConstants::OUTPUT_PORT_VAR, destPort);
-         nextState.add(
-
-             *new TraceEvent::Generic("send_to_port executed."));
+         nextState.add(*new TraceEvents::Generic("send_to_port executed"));
          nextState.popBody();
          result->emplace_back(nextState);
      }},
@@ -170,9 +166,7 @@ const ExternMethodImpls SharedPnaExprStepper::PNA_EXTERN_METHOD_IMPLS({
         IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
         const ExecutionState &state, SmallStepEvaluator::Result &result) {
          auto &nextState = state.clone();
-         nextState.add(
-
-             *new TraceEvent::Generic("add_entry executed. Currently a no-op."));
+         nextState.add(*new TraceEvents::Generic("add_entry executed. Currently a no-op."));
          nextState.replaceTopBody(Continuation::Return(IR::getBoolLiteral(true)));
          result->emplace_back(nextState);
      }},

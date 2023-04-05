@@ -16,7 +16,7 @@
 #include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
-#include "backends/p4tools/common/lib/trace_events.h"
+#include "backends/p4tools/common/lib/trace_event.h"
 #include "ir/declaration.h"
 #include "ir/ir.h"
 #include "ir/node.h"
@@ -354,15 +354,15 @@ class ExecutionState {
      * ========================================================================================= */
  public:
     /// @returns the bit type of the parser cursor.
-    static const IR::Type_Bits *getPacketSizeVarType();
+    [[nodiscard]] static const IR::Type_Bits *getPacketSizeVarType();
 
     /// @returns the symbolic constant representing the length of the input to the current parser,
     /// in bits.
-    static const StateVariable &getInputPacketSizeVar();
+    [[nodiscard]] static const StateVariable &getInputPacketSizeVar();
 
     /// @returns the maximum length, in bits, of the packet in the current packet buffer. This is
     /// the network's MTU.
-    static int getMaxPacketLength();
+    [[nodiscard]] static int getMaxPacketLength();
 
     /// @returns the current version of the packet that is intended as input.
     [[nodiscard]] const IR::Expression *getInputPacket() const;
@@ -387,14 +387,14 @@ class ExecutionState {
 
     /// Consumes and @returns a slice from the available packet buffer. If the buffer is empty, this
     /// will produce zombie constants that are appended to the input packet. This means we generate
-    /// packet content as
+    /// packet content as needed. The returned slice is optional in case one just needs to advance.
     const IR::Expression *slicePacketBuffer(int amount);
 
     /// Peeks ahead into the packet buffer. Works similarly to slicePacketBuffer but does NOT
     /// advance the parser cursor or removes content from the packet buffer. However, because
     /// functions such as lookahead may still produce a parser error, this function can also enlarge
     /// the minimum input packet required.
-    const IR::Expression *peekPacketBuffer(int amount);
+    [[nodiscard]] const IR::Expression *peekPacketBuffer(int amount);
 
     /// Append data to the packet buffer.
     void appendToPacketBuffer(const IR::Expression *expr);
@@ -416,13 +416,13 @@ class ExecutionState {
 
     /// @returns the label associated with the payload and sets the type according to the @param.
     /// TODO: Consider moving this to a separate utility class?
-    static const IR::Member *getPayloadLabel(const IR::Type *t);
+    [[nodiscard]] static const IR::Member *getPayloadLabel(const IR::Type *t);
 
     /// Set the parser error label to the @param parserError.
     void setParserErrorLabel(const IR::Member *parserError);
 
     /// @returns the current parser error label. Throws a BUG if the label is a nullptr.
-    const IR::Member *getCurrentParserErrorLabel() const;
+    [[nodiscard]] const IR::Member *getCurrentParserErrorLabel() const;
 
     /* =========================================================================================
      *  Variables and symbolic constants.
@@ -436,8 +436,8 @@ class ExecutionState {
 
     /// @see Utils::getZombieConst.
     /// We also place the zombies in the set of allocated zombies of this state.
-    const StateVariable &createZombieConst(const IR::Type *type, cstring name,
-                                           uint64_t instanceID = 0);
+    [[nodiscard]] const StateVariable &createZombieConst(const IR::Type *type, cstring name,
+                                                         uint64_t instanceID = 0);
 
     /* =========================================================================================
      *  General utilities involving ExecutionState.
@@ -449,23 +449,23 @@ class ExecutionState {
     /// "prefix.h.ethernet.src_address", ...}).
     /// If @arg validVector is provided, this function also collects the validity bits of the
     /// headers.
-    std::vector<const IR::Member *> getFlatFields(
+    [[nodiscard]] std::vector<const IR::Member *> getFlatFields(
         const IR::Expression *parent, const IR::Type_StructLike *ts,
         std::vector<const IR::Member *> *validVector = nullptr) const;
 
     /// Gets table type from a member.
     /// @returns nullptr is member type is not a IR::P4Table.
-    const IR::P4Table *getTableType(const IR::Expression *expression) const;
+    [[nodiscard]] const IR::P4Table *getTableType(const IR::Expression *expression) const;
 
     /// Gets action type from an expression.
-    const IR::P4Action *getActionDecl(const IR::Expression *expression) const;
+    [[nodiscard]] const IR::P4Action *getActionDecl(const IR::Expression *expression) const;
 
     /// @returns a translation of the path expression into a member.
     /// This function looks up the path expression in the namespace and tries to find the
     /// corresponding declaration. It then converts the name of the declaration into a zombie
     /// constant and returns. This is necessary because we sometimes
     /// get flat declarations without members (e.g., bit<8> tmp;)
-    const StateVariable &convertPathExpr(const IR::PathExpression *path) const;
+    [[nodiscard]] const StateVariable &convertPathExpr(const IR::PathExpression *path) const;
 
     /// Allocate a new execution state object with the same state as this object.
     /// Returns a reference, not a pointer.

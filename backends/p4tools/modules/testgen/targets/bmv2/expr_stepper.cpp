@@ -13,7 +13,7 @@
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
-#include "backends/p4tools/common/lib/trace_events.h"
+#include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/declaration.h"
 #include "ir/indexed_vector.h"
@@ -89,7 +89,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                                                    const IR::Expression *receiver, IR::ID name,
                                                    const IR::Vector<IR::Argument> *args,
                                                    ExecutionState &state) {
-    const ExternMethodImpls::MethodImpl AssertAssumeExecute =
+    const ExternMethodImpls::MethodImpl assertAssumeExecute =
         [](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
            IR::ID &methodName, const IR::Vector<IR::Argument> *args, const ExecutionState &state,
            SmallStepEvaluator::Result &result) {
@@ -121,23 +121,15 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
             {
                 auto &nextState = state.clone();
                 nextState.popBody();
-                nextState.add(
-
-                    *new TraceEvent::Generic(upCasename + ": true condition "));
-                nextState.add(
-
-                    *new TraceEvent::Generic(condStream.str()));
+                nextState.add(*new TraceEvents::Generic(upCasename + ": true condition "));
+                nextState.add(*new TraceEvents::Generic(condStream.str()));
                 result->emplace_back(cond, state, nextState);
             }
             // Handle the case where the condition is false.
             {
                 auto &falseState = state.clone();
-                falseState.add(
-
-                    *new TraceEvent::Generic(upCasename + ": false condition"));
-                falseState.add(
-
-                    *new TraceEvent::Generic(condStream.str()));
+                falseState.add(*new TraceEvents::Generic(upCasename + ": false condition"));
+                falseState.add(*new TraceEvents::Generic(condStream.str()));
                 falseState.replaceTopBody(Continuation::Exception::Abort);
                 result->emplace_back(new IR::LNot(IR::Type::Boolean::get(), cond), state,
                                      falseState);
@@ -168,9 +160,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              // This variable will be processed in the deparser.
              const auto *portVar = new IR::Member(nineBitType, metadataLabel, "egress_spec");
              nextState.set(portVar, IR::getConstant(nineBitType, 511));
-             nextState.add(
-
-                 *new TraceEvent::Generic("mark_to_drop executed."));
+             nextState.add(*new TraceEvents::Generic("mark_to_drop executed."));
              nextState.popBody();
              result->emplace_back(nextState);
          }},
@@ -250,7 +240,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          *  condition ever evaluates to false when operating in a network, it
          *  is likely that your assumption was wrong, and should be reexamined.
          * ====================================================================================== */
-        {"*method.assume", {"check"}, AssertAssumeExecute},
+        {"*method.assume", {"check"}, assertAssumeExecute},
         /* ======================================================================================
          *  assert
          *  Calling assert when the argument is true has no effect, except any
@@ -273,7 +263,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          *  because, if you follow this advice, your program will behave the
          *  same way when assert statements are removed.
          * ====================================================================================== */
-        {"*method.assert", {"check"}, AssertAssumeExecute},
+        {"*method.assert", {"check"}, assertAssumeExecute},
         /* ======================================================================================
          *  log_msg
          *  Log user defined messages
@@ -304,9 +294,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              }
 
              auto &nextState = state.clone();
-             nextState.add(
-
-                 *new TraceEvent::Generic(totalStream.str()));
+             nextState.add(*new TraceEvents::Generic(totalStream.str()));
              nextState.popBody();
              result->emplace_back(nextState);
          }},
@@ -317,9 +305,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
              auto msg = args->at(0)->expression->checkedTo<IR::StringLiteral>()->value;
              auto &nextState = state.clone();
-             nextState.add(
-
-                 *new TraceEvent::Generic(msg));
+             nextState.add(*new TraceEvents::Generic(msg));
              nextState.popBody();
              result->emplace_back(nextState);
          }},
@@ -486,9 +472,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              index->dbprint(registerStream);
              registerStream << " into field ";
              readOutput->dbprint(registerStream);
-             nextState.add(
-
-                 *new TraceEvent::Generic(registerStream.str()));
+             nextState.add(*new TraceEvents::Generic(registerStream.str()));
              nextState.replaceTopBody(&replacements);
              result->emplace_back(nextState);
          }},
@@ -558,9 +542,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              inputValue->dbprint(registerStream);
              registerStream << " into index ";
              index->dbprint(registerStream);
-             nextState.add(
-
-                 *new TraceEvent::Generic(registerStream.str()));
+             nextState.add(*new TraceEvents::Generic(registerStream.str()));
 
              // "Write" to the register by update the internal test object state. If the register
              // did not exist previously, update it with the value to write as initial value.

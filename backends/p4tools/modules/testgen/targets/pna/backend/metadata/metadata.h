@@ -34,7 +34,7 @@ class Metadata : public TF {
 
     Metadata &operator=(Metadata &&) = delete;
 
-    Metadata(cstring testName, std::optional<unsigned int> seed);
+    Metadata(std::filesystem::path basePath, std::optional<unsigned int> seed);
 
     /// Produce a Metadata test.
     void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testIdx,
@@ -52,6 +52,11 @@ class Metadata : public TF {
     /// preceding tests.
     void emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
                       const std::string &testCase, float currentCoverage);
+
+    /// Gets the traces from @param testSpec and populates @param dataJson.
+    /// Also retrieves the label and offset for each successful extract call and stores them in a
+    /// "offsets" key.
+    static void computeTraceData(const TestSpec *testSpec, inja::json &dataJson);
 
     /// @returns the inja test case template as a string.
     static std::string getTestCaseTemplate();
