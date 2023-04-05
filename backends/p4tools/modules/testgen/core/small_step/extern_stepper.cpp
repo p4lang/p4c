@@ -173,12 +173,14 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
                  TESTGEN_UNIMPLEMENTED("Prepend input %1% of type %2% not supported", prependVar,
                                        prependVar->type);
              }
-             auto &nextState = state.clone();
 
-             if (const auto *prependType = prependVar->type->to<IR::Type_StructLike>()) {
+             auto &nextState = state.clone();
+             const auto *prependType = state.resolveType(prependVar->type);
+
+             if (const auto *ts = prependType->to<IR::Type_StructLike>()) {
                  // We only support flat assignments, so retrieve all fields from the input
                  // argument.
-                 const auto flatFields = nextState.getFlatFields(prependVar, prependType);
+                 const auto flatFields = nextState.getFlatFields(prependVar, ts);
                  // Iterate through the fields in reverse order.
                  // We need to append in reverse order since we are prepending to the input
                  // packet.
@@ -187,15 +189,14 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
                      // Prepend the field to the packet buffer.
                      nextState.prependToPacketBuffer(nextState.get(fieldRef));
                  }
-
-             } else if (prependVar->type->is<IR::Type_Bits>()) {
+             } else if (prependType->is<IR::Type_Bits>()) {
                  // Prepend the field to the packet buffer.
                  nextState.add(*new TraceEvents::Expression(prependVar, "PrependToProgramHeader"));
                  nextState.prependToPacketBuffer(prependVar);
 
              } else {
                  TESTGEN_UNIMPLEMENTED("Prepend input %1% of type %2% not supported", prependVar,
-                                       prependVar->type);
+                                       prependType);
              }
              nextState.popBody();
              result->emplace_back(nextState);
@@ -217,21 +218,23 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
                  TESTGEN_UNIMPLEMENTED("append input %1% of type %2% not supported", appendVar,
                                        appendVar->type);
              }
-             auto &nextState = state.clone();
 
-             if (const auto *appendType = appendVar->type->to<IR::Type_StructLike>()) {
+             auto &nextState = state.clone();
+             const auto *appendType = state.resolveType(appendVar->type);
+
+             if (const auto *ts = appendType->to<IR::Type_StructLike>()) {
                  // We only support flat assignments, so retrieve all fields from the input
                  // argument.
-                 const auto flatFields = nextState.getFlatFields(appendVar, appendType);
+                 const auto flatFields = nextState.getFlatFields(appendVar, ts);
                  for (const auto *fieldRef : flatFields) {
                      nextState.appendToPacketBuffer(nextState.get(fieldRef));
                  }
-             } else if (appendVar->type->is<IR::Type_Bits>()) {
+             } else if (appendType->is<IR::Type_Bits>()) {
                  nextState.add(*new TraceEvents::Expression(appendVar, "AppendToProgramHeader"));
                  nextState.appendToPacketBuffer(appendVar);
              } else {
                  TESTGEN_UNIMPLEMENTED("Append input %1% of type %2% not supported", appendVar,
-                                       appendVar->type);
+                                       appendType);
              }
              nextState.popBody();
              result->emplace_back(nextState);
