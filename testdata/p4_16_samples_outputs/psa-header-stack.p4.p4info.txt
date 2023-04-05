@@ -13,6 +13,12 @@ tables {
     bitwidth: 48
     match_type: EXACT
   }
+  match_fields {
+    id: 2
+    name: "a.vlan_tag[0].ether_type"
+    bitwidth: 16
+    match_type: EXACT
+  }
   action_refs {
     id: 21257015
   }
@@ -27,4 +33,24 @@ actions {
   }
 }
 type_info {
+  serializable_enums {
+    key: "ether_type_t"
+    value {
+      underlying_type {
+        bitwidth: 16
+      }
+      members {
+        name: "TPID"
+        value: "\201\000"
+      }
+      members {
+        name: "IPV4"
+        value: "\010\000"
+      }
+      members {
+        name: "IPV6"
+        value: "\206\335"
+      }
+    }
+  }
 }

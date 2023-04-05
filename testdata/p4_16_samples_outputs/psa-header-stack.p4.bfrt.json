@@ -21,6 +21,18 @@
             "type" : "bytes",
             "width" : 48
           }
+        },
+        {
+          "id" : 2,
+          "name" : "a.vlan_tag$0.ether_type",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : false,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "bytes",
+            "width" : 16
+          }
         }
       ],
       "action_specs" : [
