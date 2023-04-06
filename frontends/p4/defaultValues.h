@@ -58,4 +58,4 @@ class DefaultValues : public PassManager {
 
 }  // namespace P4
 
-#endif /* _P4_STRENGTHREDUCTION_H_ */
+#endif /* _P4_DEFAULTVALUES_H_ */
