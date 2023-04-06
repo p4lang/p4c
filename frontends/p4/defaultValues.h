@@ -28,16 +28,12 @@ namespace P4 {
  * Expand the 'default values' initializer ...
  */
 class DoDefaultValues final : public Transform {
-    ReferenceMap *refMap;
     TypeMap *typeMap;
 
     const IR::Expression *defaultValue(const IR::Expression *expression, const IR::Type *type);
 
  public:
-    DoDefaultValues(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(refMap);
-        CHECK_NULL(typeMap);
-    }
+    DoDefaultValues(TypeMap *typeMap) : typeMap(typeMap) { CHECK_NULL(typeMap); }
     const IR::Node *postorder(IR::Dots *dots) override;
     const IR::Node *postorder(IR::StructExpression *expression) override;
     const IR::Node *postorder(IR::ListExpression *expression) override;
@@ -51,7 +47,7 @@ class DefaultValues : public PassManager {
             if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap, true);
             passes.push_back(typeChecking);
         }
-        passes.push_back(new DoDefaultValues(refMap, typeMap));
+        passes.push_back(new DoDefaultValues(typeMap));
     }
 };
 
