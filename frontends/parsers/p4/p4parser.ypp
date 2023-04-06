@@ -218,6 +218,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %token<Token>      PP "++"
 %token<Token>      DONTCARE "_"
 %token<Token>      MASK "&&&"
+%token<Token>      DOTS "..."
 %token<Token>      RANGE ".."
 %token<Token>      TRUE FALSE THIS
 %token<Token>      ABSTRACT ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DEFAULT
@@ -1434,6 +1435,7 @@ lvalue
 
 expression
     : INTEGER                            { $$ = parseConstant(@1, $1, 0); }
+    | DOTS                               { $$ = new IR::Dots(@1); }
     | STRING_LITERAL                     { $$ = new IR::StringLiteral(@1, $1); }
     | TRUE                               { $$ = new IR::BoolLiteral(@1, true); }
     | FALSE                              { $$ = new IR::BoolLiteral(@1, false); }
@@ -1445,6 +1447,13 @@ expression
     | INVALID                            { $$ = new IR::Invalid(@1, IR::Type::Unknown::get()); }
     | "{" kvList optTrailingComma "}"    { $$ = new IR::StructExpression(
                                                   @1 + @4, IR::Type::Unknown::get(), (IR::Type_Name*)nullptr, *$2); }
+    | "{" kvList "," DOTS optTrailingComma "}" {
+                                           auto list = $2;
+                                           list->push_back(new IR::NamedDots(@4));
+                                           list->srcInfo = list->srcInfo + @4;
+                                           $$ = new IR::StructExpression(
+                                                  @1 + @4, IR::Type::Unknown::get(),
+                                                  (IR::Type_Name*)nullptr, *list); }
     | "(" expression ")"                 { $$ = $2; }
     | "!" expression %prec PREFIX        { $$ = new IR::LNot(@1 + @2, $2); }
     | "~" expression %prec PREFIX        { $$ = new IR::Cmpl(@1 + @2, $2); }

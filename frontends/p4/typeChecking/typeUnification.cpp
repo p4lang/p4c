@@ -228,6 +228,18 @@ bool TypeUnification::unifyBlocks(const BinaryConstraint *constraint) {
     return constraint->reportError(constraints->getCurrentSubstitution());
 }
 
+bool TypeUnification::containsDots(const IR::Type_StructLike *type) {
+    if (type->fields.empty()) return false;
+    size_t lastIndex = type->fields.size() - 1;
+    return type->fields.at(lastIndex)->type->is<IR::Type_Any>();
+}
+
+bool TypeUnification::containsDots(const IR::Type_BaseList *type) {
+    if (type->components.empty()) return false;
+    size_t lastIndex = type->components.size() - 1;
+    return type->components.at(lastIndex)->is<IR::Type_Any>();
+}
+
 bool TypeUnification::unify(const BinaryConstraint *constraint) {
     auto dest = constraint->left;
     auto src = constraint->right;
@@ -236,8 +248,12 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
     CHECK_NULL(src);
     LOG3("Unifying " << dest << " with " << src);
 
-    if (src->is<IR::ITypeVar>()) src = src->apply(constraints->replaceVariables)->to<IR::Type>();
-    if (dest->is<IR::ITypeVar>()) dest = dest->apply(constraints->replaceVariables)->to<IR::Type>();
+    if (src->is<IR::ITypeVar>()) {
+        src = src->apply(constraints->replaceVariables)->to<IR::Type>();
+    }
+    if (dest->is<IR::ITypeVar>()) {
+        dest = dest->apply(constraints->replaceVariables)->to<IR::Type>();
+    }
 
     if (auto dsc = dest->to<IR::Type_SpecializedCanonical>()) {
         if (auto ssc = src->to<IR::Type_SpecializedCanonical>()) {
@@ -265,7 +281,15 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
 
     if (src->is<IR::Type_Dontcare>() || dest->is<IR::Type_Dontcare>()) return true;
 
-    if (dest->is<IR::Type_ArchBlock>()) {
+    if (src->is<IR::Type_Any>()) {
+        constraints->addUnifiableTypeVariable(src->to<IR::Type_Any>());
+        constraints->add(constraint->create(dest, src));
+        return true;
+    } else if (dest->is<IR::Type_Any>()) {
+        constraints->addUnifiableTypeVariable(dest->to<IR::Type_Any>());
+        constraints->add(constraint->create(dest, src));
+        return true;
+    } else if (dest->is<IR::Type_ArchBlock>()) {
         // This case handles the comparison of Type_Parser with P4Parser
         // (and similarly for controls).
         if (auto cont = src->to<IR::IContainer>()) {
@@ -288,31 +312,59 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
         if (!src->is<IR::Type_BaseList>())
             return constraint->reportError(constraints->getCurrentSubstitution());
         auto ts = src->to<IR::Type_BaseList>();
-        if (td->components.size() != ts->components.size())
+        bool hasDots = containsDots(ts);
+        if (td->components.size() != ts->components.size() && !hasDots)
             return constraint->reportError(constraints->getCurrentSubstitution(),
                                            "Tuples with different sizes %1% vs %2%",
                                            td->components.size(), ts->components.size());
+        auto missingFields = new IR::Vector<IR::Type>();
+        size_t sourceSize = ts->components.size();
         for (size_t i = 0; i < td->components.size(); i++) {
-            auto si = ts->components.at(i);
             auto di = td->components.at(i);
-            constraints->add(constraint->create(di, si));
+            if (hasDots && (i >= sourceSize - 1)) {
+                missingFields->push_back(di);
+            } else {
+                // Last field is the ... field
+                auto si = ts->components.at(i);
+                constraints->add(constraint->create(di, si));
+            }
+        }
+        if (hasDots) {
+            auto dotsType = new IR::Type_List(*missingFields);
+            auto dotsField = ts->components.at(sourceSize - 1);
+            auto partial = new IR::Type_Fragment(dotsType);
+            constraints->add(new EqualityConstraint(dotsField, partial, constraint));
         }
         return true;
     } else if (dest->is<IR::Type_Struct>() || dest->is<IR::Type_Header>()) {
         auto strct = dest->to<IR::Type_StructLike>();
         if (auto tpl = src->to<IR::Type_List>()) {
-            if (strct->fields.size() != tpl->components.size())
+            bool hasDots = containsDots(tpl);
+            size_t listSize = tpl->components.size();
+            if (strct->fields.size() != listSize && !hasDots)
                 return constraint->reportError(
                     constraints->getCurrentSubstitution(),
                     "Number of fields %1% in initializer %2% is different "
                     "than number of fields %3% in '%4%'",
                     tpl->components.size(), tpl, strct->fields.size(), strct);
-            int index = 0;
+            size_t index = 0;
+            auto missingFields = new IR::IndexedVector<IR::StructField>();
             for (const IR::StructField *f : strct->fields) {
-                const IR::Type *tplField = tpl->components.at(index);
-                const IR::Type *destt = f->type;
-                constraints->add(constraint->create(destt, tplField));
+                if (listSize > index + 1) {
+                    // Last field is the ... field
+                    const IR::Type *tplField = tpl->components.at(index);
+                    const IR::Type *destt = f->type;
+                    constraints->add(constraint->create(destt, tplField));
+                } else {
+                    missingFields->push_back(f);
+                }
                 index++;
+            }
+            if (hasDots) {
+                auto dotsType = new IR::Type_UnknownStruct(strct->name, *missingFields);
+                auto dotsField = tpl->components.at(listSize - 1);
+                auto partial = new IR::Type_Fragment(dotsType);
+                constraints->add(new EqualityConstraint(dotsField, partial, constraint));
             }
             return true;
         } else if (auto st = src->to<IR::Type_StructLike>()) {
@@ -321,24 +373,45 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
                 return constraint->reportError(constraints->getCurrentSubstitution(),
                                                "Cannot unify '%1%' with '%2%'", st->name,
                                                strct->name);
+            bool strctHasDots = containsDots(strct);
+            bool stHasDots = containsDots(st);
+            if (strctHasDots && stHasDots)
+                return constraint->reportError(constraints->getCurrentSubstitution(),
+                                               "Cannot unify %1% and %2% both of which "
+                                               "contain unspecified fields",
+                                               strct, st);
             // There is another case, in which each field of the source is unifiable with the
             // corresponding field of the destination, e.g., a struct containing tuples.
-            if (strct->fields.size() != st->fields.size())
+            if ((strct->fields.size() != st->fields.size()) && !strctHasDots && !stHasDots)
                 return constraint->reportError(constraints->getCurrentSubstitution(),
                                                "Number of fields %1% in initializer different "
                                                "than number of fields in structure %2%: %3% to %4%",
                                                st->fields.size(), strct->fields.size(), st, strct);
 
+            auto missingFields = new IR::IndexedVector<IR::StructField>();
             for (const IR::StructField *f : strct->fields) {
                 auto stField = st->getField(f->name);
-                if (stField == nullptr)
-                    return constraint->reportError(constraints->getCurrentSubstitution(),
-                                                   "No initializer for field %1%", f);
+                if (stField == nullptr) {
+                    if (stHasDots) {
+                        missingFields->push_back(f);
+                        continue;
+                    } else {
+                        return constraint->reportError(constraints->getCurrentSubstitution(),
+                                                       "No initializer for field %1%", f);
+                    }
+                }
                 auto c = constraint->create(f->type, stField->type);
                 c->setError(
                     "Type of initializer '%1%' does not match type '%2%' of field '%3%' in '%4%'",
                     {stField->type, f->type, f, strct});
                 constraints->add(c);
+            }
+            if (stHasDots) {
+                auto dotsType = new IR::Type_UnknownStruct(st->name, *missingFields);
+                auto dotsField = st->getField("...");
+                CHECK_NULL(dotsField);
+                auto partial = new IR::Type_Fragment(dotsType);
+                constraints->add(new EqualityConstraint(dotsField->type, partial, constraint));
             }
             return true;
         }
@@ -347,6 +420,11 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
     } else if (dest->is<IR::Type_Base>()) {
         if (dest->is<IR::Type_Bits>() && src->is<IR::Type_InfInt>()) {
             constraints->addUnifiableTypeVariable(src->to<IR::Type_InfInt>());
+            constraints->add(constraint->create(dest, src));
+            return true;
+        }
+        if (src->is<IR::Type_Any>()) {
+            constraints->addUnifiableTypeVariable(src->to<IR::Type_Any>());
             constraints->add(constraint->create(dest, src));
             return true;
         }
@@ -376,16 +454,37 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
                                                            src->to<IR::Type_Declaration>()->name;
         if (!canUnify) return constraint->reportError(constraints->getCurrentSubstitution());
         return true;
-    } else if (dest->is<IR::Type_Stack>() && src->is<IR::Type_Stack>()) {
-        auto dstack = dest->to<IR::Type_Stack>();
-        auto sstack = src->to<IR::Type_Stack>();
-        if (dstack->getSize() != sstack->getSize())
-            return constraint->reportError(
-                constraints->getCurrentSubstitution(),
-                "cannot unify header stack '%1%' and '%2%' since they have different sizes", dstack,
-                sstack);
-        constraints->add(constraint->create(dstack->elementType, sstack->elementType));
-        return true;
+    } else if (auto dstack = dest->to<IR::Type_Stack>()) {
+        if (auto sstack = src->to<IR::Type_Stack>()) {
+            if (dstack->getSize() != sstack->getSize())
+                return constraint->reportError(
+                    constraints->getCurrentSubstitution(),
+                    "cannot unify header stack '%1%' and '%2%' since they have different sizes",
+                    dstack, sstack);
+            constraints->add(constraint->create(dstack->elementType, sstack->elementType));
+            return true;
+        } else if (auto list = src->to<IR::Type_List>()) {
+            bool hasDots = containsDots(list);
+            size_t listSize = list->components.size();
+            if (dstack->getSize() != listSize && !hasDots)
+                return constraint->reportError(
+                    constraints->getCurrentSubstitution(),
+                    "Number of components %1% in initializer %2% is different "
+                    "than stack size %3%",
+                    listSize, list, dstack->getSize());
+            for (size_t index = 0; index < listSize - 1; index++) {
+                const IR::Type *comp = list->components.at(index);
+                constraints->add(constraint->create(dstack->elementType, comp));
+            }
+            if (hasDots) {
+                auto dotsType = new IR::Type_Stack(
+                    dstack->elementType, new IR::Constant(dstack->getSize() - listSize + 1));
+                auto dotsField = list->components.at(listSize - 1);
+                auto partial = new IR::Type_Fragment(dotsType);
+                constraints->add(new EqualityConstraint(dotsField, partial, constraint));
+            }
+            return true;
+        }
     } else if (dest->is<IR::Type_P4List>() && src->is<IR::Type_P4List>()) {
         auto dvec = dest->to<IR::Type_P4List>();
         auto svec = src->to<IR::Type_P4List>();

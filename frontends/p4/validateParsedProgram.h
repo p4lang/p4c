@@ -47,6 +47,7 @@ namespace P4 {
    - extern constructors have the same name as the enclosing extern
    - names of all parameters are distinct
    - no duplicate declarations in toplevel program
+   - Dots are the last field
  */
 class ValidateParsedProgram final : public Inspector {
     void container(const IR::IContainer *type);
@@ -88,6 +89,7 @@ class ValidateParsedProgram final : public Inspector {
         distinctParameters(parser->getTypeParameters(), parser->getApplyParameters(),
                            parser->getConstructorParameters());
     }
+    void postorder(const IR::Dots *dots) override;
 };
 
 }  // namespace P4

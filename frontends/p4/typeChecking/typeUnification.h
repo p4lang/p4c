@@ -40,6 +40,8 @@ class TypeUnification final {
     TypeConstraints *constraints;
     const TypeMap *typeMap;
 
+    static bool containsDots(const IR::Type_StructLike *type);
+    static bool containsDots(const IR::Type_BaseList *type);
     bool unifyCall(const BinaryConstraint *constraint);
     bool unifyFunctions(const BinaryConstraint *constraint, bool skipReturnValues = false);
     bool unifyBlocks(const BinaryConstraint *constraint);
