@@ -31,23 +31,22 @@ class DoDefaultValues final : public Transform {
     ReferenceMap *refMap;
     TypeMap *typeMap;
 
-    const IR::Expression*
-    defaultValue(const IR::Expression* expression, const IR::Type* type);
+    const IR::Expression *defaultValue(const IR::Expression *expression, const IR::Type *type);
 
  public:
-    DoDefaultValues(ReferenceMap* refMap, TypeMap* typeMap) :
-            refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(refMap); CHECK_NULL(typeMap); }
-    const IR::Node* postorder(IR::Dots* dots) override;
-    const IR::Node* postorder(IR::StructExpression* expression) override;
-    const IR::Node* postorder(IR::ListExpression* expression) override;
-    const IR::Node* postorder(IR::HeaderStackExpression* expression) override;
+    DoDefaultValues(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
+    }
+    const IR::Node *postorder(IR::Dots *dots) override;
+    const IR::Node *postorder(IR::StructExpression *expression) override;
+    const IR::Node *postorder(IR::ListExpression *expression) override;
+    const IR::Node *postorder(IR::HeaderStackExpression *expression) override;
 };
 
 class DefaultValues : public PassManager {
  public:
-    DefaultValues(ReferenceMap *refMap, TypeMap *typeMap,
-                  TypeChecking *typeChecking = nullptr) {
+    DefaultValues(ReferenceMap *refMap, TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
         if (typeMap != nullptr) {
             if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap, true);
             passes.push_back(typeChecking);
