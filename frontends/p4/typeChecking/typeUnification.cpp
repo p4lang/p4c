@@ -350,7 +350,7 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
             size_t index = 0;
             auto missingFields = new IR::IndexedVector<IR::StructField>();
             for (const IR::StructField *f : strct->fields) {
-                if (listSize > index + 1) {
+                if (!hasDots || listSize > index + 1) {
                     // Last field is the ... field
                     const IR::Type *tplField = tpl->components.at(index);
                     const IR::Type *destt = f->type;
