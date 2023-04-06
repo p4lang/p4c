@@ -19,10 +19,66 @@ on:
     # Every sunday at 1:17 am UTC
     - cron: '17 1 * * 0'
 
+env:
+  VM_NAME: inner
+  DISK_IMAGE: /tmp/vm_disk_image.qcow2
+  P4C_IMAGE: p4c.img
+  WORKING_DISK_IMAGE: /var/lib/libvirt/images/vm_disk.qcow2
+  DOCKER_VOLUME_IMAGE: /var/lib/libvirt/images/docker_disk.qcow2
+  UBUNTU_2004_KERNELS: 5.8.0-63 5.11.0-46 5.13.0-52 5.15.0-69
+
 jobs:
-  ptf-linux:
+  build-p4c:
     # Prevent triggering by a fork because this workflow is resource intensive
     if: ${{ github.repository == 'p4lang/p4c' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Cache P4C docker image
+        uses: actions/cache@v3
+        id: p4c_cache
+        with:
+          path: ${{ env.P4C_IMAGE }}
+          key: ptf-weekly-p4c-${{ github.sha }}
+          # No need to download the image, because it is only build in this job
+          lookup-only: true
+
+      - name: Build P4C docker image
+        if: steps.p4c_cache.outputs.cache-hit != 'true'
+        run: |
+          docker build --network host -t p4c --build-arg MAKEFLAGS=-j2 --build-arg IMAGE_TYPE=test --build-arg CMAKE_UNITY_BUILD=ON --build-arg INSTALL_PTF_EBPF_DEPENDENCIES=ON .
+          docker save -o ${{ env.P4C_IMAGE }} p4c
+
+  build-ubuntu-2004:
+    # Prevent triggering by a fork because this workflow is resource intensive
+    if: ${{ github.repository == 'p4lang/p4c' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    env:
+      OS_TYPE: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache VM image
+        uses: actions/cache@v3
+        id: vm_cache
+        with:
+          path: ${{ env.DISK_IMAGE }}
+          key: ${{ env.OS_TYPE }} ${{ env.UBUNTU_2004_KERNELS }}
+          # No need to download the image, because it is only build in this job
+          lookup-only: true
+
+      - name: Build VM image
+        if: steps.vm_cache.outputs.cache-hit != 'true'
+        run: |
+          sudo -E ./tools/ci-ptf/prepare_runner.sh
+          sudo -E ./tools/ci-ptf/build_vm.sh ${{ env.UBUNTU_2004_KERNELS }}
+
+  ptf-ubuntu-2004:
+    needs: [build-ubuntu-2004, build-p4c]
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -30,59 +86,37 @@ jobs:
         include:
           - kernels: 5.8
             kernel_version: 5.8.0-63
-            os: ubuntu-20.04
           - kernels: 5.11
             kernel_version: 5.11.0-46
-            os: ubuntu-20.04
           - kernels: 5.13
             kernel_version: 5.13.0-52
-            os: ubuntu-20.04
           - kernels: 5.15
-            kernel_version: 5.15.0-48
-            os: ubuntu-20.04
+            kernel_version: 5.15.0-69
     env:
-      # Used by virt-builder and virt-install, for valid values see `virt-builder --list`.
-      OS_TYPE: ${{ matrix.os }}
-      # List of kernels to use in a single job
-      KERNEL_VERSIONS: ${{ matrix.kernel_version }}
-      VM_NAME: inner
-      DISK_IMAGE: /tmp/vm_disk_image.qcow2
-      WORKING_DISK_IMAGE: /var/lib/libvirt/images/vm_disk.qcow2
-      DOCKER_VOLUME_IMAGE: /var/lib/libvirt/images/docker_disk.qcow2
-    runs-on: ubuntu-latest
+      OS_TYPE: ubuntu-20.04
+      KERNEL_VERSION: ${{ matrix.kernel_version }}
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: recursive
 
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1
+      - name: Download P4C docker image
+        uses: actions/cache/restore@v3
+        id: p4c_cache
         with:
-          key: test-ptf-kernels-${{ runner.os }}
-          max-size: 1000M
+          path: ${{ env.P4C_IMAGE }}
+          key: ptf-weekly-p4c-${{ github.sha }}
+          fail-on-cache-miss: true
 
-      - name: Cache VM image
-        uses: actions/cache@v3.0.5
+      - name: Download VM image
+        uses: actions/cache/restore@v3
         id: vm_cache
         with:
           path: ${{ env.DISK_IMAGE }}
-          key: ${{ env.OS_TYPE }} ${{ env.KERNEL_VERSIONS }}
+          key: ${{ env.OS_TYPE }} ${{ env.UBUNTU_2004_KERNELS }}
+          fail-on-cache-miss: true
 
       - name: Prepare runner
         run: sudo -E ./tools/ci-ptf/prepare_runner.sh
 
-      - name: Build VM
-        if: steps.vm_cache.outputs.cache-hit != 'true'
-        run: sudo -E ./tools/ci-ptf/build_vm.sh
-
-      - name: Build (Linux)
+      - name: Install VM and run PTF tests for eBPF backend
         run: |
-          docker build --network host -t p4c --build-arg MAKEFLAGS=-j8 --build-arg IMAGE_TYPE=test --build-arg CMAKE_UNITY_BUILD=ON --build-arg INSTALL_PTF_EBPF_DEPENDENCIES=ON --build-arg KERNEL_VERSIONS="$KERNEL_VERSIONS" .
-          ./tools/export_ccache.sh
-
-      - name: Install VM
-        run: sudo -E ./tools/ci-ptf/install_vm.sh
-
-      - name: Run PTF tests for eBPF backend (Linux)
-        run: |
-          sudo -E ./tools/ci-ptf/run_for_each_kernel.sh sudo docker run --privileged -v /sys/fs/bpf:/sys/fs/bpf -w /p4c/backends/ebpf/tests p4c ./test.sh
+          sudo -E ./tools/ci-ptf/run_test.sh sudo docker run --privileged -v /sys/fs/bpf:/sys/fs/bpf -w /p4c/backends/ebpf/tests p4c ./test.sh

@@ -24,8 +24,6 @@ ARG BUILD_STATIC_RELEASE=OFF
 ARG DEBIAN_FRONTEND=noninteractive
 # Whether to install dependencies required to run PTF-ebpf tests
 ARG INSTALL_PTF_EBPF_DEPENDENCIES=OFF
-# List of kernel versions to install supporting packages for PTF-ebpf tests
-ARG KERNEL_VERSIONS
 # Whether to build the P4Tools back end and platform.
 ARG ENABLE_TEST_TOOLS=OFF
 # Whether to treat warnings as errors.

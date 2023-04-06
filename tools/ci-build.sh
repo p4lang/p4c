@@ -28,8 +28,6 @@ P4C_DIR=$(readlink -f ${THIS_DIR}/..)
 : "${DEBIAN_FRONTEND:=noninteractive}"
 # Whether to install dependencies required to run PTF-ebpf tests
 : "${INSTALL_PTF_EBPF_DEPENDENCIES:=OFF}"
-# List of kernel versions to install supporting packages for PTF-ebpf tests
-: "${KERNEL_VERSIONS:=}"
 # Whether to build the P4Tools back end and platform.
 : "${ENABLE_TEST_TOOLS:=OFF}"
 
@@ -148,20 +146,11 @@ popd
 
 # ! ------  BEGIN PTF_EBPF -----------------------------------------------
 function install_ptf_ebpf_test_deps() (
-  # Install linux-tools for specified kernels and for current one
-  LINUX_TOOLS="linux-tools-`uname -r`"
-  for version in $KERNEL_VERSIONS; do
-    LINUX_TOOLS+=" linux-tools-$version-generic"
-  done
   P4C_PTF_PACKAGES="gcc-multilib \
                            python3-six \
                            libgmp-dev \
                            libjansson-dev"
   sudo apt-get install -y --no-install-recommends ${P4C_PTF_PACKAGES}
-
-  if sudo apt-cache show ${LINUX_TOOLS}; then
-    sudo apt-get install -y --no-install-recommends ${LINUX_TOOLS}
-  fi
 
   git clone --depth 1 --recursive --branch v0.3.1 https://github.com/NIKSS-vSwitch/nikss /tmp/nikss
   pushd /tmp/nikss

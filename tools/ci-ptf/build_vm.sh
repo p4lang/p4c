@@ -17,7 +17,11 @@
 # Script to build virtual machine disk image.
 
 USER_NAME="ubuntu"
-USER_PASS=$(mkpasswd ubuntu)
+# Password: ubuntu
+# Newer version of mkpasswd from Ubuntu 22.04 generates string that is not correctly understand by
+# Ubuntu 20.04, so hardcode password hash
+# TODO: use option `--password` from virt-builder command instead, e.g. `--password ubuntu:password:ubuntu`
+USER_PASS="Q7KzRGQd70ZS6"
 USER_HOME=$(pwd)
 
 function create_kernel_packages_str() {
@@ -31,8 +35,8 @@ function create_kernel_packages_str() {
 	done
 }
 
-# $KERNEL_VERSIONS must be passed without quotes to allow split into separate arguments
-create_kernel_packages_str $KERNEL_VERSIONS
+# $@ (list of kernels versions) must be passed without quotes to allow split into separate arguments
+create_kernel_packages_str $@
 
 # Note: Image with Ubuntu 20.04 is preinstalled on logical volume which virt-builder is unable to resize
 virt-builder "$OS_TYPE" \
