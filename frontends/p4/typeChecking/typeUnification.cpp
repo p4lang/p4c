@@ -478,7 +478,8 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
             }
             if (hasDots) {
                 auto dotsType = new IR::Type_Stack(
-                    dstack->elementType, new IR::Constant(dstack->getSize() - listSize + 1));
+                    dstack->elementType,
+                    new IR::Constant((unsigned)(dstack->getSize() - listSize + 1)));
                 auto dotsField = list->components.at(listSize - 1);
                 auto partial = new IR::Type_Fragment(dotsType);
                 constraints->add(new EqualityConstraint(dotsField, partial, constraint));
