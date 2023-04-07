@@ -286,7 +286,22 @@ class AbstractTest(bt.P4RuntimeTest):
             )
         else:
             raise self.failureException(f"Unsupported meter value {value}")
-        return self.meter_write(meter_name, index, meter_config, direct)
+        if direct:
+            meter_obj = self.get_obj("direct_meters", meter_name)
+            table_id = meter_obj.direct_table_id
+            req, _ = self.make_table_read_request_by_id(table_id)
+            table_entry = None
+            for response in self.response_dump_helper(req):
+                for entity in response.entities:
+                    assert entity.WhichOneof("entity") == "table_entry"
+                    table_entry = entity.table_entry
+                    break
+            if table_entry is None:
+                raise self.failureException(
+                    "No entry in the table that the meter is attached to."
+                )
+            return self.direct_meter_write(meter_config, table_id, table_entry)
+        return self.meter_write(meter_name, index, meter_config)
 )""");
 
     inja::json dataJson;

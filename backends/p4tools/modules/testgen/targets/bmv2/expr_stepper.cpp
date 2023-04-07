@@ -999,65 +999,32 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          * ====================================================================================== */
         {"direct_meter.read",
          {"result"},
-         [](const IR::MethodCallExpression *call, const IR::Expression *receiver,
+         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
-             auto testBackend = TestgenOptions::get().testBackend;
-             if (testBackend != "PTF") {
-                 ::warning("direct_meter.read not implemented for %1%.", testBackend);
-                 auto &nextState = state.clone();
-                 nextState.popBody();
-                 result->emplace_back(nextState);
-                 return;
-             }
+             ::warning("direct_meter.read not fully implemented.");
 
              const auto *meterResult = args->at(0)->expression;
              auto &nextState = state.clone();
-             std::vector<Continuation::Command> replacements;
-
-             const auto *receiverPath = receiver->checkedTo<IR::PathExpression>();
-             const auto &externInstance = nextState.findDecl(receiverPath);
-
-             // Retrieve the meter state from the object store. If it is already present, just
-             // cast the object to the correct class and retrieve the current value according to the
-             // index. If the meter has not been added had, create a new meter object.
-             const auto *index = IR::getConstant(IR::getBitType(1), 0);
-             const auto *meterState =
-                 state.getTestObject("meter_values", externInstance->controlPlaneName(), false);
-             Bmv2V1ModelMeterValue *meterValue = nullptr;
-             const auto &inputValue = nextState.createZombieConst(
-                 meterResult->type, "meter_value" + std::to_string(call->clone_id));
-             // Make sure we do not accidentally get "3" as enum assignment...
-             auto *cond = new IR::Lss(inputValue, IR::getConstant(meterResult->type, 3));
-             if (meterState != nullptr) {
-                 meterValue =
-                     new Bmv2V1ModelMeterValue(*meterState->checkedTo<Bmv2V1ModelMeterValue>());
-             } else {
-                 meterValue = new Bmv2V1ModelMeterValue(inputValue, true);
-             }
-             meterValue->writeToIndex(index, inputValue);
-             nextState.addTestObject("meter_values", externInstance->controlPlaneName(),
-                                     meterValue);
-
-             const IR::Expression *baseExpr = meterValue->getValueAtIndex(index);
-
              if (meterResult->type->is<IR::Type_Bits>()) {
-                 // We need an assignment statement (and the inefficient copy) here because we need
-                 // to immediately resolve the generated mux into multiple branches.
-                 // This is only possible because meters do not return a value.
-                 replacements.emplace_back(new IR::AssignmentStatement(meterResult, baseExpr));
-
+                 if (const auto *pathRef = meterResult->to<IR::PathExpression>()) {
+                     meterResult = state.convertPathExpr(pathRef);
+                 }
+                 // Since we are not configuring the meter, the result will always be green.
+                 nextState.set(meterResult, IR::getConstant(meterResult->type,
+                                                            BMv2Constants::METER_COLOR::GREEN));
              } else {
                  TESTGEN_UNIMPLEMENTED("Read extern output %1% of type %2% not supported",
                                        meterResult, meterResult->type);
              }
              // TODO: Find a better way to model a trace of this event.
              std::stringstream meterStream;
-             meterStream << "DirectMeterRead into field ";
+             meterStream << "MeterRead: into field ";
              meterResult->dbprint(meterStream);
              nextState.add(*new TraceEvents::Generic(meterStream.str()));
-             nextState.replaceTopBody(&replacements);
-             result->emplace_back(cond, state, nextState);
+             nextState.popBody();
+             result->emplace_back(nextState);
+             return;
          }},
 
         /* ======================================================================================

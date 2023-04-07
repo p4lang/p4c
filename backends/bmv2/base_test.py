@@ -901,19 +901,31 @@ class P4RuntimeTest(BaseTest):
                 counter_entries.append(entry)
         return counter_entries
 
-    def meter_write(self, meter_name, index, meter_config, direct):
+    def meter_write(self, meter_name, index, meter_config):
         req = self.get_new_write_request()
         update = req.updates.add()
         update.type = p4runtime_pb2.Update.MODIFY
         entity = update.entity
-        if direct:
-            meter_write = entity.direct_meter_entry
-            meter_obj = self.get_obj("direct_meters", meter_name)
-            meter_write.table_entry.table_id = meter_obj.direct_table_id
+        meter_write = entity.meter_entry
+        meter_write.meter_id = self.get_meter_id(meter_name)
+        meter_write.index.index = index
+        meter_write.config.cir = meter_config.cir
+        meter_write.config.cburst = meter_config.cburst
+        meter_write.config.pir = meter_config.pir
+        meter_write.config.pburst = meter_config.pburst
+        return req, self.write_request(req)
+
+    def direct_meter_write(self, meter_config, table_id, table_entry):
+        req = self.get_new_write_request()
+        update = req.updates.add()
+        update.type = p4runtime_pb2.Update.MODIFY
+        entity = update.entity
+        meter_write = entity.direct_meter_entry
+        meter_write.table_entry.table_id = table_id
+        if table_entry is None:
+            meter_write.table_entry.is_default_action = True
         else:
-            meter_write = entity.meter_entry
-            meter_write.meter_id = self.get_meter_id(meter_name)
-            meter_write.index.index = index
+            meter_write.table_entry.match.extend(table_entry.match)
         meter_write.config.cir = meter_config.cir
         meter_write.config.cburst = meter_config.cburst
         meter_write.config.pir = meter_config.pir
@@ -926,6 +938,14 @@ class P4RuntimeTest(BaseTest):
         entity = req.entities.add()
         table = entity.table_entry
         table.table_id = self.get_table_id(table_name)
+        return req, table
+
+    def make_table_read_request_by_id(self, table_id):
+        req = p4runtime_pb2.ReadRequest()
+        req.device_id = self.device_id
+        entity = req.entities.add()
+        table = entity.table_entry
+        table.table_id = table_id
         return req, table
 
     def table_dump_data(self, table_name):

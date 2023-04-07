@@ -46,13 +46,12 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
     table meter_table {
         actions = {
             meter_assign;
-            NoAction;
         }
         key = {
             h.eth_hdr.dst_addr: exact;
         }
         size = 16384;
-        default_action = NoAction();
+        default_action = meter_assign();
         meters = table_attached_meter;
     }
 
