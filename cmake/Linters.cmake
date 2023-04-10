@@ -97,8 +97,9 @@ list(FILTER P4C_PYTHON_LINT_LIST EXCLUDE REGEX "tools/cpplint.py")
 add_black_files(${P4C_SOURCE_DIR} "${P4C_PYTHON_LINT_LIST}")
 
 find_program(BLACK_CMD black)
+find_program(ISORT_CMD isort)
 
-if(NOT ${BLACK_CMD})
+if(NOT ${BLACK_CMD} OR NOT (NOT ${ISORT_CMD}))
   # Retrieve the global black property.
   get_property(BLACK_FILES GLOBAL PROPERTY black-files)
   if(DEFINED BLACK_FILES)
@@ -110,17 +111,17 @@ if(NOT ${BLACK_CMD})
     set(BLACK_CMD black)
     add_custom_target(
       black
-      COMMAND xargs -a ${BLACK_TXT_FILE} -r -d '\;' ${BLACK_CMD} --check --diff --
+      COMMAND xargs -a ${BLACK_TXT_FILE} -r -d '\;' sh -c 'for arg do ${BLACK_CMD} --check --diff \"$$arg\"\; ${ISORT_CMD} --check --diff \"$$arg\"\; done' _
       WORKING_DIRECTORY ${P4C_SOURCE_DIR}
       COMMENT "Checking files for correct black formatting."
     )
     add_custom_target(
       black-fix-errors
-      COMMAND xargs -a ${BLACK_TXT_FILE} -r -d '\;' ${BLACK_CMD} --
+      COMMAND xargs -a ${BLACK_TXT_FILE} -r -d '\;' sh -c 'for arg do ${BLACK_CMD} \"$$arg\"\; ${ISORT_CMD} \"$$arg\"\; done' _
       WORKING_DIRECTORY ${P4C_SOURCE_DIR}
       COMMENT "Formatting files using black."
     )
   endif()
 else()
-  message(WARNING "black executable not found. Disabling black checks. black can be installed with \"pip3 install --user --upgrade black\"")
+  message(WARNING "black or isort executable not found. Disabling black/isort checks. black/isort can be installed with \"pip3 install --user --upgrade black\" and \"pip3 install --user --upgrade isort\" ")
 endif()
