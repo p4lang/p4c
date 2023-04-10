@@ -258,12 +258,12 @@ method
             BEGIN(NORMAL); }
     | modifiers type methodName '('
           { ($<irMethod>$ = new IrMethod(@3, $3))->rtype = $2;
-            $<irMethod>$->inImpl = !($1 & IrField::Inline);
-            $<irMethod>$->isStatic = ($1 & IrField::Static);
-            $<irMethod>$->isVirtual = ($1 & IrField::Virtual);
+            $<irMethod>$->inImpl = !($1 & IrMethod::Inline);
+            $<irMethod>$->isStatic = ($1 & IrMethod::Static);
+            $<irMethod>$->isVirtual = ($1 & IrMethod::Virtual);
             $<irMethod>$->clss = $<irClass>0;
-            if ($1 & !(IrField::Inline | IrField::Virtual))
-                yyerror("%s invalid on method", IrElement::modifier($1)); }
+            if (auto mod = $1 & ~(IrMethod::Inline | IrMethod::Static | IrMethod::Virtual))
+                yyerror("'%s' invalid on method", IrMethod::modifier(mod)); }
       optArgList ')' optConst optOverride body
           { ($$ = $<irMethod>5)->body = $10;
             if (!$10 || $10[0] == '=') {
