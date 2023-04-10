@@ -56,11 +56,11 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 }
 
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @name("packet_path_to_int") packet_path_to_int() packet_path_to_int_inst;
     bit<32> int_packet_path;
     action record_ingress_ports_in_pkt() {
         hdr.output_data.word1 = (PortIdUint_t)istd.ingress_port;
     }
+    @name("packet_path_to_int") packet_path_to_int() packet_path_to_int_inst;
     apply {
         if (hdr.ethernet.dstAddr[3:0] >= 4w4) {
             record_ingress_ports_in_pkt();
@@ -86,7 +86,6 @@ parser EgressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user_
 }
 
 control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
-    @name("packet_path_to_int") packet_path_to_int() packet_path_to_int_inst_0;
     action add() {
         hdr.ethernet.dstAddr = hdr.ethernet.dstAddr + hdr.ethernet.srcAddr;
     }
@@ -96,6 +95,7 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
         }
         default_action = add();
     }
+    @name("packet_path_to_int") packet_path_to_int() packet_path_to_int_inst_0;
     apply {
         e.apply();
         if (istd.egress_port == (PortId_t)32w0xfffffffa) {

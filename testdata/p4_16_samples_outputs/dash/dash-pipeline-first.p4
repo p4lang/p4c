@@ -424,7 +424,6 @@ control acl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_
 }
 
 control outbound(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
-    @name("acl") acl() acl_inst;
     action route_vnet(bit<16> dst_vnet_id) {
         meta.dst_vnet_id = dst_vnet_id;
     }
@@ -488,6 +487,7 @@ control outbound(inout headers_t hdr, inout metadata_t meta, inout standard_meta
         }
         default_action = NoAction();
     }
+    @name("acl") acl() acl_inst;
     apply {
         if (meta.conntrack_data.allow_out) {
             ;
@@ -560,8 +560,6 @@ control dash_compute_checksum(inout headers_t hdr, inout metadata_t meta) {
 }
 
 control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
-    @name("outbound") outbound() outbound_inst;
-    @name("inbound") inbound() inbound_inst;
     action drop_action() {
         mark_to_drop(standard_metadata);
     }
@@ -730,6 +728,8 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         }
         default_action = NoAction();
     }
+    @name("outbound") outbound() outbound_inst;
+    @name("inbound") inbound() inbound_inst;
     apply {
         standard_metadata.egress_spec = standard_metadata.ingress_port;
         if (vip.apply().hit) {

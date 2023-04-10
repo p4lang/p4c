@@ -79,8 +79,8 @@ parser EgressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user_
 }
 
 control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
-    @name("packet_path_to_int") packet_path_to_int() packet_path_to_int_inst_0;
     Register<bit<16>, bit<8>>(32w256) egress_pkt_seen;
+    @name("packet_path_to_int") packet_path_to_int() packet_path_to_int_inst_0;
     apply {
         bit<8> idx = hdr.ethernet.etherType[7:0];
         bit<16> cur_count = egress_pkt_seen.read(idx);

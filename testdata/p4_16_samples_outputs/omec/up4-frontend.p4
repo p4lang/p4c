@@ -357,66 +357,6 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
     }
     @noWarn("unused") @name(".NoAction") action NoAction_4() {
     }
-    @name("PreQosPipe.Routing.drop") action Routing_drop_0() {
-        mark_to_drop(std_meta);
-    }
-    @name("PreQosPipe.Routing.route") action Routing_route_0(@name("src_mac") mac_addr_t src_mac, @name("dst_mac") mac_addr_t dst_mac, @name("egress_port") PortId_t egress_port_1) {
-        std_meta.egress_spec = egress_port_1;
-        hdr.ethernet.src_addr = src_mac;
-        hdr.ethernet.dst_addr = dst_mac;
-    }
-    @name("PreQosPipe.Routing.routes_v4") table Routing_routes_v4 {
-        key = {
-            hdr.ipv4.dst_addr  : lpm @name("dst_prefix");
-            hdr.ipv4.src_addr  : selector @name("hdr.ipv4.src_addr");
-            hdr.ipv4.proto     : selector @name("hdr.ipv4.proto");
-            local_meta.l4_sport: selector @name("local_meta.l4_sport");
-            local_meta.l4_dport: selector @name("local_meta.l4_dport");
-        }
-        actions = {
-            Routing_route_0();
-            @defaultonly NoAction_1();
-        }
-        @name("hashed_selector") implementation = action_selector(HashAlgorithm.crc16, 32w1024, 32w16);
-        size = 1024;
-        default_action = NoAction_1();
-    }
-    @name("PreQosPipe.Acl.set_port") action Acl_set_port_0(@name("port") PortId_t port) {
-        std_meta.egress_spec = port;
-    }
-    @name("PreQosPipe.Acl.punt") action Acl_punt_0() {
-        std_meta.egress_spec = 9w255;
-    }
-    @name("PreQosPipe.Acl.clone_to_cpu") action Acl_clone_to_cpu_0() {
-        clone_preserving_field_list(CloneType.I2E, 32w99, 8w0);
-    }
-    @name("PreQosPipe.Acl.drop") action Acl_drop_0() {
-        mark_to_drop(std_meta);
-        exit;
-    }
-    @name("PreQosPipe.Acl.acls") table Acl_acls {
-        key = {
-            std_meta.ingress_port  : ternary @name("inport");
-            local_meta.src_iface   : ternary @name("src_iface");
-            hdr.ethernet.src_addr  : ternary @name("eth_src");
-            hdr.ethernet.dst_addr  : ternary @name("eth_dst");
-            hdr.ethernet.ether_type: ternary @name("eth_type");
-            hdr.ipv4.src_addr      : ternary @name("ipv4_src");
-            hdr.ipv4.dst_addr      : ternary @name("ipv4_dst");
-            hdr.ipv4.proto         : ternary @name("ipv4_proto");
-            local_meta.l4_sport    : ternary @name("l4_sport");
-            local_meta.l4_dport    : ternary @name("l4_dport");
-        }
-        actions = {
-            Acl_set_port_0();
-            Acl_punt_0();
-            Acl_clone_to_cpu_0();
-            Acl_drop_0();
-            NoAction_2();
-        }
-        const default_action = NoAction_2();
-        @name("acls") counters = direct_counter(CounterType.packets_and_bytes);
-    }
     @name("PreQosPipe.pre_qos_counter") counter<counter_index_t>(32w1024, CounterType.packets_and_bytes) pre_qos_counter_0;
     @name("PreQosPipe.app_meter") meter<app_meter_idx_t>(32w1024, MeterType.bytes) app_meter_0;
     @name("PreQosPipe.session_meter") meter<session_meter_idx_t>(32w1024, MeterType.bytes) session_meter_0;
@@ -432,9 +372,9 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
             hdr.ethernet.dst_addr: exact @name("dst_mac");
         }
         actions = {
-            NoAction_3();
+            NoAction_1();
         }
-        default_action = NoAction_3();
+        default_action = NoAction_1();
     }
     @name("PreQosPipe.set_source_iface") action set_source_iface(@name("src_iface") InterfaceType src_iface_1, @name("direction") Direction direction_1, @name("slice_id") Slice slice_id_1) {
         local_meta.src_iface = src_iface_1;
@@ -613,9 +553,9 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
         }
         actions = {
             load_tunnel_param();
-            @defaultonly NoAction_4();
+            @defaultonly NoAction_2();
         }
-        default_action = NoAction_4();
+        default_action = NoAction_2();
     }
     @name("PreQosPipe.do_gtpu_tunnel") action do_gtpu_tunnel() {
         @hidden {
@@ -712,6 +652,66 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
         hdr.gtpu_ext_psc.rqi = 1w0;
         hdr.gtpu_ext_psc.qfi = local_meta.tunnel_out_qfi;
         hdr.gtpu_ext_psc.next_ext = 8w0x0;
+    }
+    @name("PreQosPipe.Routing.drop") action Routing_drop_0() {
+        mark_to_drop(std_meta);
+    }
+    @name("PreQosPipe.Routing.route") action Routing_route_0(@name("src_mac") mac_addr_t src_mac, @name("dst_mac") mac_addr_t dst_mac, @name("egress_port") PortId_t egress_port_1) {
+        std_meta.egress_spec = egress_port_1;
+        hdr.ethernet.src_addr = src_mac;
+        hdr.ethernet.dst_addr = dst_mac;
+    }
+    @name("PreQosPipe.Routing.routes_v4") table Routing_routes_v4 {
+        key = {
+            hdr.ipv4.dst_addr  : lpm @name("dst_prefix");
+            hdr.ipv4.src_addr  : selector @name("hdr.ipv4.src_addr");
+            hdr.ipv4.proto     : selector @name("hdr.ipv4.proto");
+            local_meta.l4_sport: selector @name("local_meta.l4_sport");
+            local_meta.l4_dport: selector @name("local_meta.l4_dport");
+        }
+        actions = {
+            Routing_route_0();
+            @defaultonly NoAction_3();
+        }
+        @name("hashed_selector") implementation = action_selector(HashAlgorithm.crc16, 32w1024, 32w16);
+        size = 1024;
+        default_action = NoAction_3();
+    }
+    @name("PreQosPipe.Acl.set_port") action Acl_set_port_0(@name("port") PortId_t port) {
+        std_meta.egress_spec = port;
+    }
+    @name("PreQosPipe.Acl.punt") action Acl_punt_0() {
+        std_meta.egress_spec = 9w255;
+    }
+    @name("PreQosPipe.Acl.clone_to_cpu") action Acl_clone_to_cpu_0() {
+        clone_preserving_field_list(CloneType.I2E, 32w99, 8w0);
+    }
+    @name("PreQosPipe.Acl.drop") action Acl_drop_0() {
+        mark_to_drop(std_meta);
+        exit;
+    }
+    @name("PreQosPipe.Acl.acls") table Acl_acls {
+        key = {
+            std_meta.ingress_port  : ternary @name("inport");
+            local_meta.src_iface   : ternary @name("src_iface");
+            hdr.ethernet.src_addr  : ternary @name("eth_src");
+            hdr.ethernet.dst_addr  : ternary @name("eth_dst");
+            hdr.ethernet.ether_type: ternary @name("eth_type");
+            hdr.ipv4.src_addr      : ternary @name("ipv4_src");
+            hdr.ipv4.dst_addr      : ternary @name("ipv4_dst");
+            hdr.ipv4.proto         : ternary @name("ipv4_proto");
+            local_meta.l4_sport    : ternary @name("l4_sport");
+            local_meta.l4_dport    : ternary @name("l4_dport");
+        }
+        actions = {
+            Acl_set_port_0();
+            Acl_punt_0();
+            Acl_clone_to_cpu_0();
+            Acl_drop_0();
+            NoAction_4();
+        }
+        const default_action = NoAction_4();
+        @name("acls") counters = direct_counter(CounterType.packets_and_bytes);
     }
     apply {
         hasReturned_0 = false;

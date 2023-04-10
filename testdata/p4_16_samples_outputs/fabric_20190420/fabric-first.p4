@@ -928,14 +928,14 @@ control PortCountersControl(inout parsed_headers_t hdr, inout fabric_metadata_t 
 }
 
 control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_metadata, inout standard_metadata_t standard_metadata) {
-    @name("spgw_normalizer") spgw_normalizer() spgw_normalizer_inst;
-    @name("spgw_ingress") spgw_ingress() spgw_ingress_inst;
     PacketIoIngress() pkt_io_ingress;
     Filtering() filtering;
     Forwarding() forwarding;
     Acl() acl;
     Next() next;
     PortCountersControl() port_counters_control;
+    @name("spgw_normalizer") spgw_normalizer() spgw_normalizer_inst;
+    @name("spgw_ingress") spgw_ingress() spgw_ingress_inst;
     apply {
         spgw_normalizer_inst.apply(hdr.gtpu.isValid(), hdr.gtpu_ipv4, hdr.gtpu_udp, hdr.ipv4, hdr.udp, hdr.inner_ipv4, hdr.inner_udp);
         pkt_io_ingress.apply(hdr, fabric_metadata, standard_metadata);
@@ -957,9 +957,9 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
 }
 
 control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_metadata, inout standard_metadata_t standard_metadata) {
-    @name("spgw_egress") spgw_egress() spgw_egress_inst;
     PacketIoEgress() pkt_io_egress;
     EgressNextControl() egress_next;
+    @name("spgw_egress") spgw_egress() spgw_egress_inst;
     apply {
         pkt_io_egress.apply(hdr, fabric_metadata, standard_metadata);
         egress_next.apply(hdr, fabric_metadata, standard_metadata);

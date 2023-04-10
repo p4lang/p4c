@@ -57,26 +57,8 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
     @name("MainControlImpl.tmp") bit<32> tmp_0;
     @name("MainControlImpl.ct.tmp") bit<32> ct_tmp;
-    @name("MainControlImpl.ct.next_hop") action ct_next_hop_0(@name("vport") PortId_t vport) {
+    @name("MainControlImpl.next_hop1") action next_hop1(@name("vport") PortId_t vport) {
         send_to_port(vport);
-    }
-    @name("MainControlImpl.ct.add_on_miss_action") action ct_add_on_miss_action_0() {
-        ct_tmp = 32w0;
-        add_entry<bit<32>>(action_name = "next_hop", action_params = ct_tmp, expire_time_profile_id = user_meta.timeout);
-    }
-    @name("MainControlImpl.ct.ipv4_da") table ct_ipv4_da {
-        key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
-        }
-        actions = {
-            @tableonly ct_next_hop_0();
-            @defaultonly ct_add_on_miss_action_0();
-        }
-        add_on_miss = true;
-        const default_action = ct_add_on_miss_action_0();
-    }
-    @name("MainControlImpl.next_hop1") action next_hop1(@name("vport") PortId_t vport_2) {
-        send_to_port(vport_2);
     }
     @name("MainControlImpl.add_on_miss_action") action add_on_miss_action() {
         tmp_0 = 32w0;
@@ -92,6 +74,24 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         }
         add_on_miss = true;
         const default_action = add_on_miss_action();
+    }
+    @name("MainControlImpl.ct.next_hop") action ct_next_hop_0(@name("vport") PortId_t vport_2) {
+        send_to_port(vport_2);
+    }
+    @name("MainControlImpl.ct.add_on_miss_action") action ct_add_on_miss_action_0() {
+        ct_tmp = 32w0;
+        add_entry<bit<32>>(action_name = "next_hop", action_params = ct_tmp, expire_time_profile_id = user_meta.timeout);
+    }
+    @name("MainControlImpl.ct.ipv4_da") table ct_ipv4_da {
+        key = {
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
+        }
+        actions = {
+            @tableonly ct_next_hop_0();
+            @defaultonly ct_add_on_miss_action_0();
+        }
+        add_on_miss = true;
+        const default_action = ct_add_on_miss_action_0();
     }
     apply {
         if (hdr.ipv4.isValid()) {

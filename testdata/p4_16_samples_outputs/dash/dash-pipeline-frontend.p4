@@ -436,6 +436,255 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         hdr_9.vxlan.vni = vni_1;
         hdr = hdr_9;
     }
+    @name("dash_ingress.drop_action") action drop_action() {
+        mark_to_drop(standard_metadata);
+    }
+    @name("dash_ingress.deny") action deny() {
+        meta.dropped = true;
+    }
+    @name("dash_ingress.deny") action deny_0() {
+        meta.dropped = true;
+    }
+    @name("dash_ingress.deny") action deny_2() {
+        meta.dropped = true;
+    }
+    @name("dash_ingress.deny") action deny_3() {
+        meta.dropped = true;
+    }
+    @name("dash_ingress.deny") action deny_4() {
+        meta.dropped = true;
+    }
+    @name("dash_ingress.deny") action deny_5() {
+        meta.dropped = true;
+    }
+    @name("dash_ingress.accept") action accept_1() {
+    }
+    @name("dash_ingress.vip|dash_vip") table vip_0 {
+        key = {
+            hdr.ipv4.dst_addr: exact @name("hdr.ipv4.dst_addr:VIP");
+        }
+        actions = {
+            accept_1();
+            @defaultonly deny();
+        }
+        const default_action = deny();
+    }
+    @name("dash_ingress.set_outbound_direction") action set_outbound_direction() {
+        meta.direction = direction_t.OUTBOUND;
+    }
+    @name("dash_ingress.set_inbound_direction") action set_inbound_direction() {
+        meta.direction = direction_t.INBOUND;
+    }
+    @name("dash_ingress.direction_lookup|dash_direction_lookup") table direction_lookup_0 {
+        key = {
+            hdr.vxlan.vni: exact @name("hdr.vxlan.vni:VNI");
+        }
+        actions = {
+            set_outbound_direction();
+            @defaultonly set_inbound_direction();
+        }
+        const default_action = set_inbound_direction();
+    }
+    @name("dash_ingress.set_appliance") action set_appliance(@name("neighbor_mac") EthernetAddress neighbor_mac, @name("mac") EthernetAddress mac) {
+        meta.encap_data.underlay_dmac = neighbor_mac;
+        meta.encap_data.underlay_smac = mac;
+    }
+    @name("dash_ingress.appliance") table appliance_0 {
+        key = {
+            meta.appliance_id: ternary @name("meta.appliance_id:appliance_id");
+        }
+        actions = {
+            set_appliance();
+            @defaultonly NoAction_1();
+        }
+        default_action = NoAction_1();
+    }
+    @name("dash_ingress.set_eni_attrs") action set_eni_attrs(@name("cps") bit<32> cps_1, @name("pps") bit<32> pps_1, @name("flows") bit<32> flows_1, @name("admin_state") bit<1> admin_state_1, @name("vm_underlay_dip") IPv4Address vm_underlay_dip, @name("vm_vni") bit<24> vm_vni, @name("vnet_id") bit<16> vnet_id_1, @name("inbound_v4_stage1_dash_acl_group_id") bit<16> inbound_v4_stage1_dash_acl_group_id, @name("inbound_v4_stage2_dash_acl_group_id") bit<16> inbound_v4_stage2_dash_acl_group_id, @name("inbound_v4_stage3_dash_acl_group_id") bit<16> inbound_v4_stage3_dash_acl_group_id, @name("inbound_v4_stage4_dash_acl_group_id") bit<16> inbound_v4_stage4_dash_acl_group_id, @name("inbound_v4_stage5_dash_acl_group_id") bit<16> inbound_v4_stage5_dash_acl_group_id, @name("inbound_v6_stage1_dash_acl_group_id") bit<16> inbound_v6_stage1_dash_acl_group_id, @name("inbound_v6_stage2_dash_acl_group_id") bit<16> inbound_v6_stage2_dash_acl_group_id, @name("inbound_v6_stage3_dash_acl_group_id") bit<16> inbound_v6_stage3_dash_acl_group_id, @name("inbound_v6_stage4_dash_acl_group_id") bit<16> inbound_v6_stage4_dash_acl_group_id, @name("inbound_v6_stage5_dash_acl_group_id") bit<16> inbound_v6_stage5_dash_acl_group_id, @name("outbound_v4_stage1_dash_acl_group_id") bit<16> outbound_v4_stage1_dash_acl_group_id, @name("outbound_v4_stage2_dash_acl_group_id") bit<16> outbound_v4_stage2_dash_acl_group_id, @name("outbound_v4_stage3_dash_acl_group_id") bit<16> outbound_v4_stage3_dash_acl_group_id, @name("outbound_v4_stage4_dash_acl_group_id") bit<16> outbound_v4_stage4_dash_acl_group_id, @name("outbound_v4_stage5_dash_acl_group_id") bit<16> outbound_v4_stage5_dash_acl_group_id, @name("outbound_v6_stage1_dash_acl_group_id") bit<16> outbound_v6_stage1_dash_acl_group_id, @name("outbound_v6_stage2_dash_acl_group_id") bit<16> outbound_v6_stage2_dash_acl_group_id, @name("outbound_v6_stage3_dash_acl_group_id") bit<16> outbound_v6_stage3_dash_acl_group_id, @name("outbound_v6_stage4_dash_acl_group_id") bit<16> outbound_v6_stage4_dash_acl_group_id, @name("outbound_v6_stage5_dash_acl_group_id") bit<16> outbound_v6_stage5_dash_acl_group_id) {
+        meta.eni_data.cps = cps_1;
+        meta.eni_data.pps = pps_1;
+        meta.eni_data.flows = flows_1;
+        meta.eni_data.admin_state = admin_state_1;
+        meta.encap_data.underlay_dip = vm_underlay_dip;
+        meta.encap_data.vni = vm_vni;
+        meta.vnet_id = vnet_id_1;
+        if (meta.is_overlay_ip_v6 == 1w1) {
+            if (meta.direction == direction_t.OUTBOUND) {
+                meta.stage1_dash_acl_group_id = outbound_v6_stage1_dash_acl_group_id;
+                meta.stage2_dash_acl_group_id = outbound_v6_stage2_dash_acl_group_id;
+                meta.stage3_dash_acl_group_id = outbound_v6_stage3_dash_acl_group_id;
+                meta.stage4_dash_acl_group_id = outbound_v6_stage4_dash_acl_group_id;
+                meta.stage5_dash_acl_group_id = outbound_v6_stage5_dash_acl_group_id;
+            } else {
+                meta.stage1_dash_acl_group_id = inbound_v6_stage1_dash_acl_group_id;
+                meta.stage2_dash_acl_group_id = inbound_v6_stage2_dash_acl_group_id;
+                meta.stage3_dash_acl_group_id = inbound_v6_stage3_dash_acl_group_id;
+                meta.stage4_dash_acl_group_id = inbound_v6_stage4_dash_acl_group_id;
+                meta.stage5_dash_acl_group_id = inbound_v6_stage5_dash_acl_group_id;
+            }
+        } else if (meta.direction == direction_t.OUTBOUND) {
+            meta.stage1_dash_acl_group_id = outbound_v4_stage1_dash_acl_group_id;
+            meta.stage2_dash_acl_group_id = outbound_v4_stage2_dash_acl_group_id;
+            meta.stage3_dash_acl_group_id = outbound_v4_stage3_dash_acl_group_id;
+            meta.stage4_dash_acl_group_id = outbound_v4_stage4_dash_acl_group_id;
+            meta.stage5_dash_acl_group_id = outbound_v4_stage5_dash_acl_group_id;
+        } else {
+            meta.stage1_dash_acl_group_id = inbound_v4_stage1_dash_acl_group_id;
+            meta.stage2_dash_acl_group_id = inbound_v4_stage2_dash_acl_group_id;
+            meta.stage3_dash_acl_group_id = inbound_v4_stage3_dash_acl_group_id;
+            meta.stage4_dash_acl_group_id = inbound_v4_stage4_dash_acl_group_id;
+            meta.stage5_dash_acl_group_id = inbound_v4_stage5_dash_acl_group_id;
+        }
+    }
+    @name("dash_ingress.eni|dash_eni") table eni_0 {
+        key = {
+            meta.eni_id: exact @name("meta.eni_id:eni_id");
+        }
+        actions = {
+            set_eni_attrs();
+            @defaultonly deny_0();
+        }
+        const default_action = deny_0();
+    }
+    @name("dash_ingress.eni_counter") direct_counter(CounterType.packets_and_bytes) eni_counter_0;
+    @name("dash_ingress.eni_meter") table eni_meter_0 {
+        key = {
+            meta.eni_id   : exact @name("meta.eni_id:eni_id");
+            meta.direction: exact @name("meta.direction:direction");
+            meta.dropped  : exact @name("meta.dropped:dropped");
+        }
+        actions = {
+            NoAction_2();
+        }
+        counters = eni_counter_0;
+        default_action = NoAction_2();
+    }
+    @name("dash_ingress.permit") action permit() {
+    }
+    @name("dash_ingress.vxlan_decap_pa_validate") action vxlan_decap_pa_validate(@name("src_vnet_id") bit<16> src_vnet_id) {
+        meta.vnet_id = src_vnet_id;
+    }
+    @name("dash_ingress.pa_validation|dash_pa_validation") table pa_validation_0 {
+        key = {
+            meta.vnet_id     : exact @name("meta.vnet_id:vnet_id");
+            hdr.ipv4.src_addr: exact @name("hdr.ipv4.src_addr:sip");
+        }
+        actions = {
+            permit();
+            @defaultonly deny_2();
+        }
+        const default_action = deny_2();
+    }
+    @name("dash_ingress.inbound_routing|dash_inbound_routing") table inbound_routing_0 {
+        key = {
+            meta.eni_id      : exact @name("meta.eni_id:eni_id");
+            hdr.vxlan.vni    : exact @name("hdr.vxlan.vni:VNI");
+            hdr.ipv4.src_addr: ternary @name("hdr.ipv4.src_addr:sip");
+        }
+        actions = {
+            vxlan_decap_1();
+            vxlan_decap_pa_validate();
+            @defaultonly deny_3();
+        }
+        const default_action = deny_3();
+    }
+    @name("dash_ingress.set_eni") action set_eni(@name("eni_id") bit<16> eni_id_1) {
+        meta.eni_id = eni_id_1;
+    }
+    @name("dash_ingress.eni_ether_address_map|dash_eni") table eni_ether_address_map_0 {
+        key = {
+            meta.eni_addr: exact @name("meta.eni_addr:address");
+        }
+        actions = {
+            set_eni();
+            @defaultonly deny_4();
+        }
+        const default_action = deny_4();
+    }
+    @name("dash_ingress.set_acl_group_attrs") action set_acl_group_attrs(@name("ip_addr_family") bit<32> ip_addr_family) {
+        if (ip_addr_family == 32w0) {
+            if (meta.is_overlay_ip_v6 == 1w1) {
+                meta.dropped = true;
+            }
+        } else if (meta.is_overlay_ip_v6 == 1w0) {
+            meta.dropped = true;
+        }
+    }
+    @name("dash_ingress.dash_acl_group|dash_acl") table acl_group_0 {
+        key = {
+            meta.stage1_dash_acl_group_id: exact @name("meta.stage1_dash_acl_group_id:dash_acl_group_id");
+        }
+        actions = {
+            set_acl_group_attrs();
+            @defaultonly NoAction_3();
+        }
+        default_action = NoAction_3();
+    }
+    @name("dash_ingress.outbound.route_vnet") action outbound_route_vnet_0(@name("dst_vnet_id") bit<16> dst_vnet_id_2) {
+        meta.dst_vnet_id = dst_vnet_id_2;
+    }
+    @name("dash_ingress.outbound.route_vnet_direct") action outbound_route_vnet_direct_0(@name("dst_vnet_id") bit<16> dst_vnet_id_3, @name("is_overlay_ip_v4_or_v6") bit<1> is_overlay_ip_v4_or_v6, @name("overlay_ip") IPv4ORv6Address overlay_ip) {
+        meta.dst_vnet_id = dst_vnet_id_3;
+        meta.lkup_dst_ip_addr = overlay_ip;
+        meta.is_lkup_dst_ip_v6 = is_overlay_ip_v4_or_v6;
+    }
+    @name("dash_ingress.outbound.route_direct") action outbound_route_direct_0() {
+    }
+    @name("dash_ingress.outbound.drop") action outbound_drop_0() {
+        meta.dropped = true;
+    }
+    @name("dash_ingress.outbound.drop") action outbound_drop_1() {
+        meta.dropped = true;
+    }
+    @name("dash_ingress.outbound.routing_counter") direct_counter(CounterType.packets_and_bytes) outbound_routing_counter;
+    @name("dash_ingress.outbound.outbound_routing|dash_outbound_routing") table outbound_outbound_routing_dash_outbound_routing {
+        key = {
+            meta.eni_id          : exact @name("meta.eni_id:eni_id");
+            meta.is_overlay_ip_v6: exact @name("meta.is_overlay_ip_v6:is_destination_v4_or_v6");
+            meta.dst_ip_addr     : lpm @name("meta.dst_ip_addr:destination");
+        }
+        actions = {
+            outbound_route_vnet_0();
+            outbound_route_vnet_direct_0();
+            outbound_route_direct_0();
+            outbound_drop_0();
+        }
+        const default_action = outbound_drop_0();
+        counters = outbound_routing_counter;
+    }
+    @name("dash_ingress.outbound.set_tunnel_mapping") action outbound_set_tunnel_mapping_0(@name("underlay_dip") IPv4Address underlay_dip_4, @name("overlay_dmac") EthernetAddress overlay_dmac_4, @name("use_dst_vnet_vni") bit<1> use_dst_vnet_vni) {
+        if (use_dst_vnet_vni == 1w1) {
+            meta.vnet_id = meta.dst_vnet_id;
+        }
+        meta.encap_data.overlay_dmac = overlay_dmac_4;
+        meta.encap_data.underlay_dip = underlay_dip_4;
+    }
+    @name("dash_ingress.outbound.ca_to_pa_counter") direct_counter(CounterType.packets_and_bytes) outbound_ca_to_pa_counter;
+    @name("dash_ingress.outbound.outbound_ca_to_pa|dash_outbound_ca_to_pa") table outbound_outbound_ca_to_pa_dash_outbound_ca_to_pa {
+        key = {
+            meta.dst_vnet_id      : exact @name("meta.dst_vnet_id:dst_vnet_id");
+            meta.is_lkup_dst_ip_v6: exact @name("meta.is_lkup_dst_ip_v6:is_dip_v4_or_v6");
+            meta.lkup_dst_ip_addr : exact @name("meta.lkup_dst_ip_addr:dip");
+        }
+        actions = {
+            outbound_set_tunnel_mapping_0();
+            @defaultonly outbound_drop_1();
+        }
+        const default_action = outbound_drop_1();
+        counters = outbound_ca_to_pa_counter;
+    }
+    @name("dash_ingress.outbound.set_vnet_attrs") action outbound_set_vnet_attrs_0(@name("vni") bit<24> vni_4) {
+        meta.encap_data.vni = vni_4;
+    }
+    @name("dash_ingress.outbound.vnet|dash_vnet") table outbound_vnet_dash_vnet {
+        key = {
+            meta.vnet_id: exact @name("meta.vnet_id:vnet_id");
+        }
+        actions = {
+            outbound_set_vnet_attrs_0();
+            @defaultonly NoAction_4();
+        }
+        default_action = NoAction_4();
+    }
     @name("dash_ingress.outbound.acl.permit") action outbound_acl_permit_0() {
     }
     @name("dash_ingress.outbound.acl.permit") action outbound_acl_permit_1() {
@@ -523,72 +772,6 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         default_action = outbound_acl_deny_2();
         counters = outbound_acl_stage3_counter;
     }
-    @name("dash_ingress.outbound.route_vnet") action outbound_route_vnet_0(@name("dst_vnet_id") bit<16> dst_vnet_id_2) {
-        meta.dst_vnet_id = dst_vnet_id_2;
-    }
-    @name("dash_ingress.outbound.route_vnet_direct") action outbound_route_vnet_direct_0(@name("dst_vnet_id") bit<16> dst_vnet_id_3, @name("is_overlay_ip_v4_or_v6") bit<1> is_overlay_ip_v4_or_v6, @name("overlay_ip") IPv4ORv6Address overlay_ip) {
-        meta.dst_vnet_id = dst_vnet_id_3;
-        meta.lkup_dst_ip_addr = overlay_ip;
-        meta.is_lkup_dst_ip_v6 = is_overlay_ip_v4_or_v6;
-    }
-    @name("dash_ingress.outbound.route_direct") action outbound_route_direct_0() {
-    }
-    @name("dash_ingress.outbound.drop") action outbound_drop_0() {
-        meta.dropped = true;
-    }
-    @name("dash_ingress.outbound.drop") action outbound_drop_1() {
-        meta.dropped = true;
-    }
-    @name("dash_ingress.outbound.routing_counter") direct_counter(CounterType.packets_and_bytes) outbound_routing_counter;
-    @name("dash_ingress.outbound.outbound_routing|dash_outbound_routing") table outbound_outbound_routing_dash_outbound_routing {
-        key = {
-            meta.eni_id          : exact @name("meta.eni_id:eni_id");
-            meta.is_overlay_ip_v6: exact @name("meta.is_overlay_ip_v6:is_destination_v4_or_v6");
-            meta.dst_ip_addr     : lpm @name("meta.dst_ip_addr:destination");
-        }
-        actions = {
-            outbound_route_vnet_0();
-            outbound_route_vnet_direct_0();
-            outbound_route_direct_0();
-            outbound_drop_0();
-        }
-        const default_action = outbound_drop_0();
-        counters = outbound_routing_counter;
-    }
-    @name("dash_ingress.outbound.set_tunnel_mapping") action outbound_set_tunnel_mapping_0(@name("underlay_dip") IPv4Address underlay_dip_4, @name("overlay_dmac") EthernetAddress overlay_dmac_4, @name("use_dst_vnet_vni") bit<1> use_dst_vnet_vni) {
-        if (use_dst_vnet_vni == 1w1) {
-            meta.vnet_id = meta.dst_vnet_id;
-        }
-        meta.encap_data.overlay_dmac = overlay_dmac_4;
-        meta.encap_data.underlay_dip = underlay_dip_4;
-    }
-    @name("dash_ingress.outbound.ca_to_pa_counter") direct_counter(CounterType.packets_and_bytes) outbound_ca_to_pa_counter;
-    @name("dash_ingress.outbound.outbound_ca_to_pa|dash_outbound_ca_to_pa") table outbound_outbound_ca_to_pa_dash_outbound_ca_to_pa {
-        key = {
-            meta.dst_vnet_id      : exact @name("meta.dst_vnet_id:dst_vnet_id");
-            meta.is_lkup_dst_ip_v6: exact @name("meta.is_lkup_dst_ip_v6:is_dip_v4_or_v6");
-            meta.lkup_dst_ip_addr : exact @name("meta.lkup_dst_ip_addr:dip");
-        }
-        actions = {
-            outbound_set_tunnel_mapping_0();
-            @defaultonly outbound_drop_1();
-        }
-        const default_action = outbound_drop_1();
-        counters = outbound_ca_to_pa_counter;
-    }
-    @name("dash_ingress.outbound.set_vnet_attrs") action outbound_set_vnet_attrs_0(@name("vni") bit<24> vni_4) {
-        meta.encap_data.vni = vni_4;
-    }
-    @name("dash_ingress.outbound.vnet|dash_vnet") table outbound_vnet_dash_vnet {
-        key = {
-            meta.vnet_id: exact @name("meta.vnet_id:vnet_id");
-        }
-        actions = {
-            outbound_set_vnet_attrs_0();
-            @defaultonly NoAction_1();
-        }
-        default_action = NoAction_1();
-    }
     @name("dash_ingress.inbound.acl.permit") action inbound_acl_permit_0() {
     }
     @name("dash_ingress.inbound.acl.permit") action inbound_acl_permit_1() {
@@ -675,189 +858,6 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         }
         default_action = inbound_acl_deny_2();
         counters = inbound_acl_stage3_counter;
-    }
-    @name("dash_ingress.drop_action") action drop_action() {
-        mark_to_drop(standard_metadata);
-    }
-    @name("dash_ingress.deny") action deny() {
-        meta.dropped = true;
-    }
-    @name("dash_ingress.deny") action deny_0() {
-        meta.dropped = true;
-    }
-    @name("dash_ingress.deny") action deny_2() {
-        meta.dropped = true;
-    }
-    @name("dash_ingress.deny") action deny_3() {
-        meta.dropped = true;
-    }
-    @name("dash_ingress.deny") action deny_4() {
-        meta.dropped = true;
-    }
-    @name("dash_ingress.deny") action deny_5() {
-        meta.dropped = true;
-    }
-    @name("dash_ingress.accept") action accept_1() {
-    }
-    @name("dash_ingress.vip|dash_vip") table vip_0 {
-        key = {
-            hdr.ipv4.dst_addr: exact @name("hdr.ipv4.dst_addr:VIP");
-        }
-        actions = {
-            accept_1();
-            @defaultonly deny();
-        }
-        const default_action = deny();
-    }
-    @name("dash_ingress.set_outbound_direction") action set_outbound_direction() {
-        meta.direction = direction_t.OUTBOUND;
-    }
-    @name("dash_ingress.set_inbound_direction") action set_inbound_direction() {
-        meta.direction = direction_t.INBOUND;
-    }
-    @name("dash_ingress.direction_lookup|dash_direction_lookup") table direction_lookup_0 {
-        key = {
-            hdr.vxlan.vni: exact @name("hdr.vxlan.vni:VNI");
-        }
-        actions = {
-            set_outbound_direction();
-            @defaultonly set_inbound_direction();
-        }
-        const default_action = set_inbound_direction();
-    }
-    @name("dash_ingress.set_appliance") action set_appliance(@name("neighbor_mac") EthernetAddress neighbor_mac, @name("mac") EthernetAddress mac) {
-        meta.encap_data.underlay_dmac = neighbor_mac;
-        meta.encap_data.underlay_smac = mac;
-    }
-    @name("dash_ingress.appliance") table appliance_0 {
-        key = {
-            meta.appliance_id: ternary @name("meta.appliance_id:appliance_id");
-        }
-        actions = {
-            set_appliance();
-            @defaultonly NoAction_2();
-        }
-        default_action = NoAction_2();
-    }
-    @name("dash_ingress.set_eni_attrs") action set_eni_attrs(@name("cps") bit<32> cps_1, @name("pps") bit<32> pps_1, @name("flows") bit<32> flows_1, @name("admin_state") bit<1> admin_state_1, @name("vm_underlay_dip") IPv4Address vm_underlay_dip, @name("vm_vni") bit<24> vm_vni, @name("vnet_id") bit<16> vnet_id_1, @name("inbound_v4_stage1_dash_acl_group_id") bit<16> inbound_v4_stage1_dash_acl_group_id, @name("inbound_v4_stage2_dash_acl_group_id") bit<16> inbound_v4_stage2_dash_acl_group_id, @name("inbound_v4_stage3_dash_acl_group_id") bit<16> inbound_v4_stage3_dash_acl_group_id, @name("inbound_v4_stage4_dash_acl_group_id") bit<16> inbound_v4_stage4_dash_acl_group_id, @name("inbound_v4_stage5_dash_acl_group_id") bit<16> inbound_v4_stage5_dash_acl_group_id, @name("inbound_v6_stage1_dash_acl_group_id") bit<16> inbound_v6_stage1_dash_acl_group_id, @name("inbound_v6_stage2_dash_acl_group_id") bit<16> inbound_v6_stage2_dash_acl_group_id, @name("inbound_v6_stage3_dash_acl_group_id") bit<16> inbound_v6_stage3_dash_acl_group_id, @name("inbound_v6_stage4_dash_acl_group_id") bit<16> inbound_v6_stage4_dash_acl_group_id, @name("inbound_v6_stage5_dash_acl_group_id") bit<16> inbound_v6_stage5_dash_acl_group_id, @name("outbound_v4_stage1_dash_acl_group_id") bit<16> outbound_v4_stage1_dash_acl_group_id, @name("outbound_v4_stage2_dash_acl_group_id") bit<16> outbound_v4_stage2_dash_acl_group_id, @name("outbound_v4_stage3_dash_acl_group_id") bit<16> outbound_v4_stage3_dash_acl_group_id, @name("outbound_v4_stage4_dash_acl_group_id") bit<16> outbound_v4_stage4_dash_acl_group_id, @name("outbound_v4_stage5_dash_acl_group_id") bit<16> outbound_v4_stage5_dash_acl_group_id, @name("outbound_v6_stage1_dash_acl_group_id") bit<16> outbound_v6_stage1_dash_acl_group_id, @name("outbound_v6_stage2_dash_acl_group_id") bit<16> outbound_v6_stage2_dash_acl_group_id, @name("outbound_v6_stage3_dash_acl_group_id") bit<16> outbound_v6_stage3_dash_acl_group_id, @name("outbound_v6_stage4_dash_acl_group_id") bit<16> outbound_v6_stage4_dash_acl_group_id, @name("outbound_v6_stage5_dash_acl_group_id") bit<16> outbound_v6_stage5_dash_acl_group_id) {
-        meta.eni_data.cps = cps_1;
-        meta.eni_data.pps = pps_1;
-        meta.eni_data.flows = flows_1;
-        meta.eni_data.admin_state = admin_state_1;
-        meta.encap_data.underlay_dip = vm_underlay_dip;
-        meta.encap_data.vni = vm_vni;
-        meta.vnet_id = vnet_id_1;
-        if (meta.is_overlay_ip_v6 == 1w1) {
-            if (meta.direction == direction_t.OUTBOUND) {
-                meta.stage1_dash_acl_group_id = outbound_v6_stage1_dash_acl_group_id;
-                meta.stage2_dash_acl_group_id = outbound_v6_stage2_dash_acl_group_id;
-                meta.stage3_dash_acl_group_id = outbound_v6_stage3_dash_acl_group_id;
-                meta.stage4_dash_acl_group_id = outbound_v6_stage4_dash_acl_group_id;
-                meta.stage5_dash_acl_group_id = outbound_v6_stage5_dash_acl_group_id;
-            } else {
-                meta.stage1_dash_acl_group_id = inbound_v6_stage1_dash_acl_group_id;
-                meta.stage2_dash_acl_group_id = inbound_v6_stage2_dash_acl_group_id;
-                meta.stage3_dash_acl_group_id = inbound_v6_stage3_dash_acl_group_id;
-                meta.stage4_dash_acl_group_id = inbound_v6_stage4_dash_acl_group_id;
-                meta.stage5_dash_acl_group_id = inbound_v6_stage5_dash_acl_group_id;
-            }
-        } else if (meta.direction == direction_t.OUTBOUND) {
-            meta.stage1_dash_acl_group_id = outbound_v4_stage1_dash_acl_group_id;
-            meta.stage2_dash_acl_group_id = outbound_v4_stage2_dash_acl_group_id;
-            meta.stage3_dash_acl_group_id = outbound_v4_stage3_dash_acl_group_id;
-            meta.stage4_dash_acl_group_id = outbound_v4_stage4_dash_acl_group_id;
-            meta.stage5_dash_acl_group_id = outbound_v4_stage5_dash_acl_group_id;
-        } else {
-            meta.stage1_dash_acl_group_id = inbound_v4_stage1_dash_acl_group_id;
-            meta.stage2_dash_acl_group_id = inbound_v4_stage2_dash_acl_group_id;
-            meta.stage3_dash_acl_group_id = inbound_v4_stage3_dash_acl_group_id;
-            meta.stage4_dash_acl_group_id = inbound_v4_stage4_dash_acl_group_id;
-            meta.stage5_dash_acl_group_id = inbound_v4_stage5_dash_acl_group_id;
-        }
-    }
-    @name("dash_ingress.eni|dash_eni") table eni_0 {
-        key = {
-            meta.eni_id: exact @name("meta.eni_id:eni_id");
-        }
-        actions = {
-            set_eni_attrs();
-            @defaultonly deny_0();
-        }
-        const default_action = deny_0();
-    }
-    @name("dash_ingress.eni_counter") direct_counter(CounterType.packets_and_bytes) eni_counter_0;
-    @name("dash_ingress.eni_meter") table eni_meter_0 {
-        key = {
-            meta.eni_id   : exact @name("meta.eni_id:eni_id");
-            meta.direction: exact @name("meta.direction:direction");
-            meta.dropped  : exact @name("meta.dropped:dropped");
-        }
-        actions = {
-            NoAction_3();
-        }
-        counters = eni_counter_0;
-        default_action = NoAction_3();
-    }
-    @name("dash_ingress.permit") action permit() {
-    }
-    @name("dash_ingress.vxlan_decap_pa_validate") action vxlan_decap_pa_validate(@name("src_vnet_id") bit<16> src_vnet_id) {
-        meta.vnet_id = src_vnet_id;
-    }
-    @name("dash_ingress.pa_validation|dash_pa_validation") table pa_validation_0 {
-        key = {
-            meta.vnet_id     : exact @name("meta.vnet_id:vnet_id");
-            hdr.ipv4.src_addr: exact @name("hdr.ipv4.src_addr:sip");
-        }
-        actions = {
-            permit();
-            @defaultonly deny_2();
-        }
-        const default_action = deny_2();
-    }
-    @name("dash_ingress.inbound_routing|dash_inbound_routing") table inbound_routing_0 {
-        key = {
-            meta.eni_id      : exact @name("meta.eni_id:eni_id");
-            hdr.vxlan.vni    : exact @name("hdr.vxlan.vni:VNI");
-            hdr.ipv4.src_addr: ternary @name("hdr.ipv4.src_addr:sip");
-        }
-        actions = {
-            vxlan_decap_1();
-            vxlan_decap_pa_validate();
-            @defaultonly deny_3();
-        }
-        const default_action = deny_3();
-    }
-    @name("dash_ingress.set_eni") action set_eni(@name("eni_id") bit<16> eni_id_1) {
-        meta.eni_id = eni_id_1;
-    }
-    @name("dash_ingress.eni_ether_address_map|dash_eni") table eni_ether_address_map_0 {
-        key = {
-            meta.eni_addr: exact @name("meta.eni_addr:address");
-        }
-        actions = {
-            set_eni();
-            @defaultonly deny_4();
-        }
-        const default_action = deny_4();
-    }
-    @name("dash_ingress.set_acl_group_attrs") action set_acl_group_attrs(@name("ip_addr_family") bit<32> ip_addr_family) {
-        if (ip_addr_family == 32w0) {
-            if (meta.is_overlay_ip_v6 == 1w1) {
-                meta.dropped = true;
-            }
-        } else if (meta.is_overlay_ip_v6 == 1w0) {
-            meta.dropped = true;
-        }
-    }
-    @name("dash_ingress.dash_acl_group|dash_acl") table acl_group_0 {
-        key = {
-            meta.stage1_dash_acl_group_id: exact @name("meta.stage1_dash_acl_group_id:dash_acl_group_id");
-        }
-        actions = {
-            set_acl_group_attrs();
-            @defaultonly NoAction_4();
-        }
-        default_action = NoAction_4();
     }
     apply {
         standard_metadata.egress_spec = standard_metadata.ingress_port;
