@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 
 import argparse
-import random
-import sys
-import re
-import os
+import datetime
 import logging
+import os
+import random
+import re
+import sys
 import tempfile
 from pathlib import Path
-import datetime
-import pandas as pd
-import seaborn as sns
+
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import seaborn as sns
 
 # Append tools to the import path.
 FILE_DIR = Path(__file__).resolve().parent

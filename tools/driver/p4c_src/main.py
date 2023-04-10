@@ -19,11 +19,11 @@ p4c - P4 Compiler Driver
 import argparse
 import glob
 import os
-import sys
 import re
+import sys
 
-import p4c_src.config as config
 import p4c_src
+import p4c_src.config as config
 
 # \TODO: let the backends set their versions ...
 p4c_version = p4c_src.__version__

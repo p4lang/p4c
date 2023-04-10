@@ -15,7 +15,7 @@
 # limitations under the License.
 
 from base_test import P4rtOVSBaseTest
-from ptf.testutils import send_packet, verify_packets, simple_icmp_packet
+from ptf.testutils import send_packet, simple_icmp_packet, verify_packets
 
 
 class NormalOvsActionTest(P4rtOVSBaseTest):

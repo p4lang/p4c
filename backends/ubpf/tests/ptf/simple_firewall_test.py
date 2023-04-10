@@ -14,10 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ptf.packet import TCP, IP, Ether
-
 from base_test import P4rtOVSBaseTest
-from ptf.testutils import send_packet, verify_packets, verify_no_packet
+from ptf.packet import IP, TCP, Ether
+from ptf.testutils import send_packet, verify_no_packet, verify_packets
 
 
 class SimpleFirewallTest(P4rtOVSBaseTest):

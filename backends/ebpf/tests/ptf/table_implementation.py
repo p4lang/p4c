@@ -15,7 +15,6 @@
 # limitations under the License.
 
 from common import *
-
 from scapy.layers.l2 import Ether
 
 PORT0 = 0

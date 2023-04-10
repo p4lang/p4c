@@ -14,10 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ptf.packet import MPLS, Ether
-
 from base_test import P4rtOVSBaseTest
-from ptf.testutils import send_packet, verify_packets, simple_ip_only_packet
+from ptf.packet import MPLS, Ether
+from ptf.testutils import send_packet, simple_ip_only_packet, verify_packets
 
 
 class TunnelingTest(P4rtOVSBaseTest):

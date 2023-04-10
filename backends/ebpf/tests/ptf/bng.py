@@ -15,11 +15,10 @@
 # limitations under the License.
 
 from common import *
-
 from scapy.contrib.mpls import MPLS
-from scapy.layers.inet import IP, UDP, TCP
-from scapy.layers.l2 import Ether, Dot1Q
-from scapy.layers.ppp import PPPoE, PPP
+from scapy.layers.inet import IP, TCP, UDP
+from scapy.layers.l2 import Dot1Q, Ether
+from scapy.layers.ppp import PPP, PPPoE
 
 ETH_TYPE_ARP = 0x0806
 ETH_TYPE_IPV4 = 0x0800

@@ -16,8 +16,8 @@
     interfaces. The bridge runs in a completely isolated namespace.
     Allows the loading and testing of eBPF programs. """
 
-import sys
 import logging
+import sys
 from pathlib import Path
 from typing import List
 

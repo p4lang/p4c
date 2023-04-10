@@ -15,10 +15,9 @@
 # limitations under the License.
 
 from common import *
-
 from ptf.mask import Mask
-from scapy.layers.l2 import Ether, Dot1Q
 from scapy.layers.inet import IP
+from scapy.layers.l2 import Dot1Q, Ether
 
 PORT0 = 0
 PORT1 = 1

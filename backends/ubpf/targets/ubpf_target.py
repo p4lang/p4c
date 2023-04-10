@@ -2,8 +2,8 @@ import sys
 from glob import glob
 from pathlib import Path
 
-from targets.target import EBPFTarget
 from targets.ebpfstf import parse_stf_file
+from targets.target import EBPFTarget
 
 # path to the tools folder of the compiler
 sys.path.insert(0, "p4c/tools")

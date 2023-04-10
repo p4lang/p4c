@@ -113,13 +113,13 @@ if(NOT ${BLACK_CMD} OR NOT (NOT ${ISORT_CMD}))
       black
       COMMAND xargs -a ${BLACK_TXT_FILE} -r -d '\;' sh -c 'for arg do ${BLACK_CMD} --check --diff \"$$arg\"\; ${ISORT_CMD} --check --diff \"$$arg\"\; done' _
       WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-      COMMENT "Checking files for correct black formatting."
+      COMMENT "Checking files for correct black/isort formatting."
     )
     add_custom_target(
       black-fix-errors
       COMMAND xargs -a ${BLACK_TXT_FILE} -r -d '\;' sh -c 'for arg do ${BLACK_CMD} \"$$arg\"\; ${ISORT_CMD} \"$$arg\"\; done' _
       WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-      COMMENT "Formatting files using black."
+      COMMENT "Formatting files using black/isort."
     )
   endif()
 else()

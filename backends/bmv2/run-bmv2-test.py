@@ -16,20 +16,20 @@
 # Runs the compiler on a sample P4 program generating code for the BMv2
 # behavioral model simulator
 
+import argparse
+import os
+import shutil
+import sys
+import tempfile
 from subprocess import Popen
 from threading import Thread
-import sys
-import os
-import tempfile
-import shutil
-import argparse
 
+from bmv2stf import RunBMV2
 from scapy.layers.all import *
 from scapy.utils import *
-from bmv2stf import RunBMV2
 
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + "/../../tools")
-from testutils import SUCCESS, FAILURE, check_if_dir, check_if_file
+from testutils import FAILURE, SUCCESS, check_if_dir, check_if_file
 
 
 def parse_args():

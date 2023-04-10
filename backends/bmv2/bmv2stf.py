@@ -15,24 +15,24 @@
 
 # Runs the BMv2 behavioral model simulator with input from an stf file
 
+import difflib
+import errno
+import json
+import os
+import random
+import re
+import shutil
+import signal
+import socket
+import stat
+import subprocess
+import sys
+import tempfile
+import time
+from collections import OrderedDict
+from glob import glob
 from subprocess import Popen
 from threading import Thread
-from glob import glob
-import json
-import sys
-import re
-import os
-import stat
-import tempfile
-import shutil
-import difflib
-import subprocess
-import signal
-import time
-import random
-import errno
-import socket
-from collections import OrderedDict
 
 try:
     from scapy.layers.all import *

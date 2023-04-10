@@ -14,11 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import subprocess
-from ptf.base_tests import BaseTest
-from ptf import config, testutils
-import ptf
 import os
+import subprocess
+
+import ptf
+from ptf import config, testutils
+from ptf.base_tests import BaseTest
 
 
 class P4rtOVSBaseTest(BaseTest):

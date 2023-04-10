@@ -24,9 +24,11 @@
 
 import os
 import sys
-from pathlib import Path
 from glob import glob
+from pathlib import Path
+
 import scapy.utils as scapy_util
+
 from .ebpfstf import create_table_file, parse_stf_file
 
 # path to the tools folder of the compiler

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
 import argparse
-import os
-import sys
-import random
 import logging
+import os
+import random
+import sys
 import tempfile
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 # Append tools to the import path.
 FILE_DIR = Path(__file__).resolve().parent
@@ -16,8 +16,8 @@ sys.path.append(str(TOOLS_PATH))
 
 BRIDGE_PATH = FILE_DIR.joinpath("../ebpf/targets")
 sys.path.append(str(BRIDGE_PATH))
-from ebpfenv import Bridge
 import testutils
+from ebpfenv import Bridge
 
 PARSER = argparse.ArgumentParser()
 PARSER.add_argument("rootdir", help="the root directory of the compiler source tree")

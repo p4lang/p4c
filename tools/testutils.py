@@ -16,14 +16,14 @@
 """ Defines helper functions for a general testing framework. Used by multiple
     Python testing scripts in the backends folder."""
 
-import subprocess
 import logging
-import socket
-import random
 import os
-import threading
+import random
 import shutil
 import signal
+import socket
+import subprocess
+import threading
 from pathlib import Path
 from typing import NamedTuple, Optional
 

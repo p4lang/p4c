@@ -14,11 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ptf.mask import Mask
-from ptf.packet import TCP, IP, Ether
-
 from base_test import P4rtOVSBaseTest
-from ptf.testutils import send_packet, verify_packets, simple_ip_packet
+from ptf.mask import Mask
+from ptf.packet import IP, TCP, Ether
+from ptf.testutils import send_packet, simple_ip_packet, verify_packets
 
 
 class Ipv4Test(P4rtOVSBaseTest):

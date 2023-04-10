@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-import signal
 import shlex
+import signal
 import subprocess
 import sys
 import traceback

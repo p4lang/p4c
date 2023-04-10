@@ -15,7 +15,6 @@
 # limitations under the License.
 
 from common import *
-
 from scapy.contrib.gtp import GTP_U_Header
 from scapy.layers.inet import IP, UDP
 from scapy.layers.l2 import Ether

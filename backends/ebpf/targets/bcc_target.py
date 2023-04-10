@@ -16,6 +16,7 @@
 
 import sys
 from pathlib import Path
+
 from .target import EBPFTarget
 
 # Append tools to the import path.

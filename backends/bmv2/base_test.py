@@ -3,28 +3,26 @@
 # repository. This file in turn was a modified version of
 # https://github.com/p4lang/PI/blob/ec6865edc770b42f22fea15e6da17ca58a83d3a6/proto/ptf/base_test.py.
 
-from collections import Counter
-from functools import wraps, partial
 import logging
+import queue
 import re
 import socket
 import sys
 import threading
 import time
-import queue
+from collections import Counter
+from functools import partial, wraps
 from pathlib import Path
 
+import google.protobuf.text_format
+import grpc
 import ptf
-from ptf.base_tests import BaseTest
+from google.rpc import code_pb2, status_pb2
+from p4.config.v1 import p4info_pb2
+from p4.v1 import p4runtime_pb2, p4runtime_pb2_grpc
 from ptf import config
 from ptf import testutils as ptfutils
-
-import grpc
-
-from google.rpc import status_pb2, code_pb2
-from p4.v1 import p4runtime_pb2, p4runtime_pb2_grpc
-from p4.config.v1 import p4info_pb2
-import google.protobuf.text_format
+from ptf.base_tests import BaseTest
 
 FILE_DIR = Path(__file__).resolve().parent
 TOOLS_PATH = FILE_DIR.joinpath("../../tools")

@@ -15,11 +15,12 @@
 # limitations under the License.
 
 import os
+import subprocess
 import sys
 import time
-import subprocess
-from pathlib import Path
 from glob import glob
+from pathlib import Path
+
 from .ebpfenv import Bridge
 from .target import EBPFTarget
 

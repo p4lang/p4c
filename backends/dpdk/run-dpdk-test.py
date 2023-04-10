@@ -15,20 +15,19 @@
 
 # Runs the compiler on a sample P4 V1.2 program
 
-from os import environ
-from threading import Timer
-from subprocess import Popen, PIPE
-from threading import Thread
-import errno
-import sys
-import re
-import os
-import stat
-import tempfile
-import shutil
 import difflib
-import subprocess
+import errno
 import glob
+import os
+import re
+import shutil
+import stat
+import subprocess
+import sys
+import tempfile
+from os import environ
+from subprocess import PIPE, Popen
+from threading import Thread, Timer
 
 SUCCESS = 0
 FAILURE = 1

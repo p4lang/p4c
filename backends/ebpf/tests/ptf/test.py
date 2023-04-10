@@ -14,17 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from common import *
-
 import copy
 
-from scapy.fields import ShortField, IntField
-from scapy.layers.l2 import Ether, ARP
+from common import *
+from ptf.mask import Mask
+from ptf.packet import MPLS
+from scapy.fields import IntField, ShortField
 from scapy.layers.inet import IP, UDP
 from scapy.layers.inet6 import IPv6
+from scapy.layers.l2 import ARP, Ether
 from scapy.packet import Packet, bind_layers, split_layers
-from ptf.packet import MPLS
-from ptf.mask import Mask
 
 
 class SimpleForwardingPSATest(P4EbpfTest):

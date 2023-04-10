@@ -17,14 +17,17 @@
 # Example of usign STFRunner that simply prints the STF statement
 
 import argparse
-import sys, os, os.path
 import logging
 import math
+import os
+import os.path
 import random
 import re
+import sys
 import time
 import traceback
 import unittest
+
 from .stf_parser import STFParser
 from .stf_runner import STFRunner
 

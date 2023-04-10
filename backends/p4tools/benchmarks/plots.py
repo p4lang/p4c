@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 
 import argparse
-from pathlib import Path
-import sys
 import re
+import sys
 from operator import attrgetter
+from pathlib import Path
 
-import pandas as pd
-import numpy as np
-import seaborn as sns
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
 import tikzplotlib
 
 # Append tools to the import path.

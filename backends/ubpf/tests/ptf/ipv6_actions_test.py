@@ -14,11 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from ptf.mask import Mask
-from ptf.packet import Ether, TCP, IPv6
-
 from base_test import P4rtOVSBaseTest
-from ptf.testutils import send_packet, verify_packets, simple_tcpv6_packet
+from ptf.mask import Mask
+from ptf.packet import TCP, Ether, IPv6
+from ptf.testutils import send_packet, simple_tcpv6_packet, verify_packets
 
 
 class Ipv6Test(P4rtOVSBaseTest):

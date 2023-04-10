@@ -22,11 +22,11 @@
    5. Evaluates the output with the expected result from the .stf file
 """
 
-import sys
-import os
-import tempfile
 import argparse
 import logging
+import os
+import sys
+import tempfile
 from pathlib import Path
 
 FILE_DIR = Path(__file__).resolve().parent

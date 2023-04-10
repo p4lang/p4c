@@ -1,9 +1,8 @@
-from common import *
-
 import random
 
-from scapy.layers.l2 import Ether
+from common import *
 from scapy.layers.inet import IP, UDP
+from scapy.layers.l2 import Ether
 
 PORT0 = 0
 PORT1 = 1

@@ -23,9 +23,9 @@
     This file also provides functions to manage P4-eBPF tables, clone sessions and multicast groups.
 """
 
-import os
-import logging
 import json
+import logging
+import os
 import shlex
 import subprocess
 import time
@@ -33,9 +33,8 @@ import time
 import ptf
 import ptf.testutils as testutils
 import pyroute2
-from pyroute2 import NetNS
-
 from ptf.base_tests import BaseTest
+from pyroute2 import NetNS
 
 logger = logging.getLogger("eBPFTest")
 if not len(logger.handlers):
