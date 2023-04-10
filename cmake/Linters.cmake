@@ -99,6 +99,7 @@ add_black_files(${P4C_SOURCE_DIR} "${P4C_PYTHON_LINT_LIST}")
 find_program(BLACK_CMD black)
 find_program(ISORT_CMD isort)
 
+# Black and isort share the same files and should be run together.
 if(NOT ${BLACK_CMD} OR NOT (NOT ${ISORT_CMD}))
   # Retrieve the global black property.
   get_property(BLACK_FILES GLOBAL PROPERTY black-files)
@@ -111,15 +112,27 @@ if(NOT ${BLACK_CMD} OR NOT (NOT ${ISORT_CMD}))
     set(BLACK_CMD black)
     add_custom_target(
       black
-      COMMAND xargs -a ${BLACK_TXT_FILE} -r -d '\;' sh -c 'for arg do ${BLACK_CMD} --check --diff \"$$arg\"\; ${ISORT_CMD} --check --diff \"$$arg\"\; done' _
+      COMMAND xargs -a ${BLACK_TXT_FILE} -r -d '\;' ${BLACK_CMD} --check --diff --
       WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-      COMMENT "Checking files for correct black/isort formatting."
+      COMMENT "Checking files for correct black formatting."
     )
     add_custom_target(
       black-fix-errors
-      COMMAND xargs -a ${BLACK_TXT_FILE} -r -d '\;' sh -c 'for arg do ${BLACK_CMD} \"$$arg\"\; ${ISORT_CMD} \"$$arg\"\; done' _
+      COMMAND xargs -a ${BLACK_TXT_FILE} -r -d '\;' ${BLACK_CMD} --
       WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-      COMMENT "Formatting files using black/isort."
+      COMMENT "Formatting files using black."
+    )
+    add_custom_target(
+      isort
+      COMMAND xargs -a ${BLACK_TXT_FILE} -r -d '\;' ${ISORT_CMD} --check --diff --
+      WORKING_DIRECTORY ${P4C_SOURCE_DIR}
+      COMMENT "Checking files for correct isort formatting."
+    )
+    add_custom_target(
+      isort-fix-errors
+      COMMAND xargs -a ${BLACK_TXT_FILE} -r -d '\;' ${ISORT_CMD} --
+      WORKING_DIRECTORY ${P4C_SOURCE_DIR}
+      COMMENT "Formatting files using isort."
     )
   endif()
 else()
