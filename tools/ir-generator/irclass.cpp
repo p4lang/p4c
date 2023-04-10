@@ -496,6 +496,14 @@ void IrClass::resolve() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
+//
+void IrEnumType::generate_hdr(std::ostream &out) const {
+    out << "enum " << (isClassEnum ? "class " : "") << name << "\n"
+        << LineDirective(srcInfo, +1) << body << ";\n"
+        << LineDirective();
+}
+
+////////////////////////////////////////////////////////////////////////////////////
 
 void IrField::generate(std::ostream &out, bool asField) const {
     if (asField) {

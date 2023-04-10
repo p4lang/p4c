@@ -197,10 +197,7 @@ class ErrorReporter {
      * generator's C-based Bison parser, which doesn't have location information
      * available.
      */
-    void parser_error(const Util::InputSources *sources, const char *fmt, ...) {
-        va_list args;
-        va_start(args, fmt);
-
+    void parser_error(const Util::InputSources *sources, const char *fmt, va_list args) {
         errorCount++;
 
         Util::SourcePosition position = sources->getCurrentPosition();
@@ -210,7 +207,11 @@ class ErrorReporter {
         Util::SourceInfo info(sources, position);
         ParserErrorMessage msg(info, message);
         emit_message(msg);
-
+    }
+    void parser_error(const Util::InputSources *sources, const char *fmt, ...) {
+        va_list args;
+        va_start(args, fmt);
+        parser_error(sources, fmt, args);
         va_end(args);
     }
 

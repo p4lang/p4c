@@ -124,3 +124,12 @@ bool operator>>(const char *p, match_t &m) {
     m = rv;
     return true;
 }
+
+void dump(const match_t &m) { std::cout << m << std::endl; }
+void dump(const match_t *m) {
+    if (m)
+        std::cout << *m;
+    else
+        std::cout << "<nullptr>";
+    std::cout << std::endl;
+}

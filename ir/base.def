@@ -12,9 +12,7 @@
    - some simple leaf classes used frequently
 */
 
-#emit
 #include "frontends/common/constantParsing.h"
-#end
 
 /// a value that can be evaluated at compile-time
 interface CompileTimeValue {
@@ -304,13 +302,12 @@ class Annotation {
     /// Extracts a single string argument; error if the argument is not a string
     cstring getSingleString() const;
 
-#emit
     enum class Kind {
         Unstructured,
         StructuredEmpty,
         StructuredKVList,
         StructuredExpressionList
-    };
+    }
 
     Kind annotationKind() const {
         if (!structured)
@@ -321,7 +318,6 @@ class Annotation {
             return Kind::StructuredKVList;
         return Kind::StructuredEmpty;
     }
-#end
 }
 
 /// There can be several annotations with the same "name", so this is a vector.

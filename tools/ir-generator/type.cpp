@@ -47,10 +47,24 @@ const IrClass *NamedType::resolve(const IrNamespace *in) const {
     if (lookup) {
         in = lookup->resolve(in);
         if (!in) return nullptr;
-        return (resolved = in->lookupClass(name));
+        if (auto *found = in->lookupClass(name)) {
+            foundin = in;
+            return (resolved = found);
+        }
+        if (in->lookupOther(name)) {
+            foundin = in;
+            return nullptr;
+        }
     }
     while (in) {
-        if (auto *found = in->lookupClass(name)) return (resolved = found);
+        if (auto *found = in->lookupClass(name)) {
+            foundin = in;
+            return (resolved = found);
+        }
+        if (in->lookupOther(name)) {
+            foundin = in;
+            return nullptr;
+        }
         in = in->parent;
     }
     return nullptr;
@@ -114,7 +128,9 @@ NamedType &NamedType::SourceInfo() {
 cstring NamedType::toString() const {
     if (resolved) return resolved->fullName();
     if (!lookup && name == "ID") return "IR::ID";  // hack -- ID is in namespace IR
-    return lookup ? lookup->toString() + name : name;
+    if (lookup) return lookup->toString() + name;
+    if (foundin) return LookupScope(foundin).toString() + name;
+    return name;
 }
 
 cstring TemplateInstantiation::toString() const {

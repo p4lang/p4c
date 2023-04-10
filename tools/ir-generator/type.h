@@ -76,6 +76,7 @@ class NamedType : public Type {
     const LookupScope *lookup;
     cstring name;
     mutable const IrClass *resolved = nullptr;
+    mutable const IrNamespace *foundin = nullptr;
 
  public:
     NamedType(Util::SourceInfo si, const LookupScope *l, cstring n)

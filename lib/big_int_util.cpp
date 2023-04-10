@@ -110,3 +110,14 @@ big_int cvtInt(const char *s, unsigned base) {
 }
 
 }  // namespace Util
+
+void dump(const big_int &i) {
+    std::cout << i << " (";
+    // DANGER -- printing a negative big_int in hex crashes...
+    if (i >= 0)
+        std::cout << "0x" << std::hex << i << std::dec;
+    else
+        std::cout << "~0x" << std::hex << ~i << std::dec;
+    std::cout << ")" << std::endl;
+}
+void dump(const big_int *i) { dump(*i); }
