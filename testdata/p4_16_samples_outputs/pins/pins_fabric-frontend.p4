@@ -501,11 +501,11 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
         local_metadata.route_metadata = route_metadata_6;
     }
     @id(0x0100000F) @name("ingress.routing.trap") action routing_trap_0() {
-        clone(CloneType.I2E, 32w511);
+        clone(CloneType.I2E, 32w1024);
         mark_to_drop(standard_metadata);
     }
     @id(0x0100000F) @name("ingress.routing.trap") action routing_trap_1() {
-        clone(CloneType.I2E, 32w511);
+        clone(CloneType.I2E, 32w1024);
         mark_to_drop(standard_metadata);
     }
     @id(0x01000015) @name("ingress.routing.set_metadata_and_drop") action routing_set_metadata_and_drop_0(@id(1) @name("route_metadata") route_metadata_t route_metadata_7) {
@@ -555,13 +555,13 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
     @id(0x01000101) @sai_action(SAI_PACKET_ACTION_COPY , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_YELLOW) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_RED) @name("ingress.acl_ingress.acl_copy") action acl_ingress_acl_copy_0(@sai_action_param(QOS_QUEUE) @id(1) @name("qos_queue") qos_queue_t qos_queue) {
         acl_ingress_acl_ingress_counter.count();
         acl_ingress_acl_ingress_meter.read(local_metadata.color);
-        clone(CloneType.I2E, 32w511);
+        clone(CloneType.I2E, 32w1024);
     }
     @id(0x01000102) @sai_action(SAI_PACKET_ACTION_TRAP , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_DROP , SAI_PACKET_COLOR_YELLOW) @sai_action(SAI_PACKET_ACTION_DROP , SAI_PACKET_COLOR_RED) @name("ingress.acl_ingress.acl_trap") action acl_ingress_acl_trap_0(@sai_action_param(QOS_QUEUE) @id(1) @name("qos_queue") qos_queue_t qos_queue_3) {
         @id(0x01000101) @sai_action(SAI_PACKET_ACTION_COPY , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_YELLOW) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_RED) {
             acl_ingress_acl_ingress_counter.count();
             acl_ingress_acl_ingress_meter.read(local_metadata.color);
-            clone(CloneType.I2E, 32w511);
+            clone(CloneType.I2E, 32w1024);
         }
         mark_to_drop(standard_metadata);
     }
@@ -571,7 +571,7 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
             @id(0x01000101) @sai_action(SAI_PACKET_ACTION_COPY , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_YELLOW) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_RED) {
                 acl_ingress_acl_ingress_counter.count();
                 acl_ingress_acl_ingress_meter.read(local_metadata.color);
-                clone(CloneType.I2E, 32w511);
+                clone(CloneType.I2E, 32w1024);
             }
             mark_to_drop(standard_metadata);
         }

@@ -27,7 +27,7 @@ class BMv2Constants {
     static constexpr uint64_t PKT_INSTANCE_TYPE_REPLICATION = 0x005;
     static constexpr uint64_t PKT_INSTANCE_TYPE_RESUBMIT = 0x006;
     static constexpr uint16_t CLONE_SESSION_ID_MIN = 1;
-    static constexpr uint16_t CLONE_SESSION_ID_MAX = 511;
+    static constexpr uint16_t CLONE_SESSION_ID_MAX = 65535;
     /// Clone type is derived from v1model.p4
     enum CloneType { I2E = 0, E2E = 1 };
     /// Other useful constants
