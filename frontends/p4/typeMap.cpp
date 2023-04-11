@@ -291,6 +291,10 @@ bool TypeMap::equivalent(const IR::Type *left, const IR::Type *right, bool stric
         auto re = right->to<IR::Type_Extern>();
         return le->name == re->name;
     }
+    if (auto lf = left->to<IR::Type_Fragment>()) {
+        auto rf = right->to<IR::Type_Fragment>();
+        return equivalent(lf->type, rf->type);
+    }
 
     BUG_CHECK(::errorCount(), "%1%: Unexpected type check for equivalence", dbp(left));
     // The following are not expected to be compared for equivalence:

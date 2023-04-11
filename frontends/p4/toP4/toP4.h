@@ -178,6 +178,8 @@ class ToP4 : public Inspector {
     bool preorder(const IR::Declaration_MatchKind *d) override;
 
     // expressions
+    bool preorder(const IR::Dots *e) override;
+    bool preorder(const IR::NamedDots *e) override;
     bool preorder(const IR::Constant *c) override;
     bool preorder(const IR::Slice *slice) override;
     bool preorder(const IR::BoolLiteral *b) override;

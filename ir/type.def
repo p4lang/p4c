@@ -62,6 +62,42 @@ inline bool operator>>(cstring s, IR::Direction &d) {
 }
 #end
 
+/// This represents a type that can unify with any other type.
+/// It is the original type of Dots (...) expressions.
+/// There is no syntax to represent this type.
+/// Treated like a type variable so that unification can assign it a value.
+class Type_Any : Type, ITypeVar {
+    long declid = nextId++;
+ private:
+    static long nextId;
+ public:
+    cstring getVarName() const override { return "int_" + Util::toString(declid); }
+    int getDeclId() const override { return declid; }
+    dbprint { out << "ANYTYPE/" << declid; }
+    toString { return "ANYTYPE"; }
+    operator== { return declid == a.declid; }
+    static Type_Any get();
+    const Type* getP4Type() const override { return nullptr; }
+}
+
+/// This type is a fragment of another type.
+/// This is used in conjunction with Type_Any to typecheck
+/// expressions containing ... (Dots).
+/// After unification this type replaces Type_Any.
+/// For example:
+/// struct S { bit<32> s; bit<16> t; }
+/// S s = { s = 2, ... };
+/// The type assigned to 'type' by unification will be
+/// Type_Fragment { type = Type_UnknownStruct { t: Type_Bits<15> } }.
+/// In other words, the type of the ... expression is a
+/// fragment of a struct that contains just the field t.
+class Type_Fragment : Type {
+    Type type;
+    dbprint { out << "FRAGMENT(" << type << ")"; }
+    toString { return "FRAGMENT(" + type->toString() + ")"; }
+    const Type* getP4Type() const override { return nullptr; }
+}
+
 /// Represents the type of a type.
 /// For example, in a declaration like
 /// bit<32> x;
@@ -175,9 +211,9 @@ class Type_Var : Type_Declaration, ITypeVar {
 /// type unification to discover the correct type for the constants
 /// in some contexts.
 class Type_InfInt : Type, ITypeVar {
-    int declid = nextId++;
+    long declid = nextId++;
  private:
-    static int nextId;
+    static long nextId;
  public:
     cstring getVarName() const override { return "int_" + Util::toString(declid); }
     int getDeclId() const override { return declid; }

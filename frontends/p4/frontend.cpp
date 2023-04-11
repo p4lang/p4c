@@ -34,6 +34,7 @@ limitations under the License.
 #include "checkNamedArgs.h"
 #include "createBuiltins.h"
 #include "defaultArguments.h"
+#include "defaultValues.h"
 #include "deprecated.h"
 #include "directCalls.h"
 #include "dontcareArgs.h"
@@ -182,6 +183,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new SetStrictStruct(&typeMap, false),
         new ValidateMatchAnnotations(&typeMap),
         new ValidateValueSets(),
+        new DefaultValues(&refMap, &typeMap),
         new BindTypeVariables(&refMap, &typeMap),
         new PassRepeated(
             {new SpecializeGenericTypes(&refMap, &typeMap),

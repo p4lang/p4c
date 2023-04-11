@@ -45,14 +45,15 @@ bool TypeConstraints::isUnifiableTypeVariable(const IR::Type *type) {
     auto tv = type->to<IR::ITypeVar>();
     if (tv == nullptr) return false;
     if (definedVariables->containsKey(tv)) return false;
-    if (tv->is<IR::Type_InfInt>())
+    if (tv->is<IR::Type_InfInt>() || tv->is<IR::Type_Any>())
         // These are always unifiable
         return true;
     return unifiableTypeVariables.count(tv) > 0;
 }
 
 bool TypeConstraints::solve(const BinaryConstraint *constraint) {
-    if (isUnifiableTypeVariable(constraint->left)) {
+    if (isUnifiableTypeVariable(constraint->left) &&
+        !constraint->right->is<IR::Type_Any>()) {  // we prefer to substitute ANY
         auto leftTv = constraint->left->to<IR::ITypeVar>();
         if (constraint->left == constraint->right) return true;
 
@@ -105,7 +106,7 @@ void TypeConstraints::dbprint(std::ostream &out) const {
         }
     }
     if (constraints.size() != 0) {
-        out << "Constraints: ";
+        out << std::endl << "Constraints: ";
         for (auto c : constraints) out << std::endl << c;
     }
 }

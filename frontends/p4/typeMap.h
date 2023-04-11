@@ -85,7 +85,7 @@ class TypeMap final : public ProgramMap {
     void cloneExpressionProperties(const IR::Expression *to, const IR::Expression *from);
     void setCompileTimeConstant(const IR::Expression *expression);
     void addSubstitutions(const TypeVariableSubstitution *tvs);
-    const IR::Type *getSubstitution(const IR::Type_Var *var) {
+    const IR::Type *getSubstitution(const IR::ITypeVar *var) {
         return allTypeVariables.lookup(var);
     }
     const TypeVariableSubstitution *getSubstitutions() const { return &allTypeVariables; }

@@ -330,7 +330,7 @@ const IR::Type *TypeInference::canonicalize(const IR::Type *type) {
 
     if (type->is<IR::Type_SpecializedCanonical>() || type->is<IR::Type_InfInt>() ||
         type->is<IR::Type_Action>() || type->is<IR::Type_Error>() || type->is<IR::Type_Newtype>() ||
-        type->is<IR::Type_Table>()) {
+        type->is<IR::Type_Table>() || type->is<IR::Type_Any>()) {
         return type;
     } else if (type->is<IR::Type_Dontcare>()) {
         return IR::Type_Dontcare::get();
@@ -735,7 +735,8 @@ const IR::Expression *TypeInference::assignment(const IR::Node *errorPosition,
         ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
         sourceExpression = cts.convert(sourceExpression);  // sets type
     }
-    if (destType->is<IR::Type_SerEnum>() && !typeMap->equivalent(destType, initType)) {
+    if (destType->is<IR::Type_SerEnum>() && !typeMap->equivalent(destType, initType) &&
+        !initType->is<IR::Type_Any>()) {
         typeError("%1%: values of type '%2%' cannot be implicitly cast to type '%3%'",
                   errorPosition, initType, destType);
         return sourceExpression;
@@ -761,64 +762,109 @@ const IR::Expression *TypeInference::assignment(const IR::Node *errorPosition,
             // we still need to recurse over its fields; they many not have
             // the right type.
             CHECK_NULL(si);
-            if (ts->fields.size() != si->components.size()) {
+            bool hasDots = si->containsDots();
+            if (ts->fields.size() != si->components.size() && !hasDots) {
                 typeError("%1%: destination type expects %2% fields, but source only has %3%",
                           errorPosition, ts->fields.size(), si->components.size());
                 return sourceExpression;
             }
             IR::IndexedVector<IR::NamedExpression> vec;
             bool changes = false;
-            for (size_t i = 0; i < ts->fields.size(); i++) {
-                auto fieldI = ts->fields.at(i);
-                auto compI = si->components.at(i)->expression;
-                auto src = assignment(sourceExpression, fieldI->type, compI);
-                if (src != compI) changes = true;
+            for (const IR::StructField *fieldI : ts->fields) {
+                auto compI = si->components.getDeclaration<IR::NamedExpression>(fieldI->name);
+                if (hasDots && compI == nullptr) {
+                    continue;
+                }
+                auto src = assignment(sourceExpression, fieldI->type, compI->expression);
+                if (src != compI->expression) changes = true;
                 vec.push_back(new IR::NamedExpression(fieldI->name, src));
             }
+            if (hasDots) vec.push_back(si->getField("..."));
             if (!changes) vec = si->components;
             if (initType->is<IR::Type_UnknownStruct>() || changes) {
                 sourceExpression = new IR::StructExpression(type, type, vec);
                 setType(sourceExpression, destType);
             }
         } else if (auto li = sourceExpression->to<IR::ListExpression>()) {
-            if (ts->fields.size() != li->components.size()) {
+            bool hasDots = li->containsDots();
+            if (ts->fields.size() != li->components.size() && !hasDots) {
                 typeError("%1%: destination type expects %2% fields, but source only has %3%",
                           errorPosition, ts->fields.size(), li->components.size());
                 return sourceExpression;
             }
             IR::IndexedVector<IR::NamedExpression> vec;
+            size_t listSize = li->size();
             for (size_t i = 0; i < ts->fields.size(); i++) {
                 auto fieldI = ts->fields.at(i);
                 auto compI = li->components.at(i);
+                if (hasDots && i == listSize - 1) {
+                    auto nd = new IR::NamedDots(fieldI->srcInfo, compI->to<IR::Dots>());
+                    vec.push_back(nd);
+                    break;
+                }
                 auto src = assignment(sourceExpression, fieldI->type, compI);
                 vec.push_back(new IR::NamedExpression(fieldI->name, src));
             }
             sourceExpression = new IR::StructExpression(type, type, vec);
             setType(sourceExpression, destType);
+            assignment(errorPosition, destType, sourceExpression);
         }
         // else this is some other expression that evaluates to a struct
         if (cst) setCompileTimeConstant(sourceExpression);
     } else if (auto tt = concreteType->to<IR::Type_Tuple>()) {
         if (auto li = sourceExpression->to<IR::ListExpression>()) {
-            if (tt->getSize() != li->components.size()) {
+            bool hasDots = li->containsDots();
+            if (tt->getSize() != li->components.size() && !hasDots) {
                 typeError("%1%: destination type expects %2% fields, but source only has %3%",
                           errorPosition, tt->getSize(), li->components.size());
                 return sourceExpression;
             }
             bool changed = false;
             IR::Vector<IR::Expression> vec;
+            size_t sourceSize = li->size();
             for (size_t i = 0; i < tt->getSize(); i++) {
                 auto typeI = tt->at(i);
                 auto compI = li->components.at(i);
+                if (hasDots && (i == sourceSize - 1)) {
+                    vec.push_back(compI);  // this is '...'
+                    break;
+                }
                 auto src = assignment(sourceExpression, typeI, compI);
                 if (src != compI) changed = true;
                 vec.push_back(src);
             }
-            if (changed) sourceExpression = new IR::ListExpression(vec);
+            if (changed) {
+                sourceExpression = new IR::ListExpression(vec);
+                setType(sourceExpression, destType);
+                if (cst) setCompileTimeConstant(sourceExpression);
+            }
         }
         // else this is some other expression that evaluates to a tuple
-        setType(sourceExpression, destType);
-        if (cst) setCompileTimeConstant(sourceExpression);
+    } else if (auto tstack = concreteType->to<IR::Type_Stack>()) {
+        if (auto li = sourceExpression->to<IR::ListExpression>()) {
+            bool hasDots = li->containsDots();
+            if (tstack->getSize() != li->components.size() && !hasDots) {
+                typeError("%1%: destination type expects %2% elements, but source only has %3%",
+                          errorPosition, tstack->getSize(), li->components.size());
+                return sourceExpression;
+            }
+            IR::Vector<IR::Expression> vec;
+            size_t sourceSize = li->size();
+            auto elementType = tstack->elementType;
+            for (size_t i = 0; i < tstack->getSize(); i++) {
+                auto compI = li->components.at(i);
+                if (hasDots && (i == sourceSize - 1)) {
+                    vec.push_back(compI);  // this is '...'
+                    break;
+                }
+                auto src = assignment(sourceExpression, elementType, compI);
+                vec.push_back(src);
+            }
+            auto p4stack = tstack->getP4Type();
+            sourceExpression = new IR::HeaderStackExpression(p4stack, vec, p4stack);
+            setType(sourceExpression, destType);
+            if (cst) setCompileTimeConstant(sourceExpression);
+        }
     }
 
     return sourceExpression;
@@ -2785,31 +2831,9 @@ const IR::Node *TypeInference::postorder(IR::Cast *expression) {
                 typeError("%1%: cast not supported", expression->destType);
                 return expression;
             }
-        } else if (auto le = expression->expr->to<IR::ListExpression>()) {
-            if (st->fields.size() == le->size()) {
-                bool isConstant = true;
-                IR::IndexedVector<IR::NamedExpression> vec;
-                for (size_t i = 0; i < st->fields.size(); i++) {
-                    auto fieldI = st->fields.at(i);
-                    auto compI = le->components.at(i);
-                    auto src = assignment(expression, fieldI->type, compI);
-                    if (!isCompileTimeConstant(src)) isConstant = false;
-                    vec.push_back(new IR::NamedExpression(fieldI->name, src));
-                }
-                auto setype = castType->getP4Type();
-                setType(setype, new IR::Type_Type(st));
-                auto result = new IR::StructExpression(le->srcInfo, setype, setype, vec);
-                setType(result, st);
-                if (isConstant) {
-                    setCompileTimeConstant(result);
-                    setCompileTimeConstant(getOriginal<IR::Expression>());
-                }
-                return result;
-            } else {
-                typeError("%1%: destination type expects %2% fields, but source only has %3%",
-                          expression, st->fields.size(), le->components.size());
-                return expression;
-            }
+        } else if (expression->expr->is<IR::ListExpression>()) {
+            auto result = assignment(expression, st, expression->expr);
+            return result;
         } else if (auto ih = expression->expr->to<IR::Invalid>()) {
             auto type = castType->getP4Type();
             auto concreteCastType = castType;
@@ -2857,25 +2881,9 @@ const IR::Node *TypeInference::postorder(IR::Cast *expression) {
             return expression;
         }
     }
-    if (auto lt = concreteType->to<IR::Type_Stack>()) {
-        auto stackElementType = lt->elementType;
-        if (auto le = expression->expr->to<IR::ListExpression>()) {
-            IR::Vector<IR::Expression> vec;
-            bool isConstant = true;
-            for (size_t i = 0; i < le->size(); i++) {
-                auto compI = le->components.at(i);
-                auto src = assignment(expression, stackElementType, compI);
-                if (!isCompileTimeConstant(src)) isConstant = false;
-                vec.push_back(src);
-            }
-            auto vecType = castType->getP4Type();
-            setType(vecType, new IR::Type_Type(lt));
-            auto result = new IR::HeaderStackExpression(le->srcInfo, vec, lt->getP4Type());
-            setType(result, lt);
-            if (isConstant) {
-                setCompileTimeConstant(result);
-                setCompileTimeConstant(getOriginal<IR::Expression>());
-            }
+    if (concreteType->is<IR::Type_Stack>()) {
+        if (expression->expr->is<IR::ListExpression>()) {
+            auto result = assignment(expression, concreteType, expression->expr);
             return result;
         } else {
             typeError("%1%: casts to header stack not supported", expression);
@@ -3074,6 +3082,15 @@ const IR::Node *TypeInference::postorder(IR::Slice *expression) {
         setCompileTimeConstant(getOriginal<IR::Expression>());
         return result;
     }
+    return expression;
+}
+
+const IR::Node *TypeInference::postorder(IR::Dots *expression) {
+    if (done()) return expression;
+    setType(expression, new IR::Type_Any());
+    setType(getOriginal(), new IR::Type_Any());
+    setCompileTimeConstant(expression);
+    setCompileTimeConstant(getOriginal<IR::Expression>());
     return expression;
 }
 

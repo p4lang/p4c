@@ -930,9 +930,7 @@ bool ToP4::preorder(const IR::StructExpression *e) {
     for (auto c : e->components) {
         if (!first) builder.append(",");
         first = false;
-        builder.append(c->name.name);
-        builder.append(" = ");
-        visit(c->expression);
+        visit(c);
     }
     expressionPrecedence = prec;
     builder.append("}");
@@ -964,6 +962,16 @@ bool ToP4::preorder(const IR::HeaderStackExpression *e) {
 
 bool ToP4::preorder(const IR::Invalid *) {
     builder.append("{#}");
+    return false;
+}
+
+bool ToP4::preorder(const IR::Dots *) {
+    builder.append("...");
+    return false;
+}
+
+bool ToP4::preorder(const IR::NamedDots *) {
+    builder.append("...");
     return false;
 }
 

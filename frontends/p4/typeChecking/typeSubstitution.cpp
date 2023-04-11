@@ -32,7 +32,8 @@ cstring TypeVariableSubstitution::compose(const IR::ITypeVar *var, const IR::Typ
         while (substitution->is<IR::Type_Newtype>())
             substitution = substitution->to<IR::Type_Newtype>()->type;
         if (auto se = substitution->to<IR::Type_SerEnum>()) substitution = se->type;
-        if (!substitution->is<IR::Type_InfInt>() && !substitution->is<IR::Type_Bits>()) {
+        if (!substitution->is<IR::Type_InfInt>() && !substitution->is<IR::Type_Bits>() &&
+            !substitution->is<IR::Type_Any>()) {
             return "'%1%' type can only be unified with 'int', 'bit<>', or 'signed<>' types, "
                    "not with '%2%'";
         }
