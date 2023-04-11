@@ -3,8 +3,6 @@
 # repository. This file in turn was a modified version of
 # https://github.com/p4lang/PI/blob/ec6865edc770b42f22fea15e6da17ca58a83d3a6/proto/ptf/base_test.py.
 
-from collections import Counter
-from functools import wraps, partialmethod
 import logging
 import queue
 import re
@@ -12,7 +10,7 @@ import sys
 import threading
 import time
 from collections import Counter
-from functools import partial, wraps
+from functools import partialmethod, wraps
 from pathlib import Path
 
 import google.protobuf.text_format
@@ -29,6 +27,7 @@ FILE_DIR = Path(__file__).resolve().parent
 TOOLS_PATH = FILE_DIR.joinpath("../../tools")
 sys.path.append(str(TOOLS_PATH))
 import testutils
+
 
 def stringify(n, length=0):
     """Take a non-negative integer 'n' as the first parameter, and a
@@ -52,6 +51,7 @@ def stringify(n, length=0):
             length = n_size_bytes
     s = n.to_bytes(length, byteorder="big")
     return s
+
 
 # Used to indicate that the gRPC error Status object returned by the server has
 # an incorrect format.
@@ -267,8 +267,14 @@ class P4RuntimeTest(BaseTest):
     def import_p4info_names(self):
         suffix_count = Counter()
         for obj_type in [
-                "tables", "action_profiles", "actions", "counters", "direct_counters",
-                "controller_packet_metadata", "meters", "direct_meters",
+            "tables",
+            "action_profiles",
+            "actions",
+            "counters",
+            "direct_counters",
+            "controller_packet_metadata",
+            "meters",
+            "direct_meters",
         ]:
             for obj in getattr(self.p4info, obj_type):
                 pre = obj.preamble
@@ -1052,10 +1058,16 @@ class P4RuntimeTest(BaseTest):
 # wrappers around P4RuntimeTest.get_obj and P4RuntimeTest.get_obj_id.
 # For example: get_table(x) and get_table_id(x) respectively call
 # get_obj("tables", x) and get_obj_id("tables", x)
-for obj_type, nickname in [("tables", "table"), ("action_profiles", "ap"), ("actions", "action"),
-                           ("counters", "counter"), ("direct_counters", "direct_counter"),
-                           ("meters", "meter"), ("direct_meters", "direct_meter"),
-                           ("controller_packet_metadata", "controller_packet_metadata")]:
+for obj_type, nickname in [
+    ("tables", "table"),
+    ("action_profiles", "ap"),
+    ("actions", "action"),
+    ("counters", "counter"),
+    ("direct_counters", "direct_counter"),
+    ("meters", "meter"),
+    ("direct_meters", "direct_meter"),
+    ("controller_packet_metadata", "controller_packet_metadata"),
+]:
     name = "_".join(["get", nickname])
     setattr(P4RuntimeTest, name, partialmethod(P4RuntimeTest.get_obj, obj_type))
     name = "_".join(["get", nickname, "id"])

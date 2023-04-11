@@ -818,7 +818,6 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
-             ::warning("counter.count not fully implemented.");
              auto &nextState = state.clone();
              nextState.popBody();
              result->emplace_back(nextState);
@@ -856,7 +855,6 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
-             ::warning("direct_counter.count not fully implemented.");
              auto &nextState = state.clone();
              nextState.popBody();
              result->emplace_back(nextState);
@@ -897,10 +895,18 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          [](const IR::MethodCallExpression *call, const IR::Expression *receiver,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
+             const auto *meterResult = args->at(1)->expression;
              auto testBackend = TestgenOptions::get().testBackend;
              if (testBackend != "PTF") {
-                 ::warning("meter.execute_meter not implemented for %1%.", testBackend);
+                 ::warning(
+                     "meter.execute_meter not implemented for %1%. Choosing default value (GREEN).",
+                     testBackend);
                  auto &nextState = state.clone();
+                 if (const auto *pathRef = meterResult->to<IR::PathExpression>()) {
+                     meterResult = state.convertPathExpr(pathRef);
+                 }
+                 nextState.set(meterResult, IR::getConstant(meterResult->type,
+                                                            BMv2Constants::METER_COLOR::GREEN));
                  nextState.popBody();
                  result->emplace_back(nextState);
                  return;
@@ -920,7 +926,6 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  });
                  return;
              }
-             const auto *meterResult = args->at(1)->expression;
              auto &nextState = state.clone();
              std::vector<Continuation::Command> replacements;
 
@@ -952,7 +957,6 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  // to immediately resolve the generated mux into multiple branches.
                  // This is only possible because meters do not return a value.
                  replacements.emplace_back(new IR::AssignmentStatement(meterResult, inputValue));
-
              } else {
                  TESTGEN_UNIMPLEMENTED("Read extern output %1% of type %2% not supported",
                                        meterResult, meterResult->type);
@@ -1002,27 +1006,35 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          [this](const IR::MethodCallExpression *call, const IR::Expression *receiver,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
+             // Check whether table that the extern is attached to has an entry.
              const auto *progInfo = getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
              const auto *receiverPath = receiver->checkedTo<IR::PathExpression>();
              const auto *externInstance = state.findDecl(receiverPath);
-             const auto *p4Table = progInfo->getTableofDirectExtern(externInstance);
-
+             const auto *table = progInfo->getTableofDirectExtern(externInstance);
+             CHECK_NULL(table);
              const auto *tableEntry =
-                 state.getTestObject("tableconfigs", p4Table->controlPlaneName(), false);
+                 state.getTestObject("tableconfigs", table->controlPlaneName(), false);
 
-             auto testBackend = TestgenOptions::get().testBackend;
-             if (testBackend != "PTF") {
-                 ::warning("meter.execute_meter not implemented for %1%.", testBackend);
+             auto &nextState = state.clone();
+             std::vector<Continuation::Command> replacements;
+             const auto *meterResult = args->at(0)->expression;
+             if (const auto *pathRef = meterResult->to<IR::PathExpression>()) {
+                 meterResult = state.convertPathExpr(pathRef);
              }
+             // If we do not have right back end and no associated table entry, do not bother
+             // configuring the extern. We just set the default value (green).
+             auto testBackend = TestgenOptions::get().testBackend;
              if (testBackend != "PTF" || tableEntry == nullptr) {
-                 auto &nextState = state.clone();
+                 ::warning(
+                     "direct_meter.read configuration not possible for %1%. Choosing default value "
+                     "(GREEN).",
+                     testBackend);
+                 nextState.set(meterResult, IR::getConstant(meterResult->type,
+                                                            BMv2Constants::METER_COLOR::GREEN));
                  nextState.popBody();
                  result->emplace_back(nextState);
                  return;
              }
-             const auto *meterResult = args->at(0)->expression;
-             auto &nextState = state.clone();
-             std::vector<Continuation::Command> replacements;
 
              // Retrieve the meter state from the object store. If it is already present, just
              // cast the object to the correct class and retrieve the current value according to the

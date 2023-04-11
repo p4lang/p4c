@@ -77,24 +77,27 @@ Bmv2V1ModelProgramInfo::Bmv2V1ModelProgramInfo(
     const IR::Expression *constraint =
         new IR::Grt(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
                     IR::getConstant(&PacketVars::PACKET_SIZE_VAR_TYPE, minPktSize));
-    /// Vector containing pairs of restrictions and nodes to which these restrictions apply.
+    // Vector containing pairs of restrictions and nodes to which these restrictions apply.
     std::vector<std::vector<const IR::Expression *>> restrictionsVec;
-    /// Defines all "entry_restriction" and then converts restrictions from string to IR
-    /// expressions, and stores them in restrictionsVec to move targetConstraints further.
+    // Defines all "entry_restriction" and then converts restrictions from string to IR
+    // expressions, and stores them in restrictionsVec to move targetConstraints further.
     program->apply(AssertsParser::AssertsParser(restrictionsVec));
-    /// Defines all "refers_to" and then converts restrictions from string to IR expressions,
-    /// and stores them in restrictionsVec to move targetConstraints further.
+    // Defines all "refers_to" and then converts restrictions from string to IR expressions,
+    // and stores them in restrictionsVec to move targetConstraints further.
     program->apply(RefersToParser::RefersToParser(restrictionsVec));
     for (const auto &element : restrictionsVec) {
         for (const auto *restriction : element) {
             constraint = new IR::LAnd(constraint, restriction);
         }
     }
+    // Try to map all instances of direct externs to the table they are attached to.
+    // Save the map in @var directExternMap.
     auto directExternMapper = MapDirectExterns();
     program->apply(directExternMapper);
-
     auto mappedDirectExterns = directExternMapper.getdirectExternMap();
     directExternMap.insert(mappedDirectExterns.begin(), mappedDirectExterns.end());
+
+    /// Finally, set the target constraints.
     targetConstraints = constraint;
 }
 
