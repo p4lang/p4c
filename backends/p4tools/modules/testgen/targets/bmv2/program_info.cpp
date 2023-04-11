@@ -30,6 +30,7 @@
 #include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/concolic.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/constants.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/map_direct_externs.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_asserts_parser.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_refers_to_parser.h"
 
@@ -89,8 +90,21 @@ Bmv2V1ModelProgramInfo::Bmv2V1ModelProgramInfo(
             constraint = new IR::LAnd(constraint, restriction);
         }
     }
+    auto directExternMapper = MapDirectExterns();
+    program->apply(directExternMapper);
 
+    auto mappedDirectExterns = directExternMapper.getdirectExternMap();
+    directExternMap.insert(mappedDirectExterns.begin(), mappedDirectExterns.end());
     targetConstraints = constraint;
+}
+
+const IR::P4Table *BMv2_V1ModelProgramInfo::getTableofDirectExtern(
+    const IR::IDeclaration *decl) const {
+    auto it = directExternMap.find(decl);
+    if (it == directExternMap.end()) {
+        return nullptr;
+    }
+    return it->second;
 }
 
 const ordered_map<cstring, const IR::Type_Declaration *>

@@ -83,7 +83,7 @@ const IR::Constant *IndexMap::getEvaluatedInitialValue() const {
 }
 
 /* =========================================================================================
- *  Bmv2V1ModelMeterValue
+ *  Bmv2V1ModelRegisterValue
  * ========================================================================================= */
 
 Bmv2V1ModelRegisterValue::Bmv2V1ModelRegisterValue(const IR::Expression *initialValue)
