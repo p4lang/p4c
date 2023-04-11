@@ -38,6 +38,12 @@ class DoDefaultValues final : public Transform {
     const IR::Node *postorder(IR::StructExpression *expression) override;
     const IR::Node *postorder(IR::ListExpression *expression) override;
     const IR::Node *postorder(IR::HeaderStackExpression *expression) override;
+
+    /**
+     * Generate a default value for the specified type.
+     * The resulting expression will have the specified srcInfo position
+     */
+    static const IR::Expression *defaultValue(Util::SourceInfo srcInfo, const IR::Type *type);
 };
 
 class DefaultValues : public PassManager {

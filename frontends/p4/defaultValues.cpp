@@ -18,17 +18,9 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Expression *DoDefaultValues::defaultValue(const IR::Expression *expression,
+// static
+const IR::Expression *DoDefaultValues::defaultValue(Util::SourceInfo srcInfo,
                                                     const IR::Type *type) {
-    Util::SourceInfo srcInfo = expression->srcInfo;
-    if (auto anyType = type->to<IR::Type_Any>()) {
-        type = typeMap->getSubstitution(anyType->to<IR::Type_Any>());
-        if (!type) {
-            ::error(ErrorType::ERR_TYPE_ERROR, "%1%: could not find default value", expression);
-            return expression;
-        }
-    }
-
     if (auto tb = type->to<IR::Type_Bits>()) {
         return new IR::Constant(srcInfo, tb, 0);
     } else if (type->is<IR::Type_InfInt>()) {
@@ -45,7 +37,7 @@ const IR::Expression *DoDefaultValues::defaultValue(const IR::Expression *expres
     } else if (type->is<IR::Type_String>()) {
         return new IR::StringLiteral(srcInfo, cstring(""));
     } else if (type->is<IR::Type_Varbits>()) {
-        ::error(ErrorType::ERR_UNSUPPORTED, "%1% default values for varbit types", expression);
+        ::error(ErrorType::ERR_UNSUPPORTED, "%1% default values for varbit types", srcInfo);
         return nullptr;
     } else if (auto ht = type->to<IR::Type_Header>()) {
         return new IR::InvalidHeader(ht->getP4Type());
@@ -54,18 +46,18 @@ const IR::Expression *DoDefaultValues::defaultValue(const IR::Expression *expres
     } else if (auto st = type->to<IR::Type_StructLike>()) {
         auto vec = new IR::IndexedVector<IR::NamedExpression>();
         for (auto field : st->fields) {
-            auto value = defaultValue(expression, field->type);
+            auto value = defaultValue(srcInfo, field->type);
             if (!value) return nullptr;
             vec->push_back(new IR::NamedExpression(field->name, value));
         }
         auto resultType = st->getP4Type();
         return new IR::StructExpression(srcInfo, resultType, resultType, *vec);
     } else if (auto tf = type->to<IR::Type_Fragment>()) {
-        return defaultValue(expression, tf->type);
+        return defaultValue(srcInfo, tf->type);
     } else if (auto tt = type->to<IR::Type_BaseList>()) {
         auto vec = new IR::Vector<IR::Expression>();
         for (auto field : tt->components) {
-            auto value = defaultValue(expression, field);
+            auto value = defaultValue(srcInfo, field);
             if (!value) return nullptr;
             vec->push_back(value);
         }
@@ -87,9 +79,22 @@ const IR::Expression *DoDefaultValues::defaultValue(const IR::Expression *expres
         auto resultType = ts->getP4Type();
         return new IR::HeaderStackExpression(srcInfo, resultType, *vec, resultType);
     } else {
-        ::error(ErrorType::ERR_INVALID, "%1%: No default value for type %2%", expression, type);
+        ::error(ErrorType::ERR_INVALID, "%1%: No default value for type %2%", srcInfo, type);
         return nullptr;
     }
+}
+
+const IR::Expression *DoDefaultValues::defaultValue(const IR::Expression *expression,
+                                                    const IR::Type *type) {
+    Util::SourceInfo srcInfo = expression->srcInfo;
+    if (auto anyType = type->to<IR::Type_Any>()) {
+        type = typeMap->getSubstitution(anyType->to<IR::Type_Any>());
+        if (!type) {
+            ::error(ErrorType::ERR_TYPE_ERROR, "%1%: could not find default value", expression);
+            return expression;
+        }
+    }
+    return defaultValue(srcInfo, type);
 }
 
 const IR::Node *DoDefaultValues::postorder(IR::Dots *expression) {
