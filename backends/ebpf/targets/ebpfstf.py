@@ -27,15 +27,21 @@ from stf.stf_parser import STFParser
 
 
 class eBPFCommand(object):
-    """Defines a match-action command for eBPF programs"""
+    """Defines a match-action command for eBPF programs."""
 
     def __init__(self, a_type, table, action, priority="", match=[], extra=""):
-        self.a_type = a_type      # dir in which all files are stored
-        self.table = table        # contains meta information
-        self.action = action      # contains meta information
-        self.priority = priority  # template to generate a filter
-        self.match = match        # contains standard and error output
-        self.extra = extra        # could also be "pcapng"
+        # Dir in which all files are stored.
+        self.a_type = a_type
+        # Contains meta information.
+        self.table = table
+        # Contains meta information.
+        self.action = action
+        # Template to generate a filter.
+        self.priority = priority
+        # Contains standard and error output.
+        self.match = match
+        # Could also be "pcapng".
+        self.extra = extra
 
 
 def _generate_control_actions(cmds):
@@ -57,14 +63,17 @@ def _generate_control_actions(cmds):
                 key_field_val = key_field[1]
                 # Support for LPM key
                 if isinstance(key_field_val, tuple):
-                    generated += ("%s.prefixlen = (offsetof(struct %s_key, %s) - 4) * 8 + %s;\n\t" %
-                                  (key_name, cmd.table, field, key_field_val[1]))
+                    generated += (
+                        "%s.prefixlen = (offsetof(struct %s_key, %s) - 4) * 8 + %s;\n\t"
+                        % (key_name, cmd.table, field, key_field_val[1])
+                    )
                     key_field_val = key_field_val[0]
                 generated += "%s.%s = %s;\n\t" % (key_name, field, key_field_val)
-        generated += "tableFileDescriptor = " 'BPF_OBJ_GET(MAP_PATH "/%s");\n\t' % tbl_name
-        generated += ("if (tableFileDescriptor < 0) {"
-                      'fprintf(stderr, "map %s not loaded");'
-                      " exit(1); }\n\t" % tbl_name)
+        generated += "tableFileDescriptor = BPF_OBJ_GET(MAP_PATH \"/%s\");\n\t" % tbl_name
+        generated += (
+            "if (tableFileDescriptor < 0) {fprintf(stderr, \"map %s not loaded\"); exit(1); }\n\t"
+            % tbl_name
+        )
         generated += "struct %s_value %s = {\n\t\t" % (cmd.table, value_name)
         if cmd.action[0] == "_NoAction":
             generated += ".action = 0,\n\t\t"
@@ -76,9 +85,11 @@ def _generate_control_actions(cmds):
             generated += "%s," % val_field[1]
         generated += "}},\n\t"
         generated += "};\n\t"
-        generated += ("ok = BPF_USER_MAP_UPDATE_ELEM"
-                      "(tableFileDescriptor, &%s, &%s, BPF_ANY);\n\t" % (key_name, value_name))
-        generated += 'if (ok != 0) { perror("Could not write in %s");' "exit(1); }\n" % tbl_name
+        generated += (
+            "ok = BPF_USER_MAP_UPDATE_ELEM(tableFileDescriptor, &%s, &%s, BPF_ANY);\n\t"
+            % (key_name, value_name)
+        )
+        generated += 'if (ok != 0) { perror("Could not write in %s");exit(1); }\n' % tbl_name
     return generated
 
 
@@ -116,8 +127,9 @@ def parse_stf_file(raw_stf):
     expected = {}
     for stf_entry in stf_map:
         if stf_entry[0] == "packet":
-            input_pkts.setdefault(stf_entry[1],
-                                  []).append(bytes.fromhex("".join(stf_entry[2].split())))
+            input_pkts.setdefault(stf_entry[1], []).append(
+                bytes.fromhex("".join(stf_entry[2].split()))
+            )
         elif stf_entry[0] == "expect":
             interface = int(stf_entry[1])
             pkt_data = stf_entry[2]

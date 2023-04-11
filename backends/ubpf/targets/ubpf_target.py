@@ -2,8 +2,8 @@ import sys
 from glob import glob
 from pathlib import Path
 
-from targets.target import EBPFTarget
 from targets.ebpfstf import parse_stf_file
+from targets.target import EBPFTarget
 
 # path to the tools folder of the compiler
 sys.path.insert(0, "p4c/tools")
@@ -16,7 +16,6 @@ import testutils
 
 
 class Target(EBPFTarget):
-
     def __init__(self, tmpdir, options, template):
         EBPFTarget.__init__(self, tmpdir, options, template)
         # We use a different compiler, override the inherited default
@@ -35,7 +34,6 @@ class Target(EBPFTarget):
         if result.returncode != testutils.SUCCESS:
             testutils.log.error("Failed to build the filter")
         return result.returncode
-
 
     def run(self):
         testutils.log.info("Running model")
@@ -62,8 +60,9 @@ class Target(EBPFTarget):
         tables = {cmd.table for cmd in cmds}
         for tbl in tables:
             generated += (
-                'INIT_UBPF_TABLE("%s", sizeof(struct %s_key), sizeof(struct %s_value));\n\t' %
-                (tbl, tbl, tbl))
+                'INIT_UBPF_TABLE("%s", sizeof(struct %s_key), sizeof(struct %s_value));\n\t'
+                % (tbl, tbl, tbl)
+            )
 
         for index, cmd in enumerate(cmds):
             key_name = "key_%s%d" % (cmd.table, index)
@@ -80,7 +79,7 @@ class Target(EBPFTarget):
                 generated += "%s," % val_field[1]
             generated += "}},\n\t"
             generated += "};\n\t"
-            generated += "ubpf_map_update" "(&%s, &%s, &%s);\n\t" % (
+            generated += "ubpf_map_update(&%s, &%s, &%s);\n\t" % (
                 cmd.table,
                 key_name,
                 value_name,

@@ -24,9 +24,11 @@
 
 import os
 import sys
-from pathlib import Path
 from glob import glob
+from pathlib import Path
+
 import scapy.utils as scapy_util
+
 from .ebpfstf import create_table_file, parse_stf_file
 
 # path to the tools folder of the compiler
@@ -36,8 +38,8 @@ FILE_DIR = Path(__file__).resolve().parent
 sys.path.append(str(FILE_DIR.joinpath("../../../tools")))
 import testutils
 
-PCAP_PREFIX = "pcap"    # match pattern
-PCAP_SUFFIX = ".pcap"   # could also be ".pcapng"
+PCAP_PREFIX = "pcap"  # match pattern
+PCAP_SUFFIX = ".pcap"  # could also be ".pcapng"
 
 
 class EBPFTarget:
@@ -45,12 +47,18 @@ class EBPFTarget:
     Defines common functions and variables"""
 
     def __init__(self, tmpdir, options, template):
-        self.tmpdir = tmpdir                     # dir in which all files are stored
-        self.options = options                   # contains meta information
-        self.template = template                 # template to generate a filter
-        self.expected = {}                       # expected packets per interface
-        self.runtimedir = options.runtimedir     # location of the runtime folder
-        self.compiler = self.options.compiler    # location of the p4c compiler binary
+        # Dir in which all files are stored.
+        self.tmpdir = tmpdir
+        # Contains meta information.
+        self.options = options
+        # Template to generate a filter.
+        self.template = template
+        # Expected packets per interface.
+        self.expected = {}
+        # Location of the runtime folder.
+        self.runtimedir = options.runtimedir
+        # Location of the p4c compiler binary.
+        self.compiler = self.options.compiler
 
     def get_make_args(self, runtimedir, target):
         args = "make "
@@ -90,7 +98,7 @@ class EBPFTarget:
         p4_args = " ".join(map(str, argv))
         if p4_args:
             # Remaining arguments
-            args += f" P4ARGS=\"{p4_args}\" "
+            args += f' P4ARGS="{p4_args}" '
         out, returncode = testutils.exec_process(args)
         if returncode != testutils.SUCCESS:
             testutils.log.error("Failed to compile the P4 program.")
@@ -184,12 +192,20 @@ class EBPFTarget:
                 if self.expected[interface]["any"]:
                     if self.expected[interface]["pkts"]:
                         testutils.log.error(
-                            ("Interface %s has both expected with packets and without", interface))
+                            (
+                                "Interface %s has both expected with packets and without",
+                                interface,
+                            )
+                        )
                     continue
                 expected = self.expected[interface]["pkts"]
             if len(expected) != len(packets):
                 testutils.log.error(
-                    "Expected %s packets on port %s got %s", len(expected), interface, len(packets))
+                    "Expected %s packets on port %s got %s",
+                    len(expected),
+                    interface,
+                    len(packets),
+                )
                 return testutils.FAILURE
             for idx, expected_pkt in enumerate(expected):
                 cmp = testutils.compare_pkt(expected_pkt, packets[idx])

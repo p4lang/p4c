@@ -21,17 +21,17 @@
 import ply.lex as lex
 from ply.lex import TOKEN
 
+
 class STFLexer:
     def __init__(self):
-        self.filename = ''
+        self.filename = ""
         # Keeps track of the last token returned from self.token()
         self.last_token = None
         self.errors_cnt = 0
         self.lexer = None
 
     def reset_lineno(self):
-        """ Resets the internal line number counter of the lexer.
-        """
+        """Resets the internal line number counter of the lexer."""
         self.lexer.lineno = 1
         self.lexer.colno = 1
 
@@ -52,16 +52,15 @@ class STFLexer:
         return self.last_token
 
     def find_tok_column(self, token):
-        """ Find the column of the token in its line.
-        """
-        last_cr = self.lexer.lexdata.rfind('\n', 0, token.lexpos)
+        """Find the column of the token in its line."""
+        last_cr = self.lexer.lexdata.rfind("\n", 0, token.lexpos)
         return token.lexpos - last_cr
 
     # Build the lexer
-    def build(self,**kwargs):
+    def build(self, **kwargs):
         self.lexer = lex.lex(module=self, **kwargs)
         # start the lexer looking for keywords
-        self.lexer.begin('keyword')
+        self.lexer.begin("keyword")
 
     def _error(self, s, token):
         print(s, "in file", self.filename, "at line", self.get_lineno())
@@ -71,89 +70,89 @@ class STFLexer:
         # add a state to lex only keywords. By default, all keywords
         # are IDs. Fortunately, in the current grammar all keywords
         # are commands at the beginning of a line (except for packets and bytes!).
-        ('keyword', 'inclusive'),
+        ("keyword", "inclusive"),
         # lex only packet data
-        ('packetdata', 'exclusive'),
+        ("packetdata", "exclusive"),
     )
 
     keywords = (
-        'ADD',
-        'ALL',
-        'BYTES',
-        'CHECK_COUNTER',
-        'EXPECT',
-        'NO_PACKET',
-        'PACKET',
-        'PACKETS',
-        'REMOVE',
-        'SETDEFAULT',
-        'WAIT'
+        "ADD",
+        "ALL",
+        "BYTES",
+        "CHECK_COUNTER",
+        "EXPECT",
+        "NO_PACKET",
+        "PACKET",
+        "PACKETS",
+        "REMOVE",
+        "SETDEFAULT",
+        "WAIT",
     )
 
     keywords_map = {}
     for keyword in keywords:
-        if keyword == 'P4_PARSING_DONE':
+        if keyword == "P4_PARSING_DONE":
             keywords_map[keyword] = keyword
         else:
             keywords_map[keyword.lower()] = keyword
 
     tokens = (
-        'COLON',
-        'COMMA',
-        'DATA_DEC',
-        'DATA_HEX',
-        'DATA_TERN',
-        'DOT',
-        'ID',
-        'INT_CONST_BIN',
-        'INT_CONST_DEC',
-        'TERN_CONST_HEX',
-        'INT_CONST_HEX',
-        'LBRACKET',
-        'RBRACKET',
-        'LPAREN',
-        'RPAREN',
-        'SLASH',
-        'EQUAL',
-        'EQEQ',
-        'LE',
-        'LEQ',
-        'GT',
-        'GEQ',
-        'NEQ'
+        "COLON",
+        "COMMA",
+        "DATA_DEC",
+        "DATA_HEX",
+        "DATA_TERN",
+        "DOT",
+        "ID",
+        "INT_CONST_BIN",
+        "INT_CONST_DEC",
+        "TERN_CONST_HEX",
+        "INT_CONST_HEX",
+        "LBRACKET",
+        "RBRACKET",
+        "LPAREN",
+        "RPAREN",
+        "SLASH",
+        "EQUAL",
+        "EQEQ",
+        "LE",
+        "LEQ",
+        "GT",
+        "GEQ",
+        "NEQ",
     ) + keywords
 
-    t_ignore_COMMENT = r'\#.*'
-    t_COLON     = r':'
-    t_COMMA     = r','
-    t_DOT       = r'\.'
-    t_LBRACKET  = r'\['
-    t_RBRACKET  = r'\]'
-    t_LPAREN    = r'\('
-    t_RPAREN    = r'\)'
-    t_EQUAL     = r'='
-    t_EQEQ      = r'=='
-    t_NEQ       = r'!='
-    t_LE        = r'<'
-    t_LEQ       = r'<='
-    t_GT        = r'>'
-    t_GEQ       = r'>='
-    t_SLASH     = r'/'
+    t_ignore_COMMENT = r"\#.*"
+    t_COLON = r":"
+    t_COMMA = r","
+    t_DOT = r"\."
+    t_LBRACKET = r"\["
+    t_RBRACKET = r"\]"
+    t_LPAREN = r"\("
+    t_RPAREN = r"\)"
+    t_EQUAL = r"="
+    t_EQEQ = r"=="
+    t_NEQ = r"!="
+    t_LE = r"<"
+    t_LEQ = r"<="
+    t_GT = r">"
+    t_GEQ = r">="
+    t_SLASH = r"/"
 
     # binary constants with ternary (don't care) bits
-    binary_constant     = r'(0[bB][*01]+)'
+    binary_constant = r"(0[bB][*01]+)"
 
-    hex_prefix          = r'0[xX]'
-    hex_digits          = r'[0-9a-fA-F]'
-    hex_constant_body   = r'(' + hex_digits + r'+)'
-    hex_constant        = r'(' + hex_prefix + hex_constant_body + r')'
+    hex_prefix = r"0[xX]"
+    hex_digits = r"[0-9a-fA-F]"
+    hex_constant_body = r"(" + hex_digits + r"+)"
+    hex_constant = r"(" + hex_prefix + hex_constant_body + r")"
 
-    hex_tern            = r'([0-9a-fA-F\*]+)'
-    hex_tern_constant   = r'(' + hex_prefix + hex_tern + r')'
+    hex_tern = r"([0-9a-fA-F\*]+)"
+    hex_tern_constant = r"(" + hex_prefix + hex_tern + r")"
 
-    dec_constant        = r'([0-9]+)'
+    dec_constant = r"([0-9]+)"
 
-    identifier          = r'([a-z$A-Z_][a-z$A-Z_0-9]*)'
+    identifier = r"([a-z$A-Z_][a-z$A-Z_0-9]*)"
 
     @TOKEN(hex_tern_constant)
     def t_TERN_CONST_HEX(self, t):
@@ -179,10 +178,10 @@ class STFLexer:
     def t_keyword_ID(self, t):
         typ = self.keywords_map.get(t.value.lower(), "ID")
         t.type = typ
-        if typ == 'EXPECT' or typ == 'PACKET':
-            t.lexer.begin('packetdata')
+        if typ == "EXPECT" or typ == "PACKET":
+            t.lexer.begin("packetdata")
         else:
-            t.lexer.begin('INITIAL')
+            t.lexer.begin("INITIAL")
         # print t, "pos:", t.lexpos, "col:", self.lexer.colno
         return t
 
@@ -191,25 +190,25 @@ class STFLexer:
     @TOKEN(identifier)
     def t_ID(self, t):
         typ = self.keywords_map.get(t.value.lower(), "ID")
-        if typ == 'BYTES' or typ == 'PACKETS':
+        if typ == "BYTES" or typ == "PACKETS":
             t.type = typ
         # print t, "pos:", t.lexpos, "col:", self.lexer.colno
         return t
 
     # Discard comments.
     def t_COMMENT(self, t):
-        r'\#.*$'
+        r"\#.*$"
         pass
 
     # Track line numbers.
     def t_newline(self, t):
-        r'\n+'
+        r"\n+"
         t.lexer.lineno += len(t.value)
         t.lexer.colno = 0
-        t.lexer.begin('keyword')
+        t.lexer.begin("keyword")
 
     # Ignore spaces and tabs.
-    t_ignore = ' \t'
+    t_ignore = " \t"
 
     # Error handling.
     def t_error(self, t):
@@ -226,17 +225,17 @@ class STFLexer:
         return t
 
     def t_packetdata_DATA_TERN(self, t):
-        r'\*'
+        r"\*"
         return t
 
     def t_packetdata_newline(self, t):
-        r'\n+'
+        r"\n+"
         t.lexer.lineno += len(t.value)
-        t.lexer.begin('keyword')
+        t.lexer.begin("keyword")
 
     # Ignore spaces and tabs.
-    t_packetdata_ignore = ' \t'
+    t_packetdata_ignore = " \t"
 
     # Error handling.
     def t_packetdata_error(self, t):
-        self._error('invalid packet data', t)
+        self._error("invalid packet data", t)

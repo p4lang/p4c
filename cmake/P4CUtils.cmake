@@ -96,6 +96,29 @@ function(add_clang_format_files dir filelist)
   set_property(GLOBAL PROPERTY clang-format-files "${CLANG_FORMAT_FILES}")
 endfunction(add_clang_format_files)
 
+# Add files with the appropriate path to the list of black-linted files.
+function(add_black_files dir filelist)
+  if (NOT filelist)
+    message(WARNING "Input file list is empty. Returning.")
+    return()
+  endif()
+  # Initialize an empty list.
+  set (__blackFileList "")
+  foreach(__f ${filelist})
+    string(REGEX MATCH "^/.*" abs_path "${__f}")
+    if (NOT ${abs_path} EQUAL "")
+      list (APPEND __blackFileList "${__f}")
+    else()
+      list (APPEND __blackFileList "${dir}/${__f}")
+    endif()
+  endforeach(__f)
+
+  # Get the global clang-format property and append to it.
+  get_property(BLACK_FILES GLOBAL PROPERTY black-files)
+  list (APPEND BLACK_FILES "${__blackFileList}")
+  list(REMOVE_DUPLICATES BLACK_FILES)
+  set_property(GLOBAL PROPERTY black-files "${BLACK_FILES}")
+endfunction(add_black_files)
 
 macro(p4c_test_set_name name tag alias)
   set(${name} ${tag}/${alias})
