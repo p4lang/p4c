@@ -25,8 +25,8 @@ class PnaDpdkCmdStepper : public SharedPnaCmdStepper {
 
     void initializeTargetEnvironment(ExecutionState &nextState) const override;
 
-    std::optional<const Constraint *> startParser_impl(const IR::P4Parser *parser,
-                                                       ExecutionState &state) const override;
+    std::optional<const Constraint *> startParserImpl(const IR::P4Parser *parser,
+                                                      ExecutionState &state) const override;
 
     std::map<Continuation::Exception, Continuation> getExceptionHandlers(
         const IR::P4Parser *parser, Continuation::Body normalContinuation,

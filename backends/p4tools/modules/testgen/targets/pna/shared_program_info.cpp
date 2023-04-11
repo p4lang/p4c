@@ -2,6 +2,7 @@
 
 #include <utility>
 
+#include "backends/p4tools/common/lib/arch_spec.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/id.h"
 #include "ir/ir.h"
@@ -9,7 +10,6 @@
 #include "lib/cstring.h"
 #include "lib/null.h"
 
-#include "backends/p4tools/modules/testgen/core/arch_spec.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
@@ -32,7 +32,7 @@ const ordered_map<cstring, const IR::Type_Declaration *>
 }
 
 const IR::Member *SharedPnaProgramInfo::getTargetInputPortVar() const {
-    return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidth_bits()),
+    return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidthBits()),
                           new IR::PathExpression("*parser_istd"), "input_port");
 }
 
@@ -66,7 +66,7 @@ const IR::PathExpression *SharedPnaProgramInfo::getBlockParam(cstring blockLabel
     const auto *paramType = param->type;
     // For convenience, resolve type names.
     if (const auto *tn = paramType->to<IR::Type_Name>()) {
-        paramType = resolveProgramType(tn);
+        paramType = resolveProgramType(program, tn);
     }
 
     const auto *archSpec = TestgenTarget::getArchSpec();

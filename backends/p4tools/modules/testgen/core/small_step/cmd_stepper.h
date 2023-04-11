@@ -46,8 +46,8 @@ class CmdStepper : public AbstractStepper {
 
     /// @see startParser. Implementations can assume that the parser has been registered, and the
     /// cursor position has been initialized.
-    virtual std::optional<const Constraint *> startParser_impl(const IR::P4Parser *parser,
-                                                               ExecutionState &state) const = 0;
+    virtual std::optional<const Constraint *> startParserImpl(const IR::P4Parser *parser,
+                                                              ExecutionState &state) const = 0;
 
     /// Initializes variables and adds constraints for the program initialization, which is target
     /// specific.

@@ -9,10 +9,10 @@
 
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/core/target.h"
+#include "backends/p4tools/common/lib/arch_spec.h"
 #include "ir/ir.h"
 #include "ir/vector.h"
 
-#include "backends/p4tools/modules/testgen/core/arch_spec.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/cmd_stepper.h"
 #include "backends/p4tools/modules/testgen/core/small_step/expr_stepper.h"
@@ -31,72 +31,64 @@ class TestgenTarget : public Target {
     /// Produces a @ProgramInfo for the given P4 program.
     ///
     /// @returns nullptr if the program is not supported by this target.
-    static const ProgramInfo *initProgram(const IR::P4Program *program) {
-        return get().initProgram_impl(program);
-    }
+    static const ProgramInfo *initProgram(const IR::P4Program *program);
 
     /// Returns the test back end associated with this P4Testgen target.
     static TestBackEnd *getTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
                                        const std::filesystem::path &testPath,
-                                       std::optional<uint32_t> seed) {
-        return get().getTestBackend_impl(programInfo, symbex, testPath, seed);
-    }
+                                       std::optional<uint32_t> seed);
 
     /// The width of a port number, in bits.
-    static int getPortNumWidth_bits() { return get().getPortNumWidth_bits_impl(); }
+    static int getPortNumWidthBits();
 
     /// Provides a CmdStepper implementation for this target.
     static CmdStepper *getCmdStepper(ExecutionState &state, AbstractSolver &solver,
-                                     const ProgramInfo &programInfo) {
-        return get().getCmdStepper_impl(state, solver, programInfo);
-    }
+                                     const ProgramInfo &programInfo);
 
     /// Provides a ExprStepper implementation for this target.
     static ExprStepper *getExprStepper(ExecutionState &state, AbstractSolver &solver,
-                                       const ProgramInfo &programInfo) {
-        return get().getExprStepper_impl(state, solver, programInfo);
-    }
+                                       const ProgramInfo &programInfo);
 
     /// A vector that maps the architecture parameters of each pipe to the corresponding
     /// global architecture variables. For example, this map specifies which parameter of each pipe
     /// refers to the input header.
     // The arch map needs to be public to be subclassed.
     /// @returns a reference to the architecture map defined in this target
-    static const ArchSpec *getArchSpec() { return get().getArchSpecImpl(); }
+    static const ArchSpec *getArchSpec();
 
  protected:
     /// @see @initProgram.
-    const ProgramInfo *initProgram_impl(const IR::P4Program *program) const;
+    const ProgramInfo *initProgramImpl(const IR::P4Program *program) const;
 
     /// @see @initProgram.
-    virtual const ProgramInfo *initProgram_impl(const IR::P4Program *program,
-                                                const IR::Declaration_Instance *mainDecl) const = 0;
+    virtual const ProgramInfo *initProgramImpl(const IR::P4Program *program,
+                                               const IR::Declaration_Instance *mainDecl) const = 0;
 
-    /// @see getPortNumWidth_bits.
-    virtual int getPortNumWidth_bits_impl() const = 0;
+    /// @see getPortNumWidthBits.
+    [[nodiscard]] virtual int getPortNumWidthBitsImpl() const = 0;
 
     /// @see getTestBackend.
-    virtual TestBackEnd *getTestBackend_impl(const ProgramInfo &programInfo,
-                                             SymbolicExecutor &symbex,
-                                             const std::filesystem::path &testPath,
-                                             std::optional<uint32_t> seed) const = 0;
+    virtual TestBackEnd *getTestBackendImpl(const ProgramInfo &programInfo,
+                                            SymbolicExecutor &symbex,
+                                            const std::filesystem::path &testPath,
+                                            std::optional<uint32_t> seed) const = 0;
 
     /// @see getCmdStepper.
-    virtual CmdStepper *getCmdStepper_impl(ExecutionState &state, AbstractSolver &solver,
-                                           const ProgramInfo &programInfo) const = 0;
+    virtual CmdStepper *getCmdStepperImpl(ExecutionState &state, AbstractSolver &solver,
+                                          const ProgramInfo &programInfo) const = 0;
 
     /// @see getExprStepper.
-    virtual ExprStepper *getExprStepper_impl(ExecutionState &state, AbstractSolver &solver,
-                                             const ProgramInfo &programInfo) const = 0;
+    virtual ExprStepper *getExprStepperImpl(ExecutionState &state, AbstractSolver &solver,
+                                            const ProgramInfo &programInfo) const = 0;
 
     /// @see getArchSpec
-    virtual const ArchSpec *getArchSpecImpl() const = 0;
+    [[nodiscard]] virtual const ArchSpec *getArchSpecImpl() const = 0;
 
     /// Utility function. Converts the list of arguments @inputArgs to a list of type declarations
     ///  and appends the result to @v. Any names appearing in the arguments are
     /// resolved with @ns.
     //
-    static void argumentsToTypeDeclarations(const NamespaceContext *ns,
+    static void argumentsToTypeDeclarations(const IR::IGeneralNamespace *ns,
                                             const IR::Vector<IR::Argument> *inputArgs,
                                             std::vector<const IR::Type_Declaration *> &resultDecls);
 

@@ -14,13 +14,9 @@
 #include "backends/p4tools/modules/testgen/core/small_step/expr_stepper.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
-namespace P4Tools {
+namespace P4Tools::P4Testgen::Bmv2 {
 
-namespace P4Testgen {
-
-namespace Bmv2 {
-
-class BMv2_V1ModelExprStepper : public ExprStepper {
+class Bmv2V1ModelExprStepper : public ExprStepper {
  protected:
     std::string getClassName() override;
 
@@ -37,8 +33,8 @@ class BMv2_V1ModelExprStepper : public ExprStepper {
                                   uint64_t recirculateIndex) const;
 
  public:
-    BMv2_V1ModelExprStepper(ExecutionState &state, AbstractSolver &solver,
-                            const ProgramInfo &programInfo);
+    Bmv2V1ModelExprStepper(ExecutionState &state, AbstractSolver &solver,
+                           const ProgramInfo &programInfo);
 
     void evalExternMethodCall(const IR::MethodCallExpression *call, const IR::Expression *receiver,
                               IR::ID name, const IR::Vector<IR::Argument> *args,
@@ -46,10 +42,6 @@ class BMv2_V1ModelExprStepper : public ExprStepper {
 
     bool preorder(const IR::P4Table * /*table*/) override;
 };
-}  // namespace Bmv2
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_EXPR_STEPPER_H_ */

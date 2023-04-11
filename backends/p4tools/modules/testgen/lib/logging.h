@@ -6,9 +6,7 @@
 
 #include "backends/p4tools/common/lib/util.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 /// Helper functions that prints strings associated with verbose test information, for example
 /// traces, or the test values themselves.
@@ -40,8 +38,6 @@ void enableCoverageLogging();
 /// Enable printing of timing reports.
 void enablePerformanceLogging();
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_LOGGING_H_ */

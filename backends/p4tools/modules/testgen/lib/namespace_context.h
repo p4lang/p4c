@@ -8,9 +8,7 @@
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 /// Represents a stack of namespaces.
 class NamespaceContext {
@@ -49,11 +47,9 @@ class NamespaceContext {
 
     /// @returns a name that is fresh in this context. The given @name and @sep are passed to
     /// cstring::make_unique.
-    const cstring genName(cstring name, char sep) const;
+    cstring genName(cstring name, char sep) const;
 };
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_NAMESPACE_CONTEXT_H_ */

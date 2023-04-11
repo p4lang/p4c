@@ -8,6 +8,7 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 
+#include "backends/p4tools/common/lib/arch_spec.h"
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/id.h"
@@ -17,7 +18,6 @@
 #include "lib/exceptions.h"
 
 #include "backends/p4tools/modules/testgen//lib/exceptions.h"
-#include "backends/p4tools/modules/testgen/core/arch_spec.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
@@ -103,12 +103,12 @@ std::vector<Continuation::Command> EBPFProgramInfo::processDeclaration(
 }
 
 const IR::Member *EBPFProgramInfo::getTargetInputPortVar() const {
-    return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidth_bits()),
+    return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidthBits()),
                           new IR::PathExpression("*"), "input_port");
 }
 
 const IR::Member *EBPFProgramInfo::getTargetOutputPortVar() const {
-    return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidth_bits()),
+    return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidthBits()),
                           new IR::PathExpression("*"), "output_port");
 }
 

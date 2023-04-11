@@ -3,11 +3,7 @@
 
 #include <cstdint>
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace Bmv2 {
+namespace P4Tools::P4Testgen::Bmv2 {
 
 enum bmv2_gress_t { BMV2_INGRESS, BMV2_EGRESS };
 
@@ -39,10 +35,6 @@ class BMv2Constants {
     static constexpr int DROP_PORT = 511;
 };
 
-}  // namespace Bmv2
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_CONSTANTS_H_ */

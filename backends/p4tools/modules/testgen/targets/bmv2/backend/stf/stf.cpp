@@ -59,7 +59,7 @@ inja::json STF::getControlPlane(const TestSpec *testSpec) {
         }
 
         // Collect action profiles and selectors associated with the table.
-        checkForTableActionProfile<Bmv2_V1ModelActionProfile, Bmv2_V1ModelActionSelector>(
+        checkForTableActionProfile<Bmv2V1ModelActionProfile, Bmv2V1ModelActionSelector>(
             tblJson, apAsMap, tblConfig);
 
         // Check whether the default action is overridden for this table.
@@ -69,8 +69,7 @@ inja::json STF::getControlPlane(const TestSpec *testSpec) {
     }
 
     // Collect declarations of action profiles.
-    collectActionProfileDeclarations<Bmv2_V1ModelActionProfile>(testSpec, controlPlaneJson,
-                                                                apAsMap);
+    collectActionProfileDeclarations<Bmv2V1ModelActionProfile>(testSpec, controlPlaneJson, apAsMap);
 
     return controlPlaneJson;
 }

@@ -34,14 +34,13 @@ void PnaDpdkTestgenTarget::make() {
     }
 }
 
-const PnaDpdkProgramInfo *PnaDpdkTestgenTarget::initProgram_impl(
+const PnaDpdkProgramInfo *PnaDpdkTestgenTarget::initProgramImpl(
     const IR::P4Program *program, const IR::Declaration_Instance *mainDecl) const {
     // The blocks in the main declaration are just the arguments in the constructor call.
     // Convert mainDecl->arguments into a vector of blocks, represented as constructor-call
     // expressions.
-    const auto *ns = NamespaceContext::Empty->push(program);
     std::vector<const IR::Type_Declaration *> blocks;
-    argumentsToTypeDeclarations(ns, mainDecl->arguments, blocks);
+    argumentsToTypeDeclarations(program, mainDecl->arguments, blocks);
 
     // We should have six arguments.
     BUG_CHECK(blocks.size() == 4, "%1%: The PNA architecture requires 4 pipes. Received %2%.",
@@ -59,23 +58,24 @@ const PnaDpdkProgramInfo *PnaDpdkTestgenTarget::initProgram_impl(
     return new PnaDpdkProgramInfo(program, programmableBlocks);
 }
 
-PnaTestBackend *PnaDpdkTestgenTarget::getTestBackend_impl(const ProgramInfo &programInfo,
-                                                          SymbolicExecutor &symbex,
-                                                          const std::filesystem::path &testPath,
-                                                          std::optional<uint32_t> seed) const {
+PnaTestBackend *PnaDpdkTestgenTarget::getTestBackendImpl(const ProgramInfo &programInfo,
+                                                         SymbolicExecutor &symbex,
+                                                         const std::filesystem::path &testPath,
+                                                         std::optional<uint32_t> seed) const {
     return new PnaTestBackend(programInfo, symbex, testPath, seed);
 }
 
-int PnaDpdkTestgenTarget::getPortNumWidth_bits_impl() const { return 9; }
+int PnaDpdkTestgenTarget::getPortNumWidthBitsImpl() const { return 9; }
 
-PnaDpdkCmdStepper *PnaDpdkTestgenTarget::getCmdStepper_impl(ExecutionState &state,
-                                                            AbstractSolver &solver,
-                                                            const ProgramInfo &programInfo) const {
+PnaDpdkCmdStepper *PnaDpdkTestgenTarget::getCmdStepperImpl(ExecutionState &state,
+                                                           AbstractSolver &solver,
+                                                           const ProgramInfo &programInfo) const {
     return new PnaDpdkCmdStepper(state, solver, programInfo);
 }
 
-PnaDpdkExprStepper *PnaDpdkTestgenTarget::getExprStepper_impl(
-    ExecutionState &state, AbstractSolver &solver, const ProgramInfo &programInfo) const {
+PnaDpdkExprStepper *PnaDpdkTestgenTarget::getExprStepperImpl(ExecutionState &state,
+                                                             AbstractSolver &solver,
+                                                             const ProgramInfo &programInfo) const {
     return new PnaDpdkExprStepper(state, solver, programInfo);
 }
 

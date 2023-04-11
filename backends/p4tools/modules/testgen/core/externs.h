@@ -18,9 +18,7 @@
 #include "backends/p4tools/modules/testgen/core/small_step/small_step.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 /// Encaspulates a set of extern method implementations.
 class ExternMethodImpls {
@@ -72,8 +70,6 @@ class ExternMethodImpls {
     explicit ExternMethodImpls(const ImplList &implList);
 };
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_EXTERNS_H_ */

@@ -11,6 +11,7 @@
 #include <boost/multiprecision/number.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
+#include "backends/p4tools/common/lib/arch_spec.h"
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
@@ -25,7 +26,6 @@
 #include "lib/log.h"
 #include "lib/ordered_map.h"
 
-#include "backends/p4tools/modules/testgen/core/arch_spec.h"
 #include "backends/p4tools/modules/testgen/core/externs.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/expr_stepper.h"
@@ -43,10 +43,10 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-std::string BMv2_V1ModelExprStepper::getClassName() { return "BMv2_V1ModelExprStepper"; }
+std::string Bmv2V1ModelExprStepper::getClassName() { return "Bmv2V1ModelExprStepper"; }
 
-bool BMv2_V1ModelExprStepper::isPartOfFieldList(const IR::StructField *field,
-                                                uint64_t recirculateIndex) {
+bool Bmv2V1ModelExprStepper::isPartOfFieldList(const IR::StructField *field,
+                                               uint64_t recirculateIndex) {
     // Check whether the field has a "field_list" annotation associated with it.
     const auto *annotation = field->getAnnotation("field_list");
     if (annotation != nullptr) {
@@ -64,9 +64,9 @@ bool BMv2_V1ModelExprStepper::isPartOfFieldList(const IR::StructField *field,
     return false;
 }
 
-void BMv2_V1ModelExprStepper::resetPreservingFieldList(ExecutionState &nextState,
-                                                       const IR::PathExpression *ref,
-                                                       uint64_t recirculateIndex) const {
+void Bmv2V1ModelExprStepper::resetPreservingFieldList(ExecutionState &nextState,
+                                                      const IR::PathExpression *ref,
+                                                      uint64_t recirculateIndex) const {
     const auto *ts = ref->type->checkedTo<IR::Type_StructLike>();
     for (const auto *field : ts->fields) {
         // Check whether the field has a "field_list" annotation associated with it.
@@ -81,14 +81,14 @@ void BMv2_V1ModelExprStepper::resetPreservingFieldList(ExecutionState &nextState
     }
 }
 
-BMv2_V1ModelExprStepper::BMv2_V1ModelExprStepper(ExecutionState &state, AbstractSolver &solver,
-                                                 const ProgramInfo &programInfo)
+Bmv2V1ModelExprStepper::Bmv2V1ModelExprStepper(ExecutionState &state, AbstractSolver &solver,
+                                               const ProgramInfo &programInfo)
     : ExprStepper(state, solver, programInfo) {}
 
-void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
-                                                   const IR::Expression *receiver, IR::ID name,
-                                                   const IR::Vector<IR::Argument> *args,
-                                                   ExecutionState &state) {
+void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
+                                                  const IR::Expression *receiver, IR::ID name,
+                                                  const IR::Vector<IR::Argument> *args,
+                                                  ExecutionState &state) {
     const ExternMethodImpls::MethodImpl assertAssumeExecute =
         [](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
            IR::ID &methodName, const IR::Vector<IR::Argument> *args, const ExecutionState &state,
@@ -137,7 +137,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
         };
 
     // Provides implementations of BMv2 externs.
-    static const ExternMethodImpls EXTERN_METHOD_IMPLS({
+    static const ExternMethodImpls EXTERN_METHODImplS({
         /* ======================================================================================
          *  mark_to_drop
          *  Mark to drop sets the BMv2 internal drop variable to true.
@@ -150,7 +150,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
              auto &nextState = state.clone();
              const auto *nineBitType =
-                 IR::getBitType(BMv2_V1ModelTestgenTarget::getPortNumWidth_bits());
+                 IR::getBitType(Bmv2V1ModelTestgenTarget::getPortNumWidthBits());
              const auto *metadataLabel = args->at(0)->expression;
              if (!(metadataLabel->is<IR::Member>() || metadataLabel->is<IR::PathExpression>())) {
                  TESTGEN_UNIMPLEMENTED("Drop input %1% of type %2% not supported", metadataLabel,
@@ -872,7 +872,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  // by calling copyIn on the entire state again. We need a little bit of information
                  // for that, including the exact parameter names of the ingress block we are in.
                  // Just grab the ingress from the programmable blocks.
-                 const auto *progInfo = getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
+                 const auto *progInfo = getProgramInfo().checkedTo<Bmv2V1ModelProgramInfo>();
                  const auto *programmableBlocks = progInfo->getProgrammableBlocks();
                  const auto *typeDecl = programmableBlocks->at("Ingress");
                  const auto *applyBlock = typeDecl->checkedTo<IR::P4Control>();
@@ -1154,7 +1154,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  }
                  // This is the clone state.
                  auto &nextState = state.clone();
-                 auto progInfo = getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
+                 auto progInfo = getProgramInfo().checkedTo<Bmv2V1ModelProgramInfo>();
 
                  // We need to reset everything to the state before the ingress call. We use a trick
                  // by calling copyIn on the entire state again. We need a little bit of information
@@ -1250,7 +1250,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  IR::getConstant(pktSizeType, recState.getPacketBufferSize() / 8);
              recState.set(packetSizeVar, packetSizeConst);
 
-             const auto *progInfo = getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
+             const auto *progInfo = getProgramInfo().checkedTo<Bmv2V1ModelProgramInfo>();
              if (recState.hasProperty("recirculate_index")) {
                  // Get the index set by the recirculate/resubmit function. Will fail if no index is
                  // set.
@@ -1743,14 +1743,14 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          }},
     });
 
-    if (!EXTERN_METHOD_IMPLS.exec(call, receiver, name, args, state, result)) {
+    if (!EXTERN_METHODImplS.exec(call, receiver, name, args, state, result)) {
         ExprStepper::evalExternMethodCall(call, receiver, name, args, state);
     }
 }  // NOLINT
 
-bool BMv2_V1ModelExprStepper::preorder(const IR::P4Table *table) {
+bool Bmv2V1ModelExprStepper::preorder(const IR::P4Table *table) {
     // Delegate to the tableStepper.
-    BMv2_V1ModelTableStepper tableStepper(this, table);
+    Bmv2V1ModelTableStepper tableStepper(this, table);
 
     return tableStepper.eval();
 }

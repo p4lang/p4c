@@ -1,5 +1,4 @@
-# CMake file for Barefoot p4testgen.
-cmake_minimum_required(VERSION 3.0.2 FATAL_ERROR)
+# CMake file for p4testgen.
 
 include(common)
 
@@ -11,7 +10,6 @@ set(
   options.cpp
   testgen.cpp
 
-  core/arch_spec.cpp
   core/externs.cpp
   core/program_info.cpp
   core/small_step/abstract_stepper.cpp
@@ -134,17 +132,6 @@ if(ENABLE_GTESTS)
     PRIVATE testgen
     PRIVATE gtest
   )
-
-  add_custom_target(
-    linkgtest
-    # Link P4 include files in a more convenient location.
-    COMMAND
-    for incl in p4include p4_14include \; do
-    ${CMAKE_COMMAND} -E create_symlink
-    ${P4C_BINARY_DIR}/\$$incl ${CMAKE_CURRENT_BINARY_DIR}/\$$incl \;
-    done
-  )
-  add_dependencies(testgen-gtest linkgtest)
 
   if(ENABLE_TESTING)
     add_definitions("-DGTEST_HAS_PTHREAD=0")

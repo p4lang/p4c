@@ -39,6 +39,7 @@ set(
   core/target.cpp
   core/z3_solver.cpp
 
+  lib/arch_spec.cpp
   lib/format_int.cpp
   lib/formulae.cpp
   lib/model.cpp

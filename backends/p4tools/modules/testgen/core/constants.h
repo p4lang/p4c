@@ -3,9 +3,7 @@
 
 #include "ir/ir.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 class P4Constants {
  public:
@@ -33,8 +31,6 @@ class P4Constants {
     static constexpr const char *MATCH_KIND_LPM = "lpm";
 };
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_CONSTANTS_H_ */

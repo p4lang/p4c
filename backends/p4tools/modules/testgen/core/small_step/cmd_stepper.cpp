@@ -513,7 +513,7 @@ const Constraint *CmdStepper::startParser(const IR::P4Parser *parser, ExecutionS
 
     // Call the implementation for the specific target.
     // If we get a constraint back, add it to the result.
-    if (auto constraintOpt = startParser_impl(parser, nextState)) {
+    if (auto constraintOpt = startParserImpl(parser, nextState)) {
         result = new IR::LAnd(boolType, result, *constraintOpt);
     }
 

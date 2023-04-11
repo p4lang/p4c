@@ -43,15 +43,15 @@ class CompilerTarget : public Target {
 
  protected:
     /// @see @makeContext.
-    virtual ICompileContext *makeContext_impl() const;
+    virtual ICompileContext *makeContextImpl() const;
 
     /// @see runCompiler.
-    virtual std::optional<const IR::P4Program *> runCompiler_impl(const IR::P4Program *) const;
+    virtual std::optional<const IR::P4Program *> runCompilerImpl(const IR::P4Program *) const;
 
     /// This implementation just forwards the given arguments to the compiler.
     ///
     /// @see @initCompiler.
-    virtual std::vector<const char *> *initCompiler_impl(int argc, char **argv) const;
+    virtual std::vector<const char *> *initCompilerImpl(int argc, char **argv) const;
 
     /// Parses the P4 program specified on the command line.
     ///
@@ -64,10 +64,10 @@ class CompilerTarget : public Target {
     const IR::P4Program *runFrontend(const IR::P4Program *program) const;
 
     /// A factory method for providing a target-specific mid end implementation.
-    virtual MidEnd mkMidEnd(const CompilerOptions &options) const;
+    [[nodiscard]] virtual MidEnd mkMidEnd(const CompilerOptions &options) const;
 
     /// A factory method for providing a target-specific front end implementation.
-    virtual P4::FrontEnd mkFrontEnd() const;
+    [[nodiscard]] virtual P4::FrontEnd mkFrontEnd() const;
 
     /// Runs the mid end provided by @mkMidEnd on the given program.
     ///

@@ -17,9 +17,7 @@
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 /// A framework for implementing small-step operational semantics. Each instance is good for one
 /// small-step evaluation.
@@ -179,8 +177,6 @@ class AbstractStepper : public Inspector {
                          const IR::Type_Base *baseType) const;
 };
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SMALL_STEP_ABSTRACT_STEPPER_H_ */

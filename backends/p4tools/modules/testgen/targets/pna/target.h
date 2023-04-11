@@ -6,9 +6,9 @@
 #include <optional>
 
 #include "backends/p4tools/common/core/solver.h"
+#include "backends/p4tools/common/lib/arch_spec.h"
 #include "ir/ir.h"
 
-#include "backends/p4tools/modules/testgen/core/arch_spec.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
@@ -26,20 +26,20 @@ class PnaDpdkTestgenTarget : public TestgenTarget {
     static void make();
 
  protected:
-    const PnaDpdkProgramInfo *initProgram_impl(
+    const PnaDpdkProgramInfo *initProgramImpl(
         const IR::P4Program *program, const IR::Declaration_Instance *mainDecl) const override;
 
-    [[nodiscard]] int getPortNumWidth_bits_impl() const override;
+    [[nodiscard]] int getPortNumWidthBitsImpl() const override;
 
-    PnaTestBackend *getTestBackend_impl(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                                        const std::filesystem::path &testPath,
-                                        std::optional<uint32_t> seed) const override;
+    PnaTestBackend *getTestBackendImpl(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
+                                       const std::filesystem::path &testPath,
+                                       std::optional<uint32_t> seed) const override;
 
-    PnaDpdkCmdStepper *getCmdStepper_impl(ExecutionState &state, AbstractSolver &solver,
-                                          const ProgramInfo &programInfo) const override;
+    PnaDpdkCmdStepper *getCmdStepperImpl(ExecutionState &state, AbstractSolver &solver,
+                                         const ProgramInfo &programInfo) const override;
 
-    PnaDpdkExprStepper *getExprStepper_impl(ExecutionState &state, AbstractSolver &solver,
-                                            const ProgramInfo &programInfo) const override;
+    PnaDpdkExprStepper *getExprStepperImpl(ExecutionState &state, AbstractSolver &solver,
+                                           const ProgramInfo &programInfo) const override;
 
     [[nodiscard]] const ArchSpec *getArchSpecImpl() const override;
 

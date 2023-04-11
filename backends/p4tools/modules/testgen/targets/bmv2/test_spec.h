@@ -81,9 +81,9 @@ class Bmv2RegisterValue : public TestObject {
 };
 
 /* =========================================================================================
- *  Bmv2_V1ModelActionProfile
+ *  Bmv2V1ModelActionProfile
  * ========================================================================================= */
-class Bmv2_V1ModelActionProfile : public TestObject {
+class Bmv2V1ModelActionProfile : public TestObject {
  private:
     /// The list of actions associated with this profile.
     std::vector<std::pair<cstring, std::vector<ActionArg>>> actions;
@@ -92,7 +92,7 @@ class Bmv2_V1ModelActionProfile : public TestObject {
     const IR::IDeclaration *profileDecl;
 
  public:
-    explicit Bmv2_V1ModelActionProfile(const IR::IDeclaration *profileDecl);
+    explicit Bmv2V1ModelActionProfile(const IR::IDeclaration *profileDecl);
 
     [[nodiscard]] cstring getObjectName() const override;
 
@@ -103,28 +103,28 @@ class Bmv2_V1ModelActionProfile : public TestObject {
     [[nodiscard]] const IR::IDeclaration *getProfileDecl() const;
 
     /// @returns the current amount of actions associated with this profile.
-    size_t getActionMapSize() const;
+    [[nodiscard]] size_t getActionMapSize() const;
 
     /// Add an action (its name) and the arguments to the action map of this profile.
     void addToActionMap(cstring actionName, std::vector<ActionArg> actionArgs);
 
-    [[nodiscard]] const Bmv2_V1ModelActionProfile *evaluate(const Model &model) const override;
+    [[nodiscard]] const Bmv2V1ModelActionProfile *evaluate(const Model &model) const override;
 };
 
 /* =========================================================================================
  *  ActionSelector
  * ========================================================================================= */
-class Bmv2_V1ModelActionSelector : public TestObject {
+class Bmv2V1ModelActionSelector : public TestObject {
  private:
     /// The associated action selector declaration.
     const IR::IDeclaration *selectorDecl;
 
     /// The associated action profile.
-    const Bmv2_V1ModelActionProfile *actionProfile;
+    const Bmv2V1ModelActionProfile *actionProfile;
 
  public:
-    explicit Bmv2_V1ModelActionSelector(const IR::IDeclaration *selectorDecl,
-                                        const Bmv2_V1ModelActionProfile *actionProfile);
+    explicit Bmv2V1ModelActionSelector(const IR::IDeclaration *selectorDecl,
+                                       const Bmv2V1ModelActionProfile *actionProfile);
 
     [[nodiscard]] cstring getObjectName() const override;
 
@@ -132,9 +132,9 @@ class Bmv2_V1ModelActionSelector : public TestObject {
     [[nodiscard]] const IR::IDeclaration *getSelectorDecl() const;
 
     /// @returns the associated action profile.
-    [[nodiscard]] const Bmv2_V1ModelActionProfile *getActionProfile() const;
+    [[nodiscard]] const Bmv2V1ModelActionProfile *getActionProfile() const;
 
-    [[nodiscard]] const Bmv2_V1ModelActionSelector *evaluate(const Model &model) const override;
+    [[nodiscard]] const Bmv2V1ModelActionSelector *evaluate(const Model &model) const override;
 };
 
 /* =========================================================================================
