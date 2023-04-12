@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include <cstdio>
+#include <filesystem>
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
@@ -137,11 +138,15 @@ std::string P4CTestEnvironment::readHeader(const char* filename, bool preprocess
 }
 
 P4CTestEnvironment::P4CTestEnvironment() {
-    // XXX(seth): We should find a more robust way to locate these headers.
-    _coreP4 = readHeader("p4include/core.p4");
-    _v1Model = readHeader("p4include/v1model.p4", true,
-                          "V1MODEL_VERSION", 20200408);
-    _psaP4 = readHeader("p4include/bmv2/psa.p4", true);
+    // Locate the headers based on the relative path of the file.
+    std::filesystem::path srcFilePath{__FILE__};
+    auto srcFileDir = srcFilePath.parent_path();
+    auto corePath = srcFileDir / "../../p4include/core.p4";
+    auto v1modelPath = srcFileDir / "../../p4include/v1model.p4";
+    auto psaPath = srcFileDir / "../../p4include/bmv2/psa.p4";
+    _coreP4 = readHeader(corePath.c_str());
+    _v1Model = readHeader(v1modelPath.c_str(), true, "V1MODEL_VERSION", 20200408);
+    _psaP4 = readHeader(psaPath.c_str(), true);
 }
 
 namespace Test {
