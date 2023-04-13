@@ -16,6 +16,7 @@
 #include "backends/p4tools/common/compiler/convert_hs_index.h"
 #include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/lib/formulae.h"
+#include "backends/p4tools/common/lib/namespace_context.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/taint.h"
 #include "backends/p4tools/common/lib/trace_event.h"
@@ -28,7 +29,6 @@
 #include "lib/source_file.h"
 
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
-#include "backends/p4tools/modules/testgen/lib/namespace_context.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/options.h"
 

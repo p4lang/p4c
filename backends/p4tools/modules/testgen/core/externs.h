@@ -20,7 +20,7 @@
 
 namespace P4Tools::P4Testgen {
 
-/// Encaspulates a set of extern method implementations.
+/// Encapsulates a set of extern method implementations.
 class ExternMethodImpls {
  public:
     /// Evaluates a call to an extern method. Upon return, the given result will be augmented with

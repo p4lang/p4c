@@ -4,6 +4,7 @@
 #include <utility>
 
 #include "backends/p4tools/common/core/target.h"
+#include "backends/p4tools/common/lib/namespace_context.h"
 #include "ir/declaration.h"
 #include "ir/ir.h"
 #include "ir/node.h"
@@ -12,7 +13,6 @@
 #include "lib/log.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
-#include "backends/p4tools/modules/testgen/lib/namespace_context.h"
 
 namespace P4Tools::P4Testgen {
 

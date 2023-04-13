@@ -1,5 +1,5 @@
-#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_NAMESPACE_CONTEXT_H_
-#define BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_NAMESPACE_CONTEXT_H_
+#ifndef BACKENDS_P4TOOLS_COMMON_LIB_NAMESPACE_CONTEXT_H_
+#define BACKENDS_P4TOOLS_COMMON_LIB_NAMESPACE_CONTEXT_H_
 
 #include <optional>
 #include <set>
@@ -8,7 +8,7 @@
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
-namespace P4Tools::P4Testgen {
+namespace P4Tools {
 
 /// Represents a stack of namespaces.
 class NamespaceContext {
@@ -50,6 +50,6 @@ class NamespaceContext {
     cstring genName(cstring name, char sep) const;
 };
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace P4Tools
 
-#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_NAMESPACE_CONTEXT_H_ */
+#endif /* BACKENDS_P4TOOLS_COMMON_LIB_NAMESPACE_CONTEXT_H_ */

@@ -349,6 +349,16 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
         stepNoMatch();
         return false;
     }
+    if (!SymbolicEnv::isSymbolicValue(selectExpression->select)) {
+        // Evaluate the expression being selected.
+        return stepToListSubexpr(selectExpression->select, result, state,
+                                 [selectExpression](const IR::ListExpression *listExpr) {
+                                     auto *result = selectExpression->clone();
+                                     result->select = listExpr;
+                                     return Continuation::Return(result);
+                                 });
+    }
+
     for (size_t idx = 0; idx < selectCases.size(); ++idx) {
         const auto *selectCase = selectCases.at(idx);
         // Getting P4ValueSet from PathExpression , to highlight a particular case of processing
@@ -380,16 +390,6 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
     const IR::Expression *missCondition = IR::getBoolLiteral(true);
     for (const auto *selectCase : selectCases) {
         auto &nextState = state.clone();
-
-        if (!SymbolicEnv::isSymbolicValue(selectExpression->select)) {
-            // Evaluate the expression being selected.
-            return stepToListSubexpr(selectExpression->select, result, state,
-                                     [selectExpression](const IR::ListExpression *listExpr) {
-                                         auto *result = selectExpression->clone();
-                                         result->select = listExpr;
-                                         return Continuation::Return(result);
-                                     });
-        }
 
         // Handle case where the first select case matches: proceed to the next parser state,
         // guarded by its path condition.

@@ -15,6 +15,7 @@ namespace P4Tools::P4Testgen {
 /// present in a particular node. However, compared to CollectStatements, it traverses the entire
 /// subsequent parser DAG for a particular parser state. If there is a loop in the parser state, it
 /// will terminate.
+/// TODO: Consider caching this information.
 class CollectLatentStatements : public Inspector {
     P4::Coverage::CoverageSet &statements;
     const ExecutionState &state;

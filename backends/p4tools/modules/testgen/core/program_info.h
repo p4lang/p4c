@@ -8,6 +8,7 @@
 #include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/lib/arch_spec.h"
 #include "backends/p4tools/common/lib/formulae.h"
+#include "backends/p4tools/common/lib/namespace_context.h"
 #include "ir/declaration.h"
 #include "ir/ir.h"
 #include "lib/castable.h"
@@ -15,7 +16,6 @@
 
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
-#include "backends/p4tools/modules/testgen/lib/namespace_context.h"
 
 namespace P4Tools::P4Testgen {
 

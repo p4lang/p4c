@@ -1,6 +1,7 @@
 #include "backends/p4tools/common/compiler/compiler_target.h"
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "backends/p4tools/common/compiler/context.h"
@@ -120,7 +121,7 @@ const IR::P4Program *CompilerTarget::runMidEnd(const IR::P4Program *program) con
 }
 
 CompilerTarget::CompilerTarget(std::string deviceName, std::string archName)
-    : Target("compiler", deviceName, archName) {}
+    : Target("compiler", std::move(deviceName), std::move(archName)) {}
 
 const CompilerTarget &CompilerTarget::get() { return Target::get<CompilerTarget>("compiler"); }
 

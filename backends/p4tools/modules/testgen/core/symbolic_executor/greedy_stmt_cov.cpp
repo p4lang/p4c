@@ -1,7 +1,6 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/greedy_stmt_cov.h"
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <functional>
 #include <map>
 #include <optional>
@@ -45,7 +44,7 @@ std::optional<SymbolicExecutor::Branch> GreedyStmtSelection::popPotentialBranch(
             }
         }
     }
-    return {};
+    return std::nullopt;
 }
 
 bool GreedyStmtSelection::pickSuccessor(StepResult successors) {

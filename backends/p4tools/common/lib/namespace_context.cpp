@@ -1,4 +1,4 @@
-#include "backends/p4tools/modules/testgen/lib/namespace_context.h"
+#include "backends/p4tools/common/lib/namespace_context.h"
 
 #include <set>
 #include <vector>
@@ -7,7 +7,7 @@
 #include "lib/enumerator.h"
 #include "lib/exceptions.h"
 
-namespace P4Tools::P4Testgen {
+namespace P4Tools {
 
 const NamespaceContext *NamespaceContext::Empty = new NamespaceContext(nullptr, nullptr);
 
@@ -122,4 +122,4 @@ cstring NamespaceContext::genName(cstring name, char sep) const {
     return cstring::make_unique(getUsedNames(), name, sep);
 }
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace P4Tools

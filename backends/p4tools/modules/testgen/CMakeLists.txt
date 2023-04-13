@@ -33,7 +33,6 @@ set(
   lib/final_state.cpp
   lib/gen_eq.cpp
   lib/logging.cpp
-  lib/namespace_context.cpp
   lib/test_backend.cpp
   lib/test_spec.cpp
   lib/tf.cpp

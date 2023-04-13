@@ -10,6 +10,7 @@
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/core/target.h"
 #include "backends/p4tools/common/lib/arch_spec.h"
+#include "backends/p4tools/common/lib/namespace_context.h"
 #include "ir/ir.h"
 #include "ir/vector.h"
 
@@ -18,7 +19,6 @@
 #include "backends/p4tools/modules/testgen/core/small_step/expr_stepper.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
-#include "backends/p4tools/modules/testgen/lib/namespace_context.h"
 #include "backends/p4tools/modules/testgen/lib/test_backend.h"
 
 namespace P4Tools::P4Testgen {
