@@ -123,9 +123,9 @@ void test(const IR::Expression *expression, const IR::AssignmentStatement *varia
 
     // getting model
     Model model = *solver.getModel();
-    ASSERT_EQ(model.size(), 2u);
+    ASSERT_EQ(model.size(), 2U);
 
-    ASSERT_EQ(model.count(variableValue->left->checkedTo<IR::Member>()), 1u);
+    ASSERT_EQ(model.count(variableValue->left->checkedTo<IR::Member>()), 1U);
 
     const auto *value = model.at(variableValue->left->checkedTo<IR::Member>());
 
