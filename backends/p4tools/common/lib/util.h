@@ -115,8 +115,8 @@ class Utils {
     /// idx2 are given, respectively.
     static const IR::StateVariable &getZombieTableVar(const IR::Type *type,
                                                       const IR::P4Table *table, cstring name,
-                                                      boost::optional<int> idx1_opt = boost::none,
-                                                      boost::optional<int> idx2_opt = boost::none);
+                                                      std::optional<int> idx1_opt = std::nullopt,
+                                                      std::optional<int> idx2_opt = std::nullopt);
 
     /// @returns the state variable for the validity of the given header instance. The resulting
     ///     variable will be boolean-typed.

@@ -14,7 +14,6 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"

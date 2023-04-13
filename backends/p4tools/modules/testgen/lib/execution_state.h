@@ -431,12 +431,12 @@ class ExecutionState {
      */
  public:
     /// @returns the zombies that were allocated in this state
-    const std::set<IR::StateVariable> &getZombies() const;
+    [[nodiscard]] const std::set<IR::StateVariable> &getZombies() const;
 
     /// @see Utils::getZombieConst.
     /// We also place the zombies in the set of allocated zombies of this state.
-    const IR::StateVariable &createZombieConst(const IR::Type *type, cstring name,
-                                               uint64_t instanceID = 0);
+    [[nodiscard]] const IR::StateVariable &createZombieConst(const IR::Type *type, cstring name,
+                                                             uint64_t instanceID = 0);
 
     /* =========================================================================================
      *  General utilities involving ExecutionState.
@@ -464,7 +464,15 @@ class ExecutionState {
     /// corresponding declaration. It then converts the name of the declaration into a zombie
     /// constant and returns. This is necessary because we sometimes
     /// get flat declarations without members (e.g., bit<8> tmp;)
-    const IR::StateVariable &convertPathExpr(const IR::PathExpression *path) const;
+    [[nodiscard]] const IR::StateVariable &convertPathExpr(const IR::PathExpression *path) const;
+
+    /// Allocate a new execution state object with the same state as this object.
+    /// Returns a reference, not a pointer.
+    [[nodiscard]] ExecutionState &clone() const;
+
+    /// Create a new execution state object from the input program.
+    /// Returns a reference not a pointer.
+    [[nodiscard]] static ExecutionState &create(const IR::P4Program *program);
 
     /* =========================================================================================
      *  Constructors

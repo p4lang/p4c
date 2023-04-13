@@ -10,7 +10,6 @@
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/multiprecision/number.hpp>
 
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/util.h"

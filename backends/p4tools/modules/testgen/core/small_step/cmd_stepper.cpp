@@ -12,7 +12,6 @@
 
 #include "backends/p4tools/common/compiler/convert_hs_index.h"
 #include "backends/p4tools/common/core/solver.h"
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/util.h"

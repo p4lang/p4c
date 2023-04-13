@@ -10,7 +10,6 @@
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/core/z3_solver.h"
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"

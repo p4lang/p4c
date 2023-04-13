@@ -155,7 +155,7 @@ class AbstractStepper : public Inspector {
     /// If the solver can find a solution, it @returns the assigned value to the expression.
     /// If not, this function @returns nullptr.
     const IR::Literal *evaluateExpression(const IR::Expression *expr,
-                                          boost::optional<const IR::Expression *> cond) const;
+                                          std::optional<const IR::Expression *> cond) const;
 
     /// Reset the given reference to an  uninitialized value. If the reference has a
     /// Type_StructLike, unroll the reference and reset each member.

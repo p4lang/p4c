@@ -428,7 +428,7 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
                  }
                  if (dir == "inout" || dir == "out") {
                      nextState.set(globalRef->checkedTo<IR::Member>(),
-                                   nextState->get(argRef->checkedTo<IR::Member>()));
+                                   nextState.get(argRef->checkedTo<IR::Member>()));
                  }
              } else {
                  P4C_UNIMPLEMENTED("Unsupported copy_out type %1%", assignType->node_type_name());

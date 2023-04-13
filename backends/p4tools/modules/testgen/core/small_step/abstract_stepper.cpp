@@ -212,9 +212,9 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::Expression *headerRef) {
 }
 
 void AbstractStepper::setHeaderValidity(const IR::Expression *expr, bool validity,
-                                        ExecutionState *nextState) {
+                                        ExecutionState &nextState) {
     const auto &headerRefValidity = Utils::getHeaderValidity(expr);
-    nextState->set(headerRefValidity, IR::getBoolLiteral(validity));
+    nextState.set(headerRefValidity, IR::getBoolLiteral(validity));
 
     // In some cases, the header may be part of a union.
     if (validity) {
@@ -387,9 +387,9 @@ void AbstractStepper::declareStructLike(ExecutionState &nextState, const IR::Exp
     }
 }
 
-void AbstractStepper::declareBaseType(ExecutionState *nextState, const IR::StateVariable &paramPath,
+void AbstractStepper::declareBaseType(ExecutionState &nextState, const IR::StateVariable &paramPath,
                                       const IR::Type_Base *baseType) const {
-    nextState->set(paramPath, programInfo.createTargetUninitialized(baseType, false));
+    nextState.set(paramPath, programInfo.createTargetUninitialized(baseType, false));
 }
 
 }  // namespace P4Tools::P4Testgen

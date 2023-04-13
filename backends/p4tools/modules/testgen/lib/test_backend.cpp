@@ -65,7 +65,7 @@ const Model *TestBackEnd::computeConcolicVariables(const ExecutionState *executi
             // We need to differentiate between state variables and expressions here.
             // We need to differentiate between state variables and expressions here.
             if (std::holds_alternative<const IR::StateVariable>(concolicVariable)) {
-                pathConstraint = new IR::Equ(std::get<const StateVariable>(concolicVariable),
+                pathConstraint = new IR::Equ(std::get<const IR::StateVariable>(concolicVariable),
                                              concolicAssignment);
             } else if (std::holds_alternative<const IR::Expression *>(concolicVariable)) {
                 pathConstraint = new IR::Equ(std::get<const IR::Expression *>(concolicVariable),

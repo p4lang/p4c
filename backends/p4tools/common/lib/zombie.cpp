@@ -4,7 +4,6 @@
 #include <string>
 #include <utility>
 
-#include "backends/p4tools/common/lib/formulae.h"
 #include "ir/id.h"
 
 namespace P4Tools {

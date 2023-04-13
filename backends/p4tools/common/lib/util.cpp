@@ -17,7 +17,6 @@
 #include <boost/multiprecision/number.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
 
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/zombie.h"
 #include "ir/id.h"
 #include "ir/irutils.h"
@@ -97,18 +96,18 @@ const IR::Constant *Utils::getRandConstantForType(const IR::Type_Bits *type) {
 const cstring Utils::Valid = "*valid";
 
 const IR::StateVariable &Utils::getZombieTableVar(const IR::Type *type, const IR::P4Table *table,
-                                                  cstring name, boost::optional<int> idx1_opt,
-                                                  boost::optional<int> idx2_opt) {
+                                                  cstring name, std::optional<int> idx1_opt,
+                                                  std::optional<int> idx2_opt) {
     // Mash the table name, the given name, and the optional indices together.
     // XXX To be nice, we should probably build a PathExpression, but that's annoying to do, and we
     // XXX can probably get away with this.
     std::stringstream out;
     out << table->name.toString() << "." << name;
-    if (idx1_opt) {
-        out << "." << *idx1_opt;
+    if (idx1_opt.has_value()) {
+        out << "." << idx1_opt.value();
     }
-    if (idx2_opt) {
-        out << "." << *idx2_opt;
+    if (idx2_opt.has_value()) {
+        out << "." << idx2_opt.value();
     }
 
     return Zombie::getVar(type, 0, out.str());

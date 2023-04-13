@@ -6,7 +6,6 @@
 
 #include <boost/container/vector.hpp>
 
-#include "backends/p4tools/common/lib/formulae.h"
 #include "frontends/p4/optimizeExpressions.h"
 #include "ir/indexed_vector.h"
 #include "ir/irutils.h"

@@ -7,7 +7,6 @@
 
 #include <boost/container/vector.hpp>
 
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/zombie.h"
 #include "frontends/p4/optimizeExpressions.h"
@@ -30,7 +29,7 @@ const IR::Expression *SymbolicEnv::get(const IR::StateVariable &var) const {
 bool SymbolicEnv::exists(const IR::StateVariable &var) const { return map.find(var) != map.end(); }
 
 void SymbolicEnv::set(const IR::StateVariable &var, const IR::Expression *value) {
-    map[var] = IR::optimizeExpression(value);
+    map[var] = P4::optimizeExpression(value);
 }
 
 Model *SymbolicEnv::complete(const Model &model) const {
