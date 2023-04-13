@@ -1,8 +1,7 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_EXPR_STEPPER_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_EXPR_STEPPER_H_
 
-#include <stdint.h>
-
+#include <cstdint>
 #include <string>
 
 #include "backends/p4tools/common/core/solver.h"

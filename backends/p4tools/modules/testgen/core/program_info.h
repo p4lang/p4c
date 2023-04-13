@@ -92,7 +92,7 @@ class ProgramInfo : public ICastable {
     static const IR::IDeclaration *findProgramDecl(const IR::IGeneralNamespace *ns,
                                                    const IR::PathExpression *pathExpr);
 
-    /// Resolves a Type_Name in the current environment.
+    /// Resolves a Type_Name in the top-level namespace.
     static const IR::Type_Declaration *resolveProgramType(const IR::IGeneralNamespace *ns,
                                                           const IR::Type_Name *type);
 

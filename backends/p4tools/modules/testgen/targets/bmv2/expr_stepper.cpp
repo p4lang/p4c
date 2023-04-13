@@ -137,7 +137,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
         };
 
     // Provides implementations of BMv2 externs.
-    static const ExternMethodImpls EXTERN_METHODImplS({
+    static const ExternMethodImpls EXTERN_METHOD_IMPLS({
         /* ======================================================================================
          *  mark_to_drop
          *  Mark to drop sets the BMv2 internal drop variable to true.
@@ -1743,7 +1743,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          }},
     });
 
-    if (!EXTERN_METHODImplS.exec(call, receiver, name, args, state, result)) {
+    if (!EXTERN_METHOD_IMPLS.exec(call, receiver, name, args, state, result)) {
         ExprStepper::evalExternMethodCall(call, receiver, name, args, state);
     }
 }  // NOLINT

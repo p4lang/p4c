@@ -74,11 +74,11 @@ void TestgenTarget::argumentsToTypeDeclarations(
         if (const auto *ctorCall = expr->to<IR::ConstructorCallExpression>()) {
             const auto *constructedTypeName = ctorCall->constructedType->checkedTo<IR::Type_Name>();
 
-            // Find the corresponding type declaration in the namespace.
+            // Find the corresponding type declaration in the top-level namespace.
             declType = ProgramInfo::findProgramDecl(ns, constructedTypeName->path)
                            ->checkedTo<IR::Type_Declaration>();
         } else if (const auto *pathExpr = expr->to<IR::PathExpression>()) {
-            // Look up the path expression in the declaration map, and expect to find a
+            // Look up the path expression in the top-level namespace and expect to find a
             // declaration instance.
             const auto *declInstance = ProgramInfo::findProgramDecl(ns, pathExpr->path)
                                            ->checkedTo<IR::Declaration_Instance>();
