@@ -24,7 +24,7 @@ class SymbolicEnv {
 
     /// Sets the symbolic value of the given state variable to the given value. Constant folding is
     /// done on the given value before updating the symbolic state.
-    void set(const IR::StateVariable& var, const IR::Expression* value);
+    void set(const IR::StateVariable &var, const IR::Expression *value);
 
     /// Completes the model with all variables referenced in the symbolic environment.
     [[nodiscard]] Model *complete(const Model &model) const;

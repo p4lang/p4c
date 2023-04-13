@@ -31,22 +31,22 @@ bool Zombie::isSymbolicConst(const IR::Member *member) {
     return isSymbolicConst(innerMember);
 }
 
-const IR::StateVariable& Zombie::getVar(const IR::Type* type, int incarnation, cstring name) {
+const IR::StateVariable &Zombie::getVar(const IR::Type *type, int incarnation, cstring name) {
     return getZombie(type, false, incarnation, name);
 }
 
-const IR::StateVariable& Zombie::getConst(const IR::Type* type, int incarnation, cstring name) {
+const IR::StateVariable &Zombie::getConst(const IR::Type *type, int incarnation, cstring name) {
     return getZombie(type, true, incarnation, name);
 }
 
-const IR::StateVariable& Zombie::getZombie(const IR::Type* type, bool isConst, int incarnation,
+const IR::StateVariable &Zombie::getZombie(const IR::Type *type, bool isConst, int incarnation,
                                            cstring name) {
     // Zombie variables are interned. Keys in the intern map are tuples of isConst, incarnations,
     // and names.
     return *mkZombie(type, isConst, incarnation, name);
 }
 
-const IR::StateVariable* Zombie::mkZombie(const IR::Type* type, bool isConst, int incarnation,
+const IR::StateVariable *Zombie::mkZombie(const IR::Type *type, bool isConst, int incarnation,
                                           cstring name) {
     static IR::PathExpression ZOMBIE_HDR(new IR::Path(P4tZombie));
 
@@ -54,7 +54,7 @@ const IR::StateVariable* Zombie::mkZombie(const IR::Type* type, bool isConst, in
     static std::map<key_t, const IR::Member *> incarnations;
     const auto *&incarnationMember = incarnations[std::make_pair(isConst, incarnation)];
     if (incarnationMember == nullptr) {
-        const IR::Expression* hdr = &ZOMBIE_HDR;
+        const IR::Expression *hdr = &ZOMBIE_HDR;
         if (isConst) {
             hdr = new IR::Member(hdr, Const);
         }

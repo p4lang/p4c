@@ -111,8 +111,8 @@ class ExprStepper : public AbstractStepper {
     /// If @param forceTaint is true, out will set the parameter to tainted.
     // Otherwise, the target default value is chosen.
     /// TODO: Consolidate this into the copy_in_out extern.
-    void generateCopyIn(ExecutionState& nextState, const IR::StateVariable& targetPath,
-                        const IR::StateVariable& srcPath, cstring dir, bool forceTaint) const;
+    void generateCopyIn(ExecutionState &nextState, const IR::StateVariable &targetPath,
+                        const IR::StateVariable &srcPath, cstring dir, bool forceTaint) const;
 
     /// Takes a step to reflect a "select" expression failing to match. The default implementation
     /// raises Continuation::Exception::NoMatch.

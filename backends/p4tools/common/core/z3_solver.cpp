@@ -162,13 +162,13 @@ z3::sort Z3Solver::toSort(const IR::Type *type) {
     BUG("Z3Solver: unimplemented type %1%: %2% ", type->node_type_name(), type);
 }
 
-std::string Z3Solver::generateName(const IR::StateVariable& var) const {
+std::string Z3Solver::generateName(const IR::StateVariable &var) const {
     std::ostringstream ostr;
     generateName(ostr, var);
     return ostr.str();
 }
 
-void Z3Solver::generateName(std::ostringstream& ostr, const IR::StateVariable& var) const {
+void Z3Solver::generateName(std::ostringstream &ostr, const IR::StateVariable &var) const {
     // Recurse into the parent member expression to retrieve the full name of the variable.
     if (const auto *next = var->expr->to<IR::Member>()) {
         generateName(ostr, next);
@@ -181,7 +181,7 @@ void Z3Solver::generateName(std::ostringstream& ostr, const IR::StateVariable& v
     ostr << "." << var->member;
 }
 
-z3::expr Z3Solver::declareVar(const IR::StateVariable& var) {
+z3::expr Z3Solver::declareVar(const IR::StateVariable &var) {
     BUG_CHECK(var, "Z3Solver: attempted to declare a non-member: %1%", var);
     auto sort = toSort(var->type);
     auto expr = z3context.constant(generateName(var).c_str(), sort);
@@ -352,7 +352,7 @@ const Model *Z3Solver::getModel() const {
             BUG_CHECK(declaredVars.count(exprId) > 0, "Z3Solver: unknown variable declaration: %1%",
                       z3Expr);
             const auto stateVar = declaredVars.at(exprId);
-            const auto* value = toLiteral(z3Value, stateVar->type);
+            const auto *value = toLiteral(z3Value, stateVar->type);
             result->emplace(stateVar, value);
         }
     } catch (z3::exception &e) {
@@ -365,7 +365,7 @@ const Model *Z3Solver::getModel() const {
     return result;
 }
 
-const IR::Literal* Z3Solver::toLiteral(const z3::expr& e, const IR::Type* type) {
+const IR::Literal *Z3Solver::toLiteral(const z3::expr &e, const IR::Type *type) {
     // Handle booleans.
     if (type->is<IR::Type::Boolean>()) {
         BUG_CHECK(e.is_bool(), "Expected a boolean value: %1%", e);
@@ -575,7 +575,7 @@ const ShiftType *Z3Translator::rewriteShift(const ShiftType *shift) const {
 }
 
 /// General function for unary operations.
-bool Z3Translator::recurseUnary(const IR::Operation_Unary* unary, Z3UnaryOp f) {
+bool Z3Translator::recurseUnary(const IR::Operation_Unary *unary, Z3UnaryOp f) {
     BUG_CHECK(unary, "Z3Translator: encountered null node during translation");
     Z3Translator tExpr(solver);
     unary->expr->apply(tExpr);

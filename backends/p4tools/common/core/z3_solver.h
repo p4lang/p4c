@@ -79,17 +79,17 @@ class Z3Solver : public AbstractSolver {
     /// Declares the given state variable to Z3.
     ///
     /// @returns the resulting Z3 variable.
-    z3::expr declareVar(const IR::StateVariable& var);
+    z3::expr declareVar(const IR::StateVariable &var);
 
     /// Generates a Z3 name for the given variable.
-    std::string generateName(const IR::StateVariable& var) const;
+    std::string generateName(const IR::StateVariable &var) const;
 
     /// Generates a Z3 name for the given variable. The generated name is written to the given
     /// output stream.
-    void generateName(std::ostringstream& ostr, const IR::StateVariable& var) const;
+    void generateName(std::ostringstream &ostr, const IR::StateVariable &var) const;
 
     /// Converts a Z3 expression to an IR::Literal with the given type.
-    static const IR::Literal* toLiteral(const z3::expr& e, const IR::Type* type);
+    static const IR::Literal *toLiteral(const z3::expr &e, const IR::Type *type);
 
     /// Adds pushes for incremental solver.
     /// Increments @a chkIndex and calls push for each occurrence

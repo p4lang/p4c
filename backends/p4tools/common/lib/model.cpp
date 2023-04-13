@@ -39,7 +39,7 @@ class CompleteVisitor : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::ConcolicVariable* var) override {
+    bool preorder(const IR::ConcolicVariable *var) override {
         auto stateVar = IR::StateVariable(var->concolicMember);
         model->emplace(stateVar, IR::getDefaultValue(var->type));
         return false;
@@ -50,7 +50,7 @@ class CompleteVisitor : public Inspector {
 
 void Model::complete(const IR::Expression *expr) { expr->apply(CompleteVisitor(this)); }
 
-void Model::complete(const std::set<IR::StateVariable>& inputSet) {
+void Model::complete(const std::set<IR::StateVariable> &inputSet) {
     auto completionVisitor = CompleteVisitor(this);
     for (const auto &var : inputSet) {
         var->apply(completionVisitor);
@@ -96,8 +96,8 @@ const IR::ListExpression *Model::evaluateListExpr(const IR::ListExpression *list
     return resolvedListExpr;
 }
 
-const IR::Literal* Model::evaluate(const IR::Expression* expr,
-                                   ExpressionMap* resolvedExpressions) const {
+const IR::Literal *Model::evaluate(const IR::Expression *expr,
+                                   ExpressionMap *resolvedExpressions) const {
     class SubstVisitor : public Transform {
         const Model &self;
 
@@ -112,7 +112,7 @@ const IR::Literal* Model::evaluate(const IR::Expression* expr,
             return IR::getDefaultValue(var->type);
         }
 
-        const IR::Literal* preorder(IR::ConcolicVariable* var) override {
+        const IR::Literal *preorder(IR::ConcolicVariable *var) override {
             auto stateVar = IR::StateVariable(var->concolicMember);
             BUG_CHECK(self.count(stateVar), "Variable not bound in model: %1%",
                       stateVar->toString());
@@ -141,7 +141,7 @@ Model *Model::evaluate(const SymbolicMapType &inputMap, ExpressionMap *resolvedE
     return result;
 }
 
-const IR::Expression* Model::get(const IR::StateVariable& var, bool checked) const {
+const IR::Expression *Model::get(const IR::StateVariable &var, bool checked) const {
     auto it = find(var);
     if (it != end()) {
         return it->second;
