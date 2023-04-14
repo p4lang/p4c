@@ -85,7 +85,7 @@ class ExecutionState {
 
     /// The list of zombies that have been created in this state.
     /// These zombies are later fed to the model for completion.
-    std::set<IR::StateVariable> allocatedZombies;
+    std::set<StateVariable> allocatedZombies;
 
     /// The program trace for the current program point (i.e., how we got to the current state).
     std::vector<std::reference_wrapper<const TraceEvent>> trace;
@@ -169,7 +169,7 @@ class ExecutionState {
     [[nodiscard]] std::optional<const Continuation::Command> getNextCmd() const;
 
     /// @returns the symbolic value of the given state variable.
-    const IR::Expression *get(const IR::StateVariable &var) const;
+    [[nodiscard]] const IR::Expression *get(const StateVariable &var) const;
 
     /// Checks whether the statement has been visited in this state.
     void markVisited(const IR::Statement *stmt);
@@ -179,10 +179,10 @@ class ExecutionState {
 
     /// Sets the symbolic value of the given state variable to the given value. Constant folding
     /// is done on the given value before updating the symbolic state.
-    void set(const IR::StateVariable &var, const IR::Expression *value);
+    void set(const StateVariable &var, const IR::Expression *value);
 
     /// Checks whether the given variable exists in the symbolic environment of this state.
-    bool exists(const IR::StateVariable &var) const;
+    [[nodiscard]] bool exists(const StateVariable &var) const;
 
     /// @see Taint::hasTaint
     bool hasTaint(const IR::Expression *expr) const;
@@ -357,7 +357,7 @@ class ExecutionState {
 
     /// @returns the symbolic constant representing the length of the input to the current parser,
     /// in bits.
-    static const IR::StateVariable &getInputPacketSizeVar();
+    static const StateVariable &getInputPacketSizeVar();
 
     /// @returns the maximum length, in bits, of the packet in the current packet buffer. This is
     /// the network's MTU.
@@ -431,12 +431,12 @@ class ExecutionState {
      */
  public:
     /// @returns the zombies that were allocated in this state
-    [[nodiscard]] const std::set<IR::StateVariable> &getZombies() const;
+    [[nodiscard]] const std::set<StateVariable> &getZombies() const;
 
     /// @see Utils::getZombieConst.
     /// We also place the zombies in the set of allocated zombies of this state.
-    [[nodiscard]] const IR::StateVariable &createZombieConst(const IR::Type *type, cstring name,
-                                                             uint64_t instanceID = 0);
+    [[nodiscard]] const StateVariable &createZombieConst(const IR::Type *type, cstring name,
+                                                         uint64_t instanceID = 0);
 
     /* =========================================================================================
      *  General utilities involving ExecutionState.
@@ -464,7 +464,7 @@ class ExecutionState {
     /// corresponding declaration. It then converts the name of the declaration into a zombie
     /// constant and returns. This is necessary because we sometimes
     /// get flat declarations without members (e.g., bit<8> tmp;)
-    [[nodiscard]] const IR::StateVariable &convertPathExpr(const IR::PathExpression *path) const;
+    [[nodiscard]] const StateVariable &convertPathExpr(const IR::PathExpression *path) const;
 
     /// Allocate a new execution state object with the same state as this object.
     /// Returns a reference, not a pointer.

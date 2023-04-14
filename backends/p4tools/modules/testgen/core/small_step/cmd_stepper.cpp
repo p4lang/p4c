@@ -539,7 +539,7 @@ IR::SwitchStatement *CmdStepper::replaceSwitchLabels(const IR::SwitchStatement *
         // Do not replace default expression labels.
         if (!newSwitchCase->label->is<IR::DefaultExpression>()) {
             newSwitchCase->label =
-                IR::getConstant(actionVar->type, actionsIds[switchCase->label->toString()]);
+                IR::getConstant(actionVar.type, actionsIds[switchCase->label->toString()]);
         }
         newCases.push_back(newSwitchCase);
     }

@@ -42,22 +42,22 @@ const ProgramInfo *TableStepper::getProgramInfo() { return &stepper->programInfo
 
 ExprStepper::Result TableStepper::getResult() { return stepper->result; }
 
-const IR::StateVariable &TableStepper::getTableActionVar(const IR::P4Table *table) {
+const StateVariable &TableStepper::getTableActionVar(const IR::P4Table *table) {
     auto numActions = table->getActionList()->size();
     const auto *type = IR::getBitTypeToFit(numActions);
     return Utils::getZombieTableVar(type, table, "*action");
 }
 
-const IR::StateVariable &TableStepper::getTableHitVar(const IR::P4Table *table) {
+const StateVariable &TableStepper::getTableHitVar(const IR::P4Table *table) {
     return Utils::getZombieTableVar(IR::Type::Boolean::get(), table, "*hit");
 }
 
-const IR::StateVariable &TableStepper::getTableKeyReadVar(const IR::P4Table *table, int keyIdx) {
+const StateVariable &TableStepper::getTableKeyReadVar(const IR::P4Table *table, int keyIdx) {
     const auto *key = table->getKey()->keyElements.at(keyIdx);
     return Utils::getZombieTableVar(key->expression->type, table, "*keyRead", keyIdx);
 }
 
-const IR::StateVariable &TableStepper::getTableReachedVar(const IR::P4Table *table) {
+const StateVariable &TableStepper::getTableReachedVar(const IR::P4Table *table) {
     return Utils::getZombieTableVar(IR::Type::Boolean::get(), table, "*reached");
 }
 

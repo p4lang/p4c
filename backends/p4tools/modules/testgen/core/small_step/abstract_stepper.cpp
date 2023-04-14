@@ -203,7 +203,7 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::Expression *headerRef) {
         result->emplace_back(state);
         return false;
     }
-    const auto &variable = Utils::getHeaderValidity(headerRef);
+    const auto *variable = Utils::getHeaderValidity(headerRef);
     BUG_CHECK(state.exists(variable),
               "At this point, the header validity bit %1% should be initialized.", variable);
     state.replaceTopBody(Continuation::Return(variable));
@@ -387,7 +387,7 @@ void AbstractStepper::declareStructLike(ExecutionState &nextState, const IR::Exp
     }
 }
 
-void AbstractStepper::declareBaseType(ExecutionState &nextState, const IR::StateVariable &paramPath,
+void AbstractStepper::declareBaseType(ExecutionState &nextState, const StateVariable &paramPath,
                                       const IR::Type_Base *baseType) const {
     nextState.set(paramPath, programInfo.createTargetUninitialized(baseType, false));
 }

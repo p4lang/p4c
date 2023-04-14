@@ -29,10 +29,11 @@ const IR::StringLiteral Taint::TAINTED_STRING_LITERAL = IR::StringLiteral(cstrin
 static bitvec computeTaintedBits(const SymbolicMapType &varMap, const IR::Expression *expr) {
     CHECK_NULL(expr);
     if (const auto *member = expr->to<IR::Member>()) {
-        if (SymbolicEnv::isSymbolicValue(member)) {
+        auto var = StateVariable(member);
+        if (SymbolicEnv::isSymbolicValue(&var)) {
             return {};
         }
-        expr = varMap.at(member);
+        expr = varMap.at(var);
     }
 
     if (const auto *taintExpr = expr->to<IR::TaintExpression>()) {
@@ -101,7 +102,8 @@ bool Taint::hasTaint(const SymbolicMapType &varMap, const IR::Expression *expr) 
     }
     if (const auto *member = expr->to<IR::Member>()) {
         if (!SymbolicEnv::isSymbolicValue(member)) {
-            return hasTaint(varMap, varMap.at(member));
+            auto var = StateVariable(member);
+            return hasTaint(varMap, varMap.at(var));
         }
         return false;
     }

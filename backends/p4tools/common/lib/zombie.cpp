@@ -11,42 +11,31 @@ namespace P4Tools {
 const cstring Zombie::P4tZombie = "p4t*zombie";
 const cstring Zombie::Const = "const";
 
-bool Zombie::isSymbolicConst(const IR::Member *member) {
+bool Zombie::isSymbolicConst(const StateVariable &var) {
     // Should always have an inner member to represent at least p4t*zombie.const.
-    const auto *innerMember = member->expr->to<IR::Member>();
-    if (innerMember == nullptr) {
+    if (var.size() < 2) {
         return false;
     }
-
-    // Base case: detect p4t*zombie.const.foo.
-    if (innerMember->member == Const) {
-        if (const auto *pathExpr = innerMember->expr->to<IR::PathExpression>()) {
-            const auto *path = pathExpr->path;
-            return (path != nullptr) && path->name == P4tZombie;
-        }
-    }
-
-    // Recursive case.
-    return isSymbolicConst(innerMember);
+    return var.getHead().first == P4tZombie;
 }
 
-const IR::StateVariable &Zombie::getVar(const IR::Type *type, int incarnation, cstring name) {
+const StateVariable &Zombie::getVar(const IR::Type *type, int incarnation, cstring name) {
     return getZombie(type, false, incarnation, name);
 }
 
-const IR::StateVariable &Zombie::getConst(const IR::Type *type, int incarnation, cstring name) {
+const StateVariable &Zombie::getConst(const IR::Type *type, int incarnation, cstring name) {
     return getZombie(type, true, incarnation, name);
 }
 
-const IR::StateVariable &Zombie::getZombie(const IR::Type *type, bool isConst, int incarnation,
-                                           cstring name) {
+const StateVariable &Zombie::getZombie(const IR::Type *type, bool isConst, int incarnation,
+                                       cstring name) {
     // Zombie variables are interned. Keys in the intern map are tuples of isConst, incarnations,
     // and names.
     return *mkZombie(type, isConst, incarnation, name);
 }
 
-const IR::StateVariable *Zombie::mkZombie(const IR::Type *type, bool isConst, int incarnation,
-                                          cstring name) {
+const StateVariable *Zombie::mkZombie(const IR::Type *type, bool isConst, int incarnation,
+                                      cstring name) {
     static IR::PathExpression ZOMBIE_HDR(new IR::Path(P4tZombie));
 
     using key_t = std::pair<bool, int>;
@@ -60,7 +49,7 @@ const IR::StateVariable *Zombie::mkZombie(const IR::Type *type, bool isConst, in
         incarnationMember = new IR::Member(hdr, cstring(std::to_string(incarnation)));
     }
 
-    return new IR::StateVariable(new IR::Member(type, incarnationMember, name));
+    return new StateVariable(new IR::Member(type, incarnationMember, name));
 }
 
 }  // namespace P4Tools

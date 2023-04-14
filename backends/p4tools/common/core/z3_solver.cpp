@@ -161,28 +161,19 @@ z3::sort Z3Solver::toSort(const IR::Type *type) {
     BUG("Z3Solver: unimplemented type %1%: %2% ", type->node_type_name(), type);
 }
 
-std::string Z3Solver::generateName(const IR::StateVariable &var) const {
+std::string Z3Solver::generateName(const StateVariable &var) const {
     std::ostringstream ostr;
     generateName(ostr, var);
     return ostr.str();
 }
 
-void Z3Solver::generateName(std::ostringstream &ostr, const IR::StateVariable &var) const {
-    // Recurse into the parent member expression to retrieve the full name of the variable.
-    if (const auto *next = var->expr->to<IR::Member>()) {
-        generateName(ostr, next);
-    } else {
-        const auto *path = var->expr->to<IR::PathExpression>();
-        BUG_CHECK(path, "Z3Solver: expected to be a PathExpression: %1%", var->expr);
-        ostr << path->path->name;
-    }
-
-    ostr << "." << var->member;
+void Z3Solver::generateName(std::ostringstream &ostr, const StateVariable &var) const {
+    ostr << var.toString();
 }
 
-z3::expr Z3Solver::declareVar(const IR::StateVariable &var) {
-    BUG_CHECK(var, "Z3Solver: attempted to declare a non-member: %1%", var);
-    auto sort = toSort(var->type);
+z3::expr Z3Solver::declareVar(const StateVariable &var) {
+    // BUG_CHECK(var, "Z3Solver: attempted to declare a non-member: %1%", var.toString());
+    auto sort = toSort(var.type);
     auto expr = z3context.constant(generateName(var).c_str(), sort);
     BUG_CHECK(
         !declaredVarsById.empty(),
@@ -323,14 +314,14 @@ void Z3Solver::asrt(const Constraint *assertion) {
 const Model *Z3Solver::getModel() const {
     auto *result = new Model();
     // First, collect a map of all the declared variables we have encountered in the stack.
-    std::map<unsigned int, IR::StateVariable> declaredVars;
+    std::map<unsigned int, StateVariable> declaredVars;
     for (auto it = declaredVarsById.rbegin(); it != declaredVarsById.rend(); ++it) {
         auto latestVars = *it;
         for (auto var : latestVars) {
             declaredVars.emplace(var);
         }
     }
-    // Then, get the model and match each declaration in the model to its IR::StateVariable.
+    // Then, get the model and match each declaration in the model to its StateVariable.
     try {
         Util::ScopedTimer ctZ3("z3");
         Util::ScopedTimer ctCheckSat("getModel");
@@ -350,8 +341,8 @@ const Model *Z3Solver::getModel() const {
             auto exprId = z3Expr.id();
             BUG_CHECK(declaredVars.count(exprId) > 0, "Z3Solver: unknown variable declaration: %1%",
                       z3Expr);
-            const auto stateVar = declaredVars.at(exprId);
-            const auto *value = toLiteral(z3Value, stateVar->type);
+            const auto &stateVar = declaredVars.at(exprId);
+            const auto *value = toLiteral(z3Value, stateVar.type);
             result->emplace(stateVar, value);
         }
     } catch (z3::exception &e) {
@@ -534,13 +525,13 @@ bool Z3Translator::preorder(const IR::BoolLiteral *boolLiteral) {
 }
 
 bool Z3Translator::preorder(const IR::Member *member) {
-    result = solver.declareVar(member);
+    result = solver.declareVar(StateVariable(member));
     return false;
 }
 
 bool Z3Translator::preorder(const IR::ConcolicVariable *var) {
     /// Declare the member contained within the concolic variable
-    result = solver.declareVar(var->concolicMember);
+    result = solver.declareVar(StateVariable(var->concolicMember));
     return false;
 }
 

@@ -95,9 +95,9 @@ const IR::Constant *Utils::getRandConstantForType(const IR::Type_Bits *type) {
 
 const cstring Utils::Valid = "*valid";
 
-const IR::StateVariable &Utils::getZombieTableVar(const IR::Type *type, const IR::P4Table *table,
-                                                  cstring name, std::optional<int> idx1_opt,
-                                                  std::optional<int> idx2_opt) {
+const StateVariable &Utils::getZombieTableVar(const IR::Type *type, const IR::P4Table *table,
+                                              cstring name, std::optional<int> idx1_opt,
+                                              std::optional<int> idx2_opt) {
     // Mash the table name, the given name, and the optional indices together.
     // XXX To be nice, we should probably build a PathExpression, but that's annoying to do, and we
     // XXX can probably get away with this.
@@ -113,22 +113,21 @@ const IR::StateVariable &Utils::getZombieTableVar(const IR::Type *type, const IR
     return Zombie::getVar(type, 0, out.str());
 }
 
-const IR::StateVariable &Utils::getZombieVar(const IR::Type *type, int incarnation, cstring name) {
+const StateVariable &Utils::getZombieVar(const IR::Type *type, int incarnation, cstring name) {
     return Zombie::getVar(type, incarnation, name);
 }
 
-const IR::StateVariable &Utils::getZombieConst(const IR::Type *type, int incarnation,
-                                               cstring name) {
+const StateVariable &Utils::getZombieConst(const IR::Type *type, int incarnation, cstring name) {
     return Zombie::getConst(type, incarnation, name);
 }
 
-IR::StateVariable Utils::getHeaderValidity(const IR::Expression *headerRef) {
+const IR::Member *Utils::getHeaderValidity(const IR::Expression *headerRef) {
     return new IR::Member(IR::Type::Boolean::get(), headerRef, Valid);
 }
 
-IR::StateVariable Utils::addZombiePostfix(const IR::Expression *paramPath,
-                                          const IR::Type_Base *baseType) {
-    return new IR::Member(baseType, paramPath, "*");
+StateVariable Utils::addZombiePostfix(const IR::Expression *paramPath,
+                                      const IR::Type_Base *baseType) {
+    return StateVariable(new IR::Member(baseType, paramPath, "*"));
 }
 
 const IR::TaintExpression *Utils::getTaintExpression(const IR::Type *type) {
@@ -154,11 +153,11 @@ const IR::TaintExpression *Utils::getTaintExpression(const IR::Type *type) {
     return result;
 }
 
-const IR::StateVariable &Utils::getConcolicMember(const IR::ConcolicVariable *var, int concolicId) {
+const StateVariable &Utils::getConcolicMember(const IR::ConcolicVariable *var, int concolicId) {
     const auto *const concolicMember = var->concolicMember;
     auto *clonedMember = concolicMember->clone();
     clonedMember->member = std::to_string(concolicId).c_str();
-    return *(new IR::StateVariable(clonedMember));
+    return *(new StateVariable(clonedMember));
 }
 
 const IR::MethodCallExpression *Utils::generateInternalMethodCall(
