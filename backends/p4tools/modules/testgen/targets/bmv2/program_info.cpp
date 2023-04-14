@@ -101,11 +101,12 @@ Bmv2V1ModelProgramInfo::Bmv2V1ModelProgramInfo(
     targetConstraints = constraint;
 }
 
-const IR::P4Table *BMv2_V1ModelProgramInfo::getTableofDirectExtern(
-    const IR::IDeclaration *decl) const {
-    auto it = directExternMap.find(decl);
+const IR::P4Table *Bmv2V1ModelProgramInfo::getTableofDirectExtern(
+    const IR::IDeclaration *directExternDecl) const {
+    auto it = directExternMap.find(directExternDecl);
     if (it == directExternMap.end()) {
-        return nullptr;
+        BUG("No table associated with this direct extern %1%. The extern should have been removed.",
+            directExternDecl);
     }
     return it->second;
 }

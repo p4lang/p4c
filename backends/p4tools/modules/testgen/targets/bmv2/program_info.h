@@ -41,7 +41,8 @@ class Bmv2V1ModelProgramInfo : public ProgramInfo {
     /// @returns the gress associated with the given parser.
     int getGress(const IR::Type_Declaration *) const;
 
-    const IR::P4Table *getTableofDirectExtern(const IR::IDeclaration *decl) const;
+    /// @returns the table associated with the direct extern
+    const IR::P4Table *getTableofDirectExtern(const IR::IDeclaration *directExternDecl) const;
 
     /// @returns the programmable blocks of the program. Should be 6.
     [[nodiscard]] const ordered_map<cstring, const IR::Type_Declaration *> *getProgrammableBlocks()

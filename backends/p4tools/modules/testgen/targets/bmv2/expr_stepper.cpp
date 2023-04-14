@@ -1007,11 +1007,10 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
              // Check whether table that the extern is attached to has an entry.
-             const auto *progInfo = getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
+             const auto *progInfo = getProgramInfo().checkedTo<Bmv2V1ModelProgramInfo>();
              const auto *receiverPath = receiver->checkedTo<IR::PathExpression>();
              const auto *externInstance = state.findDecl(receiverPath);
              const auto *table = progInfo->getTableofDirectExtern(externInstance);
-             CHECK_NULL(table);
              const auto *tableEntry =
                  state.getTestObject("tableconfigs", table->controlPlaneName(), false);
 
