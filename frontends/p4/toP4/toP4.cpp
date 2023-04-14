@@ -1516,7 +1516,7 @@ bool ToP4::preorder(const IR::Entry *e) {
     if (e->priority) {
         builder.append("priority=");
         visit(e->priority);
-        builder.append(" ");
+        builder.append(": ");
     }
     if (e->keys->components.size() == 1)
         setListTerm("", "");

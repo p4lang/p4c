@@ -1352,8 +1352,8 @@ entry
 
 optEntryPriority
     : %empty                         { $$ = nullptr; }
-    | PRIORITY "=" INTEGER           { $$ = new IR::Constant(parseConstantChecked(@3, $3)); }
-    | PRIORITY "=" "(" expression ")" { $$ = $4; }
+    | PRIORITY "=" INTEGER ":"       { $$ = new IR::Constant(parseConstantChecked(@3, $3)); }
+    | PRIORITY "=" "(" expression ")" ":" { $$ = $4; }
     ;
 
 entriesList
