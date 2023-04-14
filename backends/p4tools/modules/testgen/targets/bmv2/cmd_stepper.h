@@ -17,24 +17,24 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-class BMv2_V1ModelCmdStepper : public CmdStepper {
+class Bmv2V1ModelCmdStepper : public CmdStepper {
  protected:
-    std::string getClassName() override { return "BMv2_V1ModelCmdStepper"; }
+    std::string getClassName() override { return "Bmv2V1ModelCmdStepper"; }
 
-    const BMv2_V1ModelProgramInfo &getProgramInfo() const override;
+    const Bmv2V1ModelProgramInfo &getProgramInfo() const override;
 
     void initializeTargetEnvironment(ExecutionState &nextState) const override;
 
-    std::optional<const Constraint *> startParser_impl(const IR::P4Parser *parser,
-                                                       ExecutionState &nextState) const override;
+    std::optional<const Constraint *> startParserImpl(const IR::P4Parser *parser,
+                                                      ExecutionState &nextState) const override;
 
     std::map<Continuation::Exception, Continuation> getExceptionHandlers(
         const IR::P4Parser *parser, Continuation::Body normalContinuation,
         const ExecutionState &nextState) const override;
 
  public:
-    BMv2_V1ModelCmdStepper(ExecutionState &nextState, AbstractSolver &solver,
-                           const ProgramInfo &programInfo);
+    Bmv2V1ModelCmdStepper(ExecutionState &nextState, AbstractSolver &solver,
+                          const ProgramInfo &programInfo);
 };
 
 }  // namespace P4Tools::P4Testgen::Bmv2

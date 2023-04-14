@@ -2,20 +2,12 @@
 
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 
-namespace P4Tools {
+namespace P4Tools::P4Testgen::EBPF {
 
-namespace P4Testgen {
-
-namespace EBPF {
-
-const ConcolicMethodImpls::ImplList EBPFConcolic::EBPFConcolicMethodImpls{};
+const ConcolicMethodImpls::ImplList EBPFConcolic::EBPF_CONCOLIC_METHOD_IMPLS{};
 
 const ConcolicMethodImpls::ImplList *EBPFConcolic::getEBPFConcolicMethodImpls() {
-    return &EBPFConcolicMethodImpls;
+    return &EBPF_CONCOLIC_METHOD_IMPLS;
 }
 
-}  // namespace EBPF
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::EBPF

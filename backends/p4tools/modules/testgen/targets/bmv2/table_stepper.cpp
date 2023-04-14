@@ -36,7 +36,7 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-const IR::Expression *BMv2_V1ModelTableStepper::computeTargetMatchType(
+const IR::Expression *Bmv2V1ModelTableStepper::computeTargetMatchType(
     ExecutionState &nextState, const KeyProperties &keyProperties, TableMatchMap *matches,
     const IR::Expression *hitCondition) {
     const IR::Expression *keyExpr = keyProperties.key->expression;
@@ -60,7 +60,7 @@ const IR::Expression *BMv2_V1ModelTableStepper::computeTargetMatchType(
     }
     // Action selector entries are not part of the match.
     if (keyProperties.matchType == BMv2Constants::MATCH_KIND_SELECTOR) {
-        bmv2_V1ModelProperties.actionSelectorKeys.emplace_back(keyExpr);
+        bmv2V1ModelProperties.actionSelectorKeys.emplace_back(keyExpr);
         return hitCondition;
     }
     // Ranges are not yet implemented for BMv2 STF tests.
@@ -88,7 +88,7 @@ const IR::Expression *BMv2_V1ModelTableStepper::computeTargetMatchType(
     return TableStepper::computeTargetMatchType(nextState, keyProperties, matches, hitCondition);
 }
 
-void BMv2_V1ModelTableStepper::evalTableActionProfile(
+void Bmv2V1ModelTableStepper::evalTableActionProfile(
     const std::vector<const IR::ActionListElement *> &tableActionList) {
     const auto *state = getExecutionState();
 
@@ -104,7 +104,7 @@ void BMv2_V1ModelTableStepper::evalTableActionProfile(
         // We get the control plane name of the action we are calling.
         cstring actionName = actionType->controlPlaneName();
         // Copy the previous action profile.
-        auto *actionProfile = new Bmv2_V1ModelActionProfile(*bmv2_V1ModelProperties.actionProfile);
+        auto *actionProfile = new Bmv2V1ModelActionProfile(*bmv2V1ModelProperties.actionProfile);
         // Synthesize arguments for the call based on the action parameters.
         const auto &parameters = actionType->parameters;
         auto *arguments = new IR::Vector<IR::Argument>();
@@ -177,7 +177,7 @@ void BMv2_V1ModelTableStepper::evalTableActionProfile(
     }
 }
 
-void BMv2_V1ModelTableStepper::evalTableActionSelector(
+void Bmv2V1ModelTableStepper::evalTableActionSelector(
     const std::vector<const IR::ActionListElement *> &tableActionList) {
     const auto *state = getExecutionState();
 
@@ -194,8 +194,8 @@ void BMv2_V1ModelTableStepper::evalTableActionSelector(
         cstring actionName = actionType->controlPlaneName();
 
         // Copy the previous action profile.
-        auto *actionProfile = new Bmv2_V1ModelActionProfile(
-            bmv2_V1ModelProperties.actionSelector->getActionProfile()->getProfileDecl());
+        auto *actionProfile = new Bmv2V1ModelActionProfile(
+            bmv2V1ModelProperties.actionSelector->getActionProfile()->getProfileDecl());
         // Synthesize arguments for the call based on the action parameters.
         const auto &parameters = actionType->parameters;
         auto *arguments = new IR::Vector<IR::Argument>();
@@ -220,8 +220,8 @@ void BMv2_V1ModelTableStepper::evalTableActionSelector(
         // TODO: Should we check if we exceed the maximum number of possible profile entries?
         actionProfile->addToActionMap(actionName, ctrlPlaneArgs);
 
-        auto *actionSelector = new Bmv2_V1ModelActionSelector(
-            bmv2_V1ModelProperties.actionSelector->getSelectorDecl(), actionProfile);
+        auto *actionSelector = new Bmv2V1ModelActionSelector(
+            bmv2V1ModelProperties.actionSelector->getSelectorDecl(), actionProfile);
 
         // Update the action profile in the execution state.
         nextState.addTestObject("action_profile", actionProfile->getObjectName(), actionProfile);
@@ -276,7 +276,7 @@ void BMv2_V1ModelTableStepper::evalTableActionSelector(
     }
 }
 
-bool BMv2_V1ModelTableStepper::checkForActionProfile() {
+bool Bmv2V1ModelTableStepper::checkForActionProfile() {
     const auto *impl = table->properties->getProperty("implementation");
     if (impl == nullptr) {
         return false;
@@ -309,16 +309,16 @@ bool BMv2_V1ModelTableStepper::checkForActionProfile() {
     if (testObject == nullptr) {
         // This means, for every possible control plane entry (and with that, new execution state)
         // add the generated action profile.
-        bmv2_V1ModelProperties.addProfileToState = true;
-        bmv2_V1ModelProperties.actionProfile = new Bmv2_V1ModelActionProfile(implDecl);
+        bmv2V1ModelProperties.addProfileToState = true;
+        bmv2V1ModelProperties.actionProfile = new Bmv2V1ModelActionProfile(implDecl);
         return true;
     }
-    bmv2_V1ModelProperties.actionProfile = testObject->checkedTo<Bmv2_V1ModelActionProfile>();
-    bmv2_V1ModelProperties.addProfileToState = false;
+    bmv2V1ModelProperties.actionProfile = testObject->checkedTo<Bmv2V1ModelActionProfile>();
+    bmv2V1ModelProperties.addProfileToState = false;
     return true;
 }
 
-bool BMv2_V1ModelTableStepper::checkForActionSelector() {
+bool Bmv2V1ModelTableStepper::checkForActionSelector() {
     const auto *impl = table->properties->getProperty("implementation");
     if (impl == nullptr) {
         return false;
@@ -352,16 +352,16 @@ bool BMv2_V1ModelTableStepper::checkForActionSelector() {
     if (testObject == nullptr) {
         // This means, for every possible control plane entry (and with that, new execution state)
         // add the generated action profile.
-        bmv2_V1ModelProperties.addProfileToState = true;
-        bmv2_V1ModelProperties.actionProfile = new Bmv2_V1ModelActionProfile(selectorDecl);
+        bmv2V1ModelProperties.addProfileToState = true;
+        bmv2V1ModelProperties.actionProfile = new Bmv2V1ModelActionProfile(selectorDecl);
         return true;
     }
-    bmv2_V1ModelProperties.actionProfile = testObject->checkedTo<Bmv2_V1ModelActionProfile>();
-    bmv2_V1ModelProperties.addProfileToState = false;
+    bmv2V1ModelProperties.actionProfile = testObject->checkedTo<Bmv2V1ModelActionProfile>();
+    bmv2V1ModelProperties.addProfileToState = false;
     return true;
 }
 
-void BMv2_V1ModelTableStepper::checkTargetProperties(
+void Bmv2V1ModelTableStepper::checkTargetProperties(
     const std::vector<const IR::ActionListElement *> & /*tableActionList*/) {
     // Iterate over the table keys and check whether we can mitigate taint.
     for (auto keyProperties : properties.resolvedKeys) {
@@ -379,19 +379,19 @@ void BMv2_V1ModelTableStepper::checkTargetProperties(
 
     // Check whether the table has an action profile associated with it.
     if (checkForActionProfile()) {
-        bmv2_V1ModelProperties.implementaton = TableImplementation::profile;
+        bmv2V1ModelProperties.implementaton = TableImplementation::profile;
         return;
     }
 
     // Check whether the table has an action selector associated with it.
     if (checkForActionSelector()) {
         // TODO: This should be a selector. Implement.
-        bmv2_V1ModelProperties.implementaton = TableImplementation::profile;
+        bmv2V1ModelProperties.implementaton = TableImplementation::profile;
         return;
     }
 }
 
-void BMv2_V1ModelTableStepper::evalTargetTable(
+void Bmv2V1ModelTableStepper::evalTargetTable(
     const std::vector<const IR::ActionListElement *> &tableActionList) {
     const auto *keys = table->getKey();
     // If we have no keys, there is nothing to match.
@@ -418,10 +418,10 @@ void BMv2_V1ModelTableStepper::evalTargetTable(
 
     // If the table is not immutable, we synthesize control plane entries and follow the paths.
     if (properties.tableIsImmutable) {
-        bmv2_V1ModelProperties.implementaton = TableImplementation::constant;
+        bmv2V1ModelProperties.implementaton = TableImplementation::constant;
     }
 
-    switch (bmv2_V1ModelProperties.implementaton) {
+    switch (bmv2V1ModelProperties.implementaton) {
         case TableImplementation::selector: {
             // If an action selector is attached to the table, do not assume normal control plane
             // behavior.
@@ -466,8 +466,8 @@ void BMv2_V1ModelTableStepper::evalTargetTable(
     addDefaultAction(tableMissCondition);
 }
 
-BMv2_V1ModelTableStepper::BMv2_V1ModelTableStepper(BMv2_V1ModelExprStepper *stepper,
-                                                   const IR::P4Table *table)
+Bmv2V1ModelTableStepper::Bmv2V1ModelTableStepper(Bmv2V1ModelExprStepper *stepper,
+                                                 const IR::P4Table *table)
     : TableStepper(stepper, table) {}
 
 }  // namespace P4Tools::P4Testgen::Bmv2

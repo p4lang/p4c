@@ -5,11 +5,6 @@ include(common)
 
 project(p4tools-common)
 
-# Boost filesystem is required for path handling.
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-find_package(Boost REQUIRED COMPONENTS filesystem system iostreams)
-
 # Store the current git commit hash as part of version information.
 execute_process(
   COMMAND git log --pretty=format:-%h -n 1
@@ -39,9 +34,11 @@ set(
   core/target.cpp
   core/z3_solver.cpp
 
+  lib/arch_spec.cpp
   lib/format_int.cpp
   lib/formulae.cpp
   lib/model.cpp
+  lib/namespace_context.cpp
   lib/symbolic_env.cpp
   lib/taint.cpp
   lib/trace_event.cpp
@@ -54,8 +51,6 @@ add_p4tools_library(p4tools-common ${P4C_TOOLS_COMMON_SOURCES})
 
 target_link_libraries(
   p4tools-common
-  PUBLIC ${Boost_SYSTEM_LIBRARY}
-  PUBLIC ${Boost_FILESYSTEM_LIBRARY}
   PUBLIC z3::z3
 )
 

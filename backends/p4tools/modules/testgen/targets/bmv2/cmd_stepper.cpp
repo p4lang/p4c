@@ -9,6 +9,7 @@
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
+#include "backends/p4tools/common/lib/arch_spec.h"
 #include "backends/p4tools/common/lib/formulae.h"
 #include "ir/id.h"
 #include "ir/ir.h"
@@ -18,7 +19,6 @@
 #include "lib/exceptions.h"
 #include "lib/ordered_map.h"
 
-#include "backends/p4tools/modules/testgen/core/arch_spec.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/cmd_stepper.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
@@ -30,15 +30,15 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-BMv2_V1ModelCmdStepper::BMv2_V1ModelCmdStepper(ExecutionState &state, AbstractSolver &solver,
-                                               const ProgramInfo &programInfo)
+Bmv2V1ModelCmdStepper::Bmv2V1ModelCmdStepper(ExecutionState &state, AbstractSolver &solver,
+                                             const ProgramInfo &programInfo)
     : CmdStepper(state, solver, programInfo) {}
 
-const BMv2_V1ModelProgramInfo &BMv2_V1ModelCmdStepper::getProgramInfo() const {
-    return *CmdStepper::getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
+const Bmv2V1ModelProgramInfo &Bmv2V1ModelCmdStepper::getProgramInfo() const {
+    return *CmdStepper::getProgramInfo().checkedTo<Bmv2V1ModelProgramInfo>();
 }
 
-void BMv2_V1ModelCmdStepper::initializeTargetEnvironment(ExecutionState &nextState) const {
+void Bmv2V1ModelCmdStepper::initializeTargetEnvironment(ExecutionState &nextState) const {
     // Associate intrinsic metadata with the packet. The input packet is prefixed with
     // ingress intrinsic metadata and port metadata.
     //
@@ -99,10 +99,10 @@ void BMv2_V1ModelCmdStepper::initializeTargetEnvironment(ExecutionState &nextSta
     nextState.set(packetSizeVar, packetSizeConst);
 }
 
-std::optional<const Constraint *> BMv2_V1ModelCmdStepper::startParser_impl(
+std::optional<const Constraint *> Bmv2V1ModelCmdStepper::startParserImpl(
     const IR::P4Parser *parser, ExecutionState &nextState) const {
     // We need to explicitly map the parser error
-    const auto *errVar = BMv2_V1ModelProgramInfo::getParserParamVar(
+    const auto *errVar = Bmv2V1ModelProgramInfo::getParserParamVar(
         parser, programInfo.getParserErrorType(), 3, "parser_error");
     nextState.setParserErrorLabel(errVar);
 
@@ -115,14 +115,14 @@ std::optional<const Constraint *> BMv2_V1ModelCmdStepper::startParser_impl(
     return std::nullopt;
 }
 
-std::map<Continuation::Exception, Continuation> BMv2_V1ModelCmdStepper::getExceptionHandlers(
+std::map<Continuation::Exception, Continuation> Bmv2V1ModelCmdStepper::getExceptionHandlers(
     const IR::P4Parser *parser, Continuation::Body /*normalContinuation*/,
     const ExecutionState & /*nextState*/) const {
     std::map<Continuation::Exception, Continuation> result;
     auto programInfo = getProgramInfo();
     auto gress = programInfo.getGress(parser);
 
-    const auto *errVar = BMv2_V1ModelProgramInfo::getParserParamVar(
+    const auto *errVar = Bmv2V1ModelProgramInfo::getParserParamVar(
         parser, programInfo.getParserErrorType(), 3, "parser_error");
 
     switch (gress) {

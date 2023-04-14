@@ -8,13 +8,13 @@
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
+#include "backends/p4tools/common/lib/arch_spec.h"
 #include "backends/p4tools/common/lib/formulae.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/ordered_map.h"
 
-#include "backends/p4tools/modules/testgen/core/arch_spec.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/cmd_stepper.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
@@ -66,7 +66,7 @@ void PnaDpdkCmdStepper::initializeTargetEnvironment(ExecutionState &nextState) c
         &PnaZombies::DIRECTION);
 }
 
-std::optional<const Constraint *> PnaDpdkCmdStepper::startParser_impl(
+std::optional<const Constraint *> PnaDpdkCmdStepper::startParserImpl(
     const IR::P4Parser * /*parser*/, ExecutionState &nextState) const {
     // We need to explicitly map the parser error
     nextState.setParserErrorLabel(&PnaConstants::PARSER_ERROR);

@@ -6,11 +6,7 @@
 #include "backends/p4tools/common/compiler/midend.h"
 #include "frontends/common/options.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace EBPF {
+namespace P4Tools::P4Testgen::EBPF {
 
 EBPFCompilerTarget::EBPFCompilerTarget() : CompilerTarget("ebpf", "ebpf") {}
 
@@ -29,8 +25,4 @@ MidEnd EBPFCompilerTarget::mkMidEnd(const CompilerOptions &options) const {
     return midEnd;
 }
 
-}  // namespace EBPF
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::EBPF

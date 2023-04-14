@@ -1,24 +1,21 @@
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 
 #include "backends/p4tools/common/compiler/reachability.h"
+#include "backends/p4tools/common/lib/arch_spec.h"
+#include "backends/p4tools/common/lib/namespace_context.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/id.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "midend/coverage.h"
 
-#include "backends/p4tools/modules/testgen/core/arch_spec.h"
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
-#include "backends/p4tools/modules/testgen/lib/namespace_context.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4Tools::P4Testgen {
 
-ProgramInfo::ProgramInfo(const IR::P4Program *program)
-    : globalNameSpaceContext(NamespaceContext::Empty->push(program)),
-      concolicMethodImpls({}),
-      program(program) {
+ProgramInfo::ProgramInfo(const IR::P4Program *program) : concolicMethodImpls({}), program(program) {
     concolicMethodImpls.add(*Concolic::getCoreConcolicMethodImpls());
     if (TestgenOptions::get().dcg || !TestgenOptions::get().pattern.empty()) {
         // Create DCG.
@@ -34,17 +31,28 @@ ProgramInfo::ProgramInfo(const IR::P4Program *program)
  *  Namespaces and declarations
  * ============================================================================================= */
 
-const IR::IDeclaration *ProgramInfo::findProgramDecl(const IR::Path *path) const {
-    return globalNameSpaceContext->findDecl(path);
+const IR::IDeclaration *ProgramInfo::findProgramDecl(const IR::IGeneralNamespace *ns,
+                                                     const IR::Path *path) {
+    auto name = path->name.name;
+    const auto *decls = ns->getDeclsByName(name)->toVector();
+    if (!decls->empty()) {
+        // TODO: Figure out what to do with multiple results. Maybe return all of them and
+        // let the caller sort it out?
+        BUG_CHECK(decls->size() == 1, "Handling of overloaded names not implemented");
+        return decls->at(0);
+    }
+    BUG("Variable %1% not found in the available namespaces.", path);
 }
 
-const IR::IDeclaration *ProgramInfo::findProgramDecl(const IR::PathExpression *pathExpr) const {
-    return findProgramDecl(pathExpr->path);
+const IR::IDeclaration *ProgramInfo::findProgramDecl(const IR::IGeneralNamespace *ns,
+                                                     const IR::PathExpression *pathExpr) {
+    return findProgramDecl(ns, pathExpr->path);
 }
 
-const IR::Type_Declaration *ProgramInfo::resolveProgramType(const IR::Type_Name *type) const {
+const IR::Type_Declaration *ProgramInfo::resolveProgramType(const IR::IGeneralNamespace *ns,
+                                                            const IR::Type_Name *type) {
     const auto *path = type->path;
-    const auto *decl = findProgramDecl(path)->to<IR::Type_Declaration>();
+    const auto *decl = findProgramDecl(ns, path)->to<IR::Type_Declaration>();
     BUG_CHECK(decl, "Not a type: %1%", path);
     return decl;
 }
@@ -74,7 +82,7 @@ void ProgramInfo::produceCopyInOutCall(const IR::Parameter *param, size_t paramI
     const auto *paramType = param->type;
     // We need to resolve type names.
     if (const auto *tn = paramType->to<IR::Type_Name>()) {
-        paramType = resolveProgramType(tn);
+        paramType = resolveProgramType(program, tn);
     }
     // Retrieve the identifier of the global architecture map using the parameter
     // index.

@@ -4,11 +4,7 @@
 
 #include <algorithm>
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace Bmv2 {
+namespace P4Tools::P4Testgen::Bmv2 {
 
 /* generating from my Python script gen_crc_tables inspired from the C code at:
    http://www.barrgroup.com/Embedded-Systems/How-To/CRC-Calculation-C-Code */
@@ -198,8 +194,4 @@ uint64_t BMv2Hash::identity(const char *buf, size_t len) {
     return res;
 }
 
-}  // namespace Bmv2
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::Bmv2

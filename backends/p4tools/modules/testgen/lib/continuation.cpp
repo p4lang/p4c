@@ -3,12 +3,11 @@
 #include <variant>
 #include <vector>
 
+#include "backends/p4tools/common/lib/namespace_context.h"
 #include "backends/p4tools/common/lib/trace_event.h"
 #include "ir/id.h"
 #include "ir/visitor.h"
 #include "lib/exceptions.h"
-
-#include "backends/p4tools/modules/testgen/lib/namespace_context.h"
 
 namespace P4Tools::P4Testgen {
 

@@ -5,11 +5,7 @@
 #include "backends/p4tools/common/compiler/midend.h"
 #include "frontends/common/options.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace EBPF {
+namespace P4Tools::P4Testgen::EBPF {
 
 class EBPFCompilerTarget : public CompilerTarget {
  public:
@@ -22,10 +18,6 @@ class EBPFCompilerTarget : public CompilerTarget {
     EBPFCompilerTarget();
 };
 
-}  // namespace EBPF
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::EBPF
 
 #endif /* TESTGEN_TARGETS_EBPF_EBPF_H_ */

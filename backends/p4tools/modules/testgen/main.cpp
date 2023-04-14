@@ -7,6 +7,7 @@ int main(int argc, char **argv) {
     setup_signals();
 
     std::vector<const char *> args;
+    args.reserve(argc);
     for (int i = 0; i < argc; ++i) {
         args.push_back(argv[i]);
     }

@@ -8,9 +8,7 @@
 #include "backends/p4tools/modules/testgen/targets/ebpf/target.h"
 #include "backends/p4tools/modules/testgen/testgen.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 /// Register the ebpf compiler target with the tools framework.
 inline void ebpf_registerCompilerTarget() { EBPF::EBPFCompilerTarget::make(); }
@@ -18,8 +16,6 @@ inline void ebpf_registerCompilerTarget() { EBPF::EBPFCompilerTarget::make(); }
 /// Register the ebpf testgen target with the testgen framework.
 inline void ebpf_registerTestgenTarget() { EBPF::EBPFTestgenTarget::make(); }
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
 
 #endif /* TESTGEN_TARGETS_EBPF_REGISTER_H_ */

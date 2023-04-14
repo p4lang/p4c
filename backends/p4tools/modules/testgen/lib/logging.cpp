@@ -3,9 +3,7 @@
 
 #include "lib/log.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 void enableTraceLogging() { Log::addDebugSpec("test_traces:4"); }
 
@@ -17,6 +15,4 @@ void enableCoverageLogging() { Log::addDebugSpec("coverage:4"); }
 
 void enablePerformanceLogging() { Log::addDebugSpec("performance:4"); }
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen

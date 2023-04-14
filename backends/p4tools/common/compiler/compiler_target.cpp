@@ -1,6 +1,7 @@
 #include "backends/p4tools/common/compiler/compiler_target.h"
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "backends/p4tools/common/compiler/context.h"
@@ -17,10 +18,10 @@
 
 namespace P4Tools {
 
-ICompileContext *CompilerTarget::makeContext() { return get().makeContext_impl(); }
+ICompileContext *CompilerTarget::makeContext() { return get().makeContextImpl(); }
 
 std::vector<const char *> *CompilerTarget::initCompiler(int argc, char **argv) {
-    return get().initCompiler_impl(argc, argv);
+    return get().initCompilerImpl(argc, argv);
 }
 
 std::optional<const IR::P4Program *> CompilerTarget::runCompiler() {
@@ -42,10 +43,10 @@ std::optional<const IR::P4Program *> CompilerTarget::runCompiler(const std::stri
 }
 
 std::optional<const IR::P4Program *> CompilerTarget::runCompiler(const IR::P4Program *program) {
-    return get().runCompiler_impl(program);
+    return get().runCompilerImpl(program);
 }
 
-std::optional<const IR::P4Program *> CompilerTarget::runCompiler_impl(
+std::optional<const IR::P4Program *> CompilerTarget::runCompilerImpl(
     const IR::P4Program *program) const {
     const auto &self = get();
 
@@ -67,11 +68,11 @@ std::optional<const IR::P4Program *> CompilerTarget::runCompiler_impl(
     return program;
 }
 
-ICompileContext *CompilerTarget::makeContext_impl() const {
+ICompileContext *CompilerTarget::makeContextImpl() const {
     return new CompileContext<CompilerOptions>();
 }
 
-std::vector<const char *> *CompilerTarget::initCompiler_impl(int argc, char **argv) const {
+std::vector<const char *> *CompilerTarget::initCompilerImpl(int argc, char **argv) const {
     auto *result = P4CContext::get().options().process(argc, argv);
     return ::errorCount() > 0 ? nullptr : result;
 }
@@ -120,7 +121,7 @@ const IR::P4Program *CompilerTarget::runMidEnd(const IR::P4Program *program) con
 }
 
 CompilerTarget::CompilerTarget(std::string deviceName, std::string archName)
-    : Target("compiler", deviceName, archName) {}
+    : Target("compiler", std::move(deviceName), std::move(archName)) {}
 
 const CompilerTarget &CompilerTarget::get() { return Target::get<CompilerTarget>("compiler"); }
 

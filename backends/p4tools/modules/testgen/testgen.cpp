@@ -73,9 +73,8 @@ int Testgen::mainImpl(const IR::P4Program *program) {
     // Print basic information for each test.
     enableInformationLogging();
 
-    auto const inputFile = P4CContext::get().options().file;
+    // Get the options and the seed.
     const auto &testgenOptions = TestgenOptions::get();
-    cstring testDirStr = testgenOptions.outputDir;
     auto seed = Utils::getCurrentSeed();
     if (seed) {
         printFeature("test_info", 4, "============ Program seed %1% =============\n", *seed);
@@ -83,8 +82,10 @@ int Testgen::mainImpl(const IR::P4Program *program) {
 
     // Get the filename of the input file and remove the extension
     // This assumes that inputFile is not null.
+    auto const inputFile = P4CContext::get().options().file;
     auto testPath = std::filesystem::path(inputFile.c_str()).stem();
     // Create the directory, if the directory string is valid and if it does not exist.
+    cstring testDirStr = testgenOptions.outputDir;
     if (!testDirStr.isNullOrEmpty()) {
         auto testDir = std::filesystem::path(testDirStr.c_str());
         std::filesystem::create_directories(testDir);

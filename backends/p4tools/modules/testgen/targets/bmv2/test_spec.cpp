@@ -77,29 +77,29 @@ const Bmv2RegisterCondition *Bmv2RegisterCondition::evaluate(const Model &model)
 cstring Bmv2RegisterCondition::getObjectName() const { return "Bmv2RegisterCondition"; }
 
 /* =========================================================================================
- *  Bmv2_V1ModelActionProfile
+ *  Bmv2V1ModelActionProfile
  * ========================================================================================= */
 
 const std::vector<std::pair<cstring, std::vector<ActionArg>>>
-    *Bmv2_V1ModelActionProfile::getActions() const {
+    *Bmv2V1ModelActionProfile::getActions() const {
     return &actions;
 }
 
-Bmv2_V1ModelActionProfile::Bmv2_V1ModelActionProfile(const IR::IDeclaration *profileDecl)
+Bmv2V1ModelActionProfile::Bmv2V1ModelActionProfile(const IR::IDeclaration *profileDecl)
     : profileDecl(profileDecl) {}
 
-cstring Bmv2_V1ModelActionProfile::getObjectName() const { return profileDecl->controlPlaneName(); }
+cstring Bmv2V1ModelActionProfile::getObjectName() const { return profileDecl->controlPlaneName(); }
 
-const IR::IDeclaration *Bmv2_V1ModelActionProfile::getProfileDecl() const { return profileDecl; }
+const IR::IDeclaration *Bmv2V1ModelActionProfile::getProfileDecl() const { return profileDecl; }
 
-void Bmv2_V1ModelActionProfile::addToActionMap(cstring actionName,
-                                               std::vector<ActionArg> actionArgs) {
+void Bmv2V1ModelActionProfile::addToActionMap(cstring actionName,
+                                              std::vector<ActionArg> actionArgs) {
     actions.emplace_back(actionName, actionArgs);
 }
-size_t Bmv2_V1ModelActionProfile::getActionMapSize() const { return actions.size(); }
+size_t Bmv2V1ModelActionProfile::getActionMapSize() const { return actions.size(); }
 
-const Bmv2_V1ModelActionProfile *Bmv2_V1ModelActionProfile::evaluate(const Model &model) const {
-    auto *profile = new Bmv2_V1ModelActionProfile(profileDecl);
+const Bmv2V1ModelActionProfile *Bmv2V1ModelActionProfile::evaluate(const Model &model) const {
+    auto *profile = new Bmv2V1ModelActionProfile(profileDecl);
     for (const auto &actionTuple : actions) {
         auto actionArgs = actionTuple.second;
         std::vector<ActionArg> evaluatedArgs;
@@ -113,24 +113,24 @@ const Bmv2_V1ModelActionProfile *Bmv2_V1ModelActionProfile::evaluate(const Model
 }
 
 /* =========================================================================================
- *  Bmv2_V1ModelActionSelector
+ *  Bmv2V1ModelActionSelector
  * ========================================================================================= */
 
-Bmv2_V1ModelActionSelector::Bmv2_V1ModelActionSelector(
-    const IR::IDeclaration *selectorDecl, const Bmv2_V1ModelActionProfile *actionProfile)
+Bmv2V1ModelActionSelector::Bmv2V1ModelActionSelector(const IR::IDeclaration *selectorDecl,
+                                                     const Bmv2V1ModelActionProfile *actionProfile)
     : selectorDecl(selectorDecl), actionProfile(actionProfile) {}
 
-cstring Bmv2_V1ModelActionSelector::getObjectName() const { return "Bmv2_V1ModelActionSelector"; }
+cstring Bmv2V1ModelActionSelector::getObjectName() const { return "Bmv2V1ModelActionSelector"; }
 
-const IR::IDeclaration *Bmv2_V1ModelActionSelector::getSelectorDecl() const { return selectorDecl; }
+const IR::IDeclaration *Bmv2V1ModelActionSelector::getSelectorDecl() const { return selectorDecl; }
 
-const Bmv2_V1ModelActionProfile *Bmv2_V1ModelActionSelector::getActionProfile() const {
+const Bmv2V1ModelActionProfile *Bmv2V1ModelActionSelector::getActionProfile() const {
     return actionProfile;
 }
 
-const Bmv2_V1ModelActionSelector *Bmv2_V1ModelActionSelector::evaluate(const Model &model) const {
+const Bmv2V1ModelActionSelector *Bmv2V1ModelActionSelector::evaluate(const Model &model) const {
     const auto *evaluatedProfile = actionProfile->evaluate(model);
-    return new Bmv2_V1ModelActionSelector(selectorDecl, evaluatedProfile);
+    return new Bmv2V1ModelActionSelector(selectorDecl, evaluatedProfile);
 }
 
 /* =========================================================================================

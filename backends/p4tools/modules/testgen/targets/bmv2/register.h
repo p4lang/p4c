@@ -8,18 +8,14 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/target.h"
 #include "backends/p4tools/modules/testgen/testgen.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 /// Register the BMv2 compiler target with the tools framework.
-inline void bmv2_registerCompilerTarget() { Bmv2::BMv2_V1ModelCompilerTarget::make(); }
+inline void bmv2_registerCompilerTarget() { Bmv2::Bmv2V1ModelCompilerTarget::make(); }
 
 /// Register the BMv2 testgen target with the testgen framework.
-inline void bmv2_registerTestgenTarget() { Bmv2::BMv2_V1ModelTestgenTarget::make(); }
+inline void bmv2_registerTestgenTarget() { Bmv2::Bmv2V1ModelTestgenTarget::make(); }
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_REGISTER_H_ */

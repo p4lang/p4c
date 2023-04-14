@@ -10,6 +10,7 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 
+#include "backends/p4tools/common/lib/arch_spec.h"
 #include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/id.h"
@@ -21,7 +22,6 @@
 #include "lib/null.h"
 
 #include "backends/p4tools/modules/testgen//lib/exceptions.h"
-#include "backends/p4tools/modules/testgen/core/arch_spec.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
@@ -35,14 +35,14 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-const IR::Type_Bits BMv2_V1ModelProgramInfo::PARSER_ERR_BITS = IR::Type_Bits(32, false);
+const IR::Type_Bits Bmv2V1ModelProgramInfo::PARSER_ERR_BITS = IR::Type_Bits(32, false);
 
-BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
+Bmv2V1ModelProgramInfo::Bmv2V1ModelProgramInfo(
     const IR::P4Program *program, ordered_map<cstring, const IR::Type_Declaration *> inputBlocks,
-    const std::map<int, int> declIdToGress)
+    std::map<int, int> declIdToGress)
     : ProgramInfo(program),
       programmableBlocks(std::move(inputBlocks)),
-      declIdToGress(declIdToGress) {
+      declIdToGress(std::move(declIdToGress)) {
     const auto &options = TestgenOptions::get();
     concolicMethodImpls.add(*Bmv2Concolic::getBmv2ConcolicMethodImpls());
 
@@ -94,15 +94,15 @@ BMv2_V1ModelProgramInfo::BMv2_V1ModelProgramInfo(
 }
 
 const ordered_map<cstring, const IR::Type_Declaration *>
-    *BMv2_V1ModelProgramInfo::getProgrammableBlocks() const {
+    *Bmv2V1ModelProgramInfo::getProgrammableBlocks() const {
     return &programmableBlocks;
 }
 
-int BMv2_V1ModelProgramInfo::getGress(const IR::Type_Declaration *decl) const {
+int Bmv2V1ModelProgramInfo::getGress(const IR::Type_Declaration *decl) const {
     return declIdToGress.at(decl->declid);
 }
 
-std::vector<Continuation::Command> BMv2_V1ModelProgramInfo::processDeclaration(
+std::vector<Continuation::Command> Bmv2V1ModelProgramInfo::processDeclaration(
     const IR::Type_Declaration *typeDecl, size_t blockIdx) const {
     // Get the architecture specification for this target.
     const auto *archSpec = TestgenTarget::getArchSpec();
@@ -136,7 +136,7 @@ std::vector<Continuation::Command> BMv2_V1ModelProgramInfo::processDeclaration(
     // processing. For example, the egress port.
     if ((archMember->blockName == "Ingress")) {
         auto *egressPortVar =
-            new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidth_bits()),
+            new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidthBits()),
                            new IR::PathExpression("*standard_metadata"), "egress_port");
         auto *portStmt = new IR::AssignmentStatement(egressPortVar, getTargetOutputPortVar());
         cmds.emplace_back(portStmt);
@@ -169,43 +169,41 @@ std::vector<Continuation::Command> BMv2_V1ModelProgramInfo::processDeclaration(
     return cmds;
 }
 
-const IR::Member *BMv2_V1ModelProgramInfo::getTargetInputPortVar() const {
-    return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidth_bits()),
+const IR::Member *Bmv2V1ModelProgramInfo::getTargetInputPortVar() const {
+    return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidthBits()),
                           new IR::PathExpression("*standard_metadata"), "ingress_port");
 }
 
-const IR::Expression *BMv2_V1ModelProgramInfo::getPortConstraint(const IR::Member *portVar) {
+const IR::Expression *Bmv2V1ModelProgramInfo::getPortConstraint(const IR::Member *portVar) {
     const IR::Operation_Binary *portConstraint =
         new IR::LOr(new IR::Equ(portVar, new IR::Constant(portVar->type, BMv2Constants::DROP_PORT)),
                     new IR::Lss(portVar, new IR::Constant(portVar->type, 8)));
     return portConstraint;
 }
 
-const IR::Member *BMv2_V1ModelProgramInfo::getTargetOutputPortVar() const {
-    return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidth_bits()),
+const IR::Member *Bmv2V1ModelProgramInfo::getTargetOutputPortVar() const {
+    return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidthBits()),
                           new IR::PathExpression("*standard_metadata"), "egress_spec");
 }
 
-const IR::Expression *BMv2_V1ModelProgramInfo::dropIsActive() const {
+const IR::Expression *Bmv2V1ModelProgramInfo::dropIsActive() const {
     const auto *egressPortVar = getTargetOutputPortVar();
     return new IR::Equ(IR::getConstant(egressPortVar->type, BMv2Constants::DROP_PORT),
                        egressPortVar);
 }
 
-const IR::Expression *BMv2_V1ModelProgramInfo::createTargetUninitialized(const IR::Type *type,
-                                                                         bool forceTaint) const {
+const IR::Expression *Bmv2V1ModelProgramInfo::createTargetUninitialized(const IR::Type *type,
+                                                                        bool forceTaint) const {
     if (forceTaint) {
         return Utils::getTaintExpression(type);
     }
     return IR::getDefaultValue(type);
 }
 
-const IR::Type_Bits *BMv2_V1ModelProgramInfo::getParserErrorType() const {
-    return &PARSER_ERR_BITS;
-}
+const IR::Type_Bits *Bmv2V1ModelProgramInfo::getParserErrorType() const { return &PARSER_ERR_BITS; }
 
-const IR::PathExpression *BMv2_V1ModelProgramInfo::getBlockParam(cstring blockLabel,
-                                                                 size_t paramIndex) const {
+const IR::PathExpression *Bmv2V1ModelProgramInfo::getBlockParam(cstring blockLabel,
+                                                                size_t paramIndex) const {
     // Retrieve the block and get the parameter type.
     // TODO: This should be necessary, we should be able to this using only the arch spec.
     // TODO: Make this more general and lift it into program_info core.
@@ -218,7 +216,7 @@ const IR::PathExpression *BMv2_V1ModelProgramInfo::getBlockParam(cstring blockLa
     const auto *paramType = param->type;
     // For convenience, resolve type names.
     if (const auto *tn = paramType->to<IR::Type_Name>()) {
-        paramType = resolveProgramType(tn);
+        paramType = resolveProgramType(program, tn);
     }
 
     const auto *archSpec = TestgenTarget::getArchSpec();
@@ -227,10 +225,9 @@ const IR::PathExpression *BMv2_V1ModelProgramInfo::getBlockParam(cstring blockLa
     return new IR::PathExpression(paramType, new IR::Path(archRef));
 }
 
-const IR::Member *BMv2_V1ModelProgramInfo::getParserParamVar(const IR::P4Parser *parser,
-                                                             const IR::Type *type,
-                                                             size_t paramIndex,
-                                                             cstring paramLabel) {
+const IR::Member *Bmv2V1ModelProgramInfo::getParserParamVar(const IR::P4Parser *parser,
+                                                            const IR::Type *type, size_t paramIndex,
+                                                            cstring paramLabel) {
     // If the optional parser parameter is not present, write directly to the
     // global parser metadata state. Otherwise, we retrieve the parameter name.
     auto parserApplyParams = parser->getApplyParameters()->parameters;

@@ -14,7 +14,7 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-class BMv2_V1ModelProgramInfo : public ProgramInfo {
+class Bmv2V1ModelProgramInfo : public ProgramInfo {
  private:
     /// The program's top level blocks: the parser, the checksum verifier, the MAU pipeline, the
     /// checksum calculator, and the deparser.
@@ -32,9 +32,9 @@ class BMv2_V1ModelProgramInfo : public ProgramInfo {
                                                           size_t blockIdx) const;
 
  public:
-    BMv2_V1ModelProgramInfo(const IR::P4Program *program,
-                            ordered_map<cstring, const IR::Type_Declaration *> inputBlocks,
-                            const std::map<int, int> declIdToGress);
+    Bmv2V1ModelProgramInfo(const IR::P4Program *program,
+                           ordered_map<cstring, const IR::Type_Declaration *> inputBlocks,
+                           std::map<int, int> declIdToGress);
 
     /// @returns the gress associated with the given parser.
     int getGress(const IR::Type_Declaration *) const;

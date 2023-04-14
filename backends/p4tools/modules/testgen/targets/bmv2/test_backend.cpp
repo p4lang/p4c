@@ -103,7 +103,7 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
     // Save the values of all the fields in it and return.
     if (TestgenOptions::get().testBackend == "METADATA") {
         auto *metadataCollection = new MetadataCollection();
-        const auto *bmv2ProgInfo = programInfo.checkedTo<BMv2_V1ModelProgramInfo>();
+        const auto *bmv2ProgInfo = programInfo.checkedTo<Bmv2V1ModelProgramInfo>();
         const auto *localMetadataVar = bmv2ProgInfo->getBlockParam("Parser", 2);
         const auto *localMetadataType = executionState->resolveType(localMetadataVar->type);
         auto flatFields = executionState->getFlatFields(
@@ -134,7 +134,7 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
     const auto actionProfiles = executionState->getTestObjectCategory("action_profile");
     for (const auto &testObject : actionProfiles) {
         const auto profileName = testObject.first;
-        const auto *actionProfile = testObject.second->checkedTo<Bmv2_V1ModelActionProfile>();
+        const auto *actionProfile = testObject.second->checkedTo<Bmv2V1ModelActionProfile>();
         const auto *evaluatedProfile = actionProfile->evaluate(*completedModel);
         testSpec->addTestObject("action_profiles", profileName, evaluatedProfile);
     }
@@ -142,7 +142,7 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
     const auto actionSelectors = executionState->getTestObjectCategory("action_selector");
     for (const auto &testObject : actionSelectors) {
         const auto selectorName = testObject.first;
-        const auto *actionSelector = testObject.second->checkedTo<Bmv2_V1ModelActionSelector>();
+        const auto *actionSelector = testObject.second->checkedTo<Bmv2V1ModelActionSelector>();
         const auto *evaluatedSelector = actionSelector->evaluate(*completedModel);
         testSpec->addTestObject("action_selectors", selectorName, evaluatedSelector);
     }
