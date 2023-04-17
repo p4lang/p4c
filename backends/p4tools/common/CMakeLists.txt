@@ -38,6 +38,7 @@ set(
   lib/format_int.cpp
   lib/model.cpp
   lib/namespace_context.cpp
+  lib/state_variable.cpp
   lib/symbolic_env.cpp
   lib/taint.cpp
   lib/trace_event.cpp

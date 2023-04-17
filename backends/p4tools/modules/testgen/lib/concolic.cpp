@@ -96,7 +96,7 @@ ConcolicMethodImpls::ConcolicMethodImpls(const ImplList &implList) { add(implLis
 bool ConcolicResolver::preorder(const IR::ConcolicVariable *var) {
     cstring concolicMethodName = var->concolicMethodName;
     // Convert the concolic member variable to a state variable.
-    StateVariable concolicVarName = var->concolicMember;
+    auto concolicVarName = StateVariable(*var->concolicMember);
     auto concolicReplacment = resolvedConcolicVariables.find(concolicVarName);
     if (concolicReplacment == resolvedConcolicVariables.end()) {
         bool found = concolicMethodImpls.exec(concolicMethodName, var, state, completedModel,
@@ -126,10 +126,10 @@ ConcolicResolver::ConcolicResolver(const Model &completedModel, const ExecutionS
     visitDagOnce = false;
 }
 
-static const ConcolicMethodImpls::ImplList coreConcolicMethodImpls({});
+static const ConcolicMethodImpls::ImplList CORE_CONCOLIC_METHOD_IMPLS({});
 
 const ConcolicMethodImpls::ImplList *Concolic::getCoreConcolicMethodImpls() {
-    return &coreConcolicMethodImpls;
+    return &CORE_CONCOLIC_METHOD_IMPLS;
 }
 
 }  // namespace P4Tools::P4Testgen

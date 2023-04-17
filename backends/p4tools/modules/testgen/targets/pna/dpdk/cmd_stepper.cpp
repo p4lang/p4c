@@ -50,19 +50,19 @@ void PnaDpdkCmdStepper::initializeTargetEnvironment(ExecutionState &nextState) c
         blockIdx++;
     }
     const auto *thirtytwoBitType = IR::getBitType(32);
-    nextState.set(&PnaConstants::DROP_VAR, IR::getBoolLiteral(false));
+    nextState.set(PnaConstants::DROP_VAR, IR::getBoolLiteral(false));
     // PNA implicitly sets the output port to 0.
-    nextState.set(&PnaConstants::OUTPUT_PORT_VAR, IR::getConstant(thirtytwoBitType, 0));
+    nextState.set(PnaConstants::OUTPUT_PORT_VAR, IR::getConstant(thirtytwoBitType, 0));
     // Initialize the direction metadata variables.
-    nextState.set(
-        new IR::Member(thirtytwoBitType, new IR::PathExpression("*pre_istd"), "direction"),
-        &PnaZombies::DIRECTION);
-    nextState.set(
-        new IR::Member(thirtytwoBitType, new IR::PathExpression("*parser_istd"), "direction"),
-        &PnaZombies::DIRECTION);
-    nextState.set(
-        new IR::Member(thirtytwoBitType, new IR::PathExpression("*main_istd"), "direction"),
-        &PnaZombies::DIRECTION);
+    nextState.set(*new StateVariable(
+                      {{IR::Type_Unknown::get(), "*pre_istd"}, {thirtytwoBitType, "direction"}}),
+                  &PnaZombies::DIRECTION);
+    nextState.set(*new StateVariable(
+                      {{IR::Type_Unknown::get(), "*parser_istd"}, {thirtytwoBitType, "direction"}}),
+                  &PnaZombies::DIRECTION);
+    nextState.set(*new StateVariable(
+                      {{IR::Type_Unknown::get(), "*main_istd"}, {thirtytwoBitType, "direction"}}),
+                  &PnaZombies::DIRECTION);
 }
 
 std::optional<const Constraint *> PnaDpdkCmdStepper::startParserImpl(
@@ -70,8 +70,7 @@ std::optional<const Constraint *> PnaDpdkCmdStepper::startParserImpl(
     // We need to explicitly map the parser error
     nextState.setParserErrorLabel(&PnaConstants::PARSER_ERROR);
     // Initialize the parser error to 0.
-    nextState.set(&PnaConstants::PARSER_ERROR,
-                  IR::getConstant(programInfo.getParserErrorType(), 0));
+    nextState.set(PnaConstants::PARSER_ERROR, IR::getConstant(programInfo.getParserErrorType(), 0));
     return std::nullopt;
 }
 

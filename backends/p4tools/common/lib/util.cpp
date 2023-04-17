@@ -95,39 +95,34 @@ const IR::Constant *Utils::getRandConstantForType(const IR::Type_Bits *type) {
 
 const cstring Utils::Valid = "*valid";
 
-const StateVariable &Utils::getZombieTableVar(const IR::Type *type, const IR::P4Table *table,
-                                              cstring name, std::optional<int> idx1_opt,
-                                              std::optional<int> idx2_opt) {
-    // Mash the table name, the given name, and the optional indices together.
-    // XXX To be nice, we should probably build a PathExpression, but that's annoying to do, and we
-    // XXX can probably get away with this.
-    std::stringstream out;
-    out << table->name.toString() << "." << name;
-    if (idx1_opt.has_value()) {
-        out << "." << idx1_opt.value();
-    }
-    if (idx2_opt.has_value()) {
-        out << "." << idx2_opt.value();
-    }
-
-    return Zombie::getVar(type, 0, out.str());
-}
-
-const StateVariable &Utils::getZombieVar(const IR::Type *type, int incarnation, cstring name) {
+const StateVariable *Utils::getZombieVar(const IR::Type *type, int incarnation, cstring name) {
     return Zombie::getVar(type, incarnation, name);
 }
 
-const StateVariable &Utils::getZombieConst(const IR::Type *type, int incarnation, cstring name) {
+const StateVariable *Utils::getZombieConst(const IR::Type *type, int incarnation, cstring name) {
     return Zombie::getConst(type, incarnation, name);
 }
 
-const IR::Member *Utils::getHeaderValidity(const IR::Expression *headerRef) {
-    return new IR::Member(IR::Type::Boolean::get(), headerRef, Valid);
+const StateVariable *Utils::getHeaderValidity(const IR::Expression *headerRef) {
+    StateVariable *validityRef = nullptr;
+    if (const auto *member = headerRef->to<IR::Member>()) {
+        headerRef = new StateVariable(*member);
+    } else if (const auto *path = headerRef->to<IR::Member>()) {
+        headerRef = new StateVariable(*path);
+    } else {
+        BUG("Unsupported reference  %1% of type %2%", headerRef, headerRef->node_type_name());
+    }
+    // Members are copied here.
+    validityRef->appendInPlace({IR::Type_Boolean::get(), Valid});
+    return validityRef;
 }
 
-StateVariable Utils::addZombiePostfix(const IR::Expression *paramPath,
-                                      const IR::Type_Base *baseType) {
-    return StateVariable(new IR::Member(baseType, paramPath, "*"));
+const StateVariable *Utils::addZombiePostfix(const StateVariable &var,
+                                             const IR::Type_Base *baseType) {
+    // Members are copied here.
+    auto *newVar = var.clone();
+    newVar->appendInPlace({baseType, "*"});
+    return newVar;
 }
 
 const IR::TaintExpression *Utils::getTaintExpression(const IR::Type *type) {
@@ -153,11 +148,11 @@ const IR::TaintExpression *Utils::getTaintExpression(const IR::Type *type) {
     return result;
 }
 
-const StateVariable &Utils::getConcolicMember(const IR::ConcolicVariable *var, int concolicId) {
+const StateVariable *Utils::getConcolicMember(const IR::ConcolicVariable *var, int concolicId) {
     const auto *const concolicMember = var->concolicMember;
     auto *clonedMember = concolicMember->clone();
     clonedMember->member = std::to_string(concolicId).c_str();
-    return *(new StateVariable(clonedMember));
+    return new StateVariable(*clonedMember);
 }
 
 const IR::MethodCallExpression *Utils::generateInternalMethodCall(

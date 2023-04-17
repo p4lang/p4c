@@ -52,7 +52,7 @@ const IR::Expression *SymbolicEnv::subst(const IR::Expression *expr) const {
 
         const IR::Node *preorder(IR::Member *member) override {
             prune();
-            auto var = StateVariable(member);
+            auto var = StateVariable(*member);
             if (symbolicEnv.exists(var)) {
                 const auto *result = symbolicEnv.get(var);
                 // Sometimes the symbolic constant and its declaration in the environment are the

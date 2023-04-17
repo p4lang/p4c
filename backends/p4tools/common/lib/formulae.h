@@ -32,124 +32,120 @@ class AbstractRepCheckedNode : public ICastable {
 };
 
 class StateVariable : public IR::Expression {
-    /// The wrapped members.
-    std::vector<std::pair<IR::ID, const IR::Type *>> members;
+ public:
+    /// The member of a StateVariable. Requires a type and a name.
+    class VariableMember {
+     public:
+        /// The type of the variable item.
+        const IR::Type *type;
 
-    explicit StateVariable(std::vector<std::pair<IR::ID, const IR::Type *>> members,
-                           const IR::Type *type, const Util::SourceInfo &srcInfo)
-        : Expression(srcInfo, type), members(std::move(members)) {}
+        /// The name of the variable item.
+        cstring name;
+
+        VariableMember(const VariableMember &) = default;
+        VariableMember(VariableMember &&) = default;
+        VariableMember &operator=(const VariableMember &) = default;
+        VariableMember &operator=(VariableMember &&) = default;
+        ~VariableMember() = default;
+
+        /// Construct with type and cstring.
+        VariableMember(const IR::Type *type, cstring name);  // NOLINT(runtime/explicit)
+    };
+
+ private:
+    /// The wrapped members.
+    std::deque<VariableMember> members;
+
+    /// A constructor for an anonymous, untyped state variable without type information.
+    StateVariable(std::initializer_list<cstring> untypedMembers);
 
  public:
-    StateVariable(const IR::Member *member) : Expression(srcInfo, member->type) {
-        const IR::Expression *expr = member;
-        while (const auto *memberExpr = expr->to<IR::Member>()) {
-            members.emplace_back(memberExpr->member, memberExpr->type);
-            expr = memberExpr->expr;
-        }
-        const auto *path = expr->checkedTo<IR::PathExpression>();
-        members.emplace_back(path->path->name, path->type);
-    }
+    StateVariable(const StateVariable &) = default;
+    StateVariable(StateVariable &&) = default;
+    StateVariable &operator=(const StateVariable &) = default;
+    StateVariable &operator=(StateVariable &&) = default;
+    ~StateVariable() override = default;
 
-    StateVariable(const IR::PathExpression *path) : Expression(srcInfo, path->type) {
-        type = path->type;
-        srcInfo = path->getSourceInfo();
-        members.emplace_back(path->path->name, path->type);
-    }
+    /// Derives a StateVariable from a member by unraveling the member.
+    /// The type of the StateVariable is the type of the member, and with that the last element.
+    explicit StateVariable(const IR::Member &member);
 
-    /// Implements comparisons so that StateVariables can be used as map keys.
-    bool operator==(const StateVariable &other) const {
-        // We use a custom compare function.
-        auto memberSize = members.size();
-        auto otherMemberSize = members.size();
-        if (memberSize != otherMemberSize) {
-            return false;
-        }
-        for (size_t idx = 0; idx < memberSize; ++idx) {
-            auto member = members.at(idx);
-            auto otherMember = other.members.at(idx);
-            if (member.first.name != otherMember.first.name ||
-                member.second != otherMember.second) {
-                return false;
-            }
-        }
+    /// Derives a StateVariable from a PathExpression, which is just the path contained within the
+    /// expression. The type of the StateVariable is the type of the path.
+    explicit StateVariable(const IR::PathExpression &path);
 
-        return true;
-    }
+    /// Derives a StateVariable from a deque of members.
+    /// If the list is not empty the type of the StateVariable is the last element in the deque.
+    explicit StateVariable(const Util::SourceInfo &srcInfo, std::deque<VariableMember> members);
+
+    /// Derives a StateVariable from a deque of members.
+    /// If the list is not empty the type of the StateVariable is the last element in the deque.
+    explicit StateVariable(std::deque<VariableMember> members);
+
+    /// A completely untyped StateVariable.
+    /// Useful if you need to initialize an anonymous variable which is typed later.
+    // NOLINTNEXTLINE
+    [[nodiscard]] static StateVariable UntypedStateVariable(
+        std::initializer_list<cstring> untypedMembers);
 
     /// Implements comparisons so that StateVariables can be used as map keys.
-    [[nodiscard]] bool equiv(const StateVariable &other) const {
-        // We use a custom compare function.
-        auto memberSize = members.size();
-        auto otherMemberSize = members.size();
-        if (memberSize != otherMemberSize) {
-            return false;
-        }
-        for (size_t idx = 0; idx < memberSize; ++idx) {
-            auto member = members.at(idx);
-            auto otherMember = other.members.at(idx);
-            if (member.first.name != otherMember.first.name ||
-                member.second->equiv(*otherMember.second)) {
-                return false;
-            }
-        }
-        return true;
-    }
+    bool operator==(const StateVariable &other) const;
 
     /// Implements comparisons so that StateVariables can be used as map keys.
-    bool operator<(const StateVariable &other) const {
-        // We use a custom compare function.
-        auto memberSize = members.size();
-        auto otherMemberSize = members.size();
-        if (memberSize < otherMemberSize) {
-            return true;
-        }
-        for (size_t idx = 0; idx < memberSize; ++idx) {
-            auto member = members.at(idx);
-            auto otherMember = other.members.at(idx);
-            if (member.first.name < otherMember.first.name) {
-                return true;
-            }
-            if (member.first.name > otherMember.first.name) {
-                return false;
-            }
-        }
+    [[nodiscard]] bool equiv(const StateVariable &other) const;
 
-        return false;
-    }
+    /// Implements comparisons so that StateVariables can be used as map keys.
+    bool operator<(const StateVariable &other) const;
 
-    [[nodiscard]] cstring toString() const override {
-        std::stringstream stream;
-        for (const auto &member : members) {
-            stream << member.first;
-            if (&member != &members.front()) {
-                stream << ".";
-            }
-        }
-        return stream.str();
-    }
+    [[nodiscard]] cstring toString() const override;
 
-    void dbprint(std::ostream &out) const override {
-        for (const auto &member : members) {
-            out << member.first;
-            if (&member != &members.front()) {
-                out << ".";
-            }
-        }
-    }
+    void dbprint(std::ostream &out) const override;
 
-    [[nodiscard]] const auto &getMembers() const { return members; }
+    /// @returns the list of members contained in this StateVariable.
+    [[nodiscard]] const std::deque<VariableMember> &getMembers() const;
 
-    [[nodiscard]] auto getHead() const { return members.back(); }
+    /// @returns the element at index @param n.
+    [[nodiscard]] const StateVariable::VariableMember &at(size_t n) const;
 
-    [[nodiscard]] auto at(size_t n) const { return members.at(n); }
+    /// @returns the size of the state variable in terms of members.
+    [[nodiscard]] size_t size() const;
 
-    [[nodiscard]] auto getTail() const { return members.front(); }
+    /// @returns the first member (from the right).
+    [[nodiscard]] const StateVariable::VariableMember &front() const;
 
-    [[nodiscard]] auto size() const { return members.size(); }
+    /// @returns the last member (from the right).
+    [[nodiscard]] const StateVariable::VariableMember &back() const;
 
-    [[nodiscard]] StateVariable *clone() const override {
-        return new StateVariable(members, type, srcInfo);
-    }
+    void popFrontInPlace();
+
+    /// Pops the first member (from the right) from the StateVariable and then @returns a new
+    /// variable.
+    [[nodiscard]] StateVariable popFront() const;
+
+    /// Append a member to the StateVariable in place. Updates the type of the member.
+    void popBackInPlace();
+
+    /// Pops the last member (from the right) from the StateVariable and then @returns a new
+    /// variable.
+    [[nodiscard]] StateVariable popBack() const;
+
+    /// Append a member to the StateVariable in place. Updates the type of the member.
+    void appendInPlace(VariableMember item);
+
+    /// Append a member to the StateVariable. @returns a new variable.
+    [[nodiscard]] StateVariable append(VariableMember &item) const;
+
+    /// Prepend a member to the StateVariable in place.
+    void prependInPlace(VariableMember item);
+
+    /// Prepend a member to the StateVariable. @returns a new variable.
+    [[nodiscard]] StateVariable prepend(VariableMember item) const;
+
+    /// @returns a StateVariable which contains a subset of the parent variable.
+    /// TODO: Use a std::span once we have C++20.
+    [[nodiscard]] StateVariable getSlice(int64_t lo, int64_t hi) const;
+
+    [[nodiscard]] StateVariable *clone() const override;
 };
 
 }  // namespace P4Tools

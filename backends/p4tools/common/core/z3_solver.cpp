@@ -525,13 +525,13 @@ bool Z3Translator::preorder(const IR::BoolLiteral *boolLiteral) {
 }
 
 bool Z3Translator::preorder(const IR::Member *member) {
-    result = solver.declareVar(StateVariable(member));
+    result = solver.declareVar(StateVariable(*member));
     return false;
 }
 
 bool Z3Translator::preorder(const IR::ConcolicVariable *var) {
     /// Declare the member contained within the concolic variable
-    result = solver.declareVar(StateVariable(var->concolicMember));
+    result = solver.declareVar(StateVariable(*var->concolicMember));
     return false;
 }
 

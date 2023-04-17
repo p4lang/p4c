@@ -85,7 +85,7 @@ const TestSpec *PnaTestBackend::createTestSpec(const ExecutionState *executionSt
         auto flatFields = executionState->getFlatFields(
             localMetadataVar, localMetadataType->checkedTo<IR::Type_Struct>(), {});
         for (const auto *fieldRef : flatFields) {
-            const auto *fieldVal = completedModel->evaluate(executionState->get(fieldRef));
+            const auto *fieldVal = completedModel->evaluate(executionState->get(*fieldRef));
             // Try to remove the leading internal name for the metadata field.
             // Thankfully, this string manipulation is safe if we are out of range.
             auto fieldString = fieldRef->toString();

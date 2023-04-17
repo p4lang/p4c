@@ -97,7 +97,7 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
              // Input must be an IPv4 header.
              ipHdrRef->type->checkedTo<IR::Type_Header>();
 
-             const auto &validVar = state.get(Utils::getHeaderValidity(ipHdrRef));
+             const auto &validVar = state.get(*Utils::getHeaderValidity(ipHdrRef));
              // Check whether the validity bit of the header is false.
              // If yes, do not bother evaluating the checksum.
              auto emitIsTainted = state.hasTaint(validVar);
@@ -108,18 +108,21 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  return;
              }
              // Define a series of short-hand variables. These are hardcoded just like the extern.
-             const auto *version = state.get(new IR::Member(ipHdrRef, "version"));
-             const auto *ihl = state.get(new IR::Member(ipHdrRef, "ihl"));
-             const auto *diffserv = state.get(new IR::Member(ipHdrRef, "diffserv"));
-             const auto *totalLen = state.get(new IR::Member(ipHdrRef, "totalLen"));
-             const auto *identification = state.get(new IR::Member(ipHdrRef, "identification"));
-             const auto *flags = state.get(new IR::Member(ipHdrRef, "flags"));
-             const auto *fragOffset = state.get(new IR::Member(ipHdrRef, "fragOffset"));
-             const auto *ttl = state.get(new IR::Member(ipHdrRef, "ttl"));
-             const auto *protocol = state.get(new IR::Member(ipHdrRef, "protocol"));
-             const auto *hdrChecksum = state.get(new IR::Member(ipHdrRef, "hdrChecksum"));
-             const auto *srcAddr = state.get(new IR::Member(ipHdrRef, "srcAddr"));
-             const auto *dstAddr = state.get(new IR::Member(ipHdrRef, "dstAddr"));
+             const auto *version = state.get(*new StateVariable(IR::Member(ipHdrRef, "version")));
+             const auto *ihl = state.get(*new StateVariable(IR::Member(ipHdrRef, "ihl")));
+             const auto *diffserv = state.get(*new StateVariable(IR::Member(ipHdrRef, "diffserv")));
+             const auto *totalLen = state.get(*new StateVariable(IR::Member(ipHdrRef, "totalLen")));
+             const auto *identification =
+                 state.get(*new StateVariable(IR::Member(ipHdrRef, "identification")));
+             const auto *flags = state.get(*new StateVariable(IR::Member(ipHdrRef, "flags")));
+             const auto *fragOffset =
+                 state.get(*new StateVariable(IR::Member(ipHdrRef, "fragOffset")));
+             const auto *ttl = state.get(*new StateVariable(IR::Member(ipHdrRef, "ttl")));
+             const auto *protocol = state.get(*new StateVariable(IR::Member(ipHdrRef, "protocol")));
+             const auto *hdrChecksum =
+                 state.get(*new StateVariable(IR::Member(ipHdrRef, "hdrChecksum")));
+             const auto *srcAddr = state.get(*new StateVariable(IR::Member(ipHdrRef, "srcAddr")));
+             const auto *dstAddr = state.get(*new StateVariable(IR::Member(ipHdrRef, "dstAddr")));
              const auto *bt8 = IR::getBitType(8);
              const auto *bt16 = IR::getBitType(16);
              const auto *bt32 = IR::getBitType(32);
@@ -174,8 +177,8 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
              // Input must be the headers struct.
              headers->type->checkedTo<IR::Type_Struct>();
              const auto *tcpRef = new IR::Member(headers, "tcp");
-             const auto *syn = state.get(new IR::Member(tcpRef, "syn"));
-             const auto *ack = state.get(new IR::Member(tcpRef, "ack"));
+             const auto *syn = state.get(*new StateVariable(IR::Member(tcpRef, "syn")));
+             const auto *ack = state.get(*new StateVariable(IR::Member(tcpRef, "ack")));
 
              // Implement the simple conntrack case since we do not support multiple packets here
              // yet.

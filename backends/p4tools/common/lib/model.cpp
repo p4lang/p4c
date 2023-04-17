@@ -28,18 +28,18 @@ class CompleteVisitor : public Inspector {
 
  public:
     bool preorder(const IR::Member *member) override {
-        if (model->count(StateVariable(member)) == 0) {
+        if (model->count(StateVariable(*member)) == 0) {
             LOG_FEATURE(
                 "common", 5,
                 "***** Did not find a binding for " << member << ". Autocompleting." << std::endl);
             const auto *type = member->type;
-            model->emplace(member, IR::getDefaultValue(type));
+            model->emplace(StateVariable(*member), IR::getDefaultValue(type));
         }
         return false;
     }
 
     bool preorder(const IR::ConcolicVariable *var) override {
-        auto stateVar = StateVariable(var->concolicMember);
+        auto stateVar = StateVariable(*var->concolicMember);
         model->emplace(stateVar, IR::getDefaultValue(var->type));
         return false;
     }
@@ -102,10 +102,10 @@ const IR::Literal *Model::evaluate(const IR::Expression *expr,
 
      public:
         const IR::Literal *preorder(IR::Member *member) override {
-            BUG_CHECK(self.count(StateVariable(member)), "Variable not bound in model: %1%",
+            BUG_CHECK(self.count(StateVariable(*member)), "Variable not bound in model: %1%",
                       member);
             prune();
-            return self.at(StateVariable(member))->checkedTo<IR::Literal>();
+            return self.at(StateVariable(*member))->checkedTo<IR::Literal>();
         }
 
         const IR::Literal *preorder(IR::TaintExpression *var) override {
@@ -113,7 +113,7 @@ const IR::Literal *Model::evaluate(const IR::Expression *expr,
         }
 
         const IR::Literal *preorder(IR::ConcolicVariable *var) override {
-            auto stateVar = StateVariable(var->concolicMember);
+            auto stateVar = StateVariable(*var->concolicMember);
             BUG_CHECK(self.count(stateVar), "Variable not bound in model: %1%",
                       stateVar.toString());
             return self.at(stateVar)->checkedTo<IR::Literal>();

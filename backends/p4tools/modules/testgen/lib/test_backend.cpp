@@ -64,7 +64,7 @@ const Model *TestBackEnd::computeConcolicVariables(const ExecutionState *executi
             const IR::Expression *pathConstraint = nullptr;
             // We need to differentiate between state variables and expressions here.
             if (std::holds_alternative<const StateVariable>(concolicVariable)) {
-                pathConstraint = new IR::Equ(std::get<const StateVariable>(concolicVariable),
+                pathConstraint = new IR::Equ(&std::get<const StateVariable>(concolicVariable),
                                              concolicAssignment);
             } else if (std::holds_alternative<const IR::Expression *>(concolicVariable)) {
                 pathConstraint = new IR::Equ(std::get<const IR::Expression *>(concolicVariable),
@@ -97,7 +97,7 @@ bool TestBackEnd::run(const FinalState &state) {
         const auto *executionState = state.getExecutionState();
         const auto *outputPacketExpr = executionState->getPacketBuffer();
         const auto *completedModel = state.getCompletedModel();
-        const auto *outputPortExpr = executionState->get(programInfo.getTargetOutputPortVar());
+        const auto *outputPortExpr = executionState->get(*programInfo.getTargetOutputPortVar());
         const auto &allStatements = programInfo.getAllStatements();
 
         auto *solver = state.getSolver().to<Z3Solver>();
@@ -194,7 +194,7 @@ TestBackEnd::TestInfo TestBackEnd::produceTestInfo(
     if (payloadSize > 0) {
         const auto *payloadType = IR::getBitType(payloadSize);
         const auto *payloadExpr =
-            completedModel->get(ExecutionState::getPayloadLabel(payloadType), false);
+            completedModel->get(*ExecutionState::getPayloadLabel(payloadType), false);
         if (payloadExpr == nullptr) {
             payloadExpr = Utils::getRandConstantForType(payloadType);
         }

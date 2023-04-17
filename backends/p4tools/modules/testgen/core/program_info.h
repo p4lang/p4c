@@ -44,7 +44,7 @@ class ProgramInfo : public ICastable {
 
     ProgramInfo &operator=(ProgramInfo &&) = default;
 
-    virtual ~ProgramInfo() = default;
+    ~ProgramInfo() override = default;
 
     /// The P4 program from which this object is derived.
     const IR::P4Program *program;
@@ -60,10 +60,10 @@ class ProgramInfo : public ICastable {
     [[nodiscard]] std::optional<const Constraint *> getTargetConstraints() const;
 
     /// @returns the metadata member corresponding to the ingress port
-    [[nodiscard]] virtual const IR::Member *getTargetInputPortVar() const = 0;
+    [[nodiscard]] virtual const StateVariable *getTargetInputPortVar() const = 0;
 
     /// @returns the metadata member corresponding to the final output port
-    [[nodiscard]] virtual const IR::Member *getTargetOutputPortVar() const = 0;
+    [[nodiscard]] virtual const StateVariable *getTargetOutputPortVar() const = 0;
 
     /// @returns an expression that checks whether the packet is to be dropped.
     /// The computation is target specific.

@@ -76,26 +76,26 @@ void Bmv2V1ModelCmdStepper::initializeTargetEnvironment(ExecutionState &nextStat
 
     const auto *nineBitType = IR::getBitType(9);
     const auto *oneBitType = IR::getBitType(1);
-    nextState.set(programInfo.getTargetInputPortVar(),
+    nextState.set(*programInfo.getTargetInputPortVar(),
                   nextState.createZombieConst(nineBitType, "*bmv2_ingress_port"));
     // BMv2 implicitly sets the output port to 0.
-    nextState.set(programInfo.getTargetOutputPortVar(), IR::getConstant(nineBitType, 0));
+    nextState.set(*programInfo.getTargetOutputPortVar(), IR::getConstant(nineBitType, 0));
     // Initialize parser_err with no error.
     const auto *parserErrVar =
-        new IR::Member(programInfo.getParserErrorType(),
-                       new IR::PathExpression("*standard_metadata"), "parser_error");
-    nextState.set(parserErrVar, IR::getConstant(parserErrVar->type, 0));
+        new StateVariable({{IR::Type_Unknown::get(), "*standard_metadata"},
+                           {programInfo.getParserErrorType(), "parser_error"}});
+    nextState.set(*parserErrVar, IR::getConstant(parserErrVar->type, 0));
     // Initialize checksum_error with no error.
-    const auto *checksumErrVar =
-        new IR::Member(oneBitType, new IR::PathExpression("*standard_metadata"), "checksum_error");
-    nextState.set(checksumErrVar, IR::getConstant(checksumErrVar->type, 0));
+    const auto *checksumErrVar = new StateVariable(
+        {{IR::Type_Unknown::get(), "*standard_metadata"}, {oneBitType, "checksum_error"}});
+    nextState.set(*checksumErrVar, IR::getConstant(checksumErrVar->type, 0));
     // The packet size meta data is the testgen packet length variable divided by 8.
     const auto *pktSizeType = ExecutionState::getPacketSizeVarType();
-    const auto *packetSizeVar =
-        new IR::Member(pktSizeType, new IR::PathExpression("*standard_metadata"), "packet_length");
+    const auto *packetSizeVar = new StateVariable(
+        {{IR::Type_Unknown::get(), "*standard_metadata"}, {pktSizeType, "packet_length"}});
     const auto *packetSizeConst = new IR::Div(pktSizeType, ExecutionState::getInputPacketSizeVar(),
                                               IR::getConstant(pktSizeType, 8));
-    nextState.set(packetSizeVar, packetSizeConst);
+    nextState.set(*packetSizeVar, packetSizeConst);
 }
 
 std::optional<const Constraint *> Bmv2V1ModelCmdStepper::startParserImpl(
@@ -103,7 +103,7 @@ std::optional<const Constraint *> Bmv2V1ModelCmdStepper::startParserImpl(
     // We need to explicitly map the parser error
     const auto *errVar = Bmv2V1ModelProgramInfo::getParserParamVar(
         parser, programInfo.getParserErrorType(), 3, "parser_error");
-    nextState.setParserErrorLabel(errVar);
+    nextState.setParserErrorLabel(new StateVariable(*errVar));
 
     /// Set the restriction on the input port for PTF tests.
     /// This is necessary since the PTF framework only allows a specific port range.
@@ -126,11 +126,11 @@ std::map<Continuation::Exception, Continuation> Bmv2V1ModelCmdStepper::getExcept
 
     switch (gress) {
         case BMV2_INGRESS:
-            // TODO: Implement the conditions above. Currently, this always drops the packet.
-            // Suggest refactoring `result` so that its values are lists of (path condition,
-            // continuation) pairs. This would allow us to branch on the value of parser_err.
-            // Would also need to augment ProgramInfo to detect whether the ingress MAU refers
-            // to parser_err.
+            // TODO: Implement the conditions above. Currently, this always drops the
+            // packet. Suggest refactoring `result` so that its values are lists of (path
+            // condition, continuation) pairs. This would allow us to branch on the value of
+            // parser_err. Would also need to augment ProgramInfo to detect whether the
+            // ingress MAU refers to parser_err.
 
             ::warning("Ingress parser exception handler not fully implemented");
             result.emplace(Continuation::Exception::Reject, Continuation::Body({}));

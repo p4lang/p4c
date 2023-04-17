@@ -6,8 +6,8 @@
 #include <vector>
 
 #include <boost/container/flat_map.hpp>
-#include "backends/p4tools/common/lib/formulae.h"
 
+#include "backends/p4tools/common/lib/formulae.h"
 #include "ir/ir.h"
 
 namespace P4Tools {

@@ -68,8 +68,8 @@ void CmdStepper::declareVariable(ExecutionState &nextState, const IR::Declaratio
     } else if (declType->is<IR::Type_Base>()) {
         // If the variable does not have an initializer we need to create a new zombie for it.
         // For now we just use the name directly.
-        const auto &left = nextState.convertPathExpr(new IR::PathExpression(decl->name));
-        nextState.set(left, programInfo.createTargetUninitialized(decl->type, false));
+        const auto *left = nextState.convertPathExpr(new IR::PathExpression(decl->name));
+        nextState.set(*left, programInfo.createTargetUninitialized(decl->type, false));
     } else {
         TESTGEN_UNIMPLEMENTED("Unsupported declaration type %1% node: %2%", declType,
                               declType->node_type_name());
@@ -103,8 +103,8 @@ void CmdStepper::initializeBlockParams(const IR::Type_Declaration *typeDecl,
             declareStructLike(nextState, paramPath, ts, forceTaint);
         } else if (const auto *tb = paramType->to<IR::Type_Base>()) {
             // If the type is a flat Type_Base, postfix it with a "*".
-            const auto &paramRef = Utils::addZombiePostfix(paramPath, tb);
-            nextState.set(paramRef, programInfo.createTargetUninitialized(paramType, forceTaint));
+            const auto *paramRef = Utils::addZombiePostfix(StateVariable(*paramPath), tb);
+            nextState.set(*paramRef, programInfo.createTargetUninitialized(paramType, forceTaint));
         } else {
             P4C_UNIMPLEMENTED("Unsupported initialization type %1%", paramType->node_type_name());
         }
@@ -137,23 +137,24 @@ bool CmdStepper::preorder(const IR::AssignmentStatement *assign) {
     if (const auto *structType = leftType->to<IR::Type_StructLike>()) {
         const auto *listExpr = assign->right->checkedTo<IR::ListExpression>();
 
-        std::vector<const IR::Member *> flatRefValids;
+        std::vector<const StateVariable *> flatRefValids;
         auto flatRefFields = state.getFlatFields(left, structType, &flatRefValids);
         // First, complete the assignments for the data structure.
         for (size_t idx = 0; idx < flatRefFields.size(); ++idx) {
             const auto *leftFieldRef = flatRefFields[idx];
-            state.set(leftFieldRef, listExpr->components[idx]);
+            state.set(*leftFieldRef, listExpr->components[idx]);
         }
         // In case of a header, we also need to set the validity bits to true.
         for (const auto *headerValid : flatRefValids) {
-            state.set(headerValid, IR::getBoolLiteral(true));
+            state.set(*headerValid, IR::getBoolLiteral(true));
         }
     } else if (leftType->is<IR::Type_Base>()) {
         // Convert a path expression into the respective member.
-        if (const auto *path = assign->left->to<IR::PathExpression>()) {
-            left = state.convertPathExpr(path);
+        if (const auto *path = left->to<IR::PathExpression>()) {
+            state.set(*state.convertPathExpr(path), assign->right);
+        } else {
+            state.set(*new StateVariable(*left->checkedTo<IR::Member>()), assign->right);
         }
-        state.set(left->checkedTo<IR::Member>(), assign->right);
     } else {
         TESTGEN_UNIMPLEMENTED("Unsupported assign type %1% node: %2%", leftType,
                               leftType->node_type_name());
@@ -527,7 +528,7 @@ IR::SwitchStatement *CmdStepper::replaceSwitchLabels(const IR::SwitchStatement *
     BUG_CHECK(tableCall, "Invalid format of %1% for action_run", methodCall->method);
     const auto *table = state.getTableType(methodCall->method->to<IR::Member>());
     CHECK_NULL(table);
-    auto actionVar = TableStepper::getTableActionVar(table);
+    const auto *actionVar = TableStepper::getTableActionVar(table);
     IR::Vector<IR::SwitchCase> newCases;
     std::map<cstring, int> actionsIds;
     for (size_t index = 0; index < table->getActionList()->size(); index++) {
@@ -539,7 +540,7 @@ IR::SwitchStatement *CmdStepper::replaceSwitchLabels(const IR::SwitchStatement *
         // Do not replace default expression labels.
         if (!newSwitchCase->label->is<IR::DefaultExpression>()) {
             newSwitchCase->label =
-                IR::getConstant(actionVar.type, actionsIds[switchCase->label->toString()]);
+                IR::getConstant(actionVar->type, actionsIds[switchCase->label->toString()]);
         }
         newCases.push_back(newSwitchCase);
     }

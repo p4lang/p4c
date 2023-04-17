@@ -125,9 +125,11 @@ void test(const IR::Expression *expression, const IR::AssignmentStatement *varia
     Model model = *solver.getModel();
     ASSERT_EQ(model.size(), 2U);
 
-    ASSERT_EQ(model.count(variableValue->left->checkedTo<IR::Member>()), 1U);
+    ASSERT_EQ(model.count(P4Tools::StateVariable(*variableValue->left->checkedTo<IR::Member>())),
+              1U);
 
-    const auto *value = model.at(variableValue->left->checkedTo<IR::Member>());
+    const auto *value =
+        model.at(P4Tools::StateVariable(*variableValue->left->checkedTo<IR::Member>()));
 
     if (variableValue->right->is<IR::BoolLiteral>()) {
         ASSERT_TRUE(variableValue->right->is<IR::BoolLiteral>());

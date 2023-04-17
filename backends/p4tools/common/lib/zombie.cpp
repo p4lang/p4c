@@ -16,40 +16,39 @@ bool Zombie::isSymbolicConst(const StateVariable &var) {
     if (var.size() < 2) {
         return false;
     }
-    return var.getHead().first == P4tZombie;
+    return var.front().name == P4tZombie;
 }
 
-const StateVariable &Zombie::getVar(const IR::Type *type, int incarnation, cstring name) {
+const StateVariable *Zombie::getVar(const IR::Type *type, int incarnation, cstring name) {
     return getZombie(type, false, incarnation, name);
 }
 
-const StateVariable &Zombie::getConst(const IR::Type *type, int incarnation, cstring name) {
+const StateVariable *Zombie::getConst(const IR::Type *type, int incarnation, cstring name) {
     return getZombie(type, true, incarnation, name);
 }
 
-const StateVariable &Zombie::getZombie(const IR::Type *type, bool isConst, int incarnation,
+const StateVariable *Zombie::getZombie(const IR::Type *type, bool isConst, int incarnation,
                                        cstring name) {
     // Zombie variables are interned. Keys in the intern map are tuples of isConst, incarnations,
     // and names.
-    return *mkZombie(type, isConst, incarnation, name);
+    return mkZombie(type, isConst, incarnation, name);
 }
 
 const StateVariable *Zombie::mkZombie(const IR::Type *type, bool isConst, int incarnation,
                                       cstring name) {
-    static IR::PathExpression ZOMBIE_HDR(new IR::Path(P4tZombie));
-
     using key_t = std::pair<bool, int>;
-    static std::map<key_t, const IR::Member *> incarnations;
-    const auto *&incarnationMember = incarnations[std::make_pair(isConst, incarnation)];
+    static std::map<key_t, const StateVariable *> INCARNATIONS;
+    const auto *&incarnationMember = INCARNATIONS[std::make_pair(isConst, incarnation)];
+    std::deque<StateVariable::VariableMember> members;
     if (incarnationMember == nullptr) {
-        const IR::Expression *hdr = &ZOMBIE_HDR;
+        members.emplace_back(IR::Type_Unknown::get(), P4tZombie);
         if (isConst) {
-            hdr = new IR::Member(hdr, Const);
+            members.emplace_back(IR::Type_Unknown::get(), Const);
         }
-        incarnationMember = new IR::Member(hdr, cstring(std::to_string(incarnation)));
+        members.emplace_back(IR::Type_Unknown::get(), std::to_string(incarnation));
     }
-
-    return new StateVariable(new IR::Member(type, incarnationMember, name));
+    members.emplace_back(type, name);
+    return new StateVariable(members);
 }
 
 }  // namespace P4Tools

@@ -157,8 +157,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              }
              // Use an assignment to set egress_spec to true.
              // This variable will be processed in the deparser.
-             const auto *portVar = new IR::Member(nineBitType, metadataLabel, "egress_spec");
-             nextState.set(portVar, IR::getConstant(nineBitType, 511));
+             const auto &portVar = IR::Member(nineBitType, metadataLabel, "egress_spec");
+             nextState.set(*new StateVariable(portVar), IR::getConstant(nineBitType, 511));
              nextState.add(*new TraceEvents::Generic("mark_to_drop executed."));
              nextState.popBody();
              result->emplace_back(nextState);
@@ -181,11 +181,11 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                        "Low value ( %1% ) must be less than high value ( %2% ).", lo, hi);
              auto &nextState = state.clone();
              const auto *resultField = args->at(0)->expression;
-             const IR::Member *fieldRef = nullptr;
+             const StateVariable *fieldRef = nullptr;
              if (const auto *pathRef = resultField->to<IR::PathExpression>()) {
                  fieldRef = state.convertPathExpr(pathRef);
              } else {
-                 fieldRef = resultField->to<IR::Member>();
+                 fieldRef = new StateVariable(*resultField->to<IR::Member>());
              }
              if (fieldRef == nullptr) {
                  TESTGEN_UNIMPLEMENTED("Random output %1% of type %2% not supported", resultField,
@@ -194,7 +194,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
 
              // If the range is limited to only one value, return that value.
              if (lo->value == hi->value) {
-                 nextState.set(fieldRef, hi);
+                 nextState.set(*fieldRef, hi);
                  nextState.popBody();
                  result->emplace_back(nextState);
                  return false;
@@ -202,7 +202,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              // Otherwise, we will have to return taint,
              // as we do not control the random generator of the device under test.
              if (resultField->type->is<IR::Type_Bits>()) {
-                 nextState.set(fieldRef,
+                 nextState.set(*fieldRef,
                                programInfo.createTargetUninitialized(resultField->type, true));
                  nextState.popBody();
                  result->emplace_back(nextState);
@@ -362,23 +362,23 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              auto externName = receiver->toString() + "_" + declInstance->controlPlaneName();
              auto &nextState = state.clone();
              if (hashOutput->type->is<IR::Type_Bits>()) {
-                 const IR::Member *fieldRef = nullptr;
+                 const StateVariable *fieldRef = nullptr;
                  if (const auto *pathRef = hashOutput->to<IR::PathExpression>()) {
                      fieldRef = state.convertPathExpr(pathRef);
                  } else {
-                     fieldRef = hashOutput->to<IR::Member>();
+                     fieldRef = new StateVariable(*hashOutput->to<IR::Member>());
                  }
                  if (fieldRef == nullptr) {
                      TESTGEN_UNIMPLEMENTED("Hash output %1% of type %2% not supported", hashOutput,
                                            hashOutput->type);
                  }
                  if (argsAreTainted) {
-                     nextState.set(fieldRef,
+                     nextState.set(*fieldRef,
                                    programInfo.createTargetUninitialized(fieldRef->type, false));
                  } else {
                      const auto *concolicVar = new IR::ConcolicVariable(
                          fieldRef->type, externName, args, call->clone_id, 0, decls);
-                     nextState.set(fieldRef, concolicVar);
+                     nextState.set(*fieldRef, concolicVar);
                  }
              } else {
                  TESTGEN_UNIMPLEMENTED("Hash output %1% of type %2% not supported", hashOutput,
@@ -908,10 +908,10 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  // Reset the packet buffer, which corresponds to the output packet.
                  nextState.resetPacketBuffer();
                  const auto *bitType = IR::getBitType(32);
-                 const auto *instanceTypeVar = new IR::Member(
-                     bitType, new IR::PathExpression("*standard_metadata"), "instance_type");
+                 const auto *instanceTypeVar = new StateVariable(
+                     {{IR::Type_Unknown::get(), "*standard_metadata"}, {bitType, "instance_type"}});
                  nextState.set(
-                     instanceTypeVar,
+                     *instanceTypeVar,
                      IR::getConstant(bitType, BMv2Constants::PKT_INSTANCE_TYPE_INGRESS_CLONE));
                  nextState.replaceTopBody(&cmds);
                  result->emplace_back(cond, state, nextState);
@@ -1181,10 +1181,10 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  // Reset the packet buffer, which corresponds to the output packet.
                  nextState.resetPacketBuffer();
                  const auto *bitType = IR::getBitType(32);
-                 const auto *instanceTypeVar = new IR::Member(
-                     bitType, new IR::PathExpression("*standard_metadata"), "instance_type");
+                 const auto *instanceTypeVar = new StateVariable(
+                     {{IR::Type_Unknown::get(), "*standard_metadata"}, {bitType, "instance_type"}});
                  nextState.set(
-                     instanceTypeVar,
+                     *instanceTypeVar,
                      IR::getConstant(bitType, BMv2Constants::PKT_INSTANCE_TYPE_INGRESS_CLONE));
                  nextState.replaceTopBody(&cmds);
                  result->emplace_back(cond, state, nextState);
@@ -1243,11 +1243,11 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              // We need to update the size of the packet when recirculating. Do not forget to divide
              // by 8.
              const auto *pktSizeType = ExecutionState::getPacketSizeVarType();
-             const auto *packetSizeVar = new IR::Member(
-                 pktSizeType, new IR::PathExpression("*standard_metadata"), "packet_length");
+             const auto *packetSizeVar = new StateVariable(
+                 {{IR::Type_Unknown::get(), "*standard_metadata"}, {pktSizeType, "packet_length"}});
              const auto *packetSizeConst =
                  IR::getConstant(pktSizeType, recState.getPacketBufferSize() / 8);
-             recState.set(packetSizeVar, packetSizeConst);
+             recState.set(*packetSizeVar, packetSizeConst);
 
              const auto *progInfo = getProgramInfo().checkedTo<Bmv2V1ModelProgramInfo>();
              if (recState.hasProperty("recirculate_index")) {
@@ -1266,9 +1266,9 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              // recirculation.
              auto instanceType = state.getProperty<uint64_t>("recirculate_instance_type");
              const auto *bitType = IR::getBitType(32);
-             const auto *instanceTypeVar = new IR::Member(
-                 bitType, new IR::PathExpression("*standard_metadata"), "instance_type");
-             recState.set(instanceTypeVar, IR::getConstant(bitType, instanceType));
+             const auto *instanceTypeVar = new StateVariable(
+                 {{IR::Type_Unknown::get(), "*standard_metadata"}, {bitType, "instance_type"}});
+             recState.set(*instanceTypeVar, IR::getConstant(bitType, instanceType));
 
              // Set recirculate to false to avoid infinite loops.
              recState.setProperty("recirculate_active", false);
@@ -1405,9 +1405,10 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              // not be reliable.
              if (argsAreTainted) {
                  auto &taintedState = state.clone();
-                 const auto *checksumErr = new IR::Member(
-                     oneBitType, new IR::PathExpression("*standard_metadata"), "checksum_error");
-                 taintedState.set(checksumErr,
+                 const auto *checksumErr =
+                     new StateVariable({{IR::Type_Unknown::get(), "*standard_metadata"},
+                                        {oneBitType, "checksum_error"}});
+                 taintedState.set(*checksumErr,
                                   programInfo.createTargetUninitialized(checksumErr->type, true));
                  taintedState.popBody();
                  result->emplace_back(taintedState);
@@ -1515,6 +1516,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  checksumVarRef = state.convertPathExpr(argPath);
              }
              const auto *checksumVar = checksumVarRef->checkedTo<IR::Member>();
+             const auto *checksumStateVar = new StateVariable(*checksumVar);
 
              const auto *updateCond = args->at(0)->expression;
              const auto *checksumVarType = checksumVar->type;
@@ -1524,7 +1526,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              // The checksum will also be tainted.
              if (argsAreTainted) {
                  auto &taintedState = state.clone();
-                 taintedState.set(checksumVar,
+                 taintedState.set(*checksumStateVar,
                                   programInfo.createTargetUninitialized(checksumVarType, true));
                  taintedState.popBody();
                  result->emplace_back(taintedState);
@@ -1542,7 +1544,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  auto &nextState = state.clone();
                  const auto *concolicVar = new IR::ConcolicVariable(
                      checksumVarType, "*method_checksum", checksumArgs, call->clone_id, 0);
-                 nextState.set(checksumVar, concolicVar);
+                 nextState.set(*checksumStateVar, concolicVar);
                  nextState.popBody();
                  result->emplace_back(updateCond, state, nextState);
              }
@@ -1598,6 +1600,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  checksumVarRef = state.convertPathExpr(argPath);
              }
              const auto *checksumVar = checksumVarRef->checkedTo<IR::Member>();
+             const auto *checksumStateVar = new StateVariable(*checksumVar);
 
              const auto *updateCond = args->at(0)->expression;
              const auto *checksumVarType = checksumVar->type;
@@ -1607,7 +1610,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              // The checksum will also be tainted.
              if (argsAreTainted) {
                  auto &taintedState = state.clone();
-                 taintedState.set(checksumVar,
+                 taintedState.set(*checksumStateVar,
                                   programInfo.createTargetUninitialized(checksumVarType, true));
                  taintedState.popBody();
                  result->emplace_back(taintedState);
@@ -1626,7 +1629,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  const auto *concolicVar =
                      new IR::ConcolicVariable(checksumVarType, "*method_checksum_with_payload",
                                               checksumArgs, call->clone_id, 0);
-                 nextState.set(checksumVar, concolicVar);
+                 nextState.set(*checksumStateVar, concolicVar);
                  nextState.popBody();
                  result->emplace_back(updateCond, state, nextState);
              }
@@ -1687,9 +1690,10 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              // not be reliable.
              if (argsAreTainted) {
                  auto &taintedState = state.clone();
-                 const auto *checksumErr = new IR::Member(
-                     oneBitType, new IR::PathExpression("*standard_metadata"), "checksum_error");
-                 taintedState.set(checksumErr,
+                 const auto *checksumErr =
+                     new StateVariable({{IR::Type_Unknown::get(), "*standard_metadata"},
+                                        {oneBitType, "checksum_error"}});
+                 taintedState.set(*checksumErr,
                                   programInfo.createTargetUninitialized(checksumErr->type, true));
                  taintedState.popBody();
                  result->emplace_back(taintedState);

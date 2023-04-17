@@ -27,9 +27,9 @@ class SharedPnaProgramInfo : public ProgramInfo {
     [[nodiscard]] const ordered_map<cstring, const IR::Type_Declaration *> *getProgrammableBlocks()
         const;
 
-    [[nodiscard]] const IR::Member *getTargetInputPortVar() const override;
+    [[nodiscard]] const StateVariable *getTargetInputPortVar() const override;
 
-    [[nodiscard]] const IR::Member *getTargetOutputPortVar() const override;
+    [[nodiscard]] const StateVariable *getTargetOutputPortVar() const override;
 
     [[nodiscard]] const IR::Expression *dropIsActive() const override;
 

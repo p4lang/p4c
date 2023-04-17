@@ -1,8 +1,7 @@
 #ifndef TESTGEN_TARGETS_EBPF_PROGRAM_INFO_H_
 #define TESTGEN_TARGETS_EBPF_PROGRAM_INFO_H_
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <vector>
 
 #include "ir/ir.h"
@@ -36,9 +35,9 @@ class EBPFProgramInfo : public ProgramInfo {
     [[nodiscard]] const ordered_map<cstring, const IR::Type_Declaration *> *getProgrammableBlocks()
         const;
 
-    [[nodiscard]] const IR::Member *getTargetInputPortVar() const override;
+    [[nodiscard]] const StateVariable *getTargetInputPortVar() const override;
 
-    [[nodiscard]] const IR::Member *getTargetOutputPortVar() const override;
+    [[nodiscard]] const StateVariable *getTargetOutputPortVar() const override;
 
     [[nodiscard]] const IR::Expression *dropIsActive() const override;
 

@@ -186,9 +186,9 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::Expression *headerRef) {
         for (const auto *field : headerUnion->fields) {
             auto *fieldRef = new IR::Member(field->type, headerRef, field->name);
             const auto &variable = Utils::getHeaderValidity(fieldRef);
-            BUG_CHECK(state.exists(variable),
+            BUG_CHECK(state.exists(*variable),
                       "At this point, the header validity bit should be initialized.");
-            const auto *value = state.getSymbolicEnv().get(variable);
+            const auto *value = state.getSymbolicEnv().get(*variable);
             const auto *res = value->to<IR::BoolLiteral>();
             BUG_CHECK(res, "%1%: expected a boolean", value);
             if (res->value) {
@@ -204,7 +204,7 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::Expression *headerRef) {
         return false;
     }
     const auto *variable = Utils::getHeaderValidity(headerRef);
-    BUG_CHECK(state.exists(variable),
+    BUG_CHECK(state.exists(*variable),
               "At this point, the header validity bit %1% should be initialized.", variable);
     state.replaceTopBody(Continuation::Return(variable));
     result->emplace_back(state);
@@ -213,8 +213,8 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::Expression *headerRef) {
 
 void AbstractStepper::setHeaderValidity(const IR::Expression *expr, bool validity,
                                         ExecutionState &nextState) {
-    const auto &headerRefValidity = Utils::getHeaderValidity(expr);
-    nextState.set(headerRefValidity, IR::getBoolLiteral(validity));
+    const auto *headerRefValidity = Utils::getHeaderValidity(expr);
+    nextState.set(*headerRefValidity, IR::getBoolLiteral(validity));
 
     // In some cases, the header may be part of a union.
     if (validity) {
@@ -238,12 +238,12 @@ void AbstractStepper::setHeaderValidity(const IR::Expression *expr, bool validit
         return;
     }
     const auto *exprType = expr->type->checkedTo<IR::Type_StructLike>();
-    std::vector<const IR::Member *> validityVector;
+    std::vector<const StateVariable *> validityVector;
     auto fieldsVector = nextState.getFlatFields(expr, exprType, &validityVector);
     // The header is going to be invalid. Set all fields to taint constants.
     // TODO: Should we make this target specific? Some targets set the header fields to 0.
     for (const auto *field : fieldsVector) {
-        nextState.set(field, programInfo.createTargetUninitialized(field->type, true));
+        nextState.set(*field, programInfo.createTargetUninitialized(field->type, true));
     }
 }
 
@@ -277,7 +277,7 @@ void generateStackAssigmentStatement(ExecutionState &nextState,
     const auto *rightArrIndex = HSIndexToMember::produceStackIndex(elemType, stackRef, rightIndex);
 
     // Check right header validity.
-    const auto *value = nextState.getSymbolicEnv().get(Utils::getHeaderValidity(rightArrIndex));
+    const auto *value = nextState.getSymbolicEnv().get(*Utils::getHeaderValidity(rightArrIndex));
     if (!value->checkedTo<IR::BoolLiteral>()->value) {
         replacements.emplace_back(generateStacksetValid(stackRef, leftIndex, false));
         return;
@@ -351,20 +351,21 @@ void AbstractStepper::setTargetUninitialized(ExecutionState &nextState, const IR
     // Resolve the type of the left-and assignment, if it is a type name.
     const auto *refType = nextState.resolveType(ref->type);
     if (const auto *structType = refType->to<const IR::Type_StructLike>()) {
-        std::vector<const IR::Member *> validFields;
+        std::vector<const StateVariable *> validFields;
         auto fields = nextState.getFlatFields(ref, structType, &validFields);
         // We also need to initialize the validity bits of the headers. These are false.
         for (const auto *validField : validFields) {
-            nextState.set(validField, IR::getBoolLiteral(false));
+            nextState.set(*validField, IR::getBoolLiteral(false));
         }
         // For each field in the undefined struct, we create a new zombie variable.
         // If the variable does not have an initializer we need to create a new zombie for it.
         // For now we just use the name directly.
         for (const auto *field : fields) {
-            nextState.set(field, programInfo.createTargetUninitialized(field->type, forceTaint));
+            nextState.set(*field, programInfo.createTargetUninitialized(field->type, forceTaint));
         }
     } else if (const auto *baseType = refType->to<const IR::Type_Base>()) {
-        nextState.set(ref, programInfo.createTargetUninitialized(baseType, forceTaint));
+        nextState.set(*new StateVariable(*ref),
+                      programInfo.createTargetUninitialized(baseType, forceTaint));
     } else {
         P4C_UNIMPLEMENTED("Unsupported uninitialization type %1%", refType->node_type_name());
     }
@@ -373,17 +374,17 @@ void AbstractStepper::setTargetUninitialized(ExecutionState &nextState, const IR
 void AbstractStepper::declareStructLike(ExecutionState &nextState, const IR::Expression *parentExpr,
                                         const IR::Type_StructLike *structType,
                                         bool forceTaint) const {
-    std::vector<const IR::Member *> validFields;
+    std::vector<const StateVariable *> validFields;
     auto fields = nextState.getFlatFields(parentExpr, structType, &validFields);
     // We also need to initialize the validity bits of the headers. These are false.
     for (const auto *validField : validFields) {
-        nextState.set(validField, IR::getBoolLiteral(false));
+        nextState.set(*validField, IR::getBoolLiteral(false));
     }
     // For each field in the undefined struct, we create a new zombie variable.
     // If the variable does not have an initializer we need to create a new zombie for it.
     // For now we just use the name directly.
     for (const auto *field : fields) {
-        nextState.set(field, programInfo.createTargetUninitialized(field->type, forceTaint));
+        nextState.set(*field, programInfo.createTargetUninitialized(field->type, forceTaint));
     }
 }
 

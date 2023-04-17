@@ -93,7 +93,7 @@ bool ExprStepper::preorder(const IR::Member *member) {
     if (SymbolicEnv::isSymbolicValue(member)) {
         return stepSymbolicValue(member);
     }
-    return stepSymbolicValue(state.get(member));
+    return stepSymbolicValue(state.get(*new StateVariable(*member)));
 }
 
 void ExprStepper::evalActionCall(const IR::P4Action *action, const IR::MethodCallExpression *call) {
@@ -111,9 +111,9 @@ void ExprStepper::evalActionCall(const IR::P4Action *action, const IR::MethodCal
         BUG_CHECK(param->direction == IR::Direction::None,
                   "%1%: Only directionless action parameters are supported at this point. ",
                   action);
-        const auto &tableActionDataVar = Utils::getZombieVar(paramType, 0, paramName);
+        const auto *tableActionDataVar = Utils::getZombieVar(paramType, 0, paramName);
         const auto *curArg = call->arguments->at(argIdx)->expression;
-        nextState.set(tableActionDataVar, curArg);
+        nextState.set(*tableActionDataVar, curArg);
     }
     nextState.replaceTopBody(action->body);
     // Enter the action's namespace.
@@ -270,7 +270,7 @@ bool ExprStepper::preorder(const IR::PathExpression *pathExpression) {
         return false;
     }
     // Otherwise convert the path expression into a qualified member and return it.
-    auto pathRef = nextState.convertPathExpr(pathExpression);
+    const auto *pathRef = nextState.convertPathExpr(pathExpression);
     nextState.replaceTopBody(Continuation::Return(pathRef));
     result->emplace_back(nextState);
     return false;

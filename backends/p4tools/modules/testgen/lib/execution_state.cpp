@@ -28,21 +28,23 @@
 #include "lib/source_file.h"
 
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
+#include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4Tools::P4Testgen {
 
-const IR::Member ExecutionState::inputPacketLabel =
-    IR::Member(new IR::PathExpression("*"), "inputPacket");
+const StateVariable ExecutionState::inputPacketLabel =
+    StateVariable::UntypedStateVariable({"*", "inputPacket"});
 
-const IR::Member ExecutionState::packetBufferLabel =
-    IR::Member(new IR::PathExpression("*"), "packetBuffer");
+const StateVariable ExecutionState::packetBufferLabel =
+    StateVariable::UntypedStateVariable({"*", "packetBuffer"});
 
-const IR::Member ExecutionState::emitBufferLabel =
-    IR::Member(new IR::PathExpression("*"), "emitBuffer");
+const StateVariable ExecutionState::emitBufferLabel =
+    StateVariable::UntypedStateVariable({"*", "emitBuffer"});
 
-const IR::Member ExecutionState::payloadLabel = IR::Member(new IR::PathExpression("*"), "payload");
+const StateVariable ExecutionState::payloadLabel =
+    StateVariable::UntypedStateVariable({"*", "payload"});
 
 // The methods in P4's packet_in uses 32-bit values. Conform with this to make it easier to produce
 // well-typed expressions when manipulating the parser cursor.
@@ -54,9 +56,9 @@ ExecutionState::ExecutionState(const IR::P4Program *program)
       stack(*(new std::stack<std::reference_wrapper<const StackFrame>>())) {
     // Insert the default zombies of the execution state.
     // This also makes the zombies present in the state explicit.
-    allocatedZombies.insert(getInputPacketSizeVar());
-    env.set(&inputPacketLabel, IR::getConstant(IR::getBitType(0), 0));
-    env.set(&packetBufferLabel, IR::getConstant(IR::getBitType(0), 0));
+    allocatedZombies.insert(*getInputPacketSizeVar());
+    env.set(inputPacketLabel, IR::getConstant(IR::getBitType(0), 0));
+    env.set(packetBufferLabel, IR::getConstant(IR::getBitType(0), 0));
     // We also add the taint property and set it to false.
     setProperty("inUndefinedState", false);
     // Drop is initialized to false, too.
@@ -77,7 +79,7 @@ ExecutionState::ExecutionState(Continuation::Body body)
       stack(*(new std::stack<std::reference_wrapper<const StackFrame>>())) {
     // Insert the default zombies of the execution state.
     // This also makes the zombies present in the state explicit.
-    allocatedZombies.insert(getInputPacketSizeVar());
+    allocatedZombies.insert(*getInputPacketSizeVar());
     // We also add the taint property and set it to false.
     setProperty("inUndefinedState", false);
     // Drop is initialized to false, too.
@@ -111,15 +113,17 @@ std::optional<const Continuation::Command> ExecutionState::getNextCmd() const {
 
 const IR::Expression *ExecutionState::get(const StateVariable &var) const {
     const auto *expr = env.get(var);
-    if (var->expr->type->is<IR::Type_Header>() && var->member != Utils::Valid) {
+    if (var.type->is<IR::Type_Header>() && var.back().name != Utils::Valid) {
         // If we are setting the member of a header, we need to check whether the
         // header is valid.
         // If the header is invalid, the get returns a tainted expression.
         // The member could have any value.
         // TODO: This is a convoluted check. We should be using runtime objects instead of flat
         // assignments.
-        auto validity = Utils::getHeaderValidity(var->expr);
-        const auto *validVar = env.get(validity);
+        auto headerVar = var;
+        headerVar.popBackInPlace();
+        headerVar.appendInPlace({IR::Type_Boolean::get(), Utils::Valid});
+        const auto *validVar = env.get(headerVar);
         // The validity bit could already be tainted or the validity bit is false.
         // Both outcomes lead to a tainted write.
         bool isTainted = validVar->is<IR::TaintExpression>();
@@ -164,7 +168,7 @@ void ExecutionState::printSymbolicEnv(std::ostream &out) const {
     for (const auto &envVar : env.getInternalMap()) {
         const auto var = envVar.first;
         const auto *val = envVar.second;
-        out << "Variable: " << var->toString() << " Value: " << val << std::endl;
+        out << "Variable: " << var.toString() << " Value: " << val << std::endl;
     }
     out << "##### Symbolic Environment End #####" << std::endl;
 }
@@ -348,13 +352,13 @@ void ExecutionState::pushBranchDecision(uint64_t bIdx) { selectedBranches.push_b
 
 const IR::Type_Bits *ExecutionState::getPacketSizeVarType() { return &packetSizeVarType; }
 
-const StateVariable &ExecutionState::getInputPacketSizeVar() {
+const StateVariable *ExecutionState::getInputPacketSizeVar() {
     return Utils::getZombieConst(getPacketSizeVarType(), 0, "*packetLen_bits");
 }
 
 int ExecutionState::getMaxPacketLength() { return TestgenOptions::get().maxPktSize; }
 
-const IR::Expression *ExecutionState::getInputPacket() const { return env.get(&inputPacketLabel); }
+const IR::Expression *ExecutionState::getInputPacket() const { return env.get(inputPacketLabel); }
 
 int ExecutionState::getInputPacketSize() const {
     const auto *inputPkt = getInputPacket();
@@ -365,21 +369,19 @@ void ExecutionState::appendToInputPacket(const IR::Expression *expr) {
     const auto *inputPkt = getInputPacket();
     const auto *width = IR::getBitType(expr->type->width_bits() + inputPkt->type->width_bits());
     const auto *concat = new IR::Concat(width, inputPkt, expr);
-    env.set(&inputPacketLabel, concat);
+    env.set(inputPacketLabel, concat);
 }
 
 void ExecutionState::prependToInputPacket(const IR::Expression *expr) {
     const auto *inputPkt = getInputPacket();
     const auto *width = IR::getBitType(expr->type->width_bits() + inputPkt->type->width_bits());
     const auto *concat = new IR::Concat(width, expr, inputPkt);
-    env.set(&inputPacketLabel, concat);
+    env.set(inputPacketLabel, concat);
 }
 
 int ExecutionState::getInputPacketCursor() const { return inputPacketCursor; }
 
-const IR::Expression *ExecutionState::getPacketBuffer() const {
-    return env.get(&packetBufferLabel);
-}
+const IR::Expression *ExecutionState::getPacketBuffer() const { return env.get(packetBufferLabel); }
 
 int ExecutionState::getPacketBufferSize() const {
     const auto *buffer = getPacketBuffer();
@@ -411,7 +413,7 @@ const IR::Expression *ExecutionState::peekPacketBuffer(int amount) {
         }
         // We have peeked ahead of what is available. We need to add the content we have looked at
         // to our packet buffer, which can later be consumed.
-        env.set(&packetBufferLabel, newVar);
+        env.set(packetBufferLabel, newVar);
         return newVar;
     }
     // The buffer is large enough and we can grab a slice
@@ -463,7 +465,7 @@ const IR::Expression *ExecutionState::slicePacketBuffer(int amount) {
     if (diff < 0) {
         auto *remainder = new IR::Slice(buffer, bufferSize - amount - 1, 0);
         remainder->type = IR::getBitType(bufferSize - amount);
-        env.set(&packetBufferLabel, remainder);
+        env.set(packetBufferLabel, remainder);
     }
     // The amount we slice is equal to what is in the buffer. Just set the buffer to zero.
     if (diff == 0) {
@@ -476,34 +478,34 @@ void ExecutionState::appendToPacketBuffer(const IR::Expression *expr) {
     const auto *buffer = getPacketBuffer();
     const auto *width = IR::getBitType(expr->type->width_bits() + buffer->type->width_bits());
     const auto *concat = new IR::Concat(width, buffer, expr);
-    env.set(&packetBufferLabel, concat);
+    env.set(packetBufferLabel, concat);
 }
 
 void ExecutionState::prependToPacketBuffer(const IR::Expression *expr) {
     const auto *buffer = getPacketBuffer();
     const auto *width = IR::getBitType(expr->type->width_bits() + buffer->type->width_bits());
     const auto *concat = new IR::Concat(width, expr, buffer);
-    env.set(&packetBufferLabel, concat);
+    env.set(packetBufferLabel, concat);
 }
 
 void ExecutionState::resetPacketBuffer() {
-    env.set(&packetBufferLabel, IR::getConstant(IR::getBitType(0), 0));
+    env.set(packetBufferLabel, IR::getConstant(IR::getBitType(0), 0));
 }
 
-const IR::Expression *ExecutionState::getEmitBuffer() const { return env.get(&emitBufferLabel); }
+const IR::Expression *ExecutionState::getEmitBuffer() const { return env.get(emitBufferLabel); }
 
 void ExecutionState::resetEmitBuffer() {
-    env.set(&emitBufferLabel, IR::getConstant(IR::getBitType(0), 0));
+    env.set(emitBufferLabel, IR::getConstant(IR::getBitType(0), 0));
 }
 
 void ExecutionState::appendToEmitBuffer(const IR::Expression *expr) {
     const auto *buffer = getEmitBuffer();
     const auto *width = IR::getBitType(expr->type->width_bits() + buffer->type->width_bits());
     const auto *concat = new IR::Concat(width, buffer, expr);
-    env.set(&emitBufferLabel, concat);
+    env.set(emitBufferLabel, concat);
 }
 
-const IR::Member *ExecutionState::getPayloadLabel(const IR::Type *t) {
+const StateVariable *ExecutionState::getPayloadLabel(const IR::Type *t) {
     // If the type is not null, we construct a member clone with the input type set.
     if (t != nullptr) {
         auto *label = payloadLabel.clone();
@@ -513,11 +515,11 @@ const IR::Member *ExecutionState::getPayloadLabel(const IR::Type *t) {
     return &payloadLabel;
 }
 
-void ExecutionState::setParserErrorLabel(const IR::Member *parserError) {
+void ExecutionState::setParserErrorLabel(const StateVariable *parserError) {
     parserErrorLabel = parserError;
 }
 
-const IR::Member *ExecutionState::getCurrentParserErrorLabel() const {
+const StateVariable *ExecutionState::getCurrentParserErrorLabel() const {
     CHECK_NULL(parserErrorLabel);
     return parserErrorLabel;
 }
@@ -528,15 +530,15 @@ const IR::Member *ExecutionState::getCurrentParserErrorLabel() const {
 
 const std::set<StateVariable> &ExecutionState::getZombies() const { return allocatedZombies; }
 
-const StateVariable &ExecutionState::createZombieConst(const IR::Type *type, cstring name,
-                                                           uint64_t instanceId) {
-    const auto &zombie = Utils::getZombieConst(type, instanceId, name);
-    const auto &result = allocatedZombies.insert(zombie);
+const StateVariable *ExecutionState::createZombieConst(const IR::Type *type, cstring name,
+                                                       uint64_t instanceId) {
+    const auto *zombie = Utils::getZombieConst(type, instanceId, name);
+    const auto &result = allocatedZombies.insert(*zombie);
     // The zombie already existed, check its type.
     if (!result.second) {
-        BUG_CHECK((*result.first)->type->equiv(*type),
+        BUG_CHECK(result.first->type->equiv(*type),
                   "Inconsistent types for zombie variable %1%: previously %2%, but now %3%",
-                  zombie->toString(), (*result.first)->type, type);
+                  zombie->toString(), result.first->type, type);
     }
     return zombie;
 }
@@ -545,10 +547,10 @@ const StateVariable &ExecutionState::createZombieConst(const IR::Type *type, cst
  *  General utilities involving ExecutionState.
  * ========================================================================================= */
 
-std::vector<const IR::Member *> ExecutionState::getFlatFields(
+std::vector<const StateVariable *> ExecutionState::getFlatFields(
     const IR::Expression *parent, const IR::Type_StructLike *ts,
-    std::vector<const IR::Member *> *validVector) const {
-    std::vector<const IR::Member *> flatFields;
+    std::vector<const StateVariable *> *validVector) const {
+    std::vector<const StateVariable *> flatFields;
     for (const auto *field : ts->fields) {
         const auto *fieldType = resolveType(field->type);
         if (const auto *ts = fieldType->to<IR::Type_StructLike>()) {
@@ -568,7 +570,7 @@ std::vector<const IR::Member *> ExecutionState::getFlatFields(
                 flatFields.insert(flatFields.end(), subFields.begin(), subFields.end());
             }
         } else {
-            flatFields.push_back(new IR::Member(fieldType, parent, field->name));
+            flatFields.push_back(new StateVariable(IR::Member(fieldType, parent, field->name)));
         }
     }
     // If we are dealing with a header we also include the validity bit in the list of
@@ -607,7 +609,7 @@ const IR::P4Action *ExecutionState::getActionDecl(const IR::Expression *expressi
     return expression->to<IR::P4Action>();
 }
 
-const StateVariable &ExecutionState::convertPathExpr(const IR::PathExpression *path) const {
+const StateVariable *ExecutionState::convertPathExpr(const IR::PathExpression *path) const {
     const auto *decl = findDecl(path)->getNode();
     // Local variable.
     if (const auto *declVar = decl->to<IR::Declaration_Variable>()) {

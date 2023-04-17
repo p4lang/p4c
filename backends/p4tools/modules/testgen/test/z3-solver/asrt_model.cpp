@@ -11,6 +11,7 @@
 #include <boost/multiprecision/traits/explicit_conversion.hpp>
 
 #include "backends/p4tools/common/core/z3_solver.h"
+#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "ir/declaration.h"
 #include "ir/indexed_vector.h"
@@ -136,13 +137,13 @@ TEST_F(Z3SolverTest, Assertion2Model) {
 
     // getting right variable
     ASSERT_TRUE(opLss->right->is<IR::Member>());
-    const StateVariable varB = opLss->right->to<IR::Member>();
+    const P4Tools::StateVariable varB(*opLss->right->to<IR::Member>());
 
     // getting numeric and left variable
     ASSERT_TRUE(opLss->left->is<IR::Add>());
     const auto *opAdd = opLss->left->to<IR::Add>();
     ASSERT_TRUE(opAdd->left->is<IR::Member>());
-    const StateVariable varA = opAdd->left->to<IR::Member>();
+    const P4Tools::StateVariable varA(*opAdd->left->to<IR::Member>());
     ASSERT_TRUE(opAdd->right->is<IR::Constant>());
     const auto *addToA = opAdd->right->to<IR::Constant>();
 
