@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ limitations under the License.
 
 TEST(IR, DumpJSON) {
     auto c = new IR::Constant(2);
-    IR::Expression* e1 = new IR::Add(Util::SourceInfo(), c, c);
+    IR::Expression *e1 = new IR::Add(Util::SourceInfo(), c, c);
 
     std::stringstream ss, ss2;
     JSONGenerator(ss) << e1 << std::endl;
@@ -32,7 +32,7 @@ TEST(IR, DumpJSON) {
     JSONLoader loader(ss);
     std::cout << loader.json;
 
-    const IR::Node* e2 = nullptr;
+    const IR::Node *e2 = nullptr;
     loader >> e2;
     JSONGenerator(std::cout) << e2 << std::endl;
 }

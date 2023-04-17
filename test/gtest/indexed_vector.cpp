@@ -9,8 +9,8 @@ using namespace IR;
 
 using TestVector = IndexedVector<StructField>;
 
-const Type* testType() { return Type_Bits::get(8); }
-StructField* testItem(cstring val) { return new StructField(ID(val), testType()); }
+const Type *testType() { return Type_Bits::get(8); }
+StructField *testItem(cstring val) { return new StructField(ID(val), testType()); }
 
 TEST(IndexedVector, basics) {
     TestVector vec;
@@ -28,7 +28,7 @@ TEST(IndexedVector, basics) {
     EXPECT_EQ(vec[1]->name.name, "bar");
 
     cstring check = "foo";
-    for (auto* dec : vec) {
+    for (auto *dec : vec) {
         EXPECT_EQ(dec->name.name, check);
         check = "bar";
     }
@@ -81,7 +81,7 @@ TEST(IndexedVector, ilist_ctor) {
 }
 
 TEST(IndexedVector, save_vector_ctor) {
-    TestVector vec(safe_vector<const StructField*>{testItem("foo"), testItem("bar")});
+    TestVector vec(safe_vector<const StructField *>{testItem("foo"), testItem("bar")});
     EXPECT_EQ(vec.size(), 2u);
     EXPECT_EQ(vec[0]->name.name, "foo");
     EXPECT_EQ(vec[1]->name.name, "bar");

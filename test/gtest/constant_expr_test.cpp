@@ -20,7 +20,7 @@ limitations under the License.
 
 namespace Test {
 
-class ConstantExpr : public P4CTest { };
+class ConstantExpr : public P4CTest {};
 
 TEST_F(ConstantExpr, TestInt) {
     int val = 0x1;

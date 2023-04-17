@@ -14,8 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "gtest/gtest.h"
 #include "lib/cstring.h"
+
+#include "gtest/gtest.h"
 
 namespace Test {
 
@@ -52,7 +53,7 @@ TEST(cstring, construct) {
 
 TEST(cstring, toupper) {
     cstring c = "simple";
-    cstring c1= "";
+    cstring c1 = "";
 
     EXPECT_EQ(c.toUpper(), "SIMPLE");
     EXPECT_EQ(c1.toUpper(), "");
@@ -81,16 +82,16 @@ TEST(cstring, compare) {
     EXPECT_FALSE(c == "other");   // NOLINT
     EXPECT_TRUE(c != "other");    // NOLINT
 
-    EXPECT_TRUE(c < "zombie");    // NOLINT
-    EXPECT_FALSE(c < "awesome");  // NOLINT
-    EXPECT_TRUE(c <= "zombie");   // NOLINT
-    EXPECT_FALSE(c <= "awesome"); // NOLINT
-    EXPECT_TRUE(c >= "awesome");  // NOLINT
-    EXPECT_TRUE(c > "awesome");   // NOLINT
-    EXPECT_FALSE(c >= "zombie");  // NOLINT
-    EXPECT_FALSE(c > "zombie");   // NOLINT
+    EXPECT_TRUE(c < "zombie");     // NOLINT
+    EXPECT_FALSE(c < "awesome");   // NOLINT
+    EXPECT_TRUE(c <= "zombie");    // NOLINT
+    EXPECT_FALSE(c <= "awesome");  // NOLINT
+    EXPECT_TRUE(c >= "awesome");   // NOLINT
+    EXPECT_TRUE(c > "awesome");    // NOLINT
+    EXPECT_FALSE(c >= "zombie");   // NOLINT
+    EXPECT_FALSE(c > "zombie");    // NOLINT
 
-    const char* ptr = c.c_str();
+    const char *ptr = c.c_str();
     EXPECT_FALSE(strncmp(ptr, "simple", 7));
 }
 

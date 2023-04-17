@@ -15,9 +15,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "lib/bitvec.h"
 
 #include "gtest/gtest.h"
-#include "lib/bitvec.h"
 
 namespace Test {
 
@@ -31,7 +31,7 @@ TEST(Bitvec, Shift) {
 
 #ifdef __SIZEOF_INT128__
 TEST(Bitvec, bigval) {
-    __int128_t val[2] = { 0, 1 };
+    __int128_t val[2] = {0, 1};
     val[1] <<= 100;
     bitvec bv(val[1]);
     EXPECT_EQ(bv.getbit(100), true);
@@ -45,12 +45,12 @@ TEST(Bitvec, bigval) {
     (defined(__clang__) && (__clang_major__ >= 3) && (__clang_minor__ > 8))
     bv.setraw(val, 2);
     EXPECT_EQ(bv.getbit(238), true);
-#endif   // (defined(__GNUC__) && !defined(__clang__)) ||
-         // (defined(__clang__) && (__clang_major__ >= 3) && (__clang_minor__ > 8))
+#endif  // (defined(__GNUC__) && !defined(__clang__)) ||
+        // (defined(__clang__) && (__clang_major__ >= 3) && (__clang_minor__ > 8))
 }
 #else
 TEST(Bitvec, bigval) {
-    int64_t val[2] = { 0, 1 };
+    int64_t val[2] = {0, 1};
     val[1] <<= 60;
     bitvec bv(val[1]);
     EXPECT_EQ(bv.getbit(60), true);

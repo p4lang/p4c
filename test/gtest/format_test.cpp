@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,14 +15,14 @@ limitations under the License.
 */
 
 #include "gtest/gtest.h"
-#include "lib/error.h"
 #include "lib/cstring.h"
+#include "lib/error.h"
 #include "lib/stringify.h"
 
 namespace Util {
 
 TEST(Util, Format) {
-    auto& context = BaseCompileContext::get();
+    auto &context = BaseCompileContext::get();
     cstring message = context.errorReporter().format_message("%1%", 5u);
     EXPECT_EQ("5\n", message);
 
@@ -36,10 +36,8 @@ TEST(Util, Format) {
         int a, b, c;
 
         cstring toString() const {
-            return cstring("(") +
-                    Util::toString(this->a) + "," +
-                    Util::toString(this->b) + "," +
-                    Util::toString(this->c) + ")";
+            return cstring("(") + Util::toString(this->a) + "," + Util::toString(this->b) + "," +
+                   Util::toString(this->c) + ")";
         }
     };
 
