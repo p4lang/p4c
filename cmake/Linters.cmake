@@ -12,6 +12,8 @@ file(
   lib/*.h
   midend/*.cpp
   midend/*.h
+  test/*.cpp
+  test/*.h
   tools/*.cpp
   tools/*.h
 )
@@ -92,7 +94,6 @@ file(
   tools/*.py
 )
 list(FILTER P4C_PYTHON_LINT_LIST EXCLUDE REGEX "backends/p4tools/submodules")
-list(FILTER P4C_PYTHON_LINT_LIST EXCLUDE REGEX "control-plane/p4runtime")
 list(FILTER P4C_PYTHON_LINT_LIST EXCLUDE REGEX "tools/cpplint.py")
 
 add_black_files(${P4C_SOURCE_DIR} "${P4C_PYTHON_LINT_LIST}")
