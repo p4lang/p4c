@@ -7,8 +7,6 @@
 #include <vector>
 
 #include "backends/p4tools/common/compiler/convert_hs_index.h"
-#include "backends/p4tools/common/core/solver.h"
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/util.h"
@@ -187,7 +185,7 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::Expression *headerRef) {
     if (const auto *headerUnion = headerRef->type->to<IR::Type_HeaderUnion>()) {
         for (const auto *field : headerUnion->fields) {
             auto *fieldRef = new IR::Member(field->type, headerRef, field->name);
-            auto variable = Utils::getHeaderValidity(fieldRef);
+            const auto &variable = Utils::getHeaderValidity(fieldRef);
             BUG_CHECK(state.exists(variable),
                       "At this point, the header validity bit should be initialized.");
             const auto *value = state.getSymbolicEnv().get(variable);
@@ -205,9 +203,9 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::Expression *headerRef) {
         result->emplace_back(state);
         return false;
     }
-    auto variable = Utils::getHeaderValidity(headerRef);
+    const auto &variable = Utils::getHeaderValidity(headerRef);
     BUG_CHECK(state.exists(variable),
-              "At this point, the header validity bit should be initialized.");
+              "At this point, the header validity bit %1% should be initialized.", variable);
     state.replaceTopBody(Continuation::Return(variable));
     result->emplace_back(state);
     return false;
@@ -215,7 +213,7 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::Expression *headerRef) {
 
 void AbstractStepper::setHeaderValidity(const IR::Expression *expr, bool validity,
                                         ExecutionState &nextState) {
-    auto headerRefValidity = Utils::getHeaderValidity(expr);
+    const auto &headerRefValidity = Utils::getHeaderValidity(expr);
     nextState.set(headerRefValidity, IR::getBoolLiteral(validity));
 
     // In some cases, the header may be part of a union.
@@ -325,8 +323,8 @@ bool AbstractStepper::stepStackPushPopFront(const IR::Expression *stackRef,
     return false;
 }
 
-const Value *AbstractStepper::evaluateExpression(const IR::Expression *expr,
-                                                 std::optional<const IR::Expression *> cond) const {
+const IR::Literal *AbstractStepper::evaluateExpression(
+    const IR::Expression *expr, std::optional<const IR::Expression *> cond) const {
     BUG_CHECK(solver.isInIncrementalMode(),
               "Currently, expression valuation only supports an incremental solver.");
     auto constraints = state.getPathConstraint();
@@ -339,7 +337,7 @@ const Value *AbstractStepper::evaluateExpression(const IR::Expression *expr,
     auto solverResult = solver.checkSat(constraints);
     // If the solver can find a solution under the given condition, get the model and return the
     // value.
-    const Value *result = nullptr;
+    const IR::Literal *result = nullptr;
     if (solverResult != std::nullopt && *solverResult) {
         auto model = *solver.getModel();
         model.complete(expr);
@@ -389,7 +387,7 @@ void AbstractStepper::declareStructLike(ExecutionState &nextState, const IR::Exp
     }
 }
 
-void AbstractStepper::declareBaseType(ExecutionState &nextState, const IR::Expression *paramPath,
+void AbstractStepper::declareBaseType(ExecutionState &nextState, const IR::StateVariable &paramPath,
                                       const IR::Type_Base *baseType) const {
     nextState.set(paramPath, programInfo.createTargetUninitialized(baseType, false));
 }

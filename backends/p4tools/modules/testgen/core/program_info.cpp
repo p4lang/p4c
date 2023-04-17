@@ -71,7 +71,7 @@ const std::vector<Continuation::Command> *ProgramInfo::getPipelineSequence() con
     return &pipelineSequence;
 }
 
-std::optional<const Constraint *> ProgramInfo::getTargetConstraints() const {
+std::optional<const IR::Expression *> ProgramInfo::getTargetConstraints() const {
     return targetConstraints;
 }
 

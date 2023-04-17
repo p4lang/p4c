@@ -4,7 +4,6 @@
 #include <utility>
 #include <vector>
 
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "ir/id.h"
 #include "lib/exceptions.h"
@@ -97,7 +96,7 @@ ConcolicMethodImpls::ConcolicMethodImpls(const ImplList &implList) { add(implLis
 bool ConcolicResolver::preorder(const IR::ConcolicVariable *var) {
     cstring concolicMethodName = var->concolicMethodName;
     // Convert the concolic member variable to a state variable.
-    StateVariable concolicVarName = var->concolicMember;
+    IR::StateVariable concolicVarName = var->concolicMember;
     auto concolicReplacment = resolvedConcolicVariables.find(concolicVarName);
     if (concolicReplacment == resolvedConcolicVariables.end()) {
         bool found = concolicMethodImpls.exec(concolicMethodName, var, state, completedModel,

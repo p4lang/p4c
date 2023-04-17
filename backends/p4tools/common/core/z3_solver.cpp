@@ -14,7 +14,6 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
@@ -162,13 +161,13 @@ z3::sort Z3Solver::toSort(const IR::Type *type) {
     BUG("Z3Solver: unimplemented type %1%: %2% ", type->node_type_name(), type);
 }
 
-std::string Z3Solver::generateName(const StateVariable &var) const {
+std::string Z3Solver::generateName(const IR::StateVariable &var) const {
     std::ostringstream ostr;
     generateName(ostr, var);
     return ostr.str();
 }
 
-void Z3Solver::generateName(std::ostringstream &ostr, const StateVariable &var) const {
+void Z3Solver::generateName(std::ostringstream &ostr, const IR::StateVariable &var) const {
     // Recurse into the parent member expression to retrieve the full name of the variable.
     if (const auto *next = var->expr->to<IR::Member>()) {
         generateName(ostr, next);
@@ -181,7 +180,7 @@ void Z3Solver::generateName(std::ostringstream &ostr, const StateVariable &var) 
     ostr << "." << var->member;
 }
 
-z3::expr Z3Solver::declareVar(const StateVariable &var) {
+z3::expr Z3Solver::declareVar(const IR::StateVariable &var) {
     BUG_CHECK(var, "Z3Solver: attempted to declare a non-member: %1%", var);
     auto sort = toSort(var->type);
     auto expr = z3context.constant(generateName(var).c_str(), sort);
@@ -216,7 +215,7 @@ void Z3Solver::pop() {
 
     size_t sz = checkpoints.back();
     checkpoints.pop_back();
-    // TODO: This check should be active, but because of JSON loader issues we can not use.
+    // TODO: This check should be active, but because of JSON loader issues we can not use it.
     // So we have to be tolerant for now.
     // BUG_CHECK(!declaredVarsById.empty(), "Declaration list is empty");
     if (!declaredVarsById.empty()) {
@@ -324,14 +323,14 @@ void Z3Solver::asrt(const Constraint *assertion) {
 const Model *Z3Solver::getModel() const {
     auto *result = new Model();
     // First, collect a map of all the declared variables we have encountered in the stack.
-    std::map<unsigned int, StateVariable> declaredVars;
+    std::map<unsigned int, IR::StateVariable> declaredVars;
     for (auto it = declaredVarsById.rbegin(); it != declaredVarsById.rend(); ++it) {
         auto latestVars = *it;
         for (auto var : latestVars) {
             declaredVars.emplace(var);
         }
     }
-    // Then, get the model and match each declaration in the model to its StateVariable.
+    // Then, get the model and match each declaration in the model to its IR::StateVariable.
     try {
         Util::ScopedTimer ctZ3("z3");
         Util::ScopedTimer ctCheckSat("getModel");
@@ -352,7 +351,7 @@ const Model *Z3Solver::getModel() const {
             BUG_CHECK(declaredVars.count(exprId) > 0, "Z3Solver: unknown variable declaration: %1%",
                       z3Expr);
             const auto stateVar = declaredVars.at(exprId);
-            const auto *value = toValue(z3Value, stateVar->type);
+            const auto *value = toLiteral(z3Value, stateVar->type);
             result->emplace(stateVar, value);
         }
     } catch (z3::exception &e) {
@@ -365,7 +364,7 @@ const Model *Z3Solver::getModel() const {
     return result;
 }
 
-const Value *Z3Solver::toValue(const z3::expr &e, const IR::Type *type) {
+const IR::Literal *Z3Solver::toLiteral(const z3::expr &e, const IR::Type *type) {
     // Handle booleans.
     if (type->is<IR::Type::Boolean>()) {
         BUG_CHECK(e.is_bool(), "Expected a boolean value: %1%", e);
@@ -574,7 +573,7 @@ const ShiftType *Z3Translator::rewriteShift(const ShiftType *shift) const {
     return new ShiftType(shift->type, left, newShiftAmount);
 }
 
-/// general functon for unary operations
+/// General function for unary operations.
 bool Z3Translator::recurseUnary(const IR::Operation_Unary *unary, Z3UnaryOp f) {
     BUG_CHECK(unary, "Z3Translator: encountered null node during translation");
     Z3Translator tExpr(solver);
@@ -592,7 +591,7 @@ bool Z3Translator::preorder(const IR::Lss *op) {
     if (leftType != nullptr && !leftType->isSigned) {
         return recurseBinary(op, z3::ult);
     }
-    return recurseBinary(op, z3::operator<);  // NOLINT(whitespace/operators)
+    return recurseBinary(op, z3::operator<);
 }
 
 bool Z3Translator::preorder(const IR::Leq *op) {
@@ -608,7 +607,7 @@ bool Z3Translator::preorder(const IR::Grt *op) {
     if (leftType != nullptr && !leftType->isSigned) {
         return recurseBinary(op, z3::ugt);
     }
-    return recurseBinary(op, z3::operator>);  // NOLINT(whitespace/operators)
+    return recurseBinary(op, z3::operator>);
 }
 
 bool Z3Translator::preorder(const IR::Geq *op) {

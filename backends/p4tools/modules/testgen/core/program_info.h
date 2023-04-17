@@ -7,7 +7,6 @@
 
 #include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/lib/arch_spec.h"
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/namespace_context.h"
 #include "ir/declaration.h"
 #include "ir/ir.h"
@@ -33,7 +32,7 @@ class ProgramInfo : public ICastable {
 
     std::vector<Continuation::Command> pipelineSequence;
 
-    std::optional<const Constraint *> targetConstraints = std::nullopt;
+    std::optional<const IR::Expression *> targetConstraints = std::nullopt;
 
  public:
     ProgramInfo(const ProgramInfo &) = default;
@@ -57,7 +56,7 @@ class ProgramInfo : public ICastable {
 
     /// @returns the constraints of this target.
     /// These constraints can influence the execution of the interpreter
-    [[nodiscard]] std::optional<const Constraint *> getTargetConstraints() const;
+    [[nodiscard]] std::optional<const IR::Expression *> getTargetConstraints() const;
 
     /// @returns the metadata member corresponding to the ingress port
     [[nodiscard]] virtual const IR::Member *getTargetInputPortVar() const = 0;

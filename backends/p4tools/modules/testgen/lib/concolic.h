@@ -10,7 +10,6 @@
 #include <variant>
 #include <vector>
 
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "ir/ir.h"
 #include "ir/vector.h"
@@ -28,7 +27,8 @@ namespace P4Tools::P4Testgen {
 /// are present, but not expressions. The reason expressions need to be keys is that sometimes
 /// entire expressions are mapped to a particular constant.
 using ConcolicVariableMap =
-    ordered_map<std::variant<const StateVariable, const IR::Expression *>, const IR::Expression *>;
+    ordered_map<std::variant<const IR::StateVariable, const IR::Expression *>,
+                const IR::Expression *>;
 
 /// Encapsulates a set of concolic method implementations.
 class ConcolicMethodImpls {

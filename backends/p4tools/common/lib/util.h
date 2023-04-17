@@ -13,7 +13,6 @@
 #include <boost/format.hpp>
 #include <boost/random/mersenne_twister.hpp>
 
-#include "backends/p4tools/common/lib/formulae.h"
 #include "ir/ir.h"
 #include "lib/big_int_util.h"
 #include "lib/cstring.h"
@@ -92,10 +91,12 @@ class Utils {
     static const cstring Valid;
 
     /// @see Zombie::getVar.
-    static const StateVariable &getZombieVar(const IR::Type *type, int incarnation, cstring name);
+    static const IR::StateVariable &getZombieVar(const IR::Type *type, int incarnation,
+                                                 cstring name);
 
     /// @see Zombie::getConst.
-    static const StateVariable &getZombieConst(const IR::Type *type, int incarnation, cstring name);
+    static const IR::StateVariable &getZombieConst(const IR::Type *type, int incarnation,
+                                                   cstring name);
 
     /// @see Utils::getZombieConst.
     /// This function is used to generated variables caused by undefined behavior. This is merely a
@@ -105,27 +106,28 @@ class Utils {
     /// Creates a new member variable from a concolic variable but replaces its concolic ID.
     /// This is used within concolic methods to map back several concolic variables from a single
     /// method call.
-    static const StateVariable &getConcolicMember(const IR::ConcolicVariable *var, int concolicId);
+    static const IR::StateVariable &getConcolicMember(const IR::ConcolicVariable *var,
+                                                      int concolicId);
 
     /// @returns the zombie variable with the given type, for tracking an aspect of the given
     /// table. The returned variable will be named p4t*zombie.table.t.name.idx1.idx2, where t is
     /// the name of the given table. The "idx1" and "idx2" components are produced only if idx1 and
     /// idx2 are given, respectively.
-    static const StateVariable &getZombieTableVar(const IR::Type *type, const IR::P4Table *table,
-                                                  cstring name,
-                                                  std::optional<int> idx1_opt = std::nullopt,
-                                                  std::optional<int> idx2_opt = std::nullopt);
+    static const IR::StateVariable &getZombieTableVar(const IR::Type *type,
+                                                      const IR::P4Table *table, cstring name,
+                                                      std::optional<int> idx1_opt = std::nullopt,
+                                                      std::optional<int> idx2_opt = std::nullopt);
 
     /// @returns the state variable for the validity of the given header instance. The resulting
     ///     variable will be boolean-typed.
     ///
     /// @param headerRef a header instance. This is either a Member or a PathExpression.
-    static StateVariable getHeaderValidity(const IR::Expression *headerRef);
+    static IR::StateVariable getHeaderValidity(const IR::Expression *headerRef);
 
-    /// @returns a StateVariable that is postfixed with "*". This is used for PathExpressions with
-    /// are not yet members.
-    static StateVariable addZombiePostfix(const IR::Expression *paramPath,
-                                          const IR::Type_Base *baseType);
+    /// @returns a IR::StateVariable that is postfixed with "*". This is used for PathExpressions
+    /// with are not yet members.
+    static IR::StateVariable addZombiePostfix(const IR::Expression *paramPath,
+                                              const IR::Type_Base *baseType);
 
     /// @returns a method call to an internal extern consumed by the interpreter. The return type
     /// is typically Type_Void.

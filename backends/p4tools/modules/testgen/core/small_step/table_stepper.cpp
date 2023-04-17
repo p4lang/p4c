@@ -10,7 +10,6 @@
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/multiprecision/number.hpp>
 
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/util.h"
@@ -43,22 +42,22 @@ const ProgramInfo *TableStepper::getProgramInfo() { return &stepper->programInfo
 
 ExprStepper::Result TableStepper::getResult() { return stepper->result; }
 
-const StateVariable &TableStepper::getTableActionVar(const IR::P4Table *table) {
+const IR::StateVariable &TableStepper::getTableActionVar(const IR::P4Table *table) {
     auto numActions = table->getActionList()->size();
     const auto *type = IR::getBitTypeToFit(numActions);
     return Utils::getZombieTableVar(type, table, "*action");
 }
 
-const StateVariable &TableStepper::getTableHitVar(const IR::P4Table *table) {
+const IR::StateVariable &TableStepper::getTableHitVar(const IR::P4Table *table) {
     return Utils::getZombieTableVar(IR::Type::Boolean::get(), table, "*hit");
 }
 
-const StateVariable &TableStepper::getTableKeyReadVar(const IR::P4Table *table, int keyIdx) {
+const IR::StateVariable &TableStepper::getTableKeyReadVar(const IR::P4Table *table, int keyIdx) {
     const auto *key = table->getKey()->keyElements.at(keyIdx);
     return Utils::getZombieTableVar(key->expression->type, table, "*keyRead", keyIdx);
 }
 
-const StateVariable &TableStepper::getTableReachedVar(const IR::P4Table *table) {
+const IR::StateVariable &TableStepper::getTableReachedVar(const IR::P4Table *table) {
     return Utils::getZombieTableVar(IR::Type::Boolean::get(), table, "*reached");
 }
 

@@ -6,7 +6,6 @@
 #include <string>
 
 #include "backends/p4tools/common/core/solver.h"
-#include "backends/p4tools/common/lib/formulae.h"
 #include "ir/ir.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"

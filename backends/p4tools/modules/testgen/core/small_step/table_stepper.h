@@ -5,7 +5,6 @@
 #include <optional>
 #include <vector>
 
-#include "backends/p4tools/common/lib/formulae.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
@@ -69,21 +68,21 @@ class TableStepper {
      * Table Variable Getter functions
      * ========================================================================================= */
     /// @returns the boolean-typed state variable that tracks whether given table is reached.
-    static const StateVariable &getTableReachedVar(const IR::P4Table *table);
+    static const IR::StateVariable &getTableReachedVar(const IR::P4Table *table);
 
     /// @returns the state variable that tracks the value read by the key at the given index in the
     /// given the table.
-    static const StateVariable &getTableKeyReadVar(const IR::P4Table *table, int keyIdx);
+    static const IR::StateVariable &getTableKeyReadVar(const IR::P4Table *table, int keyIdx);
 
     /// @returns the boolean-typed state variable that tracks whether a table has resulted in a hit.
     /// The value of this variable is false if the table misses or is not reached.
-    static const StateVariable &getTableHitVar(const IR::P4Table *table);
+    static const IR::StateVariable &getTableHitVar(const IR::P4Table *table);
 
     /// @returns the state variable that tracks the index of the action taken by the given table.
     ///
     /// This variable is initially set to the number of actions in the table, indicating that no
     /// action has been selected. It is set by setTableAction and read by getTableAction.
-    static const StateVariable &getTableActionVar(const IR::P4Table *table);
+    static const IR::StateVariable &getTableActionVar(const IR::P4Table *table);
 
  protected:
     /* =========================================================================================

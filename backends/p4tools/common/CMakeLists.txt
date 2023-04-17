@@ -36,7 +36,6 @@ set(
 
   lib/arch_spec.cpp
   lib/format_int.cpp
-  lib/formulae.cpp
   lib/model.cpp
   lib/namespace_context.cpp
   lib/symbolic_env.cpp

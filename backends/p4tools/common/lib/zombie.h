@@ -1,7 +1,6 @@
 #ifndef BACKENDS_P4TOOLS_COMMON_LIB_ZOMBIE_H_
 #define BACKENDS_P4TOOLS_COMMON_LIB_ZOMBIE_H_
 
-#include "backends/p4tools/common/lib/formulae.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
@@ -27,21 +26,21 @@ class Zombie {
     ///
     /// A BUG occurs if this was previously called with the same @name and @incarnation, but with a
     /// different @type.
-    static const StateVariable &getVar(const IR::Type *type, int incarnation, cstring name);
+    static const IR::StateVariable &getVar(const IR::Type *type, int incarnation, cstring name);
 
     /// @returns the zombie symbolic constant with the given @type, @incarnation, and @name.
     ///
     /// A BUG occurs if this was previously called with the same @name and @incarnation, but with a
     /// different @type.
-    static const StateVariable &getConst(const IR::Type *type, int incarnation, cstring name);
+    static const IR::StateVariable &getConst(const IR::Type *type, int incarnation, cstring name);
 
  private:
     /// @see getVar and getConst.
-    static const StateVariable &getZombie(const IR::Type *type, bool isConst, int incarnation,
-                                          cstring name);
+    static const IR::StateVariable &getZombie(const IR::Type *type, bool isConst, int incarnation,
+                                              cstring name);
 
-    static const StateVariable *mkZombie(const IR::Type *type, bool isConst, int incarnation,
-                                         cstring name);
+    static const IR::StateVariable *mkZombie(const IR::Type *type, bool isConst, int incarnation,
+                                             cstring name);
 };
 
 }  // namespace P4Tools

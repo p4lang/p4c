@@ -6,7 +6,6 @@
 
 #include <boost/container/vector.hpp>
 
-#include "backends/p4tools/common/lib/formulae.h"
 #include "frontends/p4/optimizeExpressions.h"
 #include "ir/indexed_vector.h"
 #include "ir/irutils.h"
@@ -40,7 +39,7 @@ class CompleteVisitor : public Inspector {
     }
 
     bool preorder(const IR::ConcolicVariable *var) override {
-        auto stateVar = StateVariable(var->concolicMember);
+        auto stateVar = IR::StateVariable(var->concolicMember);
         model->emplace(stateVar, IR::getDefaultValue(var->type));
         return false;
     }
@@ -50,7 +49,7 @@ class CompleteVisitor : public Inspector {
 
 void Model::complete(const IR::Expression *expr) { expr->apply(CompleteVisitor(this)); }
 
-void Model::complete(const std::set<StateVariable> &inputSet) {
+void Model::complete(const std::set<IR::StateVariable> &inputSet) {
     auto completionVisitor = CompleteVisitor(this);
     for (const auto &var : inputSet) {
         var->apply(completionVisitor);
@@ -96,7 +95,8 @@ const IR::ListExpression *Model::evaluateListExpr(const IR::ListExpression *list
     return resolvedListExpr;
 }
 
-const Value *Model::evaluate(const IR::Expression *expr, ExpressionMap *resolvedExpressions) const {
+const IR::Literal *Model::evaluate(const IR::Expression *expr,
+                                   ExpressionMap *resolvedExpressions) const {
     class SubstVisitor : public Transform {
         const Model &self;
 
@@ -104,7 +104,7 @@ const Value *Model::evaluate(const IR::Expression *expr, ExpressionMap *resolved
         const IR::Literal *preorder(IR::Member *member) override {
             BUG_CHECK(self.count(member), "Variable not bound in model: %1%", member);
             prune();
-            return self.at(StateVariable(member))->checkedTo<IR::Literal>();
+            return self.at(IR::StateVariable(member))->checkedTo<IR::Literal>();
         }
 
         const IR::Literal *preorder(IR::TaintExpression *var) override {
@@ -112,7 +112,7 @@ const Value *Model::evaluate(const IR::Expression *expr, ExpressionMap *resolved
         }
 
         const IR::Literal *preorder(IR::ConcolicVariable *var) override {
-            auto stateVar = StateVariable(var->concolicMember);
+            auto stateVar = IR::StateVariable(var->concolicMember);
             BUG_CHECK(self.count(stateVar), "Variable not bound in model: %1%",
                       stateVar->toString());
             return self.at(stateVar)->checkedTo<IR::Literal>();
@@ -140,7 +140,7 @@ Model *Model::evaluate(const SymbolicMapType &inputMap, ExpressionMap *resolvedE
     return result;
 }
 
-const IR::Expression *Model::get(const StateVariable &var, bool checked) const {
+const IR::Expression *Model::get(const IR::StateVariable &var, bool checked) const {
     auto it = find(var);
     if (it != end()) {
         return it->second;

@@ -12,7 +12,6 @@
 
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/arch_spec.h"
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/util.h"
@@ -1511,11 +1510,12 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  argsAreTainted = argsAreTainted || state.hasTaint(arg->expression);
              }
 
-             const auto *checksumVar = args->at(2)->expression;
-             if (!(checksumVar->is<IR::Member>() || checksumVar->is<IR::PathExpression>())) {
-                 TESTGEN_UNIMPLEMENTED("Checksum input %1% of type %2% not supported", checksumVar,
-                                       checksumVar->node_type_name());
+             const auto *checksumVarRef = args->at(2)->expression;
+             if (const auto *argPath = checksumVarRef->to<IR::PathExpression>()) {
+                 checksumVarRef = state.convertPathExpr(argPath);
              }
+             const auto *checksumVar = checksumVarRef->checkedTo<IR::Member>();
+
              const auto *updateCond = args->at(0)->expression;
              const auto *checksumVarType = checksumVar->type;
              const auto *data = args->at(1)->expression;
@@ -1593,11 +1593,12 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  argsAreTainted = argsAreTainted || state.hasTaint(arg->expression);
              }
 
-             const auto *checksumVar = args->at(2)->expression;
-             if (!(checksumVar->is<IR::Member>() || checksumVar->is<IR::PathExpression>())) {
-                 TESTGEN_UNIMPLEMENTED("Checksum input %1% of type %2% not supported", checksumVar,
-                                       checksumVar->node_type_name());
+             const auto *checksumVarRef = args->at(2)->expression;
+             if (const auto *argPath = checksumVarRef->to<IR::PathExpression>()) {
+                 checksumVarRef = state.convertPathExpr(argPath);
              }
+             const auto *checksumVar = checksumVarRef->checkedTo<IR::Member>();
+
              const auto *updateCond = args->at(0)->expression;
              const auto *checksumVarType = checksumVar->type;
              const auto *data = args->at(1)->expression;

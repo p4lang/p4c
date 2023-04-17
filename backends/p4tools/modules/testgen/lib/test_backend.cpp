@@ -9,7 +9,6 @@
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/format_int.h"
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/taint.h"
@@ -64,8 +63,8 @@ const Model *TestBackEnd::computeConcolicVariables(const ExecutionState *executi
             const auto *concolicAssignment = resolvedConcolicVariable.second;
             const IR::Expression *pathConstraint = nullptr;
             // We need to differentiate between state variables and expressions here.
-            if (std::holds_alternative<const StateVariable>(concolicVariable)) {
-                pathConstraint = new IR::Equ(std::get<const StateVariable>(concolicVariable),
+            if (std::holds_alternative<const IR::StateVariable>(concolicVariable)) {
+                pathConstraint = new IR::Equ(std::get<const IR::StateVariable>(concolicVariable),
                                              concolicAssignment);
             } else if (std::holds_alternative<const IR::Expression *>(concolicVariable)) {
                 pathConstraint = new IR::Equ(std::get<const IR::Expression *>(concolicVariable),

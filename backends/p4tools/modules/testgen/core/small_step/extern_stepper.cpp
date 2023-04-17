@@ -8,7 +8,6 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/util.h"
@@ -137,8 +136,8 @@ ExprStepper::PacketCursorAdvanceInfo ExprStepper::calculateAdvanceExpression(
     return {advanceVal, advanceCond, notAdvanceVal, notAdvanceCond};
 }
 
-void ExprStepper::generateCopyIn(ExecutionState &nextState, const IR::Expression *targetPath,
-                                 const IR::Expression *srcPath, cstring dir,
+void ExprStepper::generateCopyIn(ExecutionState &nextState, const IR::StateVariable &targetPath,
+                                 const IR::StateVariable &srcPath, cstring dir,
                                  bool forceTaint) const {
     // If the direction is out, we do not copy in external values.
     // We set the parameter to uninitialized.
@@ -354,7 +353,8 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
                  if (const auto *argPath = argRef->to<IR::PathExpression>()) {
                      argRef = nextState.convertPathExpr(argPath);
                  }
-                 generateCopyIn(nextState, argRef, globalRef, dir, forceTaint->value);
+                 generateCopyIn(nextState, argRef->checkedTo<IR::Member>(),
+                                globalRef->checkedTo<IR::Member>(), dir, forceTaint->value);
              } else {
                  P4C_UNIMPLEMENTED("Unsupported copy_out type %1%", assignType->node_type_name());
              }
@@ -427,7 +427,8 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
                      argRef = nextState.convertPathExpr(argPath);
                  }
                  if (dir == "inout" || dir == "out") {
-                     nextState.set(globalRef, nextState.get(argRef));
+                     nextState.set(globalRef->checkedTo<IR::Member>(),
+                                   nextState.get(argRef->checkedTo<IR::Member>()));
                  }
              } else {
                  P4C_UNIMPLEMENTED("Unsupported copy_out type %1%", assignType->node_type_name());

@@ -7,13 +7,12 @@
 
 #include <boost/container/flat_map.hpp>
 
-#include "backends/p4tools/common/lib/formulae.h"
 #include "ir/ir.h"
 
 namespace P4Tools {
 
 /// Symbolic maps map a state variable to a IR::Expression.
-using SymbolicMapType = boost::container::flat_map<StateVariable, const IR::Expression *>;
+using SymbolicMapType = boost::container::flat_map<IR::StateVariable, const IR::Expression *>;
 
 /// Represents a solution found by the solver. A model is a concretized form of a symbolic
 /// environment. All the expressions in a Model must be of type IR::Literal.
@@ -34,15 +33,15 @@ class Model : public SymbolicMapType {
 
     /// Adds the given set of variables to the model (if they do not exist already).
     /// If the variable does not exist, it is initialized to a default value.
-    void complete(const std::set<StateVariable> &inputSet);
+    void complete(const std::set<IR::StateVariable> &inputSet);
 
     /// Evaluates a P4 expression in the context of this model.
     ///
     /// A BUG occurs if the given expression refers to a variable that is not bound by this model.
     /// If the input list @param resolvedExpressions is not null, we also collect the resolved value
     /// of this expression.
-    const Value *evaluate(const IR::Expression *expr,
-                          ExpressionMap *resolvedExpressions = nullptr) const;
+    const IR::Literal *evaluate(const IR::Expression *expr,
+                                ExpressionMap *resolvedExpressions = nullptr) const;
 
     // Evaluates a P4 StructExpression in the context of this model. Recursively calls into
     // @evaluate and substitutes all members of this list with a Value type.
@@ -62,9 +61,10 @@ class Model : public SymbolicMapType {
     /// If the input list @param resolvedExpressions is not null, we also collect the bound values
     /// of all the variables we have resolved within this expression.
     template <template <class...> class Collection>
-    std::vector<const Value *> evaluateAll(const Collection<const IR::Expression *> *exprs,
-                                           ExpressionMap *resolvedExpressions = nullptr) const {
-        std::vector<const Value *> result(exprs->size());
+    std::vector<const IR::Literal *> evaluateAll(
+        const Collection<const IR::Expression *> *exprs,
+        ExpressionMap *resolvedExpressions = nullptr) const {
+        std::vector<const IR::Literal *> result(exprs->size());
         for (const auto *expr : *exprs) {
             result.push_back(evaluate(expr, resolvedExpressions));
         }
@@ -83,7 +83,7 @@ class Model : public SymbolicMapType {
     /// Tries to retrieve @param var from the model.
     /// If @param checked is true, this function throws a BUG if the variable can not be found.
     /// Otherwise, it returns a nullptr.
-    const IR::Expression *get(const StateVariable &var, bool checked) const;
+    const IR::Expression *get(const IR::StateVariable &var, bool checked) const;
 };
 
 }  // namespace P4Tools
