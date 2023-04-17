@@ -8,28 +8,28 @@ class StateVariable : Expression {
 
     /// Implicit conversions to allow implementations to be treated like a Member*.
 #emit
-    operator const IR::Member* () const { return member; }
+    operator const IR::Member *() const { return member; }
 #end
-    Member const & operator*() const { return *member; }
+    Member const &operator*() const { return *member; }
     Member operator->() const { return member; }
 
     /// Implements comparisons so that StateVariables can be used as map keys.
-    bool operator==(const StateVariable& other) const override {
+    bool operator==(const StateVariable &other) const override {
         // Delegate to IR's notion of equality.
         return *member == *other.member;
     }
 
     /// Implements comparisons so that StateVariables can be used as map keys.
-    bool operator<(const StateVariable& other) const {
+    bool operator<(const StateVariable &other) const {
         // We use a custom compare function.
         // TODO: Is there a faster way to implement this comparison?
         return compare(member, other.member) < 0;
     }
 
-    int compare(const Expression* e1, const Expression* e2) const {
+    int compare(const Expression *e1, const Expression *e2) const {
         // e1 is a Member.
-        if (const auto* m1 = e1->to<Member>()) {
-            if (const auto* m2 = e2->to<Member>()) {
+        if (const auto *m1 = e1->to<Member>()) {
+            if (const auto *m2 = e2->to<Member>()) {
                 return compare(m1, m2);
             }
             if (e2->is<PathExpression>()) {
@@ -37,8 +37,8 @@ class StateVariable : Expression {
             }
         }
         // e1 is a PathExpression.
-        if (const auto* p1 = e1->to<PathExpression>()) {
-            if (const auto* p2 = e2->to<PathExpression>()) {
+        if (const auto *p1 = e1->to<PathExpression>()) {
+            if (const auto *p2 = e2->to<PathExpression>()) {
                 return compare(p1, p2);
             }
             if (e2->is<Member>()) {
@@ -48,7 +48,7 @@ class StateVariable : Expression {
         BUG("Not a valid StateVariable: %1%", e1);
     }
 
-    int compare(const Member* m1, const Member* m2) const {
+    int compare(const Member *m1, const Member *m2) const {
         auto result = compare(m1->expr, m2->expr);
         if (result != 0) {
             return result;
@@ -62,7 +62,7 @@ class StateVariable : Expression {
         return 0;
     }
 
-    int compare(const PathExpression* p1, const PathExpression* p2) const {
+    int compare(const PathExpression *p1, const PathExpression *p2) const {
         if (p1->path->name.name < p2->path->name.name) {
             return -1;
         }

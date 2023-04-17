@@ -74,7 +74,7 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/common)
 
 
 # Custom IR constructs for P4Tools.
-set(IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/common/testgen.def)
+set(IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/p4tools.def)
 
 file(GLOB tools_modules RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/modules ${CMAKE_CURRENT_SOURCE_DIR}/modules/*)
 foreach(ext ${tools_modules})
