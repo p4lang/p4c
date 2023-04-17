@@ -24,7 +24,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"
-#include "lib/map.h"
+#include "lib/map.h"  // IWYU pragma: keep
 #include "lib/null.h"
 #include "lib/ordered_map.h"
 #include "lib/ordered_set.h"

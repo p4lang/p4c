@@ -16,8 +16,8 @@ limitations under the License.
 
 #include <cstdio>
 #include <filesystem>
-#include <fstream>
 #include <sstream>
+#include <fstream>  // IWYU pragma: keep
 #include <stdexcept>
 
 #include "helpers.h"

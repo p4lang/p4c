@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 #include <cstdio>
-#include <fstream>
+#include <fstream>  // IWYU pragma: keep
 #include <iostream>
 #include <string>
 

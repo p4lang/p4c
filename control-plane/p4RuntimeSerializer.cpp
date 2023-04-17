@@ -38,16 +38,16 @@ limitations under the License.
 #include <boost/algorithm/string.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 
+// TODO(antonin): this include should go away when we cleanup getMatchFields
+// and tableNeedsPriority implementations.
+#include "control-plane/bytestrings.h"
+#include "control-plane/flattenHeader.h"
 #include "frontends/common/options.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/enumInstance.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/externInstance.h"
-// TODO(antonin): this include should go away when we cleanup getMatchFields
-// and tableNeedsPriority implementations.
-#include "bytestrings.h"
-#include "flattenHeader.h"
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/parseAnnotations.h"
