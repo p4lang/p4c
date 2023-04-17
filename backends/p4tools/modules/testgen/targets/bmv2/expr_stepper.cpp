@@ -895,15 +895,21 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          [](const IR::MethodCallExpression *call, const IR::Expression *receiver,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
-             const auto *meterResult = args->at(1)->expression;
              auto testBackend = TestgenOptions::get().testBackend;
              if (testBackend != "PTF") {
                  ::warning(
                      "meter.execute_meter not implemented for %1%. Choosing default value (GREEN).",
                      testBackend);
                  auto &nextState = state.clone();
-                 if (const auto *pathRef = meterResult->to<IR::PathExpression>()) {
+                 const IR::Member *meterResult = nullptr;
+                 const auto *expr = args->at(1)->expression;
+                 if (const auto *pathRef = expr->to<IR::PathExpression>()) {
                      meterResult = state.convertPathExpr(pathRef);
+                 } else if (const auto *member = expr->to<IR::Member>()) {
+                     meterResult = member;
+                 } else {
+                     TESTGEN_UNIMPLEMENTED("Unsupported meter result variable %1% of type %2%",
+                                           expr, expr->node_type_name());
                  }
                  nextState.set(meterResult, IR::getConstant(meterResult->type,
                                                             BMv2Constants::METER_COLOR::GREEN));
@@ -911,6 +917,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  result->emplace_back(nextState);
                  return;
              }
+             const auto *meterResult = args->at(1)->expression;
+
              // TODO: Frontload this in the expression stepper for method call expressions.
              const auto *index = args->at(0)->expression;
              if (!SymbolicEnv::isSymbolicValue(index)) {
@@ -1016,9 +1024,15 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
 
              auto &nextState = state.clone();
              std::vector<Continuation::Command> replacements;
-             const auto *meterResult = args->at(0)->expression;
-             if (const auto *pathRef = meterResult->to<IR::PathExpression>()) {
+             const auto *expr = args->at(0)->expression;
+             const IR::Member *meterResult = nullptr;
+             if (const auto *pathRef = expr->to<IR::PathExpression>()) {
                  meterResult = state.convertPathExpr(pathRef);
+             } else if (const auto *member = expr->to<IR::Member>()) {
+                 meterResult = member;
+             } else {
+                 TESTGEN_UNIMPLEMENTED("Unsupported meter result variable %1% of type %2%", expr,
+                                       expr->node_type_name());
              }
              // If we do not have right back end and no associated table entry, do not bother
              // configuring the extern. We just set the default value (green).
