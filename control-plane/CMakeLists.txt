@@ -52,7 +52,7 @@ set (P4RUNTIME_GEN_PYTHON "control-plane")
 #   control-plane/p4/config/p4info.pb.h
 #   control-plane/p4/config/p4info.pb.cc
 add_custom_target (mkP4configdir
-  ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/p4/config)
+  ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/p4/config)
 add_custom_command(OUTPUT ${P4RUNTIME_GEN_SRCS} ${P4RUNTIME_GEN_HDRS}
   COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
           -I ${P4RUNTIME_STD_DIR} -I${CMAKE_CURRENT_SOURCE_DIR}
