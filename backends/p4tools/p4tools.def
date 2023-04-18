@@ -1,81 +1,139 @@
 /// Represents a reference to an object in a P4 program.
-///
-/// This is a thin wrapper around a 'const IR::Member*' to (1) enforce invariants on which forms of
-/// Members can represent state variables and (2) enable the use of StateVariables as map keys.
 class StateVariable : Expression {
-    /// The wrapped member.
-    const Member *member;
-
-    /// Implicit conversions to allow implementations to be treated like a Member*.
+#noconstructor
+#nooperator==
 #emit
-    operator const IR::Member *() const { return member; }
+/// The member of a StateVariable. Requires a type and a name.
+    class VariableMember {
+     public:
+        /// The type of the variable item.
+        const IR::Type *type;
+
+        /// The name of the variable item.
+        cstring name;
+
+        VariableMember(const VariableMember &) = default;
+        VariableMember(VariableMember &&) = default;
+        VariableMember &operator=(const VariableMember &) = default;
+        VariableMember &operator=(VariableMember &&) = default;
+        ~VariableMember() = default;
+
+        /// Construct with type and cstring.
+        VariableMember(const IR::Type *type, cstring name);  // NOLINT(runtime/explicit)
+    };
+ private:
+    /// The wrapped members.
+    std::deque<VariableMember> members;
+
+    /// A constructor for an anonymous, untyped state variable without type information.
+    StateVariable(std::initializer_list<cstring> untypedMembers);
+
+ public:
+    StateVariable(const StateVariable &) = default;
+    StateVariable(StateVariable &&) = default;
+    StateVariable &operator=(const StateVariable &) = default;
+    StateVariable &operator=(StateVariable &&) = default;
+    ~StateVariable() override = default;
+
+    /// Derives a StateVariable from a member by unraveling the member.
+    /// The type of the StateVariable is the type of the member, and with that the last element.
+    explicit StateVariable(const IR::Member &member);
+
+    /// Derives a StateVariable from a PathExpression, which is just the path contained within the
+    /// expression. The type of the StateVariable is the type of the path.
+    explicit StateVariable(const IR::PathExpression &path);
+
+    /// Derives a StateVariable from a deque of members.
+    /// If the list is not empty the type of the StateVariable is the last element in the deque.
+    explicit StateVariable(const Util::SourceInfo &srcInfo, std::deque<VariableMember> members);
+
+    /// Derives a StateVariable from a deque of members.
+    /// If the list is not empty the type of the StateVariable is the last element in the deque.
+    explicit StateVariable(std::deque<VariableMember> members);
+
+    /// A completely untyped StateVariable.
+    /// Useful if you need to initialize an anonymous variable which is typed later.
+    // NOLINTNEXTLINE
+    static StateVariable UntypedStateVariable(
+        std::initializer_list<cstring> untypedMembers);
+
+    /// @returns the list of members contained in this StateVariable.
+    const std::deque<VariableMember> &getMembers() const;
+
+    /// @returns the element at index @param n.
+    const StateVariable::VariableMember &at(size_t n) const;
+
+    /// @returns the size of the state variable in terms of members.
+    size_t size() const;
+
+    /// @returns the first member (from the right).
+    const StateVariable::VariableMember &front() const;
+
+    /// @returns the last member (from the right).
+    const StateVariable::VariableMember &back() const;
+
+    /// Prepend a member to the StateVariable in place.
+    void popFrontInPlace();
+
+    /// Pops the first member (from the right) from the StateVariable and then @returns a new
+    /// variable.
+    StateVariable popFront() const;
+
+    /// Append a member to the StateVariable in place. Updates the type of the member.
+    void popBackInPlace();
+
+    /// Pops the last member (from the right) from the StateVariable and then @returns a new
+    /// variable.
+    StateVariable popBack() const;
+
+    /// Append a member to the StateVariable in place. Updates the type of the member.
+    void appendInPlace(VariableMember item);
+
+    /// Append a member to the StateVariable. @returns a new variable.
+    StateVariable append(VariableMember &item) const;
+
+    /// Prepend a member to the StateVariable in place.
+    void prependInPlace(VariableMember item);
+
+    /// Prepend a member to the StateVariable. @returns a new variable.
+    StateVariable prepend(VariableMember item) const;
+
+    /// @returns a StateVariable which contains a subset of the parent variable.
+    /// TODO: Use a std::span once we have C++20.
+    StateVariable getSlice(int64_t lo, int64_t hi) const;
 #end
-    Member const &operator*() const { return *member; }
-    Member operator->() const { return member; }
 
     /// Implements comparisons so that StateVariables can be used as map keys.
-    bool operator==(const StateVariable &other) const override {
-        // Delegate to IR's notion of equality.
-        return *member == *other.member;
+    bool operator==(const StateVariable &other) const override;
+
+    /// Implements comparisons so that StateVariables can be used as map keys.
+    equiv {
+    // We use a custom compare function.
+    auto memberSize = members.size();
+    auto otherMemberSize = members.size();
+    if (memberSize != otherMemberSize) {
+        return false;
+    }
+    for (size_t idx = 0; idx < memberSize; ++idx) {
+        auto member = members.at(idx);
+        auto otherMember = a.members.at(idx);
+        if (member.name != otherMember.name || member.type->equiv(*otherMember.type)) {
+            return false;
+        }
+    }
+    return true;
     }
 
     /// Implements comparisons so that StateVariables can be used as map keys.
-    bool operator<(const StateVariable &other) const {
-        // We use a custom compare function.
-        // TODO: Is there a faster way to implement this comparison?
-        return compare(member, other.member) < 0;
-    }
+    bool operator<(const StateVariable &other) const;
 
-    int compare(const Expression *e1, const Expression *e2) const {
-        // e1 is a Member.
-        if (const auto *m1 = e1->to<Member>()) {
-            if (const auto *m2 = e2->to<Member>()) {
-                return compare(m1, m2);
-            }
-            if (e2->is<PathExpression>()) {
-                return 1;
-            }
-        }
-        // e1 is a PathExpression.
-        if (const auto *p1 = e1->to<PathExpression>()) {
-            if (const auto *p2 = e2->to<PathExpression>()) {
-                return compare(p1, p2);
-            }
-            if (e2->is<Member>()) {
-                return -1;
-            }
-        }
-        BUG("Not a valid StateVariable: %1%", e1);
-    }
+    cstring toString() const override;
 
-    int compare(const Member *m1, const Member *m2) const {
-        auto result = compare(m1->expr, m2->expr);
-        if (result != 0) {
-            return result;
-        }
-        if (m1->member.name < m2->member.name) {
-            return -1;
-        }
-        if (m1->member.name > m2->member.name) {
-            return 1;
-        }
-        return 0;
-    }
+    void dbprint(std::ostream &out) const override;
 
-    int compare(const PathExpression *p1, const PathExpression *p2) const {
-        if (p1->path->name.name < p2->path->name.name) {
-            return -1;
-        }
-        if (p1->path->name.name > p2->path->name.name) {
-            return 1;
-        }
-        return 0;
-    }
 
-    toString { return member->toString(); }
+};
 
-    dbprint { member->dbprint(out); }
-}
 
 /// Signifies that a particular expression is tainted.
 /// This tainted expression must be resolved explicitly.

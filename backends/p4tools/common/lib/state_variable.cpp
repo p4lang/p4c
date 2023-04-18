@@ -1,6 +1,6 @@
-#include "backends/p4tools/common/lib/formulae.h"
+#include "ir/ir.h"
 
-namespace P4Tools {
+namespace IR {
 
 StateVariable::VariableMember::VariableMember(const IR::Type *type, cstring name)
     : type(type), name(name) {}
@@ -51,23 +51,6 @@ bool StateVariable::operator==(const StateVariable &other) const {
         auto member = members.at(idx);
         auto otherMember = other.members.at(idx);
         if (member.name != otherMember.name || member.type != otherMember.type) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool StateVariable::equiv(const StateVariable &other) const {
-    // We use a custom compare function.
-    auto memberSize = members.size();
-    auto otherMemberSize = members.size();
-    if (memberSize != otherMemberSize) {
-        return false;
-    }
-    for (size_t idx = 0; idx < memberSize; ++idx) {
-        auto member = members.at(idx);
-        auto otherMember = other.members.at(idx);
-        if (member.name != otherMember.name || member.type->equiv(*otherMember.type)) {
             return false;
         }
     }
@@ -181,6 +164,4 @@ StateVariable StateVariable::getSlice(int64_t lo, int64_t hi) const {
     return StateVariable(srcInfo, slice);
 }
 
-StateVariable *StateVariable::clone() const { return new StateVariable(srcInfo, members); }
-
-}  // namespace P4Tools
+}  // namespace IR

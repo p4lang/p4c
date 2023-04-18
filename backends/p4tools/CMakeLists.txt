@@ -59,7 +59,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(inja)
 include_directories(SYSTEM ${inja_SOURCE_DIR}/include)
 
-
 # Import common definitions.
 include(common)
 
@@ -94,3 +93,8 @@ endforeach(ext)
 
 # Propagate new def files upwards after all modules have been included.
 set(IR_DEF_FILES ${IR_DEF_FILES} PARENT_SCOPE)
+# Also propagate their implementation.
+set(P4C_TOOLS_IR_SOURCES
+  ${CMAKE_CURRENT_SOURCE_DIR}/common/lib/state_variable.cpp
+)
+set(EXTENSION_FRONTEND_SOURCES ${EXTENSION_FRONTEND_SOURCES} ${P4C_TOOLS_IR_SOURCES} PARENT_SCOPE)
