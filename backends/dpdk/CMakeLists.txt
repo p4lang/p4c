@@ -21,8 +21,8 @@ include_directories(${P4C_BINARY_DIR}/control-plane)
 ################ Proto
 set (DPDK_P4RUNTIME_DIR ${CMAKE_CURRENT_SOURCE_DIR}/control-plane/proto)
 set (DPDK_P4RUNTIME_INFO_PROTO ${DPDK_P4RUNTIME_DIR}/p4info.proto)
-set (DPDK_P4RUNTIME_INFO_GEN_SRCS ${P4C_BINARY_DIR}/control-plane/p4/config/dpdk/p4info.pb.cc)
-set (DPDK_P4RUNTIME_INFO_GEN_HDRS ${P4C_BINARY_DIR}/control-plane/p4/config/dpdk/p4info.pb.h)
+set (DPDK_P4RUNTIME_INFO_GEN_SRCS ${P4C_BINARY_DIR}/p4/config/dpdk/p4info.pb.cc)
+set (DPDK_P4RUNTIME_INFO_GEN_HDRS ${P4C_BINARY_DIR}/p4/config/dpdk/p4info.pb.h)
 # The generated code for protobuf has an excessive number of warnings
 # Silence -Warray-bounds as the root issue is out of our control: https://github.com/protocolbuffers/protobuf/issues/7140
 set_source_files_properties(${DPDK_P4RUNTIME_INFO_GEN_SRCS} PROPERTIES
@@ -30,7 +30,7 @@ set_source_files_properties(${DPDK_P4RUNTIME_INFO_GEN_SRCS} PROPERTIES
 
 add_custom_target (dpdk_runtime_dir
   ${CMAKE_COMMAND} -E make_directory
-  ${P4C_BINARY_DIR}/control-plane/p4/config/dpdk)
+  ${P4C_BINARY_DIR}/p4/config/dpdk)
 # Generate source code from .proto using protoc. The output is
 # placed in the build directory inside `control-plane` directory
 add_custom_command(
@@ -38,8 +38,8 @@ add_custom_command(
   COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
     --proto_path ${DPDK_P4RUNTIME_DIR}
     --proto_path ${P4C_SOURCE_DIR}/control-plane/p4runtime/proto
-    --cpp_out ${P4C_BINARY_DIR}/control-plane/p4/config/dpdk
-    --python_out ${P4C_BINARY_DIR}/control-plane/p4/config/dpdk
+    --cpp_out ${P4C_BINARY_DIR}/p4/config/dpdk
+    --python_out ${P4C_BINARY_DIR}/p4/config/dpdk
           ${DPDK_P4RUNTIME_INFO_PROTO}
   DEPENDS ${DPDK_P4RUNTIME_INFO_PROTO} dpdk_runtime_dir
   COMMENT "Generating protobuf files for p4info on target DPDK."

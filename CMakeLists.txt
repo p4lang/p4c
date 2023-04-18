@@ -342,33 +342,10 @@ set (IR_DEF_FILES)           # list to collect all .def files
 # Other configuration files that need to be generated
 configure_file ("${P4C_SOURCE_DIR}/cmake/config.h.cmake" "${P4C_BINARY_DIR}/config.h")
 
-set (IR_GENERATED_SRCS
-  ${P4C_BINARY_DIR}/ir/ir-generated.h
-  ${P4C_BINARY_DIR}/ir/ir-generated.cpp
-  ${P4C_BINARY_DIR}/ir/gen-tree-macro.h)
 # IR_GENERATOR_DIRECTORY is used to set the RUNTIME_OUTPUT_DIRECTORY property
 # of the irgenerator target to the matching path
 set (IR_GENERATOR_DIRECTORY ${P4C_BINARY_DIR}/tools/ir-generator)
 set (IR_GENERATOR ${IR_GENERATOR_DIRECTORY}/irgenerator)
-
-# Set up IWYU for P4C. Each CMake target needs to manually add IWYU to its checks.
-if(ENABLE_IWYU)
-  message("Enabling IWYU checks.")
-  find_program(iwyu_path NAMES include-what-you-use iwyu REQUIRED)
-  set(
-    iwyu_path
-    ${iwyu_path}
-    -Xiwyu
-    --max_line_length=100
-    -Xiwyu
-    --no_fwd_decls
-    -Xiwyu
-    --cxx17ns
-    -Xiwyu
-    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/p4c.imp
-  )
-  message("IWYU command: ${iwyu_path}")
-endif()
 
 # the order of adding subdirectories matters because of target dependencies
 add_subdirectory (tools/driver)
@@ -439,8 +416,13 @@ if (ENABLE_GTESTS)
   add_subdirectory (test)
 endif ()
 
-# IR Generation
-set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
+################################ IR Generation Begin ################################
+
+set (IR_GENERATED_SRCS
+  ${P4C_BINARY_DIR}/ir/ir-generated.h
+  ${P4C_BINARY_DIR}/ir/ir-generated.cpp
+  ${P4C_BINARY_DIR}/ir/gen-tree-macro.h)
+set_source_files_properties(${IR_GENERATED_SRCS} PROPERTIES GENERATED TRUE)
 
 # Fixup #line directives in the generated IR files
 # This is a vestige of automake. CMake handles dependencies correctly,
@@ -450,8 +432,8 @@ set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
 # build files only if they have changed. This avoids rebuilding the whole
 # tree when small changes to the .def files affect only the .cpp file and
 # not the headers.
-set (fixup_file "${CMAKE_CURRENT_BINARY_DIR}/irgen-fixup.awk")
-file(WRITE "${fixup_file}" "/^#\$/ { printf \"#line %d \\\"${CMAKE_CURRENT_BINARY_DIR}/ir/%s\\\"\\n\", NR+1, name; next; } 1\n")
+set (fixup_file "${P4C_BINARY_DIR}/irgen-fixup.awk")
+file(WRITE "${fixup_file}" "/^#\$/ { printf \"#line %d \\\"${P4C_BINARY_DIR}/ir/%s\\\"\\n\", NR+1, name; next; } 1\n")
 set(temp_ir_genfiles
   ir/ir-generated.cpp.tmp ir/ir-generated.cpp.fixup
   ir/ir-generated.h.tmp   ir/ir-generated.h.fixup
@@ -471,6 +453,11 @@ add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
   COMMENT "Generating IR class files")
 
 add_custom_target(genIR DEPENDS ${IR_GENERATED_SRCS})
+set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
+add_library(ir-generated OBJECT ${IR_GENERATED_SRCS})
+
+################################ IR Generation End ################################
+
 
 # Header files
 # p4test needs all the backend include files, whether the backend is enabled or not
@@ -577,3 +564,53 @@ SET(CPACK_SOURCE_IGNORE_FILES
 INCLUDE(CPack)
 
 ADD_CUSTOM_TARGET(dist COMMAND ${CMAKE_MAKE_PROGRAM} clean package_source)
+
+#################### IWYU
+# Needs to be part of the top-level to be able to find all targets in the compiler framework.
+if(ENABLE_IWYU)
+  # Set up IWYU for P4C.
+  message("Enabling IWYU checks.")
+  find_program(iwyu_path NAMES include-what-you-use iwyu REQUIRED)
+  set(iwyu_path
+      ${iwyu_path}
+      -Xiwyu
+      --max_line_length=100
+      -Xiwyu
+      --no_fwd_decls
+      -Xiwyu
+      --cxx17ns
+      -Xiwyu
+      --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/p4c.imp
+  )
+  message("IWYU command: ${iwyu_path}")
+  function(get_all_targets var)
+    set(targets)
+    get_all_targets_recursive(targets ${CMAKE_CURRENT_SOURCE_DIR})
+    set(${var} ${targets} PARENT_SCOPE)
+  endfunction()
+
+  macro(get_all_targets_recursive targets dir)
+    get_property(subdirectories DIRECTORY ${dir} PROPERTY SUBDIRECTORIES)
+    foreach(subdir ${subdirectories})
+      get_all_targets_recursive(${targets} ${subdir})
+    endforeach()
+
+    get_property(current_targets DIRECTORY ${dir} PROPERTY BUILDSYSTEM_TARGETS)
+    list(APPEND ${targets} ${current_targets})
+  endmacro()
+
+  # Apply IWYU to all targets.
+  get_all_targets(all_targets)
+  # Remove generated files from IWYU.
+  list(FILTER all_targets EXCLUDE REGEX "controlplane-gen")
+  list(FILTER all_targets EXCLUDE REGEX "dpdk_runtime")
+  list(FILTER all_targets EXCLUDE REGEX "ir-generated")
+  list(FILTER all_targets EXCLUDE REGEX "genIR")
+  list(FILTER all_targets EXCLUDE REGEX "parser-gen")
+  list(FILTER all_targets EXCLUDE REGEX "gtest")
+  message("Applying IWYU to targets: ${all_targets}")
+  foreach(target ${all_targets})
+    set_property(TARGET ${target} PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
+  endforeach()
+
+endif()

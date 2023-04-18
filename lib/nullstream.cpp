@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "nullstream.h"
 
-#include <fstream>
+#include <fstream>  // IWYU pragma: keep
 
 std::ostream *openFile(cstring name, bool nullOnError) {
     if (name.isNullOrEmpty()) {

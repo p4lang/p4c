@@ -72,7 +72,6 @@ set(ENABLE_TESTING ON)
 # Include sub projects.
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/common)
 
-
 # Custom IR constructs for P4Tools.
 set(IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/p4tools.def)
 

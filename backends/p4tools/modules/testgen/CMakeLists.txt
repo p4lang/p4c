@@ -138,11 +138,4 @@ if(ENABLE_GTESTS)
     set_tests_properties(testgen-gtest PROPERTIES LABELS "gtest-testgen")
   endif()
 
-  if(ENABLE_IWYU)
-    set_property(TARGET testgen-gtest PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
-  endif()
-endif()
-
-if(ENABLE_IWYU)
-  set_property(TARGET testgen PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
 endif()
