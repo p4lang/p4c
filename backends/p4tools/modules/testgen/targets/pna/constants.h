@@ -29,7 +29,7 @@ class PnaConstants {
 class PnaZombies {
  public:
     /// The input direction.
-    static const IR::Member DIRECTION;
+    static const IR::StateVariable DIRECTION;
 };
 
 }  // namespace P4Tools::P4Testgen::Pna

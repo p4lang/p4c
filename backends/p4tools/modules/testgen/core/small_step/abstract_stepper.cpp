@@ -184,12 +184,11 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::StateVariable &headerRef) 
     // header ref. Replace this with the variable representing the header ref's validity.
     if (const auto *headerUnion = headerRef.type->to<IR::Type_HeaderUnion>()) {
         for (const auto *field : headerUnion->fields) {
-            auto *fieldRef = headerRef.clone();
-            fieldRef->appendInPlace({field->type, field->name});
-            const auto &variable = Utils::getHeaderValidity(*fieldRef);
-            BUG_CHECK(state.exists(*variable),
+            const auto variable =
+                Utils::getHeaderValidity(headerRef.append({field->type, field->name}));
+            BUG_CHECK(state.exists(variable),
                       "At this point, the header validity bit should be initialized.");
-            const auto *value = state.getSymbolicEnv().get(*variable);
+            const auto *value = state.getSymbolicEnv().get(variable);
             const auto *res = value->to<IR::BoolLiteral>();
             BUG_CHECK(res, "%1%: expected a boolean", value);
             if (res->value) {
@@ -204,18 +203,18 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::StateVariable &headerRef) 
         result->emplace_back(state);
         return false;
     }
-    const auto *variable = Utils::getHeaderValidity(headerRef);
-    BUG_CHECK(state.exists(*variable),
+    const auto variable = Utils::getHeaderValidity(headerRef);
+    BUG_CHECK(state.exists(variable),
               "At this point, the header validity bit %1% should be initialized.", variable);
-    state.replaceTopBody(Continuation::Return(variable));
+    state.replaceTopBody(Continuation::Return(state.get(variable)));
     result->emplace_back(state);
     return false;
 }
 
 void AbstractStepper::setHeaderValidity(const IR::StateVariable &headerRef, bool validity,
                                         ExecutionState &nextState) {
-    const auto *headerRefValidity = Utils::getHeaderValidity(headerRef);
-    nextState.set(*headerRefValidity, IR::getBoolLiteral(validity));
+    const auto &headerRefValidity = Utils::getHeaderValidity(headerRef);
+    nextState.set(headerRefValidity, IR::getBoolLiteral(validity));
 
     // In some cases, the header may be part of a union.
     if (validity) {
@@ -240,12 +239,12 @@ void AbstractStepper::setHeaderValidity(const IR::StateVariable &headerRef, bool
         return;
     }
     const auto *exprType = headerRef.type->checkedTo<IR::Type_StructLike>();
-    std::vector<const IR::StateVariable *> validityVector;
+    std::vector<IR::StateVariable> validityVector;
     auto fieldsVector = nextState.getFlatFields(headerRef, exprType, &validityVector);
     // The header is going to be invalid. Set all fields to taint constants.
     // TODO: Should we make this target specific? Some targets set the header fields to 0.
-    for (const auto *field : fieldsVector) {
-        nextState.set(*field, programInfo.createTargetUninitialized(field->type, true));
+    for (const auto &field : fieldsVector) {
+        nextState.set(field, programInfo.createTargetUninitialized(field.type, true));
     }
 }
 
@@ -283,7 +282,7 @@ void generateStackAssigmentStatement(ExecutionState &nextState,
     rightArrIndex->appendInPlace({elemType, std::to_string(rightIndex)});
 
     // Check right header validity.
-    const auto *value = nextState.getSymbolicEnv().get(*Utils::getHeaderValidity(*rightArrIndex));
+    const auto *value = nextState.get(Utils::getHeaderValidity(*rightArrIndex));
     if (!value->checkedTo<IR::BoolLiteral>()->value) {
         replacements.emplace_back(generateStacksetValid(stackRef, leftIndex, false));
         return;
@@ -294,9 +293,10 @@ void generateStackAssigmentStatement(ExecutionState &nextState,
     const auto *structType = elemType->checkedTo<IR::Type_StructLike>();
     auto leftVector = nextState.getFlatFields(*leftArrIndex, structType);
     auto rightVector = nextState.getFlatFields(*rightArrIndex, structType);
-    for (size_t i = 0; i < leftVector.size(); i++) {
-        replacements.emplace_back(new IR::AssignmentStatement(leftVector[i], rightVector[i]));
-    }
+    BUG("NOT IMPLEMENTED.");
+    // for (size_t i = 0; i < leftVector.size(); i++) {
+    // replacements.emplace_back(new IR::AssignmentStatement(leftVector[i], rightVector[i]));
+    // }
 }
 
 bool AbstractStepper::stepStackPushPopFront(const IR::StateVariable &stackRef,
@@ -357,17 +357,17 @@ void AbstractStepper::setTargetUninitialized(ExecutionState &nextState,
     // Resolve the type of the left-and assignment, if it is a type name.
     const auto *refType = nextState.resolveType(ref.type);
     if (const auto *structType = refType->to<const IR::Type_StructLike>()) {
-        std::vector<const IR::StateVariable *> validFields;
+        std::vector<IR::StateVariable> validFields;
         auto fields = nextState.getFlatFields(ref, structType, &validFields);
         // We also need to initialize the validity bits of the headers. These are false.
-        for (const auto *validField : validFields) {
-            nextState.set(*validField, IR::getBoolLiteral(false));
+        for (const auto &validField : validFields) {
+            nextState.set(validField, IR::getBoolLiteral(false));
         }
         // For each field in the undefined struct, we create a new zombie variable.
         // If the variable does not have an initializer we need to create a new zombie for it.
         // For now we just use the name directly.
-        for (const auto *field : fields) {
-            nextState.set(*field, programInfo.createTargetUninitialized(field->type, forceTaint));
+        for (const auto &field : fields) {
+            nextState.set(field, programInfo.createTargetUninitialized(field.type, forceTaint));
         }
     } else if (const auto *baseType = refType->to<const IR::Type_Base>()) {
         nextState.set(ref, programInfo.createTargetUninitialized(baseType, forceTaint));
@@ -380,17 +380,17 @@ void AbstractStepper::declareStructLike(ExecutionState &nextState,
                                         const IR::StateVariable &parentRef,
                                         const IR::Type_StructLike *structType,
                                         bool forceTaint) const {
-    std::vector<const IR::StateVariable *> validFields;
+    std::vector<IR::StateVariable> validFields;
     auto fields = nextState.getFlatFields(parentRef, structType, &validFields);
     // We also need to initialize the validity bits of the headers. These are false.
-    for (const auto *validField : validFields) {
-        nextState.set(*validField, IR::getBoolLiteral(false));
+    for (const auto &validField : validFields) {
+        nextState.set(validField, IR::getBoolLiteral(false));
     }
     // For each field in the undefined struct, we create a new zombie variable.
     // If the variable does not have an initializer we need to create a new zombie for it.
     // For now we just use the name directly.
-    for (const auto *field : fields) {
-        nextState.set(*field, programInfo.createTargetUninitialized(field->type, forceTaint));
+    for (const auto &field : fields) {
+        nextState.set(field, programInfo.createTargetUninitialized(field.type, forceTaint));
     }
 }
 

@@ -125,7 +125,7 @@ class ExecutionState {
 
     /// The parserErrorLabel is set by the parser to indicate the variable corresponding to the
     /// parser error that is set by various built-in functions such as verify or extract.
-    const IR::StateVariable *parserErrorLabel = nullptr;
+    IR::StateVariable parserErrorLabel = IR::StateVariable::UntypedStateVariable({});
 
     /// This variable tracks how much of the input packet has been parsed.
     /// Typically, this is equivalent to the size of the input packet. However, there may be
@@ -415,13 +415,13 @@ class ExecutionState {
 
     /// @returns the label associated with the payload and sets the type according to the @param.
     /// TODO: Consider moving this to a separate utility class?
-    [[nodiscard]] static const IR::StateVariable *getPayloadLabel(const IR::Type *t);
+    [[nodiscard]] static IR::StateVariable getPayloadLabel(const IR::Type *t);
 
     /// Set the parser error label to the @param parserError.
-    void setParserErrorLabel(const IR::StateVariable *parserError);
+    void setParserErrorLabel(const IR::StateVariable &parserError);
 
     /// @returns the current parser error label. Throws a BUG if the label is a nullptr.
-    [[nodiscard]] const IR::StateVariable *getCurrentParserErrorLabel() const;
+    [[nodiscard]] IR::StateVariable getCurrentParserErrorLabel() const;
 
     /* =========================================================================================
      *  Variables and symbolic constants.
@@ -448,9 +448,9 @@ class ExecutionState {
     /// "prefix.h.ethernet.src_address", ...}).
     /// If @arg validVector is provided, this function also collects the validity bits of the
     /// headers.
-    [[nodiscard]] std::vector<const IR::StateVariable *> getFlatFields(
+    [[nodiscard]] std::vector<IR::StateVariable> getFlatFields(
         const IR::StateVariable &parent, const IR::Type_StructLike *ts,
-        std::vector<const IR::StateVariable *> *validVector = nullptr) const;
+        std::vector<IR::StateVariable> *validVector = nullptr) const;
 
     /// Gets table type from a member.
     /// @returns nullptr is member type is not a IR::P4Table.
@@ -464,7 +464,7 @@ class ExecutionState {
     /// corresponding declaration. It then converts the name of the declaration into a zombie
     /// constant and returns. This is necessary because we sometimes
     /// get flat declarations without members (e.g., bit<8> tmp;)
-    [[nodiscard]] const IR::StateVariable *convertPathExpr(const IR::PathExpression *path) const;
+    [[nodiscard]] IR::StateVariable convertPathExpr(const IR::PathExpression *path) const;
 
     /// Allocate a new execution state object with the same state as this object.
     /// Returns a reference, not a pointer.

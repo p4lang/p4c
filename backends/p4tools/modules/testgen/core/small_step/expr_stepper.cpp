@@ -55,13 +55,16 @@ void ExprStepper::handleHitMissActionRun(const IR::Member *member) {
     const auto *methodName = method->method->to<IR::Member>();
     const auto *table = state.getTableType(methodName);
     CHECK_NULL(table);
+    // TODO: Clean this up.
     if (member->member.name == IR::Type_Table::hit) {
-        replacements.emplace_back(Continuation::Return(TableStepper::getTableHitVar(table)));
+        replacements.emplace_back(
+            Continuation::Return(TableStepper::getTableHitVar(table).clone()));
     } else if (member->member.name == IR::Type_Table::miss) {
         replacements.emplace_back(
-            Continuation::Return(new IR::LNot(TableStepper::getTableHitVar(table))));
+            Continuation::Return(new IR::LNot(TableStepper::getTableHitVar(table).clone())));
     } else {
-        replacements.emplace_back(Continuation::Return(TableStepper::getTableActionVar(table)));
+        replacements.emplace_back(
+            Continuation::Return(TableStepper::getTableActionVar(table).clone()));
     }
     nextState.replaceTopBody(&replacements);
     result->emplace_back(nextState);
@@ -87,13 +90,13 @@ bool ExprStepper::preorder(const IR::Member *member) {
     // Check our assumption that this is a chain of member expressions terminating in a
     // PathExpression.
     checkMemberInvariant(member);
-    auto *var = new IR::StateVariable(*member);
+    auto var = IR::StateVariable(*member);
     // This case may happen when we directly assign taint, that is not bound in the symbolic
     // environment to an expression.
-    if (SymbolicEnv::isSymbolicValue(var)) {
-        return stepSymbolicValue(var);
+    if (SymbolicEnv::isSymbolicValue(&var)) {
+        return stepSymbolicValue(&var);
     }
-    return stepSymbolicValue(state.get(*var));
+    return stepSymbolicValue(state.get(var));
 }
 
 bool ExprStepper::preorder(const IR::StateVariable *var) {
@@ -120,9 +123,9 @@ void ExprStepper::evalActionCall(const IR::P4Action *action, const IR::MethodCal
         BUG_CHECK(param->direction == IR::Direction::None,
                   "%1%: Only directionless action parameters are supported at this point. ",
                   action);
-        const auto *tableActionDataVar = Utils::getZombieVar(paramType, 0, paramName);
+        const auto &tableActionDataVar = Utils::getZombieVar(paramType, 0, paramName);
         const auto *curArg = call->arguments->at(argIdx)->expression;
-        nextState.set(*tableActionDataVar, curArg);
+        nextState.set(tableActionDataVar, curArg);
     }
     nextState.replaceTopBody(action->body);
     // Enter the action's namespace.
@@ -160,45 +163,44 @@ bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
                 result->emplace_back(nextState);
                 return false;
             }
-            const auto *ref = Utils::convertToStateVariable(method->expr);
+            const auto &ref = Utils::convertToStateVariable(method->expr);
 
             // Handle extern calls. They may also be of Type_SpecializedCanonical.
-            if (ref->type->is<IR::Type_Extern>() ||
-                ref->type->is<IR::Type_SpecializedCanonical>()) {
-                evalExternMethodCall(call, ref, method->member, call->arguments, state);
+            if (ref.type->is<IR::Type_Extern>() || ref.type->is<IR::Type_SpecializedCanonical>()) {
+                evalExternMethodCall(call, &ref, method->member, call->arguments, state);
                 return false;
             }
 
             // Handle calls to header methods.
-            if (ref->type->is<IR::Type_Header>() || ref->type->is<IR::Type_HeaderUnion>()) {
+            if (ref.type->is<IR::Type_Header>() || ref.type->is<IR::Type_HeaderUnion>()) {
                 if (method->member == "isValid") {
-                    return stepGetHeaderValidity(*ref);
+                    return stepGetHeaderValidity(ref);
                 }
 
                 if (method->member == "setInvalid") {
-                    return stepSetHeaderValidity(*ref, false);
+                    return stepSetHeaderValidity(ref, false);
                 }
 
                 if (method->member == "setValid") {
-                    return stepSetHeaderValidity(*ref, true);
+                    return stepSetHeaderValidity(ref, true);
                 }
 
                 BUG("Unknown method call on header instance: %1%", call);
             }
 
-            if (ref->type->is<IR::Type_Stack>()) {
+            if (ref.type->is<IR::Type_Stack>()) {
                 if (method->member == "push_front") {
-                    return stepStackPushPopFront(*ref, call->arguments);
+                    return stepStackPushPopFront(ref, call->arguments);
                 }
 
                 if (method->member == "pop_front") {
-                    return stepStackPushPopFront(*ref, call->arguments, false);
+                    return stepStackPushPopFront(ref, call->arguments, false);
                 }
 
                 BUG("Unknown method call on stack instance: %1%", call);
             }
 
-            BUG("Unknown method member expression: %1% of type %2%", ref, ref->type);
+            BUG("Unknown method member expression: %1% of type %2%", ref, ref.type);
         }
 
         BUG("Unknown method call: %1% of type %2%", call->method, call->method->node_type_name());
@@ -278,8 +280,8 @@ bool ExprStepper::preorder(const IR::PathExpression *pathExpression) {
         return false;
     }
     // Otherwise convert the path expression into a qualified member and return it.
-    const auto *pathRef = nextState.convertPathExpr(pathExpression);
-    nextState.replaceTopBody(Continuation::Return(pathRef));
+    const auto &pathRef = nextState.convertPathExpr(pathExpression);
+    nextState.replaceTopBody(Continuation::Return(nextState.get(pathRef)));
     result->emplace_back(nextState);
     return false;
 }

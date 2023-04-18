@@ -55,7 +55,7 @@ void EBPFCmdStepper::initializeTargetEnvironment(ExecutionState &nextState) cons
     // eBPF implicitly sets the output port to 0. In reality, there is no output port.
     nextState.set(*programInfo.getTargetOutputPortVar(), IR::getConstant(nineBitType, 0));
     // We need to explicitly set the parser error. There is no eBPF metadata.
-    nextState.setParserErrorLabel(new IR::StateVariable(
+    nextState.setParserErrorLabel(IR::StateVariable(
         {{IR::Type_Unknown::get(), "*"}, {IR::Type_Unknown::get(), "parser_err"}}));
 }
 

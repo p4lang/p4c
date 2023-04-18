@@ -72,27 +72,27 @@ class TableStepper {
     /// table. The returned variable will be named p4t*zombie.table.t.name.idx1.idx2, where t is
     /// the name of the given table. The "idx1" and "idx2" components are produced only if idx1 and
     /// idx2 are given, respectively.
-    static const IR::StateVariable *getZombieTableVar(const IR::Type *type,
-                                                      const IR::P4Table *table, cstring name,
-                                                      std::optional<int> idx1_opt = std::nullopt,
-                                                      std::optional<int> idx2_opt = std::nullopt);
+    static IR::StateVariable getZombieTableVar(const IR::Type *type, const IR::P4Table *table,
+                                               cstring name,
+                                               std::optional<int> idx1_opt = std::nullopt,
+                                               std::optional<int> idx2_opt = std::nullopt);
 
     /// @returns the boolean-typed state variable that tracks whether given table is reached.
-    static const IR::StateVariable *getTableReachedVar(const IR::P4Table *table);
+    static IR::StateVariable getTableReachedVar(const IR::P4Table *table);
 
     /// @returns the state variable that tracks the value read by the key at the given index in the
     /// given the table.
-    static const IR::StateVariable *getTableKeyReadVar(const IR::P4Table *table, int keyIdx);
+    static IR::StateVariable getTableKeyReadVar(const IR::P4Table *table, int keyIdx);
 
     /// @returns the boolean-typed state variable that tracks whether a table has resulted in a hit.
     /// The value of this variable is false if the table misses or is not reached.
-    static const IR::StateVariable *getTableHitVar(const IR::P4Table *table);
+    static IR::StateVariable getTableHitVar(const IR::P4Table *table);
 
     /// @returns the state variable that tracks the index of the action taken by the given table.
     ///
     /// This variable is initially set to the number of actions in the table, indicating that no
     /// action has been selected. It is set by setTableAction and read by getTableAction.
-    static const IR::StateVariable *getTableActionVar(const IR::P4Table *table);
+    static IR::StateVariable getTableActionVar(const IR::P4Table *table);
 
  protected:
     /* =========================================================================================

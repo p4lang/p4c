@@ -117,7 +117,7 @@ void Metadata::computeTraceData(const TestSpec *testSpec, inja::json &dataJson) 
         for (const auto &trace : *traces) {
             if (const auto *successfulExtract = trace.get().to<TraceEvents::ExtractSuccess>()) {
                 inja::json j;
-                j["label"] = successfulExtract->getExtractedHeader()->toString();
+                j["label"] = successfulExtract->getExtractedHeader().toString();
                 j["offset"] = successfulExtract->getOffset();
                 dataJson["offsets"].push_back(j);
             }

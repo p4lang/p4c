@@ -128,7 +128,8 @@ class AbstractStepper : public Inspector {
 
     /// Sets validity for a header if @a expr is a header. if @a expr is a part of a header union
     /// then it sets invalid for other headers in the union. Otherwise it generates an exception.
-    void setHeaderValidity(const IR::StateVariable &expr, bool validity, ExecutionState &state);
+    void setHeaderValidity(const IR::StateVariable &headerRef, bool validity,
+                           ExecutionState &state);
 
     /// Transition function for setValid and setInvalid calls.
     ///

@@ -27,7 +27,7 @@ class Zombie {
     ///
     /// A BUG occurs if this was previously called with the same @name and @incarnation, but with a
     /// different @type.
-    static const IR::StateVariable *getVar(const IR::Type *type, int incarnation, cstring name);
+    static IR::StateVariable getVar(const IR::Type *type, int incarnation, cstring name);
 
     /// @returns the zombie symbolic constant with the given @type, @incarnation, and @name.
     ///

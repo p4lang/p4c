@@ -109,11 +109,11 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
         auto flatFields =
             executionState->getFlatFields(IR::StateVariable(*localMetadataVar),
                                           localMetadataType->checkedTo<IR::Type_Struct>(), {});
-        for (const auto *fieldRef : flatFields) {
-            const auto *fieldVal = completedModel->evaluate(executionState->get(*fieldRef));
+        for (const auto &fieldRef : flatFields) {
+            const auto *fieldVal = completedModel->evaluate(executionState->get(fieldRef));
             // Try to remove the leading internal name for the metadata field.
             // Thankfully, this string manipulation is safe if we are out of range.
-            auto fieldString = fieldRef->toString();
+            auto fieldString = fieldRef.toString();
             fieldString = fieldString.substr(fieldString.find('.') - fieldString.begin() + 1);
             metadataCollection->addMetaDataField(fieldString, fieldVal);
         }

@@ -93,7 +93,7 @@ class ExtractSuccess : public TraceEvent {
  private:
     /// The label of the extracted header.
     /// The type is IR::Expression because we may also have IR::PathExpression as inputs.
-    const IR::Expression *extractedHeader;
+    IR::StateVariable extractedHeader;
 
     /// The current parser offset on the input packet.
     int offset;
@@ -102,7 +102,7 @@ class ExtractSuccess : public TraceEvent {
     const IR::Expression *condition;
 
     /// The list of fields and their values of the emitted header.
-    std::vector<std::pair<const IR::StateVariable *, const IR::Expression *>> fields;
+    std::vector<std::pair<IR::StateVariable, const IR::Expression *>> fields;
 
  public:
     [[nodiscard]] const ExtractSuccess *subst(const SymbolicEnv &env) const override;
@@ -111,14 +111,13 @@ class ExtractSuccess : public TraceEvent {
     [[nodiscard]] const ExtractSuccess *evaluate(const Model &model) const override;
 
     /// @returns the extracted header label stored in this class.
-    [[nodiscard]] const IR::Expression *getExtractedHeader() const;
+    [[nodiscard]] const IR::StateVariable &getExtractedHeader() const;
 
     /// @returns the offset stored in this class.
     [[nodiscard]] int getOffset() const;
 
-    ExtractSuccess(
-        const IR::Expression *extractedHeader, int offset, const IR::Expression *condition,
-        std::vector<std::pair<const IR::StateVariable *, const IR::Expression *>> fields);
+    ExtractSuccess(IR::StateVariable extractedHeader, int offset, const IR::Expression *condition,
+                   std::vector<std::pair<IR::StateVariable, const IR::Expression *>> fields);
     ExtractSuccess(const ExtractSuccess &) = default;
     ExtractSuccess(ExtractSuccess &&) = default;
     ExtractSuccess &operator=(const ExtractSuccess &) = default;
@@ -139,7 +138,7 @@ class ExtractFailure : public TraceEvent {
  private:
     /// The label of the extracted header.
     /// The type is IR::Expression because we may also have IR::PathExpression as inputs.
-    const IR::Expression *extractedHeader;
+    IR::StateVariable extractedHeader;
 
     /// The current parser offset on the input packet.
     int offset;
@@ -148,8 +147,7 @@ class ExtractFailure : public TraceEvent {
     const IR::Expression *condition;
 
  public:
-    ExtractFailure(const IR::Expression *extractedHeader, int offset,
-                   const IR::Expression *condition);
+    ExtractFailure(IR::StateVariable extractedHeader, int offset, const IR::Expression *condition);
 
     ExtractFailure(const ExtractFailure &) = default;
     ExtractFailure(ExtractFailure &&) = default;
@@ -169,10 +167,10 @@ class ExtractFailure : public TraceEvent {
 class Emit : public TraceEvent {
  private:
     /// The label of the emitted header. Either a PathExpression or a member.
-    const IR::Expression *emitHeader;
+    IR::StateVariable emitHeader;
 
     /// The list of fields and their values of the emitted header.
-    std::vector<std::pair<const IR::StateVariable *, const IR::Expression *>> fields;
+    std::vector<std::pair<IR::StateVariable, const IR::Expression *>> fields;
 
  public:
     [[nodiscard]] const Emit *subst(const SymbolicEnv &env) const override;
@@ -180,8 +178,8 @@ class Emit : public TraceEvent {
     void complete(Model *model) const override;
     [[nodiscard]] const Emit *evaluate(const Model &model) const override;
 
-    Emit(const IR::Expression *emitHeader,
-         std::vector<std::pair<const IR::StateVariable *, const IR::Expression *>> fields);
+    Emit(IR::StateVariable emitHeader,
+         std::vector<std::pair<IR::StateVariable, const IR::Expression *>> fields);
     ~Emit() override = default;
     Emit(const Emit &) = default;
     Emit(Emit &&) = default;

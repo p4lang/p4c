@@ -505,22 +505,22 @@ void ExecutionState::appendToEmitBuffer(const IR::Expression *expr) {
     env.set(emitBufferLabel, concat);
 }
 
-const IR::StateVariable *ExecutionState::getPayloadLabel(const IR::Type *t) {
+IR::StateVariable ExecutionState::getPayloadLabel(const IR::Type *t) {
     // If the type is not null, we construct a member clone with the input type set.
     if (t != nullptr) {
-        auto *label = payloadLabel.clone();
-        label->type = t;
+        auto label = payloadLabel;
+        label.type = t;
         return label;
     }
-    return &payloadLabel;
+    return payloadLabel;
 }
 
-void ExecutionState::setParserErrorLabel(const IR::StateVariable *parserError) {
+void ExecutionState::setParserErrorLabel(const IR::StateVariable &parserError) {
     parserErrorLabel = parserError;
 }
 
-const IR::StateVariable *ExecutionState::getCurrentParserErrorLabel() const {
-    CHECK_NULL(parserErrorLabel);
+IR::StateVariable ExecutionState::getCurrentParserErrorLabel() const {
+    BUG_CHECK(parserErrorLabel.size() > 0, "Empty parser error label.");
     return parserErrorLabel;
 }
 
@@ -547,10 +547,10 @@ const IR::StateVariable *ExecutionState::createZombieConst(const IR::Type *type,
  *  General utilities involving ExecutionState.
  * ========================================================================================= */
 
-std::vector<const IR::StateVariable *> ExecutionState::getFlatFields(
+std::vector<IR::StateVariable> ExecutionState::getFlatFields(
     const IR::StateVariable &parent, const IR::Type_StructLike *ts,
-    std::vector<const IR::StateVariable *> *validVector) const {
-    std::vector<const IR::StateVariable *> flatFields;
+    std::vector<IR::StateVariable> *validVector) const {
+    std::vector<IR::StateVariable> flatFields;
     for (const auto *field : ts->fields) {
         const auto *fieldType = resolveType(field->type);
         if (const auto *ts = fieldType->to<IR::Type_StructLike>()) {
@@ -561,19 +561,17 @@ std::vector<const IR::StateVariable *> ExecutionState::getFlatFields(
         } else if (const auto *typeStack = fieldType->to<IR::Type_Stack>()) {
             const auto *stackElementsType = resolveType(typeStack->elementType);
             for (size_t arrayIndex = 0; arrayIndex < typeStack->getSize(); arrayIndex++) {
-                const auto *newMember = new IR::StateVariable(
-                    {{typeStack, field->name}, {stackElementsType, std::to_string(arrayIndex)}});
+                auto newMember = parent.append({typeStack, field->name});
+                newMember.appendInPlace({stackElementsType, std::to_string(arrayIndex)});
                 BUG_CHECK(stackElementsType->is<IR::Type_StructLike>(),
                           "Try to make the flat fields for non Type_StructLike element : %1%",
                           stackElementsType);
                 auto subFields = getFlatFields(
-                    *newMember, stackElementsType->to<IR::Type_StructLike>(), validVector);
+                    newMember, stackElementsType->to<IR::Type_StructLike>(), validVector);
                 flatFields.insert(flatFields.end(), subFields.begin(), subFields.end());
             }
         } else {
-            auto *newFieldRef = parent.clone();
-            newFieldRef->appendInPlace({fieldType, field->name});
-            flatFields.push_back(newFieldRef);
+            flatFields.push_back(parent.append({fieldType, field->name}));
         }
     }
     // If we are dealing with a header we also include the validity bit in the list of
@@ -612,7 +610,7 @@ const IR::P4Action *ExecutionState::getActionDecl(const IR::Expression *expressi
     return expression->to<IR::P4Action>();
 }
 
-const IR::StateVariable *ExecutionState::convertPathExpr(const IR::PathExpression *path) const {
+IR::StateVariable ExecutionState::convertPathExpr(const IR::PathExpression *path) const {
     const auto *decl = findDecl(path)->getNode();
     // Local variable.
     if (const auto *declVar = decl->to<IR::Declaration_Variable>()) {

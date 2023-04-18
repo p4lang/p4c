@@ -81,29 +81,29 @@ void Bmv2V1ModelCmdStepper::initializeTargetEnvironment(ExecutionState &nextStat
     // BMv2 implicitly sets the output port to 0.
     nextState.set(*programInfo.getTargetOutputPortVar(), IR::getConstant(nineBitType, 0));
     // Initialize parser_err with no error.
-    const auto *parserErrVar =
-        new IR::StateVariable({{IR::Type_Unknown::get(), "*standard_metadata"},
-                               {programInfo.getParserErrorType(), "parser_error"}});
-    nextState.set(*parserErrVar, IR::getConstant(parserErrVar->type, 0));
+    const auto &parserErrVar =
+        IR::StateVariable({{IR::Type_Unknown::get(), "*standard_metadata"},
+                           {programInfo.getParserErrorType(), "parser_error"}});
+    nextState.set(parserErrVar, IR::getConstant(parserErrVar.type, 0));
     // Initialize checksum_error with no error.
-    const auto *checksumErrVar = new IR::StateVariable(
+    const auto &checksumErrVar = IR::StateVariable(
         {{IR::Type_Unknown::get(), "*standard_metadata"}, {oneBitType, "checksum_error"}});
-    nextState.set(*checksumErrVar, IR::getConstant(checksumErrVar->type, 0));
+    nextState.set(checksumErrVar, IR::getConstant(checksumErrVar.type, 0));
     // The packet size meta data is the testgen packet length variable divided by 8.
     const auto *pktSizeType = ExecutionState::getPacketSizeVarType();
-    const auto *packetSizeVar = new IR::StateVariable(
+    const auto &packetSizeVar = IR::StateVariable(
         {{IR::Type_Unknown::get(), "*standard_metadata"}, {pktSizeType, "packet_length"}});
     const auto *packetSizeConst = new IR::Div(pktSizeType, ExecutionState::getInputPacketSizeVar(),
                                               IR::getConstant(pktSizeType, 8));
-    nextState.set(*packetSizeVar, packetSizeConst);
+    nextState.set(packetSizeVar, packetSizeConst);
 }
 
 std::optional<const Constraint *> Bmv2V1ModelCmdStepper::startParserImpl(
     const IR::P4Parser *parser, ExecutionState &nextState) const {
     // We need to explicitly map the parser error
-    const auto *errVar = Bmv2V1ModelProgramInfo::getParserParamVar(
+    const auto &errVar = Bmv2V1ModelProgramInfo::getParserParamVar(
         parser, programInfo.getParserErrorType(), 3, "parser_error");
-    nextState.setParserErrorLabel(new IR::StateVariable(*errVar));
+    nextState.setParserErrorLabel(errVar);
 
     /// Set the restriction on the input port for PTF tests.
     /// This is necessary since the PTF framework only allows a specific port range.
@@ -121,7 +121,7 @@ std::map<Continuation::Exception, Continuation> Bmv2V1ModelCmdStepper::getExcept
     auto programInfo = getProgramInfo();
     auto gress = programInfo.getGress(parser);
 
-    const auto *errVar = Bmv2V1ModelProgramInfo::getParserParamVar(
+    const auto &errVar = Bmv2V1ModelProgramInfo::getParserParamVar(
         parser, programInfo.getParserErrorType(), 3, "parser_error");
 
     switch (gress) {
@@ -136,7 +136,7 @@ std::map<Continuation::Exception, Continuation> Bmv2V1ModelCmdStepper::getExcept
             result.emplace(Continuation::Exception::Reject, Continuation::Body({}));
             result.emplace(Continuation::Exception::PacketTooShort,
                            Continuation::Body({new IR::AssignmentStatement(
-                               errVar, IR::getConstant(errVar->type, 1))}));
+                               errVar.clone(), IR::getConstant(errVar.type, 1))}));
             // NoMatch will transition to the next block.
             result.emplace(Continuation::Exception::NoMatch, Continuation::Body({}));
             break;

@@ -54,13 +54,13 @@ void PnaDpdkCmdStepper::initializeTargetEnvironment(ExecutionState &nextState) c
     // PNA implicitly sets the output port to 0.
     nextState.set(PnaConstants::OUTPUT_PORT_VAR, IR::getConstant(thirtytwoBitType, 0));
     // Initialize the direction metadata variables.
-    nextState.set(*new IR::StateVariable(
+    nextState.set(IR::StateVariable(
                       {{IR::Type_Unknown::get(), "*pre_istd"}, {thirtytwoBitType, "direction"}}),
                   &PnaZombies::DIRECTION);
-    nextState.set(*new IR::StateVariable(
+    nextState.set(IR::StateVariable(
                       {{IR::Type_Unknown::get(), "*parser_istd"}, {thirtytwoBitType, "direction"}}),
                   &PnaZombies::DIRECTION);
-    nextState.set(*new IR::StateVariable(
+    nextState.set(IR::StateVariable(
                       {{IR::Type_Unknown::get(), "*main_istd"}, {thirtytwoBitType, "direction"}}),
                   &PnaZombies::DIRECTION);
 }
@@ -68,7 +68,7 @@ void PnaDpdkCmdStepper::initializeTargetEnvironment(ExecutionState &nextState) c
 std::optional<const Constraint *> PnaDpdkCmdStepper::startParserImpl(
     const IR::P4Parser * /*parser*/, ExecutionState &nextState) const {
     // We need to explicitly map the parser error
-    nextState.setParserErrorLabel(&PnaConstants::PARSER_ERROR);
+    nextState.setParserErrorLabel(PnaConstants::PARSER_ERROR);
     // Initialize the parser error to 0.
     nextState.set(PnaConstants::PARSER_ERROR, IR::getConstant(programInfo.getParserErrorType(), 0));
     return std::nullopt;

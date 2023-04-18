@@ -31,12 +31,12 @@
 
 namespace P4Tools::P4Testgen {
 
-std::vector<std::pair<const IR::StateVariable *, const IR::Expression *>> ExprStepper::setFields(
-    ExecutionState &nextState, const std::vector<const IR::StateVariable *> &flatFields,
+std::vector<std::pair<IR::StateVariable, const IR::Expression *>> ExprStepper::setFields(
+    ExecutionState &nextState, const std::vector<IR::StateVariable> &flatFields,
     int varBitFieldSize) {
-    std::vector<std::pair<const IR::StateVariable *, const IR::Expression *>> fields;
-    for (const auto *fieldRef : flatFields) {
-        const auto *fieldType = fieldRef->type;
+    std::vector<std::pair<IR::StateVariable, const IR::Expression *>> fields;
+    for (const auto &fieldRef : flatFields) {
+        const auto *fieldType = fieldRef.type;
         // If the header had a varbit, the header needs to be updated.
         // We assign @param varbitFeldSize to the varbit field.
         if (const auto *varbit = fieldType->to<IR::Extracted_Varbits>()) {
@@ -45,11 +45,7 @@ std::vector<std::pair<const IR::StateVariable *, const IR::Expression *>> ExprSt
                       "point. The value is %1%.",
                       varBitFieldSize);
             auto *newVarbit = varbit->clone();
-
             newVarbit->assignedSize = varBitFieldSize;
-            auto *newRef = fieldRef->clone();
-            newRef->type = newVarbit;
-            fieldRef = newRef;
             fieldType = newVarbit;
         }
         auto fieldWidth = fieldType->width_bits();
@@ -61,18 +57,25 @@ std::vector<std::pair<const IR::StateVariable *, const IR::Expression *>> ExprSt
         // Slice from the buffer and append to the packet, if necessary.
         const auto *pktVar = nextState.slicePacketBuffer(fieldWidth);
         // We need to cast the generated variable to the appropriate type.
-        if (fieldType->is<IR::Extracted_Varbits>()) {
+        if (const auto *varbit = fieldType->to<IR::Extracted_Varbits>()) {
             pktVar = new IR::Cast(fieldType, pktVar);
-        } else if (const auto *bits = fieldType->to<IR::Type_Bits>()) {
+            auto newRef = fieldRef;
+            newRef.type = varbit;
+            // Update the field and add the field to the return list.
+            nextState.set(fieldRef, pktVar);
+            fields.emplace_back(fieldRef, pktVar);
+            continue;
+        }
+        if (const auto *bits = fieldType->to<IR::Type_Bits>()) {
             if (bits->isSigned) {
                 pktVar = new IR::Cast(fieldType, pktVar);
             }
-        } else if (fieldRef->type->is<IR::Type_Boolean>()) {
+        } else if (fieldRef.type->is<IR::Type_Boolean>()) {
             const auto *boolType = IR::Type_Boolean::get();
             pktVar = new IR::Cast(boolType, pktVar);
         }
         // Update the field and add the field to the return list.
-        nextState.set(*fieldRef, pktVar);
+        nextState.set(fieldRef, pktVar);
         fields.emplace_back(fieldRef, pktVar);
     }
     return fields;
@@ -184,9 +187,8 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
                  // We need to append in reverse order since we are prepending to the input
                  // packet.
                  for (auto fieldIt = flatFields.rbegin(); fieldIt != flatFields.rend(); ++fieldIt) {
-                     const auto *fieldRef = *fieldIt;
                      // Prepend the field to the packet buffer.
-                     nextState.prependToPacketBuffer(nextState.get(*fieldRef));
+                     nextState.prependToPacketBuffer(nextState.get(*fieldIt));
                  }
              } else if (prependType->is<IR::Type_Bits>()) {
                  // Prepend the field to the packet buffer.
@@ -225,8 +227,8 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
                  // We only support flat assignments, so retrieve all fields from the input
                  // argument.
                  const auto flatFields = nextState.getFlatFields(*appendVar, ts);
-                 for (const auto *fieldRef : flatFields) {
-                     nextState.appendToPacketBuffer(nextState.get(*fieldRef));
+                 for (const auto &fieldRef : flatFields) {
+                     nextState.appendToPacketBuffer(nextState.get(fieldRef));
                  }
              } else if (appendType->is<IR::Type_Bits>()) {
                  nextState.add(*new TraceEvents::Expression(appendVar, "AppendToProgramHeader"));
@@ -310,8 +312,8 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
              auto dir = direction->value;
              const auto *assignType = globalRef->type;
              if (const auto *ts = assignType->to<IR::Type_StructLike>()) {
-                 std::vector<const IR::StateVariable *> flatRefValids;
-                 std::vector<const IR::StateVariable *> flatParamValids;
+                 std::vector<IR::StateVariable> flatRefValids;
+                 std::vector<IR::StateVariable> flatParamValids;
                  auto flatRefFields = nextState.getFlatFields(*globalRef, ts, &flatRefValids);
                  auto flatParamFields = nextState.getFlatFields(*argRef, ts, &flatParamValids);
                  // In case of a header, we also need to copy the validity bits.
@@ -319,34 +321,34 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
                  // set validity to false.
                  // TODO: Find a more elegant method to handle this instead of code duplication.
                  for (size_t idx = 0; idx < flatRefValids.size(); ++idx) {
-                     const auto *fieldGlobalValid = flatRefValids[idx];
-                     const auto *fieldParamValid = flatParamValids[idx];
+                     const auto &fieldGlobalValid = flatRefValids[idx];
+                     const auto &fieldParamValid = flatParamValids[idx];
                      // If the validity bit did not exist before, initialize it to be false.
-                     if (!nextState.exists(*fieldGlobalValid)) {
-                         nextState.set(*fieldGlobalValid, IR::getBoolLiteral(false));
+                     if (!nextState.exists(fieldGlobalValid)) {
+                         nextState.set(fieldGlobalValid, IR::getBoolLiteral(false));
                      }
                      // Set them false in case of an out copy-in.
                      if (dir == "out") {
-                         nextState.set(*fieldParamValid, IR::getBoolLiteral(false));
+                         nextState.set(fieldParamValid, IR::getBoolLiteral(false));
                      } else {
-                         nextState.set(*fieldParamValid, nextState.get(*fieldGlobalValid));
+                         nextState.set(fieldParamValid, nextState.get(fieldGlobalValid));
                      }
                  }
                  // First, complete the assignments for the data structure.
                  for (size_t idx = 0; idx < flatRefFields.size(); ++idx) {
-                     const auto *fieldGlobalRef = flatRefFields[idx];
-                     const auto *fieldargRef = flatParamFields[idx];
-                     generateCopyIn(nextState, *fieldargRef, *fieldGlobalRef, dir,
-                                    forceTaint->value);
+                     const auto &fieldGlobalRef = flatRefFields[idx];
+                     const auto &fieldargRef = flatParamFields[idx];
+                     generateCopyIn(nextState, fieldargRef, fieldGlobalRef, dir, forceTaint->value);
                  }
              } else if (const auto *tb = assignType->to<IR::Type_Base>()) {
                  // If the type is a flat Type_Base, postfix it with a "*".
                  globalRef = Utils::addZombiePostfix(*globalRef, tb);
-                 if (const auto *argPath = argRef->to<IR::PathExpression>()) {
-                     argRef = nextState.convertPathExpr(argPath);
-                 }
-                 generateCopyIn(nextState, *new IR::StateVariable(*argRef->checkedTo<IR::Member>()),
-                                *new IR::StateVariable(*globalRef->checkedTo<IR::Member>()), dir,
+                 BUG("NOT IMPLEMENTED YET.");
+                 // if (argRef->size() == 1) {
+                 //     argRef = Utils::getZombieVar(argRef->type, 0, argRef->back().name);
+                 // }
+                 generateCopyIn(nextState, IR::StateVariable(*argRef->checkedTo<IR::Member>()),
+                                IR::StateVariable(*globalRef->checkedTo<IR::Member>()), dir,
                                 forceTaint->value);
              } else {
                  P4C_UNIMPLEMENTED("Unsupported copy_out type %1%", assignType->node_type_name());
@@ -384,35 +386,33 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
              auto dir = direction->value;
              const auto *assignType = globalRef->type;
              if (const auto *ts = assignType->to<IR::Type_StructLike>()) {
-                 std::vector<const IR::StateVariable *> flatRefValids;
-                 std::vector<const IR::StateVariable *> flatParamValids;
+                 std::vector<IR::StateVariable> flatRefValids;
+                 std::vector<IR::StateVariable> flatParamValids;
                  auto flatRefFields = nextState.getFlatFields(*globalRef, ts, &flatRefValids);
                  auto flatParamFields = nextState.getFlatFields(*argRef, ts, &flatParamValids);
                  // In case of a header, we also need to copy the validity bits.
                  for (size_t idx = 0; idx < flatRefValids.size(); ++idx) {
-                     const auto *fieldGlobalValid = flatRefValids[idx];
-                     const auto *fieldParamValid = flatParamValids[idx];
+                     const auto &fieldGlobalValid = flatRefValids[idx];
+                     const auto &fieldParamValid = flatParamValids[idx];
                      if (dir == "inout" || dir == "out") {
-                         nextState.set(*fieldGlobalValid, nextState.get(*fieldParamValid));
+                         nextState.set(fieldGlobalValid, nextState.get(fieldParamValid));
                      }
                  }
                  // First, complete the assignments for the data structure.
                  for (size_t idx = 0; idx < flatRefFields.size(); ++idx) {
-                     const auto *fieldGlobalRef = flatRefFields[idx];
-                     const auto *fieldargRef = flatParamFields[idx];
+                     const auto &fieldGlobalRef = flatRefFields[idx];
+                     const auto &fieldargRef = flatParamFields[idx];
                      if (dir == "inout" || dir == "out") {
-                         nextState.set(*fieldGlobalRef, nextState.get(*fieldargRef));
+                         nextState.set(fieldGlobalRef, nextState.get(fieldargRef));
                      }
                  }
              } else if (const auto *tb = assignType->to<IR::Type_Base>()) {
                  // If the type is a flat Type_Base, postfix it with a "*".
                  globalRef = Utils::addZombiePostfix(*globalRef, tb);
-                 if (const auto *argPath = argRef->to<IR::PathExpression>()) {
-                     argRef = nextState.convertPathExpr(argPath);
-                 }
+                 BUG("NOT IMPLEMENTED YET.");
                  if (dir == "inout" || dir == "out") {
                      nextState.set(
-                         *new IR::StateVariable(*globalRef->checkedTo<IR::Member>()),
+                         IR::StateVariable(*globalRef->checkedTo<IR::Member>()),
                          nextState.get(IR::StateVariable(*argRef->checkedTo<IR::Member>())));
                  }
              } else {
@@ -591,7 +591,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
              // This argument is the structure being written by the extract.
-             const auto *extractOutput = Utils::convertToStateVariable(args->at(0)->expression);
+             const auto &extractOutput = Utils::convertToStateVariable(args->at(0)->expression);
 
              // Get the extractedType
              const auto *typeArgs = call->typeArguments;
@@ -611,15 +611,15 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
 
                  // If we are dealing with a header, set the header valid.
                  if (extractedType->is<IR::Type_Header>()) {
-                     setHeaderValidity(*extractOutput, true, nextState);
+                     setHeaderValidity(extractOutput, true, nextState);
                  }
                  // Add an event signifying that this extract was successful.
                  // It also records the condition we are passing.
                  auto pktCursor = state.getInputPacketCursor();
                  // We only support flat assignments, so retrieve all fields from the input
                  // argument.
-                 const std::vector<const IR::StateVariable *> flatFields =
-                     nextState.getFlatFields(*extractOutput, extractedType);
+                 const std::vector<IR::StateVariable> flatFields =
+                     nextState.getFlatFields(extractOutput, extractedType);
                  /// Iterate over all the fields that need to be set.
                  auto fields = setFields(nextState, flatFields, 0);
                  nextState.add(*new TraceEvents::ExtractSuccess(extractOutput, pktCursor,
@@ -647,7 +647,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
              // This argument is the structure being written by the extract.
-             const auto *extractOutput = Utils::convertToStateVariable(args->at(0)->expression);
+             const auto &extractOutput = Utils::convertToStateVariable(args->at(0)->expression);
              const auto *varbitExtractExpr = args->at(1)->expression;
              if (!SymbolicEnv::isSymbolicValue(varbitExtractExpr)) {
                  stepToSubexpr(varbitExtractExpr, result, state,
@@ -721,7 +721,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  // If the extract amount exceeds the size of the varbit field, fail.
                  if (varbit->size < varBitFieldSize) {
                      auto &nextState = state.clone();
-                     nextState.set(*state.getCurrentParserErrorLabel(),
+                     nextState.set(state.getCurrentParserErrorLabel(),
                                    IR::getConstant(programInfo.getParserErrorType(), 4));
                      nextState.replaceTopBody(Continuation::Exception::Reject);
                      result->emplace_back(condInfo.advanceCond, state, nextState);
@@ -730,13 +730,13 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  auto &nextState = state.clone();
                  // If we are dealing with a header, set the header valid.
                  if (extractedType->is<IR::Type_Header>()) {
-                     setHeaderValidity(*extractOutput, true, nextState);
+                     setHeaderValidity(extractOutput, true, nextState);
                  }
 
                  // We only support flat assignments, so retrieve all fields from the input
                  // argument.
-                 const std::vector<const IR::StateVariable *> flatFields =
-                     nextState.getFlatFields(*extractOutput, extractedType);
+                 const std::vector<IR::StateVariable> flatFields =
+                     nextState.getFlatFields(extractOutput, extractedType);
 
                  /// Iterate over all the fields that need to be set.
                  auto fields = setFields(nextState, flatFields, varBitFieldSize);
@@ -791,14 +791,14 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
-             const auto *emitOutput = Utils::convertToStateVariable(args->at(0)->expression);
-             const auto *emitType = emitOutput->type->checkedTo<IR::Type_StructLike>();
+             const auto &emitOutput = Utils::convertToStateVariable(args->at(0)->expression);
+             const auto *emitType = emitOutput.type->checkedTo<IR::Type_StructLike>();
 
-             const auto &validVar = Utils::getHeaderValidity(*emitOutput);
-
+             const auto &validVar = Utils::getHeaderValidity(emitOutput);
+             const auto *validExpr = state.get(validVar);
              // Check whether the validity bit of the header is tainted. If it is, the entire
              // emit is tainted. There is not much we can do here, so throw an error.
-             auto emitIsTainted = state.hasTaint(validVar);
+             auto emitIsTainted = state.hasTaint(validExpr);
              if (emitIsTainted) {
                  TESTGEN_UNIMPLEMENTED(
                      "The validity bit of %1% is tainted. Tainted emit calls can not be "
@@ -810,15 +810,14 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
              // unravels emit calls on structs into emit calls on the header members.
              {
                  auto &nextState = state.clone();
-                 std::vector<std::pair<const IR::StateVariable *, const IR::Expression *>> fields;
+                 std::vector<std::pair<IR::StateVariable, const IR::Expression *>> fields;
                  for (const auto *field : emitType->fields) {
                      const auto *fieldType = field->type;
                      if (fieldType->is<IR::Type_StructLike>()) {
                          BUG("Unexpected emit field %1% of type %2%", field, fieldType);
                      }
-                     auto *fieldRef = emitOutput->clone();
-                     fieldRef->appendInPlace({fieldType, field->name});
-                     const IR::Expression *fieldExpr = nextState.get(*fieldRef);
+                     const auto &fieldRef = emitOutput.append({fieldType, field->name});
+                     const IR::Expression *fieldExpr = nextState.get(fieldRef);
                      fieldType = fieldExpr->type;
                      if (const auto *varbits = fieldType->to<IR::Extracted_Varbits>()) {
                          fieldType = IR::getBitType(varbits->assignedSize);
@@ -851,15 +850,15 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  nextState.popBody();
                  // Only when the header is valid, the members are emitted and the packet
                  // delta is adjusted.
-                 result->emplace_back(state.get(*validVar), state, nextState);
+                 result->emplace_back(validExpr, state, nextState);
              }
              {
                  auto &invalidState = state.clone();
                  std::stringstream traceString;
-                 traceString << "Invalid emit: " << emitOutput->toString();
+                 traceString << "Invalid emit: " << emitOutput.toString();
                  invalidState.add(*new TraceEvents::Generic(traceString));
                  invalidState.popBody();
-                 result->emplace_back(new IR::LNot(IR::Type::Boolean::get(), validVar), state,
+                 result->emplace_back(new IR::LNot(IR::Type::Boolean::get(), validExpr), state,
                                       invalidState);
              }
          }},
@@ -901,8 +900,8 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  traceString << "Tainted verify: ";
                  cond->dbprint(traceString);
                  taintedState.add(*new TraceEvents::Expression(cond, traceString));
-                 const auto *errVar = state.getCurrentParserErrorLabel();
-                 taintedState.set(*errVar, Utils::getTaintExpression(errVar->type));
+                 const auto &errVar = state.getCurrentParserErrorLabel();
+                 taintedState.set(errVar, Utils::getTaintExpression(errVar.type));
                  taintedState.popBody();
                  result->emplace_back(taintedState);
                  return;
@@ -914,8 +913,8 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
              result->emplace_back(cond, state, nextState);
              // Handle the case where the condition is false.
              auto &falseState = state.clone();
-             const auto *errVar = state.getCurrentParserErrorLabel();
-             falseState.set(*errVar,
+             const auto &errVar = state.getCurrentParserErrorLabel();
+             falseState.set(errVar,
                             IR::getConstant(programInfo.getParserErrorType(), error->value));
              falseState.replaceTopBody(Continuation::Exception::Reject);
              result->emplace_back(new IR::LNot(IR::Type::Boolean::get(), cond), state, falseState);

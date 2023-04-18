@@ -67,7 +67,7 @@ class Bmv2V1ModelProgramInfo : public ProgramInfo {
     /// member. @param type is the type of the member. If the parser does not have this parameter
     /// (meaning we are dealing with optional parameters) return the canonical name of this
     /// variable.
-    static const IR::Member *getParserParamVar(const IR::P4Parser *parser, const IR::Type *type,
+    static IR::StateVariable getParserParamVar(const IR::P4Parser *parser, const IR::Type *type,
                                                size_t paramIndex, cstring paramLabel);
 };
 

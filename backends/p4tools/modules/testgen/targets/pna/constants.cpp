@@ -12,9 +12,10 @@ const IR::StateVariable PnaConstants::PARSER_ERROR = IR::StateVariable(
     {{IR::Type_Unknown::get(), "*pna_internal"}, {new IR::Type_Bits(32, false), "parser_error"}});
 // TODO: Make this a proper zombie variable.
 // We can not use the utilities because of an issue related to the garbage collector.
-const IR::Member PnaZombies::DIRECTION = IR::Member(
-    new IR::Type_Bits(32, false),
-    new IR::Member(new IR::Type_Bits(32, false), new IR::PathExpression("p4t*zombie"), "const"),
-    "parser_error");
+// It looks like the static labels are not allocated at that point in time.
+const IR::StateVariable PnaZombies::DIRECTION =
+    IR::StateVariable({{IR::Type_Unknown::get(), "p4t*zombie"},
+                       {IR::Type_Unknown::get(), "const"},
+                       {new IR::Type_Bits(32, false), "parser_error"}});
 
 }  // namespace P4Tools::P4Testgen::Pna

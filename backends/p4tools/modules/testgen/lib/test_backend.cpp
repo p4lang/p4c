@@ -194,7 +194,7 @@ TestBackEnd::TestInfo TestBackEnd::produceTestInfo(
     if (payloadSize > 0) {
         const auto *payloadType = IR::getBitType(payloadSize);
         const auto *payloadExpr =
-            completedModel->get(*ExecutionState::getPayloadLabel(payloadType), false);
+            completedModel->get(ExecutionState::getPayloadLabel(payloadType), false);
         if (payloadExpr == nullptr) {
             payloadExpr = Utils::getRandConstantForType(payloadType);
         }

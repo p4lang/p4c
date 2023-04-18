@@ -92,8 +92,7 @@ class Utils {
     static const cstring Valid;
 
     /// @see Zombie::getVar.
-    static const IR::StateVariable *getZombieVar(const IR::Type *type, int incarnation,
-                                                 cstring name);
+    static IR::StateVariable getZombieVar(const IR::Type *type, int incarnation, cstring name);
 
     /// @see Zombie::getConst.
     static const IR::StateVariable *getZombieConst(const IR::Type *type, int incarnation,
@@ -114,9 +113,9 @@ class Utils {
     ///     variable will be boolean-typed.
     ///
     /// @param headerRef a header instance. This is either a Member or a PathExpression.
-    static const IR::StateVariable *getHeaderValidity(const IR::StateVariable &headerRef);
+    static IR::StateVariable getHeaderValidity(const IR::StateVariable &headerRef);
 
-    static const IR::StateVariable *convertToStateVariable(const IR::Expression *expr);
+    static IR::StateVariable convertToStateVariable(const IR::Expression *expr);
 
     /// @returns a IR::StateVariable that is postfixed with "*". This is used for PathExpressions
     /// with are not yet members.

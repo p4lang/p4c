@@ -227,7 +227,7 @@ const IR::PathExpression *Bmv2V1ModelProgramInfo::getBlockParam(cstring blockLab
     return new IR::PathExpression(paramType, new IR::Path(archRef));
 }
 
-const IR::Member *Bmv2V1ModelProgramInfo::getParserParamVar(const IR::P4Parser *parser,
+IR::StateVariable Bmv2V1ModelProgramInfo::getParserParamVar(const IR::P4Parser *parser,
                                                             const IR::Type *type, size_t paramIndex,
                                                             cstring paramLabel) {
     // If the optional parser parameter is not present, write directly to the
@@ -241,7 +241,7 @@ const IR::Member *Bmv2V1ModelProgramInfo::getParserParamVar(const IR::P4Parser *
         const auto *archSpec = TestgenTarget::getArchSpec();
         structLabel = archSpec->getParamName("Parser", paramIndex);
     }
-    return new IR::Member(type, new IR::PathExpression(structLabel), paramLabel);
+    return IR::StateVariable({{IR::Type_Unknown::get(), structLabel}, {type, paramLabel}});
 }
 
 }  // namespace P4Tools::P4Testgen::Bmv2

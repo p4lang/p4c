@@ -19,8 +19,17 @@ bool Zombie::isSymbolicConst(const IR::StateVariable &var) {
     return var.front().name == P4tZombie;
 }
 
-const IR::StateVariable *Zombie::getVar(const IR::Type *type, int incarnation, cstring name) {
-    return getZombie(type, false, incarnation, name);
+IR::StateVariable Zombie::getVar(const IR::Type *type, int incarnation, cstring name) {
+    using key_t = std::pair<bool, int>;
+    static std::map<key_t, const IR::StateVariable *> INCARNATIONS;
+    const auto *&incarnationMember = INCARNATIONS[std::make_pair(false, incarnation)];
+    std::deque<IR::StateVariable::VariableMember> members;
+    if (incarnationMember == nullptr) {
+        members.emplace_back(IR::Type_Unknown::get(), P4tZombie);
+        members.emplace_back(IR::Type_Unknown::get(), std::to_string(incarnation));
+    }
+    members.emplace_back(type, name);
+    return IR::StateVariable(members);
 }
 
 const IR::StateVariable *Zombie::getConst(const IR::Type *type, int incarnation, cstring name) {

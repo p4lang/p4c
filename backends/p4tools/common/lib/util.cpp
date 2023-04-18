@@ -95,7 +95,7 @@ const IR::Constant *Utils::getRandConstantForType(const IR::Type_Bits *type) {
 
 const cstring Utils::Valid = "*valid";
 
-const IR::StateVariable *Utils::getZombieVar(const IR::Type *type, int incarnation, cstring name) {
+IR::StateVariable Utils::getZombieVar(const IR::Type *type, int incarnation, cstring name) {
     return Zombie::getVar(type, incarnation, name);
 }
 
@@ -104,23 +104,22 @@ const IR::StateVariable *Utils::getZombieConst(const IR::Type *type, int incarna
     return Zombie::getConst(type, incarnation, name);
 }
 
-const IR::StateVariable *Utils::getHeaderValidity(const IR::StateVariable &headerRef) {
-    auto *validityRef = headerRef.clone();
+IR::StateVariable Utils::getHeaderValidity(const IR::StateVariable &headerRef) {
     // Members are copied here.
-    validityRef->appendInPlace({IR::Type_Boolean::get(), Valid});
-    return validityRef;
+    return headerRef.append({IR::Type_Boolean::get(), Valid});
 }
 
-const IR::StateVariable *Utils::convertToStateVariable(const IR::Expression *expr) {
-    IR::StateVariable *ref = nullptr;
+IR::StateVariable Utils::convertToStateVariable(const IR::Expression *expr) {
     if (const auto *member = expr->to<IR::Member>()) {
-        ref = new IR::StateVariable(*member);
-    } else if (const auto *path = expr->to<IR::PathExpression>()) {
-        ref = new IR::StateVariable(*path);
-    } else {
-        BUG("Unsupported reference  %1% of type %2%", expr, expr->node_type_name());
+        return IR::StateVariable(*member);
     }
-    return ref;
+    if (const auto *path = expr->to<IR::PathExpression>()) {
+        return IR::StateVariable(*path);
+    }
+    if (const auto *var = expr->to<IR::StateVariable>()) {
+        return *var;
+    }
+    BUG("Unsupported reference  %1% of type %2%", expr, expr->node_type_name());
 }
 
 const IR::StateVariable *Utils::addZombiePostfix(const IR::StateVariable &var,

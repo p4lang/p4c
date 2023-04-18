@@ -113,12 +113,12 @@ void Bmv2V1ModelTableStepper::evalTableActionProfile(
             // Synthesize a zombie constant here that corresponds to a control plane argument.
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
-            const auto *actionDataVar =
+            const auto &actionDataVar =
                 getZombieTableVar(parameter->type, table, "*actionData", idx, argIdx);
             cstring keyName =
                 properties.tableName + "_param_" + actionName + std::to_string(argIdx);
             const auto &actionArg = nextState.createZombieConst(parameter->type, keyName);
-            nextState.set(*actionDataVar, actionArg);
+            nextState.set(actionDataVar, actionArg);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
             // Note how we use the control plane name for the parameter here.
@@ -165,8 +165,8 @@ void Bmv2V1ModelTableStepper::evalTableActionProfile(
                 ->apply(CollectLatentStatements(coveredStmts, *state));
         }
 
-        nextState.set(*getTableHitVar(table), IR::getBoolLiteral(true));
-        nextState.set(*getTableReachedVar(table), IR::getBoolLiteral(true));
+        nextState.set(getTableHitVar(table), IR::getBoolLiteral(true));
+        nextState.set(getTableReachedVar(table), IR::getBoolLiteral(true));
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
         tableStream << " Chosen action: " << actionName;
@@ -204,12 +204,12 @@ void Bmv2V1ModelTableStepper::evalTableActionSelector(
             // Synthesize a zombie constant here that corresponds to a control plane argument.
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
-            const auto *actionDataVar =
+            const auto &actionDataVar =
                 getZombieTableVar(parameter->type, table, "*actionData", idx, argIdx);
             cstring keyName =
                 properties.tableName + "_param_" + actionName + std::to_string(argIdx);
             const auto &actionArg = nextState.createZombieConst(parameter->type, keyName);
-            nextState.set(*actionDataVar, actionArg);
+            nextState.set(actionDataVar, actionArg);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
             // Note how we use the control plane name for the parameter here.
@@ -264,8 +264,8 @@ void Bmv2V1ModelTableStepper::evalTableActionSelector(
                 ->apply(CollectLatentStatements(coveredStmts, *state));
         }
 
-        nextState.set(*getTableHitVar(table), IR::getBoolLiteral(true));
-        nextState.set(*getTableReachedVar(table), IR::getBoolLiteral(true));
+        nextState.set(getTableHitVar(table), IR::getBoolLiteral(true));
+        nextState.set(getTableReachedVar(table), IR::getBoolLiteral(true));
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
         tableStream << " Chosen action: " << actionName;

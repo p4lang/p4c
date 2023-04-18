@@ -84,7 +84,7 @@ class Model : public SymbolicMapType {
     /// Tries to retrieve @param var from the model.
     /// If @param checked is true, this function throws a BUG if the variable can not be found.
     /// Otherwise, it returns a nullptr.
-    const IR::Expression *get(const IR::StateVariable &var, bool checked) const;
+    [[nodiscard]] const IR::Expression *get(const IR::StateVariable &var, bool checked) const;
 };
 
 }  // namespace P4Tools
