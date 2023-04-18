@@ -54,53 +54,53 @@ class StateVariable : Expression {
     /// A completely untyped StateVariable.
     /// Useful if you need to initialize an anonymous variable which is typed later.
     // NOLINTNEXTLINE
-    static StateVariable UntypedStateVariable(
+    [[nodiscard]] static StateVariable UntypedStateVariable(
         std::initializer_list<cstring> untypedMembers);
 
     /// @returns the list of members contained in this StateVariable.
-    const std::deque<VariableMember> &getMembers() const;
+    [[nodiscard]] const std::deque<VariableMember> &getMembers() const;
 
     /// @returns the element at index @param n.
-    const StateVariable::VariableMember &at(size_t n) const;
+    [[nodiscard]] const StateVariable::VariableMember &at(size_t n) const;
 
     /// @returns the size of the state variable in terms of members.
-    size_t size() const;
+    [[nodiscard]] size_t size() const;
 
     /// @returns the first member (from the right).
-    const StateVariable::VariableMember &front() const;
+    [[nodiscard]] const StateVariable::VariableMember &front() const;
 
     /// @returns the last member (from the right).
-    const StateVariable::VariableMember &back() const;
+    [[nodiscard]] const StateVariable::VariableMember &back() const;
 
     /// Prepend a member to the StateVariable in place.
     void popFrontInPlace();
 
     /// Pops the first member (from the right) from the StateVariable and then @returns a new
     /// variable.
-    StateVariable popFront() const;
+    [[nodiscard]] StateVariable popFront() const;
 
     /// Append a member to the StateVariable in place. Updates the type of the member.
     void popBackInPlace();
 
     /// Pops the last member (from the right) from the StateVariable and then @returns a new
     /// variable.
-    StateVariable popBack() const;
+    [[nodiscard]] StateVariable popBack() const;
 
     /// Append a member to the StateVariable in place. Updates the type of the member.
     void appendInPlace(VariableMember item);
 
     /// Append a member to the StateVariable. @returns a new variable.
-    StateVariable append(VariableMember &item) const;
+    [[nodiscard]] StateVariable append(VariableMember item) const;
 
     /// Prepend a member to the StateVariable in place.
     void prependInPlace(VariableMember item);
 
     /// Prepend a member to the StateVariable. @returns a new variable.
-    StateVariable prepend(VariableMember item) const;
+    [[nodiscard]] StateVariable prepend(VariableMember item) const;
 
     /// @returns a StateVariable which contains a subset of the parent variable.
     /// TODO: Use a std::span once we have C++20.
-    StateVariable getSlice(int64_t lo, int64_t hi) const;
+    [[nodiscard]] StateVariable getSlice(int64_t lo, int64_t hi) const;
 #end
 
     /// Implements comparisons so that StateVariables can be used as map keys.
@@ -130,8 +130,6 @@ class StateVariable : Expression {
     cstring toString() const override;
 
     void dbprint(std::ostream &out) const override;
-
-
 };
 
 

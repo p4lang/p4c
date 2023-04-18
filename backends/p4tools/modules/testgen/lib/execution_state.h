@@ -449,7 +449,7 @@ class ExecutionState {
     /// If @arg validVector is provided, this function also collects the validity bits of the
     /// headers.
     [[nodiscard]] std::vector<const IR::StateVariable *> getFlatFields(
-        const IR::Expression *parent, const IR::Type_StructLike *ts,
+        const IR::StateVariable &parent, const IR::Type_StructLike *ts,
         std::vector<const IR::StateVariable *> *validVector = nullptr) const;
 
     /// Gets table type from a member.

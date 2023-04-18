@@ -82,8 +82,9 @@ const TestSpec *PnaTestBackend::createTestSpec(const ExecutionState *executionSt
         const auto *pnaProgInfo = programInfo.checkedTo<PnaDpdkProgramInfo>();
         const auto *localMetadataVar = pnaProgInfo->getBlockParam("MainParserT", 2);
         const auto *localMetadataType = executionState->resolveType(localMetadataVar->type);
-        auto flatFields = executionState->getFlatFields(
-            localMetadataVar, localMetadataType->checkedTo<IR::Type_Struct>(), {});
+        auto flatFields =
+            executionState->getFlatFields(*new IR::StateVariable(*localMetadataVar),
+                                          localMetadataType->checkedTo<IR::Type_Struct>(), {});
         for (const auto *fieldRef : flatFields) {
             const auto *fieldVal = completedModel->evaluate(executionState->get(*fieldRef));
             // Try to remove the leading internal name for the metadata field.

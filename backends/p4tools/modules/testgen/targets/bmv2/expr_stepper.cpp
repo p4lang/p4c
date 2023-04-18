@@ -64,9 +64,9 @@ bool Bmv2V1ModelExprStepper::isPartOfFieldList(const IR::StructField *field,
 }
 
 void Bmv2V1ModelExprStepper::resetPreservingFieldList(ExecutionState &nextState,
-                                                      const IR::PathExpression *ref,
+                                                      const IR::StateVariable &ref,
                                                       uint64_t recirculateIndex) const {
-    const auto *ts = ref->type->checkedTo<IR::Type_StructLike>();
+    const auto *ts = ref.type->checkedTo<IR::Type_StructLike>();
     for (const auto *field : ts->fields) {
         // Check whether the field has a "field_list" annotation associated with it.
         if (isPartOfFieldList(field, recirculateIndex)) {
@@ -74,9 +74,10 @@ void Bmv2V1ModelExprStepper::resetPreservingFieldList(ExecutionState &nextState,
         }
         // If there is no annotation, reset the user metadata.
         const auto *fieldType = nextState.resolveType(field->type);
-        auto *fieldLabel = new IR::Member(fieldType, ref, field->name);
+        auto *fieldLabel = ref.clone();
+        fieldLabel->appendInPlace({fieldType, field->name});
         // Reset the variable.
-        setTargetUninitialized(nextState, fieldLabel, false);
+        setTargetUninitialized(nextState, *fieldLabel, false);
     }
 }
 
@@ -892,9 +893,9 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                          if (const auto *tn = paramType->to<IR::Type_Name>()) {
                              paramType = nextState.resolveType(tn);
                          }
-                         const auto *paramRef =
-                             new IR::PathExpression(paramType, new IR::Path(param->name));
-                         resetPreservingFieldList(nextState, paramRef, recirculateIndex);
+                         resetPreservingFieldList(nextState,
+                                                  IR::StateVariable({{paramType, param->name}}),
+                                                  recirculateIndex);
                          continue;
                      }
                      programInfo.produceCopyInOutCall(param, paramIdx, archMember, &cmds, nullptr);
@@ -1259,7 +1260,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  // appropriate index will not be reset.
                  // The user metadata is the third parameter of the parser control.
                  const auto *paramPath = progInfo->getBlockParam("Parser", 2);
-                 resetPreservingFieldList(recState, paramPath, recirculateIndex);
+                 resetPreservingFieldList(recState, IR::StateVariable(*paramPath),
+                                          recirculateIndex);
              }
 
              // Update the metadata variable to the correct instance type as provided by

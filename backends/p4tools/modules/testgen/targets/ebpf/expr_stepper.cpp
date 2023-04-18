@@ -89,15 +89,11 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
-             const auto *ipHdrRef = args->at(0)->expression;
-             if (!(ipHdrRef->is<IR::Member>() || ipHdrRef->is<IR::PathExpression>())) {
-                 TESTGEN_UNIMPLEMENTED("IP header input %1% of type %2% not supported", ipHdrRef,
-                                       ipHdrRef->type);
-             }
+             const auto *ipHdrRef = Utils::convertToStateVariable(args->at(0)->expression);
              // Input must be an IPv4 header.
              ipHdrRef->type->checkedTo<IR::Type_Header>();
 
-             const auto &validVar = state.get(*Utils::getHeaderValidity(ipHdrRef));
+             const auto &validVar = state.get(*Utils::getHeaderValidity(*ipHdrRef));
              // Check whether the validity bit of the header is false.
              // If yes, do not bother evaluating the checksum.
              auto emitIsTainted = state.hasTaint(validVar);
@@ -108,27 +104,30 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  return;
              }
              // Define a series of short-hand variables. These are hardcoded just like the extern.
-             const auto *version =
-                 state.get(*new IR::StateVariable(IR::Member(ipHdrRef, "version")));
-             const auto *ihl = state.get(*new IR::StateVariable(IR::Member(ipHdrRef, "ihl")));
-             const auto *diffserv =
-                 state.get(*new IR::StateVariable(IR::Member(ipHdrRef, "diffserv")));
-             const auto *totalLen =
-                 state.get(*new IR::StateVariable(IR::Member(ipHdrRef, "totalLen")));
-             const auto *identification =
-                 state.get(*new IR::StateVariable(IR::Member(ipHdrRef, "identification")));
-             const auto *flags = state.get(*new IR::StateVariable(IR::Member(ipHdrRef, "flags")));
-             const auto *fragOffset =
-                 state.get(*new IR::StateVariable(IR::Member(ipHdrRef, "fragOffset")));
-             const auto *ttl = state.get(*new IR::StateVariable(IR::Member(ipHdrRef, "ttl")));
-             const auto *protocol =
-                 state.get(*new IR::StateVariable(IR::Member(ipHdrRef, "protocol")));
-             const auto *hdrChecksum =
-                 state.get(*new IR::StateVariable(IR::Member(ipHdrRef, "hdrChecksum")));
-             const auto *srcAddr =
-                 state.get(*new IR::StateVariable(IR::Member(ipHdrRef, "srcAddr")));
-             const auto *dstAddr =
-                 state.get(*new IR::StateVariable(IR::Member(ipHdrRef, "dstAddr")));
+             const auto *version = state.get(ipHdrRef->append(
+                 IR::StateVariable::VariableMember{IR::Type_Unknown::get(), "version"}));
+             const auto *ihl = state.get(ipHdrRef->append(
+                 IR::StateVariable::VariableMember{IR::Type_Unknown::get(), "ihl"}));
+             const auto *diffserv = state.get(ipHdrRef->append(
+                 IR::StateVariable::VariableMember{IR::Type_Unknown::get(), "diffserv"}));
+             const auto *totalLen = state.get(ipHdrRef->append(
+                 IR::StateVariable::VariableMember{IR::Type_Unknown::get(), "totalLen"}));
+             const auto *identification = state.get(ipHdrRef->append(
+                 IR::StateVariable::VariableMember{IR::Type_Unknown::get(), "identification"}));
+             const auto *flags = state.get(ipHdrRef->append(
+                 IR::StateVariable::VariableMember{IR::Type_Unknown::get(), "flags"}));
+             const auto *fragOffset = state.get(ipHdrRef->append(
+                 IR::StateVariable::VariableMember{IR::Type_Unknown::get(), "fragOffset"}));
+             const auto *ttl = state.get(ipHdrRef->append(
+                 IR::StateVariable::VariableMember{IR::Type_Unknown::get(), "ttl"}));
+             const auto *protocol = state.get(ipHdrRef->append(
+                 IR::StateVariable::VariableMember{IR::Type_Unknown::get(), "protocol"}));
+             const auto *hdrChecksum = state.get(ipHdrRef->append(
+                 IR::StateVariable::VariableMember{IR::Type_Unknown::get(), "hdrChecksum"}));
+             const auto *srcAddr = state.get(ipHdrRef->append(
+                 IR::StateVariable::VariableMember{IR::Type_Unknown::get(), "srcAddr"}));
+             const auto *dstAddr = state.get(ipHdrRef->append(
+                 IR::StateVariable::VariableMember{IR::Type_Unknown::get(), "dstAddr"}));
              const auto *bt8 = IR::getBitType(8);
              const auto *bt16 = IR::getBitType(16);
              const auto *bt32 = IR::getBitType(32);

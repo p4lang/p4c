@@ -87,13 +87,22 @@ bool ExprStepper::preorder(const IR::Member *member) {
     // Check our assumption that this is a chain of member expressions terminating in a
     // PathExpression.
     checkMemberInvariant(member);
-
+    auto *var = new IR::StateVariable(*member);
     // This case may happen when we directly assign taint, that is not bound in the symbolic
     // environment to an expression.
-    if (SymbolicEnv::isSymbolicValue(member)) {
-        return stepSymbolicValue(member);
+    if (SymbolicEnv::isSymbolicValue(var)) {
+        return stepSymbolicValue(var);
     }
-    return stepSymbolicValue(state.get(*new IR::StateVariable(*member)));
+    return stepSymbolicValue(state.get(*var));
+}
+
+bool ExprStepper::preorder(const IR::StateVariable *var) {
+    // This case may happen when we directly assign taint, that is not bound in the symbolic
+    // environment to an expression.
+    if (SymbolicEnv::isSymbolicValue(var)) {
+        return stepSymbolicValue(var);
+    }
+    return stepSymbolicValue(state.get(*var));
 }
 
 void ExprStepper::evalActionCall(const IR::P4Action *action, const IR::MethodCallExpression *call) {
@@ -151,46 +160,45 @@ bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
                 result->emplace_back(nextState);
                 return false;
             }
+            const auto *ref = Utils::convertToStateVariable(method->expr);
 
             // Handle extern calls. They may also be of Type_SpecializedCanonical.
-            if (method->expr->type->is<IR::Type_Extern>() ||
-                method->expr->type->is<IR::Type_SpecializedCanonical>()) {
-                evalExternMethodCall(call, method->expr, method->member, call->arguments, state);
+            if (ref->type->is<IR::Type_Extern>() ||
+                ref->type->is<IR::Type_SpecializedCanonical>()) {
+                evalExternMethodCall(call, ref, method->member, call->arguments, state);
                 return false;
             }
 
             // Handle calls to header methods.
-            if (method->expr->type->is<IR::Type_Header>() ||
-                method->expr->type->is<IR::Type_HeaderUnion>()) {
+            if (ref->type->is<IR::Type_Header>() || ref->type->is<IR::Type_HeaderUnion>()) {
                 if (method->member == "isValid") {
-                    return stepGetHeaderValidity(method->expr);
+                    return stepGetHeaderValidity(*ref);
                 }
 
                 if (method->member == "setInvalid") {
-                    return stepSetHeaderValidity(method->expr, false);
+                    return stepSetHeaderValidity(*ref, false);
                 }
 
                 if (method->member == "setValid") {
-                    return stepSetHeaderValidity(method->expr, true);
+                    return stepSetHeaderValidity(*ref, true);
                 }
 
                 BUG("Unknown method call on header instance: %1%", call);
             }
 
-            if (method->expr->type->is<IR::Type_Stack>()) {
+            if (ref->type->is<IR::Type_Stack>()) {
                 if (method->member == "push_front") {
-                    return stepStackPushPopFront(method->expr, call->arguments);
+                    return stepStackPushPopFront(*ref, call->arguments);
                 }
 
                 if (method->member == "pop_front") {
-                    return stepStackPushPopFront(method->expr, call->arguments, false);
+                    return stepStackPushPopFront(*ref, call->arguments, false);
                 }
 
                 BUG("Unknown method call on stack instance: %1%", call);
             }
 
-            BUG("Unknown method member expression: %1% of type %2%", method->expr,
-                method->expr->type);
+            BUG("Unknown method member expression: %1% of type %2%", ref, ref->type);
         }
 
         BUG("Unknown method call: %1% of type %2%", call->method, call->method->node_type_name());

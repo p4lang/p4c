@@ -124,11 +124,11 @@ class AbstractStepper : public Inspector {
     ///     either Members or PathExpressions.
     ///
     /// @returns false
-    bool stepGetHeaderValidity(const IR::Expression *headerRef);
+    bool stepGetHeaderValidity(const IR::StateVariable &headerRef);
 
     /// Sets validity for a header if @a expr is a header. if @a expr is a part of a header union
     /// then it sets invalid for other headers in the union. Otherwise it generates an exception.
-    void setHeaderValidity(const IR::Expression *expr, bool validity, ExecutionState &state);
+    void setHeaderValidity(const IR::StateVariable &expr, bool validity, ExecutionState &state);
 
     /// Transition function for setValid and setInvalid calls.
     ///
@@ -137,7 +137,7 @@ class AbstractStepper : public Inspector {
     /// @param validity the validity state being assigned to the header instance.
     ///
     /// @returns false
-    bool stepSetHeaderValidity(const IR::Expression *headerRef, bool validity);
+    bool stepSetHeaderValidity(const IR::StateVariable &headerRef, bool validity);
 
     /// Transition function for push_front/pop_front calls.
     ///
@@ -147,8 +147,8 @@ class AbstractStepper : public Inspector {
     /// @param isPush is true for push_front and false otherwise.
     ///
     /// @returns false
-    bool stepStackPushPopFront(const IR::Expression *stackRef, const IR::Vector<IR::Argument> *args,
-                               bool isPush = true);
+    bool stepStackPushPopFront(const IR::StateVariable &stackRef,
+                               const IR::Vector<IR::Argument> *args, bool isPush = true);
 
     /// Evaluates an expression by invoking the solver under the current collected constraints.
     /// Optionally, a condition can be provided that is temporarily added to the list of assertions.
@@ -161,13 +161,13 @@ class AbstractStepper : public Inspector {
     /// Type_StructLike, unroll the reference and reset each member.
     /// If forceTaint is active, all references are set tainted. Otherwise a target-specific
     /// mechanism is used.
-    void setTargetUninitialized(ExecutionState &nextState, const IR::Member *ref,
+    void setTargetUninitialized(ExecutionState &nextState, const IR::StateVariable &ref,
                                 bool forceTaint) const;
 
     /// This is a helper function to declare structlike data structures.
     /// This also is used to declare the members of a stack. This function is primarily used by the
     /// Declaration_Variable preorder function.
-    void declareStructLike(ExecutionState &nextState, const IR::Expression *parentExpr,
+    void declareStructLike(ExecutionState &nextState, const IR::StateVariable &parentRef,
                            const IR::Type_StructLike *structType, bool forceTaint = false) const;
 
     /// This is a helper function to declare base type variables. Because all variables need to be a

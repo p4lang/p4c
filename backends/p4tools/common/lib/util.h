@@ -114,7 +114,9 @@ class Utils {
     ///     variable will be boolean-typed.
     ///
     /// @param headerRef a header instance. This is either a Member or a PathExpression.
-    static const IR::StateVariable *getHeaderValidity(const IR::Expression *headerRef);
+    static const IR::StateVariable *getHeaderValidity(const IR::StateVariable &headerRef);
+
+    static const IR::StateVariable *convertToStateVariable(const IR::Expression *expr);
 
     /// @returns a IR::StateVariable that is postfixed with "*". This is used for PathExpressions
     /// with are not yet members.

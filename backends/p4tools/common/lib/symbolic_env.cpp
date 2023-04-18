@@ -50,19 +50,18 @@ const IR::Expression *SymbolicEnv::subst(const IR::Expression *expr) const {
     class SubstVisitor : public Transform {
         const SymbolicEnv &symbolicEnv;
 
-        const IR::Node *preorder(IR::Member *member) override {
+        const IR::Node *preorder(IR::StateVariable *var) override {
             prune();
-            auto var = IR::StateVariable(*member);
-            if (symbolicEnv.exists(var)) {
-                const auto *result = symbolicEnv.get(var);
+            if (symbolicEnv.exists(*var)) {
+                const auto *result = symbolicEnv.get(*var);
                 // Sometimes the symbolic constant and its declaration in the environment are the
                 // same. We check if they are equal and return the member instead.
-                if (member->equiv(*result)) {
-                    return member;
+                if (var->equiv(*result)) {
+                    return var;
                 }
                 return result;
             }
-            return member;
+            return var;
         }
 
      public:

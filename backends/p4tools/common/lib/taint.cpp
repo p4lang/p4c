@@ -28,12 +28,11 @@ const IR::StringLiteral Taint::TAINTED_STRING_LITERAL = IR::StringLiteral(cstrin
 /// expression.
 static bitvec computeTaintedBits(const SymbolicMapType &varMap, const IR::Expression *expr) {
     CHECK_NULL(expr);
-    if (const auto *member = expr->to<IR::Member>()) {
-        auto var = IR::StateVariable(*member);
-        if (SymbolicEnv::isSymbolicValue(&var)) {
+    if (const auto *var = expr->to<IR::StateVariable>()) {
+        if (SymbolicEnv::isSymbolicValue(var)) {
             return {};
         }
-        expr = varMap.at(var);
+        expr = varMap.at(*var);
     }
 
     if (const auto *taintExpr = expr->to<IR::TaintExpression>()) {
@@ -100,10 +99,9 @@ bool Taint::hasTaint(const SymbolicMapType &varMap, const IR::Expression *expr) 
     if (expr->is<IR::TaintExpression>()) {
         return true;
     }
-    if (const auto *member = expr->to<IR::Member>()) {
-        if (!SymbolicEnv::isSymbolicValue(member)) {
-            auto var = IR::StateVariable(*member);
-            return hasTaint(varMap, varMap.at(var));
+    if (const auto *var = expr->to<IR::StateVariable>()) {
+        if (!SymbolicEnv::isSymbolicValue(var)) {
+            return hasTaint(varMap, varMap.at(*var));
         }
         return false;
     }
@@ -178,7 +176,7 @@ class TaintPropagator : public Transform {
     }
     const IR::Node *postorder(IR::Operation_Unary *unary_op) override { return unary_op->expr; }
 
-    const IR::Node *postorder(IR::Member *member) override {
+    const IR::Node *postorder(IR::StateVariable *member) override {
         // We do not want to split members.
         return member;
     }
@@ -234,9 +232,9 @@ class TaintPropagator : public Transform {
 
 class MaskBuilder : public Transform {
  private:
-    const IR::Node *preorder(IR::Member *member) override {
+    const IR::Node *preorder(IR::StateVariable *var) override {
         // Non-tainted members just return the max value, which corresponds to a mask of all zeroes.
-        return IR::getConstant(member->type, IR::getMaxBvVal(member->type));
+        return IR::getConstant(var->type, IR::getMaxBvVal(var->type));
     }
 
     const IR::Node *preorder(IR::TaintExpression *taintExpr) override {

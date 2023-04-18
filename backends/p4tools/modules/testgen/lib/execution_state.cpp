@@ -35,16 +35,16 @@
 namespace P4Tools::P4Testgen {
 
 const IR::StateVariable ExecutionState::inputPacketLabel =
-    IR::StateVariable::UntypedIR::StateVariable({"*", "inputPacket"});
+    IR::StateVariable::UntypedStateVariable({"*", "inputPacket"});
 
 const IR::StateVariable ExecutionState::packetBufferLabel =
-    IR::StateVariable::UntypedIR::StateVariable({"*", "packetBuffer"});
+    IR::StateVariable::UntypedStateVariable({"*", "packetBuffer"});
 
 const IR::StateVariable ExecutionState::emitBufferLabel =
-    IR::StateVariable::UntypedIR::StateVariable({"*", "emitBuffer"});
+    IR::StateVariable::UntypedStateVariable({"*", "emitBuffer"});
 
 const IR::StateVariable ExecutionState::payloadLabel =
-    IR::StateVariable::UntypedIR::StateVariable({"*", "payload"});
+    IR::StateVariable::UntypedStateVariable({"*", "payload"});
 
 // The methods in P4's packet_in uses 32-bit values. Conform with this to make it easier to produce
 // well-typed expressions when manipulating the parser cursor.
@@ -548,29 +548,32 @@ const IR::StateVariable *ExecutionState::createZombieConst(const IR::Type *type,
  * ========================================================================================= */
 
 std::vector<const IR::StateVariable *> ExecutionState::getFlatFields(
-    const IR::Expression *parent, const IR::Type_StructLike *ts,
+    const IR::StateVariable &parent, const IR::Type_StructLike *ts,
     std::vector<const IR::StateVariable *> *validVector) const {
     std::vector<const IR::StateVariable *> flatFields;
     for (const auto *field : ts->fields) {
         const auto *fieldType = resolveType(field->type);
         if (const auto *ts = fieldType->to<IR::Type_StructLike>()) {
-            auto subFields =
-                getFlatFields(new IR::Member(fieldType, parent, field->name), ts, validVector);
+            auto *fieldRef = parent.clone();
+            fieldRef->appendInPlace({fieldType, field->name});
+            auto subFields = getFlatFields(*fieldRef, ts, validVector);
             flatFields.insert(flatFields.end(), subFields.begin(), subFields.end());
         } else if (const auto *typeStack = fieldType->to<IR::Type_Stack>()) {
             const auto *stackElementsType = resolveType(typeStack->elementType);
             for (size_t arrayIndex = 0; arrayIndex < typeStack->getSize(); arrayIndex++) {
-                const auto *newMember = HSIndexToMember::produceStackIndex(
-                    stackElementsType, new IR::Member(typeStack, parent, field->name), arrayIndex);
+                const auto *newMember = new IR::StateVariable(
+                    {{typeStack, field->name}, {stackElementsType, std::to_string(arrayIndex)}});
                 BUG_CHECK(stackElementsType->is<IR::Type_StructLike>(),
                           "Try to make the flat fields for non Type_StructLike element : %1%",
                           stackElementsType);
                 auto subFields = getFlatFields(
-                    newMember, stackElementsType->to<IR::Type_StructLike>(), validVector);
+                    *newMember, stackElementsType->to<IR::Type_StructLike>(), validVector);
                 flatFields.insert(flatFields.end(), subFields.begin(), subFields.end());
             }
         } else {
-            flatFields.push_back(new IR::StateVariable(IR::Member(fieldType, parent, field->name)));
+            auto *newFieldRef = parent.clone();
+            newFieldRef->appendInPlace({fieldType, field->name});
+            flatFields.push_back(newFieldRef);
         }
     }
     // If we are dealing with a header we also include the validity bit in the list of

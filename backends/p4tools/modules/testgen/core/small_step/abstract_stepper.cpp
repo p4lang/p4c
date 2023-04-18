@@ -179,13 +179,14 @@ bool AbstractStepper::stepToStructSubexpr(
         });
 }
 
-bool AbstractStepper::stepGetHeaderValidity(const IR::Expression *headerRef) {
+bool AbstractStepper::stepGetHeaderValidity(const IR::StateVariable &headerRef) {
     // The top of the body should be a Return command containing a call to getValid on the given
     // header ref. Replace this with the variable representing the header ref's validity.
-    if (const auto *headerUnion = headerRef->type->to<IR::Type_HeaderUnion>()) {
+    if (const auto *headerUnion = headerRef.type->to<IR::Type_HeaderUnion>()) {
         for (const auto *field : headerUnion->fields) {
-            auto *fieldRef = new IR::Member(field->type, headerRef, field->name);
-            const auto &variable = Utils::getHeaderValidity(fieldRef);
+            auto *fieldRef = headerRef.clone();
+            fieldRef->appendInPlace({field->type, field->name});
+            const auto &variable = Utils::getHeaderValidity(*fieldRef);
             BUG_CHECK(state.exists(*variable),
                       "At this point, the header validity bit should be initialized.");
             const auto *value = state.getSymbolicEnv().get(*variable);
@@ -211,35 +212,36 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::Expression *headerRef) {
     return false;
 }
 
-void AbstractStepper::setHeaderValidity(const IR::Expression *expr, bool validity,
+void AbstractStepper::setHeaderValidity(const IR::StateVariable &headerRef, bool validity,
                                         ExecutionState &nextState) {
-    const auto *headerRefValidity = Utils::getHeaderValidity(expr);
+    const auto *headerRefValidity = Utils::getHeaderValidity(headerRef);
     nextState.set(*headerRefValidity, IR::getBoolLiteral(validity));
 
     // In some cases, the header may be part of a union.
     if (validity) {
-        const auto *headerBaseMember = expr->to<IR::Member>();
-        if (headerBaseMember == nullptr) {
+        if (headerRef.size() < 2) {
             return;
         }
-        const auto *headerBase = headerBaseMember->expr;
+        auto *headerBase = headerRef.clone();
+        headerBase->popBackInPlace();
         // In the case of header unions, we need to set all other union members invalid.
         if (const auto *hdrUnion = headerBase->type->to<IR::Type_HeaderUnion>()) {
             for (const auto *field : hdrUnion->fields) {
-                auto *member = new IR::Member(field->type, headerBase, field->name);
+                auto *member = headerBase->clone();
+                member->appendInPlace({field->type, field->name});
                 // Ignore the member we are setting to valid.
-                if (expr->equiv(*member)) {
+                if (headerRef.equiv(*member)) {
                     continue;
                 }
                 // Set all other members to invalid.
-                setHeaderValidity(member, false, nextState);
+                setHeaderValidity(*member, false, nextState);
             }
         }
         return;
     }
-    const auto *exprType = expr->type->checkedTo<IR::Type_StructLike>();
+    const auto *exprType = headerRef.type->checkedTo<IR::Type_StructLike>();
     std::vector<const IR::StateVariable *> validityVector;
-    auto fieldsVector = nextState.getFlatFields(expr, exprType, &validityVector);
+    auto fieldsVector = nextState.getFlatFields(headerRef, exprType, &validityVector);
     // The header is going to be invalid. Set all fields to taint constants.
     // TODO: Should we make this target specific? Some targets set the header fields to 0.
     for (const auto *field : fieldsVector) {
@@ -247,7 +249,7 @@ void AbstractStepper::setHeaderValidity(const IR::Expression *expr, bool validit
     }
 }
 
-bool AbstractStepper::stepSetHeaderValidity(const IR::Expression *headerRef, bool validity) {
+bool AbstractStepper::stepSetHeaderValidity(const IR::StateVariable &headerRef, bool validity) {
     // The top of the body should be a Return command containing a call to setValid or setInvalid
     // on the given header ref. Update the symbolic environment to reflect the changed validity
     // bit, and replace the command with an expressionless Return.
@@ -257,10 +259,12 @@ bool AbstractStepper::stepSetHeaderValidity(const IR::Expression *headerRef, boo
     return false;
 }
 
-const IR::MethodCallStatement *generateStacksetValid(const IR::Expression *stackRef, int index,
+const IR::MethodCallStatement *generateStacksetValid(const IR::StateVariable &stackRef, int index,
                                                      bool isValid) {
-    const auto *arrayIndex = HSIndexToMember::produceStackIndex(
-        stackRef->type->checkedTo<IR::Type_Stack>()->elementType, stackRef, index);
+    auto *arrayIndex = stackRef.clone();
+    arrayIndex->appendInPlace(
+        {stackRef.type->checkedTo<IR::Type_Stack>()->elementType, std::to_string(index)});
+
     auto name = (isValid) ? IR::Type_Header::setValid : IR::Type_Header::setInvalid;
     return new IR::MethodCallStatement(new IR::MethodCallExpression(
         new IR::Type_Void(),
@@ -270,14 +274,16 @@ const IR::MethodCallStatement *generateStacksetValid(const IR::Expression *stack
 
 void generateStackAssigmentStatement(ExecutionState &nextState,
                                      std::vector<Continuation::Command> &replacements,
-                                     const IR::Expression *stackRef, int leftIndex,
+                                     const IR::StateVariable &stackRef, int leftIndex,
                                      int rightIndex) {
-    const auto *elemType = stackRef->type->checkedTo<IR::Type_Stack>()->elementType;
-    const auto *leftArIndex = HSIndexToMember::produceStackIndex(elemType, stackRef, leftIndex);
-    const auto *rightArrIndex = HSIndexToMember::produceStackIndex(elemType, stackRef, rightIndex);
+    const auto *elemType = stackRef.type->checkedTo<IR::Type_Stack>()->elementType;
+    auto *leftArrIndex = stackRef.clone();
+    leftArrIndex->appendInPlace({elemType, std::to_string(leftIndex)});
+    auto *rightArrIndex = stackRef.clone();
+    rightArrIndex->appendInPlace({elemType, std::to_string(rightIndex)});
 
     // Check right header validity.
-    const auto *value = nextState.getSymbolicEnv().get(*Utils::getHeaderValidity(rightArrIndex));
+    const auto *value = nextState.getSymbolicEnv().get(*Utils::getHeaderValidity(*rightArrIndex));
     if (!value->checkedTo<IR::BoolLiteral>()->value) {
         replacements.emplace_back(generateStacksetValid(stackRef, leftIndex, false));
         return;
@@ -286,16 +292,16 @@ void generateStackAssigmentStatement(ExecutionState &nextState,
 
     // Unfold fields.
     const auto *structType = elemType->checkedTo<IR::Type_StructLike>();
-    auto leftVector = nextState.getFlatFields(leftArIndex, structType);
-    auto rightVector = nextState.getFlatFields(rightArrIndex, structType);
+    auto leftVector = nextState.getFlatFields(*leftArrIndex, structType);
+    auto rightVector = nextState.getFlatFields(*rightArrIndex, structType);
     for (size_t i = 0; i < leftVector.size(); i++) {
         replacements.emplace_back(new IR::AssignmentStatement(leftVector[i], rightVector[i]));
     }
 }
 
-bool AbstractStepper::stepStackPushPopFront(const IR::Expression *stackRef,
+bool AbstractStepper::stepStackPushPopFront(const IR::StateVariable &stackRef,
                                             const IR::Vector<IR::Argument> *args, bool isPush) {
-    const auto *stackType = stackRef->type->checkedTo<IR::Type_Stack>();
+    const auto *stackType = stackRef.type->checkedTo<IR::Type_Stack>();
     auto sz = static_cast<int>(stackType->getSize());
     BUG_CHECK(args->size() == 1, "Invalid size of arguments for %1%", stackRef);
     auto count = args->at(0)->expression->checkedTo<IR::Constant>()->asInt();
@@ -346,10 +352,10 @@ const IR::Literal *AbstractStepper::evaluateExpression(
     return result;
 }
 
-void AbstractStepper::setTargetUninitialized(ExecutionState &nextState, const IR::Member *ref,
-                                             bool forceTaint) const {
+void AbstractStepper::setTargetUninitialized(ExecutionState &nextState,
+                                             const IR::StateVariable &ref, bool forceTaint) const {
     // Resolve the type of the left-and assignment, if it is a type name.
-    const auto *refType = nextState.resolveType(ref->type);
+    const auto *refType = nextState.resolveType(ref.type);
     if (const auto *structType = refType->to<const IR::Type_StructLike>()) {
         std::vector<const IR::StateVariable *> validFields;
         auto fields = nextState.getFlatFields(ref, structType, &validFields);
@@ -364,18 +370,18 @@ void AbstractStepper::setTargetUninitialized(ExecutionState &nextState, const IR
             nextState.set(*field, programInfo.createTargetUninitialized(field->type, forceTaint));
         }
     } else if (const auto *baseType = refType->to<const IR::Type_Base>()) {
-        nextState.set(*new IR::StateVariable(*ref),
-                      programInfo.createTargetUninitialized(baseType, forceTaint));
+        nextState.set(ref, programInfo.createTargetUninitialized(baseType, forceTaint));
     } else {
         P4C_UNIMPLEMENTED("Unsupported uninitialization type %1%", refType->node_type_name());
     }
 }
 
-void AbstractStepper::declareStructLike(ExecutionState &nextState, const IR::Expression *parentExpr,
+void AbstractStepper::declareStructLike(ExecutionState &nextState,
+                                        const IR::StateVariable &parentRef,
                                         const IR::Type_StructLike *structType,
                                         bool forceTaint) const {
     std::vector<const IR::StateVariable *> validFields;
-    auto fields = nextState.getFlatFields(parentExpr, structType, &validFields);
+    auto fields = nextState.getFlatFields(parentRef, structType, &validFields);
     // We also need to initialize the validity bits of the headers. These are false.
     for (const auto *validField : validFields) {
         nextState.set(*validField, IR::getBoolLiteral(false));

@@ -70,7 +70,7 @@ class Z3Translator : public virtual Inspector {
     bool preorder(const IR::BoolLiteral *boolLiteral) override;
 
     /// Translates variables.
-    bool preorder(const IR::Member *member) override;
+    bool preorder(const IR::StateVariable *var) override;
     bool preorder(const IR::ConcolicVariable *var) override;
 
     // Translations for unary operations.
@@ -524,8 +524,8 @@ bool Z3Translator::preorder(const IR::BoolLiteral *boolLiteral) {
     return false;
 }
 
-bool Z3Translator::preorder(const IR::Member *member) {
-    result = solver.declareVar(IR::StateVariable(*member));
+bool Z3Translator::preorder(const IR::StateVariable *var) {
+    result = solver.declareVar(*var);
     return false;
 }
 

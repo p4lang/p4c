@@ -104,18 +104,23 @@ const IR::StateVariable *Utils::getZombieConst(const IR::Type *type, int incarna
     return Zombie::getConst(type, incarnation, name);
 }
 
-const IR::StateVariable *Utils::getHeaderValidity(const IR::Expression *headerRef) {
-    IR::StateVariable *validityRef = nullptr;
-    if (const auto *member = headerRef->to<IR::Member>()) {
-        headerRef = new IR::StateVariable(*member);
-    } else if (const auto *path = headerRef->to<IR::Member>()) {
-        headerRef = new IR::StateVariable(*path);
-    } else {
-        BUG("Unsupported reference  %1% of type %2%", headerRef, headerRef->node_type_name());
-    }
+const IR::StateVariable *Utils::getHeaderValidity(const IR::StateVariable &headerRef) {
+    auto *validityRef = headerRef.clone();
     // Members are copied here.
     validityRef->appendInPlace({IR::Type_Boolean::get(), Valid});
     return validityRef;
+}
+
+const IR::StateVariable *Utils::convertToStateVariable(const IR::Expression *expr) {
+    IR::StateVariable *ref = nullptr;
+    if (const auto *member = expr->to<IR::Member>()) {
+        ref = new IR::StateVariable(*member);
+    } else if (const auto *path = expr->to<IR::PathExpression>()) {
+        ref = new IR::StateVariable(*path);
+    } else {
+        BUG("Unsupported reference  %1% of type %2%", expr, expr->node_type_name());
+    }
+    return ref;
 }
 
 const IR::StateVariable *Utils::addZombiePostfix(const IR::StateVariable &var,

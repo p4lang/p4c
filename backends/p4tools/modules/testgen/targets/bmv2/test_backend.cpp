@@ -106,8 +106,9 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
         const auto *bmv2ProgInfo = programInfo.checkedTo<Bmv2V1ModelProgramInfo>();
         const auto *localMetadataVar = bmv2ProgInfo->getBlockParam("Parser", 2);
         const auto *localMetadataType = executionState->resolveType(localMetadataVar->type);
-        auto flatFields = executionState->getFlatFields(
-            localMetadataVar, localMetadataType->checkedTo<IR::Type_Struct>(), {});
+        auto flatFields =
+            executionState->getFlatFields(IR::StateVariable(*localMetadataVar),
+                                          localMetadataType->checkedTo<IR::Type_Struct>(), {});
         for (const auto *fieldRef : flatFields) {
             const auto *fieldVal = completedModel->evaluate(executionState->get(*fieldRef));
             // Try to remove the leading internal name for the metadata field.

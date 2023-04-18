@@ -82,7 +82,7 @@ cstring StateVariable::toString() const {
     std::stringstream stream;
     for (const auto &member : members) {
         stream << member.name;
-        if (&member != &members.front()) {
+        if (&member != &members.back()) {
             stream << ".";
         }
     }
@@ -92,7 +92,7 @@ cstring StateVariable::toString() const {
 void StateVariable::dbprint(std::ostream &out) const {
     for (const auto &member : members) {
         out << member.name;
-        if (&member != &members.front()) {
+        if (&member != &members.back()) {
             out << ".";
         }
     }
@@ -133,11 +133,11 @@ StateVariable StateVariable::popBack() const {
 }
 
 void StateVariable::appendInPlace(VariableMember item) {
-    type = item.type;
     members.emplace_back(item);
+    type = members.back().type;
 }
 
-StateVariable StateVariable::append(VariableMember &item) const {
+StateVariable StateVariable::append(VariableMember item) const {
     auto var = StateVariable(srcInfo, members);
     var.appendInPlace(item);
     return var;
