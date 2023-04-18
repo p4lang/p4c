@@ -4,11 +4,11 @@
 
 namespace P4Tools::P4Testgen::Pna {
 
-const StateVariable PnaConstants::DROP_VAR = StateVariable(
+const IR::StateVariable PnaConstants::DROP_VAR = IR::StateVariable(
     {{IR::Type_Unknown::get(), "*pna_internal"}, {new IR::Type_Boolean(), "drop_var"}});
-const StateVariable PnaConstants::OUTPUT_PORT_VAR = StateVariable(
+const IR::StateVariable PnaConstants::OUTPUT_PORT_VAR = IR::StateVariable(
     {{IR::Type_Unknown::get(), "*pna_internal"}, {new IR::Type_Bits(32, false), "output_port"}});
-const StateVariable PnaConstants::PARSER_ERROR = StateVariable(
+const IR::StateVariable PnaConstants::PARSER_ERROR = IR::StateVariable(
     {{IR::Type_Unknown::get(), "*pna_internal"}, {new IR::Type_Bits(32, false), "parser_error"}});
 // TODO: Make this a proper zombie variable.
 // We can not use the utilities because of an issue related to the garbage collector.

@@ -18,7 +18,7 @@
 
 namespace P4Tools {
 
-const IR::Expression *SymbolicEnv::get(const StateVariable &var) const {
+const IR::Expression *SymbolicEnv::get(const IR::StateVariable &var) const {
     auto it = map.find(var);
     if (it != map.end()) {
         return it->second;
@@ -26,9 +26,9 @@ const IR::Expression *SymbolicEnv::get(const StateVariable &var) const {
     BUG("Unable to find var %s in the symbolic environment.", var.toString());
 }
 
-bool SymbolicEnv::exists(const StateVariable &var) const { return map.find(var) != map.end(); }
+bool SymbolicEnv::exists(const IR::StateVariable &var) const { return map.find(var) != map.end(); }
 
-void SymbolicEnv::set(const StateVariable &var, const IR::Expression *value) {
+void SymbolicEnv::set(const IR::StateVariable &var, const IR::Expression *value) {
     map[var] = P4::optimizeExpression(value);
 }
 
@@ -52,7 +52,7 @@ const IR::Expression *SymbolicEnv::subst(const IR::Expression *expr) const {
 
         const IR::Node *preorder(IR::Member *member) override {
             prune();
-            auto var = StateVariable(*member);
+            auto var = IR::StateVariable(*member);
             if (symbolicEnv.exists(var)) {
                 const auto *result = symbolicEnv.get(var);
                 // Sometimes the symbolic constant and its declaration in the environment are the
@@ -109,7 +109,7 @@ bool SymbolicEnv::isSymbolicValue(const IR::Node *node) {
     }
 
     // Symbolic constants are references to fields under the struct p4t*zombie.const.
-    if (const auto *member = expr->to<StateVariable>()) {
+    if (const auto *member = expr->to<IR::StateVariable>()) {
         return Zombie::isSymbolicConst(*member);
     }
 

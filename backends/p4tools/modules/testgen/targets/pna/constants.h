@@ -18,11 +18,11 @@ class PnaConstants {
     static constexpr const char *MATCH_KIND_RANGE = "range";
 
     /// PNA-internal drop variable.
-    static const StateVariable DROP_VAR;
+    static const IR::StateVariable DROP_VAR;
     /// PNA-internal egress port variable.
-    static const StateVariable OUTPUT_PORT_VAR;
+    static const IR::StateVariable OUTPUT_PORT_VAR;
     /// PNA-internal parser error label.
-    static const StateVariable PARSER_ERROR;
+    static const IR::StateVariable PARSER_ERROR;
 };
 
 /// Zombies are variables that can be controlled and set by P4Testgen.

@@ -96,7 +96,7 @@ ConcolicMethodImpls::ConcolicMethodImpls(const ImplList &implList) { add(implLis
 bool ConcolicResolver::preorder(const IR::ConcolicVariable *var) {
     cstring concolicMethodName = var->concolicMethodName;
     // Convert the concolic member variable to a state variable.
-    auto concolicVarName = StateVariable(*var->concolicMember);
+    auto concolicVarName = IR::StateVariable(*var->concolicMember);
     auto concolicReplacment = resolvedConcolicVariables.find(concolicVarName);
     if (concolicReplacment == resolvedConcolicVariables.end()) {
         bool found = concolicMethodImpls.exec(concolicMethodName, var, state, completedModel,

@@ -101,14 +101,15 @@ std::vector<Continuation::Command> EBPFProgramInfo::processDeclaration(
     return cmds;
 }
 
-const StateVariable *EBPFProgramInfo::getTargetInputPortVar() const {
+const IR::StateVariable *EBPFProgramInfo::getTargetInputPortVar() const {
     const auto *portNumBitsType = IR::getBitType(TestgenTarget::getPortNumWidthBits());
-    return new StateVariable({{IR::Type_Unknown::get(), "*"}, {portNumBitsType, "ingress_port"}});
+    return new IR::StateVariable(
+        {{IR::Type_Unknown::get(), "*"}, {portNumBitsType, "ingress_port"}});
 }
 
-const StateVariable *EBPFProgramInfo::getTargetOutputPortVar() const {
+const IR::StateVariable *EBPFProgramInfo::getTargetOutputPortVar() const {
     const auto *portNumBitsType = IR::getBitType(TestgenTarget::getPortNumWidthBits());
-    return new StateVariable({{IR::Type_Unknown::get(), "*"}, {portNumBitsType, "input_port"}});
+    return new IR::StateVariable({{IR::Type_Unknown::get(), "*"}, {portNumBitsType, "input_port"}});
 }
 
 const IR::Expression *EBPFProgramInfo::dropIsActive() const {

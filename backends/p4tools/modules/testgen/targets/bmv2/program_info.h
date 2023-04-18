@@ -48,12 +48,12 @@ class Bmv2V1ModelProgramInfo : public ProgramInfo {
     [[nodiscard]] const IR::PathExpression *getBlockParam(cstring blockLabel,
                                                           size_t paramIndex) const;
 
-    [[nodiscard]] const StateVariable *getTargetInputPortVar() const override;
+    [[nodiscard]] const IR::StateVariable *getTargetInputPortVar() const override;
 
     /// @returns the constraint expression for a given port variable.
-    static const IR::Expression *getPortConstraint(const IR::Member *portVar);
+    static const IR::Expression *getPortConstraint(const IR::Expression *portVar);
 
-    [[nodiscard]] const StateVariable *getTargetOutputPortVar() const override;
+    [[nodiscard]] const IR::StateVariable *getTargetOutputPortVar() const override;
 
     [[nodiscard]] const IR::Expression *dropIsActive() const override;
 

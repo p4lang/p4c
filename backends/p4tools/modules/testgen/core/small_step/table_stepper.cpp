@@ -42,9 +42,10 @@ const ProgramInfo *TableStepper::getProgramInfo() { return &stepper->programInfo
 
 ExprStepper::Result TableStepper::getResult() { return stepper->result; }
 
-const StateVariable *TableStepper::getZombieTableVar(const IR::Type *type, const IR::P4Table *table,
-                                                     cstring name, std::optional<int> idx1_opt,
-                                                     std::optional<int> idx2_opt) {
+const IR::StateVariable *TableStepper::getZombieTableVar(const IR::Type *type,
+                                                         const IR::P4Table *table, cstring name,
+                                                         std::optional<int> idx1_opt,
+                                                         std::optional<int> idx2_opt) {
     // Mash the table name, the given name, and the optional indices together.
     // XXX To be nice, we should probably build a PathExpression, but that's annoying to do, and we
     // XXX can probably get away with this.
@@ -59,22 +60,22 @@ const StateVariable *TableStepper::getZombieTableVar(const IR::Type *type, const
     return Utils::getZombieVar(type, 0, out.str());
 }
 
-const StateVariable *TableStepper::getTableActionVar(const IR::P4Table *table) {
+const IR::StateVariable *TableStepper::getTableActionVar(const IR::P4Table *table) {
     auto numActions = table->getActionList()->size();
     const auto *type = IR::getBitTypeToFit(numActions);
     return getZombieTableVar(type, table, "*action");
 }
 
-const StateVariable *TableStepper::getTableHitVar(const IR::P4Table *table) {
+const IR::StateVariable *TableStepper::getTableHitVar(const IR::P4Table *table) {
     return getZombieTableVar(IR::Type::Boolean::get(), table, "*hit");
 }
 
-const StateVariable *TableStepper::getTableKeyReadVar(const IR::P4Table *table, int keyIdx) {
+const IR::StateVariable *TableStepper::getTableKeyReadVar(const IR::P4Table *table, int keyIdx) {
     const auto *key = table->getKey()->keyElements.at(keyIdx);
     return getZombieTableVar(key->expression->type, table, "*keyRead", keyIdx);
 }
 
-const StateVariable *TableStepper::getTableReachedVar(const IR::P4Table *table) {
+const IR::StateVariable *TableStepper::getTableReachedVar(const IR::P4Table *table) {
     return getZombieTableVar(IR::Type::Boolean::get(), table, "*reached");
 }
 

@@ -95,20 +95,21 @@ const IR::Constant *Utils::getRandConstantForType(const IR::Type_Bits *type) {
 
 const cstring Utils::Valid = "*valid";
 
-const StateVariable *Utils::getZombieVar(const IR::Type *type, int incarnation, cstring name) {
+const IR::StateVariable *Utils::getZombieVar(const IR::Type *type, int incarnation, cstring name) {
     return Zombie::getVar(type, incarnation, name);
 }
 
-const StateVariable *Utils::getZombieConst(const IR::Type *type, int incarnation, cstring name) {
+const IR::StateVariable *Utils::getZombieConst(const IR::Type *type, int incarnation,
+                                               cstring name) {
     return Zombie::getConst(type, incarnation, name);
 }
 
-const StateVariable *Utils::getHeaderValidity(const IR::Expression *headerRef) {
-    StateVariable *validityRef = nullptr;
+const IR::StateVariable *Utils::getHeaderValidity(const IR::Expression *headerRef) {
+    IR::StateVariable *validityRef = nullptr;
     if (const auto *member = headerRef->to<IR::Member>()) {
-        headerRef = new StateVariable(*member);
+        headerRef = new IR::StateVariable(*member);
     } else if (const auto *path = headerRef->to<IR::Member>()) {
-        headerRef = new StateVariable(*path);
+        headerRef = new IR::StateVariable(*path);
     } else {
         BUG("Unsupported reference  %1% of type %2%", headerRef, headerRef->node_type_name());
     }
@@ -117,8 +118,8 @@ const StateVariable *Utils::getHeaderValidity(const IR::Expression *headerRef) {
     return validityRef;
 }
 
-const StateVariable *Utils::addZombiePostfix(const StateVariable &var,
-                                             const IR::Type_Base *baseType) {
+const IR::StateVariable *Utils::addZombiePostfix(const IR::StateVariable &var,
+                                                 const IR::Type_Base *baseType) {
     // Members are copied here.
     auto *newVar = var.clone();
     newVar->appendInPlace({baseType, "*"});
@@ -148,11 +149,11 @@ const IR::TaintExpression *Utils::getTaintExpression(const IR::Type *type) {
     return result;
 }
 
-const StateVariable *Utils::getConcolicMember(const IR::ConcolicVariable *var, int concolicId) {
+const IR::StateVariable *Utils::getConcolicMember(const IR::ConcolicVariable *var, int concolicId) {
     const auto *const concolicMember = var->concolicMember;
     auto *clonedMember = concolicMember->clone();
     clonedMember->member = std::to_string(concolicId).c_str();
-    return new StateVariable(*clonedMember);
+    return new IR::StateVariable(*clonedMember);
 }
 
 const IR::MethodCallExpression *Utils::generateInternalMethodCall(

@@ -31,13 +31,13 @@ const ordered_map<cstring, const IR::Type_Declaration *>
     return &programmableBlocks;
 }
 
-const StateVariable *SharedPnaProgramInfo::getTargetInputPortVar() const {
-    return new StateVariable(
+const IR::StateVariable *SharedPnaProgramInfo::getTargetInputPortVar() const {
+    return new IR::StateVariable(
         {{IR::Type_Unknown::get(), "*parser_istd"},
          {IR::getBitType(TestgenTarget::getPortNumWidthBits()), "input_port"}});
 }
 
-const StateVariable *SharedPnaProgramInfo::getTargetOutputPortVar() const {
+const IR::StateVariable *SharedPnaProgramInfo::getTargetOutputPortVar() const {
     return &PnaConstants::OUTPUT_PORT_VAR;
 }
 

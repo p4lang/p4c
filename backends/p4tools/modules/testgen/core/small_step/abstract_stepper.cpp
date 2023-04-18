@@ -238,7 +238,7 @@ void AbstractStepper::setHeaderValidity(const IR::Expression *expr, bool validit
         return;
     }
     const auto *exprType = expr->type->checkedTo<IR::Type_StructLike>();
-    std::vector<const StateVariable *> validityVector;
+    std::vector<const IR::StateVariable *> validityVector;
     auto fieldsVector = nextState.getFlatFields(expr, exprType, &validityVector);
     // The header is going to be invalid. Set all fields to taint constants.
     // TODO: Should we make this target specific? Some targets set the header fields to 0.
@@ -351,7 +351,7 @@ void AbstractStepper::setTargetUninitialized(ExecutionState &nextState, const IR
     // Resolve the type of the left-and assignment, if it is a type name.
     const auto *refType = nextState.resolveType(ref->type);
     if (const auto *structType = refType->to<const IR::Type_StructLike>()) {
-        std::vector<const StateVariable *> validFields;
+        std::vector<const IR::StateVariable *> validFields;
         auto fields = nextState.getFlatFields(ref, structType, &validFields);
         // We also need to initialize the validity bits of the headers. These are false.
         for (const auto *validField : validFields) {
@@ -364,7 +364,7 @@ void AbstractStepper::setTargetUninitialized(ExecutionState &nextState, const IR
             nextState.set(*field, programInfo.createTargetUninitialized(field->type, forceTaint));
         }
     } else if (const auto *baseType = refType->to<const IR::Type_Base>()) {
-        nextState.set(*new StateVariable(*ref),
+        nextState.set(*new IR::StateVariable(*ref),
                       programInfo.createTargetUninitialized(baseType, forceTaint));
     } else {
         P4C_UNIMPLEMENTED("Unsupported uninitialization type %1%", refType->node_type_name());
@@ -374,7 +374,7 @@ void AbstractStepper::setTargetUninitialized(ExecutionState &nextState, const IR
 void AbstractStepper::declareStructLike(ExecutionState &nextState, const IR::Expression *parentExpr,
                                         const IR::Type_StructLike *structType,
                                         bool forceTaint) const {
-    std::vector<const StateVariable *> validFields;
+    std::vector<const IR::StateVariable *> validFields;
     auto fields = nextState.getFlatFields(parentExpr, structType, &validFields);
     // We also need to initialize the validity bits of the headers. These are false.
     for (const auto *validField : validFields) {
@@ -388,7 +388,7 @@ void AbstractStepper::declareStructLike(ExecutionState &nextState, const IR::Exp
     }
 }
 
-void AbstractStepper::declareBaseType(ExecutionState &nextState, const StateVariable &paramPath,
+void AbstractStepper::declareBaseType(ExecutionState &nextState, const IR::StateVariable &paramPath,
                                       const IR::Type_Base *baseType) const {
     nextState.set(paramPath, programInfo.createTargetUninitialized(baseType, false));
 }

@@ -18,14 +18,14 @@ class SymbolicEnv {
     // Maybe coerce from Model for concrete execution?
 
     /// @returns the symbolic value for the given variable.
-    [[nodiscard]] const IR::Expression *get(const StateVariable &var) const;
+    [[nodiscard]] const IR::Expression *get(const IR::StateVariable &var) const;
 
     /// Checks whether the given variable exists in the symbolic environment.
-    [[nodiscard]] bool exists(const StateVariable &var) const;
+    [[nodiscard]] bool exists(const IR::StateVariable &var) const;
 
     /// Sets the symbolic value of the given state variable to the given value. Constant folding is
     /// done on the given value before updating the symbolic state.
-    void set(const StateVariable &var, const IR::Expression *value);
+    void set(const IR::StateVariable &var, const IR::Expression *value);
 
     /// Completes the model with all variables referenced in the symbolic environment.
     [[nodiscard]] Model *complete(const Model &model) const;

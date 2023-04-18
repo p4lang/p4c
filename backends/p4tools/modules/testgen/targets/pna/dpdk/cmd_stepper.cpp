@@ -54,13 +54,13 @@ void PnaDpdkCmdStepper::initializeTargetEnvironment(ExecutionState &nextState) c
     // PNA implicitly sets the output port to 0.
     nextState.set(PnaConstants::OUTPUT_PORT_VAR, IR::getConstant(thirtytwoBitType, 0));
     // Initialize the direction metadata variables.
-    nextState.set(*new StateVariable(
+    nextState.set(*new IR::StateVariable(
                       {{IR::Type_Unknown::get(), "*pre_istd"}, {thirtytwoBitType, "direction"}}),
                   &PnaZombies::DIRECTION);
-    nextState.set(*new StateVariable(
+    nextState.set(*new IR::StateVariable(
                       {{IR::Type_Unknown::get(), "*parser_istd"}, {thirtytwoBitType, "direction"}}),
                   &PnaZombies::DIRECTION);
-    nextState.set(*new StateVariable(
+    nextState.set(*new IR::StateVariable(
                       {{IR::Type_Unknown::get(), "*main_istd"}, {thirtytwoBitType, "direction"}}),
                   &PnaZombies::DIRECTION);
 }

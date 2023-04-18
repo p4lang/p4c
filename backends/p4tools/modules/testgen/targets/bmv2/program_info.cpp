@@ -143,7 +143,7 @@ std::vector<Continuation::Command> Bmv2V1ModelProgramInfo::processDeclaration(
             /// Set the restriction on the output port,
             /// this is necessary since ptf tests use ports from 0 to 7
             /// TODO: Fix this.
-            // cmds.emplace_back(Continuation::Guard(getPortConstraint(getTargetOutputPortVar())));
+            cmds.emplace_back(Continuation::Guard(getPortConstraint(getTargetOutputPortVar())));
         }
         // TODO: We have not implemented multi cast yet.
         // Drop the packet if the multicast group is set.
@@ -169,22 +169,22 @@ std::vector<Continuation::Command> Bmv2V1ModelProgramInfo::processDeclaration(
     return cmds;
 }
 
-const IR::Expression *Bmv2V1ModelProgramInfo::getPortConstraint(const IR::Member *portVar) {
+const IR::Expression *Bmv2V1ModelProgramInfo::getPortConstraint(const IR::Expression *portVar) {
     const IR::Operation_Binary *portConstraint =
         new IR::LOr(new IR::Equ(portVar, new IR::Constant(portVar->type, BMv2Constants::DROP_PORT)),
                     new IR::Lss(portVar, new IR::Constant(portVar->type, 8)));
     return portConstraint;
 }
 
-const StateVariable *Bmv2V1ModelProgramInfo::getTargetOutputPortVar() const {
+const IR::StateVariable *Bmv2V1ModelProgramInfo::getTargetOutputPortVar() const {
     const auto *portNumBitsType = IR::getBitType(TestgenTarget::getPortNumWidthBits());
-    return new StateVariable(
+    return new IR::StateVariable(
         {{IR::Type_Unknown::get(), "*standard_metadata"}, {portNumBitsType, "egress_spec"}});
 }
 
-const StateVariable *Bmv2V1ModelProgramInfo::getTargetInputPortVar() const {
+const IR::StateVariable *Bmv2V1ModelProgramInfo::getTargetInputPortVar() const {
     const auto *portNumBitsType = IR::getBitType(TestgenTarget::getPortNumWidthBits());
-    return new StateVariable(
+    return new IR::StateVariable(
         {{IR::Type_Unknown::get(), "*standard_metadata"}, {portNumBitsType, "ingress_port"}});
 }
 

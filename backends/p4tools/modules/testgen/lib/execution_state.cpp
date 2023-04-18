@@ -34,17 +34,17 @@
 
 namespace P4Tools::P4Testgen {
 
-const StateVariable ExecutionState::inputPacketLabel =
-    StateVariable::UntypedStateVariable({"*", "inputPacket"});
+const IR::StateVariable ExecutionState::inputPacketLabel =
+    IR::StateVariable::UntypedIR::StateVariable({"*", "inputPacket"});
 
-const StateVariable ExecutionState::packetBufferLabel =
-    StateVariable::UntypedStateVariable({"*", "packetBuffer"});
+const IR::StateVariable ExecutionState::packetBufferLabel =
+    IR::StateVariable::UntypedIR::StateVariable({"*", "packetBuffer"});
 
-const StateVariable ExecutionState::emitBufferLabel =
-    StateVariable::UntypedStateVariable({"*", "emitBuffer"});
+const IR::StateVariable ExecutionState::emitBufferLabel =
+    IR::StateVariable::UntypedIR::StateVariable({"*", "emitBuffer"});
 
-const StateVariable ExecutionState::payloadLabel =
-    StateVariable::UntypedStateVariable({"*", "payload"});
+const IR::StateVariable ExecutionState::payloadLabel =
+    IR::StateVariable::UntypedIR::StateVariable({"*", "payload"});
 
 // The methods in P4's packet_in uses 32-bit values. Conform with this to make it easier to produce
 // well-typed expressions when manipulating the parser cursor.
@@ -111,7 +111,7 @@ std::optional<const Continuation::Command> ExecutionState::getNextCmd() const {
     return body.next();
 }
 
-const IR::Expression *ExecutionState::get(const StateVariable &var) const {
+const IR::Expression *ExecutionState::get(const IR::StateVariable &var) const {
     const auto *expr = env.get(var);
     if (var.type->is<IR::Type_Header>() && var.back().name != Utils::Valid) {
         // If we are setting the member of a header, we need to check whether the
@@ -150,9 +150,9 @@ bool ExecutionState::hasTaint(const IR::Expression *expr) const {
     return Taint::hasTaint(env.getInternalMap(), expr);
 }
 
-bool ExecutionState::exists(const StateVariable &var) const { return env.exists(var); }
+bool ExecutionState::exists(const IR::StateVariable &var) const { return env.exists(var); }
 
-void ExecutionState::set(const StateVariable &var, const IR::Expression *value) {
+void ExecutionState::set(const IR::StateVariable &var, const IR::Expression *value) {
     if (getProperty<bool>("inUndefinedState")) {
         // If we are in an undefined state, the variable we set is tainted.
         value = Utils::getTaintExpression(value->type);
@@ -352,7 +352,7 @@ void ExecutionState::pushBranchDecision(uint64_t bIdx) { selectedBranches.push_b
 
 const IR::Type_Bits *ExecutionState::getPacketSizeVarType() { return &packetSizeVarType; }
 
-const StateVariable *ExecutionState::getInputPacketSizeVar() {
+const IR::StateVariable *ExecutionState::getInputPacketSizeVar() {
     return Utils::getZombieConst(getPacketSizeVarType(), 0, "*packetLen_bits");
 }
 
@@ -505,7 +505,7 @@ void ExecutionState::appendToEmitBuffer(const IR::Expression *expr) {
     env.set(emitBufferLabel, concat);
 }
 
-const StateVariable *ExecutionState::getPayloadLabel(const IR::Type *t) {
+const IR::StateVariable *ExecutionState::getPayloadLabel(const IR::Type *t) {
     // If the type is not null, we construct a member clone with the input type set.
     if (t != nullptr) {
         auto *label = payloadLabel.clone();
@@ -515,11 +515,11 @@ const StateVariable *ExecutionState::getPayloadLabel(const IR::Type *t) {
     return &payloadLabel;
 }
 
-void ExecutionState::setParserErrorLabel(const StateVariable *parserError) {
+void ExecutionState::setParserErrorLabel(const IR::StateVariable *parserError) {
     parserErrorLabel = parserError;
 }
 
-const StateVariable *ExecutionState::getCurrentParserErrorLabel() const {
+const IR::StateVariable *ExecutionState::getCurrentParserErrorLabel() const {
     CHECK_NULL(parserErrorLabel);
     return parserErrorLabel;
 }
@@ -528,10 +528,10 @@ const StateVariable *ExecutionState::getCurrentParserErrorLabel() const {
  *  Variables and symbolic constants
  * ============================================================================================= */
 
-const std::set<StateVariable> &ExecutionState::getZombies() const { return allocatedZombies; }
+const std::set<IR::StateVariable> &ExecutionState::getZombies() const { return allocatedZombies; }
 
-const StateVariable *ExecutionState::createZombieConst(const IR::Type *type, cstring name,
-                                                       uint64_t instanceId) {
+const IR::StateVariable *ExecutionState::createZombieConst(const IR::Type *type, cstring name,
+                                                           uint64_t instanceId) {
     const auto *zombie = Utils::getZombieConst(type, instanceId, name);
     const auto &result = allocatedZombies.insert(*zombie);
     // The zombie already existed, check its type.
@@ -547,10 +547,10 @@ const StateVariable *ExecutionState::createZombieConst(const IR::Type *type, cst
  *  General utilities involving ExecutionState.
  * ========================================================================================= */
 
-std::vector<const StateVariable *> ExecutionState::getFlatFields(
+std::vector<const IR::StateVariable *> ExecutionState::getFlatFields(
     const IR::Expression *parent, const IR::Type_StructLike *ts,
-    std::vector<const StateVariable *> *validVector) const {
-    std::vector<const StateVariable *> flatFields;
+    std::vector<const IR::StateVariable *> *validVector) const {
+    std::vector<const IR::StateVariable *> flatFields;
     for (const auto *field : ts->fields) {
         const auto *fieldType = resolveType(field->type);
         if (const auto *ts = fieldType->to<IR::Type_StructLike>()) {
@@ -570,7 +570,7 @@ std::vector<const StateVariable *> ExecutionState::getFlatFields(
                 flatFields.insert(flatFields.end(), subFields.begin(), subFields.end());
             }
         } else {
-            flatFields.push_back(new StateVariable(IR::Member(fieldType, parent, field->name)));
+            flatFields.push_back(new IR::StateVariable(IR::Member(fieldType, parent, field->name)));
         }
     }
     // If we are dealing with a header we also include the validity bit in the list of
@@ -609,7 +609,7 @@ const IR::P4Action *ExecutionState::getActionDecl(const IR::Expression *expressi
     return expression->to<IR::P4Action>();
 }
 
-const StateVariable *ExecutionState::convertPathExpr(const IR::PathExpression *path) const {
+const IR::StateVariable *ExecutionState::convertPathExpr(const IR::PathExpression *path) const {
     const auto *decl = findDecl(path)->getNode();
     // Local variable.
     if (const auto *declVar = decl->to<IR::Declaration_Variable>()) {

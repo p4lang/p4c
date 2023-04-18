@@ -93,7 +93,7 @@ bool ExprStepper::preorder(const IR::Member *member) {
     if (SymbolicEnv::isSymbolicValue(member)) {
         return stepSymbolicValue(member);
     }
-    return stepSymbolicValue(state.get(*new StateVariable(*member)));
+    return stepSymbolicValue(state.get(*new IR::StateVariable(*member)));
 }
 
 void ExprStepper::evalActionCall(const IR::P4Action *action, const IR::MethodCallExpression *call) {

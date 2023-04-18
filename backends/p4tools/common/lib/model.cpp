@@ -27,19 +27,19 @@ class CompleteVisitor : public Inspector {
     Model *model;
 
  public:
-    bool preorder(const IR::Member *member) override {
-        if (model->count(StateVariable(*member)) == 0) {
+    bool preorder(const IR::StateVariable *var) override {
+        if (model->count(*var) == 0) {
             LOG_FEATURE(
                 "common", 5,
-                "***** Did not find a binding for " << member << ". Autocompleting." << std::endl);
-            const auto *type = member->type;
-            model->emplace(StateVariable(*member), IR::getDefaultValue(type));
+                "***** Did not find a binding for " << var << ". Autocompleting." << std::endl);
+            const auto *type = var->type;
+            model->emplace(*var, IR::getDefaultValue(type));
         }
         return false;
     }
 
     bool preorder(const IR::ConcolicVariable *var) override {
-        auto stateVar = StateVariable(*var->concolicMember);
+        auto stateVar = IR::StateVariable(*var->concolicMember);
         model->emplace(stateVar, IR::getDefaultValue(var->type));
         return false;
     }
@@ -49,7 +49,7 @@ class CompleteVisitor : public Inspector {
 
 void Model::complete(const IR::Expression *expr) { expr->apply(CompleteVisitor(this)); }
 
-void Model::complete(const std::set<StateVariable> &inputSet) {
+void Model::complete(const std::set<IR::StateVariable> &inputSet) {
     auto completionVisitor = CompleteVisitor(this);
     for (const auto &var : inputSet) {
         var.apply(completionVisitor);
@@ -101,11 +101,10 @@ const IR::Literal *Model::evaluate(const IR::Expression *expr,
         const Model &self;
 
      public:
-        const IR::Literal *preorder(IR::Member *member) override {
-            BUG_CHECK(self.count(StateVariable(*member)), "Variable not bound in model: %1%",
-                      member);
+        const IR::Literal *preorder(IR::StateVariable *var) override {
+            BUG_CHECK(self.count(*var), "Variable not bound in model: %1%", var);
             prune();
-            return self.at(StateVariable(*member))->checkedTo<IR::Literal>();
+            return self.at(*var)->checkedTo<IR::Literal>();
         }
 
         const IR::Literal *preorder(IR::TaintExpression *var) override {
@@ -113,7 +112,7 @@ const IR::Literal *Model::evaluate(const IR::Expression *expr,
         }
 
         const IR::Literal *preorder(IR::ConcolicVariable *var) override {
-            auto stateVar = StateVariable(*var->concolicMember);
+            auto stateVar = IR::StateVariable(*var->concolicMember);
             BUG_CHECK(self.count(stateVar), "Variable not bound in model: %1%",
                       stateVar.toString());
             return self.at(stateVar)->checkedTo<IR::Literal>();
@@ -141,7 +140,7 @@ Model *Model::evaluate(const SymbolicMapType &inputMap, ExpressionMap *resolvedE
     return result;
 }
 
-const IR::Expression *Model::get(const StateVariable &var, bool checked) const {
+const IR::Expression *Model::get(const IR::StateVariable &var, bool checked) const {
     auto it = find(var);
     if (it != end()) {
         return it->second;

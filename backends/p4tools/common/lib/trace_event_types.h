@@ -102,7 +102,7 @@ class ExtractSuccess : public TraceEvent {
     const IR::Expression *condition;
 
     /// The list of fields and their values of the emitted header.
-    std::vector<std::pair<const StateVariable *, const IR::Expression *>> fields;
+    std::vector<std::pair<const IR::StateVariable *, const IR::Expression *>> fields;
 
  public:
     [[nodiscard]] const ExtractSuccess *subst(const SymbolicEnv &env) const override;
@@ -116,9 +116,9 @@ class ExtractSuccess : public TraceEvent {
     /// @returns the offset stored in this class.
     [[nodiscard]] int getOffset() const;
 
-    ExtractSuccess(const IR::Expression *extractedHeader, int offset,
-                   const IR::Expression *condition,
-                   std::vector<std::pair<const StateVariable *, const IR::Expression *>> fields);
+    ExtractSuccess(
+        const IR::Expression *extractedHeader, int offset, const IR::Expression *condition,
+        std::vector<std::pair<const IR::StateVariable *, const IR::Expression *>> fields);
     ExtractSuccess(const ExtractSuccess &) = default;
     ExtractSuccess(ExtractSuccess &&) = default;
     ExtractSuccess &operator=(const ExtractSuccess &) = default;
@@ -172,7 +172,7 @@ class Emit : public TraceEvent {
     const IR::Expression *emitHeader;
 
     /// The list of fields and their values of the emitted header.
-    std::vector<std::pair<const StateVariable *, const IR::Expression *>> fields;
+    std::vector<std::pair<const IR::StateVariable *, const IR::Expression *>> fields;
 
  public:
     [[nodiscard]] const Emit *subst(const SymbolicEnv &env) const override;
@@ -181,7 +181,7 @@ class Emit : public TraceEvent {
     [[nodiscard]] const Emit *evaluate(const Model &model) const override;
 
     Emit(const IR::Expression *emitHeader,
-         std::vector<std::pair<const StateVariable *, const IR::Expression *>> fields);
+         std::vector<std::pair<const IR::StateVariable *, const IR::Expression *>> fields);
     ~Emit() override = default;
     Emit(const Emit &) = default;
     Emit(Emit &&) = default;

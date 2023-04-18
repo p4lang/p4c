@@ -92,10 +92,12 @@ class Utils {
     static const cstring Valid;
 
     /// @see Zombie::getVar.
-    static const StateVariable *getZombieVar(const IR::Type *type, int incarnation, cstring name);
+    static const IR::StateVariable *getZombieVar(const IR::Type *type, int incarnation,
+                                                 cstring name);
 
     /// @see Zombie::getConst.
-    static const StateVariable *getZombieConst(const IR::Type *type, int incarnation, cstring name);
+    static const IR::StateVariable *getZombieConst(const IR::Type *type, int incarnation,
+                                                   cstring name);
 
     /// @see Utils::getZombieConst.
     /// This function is used to generated variables caused by undefined behavior. This is merely a
@@ -105,18 +107,19 @@ class Utils {
     /// Creates a new member variable from a concolic variable but replaces its concolic ID.
     /// This is used within concolic methods to map back several concolic variables from a single
     /// method call.
-    static const StateVariable *getConcolicMember(const IR::ConcolicVariable *var, int concolicId);
+    static const IR::StateVariable *getConcolicMember(const IR::ConcolicVariable *var,
+                                                      int concolicId);
 
     /// @returns the state variable for the validity of the given header instance. The resulting
     ///     variable will be boolean-typed.
     ///
     /// @param headerRef a header instance. This is either a Member or a PathExpression.
-    static const StateVariable *getHeaderValidity(const IR::Expression *headerRef);
+    static const IR::StateVariable *getHeaderValidity(const IR::Expression *headerRef);
 
-    /// @returns a StateVariable that is postfixed with "*". This is used for PathExpressions
+    /// @returns a IR::StateVariable that is postfixed with "*". This is used for PathExpressions
     /// with are not yet members.
-    static const StateVariable *addZombiePostfix(const StateVariable &var,
-                                                 const IR::Type_Base *baseType);
+    static const IR::StateVariable *addZombiePostfix(const IR::StateVariable &var,
+                                                     const IR::Type_Base *baseType);
 
     /// @returns a method call to an internal extern consumed by the interpreter. The return type
     /// is typically Type_Void.

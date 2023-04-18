@@ -93,8 +93,9 @@ void ProgramInfo::produceCopyInOutCall(const IR::Parameter *param, size_t paramI
         return;
     }
     // Use a better constructor for path expressions.
-    const auto *archPath = new StateVariable({{paramType, archRef}});
-    const auto *paramRef = new StateVariable(param->getSourceInfo(), {{paramType, param->name}});
+    const auto *archPath = new IR::StateVariable({{paramType, archRef}});
+    const auto *paramRef =
+        new IR::StateVariable(param->getSourceInfo(), {{paramType, param->name}});
     const auto *paramDir = new IR::StringLiteral(directionToString(param->direction));
     if (copyIns != nullptr) {
         // This mimicks the copy-in from the architecture environment.

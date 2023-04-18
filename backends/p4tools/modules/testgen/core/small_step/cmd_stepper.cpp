@@ -103,7 +103,7 @@ void CmdStepper::initializeBlockParams(const IR::Type_Declaration *typeDecl,
             declareStructLike(nextState, paramPath, ts, forceTaint);
         } else if (const auto *tb = paramType->to<IR::Type_Base>()) {
             // If the type is a flat Type_Base, postfix it with a "*".
-            const auto *paramRef = Utils::addZombiePostfix(StateVariable(*paramPath), tb);
+            const auto *paramRef = Utils::addZombiePostfix(IR::StateVariable(*paramPath), tb);
             nextState.set(*paramRef, programInfo.createTargetUninitialized(paramType, forceTaint));
         } else {
             P4C_UNIMPLEMENTED("Unsupported initialization type %1%", paramType->node_type_name());
@@ -137,7 +137,7 @@ bool CmdStepper::preorder(const IR::AssignmentStatement *assign) {
     if (const auto *structType = leftType->to<IR::Type_StructLike>()) {
         const auto *listExpr = assign->right->checkedTo<IR::ListExpression>();
 
-        std::vector<const StateVariable *> flatRefValids;
+        std::vector<const IR::StateVariable *> flatRefValids;
         auto flatRefFields = state.getFlatFields(left, structType, &flatRefValids);
         // First, complete the assignments for the data structure.
         for (size_t idx = 0; idx < flatRefFields.size(); ++idx) {
@@ -153,7 +153,7 @@ bool CmdStepper::preorder(const IR::AssignmentStatement *assign) {
         if (const auto *path = left->to<IR::PathExpression>()) {
             state.set(*state.convertPathExpr(path), assign->right);
         } else {
-            state.set(*new StateVariable(*left->checkedTo<IR::Member>()), assign->right);
+            state.set(*new IR::StateVariable(*left->checkedTo<IR::Member>()), assign->right);
         }
     } else {
         TESTGEN_UNIMPLEMENTED("Unsupported assign type %1% node: %2%", leftType,
