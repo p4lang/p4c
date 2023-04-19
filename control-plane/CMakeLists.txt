@@ -102,4 +102,4 @@ set_source_files_properties (${P4RUNTIME_GEN_SRCS} PROPERTIES COMPILE_FLAGS "-Wn
 
 add_library (controlplane STATIC ${CONTROLPLANE_SRCS} )
 target_link_libraries (controlplane ${PROTOBUF_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} controlplane-gen)
-add_dependencies (controlplane mkP4configdir genIR frontend)
+add_dependencies (controlplane mkP4configdir ir-generated controlplane-gen frontend-parser-gen)

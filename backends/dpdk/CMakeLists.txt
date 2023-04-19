@@ -107,6 +107,7 @@ install (TARGETS p4c-dpdk
 
 add_custom_target(linkp4cdpdk
         COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/p4c-dpdk ${P4C_BINARY_DIR}/p4c-dpdk
+        DEPENDS update_includes
         )
 
 add_dependencies(p4c_driver linkp4cdpdk)

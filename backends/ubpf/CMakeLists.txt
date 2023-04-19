@@ -73,6 +73,7 @@ add_custom_target(linkp4cubpf
         COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4include &&
         ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${P4C_UBPF_DIST_HEADERS} ${P4C_BINARY_DIR}/p4include
         COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR}/p4include ${CMAKE_CURRENT_BINARY_DIR}/p4include
+        DEPENDS update_includes
         )
 
 add_dependencies(p4c_driver linkp4cubpf)

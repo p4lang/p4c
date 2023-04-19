@@ -52,6 +52,7 @@ add_custom_target(linkp4test
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${CURRENT_BINARY_DIR_PATH_REL}/p4test ${P4C_BINARY_DIR}/p4test
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR_PATH_REL}/p4include ${CMAKE_CURRENT_BINARY_DIR}/p4include
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR_PATH_REL}/p4_14include ${CMAKE_CURRENT_BINARY_DIR}/p4_14include
+  DEPENDS update_includes
   )
 add_dependencies(p4c_driver linkp4test)
 

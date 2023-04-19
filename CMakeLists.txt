@@ -436,7 +436,7 @@ set(temp_ir_genfiles
   ir/ir-generated.cpp.tmp ir/ir-generated.cpp.fixup
   ir/ir-generated.h.tmp   ir/ir-generated.h.fixup
   ir/gen-tree-macro.h.tmp ir/gen-tree-macro.h.fixup
-  )
+)
 
 add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
   COMMAND ${IR_GENERATOR} -i ir/ir-generated.cpp.tmp -o ir/ir-generated.h.tmp -t ir/gen-tree-macro.h.tmp ${IR_DEF_FILES}
@@ -453,7 +453,7 @@ add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
 add_custom_target(genIR DEPENDS ${IR_GENERATED_SRCS})
 set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
 add_library(ir-generated OBJECT ${IR_GENERATED_SRCS} ${EXTENSION_IR_SOURCES})
-add_dependencies(ir-generated genIR)
+add_dependencies(ir-generated ir genIR)
 
 ######################################## IR Generation End ########################################
 
@@ -477,7 +477,9 @@ if (ENABLE_DPDK)
 add_custom_target(dpdk_includes ALL
   COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4include/dpdk
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/dpdk/psa.p4 ${P4C_BINARY_DIR}/p4include/dpdk
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/dpdk/pna.p4 ${P4C_BINARY_DIR}/p4include/dpdk)
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/dpdk/pna.p4 ${P4C_BINARY_DIR}/p4include/dpdk
+  DEPENDS update_includes
+)
 endif ()
 
 # Installation

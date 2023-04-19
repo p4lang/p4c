@@ -236,8 +236,8 @@ endmacro(add_parser)
 add_parser(v1)
 add_parser(p4)
 
-add_library (parser-gen OBJECT ${p4PARSER_GEN_SRCS} ${v1PARSER_GEN_SRCS})
-add_dependencies (parser-gen mkp4dirs mkv1dirs ir-generated)
+add_library (frontend-parser-gen OBJECT ${p4PARSER_GEN_SRCS} ${v1PARSER_GEN_SRCS})
+add_dependencies (frontend-parser-gen mkp4dirs mkv1dirs ir-generated)
 
 set (FRONTEND_SOURCES
   ${COMMON_FRONTEND_SRCS}
@@ -256,5 +256,5 @@ if (FLEX_INCLUDE_DIRS)
   include_directories (${FLEX_INCLUDE_DIRS})
 endif ()
 add_library (frontend STATIC ${FRONTEND_SOURCES})
-add_dependencies (frontend parser-gen)
-target_link_libraries (frontend parser-gen)
+add_dependencies (frontend frontend-parser-gen)
+target_link_libraries (frontend frontend-parser-gen)

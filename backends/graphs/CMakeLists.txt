@@ -48,6 +48,7 @@ file(RELATIVE_PATH
 # backend in the top-level build directory, along with all the other backends.
 add_custom_target(linkgraphs
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${CURRENT_BINARY_DIR_PATH_REL}/p4c-graphs ${P4C_BINARY_DIR}/p4c-graphs
+  DEPENDS update_includes
   )
 add_dependencies(p4c_driver linkgraphs)
 
