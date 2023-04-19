@@ -114,4 +114,4 @@ set (MIDEND_HDRS
 
 
 add_library (midend STATIC ${MIDEND_SRCS})
-add_dependencies(midend genIR)
+add_dependencies(midend genIR ir-generated)

@@ -255,6 +255,6 @@ set (FRONTEND_CPPLINT_FILES
 if (FLEX_INCLUDE_DIRS)
   include_directories (${FLEX_INCLUDE_DIRS})
 endif ()
-add_library (frontend STATIC ${FRONTEND_SOURCES} ${EXTENSION_FRONTEND_SOURCES})
+add_library (frontend STATIC ${FRONTEND_SOURCES})
 add_dependencies (frontend genIR parser-gen)
 target_link_libraries (frontend parser-gen)
