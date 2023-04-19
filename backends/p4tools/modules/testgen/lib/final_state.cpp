@@ -14,7 +14,7 @@ namespace P4Tools::P4Testgen {
 FinalState::FinalState(AbstractSolver &solver, const ExecutionState &inputState)
     : solver(solver),
       state(inputState),
-      completedModel(completeModel(inputState, solver.getModel())) {
+      completedModel(completeModel(inputState, new Model(solver.getSymbolicMapping()))) {
     for (const auto &event : inputState.getTrace()) {
         trace.emplace_back(*event.get().evaluate(completedModel));
     }
@@ -25,7 +25,7 @@ Model FinalState::completeModel(const ExecutionState &executionState, const Mode
     auto *completedModel = executionState.getSymbolicEnv().complete(*model);
 
     // Also complete all the zombies that were collected in this state.
-    const auto &zombies = executionState.getZombies();
+    const auto &zombies = executionState.getSymbolicVariables();
     completedModel->complete(zombies);
 
     // Now that the models initial values are completed evaluate the values that
@@ -35,7 +35,6 @@ Model FinalState::completeModel(const ExecutionState &executionState, const Mode
     for (const auto &event : executionState.getTrace()) {
         event.get().complete(evaluatedModel);
     }
-
     return *evaluatedModel;
 }
 

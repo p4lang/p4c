@@ -54,7 +54,7 @@ ExecutionState::ExecutionState(const IR::P4Program *program)
       stack(*(new std::stack<std::reference_wrapper<const StackFrame>>())) {
     // Insert the default zombies of the execution state.
     // This also makes the zombies present in the state explicit.
-    allocatedZombies.insert(getInputPacketSizeVar());
+    allocatedSymbolicVariables.insert(getInputPacketSizeVar());
     env.set(&inputPacketLabel, IR::getConstant(IR::getBitType(0), 0));
     env.set(&packetBufferLabel, IR::getConstant(IR::getBitType(0), 0));
     // We also add the taint property and set it to false.
@@ -77,7 +77,7 @@ ExecutionState::ExecutionState(Continuation::Body body)
       stack(*(new std::stack<std::reference_wrapper<const StackFrame>>())) {
     // Insert the default zombies of the execution state.
     // This also makes the zombies present in the state explicit.
-    allocatedZombies.insert(getInputPacketSizeVar());
+    allocatedSymbolicVariables.insert(getInputPacketSizeVar());
     // We also add the taint property and set it to false.
     setProperty("inUndefinedState", false);
     // Drop is initialized to false, too.
@@ -111,7 +111,7 @@ std::optional<const Continuation::Command> ExecutionState::getNextCmd() const {
 
 const IR::Expression *ExecutionState::get(const IR::StateVariable &var) const {
     const auto *expr = env.get(var);
-    if (var->expr->type->is<IR::Type_Header>() && var->member != Utils::Valid) {
+    if (var->expr->type->is<IR::Type_Header>() && var->member != Utils::VALID) {
         // If we are setting the member of a header, we need to check whether the
         // header is valid.
         // If the header is invalid, the get returns a tainted expression.
@@ -348,7 +348,7 @@ void ExecutionState::pushBranchDecision(uint64_t bIdx) { selectedBranches.push_b
 
 const IR::Type_Bits *ExecutionState::getPacketSizeVarType() { return &packetSizeVarType; }
 
-const IR::StateVariable &ExecutionState::getInputPacketSizeVar() {
+const IR::SymbolicVariable *ExecutionState::getInputPacketSizeVar() {
     return Utils::getZombieConst(getPacketSizeVarType(), 0, "*packetLen_bits");
 }
 
@@ -399,7 +399,7 @@ const IR::Expression *ExecutionState::peekPacketBuffer(int amount) {
         // We need to enlarge the input packet by the amount we are exceeding the buffer.
         // TODO: How should we perform accounting here?
         const IR::Expression *newVar =
-            createZombieConst(IR::getBitType(diff), "pktVar", allocatedZombies.size());
+            createZombieConst(IR::getBitType(diff), "pktVar", allocatedSymbolicVariables.size());
         appendToInputPacket(newVar);
         // If the buffer was not empty, append the data we have consumed to the newly generated
         // content and reset the buffer.
@@ -442,7 +442,7 @@ const IR::Expression *ExecutionState::slicePacketBuffer(int amount) {
         // We need to enlarge the input packet by the amount we are exceeding the buffer.
         // TODO: How should we perform accounting here?
         const IR::Expression *newVar =
-            createZombieConst(IR::getBitType(diff), "pktVar", allocatedZombies.size());
+            createZombieConst(IR::getBitType(diff), "pktVar", allocatedSymbolicVariables.size());
         appendToInputPacket(newVar);
         // If the buffer was not empty, append the data we have consumed to the newly generated
         // content and reset the buffer.
@@ -526,12 +526,14 @@ const IR::Member *ExecutionState::getCurrentParserErrorLabel() const {
  *  Variables and symbolic constants
  * ============================================================================================= */
 
-const std::set<IR::StateVariable> &ExecutionState::getZombies() const { return allocatedZombies; }
+const SymbolicSet &ExecutionState::getSymbolicVariables() const {
+    return allocatedSymbolicVariables;
+}
 
-const IR::StateVariable &ExecutionState::createZombieConst(const IR::Type *type, cstring name,
-                                                           uint64_t instanceId) {
-    const auto &zombie = Utils::getZombieConst(type, instanceId, name);
-    const auto &result = allocatedZombies.insert(zombie);
+const IR::SymbolicVariable *ExecutionState::createZombieConst(const IR::Type *type, cstring name,
+                                                              uint64_t instanceId) {
+    const auto *zombie = Utils::getZombieConst(type, instanceId, name);
+    const auto &result = allocatedSymbolicVariables.insert(zombie);
     // The zombie already existed, check its type.
     if (!result.second) {
         BUG_CHECK((*result.first)->type->equiv(*type),

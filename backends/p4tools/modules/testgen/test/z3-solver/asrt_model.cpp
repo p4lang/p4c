@@ -146,17 +146,17 @@ TEST_F(Z3SolverTest, Assertion2Model) {
     ASSERT_TRUE(opAdd->right->is<IR::Constant>());
     const auto *addToA = opAdd->right->to<IR::Constant>();
 
-    // getting model without check satisfiable
-    EXPECT_THROW(solver.getModel(), Util::CompilerBug);
+    // getting mapping without check satisfiable
+    EXPECT_THROW(Model(solver.getSymbolicMapping()), Util::CompilerBug);
 
     // checking satisfiability
     ASSERT_EQ(solver.checkSat(asserts), true);
-    Model model2 = *solver.getModel();
-    ASSERT_EQ(model2.size(), 2u);
+    Model model2 = Model(solver.getSymbolicMapping());
+    ASSERT_EQ(model2.size(), 2U);
 
     // checking variables
-    ASSERT_GT(model2.count(varA), 0u);
-    ASSERT_GT(model2.count(varB), 0u);
+    ASSERT_GT(model2.count(varA), 0U);
+    ASSERT_GT(model2.count(varB), 0U);
     const auto *valueA = model2.at(varA)->to<IR::Literal>();
     const auto *valueB = model2.at(varB)->to<IR::Literal>();
 
@@ -177,17 +177,17 @@ TEST_F(Z3SolverTest, Assertion2Model) {
     asserts.push_back(opLss);
 
     // try to get model, should have two assertions now
-    Model model3 = *solver.getModel();
-    ASSERT_EQ(model3.size(), 2u);
+    Model model3 = Model(solver.getSymbolicMapping());
+    ASSERT_EQ(model3.size(), 2U);
 
     // checking satisfiability
     ASSERT_EQ(solver.checkSat(asserts), true);
-    Model model4 = *solver.getModel();
-    ASSERT_EQ(model4.size(), 2u);
+    Model model4 = Model(solver.getSymbolicMapping());
+    ASSERT_EQ(model4.size(), 2U);
 
     // checking variables
-    ASSERT_GT(model4.count(varA), 0u);
-    ASSERT_GT(model4.count(varB), 0u);
+    ASSERT_GT(model4.count(varA), 0U);
+    ASSERT_GT(model4.count(varB), 0U);
     model4.at(varA)->checkedTo<IR::Literal>();
     model4.at(varB)->checkedTo<IR::Literal>();
 

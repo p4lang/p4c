@@ -21,14 +21,13 @@
 
 namespace P4Tools::P4Testgen {
 
-/// TODO: This is a very ugly data structure. Essentially, you can store both state variables and
-/// entire expression as keys. State variables can actually compared, expressions are always unique
-/// keys. Using this map, you can look up particular state variables and check whether they actually
-/// are present, but not expressions. The reason expressions need to be keys is that sometimes
-/// entire expressions are mapped to a particular constant.
+/// TODO: This is a very ugly data structure. Essentially, you can store both state variables
+/// and entire expression as keys. State variables can actually compared, expressions are always
+/// unique keys. Using this map, you can look up particular state variables and check whether
+/// they actually are present, but not expressions. The reason expressions need to be keys is
+/// that sometimes entire expressions are mapped to a particular constant.
 using ConcolicVariableMap =
-    ordered_map<std::variant<const IR::StateVariable, const IR::Expression *>,
-                const IR::Expression *>;
+    ordered_map<std::variant<IR::ConcolicVariable, const IR::Expression *>, const IR::Expression *>;
 
 /// Encapsulates a set of concolic method implementations.
 class ConcolicMethodImpls {
@@ -79,8 +78,8 @@ class ConcolicResolver : public Inspector {
     /// assertions are used to add constraints to the solver.
     ConcolicVariableMap resolvedConcolicVariables;
 
-    /// A reference to the list of implemented concolic methods. This is assembled by the testgen
-    /// targets.
+    /// A reference to the list of implemented concolic methods. This is assembled by the
+    /// testgen targets.
     const ConcolicMethodImpls &concolicMethodImpls;
 };
 

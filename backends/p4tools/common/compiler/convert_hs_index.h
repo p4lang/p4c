@@ -1,7 +1,7 @@
 #ifndef BACKENDS_P4TOOLS_COMMON_COMPILER_CONVERT_HS_INDEX_H_
 #define BACKENDS_P4TOOLS_COMMON_COMPILER_CONVERT_HS_INDEX_H_
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "ir/ir.h"
 #include "ir/node.h"

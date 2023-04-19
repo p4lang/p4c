@@ -93,7 +93,7 @@ const IR::Constant *Utils::getRandConstantForType(const IR::Type_Bits *type) {
  *  Variables and symbolic constants.
  * ========================================================================================= */
 
-const cstring Utils::Valid = "*valid";
+const cstring Utils::VALID = "*valid";
 
 const IR::StateVariable &Utils::getZombieTableVar(const IR::Type *type, const IR::P4Table *table,
                                                   cstring name, std::optional<int> idx1_opt,
@@ -110,20 +110,20 @@ const IR::StateVariable &Utils::getZombieTableVar(const IR::Type *type, const IR
         out << "." << idx2_opt.value();
     }
 
-    return Zombie::getVar(type, 0, out.str());
+    return Zombie::getStateVariable(type, 0, out.str());
 }
 
 const IR::StateVariable &Utils::getZombieVar(const IR::Type *type, int incarnation, cstring name) {
-    return Zombie::getVar(type, incarnation, name);
+    return Zombie::getStateVariable(type, incarnation, name);
 }
 
-const IR::StateVariable &Utils::getZombieConst(const IR::Type *type, int incarnation,
-                                               cstring name) {
-    return Zombie::getConst(type, incarnation, name);
+const IR::SymbolicVariable *Utils::getZombieConst(const IR::Type *type, int incarnation,
+                                                  cstring name) {
+    return Zombie::getSymbolicVariable(type, incarnation, name);
 }
 
 IR::StateVariable Utils::getHeaderValidity(const IR::Expression *headerRef) {
-    return new IR::Member(IR::Type::Boolean::get(), headerRef, Valid);
+    return new IR::Member(IR::Type::Boolean::get(), headerRef, VALID);
 }
 
 IR::StateVariable Utils::addZombiePostfix(const IR::Expression *paramPath,
@@ -152,13 +152,6 @@ const IR::TaintExpression *Utils::getTaintExpression(const IR::Type *type) {
     }
 
     return result;
-}
-
-const IR::StateVariable &Utils::getConcolicMember(const IR::ConcolicVariable *var, int concolicId) {
-    const auto *const concolicMember = var->concolicMember;
-    auto *clonedMember = concolicMember->clone();
-    clonedMember->member = std::to_string(concolicId).c_str();
-    return *(new IR::StateVariable(clonedMember));
 }
 
 const IR::MethodCallExpression *Utils::generateInternalMethodCall(

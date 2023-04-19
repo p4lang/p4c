@@ -59,10 +59,10 @@ class ProgramInfo : public ICastable {
     [[nodiscard]] std::optional<const IR::Expression *> getTargetConstraints() const;
 
     /// @returns the metadata member corresponding to the ingress port
-    [[nodiscard]] virtual const IR::Member *getTargetInputPortVar() const = 0;
+    [[nodiscard]] virtual const IR::StateVariable &getTargetInputPortVar() const = 0;
 
     /// @returns the metadata member corresponding to the final output port
-    [[nodiscard]] virtual const IR::Member *getTargetOutputPortVar() const = 0;
+    [[nodiscard]] virtual const IR::StateVariable &getTargetOutputPortVar() const = 0;
 
     /// @returns an expression that checks whether the packet is to be dropped.
     /// The computation is target specific.
@@ -72,7 +72,7 @@ class ProgramInfo : public ICastable {
     /// be a taint variable or simply 0 (bits) or false (booleans).
     /// If @param forceTaint is active, this function always returns a taint variable.
     virtual const IR::Expression *createTargetUninitialized(const IR::Type *type,
-                                                            bool forceTaint) const = 0;
+                                                            bool forceTaint) const;
 
     /// Getter to access allStatements.
     [[nodiscard]] const P4::Coverage::CoverageSet &getAllStatements() const;

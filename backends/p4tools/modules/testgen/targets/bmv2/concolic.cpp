@@ -187,10 +187,8 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
 
          // Assign a value to the @param result using the computed result
          if (const auto *checksumVarType = checksumVar->type->to<IR::Type_Bits>()) {
-             auto concolicMember = Utils::getConcolicMember(var, 0);
              // Overwrite any previous assignment or result.
-             (*resolvedConcolicVariables)[concolicMember] =
-                 IR::getConstant(checksumVarType, computedResult);
+             (*resolvedConcolicVariables)[*var] = IR::getConstant(checksumVarType, computedResult);
 
          } else {
              TESTGEN_UNIMPLEMENTED("Checksum output %1% of type %2% not supported", checksumVar,
@@ -242,10 +240,8 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
          computedResult = std::min(computedResult, maxHashInt);
          // Assign a value to the @param result using the computed result
          if (checksumVarType->is<IR::Type_Bits>()) {
-             auto concolicMember = Utils::getConcolicMember(var, 0);
              // Overwrite any previous assignment or result.
-             (*resolvedConcolicVariables)[concolicMember] =
-                 IR::getConstant(checksumVarType, computedResult);
+             (*resolvedConcolicVariables)[*var] = IR::getConstant(checksumVarType, computedResult);
          } else {
              TESTGEN_UNIMPLEMENTED("Checksum output %1% of type %2% not supported", checksumVar,
                                    checksumVarType);
@@ -307,10 +303,8 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
          computedResult = std::min(computedResult, maxHashInt);
          // Assign a value to the @param result using the computed result
          if (checksumVarType->is<IR::Type_Bits>()) {
-             auto concolicMember = Utils::getConcolicMember(var, 0);
              // Overwrite any previous assignment or result.
-             (*resolvedConcolicVariables)[concolicMember] =
-                 IR::getConstant(checksumVarType, computedResult);
+             (*resolvedConcolicVariables)[*var] = IR::getConstant(checksumVarType, computedResult);
          } else {
              TESTGEN_UNIMPLEMENTED("Checksum output %1% of type %2% not supported", checksumVar,
                                    checksumVarType);

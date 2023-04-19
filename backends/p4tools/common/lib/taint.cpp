@@ -29,10 +29,11 @@ const IR::StringLiteral Taint::TAINTED_STRING_LITERAL = IR::StringLiteral(cstrin
 static bitvec computeTaintedBits(const SymbolicMapType &varMap, const IR::Expression *expr) {
     CHECK_NULL(expr);
     if (const auto *member = expr->to<IR::Member>()) {
-        if (SymbolicEnv::isSymbolicValue(member)) {
-            return {};
-        }
         expr = varMap.at(member);
+    }
+
+    if (expr->is<IR::SymbolicVariable>()) {
+        return {};
     }
 
     if (const auto *taintExpr = expr->to<IR::TaintExpression>()) {
@@ -89,9 +90,6 @@ static bitvec computeTaintedBits(const SymbolicMapType &varMap, const IR::Expres
     if (expr->is<IR::DefaultExpression>()) {
         return {};
     }
-    if (expr->is<IR::ConcolicVariable>()) {
-        return {};
-    }
     BUG("Taint pair collection is unsupported for %1% of type %2%", expr, expr->node_type_name());
 }
 
@@ -99,11 +97,11 @@ bool Taint::hasTaint(const SymbolicMapType &varMap, const IR::Expression *expr) 
     if (expr->is<IR::TaintExpression>()) {
         return true;
     }
-    if (const auto *member = expr->to<IR::Member>()) {
-        if (!SymbolicEnv::isSymbolicValue(member)) {
-            return hasTaint(varMap, varMap.at(member));
-        }
+    if (expr->is<IR::SymbolicVariable>()) {
         return false;
+    }
+    if (const auto *member = expr->to<IR::Member>()) {
+        return hasTaint(varMap, varMap.at(member));
     }
     if (const auto *structExpr = expr->to<IR::StructExpression>()) {
         for (const auto *subExpr : structExpr->components) {
@@ -139,9 +137,6 @@ bool Taint::hasTaint(const SymbolicMapType &varMap, const IR::Expression *expr) 
     if (expr->is<IR::DefaultExpression>()) {
         return false;
     }
-    if (expr->is<IR::ConcolicVariable>()) {
-        return false;
-    }
     BUG("Taint checking is unsupported for %1% of type %2%", expr, expr->node_type_name());
 }
 
@@ -163,23 +158,16 @@ class TaintPropagator : public Transform {
         return lit;
     }
 
-    const IR::Node *postorder(IR::PathExpression *path) override {
-        // Path expressions as part of members can be encountered during the post-order traversal.
-        // Ignore them.
-        return path;
-    }
-
     const IR::Node *postorder(IR::TaintExpression *expr) override { return expr; }
+
+    const IR::Node *postorder(IR::SymbolicVariable *var) override {
+        return new IR::Constant(var->type, IR::getMaxBvVal(var->type));
+    }
 
     const IR::Node *postorder(IR::ConcolicVariable *var) override {
         return new IR::Constant(var->type, IR::getMaxBvVal(var->type));
     }
     const IR::Node *postorder(IR::Operation_Unary *unary_op) override { return unary_op->expr; }
-
-    const IR::Node *postorder(IR::Member *member) override {
-        // We do not want to split members.
-        return member;
-    }
 
     const IR::Node *postorder(IR::Cast *cast) override {
         if (Taint::hasTaint(varMap, cast->expr)) {

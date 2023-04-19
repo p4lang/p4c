@@ -31,24 +31,17 @@ const ordered_map<cstring, const IR::Type_Declaration *>
     return &programmableBlocks;
 }
 
-const IR::Member *SharedPnaProgramInfo::getTargetInputPortVar() const {
-    return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidthBits()),
-                          new IR::PathExpression("*parser_istd"), "input_port");
+const IR::StateVariable &SharedPnaProgramInfo::getTargetInputPortVar() const {
+    return *new IR::StateVariable(
+        new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidthBits()),
+                       new IR::PathExpression("*parser_istd"), "input_port"));
 }
 
-const IR::Member *SharedPnaProgramInfo::getTargetOutputPortVar() const {
-    return &PnaConstants::OUTPUT_PORT_VAR;
+const IR::StateVariable &SharedPnaProgramInfo::getTargetOutputPortVar() const {
+    return *new IR::StateVariable(&PnaConstants::OUTPUT_PORT_VAR);
 }
 
 const IR::Expression *SharedPnaProgramInfo::dropIsActive() const { return &PnaConstants::DROP_VAR; }
-
-const IR::Expression *SharedPnaProgramInfo::createTargetUninitialized(const IR::Type *type,
-                                                                      bool forceTaint) const {
-    if (forceTaint) {
-        return Utils::getTaintExpression(type);
-    }
-    return IR::getDefaultValue(type);
-}
 
 const IR::Type_Bits *SharedPnaProgramInfo::getParserErrorType() const { return &PARSER_ERR_BITS; }
 

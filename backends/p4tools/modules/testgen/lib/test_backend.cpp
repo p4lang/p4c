@@ -63,9 +63,9 @@ const Model *TestBackEnd::computeConcolicVariables(const ExecutionState *executi
             const auto *concolicAssignment = resolvedConcolicVariable.second;
             const IR::Expression *pathConstraint = nullptr;
             // We need to differentiate between state variables and expressions here.
-            if (std::holds_alternative<const IR::StateVariable>(concolicVariable)) {
-                pathConstraint = new IR::Equ(std::get<const IR::StateVariable>(concolicVariable),
-                                             concolicAssignment);
+            if (std::holds_alternative<IR::ConcolicVariable>(concolicVariable)) {
+                pathConstraint = new IR::Equ(
+                    std::get<IR::ConcolicVariable>(concolicVariable).clone(), concolicAssignment);
             } else if (std::holds_alternative<const IR::Expression *>(concolicVariable)) {
                 pathConstraint = new IR::Equ(std::get<const IR::Expression *>(concolicVariable),
                                              concolicAssignment);
@@ -210,7 +210,8 @@ TestBackEnd::TestInfo TestBackEnd::produceTestInfo(
     }
     const auto *inputPacket = completedModel->evaluate(inputPacketExpr);
     const auto *outputPacket = completedModel->evaluate(outputPacketExpr);
-    const auto *inputPort = completedModel->evaluate(programInfo.getTargetInputPortVar());
+    const auto *inputPort =
+        completedModel->evaluate(executionState->get(programInfo.getTargetInputPortVar()));
 
     const auto *outputPortVar = completedModel->evaluate(outputPortExpr);
     // Build the taint mask by dissecting the program packet variable

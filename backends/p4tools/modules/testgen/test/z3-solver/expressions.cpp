@@ -122,7 +122,7 @@ void test(const IR::Expression *expression, const IR::AssignmentStatement *varia
     ASSERT_EQ(solver.checkSat({expression}), true);
 
     // getting model
-    Model model = *solver.getModel();
+    Model model = Model(solver.getSymbolicMapping());
     ASSERT_EQ(model.size(), 2U);
 
     ASSERT_EQ(model.count(variableValue->left->checkedTo<IR::Member>()), 1U);

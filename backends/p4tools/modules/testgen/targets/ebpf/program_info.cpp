@@ -101,27 +101,21 @@ std::vector<Continuation::Command> EBPFProgramInfo::processDeclaration(
     return cmds;
 }
 
-const IR::Member *EBPFProgramInfo::getTargetInputPortVar() const {
-    return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidthBits()),
-                          new IR::PathExpression("*"), "input_port");
+const IR::StateVariable &EBPFProgramInfo::getTargetInputPortVar() const {
+    return *new IR::StateVariable(
+        new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidthBits()),
+                       new IR::PathExpression("*"), "input_port"));
 }
 
-const IR::Member *EBPFProgramInfo::getTargetOutputPortVar() const {
-    return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidthBits()),
-                          new IR::PathExpression("*"), "output_port");
+const IR::StateVariable &EBPFProgramInfo::getTargetOutputPortVar() const {
+    return *new IR::StateVariable(
+        new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidthBits()),
+                       new IR::PathExpression("*"), "output_port"));
 }
 
 const IR::Expression *EBPFProgramInfo::dropIsActive() const {
     return new IR::LNot(
         new IR::Member(IR::Type_Boolean::get(), new IR::PathExpression("*accept"), "*"));
-}
-
-const IR::Expression *EBPFProgramInfo::createTargetUninitialized(const IR::Type *type,
-                                                                 bool forceTaint) const {
-    if (forceTaint) {
-        return Utils::getTaintExpression(type);
-    }
-    return IR::getDefaultValue(type);
 }
 
 const IR::Type_Bits *EBPFProgramInfo::getParserErrorType() const { return &PARSER_ERR_BITS; }

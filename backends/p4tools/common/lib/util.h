@@ -88,26 +88,20 @@ class Utils {
     /// To represent header validity, we pretend that every header has a field that reflects the
     /// header's validity state. This is the name of that field. This is not a valid P4 identifier,
     /// so it is guaranteed to not conflict with any other field in the header.
-    static const cstring Valid;
+    static const cstring VALID;
 
     /// @see Zombie::getVar.
     static const IR::StateVariable &getZombieVar(const IR::Type *type, int incarnation,
                                                  cstring name);
 
     /// @see Zombie::getConst.
-    static const IR::StateVariable &getZombieConst(const IR::Type *type, int incarnation,
-                                                   cstring name);
+    static const IR::SymbolicVariable *getZombieConst(const IR::Type *type, int incarnation,
+                                                      cstring name);
 
     /// @see Utils::getZombieConst.
     /// This function is used to generated variables caused by undefined behavior. This is merely a
     /// wrapper function for the creation of a new Taint IR object.
     static const IR::TaintExpression *getTaintExpression(const IR::Type *type);
-
-    /// Creates a new member variable from a concolic variable but replaces its concolic ID.
-    /// This is used within concolic methods to map back several concolic variables from a single
-    /// method call.
-    static const IR::StateVariable &getConcolicMember(const IR::ConcolicVariable *var,
-                                                      int concolicId);
 
     /// @returns the zombie variable with the given type, for tracking an aspect of the given
     /// table. The returned variable will be named p4t*zombie.table.t.name.idx1.idx2, where t is

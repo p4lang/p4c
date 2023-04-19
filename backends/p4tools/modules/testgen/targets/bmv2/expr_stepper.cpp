@@ -848,7 +848,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
 
              if (cloneType == BMv2Constants::CLONE_TYPE_I2E) {
                  // Pick a clone port var. For now, pick a random value from 0-511.
-                 const auto *egressPortVar = programInfo.getTargetOutputPortVar();
+                 const auto &egressPortVar = programInfo.getTargetOutputPortVar();
                  const auto &clonePortVar = Utils::getZombieConst(
                      egressPortVar->type, 0, "clone_port_var" + std::to_string(call->clone_id));
                  cond = new IR::LAnd(
@@ -1135,7 +1135,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
 
              if (cloneType == BMv2Constants::CLONE_TYPE_I2E) {
                  // Pick a clone port var. For now, pick a random value from 0-511.
-                 const auto *egressPortVar = programInfo.getTargetOutputPortVar();
+                 const auto &egressPortVar = programInfo.getTargetOutputPortVar();
                  const auto &clonePortVar = Utils::getZombieConst(
                      egressPortVar->type, 0, "clone_port_var" + std::to_string(call->clone_id));
                  cond = new IR::LAnd(
@@ -1153,7 +1153,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  }
                  // This is the clone state.
                  auto &nextState = state.clone();
-                 auto progInfo = getProgramInfo().checkedTo<Bmv2V1ModelProgramInfo>();
+                 const auto *progInfo = getProgramInfo().checkedTo<Bmv2V1ModelProgramInfo>();
 
                  // We need to reset everything to the state before the ingress call. We use a trick
                  // by calling copyIn on the entire state again. We need a little bit of information
@@ -1243,8 +1243,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              // We need to update the size of the packet when recirculating. Do not forget to divide
              // by 8.
              const auto *pktSizeType = ExecutionState::getPacketSizeVarType();
-             const auto *packetSizeVar = new IR::Member(
-                 pktSizeType, new IR::PathExpression("*standard_metadata"), "packet_length");
+             auto packetSizeVar = IR::StateVariable(new IR::Member(
+                 pktSizeType, new IR::PathExpression("*standard_metadata"), "packet_length"));
              const auto *packetSizeConst =
                  IR::getConstant(pktSizeType, recState.getPacketBufferSize() / 8);
              recState.set(packetSizeVar, packetSizeConst);
@@ -1279,7 +1279,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  state.hasProperty("clone_active") && state.getProperty<bool>("clone_active");
              if (cloneActive) {
                  // Pick a clone port var. For now, pick a random value from 0-511.
-                 const auto *egressPortVar = programInfo.getTargetOutputPortVar();
+                 const auto &egressPortVar = programInfo.getTargetOutputPortVar();
                  const auto &clonePortVar = Utils::getZombieConst(
                      egressPortVar->type, 0, "clone_port_var" + std::to_string(call->clone_id));
                  const auto *cond = new IR::LAnd(
