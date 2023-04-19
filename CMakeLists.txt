@@ -355,7 +355,7 @@ add_subdirectory (ir)
 
 # component libraries: must be defined before being used in the
 # backend executables
-set (P4C_LIBRARIES controlplane midend frontend ir p4ctoolkit)
+set (P4C_LIBRARIES controlplane midend frontend ir p4ctoolkit ir-generated)
 
 # add extensions - before the frontends as they produce IR and extra frontend sources
 set(EXTENSION_IR_SOURCES)
@@ -453,6 +453,7 @@ add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
 add_custom_target(genIR DEPENDS ${IR_GENERATED_SRCS})
 set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
 add_library(ir-generated OBJECT ${IR_GENERATED_SRCS} ${EXTENSION_IR_SOURCES})
+add_dependencies(ir-generated genIR)
 
 ######################################## IR Generation End ########################################
 

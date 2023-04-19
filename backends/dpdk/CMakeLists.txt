@@ -100,7 +100,7 @@ set(EXTENSION_IR_SOURCES ${EXTENSION_IR_SOURCES} ${QUAL_DPDK_IR_SRCS} PARENT_SCO
 
 add_executable(p4c-dpdk ${P4C_DPDK_SOURCES})
 target_link_libraries (p4c-dpdk dpdk_runtime ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
-add_dependencies(p4c-dpdk dpdk_runtime genIR frontend)
+add_dependencies(p4c-dpdk dpdk_runtime frontend)
 
 install (TARGETS p4c-dpdk
         RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})

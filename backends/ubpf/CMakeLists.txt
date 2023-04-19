@@ -60,7 +60,7 @@ set (P4C_UBPF_DIST_HEADERS p4include/ubpf_model.p4)
 
 add_executable(p4c-ubpf ${P4C_UBPF_SOURCES})
 target_link_libraries (p4c-ubpf ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
-add_dependencies(p4c-ubpf genIR frontend)
+add_dependencies(p4c-ubpf ir-generated frontend)
 
 install (TARGETS p4c-ubpf
         RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})

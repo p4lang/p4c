@@ -33,7 +33,7 @@ set (GRAPHS_HDRS
 
 add_executable(p4c-graphs ${GRAPHS_SRCS} ${EXTENSION_P4_14_CONV_SOURCES})
 target_link_libraries (p4c-graphs ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
-add_dependencies(p4c-graphs genIR frontend)
+add_dependencies(p4c-graphs ir-generated frontend)
 
 install (TARGETS p4c-graphs
   RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})

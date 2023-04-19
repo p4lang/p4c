@@ -61,4 +61,4 @@ target_include_directories(
   PUBLIC "${P4C_BINARY_DIR}"
 )
 
-add_dependencies(p4tools-common genIR frontend)
+add_dependencies(p4tools-common ir-generated frontend)
