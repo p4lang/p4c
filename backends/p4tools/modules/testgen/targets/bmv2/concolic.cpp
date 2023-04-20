@@ -17,6 +17,7 @@
 
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "backends/p4tools/common/lib/variables.h"
 #include "ir/irutils.h"
 #include "ir/vector.h"
 #include "lib/cstring.h"
@@ -45,26 +46,6 @@ std::vector<char> Bmv2Concolic::convertBigIntToBytes(big_int &dataInt, int targe
     }
 
     return bytes;
-}
-
-const IR::Expression *Bmv2Concolic::setAndComputePayload(
-    const Model &completedModel, ConcolicVariableMap *resolvedConcolicVariables, int payloadSize) {
-    const auto *payloadType = IR::getBitType(payloadSize);
-    const auto &payLoadVar = IR::StateVariable(ExecutionState::getPayloadLabel(payloadType));
-    const auto *payloadExpr = completedModel.get(payLoadVar, false);
-    // If the variable already has been fixed, return it
-    auto it = resolvedConcolicVariables->find(payLoadVar);
-    if (it != resolvedConcolicVariables->end()) {
-        return it->second;
-    }
-    payloadExpr = Utils::getRandConstantForType(payloadType);
-    BUG_CHECK(payloadExpr->type->width_bits() == payloadSize,
-              "The width (%1%) of the payload expression should match the calculated payload "
-              "size %2%.",
-              payloadExpr->type->width_bits(), payloadSize);
-    // Set the payload variable.
-    resolvedConcolicVariables->emplace(payLoadVar, payloadExpr);
-    return payloadExpr;
 }
 
 big_int Bmv2Concolic::computeChecksum(const std::vector<const IR::Expression *> &exprList,
@@ -260,7 +241,7 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
     {"*method_checksum_with_payload",
      {"result", "algo", "data"},
      [](cstring /*concolicMethodName*/, const IR::ConcolicVariable *var,
-        const ExecutionState &state, const Model &completedModel,
+        const ExecutionState & /*state*/, const Model &completedModel,
         ConcolicVariableMap *resolvedConcolicVariables) {
          // Assign arguments to concrete variables and perform type checking.
          const auto *args = var->arguments;
@@ -281,18 +262,9 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
 
          // This is the maximum value this checksum can have.
          auto maxHashInt = IR::getMaxBvVal(checksumVarType);
-         const auto &packetBitSizeVar = ExecutionState::getInputPacketSizeVar();
-         const auto *payloadSizeConst = completedModel.evaluate(packetBitSizeVar);
-         int calculatedPacketSize = IR::getIntFromLiteral(payloadSizeConst);
-
-         const auto *inputPacketExpr = state.getInputPacket();
-         int payloadSize = calculatedPacketSize - inputPacketExpr->type->width_bits();
-         // If the payload is not 0, we need to add it to our checksum calculation.
-         if (payloadSize > 0) {
-             const auto *payloadExpr =
-                 setAndComputePayload(completedModel, resolvedConcolicVariables, payloadSize);
-             // Fix the payload size only if is not fixed already.
-             resolvedConcolicVariables->emplace(packetBitSizeVar, payloadSizeConst);
+         // If the payload is present, we need to add it to our checksum calculation.
+         const auto *payloadExpr = completedModel.get(ExecutionState::getPayloadLabel(), false);
+         if (payloadExpr != nullptr) {
              exprList.push_back(payloadExpr);
          }
 

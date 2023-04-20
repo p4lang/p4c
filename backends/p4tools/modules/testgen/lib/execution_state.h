@@ -414,9 +414,9 @@ class ExecutionState {
     /// Append data to the emit buffer.
     void appendToEmitBuffer(const IR::Expression *expr);
 
-    /// @returns the label associated with the payload and sets the type according to the @param.
+    /// @returns the label associated with the payload.
     /// TODO: Consider moving this to a separate utility class?
-    [[nodiscard]] static const IR::Member *getPayloadLabel(const IR::Type *t);
+    [[nodiscard]] static IR::StateVariable getPayloadLabel();
 
     /// Set the parser error label to the @param parserError.
     void setParserErrorLabel(const IR::Member *parserError);

@@ -503,15 +503,7 @@ void ExecutionState::appendToEmitBuffer(const IR::Expression *expr) {
     env.set(&emitBufferLabel, concat);
 }
 
-const IR::Member *ExecutionState::getPayloadLabel(const IR::Type *t) {
-    // If the type is not null, we construct a member clone with the input type set.
-    if (t != nullptr) {
-        auto *label = payloadLabel.clone();
-        label->type = t;
-        return label;
-    }
-    return &payloadLabel;
-}
+IR::StateVariable ExecutionState::getPayloadLabel() { return &payloadLabel; }
 
 void ExecutionState::setParserErrorLabel(const IR::Member *parserError) {
     parserErrorLabel = parserError;

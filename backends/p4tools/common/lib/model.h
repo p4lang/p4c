@@ -58,6 +58,12 @@ class Model : public SymbolicMapType {
     /// A model is initialized with a symbolic map. Usually, these are derived from the solver.
     explicit Model(SymbolicMapping symbolicMap) : symbolicMap(std::move(symbolicMap)) {}
 
+    Model(const Model &) = default;
+    Model(Model &&) = default;
+    Model &operator=(const Model &) = default;
+    Model &operator=(Model &&) = default;
+    ~Model() = default;
+
     /// Completes the model with the variables in the given expression. A variable needs to be
     /// completed if it is not present in the model computed by the solver that produced the
     /// model. This typically happens when a variable is not needed to solve a set of

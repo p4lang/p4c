@@ -9,6 +9,7 @@
 #include "backends/p4tools/common/lib/trace_event.h"
 #include "midend/coverage.h"
 
+#include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
 namespace P4Tools::P4Testgen {
@@ -24,18 +25,39 @@ class FinalState {
     std::reference_wrapper<const ExecutionState> state;
 
     /// The final model which has been augmented with environment completions.
-    const Model completedModel;
+    const Model &completedModel;
 
     /// The final program trace.
     std::vector<std::reference_wrapper<const TraceEvent>> trace;
 
- public:
-    FinalState(AbstractSolver &solver, const ExecutionState &inputState);
+    /// If the calculated payload size (the size of the symbolic packet size variable minus the size
+    /// of the input packet) is not negative, create a randomly sized payload and add the variable
+    /// to the model. Only do this if the payload has not been set yet.
+    static void calculatePayload(const ExecutionState &executionState, Model &evaluatedModel);
 
     /// Complete the model according to target-specific completion criteria.
     /// We first complete (this means we fill all the variables that have not been bound).
     /// Then we evaluate the model (we assign values to the variables that have been bound).
-    static Model completeModel(const ExecutionState &executionState, const Model *model);
+    static Model &completeModel(const ExecutionState &finalState, const Model *model,
+                                bool postProcess = true);
+
+ public:
+    /// This constructor invokes @function completeModel() to produce the model based on the solver
+    /// and the executionState.
+    FinalState(AbstractSolver &solver, const ExecutionState &finalState);
+
+    /// This constructor takes the input model as is and does not invoke @function completeModel().
+    FinalState(AbstractSolver &solver, const ExecutionState &finalState,
+               const Model &completedModel);
+
+    /// If there are concolic variables in the program, compute a new final state by rerunning the
+    /// solver on the concolic assignments. If the concolic assignment is not satisfiable, return
+    /// std::nullopt. Otherwise, create a new final state with the new assignment. IMPORTANT: Some
+    /// variables in this final state may have been added in post, e.g., the payload size. If the
+    /// concolic variables do not recompute these variables, the model will simply copy these
+    /// variables over manually to the newly generated model.
+    [[nodiscard]] std::optional<std::reference_wrapper<const FinalState>> computeConcolicState(
+        const ConcolicVariableMap &resolvedConcolicVariables) const;
 
     /// @returns the model after it was augmented by completions from the symbolic environment.
     [[nodiscard]] const Model *getCompletedModel() const;
