@@ -94,7 +94,7 @@ set (P4C_EBPF_DIST_HEADERS p4include/ebpf_model.p4)
 
 add_executable(p4c-ebpf ${P4C_EBPF_SRCS})
 target_link_libraries (p4c-ebpf ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
-add_dependencies(p4c-ebpf genIR frontend)
+add_dependencies(p4c-ebpf ir-generated frontend)
 
 install (TARGETS p4c-ebpf
   RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
@@ -121,6 +121,7 @@ add_custom_target(linkp4cebpf
   COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4include &&
           ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${P4C_EBPF_DIST_HEADERS} ${P4C_BINARY_DIR}/p4include
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR_PATH_REL}/p4include ${CMAKE_CURRENT_BINARY_DIR}/p4include
+  DEPENDS update_includes
   )
 
 add_dependencies(p4c_driver linkp4cebpf)

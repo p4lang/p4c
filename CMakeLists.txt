@@ -355,10 +355,10 @@ add_subdirectory (ir)
 
 # component libraries: must be defined before being used in the
 # backend executables
-set (P4C_LIBRARIES controlplane midend frontend ir p4ctoolkit)
+set (P4C_LIBRARIES controlplane midend frontend ir p4ctoolkit ir-generated)
 
 # add extensions - before the frontends as they produce IR and extra frontend sources
-set(EXTENSION_FRONTEND_SOURCES)
+set(EXTENSION_IR_SOURCES)
 # extra sources that need to be linked directly into p4test so that
 # extensions can provide specific conversions (e.g., for externs)
 set(EXTENSION_P4_14_CONV_SOURCES)
@@ -380,28 +380,26 @@ foreach (ext ${p4c_extensions})
   endif()
 endforeach(ext)
 
-# With the current implementation of ir-generator, all targets share the
-# same ir-generated.h and ir-generated.cpp file, which means all targets
-# share the same set of IR classes (frontend and backend). The DPDK backend
-# introduces additional IR classes and cpp sources which need to be added to
-# EXTENSION_FRONTEND_SOURCES. We need to populate EXTENSION_FRONTEND_SOURCES
-# before it is added to libfrontend.a in frontends/CMakeList.txt
-if (ENABLE_DPDK)
-    add_subdirectory (backends/dpdk)
-endif ()
-
 add_subdirectory (frontends)
 add_subdirectory (midend)
 add_subdirectory (control-plane)
 
+# With the current implementation of ir-generator, all targets share the
+# same ir-generated.h and ir-generated.cpp file, which means all targets
+# share the same set of IR classes (frontend and backend). Backends such as the DPDK backend
+# can introduce additional IR classes and cpp sources which need to be added to
+# EXTENSION_IR_SOURCES.
 if (ENABLE_BMV2)
     add_subdirectory (backends/bmv2)
+endif ()
+if (ENABLE_DPDK)
+    add_subdirectory (backends/dpdk)
 endif ()
 if (ENABLE_EBPF)
     add_subdirectory (backends/ebpf)
 endif ()
-if (ENABLE_UBPF)
-    add_subdirectory (backends/ubpf)
+if (ENABLE_P4C_GRAPHS AND HAVE_LIBBOOST_GRAPH EQUAL 1)
+  add_subdirectory (backends/graphs)
 endif ()
 if (ENABLE_P4TEST)
     add_subdirectory (backends/p4test)
@@ -409,14 +407,14 @@ endif ()
 if (ENABLE_TEST_TOOLS)
     add_subdirectory (backends/p4tools)
 endif ()
-if (ENABLE_P4C_GRAPHS AND HAVE_LIBBOOST_GRAPH EQUAL 1)
-  add_subdirectory (backends/graphs)
+if (ENABLE_UBPF)
+    add_subdirectory (backends/ubpf)
 endif ()
 if (ENABLE_GTESTS)
   add_subdirectory (test)
 endif ()
 
-################################ IR Generation Begin ################################
+####################################### IR Generation Begin #######################################
 
 set (IR_GENERATED_SRCS
   ${P4C_BINARY_DIR}/ir/ir-generated.h
@@ -438,7 +436,7 @@ set(temp_ir_genfiles
   ir/ir-generated.cpp.tmp ir/ir-generated.cpp.fixup
   ir/ir-generated.h.tmp   ir/ir-generated.h.fixup
   ir/gen-tree-macro.h.tmp ir/gen-tree-macro.h.fixup
-  )
+)
 
 add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
   COMMAND ${IR_GENERATOR} -i ir/ir-generated.cpp.tmp -o ir/ir-generated.h.tmp -t ir/gen-tree-macro.h.tmp ${IR_DEF_FILES}
@@ -454,10 +452,10 @@ add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
 
 add_custom_target(genIR DEPENDS ${IR_GENERATED_SRCS})
 set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
-add_library(ir-generated OBJECT ${IR_GENERATED_SRCS})
+add_library(ir-generated OBJECT ${IR_GENERATED_SRCS} ${EXTENSION_IR_SOURCES})
+add_dependencies(ir-generated ir genIR)
 
-################################ IR Generation End ################################
-
+######################################## IR Generation End ########################################
 
 # Header files
 # p4test needs all the backend include files, whether the backend is enabled or not
@@ -479,7 +477,9 @@ if (ENABLE_DPDK)
 add_custom_target(dpdk_includes ALL
   COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4include/dpdk
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/dpdk/psa.p4 ${P4C_BINARY_DIR}/p4include/dpdk
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/dpdk/pna.p4 ${P4C_BINARY_DIR}/p4include/dpdk)
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/dpdk/pna.p4 ${P4C_BINARY_DIR}/p4include/dpdk
+  DEPENDS update_includes
+)
 endif ()
 
 # Installation
@@ -487,9 +487,9 @@ endif ()
 install (DIRECTORY ${P4C_SOURCE_DIR}/p4include
   DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY})
 
-################################ Linters Begin ################################
+########################################## Linters Begin ##########################################
 include(Linters)
-################################ Linters End ################################
+########################################### Linters End ###########################################
 
 
 # tags, etags

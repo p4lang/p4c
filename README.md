@@ -458,10 +458,10 @@ where `MY_IR_DEF_FILES` is a list of file names with absolute path
 (for example, use `${CMAKE_CURRENT_SOURCE_DIR}`).
 
 If in addition you have additional supporting source files, they
-should be added to the frontend sources, as follows:
+should be added to the ir sources, as follows:
 
 ```
-set(EXTENSION_FRONTEND_SOURCES ${EXTENSION_FRONTEND_SOURCES} ${MY_IR_SRCS} PARENT_SCOPE)
+set(EXTENSION_IR_SOURCES ${EXTENSION_IR_SOURCES} ${MY_IR_SRCS} PARENT_SCOPE)
 ```
 Again, `MY_IR_SRCS` is a list of file names with absolute path.
 

@@ -28,7 +28,7 @@ set (P4TEST_HDRS
 
 add_executable(p4test ${P4TEST_SRCS} ${EXTENSION_P4_14_CONV_SOURCES})
 target_link_libraries (p4test ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
-add_dependencies(p4test genIR frontend)
+add_dependencies(p4test ir-generated frontend)
 
 install (TARGETS p4test
   RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
@@ -52,6 +52,7 @@ add_custom_target(linkp4test
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${CURRENT_BINARY_DIR_PATH_REL}/p4test ${P4C_BINARY_DIR}/p4test
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR_PATH_REL}/p4include ${CMAKE_CURRENT_BINARY_DIR}/p4include
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR_PATH_REL}/p4_14include ${CMAKE_CURRENT_BINARY_DIR}/p4_14include
+  DEPENDS update_includes
   )
 add_dependencies(p4c_driver linkp4test)
 

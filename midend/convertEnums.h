@@ -95,7 +95,7 @@ class EnumRepresentation {
 class DoConvertEnums : public Transform {
     friend class ConvertEnums;
 
-    std::map<const IR::Type_Enum *, EnumRepresentation *> repr;
+    ordered_map<const IR::Type_Enum *, EnumRepresentation *> repr;
     ChooseEnumRepresentation *policy;
     TypeMap *typeMap;
 

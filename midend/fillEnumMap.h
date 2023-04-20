@@ -23,7 +23,7 @@ namespace P4 {
 
 class FillEnumMap : public Transform {
  public:
-    std::map<const IR::Type_Enum *, EnumRepresentation *> repr;
+    ConvertEnums::EnumMapping repr;
     ChooseEnumRepresentation *policy;
     TypeMap *typeMap;
     FillEnumMap(ChooseEnumRepresentation *policy, TypeMap *typeMap)

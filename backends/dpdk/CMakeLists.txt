@@ -96,17 +96,18 @@ set(QUAL_DPDK_IR_SRCS)
 foreach(src IN LISTS DPDK_IR_SRCS)
     set(QUAL_DPDK_IR_SRCS ${QUAL_DPDK_IR_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/${src})
 endforeach()
-set(EXTENSION_FRONTEND_SOURCES ${EXTENSION_FRONTEND_SOURCES} ${QUAL_DPDK_IR_SRCS} PARENT_SCOPE)
+set(EXTENSION_IR_SOURCES ${EXTENSION_IR_SOURCES} ${QUAL_DPDK_IR_SRCS} PARENT_SCOPE)
 
 add_executable(p4c-dpdk ${P4C_DPDK_SOURCES})
 target_link_libraries (p4c-dpdk dpdk_runtime ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
-add_dependencies(p4c-dpdk dpdk_runtime genIR frontend)
+add_dependencies(p4c-dpdk dpdk_runtime frontend)
 
 install (TARGETS p4c-dpdk
         RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
 
 add_custom_target(linkp4cdpdk
         COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/p4c-dpdk ${P4C_BINARY_DIR}/p4c-dpdk
+        DEPENDS update_includes
         )
 
 add_dependencies(p4c_driver linkp4cdpdk)
