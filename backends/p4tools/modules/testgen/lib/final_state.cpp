@@ -24,9 +24,9 @@ Model FinalState::completeModel(const ExecutionState &executionState, const Mode
     // Complete the model based on the symbolic environment.
     auto *completedModel = executionState.getSymbolicEnv().complete(*model);
 
-    // Also complete all the zombies that were collected in this state.
-    const auto &zombies = executionState.getSymbolicVariables();
-    completedModel->complete(zombies);
+    // Also complete all the symbolic variables that were collected in this state.
+    const auto &symbolicVars = executionState.getSymbolicVariables();
+    completedModel->complete(symbolicVars);
 
     // Now that the models initial values are completed evaluate the values that
     // are part of the constraints that have been added to the solver.

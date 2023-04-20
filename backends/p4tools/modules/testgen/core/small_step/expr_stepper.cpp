@@ -101,7 +101,7 @@ void ExprStepper::evalActionCall(const IR::P4Action *action, const IR::MethodCal
     BUG_CHECK(actionNameSpace, "Does not instantiate an INamespace: %1%", actionNameSpace);
     auto &nextState = state.clone();
     // If the action has arguments, these are usually directionless control plane input.
-    // We introduce a zombie variable that takes the argument value. This value is either
+    // We introduce a symbolic variable that takes the argument value. This value is either
     // provided by a constant entry or synthesized by us.
     for (size_t argIdx = 0; argIdx < call->arguments->size(); ++argIdx) {
         const auto &parameters = action->parameters;
@@ -111,7 +111,7 @@ void ExprStepper::evalActionCall(const IR::P4Action *action, const IR::MethodCal
         BUG_CHECK(param->direction == IR::Direction::None,
                   "%1%: Only directionless action parameters are supported at this point. ",
                   action);
-        const auto &tableActionDataVar = Utils::getZombieVar(paramType, 0, paramName);
+        const auto &tableActionDataVar = ToolsVariables::getStateVariable(paramType, 0, paramName);
         const auto *curArg = call->arguments->at(argIdx)->expression;
         nextState.set(tableActionDataVar, curArg);
     }

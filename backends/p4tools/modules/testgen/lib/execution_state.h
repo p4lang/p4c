@@ -83,8 +83,8 @@ class ExecutionState {
     /// The symbolic environment. Maps program variables to their symbolic values.
     SymbolicEnv env;
 
-    /// The list of zombies that have been created in this state.
-    /// These zombies are later fed to the model for completion.
+    /// The list of variabless that have been created in this state.
+    /// These variabless are later fed to the model for completion.
     SymbolicSet allocatedSymbolicVariables;
 
     /// The program trace for the current program point (i.e., how we got to the current state).
@@ -385,8 +385,9 @@ class ExecutionState {
     [[nodiscard]] int getPacketBufferSize() const;
 
     /// Consumes and @returns a slice from the available packet buffer. If the buffer is empty, this
-    /// will produce zombie constants that are appended to the input packet. This means we generate
-    /// packet content as needed. The returned slice is optional in case one just needs to advance.
+    /// will produce variables constants that are appended to the input packet. This means we
+    /// generate packet content as needed. The returned slice is optional in case one just needs to
+    /// advance.
     const IR::Expression *slicePacketBuffer(int amount);
 
     /// Peeks ahead into the packet buffer. Works similarly to slicePacketBuffer but does NOT
@@ -433,10 +434,11 @@ class ExecutionState {
     /// @returns the symbolic variables that were allocated in this state
     [[nodiscard]] const SymbolicSet &getSymbolicVariables() const;
 
-    /// @see Utils::getZombieConst.
-    /// We also place the zombies in the set of allocated zombies of this state.
-    [[nodiscard]] const IR::SymbolicVariable *createZombieConst(const IR::Type *type, cstring name,
-                                                                uint64_t instanceID = 0);
+    /// @see ToolsVariables::getSymbolicVariable.
+    /// We also place the variabless in the set of allocated variabless of this state.
+    [[nodiscard]] const IR::SymbolicVariable *createSymbolicVariable(const IR::Type *type,
+                                                                     cstring name,
+                                                                     uint64_t instanceID = 0);
 
     /* =========================================================================================
      *  General utilities involving ExecutionState.
@@ -461,7 +463,7 @@ class ExecutionState {
 
     /// @returns a translation of the path expression into a member.
     /// This function looks up the path expression in the namespace and tries to find the
-    /// corresponding declaration. It then converts the name of the declaration into a zombie
+    /// corresponding declaration. It then converts the name of the declaration into a variables
     /// constant and returns. This is necessary because we sometimes
     /// get flat declarations without members (e.g., bit<8> tmp;)
     [[nodiscard]] const IR::StateVariable &convertPathExpr(const IR::PathExpression *path) const;

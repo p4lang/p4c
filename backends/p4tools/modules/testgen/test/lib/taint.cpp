@@ -20,7 +20,7 @@ namespace Test {
 namespace {
 
 using P4Tools::Taint;
-using P4Tools::Utils;
+using P4Tools::ToolsVariables;
 
 /// Test whether taint propagation works at all.
 /// Input: 8w2 + taint<8>
@@ -35,7 +35,7 @@ TEST_F(TaintTest, Taint01) {
     auto &state = ExecutionState::create(new IR::P4Program());
     const auto &env = state.getSymbolicEnv();
     {
-        const auto *taintExpression = Utils::getTaintExpression(typeBits);
+        const auto *taintExpression = ToolsVariables::getTaintExpression(typeBits);
         const auto *constantVar = IR::getConstant(typeBits, 2);
         const auto *expr = new IR::Add(constantVar, taintExpression);
         const auto *taintedExpr = Taint::propagateTaint(env.getInternalMap(), expr);
@@ -51,7 +51,7 @@ TEST_F(TaintTest, Taint01) {
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
     {
-        const auto *taintExpression = Utils::getTaintExpression(typeBits);
+        const auto *taintExpression = ToolsVariables::getTaintExpression(typeBits);
         const auto *expectedExpr = taintExpression;
         ASSERT_TRUE(taintExpression->equiv(*expectedExpr));
     }
@@ -68,7 +68,7 @@ TEST_F(TaintTest, Taint02) {
     const auto &env = state.getSymbolicEnv();
 
     const auto *typeBits = IR::getBitType(8);
-    const auto *taintExpression = Utils::getTaintExpression(typeBits);
+    const auto *taintExpression = ToolsVariables::getTaintExpression(typeBits);
     {
         const auto *expr =
             new IR::Concat(IR::getBitType(16), IR::getConstant(typeBits, 2), taintExpression);
@@ -98,7 +98,7 @@ TEST_F(TaintTest, Taint03) {
     const auto &env = state.getSymbolicEnv();
 
     const auto *typeBits = IR::getBitType(8);
-    const auto *taintExpression = Utils::getTaintExpression(typeBits);
+    const auto *taintExpression = ToolsVariables::getTaintExpression(typeBits);
     {
         const auto *expr =
             new IR::Concat(IR::getBitType(16), IR::getConstant(typeBits, 2), taintExpression);
@@ -128,7 +128,7 @@ TEST_F(TaintTest, Taint04) {
     const auto &env = state.getSymbolicEnv();
 
     const auto *typeBits = IR::getBitType(8);
-    const auto *taintExpression = Utils::getTaintExpression(typeBits);
+    const auto *taintExpression = ToolsVariables::getTaintExpression(typeBits);
     {
         const auto *expr =
             new IR::Concat(IR::getBitType(16), IR::getConstant(typeBits, 2), taintExpression);
@@ -158,7 +158,7 @@ TEST_F(TaintTest, Taint05) {
     const auto &env = state.getSymbolicEnv();
 
     const auto *typeBits = IR::getBitType(8);
-    const auto *taintExpression = Utils::getTaintExpression(typeBits);
+    const auto *taintExpression = ToolsVariables::getTaintExpression(typeBits);
     const auto *constantVar = IR::getConstant(typeBits, 2);
     {
         const auto *expr = new IR::Concat(IR::getBitType(16), taintExpression, constantVar);
@@ -189,7 +189,7 @@ TEST_F(TaintTest, Taint06) {
     const auto &env = state.getSymbolicEnv();
 
     const auto *typeBits = IR::getBitType(8);
-    const auto *taintExpression = Utils::getTaintExpression(typeBits);
+    const auto *taintExpression = ToolsVariables::getTaintExpression(typeBits);
     const auto *constantVar = IR::getConstant(typeBits, 2);
     {
         const auto *expr = new IR::Concat(IR::getBitType(16), constantVar, taintExpression);
@@ -220,7 +220,7 @@ TEST_F(TaintTest, Taint07) {
     const auto &env = state.getSymbolicEnv();
 
     const auto *typeBits = IR::getBitType(8);
-    const auto *taintExpression = Utils::getTaintExpression(typeBits);
+    const auto *taintExpression = ToolsVariables::getTaintExpression(typeBits);
     const auto *constantVar = IR::getConstant(typeBits, 2);
 
     {
@@ -253,7 +253,7 @@ TEST_F(TaintTest, Taint08) {
     const auto &env = state.getSymbolicEnv();
 
     const auto *typeBits = IR::getBitType(8);
-    const auto *taintExpression = Utils::getTaintExpression(typeBits);
+    const auto *taintExpression = ToolsVariables::getTaintExpression(typeBits);
     const auto *constantVar = IR::getConstant(typeBits, 2);
 
     {
@@ -262,7 +262,7 @@ TEST_F(TaintTest, Taint08) {
         const auto *slicedExpr = new IR::Slice(expr, 11, 4);
         slicedExpr = new IR::Slice(slicedExpr, 4, 3);
         const auto *taintedExpr = Taint::propagateTaint(env.getInternalMap(), slicedExpr);
-        const auto *expectedExpr = Utils::getTaintExpression(IR::getBitType(2));
+        const auto *expectedExpr = ToolsVariables::getTaintExpression(IR::getBitType(2));
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
     {
@@ -271,7 +271,7 @@ TEST_F(TaintTest, Taint08) {
         const auto *slicedExpr = new IR::Slice(expr, 19, 12);
         slicedExpr = new IR::Slice(slicedExpr, 2, 0);
         const auto *taintedExpr = Taint::propagateTaint(env.getInternalMap(), slicedExpr);
-        const auto *expectedExpr = Utils::getTaintExpression(IR::getBitType(3));
+        const auto *expectedExpr = ToolsVariables::getTaintExpression(IR::getBitType(3));
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
 }
@@ -285,7 +285,7 @@ TEST_F(TaintTest, Taint08) {
 /// Expected output: taint in most upper and lower 32 bits, taint in middle 64 bits
 TEST_F(TaintTest, Taint09) {
     // Taint64b
-    const auto *taint64b = Utils::getTaintExpression(IR::getBitType(64));
+    const auto *taint64b = ToolsVariables::getTaintExpression(IR::getBitType(64));
     ASSERT_TRUE(Taint::hasTaint({}, taint64b));
 
     ASSERT_TRUE(Taint::hasTaint({}, new IR::Slice(taint64b, 0, 0)));

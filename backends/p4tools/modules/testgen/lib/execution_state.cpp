@@ -52,8 +52,8 @@ ExecutionState::ExecutionState(const IR::P4Program *program)
     : namespaces(NamespaceContext::Empty->push(program)),
       body({program}),
       stack(*(new std::stack<std::reference_wrapper<const StackFrame>>())) {
-    // Insert the default zombies of the execution state.
-    // This also makes the zombies present in the state explicit.
+    // Insert the default symbolic variables of the execution state.
+    // This also makes the symbolic variables present in the state explicit.
     allocatedSymbolicVariables.insert(getInputPacketSizeVar());
     env.set(&inputPacketLabel, IR::getConstant(IR::getBitType(0), 0));
     env.set(&packetBufferLabel, IR::getConstant(IR::getBitType(0), 0));
@@ -75,8 +75,8 @@ ExecutionState::ExecutionState(Continuation::Body body)
     : namespaces(NamespaceContext::Empty),
       body(std::move(body)),
       stack(*(new std::stack<std::reference_wrapper<const StackFrame>>())) {
-    // Insert the default zombies of the execution state.
-    // This also makes the zombies present in the state explicit.
+    // Insert the default symbolic variables of the execution state.
+    // This also makes the symbolic variables present in the state explicit.
     allocatedSymbolicVariables.insert(getInputPacketSizeVar());
     // We also add the taint property and set it to false.
     setProperty("inUndefinedState", false);
@@ -111,14 +111,14 @@ std::optional<const Continuation::Command> ExecutionState::getNextCmd() const {
 
 const IR::Expression *ExecutionState::get(const IR::StateVariable &var) const {
     const auto *expr = env.get(var);
-    if (var->expr->type->is<IR::Type_Header>() && var->member != Utils::VALID) {
+    if (var->expr->type->is<IR::Type_Header>() && var->member != ToolsVariables::VALID) {
         // If we are setting the member of a header, we need to check whether the
         // header is valid.
         // If the header is invalid, the get returns a tainted expression.
         // The member could have any value.
         // TODO: This is a convoluted check. We should be using runtime objects instead of flat
         // assignments.
-        auto validity = Utils::getHeaderValidity(var->expr);
+        auto validity = ToolsVariables::getHeaderValidity(var->expr);
         const auto *validVar = env.get(validity);
         // The validity bit could already be tainted or the validity bit is false.
         // Both outcomes lead to a tainted write.
@@ -127,7 +127,7 @@ const IR::Expression *ExecutionState::get(const IR::StateVariable &var) const {
             isTainted = !validBool->value;
         }
         if (isTainted) {
-            return Utils::getTaintExpression(expr->type);
+            return ToolsVariables::getTaintExpression(expr->type);
         }
     }
     return expr;
@@ -151,7 +151,7 @@ bool ExecutionState::exists(const IR::StateVariable &var) const { return env.exi
 void ExecutionState::set(const IR::StateVariable &var, const IR::Expression *value) {
     if (getProperty<bool>("inUndefinedState")) {
         // If we are in an undefined state, the variable we set is tainted.
-        value = Utils::getTaintExpression(value->type);
+        value = ToolsVariables::getTaintExpression(value->type);
     }
     env.set(var, value);
 }
@@ -349,7 +349,7 @@ void ExecutionState::pushBranchDecision(uint64_t bIdx) { selectedBranches.push_b
 const IR::Type_Bits *ExecutionState::getPacketSizeVarType() { return &packetSizeVarType; }
 
 const IR::SymbolicVariable *ExecutionState::getInputPacketSizeVar() {
-    return Utils::getZombieConst(getPacketSizeVarType(), 0, "*packetLen_bits");
+    return ToolsVariables::getSymbolicVariable(getPacketSizeVarType(), 0, "*packetLen_bits");
 }
 
 int ExecutionState::getMaxPacketLength() { return TestgenOptions::get().maxPktSize; }
@@ -398,8 +398,8 @@ const IR::Expression *ExecutionState::peekPacketBuffer(int amount) {
     if (diff > 0) {
         // We need to enlarge the input packet by the amount we are exceeding the buffer.
         // TODO: How should we perform accounting here?
-        const IR::Expression *newVar =
-            createZombieConst(IR::getBitType(diff), "pktVar", allocatedSymbolicVariables.size());
+        const IR::Expression *newVar = createSymbolicVariable(IR::getBitType(diff), "pktVar",
+                                                              allocatedSymbolicVariables.size());
         appendToInputPacket(newVar);
         // If the buffer was not empty, append the data we have consumed to the newly generated
         // content and reset the buffer.
@@ -441,8 +441,8 @@ const IR::Expression *ExecutionState::slicePacketBuffer(int amount) {
     if (diff > 0) {
         // We need to enlarge the input packet by the amount we are exceeding the buffer.
         // TODO: How should we perform accounting here?
-        const IR::Expression *newVar =
-            createZombieConst(IR::getBitType(diff), "pktVar", allocatedSymbolicVariables.size());
+        const IR::Expression *newVar = createSymbolicVariable(IR::getBitType(diff), "pktVar",
+                                                              allocatedSymbolicVariables.size());
         appendToInputPacket(newVar);
         // If the buffer was not empty, append the data we have consumed to the newly generated
         // content and reset the buffer.
@@ -530,17 +530,18 @@ const SymbolicSet &ExecutionState::getSymbolicVariables() const {
     return allocatedSymbolicVariables;
 }
 
-const IR::SymbolicVariable *ExecutionState::createZombieConst(const IR::Type *type, cstring name,
-                                                              uint64_t instanceId) {
-    const auto *zombie = Utils::getZombieConst(type, instanceId, name);
-    const auto &result = allocatedSymbolicVariables.insert(zombie);
-    // The zombie already existed, check its type.
+const IR::SymbolicVariable *ExecutionState::createSymbolicVariable(const IR::Type *type,
+                                                                   cstring name,
+                                                                   uint64_t instanceId) {
+    const auto *variables = ToolsVariables::getSymbolicVariable(type, instanceId, name);
+    const auto &result = allocatedSymbolicVariables.insert(variables);
+    // The variable already existed, check its type.
     if (!result.second) {
         BUG_CHECK((*result.first)->type->equiv(*type),
-                  "Inconsistent types for zombie variable %1%: previously %2%, but now %3%",
-                  zombie->toString(), (*result.first)->type, type);
+                  "Inconsistent types for variables variable %1%: previously %2%, but now %3%",
+                  variables->toString(), (*result.first)->type, type);
     }
-    return zombie;
+    return variables;
 }
 
 /* =========================================================================================
@@ -576,7 +577,7 @@ std::vector<const IR::Member *> ExecutionState::getFlatFields(
     // If we are dealing with a header we also include the validity bit in the list of
     // fields.
     if (validVector != nullptr && ts->is<IR::Type_Header>()) {
-        validVector->push_back(Utils::getHeaderValidity(parent));
+        validVector->push_back(ToolsVariables::getHeaderValidity(parent));
     }
     return flatFields;
 }
@@ -613,13 +614,13 @@ const IR::StateVariable &ExecutionState::convertPathExpr(const IR::PathExpressio
     const auto *decl = findDecl(path)->getNode();
     // Local variable.
     if (const auto *declVar = decl->to<IR::Declaration_Variable>()) {
-        return Utils::getZombieVar(path->type, 0, declVar->name.name);
+        return ToolsVariables::getStateVariable(path->type, 0, declVar->name.name);
     }
     if (const auto *declInst = decl->to<IR::Declaration_Instance>()) {
-        return Utils::getZombieVar(path->type, 0, declInst->name.name);
+        return ToolsVariables::getStateVariable(path->type, 0, declInst->name.name);
     }
     if (const auto *param = decl->to<IR::Parameter>()) {
-        return Utils::getZombieVar(path->type, 0, param->name.name);
+        return ToolsVariables::getStateVariable(path->type, 0, param->name.name);
     }
     BUG("Unsupported declaration %1% of type %2%.", decl, decl->node_type_name());
 }

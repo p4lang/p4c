@@ -185,7 +185,7 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::Expression *headerRef) {
     if (const auto *headerUnion = headerRef->type->to<IR::Type_HeaderUnion>()) {
         for (const auto *field : headerUnion->fields) {
             auto *fieldRef = new IR::Member(field->type, headerRef, field->name);
-            const auto &variable = Utils::getHeaderValidity(fieldRef);
+            const auto &variable = ToolsVariables::getHeaderValidity(fieldRef);
             BUG_CHECK(state.exists(variable),
                       "At this point, the header validity bit should be initialized.");
             const auto *value = state.getSymbolicEnv().get(variable);
@@ -203,7 +203,7 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::Expression *headerRef) {
         result->emplace_back(state);
         return false;
     }
-    const auto &variable = Utils::getHeaderValidity(headerRef);
+    const auto &variable = ToolsVariables::getHeaderValidity(headerRef);
     BUG_CHECK(state.exists(variable),
               "At this point, the header validity bit %1% should be initialized.", variable);
     state.replaceTopBody(Continuation::Return(variable));
@@ -213,7 +213,7 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::Expression *headerRef) {
 
 void AbstractStepper::setHeaderValidity(const IR::Expression *expr, bool validity,
                                         ExecutionState &nextState) {
-    const auto &headerRefValidity = Utils::getHeaderValidity(expr);
+    const auto &headerRefValidity = ToolsVariables::getHeaderValidity(expr);
     nextState.set(headerRefValidity, IR::getBoolLiteral(validity));
 
     // In some cases, the header may be part of a union.
@@ -277,7 +277,8 @@ void generateStackAssigmentStatement(ExecutionState &nextState,
     const auto *rightArrIndex = HSIndexToMember::produceStackIndex(elemType, stackRef, rightIndex);
 
     // Check right header validity.
-    const auto *value = nextState.getSymbolicEnv().get(Utils::getHeaderValidity(rightArrIndex));
+    const auto *value =
+        nextState.getSymbolicEnv().get(ToolsVariables::getHeaderValidity(rightArrIndex));
     if (!value->checkedTo<IR::BoolLiteral>()->value) {
         replacements.emplace_back(generateStacksetValid(stackRef, leftIndex, false));
         return;
@@ -357,8 +358,8 @@ void AbstractStepper::setTargetUninitialized(ExecutionState &nextState, const IR
         for (const auto *validField : validFields) {
             nextState.set(validField, IR::getBoolLiteral(false));
         }
-        // For each field in the undefined struct, we create a new zombie variable.
-        // If the variable does not have an initializer we need to create a new zombie for it.
+        // For each field in the undefined struct, we create a new symbolic variable.
+        // If the variable does not have an initializer we need to create a new variable for it.
         // For now we just use the name directly.
         for (const auto *field : fields) {
             nextState.set(field, programInfo.createTargetUninitialized(field->type, forceTaint));
@@ -379,8 +380,8 @@ void AbstractStepper::declareStructLike(ExecutionState &nextState, const IR::Exp
     for (const auto *validField : validFields) {
         nextState.set(validField, IR::getBoolLiteral(false));
     }
-    // For each field in the undefined struct, we create a new zombie variable.
-    // If the variable does not have an initializer we need to create a new zombie for it.
+    // For each field in the undefined struct, we create a new symbolic variable.
+    // If the variable does not have an initializer we need to create a new variable for it.
     // For now we just use the name directly.
     for (const auto *field : fields) {
         nextState.set(field, programInfo.createTargetUninitialized(field->type, forceTaint));

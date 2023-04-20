@@ -56,13 +56,13 @@ void PnaDpdkCmdStepper::initializeTargetEnvironment(ExecutionState &nextState) c
     // Initialize the direction metadata variables.
     nextState.set(
         new IR::Member(thirtytwoBitType, new IR::PathExpression("*pre_istd"), "direction"),
-        &PnaZombies::DIRECTION);
+        &PnaSymbolicVars::DIRECTION);
     nextState.set(
         new IR::Member(thirtytwoBitType, new IR::PathExpression("*parser_istd"), "direction"),
-        &PnaZombies::DIRECTION);
+        &PnaSymbolicVars::DIRECTION);
     nextState.set(
         new IR::Member(thirtytwoBitType, new IR::PathExpression("*main_istd"), "direction"),
-        &PnaZombies::DIRECTION);
+        &PnaSymbolicVars::DIRECTION);
 }
 
 std::optional<const Constraint *> PnaDpdkCmdStepper::startParserImpl(

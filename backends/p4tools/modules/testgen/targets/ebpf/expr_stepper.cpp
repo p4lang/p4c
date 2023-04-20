@@ -97,7 +97,7 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
              // Input must be an IPv4 header.
              ipHdrRef->type->checkedTo<IR::Type_Header>();
 
-             const auto &validVar = state.get(Utils::getHeaderValidity(ipHdrRef));
+             const auto &validVar = state.get(ToolsVariables::getHeaderValidity(ipHdrRef));
              // Check whether the validity bit of the header is false.
              // If yes, do not bother evaluating the checksum.
              auto emitIsTainted = state.hasTaint(validVar);

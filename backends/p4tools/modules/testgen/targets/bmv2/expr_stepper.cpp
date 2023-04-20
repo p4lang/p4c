@@ -849,7 +849,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              if (cloneType == BMv2Constants::CLONE_TYPE_I2E) {
                  // Pick a clone port var. For now, pick a random value from 0-511.
                  const auto &egressPortVar = programInfo.getTargetOutputPortVar();
-                 const auto &clonePortVar = Utils::getZombieConst(
+                 const auto &clonePortVar = ToolsVariables::getSymbolicVariable(
                      egressPortVar->type, 0, "clone_port_var" + std::to_string(call->clone_id));
                  cond = new IR::LAnd(
                      new IR::Neq(egressPortVar, clonePortVar),
@@ -1136,7 +1136,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              if (cloneType == BMv2Constants::CLONE_TYPE_I2E) {
                  // Pick a clone port var. For now, pick a random value from 0-511.
                  const auto &egressPortVar = programInfo.getTargetOutputPortVar();
-                 const auto &clonePortVar = Utils::getZombieConst(
+                 const auto &clonePortVar = ToolsVariables::getSymbolicVariable(
                      egressPortVar->type, 0, "clone_port_var" + std::to_string(call->clone_id));
                  cond = new IR::LAnd(
                      new IR::Neq(egressPortVar, clonePortVar),
@@ -1280,7 +1280,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              if (cloneActive) {
                  // Pick a clone port var. For now, pick a random value from 0-511.
                  const auto &egressPortVar = programInfo.getTargetOutputPortVar();
-                 const auto &clonePortVar = Utils::getZombieConst(
+                 const auto &clonePortVar = ToolsVariables::getSymbolicVariable(
                      egressPortVar->type, 0, "clone_port_var" + std::to_string(call->clone_id));
                  const auto *cond = new IR::LAnd(
                      new IR::Neq(egressPortVar, clonePortVar),

@@ -349,7 +349,7 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
                  }
              } else if (const auto *tb = assignType->to<IR::Type_Base>()) {
                  // If the type is a flat Type_Base, postfix it with a "*".
-                 globalRef = Utils::addZombiePostfix(globalRef, tb);
+                 globalRef = ToolsVariables::addStateVariablePostfix(globalRef, tb);
                  if (const auto *argPath = argRef->to<IR::PathExpression>()) {
                      argRef = nextState.convertPathExpr(argPath);
                  }
@@ -422,7 +422,7 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
                  }
              } else if (const auto *tb = assignType->to<IR::Type_Base>()) {
                  // If the type is a flat Type_Base, postfix it with a "*".
-                 globalRef = Utils::addZombiePostfix(globalRef, tb);
+                 globalRef = ToolsVariables::addStateVariablePostfix(globalRef, tb);
                  if (const auto *argPath = argRef->to<IR::PathExpression>()) {
                      argRef = nextState.convertPathExpr(argPath);
                  }
@@ -812,7 +812,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  TESTGEN_UNIMPLEMENTED("Emit input %1% of type %2% not supported", emitOutput,
                                        emitType);
              }
-             const auto &validVar = Utils::getHeaderValidity(emitOutput);
+             const auto &validVar = ToolsVariables::getHeaderValidity(emitOutput);
 
              // Check whether the validity bit of the header is tainted. If it is, the entire
              // emit is tainted. There is not much we can do here, so throw an error.
@@ -919,7 +919,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  cond->dbprint(traceString);
                  taintedState.add(*new TraceEvents::Expression(cond, traceString));
                  const auto *errVar = state.getCurrentParserErrorLabel();
-                 taintedState.set(errVar, Utils::getTaintExpression(errVar->type));
+                 taintedState.set(errVar, ToolsVariables::getTaintExpression(errVar->type));
                  taintedState.popBody();
                  result->emplace_back(taintedState);
                  return;

@@ -17,7 +17,7 @@
 #include <boost/multiprecision/number.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
 
-#include "backends/p4tools/common/lib/zombie.h"
+#include "backends/p4tools/common/lib/variables.h"
 #include "ir/id.h"
 #include "ir/irutils.h"
 #include "ir/vector.h"
@@ -90,69 +90,8 @@ const IR::Constant *Utils::getRandConstantForType(const IR::Type_Bits *type) {
 }
 
 /* =========================================================================================
- *  Variables and symbolic constants.
+ *  Other.
  * ========================================================================================= */
-
-const cstring Utils::VALID = "*valid";
-
-const IR::StateVariable &Utils::getZombieTableVar(const IR::Type *type, const IR::P4Table *table,
-                                                  cstring name, std::optional<int> idx1_opt,
-                                                  std::optional<int> idx2_opt) {
-    // Mash the table name, the given name, and the optional indices together.
-    // XXX To be nice, we should probably build a PathExpression, but that's annoying to do, and we
-    // XXX can probably get away with this.
-    std::stringstream out;
-    out << table->name.toString() << "." << name;
-    if (idx1_opt.has_value()) {
-        out << "." << idx1_opt.value();
-    }
-    if (idx2_opt.has_value()) {
-        out << "." << idx2_opt.value();
-    }
-
-    return Zombie::getStateVariable(type, 0, out.str());
-}
-
-const IR::StateVariable &Utils::getZombieVar(const IR::Type *type, int incarnation, cstring name) {
-    return Zombie::getStateVariable(type, incarnation, name);
-}
-
-const IR::SymbolicVariable *Utils::getZombieConst(const IR::Type *type, int incarnation,
-                                                  cstring name) {
-    return Zombie::getSymbolicVariable(type, incarnation, name);
-}
-
-IR::StateVariable Utils::getHeaderValidity(const IR::Expression *headerRef) {
-    return new IR::Member(IR::Type::Boolean::get(), headerRef, VALID);
-}
-
-IR::StateVariable Utils::addZombiePostfix(const IR::Expression *paramPath,
-                                          const IR::Type_Base *baseType) {
-    return new IR::Member(baseType, paramPath, "*");
-}
-
-const IR::TaintExpression *Utils::getTaintExpression(const IR::Type *type) {
-    // Do not cache varbits.
-    if (type->is<IR::Extracted_Varbits>()) {
-        return new IR::TaintExpression(type);
-    }
-    // Only cache bits with width lower than 16 bit to restrict the size of the cache.
-    const auto *tb = type->to<IR::Type_Bits>();
-    if (type->width_bits() > 16 || tb == nullptr) {
-        return new IR::TaintExpression(type);
-    }
-    // Taint expressions are interned. Keys in the intern map is the signedness and width of the
-    // type.
-    using key_t = std::tuple<int, bool>;
-    static std::map<key_t, const IR::TaintExpression *> taints;
-
-    auto *&result = taints[{tb->width_bits(), tb->isSigned}];
-    if (result == nullptr) {
-        result = new IR::TaintExpression(type);
-    }
-
-    return result;
-}
 
 const IR::MethodCallExpression *Utils::generateInternalMethodCall(
     cstring methodName, const std::vector<const IR::Expression *> &argVector,

@@ -99,7 +99,7 @@ class ExprStepper : public AbstractStepper {
 
     /// Evaluates a call to an action. This usually only happens when a table is invoked.
     /// In other cases, actions should be inlined. When the action call is evaluated, we use
-    /// zombie variables to pass arguments across execution boundaries. These variables persist
+    /// symbolic variables to pass arguments across execution boundaries. These variables persist
     /// until the end of program execution.
     /// @param action the action declaration that is being referenced.
     /// @param call the actual method call containing the arguments.
@@ -107,7 +107,7 @@ class ExprStepper : public AbstractStepper {
 
     /// @returns an assignment corresponding to the direction @dir that is provided. In the case
     /// of "out", we reset. If @targetPath is the destination we will write to. If @srcPath does
-    /// not exist, we create a new zombie variable for it.
+    /// not exist, we create a new symbolic variable for it.
     /// If @param forceTaint is true, out will set the parameter to tainted.
     // Otherwise, the target default value is chosen.
     /// TODO: Consolidate this into the copy_in_out extern.

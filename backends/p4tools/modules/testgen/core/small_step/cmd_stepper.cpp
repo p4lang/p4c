@@ -66,8 +66,8 @@ void CmdStepper::declareVariable(ExecutionState &nextState, const IR::Declaratio
             declareStructLike(nextState, parentExpr, structType);
         }
     } else if (declType->is<IR::Type_Base>()) {
-        // If the variable does not have an initializer we need to create a new zombie for it.
-        // For now we just use the name directly.
+        // If the variable does not have an initializer we need to create a new value for it. For
+        // now we just use the name directly.
         const auto &left = nextState.convertPathExpr(new IR::PathExpression(decl->name));
         nextState.set(left, programInfo.createTargetUninitialized(decl->type, false));
     } else {
@@ -103,7 +103,7 @@ void CmdStepper::initializeBlockParams(const IR::Type_Declaration *typeDecl,
             declareStructLike(nextState, paramPath, ts, forceTaint);
         } else if (const auto *tb = paramType->to<IR::Type_Base>()) {
             // If the type is a flat Type_Base, postfix it with a "*".
-            const auto &paramRef = Utils::addZombiePostfix(paramPath, tb);
+            const auto &paramRef = ToolsVariables::addStateVariablePostfix(paramPath, tb);
             nextState.set(paramRef, programInfo.createTargetUninitialized(paramType, forceTaint));
         } else {
             P4C_UNIMPLEMENTED("Unsupported initialization type %1%", paramType->node_type_name());

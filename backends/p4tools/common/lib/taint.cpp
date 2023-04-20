@@ -205,7 +205,7 @@ class TaintPropagator : public Transform {
         auto width = 1 + slLeftInt - slRightInt;
         const auto *sliceTb = IR::getBitType(width);
         if (Taint::hasTaint(varMap, slice)) {
-            return Utils::getTaintExpression(sliceTb);
+            return ToolsVariables::getTaintExpression(sliceTb);
         }
         // Otherwise we convert the expression to a constant of the sliced type.
         // Ultimately, the value here does not matter.

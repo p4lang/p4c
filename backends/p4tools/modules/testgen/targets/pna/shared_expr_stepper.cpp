@@ -136,7 +136,7 @@ const ExternMethodImpls SharedPnaExprStepper::PNA_EXTERN_METHOD_IMPLS({
          if (state.hasTaint(directionVar)) {
              auto &taintedState = state.clone();
              taintedState.replaceTopBody(
-                 Continuation::Return(Utils::getTaintExpression(n2hValue->type)));
+                 Continuation::Return(ToolsVariables::getTaintExpression(n2hValue->type)));
              result->emplace_back(taintedState);
              return;
          };
