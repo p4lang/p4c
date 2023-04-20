@@ -10,7 +10,6 @@
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/core/target.h"
 #include "backends/p4tools/common/lib/arch_spec.h"
-#include "backends/p4tools/common/lib/namespace_context.h"
 #include "ir/ir.h"
 #include "ir/vector.h"
 

@@ -1,6 +1,7 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SMALL_STEP_EXPR_STEPPER_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SMALL_STEP_EXPR_STEPPER_H_
 
+#include <utility>
 #include <vector>
 
 #include "backends/p4tools/common/core/solver.h"

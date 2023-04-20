@@ -2,7 +2,6 @@
 #define BACKENDS_P4TOOLS_COMMON_LIB_MODEL_H_
 
 #include <map>
-#include <set>
 #include <utility>
 #include <vector>
 
@@ -10,6 +9,7 @@
 
 #include "backends/p4tools/common/core/solver.h"
 #include "ir/ir.h"
+#include "ir/visitor.h"
 
 namespace P4Tools {
 

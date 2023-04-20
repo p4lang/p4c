@@ -2,7 +2,7 @@
 
 #include <map>
 #include <string>
-#include <utility>
+#include <tuple>
 
 #include "ir/id.h"
 

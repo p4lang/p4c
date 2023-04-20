@@ -6,10 +6,8 @@
 #include <cstdint>
 #include <ctime>
 #include <iomanip>
-#include <map>
 #include <optional>
 #include <ratio>
-#include <tuple>
 
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/multiprecision/cpp_int/add.hpp>
@@ -17,7 +15,6 @@
 #include <boost/multiprecision/number.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
 
-#include "backends/p4tools/common/lib/variables.h"
 #include "ir/id.h"
 #include "ir/irutils.h"
 #include "ir/vector.h"

@@ -1,3 +1,7 @@
+#include <exception>
+#include <iostream>
+#include <vector>
+
 #include "lib/crash.h"
 #include "lib/exceptions.h"
 

@@ -2,7 +2,7 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_BACKEND_PROTOBUF_PROTOBUF_H_
 
 #include <cstddef>
-#include <fstream>
+#include <filesystem>
 #include <optional>
 #include <string>
 #include <utility>

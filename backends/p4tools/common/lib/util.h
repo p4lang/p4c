@@ -13,7 +13,6 @@
 #include <boost/format.hpp>
 #include <boost/random/mersenne_twister.hpp>
 
-#include "backends/p4tools/common/lib/variables.h"
 #include "ir/ir.h"
 #include "lib/big_int_util.h"
 #include "lib/cstring.h"

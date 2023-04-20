@@ -10,7 +10,6 @@
 #include "ir/indexed_vector.h"
 #include "ir/irutils.h"
 #include "ir/vector.h"
-#include "ir/visitor.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"

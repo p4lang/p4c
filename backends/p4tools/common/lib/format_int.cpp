@@ -13,7 +13,6 @@
 
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
-#include "lib/log.h"
 
 namespace P4Tools {
 

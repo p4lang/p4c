@@ -2,6 +2,7 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_BACKEND_METADATA_METADATA_H_
 
 #include <cstddef>
+#include <filesystem>
 #include <fstream>
 #include <optional>
 #include <string>

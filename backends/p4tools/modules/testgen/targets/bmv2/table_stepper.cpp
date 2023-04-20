@@ -9,7 +9,6 @@
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/lib/trace_event_types.h"
-#include "backends/p4tools/common/lib/util.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
 #include "ir/irutils.h"

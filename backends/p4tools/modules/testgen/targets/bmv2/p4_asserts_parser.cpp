@@ -1,7 +1,6 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_asserts_parser.h"
 
-#include <stdint.h>
-
+#include <cstdint>
 #include <iostream>
 #include <optional>
 #include <string>
@@ -10,7 +9,7 @@
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/core/z3_solver.h"
-#include "backends/p4tools/common/lib/util.h"
+#include "backends/p4tools/common/lib/variables.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"
@@ -19,9 +18,7 @@
 #include "lib/error.h"
 #include "lib/exceptions.h"
 
-namespace P4Tools {
-
-namespace AssertsParser {
+namespace P4Tools::AssertsParser {
 
 static std::vector<std::string> NAMES{
     "Priority",    "Text",           "True",         "False",       "LineStatementClose",
@@ -655,6 +652,4 @@ Token Lexer::next() noexcept {
             return atom(Token::Kind::Mul);
     }
 }
-}  // namespace AssertsParser
-
-}  // namespace P4Tools
+}  // namespace P4Tools::AssertsParser

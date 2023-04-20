@@ -2,11 +2,12 @@
 
 #include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/lib/arch_spec.h"
-#include "backends/p4tools/common/lib/namespace_context.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "backends/p4tools/common/lib/variables.h"
 #include "ir/id.h"
 #include "ir/irutils.h"
 #include "lib/cstring.h"
+#include "lib/enumerator.h"
 #include "lib/exceptions.h"
 #include "midend/coverage.h"
 

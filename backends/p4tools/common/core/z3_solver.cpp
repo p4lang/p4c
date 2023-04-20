@@ -8,13 +8,11 @@
 #include <iterator>
 #include <list>
 #include <map>
-#include <ostream>
 #include <string>
 #include <utility>
 
 #include <boost/multiprecision/cpp_int.hpp>
 
-#include "backends/p4tools/common/lib/model.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "ir/json_loader.h"  // IWYU pragma: keep

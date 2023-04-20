@@ -6,7 +6,7 @@
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
-#include "backends/p4tools/common/lib/util.h"
+#include "backends/p4tools/common/lib/variables.h"
 #include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/error.h"

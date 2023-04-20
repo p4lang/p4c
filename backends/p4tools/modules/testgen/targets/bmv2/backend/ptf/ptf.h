@@ -2,6 +2,7 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_BACKEND_PTF_PTF_H_
 
 #include <cstddef>
+#include <filesystem>
 #include <fstream>
 #include <map>
 #include <optional>

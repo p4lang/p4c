@@ -12,7 +12,7 @@
 
 #include "backends/p4test/version.h"
 #include "backends/p4tools/common/compiler/midend.h"
-#include "backends/p4tools/common/lib/util.h"
+#include "backends/p4tools/common/lib/variables.h"
 #include "frontends/common/options.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/common/parser_options.h"

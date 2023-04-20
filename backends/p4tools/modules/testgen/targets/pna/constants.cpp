@@ -1,6 +1,7 @@
 #include "backends/p4tools/modules/testgen/targets/pna/constants.h"
 
 #include "ir/id.h"
+#include "lib/cstring.h"
 
 namespace P4Tools::P4Testgen::Pna {
 

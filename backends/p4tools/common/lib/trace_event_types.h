@@ -2,6 +2,8 @@
 #define BACKENDS_P4TOOLS_COMMON_LIB_TRACE_EVENT_TYPES_H_
 
 #include <iosfwd>
+#include <utility>
+#include <vector>
 
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
