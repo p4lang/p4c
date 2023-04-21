@@ -72,8 +72,14 @@ if(P4TOOLS_TESTGEN_BMV2_TEST_PTF)
       "BMv2 PTF tests are enabled, but the Python3 module 'google.rpc' can not be found. BMv2 PTF tests will fail."
     )
   endif()
+  # Filter some programs  because they have issues that are not captured with Xfails.
+  set (P4C_V1_TEST_SUITES_P416_PTF ${P4C_V1_TEST_SUITES_P416})
+  list(REMOVE_ITEM P4C_V1_TEST_SUITES_P416_PTF
+       # A particular test (or packet?) combination leads to an infinite loop in the simple switch.
+       "${P4C_SOURCE_DIR}/testdata/p4_16_samples/v1model-special-ops-bmv2.p4"
+  )
   p4tools_add_tests(
-    TESTSUITES "${P4C_V1_TEST_SUITES_P416}"
+    TESTSUITES "${P4C_V1_TEST_SUITES_P416_PTF}"
     TAG "testgen-p4c-bmv2-ptf" DRIVER ${P4TESTGEN_DRIVER}
     TARGET "bmv2" ARCH "v1model" P416_PTF TEST_ARGS "-I${P4C_BINARY_DIR}/p4include --test-backend PTF --packet-size-range 0:12000 ${EXTRA_OPTS} "
   )
