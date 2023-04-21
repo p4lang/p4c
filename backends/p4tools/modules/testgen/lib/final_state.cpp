@@ -1,19 +1,25 @@
 #include "backends/p4tools/modules/testgen/lib/final_state.h"
 
+#include <list>
 #include <utility>
+#include <variant>
 #include <vector>
 
+#include <boost/container/vector.hpp>
+
 #include "backends/p4tools/common/core/solver.h"
-#include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_event.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "frontends/p4/optimizeExpressions.h"
+#include "ir/ir.h"
 #include "ir/irutils.h"
+#include "lib/error.h"
+#include "lib/null.h"
 
-#include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/lib/packet_vars.h"
 
 namespace P4Tools::P4Testgen {
 
@@ -42,11 +48,10 @@ void FinalState::calculatePayload(const ExecutionState &executionState, Model &e
     int payloadSize = calculatedPacketSize - inputPacketExpr->type->width_bits();
     if (payloadSize > 0) {
         const auto *payloadType = IR::getBitType(payloadSize);
-        const auto &payLoadLabel = ExecutionState::getPayloadLabel();
-        const IR::Expression *payloadExpr = evaluatedModel.get(payLoadLabel, false);
+        const IR::Expression *payloadExpr = evaluatedModel.get(&PacketVars::PAYLOAD_LABEL, false);
         if (payloadExpr == nullptr) {
             payloadExpr = Utils::getRandConstantForType(payloadType);
-            evaluatedModel.emplace(payLoadLabel, payloadExpr);
+            evaluatedModel.emplace(&PacketVars::PAYLOAD_LABEL, payloadExpr);
         }
     }
 }

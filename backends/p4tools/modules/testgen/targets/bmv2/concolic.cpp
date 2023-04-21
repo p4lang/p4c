@@ -2,10 +2,8 @@
 
 #include <algorithm>
 #include <iterator>
-#include <list>
 #include <map>
 #include <utility>
-#include <variant>
 #include <vector>
 
 #include <boost/multiprecision/cpp_int.hpp>
@@ -16,8 +14,6 @@
 #include <boost/multiprecision/traits/explicit_conversion.hpp>
 
 #include "backends/p4tools/common/lib/model.h"
-#include "backends/p4tools/common/lib/util.h"
-#include "backends/p4tools/common/lib/variables.h"
 #include "ir/irutils.h"
 #include "ir/vector.h"
 #include "lib/cstring.h"
@@ -27,6 +23,7 @@
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/lib/packet_vars.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/contrib/bmv2_hash/calculations.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
@@ -263,7 +260,7 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
          // This is the maximum value this checksum can have.
          auto maxHashInt = IR::getMaxBvVal(checksumVarType);
          // If the payload is present, we need to add it to our checksum calculation.
-         const auto *payloadExpr = completedModel.get(ExecutionState::getPayloadLabel(), false);
+         const auto *payloadExpr = completedModel.get(&PacketVars::PAYLOAD_LABEL, false);
          if (payloadExpr != nullptr) {
              exprList.push_back(payloadExpr);
          }

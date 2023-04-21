@@ -28,25 +28,11 @@
 #include "lib/source_file.h"
 
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
+#include "backends/p4tools/modules/testgen/lib/packet_vars.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4Tools::P4Testgen {
-
-const IR::Member ExecutionState::inputPacketLabel =
-    IR::Member(new IR::PathExpression("*"), "inputPacket");
-
-const IR::Member ExecutionState::packetBufferLabel =
-    IR::Member(new IR::PathExpression("*"), "packetBuffer");
-
-const IR::Member ExecutionState::emitBufferLabel =
-    IR::Member(new IR::PathExpression("*"), "emitBuffer");
-
-const IR::Member ExecutionState::payloadLabel = IR::Member(new IR::PathExpression("*"), "payload");
-
-// The methods in P4's packet_in uses 32-bit values. Conform with this to make it easier to produce
-// well-typed expressions when manipulating the parser cursor.
-const IR::Type_Bits ExecutionState::packetSizeVarType = IR::Type_Bits(32, false);
 
 ExecutionState::ExecutionState(const IR::P4Program *program)
     : namespaces(NamespaceContext::Empty->push(program)),
@@ -55,8 +41,8 @@ ExecutionState::ExecutionState(const IR::P4Program *program)
     // Insert the default symbolic variables of the execution state.
     // This also makes the symbolic variables present in the state explicit.
     allocatedSymbolicVariables.insert(getInputPacketSizeVar());
-    env.set(&inputPacketLabel, IR::getConstant(IR::getBitType(0), 0));
-    env.set(&packetBufferLabel, IR::getConstant(IR::getBitType(0), 0));
+    env.set(&PacketVars::INPUT_PACKET_LABEL, IR::getConstant(IR::getBitType(0), 0));
+    env.set(&PacketVars::PACKET_BUFFER_LABEL, IR::getConstant(IR::getBitType(0), 0));
     // We also add the taint property and set it to false.
     setProperty("inUndefinedState", false);
     // Drop is initialized to false, too.
@@ -346,15 +332,16 @@ void ExecutionState::pushPathConstraint(const IR::Expression *e) { pathConstrain
 
 void ExecutionState::pushBranchDecision(uint64_t bIdx) { selectedBranches.push_back(bIdx); }
 
-const IR::Type_Bits *ExecutionState::getPacketSizeVarType() { return &packetSizeVarType; }
-
 const IR::SymbolicVariable *ExecutionState::getInputPacketSizeVar() {
-    return ToolsVariables::getSymbolicVariable(getPacketSizeVarType(), 0, "*packetLen_bits");
+    return ToolsVariables::getSymbolicVariable(&PacketVars::PACKET_SIZE_VAR_TYPE, 0,
+                                               "*packetLen_bits");
 }
 
 int ExecutionState::getMaxPacketLength() { return TestgenOptions::get().maxPktSize; }
 
-const IR::Expression *ExecutionState::getInputPacket() const { return env.get(&inputPacketLabel); }
+const IR::Expression *ExecutionState::getInputPacket() const {
+    return env.get(&PacketVars::INPUT_PACKET_LABEL);
+}
 
 int ExecutionState::getInputPacketSize() const {
     const auto *inputPkt = getInputPacket();
@@ -365,20 +352,20 @@ void ExecutionState::appendToInputPacket(const IR::Expression *expr) {
     const auto *inputPkt = getInputPacket();
     const auto *width = IR::getBitType(expr->type->width_bits() + inputPkt->type->width_bits());
     const auto *concat = new IR::Concat(width, inputPkt, expr);
-    env.set(&inputPacketLabel, concat);
+    env.set(&PacketVars::INPUT_PACKET_LABEL, concat);
 }
 
 void ExecutionState::prependToInputPacket(const IR::Expression *expr) {
     const auto *inputPkt = getInputPacket();
     const auto *width = IR::getBitType(expr->type->width_bits() + inputPkt->type->width_bits());
     const auto *concat = new IR::Concat(width, expr, inputPkt);
-    env.set(&inputPacketLabel, concat);
+    env.set(&PacketVars::INPUT_PACKET_LABEL, concat);
 }
 
 int ExecutionState::getInputPacketCursor() const { return inputPacketCursor; }
 
 const IR::Expression *ExecutionState::getPacketBuffer() const {
-    return env.get(&packetBufferLabel);
+    return env.get(&PacketVars::PACKET_BUFFER_LABEL);
 }
 
 int ExecutionState::getPacketBufferSize() const {
@@ -411,7 +398,7 @@ const IR::Expression *ExecutionState::peekPacketBuffer(int amount) {
         }
         // We have peeked ahead of what is available. We need to add the content we have looked at
         // to our packet buffer, which can later be consumed.
-        env.set(&packetBufferLabel, newVar);
+        env.set(&PacketVars::PACKET_BUFFER_LABEL, newVar);
         return newVar;
     }
     // The buffer is large enough and we can grab a slice
@@ -463,7 +450,7 @@ const IR::Expression *ExecutionState::slicePacketBuffer(int amount) {
     if (diff < 0) {
         auto *remainder = new IR::Slice(buffer, bufferSize - amount - 1, 0);
         remainder->type = IR::getBitType(bufferSize - amount);
-        env.set(&packetBufferLabel, remainder);
+        env.set(&PacketVars::PACKET_BUFFER_LABEL, remainder);
     }
     // The amount we slice is equal to what is in the buffer. Just set the buffer to zero.
     if (diff == 0) {
@@ -476,34 +463,34 @@ void ExecutionState::appendToPacketBuffer(const IR::Expression *expr) {
     const auto *buffer = getPacketBuffer();
     const auto *width = IR::getBitType(expr->type->width_bits() + buffer->type->width_bits());
     const auto *concat = new IR::Concat(width, buffer, expr);
-    env.set(&packetBufferLabel, concat);
+    env.set(&PacketVars::PACKET_BUFFER_LABEL, concat);
 }
 
 void ExecutionState::prependToPacketBuffer(const IR::Expression *expr) {
     const auto *buffer = getPacketBuffer();
     const auto *width = IR::getBitType(expr->type->width_bits() + buffer->type->width_bits());
     const auto *concat = new IR::Concat(width, expr, buffer);
-    env.set(&packetBufferLabel, concat);
+    env.set(&PacketVars::PACKET_BUFFER_LABEL, concat);
 }
 
 void ExecutionState::resetPacketBuffer() {
-    env.set(&packetBufferLabel, IR::getConstant(IR::getBitType(0), 0));
+    env.set(&PacketVars::PACKET_BUFFER_LABEL, IR::getConstant(IR::getBitType(0), 0));
 }
 
-const IR::Expression *ExecutionState::getEmitBuffer() const { return env.get(&emitBufferLabel); }
+const IR::Expression *ExecutionState::getEmitBuffer() const {
+    return env.get(&PacketVars::EMIT_BUFFER_LABEL);
+}
 
 void ExecutionState::resetEmitBuffer() {
-    env.set(&emitBufferLabel, IR::getConstant(IR::getBitType(0), 0));
+    env.set(&PacketVars::EMIT_BUFFER_LABEL, IR::getConstant(IR::getBitType(0), 0));
 }
 
 void ExecutionState::appendToEmitBuffer(const IR::Expression *expr) {
     const auto *buffer = getEmitBuffer();
     const auto *width = IR::getBitType(expr->type->width_bits() + buffer->type->width_bits());
     const auto *concat = new IR::Concat(width, buffer, expr);
-    env.set(&emitBufferLabel, concat);
+    env.set(&PacketVars::EMIT_BUFFER_LABEL, concat);
 }
-
-IR::StateVariable ExecutionState::getPayloadLabel() { return &payloadLabel; }
 
 void ExecutionState::setParserErrorLabel(const IR::Member *parserError) {
     parserErrorLabel = parserError;

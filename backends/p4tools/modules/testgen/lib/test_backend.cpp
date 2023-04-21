@@ -1,10 +1,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_backend.h"
 
 #include <iostream>
-#include <list>
 #include <optional>
-#include <utility>
-#include <variant>
 
 #include "backends/p4tools/common/lib/format_int.h"
 #include "backends/p4tools/common/lib/model.h"
@@ -12,10 +9,8 @@
 #include "backends/p4tools/common/lib/taint.h"
 #include "backends/p4tools/common/lib/trace_event.h"
 #include "backends/p4tools/common/lib/util.h"
-#include "frontends/p4/optimizeExpressions.h"
 #include "ir/irutils.h"
 #include "lib/cstring.h"
-#include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"
 #include "lib/null.h"
@@ -28,6 +23,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/final_state.h"
 #include "backends/p4tools/modules/testgen/lib/logging.h"
+#include "backends/p4tools/modules/testgen/lib/packet_vars.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 #include "backends/p4tools/modules/testgen/options.h"
@@ -149,7 +145,7 @@ TestBackEnd::TestInfo TestBackEnd::produceTestInfo(
     const auto *inputPacketExpr = executionState->getInputPacket();
     // The payload fills the space between the minimum input size needed and the symbolically
     // calculated packet size.
-    const auto *payloadExpr = completedModel->get(ExecutionState::getPayloadLabel(), false);
+    const auto *payloadExpr = completedModel->get(&PacketVars::PAYLOAD_LABEL, false);
     if (payloadExpr != nullptr) {
         inputPacketExpr =
             new IR::Concat(IR::getBitType(calculatedPacketSize), inputPacketExpr, payloadExpr);

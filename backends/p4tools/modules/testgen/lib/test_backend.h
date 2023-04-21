@@ -4,9 +4,9 @@
 #include <stdint.h>
 
 #include <functional>
+#include <optional>
 #include <vector>
 
-#include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/trace_event.h"
 #include "ir/ir.h"

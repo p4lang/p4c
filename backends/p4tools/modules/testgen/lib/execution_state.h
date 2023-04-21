@@ -33,29 +33,6 @@ namespace P4Tools::P4Testgen {
 class ExecutionState {
     friend class Test::SmallStepTest;
 
-    /// Specifies the type of the packet size variable.
-    /// This is mostly used to generate bit vector constants.
-    static const IR::Type_Bits packetSizeVarType;
-
-    /// The name of the input packet. The input packet defines the minimum size of the packet
-    /// requires to pass this particular path. Typically, calls such as extract, advance, or
-    /// lookahead cause the input packet to grow.
-    static const IR::Member inputPacketLabel;
-
-    /// The name of packet buffer. The packet buffer defines the data that can be consumed by the
-    /// parser. If the packet buffer is empty, extract/advance/lookahead calls will cause the
-    /// minimum packet size to grow. The packet buffer also forms the final output packet.
-    static const IR::Member packetBufferLabel;
-
-    /// The name of the emit buffer. Each time, emit is called, the emitted content is appended to
-    /// this buffer. Typically, after exiting the control, the emit buffer is appended to the packet
-    /// buffer.
-    static const IR::Member emitBufferLabel;
-
-    /// Canonical name for the payload. This is used for consistent naming when attaching a payload
-    /// to the packet.
-    static const IR::Member payloadLabel;
-
  public:
     class StackFrame {
      public:
@@ -74,6 +51,11 @@ class ExecutionState {
               exceptionHandlers(exceptionHandlers),
               namespaces(namespaces) {}
     };
+
+    /// No move semantics because of constant members. We always need to clone a state.
+    ExecutionState(ExecutionState &&) = delete;
+    ExecutionState &operator=(ExecutionState &&) = delete;
+    ~ExecutionState() = default;
 
  private:
     /// The namespace context in the IR for the current state. The innermost element is the P4
@@ -352,9 +334,6 @@ class ExecutionState {
      *  Packet manipulation
      * ========================================================================================= */
  public:
-    /// @returns the bit type of the parser cursor.
-    [[nodiscard]] static const IR::Type_Bits *getPacketSizeVarType();
-
     /// @returns the symbolic constant representing the length of the input to the current parser,
     /// in bits.
     static const IR::SymbolicVariable *getInputPacketSizeVar();
@@ -413,10 +392,6 @@ class ExecutionState {
 
     /// Append data to the emit buffer.
     void appendToEmitBuffer(const IR::Expression *expr);
-
-    /// @returns the label associated with the payload.
-    /// TODO: Consider moving this to a separate utility class?
-    [[nodiscard]] static IR::StateVariable getPayloadLabel();
 
     /// Set the parser error label to the @param parserError.
     void setParserErrorLabel(const IR::Member *parserError);

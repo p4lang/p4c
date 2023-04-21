@@ -27,6 +27,7 @@
 #include "backends/p4tools/modules/testgen/core/small_step/small_step.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/lib/packet_vars.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4Tools::P4Testgen {
@@ -86,14 +87,14 @@ ExprStepper::PacketCursorAdvanceInfo ExprStepper::calculateSuccessfulParserAdvan
     auto minSize =
         std::max(0, state.getInputPacketCursor() + advanceSize - state.getPacketBufferSize());
     auto *cond = new IR::Geq(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
-                             IR::getConstant(ExecutionState::getPacketSizeVarType(), minSize));
+                             IR::getConstant(&PacketVars::PACKET_SIZE_VAR_TYPE, minSize));
     return {advanceSize, cond, advanceSize, new IR::LNot(cond)};
 }
 
 ExprStepper::PacketCursorAdvanceInfo ExprStepper::calculateAdvanceExpression(
     const ExecutionState &state, const IR::Expression *advanceExpr,
     const IR::Expression *restrictions) const {
-    const auto *packetSizeVarType = ExecutionState::getPacketSizeVarType();
+    const auto *packetSizeVarType = &PacketVars::PACKET_SIZE_VAR_TYPE;
 
     const auto *cursorConst = IR::getConstant(packetSizeVarType, state.getInputPacketCursor());
     const auto *bufferSizeConst = IR::getConstant(packetSizeVarType, state.getPacketBufferSize());

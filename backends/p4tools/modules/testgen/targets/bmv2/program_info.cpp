@@ -26,6 +26,7 @@
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/lib/packet_vars.h"
 #include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/concolic.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/constants.h"
@@ -74,7 +75,7 @@ Bmv2V1ModelProgramInfo::Bmv2V1ModelProgramInfo(
     }
     const IR::Expression *constraint =
         new IR::Grt(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
-                    IR::getConstant(ExecutionState::getPacketSizeVarType(), minPktSize));
+                    IR::getConstant(&PacketVars::PACKET_SIZE_VAR_TYPE, minPktSize));
     /// Vector containing pairs of restrictions and nodes to which these restrictions apply.
     std::vector<std::vector<const IR::Expression *>> restrictionsVec;
     /// Defines all "entry_restriction" and then converts restrictions from string to IR

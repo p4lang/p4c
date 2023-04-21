@@ -22,6 +22,7 @@
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/lib/packet_vars.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/concolic.h"
 
 namespace P4Tools::P4Testgen::EBPF {
@@ -55,7 +56,7 @@ EBPFProgramInfo::EBPFProgramInfo(const IR::P4Program *program,
     // The input packet should be larger than 0.
     targetConstraints =
         new IR::Grt(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
-                    IR::getConstant(ExecutionState::getPacketSizeVarType(), 0));
+                    IR::getConstant(&PacketVars::PACKET_SIZE_VAR_TYPE, 0));
 }
 
 const ordered_map<cstring, const IR::Type_Declaration *> *EBPFProgramInfo::getProgrammableBlocks()

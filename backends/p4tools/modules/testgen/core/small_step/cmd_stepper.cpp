@@ -26,14 +26,15 @@
 #include "lib/null.h"
 #include "midend/coverage.h"
 
-#include "backends/p4tools/modules/testgen//lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/abstract_stepper.h"
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
 #include "backends/p4tools/modules/testgen/lib/collect_latent_statements.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
+#include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/lib/packet_vars.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4Tools::P4Testgen {
@@ -363,7 +364,7 @@ bool CmdStepper::preorder(const IR::P4Program * /*program*/) {
     if (pktSize != 0) {
         const auto *fixedSizeEqu =
             new IR::Equ(ExecutionState::getInputPacketSizeVar(),
-                        IR::getConstant(ExecutionState::getPacketSizeVarType(), pktSize));
+                        IR::getConstant(&PacketVars::PACKET_SIZE_VAR_TYPE, pktSize));
         if (cond == std::nullopt) {
             cond = fixedSizeEqu;
         } else {
@@ -489,7 +490,7 @@ bool CmdStepper::preorder(const IR::ExitStatement *e) {
 
 const Constraint *CmdStepper::startParser(const IR::P4Parser *parser, ExecutionState &nextState) {
     // Reset the parser cursor to zero.
-    const auto *parserCursorVarType = ExecutionState::getPacketSizeVarType();
+    const auto *parserCursorVarType = &PacketVars::PACKET_SIZE_VAR_TYPE;
 
     // Constrain the input packet size to its maximum.
     const auto *boolType = IR::Type::Boolean::get();
