@@ -128,4 +128,6 @@ const IR::Expression *Model::get(const IR::StateVariable &var, bool checked) con
     return nullptr;
 }
 
+const SymbolicMapping &Model::getSymbolicMap() { return symbolicMap; }
+
 }  // namespace P4Tools
