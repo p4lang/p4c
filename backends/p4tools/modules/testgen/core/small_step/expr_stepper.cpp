@@ -111,7 +111,7 @@ void ExprStepper::evalActionCall(const IR::P4Action *action, const IR::MethodCal
         BUG_CHECK(param->direction == IR::Direction::None,
                   "%1%: Only directionless action parameters are supported at this point. ",
                   action);
-        const auto &tableActionDataVar = ToolsVariables::getStateVariable(paramType, 0, paramName);
+        const auto &tableActionDataVar = ToolsVariables::getStateVariable(paramType, paramName);
         const auto *curArg = call->arguments->at(argIdx)->expression;
         nextState.set(tableActionDataVar, curArg);
     }

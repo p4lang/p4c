@@ -10,6 +10,10 @@ namespace P4Tools {
 /// program itself, but are generated and added to the environment by the P4Tools tooling. These
 /// variables are also used for SMT solvers as symbolic variables.
 class ToolsVariables {
+ private:
+    /// The prefix used for state variables.
+    static const IR::PathExpression VAR_PREFIX;
+
  public:
     /// To represent header validity, we pretend that every header has a field that reflects the
     /// header's validity state. This is the name of that field. This is not a valid P4 identifier,
@@ -20,8 +24,7 @@ class ToolsVariables {
     ///
     /// A BUG occurs if this was previously called with the same @name and @incarnation, but with a
     /// different @type.
-    static const IR::StateVariable &getStateVariable(const IR::Type *type, int incarnation,
-                                                     cstring name);
+    static const IR::StateVariable &getStateVariable(const IR::Type *type, cstring name);
 
     /// @returns the symbolic variable with the given @type, @incarnation, and @name.
     ///

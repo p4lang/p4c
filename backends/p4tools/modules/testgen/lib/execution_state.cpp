@@ -593,13 +593,13 @@ const IR::StateVariable &ExecutionState::convertPathExpr(const IR::PathExpressio
     const auto *decl = findDecl(path)->getNode();
     // Local variable.
     if (const auto *declVar = decl->to<IR::Declaration_Variable>()) {
-        return ToolsVariables::getStateVariable(path->type, 0, declVar->name.name);
+        return ToolsVariables::getStateVariable(path->type, declVar->name.name);
     }
     if (const auto *declInst = decl->to<IR::Declaration_Instance>()) {
-        return ToolsVariables::getStateVariable(path->type, 0, declInst->name.name);
+        return ToolsVariables::getStateVariable(path->type, declInst->name.name);
     }
     if (const auto *param = decl->to<IR::Parameter>()) {
-        return ToolsVariables::getStateVariable(path->type, 0, param->name.name);
+        return ToolsVariables::getStateVariable(path->type, param->name.name);
     }
     BUG("Unsupported declaration %1% of type %2%.", decl, decl->node_type_name());
 }

@@ -410,7 +410,8 @@ class ExecutionState {
     [[nodiscard]] const SymbolicSet &getSymbolicVariables() const;
 
     /// @see ToolsVariables::getSymbolicVariable.
-    /// We also place the variabless in the set of allocated variabless of this state.
+    /// We also place the symbolic variables in the set of allocated symbolic variables of this
+    /// state.
     [[nodiscard]] const IR::SymbolicVariable *createSymbolicVariable(const IR::Type *type,
                                                                      cstring name,
                                                                      uint64_t instanceID = 0);

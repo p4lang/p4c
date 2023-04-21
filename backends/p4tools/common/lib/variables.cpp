@@ -8,22 +8,18 @@
 
 namespace P4Tools {
 
-const IR::StateVariable &ToolsVariables::getStateVariable(const IR::Type *type, int incarnation,
-                                                          cstring name) {
-    static IR::PathExpression VAR_HDR(new IR::Path("p4t*var"));
+const IR::PathExpression ToolsVariables::VAR_PREFIX = IR::PathExpression("p4tools*var");
 
-    // StateVariables are interned. Keys in the intern map is the signedness and width of the
-    // type.
-    // TODO: Caching.
-    return *new IR::StateVariable(
-        new IR::Member(type, new IR::Member(&VAR_HDR, cstring(std::to_string(incarnation))), name));
+const IR::StateVariable &ToolsVariables::getStateVariable(const IR::Type *type, cstring name) {
+    // TODO: Is caching worth it here?
+    // TODO: Do we really need to "allocate" a state variable? They are immediately consumed  by the
+    // symbolic environment.
+    return *new IR::StateVariable(new IR::Member(type, &VAR_PREFIX, name));
 }
 
 const IR::SymbolicVariable *ToolsVariables::getSymbolicVariable(const IR::Type *type,
                                                                 int incarnation, cstring name) {
-    // static SymbolicSet SYMBOLIC_VARS;
-    // TODO: Caching.
-    // const auto *&incarnationMember = SYMBOLIC_VARS[incarnation];
+    // TODO: Is caching worth it here?
     auto symbolicName = name + "_" + std::to_string(incarnation);
     return new IR::SymbolicVariable(type, symbolicName);
 }
@@ -52,9 +48,9 @@ const IR::TaintExpression *ToolsVariables::getTaintExpression(const IR::Type *ty
     // Taint expressions are interned. Keys in the intern map is the signedness and width of the
     // type.
     using key_t = std::tuple<int, bool>;
-    static std::map<key_t, const IR::TaintExpression *> taints;
+    static std::map<key_t, const IR::TaintExpression *> TAINTS;
 
-    auto *&result = taints[{tb->width_bits(), tb->isSigned}];
+    auto *&result = TAINTS[{tb->width_bits(), tb->isSigned}];
     if (result == nullptr) {
         result = new IR::TaintExpression(type);
     }

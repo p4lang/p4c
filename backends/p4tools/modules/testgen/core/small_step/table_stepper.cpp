@@ -58,7 +58,7 @@ const IR::StateVariable &TableStepper::getTableStateVariable(const IR::Type *typ
         out << "." << idx2_opt.value();
     }
 
-    return ToolsVariables::getStateVariable(type, 0, out.str());
+    return ToolsVariables::getStateVariable(type, out.str());
 }
 
 const IR::StateVariable &TableStepper::getTableActionVar(const IR::P4Table *table) {
