@@ -112,7 +112,7 @@ const IR::Literal *Model::evaluate(const IR::Expression *expr,
 Model *Model::evaluate(const SymbolicMapType &inputMap, ExpressionMap *resolvedExpressions) const {
     auto *result = new Model(*this);
     for (const auto &inputTuple : inputMap) {
-        auto name = inputTuple.first;
+        const auto &name = inputTuple.first;
         const auto *expr = inputTuple.second;
         (*result)[name] = evaluate(expr, resolvedExpressions);
     }

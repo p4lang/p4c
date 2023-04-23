@@ -442,7 +442,7 @@ class ExecutionState {
     /// corresponding declaration. It then converts the name of the declaration into a variables
     /// constant and returns. This is necessary because we sometimes
     /// get flat declarations without members (e.g., bit<8> tmp;)
-    [[nodiscard]] const IR::StateVariable &convertPathExpr(const IR::PathExpression *path) const;
+    [[nodiscard]] static const IR::StateVariable &convertPathExpr(const IR::PathExpression *path);
 
     /// Allocate a new execution state object with the same state as this object.
     /// Returns a reference, not a pointer.
