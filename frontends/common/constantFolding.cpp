@@ -23,6 +23,8 @@ limitations under the License.
 
 namespace P4 {
 
+ConstantFolding::filter_hook_t ConstantFolding::filter_hook;
+
 class CloneConstants : public Transform {
  public:
     CloneConstants() = default;
@@ -87,6 +89,9 @@ const IR::Expression *DoConstantFolding::getConstant(const IR::Expression *expr)
 }
 
 const IR::Node *DoConstantFolding::postorder(IR::PathExpression *e) {
+    if (ConstantFolding::filter_hook) {
+        if (auto *rv = ConstantFolding::filter_hook(this, e)) return rv;
+    }
     if (refMap == nullptr || assignmentTarget) return e;
     auto decl = refMap->getDeclaration(e->path);
     if (decl == nullptr) return e;

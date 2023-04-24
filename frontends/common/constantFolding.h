@@ -162,6 +162,12 @@ class ConstantFolding : public PassManager {
         if (typeMap != nullptr) passes.push_back(new ClearTypeMap(typeMap));
         setName("ConstantFolding");
     }
+
+    typedef std::function<const IR::Expression *(Visitor *, const IR::Expression *)>
+        filter_hook_t;
+    static filter_hook_t filter_hook;
+    static void setFilterHook(filter_hook_t filter) { filter_hook = filter; }
+    static void unsetFilterHook() { filter_hook = filter_hook_t(); }
 };
 
 }  // namespace P4
