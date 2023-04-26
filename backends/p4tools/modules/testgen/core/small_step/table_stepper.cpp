@@ -357,15 +357,12 @@ void TableStepper::setTableDefaultEntries(
         std::vector<ActionArg> ctrlPlaneArgs;
         for (size_t argIdx = 0; argIdx < parameters->size(); ++argIdx) {
             const auto *parameter = parameters->getParameter(argIdx);
-            // Synthesize a variables constant here that corresponds to a control plane argument.
+            // Synthesize a variable constant here that corresponds to a control plane argument.
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
-            const auto &actionDataVar =
-                getTableStateVariable(parameter->type, table, "*actionData", idx, argIdx);
             cstring paramName =
                 properties.tableName + "_arg_" + actionName + std::to_string(argIdx);
             const auto &actionArg = nextState.createSymbolicVariable(parameter->type, paramName);
-            nextState.set(actionDataVar, actionArg);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
             // Note how we use the control plane name for the parameter here.
@@ -414,8 +411,7 @@ void TableStepper::evalTableControlEntries(
     const auto *keys = table->getKey();
     BUG_CHECK(keys != nullptr, "An empty key list should have been handled earlier.");
 
-    for (size_t idx = 0; idx < tableActionList.size(); idx++) {
-        const auto *action = tableActionList.at(idx);
+    for (const auto *action : tableActionList) {
         // Grab the path from the method call.
         const auto *tableAction = action->expression->checkedTo<IR::MethodCallExpression>();
         // Try to find the action declaration corresponding to the path reference in the table.
@@ -436,15 +432,12 @@ void TableStepper::evalTableControlEntries(
         std::vector<ActionArg> ctrlPlaneArgs;
         for (size_t argIdx = 0; argIdx < parameters->size(); ++argIdx) {
             const auto *parameter = parameters->getParameter(argIdx);
-            // Synthesize a variables constant here that corresponds to a control plane argument.
+            // Synthesize a variable constant here that corresponds to a control plane argument.
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
-            const auto &actionDataVar =
-                getTableStateVariable(parameter->type, table, "*actionData", idx, argIdx);
             cstring paramName =
                 properties.tableName + "_arg_" + actionName + std::to_string(argIdx);
             const auto &actionArg = nextState.createSymbolicVariable(parameter->type, paramName);
-            nextState.set(actionDataVar, actionArg);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
             // Note how we use the control plane name for the parameter here.

@@ -113,12 +113,9 @@ void Bmv2V1ModelTableStepper::evalTableActionProfile(
             // Synthesize a symbolic variable here that corresponds to a control plane argument.
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
-            const auto &actionDataVar =
-                getTableStateVariable(parameter->type, table, "*actionData", idx, argIdx);
             cstring keyName =
                 properties.tableName + "_param_" + actionName + std::to_string(argIdx);
             const auto &actionArg = nextState.createSymbolicVariable(parameter->type, keyName);
-            nextState.set(actionDataVar, actionArg);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
             // Note how we use the control plane name for the parameter here.
@@ -204,12 +201,9 @@ void Bmv2V1ModelTableStepper::evalTableActionSelector(
             // Synthesize a symbolic variable here that corresponds to a control plane argument.
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
-            const auto &actionDataVar =
-                getTableStateVariable(parameter->type, table, "*actionData", idx, argIdx);
             cstring keyName =
                 properties.tableName + "_param_" + actionName + std::to_string(argIdx);
             const auto &actionArg = nextState.createSymbolicVariable(parameter->type, keyName);
-            nextState.set(actionDataVar, actionArg);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
             // Note how we use the control plane name for the parameter here.
