@@ -45,7 +45,7 @@ const IR::Expression *SharedPnaTableStepper::computeTargetMatchType(
         // We can recover from taint by simply not adding the optional match.
         // Create a new symbolic variable that corresponds to the key expression.
         cstring keyName = properties.tableName + "_key_" + keyProperties.name;
-        const auto ctrlPlaneKey = nextState.createSymbolicVariable(keyExpr->type, keyName);
+        const auto *ctrlPlaneKey = nextState.createSymbolicVariable(keyExpr->type, keyName);
         if (keyProperties.isTainted) {
             matches->emplace(keyProperties.name,
                              new Optional(keyProperties.key, ctrlPlaneKey, false));

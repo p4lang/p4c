@@ -238,11 +238,11 @@ void AbstractStepper::setHeaderValidity(const IR::Expression *expr, bool validit
         return;
     }
     const auto *exprType = expr->type->checkedTo<IR::Type_StructLike>();
-    std::vector<const IR::Member *> validityVector;
+    std::vector<IR::StateVariable> validityVector;
     auto fieldsVector = nextState.getFlatFields(expr, exprType, &validityVector);
     // The header is going to be invalid. Set all fields to taint constants.
     // TODO: Should we make this target specific? Some targets set the header fields to 0.
-    for (const auto *field : fieldsVector) {
+    for (const auto &field : fieldsVector) {
         nextState.set(field, programInfo.createTargetUninitialized(field->type, true));
     }
 }
@@ -347,21 +347,21 @@ const IR::Literal *AbstractStepper::evaluateExpression(
     return result;
 }
 
-void AbstractStepper::setTargetUninitialized(ExecutionState &nextState, const IR::Member *ref,
-                                             bool forceTaint) const {
+void AbstractStepper::setTargetUninitialized(ExecutionState &nextState,
+                                             const IR::StateVariable &ref, bool forceTaint) const {
     // Resolve the type of the left-and assignment, if it is a type name.
     const auto *refType = nextState.resolveType(ref->type);
     if (const auto *structType = refType->to<const IR::Type_StructLike>()) {
-        std::vector<const IR::Member *> validFields;
+        std::vector<IR::StateVariable> validFields;
         auto fields = nextState.getFlatFields(ref, structType, &validFields);
         // We also need to initialize the validity bits of the headers. These are false.
-        for (const auto *validField : validFields) {
+        for (const auto &validField : validFields) {
             nextState.set(validField, IR::getBoolLiteral(false));
         }
         // For each field in the undefined struct, we create a new symbolic variable.
         // If the variable does not have an initializer we need to create a new variable for it.
         // For now we just use the name directly.
-        for (const auto *field : fields) {
+        for (const auto &field : fields) {
             nextState.set(field, programInfo.createTargetUninitialized(field->type, forceTaint));
         }
     } else if (const auto *baseType = refType->to<const IR::Type_Base>()) {
@@ -374,16 +374,16 @@ void AbstractStepper::setTargetUninitialized(ExecutionState &nextState, const IR
 void AbstractStepper::declareStructLike(ExecutionState &nextState, const IR::Expression *parentExpr,
                                         const IR::Type_StructLike *structType,
                                         bool forceTaint) const {
-    std::vector<const IR::Member *> validFields;
+    std::vector<IR::StateVariable> validFields;
     auto fields = nextState.getFlatFields(parentExpr, structType, &validFields);
     // We also need to initialize the validity bits of the headers. These are false.
-    for (const auto *validField : validFields) {
+    for (const auto &validField : validFields) {
         nextState.set(validField, IR::getBoolLiteral(false));
     }
     // For each field in the undefined struct, we create a new symbolic variable.
     // If the variable does not have an initializer we need to create a new variable for it.
     // For now we just use the name directly.
-    for (const auto *field : fields) {
+    for (const auto &field : fields) {
         nextState.set(field, programInfo.createTargetUninitialized(field->type, forceTaint));
     }
 }

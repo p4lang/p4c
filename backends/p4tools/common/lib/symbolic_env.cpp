@@ -22,7 +22,7 @@ const IR::Expression *SymbolicEnv::get(const IR::StateVariable &var) const {
     if (it != map.end()) {
         return it->second;
     }
-    BUG("Unable to find var %s in the symbolic environment.", var->toString());
+    BUG("Unable to find var %s in the symbolic environment.", var);
 }
 
 bool SymbolicEnv::exists(const IR::StateVariable &var) const { return map.find(var) != map.end(); }

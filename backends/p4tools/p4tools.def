@@ -5,30 +5,32 @@
 class StateVariable : Expression {
     #noconstructor
 
-    /// The wrapped member.
-    const Member *member;
+    /// The wrapped reference.
+    const Expression *ref;
 
     /// The expression type is derived from the member.
-    StateVariable(Member member) : Expression(member->getSourceInfo(), member->type), member(member) {}
-
     /// Implicit conversions to allow implementations to be treated like a Member*.
 #emit
-    operator const Member *() const { return member; }
+    operator const Expression *() const { return ref; }
 #end
-    Member const &operator*() const { return *member; }
-    Member operator->() const { return member; }
+    Expression const &operator*() const { return *ref; }
+    Expression operator->() const { return ref; }
+
+    StateVariable(Member member) : Expression(member->getSourceInfo(), member->type), ref(member) {}
+    /// The expression type is derived from the path.
+    StateVariable(PathExpression path) : Expression(path->getSourceInfo(), path->type), ref(path) {}
 
     /// Implements comparisons so that StateVariables can be used as map keys.
     bool operator==(const StateVariable &other) const override {
         // Delegate to IR's notion of equality.
-        return *member == *other.member;
+        return *ref == *other.ref;
     }
 
     /// Implements comparisons so that StateVariables can be used as map keys.
     bool operator<(const StateVariable &other) const {
         // We use a custom compare function.
         // TODO: Is there a faster way to implement this comparison?
-        return compare(member, other.member) < 0;
+        return compare(ref, other.ref) < 0;
     }
 
     int compare(const Expression *e1, const Expression *e2) const {
@@ -77,9 +79,9 @@ class StateVariable : Expression {
         return 0;
     }
 
-    toString { return member->toString(); }
+    toString { return ref->toString(); }
 
-    dbprint { member->dbprint(out); }
+    dbprint { ref->dbprint(out); }
 }
 
 /// Signifies that a particular expression is tainted.

@@ -69,8 +69,8 @@ void CmdStepper::declareVariable(ExecutionState &nextState, const IR::Declaratio
     } else if (declType->is<IR::Type_Base>()) {
         // If the variable does not have an initializer we need to create a new value for it. For
         // now we just use the name directly.
-        const auto &left = nextState.convertPathExpr(new IR::PathExpression(decl->name));
-        nextState.set(left, programInfo.createTargetUninitialized(decl->type, false));
+        const auto *left = new IR::PathExpression(declType, new IR::Path(decl->name.name));
+        nextState.set(left, programInfo.createTargetUninitialized(declType, false));
     } else {
         TESTGEN_UNIMPLEMENTED("Unsupported declaration type %1% node: %2%", declType,
                               declType->node_type_name());
@@ -99,13 +99,13 @@ void CmdStepper::initializeBlockParams(const IR::Type_Declaration *typeDecl,
         }
         // We need to resolve type names.
         paramType = nextState.resolveType(paramType);
-        const auto *paramPath = new IR::PathExpression(paramType, new IR::Path(archRef));
+
         if (const auto *ts = paramType->to<IR::Type_StructLike>()) {
+            const auto *paramPath = new IR::PathExpression(paramType, new IR::Path(archRef));
             declareStructLike(nextState, paramPath, ts, forceTaint);
-        } else if (const auto *tb = paramType->to<IR::Type_Base>()) {
-            // If the type is a flat Type_Base, postfix it with a "*".
-            const auto &paramRef = ToolsVariables::addStateVariablePostfix(paramPath, tb);
-            nextState.set(paramRef, programInfo.createTargetUninitialized(paramType, forceTaint));
+        } else if (paramType->is<IR::Type_Base>()) {
+            const auto &paramPath = ToolsVariables::getStateVariable(paramType, archRef);
+            nextState.set(paramPath, programInfo.createTargetUninitialized(paramType, forceTaint));
         } else {
             P4C_UNIMPLEMENTED("Unsupported initialization type %1%", paramType->node_type_name());
         }
@@ -125,7 +125,7 @@ bool CmdStepper::preorder(const IR::AssignmentStatement *assign) {
     }
 
     state.markVisited(assign);
-    const auto *left = assign->left;
+    const auto &left = ExecutionState::convertReference(assign->left);
     const auto *leftType = left->type;
 
     // Resolve the type of the left-and assignment, if it is a type name.
@@ -138,23 +138,19 @@ bool CmdStepper::preorder(const IR::AssignmentStatement *assign) {
     if (const auto *structType = leftType->to<IR::Type_StructLike>()) {
         const auto *listExpr = assign->right->checkedTo<IR::ListExpression>();
 
-        std::vector<const IR::Member *> flatRefValids;
+        std::vector<IR::StateVariable> flatRefValids;
         auto flatRefFields = state.getFlatFields(left, structType, &flatRefValids);
         // First, complete the assignments for the data structure.
         for (size_t idx = 0; idx < flatRefFields.size(); ++idx) {
-            const auto *leftFieldRef = flatRefFields[idx];
+            const auto &leftFieldRef = flatRefFields[idx];
             state.set(leftFieldRef, listExpr->components[idx]);
         }
         // In case of a header, we also need to set the validity bits to true.
-        for (const auto *headerValid : flatRefValids) {
+        for (const auto &headerValid : flatRefValids) {
             state.set(headerValid, IR::getBoolLiteral(true));
         }
     } else if (leftType->is<IR::Type_Base>()) {
-        // Convert a path expression into the respective member.
-        if (const auto *path = assign->left->to<IR::PathExpression>()) {
-            left = state.convertPathExpr(path);
-        }
-        state.set(left->checkedTo<IR::Member>(), assign->right);
+        state.set(left, assign->right);
     } else {
         TESTGEN_UNIMPLEMENTED("Unsupported assign type %1% node: %2%", leftType,
                               leftType->node_type_name());

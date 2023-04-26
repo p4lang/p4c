@@ -124,7 +124,7 @@ const IR::Expression *Model::get(const IR::StateVariable &var, bool checked) con
     if (it != end()) {
         return it->second;
     }
-    BUG_CHECK(!checked, "Unable to find var %s in the model.", var->toString());
+    BUG_CHECK(!checked, "Unable to find var %s in the model.", var);
     return nullptr;
 }
 

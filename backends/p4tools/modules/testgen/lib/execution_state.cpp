@@ -98,26 +98,28 @@ std::optional<const Continuation::Command> ExecutionState::getNextCmd() const {
 }
 
 const IR::Expression *ExecutionState::get(const IR::StateVariable &var) const {
-    const auto *expr = env.get(var);
-    if (var->expr->type->is<IR::Type_Header>() && var->member != ToolsVariables::VALID) {
-        // If we are setting the member of a header, we need to check whether the
-        // header is valid.
-        // If the header is invalid, the get returns a tainted expression.
-        // The member could have any value.
-        // TODO: This is a convoluted check. We should be using runtime objects instead of flat
-        // assignments.
-        auto validity = ToolsVariables::getHeaderValidity(var->expr);
-        const auto *validVar = env.get(validity);
-        // The validity bit could already be tainted or the validity bit is false.
-        // Both outcomes lead to a tainted write.
-        bool isTainted = validVar->is<IR::TaintExpression>();
-        if (const auto *validBool = validVar->to<IR::BoolLiteral>()) {
-            isTainted = !validBool->value;
-        }
-        if (isTainted) {
-            return ToolsVariables::getTaintExpression(expr->type);
+    // TODO: This is a convoluted (and expensive?) check because struct members are not directly
+    // associated with a header. We should be using runtime objects instead of flat assignments.
+    if (const auto *member = var->to<IR::Member>()) {
+        if (member->expr->type->is<IR::Type_Header>() && member->member != ToolsVariables::VALID) {
+            // If we are setting the member of a header, we need to check whether the
+            // header is valid.
+            // If the header is invalid, the get returns a tainted expression.
+            // The member could have any value.
+            auto validity = ToolsVariables::getHeaderValidity(member->expr);
+            const auto *validVar = env.get(validity);
+            // The validity bit could already be tainted or the validity bit is false.
+            // Both outcomes lead to a tainted write.
+            bool isTainted = validVar->is<IR::TaintExpression>();
+            if (const auto *validBool = validVar->to<IR::BoolLiteral>()) {
+                isTainted = !validBool->value;
+            }
+            if (isTainted) {
+                return ToolsVariables::getTaintExpression(var->type);
+            }
         }
     }
+    const auto *expr = env.get(var);
     return expr;
 }
 
@@ -503,13 +505,13 @@ void ExecutionState::appendToEmitBuffer(const IR::Expression *expr) {
     env.set(&PacketVars::EMIT_BUFFER_LABEL, concat);
 }
 
-void ExecutionState::setParserErrorLabel(const IR::Member *parserError) {
-    parserErrorLabel = parserError;
+void ExecutionState::setParserErrorLabel(const IR::StateVariable &parserError) {
+    parserErrorLabel.emplace(parserError);
 }
 
-const IR::Member *ExecutionState::getCurrentParserErrorLabel() const {
-    CHECK_NULL(parserErrorLabel);
-    return parserErrorLabel;
+const IR::StateVariable &ExecutionState::getCurrentParserErrorLabel() const {
+    BUG_CHECK(parserErrorLabel.has_value(), "Parser error label has not been set.");
+    return parserErrorLabel.value();
 }
 
 /* =============================================================================================
@@ -538,10 +540,10 @@ const IR::SymbolicVariable *ExecutionState::createSymbolicVariable(const IR::Typ
  *  General utilities involving ExecutionState.
  * ========================================================================================= */
 
-std::vector<const IR::Member *> ExecutionState::getFlatFields(
+std::vector<IR::StateVariable> ExecutionState::getFlatFields(
     const IR::Expression *parent, const IR::Type_StructLike *ts,
-    std::vector<const IR::Member *> *validVector) const {
-    std::vector<const IR::Member *> flatFields;
+    std::vector<IR::StateVariable> *validVector) const {
+    std::vector<IR::StateVariable> flatFields;
     for (const auto *field : ts->fields) {
         const auto *fieldType = resolveType(field->type);
         if (const auto *ts = fieldType->to<IR::Type_StructLike>()) {
@@ -599,8 +601,14 @@ const IR::P4Action *ExecutionState::getActionDecl(const IR::Expression *expressi
     }
     return expression->to<IR::P4Action>();
 }
-const IR::StateVariable &ExecutionState::convertPathExpr(const IR::PathExpression *path) {
-    return ToolsVariables::getStateVariable(path->type, path->path->name);
+
+IR::StateVariable ExecutionState::convertReference(const IR::Expression *ref) {
+    if (const auto *member = ref->to<IR::Member>()) {
+        return member;
+    }
+    // Local variable.
+    const auto *path = ref->checkedTo<IR::PathExpression>();
+    return path;
 }
 
 ExecutionState &ExecutionState::create(const IR::P4Program *program) {

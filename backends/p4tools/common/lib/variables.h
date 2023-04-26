@@ -43,11 +43,6 @@ class ToolsVariables {
     ///
     /// @param headerRef a header instance. This is either a Member or a PathExpression.
     static IR::StateVariable getHeaderValidity(const IR::Expression *headerRef);
-
-    /// @returns a IR::StateVariable that is postfixed with "*". This is used for PathExpressions
-    /// with are not yet members.
-    static IR::StateVariable addStateVariablePostfix(const IR::Expression *paramPath,
-                                                     const IR::Type_Base *baseType);
 };
 
 }  // namespace P4Tools

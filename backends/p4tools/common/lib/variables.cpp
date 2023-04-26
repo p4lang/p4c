@@ -30,11 +30,6 @@ IR::StateVariable ToolsVariables::getHeaderValidity(const IR::Expression *header
     return new IR::Member(IR::Type::Boolean::get(), headerRef, VALID);
 }
 
-IR::StateVariable ToolsVariables::addStateVariablePostfix(const IR::Expression *paramPath,
-                                                          const IR::Type_Base *baseType) {
-    return new IR::Member(baseType, paramPath, "*");
-}
-
 const IR::TaintExpression *ToolsVariables::getTaintExpression(const IR::Type *type) {
     // Do not cache varbits.
     if (type->is<IR::Extracted_Varbits>()) {

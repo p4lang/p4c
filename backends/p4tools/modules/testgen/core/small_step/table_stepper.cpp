@@ -130,9 +130,9 @@ const IR::Expression *TableStepper::computeTargetMatchType(ExecutionState &nextS
                                                            TableMatchMap *matches,
                                                            const IR::Expression *hitCondition) {
     const IR::Expression *keyExpr = keyProperties.key->expression;
-    // Create a new variables constant that corresponds to the key expression.
+    // Create a new variable constant that corresponds to the key expression.
     cstring keyName = properties.tableName + "_key_" + keyProperties.name;
-    const auto ctrlPlaneKey = nextState.createSymbolicVariable(keyExpr->type, keyName);
+    const auto *ctrlPlaneKey = nextState.createSymbolicVariable(keyExpr->type, keyName);
 
     if (keyProperties.matchType == P4Constants::MATCH_KIND_EXACT) {
         hitCondition = new IR::LAnd(hitCondition, new IR::Equ(keyExpr, ctrlPlaneKey));
@@ -217,7 +217,7 @@ void TableStepper::setTableAction(ExecutionState &nextState,
               table);
     // Store the selected action.
     const auto &tableActionVar = getTableActionVar(table);
-    nextState.set(tableActionVar, IR::getConstant(tableActionVar->type, actionIdx));
+    nextState.set(tableActionVar, IR::getConstant(tableActionVar.type, actionIdx));
 }
 
 const IR::Expression *TableStepper::evalTableConstEntries() {

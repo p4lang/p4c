@@ -65,8 +65,8 @@ class ExecutionState {
     /// The symbolic environment. Maps program variables to their symbolic values.
     SymbolicEnv env;
 
-    /// The list of variabless that have been created in this state.
-    /// These variabless are later fed to the model for completion.
+    /// The list of variables that have been created in this state.
+    /// These variables are later fed to the model for completion.
     SymbolicSet allocatedSymbolicVariables;
 
     /// The program trace for the current program point (i.e., how we got to the current state).
@@ -107,7 +107,7 @@ class ExecutionState {
 
     /// The parserErrorLabel is set by the parser to indicate the variable corresponding to the
     /// parser error that is set by various built-in functions such as verify or extract.
-    const IR::Member *parserErrorLabel = nullptr;
+    std::optional<IR::StateVariable> parserErrorLabel = std::nullopt;
 
     /// This variable tracks how much of the input packet has been parsed.
     /// Typically, this is equivalent to the size of the input packet. However, there may be
@@ -402,10 +402,10 @@ class ExecutionState {
     void appendToEmitBuffer(const IR::Expression *expr);
 
     /// Set the parser error label to the @param parserError.
-    void setParserErrorLabel(const IR::Member *parserError);
+    void setParserErrorLabel(const IR::StateVariable &parserError);
 
     /// @returns the current parser error label. Throws a BUG if the label is a nullptr.
-    [[nodiscard]] const IR::Member *getCurrentParserErrorLabel() const;
+    [[nodiscard]] const IR::StateVariable &getCurrentParserErrorLabel() const;
 
     /* =========================================================================================
      *  Variables and symbolic constants.
@@ -434,9 +434,9 @@ class ExecutionState {
     /// "prefix.h.ethernet.src_address", ...}).
     /// If @arg validVector is provided, this function also collects the validity bits of the
     /// headers.
-    [[nodiscard]] std::vector<const IR::Member *> getFlatFields(
+    [[nodiscard]] std::vector<IR::StateVariable> getFlatFields(
         const IR::Expression *parent, const IR::Type_StructLike *ts,
-        std::vector<const IR::Member *> *validVector = nullptr) const;
+        std::vector<IR::StateVariable> *validVector = nullptr) const;
 
     /// Gets table type from a member.
     /// @returns nullptr is member type is not a IR::P4Table.
@@ -445,12 +445,9 @@ class ExecutionState {
     /// Gets action type from an expression.
     [[nodiscard]] const IR::P4Action *getActionDecl(const IR::Expression *expression) const;
 
-    /// @returns a translation of the path expression into a member.
-    /// This function looks up the path expression in the namespace and tries to find the
-    /// corresponding declaration. It then converts the name of the declaration into a variables
-    /// constant and returns. This is necessary because we sometimes
-    /// get flat declarations without members (e.g., bit<8> tmp;)
-    [[nodiscard]] static const IR::StateVariable &convertPathExpr(const IR::PathExpression *path);
+    /// @returns an IR::Expression converted into a StateVariable. Currently only IR::PathExpression
+    /// and IR::Member can be converted into a state variable.
+    [[nodiscard]] static IR::StateVariable convertReference(const IR::Expression *ref);
 
     /// Allocate a new execution state object with the same state as this object.
     /// Returns a reference, not a pointer.
