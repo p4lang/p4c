@@ -36,8 +36,8 @@
 namespace P4Tools::P4Testgen::Pna {
 
 const IR::Expression *SharedPnaTableStepper::computeTargetMatchType(
-    ExecutionState &nextState, const KeyProperties &keyProperties, TableMatchMap *matches,
-    const IR::Expression *hitCondition) {
+    ExecutionState &nextState, const TableUtils::KeyProperties &keyProperties,
+    TableMatchMap *matches, const IR::Expression *hitCondition) {
     const IR::Expression *keyExpr = keyProperties.key->expression;
 
     // TODO: We consider optional match types to be a no-op, but we could make them exact matches.

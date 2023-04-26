@@ -80,55 +80,9 @@ const IR::StateVariable &TableStepper::getTableReachedVar(const IR::P4Table *tab
     return getTableStateVariable(IR::Type::Boolean::get(), table, "*reached");
 }
 
-bool TableStepper::compareLPMEntries(const IR::Entry *leftIn, const IR::Entry *rightIn,
-                                     size_t lpmIndex) {
-    // Get the entry key that matches with provided lpm index.
-    // There should only be one and we only need to compare this precision.
-    BUG_CHECK(
-        lpmIndex < leftIn->keys->components.size() && lpmIndex < rightIn->keys->components.size(),
-        "LPM index out of range.");
-    const auto *left = leftIn->keys->components.at(lpmIndex);
-    const auto *right = rightIn->keys->components.at(lpmIndex);
-
-    // The expressions are equivalent, so no need to compare.
-    if (left->equiv(*right)) {
-        return true;
-    }
-
-    // DefaultExpression are least precise.
-    if (left->is<IR::DefaultExpression>()) {
-        return true;
-    }
-    if (right->is<IR::DefaultExpression>()) {
-        return false;
-    }
-    // Constants are implicitly more precise than masks.
-    if (left->is<IR::Constant>() && right->is<IR::Mask>()) {
-        return true;
-    }
-    if (left->is<IR::Mask>() && right->is<IR::Constant>()) {
-        return false;
-    }
-
-    const IR::Constant *leftMaskVal = nullptr;
-    const IR::Constant *rightMaskVal = nullptr;
-    if (const auto *leftMask = left->to<IR::Mask>()) {
-        leftMaskVal = leftMask->right->checkedTo<IR::Constant>();
-        // The other value must be a mask at this point.
-        if (const auto *rightMask = right->checkedTo<IR::Mask>()) {
-            rightMaskVal = rightMask->right->checkedTo<IR::Constant>();
-        }
-        return (leftMaskVal->value) >= (rightMaskVal->value);
-    }
-
-    BUG("Unhandled sort elements type: left: %1% - %2% \n right: %3% - %4% ", left,
-        left->node_type_name(), right, right->node_type_name());
-}
-
-const IR::Expression *TableStepper::computeTargetMatchType(ExecutionState &nextState,
-                                                           const KeyProperties &keyProperties,
-                                                           TableMatchMap *matches,
-                                                           const IR::Expression *hitCondition) {
+const IR::Expression *TableStepper::computeTargetMatchType(
+    ExecutionState &nextState, const TableUtils::KeyProperties &keyProperties,
+    TableMatchMap *matches, const IR::Expression *hitCondition) {
     const IR::Expression *keyExpr = keyProperties.key->expression;
     // Create a new variable constant that corresponds to the key expression.
     cstring keyName = properties.tableName + "_key_" + keyProperties.name;
@@ -239,8 +193,8 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
         const auto *keyElement = keys->keyElements.at(idx);
         if (keyElement->matchType->path->toString() == P4Constants::MATCH_KIND_LPM) {
             std::sort(entryVector.begin(), entryVector.end(), [idx](auto &&PH1, auto &&PH2) {
-                return compareLPMEntries(std::forward<decltype(PH1)>(PH1),
-                                         std::forward<decltype(PH2)>(PH2), idx);
+                return TableUtils::compareLPMEntries(std::forward<decltype(PH1)>(PH1),
+                                                     std::forward<decltype(PH2)>(PH2), idx);
             });
             break;
         }
@@ -601,24 +555,11 @@ bool TableStepper::resolveTableKeys() {
         bool keyHasTaint = state->hasTaint(keyElement->expression);
 
         // Initialize the standard keyProperties.
-        KeyProperties keyProperties(keyElement, fieldName, keyIdx, keyMatchType, keyHasTaint);
+        TableUtils::KeyProperties keyProperties(keyElement, fieldName, keyIdx, keyMatchType,
+                                                keyHasTaint);
         properties.resolvedKeys.emplace_back(keyProperties);
     }
     return false;
-}
-
-void TableStepper::checkTableIsImmutable() {
-    bool isConstant = false;
-    const auto *entriesAnnotation = table->properties->getProperty("entries");
-    if (entriesAnnotation != nullptr) {
-        isConstant = entriesAnnotation->isConstant;
-    }
-    // Also check if the table is invisible to the control plane.
-    // This also implies that it cannot be modified.
-    properties.tableIsImmutable = isConstant || table->getAnnotation("hidden") != nullptr;
-    const auto *defaultAction = table->properties->getProperty("default_action");
-    CHECK_NULL(defaultAction);
-    properties.defaultIsImmutable = defaultAction->isConstant;
 }
 
 std::vector<const IR::ActionListElement *> TableStepper::buildTableActionList() {
@@ -696,7 +637,7 @@ void TableStepper::evalTargetTable(
 
 bool TableStepper::eval() {
     // Set the appropriate properties when the table is immutable, meaning it has constant entries.
-    checkTableIsImmutable();
+    TableUtils::checkTableImmutability(table, properties);
     // Resolve any non-symbolic table keys. The function returns true when a key needs replacement.
     if (resolveTableKeys()) {
         return false;
