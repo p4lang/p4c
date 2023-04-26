@@ -20,6 +20,8 @@ limitations under the License.
 #include <fstream>  // IWYU pragma: keep
 #include <stdexcept>
 
+#include <sys/wait.h>
+
 #include "helpers.h"
 
 #include "frontends/common/applyOptionsPragmas.h"
