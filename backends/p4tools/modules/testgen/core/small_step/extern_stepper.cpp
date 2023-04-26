@@ -9,6 +9,7 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 
+#include "backends/p4tools/common/lib/constants.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/variables.h"
@@ -729,7 +730,8 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  if (varbit->size < varBitFieldSize) {
                      auto &nextState = state.clone();
                      nextState.set(state.getCurrentParserErrorLabel(),
-                                   IR::getConstant(programInfo.getParserErrorType(), 4));
+                                   IR::getConstant(programInfo.getParserErrorType(),
+                                                   P4Constants::PARSER_ERROR_HEADER_TOO_SHORT));
                      nextState.replaceTopBody(Continuation::Exception::Reject);
                      result->emplace_back(condInfo.advanceCond, state, nextState);
                      return;
