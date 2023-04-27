@@ -21,6 +21,7 @@ limitations under the License.
 
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 
 #include <regex>
 #include <unordered_set>
