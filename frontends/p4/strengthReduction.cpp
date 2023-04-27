@@ -230,14 +230,14 @@ const IR::Node *DoStrengthReduction::postorder(IR::Mul *expr) {
     if (isOne(expr->right)) return expr->left;
     auto exp = isPowerOf2(expr->left);
     if (exp >= 0) {
-        auto amt = new IR::Constant(expr->left->type, exp);
-        auto sh = new IR::Shl(expr->srcInfo, expr->right->type, expr->right, amt);
+        auto amt = new IR::Constant(exp);
+        auto sh = new IR::Shl(expr->srcInfo, expr->right, amt);
         return sh;
     }
     exp = isPowerOf2(expr->right);
     if (exp >= 0) {
-        auto amt = new IR::Constant(expr->right->type, exp);
-        auto sh = new IR::Shl(expr->srcInfo, expr->left->type, expr->left, amt);
+        auto amt = new IR::Constant(exp);
+        auto sh = new IR::Shl(expr->srcInfo, expr->left, amt);
         return sh;
     }
     if (hasSideEffects(expr)) return expr;
@@ -254,7 +254,7 @@ const IR::Node *DoStrengthReduction::postorder(IR::Div *expr) {
     if (isOne(expr->right)) return expr->left;
     auto exp = isPowerOf2(expr->right);
     if (exp >= 0) {
-        auto amt = new IR::Constant(expr->right->type, exp);
+        auto amt = new IR::Constant(exp);
         auto sh = new IR::Shr(expr->srcInfo, expr->left, amt);
         return sh;
     }
@@ -272,7 +272,7 @@ const IR::Node *DoStrengthReduction::postorder(IR::Mod *expr) {
     if (exp >= 0) {
         big_int mask = 1;
         mask = (mask << exp) - 1;
-        auto amt = new IR::Constant(expr->right->type, mask);
+        auto amt = new IR::Constant(expr->right->to<IR::Constant>()->type, mask);
         auto sh = new IR::BAnd(expr->srcInfo, expr->left, amt);
         return sh;
     }
