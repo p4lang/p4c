@@ -194,10 +194,33 @@ class JSONGenerator {
     }
 
     void generate(cstring v) {
-        if (v)
-            out << "\"" << v << "\"";
-        else
+        if (v) {
+            out << "\"";
+            for (auto ch : v) {
+                switch (ch) {
+                    case '\n':
+                        out << "\\n";
+                        break;
+                    case '\r':
+                        out << "\\r";
+                        break;
+                    case '\t':
+                        out << "\\t";
+                        break;
+                    case '\"':
+                        out << "\\\"";
+                        break;
+                    case '\\':
+                        out << "\\\\";
+                        break;
+                    default:
+                        out << ch;
+                }
+            }
+            out << "\"";
+        } else {
             out << "null";
+        }
     }
     template <typename T>
     typename std::enable_if<std::is_same<T, LTBitMatrix>::value || std::is_enum<T>::value>::type

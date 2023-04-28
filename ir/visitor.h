@@ -51,6 +51,18 @@ struct Visitor_Context {
     mutable int child_index;
     mutable const char *child_name;
     int depth;
+    template <class T>
+    inline const T *findContext(const Visitor_Context *&c) const {
+        c = this;
+        while ((c = c->parent))
+            if (auto *rv = dynamic_cast<const T *>(c->node)) return rv;
+        return nullptr;
+    }
+    template <class T>
+    inline const T *findContext() const {
+        const Visitor_Context *c = this;
+        return findContext<T>(c);
+    }
 };
 
 class SplitFlowVisit_base;

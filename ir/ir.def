@@ -338,6 +338,13 @@ class P4Table : Declaration, IAnnotated, IApply {
                     return k; } }
             error(ErrorType::ERR_INVALID, "%1% must be a constant numeric expression", d); }
         return nullptr; }
+    BoolLiteral getBooleanProperty(cstring name) const {
+        if (auto d = properties->getProperty(name)) {
+            if (auto ev = d->value->to<IR::ExpressionValue>()) {
+                if (auto k = ev->expression->to<IR::BoolLiteral>()) {
+                    return k; } }
+            error(ErrorType::ERR_INVALID, "%1% must be a boolean expression", d); }
+        return nullptr; }
     Constant getSizeProperty() const {
         return getConstantProperty(TableProperties::sizePropertyName);
     }

@@ -221,7 +221,24 @@ class JSONLoader {
     }
     void unpack_json(big_int &v) { v = json->to<JsonNumber>()->val; }
     void unpack_json(cstring &v) {
-        if (!json->is<JsonNull>()) v = *json->to<std::string>();
+        std::string tmp = *json->to<std::string>();
+        std::string::size_type p = 0;
+        while ((p = tmp.find('\\', p)) != std::string::npos) {
+            tmp.erase(p, 1);
+            switch (tmp[p]) {
+                case 'n':
+                    tmp[p] = '\n';
+                    break;
+                case 'r':
+                    tmp[p] = '\r';
+                    break;
+                case 't':
+                    tmp[p] = '\t';
+                    break;
+            }
+            p++;
+        }
+        if (!json->is<JsonNull>()) v = tmp;
     }
     void unpack_json(IR::ID &v) {
         if (!json->is<JsonNull>()) v.name = *json->to<std::string>();

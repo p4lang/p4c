@@ -295,6 +295,11 @@ cstring SourceInfo::getSourceFile() const {
     return sourceLine.fileName;
 }
 
+cstring SourceInfo::getLineNum() const {
+    SourceFileLine sourceLine = sources->getSourceLine(start.getLineNumber());
+    return toString(sourceLine.sourceLine);
+}
+
 ////////////////////////////////////////////////////////
 
 cstring SourceFileLine::toString() const {
