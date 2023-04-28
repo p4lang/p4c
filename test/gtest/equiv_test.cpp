@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -43,16 +43,16 @@ TEST(IR, Equiv) {
     EXPECT_FALSE(d1m->equiv(*em));
     EXPECT_FALSE(d1m->equiv(*d1f));
 
-    auto *call1 = new IR::MethodCallExpression(d1m, { a1, d1 });
-    auto *call2 = new IR::MethodCallExpression(d2m, { a2, d2 });
-    auto *call3 = new IR::MethodCallExpression(d1m, { b, d1 });
+    auto *call1 = new IR::MethodCallExpression(d1m, {a1, d1});
+    auto *call2 = new IR::MethodCallExpression(d2m, {a2, d2});
+    auto *call3 = new IR::MethodCallExpression(d1m, {b, d1});
 
     EXPECT_TRUE(call1->equiv(*call2));
     EXPECT_FALSE(call1->equiv(*call3));
 
-    auto *list1 = new IR::ListExpression({ a1, b, d1 });
-    auto *list2 = new IR::ListExpression({ a1, b, d2 });
-    auto *list3 = new IR::ListExpression({ a1, b, e });
+    auto *list1 = new IR::ListExpression({a1, b, d1});
+    auto *list2 = new IR::ListExpression({a1, b, d2});
+    auto *list3 = new IR::ListExpression({a1, b, e});
 
     EXPECT_TRUE(list1->equiv(*list2));
     EXPECT_FALSE(list1->equiv(*list3));

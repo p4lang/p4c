@@ -14,24 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "gtest/gtest.h"
-#include "ir/ir.h"
-#include "helpers.h"
-#include "lib/log.h"
-
 #include "frontends/common/parseInput.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/createBuiltins.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
-
+#include "gtest/gtest.h"
+#include "helpers.h"
+#include "ir/ir.h"
+#include "lib/log.h"
 
 using namespace P4;
 
 namespace Test {
 
-class P4CArchitecture : public P4CTest { };
+class P4CArchitecture : public P4CTest {};
 
 TEST_F(P4CArchitecture, packet_out) {
     std::string program = P4_SOURCE(R"(
@@ -57,10 +55,8 @@ TEST_F(P4CArchitecture, packet_out) {
     ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
     ReferenceMap refMap;
-    TypeMap      typeMap;
-    PassManager  passes({
-        new TypeChecking(&refMap, &typeMap)
-    });
+    TypeMap typeMap;
+    PassManager passes({new TypeChecking(&refMap, &typeMap)});
 
     pgm = pgm->apply(passes);
     ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
@@ -92,10 +88,8 @@ TEST_F(P4CArchitecture, duplicatedDeclarationBug) {
 
     if (pgm != nullptr) {
         ReferenceMap refMap;
-        TypeMap      typeMap;
-        PassManager  passes({
-            new TypeChecking(&refMap, &typeMap)
-        });
+        TypeMap typeMap;
+        PassManager passes({new TypeChecking(&refMap, &typeMap)});
 
         pgm = pgm->apply(passes);
     }
@@ -141,10 +135,8 @@ TEST_F(P4CArchitecture, instantiation) {
     ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
     ReferenceMap refMap;
-    TypeMap      typeMap;
-    PassManager  passes({
-        new TypeChecking(&refMap, &typeMap)
-    });
+    TypeMap typeMap;
+    PassManager passes({new TypeChecking(&refMap, &typeMap)});
 
     pgm = pgm->apply(passes);
     ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
@@ -173,10 +165,8 @@ TEST_F(P4CArchitecture, psa_package_with_body) {
 
     if (pgm != nullptr) {
         ReferenceMap refMap;
-        TypeMap      typeMap;
-        PassManager  passes({
-            new TypeChecking(&refMap, &typeMap)
-        });
+        TypeMap typeMap;
+        PassManager passes({new TypeChecking(&refMap, &typeMap)});
         pgm = pgm->apply(passes);
     }
     ASSERT_GT(::errorCount(), 0U);
@@ -211,10 +201,8 @@ TEST_F(P4CArchitecture, psa_control_in_control) {
     ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
     ReferenceMap refMap;
-    TypeMap      typeMap;
-    PassManager  passes({
-        new TypeChecking(&refMap, &typeMap)
-    });
+    TypeMap typeMap;
+    PassManager passes({new TypeChecking(&refMap, &typeMap)});
     pgm = pgm->apply(passes);
     ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 }
@@ -237,10 +225,8 @@ TEST_F(P4CArchitecture, psa_clone_as_param_to_package) {
     ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
     ReferenceMap refMap;
-    TypeMap      typeMap;
-    PassManager  passes({
-        new TypeChecking(&refMap, &typeMap)
-    });
+    TypeMap typeMap;
+    PassManager passes({new TypeChecking(&refMap, &typeMap)});
     pgm = pgm->apply(passes);
     ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 }
@@ -272,10 +258,8 @@ TEST_F(P4CArchitecture, psa_clone_as_param_to_control) {
     ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
     ReferenceMap refMap;
-    TypeMap      typeMap;
-    PassManager  passes({
-        new TypeChecking(&refMap, &typeMap)
-    });
+    TypeMap typeMap;
+    PassManager passes({new TypeChecking(&refMap, &typeMap)});
     pgm = pgm->apply(passes);
     ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 }
@@ -315,10 +299,8 @@ TEST_F(P4CArchitecture, psa_clone_as_param_to_extern) {
     ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
     ReferenceMap refMap;
-    TypeMap      typeMap;
-    PassManager  passes({
-        new TypeChecking(&refMap, &typeMap)
-    });
+    TypeMap typeMap;
+    PassManager passes({new TypeChecking(&refMap, &typeMap)});
     pgm = pgm->apply(passes);
     ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 }
@@ -347,10 +329,8 @@ TEST_F(P4CArchitecture, clone_as_extern_method) {
     ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
     ReferenceMap refMap;
-    TypeMap      typeMap;
-    PassManager  passes({
-        new TypeChecking(&refMap, &typeMap)
-    });
+    TypeMap typeMap;
+    PassManager passes({new TypeChecking(&refMap, &typeMap)});
     pgm = pgm->apply(passes);
     ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 }

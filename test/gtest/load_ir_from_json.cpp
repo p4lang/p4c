@@ -14,18 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <thread>
+#include <unistd.h>
+
 #include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <string>
+#include <thread>
 
 #include "gtest/gtest.h"
-#include "ir/ir.h"
 #include "helpers.h"
+#include "ir/ir.h"
 #include "lib/log.h"
 
 using namespace P4;
@@ -33,19 +34,22 @@ using namespace std;
 
 namespace Test {
 
-class FromJSONTest : public P4CTest { };
+class FromJSONTest : public P4CTest {};
 
 TEST_F(FromJSONTest, load_ir_from_json) {
-    int exitCode = system("./p4c-bm2-ss -o outputTO.json ../test/test_fromJSON.p4 "
-                          "--toJSON jsonFile.json");
+    int exitCode = system(
+        "./p4c-bm2-ss -o outputTO.json ../test/test_fromJSON.p4 "
+        "--toJSON jsonFile.json");
     ASSERT_FALSE(exitCode);
     exitCode = system("./p4c-bm2-ss -o outputFROM.json --fromJSON jsonFile.json");
     ASSERT_FALSE(exitCode);
-    exitCode = system("grep -v program outputTO.json > outputTO.json.tmp; "
-                      "mv outputTO.json.tmp outputTO.json");
+    exitCode = system(
+        "grep -v program outputTO.json > outputTO.json.tmp; "
+        "mv outputTO.json.tmp outputTO.json");
     ASSERT_FALSE(exitCode);
-    exitCode = system("grep -v program outputFROM.json > outputFROM.json.tmp; "
-                      "mv outputFROM.json.tmp outputFROM.json");
+    exitCode = system(
+        "grep -v program outputFROM.json > outputFROM.json.tmp; "
+        "mv outputFROM.json.tmp outputFROM.json");
     ASSERT_FALSE(exitCode);
     exitCode = system("diff outputTO.json outputFROM.json");
     ASSERT_FALSE(exitCode);

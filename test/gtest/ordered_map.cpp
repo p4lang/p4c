@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "gtest/gtest.h"
 #include "lib/ordered_map.h"
+
+#include "gtest/gtest.h"
 
 namespace Test {
 
@@ -122,7 +123,7 @@ TEST(ordered_map, insert_emplace_erase) {
     typename ordered_map<unsigned, unsigned>::const_iterator it = om.end();
     for (auto v : {0, 1, 2, 3, 4, 5, 6, 7, 8}) {
         sm.emplace(v, 2 * v);
-        std::pair<unsigned, unsigned> pair {v, 2 * v};
+        std::pair<unsigned, unsigned> pair{v, 2 * v};
         if (v % 2 == 0) {
             if ((v / 2) % 2 == 0) {
                 it = om.insert(pair).first;
@@ -147,6 +148,5 @@ TEST(ordered_map, insert_emplace_erase) {
     EXPECT_TRUE(om.size() == sm.size());
     EXPECT_TRUE(std::equal(om.begin(), om.end(), sm.begin(), sm.end()));
 }
-
 
 }  // namespace Test
