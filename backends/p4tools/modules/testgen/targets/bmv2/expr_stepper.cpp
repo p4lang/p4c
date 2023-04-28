@@ -904,7 +904,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  const IR::Member *meterResult = nullptr;
                  const auto *expr = args->at(1)->expression;
                  if (const auto *pathRef = expr->to<IR::PathExpression>()) {
-                     meterResult = state.convertPathExpr(pathRef);
+                     meterResult = ExecutionState::convertPathExpr(pathRef);
                  } else if (const auto *member = expr->to<IR::Member>()) {
                      meterResult = member;
                  } else {
@@ -946,7 +946,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              const auto *meterState =
                  state.getTestObject("meter_values", externInstance->controlPlaneName(), false);
              Bmv2V1ModelMeterValue *meterValue = nullptr;
-             const auto &inputValue = nextState.createZombieConst(
+             const auto &inputValue = nextState.createSymbolicVariable(
                  meterResult->type, "meter_value" + std::to_string(call->clone_id));
              // Make sure we do not accidentally get "3" as enum assignment...
              auto *cond = new IR::Lss(inputValue, IR::getConstant(meterResult->type, 3));
@@ -1027,7 +1027,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              const auto *expr = args->at(0)->expression;
              const IR::Member *meterResult = nullptr;
              if (const auto *pathRef = expr->to<IR::PathExpression>()) {
-                 meterResult = state.convertPathExpr(pathRef);
+                 meterResult = ExecutionState::convertPathExpr(pathRef);
              } else if (const auto *member = expr->to<IR::Member>()) {
                  meterResult = member;
              } else {
@@ -1055,7 +1055,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              const auto *meterState =
                  state.getTestObject("meter_values", externInstance->controlPlaneName(), false);
              Bmv2V1ModelMeterValue *meterValue = nullptr;
-             const auto &inputValue = nextState.createZombieConst(
+             const auto &inputValue = nextState.createSymbolicVariable(
                  meterResult->type, "meter_value" + std::to_string(call->clone_id));
              // Make sure we do not accidentally get "3" as enum assignment...
              auto *cond = new IR::Lss(inputValue, IR::getConstant(meterResult->type, 3));
