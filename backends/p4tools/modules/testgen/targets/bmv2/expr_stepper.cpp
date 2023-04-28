@@ -89,8 +89,9 @@ void Bmv2V1ModelExprStepper::processClone(const ExecutionState &state,
     const auto *cloneInfo = state.getTestObject<Bmv2V1ModelCloneInfo>("clone_infos", "clone_info");
     const auto *sessionIdExpr = cloneInfo->getSessionId();
     const auto &preserveIndex = cloneInfo->getPreserveIndex();
-    const auto *egressPortVar = programInfo.getTargetOutputPortVar();
-    const auto &clonePortVar = Utils::getZombieConst(egressPortVar->type, 0, "clone_port_var");
+    const auto &egressPortVar = programInfo.getTargetOutputPortVar();
+    const auto &clonePortVar =
+        ToolsVariables::getSymbolicVariable(egressPortVar->type, 0, "clone_port_var");
 
     uint64_t recirculateCount = 0;
     if (state.hasProperty("recirculate_count")) {
@@ -254,10 +255,11 @@ void Bmv2V1ModelExprStepper::processRecirculate(const ExecutionState &state,
 
     // We need to update the size of the packet when recirculating. Do not forget to divide
     // by 8.
-    const auto *pktSizeType = ExecutionState::getPacketSizeVarType();
     const auto *packetSizeVar =
-        new IR::Member(pktSizeType, new IR::PathExpression("*standard_metadata"), "packet_length");
-    const auto *packetSizeConst = IR::getConstant(pktSizeType, recState.getPacketBufferSize() / 8);
+        new IR::Member(&PacketVars::PACKET_SIZE_VAR_TYPE,
+                       new IR::PathExpression("*standard_metadata"), "packet_length");
+    const auto *packetSizeConst =
+        IR::getConstant(&PacketVars::PACKET_SIZE_VAR_TYPE, recState.getPacketBufferSize() / 8);
     recState.set(packetSizeVar, packetSizeConst);
 
     if (recState.hasProperty("recirculate_index")) {
