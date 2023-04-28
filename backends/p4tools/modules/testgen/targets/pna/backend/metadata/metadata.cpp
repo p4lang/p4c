@@ -1,6 +1,7 @@
 #include "backends/p4tools/modules/testgen/targets/pna/backend/metadata/metadata.h"
 
 #include <algorithm>
+#include <functional>
 #include <iomanip>
 #include <map>
 #include <string>

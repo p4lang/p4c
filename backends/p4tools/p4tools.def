@@ -1,14 +1,19 @@
 /// Represents a reference to an object in a P4 program.
 ///
-/// This is a thin wrapper around a 'const IR::Member*' to (1) enforce invariants on which forms of
-/// Members can represent state variables and (2) enable the use of IR::StateVariables as map keys.
+/// This is a thin wrapper around a 'const Member*' to (1) enforce invariants on which forms of
+/// Members can represent state variables and (2) enable the use of StateVariables as map keys.
 class StateVariable : Expression {
+    #noconstructor
+
     /// The wrapped member.
     const Member *member;
 
+    /// The expression type is derived from the member.
+    StateVariable(Member member) : Expression(member->getSourceInfo(), member->type), member(member) {}
+
     /// Implicit conversions to allow implementations to be treated like a Member*.
 #emit
-    operator const IR::Member *() const { return member; }
+    operator const Member *() const { return member; }
 #end
     Member const &operator*() const { return *member; }
     Member operator->() const { return member; }
@@ -85,6 +90,27 @@ class TaintExpression : Expression {
     dbprint { out << "TaintedExpression(" << type << ")"; }
 }
 
+/// Signifies that a particular expression is a symbolic variable with a label.
+/// These variables are intended to be consumed by SMT/SAT solvers.
+class SymbolicVariable : Expression {
+#noconstructor
+
+    /// The label of the symbolic variable.
+    cstring label;
+
+    /// A symbolic variable always has a type and no source info.
+    SymbolicVariable(Type type, cstring label) : Expression(type), label(label) {}
+
+    /// Implements comparisons so that SymbolicVariables can be used as map keys.
+    bool operator<(const SymbolicVariable &other) const {
+        return label < other.label;
+    }
+
+    toString { return "|" + label +"(" + type->toString() + ")|"; }
+
+    dbprint { out << "|" + label +"(" << type << ")|"; }
+}
+
 /// This type replaces Type_Varbits and can store information about the current size
 class Extracted_Varbits : Type_Bits {
     /// The assigned size of this varbit (assigned by extract calls).
@@ -114,11 +140,18 @@ class Extracted_Varbits : Type_Bits {
 }
 
 /// Defines a concolic variable that may be part of expressions.
-/// This variable must later be resolved and is converted in a symbolic expression.
-class ConcolicVariable : Expression {
-    /// The name of the concolic method that this variable targets.
-    cstring concolicMethodName;
+/// This variable must later be resolved and is converted into a symbolic expression.
+class ConcolicVariable : SymbolicVariable {
+    #noconstructor
 
+private:
+    static cstring produceLabel(cstring methodName, int srcIdentifier, int concolicId ) {
+        std::stringstream sstr;
+        sstr << methodName << "_" << srcIdentifier << "_" << concolicId;
+        return sstr.str();
+    }
+
+public:
     /// Arguments to the concolic method.
     Vector<Argument> arguments;
 
@@ -131,32 +164,40 @@ class ConcolicVariable : Expression {
     /// Nodes that are associated with this concolic variable. This may be declarations.
     optional inline IndexedVector<Node> associatedNodes;
 
-    /// This is the member representation of this concolic variable.
-    Member concolicMember = nullptr;
+    /// The name of the concolic method that this variable targets.
+    inline cstring concolicMethodName = "";
 
     toString {
         cstring argumentStr;
         cstring sep = "";
-        for (auto arg : *arguments) {
+        for (const auto *arg : *arguments) {
             argumentStr += sep + arg->toString();
             sep = ", ";
         }
-        return "Concolic_" + concolicMethodName + "_" + srcIdentifier + "_" + concolicId + "(" +
-               argumentStr + ")";
+        return "Concolic_" + label + "(" + argumentStr + ")";
     }
 
     dbprint {
-        out << "Concolic_" << concolicMethodName << "_" << srcIdentifier << "_" << concolicId << "("
-            << arguments << ")";
+        out << "Concolic_" << label << "(" << arguments << ")";
     }
 
     visit_children { v.visit(type, "type"); }
 
-    ConcolicVariable {
-        std::stringstream varName;
-        varName << concolicMethodName << "_" << srcIdentifier;
-        concolicMember =
-            new Member(srcInfo, type, new PathExpression(new Path(varName.str().c_str())),
-                       std::to_string(concolicId).c_str());
-    }
+    ConcolicVariable(const Type *type, cstring methodName,
+                     const Vector<Argument> *arguments, int srcIdentifier, int concolicId,
+                     const IndexedVector<Node> &associatedNodes)
+        : SymbolicVariable(type, produceLabel(methodName, srcIdentifier, concolicId)),
+          arguments(arguments),
+          srcIdentifier(srcIdentifier),
+          concolicId(concolicId),
+          associatedNodes(associatedNodes),
+          concolicMethodName(methodName) {}
+
+    ConcolicVariable(const Type *type, cstring methodName,
+                     const Vector<Argument> *arguments, int srcIdentifier, int concolicId)
+        : SymbolicVariable(type, produceLabel(methodName, srcIdentifier, concolicId)),
+          arguments(arguments),
+          srcIdentifier(srcIdentifier),
+          concolicId(concolicId),
+          concolicMethodName(methodName) {}
 }

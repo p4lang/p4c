@@ -10,7 +10,7 @@
 
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
-#include "backends/p4tools/common/lib/util.h"
+#include "backends/p4tools/common/lib/variables.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"
@@ -27,6 +27,7 @@
 #include "backends/p4tools/modules/testgen/core/small_step/small_step.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/lib/packet_vars.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4Tools::P4Testgen {
@@ -86,14 +87,14 @@ ExprStepper::PacketCursorAdvanceInfo ExprStepper::calculateSuccessfulParserAdvan
     auto minSize =
         std::max(0, state.getInputPacketCursor() + advanceSize - state.getPacketBufferSize());
     auto *cond = new IR::Geq(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
-                             IR::getConstant(ExecutionState::getPacketSizeVarType(), minSize));
+                             IR::getConstant(&PacketVars::PACKET_SIZE_VAR_TYPE, minSize));
     return {advanceSize, cond, advanceSize, new IR::LNot(cond)};
 }
 
 ExprStepper::PacketCursorAdvanceInfo ExprStepper::calculateAdvanceExpression(
     const ExecutionState &state, const IR::Expression *advanceExpr,
     const IR::Expression *restrictions) const {
-    const auto *packetSizeVarType = ExecutionState::getPacketSizeVarType();
+    const auto *packetSizeVarType = &PacketVars::PACKET_SIZE_VAR_TYPE;
 
     const auto *cursorConst = IR::getConstant(packetSizeVarType, state.getInputPacketCursor());
     const auto *bufferSizeConst = IR::getConstant(packetSizeVarType, state.getPacketBufferSize());
@@ -349,7 +350,7 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
                  }
              } else if (const auto *tb = assignType->to<IR::Type_Base>()) {
                  // If the type is a flat Type_Base, postfix it with a "*".
-                 globalRef = Utils::addZombiePostfix(globalRef, tb);
+                 globalRef = ToolsVariables::addStateVariablePostfix(globalRef, tb);
                  if (const auto *argPath = argRef->to<IR::PathExpression>()) {
                      argRef = nextState.convertPathExpr(argPath);
                  }
@@ -422,7 +423,7 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
                  }
              } else if (const auto *tb = assignType->to<IR::Type_Base>()) {
                  // If the type is a flat Type_Base, postfix it with a "*".
-                 globalRef = Utils::addZombiePostfix(globalRef, tb);
+                 globalRef = ToolsVariables::addStateVariablePostfix(globalRef, tb);
                  if (const auto *argPath = argRef->to<IR::PathExpression>()) {
                      argRef = nextState.convertPathExpr(argPath);
                  }
@@ -812,7 +813,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  TESTGEN_UNIMPLEMENTED("Emit input %1% of type %2% not supported", emitOutput,
                                        emitType);
              }
-             const auto &validVar = Utils::getHeaderValidity(emitOutput);
+             const auto &validVar = ToolsVariables::getHeaderValidity(emitOutput);
 
              // Check whether the validity bit of the header is tainted. If it is, the entire
              // emit is tainted. There is not much we can do here, so throw an error.
@@ -919,7 +920,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  cond->dbprint(traceString);
                  taintedState.add(*new TraceEvents::Expression(cond, traceString));
                  const auto *errVar = state.getCurrentParserErrorLabel();
-                 taintedState.set(errVar, Utils::getTaintExpression(errVar->type));
+                 taintedState.set(errVar, ToolsVariables::getTaintExpression(errVar->type));
                  taintedState.popBody();
                  result->emplace_back(taintedState);
                  return;

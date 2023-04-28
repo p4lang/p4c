@@ -1,7 +1,6 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_asserts_parser.h"
 
-#include <stdint.h>
-
+#include <cstdint>
 #include <iostream>
 #include <optional>
 #include <string>
@@ -10,7 +9,7 @@
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/core/z3_solver.h"
-#include "backends/p4tools/common/lib/util.h"
+#include "backends/p4tools/common/lib/variables.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"
@@ -19,9 +18,7 @@
 #include "lib/error.h"
 #include "lib/exceptions.h"
 
-namespace P4Tools {
-
-namespace AssertsParser {
+namespace P4Tools::AssertsParser {
 
 static std::vector<std::string> NAMES{
     "Priority",    "Text",           "True",         "False",       "LineStatementClose",
@@ -126,7 +123,7 @@ const IR::Expression *makeSingleExpr(std::vector<const IR::Expression *> input) 
     return expr;
 }
 
-/// Determines the token type according to the table key and generates a zombie constant for it.
+/// Determines the token type according to the table key and generates a symbolic variable for it.
 const IR::Expression *makeConstant(Token input, const IR::Vector<IR::KeyElement> &keyElements,
                                    const IR::Type *leftType) {
     const IR::Type_Base *type = nullptr;
@@ -154,7 +151,7 @@ const IR::Expression *makeConstant(Token input, const IR::Vector<IR::KeyElement>
             } else {
                 BUG("Unexpected key type %s.", keyType->node_type_name());
             }
-            return Utils::getZombieConst(type, 0, std::string(inputStr));
+            return ToolsVariables::getSymbolicVariable(type, 0, std::string(inputStr));
         }
     }
     if (input.is(Token::Kind::Number)) {
@@ -165,7 +162,8 @@ const IR::Expression *makeConstant(Token input, const IR::Vector<IR::KeyElement>
     }
     // TODO: Is this the right solution for priorities?
     if (input.is(Token::Kind::Priority)) {
-        return Utils::getZombieConst(IR::Type_Bits::get(32), 0, std::string(inputStr));
+        return ToolsVariables::getSymbolicVariable(IR::Type_Bits::get(32), 0,
+                                                   std::string(inputStr));
     }
     BUG_CHECK(result != nullptr,
               "Could not match restriction key label %s was not found in key list.",
@@ -654,6 +652,4 @@ Token Lexer::next() noexcept {
             return atom(Token::Kind::Mul);
     }
 }
-}  // namespace AssertsParser
-
-}  // namespace P4Tools
+}  // namespace P4Tools::AssertsParser

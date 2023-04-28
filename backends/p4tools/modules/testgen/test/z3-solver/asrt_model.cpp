@@ -99,11 +99,13 @@ class Z3SolverTest : public P4ToolsTest {
         auto *const declVector = test->program->getDeclsByName("mau")->toVector();
         const auto *decl = (*declVector)[0];
         const auto *control = decl->to<IR::P4Control>();
+        SymbolicConverter converter;
         for (const auto *st : control->body->components) {
             if (const auto *as = st->to<IR::IfStatement>()) {
                 const auto *asExpr = as->condition;
                 if (asExpr->is<IR::Lss>()) {
-                    opLss = asExpr->to<IR::Lss>();
+                    // Convert members to symbolic variables.
+                    opLss = asExpr->apply(converter)->checkedTo<IR::Lss>();
                 }
             }
         }
@@ -135,30 +137,30 @@ TEST_F(Z3SolverTest, Assertion2Model) {
     asserts.push_back(opLss);
 
     // getting right variable
-    ASSERT_TRUE(opLss->right->is<IR::Member>());
-    const IR::StateVariable varB = opLss->right->to<IR::Member>();
+    ASSERT_TRUE(opLss->right->is<IR::SymbolicVariable>());
+    const auto *const varB = opLss->right->to<IR::SymbolicVariable>();
 
     // getting numeric and left variable
     ASSERT_TRUE(opLss->left->is<IR::Add>());
     const auto *opAdd = opLss->left->to<IR::Add>();
-    ASSERT_TRUE(opAdd->left->is<IR::Member>());
-    const IR::StateVariable varA = opAdd->left->to<IR::Member>();
+    ASSERT_TRUE(opAdd->left->is<IR::SymbolicVariable>());
+    const auto *const varA = opAdd->left->to<IR::SymbolicVariable>();
     ASSERT_TRUE(opAdd->right->is<IR::Constant>());
     const auto *addToA = opAdd->right->to<IR::Constant>();
 
-    // getting model without check satisfiable
-    EXPECT_THROW(solver.getModel(), Util::CompilerBug);
+    // getting mapping without check satisfiable
+    EXPECT_THROW(Model(solver.getSymbolicMapping()), Util::CompilerBug);
 
     // checking satisfiability
     ASSERT_EQ(solver.checkSat(asserts), true);
-    Model model2 = *solver.getModel();
-    ASSERT_EQ(model2.size(), 2u);
+    auto symbolMap2 = solver.getSymbolicMapping();
+    ASSERT_EQ(symbolMap2.size(), 2U);
 
     // checking variables
-    ASSERT_GT(model2.count(varA), 0u);
-    ASSERT_GT(model2.count(varB), 0u);
-    const auto *valueA = model2.at(varA)->to<IR::Literal>();
-    const auto *valueB = model2.at(varB)->to<IR::Literal>();
+    ASSERT_GT(symbolMap2.count(varA), 0U);
+    ASSERT_GT(symbolMap2.count(varB), 0U);
+    const auto *valueA = symbolMap2.at(varA)->to<IR::Literal>();
+    const auto *valueB = symbolMap2.at(varB)->to<IR::Literal>();
 
     // input expression was hdr.h.a + 4w15 < hdr.h.b
     // lets calculate it: valueA + addToA < valueB
@@ -177,19 +179,19 @@ TEST_F(Z3SolverTest, Assertion2Model) {
     asserts.push_back(opLss);
 
     // try to get model, should have two assertions now
-    Model model3 = *solver.getModel();
-    ASSERT_EQ(model3.size(), 2u);
+    auto symbolMap3 = solver.getSymbolicMapping();
+    ASSERT_EQ(symbolMap3.size(), 2U);
 
     // checking satisfiability
     ASSERT_EQ(solver.checkSat(asserts), true);
-    Model model4 = *solver.getModel();
-    ASSERT_EQ(model4.size(), 2u);
+    auto symbolMap4 = solver.getSymbolicMapping();
+    ASSERT_EQ(symbolMap4.size(), 2U);
 
     // checking variables
-    ASSERT_GT(model4.count(varA), 0u);
-    ASSERT_GT(model4.count(varB), 0u);
-    model4.at(varA)->checkedTo<IR::Literal>();
-    model4.at(varB)->checkedTo<IR::Literal>();
+    ASSERT_GT(symbolMap4.count(varA), 0U);
+    ASSERT_GT(symbolMap4.count(varB), 0U);
+    symbolMap4.at(varA)->checkedTo<IR::Literal>();
+    symbolMap4.at(varB)->checkedTo<IR::Literal>();
 
     // input expression was hdr.h.a + 4w15 < hdr.h.b
     // lets calculate it: valueA + addToA < valueB

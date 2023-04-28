@@ -67,6 +67,14 @@ class TableStepper {
     /* =========================================================================================
      * Table Variable Getter functions
      * ========================================================================================= */
+    /// @returns the variables variable with the given type, for tracking an aspect of the given
+    /// table. The returned variable will be named p4t*variables.table.t.name.idx1.idx2, where t is
+    /// the name of the given table. The "idx1" and "idx2" components are produced only if idx1 and
+    /// idx2 are given, respectively.
+    static const IR::StateVariable &getTableStateVariable(
+        const IR::Type *type, const IR::P4Table *table, cstring name,
+        std::optional<int> idx1_opt = std::nullopt, std::optional<int> idx2_opt = std::nullopt);
+
     /// @returns the boolean-typed state variable that tracks whether given table is reached.
     static const IR::StateVariable &getTableReachedVar(const IR::P4Table *table);
 
@@ -166,7 +174,7 @@ class TableStepper {
     /// executed.
     const IR::Expression *evalTableConstEntries();
 
-    /// This helper function evaluates potential insertion from the control plane. We use zombie
+    /// This helper function evaluates potential insertion from the control plane. We use variables
     /// variables to mimic an operator inserting entries. We only cover ONE entry per table for
     /// now.
     /// @param table the table we invoke.

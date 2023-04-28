@@ -43,7 +43,7 @@ set(
   lib/trace_event.cpp
   lib/trace_event_types.cpp
   lib/util.cpp
-  lib/zombie.cpp
+  lib/variables.cpp
 )
 
 add_p4tools_library(p4tools-common ${P4C_TOOLS_COMMON_SOURCES})

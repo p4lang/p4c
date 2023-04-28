@@ -8,7 +8,6 @@
 #include <boost/container/vector.hpp>
 
 #include "backends/p4tools/common/lib/model.h"
-#include "backends/p4tools/common/lib/zombie.h"
 #include "frontends/p4/optimizeExpressions.h"
 #include "ir/indexed_vector.h"
 #include "ir/vector.h"
@@ -74,6 +73,11 @@ const IR::Expression *SymbolicEnv::subst(const IR::Expression *expr) const {
 const SymbolicMapType &SymbolicEnv::getInternalMap() const { return map; }
 
 bool SymbolicEnv::isSymbolicValue(const IR::Node *node) {
+    // Check the obvious case first.
+    if (node->is<IR::SymbolicVariable>()) {
+        return true;
+    }
+
     // Parser states are symbolic values.
     if (node->is<IR::ParserState>()) {
         return true;
@@ -105,11 +109,6 @@ bool SymbolicEnv::isSymbolicValue(const IR::Node *node) {
     // DefaultExpresssions are symbolic values.
     if (expr->is<IR::DefaultExpression>()) {
         return true;
-    }
-
-    // Symbolic constants are references to fields under the struct p4t*zombie.const.
-    if (const auto *member = expr->to<IR::Member>()) {
-        return Zombie::isSymbolicConst(member);
     }
 
     // Symbolic values can be composed using several IR nodes.

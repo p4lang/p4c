@@ -23,6 +23,7 @@
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/lib/packet_vars.h"
 #include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/constants.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/program_info.h"
@@ -77,7 +78,7 @@ void Bmv2V1ModelCmdStepper::initializeTargetEnvironment(ExecutionState &nextStat
     const auto *nineBitType = IR::getBitType(9);
     const auto *oneBitType = IR::getBitType(1);
     nextState.set(programInfo.getTargetInputPortVar(),
-                  nextState.createZombieConst(nineBitType, "*bmv2_ingress_port"));
+                  nextState.createSymbolicVariable(nineBitType, "bmv2_ingress_port"));
     // BMv2 implicitly sets the output port to 0.
     nextState.set(programInfo.getTargetOutputPortVar(), IR::getConstant(nineBitType, 0));
     // Initialize parser_err with no error.
@@ -90,7 +91,7 @@ void Bmv2V1ModelCmdStepper::initializeTargetEnvironment(ExecutionState &nextStat
         new IR::Member(oneBitType, new IR::PathExpression("*standard_metadata"), "checksum_error");
     nextState.set(checksumErrVar, IR::getConstant(checksumErrVar->type, 0));
     // The packet size meta data is the testgen packet length variable divided by 8.
-    const auto *pktSizeType = ExecutionState::getPacketSizeVarType();
+    const auto *pktSizeType = &PacketVars::PACKET_SIZE_VAR_TYPE;
     const auto *packetSizeVar =
         new IR::Member(pktSizeType, new IR::PathExpression("*standard_metadata"), "packet_length");
     const auto *packetSizeConst = new IR::Div(pktSizeType, ExecutionState::getInputPacketSizeVar(),

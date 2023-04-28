@@ -115,6 +115,11 @@ void test(const IR::Expression *expression, const IR::AssignmentStatement *varia
     ASSERT_TRUE(expression);
     ASSERT_TRUE(variableValue);
 
+    // Convert members to symbolic variables.
+    SymbolicConverter symbolicConverter;
+    expression = expression->apply(symbolicConverter);
+    variableValue = variableValue->apply(symbolicConverter)->checkedTo<IR::AssignmentStatement>();
+
     // adding assertion
     Z3Solver solver;
 
@@ -122,12 +127,13 @@ void test(const IR::Expression *expression, const IR::AssignmentStatement *varia
     ASSERT_EQ(solver.checkSat({expression}), true);
 
     // getting model
-    Model model = *solver.getModel();
-    ASSERT_EQ(model.size(), 2U);
+    auto symbolMap = solver.getSymbolicMapping();
 
-    ASSERT_EQ(model.count(variableValue->left->checkedTo<IR::Member>()), 1U);
+    ASSERT_EQ(symbolMap.size(), 2U);
 
-    const auto *value = model.at(variableValue->left->checkedTo<IR::Member>());
+    ASSERT_EQ(symbolMap.count(variableValue->left->checkedTo<IR::SymbolicVariable>()), 1U);
+
+    const auto *value = symbolMap.at(variableValue->left->checkedTo<IR::SymbolicVariable>());
 
     if (variableValue->right->is<IR::BoolLiteral>()) {
         ASSERT_TRUE(variableValue->right->is<IR::BoolLiteral>());

@@ -4,7 +4,6 @@
 #include <utility>
 
 #include "backends/p4tools/common/core/target.h"
-#include "backends/p4tools/common/lib/namespace_context.h"
 #include "ir/declaration.h"
 #include "ir/ir.h"
 #include "ir/node.h"

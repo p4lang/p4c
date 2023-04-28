@@ -26,6 +26,7 @@
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/lib/packet_vars.h"
 #include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/concolic.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/constants.h"
@@ -74,7 +75,7 @@ Bmv2V1ModelProgramInfo::Bmv2V1ModelProgramInfo(
     }
     const IR::Expression *constraint =
         new IR::Grt(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
-                    IR::getConstant(ExecutionState::getPacketSizeVarType(), minPktSize));
+                    IR::getConstant(&PacketVars::PACKET_SIZE_VAR_TYPE, minPktSize));
     /// Vector containing pairs of restrictions and nodes to which these restrictions apply.
     std::vector<std::vector<const IR::Expression *>> restrictionsVec;
     /// Defines all "entry_restriction" and then converts restrictions from string to IR
@@ -168,35 +169,29 @@ std::vector<Continuation::Command> Bmv2V1ModelProgramInfo::processDeclaration(
     return cmds;
 }
 
-const IR::Member *Bmv2V1ModelProgramInfo::getTargetInputPortVar() const {
-    return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidthBits()),
-                          new IR::PathExpression("*standard_metadata"), "ingress_port");
+const IR::StateVariable &Bmv2V1ModelProgramInfo::getTargetInputPortVar() const {
+    return *new IR::StateVariable(
+        new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidthBits()),
+                       new IR::PathExpression("*standard_metadata"), "ingress_port"));
 }
 
-const IR::Expression *Bmv2V1ModelProgramInfo::getPortConstraint(const IR::Member *portVar) {
+const IR::Expression *Bmv2V1ModelProgramInfo::getPortConstraint(const IR::StateVariable &portVar) {
     const IR::Operation_Binary *portConstraint =
         new IR::LOr(new IR::Equ(portVar, new IR::Constant(portVar->type, BMv2Constants::DROP_PORT)),
                     new IR::Lss(portVar, new IR::Constant(portVar->type, 8)));
     return portConstraint;
 }
 
-const IR::Member *Bmv2V1ModelProgramInfo::getTargetOutputPortVar() const {
-    return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidthBits()),
-                          new IR::PathExpression("*standard_metadata"), "egress_spec");
+const IR::StateVariable &Bmv2V1ModelProgramInfo::getTargetOutputPortVar() const {
+    return *new IR::StateVariable(
+        new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidthBits()),
+                       new IR::PathExpression("*standard_metadata"), "egress_spec"));
 }
 
 const IR::Expression *Bmv2V1ModelProgramInfo::dropIsActive() const {
-    const auto *egressPortVar = getTargetOutputPortVar();
+    const auto &egressPortVar = getTargetOutputPortVar();
     return new IR::Equ(IR::getConstant(egressPortVar->type, BMv2Constants::DROP_PORT),
                        egressPortVar);
-}
-
-const IR::Expression *Bmv2V1ModelProgramInfo::createTargetUninitialized(const IR::Type *type,
-                                                                        bool forceTaint) const {
-    if (forceTaint) {
-        return Utils::getTaintExpression(type);
-    }
-    return IR::getDefaultValue(type);
 }
 
 const IR::Type_Bits *Bmv2V1ModelProgramInfo::getParserErrorType() const { return &PARSER_ERR_BITS; }

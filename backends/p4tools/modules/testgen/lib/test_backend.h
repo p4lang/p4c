@@ -4,9 +4,9 @@
 #include <stdint.h>
 
 #include <functional>
+#include <optional>
 #include <vector>
 
-#include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/trace_event.h"
 #include "ir/ir.h"
@@ -97,10 +97,8 @@ class TestBackEnd {
                                const IR::Expression *outputPortExpr);
 
     /// @returns a new modules with all concolic variables in the program resolved.
-    const Model *computeConcolicVariables(const ExecutionState *executionState,
-                                          const Model *completedModel, Z3Solver *solver,
-                                          const IR::Expression *outputPacketExpr,
-                                          const IR::Expression *outputPortExpr) const;
+    [[nodiscard]] std::optional<std::reference_wrapper<const FinalState>> computeConcolicVariables(
+        const FinalState &state) const;
 
     /// @returns a TestInfo objects, which contains information about the input/output ports, the
     /// taint mask, the packet sizes, etc...

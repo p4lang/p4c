@@ -14,7 +14,7 @@
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
-#include "backends/p4tools/common/lib/util.h"
+#include "backends/p4tools/common/lib/variables.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
@@ -26,14 +26,15 @@
 #include "lib/null.h"
 #include "midend/coverage.h"
 
-#include "backends/p4tools/modules/testgen//lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/abstract_stepper.h"
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
 #include "backends/p4tools/modules/testgen/lib/collect_latent_statements.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
+#include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/lib/packet_vars.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4Tools::P4Testgen {
@@ -66,8 +67,8 @@ void CmdStepper::declareVariable(ExecutionState &nextState, const IR::Declaratio
             declareStructLike(nextState, parentExpr, structType);
         }
     } else if (declType->is<IR::Type_Base>()) {
-        // If the variable does not have an initializer we need to create a new zombie for it.
-        // For now we just use the name directly.
+        // If the variable does not have an initializer we need to create a new value for it. For
+        // now we just use the name directly.
         const auto &left = nextState.convertPathExpr(new IR::PathExpression(decl->name));
         nextState.set(left, programInfo.createTargetUninitialized(decl->type, false));
     } else {
@@ -103,7 +104,7 @@ void CmdStepper::initializeBlockParams(const IR::Type_Declaration *typeDecl,
             declareStructLike(nextState, paramPath, ts, forceTaint);
         } else if (const auto *tb = paramType->to<IR::Type_Base>()) {
             // If the type is a flat Type_Base, postfix it with a "*".
-            const auto &paramRef = Utils::addZombiePostfix(paramPath, tb);
+            const auto &paramRef = ToolsVariables::addStateVariablePostfix(paramPath, tb);
             nextState.set(paramRef, programInfo.createTargetUninitialized(paramType, forceTaint));
         } else {
             P4C_UNIMPLEMENTED("Unsupported initialization type %1%", paramType->node_type_name());
@@ -363,7 +364,7 @@ bool CmdStepper::preorder(const IR::P4Program * /*program*/) {
     if (pktSize != 0) {
         const auto *fixedSizeEqu =
             new IR::Equ(ExecutionState::getInputPacketSizeVar(),
-                        IR::getConstant(ExecutionState::getPacketSizeVarType(), pktSize));
+                        IR::getConstant(&PacketVars::PACKET_SIZE_VAR_TYPE, pktSize));
         if (cond == std::nullopt) {
             cond = fixedSizeEqu;
         } else {
@@ -489,7 +490,7 @@ bool CmdStepper::preorder(const IR::ExitStatement *e) {
 
 const Constraint *CmdStepper::startParser(const IR::P4Parser *parser, ExecutionState &nextState) {
     // Reset the parser cursor to zero.
-    const auto *parserCursorVarType = ExecutionState::getPacketSizeVarType();
+    const auto *parserCursorVarType = &PacketVars::PACKET_SIZE_VAR_TYPE;
 
     // Constrain the input packet size to its maximum.
     const auto *boolType = IR::Type::Boolean::get();

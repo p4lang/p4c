@@ -40,7 +40,7 @@ class CmdStepper : public AbstractStepper {
 
     /// Initializes the given state for entry into the given parser.
     ///
-    /// @returns constraints for associating packet data with program/zombie state.
+    /// @returns constraints for associating packet data with symbolic state.
     const Constraint *startParser(const IR::P4Parser *parser, ExecutionState &state);
 
     /// @see startParser. Implementations can assume that the parser has been registered, and the

@@ -2,6 +2,7 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TF_H_
 
 #include <cstddef>
+#include <filesystem>
 #include <functional>
 #include <iosfwd>
 #include <map>

@@ -24,11 +24,11 @@ class PnaConstants {
     static const IR::Member PARSER_ERROR;
 };
 
-/// Zombies are variables that can be controlled and set by P4Testgen.
-class PnaZombies {
+/// variabless are variables that can be controlled and set by P4Testgen.
+class PnaSymbolicVars {
  public:
     /// The input direction.
-    static const IR::Member DIRECTION;
+    static const IR::SymbolicVariable DIRECTION;
 };
 
 }  // namespace P4Tools::P4Testgen::Pna

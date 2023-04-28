@@ -1,6 +1,7 @@
 #include "backends/p4tools/modules/testgen/targets/ebpf/backend/stf/stf.h"
 
 #include <filesystem>
+#include <fstream>
 #include <iomanip>
 #include <map>
 #include <optional>

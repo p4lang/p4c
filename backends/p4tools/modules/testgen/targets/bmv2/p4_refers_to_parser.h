@@ -23,7 +23,7 @@ class RefersToParser : public Inspector {
 
     bool preorder(const IR::P4Table *table) override;
 
-    /// Builds names for the zombie constant and then creates a zombie constant and builds the
+    /// Builds names for the symbolic variable and then creates a symbolic variable and builds the
     /// refers_to constraints based on them
     void createConstraint(bool table, cstring currentName, cstring currentKeyName,
                           cstring destKeyName, cstring destTableName, const IR::Type *type);

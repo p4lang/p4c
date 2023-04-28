@@ -6,7 +6,7 @@
 #include <iostream>
 #include <string>
 
-#include "backends/p4tools/common/lib/util.h"
+#include "backends/p4tools/common/lib/variables.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
@@ -23,8 +23,8 @@ RefersToParser::RefersToParser(std::vector<std::vector<const IR::Expression *>> 
     setName("RefersToParser");
 }
 
-/// Builds names for the zombie constant and then creates a zombie constant and builds the refers_to
-/// constraints based on them
+/// Builds names for the symbolic variable and then creates a symbolic variable and builds the
+/// refers_to constraints based on them
 void RefersToParser::createConstraint(bool table, cstring currentName, cstring currentKeyName,
                                       cstring destKeyName, cstring destTableName,
                                       const IR::Type *type) {
@@ -34,7 +34,7 @@ void RefersToParser::createConstraint(bool table, cstring currentName, cstring c
     } else {
         tmp = currentName + currentKeyName;
     }
-    auto left = Utils::getZombieConst(type, 0, tmp);
+    auto left = ToolsVariables::getSymbolicVariable(type, 0, tmp);
     std::string str = currentName.c_str();
     std::vector<std::string> elems;
     std::stringstream ss(str);
@@ -47,7 +47,7 @@ void RefersToParser::createConstraint(bool table, cstring currentName, cstring c
         str += elems[i] + ".";
     }
     tmp = str + destTableName + "_key_" + destKeyName;
-    auto right = Utils::getZombieConst(type, 0, tmp);
+    auto right = ToolsVariables::getSymbolicVariable(type, 0, tmp);
     auto *expr = new IR::Equ(left, right);
     std::vector<const IR::Expression *> constraint;
     constraint.push_back(expr);

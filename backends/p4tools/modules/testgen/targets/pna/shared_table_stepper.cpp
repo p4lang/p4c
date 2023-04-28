@@ -9,7 +9,6 @@
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/lib/trace_event_types.h"
-#include "backends/p4tools/common/lib/util.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
 #include "ir/irutils.h"
@@ -43,9 +42,9 @@ const IR::Expression *SharedPnaTableStepper::computeTargetMatchType(
     // TODO: We consider optional match types to be a no-op, but we could make them exact matches.
     if (keyProperties.matchType == PnaConstants::MATCH_KIND_OPT) {
         // We can recover from taint by simply not adding the optional match.
-        // Create a new zombie constant that corresponds to the key expression.
+        // Create a new symbolic variable that corresponds to the key expression.
         cstring keyName = properties.tableName + "_key_" + keyProperties.name;
-        const auto ctrlPlaneKey = nextState.createZombieConst(keyExpr->type, keyName);
+        const auto ctrlPlaneKey = nextState.createSymbolicVariable(keyExpr->type, keyName);
         if (keyProperties.isTainted) {
             matches->emplace(keyProperties.name,
                              new Optional(keyProperties.key, ctrlPlaneKey, false));
@@ -75,8 +74,8 @@ const IR::Expression *SharedPnaTableStepper::computeTargetMatchType(
             maxKey = IR::getConstant(keyExpr->type, IR::getMaxBvVal(keyExpr->type));
             keyExpr = minKey;
         } else {
-            minKey = nextState.createZombieConst(keyExpr->type, minName);
-            maxKey = nextState.createZombieConst(keyExpr->type, maxName);
+            minKey = nextState.createSymbolicVariable(keyExpr->type, minName);
+            maxKey = nextState.createSymbolicVariable(keyExpr->type, maxName);
         }
         matches->emplace(keyProperties.name, new Range(keyProperties.key, minKey, maxKey));
         return new IR::LAnd(hitCondition, new IR::LAnd(new IR::LAnd(new IR::Lss(minKey, maxKey),
@@ -110,14 +109,14 @@ void SharedPnaTableStepper::evalTableActionProfile(
         std::vector<ActionArg> ctrlPlaneArgs;
         for (size_t argIdx = 0; argIdx < parameters->size(); ++argIdx) {
             const auto *parameter = parameters->getParameter(argIdx);
-            // Synthesize a zombie constant here that corresponds to a control plane argument.
+            // Synthesize a symbolic variable here that corresponds to a control plane argument.
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
             const auto &actionDataVar =
-                Utils::getZombieTableVar(parameter->type, table, "*actionData", idx, argIdx);
+                getTableStateVariable(parameter->type, table, "*actionData", idx, argIdx);
             cstring keyName =
                 properties.tableName + "_param_" + actionName + std::to_string(argIdx);
-            const auto &actionArg = nextState.createZombieConst(parameter->type, keyName);
+            const auto &actionArg = nextState.createSymbolicVariable(parameter->type, keyName);
             nextState.set(actionDataVar, actionArg);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
@@ -201,14 +200,14 @@ void SharedPnaTableStepper::evalTableActionSelector(
         std::vector<ActionArg> ctrlPlaneArgs;
         for (size_t argIdx = 0; argIdx < parameters->size(); ++argIdx) {
             const auto *parameter = parameters->getParameter(argIdx);
-            // Synthesize a zombie constant here that corresponds to a control plane argument.
+            // Synthesize a symbolic variable here that corresponds to a control plane argument.
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
             const auto &actionDataVar =
-                Utils::getZombieTableVar(parameter->type, table, "*actionData", idx, argIdx);
+                getTableStateVariable(parameter->type, table, "*actionData", idx, argIdx);
             cstring keyName =
                 properties.tableName + "_param_" + actionName + std::to_string(argIdx);
-            const auto &actionArg = nextState.createZombieConst(parameter->type, keyName);
+            const auto &actionArg = nextState.createSymbolicVariable(parameter->type, keyName);
             nextState.set(actionDataVar, actionArg);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.

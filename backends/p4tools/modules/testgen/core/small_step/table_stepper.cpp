@@ -12,7 +12,7 @@
 
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
-#include "backends/p4tools/common/lib/util.h"
+#include "backends/p4tools/common/lib/variables.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
 #include "ir/irutils.h"
@@ -42,23 +42,42 @@ const ProgramInfo *TableStepper::getProgramInfo() { return &stepper->programInfo
 
 ExprStepper::Result TableStepper::getResult() { return stepper->result; }
 
+const IR::StateVariable &TableStepper::getTableStateVariable(const IR::Type *type,
+                                                             const IR::P4Table *table, cstring name,
+                                                             std::optional<int> idx1_opt,
+                                                             std::optional<int> idx2_opt) {
+    // Mash the table name, the given name, and the optional indices together.
+    // XXX To be nice, we should probably build a PathExpression, but that's annoying to do, and we
+    // XXX can probably get away with this.
+    std::stringstream out;
+    out << table->name.toString() << "." << name;
+    if (idx1_opt.has_value()) {
+        out << "." << idx1_opt.value();
+    }
+    if (idx2_opt.has_value()) {
+        out << "." << idx2_opt.value();
+    }
+
+    return ToolsVariables::getStateVariable(type, out.str());
+}
+
 const IR::StateVariable &TableStepper::getTableActionVar(const IR::P4Table *table) {
     auto numActions = table->getActionList()->size();
     const auto *type = IR::getBitTypeToFit(numActions);
-    return Utils::getZombieTableVar(type, table, "*action");
+    return getTableStateVariable(type, table, "*action");
 }
 
 const IR::StateVariable &TableStepper::getTableHitVar(const IR::P4Table *table) {
-    return Utils::getZombieTableVar(IR::Type::Boolean::get(), table, "*hit");
+    return getTableStateVariable(IR::Type::Boolean::get(), table, "*hit");
 }
 
 const IR::StateVariable &TableStepper::getTableKeyReadVar(const IR::P4Table *table, int keyIdx) {
     const auto *key = table->getKey()->keyElements.at(keyIdx);
-    return Utils::getZombieTableVar(key->expression->type, table, "*keyRead", keyIdx);
+    return getTableStateVariable(key->expression->type, table, "*keyRead", keyIdx);
 }
 
 const IR::StateVariable &TableStepper::getTableReachedVar(const IR::P4Table *table) {
-    return Utils::getZombieTableVar(IR::Type::Boolean::get(), table, "*reached");
+    return getTableStateVariable(IR::Type::Boolean::get(), table, "*reached");
 }
 
 bool TableStepper::compareLPMEntries(const IR::Entry *leftIn, const IR::Entry *rightIn,
@@ -111,9 +130,9 @@ const IR::Expression *TableStepper::computeTargetMatchType(ExecutionState &nextS
                                                            TableMatchMap *matches,
                                                            const IR::Expression *hitCondition) {
     const IR::Expression *keyExpr = keyProperties.key->expression;
-    // Create a new zombie constant that corresponds to the key expression.
+    // Create a new variables constant that corresponds to the key expression.
     cstring keyName = properties.tableName + "_key_" + keyProperties.name;
-    const auto ctrlPlaneKey = nextState.createZombieConst(keyExpr->type, keyName);
+    const auto ctrlPlaneKey = nextState.createSymbolicVariable(keyExpr->type, keyName);
 
     if (keyProperties.matchType == P4Constants::MATCH_KIND_EXACT) {
         hitCondition = new IR::LAnd(hitCondition, new IR::Equ(keyExpr, ctrlPlaneKey));
@@ -128,7 +147,7 @@ const IR::Expression *TableStepper::computeTargetMatchType(ExecutionState &nextS
             ternaryMask = IR::getConstant(keyExpr->type, 0);
             keyExpr = ternaryMask;
         } else {
-            ternaryMask = nextState.createZombieConst(keyExpr->type, maskName);
+            ternaryMask = nextState.createSymbolicVariable(keyExpr->type, maskName);
         }
         matches->emplace(keyProperties.name,
                          new Ternary(keyProperties.key, ctrlPlaneKey, ternaryMask));
@@ -139,7 +158,7 @@ const IR::Expression *TableStepper::computeTargetMatchType(ExecutionState &nextS
         const auto *keyType = keyExpr->type->checkedTo<IR::Type_Bits>();
         auto keyWidth = keyType->width_bits();
         cstring maskName = properties.tableName + "_lpm_prefix_" + keyProperties.name;
-        const IR::Expression *maskVar = nextState.createZombieConst(keyExpr->type, maskName);
+        const IR::Expression *maskVar = nextState.createSymbolicVariable(keyExpr->type, maskName);
         // The maxReturn is the maximum vale for the given bit width. This value is shifted by
         // the mask variable to create a mask (and with that, a prefix).
         auto maxReturn = IR::getMaxBvVal(keyWidth);
@@ -338,14 +357,14 @@ void TableStepper::setTableDefaultEntries(
         std::vector<ActionArg> ctrlPlaneArgs;
         for (size_t argIdx = 0; argIdx < parameters->size(); ++argIdx) {
             const auto *parameter = parameters->getParameter(argIdx);
-            // Synthesize a zombie constant here that corresponds to a control plane argument.
+            // Synthesize a variables constant here that corresponds to a control plane argument.
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
             const auto &actionDataVar =
-                Utils::getZombieTableVar(parameter->type, table, "*actionData", idx, argIdx);
+                getTableStateVariable(parameter->type, table, "*actionData", idx, argIdx);
             cstring paramName =
                 properties.tableName + "_arg_" + actionName + std::to_string(argIdx);
-            const auto &actionArg = nextState.createZombieConst(parameter->type, paramName);
+            const auto &actionArg = nextState.createSymbolicVariable(parameter->type, paramName);
             nextState.set(actionDataVar, actionArg);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
@@ -417,14 +436,14 @@ void TableStepper::evalTableControlEntries(
         std::vector<ActionArg> ctrlPlaneArgs;
         for (size_t argIdx = 0; argIdx < parameters->size(); ++argIdx) {
             const auto *parameter = parameters->getParameter(argIdx);
-            // Synthesize a zombie constant here that corresponds to a control plane argument.
+            // Synthesize a variables constant here that corresponds to a control plane argument.
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
             const auto &actionDataVar =
-                Utils::getZombieTableVar(parameter->type, table, "*actionData", idx, argIdx);
+                getTableStateVariable(parameter->type, table, "*actionData", idx, argIdx);
             cstring paramName =
                 properties.tableName + "_arg_" + actionName + std::to_string(argIdx);
-            const auto &actionArg = nextState.createZombieConst(parameter->type, paramName);
+            const auto &actionArg = nextState.createSymbolicVariable(parameter->type, paramName);
             nextState.set(actionDataVar, actionArg);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.

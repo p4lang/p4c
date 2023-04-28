@@ -2,7 +2,7 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_EBPF_BACKEND_STF_STF_H_
 
 #include <cstddef>
-#include <fstream>
+#include <filesystem>
 #include <optional>
 #include <string>
 #include <vector>

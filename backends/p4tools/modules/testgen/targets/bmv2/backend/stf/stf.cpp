@@ -1,5 +1,6 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/backend/stf/stf.h"
 
+#include <fstream>
 #include <iomanip>
 #include <map>
 #include <optional>

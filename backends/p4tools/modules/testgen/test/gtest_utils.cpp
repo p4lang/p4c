@@ -58,4 +58,8 @@ void P4ToolsTestCase::ensureInit() {
     initialized = true;
 }
 
+const IR::SymbolicVariable *SymbolicConverter::preorder(IR::Member *member) {
+    return P4Tools::ToolsVariables::getSymbolicVariable(member->type, 0, member->toString());
+}
+
 }  // namespace Test

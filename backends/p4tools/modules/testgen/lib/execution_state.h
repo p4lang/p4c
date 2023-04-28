@@ -7,13 +7,13 @@
 #include <iostream>
 #include <map>
 #include <optional>
-#include <set>
 #include <stack>
 #include <utility>
 #include <variant>
 #include <vector>
 
 #include "backends/p4tools/common/compiler/reachability.h"
+#include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/namespace_context.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_event.h"
@@ -32,29 +32,6 @@ namespace P4Tools::P4Testgen {
 /// Represents state of execution after having reached a program point.
 class ExecutionState {
     friend class Test::SmallStepTest;
-
-    /// Specifies the type of the packet size variable.
-    /// This is mostly used to generate bit vector constants.
-    static const IR::Type_Bits packetSizeVarType;
-
-    /// The name of the input packet. The input packet defines the minimum size of the packet
-    /// requires to pass this particular path. Typically, calls such as extract, advance, or
-    /// lookahead cause the input packet to grow.
-    static const IR::Member inputPacketLabel;
-
-    /// The name of packet buffer. The packet buffer defines the data that can be consumed by the
-    /// parser. If the packet buffer is empty, extract/advance/lookahead calls will cause the
-    /// minimum packet size to grow. The packet buffer also forms the final output packet.
-    static const IR::Member packetBufferLabel;
-
-    /// The name of the emit buffer. Each time, emit is called, the emitted content is appended to
-    /// this buffer. Typically, after exiting the control, the emit buffer is appended to the packet
-    /// buffer.
-    static const IR::Member emitBufferLabel;
-
-    /// Canonical name for the payload. This is used for consistent naming when attaching a payload
-    /// to the packet.
-    static const IR::Member payloadLabel;
 
  public:
     class StackFrame {
@@ -75,6 +52,11 @@ class ExecutionState {
               namespaces(namespaces) {}
     };
 
+    /// No move semantics because of constant members. We always need to clone a state.
+    ExecutionState(ExecutionState &&) = delete;
+    ExecutionState &operator=(ExecutionState &&) = delete;
+    ~ExecutionState() = default;
+
  private:
     /// The namespace context in the IR for the current state. The innermost element is the P4
     /// program, representing the top-level namespace.
@@ -83,9 +65,9 @@ class ExecutionState {
     /// The symbolic environment. Maps program variables to their symbolic values.
     SymbolicEnv env;
 
-    /// The list of zombies that have been created in this state.
-    /// These zombies are later fed to the model for completion.
-    std::set<IR::StateVariable> allocatedZombies;
+    /// The list of variabless that have been created in this state.
+    /// These variabless are later fed to the model for completion.
+    SymbolicSet allocatedSymbolicVariables;
 
     /// The program trace for the current program point (i.e., how we got to the current state).
     std::vector<std::reference_wrapper<const TraceEvent>> trace;
@@ -169,7 +151,7 @@ class ExecutionState {
     [[nodiscard]] std::optional<const Continuation::Command> getNextCmd() const;
 
     /// @returns the symbolic value of the given state variable.
-    const IR::Expression *get(const IR::StateVariable &var) const;
+    [[nodiscard]] const IR::Expression *get(const IR::StateVariable &var) const;
 
     /// Checks whether the statement has been visited in this state.
     void markVisited(const IR::Statement *stmt);
@@ -182,7 +164,7 @@ class ExecutionState {
     void set(const IR::StateVariable &var, const IR::Expression *value);
 
     /// Checks whether the given variable exists in the symbolic environment of this state.
-    bool exists(const IR::StateVariable &var) const;
+    [[nodiscard]] bool exists(const IR::StateVariable &var) const;
 
     /// @see Taint::hasTaint
     bool hasTaint(const IR::Expression *expr) const;
@@ -352,12 +334,9 @@ class ExecutionState {
      *  Packet manipulation
      * ========================================================================================= */
  public:
-    /// @returns the bit type of the parser cursor.
-    [[nodiscard]] static const IR::Type_Bits *getPacketSizeVarType();
-
     /// @returns the symbolic constant representing the length of the input to the current parser,
     /// in bits.
-    static const IR::StateVariable &getInputPacketSizeVar();
+    static const IR::SymbolicVariable *getInputPacketSizeVar();
 
     /// @returns the maximum length, in bits, of the packet in the current packet buffer. This is
     /// the network's MTU.
@@ -385,8 +364,9 @@ class ExecutionState {
     [[nodiscard]] int getPacketBufferSize() const;
 
     /// Consumes and @returns a slice from the available packet buffer. If the buffer is empty, this
-    /// will produce zombie constants that are appended to the input packet. This means we generate
-    /// packet content as needed. The returned slice is optional in case one just needs to advance.
+    /// will produce variables constants that are appended to the input packet. This means we
+    /// generate packet content as needed. The returned slice is optional in case one just needs to
+    /// advance.
     const IR::Expression *slicePacketBuffer(int amount);
 
     /// Peeks ahead into the packet buffer. Works similarly to slicePacketBuffer but does NOT
@@ -413,10 +393,6 @@ class ExecutionState {
     /// Append data to the emit buffer.
     void appendToEmitBuffer(const IR::Expression *expr);
 
-    /// @returns the label associated with the payload and sets the type according to the @param.
-    /// TODO: Consider moving this to a separate utility class?
-    [[nodiscard]] static const IR::Member *getPayloadLabel(const IR::Type *t);
-
     /// Set the parser error label to the @param parserError.
     void setParserErrorLabel(const IR::Member *parserError);
 
@@ -430,13 +406,15 @@ class ExecutionState {
      *  based on how many times newParser() has been called.
      */
  public:
-    /// @returns the zombies that were allocated in this state
-    [[nodiscard]] const std::set<IR::StateVariable> &getZombies() const;
+    /// @returns the symbolic variables that were allocated in this state
+    [[nodiscard]] const SymbolicSet &getSymbolicVariables() const;
 
-    /// @see Utils::getZombieConst.
-    /// We also place the zombies in the set of allocated zombies of this state.
-    [[nodiscard]] const IR::StateVariable &createZombieConst(const IR::Type *type, cstring name,
-                                                             uint64_t instanceID = 0);
+    /// @see ToolsVariables::getSymbolicVariable.
+    /// We also place the symbolic variables in the set of allocated symbolic variables of this
+    /// state.
+    [[nodiscard]] const IR::SymbolicVariable *createSymbolicVariable(const IR::Type *type,
+                                                                     cstring name,
+                                                                     uint64_t instanceID = 0);
 
     /* =========================================================================================
      *  General utilities involving ExecutionState.
@@ -461,10 +439,10 @@ class ExecutionState {
 
     /// @returns a translation of the path expression into a member.
     /// This function looks up the path expression in the namespace and tries to find the
-    /// corresponding declaration. It then converts the name of the declaration into a zombie
+    /// corresponding declaration. It then converts the name of the declaration into a variables
     /// constant and returns. This is necessary because we sometimes
     /// get flat declarations without members (e.g., bit<8> tmp;)
-    [[nodiscard]] const IR::StateVariable &convertPathExpr(const IR::PathExpression *path) const;
+    [[nodiscard]] static const IR::StateVariable &convertPathExpr(const IR::PathExpression *path);
 
     /// Allocate a new execution state object with the same state as this object.
     /// Returns a reference, not a pointer.
