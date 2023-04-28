@@ -31,7 +31,7 @@ if(P4TOOLS_TESTGEN_EBPF_TEST_STF)
   p4tools_add_tests(
     TESTSUITES "${P4C_EBPF_TEST_SUITES_P416}"
     TAG "testgen-p4c-ebpf" DRIVER ${P4TESTGEN_DRIVER}
-    TARGET "ebpf" ARCH "ebpf" ENABLE_RUNNER RUNNER_ARGS "" TEST_ARGS "-I${P4C_BINARY_DIR}/p4include --test-backend STF ${EXTRA_OPTS} "
+    TARGET "ebpf" ARCH "ebpf" ENABLE_RUNNER RUNNER_ARGS "" TEST_ARGS "--test-backend STF ${EXTRA_OPTS} "
   )
 
   # These tests need special arguments.
@@ -41,14 +41,14 @@ if(P4TOOLS_TESTGEN_EBPF_TEST_STF)
   #   TESTSUITES "${P4TESTDATA}/p4_16_samples/ebpf_checksum_extern.p4;"
   #   TAG "testgen-p4c-ebpf" DRIVER ${P4TESTGEN_DRIVER}
   #   TARGET "ebpf" ARCH "ebpf" ENABLE_RUNNER RUNNER_ARGS "--extern-file ${P4C_SOURCE_DIR}/testdata/extern_modules/extern-checksum-ebpf.c"
-  #   TEST_ARGS "-I${P4C_BINARY_DIR}/p4include --test-backend STF ${EXTRA_OPTS} "
+  #   TEST_ARGS "--test-backend STF ${EXTRA_OPTS} "
   # )
 
   p4tools_add_tests(
     TESTSUITES "${P4TESTDATA}/p4_16_samples/ebpf_conntrack_extern.p4;"
     TAG "testgen-p4c-ebpf" DRIVER ${P4TESTGEN_DRIVER}
     TARGET "ebpf" ARCH "ebpf" ENABLE_RUNNER RUNNER_ARGS "--extern-file ${P4C_SOURCE_DIR}/testdata/extern_modules/extern-conntrack-ebpf.c"
-    TEST_ARGS "-I${P4C_BINARY_DIR}/p4include --test-backend STF ${EXTRA_OPTS} "
+    TEST_ARGS "--test-backend STF ${EXTRA_OPTS} "
   )
   include(${CMAKE_CURRENT_LIST_DIR}/EBPFXfail.cmake)
 endif()

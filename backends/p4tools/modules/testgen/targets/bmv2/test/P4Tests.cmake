@@ -46,7 +46,7 @@ if(P4TOOLS_TESTGEN_BMV2_TEST_PROTOBUF)
   p4tools_add_tests(
     TESTSUITES "${P4C_V1_TEST_SUITES_P416}"
     TAG "testgen-p4c-bmv2-protobuf" DRIVER ${P4TESTGEN_DRIVER}
-    TARGET "bmv2" ARCH "v1model" VALIDATE_PROTOBUF TEST_ARGS "-I${P4C_BINARY_DIR}/p4include --test-backend PROTOBUF ${EXTRA_OPTS} "
+    TARGET "bmv2" ARCH "v1model" VALIDATE_PROTOBUF TEST_ARGS "--test-backend PROTOBUF ${EXTRA_OPTS} "
   )
   include(${CMAKE_CURRENT_LIST_DIR}/BMV2ProtobufXfail.cmake)
 endif()
@@ -56,7 +56,7 @@ if(P4TOOLS_TESTGEN_BMV2_TEST_METADATA)
   p4tools_add_tests(
     TESTSUITES "${P4C_V1_TEST_SUITES_P416}"
     TAG "testgen-p4c-bmv2-metadata" DRIVER ${P4TESTGEN_DRIVER}
-    TARGET "bmv2" ARCH "v1model" TEST_ARGS "-I${P4C_BINARY_DIR}/p4include --test-backend METADATA ${EXTRA_OPTS} "
+    TARGET "bmv2" ARCH "v1model" TEST_ARGS "--test-backend METADATA ${EXTRA_OPTS} "
   )
   include(${CMAKE_CURRENT_LIST_DIR}/BMV2MetadataXfail.cmake)
 endif()
@@ -81,7 +81,7 @@ if(P4TOOLS_TESTGEN_BMV2_TEST_PTF)
   p4tools_add_tests(
     TESTSUITES "${P4C_V1_TEST_SUITES_P416_PTF}"
     TAG "testgen-p4c-bmv2-ptf" DRIVER ${P4TESTGEN_DRIVER}
-    TARGET "bmv2" ARCH "v1model" P416_PTF TEST_ARGS "-I${P4C_BINARY_DIR}/p4include --test-backend PTF --packet-size-range 0:12000 ${EXTRA_OPTS} "
+    TARGET "bmv2" ARCH "v1model" P416_PTF TEST_ARGS "--test-backend PTF --packet-size-range 0:12000 ${EXTRA_OPTS} "
   )
   include(${CMAKE_CURRENT_LIST_DIR}/BMV2PTFXfail.cmake)
 endif()
@@ -91,7 +91,7 @@ if(P4TOOLS_TESTGEN_BMV2_TEST_STF)
   p4tools_add_tests(
     TESTSUITES "${P4C_V1_TEST_SUITES_P416}"
     TAG "testgen-p4c-bmv2" DRIVER ${P4TESTGEN_DRIVER}
-    TARGET "bmv2" ARCH "v1model" ENABLE_RUNNER TEST_ARGS "-I${P4C_BINARY_DIR}/p4include --test-backend STF ${EXTRA_OPTS} "
+    TARGET "bmv2" ARCH "v1model" ENABLE_RUNNER TEST_ARGS "--test-backend STF ${EXTRA_OPTS} "
   )
   include(${CMAKE_CURRENT_LIST_DIR}/BMV2Xfail.cmake)
 endif()
