@@ -85,7 +85,7 @@ SymbolicExecutor::SymbolicExecutor(AbstractSolver &solver, const ProgramInfo &pr
     : programInfo(programInfo),
       solver(solver),
       executionState(ExecutionState::create(programInfo.program)),
-      allStatements(programInfo.getAllStatements()),
+      coverableNodes(programInfo.getCoverableNodes()),
       evaluator(solver, programInfo) {
     // If there is no seed provided, do not randomize the solver.
     auto seed = Utils::getCurrentSeed();
@@ -94,13 +94,11 @@ SymbolicExecutor::SymbolicExecutor(AbstractSolver &solver, const ProgramInfo &pr
     }
 }
 
-void SymbolicExecutor::updateVisitedStatements(const P4::Coverage::CoverageSet &newStatements) {
-    visitedStatements.insert(newStatements.begin(), newStatements.end());
+void SymbolicExecutor::updateVisitedNodes(const P4::Coverage::CoverageSet &newNodes) {
+    visitedNodes.insert(newNodes.begin(), newNodes.end());
 }
 
-const P4::Coverage::CoverageSet &SymbolicExecutor::getVisitedStatements() {
-    return visitedStatements;
-}
+const P4::Coverage::CoverageSet &SymbolicExecutor::getVisitedNodes() { return visitedNodes; }
 
 void SymbolicExecutor::printCurrentTraceAndBranches(std::ostream &out) {
     const auto &branchesList = executionState.get().getSelectedBranches();

@@ -23,7 +23,7 @@
 #include "backends/p4tools/modules/testgen/core/small_step/abstract_stepper.h"
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
-#include "backends/p4tools/modules/testgen/lib/collect_latent_statements.h"
+#include "backends/p4tools/modules/testgen/lib/collect_coverable_statements.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
@@ -118,7 +118,6 @@ bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
     logStep(call);
     // A method call expression represents an invocation of an action, a table, an extern, or
     // setValid/setInvalid.
-
     // Handle method calls. These are either table invocations or extern calls.
     if (call->method->type->is<IR::Type_Method>()) {
         if (const auto *path = call->method->to<IR::PathExpression>()) {
@@ -187,9 +186,10 @@ bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
         }
 
         BUG("Unknown method call: %1% of type %2%", call->method, call->method->node_type_name());
-    } else if (const auto *action = state.getActionDecl(call->method)) {
+    } else if (call->method->type->is<IR::Type_Action>()) {
         // Handle action calls. Actions are called by tables and are not inlined, unlike
         // functions.
+        const auto *action = state.getActionDecl(call);
         evalActionCall(action, call);
         return false;
     }
@@ -234,10 +234,11 @@ bool ExprStepper::preorder(const IR::Mux *mux) {
 
         auto &nextState = state.clone();
         // Some path selection strategies depend on looking ahead and collecting potential
-        // statements. If that is the case, apply the CollectLatentStatements visitor.
+        // statements. If that is the case, apply the CoverableNodesScanner visitor.
         P4::Coverage::CoverageSet coveredStmts;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
-            expr->apply(CollectLatentStatements(coveredStmts, state));
+            auto collector = CoverableNodesScanner(state);
+            collector.updateNodeCoverage(expr, coveredStmts);
         }
         nextState.replaceTopBody(Continuation::Return(expr));
         result->emplace_back(cond, state, nextState, coveredStmts);
@@ -398,11 +399,12 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
 
         nextState.replaceTopBody(Continuation::Return(selectCase->state));
         // Some path selection strategies depend on looking ahead and collecting potential
-        // statements. If that is the case, apply the CollectLatentStatements visitor.
+        // statements. If that is the case, apply the CoverableNodesScanner visitor.
         P4::Coverage::CoverageSet coveredStmts;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
             const auto *decl = state.findDecl(selectCase->state)->getNode();
-            decl->apply(CollectLatentStatements(coveredStmts, state));
+            auto collector = CoverableNodesScanner(state);
+            collector.updateNodeCoverage(decl, coveredStmts);
         }
         result->emplace_back(new IR::LAnd(missCondition, matchCondition), state, nextState,
                              coveredStmts);

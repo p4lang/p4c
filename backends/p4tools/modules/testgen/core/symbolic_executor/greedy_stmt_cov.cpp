@@ -62,7 +62,7 @@ bool GreedyStmtSelection::pickSuccessor(StepResult successors) {
     // This guard is necessary to avoid getting caught in parser loops.
     if (stepsWithoutTest < MAX_STEPS_WITHOUT_TEST) {
         // Try to find a branch that covers new statements.
-        auto branch = popPotentialBranch(getVisitedStatements(), *successors);
+        auto branch = popPotentialBranch(getVisitedNodes(), *successors);
         // If we succeed, pick the branch and add the remainder to the list of
         // potential branches.
         if (branch.has_value()) {
@@ -119,7 +119,7 @@ void GreedyStmtSelection::run(const Callback &callback) {
         }
         // Select a new branch by iterating over all branches
         Util::ScopedTimer chooseBranchtimer("branch_selection");
-        auto branch = popPotentialBranch(getVisitedStatements(), potentialBranches);
+        auto branch = popPotentialBranch(getVisitedNodes(), potentialBranches);
         if (branch.has_value()) {
             executionState = branch->nextState;
             continue;

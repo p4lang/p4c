@@ -8,39 +8,59 @@
 #include "ir/visitor.h"
 #include "lib/source_file.h"
 
-/// This file is a collection of utilities for coverage tracking in P4 programs. Currently, this
-/// class merely tracks statement coverage. The utilities here can be used by interpreters that need
-/// to walk the IR of the P4 program and track which percentage of statement they have visited. The
-/// p4tools (backends/p4tools) framework uses this coverage visitor.
+/// This file is a collection of utilities for coverage tracking in P4 programs.
+/// Currently, this class tracks statement and constant table entry coverage.
+/// The utilities here can be used by interpreters that need to walk the IR of the P4 program and
+/// track which percentage of nodes they have visited.
+/// The p4tools (backends/p4tools) framework uses this coverage visitor.
 
 namespace P4::Coverage {
 
+/// Utility function to compare IR nodes in a set. We use their source info.
 struct SourceIdCmp {
-    bool operator()(const IR::Statement *s1, const IR::Statement *s2) const {
+    bool operator()(const IR::Node *s1, const IR::Node *s2) const {
         return s1->srcInfo < s2->srcInfo;
     }
 };
 
-/// Set of statements used for coverage purposes. Compares statements based on their
-/// clone_id to take statement modifications into account.
-using CoverageSet = std::set<const IR::Statement *, SourceIdCmp>;
+/// Specifies, which IR nodes to track with this particular visitor.
+struct CoverageOptions {
+    bool coverStatements = false;
+    bool coverTableEntries = false;
+};
 
-/// CollectStatements iterates across all assignment, method call, and exit statements in the P4
-/// program and collects them in a "CoverageSet".
-class CollectStatements : public Inspector {
-    CoverageSet &statements;
+/// Set of nodes used for coverage purposes. Compares nodes based on their
+/// clone_id to take node modifications into account.
+using CoverageSet = std::set<const IR::Node *, SourceIdCmp>;
 
- public:
-    explicit CollectStatements(CoverageSet &output);
+/// CollectNodes iterates across selected nodes in the P4 program and collects them in a
+/// "CoverageSet". The nodes to collect are specified as options to the collector.
+class CollectNodes : public Inspector {
+    /// The set of nodes in the program that could potentially be covered.
+    CoverageSet coverableNodes;
+
+    /// Specifies, which IR nodes to track with this particular visitor.
+    CoverageOptions coverageOptions;
+
+    /// Statement coverage.
     bool preorder(const IR::AssignmentStatement *stmt) override;
     bool preorder(const IR::MethodCallStatement *stmt) override;
     bool preorder(const IR::ExitStatement *stmt) override;
+
+    /// Table entry coverage.
+    bool preorder(const IR::Entry *entry) override;
+
+ public:
+    explicit CollectNodes(CoverageOptions coverageOptions);
+
+    /// @return the set of coverable nodes in the program.
+    const CoverageSet &getCoverableNodes();
 };
 
 /// Produces detailed final coverage log.
-void coverageReportFinal(const CoverageSet &all, const CoverageSet &visited);
+void printCoverageReport(const CoverageSet &all, const CoverageSet &visited);
 
-/// Logs statements from @p new_ which have not yet been visited (are not members of @p visited).
+/// Logs nodes from @p new_ which have not yet been visited (are not members of @p visited).
 void logCoverage(const CoverageSet &all, const CoverageSet &visited, const CoverageSet &new_);
 
 }  // namespace P4::Coverage

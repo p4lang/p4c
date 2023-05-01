@@ -30,7 +30,7 @@
 #include "backends/p4tools/modules/testgen/core/small_step/abstract_stepper.h"
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
-#include "backends/p4tools/modules/testgen/lib/collect_latent_statements.h"
+#include "backends/p4tools/modules/testgen/lib/collect_coverable_statements.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
@@ -296,10 +296,11 @@ bool CmdStepper::preorder(const IR::IfStatement *ifStatement) {
         nextState.replaceTopBody(&cmds);
 
         // Some path selection strategies depend on looking ahead and collecting potential
-        // statements. If that is the case, apply the CollectLatentStatements visitor.
+        // statements. If that is the case, apply the CoverableNodesScanner visitor.
         P4::Coverage::CoverageSet coveredStmts;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
-            ifStatement->ifTrue->apply(CollectLatentStatements(coveredStmts, state));
+            auto collector = CoverableNodesScanner(state);
+            collector.updateNodeCoverage(ifStatement->ifTrue, coveredStmts);
         }
         result->emplace_back(ifStatement->condition, state, nextState, coveredStmts);
     }
@@ -313,10 +314,11 @@ bool CmdStepper::preorder(const IR::IfStatement *ifStatement) {
         nextState.replaceTopBody((ifStatement->ifFalse == nullptr) ? new IR::BlockStatement()
                                                                    : ifStatement->ifFalse);
         // Some path selection strategies depend on looking ahead and collecting potential
-        // statements. If that is the case, apply the CollectLatentStatements visitor.
+        // statements. If that is the case, apply the CoverableNodesScanner visitor.
         P4::Coverage::CoverageSet coveredStmts;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
-            ifStatement->ifFalse->apply(CollectLatentStatements(coveredStmts, state));
+            auto collector = CoverableNodesScanner(state);
+            collector.updateNodeCoverage(ifStatement->ifFalse, coveredStmts);
         }
         result->emplace_back(negation, state, nextState, coveredStmts);
     }
@@ -329,12 +331,10 @@ bool CmdStepper::preorder(const IR::MethodCallStatement *methodCallStatement) {
     state.markVisited(methodCallStatement);
     state.popBody();
     const auto *type = methodCallStatement->methodCall->type;
-    // do not push continuation for table application
-    if (methodCallStatement->methodCall->method->type->is<IR::Type_Method>() &&
-        methodCallStatement->methodCall->method->is<IR::PathExpression>()) {
-        type = methodCallStatement->methodCall->type;
-    } else if (state.getActionDecl(methodCallStatement->methodCall->method) != nullptr ||
-               state.getTableType(methodCallStatement->methodCall->method) != nullptr) {
+    // Table and action calls do not really return anything (for now).
+    // TODO: We should not need these convoluted type checks in a method call statement.
+    if (type->is<IR::Type_Action>() ||
+        state.getTableType(methodCallStatement->methodCall->method) != nullptr) {
         type = IR::Type::Void::get();
     }
     state.pushCurrentContinuation(type);
@@ -580,13 +580,13 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
         cmds.emplace_back(Continuation::PropertyUpdate("inUndefinedState", currentTaint));
     } else {
         // Otherwise, we pick the switch statement case in a normal fashion.
-
         bool hasMatched = false;
         for (const auto *switchCase : switchStatement->cases) {
             if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
                 // Some path selection strategies depend on looking ahead and collecting potential
-                // statements. If that is the case, apply the CollectLatentStatements visitor.
-                switchCase->statement->apply(CollectLatentStatements(coveredStmts, state));
+                // statements. If that is the case, apply the CoverableNodesScanner visitor.
+                auto collector = CoverableNodesScanner(state);
+                collector.updateNodeCoverage(switchCase->statement, coveredStmts);
             }
             // We have either matched already, or still need to match.
             hasMatched = hasMatched || switchStatement->expression->equiv(*switchCase->label);

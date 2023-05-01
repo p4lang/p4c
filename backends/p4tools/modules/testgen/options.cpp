@@ -205,6 +205,36 @@ TestgenOptions::TestgenOptions()
         "Defaults to DEPTH_FIRST.");
 
     registerOption(
+        "--track-coverage", "coverageItem",
+        [this](const char *arg) {
+            static std::set<cstring> const COVERAGE_OPTIONS = {
+                "STATEMENTS",
+                "TABLE_ENTRIES",
+            };
+            auto selectionString = cstring(arg).toUpper();
+            auto it = COVERAGE_OPTIONS.find(selectionString);
+            if (it != COVERAGE_OPTIONS.end()) {
+                if (selectionString == "STATEMENTS") {
+                    coverageOptions.coverStatements = true;
+                    return true;
+                }
+                if (selectionString == "TABLE_ENTRIES") {
+                    coverageOptions.coverTableEntries = true;
+                    return true;
+                }
+            }
+            ::error(
+                "Coverage tracking for label %1% not supported. Supported coverage tracking "
+                "options are "
+                "%2%.",
+                selectionString, Utils::containerToString(COVERAGE_OPTIONS));
+            return false;
+        },
+        "Specifies, which IR nodes to track for coverage in the targeted P4 program. Multiple "
+        "options are possible: Currently supported: STATEMENTS, TABLE_ENTRIES"
+        "Defaults to no coverage.");
+
+    registerOption(
         "--saddle-point", "saddlePoint",
         [this](const char *arg) {
             int64_t saddlePointTmp = 0;

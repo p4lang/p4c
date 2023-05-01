@@ -37,7 +37,7 @@ bool TestBackEnd::run(const FinalState &state) {
         const auto *outputPacketExpr = executionState->getPacketBuffer();
         const auto *completedModel = state.getCompletedModel();
         const auto *outputPortExpr = executionState->get(programInfo.getTargetOutputPortVar());
-        const auto &allStatements = programInfo.getAllStatements();
+        const auto &coverableNodes = programInfo.getCoverableNodes();
         const auto *programTraces = state.getTraces();
 
         // Don't increase the test count if --with-output-packet is enabled and we don't
@@ -107,14 +107,19 @@ bool TestBackEnd::run(const FinalState &state) {
 
         // Commit an update to the visited statements.
         // Only do this once we are sure we are generating a test.
-        symbex.updateVisitedStatements(replacedState.getVisited());
-        const P4::Coverage::CoverageSet &visitedStatements = symbex.getVisitedStatements();
-        auto coverage =
-            static_cast<float>(visitedStatements.size()) / static_cast<float>(allStatements.size());
-        printFeature("test_info", 4,
-                     "============ Test %1%: Statements covered: %2% (%3%/%4%) ============",
-                     testCount, coverage, visitedStatements.size(), allStatements.size());
-        P4::Coverage::logCoverage(allStatements, visitedStatements, executionState->getVisited());
+        symbex.updateVisitedNodes(replacedState.getVisited());
+        const P4::Coverage::CoverageSet &visitedNodes = symbex.getVisitedNodes();
+        float coverage = NAN;
+        if (coverableNodes.empty()) {
+            printFeature("test_info", 4, "============ Test %1% ============", testCount);
+        } else {
+            coverage =
+                static_cast<float>(visitedNodes.size()) / static_cast<float>(coverableNodes.size());
+            printFeature("test_info", 4,
+                         "============ Test %1%: Nodes covered: %2% (%3%/%4%) ============",
+                         testCount, coverage, visitedNodes.size(), coverableNodes.size());
+            P4::Coverage::logCoverage(coverableNodes, visitedNodes, executionState->getVisited());
+        }
 
         // Output the test.
         Util::withTimer("backend", [this, &testSpec, &selectedBranches, &coverage] {
@@ -123,7 +128,7 @@ bool TestBackEnd::run(const FinalState &state) {
 
         printTraces("============ End Test %1% ============\n", testCount);
         testCount++;
-        P4::Coverage::coverageReportFinal(allStatements, visitedStatements);
+        P4::Coverage::printCoverageReport(coverableNodes, visitedNodes);
         printPerformanceReport(false);
 
         // If MAX_STATEMENT_COVERAGE is enabled, terminate early if we hit max coverage already.

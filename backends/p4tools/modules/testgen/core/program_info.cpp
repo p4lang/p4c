@@ -26,7 +26,11 @@ ProgramInfo::ProgramInfo(const IR::P4Program *program) : concolicMethodImpls({})
         program->apply(dcgCreator);
         dcg = currentDCG;
     }
-    program->apply(P4::Coverage::CollectStatements(allStatements));
+    /// Collect coverage information about the program.
+    auto coverage = P4::Coverage::CollectNodes(TestgenOptions::get().coverageOptions);
+    program->apply(coverage);
+    auto coveredNodes = coverage.getCoverableNodes();
+    coverableNodes.insert(coveredNodes.begin(), coveredNodes.end());
 }
 
 /* =============================================================================================
@@ -71,7 +75,7 @@ const IR::Expression *ProgramInfo::createTargetUninitialized(const IR::Type *typ
  *  Getters
  * ============================================================================================= */
 
-const P4::Coverage::CoverageSet &ProgramInfo::getAllStatements() const { return allStatements; }
+const P4::Coverage::CoverageSet &ProgramInfo::getCoverableNodes() const { return coverableNodes; }
 
 const ConcolicMethodImpls *ProgramInfo::getConcolicMethodImpls() const {
     return &concolicMethodImpls;
