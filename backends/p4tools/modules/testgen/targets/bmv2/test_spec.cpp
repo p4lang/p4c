@@ -94,7 +94,6 @@ cstring Bmv2V1ModelRegisterValue::getObjectName() const { return "Bmv2V1ModelReg
 const Bmv2V1ModelRegisterValue *Bmv2V1ModelRegisterValue::evaluate(const Model &model) const {
     const auto *evaluatedValue = model.evaluate(getInitialValue());
     auto *evaluatedRegisterValue = new Bmv2V1ModelRegisterValue(evaluatedValue);
-    const std::vector<ActionArg> evaluatedConditions;
     for (const auto &cond : indexConditions) {
         const auto *evaluatedCond = cond.evaluate(model);
         evaluatedRegisterValue->writeToIndex(evaluatedCond->getEvaluatedIndex(),
@@ -115,7 +114,6 @@ cstring Bmv2V1ModelMeterValue::getObjectName() const { return "Bmv2V1ModelMeterV
 const Bmv2V1ModelMeterValue *Bmv2V1ModelMeterValue::evaluate(const Model &model) const {
     const auto *evaluatedValue = model.evaluate(getInitialValue());
     auto *evaluatedMeterValue = new Bmv2V1ModelMeterValue(evaluatedValue, isDirect);
-    const std::vector<ActionArg> evaluatedConditions;
     for (const auto &cond : indexConditions) {
         const auto *evaluatedCond = cond.evaluate(model);
         evaluatedMeterValue->writeToIndex(evaluatedCond->getEvaluatedIndex(),

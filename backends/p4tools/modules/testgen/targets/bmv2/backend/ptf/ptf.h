@@ -47,9 +47,6 @@ class PTF : public TF {
                     float currentCoverage) override;
 
  private:
-    /// @returns the static preamble string used by inja to serialize the test preamble.
-    static std::string getPreamble();
-
     /// Emits the test preamble. This is only done once for all generated tests.
     /// For the PTF back end this is the test setup Python script..
     void emitPreamble();
