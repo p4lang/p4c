@@ -9,8 +9,9 @@
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/trace_event.h"
 #include "ir/ir.h"
-#include "lib/castable.h"
 #include "lib/cstring.h"
+
+#include "backends/p4tools/modules/testgen/lib/test_object.h"
 
 namespace P4Tools::P4Testgen {
 
@@ -18,22 +19,6 @@ namespace P4Tools::P4Testgen {
 /// specification.
 /// This test specification is reified into a concrete test specification by the
 /// individual test back ends of a target extension.
-
-/* =========================================================================================
- *  Abstract Test Object Class
- * ========================================================================================= */
-
-class TestObject : public ICastable {
- public:
-    /// @returns the string name of this particular test object.
-    virtual cstring getObjectName() const = 0;
-
-    virtual ~TestObject() = default;
-
-    /// @returns a version of the test object where all expressions are resolved and symbolic
-    /// variables are substituted according to the mapping present in the @param model.
-    virtual const TestObject *evaluate(const Model &model) const = 0;
-};
 
 /* =========================================================================================
  *  Packet
@@ -53,22 +38,22 @@ class Packet : public TestObject {
  public:
     Packet(int port, const IR::Expression *payload, const IR::Expression *payloadIgnoreMask);
 
-    const Packet *evaluate(const Model &model) const override;
+    [[nodiscard]] const Packet *evaluate(const Model &model) const override;
 
-    cstring getObjectName() const override;
+    [[nodiscard]] cstring getObjectName() const override;
 
     /// @returns the port that is associated with this packet.
-    int getPort() const;
+    [[nodiscard]] int getPort() const;
 
     /// @returns the payload of the packet, which, at this point, needs to be a constant.
     /// A BUG is thrown otherwise.
-    const IR::Constant *getEvaluatedPayload() const;
+    [[nodiscard]] const IR::Constant *getEvaluatedPayload() const;
 
     /// @returns the don't care mask of the packet, which, at this point, needs to be a constant.
     /// If a bit is set in the @payloadIgnoreMask, the corresponding bit in @payload
     /// is ignored.
     /// A BUG is thrown otherwise.
-    const IR::Constant *getEvaluatedPayloadMask() const;
+    [[nodiscard]] const IR::Constant *getEvaluatedPayloadMask() const;
 };
 
 /* =========================================================================================
@@ -86,19 +71,19 @@ class ActionArg : public TestObject {
  public:
     ActionArg(const IR::Parameter *param, const IR::Expression *value);
 
-    const ActionArg *evaluate(const Model &model) const override;
+    [[nodiscard]] const ActionArg *evaluate(const Model &model) const override;
 
-    cstring getObjectName() const override;
+    [[nodiscard]] cstring getObjectName() const override;
 
-    const IR::Parameter *getActionParam() const;
+    [[nodiscard]] const IR::Parameter *getActionParam() const;
 
     /// @returns the parameter name associated with the action argument.
-    cstring getActionParamName() const;
+    [[nodiscard]] cstring getActionParamName() const;
 
     /// @returns input argument value, which at this point needs to be a constant.
     /// If the value is a bool, it is converted into a constant.
     /// A BUG is thrown otherwise.
-    const IR::Constant *getEvaluatedValue() const;
+    [[nodiscard]] const IR::Constant *getEvaluatedValue() const;
 };
 
 class ActionCall : public TestObject {
@@ -117,19 +102,19 @@ class ActionCall : public TestObject {
 
     ActionCall(const IR::P4Action *action, std::vector<ActionArg> args);
 
-    const ActionCall *evaluate(const Model &model) const override;
+    [[nodiscard]] const ActionCall *evaluate(const Model &model) const override;
 
-    cstring getObjectName() const override;
+    [[nodiscard]] cstring getObjectName() const override;
 
     /// @returns the name of the action that is being called. If not otherwise specified, this is
     /// the control plane name.
-    cstring getActionName() const;
+    [[nodiscard]] cstring getActionName() const;
 
     /// @returns the action that is associated with this object.
-    const IR::P4Action *getAction() const;
+    [[nodiscard]] const IR::P4Action *getAction() const;
 
     /// @returns the arguments of this particular call.
-    const std::vector<ActionArg> *getArgs() const;
+    [[nodiscard]] const std::vector<ActionArg> *getArgs() const;
 };
 
 class TableMatch : public TestObject {
@@ -141,7 +126,7 @@ class TableMatch : public TestObject {
     explicit TableMatch(const IR::KeyElement *key);
 
     /// @returns the key associated with this object.
-    const IR::KeyElement *getKey() const;
+    [[nodiscard]] const IR::KeyElement *getKey() const;
 };
 
 using TableMatchMap = std::map<cstring, const TableMatch *>;
@@ -158,19 +143,19 @@ class Ternary : public TableMatch {
     explicit Ternary(const IR::KeyElement *key, const IR::Expression *value,
                      const IR::Expression *mask);
 
-    const Ternary *evaluate(const Model &model) const override;
+    [[nodiscard]] const Ternary *evaluate(const Model &model) const override;
 
-    cstring getObjectName() const override;
+    [[nodiscard]] cstring getObjectName() const override;
 
     /// @returns the value of the ternary object, which is matched with the key. At this point the
     /// value needs to be a constant.
     /// A BUG is thrown otherwise.
-    const IR::Constant *getEvaluatedValue() const;
+    [[nodiscard]] const IR::Constant *getEvaluatedValue() const;
 
     /// @returns the mask of the ternary object. At this point the
     /// value needs to be a constant.
     /// A BUG is thrown otherwise.
-    const IR::Constant *getEvaluatedMask() const;
+    [[nodiscard]] const IR::Constant *getEvaluatedMask() const;
 };
 
 class LPM : public TableMatch {
@@ -185,19 +170,19 @@ class LPM : public TableMatch {
     explicit LPM(const IR::KeyElement *key, const IR::Expression *value,
                  const IR::Expression *prefixLength);
 
-    const LPM *evaluate(const Model &model) const override;
+    [[nodiscard]] const LPM *evaluate(const Model &model) const override;
 
-    cstring getObjectName() const override;
+    [[nodiscard]] cstring getObjectName() const override;
 
     /// @returns the value of the LPM object, which is matched with the key. At this point the
     /// value needs to be a constant.
     /// A BUG is thrown otherwise.
-    const IR::Constant *getEvaluatedValue() const;
+    [[nodiscard]] const IR::Constant *getEvaluatedValue() const;
 
     /// @returns the prefix of LPM, which describes how many bits of the value are matched. At this
     /// point the prefix is expected to be a constant.
     /// A BUG is thrown otherwise.
-    const IR::Constant *getEvaluatedPrefixLength() const;
+    [[nodiscard]] const IR::Constant *getEvaluatedPrefixLength() const;
 };
 
 class Exact : public TableMatch {
@@ -208,13 +193,13 @@ class Exact : public TableMatch {
  public:
     explicit Exact(const IR::KeyElement *key, const IR::Expression *value);
 
-    const Exact *evaluate(const Model &model) const override;
+    [[nodiscard]] const Exact *evaluate(const Model &model) const override;
 
-    cstring getObjectName() const override;
+    [[nodiscard]] cstring getObjectName() const override;
 
     /// @returns the match value. It is expected to be a constant at this point.
     /// A BUG is thrown otherwise.
-    const IR::Constant *getEvaluatedValue() const;
+    [[nodiscard]] const IR::Constant *getEvaluatedValue() const;
 };
 
 class TableRule : public TestObject {
@@ -232,21 +217,21 @@ class TableRule : public TestObject {
  public:
     TableRule(TableMatchMap matches, int priority, ActionCall action, int ttl);
 
-    const TableRule *evaluate(const Model &model) const override;
+    [[nodiscard]] const TableRule *evaluate(const Model &model) const override;
 
-    cstring getObjectName() const override;
+    [[nodiscard]] cstring getObjectName() const override;
 
     /// @returns the list of keys that need to match to execute the action.
-    const TableMatchMap *getMatches() const;
+    [[nodiscard]] const TableMatchMap *getMatches() const;
 
     /// @returns the priority of this entry.
-    int getPriority() const;
+    [[nodiscard]] int getPriority() const;
 
     /// @returns action that is called when the key matches.
-    const ActionCall *getActionCall() const;
+    [[nodiscard]] const ActionCall *getActionCall() const;
 
     /// @returns the time-to-live of this particular entry.
-    int getTTL() const;
+    [[nodiscard]] int getTTL() const;
 };
 
 class TableConfig : public TestObject {
@@ -258,29 +243,29 @@ class TableConfig : public TestObject {
     const std::vector<TableRule> rules;
 
     /// A map of table properties. For example, an action profile may be part of a table property.
-    std::map<cstring, const TestObject *> tableProperties;
+    TestObjectMap tableProperties;
 
  public:
     explicit TableConfig(const IR::P4Table *table, std::vector<TableRule> rules);
 
     explicit TableConfig(const IR::P4Table *table, std::vector<TableRule> rules,
-                         std::map<cstring, const TestObject *> tableProperties);
+                         TestObjectMap tableProperties);
 
-    const IR::P4Table *getTable() const;
+    [[nodiscard]] const IR::P4Table *getTable() const;
 
-    cstring getObjectName() const override;
+    [[nodiscard]] cstring getObjectName() const override;
 
-    const TableConfig *evaluate(const Model &model) const override;
+    [[nodiscard]] const TableConfig *evaluate(const Model &model) const override;
 
     /// @returns the table rules of this table.
-    const std::vector<TableRule> *getRules() const;
+    [[nodiscard]] const std::vector<TableRule> *getRules() const;
 
     /// @returns the properties associated with this table.
-    const std::map<cstring, const TestObject *> *getProperties() const;
+    [[nodiscard]] const TestObjectMap *getProperties() const;
 
     /// @returns a particular property based on @param propertyName.
     /// If @param checked is true, this will throw a BUG if @param propertyName is not in the list.
-    const TestObject *getProperty(cstring propertyName, bool checked) const;
+    [[nodiscard]] const TestObject *getProperty(cstring propertyName, bool checked) const;
 
     /// Add a table property to the table.
     void addTableProperty(cstring propertyName, const TestObject *property);
@@ -304,7 +289,7 @@ class TestSpec {
 
     /// A map of additional properties associated with this test specification.
     /// For example, tables, registers, or action profiles.
-    std::map<cstring, std::map<cstring, const TestObject *>> testObjects;
+    std::map<cstring, TestObjectMap> testObjects;
 
  public:
     TestSpec(Packet ingressPacket, std::optional<Packet> egressPacket,
@@ -317,32 +302,33 @@ class TestSpec {
 
     /// @returns a test object for the given category and objectlabel.
     /// Returns a BUG if checked is true and the object is not found.
-    const TestObject *getTestObject(cstring category, cstring objectLabel, bool checked) const;
+    [[nodiscard]] const TestObject *getTestObject(cstring category, cstring objectLabel,
+                                                  bool checked) const;
 
     /// @returns the test object using the provided category and object label. If
     /// @param checked is enabled, a BUG is thrown if the object label does not exist.
     /// Also casts the test object to the specified type. If the type does not match, a BUG is
     /// thrown.
     template <class T>
-    T *getTestObject(cstring category, cstring objectLabel, bool checked) const {
+    [[nodiscard]] auto *getTestObject(cstring category, cstring objectLabel, bool checked) const {
         const auto *testObject = getTestObject(category, objectLabel, checked);
         return testObject->checkedTo<T>();
     }
 
     /// @returns the map of test objects for a given category.
-    std::map<cstring, const TestObject *> getTestObjectCategory(cstring category) const;
+    [[nodiscard]] TestObjectMap getTestObjectCategory(cstring category) const;
 
     /// @returns the input packet for this test.
-    const Packet *getIngressPacket() const;
+    [[nodiscard]] const Packet *getIngressPacket() const;
 
     /// @returns the list of tables that need to be configured for this test.
-    const std::map<cstring, const TableConfig> *getTables() const;
+    [[nodiscard]] const std::map<cstring, const TableConfig> *getTables() const;
 
     /// @returns the expected output packet for this test.
-    std::optional<const Packet *> getEgressPacket() const;
+    [[nodiscard]] std::optional<const Packet *> getEgressPacket() const;
 
     /// @returns the list of traces that has been executed
-    const std::vector<std::reference_wrapper<const TraceEvent>> *getTraces() const;
+    [[nodiscard]] const std::vector<std::reference_wrapper<const TraceEvent>> *getTraces() const;
 
     /// Priority definitions for LPM and ternary entries.
     static constexpr int NO_PRIORITY = -1;

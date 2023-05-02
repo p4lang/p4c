@@ -26,9 +26,12 @@ class BMv2Constants {
     static constexpr uint64_t PKT_INSTANCE_TYPE_RECIRC = 0x0004;
     static constexpr uint64_t PKT_INSTANCE_TYPE_REPLICATION = 0x005;
     static constexpr uint64_t PKT_INSTANCE_TYPE_RESUBMIT = 0x006;
+    /// The session IDs for clone are limited to a specific range.
+    /// Details: https://github.com/p4lang/PI/pull/588
+    static constexpr uint16_t CLONE_SESSION_ID_MIN = 1;
+    static constexpr uint16_t CLONE_SESSION_ID_MAX = 32767;
     /// Clone type is derived from v1model.p4
-    static constexpr int CLONE_TYPE_I2E = 0x0000;
-    static constexpr int CLONE_TYPE_E2E = 0x0001;
+    enum CloneType { I2E = 0, E2E = 1 };
     /// Other useful constants
     static constexpr int STF_MIN_PKT_SIZE = 22;
     static constexpr int ETH_HDR_SIZE = 112;

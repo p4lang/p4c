@@ -162,8 +162,8 @@ std::vector<Continuation::Command> Bmv2V1ModelProgramInfo::processDeclaration(
         // Also check whether we need to drop the packet.
         const auto *dropCheck = new IR::IfStatement(dropIsActive(), dropStmt, nullptr);
         cmds.emplace_back(dropCheck);
-        const auto *recirculateCheck =
-            new IR::MethodCallStatement(Utils::generateInternalMethodCall("check_recirculate", {}));
+        const auto *recirculateCheck = new IR::MethodCallStatement(
+            Utils::generateInternalMethodCall("invoke_traffic_manager", {}));
         cmds.emplace_back(recirculateCheck);
     }
     return cmds;

@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <functional>
 #include <iosfwd>
+#include <list>
 #include <map>
 #include <optional>
 #include <string>
@@ -18,6 +19,7 @@
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
+#include "backends/p4tools/modules/testgen/lib/test_object.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 
 namespace P4Tools::P4Testgen {

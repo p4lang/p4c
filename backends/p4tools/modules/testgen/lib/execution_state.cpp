@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <initializer_list>
+#include <list>
 #include <map>
 #include <stack>
 #include <string>
@@ -25,6 +26,7 @@
 #include "ir/irutils.h"
 #include "lib/log.h"
 #include "lib/null.h"
+#include "lib/ordered_map.h"
 #include "lib/source_file.h"
 
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
@@ -193,14 +195,23 @@ const TestObject *ExecutionState::getTestObject(cstring category, cstring object
     return nullptr;
 }
 
-std::map<cstring, const TestObject *> ExecutionState::getTestObjectCategory(
-    cstring category) const {
+TestObjectMap ExecutionState::getTestObjectCategory(cstring category) const {
     auto it = testObjects.find(category);
     if (it != testObjects.end()) {
         return it->second;
     }
     return {};
 }
+
+void ExecutionState::deleteTestObject(cstring category, cstring objectLabel) {
+    auto it = testObjects.find(category);
+    if (it != testObjects.end()) {
+        return;
+    }
+    it->second.erase(objectLabel);
+}
+
+void ExecutionState::deleteTestObjectCategory(cstring category) { testObjects.erase(category); }
 
 void ExecutionState::setReachabilityEngineState(ReachabilityEngineState *newEngineState) {
     reachabilityEngineState = newEngineState;

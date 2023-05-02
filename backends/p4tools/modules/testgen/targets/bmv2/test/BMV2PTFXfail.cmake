@@ -1,20 +1,11 @@
 # XFAILS: tests that currently fail. Most of these are temporary.
 # ================================================
 
-
 ####################################################################################################
 # 1. P4C Toolchain Issues
 # These are issues either with the P4 compiler or the behavioral model executing the code.
 # These issues needed to be tracked and fixed in P4C.
 ####################################################################################################
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-ptf"
-  "Non-numeric, non-boolean member expression: .* Type: Type_Stack"
-  # We can not expand stacks in parsers because information about .next is lost.
-  # P4Testgen needs to maintain its own internal .next variable for stacks.
-  array-copy-bmv2.p4
-)
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
@@ -48,10 +39,48 @@ p4tools_add_xfail_reason(
   extract_for_header_union.p4
 )
 
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "At index"
+  # At index 0: UNKNOWN, 'Error when adding match entry to target'
+  # enums are not supported in P4Runtime yet https://github.com/p4lang/behavioral-model/issues/1178
+  issue1062-1-bmv2.p4
+  v1model-p4runtime-most-types1.p4
+  v1model-p4runtime-enumint-types1.p4
+
+  # At index 0: INVALID_ARGUMENT, 'Bytestring provided does not fit within 0 bits'
+  # https://github.com/p4lang/PI/issues/585
+  issue2283_1-bmv2.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Unexpected error in RPC handling"
+  # Unexpected error in RPC handling
+  issue3374.p4
+  control-hs-index-test6.p4
+  parser-unroll-test1.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Error when importing p4info"
+  v1model-digest-containing-ser-enum.p4
+  v1model-digest-custom-type.p4
+)
+
 ####################################################################################################
 # 2. P4Testgen Issues
 # These are failures in P4Testgen that need to be fixed.
 ####################################################################################################
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
+  "Non-numeric, non-boolean member expression: .* Type: Type_Stack"
+  # We can not expand stacks in parsers because information about .next is lost.
+  # P4Testgen needs to maintain its own internal .next variable for stacks.
+  array-copy-bmv2.p4
+)
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
@@ -61,7 +90,7 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
   "is trying to match on a tainted key set"
-  # unimlemented feature (for select statement)
+  # unimplemented feature (for select statement)
   invalid-hdr-warnings1.p4
   issue692-bmv2.p4
 )
@@ -251,37 +280,4 @@ p4tools_add_xfail_reason(
   issue3702-bmv2.p4
   issue914-bmv2.p4
   xor_test.p4
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-ptf"
-  "At index"
-  # At index 0: UNKNOWN, 'Error when adding match entry to target'
-  # enums are not supported in P4Runtime yet https://github.com/p4lang/behavioral-model/issues/1178
-  issue1062-1-bmv2.p4
-  v1model-p4runtime-most-types1.p4
-  pins_fabric.p4
-  pins_wbb.p4
-  v1model-p4runtime-enumint-types1.p4
-
-  # At index 0: INVALID_ARGUMENT, 'Bytestring provided does not fit within 0 bits'
-  pins_middleblock.p4
-  issue2283_1-bmv2.p4
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-ptf"
-  "Unexpected error in RPC handling"
-  # Unexpected error in RPC handling
-  issue3374.p4
-  control-hs-index-test6.p4
-  parser-unroll-test1.p4
-)
-
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-ptf"
-  "Error when importing p4info"
-  v1model-digest-containing-ser-enum.p4
-  v1model-digest-custom-type.p4
 )

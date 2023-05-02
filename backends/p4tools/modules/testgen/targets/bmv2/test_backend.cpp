@@ -1,8 +1,7 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend.h"
 
-#include <stdlib.h>
-
-#include <map>
+#include <cstdlib>
+#include <list>
 #include <optional>
 #include <string>
 #include <utility>
@@ -23,6 +22,7 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/test_backend.h"
+#include "backends/p4tools/modules/testgen/lib/test_object.h"
 #include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/backend/metadata/metadata.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/backend/protobuf/protobuf.h"
@@ -147,12 +147,12 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
         testSpec->addTestObject("action_selectors", selectorName, evaluatedSelector);
     }
 
-    const auto cloneInfos = executionState->getTestObjectCategory("clone_infos");
-    for (const auto &testObject : cloneInfos) {
+    const auto cloneSpecs = executionState->getTestObjectCategory("clone_specs");
+    for (const auto &testObject : cloneSpecs) {
         const auto sessionId = testObject.first;
-        const auto *cloneInfo = testObject.second->checkedTo<Bmv2_CloneInfo>();
-        const auto *evaluatedInfo = cloneInfo->evaluate(*completedModel);
-        testSpec->addTestObject("clone_infos", sessionId, evaluatedInfo);
+        const auto *cloneSpec = testObject.second->checkedTo<Bmv2V1ModelCloneSpec>();
+        const auto *evaluatedInfo = cloneSpec->evaluate(*completedModel);
+        testSpec->addTestObject("clone_specs", sessionId, evaluatedInfo);
     }
 
     return testSpec;
