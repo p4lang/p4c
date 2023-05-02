@@ -45,7 +45,7 @@ inja::json PTF::getClone(const TestObjectMap &cloneSpecs) {
     return cloneSpec;
 }
 
-inja::json::array_t getMeter(const std::map<cstring, const TestObject *> &meterValues) {
+inja::json::array_t PTF::getMeter(const TestObjectMap &meterValues) {
     auto meterJson = inja::json::array_t();
     for (auto meterValueInfoTuple : meterValues) {
         const auto *meterValue = meterValueInfoTuple.second->checkedTo<Bmv2V1ModelMeterValue>();

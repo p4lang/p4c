@@ -71,7 +71,10 @@ class PTF : public TF {
     /// Converts the output packet, port, and mask into Inja format.
     static inja::json getVerify(const TestSpec *testSpec);
 
-    /// Returns the configuration for a cloned packet configuration.
+    /// @returns the configuration for a meter call (may set the meter to GREEN, YELLOW, or RED)
+    static inja::json::array_t getMeter(const TestObjectMap &meterValues);
+
+    /// @returns the configuration for a cloned packet configuration.
     static inja::json getClone(const TestObjectMap &cloneSpecs);
 
     /// Helper function for @getVerify. Matches the mask value against the input packet value and
