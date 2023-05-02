@@ -48,7 +48,7 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
             meter_assign;
         }
         key = {
-            h.eth_hdr.dst_addr: exact;
+            h.eth_hdr.dst_addr: ternary;
         }
         size = 16384;
         default_action = meter_assign();

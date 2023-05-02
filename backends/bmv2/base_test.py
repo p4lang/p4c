@@ -931,7 +931,7 @@ class P4RuntimeTest(BaseTest):
         if table_entry is None:
             meter_write.table_entry.is_default_action = True
         else:
-            meter_write.table_entry.match.extend(table_entry.match)
+            meter_write.table_entry.CopyFrom(table_entry)
         meter_write.config.cir = meter_config.cir
         meter_write.config.cburst = meter_config.cburst
         meter_write.config.pir = meter_config.pir
