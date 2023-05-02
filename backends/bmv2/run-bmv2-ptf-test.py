@@ -200,7 +200,7 @@ def run_test(options: Options) -> int:
     return result
 
 
-def create_options(test_args) -> Options:
+def create_options(test_args) -> testutils.Optional[Options]:
     """Parse the input arguments and create a processed options object."""
     options = Options()
     options.p4_file = Path(testutils.check_if_file(test_args.p4_file))
@@ -208,7 +208,10 @@ def create_options(test_args) -> Options:
     if not testfile:
         testutils.log.info("No test file provided. Checking for file in folder.")
         testfile = options.p4_file.with_suffix(".py")
-    options.testfile = Path(testutils.check_if_file(testfile))
+    result = testutils.check_if_file(testfile)
+    if not result:
+        return None
+    options.testfile = Path(result)
     testdir = test_args.testdir
     if not testdir:
         testutils.log.info("No test directory provided. Generating temporary folder.")
@@ -240,6 +243,8 @@ if __name__ == "__main__":
     args, argv = PARSER.parse_known_args()
 
     test_options = create_options(args)
+    if not test_options:
+        sys.exit(testutils.FAILURE)
     # Run the test with the extracted options
     test_result = run_test(test_options)
     if not (args.nocleanup or test_result != testutils.SUCCESS):

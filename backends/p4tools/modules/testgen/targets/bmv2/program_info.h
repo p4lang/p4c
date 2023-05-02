@@ -31,6 +31,8 @@ class Bmv2V1ModelProgramInfo : public ProgramInfo {
     std::vector<Continuation::Command> processDeclaration(const IR::Type_Declaration *typeDecl,
                                                           size_t blockIdx) const;
 
+    std::map<const IR::IDeclaration *, const IR::P4Table *> directExternMap;
+
  public:
     Bmv2V1ModelProgramInfo(const IR::P4Program *program,
                            ordered_map<cstring, const IR::Type_Declaration *> inputBlocks,
@@ -38,6 +40,9 @@ class Bmv2V1ModelProgramInfo : public ProgramInfo {
 
     /// @returns the gress associated with the given parser.
     int getGress(const IR::Type_Declaration *) const;
+
+    /// @returns the table associated with the direct extern
+    const IR::P4Table *getTableofDirectExtern(const IR::IDeclaration *directExternDecl) const;
 
     /// @returns the programmable blocks of the program. Should be 6.
     [[nodiscard]] const ordered_map<cstring, const IR::Type_Declaration *> *getProgrammableBlocks()

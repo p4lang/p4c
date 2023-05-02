@@ -49,7 +49,7 @@ class PTF : public TF {
  private:
     /// Emits the test preamble. This is only done once for all generated tests.
     /// For the PTF back end this is the test setup Python script..
-    void emitPreamble(const std::string &preamble);
+    void emitPreamble();
 
     /// Emits a test case.
     /// @param testIdx specifies the test name.
@@ -71,7 +71,10 @@ class PTF : public TF {
     /// Converts the output packet, port, and mask into Inja format.
     static inja::json getVerify(const TestSpec *testSpec);
 
-    /// Returns the configuration for a cloned packet configuration.
+    /// @returns the configuration for a meter call (may set the meter to GREEN, YELLOW, or RED)
+    static inja::json::array_t getMeter(const TestObjectMap &meterValues);
+
+    /// @returns the configuration for a cloned packet configuration.
     static inja::json getClone(const TestObjectMap &cloneSpecs);
 
     /// Helper function for @getVerify. Matches the mask value against the input packet value and
