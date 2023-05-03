@@ -75,7 +75,7 @@ class ExpressionConverter : public Inspector {
         : refMap(refMap),
           typeMap(typeMap),
           structure(structure),
-          corelib(P4::P4CoreLibrary::instance),
+          corelib(P4::P4CoreLibrary::instance()),
           scalarsName(scalarsName),
           leftValue(false),
           simpleExpressionsOnly(false) {}

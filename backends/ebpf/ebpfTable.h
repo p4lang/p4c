@@ -122,9 +122,9 @@ class EBPFTable : public EBPFTableBase {
         builder->endOfStatement(true);
     }
     virtual bool isMatchTypeSupported(const IR::Declaration_ID *matchType) {
-        return matchType->name.name == P4::P4CoreLibrary::instance.exactMatch.name ||
-               matchType->name.name == P4::P4CoreLibrary::instance.ternaryMatch.name ||
-               matchType->name.name == P4::P4CoreLibrary::instance.lpmMatch.name;
+        return matchType->name.name == P4::P4CoreLibrary::instance().exactMatch.name ||
+               matchType->name.name == P4::P4CoreLibrary::instance().ternaryMatch.name ||
+               matchType->name.name == P4::P4CoreLibrary::instance().lpmMatch.name;
     }
     // Whether to drop packet if no match entry found.
     // Some table implementations may want to continue processing.

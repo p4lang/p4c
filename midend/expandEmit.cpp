@@ -62,8 +62,8 @@ bool DoExpandEmit::expandArg(const IR::Type *type, const IR::Argument *arg,
 const IR::Node *DoExpandEmit::postorder(IR::MethodCallStatement *statement) {
     auto mi = MethodInstance::resolve(statement->methodCall, refMap, typeMap);
     if (auto em = mi->to<P4::ExternMethod>()) {
-        if (em->originalExternType->name.name == P4::P4CoreLibrary::instance.packetOut.name &&
-            em->method->name.name == P4::P4CoreLibrary::instance.packetOut.emit.name) {
+        if (em->originalExternType->name.name == P4::P4CoreLibrary::instance().packetOut.name &&
+            em->method->name.name == P4::P4CoreLibrary::instance().packetOut.emit.name) {
             if (em->expr->arguments->size() != 1) {
                 ::error(ErrorType::ERR_UNEXPECTED, "%1%: expected exactly 1 argument", statement);
                 return statement;

@@ -105,7 +105,7 @@ const IR::Node *ExpressionConverter::postorder(IR::Primitive *primitive) {
 
         const IR::Expression *method =
             new IR::Member(structure->paramReference(structure->parserPacketIn),
-                           P4::P4CoreLibrary::instance.packetIn.lookahead.Id());
+                           P4::P4CoreLibrary::instance().packetIn.lookahead.Id());
         auto typeargs = new IR::Vector<IR::Type>();
         typeargs->push_back(IR::Type_Bits::get(aval + bval));
         auto lookahead = new IR::MethodCallExpression(method, typeargs);

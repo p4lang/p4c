@@ -49,7 +49,7 @@ void DoCheckCoreMethods::checkEmitType(const IR::Expression *emit, const IR::Typ
 }
 
 void DoCheckCoreMethods::checkCorelibMethods(const ExternMethod *em) const {
-    P4CoreLibrary &corelib = P4CoreLibrary::instance;
+    P4CoreLibrary &corelib = P4CoreLibrary::instance();
     auto et = em->actualExternType;
     auto mce = em->expr;
     unsigned argCount = mce->arguments->size();

@@ -23,12 +23,12 @@ limitations under the License.
 namespace P4 {
 
 const IR::Node *CreateBuiltins::preorder(IR::P4Program *program) {
-    auto decls = program->getDeclsByName(P4::P4CoreLibrary::instance.noAction.str());
+    auto decls = program->getDeclsByName(P4::P4CoreLibrary::instance().noAction.str());
     auto vec = decls->toVector();
     if (vec->empty()) return program;
     if (vec->size() > 1) {
         ::error(ErrorType::ERR_MODEL, "Multiple declarations of %1%: %2% %3%",
-                P4::P4CoreLibrary::instance.noAction.str(), vec->at(0), vec->at(1));
+                P4::P4CoreLibrary::instance().noAction.str(), vec->at(0), vec->at(1));
     }
     globalNoAction = vec->at(0);
     return program;
@@ -46,7 +46,7 @@ void CreateBuiltins::checkGlobalAction() {
     if (globalNoAction == nullptr) {
         ::error(ErrorType::ERR_MODEL,
                 "Declaration of the action %1% not found; did you include core.p4?",
-                P4::P4CoreLibrary::instance.noAction.str());
+                P4::P4CoreLibrary::instance().noAction.str());
         return;
     }
     if (auto action = globalNoAction->to<IR::P4Action>()) {
@@ -118,13 +118,13 @@ const IR::Node *CreateBuiltins::postorder(IR::ParserState *state) {
 
 const IR::Node *CreateBuiltins::postorder(IR::ActionList *actions) {
     if (!addNoAction) return actions;
-    auto decl = actions->getDeclaration(P4::P4CoreLibrary::instance.noAction.str());
+    auto decl = actions->getDeclaration(P4::P4CoreLibrary::instance().noAction.str());
     if (decl != nullptr) return actions;
     checkGlobalAction();
     actions->push_back(new IR::ActionListElement(
         new IR::Annotations({new IR::Annotation(IR::Annotation::defaultOnlyAnnotation, {})}),
         new IR::MethodCallExpression(
-            new IR::PathExpression(P4::P4CoreLibrary::instance.noAction.Id(actions->srcInfo)),
+            new IR::PathExpression(P4::P4CoreLibrary::instance().noAction.Id(actions->srcInfo)),
             new IR::Vector<IR::Type>(), new IR::Vector<IR::Argument>())));
     return actions;
 }
@@ -151,7 +151,8 @@ const IR::Node *CreateBuiltins::postorder(IR::Property *property) {
 const IR::Node *CreateBuiltins::postorder(IR::TableProperties *properties) {
     if (!addNoAction) return properties;
     checkGlobalAction();
-    auto act = new IR::PathExpression(P4::P4CoreLibrary::instance.noAction.Id(properties->srcInfo));
+    auto act =
+        new IR::PathExpression(P4::P4CoreLibrary::instance().noAction.Id(properties->srcInfo));
     auto args = new IR::Vector<IR::Argument>();
     auto methodCall = new IR::MethodCallExpression(act, args);
     auto prop = new IR::Property(IR::ID(IR::TableProperties::defaultActionPropertyName),

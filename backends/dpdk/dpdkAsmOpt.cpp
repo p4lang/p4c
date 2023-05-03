@@ -621,11 +621,11 @@ void EmitDpdkTableConfig::addMatchKey(const IR::DpdkTable *table, const IR::List
         auto tableKey = table->getKey()->keyElements.at(keyIndex++);
         auto keyWidth = getTypeWidth(tableKey->expression->type, typeMap);
         auto matchType = getKeyMatchType(tableKey, refMap);
-        if (matchType == P4::P4CoreLibrary::instance.exactMatch.name) {
+        if (matchType == P4::P4CoreLibrary::instance().exactMatch.name) {
             addExact(k, keyWidth, typeMap);
-        } else if (matchType == P4::P4CoreLibrary::instance.lpmMatch.name) {
+        } else if (matchType == P4::P4CoreLibrary::instance().lpmMatch.name) {
             addLpm(k, keyWidth, typeMap);
-        } else if (matchType == P4::P4CoreLibrary::instance.ternaryMatch.name) {
+        } else if (matchType == P4::P4CoreLibrary::instance().ternaryMatch.name) {
             addTernary(k, keyWidth, typeMap);
         } else if (matchType == "range") {
             addRange(k, keyWidth, typeMap);

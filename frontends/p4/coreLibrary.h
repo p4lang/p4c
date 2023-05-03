@@ -114,7 +114,10 @@ class P4CoreLibrary : public ::Model::Model {
           headerTooShort(StandardExceptions::HeaderTooShort) {}
 
  public:
-    static P4CoreLibrary instance;
+    static P4CoreLibrary &instance() {
+        static P4CoreLibrary *corelib = new P4CoreLibrary();
+        return *corelib;
+    }
     ::Model::Elem noAction;
 
     ::Model::Elem exactMatch;

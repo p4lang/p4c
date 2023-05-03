@@ -24,7 +24,8 @@ const IR::Node *DoEliminateSwitch::postorder(IR::P4Program *program) {
     if (!exactNeeded) return program;
     for (auto *obj : program->objects) {
         if (auto *match_kind = obj->to<IR::Declaration_MatchKind>()) {
-            if (match_kind->getDeclByName(P4CoreLibrary::instance.exactMatch.Id())) return program;
+            if (match_kind->getDeclByName(P4CoreLibrary::instance().exactMatch.Id()))
+                return program;
         }
     }
     ::error(ErrorType::ERR_NOT_FOUND,
@@ -65,14 +66,14 @@ const IR::Node *DoEliminateSwitch::postorder(IR::SwitchStatement *statement) {
 
     auto tableKeyEl =
         new IR::KeyElement(src, new IR::PathExpression(key),
-                           new IR::PathExpression(P4CoreLibrary::instance.exactMatch.Id()));
+                           new IR::PathExpression(P4CoreLibrary::instance().exactMatch.Id()));
     exactNeeded = true;
     IR::IndexedVector<IR::ActionListElement> actionsList;
     IR::IndexedVector<IR::Property> properties;
     IR::Vector<IR::SwitchCase> cases;
     IR::Vector<IR::Entry> entries;
     properties.push_back(new IR::Property(src, "key", new IR::Key({tableKeyEl}), false));
-    IR::ID defaultAction = P4CoreLibrary::instance.noAction.Id();
+    IR::ID defaultAction = P4CoreLibrary::instance().noAction.Id();
 
     // Add Default switch Expression if not present
     bool isDefaultPresent = false;

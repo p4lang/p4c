@@ -828,7 +828,10 @@ class ControlConverter : public Inspector {
     }
 
     explicit ControlConverter(ConversionContext *ctxt, cstring name, const bool &emitExterns_)
-        : ctxt(ctxt), name(name), corelib(P4::P4CoreLibrary::instance), emitExterns(emitExterns_) {
+        : ctxt(ctxt),
+          name(name),
+          corelib(P4::P4CoreLibrary::instance()),
+          emitExterns(emitExterns_) {
         setName("ControlConverter");
     }
 };

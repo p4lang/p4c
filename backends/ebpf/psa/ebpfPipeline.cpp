@@ -56,7 +56,7 @@ void EBPFPipeline::emitLocalVariables(CodeBuilder *builder) {
     builder->newline();
     builder->emitIndent();
     builder->appendFormat("%s %s = %s;", errorEnum.c_str(), errorVar.c_str(),
-                          P4::P4CoreLibrary::instance.noError.str());
+                          P4::P4CoreLibrary::instance().noError.str());
     builder->newline();
     builder->emitIndent();
     builder->appendFormat("void* %s = %s;", packetStartVar.c_str(),

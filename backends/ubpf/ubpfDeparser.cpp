@@ -64,7 +64,7 @@ class OutHeaderSize final : public EBPF::CodeGenInspector {
     bool preorder(const IR::ExitStatement *statement) override { return illegal(statement); }
     bool preorder(const IR::MethodCallStatement *statement) override {
         LOG5("Calculate OutHeaderSize");
-        auto &p4lib = P4::P4CoreLibrary::instance;
+        auto &p4lib = P4::P4CoreLibrary::instance();
 
         auto mi = P4::MethodInstance::resolve(statement->methodCall, refMap, typeMap);
         auto method = mi->to<P4::ExternMethod>();
@@ -104,7 +104,7 @@ class OutHeaderSize final : public EBPF::CodeGenInspector {
 UBPFDeparserTranslationVisitor::UBPFDeparserTranslationVisitor(const UBPFDeparser *deparser)
     : CodeGenInspector(deparser->program->refMap, deparser->program->typeMap),
       deparser(deparser),
-      p4lib(P4::P4CoreLibrary::instance) {
+      p4lib(P4::P4CoreLibrary::instance()) {
     setName("UBPFDeparserTranslationVisitor");
 }
 

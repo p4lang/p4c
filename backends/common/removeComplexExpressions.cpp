@@ -213,8 +213,8 @@ const IR::Node *RemoveComplexExpressions::postorder(IR::Statement *statement) {
 const IR::Node *RemoveComplexExpressions::postorder(IR::MethodCallStatement *statement) {
     auto mi = P4::MethodInstance::resolve(statement, refMap, typeMap);
     if (auto em = mi->to<P4::ExternMethod>()) {
-        if (em->originalExternType->name != P4::P4CoreLibrary::instance.packetIn.name ||
-            em->method->name != P4::P4CoreLibrary::instance.packetIn.lookahead.name)
+        if (em->originalExternType->name != P4::P4CoreLibrary::instance().packetIn.name ||
+            em->method->name != P4::P4CoreLibrary::instance().packetIn.lookahead.name)
             return simpleStatement(statement);
         auto type = em->actualMethodType->returnType;
         auto name = refMap->newName("tmp");

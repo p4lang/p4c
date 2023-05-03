@@ -41,7 +41,7 @@ class ExpressionConverter : public Transform {
  public:
     bool replaceNextWithLast;  // if true p[next] becomes p.last
     explicit ExpressionConverter(ProgramStructure *structure)
-        : structure(structure), p4lib(P4::P4CoreLibrary::instance), replaceNextWithLast(false) {
+        : structure(structure), p4lib(P4::P4CoreLibrary::instance()), replaceNextWithLast(false) {
         setName("ExpressionConverter");
     }
     const IR::Type *getFieldType(const IR::Type_StructLike *ht, cstring fieldName);
@@ -637,7 +637,7 @@ class FixExtracts final : public Transform {
         auto typeArgs = new IR::Vector<IR::Type>();
         typeArgs->push_back(fixed->fixedHeaderType->getP4Type());
         auto lookaheadMethod =
-            new IR::Member(member->expr, P4::P4CoreLibrary::instance.packetIn.lookahead.name);
+            new IR::Member(member->expr, P4::P4CoreLibrary::instance().packetIn.lookahead.name);
         auto lookahead = new IR::MethodCallExpression(mce->srcInfo, lookaheadMethod, typeArgs,
                                                       new IR::Vector<IR::Argument>());
         auto assign =
@@ -651,7 +651,7 @@ class FixExtracts final : public Transform {
         auto length = fixed->headerLength->apply(rewrite);
         auto args = new IR::Vector<IR::Argument>();
         args->push_back(arg->clone());
-        auto type = IR::Type_Bits::get(P4::P4CoreLibrary::instance.packetIn.extractSecondArgSize);
+        auto type = IR::Type_Bits::get(P4::P4CoreLibrary::instance().packetIn.extractSecondArgSize);
         auto cast = new IR::Cast(Util::SourceInfo(), type, length);
         args->push_back(new IR::Argument(cast));
         auto expression = new IR::MethodCallExpression(mce->srcInfo, mce->method->clone(), args);

@@ -50,7 +50,7 @@ class UBPFStateTranslationVisitor : public EBPF::CodeGenInspector {
  public:
     explicit UBPFStateTranslationVisitor(const UBPFParserState *state)
         : CodeGenInspector(state->parser->program->refMap, state->parser->program->typeMap),
-          p4lib(P4::P4CoreLibrary::instance),
+          p4lib(P4::P4CoreLibrary::instance()),
           state(state) {}
     bool preorder(const IR::ParserState *state) override;
     bool preorder(const IR::SelectCase *selectCase) override;
