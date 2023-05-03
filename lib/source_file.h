@@ -184,6 +184,7 @@ class SourceInfo final {
     explicit operator bool() const { return isValid(); }
 
     cstring getSourceFile() const;
+    cstring getLineNum() const;
 
     const SourcePosition &getStart() const { return this->start; }
 
