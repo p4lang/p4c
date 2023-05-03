@@ -655,11 +655,30 @@ void DoLocalCopyPropagation::apply_table(DoLocalCopyPropagation::TableInfo *tbl)
                                                                                   << var->val);
                     var->live = true;
                 }
+            } else if (var->val && lvalue_out(var->val)->is<IR::MethodCallExpression>()) {
+                if (hasSideEffects(lvalue_out(var->val))) {
+                    LOG3("  cannot propagate expression with side effect into table key "
+                         << vname << ": " << var->val);
+                    var->live = true;
+                } else if (tbl->apply_count > 1 && (!tbl->key_remap.count(vname) ||
+                                                    !tbl->key_remap.at(vname)->equiv(*var->val))) {
+                    LOG3("  different values used in different applies for key " << key);
+                    tbl->key_remap.erase(vname);
+                    var->live = true;
+                } else if (policy(getChildContext(), var->val)) {
+                    LOG3("  will propagate value into table key " << vname << ": " << var->val);
+                    tbl->key_remap.emplace(vname, var->val);
+                    need_key_rewrite = true;
+                } else {
+                    LOG3("  policy prevents propagation of value into table key " << vname << ": "
+                                                                                  << var->val);
+                    var->live = true;
+                }
             } else {
                 tbl->key_remap.erase(key);
                 LOG4("  table using "
                      << key << " with "
-                     << (var->val ? "value to complex for key" : "no propagated value"));
+                     << (var->val ? "value too complex for key" : "no propagated value"));
                 var->live = true;
             }
         });
