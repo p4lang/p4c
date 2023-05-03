@@ -56,7 +56,7 @@ class ParserOptions : public Util::Options {
     // Name of executable that is being run.
     cstring exe_name;
     // Which language to compile
-    FrontendVersion langVersion = FrontendVersion::P4_14;
+    FrontendVersion langVersion = FrontendVersion::P4_16;
     // options to pass to preprocessor
     cstring preprocessor_options = "";
     // file to compile (- for stdin)

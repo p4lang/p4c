@@ -69,7 +69,7 @@ macro(p4tools_add_test_with_args)
   file(APPEND ${__testfile} "cd ${P4TOOLS_BINARY_DIR}\n")
   file(
     APPEND ${__testfile} "${driver} --target ${target} --arch ${arch} "
-    "--std p4-16 ${test_args} --out-dir ${__testfolder} \"$@\" ${P4C_SOURCE_DIR}/${p4test}\n"
+    "${test_args} --out-dir ${__testfolder} \"$@\" ${P4C_SOURCE_DIR}/${p4test}\n"
   )
   # If ENABLE_RUNNER is active, run the generated tests on the eBPF kernek.
   if(${TOOLS_EBPF_TESTS_ENABLE_RUNNER})
