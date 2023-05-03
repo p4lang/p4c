@@ -119,7 +119,7 @@ function(p4tools_add_test_with_args)
 
   file(
     APPEND ${__testfile} "${driver} --target ${target} --arch ${arch} "
-    "--std p4-16 ${test_args} --out-dir ${__testfolder} \"$@\" ${P4C_SOURCE_DIR}/${p4test}\n"
+    "${test_args} --out-dir ${__testfolder} \"$@\" ${P4C_SOURCE_DIR}/${p4test}\n"
   )
 
   if(${TOOLS_BMV2_TESTS_USE_ASSERT_MODE} OR ${TOOLS_BMV2_TESTS_DISABLE_ASSUME_MODE})
