@@ -33,17 +33,11 @@ class DoDefaultValues final : public Transform {
     const IR::Expression *defaultValue(const IR::Expression *expression, const IR::Type *type);
 
  public:
-    DoDefaultValues(TypeMap *typeMap) : typeMap(typeMap) { CHECK_NULL(typeMap); }
+    explicit DoDefaultValues(TypeMap *typeMap) : typeMap(typeMap) { CHECK_NULL(typeMap); }
     const IR::Node *postorder(IR::Dots *dots) override;
     const IR::Node *postorder(IR::StructExpression *expression) override;
     const IR::Node *postorder(IR::ListExpression *expression) override;
     const IR::Node *postorder(IR::HeaderStackExpression *expression) override;
-
-    /**
-     * Generate a default value for the specified type.
-     * The resulting expression will have the specified srcInfo position
-     */
-    static const IR::Expression *defaultValue(Util::SourceInfo srcInfo, const IR::Type *type);
 };
 
 class DefaultValues : public PassManager {

@@ -68,7 +68,7 @@ const IR::Expression *ProgramInfo::createTargetUninitialized(const IR::Type *typ
     if (forceTaint) {
         return ToolsVariables::getTaintExpression(type);
     }
-    return IR::getDefaultValue(type);
+    return IR::getDefaultValue(type, {}, true);
 }
 
 /* =============================================================================================

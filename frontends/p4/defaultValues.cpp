@@ -16,85 +16,20 @@ limitations under the License.
 
 #include "defaultValues.h"
 
-namespace P4 {
+#include "ir/irutils.h"
 
-// static
-const IR::Expression *DoDefaultValues::defaultValue(Util::SourceInfo srcInfo,
-                                                    const IR::Type *type) {
-    if (auto tb = type->to<IR::Type_Bits>()) {
-        return new IR::Constant(srcInfo, tb, 0);
-    } else if (type->is<IR::Type_InfInt>()) {
-        return new IR::Constant(srcInfo, 0);
-    } else if (type->is<IR::Type_Boolean>()) {
-        return new IR::BoolLiteral(srcInfo, false);
-    } else if (auto te = type->to<IR::Type_Enum>()) {
-        return new IR::Member(srcInfo, new IR::TypeNameExpression(te->name),
-                              te->members.at(0)->getName());
-    } else if (auto te = type->to<IR::Type_SerEnum>()) {
-        return new IR::Cast(srcInfo, type->getP4Type(), new IR::Constant(srcInfo, te->type, 0));
-    } else if (auto te = type->to<IR::Type_Error>()) {
-        return new IR::Member(srcInfo, new IR::TypeNameExpression(te->name), "NoError");
-    } else if (type->is<IR::Type_String>()) {
-        return new IR::StringLiteral(srcInfo, cstring(""));
-    } else if (type->is<IR::Type_Varbits>()) {
-        ::error(ErrorType::ERR_UNSUPPORTED, "%1% default values for varbit types", srcInfo);
-        return nullptr;
-    } else if (auto ht = type->to<IR::Type_Header>()) {
-        return new IR::InvalidHeader(ht->getP4Type());
-    } else if (auto hu = type->to<IR::Type_HeaderUnion>()) {
-        return new IR::InvalidHeaderUnion(hu->getP4Type());
-    } else if (auto st = type->to<IR::Type_StructLike>()) {
-        auto vec = new IR::IndexedVector<IR::NamedExpression>();
-        for (auto field : st->fields) {
-            auto value = defaultValue(srcInfo, field->type);
-            if (!value) return nullptr;
-            vec->push_back(new IR::NamedExpression(field->name, value));
-        }
-        auto resultType = st->getP4Type();
-        return new IR::StructExpression(srcInfo, resultType, resultType, *vec);
-    } else if (auto tf = type->to<IR::Type_Fragment>()) {
-        return defaultValue(srcInfo, tf->type);
-    } else if (auto tt = type->to<IR::Type_BaseList>()) {
-        auto vec = new IR::Vector<IR::Expression>();
-        for (auto field : tt->components) {
-            auto value = defaultValue(srcInfo, field);
-            if (!value) return nullptr;
-            vec->push_back(value);
-        }
-        return new IR::ListExpression(srcInfo, *vec);
-    } else if (auto ts = type->to<IR::Type_Stack>()) {
-        auto vec = new IR::Vector<IR::Expression>();
-        auto elementType = ts->elementType;
-        for (size_t i = 0; i < ts->getSize(); i++) {
-            const IR::Expression *invalid;
-            if (elementType->is<IR::Type_Header>()) {
-                invalid = new IR::InvalidHeader(elementType->getP4Type());
-            } else {
-                BUG_CHECK(elementType->is<IR::Type_HeaderUnion>(),
-                          "%1%: expected a header or header union stack", elementType);
-                invalid = new IR::InvalidHeaderUnion(srcInfo, elementType->getP4Type());
-            }
-            vec->push_back(invalid);
-        }
-        auto resultType = ts->getP4Type();
-        return new IR::HeaderStackExpression(srcInfo, resultType, *vec, resultType);
-    } else {
-        ::error(ErrorType::ERR_INVALID, "%1%: No default value for type %2%", srcInfo, type);
-        return nullptr;
-    }
-}
+namespace P4 {
 
 const IR::Expression *DoDefaultValues::defaultValue(const IR::Expression *expression,
                                                     const IR::Type *type) {
-    Util::SourceInfo srcInfo = expression->srcInfo;
-    if (auto anyType = type->to<IR::Type_Any>()) {
+    if (const auto *anyType = type->to<IR::Type_Any>()) {
         type = typeMap->getSubstitution(anyType->to<IR::Type_Any>());
-        if (!type) {
+        if (type == nullptr) {
             ::error(ErrorType::ERR_TYPE_ERROR, "%1%: could not find default value", expression);
             return expression;
         }
     }
-    return defaultValue(srcInfo, type);
+    return IR::getDefaultValue(type, expression->srcInfo, false);
 }
 
 const IR::Node *DoDefaultValues::postorder(IR::Dots *expression) {

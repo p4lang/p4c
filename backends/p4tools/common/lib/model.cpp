@@ -30,7 +30,7 @@ const IR::Literal *Model::SubstVisitor::preorder(IR::SymbolicVariable *var) {
 }
 
 const IR::Literal *Model::SubstVisitor::preorder(IR::TaintExpression *var) {
-    return IR::getDefaultValue(var->type);
+    return IR::getDefaultValue(var->type, var->getSourceInfo())->checkedTo<IR::Literal>();
 }
 
 Model::CompleteVisitor::CompleteVisitor(Model &model) : self(model) {}
@@ -40,7 +40,7 @@ bool Model::CompleteVisitor::preorder(const IR::SymbolicVariable *var) {
         LOG_FEATURE("common", 5,
                     "***** Did not find a binding for " << var << ". Autocompleting." << std::endl);
         const auto *type = var->type;
-        self.symbolicMap.emplace(var, IR::getDefaultValue(type));
+        self.symbolicMap.emplace(var, IR::getDefaultValue(type, var->getSourceInfo()));
     }
     return false;
 }
