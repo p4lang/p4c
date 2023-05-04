@@ -25,13 +25,21 @@ class AbstractP4cToolOptions : protected Util::Options {
     /// The minimum permitted packet size, in bits.
     int minPktSize = 0;
 
-    /// A seed for the PRNG.
-    std::optional<uint32_t> seed = std::nullopt;
+    /// The timeout for the SMT solver in milliseconds. The default is 60 seconds.
+    /// 0 implies no timeout.
+    unsigned solverTimeout = 60000;
 
     /// Processes options.
     ///
     /// @returns a compilation context on success, std::nullopt on error.
     std::optional<ICompileContext *> process(const std::vector<const char *> &args);
+
+    // No copy constructor and no self-assignments.
+    virtual ~AbstractP4cToolOptions() = default;
+
+    AbstractP4cToolOptions(const AbstractP4cToolOptions &) = delete;
+
+    AbstractP4cToolOptions &operator=(const AbstractP4cToolOptions &) = delete;
 
  protected:
     /// Command-line arguments to be sent to the compiler. Populated by @process.
@@ -44,11 +52,6 @@ class AbstractP4cToolOptions : protected Util::Options {
     static std::tuple<int, char **> convertArgs(const std::vector<const char *> &args);
 
     explicit AbstractP4cToolOptions(cstring message);
-
-    // No copy constructor and no self-assignments.
-    AbstractP4cToolOptions(const AbstractP4cToolOptions &) = delete;
-
-    AbstractP4cToolOptions &operator=(const AbstractP4cToolOptions &) = delete;
 };
 
 }  // namespace P4Tools

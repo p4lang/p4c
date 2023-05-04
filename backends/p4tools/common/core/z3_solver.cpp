@@ -1,10 +1,12 @@
 #include "backends/p4tools/common/core/z3_solver.h"
 
+#include <z3++.h>
 #include <z3_api.h>
 
 #include <algorithm>
 #include <cstdint>
 #include <exception>
+#include <future>
 #include <iterator>
 #include <list>
 #include <map>
@@ -237,11 +239,50 @@ void Z3Solver::seed(unsigned seed) {
 }
 
 void Z3Solver::timeout(unsigned tm) {
-    Z3_LOG("set a timeout:'%d'", tm);
-    z3::params param(z3context);
-    param.set(":timeout", tm);
-    z3solver.set(param);
+    // TODO: The Z3 solver timeout does not play nicely with the Boehm Garbage Collector.
+    // Instead, we use our own async future with GC annotations.
+    // Maybe there is a better way to resolve this?
+    // Z3_LOG("set a timeout:'%d'", tm);
+    // z3::params param(z3context);
+    // param.set("solver.timeout", tm);
+    // z3solver.set(param);
     timeout_ = tm;
+}
+
+z3::check_result Z3Solver::timedCheckSat() {
+    if (!timeout_) {
+        return isIncremental ? z3solver.check() : z3solver.check(z3Assertions);
+    }
+    // TODO: The Z3 solver timeout does not play nicely with the Boehm Garbage Collector.
+    // Instead, we use our own async future with GC annotations.
+    // Maybe there is a better way to resolve this?
+    // If there is a timeout enabled, run the check call in a future.
+    auto z3CheckFun = [this](std::promise<z3::check_result> promise) {
+        promise.set_value(isIncremental ? z3solver.check() : z3solver.check(z3Assertions));
+    };
+
+    // TODO: The Z3 solver timeout does not play nicely with the Boehm Garbage Collector.
+    // Instead, we use our own async future with GC annotations.
+    // Maybe there is a better way to resolve this?
+    // If there is a timeout enabled, run the check call in a future.
+    std::promise<z3::check_result> promise;
+    auto solverFuture = promise.get_future();
+    std::thread(z3CheckFun, std::move(promise)).detach();
+
+    auto status = solverFuture.wait_for(std::chrono::milliseconds(*timeout_));
+    if (status == std::future_status::timeout) {
+        // check() timed out.
+        // Call interrupt on the solver and return that the result was unsatisfiable.
+        Z3_LOG("Solver timed out.");
+        z3solver.ctx().interrupt();
+        return z3::unknown;
+    }
+    if (status == std::future_status::ready) {
+        // check() is complete.
+        // Get result from future (if there's a need)
+        return solverFuture.get();
+    }
+    BUG("Unsupported future return result.");
 }
 
 std::optional<bool> Z3Solver::checkSat(const std::vector<const Constraint *> &asserts) {
@@ -268,7 +309,7 @@ std::optional<bool> Z3Solver::checkSat(const std::vector<const Constraint *> &as
            isIncremental ? z3solver.assertions().size() : z3Assertions.size());
     Util::ScopedTimer ctZ3("z3");
     Util::ScopedTimer ctCheckSat("checkSat");
-    z3::check_result result = isIncremental ? z3solver.check() : z3solver.check(z3Assertions);
+    auto result = timedCheckSat();
     switch (result) {
         case z3::sat:
             Z3_LOG("result:%s", "sat");
