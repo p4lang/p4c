@@ -69,6 +69,10 @@ const BoolLiteral *getBoolLiteral(bool value) {
     return result;
 }
 
+const IR::Constant *convertBoolLiteral(const IR::BoolLiteral *lit) {
+    return IR::getConstant(IR::getBitType(1), lit->value ? 1 : 0);
+}
+
 const Literal *getDefaultValue(const Type *type) {
     if (type->is<Type_Bits>()) {
         return getConstant(type, 0);
@@ -78,6 +82,42 @@ const Literal *getDefaultValue(const Type *type) {
     }
     P4C_UNIMPLEMENTED("Default value for type %s of type %s not implemented.", type,
                       type->node_type_name());
+}
+
+const IR::Constant *getMaxValueConstant(const Type *t) {
+    if (t->is<Type_Bits>()) {
+        return IR::getConstant(t, IR::getMaxBvVal(t));
+    }
+    if (t->is<Type_Boolean>()) {
+        return IR::getConstant(IR::getBitType(1), 1);
+    }
+    P4C_UNIMPLEMENTED("Maximum value calculation for type %1% not implemented.", t);
+}
+
+std::vector<const Expression *> flattenStructExpression(const StructExpression *structExpr) {
+    std::vector<const Expression *> exprList;
+    for (const auto *listElem : structExpr->components) {
+        if (const auto *subStructExpr = listElem->expression->to<StructExpression>()) {
+            auto subList = flattenStructExpression(subStructExpr);
+            exprList.insert(exprList.end(), subList.begin(), subList.end());
+        } else {
+            exprList.push_back(listElem->expression);
+        }
+    }
+    return exprList;
+}
+
+std::vector<const Expression *> flattenListExpression(const ListExpression *listExpr) {
+    std::vector<const Expression *> exprList;
+    for (const auto *listElem : listExpr->components) {
+        if (const auto *subListExpr = listElem->to<ListExpression>()) {
+            auto subList = flattenListExpression(subListExpr);
+            exprList.insert(exprList.end(), subList.begin(), subList.end());
+        } else {
+            exprList.push_back(listElem);
+        }
+    }
+    return exprList;
 }
 
 /* =============================================================================================
@@ -127,32 +167,6 @@ big_int getMinBvVal(const Type *t) {
         return 0;
     }
     P4C_UNIMPLEMENTED("Maximum value calculation for type %1% not implemented.", t);
-}
-
-std::vector<const Expression *> flattenStructExpression(const StructExpression *structExpr) {
-    std::vector<const Expression *> exprList;
-    for (const auto *listElem : structExpr->components) {
-        if (const auto *subStructExpr = listElem->expression->to<StructExpression>()) {
-            auto subList = flattenStructExpression(subStructExpr);
-            exprList.insert(exprList.end(), subList.begin(), subList.end());
-        } else {
-            exprList.push_back(listElem->expression);
-        }
-    }
-    return exprList;
-}
-
-std::vector<const Expression *> flattenListExpression(const ListExpression *listExpr) {
-    std::vector<const Expression *> exprList;
-    for (const auto *listElem : listExpr->components) {
-        if (const auto *subListExpr = listElem->to<ListExpression>()) {
-            auto subList = flattenListExpression(subListExpr);
-            exprList.insert(exprList.end(), subList.begin(), subList.end());
-        } else {
-            exprList.push_back(listElem);
-        }
-    }
-    return exprList;
 }
 
 }  // namespace IR
