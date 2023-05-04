@@ -36,7 +36,7 @@ if(P4TOOLS_TESTGEN_PNA_TEST_METADATA)
   p4tools_add_tests(
     TESTSUITES "${P4C_V1_TEST_SUITES_P416}"
     TAG "testgen-p4c-pna-metadata" DRIVER ${P4TESTGEN_DRIVER}
-    TARGET "dpdk" ARCH "pna" TEST_ARGS "-I${P4C_BINARY_DIR}/p4include --test-backend METADATA ${EXTRA_OPTS} "
+    TARGET "dpdk" ARCH "pna" TEST_ARGS "--test-backend METADATA ${EXTRA_OPTS} "
   )
   include(${CMAKE_CURRENT_LIST_DIR}/PNAMetadataXfail.cmake)
 endif()

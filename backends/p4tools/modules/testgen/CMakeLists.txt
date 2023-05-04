@@ -115,7 +115,9 @@ target_link_libraries(
 add_custom_target(
   linkp4testgen
   # Add some convenience links for invoking p4testgen.
-  COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/p4testgen ${CMAKE_BINARY_DIR}/p4testgen
+  # TODO: How to best handle includes?
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/p4testgen ${P4C_BINARY_DIR}/p4testgen
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR}/p4include ${CMAKE_CURRENT_BINARY_DIR}/p4include
   DEPENDS update_includes
 )
 
