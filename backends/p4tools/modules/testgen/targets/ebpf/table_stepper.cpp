@@ -13,10 +13,9 @@
 
 namespace P4Tools::P4Testgen::EBPF {
 
-const IR::Expression *EBPFTableStepper::computeTargetMatchType(ExecutionState &nextState,
-                                                               const KeyProperties &keyProperties,
-                                                               TableMatchMap *matches,
-                                                               const IR::Expression *hitCondition) {
+const IR::Expression *EBPFTableStepper::computeTargetMatchType(
+    ExecutionState &nextState, const TableUtils::KeyProperties &keyProperties,
+    TableMatchMap *matches, const IR::Expression *hitCondition) {
     // If the custom match type does not match, delete to the core match types.
     return TableStepper::computeTargetMatchType(nextState, keyProperties, matches, hitCondition);
 }

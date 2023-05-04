@@ -395,16 +395,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                        "Low value ( %1% ) must be less than high value ( %2% ).", lo, hi);
              auto &nextState = state.clone();
              const auto *resultField = args->at(0)->expression;
-             const IR::Member *fieldRef = nullptr;
-             if (const auto *pathRef = resultField->to<IR::PathExpression>()) {
-                 fieldRef = state.convertPathExpr(pathRef);
-             } else {
-                 fieldRef = resultField->to<IR::Member>();
-             }
-             if (fieldRef == nullptr) {
-                 TESTGEN_UNIMPLEMENTED("Random output %1% of type %2% not supported", resultField,
-                                       resultField->type);
-             }
+             const auto &fieldRef = ExecutionState::convertReference(resultField);
 
              // If the range is limited to only one value, return that value.
              if (lo->value == hi->value) {
@@ -580,16 +571,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              auto externName = receiver->toString() + "_" + declInstance->controlPlaneName();
              auto &nextState = state.clone();
              if (hashOutput->type->is<IR::Type_Bits>()) {
-                 const IR::Member *fieldRef = nullptr;
-                 if (const auto *pathRef = hashOutput->to<IR::PathExpression>()) {
-                     fieldRef = state.convertPathExpr(pathRef);
-                 } else {
-                     fieldRef = hashOutput->to<IR::Member>();
-                 }
-                 if (fieldRef == nullptr) {
-                     TESTGEN_UNIMPLEMENTED("Hash output %1% of type %2% not supported", hashOutput,
-                                           hashOutput->type);
-                 }
+                 const auto &fieldRef = ExecutionState::convertReference(hashOutput);
                  if (argsAreTainted) {
                      nextState.set(fieldRef,
                                    programInfo.createTargetUninitialized(fieldRef->type, false));
@@ -652,15 +634,13 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              const auto *readOutput = args->at(0)->expression;
              const auto *index = args->at(1)->expression;
              auto &nextState = state.clone();
+
              std::vector<Continuation::Command> replacements;
-
-             const auto *receiverPath = receiver->checkedTo<IR::PathExpression>();
-             const auto &externInstance = nextState.findDecl(receiverPath);
-
-             // Retrieve the register state from the object store. If it is already present,
-             // just cast the object to the correct class and retrieve the current value
-             // according to the index. If the register has not been added had, create a new
-             // register object.
+             const auto &externRef = receiver->checkedTo<IR::PathExpression>();
+             const auto &externInstance = state.findDecl(externRef);
+             // Retrieve the register state from the object store. If it is already present, just
+             // cast the object to the correct class and retrieve the current value according to the
+             // index. If the register has not been added had, create a new register object.
              const auto *registerState =
                  state.getTestObject("registervalues", externInstance->controlPlaneName(), false);
              const Bmv2V1ModelRegisterValue *registerValue = nullptr;
@@ -754,9 +734,9 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                      return;
                  }
              }
-             auto &nextState = state.clone();
              const auto *receiverPath = receiver->checkedTo<IR::PathExpression>();
-             const auto &externInstance = nextState.findDecl(receiverPath);
+             const auto &externInstance = state.findDecl(receiverPath);
+             auto &nextState = state.clone();
              // TODO: Find a better way to model a trace of this event.
              std::stringstream registerStream;
              registerStream << "RegisterWrite: Value ";
@@ -896,28 +876,19 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
              auto testBackend = TestgenOptions::get().testBackend;
+             const IR::StateVariable &meterResult =
+                 ExecutionState::convertReference(args->at(1)->expression);
              if (testBackend != "PTF") {
                  ::warning(
                      "meter.execute_meter not implemented for %1%. Choosing default value (GREEN).",
                      testBackend);
                  auto &nextState = state.clone();
-                 const IR::Member *meterResult = nullptr;
-                 const auto *expr = args->at(1)->expression;
-                 if (const auto *pathRef = expr->to<IR::PathExpression>()) {
-                     meterResult = ExecutionState::convertPathExpr(pathRef);
-                 } else if (const auto *member = expr->to<IR::Member>()) {
-                     meterResult = member;
-                 } else {
-                     TESTGEN_UNIMPLEMENTED("Unsupported meter result variable %1% of type %2%",
-                                           expr, expr->node_type_name());
-                 }
                  nextState.set(meterResult, IR::getConstant(meterResult->type,
                                                             BMv2Constants::METER_COLOR::GREEN));
                  nextState.popBody();
                  result->emplace_back(nextState);
                  return;
              }
-             const auto *meterResult = args->at(1)->expression;
 
              // TODO: Frontload this in the expression stepper for method call expressions.
              const auto *index = args->at(0)->expression;
@@ -1024,16 +995,8 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
 
              auto &nextState = state.clone();
              std::vector<Continuation::Command> replacements;
-             const auto *expr = args->at(0)->expression;
-             const IR::Member *meterResult = nullptr;
-             if (const auto *pathRef = expr->to<IR::PathExpression>()) {
-                 meterResult = ExecutionState::convertPathExpr(pathRef);
-             } else if (const auto *member = expr->to<IR::Member>()) {
-                 meterResult = member;
-             } else {
-                 TESTGEN_UNIMPLEMENTED("Unsupported meter result variable %1% of type %2%", expr,
-                                       expr->node_type_name());
-             }
+             const IR::StateVariable &meterResult =
+                 ExecutionState::convertReference(args->at(0)->expression);
              // If we do not have right back end and no associated table entry, do not bother
              // configuring the extern. We just set the default value (green).
              auto testBackend = TestgenOptions::get().testBackend;
@@ -1639,12 +1602,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  argsAreTainted = argsAreTainted || state.hasTaint(arg->expression);
              }
 
-             const auto *checksumVarRef = args->at(2)->expression;
-             if (const auto *argPath = checksumVarRef->to<IR::PathExpression>()) {
-                 checksumVarRef = state.convertPathExpr(argPath);
-             }
-             const auto *checksumVar = checksumVarRef->checkedTo<IR::Member>();
-
+             const auto &checksumVar = ExecutionState::convertReference(args->at(2)->expression);
              const auto *updateCond = args->at(0)->expression;
              const auto *checksumVarType = checksumVar->type;
              const auto *data = args->at(1)->expression;
@@ -1722,12 +1680,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  argsAreTainted = argsAreTainted || state.hasTaint(arg->expression);
              }
 
-             const auto *checksumVarRef = args->at(2)->expression;
-             if (const auto *argPath = checksumVarRef->to<IR::PathExpression>()) {
-                 checksumVarRef = state.convertPathExpr(argPath);
-             }
-             const auto *checksumVar = checksumVarRef->checkedTo<IR::Member>();
-
+             const auto &checksumVar = ExecutionState::convertReference(args->at(2)->expression);
              const auto *updateCond = args->at(0)->expression;
              const auto *checksumVarType = checksumVar->type;
              const auto *data = args->at(1)->expression;

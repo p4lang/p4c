@@ -36,8 +36,8 @@
 namespace P4Tools::P4Testgen::Bmv2 {
 
 const IR::Expression *Bmv2V1ModelTableStepper::computeTargetMatchType(
-    ExecutionState &nextState, const KeyProperties &keyProperties, TableMatchMap *matches,
-    const IR::Expression *hitCondition) {
+    ExecutionState &nextState, const TableUtils::KeyProperties &keyProperties,
+    TableMatchMap *matches, const IR::Expression *hitCondition) {
     const IR::Expression *keyExpr = keyProperties.key->expression;
 
     // TODO: We consider optional match types to be a no-op, but we could make them exact matches.
@@ -113,12 +113,9 @@ void Bmv2V1ModelTableStepper::evalTableActionProfile(
             // Synthesize a symbolic variable here that corresponds to a control plane argument.
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
-            const auto &actionDataVar =
-                getTableStateVariable(parameter->type, table, "*actionData", idx, argIdx);
             cstring keyName =
                 properties.tableName + "_param_" + actionName + std::to_string(argIdx);
             const auto &actionArg = nextState.createSymbolicVariable(parameter->type, keyName);
-            nextState.set(actionDataVar, actionArg);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
             // Note how we use the control plane name for the parameter here.
@@ -204,12 +201,9 @@ void Bmv2V1ModelTableStepper::evalTableActionSelector(
             // Synthesize a symbolic variable here that corresponds to a control plane argument.
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
-            const auto &actionDataVar =
-                getTableStateVariable(parameter->type, table, "*actionData", idx, argIdx);
             cstring keyName =
                 properties.tableName + "_param_" + actionName + std::to_string(argIdx);
             const auto &actionArg = nextState.createSymbolicVariable(parameter->type, keyName);
-            nextState.set(actionDataVar, actionArg);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
             // Note how we use the control plane name for the parameter here.

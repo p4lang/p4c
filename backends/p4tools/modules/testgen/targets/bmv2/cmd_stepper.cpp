@@ -10,6 +10,7 @@
 
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/arch_spec.h"
+#include "backends/p4tools/common/lib/constants.h"
 #include "ir/id.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
@@ -135,9 +136,11 @@ std::map<Continuation::Exception, Continuation> Bmv2V1ModelCmdStepper::getExcept
 
             ::warning("Ingress parser exception handler not fully implemented");
             result.emplace(Continuation::Exception::Reject, Continuation::Body({}));
-            result.emplace(Continuation::Exception::PacketTooShort,
-                           Continuation::Body({new IR::AssignmentStatement(
-                               errVar, IR::getConstant(errVar->type, 1))}));
+            result.emplace(
+                Continuation::Exception::PacketTooShort,
+                Continuation::Body({new IR::AssignmentStatement(
+                    errVar,
+                    IR::getConstant(errVar->type, P4Constants::PARSER_ERROR_PACKET_TOO_SHORT))}));
             // NoMatch will transition to the next block.
             result.emplace(Continuation::Exception::NoMatch, Continuation::Body({}));
             break;

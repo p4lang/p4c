@@ -10,6 +10,7 @@
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/multiprecision/number.hpp>
 
+#include "backends/p4tools/common/lib/constants.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/variables.h"
@@ -23,7 +24,6 @@
 #include "lib/source_file.h"
 #include "midend/coverage.h"
 
-#include "backends/p4tools/modules/testgen/core/constants.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/expr_stepper.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
@@ -80,59 +80,13 @@ const IR::StateVariable &TableStepper::getTableReachedVar(const IR::P4Table *tab
     return getTableStateVariable(IR::Type::Boolean::get(), table, "*reached");
 }
 
-bool TableStepper::compareLPMEntries(const IR::Entry *leftIn, const IR::Entry *rightIn,
-                                     size_t lpmIndex) {
-    // Get the entry key that matches with provided lpm index.
-    // There should only be one and we only need to compare this precision.
-    BUG_CHECK(
-        lpmIndex < leftIn->keys->components.size() && lpmIndex < rightIn->keys->components.size(),
-        "LPM index out of range.");
-    const auto *left = leftIn->keys->components.at(lpmIndex);
-    const auto *right = rightIn->keys->components.at(lpmIndex);
-
-    // The expressions are equivalent, so no need to compare.
-    if (left->equiv(*right)) {
-        return true;
-    }
-
-    // DefaultExpression are least precise.
-    if (left->is<IR::DefaultExpression>()) {
-        return true;
-    }
-    if (right->is<IR::DefaultExpression>()) {
-        return false;
-    }
-    // Constants are implicitly more precise than masks.
-    if (left->is<IR::Constant>() && right->is<IR::Mask>()) {
-        return true;
-    }
-    if (left->is<IR::Mask>() && right->is<IR::Constant>()) {
-        return false;
-    }
-
-    const IR::Constant *leftMaskVal = nullptr;
-    const IR::Constant *rightMaskVal = nullptr;
-    if (const auto *leftMask = left->to<IR::Mask>()) {
-        leftMaskVal = leftMask->right->checkedTo<IR::Constant>();
-        // The other value must be a mask at this point.
-        if (const auto *rightMask = right->checkedTo<IR::Mask>()) {
-            rightMaskVal = rightMask->right->checkedTo<IR::Constant>();
-        }
-        return (leftMaskVal->value) >= (rightMaskVal->value);
-    }
-
-    BUG("Unhandled sort elements type: left: %1% - %2% \n right: %3% - %4% ", left,
-        left->node_type_name(), right, right->node_type_name());
-}
-
-const IR::Expression *TableStepper::computeTargetMatchType(ExecutionState &nextState,
-                                                           const KeyProperties &keyProperties,
-                                                           TableMatchMap *matches,
-                                                           const IR::Expression *hitCondition) {
+const IR::Expression *TableStepper::computeTargetMatchType(
+    ExecutionState &nextState, const TableUtils::KeyProperties &keyProperties,
+    TableMatchMap *matches, const IR::Expression *hitCondition) {
     const IR::Expression *keyExpr = keyProperties.key->expression;
-    // Create a new variables constant that corresponds to the key expression.
+    // Create a new variable constant that corresponds to the key expression.
     cstring keyName = properties.tableName + "_key_" + keyProperties.name;
-    const auto ctrlPlaneKey = nextState.createSymbolicVariable(keyExpr->type, keyName);
+    const auto *ctrlPlaneKey = nextState.createSymbolicVariable(keyExpr->type, keyName);
 
     if (keyProperties.matchType == P4Constants::MATCH_KIND_EXACT) {
         hitCondition = new IR::LAnd(hitCondition, new IR::Equ(keyExpr, ctrlPlaneKey));
@@ -217,7 +171,7 @@ void TableStepper::setTableAction(ExecutionState &nextState,
               table);
     // Store the selected action.
     const auto &tableActionVar = getTableActionVar(table);
-    nextState.set(tableActionVar, IR::getConstant(tableActionVar->type, actionIdx));
+    nextState.set(tableActionVar, IR::getConstant(tableActionVar.type, actionIdx));
 }
 
 const IR::Expression *TableStepper::evalTableConstEntries() {
@@ -239,8 +193,8 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
         const auto *keyElement = keys->keyElements.at(idx);
         if (keyElement->matchType->path->toString() == P4Constants::MATCH_KIND_LPM) {
             std::sort(entryVector.begin(), entryVector.end(), [idx](auto &&PH1, auto &&PH2) {
-                return compareLPMEntries(std::forward<decltype(PH1)>(PH1),
-                                         std::forward<decltype(PH2)>(PH2), idx);
+                return TableUtils::compareLPMEntries(std::forward<decltype(PH1)>(PH1),
+                                                     std::forward<decltype(PH2)>(PH2), idx);
             });
             break;
         }
@@ -357,15 +311,12 @@ void TableStepper::setTableDefaultEntries(
         std::vector<ActionArg> ctrlPlaneArgs;
         for (size_t argIdx = 0; argIdx < parameters->size(); ++argIdx) {
             const auto *parameter = parameters->getParameter(argIdx);
-            // Synthesize a variables constant here that corresponds to a control plane argument.
+            // Synthesize a variable constant here that corresponds to a control plane argument.
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
-            const auto &actionDataVar =
-                getTableStateVariable(parameter->type, table, "*actionData", idx, argIdx);
             cstring paramName =
                 properties.tableName + "_arg_" + actionName + std::to_string(argIdx);
             const auto &actionArg = nextState.createSymbolicVariable(parameter->type, paramName);
-            nextState.set(actionDataVar, actionArg);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
             // Note how we use the control plane name for the parameter here.
@@ -414,8 +365,7 @@ void TableStepper::evalTableControlEntries(
     const auto *keys = table->getKey();
     BUG_CHECK(keys != nullptr, "An empty key list should have been handled earlier.");
 
-    for (size_t idx = 0; idx < tableActionList.size(); idx++) {
-        const auto *action = tableActionList.at(idx);
+    for (const auto *action : tableActionList) {
         // Grab the path from the method call.
         const auto *tableAction = action->expression->checkedTo<IR::MethodCallExpression>();
         // Try to find the action declaration corresponding to the path reference in the table.
@@ -436,15 +386,12 @@ void TableStepper::evalTableControlEntries(
         std::vector<ActionArg> ctrlPlaneArgs;
         for (size_t argIdx = 0; argIdx < parameters->size(); ++argIdx) {
             const auto *parameter = parameters->getParameter(argIdx);
-            // Synthesize a variables constant here that corresponds to a control plane argument.
+            // Synthesize a variable constant here that corresponds to a control plane argument.
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
-            const auto &actionDataVar =
-                getTableStateVariable(parameter->type, table, "*actionData", idx, argIdx);
             cstring paramName =
                 properties.tableName + "_arg_" + actionName + std::to_string(argIdx);
             const auto &actionArg = nextState.createSymbolicVariable(parameter->type, paramName);
-            nextState.set(actionDataVar, actionArg);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
             // Note how we use the control plane name for the parameter here.
@@ -608,24 +555,11 @@ bool TableStepper::resolveTableKeys() {
         bool keyHasTaint = state->hasTaint(keyElement->expression);
 
         // Initialize the standard keyProperties.
-        KeyProperties keyProperties(keyElement, fieldName, keyIdx, keyMatchType, keyHasTaint);
+        TableUtils::KeyProperties keyProperties(keyElement, fieldName, keyIdx, keyMatchType,
+                                                keyHasTaint);
         properties.resolvedKeys.emplace_back(keyProperties);
     }
     return false;
-}
-
-void TableStepper::checkTableIsImmutable() {
-    bool isConstant = false;
-    const auto *entriesAnnotation = table->properties->getProperty("entries");
-    if (entriesAnnotation != nullptr) {
-        isConstant = entriesAnnotation->isConstant;
-    }
-    // Also check if the table is invisible to the control plane.
-    // This also implies that it cannot be modified.
-    properties.tableIsImmutable = isConstant || table->getAnnotation("hidden") != nullptr;
-    const auto *defaultAction = table->properties->getProperty("default_action");
-    CHECK_NULL(defaultAction);
-    properties.defaultIsImmutable = defaultAction->isConstant;
 }
 
 std::vector<const IR::ActionListElement *> TableStepper::buildTableActionList() {
@@ -703,7 +637,7 @@ void TableStepper::evalTargetTable(
 
 bool TableStepper::eval() {
     // Set the appropriate properties when the table is immutable, meaning it has constant entries.
-    checkTableIsImmutable();
+    TableUtils::checkTableImmutability(table, properties);
     // Resolve any non-symbolic table keys. The function returns true when a key needs replacement.
     if (resolveTableKeys()) {
         return false;

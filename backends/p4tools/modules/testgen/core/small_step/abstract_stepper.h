@@ -161,7 +161,7 @@ class AbstractStepper : public Inspector {
     /// Type_StructLike, unroll the reference and reset each member.
     /// If forceTaint is active, all references are set tainted. Otherwise a target-specific
     /// mechanism is used.
-    void setTargetUninitialized(ExecutionState &nextState, const IR::Member *ref,
+    void setTargetUninitialized(ExecutionState &nextState, const IR::StateVariable &ref,
                                 bool forceTaint) const;
 
     /// This is a helper function to declare structlike data structures.

@@ -27,10 +27,13 @@ const IR::StringLiteral Taint::TAINTED_STRING_LITERAL = IR::StringLiteral(cstrin
 /// expression.
 static bitvec computeTaintedBits(const SymbolicMapType &varMap, const IR::Expression *expr) {
     CHECK_NULL(expr);
+    // TODO: Replace these two with IR::StateVariable.
     if (const auto *member = expr->to<IR::Member>()) {
         expr = varMap.at(member);
     }
-
+    if (const auto *path = expr->to<IR::PathExpression>()) {
+        expr = varMap.at(path);
+    }
     if (expr->is<IR::SymbolicVariable>()) {
         return {};
     }
@@ -99,8 +102,12 @@ bool Taint::hasTaint(const SymbolicMapType &varMap, const IR::Expression *expr) 
     if (expr->is<IR::SymbolicVariable>()) {
         return false;
     }
+    // TODO: Replace these two with IR::StateVariable.
     if (const auto *member = expr->to<IR::Member>()) {
         return hasTaint(varMap, varMap.at(member));
+    }
+    if (const auto *path = expr->to<IR::PathExpression>()) {
+        return hasTaint(varMap, varMap.at(path));
     }
     if (const auto *structExpr = expr->to<IR::StructExpression>()) {
         for (const auto *subExpr : structExpr->components) {
@@ -222,6 +229,11 @@ class MaskBuilder : public Transform {
     const IR::Node *preorder(IR::Member *member) override {
         // Non-tainted members just return the max value, which corresponds to a mask of all zeroes.
         return IR::getConstant(member->type, IR::getMaxBvVal(member->type));
+    }
+
+    const IR::Node *preorder(IR::PathExpression *path) override {
+        // Non-tainted members just return the max value, which corresponds to a mask of all zeroes.
+        return IR::getConstant(path->type, IR::getMaxBvVal(path->type));
     }
 
     const IR::Node *preorder(IR::TaintExpression *taintExpr) override {

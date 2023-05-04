@@ -39,6 +39,7 @@ set(
   lib/model.cpp
   lib/namespace_context.cpp
   lib/symbolic_env.cpp
+  lib/table_utils.cpp
   lib/taint.cpp
   lib/trace_event.cpp
   lib/trace_event_types.cpp

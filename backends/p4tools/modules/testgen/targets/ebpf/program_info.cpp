@@ -10,6 +10,7 @@
 
 #include "backends/p4tools/common/lib/arch_spec.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "backends/p4tools/common/lib/variables.h"
 #include "ir/id.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
@@ -24,6 +25,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/packet_vars.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/concolic.h"
+#include "backends/p4tools/modules/testgen/targets/ebpf/constants.h"
 
 namespace P4Tools::P4Testgen::EBPF {
 
@@ -115,8 +117,7 @@ const IR::StateVariable &EBPFProgramInfo::getTargetOutputPortVar() const {
 }
 
 const IR::Expression *EBPFProgramInfo::dropIsActive() const {
-    return new IR::LNot(
-        new IR::Member(IR::Type_Boolean::get(), new IR::PathExpression("*accept"), "*"));
+    return new IR::LNot(ToolsVariables::getStateVariable(IR::Type_Boolean::get(), "*accept"));
 }
 
 const IR::Type_Bits *EBPFProgramInfo::getParserErrorType() const { return &PARSER_ERR_BITS; }

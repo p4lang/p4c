@@ -78,21 +78,12 @@ bool ExprStepper::preorder(const IR::Member *member) {
         return false;
     }
 
-    // TODO: Do we need to handle non-numeric, non-boolean expressions?
+    // TODO: Do we want to handle non-numeric, non-boolean expressions?
     BUG_CHECK(member->type->is<IR::Type::Bits>() || member->type->is<IR::Type::Boolean>() ||
                   member->type->is<IR::Extracted_Varbits>(),
               "Non-numeric, non-boolean member expression: %1% Type: %2%", member,
               member->type->node_type_name());
 
-    // Check our assumption that this is a chain of member expressions terminating in a
-    // PathExpression.
-    checkMemberInvariant(member);
-
-    // This case may happen when we directly assign taint, that is not bound in the symbolic
-    // environment to an expression.
-    if (SymbolicEnv::isSymbolicValue(member)) {
-        return stepSymbolicValue(member);
-    }
     return stepSymbolicValue(state.get(member));
 }
 
@@ -106,12 +97,14 @@ void ExprStepper::evalActionCall(const IR::P4Action *action, const IR::MethodCal
     for (size_t argIdx = 0; argIdx < call->arguments->size(); ++argIdx) {
         const auto &parameters = action->parameters;
         const auto *param = parameters->getParameter(argIdx);
-        const auto *paramType = param->type;
+        const auto *paramType = nextState.resolveType(param->type);
+        // We do not use the control plane name here. We assume that UniqueParameters and
+        // UniqueNames ensure uniqueness of parameter names.
         const auto paramName = param->name;
         BUG_CHECK(param->direction == IR::Direction::None,
                   "%1%: Only directionless action parameters are supported at this point. ",
                   action);
-        const auto &tableActionDataVar = ToolsVariables::getStateVariable(paramType, paramName);
+        const auto *tableActionDataVar = new IR::PathExpression(paramType, new IR::Path(paramName));
         const auto *curArg = call->arguments->at(argIdx)->expression;
         nextState.set(tableActionDataVar, curArg);
     }
@@ -194,9 +187,9 @@ bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
         }
 
         BUG("Unknown method call: %1% of type %2%", call->method, call->method->node_type_name());
+    } else if (const auto *action = state.getActionDecl(call->method)) {
         // Handle action calls. Actions are called by tables and are not inlined, unlike
         // functions.
-    } else if (const auto *action = state.getActionDecl(call->method)) {
         evalActionCall(action, call);
         return false;
     }
@@ -270,8 +263,7 @@ bool ExprStepper::preorder(const IR::PathExpression *pathExpression) {
         return false;
     }
     // Otherwise convert the path expression into a qualified member and return it.
-    auto pathRef = nextState.convertPathExpr(pathExpression);
-    nextState.replaceTopBody(Continuation::Return(pathRef));
+    nextState.replaceTopBody(Continuation::Return(nextState.get(pathExpression)));
     result->emplace_back(nextState);
     return false;
 }

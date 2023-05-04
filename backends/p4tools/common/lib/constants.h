@@ -1,9 +1,9 @@
-#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_CONSTANTS_H_
-#define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_CONSTANTS_H_
+#ifndef BACKENDS_P4TOOLS_COMMON_LIB_CONSTANTS_H_
+#define BACKENDS_P4TOOLS_COMMON_LIB_CONSTANTS_H_
 
 #include "ir/ir.h"
 
-namespace P4Tools::P4Testgen {
+namespace P4Tools {
 
 class P4Constants {
  public:
@@ -31,6 +31,6 @@ class P4Constants {
     static constexpr const char *MATCH_KIND_LPM = "lpm";
 };
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace P4Tools
 
-#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_CONSTANTS_H_ */
+#endif /* BACKENDS_P4TOOLS_COMMON_LIB_CONSTANTS_H_ */
