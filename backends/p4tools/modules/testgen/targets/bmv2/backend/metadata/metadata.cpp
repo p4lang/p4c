@@ -173,7 +173,8 @@ void Metadata::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
 void Metadata::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testIdx,
                           float currentCoverage) {
     auto incrementedbasePath = basePath;
-    incrementedbasePath.replace_extension("_" + std::to_string(testIdx) + ".yml");
+    incrementedbasePath.concat("_" + std::to_string(testIdx));
+    incrementedbasePath.replace_extension(".yml");
     metadataFile = std::ofstream(incrementedbasePath);
     std::string testCase = getTestCaseTemplate();
     emitTestcase(testSpec, selectedBranches, testIdx, testCase, currentCoverage);
