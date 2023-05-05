@@ -1,8 +1,5 @@
 # This file defines how a test should be written for a particular target. This is used by testutils
 
-set(P4TOOLS_BINARY_DIR ${CMAKE_SOURCE_DIR}/build)
-set(P4TESTGEN_DIR ${CMAKE_SOURCE_DIR}/build/testgen)
-
 # Write the script to validate whether a given protobuf file has a valid format.
 # Arguments:
 #   - testfile is the testing script that this script is written to.
@@ -57,7 +54,7 @@ function(p4tools_add_test_with_args)
   file(WRITE ${__testfile} "#! /usr/bin/env bash\n")
   file(APPEND ${__testfile} "# Generated file, modify with care\n\n")
   file(APPEND ${__testfile} "set -e\n")
-  file(APPEND ${__testfile} "cd ${P4TOOLS_BINARY_DIR}\n")
+  file(APPEND ${__testfile} "cd ${P4C_BINARY_DIR}\n")
 
   file(
     APPEND ${__testfile} "${driver} --target ${target} --arch ${arch} "

@@ -36,7 +36,6 @@ option(P4TOOLS_TESTGEN_BMV2_TEST_PTF "Run tests on the PTF test back end" ON)
 option(P4TOOLS_TESTGEN_BMV2_TEST_STF "Run tests on the STF test back end" ON)
 # Test settings.
 set(EXTRA_OPTS "--strict --print-traces --seed 1000 --max-tests 10 ")
-set(P4TESTGEN_DRIVER "${P4TOOLS_BINARY_DIR}/p4testgen")
 
 # ASSERT_ASSUME TESTS
 include(${CMAKE_CURRENT_LIST_DIR}/AssumeAssertTests.cmake)

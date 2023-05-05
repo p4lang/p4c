@@ -4,6 +4,10 @@ include(common)
 
 project(p4testgen)
 
+# Declare common P4Testgen variables.
+set(P4TESTGEN_DIR ${P4C_BINARY_DIR}/testgen)
+set(P4TESTGEN_DRIVER "${CMAKE_CURRENT_BINARY_DIR}/p4testgen")
+
 # Source files for p4testgen.
 set(
   TESTGEN_SOURCES
