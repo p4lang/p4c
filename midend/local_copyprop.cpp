@@ -20,7 +20,9 @@ limitations under the License.
 
 #include "expr_uses.h"
 #include "frontends/common/copySrcInfo.h"
+#include "frontends/p4/methodInstance.h"
 #include "has_side_effects.h"
+#include "ir/ir-generated.h"
 
 namespace P4 {
 
@@ -200,6 +202,18 @@ bool DoLocalCopyPropagation::name_overlap(cstring name1, cstring name2) {
     if (name1 == name2) return true;
     if (name1.startsWith(name2) && strchr(".[", name1.get(name2.size()))) return true;
     if (name2.startsWith(name1) && strchr(".[", name2.get(name1.size()))) return true;
+    return false;
+}
+
+bool DoLocalCopyPropagation::isHeaderUnionIsValid(const IR::Expression *e) {
+    auto mce = e->to<IR::MethodCallExpression>();
+    if (!mce) return false;
+    auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
+    if (auto bm = mi->to<P4::BuiltInMethod>()) {
+        if (bm->name == "isValid" && bm->expr->arguments->size() == 0) {
+            if (bm->appliedTo->type->is<IR::Type_HeaderUnion>()) return true;
+        }
+    }
     return false;
 }
 
@@ -461,7 +475,8 @@ IR::MethodCallExpression *DoLocalCopyPropagation::postorder(IR::MethodCallExpres
                     }
                     return mc;
                 }
-            } else if (mem->expr->type->is<IR::Type_Header>()) {
+            } else if (mem->expr->type->is<IR::Type_Header>() ||
+                       mem->expr->type->is<IR::Type_HeaderUnion>()) {
                 if (mem->member == "isValid") {
                     forOverlapAvail(obj, [obj](cstring, VarInfo *var) {
                         LOG4("  using " << obj << " (isValid)");
@@ -655,11 +670,37 @@ void DoLocalCopyPropagation::apply_table(DoLocalCopyPropagation::TableInfo *tbl)
                                                                                   << var->val);
                     var->live = true;
                 }
+            } else if (var->val && lvalue_out(var->val)->is<IR::MethodCallExpression>()) {
+                if (hasSideEffects(lvalue_out(var->val))) {
+                    LOG3("  cannot propagate expression with side effect into table key "
+                         << vname << ": " << var->val);
+                    var->live = true;
+                } else if (isHeaderUnionIsValid(lvalue_out(var->val))) {
+                    // isValid() on a header union must be handled by the flattenHeaderUnion
+                    // pass to lower it to isValid() on a header. Therefore we cannot propagate
+                    // it into a table key.
+                    LOG3("  cannot propagate isValid() for header union into table key "
+                         << vname << ": " << var->val);
+                    var->live = true;
+                } else if (tbl->apply_count > 1 && (!tbl->key_remap.count(vname) ||
+                                                    !tbl->key_remap.at(vname)->equiv(*var->val))) {
+                    LOG3("  different values used in different applies for key " << key);
+                    tbl->key_remap.erase(vname);
+                    var->live = true;
+                } else if (policy(getChildContext(), var->val)) {
+                    LOG3("  will propagate value into table key " << vname << ": " << var->val);
+                    tbl->key_remap.emplace(vname, var->val);
+                    need_key_rewrite = true;
+                } else {
+                    LOG3("  policy prevents propagation of value into table key " << vname << ": "
+                                                                                  << var->val);
+                    var->live = true;
+                }
             } else {
                 tbl->key_remap.erase(key);
                 LOG4("  table using "
                      << key << " with "
-                     << (var->val ? "value to complex for key" : "no propagated value"));
+                     << (var->val ? "value too complex for key" : "no propagated value"));
                 var->live = true;
             }
         });
