@@ -197,7 +197,7 @@ TestgenOptions::TestgenOptions()
             ::error(
                 "Path selection policy %1% not supported. Supported path selection policies are "
                 "%2%.",
-                pathSelectionPolicy, Utils::containerToString(printSet));
+                selectionString, Utils::containerToString(printSet));
             return false;
         },
         "Selects a specific path selection strategy for test generation. Options are: "
@@ -231,7 +231,7 @@ TestgenOptions::TestgenOptions()
             return false;
         },
         "Specifies, which IR nodes to track for coverage in the targeted P4 program. Multiple "
-        "options are possible: Currently supported: STATEMENTS, TABLE_ENTRIES"
+        "options are possible: Currently supported: STATEMENTS, TABLE_ENTRIES "
         "Defaults to no coverage.");
 
     registerOption(
