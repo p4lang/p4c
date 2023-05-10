@@ -48,9 +48,9 @@ const Constant *getConstant(const Type *type, big_int v) {
     }
     // Constants are interned. Keys in the intern map are pairs of types and values.
     using key_t = std::tuple<int, std::type_index, bool, big_int>;
-    static std::map<key_t, const Constant *> constants;
+    static std::map<key_t, const Constant *> CONSTANTS;
 
-    auto *&result = constants[{tb->width_bits(), typeid(*type), tb->isSigned, v}];
+    auto *&result = CONSTANTS[{tb->width_bits(), typeid(*type), tb->isSigned, v}];
     if (result == nullptr) {
         result = new Constant(tb, v);
     }
@@ -60,9 +60,9 @@ const Constant *getConstant(const Type *type, big_int v) {
 
 const BoolLiteral *getBoolLiteral(bool value) {
     // Boolean literals are interned.
-    static std::map<bool, const BoolLiteral *> literals;
+    static std::map<bool, const BoolLiteral *> LITERALS;
 
-    auto *&result = literals[value];
+    auto *&result = LITERALS[value];
     if (result == nullptr) {
         result = new BoolLiteral(Type::Boolean::get(), value);
     }
@@ -81,7 +81,7 @@ const IR::Expression *getDefaultValue(const IR::Type *type, const Util::SourceIn
     }
     if (type->is<IR::Type_Boolean>()) {
         // TODO: Use getBoolLiteral.
-        return new BoolLiteral(Type::Boolean::get(), false);
+        return new BoolLiteral(srcInfo, Type::Boolean::get(), false);
     }
     if (type->is<IR::Type_InfInt>()) {
         return new IR::Constant(srcInfo, 0);

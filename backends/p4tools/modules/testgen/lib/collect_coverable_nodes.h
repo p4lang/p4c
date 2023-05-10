@@ -13,7 +13,6 @@ namespace P4Tools::P4Testgen {
 
 /// A cache of already computed nodes to avoid superfluous computation.
 using NodeCache = std::map<const IR::Node *, P4::Coverage::CoverageSet>;
-static NodeCache cachedNodes;
 
 /// CoverableNodesScanner is similar to @ref CollectNodes. It collects all the nodes
 /// present in a particular node. However, compared to CollectNodes, it traverses the entire
@@ -25,7 +24,7 @@ class CoverableNodesScanner : public Inspector {
     P4::Coverage::CoverageSet coverableNodes;
 
     /// The current execution state. Used to look up parser states.
-    const ExecutionState &state;
+    std::reference_wrapper<const ExecutionState> state;
 
     /// IDs of already visited parser states. To avoid loops.
     std::set<int> seenParserIds;

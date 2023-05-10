@@ -52,7 +52,7 @@ class StateVariable : Expression {
                 return -1;
             }
         }
-        BUG("Not a valid StateVariable: %1%", e1);
+        BUG("Either %1% of type %2% or %3% of type %4% is not a valid StateVariable", e1, e1->node_type_name(), e2, e2->node_type_name());
     }
 
     int compare(const Member *m1, const Member *m2) const {

@@ -14,17 +14,8 @@ namespace P4Tools {
 /// Sized_Type_Varbit also contains information about the width that was assigned to the type by
 /// the extract call.
 class ConvertVarbits : public Transform {
-    P4::ReferenceMap *refMap;
-    P4::TypeMap *typeMap;
-
  public:
-    ConvertVarbits(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
-        : refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(refMap);
-        CHECK_NULL(typeMap);
-        setName("ConvertVarbits");
-        visitDagOnce = false;
-    }
+    ConvertVarbits();
 
     const IR::Node *postorder(IR::Type_Varbits *varbit) override;
 

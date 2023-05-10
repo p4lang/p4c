@@ -18,7 +18,7 @@
 namespace P4Tools::P4Testgen {
 
 bool CoverableNodesScanner::preorder(const IR::ParserState *parserState) {
-    // Already have seen this state. We might be in a loop.
+    // Already have seen this executionState. We might be in a loop.
     if (seenParserIds.count(parserState->clone_id) != 0) {
         return false;
     }
@@ -30,17 +30,18 @@ bool CoverableNodesScanner::preorder(const IR::ParserState *parserState) {
     }
 
     CHECK_NULL(parserState->selectExpression);
+    const auto &executionState = state.get();
 
     if (const auto *selectExpr = parserState->selectExpression->to<IR::SelectExpression>()) {
         for (const auto *selectCase : selectExpr->selectCases) {
-            const auto *decl = state.findDecl(selectCase->state)->getNode();
+            const auto *decl = executionState.findDecl(selectCase->state)->getNode();
             decl->apply_visitor_preorder(*this);
         }
     } else if (const auto *pathExpression =
                    parserState->selectExpression->to<IR::PathExpression>()) {
         // Only bother looking up cases that are not accept or reject.
-        // If we are referencing a parser state, step into the state.
-        const auto *decl = state.findDecl(pathExpression)->getNode();
+        // If we are referencing a parser state, step into the executionState.
+        const auto *decl = executionState.findDecl(pathExpression)->getNode();
         decl->apply_visitor_preorder(*this);
     }
     seenParserIds.emplace(parserState->clone_id);
@@ -56,17 +57,18 @@ bool CoverableNodesScanner::preorder(const IR::AssignmentStatement *stmt) {
 }
 
 bool CoverableNodesScanner::preorder(const IR::MethodCallExpression *call) {
+    const auto &executionState = state.get();
     // Handle method calls. These are either table invocations or extern calls.
     if (call->method->type->is<IR::Type_Method>()) {
         if (const auto *member = call->method->to<IR::Member>()) {
             // Handle table calls.
-            const auto *table = state.getTableType(member);
+            const auto *table = executionState.getTableType(member);
             if (table == nullptr) {
                 return true;
             }
             TableUtils::TableProperties properties;
-            TableUtils::checkTableImmutability(table, properties);
-            auto tableActionList = TableUtils::buildTableActionList(table);
+            TableUtils::checkTableImmutability(*table, properties);
+            auto tableActionList = TableUtils::buildTableActionList(*table);
             if (properties.tableIsImmutable) {
                 const auto *entries = table->getEntries();
                 if (entries != nullptr) {
@@ -77,7 +79,7 @@ bool CoverableNodesScanner::preorder(const IR::MethodCallExpression *call) {
                         }
                         const auto *tableAction =
                             entry->action->checkedTo<IR::MethodCallExpression>();
-                        const auto *actionType = state.getActionDecl(tableAction);
+                        const auto *actionType = executionState.getActionDecl(tableAction);
                         actionType->body->apply_visitor_preorder(*this);
                     }
                 }
@@ -85,19 +87,19 @@ bool CoverableNodesScanner::preorder(const IR::MethodCallExpression *call) {
                 for (const auto &action : tableActionList) {
                     const auto *tableAction =
                         action->expression->checkedTo<IR::MethodCallExpression>();
-                    const auto *actionType = state.getActionDecl(tableAction);
+                    const auto *actionType = executionState.getActionDecl(tableAction);
                     actionType->body->apply_visitor_preorder(*this);
                 }
             }
             const auto *defaultAction = table->getDefaultAction();
             const auto *tableAction = defaultAction->checkedTo<IR::MethodCallExpression>();
-            const auto *actionType = state.getActionDecl(tableAction);
+            const auto *actionType = executionState.getActionDecl(tableAction);
             actionType->body->apply_visitor_preorder(*this);
         }
         return false;
     }
     if (call->method->type->is<IR::Type_Action>()) {
-        const auto *actionType = state.getActionDecl(call);
+        const auto *actionType = executionState.getActionDecl(call);
         actionType->body->apply_visitor_preorder(*this);
         return false;
     }
@@ -126,16 +128,17 @@ const P4::Coverage::CoverageSet &CoverableNodesScanner::getCoverableNodes() {
 
 void CoverableNodesScanner::updateNodeCoverage(const IR::Node *node,
                                                P4::Coverage::CoverageSet &nodes) {
+    static NodeCache CACHED_NODES;
     // If the node is already in the cache, return it.
-    auto it = cachedNodes.find(node);
-    if (it != cachedNodes.end()) {
+    auto it = CACHED_NODES.find(node);
+    if (it != CACHED_NODES.end()) {
         nodes.insert(it->second.begin(), it->second.end());
         return;
     }
     node->apply(*this);
     nodes.insert(coverableNodes.begin(), coverableNodes.end());
     // Store the result in the cache.
-    cachedNodes.emplace(node, coverableNodes);
+    CACHED_NODES.emplace(node, coverableNodes);
 }
 
 CoverableNodesScanner::CoverableNodesScanner(const ExecutionState &state)

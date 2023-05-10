@@ -158,7 +158,7 @@ void MidEnd::addDefaultPasses() {
         // Simplify header stack assignments with runtime indices into conditional statements.
         new P4::HSIndexSimplifier(&refMap, &typeMap),
         // Convert Type_Varbits into a type that contains information about the assigned width.
-        new ConvertVarbits(&refMap, &typeMap),
+        new ConvertVarbits(),
         // Cast all boolean table keys with a bit<1>.
         new P4::CastBooleanTableKeys(),
     });

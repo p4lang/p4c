@@ -49,10 +49,10 @@ struct TableProperties {
 
 /// Checks whether certain table properties are immutable and sets the properties param
 /// accordingly.
-void checkTableImmutability(const IR::P4Table *table, TableProperties &properties);
+void checkTableImmutability(const IR::P4Table &table, TableProperties &properties);
 
 /// Collects the list of actions contained in the table and filters out @defaultonly actions.
-std::vector<const IR::ActionListElement *> buildTableActionList(const IR::P4Table *table);
+std::vector<const IR::ActionListElement *> buildTableActionList(const IR::P4Table &table);
 
 /// The function compares the right and left expression.
 /// Returns true if the values are equal or if the left value is more precise.

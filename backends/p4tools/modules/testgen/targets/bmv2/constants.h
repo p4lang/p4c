@@ -32,12 +32,13 @@ class BMv2Constants {
     static constexpr uint16_t CLONE_SESSION_ID_MAX = 32767;
     /// Clone type is derived from v1model.p4
     enum CloneType { I2E = 0, E2E = 1 };
+    /// Meter colors are defined in v1model.p4
+    enum METER_COLOR { GREEN = 0, YELLOW = 1, RED = 2 };
+
     /// Other useful constants
     static constexpr int STF_MIN_PKT_SIZE = 22;
     static constexpr int ETH_HDR_SIZE = 112;
     static constexpr int DROP_PORT = 511;
-
-    enum METER_COLOR { GREEN = 0, YELLOW = 1, RED = 2 };
 };
 
 }  // namespace P4Tools::P4Testgen::Bmv2

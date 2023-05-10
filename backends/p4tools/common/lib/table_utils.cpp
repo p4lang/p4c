@@ -2,23 +2,23 @@
 
 namespace P4Tools::TableUtils {
 
-void checkTableImmutability(const IR::P4Table *table, TableProperties &properties) {
+void checkTableImmutability(const IR::P4Table &table, TableProperties &properties) {
     bool isConstant = false;
-    const auto *entriesAnnotation = table->properties->getProperty("entries");
+    const auto *entriesAnnotation = table.properties->getProperty("entries");
     if (entriesAnnotation != nullptr) {
         isConstant = entriesAnnotation->isConstant;
     }
     // Also check if the table is invisible to the control plane.
     // This also implies that it cannot be modified.
-    properties.tableIsImmutable = isConstant || table->getAnnotation("hidden") != nullptr;
-    const auto *defaultAction = table->properties->getProperty("default_action");
+    properties.tableIsImmutable = isConstant || table.getAnnotation("hidden") != nullptr;
+    const auto *defaultAction = table.properties->getProperty("default_action");
     CHECK_NULL(defaultAction);
     properties.defaultIsImmutable = defaultAction->isConstant;
 }
 
-std::vector<const IR::ActionListElement *> buildTableActionList(const IR::P4Table *table) {
+std::vector<const IR::ActionListElement *> buildTableActionList(const IR::P4Table &table) {
     std::vector<const IR::ActionListElement *> tableActionList;
-    const auto *actionList = table->getActionList();
+    const auto *actionList = table.getActionList();
     if (actionList == nullptr) {
         return tableActionList;
     }
