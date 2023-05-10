@@ -13,7 +13,7 @@ function(check_with_bmv2 testfile testfolder p4test)
   file(APPEND ${testfile} "for item in \${stffiles[@]}\n")
   file(APPEND ${testfile} "do\n")
   file(APPEND ${testfile} "\techo \"Found \${item}\"\n")
-  file(APPEND ${testfile} "\tpython3 ${__bmv2runner} . -v -b -tf \${item} -bd ${__p4cbmv2path} ${P4C_SOURCE_DIR}/${p4test}\n")
+  file(APPEND ${testfile} "\tpython3 ${__bmv2runner} . -v -b -tf \${item} -bd ${__p4cbmv2path} ${p4test}\n")
   file(APPEND ${testfile} "done\n")
 endfunction(check_with_bmv2)
 
@@ -31,7 +31,7 @@ macro(check_bmv2_with_ptf testfile testfolder p4test)
   file(APPEND ${testfile} "for item in \${ptffiles[@]}\n")
   file(APPEND ${testfile} "do\n")
   file(APPEND ${testfile} "\techo \"Found \${item}\"\n")
-  file(APPEND ${testfile} "\t python3 ${__bmv2runner} -tf \${item} ${P4C_SOURCE_DIR} -pfn ${P4C_SOURCE_DIR}/${p4test} \n")
+  file(APPEND ${testfile} "\t python3 ${__bmv2runner} -tf \${item} ${P4C_SOURCE_DIR} -pfn ${p4test} \n")
   file(APPEND ${testfile} "done\n")
 endmacro(check_bmv2_with_ptf)
 
@@ -101,7 +101,7 @@ function(p4tools_add_test_with_args)
   string(REGEX REPLACE ".p4" "" aliasname ${alias})
   set(__testfile "${P4TESTGEN_DIR}/${tag}/${alias}.test")
   set(__testfolder "${P4TESTGEN_DIR}/${tag}/${aliasname}.out")
-  get_filename_component(__testdir ${P4C_SOURCE_DIR}/${p4test} DIRECTORY)
+  get_filename_component(__testdir ${p4test} DIRECTORY)
   file(WRITE ${__testfile} "#! /usr/bin/env bash\n")
   file(APPEND ${__testfile} "# Generated file, modify with care\n\n")
   file(APPEND ${__testfile} "set -e\n")
@@ -116,7 +116,7 @@ function(p4tools_add_test_with_args)
 
   file(
     APPEND ${__testfile} "${driver} --target ${target} --arch ${arch} "
-    "${test_args} --out-dir ${__testfolder} \"$@\" ${P4C_SOURCE_DIR}/${p4test}\n"
+    "${test_args} --out-dir ${__testfolder} \"$@\" ${p4test}\n"
   )
 
   if(${TOOLS_BMV2_TESTS_USE_ASSERT_MODE} OR ${TOOLS_BMV2_TESTS_DISABLE_ASSUME_MODE})
