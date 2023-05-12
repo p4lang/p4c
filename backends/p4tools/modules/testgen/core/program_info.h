@@ -26,11 +26,13 @@ class ProgramInfo : public ICastable {
     /// initialization.
     ConcolicMethodImpls concolicMethodImpls;
 
-    /// Set of all statements in the input P4 program.
-    P4::Coverage::CoverageSet allStatements;
+    /// Set of all visitable nodes in the input P4 program.
+    P4::Coverage::CoverageSet coverableNodes;
 
+    /// The execution sequence of the P4 program.
     std::vector<Continuation::Command> pipelineSequence;
 
+    /// The constraints imposed by the target.
     std::optional<const IR::Expression *> targetConstraints = std::nullopt;
 
  public:
@@ -42,7 +44,7 @@ class ProgramInfo : public ICastable {
 
     ProgramInfo &operator=(ProgramInfo &&) = default;
 
-    virtual ~ProgramInfo() = default;
+    ~ProgramInfo() override = default;
 
     /// The P4 program from which this object is derived.
     const IR::P4Program *program;
@@ -73,8 +75,8 @@ class ProgramInfo : public ICastable {
     virtual const IR::Expression *createTargetUninitialized(const IR::Type *type,
                                                             bool forceTaint) const;
 
-    /// Getter to access allStatements.
-    [[nodiscard]] const P4::Coverage::CoverageSet &getAllStatements() const;
+    /// Getter to access coverableNodes.
+    [[nodiscard]] const P4::Coverage::CoverageSet &getCoverableNodes() const;
 
     /// @returns the list of implemented concolic methods for this particular program.
     [[nodiscard]] const ConcolicMethodImpls *getConcolicMethodImpls() const;

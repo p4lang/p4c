@@ -26,7 +26,7 @@ set(
   core/symbolic_executor/symbolic_executor.cpp
   core/target.cpp
 
-  lib/collect_latent_statements.cpp
+  lib/collect_coverable_statements.cpp
   lib/concolic.cpp
   lib/continuation.cpp
   lib/execution_state.cpp

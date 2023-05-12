@@ -22,7 +22,7 @@
 
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
-#include "backends/p4tools/modules/testgen/lib/collect_latent_statements.h"
+#include "backends/p4tools/modules/testgen/lib/collect_coverable_statements.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
@@ -91,13 +91,11 @@ void Bmv2V1ModelTableStepper::evalTableActionProfile(
     const std::vector<const IR::ActionListElement *> &tableActionList) {
     const auto *state = getExecutionState();
 
-    for (size_t idx = 0; idx < tableActionList.size(); idx++) {
-        const auto *action = tableActionList.at(idx);
+    for (const auto *action : tableActionList) {
         // Grab the path from the method call.
         const auto *tableAction = action->expression->checkedTo<IR::MethodCallExpression>();
         // Try to find the action declaration corresponding to the path reference in the table.
-        const auto *actionType = state->getActionDecl(tableAction->method);
-        CHECK_NULL(actionType);
+        const auto *actionType = state->getActionDecl(tableAction);
 
         auto &nextState = state->clone();
         // We get the control plane name of the action we are calling.
@@ -155,11 +153,11 @@ void Bmv2V1ModelTableStepper::evalTableActionProfile(
         replacements.emplace_back(
             new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
         // Some path selection strategies depend on looking ahead and collecting potential
-        // statements. If that is the case, apply the CollectLatentStatements visitor.
+        // statements. If that is the case, apply the CoverableNodesScanner visitor.
         P4::Coverage::CoverageSet coveredStmts;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
-            nextState.getActionDecl(tableAction->method)
-                ->apply(CollectLatentStatements(coveredStmts, *state));
+            auto collector = CoverableNodesScanner(*state);
+            collector.updateNodeCoverage(actionType, coveredStmts);
         }
 
         nextState.set(getTableHitVar(table), IR::getBoolLiteral(true));
@@ -177,13 +175,11 @@ void Bmv2V1ModelTableStepper::evalTableActionSelector(
     const std::vector<const IR::ActionListElement *> &tableActionList) {
     const auto *state = getExecutionState();
 
-    for (size_t idx = 0; idx < tableActionList.size(); idx++) {
-        const auto *action = tableActionList.at(idx);
+    for (const auto *action : tableActionList) {
         // Grab the path from the method call.
         const auto *tableAction = action->expression->checkedTo<IR::MethodCallExpression>();
         // Try to find the action declaration corresponding to the path reference in the table.
-        const auto *actionType = state->getActionDecl(tableAction->method);
-        CHECK_NULL(actionType);
+        const auto *actionType = state->getActionDecl(tableAction);
 
         auto &nextState = state->clone();
         // We get the control plane name of the action we are calling.
@@ -251,11 +247,11 @@ void Bmv2V1ModelTableStepper::evalTableActionSelector(
         replacements.emplace_back(
             new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
         // Some path selection strategies depend on looking ahead and collecting potential
-        // statements. If that is the case, apply the CollectLatentStatements visitor.
+        // statements. If that is the case, apply the CoverableNodesScanner visitor.
         P4::Coverage::CoverageSet coveredStmts;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
-            nextState.getActionDecl(tableAction->method)
-                ->apply(CollectLatentStatements(coveredStmts, *state));
+            auto collector = CoverableNodesScanner(*state);
+            collector.updateNodeCoverage(actionType, coveredStmts);
         }
 
         nextState.set(getTableHitVar(table), IR::getBoolLiteral(true));

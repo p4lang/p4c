@@ -27,7 +27,7 @@
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/expr_stepper.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
-#include "backends/p4tools/modules/testgen/lib/collect_latent_statements.h"
+#include "backends/p4tools/modules/testgen/lib/collect_coverable_statements.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
@@ -202,11 +202,10 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
 
     for (const auto &entry : entryVector) {
         const auto *action = entry->getAction();
-        BUG_CHECK(action && action->is<IR::MethodCallExpression>(),
-                  "Unknown format of an action '%1%' in the table '%2%'", action, table);
+        const auto *tableAction = action->checkedTo<IR::MethodCallExpression>();
+        const auto *actionType = stepper->state.getActionDecl(tableAction);
         auto &nextState = stepper->state.clone();
-        const auto *tableAction = action->to<IR::MethodCallExpression>();
-        BUG_CHECK(tableAction, "Invalid action '%1%' in the table '%2%'", action, table);
+        nextState.markVisited(entry);
         // We need to set the table action in the state for eventual switch action_run hits.
         // We also will need it for control plane table entries.
         setTableAction(nextState, tableAction);
@@ -245,11 +244,11 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
         nextState.set(getTableHitVar(table), IR::getBoolLiteral(true));
         nextState.set(getTableReachedVar(table), IR::getBoolLiteral(true));
         // Some path selection strategies depend on looking ahead and collecting potential
-        // statements. If that is the case, apply the CollectLatentStatements visitor.
+        // statements. If that is the case, apply the CoverableNodesScanner visitor.
         P4::Coverage::CoverageSet coveredStmts;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
-            nextState.getActionDecl(tableAction->method)
-                ->apply(CollectLatentStatements(coveredStmts, stepper->state));
+            auto collector = CoverableNodesScanner(stepper->state);
+            collector.updateNodeCoverage(actionType, coveredStmts);
         }
 
         // Add some tracing information.
@@ -293,13 +292,9 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
 
 void TableStepper::setTableDefaultEntries(
     const std::vector<const IR::ActionListElement *> &tableActionList) {
-    for (size_t idx = 0; idx < tableActionList.size(); idx++) {
-        const auto *action = tableActionList.at(idx);
-        // Grab the path from the method call.
+    for (const auto *action : tableActionList) {
         const auto *tableAction = action->expression->checkedTo<IR::MethodCallExpression>();
-        // Try to find the action declaration corresponding to the path reference in the table.
-        const auto *actionType = stepper->state.getActionDecl(tableAction->method);
-        CHECK_NULL(actionType);
+        const auto *actionType = stepper->state.getActionDecl(tableAction);
 
         auto &nextState = stepper->state.clone();
 
@@ -343,11 +338,11 @@ void TableStepper::setTableDefaultEntries(
         replacements.emplace_back(
             new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
         // Some path selection strategies depend on looking ahead and collecting potential
-        // statements. If that is the case, apply the CollectLatentStatements visitor.
+        // statements. If that is the case, apply the CoverableNodesScanner visitor.
         P4::Coverage::CoverageSet coveredStmts;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
-            nextState.getActionDecl(tableAction->method)
-                ->apply(CollectLatentStatements(coveredStmts, stepper->state));
+            auto collector = CoverableNodesScanner(stepper->state);
+            collector.updateNodeCoverage(actionType, coveredStmts);
         }
         nextState.set(getTableHitVar(table), IR::getBoolLiteral(false));
         nextState.set(getTableReachedVar(table), IR::getBoolLiteral(true));
@@ -369,8 +364,7 @@ void TableStepper::evalTableControlEntries(
         // Grab the path from the method call.
         const auto *tableAction = action->expression->checkedTo<IR::MethodCallExpression>();
         // Try to find the action declaration corresponding to the path reference in the table.
-        const auto *actionType = stepper->state.getActionDecl(tableAction->method);
-        CHECK_NULL(actionType);
+        const auto *actionType = stepper->state.getActionDecl(tableAction);
 
         auto &nextState = stepper->state.clone();
 
@@ -418,11 +412,11 @@ void TableStepper::evalTableControlEntries(
         replacements.emplace_back(
             new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
         // Some path selection strategies depend on looking ahead and collecting potential
-        // statements. If that is the case, apply the CollectLatentStatements visitor.
+        // statements. If that is the case, apply the CoverableNodesScanner visitor.
         P4::Coverage::CoverageSet coveredStmts;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
-            nextState.getActionDecl(tableAction->method)
-                ->apply(CollectLatentStatements(coveredStmts, stepper->state));
+            auto collector = CoverableNodesScanner(stepper->state);
+            collector.updateNodeCoverage(actionType, coveredStmts);
         }
 
         nextState.set(getTableHitVar(table), IR::getBoolLiteral(true));
@@ -583,11 +577,8 @@ std::vector<const IR::ActionListElement *> TableStepper::buildTableActionList() 
 
 void TableStepper::addDefaultAction(std::optional<const IR::Expression *> tableMissCondition) {
     const auto *defaultAction = table->getDefaultAction();
-    CHECK_NULL(defaultAction);
-    BUG_CHECK(defaultAction->is<IR::MethodCallExpression>(),
-              "Unknown format of default action in the table '%1%'", table);
-    const auto *tableAction = defaultAction->to<IR::MethodCallExpression>();
-    BUG_CHECK(tableAction, "Invalid action default action in the table '%1%'", table);
+    const auto *tableAction = defaultAction->checkedTo<IR::MethodCallExpression>();
+    const auto *actionType = stepper->state.getActionDecl(tableAction);
     auto &nextState = stepper->state.clone();
     // We need to set the table action in the state for eventual switch action_run hits.
     // We also will need it for control plane table entries.
@@ -605,8 +596,8 @@ void TableStepper::addDefaultAction(std::optional<const IR::Expression *> tableM
     // statements.
     P4::Coverage::CoverageSet coveredStmts;
     if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
-        nextState.getActionDecl(tableAction->method)
-            ->apply(CollectLatentStatements(coveredStmts, stepper->state));
+        auto collector = CoverableNodesScanner(stepper->state);
+        collector.updateNodeCoverage(actionType, coveredStmts);
     }
     nextState.set(getTableHitVar(table), IR::getBoolLiteral(false));
     nextState.set(getTableReachedVar(table), IR::getBoolLiteral(true));

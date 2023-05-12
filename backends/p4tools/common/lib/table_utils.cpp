@@ -27,9 +27,6 @@ std::vector<const IR::ActionListElement *> buildTableActionList(const IR::P4Tabl
         if (action->getAnnotation("defaultonly") != nullptr) {
             continue;
         }
-        // Check some properties of the list.
-        CHECK_NULL(action->expression);
-        action->expression->checkedTo<IR::MethodCallExpression>();
         tableActionList.emplace_back(action);
     }
     return tableActionList;

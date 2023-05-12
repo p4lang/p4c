@@ -72,8 +72,8 @@ class ExecutionState {
     /// The program trace for the current program point (i.e., how we got to the current state).
     std::vector<std::reference_wrapper<const TraceEvent>> trace;
 
-    /// Set of visited statements. Used for code coverage.
-    P4::Coverage::CoverageSet visitedStatements;
+    /// Set of visited nodes. Used for code coverage.
+    P4::Coverage::CoverageSet visitedNodes;
 
     /// The remaining body of the current function being executed.
     ///
@@ -153,8 +153,8 @@ class ExecutionState {
     /// @returns the symbolic value of the given state variable.
     [[nodiscard]] const IR::Expression *get(const IR::StateVariable &var) const;
 
-    /// Checks whether the statement has been visited in this state.
-    void markVisited(const IR::Statement *stmt);
+    /// Checks whether the node has been visited in this state.
+    void markVisited(const IR::Node *node);
 
     /// @returns list of all statements visited before reaching this state.
     [[nodiscard]] const P4::Coverage::CoverageSet &getVisited() const;
@@ -443,7 +443,8 @@ class ExecutionState {
     [[nodiscard]] const IR::P4Table *getTableType(const IR::Expression *expression) const;
 
     /// Gets action type from an expression.
-    [[nodiscard]] const IR::P4Action *getActionDecl(const IR::Expression *expression) const;
+    [[nodiscard]] const IR::P4Action *getActionDecl(
+        const IR::MethodCallExpression *actionExpr) const;
 
     /// @returns an IR::Expression converted into a StateVariable. Currently only IR::PathExpression
     /// and IR::Member can be converted into a state variable.

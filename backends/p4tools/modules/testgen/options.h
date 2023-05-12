@@ -1,13 +1,13 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_OPTIONS_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_OPTIONS_H_
 
-#include <stdint.h>
-
+#include <cstdint>
 #include <set>
 #include <string>
 
 #include "backends/p4tools/common/options.h"
 #include "lib/cstring.h"
+#include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
 
@@ -73,6 +73,10 @@ class TestgenOptions : public AbstractP4cToolOptions {
     /// Produce only tests that violate the condition defined in assert calls.
     /// This will either produce no tests or only tests that contain counter examples.
     bool assertionModeEnabled = false;
+
+    /// Specifies, which IR nodes to track for coverage in the targeted P4 program.
+    /// Multiple options are possible. Currently supported: STATEMENTS, TABLE_ENTRIES.
+    P4::Coverage::CoverageOptions coverageOptions;
 
     const char *getIncludePath() override;
 

@@ -123,14 +123,24 @@ const IR::Expression *ExecutionState::get(const IR::StateVariable &var) const {
     return expr;
 }
 
-void ExecutionState::markVisited(const IR::Statement *stmt) {
+void ExecutionState::markVisited(const IR::Node *node) {
     // Only track statements, which have a valid source position in the P4 program.
-    if (stmt->getSourceInfo().isValid()) {
-        visitedStatements.emplace(stmt);
+    if (!node->getSourceInfo().isValid()) {
+        return;
     }
+    auto &coverageOptions = TestgenOptions::get().coverageOptions;
+    // Do not add statements, if coverStatements is not toggled.
+    if (node->is<IR::Statement>() && !coverageOptions.coverStatements) {
+        return;
+    }
+    // Do not add table entries, if coverTableEntries is not toggled.
+    if (node->is<IR::Entry>() && !coverageOptions.coverTableEntries) {
+        return;
+    }
+    visitedNodes.emplace(node);
 }
 
-const P4::Coverage::CoverageSet &ExecutionState::getVisited() const { return visitedStatements; }
+const P4::Coverage::CoverageSet &ExecutionState::getVisited() const { return visitedNodes; }
 
 bool ExecutionState::hasTaint(const IR::Expression *expr) const {
     return Taint::hasTaint(env.getInternalMap(), expr);
@@ -593,13 +603,11 @@ const IR::P4Table *ExecutionState::getTableType(const IR::Expression *expression
     return nullptr;
 }
 
-const IR::P4Action *ExecutionState::getActionDecl(const IR::Expression *expression) const {
-    if (const auto *path = expression->to<IR::PathExpression>()) {
-        const auto *declaration = findDecl(path);
-        BUG_CHECK(declaration, "Can't find declaration %1%", path);
-        return declaration->to<IR::P4Action>();
-    }
-    return expression->to<IR::P4Action>();
+const IR::P4Action *ExecutionState::getActionDecl(
+    const IR::MethodCallExpression *actionExpr) const {
+    const auto *actionPath = actionExpr->method->checkedTo<IR::PathExpression>();
+    const auto *declaration = findDecl(actionPath);
+    return declaration->checkedTo<IR::P4Action>();
 }
 
 IR::StateVariable ExecutionState::convertReference(const IR::Expression *ref) {

@@ -28,7 +28,7 @@ void RandomMaxStmtCoverage::run(const Callback &callback) {
             if (executionState.get().isTerminal()) {
                 // We've reached the end of the program. Call back and (if desired) end execution.
                 bool terminate = handleTerminalState(callback, executionState);
-                uint64_t coverage = visitedStatements.size();
+                uint64_t coverage = visitedNodes.size();
                 // We set the coverage saddle track accordingly.
                 if (coverage == coverageSaddleTrack.first) {
                     coverageSaddleTrack =
@@ -97,7 +97,7 @@ void RandomMaxStmtCoverage::run(const Callback &callback) {
                     unexploredBranches.clear();
                     // We set the coverage counter to the saddle point,
                     // so we can combine it with random exploration.
-                    uint64_t coverage = visitedStatements.size();
+                    uint64_t coverage = visitedNodes.size();
                     coverageSaddleTrack = std::make_pair(coverage, saddlePoint);
                     // Get the highest rank in the map in terms of non-
                     // visited statements.
@@ -169,13 +169,13 @@ void RandomMaxStmtCoverage::sortBranchesByCoverage(std::vector<Branch> &branches
         // Calculate coverage for each branch:
         uint64_t lookAheadCoverage = 0;
         for (const auto &stmt : localBranch.potentialStatements) {
-            // We need to take into account the set of visitedStatements.
+            // We need to take into account the set of visitedNodes.
             // We also need to ensure the statement is in allStatements.
-            if (visitedStatements.count(stmt) == 0U && stmt->getSourceInfo().isValid()) {
+            if (visitedNodes.count(stmt) == 0U && stmt->getSourceInfo().isValid()) {
                 lookAheadCoverage++;
             }
         }
-        auto coverage = lookAheadCoverage + visitedStatements.size();
+        auto coverage = lookAheadCoverage + visitedNodes.size();
 
         // If there's no element in bufferUnexploredBranches with the particular coverage
         // we calculate, we'll insert a new key at bufferUnexploredBranches.
