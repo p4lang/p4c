@@ -23,7 +23,7 @@
 #include "backends/p4tools/modules/testgen/core/small_step/abstract_stepper.h"
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
-#include "backends/p4tools/modules/testgen/lib/collect_coverable_statements.h"
+#include "backends/p4tools/modules/testgen/lib/collect_coverable_nodes.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
@@ -235,13 +235,13 @@ bool ExprStepper::preorder(const IR::Mux *mux) {
         auto &nextState = state.clone();
         // Some path selection strategies depend on looking ahead and collecting potential
         // statements. If that is the case, apply the CoverableNodesScanner visitor.
-        P4::Coverage::CoverageSet coveredStmts;
+        P4::Coverage::CoverageSet coveredNodes;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
             auto collector = CoverableNodesScanner(state);
-            collector.updateNodeCoverage(expr, coveredStmts);
+            collector.updateNodeCoverage(expr, coveredNodes);
         }
         nextState.replaceTopBody(Continuation::Return(expr));
-        result->emplace_back(cond, state, nextState, coveredStmts);
+        result->emplace_back(cond, state, nextState, coveredNodes);
     }
 
     return false;
@@ -401,13 +401,13 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
         nextState.replaceTopBody(Continuation::Return(decl));
         // Some path selection strategies depend on looking ahead and collecting potential
         // statements. If that is the case, apply the CoverableNodesScanner visitor.
-        P4::Coverage::CoverageSet coveredStmts;
+        P4::Coverage::CoverageSet coveredNodes;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
             auto collector = CoverableNodesScanner(state);
-            collector.updateNodeCoverage(decl, coveredStmts);
+            collector.updateNodeCoverage(decl, coveredNodes);
         }
         result->emplace_back(new IR::LAnd(missCondition, matchCondition), state, nextState,
-                             coveredStmts);
+                             coveredNodes);
         missCondition = new IR::LAnd(new IR::LNot(matchCondition), missCondition);
     }
 

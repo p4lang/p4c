@@ -1,5 +1,5 @@
-#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_COLLECT_COVERABLE_STATEMENTS_H_
-#define BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_COLLECT_COVERABLE_STATEMENTS_H_
+#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_COLLECT_COVERABLE_NODES_H_
+#define BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_COLLECT_COVERABLE_NODES_H_
 
 #include <set>
 
@@ -10,6 +10,10 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
 namespace P4Tools::P4Testgen {
+
+/// A cache of already computed nodes to avoid superfluous computation.
+using NodeCache = std::map<const IR::Node *, P4::Coverage::CoverageSet>;
+static NodeCache cachedNodes;
 
 /// CoverableNodesScanner is similar to @ref CollectNodes. It collects all the nodes
 /// present in a particular node. However, compared to CollectNodes, it traverses the entire
@@ -34,6 +38,7 @@ class CoverableNodesScanner : public Inspector {
     bool preorder(const IR::AssignmentStatement *stmt) override;
     bool preorder(const IR::MethodCallStatement *stmt) override;
     bool preorder(const IR::ExitStatement *stmt) override;
+    bool preorder(const IR::MethodCallExpression *call) override;
 
  public:
     explicit CoverableNodesScanner(const ExecutionState &state);
@@ -48,4 +53,4 @@ class CoverableNodesScanner : public Inspector {
 
 }  // namespace P4Tools::P4Testgen
 
-#endif /*BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_COLLECT_COVERABLE_STATEMENTS_H_*/
+#endif /*BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_COLLECT_COVERABLE_NODES_H_*/
