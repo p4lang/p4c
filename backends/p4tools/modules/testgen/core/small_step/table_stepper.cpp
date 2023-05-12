@@ -200,7 +200,7 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
         }
     }
 
-    for (const auto &entry : entryVector) {
+    for (const auto *entry : entryVector) {
         const auto *action = entry->getAction();
         const auto *tableAction = action->checkedTo<IR::MethodCallExpression>();
         const auto *actionType = stepper->state.getActionDecl(tableAction);

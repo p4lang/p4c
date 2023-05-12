@@ -397,12 +397,12 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
                 selectExpression);
         }
 
-        nextState.replaceTopBody(Continuation::Return(selectCase->state));
+        const auto *decl = state.findDecl(selectCase->state)->getNode();
+        nextState.replaceTopBody(Continuation::Return(decl));
         // Some path selection strategies depend on looking ahead and collecting potential
         // statements. If that is the case, apply the CoverableNodesScanner visitor.
         P4::Coverage::CoverageSet coveredStmts;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
-            const auto *decl = state.findDecl(selectCase->state)->getNode();
             auto collector = CoverableNodesScanner(state);
             collector.updateNodeCoverage(decl, coveredStmts);
         }
