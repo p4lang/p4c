@@ -47,19 +47,6 @@ if (${Z3_VERSION_STRING} VERSION_GREATER_EQUAL ${Z3_MAX_VERSION_EXCL})
   message(FATAL_ERROR "The Z3 version has to be lower than ${Z3_MAX_VERSION_EXCL} (the latter currently does no work with libGC). Has ${Z3_VERSION_STRING}.")
 endif()
 
-# Inja is needed to produce test templates.
-set(INJA_BUILD_TESTS OFF CACHE BOOL "Build unit tests when BUILD_TESTING is enabled.")
-set(BUILD_BENCHMARK OFF CACHE BOOL "Build benchmark.")
-FetchContent_Declare(
-  inja
-  GIT_REPOSITORY https://github.com/pantor/inja.git
-  GIT_TAG        3741c73ba78babd2ed88f2acf2fcd6dafdb878e8
-  GIT_PROGRESS TRUE
-)
-FetchContent_MakeAvailable(inja)
-include_directories(SYSTEM ${inja_SOURCE_DIR}/include)
-
-
 # Import common definitions.
 include(common)
 

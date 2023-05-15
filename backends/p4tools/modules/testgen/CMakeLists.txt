@@ -4,6 +4,10 @@ include(common)
 
 project(p4testgen)
 
+# Declare common P4Testgen variables.
+set(P4TESTGEN_DIR ${P4C_BINARY_DIR}/testgen)
+set(P4TESTGEN_DRIVER "${CMAKE_CURRENT_BINARY_DIR}/p4testgen")
+
 # Source files for p4testgen.
 set(
   TESTGEN_SOURCES
@@ -26,7 +30,7 @@ set(
   core/symbolic_executor/symbolic_executor.cpp
   core/target.cpp
 
-  lib/collect_coverable_statements.cpp
+  lib/collect_coverable_nodes.cpp
   lib/concolic.cpp
   lib/continuation.cpp
   lib/execution_state.cpp
@@ -59,6 +63,17 @@ set(
   test/z3-solver/asrt_model.cpp
   test/z3-solver/expressions.cpp
 )
+
+# Inja is needed to produce test templates.
+set(INJA_BUILD_TESTS OFF CACHE BOOL "Build unit tests when BUILD_TESTING is enabled.")
+set(BUILD_BENCHMARK OFF CACHE BOOL "Build benchmark.")
+FetchContent_Declare(
+  inja
+  GIT_REPOSITORY https://github.com/pantor/inja.git
+  GIT_TAG        3741c73ba78babd2ed88f2acf2fcd6dafdb878e8
+  GIT_PROGRESS TRUE
+)
+FetchContent_MakeAvailable(inja)
 
 # Testgen libraries.
 set(
@@ -97,15 +112,14 @@ endforeach()
 # Fill the template
 configure_file(register.h.in register.h)
 
+# The library.
 add_p4tools_library(testgen ${TESTGEN_SOURCES})
+add_dependencies(testgen p4tools-common inja)
+target_include_directories(testgen SYSTEM PUBLIC ${inja_SOURCE_DIR}/include)
+target_include_directories(testgen SYSTEM PUBLIC ${inja_SOURCE_DIR}/third_party/include)
 
-target_link_libraries(
-  testgen
-  ${TESTGEN_LIBS}
-)
-
+# The executable.
 add_p4tools_executable(p4testgen main.cpp)
-
 target_link_libraries(
   p4testgen
   testgen
@@ -134,6 +148,7 @@ if(ENABLE_GTESTS)
     testgen-gtest
     PRIVATE testgen
     PRIVATE gtest
+    ${TESTGEN_LIBS}
   )
 
   if(ENABLE_TESTING)

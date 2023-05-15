@@ -6,6 +6,10 @@
 
 namespace P4::Coverage {
 
+bool SourceIdCmp::operator()(const IR::Node *s1, const IR::Node *s2) const {
+    return s1->clone_id < s2->clone_id;
+}
+
 CollectNodes::CollectNodes(CoverageOptions coverageOptions) : coverageOptions(coverageOptions) {}
 
 bool CollectNodes::preorder(const IR::AssignmentStatement *stmt) {
@@ -47,8 +51,10 @@ void printCoverageReport(const CoverageSet &all, const CoverageSet &visited) {
     LOG_FEATURE("coverage", 4, "Not covered program nodes:");
     for (const auto *node : all) {
         if (visited.count(node) == 0) {
-            auto sourceLine = node->getSourceInfo().toPosition().sourceLine;
-            LOG_FEATURE("coverage", 4, '\t' << sourceLine << ": " << *node);
+            const auto &srcInfo = node->getSourceInfo();
+            auto sourceLine = srcInfo.toPosition().sourceLine;
+            LOG_FEATURE("coverage", 4,
+                        '\t' << srcInfo.getSourceFile() << "\\" << sourceLine << ": " << *node);
         }
     }
     // Do not really need to know which program nodes we have covered. Increase the log level here.

@@ -102,6 +102,9 @@ header_offsets:
   {{offset.label}}: {{offset.offset}}
 ## endfor
 
+# The in-order list of parser states which were traversed for this test.
+parser_states: {% for s in parser_states %}{{s}}{% if not loop.is_last %}, {% endif %}{% endfor %}
+
 # Metadata results after this test has completed.
 metadata:
 ## for metadata_field in metadata_fields
@@ -114,6 +117,7 @@ metadata:
 void Metadata::computeTraceData(const TestSpec *testSpec, inja::json &dataJson) {
     dataJson["trace"] = inja::json::array();
     dataJson["offsets"] = inja::json::array();
+    dataJson["parser_states"] = inja::json::array();
     const auto *traces = testSpec->getTraces();
     if (traces != nullptr) {
         for (const auto &trace : *traces) {
@@ -122,6 +126,9 @@ void Metadata::computeTraceData(const TestSpec *testSpec, inja::json &dataJson) 
                 j["label"] = successfulExtract->getExtractedHeader()->toString();
                 j["offset"] = successfulExtract->getOffset();
                 dataJson["offsets"].push_back(j);
+            }
+            if (const auto *parserState = trace.get().to<TraceEvents::ParserState>()) {
+                dataJson["parser_states"].push_back(parserState->getParserState()->getName().name);
             }
             std::stringstream ss;
             ss << trace;
@@ -173,7 +180,8 @@ void Metadata::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
 void Metadata::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testIdx,
                           float currentCoverage) {
     auto incrementedbasePath = basePath;
-    incrementedbasePath.replace_extension("_" + std::to_string(testIdx) + ".yml");
+    incrementedbasePath.concat("_" + std::to_string(testIdx));
+    incrementedbasePath.replace_extension(".yml");
     metadataFile = std::ofstream(incrementedbasePath);
     std::string testCase = getTestCaseTemplate();
     emitTestcase(testSpec, selectedBranches, testIdx, testCase, currentCoverage);

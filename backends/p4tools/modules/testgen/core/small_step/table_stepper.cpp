@@ -27,7 +27,7 @@
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/expr_stepper.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
-#include "backends/p4tools/modules/testgen/lib/collect_coverable_statements.h"
+#include "backends/p4tools/modules/testgen/lib/collect_coverable_nodes.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
@@ -200,7 +200,7 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
         }
     }
 
-    for (const auto &entry : entryVector) {
+    for (const auto *entry : entryVector) {
         const auto *action = entry->getAction();
         const auto *tableAction = action->checkedTo<IR::MethodCallExpression>();
         const auto *actionType = stepper->state.getActionDecl(tableAction);
@@ -245,10 +245,10 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
         nextState.set(getTableReachedVar(table), IR::getBoolLiteral(true));
         // Some path selection strategies depend on looking ahead and collecting potential
         // statements. If that is the case, apply the CoverableNodesScanner visitor.
-        P4::Coverage::CoverageSet coveredStmts;
+        P4::Coverage::CoverageSet coveredNodes;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
             auto collector = CoverableNodesScanner(stepper->state);
-            collector.updateNodeCoverage(actionType, coveredStmts);
+            collector.updateNodeCoverage(actionType, coveredNodes);
         }
 
         // Add some tracing information.
@@ -284,7 +284,7 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
         // The default condition can only be triggered, if we do not hit this match.
         // We encode this constraint in this expression.
         stepper->result->emplace_back(new IR::LAnd(tableMissCondition, hitCondition),
-                                      stepper->state, nextState, coveredStmts);
+                                      stepper->state, nextState, coveredNodes);
         tableMissCondition = new IR::LAnd(new IR::LNot(hitCondition), tableMissCondition);
     }
     return tableMissCondition;
@@ -339,10 +339,10 @@ void TableStepper::setTableDefaultEntries(
             new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
         // Some path selection strategies depend on looking ahead and collecting potential
         // statements. If that is the case, apply the CoverableNodesScanner visitor.
-        P4::Coverage::CoverageSet coveredStmts;
+        P4::Coverage::CoverageSet coveredNodes;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
             auto collector = CoverableNodesScanner(stepper->state);
-            collector.updateNodeCoverage(actionType, coveredStmts);
+            collector.updateNodeCoverage(actionType, coveredNodes);
         }
         nextState.set(getTableHitVar(table), IR::getBoolLiteral(false));
         nextState.set(getTableReachedVar(table), IR::getBoolLiteral(true));
@@ -351,7 +351,7 @@ void TableStepper::setTableDefaultEntries(
         tableStream << "| Overriding default action: " << actionName;
         nextState.add(*new TraceEvents::Generic(tableStream.str()));
         nextState.replaceTopBody(&replacements);
-        stepper->result->emplace_back(std::nullopt, stepper->state, nextState, coveredStmts);
+        stepper->result->emplace_back(std::nullopt, stepper->state, nextState, coveredNodes);
     }
 }
 
@@ -413,10 +413,10 @@ void TableStepper::evalTableControlEntries(
             new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
         // Some path selection strategies depend on looking ahead and collecting potential
         // statements. If that is the case, apply the CoverableNodesScanner visitor.
-        P4::Coverage::CoverageSet coveredStmts;
+        P4::Coverage::CoverageSet coveredNodes;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
             auto collector = CoverableNodesScanner(stepper->state);
-            collector.updateNodeCoverage(actionType, coveredStmts);
+            collector.updateNodeCoverage(actionType, coveredNodes);
         }
 
         nextState.set(getTableHitVar(table), IR::getBoolLiteral(true));
@@ -438,7 +438,7 @@ void TableStepper::evalTableControlEntries(
         tableStream << "| Chosen action: " << actionName;
         nextState.add(*new TraceEvents::Generic(tableStream.str()));
         nextState.replaceTopBody(&replacements);
-        stepper->result->emplace_back(hitCondition, stepper->state, nextState, coveredStmts);
+        stepper->result->emplace_back(hitCondition, stepper->state, nextState, coveredNodes);
     }
 }
 
@@ -594,15 +594,15 @@ void TableStepper::addDefaultAction(std::optional<const IR::Expression *> tableM
     replacements.emplace_back(new IR::MethodCallStatement(Util::SourceInfo(), tableAction));
     // Some path selection strategies depend on looking ahead and collecting potential
     // statements.
-    P4::Coverage::CoverageSet coveredStmts;
+    P4::Coverage::CoverageSet coveredNodes;
     if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
         auto collector = CoverableNodesScanner(stepper->state);
-        collector.updateNodeCoverage(actionType, coveredStmts);
+        collector.updateNodeCoverage(actionType, coveredNodes);
     }
     nextState.set(getTableHitVar(table), IR::getBoolLiteral(false));
     nextState.set(getTableReachedVar(table), IR::getBoolLiteral(true));
     nextState.replaceTopBody(&replacements);
-    stepper->result->emplace_back(tableMissCondition, stepper->state, nextState, coveredStmts);
+    stepper->result->emplace_back(tableMissCondition, stepper->state, nextState, coveredNodes);
 }
 
 void TableStepper::checkTargetProperties(

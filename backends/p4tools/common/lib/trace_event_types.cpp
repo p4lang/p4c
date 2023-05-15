@@ -299,4 +299,6 @@ ParserState::ParserState(const IR::ParserState *state) : state(state) {}
 
 void ParserState::print(std::ostream &os) const { os << "[State] " << state->controlPlaneName(); }
 
+const IR::ParserState *ParserState::getParserState() const { return state; }
+
 }  // namespace P4Tools::TraceEvents

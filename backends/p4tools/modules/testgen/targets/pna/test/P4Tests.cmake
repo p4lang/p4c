@@ -29,7 +29,6 @@ set(P4C_V1_TEST_SUITES_P416 ${v1tests} ${pna_tests})
 option(P4TOOLS_TESTGEN_PNA_TEST_METADATA "Run tests on the Metadata test back end" ON)
 # Test settings.
 set(EXTRA_OPTS "--strict --print-traces --seed 1000 --max-tests 10 ")
-set(P4TESTGEN_DRIVER "${P4TOOLS_BINARY_DIR}/p4testgen")
 
 # Metadata
 if(P4TOOLS_TESTGEN_PNA_TEST_METADATA)

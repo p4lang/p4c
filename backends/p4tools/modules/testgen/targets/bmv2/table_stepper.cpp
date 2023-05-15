@@ -22,7 +22,7 @@
 
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
-#include "backends/p4tools/modules/testgen/lib/collect_coverable_statements.h"
+#include "backends/p4tools/modules/testgen/lib/collect_coverable_nodes.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
@@ -154,10 +154,10 @@ void Bmv2V1ModelTableStepper::evalTableActionProfile(
             new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
         // Some path selection strategies depend on looking ahead and collecting potential
         // statements. If that is the case, apply the CoverableNodesScanner visitor.
-        P4::Coverage::CoverageSet coveredStmts;
+        P4::Coverage::CoverageSet coveredNodes;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
             auto collector = CoverableNodesScanner(*state);
-            collector.updateNodeCoverage(actionType, coveredStmts);
+            collector.updateNodeCoverage(actionType, coveredNodes);
         }
 
         nextState.set(getTableHitVar(table), IR::getBoolLiteral(true));
@@ -167,7 +167,7 @@ void Bmv2V1ModelTableStepper::evalTableActionProfile(
         tableStream << " Chosen action: " << actionName;
         nextState.add(*new TraceEvents::Generic(tableStream.str()));
         nextState.replaceTopBody(&replacements);
-        getResult()->emplace_back(hitCondition, *state, nextState, coveredStmts);
+        getResult()->emplace_back(hitCondition, *state, nextState, coveredNodes);
     }
 }
 
@@ -248,10 +248,10 @@ void Bmv2V1ModelTableStepper::evalTableActionSelector(
             new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
         // Some path selection strategies depend on looking ahead and collecting potential
         // statements. If that is the case, apply the CoverableNodesScanner visitor.
-        P4::Coverage::CoverageSet coveredStmts;
+        P4::Coverage::CoverageSet coveredNodes;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
             auto collector = CoverableNodesScanner(*state);
-            collector.updateNodeCoverage(actionType, coveredStmts);
+            collector.updateNodeCoverage(actionType, coveredNodes);
         }
 
         nextState.set(getTableHitVar(table), IR::getBoolLiteral(true));
@@ -261,7 +261,7 @@ void Bmv2V1ModelTableStepper::evalTableActionSelector(
         tableStream << " Chosen action: " << actionName;
         nextState.add(*new TraceEvents::Generic(tableStream.str()));
         nextState.replaceTopBody(&replacements);
-        getResult()->emplace_back(hitCondition, *state, nextState, coveredStmts);
+        getResult()->emplace_back(hitCondition, *state, nextState, coveredNodes);
     }
 }
 

@@ -18,9 +18,7 @@ namespace P4::Coverage {
 
 /// Utility function to compare IR nodes in a set. We use their source info.
 struct SourceIdCmp {
-    bool operator()(const IR::Node *s1, const IR::Node *s2) const {
-        return s1->srcInfo < s2->srcInfo;
-    }
+    bool operator()(const IR::Node *s1, const IR::Node *s2) const;
 };
 
 /// Specifies, which IR nodes to track with this particular visitor.

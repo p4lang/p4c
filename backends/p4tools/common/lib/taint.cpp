@@ -167,11 +167,11 @@ class TaintPropagator : public Transform {
     const IR::Node *postorder(IR::TaintExpression *expr) override { return expr; }
 
     const IR::Node *postorder(IR::SymbolicVariable *var) override {
-        return new IR::Constant(var->type, IR::getMaxBvVal(var->type));
+        return IR::getMaxValueConstant(var->type);
     }
 
     const IR::Node *postorder(IR::ConcolicVariable *var) override {
-        return new IR::Constant(var->type, IR::getMaxBvVal(var->type));
+        return IR::getMaxValueConstant(var->type);
     }
     const IR::Node *postorder(IR::Operation_Unary *unary_op) override { return unary_op->expr; }
 
@@ -228,7 +228,7 @@ class MaskBuilder : public Transform {
  private:
     const IR::Node *preorder(IR::Member *member) override {
         // Non-tainted members just return the max value, which corresponds to a mask of all zeroes.
-        return IR::getConstant(member->type, IR::getMaxBvVal(member->type));
+        return IR::getMaxValueConstant(member->type);
     }
 
     const IR::Node *preorder(IR::PathExpression *path) override {
@@ -244,7 +244,7 @@ class MaskBuilder : public Transform {
 
     const IR::Node *preorder(IR::Literal *lit) override {
         // Fill out a literal with zeroes.
-        const auto *maxConst = IR::getConstant(lit->type, IR::getMaxBvVal(lit->type));
+        const auto *maxConst = IR::getMaxValueConstant(lit->type);
         // If the literal would have been zero anyway, just return it.
         if (lit->equiv(*maxConst)) {
             return lit;

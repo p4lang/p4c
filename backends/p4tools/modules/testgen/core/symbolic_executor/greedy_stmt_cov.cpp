@@ -121,7 +121,7 @@ void GreedyStmtSelection::run(const Callback &callback) {
         Util::ScopedTimer chooseBranchtimer("branch_selection");
         auto branch = popPotentialBranch(getVisitedNodes(), potentialBranches);
         if (branch.has_value()) {
-            executionState = branch->nextState;
+            executionState = branch.value().nextState;
             continue;
         }
         // We did not find a single branch that could cover new state.

@@ -30,7 +30,7 @@
 #include "backends/p4tools/modules/testgen/core/small_step/abstract_stepper.h"
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
-#include "backends/p4tools/modules/testgen/lib/collect_coverable_statements.h"
+#include "backends/p4tools/modules/testgen/lib/collect_coverable_nodes.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
@@ -297,12 +297,12 @@ bool CmdStepper::preorder(const IR::IfStatement *ifStatement) {
 
         // Some path selection strategies depend on looking ahead and collecting potential
         // statements. If that is the case, apply the CoverableNodesScanner visitor.
-        P4::Coverage::CoverageSet coveredStmts;
+        P4::Coverage::CoverageSet coveredNodes;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
             auto collector = CoverableNodesScanner(state);
-            collector.updateNodeCoverage(ifStatement->ifTrue, coveredStmts);
+            collector.updateNodeCoverage(ifStatement->ifTrue, coveredNodes);
         }
-        result->emplace_back(ifStatement->condition, state, nextState, coveredStmts);
+        result->emplace_back(ifStatement->condition, state, nextState, coveredNodes);
     }
 
     // Handle case for else body.
@@ -315,12 +315,12 @@ bool CmdStepper::preorder(const IR::IfStatement *ifStatement) {
                                                                    : ifStatement->ifFalse);
         // Some path selection strategies depend on looking ahead and collecting potential
         // statements. If that is the case, apply the CoverableNodesScanner visitor.
-        P4::Coverage::CoverageSet coveredStmts;
+        P4::Coverage::CoverageSet coveredNodes;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
             auto collector = CoverableNodesScanner(state);
-            collector.updateNodeCoverage(ifStatement->ifFalse, coveredStmts);
+            collector.updateNodeCoverage(ifStatement->ifFalse, coveredNodes);
         }
-        result->emplace_back(negation, state, nextState, coveredStmts);
+        result->emplace_back(negation, state, nextState, coveredNodes);
     }
 
     return false;
@@ -568,7 +568,7 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
     std::vector<Continuation::Command> cmds;
     // If the switch expression is tainted, we can not predict which case will be chosen. We taint
     // the program counter and execute all of the statements.
-    P4::Coverage::CoverageSet coveredStmts;
+    P4::Coverage::CoverageSet coveredNodes;
     if (state.hasTaint(switchStatement->expression)) {
         auto currentTaint = state.getProperty<bool>("inUndefinedState");
         cmds.emplace_back(Continuation::PropertyUpdate("inUndefinedState", true));
@@ -586,7 +586,7 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
                 // Some path selection strategies depend on looking ahead and collecting potential
                 // statements. If that is the case, apply the CoverableNodesScanner visitor.
                 auto collector = CoverableNodesScanner(state);
-                collector.updateNodeCoverage(switchCase->statement, coveredStmts);
+                collector.updateNodeCoverage(switchCase->statement, coveredNodes);
             }
             // We have either matched already, or still need to match.
             hasMatched = hasMatched || switchStatement->expression->equiv(*switchCase->label);
@@ -611,7 +611,7 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
     }
     BUG_CHECK(!cmds.empty(), "Switch statements should have at least one case (default).");
     nextState.replaceTopBody(&cmds);
-    result->emplace_back(std::nullopt, state, nextState, coveredStmts);
+    result->emplace_back(std::nullopt, state, nextState, coveredNodes);
 
     return false;
 }
