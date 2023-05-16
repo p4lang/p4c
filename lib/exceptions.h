@@ -18,9 +18,10 @@ limitations under the License.
 
 #ifndef _LIB_EXCEPTIONS_H_
 #define _LIB_EXCEPTIONS_H_
-
 #include <unistd.h>
 
+#include <experimental/source_location>
+// Exception is after experimental.
 #include <exception>
 
 #include "lib/error_helper.h"
@@ -103,7 +104,8 @@ class CompilerBug final : public P4CExceptionBase {
 class CompilerUnimplemented final : public P4CExceptionBase {
  public:
     template <typename... T>
-    CompilerUnimplemented(const char *format, T... args) : P4CExceptionBase(format, args...) {
+    explicit CompilerUnimplemented(const char *format, T... args)
+        : P4CExceptionBase(format, args...) {
         // Do not add colors when redirecting to stderr
         message = cstring(cerr_colorize(ANSI_BLUE)) + "Not yet implemented" + cerr_clear_colors() +
                   ":\n" + message;
@@ -123,28 +125,57 @@ class CompilerUnimplemented final : public P4CExceptionBase {
 class CompilationError : public P4CExceptionBase {
  public:
     template <typename... T>
-    CompilationError(const char *format, T... args) : P4CExceptionBase(format, args...) {}
+    explicit CompilationError(const char *format, T... args) : P4CExceptionBase(format, args...) {}
 };
-
-#define BUG(...)                                                  \
-    do {                                                          \
-        throw Util::CompilerBug(__LINE__, __FILE__, __VA_ARGS__); \
-    } while (0)
-#define BUG_CHECK(e, ...)           \
-    do {                            \
-        if (!(e)) BUG(__VA_ARGS__); \
-    } while (0)
-#define P4C_UNIMPLEMENTED(...)                                              \
-    do {                                                                    \
-        throw Util::CompilerUnimplemented(__LINE__, __FILE__, __VA_ARGS__); \
-    } while (0)
 
 }  // namespace Util
 
+/// A helper class to store the source location for templates with variadic arguments.
+/// Source: https://stackoverflow.com/a/66402319/3215972
+struct FormatWithLocation {
+    /// Ignore explicit warnings here, we need an implicit conversion.
+    // NOLINTNEXTLINE
+    FormatWithLocation(const char *formatString, const std::experimental::source_location &l =
+                                                     std::experimental::source_location::current())
+        : formatString(formatString), loc(l) {}
+    /// The string that is to be formatted.
+    const char *getFormatString() { return formatString; }
+
+    /// Return the line stored in the source location.
+    auto getSourceLocationLine() { return loc.line(); }
+
+    /// Return the file name stored in the source location.
+    auto getSourceLocationFileName() { return loc.file_name(); }
+
+ private:
+    const char *formatString;
+    std::experimental::source_location loc;
+};
+
+template <typename... Args>
+[[noreturn]] inline void BUG(FormatWithLocation fmt, Args &&...args) {
+    throw Util::CompilerBug(fmt.getSourceLocationLine(), fmt.getSourceLocationFileName(),
+                            fmt.getFormatString(), std::forward<Args>(args)...);
+}
+
+template <typename... Args>
+inline void BUG_CHECK(bool e, FormatWithLocation fmt, Args &&...args) {
+    if (!e) {
+        throw Util::CompilerBug(fmt.getSourceLocationLine(), fmt.getSourceLocationFileName(),
+                                fmt.getFormatString(), std::forward<Args>(args)...);
+    }
+}
+
+template <typename... Args>
+[[noreturn]] inline void P4C_UNIMPLEMENTED(FormatWithLocation fmt, Args &&...args) {
+    throw Util::CompilerBug(fmt.getSourceLocationLine(), fmt.getSourceLocationFileName(),
+                            fmt.getFormatString(), std::forward<Args>(args)...);
+}
+
 /// Report an error and exit
-#define FATAL_ERROR(...)                           \
-    do {                                           \
-        throw Util::CompilationError(__VA_ARGS__); \
-    } while (0)
+template <class... Args>
+[[noreturn]] inline auto FATAL_ERROR(Args &&...args) {
+    throw Util::CompilationError(std::forward<Args>(args)...);
+}
 
 #endif /* _LIB_EXCEPTIONS_H_ */
