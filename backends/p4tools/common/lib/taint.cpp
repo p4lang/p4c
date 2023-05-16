@@ -29,10 +29,20 @@ static bitvec computeTaintedBits(const SymbolicMapType &varMap, const IR::Expres
     CHECK_NULL(expr);
     // TODO: Replace these two with IR::StateVariable.
     if (const auto *member = expr->to<IR::Member>()) {
-        expr = varMap.at(member);
+        auto it = varMap.find(member);
+        if (it != varMap.end()) {
+            expr = it->second;
+        } else {
+            BUG("Unable to find var %s in the variable map.", member);
+        }
     }
     if (const auto *path = expr->to<IR::PathExpression>()) {
-        expr = varMap.at(path);
+        auto it = varMap.find(path);
+        if (it != varMap.end()) {
+            expr = it->second;
+        } else {
+            BUG("Unable to find var %s in the variable map.", path);
+        }
     }
     if (expr->is<IR::SymbolicVariable>()) {
         return {};
@@ -104,10 +114,18 @@ bool Taint::hasTaint(const SymbolicMapType &varMap, const IR::Expression *expr) 
     }
     // TODO: Replace these two with IR::StateVariable.
     if (const auto *member = expr->to<IR::Member>()) {
-        return hasTaint(varMap, varMap.at(member));
+        auto it = varMap.find(member);
+        if (it != varMap.end()) {
+            return hasTaint(varMap, it->second);
+        }
+        BUG("Unable to find var %s in the variable map.", member);
     }
     if (const auto *path = expr->to<IR::PathExpression>()) {
-        return hasTaint(varMap, varMap.at(path));
+        auto it = varMap.find(path);
+        if (it != varMap.end()) {
+            return hasTaint(varMap, it->second);
+        }
+        BUG("Unable to find var %s in the variable map.", path);
     }
     if (const auto *structExpr = expr->to<IR::StructExpression>()) {
         for (const auto *subExpr : structExpr->components) {
