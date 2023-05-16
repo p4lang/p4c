@@ -1,4 +1,4 @@
-# CMake file for p4testgen.
+# CMake file for P4Testgen.
 
 include(common)
 

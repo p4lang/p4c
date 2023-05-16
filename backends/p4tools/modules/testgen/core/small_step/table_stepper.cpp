@@ -556,25 +556,6 @@ bool TableStepper::resolveTableKeys() {
     return false;
 }
 
-std::vector<const IR::ActionListElement *> TableStepper::buildTableActionList() {
-    std::vector<const IR::ActionListElement *> tableActionList;
-    const auto *actionList = table->getActionList();
-    if (actionList == nullptr) {
-        return tableActionList;
-    }
-    for (size_t idx = 0; idx < actionList->size(); idx++) {
-        const auto *action = actionList->actionList.at(idx);
-        if (action->getAnnotation("defaultonly") != nullptr) {
-            continue;
-        }
-        // Check some properties of the list.
-        CHECK_NULL(action->expression);
-        action->expression->checkedTo<IR::MethodCallExpression>();
-        tableActionList.emplace_back(action);
-    }
-    return tableActionList;
-}
-
 void TableStepper::addDefaultAction(std::optional<const IR::Expression *> tableMissCondition) {
     const auto *defaultAction = table->getDefaultAction();
     const auto *tableAction = defaultAction->checkedTo<IR::MethodCallExpression>();
@@ -628,13 +609,13 @@ void TableStepper::evalTargetTable(
 
 bool TableStepper::eval() {
     // Set the appropriate properties when the table is immutable, meaning it has constant entries.
-    TableUtils::checkTableImmutability(table, properties);
+    TableUtils::checkTableImmutability(*table, properties);
     // Resolve any non-symbolic table keys. The function returns true when a key needs replacement.
     if (resolveTableKeys()) {
         return false;
     }
     // Gather the list of executable actions. This does not include default actions, for example.
-    const auto tableActionList = buildTableActionList();
+    const auto tableActionList = TableUtils::buildTableActionList(*table);
 
     checkTargetProperties(tableActionList);
 

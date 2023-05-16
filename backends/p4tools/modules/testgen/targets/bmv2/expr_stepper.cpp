@@ -275,8 +275,7 @@ void Bmv2V1ModelExprStepper::processRecirculate(const ExecutionState &state,
         resetPreservingFieldList(recState, paramPath, recirculateIndex);
     }
 
-    // Update the metadata variable to the correct instance type as provided by
-    // recirculation.
+    // Update the metadata variable to the correct instance type as provided by recirculation.
     const auto *bitType = IR::getBitType(32);
     const auto *instanceTypeVar =
         new IR::Member(bitType, new IR::PathExpression("*standard_metadata"), "instance_type");
@@ -371,7 +370,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              // Use an assignment to set egress_spec to true.
              // This variable will be processed in the deparser.
              const auto *portVar = new IR::Member(nineBitType, metadataLabel, "egress_spec");
-             nextState.set(portVar, IR::getConstant(nineBitType, 511));
+             nextState.set(portVar, IR::getConstant(nineBitType, BMv2Constants::DROP_PORT));
              nextState.add(*new TraceEvents::Generic("mark_to_drop executed."));
              nextState.popBody();
              result->emplace_back(nextState);
