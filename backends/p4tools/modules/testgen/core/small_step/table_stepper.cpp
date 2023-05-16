@@ -177,8 +177,8 @@ void TableStepper::setTableAction(ExecutionState &nextState,
 const IR::Expression *TableStepper::evalTableConstEntries() {
     const IR::Expression *tableMissCondition = IR::getBoolLiteral(true);
 
-    const auto *keys = table->getKey();
-    BUG_CHECK(keys != nullptr, "An empty key list should have been handled earlier.");
+    const auto *key = table->getKey();
+    BUG_CHECK(key != nullptr, "An empty key list should have been handled earlier.");
 
     const auto *entries = table->getEntries();
     // Sometimes, there are no entries. Just return.
@@ -188,9 +188,9 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
 
     auto entryVector = entries->entries;
 
-    // Sort entries if one of the keys contains an LPM match.
-    for (size_t idx = 0; idx < keys->keyElements.size(); ++idx) {
-        const auto *keyElement = keys->keyElements.at(idx);
+    // Sort entries if one of the key contains an LPM match.
+    for (size_t idx = 0; idx < key->keyElements.size(); ++idx) {
+        const auto *keyElement = key->keyElements.at(idx);
         if (keyElement->matchType->path->toString() == P4Constants::MATCH_KIND_LPM) {
             std::sort(entryVector.begin(), entryVector.end(), [idx](auto &&PH1, auto &&PH2) {
                 return TableUtils::compareLPMEntries(std::forward<decltype(PH1)>(PH1),
@@ -210,33 +210,7 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
         // We also will need it for control plane table entries.
         setTableAction(nextState, tableAction);
         // Compute the table key for a constant entry
-        BUG_CHECK(keys->keyElements.size() == entry->keys->size(),
-                  "The entry key list and key match list must be equal in size.");
-        const IR::Expression *hitCondition = IR::getBoolLiteral(true);
-        for (size_t idx = 0; idx < keys->keyElements.size(); ++idx) {
-            const auto *key = keys->keyElements.at(idx);
-            const auto *entryKey = entry->keys->components.at(idx);
-            BUG_CHECK(key->expression, "Null expression %1% for matching in the table %2%", entry,
-                      table);
-            // These always match, so do not even consider them in the equation.
-            if (entryKey->is<IR::DefaultExpression>()) {
-                continue;
-            }
-            const IR::Expression *keyExpr = key->expression;
-            if (const auto *rangeExpr = entryKey->to<IR::Range>()) {
-                const auto *minKey = rangeExpr->left;
-                const auto *maxKey = rangeExpr->right;
-                hitCondition = new IR::LAnd(
-                    hitCondition,
-                    new IR::LAnd(new IR::Leq(minKey, keyExpr), new IR::Leq(keyExpr, maxKey)));
-            } else if (const auto *maskExpr = entryKey->to<IR::Mask>()) {
-                hitCondition = new IR::LAnd(
-                    hitCondition, new IR::Equ(new IR::BAnd(keyExpr, maskExpr->right),
-                                              new IR::BAnd(maskExpr->left, maskExpr->right)));
-            } else {
-                hitCondition = new IR::LAnd(hitCondition, new IR::Equ(keyExpr, entryKey));
-            }
-        }
+        const auto *hitCondition = TableUtils::computeEntryMatch(*table, *entry, *key);
 
         // Update all the tracking variables for tables.
         std::vector<Continuation::Command> replacements;
@@ -255,7 +229,7 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
         std::stringstream tableStream;
         tableStream << "Constant Table Branch: " << properties.tableName;
         bool isFirstKey = true;
-        const auto &keyElements = keys->keyElements;
+        const auto &keyElements = key->keyElements;
 
         for (const auto *keyElement : keyElements) {
             if (isFirstKey) {
@@ -357,8 +331,8 @@ void TableStepper::setTableDefaultEntries(
 
 void TableStepper::evalTableControlEntries(
     const std::vector<const IR::ActionListElement *> &tableActionList) {
-    const auto *keys = table->getKey();
-    BUG_CHECK(keys != nullptr, "An empty key list should have been handled earlier.");
+    const auto *key = table->getKey();
+    BUG_CHECK(key != nullptr, "An empty key list should have been handled earlier.");
 
     for (const auto *action : tableActionList) {
         // Grab the path from the method call.
@@ -424,7 +398,7 @@ void TableStepper::evalTableControlEntries(
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
         bool isFirstKey = true;
-        const auto &keyElements = keys->keyElements;
+        const auto &keyElements = key->keyElements;
 
         for (const auto *keyElement : keyElements) {
             if (isFirstKey) {
@@ -465,10 +439,7 @@ void TableStepper::evalTaintedTable() {
 
     for (const auto &entry : entryVector) {
         const auto *action = entry->getAction();
-        BUG_CHECK(action && action->is<IR::MethodCallExpression>(),
-                  "Unknown format of an action '%1%' in the table '%2%'", action, table);
-        const auto *tableAction = action->to<IR::MethodCallExpression>();
-        BUG_CHECK(tableAction, "Invalid action '%1%' in the table '%2%'", action, table);
+        const auto *tableAction = action->checkedTo<IR::MethodCallExpression>();
         replacements.emplace_back(new IR::MethodCallStatement(Util::SourceInfo(), tableAction));
     }
     // Since we do not know which table action was selected because of the tainted key, we also
@@ -564,8 +535,7 @@ void TableStepper::addDefaultAction(std::optional<const IR::Expression *> tableM
     // We need to set the table action in the state for eventual switch action_run hits.
     // We also will need it for control plane table entries.
     setTableAction(nextState, tableAction);
-    const auto *actionPath = tableAction->method->to<IR::PathExpression>();
-    BUG_CHECK(actionPath, "Unknown formation of action '%1%' in table %2%", tableAction, table);
+    const auto *actionPath = tableAction->method->checkedTo<IR::PathExpression>();
 
     std::vector<Continuation::Command> replacements;
     std::stringstream tableStream;

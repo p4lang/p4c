@@ -1,5 +1,7 @@
 #include "backends/p4tools/common/lib/table_utils.h"
 
+#include "ir/irutils.h"
+
 namespace P4Tools::TableUtils {
 
 void checkTableImmutability(const IR::P4Table &table, TableProperties &properties) {
@@ -74,6 +76,48 @@ bool compareLPMEntries(const IR::Entry *leftIn, const IR::Entry *rightIn, size_t
 
     BUG("Unhandled sort elements type: left: %1% - %2% \n right: %3% - %4% ", left,
         left->node_type_name(), right, right->node_type_name());
+}
+
+const IR::PathExpression *getDefaultActionName(const IR::P4Table &table) {
+    const auto *defaultAction = table.getDefaultAction();
+    const auto *tableAction = defaultAction->checkedTo<IR::MethodCallExpression>();
+    return tableAction->method->checkedTo<IR::PathExpression>();
+}
+
+const IR::Expression *computeEntryMatch(const IR::P4Table &table, const IR::Entry &entry,
+                                        const IR::Key &key) {
+    auto numKeys = key.keyElements.size();
+    // If there are no entries or keys, there is nothing we can match against.
+    if (numKeys == 0) {
+        return IR::getBoolLiteral(false);
+    }
+    BUG_CHECK(key.keyElements.size() == entry.keys->size(),
+              "The entry key list and key match list must be equal in size.");
+    const IR::Expression *entryMatchCondition = IR::getBoolLiteral(true);
+    for (size_t idx = 0; idx < numKeys; ++idx) {
+        const auto *keyElement = key.keyElements.at(idx);
+        const auto *keyExpr = keyElement->expression;
+        BUG_CHECK(keyExpr != nullptr, "Entry %1% in table %2% is null", entry, table);
+        const auto *entryKey = entry.keys->components.at(idx);
+        // DefaultExpressions always match, so do not even consider them in the equation.
+        if (entryKey->is<IR::DefaultExpression>()) {
+            continue;
+        }
+        if (const auto *rangeExpr = entryKey->to<IR::Range>()) {
+            const auto *minKey = rangeExpr->left;
+            const auto *maxKey = rangeExpr->right;
+            entryMatchCondition = new IR::LAnd(
+                entryMatchCondition,
+                new IR::LAnd(new IR::Leq(minKey, keyExpr), new IR::Leq(keyExpr, maxKey)));
+        } else if (const auto *maskExpr = entryKey->to<IR::Mask>()) {
+            entryMatchCondition = new IR::LAnd(
+                entryMatchCondition, new IR::Equ(new IR::BAnd(keyExpr, maskExpr->right),
+                                                 new IR::BAnd(maskExpr->left, maskExpr->right)));
+        } else {
+            entryMatchCondition = new IR::LAnd(entryMatchCondition, new IR::Equ(keyExpr, entryKey));
+        }
+    }
+    return entryMatchCondition;
 }
 
 }  // namespace P4Tools::TableUtils
