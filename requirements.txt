@@ -1,6 +1,5 @@
 ###### Python3 dependencies with version specifiers ######
 # Install with pip3 install --user -r requirements.txt
-ipaddr==2.2.0
 pyroute2==0.7.3
 ply==3.11
 ptf==0.9.3
