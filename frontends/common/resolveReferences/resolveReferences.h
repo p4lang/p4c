@@ -53,6 +53,7 @@ class ResolutionContext : virtual public Visitor, public DeclarationLookup {
     /// We are resolving a method call.  Find the arguments from the context.
     const IR::Vector<IR::Argument> *methodArguments(cstring name) const;
 
+ public:
     /// Resolve references for @p name, restricted to @p type declarations.
     const std::vector<const IR::IDeclaration *> *resolve(IR::ID name, ResolutionType type) const;
 
@@ -60,7 +61,9 @@ class ResolutionContext : virtual public Visitor, public DeclarationLookup {
     const IR::IDeclaration *resolveUnique(IR::ID name, ResolutionType type,
                                           const IR::INamespace * = nullptr) const;
 
-    const IR::IDeclaration *resolvePath(const IR::Path *path, bool isType) const;
+    /// Resolve @p path; if @p isType is `true` then resolution will
+    /// only return type nodes.
+    virtual const IR::IDeclaration *resolvePath(const IR::Path *path, bool isType) const;
 
     // Resolve a refrence to a type @p type.
     const IR::Type *resolveType(const IR::Type *type) const;
@@ -86,7 +89,7 @@ class ResolveReferences : public Inspector, private ResolutionContext {
  private:
     /// Resolve @p path; if @p isType is `true` then resolution will
     /// only return type nodes.
-    void resolvePath(const IR::Path *path, bool isType) const;
+    const IR::IDeclaration *resolvePath(const IR::Path *path, bool isType) const override;
 
  public:
     explicit ResolveReferences(/* out */ P4::ReferenceMap *refMap, bool checkShadow = false);
