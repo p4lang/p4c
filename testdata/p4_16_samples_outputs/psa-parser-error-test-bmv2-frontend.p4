@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <psa.p4>
+#include <bmv2/psa.p4>
 
 typedef bit<48> EthernetAddress;
 header ethernet_t {
@@ -78,29 +78,36 @@ parser IngressParserImpl(packet_in pkt, out headers hdr, inout metadata user_met
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @noWarnUnused @name(".send_to_port") action send_to_port(inout psa_ingress_output_metadata_t meta_1, in PortId_t egress_port_1) {
-        meta_1.drop = false;
-        meta_1.multicast_group = (MulticastGroup_t)32w0;
-        meta_1.egress_port = egress_port_1;
+    @name("ingress.tmp") bit<16> tmp;
+    @name("ingress.meta") psa_ingress_output_metadata_t meta_0;
+    @name("ingress.egress_port") PortId_t egress_port_0;
+    @noWarn("unused") @name(".send_to_port") action send_to_port_0() {
+        meta_0 = ostd;
+        egress_port_0 = (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr;
+        meta_0.drop = false;
+        meta_0.multicast_group = (MulticastGroup_t)32w0;
+        meta_0.egress_port = egress_port_0;
+        ostd = meta_0;
     }
     apply {
-        send_to_port(ostd, (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr);
-        hdr.ethernet.dstAddr[47:32] = 16w8;
+        send_to_port_0();
+        tmp = 16w8;
         if (istd.parser_error == error.NoError) {
-            hdr.ethernet.dstAddr[47:32] = 16w1;
+            tmp = 16w1;
         } else if (istd.parser_error == error.PacketTooShort) {
-            hdr.ethernet.dstAddr[47:32] = 16w2;
+            tmp = 16w2;
         } else if (istd.parser_error == error.NoMatch) {
-            hdr.ethernet.dstAddr[47:32] = 16w3;
+            tmp = 16w3;
         } else if (istd.parser_error == error.StackOutOfBounds) {
-            hdr.ethernet.dstAddr[47:32] = 16w4;
+            tmp = 16w4;
         } else if (istd.parser_error == error.HeaderTooShort) {
-            hdr.ethernet.dstAddr[47:32] = 16w5;
+            tmp = 16w5;
         } else if (istd.parser_error == error.ParserTimeout) {
-            hdr.ethernet.dstAddr[47:32] = 16w6;
+            tmp = 16w6;
         } else if (istd.parser_error == error.ParserInvalidArgument) {
-            hdr.ethernet.dstAddr[47:32] = 16w7;
+            tmp = 16w7;
         }
+        hdr.ethernet.dstAddr[47:32] = tmp;
         hdr.ethernet.dstAddr[31:0] = (bit<32>)(TimestampUint_t)istd.ingress_timestamp;
     }
 }
@@ -125,23 +132,25 @@ parser EgressParserImpl(packet_in pkt, out headers hdr, inout metadata user_meta
 }
 
 control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
+    @name("egress.tmp_0") bit<16> tmp_0;
     apply {
-        hdr.ethernet.srcAddr[47:32] = 16w8;
+        tmp_0 = 16w8;
         if (istd.parser_error == error.NoError) {
-            hdr.ethernet.srcAddr[47:32] = 16w1;
+            tmp_0 = 16w1;
         } else if (istd.parser_error == error.PacketTooShort) {
-            hdr.ethernet.srcAddr[47:32] = 16w2;
+            tmp_0 = 16w2;
         } else if (istd.parser_error == error.NoMatch) {
-            hdr.ethernet.srcAddr[47:32] = 16w3;
+            tmp_0 = 16w3;
         } else if (istd.parser_error == error.StackOutOfBounds) {
-            hdr.ethernet.srcAddr[47:32] = 16w4;
+            tmp_0 = 16w4;
         } else if (istd.parser_error == error.HeaderTooShort) {
-            hdr.ethernet.srcAddr[47:32] = 16w5;
+            tmp_0 = 16w5;
         } else if (istd.parser_error == error.ParserTimeout) {
-            hdr.ethernet.srcAddr[47:32] = 16w6;
+            tmp_0 = 16w6;
         } else if (istd.parser_error == error.ParserInvalidArgument) {
-            hdr.ethernet.srcAddr[47:32] = 16w7;
+            tmp_0 = 16w7;
         }
+        hdr.ethernet.srcAddr[47:32] = tmp_0;
         hdr.ethernet.srcAddr[31:0] = (bit<32>)(TimestampUint_t)istd.egress_timestamp;
     }
 }
@@ -163,8 +172,5 @@ control EgressDeparserImpl(packet_out pkt, out empty_metadata_t clone_e2e_meta, 
 }
 
 IngressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-
 EgressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-
 PSA_Switch<headers, metadata, headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

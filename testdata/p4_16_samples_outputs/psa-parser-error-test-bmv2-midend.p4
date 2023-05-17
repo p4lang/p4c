@@ -1,11 +1,10 @@
 #include <core.p4>
-#include <psa.p4>
+#include <bmv2/psa.p4>
 
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv4_t {
@@ -77,117 +76,119 @@ parser IngressParserImpl(packet_in pkt, out headers hdr, inout metadata user_met
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @noWarnUnused @name(".send_to_port") action send_to_port() {
+    @name("ingress.tmp") bit<16> tmp;
+    @noWarn("unused") @name(".send_to_port") action send_to_port_0() {
         ostd.drop = false;
         ostd.multicast_group = 32w0;
-        ostd.egress_port = (PortIdUint_t)hdr.ethernet.dstAddr;
+        ostd.egress_port = (bit<32>)hdr.ethernet.dstAddr;
     }
-    @hidden action psaparsererrortestbmv2l86() {
-        hdr.ethernet.dstAddr[47:32] = 16w1;
+    @hidden action psaparsererrortestbmv2l87() {
+        tmp = 16w1;
     }
-    @hidden action psaparsererrortestbmv2l88() {
-        hdr.ethernet.dstAddr[47:32] = 16w2;
+    @hidden action psaparsererrortestbmv2l89() {
+        tmp = 16w2;
     }
-    @hidden action psaparsererrortestbmv2l90() {
-        hdr.ethernet.dstAddr[47:32] = 16w3;
+    @hidden action psaparsererrortestbmv2l91() {
+        tmp = 16w3;
     }
-    @hidden action psaparsererrortestbmv2l92() {
-        hdr.ethernet.dstAddr[47:32] = 16w4;
+    @hidden action psaparsererrortestbmv2l93() {
+        tmp = 16w4;
     }
-    @hidden action psaparsererrortestbmv2l94() {
-        hdr.ethernet.dstAddr[47:32] = 16w5;
+    @hidden action psaparsererrortestbmv2l95() {
+        tmp = 16w5;
     }
-    @hidden action psaparsererrortestbmv2l96() {
-        hdr.ethernet.dstAddr[47:32] = 16w6;
+    @hidden action psaparsererrortestbmv2l97() {
+        tmp = 16w6;
     }
-    @hidden action psaparsererrortestbmv2l98() {
-        hdr.ethernet.dstAddr[47:32] = 16w7;
+    @hidden action psaparsererrortestbmv2l99() {
+        tmp = 16w7;
     }
-    @hidden action psaparsererrortestbmv2l84() {
-        hdr.ethernet.dstAddr[47:32] = 16w8;
+    @hidden action psaparsererrortestbmv2l85() {
+        tmp = 16w8;
     }
-    @hidden action psaparsererrortestbmv2l148() {
-        hdr.ethernet.dstAddr[31:0] = (bit<32>)(TimestampUint_t)istd.ingress_timestamp;
+    @hidden action psaparsererrortestbmv2l149() {
+        hdr.ethernet.dstAddr[47:32] = tmp;
+        hdr.ethernet.dstAddr[31:0] = (bit<32>)(bit<64>)istd.ingress_timestamp;
     }
     @hidden table tbl_send_to_port {
         actions = {
-            send_to_port();
+            send_to_port_0();
         }
-        const default_action = send_to_port();
+        const default_action = send_to_port_0();
     }
-    @hidden table tbl_psaparsererrortestbmv2l84 {
+    @hidden table tbl_psaparsererrortestbmv2l85 {
         actions = {
-            psaparsererrortestbmv2l84();
+            psaparsererrortestbmv2l85();
         }
-        const default_action = psaparsererrortestbmv2l84();
+        const default_action = psaparsererrortestbmv2l85();
     }
-    @hidden table tbl_psaparsererrortestbmv2l86 {
+    @hidden table tbl_psaparsererrortestbmv2l87 {
         actions = {
-            psaparsererrortestbmv2l86();
+            psaparsererrortestbmv2l87();
         }
-        const default_action = psaparsererrortestbmv2l86();
+        const default_action = psaparsererrortestbmv2l87();
     }
-    @hidden table tbl_psaparsererrortestbmv2l88 {
+    @hidden table tbl_psaparsererrortestbmv2l89 {
         actions = {
-            psaparsererrortestbmv2l88();
+            psaparsererrortestbmv2l89();
         }
-        const default_action = psaparsererrortestbmv2l88();
+        const default_action = psaparsererrortestbmv2l89();
     }
-    @hidden table tbl_psaparsererrortestbmv2l90 {
+    @hidden table tbl_psaparsererrortestbmv2l91 {
         actions = {
-            psaparsererrortestbmv2l90();
+            psaparsererrortestbmv2l91();
         }
-        const default_action = psaparsererrortestbmv2l90();
+        const default_action = psaparsererrortestbmv2l91();
     }
-    @hidden table tbl_psaparsererrortestbmv2l92 {
+    @hidden table tbl_psaparsererrortestbmv2l93 {
         actions = {
-            psaparsererrortestbmv2l92();
+            psaparsererrortestbmv2l93();
         }
-        const default_action = psaparsererrortestbmv2l92();
+        const default_action = psaparsererrortestbmv2l93();
     }
-    @hidden table tbl_psaparsererrortestbmv2l94 {
+    @hidden table tbl_psaparsererrortestbmv2l95 {
         actions = {
-            psaparsererrortestbmv2l94();
+            psaparsererrortestbmv2l95();
         }
-        const default_action = psaparsererrortestbmv2l94();
+        const default_action = psaparsererrortestbmv2l95();
     }
-    @hidden table tbl_psaparsererrortestbmv2l96 {
+    @hidden table tbl_psaparsererrortestbmv2l97 {
         actions = {
-            psaparsererrortestbmv2l96();
+            psaparsererrortestbmv2l97();
         }
-        const default_action = psaparsererrortestbmv2l96();
+        const default_action = psaparsererrortestbmv2l97();
     }
-    @hidden table tbl_psaparsererrortestbmv2l98 {
+    @hidden table tbl_psaparsererrortestbmv2l99 {
         actions = {
-            psaparsererrortestbmv2l98();
+            psaparsererrortestbmv2l99();
         }
-        const default_action = psaparsererrortestbmv2l98();
+        const default_action = psaparsererrortestbmv2l99();
     }
-    @hidden table tbl_psaparsererrortestbmv2l148 {
+    @hidden table tbl_psaparsererrortestbmv2l149 {
         actions = {
-            psaparsererrortestbmv2l148();
+            psaparsererrortestbmv2l149();
         }
-        const default_action = psaparsererrortestbmv2l148();
+        const default_action = psaparsererrortestbmv2l149();
     }
     apply {
         tbl_send_to_port.apply();
-        tbl_psaparsererrortestbmv2l84.apply();
+        tbl_psaparsererrortestbmv2l85.apply();
         if (istd.parser_error == error.NoError) {
-            tbl_psaparsererrortestbmv2l86.apply();
+            tbl_psaparsererrortestbmv2l87.apply();
         } else if (istd.parser_error == error.PacketTooShort) {
-            tbl_psaparsererrortestbmv2l88.apply();
+            tbl_psaparsererrortestbmv2l89.apply();
         } else if (istd.parser_error == error.NoMatch) {
-            tbl_psaparsererrortestbmv2l90.apply();
+            tbl_psaparsererrortestbmv2l91.apply();
         } else if (istd.parser_error == error.StackOutOfBounds) {
-            tbl_psaparsererrortestbmv2l92.apply();
+            tbl_psaparsererrortestbmv2l93.apply();
         } else if (istd.parser_error == error.HeaderTooShort) {
-            tbl_psaparsererrortestbmv2l94.apply();
+            tbl_psaparsererrortestbmv2l95.apply();
         } else if (istd.parser_error == error.ParserTimeout) {
-            tbl_psaparsererrortestbmv2l96.apply();
+            tbl_psaparsererrortestbmv2l97.apply();
         } else if (istd.parser_error == error.ParserInvalidArgument) {
-            tbl_psaparsererrortestbmv2l98.apply();
+            tbl_psaparsererrortestbmv2l99.apply();
         }
-        tbl_psaparsererrortestbmv2l148.apply();
+        tbl_psaparsererrortestbmv2l149.apply();
     }
 }
 
@@ -211,145 +212,144 @@ parser EgressParserImpl(packet_in pkt, out headers hdr, inout metadata user_meta
 }
 
 control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
-    @hidden action psaparsererrortestbmv2l86_0() {
-        hdr.ethernet.srcAddr[47:32] = 16w1;
+    @name("egress.tmp_0") bit<16> tmp_0;
+    @hidden action psaparsererrortestbmv2l87_0() {
+        tmp_0 = 16w1;
     }
-    @hidden action psaparsererrortestbmv2l88_0() {
-        hdr.ethernet.srcAddr[47:32] = 16w2;
+    @hidden action psaparsererrortestbmv2l89_0() {
+        tmp_0 = 16w2;
     }
-    @hidden action psaparsererrortestbmv2l90_0() {
-        hdr.ethernet.srcAddr[47:32] = 16w3;
+    @hidden action psaparsererrortestbmv2l91_0() {
+        tmp_0 = 16w3;
     }
-    @hidden action psaparsererrortestbmv2l92_0() {
-        hdr.ethernet.srcAddr[47:32] = 16w4;
+    @hidden action psaparsererrortestbmv2l93_0() {
+        tmp_0 = 16w4;
     }
-    @hidden action psaparsererrortestbmv2l94_0() {
-        hdr.ethernet.srcAddr[47:32] = 16w5;
+    @hidden action psaparsererrortestbmv2l95_0() {
+        tmp_0 = 16w5;
     }
-    @hidden action psaparsererrortestbmv2l96_0() {
-        hdr.ethernet.srcAddr[47:32] = 16w6;
+    @hidden action psaparsererrortestbmv2l97_0() {
+        tmp_0 = 16w6;
     }
-    @hidden action psaparsererrortestbmv2l98_0() {
-        hdr.ethernet.srcAddr[47:32] = 16w7;
+    @hidden action psaparsererrortestbmv2l99_0() {
+        tmp_0 = 16w7;
     }
-    @hidden action psaparsererrortestbmv2l84_0() {
-        hdr.ethernet.srcAddr[47:32] = 16w8;
+    @hidden action psaparsererrortestbmv2l85_0() {
+        tmp_0 = 16w8;
     }
-    @hidden action psaparsererrortestbmv2l192() {
-        hdr.ethernet.srcAddr[31:0] = (bit<32>)(TimestampUint_t)istd.egress_timestamp;
+    @hidden action psaparsererrortestbmv2l193() {
+        hdr.ethernet.srcAddr[47:32] = tmp_0;
+        hdr.ethernet.srcAddr[31:0] = (bit<32>)(bit<64>)istd.egress_timestamp;
     }
-    @hidden table tbl_psaparsererrortestbmv2l84_0 {
+    @hidden table tbl_psaparsererrortestbmv2l85_0 {
         actions = {
-            psaparsererrortestbmv2l84_0();
+            psaparsererrortestbmv2l85_0();
         }
-        const default_action = psaparsererrortestbmv2l84_0();
+        const default_action = psaparsererrortestbmv2l85_0();
     }
-    @hidden table tbl_psaparsererrortestbmv2l86_0 {
+    @hidden table tbl_psaparsererrortestbmv2l87_0 {
         actions = {
-            psaparsererrortestbmv2l86_0();
+            psaparsererrortestbmv2l87_0();
         }
-        const default_action = psaparsererrortestbmv2l86_0();
+        const default_action = psaparsererrortestbmv2l87_0();
     }
-    @hidden table tbl_psaparsererrortestbmv2l88_0 {
+    @hidden table tbl_psaparsererrortestbmv2l89_0 {
         actions = {
-            psaparsererrortestbmv2l88_0();
+            psaparsererrortestbmv2l89_0();
         }
-        const default_action = psaparsererrortestbmv2l88_0();
+        const default_action = psaparsererrortestbmv2l89_0();
     }
-    @hidden table tbl_psaparsererrortestbmv2l90_0 {
+    @hidden table tbl_psaparsererrortestbmv2l91_0 {
         actions = {
-            psaparsererrortestbmv2l90_0();
+            psaparsererrortestbmv2l91_0();
         }
-        const default_action = psaparsererrortestbmv2l90_0();
+        const default_action = psaparsererrortestbmv2l91_0();
     }
-    @hidden table tbl_psaparsererrortestbmv2l92_0 {
+    @hidden table tbl_psaparsererrortestbmv2l93_0 {
         actions = {
-            psaparsererrortestbmv2l92_0();
+            psaparsererrortestbmv2l93_0();
         }
-        const default_action = psaparsererrortestbmv2l92_0();
+        const default_action = psaparsererrortestbmv2l93_0();
     }
-    @hidden table tbl_psaparsererrortestbmv2l94_0 {
+    @hidden table tbl_psaparsererrortestbmv2l95_0 {
         actions = {
-            psaparsererrortestbmv2l94_0();
+            psaparsererrortestbmv2l95_0();
         }
-        const default_action = psaparsererrortestbmv2l94_0();
+        const default_action = psaparsererrortestbmv2l95_0();
     }
-    @hidden table tbl_psaparsererrortestbmv2l96_0 {
+    @hidden table tbl_psaparsererrortestbmv2l97_0 {
         actions = {
-            psaparsererrortestbmv2l96_0();
+            psaparsererrortestbmv2l97_0();
         }
-        const default_action = psaparsererrortestbmv2l96_0();
+        const default_action = psaparsererrortestbmv2l97_0();
     }
-    @hidden table tbl_psaparsererrortestbmv2l98_0 {
+    @hidden table tbl_psaparsererrortestbmv2l99_0 {
         actions = {
-            psaparsererrortestbmv2l98_0();
+            psaparsererrortestbmv2l99_0();
         }
-        const default_action = psaparsererrortestbmv2l98_0();
+        const default_action = psaparsererrortestbmv2l99_0();
     }
-    @hidden table tbl_psaparsererrortestbmv2l192 {
+    @hidden table tbl_psaparsererrortestbmv2l193 {
         actions = {
-            psaparsererrortestbmv2l192();
+            psaparsererrortestbmv2l193();
         }
-        const default_action = psaparsererrortestbmv2l192();
+        const default_action = psaparsererrortestbmv2l193();
     }
     apply {
-        tbl_psaparsererrortestbmv2l84_0.apply();
+        tbl_psaparsererrortestbmv2l85_0.apply();
         if (istd.parser_error == error.NoError) {
-            tbl_psaparsererrortestbmv2l86_0.apply();
+            tbl_psaparsererrortestbmv2l87_0.apply();
         } else if (istd.parser_error == error.PacketTooShort) {
-            tbl_psaparsererrortestbmv2l88_0.apply();
+            tbl_psaparsererrortestbmv2l89_0.apply();
         } else if (istd.parser_error == error.NoMatch) {
-            tbl_psaparsererrortestbmv2l90_0.apply();
+            tbl_psaparsererrortestbmv2l91_0.apply();
         } else if (istd.parser_error == error.StackOutOfBounds) {
-            tbl_psaparsererrortestbmv2l92_0.apply();
+            tbl_psaparsererrortestbmv2l93_0.apply();
         } else if (istd.parser_error == error.HeaderTooShort) {
-            tbl_psaparsererrortestbmv2l94_0.apply();
+            tbl_psaparsererrortestbmv2l95_0.apply();
         } else if (istd.parser_error == error.ParserTimeout) {
-            tbl_psaparsererrortestbmv2l96_0.apply();
+            tbl_psaparsererrortestbmv2l97_0.apply();
         } else if (istd.parser_error == error.ParserInvalidArgument) {
-            tbl_psaparsererrortestbmv2l98_0.apply();
+            tbl_psaparsererrortestbmv2l99_0.apply();
         }
-        tbl_psaparsererrortestbmv2l192.apply();
+        tbl_psaparsererrortestbmv2l193.apply();
     }
 }
 
 control IngressDeparserImpl(packet_out pkt, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psaparsererrortestbmv2l205() {
+    @hidden action psaparsererrortestbmv2l206() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
         pkt.emit<mpls_t>(hdr.mpls);
     }
-    @hidden table tbl_psaparsererrortestbmv2l205 {
+    @hidden table tbl_psaparsererrortestbmv2l206 {
         actions = {
-            psaparsererrortestbmv2l205();
+            psaparsererrortestbmv2l206();
         }
-        const default_action = psaparsererrortestbmv2l205();
+        const default_action = psaparsererrortestbmv2l206();
     }
     apply {
-        tbl_psaparsererrortestbmv2l205.apply();
+        tbl_psaparsererrortestbmv2l206.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out pkt, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psaparsererrortestbmv2l220() {
+    @hidden action psaparsererrortestbmv2l221() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv6_t>(hdr.ipv6);
         pkt.emit<mpls_t>(hdr.mpls);
     }
-    @hidden table tbl_psaparsererrortestbmv2l220 {
+    @hidden table tbl_psaparsererrortestbmv2l221 {
         actions = {
-            psaparsererrortestbmv2l220();
+            psaparsererrortestbmv2l221();
         }
-        const default_action = psaparsererrortestbmv2l220();
+        const default_action = psaparsererrortestbmv2l221();
     }
     apply {
-        tbl_psaparsererrortestbmv2l220.apply();
+        tbl_psaparsererrortestbmv2l221.apply();
     }
 }
 
 IngressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-
 EgressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-
 PSA_Switch<headers, metadata, headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-
