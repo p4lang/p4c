@@ -4,6 +4,7 @@
 #include <optional>
 #include <string>
 
+#include "backends/p4tools/common/lib/variables.h"
 #include "frontends/common/options.h"
 #include "ir/ir.h"
 #include "test/frameworks/gtest/googletest/include/gtest/gtest.h"
@@ -38,6 +39,12 @@ class P4ToolsTestCase {
 
 /// GTest for P4 Tools tests.
 class P4ToolsTest : public ::testing::Test {};
+
+/// Converts IR::Member into symbolic variables.
+class SymbolicConverter : public Transform {
+ public:
+    const IR::SymbolicVariable *preorder(IR::Member *member) override;
+};
 
 }  // namespace Test
 

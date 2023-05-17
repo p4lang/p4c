@@ -1,8 +1,5 @@
 # This file defines how a test should be written for a particular target. This is used by testutils
 
-set(P4TOOLS_BINARY_DIR ${CMAKE_SOURCE_DIR}/build)
-set(P4TESTGEN_DIR ${CMAKE_SOURCE_DIR}/build/testgen)
-
 # Write the script to check eBPF Kernel STF tests to the designated test file.
 # Arguments:
 #   - testfile is the testing script that this script is written to.
@@ -16,7 +13,7 @@ macro(check_with_kernel testfile testfolder p4test runner_args)
   file(APPEND ${testfile} "for item in \${stffiles[@]}\n")
   file(APPEND ${testfile} "do\n")
   file(APPEND ${testfile} "\techo \"Found \${item}\"\n")
-  file(APPEND ${__testfile} "\tpython3 ${__ebpfrunner} ${runner_args} -t kernel -c ${__p4cebpfpath} -tf \${item} ${P4C_SOURCE_DIR} ${P4C_SOURCE_DIR}/${p4test}\n")
+  file(APPEND ${__testfile} "\tpython3 ${__ebpfrunner} ${runner_args} -t kernel -c ${__p4cebpfpath} -tf \${item} ${P4C_SOURCE_DIR} ${p4test}\n")
   file(APPEND ${testfile} "done\n")
 endmacro(check_with_kernel)
 
@@ -62,14 +59,14 @@ macro(p4tools_add_test_with_args)
   string(REGEX REPLACE ".p4" "" aliasname ${alias})
   set(__testfile "${P4TESTGEN_DIR}/${tag}/${alias}.test")
   set(__testfolder "${P4TESTGEN_DIR}/${tag}/${aliasname}.out")
-  get_filename_component(__testdir ${P4C_SOURCE_DIR}/${p4test} DIRECTORY)
+  get_filename_component(__testdir ${p4test} DIRECTORY)
   file(WRITE ${__testfile} "#! /usr/bin/env bash\n")
   file(APPEND ${__testfile} "# Generated file, modify with care\n\n")
   file(APPEND ${__testfile} "set -e\n")
-  file(APPEND ${__testfile} "cd ${P4TOOLS_BINARY_DIR}\n")
+  file(APPEND ${__testfile} "cd ${P4C_BINARY_DIR}\n")
   file(
     APPEND ${__testfile} "${driver} --target ${target} --arch ${arch} "
-    "--std p4-16 ${test_args} --out-dir ${__testfolder} \"$@\" ${P4C_SOURCE_DIR}/${p4test}\n"
+    "${test_args} --out-dir ${__testfolder} \"$@\" ${p4test}\n"
   )
   # If ENABLE_RUNNER is active, run the generated tests on the eBPF kernek.
   if(${TOOLS_EBPF_TESTS_ENABLE_RUNNER})

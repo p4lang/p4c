@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <iomanip>
+#include <list>
 #include <map>
 #include <optional>
 #include <string>
@@ -26,17 +27,44 @@ namespace P4Tools::P4Testgen::Bmv2 {
 PTF::PTF(std::filesystem::path basePath, std::optional<unsigned int> seed = std::nullopt)
     : TF(std::move(basePath), seed) {}
 
-inja::json::array_t PTF::getClone(const std::map<cstring, const TestObject *> &cloneInfos) {
-    auto cloneJson = inja::json::array_t();
-    for (auto cloneInfoTuple : cloneInfos) {
-        inja::json cloneInfoJson;
-        const auto *cloneInfo = cloneInfoTuple.second->checkedTo<Bmv2_CloneInfo>();
-        cloneInfoJson["session_id"] = cloneInfo->getEvaluatedSessionId()->asUint64();
-        cloneInfoJson["clone_port"] = cloneInfo->getEvaluatedClonePort()->asInt();
-        cloneInfoJson["cloned"] = cloneInfo->isClonedPacket();
-        cloneJson.push_back(cloneInfoJson);
+inja::json PTF::getClone(const TestObjectMap &cloneSpecs) {
+    auto cloneSpec = inja::json::object();
+    auto cloneJsons = inja::json::array_t();
+    auto hasClone = false;
+    for (auto cloneSpecTuple : cloneSpecs) {
+        inja::json cloneSpecJson;
+        const auto *cloneSpec = cloneSpecTuple.second->checkedTo<Bmv2V1ModelCloneSpec>();
+        cloneSpecJson["session_id"] = cloneSpec->getEvaluatedSessionId()->asUint64();
+        cloneSpecJson["clone_port"] = cloneSpec->getEvaluatedClonePort()->asInt();
+        cloneSpecJson["cloned"] = cloneSpec->isClonedPacket();
+        hasClone = hasClone || cloneSpec->isClonedPacket();
+        cloneJsons.push_back(cloneSpecJson);
     }
-    return cloneJson;
+    cloneSpec["clone_pkts"] = cloneJsons;
+    cloneSpec["has_clone"] = hasClone;
+    return cloneSpec;
+}
+
+inja::json::array_t PTF::getMeter(const TestObjectMap &meterValues) {
+    auto meterJson = inja::json::array_t();
+    for (auto meterValueInfoTuple : meterValues) {
+        const auto *meterValue = meterValueInfoTuple.second->checkedTo<Bmv2V1ModelMeterValue>();
+
+        const auto meterEntries = meterValue->unravelMap();
+        for (const auto &meterEntry : meterEntries) {
+            inja::json meterInfoJson;
+            meterInfoJson["name"] = meterValueInfoTuple.first;
+            meterInfoJson["value"] = formatHexExpr(meterEntry.second.second);
+            meterInfoJson["index"] = formatHex(meterEntry.first, meterEntry.second.first);
+            if (meterValue->isDirectMeter()) {
+                meterInfoJson["is_direct"] = "True";
+            } else {
+                meterInfoJson["is_direct"] = "False";
+            }
+            meterJson.push_back(meterInfoJson);
+        }
+    }
+    return meterJson;
 }
 
 std::vector<std::pair<size_t, size_t>> PTF::getIgnoreMasks(const IR::Constant *mask) {
@@ -92,7 +120,7 @@ inja::json PTF::getControlPlane(const TestSpec *testSpec) {
         }
 
         // Collect action profiles and selectors associated with the table.
-        checkForTableActionProfile<Bmv2_V1ModelActionProfile, Bmv2_V1ModelActionSelector>(
+        checkForTableActionProfile<Bmv2V1ModelActionProfile, Bmv2V1ModelActionSelector>(
             tblJson, apAsMap, tblConfig);
 
         // Check whether the default action is overridden for this table.
@@ -102,8 +130,7 @@ inja::json PTF::getControlPlane(const TestSpec *testSpec) {
     }
 
     // Collect declarations of action profiles.
-    collectActionProfileDeclarations<Bmv2_V1ModelActionProfile>(testSpec, controlPlaneJson,
-                                                                apAsMap);
+    collectActionProfileDeclarations<Bmv2V1ModelActionProfile>(testSpec, controlPlaneJson, apAsMap);
 
     return controlPlaneJson;
 }
@@ -184,11 +211,12 @@ inja::json PTF::getSend(const TestSpec *testSpec) {
 
 inja::json PTF::getVerify(const TestSpec *testSpec) {
     inja::json verifyData = inja::json::object();
-    if (testSpec->getEgressPacket() != std::nullopt) {
-        const auto &packet = **testSpec->getEgressPacket();
-        verifyData["eg_port"] = packet.getPort();
-        const auto *payload = packet.getEvaluatedPayload();
-        const auto *payloadMask = packet.getEvaluatedPayloadMask();
+    auto egressPacket = testSpec->getEgressPacket();
+    if (egressPacket.has_value()) {
+        const auto *packet = egressPacket.value();
+        verifyData["eg_port"] = packet->getPort();
+        const auto *payload = packet->getEvaluatedPayload();
+        const auto *payloadMask = packet->getEvaluatedPayloadMask();
         verifyData["ignore_masks"] = getIgnoreMasks(payloadMask);
 
         auto dataStr = formatHexExpr(payload, false, true, false);
@@ -197,14 +225,12 @@ inja::json PTF::getVerify(const TestSpec *testSpec) {
     return verifyData;
 }
 
-static std::string getPreamble() {
+void PTF::emitPreamble() {
     static const std::string PREAMBLE(
         R"""(# P4Runtime PTF test for {{test_name}}
 # p4testgen seed: {{ default(seed, "none") }}
 
-import logging
-import sys
-import os
+from enum import Enum
 
 from ptf.mask import Mask
 
@@ -214,7 +240,9 @@ from ptf import testutils as ptfutils
 
 import base_test as bt
 
+
 class AbstractTest(bt.P4RuntimeTest):
+    EnumColor = Enum("EnumColor", ["GREEN", "YELLOW", "RED"], start=0)
 
     @bt.autocleanup
     def setUp(self):
@@ -241,19 +269,48 @@ class AbstractTest(bt.P4RuntimeTest):
         bt.testutils.log.info("Verifying Packet ...")
         self.verifyPackets()
 
-
+    def meter_write_with_predefined_config(self, meter_name, index, value, direct):
+        """Since we can not blast the target with packets, we have to carefully craft an artificial scenario where the meter will return the color we want. We do this by setting the meter config in such a way that the meter is forced to assign the desired color. For example, for RED to the lowest threshold values, to force a RED assignment."""
+        value = self.EnumColor(value)
+        if value == self.EnumColor.GREEN:
+            meter_config = bt.p4runtime_pb2.MeterConfig(
+                cir=4294967295, cburst=4294967295, pir=4294967295, pburst=4294967295
+            )
+        elif value == self.EnumColor.YELLOW:
+            meter_config = bt.p4runtime_pb2.MeterConfig(
+                cir=1, cburst=1, pir=4294967295, pburst=4294967295
+            )
+        elif value == self.EnumColor.RED:
+            meter_config = bt.p4runtime_pb2.MeterConfig(
+                cir=1, cburst=1, pir=1, pburst=1
+            )
+        else:
+            raise self.failureException(f"Unsupported meter value {value}")
+        if direct:
+            meter_obj = self.get_obj("direct_meters", meter_name)
+            table_id = meter_obj.direct_table_id
+            req, _ = self.make_table_read_request_by_id(table_id)
+            table_entry = None
+            for response in self.response_dump_helper(req):
+                for entity in response.entities:
+                    assert entity.WhichOneof("entity") == "table_entry"
+                    table_entry = entity.table_entry
+                    break
+            if table_entry is None:
+                raise self.failureException(
+                    "No entry in the table that the meter is attached to."
+                )
+            return self.direct_meter_write(meter_config, table_id, table_entry)
+        return self.meter_write(meter_name, index, meter_config)
 )""");
-    return PREAMBLE;
-}
 
-void PTF::emitPreamble(const std::string &preamble) {
     inja::json dataJson;
     dataJson["test_name"] = basePath.stem();
     if (seed) {
         dataJson["seed"] = *seed;
     }
 
-    inja::render_to(ptfFileStream, preamble, dataJson);
+    inja::render_to(ptfFileStream, PREAMBLE, dataJson);
     ptfFileStream.flush();
 }
 
@@ -309,11 +366,15 @@ class Test{{test_id}}(AbstractTest):
 ## endfor
 ## endfor
 ## endif
-## if exists("clone_infos")
-## for clone_info in clone_infos
-        self.insert_pre_clone_session({{clone_info.session_id}}, [{{clone_info.clone_port}}])
+## if exists("clone_specs")
+## for clone_pkt in clone_specs.clone_pkts
+        self.insert_pre_clone_session({{clone_pkt.session_id}}, [{{clone_pkt.clone_port}}])
 ## endfor
 ## endif
+## for meter_value in meter_values
+        self.meter_write_with_predefined_config("{{meter_value.name}}", {{meter_value.index}}, {{meter_value.value}}, {{meter_value.is_direct}})
+## endfor
+
 
     def sendPacket(self):
 ## if send
@@ -331,13 +392,14 @@ class Test{{test_id}}(AbstractTest):
 ## for ignore_mask in verify.ignore_masks
         exp_pkt.set_do_not_care({{ignore_mask.0}}, {{ignore_mask.1}})
 ## endfor
-## if exists("clone_infos")
-## for clone_info in clone_infos
-## if clone_info.cloned
-        ptfutils.verify_packet(self, exp_pkt, {{clone_info.clone_port}})
-## else
-        ptfutils.verify_packet(self, exp_pkt, eg_port)
+## if exists("clone_specs")
+## for clone_pkt in clone_specs.clone_pkts
+## if clone_pkt.cloned
+        ptfutils.verify_packet(self, exp_pkt, {{clone_pkt.clone_port}})
+##endif
 ##endfor
+## if not clone_specs.has_clone
+        ptfutils.verify_packet(self, exp_pkt, eg_port)
 ##endif
 ## else 
         ptfutils.verify_packet(self, exp_pkt, eg_port)
@@ -375,10 +437,12 @@ void PTF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
     // Check whether this test has a clone configuration.
     // These are special because they require additional instrumentation and produce two output
     // packets.
-    auto cloneInfos = testSpec->getTestObjectCategory("clone_infos");
-    if (!cloneInfos.empty()) {
-        dataJson["clone_infos"] = getClone(cloneInfos);
+    auto cloneSpecs = testSpec->getTestObjectCategory("clone_specs");
+    if (!cloneSpecs.empty()) {
+        dataJson["clone_specs"] = getClone(cloneSpecs);
     }
+    auto meterValues = testSpec->getTestObjectCategory("meter_values");
+    dataJson["meter_values"] = getMeter(meterValues);
 
     LOG5("PTF backend: emitting testcase:" << std::setw(4) << dataJson);
 
@@ -392,8 +456,7 @@ void PTF::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t 
         auto ptfFile = basePath;
         ptfFile.replace_extension(".py");
         ptfFileStream = std::ofstream(ptfFile);
-        std::string preamble = getPreamble();
-        emitPreamble(preamble);
+        emitPreamble();
         preambleEmitted = true;
     }
     std::string testCase = getTestCaseTemplate();

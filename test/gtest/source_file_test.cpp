@@ -14,11 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "lib/source_file.h"
+
 #include "gtest/gtest.h"
+#include "lib/compile_context.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
-#include "lib/source_file.h"
-#include "lib/compile_context.h"
 
 namespace Util {
 
@@ -29,7 +30,7 @@ TEST(UtilSourceFile, SourcePosition) {
     SourcePosition position(3, 3);
     EXPECT_EQ("3:3", position.toString());
 
-    auto& context = BaseCompileContext::get();
+    auto &context = BaseCompileContext::get();
     cstring str = context.errorReporter().format_message("%1% - %2%", position, position);
     EXPECT_EQ("3:3 - 3:3\n", str);
 

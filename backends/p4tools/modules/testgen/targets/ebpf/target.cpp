@@ -15,18 +15,13 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
-#include "backends/p4tools/modules/testgen/lib/namespace_context.h"
 #include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/cmd_stepper.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/expr_stepper.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/program_info.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/test_backend.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace EBPF {
+namespace P4Tools::P4Testgen::EBPF {
 
 /* =============================================================================================
  *  EBPFTestgenTarget implementation
@@ -41,14 +36,13 @@ void EBPFTestgenTarget::make() {
     }
 }
 
-const EBPFProgramInfo *EBPFTestgenTarget::initProgram_impl(
+const EBPFProgramInfo *EBPFTestgenTarget::initProgramImpl(
     const IR::P4Program *program, const IR::Declaration_Instance *mainDecl) const {
     // The blocks in the main declaration are just the arguments in the constructor call.
     // Convert mainDecl->arguments into a vector of blocks, represented as constructor-call
     // expressions.
-    const auto *ns = NamespaceContext::Empty->push(program);
     std::vector<const IR::Type_Declaration *> blocks;
-    argumentsToTypeDeclarations(ns, mainDecl->arguments, blocks);
+    argumentsToTypeDeclarations(program, mainDecl->arguments, blocks);
 
     // We should have six arguments.
     BUG_CHECK(blocks.size() == 2, "%1%: The EBPF architecture requires 2 blocks. Received %2%.",
@@ -73,23 +67,23 @@ const EBPFProgramInfo *EBPFTestgenTarget::initProgram_impl(
     return new EBPFProgramInfo(program, programmableBlocks);
 }
 
-EBPFTestBackend *EBPFTestgenTarget::getTestBackend_impl(const ProgramInfo &programInfo,
-                                                        SymbolicExecutor &symbex,
-                                                        const std::filesystem::path &testPath,
-                                                        std::optional<uint32_t> seed) const {
+EBPFTestBackend *EBPFTestgenTarget::getTestBackendImpl(const ProgramInfo &programInfo,
+                                                       SymbolicExecutor &symbex,
+                                                       const std::filesystem::path &testPath,
+                                                       std::optional<uint32_t> seed) const {
     return new EBPFTestBackend(programInfo, symbex, testPath, seed);
 }
 
-int EBPFTestgenTarget::getPortNumWidth_bits_impl() const { return 9; }
+int EBPFTestgenTarget::getPortNumWidthBitsImpl() const { return 9; }
 
-EBPFCmdStepper *EBPFTestgenTarget::getCmdStepper_impl(ExecutionState &state, AbstractSolver &solver,
-                                                      const ProgramInfo &programInfo) const {
+EBPFCmdStepper *EBPFTestgenTarget::getCmdStepperImpl(ExecutionState &state, AbstractSolver &solver,
+                                                     const ProgramInfo &programInfo) const {
     return new EBPFCmdStepper(state, solver, programInfo);
 }
 
-EBPFExprStepper *EBPFTestgenTarget::getExprStepper_impl(ExecutionState &state,
-                                                        AbstractSolver &solver,
-                                                        const ProgramInfo &programInfo) const {
+EBPFExprStepper *EBPFTestgenTarget::getExprStepperImpl(ExecutionState &state,
+                                                       AbstractSolver &solver,
+                                                       const ProgramInfo &programInfo) const {
     return new EBPFExprStepper(state, solver, programInfo);
 }
 
@@ -101,8 +95,4 @@ const ArchSpec EBPFTestgenTarget::archSpec =
 
 const ArchSpec *EBPFTestgenTarget::getArchSpecImpl() const { return &archSpec; }
 
-}  // namespace EBPF
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::EBPF

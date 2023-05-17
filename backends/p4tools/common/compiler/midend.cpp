@@ -61,7 +61,7 @@ P4::ChooseEnumRepresentation *MidEnd::mkConvertEnumsPolicy() {
     class EnumOn32Bits : public P4::ChooseEnumRepresentation {
         bool convert(const IR::Type_Enum * /*type*/) const override { return true; }
 
-        unsigned enumSize(unsigned) const override { return 32; }
+        [[nodiscard]] unsigned enumSize(unsigned /*enumCount*/) const override { return 32; }
     };
 
     return new EnumOn32Bits();
@@ -72,7 +72,7 @@ P4::ChooseErrorRepresentation *MidEnd::mkConvertErrorPolicy() {
     class ErrorOn32Bits : public P4::ChooseErrorRepresentation {
         bool convert(const IR::Type_Error * /*type*/) const override { return true; }
 
-        unsigned errorSize(unsigned) const override { return 32; }
+        [[nodiscard]] unsigned errorSize(unsigned /*errorCount*/) const override { return 32; }
     };
 
     return new ErrorOn32Bits();
@@ -89,8 +89,6 @@ P4::TypeMap *MidEnd::getTypeMap() { return &typeMap; }
 
 void MidEnd::addDefaultPasses() {
     addPasses({
-        // Convert t.apply().miss to !t.apply().hit.
-        new P4::RemoveMiss(&refMap, &typeMap),
         // Replaces switch statements that operate on arbitrary scalars with switch statements
         // that
         // operate on actions by introducing a new table.
@@ -160,7 +158,7 @@ void MidEnd::addDefaultPasses() {
         // Simplify header stack assignments with runtime indices into conditional statements.
         new P4::HSIndexSimplifier(&refMap, &typeMap),
         // Convert Type_Varbits into a type that contains information about the assigned width.
-        new ConvertVarbits(&refMap, &typeMap),
+        new ConvertVarbits(),
         // Cast all boolean table keys with a bit<1>.
         new P4::CastBooleanTableKeys(),
     });

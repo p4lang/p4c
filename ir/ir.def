@@ -44,8 +44,8 @@
 
   inline      The field (of IR class type) should be defined directly in the object
               rather than being converted to a const T * as described above.
-  NullOK      The field is a ppointer and may be null (verify will check that it is not otherwise)
-  optional    The field may be proveded as an argument to the constructor but need not be.
+  NullOK      The field is a pointer and may be null (verify will check that it is not otherwise)
+  optional    The field may be provided as an argument to the constructor but need not be.
               (overloaded constructors will be created as needed)
 
   Unless there is a '#noconstructor' tag in the class, a constructor
@@ -337,6 +337,13 @@ class P4Table : Declaration, IAnnotated, IApply {
                 if (auto k = ev->expression->to<IR::Constant>()) {
                     return k; } }
             error(ErrorType::ERR_INVALID, "%1% must be a constant numeric expression", d); }
+        return nullptr; }
+    BoolLiteral getBooleanProperty(cstring name) const {
+        if (auto d = properties->getProperty(name)) {
+            if (auto ev = d->value->to<IR::ExpressionValue>()) {
+                if (auto k = ev->expression->to<IR::BoolLiteral>()) {
+                    return k; } }
+            error(ErrorType::ERR_INVALID, "%1% must be a boolean expression", d); }
         return nullptr; }
     Constant getSizeProperty() const {
         return getConstantProperty(TableProperties::sizePropertyName);

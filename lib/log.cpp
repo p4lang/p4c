@@ -22,9 +22,8 @@ limitations under the License.
 #define NOGC_ARGS
 #endif /* HAVE_LIBGC */
 
-#include <string.h>
-
-#include <fstream>
+#include <cstring>
+#include <fstream>  // IWYU pragma: keep
 #include <iomanip>
 #include <iostream>
 #include <memory>

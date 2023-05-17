@@ -711,15 +711,14 @@ class FindUninitialized : public Inspector {
         }
 
         if (auto dst_struct = dst_type->to<IR::Type_Struct>()) {
-            if (auto list = src->to<IR::StructExpression>()) {
-                auto it = list->components.begin();
+            if (auto se = src->to<IR::StructExpression>()) {
                 for (auto field : dst_struct->fields) {
                     auto ftype = typeMap->getType(field, true);
                     auto member = new IR::Member(dst, field->name);
                     typeMap->setType(member, ftype);
-                    processHeadersInAssignment(member, (*it)->expression, ftype,
-                                               typeMap->getType((*it)->expression, true));
-                    ++it;
+                    auto source = se->getField(field->name);
+                    auto sourceType = typeMap->getType(source->expression, true);
+                    processHeadersInAssignment(member, source->expression, ftype, sourceType);
                 }
             } else if (src->is<IR::MethodCallExpression>()) {
                 auto storage = headerDefs->getStorageLocation(dst);

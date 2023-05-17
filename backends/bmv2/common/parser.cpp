@@ -524,7 +524,7 @@ void ParserConverter::addValueSets(const IR::P4Parser *parser) {
         auto matchTypeDecl =
             ctxt->refMap->getDeclaration(matchPathExpr->path, true)->to<IR::Declaration_ID>();
         BUG_CHECK(matchTypeDecl != nullptr, "No declaration for match type '%1%'", matchPathExpr);
-        return (matchTypeDecl->name.name == P4::P4CoreLibrary::instance.exactMatch.name);
+        return (matchTypeDecl->name.name == P4::P4CoreLibrary::instance().exactMatch.name);
     };
 
     for (auto s : parser->parserLocals) {

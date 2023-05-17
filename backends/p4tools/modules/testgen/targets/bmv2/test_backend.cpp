@@ -1,8 +1,7 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend.h"
 
-#include <stdlib.h>
-
-#include <map>
+#include <cstdlib>
+#include <list>
 #include <optional>
 #include <string>
 #include <utility>
@@ -23,6 +22,7 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/test_backend.h"
+#include "backends/p4tools/modules/testgen/lib/test_object.h"
 #include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/backend/metadata/metadata.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/backend/protobuf/protobuf.h"
@@ -103,12 +103,12 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
     // Save the values of all the fields in it and return.
     if (TestgenOptions::get().testBackend == "METADATA") {
         auto *metadataCollection = new MetadataCollection();
-        const auto *bmv2ProgInfo = programInfo.checkedTo<BMv2_V1ModelProgramInfo>();
+        const auto *bmv2ProgInfo = programInfo.checkedTo<Bmv2V1ModelProgramInfo>();
         const auto *localMetadataVar = bmv2ProgInfo->getBlockParam("Parser", 2);
         const auto *localMetadataType = executionState->resolveType(localMetadataVar->type);
-        auto flatFields = executionState->getFlatFields(
+        const auto &flatFields = executionState->getFlatFields(
             localMetadataVar, localMetadataType->checkedTo<IR::Type_Struct>(), {});
-        for (const auto *fieldRef : flatFields) {
+        for (const auto &fieldRef : flatFields) {
             const auto *fieldVal = completedModel->evaluate(executionState->get(fieldRef));
             // Try to remove the leading internal name for the metadata field.
             // Thankfully, this string manipulation is safe if we are out of range.
@@ -134,7 +134,7 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
     const auto actionProfiles = executionState->getTestObjectCategory("action_profile");
     for (const auto &testObject : actionProfiles) {
         const auto profileName = testObject.first;
-        const auto *actionProfile = testObject.second->checkedTo<Bmv2_V1ModelActionProfile>();
+        const auto *actionProfile = testObject.second->checkedTo<Bmv2V1ModelActionProfile>();
         const auto *evaluatedProfile = actionProfile->evaluate(*completedModel);
         testSpec->addTestObject("action_profiles", profileName, evaluatedProfile);
     }
@@ -142,17 +142,25 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
     const auto actionSelectors = executionState->getTestObjectCategory("action_selector");
     for (const auto &testObject : actionSelectors) {
         const auto selectorName = testObject.first;
-        const auto *actionSelector = testObject.second->checkedTo<Bmv2_V1ModelActionSelector>();
+        const auto *actionSelector = testObject.second->checkedTo<Bmv2V1ModelActionSelector>();
         const auto *evaluatedSelector = actionSelector->evaluate(*completedModel);
         testSpec->addTestObject("action_selectors", selectorName, evaluatedSelector);
     }
 
-    const auto cloneInfos = executionState->getTestObjectCategory("clone_infos");
-    for (const auto &testObject : cloneInfos) {
+    const auto cloneSpecs = executionState->getTestObjectCategory("clone_specs");
+    for (const auto &testObject : cloneSpecs) {
         const auto sessionId = testObject.first;
-        const auto *cloneInfo = testObject.second->checkedTo<Bmv2_CloneInfo>();
-        const auto *evaluatedInfo = cloneInfo->evaluate(*completedModel);
-        testSpec->addTestObject("clone_infos", sessionId, evaluatedInfo);
+        const auto *cloneSpec = testObject.second->checkedTo<Bmv2V1ModelCloneSpec>();
+        const auto *evaluatedInfo = cloneSpec->evaluate(*completedModel);
+        testSpec->addTestObject("clone_specs", sessionId, evaluatedInfo);
+    }
+
+    const auto meterInfos = executionState->getTestObjectCategory("meter_values");
+    for (const auto &testObject : meterInfos) {
+        const auto meterName = testObject.first;
+        const auto *meterInfo = testObject.second->checkedTo<Bmv2V1ModelMeterValue>();
+        const auto *evaluateMeterValue = meterInfo->evaluate(*completedModel);
+        testSpec->addTestObject("meter_values", meterName, evaluateMeterValue);
     }
 
     return testSpec;

@@ -140,7 +140,7 @@ void EBPFTable::validateKeys() const {
         for (auto it : keyGenerator->keyElements) {
             auto mtdecl = program->refMap->getDeclaration(it->matchType->path, true);
             auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
-            if (matchType->name.name == P4::P4CoreLibrary::instance.lpmMatch.name) {
+            if (matchType->name.name == P4::P4CoreLibrary::instance().lpmMatch.name) {
                 if (it != *lastKey) {
                     ::error(ErrorType::ERR_UNSUPPORTED,
                             "%1% field key must be at the end of whole key", it->matchType);
@@ -297,7 +297,7 @@ void EBPFTable::emitValueActionIDNames(CodeBuilder *builder) {
         auto action = adecl->getNode()->to<IR::P4Action>();
         // no need to define a constant for NoAction,
         // "case 0" will be explicitly generated in the action handling switch
-        if (action->name.originalName == P4::P4CoreLibrary::instance.noAction.name) {
+        if (action->name.originalName == P4::P4CoreLibrary::instance().noAction.name) {
             continue;
         }
         builder->emitIndent();
@@ -333,7 +333,7 @@ void EBPFTable::emitValueStructStructure(CodeBuilder *builder) {
     for (auto a : actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->to<IR::P4Action>();
-        if (action->name.originalName == P4::P4CoreLibrary::instance.noAction.name) continue;
+        if (action->name.originalName == P4::P4CoreLibrary::instance().noAction.name) continue;
         cstring name = EBPFObject::externalName(action);
         emitActionArguments(builder, action, name);
     }
@@ -408,7 +408,7 @@ void EBPFTable::emitInstance(CodeBuilder *builder) {
             for (auto it : keyGenerator->keyElements) {
                 auto mtdecl = program->refMap->getDeclaration(it->matchType->path, true);
                 auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
-                if (matchType->name.name == P4::P4CoreLibrary::instance.lpmMatch.name) {
+                if (matchType->name.name == P4::P4CoreLibrary::instance().lpmMatch.name) {
                     if (tableKind == TableLPMTrie) {
                         ::error(ErrorType::ERR_UNSUPPORTED, "%1%: only one LPM field allowed",
                                 it->matchType);
@@ -491,7 +491,7 @@ void EBPFTable::emitKey(CodeBuilder *builder, cstring keyName) {
 
         bool isLPMKeyBigEndian = false;
         if (isLPMTable()) {
-            if (c->matchType->path->name.name == P4::P4CoreLibrary::instance.lpmMatch.name)
+            if (c->matchType->path->name.name == P4::P4CoreLibrary::instance().lpmMatch.name)
                 isLPMKeyBigEndian = true;
         }
 
@@ -852,7 +852,7 @@ void EBPFTable::emitLookup(CodeBuilder *builder, cstring key, cstring value) {
 }
 
 cstring EBPFTable::p4ActionToActionIDName(const IR::P4Action *action) const {
-    if (action->name.originalName == P4::P4CoreLibrary::instance.noAction.name) {
+    if (action->name.originalName == P4::P4CoreLibrary::instance().noAction.name) {
         // NoAction always gets ID=0.
         return "0";
     }
@@ -871,10 +871,10 @@ bool EBPFTable::isLPMTable() const {
         for (auto it : keyGenerator->keyElements) {
             auto mtdecl = program->refMap->getDeclaration(it->matchType->path, true);
             auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
-            if (matchType->name.name == P4::P4CoreLibrary::instance.ternaryMatch.name) {
+            if (matchType->name.name == P4::P4CoreLibrary::instance().ternaryMatch.name) {
                 // if there is a ternary field, we are sure, it is not an LPM table.
                 return false;
-            } else if (matchType->name.name == P4::P4CoreLibrary::instance.lpmMatch.name) {
+            } else if (matchType->name.name == P4::P4CoreLibrary::instance().lpmMatch.name) {
                 isLPM = true;
             }
         }
@@ -889,7 +889,7 @@ bool EBPFTable::isTernaryTable() const {
         for (auto it : keyGenerator->keyElements) {
             auto mtdecl = program->refMap->getDeclaration(it->matchType->path, true);
             auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
-            if (matchType->name.name == P4::P4CoreLibrary::instance.ternaryMatch.name) {
+            if (matchType->name.name == P4::P4CoreLibrary::instance().ternaryMatch.name) {
                 return true;
             }
         }

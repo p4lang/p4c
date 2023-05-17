@@ -9,7 +9,6 @@
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/taint.h"
-#include "ir/vector.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"
 #include "lib/null.h"
@@ -110,14 +109,14 @@ void IfStatementCondition::print(std::ostream &os) const {
 
 ExtractSuccess::ExtractSuccess(
     const IR::Expression *extractedHeader, int offset, const IR::Expression *condition,
-    std::vector<std::pair<const IR::Member *, const IR::Expression *>> fields)
+    std::vector<std::pair<IR::StateVariable, const IR::Expression *>> fields)
     : extractedHeader(extractedHeader),
       offset(offset),
       condition(condition),
       fields(std::move(fields)) {}
 
 const ExtractSuccess *ExtractSuccess::subst(const SymbolicEnv &env) const {
-    std::vector<std::pair<const IR::Member *, const IR::Expression *>> applyFields;
+    std::vector<std::pair<IR::StateVariable, const IR::Expression *>> applyFields;
     applyFields.reserve(fields.size());
     for (const auto &field : fields) {
         applyFields.emplace_back(field.first, env.subst(field.second));
@@ -126,7 +125,7 @@ const ExtractSuccess *ExtractSuccess::subst(const SymbolicEnv &env) const {
 }
 
 const ExtractSuccess *ExtractSuccess::apply(Transform &visitor) const {
-    std::vector<std::pair<const IR::Member *, const IR::Expression *>> applyFields;
+    std::vector<std::pair<IR::StateVariable, const IR::Expression *>> applyFields;
     applyFields.reserve(fields.size());
     for (const auto &field : fields) {
         applyFields.emplace_back(field.first, field.second->apply(visitor));
@@ -141,7 +140,7 @@ void ExtractSuccess::complete(Model *model) const {
 }
 
 const ExtractSuccess *ExtractSuccess::evaluate(const Model &model) const {
-    std::vector<std::pair<const IR::Member *, const IR::Expression *>> applyFields;
+    std::vector<std::pair<IR::StateVariable, const IR::Expression *>> applyFields;
     applyFields.reserve(fields.size());
     for (const auto &field : fields) {
         if (Taint::hasTaint(model, field.second)) {
@@ -190,11 +189,11 @@ void ExtractFailure::print(std::ostream &os) const {
  * ============================================================================================= */
 
 Emit::Emit(const IR::Expression *emitHeader,
-           std::vector<std::pair<const IR::Member *, const IR::Expression *>> fields)
+           std::vector<std::pair<IR::StateVariable, const IR::Expression *>> fields)
     : emitHeader(emitHeader), fields(std::move(fields)) {}
 
 const Emit *Emit::subst(const SymbolicEnv &env) const {
-    std::vector<std::pair<const IR::Member *, const IR::Expression *>> applyFields;
+    std::vector<std::pair<IR::StateVariable, const IR::Expression *>> applyFields;
     applyFields.reserve(fields.size());
     for (const auto &field : fields) {
         applyFields.emplace_back(field.first, env.subst(field.second));
@@ -203,7 +202,7 @@ const Emit *Emit::subst(const SymbolicEnv &env) const {
 }
 
 const Emit *Emit::apply(Transform &visitor) const {
-    std::vector<std::pair<const IR::Member *, const IR::Expression *>> applyFields;
+    std::vector<std::pair<IR::StateVariable, const IR::Expression *>> applyFields;
     applyFields.reserve(fields.size());
     for (const auto &field : fields) {
         applyFields.emplace_back(field.first, field.second->apply(visitor));
@@ -218,7 +217,7 @@ void Emit::complete(Model *model) const {
 }
 
 const Emit *Emit::evaluate(const Model &model) const {
-    std::vector<std::pair<const IR::Member *, const IR::Expression *>> applyFields;
+    std::vector<std::pair<IR::StateVariable, const IR::Expression *>> applyFields;
     applyFields.reserve(fields.size());
     for (const auto &field : fields) {
         if (Taint::hasTaint(model, field.second)) {
@@ -299,5 +298,7 @@ void ParserStart::print(std::ostream &os) const { os << "[Parser] " << parser->c
 ParserState::ParserState(const IR::ParserState *state) : state(state) {}
 
 void ParserState::print(std::ostream &os) const { os << "[State] " << state->controlPlaneName(); }
+
+const IR::ParserState *ParserState::getParserState() const { return state; }
 
 }  // namespace P4Tools::TraceEvents

@@ -6,7 +6,6 @@
 #include <string>
 
 #include "backends/p4tools/common/core/solver.h"
-#include "backends/p4tools/common/lib/formulae.h"
 #include "ir/ir.h"
 #include "ir/node.h"
 #include "ir/vector.h"
@@ -17,9 +16,7 @@
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 /// A framework for implementing small-step operational semantics. Each instance is good for one
 /// small-step evaluation.
@@ -157,14 +154,14 @@ class AbstractStepper : public Inspector {
     /// Optionally, a condition can be provided that is temporarily added to the list of assertions.
     /// If the solver can find a solution, it @returns the assigned value to the expression.
     /// If not, this function @returns nullptr.
-    const Value *evaluateExpression(const IR::Expression *expr,
-                                    std::optional<const IR::Expression *> cond) const;
+    const IR::Literal *evaluateExpression(const IR::Expression *expr,
+                                          std::optional<const IR::Expression *> cond) const;
 
     /// Reset the given reference to an  uninitialized value. If the reference has a
     /// Type_StructLike, unroll the reference and reset each member.
     /// If forceTaint is active, all references are set tainted. Otherwise a target-specific
     /// mechanism is used.
-    void setTargetUninitialized(ExecutionState &nextState, const IR::Member *ref,
+    void setTargetUninitialized(ExecutionState &nextState, const IR::StateVariable &ref,
                                 bool forceTaint) const;
 
     /// This is a helper function to declare structlike data structures.
@@ -175,12 +172,10 @@ class AbstractStepper : public Inspector {
 
     /// This is a helper function to declare base type variables. Because all variables need to be a
     /// member in the execution state environment, this helper function suffixes a "*".
-    void declareBaseType(ExecutionState &nextState, const IR::Expression *paramPath,
+    void declareBaseType(ExecutionState &nextState, const IR::StateVariable &paramPath,
                          const IR::Type_Base *baseType) const;
 };
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SMALL_STEP_ABSTRACT_STEPPER_H_ */

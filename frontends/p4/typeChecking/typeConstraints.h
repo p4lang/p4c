@@ -203,7 +203,7 @@ class EqualityConstraint : public BinaryConstraint {
     EqualityConstraint(const IR::Type *left, const IR::Type *right, const IR::Node *origin)
         : BinaryConstraint(left, right, origin) {}
     void dbprint(std::ostream &out) const override {
-        out << "Constraint:" << dbp(left) << " = " << dbp(right);
+        out << "Constraint:" << dbp(left) << " == " << dbp(right);
     }
     using TypeConstraint::reportError;
     bool reportError(const TypeVariableSubstitution *subst) const override {
@@ -267,6 +267,7 @@ class TypeConstraints final : public IHasDbPrint {
           replaceVariables(definedVariables) {}
     // Mark this variable as being free.
     void addUnifiableTypeVariable(const IR::ITypeVar *typeVariable) {
+        LOG3("Adding unifiable type variable " << typeVariable);
         unifiableTypeVariables.insert(typeVariable);
     }
 
@@ -274,7 +275,10 @@ class TypeConstraints final : public IHasDbPrint {
     /// A variable is unifiable if it is marked so and it not already
     /// part of definedVariables.
     bool isUnifiableTypeVariable(const IR::Type *type);
-    void add(const TypeConstraint *constraint) { constraints.push_back(constraint); }
+    void add(const TypeConstraint *constraint) {
+        LOG3("Adding constraint " << constraint);
+        constraints.push_back(constraint);
+    }
     void addEqualityConstraint(const IR::Node *source, const IR::Type *left, const IR::Type *right);
     /*
      * Solve the specified constraint.

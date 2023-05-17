@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,10 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "lib/json.h"
+
 #include <sstream>
 
 #include "gtest/gtest.h"
-#include "lib/json.h"
 
 namespace Util {
 
@@ -29,7 +30,7 @@ static cstring getNumStringRepr(T v) {
 }
 
 TEST(Util, Json) {
-    IJson* value;
+    IJson *value;
     value = new JsonValue(true);
     EXPECT_EQ("true", value->toString());
     value = new JsonValue();

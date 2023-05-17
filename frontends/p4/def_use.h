@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_DEF_USE_H_
 #define _FRONTENDS_P4_DEF_USE_H_
 
+#include <typeindex>  // IWYU pragma: keep
 #include <unordered_set>
 
 #include "frontends/p4/typeChecking/typeChecker.h"

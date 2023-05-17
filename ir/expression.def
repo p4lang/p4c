@@ -134,9 +134,23 @@ class LOr : Operation_Binary {
     precedence = DBPrint::Prec_LOr;
 }
 
-abstract Literal : Expression, CompileTimeValue {
-#nodbprint
+/// Represents the ... default initializer expression
+class Dots : Expression {
+    dbprint { out << "..."; }
+    toString { return "..."; }
 }
+
+/// Represents the ... default initializer expression
+/// when used in a StructExpression.
+class NamedDots : NamedExpression {
+    NamedDots() : NamedExpression("...", new Dots()) {}
+    NamedDots(Util::SourceInfo srcInfo, Dots dots) : NamedExpression(srcInfo, "...", dots) { CHECK_NULL(dots); }
+    NamedDots(Util::SourceInfo srcInfo) : NamedExpression(srcInfo, "...", new Dots()) {}
+    dbprint { out << "..."; }
+    toString { return "..."; }
+}
+
+abstract Literal : Expression, CompileTimeValue {}
 
 /// This is an integer literal on arbitrary-precision.
 class Constant : Literal {
@@ -347,10 +361,10 @@ class DefaultExpression : Expression {}
 // Two different This should not be equal.
 // That's why we use a hidden id field to distinguish them.
 class This : Expression {
-    int id = nextId++;
+    long id = nextId++;
     toString { return "this"; }
  private:
-    static int nextId;
+    static long nextId;
 }
 
 class Cast : Operation_Unary {
@@ -411,6 +425,12 @@ class BaseListExpression : Expression {
     validate { components.check_null(); }
     size_t size() const { return components.size(); }
     void push_back(Expression e) { components.push_back(e); }
+    bool containsDots() const {
+        if (components.empty())
+            return false;
+        size_t size = components.size();
+        return components.at(size - 1)->is<IR::Dots>();
+    }
 #nodbprint
 }
 
@@ -448,6 +468,14 @@ class StructExpression : Expression {
                   "%1%: unexpected struct type", this);
     }
     size_t size() const { return components.size(); }
+    NamedExpression getField(cstring name) const {
+        return components.getDeclaration<NamedExpression>(name); }
+    bool containsDots() const {
+        if (components.empty())
+            return false;
+        size_t size = components.size();
+        return components.at(size - 1)->is<IR::NamedDots>();
+    }
 }
 
 /// Can be an invalid header or header_union

@@ -1,6 +1,7 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/backend/metadata/metadata.h"
 
 #include <algorithm>
+#include <functional>
 #include <iomanip>
 #include <map>
 #include <string>
@@ -17,6 +18,7 @@
 #include "lib/log.h"
 #include "nlohmann/json.hpp"
 
+#include "backends/p4tools/modules/testgen/lib/test_object.h"
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
@@ -64,7 +66,7 @@ inja::json Metadata::getVerify(const TestSpec *testSpec) {
     inja::json verifyData = inja::json::object();
     auto egressPacket = testSpec->getEgressPacket();
     if (egressPacket.has_value()) {
-        const auto *const packet = egressPacket.value();
+        const auto *packet = egressPacket.value();
         verifyData["eg_port"] = packet->getPort();
         const auto *payload = packet->getEvaluatedPayload();
         const auto *payloadMask = packet->getEvaluatedPayloadMask();
@@ -92,7 +94,7 @@ statement_coverage: {{coverage}}
 ## endfor
 
 # The input packet in hexadecimal.
-input_packet: \"{{send.pkt}}\"
+input_packet: "{{send.pkt}}"
 
 # Parsed headers and their offsets.
 header_offsets:
@@ -100,10 +102,13 @@ header_offsets:
   {{offset.label}}: {{offset.offset}}
 ## endfor
 
+# The in-order list of parser states which were traversed for this test.
+parser_states: {% for s in parser_states %}{{s}}{% if not loop.is_last %}, {% endif %}{% endfor %}
+
 # Metadata results after this test has completed.
 metadata:
 ## for metadata_field in metadata_fields
-  {{metadata_field.name}}: [value: \"{{metadata_field.value}}\", offset: {{metadata_field.offset}}]
+  {{metadata_field.name}}: [value: "{{metadata_field.value}}", offset: {{metadata_field.offset}}]
 ## endfor
 )""");
     return TEST_CASE;
@@ -112,6 +117,7 @@ metadata:
 void Metadata::computeTraceData(const TestSpec *testSpec, inja::json &dataJson) {
     dataJson["trace"] = inja::json::array();
     dataJson["offsets"] = inja::json::array();
+    dataJson["parser_states"] = inja::json::array();
     const auto *traces = testSpec->getTraces();
     if (traces != nullptr) {
         for (const auto &trace : *traces) {
@@ -120,6 +126,9 @@ void Metadata::computeTraceData(const TestSpec *testSpec, inja::json &dataJson) 
                 j["label"] = successfulExtract->getExtractedHeader()->toString();
                 j["offset"] = successfulExtract->getOffset();
                 dataJson["offsets"].push_back(j);
+            }
+            if (const auto *parserState = trace.get().to<TraceEvents::ParserState>()) {
+                dataJson["parser_states"].push_back(parserState->getParserState()->getName().name);
             }
             std::stringstream ss;
             ss << trace;
@@ -171,7 +180,8 @@ void Metadata::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
 void Metadata::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testIdx,
                           float currentCoverage) {
     auto incrementedbasePath = basePath;
-    incrementedbasePath.replace_extension("_" + std::to_string(testIdx) + ".yml");
+    incrementedbasePath.concat("_" + std::to_string(testIdx));
+    incrementedbasePath.replace_extension(".yml");
     metadataFile = std::ofstream(incrementedbasePath);
     std::string testCase = getTestCaseTemplate();
     emitTestcase(testSpec, selectedBranches, testIdx, testCase, currentCoverage);

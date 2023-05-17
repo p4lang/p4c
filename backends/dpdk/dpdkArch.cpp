@@ -222,8 +222,8 @@ void ConvertLookahead::Collect::postorder(const IR::AssignmentStatement *stateme
     auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
     if (!mi->is<P4::ExternMethod>()) return;
     auto em = mi->to<P4::ExternMethod>();
-    if (em->originalExternType->name != P4::P4CoreLibrary::instance.packetIn.name ||
-        em->method->name != P4::P4CoreLibrary::instance.packetIn.lookahead.name)
+    if (em->originalExternType->name != P4::P4CoreLibrary::instance().packetIn.name ||
+        em->method->name != P4::P4CoreLibrary::instance().packetIn.lookahead.name)
         return;
 
     LOG2("Collecting lookahead in statement:" << std::endl << " " << statement);
@@ -1828,7 +1828,7 @@ const IR::P4Table *SplitP4TableCommon::create_member_table(const IR::P4Table *tb
     IR::Vector<IR::KeyElement> member_keys;
     auto tableKeyEl =
         new IR::KeyElement(new IR::PathExpression(member_id),
-                           new IR::PathExpression(P4::P4CoreLibrary::instance.exactMatch.Id()));
+                           new IR::PathExpression(P4::P4CoreLibrary::instance().exactMatch.Id()));
     member_keys.push_back(tableKeyEl);
     IR::IndexedVector<IR::Property> member_properties;
     member_properties.push_back(new IR::Property("key", new IR::Key(member_keys), false));

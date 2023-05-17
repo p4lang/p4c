@@ -3,9 +3,7 @@
 
 #include "ir/ir.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 /// Generates an equality on a target expression and a keyset expression, recursing into lists.
 /// This supports fuzzy matching on singleton lists: singleton lists are considered the same as
@@ -33,8 +31,6 @@ class GenEq {
     static const IR::Equ *mkEq(const IR::Expression *e1, const IR::Expression *e2);
 };
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_GEN_EQ_H_ */

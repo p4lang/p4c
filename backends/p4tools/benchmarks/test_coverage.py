@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 
 import argparse
-import random
-import sys
-import re
-import os
+import datetime
 import logging
+import os
+import random
+import re
+import sys
 import tempfile
 from pathlib import Path
-import datetime
-import pandas as pd
-import seaborn as sns
+
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import seaborn as sns
 
 # Append tools to the import path.
 FILE_DIR = Path(__file__).resolve().parent
@@ -172,9 +173,7 @@ def parse_coverage_and_timestamps(test_files, parse_type):
                     datestrs.append(datestr)
                 if "Current statement coverage:" in line:
                     if parse_type == "PROTOBUF":
-                        covstr = line.replace(
-                            'metadata: "Current statement coverage: ', ""
-                        )
+                        covstr = line.replace('metadata: "Current statement coverage: ', "")
                         covstr = covstr.replace('"\n', "")
                     else:
                         covstr = line.replace("# Current statement coverage: ", "")
@@ -219,9 +218,7 @@ def run_strategies_for_max_tests(options, test_args):
     testutils.exec_process(cmd, env=custom_env, capture_output=True)
     end_timestamp = datetime.datetime.now()
 
-    statements_cov, timestamps = collect_data_from_folder(
-        test_args.test_dir, options.test_backend
-    )
+    statements_cov, timestamps = collect_data_from_folder(test_args.test_dir, options.test_backend)
     if not statements_cov:
         print("No errors found!")
         return [], [], []
@@ -229,12 +226,11 @@ def run_strategies_for_max_tests(options, test_args):
     final_cov = str(statements_cov[-1])
     time_needed = (end_timestamp - start_timestamp).total_seconds()
     print(
-        f"Pct Statements Covered: {final_cov} Number of tests: {num_tests} Time needed: {time_needed}"
+        f"Pct Statements Covered: {final_cov} Number of tests: {num_tests} Time needed:"
+        f" {time_needed}"
     )
 
-    perf_file = test_args.test_dir.joinpath(
-        test_args.p4_program.stem + "_perf"
-    ).with_suffix(".csv")
+    perf_file = test_args.test_dir.joinpath(test_args.p4_program.stem + "_perf").with_suffix(".csv")
     perf = pd.read_csv(perf_file, index_col=0)
     summarized_data = [
         float(final_cov) * 100,
@@ -315,7 +311,7 @@ def main(args, extra_args):
         "GREEDY_POTENTIAL": "",
     }
     p4_program = options.p4_programs[0]
-    p4_program =testutils.check_if_file(p4_program)
+    p4_program = testutils.check_if_file(p4_program)
     if not p4_program:
         return
     p4_program = Path(testutils.check_if_file(p4_program))
@@ -341,9 +337,7 @@ def main(args, extra_args):
         timeseries_frame = pd.DataFrame(columns=["Seed", "Time", "Coverage"])
         for seed in seeds:
             data_row = [p4_program_name, seed]
-            print(
-                f"Seed {seed} Generating metrics for {strategy} up to {options.max_tests} tests"
-            )
+            print(f"Seed {seed} Generating metrics for {strategy} up to {options.max_tests} tests")
             test_args = TestArgs()
             test_args.seed = seed
             test_args.test_dir = Path(tempfile.mkdtemp(dir=test_dir))
@@ -372,18 +366,10 @@ def main(args, extra_args):
         summary_frame["Time per test (s)"] = (
             summary_frame["Total time (s)"] / summary_frame["Generated tests"]
         )
-        summary_frame.loc["Mean"] = summary_frame.mean(
-            numeric_only=True, axis=0, skipna=True
-        )
-        summary_frame.loc["Median"] = summary_frame.median(
-            numeric_only=True, axis=0, skipna=True
-        )
-        summary_frame.loc["Min"] = summary_frame.min(
-            numeric_only=True, axis=0, skipna=True
-        )
-        summary_frame.loc["Max"] = summary_frame.max(
-            numeric_only=True, axis=0, skipna=True
-        )
+        summary_frame.loc["Mean"] = summary_frame.mean(numeric_only=True, axis=0, skipna=True)
+        summary_frame.loc["Median"] = summary_frame.median(numeric_only=True, axis=0, skipna=True)
+        summary_frame.loc["Min"] = summary_frame.min(numeric_only=True, axis=0, skipna=True)
+        summary_frame.loc["Max"] = summary_frame.max(numeric_only=True, axis=0, skipna=True)
 
         summary_results_path = options.out_dir.joinpath(
             f"{p4_program_name}_{strategy.lower()}_summary_results.csv"

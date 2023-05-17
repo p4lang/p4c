@@ -18,11 +18,12 @@ set(
   ${CMAKE_CURRENT_SOURCE_DIR}/constants.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/contrib/bmv2_hash/calculations.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/expr_stepper.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/map_direct_externs.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/p4_asserts_parser.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/p4_refers_to_parser.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/program_info.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/table_stepper.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/target.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/p4_asserts_parser.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/p4_refers_to_parser.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test_backend.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test_spec.cpp
   PARENT_SCOPE

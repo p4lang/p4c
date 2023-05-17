@@ -16,7 +16,9 @@
 
 import sys
 from pathlib import Path
+
 from .target import EBPFTarget
+
 # Append tools to the import path.
 FILE_DIR = Path(__file__).resolve().parent
 # Append tools to the import path.
@@ -25,7 +27,6 @@ import testutils
 
 
 class Target(EBPFTarget):
-
     def __init__(self, tmpdir, options, template):
         EBPFTarget.__init__(self, tmpdir, options, template)
 

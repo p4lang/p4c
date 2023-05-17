@@ -1,6 +1,8 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/backend/stf/stf.h"
 
+#include <fstream>
 #include <iomanip>
+#include <list>
 #include <map>
 #include <optional>
 #include <string>
@@ -59,7 +61,7 @@ inja::json STF::getControlPlane(const TestSpec *testSpec) {
         }
 
         // Collect action profiles and selectors associated with the table.
-        checkForTableActionProfile<Bmv2_V1ModelActionProfile, Bmv2_V1ModelActionSelector>(
+        checkForTableActionProfile<Bmv2V1ModelActionProfile, Bmv2V1ModelActionSelector>(
             tblJson, apAsMap, tblConfig);
 
         // Check whether the default action is overridden for this table.
@@ -69,8 +71,7 @@ inja::json STF::getControlPlane(const TestSpec *testSpec) {
     }
 
     // Collect declarations of action profiles.
-    collectActionProfileDeclarations<Bmv2_V1ModelActionProfile>(testSpec, controlPlaneJson,
-                                                                apAsMap);
+    collectActionProfileDeclarations<Bmv2V1ModelActionProfile>(testSpec, controlPlaneJson, apAsMap);
 
     return controlPlaneJson;
 }
@@ -195,15 +196,15 @@ inja::json STF::getVerify(const TestSpec *testSpec) {
     return verifyData;
 }
 
-inja::json::array_t STF::getClone(const std::map<cstring, const TestObject *> &cloneInfos) {
+inja::json::array_t STF::getClone(const TestObjectMap &cloneSpecs) {
     auto cloneJson = inja::json::array_t();
-    for (auto cloneInfoTuple : cloneInfos) {
-        inja::json cloneInfoJson;
-        const auto *cloneInfo = cloneInfoTuple.second->checkedTo<Bmv2_CloneInfo>();
-        cloneInfoJson["session_id"] = cloneInfo->getEvaluatedSessionId()->asUint64();
-        cloneInfoJson["clone_port"] = cloneInfo->getEvaluatedClonePort()->asInt();
-        cloneInfoJson["cloned"] = cloneInfo->isClonedPacket();
-        cloneJson.push_back(cloneInfoJson);
+    for (auto cloneSpecTuple : cloneSpecs) {
+        inja::json cloneSpecJson;
+        const auto *cloneSpec = cloneSpecTuple.second->checkedTo<Bmv2V1ModelCloneSpec>();
+        cloneSpecJson["session_id"] = cloneSpec->getEvaluatedSessionId()->asUint64();
+        cloneSpecJson["clone_port"] = cloneSpec->getEvaluatedClonePort()->asInt();
+        cloneSpecJson["cloned"] = cloneSpec->isClonedPacket();
+        cloneJson.push_back(cloneSpecJson);
     }
     return cloneJson;
 }
@@ -235,17 +236,17 @@ add {{table.table_name}} {% if rule.rules.needs_priority %}{{rule.priority}} {% 
 ## endfor
 ## endif
 
-## if exists("clone_infos")
-## for clone_info in clone_infos
-mirroring_add {{clone_info.session_id}} {{clone_info.clone_port}}
+## if exists("clone_specs")
+## for clone_spec in clone_specs
+mirroring_add {{clone_spec.session_id}} {{clone_spec.clone_port}}
 packet {{send.ig_port}} {{send.pkt}}
-## if clone_info.cloned
+## if clone_spec.cloned
 ## if verify
-expect {{clone_info.clone_port}} {{verify.exp_pkt}}$
+expect {{clone_spec.clone_port}} {{verify.exp_pkt}}$
 expect {{verify.eg_port}}
 ## endif
 ## else
-expect {{clone_info.clone_port}}
+expect {{clone_spec.clone_port}}
 ## if verify
 expect {{verify.eg_port}} {{verify.exp_pkt}}$
 ## endif
@@ -285,9 +286,9 @@ void STF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
     // Check whether this test has a clone configuration.
     // These are special because they require additional instrumentation and produce two output
     // packets.
-    auto cloneInfos = testSpec->getTestObjectCategory("clone_infos");
-    if (!cloneInfos.empty()) {
-        dataJson["clone_infos"] = getClone(cloneInfos);
+    auto cloneSpecs = testSpec->getTestObjectCategory("clone_specs");
+    if (!cloneSpecs.empty()) {
+        dataJson["clone_specs"] = getClone(cloneSpecs);
     }
 
     LOG5("STF test back end: emitting testcase:" << std::setw(4) << dataJson);

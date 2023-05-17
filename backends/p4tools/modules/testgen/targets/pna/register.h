@@ -8,9 +8,7 @@
 #include "backends/p4tools/modules/testgen/targets/pna/target.h"
 #include "backends/p4tools/modules/testgen/testgen.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 /// Register the PNA compiler target with the tools framework.
 inline void pna_registerCompilerTarget() { Pna::PnaDpdkCompilerTarget::make(); }
@@ -18,8 +16,6 @@ inline void pna_registerCompilerTarget() { Pna::PnaDpdkCompilerTarget::make(); }
 /// Register the PNA testgen target with the testgen framework.
 inline void pna_registerTestgenTarget() { Pna::PnaDpdkTestgenTarget::make(); }
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_REGISTER_H_ */

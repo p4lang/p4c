@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "backends/p4tools/common/core/solver.h"
-#include "backends/p4tools/common/lib/formulae.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
@@ -41,13 +40,13 @@ class CmdStepper : public AbstractStepper {
 
     /// Initializes the given state for entry into the given parser.
     ///
-    /// @returns constraints for associating packet data with program/zombie state.
+    /// @returns constraints for associating packet data with symbolic state.
     const Constraint *startParser(const IR::P4Parser *parser, ExecutionState &state);
 
     /// @see startParser. Implementations can assume that the parser has been registered, and the
     /// cursor position has been initialized.
-    virtual std::optional<const Constraint *> startParser_impl(const IR::P4Parser *parser,
-                                                               ExecutionState &state) const = 0;
+    virtual std::optional<const Constraint *> startParserImpl(const IR::P4Parser *parser,
+                                                              ExecutionState &state) const = 0;
 
     /// Initializes variables and adds constraints for the program initialization, which is target
     /// specific.

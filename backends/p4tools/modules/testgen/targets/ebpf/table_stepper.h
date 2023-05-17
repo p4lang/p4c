@@ -29,7 +29,7 @@ class EBPFTableStepper : public TableStepper {
 
  protected:
     const IR::Expression *computeTargetMatchType(ExecutionState &nextState,
-                                                 const KeyProperties &keyProperties,
+                                                 const TableUtils::KeyProperties &keyProperties,
                                                  TableMatchMap *matches,
                                                  const IR::Expression *hitCondition) override;
 

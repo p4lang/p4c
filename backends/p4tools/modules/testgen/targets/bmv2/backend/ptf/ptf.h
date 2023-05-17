@@ -2,8 +2,8 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_BACKEND_PTF_PTF_H_
 
 #include <cstddef>
+#include <filesystem>
 #include <fstream>
-#include <map>
 #include <optional>
 #include <string>
 #include <utility>
@@ -15,6 +15,7 @@
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
+#include "backends/p4tools/modules/testgen/lib/test_object.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 
@@ -48,7 +49,7 @@ class PTF : public TF {
  private:
     /// Emits the test preamble. This is only done once for all generated tests.
     /// For the PTF back end this is the test setup Python script..
-    void emitPreamble(const std::string &preamble);
+    void emitPreamble();
 
     /// Emits a test case.
     /// @param testIdx specifies the test name.
@@ -70,8 +71,11 @@ class PTF : public TF {
     /// Converts the output packet, port, and mask into Inja format.
     static inja::json getVerify(const TestSpec *testSpec);
 
-    /// Returns the configuration for a cloned packet configuration.
-    static inja::json::array_t getClone(const std::map<cstring, const TestObject *> &cloneInfos);
+    /// @returns the configuration for a meter call (may set the meter to GREEN, YELLOW, or RED)
+    static inja::json::array_t getMeter(const TestObjectMap &meterValues);
+
+    /// @returns the configuration for a cloned packet configuration.
+    static inja::json getClone(const TestObjectMap &cloneSpecs);
 
     /// Helper function for @getVerify. Matches the mask value against the input packet value and
     /// generates the appropriate ignore ranges.

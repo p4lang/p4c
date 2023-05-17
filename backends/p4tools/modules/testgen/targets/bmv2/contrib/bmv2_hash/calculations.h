@@ -24,11 +24,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace Bmv2 {
+namespace P4Tools::P4Testgen::Bmv2 {
 
 class BMv2Hash {
     /* This code was adapted from:
@@ -65,10 +61,6 @@ class BMv2Hash {
     static uint64_t identity(const char *buf, size_t len);
 };
 
-}  // namespace Bmv2
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::Bmv2
 
 #endif /*BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_CONTRIB_BMV2_HASH_CALCULATIONS_H_*/

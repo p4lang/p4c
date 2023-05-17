@@ -31,7 +31,7 @@ SymbolicValue *SymbolicValueFactory::create(const IR::Type *type, bool uninitial
     }
     if (type->is<IR::Type_Extern>()) {
         auto te = type->to<IR::Type_Extern>();
-        if (te->name.name == P4CoreLibrary::instance.packetIn.name) {
+        if (te->name.name == P4CoreLibrary::instance().packetIn.name) {
             return new SymbolicPacketIn(te);
         }
         return new SymbolicExtern(te);
@@ -1085,9 +1085,9 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression *expression) 
     if (mi->is<ExternMethod>()) {
         // There are some extern methods that we know something about
         auto em = mi->to<ExternMethod>();
-        if (em->originalExternType->name.name == P4CoreLibrary::instance.packetIn.name) {
+        if (em->originalExternType->name.name == P4CoreLibrary::instance().packetIn.name) {
             // packet methods
-            if (em->method->name.name == P4CoreLibrary::instance.packetIn.extract.name) {
+            if (em->method->name.name == P4CoreLibrary::instance().packetIn.extract.name) {
                 // We know that after an extract terminates the header argument
                 // is always valid.
                 auto arg0 = expression->arguments->at(0);
@@ -1150,7 +1150,7 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression *expression) 
                 sh->setValid(true);
                 set(expression, SymbolicVoid::get());
                 return;
-            } else if (em->method->name.name == P4CoreLibrary::instance.packetIn.lookahead.name) {
+            } else if (em->method->name.name == P4CoreLibrary::instance().packetIn.lookahead.name) {
                 // If lookahead returns a header, it is always valid.
                 auto type = typeMap->getTypeType(mi->actualMethodType->returnType, true);
                 auto res = factory->create(type, false);

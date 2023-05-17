@@ -118,10 +118,10 @@ const char *addr2line(void *addr, const char *text) {
 #else
         if (pipe(pfd1) < 0) return 0;
         if (pipe(pfd2) < 0) return 0;
-        fcntl(pfd1[0], F_SETFD, FD_CLOEXEC | fcntl(pfd1[0], F_GETFL));
-        fcntl(pfd1[1], F_SETFD, FD_CLOEXEC | fcntl(pfd1[1], F_GETFL));
-        fcntl(pfd2[0], F_SETFD, FD_CLOEXEC | fcntl(pfd2[0], F_GETFL));
-        fcntl(pfd2[1], F_SETFD, FD_CLOEXEC | fcntl(pfd2[1], F_GETFL));
+        fcntl(pfd1[0], F_SETFD, FD_CLOEXEC | fcntl(pfd1[0], F_GETFD));
+        fcntl(pfd1[1], F_SETFD, FD_CLOEXEC | fcntl(pfd1[1], F_GETFD));
+        fcntl(pfd2[0], F_SETFD, FD_CLOEXEC | fcntl(pfd2[0], F_GETFD));
+        fcntl(pfd2[1], F_SETFD, FD_CLOEXEC | fcntl(pfd2[1], F_GETFD));
 #endif
         while ((child = fork()) == -1 && errno == EAGAIN) {
         }

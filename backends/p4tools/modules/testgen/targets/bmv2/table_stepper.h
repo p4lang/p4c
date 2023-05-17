@@ -11,13 +11,9 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/expr_stepper.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
-namespace P4Tools {
+namespace P4Tools::P4Testgen::Bmv2 {
 
-namespace P4Testgen {
-
-namespace Bmv2 {
-
-class BMv2_V1ModelTableStepper : public TableStepper {
+class Bmv2V1ModelTableStepper : public TableStepper {
  private:
     /// Specifies the type of the table implementation:
     /// standard: standard implementation - use normal control plane entries.
@@ -28,12 +24,12 @@ class BMv2_V1ModelTableStepper : public TableStepper {
     enum class TableImplementation { standard, selector, profile, constant, skip };
 
     /// BMv2 specific table properties.
-    struct BMv2_V1ModelProperties {
+    struct Bmv2V1ModelProperties {
         /// The table has an action profile associated with it.
-        const Bmv2_V1ModelActionProfile *actionProfile = nullptr;
+        const Bmv2V1ModelActionProfile *actionProfile = nullptr;
 
         /// The table has an action selector associated with it.
-        const Bmv2_V1ModelActionSelector *actionSelector = nullptr;
+        const Bmv2V1ModelActionSelector *actionSelector = nullptr;
 
         /// The selector keys that are part of the selector hash that is calculated.
         std::vector<const IR::Expression *> actionSelectorKeys;
@@ -43,7 +39,7 @@ class BMv2_V1ModelTableStepper : public TableStepper {
 
         /// The type of the table implementation.
         TableImplementation implementaton = TableImplementation::standard;
-    } bmv2_V1ModelProperties;
+    } bmv2V1ModelProperties;
 
     /// Check whether the table has an action profile implementation.
     bool checkForActionProfile();
@@ -61,7 +57,7 @@ class BMv2_V1ModelTableStepper : public TableStepper {
 
  protected:
     const IR::Expression *computeTargetMatchType(ExecutionState &nextState,
-                                                 const KeyProperties &keyProperties,
+                                                 const TableUtils::KeyProperties &keyProperties,
                                                  TableMatchMap *matches,
                                                  const IR::Expression *hitCondition) override;
 
@@ -72,13 +68,9 @@ class BMv2_V1ModelTableStepper : public TableStepper {
         const std::vector<const IR::ActionListElement *> &tableActionList) override;
 
  public:
-    explicit BMv2_V1ModelTableStepper(BMv2_V1ModelExprStepper *stepper, const IR::P4Table *table);
+    explicit Bmv2V1ModelTableStepper(Bmv2V1ModelExprStepper *stepper, const IR::P4Table *table);
 };
 
-}  // namespace Bmv2
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TABLE_STEPPER_H_ */

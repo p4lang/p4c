@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,9 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <algorithm>
-#include "gtest/gtest.h"
 #include "lib/ordered_set.h"
+
+#include <algorithm>
+
+#include "gtest/gtest.h"
 
 namespace Test {
 
@@ -107,9 +109,9 @@ TEST(ordered_set, insert_erase_iterators) {
 }
 
 TEST(ordered_set, set_intersect) {
-    ordered_set<unsigned> a = { 5, 8, 1, 10, 4 };
-    ordered_set<unsigned> b = { 4, 2, 9, 5, 1 };
-    ordered_set<unsigned> expect = { 1, 4, 5 };
+    ordered_set<unsigned> a = {5, 8, 1, 10, 4};
+    ordered_set<unsigned> b = {4, 2, 9, 5, 1};
+    ordered_set<unsigned> expect = {1, 4, 5};
     ordered_set<unsigned> res;
     std::set_intersection(a.sorted_begin(), a.sorted_end(), b.sorted_begin(), b.sorted_end(),
                           std::inserter(res, res.end()));

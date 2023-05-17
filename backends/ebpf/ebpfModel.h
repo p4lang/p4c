@@ -57,7 +57,7 @@ class EBPFModel : public ::Model::Model {
           hash_table("hash_table"),
           tableImplProperty("implementation"),
           CPacketName("skb"),
-          packet("packet", P4::P4CoreLibrary::instance.packetIn, 0),
+          packet("packet", P4::P4CoreLibrary::instance().packetIn, 0),
           filter(),
           counterIndexType("u32"),
           counterValueType("u32") {}

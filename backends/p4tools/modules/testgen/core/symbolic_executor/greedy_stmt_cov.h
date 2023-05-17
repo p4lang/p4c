@@ -15,7 +15,7 @@ namespace P4Tools::P4Testgen {
 
 /// Greedy path selection strategy, which, at branch points, picks the first execution state which
 /// has covered or potentially will cover program statements which have not been visited yet.
-/// Potential statements are computed using the CollectLatentStatements visitor, which collects
+/// Potential statements are computed using the CoverableNodesScanner visitor, which collects
 /// statements in the top-level statement of the execution state. These statements are latent
 /// because execution is not guaranteed. They may be guarded by an if condition or select
 /// expression. If the strategy does not find a new statement, it falls back to

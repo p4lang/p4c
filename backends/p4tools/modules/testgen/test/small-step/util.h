@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "backends/p4tools/common/core/z3_solver.h"
+#include "backends/p4tools/common/lib/namespace_context.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "ir/declaration.h"
 #include "ir/indexed_vector.h"
@@ -24,7 +25,6 @@
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
-#include "backends/p4tools/modules/testgen/lib/namespace_context.h"
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"
 
 namespace Test {
@@ -32,7 +32,7 @@ namespace Test {
 using Body = P4Tools::P4Testgen::Continuation::Body;
 using Continuation = P4Tools::P4Testgen::Continuation;
 using ExecutionState = P4Tools::P4Testgen::ExecutionState;
-using NamespaceContext = P4Tools::P4Testgen::NamespaceContext;
+using NamespaceContext = P4Tools::NamespaceContext;
 using Return = P4Tools::P4Testgen::Continuation::Return;
 using SmallStepEvaluator = P4Tools::P4Testgen::SmallStepEvaluator;
 using TestgenTarget = P4Tools::P4Testgen::TestgenTarget;

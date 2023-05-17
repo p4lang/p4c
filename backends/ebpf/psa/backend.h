@@ -37,7 +37,7 @@ class PSASwitchBackend {
         : options(options),
           refMap(refMap),
           typeMap(typeMap),
-          corelib(P4::P4CoreLibrary::instance),
+          corelib(P4::P4CoreLibrary::instance()),
           target(target) {
         refMap->setIsV1(options.isv1());
     }

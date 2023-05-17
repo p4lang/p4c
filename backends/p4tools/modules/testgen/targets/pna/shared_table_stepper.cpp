@@ -8,9 +8,7 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
-#include "backends/p4tools/common/lib/util.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
 #include "ir/irutils.h"
@@ -24,10 +22,11 @@
 
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
-#include "backends/p4tools/modules/testgen/lib/collect_latent_statements.h"
+#include "backends/p4tools/modules/testgen/lib/collect_coverable_nodes.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/lib/test_object.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/pna/constants.h"
@@ -37,16 +36,16 @@
 namespace P4Tools::P4Testgen::Pna {
 
 const IR::Expression *SharedPnaTableStepper::computeTargetMatchType(
-    ExecutionState &nextState, const KeyProperties &keyProperties, TableMatchMap *matches,
-    const IR::Expression *hitCondition) {
+    ExecutionState &nextState, const TableUtils::KeyProperties &keyProperties,
+    TableMatchMap *matches, const IR::Expression *hitCondition) {
     const IR::Expression *keyExpr = keyProperties.key->expression;
 
     // TODO: We consider optional match types to be a no-op, but we could make them exact matches.
     if (keyProperties.matchType == PnaConstants::MATCH_KIND_OPT) {
         // We can recover from taint by simply not adding the optional match.
-        // Create a new zombie constant that corresponds to the key expression.
+        // Create a new symbolic variable that corresponds to the key expression.
         cstring keyName = properties.tableName + "_key_" + keyProperties.name;
-        const auto ctrlPlaneKey = nextState.createZombieConst(keyExpr->type, keyName);
+        const auto *ctrlPlaneKey = nextState.createSymbolicVariable(keyExpr->type, keyName);
         if (keyProperties.isTainted) {
             matches->emplace(keyProperties.name,
                              new Optional(keyProperties.key, ctrlPlaneKey, false));
@@ -76,8 +75,8 @@ const IR::Expression *SharedPnaTableStepper::computeTargetMatchType(
             maxKey = IR::getConstant(keyExpr->type, IR::getMaxBvVal(keyExpr->type));
             keyExpr = minKey;
         } else {
-            minKey = nextState.createZombieConst(keyExpr->type, minName);
-            maxKey = nextState.createZombieConst(keyExpr->type, maxName);
+            minKey = nextState.createSymbolicVariable(keyExpr->type, minName);
+            maxKey = nextState.createSymbolicVariable(keyExpr->type, maxName);
         }
         matches->emplace(keyProperties.name, new Range(keyProperties.key, minKey, maxKey));
         return new IR::LAnd(hitCondition, new IR::LAnd(new IR::LAnd(new IR::Lss(minKey, maxKey),
@@ -92,13 +91,11 @@ void SharedPnaTableStepper::evalTableActionProfile(
     const std::vector<const IR::ActionListElement *> &tableActionList) {
     const auto *state = getExecutionState();
 
-    for (size_t idx = 0; idx < tableActionList.size(); idx++) {
-        const auto *action = tableActionList.at(idx);
+    for (const auto *action : tableActionList) {
         // Grab the path from the method call.
         const auto *tableAction = action->expression->checkedTo<IR::MethodCallExpression>();
         // Try to find the action declaration corresponding to the path reference in the table.
-        const auto *actionType = state->getActionDecl(tableAction->method);
-        CHECK_NULL(actionType);
+        const auto *actionType = state->getActionDecl(tableAction);
 
         auto &nextState = state->clone();
         // We get the control plane name of the action we are calling.
@@ -111,15 +108,12 @@ void SharedPnaTableStepper::evalTableActionProfile(
         std::vector<ActionArg> ctrlPlaneArgs;
         for (size_t argIdx = 0; argIdx < parameters->size(); ++argIdx) {
             const auto *parameter = parameters->getParameter(argIdx);
-            // Synthesize a zombie constant here that corresponds to a control plane argument.
+            // Synthesize a symbolic variable here that corresponds to a control plane argument.
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
-            const auto &actionDataVar =
-                Utils::getZombieTableVar(parameter->type, table, "*actionData", idx, argIdx);
             cstring keyName =
                 properties.tableName + "_param_" + actionName + std::to_string(argIdx);
-            const auto &actionArg = nextState.createZombieConst(parameter->type, keyName);
-            nextState.set(actionDataVar, actionArg);
+            const auto &actionArg = nextState.createSymbolicVariable(parameter->type, keyName);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
             // Note how we use the control plane name for the parameter here.
@@ -159,11 +153,11 @@ void SharedPnaTableStepper::evalTableActionProfile(
         replacements.emplace_back(
             new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
         // Some path selection strategies depend on looking ahead and collecting potential
-        // statements. If that is the case, apply the CollectLatentStatements visitor.
-        P4::Coverage::CoverageSet coveredStmts;
+        // statements. If that is the case, apply the CoverableNodesScanner visitor.
+        P4::Coverage::CoverageSet coveredNodes;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
-            nextState.getActionDecl(tableAction->method)
-                ->apply(CollectLatentStatements(coveredStmts, *state));
+            auto collector = CoverableNodesScanner(*state);
+            collector.updateNodeCoverage(actionType, coveredNodes);
         }
 
         nextState.set(getTableHitVar(table), IR::getBoolLiteral(true));
@@ -173,7 +167,7 @@ void SharedPnaTableStepper::evalTableActionProfile(
         tableStream << " Chosen action: " << actionName;
         nextState.add(*new TraceEvents::Generic(tableStream.str()));
         nextState.replaceTopBody(&replacements);
-        getResult()->emplace_back(hitCondition, *state, nextState, coveredStmts);
+        getResult()->emplace_back(hitCondition, *state, nextState, coveredNodes);
     }
 }
 
@@ -181,13 +175,11 @@ void SharedPnaTableStepper::evalTableActionSelector(
     const std::vector<const IR::ActionListElement *> &tableActionList) {
     const auto *state = getExecutionState();
 
-    for (size_t idx = 0; idx < tableActionList.size(); idx++) {
-        const auto *action = tableActionList.at(idx);
+    for (const auto *action : tableActionList) {
         // Grab the path from the method call.
         const auto *tableAction = action->expression->checkedTo<IR::MethodCallExpression>();
         // Try to find the action declaration corresponding to the path reference in the table.
-        const auto *actionType = state->getActionDecl(tableAction->method);
-        CHECK_NULL(actionType);
+        const auto *actionType = state->getActionDecl(tableAction);
 
         auto &nextState = state->clone();
         // We get the control plane name of the action we are calling.
@@ -202,15 +194,12 @@ void SharedPnaTableStepper::evalTableActionSelector(
         std::vector<ActionArg> ctrlPlaneArgs;
         for (size_t argIdx = 0; argIdx < parameters->size(); ++argIdx) {
             const auto *parameter = parameters->getParameter(argIdx);
-            // Synthesize a zombie constant here that corresponds to a control plane argument.
+            // Synthesize a symbolic variable here that corresponds to a control plane argument.
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
-            const auto &actionDataVar =
-                Utils::getZombieTableVar(parameter->type, table, "*actionData", idx, argIdx);
             cstring keyName =
                 properties.tableName + "_param_" + actionName + std::to_string(argIdx);
-            const auto &actionArg = nextState.createZombieConst(parameter->type, keyName);
-            nextState.set(actionDataVar, actionArg);
+            const auto &actionArg = nextState.createSymbolicVariable(parameter->type, keyName);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
             // Note how we use the control plane name for the parameter here.
@@ -258,11 +247,11 @@ void SharedPnaTableStepper::evalTableActionSelector(
         replacements.emplace_back(
             new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
         // Some path selection strategies depend on looking ahead and collecting potential
-        // statements. If that is the case, apply the CollectLatentStatements visitor.
-        P4::Coverage::CoverageSet coveredStmts;
+        // statements. If that is the case, apply the CoverableNodesScanner visitor.
+        P4::Coverage::CoverageSet coveredNodes;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
-            nextState.getActionDecl(tableAction->method)
-                ->apply(CollectLatentStatements(coveredStmts, *state));
+            auto collector = CoverableNodesScanner(*state);
+            collector.updateNodeCoverage(actionType, coveredNodes);
         }
 
         nextState.set(getTableHitVar(table), IR::getBoolLiteral(true));
@@ -272,7 +261,7 @@ void SharedPnaTableStepper::evalTableActionSelector(
         tableStream << " Chosen action: " << actionName;
         nextState.add(*new TraceEvents::Generic(tableStream.str()));
         nextState.replaceTopBody(&replacements);
-        getResult()->emplace_back(hitCondition, *state, nextState, coveredStmts);
+        getResult()->emplace_back(hitCondition, *state, nextState, coveredNodes);
     }
 }
 

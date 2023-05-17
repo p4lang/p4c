@@ -217,7 +217,7 @@ void EBPFProgram::emitLocalVariables(CodeBuilder *builder) {
 
     builder->emitIndent();
     builder->appendFormat("enum %s %s = %s;", errorEnum.c_str(), errorVar.c_str(),
-                          P4::P4CoreLibrary::instance.noError.str());
+                          P4::P4CoreLibrary::instance().noError.str());
     builder->newline();
 
     builder->emitIndent();

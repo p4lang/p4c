@@ -61,8 +61,8 @@ const cstring IApply::applyMethodName = "apply";
 const cstring P4Program::main = "main";
 const cstring Type_Error::error = "error";
 
-int IR::Declaration::nextId = 0;
-int IR::This::nextId = 0;
+long IR::Declaration::nextId = 0;
+long IR::This::nextId = 0;
 
 const Type_Method *P4Control::getConstructorMethodType() const {
     return new Type_Method(getTypeParameters(), type, constructorParams, getName());

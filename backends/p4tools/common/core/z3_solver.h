@@ -1,17 +1,15 @@
 #ifndef BACKENDS_P4TOOLS_COMMON_CORE_Z3_SOLVER_H_
 #define BACKENDS_P4TOOLS_COMMON_CORE_Z3_SOLVER_H_
 
-#include <stddef.h>
 #include <z3++.h>
 
+#include <cstddef>
 #include <iosfwd>
 #include <optional>
 #include <string>
 #include <vector>
 
 #include "backends/p4tools/common/core/solver.h"
-#include "backends/p4tools/common/lib/formulae.h"
-#include "backends/p4tools/common/lib/model.h"
 #include "ir/ir.h"
 #include "ir/json_generator.h"
 #include "lib/cstring.h"
@@ -23,7 +21,7 @@ namespace P4Tools {
 /// A stack of maps, which map Z3-internal expression IDs of declared Z3 variables to their
 /// corresponding P4 state variable. The maps are pushed and pop according to the solver push() and
 /// pop() operations.
-using Z3DeclareVariablesMap = std::vector<ordered_map<unsigned, const StateVariable>>;
+using Z3DeclaredVariablesMap = std::vector<ordered_map<unsigned, const IR::SymbolicVariable *>>;
 
 /// A Z3-based implementation of AbstractSolver. Encapsulates a z3::solver and a z3::context.
 class Z3Solver : public AbstractSolver {
@@ -32,7 +30,7 @@ class Z3Solver : public AbstractSolver {
     friend class Z3SolverAccessor;
 
  public:
-    virtual ~Z3Solver() = default;
+    ~Z3Solver() override = default;
 
     explicit Z3Solver(bool isIncremental = true,
                       std::optional<std::istream *> inOpt = std::nullopt);
@@ -45,20 +43,20 @@ class Z3Solver : public AbstractSolver {
 
     std::optional<bool> checkSat(const std::vector<const Constraint *> &asserts) override;
 
-    const Model *getModel() const override;
+    [[nodiscard]] const SymbolicMapping &getSymbolicMapping() const override;
 
     void toJSON(JSONGenerator & /*json*/) const override;
 
-    bool isInIncrementalMode() const override;
+    [[nodiscard]] bool isInIncrementalMode() const override;
 
     /// Get the actual Z3 solver backing this class.
-    const z3::solver &getZ3Solver() const;
+    [[nodiscard]] const z3::solver &getZ3Solver() const;
 
     /// Get the actual Z3 context that this class uses.
-    const z3::context &getZ3Ctx() const;
+    [[nodiscard]] const z3::context &getZ3Ctx() const;
 
     /// @returns the list of active assertions on this solver.
-    safe_vector<const Constraint *> getAssertions() const;
+    [[nodiscard]] safe_vector<const Constraint *> getAssertions() const;
 
  private:
     /// Resets the internal state: pops all assertions from previous solver
@@ -77,20 +75,16 @@ class Z3Solver : public AbstractSolver {
     /// Converts a P4 type to a Z3 sort.
     z3::sort toSort(const IR::Type *type);
 
-    /// Declares the given state variable to Z3.
+    /// Declares the given symbolic variable to Z3.
     ///
     /// @returns the resulting Z3 variable.
-    z3::expr declareVar(const StateVariable &var);
+    z3::expr declareVar(const IR::SymbolicVariable &var);
 
-    /// Generates a Z3 name for the given variable.
-    std::string generateName(const StateVariable &var) const;
+    /// Generates a Z3 name for the given symbolic variable.
+    [[nodiscard]] static std::string generateName(const IR::SymbolicVariable &var);
 
-    /// Generates a Z3 name for the given variable. The generated name is written to the given
-    /// output stream.
-    void generateName(std::ostringstream &ostr, const StateVariable &var) const;
-
-    /// Converts a Z3 expression to a value with the given type.
-    static const Value *toValue(const z3::expr &e, const IR::Type *type);
+    /// Converts a Z3 expression to an IR::Literal with the given type.
+    static const IR::Literal *toLiteral(const z3::expr &e, const IR::Type *type);
 
     /// Adds pushes for incremental solver.
     /// Increments @a chkIndex and calls push for each occurrence
@@ -108,7 +102,7 @@ class Z3Solver : public AbstractSolver {
 
     /// For each state variable declared in the solver, this maps the variable's Z3 expression ID
     /// to the original state variable.
-    Z3DeclareVariablesMap declaredVarsById;
+    Z3DeclaredVariablesMap declaredVarsById;
 
     /// The sequence of P4 assertions that have been made to the solver.
     safe_vector<const Constraint *> p4Assertions;

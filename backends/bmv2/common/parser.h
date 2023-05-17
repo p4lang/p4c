@@ -49,7 +49,7 @@ class ParserConverter : public Inspector {
  public:
     bool preorder(const IR::P4Parser *p) override;
     explicit ParserConverter(ConversionContext *ctxt, cstring name = "parser")
-        : ctxt(ctxt), name(name), corelib(P4::P4CoreLibrary::instance) {
+        : ctxt(ctxt), name(name), corelib(P4::P4CoreLibrary::instance()) {
         setName("ParserConverter");
     }
 };

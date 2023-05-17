@@ -249,4 +249,14 @@ void ValidateParsedProgram::postorder(const IR::P4Program *program) {
     }
 }
 
+void ValidateParsedProgram::postorder(const IR::Dots *dots) {
+    auto context = getContext();
+    CHECK_NULL(context);
+    if (context->node->is<IR::ListExpression>()) {
+        auto list = context->node->to<IR::ListExpression>();
+        if (context->child_index != (int)list->size() - 1)
+            ::error(ErrorType::ERR_INVALID, "%1% must be the last element", dots);
+    }
+}
+
 }  // namespace P4

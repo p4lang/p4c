@@ -11,9 +11,13 @@ const IR::Node *ConvertVarbits::postorder(IR::Type_Varbits *varbit) {
 }
 
 const IR::Node *ConvertVarbits::postorder(IR::Expression *expr) {
-    auto varBits = ConvertVarbits(refMap, typeMap);
+    auto varBits = ConvertVarbits();
     expr->type = expr->type->apply(varBits)->checkedTo<IR::Type>();
     return expr;
 }
 
+ConvertVarbits::ConvertVarbits() {
+    setName("ConvertVarbits");
+    visitDagOnce = false;
+}
 }  // namespace P4Tools

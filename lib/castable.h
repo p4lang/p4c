@@ -24,7 +24,7 @@ limitations under the License.
 /// Handy type conversion methods that can be inherited by various base classes.
 class ICastable {
  public:
-    virtual ~ICastable() {}
+    virtual ~ICastable() = default;
 
     /// Checks whether the class is of type T. Returns true if this is the case.
     template <typename T>

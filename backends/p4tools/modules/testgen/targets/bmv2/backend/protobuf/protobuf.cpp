@@ -2,7 +2,9 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <fstream>
 #include <iomanip>
+#include <list>
 #include <map>
 #include <optional>
 #include <string>
@@ -27,6 +29,7 @@
 #include "nlohmann/json.hpp"
 
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
+#include "backends/p4tools/modules/testgen/lib/test_object.h"
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
@@ -145,7 +148,7 @@ inja::json Protobuf::getControlPlane(const TestSpec *testSpec) {
         }
 
         // Collect action profiles and selectors associated with the table.
-        checkForTableActionProfile<Bmv2_V1ModelActionProfile, Bmv2_V1ModelActionSelector>(
+        checkForTableActionProfile<Bmv2V1ModelActionProfile, Bmv2V1ModelActionSelector>(
             tblJson, apAsMap, tblConfig);
 
         // Check whether the default action is overridden for this table.
@@ -155,8 +158,7 @@ inja::json Protobuf::getControlPlane(const TestSpec *testSpec) {
     }
 
     // Collect declarations of action profiles.
-    collectActionProfileDeclarations<Bmv2_V1ModelActionProfile>(testSpec, controlPlaneJson,
-                                                                apAsMap);
+    collectActionProfileDeclarations<Bmv2V1ModelActionProfile>(testSpec, controlPlaneJson, apAsMap);
 
     return controlPlaneJson;
 }

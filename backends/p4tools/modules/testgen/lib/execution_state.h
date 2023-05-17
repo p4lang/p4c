@@ -7,14 +7,14 @@
 #include <iostream>
 #include <map>
 #include <optional>
-#include <set>
 #include <stack>
 #include <utility>
 #include <variant>
 #include <vector>
 
 #include "backends/p4tools/common/compiler/reachability.h"
-#include "backends/p4tools/common/lib/formulae.h"
+#include "backends/p4tools/common/core/solver.h"
+#include "backends/p4tools/common/lib/namespace_context.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_event.h"
 #include "ir/declaration.h"
@@ -25,37 +25,13 @@
 #include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
-#include "backends/p4tools/modules/testgen/lib/namespace_context.h"
-#include "backends/p4tools/modules/testgen/lib/test_spec.h"
+#include "backends/p4tools/modules/testgen/lib/test_object.h"
 
 namespace P4Tools::P4Testgen {
 
 /// Represents state of execution after having reached a program point.
 class ExecutionState {
     friend class Test::SmallStepTest;
-
-    /// Specifies the type of the packet size variable.
-    /// This is mostly used to generate bit vector constants.
-    static const IR::Type_Bits packetSizeVarType;
-
-    /// The name of the input packet. The input packet defines the minimum size of the packet
-    /// requires to pass this particular path. Typically, calls such as extract, advance, or
-    /// lookahead cause the input packet to grow.
-    static const IR::Member inputPacketLabel;
-
-    /// The name of packet buffer. The packet buffer defines the data that can be consumed by the
-    /// parser. If the packet buffer is empty, extract/advance/lookahead calls will cause the
-    /// minimum packet size to grow. The packet buffer also forms the final output packet.
-    static const IR::Member packetBufferLabel;
-
-    /// The name of the emit buffer. Each time, emit is called, the emitted content is appended to
-    /// this buffer. Typically, after exiting the control, the emit buffer is appended to the packet
-    /// buffer.
-    static const IR::Member emitBufferLabel;
-
-    /// Canonical name for the payload. This is used for consistent naming when attaching a payload
-    /// to the packet.
-    static const IR::Member payloadLabel;
 
  public:
     class StackFrame {
@@ -76,6 +52,11 @@ class ExecutionState {
               namespaces(namespaces) {}
     };
 
+    /// No move semantics because of constant members. We always need to clone a state.
+    ExecutionState(ExecutionState &&) = delete;
+    ExecutionState &operator=(ExecutionState &&) = delete;
+    ~ExecutionState() = default;
+
  private:
     /// The namespace context in the IR for the current state. The innermost element is the P4
     /// program, representing the top-level namespace.
@@ -84,15 +65,15 @@ class ExecutionState {
     /// The symbolic environment. Maps program variables to their symbolic values.
     SymbolicEnv env;
 
-    /// The list of zombies that have been created in this state.
-    /// These zombies are later fed to the model for completion.
-    std::set<StateVariable> allocatedZombies;
+    /// The list of variables that have been created in this state.
+    /// These variables are later fed to the model for completion.
+    SymbolicSet allocatedSymbolicVariables;
 
     /// The program trace for the current program point (i.e., how we got to the current state).
     std::vector<std::reference_wrapper<const TraceEvent>> trace;
 
-    /// Set of visited statements. Used for code coverage.
-    P4::Coverage::CoverageSet visitedStatements;
+    /// Set of visited nodes. Used for code coverage.
+    P4::Coverage::CoverageSet visitedNodes;
 
     /// The remaining body of the current function being executed.
     ///
@@ -122,11 +103,11 @@ class ExecutionState {
     // which defines control plane match action entries. Once the interpreter has solved for the
     // variables used by these test objects and concretized the values, they can be used to generate
     // a test. Test objects are not constant because they may be manipulated by a target back end.
-    std::map<cstring, std::map<cstring, const TestObject *>> testObjects;
+    std::map<cstring, TestObjectMap> testObjects;
 
     /// The parserErrorLabel is set by the parser to indicate the variable corresponding to the
     /// parser error that is set by various built-in functions such as verify or extract.
-    const IR::Member *parserErrorLabel = nullptr;
+    std::optional<IR::StateVariable> parserErrorLabel = std::nullopt;
 
     /// This variable tracks how much of the input packet has been parsed.
     /// Typically, this is equivalent to the size of the input packet. However, there may be
@@ -170,20 +151,20 @@ class ExecutionState {
     [[nodiscard]] std::optional<const Continuation::Command> getNextCmd() const;
 
     /// @returns the symbolic value of the given state variable.
-    [[nodiscard]] const IR::Expression *get(const StateVariable &var) const;
+    [[nodiscard]] const IR::Expression *get(const IR::StateVariable &var) const;
 
-    /// Checks whether the statement has been visited in this state.
-    void markVisited(const IR::Statement *stmt);
+    /// Checks whether the node has been visited in this state.
+    void markVisited(const IR::Node *node);
 
     /// @returns list of all statements visited before reaching this state.
     [[nodiscard]] const P4::Coverage::CoverageSet &getVisited() const;
 
     /// Sets the symbolic value of the given state variable to the given value. Constant folding
     /// is done on the given value before updating the symbolic state.
-    void set(const StateVariable &var, const IR::Expression *value);
+    void set(const IR::StateVariable &var, const IR::Expression *value);
 
     /// Checks whether the given variable exists in the symbolic environment of this state.
-    [[nodiscard]] bool exists(const StateVariable &var) const;
+    [[nodiscard]] bool exists(const IR::StateVariable &var) const;
 
     /// @see Taint::hasTaint
     bool hasTaint(const IR::Expression *expr) const;
@@ -236,29 +217,37 @@ class ExecutionState {
     [[nodiscard]] const TestObject *getTestObject(cstring category, cstring objectLabel,
                                                   bool checked) const;
 
+    /// Remove a test object from a category.
+    void deleteTestObject(cstring category, cstring objectLabel);
+
+    /// Remove a test category entirely.
+    void deleteTestObjectCategory(cstring category);
+
     /// @returns the uninterpreted test object using the provided category and object label. If
     /// @param checked is enabled, a BUG is thrown if the object label does not exist.
     /// Also casts the test object to the specified type. If the type does not match, a BUG is
     /// thrown.
     template <class T>
-    [[nodiscard]] T *getTestObject(cstring category, cstring objectLabel, bool checked) const {
-        const auto *testObject = getTestObject(category, objectLabel, checked);
+    [[nodiscard]] const T *getTestObject(cstring category, cstring objectLabel) const {
+        const auto *testObject = getTestObject(category, objectLabel, true);
         return testObject->checkedTo<T>();
     }
 
     /// @returns the map of uninterpreted test objects for a specific test category. For example,
     /// all the table entries saved under "tableconfigs".
-    [[nodiscard]] std::map<cstring, const TestObject *> getTestObjectCategory(
-        cstring category) const;
+    [[nodiscard]] TestObjectMap getTestObjectCategory(cstring category) const;
 
+    /// Get the current state of the reachability engine.
     [[nodiscard]] ReachabilityEngineState *getReachabilityEngineState() const;
 
+    /// Update the reachability engine state.
     void setReachabilityEngineState(ReachabilityEngineState *newEngineState);
 
     /* =========================================================================================
      *  Trace events.
      * ========================================================================================= */
  public:
+    /// Add a new trace event to the state.
     void add(const TraceEvent &event);
 
     /* =========================================================================================
@@ -353,12 +342,9 @@ class ExecutionState {
      *  Packet manipulation
      * ========================================================================================= */
  public:
-    /// @returns the bit type of the parser cursor.
-    [[nodiscard]] static const IR::Type_Bits *getPacketSizeVarType();
-
     /// @returns the symbolic constant representing the length of the input to the current parser,
     /// in bits.
-    [[nodiscard]] static const StateVariable &getInputPacketSizeVar();
+    static const IR::SymbolicVariable *getInputPacketSizeVar();
 
     /// @returns the maximum length, in bits, of the packet in the current packet buffer. This is
     /// the network's MTU.
@@ -386,8 +372,9 @@ class ExecutionState {
     [[nodiscard]] int getPacketBufferSize() const;
 
     /// Consumes and @returns a slice from the available packet buffer. If the buffer is empty, this
-    /// will produce zombie constants that are appended to the input packet. This means we generate
-    /// packet content as needed. The returned slice is optional in case one just needs to advance.
+    /// will produce variables constants that are appended to the input packet. This means we
+    /// generate packet content as needed. The returned slice is optional in case one just needs to
+    /// advance.
     const IR::Expression *slicePacketBuffer(int amount);
 
     /// Peeks ahead into the packet buffer. Works similarly to slicePacketBuffer but does NOT
@@ -414,15 +401,11 @@ class ExecutionState {
     /// Append data to the emit buffer.
     void appendToEmitBuffer(const IR::Expression *expr);
 
-    /// @returns the label associated with the payload and sets the type according to the @param.
-    /// TODO: Consider moving this to a separate utility class?
-    [[nodiscard]] static const IR::Member *getPayloadLabel(const IR::Type *t);
-
     /// Set the parser error label to the @param parserError.
-    void setParserErrorLabel(const IR::Member *parserError);
+    void setParserErrorLabel(const IR::StateVariable &parserError);
 
     /// @returns the current parser error label. Throws a BUG if the label is a nullptr.
-    [[nodiscard]] const IR::Member *getCurrentParserErrorLabel() const;
+    [[nodiscard]] const IR::StateVariable &getCurrentParserErrorLabel() const;
 
     /* =========================================================================================
      *  Variables and symbolic constants.
@@ -431,13 +414,15 @@ class ExecutionState {
      *  based on how many times newParser() has been called.
      */
  public:
-    /// @returns the zombies that were allocated in this state
-    [[nodiscard]] const std::set<StateVariable> &getZombies() const;
+    /// @returns the symbolic variables that were allocated in this state
+    [[nodiscard]] const SymbolicSet &getSymbolicVariables() const;
 
-    /// @see Utils::getZombieConst.
-    /// We also place the zombies in the set of allocated zombies of this state.
-    [[nodiscard]] const StateVariable &createZombieConst(const IR::Type *type, cstring name,
-                                                         uint64_t instanceID = 0);
+    /// @see ToolsVariables::getSymbolicVariable.
+    /// We also place the symbolic variables in the set of allocated symbolic variables of this
+    /// state.
+    [[nodiscard]] const IR::SymbolicVariable *createSymbolicVariable(const IR::Type *type,
+                                                                     cstring name,
+                                                                     uint64_t instanceID = 0);
 
     /* =========================================================================================
      *  General utilities involving ExecutionState.
@@ -449,23 +434,21 @@ class ExecutionState {
     /// "prefix.h.ethernet.src_address", ...}).
     /// If @arg validVector is provided, this function also collects the validity bits of the
     /// headers.
-    [[nodiscard]] std::vector<const IR::Member *> getFlatFields(
+    [[nodiscard]] std::vector<IR::StateVariable> getFlatFields(
         const IR::Expression *parent, const IR::Type_StructLike *ts,
-        std::vector<const IR::Member *> *validVector = nullptr) const;
+        std::vector<IR::StateVariable> *validVector = nullptr) const;
 
     /// Gets table type from a member.
     /// @returns nullptr is member type is not a IR::P4Table.
     [[nodiscard]] const IR::P4Table *getTableType(const IR::Expression *expression) const;
 
     /// Gets action type from an expression.
-    [[nodiscard]] const IR::P4Action *getActionDecl(const IR::Expression *expression) const;
+    [[nodiscard]] const IR::P4Action *getActionDecl(
+        const IR::MethodCallExpression *actionExpr) const;
 
-    /// @returns a translation of the path expression into a member.
-    /// This function looks up the path expression in the namespace and tries to find the
-    /// corresponding declaration. It then converts the name of the declaration into a zombie
-    /// constant and returns. This is necessary because we sometimes
-    /// get flat declarations without members (e.g., bit<8> tmp;)
-    [[nodiscard]] const StateVariable &convertPathExpr(const IR::PathExpression *path) const;
+    /// @returns an IR::Expression converted into a StateVariable. Currently only IR::PathExpression
+    /// and IR::Member can be converted into a state variable.
+    [[nodiscard]] static IR::StateVariable convertReference(const IR::Expression *ref);
 
     /// Allocate a new execution state object with the same state as this object.
     /// Returns a reference, not a pointer.

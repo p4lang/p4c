@@ -7,11 +7,9 @@
 #include <vector>
 
 #include "backends/p4tools/common/compiler/convert_hs_index.h"
-#include "backends/p4tools/common/core/solver.h"
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
-#include "backends/p4tools/common/lib/util.h"
+#include "backends/p4tools/common/lib/variables.h"
 #include "frontends/p4/optimizeExpressions.h"
 #include "ir/dump.h"
 #include "ir/id.h"
@@ -187,7 +185,7 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::Expression *headerRef) {
     if (const auto *headerUnion = headerRef->type->to<IR::Type_HeaderUnion>()) {
         for (const auto *field : headerUnion->fields) {
             auto *fieldRef = new IR::Member(field->type, headerRef, field->name);
-            auto variable = Utils::getHeaderValidity(fieldRef);
+            const auto &variable = ToolsVariables::getHeaderValidity(fieldRef);
             BUG_CHECK(state.exists(variable),
                       "At this point, the header validity bit should be initialized.");
             const auto *value = state.getSymbolicEnv().get(variable);
@@ -205,9 +203,9 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::Expression *headerRef) {
         result->emplace_back(state);
         return false;
     }
-    auto variable = Utils::getHeaderValidity(headerRef);
+    const auto &variable = ToolsVariables::getHeaderValidity(headerRef);
     BUG_CHECK(state.exists(variable),
-              "At this point, the header validity bit should be initialized.");
+              "At this point, the header validity bit %1% should be initialized.", variable);
     state.replaceTopBody(Continuation::Return(variable));
     result->emplace_back(state);
     return false;
@@ -215,7 +213,7 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::Expression *headerRef) {
 
 void AbstractStepper::setHeaderValidity(const IR::Expression *expr, bool validity,
                                         ExecutionState &nextState) {
-    auto headerRefValidity = Utils::getHeaderValidity(expr);
+    const auto &headerRefValidity = ToolsVariables::getHeaderValidity(expr);
     nextState.set(headerRefValidity, IR::getBoolLiteral(validity));
 
     // In some cases, the header may be part of a union.
@@ -240,11 +238,11 @@ void AbstractStepper::setHeaderValidity(const IR::Expression *expr, bool validit
         return;
     }
     const auto *exprType = expr->type->checkedTo<IR::Type_StructLike>();
-    std::vector<const IR::Member *> validityVector;
+    std::vector<IR::StateVariable> validityVector;
     auto fieldsVector = nextState.getFlatFields(expr, exprType, &validityVector);
     // The header is going to be invalid. Set all fields to taint constants.
     // TODO: Should we make this target specific? Some targets set the header fields to 0.
-    for (const auto *field : fieldsVector) {
+    for (const auto &field : fieldsVector) {
         nextState.set(field, programInfo.createTargetUninitialized(field->type, true));
     }
 }
@@ -279,7 +277,8 @@ void generateStackAssigmentStatement(ExecutionState &nextState,
     const auto *rightArrIndex = HSIndexToMember::produceStackIndex(elemType, stackRef, rightIndex);
 
     // Check right header validity.
-    const auto *value = nextState.getSymbolicEnv().get(Utils::getHeaderValidity(rightArrIndex));
+    const auto *value =
+        nextState.getSymbolicEnv().get(ToolsVariables::getHeaderValidity(rightArrIndex));
     if (!value->checkedTo<IR::BoolLiteral>()->value) {
         replacements.emplace_back(generateStacksetValid(stackRef, leftIndex, false));
         return;
@@ -325,8 +324,8 @@ bool AbstractStepper::stepStackPushPopFront(const IR::Expression *stackRef,
     return false;
 }
 
-const Value *AbstractStepper::evaluateExpression(const IR::Expression *expr,
-                                                 std::optional<const IR::Expression *> cond) const {
+const IR::Literal *AbstractStepper::evaluateExpression(
+    const IR::Expression *expr, std::optional<const IR::Expression *> cond) const {
     BUG_CHECK(solver.isInIncrementalMode(),
               "Currently, expression valuation only supports an incremental solver.");
     auto constraints = state.getPathConstraint();
@@ -339,30 +338,30 @@ const Value *AbstractStepper::evaluateExpression(const IR::Expression *expr,
     auto solverResult = solver.checkSat(constraints);
     // If the solver can find a solution under the given condition, get the model and return the
     // value.
-    const Value *result = nullptr;
+    const IR::Literal *result = nullptr;
     if (solverResult != std::nullopt && *solverResult) {
-        auto model = *solver.getModel();
+        auto model = Model(solver.getSymbolicMapping());
         model.complete(expr);
         result = model.evaluate(expr);
     }
     return result;
 }
 
-void AbstractStepper::setTargetUninitialized(ExecutionState &nextState, const IR::Member *ref,
-                                             bool forceTaint) const {
+void AbstractStepper::setTargetUninitialized(ExecutionState &nextState,
+                                             const IR::StateVariable &ref, bool forceTaint) const {
     // Resolve the type of the left-and assignment, if it is a type name.
     const auto *refType = nextState.resolveType(ref->type);
     if (const auto *structType = refType->to<const IR::Type_StructLike>()) {
-        std::vector<const IR::Member *> validFields;
+        std::vector<IR::StateVariable> validFields;
         auto fields = nextState.getFlatFields(ref, structType, &validFields);
         // We also need to initialize the validity bits of the headers. These are false.
-        for (const auto *validField : validFields) {
+        for (const auto &validField : validFields) {
             nextState.set(validField, IR::getBoolLiteral(false));
         }
-        // For each field in the undefined struct, we create a new zombie variable.
-        // If the variable does not have an initializer we need to create a new zombie for it.
+        // For each field in the undefined struct, we create a new symbolic variable.
+        // If the variable does not have an initializer we need to create a new variable for it.
         // For now we just use the name directly.
-        for (const auto *field : fields) {
+        for (const auto &field : fields) {
             nextState.set(field, programInfo.createTargetUninitialized(field->type, forceTaint));
         }
     } else if (const auto *baseType = refType->to<const IR::Type_Base>()) {
@@ -375,21 +374,21 @@ void AbstractStepper::setTargetUninitialized(ExecutionState &nextState, const IR
 void AbstractStepper::declareStructLike(ExecutionState &nextState, const IR::Expression *parentExpr,
                                         const IR::Type_StructLike *structType,
                                         bool forceTaint) const {
-    std::vector<const IR::Member *> validFields;
+    std::vector<IR::StateVariable> validFields;
     auto fields = nextState.getFlatFields(parentExpr, structType, &validFields);
     // We also need to initialize the validity bits of the headers. These are false.
-    for (const auto *validField : validFields) {
+    for (const auto &validField : validFields) {
         nextState.set(validField, IR::getBoolLiteral(false));
     }
-    // For each field in the undefined struct, we create a new zombie variable.
-    // If the variable does not have an initializer we need to create a new zombie for it.
+    // For each field in the undefined struct, we create a new symbolic variable.
+    // If the variable does not have an initializer we need to create a new variable for it.
     // For now we just use the name directly.
-    for (const auto *field : fields) {
+    for (const auto &field : fields) {
         nextState.set(field, programInfo.createTargetUninitialized(field->type, forceTaint));
     }
 }
 
-void AbstractStepper::declareBaseType(ExecutionState &nextState, const IR::Expression *paramPath,
+void AbstractStepper::declareBaseType(ExecutionState &nextState, const IR::StateVariable &paramPath,
                                       const IR::Type_Base *baseType) const {
     nextState.set(paramPath, programInfo.createTargetUninitialized(baseType, false));
 }

@@ -7,9 +7,8 @@
 #include <vector>
 
 #include "backends/p4tools/common/core/solver.h"
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
-#include "backends/p4tools/common/lib/util.h"
+#include "backends/p4tools/common/lib/variables.h"
 #include "ir/declaration.h"
 #include "ir/irutils.h"
 #include "ir/node.h"
@@ -24,7 +23,7 @@
 #include "backends/p4tools/modules/testgen/core/small_step/abstract_stepper.h"
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
-#include "backends/p4tools/modules/testgen/lib/collect_latent_statements.h"
+#include "backends/p4tools/modules/testgen/lib/collect_coverable_nodes.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
@@ -79,21 +78,12 @@ bool ExprStepper::preorder(const IR::Member *member) {
         return false;
     }
 
-    // TODO: Do we need to handle non-numeric, non-boolean expressions?
+    // TODO: Do we want to handle non-numeric, non-boolean expressions?
     BUG_CHECK(member->type->is<IR::Type::Bits>() || member->type->is<IR::Type::Boolean>() ||
                   member->type->is<IR::Extracted_Varbits>(),
               "Non-numeric, non-boolean member expression: %1% Type: %2%", member,
               member->type->node_type_name());
 
-    // Check our assumption that this is a chain of member expressions terminating in a
-    // PathExpression.
-    checkMemberInvariant(member);
-
-    // This case may happen when we directly assign taint, that is not bound in the symbolic
-    // environment to an expression.
-    if (SymbolicEnv::isSymbolicValue(member)) {
-        return stepSymbolicValue(member);
-    }
     return stepSymbolicValue(state.get(member));
 }
 
@@ -102,17 +92,19 @@ void ExprStepper::evalActionCall(const IR::P4Action *action, const IR::MethodCal
     BUG_CHECK(actionNameSpace, "Does not instantiate an INamespace: %1%", actionNameSpace);
     auto &nextState = state.clone();
     // If the action has arguments, these are usually directionless control plane input.
-    // We introduce a zombie variable that takes the argument value. This value is either
+    // We introduce a symbolic variable that takes the argument value. This value is either
     // provided by a constant entry or synthesized by us.
     for (size_t argIdx = 0; argIdx < call->arguments->size(); ++argIdx) {
         const auto &parameters = action->parameters;
         const auto *param = parameters->getParameter(argIdx);
-        const auto *paramType = param->type;
+        const auto *paramType = nextState.resolveType(param->type);
+        // We do not use the control plane name here. We assume that UniqueParameters and
+        // UniqueNames ensure uniqueness of parameter names.
         const auto paramName = param->name;
         BUG_CHECK(param->direction == IR::Direction::None,
                   "%1%: Only directionless action parameters are supported at this point. ",
                   action);
-        const auto &tableActionDataVar = Utils::getZombieVar(paramType, 0, paramName);
+        const auto *tableActionDataVar = new IR::PathExpression(paramType, new IR::Path(paramName));
         const auto *curArg = call->arguments->at(argIdx)->expression;
         nextState.set(tableActionDataVar, curArg);
     }
@@ -126,7 +118,6 @@ bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
     logStep(call);
     // A method call expression represents an invocation of an action, a table, an extern, or
     // setValid/setInvalid.
-
     // Handle method calls. These are either table invocations or extern calls.
     if (call->method->type->is<IR::Type_Method>()) {
         if (const auto *path = call->method->to<IR::PathExpression>()) {
@@ -195,9 +186,10 @@ bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
         }
 
         BUG("Unknown method call: %1% of type %2%", call->method, call->method->node_type_name());
+    } else if (call->method->type->is<IR::Type_Action>()) {
         // Handle action calls. Actions are called by tables and are not inlined, unlike
         // functions.
-    } else if (const auto *action = state.getActionDecl(call->method)) {
+        const auto *action = state.getActionDecl(call);
         evalActionCall(action, call);
         return false;
     }
@@ -242,13 +234,14 @@ bool ExprStepper::preorder(const IR::Mux *mux) {
 
         auto &nextState = state.clone();
         // Some path selection strategies depend on looking ahead and collecting potential
-        // statements. If that is the case, apply the CollectLatentStatements visitor.
-        P4::Coverage::CoverageSet coveredStmts;
+        // statements. If that is the case, apply the CoverableNodesScanner visitor.
+        P4::Coverage::CoverageSet coveredNodes;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
-            expr->apply(CollectLatentStatements(coveredStmts, state));
+            auto collector = CoverableNodesScanner(state);
+            collector.updateNodeCoverage(expr, coveredNodes);
         }
         nextState.replaceTopBody(Continuation::Return(expr));
-        result->emplace_back(cond, state, nextState, coveredStmts);
+        result->emplace_back(cond, state, nextState, coveredNodes);
     }
 
     return false;
@@ -271,8 +264,7 @@ bool ExprStepper::preorder(const IR::PathExpression *pathExpression) {
         return false;
     }
     // Otherwise convert the path expression into a qualified member and return it.
-    auto pathRef = nextState.convertPathExpr(pathExpression);
-    nextState.replaceTopBody(Continuation::Return(pathRef));
+    nextState.replaceTopBody(Continuation::Return(nextState.get(pathExpression)));
     result->emplace_back(nextState);
     return false;
 }
@@ -349,6 +341,16 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
         stepNoMatch();
         return false;
     }
+    if (!SymbolicEnv::isSymbolicValue(selectExpression->select)) {
+        // Evaluate the expression being selected.
+        return stepToListSubexpr(selectExpression->select, result, state,
+                                 [selectExpression](const IR::ListExpression *listExpr) {
+                                     auto *result = selectExpression->clone();
+                                     result->select = listExpr;
+                                     return Continuation::Return(result);
+                                 });
+    }
+
     for (size_t idx = 0; idx < selectCases.size(); ++idx) {
         const auto *selectCase = selectCases.at(idx);
         // Getting P4ValueSet from PathExpression , to highlight a particular case of processing
@@ -381,16 +383,6 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
     for (const auto *selectCase : selectCases) {
         auto &nextState = state.clone();
 
-        if (!SymbolicEnv::isSymbolicValue(selectExpression->select)) {
-            // Evaluate the expression being selected.
-            return stepToListSubexpr(selectExpression->select, result, state,
-                                     [selectExpression](const IR::ListExpression *listExpr) {
-                                         auto *result = selectExpression->clone();
-                                         result->select = listExpr;
-                                         return Continuation::Return(result);
-                                     });
-        }
-
         // Handle case where the first select case matches: proceed to the next parser state,
         // guarded by its path condition.
         const auto *matchCondition = GenEq::equate(selectExpression->select, selectCase->keyset);
@@ -405,16 +397,17 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
                 selectExpression);
         }
 
-        nextState.replaceTopBody(Continuation::Return(selectCase->state));
+        const auto *decl = state.findDecl(selectCase->state)->getNode();
+        nextState.replaceTopBody(Continuation::Return(decl));
         // Some path selection strategies depend on looking ahead and collecting potential
-        // statements. If that is the case, apply the CollectLatentStatements visitor.
-        P4::Coverage::CoverageSet coveredStmts;
+        // statements. If that is the case, apply the CoverableNodesScanner visitor.
+        P4::Coverage::CoverageSet coveredNodes;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
-            const auto *decl = state.findDecl(selectCase->state)->getNode();
-            decl->apply(CollectLatentStatements(coveredStmts, state));
+            auto collector = CoverableNodesScanner(state);
+            collector.updateNodeCoverage(decl, coveredNodes);
         }
         result->emplace_back(new IR::LAnd(missCondition, matchCondition), state, nextState,
-                             coveredStmts);
+                             coveredNodes);
         missCondition = new IR::LAnd(new IR::LNot(matchCondition), missCondition);
     }
 

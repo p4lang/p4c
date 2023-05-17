@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 
 import argparse
-from pathlib import Path
-import sys
 import re
+import sys
 from operator import attrgetter
+from pathlib import Path
 
-import pandas as pd
-import numpy as np
-import seaborn as sns
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
 import tikzplotlib
 
 # Append tools to the import path.
@@ -22,11 +22,13 @@ OUTPUT_DIR = FILE_DIR.joinpath("../../../build/plots")
 
 PARSER = argparse.ArgumentParser()
 
-PARSER.add_argument("-i",
-                    "--input-dir",
-                    dest="input_dir",
-                    help="The folder containing measurement data.",
-                    required=True)
+PARSER.add_argument(
+    "-i",
+    "--input-dir",
+    dest="input_dir",
+    help="The folder containing measurement data.",
+    required=True,
+)
 
 PARSER.add_argument(
     "-o",
@@ -38,18 +40,17 @@ PARSER.add_argument(
 
 
 def plot_preconditions():
-
     # Load the example car crash dataset
     preconditions = [
-        "None", "1500B pkt", "P4-constraints", "P4-constraints + 1500B pkt",
+        "None",
+        "1500B pkt",
+        "P4-constraints",
+        "P4-constraints + 1500B pkt",
         "P4-constraints + 1500B IPv4 pkt",
-        "P4-constraints + 1500B IPv4-TCP pkt"
+        "P4-constraints + 1500B IPv4-TCP pkt",
     ]
     data = [237846, 178384, 135719, 101789, 50231, 12557]
-    target_frame = pd.DataFrame({
-        "Precondition": preconditions,
-        "Number of tests": data
-    })
+    target_frame = pd.DataFrame({"Precondition": preconditions, "Number of tests": data})
     _, ax = plt.subplots(figsize=(4, 1.2))
     ax = sns.barplot(
         x="Number of tests",
@@ -59,15 +60,18 @@ def plot_preconditions():
         linewidth=0.5,
         palette=sns.color_palette("RdYlGn"),
         # facecolor=(0,0,0,0),
-        edgecolor="0")
+        edgecolor="0",
+    )
     hatches = ["/", ".", "//", "o", "x", "\\", "-", "+", "*", "O"]
     for idx, plot_bar in enumerate(ax.patches):
         # plot_bar.set_hatch(hatches[idx])
-        ax.text(plot_bar.get_width() + 3000,
-                plot_bar.get_y() + 0.22,
-                preconditions[idx],
-                ha="left",
-                va="top")
+        ax.text(
+            plot_bar.get_width() + 3000,
+            plot_bar.get_y() + 0.22,
+            preconditions[idx],
+            ha="left",
+            va="top",
+        )
     ax.set(yticklabels=[], yticks=[])
     plt.savefig("precondition_reduction.png", bbox_inches="tight")
     plt.savefig("precondition_reduction.pdf", bbox_inches="tight")
@@ -85,8 +89,7 @@ def get_strategy_data(input_dir):
         strategy_files = folder.glob("*_coverage_over_time.csv")
         strategy_data = {}
         for strategy_file in strategy_files:
-            m = re.search(f"{program_name}_(.+?)_coverage_over_time",
-                          strategy_file.stem)
+            m = re.search(f"{program_name}_(.+?)_coverage_over_time", strategy_file.stem)
             if m:
                 strategy_name = m.group(1)
             else:
@@ -111,28 +114,18 @@ def plot_strategies(args, extra_args):
         bins = np.arange(
             0,
             candidate_data.Time.max() + candidate_data.Time.max() / 1000,
-            candidate_data.Time.max() / 1000)
-        candidate_data["Minutes"] = pd.cut(candidate_data.Time,
-                                           bins.astype(np.int64),
-                                           include_lowest=True).map(
-                                               attrgetter('right'))
-        candidate_data.Minutes = pd.to_timedelta(candidate_data.Minutes,
-                                                 unit="nanoseconds")
-        candidate_data.Minutes = candidate_data.Minutes / pd.Timedelta(
-            minutes=1)
+            candidate_data.Time.max() / 1000,
+        )
+        candidate_data["Minutes"] = pd.cut(
+            candidate_data.Time, bins.astype(np.int64), include_lowest=True
+        ).map(attrgetter("right"))
+        candidate_data.Minutes = pd.to_timedelta(candidate_data.Minutes, unit="nanoseconds")
+        candidate_data.Minutes = candidate_data.Minutes / pd.Timedelta(minutes=1)
         candidate_data = candidate_data[candidate_data.Minutes <= 60]
         pruned_data.append(candidate_data)
     concat_data = pd.concat(pruned_data)
-    ax = sns.lineplot(x="Minutes",
-                      y="Coverage",
-                      hue="Strategy",
-                      data=concat_data,
-                      errorbar="sd")
-    sns.move_legend(ax,
-                    "lower center",
-                    bbox_to_anchor=(.5, 0.98),
-                    ncol=2,
-                    title=None)
+    ax = sns.lineplot(x="Minutes", y="Coverage", hue="Strategy", data=concat_data, errorbar="sd")
+    sns.move_legend(ax, "lower center", bbox_to_anchor=(0.5, 0.98), ncol=2, title=None)
     plt.savefig("strategy_coverage.png", bbox_inches="tight")
     plt.savefig("strategy_coverage.pdf", bbox_inches="tight")
     plt.gcf().clear()

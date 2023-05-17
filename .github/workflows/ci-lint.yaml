@@ -35,8 +35,16 @@ jobs:
       run: |
        tools/ci-build.sh
 
-    - name: Run cpplint.
-      run: make cpplint -C build
+    - name: Run cpplint on C/C++ files.
+      run: make cpplint
+      working-directory: ./build
 
-    - name: Run clang-format.
-      run: make clang-format -C build
+    - name: Run clang-format on C/C++ files.
+      run: make clang-format
+      working-directory: ./build
+
+    - name: Run black and isort on Python files.
+      run: |
+        make black
+        make isort
+      working-directory: ./build

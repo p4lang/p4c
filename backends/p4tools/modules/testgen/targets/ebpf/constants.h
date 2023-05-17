@@ -1,20 +1,16 @@
 #ifndef TESTGEN_TARGETS_EBPF_CONSTANTS_H_
 #define TESTGEN_TARGETS_EBPF_CONSTANTS_H_
 
-namespace P4Tools {
+#include "ir/ir.h"
 
-namespace P4Testgen {
-
-namespace EBPF {
+namespace P4Tools::P4Testgen::EBPF {
 
 class EBPFConstants {
  public:
+    /// eBPF-internal drop variable.
+    static const IR::PathExpression ACCEPT_VAR;
 };
 
-}  // namespace EBPF
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::EBPF
 
 #endif /* TESTGEN_TARGETS_EBPF_CONSTANTS_H_ */

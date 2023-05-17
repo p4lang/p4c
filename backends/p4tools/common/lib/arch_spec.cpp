@@ -1,12 +1,10 @@
-#include "backends/p4tools/modules/testgen/core/arch_spec.h"
+#include "backends/p4tools/common/lib/arch_spec.h"
 
 #include <utility>
 
 #include "lib/exceptions.h"
 
 namespace P4Tools {
-
-namespace P4Testgen {
 
 ArchSpec::ArchSpec(cstring packageName, const std::vector<ArchMember> &archVectorInput)
     : packageName(packageName) {
@@ -52,6 +50,4 @@ const ArchSpec::ArchMember *ArchSpec::getArchMember(size_t blockIndex) const {
 size_t ArchSpec::getArchVectorSize() const { return archVector.size(); }
 
 cstring ArchSpec::getPackageName() const { return packageName; }
-}  // namespace P4Testgen
-
 }  // namespace P4Tools

@@ -1,7 +1,6 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/target.h"
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <map>
 #include <vector>
 
@@ -15,40 +14,34 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
-#include "backends/p4tools/modules/testgen/lib/namespace_context.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/cmd_stepper.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/constants.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/expr_stepper.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/program_info.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace Bmv2 {
+namespace P4Tools::P4Testgen::Bmv2 {
 
 /* =============================================================================================
- *  BMv2_V1ModelTestgenTarget implementation
+ *  Bmv2V1ModelTestgenTarget implementation
  * ============================================================================================= */
 
-BMv2_V1ModelTestgenTarget::BMv2_V1ModelTestgenTarget() : TestgenTarget("bmv2", "v1model") {}
+Bmv2V1ModelTestgenTarget::Bmv2V1ModelTestgenTarget() : TestgenTarget("bmv2", "v1model") {}
 
-void BMv2_V1ModelTestgenTarget::make() {
-    static BMv2_V1ModelTestgenTarget *INSTANCE = nullptr;
+void Bmv2V1ModelTestgenTarget::make() {
+    static Bmv2V1ModelTestgenTarget *INSTANCE = nullptr;
     if (INSTANCE == nullptr) {
-        INSTANCE = new BMv2_V1ModelTestgenTarget();
+        INSTANCE = new Bmv2V1ModelTestgenTarget();
     }
 }
 
-const BMv2_V1ModelProgramInfo *BMv2_V1ModelTestgenTarget::initProgram_impl(
+const Bmv2V1ModelProgramInfo *Bmv2V1ModelTestgenTarget::initProgramImpl(
     const IR::P4Program *program, const IR::Declaration_Instance *mainDecl) const {
     // The blocks in the main declaration are just the arguments in the constructor call.
     // Convert mainDecl->arguments into a vector of blocks, represented as constructor-call
     // expressions.
-    const auto *ns = NamespaceContext::Empty->push(program);
     std::vector<const IR::Type_Declaration *> blocks;
-    argumentsToTypeDeclarations(ns, mainDecl->arguments, blocks);
+    argumentsToTypeDeclarations(program, mainDecl->arguments, blocks);
 
     // We should have six arguments.
     BUG_CHECK(blocks.size() == 6, "%1%: The BMV2 architecture requires 6 pipes. Received %2%.",
@@ -61,7 +54,7 @@ const BMv2_V1ModelProgramInfo *BMv2_V1ModelTestgenTarget::initProgram_impl(
     for (size_t idx = 0; idx < blocks.size(); ++idx) {
         const auto *declType = blocks.at(idx);
 
-        auto canonicalName = archSpec.getArchMember(idx)->blockName;
+        auto canonicalName = ARCH_SPEC.getArchMember(idx)->blockName;
         programmableBlocks.emplace(canonicalName, declType);
 
         if (idx < 3) {
@@ -71,28 +64,29 @@ const BMv2_V1ModelProgramInfo *BMv2_V1ModelTestgenTarget::initProgram_impl(
         }
     }
 
-    return new BMv2_V1ModelProgramInfo(program, programmableBlocks, declIdToGress);
+    return new Bmv2V1ModelProgramInfo(program, programmableBlocks, declIdToGress);
 }
 
-Bmv2TestBackend *BMv2_V1ModelTestgenTarget::getTestBackend_impl(
-    const ProgramInfo &programInfo, SymbolicExecutor &symbex, const std::filesystem::path &testPath,
-    std::optional<uint32_t> seed) const {
+Bmv2TestBackend *Bmv2V1ModelTestgenTarget::getTestBackendImpl(const ProgramInfo &programInfo,
+                                                              SymbolicExecutor &symbex,
+                                                              const std::filesystem::path &testPath,
+                                                              std::optional<uint32_t> seed) const {
     return new Bmv2TestBackend(programInfo, symbex, testPath, seed);
 }
 
-int BMv2_V1ModelTestgenTarget::getPortNumWidth_bits_impl() const { return 9; }
+int Bmv2V1ModelTestgenTarget::getPortNumWidthBitsImpl() const { return 9; }
 
-BMv2_V1ModelCmdStepper *BMv2_V1ModelTestgenTarget::getCmdStepper_impl(
+Bmv2V1ModelCmdStepper *Bmv2V1ModelTestgenTarget::getCmdStepperImpl(
     ExecutionState &state, AbstractSolver &solver, const ProgramInfo &programInfo) const {
-    return new BMv2_V1ModelCmdStepper(state, solver, programInfo);
+    return new Bmv2V1ModelCmdStepper(state, solver, programInfo);
 }
 
-BMv2_V1ModelExprStepper *BMv2_V1ModelTestgenTarget::getExprStepper_impl(
+Bmv2V1ModelExprStepper *Bmv2V1ModelTestgenTarget::getExprStepperImpl(
     ExecutionState &state, AbstractSolver &solver, const ProgramInfo &programInfo) const {
-    return new BMv2_V1ModelExprStepper(state, solver, programInfo);
+    return new Bmv2V1ModelExprStepper(state, solver, programInfo);
 }
 
-const ArchSpec BMv2_V1ModelTestgenTarget::archSpec =
+const ArchSpec Bmv2V1ModelTestgenTarget::ARCH_SPEC =
     ArchSpec("V1Switch", {// parser Parser<H, M>(packet_in b,
                           //                     out H parsedHdr,
                           //                     inout M meta,
@@ -115,10 +109,6 @@ const ArchSpec BMv2_V1ModelTestgenTarget::archSpec =
                           // control Deparser<H>(packet_out b, in H hdr);
                           {"Deparser", {nullptr, "*hdr"}}});
 
-const ArchSpec *BMv2_V1ModelTestgenTarget::getArchSpecImpl() const { return &archSpec; }
+const ArchSpec *Bmv2V1ModelTestgenTarget::getArchSpecImpl() const { return &ARCH_SPEC; }
 
-}  // namespace Bmv2
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::Bmv2

@@ -99,7 +99,7 @@ void EBPFTableImplementationPSA::verifyTableNoDefaultAction(const EBPFTablePSA *
     auto ac = mi->to<P4::ActionCall>();
     BUG_CHECK(ac != nullptr, "%1%: expected an action call", mi);
 
-    if (ac->action->name.originalName != P4::P4CoreLibrary::instance.noAction.name) {
+    if (ac->action->name.originalName != P4::P4CoreLibrary::instance().noAction.name) {
         ::error(ErrorType::ERR_UNSUPPORTED,
                 "%1%: Default action cannot be defined for table %2% with implementation %3%",
                 defaultAction, instance->table->container->name, declaration);
@@ -276,7 +276,7 @@ void EBPFActionSelectorPSA::emitInitializer(CodeBuilder *builder) {
         builder->appendFormat("struct %s %s = ", valueTypeName.c_str(), value.c_str());
         builder->blockStart();
         builder->emitIndent();
-        if (action->name.originalName == P4::P4CoreLibrary::instance.noAction.name) {
+        if (action->name.originalName == P4::P4CoreLibrary::instance().noAction.name) {
             builder->append(".action = 0,");
         } else {
             builder->appendFormat(".action = %s,", p4ActionToActionIDName(action));

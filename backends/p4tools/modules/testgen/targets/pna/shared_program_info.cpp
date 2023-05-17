@@ -2,14 +2,13 @@
 
 #include <utility>
 
-#include "backends/p4tools/common/lib/util.h"
+#include "backends/p4tools/common/lib/arch_spec.h"
 #include "ir/id.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/null.h"
 
-#include "backends/p4tools/modules/testgen/core/arch_spec.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
@@ -31,24 +30,17 @@ const ordered_map<cstring, const IR::Type_Declaration *>
     return &programmableBlocks;
 }
 
-const IR::Member *SharedPnaProgramInfo::getTargetInputPortVar() const {
-    return new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidth_bits()),
-                          new IR::PathExpression("*parser_istd"), "input_port");
+const IR::StateVariable &SharedPnaProgramInfo::getTargetInputPortVar() const {
+    return *new IR::StateVariable(
+        new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidthBits()),
+                       new IR::PathExpression("*parser_istd"), "input_port"));
 }
 
-const IR::Member *SharedPnaProgramInfo::getTargetOutputPortVar() const {
-    return &PnaConstants::OUTPUT_PORT_VAR;
+const IR::StateVariable &SharedPnaProgramInfo::getTargetOutputPortVar() const {
+    return *new IR::StateVariable(&PnaConstants::OUTPUT_PORT_VAR);
 }
 
 const IR::Expression *SharedPnaProgramInfo::dropIsActive() const { return &PnaConstants::DROP_VAR; }
-
-const IR::Expression *SharedPnaProgramInfo::createTargetUninitialized(const IR::Type *type,
-                                                                      bool forceTaint) const {
-    if (forceTaint) {
-        return Utils::getTaintExpression(type);
-    }
-    return IR::getDefaultValue(type);
-}
 
 const IR::Type_Bits *SharedPnaProgramInfo::getParserErrorType() const { return &PARSER_ERR_BITS; }
 
@@ -66,7 +58,7 @@ const IR::PathExpression *SharedPnaProgramInfo::getBlockParam(cstring blockLabel
     const auto *paramType = param->type;
     // For convenience, resolve type names.
     if (const auto *tn = paramType->to<IR::Type_Name>()) {
-        paramType = resolveProgramType(tn);
+        paramType = resolveProgramType(program, tn);
     }
 
     const auto *archSpec = TestgenTarget::getArchSpec();

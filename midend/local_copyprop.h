@@ -93,6 +93,7 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     bool hasSideEffects(const IR::Expression *e) {
         return bool(::hasSideEffects(refMap, typeMap, e));
     }
+    bool isHeaderUnionIsValid(const IR::Expression *e);
 
     void visit_local_decl(const IR::Declaration_Variable *);
     const IR::Node *postorder(IR::Declaration_Variable *) override;

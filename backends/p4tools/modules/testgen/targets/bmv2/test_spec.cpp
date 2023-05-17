@@ -8,98 +8,146 @@
 namespace P4Tools::P4Testgen::Bmv2 {
 
 /* =========================================================================================
- *  Bmv2Register
+ *  IndexExpression
  * ========================================================================================= */
 
-Bmv2RegisterValue::Bmv2RegisterValue(const IR::Expression *initialValue)
-    : initialValue(initialValue) {}
-
-void Bmv2RegisterValue::addRegisterCondition(Bmv2RegisterCondition cond) {
-    registerConditions.push_back(cond);
-}
-
-const IR::Expression *Bmv2RegisterValue::getInitialValue() const { return initialValue; }
-
-cstring Bmv2RegisterValue::getObjectName() const { return "Bmv2RegisterValue"; }
-
-const IR::Expression *Bmv2RegisterValue::getCurrentValue(const IR::Expression *index) const {
-    const IR::Expression *baseExpr = initialValue;
-    for (const auto &bmv2registerValue : registerConditions) {
-        const auto *storedIndex = bmv2registerValue.index;
-        const auto *storedVal = bmv2registerValue.value;
-        baseExpr =
-            new IR::Mux(baseExpr->type, new IR::Equ(storedIndex, index), storedVal, baseExpr);
-    }
-    return baseExpr;
-}
-
-const IR::Constant *Bmv2RegisterValue::getEvaluatedValue() const {
-    const auto *constant = initialValue->to<IR::Constant>();
-    BUG_CHECK(constant, "Variable is not a constant, has the test object %1% been evaluated?",
-              getObjectName());
-    return constant;
-}
-
-const Bmv2RegisterValue *Bmv2RegisterValue::evaluate(const Model &model) const {
-    const auto *evaluatedValue = model.evaluate(initialValue);
-    auto *evaluatedRegisterValue = new Bmv2RegisterValue(evaluatedValue);
-    const std::vector<ActionArg> evaluatedConditions;
-    for (const auto &cond : registerConditions) {
-        evaluatedRegisterValue->addRegisterCondition(*cond.evaluate(model));
-    }
-    return evaluatedRegisterValue;
-}
-
-Bmv2RegisterCondition::Bmv2RegisterCondition(const IR::Expression *index,
-                                             const IR::Expression *value)
+IndexExpression::IndexExpression(const IR::Expression *index, const IR::Expression *value)
     : index(index), value(value) {}
 
-const IR::Constant *Bmv2RegisterCondition::getEvaluatedValue() const {
+const IR::Constant *IndexExpression::getEvaluatedValue() const {
     const auto *constant = value->to<IR::Constant>();
     BUG_CHECK(constant, "Variable is not a constant, has the test object %1% been evaluated?",
               getObjectName());
     return constant;
 }
 
-const IR::Constant *Bmv2RegisterCondition::getEvaluatedIndex() const {
+const IR::Constant *IndexExpression::getEvaluatedIndex() const {
     const auto *constant = index->to<IR::Constant>();
     BUG_CHECK(constant, "Variable is not a constant, has the test object %1% been evaluated?",
               getObjectName());
     return constant;
 }
 
-const Bmv2RegisterCondition *Bmv2RegisterCondition::evaluate(const Model &model) const {
+const IR::Expression *IndexExpression::getIndex() const { return index; }
+
+const IR::Expression *IndexExpression::getValue() const { return value; }
+
+cstring IndexExpression::getObjectName() const { return "IndexExpression"; }
+
+const IndexExpression *IndexExpression::evaluate(const Model &model) const {
     const auto *evaluatedIndex = model.evaluate(index);
     const auto *evaluatedValue = model.evaluate(value);
-    return new Bmv2RegisterCondition(evaluatedIndex, evaluatedValue);
+    return new IndexExpression(evaluatedIndex, evaluatedValue);
 }
 
-cstring Bmv2RegisterCondition::getObjectName() const { return "Bmv2RegisterCondition"; }
+std::map<big_int, std::pair<int, const IR::Constant *>> IndexMap::unravelMap() const {
+    std::map<big_int, std::pair<int, const IR::Constant *>> valueMap;
+    for (auto it = indexConditions.rbegin(); it != indexConditions.rend(); ++it) {
+        const auto *storedIndex = it->getEvaluatedIndex();
+        const auto *storedVal = it->getEvaluatedValue();
+        // Important, if the element already exists in the map, ignore it.
+        // That index has been overwritten.
+        valueMap.insert({storedIndex->value, {storedIndex->type->width_bits(), storedVal}});
+    }
+    return valueMap;
+}
 
 /* =========================================================================================
- *  Bmv2_V1ModelActionProfile
+ *  Bmv2Register
+ * ========================================================================================= */
+
+IndexMap::IndexMap(const IR::Expression *initialValue) : initialValue(initialValue) {}
+
+void IndexMap::writeToIndex(const IR::Expression *index, const IR::Expression *value) {
+    indexConditions.emplace_back(index, value);
+}
+
+const IR::Expression *IndexMap::getInitialValue() const { return initialValue; }
+
+const IR::Expression *IndexMap::getValueAtIndex(const IR::Expression *index) const {
+    const IR::Expression *baseExpr = initialValue;
+    for (const auto &indexMap : indexConditions) {
+        const auto *storedIndex = indexMap.getIndex();
+        const auto *storedVal = indexMap.getValue();
+        baseExpr =
+            new IR::Mux(baseExpr->type, new IR::Equ(storedIndex, index), storedVal, baseExpr);
+    }
+    return baseExpr;
+}
+
+const IR::Constant *IndexMap::getEvaluatedInitialValue() const {
+    const auto *constant = initialValue->to<IR::Constant>();
+    BUG_CHECK(constant, "Variable is not a constant, has the test object %1% been evaluated?",
+              getObjectName());
+    return constant;
+}
+
+/* =========================================================================================
+ *  Bmv2V1ModelRegisterValue
+ * ========================================================================================= */
+
+Bmv2V1ModelRegisterValue::Bmv2V1ModelRegisterValue(const IR::Expression *initialValue)
+    : IndexMap(initialValue) {}
+
+cstring Bmv2V1ModelRegisterValue::getObjectName() const { return "Bmv2V1ModelRegisterValue"; }
+
+const Bmv2V1ModelRegisterValue *Bmv2V1ModelRegisterValue::evaluate(const Model &model) const {
+    const auto *evaluatedValue = model.evaluate(getInitialValue());
+    auto *evaluatedRegisterValue = new Bmv2V1ModelRegisterValue(evaluatedValue);
+    for (const auto &cond : indexConditions) {
+        const auto *evaluatedCond = cond.evaluate(model);
+        evaluatedRegisterValue->writeToIndex(evaluatedCond->getEvaluatedIndex(),
+                                             evaluatedCond->getEvaluatedValue());
+    }
+    return evaluatedRegisterValue;
+}
+
+/* =========================================================================================
+ *  Bmv2V1ModelMeterValue
+ * ========================================================================================= */
+
+Bmv2V1ModelMeterValue::Bmv2V1ModelMeterValue(const IR::Expression *initialValue, bool isDirect)
+    : IndexMap(initialValue), isDirect(isDirect) {}
+
+cstring Bmv2V1ModelMeterValue::getObjectName() const { return "Bmv2V1ModelMeterValue"; }
+
+const Bmv2V1ModelMeterValue *Bmv2V1ModelMeterValue::evaluate(const Model &model) const {
+    const auto *evaluatedValue = model.evaluate(getInitialValue());
+    auto *evaluatedMeterValue = new Bmv2V1ModelMeterValue(evaluatedValue, isDirect);
+    for (const auto &cond : indexConditions) {
+        const auto *evaluatedCond = cond.evaluate(model);
+        evaluatedMeterValue->writeToIndex(evaluatedCond->getEvaluatedIndex(),
+                                          evaluatedCond->getEvaluatedValue());
+    }
+    return evaluatedMeterValue;
+}
+
+bool Bmv2V1ModelMeterValue::isDirectMeter() const { return isDirect; }
+
+/* =========================================================================================
+ *  Bmv2V1ModelActionProfile
  * ========================================================================================= */
 
 const std::vector<std::pair<cstring, std::vector<ActionArg>>>
-    *Bmv2_V1ModelActionProfile::getActions() const {
+    *Bmv2V1ModelActionProfile::getActions() const {
     return &actions;
 }
 
-Bmv2_V1ModelActionProfile::Bmv2_V1ModelActionProfile(const IR::IDeclaration *profileDecl)
+Bmv2V1ModelActionProfile::Bmv2V1ModelActionProfile(const IR::IDeclaration *profileDecl)
     : profileDecl(profileDecl) {}
 
-cstring Bmv2_V1ModelActionProfile::getObjectName() const { return profileDecl->controlPlaneName(); }
+cstring Bmv2V1ModelActionProfile::getObjectName() const { return profileDecl->controlPlaneName(); }
 
-const IR::IDeclaration *Bmv2_V1ModelActionProfile::getProfileDecl() const { return profileDecl; }
+const IR::IDeclaration *Bmv2V1ModelActionProfile::getProfileDecl() const { return profileDecl; }
 
-void Bmv2_V1ModelActionProfile::addToActionMap(cstring actionName,
-                                               std::vector<ActionArg> actionArgs) {
+void Bmv2V1ModelActionProfile::addToActionMap(cstring actionName,
+                                              std::vector<ActionArg> actionArgs) {
     actions.emplace_back(actionName, actionArgs);
 }
-size_t Bmv2_V1ModelActionProfile::getActionMapSize() const { return actions.size(); }
+size_t Bmv2V1ModelActionProfile::getActionMapSize() const { return actions.size(); }
 
-const Bmv2_V1ModelActionProfile *Bmv2_V1ModelActionProfile::evaluate(const Model &model) const {
-    auto *profile = new Bmv2_V1ModelActionProfile(profileDecl);
+const Bmv2V1ModelActionProfile *Bmv2V1ModelActionProfile::evaluate(const Model &model) const {
+    auto *profile = new Bmv2V1ModelActionProfile(profileDecl);
     for (const auto &actionTuple : actions) {
         auto actionArgs = actionTuple.second;
         std::vector<ActionArg> evaluatedArgs;
@@ -113,61 +161,86 @@ const Bmv2_V1ModelActionProfile *Bmv2_V1ModelActionProfile::evaluate(const Model
 }
 
 /* =========================================================================================
- *  Bmv2_V1ModelActionSelector
+ *  Bmv2V1ModelActionSelector
  * ========================================================================================= */
 
-Bmv2_V1ModelActionSelector::Bmv2_V1ModelActionSelector(
-    const IR::IDeclaration *selectorDecl, const Bmv2_V1ModelActionProfile *actionProfile)
+Bmv2V1ModelActionSelector::Bmv2V1ModelActionSelector(const IR::IDeclaration *selectorDecl,
+                                                     const Bmv2V1ModelActionProfile *actionProfile)
     : selectorDecl(selectorDecl), actionProfile(actionProfile) {}
 
-cstring Bmv2_V1ModelActionSelector::getObjectName() const { return "Bmv2_V1ModelActionSelector"; }
+cstring Bmv2V1ModelActionSelector::getObjectName() const { return "Bmv2V1ModelActionSelector"; }
 
-const IR::IDeclaration *Bmv2_V1ModelActionSelector::getSelectorDecl() const { return selectorDecl; }
+const IR::IDeclaration *Bmv2V1ModelActionSelector::getSelectorDecl() const { return selectorDecl; }
 
-const Bmv2_V1ModelActionProfile *Bmv2_V1ModelActionSelector::getActionProfile() const {
+const Bmv2V1ModelActionProfile *Bmv2V1ModelActionSelector::getActionProfile() const {
     return actionProfile;
 }
 
-const Bmv2_V1ModelActionSelector *Bmv2_V1ModelActionSelector::evaluate(const Model &model) const {
+const Bmv2V1ModelActionSelector *Bmv2V1ModelActionSelector::evaluate(const Model &model) const {
     const auto *evaluatedProfile = actionProfile->evaluate(model);
-    return new Bmv2_V1ModelActionSelector(selectorDecl, evaluatedProfile);
+    return new Bmv2V1ModelActionSelector(selectorDecl, evaluatedProfile);
 }
 
 /* =========================================================================================
- *  Bmv2_CloneInfo
+ *  Bmv2V1ModelCloneInfo
  * ========================================================================================= */
 
-Bmv2_CloneInfo::Bmv2_CloneInfo(const IR::Expression *sessionId, const IR::Expression *clonePort,
-                               bool isClone)
+Bmv2V1ModelCloneInfo::Bmv2V1ModelCloneInfo(const IR::Expression *sessionId,
+                                           BMv2Constants::CloneType cloneType,
+                                           const ExecutionState &clonedState,
+                                           std::optional<int> preserveIndex)
+    : sessionId(sessionId),
+      cloneType(cloneType),
+      clonedState(clonedState),
+      preserveIndex(preserveIndex) {}
+
+cstring Bmv2V1ModelCloneInfo::getObjectName() const { return "Bmv2V1ModelCloneInfo"; }
+
+BMv2Constants::CloneType Bmv2V1ModelCloneInfo::getCloneType() const { return cloneType; }
+
+const IR::Expression *Bmv2V1ModelCloneInfo::getSessionId() const { return sessionId; }
+
+const ExecutionState &Bmv2V1ModelCloneInfo::getClonedState() const { return clonedState; }
+
+std::optional<int> Bmv2V1ModelCloneInfo::getPreserveIndex() const { return preserveIndex; }
+
+const Bmv2V1ModelCloneInfo *Bmv2V1ModelCloneInfo::evaluate(const Model & /*model*/) const {
+    P4C_UNIMPLEMENTED("Evaluate is not implemented for this test object.");
+}
+
+/* =========================================================================================
+ *  Bmv2V1ModelCloneSpec
+ * ========================================================================================= */
+
+Bmv2V1ModelCloneSpec::Bmv2V1ModelCloneSpec(const IR::Expression *sessionId,
+                                           const IR::Expression *clonePort, bool isClone)
     : sessionId(sessionId), clonePort(clonePort), isClone(isClone) {}
 
-cstring Bmv2_CloneInfo::getObjectName() const { return "Bmv2_CloneInfo"; }
+cstring Bmv2V1ModelCloneSpec::getObjectName() const { return "Bmv2V1ModelCloneSpec"; }
 
-const IR::Expression *Bmv2_CloneInfo::getClonePort() const { return clonePort; }
+const IR::Expression *Bmv2V1ModelCloneSpec::getClonePort() const { return clonePort; }
 
-const IR::Expression *Bmv2_CloneInfo::getSessionId() const { return sessionId; }
+const IR::Expression *Bmv2V1ModelCloneSpec::getSessionId() const { return sessionId; }
 
-const IR::Constant *Bmv2_CloneInfo::getEvaluatedClonePort() const {
+const IR::Constant *Bmv2V1ModelCloneSpec::getEvaluatedClonePort() const {
     const auto *constant = clonePort->to<IR::Constant>();
     BUG_CHECK(constant, "Variable is not a constant, has the test object %1% been evaluated?",
               getObjectName());
     return constant;
 }
 
-const IR::Constant *Bmv2_CloneInfo::getEvaluatedSessionId() const {
+const IR::Constant *Bmv2V1ModelCloneSpec::getEvaluatedSessionId() const {
     const auto *constant = sessionId->to<IR::Constant>();
     BUG_CHECK(constant, "Variable is not a constant, has the test object %1% been evaluated?",
               getObjectName());
     return constant;
 }
 
-const Bmv2_CloneInfo *Bmv2_CloneInfo::evaluate(const Model &model) const {
-    const auto *evaluatedClonePort = model.evaluate(clonePort);
-    const auto *evaluatedSessionId = model.evaluate(sessionId);
-    return new Bmv2_CloneInfo(evaluatedSessionId, evaluatedClonePort, isClone);
+const Bmv2V1ModelCloneSpec *Bmv2V1ModelCloneSpec::evaluate(const Model &model) const {
+    return new Bmv2V1ModelCloneSpec(model.evaluate(sessionId), model.evaluate(clonePort), isClone);
 }
 
-bool Bmv2_CloneInfo::isClonedPacket() const { return isClone; }
+bool Bmv2V1ModelCloneSpec::isClonedPacket() const { return isClone; }
 
 /* =========================================================================================
  * Table Key Match Types

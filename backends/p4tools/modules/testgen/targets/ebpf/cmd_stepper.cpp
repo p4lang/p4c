@@ -9,7 +9,7 @@
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
-#include "backends/p4tools/common/lib/formulae.h"
+#include "backends/p4tools/common/lib/arch_spec.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/id.h"
 #include "ir/ir.h"
@@ -17,7 +17,6 @@
 #include "lib/cstring.h"
 #include "lib/ordered_map.h"
 
-#include "backends/p4tools/modules/testgen/core/arch_spec.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/cmd_stepper.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
@@ -60,7 +59,7 @@ void EBPFCmdStepper::initializeTargetEnvironment(ExecutionState &nextState) cons
     nextState.setParserErrorLabel(errVar);
 }
 
-std::optional<const Constraint *> EBPFCmdStepper::startParser_impl(
+std::optional<const Constraint *> EBPFCmdStepper::startParserImpl(
     const IR::P4Parser * /*parser*/, ExecutionState & /*nextState*/) const {
     return std::nullopt;
 }

@@ -58,6 +58,9 @@ class TypeVariableSubstitutionVisitor : public Transform {
     }
 
     const IR::Node *preorder(IR::TypeParameters *tps) override;
+    const IR::Node *preorder(IR::Type_Any *tv) override {
+        return replacement(getOriginal<IR::Type_Any>(), tv);
+    }
     const IR::Node *preorder(IR::Type_Var *tv) override {
         return replacement(getOriginal<IR::Type_Var>(), tv);
     }

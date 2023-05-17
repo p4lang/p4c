@@ -29,7 +29,7 @@ namespace EBPF {
 ControlBodyTranslator::ControlBodyTranslator(const EBPFControl *control)
     : CodeGenInspector(control->program->refMap, control->program->typeMap),
       control(control),
-      p4lib(P4::P4CoreLibrary::instance) {
+      p4lib(P4::P4CoreLibrary::instance()) {
     setName("ControlBodyTranslator");
 }
 

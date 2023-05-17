@@ -12,12 +12,11 @@
 #include <variant>
 #include <vector>
 
+#include "backends/p4tools/common/lib/namespace_context.h"
 #include "backends/p4tools/common/lib/trace_event.h"
 #include "ir/ir.h"
 #include "ir/node.h"
 #include "lib/cstring.h"
-
-#include "backends/p4tools/modules/testgen/lib/namespace_context.h"
 
 namespace Test {
 class SmallStepTest;

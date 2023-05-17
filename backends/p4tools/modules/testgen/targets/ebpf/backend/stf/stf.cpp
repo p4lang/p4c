@@ -1,7 +1,9 @@
 #include "backends/p4tools/modules/testgen/targets/ebpf/backend/stf/stf.h"
 
 #include <filesystem>
+#include <fstream>
 #include <iomanip>
+#include <list>
 #include <map>
 #include <optional>
 #include <regex>  // NOLINT
@@ -24,6 +26,7 @@
 #include "nlohmann/json.hpp"
 
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
+#include "backends/p4tools/modules/testgen/lib/test_object.h"
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 
 namespace P4Tools::P4Testgen::EBPF {

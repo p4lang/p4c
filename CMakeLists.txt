@@ -342,33 +342,10 @@ set (IR_DEF_FILES)           # list to collect all .def files
 # Other configuration files that need to be generated
 configure_file ("${P4C_SOURCE_DIR}/cmake/config.h.cmake" "${P4C_BINARY_DIR}/config.h")
 
-set (IR_GENERATED_SRCS
-  ${P4C_BINARY_DIR}/ir/ir-generated.h
-  ${P4C_BINARY_DIR}/ir/ir-generated.cpp
-  ${P4C_BINARY_DIR}/ir/gen-tree-macro.h)
 # IR_GENERATOR_DIRECTORY is used to set the RUNTIME_OUTPUT_DIRECTORY property
 # of the irgenerator target to the matching path
 set (IR_GENERATOR_DIRECTORY ${P4C_BINARY_DIR}/tools/ir-generator)
 set (IR_GENERATOR ${IR_GENERATOR_DIRECTORY}/irgenerator)
-
-# Set up IWYU for P4C. Each CMake target needs to manually add IWYU to its checks.
-if(ENABLE_IWYU)
-  message("Enabling IWYU checks.")
-  find_program(iwyu_path NAMES include-what-you-use iwyu REQUIRED)
-  set(
-    iwyu_path
-    ${iwyu_path}
-    -Xiwyu
-    --max_line_length=100
-    -Xiwyu
-    --no_fwd_decls
-    -Xiwyu
-    --cxx17ns
-    -Xiwyu
-    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/p4c.imp
-  )
-  message("IWYU command: ${iwyu_path}")
-endif()
 
 # the order of adding subdirectories matters because of target dependencies
 add_subdirectory (tools/driver)
@@ -378,10 +355,10 @@ add_subdirectory (ir)
 
 # component libraries: must be defined before being used in the
 # backend executables
-set (P4C_LIBRARIES controlplane midend frontend ir p4ctoolkit)
+set (P4C_LIBRARIES controlplane midend frontend ir p4ctoolkit ir-generated)
 
 # add extensions - before the frontends as they produce IR and extra frontend sources
-set(EXTENSION_FRONTEND_SOURCES)
+set(EXTENSION_IR_SOURCES)
 # extra sources that need to be linked directly into p4test so that
 # extensions can provide specific conversions (e.g., for externs)
 set(EXTENSION_P4_14_CONV_SOURCES)
@@ -403,28 +380,26 @@ foreach (ext ${p4c_extensions})
   endif()
 endforeach(ext)
 
-# With the current implementation of ir-generator, all targets share the
-# same ir-generated.h and ir-generated.cpp file, which means all targets
-# share the same set of IR classes (frontend and backend). The DPDK backend
-# introduces additional IR classes and cpp sources which need to be added to
-# EXTENSION_FRONTEND_SOURCES. We need to populate EXTENSION_FRONTEND_SOURCES
-# before it is added to libfrontend.a in frontends/CMakeList.txt
-if (ENABLE_DPDK)
-    add_subdirectory (backends/dpdk)
-endif ()
-
 add_subdirectory (frontends)
 add_subdirectory (midend)
 add_subdirectory (control-plane)
 
+# With the current implementation of ir-generator, all targets share the
+# same ir-generated.h and ir-generated.cpp file, which means all targets
+# share the same set of IR classes (frontend and backend). Backends such as the DPDK backend
+# can introduce additional IR classes and cpp sources which need to be added to
+# EXTENSION_IR_SOURCES.
 if (ENABLE_BMV2)
     add_subdirectory (backends/bmv2)
+endif ()
+if (ENABLE_DPDK)
+    add_subdirectory (backends/dpdk)
 endif ()
 if (ENABLE_EBPF)
     add_subdirectory (backends/ebpf)
 endif ()
-if (ENABLE_UBPF)
-    add_subdirectory (backends/ubpf)
+if (ENABLE_P4C_GRAPHS AND HAVE_LIBBOOST_GRAPH EQUAL 1)
+  add_subdirectory (backends/graphs)
 endif ()
 if (ENABLE_P4TEST)
     add_subdirectory (backends/p4test)
@@ -432,15 +407,20 @@ endif ()
 if (ENABLE_TEST_TOOLS)
     add_subdirectory (backends/p4tools)
 endif ()
-if (ENABLE_P4C_GRAPHS AND HAVE_LIBBOOST_GRAPH EQUAL 1)
-  add_subdirectory (backends/graphs)
+if (ENABLE_UBPF)
+    add_subdirectory (backends/ubpf)
 endif ()
 if (ENABLE_GTESTS)
   add_subdirectory (test)
 endif ()
 
-# IR Generation
-set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
+####################################### IR Generation Begin #######################################
+
+set (IR_GENERATED_SRCS
+  ${P4C_BINARY_DIR}/ir/ir-generated.h
+  ${P4C_BINARY_DIR}/ir/ir-generated.cpp
+  ${P4C_BINARY_DIR}/ir/gen-tree-macro.h)
+set_source_files_properties(${IR_GENERATED_SRCS} PROPERTIES GENERATED TRUE)
 
 # Fixup #line directives in the generated IR files
 # This is a vestige of automake. CMake handles dependencies correctly,
@@ -450,13 +430,13 @@ set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
 # build files only if they have changed. This avoids rebuilding the whole
 # tree when small changes to the .def files affect only the .cpp file and
 # not the headers.
-set (fixup_file "${CMAKE_CURRENT_BINARY_DIR}/irgen-fixup.awk")
-file(WRITE "${fixup_file}" "/^#\$/ { printf \"#line %d \\\"${CMAKE_CURRENT_BINARY_DIR}/ir/%s\\\"\\n\", NR+1, name; next; } 1\n")
+set (fixup_file "${P4C_BINARY_DIR}/irgen-fixup.awk")
+file(WRITE "${fixup_file}" "/^#\$/ { printf \"#line %d \\\"${P4C_BINARY_DIR}/ir/%s\\\"\\n\", NR+1, name; next; } 1\n")
 set(temp_ir_genfiles
   ir/ir-generated.cpp.tmp ir/ir-generated.cpp.fixup
   ir/ir-generated.h.tmp   ir/ir-generated.h.fixup
   ir/gen-tree-macro.h.tmp ir/gen-tree-macro.h.fixup
-  )
+)
 
 add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
   COMMAND ${IR_GENERATOR} -i ir/ir-generated.cpp.tmp -o ir/ir-generated.h.tmp -t ir/gen-tree-macro.h.tmp ${IR_DEF_FILES}
@@ -471,6 +451,11 @@ add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
   COMMENT "Generating IR class files")
 
 add_custom_target(genIR DEPENDS ${IR_GENERATED_SRCS})
+set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
+add_library(ir-generated OBJECT ${IR_GENERATED_SRCS} ${EXTENSION_IR_SOURCES})
+add_dependencies(ir-generated ir genIR)
+
+######################################## IR Generation End ########################################
 
 # Header files
 # p4test needs all the backend include files, whether the backend is enabled or not
@@ -492,7 +477,9 @@ if (ENABLE_DPDK)
 add_custom_target(dpdk_includes ALL
   COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4include/dpdk
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/dpdk/psa.p4 ${P4C_BINARY_DIR}/p4include/dpdk
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/dpdk/pna.p4 ${P4C_BINARY_DIR}/p4include/dpdk)
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/dpdk/pna.p4 ${P4C_BINARY_DIR}/p4include/dpdk
+  DEPENDS update_includes
+)
 endif ()
 
 # Installation
@@ -500,93 +487,9 @@ endif ()
 install (DIRECTORY ${P4C_SOURCE_DIR}/p4include
   DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY})
 
-################################ Linters Begin ################################
-
-file(
-  GLOB_RECURSE P4C_LINT_LIST  FOLLOW_SYMLINKS
-  backends/*.cpp
-  backends/*.h
-  control-plane/*.cpp
-  control-plane/*.h
-  frontends/*.cpp
-  frontends/*.h
-  ir/*.cpp
-  ir/*.h
-  lib/*.cpp
-  lib/*.h
-  midend/*.cpp
-  midend/*.h
-  tools/*.cpp
-  tools/*.h
-)
-# Filter some folders from the CI checks.
-list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/p4tools/submodules")
-list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/ebpf/runtime")
-list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/ubpf/runtime")
-list(FILTER P4C_LINT_LIST EXCLUDE REGEX "control-plane/p4runtime")
-
-# cpplint
-add_cpplint_files(${P4C_SOURCE_DIR} "${P4C_LINT_LIST}")
-
-# Retrieve the global cpplint property.
-get_property(CPPLINT_FILES GLOBAL PROPERTY cpplint-files)
-
-if(DEFINED CPPLINT_FILES)
-  # Write the list to a file. We need to do this as too many files will reach
-  # the shell argument limit.
-  set(CPPLINT_TXT_FILE ${P4C_BINARY_DIR}/cpplint_files.txt)
-  file(WRITE ${CPPLINT_TXT_FILE} "${CPPLINT_FILES}")
-  list(SORT CPPLINT_FILES)
-  set(CPPLINT_CMD ${P4C_SOURCE_DIR}/tools/cpplint.py)
-  set(CPPLINT_ARGS --root=${P4C_SOURCE_DIR} --extensions=h,hpp,cpp,ypp,l)
-  # Pipe the file into cpplint.
-  add_custom_target(
-    cpplint
-    COMMAND xargs -a ${CPPLINT_TXT_FILE} -r -d '\;' ${CPPLINT_CMD} ${CPPLINT_ARGS}
-    WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-    COMMENT "cpplint"
-  )
-  add_custom_target(
-    cpplint-quiet
-    COMMAND xargs -a ${CPPLINT_TXT_FILE} -r -d '\;' ${CPPLINT_CMD} ${CPPLINT_ARGS} --quiet
-    WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-    COMMENT "cpplint quietly"
-  )
-endif()
-
-# clang-format
-add_clang_format_files(${P4C_SOURCE_DIR} "${P4C_LINT_LIST}")
-
-find_program(CLANG_FORMAT_CMD clang-format)
-
-if(NOT ${CLANG_FORMAT_CMD})
-  # Retrieve the global clang-format property.
-  get_property(CLANG_FORMAT_FILES GLOBAL PROPERTY clang-format-files)
-  if(DEFINED CLANG_FORMAT_FILES)
-    # Write the list to a file. We need to do this as too many files will reach
-    # the shell argument limit.
-    set(CLANG_FORMAT_TXT_FILE ${P4C_BINARY_DIR}/clang_format_files.txt)
-    list(SORT CLANG_FORMAT_FILES)
-    file(WRITE ${CLANG_FORMAT_TXT_FILE} "${CLANG_FORMAT_FILES}")
-    set(CLANG_FORMAT_CMD clang-format)
-    add_custom_target(
-      clang-format
-      COMMAND xargs -a ${CLANG_FORMAT_TXT_FILE} -r -d '\;' ${CLANG_FORMAT_CMD} --verbose --Werror --dry-run -i --
-      WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-      COMMENT "Checking files for correct clang-format formatting."
-    )
-    add_custom_target(
-      clang-format-fix-errors
-      COMMAND xargs -a ${CLANG_FORMAT_TXT_FILE} -r -d '\;' ${CLANG_FORMAT_CMD} --verbose -i --
-      WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-      COMMENT "Formatting files using clang-format."
-    )
-  endif()
-else()
-  message(WARNING "clang-format executable not found. Disabling clang-format checks. clang-format can be installed with \"pip3 install --user --upgrade clang-format\"")
-endif()
-
-################################ Linters End ################################
+########################################## Linters Begin ##########################################
+include(Linters)
+########################################### Linters End ###########################################
 
 
 # tags, etags
@@ -661,3 +564,53 @@ SET(CPACK_SOURCE_IGNORE_FILES
 INCLUDE(CPack)
 
 ADD_CUSTOM_TARGET(dist COMMAND ${CMAKE_MAKE_PROGRAM} clean package_source)
+
+#################### IWYU
+# Needs to be part of the top-level to be able to find all targets in the compiler framework.
+if(ENABLE_IWYU)
+  # Set up IWYU for P4C.
+  message("Enabling IWYU checks.")
+  find_program(iwyu_path NAMES include-what-you-use iwyu REQUIRED)
+  set(iwyu_path
+      ${iwyu_path}
+      -Xiwyu
+      --max_line_length=100
+      -Xiwyu
+      --no_fwd_decls
+      -Xiwyu
+      --cxx17ns
+      -Xiwyu
+      --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/p4c.imp
+  )
+  message("IWYU command: ${iwyu_path}")
+  function(get_all_targets var)
+    set(targets)
+    get_all_targets_recursive(targets ${CMAKE_CURRENT_SOURCE_DIR})
+    set(${var} ${targets} PARENT_SCOPE)
+  endfunction()
+
+  macro(get_all_targets_recursive targets dir)
+    get_property(subdirectories DIRECTORY ${dir} PROPERTY SUBDIRECTORIES)
+    foreach(subdir ${subdirectories})
+      get_all_targets_recursive(${targets} ${subdir})
+    endforeach()
+
+    get_property(current_targets DIRECTORY ${dir} PROPERTY BUILDSYSTEM_TARGETS)
+    list(APPEND ${targets} ${current_targets})
+  endmacro()
+
+  # Apply IWYU to all targets.
+  get_all_targets(all_targets)
+  # Remove generated files from IWYU.
+  list(FILTER all_targets EXCLUDE REGEX "controlplane-gen")
+  list(FILTER all_targets EXCLUDE REGEX "dpdk_runtime")
+  list(FILTER all_targets EXCLUDE REGEX "ir-generated")
+  list(FILTER all_targets EXCLUDE REGEX "genIR")
+  list(FILTER all_targets EXCLUDE REGEX "parser-gen")
+  list(FILTER all_targets EXCLUDE REGEX "gtest")
+  message("Applying IWYU to targets: ${all_targets}")
+  foreach(target ${all_targets})
+    set_property(TARGET ${target} PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
+  endforeach()
+
+endif()

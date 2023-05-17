@@ -17,6 +17,7 @@
 import sys
 from glob import glob
 from pathlib import Path
+
 from .target import EBPFTarget
 
 # path to the tools folder of the compiler
@@ -28,7 +29,6 @@ import testutils
 
 
 class Target(EBPFTarget):
-
     def __init__(self, tmpdir, options, template):
         EBPFTarget.__init__(self, tmpdir, options, template)
 

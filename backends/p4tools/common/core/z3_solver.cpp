@@ -8,14 +8,11 @@
 #include <iterator>
 #include <list>
 #include <map>
-#include <ostream>
 #include <string>
 #include <utility>
 
 #include <boost/multiprecision/cpp_int.hpp>
 
-#include "backends/p4tools/common/lib/formulae.h"
-#include "backends/p4tools/common/lib/model.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "ir/json_loader.h"  // IWYU pragma: keep
@@ -71,8 +68,7 @@ class Z3Translator : public virtual Inspector {
     bool preorder(const IR::BoolLiteral *boolLiteral) override;
 
     /// Translates variables.
-    bool preorder(const IR::Member *member) override;
-    bool preorder(const IR::ConcolicVariable *var) override;
+    bool preorder(const IR::SymbolicVariable *var) override;
 
     // Translations for unary operations.
     bool preorder(const IR::Neg *op) override;
@@ -162,35 +158,21 @@ z3::sort Z3Solver::toSort(const IR::Type *type) {
     BUG("Z3Solver: unimplemented type %1%: %2% ", type->node_type_name(), type);
 }
 
-std::string Z3Solver::generateName(const StateVariable &var) const {
+std::string Z3Solver::generateName(const IR::SymbolicVariable &var) {
     std::ostringstream ostr;
-    generateName(ostr, var);
+    ostr << var;
     return ostr.str();
 }
 
-void Z3Solver::generateName(std::ostringstream &ostr, const StateVariable &var) const {
-    // Recurse into the parent member expression to retrieve the full name of the variable.
-    if (const auto *next = var->expr->to<IR::Member>()) {
-        generateName(ostr, next);
-    } else {
-        const auto *path = var->expr->to<IR::PathExpression>();
-        BUG_CHECK(path, "Z3Solver: expected to be a PathExpression: %1%", var->expr);
-        ostr << path->path->name;
-    }
-
-    ostr << "." << var->member;
-}
-
-z3::expr Z3Solver::declareVar(const StateVariable &var) {
-    BUG_CHECK(var, "Z3Solver: attempted to declare a non-member: %1%", var);
-    auto sort = toSort(var->type);
+z3::expr Z3Solver::declareVar(const IR::SymbolicVariable &var) {
+    auto sort = toSort(var.type);
     auto expr = z3context.constant(generateName(var).c_str(), sort);
     BUG_CHECK(
         !declaredVarsById.empty(),
         "DeclaredVarsById should have at least one entry! Check if push() was used correctly.");
     // Need to take the reference here to avoid accidental copies.
     auto *latestVars = &declaredVarsById.back();
-    latestVars->emplace(expr.id(), var);
+    latestVars->emplace(expr.id(), &var);
     return expr;
 }
 
@@ -216,7 +198,7 @@ void Z3Solver::pop() {
 
     size_t sz = checkpoints.back();
     checkpoints.pop_back();
-    // TODO: This check should be active, but because of JSON loader issues we can not use.
+    // TODO: This check should be active, but because of JSON loader issues we can not use it.
     // So we have to be tolerant for now.
     // BUG_CHECK(!declaredVarsById.empty(), "Declaration list is empty");
     if (!declaredVarsById.empty()) {
@@ -321,17 +303,17 @@ void Z3Solver::asrt(const Constraint *assertion) {
     }
 }
 
-const Model *Z3Solver::getModel() const {
-    auto *result = new Model();
+const SymbolicMapping &Z3Solver::getSymbolicMapping() const {
+    auto *result = new SymbolicMapping();
     // First, collect a map of all the declared variables we have encountered in the stack.
-    std::map<unsigned int, StateVariable> declaredVars;
+    std::map<unsigned int, const IR::SymbolicVariable *> declaredVars;
     for (auto it = declaredVarsById.rbegin(); it != declaredVarsById.rend(); ++it) {
         auto latestVars = *it;
         for (auto var : latestVars) {
             declaredVars.emplace(var);
         }
     }
-    // Then, get the model and match each declaration in the model to its StateVariable.
+    // Then, get the model and match each declaration in the model to its IR::SymbolicVariable.
     try {
         Util::ScopedTimer ctZ3("z3");
         Util::ScopedTimer ctCheckSat("getModel");
@@ -347,13 +329,13 @@ const Model *Z3Solver::getModel() const {
             auto z3Expr = z3Func();
             auto z3Value = z3Model.get_const_interp(z3Func);
 
-            // Convert to a state variable and value.
+            // Convert to a symbolic variable and value.
             auto exprId = z3Expr.id();
             BUG_CHECK(declaredVars.count(exprId) > 0, "Z3Solver: unknown variable declaration: %1%",
                       z3Expr);
-            const auto stateVar = declaredVars.at(exprId);
-            const auto *value = toValue(z3Value, stateVar->type);
-            result->emplace(stateVar, value);
+            const auto *symbolicVar = declaredVars.at(exprId);
+            const auto *value = toLiteral(z3Value, symbolicVar->type);
+            result->emplace(symbolicVar, value);
         }
     } catch (z3::exception &e) {
         BUG("Z3Solver : Z3 exception: %1%", e.msg());
@@ -362,10 +344,10 @@ const Model *Z3Solver::getModel() const {
     } catch (...) {
         BUG("Z3Solver : unknown segmentation fault in getModel");
     }
-    return result;
+    return *result;
 }
 
-const Value *Z3Solver::toValue(const z3::expr &e, const IR::Type *type) {
+const IR::Literal *Z3Solver::toLiteral(const z3::expr &e, const IR::Type *type) {
     // Handle booleans.
     if (type->is<IR::Type::Boolean>()) {
         BUG_CHECK(e.is_bool(), "Expected a boolean value: %1%", e);
@@ -534,14 +516,8 @@ bool Z3Translator::preorder(const IR::BoolLiteral *boolLiteral) {
     return false;
 }
 
-bool Z3Translator::preorder(const IR::Member *member) {
-    result = solver.declareVar(member);
-    return false;
-}
-
-bool Z3Translator::preorder(const IR::ConcolicVariable *var) {
-    /// Declare the member contained within the concolic variable
-    result = solver.declareVar(var->concolicMember);
+bool Z3Translator::preorder(const IR::SymbolicVariable *var) {
+    result = solver.declareVar(*var);
     return false;
 }
 
@@ -574,7 +550,7 @@ const ShiftType *Z3Translator::rewriteShift(const ShiftType *shift) const {
     return new ShiftType(shift->type, left, newShiftAmount);
 }
 
-/// general functon for unary operations
+/// General function for unary operations.
 bool Z3Translator::recurseUnary(const IR::Operation_Unary *unary, Z3UnaryOp f) {
     BUG_CHECK(unary, "Z3Translator: encountered null node during translation");
     Z3Translator tExpr(solver);
@@ -592,7 +568,7 @@ bool Z3Translator::preorder(const IR::Lss *op) {
     if (leftType != nullptr && !leftType->isSigned) {
         return recurseBinary(op, z3::ult);
     }
-    return recurseBinary(op, z3::operator<);  // NOLINT(whitespace/operators)
+    return recurseBinary(op, z3::operator<);
 }
 
 bool Z3Translator::preorder(const IR::Leq *op) {
@@ -608,7 +584,7 @@ bool Z3Translator::preorder(const IR::Grt *op) {
     if (leftType != nullptr && !leftType->isSigned) {
         return recurseBinary(op, z3::ugt);
     }
-    return recurseBinary(op, z3::operator>);  // NOLINT(whitespace/operators)
+    return recurseBinary(op, z3::operator>);
 }
 
 bool Z3Translator::preorder(const IR::Geq *op) {

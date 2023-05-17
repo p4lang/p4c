@@ -14,7 +14,7 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-class BMv2_V1ModelProgramInfo : public ProgramInfo {
+class Bmv2V1ModelProgramInfo : public ProgramInfo {
  private:
     /// The program's top level blocks: the parser, the checksum verifier, the MAU pipeline, the
     /// checksum calculator, and the deparser.
@@ -31,13 +31,18 @@ class BMv2_V1ModelProgramInfo : public ProgramInfo {
     std::vector<Continuation::Command> processDeclaration(const IR::Type_Declaration *typeDecl,
                                                           size_t blockIdx) const;
 
+    std::map<const IR::IDeclaration *, const IR::P4Table *> directExternMap;
+
  public:
-    BMv2_V1ModelProgramInfo(const IR::P4Program *program,
-                            ordered_map<cstring, const IR::Type_Declaration *> inputBlocks,
-                            const std::map<int, int> declIdToGress);
+    Bmv2V1ModelProgramInfo(const IR::P4Program *program,
+                           ordered_map<cstring, const IR::Type_Declaration *> inputBlocks,
+                           std::map<int, int> declIdToGress);
 
     /// @returns the gress associated with the given parser.
     int getGress(const IR::Type_Declaration *) const;
+
+    /// @returns the table associated with the direct extern
+    const IR::P4Table *getTableofDirectExtern(const IR::IDeclaration *directExternDecl) const;
 
     /// @returns the programmable blocks of the program. Should be 6.
     [[nodiscard]] const ordered_map<cstring, const IR::Type_Declaration *> *getProgrammableBlocks()
@@ -48,17 +53,14 @@ class BMv2_V1ModelProgramInfo : public ProgramInfo {
     [[nodiscard]] const IR::PathExpression *getBlockParam(cstring blockLabel,
                                                           size_t paramIndex) const;
 
-    [[nodiscard]] const IR::Member *getTargetInputPortVar() const override;
+    [[nodiscard]] const IR::StateVariable &getTargetInputPortVar() const override;
 
     /// @returns the constraint expression for a given port variable.
-    static const IR::Expression *getPortConstraint(const IR::Member *portVar);
+    static const IR::Expression *getPortConstraint(const IR::StateVariable &portVar);
 
-    [[nodiscard]] const IR::Member *getTargetOutputPortVar() const override;
+    [[nodiscard]] const IR::StateVariable &getTargetOutputPortVar() const override;
 
     [[nodiscard]] const IR::Expression *dropIsActive() const override;
-
-    [[nodiscard]] const IR::Expression *createTargetUninitialized(const IR::Type *type,
-                                                                  bool forceTaint) const override;
 
     [[nodiscard]] const IR::Type_Bits *getParserErrorType() const override;
 

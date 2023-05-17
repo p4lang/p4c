@@ -7,9 +7,7 @@
 
 #include <boost/container/vector.hpp>
 
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
-#include "backends/p4tools/common/lib/zombie.h"
 #include "frontends/p4/optimizeExpressions.h"
 #include "ir/indexed_vector.h"
 #include "ir/vector.h"
@@ -19,17 +17,17 @@
 
 namespace P4Tools {
 
-const IR::Expression *SymbolicEnv::get(const StateVariable &var) const {
+const IR::Expression *SymbolicEnv::get(const IR::StateVariable &var) const {
     auto it = map.find(var);
     if (it != map.end()) {
         return it->second;
     }
-    BUG("Unable to find var %s in the symbolic environment.", var->toString());
+    BUG("Unable to find var %s in the symbolic environment.", var);
 }
 
-bool SymbolicEnv::exists(const StateVariable &var) const { return map.find(var) != map.end(); }
+bool SymbolicEnv::exists(const IR::StateVariable &var) const { return map.find(var) != map.end(); }
 
-void SymbolicEnv::set(const StateVariable &var, const IR::Expression *value) {
+void SymbolicEnv::set(const IR::StateVariable &var, const IR::Expression *value) {
     map[var] = P4::optimizeExpression(value);
 }
 
@@ -75,6 +73,11 @@ const IR::Expression *SymbolicEnv::subst(const IR::Expression *expr) const {
 const SymbolicMapType &SymbolicEnv::getInternalMap() const { return map; }
 
 bool SymbolicEnv::isSymbolicValue(const IR::Node *node) {
+    // Check the obvious case first.
+    if (node->is<IR::SymbolicVariable>()) {
+        return true;
+    }
+
     // Parser states are symbolic values.
     if (node->is<IR::ParserState>()) {
         return true;
@@ -106,11 +109,6 @@ bool SymbolicEnv::isSymbolicValue(const IR::Node *node) {
     // DefaultExpresssions are symbolic values.
     if (expr->is<IR::DefaultExpression>()) {
         return true;
-    }
-
-    // Symbolic constants are references to fields under the struct p4t*zombie.const.
-    if (const auto *member = expr->to<IR::Member>()) {
-        return Zombie::isSymbolicConst(member);
     }
 
     // Symbolic values can be composed using several IR nodes.

@@ -3,11 +3,7 @@
 
 #include <cstdint>
 
-namespace P4Tools {
-
-namespace P4Testgen {
-
-namespace Bmv2 {
+namespace P4Tools::P4Testgen::Bmv2 {
 
 enum bmv2_gress_t { BMV2_INGRESS, BMV2_EGRESS };
 
@@ -30,19 +26,21 @@ class BMv2Constants {
     static constexpr uint64_t PKT_INSTANCE_TYPE_RECIRC = 0x0004;
     static constexpr uint64_t PKT_INSTANCE_TYPE_REPLICATION = 0x005;
     static constexpr uint64_t PKT_INSTANCE_TYPE_RESUBMIT = 0x006;
+    /// The session IDs for clone are limited to a specific range.
+    /// Details: https://github.com/p4lang/PI/pull/588
+    static constexpr uint16_t CLONE_SESSION_ID_MIN = 1;
+    static constexpr uint16_t CLONE_SESSION_ID_MAX = 32767;
     /// Clone type is derived from v1model.p4
-    static constexpr int CLONE_TYPE_I2E = 0x0000;
-    static constexpr int CLONE_TYPE_E2E = 0x0001;
+    enum CloneType { I2E = 0, E2E = 1 };
+    /// Meter colors are defined in v1model.p4
+    enum METER_COLOR { GREEN = 0, YELLOW = 1, RED = 2 };
+
     /// Other useful constants
     static constexpr int STF_MIN_PKT_SIZE = 22;
     static constexpr int ETH_HDR_SIZE = 112;
     static constexpr int DROP_PORT = 511;
 };
 
-}  // namespace Bmv2
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_CONSTANTS_H_ */

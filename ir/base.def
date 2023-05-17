@@ -130,11 +130,11 @@ abstract StatOrDecl {}
 /// That's why declid is used to distinguish them.
 abstract Declaration : StatOrDecl, IDeclaration {
     ID          name;
-    int declid = nextId++;
+    long declid = nextId++;
     ID getName() const override { return name; }
     equiv { return name == a.name; /* ignore declid */ }
  private:
-    static int nextId;
+    static long nextId;
  public:
     toString { return externalName(); }
 }
@@ -146,11 +146,11 @@ abstract Declaration : StatOrDecl, IDeclaration {
 /// inherit both Type and Declaration.)
 abstract Type_Declaration : Type, IDeclaration {
     ID name;
-    int declid = nextId++;
+    long declid = nextId++;
     ID getName() const override { return name; }
     equiv { return name == a.name; /* ignore declid */ }
  private:
-    static int nextId;
+    static long nextId;
  public:
     toString { return externalName(); }
     const Type* getP4Type() const override { return new Type_Name(name); }

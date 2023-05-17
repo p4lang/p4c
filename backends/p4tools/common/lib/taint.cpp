@@ -7,8 +7,7 @@
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/lib/model.h"
-#include "backends/p4tools/common/lib/symbolic_env.h"
-#include "backends/p4tools/common/lib/util.h"
+#include "backends/p4tools/common/lib/variables.h"
 #include "ir/indexed_vector.h"
 #include "ir/irutils.h"
 #include "ir/node.h"
@@ -28,11 +27,15 @@ const IR::StringLiteral Taint::TAINTED_STRING_LITERAL = IR::StringLiteral(cstrin
 /// expression.
 static bitvec computeTaintedBits(const SymbolicMapType &varMap, const IR::Expression *expr) {
     CHECK_NULL(expr);
+    // TODO: Replace these two with IR::StateVariable.
     if (const auto *member = expr->to<IR::Member>()) {
-        if (SymbolicEnv::isSymbolicValue(member)) {
-            return {};
-        }
         expr = varMap.at(member);
+    }
+    if (const auto *path = expr->to<IR::PathExpression>()) {
+        expr = varMap.at(path);
+    }
+    if (expr->is<IR::SymbolicVariable>()) {
+        return {};
     }
 
     if (const auto *taintExpr = expr->to<IR::TaintExpression>()) {
@@ -89,9 +92,6 @@ static bitvec computeTaintedBits(const SymbolicMapType &varMap, const IR::Expres
     if (expr->is<IR::DefaultExpression>()) {
         return {};
     }
-    if (expr->is<IR::ConcolicVariable>()) {
-        return {};
-    }
     BUG("Taint pair collection is unsupported for %1% of type %2%", expr, expr->node_type_name());
 }
 
@@ -99,11 +99,15 @@ bool Taint::hasTaint(const SymbolicMapType &varMap, const IR::Expression *expr) 
     if (expr->is<IR::TaintExpression>()) {
         return true;
     }
-    if (const auto *member = expr->to<IR::Member>()) {
-        if (!SymbolicEnv::isSymbolicValue(member)) {
-            return hasTaint(varMap, varMap.at(member));
-        }
+    if (expr->is<IR::SymbolicVariable>()) {
         return false;
+    }
+    // TODO: Replace these two with IR::StateVariable.
+    if (const auto *member = expr->to<IR::Member>()) {
+        return hasTaint(varMap, varMap.at(member));
+    }
+    if (const auto *path = expr->to<IR::PathExpression>()) {
+        return hasTaint(varMap, varMap.at(path));
     }
     if (const auto *structExpr = expr->to<IR::StructExpression>()) {
         for (const auto *subExpr : structExpr->components) {
@@ -139,9 +143,6 @@ bool Taint::hasTaint(const SymbolicMapType &varMap, const IR::Expression *expr) 
     if (expr->is<IR::DefaultExpression>()) {
         return false;
     }
-    if (expr->is<IR::ConcolicVariable>()) {
-        return false;
-    }
     BUG("Taint checking is unsupported for %1% of type %2%", expr, expr->node_type_name());
 }
 
@@ -163,23 +164,16 @@ class TaintPropagator : public Transform {
         return lit;
     }
 
-    const IR::Node *postorder(IR::PathExpression *path) override {
-        // Path expressions as part of members can be encountered during the post-order traversal.
-        // Ignore them.
-        return path;
-    }
-
     const IR::Node *postorder(IR::TaintExpression *expr) override { return expr; }
 
+    const IR::Node *postorder(IR::SymbolicVariable *var) override {
+        return IR::getMaxValueConstant(var->type);
+    }
+
     const IR::Node *postorder(IR::ConcolicVariable *var) override {
-        return new IR::Constant(var->type, IR::getMaxBvVal(var->type));
+        return IR::getMaxValueConstant(var->type);
     }
     const IR::Node *postorder(IR::Operation_Unary *unary_op) override { return unary_op->expr; }
-
-    const IR::Node *postorder(IR::Member *member) override {
-        // We do not want to split members.
-        return member;
-    }
 
     const IR::Node *postorder(IR::Cast *cast) override {
         if (Taint::hasTaint(varMap, cast->expr)) {
@@ -217,7 +211,7 @@ class TaintPropagator : public Transform {
         auto width = 1 + slLeftInt - slRightInt;
         const auto *sliceTb = IR::getBitType(width);
         if (Taint::hasTaint(varMap, slice)) {
-            return Utils::getTaintExpression(sliceTb);
+            return ToolsVariables::getTaintExpression(sliceTb);
         }
         // Otherwise we convert the expression to a constant of the sliced type.
         // Ultimately, the value here does not matter.
@@ -234,7 +228,12 @@ class MaskBuilder : public Transform {
  private:
     const IR::Node *preorder(IR::Member *member) override {
         // Non-tainted members just return the max value, which corresponds to a mask of all zeroes.
-        return IR::getConstant(member->type, IR::getMaxBvVal(member->type));
+        return IR::getMaxValueConstant(member->type);
+    }
+
+    const IR::Node *preorder(IR::PathExpression *path) override {
+        // Non-tainted members just return the max value, which corresponds to a mask of all zeroes.
+        return IR::getConstant(path->type, IR::getMaxBvVal(path->type));
     }
 
     const IR::Node *preorder(IR::TaintExpression *taintExpr) override {
@@ -245,7 +244,7 @@ class MaskBuilder : public Transform {
 
     const IR::Node *preorder(IR::Literal *lit) override {
         // Fill out a literal with zeroes.
-        const auto *maxConst = IR::getConstant(lit->type, IR::getMaxBvVal(lit->type));
+        const auto *maxConst = IR::getMaxValueConstant(lit->type);
         // If the literal would have been zero anyway, just return it.
         if (lit->equiv(*maxConst)) {
             return lit;

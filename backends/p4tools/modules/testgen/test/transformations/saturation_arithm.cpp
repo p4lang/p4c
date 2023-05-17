@@ -124,6 +124,10 @@ void test(const IR::Expression *expression, const IR::AssignmentStatement *varia
     ASSERT_TRUE(variableValue);
 
     // eliminate saturation arithmetics
+    SymbolicConverter symbolicConverter;
+    expression = expression->apply(symbolicConverter);
+    variableValue = variableValue->apply(symbolicConverter)->checkedTo<IR::AssignmentStatement>();
+
     SaturationTransform transform;
     expression = expression->apply(transform);
 
@@ -134,12 +138,12 @@ void test(const IR::Expression *expression, const IR::AssignmentStatement *varia
     ASSERT_EQ(solver.checkSat({expression}), true);
 
     // getting model
-    Model model = *solver.getModel();
-    ASSERT_EQ(model.size(), 2u);
+    auto symbolMap = solver.getSymbolicMapping();
+    ASSERT_EQ(symbolMap.size(), 2U);
 
-    ASSERT_EQ(model.count(variableValue->left), 1u);
+    ASSERT_EQ(symbolMap.count(variableValue->left->checkedTo<IR::SymbolicVariable>()), 1U);
 
-    const auto *value = model.at(variableValue->left);
+    const auto *value = symbolMap.at(variableValue->left->checkedTo<IR::SymbolicVariable>());
 
     ASSERT_TRUE(variableValue->right->is<IR::Constant>());
     ASSERT_TRUE(value->is<IR::Constant>());

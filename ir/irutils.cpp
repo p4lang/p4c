@@ -48,9 +48,9 @@ const Constant *getConstant(const Type *type, big_int v) {
     }
     // Constants are interned. Keys in the intern map are pairs of types and values.
     using key_t = std::tuple<int, std::type_index, bool, big_int>;
-    static std::map<key_t, const Constant *> constants;
+    static std::map<key_t, const Constant *> CONSTANTS;
 
-    auto *&result = constants[{tb->width_bits(), typeid(*type), tb->isSigned, v}];
+    auto *&result = CONSTANTS[{tb->width_bits(), typeid(*type), tb->isSigned, v}];
     if (result == nullptr) {
         result = new Constant(tb, v);
     }
@@ -60,24 +60,144 @@ const Constant *getConstant(const Type *type, big_int v) {
 
 const BoolLiteral *getBoolLiteral(bool value) {
     // Boolean literals are interned.
-    static std::map<bool, const BoolLiteral *> literals;
+    static std::map<bool, const BoolLiteral *> LITERALS;
 
-    auto *&result = literals[value];
+    auto *&result = LITERALS[value];
     if (result == nullptr) {
         result = new BoolLiteral(Type::Boolean::get(), value);
     }
     return result;
 }
 
-const Literal *getDefaultValue(const Type *type) {
-    if (type->is<Type_Bits>()) {
-        return getConstant(type, 0);
+const IR::Constant *convertBoolLiteral(const IR::BoolLiteral *lit) {
+    return IR::getConstant(IR::getBitType(1), lit->value ? 1 : 0);
+}
+
+const IR::Expression *getDefaultValue(const IR::Type *type, const Util::SourceInfo &srcInfo,
+                                      bool valueRequired) {
+    if (const auto *tb = type->to<IR::Type_Bits>()) {
+        // TODO: Use getConstant.
+        return new IR::Constant(srcInfo, tb, 0);
     }
-    if (type->is<Type_Boolean>()) {
-        return getBoolLiteral(false);
+    if (type->is<IR::Type_Boolean>()) {
+        // TODO: Use getBoolLiteral.
+        return new BoolLiteral(srcInfo, Type::Boolean::get(), false);
     }
-    P4C_UNIMPLEMENTED("Default value for type %s of type %s not implemented.", type,
-                      type->node_type_name());
+    if (type->is<IR::Type_InfInt>()) {
+        return new IR::Constant(srcInfo, 0);
+    }
+    if (const auto *te = type->to<IR::Type_Enum>()) {
+        return new IR::Member(srcInfo, new IR::TypeNameExpression(te->name),
+                              te->members.at(0)->getName());
+    }
+    if (const auto *te = type->to<IR::Type_SerEnum>()) {
+        return new IR::Cast(srcInfo, type->getP4Type(), new IR::Constant(srcInfo, te->type, 0));
+    }
+    if (const auto *te = type->to<IR::Type_Error>()) {
+        return new IR::Member(srcInfo, new IR::TypeNameExpression(te->name), "NoError");
+    }
+    if (type->is<IR::Type_String>()) {
+        return new IR::StringLiteral(srcInfo, cstring(""));
+    }
+    if (type->is<IR::Type_Varbits>()) {
+        if (valueRequired) {
+            P4C_UNIMPLEMENTED("%1%: No default value for varbit types.", srcInfo);
+        }
+        ::error(ErrorType::ERR_UNSUPPORTED, "%1% default values for varbit types", srcInfo);
+        return nullptr;
+    }
+    if (const auto *ht = type->to<IR::Type_Header>()) {
+        return new IR::InvalidHeader(ht->getP4Type());
+    }
+    if (const auto *hu = type->to<IR::Type_HeaderUnion>()) {
+        return new IR::InvalidHeaderUnion(hu->getP4Type());
+    }
+    if (const auto *st = type->to<IR::Type_StructLike>()) {
+        auto *vec = new IR::IndexedVector<IR::NamedExpression>();
+        for (const auto *field : st->fields) {
+            const auto *value = getDefaultValue(field->type, srcInfo);
+            if (value == nullptr) {
+                return nullptr;
+            }
+            vec->push_back(new IR::NamedExpression(field->name, value));
+        }
+        const auto *resultType = st->getP4Type();
+        return new IR::StructExpression(srcInfo, resultType, resultType, *vec);
+    }
+    if (const auto *tf = type->to<IR::Type_Fragment>()) {
+        return getDefaultValue(tf->type, srcInfo);
+    }
+    if (const auto *tt = type->to<IR::Type_BaseList>()) {
+        auto *vec = new IR::Vector<IR::Expression>();
+        for (const auto *field : tt->components) {
+            const auto *value = getDefaultValue(field, srcInfo);
+            if (value == nullptr) {
+                return nullptr;
+            }
+            vec->push_back(value);
+        }
+        return new IR::ListExpression(srcInfo, *vec);
+    }
+    if (const auto *ts = type->to<IR::Type_Stack>()) {
+        auto *vec = new IR::Vector<IR::Expression>();
+        const auto *elementType = ts->elementType;
+        for (size_t i = 0; i < ts->getSize(); i++) {
+            const IR::Expression *invalid = nullptr;
+            if (elementType->is<IR::Type_Header>()) {
+                invalid = new IR::InvalidHeader(elementType->getP4Type());
+            } else {
+                BUG_CHECK(elementType->is<IR::Type_HeaderUnion>(),
+                          "%1%: expected a header or header union stack", elementType);
+                invalid = new IR::InvalidHeaderUnion(srcInfo, elementType->getP4Type());
+            }
+            vec->push_back(invalid);
+        }
+        const auto *resultType = ts->getP4Type();
+        return new IR::HeaderStackExpression(srcInfo, resultType, *vec, resultType);
+    }
+    if (valueRequired) {
+        P4C_UNIMPLEMENTED("%1%: No default value for type %2% (%3%).", srcInfo, type,
+                          type->node_type_name());
+    }
+    ::error(ErrorType::ERR_INVALID, "%1%: No default value for type %2% (%3%)", srcInfo, type,
+            type->node_type_name());
+    return nullptr;
+}
+
+const IR::Constant *getMaxValueConstant(const Type *t) {
+    if (t->is<Type_Bits>()) {
+        return IR::getConstant(t, IR::getMaxBvVal(t));
+    }
+    if (t->is<Type_Boolean>()) {
+        return IR::getConstant(IR::getBitType(1), 1);
+    }
+    P4C_UNIMPLEMENTED("Maximum value calculation for type %1% not implemented.", t);
+}
+
+std::vector<const Expression *> flattenStructExpression(const StructExpression *structExpr) {
+    std::vector<const Expression *> exprList;
+    for (const auto *listElem : structExpr->components) {
+        if (const auto *subStructExpr = listElem->expression->to<StructExpression>()) {
+            auto subList = flattenStructExpression(subStructExpr);
+            exprList.insert(exprList.end(), subList.begin(), subList.end());
+        } else {
+            exprList.push_back(listElem->expression);
+        }
+    }
+    return exprList;
+}
+
+std::vector<const Expression *> flattenListExpression(const ListExpression *listExpr) {
+    std::vector<const Expression *> exprList;
+    for (const auto *listElem : listExpr->components) {
+        if (const auto *subListExpr = listElem->to<ListExpression>()) {
+            auto subList = flattenListExpression(subListExpr);
+            exprList.insert(exprList.end(), subList.begin(), subList.end());
+        } else {
+            exprList.push_back(listElem);
+        }
+    }
+    return exprList;
 }
 
 /* =============================================================================================
@@ -127,32 +247,6 @@ big_int getMinBvVal(const Type *t) {
         return 0;
     }
     P4C_UNIMPLEMENTED("Maximum value calculation for type %1% not implemented.", t);
-}
-
-std::vector<const Expression *> flattenStructExpression(const StructExpression *structExpr) {
-    std::vector<const Expression *> exprList;
-    for (const auto *listElem : structExpr->components) {
-        if (const auto *subStructExpr = listElem->expression->to<StructExpression>()) {
-            auto subList = flattenStructExpression(subStructExpr);
-            exprList.insert(exprList.end(), subList.begin(), subList.end());
-        } else {
-            exprList.push_back(listElem->expression);
-        }
-    }
-    return exprList;
-}
-
-std::vector<const Expression *> flattenListExpression(const ListExpression *listExpr) {
-    std::vector<const Expression *> exprList;
-    for (const auto *listElem : listExpr->components) {
-        if (const auto *subListExpr = listElem->to<ListExpression>()) {
-            auto subList = flattenListExpression(subListExpr);
-            exprList.insert(exprList.end(), subList.begin(), subList.end());
-        } else {
-            exprList.push_back(listElem);
-        }
-    }
-    return exprList;
 }
 
 }  // namespace IR

@@ -335,7 +335,7 @@ int64_t getTableSize(const IR::P4Table *table);
 
 /// A traits class describing the properties of "counterlike" things.
 template <typename Kind>
-struct CounterlikeTraits;
+struct CounterlikeTraits;  // IWYU pragma: keep
 
 /// The information about a counter or meter instance which is necessary to
 /// serialize it. @Kind must be a class with a CounterlikeTraits<>

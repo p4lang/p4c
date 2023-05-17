@@ -1,28 +1,26 @@
-#include <boost/algorithm/string/replace.hpp>
 #include <optional>
 
-#include "gtest/gtest.h"
-#include "ir/ir.h"
-#include "helpers.h"
-#include "lib/log.h"
-#include "lib/sourceCodeBuilder.h"
+#include <boost/algorithm/string/replace.hpp>
 
 #include "frontends/common/parseInput.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/toP4/toP4.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
+#include "gtest/gtest.h"
+#include "helpers.h"
+#include "ir/ir.h"
+#include "lib/log.h"
+#include "lib/sourceCodeBuilder.h"
 #include "midend/simplifyBitwise.h"
 
 using namespace P4;
-
 
 namespace Test {
 
 namespace {
 
-std::optional<FrontendTestCase>
-createSimplifyBitwiseTestCase(const std::string &ingressSource) {
+std::optional<FrontendTestCase> createSimplifyBitwiseTestCase(const std::string &ingressSource) {
     std::string source = P4_SOURCE(P4Headers::V1MODEL, R"(
 header H
 {
@@ -80,7 +78,7 @@ class CountAssignmentStatements : public Inspector {
 
 }  // namespace
 
-class SimplifyBitwiseTest : public P4CTest { };
+class SimplifyBitwiseTest : public P4CTest {};
 
 TEST_F(SimplifyBitwiseTest, SimpleSplit) {
     auto test = createSimplifyBitwiseTestCase(P4_SOURCE(R"(
@@ -94,12 +92,8 @@ TEST_F(SimplifyBitwiseTest, SimpleSplit) {
     Util::SourceCodeBuilder builder;
     ToP4 dump(builder, false);
 
-    PassManager quick_midend = {
-        new TypeChecking(&refMap, &typeMap, true),
-        new SimplifyBitwise,
-        &cas,
-        &dump
-    };
+    PassManager quick_midend = {new TypeChecking(&refMap, &typeMap, true), new SimplifyBitwise,
+                                &cas, &dump};
 
     test->program->apply(quick_midend);
     EXPECT_EQ(2, cas.as_total());
@@ -123,23 +117,19 @@ TEST_F(SimplifyBitwiseTest, ManySplit) {
     Util::SourceCodeBuilder builder;
     ToP4 dump(builder, false);
 
-    PassManager quick_midend = {
-        new TypeChecking(&refMap, &typeMap, true),
-        new SimplifyBitwise,
-        &cas,
-        &dump
-    };
+    PassManager quick_midend = {new TypeChecking(&refMap, &typeMap, true), new SimplifyBitwise,
+                                &cas, &dump};
 
     test->program->apply(quick_midend);
     EXPECT_EQ(32, cas.as_total());
     std::string program_string = builder.toString();
     for (int i = 0; i < 32; i += 2) {
-        std::string value1 = "headers.h.f1[" + std::to_string(i) + ":" + std::to_string(i)
-                              + "] = headers.h.f2[" + std::to_string(i) + ":"
-                              + std::to_string(i) + "]";
-        std::string value2 = "headers.h.f1[" + std::to_string(i+1) + ":" + std::to_string(i+1)
-                              + "] = headers.h.f1[" + std::to_string(i+1) + ":"
-                              + std::to_string(i+1) + "]";
+        std::string value1 = "headers.h.f1[" + std::to_string(i) + ":" + std::to_string(i) +
+                             "] = headers.h.f2[" + std::to_string(i) + ":" + std::to_string(i) +
+                             "]";
+        std::string value2 = "headers.h.f1[" + std::to_string(i + 1) + ":" + std::to_string(i + 1) +
+                             "] = headers.h.f1[" + std::to_string(i + 1) + ":" +
+                             std::to_string(i + 1) + "]";
         EXPECT_FALSE(program_string.find(value1) == std::string::npos);
         EXPECT_FALSE(program_string.find(value2) == std::string::npos);
     }
@@ -156,12 +146,8 @@ TEST_F(SimplifyBitwiseTest, SplitWithZero) {
 
     Util::SourceCodeBuilder builder;
     ToP4 dump(builder, false);
-    PassManager quick_midend = {
-        new TypeChecking(&refMap, &typeMap, true),
-        new SimplifyBitwise,
-        &cas,
-        &dump
-    };
+    PassManager quick_midend = {new TypeChecking(&refMap, &typeMap, true), new SimplifyBitwise,
+                                &cas, &dump};
 
     test->program->apply(quick_midend);
     EXPECT_EQ(3, cas.as_total());

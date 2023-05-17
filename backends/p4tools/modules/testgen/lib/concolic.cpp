@@ -4,7 +4,6 @@
 #include <utility>
 #include <vector>
 
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "ir/id.h"
 #include "lib/exceptions.h"
@@ -12,9 +11,7 @@
 
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
-namespace P4Tools {
-
-namespace P4Testgen {
+namespace P4Tools::P4Testgen {
 
 bool ConcolicMethodImpls::matches(const std::vector<cstring> &paramNames,
                                   const IR::Vector<IR::Argument> *args) {
@@ -40,16 +37,16 @@ bool ConcolicMethodImpls::matches(const std::vector<cstring> &paramNames,
     return true;
 }
 
-bool ConcolicMethodImpls::exec(cstring qualifiedMethodName, const IR::ConcolicVariable *var,
+bool ConcolicMethodImpls::exec(cstring concolicMethodName, const IR::ConcolicVariable *var,
                                const ExecutionState &state, const Model &completedModel,
                                ConcolicVariableMap *resolvedConcolicVariables) const {
-    if (impls.count(qualifiedMethodName) == 0) {
+    if (impls.count(concolicMethodName) == 0) {
         return false;
     }
 
     const auto *args = var->arguments;
 
-    const auto &submap = impls.at(qualifiedMethodName);
+    const auto &submap = impls.at(concolicMethodName);
     if (submap.count(args->size()) == 0) {
         return false;
     }
@@ -61,7 +58,7 @@ bool ConcolicMethodImpls::exec(cstring qualifiedMethodName, const IR::ConcolicVa
         const auto &methodImpl = pair.second;
 
         if (matches(paramNames, args)) {
-            BUG_CHECK(!matchingImpl, "Ambiguous extern method call: %1%", qualifiedMethodName);
+            BUG_CHECK(!matchingImpl, "Ambiguous extern method call: %1%", concolicMethodName);
             matchingImpl = methodImpl;
         }
     }
@@ -69,7 +66,7 @@ bool ConcolicMethodImpls::exec(cstring qualifiedMethodName, const IR::ConcolicVa
     if (!matchingImpl) {
         return false;
     }
-    (*matchingImpl)(qualifiedMethodName, var, state, completedModel, resolvedConcolicVariables);
+    (*matchingImpl)(concolicMethodName, var, state, completedModel, resolvedConcolicVariables);
     return true;
 }
 
@@ -97,10 +94,9 @@ void ConcolicMethodImpls::add(const ImplList &inputImplList) {
 ConcolicMethodImpls::ConcolicMethodImpls(const ImplList &implList) { add(implList); }
 
 bool ConcolicResolver::preorder(const IR::ConcolicVariable *var) {
-    cstring concolicMethodName = var->concolicMethodName;
+    auto concolicMethodName = var->concolicMethodName;
     // Convert the concolic member variable to a state variable.
-    StateVariable concolicVarName = var->concolicMember;
-    auto concolicReplacment = resolvedConcolicVariables.find(concolicVarName);
+    auto concolicReplacment = resolvedConcolicVariables.find(*var);
     if (concolicReplacment == resolvedConcolicVariables.end()) {
         bool found = concolicMethodImpls.exec(concolicMethodName, var, state, completedModel,
                                               &resolvedConcolicVariables);
@@ -129,12 +125,10 @@ ConcolicResolver::ConcolicResolver(const Model &completedModel, const ExecutionS
     visitDagOnce = false;
 }
 
-static const ConcolicMethodImpls::ImplList coreConcolicMethodImpls({});
+static const ConcolicMethodImpls::ImplList CORE_CONCOLIC_METHOD_IMPLS({});
 
 const ConcolicMethodImpls::ImplList *Concolic::getCoreConcolicMethodImpls() {
-    return &coreConcolicMethodImpls;
+    return &CORE_CONCOLIC_METHOD_IMPLS;
 }
 
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen

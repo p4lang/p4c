@@ -12,22 +12,18 @@
 
 #include "backends/p4tools/modules/testgen/options.h"
 
-namespace P4Tools {
+namespace P4Tools::P4Testgen::Bmv2 {
 
-namespace P4Testgen {
+Bmv2V1ModelCompilerTarget::Bmv2V1ModelCompilerTarget() : CompilerTarget("bmv2", "v1model") {}
 
-namespace Bmv2 {
-
-BMv2_V1ModelCompilerTarget::BMv2_V1ModelCompilerTarget() : CompilerTarget("bmv2", "v1model") {}
-
-void BMv2_V1ModelCompilerTarget::make() {
-    static BMv2_V1ModelCompilerTarget *INSTANCE = nullptr;
+void Bmv2V1ModelCompilerTarget::make() {
+    static Bmv2V1ModelCompilerTarget *INSTANCE = nullptr;
     if (INSTANCE == nullptr) {
-        INSTANCE = new BMv2_V1ModelCompilerTarget();
+        INSTANCE = new Bmv2V1ModelCompilerTarget();
     }
 }
 
-MidEnd BMv2_V1ModelCompilerTarget::mkMidEnd(const CompilerOptions &options) const {
+MidEnd Bmv2V1ModelCompilerTarget::mkMidEnd(const CompilerOptions &options) const {
     MidEnd midEnd(options);
     auto *refMap = midEnd.getRefMap();
     auto *typeMap = midEnd.getTypeMap();
@@ -46,8 +42,4 @@ MidEnd BMv2_V1ModelCompilerTarget::mkMidEnd(const CompilerOptions &options) cons
     return midEnd;
 }
 
-}  // namespace Bmv2
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::Bmv2

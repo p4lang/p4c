@@ -11,12 +11,14 @@
 #include <boost/multiprecision/number.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
-#include "backends/p4tools/common/lib/formulae.h"
+#include "backends/p4tools/common/lib/arch_spec.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "backends/p4tools/common/lib/variables.h"
 #include "ir/declaration.h"
 #include "ir/indexed_vector.h"
+#include "ir/ir-generated.h"
 #include "ir/irutils.h"
 #include "ir/node.h"
 #include "lib/cstring.h"
@@ -25,7 +27,6 @@
 #include "lib/log.h"
 #include "lib/ordered_map.h"
 
-#include "backends/p4tools/modules/testgen/core/arch_spec.h"
 #include "backends/p4tools/modules/testgen/core/externs.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/expr_stepper.h"
@@ -34,6 +35,7 @@
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/lib/packet_vars.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/constants.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/program_info.h"
@@ -43,10 +45,10 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-std::string BMv2_V1ModelExprStepper::getClassName() { return "BMv2_V1ModelExprStepper"; }
+std::string Bmv2V1ModelExprStepper::getClassName() { return "Bmv2V1ModelExprStepper"; }
 
-bool BMv2_V1ModelExprStepper::isPartOfFieldList(const IR::StructField *field,
-                                                uint64_t recirculateIndex) {
+bool Bmv2V1ModelExprStepper::isPartOfFieldList(const IR::StructField *field,
+                                               uint64_t recirculateIndex) {
     // Check whether the field has a "field_list" annotation associated with it.
     const auto *annotation = field->getAnnotation("field_list");
     if (annotation != nullptr) {
@@ -64,9 +66,9 @@ bool BMv2_V1ModelExprStepper::isPartOfFieldList(const IR::StructField *field,
     return false;
 }
 
-void BMv2_V1ModelExprStepper::resetPreservingFieldList(ExecutionState &nextState,
-                                                       const IR::PathExpression *ref,
-                                                       uint64_t recirculateIndex) const {
+void Bmv2V1ModelExprStepper::resetPreservingFieldList(ExecutionState &nextState,
+                                                      const IR::PathExpression *ref,
+                                                      uint64_t recirculateIndex) const {
     const auto *ts = ref->type->checkedTo<IR::Type_StructLike>();
     for (const auto *field : ts->fields) {
         // Check whether the field has a "field_list" annotation associated with it.
@@ -81,14 +83,222 @@ void BMv2_V1ModelExprStepper::resetPreservingFieldList(ExecutionState &nextState
     }
 }
 
-BMv2_V1ModelExprStepper::BMv2_V1ModelExprStepper(ExecutionState &state, AbstractSolver &solver,
-                                                 const ProgramInfo &programInfo)
+void Bmv2V1ModelExprStepper::processClone(const ExecutionState &state,
+                                          SmallStepEvaluator::Result &result) {
+    const auto *progInfo = getProgramInfo().checkedTo<Bmv2V1ModelProgramInfo>();
+    // Pick a clone port var. It must adhere to the constraints of the target.
+    const auto *cloneInfo = state.getTestObject<Bmv2V1ModelCloneInfo>("clone_infos", "clone_info");
+    const auto *sessionIdExpr = cloneInfo->getSessionId();
+    const auto &preserveIndex = cloneInfo->getPreserveIndex();
+    const auto &egressPortVar = programInfo.getTargetOutputPortVar();
+    const auto &clonePortVar =
+        ToolsVariables::getSymbolicVariable(egressPortVar->type, 0, "clone_port_var");
+
+    uint64_t recirculateCount = 0;
+    if (state.hasProperty("recirculate_count")) {
+        recirculateCount = state.getProperty<uint64_t>("recirculate_count");
+    }
+
+    // Pick a clone port var. It must adhere to the constraints of the target.
+    // Pick a value that is not equal to the normal egress port.
+    // TODO: Is this a reasonable restriction? Do we want to test this case?
+    // TODO: What about programs where we can not satisfy this restriction? Do we not generate
+    // tests?
+    // TODO: Circle back to this once we have modifiable state in extern steppers.
+    const Constraint *cond = new IR::Neq(egressPortVar, clonePortVar);
+    // PTF has a couple more restrictions because it uses P4Runtime. The session ID must be within
+    // a specific range. Otherwise no clone call can be produced.
+    if (TestgenOptions::get().testBackend == "PTF") {
+        cond = new IR::LAnd(
+            new IR::LAnd(
+                new IR::Leq(sessionIdExpr, IR::getConstant(sessionIdExpr->type,
+                                                           BMv2Constants::CLONE_SESSION_ID_MAX)),
+                new IR::Geq(sessionIdExpr, IR::getConstant(sessionIdExpr->type,
+                                                           BMv2Constants::CLONE_SESSION_ID_MIN))),
+            new IR::LAnd(cond, new IR::Lss(clonePortVar, IR::getConstant(clonePortVar->type, 8))));
+    }
+    // clone methods have a default state where the packet continues as is.
+    {
+        auto &defaultState = state.clone();
+        // Delete the stale clone info to free up some space and reset the clone_active flag.
+        defaultState.deleteTestObjectCategory("clone_infos");
+        defaultState.setProperty("clone_active", false);
+        // Increment the recirculation count.
+        defaultState.setProperty("recirculate_count", ++recirculateCount);
+        // Attach the clone specification for test generation.
+        const auto *defaultCloneInfo = new Bmv2V1ModelCloneSpec(sessionIdExpr, clonePortVar, false);
+        defaultState.addTestObject("clone_specs", "clone_spec", defaultCloneInfo);
+        defaultState.popBody();
+        result->emplace_back(cond, state, defaultState);
+    }
+
+    // Use a nullptr state to avoid some code duplication...
+    ExecutionState *cloneState = nullptr;
+    std::vector<Continuation::Command> cmds;
+
+    // We need to set the instance type once we recirculate.
+    const auto *instanceBitType = IR::getBitType(32);
+    const auto *instanceTypeVar = new IR::Member(
+        instanceBitType, new IR::PathExpression("*standard_metadata"), "instance_type");
+    const IR::Constant *instanceTypeConst = nullptr;
+
+    auto cloneType = cloneInfo->getCloneType();
+    if (cloneType == BMv2Constants::CloneType::I2E) {
+        cloneState = &cloneInfo->getClonedState().clone();
+        instanceTypeConst =
+            IR::getConstant(instanceBitType, BMv2Constants::PKT_INSTANCE_TYPE_INGRESS_CLONE);
+        const auto *progInfo = getProgramInfo().checkedTo<Bmv2V1ModelProgramInfo>();
+        // Reset the packet buffer, which corresponds to the output packet.
+        // We need to reset everything to the state before the ingress call. We use a
+        // trick by calling copyIn on the entire state again. We need a little bit of
+        // information for that, including the exact parameter names of the ingress
+        // block we are in. Just grab the ingress from the programmable blocks.
+        const auto *programmableBlocks = progInfo->getProgrammableBlocks();
+        const auto *typeDecl = programmableBlocks->at("Ingress");
+        const auto *applyBlock = typeDecl->checkedTo<IR::P4Control>();
+        const auto *params = applyBlock->getApplyParameters();
+        auto blockIndex = 2;
+        const auto *archSpec = TestgenTarget::getArchSpec();
+        const auto *archMember = archSpec->getArchMember(blockIndex);
+        if (preserveIndex.has_value()) {
+            for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
+                const auto *param = params->getParameter(paramIdx);
+                // Skip the second parameter (metadata) since we do want to preserve
+                // it.
+                if (paramIdx == 1) {
+                    // This program segment resets the user metadata of the v1model
+                    // program to 0. However, fields in the user metadata that have the
+                    // field_list annotation and the appropriate index will not be
+                    // reset. The user metadata is the second parameter of the ingress
+                    // control.
+                    const auto *paramType = param->type;
+                    if (const auto *tn = paramType->to<IR::Type_Name>()) {
+                        paramType = cloneState->resolveType(tn);
+                    }
+                    const auto *paramRef =
+                        new IR::PathExpression(paramType, new IR::Path(param->name));
+                    resetPreservingFieldList(*cloneState, paramRef, preserveIndex.value());
+                    continue;
+                }
+                programInfo.produceCopyInOutCall(param, paramIdx, archMember, &cmds, nullptr);
+            }
+        } else {
+            for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
+                const auto *param = params->getParameter(paramIdx);
+                programInfo.produceCopyInOutCall(param, paramIdx, archMember, &cmds, nullptr);
+            }
+        }
+        // We then exit, which will copy out all the state that we have just reset.
+        cmds.emplace_back(new IR::ExitStatement());
+    } else if (cloneType == BMv2Constants::CloneType::E2E) {
+        cloneState = &state.clone();
+        instanceTypeConst =
+            IR::getConstant(instanceBitType, BMv2Constants::PKT_INSTANCE_TYPE_EGRESS_CLONE);
+        if (preserveIndex.has_value()) {
+            // This program segment resets the user metadata of the v1model program to
+            // 0. However, fields in the user metadata that have the field_list
+            // annotation and the appropriate index will not be reset. The user
+            // metadata is the third parameter of the parser control.
+            const auto *paramPath = progInfo->getBlockParam("Parser", 2);
+            resetPreservingFieldList(*cloneState, paramPath, preserveIndex.value());
+        }
+
+        // In the other state, we start processing from the egress.
+        const auto *topLevelBlocks = progInfo->getPipelineSequence();
+        size_t egressDelim = 0;
+        for (; egressDelim < topLevelBlocks->size(); ++egressDelim) {
+            auto block = topLevelBlocks->at(egressDelim);
+            if (!std::holds_alternative<const IR::Node *>(block)) {
+                continue;
+            }
+            const auto *p4Node = std::get<const IR::Node *>(block);
+            if (const auto *ctrl = p4Node->to<IR::P4Control>()) {
+                if (progInfo->getGress(ctrl) == BMV2_EGRESS) {
+                    break;
+                }
+            }
+        }
+        cmds.insert(cmds.begin(), topLevelBlocks->begin() + egressDelim - 2, topLevelBlocks->end());
+    } else {
+        TESTGEN_UNIMPLEMENTED("Unsupported clone type %1%.", cloneType);
+    }
+    // Set the metadata instance types.
+    cloneState->set(instanceTypeVar, instanceTypeConst);
+    // Attach the clone specification for test generation.
+    cloneState->addTestObject("clone_specs", "clone_spec",
+                              new Bmv2V1ModelCloneSpec(sessionIdExpr, clonePortVar, true));
+    // Delete the stale clone info to free up some space and reset the clone_active flag.
+    cloneState->setProperty("clone_active", false);
+    cloneState->deleteTestObjectCategory("clone_infos");
+    // Increment the recirculation count.
+    cloneState->setProperty("recirculate_count", ++recirculateCount);
+    /// Reset the packet buffer for recirculation.
+    cloneState->resetPacketBuffer();
+    cloneState->replaceTopBody(&cmds);
+    result->emplace_back(cond, state, *cloneState);
+}
+
+void Bmv2V1ModelExprStepper::processRecirculate(const ExecutionState &state,
+                                                SmallStepEvaluator::Result &result) {
+    auto instanceType = state.getProperty<uint64_t>("recirculate_instance_type");
+    const auto *progInfo = getProgramInfo().checkedTo<Bmv2V1ModelProgramInfo>();
+    auto &recState = state.clone();
+
+    // Check whether the packet needs to be reset.
+    // If that is the case, reset the packet buffer to the calculated input packet.
+    auto recirculateReset = state.hasProperty("recirculate_reset_pkt");
+    if (recirculateReset) {
+        // Reset the packet buffer, which corresponds to the output packet.
+        recState.resetPacketBuffer();
+        // Set the packet buffer to the current calculated program packet for consistency.
+        recState.appendToPacketBuffer(recState.getInputPacket());
+    }
+
+    // We need to update the size of the packet when recirculating. Do not forget to divide
+    // by 8.
+    const auto *packetSizeVar =
+        new IR::Member(&PacketVars::PACKET_SIZE_VAR_TYPE,
+                       new IR::PathExpression("*standard_metadata"), "packet_length");
+    const auto *packetSizeConst =
+        IR::getConstant(&PacketVars::PACKET_SIZE_VAR_TYPE, recState.getPacketBufferSize() / 8);
+    recState.set(packetSizeVar, packetSizeConst);
+
+    if (recState.hasProperty("recirculate_index")) {
+        // Get the index set by the recirculate/resubmit function. Will fail if no index is
+        // set.
+        auto recirculateIndex = recState.getProperty<uint64_t>("recirculate_index");
+        // This program segment resets the user metadata of the v1model program to 0.
+        // However, fields in the user metadata that have the field_list annotation and the
+        // appropriate index will not be reset.
+        // The user metadata is the third parameter of the parser control.
+        const auto *paramPath = progInfo->getBlockParam("Parser", 2);
+        resetPreservingFieldList(recState, paramPath, recirculateIndex);
+    }
+
+    // Update the metadata variable to the correct instance type as provided by recirculation.
+    const auto *bitType = IR::getBitType(32);
+    const auto *instanceTypeVar =
+        new IR::Member(bitType, new IR::PathExpression("*standard_metadata"), "instance_type");
+    recState.set(instanceTypeVar, IR::getConstant(bitType, instanceType));
+
+    // Set recirculate to false to avoid infinite loops.
+    recState.setProperty("recirculate_active", false);
+
+    // "Recirculate" by attaching the sequence again.
+    // Does NOT initialize state or adds new conditions.
+    const auto *topLevelBlocks = progInfo->getPipelineSequence();
+    recState.replaceTopBody(topLevelBlocks);
+    result->emplace_back(recState);
+}
+
+Bmv2V1ModelExprStepper::Bmv2V1ModelExprStepper(ExecutionState &state, AbstractSolver &solver,
+                                               const ProgramInfo &programInfo)
     : ExprStepper(state, solver, programInfo) {}
 
-void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
-                                                   const IR::Expression *receiver, IR::ID name,
-                                                   const IR::Vector<IR::Argument> *args,
-                                                   ExecutionState &state) {
+void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
+                                                  const IR::Expression *receiver, IR::ID name,
+                                                  const IR::Vector<IR::Argument> *args,
+                                                  ExecutionState &state) {
     const ExternMethodImpls::MethodImpl assertAssumeExecute =
         [](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
            IR::ID &methodName, const IR::Vector<IR::Argument> *args, const ExecutionState &state,
@@ -141,7 +351,8 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
         /* ======================================================================================
          *  mark_to_drop
          *  Mark to drop sets the BMv2 internal drop variable to true.
-         * ====================================================================================== */
+         * ======================================================================================
+         */
         // TODO: Implement extern path expression calls.
         {"*method.mark_to_drop",
          {"standard_metadata"},
@@ -150,7 +361,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
              auto &nextState = state.clone();
              const auto *nineBitType =
-                 IR::getBitType(BMv2_V1ModelTestgenTarget::getPortNumWidth_bits());
+                 IR::getBitType(Bmv2V1ModelTestgenTarget::getPortNumWidthBits());
              const auto *metadataLabel = args->at(0)->expression;
              if (!(metadataLabel->is<IR::Member>() || metadataLabel->is<IR::PathExpression>())) {
                  TESTGEN_UNIMPLEMENTED("Drop input %1% of type %2% not supported", metadataLabel,
@@ -159,7 +370,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              // Use an assignment to set egress_spec to true.
              // This variable will be processed in the deparser.
              const auto *portVar = new IR::Member(nineBitType, metadataLabel, "egress_spec");
-             nextState.set(portVar, IR::getConstant(nineBitType, 511));
+             nextState.set(portVar, IR::getConstant(nineBitType, BMv2Constants::DROP_PORT));
              nextState.add(*new TraceEvents::Generic("mark_to_drop executed."));
              nextState.popBody();
              result->emplace_back(nextState);
@@ -168,7 +379,8 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          *  random
          *  Generate a random number in the range lo..hi, inclusive, and write
          *  it to the result parameter.
-         * ====================================================================================== */
+         * ======================================================================================
+         */
         {"*method.random",
          {"result", "lo", "hi"},
          [this](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
@@ -182,16 +394,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                        "Low value ( %1% ) must be less than high value ( %2% ).", lo, hi);
              auto &nextState = state.clone();
              const auto *resultField = args->at(0)->expression;
-             const IR::Member *fieldRef = nullptr;
-             if (const auto *pathRef = resultField->to<IR::PathExpression>()) {
-                 fieldRef = state.convertPathExpr(pathRef);
-             } else {
-                 fieldRef = resultField->to<IR::Member>();
-             }
-             if (fieldRef == nullptr) {
-                 TESTGEN_UNIMPLEMENTED("Random output %1% of type %2% not supported", resultField,
-                                       resultField->type);
-             }
+             const auto &fieldRef = ExecutionState::convertReference(resultField);
 
              // If the range is limited to only one value, return that value.
              if (lo->value == hi->value) {
@@ -239,7 +442,8 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          *  statements when compiled to a target device is that if the
          *  condition ever evaluates to false when operating in a network, it
          *  is likely that your assumption was wrong, and should be reexamined.
-         * ====================================================================================== */
+         * ======================================================================================
+         */
         {"*method.assume", {"check"}, assertAssumeExecute},
         /* ======================================================================================
          *  assert
@@ -262,14 +466,16 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          *  allow you to do this with no warning given.  We recommend this
          *  because, if you follow this advice, your program will behave the
          *  same way when assert statements are removed.
-         * ====================================================================================== */
+         * ======================================================================================
+         */
         {"*method.assert", {"check"}, assertAssumeExecute},
         /* ======================================================================================
          *  log_msg
          *  Log user defined messages
          *  Example: log_msg("User defined message");
          *  or log_msg("Value1 = {}, Value2 = {}",{value1, value2});
-         * ====================================================================================== */
+         * ======================================================================================
+         */
         {"*method.log_msg",
          {"msg", "args"},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
@@ -319,11 +525,12 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          *  different from, each other, and thus their bit widths are allowed
          *  to be different.
          *  @param O          Must be a type bit<W>
-         *  @param D          Must be a tuple type where all the fields are bit-fields (type bit<W>
-         *  or int<W>) or varbits.
+         *  @param D          Must be a tuple type where all the fields are bit-fields (type
+         * bit<W> or int<W>) or varbits.
          *  @param T          Must be a type bit<W>
          *  @param M          Must be a type bit<W>
-         * ====================================================================================== */
+         * ======================================================================================
+         */
         {"*method.hash",
          {"result", "algo", "base", "data", "max"},
          [this](const IR::MethodCallExpression *call, const IR::Expression *receiver, IR::ID &name,
@@ -363,16 +570,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              auto externName = receiver->toString() + "_" + declInstance->controlPlaneName();
              auto &nextState = state.clone();
              if (hashOutput->type->is<IR::Type_Bits>()) {
-                 const IR::Member *fieldRef = nullptr;
-                 if (const auto *pathRef = hashOutput->to<IR::PathExpression>()) {
-                     fieldRef = state.convertPathExpr(pathRef);
-                 } else {
-                     fieldRef = hashOutput->to<IR::Member>();
-                 }
-                 if (fieldRef == nullptr) {
-                     TESTGEN_UNIMPLEMENTED("Hash output %1% of type %2% not supported", hashOutput,
-                                           hashOutput->type);
-                 }
+                 const auto &fieldRef = ExecutionState::convertReference(hashOutput);
                  if (argsAreTainted) {
                      nextState.set(fieldRef,
                                    programInfo.createTargetUninitialized(fieldRef->type, false));
@@ -405,7 +603,8 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          *               value of result is not specified, and should be
          *               ignored by the caller.
          *
-         * ====================================================================================== */
+         * ======================================================================================
+         */
         {"register.read",
          {"result", "index"},
          [this](const IR::MethodCallExpression *call, const IR::Expression *receiver,
@@ -434,32 +633,31 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              const auto *readOutput = args->at(0)->expression;
              const auto *index = args->at(1)->expression;
              auto &nextState = state.clone();
+
              std::vector<Continuation::Command> replacements;
-
-             const auto *receiverPath = receiver->checkedTo<IR::PathExpression>();
-             const auto &externInstance = state.convertPathExpr(receiverPath);
-
+             const auto &externRef = receiver->checkedTo<IR::PathExpression>();
+             const auto &externInstance = state.findDecl(externRef);
              // Retrieve the register state from the object store. If it is already present, just
              // cast the object to the correct class and retrieve the current value according to the
              // index. If the register has not been added had, create a new register object.
              const auto *registerState =
-                 state.getTestObject("registervalues", externInstance->toString(), false);
-             const Bmv2RegisterValue *registerValue = nullptr;
+                 state.getTestObject("registervalues", externInstance->controlPlaneName(), false);
+             const Bmv2V1ModelRegisterValue *registerValue = nullptr;
              if (registerState != nullptr) {
-                 registerValue = registerState->checkedTo<Bmv2RegisterValue>();
+                 registerValue = registerState->checkedTo<Bmv2V1ModelRegisterValue>();
              } else {
                  const auto *inputValue =
                      programInfo.createTargetUninitialized(readOutput->type, false);
-                 registerValue = new Bmv2RegisterValue(inputValue);
-                 nextState.addTestObject("registervalues", externInstance->toString(),
+                 registerValue = new Bmv2V1ModelRegisterValue(inputValue);
+                 nextState.addTestObject("registervalues", externInstance->controlPlaneName(),
                                          registerValue);
              }
-             const IR::Expression *baseExpr = registerValue->getCurrentValue(index);
+             const IR::Expression *baseExpr = registerValue->getValueAtIndex(index);
 
              if (readOutput->type->is<IR::Type_Bits>()) {
-                 // We need an assignment statement (and the inefficient copy) here because we need
-                 // to immediately resolve the generated mux into multiple branches.
-                 // This is only possible because registers do not return a value.
+                 // We need an assignment statement (and the inefficient copy) here because we
+                 // need to immediately resolve the generated mux into multiple branches. This
+                 // is only possible because registers do not return a value.
                  replacements.emplace_back(new IR::AssignmentStatement(readOutput, baseExpr));
 
              } else {
@@ -500,7 +698,8 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          *               parameter's value is written into the register
          *               array element specified by index.
          *
-         * ====================================================================================== */
+         * ======================================================================================
+         */
         {"register.write",
          {"index", "value"},
          [this](const IR::MethodCallExpression *call, const IR::Expression *receiver,
@@ -511,7 +710,8 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              if (!(inputValue->type->is<IR::Type_InfInt>() ||
                    inputValue->type->is<IR::Type_Bits>())) {
                  TESTGEN_UNIMPLEMENTED(
-                     "Only registers with bit or int types are currently supported for v1model.");
+                     "Only registers with bit or int types are currently supported for "
+                     "v1model.");
              }
              for (size_t idx = 0; idx < args->size(); ++idx) {
                  const auto *arg = args->at(idx);
@@ -534,7 +734,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  }
              }
              const auto *receiverPath = receiver->checkedTo<IR::PathExpression>();
-             const auto &externInstance = state.convertPathExpr(receiverPath);
+             const auto &externInstance = state.findDecl(receiverPath);
              auto &nextState = state.clone();
              // TODO: Find a better way to model a trace of this event.
              std::stringstream registerStream;
@@ -546,20 +746,21 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
 
              // "Write" to the register by update the internal test object state. If the register
              // did not exist previously, update it with the value to write as initial value.
-             const auto *registerState =
-                 nextState.getTestObject("registervalues", externInstance->toString(), false);
-             Bmv2RegisterValue *registerValue = nullptr;
+             const auto *registerState = nextState.getTestObject(
+                 "registervalues", externInstance->controlPlaneName(), false);
+             Bmv2V1ModelRegisterValue *registerValue = nullptr;
              if (registerState != nullptr) {
-                 registerValue =
-                     new Bmv2RegisterValue(*registerState->checkedTo<Bmv2RegisterValue>());
-                 registerValue->addRegisterCondition(Bmv2RegisterCondition{index, inputValue});
+                 registerValue = new Bmv2V1ModelRegisterValue(
+                     *registerState->checkedTo<Bmv2V1ModelRegisterValue>());
+                 registerValue->writeToIndex(index, inputValue);
              } else {
                  const auto &writeValue =
                      programInfo.createTargetUninitialized(inputValue->type, false);
-                 registerValue = new Bmv2RegisterValue(writeValue);
-                 registerValue->addRegisterCondition(Bmv2RegisterCondition{index, inputValue});
+                 registerValue = new Bmv2V1ModelRegisterValue(writeValue);
+                 registerValue->writeToIndex(index, inputValue);
              }
-             nextState.addTestObject("registervalues", externInstance->toString(), registerValue);
+             nextState.addTestObject("registervalues", externInstance->controlPlaneName(),
+                                     registerValue);
              nextState.popBody();
              result->emplace_back(nextState);
          }},
@@ -588,14 +789,14 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          *               updated, normally a value in the range [0,
          *               size-1].  If index >= size, no counter state will be
          *               updated.
-         * ====================================================================================== */
+         * ======================================================================================
+         */
         // TODO: Count currently has no effect in the symbolic interpreter.
         {"counter.count",
          {"index"},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
-             ::warning("counter.count not fully implemented.");
              auto &nextState = state.clone();
              nextState.popBody();
              result->emplace_back(nextState);
@@ -625,20 +826,20 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          *  written back, atomically relative to the processing of other
          *  packets, regardless of whether the count() method is called in
          *  the body of that action.
-         * ====================================================================================== */
+         * ======================================================================================
+         */
         // TODO: Count currently has no effect in the symbolic interpreter.
         {"direct_counter.count",
          {},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
-             ::warning("direct_counter.count not fully implemented.");
              auto &nextState = state.clone();
              nextState.popBody();
              result->emplace_back(nextState);
          }},
         /* ======================================================================================
-         *  meter.read
+         *  meter.execute_meter
          *  A meter object is created by calling its constructor.  This
          *  creates an array of meter states, with the number of meter
          *  states specified by the size parameter.  The array indices are
@@ -668,19 +869,88 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          *               range, the final value of result is not specified,
          *  and should be ignored by the caller.
          * ====================================================================================== */
-        // TODO: Read currently has no effect in the symbolic interpreter.
         {"meter.execute_meter",
          {"index", "result"},
-         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
-            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
+         [](const IR::MethodCallExpression *call, const IR::Expression *receiver,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
-             ::warning("meter.execute_meter not fully implemented.");
+             auto testBackend = TestgenOptions::get().testBackend;
+             const IR::StateVariable &meterResult =
+                 ExecutionState::convertReference(args->at(1)->expression);
+             if (testBackend != "PTF") {
+                 ::warning(
+                     "meter.execute_meter not implemented for %1%. Choosing default value (GREEN).",
+                     testBackend);
+                 auto &nextState = state.clone();
+                 nextState.set(meterResult, IR::getConstant(meterResult->type,
+                                                            BMv2Constants::METER_COLOR::GREEN));
+                 nextState.popBody();
+                 result->emplace_back(nextState);
+                 return;
+             }
+
+             // TODO: Frontload this in the expression stepper for method call expressions.
+             const auto *index = args->at(0)->expression;
+             if (!SymbolicEnv::isSymbolicValue(index)) {
+                 // Evaluate the condition.
+                 stepToSubexpr(index, result, state, [call](const Continuation::Parameter *v) {
+                     auto *clonedCall = call->clone();
+                     auto *arguments = clonedCall->arguments->clone();
+                     auto *arg = arguments->at(0)->clone();
+                     arg->expression = v->param;
+                     (*arguments)[0] = arg;
+                     clonedCall->arguments = arguments;
+                     return Continuation::Return(clonedCall);
+                 });
+                 return;
+             }
              auto &nextState = state.clone();
-             nextState.popBody();
-             result->emplace_back(nextState);
+             std::vector<Continuation::Command> replacements;
+
+             const auto *receiverPath = receiver->checkedTo<IR::PathExpression>();
+             const auto &externInstance = nextState.findDecl(receiverPath);
+
+             // Retrieve the meter state from the object store. If it is already present, just
+             // cast the object to the correct class and retrieve the current value according to the
+             // index. If the meter has not been added had, create a new meter object.
+             const auto *meterState =
+                 state.getTestObject("meter_values", externInstance->controlPlaneName(), false);
+             Bmv2V1ModelMeterValue *meterValue = nullptr;
+             const auto &inputValue = nextState.createSymbolicVariable(
+                 meterResult->type, "meter_value" + std::to_string(call->clone_id));
+             // Make sure we do not accidentally get "3" as enum assignment...
+             auto *cond = new IR::Lss(inputValue, IR::getConstant(meterResult->type, 3));
+             if (meterState != nullptr) {
+                 meterValue =
+                     new Bmv2V1ModelMeterValue(*meterState->checkedTo<Bmv2V1ModelMeterValue>());
+             } else {
+                 meterValue = new Bmv2V1ModelMeterValue(inputValue, false);
+             }
+             meterValue->writeToIndex(index, inputValue);
+             nextState.addTestObject("meter_values", externInstance->controlPlaneName(),
+                                     meterValue);
+
+             if (meterResult->type->is<IR::Type_Bits>()) {
+                 // We need an assignment statement (and the inefficient copy) here because we need
+                 // to immediately resolve the generated mux into multiple branches.
+                 // This is only possible because meters do not return a value.
+                 replacements.emplace_back(new IR::AssignmentStatement(meterResult, inputValue));
+             } else {
+                 TESTGEN_UNIMPLEMENTED("Read extern output %1% of type %2% not supported",
+                                       meterResult, meterResult->type);
+             }
+             // TODO: Find a better way to model a trace of this event.
+             std::stringstream meterStream;
+             meterStream << "MeterExecute: Index ";
+             index->dbprint(meterStream);
+             meterStream << " into field ";
+             meterResult->dbprint(meterStream);
+             nextState.add(*new TraceEvents::Generic(meterStream.str()));
+             nextState.replaceTopBody(&replacements);
+             result->emplace_back(cond, state, nextState);
          }},
         /* ======================================================================================
-         *  direct_meter.count
+         *  direct_meter.read
          *  A direct_meter object is created by calling its constructor.
          *  You must provide a choice of whether to meter based on the
          *  number of packets, regardless of their size
@@ -709,16 +979,75 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          *               color YELLOW, and 2 for color RED (see RFC 2697
          *               and RFC 2698 for the meaning of these colors).
          * ====================================================================================== */
-        // TODO: Read currently has no effect in the symbolic interpreter.
         {"direct_meter.read",
          {"result"},
-         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
-            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
-            const ExecutionState &state, SmallStepEvaluator::Result &result) {
-             ::warning("direct_meter.read not fully implemented.");
+         [this](const IR::MethodCallExpression *call, const IR::Expression *receiver,
+                IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+                const ExecutionState &state, SmallStepEvaluator::Result &result) {
+             // Check whether table that the extern is attached to has an entry.
+             const auto *progInfo = getProgramInfo().checkedTo<Bmv2V1ModelProgramInfo>();
+             const auto *receiverPath = receiver->checkedTo<IR::PathExpression>();
+             const auto *externInstance = state.findDecl(receiverPath);
+             const auto *table = progInfo->getTableofDirectExtern(externInstance);
+             const auto *tableEntry =
+                 state.getTestObject("tableconfigs", table->controlPlaneName(), false);
+
              auto &nextState = state.clone();
-             nextState.popBody();
-             result->emplace_back(nextState);
+             std::vector<Continuation::Command> replacements;
+             const IR::StateVariable &meterResult =
+                 ExecutionState::convertReference(args->at(0)->expression);
+             // If we do not have right back end and no associated table entry, do not bother
+             // configuring the extern. We just set the default value (green).
+             auto testBackend = TestgenOptions::get().testBackend;
+             if (testBackend != "PTF" || tableEntry == nullptr) {
+                 ::warning(
+                     "direct_meter.read configuration not possible for %1%. Choosing default value "
+                     "(GREEN).",
+                     testBackend);
+                 nextState.set(meterResult, IR::getConstant(meterResult->type,
+                                                            BMv2Constants::METER_COLOR::GREEN));
+                 nextState.popBody();
+                 result->emplace_back(nextState);
+                 return;
+             }
+
+             // Retrieve the meter state from the object store. If it is already present, just
+             // cast the object to the correct class and retrieve the current value according to the
+             // index. If the meter has not been added had, create a new meter object.
+             const auto *meterState =
+                 state.getTestObject("meter_values", externInstance->controlPlaneName(), false);
+             Bmv2V1ModelMeterValue *meterValue = nullptr;
+             const auto &inputValue = nextState.createSymbolicVariable(
+                 meterResult->type, "meter_value" + std::to_string(call->clone_id));
+             // Make sure we do not accidentally get "3" as enum assignment...
+             auto *cond = new IR::Lss(inputValue, IR::getConstant(meterResult->type, 3));
+             if (meterState != nullptr) {
+                 meterValue =
+                     new Bmv2V1ModelMeterValue(*meterState->checkedTo<Bmv2V1ModelMeterValue>());
+             } else {
+                 meterValue = new Bmv2V1ModelMeterValue(inputValue, true);
+             }
+             meterValue->writeToIndex(IR::getConstant(IR::getBitType(1), 0), inputValue);
+             nextState.addTestObject("meter_values", externInstance->controlPlaneName(),
+                                     meterValue);
+
+             if (meterResult->type->is<IR::Type_Bits>()) {
+                 // We need an assignment statement (and the inefficient copy) here because we need
+                 // to immediately resolve the generated mux into multiple branches.
+                 // This is only possible because meters do not return a value.
+                 replacements.emplace_back(new IR::AssignmentStatement(meterResult, inputValue));
+             } else {
+                 TESTGEN_UNIMPLEMENTED("Read extern output %1% of type %2% not supported",
+                                       meterResult, meterResult->type);
+             }
+             // TODO: Find a better way to model a trace of this event.
+             std::stringstream meterStream;
+             meterStream << "MeterRead: into field ";
+             meterResult->dbprint(meterStream);
+             nextState.add(*new TraceEvents::Generic(meterStream.str()));
+             nextState.replaceTopBody(&replacements);
+             result->emplace_back(cond, state, nextState);
+             return;
          }},
 
         /* ======================================================================================
@@ -744,7 +1073,8 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          *
          *  The BMv2 implementation of the v1model architecture ignores the
          *  value of the receiver parameter.
-         * ====================================================================================== */
+         * ======================================================================================
+         */
         {"*method.digest",
          {"receiver", "data"},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
@@ -789,19 +1119,18 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          *  clone during a single execution of the same ingress (or egress)
          *  control, only the last clone session and index are used.  See the
          *  v1model architecture documentation (Note 1) for more details.
-         * ====================================================================================== */
+         * ======================================================================================
+         */
         {"*method.clone_preserving_field_list",
          {"type", "session", "data"},
-         [this](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
-                IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
-                const ExecutionState &state, SmallStepEvaluator::Result &result) {
-             uint64_t recirculateCount = 0;
+         [](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+            const ExecutionState &state, SmallStepEvaluator::Result &result) {
              // Grab the recirculate count. Stop after more than 1 circulation loop to avoid
              // infinite recirculation loops.
              // TODO: Determine the exact count.
              if (state.hasProperty("recirculate_count")) {
-                 recirculateCount = state.getProperty<uint64_t>("recirculate_count");
-                 if (recirculateCount > 1) {
+                 if (state.getProperty<uint64_t>("recirculate_count") > 0) {
                      auto &nextState = state.clone();
                      ::warning("Only single recirculation supported for now. Dropping packet.");
                      auto *dropStmt = new IR::MethodCallStatement(
@@ -844,103 +1173,18 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
 
              auto cloneType = args->at(0)->expression->checkedTo<IR::Constant>()->asUint64();
              const auto *sessionIdExpr = args->at(1)->expression;
-             auto recirculateIndex = args->at(2)->expression->checkedTo<IR::Constant>()->asUint64();
-             std::optional<const Constraint *> cond = std::nullopt;
-
-             if (cloneType == BMv2Constants::CLONE_TYPE_I2E) {
-                 // Pick a clone port var. For now, pick a random value from 0-511.
-                 const auto *egressPortVar = programInfo.getTargetOutputPortVar();
-                 const auto &clonePortVar = Utils::getZombieConst(
-                     egressPortVar->type, 0, "clone_port_var" + std::to_string(call->clone_id));
-                 cond = new IR::LAnd(
-                     new IR::Neq(egressPortVar, clonePortVar),
-                     new IR::Lss(clonePortVar, IR::getConstant(clonePortVar->type, 8)));
-                 // clone_preserving_field_list has a default state where the packet continues as
-                 // is.
-                 {
-                     auto &defaultState = state.clone();
-                     const auto *cloneInfo = new Bmv2_CloneInfo(sessionIdExpr, clonePortVar, false);
-                     defaultState.addTestObject("clone_infos",
-                                                std::to_string(sessionIdExpr->clone_id), cloneInfo);
-                     defaultState.popBody();
-                     result->emplace_back(cond, state, defaultState);
-                 }
-                 // This is the clone state.
-                 auto &nextState = state.clone();
-
-                 // We need to reset everything to the state before the ingress call. We use a trick
-                 // by calling copyIn on the entire state again. We need a little bit of information
-                 // for that, including the exact parameter names of the ingress block we are in.
-                 // Just grab the ingress from the programmable blocks.
-                 const auto *progInfo = getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
-                 const auto *programmableBlocks = progInfo->getProgrammableBlocks();
-                 const auto *typeDecl = programmableBlocks->at("Ingress");
-                 const auto *applyBlock = typeDecl->checkedTo<IR::P4Control>();
-                 const auto *params = applyBlock->getApplyParameters();
-                 auto blockIndex = 2;
-                 const auto *archSpec = TestgenTarget::getArchSpec();
-                 const auto *archMember = archSpec->getArchMember(blockIndex);
-                 std::vector<Continuation::Command> cmds;
-                 for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
-                     const auto *param = params->getParameter(paramIdx);
-                     // Skip the second parameter (metadata) since we do want to preserve it.
-                     if (paramIdx == 1) {
-                         // This program segment resets the user metadata of the v1model program to
-                         // 0. However, fields in the user metadata that have the field_list
-                         // annotation and the appropriate index will not be reset.
-                         // The user metadata is the second parameter of the ingress control.
-                         const auto *paramType = param->type;
-                         if (const auto *tn = paramType->to<IR::Type_Name>()) {
-                             paramType = nextState.resolveType(tn);
-                         }
-                         const auto *paramRef =
-                             new IR::PathExpression(paramType, new IR::Path(param->name));
-                         resetPreservingFieldList(nextState, paramRef, recirculateIndex);
-                         continue;
-                     }
-                     programInfo.produceCopyInOutCall(param, paramIdx, archMember, &cmds, nullptr);
-                 }
-                 // We then exit, which will copy out all the state that we have just reset.
-                 cmds.emplace_back(new IR::ExitStatement());
-
-                 const auto *cloneInfo = new Bmv2_CloneInfo(sessionIdExpr, clonePortVar, true);
-                 nextState.addTestObject("clone_infos", std::to_string(sessionIdExpr->clone_id),
-                                         cloneInfo);
-                 // Reset the packet buffer, which corresponds to the output packet.
-                 nextState.resetPacketBuffer();
-                 const auto *bitType = IR::getBitType(32);
-                 const auto *instanceTypeVar = new IR::Member(
-                     bitType, new IR::PathExpression("*standard_metadata"), "instance_type");
-                 nextState.set(
-                     instanceTypeVar,
-                     IR::getConstant(bitType, BMv2Constants::PKT_INSTANCE_TYPE_INGRESS_CLONE));
-                 nextState.replaceTopBody(&cmds);
-                 result->emplace_back(cond, state, nextState);
-                 return;
-             }
-
-             if (cloneType == BMv2Constants::CLONE_TYPE_E2E) {
-                 auto &nextState = state.clone();
-                 // Increment the recirculation count.
-                 nextState.setProperty("recirculate_count", ++recirculateCount);
-                 // Recirculate is now active and "check_recirculate" will be triggered.
-                 nextState.setProperty("recirculate_active", true);
-                 // Also set clone as active, which will trigger slightly different processing.
-                 nextState.setProperty("clone_active", true);
-                 // Grab the index and save it to the execution state.
-                 nextState.setProperty("recirculate_index", recirculateIndex);
-                 // Grab the session id and save it to the execution state.
-                 nextState.setProperty("clone_session_id", sessionIdExpr);
-                 // Set the appropriate instance type, which will be processed by
-                 // "check_recirculate".
-                 nextState.setProperty("recirculate_instance_type",
-                                       BMv2Constants::PKT_INSTANCE_TYPE_EGRESS_CLONE);
-                 nextState.popBody();
-                 result->emplace_back(cond, state, nextState);
-                 return;
-             }
-
-             TESTGEN_UNIMPLEMENTED("Unsupported clone type %1%.", cloneType);
+             auto preserveIndex = args->at(2)->expression->checkedTo<IR::Constant>()->asInt();
+             // This is the clone state. Clone the state and save it.
+             // TODO: Do we really need to clone twice?
+             auto *cloneInfo = new Bmv2V1ModelCloneInfo(
+                 sessionIdExpr, static_cast<BMv2Constants::CloneType>(cloneType), state.clone(),
+                 preserveIndex);
+             auto &nextState = state.clone();
+             nextState.addTestObject("clone_infos", "clone_info", cloneInfo);
+             // Also set clone as active, which will trigger "processClone" in the deparser.
+             nextState.setProperty("clone_active", true);
+             nextState.popBody();
+             result->emplace_back(nextState);
          }},
         /* ======================================================================================
          *  resubmit_preserving_field_list
@@ -976,7 +1220,8 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          *  Calling resubmit_preserving_field_list(1) will resubmit the packet
          *  and preserve fields x and y of the user metadata.  Calling
          *  resubmit_preserving_field_list(2) will only preserve field y.
-         * ====================================================================================== */
+         * ======================================================================================
+         */
         {"*method.resubmit_preserving_field_list",
          {"data"},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
@@ -989,7 +1234,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              // TODO: Determine the exact count.
              if (state.hasProperty("recirculate_count")) {
                  recirculateCount = state.getProperty<uint64_t>("recirculate_count");
-                 if (recirculateCount > 1) {
+                 if (recirculateCount > 0) {
                      ::warning("Only single resubmit supported for now. Dropping packet.");
                      auto *dropStmt = new IR::MethodCallStatement(
                          Utils::generateInternalMethodCall("drop_and_exit", {}));
@@ -1000,15 +1245,17 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              }
              // Increment the recirculation count.
              nextState.setProperty("recirculate_count", ++recirculateCount);
-             // Recirculate is now active and "check_recirculate" will be triggered.
+             // Recirculate is now active and "processRecirculate" will be triggered in the
+             // deparser.
              nextState.setProperty("recirculate_active", true);
              // Grab the index and save it to the execution state.
              auto index = args->at(0)->expression->checkedTo<IR::Constant>()->asUint64();
              nextState.setProperty("recirculate_index", index);
              // Resubmit actually uses the original input packet, not the deparsed packet.
-             // We have to reset the packet content to the input packet in "check_recirculate".
+             // We have to reset the packet content to the input packet in "processRecirculate".
              nextState.setProperty("recirculate_reset_pkt", true);
-             // Set the appropriate instance type, which will be processed by "check_recirculate".
+             // Set the appropriate instance type, which will be processed by
+             // "processRecirculate".
              nextState.setProperty("recirculate_instance_type",
                                    BMv2Constants::PKT_INSTANCE_TYPE_RESUBMIT);
              nextState.popBody();
@@ -1034,7 +1281,8 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          * fields specified by the field list index from the last such call
          * are preserved.  See the v1model architecture documentation (Note 1)
          * for more details.
-         * ====================================================================================== */
+         * ======================================================================================
+         */
         {"*method.recirculate_preserving_field_list",
          {"index"},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
@@ -1047,7 +1295,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              // TODO: Determine the exact count.
              if (state.hasProperty("recirculate_count")) {
                  recirculateCount = state.getProperty<uint64_t>("recirculate_count");
-                 if (recirculateCount > 1) {
+                 if (recirculateCount > 0) {
                      ::warning("Only single recirculation supported for now. Dropping packet.");
                      auto *dropStmt = new IR::MethodCallStatement(
                          Utils::generateInternalMethodCall("drop_and_exit", {}));
@@ -1058,12 +1306,14 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              }
              // Increment the recirculation count.
              nextState.setProperty("recirculate_count", ++recirculateCount);
-             // Recirculate is now active and "check_recirculate" will be triggered.
+             // Recirculate is now active and "processRecirculate" will be triggered in the
+             // deparser.
              nextState.setProperty("recirculate_active", true);
              // Grab the index and save it to the execution state.
              auto index = args->at(0)->expression->checkedTo<IR::Constant>()->asUint64();
              nextState.setProperty("recirculate_index", index);
-             // Set the appropriate instance type, which will be processed by "check_recirculate".
+             // Set the appropriate instance type, which will be processed by
+             // "processRecirculate".
              nextState.setProperty("recirculate_instance_type",
                                    BMv2Constants::PKT_INSTANCE_TYPE_RECIRC);
              nextState.popBody();
@@ -1076,19 +1326,18 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
          *  any user-defined metadata fields with the cloned packet.  It is
          *  equivalent to calling clone_preserving_field_list with the same
          *  type and session parameter values, with empty data.
-         * ====================================================================================== */
+         * ======================================================================================
+         */
         {"*method.clone",
          {"type", "session"},
-         [this](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
-                IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
-                const ExecutionState &state, SmallStepEvaluator::Result &result) {
-             uint64_t recirculateCount = 0;
+         [](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
+            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+            const ExecutionState &state, SmallStepEvaluator::Result &result) {
              // Grab the recirculate count. Stop after more than 1 circulation loop to avoid
              // infinite recirculation loops.
              // TODO: Determine the exact count.
              if (state.hasProperty("recirculate_count")) {
-                 recirculateCount = state.getProperty<uint64_t>("recirculate_count");
-                 if (recirculateCount > 1) {
+                 if (state.getProperty<uint64_t>("recirculate_count") > 0) {
                      auto &nextState = state.clone();
                      ::warning("Only single recirculation supported for now. Dropping packet.");
                      auto *dropStmt = new IR::MethodCallStatement(
@@ -1131,210 +1380,51 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
 
              auto cloneType = args->at(0)->expression->checkedTo<IR::Constant>()->asUint64();
              const auto *sessionIdExpr = args->at(1)->expression;
-             uint64_t sessionId = 0;
-             std::optional<const Constraint *> cond = std::nullopt;
-
-             if (cloneType == BMv2Constants::CLONE_TYPE_I2E) {
-                 // Pick a clone port var. For now, pick a random value from 0-511.
-                 const auto *egressPortVar = programInfo.getTargetOutputPortVar();
-                 const auto &clonePortVar = Utils::getZombieConst(
-                     egressPortVar->type, 0, "clone_port_var" + std::to_string(call->clone_id));
-                 cond = new IR::LAnd(
-                     new IR::Neq(egressPortVar, clonePortVar),
-                     new IR::Lss(clonePortVar, IR::getConstant(clonePortVar->type, 8)));
-                 // clone_preserving_field_list has a default state where the packet continues as
-                 // is.
-                 {
-                     auto &defaultState = state.clone();
-                     const auto *cloneInfo = new Bmv2_CloneInfo(sessionIdExpr, clonePortVar, false);
-                     defaultState.addTestObject("clone_infos",
-                                                std::to_string(sessionIdExpr->clone_id), cloneInfo);
-                     defaultState.popBody();
-                     result->emplace_back(cond, state, defaultState);
-                 }
-                 // This is the clone state.
-                 auto &nextState = state.clone();
-                 auto progInfo = getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
-
-                 // We need to reset everything to the state before the ingress call. We use a trick
-                 // by calling copyIn on the entire state again. We need a little bit of information
-                 // for that, including the exact parameter names of the ingress block we are in.
-                 // Just grab the ingress from the programmable blocks.
-                 const auto *programmableBlocks = progInfo->getProgrammableBlocks();
-                 const auto *typeDecl = programmableBlocks->at("Ingress");
-                 const auto *applyBlock = typeDecl->checkedTo<IR::P4Control>();
-                 const auto *params = applyBlock->getApplyParameters();
-                 auto blockIndex = 2;
-                 const auto *archSpec = TestgenTarget::getArchSpec();
-                 const auto *archMember = archSpec->getArchMember(blockIndex);
-                 std::vector<Continuation::Command> cmds;
-                 for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
-                     const auto *param = params->getParameter(paramIdx);
-                     programInfo.produceCopyInOutCall(param, paramIdx, archMember, &cmds, nullptr);
-                 }
-
-                 // We then exit, which will copy out all the state that we have just reset.
-                 cmds.emplace_back(new IR::ExitStatement());
-
-                 const auto *cloneInfo = new Bmv2_CloneInfo(sessionIdExpr, clonePortVar, true);
-                 nextState.addTestObject("clone_infos", std::to_string(sessionIdExpr->clone_id),
-                                         cloneInfo);
-                 // Reset the packet buffer, which corresponds to the output packet.
-                 nextState.resetPacketBuffer();
-                 const auto *bitType = IR::getBitType(32);
-                 const auto *instanceTypeVar = new IR::Member(
-                     bitType, new IR::PathExpression("*standard_metadata"), "instance_type");
-                 nextState.set(
-                     instanceTypeVar,
-                     IR::getConstant(bitType, BMv2Constants::PKT_INSTANCE_TYPE_INGRESS_CLONE));
-                 nextState.replaceTopBody(&cmds);
-                 result->emplace_back(cond, state, nextState);
-                 return;
-             }
-
-             if (cloneType == BMv2Constants::CLONE_TYPE_E2E) {
-                 auto &nextState = state.clone();
-                 // Increment the recirculation count.
-                 nextState.setProperty("recirculate_count", ++recirculateCount);
-                 // Recirculate is now active and "check_recirculate" will be triggered.
-                 nextState.setProperty("recirculate_active", true);
-                 // Also set clone as active, which will trigger slightly different processing.
-                 nextState.setProperty("clone_active", true);
-                 // Grab the session id and save it to the execution state.
-                 nextState.setProperty("clone_session_id", sessionId);
-                 // Set the appropriate instance type, which will be processed by
-                 // "check_recirculate".
-                 nextState.setProperty("recirculate_instance_type",
-                                       BMv2Constants::PKT_INSTANCE_TYPE_EGRESS_CLONE);
-                 nextState.popBody();
-                 result->emplace_back(cond, state, nextState);
-                 return;
-             }
-             TESTGEN_UNIMPLEMENTED("Unsupported clone type %1%.", cloneType);
+             auto &nextState = state.clone();
+             // This is the clone state. Clone the state and save it.
+             // TODO: Do we really need to clone twice?
+             auto *cloneInfo = new Bmv2V1ModelCloneInfo(
+                 sessionIdExpr, static_cast<BMv2Constants::CloneType>(cloneType), state.clone(),
+                 std::nullopt);
+             nextState.addTestObject("clone_infos", "clone_info", cloneInfo);
+             // Also set clone as active, which will trigger "processClone" in the deparser.
+             nextState.setProperty("clone_active", true);
+             nextState.popBody();
+             result->emplace_back(nextState);
          }},
         /* ======================================================================================
-         *  *check_recirculate
-         * ====================================================================================== */
-        /// Helper externs that processing the parameters set by the recirculate and resubmit
-        /// externs. This extern assumes it is executed at the end of the deparser.
-        {"*.check_recirculate",
+         *  *invoke_traffic_manager
+         * ======================================================================================
+         */
+        /// Helper extern that processes the parameters set by the recirculate, clone and resubmit
+        /// externs. This extern assume the TM is executed at the end of the deparser.
+        {"*.invoke_traffic_manager",
          {},
-         [this](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
+         [this](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
-             auto &recState = state.clone();
-             // Check whether recirculate is even active, if not, skip.
-             if (!state.hasProperty("recirculate_active") ||
-                 !state.getProperty<bool>("recirculate_active")) {
-                 recState.popBody();
-                 result->emplace_back(recState);
-                 return;
-             }
-
-             // Check whether the packet needs to be reset.
-             // If that is the case, reset the packet buffer to the calculated input packet.
-             auto recirculateReset = state.hasProperty("recirculate_reset_pkt");
-             if (recirculateReset) {
-                 // Reset the packet buffer, which corresponds to the output packet.
-                 recState.resetPacketBuffer();
-                 // Set the packet buffer to the current calculated program packet for consistency.
-                 recState.appendToPacketBuffer(recState.getInputPacket());
-             }
-
-             // We need to update the size of the packet when recirculating. Do not forget to divide
-             // by 8.
-             const auto *pktSizeType = ExecutionState::getPacketSizeVarType();
-             const auto *packetSizeVar = new IR::Member(
-                 pktSizeType, new IR::PathExpression("*standard_metadata"), "packet_length");
-             const auto *packetSizeConst =
-                 IR::getConstant(pktSizeType, recState.getPacketBufferSize() / 8);
-             recState.set(packetSizeVar, packetSizeConst);
-
-             const auto *progInfo = getProgramInfo().checkedTo<BMv2_V1ModelProgramInfo>();
-             if (recState.hasProperty("recirculate_index")) {
-                 // Get the index set by the recirculate/resubmit function. Will fail if no index is
-                 // set.
-                 auto recirculateIndex = recState.getProperty<uint64_t>("recirculate_index");
-                 // This program segment resets the user metadata of the v1model program to 0.
-                 // However, fields in the user metadata that have the field_list annotation and the
-                 // appropriate index will not be reset.
-                 // The user metadata is the third parameter of the parser control.
-                 const auto *paramPath = progInfo->getBlockParam("Parser", 2);
-                 resetPreservingFieldList(recState, paramPath, recirculateIndex);
-             }
-
-             // Update the metadata variable to the correct instance type as provided by
-             // recirculation.
-             auto instanceType = state.getProperty<uint64_t>("recirculate_instance_type");
-             const auto *bitType = IR::getBitType(32);
-             const auto *instanceTypeVar = new IR::Member(
-                 bitType, new IR::PathExpression("*standard_metadata"), "instance_type");
-             recState.set(instanceTypeVar, IR::getConstant(bitType, instanceType));
-
-             // Set recirculate to false to avoid infinite loops.
-             recState.setProperty("recirculate_active", false);
-
              // Check whether the clone variant is  active.
              // Clone triggers a branch and slightly different processing.
-             auto cloneActive =
-                 state.hasProperty("clone_active") && state.getProperty<bool>("clone_active");
-             if (cloneActive) {
-                 // Pick a clone port var. For now, pick a random value from 0-511.
-                 const auto *egressPortVar = programInfo.getTargetOutputPortVar();
-                 const auto &clonePortVar = Utils::getZombieConst(
-                     egressPortVar->type, 0, "clone_port_var" + std::to_string(call->clone_id));
-                 const auto *cond = new IR::LAnd(
-                     new IR::Neq(egressPortVar, clonePortVar),
-                     new IR::Lss(clonePortVar, IR::getConstant(clonePortVar->type, 8)));
-                 const auto *sessionIdExpr =
-                     state.getProperty<const IR::Expression *>("clone_session_id");
-                 // clone_preserving_field_list has a default state where the packet continues as
-                 // is.
-                 {
-                     auto &defaultState = state.clone();
-                     defaultState.setProperty("clone_active", false);
-                     const auto *cloneInfo = new Bmv2_CloneInfo(sessionIdExpr, clonePortVar, false);
-                     defaultState.addTestObject("clone_infos",
-                                                std::to_string(sessionIdExpr->clone_id), cloneInfo);
-                     defaultState.popBody();
-                     result->emplace_back(cond, state, defaultState);
-                 }
-                 // In the other state, we start processing from the egress.
-                 const auto *topLevelBlocks = progInfo->getPipelineSequence();
-                 size_t egressDelim = 0;
-                 for (; egressDelim < topLevelBlocks->size(); ++egressDelim) {
-                     auto block = topLevelBlocks->at(egressDelim);
-                     if (!std::holds_alternative<const IR::Node *>(block)) {
-                         continue;
-                     }
-                     const auto *p4Node = std::get<const IR::Node *>(block);
-                     if (const auto *ctrl = p4Node->to<IR::P4Control>()) {
-                         if (progInfo->getGress(ctrl) == BMV2_EGRESS) {
-                             break;
-                         }
-                     }
-                 }
-                 const std::vector<Continuation::Command> blocks = {
-                     topLevelBlocks->begin() + egressDelim - 2, topLevelBlocks->end()};
-                 recState.replaceTopBody(&blocks);
-                 const auto *cloneInfo = new Bmv2_CloneInfo(sessionIdExpr, clonePortVar, true);
-                 recState.addTestObject("clone_infos", std::to_string(sessionIdExpr->clone_id),
-                                        cloneInfo);
-                 recState.setProperty("clone_active", false);
-                 // Reset the packet buffer, which corresponds to the output packet.
-                 recState.resetPacketBuffer();
-                 result->emplace_back(cond, state, recState);
+             if (state.hasProperty("clone_active") && state.getProperty<bool>("clone_active")) {
+                 processClone(state, result);
                  return;
              }
-             // "Recirculate" by attaching the sequence again.
-             // Does NOT initialize state or adds new conditions.
-             const auto *topLevelBlocks = progInfo->getPipelineSequence();
-             recState.replaceTopBody(topLevelBlocks);
-             result->emplace_back(recState);
+
+             // Check whether recirculate is active.
+             if (state.hasProperty("recirculate_active") &&
+                 state.getProperty<bool>("recirculate_active")) {
+                 processRecirculate(state, result);
+                 return;
+             }
+             // Neither clone nor recirculate are active, so skip.
+             auto &nextState = state.clone();
+             nextState.popBody();
+             result->emplace_back(nextState);
          }},
         /* ======================================================================================
          * Checksum16.get
-         * ====================================================================================== */
+         * ======================================================================================
+         */
         {"Checksum16.get",
          {"data"},
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
@@ -1402,8 +1492,8 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              const auto *algo = args->at(3)->expression;
              const auto *oneBitType = IR::getBitType(1);
 
-             // If the condition is tainted or the input data is tainted, the checksum error will
-             // not be reliable.
+             // If the condition is tainted or the input data is tainted, the checksum error
+             // will not be reliable.
              if (argsAreTainted) {
                  auto &taintedState = state.clone();
                  const auto *checksumErr = new IR::Member(
@@ -1511,11 +1601,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  argsAreTainted = argsAreTainted || state.hasTaint(arg->expression);
              }
 
-             const auto *checksumVar = args->at(2)->expression;
-             if (!(checksumVar->is<IR::Member>() || checksumVar->is<IR::PathExpression>())) {
-                 TESTGEN_UNIMPLEMENTED("Checksum input %1% of type %2% not supported", checksumVar,
-                                       checksumVar->node_type_name());
-             }
+             const auto &checksumVar = ExecutionState::convertReference(args->at(2)->expression);
              const auto *updateCond = args->at(0)->expression;
              const auto *checksumVarType = checksumVar->type;
              const auto *data = args->at(1)->expression;
@@ -1593,11 +1679,7 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
                  argsAreTainted = argsAreTainted || state.hasTaint(arg->expression);
              }
 
-             const auto *checksumVar = args->at(2)->expression;
-             if (!(checksumVar->is<IR::Member>() || checksumVar->is<IR::PathExpression>())) {
-                 TESTGEN_UNIMPLEMENTED("Checksum input %1% of type %2% not supported", checksumVar,
-                                       checksumVar->node_type_name());
-             }
+             const auto &checksumVar = ExecutionState::convertReference(args->at(2)->expression);
              const auto *updateCond = args->at(0)->expression;
              const auto *checksumVarType = checksumVar->type;
              const auto *data = args->at(1)->expression;
@@ -1682,8 +1764,8 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
              const auto *checksumValueType = checksumValue->type;
              const auto *algo = args->at(3)->expression;
              const auto *oneBitType = IR::getBitType(1);
-             // If the condition is tainted or the input data is tainted, the checksum error will
-             // not be reliable.
+             // If the condition is tainted or the input data is tainted, the checksum error
+             // will not be reliable.
              if (argsAreTainted) {
                  auto &taintedState = state.clone();
                  const auto *checksumErr = new IR::Member(
@@ -1748,9 +1830,9 @@ void BMv2_V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpressio
     }
 }  // NOLINT
 
-bool BMv2_V1ModelExprStepper::preorder(const IR::P4Table *table) {
+bool Bmv2V1ModelExprStepper::preorder(const IR::P4Table *table) {
     // Delegate to the tableStepper.
-    BMv2_V1ModelTableStepper tableStepper(this, table);
+    Bmv2V1ModelTableStepper tableStepper(this, table);
 
     return tableStepper.eval();
 }

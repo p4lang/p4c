@@ -38,16 +38,16 @@ limitations under the License.
 #include <boost/algorithm/string.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 
+// TODO(antonin): this include should go away when we cleanup getMatchFields
+// and tableNeedsPriority implementations.
+#include "control-plane/bytestrings.h"
+#include "control-plane/flattenHeader.h"
 #include "frontends/common/options.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/enumInstance.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/externInstance.h"
-// TODO(antonin): this include should go away when we cleanup getMatchFields
-// and tableNeedsPriority implementations.
-#include "bytestrings.h"
-#include "flattenHeader.h"
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/parseAnnotations.h"
@@ -330,11 +330,11 @@ static cstring getMatchTypeName(const IR::PathExpression *matchPathExpr,
 /// correspond to any standard match type known to P4Info, default enum member
 /// UNSPECIFIED is returned.
 static std::optional<MatchField::MatchType> getMatchType(cstring matchTypeName) {
-    if (matchTypeName == P4CoreLibrary::instance.exactMatch.name) {
+    if (matchTypeName == P4CoreLibrary::instance().exactMatch.name) {
         return MatchField::MatchTypes::EXACT;
-    } else if (matchTypeName == P4CoreLibrary::instance.lpmMatch.name) {
+    } else if (matchTypeName == P4CoreLibrary::instance().lpmMatch.name) {
         return MatchField::MatchTypes::LPM;
-    } else if (matchTypeName == P4CoreLibrary::instance.ternaryMatch.name) {
+    } else if (matchTypeName == P4CoreLibrary::instance().ternaryMatch.name) {
         return MatchField::MatchTypes::TERNARY;
     } else if (matchTypeName == P4V1::V1Model::instance.rangeMatchType.name) {
         return MatchField::MatchTypes::RANGE;
@@ -1041,7 +1041,7 @@ class P4RuntimeEntriesConverter {
         for (auto e : table->getKey()->keyElements) {
             auto matchType = getKeyMatchType(e, refMap);
             // TODO(antonin): remove dependency on v1model.
-            if (matchType == P4CoreLibrary::instance.ternaryMatch.name ||
+            if (matchType == P4CoreLibrary::instance().ternaryMatch.name ||
                 matchType == P4V1::V1Model::instance.rangeMatchType.name ||
                 matchType == P4V1::V1Model::instance.optionalMatchType.name) {
                 return true;
@@ -1101,11 +1101,11 @@ class P4RuntimeEntriesConverter {
             auto keyWidth = getTypeWidth(tableKey->expression->type, typeMap);
             auto matchType = getKeyMatchType(tableKey, refMap);
 
-            if (matchType == P4CoreLibrary::instance.exactMatch.name) {
+            if (matchType == P4CoreLibrary::instance().exactMatch.name) {
                 addExact(protoEntry, fieldId++, k, keyWidth, typeMap);
-            } else if (matchType == P4CoreLibrary::instance.lpmMatch.name) {
+            } else if (matchType == P4CoreLibrary::instance().lpmMatch.name) {
                 addLpm(protoEntry, fieldId++, k, keyWidth, typeMap);
-            } else if (matchType == P4CoreLibrary::instance.ternaryMatch.name) {
+            } else if (matchType == P4CoreLibrary::instance().ternaryMatch.name) {
                 addTernary(protoEntry, fieldId++, k, keyWidth, typeMap);
             } else if (matchType == P4V1::V1Model::instance.rangeMatchType.name) {
                 addRange(protoEntry, fieldId++, k, keyWidth, typeMap);

@@ -1,5 +1,6 @@
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 
+#include <list>
 #include <map>
 #include <optional>
 #include <utility>
@@ -11,6 +12,7 @@
 #include "backends/p4tools/common/lib/trace_event.h"
 #include "ir/irutils.h"
 #include "lib/exceptions.h"
+#include "lib/ordered_map.h"
 
 namespace P4Tools::P4Testgen {
 
@@ -62,7 +64,7 @@ cstring ActionArg::getActionParamName() const { return param->controlPlaneName()
 
 const IR::Constant *ActionArg::getEvaluatedValue() const {
     if (const auto *boolVal = value->to<IR::BoolLiteral>()) {
-        return IR::getConstant(IR::getBitType(1), boolVal->value ? 1 : 0);
+        return IR::convertBoolLiteral(boolVal);
     }
     const auto *constant = value->to<IR::Constant>();
     BUG_CHECK(constant,
@@ -216,14 +218,12 @@ TableConfig::TableConfig(const IR::P4Table *table, std::vector<TableRule> rules)
     : table(table), rules(std::move(rules)) {}
 
 TableConfig::TableConfig(const IR::P4Table *table, std::vector<TableRule> rules,
-                         std::map<cstring, const TestObject *> tableProperties)
+                         TestObjectMap tableProperties)
     : table(table), rules(std::move(rules)), tableProperties(std::move(tableProperties)) {}
 
 const std::vector<TableRule> *TableConfig::getRules() const { return &rules; }
 
-const std::map<cstring, const TestObject *> *TableConfig::getProperties() const {
-    return &tableProperties;
-}
+const TestObjectMap *TableConfig::getProperties() const { return &tableProperties; }
 
 const TestObject *TableConfig::getProperty(cstring propertyName, bool checked) const {
     auto it = tableProperties.find(propertyName);
@@ -246,7 +246,7 @@ const TableConfig *TableConfig::evaluate(const Model &model) const {
         const auto *evaluatedRule = rule.evaluate(model);
         evaluatedRules.emplace_back(*evaluatedRule);
     }
-    std::map<cstring, const TestObject *> evaluatedProperties;
+    TestObjectMap evaluatedProperties;
     for (const auto &propertyTuple : tableProperties) {
         auto name = propertyTuple.first;
         const auto *property = propertyTuple.second;
@@ -298,7 +298,7 @@ const TestObject *TestSpec::getTestObject(cstring category, cstring objectLabel,
     return nullptr;
 }
 
-std::map<cstring, const TestObject *> TestSpec::getTestObjectCategory(cstring category) const {
+TestObjectMap TestSpec::getTestObjectCategory(cstring category) const {
     auto it = testObjects.find(category);
     if (it != testObjects.end()) {
         return it->second;

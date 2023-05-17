@@ -12,10 +12,9 @@
 
 #include "backends/p4tools/common/compiler/convert_hs_index.h"
 #include "backends/p4tools/common/core/solver.h"
-#include "backends/p4tools/common/lib/formulae.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
-#include "backends/p4tools/common/lib/util.h"
+#include "backends/p4tools/common/lib/variables.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
@@ -27,14 +26,15 @@
 #include "lib/null.h"
 #include "midend/coverage.h"
 
-#include "backends/p4tools/modules/testgen//lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/abstract_stepper.h"
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
-#include "backends/p4tools/modules/testgen/lib/collect_latent_statements.h"
+#include "backends/p4tools/modules/testgen/lib/collect_coverable_nodes.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
+#include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/lib/packet_vars.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4Tools::P4Testgen {
@@ -67,10 +67,10 @@ void CmdStepper::declareVariable(ExecutionState &nextState, const IR::Declaratio
             declareStructLike(nextState, parentExpr, structType);
         }
     } else if (declType->is<IR::Type_Base>()) {
-        // If the variable does not have an initializer we need to create a new zombie for it.
-        // For now we just use the name directly.
-        const auto &left = nextState.convertPathExpr(new IR::PathExpression(decl->name));
-        nextState.set(left, programInfo.createTargetUninitialized(decl->type, false));
+        // If the variable does not have an initializer we need to create a new value for it. For
+        // now we just use the name directly.
+        const auto *left = new IR::PathExpression(declType, new IR::Path(decl->name.name));
+        nextState.set(left, programInfo.createTargetUninitialized(declType, false));
     } else {
         TESTGEN_UNIMPLEMENTED("Unsupported declaration type %1% node: %2%", declType,
                               declType->node_type_name());
@@ -99,13 +99,13 @@ void CmdStepper::initializeBlockParams(const IR::Type_Declaration *typeDecl,
         }
         // We need to resolve type names.
         paramType = nextState.resolveType(paramType);
-        const auto *paramPath = new IR::PathExpression(paramType, new IR::Path(archRef));
+
         if (const auto *ts = paramType->to<IR::Type_StructLike>()) {
+            const auto *paramPath = new IR::PathExpression(paramType, new IR::Path(archRef));
             declareStructLike(nextState, paramPath, ts, forceTaint);
-        } else if (const auto *tb = paramType->to<IR::Type_Base>()) {
-            // If the type is a flat Type_Base, postfix it with a "*".
-            const auto &paramRef = Utils::addZombiePostfix(paramPath, tb);
-            nextState.set(paramRef, programInfo.createTargetUninitialized(paramType, forceTaint));
+        } else if (paramType->is<IR::Type_Base>()) {
+            const auto &paramPath = ToolsVariables::getStateVariable(paramType, archRef);
+            nextState.set(paramPath, programInfo.createTargetUninitialized(paramType, forceTaint));
         } else {
             P4C_UNIMPLEMENTED("Unsupported initialization type %1%", paramType->node_type_name());
         }
@@ -125,7 +125,7 @@ bool CmdStepper::preorder(const IR::AssignmentStatement *assign) {
     }
 
     state.markVisited(assign);
-    const auto *left = assign->left;
+    const auto &left = ExecutionState::convertReference(assign->left);
     const auto *leftType = left->type;
 
     // Resolve the type of the left-and assignment, if it is a type name.
@@ -138,24 +138,18 @@ bool CmdStepper::preorder(const IR::AssignmentStatement *assign) {
     if (const auto *structType = leftType->to<IR::Type_StructLike>()) {
         const auto *listExpr = assign->right->checkedTo<IR::ListExpression>();
 
-        std::vector<const IR::Member *> flatRefValids;
+        std::vector<IR::StateVariable> flatRefValids;
         auto flatRefFields = state.getFlatFields(left, structType, &flatRefValids);
         // First, complete the assignments for the data structure.
         for (size_t idx = 0; idx < flatRefFields.size(); ++idx) {
-            const auto *leftFieldRef = flatRefFields[idx];
+            const auto &leftFieldRef = flatRefFields[idx];
             state.set(leftFieldRef, listExpr->components[idx]);
         }
         // In case of a header, we also need to set the validity bits to true.
-        for (const auto *headerValid : flatRefValids) {
+        for (const auto &headerValid : flatRefValids) {
             state.set(headerValid, IR::getBoolLiteral(true));
         }
     } else if (leftType->is<IR::Type_Base>()) {
-        // Convert a path expression into the respective member.
-        if (const auto *path = assign->left->to<IR::PathExpression>()) {
-            left = state.convertPathExpr(path);
-        }
-        // Check that all members have the correct format. All members end with a pathExpression.
-        checkMemberInvariant(left);
         state.set(left, assign->right);
     } else {
         TESTGEN_UNIMPLEMENTED("Unsupported assign type %1% node: %2%", leftType,
@@ -302,12 +296,13 @@ bool CmdStepper::preorder(const IR::IfStatement *ifStatement) {
         nextState.replaceTopBody(&cmds);
 
         // Some path selection strategies depend on looking ahead and collecting potential
-        // statements. If that is the case, apply the CollectLatentStatements visitor.
-        P4::Coverage::CoverageSet coveredStmts;
+        // statements. If that is the case, apply the CoverableNodesScanner visitor.
+        P4::Coverage::CoverageSet coveredNodes;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
-            ifStatement->ifTrue->apply(CollectLatentStatements(coveredStmts, state));
+            auto collector = CoverableNodesScanner(state);
+            collector.updateNodeCoverage(ifStatement->ifTrue, coveredNodes);
         }
-        result->emplace_back(ifStatement->condition, state, nextState, coveredStmts);
+        result->emplace_back(ifStatement->condition, state, nextState, coveredNodes);
     }
 
     // Handle case for else body.
@@ -319,12 +314,13 @@ bool CmdStepper::preorder(const IR::IfStatement *ifStatement) {
         nextState.replaceTopBody((ifStatement->ifFalse == nullptr) ? new IR::BlockStatement()
                                                                    : ifStatement->ifFalse);
         // Some path selection strategies depend on looking ahead and collecting potential
-        // statements. If that is the case, apply the CollectLatentStatements visitor.
-        P4::Coverage::CoverageSet coveredStmts;
+        // statements. If that is the case, apply the CoverableNodesScanner visitor.
+        P4::Coverage::CoverageSet coveredNodes;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
-            ifStatement->ifFalse->apply(CollectLatentStatements(coveredStmts, state));
+            auto collector = CoverableNodesScanner(state);
+            collector.updateNodeCoverage(ifStatement->ifFalse, coveredNodes);
         }
-        result->emplace_back(negation, state, nextState, coveredStmts);
+        result->emplace_back(negation, state, nextState, coveredNodes);
     }
 
     return false;
@@ -335,12 +331,10 @@ bool CmdStepper::preorder(const IR::MethodCallStatement *methodCallStatement) {
     state.markVisited(methodCallStatement);
     state.popBody();
     const auto *type = methodCallStatement->methodCall->type;
-    // do not push continuation for table application
-    if (methodCallStatement->methodCall->method->type->is<IR::Type_Method>() &&
-        methodCallStatement->methodCall->method->is<IR::PathExpression>()) {
-        type = methodCallStatement->methodCall->type;
-    } else if (state.getActionDecl(methodCallStatement->methodCall->method) != nullptr ||
-               state.getTableType(methodCallStatement->methodCall->method) != nullptr) {
+    // Table and action calls do not really return anything (for now).
+    // TODO: We should not need these convoluted type checks in a method call statement.
+    if (type->is<IR::Type_Action>() ||
+        state.getTableType(methodCallStatement->methodCall->method) != nullptr) {
         type = IR::Type::Void::get();
     }
     state.pushCurrentContinuation(type);
@@ -366,7 +360,7 @@ bool CmdStepper::preorder(const IR::P4Program * /*program*/) {
     if (pktSize != 0) {
         const auto *fixedSizeEqu =
             new IR::Equ(ExecutionState::getInputPacketSizeVar(),
-                        IR::getConstant(ExecutionState::getPacketSizeVarType(), pktSize));
+                        IR::getConstant(&PacketVars::PACKET_SIZE_VAR_TYPE, pktSize));
         if (cond == std::nullopt) {
             cond = fixedSizeEqu;
         } else {
@@ -492,7 +486,7 @@ bool CmdStepper::preorder(const IR::ExitStatement *e) {
 
 const Constraint *CmdStepper::startParser(const IR::P4Parser *parser, ExecutionState &nextState) {
     // Reset the parser cursor to zero.
-    const auto *parserCursorVarType = ExecutionState::getPacketSizeVarType();
+    const auto *parserCursorVarType = &PacketVars::PACKET_SIZE_VAR_TYPE;
 
     // Constrain the input packet size to its maximum.
     const auto *boolType = IR::Type::Boolean::get();
@@ -513,7 +507,7 @@ const Constraint *CmdStepper::startParser(const IR::P4Parser *parser, ExecutionS
 
     // Call the implementation for the specific target.
     // If we get a constraint back, add it to the result.
-    if (auto constraintOpt = startParser_impl(parser, nextState)) {
+    if (auto constraintOpt = startParserImpl(parser, nextState)) {
         result = new IR::LAnd(boolType, result, *constraintOpt);
     }
 
@@ -574,7 +568,7 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
     std::vector<Continuation::Command> cmds;
     // If the switch expression is tainted, we can not predict which case will be chosen. We taint
     // the program counter and execute all of the statements.
-    P4::Coverage::CoverageSet coveredStmts;
+    P4::Coverage::CoverageSet coveredNodes;
     if (state.hasTaint(switchStatement->expression)) {
         auto currentTaint = state.getProperty<bool>("inUndefinedState");
         cmds.emplace_back(Continuation::PropertyUpdate("inUndefinedState", true));
@@ -586,13 +580,13 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
         cmds.emplace_back(Continuation::PropertyUpdate("inUndefinedState", currentTaint));
     } else {
         // Otherwise, we pick the switch statement case in a normal fashion.
-
         bool hasMatched = false;
         for (const auto *switchCase : switchStatement->cases) {
             if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
                 // Some path selection strategies depend on looking ahead and collecting potential
-                // statements. If that is the case, apply the CollectLatentStatements visitor.
-                switchCase->statement->apply(CollectLatentStatements(coveredStmts, state));
+                // statements. If that is the case, apply the CoverableNodesScanner visitor.
+                auto collector = CoverableNodesScanner(state);
+                collector.updateNodeCoverage(switchCase->statement, coveredNodes);
             }
             // We have either matched already, or still need to match.
             hasMatched = hasMatched || switchStatement->expression->equiv(*switchCase->label);
@@ -617,7 +611,7 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
     }
     BUG_CHECK(!cmds.empty(), "Switch statements should have at least one case (default).");
     nextState.replaceTopBody(&cmds);
-    result->emplace_back(std::nullopt, state, nextState, coveredStmts);
+    result->emplace_back(std::nullopt, state, nextState, coveredNodes);
 
     return false;
 }

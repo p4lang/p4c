@@ -1,15 +1,14 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TARGET_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TARGET_H_
 
-#include <stdint.h>
-
+#include <cstdint>
 #include <filesystem>
 #include <optional>
 
 #include "backends/p4tools/common/core/solver.h"
+#include "backends/p4tools/common/lib/arch_spec.h"
 #include "ir/ir.h"
 
-#include "backends/p4tools/modules/testgen/core/arch_spec.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
@@ -19,45 +18,37 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/program_info.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend.h"
 
-namespace P4Tools {
+namespace P4Tools::P4Testgen::Bmv2 {
 
-namespace P4Testgen {
-
-namespace Bmv2 {
-
-class BMv2_V1ModelTestgenTarget : public TestgenTarget {
+class Bmv2V1ModelTestgenTarget : public TestgenTarget {
  public:
     /// Registers this target.
     static void make();
 
  protected:
-    const BMv2_V1ModelProgramInfo *initProgram_impl(
+    const Bmv2V1ModelProgramInfo *initProgramImpl(
         const IR::P4Program *program, const IR::Declaration_Instance *mainDecl) const override;
 
-    int getPortNumWidth_bits_impl() const override;
+    [[nodiscard]] int getPortNumWidthBitsImpl() const override;
 
-    Bmv2TestBackend *getTestBackend_impl(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                                         const std::filesystem::path &testPath,
-                                         std::optional<uint32_t> seed) const override;
+    Bmv2TestBackend *getTestBackendImpl(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
+                                        const std::filesystem::path &testPath,
+                                        std::optional<uint32_t> seed) const override;
 
-    BMv2_V1ModelCmdStepper *getCmdStepper_impl(ExecutionState &state, AbstractSolver &solver,
+    Bmv2V1ModelCmdStepper *getCmdStepperImpl(ExecutionState &state, AbstractSolver &solver,
+                                             const ProgramInfo &programInfo) const override;
+
+    Bmv2V1ModelExprStepper *getExprStepperImpl(ExecutionState &state, AbstractSolver &solver,
                                                const ProgramInfo &programInfo) const override;
 
-    BMv2_V1ModelExprStepper *getExprStepper_impl(ExecutionState &state, AbstractSolver &solver,
-                                                 const ProgramInfo &programInfo) const override;
-
-    const ArchSpec *getArchSpecImpl() const override;
+    [[nodiscard]] const ArchSpec *getArchSpecImpl() const override;
 
  private:
-    BMv2_V1ModelTestgenTarget();
+    Bmv2V1ModelTestgenTarget();
 
-    static const ArchSpec archSpec;
+    static const ArchSpec ARCH_SPEC;
 };
 
-}  // namespace Bmv2
-
-}  // namespace P4Testgen
-
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TARGET_H_ */
