@@ -26,7 +26,7 @@ struct metadata {
 }
 
 parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
-    bit<8> tmp_0;
+    @name("prs.tmp_0") bit<8> tmp_0;
     state start {
         transition parse_headers;
     }
@@ -76,4 +76,3 @@ control dprs(packet_out packet, in Headers_t headers) {
 }
 
 ubpf<Headers_t, metadata>(prs(), pipe(), dprs()) main;
-

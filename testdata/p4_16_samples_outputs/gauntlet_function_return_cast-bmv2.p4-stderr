@@ -1,0 +1,3 @@
+gauntlet_function_return_cast-bmv2.p4(18): [--Wwarn=mismatch] warning: -8w1: negative value with unsigned type
+    return -1;
+            ^

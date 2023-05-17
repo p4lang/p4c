@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "localizeActions.h"
+
 #include "frontends/p4/cloner.h"
 
 namespace P4 {
@@ -24,23 +25,22 @@ namespace {
 class ParamCloner : public ClonePathExpressions {
  public:
     ParamCloner() { setName("ParamCloner"); }
-    const IR::Node* postorder(IR::Parameter* param) override {
-        return new IR::Parameter(param->srcInfo, param->name, param->annotations,
-                                 param->direction, param->type, param->defaultValue);
+    const IR::Node *postorder(IR::Parameter *param) override {
+        return new IR::Parameter(param->srcInfo, param->name, param->annotations, param->direction,
+                                 param->type, param->defaultValue);
     }
-    const IR::Node* postorder(IR::Declaration_Variable* decl) override {
-        return new IR::Declaration_Variable(decl->srcInfo, decl->name,
-                                            decl->annotations, decl->type, decl->initializer);
+    const IR::Node *postorder(IR::Declaration_Variable *decl) override {
+        return new IR::Declaration_Variable(decl->srcInfo, decl->name, decl->annotations,
+                                            decl->type, decl->initializer);
     }
 };
 
 }  // namespace
 
-const IR::Node* TagGlobalActions::preorder(IR::P4Action* action) {
+const IR::Node *TagGlobalActions::preorder(IR::P4Action *action) {
     if (findContext<IR::P4Control>() == nullptr) {
         auto annos = action->annotations;
-        if (annos == nullptr)
-            annos = IR::Annotations::empty;
+        if (annos == nullptr) annos = IR::Annotations::empty;
         cstring name = cstring(".") + action->name;
         annos = annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
                                           new IR::StringLiteral(name), false);
@@ -50,46 +50,40 @@ const IR::Node* TagGlobalActions::preorder(IR::P4Action* action) {
     return action;
 }
 
-bool FindGlobalActionUses::preorder(const IR::P4Action* action) {
-    if (findContext<IR::P4Control>() == nullptr)
-        globalActions.emplace(action);
+bool FindGlobalActionUses::preorder(const IR::P4Action *action) {
+    if (findContext<IR::P4Control>() == nullptr) globalActions.emplace(action);
     return false;
 }
 
-bool FindGlobalActionUses::preorder(const IR::PathExpression* path) {
+bool FindGlobalActionUses::preorder(const IR::PathExpression *path) {
     auto decl = refMap->getDeclaration(path->path, true);
-    if (!decl->is<IR::P4Action>())
-        return false;
+    if (!decl->is<IR::P4Action>()) return false;
 
     auto action = decl->to<IR::P4Action>();
-    if (globalActions.find(action) == globalActions.end())
-        return false;
+    if (globalActions.find(action) == globalActions.end()) return false;
     auto control = findContext<IR::P4Control>();
     if (control != nullptr) {
-        if (repl->getReplacement(action, control) != nullptr)
-            return false;
+        if (repl->getReplacement(action, control) != nullptr) return false;
         auto newName = refMap->newName(action->name);
         ParamCloner cloner;
         auto replBody = cloner.clone<IR::BlockStatement>(action->body);
         auto params = cloner.clone<IR::ParameterList>(action->parameters);
 
         auto annos = action->annotations;
-        if (annos == nullptr)
-            annos = IR::Annotations::empty;
+        if (annos == nullptr) annos = IR::Annotations::empty;
         annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
                                   new IR::StringLiteral(action->name), false);
-        auto replacement = new IR::P4Action(action->srcInfo,
-                    IR::ID(action->name.srcInfo, newName, action->name.originalName),
-                    annos, params, replBody);
+        auto replacement = new IR::P4Action(
+            action->srcInfo, IR::ID(action->name.srcInfo, newName, action->name.originalName),
+            annos, params, replBody);
         repl->addReplacement(action, control, replacement);
     }
     return false;
 }
 
-const IR::Node* LocalizeActions::postorder(IR::P4Control* control) {
+const IR::Node *LocalizeActions::postorder(IR::P4Control *control) {
     auto actions = ::get(repl->repl, getOriginal<IR::P4Control>());
-    if (actions == nullptr)
-        return control;
+    if (actions == nullptr) return control;
     IR::IndexedVector<IR::Declaration> newDecls;
     for (auto pair : *actions) {
         auto toInsert = pair.second;
@@ -102,38 +96,33 @@ const IR::Node* LocalizeActions::postorder(IR::P4Control* control) {
     return control;
 }
 
-const IR::Node* LocalizeActions::postorder(IR::PathExpression* expression) {
+const IR::Node *LocalizeActions::postorder(IR::PathExpression *expression) {
     auto control = findOrigCtxt<IR::P4Control>();
-    if (control == nullptr)
-        return expression;
+    if (control == nullptr) return expression;
     auto decl = refMap->getDeclaration(expression->path);
-    if (!decl || !decl->is<IR::P4Action>())
-        return expression;
+    if (!decl || !decl->is<IR::P4Action>()) return expression;
     auto action = decl->to<IR::P4Action>();
     auto replacement = repl->getReplacement(action, control);
     if (replacement != nullptr) {
         LOG1("Rewriting " << dbp(expression) << " to " << dbp(replacement));
-        expression = new IR::PathExpression(IR::ID(expression->srcInfo, replacement->name,
-                                                   expression->path->name.originalName));
+        expression = new IR::PathExpression(
+            IR::ID(expression->srcInfo, replacement->name, expression->path->name.originalName));
     }
     return expression;
 }
 
-bool FindRepeatedActionUses::preorder(const IR::PathExpression* expression) {
+bool FindRepeatedActionUses::preorder(const IR::PathExpression *expression) {
     auto decl = refMap->getDeclaration(expression->path, true);
-    if (!decl->is<IR::P4Action>())
-        return false;
+    if (!decl->is<IR::P4Action>()) return false;
     auto action = decl->to<IR::P4Action>();
     auto control = findContext<IR::P4Control>();
     if (control == nullptr)
         // not within a control; ignore.
         return false;
 
-    const IR::Node* actionUser = findContext<IR::P4Table>();
-    if (actionUser == nullptr)
-        actionUser = findContext<IR::MethodCallExpression>();
-    if (actionUser == nullptr)
-        actionUser = findContext<IR::SwitchStatement>();
+    const IR::Node *actionUser = findContext<IR::P4Table>();
+    if (actionUser == nullptr) actionUser = findContext<IR::MethodCallExpression>();
+    if (actionUser == nullptr) actionUser = findContext<IR::SwitchStatement>();
     BUG_CHECK(actionUser != nullptr,
               "%1%: action not within a table, method call or switch statement", expression);
     if (actionUser->is<IR::SwitchStatement>()) {
@@ -141,8 +130,8 @@ bool FindRepeatedActionUses::preorder(const IR::PathExpression* expression) {
         // We must figure out which table is being invoked; that is the user
         auto mem = swstat->expression->to<IR::Member>();
         CHECK_NULL(mem);
-        BUG_CHECK(mem->member.name == IR::Type_Table::action_run,
-                  "%1%: unexpected expression", mem);
+        BUG_CHECK(mem->member.name == IR::Type_Table::action_run, "%1%: unexpected expression",
+                  mem);
         auto mce = mem->expr->to<IR::MethodCallExpression>();
         CHECK_NULL(mce);
         auto method = mce->method;
@@ -164,20 +153,19 @@ bool FindRepeatedActionUses::preorder(const IR::PathExpression* expression) {
         auto annos = action->annotations;
         auto params = cloner.clone<IR::ParameterList>(action->parameters);
 
-        if (annos == nullptr)
-            annos = IR::Annotations::empty;
+        if (annos == nullptr) annos = IR::Annotations::empty;
         annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
                                   new IR::StringLiteral(action->name), false);
-        replacement = new IR::P4Action(action->srcInfo,
-                IR::ID(action->name.srcInfo, newName, action->name.originalName),
-                annos, params, replBody);
+        replacement = new IR::P4Action(
+            action->srcInfo, IR::ID(action->name.srcInfo, newName, action->name.originalName),
+            annos, params, replBody);
         repl->createReplacement(action, actionUser, replacement);
     }
     repl->setRefReplacement(expression, replacement);
     return false;
 }
 
-const IR::Node* DuplicateActions::postorder(IR::P4Control* control) {
+const IR::Node *DuplicateActions::postorder(IR::P4Control *control) {
     bool changes = false;
     IR::IndexedVector<IR::Declaration> newDecls;
     for (auto d : control->controlLocals) {
@@ -196,17 +184,16 @@ const IR::Node* DuplicateActions::postorder(IR::P4Control* control) {
         }
     }
 
-    if (changes)
-        control->controlLocals = newDecls;
+    if (changes) control->controlLocals = newDecls;
     return control;
 }
 
-const IR::Node* DuplicateActions::postorder(IR::PathExpression* expression) {
+const IR::Node *DuplicateActions::postorder(IR::PathExpression *expression) {
     auto replacement = ::get(repl->repl, getOriginal<IR::PathExpression>());
     if (replacement != nullptr) {
         LOG1("Rewriting " << dbp(expression) << " to " << dbp(replacement));
-        expression = new IR::PathExpression(IR::ID(expression->srcInfo, replacement->name,
-                                                   expression->path->name.originalName));
+        expression = new IR::PathExpression(
+            IR::ID(expression->srcInfo, replacement->name, expression->path->name.originalName));
     }
     return expression;
 }

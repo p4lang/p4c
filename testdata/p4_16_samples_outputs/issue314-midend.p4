@@ -18,4 +18,3 @@ parser Parser(inout struct_t input) {
 parser MyParser<S>(inout S input);
 package MyPackage<S>(MyParser<S> p);
 MyPackage<struct_t>(Parser()) main;
-

@@ -71,12 +71,15 @@ add_custom_command(OUTPUT ${P4RUNTIME_GEN_SRCS} ${P4RUNTIME_GEN_HDRS}
 #PROTOBUF_GENERATE_PYTHON (P4RUNTIME_GEN_PYTHON P4RUNTIME_INFO_GEN_HDRS ${P4RUNTIME_INFO_PROTO})
 
 set (CONTROLPLANE_SRCS
+  addMissingIds.cpp
   bytestrings.cpp
   flattenHeader.cpp
   p4RuntimeArchHandler.cpp
   p4RuntimeArchStandard.cpp
   p4RuntimeSerializer.cpp
+  p4RuntimeSymbolTable.cpp
   typeSpecConverter.cpp
+  bfruntime.cpp
   )
 set (CONTROLPLANE_SOURCES
   ${P4RUNTIME_GEN_SRCS}
@@ -84,20 +87,21 @@ set (CONTROLPLANE_SOURCES
   )
 
 set (CONTROLPLANE_HDRS
+  addMissingIds.h
   bytestrings.h
   flattenHeader.h
   p4RuntimeArchHandler.h
   p4RuntimeArchStandard.h
   p4RuntimeSerializer.h
+  p4RuntimeSymbolTable.h
   typeSpecConverter.h
+  bfruntime.h
   )
 
-add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${CONTROLPLANE_HDRS};${CONTROLPLANE_SRCS}")
-
 include_directories (${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
-set_source_files_properties (${CONTROLPLANE_SOURCES} PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter")
-set_source_files_properties (${P4RUNTIME_GEN_SRCS} PROPERTIES GENERATED TRUE)
-build_unified(CONTROLPLANE_SOURCES)
+# Silence -Warray-bounds as the root issue is out of our control: https://github.com/protocolbuffers/protobuf/issues/7140
+set_source_files_properties (${P4RUNTIME_GEN_SRCS} PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-array-bounds")
+
 add_library (controlplane STATIC ${CONTROLPLANE_SOURCES} )
 target_link_libraries (controlplane ${PROTOBUF_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
 add_dependencies (controlplane mkP4configdir genIR frontend)

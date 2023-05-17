@@ -47,7 +47,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     table ingress_tbl {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
         }
         actions = {
             actTbl();
@@ -57,7 +57,6 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         const entries = {
                         32w0x20020420 : actTbl(24w42, 32w0x20024200);
         }
-
     }
     apply {
         if (hdr.ipv4.isValid()) {
@@ -87,4 +86,3 @@ control MyComputeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

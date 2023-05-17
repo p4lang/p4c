@@ -31,7 +31,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
-        h.eth_hdr.eth_type = (do_function(h.eth_hdr.dst_addr) << 8w15)[15:0];
+        h.eth_hdr.eth_type = do_function(h.eth_hdr.dst_addr)[0:0] ++ 15w0;
     }
 }
 
@@ -57,4 +57,3 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

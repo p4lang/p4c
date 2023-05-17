@@ -10,7 +10,7 @@ struct metadata {
 }
 
 struct headers {
-    @name(".data") 
+    @name(".data")
     data_t data;
 }
 
@@ -27,24 +27,24 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name(".my_drop") action my_drop() {
         mark_to_drop(standard_metadata);
     }
-    @name(".set_egress_port") action set_egress_port(bit<9> egress_port) {
-        standard_metadata.egress_spec = egress_port;
+    @name(".set_egress_port") action set_egress_port(@name("egress_port") bit<9> egress_port_1) {
+        standard_metadata.egress_spec = egress_port_1;
     }
     @name(".repeater") table repeater_0 {
         actions = {
             my_drop();
             set_egress_port();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port") ;
+            standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port");
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         repeater_0.apply();
@@ -68,4 +68,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

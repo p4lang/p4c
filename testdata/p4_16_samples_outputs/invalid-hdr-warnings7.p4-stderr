@@ -1,0 +1,54 @@
+invalid-hdr-warnings7.p4(48): [--Wwarn=unused] warning: 'u1' is unused
+    action inout_action2(inout U u1, inout H1[2] hs1, inout U[2] us1) {
+                                 ^^
+invalid-hdr-warnings7.p4(48): [--Wwarn=unused] warning: 'hs1' is unused
+    action inout_action2(inout U u1, inout H1[2] hs1, inout U[2] us1) {
+                                                 ^^^
+invalid-hdr-warnings7.p4(19): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u1.h1
+        u1.h1.a = 1;
+        ^^^^^
+invalid-hdr-warnings7.p4(20): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u1.h2
+        u1.h2.a = 1;
+        ^^^^^
+invalid-hdr-warnings7.p4(21): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hs1[0]
+        hs1[0].a = 1;
+        ^^^^^^
+invalid-hdr-warnings7.p4(22): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hs1[1]
+        hs1[1].a = 1;
+        ^^^^^^
+invalid-hdr-warnings7.p4(23): [--Wwarn=invalid_header] warning: accessing a field of an invalid header us1[0].h1
+        us1[0].h1.a = 1;
+        ^^^^^^^^^
+invalid-hdr-warnings7.p4(24): [--Wwarn=invalid_header] warning: accessing a field of an invalid header us1[0].h2
+        us1[0].h2.a = 1;
+        ^^^^^^^^^
+invalid-hdr-warnings7.p4(68): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u.h1
+        u.h1.a = 1; // expected invalid
+        ^^^^
+invalid-hdr-warnings7.p4(72): [--Wwarn=invalid_header] warning: accessing a field of an invalid header us[0].h1
+        us[0].h1.a = 1; // expected invalid
+        ^^^^^^^^
+invalid-hdr-warnings7.p4(36): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u1.h1
+        u1.h1.a = 1; // expected invalid
+        ^^^^^
+invalid-hdr-warnings7.p4(40): [--Wwarn=invalid_header] warning: accessing a field of an invalid header us1[0].h1
+        us1[0].h1.a = 1; // expected invalid
+        ^^^^^^^^^
+invalid-hdr-warnings7.p4(79): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u.h2
+        u.h2.a = 1; // expected invalid
+        ^^^^
+invalid-hdr-warnings7.p4(80): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hs[0]
+        hs[0].a = 1; // expected invalid
+        ^^^^^
+invalid-hdr-warnings7.p4(83): [--Wwarn=invalid_header] warning: accessing a field of an invalid header us[0].h2
+        us[0].h2.a = 1; // expected invalid
+        ^^^^^^^^
+invalid-hdr-warnings7.p4(56): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u1.h2
+        result = u1.h1.a ^ u1.h2.a ^ hs1[0].a ^ hs1[1].a ^ us1[0].h1.a
+                           ^^^^^
+invalid-hdr-warnings7.p4(56): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hs1[0]
+        result = u1.h1.a ^ u1.h2.a ^ hs1[0].a ^ hs1[1].a ^ us1[0].h1.a
+                                     ^^^^^^
+invalid-hdr-warnings7.p4(57): [--Wwarn=invalid_header] warning: accessing a field of an invalid header us1[1].h1
+                 ^ us1[0].h2.a ^ us1[1].h1.a ^ us1[1].h2.a;
+                                 ^^^^^^^^^

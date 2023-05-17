@@ -32,17 +32,29 @@ header bitvec_hdr {
 }
 
 struct local_metadata_t {
+    @field_list(0)
     bit<1>     _row0_alt0_valid0;
+    @field_list(0)
     bit<7>     _row0_alt0_port1;
+    @field_list(0)
     int<8>     _row0_alt0_hashRes2;
+    @field_list(0)
     bool       _row0_alt0_useHash3;
+    @field_list(0)
     bit<16>    _row0_alt0_type4;
+    @field_list(0)
     bit<7>     _row0_alt0_pad5;
+    @field_list(0)
     bit<1>     _row0_alt1_valid6;
+    @field_list(0)
     bit<7>     _row0_alt1_port7;
+    @field_list(0)
     int<8>     _row0_alt1_hashRes8;
+    @field_list(0)
     bool       _row0_alt1_useHash9;
+    @field_list(0)
     bit<16>    _row0_alt1_type10;
+    @field_list(0)
     bit<7>     _row0_alt1_pad11;
     bit<1>     _row1_alt0_valid12;
     bit<7>     _row1_alt0_port13;
@@ -74,7 +86,8 @@ parser parse(packet_in pk, out parsed_packet_t h, inout local_metadata_t local_m
 }
 
 control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @name("ingress.bh") bitvec_hdr bh_0;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.do_act") action do_act() {
         h.bvh1._row_alt1_valid6 = 1w0;
@@ -82,19 +95,29 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
     }
     @name("ingress.tns") table tns_0 {
         key = {
-            h.bvh1._row_alt1_valid6         : exact @name("h.bvh1.row.alt1.valid") ;
-            local_metadata._row0_alt0_valid0: exact @name("local_metadata.row0.alt0.valid") ;
+            h.bvh1._row_alt1_valid6         : exact @name("h.bvh1.row.alt1.valid");
+            local_metadata._row0_alt0_valid0: exact @name("local_metadata.row0.alt0.valid");
         }
         actions = {
             do_act();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
+    }
+    @hidden action issue1653complexbmv2l72() {
+        bh_0.setInvalid();
     }
     @hidden action issue1653complexbmv2l95() {
+        bh_0._row_alt1_type10 = 16w0x800;
         h.bvh0._row_alt1_type10 = 16w0x800;
         local_metadata._row0_alt0_useHash3 = true;
-        clone3<row_t>(CloneType.I2E, 32w0, (row_t){alt0 = (alt_t){valid = local_metadata._row0_alt0_valid0,port = local_metadata._row0_alt0_port1,hashRes = local_metadata._row0_alt0_hashRes2,useHash = true,type = local_metadata._row0_alt0_type4,pad = local_metadata._row0_alt0_pad5},alt1 = (alt_t){valid = local_metadata._row0_alt1_valid6,port = local_metadata._row0_alt1_port7,hashRes = local_metadata._row0_alt1_hashRes8,useHash = local_metadata._row0_alt1_useHash9,type = local_metadata._row0_alt1_type10,pad = local_metadata._row0_alt1_pad11}});
+        clone_preserving_field_list(CloneType.I2E, 32w1, 8w0);
+    }
+    @hidden table tbl_issue1653complexbmv2l72 {
+        actions = {
+            issue1653complexbmv2l72();
+        }
+        const default_action = issue1653complexbmv2l72();
     }
     @hidden table tbl_issue1653complexbmv2l95 {
         actions = {
@@ -103,6 +126,7 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
         const default_action = issue1653complexbmv2l95();
     }
     apply {
+        tbl_issue1653complexbmv2l72.apply();
         tns_0.apply();
         tbl_issue1653complexbmv2l95.apply();
     }
@@ -131,4 +155,3 @@ control compute_checksum(inout parsed_packet_t hdr, inout local_metadata_t local
 }
 
 V1Switch<parsed_packet_t, local_metadata_t>(parse(), verifyChecksum(), ingress(), egress(), compute_checksum(), deparser()) main;
-

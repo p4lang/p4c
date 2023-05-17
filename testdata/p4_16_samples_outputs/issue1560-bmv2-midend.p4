@@ -7,7 +7,6 @@ error {
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<32> IPv4Address;
 header ethernet_t {
     bit<48> dstAddr;
     bit<48> srcAddr;
@@ -25,8 +24,8 @@ header ipv4_t {
     bit<8>      ttl;
     bit<8>      protocol;
     bit<16>     hdrChecksum;
-    IPv4Address srcAddr;
-    IPv4Address dstAddr;
+    bit<32>     srcAddr;
+    bit<32>     dstAddr;
     varbit<320> options;
 }
 
@@ -67,7 +66,7 @@ struct metadata {
 }
 
 parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    IPv4_up_to_ihl_only_h tmp;
+    @name("parserI.tmp") IPv4_up_to_ihl_only_h tmp;
     bit<8> tmp_4;
     state start {
         pkt.extract<ethernet_t>(hdr.ethernet);
@@ -96,66 +95,66 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
 }
 
 control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_4() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_5() {
+    @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @name("cIngress.foo1") action foo1(IPv4Address dstAddr) {
-        hdr.ipv4.dstAddr = dstAddr;
+    @name("cIngress.foo1") action foo1(@name("dstAddr") bit<32> dstAddr_1) {
+        hdr.ipv4.dstAddr = dstAddr_1;
     }
-    @name("cIngress.foo1") action foo1_3(IPv4Address dstAddr) {
-        hdr.ipv4.dstAddr = dstAddr;
+    @name("cIngress.foo1") action foo1_1(@name("dstAddr") bit<32> dstAddr_2) {
+        hdr.ipv4.dstAddr = dstAddr_2;
     }
-    @name("cIngress.foo1") action foo1_4(IPv4Address dstAddr) {
-        hdr.ipv4.dstAddr = dstAddr;
+    @name("cIngress.foo1") action foo1_2(@name("dstAddr") bit<32> dstAddr_3) {
+        hdr.ipv4.dstAddr = dstAddr_3;
     }
-    @name("cIngress.foo2") action foo2(IPv4Address srcAddr) {
-        hdr.ipv4.srcAddr = srcAddr;
+    @name("cIngress.foo2") action foo2(@name("srcAddr") bit<32> srcAddr_1) {
+        hdr.ipv4.srcAddr = srcAddr_1;
     }
-    @name("cIngress.foo2") action foo2_3(IPv4Address srcAddr) {
-        hdr.ipv4.srcAddr = srcAddr;
+    @name("cIngress.foo2") action foo2_1(@name("srcAddr") bit<32> srcAddr_2) {
+        hdr.ipv4.srcAddr = srcAddr_2;
     }
-    @name("cIngress.foo2") action foo2_4(IPv4Address srcAddr) {
-        hdr.ipv4.srcAddr = srcAddr;
+    @name("cIngress.foo2") action foo2_2(@name("srcAddr") bit<32> srcAddr_3) {
+        hdr.ipv4.srcAddr = srcAddr_3;
     }
     @name("cIngress.t0") table t0_0 {
         key = {
-            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort") ;
+            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort");
         }
         actions = {
             foo1();
             foo2();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         size = 8;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name("cIngress.t1") table t1_0 {
         key = {
-            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort") ;
+            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort");
         }
         actions = {
-            foo1_3();
-            foo2_3();
-            @defaultonly NoAction_4();
+            foo1_1();
+            foo2_1();
+            @defaultonly NoAction_2();
         }
         size = 8;
-        default_action = NoAction_4();
+        default_action = NoAction_2();
     }
     @name("cIngress.t2") table t2_0 {
         actions = {
-            foo1_4();
-            foo2_4();
-            @defaultonly NoAction_5();
+            foo1_2();
+            foo2_2();
+            @defaultonly NoAction_3();
         }
         key = {
-            hdr.tcp.srcPort       : exact @name("hdr.tcp.srcPort") ;
-            hdr.ipv4.dstAddr[15:0]: selector @name("meta.hash1") ;
+            hdr.tcp.srcPort       : exact @name("hdr.tcp.srcPort");
+            hdr.ipv4.dstAddr[15:0]: selector @name("meta.hash1");
         }
         size = 16;
-        default_action = NoAction_5();
+        default_action = NoAction_3();
     }
     @hidden action issue1560bmv2l175() {
         meta._hash12 = hdr.ipv4.dstAddr[15:0];
@@ -198,4 +197,3 @@ control DeparserI(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
-

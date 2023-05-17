@@ -13,12 +13,12 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name("meta") 
+    @name("meta")
     meta_t meta;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
 }
 
@@ -38,11 +38,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 @name("namedmeter") direct_meter<bit<32>>(MeterType.packets) my_meter;
-
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("ingress._drop") action _drop() {
         mark_to_drop(standard_metadata);
@@ -53,15 +52,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             _drop();
             _nop();
-            NoAction_0();
+            NoAction_1();
         }
         key = {
-            meta.meta.meter_tag: exact @name("meta.meta.meter_tag") ;
+            meta.meta.meter_tag: exact @name("meta.meta.meter_tag");
         }
         size = 16;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
-    @name("ingress.m_action") action m_action_0(bit<9> meter_idx) {
+    @name("ingress.m_action") action m_action_0(@name("meter_idx") bit<9> meter_idx) {
         standard_metadata.egress_spec = meter_idx;
         my_meter.read(meta.meta.meter_tag);
     }
@@ -72,13 +71,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             m_action_0();
             _nop_0();
-            NoAction_3();
+            NoAction_2();
         }
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
         }
         size = 16384;
-        default_action = NoAction_3();
+        default_action = NoAction_2();
         meters = my_meter;
     }
     apply {
@@ -104,4 +103,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

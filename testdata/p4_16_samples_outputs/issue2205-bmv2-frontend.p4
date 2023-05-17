@@ -21,23 +21,16 @@ struct Meta {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bit<8> val;
-    bit<8> tmp;
-    bit<8> tmp_0;
-    bit<8> tmp_1;
+    @name("ingress.val_0") bit<8> val;
+    @name("ingress.tmp") bit<8> tmp;
+    @name("ingress.tmp_0") bit<8> tmp_0;
+    @name("ingress.tmp_1") bit<8> tmp_1;
+    @name("ingress.retval") bit<8> retval;
     apply {
         val = 8w3;
         tmp = val;
-        {
-            bit<8> some_input_0 = val;
-            bool hasReturned = false;
-            bit<8> retval;
-            some_input_0 = 8w1;
-            hasReturned = true;
-            retval = 8w1;
-            val = some_input_0;
-            tmp_0 = retval;
-        }
+        retval = 8w1;
+        tmp_0 = retval;
         tmp_1 = tmp + tmp_0;
         h.h.a = tmp_1;
     }
@@ -73,4 +66,3 @@ control deparser(packet_out b, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

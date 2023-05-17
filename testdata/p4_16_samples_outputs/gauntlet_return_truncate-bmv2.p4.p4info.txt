@@ -1,0 +1,10 @@
+pkg_info {
+  arch: "v1model"
+}
+actions {
+  preamble {
+    id: 28905910
+    name: "ingress.iuJze"
+    alias: "iuJze"
+  }
+}

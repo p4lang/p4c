@@ -1,0 +1,10 @@
+pkg_info {
+  arch: "v1model"
+}
+actions {
+  preamble {
+    id: 18843410
+    name: "ingress.pointless_action"
+    alias: "pointless_action"
+  }
+}

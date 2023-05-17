@@ -14,11 +14,9 @@ control c(inout bit<32> b) {
                 b[6:3] = 4w1;
             }
         }
-
     }
 }
 
 control empty(inout bit<32> b);
 package top(empty _e);
 top(c()) main;
-

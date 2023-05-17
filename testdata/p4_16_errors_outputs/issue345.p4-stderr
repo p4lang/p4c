@@ -1,6 +1,14 @@
-issue345.p4(19): [--Werror=type-error] error: h: Cannot unify type int with H
+issue345.p4(19): [--Werror=type-error] error: h
         H h = 0;
         ^^^^^^^^
+  ---- Actual error:
+issue345.p4(17): 'int' type can only be unified with 'int', 'bit<>', or 'signed<>' types, not with 'H'
+  control C<H>() {
+            ^
+  ---- Originating from:
+issue345.p4(19): Source expression '0' produces a result of type 'int' which cannot be assigned to a left-value with type 'H'
+          H h = 0;
+                ^
 issue345.p4(17)
-control C<H>() {
-          ^
+  control C<H>() {
+            ^

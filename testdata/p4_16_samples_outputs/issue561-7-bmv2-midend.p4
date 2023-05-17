@@ -47,43 +47,49 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.debug_hdr") table debug_hdr_0 {
         key = {
-            hdr.base.t              : exact @name("hdr.base.t") ;
-            hdr.u[0].short.isValid(): exact @name("hdr.u[0].short.$valid$") ;
-            hdr.u[0].byte.isValid() : exact @name("hdr.u[0].byte.$valid$") ;
+            hdr.base.t              : exact @name("hdr.base.t");
+            hdr.u[0].short.isValid(): exact @name("hdr.u[0].short.$valid$");
+            hdr.u[0].byte.isValid() : exact @name("hdr.u[0].byte.$valid$");
         }
         actions = {
-            NoAction_0();
+            NoAction_1();
         }
-        const default_action = NoAction_0();
+        const default_action = NoAction_1();
     }
-    @hidden action issue5617bmv2l66() {
+    @hidden action issue5617bmv2l65() {
+        hdr.u[0].short.setValid();
+        hdr.u[0].short.data = 16w0xffff;
+        hdr.u[0].byte.setInvalid();
         hdr.u[0].short.setInvalid();
     }
-    @hidden action issue5617bmv2l70() {
+    @hidden action issue5617bmv2l69() {
+        hdr.u[0].byte.setValid();
+        hdr.u[0].byte.data = 8w0xff;
+        hdr.u[0].short.setInvalid();
         hdr.u[0].byte.setInvalid();
     }
-    @hidden table tbl_issue5617bmv2l66 {
+    @hidden table tbl_issue5617bmv2l65 {
         actions = {
-            issue5617bmv2l66();
+            issue5617bmv2l65();
         }
-        const default_action = issue5617bmv2l66();
+        const default_action = issue5617bmv2l65();
     }
-    @hidden table tbl_issue5617bmv2l70 {
+    @hidden table tbl_issue5617bmv2l69 {
         actions = {
-            issue5617bmv2l70();
+            issue5617bmv2l69();
         }
-        const default_action = issue5617bmv2l70();
+        const default_action = issue5617bmv2l69();
     }
     apply {
         debug_hdr_0.apply();
         if (hdr.u[0].short.isValid()) {
-            tbl_issue5617bmv2l66.apply();
+            tbl_issue5617bmv2l65.apply();
         } else if (hdr.u[0].byte.isValid()) {
-            tbl_issue5617bmv2l70.apply();
+            tbl_issue5617bmv2l69.apply();
         }
     }
 }
@@ -112,4 +118,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

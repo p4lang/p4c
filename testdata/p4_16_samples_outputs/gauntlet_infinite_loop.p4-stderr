@@ -1,0 +1,31 @@
+gauntlet_infinite_loop.p4(16): [--Wwarn=shadow] warning: 'padding' shadows 'header padding'
+parser sub_parser(packet_in b, out headers hdr, out padding padding) {
+                                                            ^^^^^^^
+gauntlet_infinite_loop.p4(7)
+header padding {
+       ^^^^^^^
+gauntlet_infinite_loop.p4(37): [--Wwarn=ordering] warning: hdr: 'out' argument has fields in common with hdr.p
+        sub_parser.apply(packet, hdr, hdr.p);
+                                 ^^^
+gauntlet_infinite_loop.p4(37)
+        sub_parser.apply(packet, hdr, hdr.p);
+                                      ^^^^^
+gauntlet_infinite_loop.p4(37): [--Wwarn=ordering] warning: hdr.p: 'out' argument has fields in common with hdr
+        sub_parser.apply(packet, hdr, hdr.p);
+                                      ^^^^^
+gauntlet_infinite_loop.p4(37)
+        sub_parser.apply(packet, hdr, hdr.p);
+                                 ^^^
+gauntlet_infinite_loop.p4(23): [--Wwarn=uninitialized_use] warning: padding.p may be uninitialized
+        transition select(padding.p) {
+                          ^^^^^^^^^
+gauntlet_infinite_loop.p4(23): [--Wwarn=invalid_header] warning: accessing a field of an invalid header padding
+        transition select(padding.p) {
+                          ^^^^^^^
+[--Wwarn=uninitialized_use] warning: tmp may not be completely initialized
+[--Wwarn=uninitialized_use] warning: tmp_0 may not be completely initialized
+[--Wwarn=uninitialized_use] warning: tmp may not be completely initialized
+[--Wwarn=uninitialized_use] warning: tmp_0 may not be completely initialized
+[--Wwarn=invalid_header] warning: accessing a field of an invalid header tmp_0
+[--Wwarn=uninitialized_use] warning: tmp may not be completely initialized
+[--Wwarn=uninitialized_use] warning: tmp_0 may not be completely initialized

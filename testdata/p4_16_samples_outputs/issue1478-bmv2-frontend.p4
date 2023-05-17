@@ -38,30 +38,29 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("ingress.t1") table t1_0 {
         size = 3;
         actions = {
-            NoAction_0();
+            NoAction_1();
         }
-        const default_action = NoAction_0();
+        const default_action = NoAction_1();
     }
     @name("ingress.t2") table t2_0 {
         key = {
-            sm.ingress_port: exact @name("sm.ingress_port") ;
+            sm.ingress_port: exact @name("sm.ingress_port");
         }
         actions = {
-            NoAction_3();
+            NoAction_2();
         }
         const entries = {
-                        9w0 : NoAction_3();
+                        9w0 : NoAction_2();
         }
-
         size = 10;
-        default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     apply {
         t1_0.apply();
@@ -70,4 +69,3 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

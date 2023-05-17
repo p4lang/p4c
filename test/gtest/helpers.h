@@ -17,8 +17,9 @@ limitations under the License.
 #ifndef TEST_GTEST_HELPERS_H_
 #define TEST_GTEST_HELPERS_H_
 
-#include <boost/optional.hpp>
 #include <string>
+
+#include <optional>
 
 #include "frontends/common/options.h"
 #include "frontends/p4/parseAnnotations.h"
@@ -52,6 +53,8 @@ namespace detail {
  * @return the transformed P4 program.
  */
 std::string makeP4Source(const char* file, unsigned line,
+                         const char* headers, const char* rawSource);
+std::string makeP4Source(const char* file, unsigned line,
                          P4Headers headers, const char* rawSource);
 
 /// An overload of makeP4Source which doesn't prepend any headers; equivalent to
@@ -73,6 +76,9 @@ class P4CTestEnvironment {
  public:
     /// @return the global instance of P4CTestEnvironment.
     static P4CTestEnvironment* get();
+
+    static std::string readHeader(const char* filename, bool preprocess = false,
+                                  const char *macro = nullptr, int macro_val = 1);
 
     /// @return a string containing the "core.p4" P4 standard header.
     const std::string& coreP4() const { return _coreP4; }
@@ -110,12 +116,12 @@ struct FrontendTestCase {
         CompilerOptions::FrontendVersion::P4_16;
 
     /// Create a test case that only requires the frontend to run.
-    static boost::optional<FrontendTestCase>
+    static std::optional<FrontendTestCase>
     create(const std::string& source,
            CompilerOptions::FrontendVersion langVersion = defaultVersion,
            P4::ParseAnnotations parseAnnotations = P4::ParseAnnotations());
 
-    static boost::optional<FrontendTestCase>
+    static std::optional<FrontendTestCase>
     create(const std::string& source, P4::ParseAnnotations parseAnnotations) {
         return create(source, defaultVersion, parseAnnotations);
     }

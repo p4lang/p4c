@@ -40,14 +40,10 @@ parser P(packet_in b, out Headers p, inout Metadata meta, inout standard_metadat
 }
 
 control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_t standard_meta) {
-    bit<8> n_0;
-    bit<8> m_0;
-    bit<8> x_0;
+    @name("Ing.n") bit<8> n_0;
     @name("Ing.debug") register<bit<8>>(32w2) debug_0;
     apply {
         n_0 = 8w0b11111111;
-        m_0 = 8w0b11111111;
-        x_0 = 8w0b11111111;
         n_0[7:4] = 4w0;
         debug_0.write(32w1, n_0);
         standard_meta.egress_spec = 9w0;
@@ -77,4 +73,3 @@ control Compute(inout Headers hdr, inout Metadata meta) {
 }
 
 V1Switch<Headers, Metadata>(P(), Verify(), Ing(), Eg(), Compute(), DP()) main;
-

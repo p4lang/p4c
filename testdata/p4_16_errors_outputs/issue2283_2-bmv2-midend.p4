@@ -2,14 +2,10 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<16> PortIdUint_t;
-typedef PortIdUint_t PortId1_t;
-typedef PortIdUint_t PortId2_t;
-typedef PortIdUint_t PortId3_t;
 header ports_t {
-    PortId1_t port1;
-    PortId2_t port2;
-    PortId3_t port3;
+    bit<16> port1;
+    bit<16> port2;
+    bit<16> port3;
 }
 
 struct Headers {
@@ -32,18 +28,18 @@ control vrfy(inout Headers h, inout Meta m) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.t") table t_0 {
         key = {
-            h.ports.port1: exact @name("h.ports.port1") ;
-            h.ports.port2: exact @name("h.ports.port2") ;
-            h.ports.port3: exact @name("h.ports.port3") ;
+            h.ports.port1: exact @name("h.ports.port1");
+            h.ports.port2: exact @name("h.ports.port2");
+            h.ports.port3: exact @name("h.ports.port3");
         }
         actions = {
-            NoAction_0();
+            NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         t_0.apply();
@@ -67,4 +63,3 @@ control deparser(packet_out b, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

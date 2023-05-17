@@ -68,7 +68,6 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
                         0x11 &&& 0x181 : a_with_control_params(14);
                         0x100 : a_with_control_params(15);
         }
-
     }
     apply {
         t_lpm.apply();
@@ -76,4 +75,3 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

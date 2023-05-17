@@ -2,16 +2,14 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<8> USat_t;
-typedef int<16> Sat_t;
 header hdr {
-    bit<8> op;
-    USat_t opr1_8;
-    USat_t opr2_8;
-    USat_t res_8;
-    Sat_t  opr1_16;
-    Sat_t  opr2_16;
-    Sat_t  res_16;
+    bit<8>  op;
+    bit<8>  opr1_8;
+    bit<8>  opr2_8;
+    bit<8>  res_8;
+    int<16> opr1_16;
+    int<16> opr2_16;
+    int<16> res_16;
 }
 
 struct Header_t {
@@ -71,7 +69,7 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     }
     @name("ingress.t") table t_0 {
         key = {
-            h.h.op: exact @name("h.h.op") ;
+            h.h.op: exact @name("h.h.op");
         }
         actions = {
             usat_plus();
@@ -87,7 +85,6 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
                         8w0x3 : sat_plus();
                         8w0x4 : sat_minus();
         }
-
     }
     apply {
         t_0.apply();
@@ -95,4 +92,3 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 }
 
 V1Switch<Header_t, Meta_t>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

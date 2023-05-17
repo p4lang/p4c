@@ -68,10 +68,10 @@ def nextWord(text, sep = None):
         return spl[0].strip(), spl[1].strip()
 
 def ByteToHex(byteStr):
-    return ''.join( [ "%02X " % ord( x ) for x in byteStr ] ).strip()
+    return ''.join( [ ("%02X" % x) for x in byteStr ] )
 
 def convert_packet_bin2hexstr(pkt_bin):
-    return pkt_bin.convert_to(Raw).load.hex().upper()
+    return ByteToHex(bytes(pkt_bin))
 
 def convert_packet_stf2hexstr(pkt_stf_text):
     return ''.join(pkt_stf_text.split()).upper()
@@ -320,8 +320,10 @@ class BMV2Table(object):
         self.key = TableKey()
         self.actions = {}
         for k in jsonTable["key"]:
-            name = k["name"]
-            if name is None:
+            name = ""
+            if "name" in k:
+                name = k["name"]
+            else:
                 name = k["target"]
             if isinstance(name, list):
                 name = ""
@@ -450,7 +452,7 @@ class RunBMV2(object):
             actionArgs.set(k, v)
         command = "table_set_default " + tableName + " " + actionName
         if actionArgs.size():
-            command += " => " + str(actionArgs)
+            command += " " + str(actionArgs)
         return command
     def parse_table_add(self, cmd):
         tableName, cmd = nextWord(cmd)
@@ -746,7 +748,7 @@ class RunBMV2(object):
             # Check for expected packets.
             if interface in self.expectedAny:
                 if interface in self.expected:
-                    reportError("Interface " + interface + " has both expected with packets and without")
+                    reportError(f"Interface {interface} has both expected with packets and without")
                 continue
             if interface not in self.expected:
                 expected = []

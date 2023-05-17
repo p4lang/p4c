@@ -17,7 +17,7 @@ struct metadata {
 }
 
 struct headers {
-    @name(".data") 
+    @name(".data")
     data_t data;
 }
 
@@ -29,21 +29,21 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name(".noop") action noop() {
     }
-    @name(".setb1") action setb1(bit<8> val) {
+    @name(".setb1") action setb1(@name("val") bit<8> val) {
         hdr.data.b1 = val;
     }
-    @name(".setb2") action setb2(bit<8> val) {
-        hdr.data.b2 = val;
+    @name(".setb2") action setb2(@name("val") bit<8> val_4) {
+        hdr.data.b2 = val_4;
     }
-    @name(".setb3") action setb3(bit<8> val) {
-        hdr.data.b3 = val;
+    @name(".setb3") action setb3(@name("val") bit<8> val_5) {
+        hdr.data.b3 = val_5;
     }
-    @name(".setb4") action setb4(bit<8> val) {
-        hdr.data.b4 = val;
+    @name(".setb4") action setb4(@name("val") bit<8> val_6) {
+        hdr.data.b4 = val_6;
     }
     @name(".test1") table test1_0 {
         actions = {
@@ -52,12 +52,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             setb2();
             setb3();
             setb4();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            hdr.data.f1: exact @name("data.f1") ;
+            hdr.data.f1: exact @name("data.f1");
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         if (hdr.data.f2 != 32w0) {
@@ -88,4 +88,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

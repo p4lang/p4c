@@ -1,0 +1,28 @@
+issue3045-2.p4(16): [--Werror=type-error] error: f
+        f(r, exact);
+        ^^^^^^^^^^^
+  ---- Actual error:
+issue3045-2.p4(12): Cannot cast implicitly type 'T' to type 'match_kind'
+  control c<T>()() {
+            ^
+  ---- Originating from:
+issue3045-2.p4(16): Type of argument 'r' (register<...>) does not match type of parameter 'r' (register<...>)
+          f(r, exact);
+            ^
+issue3045-2.p4(13)
+      register<T>(1) r;
+      ^^^^^^^^^^^
+issue3045-2.p4(8)
+  void f<T>(register<T> r, in T t) {
+                        ^
+issue3045-2.p4(8)
+  void f<T>(register<T> r, in T t) {
+            ^^^^^^^^^^^
+  Where 'T' is bound to 'match_kind'
+  ---- Originating from:
+issue3045-2.p4(8): Function type 'f' does not match invocation type '<Method call>'
+  void f<T>(register<T> r, in T t) {
+       ^
+issue3045-2.p4(16)
+          f(r, exact);
+          ^^^^^^^^^^^

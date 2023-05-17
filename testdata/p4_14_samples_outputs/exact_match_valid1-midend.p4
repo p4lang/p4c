@@ -17,9 +17,9 @@ struct metadata {
 }
 
 struct headers {
-    @name(".data") 
+    @name(".data")
     data_t data;
-    @name(".data2") 
+    @name(".data2")
     data_t data2;
 }
 
@@ -38,9 +38,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name(".setb1") action setb1(bit<8> val, bit<9> port) {
+    @name(".setb1") action setb1(@name("val") bit<8> val, @name("port") bit<9> port) {
         hdr.data.b1 = val;
         standard_metadata.egress_spec = port;
     }
@@ -50,13 +50,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             setb1();
             noop();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            hdr.data.isValid() : exact @name("data.$valid$") ;
-            hdr.data2.isValid(): exact @name("data2.$valid$") ;
+            hdr.data.isValid() : exact @name("data.$valid$");
+            hdr.data2.isValid(): exact @name("data2.$valid$");
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         test1_0.apply();
@@ -86,4 +86,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

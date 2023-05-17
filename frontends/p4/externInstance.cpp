@@ -23,13 +23,10 @@ limitations under the License.
 
 namespace P4 {
 
-
-boost::optional<ExternInstance>
-ExternInstance::resolve(const IR::Expression* expr,
-                        ReferenceMap* refMap,
-                        TypeMap* typeMap,
-                        const boost::optional<cstring>& defaultName
-                            /* = boost::none */) {
+std::optional<ExternInstance> ExternInstance::resolve(const IR::Expression *expr,
+                                                      ReferenceMap *refMap, TypeMap *typeMap,
+                                                      const std::optional<cstring> &defaultName
+                                                      /* = std::nullopt */) {
     CHECK_NULL(expr);
     CHECK_NULL(refMap);
     CHECK_NULL(typeMap);
@@ -37,58 +34,52 @@ ExternInstance::resolve(const IR::Expression* expr,
     if (expr->is<IR::PathExpression>()) {
         return resolve(expr->to<IR::PathExpression>(), refMap, typeMap);
     } else if (expr->is<IR::ConstructorCallExpression>()) {
-        return resolve(expr->to<IR::ConstructorCallExpression>(),
-                       refMap, typeMap, defaultName);
+        return resolve(expr->to<IR::ConstructorCallExpression>(), refMap, typeMap, defaultName);
     } else {
-        return boost::none;
+        return std::nullopt;
     }
 }
 
-boost::optional<ExternInstance>
-ExternInstance::resolve(const IR::PathExpression* path,
-                        ReferenceMap* refMap,
-                        TypeMap* typeMap) {
+std::optional<ExternInstance> ExternInstance::resolve(const IR::PathExpression *path,
+                                                      ReferenceMap *refMap, TypeMap *typeMap) {
     CHECK_NULL(path);
     CHECK_NULL(refMap);
     CHECK_NULL(typeMap);
 
     auto decl = refMap->getDeclaration(path->path, true);
-    if (!decl->is<IR::Declaration_Instance>()) return boost::none;
+    if (!decl->is<IR::Declaration_Instance>()) return std::nullopt;
 
     auto instance = decl->to<IR::Declaration_Instance>();
     auto type = typeMap->getType(instance);
     if (!type) {
         BUG("Couldn't determine the type of expression: %1%", path);
-        return boost::none;
+        return std::nullopt;
     }
 
     auto instantiation = Instantiation::resolve(instance, refMap, typeMap);
-    if (!instantiation->is<ExternInstantiation>()) return boost::none;
+    if (!instantiation->is<ExternInstantiation>()) return std::nullopt;
     auto externInstantiation = instantiation->to<ExternInstantiation>();
 
-    return ExternInstance{instance->controlPlaneName(), path,
-                          externInstantiation->type,
-                          externInstantiation->typeArguments,
-                          instance->arguments,
-                          externInstantiation->substitution,
+    return ExternInstance{instance->controlPlaneName(),  path,
+                          externInstantiation->type,     externInstantiation->typeArguments,
+                          instance->arguments,           externInstantiation->substitution,
                           instance->to<IR::IAnnotated>()};
 }
 
-boost::optional<ExternInstance>
-ExternInstance::resolve(const IR::ConstructorCallExpression* constructorCallExpr,
-                        ReferenceMap* refMap,
-                        TypeMap* typeMap,
-                        const boost::optional<cstring>& name /* = boost::none */) {
+std::optional<ExternInstance> ExternInstance::resolve(
+    const IR::ConstructorCallExpression *constructorCallExpr, ReferenceMap *refMap,
+    TypeMap *typeMap, const std::optional<cstring> &name /* = std::nullopt */) {
     CHECK_NULL(constructorCallExpr);
     CHECK_NULL(refMap);
     CHECK_NULL(typeMap);
 
-    auto constructorCall =
-            P4::ConstructorCall::resolve(constructorCallExpr, refMap, typeMap);
-    if (!constructorCall->is<P4::ExternConstructorCall>()) return boost::none;
+    auto constructorCall = P4::ConstructorCall::resolve(constructorCallExpr, refMap, typeMap);
+    if (!constructorCall->is<P4::ExternConstructorCall>()) return std::nullopt;
 
     auto type = constructorCall->to<P4::ExternConstructorCall>()->type;
-    return ExternInstance{name, constructorCallExpr, type,
+    return ExternInstance{name,
+                          constructorCallExpr,
+                          type,
                           constructorCall->typeArguments,
                           constructorCallExpr->arguments,
                           constructorCall->substitution,

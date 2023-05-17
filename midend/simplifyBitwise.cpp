@@ -1,4 +1,5 @@
 #include "simplifyBitwise.h"
+
 #include "ir/pattern.h"
 
 namespace P4 {
@@ -21,10 +22,8 @@ const IR::Node *SimplifyBitwise::preorder(IR::AssignmentStatement *as) {
     Pattern::Match<IR::Expression> a, b;
     Pattern::Match<IR::Constant> maskA, maskB;
 
-    if (!((a & maskA) | (b & maskB)).match(as->right))
-        return as;
-    if ((maskA->value & maskB->value) != 0)
-        return as;
+    if (!((a & maskA) | (b & maskB)).match(as->right)) return as;
+    if ((maskA->value & maskB->value) != 0) return as;
 
     changing_as = as;
     slice_statements = new IR::Vector<IR::StatOrDecl>();
@@ -33,8 +32,7 @@ const IR::Node *SimplifyBitwise::preorder(IR::AssignmentStatement *as) {
     big_int parameter_mask = (big_int(1) << (as->left->type->width_bits())) - 1;
     parameter_mask &= ~maskA->value;
     parameter_mask &= ~maskB->value;
-    if (parameter_mask != 0)
-        assignSlices(new IR::Constant(0), parameter_mask);
+    if (parameter_mask != 0) assignSlices(new IR::Constant(0), parameter_mask);
     return slice_statements;
 }
 

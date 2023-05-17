@@ -1,4 +1,6 @@
-[![Build Status](https://travis-ci.com/p4lang/p4c.svg?branch=master)](https://travis-ci.com/p4lang/p4c)
+[![Main Build](https://github.com/p4lang/p4c/actions/workflows/ci-test.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-test.yml)
+[![Bazel Build](https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml)
+[![Validation](https://github.com/p4lang/p4c/actions/workflows/ci-validation.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-validation.yml)
 
 # p4c
 
@@ -15,18 +17,20 @@ p4c is modular; it provides a standard frontend and midend which can be combined
 with a target-specific backend to create a complete P4 compiler. The goal is to
 make adding new backends easy.
 
-The code contains five sample backends:
+The code contains seven sample backends:
 * p4c-bm2-ss: can be used to target the P4 `simple_switch` written using
-  the BMv2 behavioral model https://github.com/p4lang/behavioral-model
-* p4c-ebpf: can be used to generate C code which can be compiled to EBPF
-  https://en.wikipedia.org/wiki/Berkeley_Packet_Filter and then loaded
-  in the Linux kernel for packet filtering
+  the BMv2 behavioral model https://github.com/p4lang/behavioral-model,
+* p4c-dpdk: can be used to target the DPDK software switch (SWX) pipeline
+  https://doc.dpdk.org/guides/rel_notes/release_20_11.html,
+* p4c-ebpf: can be used to generate C code which can be compiled to [eBPF](https://en.wikipedia.org/wiki/Berkeley_Packet_Filter)
+  and then loaded in the Linux kernel. The eBPF backend currently implements two architecture models:
+  [ebpf_model.p4 for packet filtering](./backends/ebpf/README.md) and [the fully-featured PSA (Portable Switch Architecture) model](./backends/ebpf/psa/README.md).
 * p4test: a source-to-source P4 translator which can be used for
-  testing, learning compiler internals and debugging.
+  testing, learning compiler internals and debugging,
 * p4c-graphs: can be used to generate visual representations of a P4 program;
-  for now it only supports generating graphs of top-level control flows.
-* p4c-ubfp: can be used to generate ebpf code that runs in user-space
-
+  for now it only supports generating graphs of top-level control flows, and
+* p4c-ubpf: can be used to generate eBPF code that runs in user-space.
+* p4tools: a platform for P4 test utilities, including a test-case generator for P4 programs.
 Sample command lines:
 
 Compile P4_16 or P4_14 source code.  If your program successfully
@@ -97,6 +101,47 @@ dot -Tpdf ParserImpl.dot > ParserImpl.pdf
 
 # Getting started
 
+## Installing packaged versions of p4c
+
+p4c has package support for several Ubuntu and Debian distributions.
+
+### Ubuntu
+
+A p4c package is available in the following repositories for Ubuntu 20.04 and newer.
+
+```bash
+. /etc/os-release
+echo "deb https://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${VERSION_ID}/ /" | sudo tee /etc/apt/sources.list.d/home:p4lang.list
+curl -L "https://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${VERSION_ID}/Release.key" | sudo apt-key add -
+sudo apt-get update
+sudo apt install p4lang-p4c
+```
+
+### Debian
+
+For Debian 11 (Bullseye) it can be installed as follows:
+
+```bash
+echo 'deb https://download.opensuse.org/repositories/home:/p4lang/Debian_11/ /' | sudo tee /etc/apt/sources.list.d/home:p4lang.list
+curl -fsSL https://download.opensuse.org/repositories/home:p4lang/Debian_11/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_p4lang.gpg > /dev/null
+sudo apt update
+sudo apt install p4lang-p4c
+```
+
+If you cannot use a repository to install p4c, you can download the `.deb` file
+for your release and install it manually. You need to download a new file each
+time you want to upgrade p4c.
+
+1. Go to https://build.opensuse.org/package/show/home:p4lang/p4lang-p4c, click on
+"Download package" and choose your operating system version.
+
+2. Install p4c, changing the path below to the path where you downloaded the package.
+
+```bash
+sudo dpkg -i /path/to/package.deb
+```
+
+## Installing p4c from source
 1.  Clone the repository. It includes submodules, so be sure to use
     `--recursive` to pull them in:
     ```
@@ -108,9 +153,9 @@ dot -Tpdf ParserImpl.dot > ParserImpl.pdf
     ```
 
 2.  Install [dependencies](#dependencies). You can find specific instructions
-    for Ubuntu 16.04 [here](#ubuntu-dependencies) and for macOS 10.12
+    for Ubuntu 20.04 [here](#ubuntu-dependencies) and for macOS 11
     [here](#macos-dependencies).  You can also look at the
-    [travis installation script](tools/travis-build).
+    [CI installation script](tools/ci-build.sh).
 
 3.  Build. Building should also take place in a subdirectory named `build`.
     ```
@@ -127,10 +172,20 @@ dot -Tpdf ParserImpl.dot > ParserImpl.pdf
       symbols to run in gdb. Default is RELEASE.
      - `-DCMAKE_INSTALL_PREFIX=<path>` -- set the directory where
        `make install` installs the compiler. Defaults to /usr/local.
-     - `-DENABLE_BMV2=ON|OFF`. Enable the bmv2 backend. Default ON.
-     - `-DENABLE_EBPF=ON|OFF`. Enable the ebpf backend. Default ON.
-     - `-DENABLE_P4C_GRAPHS=ON|OFF`. Enable the p4c-graphs backend. Default ON.
-     - `-DENABLE_P4TEST=ON|OFF`. Enable the p4test backend. Default ON.
+     - `-DENABLE_BMV2=ON|OFF`. Enable [the bmv2
+       backend](backends/bmv2/README.md). Default ON.
+     - `-DENABLE_EBPF=ON|OFF`. Enable [the ebpf
+       backend](backends/ebpf/README.md). Default ON.
+     - `-DENABLE_UBPF=ON|OFF`. Enable [the ubpf
+       backend](backends/ubpf/README.md). Default ON.
+     - `-DENABLE_DPDK=ON|OFF`. Enable [the DPDK
+       backend](backends/dpdk/README.md). Default ON.
+     - `-DENABLE_P4C_GRAPHS=ON|OFF`. Enable [the p4c-graphs
+       backend](backends/graphs/README.md). Default ON.
+     - `-DENABLE_P4TEST=ON|OFF`. Enable [the p4test
+       backend](backends/p4test/README.md). Default ON.
+     - `-DENABLE_TEST_TOOLS=ON|OFF`. Enable [the p4tools
+         backend](backends/p4tools/README.md). Default OFF.
      - `-DENABLE_DOCS=ON|OFF`. Build documentation. Default is OFF.
      - `-DENABLE_GC=ON|OFF`. Enable the use of the garbage collection
        library. Default is ON.
@@ -138,6 +193,13 @@ dot -Tpdf ParserImpl.dot > ParserImpl.pdf
        Default is ON.
      - `-DENABLE_PROTOBUF_STATIC=ON|OFF`. Enable the use of static
        protobuf libraries. Default is ON.
+     - `-DENABLE_MULTITHREAD=ON|OFF`. Use multithreading.  Default is
+       OFF.
+     - `-DBUILD_LINK_WITH_GOLD=ON|OFF`. Use Gold linker for build if available.
+     - `-DBUILD_LINK_WITH_LLD=ON|OFF`. Use LLD linker for build if available (overrides BUILD_LINK_WITH_GOLD).
+     - `-DENABLE_LTO=ON|OFF`. Use Link Time Optimization (LTO).  Default is OFF.
+     - `-DENABLE_WERROR=ON|OFF`. Treat warnings as errors.  Default is OFF.
+     - `-DCMAKE_UNITY_BUILD=ON|OFF `. Enable [unity builds](https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html) for faster compilation.  Default is OFF.
 
     If adding new targets to this build system, please see
     [instructions](#defining-new-cmake-targets).
@@ -161,17 +223,15 @@ If you plan to contribute to p4c, you'll find more useful information
 
 # Dependencies
 
-Ubuntu 16.04 is the officially supported platform for p4c. There's also
-unofficial support for macOS 10.12. Other platforms are untested; you can try to
+Ubuntu 20.04 is the officially supported platform for p4c. There's also
+unofficial support for macOS 11. Other platforms are untested; you can try to
 use them, but YMMV.
 
-- A C++11 compiler. GCC 4.9 or later or Clang 3.3 or later is required.
+- A C++17 compiler. GCC 9.1 or later or Clang 6.0 or later is required.
 
 - `git` for version control
 
-- GNU autotools for the build process
-
-- CMake 3.0.2 or higher
+- CMake 3.16.3 or higher
 
 - Boehm-Weiser garbage-collector C++ library
 
@@ -179,11 +239,9 @@ use them, but YMMV.
 
 - Google Protocol Buffers 3.0 or higher for control plane API generation
 
-- GNU multiple precision library GMP
+- C++ boost library
 
-- C++ boost library (minimally used)
-
-- Python 2.7 for scripting and running tests
+- Python 3 for scripting and running tests
 
 - Optional: Documentation generation (enabled when configuring with
   --enable-doxygen-doc) requires Doxygen (1.8.10 or higher) and Graphviz
@@ -200,34 +258,53 @@ included with `p4c` are documented here:
 Most dependencies can be installed using `apt-get install`:
 
 ```bash
-$ sudo apt-get install cmake g++ git automake libtool libgc-dev bison flex
-libfl-dev libgmp-dev libboost-dev libboost-iostreams-dev
-libboost-graph-dev llvm pkg-config python python-scapy python-ipaddr python-ply python3-pip
+sudo apt-get install cmake g++ git automake libtool libgc-dev bison flex \
+libfl-dev libboost-dev libboost-iostreams-dev \
+libboost-graph-dev llvm pkg-config python3 python3-pip \
 tcpdump
 
-$ pip3 install scapy ply
+pip3 install --user -r requirements.txt
 ```
 
 For documentation building:
 `sudo apt-get install -y doxygen graphviz texlive-full`
 
-An exception is Google Protocol Buffers; `p4c` depends on version 3.0 or higher,
-which is not available until Ubuntu 16.10. For earlier releases of Ubuntu,
-you'll need to install from source. You can find instructions
-[here](https://github.com/google/protobuf/blob/master/src/README.md). **We
-recommend that you use version
-[3.6.1](https://github.com/google/protobuf/releases/tag/v3.6.1)**. Earlier
-versions in the 3 series may not be supported by other p4lang projects, such as
-[p4lang/PI](https://github.com/p4lang/PI). More recent versions may work as
-well, but all our CI testing is done with version 3.6.1. After cloning protobuf
-and before you build, check-out version 3.6.1:
+`p4c` also depends on Google Protocol Buffers (Protobuf). `p4c` requires version
+3.0 or higher, so the packaged version provided in Ubuntu 20.04 **should**
+work. However, all our CI testing is done with a more recent version of Protobuf
+(at the moment, 3.18.1), which we install from source. If you are experiencing
+issues with the Protobuf version shipped with your OS distribution, we recommend
+that we install Protobuf 3.18.1 from source. You can find instructions
+[here](https://github.com/protocolbuffers/protobuf/blob/v3.18.1/src/README.md).
+After cloning Protobuf and before you build, check-out version 3.18.1:
 
-`git checkout v3.6.1`
+`git checkout v3.18.1`
 
-Please note that while all protobuf versions newer than 3.0 should work for
+Please note that while all Protobuf versions newer than 3.0 should work for
 `p4c` itself, you may run into trouble with some extensions and other p4lang
-projects unless you install version 3.6.1, so you may want to install from
-source even on newer releases of Ubuntu.
+projects unless you install version 3.18.1.
+
+### CMake
+p4c requires a CMake version of at least 3.16.3 or higher. On older systems, a newer version of CMake can be installed using `pip3 install --user cmake==3.16.3`. We have a CI test on Ubuntu 18.04 that uses this option, but there is no guarantee that this will lead to a successful build.
+
+## Fedora dependencies
+
+```bash
+sudo dnf install -y cmake g++ git automake libtool gc-devel bison flex \
+libfl-devel gmp-devel boost-devel boost-iostreams boost-graph llvm pkg-config \
+python3 python3-pip tcpdump protobuf-devel protobuf-static
+
+sudo pip3 install -r requirements.txt
+```
+
+For documentation building:
+
+```bash
+sudo dnf install -y doxygen graphviz texlive-scheme-full
+```
+
+You can also look at the [dependencies installation script](tools/install_fedora_deps.sh)
+for a fresh Fedora instance.
 
 ## macOS dependencies
 
@@ -247,11 +324,6 @@ Installing on macOS:
 - Install dependencies using Homebrew:
   ```
   brew install autoconf automake libtool bdw-gc boost bison pkg-config
-  ```
-
-  Install GMP built in C++11 mode:
-  ```
-  brew install gmp --c++11
   ```
 
   By default, Homebrew doesn't link programs into `/usr/local/bin` if
@@ -276,15 +348,28 @@ Installing on macOS:
   out the newest tag in the 3.0 series (`v3.0.2` as of this writing) before you
   build.
 
+  The `protobuf` formula requires the following CMake variables to be set,
+  otherwise CMake does not find the libraries or fails in linking. It is likely
+  that manually installed Protobuf will require similar treatment.
+
+  ```
+  PB_PREFIX="$(brew --prefix --installed protobuf)"
+  ./bootstrap.sh \
+    -DProtobuf_INCLUDE_DIR="${PB_PREFIX}/include/" \
+    -DProtobuf_LIBRARY="${PB_PREFIX}/lib/libprotobuf.dylib" \
+    -DENABLE_PROTOBUF_STATIC=OFF
+  ```
+
 ## Garbage collector
 
 P4c relies on [BDW garbage collector](https://github.com/ivmai/bdwgc)
-to manage its memory.  By default, the p4c exectuables are linked with
-the garbage collector library.  In rare cases when the GC causes
-problems, this can be disabled by setting `ENABLE_GC` cmake option to
-`OFF`.  However, this will dramatically increase the memory usage by the
-compiler, and may become impractical for compiling large programs.  **Do
-not disable the GC**, unless you really have to.
+to manage its memory.  By default, the p4c executables are linked with
+the garbage collector library.  When the GC causes problems, this can
+be disabled by setting `ENABLE_GC` cmake option to `OFF`.  However,
+this will dramatically increase the memory usage by the compiler, and
+may become impractical for compiling large programs.  **Do not disable
+the GC**, unless you really have to.  We have noticed that this may be
+a problem on MacOS.
 
 # Development tools
 
@@ -293,8 +378,8 @@ There is a variety of design and development documentation [here](docs/README.md
 We recommend using `clang++` with no optimizations for speeding up
 compilation and simplifying debugging.
 
-We recommend installing a new version of [gdb](http://ftp.gnu.org/gnu/gdb).,
-because older gdb versions do not always handle C++11 correctly.
+We recommend installing a new version of [gdb](http://ftp.gnu.org/gnu/gdb),
+because older gdb versions do not always handle C++11 or newer correctly.
 
 We recommend exuberant ctags for navigating source code in Emacs and vi.  `sudo
 apt-get install exuberant-ctags.` The Makefile targets `make ctags` and `make
@@ -306,6 +391,15 @@ To enable building code documentation, please run `cmake
 .. -DENABLE_DOCS=ON`.  This enables the `make docs` rule to generate
 documentation. The HTML output is available in
 `build/doxygen-out/html/index.html`.
+
+## Git setup
+
+Occasionally formatting commits are applied to p4c. These pollute the git history. To ignore these commits in git blame, run this command
+```git config blame.ignoreRevsFile .git-blame-ignore-revs```
+
+The p4c code base is subject to a series of linter checks which are checked by CI. To avoid failing these checks and wasting unnecessary CI cycles and resources, you can install [git commit hooks](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) by running
+```./tools/install_git_hooks.sh```
+These commit hooks will run on every commit and check the files you are planning to commit with cpplint and clang-format.
 
 # Docker
 
@@ -373,14 +467,27 @@ Again, `MY_IR_SRCS` is a list of file names with absolute path.
 
 ### Source files
 
-Sources (.cpp and .h) should be added to the cpplint target using the following rule:
+Sources (.cpp and .h) should be added to the cpplint and clang_format target using the following rule:
 
 ```
 add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${MY_SOURCES_AND_HEADERS}")
+add_clang_format_files (${CMAKE_CURRENT_SOURCE_DIR} "${MY_SOURCES_AND_HEADERS}")
 ```
 
 where `mybackend` is the name of the directory you added under extensions.
 The p4c CMakeLists.txt will use that name to figure the full path of the files to lint.
+
+Unlike cpplint, clang-format needs to be installed before the linter can be used. clang-format can be installed with the following command:
+```
+pip3 install --user "clang-format>=15.0.4"
+```
+clang-format can be checked using the `make clang-format` command. Complaints can be fixed by running `make clang-format-fix-errors`.
+
+Both cpplint and clang-format run as checks as port of P4C's continuous integration process. To make sure that these tests pass, we recommend installing the appropriate git hooks. This can be done by running
+```
+./tools/install_git_hooks.sh
+```
+clang-format and cpplint checks will be enforced on every branch commit. In cases where checks are failing but the commit is sound, one can bypass the hook enforcement using `git commit --no-verify`.
 
 ### Target
 
@@ -437,6 +544,18 @@ arguments to these macros.
 To pass custom arguments to p4c, you can set the environment variable `P4C_ARGS`:
 ```
 make check P4C_ARGS="-Xp4c=MY_CUSTOM_FLAG"
+```
+
+When making changes to p4c, it is sometimes useful to be able to run
+the tests while overwriting the expected output files that are saved
+in this repository.  One such situation is when your changes to p4c
+cause the names of compiler-generated local variables to change.  To
+force the expected output files to be rewritten while running the
+tests, assign a value to the shell environment variable
+`P4TEST_REPLACE`.  Here is one example Bash command to do so:
+
+```
+P4TEST_REPLACE=1 make check
 ```
 
 ### Installation

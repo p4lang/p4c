@@ -23,7 +23,7 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout 
 }
 
 control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
-    bit<16> rand_int_0;
+    @name("ingress.rand_int") bit<16> rand_int_0;
     @hidden action issue1517bmv2l62() {
         mark_to_drop(standard_metadata);
     }
@@ -72,4 +72,3 @@ control computeChecksum(inout headers_t hdr, inout meta_t meta) {
 }
 
 V1Switch<headers_t, meta_t>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

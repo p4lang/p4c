@@ -19,7 +19,7 @@ struct metadata {
 }
 
 struct headers {
-    @name(".data") 
+    @name(".data")
     data_t data;
 }
 
@@ -46,38 +46,38 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @name(".setb1") action setb1(bit<8> val, bit<9> port) {
-        meta._meta_val0 = val;
+    @name(".setb1") action setb1(@name("val") bit<8> val_1, @name("port") bit<9> port) {
+        meta._meta_val0 = val_1;
         standard_metadata.egress_spec = port;
     }
     @name(".noop") action noop() {
     }
-    @name(".noop") action noop_2() {
+    @name(".noop") action noop_1() {
     }
     @name(".test1") table test1_0 {
         actions = {
             setb1();
             noop();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            hdr.data.f1: exact @name("data.f1") ;
+            hdr.data.f1: exact @name("data.f1");
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name(".test2") table test2_0 {
         actions = {
-            noop_2();
-            @defaultonly NoAction_3();
+            noop_1();
+            @defaultonly NoAction_2();
         }
         key = {
-            meta._meta_val0: exact @name("meta.val") ;
+            meta._meta_val0: exact @name("meta.val");
         }
-        default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     apply {
         test1_0.apply();
@@ -102,4 +102,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

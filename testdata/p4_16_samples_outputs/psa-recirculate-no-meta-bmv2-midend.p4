@@ -1,11 +1,10 @@
 #include <core.p4>
-#include <psa.p4>
+#include <bmv2/psa.p4>
 
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header output_data_t {
@@ -35,19 +34,19 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 }
 
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    bit<32> int_packet_path_0;
-    @noWarnUnused @name(".send_to_port") action send_to_port() {
+    @name("cIngress.int_packet_path") bit<32> int_packet_path_0;
+    @noWarn("unused") @name(".send_to_port") action send_to_port_1() {
         ostd.drop = false;
         ostd.multicast_group = 32w0;
-        ostd.egress_port = (PortIdUint_t)hdr.ethernet.dstAddr;
+        ostd.egress_port = (bit<32>)hdr.ethernet.dstAddr;
     }
-    @noWarnUnused @name(".send_to_port") action send_to_port_0() {
+    @noWarn("unused") @name(".send_to_port") action send_to_port_2() {
         ostd.drop = false;
         ostd.multicast_group = 32w0;
         ostd.egress_port = 32w0xfffffffa;
     }
     @name("cIngress.record_ingress_ports_in_pkt") action record_ingress_ports_in_pkt() {
-        hdr.output_data.word1 = (PortIdUint_t)istd.ingress_port;
+        hdr.output_data.word1 = (bit<32>)istd.ingress_port;
     }
     @hidden action psarecirculatenometabmv2l56() {
         int_packet_path_0 = 32w1;
@@ -87,15 +86,15 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     }
     @hidden table tbl_send_to_port {
         actions = {
-            send_to_port();
+            send_to_port_1();
         }
-        const default_action = send_to_port();
+        const default_action = send_to_port_1();
     }
     @hidden table tbl_send_to_port_0 {
         actions = {
-            send_to_port_0();
+            send_to_port_2();
         }
-        const default_action = send_to_port_0();
+        const default_action = send_to_port_2();
     }
     @hidden table tbl_psarecirculatenometabmv2l54 {
         actions = {
@@ -334,8 +333,5 @@ control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_met
 }
 
 IngressPipeline<headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), cIngress(), IngressDeparserImpl()) ip;
-
 EgressPipeline<headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), cEgress(), EgressDeparserImpl()) ep;
-
 PSA_Switch<headers_t, metadata_t, headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <psa.p4>
+#include <bmv2/psa.p4>
 
 struct EMPTY {
 }
@@ -41,16 +41,21 @@ parser MyEP(packet_in pkt, out headers_t hdr, inout metadata_t user_meta, in psa
 }
 
 control MyIC(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @noWarnUnused @name(".send_to_port") action send_to_port(inout psa_ingress_output_metadata_t meta_1, in PortId_t egress_port_1) {
-        meta_1.drop = false;
-        meta_1.multicast_group = (MulticastGroup_t)32w0;
-        meta_1.egress_port = egress_port_1;
+    @name("MyIC.idx") bit<8> idx_0;
+    @name("MyIC.action_type") bit<8> action_type_0;
+    @name("MyIC.orig_data") bit<16> orig_data_0;
+    @name("MyIC.next_data") bit<16> next_data_0;
+    @name("MyIC.validAction") bool validAction_0;
+    @name("MyIC.meta") psa_ingress_output_metadata_t meta_0;
+    @name("MyIC.egress_port") PortId_t egress_port_0;
+    @noWarn("unused") @name(".send_to_port") action send_to_port_0() {
+        meta_0 = ostd;
+        egress_port_0 = (PortId_t)32w1;
+        meta_0.drop = false;
+        meta_0.multicast_group = (MulticastGroup_t)32w0;
+        meta_0.egress_port = egress_port_0;
+        ostd = meta_0;
     }
-    bit<8> idx_0;
-    bit<8> action_type_0;
-    bit<16> orig_data_0;
-    bit<16> next_data_0;
-    bool validAction_0;
     @name("MyIC.reg") Register<bit<16>, bit<8>>(32w6) reg_0;
     apply {
         if (hdr.ethernet.isValid()) {
@@ -74,7 +79,7 @@ control MyIC(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_inp
             hdr.output_data.word0 = (bit<32>)orig_data_0;
             hdr.output_data.word1 = (bit<32>)next_data_0;
         }
-        send_to_port(ostd, (PortId_t)32w1);
+        send_to_port_0();
     }
 }
 
@@ -96,8 +101,5 @@ control MyED(packet_out pkt, out EMPTY clone_e2e_meta, out EMPTY recirculate_met
 }
 
 IngressPipeline<headers_t, metadata_t, EMPTY, EMPTY, EMPTY, EMPTY>(MyIP(), MyIC(), MyID()) ip;
-
 EgressPipeline<headers_t, metadata_t, EMPTY, EMPTY, EMPTY, EMPTY>(MyEP(), MyEC(), MyED()) ep;
-
 PSA_Switch<headers_t, metadata_t, headers_t, metadata_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

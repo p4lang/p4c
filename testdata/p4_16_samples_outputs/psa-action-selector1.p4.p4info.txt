@@ -9,7 +9,7 @@ tables {
   }
   match_fields {
     id: 1
-    name: "a.srcAddr"
+    name: "hdr.ethernet.srcAddr"
     bitwidth: 48
     match_type: EXACT
   }
@@ -22,8 +22,8 @@ tables {
   action_refs {
     id: 23466264
   }
+  implementation_id: 294316857
   size: 1024
-  idle_timeout_behavior: NOTIFY_CONTROL
 }
 actions {
   preamble {
@@ -63,6 +63,7 @@ action_profiles {
     name: "MyIC.as"
     alias: "as"
   }
+  table_ids: 39967501
   with_selector: true
   size: 1024
 }

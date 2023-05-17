@@ -1,4 +1,9 @@
-issue1986-1.p4(22): [--Werror=invalid] error: : invalid width; 0 must be positive
-         transition select(2w0) {0w0
-                                 ^^^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation
+issue1986-1.p4(22): [--Werror=type-error] error: SelectExpression
+        transition select(2w0) {
+                   ^
+  ---- Actual error:
+  Cannot cast implicitly type 'bit<0>' to type 'bit<2>'
+  ---- Originating from:
+issue1986-1.p4(23): 'match' case label '0' has type 'bit<0>' which does not match the expected type 'bit<2>'
+              0w0: parse_h2;
+              ^^^

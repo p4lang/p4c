@@ -1,9 +1,13 @@
 #include <core.p4>
 
 control Ing(out bit<32> a) {
-    bool b_0;
+    @name("Ing.b") bool b_0;
     @name("Ing.cond") action cond() {
-        a = (b_0 ? 32w5 : 32w10);
+        if (b_0) {
+            a = 32w5;
+        } else {
+            a = 32w10;
+        }
     }
     @hidden action issue210l30() {
         b_0 = true;
@@ -29,4 +33,3 @@ control Ing(out bit<32> a) {
 control s(out bit<32> a);
 package top(s e);
 top(Ing()) main;
-

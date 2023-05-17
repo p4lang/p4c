@@ -14,14 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4C_LIB_SAFE_VECTOR_H_
-#define P4C_LIB_SAFE_VECTOR_H_
+#ifndef _LIB_SAFE_VECTOR_H_
+#define _LIB_SAFE_VECTOR_H_
 
 #include <vector>
 
 /// An enhanced version of std::vector that performs bounds checking for
 /// operator[].
-template<class T, class _Alloc = std::allocator<T>>
+template <class T, class _Alloc = std::allocator<T>>
 class safe_vector : public std::vector<T, _Alloc> {
  public:
     using std::vector<T, _Alloc>::vector;
@@ -33,4 +33,4 @@ class safe_vector : public std::vector<T, _Alloc> {
     const_reference operator[](size_type n) const { return this->at(n); }
 };
 
-#endif /* P4C_LIB_SAFE_VECTOR_H_ */
+#endif /* _LIB_SAFE_VECTOR_H_ */

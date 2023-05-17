@@ -1,0 +1,21 @@
+issue2344.p4(19): [--Wwarn=invalid_header] warning: accessing a field of an invalid header tmp1
+    if (tmp1.a != 10) {
+        ^^^^
+issue2344.p4(19): [--Wwarn=uninitialized_use] warning: tmp1.a may be uninitialized
+    if (tmp1.a != 10) {
+        ^^^^^^
+issue2344.p4(20): [--Wwarn=invalid_header] warning: accessing a field of an invalid header tmp1
+        tmp1.a = tmp1.a + 10;
+        ^^^^
+issue2344.p4(20): [--Wwarn=invalid_header] warning: accessing a field of an invalid header tmp1
+        tmp1.a = tmp1.a + 10;
+                 ^^^^
+issue2344.p4(20): [--Wwarn=uninitialized_use] warning: tmp1.a may be uninitialized
+        tmp1.a = tmp1.a + 10;
+                 ^^^^^^
+issue2344.p4(22): [--Wwarn=invalid_header] warning: accessing a field of an invalid header tmp1
+    return tmp1.a;
+           ^^^^
+issue2344.p4(22): [--Wwarn=uninitialized_use] warning: tmp1.a may be uninitialized
+    return tmp1.a;
+           ^^^^^^

@@ -24,35 +24,35 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 }
 
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("pipe.fill_metadata") action fill_metadata() {
         meta.etherType = headers.ethernet.etherType;
     }
     @name("pipe.tbl") table tbl_0 {
         key = {
-            headers.ethernet.etherType: exact @name("headers.ethernet.etherType") ;
+            headers.ethernet.etherType: exact @name("headers.ethernet.etherType");
         }
         actions = {
             fill_metadata();
-            NoAction_0();
+            NoAction_1();
         }
-        const default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name("pipe.change_etherType") action change_etherType() {
         headers.ethernet.etherType = 16w0x86dd;
     }
     @name("pipe.meta_based_tbl") table meta_based_tbl_0 {
         key = {
-            meta.etherType: exact @name("meta.etherType") ;
+            meta.etherType: exact @name("meta.etherType");
         }
         actions = {
             change_etherType();
-            NoAction_3();
+            NoAction_2();
         }
-        const default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     apply {
         tbl_0.apply();
@@ -67,4 +67,3 @@ control DeparserImpl(packet_out packet, in Headers_t headers) {
 }
 
 ubpf<Headers_t, metadata>(prs(), pipe(), DeparserImpl()) main;
-

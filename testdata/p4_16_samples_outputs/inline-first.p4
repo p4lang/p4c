@@ -6,7 +6,7 @@ control p(out bit<1> y) {
     action b(in bit<1> x, out bit<1> y) {
         bit<1> z;
         a(x, z);
-        a(z & z, y);
+        a(z, y);
     }
     apply {
         bit<1> x = 1w1;
@@ -17,4 +17,3 @@ control p(out bit<1> y) {
 control simple(out bit<1> y);
 package m(simple pipe);
 m(p()) main;
-

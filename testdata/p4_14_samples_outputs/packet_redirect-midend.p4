@@ -9,7 +9,9 @@ struct intrinsic_metadata_t {
 }
 
 struct metaA_t {
+    @field_list(8w1)
     bit<8> f1;
+    @field_list(8w1)
     bit<8> f2;
 }
 
@@ -24,14 +26,16 @@ header hdrA_t {
 }
 
 struct metadata {
+    @field_list(8w1)
     bit<8> _metaA_f10;
+    @field_list(8w1)
     bit<8> _metaA_f21;
     bit<8> _metaB_f12;
     bit<8> _metaB_f23;
 }
 
 struct headers {
-    @name(".hdrA") 
+    @name(".hdrA")
     hdrA_t hdrA;
 }
 
@@ -42,35 +46,30 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
-struct tuple_0 {
-    standard_metadata_t f0;
-    metaA_t             f1;
-}
-
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("._nop") action _nop() {
     }
     @name("._recirculate") action _recirculate() {
-        recirculate<tuple_0>({ standard_metadata, (metaA_t){f1 = meta._metaA_f10,f2 = meta._metaA_f21} });
+        recirculate_preserving_field_list(8w1);
     }
-    @name("._clone_e2e") action _clone_e2e(bit<32> mirror_id) {
-        clone3<tuple_0>(CloneType.E2E, mirror_id, { standard_metadata, (metaA_t){f1 = meta._metaA_f10,f2 = meta._metaA_f21} });
+    @name("._clone_e2e") action _clone_e2e(@name("mirror_id") bit<32> mirror_id) {
+        clone_preserving_field_list(CloneType.E2E, mirror_id, 8w1);
     }
     @name(".t_egress") table t_egress_0 {
         actions = {
             _nop();
             _recirculate();
             _clone_e2e();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_2();
         }
         key = {
-            hdr.hdrA.f1                    : exact @name("hdrA.f1") ;
-            standard_metadata.instance_type: ternary @name("standard_metadata.instance_type") ;
+            hdr.hdrA.f1                    : exact @name("hdrA.f1");
+            standard_metadata.instance_type: ternary @name("standard_metadata.instance_type");
         }
         size = 128;
-        default_action = NoAction_0();
+        default_action = NoAction_2();
     }
     apply {
         t_egress_0.apply();
@@ -78,54 +77,54 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_5() {
+    @noWarn("unused") @name(".NoAction") action NoAction_4() {
     }
     @name("._nop") action _nop_2() {
     }
-    @name("._nop") action _nop_4() {
+    @name("._nop") action _nop_3() {
     }
-    @name("._set_port") action _set_port(bit<9> port) {
+    @name("._set_port") action _set_port(@name("port") bit<9> port) {
         standard_metadata.egress_spec = port;
         meta._metaA_f10 = 8w1;
     }
-    @name("._multicast") action _multicast(bit<16> mgrp) {
+    @name("._multicast") action _multicast(@name("mgrp") bit<16> mgrp) {
         standard_metadata.mcast_grp = mgrp;
     }
     @name("._resubmit") action _resubmit() {
-        resubmit<tuple_0>({ standard_metadata, (metaA_t){f1 = meta._metaA_f10,f2 = meta._metaA_f21} });
+        resubmit_preserving_field_list(8w1);
     }
-    @name("._clone_i2e") action _clone_i2e(bit<32> mirror_id) {
-        clone3<tuple_0>(CloneType.I2E, mirror_id, { standard_metadata, (metaA_t){f1 = meta._metaA_f10,f2 = meta._metaA_f21} });
+    @name("._clone_i2e") action _clone_i2e(@name("mirror_id") bit<32> mirror_id_2) {
+        clone_preserving_field_list(CloneType.I2E, mirror_id_2, 8w1);
     }
     @name(".t_ingress_1") table t_ingress {
         actions = {
             _nop_2();
             _set_port();
             _multicast();
-            @defaultonly NoAction_1();
+            @defaultonly NoAction_3();
         }
         key = {
-            hdr.hdrA.f1    : exact @name("hdrA.f1") ;
-            meta._metaA_f10: exact @name("metaA.f1") ;
+            hdr.hdrA.f1    : exact @name("hdrA.f1");
+            meta._metaA_f10: exact @name("metaA.f1");
         }
         size = 128;
-        default_action = NoAction_1();
+        default_action = NoAction_3();
     }
     @name(".t_ingress_2") table t_ingress_0 {
         actions = {
-            _nop_4();
+            _nop_3();
             _resubmit();
             _clone_i2e();
-            @defaultonly NoAction_5();
+            @defaultonly NoAction_4();
         }
         key = {
-            hdr.hdrA.f1                    : exact @name("hdrA.f1") ;
-            standard_metadata.instance_type: ternary @name("standard_metadata.instance_type") ;
+            hdr.hdrA.f1                    : exact @name("hdrA.f1");
+            standard_metadata.instance_type: ternary @name("standard_metadata.instance_type");
         }
         size = 128;
-        default_action = NoAction_5();
+        default_action = NoAction_4();
     }
     apply {
         t_ingress.apply();
@@ -150,4 +149,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

@@ -16,15 +16,15 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     table t {
-        key = {
-        }
         actions = {
             NoAction();
         }
         default_action = NoAction();
     }
     apply {
-        if (!t.apply().hit) {
+        if (t.apply().hit) {
+            ;
+        } else {
             ;
         }
     }
@@ -51,4 +51,3 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

@@ -54,20 +54,29 @@ control compute_checksum_stub(inout headers hdr, inout test_metadata_t meta) {
 }
 
 control ingress(inout headers hdr, inout test_metadata_t meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
+    bit<32> hsiVar;
+    ethernet_t hsVar;
     @name("ingress.assign_non_const_array_index") action assign_non_const_array_index() {
-        hdr.ethernet_stack[1] = hdr.ethernet_stack[meta.color];
+        hsiVar = meta.color;
+        if (hsiVar == 32w0) {
+            hdr.ethernet_stack[1] = hdr.ethernet_stack[32w0];
+        } else if (hsiVar == 32w1) {
+            hdr.ethernet_stack[1] = hdr.ethernet_stack[32w1];
+        } else if (hsiVar >= 32w1) {
+            hdr.ethernet_stack[1] = hsVar;
+        }
     }
     @name("ingress.acl_table") table acl_table_0 {
         actions = {
             assign_non_const_array_index();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            hdr.ethernet.etherType: exact @name("hdr.ethernet.etherType") ;
+            hdr.ethernet.etherType: exact @name("hdr.ethernet.etherType");
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         acl_table_0.apply();
@@ -75,4 +84,3 @@ control ingress(inout headers hdr, inout test_metadata_t meta, inout standard_me
 }
 
 V1Switch<headers, test_metadata_t>(parser_stub(), verify_checksum_stub(), ingress(), egress_stub(), compute_checksum_stub(), deparser_stub()) main;
-

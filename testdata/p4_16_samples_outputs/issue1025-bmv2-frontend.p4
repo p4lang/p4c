@@ -59,9 +59,9 @@ struct metadata {
 }
 
 parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    IPv4_up_to_ihl_only_h tmp;
-    bit<9> tmp_0;
-    bit<32> tmp_1;
+    @name("parserI.tmp") IPv4_up_to_ihl_only_h tmp;
+    @name("parserI.tmp_0") bit<9> tmp_0;
+    @name("parserI.tmp_1") bit<32> tmp_1;
     state start {
         pkt.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -86,9 +86,9 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
 }
 
 control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    bit<1> eth_valid_0;
-    bit<1> ipv4_valid_0;
-    bit<1> tcp_valid_0;
+    @name("cIngress.eth_valid") bit<1> eth_valid_0;
+    @name("cIngress.ipv4_valid") bit<1> ipv4_valid_0;
+    @name("cIngress.tcp_valid") bit<1> tcp_valid_0;
     apply {
         eth_valid_0 = (bit<1>)hdr.ethernet.isValid();
         ipv4_valid_0 = (bit<1>)hdr.ipv4.isValid();
@@ -121,4 +121,3 @@ control DeparserI(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(parserI(), verifyChecksum(), cIngress(), cEgress(), updateChecksum(), DeparserI()) main;
-

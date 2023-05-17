@@ -1,7 +1,7 @@
 control c() {
     @name("c.a") action a() {
     }
-    @name("c.a") action a_2() {
+    @name("c.a") action a_1() {
     }
     @name("c.b") action b() {
     }
@@ -14,9 +14,9 @@ control c() {
     }
     @name("c.t2") table t2_0 {
         actions = {
-            a_2();
+            a_1();
         }
-        default_action = a_2();
+        default_action = a_1();
     }
     apply {
         t1_0.apply();
@@ -27,4 +27,3 @@ control c() {
 control empty();
 package top(empty e);
 top(c()) main;
-

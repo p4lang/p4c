@@ -20,7 +20,7 @@ struct metadata {
 }
 
 struct headers {
-    @name(".data") 
+    @name(".data")
     data_t data;
 }
 
@@ -32,12 +32,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 @name(".count1") @min_width(32) counter<bit<14>>(32w16384, CounterType.packets) count1;
-
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name(".set_index") action set_index(bit<16> index, bit<9> port) {
-        meta._counter_metadata_counter_index0 = index;
+    @name(".set_index") action set_index(@name("index") bit<16> index_1, @name("port") bit<9> port) {
+        meta._counter_metadata_counter_index0 = index_1;
         standard_metadata.egress_spec = port;
     }
     @name(".count_entries") action count_entries() {
@@ -46,14 +45,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".index_setter") table index_setter_0 {
         actions = {
             set_index();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            hdr.data.f1: exact @name("data.f1") ;
-            hdr.data.f2: exact @name("data.f2") ;
+            hdr.data.f1: exact @name("data.f1");
+            hdr.data.f2: exact @name("data.f2");
         }
         size = 2048;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name(".stats") table stats_0 {
         actions = {
@@ -89,4 +88,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

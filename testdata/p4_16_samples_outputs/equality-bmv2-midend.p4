@@ -30,7 +30,7 @@ parser p(packet_in b, out headers hdr, inout metadata meta, inout standard_metad
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    H[2] tmp_0;
+    @name("ingress.tmp") H[2] tmp_0;
     @hidden action equalitybmv2l42() {
         hdr.same.same = 8w1;
     }
@@ -48,7 +48,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @hidden action equalitybmv2l55() {
         hdr.same.same = hdr.same.same | 8w8;
     }
-    @hidden action equalitybmv2l52() {
+    @hidden action equalitybmv2l51() {
+        tmp_0[0].setInvalid();
+        tmp_0[1].setInvalid();
         tmp_0[0] = hdr.h;
         tmp_0[1] = hdr.a[0];
     }
@@ -76,11 +78,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         const default_action = equalitybmv2l48();
     }
-    @hidden table tbl_equalitybmv2l52 {
+    @hidden table tbl_equalitybmv2l51 {
         actions = {
-            equalitybmv2l52();
+            equalitybmv2l51();
         }
-        const default_action = equalitybmv2l52();
+        const default_action = equalitybmv2l51();
     }
     @hidden table tbl_equalitybmv2l55 {
         actions = {
@@ -99,7 +101,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         if (!hdr.h.isValid() && !hdr.a[0].isValid() || hdr.h.isValid() && hdr.a[0].isValid() && hdr.h.s == hdr.a[0].s && hdr.h.v == hdr.a[0].v) {
             tbl_equalitybmv2l48.apply();
         }
-        tbl_equalitybmv2l52.apply();
+        tbl_equalitybmv2l51.apply();
         if ((!tmp_0[0].isValid() && !hdr.a[0].isValid() || tmp_0[0].isValid() && hdr.a[0].isValid() && tmp_0[0].s == hdr.a[0].s && tmp_0[0].v == hdr.a[0].v) && (!tmp_0[1].isValid() && !hdr.a[1].isValid() || tmp_0[1].isValid() && hdr.a[1].isValid() && tmp_0[1].s == hdr.a[1].s && tmp_0[1].v == hdr.a[1].v)) {
             tbl_equalitybmv2l55.apply();
         }
@@ -131,4 +133,3 @@ control deparser(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(p(), vc(), ingress(), egress(), uc(), deparser()) main;
-

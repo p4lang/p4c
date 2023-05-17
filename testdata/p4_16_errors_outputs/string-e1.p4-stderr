@@ -1,6 +1,15 @@
-string-e1.p4(2): [--Werror=type-error] error: Field s of struct S cannot have type string
+string-e1.p4(2): [--Werror=type-error] error: Field 's' of 'struct S' cannot have type 'string'
     string s;
            ^
+string-e1.p4(2)
+    string s;
+    ^^^^^^
+string-e1.p4(1): [--Werror=type-error] error: Error while analyzing struct S
+struct S {
+       ^
 string-e1.p4(7): [--Werror=type-error] error: v: Cannot declare variables with type string
         string v;
         ^^^^^^^^^
+string-e1.p4(7)
+        string v;
+        ^^^^^^

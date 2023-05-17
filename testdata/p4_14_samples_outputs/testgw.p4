@@ -23,9 +23,9 @@ struct metadata {
 }
 
 struct headers {
-    @name(".data") 
+    @name(".data")
     data_t     data;
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
 }
 
@@ -87,7 +87,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         routing.apply();
-        if (hdr.data.f5 != hdr.data.f6) {
+        if ((bit<8>)hdr.data.f5 != hdr.data.f6) {
             test1.apply();
         } else {
             test2.apply();
@@ -113,4 +113,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

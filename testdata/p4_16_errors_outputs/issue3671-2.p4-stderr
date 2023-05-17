@@ -1,0 +1,6 @@
+issue3671-2.p4(17): [--Werror=type-error] error: StructExpression: argument does not match declaration in actions list: StructExpression
+        default_action = a1({f1 = ext1(),f0 = ext2()});
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^
+issue3671-2.p4(15)
+            a1({f0 = ext1(),f1 = ext2()});
+               ^^^^^^^^^^^^^^^^^^^^^^^^^

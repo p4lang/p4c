@@ -39,19 +39,19 @@ control MyVerifyChecksum(inout my_packet hdr, inout my_metadata meta) {
 }
 
 control MyIngress(inout my_packet p, inout my_metadata meta, inout standard_metadata_t s) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyIngress.set_data") action set_data() {
     }
     @name("MyIngress.t") table t_0 {
         actions = {
             set_data();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            meta.data[0].da: exact @name("meta.data[0].da") ;
+            meta.data[0].da: exact @name("meta.data[0].da");
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         t_0.apply();
@@ -74,4 +74,3 @@ control MyDeparser(packet_out b, in my_packet p) {
 }
 
 V1Switch<my_packet, my_metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

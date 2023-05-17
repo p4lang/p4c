@@ -17,7 +17,8 @@ limitations under the License.
 #ifndef _IR_DECLARATION_H_
 #define _IR_DECLARATION_H_
 
-#include "node.h"
+#include "ir/id.h"
+#include "ir/node.h"
 
 namespace IR {
 
@@ -50,4 +51,4 @@ class IDeclaration : public virtual INode {
 
 }  // namespace IR
 
-#endif  /* _IR_DECLARATION_H_ */
+#endif /* _IR_DECLARATION_H_ */

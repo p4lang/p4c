@@ -60,7 +60,6 @@ control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_met
                 tmp_condition = 8w1;
             }
         }
-
         if (tmp_condition > 0) {
             hdr.h.a = 8w0;
         }
@@ -83,4 +82,3 @@ control update(inout Parsed_packet hdr, inout Metadata meta) {
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

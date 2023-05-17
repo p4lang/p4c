@@ -1,27 +1,25 @@
 #include <core.p4>
 #include <ubpf_model.p4>
 
-typedef bit<48> EthernetAddress;
-typedef bit<32> IPv4Address;
 header IPv4_h {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     totalLen;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     fragOffset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdrChecksum;
-    IPv4Address srcAddr;
-    IPv4Address dstAddr;
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<8>  diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
 }
 
 header Ethernet_h {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 struct Headers_t {
@@ -43,8 +41,8 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 }
 
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
-    bool verified_0;
-    bit<32> old_addr_0;
+    @name("pipe.verified") bool verified_0;
+    @name("pipe.old_addr") bit<32> old_addr_0;
     @hidden action ubpf_checksum_extern56() {
         old_addr_0 = headers.ipv4.dstAddr;
         headers.ipv4.dstAddr = 32w0x1020304;
@@ -76,7 +74,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     }
     apply {
         tbl_ubpf_checksum_extern54.apply();
-        if (verified_0 == true) {
+        if (verified_0) {
             tbl_ubpf_checksum_extern56.apply();
         } else {
             tbl_ubpf_checksum_extern61.apply();
@@ -101,4 +99,3 @@ control dprs(packet_out packet, in Headers_t headers) {
 }
 
 ubpf<Headers_t, metadata>(prs(), pipe(), dprs()) main;
-

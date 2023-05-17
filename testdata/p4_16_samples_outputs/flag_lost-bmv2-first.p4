@@ -63,7 +63,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     table ipv4_lpm {
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr");
         }
         actions = {
             NoAction();
@@ -78,7 +78,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         if (hdr.ipv4.isValid()) {
             ipv4_lpm.apply();
         }
-        if (!meta.test_bool) {
+        if (meta.test_bool) {
+            ;
+        } else {
             drop();
         }
     }
@@ -101,4 +103,3 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

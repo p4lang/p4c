@@ -74,34 +74,49 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 }
 
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
+    @name("pipe.s") bit<32> s_0;
+    @name("pipe.s") bit<32> s_1;
+    @name("pipe.s") bit<32> s_7;
+    @name("pipe.addr") bit<32> addr_0;
+    @name("pipe.s") bit<32> s_8;
+    @name("pipe.addr") bit<32> addr_3;
+    @name("pipe.s") bit<32> s_9;
+    @name("pipe.addr") bit<32> addr_4;
     @name("pipe.conn_state") Register<bit<32>, bit<32>>(32w65536) conn_state_0;
     @name("pipe.conn_srv_addr") Register<bit<32>, bit<32>>(32w65536) conn_srv_addr_0;
-    @name("pipe.update_conn_state") action update_conn_state(bit<32> s_2) {
-        conn_state_0.write(meta.conn_id, s_2);
+    @name("pipe.update_conn_state") action update_conn_state() {
+        s_0 = 32w2;
+        conn_state_0.write(meta.conn_id, s_0);
     }
-    @name("pipe.update_conn_state") action update_conn_state_2(bit<32> s_3) {
-        conn_state_0.write(meta.conn_id, s_3);
+    @name("pipe.update_conn_state") action update_conn_state_1() {
+        s_1 = 32w3;
+        conn_state_0.write(meta.conn_id, s_1);
     }
-    @name("pipe.update_conn_info") action update_conn_info(bit<32> s_4, bit<32> addr) {
-        conn_state_0.write(meta.conn_id, s_4);
-        conn_srv_addr_0.write(meta.conn_id, addr);
+    @name("pipe.update_conn_info") action update_conn_info() {
+        s_7 = 32w1;
+        addr_0 = headers.ipv4.dstAddr;
+        conn_state_0.write(meta.conn_id, s_7);
+        conn_srv_addr_0.write(meta.conn_id, addr_0);
     }
-    @name("pipe.update_conn_info") action update_conn_info_3(bit<32> s_5, bit<32> addr_1) {
-        conn_state_0.write(meta.conn_id, s_5);
-        conn_srv_addr_0.write(meta.conn_id, addr_1);
+    @name("pipe.update_conn_info") action update_conn_info_1() {
+        s_8 = 32w0;
+        addr_3 = 32w0;
+        conn_state_0.write(meta.conn_id, s_8);
+        conn_srv_addr_0.write(meta.conn_id, addr_3);
     }
-    @name("pipe.update_conn_info") action update_conn_info_4(bit<32> s_6, bit<32> addr_2) {
-        conn_state_0.write(meta.conn_id, s_6);
-        conn_srv_addr_0.write(meta.conn_id, addr_2);
+    @name("pipe.update_conn_info") action update_conn_info_2() {
+        s_9 = 32w0;
+        addr_4 = 32w0;
+        conn_state_0.write(meta.conn_id, s_9);
+        conn_srv_addr_0.write(meta.conn_id, addr_4);
     }
     @name("pipe._drop") action _drop() {
         mark_to_drop();
     }
-    @name("pipe._drop") action _drop_2() {
+    @name("pipe._drop") action _drop_1() {
         mark_to_drop();
     }
     apply {
-        bool hasReturned = false;
         if (headers.tcp.isValid()) {
             if (headers.ipv4.srcAddr < headers.ipv4.dstAddr) {
                 hash<tuple<bit<32>, bit<32>>>(meta.conn_id, HashAlgorithm.lookup3, { headers.ipv4.srcAddr, headers.ipv4.dstAddr });
@@ -112,31 +127,29 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
             meta.connInfo.srv_addr = conn_srv_addr_0.read(meta.conn_id);
             if (meta.connInfo.s == 32w0 || meta.connInfo.srv_addr == 32w0) {
                 if (headers.tcp.syn == 1w1 && headers.tcp.ack == 1w0) {
-                    update_conn_info(32w1, headers.ipv4.dstAddr);
+                    update_conn_info();
                 }
             } else if (meta.connInfo.srv_addr == headers.ipv4.srcAddr) {
                 if (meta.connInfo.s == 32w1) {
                     if (headers.tcp.syn == 1w1 && headers.tcp.ack == 1w1) {
-                        update_conn_state(32w2);
+                        update_conn_state();
                     }
                 } else if (meta.connInfo.s == 32w2) {
                     _drop();
-                    hasReturned = true;
                 } else if (meta.connInfo.s == 32w3) {
                     if (headers.tcp.fin == 1w1 && headers.tcp.ack == 1w1) {
-                        update_conn_info_3(32w0, 32w0);
+                        update_conn_info_1();
                     }
                 }
             } else if (meta.connInfo.s == 32w1) {
-                _drop_2();
-                hasReturned = true;
+                _drop_1();
             } else if (meta.connInfo.s == 32w2) {
                 if (headers.tcp.syn == 1w0 && headers.tcp.ack == 1w1) {
-                    update_conn_state_2(32w3);
+                    update_conn_state_1();
                 }
             } else if (meta.connInfo.s == 32w3) {
                 if (headers.tcp.fin == 1w1 && headers.tcp.ack == 1w1) {
-                    update_conn_info_4(32w0, 32w0);
+                    update_conn_info_2();
                 }
             }
         }
@@ -152,4 +165,3 @@ control dprs(packet_out packet, in Headers_t headers) {
 }
 
 ubpf<Headers_t, metadata>(prs(), pipe(), dprs()) main;
-

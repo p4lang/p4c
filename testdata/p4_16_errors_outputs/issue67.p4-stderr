@@ -1,3 +1,14 @@
-issue67.p4(1): [--Werror=type-error] error: x: Cannot unify type int with bool
+issue67.p4(1): [--Werror=type-error] error: x
 const bool x = 20; // error
            ^
+  ---- Actual error:
+issue67.p4(1): 'int' type can only be unified with 'int', 'bit<>', or 'signed<>' types, not with 'bool'
+  const bool x = 20; // error
+        ^^^^
+  ---- Originating from:
+issue67.p4(1): Source expression '20' produces a result of type 'int' which cannot be assigned to a left-value with type 'bool'
+  const bool x = 20; // error
+                 ^^
+issue67.p4(1)
+  const bool x = 20; // error
+        ^^^^

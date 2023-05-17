@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <psa.p4>
+#include <bmv2/psa.p4>
 
 typedef bit<48> EthernetAddress;
 header ethernet_t {
@@ -54,11 +54,16 @@ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadat
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @name(".update_pkt_ip_byte_count") action update_pkt_ip_byte_count(inout PacketByteCountState_t s, in bit<16> ip_length_bytes) {
-        s[79:48] = s[79:48] + 32w1;
-        s[47:0] = s[47:0] + (bit<48>)ip_length_bytes;
+    @name("ingress.tmp") PacketByteCountState_t tmp_0;
+    @name("ingress.s") PacketByteCountState_t s_0;
+    @name("ingress.ip_length_bytes") bit<16> ip_length_bytes_0;
+    @name(".update_pkt_ip_byte_count") action update_pkt_ip_byte_count_0() {
+        s_0 = tmp_0;
+        ip_length_bytes_0 = hdr.ipv4.totalLen;
+        s_0[79:48] = s_0[79:48] + 32w1;
+        s_0[47:0] = s_0[47:0] + (bit<48>)ip_length_bytes_0;
+        tmp_0 = s_0;
     }
-    PacketByteCountState_t tmp_0;
     @name("ingress.port_pkt_ip_bytes_in") Register<PacketByteCountState_t, PortId_t>(32w512) port_pkt_ip_bytes_in_0;
     apply {
         ostd.egress_port = (PortId_t)32w0;
@@ -66,7 +71,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
         hdr.ipv4.totalLen = 16w14;
         if (hdr.ipv4.isValid()) @atomic {
             tmp_0 = port_pkt_ip_bytes_in_0.read(istd.ingress_port);
-            update_pkt_ip_byte_count(tmp_0, hdr.ipv4.totalLen);
+            update_pkt_ip_byte_count_0();
             port_pkt_ip_bytes_in_0.write(istd.ingress_port, tmp_0);
         }
     }
@@ -98,8 +103,5 @@ control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_met
 }
 
 IngressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-
 EgressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-
 PSA_Switch<headers, metadata, headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

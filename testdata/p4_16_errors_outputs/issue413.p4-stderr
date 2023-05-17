@@ -1,4 +1,4 @@
-issue413.p4(34): [--Wwarn=mismatch] warning: 0xcafebabe: value does not fit in 16 bits
+issue413.p4(34): [--Wwarn=mismatch] warning: 16w0xcafebabe: value does not fit in 16 bits
     const bit<32> c1d = 32w0xcafebabe;
                         ^^^^^^^^^^^^^
 issue413.p4(41): [--Werror=type-error] error: foo2: Action calls are not allowed within parsers

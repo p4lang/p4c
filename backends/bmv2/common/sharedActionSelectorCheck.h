@@ -18,15 +18,16 @@ limitations under the License.
 #define BACKENDS_BMV2_COMMON_SHAREDACTIONSELECTORCHECK_H_
 
 #include <algorithm>
-#include "ir/ir.h"
-#include "lib/json.h"
-#include "lib/error.h"
+
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/frontend.h"
-#include "frontends/p4/typeMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
-#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
 #include "helpers.h"
+#include "ir/ir.h"
+#include "lib/error.h"
+#include "lib/json.h"
 
 namespace BMV2 {
 
@@ -37,42 +38,41 @@ using SelectorInput = std::vector<const IR::Expression *>;
 // action_selector while v1model.p4 considers that it belongs to the table match key definition.
 template <Standard::Arch arch>
 class SharedActionSelectorCheck : public Inspector {
-    BMV2::ConversionContext* ctxt;
-    P4::ReferenceMap* refMap;
-    P4::TypeMap*      typeMap;
+    BMV2::ConversionContext *ctxt;
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
 
-  static bool checkSameKeyExpr(const IR::Expression* expr0, const IR::Expression* expr1) {
-      if (expr0->node_type_name() != expr1->node_type_name())
-          return false;
-      if (auto pe0 = expr0->to<IR::PathExpression>()) {
-          auto pe1 = expr1->to<IR::PathExpression>();
-          return pe0->path->name == pe1->path->name &&
-              pe0->path->absolute == pe1->path->absolute;
-      } else if (auto mem0 = expr0->to<IR::Member>()) {
-          auto mem1 = expr1->to<IR::Member>();
-          return checkSameKeyExpr(mem0->expr, mem1->expr) && mem0->member == mem1->member;
-      } else if (auto l0 = expr0->to<IR::Literal>()) {
-          auto l1 = expr1->to<IR::Literal>();
-          return *l0 == *l1;
-      } else if (auto ai0 = expr0->to<IR::ArrayIndex>()) {
-          auto ai1 = expr1->to<IR::ArrayIndex>();
-          return checkSameKeyExpr(ai0->left, ai1->left) && checkSameKeyExpr(ai0->right, ai1->right);
-      }
-      return false;
-  }
+    static bool checkSameKeyExpr(const IR::Expression *expr0, const IR::Expression *expr1) {
+        if (expr0->node_type_name() != expr1->node_type_name()) return false;
+        if (auto pe0 = expr0->to<IR::PathExpression>()) {
+            auto pe1 = expr1->to<IR::PathExpression>();
+            return pe0->path->name == pe1->path->name && pe0->path->absolute == pe1->path->absolute;
+        } else if (auto mem0 = expr0->to<IR::Member>()) {
+            auto mem1 = expr1->to<IR::Member>();
+            return checkSameKeyExpr(mem0->expr, mem1->expr) && mem0->member == mem1->member;
+        } else if (auto l0 = expr0->to<IR::Literal>()) {
+            auto l1 = expr1->to<IR::Literal>();
+            return *l0 == *l1;
+        } else if (auto ai0 = expr0->to<IR::ArrayIndex>()) {
+            auto ai1 = expr1->to<IR::ArrayIndex>();
+            return checkSameKeyExpr(ai0->left, ai1->left) &&
+                   checkSameKeyExpr(ai0->right, ai1->right);
+        }
+        return false;
+    }
 
  public:
-    explicit SharedActionSelectorCheck(BMV2::ConversionContext* ctxt) : ctxt(ctxt) {
+    explicit SharedActionSelectorCheck(BMV2::ConversionContext *ctxt) : ctxt(ctxt) {
         refMap = ctxt->refMap;
         typeMap = ctxt->typeMap;
     }
 
-    bool preorder(const IR::P4Table* table) override {
+    bool preorder(const IR::P4Table *table) override {
         auto implementation = table->properties->getProperty("implementation");
         if (implementation == nullptr) return false;
         if (!implementation->value->is<IR::ExpressionValue>()) {
-            ::error(ErrorType::ERR_EXPECTED,
-                    "%1%: expected expression for property", implementation);
+            ::error(ErrorType::ERR_EXPECTED, "%1%: expected expression for property",
+                    implementation);
             return false;
         }
         auto propv = implementation->value->to<IR::ExpressionValue>();
@@ -124,4 +124,4 @@ class SharedActionSelectorCheck : public Inspector {
 
 }  // namespace BMV2
 
-#endif  /* BACKENDS_BMV2_COMMON_SHAREDACTIONSELECTORCHECK_H_ */
+#endif /* BACKENDS_BMV2_COMMON_SHAREDACTIONSELECTORCHECK_H_ */

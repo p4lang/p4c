@@ -36,7 +36,6 @@ control myc(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
                         (32w1, MyIP) : set_eg(9w1);
                         (32w2, MyIP) : set_eg(9w2);
         }
-
     }
     apply {
         myt.apply();
@@ -70,4 +69,3 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 V1Switch(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

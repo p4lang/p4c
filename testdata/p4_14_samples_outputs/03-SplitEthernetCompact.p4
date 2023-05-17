@@ -18,11 +18,11 @@ struct metadata {
 }
 
 struct headers {
-    @name(".len_or_type") 
+    @name(".len_or_type")
     len_or_type_t len_or_type;
-    @name(".mac_da") 
+    @name(".mac_da")
     mac_da_t      mac_da;
-    @name(".mac_sa") 
+    @name(".mac_sa")
     mac_sa_t      mac_sa;
 }
 
@@ -87,4 +87,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

@@ -111,7 +111,6 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
             Reject;
             NoAction;
         }
-        const default_action = NoAction;
     }
     apply {
         filter_tbl.apply();
@@ -127,4 +126,3 @@ control dprs(packet_out packet, in Headers_t headers) {
 }
 
 ubpf(prs(), pipe(), dprs()) main;
-

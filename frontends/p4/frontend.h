@@ -17,9 +17,9 @@ limitations under the License.
 #ifndef _P4_FRONTEND_H_
 #define _P4_FRONTEND_H_
 
+#include "../common/options.h"
 #include "ir/ir.h"
 #include "parseAnnotations.h"
-#include "../common/options.h"
 
 namespace P4 {
 
@@ -31,18 +31,17 @@ class FrontEnd {
 
  public:
     FrontEnd() = default;
-    explicit FrontEnd(ParseAnnotations parseAnnotations)
-        : parseAnnotations(parseAnnotations) { }
+    explicit FrontEnd(ParseAnnotations parseAnnotations) : parseAnnotations(parseAnnotations) {}
     explicit FrontEnd(DebugHook hook) { hooks.push_back(hook); }
     explicit FrontEnd(ParseAnnotations parseAnnotations, DebugHook hook)
-            : FrontEnd(parseAnnotations) {
+        : FrontEnd(parseAnnotations) {
         hooks.push_back(hook);
     }
     void addDebugHook(DebugHook hook) { hooks.push_back(hook); }
     // If p4c is run with option '--listFrontendPasses', outStream is used for printing passes names
-    const IR::P4Program* run(const CompilerOptions& options, const IR::P4Program* program,
+    const IR::P4Program *run(const CompilerOptions &options, const IR::P4Program *program,
                              bool skipSideEffectOrdering = false,
-                             std::ostream* outStream = nullptr);
+                             std::ostream *outStream = nullptr);
 };
 
 }  // namespace P4

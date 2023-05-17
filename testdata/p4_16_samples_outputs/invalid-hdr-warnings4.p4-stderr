@@ -1,0 +1,21 @@
+invalid-hdr-warnings4.p4(20): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.h1[1]
+        hdr.h1[1].data = 1;
+        ^^^^^^^^^
+invalid-hdr-warnings4.p4(26): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.h1[0]
+        hdr.h1[0].data = 1;
+        ^^^^^^^^^
+invalid-hdr-warnings4.p4(63): [--Wwarn=uninitialized_use] warning: h.h1[0] may not be completely initialized
+        validateHeader(h.h1[0]);
+                       ^^^^^^^
+invalid-hdr-warnings4.p4(82): [--Wwarn=invalid_header] warning: accessing a field of an invalid header h_copy2.h2[0]
+        h_copy2.h2[0].data = 1;
+        ^^^^^^^^^^^^^
+invalid-hdr-warnings4.p4(90): [--Wwarn=invalid_header] warning: accessing a field of an invalid header h_copy2.h2[0]
+        h_copy2.h2[0].data = 1;
+        ^^^^^^^^^^^^^
+invalid-hdr-warnings4.p4(105): [--Wwarn=invalid_header] warning: accessing a field of an invalid header h_copy.h1[0]
+        h_copy.h1[0].data = 1;
+        ^^^^^^^^^^^^
+invalid-hdr-warnings4.p4(106): [--Wwarn=invalid_header] warning: accessing a field of an invalid header h_copy.h1[1]
+        h_copy.h1[1].data = 1;
+        ^^^^^^^^^^^^

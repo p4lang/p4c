@@ -14,10 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4C_LIB_BITOPS_H_
-#define P4C_LIB_BITOPS_H_
+#ifndef _LIB_BITOPS_H_
+#define _LIB_BITOPS_H_
 
 #include <limits.h>
+
 #include "bitvec.h"
 
 static inline unsigned bitcount(unsigned v) {
@@ -25,31 +26,36 @@ static inline unsigned bitcount(unsigned v) {
     unsigned rv = __builtin_popcount(v);
 #else
     unsigned rv = 0;
-    while (v) { v &= v-1; ++rv; }
+    while (v) {
+        v &= v - 1;
+        ++rv;
+    }
 #endif
-    return rv; }
+    return rv;
+}
 
 static inline int floor_log2(unsigned v) {
     int rv = -1;
 #if defined(__GNUC__) || defined(__clang__)
-    if (v) rv = CHAR_BIT*sizeof(unsigned) - __builtin_clz(v) - 1;
+    if (v) rv = CHAR_BIT * sizeof(unsigned) - __builtin_clz(v) - 1;
 #else
-    while (v) { rv++; v >>= 1; }
+    while (v) {
+        rv++;
+        v >>= 1;
+    }
 #endif
-    return rv; }
-
-static inline int ceil_log2(unsigned v) {
-    return v ? floor_log2(v-1) + 1 : -1;
+    return rv;
 }
+
+static inline int ceil_log2(unsigned v) { return v ? floor_log2(v - 1) + 1 : -1; }
 
 static inline unsigned bitmask2bytemask(const bitvec &a) {
     int max = a.max().index();
     if (max < 0) return 0;
     unsigned rv = 0;
-    for (unsigned i = 0; i <= max/8U; i++)
-        if (a.getrange(i*8, 8))
-            rv |= 1 << i;
+    for (unsigned i = 0; i <= max / 8U; i++)
+        if (a.getrange(i * 8, 8)) rv |= 1 << i;
     return rv;
 }
 
-#endif /* P4C_LIB_BITOPS_H_ */
+#endif /* _LIB_BITOPS_H_ */

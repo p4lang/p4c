@@ -19,8 +19,7 @@ limitations under the License.
 namespace P4 {
 
 // cast all boolean values to bit values, but only at the top-level
-const IR::Expression*
-DoRemoveSelectBooleans::addToplevelCasts(const IR::Expression* expression) {
+const IR::Expression *DoRemoveSelectBooleans::addToplevelCasts(const IR::Expression *expression) {
     if (expression->is<IR::ListExpression>()) {
         IR::Vector<IR::Expression> vec;
         bool changes = false;
@@ -35,8 +34,7 @@ DoRemoveSelectBooleans::addToplevelCasts(const IR::Expression* expression) {
                 vec.push_back(e);
             }
         }
-        if (changes)
-            return new IR::ListExpression(expression->srcInfo, vec);
+        if (changes) return new IR::ListExpression(expression->srcInfo, vec);
         return expression;
     } else {
         auto type = typeMap->getType(expression, true);
@@ -46,15 +44,13 @@ DoRemoveSelectBooleans::addToplevelCasts(const IR::Expression* expression) {
     }
 }
 
-const IR::Node*
-DoRemoveSelectBooleans::postorder(IR::SelectExpression* expression) {
+const IR::Node *DoRemoveSelectBooleans::postorder(IR::SelectExpression *expression) {
     auto e = addToplevelCasts(expression->select);
     expression->select = e->to<IR::ListExpression>();
     return expression;
 }
 
-const IR::Node*
-DoRemoveSelectBooleans::postorder(IR::SelectCase* selectCase) {
+const IR::Node *DoRemoveSelectBooleans::postorder(IR::SelectCase *selectCase) {
     // here we rely on the fact that Range and Mask expressions cannot
     // be applied to booleans
     selectCase->keyset = addToplevelCasts(selectCase->keyset);

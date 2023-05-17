@@ -17,9 +17,10 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_SIMPLIFYPARSERS_H_
 #define _FRONTENDS_P4_SIMPLIFYPARSERS_H_
 
-#include "ir/ir.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/parserCallGraph.h"
+#include "ir/ir.h"
+#include "ir/pass_manager.h"
 
 namespace P4 {
 
@@ -34,20 +35,23 @@ namespace P4 {
  */
 class DoSimplifyParsers : public Transform {
     ReferenceMap *refMap;
+
  public:
     explicit DoSimplifyParsers(ReferenceMap *refMap) : refMap(refMap) {
         CHECK_NULL(refMap);
         setName("DoSimplifyParsers");
     }
 
-    const IR::Node* preorder(IR::P4Parser* parser) override;
-    const IR::Node* preorder(IR::P4Control* control) override
-    { prune(); return control; }
+    const IR::Node *preorder(IR::P4Parser *parser) override;
+    const IR::Node *preorder(IR::P4Control *control) override {
+        prune();
+        return control;
+    }
 };
 
 class SimplifyParsers : public PassManager {
  public:
-    explicit SimplifyParsers(ReferenceMap* refMap) {
+    explicit SimplifyParsers(ReferenceMap *refMap) {
         passes.push_back(new ResolveReferences(refMap));
         passes.push_back(new DoSimplifyParsers(refMap));
         setName("SimplifyParsers");

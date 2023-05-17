@@ -1,11 +1,10 @@
 #include <core.p4>
-#include <psa.p4>
+#include <bmv2/psa.p4>
 
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 struct empty_metadata_t {
@@ -26,18 +25,18 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 }
 
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    bit<48> tmp;
-    @noWarnUnused @name(".send_to_port") action send_to_port() {
+    @name("cIngress.tmp") bit<48> tmp;
+    @noWarn("unused") @name(".send_to_port") action send_to_port_0() {
         ostd.drop = false;
         ostd.multicast_group = 32w0;
-        ostd.egress_port = (PortIdUint_t)hdr.ethernet.dstAddr;
+        ostd.egress_port = (bit<32>)hdr.ethernet.dstAddr;
     }
-    @name("cIngress.regfile") Register<EthernetAddress, bit<32>>(32w128) regfile_0;
+    @name("cIngress.regfile") Register<bit<48>, bit<32>>(32w128) regfile_0;
     @hidden action psaregistercomplexbmv2l60() {
         regfile_0.write(32w1, 48w3);
         regfile_0.write(32w2, 48w4);
         tmp = regfile_0.read(32w1);
-        hdr.ethernet.dstAddr = tmp + regfile_0.read(32w2) + 48w281474976710651;
+        hdr.ethernet.dstAddr = regfile_0.read(32w1) + regfile_0.read(32w2) + 48w281474976710651;
     }
     @hidden table tbl_psaregistercomplexbmv2l60 {
         actions = {
@@ -47,9 +46,9 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     }
     @hidden table tbl_send_to_port {
         actions = {
-            send_to_port();
+            send_to_port_0();
         }
-        const default_action = send_to_port();
+        const default_action = send_to_port_0();
     }
     apply {
         tbl_psaregistercomplexbmv2l60.apply();
@@ -102,8 +101,5 @@ control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_met
 }
 
 IngressPipeline<headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), cIngress(), IngressDeparserImpl()) ip;
-
 EgressPipeline<headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), cEgress(), EgressDeparserImpl()) ep;
-
 PSA_Switch<headers_t, metadata_t, headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

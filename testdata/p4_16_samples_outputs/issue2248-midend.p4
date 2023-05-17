@@ -23,12 +23,16 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bit<48> tmp_val_0;
-    bit<48> tmp;
+    @name("ingress.tmp") bit<48> tmp;
     @name("ingress.simple_action") action simple_action() {
-        tmp = (h.eth_hdr.eth_type != 16w0 ? (h.eth_hdr.src_addr != 48w0 ? 48w1 : 48w2) : tmp);
-        tmp_val_0 = (h.eth_hdr.eth_type != 16w0 ? tmp : tmp_val_0);
-        h.eth_hdr.dst_addr = (h.eth_hdr.eth_type != 16w0 ? tmp_val_0 : h.eth_hdr.dst_addr);
+        if (h.eth_hdr.eth_type != 16w0) {
+            if (h.eth_hdr.src_addr != 48w0) {
+                tmp = 48w1;
+            } else {
+                tmp = 48w2;
+            }
+            h.eth_hdr.dst_addr = tmp;
+        }
     }
     @hidden table tbl_simple_action {
         actions = {
@@ -63,4 +67,3 @@ control deparser(packet_out b, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

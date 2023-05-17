@@ -2,42 +2,37 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<48> mac_addr_t;
-typedef bit<32> ipv4_addr_t;
-typedef bit<128> ipv6_addr_t;
-typedef bit<9> port_t;
-typedef bit<16> task_t;
 header ethernet_t {
-    mac_addr_t dst_addr;
-    mac_addr_t src_addr;
-    bit<16>    ethertype;
+    bit<48> dst_addr;
+    bit<48> src_addr;
+    bit<16> ethertype;
 }
 
 header ipv4_t {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<6>      diff_serv;
-    bit<2>      ecn;
-    bit<16>     totalLen;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     fragOffset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdrChecksum;
-    ipv4_addr_t src_addr;
-    ipv4_addr_t dst_addr;
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<6>  diff_serv;
+    bit<2>  ecn;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    bit<32> src_addr;
+    bit<32> dst_addr;
 }
 
 header ipv6_t {
-    bit<4>      version;
-    bit<8>      traffic_class;
-    bit<20>     flow_label;
-    bit<16>     payload_length;
-    bit<8>      next_header;
-    bit<8>      hop_limit;
-    ipv6_addr_t src_addr;
-    ipv6_addr_t dst_addr;
+    bit<4>   version;
+    bit<8>   traffic_class;
+    bit<20>  flow_label;
+    bit<16>  payload_length;
+    bit<8>   next_header;
+    bit<8>   hop_limit;
+    bit<128> src_addr;
+    bit<128> dst_addr;
 }
 
 header tcp_t {
@@ -81,7 +76,7 @@ header icmp_t {
 }
 
 header cpu_t {
-    task_t  task;
+    bit<16> task;
     bit<16> ingress_port;
     bit<16> ethertype;
 }
@@ -98,10 +93,15 @@ struct headers {
 }
 
 struct metadata {
-    port_t  ingress_port;
-    task_t  task;
+    @field_list(0)
+    bit<9>  ingress_port;
+    @field_list(0)
+    bit<16> task;
+    @field_list(0)
     bit<16> tcp_length;
+    @field_list(0)
     bit<32> cast_length;
+    @field_list(0)
     bit<1>  do_cksum;
 }
 
@@ -180,44 +180,44 @@ struct tuple_0 {
 
 control MyComputeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        update_checksum_with_payload<tuple_0, bit<16>>(meta.do_cksum == 1w1, { hdr.ipv6.src_addr, hdr.ipv6.dst_addr, (bit<32>)hdr.ipv6.payload_length, 24w0, 8w58 }, hdr.icmp6.checksum, HashAlgorithm.csum16);
+        update_checksum_with_payload<tuple_0, bit<16>>(meta.do_cksum == 1w1, (tuple_0){f0 = hdr.ipv6.src_addr,f1 = hdr.ipv6.dst_addr,f2 = (bit<32>)hdr.ipv6.payload_length,f3 = 24w0,f4 = 8w58}, hdr.icmp6.checksum, HashAlgorithm.csum16);
     }
 }
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    mac_addr_t mac_tmp_0;
-    ipv6_addr_t addr_tmp_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @name("MyIngress.mac_tmp") bit<48> mac_tmp_0;
+    @name("MyIngress.addr_tmp") bit<128> addr_tmp_0;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_4() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_5() {
+    @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @name("MyIngress.set_egress_port") action set_egress_port(port_t out_port) {
+    @name("MyIngress.set_egress_port") action set_egress_port(@name("out_port") bit<9> out_port) {
         standard_metadata.egress_spec = out_port;
     }
-    @name("MyIngress.set_egress_port") action set_egress_port_2(port_t out_port) {
-        standard_metadata.egress_spec = out_port;
+    @name("MyIngress.set_egress_port") action set_egress_port_1(@name("out_port") bit<9> out_port_1) {
+        standard_metadata.egress_spec = out_port_1;
     }
     @name("MyIngress.controller_debug") action controller_debug() {
         meta.task = 16w3;
         meta.ingress_port = standard_metadata.ingress_port;
-        clone3<metadata>(CloneType.I2E, 32w100, meta);
+        clone_preserving_field_list(CloneType.I2E, 32w100, 8w0);
     }
-    @name("MyIngress.controller_debug") action controller_debug_2() {
+    @name("MyIngress.controller_debug") action controller_debug_1() {
         meta.task = 16w3;
         meta.ingress_port = standard_metadata.ingress_port;
-        clone3<metadata>(CloneType.I2E, 32w100, meta);
+        clone_preserving_field_list(CloneType.I2E, 32w100, 8w0);
     }
-    @name("MyIngress.controller_reply") action controller_reply(task_t task) {
-        meta.task = task;
+    @name("MyIngress.controller_reply") action controller_reply(@name("task") bit<16> task_1) {
+        meta.task = task_1;
         meta.ingress_port = standard_metadata.ingress_port;
-        clone3<metadata>(CloneType.I2E, 32w100, meta);
+        clone_preserving_field_list(CloneType.I2E, 32w100, 8w0);
     }
-    @name("MyIngress.controller_reply") action controller_reply_2(task_t task) {
-        meta.task = task;
+    @name("MyIngress.controller_reply") action controller_reply_1(@name("task") bit<16> task_2) {
+        meta.task = task_2;
         meta.ingress_port = standard_metadata.ingress_port;
-        clone3<metadata>(CloneType.I2E, 32w100, meta);
+        clone_preserving_field_list(CloneType.I2E, 32w100, 8w0);
     }
     @name("MyIngress.icmp6_echo_reply") action icmp6_echo_reply() {
         mac_tmp_0 = hdr.ethernet.dst_addr;
@@ -231,40 +231,40 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     @name("MyIngress.v6_addresses") table v6_addresses_0 {
         key = {
-            hdr.ipv6.dst_addr: exact @name("hdr.ipv6.dst_addr") ;
+            hdr.ipv6.dst_addr: exact @name("hdr.ipv6.dst_addr");
         }
         actions = {
             controller_debug();
             controller_reply();
             icmp6_echo_reply();
-            NoAction_0();
+            NoAction_1();
         }
         size = 64;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name("MyIngress.v6_networks") table v6_networks_0 {
         key = {
-            hdr.ipv6.dst_addr: lpm @name("hdr.ipv6.dst_addr") ;
+            hdr.ipv6.dst_addr: lpm @name("hdr.ipv6.dst_addr");
         }
         actions = {
             set_egress_port();
-            controller_debug_2();
-            controller_reply_2();
-            NoAction_4();
+            controller_debug_1();
+            controller_reply_1();
+            NoAction_2();
         }
         size = 64;
-        default_action = NoAction_4();
+        default_action = NoAction_2();
     }
     @name("MyIngress.v4_networks") table v4_networks_0 {
         key = {
-            hdr.ipv4.dst_addr: lpm @name("hdr.ipv4.dst_addr") ;
+            hdr.ipv4.dst_addr: lpm @name("hdr.ipv4.dst_addr");
         }
         actions = {
-            set_egress_port_2();
-            NoAction_5();
+            set_egress_port_1();
+            NoAction_3();
         }
         size = 64;
-        default_action = NoAction_5();
+        default_action = NoAction_3();
     }
     apply {
         if (hdr.ipv6.isValid()) {
@@ -278,25 +278,24 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
 }
 
 control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @hidden action issue17651bmv2l343() {
+    @hidden action issue17651bmv2l348() {
         hdr.cpu.setValid();
         hdr.cpu.task = meta.task;
         hdr.cpu.ethertype = hdr.ethernet.ethertype;
         hdr.cpu.ingress_port = (bit<16>)meta.ingress_port;
         hdr.ethernet.ethertype = 16w0x4242;
     }
-    @hidden table tbl_issue17651bmv2l343 {
+    @hidden table tbl_issue17651bmv2l348 {
         actions = {
-            issue17651bmv2l343();
+            issue17651bmv2l348();
         }
-        const default_action = issue17651bmv2l343();
+        const default_action = issue17651bmv2l348();
     }
     apply {
         if (standard_metadata.instance_type == 32w1) {
-            tbl_issue17651bmv2l343.apply();
+            tbl_issue17651bmv2l348.apply();
         }
     }
 }
 
 V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

@@ -270,101 +270,101 @@ struct metadata {
 }
 
 struct headers {
-    @name(".arp_rarp") 
+    @name(".arp_rarp")
     arp_rarp_t           arp_rarp;
-    @name(".arp_rarp_ipv4") 
+    @name(".arp_rarp_ipv4")
     arp_rarp_ipv4_t      arp_rarp_ipv4;
-    @name(".cpu_header") 
+    @name(".cpu_header")
     cpu_header_t         cpu_header;
-    @name(".data") 
+    @name(".data")
     payload_t            data;
-    @name(".eompls") 
+    @name(".eompls")
     eompls_t             eompls;
-    @name(".erspan_v1_header") 
+    @name(".erspan_v1_header")
     erspan_header_v1_t_0 erspan_v1_header;
-    @name(".erspan_v2_header") 
+    @name(".erspan_v2_header")
     erspan_header_v2_t_0 erspan_v2_header;
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t           ethernet;
-    @name(".fcoe") 
+    @name(".fcoe")
     fcoe_header_t        fcoe;
-    @name(".genv") 
+    @name(".genv")
     genv_t               genv;
-    @name(".genv_opt_A") 
+    @name(".genv_opt_A")
     genv_opt_A_t         genv_opt_A;
-    @name(".genv_opt_B") 
+    @name(".genv_opt_B")
     genv_opt_B_t         genv_opt_B;
-    @name(".genv_opt_C") 
+    @name(".genv_opt_C")
     genv_opt_C_t         genv_opt_C;
-    @name(".gre") 
+    @name(".gre")
     gre_t                gre;
-    @name(".icmp") 
+    @name(".icmp")
     icmp_t               icmp;
-    @name(".icmpv6") 
+    @name(".icmpv6")
     icmpv6_t             icmpv6;
-    @name(".inner_ethernet") 
+    @name(".inner_ethernet")
     ethernet_t           inner_ethernet;
-    @name(".inner_icmp") 
+    @name(".inner_icmp")
     icmp_t               inner_icmp;
-    @name(".inner_icmpv6") 
+    @name(".inner_icmpv6")
     icmpv6_t             inner_icmpv6;
-    @name(".inner_ipv4") 
+    @name(".inner_ipv4")
     ipv4_t               inner_ipv4;
-    @name(".inner_ipv6") 
+    @name(".inner_ipv6")
     ipv6_t               inner_ipv6;
-    @name(".inner_sctp") 
+    @name(".inner_sctp")
     sctp_t               inner_sctp;
-    @name(".inner_tcp") 
+    @name(".inner_tcp")
     tcp_t                inner_tcp;
-    @name(".inner_udp") 
+    @name(".inner_udp")
     udp_t                inner_udp;
-    @name(".input_port_hdr") 
+    @name(".input_port_hdr")
     input_port_hdr_t     input_port_hdr;
-    @name(".ipv4") 
+    @name(".ipv4")
     ipv4_t               ipv4;
-    @name(".ipv6") 
+    @name(".ipv6")
     ipv6_t               ipv6;
-    @name(".mpls_bos") 
+    @name(".mpls_bos")
     mpls_t               mpls_bos;
-    @name(".nsh") 
+    @name(".nsh")
     nsh_t                nsh;
-    @name(".nsh_context") 
+    @name(".nsh_context")
     nsh_context_t        nsh_context;
-    @name(".nvgre") 
+    @name(".nvgre")
     nvgre_t              nvgre;
-    @name(".outer_ipv4") 
+    @name(".outer_ipv4")
     ipv4_t               outer_ipv4;
-    @name(".outer_ipv6") 
+    @name(".outer_ipv6")
     ipv6_t               outer_ipv6;
-    @name(".outer_udp") 
+    @name(".outer_udp")
     udp_t                outer_udp;
-    @name(".roce") 
+    @name(".roce")
     roce_header_t        roce;
-    @name(".roce_v2") 
+    @name(".roce_v2")
     roce_v2_header_t     roce_v2;
-    @name(".sctp") 
+    @name(".sctp")
     sctp_t               sctp;
-    @name(".snap_header") 
+    @name(".snap_header")
     snap_header_t        snap_header;
-    @name(".tcp") 
+    @name(".tcp")
     tcp_t                tcp;
-    @name(".udp") 
+    @name(".udp")
     udp_t                udp;
-    @name(".vxlan") 
+    @name(".vxlan")
     vxlan_t              vxlan;
-    @name(".mpls") 
+    @name(".mpls")
     mpls_t[3]            mpls;
-    @name(".vlan_tag_") 
+    @name(".vlan_tag_")
     vlan_tag_t[2]        vlan_tag_;
-    @name(".vlan_tag_3b") 
+    @name(".vlan_tag_3b")
     vlan_tag_3b_t[2]     vlan_tag_3b;
-    @name(".vlan_tag_5b") 
+    @name(".vlan_tag_5b")
     vlan_tag_5b_t[2]     vlan_tag_5b;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<24> tmp_0;
-    bit<4> tmp_2;
+    @name("ParserImpl.tmp_0") bit<24> tmp_0;
+    @name("ParserImpl.tmp_2") bit<4> tmp_2;
     @name(".parse_arp_rarp") state parse_arp_rarp {
         packet.extract<arp_rarp_t>(hdr.arp_rarp);
         transition select(hdr.arp_rarp.protoType) {
@@ -627,7 +627,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             mark_forward();
         }
         key = {
-            hdr.data.data: exact @name("data.data") ;
+            hdr.data.data: exact @name("data.data");
         }
         default_action = mark_forward();
     }
@@ -700,17 +700,16 @@ struct tuple_0 {
 
 control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        verify_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid(), { hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr }, hdr.inner_ipv4.hdrChecksum, HashAlgorithm.csum16);
-        verify_checksum<tuple_0, bit<16>>(hdr.ipv4.ihl == 4w5, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+        verify_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid(), (tuple_0){f0 = hdr.inner_ipv4.version,f1 = hdr.inner_ipv4.ihl,f2 = hdr.inner_ipv4.diffserv,f3 = hdr.inner_ipv4.totalLen,f4 = hdr.inner_ipv4.identification,f5 = hdr.inner_ipv4.flags,f6 = hdr.inner_ipv4.fragOffset,f7 = hdr.inner_ipv4.ttl,f8 = hdr.inner_ipv4.protocol,f9 = hdr.inner_ipv4.srcAddr,f10 = hdr.inner_ipv4.dstAddr}, hdr.inner_ipv4.hdrChecksum, HashAlgorithm.csum16);
+        verify_checksum<tuple_0, bit<16>>(hdr.ipv4.ihl == 4w5, (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr}, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        update_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid(), { hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr }, hdr.inner_ipv4.hdrChecksum, HashAlgorithm.csum16);
-        update_checksum<tuple_0, bit<16>>(hdr.ipv4.ihl == 4w5, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+        update_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid(), (tuple_0){f0 = hdr.inner_ipv4.version,f1 = hdr.inner_ipv4.ihl,f2 = hdr.inner_ipv4.diffserv,f3 = hdr.inner_ipv4.totalLen,f4 = hdr.inner_ipv4.identification,f5 = hdr.inner_ipv4.flags,f6 = hdr.inner_ipv4.fragOffset,f7 = hdr.inner_ipv4.ttl,f8 = hdr.inner_ipv4.protocol,f9 = hdr.inner_ipv4.srcAddr,f10 = hdr.inner_ipv4.dstAddr}, hdr.inner_ipv4.hdrChecksum, HashAlgorithm.csum16);
+        update_checksum<tuple_0, bit<16>>(hdr.ipv4.ihl == 4w5, (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr}, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

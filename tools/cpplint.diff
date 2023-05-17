@@ -1,0 +1,123 @@
+This diff file tracks the modifications that have been applied to cpplint.py compared to the original found here:
+https://github.com/cpplint/cpplint/blob/7b88b68187e3516540fab3caa900988d2179ed24/cpplint.py
+Please update this file, whenever you make changes to cpplint.
+diff --git a/tools/cpplint.py b/tools/cpplint.py
+index 8158eb7cd..f013773ba 100755
+--- a/tools/cpplint.py
++++ b/tools/cpplint.py
+@@ -60,6 +60,7 @@ import sys
+ import sysconfig
+ import unicodedata
+ import xml.etree.ElementTree
++import fnmatch
+ 
+ # if empty, use defaults
+ _valid_extensions = set([])
+@@ -335,6 +336,8 @@ _ERROR_CATEGORIES = [
+     'runtime/memset',
+     'runtime/indentation_namespace',
+     'runtime/operator',
++    # This check currently does not work correctly. So it is disabled
++    # 'runtime/override',
+     'runtime/printf',
+     'runtime/printf_format',
+     'runtime/references',
+@@ -2456,11 +2459,15 @@ def CheckForHeaderGuard(filename, clean_lines, error):
+     error_level = 0
+     if ifndef != cppvar + '_':
+       error_level = 5
++    if ifndef == ('P4C_' + cppvar)[-len(ifndef):]:
++      error_level = 0
+ 
+     ParseNolintSuppressions(filename, raw_lines[ifndef_linenum], ifndef_linenum,
+                             error)
+     error(filename, ifndef_linenum, 'build/header_guard', error_level,
+           '#ifndef header guard has wrong style, please use: %s' % cppvar)
++    if error_level < 1:
++      cppvar = ifndef
+ 
+   # Check for "//" comments on endif line.
+   ParseNolintSuppressions(filename, raw_lines[endif_linenum], endif_linenum,
+@@ -2470,18 +2477,19 @@ def CheckForHeaderGuard(filename, clean_lines, error):
+     if match.group(1) == '_':
+       # Issue low severity warning for deprecated double trailing underscore
+       error(filename, endif_linenum, 'build/header_guard', 0,
+-            '#endif line should be "#endif  // %s"' % cppvar)
++            '#endif line should be "#endif  /* %s */"' % cppvar)
+     return
+ 
+   # Didn't find the corresponding "//" comment.  If this file does not
+   # contain any "//" comments at all, it could be that the compiler
+   # only wants "/**/" comments, look for those instead.
++  # "//" comments in preprocessor directives are undefined behavior!!!
+   no_single_line_comments = True
+-  for i in xrange(1, len(raw_lines) - 1):
+-    line = raw_lines[i]
+-    if Match(r'^(?:(?:\'(?:\.|[^\'])*\')|(?:"(?:\.|[^"])*")|[^\'"])*//', line):
+-      no_single_line_comments = False
+-      break
++  #for i in xrange(1, len(raw_lines) - 1):
++  #  line = raw_lines[i]
++  #  if Match(r'^(?:(?:\'(?:\.|[^\'])*\')|(?:"(?:\.|[^"])*")|[^\'"])*//', line):
++  #    no_single_line_comments = False
++  #    break
+ 
+   if no_single_line_comments:
+     match = Match(r'#endif\s*/\*\s*' + cppvar + r'(_)?\s*\*/', endif)
+@@ -2494,7 +2502,7 @@ def CheckForHeaderGuard(filename, clean_lines, error):
+ 
+   # Didn't find anything
+   error(filename, endif_linenum, 'build/header_guard', 5,
+-        '#endif line should be "#endif  // %s"' % cppvar)
++        '#endif line should be "#endif  /* %s */"' % cppvar)
+ 
+ 
+ def CheckHeaderFileIncluded(filename, include_state, error):
+@@ -6276,6 +6284,30 @@ def CheckRedundantVirtual(filename, clean_lines, linenum, error):
+     if Search(r'[^\w]\s*$', line):
+       break
+ 
++def CheckMissingOverrideOrFinal(filename, clean_lines, linenum, nesting_state, error):
++  """Check if a line is missing a required "override" or "final" virt-specifier.
++
++  Args:
++    filename: The name of the current file.
++    clean_lines: A CleansedLines instance containing the file.
++    linenum: The number of the line to check.
++    nesting_state: The _NestingState object that contains info about our state.
++    error: The function to call with any errors found.
++  """
++  if not nesting_state.InClassDeclaration():
++    return
++  line = clean_lines.elided[linenum]
++  if Search(r'\bvirtual\b', line):
++    # assuming if there's a 'virtual' this is the base class.
++    return
++
++  if Search(r'\bpreorder\b *\(', line) and not Search(r'\b(override|final)\b', line):
++    error(filename, linenum, 'runtime/override', 4,
++          ('missing "override" on preorder function'))
++  if Search(r'\bpostorder\b *\(', line) and not Search(r'\b(override|final)\b', line):
++    error(filename, linenum, 'runtime/override', 4,
++          ('missing "override" on postorder function'))
++
+ 
+ def CheckRedundantOverrideOrFinal(filename, clean_lines, linenum, error):
+   """Check if line contains a redundant "override" or "final" virt-specifier.
+@@ -6411,6 +6443,7 @@ def ProcessLine(filename, file_extension, clean_lines, line,
+   CheckMakePairUsesDeduction(filename, clean_lines, line, error)
+   CheckRedundantVirtual(filename, clean_lines, line, error)
+   CheckRedundantOverrideOrFinal(filename, clean_lines, line, error)
++  # CheckMissingOverrideOrFinal(filename, clean_lines, line, nesting_state, error)
+   if extra_check_functions:
+     for check_fn in extra_check_functions:
+       check_fn(filename, clean_lines, line, error)
+@@ -6608,6 +6641,8 @@ def ProcessConfigOverrides(filename):
+             ProcessHppHeadersOption(val)
+           elif name == 'includeorder':
+             ProcessIncludeOrderOption(val)
++          elif name == 'filematch':
++            skip = not fnmatch.fnmatch(os.path.basename(filename), val)
+           else:
+             _cpplint_state.PrintError(
+                 'Invalid configuration option (%s) in file %s\n' %

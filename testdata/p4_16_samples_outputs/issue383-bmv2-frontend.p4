@@ -21,6 +21,7 @@ struct col_t {
 }
 
 struct local_metadata_t {
+    @field_list(0)
     row_t      row0;
     row_t      row1;
     col_t      col;
@@ -51,29 +52,35 @@ parser parse(packet_in pk, out parsed_packet_t h, inout local_metadata_t local_m
 }
 
 control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @name("ingress.s") tst_t s_0;
+    @name("ingress.bh") bitvec_hdr bh_0;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.do_act") action do_act() {
         h.bvh1.row.alt1.valid = 1w0;
     }
     @name("ingress.tns") table tns_0 {
         key = {
-            h.bvh1.row.alt1.valid                : exact @name("h.bvh1.row.alt1.valid") ;
-            local_metadata.col.bvh.row.alt0.valid: exact @name("local_metadata.col.bvh.row.alt0.valid") ;
+            h.bvh1.row.alt1.valid                : exact @name("h.bvh1.row.alt1.valid");
+            local_metadata.col.bvh.row.alt0.valid: exact @name("local_metadata.col.bvh.row.alt0.valid");
         }
         actions = {
             do_act();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
+        s_0.col.bvh.setInvalid();
+        s_0.bvh0.setInvalid();
+        s_0.bvh1.setInvalid();
+        bh_0.setInvalid();
         tns_0.apply();
         local_metadata.col.bvh.row.alt0.valid = 1w0;
         local_metadata.row0.alt0 = local_metadata.row1.alt1;
         local_metadata.row1.alt0.valid = 1w1;
         local_metadata.row1.alt1.port = local_metadata.row0.alt1.port + 7w1;
-        clone3<row_t>(CloneType.I2E, 32w0, local_metadata.row0);
+        clone_preserving_field_list(CloneType.I2E, 32w1, 8w0);
     }
 }
 
@@ -100,4 +107,3 @@ control compute_checksum(inout parsed_packet_t hdr, inout local_metadata_t local
 }
 
 V1Switch<parsed_packet_t, local_metadata_t>(parse(), verifyChecksum(), ingress(), egress(), compute_checksum(), deparser()) main;
-

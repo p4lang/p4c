@@ -1,5 +1,5 @@
 control c(inout bit<32> x) {
-    bit<32> tmp_2;
+    @name("c.tmp") bit<32> tmp_2;
     @hidden action inlinefunction2() {
         tmp_2 = x;
     }
@@ -40,4 +40,3 @@ control c(inout bit<32> x) {
 control ctr(inout bit<32> x);
 package top(ctr _c);
 top(c()) main;
-

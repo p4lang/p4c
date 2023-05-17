@@ -16,13 +16,14 @@ limitations under the License.
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-#include <boost/algorithm/string/replace.hpp>
-#include <boost/optional.hpp>
 #include <google/protobuf/util/message_differencer.h>
 
 #include <iterator>
 #include <string>
 #include <vector>
+
+#include <boost/algorithm/string/replace.hpp>
+#include <optional>
 
 #include "control-plane/p4/config/v1/p4info.pb.h"
 #include "control-plane/p4/config/v1/p4types.pb.h"
@@ -62,18 +63,18 @@ class ParseAnnotations : public P4::ParseAnnotations {
             }) { }
 };
 
-boost::optional<P4::P4RuntimeAPI>
+std::optional<P4::P4RuntimeAPI>
 createP4RuntimeTestCase(
     const std::string& source,
     CompilerOptions::FrontendVersion langVersion = FrontendTestCase::defaultVersion,
     const cstring arch = defaultArch,
     P4::ParseAnnotations parseAnnotations = P4::ParseAnnotations()) {
     auto frontendTestCase = FrontendTestCase::create(source, langVersion, parseAnnotations);
-    if (!frontendTestCase) return boost::none;
+    if (!frontendTestCase) return std::nullopt;
     return P4::generateP4Runtime(frontendTestCase->program, arch);
 }
 
-boost::optional<P4::P4RuntimeAPI>
+std::optional<P4::P4RuntimeAPI>
 createP4RuntimeTestCase(
     const std::string& source,
     P4::ParseAnnotations parseAnnotations) {
@@ -990,6 +991,7 @@ TEST_F(P4Runtime, PSADigests) {
     )"), CompilerOptions::FrontendVersion::P4_16, "psa");
 
     ASSERT_TRUE(test);
+    // 0 warnings
     EXPECT_EQ(0u, ::diagnosticCount());
     const auto &typeInfo = test->p4Info->type_info();
 
@@ -1097,18 +1099,18 @@ TEST_F(P4Runtime, StaticTableEntries) {
         int priority = 1000;
         auto check_entry = [&](const p4v1::Update& update,
                                const std::string& exact_v,
-                               const boost::optional<std::string>& ternary_v,
-                               const boost::optional<std::string>& ternary_mask,
+                               const std::optional<std::string>& ternary_v,
+                               const std::optional<std::string>& ternary_mask,
                                const std::string& param_v) {
             EXPECT_EQ(p4v1::Update::INSERT, update.type());
             const auto& protoEntry = update.entity().table_entry();
             EXPECT_EQ(table->preamble().id(), protoEntry.table_id());
 
-            ASSERT_EQ((ternary_v == boost::none) ? 1 : 2, protoEntry.match().size());
+            ASSERT_EQ((ternary_v == std::nullopt) ? 1 : 2, protoEntry.match().size());
             const auto& mfA = protoEntry.match().Get(0);
             EXPECT_EQ(hfAId, mfA.field_id());
             EXPECT_EQ(exact_v, mfA.exact().value());
-            if (ternary_v != boost::none) {
+            if (ternary_v != std::nullopt) {
               const auto& mfB = protoEntry.match().Get(1);
               EXPECT_EQ(hfBId, mfB.field_id());
               EXPECT_EQ(*ternary_v, mfB.ternary().value());
@@ -1134,7 +1136,7 @@ TEST_F(P4Runtime, StaticTableEntries) {
                     std::string("\x00\x02", 2));
         check_entry(updates.Get(2), "\x03", std::string("\x10\x00", 2), std::string("\xf0\x00", 2),
                     std::string("\x00\x03", 2));
-        check_entry(updates.Get(3), "\x04", boost::none, boost::none,  // don't care match
+        check_entry(updates.Get(3), "\x04", std::nullopt, std::nullopt,  // don't care match
                     std::string("\x00\x04", 2));
     }
 
@@ -1327,8 +1329,8 @@ TEST_F(P4Runtime, ValueSet) {
                               unsigned int id, cstring name,
                               const std::vector<cstring> annotations,
                               int bitwidth,
-                              boost::optional<MatchField::MatchType> matchType,
-                              boost::optional<cstring> otherMatchType) {
+                              std::optional<MatchField::MatchType> matchType,
+                              std::optional<cstring> otherMatchType) {
         EXPECT_EQ(mf.id(), id);
         EXPECT_EQ(mf.name(), name);
         ASSERT_EQ(static_cast<size_t>(mf.annotations_size()), annotations.size());
@@ -1339,9 +1341,9 @@ TEST_F(P4Runtime, ValueSet) {
         if (otherMatchType) { EXPECT_EQ(mf.other_match_type(), *otherMatchType); }
     };
     checkMatchField(vset->match(0), 1, "f1", {"@my_anno(\"body\")"}, 8,
-                    MatchField::TERNARY, boost::none);
-    checkMatchField(vset->match(1), 2, "f2", {}, 8, MatchField::EXACT, boost::none);
-    checkMatchField(vset->match(2), 3, "f3", {}, 8, boost::none, cstring("custom"));
+                    MatchField::TERNARY, std::nullopt);
+    checkMatchField(vset->match(1), 2, "f2", {}, 8, MatchField::EXACT, std::nullopt);
+    checkMatchField(vset->match(2), 3, "f3", {}, 8, std::nullopt, cstring("custom"));
 }
 
 TEST_F(P4Runtime, Register) {
@@ -1468,11 +1470,11 @@ TEST_F(P4Runtime, Documentation) {
 
 class P4RuntimePkgInfo : public P4CTest {
  protected:
-    static boost::optional<P4::P4RuntimeAPI> createTestCase(const char* annotations);
+    static std::optional<P4::P4RuntimeAPI> createTestCase(const char* annotations);
 };
 
 /* static */
-boost::optional<P4::P4RuntimeAPI> P4RuntimePkgInfo::createTestCase(const char* annotations) {
+std::optional<P4::P4RuntimeAPI> P4RuntimePkgInfo::createTestCase(const char* annotations) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
         struct Headers { }
         struct Metadata { }

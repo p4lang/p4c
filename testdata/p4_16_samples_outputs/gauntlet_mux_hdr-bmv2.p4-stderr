@@ -1,0 +1,18 @@
+gauntlet_mux_hdr-bmv2.p4(26): [--Wwarn=invalid_header] warning: accessing a field of an invalid header tmp2[0]
+    if (tmp2[0].a <= 3) {
+        ^^^^^^^
+gauntlet_mux_hdr-bmv2.p4(26): [--Wwarn=uninitialized_use] warning: tmp2[0].a may be uninitialized
+    if (tmp2[0].a <= 3) {
+        ^^^^^^^^^
+gauntlet_mux_hdr-bmv2.p4(27): [--Wwarn=uninitialized_use] warning: tmp2[1] may not be completely initialized
+        tmp1[0] = tmp2[1];
+                  ^^^^^^^
+gauntlet_mux_hdr-bmv2.p4(28): [--Wwarn=uninitialized_use] warning: tmp1[1] may not be completely initialized
+        tmp2[1] = tmp1[1];
+                  ^^^^^^^
+gauntlet_mux_hdr-bmv2.p4(30): [--Wwarn=invalid_header] warning: accessing a field of an invalid header tmp1[0]
+    return tmp1[0].a;
+           ^^^^^^^
+gauntlet_mux_hdr-bmv2.p4(30): [--Wwarn=uninitialized_use] warning: tmp1[0].a may be uninitialized
+    return tmp1[0].a;
+           ^^^^^^^^^

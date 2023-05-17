@@ -24,9 +24,17 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bool hasExited;
+    @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.do_action") action do_action() {
-        h.eth_hdr.src_addr = (!(h.eth_hdr.eth_type == 16w1 ? true : false) ? h.eth_hdr.src_addr : h.eth_hdr.src_addr);
-        hasExited = (!(h.eth_hdr.eth_type == 16w1 ? true : false) ? true : hasExited);
+        hasReturned = false;
+        if (h.eth_hdr.eth_type == 16w1) {
+            hasReturned = true;
+        }
+        if (hasReturned) {
+            ;
+        } else {
+            hasExited = true;
+        }
     }
     @hidden action act() {
         hasExited = false;
@@ -71,4 +79,3 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

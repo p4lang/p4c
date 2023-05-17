@@ -91,15 +91,15 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
     }
     action do_resubmit(bit<32> new_ipv4_dstAddr) {
         hdr.ipv4.dstAddr = new_ipv4_dstAddr;
-        resubmit<tuple<>>({  });
+        resubmit_preserving_field_list(8w0);
     }
     action do_clone_i2e(bit<32> l2ptr) {
-        clone3<tuple<>>(CloneType.I2E, 32w5, {  });
+        clone_preserving_field_list(CloneType.I2E, 32w5, 8w0);
         meta.fwd.l2ptr = l2ptr;
     }
     table ipv4_da_lpm {
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr");
         }
         actions = {
             set_l2ptr();
@@ -118,7 +118,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
     }
     table mac_da {
         key = {
-            meta.fwd.l2ptr: exact @name("meta.fwd.l2ptr") ;
+            meta.fwd.l2ptr: exact @name("meta.fwd.l2ptr");
         }
         actions = {
             set_bd_dmac_intf();
@@ -148,8 +148,8 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
     }
     table get_multicast_copy_out_bd {
         key = {
-            standard_metadata.mcast_grp : exact @name("standard_metadata.mcast_grp") ;
-            standard_metadata.egress_rid: exact @name("standard_metadata.egress_rid") ;
+            standard_metadata.mcast_grp : exact @name("standard_metadata.mcast_grp");
+            standard_metadata.egress_rid: exact @name("standard_metadata.egress_rid");
         }
         actions = {
             set_out_bd();
@@ -162,15 +162,15 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
     }
     action do_recirculate(bit<32> new_ipv4_dstAddr) {
         hdr.ipv4.dstAddr = new_ipv4_dstAddr;
-        recirculate<tuple<>>({  });
+        recirculate_preserving_field_list(8w0);
     }
     action do_clone_e2e(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
-        clone3<tuple<>>(CloneType.E2E, 32w11, {  });
+        clone_preserving_field_list(CloneType.E2E, 32w11, 8w0);
     }
     table send_frame {
         key = {
-            meta.fwd.out_bd: exact @name("meta.fwd.out_bd") ;
+            meta.fwd.out_bd: exact @name("meta.fwd.out_bd");
         }
         actions = {
             rewrite_mac();
@@ -219,4 +219,3 @@ control computeChecksum(inout headers_t hdr, inout meta_t meta) {
 }
 
 V1Switch<headers_t, meta_t>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

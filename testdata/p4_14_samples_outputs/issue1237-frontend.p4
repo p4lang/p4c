@@ -20,9 +20,9 @@ struct metadata {
 }
 
 struct headers {
-    @name(".expressivenesss") 
+    @name(".expressivenesss")
     backs_0   expressivenesss;
-    @name(".kilometer") 
+    @name(".kilometer")
     affairs_0 kilometer;
 }
 
@@ -35,7 +35,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name(".mooneys") action mooneys() {
         hdr.expressivenesss.breasted = hdr.expressivenesss.breasted - hdr.expressivenesss.peptides;
@@ -44,14 +44,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".conceptualization") table conceptualization_0 {
         actions = {
             mooneys();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            hdr.kilometer.isValid()      : exact @name("kilometer.$valid$") ;
-            48w0                         : lpm @name("kilometer.flaccidly") ;
-            hdr.expressivenesss.isValid(): exact @name("expressivenesss.$valid$") ;
+            hdr.kilometer.isValid()      : exact @name("kilometer.$valid$");
+            48w0                         : lpm @name("kilometer.flaccidly");
+            hdr.expressivenesss.isValid(): exact @name("expressivenesss.$valid$");
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         conceptualization_0.apply();
@@ -81,4 +81,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

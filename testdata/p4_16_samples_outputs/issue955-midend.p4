@@ -21,17 +21,7 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
 }
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    @hidden action issue955l33() {
-        hdr.h.isValid();
-    }
-    @hidden table tbl_issue955l33 {
-        actions = {
-            issue955l33();
-        }
-        const default_action = issue955l33();
-    }
     apply {
-        tbl_issue955l33.apply();
     }
 }
 
@@ -56,4 +46,3 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

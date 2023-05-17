@@ -18,11 +18,9 @@ control d(out bit<32> x) {
             default: {
             }
         }
-
     }
 }
 
 control dproto(out bit<32> x);
 package top(dproto _d);
 top(d()) main;
-

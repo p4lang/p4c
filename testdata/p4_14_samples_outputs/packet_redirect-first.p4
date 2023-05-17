@@ -2,6 +2,11 @@
 #define V1MODEL_VERSION 20200408
 #include <v1model.p4>
 
+enum bit<8> FieldLists {
+    none = 8w0,
+    redirect_FL = 8w1
+}
+
 struct intrinsic_metadata_t {
     bit<16> mcast_grp;
     bit<4>  egress_rid;
@@ -9,7 +14,9 @@ struct intrinsic_metadata_t {
 }
 
 struct metaA_t {
+    @field_list(FieldLists.redirect_FL)
     bit<8> f1;
+    @field_list(FieldLists.redirect_FL)
     bit<8> f2;
 }
 
@@ -24,14 +31,14 @@ header hdrA_t {
 }
 
 struct metadata {
-    @name(".metaA") 
+    @name(".metaA")
     metaA_t metaA;
-    @name(".metaB") 
+    @name(".metaB")
     metaB_t metaB;
 }
 
 struct headers {
-    @name(".hdrA") 
+    @name(".hdrA")
     hdrA_t hdrA;
 }
 
@@ -46,10 +53,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("._nop") action _nop() {
     }
     @name("._recirculate") action _recirculate() {
-        recirculate<tuple<standard_metadata_t, metaA_t>>({ standard_metadata, meta.metaA });
+        recirculate_preserving_field_list(8w1);
     }
     @name("._clone_e2e") action _clone_e2e(bit<32> mirror_id) {
-        clone3<tuple<standard_metadata_t, metaA_t>>(CloneType.E2E, mirror_id, { standard_metadata, meta.metaA });
+        clone_preserving_field_list(CloneType.E2E, mirror_id, 8w1);
     }
     @name(".t_egress") table t_egress {
         actions = {
@@ -59,8 +66,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @defaultonly NoAction();
         }
         key = {
-            hdr.hdrA.f1                    : exact @name("hdrA.f1") ;
-            standard_metadata.instance_type: ternary @name("standard_metadata.instance_type") ;
+            hdr.hdrA.f1                    : exact @name("hdrA.f1");
+            standard_metadata.instance_type: ternary @name("standard_metadata.instance_type");
         }
         size = 128;
         default_action = NoAction();
@@ -81,10 +88,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.mcast_grp = mgrp;
     }
     @name("._resubmit") action _resubmit() {
-        resubmit<tuple<standard_metadata_t, metaA_t>>({ standard_metadata, meta.metaA });
+        resubmit_preserving_field_list(8w1);
     }
     @name("._clone_i2e") action _clone_i2e(bit<32> mirror_id) {
-        clone3<tuple<standard_metadata_t, metaA_t>>(CloneType.I2E, mirror_id, { standard_metadata, meta.metaA });
+        clone_preserving_field_list(CloneType.I2E, mirror_id, 8w1);
     }
     @name(".t_ingress_1") table t_ingress_1 {
         actions = {
@@ -94,8 +101,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.hdrA.f1  : exact @name("hdrA.f1") ;
-            meta.metaA.f1: exact @name("metaA.f1") ;
+            hdr.hdrA.f1  : exact @name("hdrA.f1");
+            meta.metaA.f1: exact @name("metaA.f1");
         }
         size = 128;
         default_action = NoAction();
@@ -108,8 +115,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.hdrA.f1                    : exact @name("hdrA.f1") ;
-            standard_metadata.instance_type: ternary @name("standard_metadata.instance_type") ;
+            hdr.hdrA.f1                    : exact @name("hdrA.f1");
+            standard_metadata.instance_type: ternary @name("standard_metadata.instance_type");
         }
         size = 128;
         default_action = NoAction();
@@ -137,4 +144,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

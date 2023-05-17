@@ -61,32 +61,40 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.debug_hdr") table debug_hdr_0 {
         key = {
-            hdr.base.t              : exact @name("hdr.base.t") ;
-            hdr.u[0].byte.isValid() : exact @name("hdr.u[0].byte.$valid$") ;
-            hdr.u[0].short.isValid(): exact @name("hdr.u[0].short.$valid$") ;
-            hdr.u[1].byte.isValid() : exact @name("hdr.u[1].byte.$valid$") ;
-            hdr.u[1].short.isValid(): exact @name("hdr.u[1].short.$valid$") ;
+            hdr.base.t              : exact @name("hdr.base.t");
+            hdr.u[0].byte.isValid() : exact @name("hdr.u[0].byte.$valid$");
+            hdr.u[0].short.isValid(): exact @name("hdr.u[0].short.$valid$");
+            hdr.u[1].byte.isValid() : exact @name("hdr.u[1].byte.$valid$");
+            hdr.u[1].short.isValid(): exact @name("hdr.u[1].short.$valid$");
         }
         actions = {
-            NoAction_0();
+            NoAction_1();
         }
-        const default_action = NoAction_0();
+        const default_action = NoAction_1();
     }
     @hidden action issue5616bmv2l81() {
+        hdr.u[0].short.setValid();
         hdr.u[0].short.data = 16w0xffff;
+        hdr.u[0].byte.setInvalid();
     }
     @hidden action issue5616bmv2l84() {
+        hdr.u[0].byte.setValid();
         hdr.u[0].byte.data = 8w0xaa;
+        hdr.u[0].short.setInvalid();
     }
     @hidden action issue5616bmv2l87() {
+        hdr.u[1].short.setValid();
         hdr.u[1].short.data = 16w0xffff;
+        hdr.u[1].byte.setInvalid();
     }
     @hidden action issue5616bmv2l90() {
+        hdr.u[1].byte.setValid();
         hdr.u[1].byte.data = 8w0xaa;
+        hdr.u[1].short.setInvalid();
     }
     @hidden table tbl_issue5616bmv2l81 {
         actions = {
@@ -155,4 +163,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

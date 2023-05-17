@@ -6,7 +6,7 @@ extern Generic<T> {
 
 extern void f<T>(in T arg);
 control caller() {
-    bit<5> cinst_b;
+    @name("caller.cinst.b") bit<5> cinst_b;
     @name("caller.cinst.x") Generic<bit<8>>(8w9) cinst_x;
     apply {
         cinst_x.get<bit<32>>();
@@ -18,4 +18,3 @@ control caller() {
 control s();
 package p(s parg);
 p(caller()) main;
-

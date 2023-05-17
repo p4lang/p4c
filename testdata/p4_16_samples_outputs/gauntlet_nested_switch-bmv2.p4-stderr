@@ -1,0 +1,3 @@
+gauntlet_nested_switch-bmv2.p4(27): [--Wwarn=unused] warning: 'val' is unused
+    action call_action(inout bit<48> val) { }
+                                     ^^^

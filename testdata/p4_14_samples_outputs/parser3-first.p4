@@ -27,9 +27,9 @@ struct metadata {
 }
 
 struct headers {
-    @name(".data1") 
+    @name(".data1")
     data1_t data1;
-    @name(".data2") 
+    @name(".data2")
     data2_t data2;
 }
 
@@ -56,7 +56,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.data1.f1: exact @name("data1.f1") ;
+            hdr.data1.f1: exact @name("data1.f1");
         }
         default_action = NoAction();
     }
@@ -88,4 +88,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

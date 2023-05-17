@@ -59,7 +59,7 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    bool allow_0;
+    @name("pipe.allow") bool allow_0;
     apply {
         pass = false;
         if (headers.tcp.isValid()) {
@@ -72,4 +72,3 @@ control pipe(inout Headers_t headers, out bool pass) {
 }
 
 ebpfFilter<Headers_t>(prs(), pipe()) main;
-

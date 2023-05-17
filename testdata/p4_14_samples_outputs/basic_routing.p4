@@ -30,14 +30,14 @@ header ipv4_t {
 }
 
 struct metadata {
-    @name(".ingress_metadata") 
+    @name(".ingress_metadata")
     ingress_metadata_t ingress_metadata;
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
-    @name(".ipv4") 
+    @name(".ipv4")
     ipv4_t     ipv4;
 }
 
@@ -155,7 +155,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                     ipv4_fib_lpm.apply();
                 }
             }
-
             nexthop.apply();
         }
     }
@@ -181,4 +180,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

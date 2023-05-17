@@ -16,11 +16,9 @@ control c(out bit<1> arun) {
                 arun = 1;
             }
         }
-
     }
 }
 
 control proto(out bit<1> run);
 package top(proto _p);
 top(c()) main;
-

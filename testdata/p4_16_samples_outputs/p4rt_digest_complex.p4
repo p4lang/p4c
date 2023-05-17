@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <psa.p4>
+#include <bmv2/psa.p4>
 
 struct EMPTY {
 }
@@ -7,6 +7,15 @@ struct EMPTY {
 struct s_t {
     bit<8>  f8;
     bit<16> f16;
+}
+
+struct s2_t<T> {
+    bit<16> f16;
+    T       f;
+}
+
+@name("s3_t") struct s3_t<T> {
+    T f;
 }
 
 header h_t {
@@ -43,14 +52,16 @@ control MyEC(inout EMPTY a, inout EMPTY b, in psa_egress_input_metadata_t c, ino
 }
 
 struct digest_t {
-    h_t      h;
-    PortId_t port;
+    h_t           h;
+    PortId_t      port;
+    s2_t<bit<32>> s2;
+    s3_t<bit<64>> s3;
 }
 
 control MyID(packet_out buffer, out EMPTY a, out EMPTY b, out EMPTY c, inout headers hdr, in EMPTY e, in psa_ingress_output_metadata_t f) {
     Digest<digest_t>() digest;
     apply {
-        digest.pack({ hdr.h, f.egress_port });
+        digest.pack({ hdr.h, f.egress_port, { 16w10, 32w20 }, { 64w30 } });
     }
 }
 
@@ -60,8 +71,5 @@ control MyED(packet_out buffer, out EMPTY a, out EMPTY b, inout EMPTY c, in EMPT
 }
 
 IngressPipeline(MyIP(), MyIC(), MyID()) ip;
-
 EgressPipeline(MyEP(), MyEC(), MyED()) ep;
-
 PSA_Switch(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

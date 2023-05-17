@@ -25,7 +25,7 @@ control c(inout bit<1> r) {
     @hidden action nestedtuple34() {
         s_0_f1_f0.f = 1w0;
         s_0_f1_f1.f = 1w1;
-        f<tuple_1>({ s_0_f1_f0, s_0_f1_f1 });
+        f<tuple_1>((tuple_1){f0 = s_0_f1_f0,f1 = s_0_f1_f1});
         f<tuple_0>((tuple_0){field = (T){f = 1w0},field_0 = (T){f = 1w1}});
         r = 1w0;
     }
@@ -43,4 +43,3 @@ control c(inout bit<1> r) {
 control simple(inout bit<1> r);
 package top(simple e);
 top(c()) main;
-

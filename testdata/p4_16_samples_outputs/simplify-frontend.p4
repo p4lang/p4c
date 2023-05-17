@@ -1,39 +1,39 @@
 #include <core.p4>
 
 control c(out bool x) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @name("c.tmp") bool tmp;
+    @name("c.tmp_0") bool tmp_0;
+    @name("c.tmp_1") bool tmp_1;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    bool tmp;
-    bool tmp_0;
-    bool tmp_1;
     @name("c.t1") table t1_0 {
         key = {
-            x: exact @name("x") ;
+            x: exact @name("x");
         }
         actions = {
-            NoAction_0();
+            NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name("c.t2") table t2_0 {
         key = {
-            x: exact @name("x") ;
+            x: exact @name("x");
         }
         actions = {
-            NoAction_3();
+            NoAction_2();
         }
-        default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     apply {
         x = true;
         tmp = t1_0.apply().hit;
-        if (!tmp) {
-            tmp_0 = false;
-        } else {
+        if (tmp) {
             tmp_1 = t2_0.apply().hit;
             tmp_0 = tmp_1;
+        } else {
+            tmp_0 = false;
         }
         if (tmp_0) {
             x = false;
@@ -44,4 +44,3 @@ control c(out bool x) {
 control proto(out bool x);
 package top(proto p);
 top(c()) main;
-

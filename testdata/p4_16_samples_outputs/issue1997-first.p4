@@ -28,7 +28,7 @@ control c(in hdr h, inout standard_metadata_t standard_meta) {
     }
     table t {
         key = {
-            h.e: exact @name("h.e") ;
+            h.e: exact @name("h.e");
         }
         actions = {
             a();
@@ -39,7 +39,6 @@ control c(in hdr h, inout standard_metadata_t standard_meta) {
                         8w0x1 : a();
                         8w0x2 : b();
         }
-
     }
     apply {
         t.apply();

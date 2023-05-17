@@ -1,27 +1,27 @@
 control c(inout bit<32> x) {
-    bit<32> tmp_3;
-    bit<32> tmp_9;
-    bit<32> tmp_10;
+    @name("c.tmp") bit<32> tmp_1;
+    @name("c.tmp") bit<32> tmp_5;
+    @name("c.tmp") bit<32> tmp_6;
     @hidden action issue15442l2() {
-        tmp_3 = x + 32w1;
+        tmp_1 = x + 32w1;
     }
     @hidden action issue15442l2_0() {
-        tmp_3 = x;
+        tmp_1 = x;
     }
     @hidden action issue15442l2_1() {
-        tmp_9 = x + 32w4294967295;
+        tmp_5 = x + 32w4294967295;
     }
     @hidden action issue15442l2_2() {
-        tmp_9 = x;
+        tmp_5 = x;
     }
     @hidden action issue15442l2_3() {
-        tmp_10 = tmp_9;
+        tmp_6 = tmp_5;
     }
     @hidden action issue15442l2_4() {
-        tmp_10 = tmp_3;
+        tmp_6 = tmp_1;
     }
     @hidden action issue15442l7() {
-        x = tmp_10;
+        x = tmp_6;
     }
     @hidden table tbl_issue15442l2 {
         actions = {
@@ -76,7 +76,7 @@ control c(inout bit<32> x) {
         } else {
             tbl_issue15442l2_2.apply();
         }
-        if (tmp_3 > tmp_9) {
+        if (tmp_1 > tmp_5) {
             tbl_issue15442l2_3.apply();
         } else {
             tbl_issue15442l2_4.apply();
@@ -88,4 +88,3 @@ control c(inout bit<32> x) {
 control ctr(inout bit<32> x);
 package top(ctr _c);
 top(c()) main;
-

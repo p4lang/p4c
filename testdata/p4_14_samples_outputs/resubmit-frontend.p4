@@ -2,12 +2,18 @@
 #define V1MODEL_VERSION 20200408
 #include <v1model.p4>
 
+enum bit<8> FieldLists {
+    none = 8w0,
+    resubmit_FL = 8w1
+}
+
 struct intrinsic_metadata_t {
     bit<4> mcast_grp;
     bit<4> egress_rid;
 }
 
 struct mymeta_t {
+    @field_list(FieldLists.resubmit_FL)
     bit<8> f1;
 }
 
@@ -18,12 +24,12 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name(".mymeta") 
+    @name(".mymeta")
     mymeta_t mymeta;
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
 }
 
@@ -43,44 +49,44 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("._nop") action _nop() {
     }
-    @name("._nop") action _nop_2() {
+    @name("._nop") action _nop_1() {
     }
-    @name(".set_port") action set_port(bit<9> port) {
+    @name(".set_port") action set_port(@name("port") bit<9> port) {
         standard_metadata.egress_spec = port;
     }
     @name("._resubmit") action _resubmit() {
         meta.mymeta.f1 = 8w1;
-        resubmit<tuple<standard_metadata_t, mymeta_t>>({ standard_metadata, meta.mymeta });
+        resubmit_preserving_field_list(8w1);
     }
     @name(".t_ingress_1") table t_ingress {
         actions = {
             _nop();
             set_port();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            meta.mymeta.f1: exact @name("mymeta.f1") ;
+            meta.mymeta.f1: exact @name("mymeta.f1");
         }
         size = 128;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name(".t_ingress_2") table t_ingress_0 {
         actions = {
-            _nop_2();
+            _nop_1();
             _resubmit();
-            @defaultonly NoAction_3();
+            @defaultonly NoAction_2();
         }
         key = {
-            meta.mymeta.f1: exact @name("mymeta.f1") ;
+            meta.mymeta.f1: exact @name("mymeta.f1");
         }
         size = 128;
-        default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     apply {
         t_ingress.apply();
@@ -105,4 +111,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

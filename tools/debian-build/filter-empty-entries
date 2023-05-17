@@ -1,0 +1,59 @@
+#!/usr/bin/perl
+#
+# Debian/Ubuntu Packaging Scripts
+# Copyright (C) 2002-2021 by Thomas Dreibholz
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Contact: dreibh@iem.uni-due.de
+
+use warnings;
+use strict;
+
+my $mode=0;
+my $entryLines=0;
+my $entry="";
+
+while (my $text = <STDIN>) {
+   chomp $text;
+
+   if($entryLines == 0) {
+      if($text =~ /^[a-zA-Z].*$/) {
+         $entry      = "$text\n\n";
+         $entryLines = 1;
+      }
+   }
+   else {
+      if($text =~ /^[ \t]*$/) {
+         # Remove empty line.
+      }
+      elsif($text =~ /^ --.*$/) {
+         $entry  = "$entry\n$text\n";
+         if($entryLines > 1) {
+            print "$entry\n";
+         }
+
+         if($ARGV[0] !~ /^$/) {
+            if($text =~ /($ARGV[0])/) {
+               exit;
+            }
+         }
+
+         $entryLines = 0;
+      }
+      else {
+         $entry      = "$entry$text\n";
+         $entryLines = $entryLines + 1;
+      }
+   }
+}

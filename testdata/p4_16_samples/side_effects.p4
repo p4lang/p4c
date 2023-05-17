@@ -19,13 +19,12 @@ extern bit g(inout bit x);
 
 header H { bit z; }
 
-control c();
-package top(c _c);
+control c<T>(inout T t);
+package top<T>(c<T> _c);
 
-control my() {
+control my(inout H[2] s) {
     apply {
         bit a = 0;
-        H[2] s;
 
         a = f(a, g(a));
         a = f(s[a].z, g(a));

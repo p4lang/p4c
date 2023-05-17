@@ -23,9 +23,9 @@ struct headers {
 }
 
 parser Parser(packet_in packet, out headers hdr) {
-    p4calc_t tmp_0;
-    p4calc_t tmp_2;
-    p4calc_t tmp_4;
+    @name("Parser.tmp_1") p4calc_t tmp_0;
+    @name("Parser.tmp_3") p4calc_t tmp_2;
+    @name("Parser.tmp_5") p4calc_t tmp_4;
     bit<128> tmp_6;
     bit<128> tmp_7;
     bit<128> tmp_8;
@@ -76,7 +76,7 @@ parser Parser(packet_in packet, out headers hdr) {
 }
 
 control Ingress(inout headers hdr, out bool xout) {
-    bit<48> tmp_5;
+    @name("Ingress.tmp") bit<48> tmp_5;
     @name("Ingress.operation_add") action operation_add() {
         tmp_5 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
@@ -110,12 +110,12 @@ control Ingress(inout headers hdr, out bool xout) {
     @name("Ingress.operation_drop") action operation_drop() {
         xout = false;
     }
-    @name("Ingress.operation_drop") action operation_drop_2() {
+    @name("Ingress.operation_drop") action operation_drop_1() {
         xout = false;
     }
     @name("Ingress.calculate") table calculate_0 {
         key = {
-            hdr.p4calc.op: exact @name("hdr.p4calc.op") ;
+            hdr.p4calc.op: exact @name("hdr.p4calc.op");
         }
         actions = {
             operation_add();
@@ -133,26 +133,26 @@ control Ingress(inout headers hdr, out bool xout) {
                         8w0x7c : operation_or();
                         8w0x5e : operation_xor();
         }
-
         implementation = hash_table(32w8);
+        size = 100;
     }
-    @hidden action calcebpf152() {
+    @hidden action calcebpf153() {
         xout = true;
     }
-    @hidden table tbl_calcebpf152 {
+    @hidden table tbl_calcebpf153 {
         actions = {
-            calcebpf152();
+            calcebpf153();
         }
-        const default_action = calcebpf152();
+        const default_action = calcebpf153();
     }
     @hidden table tbl_operation_drop {
         actions = {
-            operation_drop_2();
+            operation_drop_1();
         }
-        const default_action = operation_drop_2();
+        const default_action = operation_drop_1();
     }
     apply {
-        tbl_calcebpf152.apply();
+        tbl_calcebpf153.apply();
         if (hdr.p4calc.isValid()) {
             calculate_0.apply();
         } else {
@@ -162,4 +162,3 @@ control Ingress(inout headers hdr, out bool xout) {
 }
 
 ebpfFilter<headers>(Parser(), Ingress()) main;
-

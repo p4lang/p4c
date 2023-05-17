@@ -44,7 +44,7 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("pipe.counters") CounterArray(32w10, true) counters_0;
     @name("pipe.invalidate") action invalidate() {
@@ -54,10 +54,10 @@ control pipe(inout Headers_t headers, out bool pass) {
     @name("pipe.t") table t_0 {
         actions = {
             invalidate();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         implementation = array_table(32w1);
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         if (headers.ipv4.isValid()) {
@@ -71,4 +71,3 @@ control pipe(inout Headers_t headers, out bool pass) {
 }
 
 ebpfFilter<Headers_t>(prs(), pipe()) main;
-

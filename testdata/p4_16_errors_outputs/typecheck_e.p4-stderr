@@ -1,3 +1,24 @@
-typecheck_e.p4(21): [--Werror=type-error] error: f: Cannot unify T to int<32>
+typecheck_e.p4(21): [--Werror=type-error] error: f
         f(x);
         ^^^^
+  ---- Actual error:
+typecheck_e.p4(18): Cannot cast implicitly type 'T' to type 'int<32>'
+  control p<T>(in T x)
+            ^
+  ---- Originating from:
+typecheck_e.p4(21): Type of argument 'x' (T) does not match type of parameter 'd' (int<32>)
+          f(x);
+            ^
+typecheck_e.p4(18)
+  control p<T>(in T x)
+            ^
+typecheck_e.p4(16)
+  extern void f(in int<32> d);
+                           ^
+  ---- Originating from:
+typecheck_e.p4(16): Function type 'f' does not match invocation type '<Method call>'
+  extern void f(in int<32> d);
+              ^
+typecheck_e.p4(21)
+          f(x);
+          ^^^^

@@ -1,13 +1,9 @@
 #include <core.p4>
 
-typedef bit<16> Base_t;
-typedef Base_t Base1_t;
-typedef Base1_t Base2_t;
-typedef Base2_t EthT;
 header Ethernet {
     bit<48> src;
     bit<48> dest;
-    EthT    type;
+    bit<16> type;
 }
 
 struct Headers {
@@ -15,8 +11,9 @@ struct Headers {
 }
 
 parser prs(packet_in p, out Headers h) {
-    Ethernet e_0;
+    @name("prs.e") Ethernet e_0;
     state start {
+        e_0.setInvalid();
         p.extract<Ethernet>(e_0);
         transition select(e_0.type) {
             16w0x800: accept;
@@ -27,7 +24,7 @@ parser prs(packet_in p, out Headers h) {
 }
 
 control c(inout Headers h) {
-    bool hasReturned;
+    @name("c.hasReturned") bool hasReturned;
     @hidden action issue2391l47() {
         hasReturned = true;
     }
@@ -66,15 +63,17 @@ control c(inout Headers h) {
     }
     apply {
         tbl_act.apply();
-        if (!h.eth.isValid()) {
+        if (h.eth.isValid()) {
+            ;
+        } else {
             tbl_issue2391l47.apply();
         }
-        if (!hasReturned) {
-            if (h.eth.type == 16w0x800) {
-                tbl_issue2391l49.apply();
-            } else {
-                tbl_issue2391l51.apply();
-            }
+        if (hasReturned) {
+            ;
+        } else if (h.eth.type == 16w0x800) {
+            tbl_issue2391l49.apply();
+        } else {
+            tbl_issue2391l51.apply();
         }
     }
 }
@@ -83,4 +82,3 @@ parser p<H>(packet_in _p, out H h);
 control ctr<H>(inout H h);
 package top<H>(p<H> _p, ctr<H> _c);
 top<Headers>(prs(), c()) main;
-

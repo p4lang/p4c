@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <../p4include/psa.p4>
+#include <bmv2/psa.p4>
 
 struct EMPTY {
 }
@@ -37,4 +37,3 @@ control MyED(packet_out buffer, out EMPTY a, out EMPTY b, inout EMPTY c, in EMPT
 }
 
 PSA_Switch<EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(IngressPipeline<EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(MyIP(), MyIC(), MyID()), PacketReplicationEngine(), EgressPipeline<EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(MyEP(), MyEC(), MyED()), BufferingQueueingEngine()) main;
-

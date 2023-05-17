@@ -51,13 +51,13 @@ struct tuple_2 {
 
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     @name("pipe.a") action a_1() {
-        hash<tuple_0>(meta.output, HashAlgorithm.lookup3, { headers.test.sa, headers.test.da });
+        hash<tuple_0>(meta.output, HashAlgorithm.lookup3, (tuple_0){f0 = headers.test.sa,f1 = headers.test.da});
     }
     @name("pipe.b") action b_1() {
-        hash<tuple_1>(meta.output, HashAlgorithm.lookup3, { headers.test1.a, headers.test1.b, headers.test1.c, headers.test1.d });
+        hash<tuple_1>(meta.output, HashAlgorithm.lookup3, (tuple_1){f0 = headers.test1.a,f1 = headers.test1.b,f2 = headers.test1.c,f3 = headers.test1.d});
     }
     @name("pipe.c") action c_1() {
-        hash<tuple_2>(meta.output, HashAlgorithm.lookup3, { headers.test2.a });
+        hash<tuple_2>(meta.output, HashAlgorithm.lookup3, (tuple_2){f0 = headers.test2.a});
     }
     @hidden table tbl_a {
         actions = {
@@ -90,4 +90,3 @@ control dprs(packet_out packet, in Headers_t headers) {
 }
 
 ubpf<Headers_t, metadata>(prs(), pipe(), dprs()) main;
-

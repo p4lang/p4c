@@ -31,6 +31,7 @@ header bitvec_hdr {
 }
 
 struct local_metadata_t {
+    @field_list(0)
     row_t      row0;
     row_t      row1;
     bitvec_hdr bvh0;
@@ -58,8 +59,8 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
     }
     table tns {
         key = {
-            h.bvh1.row.alt1.valid         : exact @name("h.bvh1.row.alt1.valid") ;
-            local_metadata.row0.alt0.valid: exact @name("local_metadata.row0.alt0.valid") ;
+            h.bvh1.row.alt1.valid         : exact @name("h.bvh1.row.alt1.valid");
+            local_metadata.row0.alt0.valid: exact @name("local_metadata.row0.alt0.valid");
         }
         actions = {
             do_act();
@@ -73,7 +74,7 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
         bh.row.alt1.type = EthTypes.IPv4;
         h.bvh0.row.alt1.type = bh.row.alt1.type;
         local_metadata.row0.alt0.useHash = true;
-        clone3<row_t>(CloneType.I2E, 32w0, local_metadata.row0);
+        clone_preserving_field_list(CloneType.I2E, 32w1, 8w0);
     }
 }
 
@@ -100,4 +101,3 @@ control compute_checksum(inout parsed_packet_t hdr, inout local_metadata_t local
 }
 
 V1Switch<parsed_packet_t, local_metadata_t>(parse(), verifyChecksum(), ingress(), egress(), compute_checksum(), deparser()) main;
-

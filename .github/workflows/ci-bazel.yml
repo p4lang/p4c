@@ -2,9 +2,14 @@ name: "bazel"
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
+
+# Cancel any preceding run on the pull request.
+concurrency:
+  group: bazel-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   build_direct:  # Build p4c directly.
@@ -12,42 +17,52 @@ jobs:
     env:
       BAZEL: bazelisk-linux-amd64
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
-    
+
     - name: Mount bazel cache
       uses: actions/cache@v2
       with:
-        path: "~/.cache/bazel"  # See https://docs.bazel.build/versions/master/output_directories.html
-        key: bazel1
+        # See https://docs.bazel.build/versions/master/output_directories.html
+        path: "~/.cache/bazel"
+        # Create cash entry for every run (by using unique key derived from commit hash).
+        # See https://docs.github.com/en/actions/guides/caching-dependencies-to-speed-up-workflows
+        key: ${{ runner.os }}-build-direct-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-build-direct-
 
     - name: Install bazelisk
       run: |
-        curl -LO "https://github.com/bazelbuild/bazelisk/releases/download/v1.4.0/$BAZEL"
+        curl -LO "https://github.com/bazelbuild/bazelisk/releases/download/v1.7.1/$BAZEL"
         chmod +x $BAZEL
         sudo mv $BAZEL /usr/local/bin/bazel
 
-    - name: Install Flex, Bison, and GMP
-      run: sudo apt-get update && sudo apt-get install bison flex libfl-dev libgmp-dev
+    - name: Install Flex and Bison
+      run: sudo apt-get update && sudo apt-get install bison flex libfl-dev
 
     - name: Build p4c
-      run: bazel build //... --verbose_failures
-  
+      run: bazel build //... --verbose_failures --distinct_host_configuration=false
+
   build_indirect:  # Build 3rd party Bazel project depending on p4c as a subproject.
     runs-on: ubuntu-latest
     env:
       BAZEL: bazelisk-linux-amd64
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
-    
+
     - name: Mount bazel cache
       uses: actions/cache@v2
       with:
-        path: "~/.cache/bazel"  # See https://docs.bazel.build/versions/master/output_directories.html
-        key: bazel2
+        # See https://docs.bazel.build/versions/master/output_directories.html
+        path: "~/.cache/bazel"
+        # Create cash entry for every run (by using unique key derived from commit hash).
+        # See https://docs.github.com/en/actions/guides/caching-dependencies-to-speed-up-workflows
+        key: ${{ runner.os }}-build-indirect-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-build-indirect-
 
     - name: Install bazelisk
       run: |
@@ -55,8 +70,8 @@ jobs:
         chmod +x $BAZEL
         sudo mv $BAZEL /usr/local/bin/bazel
 
-    - name: Install Flex, Bison, and GMP
-      run: sudo apt-get update && sudo apt-get install bison flex libfl-dev libgmp-dev
+    - name: Install Flex and Bison
+      run: sudo apt-get update && sudo apt-get install bison flex libfl-dev
 
     - name: Build bazel/example
-      run: cd ./bazel/example && bazel build //... --verbose_failures
+      run: cd ./bazel/example && bazel build //... --verbose_failures --distinct_host_configuration=false

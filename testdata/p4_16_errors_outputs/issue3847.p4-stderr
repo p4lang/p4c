@@ -1,0 +1,6 @@
+issue3847.p4(9): [--Werror=type-error] error: tt.apply.action_run: only allowed in switch statements
+    if (tt.apply().action_run == tt.apply().action_run) {
+        ^^^^^^^^^^^^^^^^^^^^^
+issue3847.p4(9): [--Werror=type-error] error: tt.apply.action_run: only allowed in switch statements
+    if (tt.apply().action_run == tt.apply().action_run) {
+                                 ^^^^^^^^^^^^^^^^^^^^^

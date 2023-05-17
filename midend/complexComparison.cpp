@@ -18,11 +18,11 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Expression* RemoveComplexComparisons::explode(
-    Util::SourceInfo srcInfo,
-    const IR::Type* leftType, const IR::Expression* left,
-    const IR::Type* rightType, const IR::Expression* right) {
-
+const IR::Expression *RemoveComplexComparisons::explode(Util::SourceInfo srcInfo,
+                                                        const IR::Type *leftType,
+                                                        const IR::Expression *left,
+                                                        const IR::Type *rightType,
+                                                        const IR::Expression *right) {
     // we allow several cases
     // header == header
     // header == list
@@ -42,7 +42,7 @@ const IR::Expression* RemoveComplexComparisons::explode(
 
     if (auto ht = leftType->to<IR::Type_Header>()) {
         auto lmethod = new IR::Member(left, IR::Type_Header::isValid);
-        const IR::Expression* lvalid;
+        const IR::Expression *lvalid;
         if (left->is<IR::StructExpression>()) {
             // A header defined this way is always valid
             lvalid = new IR::BoolLiteral(true);
@@ -51,7 +51,7 @@ const IR::Expression* RemoveComplexComparisons::explode(
         }
         auto linvalid = new IR::LNot(srcInfo, lvalid);
 
-        const IR::Expression* rvalid;
+        const IR::Expression *rvalid;
         if (!rightTuple) {
             if (right->is<IR::StructExpression>()) {
                 rvalid = new IR::BoolLiteral(true);
@@ -70,8 +70,8 @@ const IR::Expression* RemoveComplexComparisons::explode(
         for (auto f : ht->fields) {
             auto ftype = f->type;
             auto fleft = new IR::Member(srcInfo, left, f->name);
-            const IR::Expression* fright;
-            const IR::Type* rightType;
+            const IR::Expression *fright;
+            const IR::Type *rightType;
             if (!rightTuple) {
                 if (auto si = right->to<IR::StructExpression>()) {
                     auto nf = si->components.getDeclaration<IR::NamedExpression>(f->name);
@@ -93,13 +93,13 @@ const IR::Expression* RemoveComplexComparisons::explode(
         return result;
     } else if (auto st = leftType->to<IR::Type_StructLike>()) {
         // Works for structs and unions
-        const IR::Expression* result = new IR::BoolLiteral(true);
+        const IR::Expression *result = new IR::BoolLiteral(true);
         size_t index = 0;
         for (auto f : st->fields) {
             auto ftype = f->type;
             auto fleft = new IR::Member(srcInfo, left, f->name);
-            const IR::Expression* fright;
-            const IR::Type* rightType;
+            const IR::Expression *fright;
+            const IR::Type *rightType;
             if (!rightTuple) {
                 if (auto si = right->to<IR::StructExpression>()) {
                     auto nf = si->components.getDeclaration<IR::NamedExpression>(f->name);
@@ -120,10 +120,10 @@ const IR::Expression* RemoveComplexComparisons::explode(
         return result;
     } else if (auto at = leftType->to<IR::Type_Stack>()) {
         auto size = at->getSize();
-        const IR::Expression* result = new IR::BoolLiteral(true);
-        BUG_CHECK(rightType->is<IR::Type_Stack>(),
-                  "%1%: comparing stack with %1%", left, rightType);
-        for (unsigned i=0; i < size; i++) {
+        const IR::Expression *result = new IR::BoolLiteral(true);
+        BUG_CHECK(rightType->is<IR::Type_Stack>(), "%1%: comparing stack with %1%", left,
+                  rightType);
+        for (unsigned i = 0; i < size; i++) {
             auto index = new IR::Constant(i);
             auto lelem = new IR::ArrayIndex(srcInfo, left, index);
             auto relem = new IR::ArrayIndex(srcInfo, right, index);
@@ -133,7 +133,7 @@ const IR::Expression* RemoveComplexComparisons::explode(
         return result;
     } else if (leftTuple) {
         BUG_CHECK(rightTuple, "%1% vs %2%: unexpected comparison", left, right);
-        const IR::Expression* result = new IR::BoolLiteral(true);
+        const IR::Expression *result = new IR::BoolLiteral(true);
         auto leftList = left->to<IR::ListExpression>();
         for (size_t index = 0; index < leftList->components.size(); index++) {
             auto fleft = leftList->components.at(index);
@@ -149,17 +149,15 @@ const IR::Expression* RemoveComplexComparisons::explode(
     }
 }
 
-const IR::Node* RemoveComplexComparisons::postorder(IR::Operation_Binary* expression) {
-    if (!expression->is<IR::Neq>() && !expression->is<IR::Equ>())
-        return expression;
+const IR::Node *RemoveComplexComparisons::postorder(IR::Operation_Binary *expression) {
+    if (!expression->is<IR::Neq>() && !expression->is<IR::Equ>()) return expression;
     auto ltype = typeMap->getType(expression->left, true);
     auto rtype = typeMap->getType(expression->right, true);
     if (!ltype->is<IR::Type_StructLike>() && !ltype->is<IR::Type_Stack>() &&
         !ltype->is<IR::Type_BaseList>())
         return expression;
     auto result = explode(expression->srcInfo, ltype, expression->left, rtype, expression->right);
-    if (expression->is<IR::Neq>())
-        result = new IR::LNot(expression->srcInfo, result);
+    if (expression->is<IR::Neq>()) result = new IR::LNot(expression->srcInfo, result);
     return result;
 }
 

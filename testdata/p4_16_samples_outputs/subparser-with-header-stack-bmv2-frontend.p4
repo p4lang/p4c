@@ -36,7 +36,7 @@ struct metadata {
 }
 
 parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    bit<8> my_next_hdr_type_0;
+    @name("parserI.my_next_hdr_type") bit<8> my_next_hdr_type_0;
     state start {
         pkt.extract<h1_t>(hdr.h1);
         verify(hdr.h1.hdr_type == 8w1, error.BadHeaderType);
@@ -123,4 +123,3 @@ control DeparserI(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
-

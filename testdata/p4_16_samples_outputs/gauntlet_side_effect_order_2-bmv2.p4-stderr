@@ -1,0 +1,12 @@
+gauntlet_side_effect_order_2-bmv2.p4(33): [--Wwarn=unused] warning: 'tmp' is unused
+    action do_thing(out bit<8> tmp, in bit<8> val_1) {
+                               ^^^
+gauntlet_side_effect_order_2-bmv2.p4(33): [--Wwarn=uninitialized_out_param] warning: out parameter 'tmp' may be uninitialized when 'do_thing' terminates
+    action do_thing(out bit<8> tmp, in bit<8> val_1) {
+                               ^^^
+gauntlet_side_effect_order_2-bmv2.p4(33)
+    action do_thing(out bit<8> tmp, in bit<8> val_1) {
+           ^^^^^^^^
+gauntlet_side_effect_order_2-bmv2.p4(33): [--Wwarn=uninitialized_use] warning: tmp may be uninitialized
+    action do_thing(out bit<8> tmp, in bit<8> val_1) {
+                               ^^^

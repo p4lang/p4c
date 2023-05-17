@@ -16,7 +16,7 @@ struct Meta {
 }
 
 ethernet_t do_function() {
-    return { 48w1, 48w1, 16w1 };
+    return (ethernet_t){dst_addr = 48w1,src_addr = 48w1,eth_type = 16w1};
 }
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
@@ -56,4 +56,3 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

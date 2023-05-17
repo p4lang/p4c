@@ -25,14 +25,19 @@ namespace P4 {
 /// into distinct nodes.
 class ClonePathExpressions : public Transform {
  public:
-    ClonePathExpressions()
-    { visitDagOnce = false; setName("ClonePathExpressions"); }
-    const IR::Node* postorder(IR::PathExpression* path) override
-    { return new IR::PathExpression(path->path->clone()); }
+    ClonePathExpressions() {
+        visitDagOnce = false;
+        setName("ClonePathExpressions");
+    }
+    const IR::Node *postorder(IR::PathExpression *path) override {
+        path->path = path->path->clone();
+        return path;
+    }
 
-    template<typename T>
-    const T* clone(const IR::Node* node)
-    { return node->apply(*this)->to<T>(); }
+    template <typename T>
+    const T *clone(const IR::Node *node) {
+        return node->apply(*this)->to<T>();
+    }
 };
 
 }  // namespace P4

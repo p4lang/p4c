@@ -23,11 +23,12 @@ P4CoreLibrary P4CoreLibrary::instance;
 
 }  // namespace P4
 
-/* These must be in the same compiliation unit to ensure that P4CoreLibrary::instance
+/* These must be in the same compilation unit to ensure that P4CoreLibrary::instance
  * is initialized before V1Model::instance */
 namespace P4V1 {
 
 V1Model V1Model::instance;
+const char *V1Model::versionInitial = "20180101";
+const char *V1Model::versionCurrent = "20200408";
 
 }  // namespace P4V1
-

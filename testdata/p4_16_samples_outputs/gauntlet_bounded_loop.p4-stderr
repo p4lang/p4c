@@ -1,0 +1,6 @@
+gauntlet_bounded_loop.p4(29): [--Wwarn=uninitialized_use] warning: hdr.p.p may be uninitialized
+        transition select(hdr.p.p) {
+                          ^^^^^^^
+gauntlet_bounded_loop.p4(29): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.p
+        transition select(hdr.p.p) {
+                          ^^^^^

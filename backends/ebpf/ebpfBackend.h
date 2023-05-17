@@ -17,15 +17,15 @@ limitations under the License.
 #ifndef _BACKENDS_EBPF_EBPFBACKEND_H_
 #define _BACKENDS_EBPF_EBPFBACKEND_H_
 
-#include "ebpfOptions.h"
 #include "ebpfObject.h"
-#include "ir/ir.h"
+#include "ebpfOptions.h"
 #include "frontends/p4/evaluator/evaluator.h"
+#include "ir/ir.h"
 
 namespace EBPF {
 
-void run_ebpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* toplevel,
-                      P4::ReferenceMap* refMap, P4::TypeMap* typeMap);
+void run_ebpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *toplevel,
+                      P4::ReferenceMap *refMap, P4::TypeMap *typeMap);
 
 }  // namespace EBPF
 

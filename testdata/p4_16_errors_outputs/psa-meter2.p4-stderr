@@ -1,3 +1,11 @@
-psa-meter2.p4(53): [--Werror=type-error] error: cast: Cannot unify PSA_MeterColor_t to bit<16>
+psa-meter2.p4(57): [--Werror=type-error] error: cast
         b.data = (bit<16>)meter0.execute(index, PSA_MeterColor_t.GREEN);
                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+psa.p4(631): Cannot unify type 'PSA_MeterColor_t' with type 'bit<16>'
+  enum PSA_MeterColor_t { RED, GREEN, YELLOW }
+       ^^^^^^^^^^^^^^^^
+  ---- Originating from:
+psa.p4(631): Cannot cast from 'PSA_MeterColor_t' to 'bit<16>'
+  enum PSA_MeterColor_t { RED, GREEN, YELLOW }
+       ^^^^^^^^^^^^^^^^

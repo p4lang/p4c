@@ -8,7 +8,6 @@ header ethernet_t {
     bit<16> eth_type;
 }
 
-
 struct Headers {
     ethernet_t eth_hdr;
 }
@@ -20,7 +19,7 @@ struct S {
     bit<8> c;
 }
 
-parser p( packet_in pkt, out Headers hdr, inout S s, inout standard_metadata_t sm) {
+parser p(packet_in pkt, out Headers hdr, inout S s, inout standard_metadata_t sm) {
     state start {
         pkt.extract(hdr.eth_hdr);
         s.start = 0;
@@ -42,7 +41,6 @@ parser p( packet_in pkt, out Headers hdr, inout S s, inout standard_metadata_t s
 
 control ingress(inout Headers h, inout S s, inout standard_metadata_t sm) {
     apply {
-
     }
 }
 

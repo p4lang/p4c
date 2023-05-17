@@ -1,0 +1,8 @@
+gauntlet_switch_shadowing-bmv2.p4(16): [--Wwarn=uninitialized_out_param] warning: out parameter 'val' may be uninitialized when 'set_undefined' terminates
+bit<2> set_undefined(out bit<32> val) {
+                                 ^^^
+gauntlet_switch_shadowing-bmv2.p4(16)
+bit<2> set_undefined(out bit<32> val) {
+       ^^^^^^^^^^^^^
+[--Wwarn=uninitialized_use] warning: val_0 may be uninitialized
+[--Wwarn=uninitialized_use] warning: val_0 may be uninitialized

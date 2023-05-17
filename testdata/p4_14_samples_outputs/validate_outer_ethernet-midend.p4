@@ -30,9 +30,9 @@ struct metadata {
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t    ethernet;
-    @name(".vlan_tag_") 
+    @name(".vlan_tag_")
     vlan_tag_t[2] vlan_tag_;
 }
 
@@ -63,7 +63,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name(".set_valid_outer_unicast_packet_untagged") action set_valid_outer_unicast_packet_untagged() {
         meta._ingress_metadata_lkp_pkt_type0 = 3w1;
@@ -151,15 +151,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_valid_outer_broadcast_packet_single_tagged();
             set_valid_outer_broadcast_packet_double_tagged();
             set_valid_outer_broadcast_packet_qinq_tagged();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            hdr.ethernet.dstAddr      : ternary @name("ethernet.dstAddr") ;
-            hdr.vlan_tag_[0].isValid(): exact @name("vlan_tag_[0].$valid$") ;
-            hdr.vlan_tag_[1].isValid(): exact @name("vlan_tag_[1].$valid$") ;
+            hdr.ethernet.dstAddr      : ternary @name("ethernet.dstAddr");
+            hdr.vlan_tag_[0].isValid(): exact @name("vlan_tag_[0].$valid$");
+            hdr.vlan_tag_[1].isValid(): exact @name("vlan_tag_[1].$valid$");
         }
         size = 64;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         validate_outer_ethernet_0.apply();
@@ -190,4 +190,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

@@ -71,7 +71,7 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     }
     @name("ingress.t") table t_0 {
         key = {
-            h.h.op: exact @name("h.h.op") ;
+            h.h.op: exact @name("h.h.op");
         }
         actions = {
             usat_plus();
@@ -87,7 +87,6 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
                         8w0x3 : sat_plus();
                         8w0x4 : sat_minus();
         }
-
     }
     apply {
         t_0.apply();
@@ -95,4 +94,3 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 }
 
 V1Switch<Header_t, Meta_t>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

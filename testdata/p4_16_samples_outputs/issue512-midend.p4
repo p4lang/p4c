@@ -2,11 +2,10 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<48> EthernetAddress;
 header Ethernet_h {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 struct Parsed_packet {
@@ -32,16 +31,23 @@ parser parserI(packet_in pkt, out Parsed_packet hdr, inout mystruct1 meta, inout
 }
 
 control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_metadata_t stdmeta) {
-    bool cond;
+    @name("cIngress.hasReturned") bool hasReturned;
     @name("cIngress.foo") action foo() {
+        hasReturned = false;
         meta.b = meta.b + 4w5;
-        cond = meta.b > 4w10;
-        meta.b = (meta.b > 4w10 ? meta.b ^ 4w5 : meta.b);
-        meta.b = (!(cond ? true : false) ? meta.b + 4w5 : meta.b);
+        if (meta.b > 4w10) {
+            meta.b = meta.b ^ 4w5;
+            hasReturned = true;
+        }
+        if (hasReturned) {
+            ;
+        } else {
+            meta.b = meta.b + 4w5;
+        }
     }
     @name("cIngress.guh") table guh_0 {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
         }
         actions = {
             foo();
@@ -69,4 +75,3 @@ control uc(inout Parsed_packet hdr, inout mystruct1 meta) {
 }
 
 V1Switch<Parsed_packet, mystruct1>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
-

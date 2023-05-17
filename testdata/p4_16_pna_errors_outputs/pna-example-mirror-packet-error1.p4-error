@@ -1,0 +1,2 @@
+[--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table flowTable. Copying all match fields to metadata
+[--Werror=invalid] error: Mirror session ID 0 is reserved for use by Architecture

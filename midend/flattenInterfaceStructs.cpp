@@ -18,89 +18,41 @@ limitations under the License.
 
 namespace P4 {
 
-void StructTypeReplacement::flatten(const P4::TypeMap* typeMap,
-                                    cstring prefix,
-                                    const IR::Type* type,
-                                    IR::IndexedVector<IR::StructField> *fields) {
-    if (auto st = type->to<IR::Type_Struct>()) {
-        structFieldMap.emplace(prefix, st);
-        for (auto f : st->fields)
-            flatten(typeMap, prefix + "." + f->name, f->type, fields);
-        return;
-    }
-    cstring fieldName = prefix.replace(".", "_") +
-                        cstring::to_cstring(fieldNameRemap.size());
-    fieldNameRemap.emplace(prefix, fieldName);
-    fields->push_back(new IR::StructField(IR::ID(fieldName), type->getP4Type()));
-}
-
-StructTypeReplacement::StructTypeReplacement(
-    const P4::TypeMap* typeMap, const IR::Type_Struct* type) {
-    auto vec = new IR::IndexedVector<IR::StructField>();
-    flatten(typeMap, "", type, vec);
-    replacementType = new IR::Type_Struct(type->name, IR::Annotations::empty, *vec);
-}
-
-const IR::StructExpression* StructTypeReplacement::explode(
-    const IR::Expression *root, cstring prefix) {
-    auto vec = new IR::IndexedVector<IR::NamedExpression>();
-    auto fieldType = ::get(structFieldMap, prefix);
-    BUG_CHECK(fieldType, "No field for %1%", prefix);
-    for (auto f : fieldType->fields) {
-        cstring fieldName = prefix + "." + f->name.name;
-        auto newFieldname = ::get(fieldNameRemap, fieldName);
-        const IR::Expression* expr;
-        if (!newFieldname.isNullOrEmpty()) {
-            expr = new IR::Member(root, newFieldname);
-        } else {
-            expr = explode(root, fieldName);
-        }
-        vec->push_back(new IR::NamedExpression(f->name, expr));
-    }
-    auto type = fieldType->getP4Type()->to<IR::Type_Name>();
-    return new IR::StructExpression(
-        root->srcInfo, type, type, *vec);
-}
-
 namespace {
-static const IR::Type_Struct* isNestedStruct(const P4::TypeMap* typeMap, const IR::Type* type) {
+static const IR::Type_Struct *isNestedStruct(const P4::TypeMap *typeMap, const IR::Type *type) {
     if (auto st = type->to<IR::Type_Struct>()) {
         for (auto f : st->fields) {
             auto ft = typeMap->getType(f, true);
-            if (ft->is<IR::Type_Struct>())
-                return st;
+            if (ft->is<IR::Type_Struct>()) return st;
         }
     }
     return nullptr;
 }
 }  // namespace
 
-void NestedStructMap::createReplacement(const IR::Type_Struct* type) {
+void NestedStructMap::createReplacement(const IR::Type_Struct *type) {
     auto repl = ::get(replacement, type);
-    if (repl != nullptr)
-        return;
-    repl = new StructTypeReplacement(typeMap, type);
+    if (repl != nullptr) return;
+    repl =
+        new StructTypeReplacement<IR::Type_Struct>(typeMap, type, new AnnotationSelectionPolicy());
     LOG3("Replacement for " << type << " is " << repl);
     replacement.emplace(type, repl);
 }
 
-bool FindTypesToReplace::preorder(const IR::Declaration_Instance* inst) {
+bool FindTypesToReplace::preorder(const IR::Declaration_Instance *inst) {
     auto type = map->typeMap->getTypeType(inst->type, true);
     auto ts = type->to<IR::Type_SpecializedCanonical>();
-    if (ts == nullptr)
-        return false;
-    if (!ts->baseType->is<IR::Type_Package>())
-        return false;
+    if (ts == nullptr) return false;
+    if (!ts->baseType->is<IR::Type_Package>()) return false;
     for (auto t : *ts->arguments) {
-        if (auto st = isNestedStruct(map->typeMap, t))
-            map->createReplacement(st);
+        if (auto st = isNestedStruct(map->typeMap, t)) map->createReplacement(st);
     }
     return false;
 }
 
 /////////////////////////////////
 
-const IR::Node* ReplaceStructs::preorder(IR::P4Program* program) {
+const IR::Node *ReplaceStructs::preorder(IR::P4Program *program) {
     if (replacementMap->empty()) {
         // nothing to do
         prune();
@@ -108,41 +60,36 @@ const IR::Node* ReplaceStructs::preorder(IR::P4Program* program) {
     return program;
 }
 
-const IR::Node* ReplaceStructs::postorder(IR::Type_Struct* type) {
+const IR::Node *ReplaceStructs::postorder(IR::Type_Struct *type) {
     auto canon = replacementMap->typeMap->getTypeType(getOriginal(), true);
     auto repl = replacementMap->getReplacement(canon);
-    if (repl != nullptr)
-        return repl->replacementType;
+    if (repl != nullptr) return repl->replacementType;
     return type;
 }
 
-const IR::Node* ReplaceStructs::postorder(IR::Member* expression) {
+const IR::Node *ReplaceStructs::postorder(IR::Member *expression) {
     // Find out if this applies to one of the parameters that are being replaced.
-    const IR::Expression* e = expression;
+    const IR::Expression *e = expression;
     cstring prefix = "";
     while (auto mem = e->to<IR::Member>()) {
         e = mem->expr;
         prefix = cstring(".") + mem->member + prefix;
     }
     auto pe = e->to<IR::PathExpression>();
-    if (pe == nullptr)
-        return expression;
+    if (pe == nullptr) return expression;
     // At this point we know that pe is an expression of the form
     // param.field1.etc.fieldN, where param has a type that needs to be replaced.
     auto decl = replacementMap->refMap->getDeclaration(pe->path, true);
     auto param = decl->to<IR::Parameter>();
-    if (param == nullptr)
-        return expression;
+    if (param == nullptr) return expression;
     auto repl = ::get(toReplace, param);
-    if (repl == nullptr)
-        return expression;
+    if (repl == nullptr) return expression;
     auto newFieldName = ::get(repl->fieldNameRemap, prefix);
-    const IR::Expression* result;
+    const IR::Expression *result;
     if (newFieldName.isNullOrEmpty()) {
         auto type = replacementMap->typeMap->getType(getOriginal(), true);
         // This could be, for example, a method like setValid.
-        if (!type->is<IR::Type_Struct>())
-            return expression;
+        if (!type->is<IR::Type_Struct>()) return expression;
         if (getParent<IR::Member>() != nullptr)
             // We only want to process the outermost Member
             return expression;
@@ -165,7 +112,7 @@ const IR::Node* ReplaceStructs::postorder(IR::Member* expression) {
     return result;
 }
 
-const IR::Node* ReplaceStructs::preorder(IR::P4Parser* parser) {
+const IR::Node *ReplaceStructs::preorder(IR::P4Parser *parser) {
     for (auto p : parser->getApplyParameters()->parameters) {
         auto pt = replacementMap->typeMap->getType(p, true);
         auto repl = replacementMap->getReplacement(pt);
@@ -177,7 +124,7 @@ const IR::Node* ReplaceStructs::preorder(IR::P4Parser* parser) {
     return parser;
 }
 
-const IR::Node* ReplaceStructs::preorder(IR::P4Control* control) {
+const IR::Node *ReplaceStructs::preorder(IR::P4Control *control) {
     for (auto p : control->getApplyParameters()->parameters) {
         auto pt = replacementMap->typeMap->getType(p, true);
         auto repl = replacementMap->getReplacement(pt);

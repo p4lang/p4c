@@ -25,64 +25,69 @@ namespace EBPF {
 
 class EBPFControl;
 
-class ControlBodyTranslator : public CodeGenInspector {
-    const EBPFControl* control;
-    std::set<const IR::Parameter*> toDereference;
+class ControlBodyTranslator : public virtual CodeGenInspector {
+ protected:
+    const EBPFControl *control;
+    std::set<const IR::Parameter *> toDereference;
     std::vector<cstring> saveAction;
-    P4::P4CoreLibrary& p4lib;
+    P4::P4CoreLibrary &p4lib;
+
  public:
-    explicit ControlBodyTranslator(const EBPFControl* control);
+    explicit ControlBodyTranslator(const EBPFControl *control);
 
     // handle the packet_out.emit method
-    virtual void compileEmitField(const IR::Expression* expr, cstring field,
-                                  unsigned alignment, EBPFType* type);
-    virtual void compileEmit(const IR::Vector<IR::Argument>* args);
-    virtual void processMethod(const P4::ExternMethod* method);
-    virtual void processApply(const P4::ApplyMethod* method);
-    virtual void processFunction(const P4::ExternFunction* function);
-    void processCustomExternFunction(const P4::ExternFunction* function,
+    virtual void compileEmitField(const IR::Expression *expr, cstring field, unsigned alignment,
+                                  EBPFType *type);
+    virtual void compileEmit(const IR::Vector<IR::Argument> *args);
+    virtual void processMethod(const P4::ExternMethod *method);
+    virtual void processApply(const P4::ApplyMethod *method);
+    virtual void processFunction(const P4::ExternFunction *function);
+    void processCustomExternFunction(const P4::ExternFunction *function,
                                      EBPFTypeFactory *typeFactory);
 
-    bool preorder(const IR::PathExpression* expression) override;
-    bool preorder(const IR::MethodCallExpression* expression) override;
-    bool preorder(const IR::ExitStatement*) override;
-    bool preorder(const IR::ReturnStatement*) override;
-    bool preorder(const IR::IfStatement* statement) override;
-    bool preorder(const IR::SwitchStatement* statement) override;
+    bool preorder(const IR::PathExpression *expression) override;
+    bool preorder(const IR::MethodCallExpression *expression) override;
+    bool preorder(const IR::ExitStatement *) override;
+    bool preorder(const IR::ReturnStatement *) override;
+    bool preorder(const IR::IfStatement *statement) override;
+    bool preorder(const IR::SwitchStatement *statement) override;
+    bool preorder(const IR::StructExpression *expr) override;
 };
 
 class EBPFControl : public EBPFObject {
  public:
-    const EBPFProgram*      program;
-    const IR::ControlBlock* controlBlock;
-    const IR::Parameter*    headers;
-    const IR::Parameter*    accept;
-    const IR::Parameter*    parserHeaders;
+    const EBPFProgram *program;
+    const IR::ControlBlock *controlBlock;
+    const IR::Parameter *headers;
+    const IR::Parameter *accept;
+    const IR::Parameter *parserHeaders;
     // replace references to headers with references to parserHeaders
-    cstring                 hitVariable;
-    ControlBodyTranslator*  codeGen;
-    const bool              emitExterns;
+    cstring hitVariable;
+    ControlBodyTranslator *codeGen;
+    const bool emitExterns;
 
-    std::set<const IR::Parameter*> toDereference;
-    std::map<cstring, EBPFTable*>  tables;
-    std::map<cstring, EBPFCounterTable*>  counters;
+    std::set<const IR::Parameter *> toDereference;
+    std::map<cstring, EBPFTable *> tables;
+    std::map<cstring, EBPFCounterTable *> counters;
 
-    EBPFControl(const EBPFProgram* program, const IR::ControlBlock* block,
-                const IR::Parameter* parserHeaders);
-    virtual void emit(CodeBuilder* builder);
-    void emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl);
-    void emitTableTypes(CodeBuilder* builder);
-    void emitTableInitializers(CodeBuilder* builder);
-    void emitTableInstances(CodeBuilder* builder);
+    EBPFControl(const EBPFProgram *program, const IR::ControlBlock *block,
+                const IR::Parameter *parserHeaders);
+    virtual void emit(CodeBuilder *builder);
+    virtual void emitDeclaration(CodeBuilder *builder, const IR::Declaration *decl);
+    virtual void emitTableTypes(CodeBuilder *builder);
+    virtual void emitTableInitializers(CodeBuilder *builder);
+    virtual void emitTableInstances(CodeBuilder *builder);
     virtual bool build();
-    EBPFTable* getTable(cstring name) const {
+    EBPFTable *getTable(cstring name) const {
         auto result = ::get(tables, name);
         BUG_CHECK(result != nullptr, "No table named %1%", name);
-        return result; }
-    EBPFCounterTable* getCounter(cstring name) const {
+        return result;
+    }
+    EBPFCounterTable *getCounter(cstring name) const {
         auto result = ::get(counters, name);
         BUG_CHECK(result != nullptr, "No counter named %1%", name);
-        return result; }
+        return result;
+    }
 
  protected:
     void scanConstants();

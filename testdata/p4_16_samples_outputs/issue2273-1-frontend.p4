@@ -26,9 +26,9 @@ struct headers {
 }
 
 control ingress(inout headers hdr) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("ingress.stack") Stack<bit<16>>(2048) stack_0;
     @name("ingress.write") StackAction<bit<16>, bit<16>>(stack_0) write_0 = {
@@ -54,12 +54,12 @@ control ingress(inout headers hdr) {
     @name("ingress.do_push") table do_push_0 {
         actions = {
             push_1();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            hdr.data.f1: ternary @name("hdr.data.f1") ;
+            hdr.data.f1: ternary @name("hdr.data.f1");
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name("ingress.pop") action pop_1() {
         hdr.data.b1 = 8w0xfe;
@@ -68,12 +68,12 @@ control ingress(inout headers hdr) {
     @name("ingress.do_pop") table do_pop_0 {
         actions = {
             pop_1();
-            @defaultonly NoAction_3();
+            @defaultonly NoAction_2();
         }
         key = {
-            hdr.data.f1: exact @name("hdr.data.f1") ;
+            hdr.data.f1: exact @name("hdr.data.f1");
         }
-        default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     apply {
         if (hdr.data.b1 == 8w0) {
@@ -87,4 +87,3 @@ control ingress(inout headers hdr) {
 control ctr<H>(inout H hdr);
 package top<H>(ctr<H> ctrl);
 top<headers>(ingress()) main;
-

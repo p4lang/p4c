@@ -1,5 +1,5 @@
 control ingress(inout bit<8> h) {
-    bit<7> tmp_0;
+    @name("ingress.tmp") bit<7> tmp_0;
     @name("ingress.a") action a() {
         h[0:0] = 1w0;
     }
@@ -37,4 +37,3 @@ control ingress(inout bit<8> h) {
 control c<H>(inout H h);
 package top<H>(c<H> c);
 top<bit<8>>(ingress()) main;
-

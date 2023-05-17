@@ -1,3 +1,9 @@
-implicit.p4(19): [--Werror=type-error] error: b: Cannot unify int<32> to bit<32>
+implicit.p4(19): [--Werror=type-error] error: b
     bit<32> b = 32s1;
     ^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+  Cannot cast implicitly type 'int<32>' to type 'bit<32>'
+  ---- Originating from:
+implicit.p4(19): Source expression '32s1' produces a result of type 'int<32>' which cannot be assigned to a left-value with type 'bit<32>'
+      bit<32> b = 32s1;
+                  ^^^^

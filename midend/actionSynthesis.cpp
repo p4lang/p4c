@@ -15,15 +15,15 @@ limitations under the License.
 */
 
 #include "actionSynthesis.h"
-#include "frontends/p4/methodInstance.h"
+
 #include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/methodInstance.h"
 
 namespace P4 {
 
-const IR::Node* DoMoveActionsToTables::postorder(IR::MethodCallStatement* statement) {
+const IR::Node *DoMoveActionsToTables::postorder(IR::MethodCallStatement *statement) {
     auto mi = MethodInstance::resolve(statement, refMap, typeMap);
-    if (!mi->is<ActionCall>())
-        return statement;
+    if (!mi->is<ActionCall>()) return statement;
     auto ac = mi->to<ActionCall>();
 
     auto action = ac->action;
@@ -35,24 +35,22 @@ const IR::Node* DoMoveActionsToTables::postorder(IR::MethodCallStatement* statem
     auto arg = mc->arguments->begin();
     for (; it != action->parameters->parameters.end(); ++it) {
         auto p = *it;
-        if (p->direction == IR::Direction::None)
-            break;
+        if (p->direction == IR::Direction::None) break;
         directionArgs->push_back(*arg);
         ++arg;
     }
 
     // Action invocation
-    BUG_CHECK(ac->expr->method->is<IR::PathExpression>(),
-              "%1%: Expected a PathExpression", ac->expr->method);
+    BUG_CHECK(ac->expr->method->is<IR::PathExpression>(), "%1%: Expected a PathExpression",
+              ac->expr->method);
     auto actionPath = new IR::PathExpression(IR::ID(mc->srcInfo, ac->action->name));
-    auto call = new IR::MethodCallExpression(mc->srcInfo, actionPath,
-                                             new IR::Vector<IR::Type>(), directionArgs);
+    auto call = new IR::MethodCallExpression(mc->srcInfo, actionPath, new IR::Vector<IR::Type>(),
+                                             directionArgs);
     auto actinst = new IR::ActionListElement(statement->srcInfo, call);
     // Action list property
     auto actlist = new IR::ActionList({actinst});
-    auto prop = new IR::Property(
-        IR::ID(IR::TableProperties::actionsPropertyName, nullptr),
-        actlist, false);
+    auto prop =
+        new IR::Property(IR::ID(IR::TableProperties::actionsPropertyName, nullptr), actlist, false);
     // default action property
     auto otherArgs = new IR::Vector<IR::Argument>();
     for (; it != action->parameters->parameters.end(); ++it) {
@@ -62,12 +60,11 @@ const IR::Node* DoMoveActionsToTables::postorder(IR::MethodCallStatement* statem
     BUG_CHECK(arg == mc->arguments->end(), "%1%: mismatched arguments", mc);
     auto amce = new IR::MethodCallExpression(mc->srcInfo, mc->method, mc->typeArguments, otherArgs);
     auto defactval = new IR::ExpressionValue(amce);
-    auto defprop = new IR::Property(
-        IR::ID(IR::TableProperties::defaultActionPropertyName, nullptr),
-        defactval, true);
+    auto defprop = new IR::Property(IR::ID(IR::TableProperties::defaultActionPropertyName, nullptr),
+                                    defactval, true);
 
     // List of table properties
-    auto props = new IR::TableProperties({ prop, defprop });
+    auto props = new IR::TableProperties({prop, defprop});
     // Synthesize a new table
     cstring tblName = IR::ID(refMap->newName(cstring("tbl_") + ac->action->name.name), nullptr);
 
@@ -79,54 +76,48 @@ const IR::Node* DoMoveActionsToTables::postorder(IR::MethodCallStatement* statem
     // Table invocation statement
     auto tblpath = new IR::PathExpression(tblName);
     auto method = new IR::Member(tblpath, IR::IApply::applyMethodName);
-    auto mce = new IR::MethodCallExpression(
-        statement->srcInfo, method, new IR::Vector<IR::Type>(),
-        new IR::Vector<IR::Argument>());
+    auto mce = new IR::MethodCallExpression(statement->srcInfo, method, new IR::Vector<IR::Type>(),
+                                            new IR::Vector<IR::Argument>());
     auto stat = new IR::MethodCallStatement(mce->srcInfo, mce);
     return stat;
 }
 
-const IR::Node* DoMoveActionsToTables::postorder(IR::P4Control* control) {
-    for (auto t : tables)
-        control->controlLocals.push_back(t);
+const IR::Node *DoMoveActionsToTables::postorder(IR::P4Control *control) {
+    for (auto t : tables) control->controlLocals.push_back(t);
     return control;
 }
 
 /////////////////////////////////////////////////////////////////////
 
-bool DoSynthesizeActions::mustMove(const IR::MethodCallStatement* statement) {
+bool DoSynthesizeActions::mustMove(const IR::MethodCallStatement *statement) {
     auto mi = MethodInstance::resolve(statement, refMap, typeMap);
-    if (mi->is<ActionCall>() || mi->is<ApplyMethod>())
-        return false;
+    if (mi->is<ActionCall>() || mi->is<ApplyMethod>()) return false;
     return true;
 }
 
 bool DoSynthesizeActions::mustMove(const IR::AssignmentStatement *assign) {
     if (auto mc = assign->right->to<IR::MethodCallExpression>()) {
         auto mi = MethodInstance::resolve(mc, refMap, typeMap);
-        if (!mi->is<ExternMethod>())
-            return true;
+        if (!mi->is<ExternMethod>()) return true;
     }
     return true;
 }
 
-const IR::Node* DoSynthesizeActions::preorder(IR::P4Control* control) {
+const IR::Node *DoSynthesizeActions::preorder(IR::P4Control *control) {
     actions.clear();
     changes = false;
-    if (policy != nullptr && !policy->convert(getContext(), control))
-        prune();  // skip this one
+    if (policy != nullptr && !policy->convert(getContext(), control)) prune();  // skip this one
     return control;
 }
 
-const IR::Node* DoSynthesizeActions::postorder(IR::P4Control* control) {
-    for (auto a : actions)
-        control->controlLocals.push_back(a);
+const IR::Node *DoSynthesizeActions::postorder(IR::P4Control *control) {
+    for (auto a : actions) control->controlLocals.push_back(a);
     return control;
 }
 
-const IR::Node* DoSynthesizeActions::preorder(IR::BlockStatement* statement) {
+const IR::Node *DoSynthesizeActions::preorder(IR::BlockStatement *statement) {
     // Find a chain of statements to convert
-    auto actbody = new IR::BlockStatement;  // build here new action
+    auto actbody = new IR::BlockStatement;                       // build here new action
     auto left = new IR::BlockStatement(statement->annotations);  // leftover statements
 
     for (auto c : statement->components) {
@@ -146,10 +137,12 @@ const IR::Node* DoSynthesizeActions::preorder(IR::BlockStatement* statement) {
                 !policy->can_combine(getContext(), actbody, c)) {
                 auto action = createAction(actbody);
                 left->push_back(action);
-                actbody = new IR::BlockStatement; }
+                actbody = new IR::BlockStatement;
+            }
             actbody->push_back(c);
             actbody->srcInfo += c->srcInfo;
-            continue; }
+            continue;
+        }
 
         if (!actbody->components.empty()) {
             auto action = createAction(actbody);
@@ -182,28 +175,28 @@ static cstring createName(const Util::SourceInfo &si) {
     p = p ? p + 1 : pos.fileName.c_str();
     while (*p && !isalpha(*p)) ++p;
     while (*p && *p != '.') {
-        if (isalnum(*p) || *p == '_')
-            name += *p;
-        ++p; }
+        if (isalnum(*p) || *p == '_') name += *p;
+        ++p;
+    }
     if (name.empty()) return "act";
     if (isdigit(name.back())) name += 'l';
     return name + std::to_string(pos.sourceLine);
 }
 
-const IR::Statement* DoSynthesizeActions::createAction(const IR::Statement* toAdd) {
+const IR::Statement *DoSynthesizeActions::createAction(const IR::Statement *toAdd) {
     changes = true;
     auto name = refMap->newName(createName(toAdd->srcInfo));
-    const IR::BlockStatement* body;
+    const IR::BlockStatement *body;
     if (toAdd->is<IR::BlockStatement>()) {
         body = toAdd->to<IR::BlockStatement>();
     } else {
-        body = new IR::BlockStatement(toAdd->srcInfo, { toAdd });
+        body = new IR::BlockStatement(toAdd->srcInfo, {toAdd});
     }
     LOG3("Adding new action " << name << body);
 
     auto annos = new IR::Annotations();
     annos->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
-    auto action = new IR::P4Action(name, annos, new IR::ParameterList(), body);
+    auto action = new IR::P4Action(toAdd->srcInfo, name, annos, new IR::ParameterList(), body);
     actions.push_back(action);
     auto actpath = new IR::PathExpression(name);
     auto repl = new IR::MethodCallExpression(toAdd->srcInfo, actpath);
@@ -211,19 +204,17 @@ const IR::Statement* DoSynthesizeActions::createAction(const IR::Statement* toAd
     return result;
 }
 
-const IR::Node* DoSynthesizeActions::preorder(IR::AssignmentStatement* statement) {
-    if (mustMove(statement))
-        return createAction(statement);
+const IR::Node *DoSynthesizeActions::preorder(IR::AssignmentStatement *statement) {
+    if (mustMove(statement)) return createAction(statement);
     return statement;
 }
 
-const IR::Node* DoSynthesizeActions::preorder(IR::MethodCallStatement* statement) {
-    if (mustMove(statement))
-        return createAction(statement);
+const IR::Node *DoSynthesizeActions::preorder(IR::MethodCallStatement *statement) {
+    if (mustMove(statement)) return createAction(statement);
     return statement;
 }
 
-const IR::Node* DoSynthesizeActions::preorder(IR::ExitStatement* statement) {
+const IR::Node *DoSynthesizeActions::preorder(IR::ExitStatement *statement) {
     return createAction(statement);
 }
 

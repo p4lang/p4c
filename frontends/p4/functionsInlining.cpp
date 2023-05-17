@@ -15,27 +15,24 @@ limitations under the License.
 */
 
 #include "functionsInlining.h"
+
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/callGraph.h"
 #include "frontends/p4/evaluator/substituteParameters.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/parameterSubstitution.h"
-#include "frontends/common/resolveReferences/resolveReferences.h"
 
 namespace P4 {
 
-void DiscoverFunctionsInlining::postorder(const IR::MethodCallExpression* mce) {
+void DiscoverFunctionsInlining::postorder(const IR::MethodCallExpression *mce) {
     auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
     CHECK_NULL(mi);
     auto ac = mi->to<P4::FunctionCall>();
-    if (ac == nullptr)
-        return;
-    const IR::Node* caller = findContext<IR::Function>();
-    if (caller == nullptr)
-        caller = findContext<IR::P4Action>();
-    if (caller == nullptr)
-        caller = findContext<IR::P4Control>();
-    if (caller == nullptr)
-        caller = findContext<IR::P4Parser>();
+    if (ac == nullptr) return;
+    const IR::Node *caller = findContext<IR::Function>();
+    if (caller == nullptr) caller = findContext<IR::P4Action>();
+    if (caller == nullptr) caller = findContext<IR::P4Control>();
+    if (caller == nullptr) caller = findContext<IR::P4Parser>();
     CHECK_NULL(caller);
     auto stat = findContext<IR::Statement>();
     CHECK_NULL(stat);
@@ -46,11 +43,11 @@ void DiscoverFunctionsInlining::postorder(const IR::MethodCallExpression* mce) {
     toInline->add(aci);
 }
 
-void FunctionsInliner::end_apply(const IR::Node*) {
+void FunctionsInliner::end_apply(const IR::Node *) {
     BUG_CHECK(replacementStack.empty(), "Non-empty replacement stack");
 }
 
-Visitor::profile_t FunctionsInliner::init_apply(const IR::Node* node) {
+Visitor::profile_t FunctionsInliner::init_apply(const IR::Node *node) {
     P4::ResolveReferences solver(refMap, true);
     node->apply(solver);
     LOG2("FunctionsInliner " << toInline);
@@ -68,60 +65,51 @@ bool FunctionsInliner::preCaller() {
     return true;
 }
 
-const IR::Node* FunctionsInliner::postCaller(const IR::Node* node) {
+const IR::Node *FunctionsInliner::postCaller(const IR::Node *node) {
     LOG2("Ending: " << dbp(getOriginal()));
-    if (toInline->sites.count(getOriginal()) > 0)
-        list->replace(getOriginal(), node);
+    if (toInline->sites.count(getOriginal()) > 0) list->replace(getOriginal(), node);
     BUG_CHECK(!replacementStack.empty(), "Empty replacement stack");
     replacementStack.pop_back();
     return node;
 }
 
-const IR::Node* FunctionsInliner::preorder(IR::MethodCallStatement* statement) {
+const IR::Node *FunctionsInliner::preorder(IR::MethodCallStatement *statement) {
     auto orig = getOriginal<IR::MethodCallStatement>();
     LOG2("Visiting " << dbp(orig));
     auto replMap = getReplacementMap();
-    if (replMap == nullptr)
-        return statement;
+    if (replMap == nullptr) return statement;
 
     auto callee = get(*replMap, orig);
-    if (callee == nullptr)
-        return statement;
+    if (callee == nullptr) return statement;
     return inlineBefore(callee, statement->methodCall, statement);
 }
 
-const FunctionsInliner::ReplacementMap* FunctionsInliner::getReplacementMap() const {
-    if (replacementStack.empty())
-        return nullptr;
+const FunctionsInliner::ReplacementMap *FunctionsInliner::getReplacementMap() const {
+    if (replacementStack.empty()) return nullptr;
     return replacementStack.back();
 }
 
 void FunctionsInliner::dumpReplacementMap() const {
     auto replMap = getReplacementMap();
     LOG2("Replacement map contents");
-    if (replMap == nullptr)
-        return;
-    for (auto it : *replMap)
-        LOG2("\t" << it.first << " with " << it.second);
+    if (replMap == nullptr) return;
+    for (auto it : *replMap) LOG2("\t" << it.first << " with " << it.second);
 }
 
-const IR::Node* FunctionsInliner::preorder(IR::AssignmentStatement* statement) {
+const IR::Node *FunctionsInliner::preorder(IR::AssignmentStatement *statement) {
     auto orig = getOriginal<IR::AssignmentStatement>();
     LOG2("Visiting " << dbp(orig));
     auto replMap = getReplacementMap();
-    if (replMap == nullptr)
-        return statement;
+    if (replMap == nullptr) return statement;
 
     auto callee = get(*replMap, orig);
-    if (callee == nullptr)
-        return statement;
+    if (callee == nullptr) return statement;
     auto call = statement->right->to<IR::MethodCallExpression>();
-    BUG_CHECK(call != nullptr,
-              "%1%: expected a method call", statement->right);
+    BUG_CHECK(call != nullptr, "%1%: expected a method call", statement->right);
     return inlineBefore(callee, call, statement);
 }
 
-const IR::Node* FunctionsInliner::preorder(IR::P4Parser* parser) {
+const IR::Node *FunctionsInliner::preorder(IR::P4Parser *parser) {
     if (preCaller()) {
         parser->visit_children(*this);
         return postCaller(parser);
@@ -130,17 +118,16 @@ const IR::Node* FunctionsInliner::preorder(IR::P4Parser* parser) {
     }
 }
 
-const IR::Node* FunctionsInliner::preorder(IR::P4Control* control) {
+const IR::Node *FunctionsInliner::preorder(IR::P4Control *control) {
     bool hasWork = preCaller();
     // We always visit the children: there may be function calls in
     // actions within the control
     control->visit_children(*this);
-    if (hasWork)
-        return postCaller(control);
+    if (hasWork) return postCaller(control);
     return control;
 }
 
-const IR::Node* FunctionsInliner::preorder(IR::Function* function) {
+const IR::Node *FunctionsInliner::preorder(IR::Function *function) {
     if (preCaller()) {
         function->visit_children(*this);
         return postCaller(function);
@@ -149,7 +136,7 @@ const IR::Node* FunctionsInliner::preorder(IR::Function* function) {
     }
 }
 
-const IR::Node* FunctionsInliner::preorder(IR::P4Action* action) {
+const IR::Node *FunctionsInliner::preorder(IR::P4Action *action) {
     if (preCaller()) {
         action->visit_children(*this);
         return postCaller(action);
@@ -158,10 +145,9 @@ const IR::Node* FunctionsInliner::preorder(IR::P4Action* action) {
     }
 }
 
-const IR::Expression* FunctionsInliner::cloneBody(
-    const IR::IndexedVector<IR::StatOrDecl>& src,
-    IR::IndexedVector<IR::StatOrDecl>& dest) {
-    const IR::Expression* retVal = nullptr;
+const IR::Expression *FunctionsInliner::cloneBody(const IR::IndexedVector<IR::StatOrDecl> &src,
+                                                  IR::IndexedVector<IR::StatOrDecl> &dest) {
+    const IR::Expression *retVal = nullptr;
     for (auto s : src) {
         if (auto rs = s->to<IR::ReturnStatement>())
             retVal = rs->expression;
@@ -171,9 +157,9 @@ const IR::Expression* FunctionsInliner::cloneBody(
     return retVal;
 }
 
-const IR::Node* FunctionsInliner::inlineBefore(
-    const IR::Node* calleeNode, const IR::MethodCallExpression* mce,
-    const IR::Statement* statement) {
+const IR::Node *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
+                                               const IR::MethodCallExpression *mce,
+                                               const IR::Statement *statement) {
     LOG2("Inlining: " << dbp(calleeNode) << " before " << dbp(statement));
 
     auto callee = calleeNode->to<IR::Function>();
@@ -183,7 +169,7 @@ const IR::Node* FunctionsInliner::inlineBefore(
     ParameterSubstitution subst;
     TypeVariableSubstitution tvs;  // empty
 
-    std::map<const IR::Parameter*, cstring> paramRename;
+    std::map<const IR::Parameter *, cstring> paramRename;
     ParameterSubstitution substitution;
     substitution.populate(callee->type->parameters, mce->arguments);
 
@@ -193,29 +179,27 @@ const IR::Node* FunctionsInliner::inlineBefore(
         cstring newName = refMap->newName(param->name);
         paramRename.emplace(param, newName);
         if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
-            auto vardecl = new IR::Declaration_Variable(newName, param->annotations,
-                                                        param->type, argument->expression);
+            auto vardecl = new IR::Declaration_Variable(newName, param->annotations, param->type,
+                                                        argument->expression);
             body.push_back(vardecl);
-            subst.add(param, new IR::Argument(
-                argument->srcInfo, argument->name, new IR::PathExpression(newName)));
+            subst.add(param, new IR::Argument(argument->srcInfo, argument->name,
+                                              new IR::PathExpression(newName)));
         } else if (param->direction == IR::Direction::None) {
             // This works because there can be no side-effects in the evaluation of this
             // argument.
             subst.add(param, argument);
         } else if (param->direction == IR::Direction::Out) {
             // uninitialized variable
-            auto vardecl = new IR::Declaration_Variable(newName,
-                                                        param->annotations, param->type);
-            subst.add(param, new IR::Argument(
-                argument->srcInfo, argument->name, new IR::PathExpression(newName)));
+            auto vardecl = new IR::Declaration_Variable(newName, param->annotations, param->type);
+            subst.add(param, new IR::Argument(argument->srcInfo, argument->name,
+                                              new IR::PathExpression(newName)));
             body.push_back(vardecl);
         }
     }
 
     SubstituteParameters sp(refMap, &subst, &tvs);
     auto clone = callee->apply(sp);
-    if (::errorCount() > 0)
-        return statement;
+    if (::errorCount() > 0) return statement;
     CHECK_NULL(clone);
     BUG_CHECK(clone->is<IR::Function>(), "%1%: not an function", clone);
     auto funclone = clone->to<IR::Function>();
@@ -238,8 +222,8 @@ const IR::Node* FunctionsInliner::inlineBefore(
         auto setRetval = new IR::AssignmentStatement(assign->srcInfo, assign->left, retExpr);
         body.push_back(setRetval);
     } else {
-        BUG_CHECK(statement->is<IR::MethodCallStatement>(),
-                  "%1%: expected a method call", statement);
+        BUG_CHECK(statement->is<IR::MethodCallStatement>(), "%1%: expected a method call",
+                  statement);
         // ignore the returned value.
     }
 

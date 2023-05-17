@@ -1,0 +1,6 @@
+gauntlet_index_2-bmv2.p4(40): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
+            32w1 : exact @name("IymcAg") ;
+            ^^^^
+gauntlet_index_2-bmv2.p4(40): [--Wwarn=mismatch] warning: 32w1: Constant key field
+            32w1 : exact @name("IymcAg") ;
+            ^^^^

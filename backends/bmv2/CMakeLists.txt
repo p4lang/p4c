@@ -29,7 +29,6 @@ set (BMV2_SIMPLE_SWITCH_SRCS
     simple_switch/simpleSwitch.h
     simple_switch/options.h
     )
-add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_SIMPLE_SWITCH_SRCS}")
 
 set (BMV2_PSA_SWITCH_SRCS
     psa_switch/main.cpp
@@ -37,9 +36,11 @@ set (BMV2_PSA_SWITCH_SRCS
     psa_switch/midend.h
     psa_switch/psaSwitch.cpp
     psa_switch/psaSwitch.h
+    psa_switch/psaProgramStructure.cpp
+    psa_switch/psaProgramStructure.h
+    psa_switch/options.cpp
     psa_switch/options.h
     )
-add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_PSA_SWITCH_SRCS}")
 
 set (BMV2_BACKEND_COMMON_SRCS
   common/JsonObjects.cpp
@@ -80,31 +81,39 @@ set (BMV2_BACKEND_COMMON_HDRS
   )
 
 set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/bmv2.def PARENT_SCOPE)
-add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_BACKEND_COMMON_SRCS};${BMV2_BACKEND_COMMON_HDRS}")
 
-build_unified(BMV2_BACKEND_COMMON_SRCS)
-add_library(bmv2backend ${BMV2_BACKEND_COMMON_SRCS})
+add_library(bmv2backend ${P4C_STATIC_BUILD} ${BMV2_BACKEND_COMMON_SRCS})
 add_dependencies(bmv2backend genIR frontend)
 
-build_unified(BMV2_SIMPLE_SWITCH_SRCS)
 add_executable(p4c-bm2-ss ${BMV2_SIMPLE_SWITCH_SRCS})
 target_link_libraries (p4c-bm2-ss bmv2backend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 
 install(TARGETS p4c-bm2-ss RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
 
-build_unified(BMV2_PSA_SWITCH_SRCS)
 add_executable(p4c-bm2-psa ${BMV2_PSA_SWITCH_SRCS})
 target_link_libraries (p4c-bm2-psa bmv2backend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 install(TARGETS p4c-bm2-psa RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
+
+file(RELATIVE_PATH
+    CURRENT_BINARY_DIR_PATH_REL
+    ${P4C_BINARY_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+file(RELATIVE_PATH
+    P4C_BINARY_DIR_PATH_REL
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${P4C_BINARY_DIR}
+)
 
 # hack to get around the fact that the test scripts expect the backend
 # binary to be in the top level directory. This should go away when we
 # remove automake and fix the scripts.
 add_custom_target(linkbmv2
-  COMMAND ${CMAKE_COMMAND} -E create_symlink `realpath --relative-to=${P4C_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/p4c-bm2-ss` ${P4C_BINARY_DIR}/p4c-bm2-ss
-  COMMAND ${CMAKE_COMMAND} -E create_symlink `realpath --relative-to=${P4C_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/p4c-bm2-psa` ${P4C_BINARY_DIR}/p4c-bm2-psa
-  COMMAND ${CMAKE_COMMAND} -E create_symlink `realpath --relative-to=${CMAKE_CURRENT_BINARY_DIR} ${P4C_BINARY_DIR}/p4include` ${CMAKE_CURRENT_BINARY_DIR}/p4include
-  COMMAND ${CMAKE_COMMAND} -E create_symlink `realpath --relative-to=${CMAKE_CURRENT_BINARY_DIR} ${P4C_BINARY_DIR}/p4_14include` ${CMAKE_CURRENT_BINARY_DIR}/p4_14include
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${CURRENT_BINARY_DIR_PATH_REL}/p4c-bm2-ss ${P4C_BINARY_DIR}/p4c-bm2-ss
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${CURRENT_BINARY_DIR_PATH_REL}/p4c-bm2-psa ${P4C_BINARY_DIR}/p4c-bm2-psa
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR_PATH_REL}/p4include ${CMAKE_CURRENT_BINARY_DIR}/p4include
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR_PATH_REL}/p4_14include ${CMAKE_CURRENT_BINARY_DIR}/p4_14include
   )
 add_dependencies(p4c_driver linkbmv2)
 
@@ -112,6 +121,7 @@ add_dependencies(p4c_driver linkbmv2)
 # Tests
 
 set(BMV2_DRIVER ${CMAKE_CURRENT_SOURCE_DIR}/run-bmv2-test.py)
+set(BMV2_PTF_DRIVER "sudo -E ${CMAKE_CURRENT_SOURCE_DIR}/run-bmv2-ptf-test.py")
 
 set (V1_INCLUDE_PATTERNS "include.*v1model.p4")
 set (P4TESTS_FOR_V1MODEL "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*-bmv2.p4")
@@ -119,7 +129,10 @@ p4c_find_tests("${P4TESTS_FOR_V1MODEL}" v1tests INCLUDE "${V1_INCLUDE_PATTERNS}"
 
 set (BMV2_V1MODEL_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_bmv_errors/*-bmv2.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/dash/*.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/fabric_*/fabric.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/omec/*.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pins/*.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_14_samples/switch_*/switch.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_14_samples/*.p4"
   ${v1tests}
@@ -132,11 +145,16 @@ p4c_find_tests("${P4TESTS_FOR_PSA}" psa_tests INCLUDE "${PSA_INCLUDE_PATTERNS}" 
 
 set (BMV2_PSA_TEST_SUITES
   ${psa_tests}
-  )
+)
+
+# Execute PTF tests for these files.
+set (BMV2_PTF_TEST_SUITES
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/ternary2-bmv2.p4"
+)
 
 # -p to use psa switch model
 # -a to pass flags to compiler
-set (testExtraFlags "${testExtraFlags} -p -a '--target bmv2 --arch psa'")
+set (testExtraFlags "${testExtraFlags} -p -a='--target bmv2 --arch psa'")
 
 set (XFAIL_TESTS
   # This test defines two lpm keys for a table.
@@ -145,24 +163,12 @@ set (XFAIL_TESTS
   testdata/p4_14_samples/issue60.p4
   # compiler claims (incorrectly?) that c2 has mulitple successors, so is not supported
   testdata/p4_14_samples/issue-1426.p4
-  # As of 2019-Feb-04 latest p4c code, this program fails due to the
-  # root cause of both issues #1694 and #1669.  I have tested it with
-  # the proposed fix for issue #1694 that is on PR #1704, and while
-  # that does make the produced BMv2 JSON file able to cause packets
-  # to be recirculated, resubmitted, etc. it still has the bug of not
-  # preserving the metadata specified in the program's field_lists, so
-  # the STF tests fail because of issue #1669.  As of this writing,
-  # this program is the _only_ p4c test program that relies for its
-  # successful execution on the preservation of metadata across
-  # resubmit, recirculate, and/or clone operations.
-  testdata/p4_14_samples/p414-special-ops-2-bmv2.p4
   # This test uses a feature currently unsupported in the BMv2 back-end.
   testdata/p4_16_samples/issue907-bmv2.p4
   # This test uses a table graph that is not implementable in BMv2
   testdata/p4_16_samples/issue986-bmv2.p4
   # These tests use a table key with type 'error'
   testdata/p4_16_samples/issue1062-bmv2.p4
-  testdata/p4_16_samples/issue1062-1-bmv2.p4
   # This test uses an undefined extern
   testdata/p4_16_samples/issue1193-bmv2.p4
   # This test also uses a custom extern
@@ -176,19 +182,35 @@ set (XFAIL_TESTS
   # These test use computations in the verify/update checksum controls - unsupported
   testdata/p4_16_samples/issue1765-bmv2.p4
   testdata/p4_16_samples/issue1765-1-bmv2.p4
-  # Next two use unknown externs
+  # Next three use unknown externs
   testdata/p4_16_samples/issue1882-bmv2.p4
   testdata/p4_16_samples/issue1882-1-bmv2.p4
-  # This one uses arguments of incorrect types to log_msg
-  testdata/p4_16_samples/issue2201-bmv2.p4
+  testdata/p4_16_samples/issue2664-bmv2.p4
+  # This test tries to hash (via the hash extern) a value that isn't a tuple - unsupported
+  testdata/p4_16_samples/hashing-non-tuple-bmv2.p4
+  # Similarly, this test hashes on a bit input.
+  testdata/p4_16_samples/issue584-1-bmv2.p4
 )
 
+set (BMV2_PARSER_INLINE_TESTS "${P4C_SOURCE_DIR}/testdata/p4_16_samples/parser-inline/*.p4")
+
 if (HAVE_SIMPLE_SWITCH)
-  p4c_add_tests("bmv2" ${BMV2_DRIVER} "${BMV2_V1MODEL_TEST_SUITES}" "${XFAIL_TESTS}")
-  add_library(extern_func_module MODULE EXCLUDE_FROM_ALL "${P4C_SOURCE_DIR}/testdata/extern_modules/extern-funcs-bmv2.cpp" )
-  p4c_add_test_with_args("bmv2" ${BMV2_DRIVER} FALSE "bmv2_emit_externs" "testdata/p4_16_samples/extern-funcs-bmv2.p4" "-a --emit-externs --target-specific-switch-arg \"--load-modules ${CMAKE_CURRENT_BINARY_DIR}/libextern_func_module.so\" --init \"make extern_func_module\"" "")
+  if (NOT ENABLE_SANITIZERS)
+    # Does not work well with sanitizers, extern_func_module fails due to linking failures related to missing symbols.
+    p4c_add_tests("bmv2" ${BMV2_DRIVER} "${BMV2_V1MODEL_TEST_SUITES}" "${XFAIL_TESTS}")
+    add_library(extern_func_module MODULE EXCLUDE_FROM_ALL "${P4C_SOURCE_DIR}/testdata/extern_modules/extern-funcs-bmv2.cpp" )
+    p4c_add_test_with_args("bmv2" ${BMV2_DRIVER} FALSE "bmv2_emit_externs" "testdata/p4_16_samples/extern-funcs-bmv2.p4" "-a=--emit-externs --target-specific-switch-arg=\"--load-modules ${CMAKE_CURRENT_BINARY_DIR}/libextern_func_module.so\" --init=\"make extern_func_module\"" "")
+    p4c_add_tests("bmv2-parser-inline-opt-disabled" ${BMV2_DRIVER} "${BMV2_PARSER_INLINE_TESTS}" "")
+    p4c_add_tests("bmv2-parser-inline-opt-enabled" ${BMV2_DRIVER} "${BMV2_PARSER_INLINE_TESTS}" "" "-a=--parser-inline-opt")
+  endif()
 else()
   MESSAGE(WARNING "BMv2 simple switch is not available, not adding v1model BMv2 tests")
+endif()
+
+if (HAVE_SIMPLE_SWITCH_GRPC)
+    p4c_add_tests("bmv2-ptf" ${BMV2_PTF_DRIVER} "${BMV2_PTF_TEST_SUITES}" "")
+else()
+  MESSAGE(WARNING "BMv2 simple switch grpc is not available, not adding v1model BMv2 PTF tests")
 endif()
 
 if (HAVE_PSA_SWITCH)

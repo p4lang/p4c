@@ -20,6 +20,8 @@ unified-compilation.am
 *p4.json
 build/
 *.pyc
+# testing may generate packet observation logs
+*.obs
 
 # Eclipse files
 .cproject

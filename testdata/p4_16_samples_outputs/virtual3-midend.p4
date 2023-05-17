@@ -8,8 +8,8 @@ extern Virtual {
 }
 
 control c(inout bit<16> p) {
-    bit<16> local_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @name("c.local") bit<16> local_0;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("c.cntr") Virtual() cntr_0 = {
         bit<16> f(in bit<16> ix) {
@@ -24,14 +24,14 @@ control c(inout bit<16> p) {
     }
     @name("c.run_ctr") table run_ctr_0 {
         key = {
-            p: exact @name("p") ;
+            p: exact @name("p");
         }
         actions = {
             add_ctr();
             final_ctr();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @hidden action virtual3l47() {
         local_0 = 16w4;
@@ -51,4 +51,3 @@ control c(inout bit<16> p) {
 control ctr(inout bit<16> x);
 package top(ctr ctrl);
 top(c()) main;
-

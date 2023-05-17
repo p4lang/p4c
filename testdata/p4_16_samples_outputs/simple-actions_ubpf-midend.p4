@@ -1,27 +1,25 @@
 #include <core.p4>
 #include <ubpf_model.p4>
 
-typedef bit<48> EthernetAddress;
-typedef bit<32> IPv4Address;
 header Ethernet_h {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header IPv4_h {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     totalLen;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     fragOffset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdrChecksum;
-    IPv4Address srcAddr;
-    IPv4Address dstAddr;
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<8>  diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
 }
 
 header mpls_h {
@@ -60,31 +58,31 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 }
 
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
-    bit<32> tmp_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @name("pipe.tmp") bit<32> tmp_0;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name("pipe.ip_modify_saddr") action ip_modify_saddr(bit<32> srcAddr) {
-        headers.ipv4.srcAddr = srcAddr;
+    @name("pipe.ip_modify_saddr") action ip_modify_saddr(@name("srcAddr") bit<32> srcAddr_1) {
+        headers.ipv4.srcAddr = srcAddr_1;
     }
-    @name("pipe.mpls_modify_tc") action mpls_modify_tc(bit<3> tc) {
-        headers.mpls.tc = tc;
+    @name("pipe.mpls_modify_tc") action mpls_modify_tc(@name("tc") bit<3> tc_2) {
+        headers.mpls.tc = tc_2;
     }
-    @name("pipe.mpls_set_label") action mpls_set_label(bit<20> label) {
-        headers.mpls.label = label;
+    @name("pipe.mpls_set_label") action mpls_set_label(@name("label") bit<20> label_3) {
+        headers.mpls.label = label_3;
     }
-    @name("pipe.mpls_set_label_tc") action mpls_set_label_tc(bit<20> label, bit<3> tc) {
-        headers.mpls.label = label;
-        headers.mpls.tc = tc;
+    @name("pipe.mpls_set_label_tc") action mpls_set_label_tc(@name("label") bit<20> label_4, @name("tc") bit<3> tc_3) {
+        headers.mpls.label = label_4;
+        headers.mpls.tc = tc_3;
     }
     @name("pipe.mpls_decrement_ttl") action mpls_decrement_ttl() {
         headers.mpls.ttl = headers.mpls.ttl + 8w255;
     }
-    @name("pipe.mpls_set_label_decrement_ttl") action mpls_set_label_decrement_ttl(bit<20> label) {
-        headers.mpls.label = label;
+    @name("pipe.mpls_set_label_decrement_ttl") action mpls_set_label_decrement_ttl(@name("label") bit<20> label_5) {
+        headers.mpls.label = label_5;
         headers.mpls.ttl = headers.mpls.ttl + 8w255;
     }
-    @name("pipe.mpls_modify_stack") action mpls_modify_stack(bit<1> stack) {
-        headers.mpls.stack = stack;
+    @name("pipe.mpls_modify_stack") action mpls_modify_stack(@name("stack") bit<1> stack_1) {
+        headers.mpls.stack = stack_1;
     }
     @name("pipe.change_ip_ver") action change_ip_ver() {
         headers.ipv4.version = 4w6;
@@ -99,7 +97,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     }
     @name("pipe.filter_tbl") table filter_tbl_0 {
         key = {
-            headers.ipv4.dstAddr: exact @name("headers.ipv4.dstAddr") ;
+            headers.ipv4.dstAddr: exact @name("headers.ipv4.dstAddr");
         }
         actions = {
             mpls_decrement_ttl();
@@ -112,9 +110,9 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
             ip_swap_addrs();
             ip_modify_saddr();
             Reject();
-            NoAction_0();
+            NoAction_1();
         }
-        const default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         filter_tbl_0.apply();
@@ -122,21 +120,20 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
 }
 
 control dprs(packet_out packet, in Headers_t headers) {
-    @hidden action simpleactions_ubpf160() {
+    @hidden action simpleactions_ubpf158() {
         packet.emit<Ethernet_h>(headers.ethernet);
         packet.emit<mpls_h>(headers.mpls);
         packet.emit<IPv4_h>(headers.ipv4);
     }
-    @hidden table tbl_simpleactions_ubpf160 {
+    @hidden table tbl_simpleactions_ubpf158 {
         actions = {
-            simpleactions_ubpf160();
+            simpleactions_ubpf158();
         }
-        const default_action = simpleactions_ubpf160();
+        const default_action = simpleactions_ubpf158();
     }
     apply {
-        tbl_simpleactions_ubpf160.apply();
+        tbl_simpleactions_ubpf158.apply();
     }
 }
 
 ubpf<Headers_t, metadata>(prs(), pipe(), dprs()) main;
-

@@ -23,22 +23,18 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    bool tmp_0;
-    @name("ingress.do_action") action do_action(inout bool val1, inout bool val2) {
+    @name("ingress.do_action") action do_action() {
     }
     @name("ingress.simple_table") table simple_table_0 {
-        key = {
-        }
         actions = {
-            do_action(tmp_0, tmp_0);
-            @defaultonly NoAction_0();
+            do_action();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
-        tmp_0 = false;
         simple_table_0.apply();
     }
 }
@@ -65,4 +61,3 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

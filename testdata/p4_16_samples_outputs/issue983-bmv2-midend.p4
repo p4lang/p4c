@@ -2,11 +2,10 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 struct fwd_meta_t {
@@ -47,28 +46,28 @@ parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.debug_table_cksum1") table debug_table_cksum1_0 {
         key = {
-            hdr.ethernet.srcAddr              : exact @name("hdr.ethernet.srcAddr") ;
-            hdr.ethernet.dstAddr              : exact @name("hdr.ethernet.dstAddr") ;
-            hdr.ethernet.etherType            : exact @name("hdr.ethernet.etherType") ;
-            user_meta._fwd_meta_exp_etherType5: exact @name("user_meta.fwd_meta.exp_etherType") ;
-            user_meta._fwd_meta_tmp0          : exact @name("user_meta.fwd_meta.tmp") ;
-            user_meta._fwd_meta_exp_x16       : exact @name("user_meta.fwd_meta.exp_x1") ;
-            user_meta._fwd_meta_x11           : exact @name("user_meta.fwd_meta.x1") ;
-            user_meta._fwd_meta_exp_x27       : exact @name("user_meta.fwd_meta.exp_x2") ;
-            user_meta._fwd_meta_x22           : exact @name("user_meta.fwd_meta.x2") ;
-            user_meta._fwd_meta_exp_x38       : exact @name("user_meta.fwd_meta.exp_x3") ;
-            user_meta._fwd_meta_x33           : exact @name("user_meta.fwd_meta.x3") ;
-            user_meta._fwd_meta_exp_x49       : exact @name("user_meta.fwd_meta.exp_x4") ;
-            user_meta._fwd_meta_x44           : exact @name("user_meta.fwd_meta.x4") ;
+            hdr.ethernet.srcAddr              : exact @name("hdr.ethernet.srcAddr");
+            hdr.ethernet.dstAddr              : exact @name("hdr.ethernet.dstAddr");
+            hdr.ethernet.etherType            : exact @name("hdr.ethernet.etherType");
+            user_meta._fwd_meta_exp_etherType5: exact @name("user_meta.fwd_meta.exp_etherType");
+            user_meta._fwd_meta_tmp0          : exact @name("user_meta.fwd_meta.tmp");
+            user_meta._fwd_meta_exp_x16       : exact @name("user_meta.fwd_meta.exp_x1");
+            user_meta._fwd_meta_x11           : exact @name("user_meta.fwd_meta.x1");
+            user_meta._fwd_meta_exp_x27       : exact @name("user_meta.fwd_meta.exp_x2");
+            user_meta._fwd_meta_x22           : exact @name("user_meta.fwd_meta.x2");
+            user_meta._fwd_meta_exp_x38       : exact @name("user_meta.fwd_meta.exp_x3");
+            user_meta._fwd_meta_x33           : exact @name("user_meta.fwd_meta.x3");
+            user_meta._fwd_meta_exp_x49       : exact @name("user_meta.fwd_meta.exp_x4");
+            user_meta._fwd_meta_x44           : exact @name("user_meta.fwd_meta.x4");
         }
         actions = {
-            NoAction_0();
+            NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @hidden action issue983bmv2l108() {
         hdr.ethernet.dstAddr[47:40] = 8w1;
@@ -177,4 +176,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(IngressParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

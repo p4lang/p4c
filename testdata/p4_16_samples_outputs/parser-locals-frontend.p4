@@ -12,7 +12,7 @@ struct S {
 }
 
 parser p() {
-    S s_0;
+    @name("p.s") S s_0;
     state start {
         s_0.h1.setInvalid();
         s_0.h2.setInvalid();
@@ -23,4 +23,3 @@ parser p() {
 parser empty();
 package top(empty e);
 top(p()) main;
-

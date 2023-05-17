@@ -1,5 +1,5 @@
 control ctrl(out bit<32> c) {
-    bit<32> a_0;
+    @name("ctrl.a") bit<32> a_0;
     @name("ctrl.e") action e() {
         exit;
     }
@@ -24,4 +24,3 @@ control ctrl(out bit<32> c) {
 control noop(out bit<32> c);
 package p(noop _n);
 p(ctrl()) main;
-

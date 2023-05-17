@@ -16,36 +16,34 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
 }
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("IngressI.ap") action_profile(32w128) ap_0;
     @name("IngressI.drop") action drop() {
         mark_to_drop(smeta);
     }
-    @name("IngressI.drop") action drop_2() {
+    @name("IngressI.drop") action drop_1() {
         mark_to_drop(smeta);
     }
     @name("IngressI.indirect") table indirect_0 {
-        key = {
-        }
         actions = {
             drop();
-            NoAction_0();
+            NoAction_1();
         }
-        const default_action = NoAction_0();
+        const default_action = NoAction_1();
         implementation = ap_0;
     }
     @name("IngressI.indirect_ws") table indirect_ws_0 {
         key = {
-            meta.hash1: selector @name("meta.hash1") ;
+            meta.hash1: selector @name("meta.hash1");
         }
         actions = {
-            drop_2();
-            NoAction_3();
+            drop_1();
+            NoAction_2();
         }
-        const default_action = NoAction_3();
+        const default_action = NoAction_2();
         @name("ap_ws") implementation = action_selector(HashAlgorithm.identity, 32w1024, 32w10);
     }
     apply {
@@ -75,4 +73,3 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

@@ -42,7 +42,7 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bool c_hasReturned;
+    @name("ingress.c.hasReturned") bool c_hasReturned;
     @hidden action issue1386l12() {
         c_hasReturned = true;
     }
@@ -72,7 +72,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         tbl_act.apply();
-        if (!h.h.isValid()) {
+        if (h.h.isValid()) {
+            ;
+        } else {
             tbl_issue1386l12.apply();
         }
         tbl_arithinlineskeleton51.apply();
@@ -80,4 +82,3 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

@@ -4,4 +4,4 @@ struct Version {
     bit<32> minor;
 }
 
-const Version version = { 32w0, 32w0 };
+const Version version = (Version){major = 32w0,minor = 32w0};

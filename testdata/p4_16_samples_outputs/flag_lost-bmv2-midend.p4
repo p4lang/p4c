@@ -2,28 +2,25 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<9> egressSpec_t;
-typedef bit<48> macAddr_t;
-typedef bit<32> ip4Addr_t;
 header ethernet_t {
-    macAddr_t dstAddr;
-    macAddr_t srcAddr;
-    bit<16>   etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>    version;
-    bit<4>    ihl;
-    bit<8>    diffserv;
-    bit<16>   totalLen;
-    bit<16>   identification;
-    bit<3>    flags;
-    bit<13>   fragOffset;
-    bit<8>    ttl;
-    bit<8>    protocol;
-    bit<16>   hdrChecksum;
-    ip4Addr_t srcAddr;
-    ip4Addr_t dstAddr;
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<8>  diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
 }
 
 struct metadata {
@@ -55,28 +52,28 @@ control verifyChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.drop") action drop() {
         mark_to_drop(standard_metadata);
     }
-    @name("ingress.drop") action drop_2() {
+    @name("ingress.drop") action drop_1() {
         mark_to_drop(standard_metadata);
     }
-    @name("ingress.ipv4_forward") action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
+    @name("ingress.ipv4_forward") action ipv4_forward(@name("dstAddr") bit<48> dstAddr_1, @name("port") bit<9> port) {
         meta.test_bool = true;
     }
     @name("ingress.ipv4_lpm") table ipv4_lpm_0 {
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr");
         }
         actions = {
-            NoAction_0();
+            NoAction_1();
             ipv4_forward();
             drop();
         }
         size = 1024;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @hidden action flag_lostbmv2l86() {
         meta.test_bool = false;
@@ -89,16 +86,18 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @hidden table tbl_drop {
         actions = {
-            drop_2();
+            drop_1();
         }
-        const default_action = drop_2();
+        const default_action = drop_1();
     }
     apply {
         tbl_flag_lostbmv2l86.apply();
         if (hdr.ipv4.isValid()) {
             ipv4_lpm_0.apply();
         }
-        if (!meta.test_bool) {
+        if (meta.test_bool) {
+            ;
+        } else {
             tbl_drop.apply();
         }
     }
@@ -122,4 +121,3 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

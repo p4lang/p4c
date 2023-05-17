@@ -31,9 +31,9 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bit<16> byaA;
+    @name("ingress.byaA") bit<16> byaA_0;
     @name("ingress.simple_action") action simple_action() {
-        h.eth_hdr.eth_type = byaA;
+        h.eth_hdr.eth_type = byaA_0;
     }
     @hidden table tbl_simple_action {
         actions = {
@@ -68,4 +68,3 @@ control deparser(packet_out b, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

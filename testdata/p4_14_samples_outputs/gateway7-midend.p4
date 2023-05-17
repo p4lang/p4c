@@ -15,7 +15,7 @@ struct metadata {
 }
 
 struct headers {
-    @name(".data") 
+    @name(".data")
     data_t data;
 }
 
@@ -27,41 +27,41 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @name(".output") action output(bit<9> port) {
+    @name(".output") action output(@name("port") bit<9> port) {
         standard_metadata.egress_spec = port;
     }
-    @name(".output") action output_2(bit<9> port) {
-        standard_metadata.egress_spec = port;
+    @name(".output") action output_1(@name("port") bit<9> port_1) {
+        standard_metadata.egress_spec = port_1;
     }
     @name(".noop") action noop() {
     }
-    @name(".noop") action noop_2() {
+    @name(".noop") action noop_1() {
     }
     @name(".test1") table test1_0 {
         actions = {
             output();
             noop();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            hdr.data.f1: exact @name("data.f1") ;
+            hdr.data.f1: exact @name("data.f1");
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name(".test2") table test2_0 {
         actions = {
-            output_2();
-            noop_2();
-            @defaultonly NoAction_3();
+            output_1();
+            noop_1();
+            @defaultonly NoAction_2();
         }
         key = {
-            hdr.data.f2: exact @name("data.f2") ;
+            hdr.data.f2: exact @name("data.f2");
         }
-        default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     apply {
         if (hdr.data.b2 > 8w49) {
@@ -94,4 +94,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

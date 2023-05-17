@@ -12,8 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-import shlex, subprocess
+import signal
+import shlex
+import subprocess
 import sys
+import traceback
 
 import p4c_src.util as util
 
@@ -46,6 +49,7 @@ class BackendDriver:
         self._source_filename = None
         self._source_basename = None
         self._verbose = False
+        self._run_preprocessor_only = False
 
     def __str__(self):
         return self._backend
@@ -84,6 +88,7 @@ class BackendDriver:
         self._output_directory = opts.output_directory
         self._source_filename = opts.source_file
         self._source_basename = os.path.splitext(os.path.basename(opts.source_file))[0]
+        self._run_preprocessor_only = opts.run_preprocessor_only
 
         # set preprocessor options
         if 'preprocessor' in self._commands:
@@ -162,6 +167,11 @@ class BackendDriver:
         if opts.disabled_annos is not None:
             self.add_command_option('compiler',
                                     '--disable-annotations={}'.format(opts.disabled_annos))
+
+        # enable parser inlining optimization
+        if opts.optimizeParserInlining:
+            self.add_command_option('compiler', '--parser-inline-opt')
+
         # set developer options
         if (os.environ['P4C_BUILD_TYPE'] == "DEVELOPER"):
             for option in opts.log_levels:
@@ -197,6 +207,17 @@ class BackendDriver:
             # its commands and the order in which they execute
             pass
 
+    def should_not_check_input(self, opts):
+        """
+        Custom backends can use this function to implement their own --help* options
+        which don't require input file to be specified. In such cases, this function
+        should be overloaded and return true whenever such option has been specified by
+        the user.
+        As a result, dummy.p4 will be used as a source file to prevent sanity checking
+        from failing.
+        """
+        return False
+
     def enable_commands(self, cmdsEnabled):
         """
         Defines the order in which the steps are executed and which commands
@@ -227,13 +248,35 @@ class BackendDriver:
         try:
             p = subprocess.Popen(args)
         except:
-            import traceback
             print("error invoking {}".format(" ".join(cmd)), file=sys.stderr)
             print(traceback.format_exc(), file=sys.stderr)
             return 1
 
         if self._verbose: print('running {}'.format(' '.join(cmd)))
-        p.communicate() # now wait
+        # Wait for the process, if we get CTRL+C during that time, forward it
+        # to the process and continue waiting (leave the program to resolve
+        # it), if we get other error kill the process:
+        # - prevents unnecessary bactraces in case CTRL+C is pressed
+        # - prevents leaving the child process running of communicate error
+        # - it allows running e.g. debugger from the driver, which is useful
+        #   for development
+        try:
+            while True:
+                try:
+                    p.communicate()
+                    break  # done waiting, process ended
+                except KeyboardInterrupt:
+                    p.send_signal(signal.SIGINT)
+        except:
+            p.terminate()  # don't leave process possibly running
+            try:
+                p.communicate(timeout=0.1)
+            except:  # on timeout or other error
+                p.kill()
+            print("error running {}".format(" ".join(cmd)), file=sys.stderr)
+            print(traceback.format_exc(), file=sys.stderr)
+            return 1
+
         return p.returncode
 
 
@@ -271,7 +314,7 @@ class BackendDriver:
         """
 
         # set output directory
-        if not os.path.exists(self._output_directory):
+        if not os.path.exists(self._output_directory) and not self._run_preprocessor_only:
             os.makedirs(self._output_directory)
 
         for c in self._commandsEnabled:

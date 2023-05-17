@@ -17,52 +17,43 @@ limitations under the License.
 #ifndef _TYPECHECKING_TYPEUNIFICATION_H_
 #define _TYPECHECKING_TYPEUNIFICATION_H_
 
+#include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
 namespace P4 {
 
 class TypeConstraints;
+class BinaryConstraint;
 
 /**
 Hindley-Milner type unification algorithm
-(See for example, http://cs.brown.edu/~sk/Publications/Books/ProgLangs/2007-04-26/plai-2007-04-26.pdf, page 280.)
+(See for example,
+http://cs.brown.edu/~sk/Publications/Books/ProgLangs/2007-04-26/plai-2007-04-26.pdf, page 280.)
 Attempts to unify two types.  As a consequence it generates constraints on other sub-types.
 Constraints are solved at the end.
 Solving a constraint generates type-variable substitutions
-(where a type variable is replaced with another type - which could still contain type variables inside).
-All substitutions are composed together.
-Constraint solving can fail, which means that the program does not type-check.
+(where a type variable is replaced with another type - which could still contain type variables
+inside). All substitutions are composed together. Constraint solving can fail, which means that the
+program does not type-check.
 */
 class TypeUnification final {
-    TypeConstraints*  constraints;
+    TypeConstraints *constraints;
+    const TypeMap *typeMap;
 
-    bool unifyCall(const IR::Node* errorPosition,
-                   const IR::Type_MethodBase* dest,
-                   const IR::Type_MethodCall* src,
-                   bool reportErrors);
-    bool unifyFunctions(const IR::Node* errorPosition,
-                        const IR::Type_MethodBase* dest,
-                        const IR::Type_MethodBase* src,
-                        bool reportErrors,
-                        bool skipReturnValues = false);
-    bool unifyBlocks(const IR::Node* errorPosition,
-                     const IR::Type_ArchBlock* dest,
-                     const IR::Type_ArchBlock* src,
-                     bool reportErrors);
+    bool unifyCall(const BinaryConstraint *constraint);
+    bool unifyFunctions(const BinaryConstraint *constraint, bool skipReturnValues = false);
+    bool unifyBlocks(const BinaryConstraint *constraint);
 
  public:
-    explicit TypeUnification(TypeConstraints* constraints) : constraints(constraints) {}
+    TypeUnification(TypeConstraints *constraints, const P4::TypeMap *typeMap)
+        : constraints(constraints), typeMap(typeMap) {}
     /**
      * Return false if unification fails right away.
      * Generates a set of type constraints.
      * If it returns true unification could still fail later.
-     * @param dest         Destination type.
-     * @param src          Source type.
-     * @param reportErrors If true report errors caused by unification.
      * @return     False if unification fails immediately.
      */
-    bool unify(const IR::Node* errorPosition, const IR::Type* dest,
-               const IR::Type* src, bool reportErrors);
+    bool unify(const BinaryConstraint *constraint);
 };
 
 }  // namespace P4

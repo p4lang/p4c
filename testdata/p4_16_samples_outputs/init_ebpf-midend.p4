@@ -19,26 +19,25 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name("pipe.match") action match(bool act) {
+    @name("pipe.match") action match(@name("act") bool act) {
         pass = act;
     }
     @name("pipe.tbl") table tbl_0 {
         key = {
-            headers.ethernet.protocol: exact @name("headers.ethernet.protocol") ;
+            headers.ethernet.protocol: exact @name("headers.ethernet.protocol");
         }
         actions = {
             match();
-            NoAction_0();
+            NoAction_1();
         }
         const entries = {
                         16w0x800 : match(true);
                         16w0xd000 : match(false);
         }
-
         implementation = hash_table(32w64);
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @hidden action init_ebpf58() {
         pass = true;
@@ -56,4 +55,3 @@ control pipe(inout Headers_t headers, out bool pass) {
 }
 
 ebpfFilter<Headers_t>(prs(), pipe()) main;
-

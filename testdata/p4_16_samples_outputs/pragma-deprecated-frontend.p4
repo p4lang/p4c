@@ -2,5 +2,5 @@
     Checksum16();
 }
 
+@deprecated("Please don't use this function.") extern bit<6> wrong();
 Checksum16() instance;
-

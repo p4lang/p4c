@@ -27,9 +27,9 @@ struct metadata {
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
-    @name(".ipv4") 
+    @name(".ipv4")
     ipv4_t     ipv4;
 }
 
@@ -60,25 +60,25 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name(".do_drop") action do_drop() {
     }
-    @name(".route_ipv4") action route_ipv4(bit<9> egress_spec) {
+    @name(".route_ipv4") action route_ipv4(@name("egress_spec") bit<9> egress_spec_1) {
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
-        standard_metadata.egress_spec = egress_spec;
+        standard_metadata.egress_spec = egress_spec_1;
     }
     @name(".routing") table routing_0 {
         actions = {
             do_drop();
             route_ipv4();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            hdr.ipv4.dstAddr: lpm @name("ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("ipv4.dstAddr");
         }
         size = 2048;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         routing_0.apply();
@@ -103,4 +103,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

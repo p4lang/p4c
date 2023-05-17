@@ -1,3 +1,9 @@
-issue803-1.p4(14): [--Werror=type-error] error: ig1: Passing 1 arguments when 0 expected
-Ingress<H>(ing_parse()) ig1;
-                        ^^^
+issue803-1.p4(3): [--Werror=type-error] error: package Ingress
+package Ingress<IH>();
+        ^^^^^^^
+  ---- Actual error:
+  Ingress: 1 arguments supplied while 0 are expected
+  ---- Originating from:
+issue803-1.p4(14): Constructor invocation '<Method call>' does not match declaration 'Ingress'
+  Ingress<H>(ing_parse()) ig1;
+                          ^^^

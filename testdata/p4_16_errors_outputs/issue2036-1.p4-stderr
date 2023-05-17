@@ -1,3 +1,30 @@
-issue2036-1.p4(10): [--Werror=type-error] error: f: Cannot unify Tuple(1) to struct s
+issue2036-1.p4(10): [--Werror=type-error] error: f
         f(b);
         ^^^^
+  ---- Actual error:
+issue2036-1.p4(9): Cannot cast implicitly type 'tuple<bit<8>>' to type 'struct s'
+          tuple<bit<8>> b = { 0 };
+          ^^^^^^^^^^^^^
+issue2036-1.p4(1)
+  struct s {
+         ^
+  ---- Originating from:
+issue2036-1.p4(10): Type of argument 'b' (tuple<bit<8>>) does not match type of parameter 'sarg' (struct s)
+          f(b);
+            ^
+issue2036-1.p4(9)
+          tuple<bit<8>> b = { 0 };
+          ^^^^^^^^^^^^^
+issue2036-1.p4(5)
+  extern void f(in s sarg);
+                     ^^^^
+issue2036-1.p4(1)
+  struct s {
+         ^
+  ---- Originating from:
+issue2036-1.p4(5): Function type 'f' does not match invocation type '<Method call>'
+  extern void f(in s sarg);
+              ^
+issue2036-1.p4(10)
+          f(b);
+          ^^^^

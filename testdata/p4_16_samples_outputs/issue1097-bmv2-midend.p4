@@ -15,20 +15,8 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
 }
 
 register<bit<8>>(32w2) r;
-
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bit<8> x_0;
-    @hidden action issue1097bmv2l19() {
-        r.read(x_0, 32w0);
-    }
-    @hidden table tbl_issue1097bmv2l19 {
-        actions = {
-            issue1097bmv2l19();
-        }
-        const default_action = issue1097bmv2l19();
-    }
     apply {
-        tbl_issue1097bmv2l19.apply();
     }
 }
 
@@ -53,4 +41,3 @@ control deparser(packet_out b, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

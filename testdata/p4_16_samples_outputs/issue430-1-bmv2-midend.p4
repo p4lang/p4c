@@ -2,11 +2,10 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<48> EthernetAddress;
 header Ethernet_h {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 struct Parsed_packet {
@@ -33,7 +32,7 @@ struct tuple_0 {
 
 control cIngress(inout Parsed_packet hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {
     @hidden action issue4301bmv2l44() {
-        digest<tuple_0>(32w5, { hdr.ethernet.srcAddr });
+        digest<tuple_0>(32w5, (tuple_0){f0 = hdr.ethernet.srcAddr});
         hdr.ethernet.srcAddr = 48w0;
     }
     @hidden table tbl_issue4301bmv2l44 {
@@ -63,4 +62,3 @@ control uc(inout Parsed_packet hdr, inout Metadata meta) {
 }
 
 V1Switch<Parsed_packet, Metadata>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
-

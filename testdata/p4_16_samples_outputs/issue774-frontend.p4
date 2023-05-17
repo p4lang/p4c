@@ -5,7 +5,7 @@ header Header {
 }
 
 parser p0(packet_in p, out Header h) {
-    Header arg;
+    @name("p0.arg") Header arg;
     state start {
         p.extract<Header>(arg);
         p.extract<Header>(h);
@@ -16,4 +16,3 @@ parser p0(packet_in p, out Header h) {
 parser proto(packet_in p, out Header h);
 package top(proto p);
 top(p0()) main;
-

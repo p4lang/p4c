@@ -85,16 +85,16 @@ struct metadata {
 }
 
 parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    IPv4_up_to_ihl_only_h tmp;
-    bit<9> tmp_0;
-    bit<9> tmp_1;
-    bit<9> tmp_2;
-    bit<32> tmp_3;
-    tcp_upto_data_offset_only_h tmp_4;
-    bit<9> tmp_5;
-    bit<9> tmp_6;
-    bit<9> tmp_7;
-    bit<32> tmp_8;
+    @name("parserI.tmp") IPv4_up_to_ihl_only_h tmp;
+    @name("parserI.tmp_0") bit<9> tmp_0;
+    @name("parserI.tmp_1") bit<9> tmp_1;
+    @name("parserI.tmp_2") bit<9> tmp_2;
+    @name("parserI.tmp_3") bit<32> tmp_3;
+    @name("parserI.tmp_4") tcp_upto_data_offset_only_h tmp_4;
+    @name("parserI.tmp_5") bit<9> tmp_5;
+    @name("parserI.tmp_6") bit<9> tmp_6;
+    @name("parserI.tmp_7") bit<9> tmp_7;
+    @name("parserI.tmp_8") bit<32> tmp_8;
     state start {
         pkt.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -135,9 +135,9 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
 }
 
 control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("cIngress.foot") action foot() {
         hdr.tcp.srcPort = hdr.tcp.srcPort + 16w1;
@@ -151,31 +151,29 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     @name("cIngress.guh") table guh_0 {
         key = {
-            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort") ;
+            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort");
         }
         actions = {
             foot();
-            NoAction_0();
+            NoAction_1();
         }
-        const default_action = NoAction_0();
+        const default_action = NoAction_1();
         const entries = {
                         16w80 : foot();
         }
-
     }
     @name("cIngress.huh") table huh_0 {
         key = {
-            hdr.udp.dstPort: exact @name("hdr.udp.dstPort") ;
+            hdr.udp.dstPort: exact @name("hdr.udp.dstPort");
         }
         actions = {
             foou();
-            NoAction_3();
+            NoAction_2();
         }
-        const default_action = NoAction_3();
+        const default_action = NoAction_2();
         const entries = {
                         16w80 : foou();
         }
-
     }
     apply {
         if (hdr.tcp.isValid()) {
@@ -218,4 +216,3 @@ control DeparserI(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
-

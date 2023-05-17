@@ -1,11 +1,10 @@
 #include <core.p4>
-#include <psa.p4>
+#include <bmv2/psa.p4>
 
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv4_t {
@@ -33,8 +32,8 @@ struct empty_metadata_t {
 }
 
 struct mac_learn_digest_t {
-    EthernetAddress srcAddr;
-    PortId_t        ingress_port;
+    bit<48> srcAddr;
+    bit<32> ingress_port;
 }
 
 struct metadata {
@@ -82,11 +81,11 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
 }
 
 control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_4() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_5() {
+    @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
     @name("ingress.unknown_source") action unknown_source() {
         meta._send_mac_learn_msg0 = true;
@@ -95,47 +94,43 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
     }
     @name("ingress.learned_sources") table learned_sources_0 {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
         }
         actions = {
-            NoAction_0();
+            NoAction_1();
             unknown_source();
         }
         default_action = unknown_source();
     }
-    @name("ingress.do_L2_forward") action do_L2_forward(PortId_t egress_port) {
-        @noWarnUnused {
-            ostd.drop = false;
-            ostd.multicast_group = 32w0;
-            ostd.egress_port = egress_port;
-        }
+    @name("ingress.do_L2_forward") action do_L2_forward(@name("egress_port") bit<32> egress_port_3) {
+        ostd.drop = false;
+        ostd.multicast_group = 32w0;
+        ostd.egress_port = egress_port_3;
     }
-    @name("ingress.do_tst") action do_tst(PortId_t egress_port, bit<16> serEnumT) {
-        @noWarnUnused {
-            ostd.drop = false;
-            ostd.multicast_group = 32w0;
-            ostd.egress_port = egress_port;
-        }
+    @name("ingress.do_tst") action do_tst(@name("egress_port") bit<32> egress_port_4, @name("serEnumT") bit<16> serEnumT) {
+        ostd.drop = false;
+        ostd.multicast_group = 32w0;
+        ostd.egress_port = egress_port_4;
     }
     @name("ingress.l2_tbl") table l2_tbl_0 {
         key = {
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
+            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr");
         }
         actions = {
             do_L2_forward();
-            NoAction_4();
+            NoAction_2();
         }
-        default_action = NoAction_4();
+        default_action = NoAction_2();
     }
     @name("ingress.tst_tbl") table tst_tbl_0 {
         key = {
-            meta._mac_learn_msg_ingress_port2: exact @name("meta.mac_learn_msg.ingress_port") ;
+            meta._mac_learn_msg_ingress_port2: exact @name("meta.mac_learn_msg.ingress_port");
         }
         actions = {
             do_tst();
-            NoAction_5();
+            NoAction_3();
         }
-        default_action = NoAction_5();
+        default_action = NoAction_3();
     }
     @hidden action psaexampledigestbmv2l197() {
         meta._send_mac_learn_msg0 = false;
@@ -205,8 +200,5 @@ control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_met
 }
 
 IngressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-
 EgressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-
 PSA_Switch<headers, metadata, headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

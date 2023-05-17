@@ -1,0 +1,6 @@
+issue383-bmv2.p4(98): [--Wwarn=invalid_header] warning: accessing a field of an invalid header bh
+        bh.row.alt0.valid = h.bvh0.row.alt0.valid;
+        ^^
+issue383-bmv2.p4(103): [--Wwarn=invalid_header] warning: accessing a field of an invalid header s.col.bvh
+        s.col.bvh.row.alt0.valid = 0;
+        ^^^^^^^^^

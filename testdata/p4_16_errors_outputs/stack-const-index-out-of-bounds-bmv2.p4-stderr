@@ -1,0 +1,36 @@
+stack-const-index-out-of-bounds-bmv2.p4(62): [--Werror=type-error] error: h.hs[-1]: Negative array index -1
+        h.hs[-1].setValid();
+        ^^^^^^^^
+stack-const-index-out-of-bounds-bmv2.p4(62)
+        h.hs[-1].setValid();
+              ^
+stack-const-index-out-of-bounds-bmv2.p4(63): [--Werror=type-error] error: h.hs[-1]: Negative array index -1
+        h.hs[-1].f1 = 5;
+        ^^^^^^^^
+stack-const-index-out-of-bounds-bmv2.p4(63)
+        h.hs[-1].f1 = 5;
+              ^
+stack-const-index-out-of-bounds-bmv2.p4(64): [--Werror=type-error] error: h.hs[-1]: Negative array index -1
+        h.hs[-1].f2 = 8;
+        ^^^^^^^^
+stack-const-index-out-of-bounds-bmv2.p4(64)
+        h.hs[-1].f2 = 8;
+              ^
+stack-const-index-out-of-bounds-bmv2.p4(76): [--Werror=type-error] error: Array index 3 larger or equal to array size 3
+        h.hs[3].setValid();
+             ^
+stack-const-index-out-of-bounds-bmv2.p4(26)
+    hdr[3] hs;
+        ^
+stack-const-index-out-of-bounds-bmv2.p4(77): [--Werror=type-error] error: Array index 3 larger or equal to array size 3
+        h.hs[3].f1 = 5;
+             ^
+stack-const-index-out-of-bounds-bmv2.p4(26)
+    hdr[3] hs;
+        ^
+stack-const-index-out-of-bounds-bmv2.p4(78): [--Werror=type-error] error: Array index 3 larger or equal to array size 3
+        h.hs[3].f2 = 8;
+             ^
+stack-const-index-out-of-bounds-bmv2.p4(26)
+    hdr[3] hs;
+        ^

@@ -18,30 +18,31 @@ limitations under the License.
 #include <v1model.p4>
 
 struct alt_t {
-  bit<1> valid;
-  bit<7> port;
+    bit<1> valid;
+    bit<7> port;
 };
 
 @MNK_annotation("(test flatten)")
 struct row_t {
-  alt_t alt0;
-  alt_t alt1;
+    alt_t alt0;
+    alt_t alt1;
 };
 
 header bitvec_hdr {
-  row_t row;
+    row_t row;
 }
 
 struct col_t {
-  bitvec_hdr bvh;
+    bitvec_hdr bvh;
 }
 
 struct local_metadata_t {
-  row_t row0;
-  row_t row1;
-  col_t col;
-  bitvec_hdr bvh0;
-  bitvec_hdr bvh1;
+    @field_list(0)
+    row_t row0;
+    row_t row1;
+    col_t col;
+    bitvec_hdr bvh0;
+    bitvec_hdr bvh1;
 };
 
 struct parsed_packet_t {
@@ -50,11 +51,11 @@ struct parsed_packet_t {
 };
 
 struct tst_t {
-  row_t row0;
-  row_t row1;
-  col_t col;
-  bitvec_hdr bvh0;
-  bitvec_hdr bvh1;
+    row_t row0;
+    row_t row1;
+    col_t col;
+    bitvec_hdr bvh0;
+    bitvec_hdr bvh1;
 }
 
 parser parse(packet_in pk, out parsed_packet_t h,
@@ -105,7 +106,7 @@ control ingress(inout parsed_packet_t h,
         local_metadata.row0.alt0 = local_metadata.row1.alt1;
         local_metadata.row1.alt0.valid = 1;
         local_metadata.row1.alt1.port = local_metadata.row0.alt1.port + 1;
-        clone3(CloneType.I2E, 0, local_metadata.row0);
+        clone_preserving_field_list(CloneType.I2E, 1, 0);
 
 /*
         Cast support is TODO for bmv2.

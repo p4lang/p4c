@@ -41,16 +41,16 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.t") table t_0 {
         key = {
-            h.h.b: exact @name("h.h.b") ;
+            h.h.b: exact @name("h.h.b");
         }
         actions = {
-            NoAction_0();
+            NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @hidden action issue2044bmv2l37() {
         h.h.setInvalid();
@@ -62,11 +62,12 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = issue2044bmv2l37();
     }
     apply {
-        if (!t_0.apply().hit) {
+        if (t_0.apply().hit) {
+            ;
+        } else {
             tbl_issue2044bmv2l37.apply();
         }
     }
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

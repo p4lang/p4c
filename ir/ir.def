@@ -81,12 +81,13 @@ class ParserState : ISimpleNamespace, Declaration, IAnnotated {
 }
 
 // A parser that contains all states (unlike the P4 v1.0 parser, which is really just a state)
-class P4Parser : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, IContainer {
+class P4Parser : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, IContainer, IAnnotated {
     Type_Parser                                 type;
     optional ParameterList                      constructorParams = new ParameterList;
     optional inline IndexedVector<Declaration>  parserLocals;
     optional inline IndexedVector<ParserState>  states;
 
+    Annotations getAnnotations() const override { return type->getAnnotations(); }
     TypeParameters getTypeParameters() const override { return type->getTypeParameters(); }
     std::vector<INamespace> getNestedNamespaces() const override {
         return { type->typeParameters, type->applyParams, constructorParams }; }
@@ -101,6 +102,7 @@ class P4Parser : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, I
     Type_Method getConstructorMethodType() const override;
     ParameterList getConstructorParameters() const override { return constructorParams; }
     void checkDuplicates() const;
+    Type getType() const override { return this->type; }
 #apply
     validate {
         if (!(name == type->name))
@@ -108,16 +110,19 @@ class P4Parser : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, I
         parserLocals.check_null();
         states.check_null();
         checkDuplicates();
+        for (auto d : parserLocals)
+            BUG_CHECK(!d->is<ParserState>(), "%1%: state in locals", d);
     }
     toString { return cstring("parser ") + externalName(); }
 }
 
-class P4Control : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, IContainer {
+class P4Control : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, IContainer, IAnnotated {
     Type_Control                                type;
     optional ParameterList                      constructorParams = new ParameterList;
     optional inline IndexedVector<Declaration>  controlLocals;
     BlockStatement                              body;
 
+    Annotations getAnnotations() const override { return type->getAnnotations(); }
     TypeParameters getTypeParameters() const override { return type->getTypeParameters(); }
     std::vector<INamespace> getNestedNamespaces() const override {
         return { type->typeParameters, type->applyParams, constructorParams }; }
@@ -129,6 +134,7 @@ class P4Control : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, 
     IDeclaration getDeclByName(cstring name) const override {
         return controlLocals.getDeclaration(name); }
     ParameterList getConstructorParameters() const override { return constructorParams; }
+    Type getType() const override { return this->type; }
 #apply
     validate {
         if (!(name == type->name))
@@ -251,6 +257,7 @@ class Entry : IAnnotated {
     ListExpression      keys;         /// must be a tuple expression
     Expression          action;       /// typically a MethodCallExpression.
                                       /// The action must be defined in action list
+    bool                singleton;    /// True if the entry is not a list.
 
     Annotations     getAnnotations() const override { return annotations; }
     ListExpression  getKeys() const { return keys; }
@@ -290,7 +297,7 @@ class TableProperties : ISimpleNamespace {
     static const cstring entriesPropertyName;
     static const cstring sizePropertyName;
 #nodbprint
-    validate{ properties.check_null(); properties.check_valid(); }
+    validate{ properties.check_null(); properties.validate(); }
 }
 
 class P4Table : Declaration, IAnnotated, IApply {
@@ -439,12 +446,7 @@ class IfStatement : Statement {
     NullOK Statement ifFalse;
     visit_children {
         v.visit(condition, "condition");
-        auto &clone(v.flow_clone());
-        v.visit(ifTrue, "ifTrue");
-        clone.visit(ifFalse, "ifFalse");
-        v.flow_merge(clone);
-    }
-    validate{ CHECK_NULL(ifTrue); }
+        SplitFlowVisit<Statement>(v, ifTrue, ifFalse).run_visit(); }
 }
 
 class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
@@ -456,6 +458,7 @@ class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
         return components.getDeclarations(); }
     void push_back(StatOrDecl st) { components.push_back(st); }
     Annotations getAnnotations() const override { return annotations; }
+    bool empty() const { return components.empty(); }
 }
 
 class MethodCallStatement : Statement {
@@ -470,13 +473,10 @@ class MethodCallStatement : Statement {
 }
 
 class SwitchCase {
-    Expression       label;  // Can be DefaultExpression or a PathExpression
+    Expression       label;
     NullOK Statement statement;  // If missing then it's a fall-through
 #nodbprint
     validate{
-        if (!(label->is<IR::DefaultExpression>() || label->is<IR::PathExpression>()))
-            ::error(ErrorType::ERR_EXPRESSION,
-                    "%1%: Unexpected expression for switch case", *this);
         BUG_CHECK(statement == nullptr || statement->is<IR::BlockStatement>(),
                   "%1%: Expected a block statement",
                   statement);
@@ -490,7 +490,9 @@ class SwitchStatement : Statement {
     inline Vector<SwitchCase> cases;
     visit_children {
         v.visit(expression, "expression");
-        v.parallel_visit(cases, "cases"); }
+        SplitFlowVisit<SwitchCase> split(v);
+        for (auto &c : cases) split.addNode(c);
+        split.run_visit(); }
 }
 
 class Function : Declaration, IFunctional, ISimpleNamespace, INestedNamespace {

@@ -49,7 +49,6 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
                 stdmeta.egress_port = 3;
             }
         }
-
     }
 }
 
@@ -70,4 +69,3 @@ control deparserImpl(packet_out packet, in headers_t hdr) {
 }
 
 V1Switch(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
-

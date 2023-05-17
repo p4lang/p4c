@@ -1,0 +1,6 @@
+issue3363.p4(8): [--Werror=type-error] error: t and t1: externs cannot be compared
+@myat[t == t1] typedef int b1;
+      ^
+issue3363.p4(8)
+@myat[t == t1] typedef int b1;
+           ^^

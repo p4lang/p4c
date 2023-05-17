@@ -1,0 +1,6 @@
+psa-dpdk-table-key-consolidation-mixed-keys-2.p4(98): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
+            8w0x48 : exact;
+            ^^^^^^
+psa-dpdk-table-key-consolidation-mixed-keys-2.p4(98): [--Wwarn=mismatch] warning: 8w0x48: Constant key field
+            8w0x48 : exact;
+            ^^^^^^

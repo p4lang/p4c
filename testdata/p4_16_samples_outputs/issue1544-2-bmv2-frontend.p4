@@ -23,37 +23,37 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".my_drop") action my_drop(inout standard_metadata_t smeta) {
-        mark_to_drop(smeta);
+    @name("ingress.smeta") standard_metadata_t smeta_0;
+    @name("ingress.x_0") bit<16> x;
+    @name("ingress.retval") bit<16> retval;
+    @name("ingress.tmp") bit<16> tmp_0;
+    @name(".my_drop") action my_drop_0() {
+        smeta_0 = standard_metadata;
+        mark_to_drop(smeta_0);
+        standard_metadata = smeta_0;
     }
-    @name("ingress.set_port") action set_port(bit<9> output_port) {
+    @name("ingress.set_port") action set_port(@name("output_port") bit<9> output_port) {
         standard_metadata.egress_spec = output_port;
     }
     @name("ingress.mac_da") table mac_da_0 {
         key = {
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
+            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr");
         }
         actions = {
             set_port();
-            my_drop(standard_metadata);
+            my_drop_0();
         }
-        default_action = my_drop(standard_metadata);
+        default_action = my_drop_0();
     }
     apply {
         mac_da_0.apply();
-        {
-            bit<16> x_0 = hdr.ethernet.srcAddr[15:0];
-            bool hasReturned = false;
-            bit<16> retval;
-            bit<16> tmp_0;
-            tmp_0 = x_0;
-            if (x_0 > 16w5) {
-                tmp_0 = x_0 + 16w65535;
-            }
-            hasReturned = true;
-            retval = tmp_0;
-            hdr.ethernet.srcAddr[15:0] = retval;
+        x = hdr.ethernet.srcAddr[15:0];
+        tmp_0 = x;
+        if (x > 16w5) {
+            tmp_0 = x + 16w65535;
         }
+        retval = tmp_0;
+        hdr.ethernet.srcAddr[15:0] = retval;
     }
 }
 
@@ -79,4 +79,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

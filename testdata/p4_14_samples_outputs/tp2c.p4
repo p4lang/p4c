@@ -17,7 +17,7 @@ struct metadata {
 }
 
 struct headers {
-    @name(".data") 
+    @name(".data")
     data_t data;
 }
 
@@ -111,7 +111,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                         A4.apply();
                     }
                 }
-
             }
         }
         B1.apply();
@@ -141,4 +140,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

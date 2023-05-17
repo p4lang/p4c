@@ -5,9 +5,7 @@
 typedef bit<48> EthernetAddress;
 typedef bit<32> IPv4Address;
 register<bit<32>>(32w100) debug;
-
 register<bit<32>>(32w1) reg;
-
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
@@ -61,11 +59,11 @@ control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_
 }
 
 control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t standard_meta) {
-    Value val_0;
-    bool _pred_0;
-    bit<32> inc_0;
-    bit<32> tmp;
-    bit<32> tmp_0;
+    @name("Eg.val") Value val_0;
+    @name("Eg._pred") bool _pred_0;
+    @name("Eg.inc") bit<32> inc_0;
+    @name("Eg.tmp") bit<32> tmp;
+    @name("Eg.tmp_0") bit<32> tmp_0;
     @name("Eg.test") action test() {
         val_0 = (Value){field1 = 32w0};
         _pred_0 = val_0.field1 != 32w0;
@@ -109,4 +107,3 @@ control Compute(inout Headers hdr, inout Metadata meta) {
 }
 
 V1Switch<Headers, Metadata>(P(), Verify(), Ing(), Eg(), Compute(), DP()) main;
-

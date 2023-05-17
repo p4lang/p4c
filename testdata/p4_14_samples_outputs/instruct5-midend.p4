@@ -20,9 +20,9 @@ struct metadata {
 }
 
 struct headers {
-    @name(".data") 
+    @name(".data")
     data_t       data;
-    @name(".extra") 
+    @name(".extra")
     data2_t_0[4] extra;
 }
 
@@ -44,25 +44,25 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name(".output") action output(bit<9> port) {
+    @name(".output") action output(@name("port") bit<9> port) {
         standard_metadata.egress_spec = port;
     }
     @name(".noop") action noop() {
     }
-    @name(".push1") action push1(bit<24> x1) {
+    @name(".push1") action push1(@name("x1") bit<24> x1_2) {
         hdr.extra.push_front(1);
         hdr.extra[0].setValid();
-        hdr.extra[0].x1 = x1;
+        hdr.extra[0].x1 = x1_2;
         hdr.extra[0].more = hdr.data.more;
         hdr.data.more = 8w1;
     }
-    @name(".push2") action push2(bit<24> x1, bit<24> x2) {
+    @name(".push2") action push2(@name("x1") bit<24> x1_3, @name("x2") bit<24> x2) {
         hdr.extra.push_front(2);
         hdr.extra[0].setValid();
         hdr.extra[1].setValid();
-        hdr.extra[0].x1 = x1;
+        hdr.extra[0].x1 = x1_3;
         hdr.extra[0].more = 8w1;
         hdr.extra[1].x1 = x2;
         hdr.extra[1].more = hdr.data.more;
@@ -84,12 +84,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             push1();
             push2();
             pop1();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            hdr.data.f1: exact @name("data.f1") ;
+            hdr.data.f1: exact @name("data.f1");
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         test1_0.apply();
@@ -123,4 +123,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

@@ -1,3 +1,11 @@
-issue401.p4(42): [--Werror=type-error] error: cast: Cannot unify Tuple(1) to bit<1>
+issue401.p4(42): [--Werror=type-error] error: cast
     bit<1> b = (bit<1>) { 0 };
                ^^^^^^^^^^^^^^
+  ---- Actual error:
+issue401.p4(42): Cannot unify type 'tuple<int>' with type 'bit<1>'
+      bit<1> b = (bit<1>) { 0 };
+                          ^^^^^
+  ---- Originating from:
+issue401.p4(42): Cannot cast from 'tuple<int>' to 'bit<1>'
+      bit<1> b = (bit<1>) { 0 };
+                          ^^^^^

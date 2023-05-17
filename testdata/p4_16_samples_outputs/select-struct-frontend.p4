@@ -6,8 +6,8 @@ struct S {
 }
 
 parser p() {
-    bit<8> x_0;
-    S s_0;
+    @name("p.x") bit<8> x_0;
+    @name("p.s") S s_0;
     state start {
         x_0 = 8w5;
         s_0 = (S){f0 = 8w0,f1 = 8w0};
@@ -23,4 +23,3 @@ parser p() {
 parser s();
 package top(s _s);
 top(p()) main;
-

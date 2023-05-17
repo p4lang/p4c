@@ -45,25 +45,25 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyIngress.drop") action drop() {
         mark_to_drop(standard_metadata);
     }
     @name("MyIngress.ipv4_forward") action ipv4_forward() {
     }
-    @name("MyIngress.ipv4_lpm") table ipv4_lpm_0 {
+    @__debug @name("MyIngress.ipv4_lpm") table ipv4_lpm_0 {
         key = {
-            hdr.ipv4.dstAddr: ternary @name("hdr.ipv4.dstAddr") ;
-            hdr.ipv4.srcAddr: lpm @name("hdr.ipv4.srcAddr") ;
+            hdr.ipv4.dstAddr: ternary @name("hdr.ipv4.dstAddr");
+            hdr.ipv4.srcAddr: lpm @name("hdr.ipv4.srcAddr");
         }
         actions = {
             ipv4_forward();
             drop();
-            NoAction_0();
+            NoAction_1();
         }
         size = 1024;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         ipv4_lpm_0.apply();
@@ -87,4 +87,3 @@ control MyDeparser(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

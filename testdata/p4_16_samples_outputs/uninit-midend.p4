@@ -9,18 +9,20 @@ header Header {
 extern void func(in Header h);
 extern bit<32> g(inout bit<32> v, in bit<32> w);
 parser p1(packet_in p, out Header h) {
-    Header[2] stack_0;
-    bit<32> tmp;
-    bit<32> tmp_1;
+    @name("p1.stack") Header[2] stack_0;
+    @name("p1.tmp") bit<32> tmp;
+    @name("p1.tmp_0") bit<32> tmp_0;
+    @name("p1.tmp_1") bit<32> tmp_1;
     state start {
+        stack_0[0].setInvalid();
+        stack_0[1].setInvalid();
         h.data1 = 32w0;
         func(h);
         tmp = h.data2;
-        tmp_1 = g(tmp, h.data2);
-        h.data2 = tmp;
-        g(h.data2, tmp_1);
+        tmp_0 = h.data2;
+        tmp_1 = g(h.data2, tmp_0);
+        g(tmp, tmp_1);
         h.data2 = h.data3 + 32w1;
-        stack_0[1].isValid();
         transition select((bit<1>)h.isValid()) {
             1w1: next1;
             1w0: next2;
@@ -43,10 +45,10 @@ parser p1(packet_in p, out Header h) {
 }
 
 control c(out bit<32> v) {
-    bit<32> e_0;
+    @name("c.e") bit<32> e_0;
     @name("c.a1") action a1() {
     }
-    @name("c.a1") action a1_2() {
+    @name("c.a1") action a1_1() {
     }
     @name("c.a2") action a2() {
     }
@@ -77,9 +79,9 @@ control c(out bit<32> v) {
     }
     @hidden table tbl_a1 {
         actions = {
-            a1_2();
+            a1_1();
         }
-        const default_action = a1_2();
+        const default_action = a1_1();
     }
     apply {
         if (e_0 > 32w0) {
@@ -94,7 +96,6 @@ control c(out bit<32> v) {
             default: {
             }
         }
-
         if (e_0 > 32w0) {
             t_0.apply();
         } else {
@@ -107,4 +108,3 @@ parser proto(packet_in p, out Header h);
 control cproto(out bit<32> v);
 package top(proto _p, cproto _c);
 top(p1(), c()) main;
-

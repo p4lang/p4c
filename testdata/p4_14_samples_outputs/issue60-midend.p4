@@ -12,7 +12,7 @@ struct metadata {
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
 }
 
@@ -29,21 +29,21 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name(".set_egress_port") action set_egress_port(bit<9> port) {
+    @name(".set_egress_port") action set_egress_port(@name("port") bit<9> port) {
         standard_metadata.egress_spec = port;
     }
     @name(".t1") table t1_0 {
         actions = {
             set_egress_port();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            hdr.ethernet.dstAddr: lpm @name("ethernet.dstAddr") ;
-            hdr.ethernet.srcAddr: lpm @name("ethernet.srcAddr") ;
+            hdr.ethernet.dstAddr: lpm @name("ethernet.dstAddr");
+            hdr.ethernet.srcAddr: lpm @name("ethernet.srcAddr");
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         t1_0.apply();
@@ -67,4 +67,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

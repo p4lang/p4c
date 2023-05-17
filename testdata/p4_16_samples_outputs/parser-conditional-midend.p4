@@ -1,17 +1,13 @@
 #include <core.p4>
 
 parser p(out bit<32> b) {
-    bit<32> a_0;
-    bit<32> tmp;
-    bit<32> tmp_0;
-    bit<32> tmp_1;
+    @name("p.a") bit<32> a_0;
+    @name("p.tmp") bit<32> tmp;
+    @name("p.tmp_0") bit<32> tmp_0;
+    @name("p.tmp_1") bit<32> tmp_1;
     state start {
         a_0 = 32w1;
         transition start_0_false;
-    }
-    state start_0_true {
-        tmp = 32w2;
-        transition start_0_join;
     }
     state start_0_false {
         tmp = 32w3;
@@ -62,4 +58,3 @@ parser p(out bit<32> b) {
 parser proto(out bit<32> b);
 package top(proto _p);
 top(p()) main;
-

@@ -19,10 +19,8 @@ limitations under the License.
 namespace P4 {
 
 /// Check that the type of a constant is either bit<>, int<> or int
-void ValidateParsedProgram::postorder(const IR::Constant* c) {
-    if (c->type != nullptr &&
-        !c->type->is<IR::Type_Unknown>() &&
-        !c->type->is<IR::Type_Bits>() &&
+void ValidateParsedProgram::postorder(const IR::Constant *c) {
+    if (c->type != nullptr && !c->type->is<IR::Type_Unknown>() && !c->type->is<IR::Type_Bits>() &&
         !c->type->is<IR::Type_InfInt>())
         BUG("Invalid type %1% for constant %2%", c->type, c);
 }
@@ -30,13 +28,13 @@ void ValidateParsedProgram::postorder(const IR::Constant* c) {
 /// Check that underscore is not a method name
 /// Check that constructors do not have a return type
 /// Check that extern constructor names match the enclosing extern
-void ValidateParsedProgram::postorder(const IR::Method* m) {
+void ValidateParsedProgram::postorder(const IR::Method *m) {
     if (m->name.isDontCare())
         ::error(ErrorType::ERR_INVALID, "%1%: invalid method/function name.", m->name);
     if (auto ext = findContext<IR::Type_Extern>()) {
         if (m->name == ext->name && m->type->returnType != nullptr)
-            ::error(ErrorType::ERR_INVALID,
-                    "%1%: invalid constructor; cannot have a return type.", m);
+            ::error(ErrorType::ERR_INVALID, "%1%: invalid constructor; cannot have a return type.",
+                    m);
         if (m->type->returnType == nullptr) {
             if (m->name != ext->name) {
                 ::error(ErrorType::ERR_INVALID, "%1%: invalid type; method has no return type.", m);
@@ -51,53 +49,49 @@ void ValidateParsedProgram::postorder(const IR::Method* m) {
 }
 
 /// Structured annotations cannot reuse names
-void ValidateParsedProgram::postorder(const IR::Annotations* annotations) {
+void ValidateParsedProgram::postorder(const IR::Annotations *annotations) {
     std::multiset<cstring> namesUsed;
-    for (auto a : annotations->annotations)
-        namesUsed.emplace(a->name);
+    for (auto a : annotations->annotations) namesUsed.emplace(a->name);
 
     for (auto a : annotations->annotations) {
-        if (!a->structured)
-            continue;
+        if (!a->structured) continue;
         if (namesUsed.count(a->name) > 1)
             ::error(ErrorType::ERR_DUPLICATE, "%1%: duplicate name for structured annotation", a);
     }
 }
 
 /// Struct field names cannot be underscore
-void ValidateParsedProgram::postorder(const IR::StructField* f) {
-    if (f->name.isDontCare())
-        ::error(ErrorType::ERR_INVALID, "%1%: invalid field name", f->name);
+void ValidateParsedProgram::postorder(const IR::StructField *f) {
+    if (f->name.isDontCare()) ::error(ErrorType::ERR_INVALID, "%1%: invalid field name", f->name);
 }
 
 /// Width of a bit<> or int<> type is greater than 0
-void ValidateParsedProgram::postorder(const IR::Type_Bits* type) {
+void ValidateParsedProgram::postorder(const IR::Type_Bits *type) {
     if (type->expression)
         // cannot validate yet
         return;
-    if (type->size <= 0)
+    if (type->size < 0) ::error(ErrorType::ERR_INVALID, "%1%: invalid type size", type);
+    if (type->size == 0 && type->isSigned)
         ::error(ErrorType::ERR_INVALID, "%1%: invalid type size", type);
 }
 
-void ValidateParsedProgram::postorder(const IR::Type_Varbits* type) {
+void ValidateParsedProgram::postorder(const IR::Type_Varbits *type) {
     if (type->expression)
         // cannot validate yet
         return;
-    if (type->size <= 0)
-        ::error(ErrorType::ERR_INVALID, "%1%: invalid type size", type);
+    if (type->size < 0) ::error(ErrorType::ERR_INVALID, "%1%: invalid type size", type);
 }
 
 /// The accept and reject states cannot be implemented
-void ValidateParsedProgram::postorder(const IR::ParserState* s) {
-    if (s->name == IR::ParserState::accept ||
-        s->name == IR::ParserState::reject)
+void ValidateParsedProgram::postorder(const IR::ParserState *s) {
+    if (s->name == IR::ParserState::accept || s->name == IR::ParserState::reject)
         ::error(ErrorType::ERR_INVALID,
                 "Invalid parser state: %1% should not be implemented, it is built-in", s->name);
 }
 
 /// All parameters of a constructor must be directionless.
 /// This only checks controls, parsers and packages
-void ValidateParsedProgram::container(const IR::IContainer* type) {
+void ValidateParsedProgram::container(const IR::IContainer *type) {
     for (auto p : type->getConstructorParameters()->parameters)
         if (p->direction != IR::Direction::None)
             ::error(ErrorType::ERR_INVALID,
@@ -105,42 +99,37 @@ void ValidateParsedProgram::container(const IR::IContainer* type) {
 }
 
 /// Tables must have an 'actions' property.
-void ValidateParsedProgram::postorder(const IR::P4Table* t) {
+void ValidateParsedProgram::postorder(const IR::P4Table *t) {
     auto ac = t->getActionList();
     if (ac == nullptr)
-        ::error(ErrorType::ERR_EXPECTED,
-                "%1%: expected '%2%' property",
-                t->name, IR::TableProperties::actionsPropertyName);
+        ::error(ErrorType::ERR_EXPECTED, "%1%: expected '%2%' property", t->name,
+                IR::TableProperties::actionsPropertyName);
 }
 
 /// Checks that the names of the three parameter lists for some constructs
 /// are all distinct (type parameters, apply parameters, constructor parameters)
-void ValidateParsedProgram::distinctParameters(
-    const IR::TypeParameters* typeParams,
-    const IR::ParameterList* apply,
-    const IR::ParameterList* constr) {
-    std::map<cstring, const IR::Node*> found;
+void ValidateParsedProgram::distinctParameters(const IR::TypeParameters *typeParams,
+                                               const IR::ParameterList *apply,
+                                               const IR::ParameterList *constr) {
+    std::map<cstring, const IR::Node *> found;
 
-    for (auto p : typeParams->parameters)
-        found.emplace(p->getName(), p);
+    for (auto p : typeParams->parameters) found.emplace(p->getName(), p);
     for (auto p : apply->parameters) {
         auto it = found.find(p->getName());
         if (it != found.end())
-            ::error(ErrorType::ERR_DUPLICATE, "%1% duplicates %2%.",
-                    it->second, p);
+            ::error(ErrorType::ERR_DUPLICATE, "%1% duplicates %2%.", it->second, p);
         else
             found.emplace(p->getName(), p);
     }
     for (auto p : constr->parameters) {
         auto it = found.find(p->getName());
         if (it != found.end())
-            ::error(ErrorType::ERR_DUPLICATE, "%1% duplicates %2%.",
-                    it->second, p);
+            ::error(ErrorType::ERR_DUPLICATE, "%1% duplicates %2%.", it->second, p);
     }
 }
 
 /// Cannot invoke constructors in actions
-void ValidateParsedProgram::postorder(const IR::ConstructorCallExpression* expression) {
+void ValidateParsedProgram::postorder(const IR::ConstructorCallExpression *expression) {
     auto inAction = findContext<IR::P4Action>();
     if (inAction != nullptr)
         ::error(ErrorType::ERR_INVALID,
@@ -148,18 +137,18 @@ void ValidateParsedProgram::postorder(const IR::ConstructorCallExpression* expre
 }
 
 /// Variable names cannot be underscore
-void ValidateParsedProgram::postorder(const IR::Declaration_Variable* decl) {
+void ValidateParsedProgram::postorder(const IR::Declaration_Variable *decl) {
     if (decl->name.isDontCare())
         ::error(ErrorType::ERR_INVALID, "%1%: invalid variable name.", decl);
 }
 
 /// Instance names cannot be don't care
 /// Do not declare instances in apply {} blocks, parser states or actions
-void ValidateParsedProgram::postorder(const IR::Declaration_Instance* decl) {
+void ValidateParsedProgram::postorder(const IR::Declaration_Instance *decl) {
     if (decl->name.isDontCare())
         ::error(ErrorType::ERR_INVALID, "%1%: invalid instance name.", decl);
-    if (findContext<IR::BlockStatement>() &&  // we're looking for the apply block
-        findContext<IR::P4Control>() &&       // of a control
+    if (findContext<IR::BlockStatement>() &&         // we're looking for the apply block
+        findContext<IR::P4Control>() &&              // of a control
         !findContext<IR::Declaration_Instance>()) {  // but not in an instance initializer
         ::error(ErrorType::ERR_INVALID,
                 "%1%: invalid declaration. Instantiations cannot be in a control 'apply' block.",
@@ -168,72 +157,72 @@ void ValidateParsedProgram::postorder(const IR::Declaration_Instance* decl) {
     if (findContext<IR::ParserState>())
         ::error(ErrorType::ERR_INVALID,
                 "%1%: invalid declaration. Instantiations cannot be in a parser state.", decl);
+    if (findContext<IR::Function>() || findContext<IR::Method>())
+        ::error(ErrorType::ERR_INVALID,
+                "%1%: invalid declaration. Instantiations cannot be in a function or method.",
+                decl);
     auto inAction = findContext<IR::P4Action>();
     if (inAction != nullptr)
-        ::error(ErrorType::ERR_INVALID,
-                "%1%: declaration. Instantiations not allowed in actions.", decl);
+        ::error(ErrorType::ERR_INVALID, "%1%: declaration. Instantiations not allowed in actions.",
+                decl);
 }
 
 /// Constant names cannot be underscore
-void ValidateParsedProgram::postorder(const IR::Declaration_Constant* decl) {
+void ValidateParsedProgram::postorder(const IR::Declaration_Constant *decl) {
     if (decl->name.isDontCare())
         ::error(ErrorType::ERR_INVALID, "%1%: invalid constant name.", decl);
 }
 
 /**
-  * check that an entries list is declared as constant
-  * The current specification supports only const entries, and we chose
-  * to implement optCONST in the grammar, in part because we can provide
-  * a more informative message here, and in part because it more uniform
-  * handling with the rest of the properties defined for tables.
-  */
-void ValidateParsedProgram::postorder(const IR::EntriesList* l) {
+ * check that an entries list is declared as constant
+ * The current specification supports only const entries, and we chose
+ * to implement optCONST in the grammar, in part because we can provide
+ * a more informative message here, and in part because it more uniform
+ * handling with the rest of the properties defined for tables.
+ */
+void ValidateParsedProgram::postorder(const IR::EntriesList *l) {
     auto table = findContext<IR::P4Table>();
     if (table == nullptr) {
         ::error(ErrorType::ERR_INVALID,
                 "%1%: invalid initializer. Table initializers must belong to a table.", l);
-        return; }
+        return;
+    }
     auto ep = table->properties->getProperty(IR::TableProperties::entriesPropertyName);
     if (!ep->isConstant)
         ::error(ErrorType::ERR_INVALID,
                 "%1%: invalid initializer. Table initializers must be constant.", l);
 }
 
-/// Switch statements are not allowed in actions.
 /// Default label in switch statement is always the last one.
-void ValidateParsedProgram::postorder(const IR::SwitchStatement* statement) {
-    auto inAction = findContext<IR::P4Action>();
-    if (inAction != nullptr)
-        ::error(ErrorType::ERR_INVALID,
-                "%1%: invalid statement. 'switch' statements not allowed in actions.", statement);
+void ValidateParsedProgram::postorder(const IR::SwitchStatement *statement) {
     const IR::SwitchCase *defaultFound = nullptr;
     for (auto c : statement->cases) {
         if (defaultFound != nullptr) {
             if (c->label->is<IR::DefaultExpression>())
-                ::error(ErrorType::ERR_INVALID,
-                        "%1% has multiple 'default' labels: %2% and %3%.",
+                ::error(ErrorType::ERR_INVALID, "%1% has multiple 'default' labels: %2% and %3%.",
                         statement, defaultFound->label, c->label);
             else
-                ::warning(ErrorType::WARN_ORDERING,
-                          "%1%: label following 'default' %2% label.",
-                          c->label, defaultFound->label);
+                warn(ErrorType::WARN_ORDERING, "%1%: label following 'default' %2% label.",
+                     c->label, defaultFound->label);
             break;
         }
-        if (c->label->is<IR::DefaultExpression>())
-            defaultFound = c;
+        if (c->label->is<IR::DefaultExpression>()) defaultFound = c;
     }
 }
 
 /// Return statements are not allowed in parsers
-void ValidateParsedProgram::postorder(const IR::ReturnStatement* statement) {
-    auto inParser = findContext<IR::P4Parser>();
-    if (inParser != nullptr)
-        ::error(ErrorType::ERR_INVALID,
-                "%1%: invalid statement. 'return' statements not allowed in parsers.", statement);
+void ValidateParsedProgram::postorder(const IR::ReturnStatement *statement) {
+    if (!findContext<IR::Function>()) {
+        auto inParser = findContext<IR::P4Parser>();
+        if (inParser != nullptr)
+            ::error(ErrorType::ERR_INVALID,
+                    "%1%: invalid statement. 'return' statements not allowed in parsers.",
+                    statement);
+    }
 }
 
 /// Exit statements are not allowed in parsers or functions
-void ValidateParsedProgram::postorder(const IR::ExitStatement* statement) {
+void ValidateParsedProgram::postorder(const IR::ExitStatement *statement) {
     auto inParser = findContext<IR::P4Parser>();
     if (inParser != nullptr)
         ::error(ErrorType::ERR_INVALID,
@@ -243,16 +232,16 @@ void ValidateParsedProgram::postorder(const IR::ExitStatement* statement) {
                 "%1% invalid statement. 'exit' statements not allowed in functions.", statement);
 }
 
-void ValidateParsedProgram::postorder(const IR::P4Program* program) {
+void ValidateParsedProgram::postorder(const IR::P4Program *program) {
     IR::IndexedVector<IR::Node> declarations;
     for (auto decl : *program->getDeclarations()) {
         cstring name = decl->getName();
         auto existing = declarations.getDeclaration(name);
         if (existing != nullptr) {
-            if (!existing->is<IR::IFunctional>() || !decl->is<IR::IFunctional>()
-                || typeid(*existing) != typeid(*decl) || decl->is<IR::P4Action>()) {
-                ::error(ErrorType::ERR_DUPLICATE, "%1% duplicates %2%.",
-                        decl->getName(), existing->getName());
+            if (!existing->is<IR::IFunctional>() || !decl->is<IR::IFunctional>() ||
+                typeid(*existing) != typeid(*decl) || decl->is<IR::P4Action>()) {
+                ::error(ErrorType::ERR_DUPLICATE, "%1% duplicates %2%.", decl->getName(),
+                        existing->getName());
             }
         } else {
             declarations.push_back(decl->getNode());

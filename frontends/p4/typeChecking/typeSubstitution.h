@@ -29,43 +29,39 @@ namespace P4 {
 template <class T>
 class TypeSubstitution : public IHasDbPrint {
  protected:
-    std::map<T, const IR::Type*> binding;
+    ordered_map<T, const IR::Type *> binding;
 
  public:
     TypeSubstitution() = default;
-    TypeSubstitution(const TypeSubstitution& other) : binding(other.binding) {}
+    TypeSubstitution(const TypeSubstitution &other) : binding(other.binding) {}
 
     /** True if this is the empty substitution, which does not replace anything. */
     bool isIdentity() const { return binding.size() == 0; }
-    const IR::Type* lookup(T t) const
-    { return ::get(binding, t); }
-    const IR::Type* get(T t) const
-    { return ::get(binding, t); }
+    const IR::Type *lookup(T t) const { return ::get(binding, t); }
+    const IR::Type *get(T t) const { return ::get(binding, t); }
 
     bool containsKey(T key) const { return binding.find(key) != binding.end(); }
 
     /* This can fail if id is already bound.
      * @return true on success. */
-    bool setBinding(T id, const IR::Type* type) {
-        CHECK_NULL(id); CHECK_NULL(type);
+    virtual bool setBinding(T id, const IR::Type *type) {
+        CHECK_NULL(id);
+        CHECK_NULL(type);
         auto it = binding.find(id);
         if (it != binding.end()) {
-            if (it->second != type)
-                return false;
+            if (it->second != type) return false;
             return true;
         }
         binding.emplace(id, type);
         return true;
     }
 
-    void dbprint(std::ostream& out) const {
-        if (isIdentity())
-            out << "Empty substitution";
+    void dbprint(std::ostream &out) const {
+        if (isIdentity()) out << "Empty substitution";
         bool first = true;
         for (auto it : binding) {
-            if (!first)
-                out << std::endl;
-            out << it.first << " -> " << dbp(it.second);
+            if (!first) out << std::endl;
+            out << dbp(it.first) << " " << it.first << " -> " << dbp(it.second) << " " << it.second;
             first = false;
         }
     }
@@ -73,18 +69,25 @@ class TypeSubstitution : public IHasDbPrint {
     void clear() { binding.clear(); }
 };
 
-class TypeVariableSubstitution final : public TypeSubstitution<const IR::ITypeVar*> {
+class TypeVariableSubstitution final : public TypeSubstitution<const IR::ITypeVar *> {
  public:
     TypeVariableSubstitution() = default;
-    TypeVariableSubstitution(const TypeVariableSubstitution& other) = default;
-    bool setBindings(const IR::Node* errorLocation,
-                     const IR::TypeParameters* params,
-                     const IR::Vector<IR::Type>* args);
-    bool compose(const IR::Node* errorLocation,
-                 const IR::ITypeVar* var, const IR::Type* substitution);
+    TypeVariableSubstitution(const TypeVariableSubstitution &other) = default;
+    bool setBindings(const IR::Node *errorLocation, const IR::TypeParameters *params,
+                     const IR::Vector<IR::Type> *args);
+    /// Returns an empty string on error, or an error message format otherwise.
+    /// The error message should be used with 'var' and 'substitution' as arguments when
+    /// reporting an error (i.e., it may contain %1% and %2% inside).
+    cstring compose(const IR::ITypeVar *var, const IR::Type *substitution);
     // In this variant of compose all variables in 'other' that are
     // assigned to are disjoint from all variables already in 'this'.
-    void simpleCompose(const TypeVariableSubstitution* other);
+    void simpleCompose(const TypeVariableSubstitution *other);
+    void debugValidate();
+    bool setBinding(const IR::ITypeVar *id, const IR::Type *type) override {
+        auto result = TypeSubstitution::setBinding(id, type);
+        debugValidate();
+        return result;
+    }
 };
 
 }  // namespace P4

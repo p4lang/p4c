@@ -5,7 +5,7 @@ header Header {
 }
 
 parser p0(packet_in p, out Header h) {
-    bool b_0;
+    @name("p0.b") bool b_0;
     state start {
         b_0 = true;
         transition start_0;
@@ -30,4 +30,3 @@ parser p0(packet_in p, out Header h) {
 parser proto(packet_in p, out Header h);
 package top(proto _p);
 top(p0()) main;
-

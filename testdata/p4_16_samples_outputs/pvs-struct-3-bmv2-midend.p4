@@ -16,13 +16,13 @@ struct my_metadata {
 }
 
 struct value_set_t {
-    @match(ternary) 
+    @match(ternary)
     bit<16> field1;
-    @match(lpm) 
+    @match(lpm)
     bit<3>  field2;
-    @match(exact) 
+    @match(exact)
     bit<6>  field3;
-    @match(range) 
+    @match(range)
     bit<5>  field4;
 }
 
@@ -35,7 +35,7 @@ parser MyParser(packet_in b, out my_packet p, inout my_metadata m, inout standar
             (16w0x810, 3w0x4 &&& 3w0x6, 6w0x32 &&& 6w0x33, 5w10 &&& 5w30): foo;
             (16w0x810, 3w0x4 &&& 3w0x6, 6w0x32 &&& 6w0x33, 5w12 &&& 5w28): foo;
             (16w0x810, 3w0x4 &&& 3w0x6, 6w0x32 &&& 6w0x33, 5w16 &&& 5w28): foo;
-            (16w0x810, 3w0x4 &&& 3w0x6, 6w0x32 &&& 6w0x33, 5w20 &&& 5w31): foo;
+            (16w0x810, 3w0x4 &&& 3w0x6, 6w0x32 &&& 6w0x33, 5w20): foo;
             default: noMatch;
         }
     }
@@ -54,19 +54,19 @@ control MyVerifyChecksum(inout my_packet hdr, inout my_metadata meta) {
 }
 
 control MyIngress(inout my_packet p, inout my_metadata meta, inout standard_metadata_t s) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyIngress.set_data") action set_data() {
     }
     @name("MyIngress.t") table t_0 {
         actions = {
             set_data();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            meta.data[0].da: exact @name("meta.data[0].da") ;
+            meta.data[0].da: exact @name("meta.data[0].da");
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         t_0.apply();
@@ -89,4 +89,3 @@ control MyDeparser(packet_out b, in my_packet p) {
 }
 
 V1Switch<my_packet, my_metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

@@ -7,7 +7,6 @@ error {
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<32> IPv4Address;
 header ethernet_t {
     bit<48> dstAddr;
     bit<48> srcAddr;
@@ -25,8 +24,8 @@ header ipv4_t {
     bit<8>      ttl;
     bit<8>      protocol;
     bit<16>     hdrChecksum;
-    IPv4Address srcAddr;
-    IPv4Address dstAddr;
+    bit<32>     srcAddr;
+    bit<32>     dstAddr;
     varbit<320> options;
 }
 
@@ -67,7 +66,7 @@ struct metadata {
 }
 
 parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    IPv4_up_to_ihl_only_h tmp;
+    @name("parserI.tmp") IPv4_up_to_ihl_only_h tmp;
     bit<8> tmp_4;
     state start {
         pkt.extract<ethernet_t>(hdr.ethernet);
@@ -103,7 +102,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     @name("cIngress.guh") table guh_0 {
         key = {
-            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort") ;
+            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort");
         }
         actions = {
             foo();
@@ -137,13 +136,13 @@ struct tuple_0 {
 
 control vc(inout headers hdr, inout metadata meta) {
     apply {
-        verify_checksum<tuple_0, bit<16>>(true, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.options }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+        verify_checksum<tuple_0, bit<16>>(true, (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr,f11 = hdr.ipv4.options}, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 
 control uc(inout headers hdr, inout metadata meta) {
     apply {
-        update_checksum<tuple_0, bit<16>>(meta._b2, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, meta._mystruct1_a0 ++ meta._mystruct1_b1, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.options }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+        update_checksum<tuple_0, bit<16>>(meta._b2, (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = meta._mystruct1_a0 ++ meta._mystruct1_b1,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr,f11 = hdr.ipv4.options}, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 
@@ -156,4 +155,3 @@ control DeparserI(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
-

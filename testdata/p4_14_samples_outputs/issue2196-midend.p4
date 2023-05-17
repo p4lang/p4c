@@ -24,9 +24,9 @@ struct metadata {
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t  ethernet;
-    @name(".my_header") 
+    @name(".my_header")
     my_header_t my_header;
 }
 
@@ -58,11 +58,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name(".route_eth") action route_eth(bit<9> egress_spec, bit<48> src_addr) {
-        standard_metadata.egress_spec = egress_spec;
-        hdr.ethernet.src_addr = src_addr;
+    @name(".route_eth") action route_eth(@name("egress_spec") bit<9> egress_spec_1, @name("src_addr") bit<48> src_addr_1) {
+        standard_metadata.egress_spec = egress_spec_1;
+        hdr.ethernet.src_addr = src_addr_1;
     }
     @name(".noop") action noop() {
     }
@@ -70,12 +70,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             route_eth();
             noop();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            hdr.ethernet.dst_addr: lpm @name("ethernet.dst_addr") ;
+            hdr.ethernet.dst_addr: lpm @name("ethernet.dst_addr");
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         routing_0.apply();
@@ -105,4 +105,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

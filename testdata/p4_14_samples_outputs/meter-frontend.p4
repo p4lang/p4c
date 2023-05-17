@@ -18,12 +18,12 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name(".meta") 
+    @name(".meta")
     meta_t meta;
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
 }
 
@@ -43,20 +43,19 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 @name(".my_meter") meter<bit<14>>(32w16384, MeterType.packets) my_meter;
-
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("._drop") action _drop() {
         mark_to_drop(standard_metadata);
     }
     @name("._nop") action _nop() {
     }
-    @name("._nop") action _nop_2() {
+    @name("._nop") action _nop_1() {
     }
-    @name(".m_action") action m_action(bit<14> meter_idx) {
+    @name(".m_action") action m_action(@name("meter_idx") bit<14> meter_idx) {
         my_meter.execute_meter<bit<32>>(meter_idx, meta.meta.meter_tag);
         standard_metadata.egress_spec = 9w1;
     }
@@ -64,25 +63,25 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             _drop();
             _nop();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            meta.meta.meter_tag: exact @name("meta.meter_tag") ;
+            meta.meta.meter_tag: exact @name("meta.meter_tag");
         }
         size = 16;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name(".m_table") table m_table_0 {
         actions = {
             m_action();
-            _nop_2();
-            @defaultonly NoAction_3();
+            _nop_1();
+            @defaultonly NoAction_2();
         }
         key = {
-            hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr") ;
+            hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr");
         }
         size = 16384;
-        default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     apply {
         m_table_0.apply();
@@ -107,4 +106,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

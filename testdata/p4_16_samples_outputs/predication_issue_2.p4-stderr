@@ -1,0 +1,6 @@
+predication_issue_2.p4(24): [--Wwarn=shadow] warning: 'bound' shadows 'bound'
+bit<8> bound(in bit<8> val, in bit<8> bound) {
+                                      ^^^^^
+predication_issue_2.p4(24)
+bit<8> bound(in bit<8> val, in bit<8> bound) {
+       ^^^^^

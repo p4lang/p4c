@@ -1,1 +1,4 @@
+spec-ex25.p4(31): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
+        key = { x : exact; }
+                ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

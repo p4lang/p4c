@@ -16,20 +16,20 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
 }
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("IngressI.do_something") action do_something() {
         mark_to_drop(smeta);
     }
     @name("IngressI.do_something") table do_something_2 {
         key = {
-            smeta.ingress_port: exact @name("smeta.ingress_port") ;
+            smeta.ingress_port: exact @name("smeta.ingress_port");
         }
         actions = {
             do_something();
-            NoAction_0();
+            NoAction_1();
         }
-        const default_action = NoAction_0();
+        const default_action = NoAction_1();
     }
     apply {
         do_something_2.apply();
@@ -57,4 +57,3 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

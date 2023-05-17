@@ -34,11 +34,11 @@ struct metadata {
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
-    @name(".ipv4") 
+    @name(".ipv4")
     ipv4_t     ipv4;
-    @name(".vlan") 
+    @name(".vlan")
     vlan_t     vlan;
 }
 
@@ -65,25 +65,25 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name(".action_0") action action_0(bit<8> my_param0, bit<8> my_param1) {
+    @name(".action_0") action action_0(@name("my_param0") bit<8> my_param0, @name("my_param1") bit<8> my_param1) {
         hdr.ipv4.protocol[7:3] = my_param0[7:3];
         hdr.ipv4.ttl = my_param1;
     }
-    @name(".action_1") action action_1(bit<8> my_param2) {
+    @name(".action_1") action action_1(@name("my_param2") bit<8> my_param2) {
     }
     @name(".table_0") table table_1 {
         actions = {
             action_0();
             action_1();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            hdr.ipv4.srcAddr: exact @name("ipv4.srcAddr") ;
+            hdr.ipv4.srcAddr: exact @name("ipv4.srcAddr");
         }
         max_size = 4096;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         table_1.apply();
@@ -114,4 +114,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

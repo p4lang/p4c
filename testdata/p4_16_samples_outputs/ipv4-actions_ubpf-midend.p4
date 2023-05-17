@@ -1,27 +1,25 @@
 #include <core.p4>
 #include <ubpf_model.p4>
 
-typedef bit<48> EthernetAddress;
-typedef bit<32> IPv4Address;
 header Ethernet_h {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header IPv4_h {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     totalLen;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     fragOffset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdrChecksum;
-    IPv4Address srcAddr;
-    IPv4Address dstAddr;
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<8>  diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
 }
 
 struct Headers_t {
@@ -47,64 +45,64 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 }
 
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("pipe.Reject") action Reject() {
         mark_to_drop();
     }
-    @name("pipe.set_ipv4_version") action set_ipv4_version(bit<4> version) {
-        headers.ipv4.version = version;
+    @name("pipe.set_ipv4_version") action set_ipv4_version(@name("version") bit<4> version_1) {
+        headers.ipv4.version = version_1;
     }
-    @name("pipe.set_ihl") action set_ihl(bit<4> ihl) {
-        headers.ipv4.ihl = ihl;
+    @name("pipe.set_ihl") action set_ihl(@name("ihl") bit<4> ihl_2) {
+        headers.ipv4.ihl = ihl_2;
     }
-    @name("pipe.set_diffserv") action set_diffserv(bit<8> diffserv) {
-        headers.ipv4.diffserv = diffserv;
+    @name("pipe.set_diffserv") action set_diffserv(@name("diffserv") bit<8> diffserv_2) {
+        headers.ipv4.diffserv = diffserv_2;
     }
-    @name("pipe.set_identification") action set_identification(bit<16> identification) {
-        headers.ipv4.identification = identification;
+    @name("pipe.set_identification") action set_identification(@name("identification") bit<16> identification_1) {
+        headers.ipv4.identification = identification_1;
     }
-    @name("pipe.set_flags") action set_flags(bit<3> flags) {
-        headers.ipv4.flags = flags;
+    @name("pipe.set_flags") action set_flags(@name("flags") bit<3> flags_3) {
+        headers.ipv4.flags = flags_3;
     }
-    @name("pipe.set_fragOffset") action set_fragOffset(bit<13> fragOffset) {
-        headers.ipv4.fragOffset = fragOffset;
+    @name("pipe.set_fragOffset") action set_fragOffset(@name("fragOffset") bit<13> fragOffset_3) {
+        headers.ipv4.fragOffset = fragOffset_3;
     }
-    @name("pipe.set_ttl") action set_ttl(bit<8> ttl) {
-        headers.ipv4.ttl = ttl;
+    @name("pipe.set_ttl") action set_ttl(@name("ttl") bit<8> ttl_2) {
+        headers.ipv4.ttl = ttl_2;
     }
-    @name("pipe.set_protocol") action set_protocol(bit<8> protocol) {
-        headers.ipv4.protocol = protocol;
+    @name("pipe.set_protocol") action set_protocol(@name("protocol") bit<8> protocol_1) {
+        headers.ipv4.protocol = protocol_1;
     }
-    @name("pipe.set_srcAddr") action set_srcAddr(bit<32> srcAddr) {
-        headers.ipv4.srcAddr = srcAddr;
+    @name("pipe.set_srcAddr") action set_srcAddr(@name("srcAddr") bit<32> srcAddr_3) {
+        headers.ipv4.srcAddr = srcAddr_3;
     }
-    @name("pipe.set_dstAddr") action set_dstAddr(bit<32> dstAddr) {
-        headers.ipv4.dstAddr = dstAddr;
+    @name("pipe.set_dstAddr") action set_dstAddr(@name("dstAddr") bit<32> dstAddr_2) {
+        headers.ipv4.dstAddr = dstAddr_2;
     }
-    @name("pipe.set_srcAddr_dstAddr") action set_srcAddr_dstAddr(bit<32> srcAddr, bit<32> dstAddr) {
-        headers.ipv4.srcAddr = srcAddr;
-        headers.ipv4.dstAddr = dstAddr;
+    @name("pipe.set_srcAddr_dstAddr") action set_srcAddr_dstAddr(@name("srcAddr") bit<32> srcAddr_4, @name("dstAddr") bit<32> dstAddr_3) {
+        headers.ipv4.srcAddr = srcAddr_4;
+        headers.ipv4.dstAddr = dstAddr_3;
     }
-    @name("pipe.set_ihl_diffserv") action set_ihl_diffserv(bit<4> ihl, bit<8> diffserv) {
-        headers.ipv4.ihl = ihl;
-        headers.ipv4.diffserv = diffserv;
+    @name("pipe.set_ihl_diffserv") action set_ihl_diffserv(@name("ihl") bit<4> ihl_3, @name("diffserv") bit<8> diffserv_3) {
+        headers.ipv4.ihl = ihl_3;
+        headers.ipv4.diffserv = diffserv_3;
     }
-    @name("pipe.set_fragOffset_flags") action set_fragOffset_flags(bit<13> fragOffset, bit<3> flags) {
-        headers.ipv4.flags = flags;
-        headers.ipv4.fragOffset = fragOffset;
+    @name("pipe.set_fragOffset_flags") action set_fragOffset_flags(@name("fragOffset") bit<13> fragOffset_4, @name("flags") bit<3> flags_4) {
+        headers.ipv4.flags = flags_4;
+        headers.ipv4.fragOffset = fragOffset_4;
     }
-    @name("pipe.set_flags_ttl") action set_flags_ttl(bit<3> flags, bit<8> ttl) {
-        headers.ipv4.flags = flags;
-        headers.ipv4.ttl = ttl;
+    @name("pipe.set_flags_ttl") action set_flags_ttl(@name("flags") bit<3> flags_5, @name("ttl") bit<8> ttl_3) {
+        headers.ipv4.flags = flags_5;
+        headers.ipv4.ttl = ttl_3;
     }
-    @name("pipe.set_fragOffset_srcAddr") action set_fragOffset_srcAddr(bit<13> fragOffset, bit<32> srcAddr) {
-        headers.ipv4.fragOffset = fragOffset;
-        headers.ipv4.srcAddr = srcAddr;
+    @name("pipe.set_fragOffset_srcAddr") action set_fragOffset_srcAddr(@name("fragOffset") bit<13> fragOffset_5, @name("srcAddr") bit<32> srcAddr_5) {
+        headers.ipv4.fragOffset = fragOffset_5;
+        headers.ipv4.srcAddr = srcAddr_5;
     }
     @name("pipe.filter_tbl") table filter_tbl_0 {
         key = {
-            headers.ipv4.srcAddr: exact @name("headers.ipv4.srcAddr") ;
+            headers.ipv4.srcAddr: exact @name("headers.ipv4.srcAddr");
         }
         actions = {
             set_ipv4_version();
@@ -123,9 +121,9 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
             set_flags_ttl();
             set_fragOffset_srcAddr();
             Reject();
-            NoAction_0();
+            NoAction_1();
         }
-        const default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         filter_tbl_0.apply();
@@ -133,20 +131,19 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
 }
 
 control dprs(packet_out packet, in Headers_t headers) {
-    @hidden action ipv4actions_ubpf173() {
+    @hidden action ipv4actions_ubpf171() {
         packet.emit<Ethernet_h>(headers.ethernet);
         packet.emit<IPv4_h>(headers.ipv4);
     }
-    @hidden table tbl_ipv4actions_ubpf173 {
+    @hidden table tbl_ipv4actions_ubpf171 {
         actions = {
-            ipv4actions_ubpf173();
+            ipv4actions_ubpf171();
         }
-        const default_action = ipv4actions_ubpf173();
+        const default_action = ipv4actions_ubpf171();
     }
     apply {
-        tbl_ipv4actions_ubpf173.apply();
+        tbl_ipv4actions_ubpf171.apply();
     }
 }
 
 ubpf<Headers_t, metadata>(prs(), pipe(), dprs()) main;
-

@@ -54,7 +54,7 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     }
     table t_ternary {
         key = {
-            h.h.t: ternary @name("h.h.t") ;
+            h.h.t: ternary @name("h.h.t");
         }
         actions = {
             a();
@@ -67,7 +67,6 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
                         16w0x1111 &&& 16w0xf000 : a_with_control_params(9w3);
                         default : a_with_control_params(9w4);
         }
-
     }
     apply {
         t_ternary.apply();
@@ -75,4 +74,3 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 }
 
 V1Switch<Header_t, Meta_t>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

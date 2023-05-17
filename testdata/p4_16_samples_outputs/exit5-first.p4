@@ -30,7 +30,6 @@ control ctrl() {
                 c = 32w4;
             }
         }
-
         c = 32w5;
     }
 }
@@ -38,4 +37,3 @@ control ctrl() {
 control noop();
 package p(noop _n);
 p(ctrl()) main;
-

@@ -1,27 +1,25 @@
 #include <core.p4>
 #include <ebpf_model.p4>
 
-@ethernetaddress typedef bit<48> EthernetAddress;
-@ipv4address typedef bit<32> IPv4Address;
 header Ethernet_h {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header IPv4_h {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     totalLen;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     fragOffset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdrChecksum;
-    IPv4Address srcAddr;
-    IPv4Address dstAddr;
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<8>  diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
 }
 
 struct Headers_t {
@@ -44,23 +42,23 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    bool hasReturned;
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @name("pipe.hasReturned") bool hasReturned;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name("pipe.Reject") action Reject(IPv4Address add) {
+    @name("pipe.Reject") action Reject(@name("add") bit<32> add_1) {
         pass = false;
-        headers.ipv4.srcAddr = add;
+        headers.ipv4.srcAddr = add_1;
     }
     @name("pipe.Check_src_ip") table Check_src_ip_0 {
         key = {
-            headers.ipv4.srcAddr: exact @name("headers.ipv4.srcAddr") ;
+            headers.ipv4.srcAddr: exact @name("headers.ipv4.srcAddr");
         }
         actions = {
             Reject();
-            NoAction_0();
+            NoAction_1();
         }
         implementation = hash_table(32w1024);
-        const default_action = NoAction_0();
+        const default_action = NoAction_1();
     }
     @hidden action hit_ebpf63() {
         pass = false;
@@ -84,16 +82,17 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     apply {
         tbl_hit_ebpf60.apply();
-        if (!headers.ipv4.isValid()) {
+        if (headers.ipv4.isValid()) {
+            ;
+        } else {
             tbl_hit_ebpf63.apply();
         }
-        if (!hasReturned) {
-            if (Check_src_ip_0.apply().hit) {
-                ;
-            }
+        if (hasReturned) {
+            ;
+        } else if (Check_src_ip_0.apply().hit) {
+            ;
         }
     }
 }
 
 ebpfFilter<Headers_t>(prs(), pipe()) main;
-

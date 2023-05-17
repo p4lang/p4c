@@ -1,0 +1,15 @@
+invalid-hdr-warnings2.p4(49): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header h1
+        hdr.h1.data = h1.data; // h1 potentially invalid at this point
+                      ^^
+invalid-hdr-warnings2.p4(60): [--Wwarn=invalid_header] warning: accessing a field of an invalid header s1.h1
+                hdr.h1.data = s1.h1.data; // s1.h1 invalid at this point
+                              ^^^^^
+invalid-hdr-warnings2.p4(64): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header s1.h1
+            hdr.h2.data = s1.h1.data; // s1.h1 potentially invalid at this point
+                          ^^^^^
+invalid-hdr-warnings2.p4(69): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.h1
+        hdr.h1.data = 1; //  hdr.h1 invalid at this point
+        ^^^^^^
+invalid-hdr-warnings2.p4(70): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.h2
+        hdr.h2.data = 1; //  hdr.h2 invalid at this point
+        ^^^^^^

@@ -1,0 +1,10 @@
+pkg_info {
+  arch: "v1model"
+}
+actions {
+  preamble {
+    id: 20289359
+    name: "ingress.action_thing"
+    alias: "action_thing"
+  }
+}

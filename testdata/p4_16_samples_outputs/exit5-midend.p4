@@ -25,21 +25,23 @@ control ctrl() {
         tbl_act.apply();
         switch (t_0.apply().action_run) {
             e: {
-                if (!hasExited) {
+                if (hasExited) {
+                    ;
+                } else {
                     t_0.apply();
                 }
             }
             f: {
-                if (!hasExited) {
+                if (hasExited) {
+                    ;
+                } else {
                     t_0.apply();
                 }
             }
         }
-
     }
 }
 
 control noop();
 package p(noop _n);
 p(ctrl()) main;
-

@@ -1,0 +1,27 @@
+invalid-hdr-warnings6.p4(30): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.u[0].h1
+        hdr.u[0].h1.data = 1;
+        ^^^^^^^^^^^
+invalid-hdr-warnings6.p4(35): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.u[0].h3
+        hdr.u[0].h3.data = 1;
+        ^^^^^^^^^^^
+invalid-hdr-warnings6.p4(49): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.u[0].h1
+        hdr.u[0].h1.data = 1;
+        ^^^^^^^^^^^
+invalid-hdr-warnings6.p4(50): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.u[0].h2
+        hdr.u[0].h2.data = 1;
+        ^^^^^^^^^^^
+invalid-hdr-warnings6.p4(51): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.u[0].h3
+        hdr.u[0].h3.data = 1;
+        ^^^^^^^^^^^
+invalid-hdr-warnings6.p4(74): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u[0].h1
+        u[0].h1.data = 1; // u[0].h1 is invalid either if the then branch is executed (for any i) or not
+        ^^^^^^^
+invalid-hdr-warnings6.p4(82): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header u[0].h1
+        u[0].h1.data = 1;
+        ^^^^^^^
+invalid-hdr-warnings6.p4(86): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header u[0].h1
+        u[0].h1.data = 1;
+        ^^^^^^^
+invalid-hdr-warnings6.p4(87): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u[1].h1
+        u[1].h1.data = 1;
+        ^^^^^^^

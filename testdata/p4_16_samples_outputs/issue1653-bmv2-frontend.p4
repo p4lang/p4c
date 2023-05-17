@@ -23,8 +23,10 @@ parser parse(packet_in pk, out parsed_packet_t h, inout local_metadata_t local_m
 }
 
 control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
+    @name("ingress.bh") bitvec_hdr bh_0;
     apply {
-        clone3<parsed_packet_t>(CloneType.I2E, 32w0, h);
+        bh_0.setInvalid();
+        clone_preserving_field_list(CloneType.I2E, 32w1, 8w0);
     }
 }
 
@@ -49,4 +51,3 @@ control compute_checksum(inout parsed_packet_t hdr, inout local_metadata_t local
 }
 
 V1Switch<parsed_packet_t, local_metadata_t>(parse(), verifyChecksum(), ingress(), egress(), compute_checksum(), deparser()) main;
-

@@ -53,7 +53,7 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     }
     table t_exact {
         key = {
-            m.my_err: exact @name("m.my_err") ;
+            m.my_err: exact @name("m.my_err");
         }
         actions = {
             set_error_idx();
@@ -62,7 +62,6 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         const entries = {
                         error.NoError : set_error_idx(8w1);
         }
-
     }
     apply {
         t_exact.apply();
@@ -70,4 +69,3 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 }
 
 V1Switch<Header_t, Meta_t>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

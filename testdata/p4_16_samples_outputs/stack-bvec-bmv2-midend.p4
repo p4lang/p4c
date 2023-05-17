@@ -56,21 +56,24 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action stackbvecbmv2l40() {
+    @name("ingress.c.tmp") hdr[1] c_tmp;
+    @hidden action stackbvecbmv2l37() {
+        c_tmp[0].setInvalid();
+        c_tmp[0]._row_alt1_valid3 = 1w1;
+        c_tmp[0]._f0 = h.h._f0 + 32w1;
         h.h._f0 = h.h._f0 + 32w1;
         h.h._row_alt1_valid3 = 1w1;
         sm.egress_spec = 9w0;
     }
-    @hidden table tbl_stackbvecbmv2l40 {
+    @hidden table tbl_stackbvecbmv2l37 {
         actions = {
-            stackbvecbmv2l40();
+            stackbvecbmv2l37();
         }
-        const default_action = stackbvecbmv2l40();
+        const default_action = stackbvecbmv2l37();
     }
     apply {
-        tbl_stackbvecbmv2l40.apply();
+        tbl_stackbvecbmv2l37.apply();
     }
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

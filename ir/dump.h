@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,8 +17,12 @@ limitations under the License.
 #ifndef _IR_DUMP_H_
 #define _IR_DUMP_H_
 
-#include <string>
+#include <cstdint>
 #include <iostream>
+#include <string>
+
+#include "ir/node.h"
+#include "ir/visitor.h"
 
 /* overloads rather than optional arguments to make it easier to call from the debugger */
 void dump(std::ostream &out, const IR::Node *n);
@@ -38,13 +42,14 @@ void dump_notype(uintptr_t p, unsigned maxdepth);
 void dump(std::ostream &, const Visitor::Context *);
 void dump(const Visitor::Context *);
 
-std::string dumpToString(const IR::Node* n);
+std::string dumpToString(const IR::Node *n);
 
 class Dump {
     const IR::Node *n = nullptr;
     const Visitor::Context *ctxt = nullptr;
     unsigned maxdepth;
     friend std::ostream &operator<<(std::ostream &, const Dump &);
+
  public:
     explicit Dump(const IR::Node *n, unsigned maxdepth = ~0U) : n(n), maxdepth(maxdepth) {}
     explicit Dump(const Visitor::Context *ctxt) : ctxt(ctxt) {}
@@ -55,6 +60,7 @@ inline std::ostream &operator<<(std::ostream &out, const Dump &d) {
         dump(out, d.n, d.maxdepth);
     else
         dump(out, d.ctxt);
-    return out; }
+    return out;
+}
 
 #endif /* _IR_DUMP_H_ */

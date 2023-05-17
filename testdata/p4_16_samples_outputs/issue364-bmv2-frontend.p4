@@ -43,8 +43,8 @@ control deparser(packet_out b, in Headers h) {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.c") direct_counter(CounterType.packets) c_0;
-    @name("ingress.my_action") action my_action(bit<9> a) {
-        sm.egress_spec = a;
+    @name("ingress.my_action") action my_action(@name("a") bit<9> a_1) {
+        sm.egress_spec = a_1;
     }
     @name("ingress.t") table t_0 {
         actions = {
@@ -59,4 +59,3 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

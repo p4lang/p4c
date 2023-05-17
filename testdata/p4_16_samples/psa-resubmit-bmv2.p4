@@ -13,7 +13,7 @@ limitations under the License.
 */
 
 #include <core.p4>
-#include "psa.p4"
+#include "bmv2/psa.p4"
 
 
 typedef bit<48>  EthernetAddress;

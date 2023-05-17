@@ -36,6 +36,9 @@ endif()
 if (ENABLE_EBPF)
   list (APPEND P4C_TARGET_CFGS p4c_src/p4c.ebpf.cfg)
 endif()
+if (ENABLE_DPDK)
+  list (APPEND P4C_TARGET_CFGS p4c_src/p4c.dpdk.cfg)
+endif()
 
 install (PROGRAMS ${P4C_BINARY_DIR}/${P4C_DRIVER_NAME}
   DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
@@ -62,3 +65,12 @@ add_custom_command(OUTPUT ${P4C_DRIVER_DST}
   )
 
 add_custom_target(p4c_driver ALL DEPENDS ${P4C_DRIVER_DST})
+
+
+
+### Added by Abe starting April 6 2022; these tests are all expected to fail until Abe`s branch with driver improvements is merged.
+
+add_test(NAME driver_inputs_test_1 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_scripts/driver_inputs_test_1)
+add_test(NAME driver_inputs_test_2 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_scripts/driver_inputs_test_2)
+add_test(NAME driver_inputs_test_3 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_scripts/driver_inputs_test_3)
+add_test(NAME driver_inputs_test_4 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_scripts/driver_inputs_test_4)

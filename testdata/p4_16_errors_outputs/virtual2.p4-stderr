@@ -1,6 +1,15 @@
-virtual2.p4(23): [--Werror=type-error] error: return +: return expression in function with void return
+virtual2.p4(24): [--Werror=type-error] error: return +: return expression in function with void return
             return (ix + 1);
             ^^^^^^
-virtual2.p4(21): [--Werror=type-error] error: cntr: Cannot unify void to bit<16>
+virtual2.p4(22): [--Werror=type-error] error: cntr
     Virtual() cntr = {
               ^^^^
+  ---- Actual error:
+  Cannot unify type 'void' with type 'bit<16>'
+  ---- Originating from:
+virtual2.p4(23): Method 'f' does not have the expected type 'f'
+          void f(in bit<16> ix) {
+               ^
+virtual2.p4(18)
+      abstract bit<16> f(in bit<16> ix);
+                       ^

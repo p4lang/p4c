@@ -45,7 +45,7 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     apply {
         bool verified = verify_ipv4_checksum(headers.ipv4);
-        if (verified == true) {
+        if (verified) {
             bit<32> old_addr = headers.ipv4.dstAddr;
             bit<32> new_addr = 32w0x1020304;
             headers.ipv4.dstAddr = new_addr;
@@ -64,4 +64,3 @@ control dprs(packet_out packet, in Headers_t headers) {
 }
 
 ubpf<Headers_t, metadata>(prs(), pipe(), dprs()) main;
-

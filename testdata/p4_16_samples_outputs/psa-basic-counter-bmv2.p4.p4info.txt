@@ -11,14 +11,13 @@ tables {
     id: 17064084
   }
   size: 1024
-  idle_timeout_behavior: NOTIFY_CONTROL
 }
 actions {
   preamble {
     id: 27646489
     name: "send_to_port"
     alias: "send_to_port"
-    annotations: "@noWarnUnused"
+    annotations: "@noWarn(\"unused\")"
   }
 }
 actions {

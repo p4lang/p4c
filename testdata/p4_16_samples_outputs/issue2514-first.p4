@@ -36,7 +36,7 @@ control MyIngress(inout my_headers_t hdr, inout my_meta_t meta) {
     }
     table t {
         key = {
-            hdr.h.f1: ternary @name("hdr.h.f1") ;
+            hdr.h.f1: ternary @name("hdr.h.f1");
         }
         actions = {
             hit();
@@ -47,7 +47,6 @@ control MyIngress(inout my_headers_t hdr, inout my_meta_t meta) {
                         16w0x101 &&& 16w0x505 : hit(16w5);
                         default : hit(16w0);
         }
-
         default_action = NoAction();
     }
     apply {
@@ -56,4 +55,3 @@ control MyIngress(inout my_headers_t hdr, inout my_meta_t meta) {
 }
 
 test<my_headers_t, my_meta_t>(MyIngress()) main;
-

@@ -1,6 +1,6 @@
 extern bit<32> f(in bit<32> x);
 control c(inout bit<32> r) {
-    bit<32> tmp;
+    @name("c.tmp") bit<32> tmp;
     @hidden action complex21() {
         tmp = f(32w5);
         r = f(tmp);
@@ -19,4 +19,3 @@ control c(inout bit<32> r) {
 control simple(inout bit<32> r);
 package top(simple e);
 top(c()) main;
-

@@ -1,27 +1,25 @@
 #include <core.p4>
 #include <ebpf_model.p4>
 
-@ethernetaddress typedef bit<48> EthernetAddress;
-@ipv4address typedef bit<32> IPv4Address;
 header Ethernet_h {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header IPv4_h {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     totalLen;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     fragOffset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdrChecksum;
-    IPv4Address srcAddr;
-    IPv4Address dstAddr;
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<8>  diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
 }
 
 struct Headers_t {
@@ -44,24 +42,24 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    IPv4Address address_0;
-    bool pass_0;
-    bool hasReturned;
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @name("pipe.address_0") bit<32> address_0;
+    @name("pipe.pass_0") bool pass_0;
+    @name("pipe.hasReturned") bool hasReturned;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("pipe.c1.Reject") action c1_Reject_0() {
         pass_0 = false;
     }
     @name("pipe.c1.Check_ip") table c1_Check_ip {
         key = {
-            address_0: exact @name("address") ;
+            address_0: exact @name("address");
         }
         actions = {
             c1_Reject_0();
-            NoAction_0();
+            NoAction_1();
         }
         implementation = hash_table(32w1024);
-        const default_action = NoAction_0();
+        const default_action = NoAction_1();
     }
     @hidden action two_ebpf69() {
         pass = false;
@@ -114,10 +112,14 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     apply {
         tbl_two_ebpf66.apply();
-        if (!headers.ipv4.isValid()) {
+        if (headers.ipv4.isValid()) {
+            ;
+        } else {
             tbl_two_ebpf69.apply();
         }
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             tbl_act.apply();
             c1_Check_ip.apply();
             tbl_act_0.apply();
@@ -128,4 +130,3 @@ control pipe(inout Headers_t headers, out bool pass) {
 }
 
 ebpfFilter<Headers_t>(prs(), pipe()) main;
-

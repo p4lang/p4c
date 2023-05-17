@@ -36,32 +36,34 @@ parser p(packet_in pkt, out Parsed_packet hdr, inout Metadata meta, inout standa
 }
 
 control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @name("ingress.hasReturned") bool hasReturned;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.do_something") action do_something() {
         stdmeta.egress_spec = 9w0;
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
-            hdr.h.b: exact @name("hdr.h.b") ;
+            hdr.h.b: exact @name("hdr.h.b");
         }
         actions = {
-            NoAction_0();
+            NoAction_1();
             do_something();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
-        bool hasReturned = false;
+        hasReturned = false;
         switch (simple_table_0.apply().action_run) {
-            NoAction_0: {
+            NoAction_1: {
                 hasReturned = true;
             }
             default: {
             }
         }
-
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             hdr.h.a = 8w0;
         }
     }
@@ -83,4 +85,3 @@ control update(inout Parsed_packet hdr, inout Metadata meta) {
 }
 
 V1Switch<Parsed_packet, Metadata>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

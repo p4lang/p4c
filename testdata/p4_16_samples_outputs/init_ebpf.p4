@@ -34,7 +34,6 @@ control pipe(inout Headers_t headers, out bool pass) {
                         0x800 : match(true);
                         0xd000 : match(false);
         }
-
         implementation = hash_table(64);
     }
     apply {
@@ -44,4 +43,3 @@ control pipe(inout Headers_t headers, out bool pass) {
 }
 
 ebpfFilter(prs(), pipe()) main;
-

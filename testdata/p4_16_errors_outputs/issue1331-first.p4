@@ -17,8 +17,6 @@ control MyC(packet_in pkt, inout ethernet ether)(P p) {
     action a() {
     }
     table t {
-        key = {
-        }
         actions = {
             a();
             @defaultonly NoAction();
@@ -33,4 +31,3 @@ control MyC(packet_in pkt, inout ethernet ether)(P p) {
 }
 
 S(MyC(MyP())) main;
-

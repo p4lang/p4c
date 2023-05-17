@@ -1,0 +1,26 @@
+gauntlet_side_effect_order_1-bmv2.p4(37): [--Wwarn=ordering] warning: val: 'out' argument has fields in common with val
+        do_action_1(val, val);
+                    ^^^
+gauntlet_side_effect_order_1-bmv2.p4(37)
+        do_action_1(val, val);
+                         ^^^
+gauntlet_side_effect_order_1-bmv2.p4(37): [--Wwarn=ordering] warning: val: 'out' argument has fields in common with val
+        do_action_1(val, val);
+                         ^^^
+gauntlet_side_effect_order_1-bmv2.p4(37)
+        do_action_1(val, val);
+                    ^^^
+gauntlet_side_effect_order_1-bmv2.p4(34): [--Wwarn=uninitialized_use] warning: val_2 may be uninitialized
+        val_1 = val_2;
+                ^^^^^
+gauntlet_side_effect_order_1-bmv2.p4(33): [--Wwarn=uninitialized_out_param] warning: out parameter 'val_2' may be uninitialized when 'do_action_1' terminates
+    action do_action_1(out bit<16> val_1, out bit<16> val_2) {
+                                                      ^^^^^
+gauntlet_side_effect_order_1-bmv2.p4(33)
+    action do_action_1(out bit<16> val_1, out bit<16> val_2) {
+           ^^^^^^^^^^^
+[--Wwarn=uninitialized_use] warning: val_1 may be uninitialized
+[--Wwarn=uninitialized_use] warning: val_1 may be uninitialized
+[--Wwarn=uninitialized_use] warning: val_1 may be uninitialized
+[--Wwarn=uninitialized_use] warning: val_1 may be uninitialized
+[--Wwarn=uninitialized_use] warning: val_1 may be uninitialized

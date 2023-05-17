@@ -31,10 +31,14 @@ control IngressP(inout Parsed_packet hdr, inout Meta m, inout standard_metadata_
         if (m.metafield) {
             hdr.h.field = 64w3;
         }
-        if (m.metafield == false) {
+        if (m.metafield) {
+            ;
+        } else {
             hdr.h.field = 64w5;
         }
-        if (!m.metafield) {
+        if (m.metafield) {
+            ;
+        } else {
             hdr.h.field = 64w4;
         }
     }
@@ -56,4 +60,3 @@ control TopDeparser(packet_out b, in Parsed_packet hdr) {
 }
 
 V1Switch<Parsed_packet, Meta>(TopParser(), VeryChecksum(), IngressP(), EgressP(), ChecksumComputer(), TopDeparser()) main;
-

@@ -20,16 +20,16 @@ struct meta_t {
 }
 
 control MyC(inout hdr_t hdr, inout meta_t meta, in intrinsic_metadata_t intr_md) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyC.c2.a") table c2_a {
         key = {
-            ((meta_t){f0 = 8w0,f1 = 8w0,f2 = 8w0}).f0: exact @name("meta.f0") ;
+            ((meta_t){f0 = 8w0,f1 = 8w0,f2 = 8w0}).f0: exact @name("meta.f0");
         }
         actions = {
-            NoAction_0();
+            NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         c2_a.apply();
@@ -37,4 +37,3 @@ control MyC(inout hdr_t hdr, inout meta_t meta, in intrinsic_metadata_t intr_md)
 }
 
 P<hdr_t, meta_t>(MyC()) main;
-

@@ -1,0 +1,9 @@
+issue1653-complex-bmv2.p4(94): [--Wwarn=invalid_header] warning: accessing a field of an invalid header bh
+        bh.row.alt0.useHash = h.bvh0.row.alt0.useHash;
+        ^^
+issue1653-complex-bmv2.p4(95): [--Wwarn=invalid_header] warning: accessing a field of an invalid header bh
+        bh.row.alt1.type = EthTypes.IPv4;
+        ^^
+issue1653-complex-bmv2.p4(96): [--Wwarn=invalid_header] warning: accessing a field of an invalid header bh
+        h.bvh0.row.alt1.type = bh.row.alt1.type;
+                               ^^

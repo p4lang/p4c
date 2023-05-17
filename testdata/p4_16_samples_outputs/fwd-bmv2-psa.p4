@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <psa.p4>
+#include <bmv2/psa.p4>
 
 typedef bit<48> EthernetAddress;
 header ethernet_t {
@@ -76,8 +76,5 @@ control EgressDeparserImpl(packet_out buffer, out empty_t clone_e2e_meta, out em
 }
 
 IngressPipeline(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-
 EgressPipeline(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-
 PSA_Switch(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

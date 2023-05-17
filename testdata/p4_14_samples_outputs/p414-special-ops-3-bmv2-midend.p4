@@ -10,10 +10,14 @@ struct intrinsic_metadata_t {
 }
 
 struct mymeta_t {
+    @field_list(8w3)
     bit<8> resubmit_count;
+    @field_list(8w2)
     bit<8> recirculate_count;
+    @field_list(8w1)
     bit<8> clone_e2e_count;
     bit<8> last_ing_instance_type;
+    @field_list(8w1, 8w2, 8w3)
     bit<8> f1;
 }
 
@@ -28,16 +32,20 @@ header ethernet_t {
 }
 
 struct metadata {
+    @field_list(8w3)
     bit<8>  _mymeta_resubmit_count0;
+    @field_list(8w2)
     bit<8>  _mymeta_recirculate_count1;
+    @field_list(8w1)
     bit<8>  _mymeta_clone_e2e_count2;
     bit<8>  _mymeta_last_ing_instance_type3;
+    @field_list(8w1, 8w2, 8w3)
     bit<8>  _mymeta_f14;
     bit<48> _temporaries_temp15;
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
 }
 
@@ -51,23 +59,18 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
-struct tuple_0 {
-    bit<8> f0;
-    bit<8> f1;
-}
-
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".do_clone_e2e") action do_clone_e2e() {
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr + 48w281474976710633;
         meta._mymeta_f14 = meta._mymeta_f14 + 8w23;
         meta._mymeta_clone_e2e_count2 = meta._mymeta_clone_e2e_count2 + 8w1;
-        clone3<tuple_0>(CloneType.E2E, 32w1, { meta._mymeta_clone_e2e_count2, meta._mymeta_f14 });
+        clone_preserving_field_list(CloneType.E2E, 32w1, 8w1);
     }
     @name(".do_recirculate") action do_recirculate() {
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr + 48w281474976710637;
         meta._mymeta_f14 = meta._mymeta_f14 + 8w19;
         meta._mymeta_recirculate_count1 = meta._mymeta_recirculate_count1 + 8w1;
-        recirculate<tuple_0>({ meta._mymeta_recirculate_count1, meta._mymeta_f14 });
+        recirculate_preserving_field_list(8w2);
     }
     @name("._nop") action _nop() {
     }
@@ -136,15 +139,11 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             do_clone_e2e();
         }
-        key = {
-        }
         default_action = do_clone_e2e();
     }
     @name(".t_do_recirculate") table t_do_recirculate_0 {
         actions = {
             do_recirculate();
-        }
-        key = {
         }
         default_action = do_recirculate();
     }
@@ -153,23 +152,23 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             _nop();
         }
         key = {
-            standard_metadata.ingress_port            : exact @name("standard_metadata.ingress_port") ;
-            standard_metadata.packet_length           : exact @name("standard_metadata.packet_length") ;
-            standard_metadata.egress_spec             : exact @name("standard_metadata.egress_spec") ;
-            standard_metadata.egress_port             : exact @name("standard_metadata.egress_port") ;
-            standard_metadata.instance_type           : exact @name("standard_metadata.instance_type") ;
-            standard_metadata.ingress_global_timestamp: exact @name("standard_metadata.ingress_global_timestamp") ;
-            standard_metadata.egress_global_timestamp : exact @name("standard_metadata.egress_global_timestamp") ;
-            standard_metadata.mcast_grp               : exact @name("standard_metadata.mcast_grp") ;
-            standard_metadata.egress_rid              : exact @name("standard_metadata.egress_rid") ;
-            meta._mymeta_resubmit_count0              : exact @name("mymeta.resubmit_count") ;
-            meta._mymeta_recirculate_count1           : exact @name("mymeta.recirculate_count") ;
-            meta._mymeta_clone_e2e_count2             : exact @name("mymeta.clone_e2e_count") ;
-            meta._mymeta_f14                          : exact @name("mymeta.f1") ;
-            meta._mymeta_last_ing_instance_type3      : exact @name("mymeta.last_ing_instance_type") ;
-            hdr.ethernet.dstAddr                      : exact @name("ethernet.dstAddr") ;
-            hdr.ethernet.srcAddr                      : exact @name("ethernet.srcAddr") ;
-            hdr.ethernet.etherType                    : exact @name("ethernet.etherType") ;
+            standard_metadata.ingress_port            : exact @name("standard_metadata.ingress_port");
+            standard_metadata.packet_length           : exact @name("standard_metadata.packet_length");
+            standard_metadata.egress_spec             : exact @name("standard_metadata.egress_spec");
+            standard_metadata.egress_port             : exact @name("standard_metadata.egress_port");
+            standard_metadata.instance_type           : exact @name("standard_metadata.instance_type");
+            standard_metadata.ingress_global_timestamp: exact @name("standard_metadata.ingress_global_timestamp");
+            standard_metadata.egress_global_timestamp : exact @name("standard_metadata.egress_global_timestamp");
+            standard_metadata.mcast_grp               : exact @name("standard_metadata.mcast_grp");
+            standard_metadata.egress_rid              : exact @name("standard_metadata.egress_rid");
+            meta._mymeta_resubmit_count0              : exact @name("mymeta.resubmit_count");
+            meta._mymeta_recirculate_count1           : exact @name("mymeta.recirculate_count");
+            meta._mymeta_clone_e2e_count2             : exact @name("mymeta.clone_e2e_count");
+            meta._mymeta_f14                          : exact @name("mymeta.f1");
+            meta._mymeta_last_ing_instance_type3      : exact @name("mymeta.last_ing_instance_type");
+            hdr.ethernet.dstAddr                      : exact @name("ethernet.dstAddr");
+            hdr.ethernet.srcAddr                      : exact @name("ethernet.srcAddr");
+            hdr.ethernet.etherType                    : exact @name("ethernet.etherType");
         }
         default_action = _nop();
     }
@@ -178,23 +177,23 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             _nop_2();
         }
         key = {
-            standard_metadata.ingress_port            : exact @name("standard_metadata.ingress_port") ;
-            standard_metadata.packet_length           : exact @name("standard_metadata.packet_length") ;
-            standard_metadata.egress_spec             : exact @name("standard_metadata.egress_spec") ;
-            standard_metadata.egress_port             : exact @name("standard_metadata.egress_port") ;
-            standard_metadata.instance_type           : exact @name("standard_metadata.instance_type") ;
-            standard_metadata.ingress_global_timestamp: exact @name("standard_metadata.ingress_global_timestamp") ;
-            standard_metadata.egress_global_timestamp : exact @name("standard_metadata.egress_global_timestamp") ;
-            standard_metadata.mcast_grp               : exact @name("standard_metadata.mcast_grp") ;
-            standard_metadata.egress_rid              : exact @name("standard_metadata.egress_rid") ;
-            meta._mymeta_resubmit_count0              : exact @name("mymeta.resubmit_count") ;
-            meta._mymeta_recirculate_count1           : exact @name("mymeta.recirculate_count") ;
-            meta._mymeta_clone_e2e_count2             : exact @name("mymeta.clone_e2e_count") ;
-            meta._mymeta_f14                          : exact @name("mymeta.f1") ;
-            meta._mymeta_last_ing_instance_type3      : exact @name("mymeta.last_ing_instance_type") ;
-            hdr.ethernet.dstAddr                      : exact @name("ethernet.dstAddr") ;
-            hdr.ethernet.srcAddr                      : exact @name("ethernet.srcAddr") ;
-            hdr.ethernet.etherType                    : exact @name("ethernet.etherType") ;
+            standard_metadata.ingress_port            : exact @name("standard_metadata.ingress_port");
+            standard_metadata.packet_length           : exact @name("standard_metadata.packet_length");
+            standard_metadata.egress_spec             : exact @name("standard_metadata.egress_spec");
+            standard_metadata.egress_port             : exact @name("standard_metadata.egress_port");
+            standard_metadata.instance_type           : exact @name("standard_metadata.instance_type");
+            standard_metadata.ingress_global_timestamp: exact @name("standard_metadata.ingress_global_timestamp");
+            standard_metadata.egress_global_timestamp : exact @name("standard_metadata.egress_global_timestamp");
+            standard_metadata.mcast_grp               : exact @name("standard_metadata.mcast_grp");
+            standard_metadata.egress_rid              : exact @name("standard_metadata.egress_rid");
+            meta._mymeta_resubmit_count0              : exact @name("mymeta.resubmit_count");
+            meta._mymeta_recirculate_count1           : exact @name("mymeta.recirculate_count");
+            meta._mymeta_clone_e2e_count2             : exact @name("mymeta.clone_e2e_count");
+            meta._mymeta_f14                          : exact @name("mymeta.f1");
+            meta._mymeta_last_ing_instance_type3      : exact @name("mymeta.last_ing_instance_type");
+            hdr.ethernet.dstAddr                      : exact @name("ethernet.dstAddr");
+            hdr.ethernet.srcAddr                      : exact @name("ethernet.srcAddr");
+            hdr.ethernet.etherType                    : exact @name("ethernet.etherType");
         }
         default_action = _nop_2();
     }
@@ -202,15 +201,11 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             egr_inc_mymeta_counts();
         }
-        key = {
-        }
         default_action = egr_inc_mymeta_counts();
     }
     @name(".t_egr_mark_resubmit_packet") table t_egr_mark_resubmit_packet_0 {
         actions = {
             mark_egr_resubmit_packet();
-        }
-        key = {
         }
         default_action = mark_egr_resubmit_packet();
     }
@@ -218,23 +213,17 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             mark_max_clone_e2e_packet();
         }
-        key = {
-        }
         default_action = mark_max_clone_e2e_packet();
     }
     @name(".t_mark_max_recirculate_packet") table t_mark_max_recirculate_packet_0 {
         actions = {
             mark_max_recirculate_packet();
         }
-        key = {
-        }
         default_action = mark_max_recirculate_packet();
     }
     @name(".t_mark_vanilla_packet") table t_mark_vanilla_packet_0 {
         actions = {
             mark_vanilla_packet();
-        }
-        key = {
         }
         default_action = mark_vanilla_packet();
     }
@@ -267,11 +256,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr + 48w281474976710639;
         meta._mymeta_f14 = meta._mymeta_f14 + 8w17;
         meta._mymeta_resubmit_count0 = meta._mymeta_resubmit_count0 + 8w1;
-        resubmit<tuple_0>({ meta._mymeta_resubmit_count0, meta._mymeta_f14 });
+        resubmit_preserving_field_list(8w3);
     }
-    @name("._nop") action _nop_5() {
+    @name("._nop") action _nop_3() {
     }
-    @name("._nop") action _nop_6() {
+    @name("._nop") action _nop_4() {
     }
     @name(".ing_inc_mymeta_counts") action ing_inc_mymeta_counts() {
         meta._mymeta_resubmit_count0 = meta._mymeta_resubmit_count0 + 8w1;
@@ -289,65 +278,61 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             do_resubmit();
         }
-        key = {
-        }
         default_action = do_resubmit();
     }
     @name(".t_ing_debug_table1") table t_ing_debug_table1_0 {
         actions = {
-            _nop_5();
+            _nop_3();
         }
         key = {
-            standard_metadata.ingress_port            : exact @name("standard_metadata.ingress_port") ;
-            standard_metadata.packet_length           : exact @name("standard_metadata.packet_length") ;
-            standard_metadata.egress_spec             : exact @name("standard_metadata.egress_spec") ;
-            standard_metadata.egress_port             : exact @name("standard_metadata.egress_port") ;
-            standard_metadata.instance_type           : exact @name("standard_metadata.instance_type") ;
-            standard_metadata.ingress_global_timestamp: exact @name("standard_metadata.ingress_global_timestamp") ;
-            standard_metadata.egress_global_timestamp : exact @name("standard_metadata.egress_global_timestamp") ;
-            standard_metadata.mcast_grp               : exact @name("standard_metadata.mcast_grp") ;
-            standard_metadata.egress_rid              : exact @name("standard_metadata.egress_rid") ;
-            meta._mymeta_resubmit_count0              : exact @name("mymeta.resubmit_count") ;
-            meta._mymeta_recirculate_count1           : exact @name("mymeta.recirculate_count") ;
-            meta._mymeta_clone_e2e_count2             : exact @name("mymeta.clone_e2e_count") ;
-            meta._mymeta_f14                          : exact @name("mymeta.f1") ;
-            meta._mymeta_last_ing_instance_type3      : exact @name("mymeta.last_ing_instance_type") ;
-            hdr.ethernet.dstAddr                      : exact @name("ethernet.dstAddr") ;
-            hdr.ethernet.srcAddr                      : exact @name("ethernet.srcAddr") ;
-            hdr.ethernet.etherType                    : exact @name("ethernet.etherType") ;
+            standard_metadata.ingress_port            : exact @name("standard_metadata.ingress_port");
+            standard_metadata.packet_length           : exact @name("standard_metadata.packet_length");
+            standard_metadata.egress_spec             : exact @name("standard_metadata.egress_spec");
+            standard_metadata.egress_port             : exact @name("standard_metadata.egress_port");
+            standard_metadata.instance_type           : exact @name("standard_metadata.instance_type");
+            standard_metadata.ingress_global_timestamp: exact @name("standard_metadata.ingress_global_timestamp");
+            standard_metadata.egress_global_timestamp : exact @name("standard_metadata.egress_global_timestamp");
+            standard_metadata.mcast_grp               : exact @name("standard_metadata.mcast_grp");
+            standard_metadata.egress_rid              : exact @name("standard_metadata.egress_rid");
+            meta._mymeta_resubmit_count0              : exact @name("mymeta.resubmit_count");
+            meta._mymeta_recirculate_count1           : exact @name("mymeta.recirculate_count");
+            meta._mymeta_clone_e2e_count2             : exact @name("mymeta.clone_e2e_count");
+            meta._mymeta_f14                          : exact @name("mymeta.f1");
+            meta._mymeta_last_ing_instance_type3      : exact @name("mymeta.last_ing_instance_type");
+            hdr.ethernet.dstAddr                      : exact @name("ethernet.dstAddr");
+            hdr.ethernet.srcAddr                      : exact @name("ethernet.srcAddr");
+            hdr.ethernet.etherType                    : exact @name("ethernet.etherType");
         }
-        default_action = _nop_5();
+        default_action = _nop_3();
     }
     @name(".t_ing_debug_table2") table t_ing_debug_table2_0 {
         actions = {
-            _nop_6();
+            _nop_4();
         }
         key = {
-            standard_metadata.ingress_port            : exact @name("standard_metadata.ingress_port") ;
-            standard_metadata.packet_length           : exact @name("standard_metadata.packet_length") ;
-            standard_metadata.egress_spec             : exact @name("standard_metadata.egress_spec") ;
-            standard_metadata.egress_port             : exact @name("standard_metadata.egress_port") ;
-            standard_metadata.instance_type           : exact @name("standard_metadata.instance_type") ;
-            standard_metadata.ingress_global_timestamp: exact @name("standard_metadata.ingress_global_timestamp") ;
-            standard_metadata.egress_global_timestamp : exact @name("standard_metadata.egress_global_timestamp") ;
-            standard_metadata.mcast_grp               : exact @name("standard_metadata.mcast_grp") ;
-            standard_metadata.egress_rid              : exact @name("standard_metadata.egress_rid") ;
-            meta._mymeta_resubmit_count0              : exact @name("mymeta.resubmit_count") ;
-            meta._mymeta_recirculate_count1           : exact @name("mymeta.recirculate_count") ;
-            meta._mymeta_clone_e2e_count2             : exact @name("mymeta.clone_e2e_count") ;
-            meta._mymeta_f14                          : exact @name("mymeta.f1") ;
-            meta._mymeta_last_ing_instance_type3      : exact @name("mymeta.last_ing_instance_type") ;
-            hdr.ethernet.dstAddr                      : exact @name("ethernet.dstAddr") ;
-            hdr.ethernet.srcAddr                      : exact @name("ethernet.srcAddr") ;
-            hdr.ethernet.etherType                    : exact @name("ethernet.etherType") ;
+            standard_metadata.ingress_port            : exact @name("standard_metadata.ingress_port");
+            standard_metadata.packet_length           : exact @name("standard_metadata.packet_length");
+            standard_metadata.egress_spec             : exact @name("standard_metadata.egress_spec");
+            standard_metadata.egress_port             : exact @name("standard_metadata.egress_port");
+            standard_metadata.instance_type           : exact @name("standard_metadata.instance_type");
+            standard_metadata.ingress_global_timestamp: exact @name("standard_metadata.ingress_global_timestamp");
+            standard_metadata.egress_global_timestamp : exact @name("standard_metadata.egress_global_timestamp");
+            standard_metadata.mcast_grp               : exact @name("standard_metadata.mcast_grp");
+            standard_metadata.egress_rid              : exact @name("standard_metadata.egress_rid");
+            meta._mymeta_resubmit_count0              : exact @name("mymeta.resubmit_count");
+            meta._mymeta_recirculate_count1           : exact @name("mymeta.recirculate_count");
+            meta._mymeta_clone_e2e_count2             : exact @name("mymeta.clone_e2e_count");
+            meta._mymeta_f14                          : exact @name("mymeta.f1");
+            meta._mymeta_last_ing_instance_type3      : exact @name("mymeta.last_ing_instance_type");
+            hdr.ethernet.dstAddr                      : exact @name("ethernet.dstAddr");
+            hdr.ethernet.srcAddr                      : exact @name("ethernet.srcAddr");
+            hdr.ethernet.etherType                    : exact @name("ethernet.etherType");
         }
-        default_action = _nop_6();
+        default_action = _nop_4();
     }
     @name(".t_ing_inc_mymeta_counts") table t_ing_inc_mymeta_counts_0 {
         actions = {
             ing_inc_mymeta_counts();
-        }
-        key = {
         }
         default_action = ing_inc_mymeta_counts();
     }
@@ -355,23 +340,17 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set_port_to_mac_da_lsbs();
         }
-        key = {
-        }
         default_action = set_port_to_mac_da_lsbs();
     }
     @name(".t_mark_max_resubmit_packet") table t_mark_max_resubmit_packet_0 {
         actions = {
             mark_max_resubmit_packet();
         }
-        key = {
-        }
         default_action = mark_max_resubmit_packet();
     }
     @name(".t_save_ing_instance_type") table t_save_ing_instance_type_0 {
         actions = {
             save_ing_instance_type();
-        }
-        key = {
         }
         default_action = save_ing_instance_type();
     }
@@ -409,4 +388,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

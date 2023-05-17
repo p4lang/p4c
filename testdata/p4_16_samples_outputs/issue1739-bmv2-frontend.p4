@@ -51,36 +51,42 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout 
 }
 
 control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
-    @name(".my_drop") action my_drop(inout standard_metadata_t smeta) {
-        mark_to_drop(smeta);
+    @name("ingress.smeta") standard_metadata_t smeta_0;
+    @name("ingress.smeta") standard_metadata_t smeta_2;
+    @name(".my_drop") action my_drop_1() {
+        smeta_0 = standard_metadata;
+        mark_to_drop(smeta_0);
+        standard_metadata = smeta_0;
     }
-    @name(".my_drop") action my_drop_0(inout standard_metadata_t smeta_1) {
-        mark_to_drop(smeta_1);
+    @name(".my_drop") action my_drop_2() {
+        smeta_2 = standard_metadata;
+        mark_to_drop(smeta_2);
+        standard_metadata = smeta_2;
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name("ingress.set_output") action set_output(bit<9> out_port) {
+    @name("ingress.set_output") action set_output(@name("out_port") bit<9> out_port) {
         standard_metadata.egress_spec = out_port;
     }
     @name("ingress.ipv4_da_lpm") table ipv4_da_lpm_0 {
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr");
         }
         actions = {
             set_output();
-            my_drop(standard_metadata);
+            my_drop_1();
         }
-        default_action = my_drop(standard_metadata);
+        default_action = my_drop_1();
     }
     @name("ingress.ipv4_sa_filter") table ipv4_sa_filter_0 {
         key = {
-            hdr.ipv4.srcAddr: ternary @name("hdr.ipv4.srcAddr") ;
+            hdr.ipv4.srcAddr: ternary @name("hdr.ipv4.srcAddr");
         }
         actions = {
-            my_drop_0(standard_metadata);
-            NoAction_0();
+            my_drop_2();
+            NoAction_1();
         }
-        const default_action = NoAction_0();
+        const default_action = NoAction_1();
     }
     apply {
         if (hdr.ipv4.isValid()) {
@@ -115,4 +121,3 @@ control computeChecksum(inout headers_t hdr, inout meta_t meta) {
 }
 
 V1Switch<headers_t, meta_t>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

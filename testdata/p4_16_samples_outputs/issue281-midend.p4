@@ -40,7 +40,7 @@ struct m {
 }
 
 parser MyParser(packet_in b, out h hdr, inout m meta, inout standard_metadata_t std) {
-    bit<16> l3_etherType;
+    @name("MyParser.l3.etherType") bit<16> l3_etherType;
     state start {
         hdr.ether.setInvalid();
         hdr.vlan.setInvalid();
@@ -99,4 +99,3 @@ control MyDeparser(packet_out b, in h hdr) {
 }
 
 V1Switch<h, m>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

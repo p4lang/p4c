@@ -7,10 +7,10 @@ struct struct_t {
 }
 
 control ctrl(inout struct_t input, out bit<8> out1, out header_h out2) {
-    bit<8> tmp0_0;
-    bit<8> tmp1_0;
-    header_h tmp2_0;
-    header_h tmp3_0;
+    @name("ctrl.tmp0") bit<8> tmp0_0;
+    @name("ctrl.tmp1") bit<8> tmp1_0;
+    @name("ctrl.tmp2") header_h tmp2_0;
+    @name("ctrl.tmp3") header_h tmp3_0;
     @name("ctrl.act") action act() {
         tmp0_0 = input.hdr.field;
         input.hdr.setValid();
@@ -19,9 +19,19 @@ control ctrl(inout struct_t input, out bit<8> out1, out header_h out2) {
         input.hdr.setInvalid();
         tmp3_0 = tmp2_0;
     }
+    @hidden action issue313_3l28() {
+        tmp2_0.setInvalid();
+        tmp3_0.setInvalid();
+    }
     @hidden action issue313_3l41() {
         out1 = tmp1_0;
         out2 = tmp3_0;
+    }
+    @hidden table tbl_issue313_3l28 {
+        actions = {
+            issue313_3l28();
+        }
+        const default_action = issue313_3l28();
     }
     @hidden table tbl_act {
         actions = {
@@ -36,6 +46,7 @@ control ctrl(inout struct_t input, out bit<8> out1, out header_h out2) {
         const default_action = issue313_3l41();
     }
     apply {
+        tbl_issue313_3l28.apply();
         tbl_act.apply();
         tbl_issue313_3l41.apply();
     }
@@ -44,4 +55,3 @@ control ctrl(inout struct_t input, out bit<8> out1, out header_h out2) {
 control MyControl<S, H>(inout S i, out bit<8> o1, out H o2);
 package MyPackage<S, H>(MyControl<S, H> c);
 MyPackage<struct_t, header_h>(ctrl()) main;
-

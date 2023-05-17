@@ -2,12 +2,18 @@
 #define V1MODEL_VERSION 20200408
 #include <v1model.p4>
 
+enum bit<8> FieldLists {
+    none = 0,
+    resubmit_FL = 1
+}
+
 struct intrinsic_metadata_t {
     bit<4> mcast_grp;
     bit<4> egress_rid;
 }
 
 struct mymeta_t {
+    @field_list(FieldLists.resubmit_FL)
     bit<8> f1;
 }
 
@@ -18,12 +24,12 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name(".mymeta") 
+    @name(".mymeta")
     mymeta_t mymeta;
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
 }
 
@@ -50,7 +56,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("._resubmit") action _resubmit() {
         meta.mymeta.f1 = 8w1;
-        resubmit({ standard_metadata, meta.mymeta });
+        resubmit_preserving_field_list((bit<8>)FieldLists.resubmit_FL);
     }
     @name(".t_ingress_1") table t_ingress_1 {
         actions = {
@@ -95,4 +101,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

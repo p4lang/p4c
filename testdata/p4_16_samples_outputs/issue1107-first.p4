@@ -26,8 +26,8 @@ control myc(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     }
     table myt {
         key = {
-            meta.f1: exact @name("meta.f1") ;
-            meta.f2: exact @name("meta.f2") ;
+            meta.f1: exact @name("meta.f1");
+            meta.f2: exact @name("meta.f2");
         }
         actions = {
             set_eg();
@@ -37,7 +37,6 @@ control myc(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
                         (32w1, 32w0xffffffff) : set_eg(9w1);
                         (32w2, 32w0xffffffff) : set_eg(9w2);
         }
-
         default_action = NoAction();
     }
     apply {
@@ -73,4 +72,3 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

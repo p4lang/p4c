@@ -43,10 +43,9 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata,
     bitvec_hdr bh;
 
     apply {
-
         // Copy another header's data to local variable.
         bh.x = h.bvh0.x;
-        clone3(CloneType.I2E, 0, h);
+        clone_preserving_field_list(CloneType.I2E, 1, 0);
     }
 }
 

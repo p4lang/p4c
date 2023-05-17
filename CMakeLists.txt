@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-cmake_minimum_required (VERSION 3.0.2 FATAL_ERROR)
+# This is the CMake version supplied by Ubuntu 20.04.
+cmake_minimum_required (VERSION 3.16.3 FATAL_ERROR)
 
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
@@ -33,12 +34,21 @@ OPTION (ENABLE_GTESTS "Enable building and running GTest unit tests" ON)
 OPTION (ENABLE_BMV2 "Build the BMV2 backend (required for the full test suite)" ON)
 OPTION (ENABLE_EBPF "Build the EBPF backend (required for the full test suite)" ON)
 OPTION (ENABLE_UBPF "Build the uBPF backend (required for the full test suite)" ON)
+OPTION (ENABLE_DPDK "Build the DPDK backend (required for the full test suite)" ON)
 OPTION (ENABLE_P4TEST "Build the P4Test backend (required for the full test suite)" ON)
+OPTION (ENABLE_TEST_TOOLS "Build the P4Tools development platform" OFF)
 OPTION (ENABLE_P4C_GRAPHS "Build the p4c-graphs backend" ON)
 OPTION (ENABLE_PROTOBUF_STATIC "Link against Protobuf statically" ON)
 OPTION (ENABLE_GC "Use libgc" ON)
 OPTION (ENABLE_MULTITHREAD "Use multithreading" OFF)
-OPTION (ENABLE_GMP "Use GMP library" ON)
+OPTION (ENABLE_LTO "Enable Link Time Optimization (LTO)" OFF)
+OPTION (ENABLE_WERROR "Treat warnings as errors" OFF)
+OPTION (ENABLE_SANITIZERS "Enable sanitizers" OFF)
+OPTION (BUILD_STATIC_RELEASE "Build a statically linked release binary" OFF)
+OPTION (BUILD_AUTO_VAR_INIT_PATTERN "Initialize variables with pattern during build" OFF)
+OPTION (ENABLE_IWYU "Enable checking includes with IWYU" OFF)
+# Support a legacy option. TODO: Remove?
+OPTION (ENABLE_UNIFIED_COMPILATION "Enable CMAKE_UNITY_BUILD" OFF)
 
 set (P4C_DRIVER_NAME "p4c" CACHE STRING "Customize the name of the driver script")
 
@@ -56,7 +66,11 @@ if (NOT $ENV{P4C_VERSION} STREQUAL "")
 else()
   # Semantic version numbering: <major>.<minor>.<patch>[-rcX]
   # Examples: 0.5.1, 1.0.0-rc1, 1.0.1-alpha
-  set (P4C_SEM_VERSION_STRING "1.2.0")
+  execute_process (COMMAND cat Version.txt
+    OUTPUT_VARIABLE P4C_SEM_VERSION_STRING
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE rc
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
   string (REGEX MATCH "([0-9]+)\\.([0-9]+)\\.([0-9]+)([-0-9a-z\\.]*).*"
     __p4c_version ${P4C_SEM_VERSION_STRING})
   set (P4C_VERSION_MAJOR ${CMAKE_MATCH_1})
@@ -70,7 +84,12 @@ else()
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
   set (P4C_VERSION "${P4C_SEM_VERSION_STRING} (SHA: ${P4C_GIT_SHA} BUILD: ${CMAKE_BUILD_TYPE})")
 endif()
+# P4 General Utilities
 include(P4CUtils)
+# CMake Utilities to fetch dependencies.
+include(FetchContent)
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+# TODO: Remove this deprecated include eventually.
 include(UnifiedBuild)
 
 # # search in /usr/local first
@@ -78,10 +97,40 @@ include(UnifiedBuild)
 set (P4C_CXX_FLAGS "")
 set (P4C_LIB_DEPS)
 
+
+# Support the legacy unified build option.
+if(ENABLE_UNIFIED_COMPILATION)
+  message(
+    WARNING
+      "Using deprecated option \"ENABLE_UNIFIED_COMPILATION\". Please use \"CMAKE_UNITY_BUILD\" instead."
+  )
+  set(CMAKE_UNITY_BUILD ON)
+endif()
+
+# If unity builds are enabled, choose an aggressive batch size.
+if (CMAKE_UNITY_BUILD)
+  set(CMAKE_UNITY_BUILD_BATCH_SIZE 10 CACHE UNINITIALIZED "Set the unity build batch size.")
+endif ()
+# set the required options for a static release build
+if (BUILD_STATIC_RELEASE)
+  message(STATUS "Building static release binaries")
+  set(BUILD_SHARED_LIBS OFF)
+  set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
+  # Link Boost statically
+  # See https://cmake.org/cmake/help/latest/module/FindBoost.html for details
+  set(Boost_USE_STATIC_LIBS ON)
+  set(Boost_USE_STATIC_RUNTIME OFF)
+  # Set the static variable
+  set(P4C_STATIC_BUILD STATIC)
+  # Do not bring in dynamic libstdcc and libgcc
+  set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++ -Wl,-z,muldefs")
+  add_definitions(-DP4C_STATIC_BUILD)
+endif ()
+
 # required tools and libraries
 find_package (PythonInterp 3 REQUIRED)
-find_package (FLEX REQUIRED)
-find_package (BISON 3.0.2 REQUIRED)
+find_package (FLEX 2.0 REQUIRED)
+find_package (BISON 3.0 REQUIRED)
 if (ENABLE_PROTOBUF_STATIC)
   set(SAVED_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
   set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
@@ -101,7 +150,7 @@ find_package (Boost REQUIRED COMPONENTS iostreams)
 # otherwise ordered_map code tries to use boost::get (graph)
 add_definitions ("-DBOOST_NO_ARGUMENT_DEPENDENT_LOOKUP")
 if (ENABLE_GC)
-  find_package (LibGc 7.2.0 REQUIRED)
+  find_package (LibGc 7.4.2 REQUIRED)
   set (HAVE_LIBGC 1)
 endif ()
 if (ENABLE_MULTITHREAD)
@@ -111,18 +160,11 @@ endif()
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${CMAKE_THREAD_LIBS_INIT}")
-include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${PROTOBUF_INCLUDE_DIRS})
-include_directories(${LIBGC_INCLUDE_DIR})
+include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
+include_directories(SYSTEM ${PROTOBUF_INCLUDE_DIRS})
+include_directories(SYSTEM ${LIBGC_INCLUDE_DIR})
 set (HAVE_LIBBOOST_IOSTREAMS 1)
 set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_LIBRARIES}")
-if (ENABLE_GMP)
-  find_package (LibGmp REQUIRED)
-  include_directories(${LIBGMP_INCLUDE_DIR})
-  set (HAVE_LIBGMP 1)
-  set (HAVE_LIBGMPXX 1)
-  set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${LIBGMP_LIBRARIES}")
-endif ()
 if (ENABLE_GC)
   set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${LIBGC_LIBRARIES}")
 endif ()
@@ -164,7 +206,11 @@ find_python_module (re REQUIRED)
 # other packages
 find_package (Doxygen)
 find_package (BMV2)
-
+# If we have found simple switch or psa switch, we also need scapy and ipaddr.
+if(SIMPLE_SWITCH OR PSA_SWITCH)
+    find_python_module (scapy REQUIRED)
+    find_python_module (ipaddr REQUIRED)
+endif()
 # enable CTest
 enable_testing ()
 
@@ -178,43 +224,111 @@ enable_testing ()
 #   set (CPACK_PACKAGE_VERSION_PATCH ${CPACK_PACKAGE_VERSION_PATCH}-${__P4C_VERSION_RC})
 # endif ()
 
-# set (CMAKE_CXX_EXTENSIONS OFF) # prefer using -std=c++11 rather than -std=gnu++11
-# CMAKE_CXX_STANDARD was introduced in CMake 3.1, so for older versions of CMake, we use -std=gnu++11
-if (CMAKE_VERSION VERSION_LESS "3.1")
-    set (CMAKE_CXX_FLAGS "-std=gnu++11 ${CMAKE_CXX_FLAGS}")
-else ()
-    set (CMAKE_CXX_STANDARD 11)
-endif ()
+# set (CMAKE_CXX_EXTENSIONS OFF) # prefer using -std=c++17 rather than -std=gnu++17
+set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_cxx_compiler_option ("-Wall")
 add_cxx_compiler_option ("-Wextra")
 add_cxx_compiler_option ("-Wno-overloaded-virtual")
 add_cxx_compiler_option ("-Wno-deprecated")
+add_cxx_compiler_option ("-Wno-deprecated-declarations")
+# Make compiler follow the standard and not be too lenient. The increases
+# likelyhood that compilation will not break with other compilers (mainly clang)
+# or in future versions of GCC.
+add_cxx_compiler_option ("-pedantic")
 
-# If we're on GCC, use the gold linker if available.
-if(CMAKE_COMPILER_IS_GNUCC)
-    execute_process(
-            COMMAND ${CMAKE_C_COMPILER} -fuse-ld=gold -Wl,--version
-            ERROR_QUIET OUTPUT_VARIABLE LD_VERSION)
-    if ("${LD_VERSION}" MATCHES "GNU gold")
-        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fuse-ld=gold")
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fuse-ld=gold")
-        message(STATUS "Using the GNU gold linker.")
-    else ()
-        message(STATUS "Using the default system linker.")
-    endif ()
-    unset(LD_VERSION)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  # The ##__VA_ARGS__ GNU extension is needed for IR. But clang compains about it.
+  # FIXME: with C++20 we would be able to use standard __VA_OPT__
+  add_cxx_compiler_option ("-Wno-gnu-zero-variadic-macro-arguments")
+endif()
+
+if (ENABLE_SANITIZERS)
+  append("-fsanitize=undefined,address" CMAKE_C_FLAGS CMAKE_CXX_FLAGS)
 endif ()
 
+if (BUILD_AUTO_VAR_INIT_PATTERN)
+  add_cxx_compiler_option  ("-ftrivial-auto-var-init=pattern")
+endif ()
+
+if (ENABLE_WERROR)
+  add_cxx_compiler_option  ("-Werror")
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # GCC's -Waybe-uninitialized warnings are quite noisy and unlikely to catch
+    # real issues - do not treat them as build errors.
+    add_cxx_compiler_option ("-Wno-error=maybe-uninitialized")
+  endif ()
+endif ()
+
+# If we're on GCC or Clang, use the prefer LLD or Gold linker if available.
+set(BUILD_LINK_WITH_GOLD ON CACHE BOOL "Use Gold linker for build if available")
+set(BUILD_LINK_WITH_LLD ON CACHE BOOL "Use LLD linker for build if available (overrides BUILD_LINK_WITH_GOLD)")
+
+# Build with LTO
+if (ENABLE_LTO AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  if (BUILD_LINK_WITH_LLD)
+    message(WARNING "LLD does not work with GCC's LTO object format, switching to Gold.")
+    set(BUILD_LINK_WITH_LLD OFF)
+  endif ()
+  add_cxx_compiler_option  ("-flto")
+endif ()
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    # We want to optimize the binary size for a static release binary.
+    # This only works with modern versions of GCC.
+    if (BUILD_STATIC_RELEASE AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)
+        if (BUILD_LINK_WITH_LLD)
+          message(WARNING "LLD does not work with GCC's LTO object format, switching to Gold.")
+          set(BUILD_LINK_WITH_LLD OFF)
+        endif ()
+        add_cxx_compiler_option ("-flto")
+    endif ()
+    set(_LD_USED "default system")
+    set(_LD_OPT_USED "")
+    macro(check_linker BUILD_LINK_WITH_VAR LINKER_OPT LINKER_NAME)
+        if (${BUILD_LINK_WITH_VAR})
+            execute_process(
+                    COMMAND ${CMAKE_C_COMPILER} -fuse-ld=${LINKER_OPT} -Wl,--version
+                    ERROR_QUIET OUTPUT_VARIABLE LD_VERSION)
+            if ("${LD_VERSION}" MATCHES ${LINKER_NAME})
+                set(_LD_USED "${LINKER_NAME}")
+                set(_LD_OPT_USED "-fuse-ld=${LINKER_OPT}")
+            endif()
+        endif()
+    endmacro()
+    check_linker(BUILD_LINK_WITH_GOLD "gold" "GNU gold")
+    check_linker(BUILD_LINK_WITH_LLD "lld" "LLD")
+    append("${_LD_OPT_USED}" CMAKE_EXE_LINKER_FLAGS CMAKE_SHARED_LINKER_FLAGS CMAKE_MODULE_LINKER_FLAGS)
+    message(STATUS "Using the ${_LD_USED} linker.")
+    unset(LD_VERSION)
+    unset(_LD_USED)
+    unset(_LD_OPT_USED)
+endif()
+
+set(BUILD_USE_COLOR OFF CACHE BOOL "Use color in C++ compiler output (even if \
+    the compiler does not detect terminal, e.g. when using ccache/distcc)")
+if (BUILD_USE_COLOR)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fdiagnostics-color=always")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=always")
+    else()
+        message(WARNING "Colors enabled (BUILD_USE_COLOR=ON) but we don't know "
+                "how to enable them for ${CMAKE_CXX_COMPILER_ID} C++ compiler")
+    endif()
+else()
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fdiagnostics-color=never")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=never")
+  endif()
+endif()
+
 include_directories (
-  ${P4C_SOURCE_DIR}/frontends
-  ${P4C_SOURCE_DIR}/backends
   ${P4C_SOURCE_DIR}/extensions
   ${P4C_SOURCE_DIR}
-  ${P4C_SOURCE_DIR}/test/frameworks/gtest/googletest/include
   ${P4C_BINARY_DIR}
   )
+include_directories(SYSTEM ${P4C_SOURCE_DIR}/test/frameworks/gtest/googletest/include)
 add_definitions (-DCONFIG_PREFIX="${CMAKE_INSTALL_PREFIX}")
 add_definitions (-DCONFIG_PKGDATADIR="${CMAKE_INSTALL_PREFIX}/${P4C_ARTIFACTS_OUTPUT_DIRECTORY}")
 
@@ -236,6 +350,25 @@ set (IR_GENERATED_SRCS
 # of the irgenerator target to the matching path
 set (IR_GENERATOR_DIRECTORY ${P4C_BINARY_DIR}/tools/ir-generator)
 set (IR_GENERATOR ${IR_GENERATOR_DIRECTORY}/irgenerator)
+
+# Set up IWYU for P4C. Each CMake target needs to manually add IWYU to its checks.
+if(ENABLE_IWYU)
+  message("Enabling IWYU checks.")
+  find_program(iwyu_path NAMES include-what-you-use iwyu REQUIRED)
+  set(
+    iwyu_path
+    ${iwyu_path}
+    -Xiwyu
+    --max_line_length=100
+    -Xiwyu
+    --no_fwd_decls
+    -Xiwyu
+    --cxx17ns
+    -Xiwyu
+    --mapping_file=${P4C_SOURCE_DIR}/tools/iwyu_mappings/p4c.imp
+  )
+  message("IWYU command: ${iwyu_path}")
+endif()
 
 # the order of adding subdirectories matters because of target dependencies
 add_subdirectory (tools/driver)
@@ -270,6 +403,16 @@ foreach (ext ${p4c_extensions})
   endif()
 endforeach(ext)
 
+# With the current implementation of ir-generator, all targets share the
+# same ir-generated.h and ir-generated.cpp file, which means all targets
+# share the same set of IR classes (frontend and backend). The DPDK backend
+# introduces additional IR classes and cpp sources which need to be added to
+# EXTENSION_FRONTEND_SOURCES. We need to populate EXTENSION_FRONTEND_SOURCES
+# before it is added to libfrontend.a in frontends/CMakeList.txt
+if (ENABLE_DPDK)
+    add_subdirectory (backends/dpdk)
+endif ()
+
 add_subdirectory (frontends)
 add_subdirectory (midend)
 add_subdirectory (control-plane)
@@ -285,6 +428,9 @@ if (ENABLE_UBPF)
 endif ()
 if (ENABLE_P4TEST)
     add_subdirectory (backends/p4test)
+endif ()
+if (ENABLE_TEST_TOOLS)
+    add_subdirectory (backends/p4tools)
 endif ()
 if (ENABLE_P4C_GRAPHS AND HAVE_LIBBOOST_GRAPH EQUAL 1)
   add_subdirectory (backends/graphs)
@@ -305,14 +451,12 @@ set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
 # tree when small changes to the .def files affect only the .cpp file and
 # not the headers.
 set (fixup_file "${CMAKE_CURRENT_BINARY_DIR}/irgen-fixup.awk")
-set_source_files_properties (${fixup_file} PROPERTIES GENERATED TRUE)
 file(WRITE "${fixup_file}" "/^#\$/ { printf \"#line %d \\\"${CMAKE_CURRENT_BINARY_DIR}/ir/%s\\\"\\n\", NR+1, name; next; } 1\n")
 set(temp_ir_genfiles
   ir/ir-generated.cpp.tmp ir/ir-generated.cpp.fixup
   ir/ir-generated.h.tmp   ir/ir-generated.h.fixup
   ir/gen-tree-macro.h.tmp ir/gen-tree-macro.h.fixup
   )
-set_source_files_properties (${temp_ir_genfiles} PROPERTIES GENERATED TRUE)
 
 add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
   COMMAND ${IR_GENERATOR} -i ir/ir-generated.cpp.tmp -o ir/ir-generated.h.tmp -t ir/gen-tree-macro.h.tmp ${IR_DEF_FILES}
@@ -338,34 +482,112 @@ set (OTHER_HEADERS
 add_custom_target(update_includes ALL
   COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4include
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/*.p4 ${P4C_BINARY_DIR}/p4include
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4include/bmv2
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/bmv2/psa.p4 ${P4C_BINARY_DIR}/p4include/bmv2
   COMMAND for h in ${OTHER_HEADERS} \; do
     ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/\$$h ${P4C_BINARY_DIR}/p4include \;
   done
   )
+if (ENABLE_DPDK)
+add_custom_target(dpdk_includes ALL
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4include/dpdk
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/dpdk/psa.p4 ${P4C_BINARY_DIR}/p4include/dpdk
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/dpdk/pna.p4 ${P4C_BINARY_DIR}/p4include/dpdk)
+endif ()
 
 # Installation
 # Targets install themselves. Here we install the core headers
 install (DIRECTORY ${P4C_SOURCE_DIR}/p4include
-  DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}
-  FILES_MATCHING PATTERN "*.p4")
+  DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY})
+
+################################ Linters Begin ################################
+
+file(
+  GLOB_RECURSE P4C_LINT_LIST  FOLLOW_SYMLINKS
+  backends/*.cpp
+  backends/*.h
+  control-plane/*.cpp
+  control-plane/*.h
+  frontends/*.cpp
+  frontends/*.h
+  ir/*.cpp
+  ir/*.h
+  lib/*.cpp
+  lib/*.h
+  midend/*.cpp
+  midend/*.h
+  tools/*.cpp
+  tools/*.h
+)
+# Filter some folders from the CI checks.
+list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/p4tools/submodules")
+list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/ebpf/runtime")
+list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/ubpf/runtime")
+list(FILTER P4C_LINT_LIST EXCLUDE REGEX "control-plane/p4runtime")
 
 # cpplint
-list ( SORT CPPLINT_FILES )
-set (CPPLINT_CMD ${P4C_SOURCE_DIR}/tools/cpplint.py)
-set (CPPLINT_ARGS --root=${P4C_SOURCE_DIR} --extensions=h,hpp,cpp,ypp,l)
-add_custom_target(cpplint
-  COMMAND ${CPPLINT_CMD} ${CPPLINT_ARGS} ${CPPLINT_FILES}
-  WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-  COMMENT "cpplint")
-add_custom_target(cpplint-quiet
-  COMMAND ${CPPLINT_CMD} --quiet ${CPPLINT_ARGS} ${CPPLINT_FILES}
-  WORKING_DIRECTORY ${P4C_SOURCE_DIR}
-  COMMENT "cpplint quietly")
-# add cpplint as a test so that make check can proceed in parallel
-add_test(NAME cpplint
-  COMMAND ${CPPLINT_CMD} --quiet ${CPPLINT_ARGS} ${CPPLINT_FILES}
-  WORKING_DIRECTORY ${P4C_SOURCE_DIR})
-set_tests_properties(cpplint PROPERTIES LABELS cpplint)
+add_cpplint_files(${P4C_SOURCE_DIR} "${P4C_LINT_LIST}")
+
+# Retrieve the global cpplint property.
+get_property(CPPLINT_FILES GLOBAL PROPERTY cpplint-files)
+
+if(DEFINED CPPLINT_FILES)
+  # Write the list to a file. We need to do this as too many files will reach
+  # the shell argument limit.
+  set(CPPLINT_TXT_FILE ${P4C_BINARY_DIR}/cpplint_files.txt)
+  file(WRITE ${CPPLINT_TXT_FILE} "${CPPLINT_FILES}")
+  list(SORT CPPLINT_FILES)
+  set(CPPLINT_CMD ${P4C_SOURCE_DIR}/tools/cpplint.py)
+  set(CPPLINT_ARGS --root=${P4C_SOURCE_DIR} --extensions=h,hpp,cpp,ypp,l)
+  # Pipe the file into cpplint.
+  add_custom_target(
+    cpplint
+    COMMAND xargs -a ${CPPLINT_TXT_FILE} -r -d '\;' ${CPPLINT_CMD} ${CPPLINT_ARGS}
+    WORKING_DIRECTORY ${P4C_SOURCE_DIR}
+    COMMENT "cpplint"
+  )
+  add_custom_target(
+    cpplint-quiet
+    COMMAND xargs -a ${CPPLINT_TXT_FILE} -r -d '\;' ${CPPLINT_CMD} ${CPPLINT_ARGS} --quiet
+    WORKING_DIRECTORY ${P4C_SOURCE_DIR}
+    COMMENT "cpplint quietly"
+  )
+endif()
+
+# clang-format
+add_clang_format_files(${P4C_SOURCE_DIR} "${P4C_LINT_LIST}")
+
+find_program(CLANG_FORMAT_CMD clang-format)
+
+if(NOT ${CLANG_FORMAT_CMD})
+  # Retrieve the global clang-format property.
+  get_property(CLANG_FORMAT_FILES GLOBAL PROPERTY clang-format-files)
+  if(DEFINED CLANG_FORMAT_FILES)
+    # Write the list to a file. We need to do this as too many files will reach
+    # the shell argument limit.
+    set(CLANG_FORMAT_TXT_FILE ${P4C_BINARY_DIR}/clang_format_files.txt)
+    list(SORT CLANG_FORMAT_FILES)
+    file(WRITE ${CLANG_FORMAT_TXT_FILE} "${CLANG_FORMAT_FILES}")
+    set(CLANG_FORMAT_CMD clang-format)
+    add_custom_target(
+      clang-format
+      COMMAND xargs -a ${CLANG_FORMAT_TXT_FILE} -r -d '\;' ${CLANG_FORMAT_CMD} --verbose --Werror --dry-run -i --
+      WORKING_DIRECTORY ${P4C_SOURCE_DIR}
+      COMMENT "Checking files for correct clang-format formatting."
+    )
+    add_custom_target(
+      clang-format-fix-errors
+      COMMAND xargs -a ${CLANG_FORMAT_TXT_FILE} -r -d '\;' ${CLANG_FORMAT_CMD} --verbose -i --
+      WORKING_DIRECTORY ${P4C_SOURCE_DIR}
+      COMMENT "Formatting files using clang-format."
+    )
+  endif()
+else()
+  message(WARNING "clang-format executable not found. Disabling clang-format checks. clang-format can be installed with \"pip3 install --user --upgrade clang-format\"")
+endif()
+
+################################ Linters End ################################
+
 
 # tags, etags
 set (CTAGS_DIRS backends extensions frontends ir lib tools midend)
@@ -430,4 +652,12 @@ if (ENABLE_DOCS AND DOXYGEN_FOUND)
     DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}/docs)
 endif()
 
-# \TODO: packaging
+# Packaging:
+SET(CPACK_SOURCE_GENERATOR "TXZ")
+SET(CPACK_SOURCE_PACKAGE_FILE_NAME
+   "p4c-${P4C_SEM_VERSION_STRING}")
+SET(CPACK_SOURCE_IGNORE_FILES
+   "${PROJECT_SOURCE_DIR}/${CMAKE_PROJECT_NAME}-*;${PROJECT_SOURCE_DIR}/${CMAKE_PROJECT_NAME}_*;/build/;/.git/;/config.log;/CMakeFiles/;CMakeCache.txt$;.tar.gz$;/_CPack_Packages;/Makefile$;~$;/build-deb;/clean-deb;/filter-empty-entries;/make-symbols;/make-ppa;/make-deb;/debian.conf;/make-rpm;/rpm.conf;${CPACK_SOURCE_IGNORE_FILES}")
+INCLUDE(CPack)
+
+ADD_CUSTOM_TARGET(dist COMMAND ${CMAKE_MAKE_PROGRAM} clean package_source)

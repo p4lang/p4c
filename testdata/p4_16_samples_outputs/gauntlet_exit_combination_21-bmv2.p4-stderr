@@ -1,0 +1,3 @@
+gauntlet_exit_combination_21-bmv2.p4(31): [--Wwarn=unused] warning: Table tbl is not used; removing
+    table tbl {
+          ^^^

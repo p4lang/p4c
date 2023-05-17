@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4C_LIB_PATH_H_
-#define P4C_LIB_PATH_H_
+#ifndef _LIB_PATH_H_
+#define _LIB_PATH_H_
 
 /*
   It's 2015 and C++ still does not have a portable way to manipulate pathnames.
@@ -31,7 +31,7 @@ class PathName final {
     static const char pathSeparators[2];
     cstring str;
 
-    const char* findLastSeparator() const;
+    const char *findLastSeparator() const;
 
  public:
     static inline cstring separator() {
@@ -42,9 +42,9 @@ class PathName final {
 #endif
     }
 
-    PathName(cstring str) : str(str)  {}             // NOLINT(runtime/explicit)
-    PathName(const char* str) : str(str) {}          // NOLINT(runtime/explicit)
-    PathName(const std::string &str) : str(str) {}   // NOLINT(runtime/explicit)
+    PathName(cstring str) : str(str) {}             // NOLINT(runtime/explicit)
+    PathName(const char *str) : str(str) {}         // NOLINT(runtime/explicit)
+    PathName(const std::string &str) : str(str) {}  // NOLINT(runtime/explicit)
     // get the file name extension.  It starts at the last dot.
     // e.g, exe
     cstring getExtension() const;
@@ -67,4 +67,4 @@ class PathName final {
 };
 }  // namespace Util
 
-#endif /* P4C_LIB_PATH_H_ */
+#endif /* _LIB_PATH_H_ */

@@ -18,9 +18,10 @@ header h1_t {
          transition parse_h1;
      }
      state parse_h1 {
-         pkt.extract(hdr.h1);
-         transition select(2w0) {0w0: parse_h2;
-         }
+        pkt.extract(hdr.h1);
+        transition select(2w0) {
+            0w0: parse_h2;
+        }
      }
      state parse_h2 {
          pkt.extract(hdr.h2);

@@ -53,15 +53,14 @@ struct tuple_0 {
 
 control vc(inout Parsed_packet hdr, inout Metadata meta) {
     apply {
-        verify_checksum<tuple_0, bit<16>>(true, { hdr.h.d }, hdr.h.c, HashAlgorithm.csum16);
+        verify_checksum<tuple_0, bit<16>>(true, (tuple_0){f0 = hdr.h.d}, hdr.h.c, HashAlgorithm.csum16);
     }
 }
 
 control uc(inout Parsed_packet hdr, inout Metadata meta) {
     apply {
-        update_checksum<tuple_0, bit<16>>(true, { hdr.h.d }, hdr.h.c, HashAlgorithm.csum16);
+        update_checksum<tuple_0, bit<16>>(true, (tuple_0){f0 = hdr.h.d}, hdr.h.c, HashAlgorithm.csum16);
     }
 }
 
 V1Switch<Parsed_packet, Metadata>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
-

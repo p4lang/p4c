@@ -53,16 +53,16 @@ header tcp_t {
 }
 
 struct metadata {
-    @name(".ingress_metadata") 
+    @name(".ingress_metadata")
     ingress_metadata_t ingress_metadata;
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
-    @name(".ipv4") 
+    @name(".ipv4")
     ipv4_t     ipv4;
-    @name(".tcp") 
+    @name(".tcp")
     tcp_t      tcp;
 }
 
@@ -91,9 +91,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @name(".rewrite_mac") action rewrite_mac(bit<48> smac) {
+    @name(".rewrite_mac") action rewrite_mac(@name("smac") bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
     }
     @name("._drop") action _drop() {
@@ -103,13 +103,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             rewrite_mac();
             _drop();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_2();
         }
         key = {
-            standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
+            standard_metadata.egress_port: exact @name("standard_metadata.egress_port");
         }
         size = 256;
-        default_action = NoAction_0();
+        default_action = NoAction_2();
     }
     apply {
         send_frame_0.apply();
@@ -117,34 +117,32 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 @name(".flowlet_id") register<bit<16>, bit<13>>(32w8192) flowlet_id;
-
 @name(".flowlet_lasttime") register<bit<32>, bit<13>>(32w8192) flowlet_lasttime;
-
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_8() {
+    @noWarn("unused") @name(".NoAction") action NoAction_4() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_9() {
+    @noWarn("unused") @name(".NoAction") action NoAction_5() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_10() {
+    @noWarn("unused") @name(".NoAction") action NoAction_6() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_11() {
+    @noWarn("unused") @name(".NoAction") action NoAction_7() {
     }
     @name("._drop") action _drop_2() {
         mark_to_drop(standard_metadata);
     }
-    @name("._drop") action _drop_5() {
+    @name("._drop") action _drop_3() {
         mark_to_drop(standard_metadata);
     }
-    @name("._drop") action _drop_6() {
+    @name("._drop") action _drop_4() {
         mark_to_drop(standard_metadata);
     }
-    @name(".set_ecmp_select") action set_ecmp_select(bit<8> ecmp_base, bit<8> ecmp_count) {
+    @name(".set_ecmp_select") action set_ecmp_select(@name("ecmp_base") bit<8> ecmp_base, @name("ecmp_count") bit<8> ecmp_count) {
         hash<bit<14>, bit<10>, tuple<bit<32>, bit<32>, bit<8>, bit<16>, bit<16>, bit<16>>, bit<20>>(meta.ingress_metadata.ecmp_offset, HashAlgorithm.crc16, (bit<10>)ecmp_base, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort, meta.ingress_metadata.flowlet_id }, (bit<20>)ecmp_count);
     }
-    @name(".set_nhop") action set_nhop(bit<32> nhop_ipv4, bit<9> port) {
-        meta.ingress_metadata.nhop_ipv4 = nhop_ipv4;
+    @name(".set_nhop") action set_nhop(@name("nhop_ipv4") bit<32> nhop_ipv4_1, @name("port") bit<9> port) {
+        meta.ingress_metadata.nhop_ipv4 = nhop_ipv4_1;
         standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
@@ -156,7 +154,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ingress_metadata.flow_ipg = meta.ingress_metadata.flow_ipg - meta.ingress_metadata.flowlet_lasttime;
         flowlet_lasttime.write(meta.ingress_metadata.flowlet_map_index, (bit<32>)standard_metadata.ingress_global_timestamp);
     }
-    @name(".set_dmac") action set_dmac(bit<48> dmac) {
+    @name(".set_dmac") action set_dmac(@name("dmac") bit<48> dmac) {
         hdr.ethernet.dstAddr = dmac;
     }
     @name(".update_flowlet_id") action update_flowlet_id() {
@@ -167,51 +165,51 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             _drop_2();
             set_ecmp_select();
-            @defaultonly NoAction_1();
+            @defaultonly NoAction_3();
         }
         key = {
-            hdr.ipv4.dstAddr: lpm @name("ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("ipv4.dstAddr");
         }
         size = 1024;
-        default_action = NoAction_1();
+        default_action = NoAction_3();
     }
     @name(".ecmp_nhop") table ecmp_nhop_0 {
         actions = {
-            _drop_5();
+            _drop_3();
             set_nhop();
-            @defaultonly NoAction_8();
+            @defaultonly NoAction_4();
         }
         key = {
-            meta.ingress_metadata.ecmp_offset: exact @name("ingress_metadata.ecmp_offset") ;
+            meta.ingress_metadata.ecmp_offset: exact @name("ingress_metadata.ecmp_offset");
         }
         size = 16384;
-        default_action = NoAction_8();
+        default_action = NoAction_4();
     }
     @name(".flowlet") table flowlet_0 {
         actions = {
             lookup_flowlet_map();
-            @defaultonly NoAction_9();
+            @defaultonly NoAction_5();
         }
-        default_action = NoAction_9();
+        default_action = NoAction_5();
     }
     @name(".forward") table forward_0 {
         actions = {
             set_dmac();
-            _drop_6();
-            @defaultonly NoAction_10();
+            _drop_4();
+            @defaultonly NoAction_6();
         }
         key = {
-            meta.ingress_metadata.nhop_ipv4: exact @name("ingress_metadata.nhop_ipv4") ;
+            meta.ingress_metadata.nhop_ipv4: exact @name("ingress_metadata.nhop_ipv4");
         }
         size = 512;
-        default_action = NoAction_10();
+        default_action = NoAction_6();
     }
     @name(".new_flowlet") table new_flowlet_0 {
         actions = {
             update_flowlet_id();
-            @defaultonly NoAction_11();
+            @defaultonly NoAction_7();
         }
-        default_action = NoAction_11();
+        default_action = NoAction_7();
     }
     apply {
         flowlet_0.apply();
@@ -245,4 +243,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

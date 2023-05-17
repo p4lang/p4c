@@ -2,24 +2,21 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<48> mac_addr_t;
-typedef bit<128> ipv6_addr_t;
-typedef bit<9> port_t;
 header ethernet_t {
-    mac_addr_t dstAddr;
-    mac_addr_t srcAddr;
-    bit<16>    etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv6_t {
-    bit<4>      version;
-    bit<8>      traffic_class;
-    bit<20>     flow_label;
-    bit<16>     payload_length;
-    bit<8>      nextHdr;
-    bit<8>      hopLimit;
-    ipv6_addr_t srcAddr;
-    ipv6_addr_t dstAddr;
+    bit<4>   version;
+    bit<8>   traffic_class;
+    bit<20>  flow_label;
+    bit<16>  payload_length;
+    bit<8>   nextHdr;
+    bit<8>   hopLimit;
+    bit<128> srcAddr;
+    bit<128> dstAddr;
 }
 
 header tcp_t {
@@ -257,21 +254,21 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta, inout 
 
 control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
     bool key_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @name("ingress.set_mcast_grp") action set_mcast_grp(bit<16> mcast_grp, bit<9> port) {
-        standard_metadata.mcast_grp = mcast_grp;
+    @name("ingress.set_mcast_grp") action set_mcast_grp(@name("mcast_grp") bit<16> mcast_grp_1, @name("port") bit<9> port) {
+        standard_metadata.mcast_grp = mcast_grp_1;
         meta._egress_port1 = port;
     }
     @name("ingress.ipv6_tbl") table ipv6_tbl_0 {
         key = {
-            key_0: exact @name("mcast_key") ;
+            key_0: exact @name("mcast_key");
         }
         actions = {
             set_mcast_grp();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_2();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_2();
     }
     @hidden action ipv6switchmlbmv2l66() {
         key_0 = hdr.ipv6.dstAddr[127:120] == 8w0xff;
@@ -291,31 +288,31 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
 }
 
 control egress(inout headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @name("egress.set_out_bd") action set_out_bd(bit<24> bd) {
+    @name("egress.set_out_bd") action set_out_bd(@name("bd") bit<24> bd) {
         meta._fwd_out_bd69 = bd;
     }
     @name("egress.get_multicast_copy_out_bd") table get_multicast_copy_out_bd_0 {
         key = {
-            standard_metadata.mcast_grp : exact @name("standard_metadata.mcast_grp") ;
-            standard_metadata.egress_rid: exact @name("standard_metadata.egress_rid") ;
+            standard_metadata.mcast_grp : exact @name("standard_metadata.mcast_grp");
+            standard_metadata.egress_rid: exact @name("standard_metadata.egress_rid");
         }
         actions = {
             set_out_bd();
-            @defaultonly NoAction_1();
+            @defaultonly NoAction_3();
         }
-        default_action = NoAction_1();
+        default_action = NoAction_3();
     }
     @name("egress.drop") action drop() {
         mark_to_drop(standard_metadata);
     }
-    @name("egress.rewrite_mac") action rewrite_mac(bit<48> smac) {
+    @name("egress.rewrite_mac") action rewrite_mac(@name("smac") bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
     }
     @name("egress.send_frame") table send_frame_0 {
         key = {
-            meta._fwd_out_bd69: exact @name("meta.fwd.out_bd") ;
+            meta._fwd_out_bd69: exact @name("meta.fwd.out_bd");
         }
         actions = {
             rewrite_mac();
@@ -351,4 +348,3 @@ control MyComputeChecksum(inout headers hdr, inout metadata_t meta) {
 }
 
 V1Switch<headers, metadata_t>(MyParser(), MyVerifyChecksum(), ingress(), egress(), MyComputeChecksum(), MyDeparser()) main;
-

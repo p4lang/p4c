@@ -18,67 +18,57 @@ limitations under the License.
 
 namespace P4 {
 
-namespace {
-
-class TypeSubstitutionVisitor : public TypeVariableSubstitutionVisitor {
-    TypeMap* typeMap;
-
- public:
-    TypeSubstitutionVisitor(TypeMap* typeMap, TypeVariableSubstitution* ts) :
-            TypeVariableSubstitutionVisitor(ts), typeMap(typeMap) {
-        CHECK_NULL(typeMap); setName("TypeSubstitutionVisitor"); }
-    const IR::Node* postorder(IR::PathExpression* path) override {
-        // We want fresh nodes for variables, etc.
-        return new IR::PathExpression(path->path->clone()); }
-    const IR::Node* postorder(IR::Type_Name* type) override {
-        auto actual = typeMap->getTypeType(getOriginal<IR::Type_Name>(), true);
-        if (auto tv = actual->to<IR::ITypeVar>()) {
-            LOG3("Replacing " << tv);
-            return replacement(tv, type);
-        }
-        return type;
+bool FindFunctionSpecializations::preorder(const IR::MethodCallExpression *mce) {
+    if (!mce->typeArguments->size()) return false;
+    // We only specialize if the type arguments are not type variables
+    for (auto arg : *mce->typeArguments) {
+        auto type = specMap->typeMap->getTypeType(arg, true);
+        if (type->is<IR::ITypeVar>()) return false;
     }
-};
 
-}  // namespace
-
-bool FindFunctionSpecializations::preorder(const IR::MethodCallExpression* mce) {
-    if (!mce->typeArguments->size())
-        return false;
+    const IR::Node *insert = findContext<IR::P4Parser>();
+    if (!insert) insert = findContext<IR::Function>();
+    if (!insert) insert = findContext<IR::P4Control>();
+    if (!insert) insert = findContext<IR::Declaration_Constant>();
+    if (!insert) insert = findContext<IR::Declaration_Instance>();
+    if (!insert) insert = findContext<IR::P4Action>();
+    CHECK_NULL(insert);
     MethodInstance *mi = MethodInstance::resolve(mce, specMap->refMap, specMap->typeMap);
     if (auto func = mi->to<FunctionCall>()) {
         LOG3("Will specialize " << mce);
-        specMap->add(mce, func->function);
+        specMap->add(mce, func->function, insert);
     }
     return false;
 }
 
-const IR::Node* SpecializeFunctions::postorder(IR::Function* function) {
-    auto result = new IR::Vector<IR::Node>();
+const IR::Node *SpecializeFunctions::insert(const IR::Node *before) {
+    auto specs = specMap->getInsertions(getOriginal());
+    if (specs == nullptr) return before;
+    LOG2(specs->size() << " instantiations before " << dbp(before));
+    specs->push_back(before);
+    return specs;
+}
+
+const IR::Node *SpecializeFunctions::postorder(IR::Function *function) {
     for (auto it : specMap->map) {
-        if (it.second->specialized == getOriginal()) {
+        if (it.second->original == getOriginal()) {
             auto methodCall = it.first;
             TypeVariableSubstitution ts;
             ts.setBindings(function, function->type->typeParameters, methodCall->typeArguments);
             TypeSubstitutionVisitor tsv(specMap->typeMap, &ts);
+            tsv.setCalledBy(this);
             LOG3("Substitution " << ts);
             auto specialized = function->apply(tsv)->to<IR::Function>();
-            auto renamed = new IR::Function(
-                specialized->srcInfo,
-                it.second->name,
-                specialized->type,
-                specialized->body);
-            result->push_back(renamed);
+            auto renamed = new IR::Function(specialized->srcInfo, it.second->name,
+                                            specialized->type, specialized->body);
+            it.second->specialized = renamed;
             LOG3("Specializing " << function << " as " << renamed);
         }
     }
-    if (!result->size())
-        return function;
-    result->push_back(function);
-    return result;
+    return function;
 }
 
-const IR::Node* SpecializeFunctions::postorder(IR::MethodCallExpression* mce) {
+const IR::Node *SpecializeFunctions::postorder(IR::MethodCallExpression *mce) {
     if (auto fs = specMap->get(getOriginal<IR::MethodCallExpression>())) {
         LOG3("Substituting call to " << mce->method << " with " << fs->name);
         mce->method = new IR::PathExpression(new IR::Path(mce->srcInfo, fs->name));

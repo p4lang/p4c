@@ -47,18 +47,18 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.debug_hdr") table debug_hdr_0 {
         key = {
-            hdr.base.t           : exact @name("hdr.base.t") ;
-            hdr.u.short.isValid(): exact @name("hdr.u.short.$valid$") ;
-            hdr.u.byte.isValid() : exact @name("hdr.u.byte.$valid$") ;
+            hdr.base.t           : exact @name("hdr.base.t");
+            hdr.u.short.isValid(): exact @name("hdr.u.short.$valid$");
+            hdr.u.byte.isValid() : exact @name("hdr.u.byte.$valid$");
         }
         actions = {
-            NoAction_0();
+            NoAction_1();
         }
-        const default_action = NoAction_0();
+        const default_action = NoAction_1();
     }
     apply {
         debug_hdr_0.apply();
@@ -92,4 +92,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

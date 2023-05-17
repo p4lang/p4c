@@ -45,4 +45,3 @@ control DeparserI(packet_out b, in H hdr) {
 }
 
 V1Switch(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

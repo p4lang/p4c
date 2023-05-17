@@ -54,8 +54,8 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     }
     table t_optional {
         key = {
-            h.h.e: optional @name("h.h.e") ;
-            h.h.t: optional @name("h.h.t") ;
+            h.h.e: optional @name("h.h.e");
+            h.h.t: optional @name("h.h.t");
         }
         actions = {
             a();
@@ -68,7 +68,6 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
                         (8w0xaa, default) : a_with_control_params(9w3);
                         (default, default) : a_with_control_params(9w4);
         }
-
     }
     apply {
         t_optional.apply();
@@ -76,4 +75,3 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 }
 
 V1Switch<Header_t, Meta_t>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

@@ -1,3 +1,12 @@
 issue1937.p4(14): [--Wwarn=uninitialized_use] warning: hdr.f1 may be uninitialized
         foo.apply(hdr.f1, hdr.f1);
                           ^^^^^^
+issue1937.p4(14): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr
+        foo.apply(hdr.f1, hdr.f1);
+                          ^^^
+issue1937.p4(14): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr
+        foo.apply(hdr.f1, hdr.f1);
+                  ^^^
+issue1937.p4(15): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr
+        foo.apply(hdr.f2);
+                  ^^^

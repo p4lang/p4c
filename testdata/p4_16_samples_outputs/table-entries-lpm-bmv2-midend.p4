@@ -49,12 +49,12 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     @name("ingress.a") action a() {
         standard_meta.egress_spec = 9w0;
     }
-    @name("ingress.a_with_control_params") action a_with_control_params(bit<9> x) {
+    @name("ingress.a_with_control_params") action a_with_control_params(@name("x") bit<9> x) {
         standard_meta.egress_spec = x;
     }
     @name("ingress.t_lpm") table t_lpm_0 {
         key = {
-            h.h.l: lpm @name("h.h.l") ;
+            h.h.l: lpm @name("h.h.l");
         }
         actions = {
             a();
@@ -66,7 +66,6 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
                         8w0x12 : a_with_control_params(9w12);
                         default : a_with_control_params(9w13);
         }
-
     }
     apply {
         t_lpm_0.apply();
@@ -74,4 +73,3 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 }
 
 V1Switch<Header_t, Meta_t>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

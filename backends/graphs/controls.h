@@ -30,6 +30,7 @@ class ControlGraphs : public Graphs {
         Graph *getSubgraph() const;
         cstring getName(const cstring &name) const;
         bool isEmpty() const;
+
      private:
         std::vector<cstring> names{};
         std::vector<Graph *> subgraphs{};
@@ -48,18 +49,21 @@ class ControlGraphs : public Graphs {
     bool preorder(const IR::ReturnStatement *) override;
     bool preorder(const IR::ExitStatement *) override;
     bool preorder(const IR::P4Table *table) override;
+    bool preorder(const IR::Key *key) override;
+    bool preorder(const IR::P4Action *action) override;
 
-    void writeGraphToFile(const Graph &g, const cstring &name);
+    std::vector<Graph *> controlGraphsArray{};
 
  private:
-    P4::ReferenceMap *refMap; P4::TypeMap *typeMap;
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
     const cstring graphsDir;
     Parents return_parents{};
     // we keep a stack of subgraphs; every time we visit a control, we create a
     // new subgraph and push it to the stack; this new graph becomes the
     // "current graph" to which we add vertices (e.g. tables).
     ControlStack controlStack{};
-    boost::optional<cstring> instanceName{};
+    std::optional<cstring> instanceName{};
 };
 
 }  // namespace graphs

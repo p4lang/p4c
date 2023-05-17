@@ -1,0 +1,6 @@
+gauntlet_exit_combination_1-bmv2.p4(39): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
+            32w1 : exact @name("akSTMF") ;
+            ^^^^
+gauntlet_exit_combination_1-bmv2.p4(39): [--Wwarn=mismatch] warning: 32w1: Constant key field
+            32w1 : exact @name("akSTMF") ;
+            ^^^^

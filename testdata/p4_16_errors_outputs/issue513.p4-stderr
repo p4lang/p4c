@@ -1,9 +1,0 @@
-issue513.p4(60): [--Wwarn=deprecated] warning: mark_to_drop: Using deprecated feature mark_to_drop. Please use mark_to_drop(standard_metadata) instead.
-            mark_to_drop();
-            ^^^^^^^^^^^^
-v1model.p4(415)
-extern void mark_to_drop();
-            ^^^^^^^^^^^^
-issue513.p4(60): [--Werror=target-error] error: mark_to_drop: Conditional execution in actions unsupported on this target
-            mark_to_drop();
-            ^^^^^^^^^^^^^^

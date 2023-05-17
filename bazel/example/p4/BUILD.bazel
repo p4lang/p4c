@@ -1,4 +1,4 @@
-load("@com_github_p4lang_p4c//:bazel/p4_library.bzl", "p4_library")
+load("@com_github_p4lang_p4c//:bazel/p4_library.bzl", "p4_library", "p4_graphs")
 
 p4_library(
   name = "program",
@@ -17,4 +17,22 @@ p4_library(
   target_out = "program.bmv2.json",     # Optional.
   arch = "v1model",                     # Optional (default: "v1model").
   visibility = ["//:__subpackages__"],  # Optional.
+)
+
+p4_library(
+  name = "vxlan_dpdk_pna",
+  src = "vxlan.p4",
+  p4c_backend = "@com_github_p4lang_p4c//:p4c_dpdk",
+  arch = "pna",
+  target = "dpdk",
+  context_out = "vxlan.context",
+  bf_rt_schema_out = "vxlan.bf-rt-schema",
+  target_out = "vxlan.spec",
+)
+
+p4_graphs(
+  name = "program_graphs",
+  src = "program.p4",
+  deps = ["empty.p4"],
+  out = "program_graphs.dot",
 )

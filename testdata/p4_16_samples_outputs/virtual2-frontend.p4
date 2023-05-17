@@ -13,7 +13,7 @@ control c(inout bit<16> p) {
     @name("c.cntr") Virtual() cntr_0 = {
         @name("c.state") State(16s1024) state_0;
         bit<16> f(in bit<16> ix) {
-            bit<16> tmp;
+            @name("c.tmp") bit<16> tmp;
             tmp = state_0.get(ix);
             return tmp;
         }
@@ -26,4 +26,3 @@ control c(inout bit<16> p) {
 control ctr(inout bit<16> x);
 package top(ctr ctrl);
 top(c()) main;
-

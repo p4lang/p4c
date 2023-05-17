@@ -16,4 +16,3 @@ parser p1_0(out bit<2> a) {
 }
 
 m(p1_0()) main;
-

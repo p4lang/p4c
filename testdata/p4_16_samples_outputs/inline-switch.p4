@@ -22,7 +22,6 @@ control c(out bit<32> x) {
                 return;
             }
         }
-
     }
 }
 
@@ -36,4 +35,3 @@ control d(out bit<32> x) {
 control dproto(out bit<32> x);
 package top(dproto _d);
 top(d()) main;
-

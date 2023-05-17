@@ -16,7 +16,6 @@ control x() {
             default: {
             }
         }
-
     }
 }
 

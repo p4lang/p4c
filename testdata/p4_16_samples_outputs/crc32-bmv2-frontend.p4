@@ -27,12 +27,12 @@ struct metadata {
 }
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<8> tmp;
-    p4calc_t tmp_0;
-    bit<8> tmp_1;
-    p4calc_t tmp_2;
-    bit<8> tmp_3;
-    p4calc_t tmp_4;
+    @name("MyParser.tmp") bit<8> tmp;
+    @name("MyParser.tmp_1") p4calc_t tmp_0;
+    @name("MyParser.tmp_2") bit<8> tmp_1;
+    @name("MyParser.tmp_3") p4calc_t tmp_2;
+    @name("MyParser.tmp_4") bit<8> tmp_3;
+    @name("MyParser.tmp_5") p4calc_t tmp_4;
     state start {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -64,11 +64,11 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<48> tmp_5;
-    bit<32> nbase_0;
-    bit<64> ncount_0;
-    bit<32> nselect_0;
-    bit<32> ninput_0;
+    @name("MyIngress.tmp") bit<48> tmp_5;
+    @name("MyIngress.nbase") bit<32> nbase_0;
+    @name("MyIngress.ncount") bit<64> ncount_0;
+    @name("MyIngress.nselect") bit<32> nselect_0;
+    @name("MyIngress.ninput") bit<32> ninput_0;
     @name("MyIngress.operation_add") action operation_add() {
         hdr.p4calc.res = hdr.p4calc.operand_a + hdr.p4calc.operand_b;
         tmp_5 = hdr.ethernet.dstAddr;
@@ -118,12 +118,12 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     @name("MyIngress.operation_drop") action operation_drop() {
         mark_to_drop(standard_metadata);
     }
-    @name("MyIngress.operation_drop") action operation_drop_2() {
+    @name("MyIngress.operation_drop") action operation_drop_1() {
         mark_to_drop(standard_metadata);
     }
     @name("MyIngress.calculate") table calculate_0 {
         key = {
-            hdr.p4calc.op: exact @name("hdr.p4calc.op") ;
+            hdr.p4calc.op: exact @name("hdr.p4calc.op");
         }
         actions = {
             operation_add();
@@ -143,13 +143,12 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
                         8w0x5e : operation_xor();
                         8w0x3e : operation_crc();
         }
-
     }
     apply {
         if (hdr.p4calc.isValid()) {
             calculate_0.apply();
         } else {
-            operation_drop_2();
+            operation_drop_1();
         }
     }
 }
@@ -173,4 +172,3 @@ control MyDeparser(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

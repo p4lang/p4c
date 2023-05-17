@@ -23,7 +23,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bit<16> tmp;
+    @name("ingress.tmp") bit<16> tmp;
     @hidden action issue22051bmv2l35() {
         h.eth_hdr.src_addr = 48w1;
     }
@@ -73,4 +73,3 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

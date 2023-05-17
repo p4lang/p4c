@@ -6,7 +6,7 @@ struct PortId_t {
     bit<9> _v;
 }
 
-const PortId_t PSA_CPU_PORT = { 9w192 };
+const PortId_t PSA_CPU_PORT = (PortId_t){_v = 9w192};
 struct parsed_headers_t {
 }
 
@@ -26,7 +26,7 @@ control IngressImpl(inout parsed_headers_t hdr, inout metadata_t meta, inout sta
         if (meta.foo == meta.bar) {
             meta.foo._v = meta.foo._v + 9w1;
         }
-        if (meta.foo == { 9w192 }) {
+        if (meta.foo == (PortId_t){_v = 9w192}) {
             meta.foo._v = meta.foo._v + 9w1;
         }
     }
@@ -53,4 +53,3 @@ control ComputeChecksumImpl(inout parsed_headers_t hdr, inout metadata_t meta) {
 }
 
 V1Switch<parsed_headers_t, metadata_t>(ParserImpl(), VerifyChecksumImpl(), IngressImpl(), EgressImpl(), ComputeChecksumImpl(), DeparserImpl()) main;
-

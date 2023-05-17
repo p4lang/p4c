@@ -1,0 +1,3 @@
+issue122.p4(28): [--Werror=type-error] error: simple_action: no function calls allowed in this context
+            simple_action(): reject;
+            ^^^^^^^^^^^^^^^

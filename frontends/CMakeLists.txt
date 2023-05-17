@@ -16,6 +16,7 @@ set (P4_FRONTEND_SRCS
   p4/actionsInlining.cpp
   p4/callGraph.cpp
   p4/checkConstants.cpp
+  p4/checkCoreMethods.cpp
   p4/checkNamedArgs.cpp
   p4/createBuiltins.cpp
   p4/def_use.cpp
@@ -42,6 +43,9 @@ set (P4_FRONTEND_SRCS
   p4/parseAnnotations.cpp
   p4/parserCallGraph.cpp
   p4/parserControlFlow.cpp
+  p4/reassociation.cpp
+  p4/redundantParsers.cpp
+  p4/removeParameters.cpp
   p4/removeReturns.cpp
   p4/reservedWords.cpp
   p4/resetHeaders.cpp
@@ -50,14 +54,17 @@ set (P4_FRONTEND_SRCS
   p4/simplify.cpp
   p4/simplifyDefUse.cpp
   p4/simplifyParsers.cpp
+  p4/simplifySwitch.cpp
   p4/specialize.cpp
   p4/specializeGenericFunctions.cpp
+  p4/specializeGenericTypes.cpp
   p4/strengthReduction.cpp
   p4/structInitializers.cpp
   p4/switchAddDefault.cpp
   p4/symbol_table.cpp
   p4/tableApply.cpp
   p4/tableKeyNames.cpp
+  p4/ternaryBool.cpp
   p4/toP4/toP4.cpp
   p4/typeChecking/bindVariables.cpp
   p4/typeChecking/syntacticEquivalence.cpp
@@ -78,6 +85,7 @@ set (P4_FRONTEND_HDRS
   p4/alias.h
   p4/callGraph.h
   p4/checkConstants.h
+  p4/checkCoreMethods.h
   p4/checkNamedArgs.h
   p4/cloner.h
   p4/commonInlining.h
@@ -107,6 +115,9 @@ set (P4_FRONTEND_HDRS
   p4/parseAnnotations.h
   p4/parserCallGraph.h
   p4/parserControlFlow.h
+  p4/reassociation.h
+  p4/redundantParsers.h
+  p4/removeParameters.h
   p4/removeReturns.h
   p4/reservedWords.h
   p4/resetHeaders.h
@@ -115,14 +126,18 @@ set (P4_FRONTEND_HDRS
   p4/simplify.h
   p4/simplifyDefUse.h
   p4/simplifyParsers.h
+  p4/simplifySwitch.h
   p4/specialize.h
   p4/specializeGenericFunctions.h
+  p4/specializeGenericTypes.h
+  p4/staticAssert.h
   p4/strengthReduction.h
   p4/structInitializers.h
   p4/switchAddDefault.h
   p4/symbol_table.h
   p4/tableApply.h
   p4/tableKeyNames.h
+  p4/ternaryBool.h
   p4/toP4/toP4.h
   p4/typeChecking/bindVariables.h
   p4/typeChecking/syntacticEquivalence.h
@@ -137,6 +152,7 @@ set (P4_FRONTEND_HDRS
   p4/uselessCasts.h
   p4/validateMatchAnnotations.h
   p4/validateParsedProgram.h
+  p4/validateValueSets.h
   )
 
 
@@ -145,6 +161,7 @@ set (COMMON_FRONTEND_SRCS
   common/constantFolding.cpp
   common/constantParsing.cpp
   common/options.cpp
+  common/parser_options.cpp
   common/parseInput.cpp
   common/resolveReferences/referenceMap.cpp
   common/resolveReferences/resolveReferences.cpp
@@ -157,6 +174,7 @@ set (COMMON_FRONTEND_HDRS
   common/model.h
   common/name_gateways.h
   common/options.h
+  common/parser_options.h
   common/parseInput.h
   common/programMap.h
   common/resolveReferences/referenceMap.h
@@ -192,20 +210,12 @@ macro(add_parser pname)
   add_custom_target (mk${pname}dirs
     ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname})
 
-  # Versions of CMake before 3.7.2 require a filename argument to BISON_TARGET's
-  # VERBOSE option. Later versions "support" it, but they generate a file with
-  # the same name automatically anyway, and then issue a warning because the
-  # file gets overwritten, so we need this code to avoid warning spew during
-  # compilation.
-  if (CMAKE_VERSION VERSION_LESS "3.7.2")
-      BISON_TARGET (${pname}Parser parsers/${pname}/${pname}parser.ypp ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname}/${pname}parser.cpp VERBOSE ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname}/${pname}parser.output)
-  else ()
-      BISON_TARGET (${pname}Parser parsers/${pname}/${pname}parser.ypp ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname}/${pname}parser.cpp VERBOSE)
-  endif ()
+  # CMake generates a file with the same name automatically and then issues a warning because the
+  # file gets overwritten, so we need this code to avoid warning spew during compilation.
+  BISON_TARGET (${pname}Parser parsers/${pname}/${pname}parser.ypp ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname}/${pname}parser.cpp VERBOSE COMPILE_FLAGS "-Werror=conflicts-sr -Werror=conflicts-rr")
 
   # regardless of the output name, flex puts out yy.lex.c, so we use a custom command to generate
   # the file to stdout and redirect to the desired name
-  # FLEX_TARGET (${pname}Lexer parsers/${pname}/${pname}lexer.ll ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname}/${pname}lexer.cc)
   set (FLEX_${pname}Lexer_OUTPUTS ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname}/${pname}lexer.cc)
   set (FLEX_${pname}_INPUT ${CMAKE_CURRENT_SOURCE_DIR}/parsers/${pname}/${pname}lexer.ll)
   add_custom_command (OUTPUT ${FLEX_${pname}Lexer_OUTPUTS}
@@ -217,42 +227,31 @@ macro(add_parser pname)
     ${FLEX_${pname}Lexer_OUTPUTS}
     ${BISON_${pname}Parser_OUTPUTS}
     )
+  set_source_files_properties(${${pname}PARSER_GEN_SRCS} PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
+
 endmacro(add_parser)
 
 add_parser(v1)
 add_parser(p4)
 
-# BUILT_SOURCES += \
-# 	parsers/p4/p4parser.hpp \
-# 	parsers/v1/v1parser.hpp
-
-# noinst_HEADERS += \
-# 	parsers/p4/p4lexer.hpp \
-# 	parsers/v1/v1lexer.hpp
-
 set (FRONTEND_SOURCES
+  ${IR_GENERATED_SRCS}
   ${COMMON_FRONTEND_SRCS}
   ${PARSERS_SRCS}
   ${P4_FRONTEND_SRCS}
   ${V1_FRONTEND_SRCS}
   ${p4PARSER_GEN_SRCS}
   ${v1PARSER_GEN_SRCS}
-  ${IR_GENERATED_SRCS}
   )
 
 set_source_files_properties(${IR_GENERATED_SRCS} PROPERTIES GENERATED TRUE)
-set_source_files_properties(${v1PARSER_GEN_SRCS} PROPERTIES GENERATED TRUE)
-set_source_files_properties(${p4PARSER_GEN_SRCS} PROPERTIES GENERATED TRUE)
 
 set (FRONTEND_CPPLINT_FILES
   ${P4_FRONTEND_SRCS} ${P4_FRONTEND_HDRS}
   ${COMMON_FRONTEND_SRCS} ${COMMON_FRONTEND_HDRS}
   ${V1_FRONTEND_SRCS} ${V1_FRONTEND_HDRS}
   ${PARSERS_SRCS} ${PARSERS_HDRS})
-add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${FRONTEND_CPPLINT_FILES}")
 
-build_unified(FRONTEND_SOURCES)
-build_unified(EXTENSION_FRONTEND_SOURCES)
 if (FLEX_INCLUDE_DIRS)
   include_directories(${FLEX_INCLUDE_DIRS})
 endif ()

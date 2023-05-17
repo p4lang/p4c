@@ -1,3 +1,0 @@
-switch_expression.p4(13): [--Werror=expr] error: SwitchCase: Unexpected expression for switch case
-            NumConstant: { }
-            ^^^^^^^^^^^^^^^^

@@ -15,24 +15,10 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<32> value_0;
-    @name("IngressImpl.update_value") action update_value(out bit<32> value_2) {
-        {
-            bool hasReturned = false;
-            bit<32> retval;
-            hasReturned = true;
-            retval = 32w1;
-            value_2 = retval;
-        }
+    @name("IngressImpl.update_value") action update_value() {
     }
     apply {
-        {
-            bool hasReturned_1 = false;
-            bit<32> retval_1;
-            hasReturned_1 = true;
-            retval_1 = 32w1;
-        }
-        update_value(value_0);
+        update_value();
     }
 }
 
@@ -57,4 +43,3 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), VerifyChecksumImpl(), IngressImpl(), EgressImpl(), ComputeChecksumImpl(), DeparserImpl()) main;
-

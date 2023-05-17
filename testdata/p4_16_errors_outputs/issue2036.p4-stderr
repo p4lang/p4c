@@ -1,3 +1,27 @@
-issue2036.p4(23): [--Werror=type-error] error: d.apply: Cannot unify Tuple(1) to struct s
+issue2036.p4(23): [--Werror=type-error] error: d.apply
     d.apply(a);
     ^^^^^^^^^^
+  ---- Actual error:
+issue2036.p4(19): Cannot cast implicitly type 'tuple<bit<8>>' to type 'struct s'
+    tuple<bit<8>> a = { 0 };
+    ^^^^^^^^^^^^^
+issue2036.p4(8)
+  struct s {
+         ^
+  ---- Originating from:
+issue2036.p4(23): Type of argument 'a' (tuple<bit<8>>) does not match type of parameter 'z' (struct s)
+      d.apply(a);
+              ^
+issue2036.p4(19)
+    tuple<bit<8>> a = { 0 };
+    ^^^^^^^^^^^^^
+issue2036.p4(12)
+  parser D(in s z) {
+                ^
+issue2036.p4(8)
+  struct s {
+         ^
+  ---- Originating from:
+issue2036.p4(23): Function type 'D' does not match invocation type '<Method call>'
+      d.apply(a);
+      ^^^^^^^^^^

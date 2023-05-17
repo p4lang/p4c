@@ -3,7 +3,7 @@ error {
     BadIPv4HeaderChecksum
 }
 #include <core.p4>
-#include <psa.p4>
+#include <bmv2/psa.p4>
 
 typedef bit<48> EthernetAddress;
 header ethernet_t {
@@ -111,7 +111,6 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
                         error.BadIPv4HeaderChecksum : set_error_idx(7);
                         error.UnhandledIPv4Options : set_error_idx(8);
         }
-
         psa_direct_counter = parser_error_counts;
     }
     apply {
@@ -155,8 +154,5 @@ control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_met
 }
 
 IngressPipeline(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-
 EgressPipeline(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-
 PSA_Switch(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

@@ -8,7 +8,7 @@ const pair x = { 32w10, 32w20 };
 const pair y = { 32w30, 32w40 };
 const bool z = false;
 const bool w = true;
-const S s = { 32w10, 32w20 };
+const S s = (S){l = 32w10,r = 32w20};
 control c(out bool z);
 package top(c _c);
 control test(out bool zout) {
@@ -21,4 +21,3 @@ control test(out bool zout) {
 }
 
 top(test()) main;
-

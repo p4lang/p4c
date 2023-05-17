@@ -7,7 +7,7 @@ struct tuple_0 {
 }
 
 control c() {
-    tuple_0 x;
+    @name("c.x_0") tuple_0 x;
     @hidden action tuple2l23() {
         x.f0 = 32w10;
         x.f1 = false;
@@ -25,4 +25,3 @@ control c() {
 }
 
 top(c()) main;
-

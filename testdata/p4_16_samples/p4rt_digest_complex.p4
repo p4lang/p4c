@@ -1,11 +1,23 @@
 #include <core.p4>
-#include <psa.p4>
+#include <bmv2/psa.p4>
 
 struct EMPTY { };
 
 struct s_t {
     bit<8> f8;
     bit<16> f16;
+}
+
+// generic struct without @name annotation
+struct s2_t<T> {
+    bit<16> f16;
+    T f;
+}
+
+// generic struct with @name annotation
+@name("s3_t")
+struct s3_t<T> {
+    T f;
 }
 
 header h_t {
@@ -63,6 +75,8 @@ control MyEC(
 struct digest_t {
     h_t h;
     PortId_t port;
+    s2_t<bit<32> > s2;
+    s3_t<bit<64> > s3;
 }
 
 control MyID(
@@ -75,7 +89,7 @@ control MyID(
     in psa_ingress_output_metadata_t f) {
     Digest<digest_t>() digest;
     apply {
-        digest.pack({hdr.h, f.egress_port});
+        digest.pack({hdr.h, f.egress_port, {16w10, 32w20}, {64w30}});
     }
 }
 

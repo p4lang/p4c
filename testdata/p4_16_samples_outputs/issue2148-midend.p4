@@ -14,25 +14,27 @@ struct Meta {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    H not_initialized_0;
-    H not_initialized_2;
-    bit<32> new_val_1;
+    @name("ingress.not_initialized") H not_initialized_0;
+    @name("ingress.not_initialized") H not_initialized_1;
+    @name("ingress.new_val") bit<32> new_val_1;
     @name("ingress.do_thing_action") action do_thing_action() {
+        not_initialized_0.setInvalid();
     }
     @hidden action issue2148l21() {
         new_val_1 = 32w232;
     }
-    @hidden action issue2148l18() {
+    @hidden action issue2148l17() {
+        not_initialized_1.setInvalid();
         new_val_1 = 32w1;
     }
     @hidden action issue2148l30() {
         h.h.a = (bit<16>)new_val_1;
     }
-    @hidden table tbl_issue2148l18 {
+    @hidden table tbl_issue2148l17 {
         actions = {
-            issue2148l18();
+            issue2148l17();
         }
-        const default_action = issue2148l18();
+        const default_action = issue2148l17();
     }
     @hidden table tbl_issue2148l21 {
         actions = {
@@ -53,8 +55,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = do_thing_action();
     }
     apply {
-        tbl_issue2148l18.apply();
-        if (not_initialized_2.a < 16w6) {
+        tbl_issue2148l17.apply();
+        if (not_initialized_1.a < 16w6) {
             ;
         } else {
             tbl_issue2148l21.apply();
@@ -91,4 +93,3 @@ control deparser(packet_out b, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

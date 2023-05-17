@@ -35,7 +35,7 @@ control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
 }
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
-    bit<8> error_as_int_0;
+    @name("ingressImpl.error_as_int") bit<8> error_as_int_0;
     apply {
         stdmeta.egress_spec = 9w1;
         if (stdmeta.parser_error == error.NoError) {
@@ -76,4 +76,3 @@ control deparserImpl(packet_out packet, in headers_t hdr) {
 }
 
 V1Switch<headers_t, metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
-

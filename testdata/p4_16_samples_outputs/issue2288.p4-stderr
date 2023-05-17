@@ -1,0 +1,6 @@
+issue2288.p4(26): [--Wwarn=ordering] warning: h.a: 'out' argument has fields in common with h.a
+        f(h.a, g(h.a));
+          ^^^
+issue2288.p4(26)
+        f(h.a, g(h.a));
+                 ^^^

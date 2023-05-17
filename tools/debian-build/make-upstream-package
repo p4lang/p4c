@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+#
+# Packaging Scripts
+# Copyright (C) 2017-2021 by Thomas Dreibholz
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Contact: dreibh@iem.uni-due.de
+
+# Bash options:
+set -e
+
+# ====== Path variables =========================================
+FILE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+P4C_DIR="${FILE_DIR}/../.."
+DEBIAN_DIR="${P4C_DIR}/debian"
+
+# ---------------------------------------------------------------------------
+# USAGE:
+# ./make-upstream-package package_name version [-skip-signing]
+# ---------------------------------------------------------------------------
+
+
+# ====== Check arguments ====================================================
+if [ $# -lt 3 ] ; then
+   echo >&2 "Usage: $0 package_name version make_dist [-skip-signing]"
+   exit 1
+fi
+PACKAGE="$1"
+UPSTREAM_VERSION="$2"
+MAKE_DIST="$3"
+SKIP_PACKAGE_SIGNING=0
+shift ; shift ; shift
+while [ $# -gt 0 ] ; do
+   if [ "$1" == "-skip-signing" ] ; then
+      SKIP_PACKAGE_SIGNING=1
+   else
+      echo >&2 "ERROR: Bad argument $0!"
+      exit 1
+   fi
+   shift
+done
+
+
+# ====== Create upstream source package =====================================
+echo -e ""
+echo -e "\x1b[34m`date +%FT%H:%M:%S`: ====== Creating upstream package ======================================\x1b[0m"
+echo -e ""
+for UPSTREAM_PACKAGE_TYPE in xz bz2 gz ; do
+   echo -n "Looking for ${PACKAGE}-*.tar.${UPSTREAM_PACKAGE_TYPE} ... "
+   UPSTREAM_PACKAGE="`find . -maxdepth 1 -name "${PACKAGE}-*.tar.${UPSTREAM_PACKAGE_TYPE}" -printf '%f'`"
+   if [ -e "${UPSTREAM_PACKAGE}" ] ; then
+      echo "found!"
+      break
+   else
+      echo "not found"
+   fi
+done
+if [ ! -e "${UPSTREAM_PACKAGE}" ]; then
+   rm -f ${PACKAGE}-*.gz ${PACKAGE}"_"*.gz ${PACKAGE}-*.bz2 ${PACKAGE}"_"*.bz2 ${PACKAGE}-*.xz ${PACKAGE}"_"*.xz
+
+   echo -e "\x1b[34m------ Running MAKE_DIST ... ------\x1b[0m"
+   echo "\$ $MAKE_DIST"
+   eval "$MAKE_DIST"
+
+   echo -e "\x1b[34m------ Looking for upstream package ... ------\x1b[0m"
+   for UPSTREAM_PACKAGE_TYPE in xz bz2 gz ; do
+      UPSTREAM_PACKAGE="`find . -maxdepth 1 -name "${PACKAGE}-*.tar.${UPSTREAM_PACKAGE_TYPE}" -printf '%f'`"
+      if [ -e "${UPSTREAM_PACKAGE}" ] ; then
+         break
+      fi
+   done
+   if [ ! -e "${UPSTREAM_PACKAGE}" ] ; then
+      echo -e "\x1b[34mERROR: No upstream package (${PACKAGE}-*.tar.*) found!\x1b[0m"
+      exit 1
+   fi
+
+   rm -f "${UPSTREAM_PACKAGE}.asc"   # Ensure that old signature file is removed!
+   echo -e ""
+fi
+echo -e "\x1b[34m==> Upstream package is ${UPSTREAM_PACKAGE} (type is ${UPSTREAM_PACKAGE_TYPE})\x1b[0m"
+echo -e ""
+
+
+# ====== Sign upstream source package =======================================
+if [ ! -e "${UPSTREAM_PACKAGE}.asc" ] ; then
+   if [ ! ${SKIP_PACKAGE_SIGNING} == "1" -a ! "${OVERRIDE_SKIP_PACKAGE_SIGNING}" == "1" ] ; then
+      echo -e ""
+      echo -e "\x1b[34m`date +%FT%H:%M:%S`: ====== Sign upstream package ==========================================\x1b[0m"
+      echo -e ""
+      echo -e "\x1b[34mSigning upstream package ${UPSTREAM_PACKAGE} ...\x1b[0m"
+      gpg -sab "${UPSTREAM_PACKAGE}"
+   else
+      rm -f "${UPSTREAM_PACKAGE}.asc"
+   fi
+fi

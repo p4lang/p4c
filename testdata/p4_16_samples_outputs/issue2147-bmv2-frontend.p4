@@ -35,13 +35,16 @@ parser p(packet_in pkt, out Parsed_packet hdr, inout Metadata meta, inout standa
 }
 
 control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {
-    bit<7> tmp_0;
-    @name("ingress.do_action") action do_action(inout bit<7> in_bit) {
+    @name("ingress.tmp") bit<7> tmp_0;
+    @name("ingress.in_bit") bit<7> in_bit_0;
+    @name("ingress.do_action") action do_action() {
+        in_bit_0 = tmp_0;
         hdr.h.a[0:0] = 1w0;
+        tmp_0 = in_bit_0;
     }
     apply {
         tmp_0 = hdr.h.a[7:1];
-        do_action(tmp_0);
+        do_action();
         hdr.h.a[7:1] = tmp_0;
     }
 }
@@ -62,4 +65,3 @@ control update(inout Parsed_packet hdr, inout Metadata meta) {
 }
 
 V1Switch<Parsed_packet, Metadata>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

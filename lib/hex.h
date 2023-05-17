@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,17 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4C_LIB_HEX_H_
-#define P4C_LIB_HEX_H_
+#ifndef _LIB_HEX_H_
+#define _LIB_HEX_H_
 
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 #include <vector>
 
 class hex {
-    intmax_t    val;
-    int         width;
-    char        fill;
+    intmax_t val;
+    int width;
+    char fill;
+
  public:
     explicit hex(intmax_t v, int w = 0, char f = ' ') : val(v), width(w), fill(f) {}
     explicit hex(void *v, int w = 0, char f = ' ') : val((intmax_t)v), width(w), fill(f) {}
@@ -37,21 +38,25 @@ inline std::ostream &operator<<(std::ostream &os, const hex &h) {
     os << std::hex << std::setw(h.width) << std::setfill(h.fill) << h.val;
     os.fill(save_fill);
     os.flags(save);
-    return os; }
+    return os;
+}
 
 class hexvec {
-    void        *data;
-    size_t      elsize, len;
-    int         width;
-    char        fill;
+    void *data;
+    size_t elsize, len;
+    int width;
+    char fill;
+
  public:
-    template<typename I> hexvec(I *d, size_t l, int w = 0, char f = ' ') :
-        data(d), elsize(sizeof(I)), len(l), width(w), fill(f) {}
-    template<typename T> hexvec(std::vector<T> &d, int w = 0, char f = ' ') :
-        data(d.data()), elsize(sizeof(T)), len(d.size()), width(w), fill(f) {}
+    template <typename I>
+    hexvec(I *d, size_t l, int w = 0, char f = ' ')
+        : data(d), elsize(sizeof(I)), len(l), width(w), fill(f) {}
+    template <typename T>
+    explicit hexvec(std::vector<T> &d, int w = 0, char f = ' ')
+        : data(d.data()), elsize(sizeof(T)), len(d.size()), width(w), fill(f) {}
     friend std::ostream &operator<<(std::ostream &os, const hexvec &h);
 };
 
 std::ostream &operator<<(std::ostream &os, const hexvec &h);
 
-#endif /* P4C_LIB_HEX_H_ */
+#endif /* _LIB_HEX_H_ */

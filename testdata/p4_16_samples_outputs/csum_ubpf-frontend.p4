@@ -54,10 +54,10 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 }
 
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
-    bit<32> old_addr_0;
-    bit<32> new_addr_0;
-    bit<16> from_0;
-    bit<16> to_0;
+    @name("pipe.old_addr") bit<32> old_addr_0;
+    @name("pipe.new_addr") bit<32> new_addr_0;
+    @name("pipe.from") bit<16> from_0;
+    @name("pipe.to") bit<16> to_0;
     apply {
         old_addr_0 = headers.ipv4.dstAddr;
         new_addr_0 = 32w0x1020304;
@@ -79,4 +79,3 @@ control dprs(packet_out packet, in Headers_t headers) {
 }
 
 ubpf<Headers_t, metadata>(prs(), pipe(), dprs()) main;
-

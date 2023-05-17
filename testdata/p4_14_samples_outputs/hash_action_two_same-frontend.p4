@@ -23,14 +23,14 @@ header data_t {
 }
 
 struct metadata {
-    @name(".counter_metadata") 
+    @name(".counter_metadata")
     counter_metadata_t counter_metadata;
-    @name(".meter_metadata") 
+    @name(".meter_metadata")
     meter_metadata_t   meter_metadata;
 }
 
 struct headers {
-    @name(".data") 
+    @name(".data")
     data_t data;
 }
 
@@ -42,17 +42,15 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 @name(".count1") @min_width(32) counter<bit<14>>(32w16384, CounterType.packets) count1;
-
 @name(".meter1") meter<bit<10>>(32w1024, MeterType.bytes) meter1;
-
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @name(".set_index") action set_index(bit<16> index, bit<9> port) {
-        meta.counter_metadata.counter_index = index;
-        meta.meter_metadata.meter_index = index;
+    @name(".set_index") action set_index(@name("index") bit<16> index_1, @name("port") bit<9> port) {
+        meta.counter_metadata.counter_index = index_1;
+        meta.meter_metadata.meter_index = index_1;
         standard_metadata.egress_spec = port;
     }
     @name(".count_entries") action count_entries() {
@@ -62,21 +60,21 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".index_setter") table index_setter_0 {
         actions = {
             set_index();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            hdr.data.f1: exact @name("data.f1") ;
-            hdr.data.f2: exact @name("data.f2") ;
+            hdr.data.f1: exact @name("data.f1");
+            hdr.data.f2: exact @name("data.f2");
         }
         size = 2048;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name(".stats") table stats_0 {
         actions = {
             count_entries();
-            @defaultonly NoAction_3();
+            @defaultonly NoAction_2();
         }
-        default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     apply {
         index_setter_0.apply();
@@ -106,4 +104,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

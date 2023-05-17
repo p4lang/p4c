@@ -13,9 +13,8 @@ parser prs(packet_in p, out Headers_t headers) {
 control pipe(inout Headers_t headers, out bool pass) {
     apply {
         bool x = true;
-        pass = x != false;
+        pass = x;
     }
 }
 
 ebpfFilter<Headers_t>(prs(), pipe()) main;
-

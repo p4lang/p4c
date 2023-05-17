@@ -17,9 +17,9 @@ struct Metadata {
 }
 
 control ingress(inout H pkt_hdr, in Metadata metadata) {
-    bit<32> input_traffic_bytes_tmp_0;
-    bit<32> sum_rtt_Tr_tmp_0;
-    bit<32> num_pkts_with_rtt_tmp_0;
+    @name("ingress.input_traffic_bytes_tmp") bit<32> input_traffic_bytes_tmp_0;
+    @name("ingress.sum_rtt_Tr_tmp") bit<32> sum_rtt_Tr_tmp_0;
+    @name("ingress.num_pkts_with_rtt_tmp") bit<32> num_pkts_with_rtt_tmp_0;
     @name("ingress.input_traffic_bytes") Register<bit<32>>(32w1) input_traffic_bytes_0;
     @name("ingress.sum_rtt_Tr") Register<bit<32>>(32w1) sum_rtt_Tr_0;
     @name("ingress.num_pkts_with_rtt") Register<bit<32>>(32w1) num_pkts_with_rtt_0;
@@ -59,4 +59,3 @@ control ingress(inout H pkt_hdr, in Metadata metadata) {
 }
 
 top<H, Metadata>(ingress()) main;
-

@@ -1,0 +1,20 @@
+gauntlet_side_effect_order_5-bmv2.p4(33): [--Wwarn=ordering] warning: h.eth_hdr.src_addr: 'out' argument has fields in common with h.eth_hdr.src_addr
+        do_thing(h.eth_hdr.src_addr, h.eth_hdr.src_addr);
+                 ^^^^^^^^^^^^^^^^^^
+gauntlet_side_effect_order_5-bmv2.p4(33)
+        do_thing(h.eth_hdr.src_addr, h.eth_hdr.src_addr);
+                                     ^^^^^^^^^^^^^^^^^^
+gauntlet_side_effect_order_5-bmv2.p4(33): [--Wwarn=ordering] warning: h.eth_hdr.src_addr: 'out' argument has fields in common with h.eth_hdr.src_addr
+        do_thing(h.eth_hdr.src_addr, h.eth_hdr.src_addr);
+                                     ^^^^^^^^^^^^^^^^^^
+gauntlet_side_effect_order_5-bmv2.p4(33)
+        do_thing(h.eth_hdr.src_addr, h.eth_hdr.src_addr);
+                 ^^^^^^^^^^^^^^^^^^
+gauntlet_side_effect_order_5-bmv2.p4(16): [--Wwarn=uninitialized_out_param] warning: out parameter 'val_1' may be uninitialized when 'do_thing' terminates
+bit<48> do_thing(inout bit<48> val_0, out bit<48> val_1) {
+                                                  ^^^^^
+gauntlet_side_effect_order_5-bmv2.p4(16)
+bit<48> do_thing(inout bit<48> val_0, out bit<48> val_1) {
+        ^^^^^^^^
+[--Wwarn=uninitialized_use] warning: val_2 may be uninitialized
+[--Wwarn=uninitialized_use] warning: val_2 may be uninitialized

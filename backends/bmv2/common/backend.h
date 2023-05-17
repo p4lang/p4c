@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_COMMON_BACKEND_H_
 #define BACKENDS_BMV2_COMMON_BACKEND_H_
 
+#include "JsonObjects.h"
 #include "controlFlowGraph.h"
 #include "expression.h"
 #include "frontends/common/model.h"
@@ -29,43 +30,55 @@ limitations under the License.
 #include "lib/json.h"
 #include "lib/log.h"
 #include "lib/nullstream.h"
-#include "JsonObjects.h"
 #include "metermap.h"
-#include "midend/convertEnums.h"
 #include "midend/actionSynthesis.h"
+#include "midend/convertEnums.h"
+#include "midend/removeComplexExpressions.h"
 #include "midend/removeLeftSlices.h"
-#include "sharedActionSelectorCheck.h"
 #include "options.h"
+#include "sharedActionSelectorCheck.h"
 
 namespace BMV2 {
 
 enum gress_t { INGRESS, EGRESS };
-enum block_t { PARSER, PIPELINE, DEPARSER, V1_PARSER, V1_DEPARSER,
-               V1_INGRESS, V1_EGRESS, V1_VERIFY, V1_COMPUTE};
+enum block_t {
+    PARSER,
+    PIPELINE,
+    DEPARSER,
+    V1_PARSER,
+    V1_DEPARSER,
+    V1_INGRESS,
+    V1_EGRESS,
+    V1_VERIFY,
+    V1_COMPUTE
+};
 
 class ExpressionConverter;
 
 // Backend is a the base class for SimpleSwitchBackend and PortableSwitchBackend.
 class Backend {
  public:
-    BMV2Options&                     options;
-    P4::ReferenceMap*                refMap;
-    P4::TypeMap*                     typeMap;
-    P4::ConvertEnums::EnumMapping*   enumMap;
-    P4::P4CoreLibrary&               corelib;
-    BMV2::JsonObjects*               json;
-    const IR::ToplevelBlock*         toplevel = nullptr;
+    BMV2Options &options;
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
+    P4::ConvertEnums::EnumMapping *enumMap;
+    P4::P4CoreLibrary &corelib;
+    BMV2::JsonObjects *json;
+    const IR::ToplevelBlock *toplevel = nullptr;
 
  public:
-    Backend(BMV2Options& options, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-            P4::ConvertEnums::EnumMapping* enumMap) :
-        options(options),
-        refMap(refMap), typeMap(typeMap), enumMap(enumMap),
-        corelib(P4::P4CoreLibrary::instance), json(new BMV2::JsonObjects()) {
+    Backend(BMV2Options &options, P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+            P4::ConvertEnums::EnumMapping *enumMap)
+        : options(options),
+          refMap(refMap),
+          typeMap(typeMap),
+          enumMap(enumMap),
+          corelib(P4::P4CoreLibrary::instance),
+          json(new BMV2::JsonObjects()) {
         refMap->setIsV1(options.isv1());
-        }
-    void serialize(std::ostream& out) const { json->toplevel->serialize(out); }
-    virtual void convert(const IR::ToplevelBlock* block) = 0;
+    }
+    void serialize(std::ostream &out) const { json->toplevel->serialize(out); }
+    virtual void convert(const IR::ToplevelBlock *block) = 0;
 };
 
 /**
@@ -81,9 +94,8 @@ class SkipControls : public P4::ActionSynthesisPolicy {
 
  public:
     explicit SkipControls(const std::set<cstring> *skip) : skip(skip) { CHECK_NULL(skip); }
-    bool convert(const Visitor::Context *, const IR::P4Control* control) override {
-        if (skip->find(control->name) != skip->end())
-            return false;
+    bool convert(const Visitor::Context *, const IR::P4Control *control) override {
+        if (skip->find(control->name) != skip->end()) return false;
         return true;
     }
 };
@@ -95,16 +107,15 @@ are in the specified set.
 For example, we expect that the code in ingress and egress will have complex
 expression removed.
 */
-class ProcessControls : public BMV2::RemoveComplexExpressionsPolicy {
+class ProcessControls : public P4::RemoveComplexExpressionsPolicy {
     const std::set<cstring> *process;
 
  public:
     explicit ProcessControls(const std::set<cstring> *process) : process(process) {
         CHECK_NULL(process);
     }
-    bool convert(const IR::P4Control* control) const {
-        if (process->find(control->name) != process->end())
-            return true;
+    bool convert(const IR::P4Control *control) const {
+        if (process->find(control->name) != process->end()) return true;
         return false;
     }
 };
@@ -116,25 +127,30 @@ structure.  This is necessary because both of them become global
 objects in the output json.
 */
 class RenameUserMetadata : public Transform {
-    P4::ReferenceMap* refMap;
-    const IR::Type_Struct* userMetaType;
+    P4::ReferenceMap *refMap;
+    const IR::Type_Struct *userMetaType;
     // Used as a prefix for the fields of the userMetadata structure
     // and also as a name for the userMetadata type clone.
     cstring namePrefix;
+    bool renamed = false;
 
  public:
-    RenameUserMetadata(P4::ReferenceMap* refMap,
-                       const IR::Type_Struct* userMetaType, cstring namePrefix):
-        refMap(refMap), userMetaType(userMetaType), namePrefix(namePrefix)
-    { setName("RenameUserMetadata"); CHECK_NULL(refMap); }
+    RenameUserMetadata(P4::ReferenceMap *refMap, const IR::Type_Struct *userMetaType,
+                       cstring namePrefix)
+        : refMap(refMap), userMetaType(userMetaType), namePrefix(namePrefix) {
+        setName("RenameUserMetadata");
+        CHECK_NULL(refMap);
+        visitDagOnce = false;
+    }
 
-    const IR::Node* postorder(IR::Type_Struct* type) override {
+    const IR::Node *postorder(IR::Type_Struct *type) override {
         // Clone the user metadata type
-        if (userMetaType != getOriginal())
-            return type;
+        auto orig = getOriginal<IR::Type_Struct>();
+        if (userMetaType->name != orig->name) return type;
 
         auto vec = new IR::IndexedVector<IR::Node>();
-        LOG2("Creating clone" << getOriginal());
+        LOG2("Creating clone of " << orig);
+        renamed = true;
         auto clone = type->clone();
         clone->name = namePrefix;
         vec->push_back(clone);
@@ -144,8 +160,7 @@ class RenameUserMetadata : public Transform {
         for (auto f : type->fields) {
             auto anno = f->getAnnotation(IR::Annotation::nameAnnotation);
             cstring suffix = "";
-            if (anno != nullptr)
-                suffix = anno->getName();
+            if (anno != nullptr) suffix = anno->getName();
             if (suffix.startsWith(".")) {
                 // We can't change the name of this field.
                 // Hopefully the user knows what they are doing.
@@ -165,19 +180,23 @@ class RenameUserMetadata : public Transform {
             fields.push_back(field);
         }
 
-        auto annotated = new IR::Type_Struct(
-            type->srcInfo, type->name, type->annotations, std::move(fields));
+        auto annotated =
+            new IR::Type_Struct(type->srcInfo, type->name, type->annotations, std::move(fields));
         vec->push_back(annotated);
         return vec;
     }
 
-    const IR::Node* preorder(IR::Type_Name* type) override {
+    const IR::Node *preorder(IR::Type_Name *type) override {
         // Find any reference to the user metadata type that is used and replace them
         auto decl = refMap->getDeclaration(type->path);
         if (decl == userMetaType)
             type->path = new IR::Path(type->path->srcInfo, IR::ID(type->path->srcInfo, namePrefix));
         LOG2("Replacing reference with " << type);
         return type;
+    }
+
+    void end_apply(const IR::Node *) override {
+        BUG_CHECK(renamed, "Could not identify user metadata type declaration %1%", userMetaType);
     }
 };
 

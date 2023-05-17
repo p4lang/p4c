@@ -1,3 +1,9 @@
-table-entries-exact.p4(72): [--Werror=type-error] error: Entry: tuples with different sizes 1 vs 2
+table-entries-exact.p4(72): [--Werror=type-error] error: Entry
             (0x1111 &&& 0xF, 0x1 ) : a(); // invalid exact key
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+  Tuples with different sizes 1 vs 2
+  ---- Originating from:
+table-entries-exact.p4(72): Table entry has type 'tuple<bit<8>>' which is not the expected type 'tuple<int, int>'
+              (0x1111 &&& 0xF, 0x1 ) : a(); // invalid exact key
+              ^^^^^^^^^^^^^^^^^^^^^^

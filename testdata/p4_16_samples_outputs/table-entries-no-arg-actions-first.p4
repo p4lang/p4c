@@ -9,7 +9,7 @@ control MyC(inout bit<2> x) {
     }
     table t {
         key = {
-            x: exact @name("x") ;
+            x: exact @name("x");
         }
         actions = {
             a();
@@ -22,7 +22,6 @@ control MyC(inout bit<2> x) {
                         2w2 : a();
                         2w3 : b();
         }
-
         default_action = NoAction();
     }
     apply {
@@ -31,4 +30,3 @@ control MyC(inout bit<2> x) {
 }
 
 S(MyC()) main;
-

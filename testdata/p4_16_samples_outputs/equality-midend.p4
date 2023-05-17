@@ -9,16 +9,16 @@ struct S {
 }
 
 control c(out bit<1> x) {
-    varbit<32> a_0;
-    varbit<32> b_0;
-    H h1_0;
-    H h2_0;
+    @name("c.a") varbit<32> a_0;
+    @name("c.b") varbit<32> b_0;
+    @name("c.h1") H h1_0;
+    @name("c.h2") H h2_0;
     bit<32> s1_0_a;
     H s1_0_h;
     bit<32> s2_0_a;
     H s2_0_h;
-    H[2] a1_0;
-    H[2] a2_0;
+    @name("c.a1") H[2] a1_0;
+    @name("c.a2") H[2] a2_0;
     @hidden action equality23() {
         x = 1w1;
     }
@@ -33,6 +33,22 @@ control c(out bit<1> x) {
     }
     @hidden action equality31() {
         x = 1w0;
+    }
+    @hidden action equality14() {
+        h1_0.setInvalid();
+        h2_0.setInvalid();
+        s1_0_h.setInvalid();
+        s2_0_h.setInvalid();
+        a1_0[0].setInvalid();
+        a1_0[1].setInvalid();
+        a2_0[0].setInvalid();
+        a2_0[1].setInvalid();
+    }
+    @hidden table tbl_equality14 {
+        actions = {
+            equality14();
+        }
+        const default_action = equality14();
     }
     @hidden table tbl_equality23 {
         actions = {
@@ -65,6 +81,7 @@ control c(out bit<1> x) {
         const default_action = equality31();
     }
     apply {
+        tbl_equality14.apply();
         if (a_0 == b_0) {
             tbl_equality23.apply();
         } else if (!h1_0.isValid() && !h2_0.isValid() || h1_0.isValid() && h2_0.isValid() && h1_0.a == h2_0.a && h1_0.b == h2_0.b) {
@@ -82,4 +99,3 @@ control c(out bit<1> x) {
 control ctrl(out bit<1> x);
 package top(ctrl _c);
 top(c()) main;
-

@@ -58,10 +58,14 @@ control IngressP(inout Parsed_packet hdr, inout Meta m, inout standard_metadata_
         if (m.metafield) {
             tbl_issue737bmv2l35.apply();
         }
-        if (m.metafield == false) {
+        if (m.metafield) {
+            ;
+        } else {
             tbl_issue737bmv2l38.apply();
         }
-        if (!m.metafield) {
+        if (m.metafield) {
+            ;
+        } else {
             tbl_issue737bmv2l41.apply();
         }
     }
@@ -83,4 +87,3 @@ control TopDeparser(packet_out b, in Parsed_packet hdr) {
 }
 
 V1Switch<Parsed_packet, Meta>(TopParser(), VeryChecksum(), IngressP(), EgressP(), ChecksumComputer(), TopDeparser()) main;
-

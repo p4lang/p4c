@@ -14,7 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <psa.p4>
+#include <core.p4>
+#include <bmv2/psa.p4>
 
 
 typedef bit<48>  EthernetAddress;

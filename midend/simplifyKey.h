@@ -17,9 +17,10 @@ limitations under the License.
 #ifndef _MIDEND_SIMPLIFYKEY_H_
 #define _MIDEND_SIMPLIFYKEY_H_
 
-#include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/sideEffects.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -30,7 +31,7 @@ namespace P4 {
 class KeyIsSimple {
  public:
     virtual ~KeyIsSimple() {}
-    virtual bool isSimple(const IR::Expression* expression, const Visitor::Context*) = 0;
+    virtual bool isSimple(const IR::Expression *expression, const Visitor::Context *) = 0;
 };
 
 /**
@@ -39,24 +40,24 @@ class KeyIsSimple {
  */
 class IsLikeLeftValue : public KeyIsSimple, public Inspector {
  protected:
-    bool     simple;
+    bool simple;
 
  public:
-    IsLikeLeftValue()
-    { setName("IsLikeLeftValue"); }
+    IsLikeLeftValue() { setName("IsLikeLeftValue"); }
 
-    void postorder(const IR::Expression*) override {
+    void postorder(const IR::Expression *) override {
         // all other expressions are complicated
         simple = false;
     }
-    void postorder(const IR::Member*) override {}
-    void postorder(const IR::PathExpression*) override {}
-    void postorder(const IR::ArrayIndex*) override {}
-    profile_t init_apply(const IR::Node* root) override {
+    void postorder(const IR::Member *) override {}
+    void postorder(const IR::PathExpression *) override {}
+    void postorder(const IR::ArrayIndex *) override {}
+    profile_t init_apply(const IR::Node *root) override {
         simple = true;
-        return Inspector::init_apply(root); }
+        return Inspector::init_apply(root);
+    }
 
-    bool isSimple(const IR::Expression* expression, const Visitor::Context*) override {
+    bool isSimple(const IR::Expression *expression, const Visitor::Context *) override {
         (void)expression->apply(*this);
         return simple;
     }
@@ -66,13 +67,15 @@ class IsLikeLeftValue : public KeyIsSimple, public Inspector {
  * Policy that treats a key as simple if it a call to isValid().
  */
 class IsValid : public KeyIsSimple {
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
 
  public:
-    IsValid(ReferenceMap* refMap, TypeMap* typeMap) : refMap(refMap), typeMap(typeMap)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); }
-    bool isSimple(const IR::Expression* expression, const Visitor::Context*);
+    IsValid(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
+    }
+    bool isSimple(const IR::Expression *expression, const Visitor::Context *);
 };
 
 /**
@@ -81,13 +84,15 @@ class IsValid : public KeyIsSimple {
  */
 class IsMask : public IsLikeLeftValue {
  public:
-    bool isSimple(const IR::Expression* expression, const Visitor::Context* ctxt) {
+    bool isSimple(const IR::Expression *expression, const Visitor::Context *ctxt) {
         if (auto mask = expression->to<IR::BAnd>()) {
             if (mask->right->is<IR::Constant>())
                 expression = mask->left;
             else if (mask->left->is<IR::Constant>())
-                expression = mask->right; }
-        return IsLikeLeftValue::isSimple(expression, ctxt); }
+                expression = mask->right;
+        }
+        return IsLikeLeftValue::isSimple(expression, ctxt);
+    }
 };
 
 /**
@@ -95,21 +100,17 @@ class IsMask : public IsLikeLeftValue {
     other policies with a logical 'or'.
 */
 class OrPolicy : public KeyIsSimple {
-    KeyIsSimple* left;
-    KeyIsSimple* right;
+    KeyIsSimple *left;
+    KeyIsSimple *right;
 
  public:
-    OrPolicy(KeyIsSimple* left, KeyIsSimple* right) : left(left), right(right)
-    { CHECK_NULL(left); CHECK_NULL(right); }
-    bool isSimple(const IR::Expression* expression, const Visitor::Context* ctxt) {
+    OrPolicy(KeyIsSimple *left, KeyIsSimple *right) : left(left), right(right) {
+        CHECK_NULL(left);
+        CHECK_NULL(right);
+    }
+    bool isSimple(const IR::Expression *expression, const Visitor::Context *ctxt) {
         return left->isSimple(expression, ctxt) || right->isSimple(expression, ctxt);
     }
-};
-
-class TableInsertions {
- public:
-    std::vector<const IR::Declaration_Variable*> declarations;
-    std::vector<const IR::AssignmentStatement*> statements;
 };
 
 /**
@@ -143,29 +144,37 @@ class TableInsertions {
  * @post all complex table key expressions are replaced with a simpler expression.
  */
 class DoSimplifyKey : public Transform {
-    ReferenceMap* refMap;
-    TypeMap*      typeMap;
-    KeyIsSimple*  key_policy;
-    std::map<const IR::P4Table*, TableInsertions*> toInsert;
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
+    KeyIsSimple *key_policy;
+    std::map<const IR::P4Table *, TableInsertions *> toInsert;
 
  public:
-    DoSimplifyKey(ReferenceMap* refMap, TypeMap* typeMap, KeyIsSimple* key_policy)
-        : refMap(refMap), typeMap(typeMap), key_policy(key_policy)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(key_policy); setName("DoSimplifyKey"); }
-    const IR::Node* doStatement(const IR::Statement* statement, const IR::Expression* expression);
+    DoSimplifyKey(ReferenceMap *refMap, TypeMap *typeMap, KeyIsSimple *key_policy)
+        : refMap(refMap), typeMap(typeMap), key_policy(key_policy) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
+        CHECK_NULL(key_policy);
+        setName("DoSimplifyKey");
+    }
+    const IR::Node *doStatement(const IR::Statement *statement, const IR::Expression *expression);
 
     // These should be all kinds of statements that may contain a table apply
     // after the program has been simplified
-    const IR::Node* postorder(IR::MethodCallStatement* statement) override
-    { return doStatement(statement, statement->methodCall); }
-    const IR::Node* postorder(IR::IfStatement* statement) override
-    { return doStatement(statement, statement->condition); }
-    const IR::Node* postorder(IR::SwitchStatement* statement) override
-    { return doStatement(statement, statement->expression); }
-    const IR::Node* postorder(IR::AssignmentStatement* statement) override
-    { return doStatement(statement, statement->right); }
-    const IR::Node* postorder(IR::KeyElement* element) override;
-    const IR::Node* postorder(IR::P4Table* table) override;
+    const IR::Node *postorder(IR::MethodCallStatement *statement) override {
+        return doStatement(statement, statement->methodCall);
+    }
+    const IR::Node *postorder(IR::IfStatement *statement) override {
+        return doStatement(statement, statement->condition);
+    }
+    const IR::Node *postorder(IR::SwitchStatement *statement) override {
+        return doStatement(statement, statement->expression);
+    }
+    const IR::Node *postorder(IR::AssignmentStatement *statement) override {
+        return doStatement(statement, statement->right);
+    }
+    const IR::Node *postorder(IR::KeyElement *element) override;
+    const IR::Node *postorder(IR::P4Table *table) override;
 };
 
 /**
@@ -174,10 +183,9 @@ class DoSimplifyKey : public Transform {
  */
 class SimplifyKey : public PassManager {
  public:
-    SimplifyKey(ReferenceMap* refMap, TypeMap* typeMap, KeyIsSimple* key_policy,
-                TypeChecking* typeChecking = nullptr) {
-        if (!typeChecking)
-            typeChecking = new TypeChecking(refMap, typeMap);
+    SimplifyKey(ReferenceMap *refMap, TypeMap *typeMap, KeyIsSimple *key_policy,
+                TypeChecking *typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoSimplifyKey(refMap, typeMap, key_policy));
         setName("SimplifyKey");

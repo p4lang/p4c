@@ -1,25 +1,25 @@
 control c(inout bit<8> v) {
-    bool hasReturned;
-    bit<8> val_0;
-    bool hasReturned_0;
+    @name("c.hasReturned_0") bool hasReturned;
+    @name("c.val_0") bit<8> val;
+    @name("c.hasReturned") bool hasReturned_0;
     @hidden action issue2175l3() {
-        val_0 = 8w1;
+        val = 8w1;
         hasReturned_0 = true;
     }
     @hidden action act() {
         hasReturned = false;
-        val_0 = v;
+        val = v;
         hasReturned_0 = false;
     }
     @hidden action issue2175l6() {
-        val_0 = 8w2;
+        val = 8w2;
     }
     @hidden action issue2175l14() {
         v = 8w1;
         hasReturned = true;
     }
     @hidden action act_0() {
-        v = val_0;
+        v = val;
     }
     @hidden action issue2175l17() {
         v = 8w2;
@@ -65,14 +65,18 @@ control c(inout bit<8> v) {
         if (v == 8w0) {
             tbl_issue2175l3.apply();
         }
-        if (!hasReturned_0) {
+        if (hasReturned_0) {
+            ;
+        } else {
             tbl_issue2175l6.apply();
         }
         tbl_act_0.apply();
-        if (val_0 == 8w0) {
+        if (val == 8w0) {
             tbl_issue2175l14.apply();
         }
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             tbl_issue2175l17.apply();
         }
     }
@@ -81,4 +85,3 @@ control c(inout bit<8> v) {
 control e(inout bit<8> _v);
 package top(e _e);
 top(c()) main;
-

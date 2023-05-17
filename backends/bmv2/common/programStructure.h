@@ -17,11 +17,23 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_COMMON_PROGRAMSTRUCTURE_H_
 #define BACKENDS_BMV2_COMMON_PROGRAMSTRUCTURE_H_
 
+#include "ir/visitor.h"
+#include "lib/ordered_set.h"
 #include "metermap.h"
 
 namespace BMV2 {
 
-using ResourceMap = ordered_map<const IR::Node*, const IR::CompileTimeValue*>;
+using ResourceMap = ordered_map<const IR::Node *, const IR::CompileTimeValue *>;
+
+enum class BlockConverted {
+    None,
+    Parser,
+    Ingress,
+    Egress,
+    Deparser,
+    ChecksumCompute,
+    ChecksumVerify
+};
 
 // Represents all the compile-time information about a P4-16 program that
 // is common to all bmv2 targets (simple switch and psa switch).
@@ -44,13 +56,13 @@ class ProgramStructure {
     // in the scalarsName metadata object, so we may need to rename
     // these fields.  This map holds the new names.
     std::map<const IR::StructField *, cstring> scalarMetadataFields;
-    // All the direct meters.
+    /// All the direct meters.
     DirectMeterMap directMeterMap;
-    // All the direct counters.
+    /// All the direct counters.
     ordered_map<cstring, const IR::P4Table *> directCounterMap;
-    // All match kinds
-    std::set<cstring>  match_kinds;
-    // map IR node to compile-time allocated resource blocks.
+    /// All match kinds
+    std::set<cstring> match_kinds;
+    /// map IR node to compile-time allocated resource blocks.
     ResourceMap resourceMap;
 
     ProgramStructure() {}
@@ -60,13 +72,14 @@ class DiscoverStructure : public Inspector {
  public:
     ProgramStructure *structure;
 
-    explicit DiscoverStructure(ProgramStructure *structure) :
-        structure(structure) { setName("DiscoverStructure"); }
+    explicit DiscoverStructure(ProgramStructure *structure) : structure(structure) {
+        setName("DiscoverStructure");
+    }
     void postorder(const IR::ParameterList *paramList) override;
     void postorder(const IR::P4Action *action) override;
     void postorder(const IR::Declaration_Variable *decl) override;
     void postorder(const IR::Type_Error *errors) override;
-    void postorder(const IR::Declaration_MatchKind* kind) override;
+    void postorder(const IR::Declaration_MatchKind *kind) override;
 };
 
 // The resource map represents the mapping from IR::Node to IR::Block. This
@@ -78,9 +91,10 @@ class BuildResourceMap : public Inspector {
 
  public:
     explicit BuildResourceMap(ResourceMap *resourceMap) : resourceMap(resourceMap) {
-        CHECK_NULL(resourceMap); }
+        CHECK_NULL(resourceMap);
+    }
 
-    bool preorder(const IR::ControlBlock* control) override {
+    bool preorder(const IR::ControlBlock *control) override {
         resourceMap->emplace(control->container, control);
         for (auto cv : control->constantValue) {
             resourceMap->emplace(cv.first, cv.second);
@@ -89,42 +103,49 @@ class BuildResourceMap : public Inspector {
         for (auto c : control->container->controlLocals) {
             if (c->is<IR::InstantiatedBlock>()) {
                 resourceMap->emplace(c, control->getValue(c));
-            } }
+            }
+        }
         return false;
     }
 
-    bool preorder(const IR::ParserBlock* parser) override {
+    bool preorder(const IR::ParserBlock *parser) override {
         resourceMap->emplace(parser->container, parser);
         for (auto cv : parser->constantValue) {
             resourceMap->emplace(cv.first, cv.second);
             if (cv.second->is<IR::Block>()) {
                 visit(cv.second->getNode());
-            } }
+            }
+        }
 
         for (auto c : parser->container->parserLocals) {
             if (c->is<IR::InstantiatedBlock>()) {
                 resourceMap->emplace(c, parser->getValue(c));
-            } }
+            }
+        }
         return false;
     }
 
-    bool preorder(const IR::TableBlock* table) override {
+    bool preorder(const IR::TableBlock *table) override {
         resourceMap->emplace(table->container, table);
         for (auto cv : table->constantValue) {
             resourceMap->emplace(cv.first, cv.second);
             if (cv.second->is<IR::Block>()) {
-                visit(cv.second->getNode()); } }
+                visit(cv.second->getNode());
+            }
+        }
         return false;
     }
 
-    bool preorder(const IR::PackageBlock* package) override {
+    bool preorder(const IR::PackageBlock *package) override {
         for (auto cv : package->constantValue) {
             if (cv.second->is<IR::Block>()) {
-                visit(cv.second->getNode()); } }
+                visit(cv.second->getNode());
+            }
+        }
         return false;
     }
 
-    bool preorder(const IR::ToplevelBlock* tlb) override {
+    bool preorder(const IR::ToplevelBlock *tlb) override {
         auto package = tlb->getMain();
         visit(package);
         return false;
@@ -133,4 +154,4 @@ class BuildResourceMap : public Inspector {
 
 }  // namespace BMV2
 
-#endif  /* BACKENDS_BMV2_COMMON_PROGRAMSTRUCTURE_H_ */
+#endif /* BACKENDS_BMV2_COMMON_PROGRAMSTRUCTURE_H_ */

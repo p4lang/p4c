@@ -30,19 +30,17 @@ control c2(inout headers hdr, inout metadata meta, inout standard_metadata_t std
 }
 
 control c3(inout headers hdr, inout metadata meta, inout standard_metadata_t std_meta) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name("c3.a") action a(in bool b_1) {
+    @name("c3.a") action a() {
         hdr.h.x = 8w0;
     }
     @name("c3.t") table t_0 {
-        key = {
-        }
         actions = {
-            a(hdr.h.isValid() || true);
-            @defaultonly NoAction_0();
+            a();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         t_0.apply();
@@ -60,4 +58,3 @@ control c5(packet_out pkt, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(p(), c1(), c2(), c3(), c4(), c5()) main;
-

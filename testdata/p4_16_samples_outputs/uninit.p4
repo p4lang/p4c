@@ -79,7 +79,6 @@ control c(out bit<32> v) {
                 touched = true;
             }
         }
-
         touched = !touched;
         if (e > 0) {
             t.apply();
@@ -94,4 +93,3 @@ parser proto(packet_in p, out Header h);
 control cproto(out bit<32> v);
 package top(proto _p, cproto _c);
 top(p1(), c()) main;
-

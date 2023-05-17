@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "typeSpecConverter.h"
+
 #include <limits>
 #include <map>
 #include <string>
-
-#include "p4/config/v1/p4types.pb.h"
 
 #include "bytestrings.h"
 #include "flattenHeader.h"
@@ -29,8 +29,7 @@ limitations under the License.
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/null.h"
-
-#include "typeSpecConverter.h"
+#include "p4/config/v1/p4types.pb.h"
 
 namespace p4configv1 = ::p4::config::v1;
 
@@ -41,8 +40,7 @@ namespace P4 {
 
 namespace ControlPlaneAPI {
 
-bool hasTranslationAnnotation(const IR::Type* type,
-                              TranslationAnnotation* payload) {
+bool hasTranslationAnnotation(const IR::Type *type, TranslationAnnotation *payload) {
     auto ann = type->getAnnotation("p4runtime_translation");
     if (!ann) return false;
 
@@ -51,8 +49,8 @@ bool hasTranslationAnnotation(const IR::Type* type,
               "%1%: expected @p4runtime_translation annotation with 2 "
               "arguments, but found %2% arguments",
               type, ann->expr.size());
-    const IR::Expression* first_arg = ann->expr[0];
-    const IR::Expression* second_arg = ann->expr[1];
+    const IR::Expression *first_arg = ann->expr[0];
+    const IR::Expression *second_arg = ann->expr[1];
 
     auto uri = first_arg->to<IR::StringLiteral>();
     BUG_CHECK(uri != nullptr,
@@ -64,16 +62,11 @@ bool hasTranslationAnnotation(const IR::Type* type,
     // See p4rtControllerType in p4parser.ypp for an explanation of how the
     // second argument is encoded.
     if (second_arg->to<IR::StringLiteral>() != nullptr) {
-        payload->controller_type = ControllerType {
-            .type = ControllerType::kString,
-            .width = 0,
-        };
+        payload->controller_type = ControllerType{ControllerType::kString, 0};
         return true;
     } else if (second_arg->to<IR::Constant>() != nullptr) {
-        payload->controller_type = ControllerType {
-            .type = ControllerType::kBit,
-            .width = second_arg->to<IR::Constant>()->asInt(),
-        };
+        payload->controller_type =
+            ControllerType{ControllerType::kBit, second_arg->to<IR::Constant>()->asInt()};
         return true;
     }
     BUG("%1%: expected second argument to @p4runtime_translation to parse as an"
@@ -82,7 +75,7 @@ bool hasTranslationAnnotation(const IR::Type* type,
     return false;
 }
 
-cstring getTypeName(const IR::Type* type, const TypeMap* typeMap) {
+cstring getTypeName(const IR::Type *type, TypeMap *typeMap) {
     CHECK_NULL(type);
 
     auto t = typeMap->getTypeType(type, true);
@@ -92,31 +85,32 @@ cstring getTypeName(const IR::Type* type, const TypeMap* typeMap) {
     return nullptr;
 }
 
-TypeSpecConverter::TypeSpecConverter(
-    const P4::ReferenceMap* refMap, const P4::TypeMap* typeMap, P4TypeInfo* p4RtTypeInfo)
+TypeSpecConverter::TypeSpecConverter(const P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                                     P4TypeInfo *p4RtTypeInfo)
     : refMap(refMap), typeMap(typeMap), p4RtTypeInfo(p4RtTypeInfo) {
     CHECK_NULL(refMap);
     CHECK_NULL(typeMap);
 }
 
-bool TypeSpecConverter::preorder(const IR::Type* type) {
+bool TypeSpecConverter::preorder(const IR::Type *type) {
     ::error(ErrorType::ERR_UNEXPECTED, "Unexpected type %1%", type);
     map.emplace(type, new P4DataTypeSpec());
     return false;
 }
 
-bool TypeSpecConverter::preorder(const IR::Type_Bits* type) {
+bool TypeSpecConverter::preorder(const IR::Type_Bits *type) {
     auto typeSpec = new P4DataTypeSpec();
     auto bitTypeSpec = typeSpec->mutable_bitstring();
     auto bw = type->width_bits();
-    if (type->isSigned) bitTypeSpec->mutable_int_()->set_bitwidth(bw);
+    if (type->isSigned)
+        bitTypeSpec->mutable_int_()->set_bitwidth(bw);
     else
         bitTypeSpec->mutable_bit()->set_bitwidth(bw);
     map.emplace(type, typeSpec);
     return false;
 }
 
-bool TypeSpecConverter::preorder(const IR::Type_Varbits* type) {
+bool TypeSpecConverter::preorder(const IR::Type_Varbits *type) {
     auto typeSpec = new P4DataTypeSpec();
     auto bitTypeSpec = typeSpec->mutable_bitstring();
     bitTypeSpec->mutable_varbit()->set_max_bitwidth(type->size);
@@ -124,7 +118,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Varbits* type) {
     return false;
 }
 
-bool TypeSpecConverter::preorder(const IR::Type_Boolean* type) {
+bool TypeSpecConverter::preorder(const IR::Type_Boolean *type) {
     auto typeSpec = new P4DataTypeSpec();
     // enable "bool" field in P4DataTypeSpec's type_spec oneof
     (void)typeSpec->mutable_bool_();
@@ -132,7 +126,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Boolean* type) {
     return false;
 }
 
-bool TypeSpecConverter::preorder(const IR::Type_Name* type) {
+bool TypeSpecConverter::preorder(const IR::Type_Name *type) {
     auto typeSpec = new P4DataTypeSpec();
     auto decl = refMap->getDeclaration(type->path, true);
     auto name = decl->controlPlaneName();
@@ -169,7 +163,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Name* type) {
     return false;
 }
 
-bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
+bool TypeSpecConverter::preorder(const IR::Type_Newtype *type) {
     if (p4RtTypeInfo) {
         auto name = std::string(type->controlPlaneName());
         auto types = p4RtTypeInfo->mutable_new_types();
@@ -177,10 +171,10 @@ bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
             auto newTypeSpec = new p4configv1::P4NewTypeSpec();
 
             // walk the chain of new types
-            const IR::Type* underlyingType = type;
+            const IR::Type *underlyingType = type;
             while (underlyingType->is<IR::Type_Newtype>()) {
-                underlyingType = typeMap->getTypeType(
-                    underlyingType->to<IR::Type_Newtype>()->type, true);
+                underlyingType =
+                    typeMap->getTypeType(underlyingType->to<IR::Type_Newtype>()->type, true);
             }
 
             TranslationAnnotation ann;
@@ -204,20 +198,19 @@ bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
                 } else if (ann.controller_type.type == ControllerType::kBit) {
                     translatedType->set_sdn_bitwidth(ann.controller_type.width);
                 } else {
-                    BUG("Unexpected controller type: %1%",
-                        ann.controller_type.type);
+                    BUG("Unexpected controller type: %1%", ann.controller_type.type);
                 }
             } else {
                 newTypeSpec->mutable_original_type()->CopyFrom(*typeSpec);
             }
             (*types)[name] = *newTypeSpec;
-       }
+        }
     }
     map.emplace(type, nullptr);
     return false;
 }
 
-bool TypeSpecConverter::preorder(const IR::Type_BaseList* type) {
+bool TypeSpecConverter::preorder(const IR::Type_BaseList *type) {
     auto typeSpec = new P4DataTypeSpec();
     auto tupleTypeSpec = typeSpec->mutable_tuple();
     for (auto cType : type->components) {
@@ -231,7 +224,7 @@ bool TypeSpecConverter::preorder(const IR::Type_BaseList* type) {
     return false;
 }
 
-bool TypeSpecConverter::preorder(const IR::Type_Stack* type) {
+bool TypeSpecConverter::preorder(const IR::Type_Stack *type) {
     auto typeSpec = new P4DataTypeSpec();
     if (!type->elementType->is<IR::Type_Name>()) {
         BUG("Unexpected stack element type %1%", type->elementType);
@@ -259,7 +252,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Stack* type) {
     return false;
 }
 
-bool TypeSpecConverter::preorder(const IR::Type_Struct* type) {
+bool TypeSpecConverter::preorder(const IR::Type_Struct *type) {
     if (p4RtTypeInfo) {
         auto name = std::string(type->controlPlaneName());
         auto structs = p4RtTypeInfo->mutable_structs();
@@ -281,7 +274,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Struct* type) {
     return false;
 }
 
-bool TypeSpecConverter::preorder(const IR::Type_Header* type) {
+bool TypeSpecConverter::preorder(const IR::Type_Header *type) {
     auto flattenedHeaderType = FlattenHeader::flatten(typeMap, type);
     if (p4RtTypeInfo) {
         auto name = std::string(type->controlPlaneName());
@@ -307,7 +300,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Header* type) {
     return false;
 }
 
-bool TypeSpecConverter::preorder(const IR::Type_HeaderUnion* type) {
+bool TypeSpecConverter::preorder(const IR::Type_HeaderUnion *type) {
     if (p4RtTypeInfo) {
         auto name = std::string(type->controlPlaneName());
         auto headerUnions = p4RtTypeInfo->mutable_header_unions();
@@ -331,7 +324,7 @@ bool TypeSpecConverter::preorder(const IR::Type_HeaderUnion* type) {
     return false;
 }
 
-bool TypeSpecConverter::preorder(const IR::Type_Enum* type) {
+bool TypeSpecConverter::preorder(const IR::Type_Enum *type) {
     if (p4RtTypeInfo) {
         auto name = std::string(type->controlPlaneName());
         auto enums = p4RtTypeInfo->mutable_enums();
@@ -348,7 +341,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Enum* type) {
     return false;
 }
 
-bool TypeSpecConverter::preorder(const IR::Type_SerEnum* type) {
+bool TypeSpecConverter::preorder(const IR::Type_SerEnum *type) {
     if (p4RtTypeInfo) {
         auto name = std::string(type->controlPlaneName());
         auto enums = p4RtTypeInfo->mutable_serializable_enums();
@@ -361,8 +354,8 @@ bool TypeSpecConverter::preorder(const IR::Type_SerEnum* type) {
                 auto member = enumTypeSpec->add_members();
                 member->set_name(m->controlPlaneName());
                 if (!m->value->is<IR::Constant>()) {
-                    ::error(ErrorType::ERR_UNSUPPORTED,
-                            "%1% unsupported SerEnum member value", m->value);
+                    ::error(ErrorType::ERR_UNSUPPORTED, "%1% unsupported SerEnum member value",
+                            m->value);
                     continue;
                 }
                 auto value = stringRepr(m->value->to<IR::Constant>(), width);
@@ -376,20 +369,18 @@ bool TypeSpecConverter::preorder(const IR::Type_SerEnum* type) {
     return false;
 }
 
-bool TypeSpecConverter::preorder(const IR::Type_Error* type) {
+bool TypeSpecConverter::preorder(const IR::Type_Error *type) {
     if (p4RtTypeInfo && !p4RtTypeInfo->has_error()) {
         auto errorTypeSpec = p4RtTypeInfo->mutable_error();
-        for (auto m : type->members)
-            errorTypeSpec->add_members(m->controlPlaneName());
+        for (auto m : type->members) errorTypeSpec->add_members(m->controlPlaneName());
     }
     map.emplace(type, nullptr);
     return false;
 }
 
-const P4DataTypeSpec* TypeSpecConverter::convert(
-    const P4::ReferenceMap* refMap,
-    const P4::TypeMap* typeMap,
-    const IR::Type* type, P4TypeInfo* typeInfo) {
+const P4DataTypeSpec *TypeSpecConverter::convert(const P4::ReferenceMap *refMap,
+                                                 P4::TypeMap *typeMap, const IR::Type *type,
+                                                 P4TypeInfo *typeInfo) {
     TypeSpecConverter typeSpecConverter(refMap, typeMap, typeInfo);
     type->apply(typeSpecConverter);
     return typeSpecConverter.map.at(type);

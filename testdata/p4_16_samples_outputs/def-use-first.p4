@@ -24,8 +24,6 @@ control EgressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
     action a() {
     }
     table t {
-        key = {
-        }
         actions = {
             a();
         }
@@ -41,7 +39,6 @@ control EgressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
                 do.apply(hdr, meta, std_meta);
             }
         }
-
     }
 }
 
@@ -61,4 +58,3 @@ control DeparserI(packet_out b, in H hdr) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

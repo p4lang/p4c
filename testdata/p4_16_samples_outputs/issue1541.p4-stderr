@@ -1,0 +1,6 @@
+issue1541.p4(25): [--Wwarn=shadow] warning: 'hash' shadows 'hash'
+    action hash() {
+           ^^^^
+v1model.p4(444)
+extern void hash<O, T, D, M>(out O result, in HashAlgorithm algo, in T base, in D data, in M max);
+            ^^^^

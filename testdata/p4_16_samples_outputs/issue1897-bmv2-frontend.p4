@@ -30,8 +30,8 @@ struct headers {
 }
 
 parser ProtParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<8> addrType_0;
-    addr_t addr_0;
+    @name("ProtParser.addrType_0") bit<8> addrType_0;
+    @name("ProtParser.addr_0") addr_t addr_0;
     state start {
         packet.extract<addr_type_t>(hdr.addr_type);
         addrType_0 = hdr.addr_type.dstType;
@@ -107,4 +107,3 @@ control ProtDeparser(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(ProtParser(), ProtVerifyChecksum(), ProtIngress(), ProtEgress(), ProtComputeChecksum(), ProtDeparser()) main;
-

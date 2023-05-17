@@ -1,3 +1,6 @@
 tuple-newtype.p4(5): [--Werror=type-error] error: T: `type' can only be applied to base types
 type tuple<bit> T;
                 ^
+tuple-newtype.p4(12): [--Werror=type-error] error: cast: Illegal cast from tuple<bit<1>> to T
+        T tt2 = (T){1w0};
+                ^^^^^^^^

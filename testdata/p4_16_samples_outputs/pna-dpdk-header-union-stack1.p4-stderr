@@ -1,0 +1,36 @@
+pna-dpdk-header-union-stack1.p4(31): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.u[0].h1
+        hdr.u[0].h1.data = 1;
+        ^^^^^^^^^^^
+pna-dpdk-header-union-stack1.p4(36): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.u[0].h3
+        hdr.u[0].h3.data = 1;
+        ^^^^^^^^^^^
+pna-dpdk-header-union-stack1.p4(37): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.h2[0]
+        hdr.h2[0].data = 1;
+        ^^^^^^^^^
+pna-dpdk-header-union-stack1.p4(51): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.u[0].h1
+        hdr.u[0].h1.data = 1;
+        ^^^^^^^^^^^
+pna-dpdk-header-union-stack1.p4(52): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.u[0].h2
+        hdr.u[0].h2.data = 1;
+        ^^^^^^^^^^^
+pna-dpdk-header-union-stack1.p4(53): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.u[0].h3
+        hdr.u[0].h3.data = 1;
+        ^^^^^^^^^^^
+pna-dpdk-header-union-stack1.p4(68): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.u[1].h1
+        hdr.u[1].h1.data = 1;
+        ^^^^^^^^^^^
+pna-dpdk-header-union-stack1.p4(77): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.u[0].h1
+        hdr.u[0].h1.data = 1;
+        ^^^^^^^^^^^
+pna-dpdk-header-union-stack1.p4(78): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.u[0].h2
+        hdr.u[0].h2.data = 1;
+        ^^^^^^^^^^^
+pna-dpdk-header-union-stack1.p4(82): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.u[0].h1
+        hdr.u[0].h1.data = 1;
+        ^^^^^^^^^^^
+pna-dpdk-header-union-stack1.p4(83): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.u[0].h2
+        hdr.u[0].h2.data = 1;
+        ^^^^^^^^^^^
+pna-dpdk-header-union-stack1.p4(84): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.u[0].h3
+        hdr.u[0].h3.data = 1;
+        ^^^^^^^^^^^

@@ -30,24 +30,23 @@ namespace P4 {
  * `@name` annotations.
  */
 class KeyNameGenerator : public Inspector {
-    std::map<const IR::Expression*, cstring> name;
-    const TypeMap* typeMap;  // can be nullptr
+    std::map<const IR::Expression *, cstring> name;
+    const TypeMap *typeMap;  // can be nullptr
 
  public:
-    explicit KeyNameGenerator(const TypeMap* typeMap) : typeMap(typeMap)
-    { setName("KeyNameGenerator"); }
-    void error(const IR::Expression* expression);
-    void postorder(const IR::Expression* expression) override;
-    void postorder(const IR::PathExpression* expression) override;
-    void postorder(const IR::Member* expression) override;
-    void postorder(const IR::ArrayIndex* expression) override;
-    void postorder(const IR::Constant* expression) override;
-    void postorder(const IR::Slice* expression) override;
-    void postorder(const IR::BAnd* expression) override;
-    void postorder(const IR::MethodCallExpression* expression) override;
-    cstring getName(const IR::Expression* expression) {
-        return ::get(name, expression);
+    explicit KeyNameGenerator(const TypeMap *typeMap) : typeMap(typeMap) {
+        setName("KeyNameGenerator");
     }
+    void error(const IR::Expression *expression);
+    void postorder(const IR::Expression *expression) override;
+    void postorder(const IR::PathExpression *expression) override;
+    void postorder(const IR::Member *expression) override;
+    void postorder(const IR::ArrayIndex *expression) override;
+    void postorder(const IR::Constant *expression) override;
+    void postorder(const IR::Slice *expression) override;
+    void postorder(const IR::BAnd *expression) override;
+    void postorder(const IR::MethodCallExpression *expression) override;
+    cstring getName(const IR::Expression *expression) { return ::get(name, expression); }
 };
 
 /** Adds a "@name" annotation to each table key that does not have a name.
@@ -78,16 +77,19 @@ class KeyNameGenerator : public Inspector {
  * without `@name` annotations.
  */
 class DoTableKeyNames final : public Transform {
-    const TypeMap* typeMap;
+    const TypeMap *typeMap;
+
  public:
-    explicit DoTableKeyNames(const TypeMap* typeMap) :typeMap(typeMap)
-    { CHECK_NULL(typeMap); setName("DoTableKeyNames"); }
-    const IR::Node* postorder(IR::KeyElement* keyElement) override;
+    explicit DoTableKeyNames(const TypeMap *typeMap) : typeMap(typeMap) {
+        CHECK_NULL(typeMap);
+        setName("DoTableKeyNames");
+    }
+    const IR::Node *postorder(IR::KeyElement *keyElement) override;
 };
 
 class TableKeyNames final : public PassManager {
  public:
-    TableKeyNames(ReferenceMap* refMap, TypeMap* typeMap) {
+    TableKeyNames(ReferenceMap *refMap, TypeMap *typeMap) {
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DoTableKeyNames(typeMap));
         setName("TableKeyNames");

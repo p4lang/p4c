@@ -98,7 +98,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     table calculate {
         key = {
-            hdr.p4calc.op: exact @name("hdr.p4calc.op") ;
+            hdr.p4calc.op: exact @name("hdr.p4calc.op");
         }
         actions = {
             operation_add();
@@ -118,7 +118,6 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
                         8w0x5e : operation_xor();
                         8w0x3e : operation_crc();
         }
-
     }
     apply {
         if (hdr.p4calc.isValid()) {
@@ -148,4 +147,3 @@ control MyDeparser(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

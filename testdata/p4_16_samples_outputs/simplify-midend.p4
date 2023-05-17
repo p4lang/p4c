@@ -1,30 +1,30 @@
 #include <core.p4>
 
 control c(out bool x) {
-    bool tmp;
-    bool tmp_0;
-    bool tmp_1;
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @name("c.tmp") bool tmp;
+    @name("c.tmp_0") bool tmp_0;
+    @name("c.tmp_1") bool tmp_1;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("c.t1") table t1_0 {
         key = {
-            x: exact @name("x") ;
+            x: exact @name("x");
         }
         actions = {
-            NoAction_0();
+            NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name("c.t2") table t2_0 {
         key = {
-            x: exact @name("x") ;
+            x: exact @name("x");
         }
         actions = {
-            NoAction_3();
+            NoAction_2();
         }
-        default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     @hidden action act() {
         tmp = true;
@@ -35,17 +35,17 @@ control c(out bool x) {
     @hidden action simplify31() {
         x = true;
     }
-    @hidden action simplify32() {
-        tmp_0 = false;
-    }
     @hidden action act_1() {
         tmp_1 = true;
     }
     @hidden action act_2() {
         tmp_1 = false;
     }
-    @hidden action simplify32_0() {
+    @hidden action simplify32() {
         tmp_0 = tmp_1;
+    }
+    @hidden action simplify32_0() {
+        tmp_0 = false;
     }
     @hidden action simplify33() {
         x = false;
@@ -68,12 +68,6 @@ control c(out bool x) {
         }
         const default_action = act_0();
     }
-    @hidden table tbl_simplify32 {
-        actions = {
-            simplify32();
-        }
-        const default_action = simplify32();
-    }
     @hidden table tbl_act_1 {
         actions = {
             act_1();
@@ -85,6 +79,12 @@ control c(out bool x) {
             act_2();
         }
         const default_action = act_2();
+    }
+    @hidden table tbl_simplify32 {
+        actions = {
+            simplify32();
+        }
+        const default_action = simplify32();
     }
     @hidden table tbl_simplify32_0 {
         actions = {
@@ -105,14 +105,14 @@ control c(out bool x) {
         } else {
             tbl_act_0.apply();
         }
-        if (!tmp) {
-            tbl_simplify32.apply();
-        } else {
+        if (tmp) {
             if (t2_0.apply().hit) {
                 tbl_act_1.apply();
             } else {
                 tbl_act_2.apply();
             }
+            tbl_simplify32.apply();
+        } else {
             tbl_simplify32_0.apply();
         }
         if (tmp_0) {
@@ -124,4 +124,3 @@ control c(out bool x) {
 control proto(out bool x);
 package top(proto p);
 top(c()) main;
-

@@ -66,11 +66,11 @@ struct metadata {
 }
 
 parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    IPv4_up_to_ihl_only_h tmp;
-    bit<9> tmp_0;
-    bit<9> tmp_1;
-    bit<9> tmp_2;
-    bit<32> tmp_3;
+    @name("parserI.tmp") IPv4_up_to_ihl_only_h tmp;
+    @name("parserI.tmp_0") bit<9> tmp_0;
+    @name("parserI.tmp_1") bit<9> tmp_1;
+    @name("parserI.tmp_2") bit<9> tmp_2;
+    @name("parserI.tmp_3") bit<32> tmp_3;
     state start {
         pkt.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -106,7 +106,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     @name("cIngress.guh") table guh_0 {
         key = {
-            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort") ;
+            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort");
         }
         actions = {
             foo();
@@ -144,4 +144,3 @@ control DeparserI(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
-

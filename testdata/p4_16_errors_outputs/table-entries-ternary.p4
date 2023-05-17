@@ -71,7 +71,6 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
                         0x1111 : missing_a();
                         0x1111 : a_with_control_params(32w10);
         }
-
     }
     apply {
         t_ternary.apply();
@@ -79,4 +78,3 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

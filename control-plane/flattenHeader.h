@@ -30,25 +30,24 @@ namespace ControlPlaneAPI {
 /// Flattens a header type "locally", without modifying the IR.
 class FlattenHeader {
  private:
-    const P4::TypeMap* typeMap;
-    IR::Type_Header* flattenedHeader;
+    P4::TypeMap *typeMap;
+    IR::Type_Header *flattenedHeader;
     std::vector<cstring> nameSegments{};
-    std::vector<const IR::Annotations*> allAnnotations{};
+    std::vector<const IR::Annotations *> allAnnotations{};
     bool needsFlattening{false};
 
-    FlattenHeader(const P4::TypeMap* typeMap, IR::Type_Header* flattenedHeader);
+    FlattenHeader(P4::TypeMap *typeMap, IR::Type_Header *flattenedHeader);
 
-    void doFlatten(const IR::Type* type);
+    void doFlatten(const IR::Type *type);
 
     cstring makeName(cstring sep) const;
-    const IR::Annotations* mergeAnnotations() const;
+    const IR::Annotations *mergeAnnotations() const;
 
  public:
     /// If the @headerType needs flattening, creates a clone of the IR node with
     /// a new flattened field list. Otherwise returns @headerType. This does not
     /// modify the IR.
-    static const IR::Type_Header* flatten(
-        const P4::TypeMap* typeMap, const IR::Type_Header* headerType);
+    static const IR::Type_Header *flatten(P4::TypeMap *typeMap, const IR::Type_Header *headerType);
 };
 
 }  // namespace ControlPlaneAPI

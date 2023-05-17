@@ -129,7 +129,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     table guh {
         key = {
-            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort") ;
+            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort");
         }
         actions = {
             foot();
@@ -139,11 +139,10 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         const entries = {
                         16w80 : foot();
         }
-
     }
     table huh {
         key = {
-            hdr.udp.dstPort: exact @name("hdr.udp.dstPort") ;
+            hdr.udp.dstPort: exact @name("hdr.udp.dstPort");
         }
         actions = {
             foou();
@@ -153,7 +152,6 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         const entries = {
                         16w80 : foou();
         }
-
     }
     apply {
         if (hdr.tcp.isValid()) {
@@ -196,4 +194,3 @@ control DeparserI(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
-

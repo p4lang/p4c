@@ -1,0 +1,16 @@
+issue2393.p4(11): [--Wwarn=unused] warning: 'val_undefined' is unused
+action do_global_action(in bool make_zero, out bool val_undefined) {
+                                                    ^^^^^^^^^^^^^
+issue2393.p4(13): [--Wwarn=uninitialized_use] warning: tmp may be uninitialized
+    tmp = tmp * (make_zero ? 16w0: 16w1);
+          ^^^
+issue2393.p4(11): [--Wwarn=uninitialized_out_param] warning: out parameter 'val_undefined' may be uninitialized when 'do_global_action' terminates
+action do_global_action(in bool make_zero, out bool val_undefined) {
+                                                    ^^^^^^^^^^^^^
+issue2393.p4(11)
+action do_global_action(in bool make_zero, out bool val_undefined) {
+       ^^^^^^^^^^^^^^^^
+[--Wwarn=uninitialized_use] warning: val_undefined may be uninitialized
+issue2393.p4(11): [--Wwarn=uninitialized_use] warning: val_undefined may be uninitialized
+action do_global_action(in bool make_zero, out bool val_undefined) {
+                                                    ^^^^^^^^^^^^^

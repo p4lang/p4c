@@ -24,9 +24,10 @@ filegroup(
     if not native.existing_rule("com_github_nelhage_rules_boost"):
         git_repository(
             name = "com_github_nelhage_rules_boost",
-            commit = "1da7517245fb944d6b7b427aa86fd5571663f90a",
+            # Newest commit on main branch as of May 3, 2021.
+            commit = "2598b37ce68226fab465c0f0e10988af872b6dc9",
             remote = "https://github.com/nelhage/rules_boost",
-            shallow_since = "1591812253 -0700",
+            shallow_since = "1611019749 -0800",
         )
     if not native.existing_rule("com_github_p4lang_p4runtime"):
         # Cannot currently use local_repository due to Bazel limitation,
@@ -42,9 +43,9 @@ filegroup(
         git_repository(
             name = "com_github_p4lang_p4runtime",
             remote = "https://github.com/p4lang/p4runtime",
-            # Newest commit on master branch as of June 24, 2020.
-            commit = "af483ccbdc030fa1edba3668f1c7af9118b60c9a",
-            shallow_since = "1592931215 -0700",
+            # Newest commit on main branch as of Jan 22, 2021.
+            commit = "0d40261b67283999bf0f03bd6b40b5374c7aebd0",
+            shallow_since = "1611340571 -0800",
             # strip_prefix is broken; we use patch_cmds as a workaround,
             # see https://github.com/bazelbuild/bazel/issues/10062.
             # strip_prefix = "proto",
@@ -70,7 +71,7 @@ filegroup(
     if not native.existing_rule("com_google_protobuf"):
         http_archive(
             name = "com_google_protobuf",
-            url = "https://github.com/protocolbuffers/protobuf/releases/download/v3.12.3/protobuf-all-3.12.3.tar.gz",
-            strip_prefix = "protobuf-3.12.3",
-            sha256 = "1a83f0525e5c8096b7b812181865da3c8637de88f9777056cefbf51a1eb0b83f",
+            url = "https://github.com/protocolbuffers/protobuf/releases/download/v3.13.0/protobuf-all-3.13.0.tar.gz",
+            strip_prefix = "protobuf-3.13.0",
+            sha256 = "465fd9367992a9b9c4fba34a549773735da200903678b81b25f367982e8df376",
         )

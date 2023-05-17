@@ -17,11 +17,10 @@ limitations under the License.
 #ifndef CONTROL_PLANE_BYTESTRINGS_H_
 #define CONTROL_PLANE_BYTESTRINGS_H_
 
-#include <boost/optional.hpp>
-
+#include <optional>
 #include <string>
 
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 
 namespace IR {
 
@@ -34,11 +33,11 @@ namespace P4 {
 
 namespace ControlPlaneAPI {
 
-boost::optional<std::string> stringRepr(const IR::Constant* constant, int width);
+std::optional<std::string> stringRepr(const IR::Constant *constant, int width);
 
-boost::optional<std::string> stringRepr(const IR::BoolLiteral* constant, int width);
+std::optional<std::string> stringRepr(const IR::BoolLiteral *constant, int width);
 
-boost::optional<std::string> stringReprConstant(big_int value, int width);
+std::optional<std::string> stringReprConstant(big_int value, int width);
 
 }  // namespace ControlPlaneAPI
 

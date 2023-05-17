@@ -1,6 +1,14 @@
-named-fail1.p4(8): [--Werror=type-error] error: f: No parameter named z
+named-fail1.p4(8): [--Werror=type-error] error: f
         f(z = b, y = b); // No such parameter
         ^^^^^^^^^^^^^^^
+  ---- Actual error:
+named-fail1.p4(8): No parameter named 'z'
+          f(z = b, y = b); // No such parameter
+            ^
+  ---- Originating from:
+named-fail1.p4(1): Function type 'f' does not match invocation type '<Method call>'
+  extern void f(in bit<16> x, in bool y);
+              ^
 named-fail1.p4(8)
-        f(z = b, y = b); // No such parameter
-          ^
+          f(z = b, y = b); // No such parameter
+          ^^^^^^^^^^^^^^^

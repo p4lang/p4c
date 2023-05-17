@@ -1,0 +1,3 @@
+issue1897-bmv2.p4(40): [--Wwarn=uninitialized_use] warning: addr_0 may not be completely initialized
+                       out addr_t addr) {
+                                  ^^^^

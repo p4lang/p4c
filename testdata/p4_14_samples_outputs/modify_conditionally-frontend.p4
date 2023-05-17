@@ -14,12 +14,12 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name(".metadata_global") 
+    @name(".metadata_global")
     metadata_global_t metadata_global;
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
 }
 
@@ -36,27 +36,28 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @name("ingress.tmp") bit<8> tmp;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    bit<8> tmp;
-    @name(".table0_actionlist") action table0_actionlist(bit<1> do_goto_table, bit<8> goto_table_id) {
-        meta.metadata_global.do_goto_table = do_goto_table;
-        if (do_goto_table != 1w0) {
-            tmp = goto_table_id;
+    @name(".table0_actionlist") action table0_actionlist(@name("do_goto_table") bit<1> do_goto_table_1, @name("goto_table_id") bit<8> goto_table_id_1) {
+        meta.metadata_global.do_goto_table = do_goto_table_1;
+        if (do_goto_table_1 != 1w0) {
+            tmp = goto_table_id_1;
         } else {
             tmp = meta.metadata_global.goto_table_id;
         }
+        meta.metadata_global.goto_table_id = tmp;
     }
     @name(".table0") table table0_0 {
         actions = {
             table0_actionlist();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            hdr.ethernet.etherType: ternary @name("ethernet.etherType") ;
+            hdr.ethernet.etherType: ternary @name("ethernet.etherType");
         }
         size = 2000;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         if (meta.metadata_global.goto_table_id == 8w0) {
@@ -82,4 +83,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

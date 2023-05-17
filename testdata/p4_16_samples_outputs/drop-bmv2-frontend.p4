@@ -15,16 +15,17 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
 }
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    @name(".drop") action drop(inout standard_metadata_t smeta_1) {
-        mark_to_drop(smeta_1);
+    @name("IngressI.smeta") standard_metadata_t smeta_0;
+    @name(".drop") action drop_0() {
+        smeta_0 = smeta;
+        mark_to_drop(smeta_0);
+        smeta = smeta_0;
     }
     @name("IngressI.forward") table forward_0 {
-        key = {
-        }
         actions = {
-            drop(smeta);
+            drop_0();
         }
-        const default_action = drop(smeta);
+        const default_action = drop_0();
     }
     apply {
         forward_0.apply();
@@ -52,4 +53,3 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package dpdk;
+
+message P4Ids {
+  enum Prefix {
+    UNSPECIFIED                 = 0;
+    ACTION_SELECTOR             = 0x81;
+    ACTION_SELECTOR_GET_MEMBER  = 0x82;
+  }
+}
+
+message ActionSelector {
+  repeated uint32 table_ids = 1;
+  uint32 hash_id = 2;
+  int64 max_group_size = 3;
+  int64 num_groups = 4;
+  uint32 action_profile_id = 5;
+}

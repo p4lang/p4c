@@ -10,6 +10,7 @@
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #ifdef __clang__
 #pragma clang diagnostic ignored "-Wnull-conversion"
+#pragma clang diagnostic ignored "-Wregister"
 #endif
 
 
@@ -49,6 +50,8 @@ static std::string      comment_block;
                             return EMITBLOCK; }
 <EMIT>.*                  { block_buffer += yytext; }
 
+"#include".*[\n]          { yylval.str = yytext; return INCLUDE; }
+
 "/*"            { comment_block.clear();
                   comment_block += yytext;
                   yy_push_state(COMMENT); }
@@ -67,6 +70,7 @@ static std::string      comment_block;
 "const"         { return CONST; }
 "default"       { return DEFAULT; }
 "delete"        { return DELETE; }
+"enum"          { return ENUM; }
 "inline"        { return INLINE; }
 "interface"     { return INTERFACE; }
 "namespace"     { return NAMESPACE; }
@@ -80,7 +84,7 @@ static std::string      comment_block;
 "virtual"       { return VIRTUAL; }
 "NullOK"        { return NULLOK; }
 "#apply"        { return APPLY; }
-"#no"[a-z]*     { yylval.str = yytext+3; return NO; }
+"#no"[a-z_]*    { yylval.str = yytext+3; return NO; }
 "#nooperator==" { yylval.str = yytext+3; return NO; }
 "0"             { yylval.str = yytext; return ZERO; }
 -?[0-9]+        { yylval.str = yytext; return INTEGER; }

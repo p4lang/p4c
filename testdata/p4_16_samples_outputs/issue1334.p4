@@ -45,4 +45,3 @@ control proto();
 package top(proto p);
 package top(proto p1, proto p2);
 top(p = c()) main;
-

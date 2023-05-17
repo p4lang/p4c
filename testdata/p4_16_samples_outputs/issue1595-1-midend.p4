@@ -23,11 +23,9 @@ control c(inout bit<32> b) {
                 tbl_issue15951l12.apply();
             }
         }
-
     }
 }
 
 control empty(inout bit<32> b);
 package top(empty _e);
 top(c()) main;
-

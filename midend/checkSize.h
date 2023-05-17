@@ -25,24 +25,23 @@ namespace P4 {
 class CheckTableSize : public Modifier {
  public:
     CheckTableSize() { setName("CheckTableSize"); }
-    bool preorder(IR::P4Table* table) override {
+    bool preorder(IR::P4Table *table) override {
         auto size = table->getSizeProperty();
-        if (size == nullptr)
-            return false;
+        if (size == nullptr) return false;
 
         bool deleteSize = false;
         auto key = table->getKey();
         if (key == nullptr) {
             if (size->value != 1) {
-                ::warning(ErrorType::WARN_MISMATCH,
-                          "%1%: size %2% specified for table without keys", table, size);
+                warn(ErrorType::WARN_MISMATCH, "%1%: size %2% specified for table without keys",
+                     table, size);
                 deleteSize = true;
             }
         }
         auto entries = table->properties->getProperty(IR::TableProperties::entriesPropertyName);
         if (entries != nullptr && entries->isConstant) {
-            ::warning(ErrorType::WARN_MISMATCH,
-                      "%1%: size %2% specified for table with constant entries", table, size);
+            warn(ErrorType::WARN_MISMATCH,
+                 "%1%: size %2% specified for table with constant entries", table, size);
             deleteSize = true;
         }
         if (deleteSize) {

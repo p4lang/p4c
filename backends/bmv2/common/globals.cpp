@@ -14,13 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "extern.h"
 #include "globals.h"
+
+#include "extern.h"
 #include "sharedActionSelectorCheck.h"
 
 namespace BMV2 {
 
-bool ConvertGlobals::preorder(const IR::ExternBlock* block) {
+bool ConvertGlobals::preorder(const IR::ExternBlock *block) {
     LOG2("Converting " << block);
     // This object will be lost, but we don't care about
     // global action profiles here; they are synthesized also
@@ -28,7 +29,7 @@ bool ConvertGlobals::preorder(const IR::ExternBlock* block) {
     auto action_profiles = new Util::JsonArray();
     ctxt->action_profiles = action_profiles;
     ExternConverter::cvtExternInstance(ctxt, block->node->to<IR::Declaration>(),
-        block->to<IR::ExternBlock>(), emitExterns);
+                                       block->to<IR::ExternBlock>(), emitExterns);
     return false;
 }
 

@@ -21,10 +21,14 @@ control ctrl() {
     apply {
         tbl_act.apply();
         if (t_0.apply().hit) {
-            if (!hasExited) {
+            if (hasExited) {
+                ;
+            } else {
                 t_0.apply();
             }
-        } else if (!hasExited) {
+        } else if (hasExited) {
+            ;
+        } else {
             t_0.apply();
         }
     }
@@ -33,4 +37,3 @@ control ctrl() {
 control noop();
 package p(noop _n);
 p(ctrl()) main;
-

@@ -1,25 +1,14 @@
 control c(inout bit<8> a) {
+    @name("c.x_0") bit<8> x;
+    @name("c.x_1") bit<8> x_2;
     apply {
-        {
-            bit<8> x_0 = a;
-            bool hasReturned = false;
-            bit<8> retval;
-            hasReturned = true;
-            retval = x_0;
-            a = x_0;
-        }
-        {
-            bit<8> x_1 = a;
-            bool hasReturned_0 = false;
-            bit<8> retval_0;
-            hasReturned_0 = true;
-            retval_0 = x_1;
-            a = x_1;
-        }
+        x = a;
+        a = x;
+        x_2 = a;
+        a = x_2;
     }
 }
 
 control E(inout bit<8> t);
 package top(E e);
 top(c()) main;
-

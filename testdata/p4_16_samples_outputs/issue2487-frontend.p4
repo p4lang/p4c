@@ -15,7 +15,7 @@ struct Headers {
 }
 
 control ingress(inout Headers h) {
-    ethernet_t tmp;
+    @name("ingress.tmp") ethernet_t tmp;
     apply {
         if (h.eth_hdr.eth_type == 16w1) {
             tmp.setValid();
@@ -31,4 +31,3 @@ control ingress(inout Headers h) {
 control Ingress(inout Headers hdr);
 package top(Ingress ig);
 top(ingress()) main;
-

@@ -11,7 +11,6 @@ extern Overloaded {
 }
 
 control c() {
-    bit<32> z_0;
     @name("c.o") Overloaded() o_0;
     apply {
         f();
@@ -24,11 +23,9 @@ control c() {
         o_0.f(b = 16w1);
         o_0.f(a = 32w1, b = 16w2);
         o_0.f(b = 16w2, a = 32w1);
-        z_0 = 32w4294967294;
     }
 }
 
 control proto();
 package top(proto p);
 top(p = c()) main;
-

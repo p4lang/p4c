@@ -3,8 +3,8 @@ struct S {
 }
 
 control c(inout bit<32> b) {
-    S s1_0;
-    S s2_0;
+    @name("c.s1") S s1_0;
+    @name("c.s2") S s2_0;
     @name("c.a") action a() {
         s2_0 = (S){x = 32w0};
         s1_0 = s2_0;
@@ -19,4 +19,3 @@ control c(inout bit<32> b) {
 control proto(inout bit<32> _b);
 package top(proto _p);
 top(c()) main;
-

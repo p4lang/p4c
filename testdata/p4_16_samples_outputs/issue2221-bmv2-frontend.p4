@@ -23,52 +23,10 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bit<16> tmp;
-    bit<16> tmp_0;
-    bit<16> tmp_1;
-    bit<16> tmp_2;
-    bit<16> tmp_3;
-    bit<16> tmp_4;
-    bit<16> tmp_5;
-    bit<16> tmp_6;
-    bit<16> tmp_7;
+    @name("ingress.eth_type_2") bit<16> eth_type_5;
     apply {
-        tmp = 16w0;
-        {
-            bit<16> eth_type_0 = h.eth_hdr.eth_type;
-            bool hasReturned = false;
-            bit<16> retval;
-            eth_type_0 = 16w0x806;
-            hasReturned = true;
-            retval = 16w2;
-            h.eth_hdr.eth_type = eth_type_0;
-            tmp_0 = retval;
-        }
-        tmp_1 = tmp & tmp_0;
-        tmp_2 = 16w0;
-        {
-            bit<16> eth_type_1 = h.eth_hdr.eth_type;
-            bool hasReturned_1 = false;
-            bit<16> retval_1;
-            eth_type_1 = 16w0x806;
-            hasReturned_1 = true;
-            retval_1 = 16w2;
-            h.eth_hdr.eth_type = eth_type_1;
-            tmp_3 = retval_1;
-        }
-        tmp_4 = tmp_2 * tmp_3;
-        tmp_5 = 16w0;
-        {
-            bit<16> eth_type_2 = h.eth_hdr.eth_type;
-            bool hasReturned_2 = false;
-            bit<16> retval_2;
-            eth_type_2 = 16w0x806;
-            hasReturned_2 = true;
-            retval_2 = 16w2;
-            h.eth_hdr.eth_type = eth_type_2;
-            tmp_6 = retval_2;
-        }
-        tmp_7 = tmp_5 >> tmp_6;
+        eth_type_5 = 16w0x806;
+        h.eth_hdr.eth_type = eth_type_5;
     }
 }
 
@@ -94,4 +52,3 @@ control deparser(packet_out b, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

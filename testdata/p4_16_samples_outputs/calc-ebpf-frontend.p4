@@ -23,12 +23,12 @@ struct headers {
 }
 
 parser Parser(packet_in packet, out headers hdr) {
-    bit<8> tmp;
-    p4calc_t tmp_0;
-    bit<8> tmp_1;
-    p4calc_t tmp_2;
-    bit<8> tmp_3;
-    p4calc_t tmp_4;
+    @name("Parser.tmp") bit<8> tmp;
+    @name("Parser.tmp_1") p4calc_t tmp_0;
+    @name("Parser.tmp_2") bit<8> tmp_1;
+    @name("Parser.tmp_3") p4calc_t tmp_2;
+    @name("Parser.tmp_4") bit<8> tmp_3;
+    @name("Parser.tmp_5") p4calc_t tmp_4;
     state start {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -55,7 +55,7 @@ parser Parser(packet_in packet, out headers hdr) {
 }
 
 control Ingress(inout headers hdr, out bool xout) {
-    bit<48> tmp_5;
+    @name("Ingress.tmp") bit<48> tmp_5;
     @name("Ingress.operation_add") action operation_add() {
         tmp_5 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
@@ -89,12 +89,12 @@ control Ingress(inout headers hdr, out bool xout) {
     @name("Ingress.operation_drop") action operation_drop() {
         xout = false;
     }
-    @name("Ingress.operation_drop") action operation_drop_2() {
+    @name("Ingress.operation_drop") action operation_drop_1() {
         xout = false;
     }
     @name("Ingress.calculate") table calculate_0 {
         key = {
-            hdr.p4calc.op: exact @name("hdr.p4calc.op") ;
+            hdr.p4calc.op: exact @name("hdr.p4calc.op");
         }
         actions = {
             operation_add();
@@ -112,18 +112,17 @@ control Ingress(inout headers hdr, out bool xout) {
                         8w0x7c : operation_or();
                         8w0x5e : operation_xor();
         }
-
         implementation = hash_table(32w8);
+        size = 100;
     }
     apply {
         xout = true;
         if (hdr.p4calc.isValid()) {
             calculate_0.apply();
         } else {
-            operation_drop_2();
+            operation_drop_1();
         }
     }
 }
 
 ebpfFilter<headers>(Parser(), Ingress()) main;
-

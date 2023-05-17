@@ -128,6 +128,7 @@ int main(int argc, char **argv) {
         usage(argv[0]);
 
 #ifdef CONTROL_PLANE
+    init_tables();
     /* Run all commands specified in the control file */
     setup_control_plane();
 #endif

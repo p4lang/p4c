@@ -1,0 +1,3 @@
+wrong-warning.p4(104): [--Wwarn=uninitialized_use] warning: a1b may not be completely initialized
+        a1 = a1b;
+             ^^^

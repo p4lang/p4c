@@ -103,11 +103,11 @@ struct Tcp_option_sack_top {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<7> Tcp_option_parser_tcp_hdr_bytes_left;
-    bit<8> Tcp_option_parser_n_sack_bytes;
-    bit<8> Tcp_option_parser_tmp;
-    bit<8> Tcp_option_parser_tmp_0;
-    Tcp_option_sack_top Tcp_option_parser_tmp_1;
+    @name("ParserImpl.Tcp_option_parser.tcp_hdr_bytes_left") bit<7> Tcp_option_parser_tcp_hdr_bytes_left;
+    @name("ParserImpl.Tcp_option_parser.n_sack_bytes") bit<8> Tcp_option_parser_n_sack_bytes;
+    @name("ParserImpl.Tcp_option_parser.tmp") bit<8> Tcp_option_parser_tmp;
+    @name("ParserImpl.Tcp_option_parser.tmp_0") bit<8> Tcp_option_parser_tmp_0;
+    @name("ParserImpl.Tcp_option_parser.tmp_1") Tcp_option_sack_top Tcp_option_parser_tmp_1;
     state start {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -237,26 +237,32 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".my_drop") action my_drop(inout standard_metadata_t smeta) {
-        mark_to_drop(smeta);
+    @name("ingress.smeta") standard_metadata_t smeta_0;
+    @name("ingress.smeta") standard_metadata_t smeta_3;
+    @name(".my_drop") action my_drop_2() {
+        smeta_0 = standard_metadata;
+        mark_to_drop(smeta_0);
+        standard_metadata = smeta_0;
     }
-    @name(".my_drop") action my_drop_0(inout standard_metadata_t smeta_1) {
-        mark_to_drop(smeta_1);
+    @name(".my_drop") action my_drop_3() {
+        smeta_3 = standard_metadata;
+        mark_to_drop(smeta_3);
+        standard_metadata = smeta_3;
     }
-    @name("ingress.set_l2ptr") action set_l2ptr(bit<32> l2ptr) {
-        meta.fwd_metadata.l2ptr = l2ptr;
+    @name("ingress.set_l2ptr") action set_l2ptr(@name("l2ptr") bit<32> l2ptr_1) {
+        meta.fwd_metadata.l2ptr = l2ptr_1;
     }
     @name("ingress.ipv4_da_lpm") table ipv4_da_lpm_0 {
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr");
         }
         actions = {
             set_l2ptr();
-            my_drop(standard_metadata);
+            my_drop_2();
         }
-        default_action = my_drop(standard_metadata);
+        default_action = my_drop_2();
     }
-    @name("ingress.set_bd_dmac_intf") action set_bd_dmac_intf(bit<24> bd, bit<48> dmac, bit<9> intf) {
+    @name("ingress.set_bd_dmac_intf") action set_bd_dmac_intf(@name("bd") bit<24> bd, @name("dmac") bit<48> dmac, @name("intf") bit<9> intf) {
         meta.fwd_metadata.out_bd = bd;
         hdr.ethernet.dstAddr = dmac;
         standard_metadata.egress_spec = intf;
@@ -264,13 +270,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ingress.mac_da") table mac_da_0 {
         key = {
-            meta.fwd_metadata.l2ptr: exact @name("meta.fwd_metadata.l2ptr") ;
+            meta.fwd_metadata.l2ptr: exact @name("meta.fwd_metadata.l2ptr");
         }
         actions = {
             set_bd_dmac_intf();
-            my_drop_0(standard_metadata);
+            my_drop_3();
         }
-        default_action = my_drop_0(standard_metadata);
+        default_action = my_drop_3();
     }
     apply {
         ipv4_da_lpm_0.apply();
@@ -279,21 +285,24 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".my_drop") action my_drop_1(inout standard_metadata_t smeta_2) {
-        mark_to_drop(smeta_2);
+    @name("egress.smeta") standard_metadata_t smeta_4;
+    @name(".my_drop") action my_drop_4() {
+        smeta_4 = standard_metadata;
+        mark_to_drop(smeta_4);
+        standard_metadata = smeta_4;
     }
-    @name("egress.rewrite_mac") action rewrite_mac(bit<48> smac) {
+    @name("egress.rewrite_mac") action rewrite_mac(@name("smac") bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
     }
     @name("egress.send_frame") table send_frame_0 {
         key = {
-            meta.fwd_metadata.out_bd: exact @name("meta.fwd_metadata.out_bd") ;
+            meta.fwd_metadata.out_bd: exact @name("meta.fwd_metadata.out_bd");
         }
         actions = {
             rewrite_mac();
-            my_drop_1(standard_metadata);
+            my_drop_4();
         }
-        default_action = my_drop_1(standard_metadata);
+        default_action = my_drop_4();
     }
     apply {
         send_frame_0.apply();
@@ -321,4 +330,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

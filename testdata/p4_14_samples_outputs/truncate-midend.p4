@@ -11,7 +11,7 @@ struct metadata {
 }
 
 struct headers {
-    @name(".hdrA") 
+    @name(".hdrA")
     hdrA_t hdrA;
 }
 
@@ -28,11 +28,11 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("._nop") action _nop() {
     }
-    @name("._truncate") action _truncate(bit<32> new_length, bit<9> port) {
+    @name("._truncate") action _truncate(@name("new_length") bit<32> new_length, @name("port") bit<9> port) {
         standard_metadata.egress_spec = port;
         truncate(new_length);
     }
@@ -40,13 +40,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             _nop();
             _truncate();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            hdr.hdrA.f1: exact @name("hdrA.f1") ;
+            hdr.hdrA.f1: exact @name("hdrA.f1");
         }
         size = 128;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         t_ingress_0.apply();
@@ -70,4 +70,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

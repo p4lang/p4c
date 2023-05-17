@@ -6,8 +6,8 @@ struct S {
 control c(out bool z);
 package top(c _c);
 control test(out bool zout) {
-    tuple<bit<32>, bit<32>> p_0;
-    S q_0;
+    @name("test.p") tuple<bit<32>, bit<32>> p_0;
+    @name("test.q") S q_0;
     apply {
         p_0 = { 32w4, 32w5 };
         q_0 = (S){l = 32w2,r = 32w3};
@@ -17,4 +17,3 @@ control test(out bool zout) {
 }
 
 top(test()) main;
-

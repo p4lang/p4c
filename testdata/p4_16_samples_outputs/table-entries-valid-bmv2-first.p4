@@ -54,8 +54,8 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     }
     table t_valid {
         key = {
-            h.h.isValid(): exact @name("h.h.$valid$") ;
-            h.h.e        : exact @name("h.h.e") ;
+            h.h.isValid(): exact @name("h.h.$valid$");
+            h.h.e        : exact @name("h.h.e");
         }
         actions = {
             a();
@@ -66,7 +66,6 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
                         (true, 8w0x1) : a_with_control_params(9w1);
                         (false, 8w0x2) : a_with_control_params(9w2);
         }
-
     }
     apply {
         t_valid.apply();
@@ -74,4 +73,3 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 }
 
 V1Switch<Header_t, Meta_t>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

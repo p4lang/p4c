@@ -74,7 +74,6 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
                         (MyEnum1B.MBR2, MyEnum2B.MBR2 &&& 0xff00) : a_with_control_params(2);
                         (MyEnum1B.MBR2, default) : a_with_control_params(3);
         }
-
     }
     apply {
         t_ternary.apply();
@@ -82,4 +81,3 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

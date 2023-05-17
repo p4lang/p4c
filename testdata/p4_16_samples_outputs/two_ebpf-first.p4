@@ -49,7 +49,7 @@ control Check(in IPv4Address address, inout bool pass) {
     }
     table Check_ip {
         key = {
-            address: exact @name("address") ;
+            address: exact @name("address");
         }
         actions = {
             Reject();
@@ -67,7 +67,9 @@ control pipe(inout Headers_t headers, out bool pass) {
     Check() c1;
     apply {
         pass = true;
-        if (!headers.ipv4.isValid()) {
+        if (headers.ipv4.isValid()) {
+            ;
+        } else {
             pass = false;
             return;
         }
@@ -77,4 +79,3 @@ control pipe(inout Headers_t headers, out bool pass) {
 }
 
 ebpfFilter<Headers_t>(prs(), pipe()) main;
-

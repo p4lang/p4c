@@ -1,0 +1,7 @@
+psa-dpdk-table-key-consolidation-mixed-keys-1.p4(96): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
+            8w0x48 : exact;
+            ^^^^^^
+psa-dpdk-table-key-consolidation-mixed-keys-1.p4(96): [--Wwarn=mismatch] warning: 8w0x48: Constant key field
+            8w0x48 : exact;
+            ^^^^^^
+[--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table tbl. Copying all match fields to metadata

@@ -1,9 +1,27 @@
-module_e.p4(25): [--Werror=type-error] error: main: Cannot unify parameter x with filter because they have different directions
-top(g()) main;
-         ^^^^
-module_e.p4(20)
-parser g(in bit x) // mismatch in direction
-                ^
+module_e.p4(18): [--Werror=type-error] error: package top
+package top(Filter f);
+        ^^^
+  ---- Actual error:
+module_e.p4(20): Cannot unify 'in' parameter 'x' with 'out' parameter 'filter' because they have different directions
+  parser g(in bit x) // mismatch in direction
+                  ^
 module_e.p4(16)
-parser Filter(out bool filter);
-                       ^^^^^^
+  parser Filter(out bool filter);
+                         ^^^^^^
+  ---- Originating from:
+module_e.p4(25): Type of argument 'g' (parser g) does not match type of parameter 'f' (parser Filter)
+  top(g()) main;
+      ^^^
+module_e.p4(20)
+  parser g(in bit x) // mismatch in direction
+         ^
+module_e.p4(18)
+  package top(Filter f);
+                     ^
+module_e.p4(16)
+  parser Filter(out bool filter);
+         ^^^^^^
+  ---- Originating from:
+module_e.p4(25): Constructor invocation '<Method call>' does not match declaration 'top'
+  top(g()) main;
+           ^^^^

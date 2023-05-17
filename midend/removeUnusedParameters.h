@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef _MIDEND_REMOVEUNUSEDPARAMETERS_H_
 #define _MIDEND_REMOVEUNUSEDPARAMETERS_H_
 
-#include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -48,13 +48,15 @@ namespace P4 {
  */
 class RemoveUnusedActionParameters : public Transform {
  public:
-    explicit RemoveUnusedActionParameters(ReferenceMap* refMap) : refMap(refMap)
-    { CHECK_NULL(refMap); setName("RemoveUnusedActionParameters"); }
+    explicit RemoveUnusedActionParameters(ReferenceMap *refMap) : refMap(refMap) {
+        CHECK_NULL(refMap);
+        setName("RemoveUnusedActionParameters");
+    }
 
-    const IR::Node* postorder(IR::P4Action* action) override;
+    const IR::Node *postorder(IR::P4Action *action) override;
 
  private:
-  ReferenceMap* refMap;
+    ReferenceMap *refMap;
 };
 
 }  // namespace P4

@@ -79,19 +79,19 @@ struct metadata {
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
-    @name(".icmp") 
+    @name(".icmp")
     icmp_t     icmp;
-    @name(".ipv4") 
+    @name(".ipv4")
     ipv4_t     ipv4;
-    @name(".ipv6") 
+    @name(".ipv6")
     ipv6_t     ipv6;
-    @name(".tcp") 
+    @name(".tcp")
     tcp_t      tcp;
-    @name(".udp") 
+    @name(".udp")
     udp_t      udp;
-    @name(".vlan_tag") 
+    @name(".vlan_tag")
     vlan_tag_t vlan_tag;
 }
 
@@ -103,9 +103,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     @name(".parse_ipv4") state parse_ipv4 {
         packet.extract<ipv4_t>(hdr.ipv4);
         transition select(hdr.ipv4.fragOffset, hdr.ipv4.ihl, hdr.ipv4.protocol) {
-            (13w0x0 &&& 13w0x0, 4w0x5 &&& 4w0xf, 8w0x1 &&& 8w0xff): parse_icmp;
-            (13w0x0 &&& 13w0x0, 4w0x5 &&& 4w0xf, 8w0x6 &&& 8w0xff): parse_tcp;
-            (13w0x0 &&& 13w0x0, 4w0x5 &&& 4w0xf, 8w0x11 &&& 8w0xff): parse_udp;
+            (13w0x0 &&& 13w0x0, 4w0x5, 8w0x1): parse_icmp;
+            (13w0x0 &&& 13w0x0, 4w0x5, 8w0x6): parse_tcp;
+            (13w0x0 &&& 13w0x0, 4w0x5, 8w0x11): parse_udp;
             default: accept;
         }
     }
@@ -152,21 +152,21 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_9() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_10() {
+    @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_11() {
+    @noWarn("unused") @name(".NoAction") action NoAction_4() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_12() {
+    @noWarn("unused") @name(".NoAction") action NoAction_5() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_13() {
+    @noWarn("unused") @name(".NoAction") action NoAction_6() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_14() {
+    @noWarn("unused") @name(".NoAction") action NoAction_7() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_15() {
+    @noWarn("unused") @name(".NoAction") action NoAction_8() {
     }
     @name(".l2_packet") action l2_packet() {
         meta._ing_metadata_packet_type2 = 4w0;
@@ -185,33 +185,33 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".nop") action nop() {
     }
-    @name(".nop") action nop_6() {
+    @name(".nop") action nop_1() {
     }
-    @name(".nop") action nop_7() {
+    @name(".nop") action nop_2() {
     }
-    @name(".nop") action nop_8() {
+    @name(".nop") action nop_3() {
     }
-    @name(".nop") action nop_9() {
+    @name(".nop") action nop_4() {
     }
-    @name(".nop") action nop_10() {
+    @name(".nop") action nop_5() {
     }
     @name("._drop") action _drop() {
         meta._ing_metadata_drop0 = 1w1;
     }
-    @name("._drop") action _drop_3() {
+    @name("._drop") action _drop_1() {
         meta._ing_metadata_drop0 = 1w1;
     }
-    @name("._drop") action _drop_4() {
+    @name("._drop") action _drop_2() {
         meta._ing_metadata_drop0 = 1w1;
     }
-    @name(".set_egress_port") action set_egress_port(bit<9> egress_port) {
-        meta._ing_metadata_egress_port1 = egress_port;
+    @name(".set_egress_port") action set_egress_port(@name("egress_port") bit<9> egress_port_1) {
+        meta._ing_metadata_egress_port1 = egress_port_1;
     }
-    @name(".set_egress_port") action set_egress_port_3(bit<9> egress_port) {
-        meta._ing_metadata_egress_port1 = egress_port;
+    @name(".set_egress_port") action set_egress_port_1(@name("egress_port") bit<9> egress_port_2) {
+        meta._ing_metadata_egress_port1 = egress_port_2;
     }
-    @name(".set_egress_port") action set_egress_port_4(bit<9> egress_port) {
-        meta._ing_metadata_egress_port1 = egress_port;
+    @name(".set_egress_port") action set_egress_port_2(@name("egress_port") bit<9> egress_port_3) {
+        meta._ing_metadata_egress_port1 = egress_port_3;
     }
     @name(".discard") action discard() {
         mark_to_drop(standard_metadata);
@@ -226,89 +226,89 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             ipv6_packet();
             mpls_packet();
             mim_packet();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            hdr.ethernet.etherType: exact @name("ethernet.etherType") ;
+            hdr.ethernet.etherType: exact @name("ethernet.etherType");
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name(".icmp_check") table icmp_check_0 {
         actions = {
             nop();
             _drop();
-            @defaultonly NoAction_9();
+            @defaultonly NoAction_2();
         }
         key = {
-            hdr.icmp.typeCode: exact @name("icmp.typeCode") ;
+            hdr.icmp.typeCode: exact @name("icmp.typeCode");
         }
-        default_action = NoAction_9();
+        default_action = NoAction_2();
     }
     @name(".ipv4_match") table ipv4_match_0 {
         actions = {
-            nop_6();
+            nop_1();
             set_egress_port();
-            @defaultonly NoAction_10();
+            @defaultonly NoAction_3();
         }
         key = {
-            hdr.ipv4.dstAddr: exact @name("ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: exact @name("ipv4.dstAddr");
         }
-        default_action = NoAction_10();
+        default_action = NoAction_3();
     }
     @name(".ipv6_match") table ipv6_match_0 {
         actions = {
-            nop_7();
-            set_egress_port_3();
-            @defaultonly NoAction_11();
+            nop_2();
+            set_egress_port_1();
+            @defaultonly NoAction_4();
         }
         key = {
-            hdr.ipv6.dstAddr: exact @name("ipv6.dstAddr") ;
+            hdr.ipv6.dstAddr: exact @name("ipv6.dstAddr");
         }
-        default_action = NoAction_11();
+        default_action = NoAction_4();
     }
     @name(".l2_match") table l2_match_0 {
         actions = {
-            nop_8();
-            set_egress_port_4();
-            @defaultonly NoAction_12();
+            nop_3();
+            set_egress_port_2();
+            @defaultonly NoAction_5();
         }
         key = {
-            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr") ;
+            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr");
         }
-        default_action = NoAction_12();
+        default_action = NoAction_5();
     }
     @name(".set_egress") table set_egress_0 {
         actions = {
             discard();
             send_packet();
-            @defaultonly NoAction_13();
+            @defaultonly NoAction_6();
         }
         key = {
-            meta._ing_metadata_drop0: exact @name("ing_metadata.drop") ;
+            meta._ing_metadata_drop0: exact @name("ing_metadata.drop");
         }
-        default_action = NoAction_13();
+        default_action = NoAction_6();
     }
     @name(".tcp_check") table tcp_check_0 {
         actions = {
-            nop_9();
-            _drop_3();
-            @defaultonly NoAction_14();
+            nop_4();
+            _drop_1();
+            @defaultonly NoAction_7();
         }
         key = {
-            hdr.tcp.dstPort: exact @name("tcp.dstPort") ;
+            hdr.tcp.dstPort: exact @name("tcp.dstPort");
         }
-        default_action = NoAction_14();
+        default_action = NoAction_7();
     }
     @name(".udp_check") table udp_check_0 {
         actions = {
-            nop_10();
-            _drop_4();
-            @defaultonly NoAction_15();
+            nop_5();
+            _drop_2();
+            @defaultonly NoAction_8();
         }
         key = {
-            hdr.udp.dstPort: exact @name("udp.dstPort") ;
+            hdr.udp.dstPort: exact @name("udp.dstPort");
         }
-        default_action = NoAction_15();
+        default_action = NoAction_8();
     }
     apply {
         switch (ethertype_match_0.apply().action_run) {
@@ -323,7 +323,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                 l2_match_0.apply();
             }
         }
-
         if (hdr.tcp.isValid()) {
             tcp_check_0.apply();
         } else if (hdr.udp.isValid()) {
@@ -358,4 +357,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

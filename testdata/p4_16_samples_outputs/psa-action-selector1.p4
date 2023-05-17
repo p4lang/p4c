@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <psa.p4>
+#include <bmv2/psa.p4>
 
 struct EMPTY {
 }
@@ -15,9 +15,13 @@ header ethernet_t {
     bit<16>         etherType;
 }
 
-parser MyIP(packet_in buffer, out ethernet_t eth, inout user_meta_t b, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
+struct headers_t {
+    ethernet_t ethernet;
+}
+
+parser MyIP(packet_in buffer, out headers_t hdr, inout user_meta_t b, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
     state start {
-        buffer.extract(eth);
+        buffer.extract(hdr.ethernet);
         transition accept;
     }
 }
@@ -28,18 +32,18 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
     }
 }
 
-control MyIC(inout ethernet_t a, inout user_meta_t b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
+control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
     ActionSelector(PSA_HashAlgorithm_t.CRC32, 32w1024, 32w16) as;
     action a1(bit<48> param) {
-        a.dstAddr = param;
+        hdr.ethernet.dstAddr = param;
     }
     action a2(bit<16> param) {
-        a.etherType = param;
+        hdr.ethernet.etherType = param;
     }
     table tbl {
         key = {
-            a.srcAddr: exact;
-            b.data   : selector;
+            hdr.ethernet.srcAddr: exact;
+            b.data              : selector;
         }
         actions = {
             NoAction;
@@ -58,9 +62,9 @@ control MyEC(inout EMPTY a, inout EMPTY b, in psa_egress_input_metadata_t c, ino
     }
 }
 
-control MyID(packet_out buffer, out EMPTY a, out EMPTY b, out EMPTY c, inout ethernet_t d, in user_meta_t e, in psa_ingress_output_metadata_t f) {
+control MyID(packet_out buffer, out EMPTY a, out EMPTY b, out EMPTY c, inout headers_t hdr, in user_meta_t e, in psa_ingress_output_metadata_t f) {
     apply {
-        buffer.emit(d);
+        buffer.emit(hdr.ethernet);
     }
 }
 
@@ -70,8 +74,5 @@ control MyED(packet_out buffer, out EMPTY a, out EMPTY b, inout EMPTY c, in EMPT
 }
 
 IngressPipeline(MyIP(), MyIC(), MyID()) ip;
-
 EgressPipeline(MyEP(), MyEC(), MyED()) ep;
-
 PSA_Switch(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

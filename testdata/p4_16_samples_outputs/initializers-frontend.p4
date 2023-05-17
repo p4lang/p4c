@@ -6,7 +6,7 @@ extern Fake {
 }
 
 parser P() {
-    bit<32> x_0;
+    @name("P.x") bit<32> x_0;
     @name("P.fake") Fake() fake_0;
     state start {
         x_0 = 32w0;
@@ -19,8 +19,8 @@ parser P() {
 }
 
 control C() {
-    bit<32> x_1;
-    bit<32> y_0;
+    @name("C.x") bit<32> x_1;
+    @name("C.y") bit<32> y_0;
     @name("C.fake") Fake() fake_1;
     apply {
         x_1 = 32w0;
@@ -33,4 +33,3 @@ parser SimpleParser();
 control SimpleControl();
 package top(SimpleParser prs, SimpleControl ctrl);
 top(P(), C()) main;
-

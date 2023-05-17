@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_COMMON_ANNOTATIONS_H_
 #define BACKENDS_BMV2_COMMON_ANNOTATIONS_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/parseAnnotations.h"
+#include "ir/ir.h"
 
 namespace BMV2 {
 
@@ -27,11 +27,10 @@ namespace BMV2 {
  */
 class ParseAnnotations : public P4::ParseAnnotations {
  public:
-    ParseAnnotations() : P4::ParseAnnotations("BMV2", false, {
-                PARSE_EMPTY("metadata"),
-                PARSE("alias", StringLiteral),
-                PARSE("priority", Constant)
-            }) { }
+    ParseAnnotations()
+        : P4::ParseAnnotations("BMV2", false,
+                               {PARSE_EMPTY("metadata"), PARSE_EXPRESSION_LIST("field_list"),
+                                PARSE("alias", StringLiteral), PARSE("priority", Constant)}) {}
 };
 
 }  // namespace BMV2

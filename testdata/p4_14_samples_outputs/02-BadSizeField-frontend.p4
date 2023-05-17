@@ -19,14 +19,14 @@ header vag_t {
 }
 
 struct metadata {
-    @name(".ing_metadata") 
+    @name(".ing_metadata")
     ingress_metadata_t ing_metadata;
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
-    @name(".vag") 
+    @name(".vag")
     vag_t      vag;
 }
 
@@ -39,19 +39,19 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name(".nop") action nop() {
     }
     @name(".e_t1") table e_t1_0 {
         actions = {
             nop();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_2();
         }
         key = {
-            hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr") ;
+            hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr");
         }
-        default_action = NoAction_0();
+        default_action = NoAction_2();
     }
     apply {
         e_t1_0.apply();
@@ -59,23 +59,23 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
     @name(".nop") action nop_2() {
     }
-    @name(".set_egress_port") action set_egress_port(bit<8> egress_port) {
-        meta.ing_metadata.egress_port = egress_port;
+    @name(".set_egress_port") action set_egress_port(@name("egress_port") bit<8> egress_port_1) {
+        meta.ing_metadata.egress_port = egress_port_1;
     }
     @name(".i_t1") table i_t1_0 {
         actions = {
             nop_2();
             set_egress_port();
-            @defaultonly NoAction_1();
+            @defaultonly NoAction_3();
         }
         key = {
-            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr") ;
+            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr");
         }
-        default_action = NoAction_1();
+        default_action = NoAction_3();
     }
     apply {
         i_t1_0.apply();
@@ -100,4 +100,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

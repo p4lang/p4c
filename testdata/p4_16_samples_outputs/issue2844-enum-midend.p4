@@ -1,0 +1,69 @@
+#include <core.p4>
+#define V1MODEL_VERSION 20180101
+#include <v1model.p4>
+
+header Ethernet_h {
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
+}
+
+struct Parsed_packet {
+    Ethernet_h ethernet;
+}
+
+struct metadata_t {
+    bit<4> a;
+    bit<4> b;
+}
+
+parser parserI(packet_in pkt, out Parsed_packet hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
+    state start {
+        pkt.extract<Ethernet_h>(hdr.ethernet);
+        transition accept;
+    }
+}
+
+control cIngress(inout Parsed_packet hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
+    @name("cIngress.E.c1.stats") counter(32w1024, CounterType.packets) E_c1_stats;
+    @hidden action issue2844enum48() {
+        hdr.ethernet.etherType = hdr.ethernet.etherType << 1;
+        hdr.ethernet.etherType = hdr.ethernet.etherType + 16w1;
+        E_c1_stats.count((bit<32>)hdr.ethernet.etherType);
+        hdr.ethernet.etherType = hdr.ethernet.etherType << 3;
+        hdr.ethernet.etherType = hdr.ethernet.etherType + 16w1;
+        E_c1_stats.count((bit<32>)hdr.ethernet.etherType);
+    }
+    @hidden table tbl_issue2844enum48 {
+        actions = {
+            issue2844enum48();
+        }
+        const default_action = issue2844enum48();
+    }
+    apply {
+        tbl_issue2844enum48.apply();
+    }
+}
+
+control cEgress(inout Parsed_packet hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
+    apply {
+    }
+}
+
+control DeparserI(packet_out packet, in Parsed_packet hdr) {
+    apply {
+        packet.emit<Ethernet_h>(hdr.ethernet);
+    }
+}
+
+control vc(inout Parsed_packet hdr, inout metadata_t meta) {
+    apply {
+    }
+}
+
+control uc(inout Parsed_packet hdr, inout metadata_t meta) {
+    apply {
+    }
+}
+
+V1Switch<Parsed_packet, metadata_t>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;

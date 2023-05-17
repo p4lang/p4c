@@ -22,7 +22,7 @@ struct metadata {
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
 }
 
@@ -42,9 +42,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name(".my_meter") direct_meter<bit<32>>(MeterType.packets) my_meter_0;
     @name("._drop") action _drop() {
@@ -56,15 +56,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             _drop();
             _nop();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            meta._meta_meter_tag0: exact @name("meta.meter_tag") ;
+            meta._meta_meter_tag0: exact @name("meta.meter_tag");
         }
         size = 16;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
-    @name(".m_action") action m_action_0(bit<9> meter_idx) {
+    @name(".m_action") action m_action_0(@name("meter_idx") bit<9> meter_idx) {
         my_meter_0.read(meta._meta_meter_tag0);
         standard_metadata.egress_spec = 9w1;
     }
@@ -75,14 +75,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             m_action_0();
             _nop_0();
-            @defaultonly NoAction_3();
+            @defaultonly NoAction_2();
         }
         key = {
-            hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr") ;
+            hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr");
         }
         size = 16384;
         meters = my_meter_0;
-        default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     apply {
         m_table_0.apply();
@@ -107,4 +107,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

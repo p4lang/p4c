@@ -18,6 +18,10 @@ class Neg : Operation_Unary {
     stringOp = "-";
 }
 
+class UPlus : Operation_Unary {
+    stringOp = "+";
+}
+
 class Cmpl : Operation_Unary {
     stringOp = "~";
 }
@@ -215,7 +219,19 @@ class Constant : Literal {
     Constant operator-(const Constant &c) const;
     Constant operator-() const;
 #end
-    toString { return Util::toString(&value, base); }
+    toString {
+        const IR::Type_Bits* tb = dynamic_cast<const IR::Type_Bits*>(type);
+        unsigned width;
+        bool sign;
+        if (tb == nullptr) {
+            width = 0;
+            sign = false;
+        } else {
+            width = tb->size;
+            sign = tb->isSigned;
+        }
+        return Util::toString(value, width, sign, base);
+    }
     visit_children { v.visit(type, "type"); }
 }
 
@@ -227,7 +243,7 @@ class BoolLiteral : Literal {
 class StringLiteral : Literal {
     cstring value;
     validate{ if (value.isNull()) BUG("null StringLiteral"); }
-    toString{ return cstring("\"") + value + "\""; }
+    toString{ return cstring("\"") + value.escapeJson() + "\""; }
     StringLiteral(ID v) : Literal(v.srcInfo), value(v.name) {}
 #emit
     operator IR::ID() const { return IR::ID(srcInfo, value); }
@@ -245,12 +261,14 @@ class PathExpression : Expression {
 // X.a
 // The 'X' portion is a TypeNameExpression
 class TypeNameExpression : Expression {
-    Type_Name typeName;
+    Type typeName;
     TypeNameExpression { if (!srcInfo && typeName) srcInfo = typeName->srcInfo; }
     TypeNameExpression(ID id) : Expression(id.srcInfo),
                                 typeName(new IR::Type_Name(new IR::Path(id))) {}
     dbprint{ out << typeName; }
     toString { return typeName->toString(); }
+    validate { BUG_CHECK(typeName->is<Type_Name>() || typeName->is<Type_Specialized>(),
+                         "%1 unexpected type in TypeNameExpression", typeName); }
 }
 
 class Slice : Operation_Ternary {
@@ -298,6 +316,7 @@ class ArrayIndex : Operation_Binary {
     ArrayIndex {
         if (auto st = left ? left->type->to<IR::Type_Stack>() : nullptr)
             type = st->elementType; }
+    toString{ return left->toString() + "[" + right->toString() + "]"; }
 }
 
 class Range : Operation_Binary {
@@ -319,10 +338,7 @@ class Mux : Operation_Ternary {
     precedence = DBPrint::Prec_Low;
     visit_children {
         v.visit(e0, "e0");
-        auto &clone(v.flow_clone());
-        v.visit(e1, "e1");
-        clone.visit(e2, "e2");
-        v.flow_merge(clone); }
+        SplitFlowVisit<Expression>(v, e1, e2).run_visit(); }
     Mux { if (type->is<Type::Unknown>() && e1 && e2 && e1->type == e2->type) type = e1->type; }
 }
 
@@ -332,9 +348,10 @@ class DefaultExpression : Expression {}
 // That's why we use a hidden id field to distinguish them.
 class This : Expression {
     int id = nextId++;
+    toString { return "this"; }
  private:
     static int nextId;
-}  // experimental
+}
 
 class Cast : Operation_Unary {
     Type destType = type;
@@ -358,7 +375,7 @@ class SelectExpression : Expression {
     inline Vector<SelectCase> selectCases;
     visit_children {
         v.visit(select, "select");
-        v.parallel_visit(selectCases, "selectCases"); }
+        SplitFlowVisitVector<SelectCase>(v, selectCases).run_visit(); }
 }
 
 class MethodCallExpression : Expression {
@@ -389,9 +406,16 @@ class ConstructorCallExpression : Expression {
         arguments->check_null(); }
 }
 
-/// Represents a list of expressions separated by commas
-class ListExpression : Expression {
+class BaseListExpression : Expression {
     inline Vector<Expression> components;
+    validate { components.check_null(); }
+    size_t size() const { return components.size(); }
+    void push_back(Expression e) { components.push_back(e); }
+#nodbprint
+}
+
+/// Represents a list of expressions separated by commas
+class ListExpression : BaseListExpression {
     ListExpression {
         validate();
         if (type->is<Type::Unknown>()) {
@@ -399,24 +423,79 @@ class ListExpression : Expression {
             for (auto e : components)
                 tuple.push_back(e->type);
             type = new Type_List(tuple); } }
-    validate { components.check_null(); }
-    size_t size() const { return components.size(); }
-    void push_back(Expression e) { components.push_back(e); }
+}
+
+/// Represents P4 list expression, not to be confused with
+/// ListExpression from above.
+class P4ListExpression : BaseListExpression {
+    Type elementType;
+    P4ListExpression {
+        validate();
+        if (type->is<Type::Unknown>()) {
+            type = new Type_P4List(elementType); } }
 }
 
 /// An expression that evaluates to a struct.
 class StructExpression : Expression {
     /// The struct or header type that is being intialized.
     /// May only be known after type checking; so it can be nullptr.
-    NullOK optional Type_Name typeName;
+    NullOK Type structType;
     inline IndexedVector<NamedExpression> components;
-    validate { components.check_null(); }
+    validate {
+        components.check_null(); components.validate();
+        BUG_CHECK(structType == nullptr || structType->is<IR::Type_Name>() ||
+                  structType->is<IR::Type_Specialized>(),
+                  "%1%: unexpected struct type", this);
+    }
     size_t size() const { return components.size(); }
+}
+
+/// Can be an invalid header or header_union
+class Invalid : Expression {
+}
+
+/// An expression that evaluates to an invalid header with the specified type.
+class InvalidHeader : Expression {
+    Type headerType;
+}
+
+/// An expression that evaluates to an invalid header union with the specified type.
+class InvalidHeaderUnion : Expression {
+    Type headerUnionType;
+}
+
+/// An expression that evaluates to a header stack
+class HeaderStackExpression : BaseListExpression {
+    /// May only be known after type checking; so it can be nullptr.
+    NullOK Type headerStackType;
+    validate {
+        components.check_null();
+    }
 }
 
 /// A ListExpression where all the components are compile-time values.
 /// This is used by the evaluator pass.
 class ListCompileTimeValue : CompileTimeValue {
+    inline Vector<Node> components;
+    validate {
+        for (auto v : components)
+            BUG_CHECK(v->is<CompileTimeValue>(), "%1%: not a compile-time value", v); }
+#nodbprint
+}
+
+/// A P4ListExpression where all the components are compile-time values.
+/// This is used by the evaluator pass.
+class P4ListCompileTimeValue : CompileTimeValue {
+    inline Vector<Node> components;
+    validate {
+        for (auto v : components)
+            BUG_CHECK(v->is<CompileTimeValue>(), "%1%: not a compile-time value", v); }
+#nodbprint
+}
+
+/// A StructExpression where all the components are compile-time values.
+/// This is used by the evaluator pass.
+class StructCompileTimeValue : CompileTimeValue {
     inline Vector<Node> components;
     validate {
         for (auto v : components)

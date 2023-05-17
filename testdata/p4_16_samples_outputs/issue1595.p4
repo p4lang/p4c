@@ -74,7 +74,6 @@ control cIngress(inout Parsed_packet hdr, inout metadata_t meta, inout standard_
                 hdr.ethernet.srcAddr[39:32] = 5;
             }
         }
-
     }
 }
 
@@ -94,4 +93,3 @@ control uc(inout Parsed_packet hdr, inout metadata_t meta) {
 }
 
 V1Switch(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
-

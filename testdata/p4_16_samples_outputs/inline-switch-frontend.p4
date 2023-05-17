@@ -11,18 +11,12 @@ control d(out bit<32> x) {
         default_action = cinst_a1_0();
     }
     apply {
-        {
-            bool cinst_hasReturned = false;
-            switch (cinst_t.apply().action_run) {
-                cinst_a1_0: 
-                cinst_a2_0: {
-                    cinst_hasReturned = true;
-                }
-                default: {
-                    cinst_hasReturned = true;
-                }
+        switch (cinst_t.apply().action_run) {
+            cinst_a1_0: 
+            cinst_a2_0: {
             }
-
+            default: {
+            }
         }
     }
 }
@@ -30,4 +24,3 @@ control d(out bit<32> x) {
 control dproto(out bit<32> x);
 package top(dproto _d);
 top(d()) main;
-

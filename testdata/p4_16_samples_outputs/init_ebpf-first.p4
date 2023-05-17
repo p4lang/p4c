@@ -24,7 +24,7 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     table tbl {
         key = {
-            headers.ethernet.protocol: exact @name("headers.ethernet.protocol") ;
+            headers.ethernet.protocol: exact @name("headers.ethernet.protocol");
         }
         actions = {
             match();
@@ -34,7 +34,6 @@ control pipe(inout Headers_t headers, out bool pass) {
                         16w0x800 : match(true);
                         16w0xd000 : match(false);
         }
-
         implementation = hash_table(32w64);
         default_action = NoAction();
     }
@@ -45,4 +44,3 @@ control pipe(inout Headers_t headers, out bool pass) {
 }
 
 ebpfFilter<Headers_t>(prs(), pipe()) main;
-

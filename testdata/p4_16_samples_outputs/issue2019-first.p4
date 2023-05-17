@@ -9,4 +9,3 @@ struct E {
 
 package S<H1>(V<H1> vr=EmptyV<H1>());
 S<E>(vr = EmptyV<E>()) main;
-

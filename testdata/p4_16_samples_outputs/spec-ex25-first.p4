@@ -14,7 +14,7 @@ control c(bit<32> x) {
     }
     table unit {
         key = {
-            x: exact @name("x") ;
+            x: exact @name("x");
         }
         actions = {
             Set_dmac();
@@ -26,7 +26,6 @@ control c(bit<32> x) {
                         32w0xb000003 : Set_dmac(dmac = 48w0x112233445577);
                         32w0xb000000 &&& 32w0xff000000 : drop();
         }
-
         default_action = Set_dmac(48w0xaabbccddeeff);
         implementation = tbl();
     }

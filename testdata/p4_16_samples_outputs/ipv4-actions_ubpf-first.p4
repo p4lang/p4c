@@ -102,7 +102,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     }
     table filter_tbl {
         key = {
-            headers.ipv4.srcAddr: exact @name("headers.ipv4.srcAddr") ;
+            headers.ipv4.srcAddr: exact @name("headers.ipv4.srcAddr");
         }
         actions = {
             set_ipv4_version();
@@ -123,7 +123,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
             Reject();
             NoAction();
         }
-        const default_action = NoAction();
+        default_action = NoAction();
     }
     apply {
         filter_tbl.apply();
@@ -138,4 +138,3 @@ control dprs(packet_out packet, in Headers_t headers) {
 }
 
 ubpf<Headers_t, metadata>(prs(), pipe(), dprs()) main;
-

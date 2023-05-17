@@ -1,0 +1,21 @@
+issue2583_simplify_slice.p4(26): [--Wwarn=invalid_header] warning: accessing a field of an invalid header h
+        h.data = 0;
+        ^
+issue2583_simplify_slice.p4(27): [--Wwarn=invalid_header] warning: accessing a field of an invalid header h
+        h.data[3:0] = 2; // skipped
+        ^
+issue2583_simplify_slice.p4(29): [--Wwarn=invalid_header] warning: accessing a field of an invalid header h
+        h.data = 7;
+        ^
+issue2583_simplify_slice.p4(30): [--Wwarn=invalid_header] warning: accessing a field of an invalid header h
+        h.data[7:0] = 4; // skipped
+        ^
+issue2583_simplify_slice.p4(31): [--Wwarn=invalid_header] warning: accessing a field of an invalid header h
+        h.data[7:0] = 3; // skipped
+        ^
+issue2583_simplify_slice.p4(32): [--Wwarn=invalid_header] warning: accessing a field of an invalid header h
+        h.data[15:0] = 8; // stays
+        ^
+issue2583_simplify_slice.p4(33): [--Wwarn=invalid_header] warning: accessing a field of an invalid header h
+        h.data[31:16] = 5; // stays
+        ^

@@ -17,26 +17,25 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
 }
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name("IngressI.myc.set_eg") action myc_set_eg_0(bit<9> eg) {
-        smeta.egress_spec = eg;
+    @name("IngressI.myc.set_eg") action myc_set_eg_0(@name("eg") bit<9> eg_1) {
+        smeta.egress_spec = eg_1;
     }
     @name("IngressI.myc.myt") table myc_myt {
         key = {
-            meta.f1: exact @name("meta.f1") ;
-            meta.f2: exact @name("meta.f2") ;
+            meta.f1: exact @name("meta.f1");
+            meta.f2: exact @name("meta.f2");
         }
         actions = {
             myc_set_eg_0();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         const entries = {
                         (32w1, 32w0xffffffff) : myc_set_eg_0(9w1);
                         (32w2, 32w0xffffffff) : myc_set_eg_0(9w2);
         }
-
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         myc_myt.apply();
@@ -64,4 +63,3 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

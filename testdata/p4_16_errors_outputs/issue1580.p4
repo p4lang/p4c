@@ -50,7 +50,6 @@ control ingress(inout headers_t hdr, inout user_metadata_t meta, inout standard_
         const entries = {
                         3 : a3();
         }
-
         default_action = a1;
     }
     apply {
@@ -74,4 +73,3 @@ control computeChecksum(inout headers_t hdr, inout user_metadata_t meta) {
 }
 
 V1Switch(myParser(), verifyChecksum(), ingress(), egress(), computeChecksum(), MyDeparser()) main;
-

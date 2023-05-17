@@ -28,9 +28,7 @@ control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_
 }
 
 control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t standard_meta) {
-    Value val_0;
     @name("Eg.test") action test() {
-        val_0.field1 = val_0.field1;
     }
     @hidden table tbl_test {
         actions = {
@@ -59,4 +57,3 @@ control Compute(inout Headers hdr, inout Metadata meta) {
 }
 
 V1Switch<Headers, Metadata>(P(), Verify(), Ing(), Eg(), Compute(), DP()) main;
-

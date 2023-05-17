@@ -26,9 +26,9 @@ struct metadata {
 }
 
 struct headers {
-    @name(".hdr1") 
+    @name(".hdr1")
     hdr1_t                     hdr1;
-    @name(".queueing_hdr") 
+    @name(".queueing_hdr")
     queueing_metadata_t_padded queueing_hdr;
 }
 
@@ -47,7 +47,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name(".copy_queueing_data") action copy_queueing_data() {
         hdr.queueing_hdr.setValid();
@@ -60,9 +60,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name(".t_egress") table t_egress_0 {
         actions = {
             copy_queueing_data();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_2();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_2();
     }
     apply {
         t_egress_0.apply();
@@ -70,9 +70,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @name(".set_port") action set_port(bit<9> port) {
+    @name(".set_port") action set_port(@name("port") bit<9> port) {
         standard_metadata.egress_spec = port;
     }
     @name("._drop") action _drop() {
@@ -82,13 +82,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set_port();
             _drop();
-            @defaultonly NoAction_1();
+            @defaultonly NoAction_3();
         }
         key = {
-            hdr.hdr1.f1: exact @name("hdr1.f1") ;
+            hdr.hdr1.f1: exact @name("hdr1.f1");
         }
         size = 128;
-        default_action = NoAction_1();
+        default_action = NoAction_3();
     }
     apply {
         t_ingress_0.apply();
@@ -113,4 +113,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

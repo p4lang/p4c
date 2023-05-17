@@ -63,11 +63,10 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         }
         default_action = a;
         const entries = {
-                        (0xaa &&& 0xff, 0x1111 &&& 0xffff) : a_with_control_params(1);
+                        (0xaa &&& 0xf0, 0x1111 &&& 0xffff) : a_with_control_params(1);
                         (0x100, default) : a_with_control_params(2);
                         (default, 0x10000) : a_with_control_params(3);
         }
-
     }
     apply {
         t_optional.apply();
@@ -75,4 +74,3 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

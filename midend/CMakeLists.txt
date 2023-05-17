@@ -14,18 +14,28 @@
 
 set (MIDEND_SRCS
   actionSynthesis.cpp
+  booleanKeys.cpp
   complexComparison.cpp
   convertEnums.cpp
+  convertErrors.cpp
   copyStructures.cpp
+  coverage.cpp
+  eliminateInvalidHeaders.cpp
   eliminateNewtype.cpp
   eliminateSerEnums.cpp
+  eliminateSwitch.cpp
   eliminateTuples.cpp
+  eliminateTypedefs.cpp
   expandEmit.cpp
   expandLookahead.cpp
   fillEnumMap.cpp
   flattenHeaders.cpp
   flattenInterfaceStructs.cpp
+  flattenLogMsg.cpp
+  flattenUnions.cpp
+  hsIndexSimplify.cpp
   interpreter.cpp
+  global_copyprop.cpp
   local_copyprop.cpp
   nestedStructs.cpp
   noMatch.cpp
@@ -33,13 +43,14 @@ set (MIDEND_SRCS
   parserUnroll.cpp
   predication.cpp
   removeAssertAssume.cpp
+  removeComplexExpressions.cpp
   removeExits.cpp
   removeLeftSlices.cpp
   removeMiss.cpp
-  removeParameters.cpp
   removeSelectBooleans.cpp
   replaceSelectRange.cpp
   removeUnusedParameters.cpp
+  saturationElim.cpp
   simplifyBitwise.cpp
   simplifyKey.cpp
   simplifySelectCases.cpp
@@ -51,22 +62,31 @@ set (MIDEND_SRCS
 
 set (MIDEND_HDRS
   actionSynthesis.h
+  booleanKeys.h
   checkSize.h
+  checkExternInvocationCommon.h
   compileTimeOps.h
   complexComparison.h
   convertEnums.h
+  convertErrors.h
   copyStructures.h
+  coverage.h
+  eliminateInvalidHeaders.h
   eliminateNewtype.h
   eliminateSerEnums.h
+  eliminateSwitch.h
   eliminateTuples.h
+  eliminateTypedefs.h
   expandEmit.h
   expandLookahead.h
   expr_uses.h
   fillEnumMap.h
   flattenHeaders.h
   flattenInterfaceStructs.h
+  flattenUnions.h
   has_side_effects.h
   interpreter.h
+  global_copyprop.h
   local_copyprop.h
   midEndLast.h
   nestedStructs.h
@@ -75,13 +95,14 @@ set (MIDEND_HDRS
   parserUnroll.h
   predication.h
   removeAssertAssume.h
+  removeComplexExpressions.h
   removeExits.h
   removeLeftSlices.h
   removeMiss.h
-  removeParameters.h
   removeSelectBooleans.h
   removeUnusedParameters.h
   replaceSelectRange.h
+  saturationElim.h
   simplifyBitwise.h
   simplifyKey.h
   simplifySelectCases.h
@@ -91,8 +112,6 @@ set (MIDEND_HDRS
   validateProperties.h
   )
 
-add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${MIDEND_SRCS};${MIDEND_HDRS}")
 
-build_unified(MIDEND_SRCS)
 add_library (midend STATIC ${MIDEND_SRCS})
 add_dependencies(midend genIR)

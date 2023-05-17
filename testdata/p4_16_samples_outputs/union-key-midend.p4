@@ -8,29 +8,25 @@ header H2 {
     bit<16> y;
 }
 
-header_union U {
-    H1 h1;
-    H2 h2;
-}
-
 struct Headers {
-    U u;
+    H1 u_h1;
+    H2 u_h2;
 }
 
 control c(in Headers h) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("c.a") action a() {
     }
     @name("c.t") table t_0 {
         key = {
-            h.u.h1.x: exact @name("h.u.h1.x") ;
+            h.u_h1.x: exact @name("h.u.h1.x");
         }
         actions = {
             a();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         t_0.apply();
@@ -40,4 +36,3 @@ control c(in Headers h) {
 control _c(in Headers h);
 package top(_c c);
 top(c()) main;
-

@@ -73,24 +73,24 @@ header vlan_tag_t {
 }
 
 struct metadata {
-    @name(".ing_metadata") 
+    @name(".ing_metadata")
     ingress_metadata_t ing_metadata;
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
-    @name(".icmp") 
+    @name(".icmp")
     icmp_t     icmp;
-    @name(".ipv4") 
+    @name(".ipv4")
     ipv4_t     ipv4;
-    @name(".ipv6") 
+    @name(".ipv6")
     ipv6_t     ipv6;
-    @name(".tcp") 
+    @name(".tcp")
     tcp_t      tcp;
-    @name(".udp") 
+    @name(".udp")
     udp_t      udp;
-    @name(".vlan_tag") 
+    @name(".vlan_tag")
     vlan_tag_t vlan_tag;
 }
 
@@ -102,9 +102,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     @name(".parse_ipv4") state parse_ipv4 {
         packet.extract<ipv4_t>(hdr.ipv4);
         transition select(hdr.ipv4.fragOffset, hdr.ipv4.ihl, hdr.ipv4.protocol) {
-            (13w0x0 &&& 13w0x0, 4w0x5 &&& 4w0xf, 8w0x1 &&& 8w0xff): parse_icmp;
-            (13w0x0 &&& 13w0x0, 4w0x5 &&& 4w0xf, 8w0x6 &&& 8w0xff): parse_tcp;
-            (13w0x0 &&& 13w0x0, 4w0x5 &&& 4w0xf, 8w0x11 &&& 8w0xff): parse_udp;
+            (13w0x0 &&& 13w0x0, 4w0x5, 8w0x1): parse_icmp;
+            (13w0x0 &&& 13w0x0, 4w0x5, 8w0x6): parse_tcp;
+            (13w0x0 &&& 13w0x0, 4w0x5, 8w0x11): parse_udp;
             default: accept;
         }
     }
@@ -190,7 +190,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.ethernet.etherType: exact @name("ethernet.etherType") ;
+            hdr.ethernet.etherType: exact @name("ethernet.etherType");
         }
         default_action = NoAction();
     }
@@ -201,7 +201,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.icmp.typeCode: exact @name("icmp.typeCode") ;
+            hdr.icmp.typeCode: exact @name("icmp.typeCode");
         }
         default_action = NoAction();
     }
@@ -212,7 +212,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.ipv4.dstAddr: exact @name("ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: exact @name("ipv4.dstAddr");
         }
         default_action = NoAction();
     }
@@ -223,7 +223,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.ipv6.dstAddr: exact @name("ipv6.dstAddr") ;
+            hdr.ipv6.dstAddr: exact @name("ipv6.dstAddr");
         }
         default_action = NoAction();
     }
@@ -234,7 +234,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr") ;
+            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr");
         }
         default_action = NoAction();
     }
@@ -245,7 +245,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            meta.ing_metadata.drop: exact @name("ing_metadata.drop") ;
+            meta.ing_metadata.drop: exact @name("ing_metadata.drop");
         }
         default_action = NoAction();
     }
@@ -256,7 +256,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.tcp.dstPort: exact @name("tcp.dstPort") ;
+            hdr.tcp.dstPort: exact @name("tcp.dstPort");
         }
         default_action = NoAction();
     }
@@ -267,7 +267,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.udp.dstPort: exact @name("udp.dstPort") ;
+            hdr.udp.dstPort: exact @name("udp.dstPort");
         }
         default_action = NoAction();
     }
@@ -284,7 +284,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                 l2_match.apply();
             }
         }
-
         if (hdr.tcp.isValid()) {
             tcp_check.apply();
         } else if (hdr.udp.isValid()) {
@@ -319,4 +318,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

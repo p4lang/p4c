@@ -64,4 +64,3 @@ control EmptyVerifyChecksum_0(inout headers_t hdr, inout metadata_t meta) {
 }
 
 MySwitch<headers_t, metadata_t>(p = parserImpl(), vr = EmptyVerifyChecksum_0(), ig = ingressImpl(), eg = egressImpl(), ck = updateChecksum(), dep = deparserImpl()) main;
-

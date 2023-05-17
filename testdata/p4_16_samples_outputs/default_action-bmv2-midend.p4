@@ -43,8 +43,8 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.c.add") action c_add_0(bit<32> data) {
-        h.h.b = h.h.a + data;
+    @name("ingress.c.add") action c_add_0(@name("data") bit<32> data_1) {
+        h.h.b = h.h.a + data_1;
     }
     @name("ingress.c.t") table c_t {
         actions = {
@@ -68,4 +68,3 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

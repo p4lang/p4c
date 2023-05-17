@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,11 +18,12 @@ limitations under the License.
 #define _FRONTENDS_P4_14_TYPECHECK_H_
 
 #include "ir/ir.h"
+#include "ir/pass_manager.h"
 
 /* This is the P4 v1.0/v1.1 typechecker/type inference algorithm */
 class TypeCheck : public PassManager {
-    std::map<const IR::Node *, const IR::Type *>        actionArgUseTypes;
-    int                                                 iterCounter = 0;
+    std::map<const IR::Node *, const IR::Type *> actionArgUseTypes;
+    int iterCounter = 0;
     class AssignInitialTypes;
     class InferExpressionsBottomUp;
     class InferExpressionsTopDown;
@@ -30,6 +31,7 @@ class TypeCheck : public PassManager {
     class InferActionArgsTopDown;
     class AssignActionArgTypes;
     class MakeImplicitCastsExplicit;
+
  public:
     TypeCheck();
     const IR::Node *apply_visitor(const IR::Node *, const char *) override;

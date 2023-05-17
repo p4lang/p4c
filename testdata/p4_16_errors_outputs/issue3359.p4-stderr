@@ -1,0 +1,12 @@
+issue3359.p4(14): [--Werror=type-error] error: t: cannot declare variables of type 'parser mypt' (consider using an instantiation)
+    mypt t = MyParser();
+    ^^^^^^^^^^^^^^^^^^^^
+issue3359.p4(1)
+parser mypt(in bit tt);
+       ^^^^
+issue3359.p4(25): [--Werror=type-error] error: t: cannot declare variables of type 'parser mypt' (consider using an instantiation)
+    mypt t;
+    ^^^^^^^
+issue3359.p4(1)
+parser mypt(in bit tt);
+       ^^^^

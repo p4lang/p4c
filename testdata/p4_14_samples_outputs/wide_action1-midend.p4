@@ -50,7 +50,7 @@ struct metadata {
 }
 
 struct headers {
-    @name(".data") 
+    @name(".data")
     data_t data;
 }
 
@@ -62,9 +62,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name(".setmeta") action setmeta(bit<32> v0, bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<16> v5, bit<16> v6) {
+    @name(".setmeta") action setmeta(@name("v0") bit<32> v0, @name("v1") bit<32> v1, @name("v2") bit<32> v2, @name("v3") bit<32> v3, @name("v4") bit<32> v4, @name("v5") bit<16> v5, @name("v6") bit<16> v6) {
         meta._m_m00 = v0;
         meta._m_m11 = v1;
         meta._m_m22 = v2;
@@ -76,12 +76,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".test1") table test1_0 {
         actions = {
             setmeta();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            hdr.data.f1: exact @name("data.f1") ;
+            hdr.data.f1: exact @name("data.f1");
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         test1_0.apply();
@@ -110,4 +110,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

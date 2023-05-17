@@ -20,7 +20,7 @@ control DeparserI(packet_out packet, in H hdr) {
 }
 
 parser parserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t stdmeta) {
-    ethernet_t tmp_0;
+    @name("parserI.tmp_0") ethernet_t tmp_0;
     bit<112> tmp_1;
     state start {
         tmp_1 = pkt.lookahead<bit<112>>();
@@ -60,4 +60,3 @@ control uc(inout H hdr, inout M meta) {
 }
 
 V1Switch<H, M>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
-

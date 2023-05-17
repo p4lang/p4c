@@ -2,6 +2,13 @@
 #define V1MODEL_VERSION 20200408
 #include <v1model.p4>
 
+enum bit<8> FieldLists {
+    none = 0,
+    clone_e2e_FL = 1,
+    recirculate_FL = 2,
+    resubmit_FL = 3
+}
+
 struct intrinsic_metadata_t {
     bit<48> ingress_global_timestamp;
     bit<48> egress_global_timestamp;
@@ -10,10 +17,14 @@ struct intrinsic_metadata_t {
 }
 
 struct mymeta_t {
+    @field_list(FieldLists.resubmit_FL)
     bit<8> resubmit_count;
+    @field_list(FieldLists.recirculate_FL)
     bit<8> recirculate_count;
+    @field_list(FieldLists.clone_e2e_FL)
     bit<8> clone_e2e_count;
     bit<8> last_ing_instance_type;
+    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL)
     bit<8> f1;
 }
 
@@ -28,14 +39,14 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name(".mymeta") 
+    @name(".mymeta")
     mymeta_t      mymeta;
-    @name(".temporaries") 
+    @name(".temporaries")
     temporaries_t temporaries;
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
 }
 
@@ -54,13 +65,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr - 48w23;
         meta.mymeta.f1 = meta.mymeta.f1 + 8w23;
         meta.mymeta.clone_e2e_count = meta.mymeta.clone_e2e_count + 8w1;
-        clone3(CloneType.E2E, (bit<32>)32w1, { meta.mymeta.clone_e2e_count, meta.mymeta.f1 });
+        clone_preserving_field_list(CloneType.E2E, (bit<32>)32w1, (bit<8>)FieldLists.clone_e2e_FL);
     }
     @name(".do_recirculate") action do_recirculate() {
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr - 48w19;
         meta.mymeta.f1 = meta.mymeta.f1 + 8w19;
         meta.mymeta.recirculate_count = meta.mymeta.recirculate_count + 8w1;
-        recirculate({ meta.mymeta.recirculate_count, meta.mymeta.f1 });
+        recirculate_preserving_field_list((bit<8>)FieldLists.recirculate_FL);
     }
     @name("._nop") action _nop() {
     }
@@ -71,15 +82,15 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name(".put_debug_vals_in_eth_dstaddr") action put_debug_vals_in_eth_dstaddr() {
         hdr.ethernet.dstAddr = 48w0;
         meta.temporaries.temp1 = (bit<48>)meta.mymeta.resubmit_count << 40;
-        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | meta.temporaries.temp1;
+        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | (bit<48>)meta.temporaries.temp1;
         meta.temporaries.temp1 = (bit<48>)meta.mymeta.recirculate_count << 32;
-        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | meta.temporaries.temp1;
+        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | (bit<48>)meta.temporaries.temp1;
         meta.temporaries.temp1 = (bit<48>)meta.mymeta.clone_e2e_count << 24;
-        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | meta.temporaries.temp1;
+        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | (bit<48>)meta.temporaries.temp1;
         meta.temporaries.temp1 = (bit<48>)meta.mymeta.f1 << 16;
-        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | meta.temporaries.temp1;
+        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | (bit<48>)meta.temporaries.temp1;
         meta.temporaries.temp1 = (bit<48>)meta.mymeta.last_ing_instance_type << 8;
-        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | meta.temporaries.temp1;
+        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | (bit<48>)meta.temporaries.temp1;
     }
     @name(".mark_egr_resubmit_packet") action mark_egr_resubmit_packet() {
         put_debug_vals_in_eth_dstaddr();
@@ -235,7 +246,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr - 48w17;
         meta.mymeta.f1 = meta.mymeta.f1 + 8w17;
         meta.mymeta.resubmit_count = meta.mymeta.resubmit_count + 8w1;
-        resubmit({ meta.mymeta.resubmit_count, meta.mymeta.f1 });
+        resubmit_preserving_field_list((bit<8>)FieldLists.resubmit_FL);
     }
     @name("._nop") action _nop() {
     }
@@ -375,4 +386,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

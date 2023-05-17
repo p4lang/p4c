@@ -21,7 +21,7 @@ struct metadata {
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
 }
 
@@ -42,7 +42,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name(".test_action") action test_action() {
         digest<test1_digest>(32w0x666, (test1_digest){dstAddr = hdr.ethernet.dstAddr,standard_metadata = standard_metadata});
@@ -50,9 +50,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".tbl0") table tbl0_0 {
         actions = {
             test_action();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         tbl0_0.apply();
@@ -81,4 +81,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

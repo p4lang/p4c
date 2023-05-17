@@ -1,0 +1,28 @@
+issue3534.p4(5): [--Werror=type-error] error: return ?:: values of type 'bit<2>' cannot be implicitly cast to type 'e'
+  return c ? v0 : v1; // { dg-error "" }
+  ^^^^^^
+issue3534.p4(1)
+enum bit<2> e{ t = 1}
+            ^
+issue3534.p4(9): [--Werror=type-error] error: ?:
+  return c ? v0 : v1; // { dg-error "" }
+         ^^^^^^^^^^^
+  ---- Actual error:
+issue3534.p4(1): Cannot unify type 'e' with type 'bit<2>'
+  enum bit<2> e{ t = 1}
+              ^
+  ---- Originating from:
+issue3534.p4(1): The expressions in a ?: conditional have different types 'bit<2>' and 'e'
+  enum bit<2> e{ t = 1}
+              ^
+issue3534.p4(13): [--Werror=type-error] error: ?:
+  return c ? v0 : v1; // { dg-error "" }
+         ^^^^^^^^^^^
+  ---- Actual error:
+issue3534.p4(1): Cannot unify type 'bit<2>' with type 'e'
+  enum bit<2> e{ t = 1}
+              ^
+  ---- Originating from:
+issue3534.p4(1): The expressions in a ?: conditional have different types 'e' and 'bit<2>'
+  enum bit<2> e{ t = 1}
+              ^

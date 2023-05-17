@@ -1,0 +1,6 @@
+issue2542.p4(13): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
+            eth_type: exact @name("dummy_key") ;
+            ^^^^^^^^
+issue2542.p4(26): [--Wwarn=mismatch] warning: 16w2: Constant key field
+        sub.apply(16w2);
+                  ^^^^

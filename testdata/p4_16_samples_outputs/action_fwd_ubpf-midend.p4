@@ -14,7 +14,7 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 }
 
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
-    bool hasReturned;
+    @name("pipe.hasReturned") bool hasReturned;
     @hidden action action_fwd_ubpf22() {
         std_meta.output_port = 32w2;
     }
@@ -69,7 +69,9 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
         } else {
             tbl_action_fwd_ubpf26.apply();
         }
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             tbl_action_fwd_ubpf28.apply();
         }
     }
@@ -81,4 +83,3 @@ control dprs(packet_out packet, in Headers_t headers) {
 }
 
 ubpf<Headers_t, metadata>(prs(), pipe(), dprs()) main;
-

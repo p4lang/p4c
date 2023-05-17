@@ -15,7 +15,7 @@ struct tuple_0 {
 
 extern void f<T>(in T data);
 control c(inout bit<1> r) {
-    S s_0;
+    @name("c.s") S s_0;
     apply {
         s_0 = (S){f1 = { (T){f = 1w0}, (T){f = 1w1} },f2 = (T){f = 1w0},z = 1w1};
         f<tuple<T, T>>(s_0.f1);
@@ -27,4 +27,3 @@ control c(inout bit<1> r) {
 control simple(inout bit<1> r);
 package top(simple e);
 top(c()) main;
-

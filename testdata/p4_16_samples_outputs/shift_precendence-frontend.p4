@@ -1,5 +1,5 @@
 control i(out bit<4> a, out bit<16> x) {
-    bit<4> tmp;
+    @name("i.tmp_0") bit<4> tmp;
     apply {
         tmp = 4w0;
         a = 4w1 & 4w2 + tmp >> 4w2;
@@ -10,4 +10,3 @@ control i(out bit<4> a, out bit<16> x) {
 control c(out bit<4> a, out bit<16> x);
 package top(c _c);
 top(i()) main;
-

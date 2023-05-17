@@ -21,7 +21,7 @@ struct metadata {
 }
 
 struct headers {
-    @name(".hdr0") 
+    @name(".hdr0")
     hdr0_t hdr0;
 }
 
@@ -41,89 +41,91 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_5() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_6() {
+    @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_7() {
+    @noWarn("unused") @name(".NoAction") action NoAction_4() {
     }
     @name(".do_nothing") action do_nothing() {
     }
-    @name(".do_nothing") action do_nothing_4() {
+    @name(".do_nothing") action do_nothing_1() {
     }
-    @name(".do_nothing") action do_nothing_5() {
+    @name(".do_nothing") action do_nothing_2() {
     }
-    @name(".do_nothing") action do_nothing_6() {
+    @name(".do_nothing") action do_nothing_3() {
     }
-    @name(".action_0") action action_0(bit<8> p) {
+    @name(".action_0") action action_0(@name("p") bit<8> p_3) {
         meta._meta_x0 = 16w1;
         meta._meta_y1 = 16w2;
     }
-    @name(".action_1") action action_1(bit<8> p) {
+    @name(".action_1") action action_1(@name("p") bit<8> p_4) {
         meta._meta_z2 = meta._meta_y1 + meta._meta_x0;
     }
-    @name(".action_1") action action_2(bit<8> p) {
+    @name(".action_1") action action_2(@name("p") bit<8> p_5) {
         meta._meta_z2 = meta._meta_y1 + meta._meta_x0;
     }
-    @name(".action_2") action action_7(bit<8> p) {
+    @name(".action_2") action action_6(@name("p") bit<8> p_6) {
         hdr.hdr0.a = meta._meta_z2;
     }
     @name(".t0") table t0_0 {
         actions = {
             do_nothing();
             action_0();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            hdr.hdr0.a: ternary @name("hdr0.a") ;
+            hdr.hdr0.a: ternary @name("hdr0.a");
         }
         size = 512;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name(".t1") table t1_0 {
         actions = {
-            do_nothing_4();
+            do_nothing_1();
             action_1();
-            @defaultonly NoAction_5();
+            @defaultonly NoAction_2();
         }
         key = {
-            hdr.hdr0.a: ternary @name("hdr0.a") ;
+            hdr.hdr0.a: ternary @name("hdr0.a");
         }
         size = 512;
-        default_action = NoAction_5();
+        default_action = NoAction_2();
     }
     @name(".t2") table t2_0 {
         actions = {
-            do_nothing_5();
-            action_7();
-            @defaultonly NoAction_6();
+            do_nothing_2();
+            action_6();
+            @defaultonly NoAction_3();
         }
         key = {
-            meta._meta_y1: ternary @name("meta.y") ;
-            meta._meta_z2: exact @name("meta.z") ;
+            meta._meta_y1: ternary @name("meta.y");
+            meta._meta_z2: exact @name("meta.z");
         }
         size = 512;
-        default_action = NoAction_6();
+        default_action = NoAction_3();
     }
     @name(".t3") table t3_0 {
         actions = {
-            do_nothing_6();
+            do_nothing_3();
             action_2();
-            @defaultonly NoAction_7();
+            @defaultonly NoAction_4();
         }
         key = {
-            hdr.hdr0.a: ternary @name("hdr0.a") ;
+            hdr.hdr0.a: ternary @name("hdr0.a");
         }
         size = 512;
-        default_action = NoAction_7();
+        default_action = NoAction_4();
     }
     apply {
         if (hdr.hdr0.isValid()) {
             t0_0.apply();
         }
-        if (!hdr.hdr0.isValid()) {
+        if (hdr.hdr0.isValid()) {
+            ;
+        } else {
             t1_0.apply();
         }
         if (hdr.hdr0.isValid() || hdr.hdr0.isValid()) {
@@ -152,4 +154,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

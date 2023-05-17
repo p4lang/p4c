@@ -133,7 +133,6 @@ control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t met
                 tbl3.apply();
             }
         }
-
     }
 }
 
@@ -150,4 +149,3 @@ control deparser(packet_out b, in packet_t hdrs) {
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

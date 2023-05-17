@@ -116,10 +116,15 @@ struct headers {
 }
 
 struct metadata {
+    @field_list(0)
     port_t  ingress_port;
+    @field_list(0)
     task_t  task;
+    @field_list(0)
     bit<16> tcp_length;
+    @field_list(0)
     bit<32> cast_length;
+    @field_list(0)
     bit<1>  do_cksum;
 }
 
@@ -204,12 +209,12 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     action controller_debug() {
         meta.task = 16w3;
         meta.ingress_port = standard_metadata.ingress_port;
-        clone3<metadata>(CloneType.I2E, 32w100, meta);
+        clone_preserving_field_list(CloneType.I2E, 32w100, 8w0);
     }
     action controller_reply(task_t task) {
         meta.task = task;
         meta.ingress_port = standard_metadata.ingress_port;
-        clone3<metadata>(CloneType.I2E, 32w100, meta);
+        clone_preserving_field_list(CloneType.I2E, 32w100, 8w0);
     }
     action multicast_pkg(mcast_t mcast_grp) {
         standard_metadata.mcast_grp = mcast_grp;
@@ -232,8 +237,8 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     table ndp_answer {
         key = {
-            hdr.ipv6.dst_addr: exact @name("hdr.ipv6.dst_addr") ;
-            hdr.icmp6.type   : exact @name("hdr.icmp6.type") ;
+            hdr.ipv6.dst_addr: exact @name("hdr.ipv6.dst_addr");
+            hdr.icmp6.type   : exact @name("hdr.icmp6.type");
         }
         actions = {
             controller_debug();
@@ -245,7 +250,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     table port2mcast {
         key = {
-            standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port") ;
+            standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port");
         }
         actions = {
             multicast_pkg();
@@ -257,7 +262,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     table addr2mcast {
         key = {
-            hdr.ipv6.dst_addr: exact @name("hdr.ipv6.dst_addr") ;
+            hdr.ipv6.dst_addr: exact @name("hdr.ipv6.dst_addr");
         }
         actions = {
             multicast_pkg();
@@ -269,8 +274,8 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     table ndp {
         key = {
-            hdr.ipv6.dst_addr             : lpm @name("hdr.ipv6.dst_addr") ;
-            standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port") ;
+            hdr.ipv6.dst_addr             : lpm @name("hdr.ipv6.dst_addr");
+            standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port");
         }
         actions = {
             multicast_pkg();
@@ -292,7 +297,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     table v6_addresses {
         key = {
-            hdr.ipv6.dst_addr: exact @name("hdr.ipv6.dst_addr") ;
+            hdr.ipv6.dst_addr: exact @name("hdr.ipv6.dst_addr");
         }
         actions = {
             controller_debug();
@@ -305,7 +310,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     table v6_networks {
         key = {
-            hdr.ipv6.dst_addr: lpm @name("hdr.ipv6.dst_addr") ;
+            hdr.ipv6.dst_addr: lpm @name("hdr.ipv6.dst_addr");
         }
         actions = {
             set_egress_port();
@@ -318,7 +323,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     table v4_networks {
         key = {
-            hdr.ipv4.dst_addr: lpm @name("hdr.ipv4.dst_addr") ;
+            hdr.ipv4.dst_addr: lpm @name("hdr.ipv4.dst_addr");
         }
         actions = {
             set_egress_port();
@@ -351,4 +356,3 @@ control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata
 }
 
 V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

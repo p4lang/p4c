@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_USELESSCASTS_H_
 #define _FRONTENDS_P4_USELESSCASTS_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -27,17 +27,19 @@ Removes casts where the input expression has the exact same type
 as the cast type
 */
 class RemoveUselessCasts : public Transform {
-    const P4::TypeMap* typeMap;
+    const P4::TypeMap *typeMap;
 
  public:
-    explicit RemoveUselessCasts(const P4::TypeMap* typeMap): typeMap(typeMap)
-    { CHECK_NULL(typeMap); setName("RemoveUselessCasts"); }
-    const IR::Node* postorder(IR::Cast* cast) override;
+    explicit RemoveUselessCasts(const P4::TypeMap *typeMap) : typeMap(typeMap) {
+        CHECK_NULL(typeMap);
+        setName("RemoveUselessCasts");
+    }
+    const IR::Node *postorder(IR::Cast *cast) override;
 };
 
 class UselessCasts : public PassManager {
  public:
-    UselessCasts(ReferenceMap* refMap, TypeMap* typeMap) {
+    UselessCasts(ReferenceMap *refMap, TypeMap *typeMap) {
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new RemoveUselessCasts(typeMap));
         setName("UselessCasts");

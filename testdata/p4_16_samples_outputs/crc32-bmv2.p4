@@ -118,7 +118,6 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
                         P4CALC_CARET : operation_xor();
                         P4CALC_CRC : operation_crc();
         }
-
     }
     apply {
         if (hdr.p4calc.isValid()) {
@@ -148,4 +147,3 @@ control MyDeparser(packet_out packet, in headers hdr) {
 }
 
 V1Switch(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

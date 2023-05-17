@@ -28,19 +28,19 @@ parser MyParser(packet_in b, out my_packet p, inout my_metadata m, inout standar
 }
 
 control MyIngress(inout my_packet p, inout my_metadata meta, inout standard_metadata_t s) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyIngress.set_data") action set_data() {
     }
     @name("MyIngress.t") table t_0 {
         actions = {
             set_data();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
-            meta.err: exact @name("meta.err") ;
+            meta.err: exact @name("meta.err");
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         t_0.apply();
@@ -58,6 +58,4 @@ control MyDeparser(packet_out b, in my_packet p) {
 }
 
 Pipeline<my_packet, my_metadata>(MyParser(), MyIngress(), MyEgress(), MyDeparser()) p0;
-
 Switch<my_packet, my_metadata, _, _>(p0) main;
-

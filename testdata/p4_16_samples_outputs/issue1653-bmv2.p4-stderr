@@ -1,0 +1,3 @@
+issue1653-bmv2.p4(47): [--Wwarn=invalid_header] warning: accessing a field of an invalid header bh
+        bh.x = h.bvh0.x;
+        ^^

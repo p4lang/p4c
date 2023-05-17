@@ -43,20 +43,20 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.c.a") action c_a_0() {
         h.h.b = h.h.a;
     }
     @name("ingress.c.t") table c_t {
         key = {
-            h.h.a + 32w1: exact @name("e") ;
+            h.h.a + 32w1: exact @name("e");
         }
         actions = {
             c_a_0();
-            NoAction_0();
+            NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         c_t.apply();
@@ -65,4 +65,3 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

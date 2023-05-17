@@ -21,7 +21,6 @@ control c() {
         const entries = {
                         (true, 1, true) : multicast(2);
         }
-
     }
     apply {
         forward.apply();
@@ -31,4 +30,3 @@ control c() {
 control empty();
 package top(empty _e);
 top(c()) main;
-

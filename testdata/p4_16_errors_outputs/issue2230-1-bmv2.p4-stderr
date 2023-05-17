@@ -1,18 +1,57 @@
-issue2230-1-bmv2.p4(115): [--Werror=type-error] error: c1.apply: Cannot unify s1_t with s2_t
+issue2230-1-bmv2.p4(115): [--Werror=type-error] error: c1.apply
         c1.apply(hdr.h1, s1);
         ^^^^^^^^^^^^^^^^^^^^
-issue2230-1-bmv2.p4(38)
-struct s1_t {
-       ^^^^
+  ---- Actual error:
+issue2230-1-bmv2.p4(38): Cannot unify 's1_t' with 's2_t'
+  struct s1_t {
+         ^^^^
 issue2230-1-bmv2.p4(43)
-struct s2_t {
-       ^^^^
-issue2230-1-bmv2.p4(137): [--Werror=type-error] error: funky_swap: Cannot unify s1_t with s2_t
+  struct s2_t {
+         ^^^^
+  ---- Originating from:
+issue2230-1-bmv2.p4(115): Type of argument 's1' (struct s1_t) does not match type of parameter 's2' (struct s2_t)
+          c1.apply(hdr.h1, s1);
+                           ^^
+issue2230-1-bmv2.p4(38)
+  struct s1_t {
+         ^^^^
+issue2230-1-bmv2.p4(82)
+  control myCtrl(inout h2_t h2, inout s2_t s2)
+                                           ^^
+issue2230-1-bmv2.p4(43)
+  struct s2_t {
+         ^^^^
+  ---- Originating from:
+issue2230-1-bmv2.p4(115): Function type 'myCtrl' does not match invocation type '<Method call>'
+          c1.apply(hdr.h1, s1);
+          ^^^^^^^^^^^^^^^^^^^^
+issue2230-1-bmv2.p4(137): [--Werror=type-error] error: funky_swap
         s1 = funky_swap(s1);
              ^^^^^^^^^^^^^^
-issue2230-1-bmv2.p4(38)
-struct s1_t {
-       ^^^^
+  ---- Actual error:
+issue2230-1-bmv2.p4(38): Cannot unify 's1_t' with 's2_t'
+  struct s1_t {
+         ^^^^
 issue2230-1-bmv2.p4(43)
-struct s2_t {
-       ^^^^
+  struct s2_t {
+         ^^^^
+  ---- Originating from:
+issue2230-1-bmv2.p4(137): Type of argument 's1' (struct s1_t) does not match type of parameter 's2' (struct s2_t)
+          s1 = funky_swap(s1);
+                          ^^
+issue2230-1-bmv2.p4(38)
+  struct s1_t {
+         ^^^^
+issue2230-1-bmv2.p4(72)
+  s2_t funky_swap(in s2_t s2)
+                          ^^
+issue2230-1-bmv2.p4(43)
+  struct s2_t {
+         ^^^^
+  ---- Originating from:
+issue2230-1-bmv2.p4(72): Function type 'funky_swap' does not match invocation type '<Method call>'
+  s2_t funky_swap(in s2_t s2)
+       ^^^^^^^^^^
+issue2230-1-bmv2.p4(137)
+          s1 = funky_swap(s1);
+               ^^^^^^^^^^^^^^

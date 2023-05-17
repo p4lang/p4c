@@ -12,21 +12,21 @@ header H {
 }
 
 control c(out B32 x) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @name("c.k") N32 k_0;
+    @name("c.b") bit<32> b_0;
+    @name("c.n") N32 n_0;
+    @name("c.n1") N32 n1_0;
+    @name("c.s") S s_0;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    N32 k_0;
-    bit<32> b_0;
-    N32 n_0;
-    N32 n1_0;
-    S s_0;
     @name("c.t") table t_0 {
         actions = {
-            NoAction_0();
+            NoAction_1();
         }
         key = {
-            k_0: exact @name("k") ;
+            k_0: exact @name("k");
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         b_0 = 32w0;
@@ -49,4 +49,3 @@ control c(out B32 x) {
 control e(out B32 x);
 package top(e _e);
 top(c()) main;
-

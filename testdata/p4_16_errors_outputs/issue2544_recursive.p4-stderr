@@ -1,0 +1,6 @@
+issue2544_recursive.p4(2): [--Werror=unsupported] error: Self-referencing types not supported: 'S' within 'struct S'
+struct S { S x; }
+           ^
+issue2544_recursive.p4(2)
+struct S { S x; }
+       ^

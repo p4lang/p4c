@@ -1,9 +1,9 @@
 extern bit<32> f(in bit<32> x);
 control c(inout bit<32> r) {
-    bit<32> tmp;
-    bool tmp_0;
-    bit<32> tmp_1;
-    bool tmp_2;
+    @name("c.tmp") bit<32> tmp;
+    @name("c.tmp_0") bool tmp_0;
+    @name("c.tmp_1") bit<32> tmp_1;
+    @name("c.tmp_2") bool tmp_2;
     apply {
         tmp = f(32w2);
         tmp_0 = tmp > 32w0;
@@ -24,4 +24,3 @@ control c(inout bit<32> r) {
 control simple(inout bit<32> r);
 package top(simple e);
 top(c()) main;
-

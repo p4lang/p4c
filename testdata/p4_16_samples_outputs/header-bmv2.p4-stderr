@@ -1,0 +1,6 @@
+header-bmv2.p4(27): [--Wwarn=invalid_header] warning: accessing a field of an invalid header tmp
+        tmp.f = h.f + 1;
+        ^^^
+header-bmv2.p4(28): [--Wwarn=invalid_header] warning: accessing a field of an invalid header tmp
+        h.f = tmp.f;
+              ^^^

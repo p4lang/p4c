@@ -29,9 +29,9 @@ struct tuple_0 {
 }
 
 control MyIngress(inout my_packet p, inout my_metadata m, inout standard_metadata_t s) {
-    bit<32> x_0;
+    @name("MyIngress.x") bit<32> x_0;
     @hidden action issue430bmv2l40() {
-        hash<bit<32>, bit<32>, tuple_0, bit<32>>(x_0, HashAlgorithm.crc32, 32w0, { p.h.f ^ 32w0xffff }, 32w65536);
+        hash<bit<32>, bit<32>, tuple_0, bit<32>>(x_0, HashAlgorithm.crc32, 32w0, (tuple_0){f0 = p.h.f ^ 32w0xffff}, 32w65536);
     }
     @hidden table tbl_issue430bmv2l40 {
         actions = {
@@ -60,4 +60,3 @@ control MyDeparser(packet_out b, in my_packet p) {
 }
 
 V1Switch<my_packet, my_metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

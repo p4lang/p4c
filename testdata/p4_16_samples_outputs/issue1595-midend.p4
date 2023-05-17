@@ -2,11 +2,10 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<48> EthernetAddress;
 header Ethernet_h {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 struct Parsed_packet {
@@ -32,7 +31,7 @@ parser parserI(packet_in pkt, out Parsed_packet hdr, inout metadata_t meta, inou
 }
 
 control cIngress(inout Parsed_packet hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("cIngress.a1") action a1() {
         hdr.ethernet.srcAddr = 48w1;
@@ -48,16 +47,16 @@ control cIngress(inout Parsed_packet hdr, inout metadata_t meta, inout standard_
     }
     @name("cIngress.t1") table t1_0 {
         key = {
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
+            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr");
         }
         actions = {
             a1();
             a2();
             a3();
             a4();
-            NoAction_0();
+            NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @hidden action issue1595l76() {
         hdr.ethernet.srcAddr[39:32] = 8w2;
@@ -108,11 +107,10 @@ control cIngress(inout Parsed_packet hdr, inout metadata_t meta, inout standard_
             a4: {
                 tbl_issue1595l78.apply();
             }
-            NoAction_0: {
+            NoAction_1: {
                 tbl_issue1595l79.apply();
             }
         }
-
     }
 }
 
@@ -132,4 +130,3 @@ control uc(inout Parsed_packet hdr, inout metadata_t meta) {
 }
 
 V1Switch<Parsed_packet, metadata_t>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
-

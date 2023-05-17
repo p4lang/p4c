@@ -3,7 +3,7 @@ error {
     BadIPv4HeaderChecksum
 }
 #include <core.p4>
-#include <psa.p4>
+#include <bmv2/psa.p4>
 
 typedef bit<48> EthernetAddress;
 header ethernet_t {
@@ -60,9 +60,9 @@ struct headers {
 typedef bit<32> PacketCounter_t;
 typedef bit<8> ErrorIndex_t;
 parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
-    bit<16> tmp;
-    bool tmp_0;
-    bool tmp_1;
+    @name("IngressParserImpl.tmp") bit<16> tmp;
+    @name("IngressParserImpl.tmp_0") bool tmp_0;
+    @name("IngressParserImpl.tmp_1") bool tmp_1;
     @name("IngressParserImpl.ck") InternetChecksum() ck_0;
     state start {
         buffer.extract<ethernet_t>(hdr.ethernet);
@@ -92,16 +92,19 @@ parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @noWarnUnused @name(".ingress_drop") action ingress_drop(inout psa_ingress_output_metadata_t meta_1) {
-        meta_1.drop = true;
+    @name("ingress.meta") psa_ingress_output_metadata_t meta_0;
+    @noWarn("unused") @name(".ingress_drop") action ingress_drop_0() {
+        meta_0 = ostd;
+        meta_0.drop = true;
+        ostd = meta_0;
     }
     @name("ingress.parser_error_counts") DirectCounter<PacketCounter_t>(PSA_CounterType_t.PACKETS) parser_error_counts_0;
-    @name("ingress.set_error_idx") action set_error_idx(ErrorIndex_t idx) {
+    @name("ingress.set_error_idx") action set_error_idx(@name("idx") ErrorIndex_t idx) {
         parser_error_counts_0.count();
     }
     @name("ingress.parser_error_count_and_convert") table parser_error_count_and_convert_0 {
         key = {
-            istd.parser_error: exact @name("istd.parser_error") ;
+            istd.parser_error: exact @name("istd.parser_error");
         }
         actions = {
             set_error_idx();
@@ -117,13 +120,12 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
                         error.BadIPv4HeaderChecksum : set_error_idx(8w7);
                         error.UnhandledIPv4Options : set_error_idx(8w8);
         }
-
         psa_direct_counter = parser_error_counts_0;
     }
     apply {
         if (istd.parser_error != error.NoError) {
             parser_error_count_and_convert_0.apply();
-            ingress_drop(ostd);
+            ingress_drop_0();
             exit;
         }
     }
@@ -161,8 +163,5 @@ control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_met
 }
 
 IngressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-
 EgressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-
 PSA_Switch<headers, metadata, headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

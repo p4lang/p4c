@@ -1,0 +1,8 @@
+issue2409.p4(3): [--Wwarn=uninitialized_out_param] warning: out parameter 'z' may be uninitialized when 'p' terminates
+parser p(out bit<32> z) {
+                     ^
+issue2409.p4(3)
+parser p(out bit<32> z) {
+       ^
+[--Wwarn=parser-transition] warning: SelectCase: unreachable case
+[--Wwarn=parser-transition] warning: SelectCase: unreachable case

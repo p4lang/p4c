@@ -1,0 +1,17 @@
+packet  0 01 23 45 67 89
+expect  1 2a 23 45 67 89
+
+packet  1 01 23 45 67 89
+expect  1 2a 23 45 67 89
+
+packet  2 01 23 45 67 89
+expect 10 01 2a 67 89
+
+packet  2 2a 23 45 67 89
+expect  1 2a 2a 67 89
+
+packet  3 01 23 45 67 89
+expect 10 01 2a 45 67 89
+
+packet  3 2a 23 45 67 89
+expect  1 2a 2a 45 67 89

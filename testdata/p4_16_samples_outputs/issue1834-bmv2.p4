@@ -29,7 +29,6 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
         const entries = {
                         1 : act(1);
         }
-
     }
     apply {
         test_table.apply();
@@ -57,4 +56,3 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 }
 
 V1Switch(ParserImpl(), VerifyChecksumImpl(), IngressImpl(), EgressImpl(), ComputeChecksumImpl(), DeparserImpl()) main;
-

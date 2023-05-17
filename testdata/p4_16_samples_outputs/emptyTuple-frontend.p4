@@ -1,6 +1,6 @@
 typedef tuple<> emptyTuple;
 control c(out bool b) {
-    emptyTuple t_0;
+    @name("c.t") emptyTuple t_0;
     apply {
         t_0 = {  };
         if (t_0 == {  }) {
@@ -14,4 +14,3 @@ control c(out bool b) {
 control e(out bool b);
 package top(e _e);
 top(c()) main;
-

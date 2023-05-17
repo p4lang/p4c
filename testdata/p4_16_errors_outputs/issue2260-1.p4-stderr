@@ -1,3 +1,17 @@
-issue2260-1.p4(8): [--Werror=type-error] error: f: Cannot unify type int with return type
+issue2260-1.p4(8): [--Werror=type-error] error: f
         bit<8> y = f(255);
                    ^^^^^^
+  ---- Actual error:
+  'int' type can only be unified with 'int', 'bit<>', or 'signed<>' types, not with '<returned type>'
+  ---- Originating from:
+issue2260-1.p4(3): Return type 'T' cannot be used for '<returned type>'
+  T f<T>(T x) {
+      ^
+  Where 'T' is bound to 'int'
+  ---- Originating from:
+issue2260-1.p4(3): Function type 'f' does not match invocation type '<Method call>'
+  T f<T>(T x) {
+    ^
+issue2260-1.p4(8)
+          bit<8> y = f(255);
+                     ^^^^^^

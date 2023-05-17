@@ -21,7 +21,6 @@ control MyC(inout bit<2> x) {
                         2 : a();
                         3 : b();
         }
-
     }
     apply {
         t.apply();
@@ -29,4 +28,3 @@ control MyC(inout bit<2> x) {
 }
 
 S(MyC()) main;
-
