@@ -150,17 +150,13 @@ ConstructorCall *ConstructorCall::resolve(const IR::ConstructorCallExpression *c
     if (auto tsc = ct->to<IR::Type_SpecializedCanonical>())
         ct = typeMap ? typeMap->getTypeType(tsc->baseType, true) : tsc;
 
-    if (ct->is<IR::Type_Extern>()) {
-        auto decl = refMap->getDeclaration(type->path, true);
-        auto ext = decl->to<IR::Type_Extern>();
-        BUG_CHECK(ext, "%1%: expected an extern type", dbp(decl));
+    auto decl = refMap->getDeclaration(type->path, true);
+    if (auto ext = decl ? decl->to<IR::Type_Extern>() : nullptr) {
         auto constr = ext->lookupConstructor(cce->arguments);
         result = new ExternConstructorCall(cce, ext->to<IR::Type_Extern>(), constr);
         BUG_CHECK(constr, "%1%: constructor not found", ext);
         constructorParameters = constr->type->parameters;
-    } else if (ct->is<IR::IContainer>()) {
-        auto decl = refMap->getDeclaration(type->path, true);
-        auto cont = decl->to<IR::IContainer>();
+    } else if (auto cont = decl ? decl->to<IR::IContainer>() : nullptr) {
         BUG_CHECK(cont, "%1%: expected a container", dbp(decl));
         result = new ContainerConstructorCall(cce, cont);
         constructorParameters = cont->getConstructorParameters();
