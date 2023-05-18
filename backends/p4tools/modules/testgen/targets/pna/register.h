@@ -11,10 +11,10 @@
 namespace P4Tools::P4Testgen {
 
 /// Register the PNA compiler target with the tools framework.
-inline void pna_registerCompilerTarget() { Pna::PnaDpdkCompilerTarget::make(); }
+inline void pnaRegisterCompilerTarget() { Pna::PnaDpdkCompilerTarget::make(); }
 
 /// Register the PNA testgen target with the testgen framework.
-inline void pna_registerTestgenTarget() { Pna::PnaDpdkTestgenTarget::make(); }
+inline void pnaRegisterTestgenTarget() { Pna::PnaDpdkTestgenTarget::make(); }
 
 }  // namespace P4Tools::P4Testgen
 
