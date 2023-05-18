@@ -32,7 +32,7 @@ option(P4TOOLS_TESTGEN_BMV2_TEST_PROTOBUF "Run tests on the Protobuf test back e
 option(P4TOOLS_TESTGEN_BMV2_TEST_PTF "Run tests on the PTF test back end" ON)
 option(P4TOOLS_TESTGEN_BMV2_TEST_STF "Run tests on the STF test back end" ON)
 # Test settings.
-set(EXTRA_OPTS "--strict --print-traces --seed 1000 --max-tests 10 ")
+set(EXTRA_OPTS "--strict --print-traces --seed 1000 --max-tests 500 --path-selection GREEDY_STATEMENT_SEARCH --track-coverage STATEMENTS --stop-metric MAX_STATEMENT_COVERAGE")
 
 # ASSERT_ASSUME TESTS
 include(${CMAKE_CURRENT_LIST_DIR}/AssumeAssertTests.cmake)

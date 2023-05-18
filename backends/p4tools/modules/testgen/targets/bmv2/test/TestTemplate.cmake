@@ -150,7 +150,7 @@ function(p4tools_add_test_with_args)
     WORKING_DIRECTORY ${P4TESTGEN_DIR}
   )
   if(NOT DEFINED ${tag}_timeout)
-    set(${tag}_timeout 300)
+    set(${tag}_timeout 3000)
   endif()
   set_tests_properties(${__testname} PROPERTIES LABELS ${tag} TIMEOUT ${${tag}_timeout})
 endfunction(p4tools_add_test_with_args)
