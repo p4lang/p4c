@@ -179,10 +179,11 @@ void AbstractExecutionState::declareVariable(const Target &target,
     }
     const auto *declType = resolveType(declVar.type);
 
-    if (const auto *structType = declType->to<IR::Type_StructLike>()) {
-        const auto *parentExpr =
-            new IR::PathExpression(structType, new IR::Path(declVar.name.name));
-        initializeStructLike(target, parentExpr, false);
+    // If the variable does not have an initializer we need to create a new, uninitialized value for
+    // it.
+    const auto *leftExpr = new IR::PathExpression(declType, new IR::Path(declVar.name.name));
+    if (declType->is<IR::Type_StructLike>()) {
+        initializeStructLike(target, leftExpr, false);
     } else if (const auto *stackType = declType->to<IR::Type_Stack>()) {
         const auto *stackSizeExpr = stackType->size;
         auto stackSize = stackSizeExpr->checkedTo<IR::Constant>()->asInt();
@@ -198,10 +199,7 @@ void AbstractExecutionState::declareVariable(const Target &target,
             initializeStructLike(target, parentExpr, false);
         }
     } else if (declType->is<IR::Type_Base>()) {
-        // If the variable does not have an initializer we need to create a new value for it. For
-        // now we just use the name directly.
-        const auto *left = new IR::PathExpression(declType, new IR::Path(declVar.name.name));
-        set(left, target.createTargetUninitialized(declType, false));
+        set(leftExpr, target.createTargetUninitialized(declType, false));
     } else {
         P4C_UNIMPLEMENTED("Unsupported declaration type %1% node: %2%", declType,
                           declType->node_type_name());
@@ -215,24 +213,22 @@ void AbstractExecutionState::copyIn(const Target &target, const IR::Parameter *i
     if (paramType->is<IR::Type_Extern>()) {
         return;
     }
+    const auto *internalParamRef =
+        new IR::PathExpression(paramType, new IR::Path(internalParam->getName().name));
     if (paramType->is<IR::Type_StructLike>()) {
-        const auto *externalParamRef =
-            new IR::PathExpression(paramType, new IR::Path(externalParamName));
-        const auto *internalParamRef =
-            new IR::PathExpression(paramType, new IR::Path(internalParam->controlPlaneName()));
         if (internalParam->direction == IR::Direction::Out) {
             initializeStructLike(target, internalParamRef, false);
         } else {
+            const auto *externalParamRef =
+                new IR::PathExpression(paramType, new IR::Path(externalParamName));
             setStructLike(internalParamRef, externalParamRef);
         }
     } else if (const auto *tb = paramType->to<IR::Type_Base>()) {
-        const auto &externalParamRef =
-            ToolsVariables::getStateVariable(paramType, externalParamName);
-        const auto &internalParamRef =
-            ToolsVariables::getStateVariable(paramType, internalParam->controlPlaneName());
         if (internalParam->direction == IR::Direction::Out) {
             set(internalParamRef, target.createTargetUninitialized(tb, false));
         } else {
+            const auto *externalParamRef =
+                new IR::PathExpression(paramType, new IR::Path(externalParamName));
             set(internalParamRef, get(externalParamRef));
         }
     } else {
@@ -247,24 +243,18 @@ void AbstractExecutionState::copyOut(const IR::Parameter *internalParam,
     if (paramType->is<IR::Type_Extern>()) {
         return;
     }
+    if (internalParam->direction != IR::Direction::Out &&
+        internalParam->direction != IR::Direction::InOut) {
+        return;
+    }
+    const auto *externalParamRef =
+        new IR::PathExpression(paramType, new IR::Path(externalParamName));
+    const auto *internalParamRef =
+        new IR::PathExpression(paramType, new IR::Path(internalParam->getName().name));
     if (paramType->is<IR::Type_StructLike>()) {
-        const auto *externalParamRef =
-            new IR::PathExpression(paramType, new IR::Path(externalParamName));
-        const auto *internalParamRef =
-            new IR::PathExpression(paramType, new IR::Path(internalParam->controlPlaneName()));
-        if (internalParam->direction == IR::Direction::Out ||
-            internalParam->direction == IR::Direction::InOut) {
-            setStructLike(externalParamRef, internalParamRef);
-        }
+        setStructLike(externalParamRef, internalParamRef);
     } else if (paramType->is<IR::Type_Base>()) {
-        const auto &externalParamRef =
-            ToolsVariables::getStateVariable(paramType, externalParamName);
-        const auto &internalParamRef =
-            ToolsVariables::getStateVariable(paramType, internalParam->controlPlaneName());
-        if (internalParam->direction == IR::Direction::Out ||
-            internalParam->direction == IR::Direction::InOut) {
-            set(externalParamRef, get(internalParamRef));
-        }
+        set(externalParamRef, get(internalParamRef));
     } else {
         P4C_UNIMPLEMENTED("Unsupported copy-in type %1%", paramType->node_type_name());
     }
@@ -297,7 +287,6 @@ void AbstractExecutionState::initializeBlockParams(const Target &target,
     const auto *params = iApply->getApplyParameters();
     for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
         const auto *param = params->getParameter(paramIdx);
-        const auto *paramType = param->type;
         // Retrieve the identifier of the global architecture map using the parameter index.
         auto archRef = blockParams->at(paramIdx);
         // Irrelevant parameter. Ignore.
@@ -305,13 +294,12 @@ void AbstractExecutionState::initializeBlockParams(const Target &target,
             continue;
         }
         // We need to resolve type names.
-        paramType = resolveType(paramType);
+        const auto *paramType = resolveType(param->type);
+        const auto *archPath = new IR::PathExpression(paramType, new IR::Path(archRef));
         if (paramType->is<IR::Type_StructLike>()) {
-            const auto *paramRef = new IR::PathExpression(paramType, new IR::Path(archRef));
-            initializeStructLike(target, paramRef, false);
+            initializeStructLike(target, archPath, false);
         } else if (paramType->is<IR::Type_Base>()) {
-            const auto &paramRef = ToolsVariables::getStateVariable(paramType, archRef);
-            set(paramRef, target.createTargetUninitialized(paramType, false));
+            set(archPath, target.createTargetUninitialized(paramType, false));
         } else {
             P4C_UNIMPLEMENTED("Unsupported initialization type %1%", paramType->node_type_name());
         }

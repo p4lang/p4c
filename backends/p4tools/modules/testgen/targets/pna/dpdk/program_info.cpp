@@ -66,8 +66,16 @@ std::vector<Continuation::Command> PnaDpdkProgramInfo::processDeclaration(
     const auto *archMember = archSpec->getArchMember(blockIdx);
 
     std::vector<Continuation::Command> cmds;
+    // Copy-in.
+    const auto *copyInCall = new IR::MethodCallStatement(
+        Utils::generateInternalMethodCall("copy_in", {new IR::PathExpression(typeDecl->name)}));
+    cmds.emplace_back(copyInCall);
     // Insert the actual pipeline.
     cmds.emplace_back(typeDecl);
+    // Copy-out.
+    const auto *copyOutCall = new IR::MethodCallStatement(
+        Utils::generateInternalMethodCall("copy_out", {new IR::PathExpression(typeDecl->name)}));
+    cmds.emplace_back(copyOutCall);
 
     auto *dropStmt =
         new IR::MethodCallStatement(Utils::generateInternalMethodCall("drop_and_exit", {}));

@@ -276,7 +276,41 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
              nextState.replaceTopBody(Continuation::Exception::Drop);
              result->emplace_back(nextState);
          }},
+        /* ======================================================================================
+         *  copy_in
+         *  Applies CopyIn to the provided reference to a control or parser block. The block
+         * reference is resolved and we iterate over all the parameters, copying in values
+         * appropriately.
+         * ======================================================================================
+         */
+        {"*.copy_in",
+         {"blockRef"},
+         [this](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+                IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+                const ExecutionState &state, SmallStepEvaluator::Result &result) {
+             const auto *blockRef = args->at(0)->expression->checkedTo<IR::PathExpression>();
+             const auto *block = state.findDecl(blockRef);
+             const auto *archSpec = TestgenTarget::getArchSpec();
+             auto blockName = block->getName().name;
+             auto &nextState = state.clone();
+             auto canonicalName = getProgramInfo().getCanonicalBlockName(blockName);
+             const auto *blockApply = block->to<IR::IApply>();
+             CHECK_NULL(blockApply);
+             const auto *blockParams = blockApply->getApplyParameters();
 
+             // Copy-in.
+             // Get the current level and disable it for these operations to avoid overtainting.
+             auto currentTaint = state.getProperty<bool>("inUndefinedState");
+             nextState.setProperty("inUndefinedState", false);
+             for (size_t paramIdx = 0; paramIdx < blockParams->size(); ++paramIdx) {
+                 const auto *internalParam = blockParams->getParameter(paramIdx);
+                 auto externalParamName = archSpec->getParamName(canonicalName, paramIdx);
+                 nextState.copyIn(TestgenTarget::get(), internalParam, externalParamName);
+             }
+             nextState.setProperty("inUndefinedState", currentTaint);
+             nextState.popBody();
+             result->emplace_back(nextState);
+         }},
         /* ======================================================================================
          *  copy_out
          *  Applies CopyOut to the provided reference to a control or parser block. The block
@@ -306,7 +340,6 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
              for (size_t paramIdx = 0; paramIdx < blockParams->size(); ++paramIdx) {
                  const auto *internalParam = blockParams->getParameter(paramIdx);
                  auto externalParamName = archSpec->getParamName(canonicalName, paramIdx);
-                 printf("COPPIYING FROM %s to %s\n", internalParam->toString(), externalParamName);
                  nextState.copyOut(internalParam, externalParamName);
              }
              nextState.setProperty("inUndefinedState", currentTaint);

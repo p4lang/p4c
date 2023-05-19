@@ -83,8 +83,16 @@ std::vector<Continuation::Command> EBPFProgramInfo::processDeclaration(
 
     std::vector<Continuation::Command> cmds;
 
+    // Copy-in.
+    const auto *copyInCall = new IR::MethodCallStatement(
+        Utils::generateInternalMethodCall("copy_in", {new IR::PathExpression(typeDecl->name)}));
+    cmds.emplace_back(copyInCall);
     // Insert the actual pipeline.
     cmds.emplace_back(typeDecl);
+    // Copy-out.
+    const auto *copyOutCall = new IR::MethodCallStatement(
+        Utils::generateInternalMethodCall("copy_out", {new IR::PathExpression(typeDecl->name)}));
+    cmds.emplace_back(copyOutCall);
 
     // After some specific pipelines (filter), we check whether the packet has been dropped.
     // eBPF can not modify the packet, so we do not append any emit buffer here.
@@ -110,7 +118,7 @@ const IR::StateVariable &EBPFProgramInfo::getTargetOutputPortVar() const {
 }
 
 const IR::Expression *EBPFProgramInfo::dropIsActive() const {
-    return new IR::LNot(ToolsVariables::getStateVariable(IR::Type_Boolean::get(), "*accept"));
+    return new IR::LNot(new IR::PathExpression(IR::Type_Boolean::get(), new IR::Path("*accept")));
 }
 
 const IR::Type_Bits *EBPFProgramInfo::getParserErrorType() const { return &PARSER_ERR_BITS; }

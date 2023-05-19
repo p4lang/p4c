@@ -98,8 +98,12 @@ bool CmdStepper::preorder(const IR::P4Parser *p4parser) {
     logStep(p4parser);
 
     auto &nextState = state.clone();
-    const auto &target = TestgenTarget::get();
-    auto blockName = p4parser->getName().name;
+
+    // Obtain the parser's namespace.
+    const auto *ns = p4parser->to<IR::INamespace>();
+    CHECK_NULL(ns);
+    // Enter the parser's namespace.
+    nextState.pushNamespace(ns);
 
     // Register and do target-specific initialization of the parser.
     const auto *constraint = startParser(p4parser, nextState);
@@ -114,29 +118,9 @@ bool CmdStepper::preorder(const IR::P4Parser *p4parser) {
     auto handlers = getExceptionHandlers(p4parser, nextState.getBody(), nextState);
     nextState.pushCurrentContinuation(handlers);
 
-    // Obtain the parser's namespace.
-    const auto *ns = p4parser->to<IR::INamespace>();
-    CHECK_NULL(ns);
-    // Enter the parser's namespace.
-    nextState.pushNamespace(ns);
-
     // Set the start state as the new body.
     const auto *startState = p4parser->states.getDeclaration<IR::ParserState>("start");
     std::vector<Continuation::Command> cmds;
-
-    // Copy-in.
-    // Get the current level and disable it for these operations to avoid overtainting.
-    auto currentTaint = state.getProperty<bool>("inUndefinedState");
-    nextState.setProperty("inUndefinedState", false);
-    auto canonicalName = getProgramInfo().getCanonicalBlockName(blockName);
-    const auto *controlParams = p4parser->getApplyParameters();
-    const auto *archSpec = TestgenTarget::getArchSpec();
-    for (size_t paramIdx = 0; paramIdx < controlParams->size(); ++paramIdx) {
-        const auto *internalParam = controlParams->getParameter(paramIdx);
-        auto externalParamName = archSpec->getParamName(canonicalName, paramIdx);
-        nextState.copyIn(target, internalParam, externalParamName);
-    }
-    nextState.setProperty("inUndefinedState", currentTaint);
 
     // Initialize parser-local declarations.
     for (const auto *decl : p4parser->parserLocals) {
@@ -147,11 +131,6 @@ bool CmdStepper::preorder(const IR::P4Parser *p4parser) {
 
     // The actual execution.
     cmds.emplace_back(startState);
-
-    // Copy-out.
-    const auto *copyOutCall = new IR::MethodCallStatement(
-        Utils::generateInternalMethodCall("copy_out", {new IR::PathExpression(blockName)}));
-    cmds.emplace_back(copyOutCall);
 
     nextState.replaceBody(Continuation::Body(cmds));
 
@@ -178,20 +157,6 @@ bool CmdStepper::preorder(const IR::P4Control *p4control) {
     // Enter the control's namespace.
     nextState.pushNamespace(ns);
 
-    // Copy-in.
-    // Get the current level and disable it for these operations to avoid overtainting.
-    auto currentTaint = state.getProperty<bool>("inUndefinedState");
-    nextState.setProperty("inUndefinedState", false);
-    auto canonicalName = getProgramInfo().getCanonicalBlockName(blockName);
-    const auto *controlParams = p4control->getApplyParameters();
-    const auto *archSpec = TestgenTarget::getArchSpec();
-    for (size_t paramIdx = 0; paramIdx < controlParams->size(); ++paramIdx) {
-        const auto *internalParam = controlParams->getParameter(paramIdx);
-        auto externalParamName = archSpec->getParamName(canonicalName, paramIdx);
-        nextState.copyIn(target, internalParam, externalParamName);
-    }
-    nextState.setProperty("inUndefinedState", currentTaint);
-
     // Add control-local declarations.
     std::vector<Continuation::Command> cmds;
     for (const auto *decl : p4control->controlLocals) {
@@ -210,11 +175,6 @@ bool CmdStepper::preorder(const IR::P4Control *p4control) {
     std::map<Continuation::Exception, Continuation> handlers;
     handlers.emplace(Continuation::Exception::Exit, Continuation::Body({}));
     nextState.pushCurrentContinuation(handlers);
-
-    // Copy-out.
-    const auto *copyOutCall = new IR::MethodCallStatement(
-        Utils::generateInternalMethodCall("copy_out", {new IR::PathExpression(blockName)}));
-    cmds.emplace_back(copyOutCall);
 
     // If the cmds are not empty, replace the body
     if (!cmds.empty()) {
