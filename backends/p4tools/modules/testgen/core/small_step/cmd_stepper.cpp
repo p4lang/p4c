@@ -139,29 +139,28 @@ bool CmdStepper::preorder(const IR::P4Parser *p4parser) {
 }
 
 bool CmdStepper::preorder(const IR::P4Control *p4control) {
-    auto &nextState = state.clone();
     const auto &target = TestgenTarget::get();
     auto blockName = p4control->getName().name;
 
     // Add trace events.
     std::stringstream controlName;
     controlName << "Control " << blockName << " start";
-    nextState.add(*new TraceEvents::Generic(controlName));
+    state.add(*new TraceEvents::Generic(controlName));
 
     // Set the emit buffer to be zero for the current control pipeline.
-    nextState.resetEmitBuffer();
+    state.resetEmitBuffer();
 
     // Obtain the control's namespace.
     const auto *ns = p4control->to<IR::INamespace>();
     CHECK_NULL(ns);
     // Enter the control's namespace.
-    nextState.pushNamespace(ns);
+    state.pushNamespace(ns);
 
     // Add control-local declarations.
     std::vector<Continuation::Command> cmds;
     for (const auto *decl : p4control->controlLocals) {
         if (const auto *declVar = decl->to<IR::Declaration_Variable>()) {
-            nextState.declareVariable(target, *declVar);
+            state.declareVariable(target, *declVar);
         }
     }
     // Add the body, if it is not empty
@@ -170,26 +169,25 @@ bool CmdStepper::preorder(const IR::P4Control *p4control) {
     }
     // Remove the invocation of the control from the current body and push the resulting
     // continuation onto the continuation stack.
-    nextState.popBody();
+    state.popBody();
     // Exit terminates the entire control block (only the control).
     std::map<Continuation::Exception, Continuation> handlers;
     handlers.emplace(Continuation::Exception::Exit, Continuation::Body({}));
-    nextState.pushCurrentContinuation(handlers);
+    state.pushCurrentContinuation(handlers);
 
     // If the cmds are not empty, replace the body
     if (!cmds.empty()) {
         Continuation::Body newBody(cmds);
-        nextState.replaceBody(newBody);
+        state.replaceBody(newBody);
     }
 
-    result->emplace_back(nextState);
+    result->emplace_back(state);
     return false;
 }
 
 bool CmdStepper::preorder(const IR::EmptyStatement * /*empty*/) {
-    auto &nextState = state.clone();
-    nextState.popBody();
-    result->emplace_back(nextState);
+    state.popBody();
+    result->emplace_back(state);
     return false;
 }
 
@@ -286,11 +284,8 @@ bool CmdStepper::preorder(const IR::P4Program * /*program*/) {
     // Get the initial constraints of the target. These constraints influence branch selection.
     std::optional<const Constraint *> cond = programInfo.getTargetConstraints();
 
-    // Have the target break apart the main declaration instance.
-    auto &nextState = state.clone();
-
     // Initialize all relevant environment variables for the respective target.
-    initializeTargetEnvironment(nextState);
+    initializeTargetEnvironment(state);
 
     // If this option is active, mandate that all packets conform to a fixed size.
     auto pktSize = TestgenOptions::get().minPktSize;
@@ -311,19 +306,19 @@ bool CmdStepper::preorder(const IR::P4Program * /*program*/) {
     // This segment inserts a special exception to deal with this case.
     // The drop exception just terminates execution completely.
     // We first pop the current body.
-    nextState.popBody();
+    state.popBody();
     // Then we insert the exception handlers.
     std::map<Continuation::Exception, Continuation> handlers;
     handlers.emplace(Continuation::Exception::Drop, Continuation::Body({}));
     handlers.emplace(Continuation::Exception::Exit, Continuation::Body({}));
     handlers.emplace(Continuation::Exception::Abort, Continuation::Body({}));
-    nextState.pushCurrentContinuation(handlers);
+    state.pushCurrentContinuation(handlers);
 
     // After, we insert the program commands into the new body and push them to the top.
     Continuation::Body newBody(*topLevelBlocks);
-    nextState.replaceBody(newBody);
+    state.replaceBody(newBody);
 
-    result->emplace_back(cond, state, nextState);
+    result->emplace_back(cond, state, state);
     return false;
 }
 

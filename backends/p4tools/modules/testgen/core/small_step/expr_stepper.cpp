@@ -90,14 +90,13 @@ bool ExprStepper::preorder(const IR::Member *member) {
 void ExprStepper::evalActionCall(const IR::P4Action *action, const IR::MethodCallExpression *call) {
     const auto *actionNameSpace = action->to<IR::INamespace>();
     BUG_CHECK(actionNameSpace, "Does not instantiate an INamespace: %1%", actionNameSpace);
-    auto &nextState = state.clone();
     // If the action has arguments, these are usually directionless control plane input.
     // We introduce a symbolic variable that takes the argument value. This value is either
     // provided by a constant entry or synthesized by us.
     for (size_t argIdx = 0; argIdx < call->arguments->size(); ++argIdx) {
         const auto &parameters = action->parameters;
         const auto *param = parameters->getParameter(argIdx);
-        const auto *paramType = nextState.resolveType(param->type);
+        const auto *paramType = state.resolveType(param->type);
         // We do not use the control plane name here. We assume that UniqueParameters and
         // UniqueNames ensure uniqueness of parameter names.
         const auto paramName = param->name;
@@ -106,12 +105,12 @@ void ExprStepper::evalActionCall(const IR::P4Action *action, const IR::MethodCal
                   action);
         const auto *tableActionDataVar = new IR::PathExpression(paramType, new IR::Path(paramName));
         const auto *curArg = call->arguments->at(argIdx)->expression;
-        nextState.set(tableActionDataVar, curArg);
+        state.set(tableActionDataVar, curArg);
     }
-    nextState.replaceTopBody(action->body);
+    state.replaceTopBody(action->body);
     // Enter the action's namespace.
-    nextState.pushNamespace(actionNameSpace);
-    result->emplace_back(nextState);
+    state.pushNamespace(actionNameSpace);
+    result->emplace_back(state);
 }
 
 bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
@@ -138,9 +137,8 @@ bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
 
             // Handle table calls.
             if (const auto *table = state.getTableType(method)) {
-                auto &nextState = state.clone();
-                nextState.replaceTopBody(Continuation::Return(table));
-                result->emplace_back(nextState);
+                state.replaceTopBody(Continuation::Return(table));
+                result->emplace_back(state);
                 return false;
             }
 
@@ -216,10 +214,9 @@ bool ExprStepper::preorder(const IR::Mux *mux) {
     }
     // If the Mux condition  is tainted, just return a taint constant.
     if (state.hasTaint(mux->e0)) {
-        auto &nextState = state.clone();
-        nextState.replaceTopBody(
+        state.replaceTopBody(
             Continuation::Return(programInfo.createTargetUninitialized(mux->type, true)));
-        result->emplace_back(nextState);
+        result->emplace_back(state);
         return false;
     }
     // A list of path conditions paired with the resulting expression for each branch.
@@ -259,15 +256,14 @@ bool ExprStepper::preorder(const IR::P4ValueSet *valueSet) {
     logStep(valueSet);
 
     auto vsSize = valueSet->size->checkedTo<IR::Constant>()->value;
-    auto &nextState = state.clone();
     IR::Vector<IR::Expression> components;
     // TODO: Fill components with values when we have an API.
     const auto *pvsType = valueSet->elementType;
     pvsType = state.resolveType(pvsType);
     TESTGEN_UNIMPLEMENTED("Value Set not yet fully implemented");
 
-    nextState.popBody();
-    result->emplace_back(nextState);
+    state.popBody();
+    result->emplace_back(state);
     return false;
 }
 
@@ -294,9 +290,8 @@ bool ExprStepper::preorder(const IR::Operation_Binary *binary) {
 
     // Handle saturating arithmetic expressions by translating them into Mux expressions.
     if (P4::SaturationElim::isSaturationOperation(binary)) {
-        auto &nextState = state.clone();
-        nextState.replaceTopBody(Continuation::Return(P4::SaturationElim::eliminate(binary)));
-        result->emplace_back(nextState);
+        state.replaceTopBody(Continuation::Return(P4::SaturationElim::eliminate(binary)));
+        result->emplace_back(state);
         return false;
     }
 
