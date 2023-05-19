@@ -361,6 +361,8 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
             // TODO: Implement value sets.
             if (decl->is<IR::P4ValueSet>()) {
                 selectCases.erase(selectCases.begin() + idx);
+                // Since we erased an element from the vector, we need to reset the index.
+                idx = idx - 1;
                 continue;
             }
         }
