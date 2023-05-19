@@ -203,7 +203,7 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
     for (const auto *entry : entryVector) {
         const auto *action = entry->getAction();
         const auto *tableAction = action->checkedTo<IR::MethodCallExpression>();
-        const auto *actionType = stepper->state.getActionDecl(tableAction);
+        const auto *actionType = stepper->state.getP4Action(tableAction);
         auto &nextState = stepper->state.clone();
         nextState.markVisited(entry);
         // We need to set the table action in the state for eventual switch action_run hits.
@@ -268,7 +268,7 @@ void TableStepper::setTableDefaultEntries(
     const std::vector<const IR::ActionListElement *> &tableActionList) {
     for (const auto *action : tableActionList) {
         const auto *tableAction = action->expression->checkedTo<IR::MethodCallExpression>();
-        const auto *actionType = stepper->state.getActionDecl(tableAction);
+        const auto *actionType = stepper->state.getP4Action(tableAction);
 
         auto &nextState = stepper->state.clone();
 
@@ -338,7 +338,7 @@ void TableStepper::evalTableControlEntries(
         // Grab the path from the method call.
         const auto *tableAction = action->expression->checkedTo<IR::MethodCallExpression>();
         // Try to find the action declaration corresponding to the path reference in the table.
-        const auto *actionType = stepper->state.getActionDecl(tableAction);
+        const auto *actionType = stepper->state.getP4Action(tableAction);
 
         auto &nextState = stepper->state.clone();
 
@@ -530,7 +530,7 @@ bool TableStepper::resolveTableKeys() {
 void TableStepper::addDefaultAction(std::optional<const IR::Expression *> tableMissCondition) {
     const auto *defaultAction = table->getDefaultAction();
     const auto *tableAction = defaultAction->checkedTo<IR::MethodCallExpression>();
-    const auto *actionType = stepper->state.getActionDecl(tableAction);
+    const auto *actionType = stepper->state.getP4Action(tableAction);
     auto &nextState = stepper->state.clone();
     // We need to set the table action in the state for eventual switch action_run hits.
     // We also will need it for control plane table entries.

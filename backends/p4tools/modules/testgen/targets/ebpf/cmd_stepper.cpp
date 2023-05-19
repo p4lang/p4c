@@ -37,6 +37,7 @@ const EBPFProgramInfo &EBPFCmdStepper::getProgramInfo() const {
 void EBPFCmdStepper::initializeTargetEnvironment(ExecutionState &nextState) const {
     auto programInfo = getProgramInfo();
     const auto *archSpec = TestgenTarget::getArchSpec();
+    const auto &target = TestgenTarget::get();
     const auto *programmableBlocks = programInfo.getProgrammableBlocks();
 
     // eBPF initializes all metadata to zero. To avoid unnecessary taint, we retrieve the type and
@@ -45,7 +46,7 @@ void EBPFCmdStepper::initializeTargetEnvironment(ExecutionState &nextState) cons
     for (const auto &blockTuple : *programmableBlocks) {
         const auto *typeDecl = blockTuple.second;
         const auto *archMember = archSpec->getArchMember(blockIdx);
-        initializeBlockParams(typeDecl, &archMember->blockParams, nextState);
+        nextState.initializeBlockParams(target, typeDecl, &archMember->blockParams);
         blockIdx++;
     }
 

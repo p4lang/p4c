@@ -62,6 +62,7 @@ Bmv2V1ModelProgramInfo::Bmv2V1ModelProgramInfo(
     int pipeIdx = 0;
 
     for (const auto &declTuple : programmableBlocks) {
+        blockMap.emplace(declTuple.second->getName(), declTuple.first);
         // Iterate through the (ordered) pipes of the target architecture.
         auto subResult = processDeclaration(declTuple.second, pipeIdx);
         pipelineSequence.insert(pipelineSequence.end(), subResult.begin(), subResult.end());

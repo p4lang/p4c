@@ -189,8 +189,8 @@ bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
     } else if (call->method->type->is<IR::Type_Action>()) {
         // Handle action calls. Actions are called by tables and are not inlined, unlike
         // functions.
-        const auto *action = state.getActionDecl(call);
-        evalActionCall(action, call);
+        const auto *actionType = state.getP4Action(call);
+        evalActionCall(actionType, call);
         return false;
     }
 

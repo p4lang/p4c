@@ -89,6 +89,14 @@ std::optional<const IR::Expression *> ProgramInfo::getTargetConstraints() const 
     return targetConstraints;
 }
 
+cstring ProgramInfo::getCanonicalBlockName(cstring programBlockName) const {
+    auto it = blockMap.find(programBlockName);
+    if (it != blockMap.end()) {
+        return it->second;
+    }
+    BUG("Unable to find var %s in the canonical block map.", programBlockName);
+}
+
 void ProgramInfo::produceCopyInOutCall(const IR::Parameter *param, size_t paramIdx,
                                        const ArchSpec::ArchMember *archMember,
                                        std::vector<Continuation::Command> *copyIns,

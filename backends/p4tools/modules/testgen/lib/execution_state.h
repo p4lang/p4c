@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "backends/p4tools/common/compiler/reachability.h"
+#include "backends/p4tools/common/core/abstract_execution_state.h"
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/namespace_context.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
@@ -30,7 +31,7 @@
 namespace P4Tools::P4Testgen {
 
 /// Represents state of execution after having reached a program point.
-class ExecutionState {
+class ExecutionState : public AbstractExecutionState {
     friend class Test::SmallStepTest;
 
  public:
@@ -55,16 +56,9 @@ class ExecutionState {
     /// No move semantics because of constant members. We always need to clone a state.
     ExecutionState(ExecutionState &&) = delete;
     ExecutionState &operator=(ExecutionState &&) = delete;
-    ~ExecutionState() = default;
+    ~ExecutionState() override = default;
 
  private:
-    /// The namespace context in the IR for the current state. The innermost element is the P4
-    /// program, representing the top-level namespace.
-    const NamespaceContext *namespaces;
-
-    /// The symbolic environment. Maps program variables to their symbolic values.
-    SymbolicEnv env;
-
     /// The list of variables that have been created in this state.
     /// These variables are later fed to the model for completion.
     SymbolicSet allocatedSymbolicVariables;
@@ -151,7 +145,7 @@ class ExecutionState {
     [[nodiscard]] std::optional<const Continuation::Command> getNextCmd() const;
 
     /// @returns the symbolic value of the given state variable.
-    [[nodiscard]] const IR::Expression *get(const IR::StateVariable &var) const;
+    [[nodiscard]] const IR::Expression *get(const IR::StateVariable &var) const override;
 
     /// Checks whether the node has been visited in this state.
     void markVisited(const IR::Node *node);
@@ -161,19 +155,10 @@ class ExecutionState {
 
     /// Sets the symbolic value of the given state variable to the given value. Constant folding
     /// is done on the given value before updating the symbolic state.
-    void set(const IR::StateVariable &var, const IR::Expression *value);
-
-    /// Checks whether the given variable exists in the symbolic environment of this state.
-    [[nodiscard]] bool exists(const IR::StateVariable &var) const;
+    void set(const IR::StateVariable &var, const IR::Expression *value) override;
 
     /// @see Taint::hasTaint
     bool hasTaint(const IR::Expression *expr) const;
-
-    /// @returns the current symbolic environment.
-    [[nodiscard]] const SymbolicEnv &getSymbolicEnv() const;
-
-    /// Produce a formatted output of the current symbolic environment.
-    void printSymbolicEnv(std::ostream &out = std::cout) const;
 
     /// @returns the current event trace.
     [[nodiscard]] const std::vector<std::reference_wrapper<const TraceEvent>> &getTrace() const;
@@ -246,36 +231,12 @@ class ExecutionState {
     /* =========================================================================================
      *  Trace events.
      * ========================================================================================= */
- public:
     /// Add a new trace event to the state.
     void add(const TraceEvent &event);
 
     /* =========================================================================================
-     *  Namespaces and declarations
-     * ========================================================================================= */
- public:
-    /// Looks up a declaration from a path. A BUG occurs if no declaration is found.
-    [[nodiscard]] const IR::IDeclaration *findDecl(const IR::Path *path) const;
-
-    /// Looks up a declaration from a path expression. A BUG occurs if no declaration is found.
-    [[nodiscard]] const IR::IDeclaration *findDecl(const IR::PathExpression *pathExpr) const;
-
-    /// Resolves a Type in the current environment.
-    [[nodiscard]] const IR::Type *resolveType(const IR::Type *type) const;
-
-    /// @returns the current namespace context.
-    [[nodiscard]] const NamespaceContext *getNamespaceContext() const;
-
-    /// Replaces the namespace context in the current state with the given context.
-    void setNamespaceContext(const NamespaceContext *namespaces);
-
-    /// Enters a namespace of declarations.
-    void pushNamespace(const IR::INamespace *ns);
-
-    /* =========================================================================================
      *  Body operations
      * ========================================================================================= */
- public:
     /// Replaces the top element of @body with @cmd.
     void replaceTopBody(const Continuation::Command cmd);
 
@@ -311,7 +272,6 @@ class ExecutionState {
     /* =========================================================================================
      *  Continuation-stack operations
      * ========================================================================================= */
- public:
     /// Pushes a new frame onto the continuation stack.
     void pushContinuation(const StackFrame &frame);
 
@@ -341,7 +301,6 @@ class ExecutionState {
     /* =========================================================================================
      *  Packet manipulation
      * ========================================================================================= */
- public:
     /// @returns the symbolic constant representing the length of the input to the current parser,
     /// in bits.
     static const IR::SymbolicVariable *getInputPacketSizeVar();
@@ -413,7 +372,6 @@ class ExecutionState {
      *  These mirror what's available in IRUtils, but automatically fill in the incarnation number,
      *  based on how many times newParser() has been called.
      */
- public:
     /// @returns the symbolic variables that were allocated in this state
     [[nodiscard]] const SymbolicSet &getSymbolicVariables() const;
 
@@ -427,7 +385,6 @@ class ExecutionState {
     /* =========================================================================================
      *  General utilities involving ExecutionState.
      * ========================================================================================= */
- public:
     /// Takes an input struct type @ts and a prefix @parent and appends each field of the struct
     /// type to the provided vector @flatFields. The result is a vector of all in the bit and bool
     /// members in canonical representation (e.g., {"prefix.h.ethernet.dst_address",
@@ -442,17 +399,9 @@ class ExecutionState {
     /// @returns nullptr is member type is not a IR::P4Table.
     [[nodiscard]] const IR::P4Table *getTableType(const IR::Expression *expression) const;
 
-    /// Gets action type from an expression.
-    [[nodiscard]] const IR::P4Action *getActionDecl(
-        const IR::MethodCallExpression *actionExpr) const;
-
-    /// @returns an IR::Expression converted into a StateVariable. Currently only IR::PathExpression
-    /// and IR::Member can be converted into a state variable.
-    [[nodiscard]] static IR::StateVariable convertReference(const IR::Expression *ref);
-
     /// Allocate a new execution state object with the same state as this object.
     /// Returns a reference, not a pointer.
-    [[nodiscard]] ExecutionState &clone() const;
+    [[nodiscard]] ExecutionState &clone() const override;
 
     /// Create a new execution state object from the input program.
     /// Returns a reference not a pointer.
@@ -469,6 +418,8 @@ class ExecutionState {
     /// Creates an initial execution state for the given program.
     explicit ExecutionState(const IR::P4Program *program);
     ExecutionState(const ExecutionState &) = default;
+
+    /// Do not accidentally copy-assign the execution state.
     ExecutionState &operator=(const ExecutionState &) = default;
 };
 

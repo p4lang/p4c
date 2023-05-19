@@ -79,7 +79,7 @@ bool CoverableNodesScanner::preorder(const IR::MethodCallExpression *call) {
                         }
                         const auto *tableAction =
                             entry->action->checkedTo<IR::MethodCallExpression>();
-                        const auto *actionType = executionState.getActionDecl(tableAction);
+                        const auto *actionType = executionState.getP4Action(tableAction);
                         actionType->body->apply_visitor_preorder(*this);
                     }
                 }
@@ -87,19 +87,19 @@ bool CoverableNodesScanner::preorder(const IR::MethodCallExpression *call) {
                 for (const auto &action : tableActionList) {
                     const auto *tableAction =
                         action->expression->checkedTo<IR::MethodCallExpression>();
-                    const auto *actionType = executionState.getActionDecl(tableAction);
+                    const auto *actionType = executionState.getP4Action(tableAction);
                     actionType->body->apply_visitor_preorder(*this);
                 }
             }
             const auto *defaultAction = table->getDefaultAction();
             const auto *tableAction = defaultAction->checkedTo<IR::MethodCallExpression>();
-            const auto *actionType = executionState.getActionDecl(tableAction);
+            const auto *actionType = executionState.getP4Action(tableAction);
             actionType->body->apply_visitor_preorder(*this);
         }
         return false;
     }
     if (call->method->type->is<IR::Type_Action>()) {
-        const auto *actionType = executionState.getActionDecl(call);
+        const auto *actionType = executionState.getP4Action(call);
         actionType->body->apply_visitor_preorder(*this);
         return false;
     }

@@ -37,7 +37,7 @@
 namespace P4Tools::P4Testgen {
 
 ExecutionState::ExecutionState(const IR::P4Program *program)
-    : namespaces(NamespaceContext::Empty->push(program)),
+    : AbstractExecutionState(program),
       body({program}),
       stack(*(new std::stack<std::reference_wrapper<const StackFrame>>())) {
     // Insert the default symbolic variables of the execution state.
@@ -60,9 +60,7 @@ ExecutionState::ExecutionState(const IR::P4Program *program)
 }
 
 ExecutionState::ExecutionState(Continuation::Body body)
-    : namespaces(NamespaceContext::Empty),
-      body(std::move(body)),
-      stack(*(new std::stack<std::reference_wrapper<const StackFrame>>())) {
+    : body(std::move(body)), stack(*(new std::stack<std::reference_wrapper<const StackFrame>>())) {
     // Insert the default symbolic variables of the execution state.
     // This also makes the symbolic variables present in the state explicit.
     allocatedSymbolicVariables.insert(getInputPacketSizeVar());
@@ -146,27 +144,12 @@ bool ExecutionState::hasTaint(const IR::Expression *expr) const {
     return Taint::hasTaint(env.getInternalMap(), expr);
 }
 
-bool ExecutionState::exists(const IR::StateVariable &var) const { return env.exists(var); }
-
 void ExecutionState::set(const IR::StateVariable &var, const IR::Expression *value) {
     if (getProperty<bool>("inUndefinedState")) {
         // If we are in an undefined state, the variable we set is tainted.
         value = ToolsVariables::getTaintExpression(value->type);
     }
     env.set(var, value);
-}
-
-const SymbolicEnv &ExecutionState::getSymbolicEnv() const { return env; }
-
-void ExecutionState::printSymbolicEnv(std::ostream &out) const {
-    // TODO(fruffy): How do we do logging here?
-    out << "##### Symbolic Environment Begin #####" << std::endl;
-    for (const auto &envVar : env.getInternalMap()) {
-        const auto var = envVar.first;
-        const auto *val = envVar.second;
-        out << "Variable: " << var->toString() << " Value: " << val << std::endl;
-    }
-    out << "##### Symbolic Environment End #####" << std::endl;
 }
 
 const std::vector<std::reference_wrapper<const TraceEvent>> &ExecutionState::getTrace() const {
@@ -238,38 +221,6 @@ ReachabilityEngineState *ExecutionState::getReachabilityEngineState() const {
  * ============================================================================================= */
 
 void ExecutionState::add(const TraceEvent &event) { trace.emplace_back(event); }
-
-/* =============================================================================================
- *  Namespaces and declarations
- * ============================================================================================= */
-
-const IR::IDeclaration *ExecutionState::findDecl(const IR::Path *path) const {
-    return namespaces->findDecl(path);
-}
-
-const IR::IDeclaration *ExecutionState::findDecl(const IR::PathExpression *pathExpr) const {
-    return findDecl(pathExpr->path);
-}
-
-const IR::Type *ExecutionState::resolveType(const IR::Type *type) const {
-    const auto *typeName = type->to<IR::Type_Name>();
-    // Nothing to resolve here. Just return.
-    if (typeName == nullptr) {
-        return type;
-    }
-    const auto *path = typeName->path;
-    const auto *decl = findDecl(path)->to<IR::Type_Declaration>();
-    BUG_CHECK(decl, "Not a type: %1%", path);
-    return decl;
-}
-
-const NamespaceContext *ExecutionState::getNamespaceContext() const { return namespaces; }
-
-void ExecutionState::setNamespaceContext(const NamespaceContext *namespaces) {
-    this->namespaces = namespaces;
-}
-
-void ExecutionState::pushNamespace(const IR::INamespace *ns) { namespaces = namespaces->push(ns); }
 
 void ExecutionState::popBody() { body.pop(); }
 
@@ -601,22 +552,6 @@ const IR::P4Table *ExecutionState::getTableType(const IR::Expression *expression
         return tableType->table;
     }
     return nullptr;
-}
-
-const IR::P4Action *ExecutionState::getActionDecl(
-    const IR::MethodCallExpression *actionExpr) const {
-    const auto *actionPath = actionExpr->method->checkedTo<IR::PathExpression>();
-    const auto *declaration = findDecl(actionPath);
-    return declaration->checkedTo<IR::P4Action>();
-}
-
-IR::StateVariable ExecutionState::convertReference(const IR::Expression *ref) {
-    if (const auto *member = ref->to<IR::Member>()) {
-        return member;
-    }
-    // Local variable.
-    const auto *path = ref->checkedTo<IR::PathExpression>();
-    return path;
 }
 
 ExecutionState &ExecutionState::create(const IR::P4Program *program) {

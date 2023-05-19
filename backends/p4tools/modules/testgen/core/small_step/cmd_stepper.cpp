@@ -14,6 +14,7 @@
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
+#include "backends/p4tools/common/lib/util.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
@@ -30,6 +31,7 @@
 #include "backends/p4tools/modules/testgen/core/small_step/abstract_stepper.h"
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
+#include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/collect_coverable_nodes.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
@@ -42,75 +44,6 @@ namespace P4Tools::P4Testgen {
 CmdStepper::CmdStepper(ExecutionState &state, AbstractSolver &solver,
                        const ProgramInfo &programInfo)
     : AbstractStepper(state, solver, programInfo) {}
-
-void CmdStepper::declareVariable(ExecutionState &nextState, const IR::Declaration_Variable *decl) {
-    if (decl->initializer != nullptr) {
-        TESTGEN_UNIMPLEMENTED("Unsupported initializer %s for declaration variable.",
-                              decl->initializer);
-    }
-    const auto *declType = state.resolveType(decl->type);
-
-    if (const auto *structType = declType->to<IR::Type_StructLike>()) {
-        const auto *parentExpr = new IR::PathExpression(structType, new IR::Path(decl->name.name));
-        declareStructLike(nextState, parentExpr, structType);
-    } else if (const auto *stackType = declType->to<IR::Type_Stack>()) {
-        const auto *stackSizeExpr = stackType->size;
-        auto stackSize = stackSizeExpr->checkedTo<IR::Constant>()->asInt();
-        const auto *stackElemType = stackType->elementType;
-        if (stackElemType->is<IR::Type_Name>()) {
-            stackElemType = nextState.resolveType(stackElemType->to<IR::Type_Name>());
-        }
-        const auto *structType = stackElemType->checkedTo<IR::Type_StructLike>();
-        for (auto idx = 0; idx < stackSize; idx++) {
-            const auto *parentExpr = HSIndexToMember::produceStackIndex(
-                structType, new IR::PathExpression(stackType, new IR::Path(decl->name.name)), idx);
-            declareStructLike(nextState, parentExpr, structType);
-        }
-    } else if (declType->is<IR::Type_Base>()) {
-        // If the variable does not have an initializer we need to create a new value for it. For
-        // now we just use the name directly.
-        const auto *left = new IR::PathExpression(declType, new IR::Path(decl->name.name));
-        nextState.set(left, programInfo.createTargetUninitialized(declType, false));
-    } else {
-        TESTGEN_UNIMPLEMENTED("Unsupported declaration type %1% node: %2%", declType,
-                              declType->node_type_name());
-    }
-}
-
-void CmdStepper::initializeBlockParams(const IR::Type_Declaration *typeDecl,
-                                       const std::vector<cstring> *blockParams,
-                                       ExecutionState &nextState, bool forceTaint) const {
-    // Collect parameters.
-    const auto *iApply = typeDecl->to<IR::IApply>();
-    BUG_CHECK(iApply != nullptr, "Constructed type %s of type %s not supported.", typeDecl,
-              typeDecl->node_type_name());
-    // Also push the namespace of the respective parameter.
-    nextState.pushNamespace(typeDecl->to<IR::INamespace>());
-    // Collect parameters.
-    const auto *params = iApply->getApplyParameters();
-    for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
-        const auto *param = params->getParameter(paramIdx);
-        const auto *paramType = param->type;
-        // Retrieve the identifier of the global architecture map using the parameter index.
-        auto archRef = blockParams->at(paramIdx);
-        // Irrelevant parameter. Ignore.
-        if (archRef == nullptr) {
-            continue;
-        }
-        // We need to resolve type names.
-        paramType = nextState.resolveType(paramType);
-
-        if (const auto *ts = paramType->to<IR::Type_StructLike>()) {
-            const auto *paramPath = new IR::PathExpression(paramType, new IR::Path(archRef));
-            declareStructLike(nextState, paramPath, ts, forceTaint);
-        } else if (paramType->is<IR::Type_Base>()) {
-            const auto &paramPath = ToolsVariables::getStateVariable(paramType, archRef);
-            nextState.set(paramPath, programInfo.createTargetUninitialized(paramType, forceTaint));
-        } else {
-            P4C_UNIMPLEMENTED("Unsupported initialization type %1%", paramType->node_type_name());
-        }
-    }
-}
 
 bool CmdStepper::preorder(const IR::AssignmentStatement *assign) {
     logStep(assign);
@@ -125,7 +58,7 @@ bool CmdStepper::preorder(const IR::AssignmentStatement *assign) {
     }
 
     state.markVisited(assign);
-    const auto &left = ExecutionState::convertReference(assign->left);
+    const auto &left = AbstractExecutionState::convertReference(assign->left);
     const auto *leftType = left->type;
 
     // Resolve the type of the left-and assignment, if it is a type name.
@@ -192,7 +125,7 @@ bool CmdStepper::preorder(const IR::P4Parser *p4parser) {
     // Initialize parser-local declarations.
     for (const auto *decl : p4parser->parserLocals) {
         if (const auto *declVar = decl->to<IR::Declaration_Variable>()) {
-            declareVariable(nextState, declVar);
+            nextState.declareVariable(TestgenTarget::get(), *declVar);
         }
     }
     cmds.emplace_back(startState);
@@ -225,7 +158,7 @@ bool CmdStepper::preorder(const IR::P4Control *p4control) {
     std::vector<Continuation::Command> cmds;
     for (const auto *decl : p4control->controlLocals) {
         if (const auto *declVar = decl->to<IR::Declaration_Variable>()) {
-            declareVariable(nextState, declVar);
+            nextState.declareVariable(TestgenTarget::get(), *declVar);
         }
     }
     // Add the body, if it is not empty
@@ -431,7 +364,7 @@ bool CmdStepper::preorder(const IR::ParserState *parserState) {
             continue;
         }
         if (const auto *declVar = component->to<IR::Declaration_Variable>()) {
-            declareVariable(nextState, declVar);
+            nextState.declareVariable(TestgenTarget::get(), *declVar);
         } else {
             cmds.emplace_back(component);
         }
@@ -458,7 +391,7 @@ bool CmdStepper::preorder(const IR::BlockStatement *block) {
             continue;
         }
         if (const auto *declVar = component->to<IR::Declaration_Variable>()) {
-            declareVariable(nextState, declVar);
+            nextState.declareVariable(TestgenTarget::get(), *declVar);
         } else {
             cmds.emplace_back(component);
         }

@@ -215,7 +215,7 @@ void AbstractExecutionState::copyIn(const Target &target, const IR::Parameter *i
     if (paramType->is<IR::Type_Extern>()) {
         return;
     }
-    if (const auto *ts = paramType->to<IR::Type_StructLike>()) {
+    if (paramType->is<IR::Type_StructLike>()) {
         const auto *externalParamRef =
             new IR::PathExpression(paramType, new IR::Path(externalParamName));
         const auto *internalParamRef =
@@ -247,7 +247,7 @@ void AbstractExecutionState::copyOut(const IR::Parameter *internalParam,
     if (paramType->is<IR::Type_Extern>()) {
         return;
     }
-    if (const auto *ts = paramType->to<IR::Type_StructLike>()) {
+    if (paramType->is<IR::Type_StructLike>()) {
         const auto *externalParamRef =
             new IR::PathExpression(paramType, new IR::Path(externalParamName));
         const auto *internalParamRef =
@@ -256,7 +256,7 @@ void AbstractExecutionState::copyOut(const IR::Parameter *internalParam,
             internalParam->direction == IR::Direction::InOut) {
             setStructLike(externalParamRef, internalParamRef);
         }
-    } else if (const auto *tb = paramType->to<IR::Type_Base>()) {
+    } else if (paramType->is<IR::Type_Base>()) {
         const auto &externalParamRef =
             ToolsVariables::getStateVariable(paramType, externalParamName);
         const auto &internalParamRef =
@@ -306,10 +306,10 @@ void AbstractExecutionState::initializeBlockParams(const Target &target,
         }
         // We need to resolve type names.
         paramType = resolveType(paramType);
-        if (const auto *ts = paramType->to<IR::Type_StructLike>()) {
+        if (paramType->is<IR::Type_StructLike>()) {
             const auto *paramRef = new IR::PathExpression(paramType, new IR::Path(archRef));
             initializeStructLike(target, paramRef, false);
-        } else if (const auto *tb = paramType->to<IR::Type_Base>()) {
+        } else if (paramType->is<IR::Type_Base>()) {
             const auto &paramRef = ToolsVariables::getStateVariable(paramType, archRef);
             set(paramRef, target.createTargetUninitialized(paramType, false));
         } else {

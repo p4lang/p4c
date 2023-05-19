@@ -27,6 +27,7 @@
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/expr_stepper.h"  // IWYU pragma: associated
 #include "backends/p4tools/modules/testgen/core/small_step/small_step.h"
+#include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/packet_vars.h"
@@ -157,7 +158,6 @@ void ExprStepper::generateCopyIn(ExecutionState &nextState, const IR::StateVaria
         nextState.set(targetPath, nextState.get(srcPath));
     }
 }
-
 void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *call,
                                                const IR::Expression *receiver, IR::ID name,
                                                const IR::Vector<IR::Argument> *args,

@@ -35,6 +35,9 @@ class ProgramInfo : public ICastable {
     /// The constraints imposed by the target.
     std::optional<const IR::Expression *> targetConstraints = std::nullopt;
 
+    /// Maps the programmable blocks in the P4 program to their canonical counterpart.
+    std::map<cstring, cstring> blockMap;
+
  public:
     ProgramInfo(const ProgramInfo &) = default;
 
@@ -95,6 +98,10 @@ class ProgramInfo : public ICastable {
     /// Resolves a Type_Name in the top-level namespace.
     static const IR::Type_Declaration *resolveProgramType(const IR::IGeneralNamespace *ns,
                                                           const IR::Type_Name *type);
+
+    /// @returns the canonical name of the program block that is passed in.
+    /// Throws a BUG, if the name can not be found.
+    [[nodiscard]] cstring getCanonicalBlockName(cstring programBlockName) const;
 
     /// Helper function to produce copy-in and copy-out helper calls.
     /// Copy-in and copy-out is needed to correctly model the value changes of data when it is
