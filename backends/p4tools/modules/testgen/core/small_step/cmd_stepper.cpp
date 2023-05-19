@@ -98,6 +98,8 @@ bool CmdStepper::preorder(const IR::P4Parser *p4parser) {
     logStep(p4parser);
 
     auto &nextState = state.clone();
+    const auto &target = TestgenTarget::get();
+    auto blockName = p4parser->getName().name;
 
     // Register and do target-specific initialization of the parser.
     const auto *constraint = startParser(p4parser, nextState);
@@ -122,13 +124,35 @@ bool CmdStepper::preorder(const IR::P4Parser *p4parser) {
     const auto *startState = p4parser->states.getDeclaration<IR::ParserState>("start");
     std::vector<Continuation::Command> cmds;
 
+    // Copy-in.
+    // Get the current level and disable it for these operations to avoid overtainting.
+    auto currentTaint = state.getProperty<bool>("inUndefinedState");
+    nextState.setProperty("inUndefinedState", false);
+    auto canonicalName = getProgramInfo().getCanonicalBlockName(blockName);
+    const auto *controlParams = p4parser->getApplyParameters();
+    const auto *archSpec = TestgenTarget::getArchSpec();
+    for (size_t paramIdx = 0; paramIdx < controlParams->size(); ++paramIdx) {
+        const auto *internalParam = controlParams->getParameter(paramIdx);
+        auto externalParamName = archSpec->getParamName(canonicalName, paramIdx);
+        nextState.copyIn(target, internalParam, externalParamName);
+    }
+    nextState.setProperty("inUndefinedState", currentTaint);
+
     // Initialize parser-local declarations.
     for (const auto *decl : p4parser->parserLocals) {
         if (const auto *declVar = decl->to<IR::Declaration_Variable>()) {
             nextState.declareVariable(TestgenTarget::get(), *declVar);
         }
     }
+
+    // The actual execution.
     cmds.emplace_back(startState);
+
+    // Copy-out.
+    const auto *copyOutCall = new IR::MethodCallStatement(
+        Utils::generateInternalMethodCall("copy_out", {new IR::PathExpression(blockName)}));
+    cmds.emplace_back(copyOutCall);
+
     nextState.replaceBody(Continuation::Body(cmds));
 
     result->emplace_back(constraint, state, nextState);
@@ -137,7 +161,7 @@ bool CmdStepper::preorder(const IR::P4Parser *p4parser) {
 
 bool CmdStepper::preorder(const IR::P4Control *p4control) {
     auto &nextState = state.clone();
-
+    const auto &target = TestgenTarget::get();
     auto blockName = p4control->getName().name;
 
     // Add trace events.
@@ -154,11 +178,25 @@ bool CmdStepper::preorder(const IR::P4Control *p4control) {
     // Enter the control's namespace.
     nextState.pushNamespace(ns);
 
+    // Copy-in.
+    // Get the current level and disable it for these operations to avoid overtainting.
+    auto currentTaint = state.getProperty<bool>("inUndefinedState");
+    nextState.setProperty("inUndefinedState", false);
+    auto canonicalName = getProgramInfo().getCanonicalBlockName(blockName);
+    const auto *controlParams = p4control->getApplyParameters();
+    const auto *archSpec = TestgenTarget::getArchSpec();
+    for (size_t paramIdx = 0; paramIdx < controlParams->size(); ++paramIdx) {
+        const auto *internalParam = controlParams->getParameter(paramIdx);
+        auto externalParamName = archSpec->getParamName(canonicalName, paramIdx);
+        nextState.copyIn(target, internalParam, externalParamName);
+    }
+    nextState.setProperty("inUndefinedState", currentTaint);
+
     // Add control-local declarations.
     std::vector<Continuation::Command> cmds;
     for (const auto *decl : p4control->controlLocals) {
         if (const auto *declVar = decl->to<IR::Declaration_Variable>()) {
-            nextState.declareVariable(TestgenTarget::get(), *declVar);
+            nextState.declareVariable(target, *declVar);
         }
     }
     // Add the body, if it is not empty
@@ -172,6 +210,12 @@ bool CmdStepper::preorder(const IR::P4Control *p4control) {
     std::map<Continuation::Exception, Continuation> handlers;
     handlers.emplace(Continuation::Exception::Exit, Continuation::Body({}));
     nextState.pushCurrentContinuation(handlers);
+
+    // Copy-out.
+    const auto *copyOutCall = new IR::MethodCallStatement(
+        Utils::generateInternalMethodCall("copy_out", {new IR::PathExpression(blockName)}));
+    cmds.emplace_back(copyOutCall);
+
     // If the cmds are not empty, replace the body
     if (!cmds.empty()) {
         Continuation::Body newBody(cmds);

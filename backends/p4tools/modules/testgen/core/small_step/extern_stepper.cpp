@@ -145,19 +145,6 @@ ExprStepper::PacketCursorAdvanceInfo ExprStepper::calculateAdvanceExpression(
     return {advanceVal, advanceCond, notAdvanceVal, notAdvanceCond};
 }
 
-void ExprStepper::generateCopyIn(ExecutionState &nextState, const IR::StateVariable &targetPath,
-                                 const IR::StateVariable &srcPath, cstring dir,
-                                 bool forceTaint) const {
-    // If the direction is out, we do not copy in external values.
-    // We set the parameter to uninitialized.
-    if (dir == "out") {
-        nextState.set(targetPath,
-                      programInfo.createTargetUninitialized(targetPath->type, forceTaint));
-    } else {
-        // Otherwise we use a conventional assignment.
-        nextState.set(targetPath, nextState.get(srcPath));
-    }
-}
 void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *call,
                                                const IR::Expression *receiver, IR::ID name,
                                                const IR::Vector<IR::Argument> *args,
@@ -289,148 +276,42 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
              nextState.replaceTopBody(Continuation::Exception::Drop);
              result->emplace_back(nextState);
          }},
-        /* ======================================================================================
-         *  copy_in
-         *  Copies values from @param srcRef to @param targetParam following the
-         *  copy-in/copy-out semantics of P4. We use this function to copy values in and out of
-         *  individual program pipes.
-         *  @param direction signifies the qualified class of the targetParam ("in", "inout", "out",
-         *  or "<none>").
-         *  All parameters that have direction "out" are set uninitialized.
-         * ======================================================================================
-         */
-        {"*.copy_in",
-         {"srcRef", "targetParam", "direction", "forceUninitialized"},
-         [this](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
-                IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
-                const ExecutionState &state, SmallStepEvaluator::Result &result) {
-             const auto *globalRef = args->at(0)->expression;
-             if (!(globalRef->is<IR::Member>() || globalRef->is<IR::PathExpression>())) {
-                 TESTGEN_UNIMPLEMENTED("Global input %1% of type %2% not supported", globalRef,
-                                       globalRef->type);
-             }
-             const auto &argRef = ExecutionState::convertReference(args->at(1)->expression);
 
-             const auto *direction = args->at(2)->expression->checkedTo<IR::StringLiteral>();
-             const auto *forceTaint = args->at(3)->expression->checkedTo<IR::BoolLiteral>();
-
-             auto &nextState = state.clone();
-             // Get the current level and disable it for these operations to avoid overtainting.
-             auto currentTaint = state.getProperty<bool>("inUndefinedState");
-             nextState.setProperty("inUndefinedState", false);
-
-             auto dir = direction->value;
-             const auto *assignType = globalRef->type;
-             if (const auto *ts = assignType->to<IR::Type_StructLike>()) {
-                 std::vector<IR::StateVariable> flatRefValids;
-                 std::vector<IR::StateVariable> flatParamValids;
-                 auto flatRefFields = nextState.getFlatFields(globalRef, ts, &flatRefValids);
-                 auto flatParamFields = nextState.getFlatFields(argRef, ts, &flatParamValids);
-                 // In case of a header, we also need to copy the validity bits.
-                 // The only difference here is that, in the case of a copy-in out parameter, we
-                 // set validity to false.
-                 // TODO: Find a more elegant method to handle this instead of code duplication.
-                 for (size_t idx = 0; idx < flatRefValids.size(); ++idx) {
-                     const auto &fieldGlobalValid = flatRefValids[idx];
-                     const auto &fieldParamValid = flatParamValids[idx];
-                     // If the validity bit did not exist before, initialize it to be false.
-                     if (!nextState.exists(fieldGlobalValid)) {
-                         nextState.set(fieldGlobalValid, IR::getBoolLiteral(false));
-                     }
-                     // Set them false in case of an out copy-in.
-                     if (dir == "out") {
-                         nextState.set(fieldParamValid, IR::getBoolLiteral(false));
-                     } else {
-                         nextState.set(fieldParamValid, nextState.get(fieldGlobalValid));
-                     }
-                 }
-                 // First, complete the assignments for the data structure.
-                 for (size_t idx = 0; idx < flatRefFields.size(); ++idx) {
-                     const auto &fieldGlobalRef = flatRefFields[idx];
-                     const auto &fieldargRef = flatParamFields[idx];
-                     generateCopyIn(nextState, fieldargRef, fieldGlobalRef, dir, forceTaint->value);
-                 }
-             } else if (const auto *tb = assignType->to<IR::Type_Base>()) {
-                 // If the type is a flat Type_Base, postfix it with a "*".
-                 globalRef = ToolsVariables::getStateVariable(
-                     tb, globalRef->checkedTo<IR::PathExpression>()->path->name);
-                 generateCopyIn(nextState, argRef, globalRef->checkedTo<IR::Member>(), dir,
-                                forceTaint->value);
-             } else {
-                 P4C_UNIMPLEMENTED("Unsupported copy_out type %1%", assignType->node_type_name());
-             }
-             // Push back the current taint level.
-             nextState.setProperty("inUndefinedState", currentTaint);
-             nextState.popBody();
-             result->emplace_back(nextState);
-             return false;
-         }},
         /* ======================================================================================
          *  copy_out
-         *  copies values from @param srcRef to @param targetParam following the
-         *  copy-in/copy-out semantics of P4. We use this function to copy values in and out of
-         *  individual program pipes. We copy all values
-         *  that are (In)out from srcRef to inputRef. @param direction signifies the
-         *  qualified class of the srcRef ("in", "inout", "out", or "<none>").
+         *  Applies CopyOut to the provided reference to a control or parser block. The block
+         * reference is resolved and we iterate over all the parameters, copying out values
+         * appropriately.
          * ======================================================================================
          */
         {"*.copy_out",
-         {"targetParam", "srcRef", "direction"},
-         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
-            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
-            const ExecutionState &state, SmallStepEvaluator::Result &result) {
-             const auto *globalRef = args->at(0)->expression;
-             if (!(globalRef->is<IR::Member>() || globalRef->is<IR::PathExpression>())) {
-                 TESTGEN_UNIMPLEMENTED("Global input %1% of type %2% not supported", globalRef,
-                                       globalRef->type);
-             }
-             const auto &argRef = ExecutionState::convertReference(args->at(1)->expression);
-
-             const auto *direction = args->at(2)->expression->checkedTo<IR::StringLiteral>();
-
+         {"blockRef"},
+         [this](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+                IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+                const ExecutionState &state, SmallStepEvaluator::Result &result) {
+             const auto *blockRef = args->at(0)->expression->checkedTo<IR::PathExpression>();
+             const auto *block = state.findDecl(blockRef);
+             const auto *archSpec = TestgenTarget::getArchSpec();
+             auto blockName = block->getName().name;
              auto &nextState = state.clone();
+             auto canonicalName = getProgramInfo().getCanonicalBlockName(blockName);
+             const auto *blockApply = block->to<IR::IApply>();
+             CHECK_NULL(blockApply);
+             const auto *blockParams = blockApply->getApplyParameters();
+
+             // Copy-in.
              // Get the current level and disable it for these operations to avoid overtainting.
              auto currentTaint = state.getProperty<bool>("inUndefinedState");
              nextState.setProperty("inUndefinedState", false);
-
-             auto dir = direction->value;
-             const auto *assignType = globalRef->type;
-             if (const auto *ts = assignType->to<IR::Type_StructLike>()) {
-                 std::vector<IR::StateVariable> flatRefValids;
-                 std::vector<IR::StateVariable> flatParamValids;
-                 auto flatRefFields = nextState.getFlatFields(globalRef, ts, &flatRefValids);
-                 auto flatParamFields = nextState.getFlatFields(argRef, ts, &flatParamValids);
-                 // In case of a header, we also need to copy the validity bits.
-                 for (size_t idx = 0; idx < flatRefValids.size(); ++idx) {
-                     const auto &fieldGlobalValid = flatRefValids[idx];
-                     const auto &fieldParamValid = flatParamValids[idx];
-                     if (dir == "inout" || dir == "out") {
-                         nextState.set(fieldGlobalValid, nextState.get(fieldParamValid));
-                     }
-                 }
-                 // First, complete the assignments for the data structure.
-                 for (size_t idx = 0; idx < flatRefFields.size(); ++idx) {
-                     const auto &fieldGlobalRef = flatRefFields[idx];
-                     const auto &fieldargRef = flatParamFields[idx];
-                     if (dir == "inout" || dir == "out") {
-                         nextState.set(fieldGlobalRef, nextState.get(fieldargRef));
-                     }
-                 }
-             } else if (assignType->is<IR::Type_Base>()) {
-                 if (dir == "inout" || dir == "out") {
-                     // If the type is a flat Type_Base, postfix it with a "*".
-                     globalRef = ToolsVariables::getStateVariable(
-                         assignType, globalRef->checkedTo<IR::PathExpression>()->path->name);
-                     nextState.set(globalRef->checkedTo<IR::Member>(), nextState.get(argRef));
-                 }
-             } else {
-                 P4C_UNIMPLEMENTED("Unsupported copy_out type %1%", assignType->node_type_name());
+             for (size_t paramIdx = 0; paramIdx < blockParams->size(); ++paramIdx) {
+                 const auto *internalParam = blockParams->getParameter(paramIdx);
+                 auto externalParamName = archSpec->getParamName(canonicalName, paramIdx);
+                 printf("COPPIYING FROM %s to %s\n", internalParam->toString(), externalParamName);
+                 nextState.copyOut(internalParam, externalParamName);
              }
-             // Push back the current taint level.
              nextState.setProperty("inUndefinedState", currentTaint);
              nextState.popBody();
              result->emplace_back(nextState);
-             return false;
          }},
     });
     // Provides implementations of extern calls internal to the interpreter.

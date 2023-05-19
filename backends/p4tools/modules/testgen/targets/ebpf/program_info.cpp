@@ -78,21 +78,13 @@ std::vector<Continuation::Command> EBPFProgramInfo::processDeclaration(
         TESTGEN_UNIMPLEMENTED("Constructed type %s of type %s not supported.", typeDecl,
                               typeDecl->node_type_name());
     }
-    const auto *params = applyBlock->getApplyParameters();
     // Retrieve the current canonical pipe in the architecture spec using the pipe index.
     const auto *archMember = archSpec->getArchMember(blockIdx);
 
     std::vector<Continuation::Command> cmds;
-    // Generate all the necessary copy-in/outs.
-    std::vector<Continuation::Command> copyOuts;
-    for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
-        const auto *param = params->getParameter(paramIdx);
-        produceCopyInOutCall(param, paramIdx, archMember, &cmds, &copyOuts);
-    }
+
     // Insert the actual pipeline.
     cmds.emplace_back(typeDecl);
-    // Add the copy out assignments after the pipe has completed executing.
-    cmds.insert(cmds.end(), copyOuts.begin(), copyOuts.end());
 
     // After some specific pipelines (filter), we check whether the packet has been dropped.
     // eBPF can not modify the packet, so we do not append any emit buffer here.

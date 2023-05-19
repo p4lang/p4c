@@ -62,21 +62,12 @@ std::vector<Continuation::Command> PnaDpdkProgramInfo::processDeclaration(
         TESTGEN_UNIMPLEMENTED("Constructed type %s of type %s not supported.", typeDecl,
                               typeDecl->node_type_name());
     }
-    const auto *params = applyBlock->getApplyParameters();
     // Retrieve the current canonical pipe in the architecture spec using the pipe index.
     const auto *archMember = archSpec->getArchMember(blockIdx);
 
     std::vector<Continuation::Command> cmds;
-    // Generate all the necessary copy-in/outs.
-    std::vector<Continuation::Command> copyOuts;
-    for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
-        const auto *param = params->getParameter(paramIdx);
-        produceCopyInOutCall(param, paramIdx, archMember, &cmds, &copyOuts);
-    }
     // Insert the actual pipeline.
     cmds.emplace_back(typeDecl);
-    // Add the copy out assignments after the pipe has completed executing.
-    cmds.insert(cmds.end(), copyOuts.begin(), copyOuts.end());
 
     auto *dropStmt =
         new IR::MethodCallStatement(Utils::generateInternalMethodCall("drop_and_exit", {}));
