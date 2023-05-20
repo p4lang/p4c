@@ -5,6 +5,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 def p4c_deps():
     """Loads dependencies need to compile p4c."""
+
     # Third party projects can define the target
     # @com_github_p4lang_p4c_extension:ir_extensions with a `filegroup`
     # containing their custom .def files.
@@ -74,4 +75,21 @@ filegroup(
             url = "https://github.com/protocolbuffers/protobuf/releases/download/v21.10/protobuf-all-21.10.tar.gz",
             strip_prefix = "protobuf-21.10",
             sha256 = "6fc9b6efc18acb2fd5fb3bcf981572539c3432600042b662a162c1226b362426",
+        )
+
+    # Dependencies used by the tc backend
+    if not native.existing_rule("com_google_absl"):
+        http_archive(
+            name = "com_google_absl",
+            # The most recent commit as of 2021-09-02
+            urls = ["https://github.com/abseil/abseil-cpp/archive/4bb9e39c88854dbf466688177257d11810719853.zip"],
+            strip_prefix = "abseil-cpp-4bb9e39c88854dbf466688177257d11810719853",
+            sha256 = "4cad653c8d6a2c0a551bae3114e2208bf80b0e7d54a4f094f3f5e967c1dab45b",
+        )
+    if not native.existing_rule("com_github_jbeder_yaml_cpp"):
+        http_archive(
+            name = "com_github_jbeder_yaml_cpp",
+            urls = ["https://github.com/jbeder/yaml-cpp/archive/refs/tags/yaml-cpp-0.7.0.zip"],
+            strip_prefix = "yaml-cpp-yaml-cpp-0.7.0",
+            sha256 = "4d5e664a7fb2d7445fc548cc8c0e1aa7b1a496540eb382d137e2cc263e6d3ef5",
         )

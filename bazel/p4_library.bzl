@@ -255,3 +255,75 @@ p4_graphs = rule(
     incompatible_use_toolchain_transition = True,
     toolchains = use_cpp_toolchain(),
 )
+
+def _p4_ir_impl(ctx):
+    p4c = ctx.executable._p4c
+    p4file = ctx.file.src
+    args = _extract_common_p4c_args(ctx)
+    args += ["--toJSON", ctx.outputs.ir_out.path]
+    outputs = [ctx.outputs.ir_out]
+
+    if ctx.attr.extra_args:
+        args.append(ctx.attr.extra_args)
+
+    _run_shell_cmd_with_p4c(
+        ctx,
+        command = """
+            "{p4c}" {p4c_args}
+        """.format(
+            p4c = p4c.path,
+            p4c_args = " ".join(args),
+        ),
+        inputs = _extract_p4c_inputs(ctx),
+        outputs = outputs,
+        progress_message = "Compiling P4 program %s" % p4file.short_path,
+    )
+
+p4_ir = rule(
+    doc = """Generates P4 IR in JSON format from a P4 program.""",
+    implementation = _p4_ir_impl,
+    attrs = {
+        "src": attr.label(
+            doc = "P4 source file to pass to p4c.",
+            mandatory = True,
+            allow_single_file = [".p4"],
+        ),
+        "deps": attr.label_list(
+            doc = "Additional P4 dependencies (optional). Use for #include-ed files.",
+            mandatory = False,
+            allow_files = [".p4", ".h"],
+            default = [],
+        ),
+        "ir_out": attr.output(
+            mandatory = True,
+            doc = "The name of the output JSON file.",
+        ),
+        "arch": attr.string(
+            doc = "The --arch argument passed to p4c (default: v1model).",
+            mandatory = False,
+            default = "v1model",
+        ),
+        "std": attr.string(
+            doc = "The --std argument passed to p4c (default: p4-16).",
+            mandatory = False,
+            default = "p4-16",
+        ),
+        "extra_args": attr.string(
+            doc = "String of additional command line arguments to pass to p4c.",
+            mandatory = False,
+            default = "",
+        ),
+        "_p4c": attr.label(
+            default = Label("@com_github_p4lang_p4c//backends/tc:p4c_tc"),
+            executable = True,
+            cfg = "target",
+        ),
+        "_p4include": attr.label(
+            default = Label("@com_github_p4lang_p4c//:p4include"),
+            allow_files = [".p4", ".h"],
+        ),
+        "_cc_toolchain": attr.label(default = Label("@bazel_tools//tools/cpp:current_cc_toolchain")),
+    },
+    incompatible_use_toolchain_transition = True,
+    toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
+)
