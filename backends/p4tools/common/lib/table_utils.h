@@ -64,6 +64,15 @@ std::vector<const IR::ActionListElement *> buildTableActionList(const IR::P4Tabl
 /// It is used for comparison.
 bool compareLPMEntries(const IR::Entry *leftIn, const IR::Entry *rightIn, size_t lpmIndex);
 
+/// @returns the name of the default action of the table as path expression.
+const IR::PathExpression *getDefaultActionName(const IR::P4Table &table);
+
+/// Matches the match values of an entry with the values and variables of the key.
+/// @returns a boolean expression describing the match.
+/// Returns a false IR::BoolLiteral if there are no keys.
+const IR::Expression *computeEntryMatch(const IR::P4Table &table, const IR::Entry &entry,
+                                        const IR::Key &key);
+
 }  // namespace P4Tools::TableUtils
 
 #endif /* BACKENDS_P4TOOLS_COMMON_LIB_TABLE_UTILS_H_ */

@@ -35,7 +35,6 @@ set(
   lib/continuation.cpp
   lib/execution_state.cpp
   lib/final_state.cpp
-  lib/gen_eq.cpp
   lib/logging.cpp
   lib/packet_vars.cpp
   lib/test_backend.cpp

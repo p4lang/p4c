@@ -1,4 +1,4 @@
-#include "backends/p4tools/modules/testgen/lib/gen_eq.h"
+#include "backends/p4tools/common/lib/gen_eq.h"
 
 #include <cstddef>
 #include <string>
@@ -8,7 +8,7 @@
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 
-namespace P4Tools::P4Testgen {
+namespace P4Tools {
 
 const IR::Expression *GenEq::equate(const IR::Expression *target, const IR::Expression *keyset) {
     if (const auto *defaultKey = keyset->to<IR::DefaultExpression>()) {
@@ -113,4 +113,4 @@ const IR::Equ *GenEq::mkEq(const IR::Expression *e1, const IR::Expression *e2) {
     return new IR::Equ(IR::Type::Boolean::get(), e1, e2);
 }
 
-}  // namespace P4Tools::P4Testgen
+}  // namespace P4Tools
