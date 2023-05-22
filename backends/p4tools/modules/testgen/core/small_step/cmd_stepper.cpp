@@ -342,17 +342,6 @@ bool CmdStepper::preorder(const IR::ParserState *parserState) {
         return false;
     }
 
-    // Push a new continuation that will take the next state as an argument and execute the state
-    // as a command.
-    // Create a parameter for the continuation we're about to build.
-    const auto *v =
-        Continuation::genParameter(IR::Type_State::get(), "nextState", state.getNamespaceContext());
-
-    // Create the continuation itself.
-    Continuation::Body kBody({v->param});
-    Continuation k(v, kBody);
-    nextState.pushContinuation(*new ExecutionState::StackFrame(k, state.getNamespaceContext()));
-
     // Enter the parser state's namespace
     nextState.pushNamespace(parserState);
 
@@ -369,9 +358,27 @@ bool CmdStepper::preorder(const IR::ParserState *parserState) {
             cmds.emplace_back(component);
         }
     }
+    const auto *select = parserState->selectExpression;
+    if (select->is<IR::SelectExpression>()) {
+        // Push a new continuation that will take the next state as an argument and execute the
+        // state as a command. Create a parameter for the continuation we're about to build.
+        const auto *v = Continuation::genParameter(IR::Type_State::get(), "nextState",
+                                                   state.getNamespaceContext());
 
-    // Add the next parser state(s) to the cmds
-    cmds.emplace_back(Continuation::Return(parserState->selectExpression));
+        // Create the continuation itself.
+        Continuation::Body kBody({v->param});
+        Continuation k(v, kBody);
+        nextState.pushContinuation(*new ExecutionState::StackFrame(k, state.getNamespaceContext()));
+        // Add the next parser state(s) to the cmds
+        cmds.emplace_back(Continuation::Return(parserState->selectExpression));
+    } else if (const auto *pathExpression = select->to<IR::PathExpression>()) {
+        // Do not need a continuation here, just transition directly to the next state.
+        const auto *parserState = state.findDecl(pathExpression)->getNode();
+        cmds.emplace_back(parserState);
+    } else {
+        P4C_UNIMPLEMENTED("Select expression %1% of type %2% not implemented for parser states.",
+                          select, select->node_type_name());
+    }
 
     nextState.replaceTopBody(&cmds);
     result->emplace_back(nextState);

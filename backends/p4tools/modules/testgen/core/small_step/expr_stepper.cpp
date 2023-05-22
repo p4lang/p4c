@@ -249,23 +249,9 @@ bool ExprStepper::preorder(const IR::Mux *mux) {
 
 bool ExprStepper::preorder(const IR::PathExpression *pathExpression) {
     logStep(pathExpression);
-
-    // If we are referencing a parser state, step into the state.
-    const auto *decl = state.findDecl(pathExpression)->getNode();
-    if (decl->is<IR::ParserState>()) {
-        return stepSymbolicValue(decl);
-    }
-    auto &nextState = state.clone();
-    // ValueSets can be declared in parsers and are usually set by the control plane.
-    // We simply return the contained valueSet.
-    if (const auto *valueSet = decl->to<IR::P4ValueSet>()) {
-        nextState.replaceTopBody(Continuation::Return(valueSet));
-        result->emplace_back(nextState);
-        return false;
-    }
     // Otherwise convert the path expression into a qualified member and return it.
-    nextState.replaceTopBody(Continuation::Return(nextState.get(pathExpression)));
-    result->emplace_back(nextState);
+    state.replaceTopBody(Continuation::Return(state.get(pathExpression)));
+    result->emplace_back(state);
     return false;
 }
 
