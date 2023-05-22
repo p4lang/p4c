@@ -114,16 +114,15 @@ configure_file(register.h.in register.h)
 
 # The library.
 add_p4tools_library(testgen ${TESTGEN_SOURCES})
-add_dependencies(testgen p4tools-common inja)
-target_include_directories(testgen SYSTEM PUBLIC ${inja_SOURCE_DIR}/include)
-target_include_directories(testgen SYSTEM PUBLIC ${inja_SOURCE_DIR}/third_party/include)
+# make sure the testgen library sees both Z3 and Inja includes and anything that links to testgen
+# also links to Z3 and inja
+target_link_libraries(testgen PUBLIC ${TESTGEN_LIBS})
 
 # The executable.
 add_p4tools_executable(p4testgen main.cpp)
 target_link_libraries(
   p4testgen
   testgen
-  ${TESTGEN_LIBS}
 )
 
 add_custom_target(
@@ -148,7 +147,6 @@ if(ENABLE_GTESTS)
     testgen-gtest
     PRIVATE testgen
     PRIVATE gtest
-    ${TESTGEN_LIBS}
   )
 
   if(ENABLE_TESTING)
