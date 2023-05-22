@@ -173,18 +173,11 @@ void ValidateParsedProgram::postorder(const IR::Declaration_Constant *decl) {
         ::error(ErrorType::ERR_INVALID, "%1%: invalid constant name.", decl);
 }
 
-/**
- * check that an entries list is declared as constant
- * The current specification supports only const entries, and we chose
- * to implement optCONST in the grammar, in part because we can provide
- * a more informative message here, and in part because it more uniform
- * handling with the rest of the properties defined for tables.
- */
 void ValidateParsedProgram::postorder(const IR::EntriesList *l) {
     auto table = findContext<IR::P4Table>();
     if (table == nullptr) {
         ::error(ErrorType::ERR_INVALID,
-                "%1%: invalid initializer. Table initializers must belong to a table.", l);
+                "%1%: invalid entries list. Table entries must belong to a table.", l);
         return;
     }
 }

@@ -37,7 +37,6 @@ namespace P4 {
    - no parser state is named 'accept' or 'reject'
    - constructor parameters are direction-less
    - tables have an actions property
-   - table entries lists are const
    - instantiations appear at the top-level only
    - the default label of a switch statement appears last
    - instantiations do not occur in actions

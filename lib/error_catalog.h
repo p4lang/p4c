@@ -75,6 +75,8 @@ class ErrorType {
     static const int WARN_SHADOWING;                // instance shadowing
     static const int WARN_IGNORE;                   // simply ignore
     static const int WARN_INVALID_HEADER;           // access to fields of an invalid header
+    static const int WARN_DUPLICATE_PRIORITIES;     // two entries with the same priority
+    static const int WARN_ENTRIES_OUT_OF_ORDER;     // entries with priorities out of order
 
     static const int WARN_MAX_WARNINGS;
 };
