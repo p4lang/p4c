@@ -36,6 +36,10 @@
 
 namespace P4Tools::P4Testgen {
 
+/* =============================================================================================
+ *  Constructors
+ * ============================================================================================= */
+
 ExecutionState::ExecutionState(const IR::P4Program *program)
     : AbstractExecutionState(program),
       body({program}),
@@ -73,6 +77,12 @@ ExecutionState::ExecutionState(Continuation::Body body)
         reachabilityEngineState = ReachabilityEngineState::getInitial();
     }
 }
+
+ExecutionState &ExecutionState::create(const IR::P4Program *program) {
+    return *new ExecutionState(program);
+}
+
+ExecutionState &ExecutionState::clone() const { return *new ExecutionState(*this); }
 
 /* =============================================================================================
  *  Accessors
@@ -283,7 +293,7 @@ void ExecutionState::handleException(Continuation::Exception e) {
  *  Body operations
  * ============================================================================================= */
 
-void ExecutionState::replaceTopBody(const Continuation::Command cmd) { replaceTopBody({cmd}); }
+void ExecutionState::replaceTopBody(const Continuation::Command &cmd) { replaceTopBody({cmd}); }
 
 void ExecutionState::replaceTopBody(const std::vector<Continuation::Command> *cmds) {
     BUG_CHECK(!cmds->empty(), "Replaced top of execution stack with empty list");
@@ -496,34 +506,5 @@ const IR::SymbolicVariable *ExecutionState::createSymbolicVariable(const IR::Typ
     }
     return variables;
 }
-
-/* =========================================================================================
- *  General utilities involving ExecutionState.
- * ========================================================================================= */
-
-const IR::P4Table *ExecutionState::getTableType(const IR::Expression *expression) const {
-    if (!expression->is<IR::Member>()) {
-        return nullptr;
-    }
-    const auto *member = expression->to<IR::Member>();
-    if (member->member != IR::IApply::applyMethodName) {
-        return nullptr;
-    }
-    if (member->expr->is<IR::PathExpression>()) {
-        const auto *declaration = findDecl(member->expr->to<IR::PathExpression>());
-        return declaration->to<IR::P4Table>();
-    }
-    const auto *type = member->expr->type;
-    if (const auto *tableType = type->to<IR::Type_Table>()) {
-        return tableType->table;
-    }
-    return nullptr;
-}
-
-ExecutionState &ExecutionState::create(const IR::P4Program *program) {
-    return *new ExecutionState(program);
-}
-
-ExecutionState &ExecutionState::clone() const { return *new ExecutionState(*this); }
 
 }  // namespace P4Tools::P4Testgen

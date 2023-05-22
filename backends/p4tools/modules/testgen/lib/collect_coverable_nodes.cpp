@@ -62,7 +62,7 @@ bool CoverableNodesScanner::preorder(const IR::MethodCallExpression *call) {
     if (call->method->type->is<IR::Type_Method>()) {
         if (const auto *member = call->method->to<IR::Member>()) {
             // Handle table calls.
-            const auto *table = executionState.getTableType(member);
+            const auto *table = executionState.findTable(member);
             if (table == nullptr) {
                 return true;
             }

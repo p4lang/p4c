@@ -391,7 +391,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                        "Low value ( %1% ) must be less than high value ( %2% ).", lo, hi);
              auto &nextState = state.clone();
              const auto *resultField = args->at(0)->expression;
-             const auto &fieldRef = AbstractExecutionState::convertReference(resultField);
+             const auto &fieldRef = ToolsVariables::convertReference(resultField);
 
              // If the range is limited to only one value, return that value.
              if (lo->value == hi->value) {
@@ -567,7 +567,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              auto externName = receiver->toString() + "_" + declInstance->controlPlaneName();
              auto &nextState = state.clone();
              if (hashOutput->type->is<IR::Type_Bits>()) {
-                 const auto &fieldRef = AbstractExecutionState::convertReference(hashOutput);
+                 const auto &fieldRef = ToolsVariables::convertReference(hashOutput);
                  if (argsAreTainted) {
                      nextState.set(fieldRef,
                                    programInfo.createTargetUninitialized(fieldRef->type, false));
@@ -873,7 +873,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
              auto testBackend = TestgenOptions::get().testBackend;
              const IR::StateVariable &meterResult =
-                 AbstractExecutionState::convertReference(args->at(1)->expression);
+                 ToolsVariables::convertReference(args->at(1)->expression);
              if (testBackend != "PTF") {
                  ::warning(
                      "meter.execute_meter not implemented for %1%. Choosing default value (GREEN).",
@@ -992,7 +992,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              auto &nextState = state.clone();
              std::vector<Continuation::Command> replacements;
              const IR::StateVariable &meterResult =
-                 AbstractExecutionState::convertReference(args->at(0)->expression);
+                 ToolsVariables::convertReference(args->at(0)->expression);
              // If we do not have right back end and no associated table entry, do not bother
              // configuring the extern. We just set the default value (green).
              auto testBackend = TestgenOptions::get().testBackend;
@@ -1598,8 +1598,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  argsAreTainted = argsAreTainted || state.hasTaint(arg->expression);
              }
 
-             const auto &checksumVar =
-                 AbstractExecutionState::convertReference(args->at(2)->expression);
+             const auto &checksumVar = ToolsVariables::convertReference(args->at(2)->expression);
              const auto *updateCond = args->at(0)->expression;
              const auto *checksumVarType = checksumVar->type;
              const auto *data = args->at(1)->expression;
@@ -1677,8 +1676,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  argsAreTainted = argsAreTainted || state.hasTaint(arg->expression);
              }
 
-             const auto &checksumVar =
-                 AbstractExecutionState::convertReference(args->at(2)->expression);
+             const auto &checksumVar = ToolsVariables::convertReference(args->at(2)->expression);
              const auto *updateCond = args->at(0)->expression;
              const auto *checksumVarType = checksumVar->type;
              const auto *data = args->at(1)->expression;

@@ -53,7 +53,7 @@ void ExprStepper::handleHitMissActionRun(const IR::Member *member) {
     BUG_CHECK(method->method->is<IR::Member>(), "Method apply has unexpected format: %1%", method);
     replacements.emplace_back(new IR::MethodCallStatement(Util::SourceInfo(), method));
     const auto *methodName = method->method->to<IR::Member>();
-    const auto *table = state.getTableType(methodName);
+    const auto *table = state.findTable(methodName);
     CHECK_NULL(table);
     if (member->member.name == IR::Type_Table::hit) {
         replacements.emplace_back(Continuation::Return(TableStepper::getTableHitVar(table)));
@@ -136,7 +136,7 @@ bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
             BUG_CHECK(method->expr, "Method call has unexpected format: %1%", call);
 
             // Handle table calls.
-            if (const auto *table = state.getTableType(method)) {
+            if (const auto *table = state.findTable(method)) {
                 state.replaceTopBody(Continuation::Return(table));
                 result->emplace_back(state);
                 return false;

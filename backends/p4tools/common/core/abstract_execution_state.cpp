@@ -26,13 +26,13 @@ const SymbolicEnv &AbstractExecutionState::getSymbolicEnv() const { return env; 
 
 void AbstractExecutionState::printSymbolicEnv(std::ostream &out) const {
     // TODO(fruffy): How do we do logging here?
-    out << "##### Symbolic Environment Begin #####" << std::endl;
+    out << "##### Symbolic Environment Begin #####\n";
     for (const auto &envVar : env.getInternalMap()) {
         const auto var = envVar.first;
         const auto *val = envVar.second;
-        out << "Variable: " << var->toString() << " Value: " << val << std::endl;
+        out << "Variable: " << var->toString() << " Value: " << val << '\n';
     }
-    out << "##### Symbolic Environment End #####" << std::endl;
+    out << "##### Symbolic Environment End #####\n";
 }
 /* =============================================================================================
  *  Namespaces and declarations
@@ -120,16 +120,6 @@ void AbstractExecutionState::initializeStructLike(const Target &target,
     for (const auto &flatTargetRef : flatTargetFields) {
         set(flatTargetRef, target.createTargetUninitialized(flatTargetRef->type, forceTaint));
     }
-}
-
-IR::StateVariable AbstractExecutionState::convertReference(const IR::Expression *ref) {
-    if (const auto *member = ref->to<IR::Member>()) {
-        return member;
-    }
-    // Local variable.
-    const auto *path = ref->checkedTo<IR::PathExpression>();
-    // return ToolsVariables::getStateVariable(path->type, path->path->name);
-    return path;
 }
 
 const IR::P4Table *AbstractExecutionState::findTable(const IR::Member *member) const {
@@ -258,20 +248,6 @@ void AbstractExecutionState::copyOut(const IR::Parameter *internalParam,
     } else {
         P4C_UNIMPLEMENTED("Unsupported copy-in type %1%", paramType->node_type_name());
     }
-}
-
-std::vector<const IR::Expression *> AbstractExecutionState::getFlatStructFields(
-    const IR::StructExpression *se) {
-    std::vector<const IR::Expression *> flatStructFields;
-    for (const auto *field : se->components) {
-        if (const auto *structExpr = field->expression->to<IR::StructExpression>()) {
-            auto subFields = getFlatStructFields(structExpr);
-            flatStructFields.insert(flatStructFields.end(), subFields.begin(), subFields.end());
-        } else {
-            flatStructFields.push_back(field->expression);
-        }
-    }
-    return flatStructFields;
 }
 
 void AbstractExecutionState::initializeBlockParams(const Target &target,

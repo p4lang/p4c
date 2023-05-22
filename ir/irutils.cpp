@@ -181,7 +181,7 @@ std::vector<const Expression *> flattenStructExpression(const StructExpression *
             auto subList = flattenStructExpression(subStructExpr);
             exprList.insert(exprList.end(), subList.begin(), subList.end());
         } else {
-            exprList.push_back(listElem->expression);
+            exprList.emplace_back(listElem->expression);
         }
     }
     return exprList;
@@ -194,7 +194,7 @@ std::vector<const Expression *> flattenListExpression(const ListExpression *list
             auto subList = flattenListExpression(subListExpr);
             exprList.insert(exprList.end(), subList.begin(), subList.end());
         } else {
-            exprList.push_back(listElem);
+            exprList.emplace_back(listElem);
         }
     }
     return exprList;

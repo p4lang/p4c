@@ -58,7 +58,7 @@ bool CmdStepper::preorder(const IR::AssignmentStatement *assign) {
     }
 
     state.markVisited(assign);
-    const auto &left = AbstractExecutionState::convertReference(assign->left);
+    const auto &left = ToolsVariables::convertReference(assign->left);
     const auto *leftType = left->type;
 
     // Resolve the type of the left-and assignment, if it is a type name.
@@ -268,9 +268,13 @@ bool CmdStepper::preorder(const IR::MethodCallStatement *methodCallStatement) {
     const auto *type = methodCallStatement->methodCall->type;
     // Table and action calls do not really return anything (for now).
     // TODO: We should not need these convoluted type checks in a method call statement.
-    if (type->is<IR::Type_Action>() ||
-        state.getTableType(methodCallStatement->methodCall->method) != nullptr) {
+    // We can directly jump to the respective visitor function instead of placing a continuation.
+    if (type->is<IR::Type_Action>()) {
         type = IR::Type::Void::get();
+    } else if (const auto *member = methodCallStatement->methodCall->method->to<IR::Member>()) {
+        if (state.findTable(member) != nullptr) {
+            type = IR::Type::Void::get();
+        }
     }
     state.pushCurrentContinuation(type);
     state.replaceBody(Continuation::Body({Continuation::Return(methodCallStatement->methodCall)}));
@@ -461,7 +465,7 @@ IR::SwitchStatement *CmdStepper::replaceSwitchLabels(const IR::SwitchStatement *
     BUG_CHECK(methodCall, "Invalid format of %1% for action_run", member->expr);
     const auto *tableCall = methodCall->method->to<IR::Member>();
     BUG_CHECK(tableCall, "Invalid format of %1% for action_run", methodCall->method);
-    const auto *table = state.getTableType(methodCall->method->to<IR::Member>());
+    const auto *table = state.findTable(methodCall->method->to<IR::Member>());
     CHECK_NULL(table);
     auto actionVar = TableStepper::getTableActionVar(table);
     IR::Vector<IR::SwitchCase> newCases;

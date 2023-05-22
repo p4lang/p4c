@@ -238,7 +238,7 @@ class ExecutionState : public AbstractExecutionState {
      *  Body operations
      * ========================================================================================= */
     /// Replaces the top element of @body with @cmd.
-    void replaceTopBody(const Continuation::Command cmd);
+    void replaceTopBody(const Continuation::Command &cmd);
 
     /// Replaces the topmost command in @body with the contents of @cmds. A BUG occurs if @body
     /// is empty or @cmds is empty.
@@ -383,12 +383,8 @@ class ExecutionState : public AbstractExecutionState {
                                                                      uint64_t instanceID = 0);
 
     /* =========================================================================================
-     *  General utilities involving ExecutionState.
+     *  Constructors
      * ========================================================================================= */
-    /// Gets table type from a member.
-    /// @returns nullptr is member type is not a IR::P4Table.
-    [[nodiscard]] const IR::P4Table *getTableType(const IR::Expression *expression) const;
-
     /// Allocate a new execution state object with the same state as this object.
     /// Returns a reference, not a pointer.
     [[nodiscard]] ExecutionState &clone() const override;
@@ -397,9 +393,6 @@ class ExecutionState : public AbstractExecutionState {
     /// Returns a reference not a pointer.
     [[nodiscard]] static ExecutionState &create(const IR::P4Program *program);
 
-    /* =========================================================================================
-     *  Constructors
-     * ========================================================================================= */
  private:
     /// Create an initial execution state with @param body for testing.
     explicit ExecutionState(Continuation::Body body);

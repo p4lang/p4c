@@ -88,10 +88,6 @@ class AbstractExecutionState {
      *  General utilities involving ExecutionState.
      * ========================================================================================= */
 
-    /// @returns an IR::Expression converted into a StateVariable. Currently only IR::PathExpression
-    /// and IR::Member can be converted into a state variable.
-    static IR::StateVariable convertReference(const IR::Expression *ref);
-
     /// Looks up the @param member in the environment of @param state. Returns nullptr if the member
     /// is not a table type.
     const IR::P4Table *findTable(const IR::Member *member) const;
@@ -104,11 +100,6 @@ class AbstractExecutionState {
     [[nodiscard]] std::vector<IR::StateVariable> getFlatFields(
         const IR::Expression *parent, const IR::Type_StructLike *ts,
         std::vector<IR::StateVariable> *validVector = nullptr) const;
-
-    /// Takes an input struct expression @se and returns a flattened vector of all the Type_Base
-    /// (bit and bool) expressions contained within the struct expression.
-    [[nodiscard]] static std::vector<const IR::Expression *> getFlatStructFields(
-        const IR::StructExpression *se);
 
     /// Initialize all the members of a struct-like object by calling the initialization function of
     /// the active target. Headers validity is set to "false".
