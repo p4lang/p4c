@@ -1,0 +1,9 @@
+init-entries-error3-bmv2.p4(79): [--Wwarn=entries_out_of_priority_order] warning: Entry (priority 12) and Entry (priority 2) have priorities out of order
+            priority=12: (0x01, 0x1111 &&& 0xF ) : a_params(1);
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+init-entries-error3-bmv2.p4(80)
+                         (0x02, 0x1181 ) : a_params(2); // priority 2
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+init-entries-error3-bmv2.p4(65): [--Werror=overlimit] error: t1 Overflow in priority computation
+    table t1 {
+          ^^
