@@ -32,8 +32,7 @@ class PnaDpdkTestgenTarget : public TestgenTarget {
     [[nodiscard]] int getPortNumWidthBitsImpl() const override;
 
     PnaTestBackend *getTestBackendImpl(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                                       const std::filesystem::path &testPath,
-                                       std::optional<uint32_t> seed) const override;
+                                       const std::filesystem::path &testPath) const override;
 
     PnaDpdkCmdStepper *getCmdStepperImpl(ExecutionState &state, AbstractSolver &solver,
                                          const ProgramInfo &programInfo) const override;

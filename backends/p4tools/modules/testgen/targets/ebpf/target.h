@@ -32,8 +32,7 @@ class EBPFTestgenTarget : public TestgenTarget {
     int getPortNumWidthBitsImpl() const override;
 
     EBPFTestBackend *getTestBackendImpl(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                                        const std::filesystem::path &testPath,
-                                        std::optional<uint32_t> seed) const override;
+                                        const std::filesystem::path &testPath) const override;
 
     EBPFCmdStepper *getCmdStepperImpl(ExecutionState &state, AbstractSolver &solver,
                                       const ProgramInfo &programInfo) const override;

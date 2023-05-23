@@ -32,7 +32,7 @@ namespace P4Tools::P4Testgen::Pna {
 const std::set<std::string> PnaTestBackend::SUPPORTED_BACKENDS = {"METADATA"};
 
 PnaTestBackend::PnaTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                               const std::filesystem::path &testPath, std::optional<uint32_t> seed)
+                               const std::filesystem::path &testPath)
     : TestBackEnd(programInfo, symbex) {
     cstring testBackendString = TestgenOptions::get().testBackend;
     if (testBackendString.isNullOrEmpty()) {
@@ -43,7 +43,7 @@ PnaTestBackend::PnaTestBackend(const ProgramInfo &programInfo, SymbolicExecutor 
     }
 
     if (testBackendString == "METADATA") {
-        testWriter = new Metadata(testPath.c_str(), seed);
+        testWriter = new Metadata(testPath.c_str(), TestgenOptions::get().seed);
     } else {
         P4C_UNIMPLEMENTED(
             "Test back end %1% not implemented for this target. Supported back ends are %2%.",

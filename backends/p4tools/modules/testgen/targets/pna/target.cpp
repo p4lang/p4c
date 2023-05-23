@@ -57,11 +57,10 @@ const PnaDpdkProgramInfo *PnaDpdkTestgenTarget::initProgramImpl(
     return new PnaDpdkProgramInfo(program, programmableBlocks);
 }
 
-PnaTestBackend *PnaDpdkTestgenTarget::getTestBackendImpl(const ProgramInfo &programInfo,
-                                                         SymbolicExecutor &symbex,
-                                                         const std::filesystem::path &testPath,
-                                                         std::optional<uint32_t> seed) const {
-    return new PnaTestBackend(programInfo, symbex, testPath, seed);
+PnaTestBackend *PnaDpdkTestgenTarget::getTestBackendImpl(
+    const ProgramInfo &programInfo, SymbolicExecutor &symbex,
+    const std::filesystem::path &testPath) const {
+    return new PnaTestBackend(programInfo, symbex, testPath);
 }
 
 int PnaDpdkTestgenTarget::getPortNumWidthBitsImpl() const { return 9; }

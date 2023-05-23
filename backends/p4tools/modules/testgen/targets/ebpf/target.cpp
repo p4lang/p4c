@@ -67,11 +67,10 @@ const EBPFProgramInfo *EBPFTestgenTarget::initProgramImpl(
     return new EBPFProgramInfo(program, programmableBlocks);
 }
 
-EBPFTestBackend *EBPFTestgenTarget::getTestBackendImpl(const ProgramInfo &programInfo,
-                                                       SymbolicExecutor &symbex,
-                                                       const std::filesystem::path &testPath,
-                                                       std::optional<uint32_t> seed) const {
-    return new EBPFTestBackend(programInfo, symbex, testPath, seed);
+EBPFTestBackend *EBPFTestgenTarget::getTestBackendImpl(
+    const ProgramInfo &programInfo, SymbolicExecutor &symbex,
+    const std::filesystem::path &testPath) const {
+    return new EBPFTestBackend(programInfo, symbex, testPath);
 }
 
 int EBPFTestgenTarget::getPortNumWidthBitsImpl() const { return 9; }

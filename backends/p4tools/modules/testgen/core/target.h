@@ -34,8 +34,7 @@ class TestgenTarget : public Target {
 
     /// Returns the test back end associated with this P4Testgen target.
     static TestBackEnd *getTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                                       const std::filesystem::path &testPath,
-                                       std::optional<uint32_t> seed);
+                                       const std::filesystem::path &testPath);
 
     /// The width of a port number, in bits.
     static int getPortNumWidthBits();
@@ -69,8 +68,7 @@ class TestgenTarget : public Target {
     /// @see getTestBackend.
     virtual TestBackEnd *getTestBackendImpl(const ProgramInfo &programInfo,
                                             SymbolicExecutor &symbex,
-                                            const std::filesystem::path &testPath,
-                                            std::optional<uint32_t> seed) const = 0;
+                                            const std::filesystem::path &testPath) const = 0;
 
     /// @see getCmdStepper.
     virtual CmdStepper *getCmdStepperImpl(ExecutionState &state, AbstractSolver &solver,
@@ -86,7 +84,6 @@ class TestgenTarget : public Target {
     /// Utility function. Converts the list of arguments @inputArgs to a list of type declarations
     ///  and appends the result to @v. Any names appearing in the arguments are
     /// resolved with @ns.
-    //
     static void argumentsToTypeDeclarations(const IR::IGeneralNamespace *ns,
                                             const IR::Vector<IR::Argument> *inputArgs,
                                             std::vector<const IR::Type_Declaration *> &resultDecls);

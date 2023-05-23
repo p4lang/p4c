@@ -31,12 +31,12 @@ const big_int EBPFTestBackend::ZERO_PKT_MAX = 0xffffffff;
 const std::vector<std::string> EBPFTestBackend::SUPPORTED_BACKENDS = {"STF"};
 
 EBPFTestBackend::EBPFTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                                 const std::filesystem::path &testPath,
-                                 std::optional<uint32_t> seed)
+                                 const std::filesystem::path &testPath)
     : TestBackEnd(programInfo, symbex) {
     cstring testBackendString = TestgenOptions::get().testBackend;
+
     if (testBackendString == "STF") {
-        testWriter = new STF(testPath.c_str(), seed);
+        testWriter = new STF(testPath.c_str(), TestgenOptions::get().seed);
     } else {
         std::stringstream supportedBackendString;
         bool isFirst = true;
