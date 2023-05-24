@@ -113,9 +113,9 @@ configure_file(register.h.in register.h)
 
 # The library.
 add_p4tools_library(testgen ${TESTGEN_SOURCES})
-add_dependencies(testgen p4tools-common inja)
-target_include_directories(testgen SYSTEM PUBLIC ${inja_SOURCE_DIR}/include)
-target_include_directories(testgen SYSTEM PUBLIC ${inja_SOURCE_DIR}/third_party/include)
+# Make sure the testgen library and anything that links to it see both the Z3 and Inja includes.
+# also links to Z3 and inja
+target_link_libraries(testgen PUBLIC p4tools-common inja)
 
 # The executable.
 add_p4tools_executable(p4testgen main.cpp)
