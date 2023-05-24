@@ -58,7 +58,6 @@ IR::StateVariable convertReference(const IR::Expression *ref) {
     }
     // Local variable.
     const auto *path = ref->checkedTo<IR::PathExpression>();
-    // return getStateVariable(path->type, path->path->name);
     return path;
 }
 

@@ -36,7 +36,7 @@ class ProgramInfo : public ICastable {
     std::optional<const IR::Expression *> targetConstraints = std::nullopt;
 
     /// Maps the programmable blocks in the P4 program to their canonical counterpart.
-    std::map<cstring, cstring> blockMap;
+    ordered_map<cstring, cstring> blockMap;
 
  public:
     ProgramInfo(const ProgramInfo &) = default;
