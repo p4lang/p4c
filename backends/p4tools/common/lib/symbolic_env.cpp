@@ -31,17 +31,9 @@ void SymbolicEnv::set(const IR::StateVariable &var, const IR::Expression *value)
     map[var] = P4::optimizeExpression(value);
 }
 
-Model *SymbolicEnv::complete(const Model &model) const {
-    // Produce a new model based on the input model
-    // Add the variables contained in this environment and try to complete them.
-    auto *newModel = new Model(model);
-    newModel->complete(map);
-    return newModel;
-}
-
 Model *SymbolicEnv::evaluate(const Model &model) const {
     // Produce a new model based on the input model
-    return model.evaluate(map);
+    return model.evaluate(map, true);
 }
 
 const IR::Expression *SymbolicEnv::subst(const IR::Expression *expr) const {

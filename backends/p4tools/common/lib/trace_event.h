@@ -27,12 +27,9 @@ class TraceEvent : public ICastable {
     /// Applies the given IR transform to the expressions in this trace event.
     virtual const TraceEvent *apply(Transform &visitor) const;
 
-    /// Completes a model with the variables used in this trace event.
-    virtual void complete(Model *model) const;
-
     /// Evaluates expressions in the body of this trace event for their concrete value in the given
     /// model. A BUG occurs if there are any variables that are unbound by the given model.
-    [[nodiscard]] virtual const TraceEvent *evaluate(const Model &model) const;
+    [[nodiscard]] virtual const TraceEvent *evaluate(const Model &model, bool doComplete) const;
 
  protected:
     /// Prints this trace event to the given ostream.

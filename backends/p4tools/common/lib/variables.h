@@ -24,8 +24,7 @@ const IR::StateVariable &getStateVariable(const IR::Type *type, cstring name);
 ///
 /// A BUG occurs if this was previously called with the same @name and @incarnation, but with a
 /// different @type.
-const IR::SymbolicVariable *getSymbolicVariable(const IR::Type *type, int incarnation,
-                                                cstring name);
+const IR::SymbolicVariable *getSymbolicVariable(const IR::Type *type, cstring name);
 
 /// @see ToolsVariables::getSymbolicVariable.
 /// This function is used to generated variables caused by undefined behavior. This is merely a

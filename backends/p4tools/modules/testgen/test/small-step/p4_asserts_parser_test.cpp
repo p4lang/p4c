@@ -101,9 +101,9 @@ TEST_F(P4AssertsParserTest, Restrictions) {
     ASSERT_EQ(parsingResult.size(), (unsigned long)1);
     {
         const auto &expr1 = P4Tools::ToolsVariables::getSymbolicVariable(
-            IR::Type_Bits::get(8), 0, "ingress.ternary_table_mask_h.h.a1");
+            IR::Type_Bits::get(8), "ingress.ternary_table_mask_h.h.a1");
         const auto &expr2 = P4Tools::ToolsVariables::getSymbolicVariable(
-            IR::Type_Bits::get(8), 0, "ingress.ternary_table_lpm_prefix_h.h.a1");
+            IR::Type_Bits::get(8), "ingress.ternary_table_lpm_prefix_h.h.a1");
         const auto *const1 = IR::getConstant(IR::Type_Bits::get(8), 0);
         const auto *const2 = IR::getConstant(IR::Type_Bits::get(8), 64);
         const auto *operation =
@@ -112,14 +112,14 @@ TEST_F(P4AssertsParserTest, Restrictions) {
     }
     {
         const auto &expr1 = P4Tools::ToolsVariables::getSymbolicVariable(
-            IR::Type_Bits::get(8), 0, "ingress.ternary_table_key_h.h.a1");
+            IR::Type_Bits::get(8), "ingress.ternary_table_key_h.h.a1");
         const auto *const1 = IR::getConstant(IR::Type_Bits::get(8), 0);
         const auto *operation1 = new IR::Neq(expr1, const1);
         ASSERT_TRUE(parsingResult[0][1]->equiv(*operation1));
     }
     {
         const auto &expr1 = P4Tools::ToolsVariables::getSymbolicVariable(
-            IR::Type_Bits::get(8), 0, "ingress.ternary_table_key_h.h.a");
+            IR::Type_Bits::get(8), "ingress.ternary_table_key_h.h.a");
         const auto *const2 = IR::getConstant(IR::Type_Bits::get(8), 255);
         const auto *operation2 = new IR::Neq(expr1, const2);
         ASSERT_TRUE(parsingResult[0][2]->equiv(*operation2));
@@ -131,9 +131,9 @@ TEST_F(P4AssertsParserTest, RestrictionMiddleblockReferToInTable) {
         "backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_restrictions_2.p4",
         false);
     ASSERT_EQ(parsingResult.size(), (unsigned long)3);
-    const auto &expr1 = P4Tools::ToolsVariables::getSymbolicVariable(IR::Type_Bits::get(8), 0,
+    const auto &expr1 = P4Tools::ToolsVariables::getSymbolicVariable(IR::Type_Bits::get(8),
                                                                      "ingress.table_1_key_h.h.a");
-    const auto &expr2 = P4Tools::ToolsVariables::getSymbolicVariable(IR::Type_Bits::get(8), 0,
+    const auto &expr2 = P4Tools::ToolsVariables::getSymbolicVariable(IR::Type_Bits::get(8),
                                                                      "ingress.table_2_key_h.h.b");
     const auto *operation = new IR::Equ(expr1, expr2);
     ASSERT_TRUE(parsingResult[0][0]->equiv(*operation));
@@ -144,11 +144,11 @@ TEST_F(P4AssertsParserTest, RestrictionMiddleblockReferToInAction) {
         "backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_restrictions_2.p4",
         false);
     ASSERT_EQ(parsingResult.size(), (unsigned long)3);
-    auto expr1 = P4Tools::ToolsVariables::getSymbolicVariable(
-        IR::Type_Bits::get(8), 0, "ingress.table_1_arg_ingress.MyAction10");
-    auto expr2 = P4Tools::ToolsVariables::getSymbolicVariable(IR::Type_Bits::get(8), 0,
-                                                              "ingress.table_1_key_h.h.a");
-    auto operation = new IR::Equ(expr1, expr2);
+    const auto *expr1 = P4Tools::ToolsVariables::getSymbolicVariable(
+        IR::Type_Bits::get(8), "ingress.table_1_arg_ingress.MyAction10");
+    const auto *expr2 = P4Tools::ToolsVariables::getSymbolicVariable(IR::Type_Bits::get(8),
+                                                                     "ingress.table_1_key_h.h.a");
+    auto *operation = new IR::Equ(expr1, expr2);
     ASSERT_TRUE(parsingResult[1][0]->equiv(*operation));
 }
 

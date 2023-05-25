@@ -38,7 +38,8 @@ class PnaDpdkRegisterCondition : public TestObject {
     /// The function will throw a bug if this is not the case.
     [[nodiscard]] const IR::Constant *getEvaluatedValue() const;
 
-    [[nodiscard]] const PnaDpdkRegisterCondition *evaluate(const Model &model) const override;
+    [[nodiscard]] const PnaDpdkRegisterCondition *evaluate(const Model &model,
+                                                           bool doComplete) const override;
 
     [[nodiscard]] cstring getObjectName() const override;
 };
@@ -79,7 +80,8 @@ class PnaDpdkRegisterValue : public TestObject {
     /// The function will throw a bug if this is not the case.
     [[nodiscard]] const IR::Constant *getEvaluatedValue() const;
 
-    [[nodiscard]] const PnaDpdkRegisterValue *evaluate(const Model &model) const override;
+    [[nodiscard]] const PnaDpdkRegisterValue *evaluate(const Model &model,
+                                                       bool doComplete) const override;
 };
 
 /* =========================================================================================
@@ -110,7 +112,8 @@ class PnaDpdkActionProfile : public TestObject {
     /// Add an action (its name) and the arguments to the action map of this profile.
     void addToActionMap(cstring actionName, std::vector<ActionArg> actionArgs);
 
-    [[nodiscard]] const PnaDpdkActionProfile *evaluate(const Model &model) const override;
+    [[nodiscard]] const PnaDpdkActionProfile *evaluate(const Model &model,
+                                                       bool doComplete) const override;
 };
 
 /* =========================================================================================
@@ -136,7 +139,8 @@ class PnaDpdkActionSelector : public TestObject {
     /// @returns the associated action profile.
     [[nodiscard]] const PnaDpdkActionProfile *getActionProfile() const;
 
-    [[nodiscard]] const PnaDpdkActionSelector *evaluate(const Model &model) const override;
+    [[nodiscard]] const PnaDpdkActionSelector *evaluate(const Model &model,
+                                                        bool doComplete) const override;
 };
 
 /* =========================================================================================
@@ -151,7 +155,8 @@ class MetadataCollection : public TestObject {
 
     [[nodiscard]] cstring getObjectName() const override;
 
-    [[nodiscard]] const MetadataCollection *evaluate(const Model & /*model*/) const override;
+    [[nodiscard]] const MetadataCollection *evaluate(const Model & /*model*/,
+                                                     bool doComplete) const override;
 
     /// @returns the clone port expression.
     [[nodiscard]] const std::map<cstring, const IR::Literal *> &getMetadataFields() const;
@@ -176,7 +181,7 @@ class Optional : public TableMatch {
  public:
     explicit Optional(const IR::KeyElement *key, const IR::Expression *value, bool addMatch);
 
-    const Optional *evaluate(const Model &model) const override;
+    const Optional *evaluate(const Model &model, bool doComplete) const override;
 
     cstring getObjectName() const override;
 
@@ -200,7 +205,7 @@ class Range : public TableMatch {
     explicit Range(const IR::KeyElement *key, const IR::Expression *low,
                    const IR::Expression *high);
 
-    const Range *evaluate(const Model &model) const override;
+    const Range *evaluate(const Model &model, bool doComplete) const override;
 
     cstring getObjectName() const override;
 

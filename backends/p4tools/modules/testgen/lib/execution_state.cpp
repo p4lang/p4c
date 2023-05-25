@@ -44,9 +44,6 @@ ExecutionState::ExecutionState(const IR::P4Program *program)
     : AbstractExecutionState(program),
       body({program}),
       stack(*(new std::stack<std::reference_wrapper<const StackFrame>>())) {
-    // Insert the default symbolic variables of the execution state.
-    // This also makes the symbolic variables present in the state explicit.
-    allocatedSymbolicVariables.insert(getInputPacketSizeVar());
     env.set(&PacketVars::INPUT_PACKET_LABEL, IR::getConstant(IR::getBitType(0), 0));
     env.set(&PacketVars::PACKET_BUFFER_LABEL, IR::getConstant(IR::getBitType(0), 0));
     // We also add the taint property and set it to false.
@@ -65,9 +62,6 @@ ExecutionState::ExecutionState(const IR::P4Program *program)
 
 ExecutionState::ExecutionState(Continuation::Body body)
     : body(std::move(body)), stack(*(new std::stack<std::reference_wrapper<const StackFrame>>())) {
-    // Insert the default symbolic variables of the execution state.
-    // This also makes the symbolic variables present in the state explicit.
-    allocatedSymbolicVariables.insert(getInputPacketSizeVar());
     // We also add the taint property and set it to false.
     setProperty("inUndefinedState", false);
     // Drop is initialized to false, too.
@@ -317,7 +311,7 @@ void ExecutionState::pushPathConstraint(const IR::Expression *e) { pathConstrain
 void ExecutionState::pushBranchDecision(uint64_t bIdx) { selectedBranches.push_back(bIdx); }
 
 const IR::SymbolicVariable *ExecutionState::getInputPacketSizeVar() {
-    return ToolsVariables::getSymbolicVariable(&PacketVars::PACKET_SIZE_VAR_TYPE, 0,
+    return ToolsVariables::getSymbolicVariable(&PacketVars::PACKET_SIZE_VAR_TYPE,
                                                "*packetLen_bits");
 }
 
@@ -369,8 +363,8 @@ const IR::Expression *ExecutionState::peekPacketBuffer(int amount) {
     if (diff > 0) {
         // We need to enlarge the input packet by the amount we are exceeding the buffer.
         // TODO: How should we perform accounting here?
-        const IR::Expression *newVar = createSymbolicVariable(IR::getBitType(diff), "pktVar",
-                                                              allocatedSymbolicVariables.size());
+        const IR::Expression *newVar =
+            createSymbolicVariable(IR::getBitType(diff), "pktVar", numAllocatedSymbolicVariables);
         appendToInputPacket(newVar);
         // If the buffer was not empty, append the data we have consumed to the newly generated
         // content and reset the buffer.
@@ -412,8 +406,8 @@ const IR::Expression *ExecutionState::slicePacketBuffer(int amount) {
     if (diff > 0) {
         // We need to enlarge the input packet by the amount we are exceeding the buffer.
         // TODO: How should we perform accounting here?
-        const IR::Expression *newVar = createSymbolicVariable(IR::getBitType(diff), "pktVar",
-                                                              allocatedSymbolicVariables.size());
+        const IR::Expression *newVar =
+            createSymbolicVariable(IR::getBitType(diff), "pktVar", numAllocatedSymbolicVariables);
         appendToInputPacket(newVar);
         // If the buffer was not empty, append the data we have consumed to the newly generated
         // content and reset the buffer.
@@ -489,21 +483,14 @@ const IR::StateVariable &ExecutionState::getCurrentParserErrorLabel() const {
  *  Variables and symbolic constants
  * ============================================================================================= */
 
-const SymbolicSet &ExecutionState::getSymbolicVariables() const {
-    return allocatedSymbolicVariables;
-}
-
 const IR::SymbolicVariable *ExecutionState::createSymbolicVariable(const IR::Type *type,
                                                                    cstring name,
-                                                                   uint64_t instanceId) {
-    const auto *variables = ToolsVariables::getSymbolicVariable(type, instanceId, name);
-    const auto &result = allocatedSymbolicVariables.insert(variables);
-    // The variable already existed, check its type.
-    if (!result.second) {
-        BUG_CHECK((*result.first)->type->equiv(*type),
-                  "Inconsistent types for variables variable %1%: previously %2%, but now %3%",
-                  variables->toString(), (*result.first)->type, type);
+                                                                   std::optional<int> instanceID) {
+    if (instanceID.has_value()) {
+        name = name + "_" + std::to_string(instanceID.value());
     }
+    const auto *variables = ToolsVariables::getSymbolicVariable(type, name);
+    numAllocatedSymbolicVariables++;
     return variables;
 }
 

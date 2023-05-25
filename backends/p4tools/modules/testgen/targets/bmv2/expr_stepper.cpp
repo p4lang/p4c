@@ -92,7 +92,7 @@ void Bmv2V1ModelExprStepper::processClone(const ExecutionState &state,
     const auto &preserveIndex = cloneInfo->getPreserveIndex();
     const auto &egressPortVar = programInfo.getTargetOutputPortVar();
     const auto &clonePortVar =
-        ToolsVariables::getSymbolicVariable(egressPortVar->type, 0, "clone_port_var");
+        ToolsVariables::getSymbolicVariable(egressPortVar->type, "clone_port_var");
 
     uint64_t recirculateCount = 0;
     if (state.hasProperty("recirculate_count")) {

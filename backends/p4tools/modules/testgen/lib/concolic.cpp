@@ -38,7 +38,7 @@ bool ConcolicMethodImpls::matches(const std::vector<cstring> &paramNames,
 }
 
 bool ConcolicMethodImpls::exec(cstring concolicMethodName, const IR::ConcolicVariable *var,
-                               const ExecutionState &state, const Model &completedModel,
+                               const ExecutionState &state, const Model &evaluatedModel,
                                ConcolicVariableMap *resolvedConcolicVariables) const {
     if (impls.count(concolicMethodName) == 0) {
         return false;
@@ -66,7 +66,7 @@ bool ConcolicMethodImpls::exec(cstring concolicMethodName, const IR::ConcolicVar
     if (!matchingImpl) {
         return false;
     }
-    (*matchingImpl)(concolicMethodName, var, state, completedModel, resolvedConcolicVariables);
+    (*matchingImpl)(concolicMethodName, var, state, evaluatedModel, resolvedConcolicVariables);
     return true;
 }
 
@@ -98,7 +98,7 @@ bool ConcolicResolver::preorder(const IR::ConcolicVariable *var) {
     // Convert the concolic member variable to a state variable.
     auto concolicReplacment = resolvedConcolicVariables.find(*var);
     if (concolicReplacment == resolvedConcolicVariables.end()) {
-        bool found = concolicMethodImpls.exec(concolicMethodName, var, state, completedModel,
+        bool found = concolicMethodImpls.exec(concolicMethodName, var, state, evaluatedModel,
                                               &resolvedConcolicVariables);
         BUG_CHECK(found, "Unknown or unimplemented concolic method: %1%", concolicMethodName);
     }
@@ -109,17 +109,17 @@ const ConcolicVariableMap *ConcolicResolver::getResolvedConcolicVariables() cons
     return &resolvedConcolicVariables;
 }
 
-ConcolicResolver::ConcolicResolver(const Model &completedModel, const ExecutionState &state,
+ConcolicResolver::ConcolicResolver(const Model &evaluatedModel, const ExecutionState &state,
                                    const ConcolicMethodImpls &concolicMethodImpls)
-    : state(state), completedModel(completedModel), concolicMethodImpls(concolicMethodImpls) {
+    : state(state), evaluatedModel(evaluatedModel), concolicMethodImpls(concolicMethodImpls) {
     visitDagOnce = false;
 }
 
-ConcolicResolver::ConcolicResolver(const Model &completedModel, const ExecutionState &state,
+ConcolicResolver::ConcolicResolver(const Model &evaluatedModel, const ExecutionState &state,
                                    const ConcolicMethodImpls &concolicMethodImpls,
                                    ConcolicVariableMap resolvedConcolicVariables)
     : state(state),
-      completedModel(completedModel),
+      evaluatedModel(evaluatedModel),
       resolvedConcolicVariables(std::move(resolvedConcolicVariables)),
       concolicMethodImpls(concolicMethodImpls) {
     visitDagOnce = false;

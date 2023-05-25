@@ -59,9 +59,9 @@ class ExecutionState : public AbstractExecutionState {
     ~ExecutionState() override = default;
 
  private:
-    /// The list of variables that have been created in this state.
-    /// These variables are later fed to the model for completion.
-    SymbolicSet allocatedSymbolicVariables;
+    /// The number of variables that have been created in this state.
+    /// Used to create unique symbolic variables in some cases.
+    int numAllocatedSymbolicVariables = 0;
 
     /// The program trace for the current program point (i.e., how we got to the current state).
     std::vector<std::reference_wrapper<const TraceEvent>> trace;
@@ -369,18 +369,12 @@ class ExecutionState : public AbstractExecutionState {
     /* =========================================================================================
      *  Variables and symbolic constants.
      * =========================================================================================
-     *  These mirror what's available in IRUtils, but automatically fill in the incarnation number,
-     *  based on how many times newParser() has been called.
      */
-    /// @returns the symbolic variables that were allocated in this state
-    [[nodiscard]] const SymbolicSet &getSymbolicVariables() const;
-
     /// @see ToolsVariables::getSymbolicVariable.
     /// We also place the symbolic variables in the set of allocated symbolic variables of this
     /// state.
-    [[nodiscard]] const IR::SymbolicVariable *createSymbolicVariable(const IR::Type *type,
-                                                                     cstring name,
-                                                                     uint64_t instanceID = 0);
+    [[nodiscard]] const IR::SymbolicVariable *createSymbolicVariable(
+        const IR::Type *type, cstring name, std::optional<int> instanceID = std::nullopt);
 
     /* =========================================================================================
      *  Constructors

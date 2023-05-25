@@ -34,7 +34,7 @@ void RefersToParser::createConstraint(bool table, cstring currentName, cstring c
     } else {
         tmp = currentName + currentKeyName;
     }
-    auto left = ToolsVariables::getSymbolicVariable(type, 0, tmp);
+    auto left = ToolsVariables::getSymbolicVariable(type, tmp);
     std::string str = currentName.c_str();
     std::vector<std::string> elems;
     std::stringstream ss(str);
@@ -47,7 +47,7 @@ void RefersToParser::createConstraint(bool table, cstring currentName, cstring c
         str += elems[i] + ".";
     }
     tmp = str + destTableName + "_key_" + destKeyName;
-    auto right = ToolsVariables::getSymbolicVariable(type, 0, tmp);
+    auto right = ToolsVariables::getSymbolicVariable(type, tmp);
     auto *expr = new IR::Equ(left, right);
     std::vector<const IR::Expression *> constraint;
     constraint.push_back(expr);

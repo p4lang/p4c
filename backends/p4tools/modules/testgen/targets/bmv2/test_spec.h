@@ -51,7 +51,8 @@ class IndexExpression : public TestObject {
     /// @returns the value stored in the index expression.
     [[nodiscard]] const IR::Expression *getValue() const;
 
-    [[nodiscard]] const IndexExpression *evaluate(const Model &model) const override;
+    [[nodiscard]] const IndexExpression *evaluate(const Model &model,
+                                                  bool doComplete) const override;
 
     [[nodiscard]] cstring getObjectName() const override;
 };
@@ -106,7 +107,8 @@ class Bmv2V1ModelRegisterValue : public IndexMap {
 
     [[nodiscard]] cstring getObjectName() const override;
 
-    [[nodiscard]] const Bmv2V1ModelRegisterValue *evaluate(const Model &model) const override;
+    [[nodiscard]] const Bmv2V1ModelRegisterValue *evaluate(const Model &model,
+                                                           bool doComplete) const override;
 };
 
 /* =========================================================================================
@@ -123,7 +125,8 @@ class Bmv2V1ModelMeterValue : public IndexMap {
 
     [[nodiscard]] cstring getObjectName() const override;
 
-    [[nodiscard]] const Bmv2V1ModelMeterValue *evaluate(const Model &model) const override;
+    [[nodiscard]] const Bmv2V1ModelMeterValue *evaluate(const Model &model,
+                                                        bool doComplete) const override;
 
     /// @returns whether the meter associated with this meter value object is a direct meter.
     [[nodiscard]] bool isDirectMeter() const;
@@ -157,7 +160,8 @@ class Bmv2V1ModelActionProfile : public TestObject {
     /// Add an action (its name) and the arguments to the action map of this profile.
     void addToActionMap(cstring actionName, std::vector<ActionArg> actionArgs);
 
-    [[nodiscard]] const Bmv2V1ModelActionProfile *evaluate(const Model &model) const override;
+    [[nodiscard]] const Bmv2V1ModelActionProfile *evaluate(const Model &model,
+                                                           bool doComplete) const override;
 };
 
 /* =========================================================================================
@@ -183,7 +187,8 @@ class Bmv2V1ModelActionSelector : public TestObject {
     /// @returns the associated action profile.
     [[nodiscard]] const Bmv2V1ModelActionProfile *getActionProfile() const;
 
-    [[nodiscard]] const Bmv2V1ModelActionSelector *evaluate(const Model &model) const override;
+    [[nodiscard]] const Bmv2V1ModelActionSelector *evaluate(const Model &model,
+                                                            bool doComplete) const override;
 };
 
 /* =========================================================================================
@@ -211,7 +216,8 @@ class Bmv2V1ModelCloneInfo : public TestObject {
 
     [[nodiscard]] cstring getObjectName() const override;
 
-    [[nodiscard]] const Bmv2V1ModelCloneInfo *evaluate(const Model &model) const override;
+    [[nodiscard]] const Bmv2V1ModelCloneInfo *evaluate(const Model &model,
+                                                       bool doComplete) const override;
 
     /// @returns the associated session ID with this cloned packet.
     [[nodiscard]] const IR::Expression *getSessionId() const;
@@ -247,7 +253,8 @@ class Bmv2V1ModelCloneSpec : public TestObject {
 
     [[nodiscard]] cstring getObjectName() const override;
 
-    [[nodiscard]] const Bmv2V1ModelCloneSpec *evaluate(const Model &model) const override;
+    [[nodiscard]] const Bmv2V1ModelCloneSpec *evaluate(const Model &model,
+                                                       bool doComplete) const override;
 
     /// @returns the associated session ID with this cloned packet.
     [[nodiscard]] const IR::Expression *getSessionId() const;
@@ -281,7 +288,8 @@ class MetadataCollection : public TestObject {
 
     [[nodiscard]] cstring getObjectName() const override;
 
-    [[nodiscard]] const MetadataCollection *evaluate(const Model & /*model*/) const override;
+    [[nodiscard]] const MetadataCollection *evaluate(const Model & /*model*/,
+                                                     bool doComplete) const override;
 
     /// @returns the list of metadata fields.
     [[nodiscard]] const std::map<cstring, const IR::Literal *> &getMetadataFields() const;
@@ -308,7 +316,7 @@ class Optional : public TableMatch {
  public:
     explicit Optional(const IR::KeyElement *key, const IR::Expression *value, bool addMatch);
 
-    [[nodiscard]] const Optional *evaluate(const Model &model) const override;
+    [[nodiscard]] const Optional *evaluate(const Model &model, bool doComplete) const override;
 
     [[nodiscard]] cstring getObjectName() const override;
 
@@ -332,7 +340,7 @@ class Range : public TableMatch {
     explicit Range(const IR::KeyElement *key, const IR::Expression *low,
                    const IR::Expression *high);
 
-    [[nodiscard]] const Range *evaluate(const Model &model) const override;
+    [[nodiscard]] const Range *evaluate(const Model &model, bool doComplete) const override;
 
     [[nodiscard]] cstring getObjectName() const override;
 

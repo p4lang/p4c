@@ -38,13 +38,11 @@ const Expression *Expression::apply(Transform &visitor) const {
     return new Expression(value->apply(visitor), label);
 }
 
-void Expression::complete(Model *model) const { model->complete(value); }
-
-const Expression *Expression::evaluate(const Model &model) const {
+const Expression *Expression::evaluate(const Model &model, bool doComplete) const {
     if (Taint::hasTaint(model, value)) {
         return new Expression(&Taint::TAINTED_STRING_LITERAL, label);
     }
-    return new Expression(model.evaluate(value), label);
+    return new Expression(model.evaluate(value, doComplete), label);
 }
 
 void Expression::print(std::ostream &os) const {
@@ -72,14 +70,13 @@ const IfStatementCondition *IfStatementCondition::apply(Transform &visitor) cons
     return traceEvent;
 }
 
-void IfStatementCondition::complete(Model *model) const { model->complete(postEvalCond); }
-
-const IfStatementCondition *IfStatementCondition::evaluate(const Model &model) const {
+const IfStatementCondition *IfStatementCondition::evaluate(const Model &model,
+                                                           bool doComplete) const {
     const IR::Literal *evaluatedPostVal = nullptr;
     if (Taint::hasTaint(model, postEvalCond)) {
         evaluatedPostVal = &Taint::TAINTED_STRING_LITERAL;
     } else {
-        evaluatedPostVal = model.evaluate(postEvalCond);
+        evaluatedPostVal = model.evaluate(postEvalCond, doComplete);
     }
     auto *traceEvent = new IfStatementCondition(evaluatedPostVal);
     traceEvent->setPreEvalCond(postEvalCond);
@@ -133,20 +130,14 @@ const ExtractSuccess *ExtractSuccess::apply(Transform &visitor) const {
     return new ExtractSuccess(extractedHeader, offset, condition, applyFields);
 }
 
-void ExtractSuccess::complete(Model *model) const {
-    for (const auto &field : fields) {
-        model->complete(field.second);
-    }
-}
-
-const ExtractSuccess *ExtractSuccess::evaluate(const Model &model) const {
+const ExtractSuccess *ExtractSuccess::evaluate(const Model &model, bool doComplete) const {
     std::vector<std::pair<IR::StateVariable, const IR::Expression *>> applyFields;
     applyFields.reserve(fields.size());
     for (const auto &field : fields) {
         if (Taint::hasTaint(model, field.second)) {
             applyFields.emplace_back(field.first, &Taint::TAINTED_STRING_LITERAL);
         } else {
-            applyFields.emplace_back(field.first, model.evaluate(field.second));
+            applyFields.emplace_back(field.first, model.evaluate(field.second, doComplete));
         }
     }
     return new ExtractSuccess(extractedHeader, offset, condition, applyFields);
@@ -210,20 +201,14 @@ const Emit *Emit::apply(Transform &visitor) const {
     return new Emit(emitHeader, applyFields);
 }
 
-void Emit::complete(Model *model) const {
-    for (const auto &field : fields) {
-        model->complete(field.second);
-    }
-}
-
-const Emit *Emit::evaluate(const Model &model) const {
+const Emit *Emit::evaluate(const Model &model, bool doComplete) const {
     std::vector<std::pair<IR::StateVariable, const IR::Expression *>> applyFields;
     applyFields.reserve(fields.size());
     for (const auto &field : fields) {
         if (Taint::hasTaint(model, field.second)) {
             applyFields.emplace_back(field.first, &Taint::TAINTED_STRING_LITERAL);
         } else {
-            applyFields.emplace_back(field.first, model.evaluate(field.second));
+            applyFields.emplace_back(field.first, model.evaluate(field.second, doComplete));
         }
     }
     return new Emit(emitHeader, applyFields);
@@ -254,13 +239,11 @@ const Packet *Packet::apply(Transform &visitor) const {
     return new Packet(direction, packetValue->apply(visitor));
 }
 
-void Packet::complete(Model *model) const { model->complete(packetValue); }
-
-const Packet *Packet::evaluate(const Model &model) const {
+const Packet *Packet::evaluate(const Model &model, bool doComplete) const {
     if (Taint::hasTaint(model, packetValue)) {
         return new Packet(direction, &Taint::TAINTED_STRING_LITERAL);
     }
-    return new Packet(direction, model.evaluate(packetValue));
+    return new Packet(direction, model.evaluate(packetValue, doComplete));
 }
 
 void Packet::print(std::ostream &os) const {
