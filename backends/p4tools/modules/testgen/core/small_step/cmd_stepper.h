@@ -59,18 +59,6 @@ class CmdStepper : public AbstractStepper {
     virtual std::map<Continuation::Exception, Continuation> getExceptionHandlers(
         const IR::P4Parser *parser, Continuation::Body normalContinuation,
         const ExecutionState &state) const = 0;
-
-    /// Helper function that initializes a given type declaration using the given block parameter
-    /// cstring list as prefixes.All the members of the Type_Declaration are initialized using the
-    /// createTargetUninitialized of the respective target.
-    void initializeBlockParams(const IR::Type_Declaration *typeDecl,
-                               const std::vector<cstring> *blockParams, ExecutionState &state,
-                               bool forceTaint = false) const;
-
-    /// Add a variable to the symbolic interpreter. This looks up the full control-plane name of a
-    /// variable defined in @param decl and declares in the symbolic environment of @param
-    /// nextState.
-    void declareVariable(ExecutionState &state, const IR::Declaration_Variable *decl);
 };
 
 }  // namespace P4Tools::P4Testgen

@@ -31,6 +31,7 @@ set(
   compiler/midend.cpp
   compiler/reachability.cpp
 
+  core/abstract_execution_state.cpp
   core/target.cpp
   core/z3_solver.cpp
 

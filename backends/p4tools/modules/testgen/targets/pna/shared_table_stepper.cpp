@@ -95,7 +95,7 @@ void SharedPnaTableStepper::evalTableActionProfile(
         // Grab the path from the method call.
         const auto *tableAction = action->expression->checkedTo<IR::MethodCallExpression>();
         // Try to find the action declaration corresponding to the path reference in the table.
-        const auto *actionType = state->getActionDecl(tableAction);
+        const auto *actionType = state->getP4Action(tableAction);
 
         auto &nextState = state->clone();
         // We get the control plane name of the action we are calling.
@@ -179,7 +179,7 @@ void SharedPnaTableStepper::evalTableActionSelector(
         // Grab the path from the method call.
         const auto *tableAction = action->expression->checkedTo<IR::MethodCallExpression>();
         // Try to find the action declaration corresponding to the path reference in the table.
-        const auto *actionType = state->getActionDecl(tableAction);
+        const auto *actionType = state->getP4Action(tableAction);
 
         auto &nextState = state->clone();
         // We get the control plane name of the action we are calling.

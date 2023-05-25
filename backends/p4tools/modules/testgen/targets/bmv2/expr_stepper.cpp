@@ -140,13 +140,17 @@ void Bmv2V1ModelExprStepper::processClone(const ExecutionState &state,
     const auto *instanceBitType = IR::getBitType(32);
     const auto *instanceTypeVar = new IR::Member(
         instanceBitType, new IR::PathExpression("*standard_metadata"), "instance_type");
-    const IR::Constant *instanceTypeConst = nullptr;
 
     auto cloneType = cloneInfo->getCloneType();
     if (cloneType == BMv2Constants::CloneType::I2E) {
         cloneState = &cloneInfo->getClonedState().clone();
-        instanceTypeConst =
-            IR::getConstant(instanceBitType, BMv2Constants::PKT_INSTANCE_TYPE_INGRESS_CLONE);
+        // Set the metadata instance type.
+        // It is important to do this here at the beginning because we use copyIn later.
+        // This value will be copied into the local metadata first, then copied back out with the
+        // exit statement.
+        cloneState->set(
+            instanceTypeVar,
+            IR::getConstant(instanceBitType, BMv2Constants::PKT_INSTANCE_TYPE_INGRESS_CLONE));
         const auto *progInfo = getProgramInfo().checkedTo<Bmv2V1ModelProgramInfo>();
         // Reset the packet buffer, which corresponds to the output packet.
         // We need to reset everything to the state before the ingress call. We use a
@@ -160,40 +164,35 @@ void Bmv2V1ModelExprStepper::processClone(const ExecutionState &state,
         auto blockIndex = 2;
         const auto *archSpec = TestgenTarget::getArchSpec();
         const auto *archMember = archSpec->getArchMember(blockIndex);
-        if (preserveIndex.has_value()) {
-            for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
-                const auto *param = params->getParameter(paramIdx);
-                // Skip the second parameter (metadata) since we do want to preserve
-                // it.
-                if (paramIdx == 1) {
-                    // This program segment resets the user metadata of the v1model
-                    // program to 0. However, fields in the user metadata that have the
-                    // field_list annotation and the appropriate index will not be
-                    // reset. The user metadata is the second parameter of the ingress
-                    // control.
-                    const auto *paramType = param->type;
-                    if (const auto *tn = paramType->to<IR::Type_Name>()) {
-                        paramType = cloneState->resolveType(tn);
-                    }
-                    const auto *paramRef =
-                        new IR::PathExpression(paramType, new IR::Path(param->name));
-                    resetPreservingFieldList(*cloneState, paramRef, preserveIndex.value());
-                    continue;
+        for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
+            const auto *param = params->getParameter(paramIdx);
+            const auto &archRef = archMember->blockParams.at(paramIdx);
+            // If there is a preservation index present skip the second parameter (metadata) and do
+            // not reset it using copyIn.
+            if (preserveIndex.has_value() && paramIdx == 1) {
+                // This program segment resets the user metadata of the v1model
+                // program to 0. However, fields in the user metadata that have the
+                // field_list annotation and the appropriate index will not be
+                // reset. The user metadata is the second parameter of the ingress
+                // control.
+                const auto *paramType = param->type;
+                if (const auto *tn = paramType->to<IR::Type_Name>()) {
+                    paramType = cloneState->resolveType(tn);
                 }
-                programInfo.produceCopyInOutCall(param, paramIdx, archMember, &cmds, nullptr);
+                const auto *paramRef = new IR::PathExpression(paramType, new IR::Path(param->name));
+                resetPreservingFieldList(*cloneState, paramRef, preserveIndex.value());
+                continue;
             }
-        } else {
-            for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
-                const auto *param = params->getParameter(paramIdx);
-                programInfo.produceCopyInOutCall(param, paramIdx, archMember, &cmds, nullptr);
-            }
+            cloneState->copyIn(TestgenTarget::get(), param, archRef);
         }
         // We then exit, which will copy out all the state that we have just reset.
         cmds.emplace_back(new IR::ExitStatement());
     } else if (cloneType == BMv2Constants::CloneType::E2E) {
         cloneState = &state.clone();
-        instanceTypeConst =
-            IR::getConstant(instanceBitType, BMv2Constants::PKT_INSTANCE_TYPE_EGRESS_CLONE);
+        // Set the metadata instance type.
+        cloneState->set(
+            instanceTypeVar,
+            IR::getConstant(instanceBitType, BMv2Constants::PKT_INSTANCE_TYPE_EGRESS_CLONE));
         if (preserveIndex.has_value()) {
             // This program segment resets the user metadata of the v1model program to
             // 0. However, fields in the user metadata that have the field_list
@@ -222,8 +221,6 @@ void Bmv2V1ModelExprStepper::processClone(const ExecutionState &state,
     } else {
         TESTGEN_UNIMPLEMENTED("Unsupported clone type %1%.", cloneType);
     }
-    // Set the metadata instance types.
-    cloneState->set(instanceTypeVar, instanceTypeConst);
     // Attach the clone specification for test generation.
     cloneState->addTestObject("clone_specs", "clone_spec",
                               new Bmv2V1ModelCloneSpec(sessionIdExpr, clonePortVar, true));
@@ -394,7 +391,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                        "Low value ( %1% ) must be less than high value ( %2% ).", lo, hi);
              auto &nextState = state.clone();
              const auto *resultField = args->at(0)->expression;
-             const auto &fieldRef = ExecutionState::convertReference(resultField);
+             const auto &fieldRef = ToolsVariables::convertReference(resultField);
 
              // If the range is limited to only one value, return that value.
              if (lo->value == hi->value) {
@@ -570,7 +567,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              auto externName = receiver->toString() + "_" + declInstance->controlPlaneName();
              auto &nextState = state.clone();
              if (hashOutput->type->is<IR::Type_Bits>()) {
-                 const auto &fieldRef = ExecutionState::convertReference(hashOutput);
+                 const auto &fieldRef = ToolsVariables::convertReference(hashOutput);
                  if (argsAreTainted) {
                      nextState.set(fieldRef,
                                    programInfo.createTargetUninitialized(fieldRef->type, false));
@@ -876,7 +873,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
              auto testBackend = TestgenOptions::get().testBackend;
              const IR::StateVariable &meterResult =
-                 ExecutionState::convertReference(args->at(1)->expression);
+                 ToolsVariables::convertReference(args->at(1)->expression);
              if (testBackend != "PTF") {
                  ::warning(
                      "meter.execute_meter not implemented for %1%. Choosing default value (GREEN).",
@@ -995,7 +992,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              auto &nextState = state.clone();
              std::vector<Continuation::Command> replacements;
              const IR::StateVariable &meterResult =
-                 ExecutionState::convertReference(args->at(0)->expression);
+                 ToolsVariables::convertReference(args->at(0)->expression);
              // If we do not have right back end and no associated table entry, do not bother
              // configuring the extern. We just set the default value (green).
              auto testBackend = TestgenOptions::get().testBackend;
@@ -1601,7 +1598,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  argsAreTainted = argsAreTainted || state.hasTaint(arg->expression);
              }
 
-             const auto &checksumVar = ExecutionState::convertReference(args->at(2)->expression);
+             const auto &checksumVar = ToolsVariables::convertReference(args->at(2)->expression);
              const auto *updateCond = args->at(0)->expression;
              const auto *checksumVarType = checksumVar->type;
              const auto *data = args->at(1)->expression;
@@ -1679,7 +1676,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  argsAreTainted = argsAreTainted || state.hasTaint(arg->expression);
              }
 
-             const auto &checksumVar = ExecutionState::convertReference(args->at(2)->expression);
+             const auto &checksumVar = ToolsVariables::convertReference(args->at(2)->expression);
              const auto *updateCond = args->at(0)->expression;
              const auto *checksumVarType = checksumVar->type;
              const auto *data = args->at(1)->expression;

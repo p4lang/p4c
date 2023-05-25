@@ -180,8 +180,16 @@ std::vector<const Expression *> flattenStructExpression(const StructExpression *
         if (const auto *subStructExpr = listElem->expression->to<StructExpression>()) {
             auto subList = flattenStructExpression(subStructExpr);
             exprList.insert(exprList.end(), subList.begin(), subList.end());
+        } else if (const auto *headerStackExpr =
+                       listElem->expression->to<HeaderStackExpression>()) {
+            for (const auto *headerStackElem : headerStackExpr->components) {
+                // We assume there are no nested header stacks.
+                auto subList =
+                    flattenStructExpression(headerStackElem->checkedTo<IR::StructExpression>());
+                exprList.insert(exprList.end(), subList.begin(), subList.end());
+            }
         } else {
-            exprList.push_back(listElem->expression);
+            exprList.emplace_back(listElem->expression);
         }
     }
     return exprList;
@@ -194,7 +202,7 @@ std::vector<const Expression *> flattenListExpression(const ListExpression *list
             auto subList = flattenListExpression(subListExpr);
             exprList.insert(exprList.end(), subList.begin(), subList.end());
         } else {
-            exprList.push_back(listElem);
+            exprList.emplace_back(listElem);
         }
     }
     return exprList;

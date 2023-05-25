@@ -64,6 +64,7 @@ void Bmv2V1ModelCmdStepper::initializeTargetEnvironment(ExecutionState &nextStat
 
     auto programInfo = getProgramInfo();
     const auto *archSpec = TestgenTarget::getArchSpec();
+    const auto &target = TestgenTarget::get();
     const auto *programmableBlocks = programInfo.getProgrammableBlocks();
 
     // BMv2 initializes all metadata to zero. To avoid unnecessary taint, we retrieve the type and
@@ -72,7 +73,7 @@ void Bmv2V1ModelCmdStepper::initializeTargetEnvironment(ExecutionState &nextStat
     for (const auto &blockTuple : *programmableBlocks) {
         const auto *typeDecl = blockTuple.second;
         const auto *archMember = archSpec->getArchMember(blockIdx);
-        initializeBlockParams(typeDecl, &archMember->blockParams, nextState);
+        nextState.initializeBlockParams(target, typeDecl, &archMember->blockParams);
         blockIdx++;
     }
 

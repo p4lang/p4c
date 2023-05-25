@@ -36,8 +36,12 @@
 
 namespace P4Tools::P4Testgen {
 
+/* =============================================================================================
+ *  Constructors
+ * ============================================================================================= */
+
 ExecutionState::ExecutionState(const IR::P4Program *program)
-    : namespaces(NamespaceContext::Empty->push(program)),
+    : AbstractExecutionState(program),
       body({program}),
       stack(*(new std::stack<std::reference_wrapper<const StackFrame>>())) {
     // Insert the default symbolic variables of the execution state.
@@ -60,9 +64,7 @@ ExecutionState::ExecutionState(const IR::P4Program *program)
 }
 
 ExecutionState::ExecutionState(Continuation::Body body)
-    : namespaces(NamespaceContext::Empty),
-      body(std::move(body)),
-      stack(*(new std::stack<std::reference_wrapper<const StackFrame>>())) {
+    : body(std::move(body)), stack(*(new std::stack<std::reference_wrapper<const StackFrame>>())) {
     // Insert the default symbolic variables of the execution state.
     // This also makes the symbolic variables present in the state explicit.
     allocatedSymbolicVariables.insert(getInputPacketSizeVar());
@@ -75,6 +77,12 @@ ExecutionState::ExecutionState(Continuation::Body body)
         reachabilityEngineState = ReachabilityEngineState::getInitial();
     }
 }
+
+ExecutionState &ExecutionState::create(const IR::P4Program *program) {
+    return *new ExecutionState(program);
+}
+
+ExecutionState &ExecutionState::clone() const { return *new ExecutionState(*this); }
 
 /* =============================================================================================
  *  Accessors
@@ -146,27 +154,12 @@ bool ExecutionState::hasTaint(const IR::Expression *expr) const {
     return Taint::hasTaint(env.getInternalMap(), expr);
 }
 
-bool ExecutionState::exists(const IR::StateVariable &var) const { return env.exists(var); }
-
 void ExecutionState::set(const IR::StateVariable &var, const IR::Expression *value) {
     if (getProperty<bool>("inUndefinedState")) {
         // If we are in an undefined state, the variable we set is tainted.
         value = ToolsVariables::getTaintExpression(value->type);
     }
     env.set(var, value);
-}
-
-const SymbolicEnv &ExecutionState::getSymbolicEnv() const { return env; }
-
-void ExecutionState::printSymbolicEnv(std::ostream &out) const {
-    // TODO(fruffy): How do we do logging here?
-    out << "##### Symbolic Environment Begin #####" << std::endl;
-    for (const auto &envVar : env.getInternalMap()) {
-        const auto var = envVar.first;
-        const auto *val = envVar.second;
-        out << "Variable: " << var->toString() << " Value: " << val << std::endl;
-    }
-    out << "##### Symbolic Environment End #####" << std::endl;
 }
 
 const std::vector<std::reference_wrapper<const TraceEvent>> &ExecutionState::getTrace() const {
@@ -239,38 +232,6 @@ ReachabilityEngineState *ExecutionState::getReachabilityEngineState() const {
 
 void ExecutionState::add(const TraceEvent &event) { trace.emplace_back(event); }
 
-/* =============================================================================================
- *  Namespaces and declarations
- * ============================================================================================= */
-
-const IR::IDeclaration *ExecutionState::findDecl(const IR::Path *path) const {
-    return namespaces->findDecl(path);
-}
-
-const IR::IDeclaration *ExecutionState::findDecl(const IR::PathExpression *pathExpr) const {
-    return findDecl(pathExpr->path);
-}
-
-const IR::Type *ExecutionState::resolveType(const IR::Type *type) const {
-    const auto *typeName = type->to<IR::Type_Name>();
-    // Nothing to resolve here. Just return.
-    if (typeName == nullptr) {
-        return type;
-    }
-    const auto *path = typeName->path;
-    const auto *decl = findDecl(path)->to<IR::Type_Declaration>();
-    BUG_CHECK(decl, "Not a type: %1%", path);
-    return decl;
-}
-
-const NamespaceContext *ExecutionState::getNamespaceContext() const { return namespaces; }
-
-void ExecutionState::setNamespaceContext(const NamespaceContext *namespaces) {
-    this->namespaces = namespaces;
-}
-
-void ExecutionState::pushNamespace(const IR::INamespace *ns) { namespaces = namespaces->push(ns); }
-
 void ExecutionState::popBody() { body.pop(); }
 
 void ExecutionState::replaceBody(const Continuation::Body &body) { this->body = body; }
@@ -332,7 +293,7 @@ void ExecutionState::handleException(Continuation::Exception e) {
  *  Body operations
  * ============================================================================================= */
 
-void ExecutionState::replaceTopBody(const Continuation::Command cmd) { replaceTopBody({cmd}); }
+void ExecutionState::replaceTopBody(const Continuation::Command &cmd) { replaceTopBody({cmd}); }
 
 void ExecutionState::replaceTopBody(const std::vector<Continuation::Command> *cmds) {
     BUG_CHECK(!cmds->empty(), "Replaced top of execution stack with empty list");
@@ -545,84 +506,5 @@ const IR::SymbolicVariable *ExecutionState::createSymbolicVariable(const IR::Typ
     }
     return variables;
 }
-
-/* =========================================================================================
- *  General utilities involving ExecutionState.
- * ========================================================================================= */
-
-std::vector<IR::StateVariable> ExecutionState::getFlatFields(
-    const IR::Expression *parent, const IR::Type_StructLike *ts,
-    std::vector<IR::StateVariable> *validVector) const {
-    std::vector<IR::StateVariable> flatFields;
-    for (const auto *field : ts->fields) {
-        const auto *fieldType = resolveType(field->type);
-        if (const auto *ts = fieldType->to<IR::Type_StructLike>()) {
-            auto subFields =
-                getFlatFields(new IR::Member(fieldType, parent, field->name), ts, validVector);
-            flatFields.insert(flatFields.end(), subFields.begin(), subFields.end());
-        } else if (const auto *typeStack = fieldType->to<IR::Type_Stack>()) {
-            const auto *stackElementsType = resolveType(typeStack->elementType);
-            for (size_t arrayIndex = 0; arrayIndex < typeStack->getSize(); arrayIndex++) {
-                const auto *newMember = HSIndexToMember::produceStackIndex(
-                    stackElementsType, new IR::Member(typeStack, parent, field->name), arrayIndex);
-                BUG_CHECK(stackElementsType->is<IR::Type_StructLike>(),
-                          "Try to make the flat fields for non Type_StructLike element : %1%",
-                          stackElementsType);
-                auto subFields = getFlatFields(
-                    newMember, stackElementsType->to<IR::Type_StructLike>(), validVector);
-                flatFields.insert(flatFields.end(), subFields.begin(), subFields.end());
-            }
-        } else {
-            flatFields.push_back(new IR::Member(fieldType, parent, field->name));
-        }
-    }
-    // If we are dealing with a header we also include the validity bit in the list of
-    // fields.
-    if (validVector != nullptr && ts->is<IR::Type_Header>()) {
-        validVector->push_back(ToolsVariables::getHeaderValidity(parent));
-    }
-    return flatFields;
-}
-
-const IR::P4Table *ExecutionState::getTableType(const IR::Expression *expression) const {
-    if (!expression->is<IR::Member>()) {
-        return nullptr;
-    }
-    const auto *member = expression->to<IR::Member>();
-    if (member->member != IR::IApply::applyMethodName) {
-        return nullptr;
-    }
-    if (member->expr->is<IR::PathExpression>()) {
-        const auto *declaration = findDecl(member->expr->to<IR::PathExpression>());
-        return declaration->to<IR::P4Table>();
-    }
-    const auto *type = member->expr->type;
-    if (const auto *tableType = type->to<IR::Type_Table>()) {
-        return tableType->table;
-    }
-    return nullptr;
-}
-
-const IR::P4Action *ExecutionState::getActionDecl(
-    const IR::MethodCallExpression *actionExpr) const {
-    const auto *actionPath = actionExpr->method->checkedTo<IR::PathExpression>();
-    const auto *declaration = findDecl(actionPath);
-    return declaration->checkedTo<IR::P4Action>();
-}
-
-IR::StateVariable ExecutionState::convertReference(const IR::Expression *ref) {
-    if (const auto *member = ref->to<IR::Member>()) {
-        return member;
-    }
-    // Local variable.
-    const auto *path = ref->checkedTo<IR::PathExpression>();
-    return path;
-}
-
-ExecutionState &ExecutionState::create(const IR::P4Program *program) {
-    return *new ExecutionState(program);
-}
-
-ExecutionState &ExecutionState::clone() const { return *new ExecutionState(*this); }
 
 }  // namespace P4Tools::P4Testgen

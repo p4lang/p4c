@@ -8,6 +8,9 @@
 #include <string>
 #include <utility>
 
+#include "backends/p4tools/common/lib/variables.h"
+#include "ir/irutils.h"
+
 namespace P4Tools {
 
 Target::Spec::Spec(std::string deviceName, std::string archName)
@@ -63,6 +66,14 @@ bool Target::setArch(std::string archName) {
 
     auto deviceName = curTarget ? curTarget->deviceName : defaultDeviceByArch.at(archName);
     return init(deviceName, archName);
+}
+
+const IR::Expression *Target::createTargetUninitialized(const IR::Type *type,
+                                                        bool forceTaint) const {
+    if (forceTaint) {
+        return ToolsVariables::getTaintExpression(type);
+    }
+    return IR::getDefaultValue(type);
 }
 
 Target::Target(std::string toolName, std::string deviceName, std::string archName)
