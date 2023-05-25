@@ -131,20 +131,29 @@ const IR::Node *DoEntryPriorities::preorder(IR::EntriesList *entries) {
                  previous->second, entries->entries[i], currentPriority);
         }
         usedPriorities.emplace(currentPriority, entries->entries[i]);
-        if (i > 0 && currentPriority < previousPriority) {
-            warn(ErrorType::WARN_ENTRIES_OUT_OF_ORDER,
-                 "%1% (priority %2%) and %3% (priority %4%) have priorities out of order",
-                 entries->entries[i - 1], previousPriority, entries->entries[i], currentPriority);
-        }
 
         size_t nextPriority;
         if (largestWins) {
+            if (i > 0 && currentPriority > previousPriority) {
+                warn(ErrorType::WARN_ENTRIES_OUT_OF_ORDER,
+                     "%1% (priority %2%) and %3% (priority %4%) have priorities out of order",
+                     entries->entries[i - 1], previousPriority, entries->entries[i],
+                     currentPriority);
+            }
+
             nextPriority = currentPriority - priorityDelta;
             if (nextPriority > currentPriority) {
                 ::error(ErrorType::ERR_OVERLIMIT, "%1% Overflow in priority computation", table);
                 return entries;
             }
         } else {
+            if (i > 0 && currentPriority < previousPriority) {
+                warn(ErrorType::WARN_ENTRIES_OUT_OF_ORDER,
+                     "%1% (priority %2%) and %3% (priority %4%) have priorities out of order",
+                     entries->entries[i - 1], previousPriority, entries->entries[i],
+                     currentPriority);
+            }
+
             nextPriority = currentPriority + priorityDelta;
             if (nextPriority < currentPriority) {
                 ::error(ErrorType::ERR_OVERLIMIT, "%1% Overflow in priority computation", table);

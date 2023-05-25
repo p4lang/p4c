@@ -285,21 +285,13 @@ static std::optional<DefaultAction> getDefaultAction(const IR::P4Table *table, R
     return DefaultAction{actionName, defaultActionProperty->isConstant};
 }
 
-/// @return true if @table has a 'entries' property. The property must be const
-/// as per the current P4_16 specification. The frontend already enforces that
-/// check but we perform the check again here in case the constraint is relaxed
-/// in the specification in the future.
+/// @return true if @table has a 'const entries' property.
 static bool getConstTable(const IR::P4Table *table) {
-    // not using IR::P4Table::getEntries() here as I need to check if the
-    // property is constant.
     BUG_CHECK(table != nullptr, "Failed precondition for getConstTable");
     auto ep = table->properties->getProperty(IR::TableProperties::entriesPropertyName);
     if (ep == nullptr) return false;
     BUG_CHECK(ep->value->is<IR::EntriesList>(), "Invalid 'entries' property");
-    if (!ep->isConstant)
-        ::error(ErrorType::ERR_UNSUPPORTED,
-                "%1%: P4Runtime only supports constant table initializers", ep);
-    return true;
+    return ep->isConstant;
 }
 
 static std::vector<ActionRef> getActionRefs(const IR::P4Table *table, ReferenceMap *refMap) {
@@ -1003,6 +995,7 @@ class P4RuntimeEntriesConverter {
         auto entriesList = table->getEntries();
         if (entriesList == nullptr) return;
 
+        bool isConst = getConstTable(table);
         auto tableName = archHandler->getControlPlaneName(tableBlock);
         auto tableId = symbols.getId(P4RuntimeSymbolType::P4RT_TABLE(), tableName);
 
@@ -1016,14 +1009,27 @@ class P4RuntimeEntriesConverter {
             protoEntry->set_table_id(tableId);
             addMatchKey(protoEntry, table, e->getKeys(), refMap, typeMap);
             addAction(protoEntry, e->getAction(), refMap, typeMap);
-            // According to the P4 specification, "Entries in a table are
-            // matched in the program order, stopping at the first matching
-            // entry." In P4Runtime, the lowest valid priority value is 1 and
-            // entries with a higher numerical priority value have higher
-            // priority. So we assign the first entry a priority of #entries and
-            // we decrement the priority by 1 for each entry. The last entry in
-            // the table will have priority 1.
-            if (needsPriority) protoEntry->set_priority(entryPriority--);
+            if (needsPriority) {
+                if (isConst) {
+                    // The entry has a priority, use it.
+                    CHECK_NULL(e->priority);
+                    if (auto c = e->priority->to<IR::Constant>()) {
+                        protoEntry->set_priority(c->asInt());
+                    } else {
+                        ::error(ErrorType::ERR_EXPECTED, "%1%: entry should have priority", e);
+                        return;
+                    }
+                } else {
+                    // According to the P4 specification, "Entries in a table are
+                    // matched in the program order, stopping at the first matching
+                    // entry." In P4Runtime, the lowest valid priority value is 1 and
+                    // entries with a higher numerical priority value have higher
+                    // priority. So we assign the first entry a priority of #entries and
+                    // we decrement the priority by 1 for each entry. The last entry in
+                    // the table will have priority 1.
+                    protoEntry->set_priority(entryPriority--);
+                }
+            }
 
             auto priorityAnnotation = e->getAnnotation("priority");
             if (priorityAnnotation != nullptr) {
