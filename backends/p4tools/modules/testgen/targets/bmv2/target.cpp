@@ -73,8 +73,6 @@ Bmv2TestBackend *Bmv2V1ModelTestgenTarget::getTestBackendImpl(
     return new Bmv2TestBackend(programInfo, symbex, testPath);
 }
 
-int Bmv2V1ModelTestgenTarget::getPortNumWidthBitsImpl() const { return 9; }
-
 Bmv2V1ModelCmdStepper *Bmv2V1ModelTestgenTarget::getCmdStepperImpl(
     ExecutionState &state, AbstractSolver &solver, const ProgramInfo &programInfo) const {
     return new Bmv2V1ModelCmdStepper(state, solver, programInfo);

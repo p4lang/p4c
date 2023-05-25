@@ -29,8 +29,6 @@ class EBPFTestgenTarget : public TestgenTarget {
     const EBPFProgramInfo *initProgramImpl(const IR::P4Program *program,
                                            const IR::Declaration_Instance *mainDecl) const override;
 
-    int getPortNumWidthBitsImpl() const override;
-
     EBPFTestBackend *getTestBackendImpl(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
                                         const std::filesystem::path &testPath) const override;
 

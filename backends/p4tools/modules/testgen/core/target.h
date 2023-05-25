@@ -36,9 +36,6 @@ class TestgenTarget : public Target {
     static TestBackEnd *getTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
                                        const std::filesystem::path &testPath);
 
-    /// The width of a port number, in bits.
-    static int getPortNumWidthBits();
-
     /// Provides a CmdStepper implementation for this target.
     static CmdStepper *getCmdStepper(ExecutionState &state, AbstractSolver &solver,
                                      const ProgramInfo &programInfo);
@@ -61,9 +58,6 @@ class TestgenTarget : public Target {
     /// @see @initProgram.
     virtual const ProgramInfo *initProgramImpl(const IR::P4Program *program,
                                                const IR::Declaration_Instance *mainDecl) const = 0;
-
-    /// @see getPortNumWidthBits.
-    [[nodiscard]] virtual int getPortNumWidthBitsImpl() const = 0;
 
     /// @see getTestBackend.
     virtual TestBackEnd *getTestBackendImpl(const ProgramInfo &programInfo,

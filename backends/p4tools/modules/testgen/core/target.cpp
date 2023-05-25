@@ -38,8 +38,6 @@ const ProgramInfo *TestgenTarget::initProgramImpl(const IR::P4Program *program) 
 
 const TestgenTarget &TestgenTarget::get() { return Target::get<TestgenTarget>("testgen"); }
 
-int TestgenTarget::getPortNumWidthBits() { return get().getPortNumWidthBitsImpl(); }
-
 TestBackEnd *TestgenTarget::getTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
                                            const std::filesystem::path &testPath) {
     return get().getTestBackendImpl(programInfo, symbex, testPath);

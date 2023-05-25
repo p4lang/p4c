@@ -31,9 +31,9 @@ const ordered_map<cstring, const IR::Type_Declaration *>
 }
 
 const IR::StateVariable &SharedPnaProgramInfo::getTargetInputPortVar() const {
-    return *new IR::StateVariable(
-        new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidthBits()),
-                       new IR::PathExpression("*parser_istd"), "input_port"));
+    return *new IR::StateVariable(new IR::Member(IR::getBitType(PnaConstants::PORT_BIT_WIDTH),
+                                                 new IR::PathExpression("*parser_istd"),
+                                                 "input_port"));
 }
 
 const IR::StateVariable &SharedPnaProgramInfo::getTargetOutputPortVar() const {

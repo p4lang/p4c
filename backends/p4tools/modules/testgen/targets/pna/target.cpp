@@ -63,8 +63,6 @@ PnaTestBackend *PnaDpdkTestgenTarget::getTestBackendImpl(
     return new PnaTestBackend(programInfo, symbex, testPath);
 }
 
-int PnaDpdkTestgenTarget::getPortNumWidthBitsImpl() const { return 9; }
-
 PnaDpdkCmdStepper *PnaDpdkTestgenTarget::getCmdStepperImpl(ExecutionState &state,
                                                            AbstractSolver &solver,
                                                            const ProgramInfo &programInfo) const {

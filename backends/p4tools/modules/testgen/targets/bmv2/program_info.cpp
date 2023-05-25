@@ -153,7 +153,7 @@ std::vector<Continuation::Command> Bmv2V1ModelProgramInfo::processDeclaration(
     // processing. For example, the egress port.
     if ((archMember->blockName == "Ingress")) {
         auto *egressPortVar =
-            new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidthBits()),
+            new IR::Member(IR::getBitType(BMv2Constants::PORT_BIT_WIDTH),
                            new IR::PathExpression("*standard_metadata"), "egress_port");
         auto *portStmt = new IR::AssignmentStatement(egressPortVar, getTargetOutputPortVar());
         cmds.emplace_back(portStmt);
@@ -187,9 +187,9 @@ std::vector<Continuation::Command> Bmv2V1ModelProgramInfo::processDeclaration(
 }
 
 const IR::StateVariable &Bmv2V1ModelProgramInfo::getTargetInputPortVar() const {
-    return *new IR::StateVariable(
-        new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidthBits()),
-                       new IR::PathExpression("*standard_metadata"), "ingress_port"));
+    return *new IR::StateVariable(new IR::Member(IR::getBitType(BMv2Constants::PORT_BIT_WIDTH),
+                                                 new IR::PathExpression("*standard_metadata"),
+                                                 "ingress_port"));
 }
 
 const IR::Expression *Bmv2V1ModelProgramInfo::getPortConstraint(const IR::StateVariable &portVar) {
@@ -200,9 +200,9 @@ const IR::Expression *Bmv2V1ModelProgramInfo::getPortConstraint(const IR::StateV
 }
 
 const IR::StateVariable &Bmv2V1ModelProgramInfo::getTargetOutputPortVar() const {
-    return *new IR::StateVariable(
-        new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidthBits()),
-                       new IR::PathExpression("*standard_metadata"), "egress_spec"));
+    return *new IR::StateVariable(new IR::Member(IR::getBitType(BMv2Constants::PORT_BIT_WIDTH),
+                                                 new IR::PathExpression("*standard_metadata"),
+                                                 "egress_spec"));
 }
 
 const IR::Expression *Bmv2V1ModelProgramInfo::dropIsActive() const {

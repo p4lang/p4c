@@ -29,8 +29,6 @@ class PnaDpdkTestgenTarget : public TestgenTarget {
     const PnaDpdkProgramInfo *initProgramImpl(
         const IR::P4Program *program, const IR::Declaration_Instance *mainDecl) const override;
 
-    [[nodiscard]] int getPortNumWidthBitsImpl() const override;
-
     PnaTestBackend *getTestBackendImpl(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
                                        const std::filesystem::path &testPath) const override;
 

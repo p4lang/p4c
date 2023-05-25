@@ -73,8 +73,6 @@ EBPFTestBackend *EBPFTestgenTarget::getTestBackendImpl(
     return new EBPFTestBackend(programInfo, symbex, testPath);
 }
 
-int EBPFTestgenTarget::getPortNumWidthBitsImpl() const { return 9; }
-
 EBPFCmdStepper *EBPFTestgenTarget::getCmdStepperImpl(ExecutionState &state, AbstractSolver &solver,
                                                      const ProgramInfo &programInfo) const {
     return new EBPFCmdStepper(state, solver, programInfo);
