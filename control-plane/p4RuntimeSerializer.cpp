@@ -1010,7 +1010,7 @@ class P4RuntimeEntriesConverter {
             addMatchKey(protoEntry, table, e->getKeys(), refMap, typeMap);
             addAction(protoEntry, e->getAction(), refMap, typeMap);
             if (needsPriority) {
-                if (isConst) {
+                if (!isConst) {
                     // The entry has a priority, use it.
                     CHECK_NULL(e->priority);
                     if (auto c = e->priority->to<IR::Constant>()) {
