@@ -35,7 +35,6 @@ bool TestBackEnd::run(const FinalState &state) {
         // Evaluate the model and extract the input and output packets.
         const auto *executionState = state.getExecutionState();
         const auto *outputPacketExpr = executionState->getPacketBuffer();
-        const auto *completedModel = state.getCompletedModel();
         const auto *outputPortExpr = executionState->get(programInfo.getTargetOutputPortVar());
         const auto &coverableNodes = programInfo.getCoverableNodes();
         const auto *programTraces = state.getTraces();
@@ -63,7 +62,7 @@ bool TestBackEnd::run(const FinalState &state) {
 
         // Execute concolic functions that may occur in the output packet, the output port,
         // or any path conditions.
-        auto concolicResolver = ConcolicResolver(*completedModel, *executionState,
+        auto concolicResolver = ConcolicResolver(state.getCompletedModel(), *executionState,
                                                  *programInfo.getConcolicMethodImpls());
 
         outputPacketExpr->apply(concolicResolver);
@@ -85,10 +84,10 @@ bool TestBackEnd::run(const FinalState &state) {
         auto replacedState = concolicOptState.value().get();
         executionState = replacedState.getExecutionState();
         outputPacketExpr = executionState->getPacketBuffer();
-        completedModel = replacedState.getCompletedModel();
+        const auto &completedModel = replacedState.getCompletedModel();
         outputPortExpr = executionState->get(programInfo.getTargetOutputPortVar());
 
-        auto testInfo = produceTestInfo(executionState, completedModel, outputPacketExpr,
+        auto testInfo = produceTestInfo(executionState, &completedModel, outputPacketExpr,
                                         outputPortExpr, programTraces);
 
         // Add a list of tracked branches to the test output, too.
@@ -103,7 +102,7 @@ bool TestBackEnd::run(const FinalState &state) {
             printPerformanceReport(false);
             return needsToTerminate(testCount);
         }
-        const auto *testSpec = createTestSpec(executionState, completedModel, testInfo);
+        const auto *testSpec = createTestSpec(executionState, &completedModel, testInfo);
 
         // Commit an update to the visited statements.
         // Only do this once we are sure we are generating a test.

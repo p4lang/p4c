@@ -118,13 +118,13 @@ std::optional<std::reference_wrapper<const FinalState>> FinalState::computeConco
     auto &model = completeModel(state, new Model(solver.get().getSymbolicMapping()), false);
     /// Transfer any derived variables from that are missing  in this model.
     /// Do NOT update any variables that already exist.
-    for (const auto &varTuple : completedModel) {
+    for (const auto &varTuple : completedModel.get()) {
         model.emplace(varTuple.first, varTuple.second);
     }
     return *new FinalState(solver, state, model);
 }
 
-const Model *FinalState::getCompletedModel() const { return &completedModel; }
+const Model &FinalState::getCompletedModel() const { return completedModel; }
 
 AbstractSolver &FinalState::getSolver() const { return solver; }
 

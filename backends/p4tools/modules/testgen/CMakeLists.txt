@@ -77,8 +77,8 @@ FetchContent_MakeAvailable(inja)
 # Testgen libraries.
 set(
   TESTGEN_LIBS
-  p4tools-common
-  inja
+  PRIVATE p4tools-common
+  PUBLIC inja
 )
 
 file(GLOB testgen_targets RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/targets ${CMAKE_CURRENT_SOURCE_DIR}/targets/*)
@@ -114,15 +114,17 @@ configure_file(register.h.in register.h)
 # The library.
 add_p4tools_library(testgen ${TESTGEN_SOURCES})
 # Make sure the testgen library and anything that links to it see both the Z3 and Inja includes.
-# also links to Z3 and inja
 target_link_libraries(testgen PUBLIC p4tools-common inja)
 
 # The executable.
 add_p4tools_executable(p4testgen main.cpp)
 target_link_libraries(
   p4testgen
-  testgen
+  PRIVATE testgen
   ${TESTGEN_LIBS}
+  ${P4C_LIBRARIES}
+  ${P4C_LIB_DEPS}
+  ${CMAKE_THREAD_LIBS_INIT}
 )
 
 add_custom_target(
@@ -148,6 +150,9 @@ if(ENABLE_GTESTS)
     PRIVATE testgen
     PRIVATE gtest
     ${TESTGEN_LIBS}
+    ${P4C_LIBRARIES}
+    ${P4C_LIB_DEPS}
+    ${CMAKE_THREAD_LIBS_INIT}
   )
 
   if(ENABLE_TESTING)

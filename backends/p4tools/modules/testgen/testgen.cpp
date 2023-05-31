@@ -56,7 +56,7 @@ SymbolicExecutor *pickExecutionEngine(const TestgenOptions &testgenOptions,
 }
 
 int generateAbstractTests(const TestgenOptions &testgenOptions, const ProgramInfo *programInfo,
-                          SymbolicExecutor *symbex) {
+                          SymbolicExecutor &symbex) {
     // Get the filename of the input file and remove the extension
     // This assumes that inputFile is not null.
     auto const inputFile = P4CContext::get().options().file;
@@ -69,7 +69,7 @@ int generateAbstractTests(const TestgenOptions &testgenOptions, const ProgramInf
         testPath = testDir / testPath;
     }
     // Each test back end has a different run function.
-    auto *testBackend = TestgenTarget::getTestBackend(*programInfo, *symbex, testPath);
+    auto *testBackend = TestgenTarget::getTestBackend(*programInfo, symbex, testPath);
     // Define how to handle the final state for each test. This is target defined.
     // We delegate execution to the symbolic executor.
     auto callBack = [testBackend](auto &&finalState) {
@@ -78,14 +78,14 @@ int generateAbstractTests(const TestgenOptions &testgenOptions, const ProgramInf
 
     try {
         // Run the symbolic executor with given exploration strategy.
-        symbex->run(callBack);
+        symbex.run(callBack);
     } catch (...) {
         if (testgenOptions.trackBranches) {
             // Print list of the selected branches and store all information into
             // dumpFolder/selectedBranches.txt file.
             // This printed list could be used for repeat this bug in arguments of --input-branches
             // command line. For example, --input-branches "1,1".
-            symbex->printCurrentTraceAndBranches(std::cerr);
+            symbex.printCurrentTraceAndBranches(std::cerr);
         }
         throw;
     }
@@ -130,7 +130,7 @@ int Testgen::mainImpl(const IR::P4Program *program) {
     Z3Solver solver;
     auto *symbex = pickExecutionEngine(testgenOptions, programInfo, solver);
 
-    return generateAbstractTests(testgenOptions, programInfo, symbex);
+    return generateAbstractTests(testgenOptions, programInfo, *symbex);
 }
 
 }  // namespace P4Tools::P4Testgen
