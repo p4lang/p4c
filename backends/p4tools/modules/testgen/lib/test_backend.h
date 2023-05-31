@@ -1,8 +1,7 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TEST_BACKEND_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TEST_BACKEND_H_
 
-#include <stdint.h>
-
+#include <cstdint>
 #include <functional>
 #include <optional>
 #include <vector>

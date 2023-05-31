@@ -16,7 +16,7 @@
 
 #include "backends/p4tools/modules/testgen/lib/logging.h"
 
-namespace P4Tools {
+namespace P4Tools::P4Testgen {
 
 TestgenOptions &TestgenOptions::get() {
     static TestgenOptions INSTANCE;
@@ -327,4 +327,4 @@ TestgenOptions::TestgenOptions()
         "produce no tests or only tests that contain counter examples.");
 }
 
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen

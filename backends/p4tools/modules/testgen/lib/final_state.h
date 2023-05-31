@@ -26,7 +26,7 @@ class FinalState {
     std::reference_wrapper<const ExecutionState> state;
 
     /// The final model which has been augmented with environment completions.
-    const Model &completedModel;
+    std::reference_wrapper<const Model> completedModel;
 
     /// The final program trace.
     std::vector<std::reference_wrapper<const TraceEvent>> trace;
@@ -61,7 +61,7 @@ class FinalState {
         const ConcolicVariableMap &resolvedConcolicVariables) const;
 
     /// @returns the model after it was augmented by completions from the symbolic environment.
-    [[nodiscard]] const Model *getCompletedModel() const;
+    [[nodiscard]] const Model &getCompletedModel() const;
 
     /// @returns the solver associated with this final state.
     [[nodiscard]] AbstractSolver &getSolver() const;

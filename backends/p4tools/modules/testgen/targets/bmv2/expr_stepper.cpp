@@ -357,8 +357,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
              auto &nextState = state.clone();
-             const auto *nineBitType =
-                 IR::getBitType(Bmv2V1ModelTestgenTarget::getPortNumWidthBits());
+             const auto *nineBitType = IR::getBitType(BMv2Constants::PORT_BIT_WIDTH);
              const auto *metadataLabel = args->at(0)->expression;
              if (!(metadataLabel->is<IR::Member>() || metadataLabel->is<IR::PathExpression>())) {
                  TESTGEN_UNIMPLEMENTED("Drop input %1% of type %2% not supported", metadataLabel,

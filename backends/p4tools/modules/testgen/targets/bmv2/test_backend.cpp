@@ -39,8 +39,7 @@ const std::set<std::string> Bmv2TestBackend::SUPPORTED_BACKENDS = {"PTF", "STF",
                                                                    "METADATA"};
 
 Bmv2TestBackend::Bmv2TestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                                 const std::filesystem::path &testPath,
-                                 std::optional<uint32_t> seed)
+                                 const std::filesystem::path &testPath)
     : TestBackEnd(programInfo, symbex) {
     cstring testBackendString = TestgenOptions::get().testBackend;
     if (testBackendString.isNullOrEmpty()) {
@@ -50,6 +49,7 @@ Bmv2TestBackend::Bmv2TestBackend(const ProgramInfo &programInfo, SymbolicExecuto
         exit(EXIT_FAILURE);
     }
 
+    auto seed = TestgenOptions::get().seed;
     if (testBackendString == "PTF") {
         testWriter = new PTF(testPath, seed);
     } else if (testBackendString == "STF") {

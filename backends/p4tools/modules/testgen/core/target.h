@@ -34,11 +34,7 @@ class TestgenTarget : public Target {
 
     /// Returns the test back end associated with this P4Testgen target.
     static TestBackEnd *getTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                                       const std::filesystem::path &testPath,
-                                       std::optional<uint32_t> seed);
-
-    /// The width of a port number, in bits.
-    static int getPortNumWidthBits();
+                                       const std::filesystem::path &testPath);
 
     /// Provides a CmdStepper implementation for this target.
     static CmdStepper *getCmdStepper(ExecutionState &state, AbstractSolver &solver,
@@ -63,14 +59,10 @@ class TestgenTarget : public Target {
     virtual const ProgramInfo *initProgramImpl(const IR::P4Program *program,
                                                const IR::Declaration_Instance *mainDecl) const = 0;
 
-    /// @see getPortNumWidthBits.
-    [[nodiscard]] virtual int getPortNumWidthBitsImpl() const = 0;
-
     /// @see getTestBackend.
     virtual TestBackEnd *getTestBackendImpl(const ProgramInfo &programInfo,
                                             SymbolicExecutor &symbex,
-                                            const std::filesystem::path &testPath,
-                                            std::optional<uint32_t> seed) const = 0;
+                                            const std::filesystem::path &testPath) const = 0;
 
     /// @see getCmdStepper.
     virtual CmdStepper *getCmdStepperImpl(ExecutionState &state, AbstractSolver &solver,
@@ -86,7 +78,6 @@ class TestgenTarget : public Target {
     /// Utility function. Converts the list of arguments @inputArgs to a list of type declarations
     ///  and appends the result to @v. Any names appearing in the arguments are
     /// resolved with @ns.
-    //
     static void argumentsToTypeDeclarations(const IR::IGeneralNamespace *ns,
                                             const IR::Vector<IR::Argument> *inputArgs,
                                             std::vector<const IR::Type_Declaration *> &resultDecls);

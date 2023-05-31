@@ -34,6 +34,8 @@ class BMv2Constants {
     enum CloneType { I2E = 0, E2E = 1 };
     /// Meter colors are defined in v1model.p4
     enum METER_COLOR { GREEN = 0, YELLOW = 1, RED = 2 };
+    /// Port width in bits.
+    static constexpr int PORT_BIT_WIDTH = 9;
 
     /// Other useful constants
     static constexpr int STF_MIN_PKT_SIZE = 22;

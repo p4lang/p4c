@@ -35,7 +35,7 @@ class EBPFTestBackend : public TestBackEnd {
 
  public:
     explicit EBPFTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                             const std::filesystem::path &testPath, std::optional<uint32_t> seed);
+                             const std::filesystem::path &testPath);
 
     TestBackEnd::TestInfo produceTestInfo(
         const ExecutionState *executionState, const Model *completedModel,
