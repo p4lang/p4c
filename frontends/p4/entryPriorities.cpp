@@ -74,7 +74,7 @@ const IR::Node *DoEntryPriorities::preorder(IR::EntriesList *entries) {
             size_t index = largestWins ? entries->size() - i - 1 : i;
             auto entry = entries->entries.at(index);
             BUG_CHECK(entry->priority == nullptr, "%1%: Priority found?", entry);
-            auto priority = new IR::Constant(currentPriority);
+            auto priority = new IR::Constant((uint64_t)currentPriority);
             auto newEntry = new IR::Entry(entry->srcInfo, entry->annotations, entry->isConst,
                                           priority, entry->keys, entry->action, entry->singleton);
             entries->entries[index] = newEntry;
