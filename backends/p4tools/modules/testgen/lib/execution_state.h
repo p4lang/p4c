@@ -72,10 +72,6 @@ class ExecutionState : public AbstractExecutionState {
     ~ExecutionState() override = default;
 
  private:
-    /// The number of variables that have been created in this state.
-    /// Used to create unique symbolic variables in some cases.
-    uint32_t numAllocatedSymbolicVariables = 0;
-
     /// The program trace for the current program point (i.e., how we got to the current state).
     std::vector<std::reference_wrapper<const TraceEvent>> trace;
 
@@ -131,6 +127,16 @@ class ExecutionState : public AbstractExecutionState {
 
     /// State that is needed to track reachability of statements given a query.
     ReachabilityEngineState *reachabilityEngineState = nullptr;
+
+    /// The number of individual packet variables that have been created in this state.
+    /// Used to create unique symbolic variables in some cases.
+    uint16_t numAllocatedPacketVariables = 0;
+
+    /// Helper function to create a new, unique symbolic packet variable.
+    /// Keeps track of the allocated packet variables by incrementing @ref
+    /// numAllocatedPacketVariables.
+    /// @returns a fresh symbolic variable.
+    [[nodiscard]] const IR::SymbolicVariable *createPacketVariable(const IR::Type *type);
 
     /* =========================================================================================
      *  Accessors
@@ -378,16 +384,6 @@ class ExecutionState : public AbstractExecutionState {
 
     /// @returns the current parser error label. Throws a BUG if the label is a nullptr.
     [[nodiscard]] const IR::StateVariable &getCurrentParserErrorLabel() const;
-
-    /* =========================================================================================
-     *  Variables and symbolic constants.
-     * =========================================================================================
-     */
-    /// @see ToolsVariables::getSymbolicVariable.
-    /// We also place the symbolic variables in the set of allocated symbolic variables of this
-    /// state.
-    [[nodiscard]] const IR::SymbolicVariable *createSymbolicVariable(
-        const IR::Type *type, cstring name, std::optional<int> instanceID = std::nullopt);
 
     /* =========================================================================================
      *  Constructors

@@ -6,14 +6,6 @@
 
 namespace P4Tools::P4Testgen::Pna {
 
-const IR::Expression *PnaDpdkTableStepper::computeTargetMatchType(
-    ExecutionState &nextState, const TableUtils::KeyProperties &keyProperties,
-    TableMatchMap *matches, const IR::Expression *hitCondition) {
-    // If the custom match type does not match, delete to the core match types.
-    return SharedPnaTableStepper::computeTargetMatchType(nextState, keyProperties, matches,
-                                                         hitCondition);
-}
-
 PnaDpdkTableStepper::PnaDpdkTableStepper(PnaDpdkExprStepper *stepper, const IR::P4Table *table)
     : SharedPnaTableStepper(stepper, table) {}
 

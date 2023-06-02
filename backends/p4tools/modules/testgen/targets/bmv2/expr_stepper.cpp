@@ -912,7 +912,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              const auto *meterState =
                  state.getTestObject("meter_values", externInstance->controlPlaneName(), false);
              Bmv2V1ModelMeterValue *meterValue = nullptr;
-             const auto &inputValue = nextState.createSymbolicVariable(
+             const auto &inputValue = ToolsVariables::getSymbolicVariable(
                  meterResult->type, "meter_value" + std::to_string(call->clone_id));
              // Make sure we do not accidentally get "3" as enum assignment...
              auto *cond = new IR::Lss(inputValue, IR::getConstant(meterResult->type, 3));
@@ -1013,7 +1013,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              const auto *meterState =
                  state.getTestObject("meter_values", externInstance->controlPlaneName(), false);
              Bmv2V1ModelMeterValue *meterValue = nullptr;
-             const auto &inputValue = nextState.createSymbolicVariable(
+             const auto &inputValue = ToolsVariables::getSymbolicVariable(
                  meterResult->type, "meter_value" + std::to_string(call->clone_id));
              // Make sure we do not accidentally get "3" as enum assignment...
              auto *cond = new IR::Lss(inputValue, IR::getConstant(meterResult->type, 3));

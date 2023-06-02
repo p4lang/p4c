@@ -28,11 +28,6 @@ class EBPFTableStepper : public TableStepper {
     } EBPFProperties;
 
  protected:
-    const IR::Expression *computeTargetMatchType(ExecutionState &nextState,
-                                                 const TableUtils::KeyProperties &keyProperties,
-                                                 TableMatchMap *matches,
-                                                 const IR::Expression *hitCondition) override;
-
     void checkTargetProperties(
         const std::vector<const IR::ActionListElement *> &tableActionList) override;
 

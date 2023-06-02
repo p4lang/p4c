@@ -11,12 +11,6 @@
 namespace P4Tools::P4Testgen::Pna {
 
 class PnaDpdkTableStepper : public SharedPnaTableStepper {
- protected:
-    const IR::Expression *computeTargetMatchType(ExecutionState &nextState,
-                                                 const TableUtils::KeyProperties &keyProperties,
-                                                 TableMatchMap *matches,
-                                                 const IR::Expression *hitCondition) override;
-
  public:
     explicit PnaDpdkTableStepper(PnaDpdkExprStepper *stepper, const IR::P4Table *table);
 };

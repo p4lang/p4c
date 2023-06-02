@@ -385,8 +385,7 @@ const IR::Expression *ExecutionState::peekPacketBuffer(int amount) {
     if (diff > 0) {
         // We need to enlarge the input packet by the amount we are exceeding the buffer.
         // TODO: How should we perform accounting here?
-        const IR::Expression *newVar =
-            createSymbolicVariable(IR::getBitType(diff), "pktVar", numAllocatedSymbolicVariables);
+        const IR::Expression *newVar = createPacketVariable(IR::getBitType(diff));
         appendToInputPacket(newVar);
         // If the buffer was not empty, append the data we have consumed to the newly generated
         // content and reset the buffer.
@@ -428,8 +427,7 @@ const IR::Expression *ExecutionState::slicePacketBuffer(int amount) {
     if (diff > 0) {
         // We need to enlarge the input packet by the amount we are exceeding the buffer.
         // TODO: How should we perform accounting here?
-        const IR::Expression *newVar =
-            createSymbolicVariable(IR::getBitType(diff), "pktVar", numAllocatedSymbolicVariables);
+        const IR::Expression *newVar = createPacketVariable(IR::getBitType(diff));
         appendToInputPacket(newVar);
         // If the buffer was not empty, append the data we have consumed to the newly generated
         // content and reset the buffer.
@@ -505,15 +503,15 @@ const IR::StateVariable &ExecutionState::getCurrentParserErrorLabel() const {
  *  Variables and symbolic constants
  * ============================================================================================= */
 
-const IR::SymbolicVariable *ExecutionState::createSymbolicVariable(const IR::Type *type,
-                                                                   cstring name,
-                                                                   std::optional<int> instanceID) {
-    if (instanceID.has_value()) {
-        name = name + "_" + std::to_string(instanceID.value());
-    }
-    const auto *variables = ToolsVariables::getSymbolicVariable(type, name);
-    numAllocatedSymbolicVariables++;
-    return variables;
+const IR::SymbolicVariable *ExecutionState::createPacketVariable(const IR::Type *type) {
+    const auto *variable = ToolsVariables::getSymbolicVariable(
+        type, "pktvar_" + std::to_string(numAllocatedPacketVariables));
+    numAllocatedPacketVariables++;
+    BUG_CHECK(numAllocatedPacketVariables < UINT16_MAX,
+              "Allocating too many symbolic packet variables. The symbolic variable counter with "
+              "maximum size %1% counter will overflow.",
+              UINT16_MAX);
+    return variable;
 }
 
 }  // namespace P4Tools::P4Testgen

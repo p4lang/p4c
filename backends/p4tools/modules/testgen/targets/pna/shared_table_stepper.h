@@ -55,8 +55,7 @@ class SharedPnaTableStepper : public TableStepper {
         TableImplementation implementaton = TableImplementation::standard;
     } SharedPnaProperties;
 
-    const IR::Expression *computeTargetMatchType(ExecutionState &nextState,
-                                                 const TableUtils::KeyProperties &keyProperties,
+    const IR::Expression *computeTargetMatchType(const TableUtils::KeyProperties &keyProperties,
                                                  TableMatchMap *matches,
                                                  const IR::Expression *hitCondition) override;
 
