@@ -39,18 +39,31 @@ class ExecutionState : public AbstractExecutionState {
      public:
         using ExceptionHandlers = std::map<Continuation::Exception, Continuation>;
 
+     private:
         Continuation normalContinuation;
         ExceptionHandlers exceptionHandlers;
         const NamespaceContext *namespaces = nullptr;
 
-        StackFrame(Continuation normalContinuation, const NamespaceContext *namespaces)
-            : StackFrame(normalContinuation, {}, namespaces) {}
+     public:
+        StackFrame(Continuation normalContinuation, const NamespaceContext *namespaces);
 
         StackFrame(Continuation normalContinuation, ExceptionHandlers exceptionHandlers,
-                   const NamespaceContext *namespaces)
-            : normalContinuation(normalContinuation),
-              exceptionHandlers(exceptionHandlers),
-              namespaces(namespaces) {}
+                   const NamespaceContext *namespaces);
+
+        StackFrame(const StackFrame &) = default;
+        StackFrame(StackFrame &&) noexcept = default;
+        StackFrame &operator=(const StackFrame &) = default;
+        StackFrame &operator=(StackFrame &&) = default;
+        ~StackFrame() = default;
+
+        /// @returns the top-level continuation of this particular stack frame.
+        [[nodiscard]] const Continuation &getContinuation() const;
+
+        /// @returns the exception handlers contained within this stack frame.
+        [[nodiscard]] const ExceptionHandlers &getExceptionHandlers() const;
+
+        /// @returns the namespaces contained within this stack frame.
+        [[nodiscard]] const NamespaceContext *getNameSpaces() const;
     };
 
     /// No move semantics because of constant members. We always need to clone a state.
@@ -61,7 +74,7 @@ class ExecutionState : public AbstractExecutionState {
  private:
     /// The number of variables that have been created in this state.
     /// Used to create unique symbolic variables in some cases.
-    int numAllocatedSymbolicVariables = 0;
+    uint32_t numAllocatedSymbolicVariables = 0;
 
     /// The program trace for the current program point (i.e., how we got to the current state).
     std::vector<std::reference_wrapper<const TraceEvent>> trace;

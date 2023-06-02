@@ -40,6 +40,28 @@ namespace P4Tools::P4Testgen {
  *  Constructors
  * ============================================================================================= */
 
+ExecutionState::StackFrame::StackFrame(Continuation normalContinuation,
+                                       const NamespaceContext *namespaces)
+    : StackFrame(std::move(normalContinuation), {}, namespaces) {}
+
+ExecutionState::StackFrame::StackFrame(Continuation normalContinuation,
+                                       ExceptionHandlers exceptionHandlers,
+                                       const NamespaceContext *namespaces)
+    : normalContinuation(std::move(normalContinuation)),
+      exceptionHandlers(std::move(exceptionHandlers)),
+      namespaces(namespaces) {}
+
+const Continuation &ExecutionState::StackFrame::getContinuation() const {
+    return normalContinuation;
+}
+
+const ExecutionState::StackFrame::ExceptionHandlers &
+ExecutionState::StackFrame::getExceptionHandlers() const {
+    return exceptionHandlers;
+}
+
+const NamespaceContext *ExecutionState::StackFrame::getNameSpaces() const { return namespaces; }
+
 ExecutionState::ExecutionState(const IR::P4Program *program)
     : AbstractExecutionState(program),
       body({program}),
@@ -263,19 +285,19 @@ void ExecutionState::popContinuation(std::optional<const IR::Node *> argument_op
     auto frame = stack.top();
     stack.pop();
 
-    auto newBody = frame.get().normalContinuation.apply(argument_opt);
+    auto newBody = frame.get().getContinuation().apply(argument_opt);
     replaceBody(newBody);
-    setNamespaceContext(frame.get().namespaces);
+    setNamespaceContext(frame.get().getNameSpaces());
 }
 
 void ExecutionState::handleException(Continuation::Exception e) {
     while (!stack.empty()) {
         auto frame = stack.top();
-        if (frame.get().exceptionHandlers.count(e) > 0) {
-            auto k = frame.get().exceptionHandlers.at(e);
+        if (frame.get().getExceptionHandlers().count(e) > 0) {
+            auto k = frame.get().getExceptionHandlers().at(e);
             auto newBody = k.apply(std::nullopt);
             replaceBody(newBody);
-            setNamespaceContext(frame.get().namespaces);
+            setNamespaceContext(frame.get().getNameSpaces());
             return;
         }
         stack.pop();
