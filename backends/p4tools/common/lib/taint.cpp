@@ -28,21 +28,8 @@ const IR::StringLiteral Taint::TAINTED_STRING_LITERAL = IR::StringLiteral(cstrin
 static bitvec computeTaintedBits(const SymbolicMapType &varMap, const IR::Expression *expr) {
     CHECK_NULL(expr);
     // TODO: Replace these two with IR::StateVariable.
-    if (const auto *member = expr->to<IR::Member>()) {
-        auto it = varMap.find(member);
-        if (it != varMap.end()) {
-            expr = it->second;
-        } else {
-            BUG("Unable to find var %s in the variable map.", member);
-        }
-    }
-    if (const auto *path = expr->to<IR::PathExpression>()) {
-        auto it = varMap.find(path);
-        if (it != varMap.end()) {
-            expr = it->second;
-        } else {
-            BUG("Unable to find var %s in the variable map.", path);
-        }
+    if (expr->is<IR::Member>() || expr->is<IR::PathExpression>()) {
+        BUG("Member or path expression %s should have been resolved at this point", expr);
     }
     if (expr->is<IR::SymbolicVariable>()) {
         return {};
@@ -175,19 +162,8 @@ bool Taint::hasTaint(const SymbolicMapType &varMap, const IR::Expression *expr) 
         return false;
     }
     // TODO: Replace these two with IR::StateVariable.
-    if (const auto *member = expr->to<IR::Member>()) {
-        auto it = varMap.find(member);
-        if (it != varMap.end()) {
-            return hasTaint(varMap, it->second);
-        }
-        BUG("Unable to find var %s in the variable map.", member);
-    }
-    if (const auto *path = expr->to<IR::PathExpression>()) {
-        auto it = varMap.find(path);
-        if (it != varMap.end()) {
-            return hasTaint(varMap, it->second);
-        }
-        BUG("Unable to find var %s in the variable map.", path);
+    if (expr->is<IR::Member>() || expr->is<IR::PathExpression>()) {
+        BUG("Member or path expression %s should have been resolved at this point", expr);
     }
     if (const auto *structExpr = expr->to<IR::StructExpression>()) {
         for (const auto *subExpr : structExpr->components) {

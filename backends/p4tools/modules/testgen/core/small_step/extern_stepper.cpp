@@ -265,8 +265,9 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
              auto &nextState = state.clone();
+             const auto *drop = state.getSymbolicEnv().subst(programInfo.dropIsActive());
              // If the drop variable is tainted, we also mark the port tainted.
-             if (state.hasTaint(programInfo.dropIsActive())) {
+             if (state.hasTaint(drop)) {
                  nextState.set(programInfo.getTargetOutputPortVar(),
                                programInfo.createTargetUninitialized(
                                    programInfo.getTargetOutputPortVar()->type, true));
@@ -720,7 +721,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  TESTGEN_UNIMPLEMENTED("Emit input %1% of type %2% not supported", emitOutput,
                                        emitType);
              }
-             const auto &validVar = ToolsVariables::getHeaderValidity(emitOutput);
+             const auto *validVar = state.get(ToolsVariables::getHeaderValidity(emitOutput));
 
              // Check whether the validity bit of the header is tainted. If it is, the entire
              // emit is tainted. There is not much we can do here, so throw an error.
@@ -776,7 +777,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  nextState.popBody();
                  // Only when the header is valid, the members are emitted and the packet
                  // delta is adjusted.
-                 result->emplace_back(state.get(validVar), state, nextState);
+                 result->emplace_back(validVar, state, nextState);
              }
              {
                  auto &invalidState = state.clone();

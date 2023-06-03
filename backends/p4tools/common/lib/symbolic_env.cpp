@@ -50,6 +50,15 @@ const IR::Expression *SymbolicEnv::subst(const IR::Expression *expr) const {
             return member;
         }
 
+        const IR::Node *preorder(IR::PathExpression *path) override {
+            prune();
+            if (symbolicEnv.exists(path)) {
+                const auto *result = symbolicEnv.get(path);
+                return result;
+            }
+            return path;
+        }
+
      public:
         explicit SubstVisitor(const SymbolicEnv &symbolicEnv) : symbolicEnv(symbolicEnv) {}
     };
