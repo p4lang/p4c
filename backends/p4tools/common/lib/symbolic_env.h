@@ -26,12 +26,6 @@ class SymbolicEnv {
     /// done on the given value before updating the symbolic state.
     void set(const IR::StateVariable &var, const IR::Expression *value);
 
-    /// Evaluates this symbolic environment in the context of the given model.
-    ///
-    /// A BUG occurs if any symbolic value in this environment refers to a variable that is not
-    /// bound by the given model.
-    [[nodiscard]] Model *evaluate(const Model &model) const;
-
     /// Substitutes state variables in @expr for their symbolic value in this environment.
     /// Variables that are unbound by this environment are left untouched.
     const IR::Expression *subst(const IR::Expression *expr) const;

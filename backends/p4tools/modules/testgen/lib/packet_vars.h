@@ -30,7 +30,7 @@ class PacketVars {
 
     /// Canonical name for the payload. This is used for consistent naming when attaching a payload
     /// to the packet.
-    static const IR::Member PAYLOAD_LABEL;
+    static const IR::SymbolicVariable PAYLOAD_SYMBOL;
 };
 
 }  // namespace P4Tools::P4Testgen

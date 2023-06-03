@@ -261,7 +261,7 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
          // This is the maximum value this checksum can have.
          auto maxHashInt = IR::getMaxBvVal(checksumVarType);
          // If the payload is present, we need to add it to our checksum calculation.
-         const auto *payloadExpr = completedModel.get(&PacketVars::PAYLOAD_LABEL, false);
+         const auto *payloadExpr = completedModel.get(&PacketVars::PAYLOAD_SYMBOL, false);
          if (payloadExpr != nullptr) {
              exprList.push_back(payloadExpr);
          }

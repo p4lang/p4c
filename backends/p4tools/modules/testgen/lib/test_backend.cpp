@@ -149,7 +149,7 @@ TestBackEnd::TestInfo TestBackEnd::produceTestInfo(
     const auto *inputPacketExpr = executionState->getInputPacket();
     // The payload fills the space between the minimum input size needed and the symbolically
     // calculated packet size.
-    const auto *payloadExpr = completedModel->get(&PacketVars::PAYLOAD_LABEL, false);
+    const auto *payloadExpr = completedModel->get(&PacketVars::PAYLOAD_SYMBOL, false);
     if (payloadExpr != nullptr) {
         inputPacketExpr =
             new IR::Concat(IR::getBitType(calculatedPacketSize), inputPacketExpr, payloadExpr);
