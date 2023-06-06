@@ -233,13 +233,13 @@ add_cxx_compiler_option ("-Wextra")
 add_cxx_compiler_option ("-Wno-overloaded-virtual")
 add_cxx_compiler_option ("-Wno-deprecated")
 add_cxx_compiler_option ("-Wno-deprecated-declarations")
-# Make compiler follow the standard and not be too lenient. The increases
-# likelyhood that compilation will not break with other compilers (mainly clang)
+# Make compiler follow the standard and not be too lenient. The increases the
+# likelihood that compilation will not break with other compilers (mainly clang)
 # or in future versions of GCC.
 add_cxx_compiler_option ("-pedantic")
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  # The ##__VA_ARGS__ GNU extension is needed for IR. But clang compains about it.
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+  # The ##__VA_ARGS__ GNU extension is needed for IR. But clang complains about it.
   # FIXME: with C++20 we would be able to use standard __VA_OPT__
   add_cxx_compiler_option ("-Wno-gnu-zero-variadic-macro-arguments")
 endif()
