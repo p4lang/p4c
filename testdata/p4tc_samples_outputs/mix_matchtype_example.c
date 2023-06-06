@@ -88,11 +88,6 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_value {
         } MainControlImpl_drop;
     } u;
 };
-struct MainControlImpl_ipv4_tbl_2_value_mask {
-    __u32 tuple_id;
-    struct MainControlImpl_ipv4_tbl_2_key_mask next_tuple_mask;
-    __u8 has_next;
-};
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_3_key {
     u32 keysz;
     u32 maskid;
@@ -117,11 +112,6 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_3_value {
         struct {
         } MainControlImpl_drop;
     } u;
-};
-struct MainControlImpl_ipv4_tbl_3_value_mask {
-    __u32 tuple_id;
-    struct MainControlImpl_ipv4_tbl_3_key_mask next_tuple_mask;
-    __u8 has_next;
 };
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_4_key {
     u32 keysz;

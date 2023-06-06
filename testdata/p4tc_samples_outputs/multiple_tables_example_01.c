@@ -215,11 +215,6 @@ struct __attribute__((__packed__)) MainControlImpl_set_ct_options_value {
         } MainControlImpl_tcp_other_packets;
     } u;
 };
-struct MainControlImpl_set_ct_options_value_mask {
-    __u32 tuple_id;
-    struct MainControlImpl_set_ct_options_key_mask next_tuple_mask;
-    __u8 has_next;
-};
 
 struct hdr_md {
     struct headers_t cpumap_hdr;

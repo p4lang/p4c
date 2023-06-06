@@ -59,10 +59,6 @@ class ConvertToBackendIR : public Inspector {
     ordered_map<unsigned, cstring> tableIDList;
     ordered_map<unsigned, cstring> actionIDList;
     ordered_map<unsigned, unsigned> tableKeysizeList;
-    bool isDropPacketCallPresent = false;
-    bool isSendToPortCallPresent = false;
-    bool isDropMetaCreated = false;
-    bool isEgressSpecCreated = false;
 
  public:
     ConvertToBackendIR(const IR::ToplevelBlock *tlb, IR::TCPipeline *pipe, P4::ReferenceMap *refMap,
@@ -82,7 +78,7 @@ class ConvertToBackendIR : public Inspector {
     bool isPnaMainOutputMeta(const IR::Member *mem);
     unsigned int findMappedKernelMeta(const IR::Member *mem);
     const IR::Expression *ExtractExpFromCast(const IR::Expression *exp);
-    unsigned checkTcType(const IR::StringLiteral *sl);
+    unsigned getTcType(const IR::StringLiteral *sl);
     unsigned getTableId(cstring tableName) const;
     unsigned getActionId(cstring actionName) const;
     unsigned getTableKeysize(unsigned tableId) const;
@@ -91,8 +87,8 @@ class ConvertToBackendIR : public Inspector {
 
 class Extern {
  public:
-    static const cstring drop_packet;
-    static const cstring send_to_port;
+    static const cstring dropPacket;
+    static const cstring sendToPort;
 };
 
 class Backend : public PassManager {

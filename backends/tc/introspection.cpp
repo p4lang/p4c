@@ -16,6 +16,8 @@ and limitations under the License.
 
 #include "introspection.h"
 
+/// This file defines functions for the pass to generate the introspection file
+
 namespace TC {
 
 void IntrospectionGenerator::postorder(const IR::P4Table *t) {
@@ -31,7 +33,7 @@ cstring IntrospectionGenerator::externalName(const IR::IDeclaration *declaration
 
 void IntrospectionGenerator::collectTableInfo() {
     for (auto table : tcPipeline->tableDefs) {
-        auto tableInfo = new struct tableAttributes();
+        auto tableInfo = new struct TableAttributes();
         tableInfo->id = table->tableID;
         tableInfo->name = table->controlName + "/" + table->tableName;
         tableInfo->tentries = table->tableEntriesCount;
@@ -47,7 +49,7 @@ void IntrospectionGenerator::collectTableInfo() {
             auto key = p4table->getKey();
             if (key != nullptr && key->keyElements.size()) {
                 for (auto k : key->keyElements) {
-                    auto keyField = new struct keyFieldAttributes();
+                    auto keyField = new struct KeyFieldAttributes();
                     keyField->id = i++;
                     auto keyExp = k->expression;
                     keyField->name = keyExp->toString();
@@ -57,33 +59,25 @@ void IntrospectionGenerator::collectTableInfo() {
                     keyField->type = "bit" + Util::toString(widthBits);
                     auto keyAnno = k->getAnnotations()->annotations;
                     for (auto anno : keyAnno) {
-                        if (anno->name == "tc_type") {
-                            auto expressionList = anno->expr;
-                            for (auto expr : expressionList) {
-                                if (auto typeLiteral = expr->to<IR::StringLiteral>()) {
-                                    auto val = checkValidTcType(typeLiteral);
-                                    if (val != nullptr) {
-                                        keyField->type = val;
-                                    } else {
-                                        ::error(ErrorType::ERR_INVALID,
-                                                "tc_type annotation cannot have '%1%' as value",
-                                                expr);
-                                    }
+                        if (anno->name == ParseTCAnnotations::tcType) {
+                            auto expr = anno->expr[0];
+                            if (auto typeLiteral = expr->to<IR::StringLiteral>()) {
+                                auto val = checkValidTcType(typeLiteral);
+                                if (val != nullptr) {
+                                    keyField->type = val;
                                 } else {
                                     ::error(ErrorType::ERR_INVALID,
                                             "tc_type annotation cannot have '%1%' as value", expr);
                                 }
+                            } else {
+                                ::error(ErrorType::ERR_INVALID,
+                                        "tc_type annotation cannot have '%1%' as value", expr);
                             }
                         }
-                        if (anno->name == "name") {
-                            auto expressionList = anno->expr;
-                            for (auto expr : expressionList) {
-                                if (auto name = expr->to<IR::StringLiteral>()) {
-                                    keyField->name = name->value;
-                                } else {
-                                    ::error(ErrorType::ERR_INVALID,
-                                            "tc_type annotation cannot have '%1%' as value", expr);
-                                }
+                        if (anno->name == IR::Annotation::nameAnnotation) {
+                            auto expr = anno->expr[0];
+                            if (auto name = expr->to<IR::StringLiteral>()) {
+                                keyField->name = name->value;
                             }
                         }
                     }
@@ -99,20 +93,20 @@ void IntrospectionGenerator::collectTableInfo() {
                         auto adecl = refMap->getDeclaration(action->getPath(), true);
                         auto actionName = externalName(adecl);
                         if (actionName == actionDef->actionName) {
-                            auto actionInfo = new struct actionAttributes();
+                            auto actionInfo = new struct ActionAttributes();
                             actionInfo->id = actionDef->actId;
                             actionInfo->name = actionDef->actionName;
                             auto annoList = action->getAnnotations()->annotations;
                             bool isTableOnly = false;
                             bool isDefaultOnly = false;
                             for (auto anno : annoList) {
-                                if (anno->name == "tableonly") {
+                                if (anno->name == IR::Annotation::tableOnlyAnnotation) {
                                     isTableOnly = true;
                                 }
-                                if (anno->name == "defaultonly") {
+                                if (anno->name == IR::Annotation::defaultOnlyAnnotation) {
                                     isDefaultOnly = true;
                                 }
-                                auto actionAnno = new struct annotation(anno->name);
+                                auto actionAnno = new struct Annotation(anno->name);
                                 actionInfo->annotations.push_back(actionAnno);
                             }
                             if (isTableOnly && isDefaultOnly) {
@@ -136,7 +130,7 @@ void IntrospectionGenerator::collectTableInfo() {
                             }
                             unsigned int id = 1;
                             for (auto actParam : actionDef->actionParams) {
-                                auto param = new struct actionParam();
+                                auto param = new struct ActionParam();
                                 param->id = id++;
                                 param->name = actParam->paramName;
                                 param->dataType = actParam->dataType;
@@ -160,7 +154,7 @@ void IntrospectionGenerator::genTableJson(Util::JsonArray *tablesJson) {
     }
 }
 
-Util::JsonObject *IntrospectionGenerator::genActionInfo(struct actionAttributes *action) {
+Util::JsonObject *IntrospectionGenerator::genActionInfo(struct ActionAttributes *action) {
     auto actionJson = new Util::JsonObject();
     actionJson->emplace("id", action->id);
     actionJson->emplace("name", action->name);
@@ -226,7 +220,7 @@ Util::JsonObject *IntrospectionGenerator::genActionInfo(struct actionAttributes 
     return actionJson;
 }
 
-Util::JsonObject *IntrospectionGenerator::genKeyInfo(struct keyFieldAttributes *keyField) {
+Util::JsonObject *IntrospectionGenerator::genKeyInfo(struct KeyFieldAttributes *keyField) {
     auto keyJson = new Util::JsonObject();
     keyJson->emplace("id", keyField->id);
     keyJson->emplace("name", keyField->name);
@@ -236,7 +230,7 @@ Util::JsonObject *IntrospectionGenerator::genKeyInfo(struct keyFieldAttributes *
     return keyJson;
 }
 
-Util::JsonObject *IntrospectionGenerator::genTableInfo(struct tableAttributes *tbl) {
+Util::JsonObject *IntrospectionGenerator::genTableInfo(struct TableAttributes *tbl) {
     auto tableJson = new Util::JsonObject();
     tableJson->emplace("name", tbl->name);
     tableJson->emplace("id", tbl->id);
@@ -267,7 +261,7 @@ Util::JsonObject *IntrospectionGenerator::genTableInfo(struct tableAttributes *t
 const Util::JsonObject *IntrospectionGenerator::genIntrospectionJson() {
     auto *json = new Util::JsonObject();
     auto *tablesJson = new Util::JsonArray();
-    struct introspectionInfo introspec;
+    struct IntrospectionInfo introspec;
     collectTableInfo();
     introspec.initIntrospectionInfo(tcPipeline);
     json->emplace("schema_version", introspec.schemaVersion);

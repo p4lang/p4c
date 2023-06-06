@@ -15,8 +15,6 @@
 # and limitations under the License.
 # *******************************************************************************/
 
-from __future__ import print_function
-
 import difflib
 import os
 import shutil

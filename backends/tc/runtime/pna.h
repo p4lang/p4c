@@ -113,9 +113,6 @@ extern struct p4tc_table_entry_act_bpf *bpf_xdp_p4tc_tbl_lookup(
     struct xdp_md *skb, struct p4tc_table_entry_act_bpf_params__local *params, void *key,
     const u32 key__sz) __ksym;
 
-// port direction externs
-
-// Additions to pna.h or wherever we put externs..
 /* Start generic kfunc interface to any extern */
 struct p4tc_ext_bpf_params {
     u32 ext_id;

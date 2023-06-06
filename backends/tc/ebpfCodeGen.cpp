@@ -102,7 +102,7 @@ void PNAEbpfGenerator::emitPipelineInstances(EBPF::CodeBuilder *builder) const {
 // =====================PNAArchTC=============================
 void PNAArchTC::emit(EBPF::CodeBuilder *builder) const {
     /**
-     * How the structure of a single C program for PSA should look like?
+     * Structure of a single C program for PNA
      * 1. Automatically generated comment
      * 2. Includes
      * 3. Macro definitions (it's called "preamble")
@@ -163,10 +163,6 @@ void PNAArchTC::emitInstances(EBPF::CodeBuilder *builder) const {
     emitPipelineInstances(builder);
     builder->appendLine("REGISTER_END()");
     builder->newline();
-}
-
-void PNAArchTC::emitInitializerSection(EBPF::CodeBuilder *builder) const {
-    builder->appendLine("SEC(\"classifier/map-initializer\")");
 }
 
 // =====================TCIngressPipelinePNA=============================
@@ -463,14 +459,6 @@ void EBPFTablePNA::emitKeyType(EBPF::CodeBuilder *builder) {
         }
     }
 
-    // Add dummy key if P4 table define table with empty key. This due to that hash map
-    // cannot have zero-length key. See function htab_map_alloc_check in kernel/bpf/hashtab.c
-    // located in Linux kernel repository
-    if (keyFieldNames.empty()) {
-        builder->emitIndent();
-        builder->appendLine("u8 __dummy_table_key;");
-    }
-
     builder->blockEnd(false);
     builder->appendFormat(" __attribute__((aligned(%d)))", structAlignment);
     builder->endOfStatement(true);
@@ -509,23 +497,6 @@ void EBPFTablePNA::emitValueType(EBPF::CodeBuilder *builder) {
 
     builder->blockEnd(false);
     builder->endOfStatement(true);
-
-    if (isTernaryTable()) {
-        // emit ternary mask value
-        builder->emitIndent();
-        builder->appendFormat("struct %s_mask ", valueTypeName.c_str());
-        builder->blockStart();
-
-        builder->emitIndent();
-        builder->appendLine("__u32 tuple_id;");
-        builder->emitIndent();
-        builder->appendFormat("struct %s_mask next_tuple_mask;", keyTypeName.c_str());
-        builder->newline();
-        builder->emitIndent();
-        builder->appendLine("__u8 has_next;");
-        builder->blockEnd(false);
-        builder->endOfStatement(true);
-    }
 }
 
 void EBPFTablePNA::emitValueStructStructure(EBPF::CodeBuilder *builder) {
@@ -1341,7 +1312,7 @@ void DeparserHdrEmitTranslatorPNA::processMethod(const P4::ExternMethod *method)
                 bool checkIfMAC = false;
                 auto annolist = f->getAnnotations()->annotations;
                 for (auto anno : annolist) {
-                    if (anno->name != "tc_type") continue;
+                    if (anno->name != ParseTCAnnotations::tcType) continue;
                     auto annoBody = anno->body;
                     for (auto annoVal : annoBody) {
                         if (annoVal->text == "macaddr") {

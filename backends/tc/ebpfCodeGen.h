@@ -49,7 +49,6 @@ class PNAEbpfGenerator {
     void emitGlobalHeadersMetadata(EBPF::CodeBuilder *builder) const;
     virtual void emitInstances(EBPF::CodeBuilder *builder) const = 0;
     void emitPipelineInstances(EBPF::CodeBuilder *builder) const;
-    virtual void emitInitializerSection(EBPF::CodeBuilder *builder) const = 0;
 };
 
 // Similar to class PSAErrorCodesGen in backends/ebpf/psa/ebpfPsaGen.cpp
@@ -97,7 +96,6 @@ class PNAArchTC : public PNAEbpfGenerator {
 
     void emit(EBPF::CodeBuilder *builder) const override;
     void emitInstances(EBPF::CodeBuilder *builder) const override;
-    void emitInitializerSection(EBPF::CodeBuilder *builder) const override;
 };
 
 class TCIngressPipelinePNA : public EBPF::TCIngressPipeline {

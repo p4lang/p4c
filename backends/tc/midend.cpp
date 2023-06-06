@@ -71,10 +71,6 @@ const IR::ToplevelBlock *MidEnd::run(TCOptions &options, const IR::P4Program *pr
          new P4::ParsersUnroll(true, &refMap, &typeMap),
          evaluator,
          new P4::MidEndLast()});
-    // PSA realted checks
-    midEnd.addPasses(
-        {new P4::ValidateTableProperties({"size", "psa_direct_counter", "psa_direct_meter",
-                                          "psa_empty_group_action", "psa_implementation"})});
     if (options.listMidendPasses) {
         midEnd.listPasses(*outStream, "\n");
         *outStream << std::endl;

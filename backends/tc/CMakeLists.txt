@@ -101,9 +101,6 @@ set(P4TC_BACKEND_HEADERS
 
 set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/tc.def PARENT_SCOPE)
 
-# cpplint
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${P4TC_BACKEND_SOURCES};${P4TC_BACKEND_HEADERS}")
-
 # build
 add_executable(p4c-pna-p4tc ${P4TC_BACKEND_SOURCES})
 target_link_libraries (p4c-pna-p4tc ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
@@ -118,6 +115,10 @@ add_custom_target(linkp4tc
         )
 
 add_dependencies(p4c_driver linkp4tc)
+
+add_custom_target(tc_includes ALL
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4include/tc
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/tc/pna.p4 ${P4C_BINARY_DIR}/p4include/tc)
 
 set(P4TC_COMPILER_DRIVER "${CMAKE_CURRENT_SOURCE_DIR}/run-tc-test.py")
 

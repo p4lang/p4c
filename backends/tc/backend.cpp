@@ -21,15 +21,15 @@ and limitations under the License.
 
 namespace TC {
 
-const cstring Extern::drop_packet = "drop_packet";
-const cstring Extern::send_to_port = "send_to_port";
+const cstring Extern::dropPacket = "drop_packet";
+const cstring Extern::sendToPort = "send_to_port";
 
-cstring PnaMainParserInputMetaFields[MAX_PNA_PARSER_META] = {"recirculated", "input_port"};
+cstring pnaMainParserInputMetaFields[MAX_PNA_PARSER_META] = {"recirculated", "input_port"};
 
-cstring PnaMainInputMetaFields[MAX_PNA_INPUT_META] = {"recirculated", "timestamp", "parser_error",
+cstring pnaMainInputMetaFields[MAX_PNA_INPUT_META] = {"recirculated", "timestamp", "parser_error",
                                                       "class_of_service", "input_port"};
 
-cstring PnaMainOutputMetaFields[MAX_PNA_OUTPUT_META] = {"class_of_service"};
+cstring pnaMainOutputMetaFields[MAX_PNA_OUTPUT_META] = {"class_of_service"};
 
 const cstring pnaParserMeta = "pna_main_parser_input_metadata_t";
 const cstring pnaInputMeta = "pna_main_input_metadata_t";
@@ -57,11 +57,7 @@ bool Backend::process() {
 bool Backend::ebpfCodeGen(P4::ReferenceMap *refMapEBPF, P4::TypeMap *typeMapEBPF) {
     if (options.cFile.isNullOrEmpty()) return true;
     target = new EBPF::KernelSamplesTarget(options.emitTraceMessages);
-    ebpfOption.emitTraceMessages = options.emitTraceMessages;
-    ebpfOption.maxTernaryMasks = options.maxTernaryMasks;
-    ebpfOption.generateToXDP = options.generateToXDP;
     ebpfOption.xdp2tcMode = options.xdp2tcMode;
-    ebpfOption.enableTableCache = options.enableTableCache;
     ebpfOption.exe_name = options.exe_name;
     ebpfOption.file = options.file;
     PnaProgramStructure structure(refMapEBPF, typeMapEBPF);
@@ -167,10 +163,8 @@ bool ConvertToBackendIR::preorder(const IR::P4Program *p) {
     if (p != nullptr) {
         setPipelineName();
         return true;
-    } else {
-        ::error("main is missing");
-        return false;
     }
+    return false;
 }
 
 cstring ConvertToBackendIR::externalName(const IR::IDeclaration *declaration) const {
@@ -183,7 +177,7 @@ cstring ConvertToBackendIR::externalName(const IR::IDeclaration *declaration) co
 bool ConvertToBackendIR::isDuplicateOrNoAction(const IR::P4Action *action) {
     auto actionName = externalName(action);
     if (actions.find(actionName) != actions.end()) return true;
-    if (actionName == "NoAction") return true;
+    if (actionName == P4::P4CoreLibrary::instance().noAction.name) return true;
     return false;
 }
 
@@ -221,21 +215,19 @@ void ConvertToBackendIR::postorder(const IR::P4Action *action) {
                 }
                 auto annoList = param->getAnnotations()->annotations;
                 for (auto anno : annoList) {
-                    if (anno->name != "tc_type") continue;
-                    auto expressionList = anno->expr;
-                    for (auto expr : expressionList) {
-                        if (auto typeLiteral = expr->to<IR::StringLiteral>()) {
-                            auto val = checkTcType(typeLiteral);
-                            if (val != BIT_TYPE) {
-                                tcActionParam->setDataType(val);
-                            } else {
-                                ::error(ErrorType::ERR_INVALID,
-                                        "tc_type annotation cannot have '%1%' as value", expr);
-                            }
+                    if (anno->name != ParseTCAnnotations::tcType) continue;
+                    auto expr = anno->expr[0];
+                    if (auto typeLiteral = expr->to<IR::StringLiteral>()) {
+                        auto val = getTcType(typeLiteral);
+                        if (val != BIT_TYPE) {
+                            tcActionParam->setDataType(val);
                         } else {
                             ::error(ErrorType::ERR_INVALID,
                                     "tc_type annotation cannot have '%1%' as value", expr);
                         }
+                    } else {
+                        ::error(ErrorType::ERR_INVALID,
+                                "tc_type annotation cannot have '%1%' as value", expr);
                     }
                 }
                 tcAction->addActionParams(tcActionParam);
@@ -249,14 +241,11 @@ void ConvertToBackendIR::updateDefaultMissAction(const IR::P4Table *t, IR::TCTab
     auto defaultAction = t->getDefaultAction();
     if (defaultAction == nullptr || !defaultAction->is<IR::MethodCallExpression>()) return;
     auto methodexp = defaultAction->to<IR::MethodCallExpression>();
-    if ((methodexp == nullptr) || (methodexp->method == nullptr) ||
-        (!methodexp->method->is<IR::PathExpression>()))
-        return;
-    auto pathexp = methodexp->method->to<IR::PathExpression>();
-    if (pathexp == nullptr || pathexp->path == nullptr) return;
-    auto actionDecl = refMap->getDeclaration(pathexp->path);
-    auto actionName = externalName(actionDecl);
-    if (actionName != "NoAction") {
+    auto mi = P4::MethodInstance::resolve(methodexp, refMap, typeMap);
+    auto actionCall = mi->to<P4::ActionCall>();
+    if (actionCall == nullptr) return;
+    auto actionName = externalName(actionCall->action);
+    if (actionName != P4::P4CoreLibrary::instance().noAction.name) {
         for (auto tcAction : tcPipeline->actionDefs) {
             if (actionName == tcAction->actionName) {
                 tabledef->setDefaultMissAction(tcAction);
@@ -282,16 +271,16 @@ void ConvertToBackendIR::updateDefaultHitAction(const IR::P4Table *t, IR::TCTabl
             bool isDefaultHit = false;
             bool isDefaultHitConst = false;
             for (auto anno : annoList) {
-                if (anno->name == "tableonly") {
+                if (anno->name == IR::Annotation::tableOnlyAnnotation) {
                     isTableOnly = true;
                 }
-                if (anno->name == "default_hit") {
+                if (anno->name == ParseTCAnnotations::default_hit) {
                     isDefaultHit = true;
                     defaultHit++;
                     auto adecl = refMap->getDeclaration(action->getPath(), true);
                     defaultActionName = externalName(adecl);
                 }
-                if (anno->name == "default_hit_const") {
+                if (anno->name == ParseTCAnnotations::default_hit_const) {
                     isDefaultHitConst = true;
                     defaultHitConst++;
                     auto adecl = refMap->getDeclaration(action->getPath(), true);
@@ -343,7 +332,8 @@ void ConvertToBackendIR::updateDefaultHitAction(const IR::P4Table *t, IR::TCTabl
                     t->name.originalName);
             return;
         }
-        if (defaultActionName != nullptr && defaultActionName != "NoAction") {
+        if (defaultActionName != nullptr &&
+            defaultActionName != P4::P4CoreLibrary::instance().noAction.name) {
             for (auto tcAction : tcPipeline->actionDefs) {
                 if (defaultActionName == tcAction->actionName) {
                     tabledef->setDefaultHitAction(tcAction);
@@ -367,8 +357,14 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
         IR::TCTable *tableDefinition = new IR::TCTable(tId, tName, cName, pipelineName);
         auto tEntriesCount = DEFAULT_TABLE_ENTRIES;
         auto sizeProperty = t->getSizeProperty();
-        if (sizeProperty && sizeProperty->fitsUint64()) {
-            tEntriesCount = sizeProperty->asUint64();
+        if (sizeProperty) {
+            if (sizeProperty->fitsUint64()) {
+                tEntriesCount = sizeProperty->asUint64();
+            } else {
+                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                        "table with size %1% cannot be supported", t->getSizeProperty());
+                return;
+            }
         }
         tableDefinition->setTableEntriesCount(tEntriesCount);
         unsigned int keySize = 0;
@@ -387,17 +383,15 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
         tableKeysizeList.emplace(tId, keySize);
         auto annoList = t->getAnnotations()->annotations;
         for (auto anno : annoList) {
-            if (anno->name != "nummask") continue;
-            auto expressionList = anno->expr;
-            for (auto expr : expressionList) {
-                if (auto val = expr->to<IR::Constant>()) {
-                    tableDefinition->setNumMask(val->asUint64());
-                } else {
-                    ::error(ErrorType::ERR_INVALID,
-                            "nummask annotation cannot have '%1%' as value. Only integer "
-                            "constants are allowed",
-                            expr);
-                }
+            if (anno->name != ParseTCAnnotations::numMask) continue;
+            auto expr = anno->expr[0];
+            if (auto val = expr->to<IR::Constant>()) {
+                tableDefinition->setNumMask(val->asUint64());
+            } else {
+                ::error(ErrorType::ERR_INVALID,
+                        "nummask annotation cannot have '%1%' as value. Only integer "
+                        "constants are allowed",
+                        expr);
             }
         }
         auto actionlist = t->getActionList();
@@ -409,10 +403,10 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
                 auto annoList = action->getAnnotations()->annotations;
                 unsigned int tableFlag = TABLEDEFAULT;
                 for (auto anno : annoList) {
-                    if (anno->name == "tableonly") {
+                    if (anno->name == IR::Annotation::tableOnlyAnnotation) {
                         tableFlag = TABLEONLY;
                     }
-                    if (anno->name == "defaultonly") {
+                    if (anno->name == IR::Annotation::defaultOnlyAnnotation) {
                         tableFlag = DEFAULTONLY;
                     }
                 }
@@ -431,9 +425,6 @@ void ConvertToBackendIR::postorder(const IR::P4Program *p) {
         tcPipeline->setPipelineName(pipelineName);
         tcPipeline->setPipelineId(DEFAULT_PIPELINE_ID);
         tcPipeline->setNumTables(tableCount);
-    } else {
-        ::error("main is missing");
-        return;
     }
 }
 
@@ -470,7 +461,7 @@ bool ConvertToBackendIR::isPnaMainOutputMeta(const IR::Member *mem) {
 unsigned int ConvertToBackendIR::findMappedKernelMeta(const IR::Member *mem) {
     if (isPnaParserMeta(mem)) {
         for (auto i = 0; i < MAX_PNA_PARSER_META; i++) {
-            if (mem->member.name == PnaMainParserInputMetaFields[i]) {
+            if (mem->member.name == pnaMainParserInputMetaFields[i]) {
                 if (i == PARSER_RECIRCULATED) {
                     return SKBREDIR;
                 } else if (i == PARSER_INPUT_PORT) {
@@ -480,7 +471,7 @@ unsigned int ConvertToBackendIR::findMappedKernelMeta(const IR::Member *mem) {
         }
     } else if (isPnaMainInputMeta(mem)) {
         for (auto i = 0; i < MAX_PNA_INPUT_META; i++) {
-            if (mem->member.name == PnaMainInputMetaFields[i]) {
+            if (mem->member.name == pnaMainInputMetaFields[i]) {
                 switch (i) {
                     case INPUT_RECIRCULATED:
                         return SKBREDIR;
@@ -498,7 +489,7 @@ unsigned int ConvertToBackendIR::findMappedKernelMeta(const IR::Member *mem) {
             }
         }
     } else if (isPnaMainOutputMeta(mem)) {
-        if (mem->member.name == PnaMainOutputMetaFields[OUTPUT_CLASS_OF_SERVICE]) {
+        if (mem->member.name == pnaMainOutputMetaFields[OUTPUT_CLASS_OF_SERVICE]) {
             return SKBPRIO;
         }
     }
@@ -513,7 +504,7 @@ const IR::Expression *ConvertToBackendIR::ExtractExpFromCast(const IR::Expressio
     return castexp;
 }
 
-unsigned ConvertToBackendIR::checkTcType(const IR::StringLiteral *sl) {
+unsigned ConvertToBackendIR::getTcType(const IR::StringLiteral *sl) {
     auto value = sl->value;
     auto typeVal = BIT_TYPE;
     if (value == "dev") {

@@ -72,11 +72,6 @@ struct __attribute__((__packed__)) ingress_nh_table_value {
         } ingress_drop;
     } u;
 };
-struct ingress_nh_table_value_mask {
-    __u32 tuple_id;
-    struct ingress_nh_table_key_mask next_tuple_mask;
-    __u8 has_next;
-};
 
 struct hdr_md {
     struct my_ingress_headers_t cpumap_hdr;

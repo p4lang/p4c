@@ -484,13 +484,7 @@ add_custom_target(dpdk_includes ALL
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/dpdk/pna.p4 ${P4C_BINARY_DIR}/p4include/dpdk
   DEPENDS update_includes
 )
-endif ()
-
-if (ENABLE_P4TC)
-add_custom_target(tc_includes ALL
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4include/tc
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/tc/pna.p4 ${P4C_BINARY_DIR}/p4include/tc)
-endif ()
+endif()
 
 # Installation
 # Targets install themselves. Here we install the core headers
