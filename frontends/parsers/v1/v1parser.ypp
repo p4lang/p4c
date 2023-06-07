@@ -21,6 +21,7 @@ limitations under the License.
 // Set up names.
 %defines
 %define api.namespace {V1}
+// TODO: Update, once we drop Ubuntu 18.04 support.
 %define parser_class_name {V1Parser}
 
 // Use the C++-native variant representation of tokens.

@@ -207,7 +207,7 @@ jobs:
       # Also, there are no static protobuf libs in homebrew.
       # See also https://github.com/Homebrew/homebrew-core/pull/122277
       run: |
-          PROTOBUF=`brew --prefix --installed protobuf`
+          PROTOBUF=`brew --prefix --installed protobuf@21`
           ./bootstrap.sh -DENABLE_GC=ON -DCMAKE_BUILD_TYPE=RELEASE \
               -DCMAKE_UNITY_BUILD=ON \
               -DProtobuf_INCLUDE_DIR=$PROTOBUF/include \
