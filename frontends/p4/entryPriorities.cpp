@@ -120,7 +120,7 @@ const IR::Node *DoEntryPriorities::preorder(IR::EntriesList *entries) {
                 ::error(ErrorType::ERR_EXPECTED, "%1% entry must have a priority", entry);
                 return entries;
             }
-            auto priority = new IR::Constant(currentPriority);
+            auto priority = new IR::Constant((uint64_t)currentPriority);
             auto newEntry = new IR::Entry(entry->srcInfo, entry->annotations, entry->isConst,
                                           priority, entry->keys, entry->action, entry->singleton);
             entries->entries[i] = newEntry;
