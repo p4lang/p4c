@@ -110,8 +110,8 @@ const IR::Node *DoEliminateSwitch::postorder(IR::SwitchStatement *statement) {
 
             for (auto lab : pendingLabels) {
                 if (!lab->is<IR::DefaultExpression>()) {
-                    auto entry =
-                        new IR::Entry(scSrc, new IR::ListExpression({lab}), actionCall, false);
+                    auto entry = new IR::Entry(scSrc, true, nullptr, new IR::ListExpression({lab}),
+                                               actionCall, false);
                     entries.push_back(entry);
                 }
             }

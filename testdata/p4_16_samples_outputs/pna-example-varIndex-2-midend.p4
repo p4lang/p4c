@@ -101,8 +101,8 @@ control MainControlImpl(inout headers_t hdrs, inout main_metadata_t meta, in pna
         }
         const default_action = switch_0_case_1();
         const entries = {
-                        12w1 : switch_0_case();
-                        12w2 : switch_0_case_0();
+                        const 12w1 : switch_0_case();
+                        const 12w2 : switch_0_case_0();
         }
     }
     @hidden action pnaexamplevarIndex2l125() {

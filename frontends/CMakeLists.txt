@@ -26,6 +26,7 @@ set (P4_FRONTEND_SRCS
   p4/directCalls.cpp
   p4/dontcareArgs.cpp
   p4/enumInstance.cpp
+  p4/entryPriorities.cpp
   p4/evaluator/evaluator.cpp
   p4/evaluator/substituteParameters.cpp
   p4/externInstance.cpp
@@ -99,6 +100,7 @@ set (P4_FRONTEND_HDRS
   p4/directCalls.h
   p4/dontcareArgs.h
   p4/enumInstance.h
+  p4/entryPriorities.h
   p4/evaluator/evaluator.h
   p4/evaluator/substituteParameters.h
   p4/externInstance.h
