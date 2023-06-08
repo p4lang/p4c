@@ -41,109 +41,113 @@ void IntrospectionGenerator::collectTableInfo() {
         if (table->keySize != 0) {
             tableInfo->keysize = table->keySize;
         }
-        // Key field information collection
-        unsigned int i = 1;
         const IR::P4Table *p4table = nullptr;
         p4table = p4tables[table->tableName];
-        if (p4table != nullptr) {
-            auto key = p4table->getKey();
-            if (key != nullptr && key->keyElements.size()) {
-                for (auto k : key->keyElements) {
-                    auto keyField = new struct KeyFieldAttributes();
-                    keyField->id = i++;
-                    auto keyExp = k->expression;
-                    keyField->name = keyExp->toString();
-                    keyField->matchType = k->matchType->toString();
-                    auto keyExpType = typeMap->getType(keyExp);
-                    auto widthBits = keyExpType->width_bits();
-                    keyField->type = "bit" + Util::toString(widthBits);
-                    auto keyAnno = k->getAnnotations()->annotations;
-                    for (auto anno : keyAnno) {
-                        if (anno->name == ParseTCAnnotations::tcType) {
-                            auto expr = anno->expr[0];
-                            if (auto typeLiteral = expr->to<IR::StringLiteral>()) {
-                                auto val = checkValidTcType(typeLiteral);
-                                if (val != nullptr) {
-                                    keyField->type = val;
-                                } else {
-                                    ::error(ErrorType::ERR_INVALID,
-                                            "tc_type annotation cannot have '%1%' as value", expr);
-                                }
-                            } else {
-                                ::error(ErrorType::ERR_INVALID,
-                                        "tc_type annotation cannot have '%1%' as value", expr);
-                            }
-                        }
-                        if (anno->name == IR::Annotation::nameAnnotation) {
-                            auto expr = anno->expr[0];
-                            if (auto name = expr->to<IR::StringLiteral>()) {
-                                keyField->name = name->value;
-                            }
-                        }
+        if (p4table == nullptr) continue;
+        // Key field information collection
+        auto key = p4table->getKey();
+        if (key != nullptr && key->keyElements.size()) collectKeyInfo(key, tableInfo);
+        // Action information collection
+        auto actionlist = p4table->getActionList();
+        if (actionlist != nullptr) collectActionInfo(actionlist, tableInfo, p4table, table);
+        tablesInfo.push_back(tableInfo);
+    }
+}
+
+void IntrospectionGenerator::collectKeyInfo(const IR::Key *key, struct TableAttributes *tableInfo) {
+    unsigned int i = 1;
+    for (auto k : key->keyElements) {
+        auto keyField = new struct KeyFieldAttributes();
+        keyField->id = i++;
+        auto keyExp = k->expression;
+        keyField->name = keyExp->toString();
+        keyField->matchType = k->matchType->toString();
+        auto keyExpType = typeMap->getType(keyExp);
+        auto widthBits = keyExpType->width_bits();
+        keyField->type = "bit" + Util::toString(widthBits);
+        auto keyAnno = k->getAnnotations()->annotations;
+        for (auto anno : keyAnno) {
+            if (anno->name == ParseTCAnnotations::tcType) {
+                auto expr = anno->expr[0];
+                if (auto typeLiteral = expr->to<IR::StringLiteral>()) {
+                    auto val = std::move(*checkValidTcType(typeLiteral));
+                    if (val != nullptr) {
+                        keyField->type = val;
+                    } else {
+                        ::error(ErrorType::ERR_INVALID,
+                                "tc_type annotation cannot have '%1%' as value", expr);
                     }
-                    keyField->bitwidth = widthBits;
-                    tableInfo->keyFields.push_back(keyField);
+                } else {
+                    ::error(ErrorType::ERR_INVALID, "tc_type annotation cannot have '%1%' as value",
+                            expr);
                 }
             }
-            // Action information collection
-            auto actionlist = p4table->getActionList();
-            if (actionlist != nullptr) {
-                for (auto action : actionlist->actionList) {
-                    for (auto actionDef : tcPipeline->actionDefs) {
-                        auto adecl = refMap->getDeclaration(action->getPath(), true);
-                        auto actionName = externalName(adecl);
-                        if (actionName == actionDef->actionName) {
-                            auto actionInfo = new struct ActionAttributes();
-                            actionInfo->id = actionDef->actId;
-                            actionInfo->name = actionDef->actionName;
-                            auto annoList = action->getAnnotations()->annotations;
-                            bool isTableOnly = false;
-                            bool isDefaultOnly = false;
-                            for (auto anno : annoList) {
-                                if (anno->name == IR::Annotation::tableOnlyAnnotation) {
-                                    isTableOnly = true;
-                                }
-                                if (anno->name == IR::Annotation::defaultOnlyAnnotation) {
-                                    isDefaultOnly = true;
-                                }
-                                auto actionAnno = new struct Annotation(anno->name);
-                                actionInfo->annotations.push_back(actionAnno);
-                            }
-                            if (isTableOnly && isDefaultOnly) {
-                                ::error(
-                                    "Table '%1%' has an action reference '%2%' which is "
-                                    "annotated with both '@tableonly' and '@defaultonly'",
-                                    p4table->getName().originalName,
-                                    action->getName().originalName);
-                            } else if (isTableOnly) {
-                                actionInfo->scope = TableOnly;
-                            } else if (isDefaultOnly) {
-                                actionInfo->scope = DefaultOnly;
-                            }
-                            if ((table->defaultHitAction != nullptr) &&
-                                (table->defaultHitAction->actionName == actionInfo->name)) {
-                                actionInfo->defaultHit = true;
-                            }
-                            if ((table->defaultMissAction != nullptr) &&
-                                (table->defaultMissAction->actionName == actionInfo->name)) {
-                                actionInfo->defaultMiss = true;
-                            }
-                            unsigned int id = 1;
-                            for (auto actParam : actionDef->actionParams) {
-                                auto param = new struct ActionParam();
-                                param->id = id++;
-                                param->name = actParam->paramName;
-                                param->dataType = actParam->dataType;
-                                param->bitwidth = actParam->bitSize;
-                                actionInfo->actionParams.push_back(param);
-                            }
-                            tableInfo->actions.push_back(actionInfo);
-                        }
-                    }
+            if (anno->name == IR::Annotation::nameAnnotation) {
+                auto expr = anno->expr[0];
+                if (auto name = expr->to<IR::StringLiteral>()) {
+                    keyField->name = name->value;
                 }
             }
         }
-        tablesInfo.push_back(tableInfo);
+        keyField->bitwidth = widthBits;
+        tableInfo->keyFields.push_back(keyField);
+    }
+}
+
+void IntrospectionGenerator::collectActionInfo(const IR::ActionList *actionlist,
+                                               struct TableAttributes *tableInfo,
+                                               const IR::P4Table *p4table,
+                                               const IR::TCTable *table) {
+    for (auto action : actionlist->actionList) {
+        for (auto actionDef : tcPipeline->actionDefs) {
+            auto adecl = refMap->getDeclaration(action->getPath(), true);
+            auto actionName = externalName(adecl);
+            if (actionName != actionDef->actionName) continue;
+            auto actionInfo = new struct ActionAttributes();
+            actionInfo->id = actionDef->actId;
+            actionInfo->name = actionDef->actionName;
+            auto annoList = action->getAnnotations()->annotations;
+            bool isTableOnly = false;
+            bool isDefaultOnly = false;
+            for (auto anno : annoList) {
+                if (anno->name == IR::Annotation::tableOnlyAnnotation) {
+                    isTableOnly = true;
+                }
+                if (anno->name == IR::Annotation::defaultOnlyAnnotation) {
+                    isDefaultOnly = true;
+                }
+                auto actionAnno = new struct Annotation(anno->name);
+                actionInfo->annotations.push_back(actionAnno);
+            }
+            if (isTableOnly && isDefaultOnly) {
+                ::error(
+                    "Table '%1%' has an action reference '%2%' which is "
+                    "annotated with both '@tableonly' and '@defaultonly'",
+                    p4table->getName().originalName, action->getName().originalName);
+            } else if (isTableOnly) {
+                actionInfo->scope = TableOnly;
+            } else if (isDefaultOnly) {
+                actionInfo->scope = DefaultOnly;
+            }
+            if ((table->defaultHitAction != nullptr) &&
+                (table->defaultHitAction->actionName == actionInfo->name)) {
+                actionInfo->defaultHit = true;
+            }
+            if ((table->defaultMissAction != nullptr) &&
+                (table->defaultMissAction->actionName == actionInfo->name)) {
+                actionInfo->defaultMiss = true;
+            }
+            unsigned int id = 1;
+            for (auto actParam : actionDef->actionParams) {
+                auto param = new struct ActionParam();
+                param->id = id++;
+                param->name = actParam->paramName;
+                param->dataType = actParam->dataType;
+                param->bitwidth = actParam->bitSize;
+                actionInfo->actionParams.push_back(param);
+            }
+            tableInfo->actions.push_back(actionInfo);
+        }
     }
 }
 
@@ -281,7 +285,7 @@ bool IntrospectionGenerator::serializeIntrospectionJson(std::ostream &destinatio
     return true;
 }
 
-cstring IntrospectionGenerator::checkValidTcType(const IR::StringLiteral *sl) {
+std::optional<cstring> IntrospectionGenerator::checkValidTcType(const IR::StringLiteral *sl) {
     auto value = sl->value;
     if (value == "dev" || value == "macaddr" || value == "ipv4" || value == "ipv6" ||
         value == "be16" || value == "be32" || value == "be64") {

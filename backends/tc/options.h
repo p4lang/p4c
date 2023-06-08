@@ -33,7 +33,7 @@ class TCOptions : public CompilerOptions {
     // tracing eBPF code execution
     bool emitTraceMessages = false;
     // XDP2TC mode for PSA-eBPF
-    enum XDP2TC xdp2tcMode = XDP2TC_NONE;
+    enum XDP2TC xdp2tcMode = XDP2TC_META;
 
     TCOptions() {
         registerOption(
@@ -85,10 +85,6 @@ class TCOptions : public CompilerOptions {
             },
             "Select the mode used to pass metadata from XDP to TC "
             "(possible values: meta, head, cpumap).");
-    }
-    void calculateXDP2TCMode() {
-        // For TC, use 'meta' mode by default.
-        xdp2tcMode = XDP2TC_META;
     }
 };
 

@@ -25,30 +25,23 @@ class ConvertToBackendIR;
 
 //  Similar to class PSAEbpfGenerator in backends/ebpf/psa/ebpfPsaGen.h
 
-class PNAEbpfGenerator {
+class PNAEbpfGenerator : public EBPF::EbpfCodeGenerator {
  public:
-    static const unsigned MaxClones = 64;
-    static const unsigned MaxCloneSessions = 1024;
-
-    const EbpfOptions &options;
-    std::vector<EBPF::EBPFType *> ebpfTypes;
-
     EBPF::EBPFPipeline *pipeline;
 
     PNAEbpfGenerator(const EbpfOptions &options, std::vector<EBPF::EBPFType *> &ebpfTypes,
                      EBPF::EBPFPipeline *pipeline)
-        : options(options), ebpfTypes(ebpfTypes), pipeline(pipeline) {}
+        : EBPF::EbpfCodeGenerator(options, ebpfTypes), pipeline(pipeline) {}
 
     virtual void emit(EBPF::CodeBuilder *builder) const = 0;
-
-    void emitPNAIncludes(EBPF::CodeBuilder *builder) const;
-    virtual void emitPreamble(EBPF::CodeBuilder *builder) const;
-    void emitCommonPreamble(EBPF::CodeBuilder *builder) const;
-    void emitInternalStructures(EBPF::CodeBuilder *pBuilder) const;
-    void emitTypes(EBPF::CodeBuilder *builder) const;
-    void emitGlobalHeadersMetadata(EBPF::CodeBuilder *builder) const;
     virtual void emitInstances(EBPF::CodeBuilder *builder) const = 0;
-    void emitPipelineInstances(EBPF::CodeBuilder *builder) const;
+    void emitPNAIncludes(EBPF::CodeBuilder *builder) const;
+    void emitPreamble(EBPF::CodeBuilder *builder) const override;
+    void emitCommonPreamble(EBPF::CodeBuilder *builder) const override;
+    void emitInternalStructures(EBPF::CodeBuilder *pBuilder) const override;
+    void emitTypes(EBPF::CodeBuilder *builder) const override;
+    void emitGlobalHeadersMetadata(EBPF::CodeBuilder *builder) const override;
+    void emitPipelineInstances(EBPF::CodeBuilder *builder) const override;
 };
 
 // Similar to class PSAErrorCodesGen in backends/ebpf/psa/ebpfPsaGen.cpp

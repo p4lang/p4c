@@ -42,7 +42,6 @@ int main(int argc, char *const argv[]) {
     if (::errorCount() > 0) {
         return 1;
     }
-    options.calculateXDP2TCMode();
     auto hook = options.getDebugHook();
     auto chkprogram = P4::parseP4File(options);
     if (chkprogram == nullptr || ::errorCount() > 0) {

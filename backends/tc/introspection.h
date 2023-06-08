@@ -134,10 +134,13 @@ class IntrospectionGenerator : public Inspector {
     void genTableJson(Util::JsonArray *tablesJson);
     Util::JsonObject *genTableInfo(struct TableAttributes *tbl);
     void collectTableInfo();
+    void collectKeyInfo(const IR::Key *k, struct TableAttributes *tableinfo);
+    void collectActionInfo(const IR::ActionList *actionlist, struct TableAttributes *tableinfo,
+                           const IR::P4Table *p4table, const IR::TCTable *table);
     Util::JsonObject *genActionInfo(struct ActionAttributes *action);
     Util::JsonObject *genKeyInfo(struct KeyFieldAttributes *keyField);
     bool serializeIntrospectionJson(std::ostream &destination);
-    cstring checkValidTcType(const IR::StringLiteral *sl);
+    std::optional<cstring> checkValidTcType(const IR::StringLiteral *sl);
     cstring externalName(const IR::IDeclaration *declaration);
 };
 

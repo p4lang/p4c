@@ -18,21 +18,6 @@ and limitations under the License.
 
 namespace TC {
 
-/**
-This class implements a policy suitable for the ConvertEnums pass.
-The policy is: convert all enums that are not part of the v1model.
-Use 32-bit values for all enums.
-*/
-class EnumOn32Bits : public P4::ChooseEnumRepresentation {
-    bool convert(const IR::Type_Enum *type) const override {
-        if (type->srcInfo.isValid()) {
-            return true;
-        }
-        return true;
-    }
-    unsigned enumSize(unsigned) const override { return 32; }
-};
-
 const IR::ToplevelBlock *MidEnd::run(TCOptions &options, const IR::P4Program *program,
                                      std::ostream *outStream) {
     if (program == nullptr && options.listMidendPasses == 0) return nullptr;
@@ -40,7 +25,7 @@ const IR::ToplevelBlock *MidEnd::run(TCOptions &options, const IR::P4Program *pr
 
     PassManager midEnd = {};
     midEnd.addPasses(
-        {new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits()),
+        {new P4::ConvertEnums(&refMap, &typeMap, new P4::EnumOn32Bits()),
          new P4::ClearTypeMap(&typeMap),
          new P4::RemoveMiss(&refMap, &typeMap),
          new P4::EliminateInvalidHeaders(&refMap, &typeMap),

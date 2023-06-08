@@ -129,6 +129,21 @@ class ConvertEnums : public PassManager {
     EnumMapping getEnumMapping() const { return convertEnums->repr; }
 };
 
+/**
+This class implements a policy suitable for the ConvertEnums pass.
+The policy is: convert all enums that are not part of the v1model.
+Use 32-bit values for all enums.
+*/
+class EnumOn32Bits : public P4::ChooseEnumRepresentation {
+    bool convert(const IR::Type_Enum *type) const override {
+        if (type->srcInfo.isValid()) {
+            return true;
+        }
+        return true;
+    }
+    unsigned enumSize(unsigned) const override { return 32; }
+};
+
 }  // namespace P4
 
 #endif /* _MIDEND_CONVERTENUMS_H_ */
