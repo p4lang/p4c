@@ -166,10 +166,6 @@ void ExecutionState::markVisited(const IR::Node *node) {
 
 const P4::Coverage::CoverageSet &ExecutionState::getVisited() const { return visitedNodes; }
 
-bool ExecutionState::hasTaint(const IR::Expression *expr) const {
-    return Taint::hasTaint(env.getInternalMap(), expr);
-}
-
 void ExecutionState::set(const IR::StateVariable &var, const IR::Expression *value) {
     if (getProperty<bool>("inUndefinedState")) {
         // If we are in an undefined state, the variable we set is tainted.

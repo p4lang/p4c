@@ -14,19 +14,15 @@ class Taint {
     /// either return a literal, a Member/PathExpression, or a concatenation. Any non-tainted
     /// variable is replaced with a zero constant. This function is used for the generation of taint
     /// masks.
-    static const IR::Expression *propagateTaint(const SymbolicMapType &varMap,
-                                                const IR::Expression *expr);
+    static const IR::Expression *propagateTaint(const IR::Expression *expr);
 
     /// @returns whether the given expression is tainted. An expression is tainted if one or more
     /// bits of the expression are expected to evaluate to (possibly part of) IR::TaintExpression.
-    static bool hasTaint(const SymbolicMapType &varMap, const IR::Expression *expr);
-
     static bool hasTaint(const IR::Expression *expr);
 
     /// @returns the mask for the corresponding program packet, indicating bits of the expression
     /// which are not tainted.
-    static const IR::Literal *buildTaintMask(const SymbolicMapType &varMap,
-                                             const Model *evaluatedModel,
+    static const IR::Literal *buildTaintMask(const Model *evaluatedModel,
                                              const IR::Expression *programPacket);
 };
 

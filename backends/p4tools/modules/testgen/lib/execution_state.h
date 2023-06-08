@@ -176,9 +176,6 @@ class ExecutionState : public AbstractExecutionState {
     /// is done on the given value before updating the symbolic state.
     void set(const IR::StateVariable &var, const IR::Expression *value) override;
 
-    /// @see Taint::hasTaint
-    bool hasTaint(const IR::Expression *expr) const;
-
     /// @returns the current event trace.
     [[nodiscard]] const std::vector<std::reference_wrapper<const TraceEvent>> &getTrace() const;
 

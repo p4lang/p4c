@@ -12,6 +12,7 @@
 
 #include "backends/p4tools/common/lib/constants.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
+#include "backends/p4tools/common/lib/taint.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/id.h"
@@ -475,7 +476,6 @@ bool TableStepper::resolveTableKeys() {
         return false;
     }
 
-    const auto *state = getExecutionState();
     auto keyElements = key->keyElements;
     for (size_t keyIdx = 0; keyIdx < keyElements.size(); ++keyIdx) {
         const auto *keyElement = keyElements.at(keyIdx);
@@ -519,7 +519,7 @@ bool TableStepper::resolveTableKeys() {
         // So we have to stay generic and produce a corresponding variable.
         cstring keyMatchType = keyElement->matchType->toString();
         // We can recover from taint for some match types, which is why we track taint.
-        bool keyHasTaint = state->hasTaint(keyElement->expression);
+        bool keyHasTaint = Taint::hasTaint(keyElement->expression);
 
         // Initialize the standard keyProperties.
         TableUtils::KeyProperties keyProperties(keyElement, fieldName, keyIdx, keyMatchType,

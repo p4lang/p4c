@@ -13,6 +13,7 @@
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/arch_spec.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
+#include "backends/p4tools/common/lib/taint.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "backends/p4tools/common/lib/variables.h"
@@ -315,7 +316,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
             }
 
             // If the assert/assume condition is tainted, we do not know whether we abort.
-            if (state.hasTaint(cond)) {
+            if (Taint::hasTaint(cond)) {
                 TESTGEN_UNIMPLEMENTED(
                     "Assert/assume can not be executed under a tainted condition.");
             }
@@ -553,7 +554,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                                    });
                      return;
                  }
-                 argsAreTainted = argsAreTainted || state.hasTaint(arg->expression);
+                 argsAreTainted = argsAreTainted || Taint::hasTaint(arg->expression);
              }
              const auto *hashOutput = args->at(0)->expression;
 
@@ -1156,7 +1157,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                                    });
                      return;
                  }
-                 argsAreTainted = argsAreTainted || state.hasTaint(arg->expression);
+                 argsAreTainted = argsAreTainted || Taint::hasTaint(arg->expression);
              }
              // If any of the input arguments is tainted, the entire extern is unreliable.
              if (argsAreTainted) {
@@ -1363,7 +1364,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                                    });
                      return;
                  }
-                 argsAreTainted = argsAreTainted || state.hasTaint(arg->expression);
+                 argsAreTainted = argsAreTainted || Taint::hasTaint(arg->expression);
              }
              // If any of the input arguments is tainted, the entire extern is unreliable.
              if (argsAreTainted) {
@@ -1478,7 +1479,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                                    });
                      return;
                  }
-                 argsAreTainted = argsAreTainted || state.hasTaint(arg->expression);
+                 argsAreTainted = argsAreTainted || Taint::hasTaint(arg->expression);
              }
 
              const auto *verifyCond = args->at(0)->expression;
@@ -1594,7 +1595,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                                    });
                      return;
                  }
-                 argsAreTainted = argsAreTainted || state.hasTaint(arg->expression);
+                 argsAreTainted = argsAreTainted || Taint::hasTaint(arg->expression);
              }
 
              const auto &checksumVar = ToolsVariables::convertReference(args->at(2)->expression);
@@ -1672,7 +1673,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                                    });
                      return;
                  }
-                 argsAreTainted = argsAreTainted || state.hasTaint(arg->expression);
+                 argsAreTainted = argsAreTainted || Taint::hasTaint(arg->expression);
              }
 
              const auto &checksumVar = ToolsVariables::convertReference(args->at(2)->expression);
@@ -1751,7 +1752,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                                    });
                      return;
                  }
-                 argsAreTainted = argsAreTainted || state.hasTaint(arg->expression);
+                 argsAreTainted = argsAreTainted || Taint::hasTaint(arg->expression);
              }
 
              const auto *verifyCond = args->at(0)->expression;
