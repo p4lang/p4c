@@ -67,32 +67,14 @@ class Model {
 
     // Evaluates a P4 StructExpression in the context of this model. Recursively calls into
     // @evaluate and substitutes all members of this list with a Value type.
-    const IR::StructExpression *evaluateStructExpr(const IR::StructExpression *structExpr,
-                                                   bool doComplete,
-                                                   ExpressionMap *resolvedExpressions) const;
+    const IR::StructExpression *evaluateStructExpr(
+        const IR::StructExpression *structExpr, bool doComplete,
+        ExpressionMap *resolvedExpressions = nullptr) const;
 
     // Evaluates a P4 ListExpression in the context of this model. Recursively calls into @evaluate
     // and substitutes all members of this list with a Value type.
     const IR::ListExpression *evaluateListExpr(const IR::ListExpression *listExpr, bool doComplete,
-                                               ExpressionMap *resolvedExpressions) const;
-
-    /// Evaluates a collection of P4 expressions in the context of this model by calling @evaluate
-    /// on each member of the collection.
-    ///
-    /// A BUG occurs if any expression in the given collection refers to a variable that is not
-    /// bound by this model.
-    /// If the input list @param resolvedExpressions is not null, we also collect the bound values
-    /// of all the variables we have resolved within this expression.
-    template <template <class...> class Collection>
-    std::vector<const IR::Literal *> evaluateAll(
-        const Collection<const IR::Expression *> *exprs, bool doComplete,
-        ExpressionMap *resolvedExpressions = nullptr) const {
-        std::vector<const IR::Literal *> result(exprs->size());
-        for (const auto *expr : *exprs) {
-            result.push_back(evaluate(expr, doComplete, resolvedExpressions));
-        }
-        return result;
-    }
+                                               ExpressionMap *resolvedExpressions = nullptr) const;
 
     /// Tries to retrieve @param var from the model.
     /// If @param checked is true, this function throws a BUG if the variable can not be found.

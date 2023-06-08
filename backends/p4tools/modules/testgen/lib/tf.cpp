@@ -50,7 +50,8 @@ void TF::printPerformanceReport(bool write) const {
 ## endfor
 )""");
         auto perfFilePath = basePath;
-        perfFilePath.replace_extension("_perf.csv");
+        perfFilePath.concat("_perf");
+        perfFilePath.replace_extension(".csv");
         auto perfFile = std::ofstream(perfFilePath);
         inja::render_to(perfFile, TEST_CASE, dataJson);
         perfFile.flush();
