@@ -60,11 +60,6 @@ std::optional<const IR::P4Program *> CompilerTarget::runCompilerImpl(
         return std::nullopt;
     }
 
-    // Rewrite all occurrences of ArrayIndex to be members instead.
-    // IMPORTANT: After this change, the program will no longer type-check.
-    // This is why perform this rewrite after all front and mid end passes have been applied.
-    program = program->apply(HSIndexToMember());
-
     return program;
 }
 

@@ -3,6 +3,7 @@
 #include <string>
 
 #include "ir/id.h"
+#include "ir/irutils.h"
 #include "lib/cstring.h"
 
 namespace P4Tools {
@@ -14,10 +15,10 @@ const IR::Node *HSIndexToMember::postorder(IR::ArrayIndex *curArrayIndex) {
     return curArrayIndex;
 }
 
-const IR::Member *HSIndexToMember::produceStackIndex(const IR::Type *type,
-                                                     const IR::Expression *expression,
-                                                     size_t arrayIndex) {
-    return new IR::Member(type, expression, IR::ID(std::to_string(arrayIndex)));
+const IR::ArrayIndex *HSIndexToMember::produceStackIndex(const IR::Type *type,
+                                                         const IR::Expression *expression,
+                                                         size_t arrayIndex) {
+    return new IR::ArrayIndex(type, expression, IR::getConstant(IR::getBitType(32), arrayIndex));
 }
 
 }  // namespace P4Tools

@@ -718,7 +718,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
              const auto *emitOutput = args->at(0)->expression;
              const auto *emitType = emitOutput->type->checkedTo<IR::Type_StructLike>();
-             if (!emitOutput->is<IR::Member>()) {
+             if (!(emitOutput->is<IR::Member>() || emitOutput->is<IR::ArrayIndex>())) {
                  TESTGEN_UNIMPLEMENTED("Emit input %1% of type %2% not supported", emitOutput,
                                        emitType);
              }
