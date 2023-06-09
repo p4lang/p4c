@@ -70,8 +70,8 @@ void IntrospectionGenerator::collectKeyInfo(const IR::Key *key, struct TableAttr
             if (anno->name == ParseTCAnnotations::tcType) {
                 auto expr = anno->expr[0];
                 if (auto typeLiteral = expr->to<IR::StringLiteral>()) {
-                    auto val = std::move(*checkValidTcType(typeLiteral));
-                    if (val != nullptr) {
+                    if (auto tcVal = checkValidTcType(typeLiteral)) {
+                        auto val = std::move(*tcVal);
                         keyField->type = val;
                     } else {
                         ::error(ErrorType::ERR_INVALID,
@@ -291,7 +291,7 @@ std::optional<cstring> IntrospectionGenerator::checkValidTcType(const IR::String
         value == "be16" || value == "be32" || value == "be64") {
         return value;
     }
-    return nullptr;
+    return std::nullopt;
 }
 
 }  // namespace TC
