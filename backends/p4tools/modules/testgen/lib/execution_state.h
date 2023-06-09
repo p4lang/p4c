@@ -39,18 +39,31 @@ class ExecutionState : public AbstractExecutionState {
      public:
         using ExceptionHandlers = std::map<Continuation::Exception, Continuation>;
 
+     private:
         Continuation normalContinuation;
         ExceptionHandlers exceptionHandlers;
         const NamespaceContext *namespaces = nullptr;
 
-        StackFrame(Continuation normalContinuation, const NamespaceContext *namespaces)
-            : StackFrame(normalContinuation, {}, namespaces) {}
+     public:
+        StackFrame(Continuation normalContinuation, const NamespaceContext *namespaces);
 
         StackFrame(Continuation normalContinuation, ExceptionHandlers exceptionHandlers,
-                   const NamespaceContext *namespaces)
-            : normalContinuation(normalContinuation),
-              exceptionHandlers(exceptionHandlers),
-              namespaces(namespaces) {}
+                   const NamespaceContext *namespaces);
+
+        StackFrame(const StackFrame &) = default;
+        StackFrame(StackFrame &&) noexcept = default;
+        StackFrame &operator=(const StackFrame &) = default;
+        StackFrame &operator=(StackFrame &&) = default;
+        ~StackFrame() = default;
+
+        /// @returns the top-level continuation of this particular stack frame.
+        [[nodiscard]] const Continuation &getContinuation() const;
+
+        /// @returns the exception handlers contained within this stack frame.
+        [[nodiscard]] const ExceptionHandlers &getExceptionHandlers() const;
+
+        /// @returns the namespaces contained within this stack frame.
+        [[nodiscard]] const NamespaceContext *getNameSpaces() const;
     };
 
     /// No move semantics because of constant members. We always need to clone a state.
@@ -59,10 +72,6 @@ class ExecutionState : public AbstractExecutionState {
     ~ExecutionState() override = default;
 
  private:
-    /// The list of variables that have been created in this state.
-    /// These variables are later fed to the model for completion.
-    SymbolicSet allocatedSymbolicVariables;
-
     /// The program trace for the current program point (i.e., how we got to the current state).
     std::vector<std::reference_wrapper<const TraceEvent>> trace;
 
@@ -118,6 +127,16 @@ class ExecutionState : public AbstractExecutionState {
 
     /// State that is needed to track reachability of statements given a query.
     ReachabilityEngineState *reachabilityEngineState = nullptr;
+
+    /// The number of individual packet variables that have been created in this state.
+    /// Used to create unique symbolic variables in some cases.
+    uint16_t numAllocatedPacketVariables = 0;
+
+    /// Helper function to create a new, unique symbolic packet variable.
+    /// Keeps track of the allocated packet variables by incrementing @ref
+    /// numAllocatedPacketVariables.
+    /// @returns a fresh symbolic variable.
+    [[nodiscard]] const IR::SymbolicVariable *createPacketVariable(const IR::Type *type);
 
     /* =========================================================================================
      *  Accessors
@@ -365,22 +384,6 @@ class ExecutionState : public AbstractExecutionState {
 
     /// @returns the current parser error label. Throws a BUG if the label is a nullptr.
     [[nodiscard]] const IR::StateVariable &getCurrentParserErrorLabel() const;
-
-    /* =========================================================================================
-     *  Variables and symbolic constants.
-     * =========================================================================================
-     *  These mirror what's available in IRUtils, but automatically fill in the incarnation number,
-     *  based on how many times newParser() has been called.
-     */
-    /// @returns the symbolic variables that were allocated in this state
-    [[nodiscard]] const SymbolicSet &getSymbolicVariables() const;
-
-    /// @see ToolsVariables::getSymbolicVariable.
-    /// We also place the symbolic variables in the set of allocated symbolic variables of this
-    /// state.
-    [[nodiscard]] const IR::SymbolicVariable *createSymbolicVariable(const IR::Type *type,
-                                                                     cstring name,
-                                                                     uint64_t instanceID = 0);
 
     /* =========================================================================================
      *  Constructors

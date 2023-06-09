@@ -40,13 +40,32 @@ namespace P4Tools::P4Testgen {
  *  Constructors
  * ============================================================================================= */
 
+ExecutionState::StackFrame::StackFrame(Continuation normalContinuation,
+                                       const NamespaceContext *namespaces)
+    : StackFrame(std::move(normalContinuation), {}, namespaces) {}
+
+ExecutionState::StackFrame::StackFrame(Continuation normalContinuation,
+                                       ExceptionHandlers exceptionHandlers,
+                                       const NamespaceContext *namespaces)
+    : normalContinuation(std::move(normalContinuation)),
+      exceptionHandlers(std::move(exceptionHandlers)),
+      namespaces(namespaces) {}
+
+const Continuation &ExecutionState::StackFrame::getContinuation() const {
+    return normalContinuation;
+}
+
+const ExecutionState::StackFrame::ExceptionHandlers &
+ExecutionState::StackFrame::getExceptionHandlers() const {
+    return exceptionHandlers;
+}
+
+const NamespaceContext *ExecutionState::StackFrame::getNameSpaces() const { return namespaces; }
+
 ExecutionState::ExecutionState(const IR::P4Program *program)
     : AbstractExecutionState(program),
       body({program}),
       stack(*(new std::stack<std::reference_wrapper<const StackFrame>>())) {
-    // Insert the default symbolic variables of the execution state.
-    // This also makes the symbolic variables present in the state explicit.
-    allocatedSymbolicVariables.insert(getInputPacketSizeVar());
     env.set(&PacketVars::INPUT_PACKET_LABEL, IR::getConstant(IR::getBitType(0), 0));
     env.set(&PacketVars::PACKET_BUFFER_LABEL, IR::getConstant(IR::getBitType(0), 0));
     // We also add the taint property and set it to false.
@@ -65,9 +84,6 @@ ExecutionState::ExecutionState(const IR::P4Program *program)
 
 ExecutionState::ExecutionState(Continuation::Body body)
     : body(std::move(body)), stack(*(new std::stack<std::reference_wrapper<const StackFrame>>())) {
-    // Insert the default symbolic variables of the execution state.
-    // This also makes the symbolic variables present in the state explicit.
-    allocatedSymbolicVariables.insert(getInputPacketSizeVar());
     // We also add the taint property and set it to false.
     setProperty("inUndefinedState", false);
     // Drop is initialized to false, too.
@@ -269,19 +285,19 @@ void ExecutionState::popContinuation(std::optional<const IR::Node *> argument_op
     auto frame = stack.top();
     stack.pop();
 
-    auto newBody = frame.get().normalContinuation.apply(argument_opt);
+    auto newBody = frame.get().getContinuation().apply(argument_opt);
     replaceBody(newBody);
-    setNamespaceContext(frame.get().namespaces);
+    setNamespaceContext(frame.get().getNameSpaces());
 }
 
 void ExecutionState::handleException(Continuation::Exception e) {
     while (!stack.empty()) {
         auto frame = stack.top();
-        if (frame.get().exceptionHandlers.count(e) > 0) {
-            auto k = frame.get().exceptionHandlers.at(e);
+        if (frame.get().getExceptionHandlers().count(e) > 0) {
+            auto k = frame.get().getExceptionHandlers().at(e);
             auto newBody = k.apply(std::nullopt);
             replaceBody(newBody);
-            setNamespaceContext(frame.get().namespaces);
+            setNamespaceContext(frame.get().getNameSpaces());
             return;
         }
         stack.pop();
@@ -317,7 +333,7 @@ void ExecutionState::pushPathConstraint(const IR::Expression *e) { pathConstrain
 void ExecutionState::pushBranchDecision(uint64_t bIdx) { selectedBranches.push_back(bIdx); }
 
 const IR::SymbolicVariable *ExecutionState::getInputPacketSizeVar() {
-    return ToolsVariables::getSymbolicVariable(&PacketVars::PACKET_SIZE_VAR_TYPE, 0,
+    return ToolsVariables::getSymbolicVariable(&PacketVars::PACKET_SIZE_VAR_TYPE,
                                                "*packetLen_bits");
 }
 
@@ -369,8 +385,7 @@ const IR::Expression *ExecutionState::peekPacketBuffer(int amount) {
     if (diff > 0) {
         // We need to enlarge the input packet by the amount we are exceeding the buffer.
         // TODO: How should we perform accounting here?
-        const IR::Expression *newVar = createSymbolicVariable(IR::getBitType(diff), "pktVar",
-                                                              allocatedSymbolicVariables.size());
+        const IR::Expression *newVar = createPacketVariable(IR::getBitType(diff));
         appendToInputPacket(newVar);
         // If the buffer was not empty, append the data we have consumed to the newly generated
         // content and reset the buffer.
@@ -412,8 +427,7 @@ const IR::Expression *ExecutionState::slicePacketBuffer(int amount) {
     if (diff > 0) {
         // We need to enlarge the input packet by the amount we are exceeding the buffer.
         // TODO: How should we perform accounting here?
-        const IR::Expression *newVar = createSymbolicVariable(IR::getBitType(diff), "pktVar",
-                                                              allocatedSymbolicVariables.size());
+        const IR::Expression *newVar = createPacketVariable(IR::getBitType(diff));
         appendToInputPacket(newVar);
         // If the buffer was not empty, append the data we have consumed to the newly generated
         // content and reset the buffer.
@@ -489,22 +503,15 @@ const IR::StateVariable &ExecutionState::getCurrentParserErrorLabel() const {
  *  Variables and symbolic constants
  * ============================================================================================= */
 
-const SymbolicSet &ExecutionState::getSymbolicVariables() const {
-    return allocatedSymbolicVariables;
-}
-
-const IR::SymbolicVariable *ExecutionState::createSymbolicVariable(const IR::Type *type,
-                                                                   cstring name,
-                                                                   uint64_t instanceId) {
-    const auto *variables = ToolsVariables::getSymbolicVariable(type, instanceId, name);
-    const auto &result = allocatedSymbolicVariables.insert(variables);
-    // The variable already existed, check its type.
-    if (!result.second) {
-        BUG_CHECK((*result.first)->type->equiv(*type),
-                  "Inconsistent types for variables variable %1%: previously %2%, but now %3%",
-                  variables->toString(), (*result.first)->type, type);
-    }
-    return variables;
+const IR::SymbolicVariable *ExecutionState::createPacketVariable(const IR::Type *type) {
+    const auto *variable = ToolsVariables::getSymbolicVariable(
+        type, "pktvar_" + std::to_string(numAllocatedPacketVariables));
+    numAllocatedPacketVariables++;
+    BUG_CHECK(numAllocatedPacketVariables < UINT16_MAX,
+              "Allocating too many symbolic packet variables. The symbolic variable counter with "
+              "maximum size %1% counter will overflow.",
+              UINT16_MAX);
+    return variable;
 }
 
 }  // namespace P4Tools::P4Testgen

@@ -47,8 +47,7 @@ class Expression : public Generic {
  public:
     [[nodiscard]] const Expression *subst(const SymbolicEnv &env) const override;
     const Expression *apply(Transform &visitor) const override;
-    void complete(Model *model) const override;
-    [[nodiscard]] const Expression *evaluate(const Model &model) const override;
+    [[nodiscard]] const Expression *evaluate(const Model &model, bool doComplete) const override;
 
     explicit Expression(const IR::Expression *value, cstring label);
     ~Expression() override = default;
@@ -76,8 +75,8 @@ class IfStatementCondition : public TraceEvent {
  public:
     [[nodiscard]] const IfStatementCondition *subst(const SymbolicEnv &env) const override;
     const IfStatementCondition *apply(Transform &visitor) const override;
-    void complete(Model *model) const override;
-    [[nodiscard]] const IfStatementCondition *evaluate(const Model &model) const override;
+    [[nodiscard]] const IfStatementCondition *evaluate(const Model &model,
+                                                       bool doComplete) const override;
 
     explicit IfStatementCondition(const IR::Expression *cond);
 
@@ -109,8 +108,8 @@ class ExtractSuccess : public TraceEvent {
  public:
     [[nodiscard]] const ExtractSuccess *subst(const SymbolicEnv &env) const override;
     const ExtractSuccess *apply(Transform &visitor) const override;
-    void complete(Model *model) const override;
-    [[nodiscard]] const ExtractSuccess *evaluate(const Model &model) const override;
+    [[nodiscard]] const ExtractSuccess *evaluate(const Model &model,
+                                                 bool doComplete) const override;
 
     /// @returns the extracted header label stored in this class.
     [[nodiscard]] const IR::Expression *getExtractedHeader() const;
@@ -179,8 +178,7 @@ class Emit : public TraceEvent {
  public:
     [[nodiscard]] const Emit *subst(const SymbolicEnv &env) const override;
     const Emit *apply(Transform &visitor) const override;
-    void complete(Model *model) const override;
-    [[nodiscard]] const Emit *evaluate(const Model &model) const override;
+    [[nodiscard]] const Emit *evaluate(const Model &model, bool doComplete) const override;
 
     Emit(const IR::Expression *emitHeader,
          std::vector<std::pair<IR::StateVariable, const IR::Expression *>> fields);
@@ -211,9 +209,7 @@ class Packet : public TraceEvent {
 
     const Packet *apply(Transform &visitor) const override;
 
-    void complete(Model *model) const override;
-
-    [[nodiscard]] const Packet *evaluate(const Model &model) const override;
+    [[nodiscard]] const Packet *evaluate(const Model &model, bool doComplete) const override;
 
     [[nodiscard]] const Packet *subst(const SymbolicEnv &env) const override;
 

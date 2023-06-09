@@ -144,8 +144,8 @@ TestBackEnd::TestInfo TestBackEnd::produceTestInfo(
     const std::vector<std::reference_wrapper<const TraceEvent>> *programTraces) {
     // Evaluate all the important expressions necessary for program execution by using the
     // completed model.
-    int calculatedPacketSize =
-        IR::getIntFromLiteral(completedModel->evaluate(ExecutionState::getInputPacketSizeVar()));
+    int calculatedPacketSize = IR::getIntFromLiteral(
+        completedModel->evaluate(ExecutionState::getInputPacketSizeVar(), true));
     const auto *inputPacketExpr = executionState->getInputPacket();
     // The payload fills the space between the minimum input size needed and the symbolically
     // calculated packet size.
@@ -157,12 +157,12 @@ TestBackEnd::TestInfo TestBackEnd::produceTestInfo(
             IR::getBitType(outputPacketExpr->type->width_bits() + payloadExpr->type->width_bits()),
             outputPacketExpr, payloadExpr);
     }
-    const auto *inputPacket = completedModel->evaluate(inputPacketExpr);
-    const auto *outputPacket = completedModel->evaluate(outputPacketExpr);
+    const auto *inputPacket = completedModel->evaluate(inputPacketExpr, true);
+    const auto *outputPacket = completedModel->evaluate(outputPacketExpr, true);
     const auto *inputPort =
-        completedModel->evaluate(executionState->get(programInfo.getTargetInputPortVar()));
+        completedModel->evaluate(executionState->get(programInfo.getTargetInputPortVar()), true);
 
-    const auto *outputPortVar = completedModel->evaluate(outputPortExpr);
+    const auto *outputPortVar = completedModel->evaluate(outputPortExpr, true);
     // Build the taint mask by dissecting the program packet variable
     const auto *evalMask = Taint::buildTaintMask(executionState->getSymbolicEnv().getInternalMap(),
                                                  completedModel, outputPacketExpr);

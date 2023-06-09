@@ -6,7 +6,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/TestTemplate.cmake)
 # ##################################################################################################
 # TEST PROGRAMS
 # ##################################################################################################
-set(P4TESTGEN_EBPF_EXCLUDES "ebpf_checksum_extern\\.p4" "ebpf_conntrack_extern\\.p4")
 
 set(EBPF_SEARCH_PATTERNS "include.*ebpf_model.p4")
 set(P4TESTS_FOR_EBPF "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*.p4")

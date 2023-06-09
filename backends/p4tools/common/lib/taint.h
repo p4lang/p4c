@@ -24,7 +24,7 @@ class Taint {
     /// @returns the mask for the corresponding program packet, indicating bits of the expression
     /// which are not tainted.
     static const IR::Literal *buildTaintMask(const SymbolicMapType &varMap,
-                                             const Model *completedModel,
+                                             const Model *evaluatedModel,
                                              const IR::Expression *programPacket);
 };
 

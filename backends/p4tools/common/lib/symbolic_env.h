@@ -26,9 +26,6 @@ class SymbolicEnv {
     /// done on the given value before updating the symbolic state.
     void set(const IR::StateVariable &var, const IR::Expression *value);
 
-    /// Completes the model with all variables referenced in the symbolic environment.
-    [[nodiscard]] Model *complete(const Model &model) const;
-
     /// Evaluates this symbolic environment in the context of the given model.
     ///
     /// A BUG occurs if any symbolic value in this environment refers to a variable that is not

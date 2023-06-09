@@ -31,24 +31,17 @@ class Model : public SymbolicMapType {
     class SubstVisitor : public Transform {
         const Model &self;
 
+        /// If doComplete is true, the visitor will not throw an error if a variable does not have a
+        /// substitution and instead assign a random or zero value (depending on whether there is a
+        /// seed) to the variable..
+        bool doComplete;
+
      public:
         const IR::Literal *preorder(IR::StateVariable *var) override;
         const IR::Literal *preorder(IR::SymbolicVariable *var) override;
         const IR::Literal *preorder(IR::TaintExpression *var) override;
 
-        explicit SubstVisitor(const Model &model);
-    };
-
-    // @see SubstVisitor. Does not fail if a variable is not part of the model.
-    /// Instead, it completes the variable and adds it to the symbolic map.
-    class CompleteVisitor : public Inspector {
-        Model &self;
-
-     public:
-        bool preorder(const IR::SymbolicVariable *var) override;
-        bool preorder(const IR::StateVariable *var) override;
-
-        explicit CompleteVisitor(Model &model);
+        explicit SubstVisitor(const Model &model, bool doComplete);
     };
 
  public:
@@ -64,37 +57,23 @@ class Model : public SymbolicMapType {
     Model &operator=(Model &&) = default;
     ~Model() = default;
 
-    /// Completes the model with the variables in the given expression. A variable needs to be
-    /// completed if it is not present in the model computed by the solver that produced the
-    /// model. This typically happens when a variable is not needed to solve a set of
-    /// constraints.
-    void complete(const IR::Expression *expr);
-
-    /// Completes the model with the variables in the given list of expressions. A variable needs to
-    /// be completed if it is not present in the model computed by the solver that produced the
-    /// model. This typically happens when a variable is not needed to solve a set of constraints.
-    void complete(const SymbolicMapType &inputMap);
-
-    /// Adds the given set of variables to the model (if they do not exist already).
-    /// If the variable does not exist, it is initialized to a default value.
-    void complete(const SymbolicSet &inputSet);
-
     /// Evaluates a P4 expression in the context of this model.
     ///
     /// A BUG occurs if the given expression refers to a variable that is not bound by this model.
     /// If the input list @param resolvedExpressions is not null, we also collect the resolved value
     /// of this expression.
-    const IR::Literal *evaluate(const IR::Expression *expr,
+    const IR::Literal *evaluate(const IR::Expression *expr, bool doComplete,
                                 ExpressionMap *resolvedExpressions = nullptr) const;
 
     // Evaluates a P4 StructExpression in the context of this model. Recursively calls into
     // @evaluate and substitutes all members of this list with a Value type.
     const IR::StructExpression *evaluateStructExpr(const IR::StructExpression *structExpr,
+                                                   bool doComplete,
                                                    ExpressionMap *resolvedExpressions) const;
 
     // Evaluates a P4 ListExpression in the context of this model. Recursively calls into @evaluate
     // and substitutes all members of this list with a Value type.
-    const IR::ListExpression *evaluateListExpr(const IR::ListExpression *listExpr,
+    const IR::ListExpression *evaluateListExpr(const IR::ListExpression *listExpr, bool doComplete,
                                                ExpressionMap *resolvedExpressions) const;
 
     /// Evaluates a collection of P4 expressions in the context of this model by calling @evaluate
@@ -106,11 +85,11 @@ class Model : public SymbolicMapType {
     /// of all the variables we have resolved within this expression.
     template <template <class...> class Collection>
     std::vector<const IR::Literal *> evaluateAll(
-        const Collection<const IR::Expression *> *exprs,
+        const Collection<const IR::Expression *> *exprs, bool doComplete,
         ExpressionMap *resolvedExpressions = nullptr) const {
         std::vector<const IR::Literal *> result(exprs->size());
         for (const auto *expr : *exprs) {
-            result.push_back(evaluate(expr, resolvedExpressions));
+            result.push_back(evaluate(expr, doComplete, resolvedExpressions));
         }
         return result;
     }
@@ -121,7 +100,7 @@ class Model : public SymbolicMapType {
     /// variable that is not bound by this model. If the input list @param resolvedExpressions is
     /// not null, we also collect the bound values of all the variables we have resolved within this
     /// expression.
-    Model *evaluate(const SymbolicMapType &inputMap,
+    Model *evaluate(const SymbolicMapType &inputMap, bool doComplete,
                     ExpressionMap *resolvedExpressions = nullptr) const;
 
     /// Tries to retrieve @param var from the model.

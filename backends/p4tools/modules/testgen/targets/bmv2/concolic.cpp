@@ -100,8 +100,8 @@ big_int Bmv2Concolic::computeChecksum(const std::vector<const IR::Expression *> 
             const auto *remainderExpr = IR::getConstant(IR::getBitType(fillWidth), 0);
             concatExpr = new IR::Concat(IR::getBitType(concatWidth), concatExpr, remainderExpr);
         }
-        auto dataInt =
-            IR::getBigIntFromLiteral(completedModel.evaluate(concatExpr, resolvedExpressions));
+        auto dataInt = IR::getBigIntFromLiteral(
+            completedModel.evaluate(concatExpr, true, resolvedExpressions));
         bytes = convertBigIntToBytes(dataInt, concatWidth);
     }
     return checksumFun(bytes.data(), bytes.size());
@@ -137,11 +137,12 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
          // Assign arguments to concrete variables and perform type checking.
          auto algo = args->at(1)->expression->checkedTo<IR::Constant>()->asInt();
          Model::ExpressionMap resolvedExpressions;
-         const auto *base = completedModel.evaluate(args->at(2)->expression, &resolvedExpressions);
+         const auto *base =
+             completedModel.evaluate(args->at(2)->expression, true, &resolvedExpressions);
          auto baseInt = IR::getBigIntFromLiteral(base);
          const auto *dataExpr = args->at(3)->expression;
          const auto *maxHash =
-             completedModel.evaluate(args->at(4)->expression, &resolvedExpressions);
+             completedModel.evaluate(args->at(4)->expression, true, &resolvedExpressions);
          auto maxHashInt = IR::getBigIntFromLiteral(maxHash);
 
          /// Flatten the data input and compute the byte array that will be used for

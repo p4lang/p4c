@@ -274,14 +274,14 @@ class MaskBuilder : public Transform {
     MaskBuilder() { visitDagOnce = false; }
 };
 
-const IR::Literal *Taint::buildTaintMask(const SymbolicMapType &varMap, const Model *completedModel,
+const IR::Literal *Taint::buildTaintMask(const SymbolicMapType &varMap, const Model *evaluatedModel,
                                          const IR::Expression *programPacket) {
     // First propagate taint and simplify the packet.
     const auto *taintedPacket = programPacket->apply(TaintPropagator(varMap));
     // Then create the mask based on the remaining expressions.
     const auto *mask = taintedPacket->apply(MaskBuilder());
     // Produce the evaluated literal. The hex expression should only have 0 or f.
-    return completedModel->evaluate(mask);
+    return evaluatedModel->evaluate(mask, false);
 }
 
 const IR::Expression *Taint::propagateTaint(const SymbolicMapType &varMap,

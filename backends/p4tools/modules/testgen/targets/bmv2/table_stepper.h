@@ -56,8 +56,7 @@ class Bmv2V1ModelTableStepper : public TableStepper {
     void evalTableActionSelector(const std::vector<const IR::ActionListElement *> &tableActionList);
 
  protected:
-    const IR::Expression *computeTargetMatchType(ExecutionState &nextState,
-                                                 const TableUtils::KeyProperties &keyProperties,
+    const IR::Expression *computeTargetMatchType(const TableUtils::KeyProperties &keyProperties,
                                                  TableMatchMap *matches,
                                                  const IR::Expression *hitCondition) override;
 

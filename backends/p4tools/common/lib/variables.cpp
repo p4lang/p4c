@@ -18,11 +18,9 @@ const IR::StateVariable &getStateVariable(const IR::Type *type, cstring name) {
     return *new IR::StateVariable(new IR::Member(type, &VAR_PREFIX, name));
 }
 
-const IR::SymbolicVariable *getSymbolicVariable(const IR::Type *type, int incarnation,
-                                                cstring name) {
+const IR::SymbolicVariable *getSymbolicVariable(const IR::Type *type, cstring name) {
     // TODO: Is caching worth it here?
-    auto symbolicName = name + "_" + std::to_string(incarnation);
-    return new IR::SymbolicVariable(type, symbolicName);
+    return new IR::SymbolicVariable(type, name);
 }
 
 IR::StateVariable getHeaderValidity(const IR::Expression *headerRef) {

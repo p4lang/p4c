@@ -28,7 +28,7 @@ FinalState::FinalState(AbstractSolver &solver, const ExecutionState &finalState)
       state(finalState),
       completedModel(completeModel(finalState, new Model(solver.getSymbolicMapping()))) {
     for (const auto &event : finalState.getTrace()) {
-        trace.emplace_back(*event.get().evaluate(completedModel));
+        trace.emplace_back(*event.get().evaluate(completedModel, true));
     }
 }
 
@@ -36,13 +36,13 @@ FinalState::FinalState(AbstractSolver &solver, const ExecutionState &finalState,
                        const Model &completedModel)
     : solver(solver), state(finalState), completedModel(completedModel) {
     for (const auto &event : finalState.getTrace()) {
-        trace.emplace_back(*event.get().evaluate(completedModel));
+        trace.emplace_back(*event.get().evaluate(completedModel, true));
     }
 }
 
 void FinalState::calculatePayload(const ExecutionState &executionState, Model &evaluatedModel) {
     const auto &packetBitSizeVar = ExecutionState::getInputPacketSizeVar();
-    const auto *payloadSizeConst = evaluatedModel.evaluate(packetBitSizeVar);
+    const auto *payloadSizeConst = evaluatedModel.evaluate(packetBitSizeVar, true);
     int calculatedPacketSize = IR::getIntFromLiteral(payloadSizeConst);
     const auto *inputPacketExpr = executionState.getInputPacket();
     int payloadSize = calculatedPacketSize - inputPacketExpr->type->width_bits();
@@ -58,23 +58,13 @@ void FinalState::calculatePayload(const ExecutionState &executionState, Model &e
 
 Model &FinalState::completeModel(const ExecutionState &finalState, const Model *model,
                                  bool postProcess) {
-    // Complete the model based on the symbolic environment.
-    auto *completedModel = finalState.getSymbolicEnv().complete(*model);
-
-    // Also complete all the symbolic variables that were collected in this state.
-    const auto &symbolicVars = finalState.getSymbolicVariables();
-    completedModel->complete(symbolicVars);
-
     // Now that the models initial values are completed evaluate the values that
     // are part of the constraints that have been added to the solver.
-    auto *evaluatedModel = finalState.getSymbolicEnv().evaluate(*completedModel);
+    auto *evaluatedModel = finalState.getSymbolicEnv().evaluate(*model);
 
     if (postProcess) {
         // Append a payload, if requested.
         calculatePayload(finalState, *evaluatedModel);
-    }
-    for (const auto &event : finalState.getTrace()) {
-        event.get().complete(evaluatedModel);
     }
 
     return *evaluatedModel;
