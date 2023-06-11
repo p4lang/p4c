@@ -66,10 +66,10 @@ Bmv2TestBackend::Bmv2TestBackend(const ProgramInfo &programInfo, SymbolicExecuto
 }
 
 TestBackEnd::TestInfo Bmv2TestBackend::produceTestInfo(
-    const ExecutionState *executionState, const Model *finalModel,
+    const ExecutionState *executionState, const Model *completedModel,
     const IR::Expression *outputPacketExpr, const IR::Expression *outputPortExpr,
     const std::vector<std::reference_wrapper<const TraceEvent>> *programTraces) {
-    auto testInfo = TestBackEnd::produceTestInfo(executionState, finalModel, outputPacketExpr,
+    auto testInfo = TestBackEnd::produceTestInfo(executionState, completedModel, outputPacketExpr,
                                                  outputPortExpr, programTraces);
     // This is a hack to deal with a behavioral model quirk.
     // Packets that are too small are truncated to 02000000 (in hex) with width 32 bit.
@@ -84,7 +84,7 @@ TestBackEnd::TestInfo Bmv2TestBackend::produceTestInfo(
 }
 
 const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionState,
-                                                const Model *finalModel, const TestInfo &testInfo) {
+                                                const Model *completedModel, const TestInfo &testInfo) {
     // Create a testSpec.
     TestSpec *testSpec = nullptr;
 
@@ -108,7 +108,7 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
         const auto &flatFields = executionState->getFlatFields(
             localMetadataVar, localMetadataType->checkedTo<IR::Type_Struct>(), {});
         for (const auto &fieldRef : flatFields) {
-            const auto *fieldVal = finalModel->evaluate(executionState->get(fieldRef), true);
+            const auto *fieldVal = completedModel->evaluate(executionState->get(fieldRef), true);
             // Try to remove the leading internal name for the metadata field.
             // Thankfully, this string manipulation is safe if we are out of range.
             auto fieldString = fieldRef->toString();
@@ -126,7 +126,7 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
     for (const auto &tablePair : uninterpretedTableConfigs) {
         const auto tableName = tablePair.first;
         const auto *uninterpretedTableConfig = tablePair.second->checkedTo<TableConfig>();
-        const auto *tableConfig = uninterpretedTableConfig->evaluate(*finalModel, true);
+        const auto *tableConfig = uninterpretedTableConfig->evaluate(*completedModel, true);
         testSpec->addTestObject("tables", tableName, tableConfig);
     }
 
@@ -134,7 +134,7 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
     for (const auto &testObject : actionProfiles) {
         const auto profileName = testObject.first;
         const auto *actionProfile = testObject.second->checkedTo<Bmv2V1ModelActionProfile>();
-        const auto *evaluatedProfile = actionProfile->evaluate(*finalModel, true);
+        const auto *evaluatedProfile = actionProfile->evaluate(*completedModel, true);
         testSpec->addTestObject("action_profiles", profileName, evaluatedProfile);
     }
 
@@ -142,7 +142,7 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
     for (const auto &testObject : actionSelectors) {
         const auto selectorName = testObject.first;
         const auto *actionSelector = testObject.second->checkedTo<Bmv2V1ModelActionSelector>();
-        const auto *evaluatedSelector = actionSelector->evaluate(*finalModel, true);
+        const auto *evaluatedSelector = actionSelector->evaluate(*completedModel, true);
         testSpec->addTestObject("action_selectors", selectorName, evaluatedSelector);
     }
 
@@ -150,7 +150,7 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
     for (const auto &testObject : cloneSpecs) {
         const auto sessionId = testObject.first;
         const auto *cloneSpec = testObject.second->checkedTo<Bmv2V1ModelCloneSpec>();
-        const auto *evaluatedInfo = cloneSpec->evaluate(*finalModel, true);
+        const auto *evaluatedInfo = cloneSpec->evaluate(*completedModel, true);
         testSpec->addTestObject("clone_specs", sessionId, evaluatedInfo);
     }
 
@@ -158,7 +158,7 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
     for (const auto &testObject : meterInfos) {
         const auto meterName = testObject.first;
         const auto *meterInfo = testObject.second->checkedTo<Bmv2V1ModelMeterValue>();
-        const auto *evaluateMeterValue = meterInfo->evaluate(*finalModel, true);
+        const auto *evaluateMeterValue = meterInfo->evaluate(*completedModel, true);
         testSpec->addTestObject("meter_values", meterName, evaluateMeterValue);
     }
 

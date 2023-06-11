@@ -49,6 +49,13 @@ PARSER.add_argument(
     help="How many virtual interfaces to create.",
 )
 PARSER.add_argument(
+    "-nn",
+    "--use-nanomsg",
+    action="store_true",
+    dest="use_nn",
+    help="Use nanomsg for packet sending instead of virtual interfaces.",
+)
+PARSER.add_argument(
     "-ll",
     "--log_level",
     dest="log_level",
@@ -57,8 +64,8 @@ PARSER.add_argument(
     help="The log level to choose.",
 )
 
-GRPC_PORT = 28000
-THRIFT_PORT = 22000
+GRPC_PORT: int = 28000
+THRIFT_PORT: int = 22000
 
 
 class Options:
@@ -73,91 +80,150 @@ class Options:
     # The base directory where tests are executed.
     rootdir: Path = Path(".")
     # The number of interfaces to create for this particular test.
-    num_ifaces = 8
+    num_ifaces: int = 8
+    # Whether to use nanomsg for packet delivery as opposed to Linux veth interfaces.
+    use_nn: bool = False
 
 
-def create_bridge(num_ifaces: int) -> Bridge:
-    """Create a network namespace environment."""
-    testutils.log.info(
-        "---------------------- Creating a namespace ----------------------",
-    )
-    random.seed(datetime.now().timestamp())
-    bridge = Bridge(str(random.randint(0, sys.maxsize)))
-    result = bridge.create_virtual_env(num_ifaces)
-    if result != testutils.SUCCESS:
-        bridge.ns_del()
-        testutils.log.error(
-            "---------------------- Namespace creation failed ----------------------",
+class PTFTestEnv:
+    options: Options = Options()
+    switch_proc: testutils.subprocess.Popen = None
+
+    def __init__(self, options):
+        self.options = options
+
+    def __del__(self):
+        if self.switch_proc:
+            # Terminate the switch process and emit its output in case of failure.
+            testutils.kill_proc_group(self.switch_proc)
+
+    def compile_program(self, json_name: Path, info_name: Path) -> int:
+        """Compile the input P4 program using p4c-bm2-ss."""
+        testutils.log.info("---------------------- Compile with p4c-bm2-ss ----------------------")
+        compilation_cmd = (
+            f"{self.options.rootdir}/build/p4c-bm2-ss --target bmv2 --arch v1model "
+            f"--p4runtime-files {info_name} {self.options.p4_file} -o {json_name}"
         )
-        raise SystemExit("Unable to create the namespace environment.")
-    testutils.log.info(
-        "---------------------- Namespace successfully created ----------------------"
-    )
-    return bridge
-
-
-def compile_program(options: Options, json_name: Path, info_name: Path) -> int:
-    """Compile the input P4 program using p4c-bm2-ss."""
-    testutils.log.info("---------------------- Compile with p4c-bm2-ss ----------------------")
-    compilation_cmd = (
-        f"{options.rootdir}/build/p4c-bm2-ss --target bmv2 --arch v1model "
-        f"--p4runtime-files {info_name} {options.p4_file} -o {json_name}"
-    )
-    _, returncode = testutils.exec_process(compilation_cmd, timeout=30)
-    if returncode != testutils.SUCCESS:
-        testutils.log.error("Failed to compile the P4 program %s.", options.p4_file)
-    return returncode
-
-
-def get_iface_str(num_ifaces: int, prefix: str = "") -> str:
-    """Produce the PTF interface arguments based on the number of interfaces the PTF test uses."""
-    iface_str = ""
-    for iface_num in range(num_ifaces):
-        iface_str += f"-i {iface_num}@{prefix}{iface_num} "
-    return iface_str
-
-
-def run_simple_switch_grpc(
-    options: Options, bridge: Bridge, switchlog: Path, grpc_port: int
-) -> testutils.subprocess.Popen:
-    """Start simple_switch_grpc and return the process handle."""
-    thrift_port = testutils.pick_tcp_port(THRIFT_PORT)
-    testutils.log.info(
-        "---------------------- Start simple_switch_grpc ----------------------",
-    )
-    ifaces = get_iface_str(num_ifaces=options.num_ifaces)
-    simple_switch_grpc = (
-        f"simple_switch_grpc --thrift-port {thrift_port} --device-id 0 --log-file {switchlog} --log-flush "
-        f"--packet-in ipc://{options.testdir}/bmv2_packets_1.ipc  --no-p4 "
-        f"-- --grpc-server-addr 0.0.0.0:{grpc_port}")
-    bridge_cmd = bridge.get_ns_prefix() + " " + simple_switch_grpc
-    switch_proc = testutils.open_process(bridge_cmd)
-    if switch_proc is None:
-        bridge.ns_del()
-        raise SystemExit("simple_switch_grpc ended with errors")
-
-    return switch_proc
-
-
-def run_ptf(
-    options: Options, bridge: Bridge, grpc_port: int, json_name: Path, info_name: Path
-) -> int:
-    """Run the PTF test."""
-    testutils.log.info("---------------------- Run PTF test ----------------------")
-    # Add the file location to the python path.
-    pypath = FILE_DIR
-    # Show list of the tests
-    testListCmd = f"ptf --pypath {pypath} --test-dir {options.testdir} --list"
-    returncode = bridge.ns_exec(testListCmd)
-    if returncode != testutils.SUCCESS:
+        _, returncode = testutils.exec_process(compilation_cmd, timeout=30)
+        if returncode != testutils.SUCCESS:
+            testutils.log.error("Failed to compile the P4 program %s.", self.options.p4_file)
         return returncode
-    ifaces = get_iface_str(num_ifaces=options.num_ifaces, prefix="br_")
-    test_params = f"grpcaddr='0.0.0.0:{grpc_port}';p4info='{info_name}';config='{json_name}';"
-    tmp = "{0-8}"
-    run_ptf_cmd = f"ptf --platform nn --device-socket 0-{tmp}@ipc://{options.testdir}/bmv2_packets_1.ipc --pypath {pypath}  --log-file {options.testdir.joinpath('ptf.log')}"
-    run_ptf_cmd += f" --test-params={test_params} --test-dir {options.testdir}"
-    returncode = bridge.ns_exec(run_ptf_cmd)
-    return returncode
+
+    def run_simple_switch_grpc(self, switchlog: Path, grpc_port: int) -> testutils.subprocess.Popen:
+        raise NotImplementedError("method run_simple_switch_grpc not implemented for this class")
+
+    def run_ptf(self, grpc_port: int, json_name: Path, info_name: Path) -> int:
+        raise NotImplementedError("method run_ptf not implemented for this class")
+
+
+class NNEnv(PTFTestEnv):
+    def run_simple_switch_grpc(self, switchlog: Path, grpc_port: int) -> testutils.subprocess.Popen:
+        """Start simple_switch_grpc and return the process handle."""
+        thrift_port = testutils.pick_tcp_port(THRIFT_PORT)
+        testutils.log.info(
+            "---------------------- Start simple_switch_grpc ----------------------",
+        )
+        simple_switch_grpc = (
+            f"simple_switch_grpc --thrift-port {thrift_port} --device-id 0 --log-file {switchlog} --log-flush "
+            f"--packet-in ipc://{self.options.testdir}/bmv2_packets_1.ipc  --no-p4 "
+            f"-- --grpc-server-addr 0.0.0.0:{grpc_port} & "
+        )
+        self.switch_proc = testutils.open_process(simple_switch_grpc)
+        return self.switch_proc
+
+    def run_ptf(self, grpc_port: int, json_name: Path, info_name: Path) -> int:
+        """Run the PTF test."""
+        testutils.log.info("---------------------- Run PTF test ----------------------")
+        # Add the file location to the python path.
+        pypath = FILE_DIR
+        # Show list of the tests
+        testListCmd = f"ptf --pypath {pypath} --test-dir {self.options.testdir} --list"
+        returncode = testutils.exec_process(testListCmd).returncode
+        if returncode != testutils.SUCCESS:
+            return returncode
+        test_params = f"grpcaddr='0.0.0.0:{grpc_port}';p4info='{info_name}';config='{json_name}';"
+        tmp = "{0-8}"
+        run_ptf_cmd = (
+            f"ptf --platform nn --device-socket 0-{tmp}@ipc://{self.options.testdir}/"
+            f"bmv2_packets_1.ipc --pypath {pypath} "
+            f"--log-file {self.options.testdir.joinpath('ptf.log')}"
+        )
+        run_ptf_cmd += f" --test-params={test_params} --test-dir {self.options.testdir}"
+        return testutils.exec_process(run_ptf_cmd).returncode
+
+
+class VethEnv(PTFTestEnv):
+    bridge: Bridge = None
+
+    def __init__(self, options):
+        super().__init__(options)
+        # Create the virtual environment for the test execution.
+        self.bridge = self.create_bridge(options.num_ifaces)
+
+    def __del__(self):
+        self.bridge.ns_del()
+        super().__del__()
+
+    def get_iface_str(self, num_ifaces: int, prefix: str = "") -> str:
+        """Produce the PTF interface arguments based on the number of interfaces the PTF test uses."""
+        iface_str = ""
+        for iface_num in range(num_ifaces):
+            iface_str += f"-i {iface_num}@{prefix}{iface_num} "
+        return iface_str
+
+    def create_bridge(self, num_ifaces: int) -> Bridge:
+        """Create a network namespace environment."""
+        testutils.log.info(
+            "---------------------- Creating a namespace ----------------------",
+        )
+        random.seed(datetime.now().timestamp())
+        bridge = Bridge(str(random.randint(0, sys.maxsize)))
+        result = bridge.create_virtual_env(num_ifaces)
+        if result != testutils.SUCCESS:
+            bridge.ns_del()
+            testutils.log.error(
+                "---------------------- Namespace creation failed ----------------------",
+            )
+            raise SystemExit("Unable to create the namespace environment.")
+        testutils.log.info(
+            "---------------------- Namespace successfully created ----------------------"
+        )
+        return bridge
+
+    def run_simple_switch_grpc(self, switchlog: Path, grpc_port: int) -> testutils.subprocess.Popen:
+        """Start simple_switch_grpc and return the process handle."""
+        thrift_port = testutils.pick_tcp_port(THRIFT_PORT)
+        testutils.log.info(
+            "---------------------- Start simple_switch_grpc ----------------------",
+        )
+        ifaces = self.get_iface_str(num_ifaces=self.options.num_ifaces)
+        simple_switch_grpc = (
+            f"simple_switch_grpc --thrift-port {thrift_port} --log-file {switchlog} --log-flush -i 0@0 "
+            f"{ifaces} --no-p4 "
+            f"-- --grpc-server-addr 0.0.0.0:{grpc_port}"
+        )
+        bridge_cmd = self.bridge.get_ns_prefix() + " " + simple_switch_grpc
+        self.switch_proc = testutils.open_process(bridge_cmd)
+        return self.switch_proc
+
+    def run_ptf(self, grpc_port: int, json_name: Path, info_name: Path) -> int:
+        """Run the PTF test."""
+        testutils.log.info("---------------------- Run PTF test ----------------------")
+        # Add the file location to the python path.
+        pypath = FILE_DIR
+        # Show list of the tests
+        testListCmd = f"ptf --pypath {pypath} --test-dir {self.options.testdir} --list"
+        returncode = self.bridge.ns_exec(testListCmd)
+        if returncode != testutils.SUCCESS:
+            return returncode
+        ifaces = self.get_iface_str(num_ifaces=self.options.num_ifaces, prefix="br_")
+        test_params = f"grpcaddr='0.0.0.0:{grpc_port}';p4info='{info_name}';config='{json_name}';"
+        run_ptf_cmd = (
+            f"ptf --pypath {pypath} {ifaces} --log-file {self.options.testdir.joinpath('ptf.log')}"
+        )
+        run_ptf_cmd += f" --test-params={test_params} --test-dir {self.options.testdir}"
+        returncode = self.bridge.ns_exec(run_ptf_cmd)
+        return returncode
 
 
 def run_test(options: Options) -> int:
@@ -168,21 +234,29 @@ def run_test(options: Options) -> int:
     info_name = options.testdir.joinpath(test_name.with_suffix(".p4info.txt"))
     # Copy the test file into the test folder so that it can be picked up by PTF.
     testutils.copy_file(options.testfile, options.testdir)
+
+    if options.use_nn:
+        testenv: PTFTestEnv = NNEnv(options)
+    else:
+        testenv = VethEnv(options)
+
     # Compile the P4 program.
-    returncode = compile_program(options, json_name, info_name)
+    returncode = testenv.compile_program(json_name, info_name)
     if returncode != testutils.SUCCESS:
         return returncode
-    # Create the virtual environment for the test execution.
-    bridge = create_bridge(options.num_ifaces)
+
     # Pick available ports for the gRPC switch.
     grpc_port = testutils.pick_tcp_port(GRPC_PORT)
     switchlog = options.testdir.joinpath("switchlog")
-    switch_proc = run_simple_switch_grpc(options, bridge, switchlog, grpc_port)
+    switch_proc = testenv.run_simple_switch_grpc(switchlog, grpc_port)
+    if switch_proc is None:
+        return testutils.FAILURE
     # Run the PTF test and retrieve the result.
-    result = run_ptf(options, bridge, grpc_port, json_name, info_name)
+    result = testenv.run_ptf(grpc_port, json_name, info_name)
+    # Delete the test environment and trigger a clean up.
+    del testenv
+    # Print switch log if the results were not successful.
     if result != testutils.SUCCESS:
-        # Terminate the switch process and emit its output in case of failure.
-        testutils.kill_proc_group(switch_proc)
         if switchlog.with_suffix(".txt").exists():
             switchout = switchlog.with_suffix(".txt").read_text()
             testutils.log.error("######## Switch log ########\n%s", switchout)
@@ -196,7 +270,6 @@ def run_test(options: Options) -> int:
             # Do not bother to print whitespace.
             if err.strip():
                 testutils.log.error("######## Switch errors ######## \n%s", err)
-    bridge.ns_del()
     return result
 
 
@@ -222,6 +295,15 @@ def create_options(test_args) -> testutils.Optional[Options]:
     options.rootdir = Path(test_args.rootdir)
     options.num_ifaces = args.num_ifaces
 
+    try:
+        import nnpy  # pylint: disable=W0611,C0415
+
+        assert nnpy
+        options.use_nn = args.use_nn
+    except ImportError:
+        testutils.log.error("nnpy is not available on this system. Falling back to veth testing.")
+        options.use_nn = False
+
     # Configure logging.
     logging.basicConfig(
         filename=options.testdir.joinpath("test.log"),
@@ -236,15 +318,17 @@ def create_options(test_args) -> testutils.Optional[Options]:
 
 
 if __name__ == "__main__":
-    if not testutils.check_root():
-        testutils.log.error("This script requires root privileges; Exiting.")
-        sys.exit(1)
     # Parse options and process argv
     args, argv = PARSER.parse_known_args()
 
     test_options = create_options(args)
     if not test_options:
         sys.exit(testutils.FAILURE)
+
+    if not testutils.check_root() and not test_options.use_nn:
+        testutils.log.error("This script requires root privileges; Exiting.")
+        sys.exit(1)
+
     # Run the test with the extracted options
     test_result = run_test(test_options)
     if not (args.nocleanup or test_result != testutils.SUCCESS):

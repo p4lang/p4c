@@ -42,8 +42,9 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
   "Exception in thread"
-  # The error here is unclear.
+  # The error here is unclear. It looks like a segmentation fault.
   extract_for_header_union.p4
+  header-stack-ops-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
@@ -276,15 +277,9 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
   "Expected packet was not received on device"
-  # The packet is too short and is dropped by PTF.
-  issue2314.p4
+  # The packet has a zero width and is dropped by PTF.
   issue281.p4
-  bmv2_lookahead_2.p4
   parser-unroll-issue3537-1.p4
   parser-unroll-issue3537.p4
   parser-unroll-test2.p4
-  header-stack-ops-bmv2.p4
-  issue3702-bmv2.p4
-  issue914-bmv2.p4
-  xor_test.p4
 )
