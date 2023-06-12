@@ -1,0 +1,6 @@
+p4tc_samples/global_action_example_02.p4(89): [--Wwarn=shadow] warning: 'drop' shadows 'drop'
+    action drop() {
+           ^^^^
+p4tc_samples/global_action_example_02.p4(72)
+action drop() {
+       ^^^^

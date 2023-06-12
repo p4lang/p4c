@@ -1,0 +1,1 @@
+error: Table 'set_ct_options' has an action reference 'tcp_syn_packet' which is annotated with both '@tableonly' and '@defaultonly'

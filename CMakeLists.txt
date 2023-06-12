@@ -35,6 +35,7 @@ OPTION (ENABLE_BMV2 "Build the BMV2 backend (required for the full test suite)" 
 OPTION (ENABLE_EBPF "Build the EBPF backend (required for the full test suite)" ON)
 OPTION (ENABLE_UBPF "Build the uBPF backend (required for the full test suite)" ON)
 OPTION (ENABLE_DPDK "Build the DPDK backend (required for the full test suite)" ON)
+OPTION (ENABLE_P4TC "Build the P4TC backend" ON)
 OPTION (ENABLE_P4TEST "Build the P4Test backend (required for the full test suite)" ON)
 OPTION (ENABLE_TEST_TOOLS "Build the P4Tools development platform" OFF)
 OPTION (ENABLE_P4C_GRAPHS "Build the p4c-graphs backend" ON)
@@ -401,6 +402,9 @@ endif ()
 if (ENABLE_P4C_GRAPHS AND HAVE_LIBBOOST_GRAPH EQUAL 1)
   add_subdirectory (backends/graphs)
 endif ()
+if (ENABLE_P4TC)
+    add_subdirectory (backends/tc)
+endif ()
 if (ENABLE_P4TEST)
     add_subdirectory (backends/p4test)
 endif ()
@@ -480,7 +484,7 @@ add_custom_target(dpdk_includes ALL
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/dpdk/pna.p4 ${P4C_BINARY_DIR}/p4include/dpdk
   DEPENDS update_includes
 )
-endif ()
+endif()
 
 # Installation
 # Targets install themselves. Here we install the core headers

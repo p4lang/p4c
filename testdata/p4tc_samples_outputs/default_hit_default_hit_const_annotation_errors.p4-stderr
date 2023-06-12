@@ -1,0 +1,1 @@
+[--Werror=invalid] error: Table 'set_ct_options' has an action reference 'tcp_syn_packet' which is annotated with '@default_hit' and '@default_hit_const'

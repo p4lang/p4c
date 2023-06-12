@@ -1,0 +1,52 @@
+{
+  "schema_version" : "1.0.0",
+  "pipeline_name" : "default_hit_const_example",
+  "id" : 1,
+  "tables" : [
+    {
+      "name" : "MainControlImpl/set_ct_options",
+      "id" : 1,
+      "tentries" : 2048,
+      "nummask" : 8,
+      "keysize" : 8,
+      "keyfields" : [
+        {
+          "id" : 1,
+          "name" : "hdr.tcp.flags",
+          "type" : "bit8",
+          "match_type" : "ternary",
+          "bitwidth" : 8
+        }
+      ],
+      "actions" : [
+        {
+          "id" : 1,
+          "name" : "MainControlImpl/tcp_syn_packet",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "params" : [],
+          "default_hit_action" : false,
+          "default_miss_action" : false
+        },
+        {
+          "id" : 2,
+          "name" : "MainControlImpl/tcp_fin_or_rst_packet",
+          "action_scope" : "TableAndDefault",
+          "annotations" : ["default_hit_const"],
+          "params" : [],
+          "default_hit_action" : true,
+          "default_miss_action" : false
+        },
+        {
+          "id" : 3,
+          "name" : "MainControlImpl/tcp_other_packets",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "params" : [],
+          "default_hit_action" : false,
+          "default_miss_action" : true
+        }
+      ]
+    }
+  ]
+}
