@@ -190,7 +190,7 @@ void DpdkContextGenerator::addKeyField(Util::JsonArray *keyJson, const cstring n
 Util::JsonObject *DpdkContextGenerator::initTableCommonJson(const cstring name,
                                                             const struct TableAttributes &attr) {
     auto *tableJson = new Util::JsonObject();
-    cstring tableName = attr.controlName + "." + name;
+    cstring tableName = name;
     tableJson->emplace("name", attr.externalName);
     tableJson->emplace("target_name", tableName);
     tableJson->emplace("direction", attr.direction);
@@ -349,6 +349,12 @@ Util::JsonObject *DpdkContextGenerator::addMatchAttributes(const IR::P4Table *ta
             for (auto param : *(attr.params)) {
                 if (param->type->is<IR::Type_Bits>()) {
                     param_width = param->type->width_bits();
+                    if (param_width % 8 != 0) {
+                        if (param_width < 32)
+                            param_width = 32;
+                        else
+                            param_width = 64;
+                    }
                 } else if (!param->type->is<IR::Type_Boolean>()) {
                     BUG("Unsupported parameter type %1%", param->type);
                 }
@@ -411,6 +417,12 @@ Util::JsonArray *DpdkContextGenerator::addActions(const IR::P4Table *table,
                 for (auto param : *(attr.params)) {
                     if (param->type->is<IR::Type_Bits>()) {
                         param_width = param->type->width_bits();
+                        if (param_width % 8 != 0) {
+                            if (param_width < 32)
+                                param_width = 32;
+                            else
+                                param_width = 64;
+                        }
                     } else if (!param->type->is<IR::Type_Boolean>()) {
                         BUG("Unsupported parameter type %1%", param->type);
                     }
