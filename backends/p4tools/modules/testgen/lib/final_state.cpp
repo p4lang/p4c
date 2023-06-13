@@ -26,17 +26,17 @@ namespace P4Tools::P4Testgen {
 FinalState::FinalState(AbstractSolver &solver, const ExecutionState &finalState)
     : solver(solver),
       state(finalState),
-      completedModel(processModel(finalState, *new Model(solver.getSymbolicMapping()))) {
+      finalModel(processModel(finalState, *new Model(solver.getSymbolicMapping()))) {
     for (const auto &event : finalState.getTrace()) {
-        trace.emplace_back(*event.get().evaluate(completedModel, true));
+        trace.emplace_back(*event.get().evaluate(finalModel, true));
     }
 }
 
 FinalState::FinalState(AbstractSolver &solver, const ExecutionState &finalState,
-                       const Model &completedModel)
-    : solver(solver), state(finalState), completedModel(completedModel) {
+                       const Model &finalModel)
+    : solver(solver), state(finalState), finalModel(finalModel) {
     for (const auto &event : finalState.getTrace()) {
-        trace.emplace_back(*event.get().evaluate(completedModel, true));
+        trace.emplace_back(*event.get().evaluate(finalModel, true));
     }
 }
 
@@ -103,11 +103,11 @@ std::optional<std::reference_wrapper<const FinalState>> FinalState::computeConco
     auto &model = processModel(state, *new Model(solver.get().getSymbolicMapping()), false);
     /// Transfer any derived variables from that are missing  in this model.
     /// Do NOT update any variables that already exist.
-    model.mergeMap(completedModel.get().getSymbolicMap());
+    model.mergeMap(finalModel.get().getSymbolicMap());
     return *new FinalState(solver, state, model);
 }
 
-const Model &FinalState::getCompletedModel() const { return completedModel; }
+const Model &FinalState::getFinalModel() const { return finalModel; }
 
 AbstractSolver &FinalState::getSolver() const { return solver; }
 

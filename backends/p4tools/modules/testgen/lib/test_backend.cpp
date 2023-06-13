@@ -62,7 +62,7 @@ bool TestBackEnd::run(const FinalState &state) {
 
         // Execute concolic functions that may occur in the output packet, the output port,
         // or any path conditions.
-        auto concolicResolver = ConcolicResolver(state.getCompletedModel(), *executionState,
+        auto concolicResolver = ConcolicResolver(state.getFinalModel(), *executionState,
                                                  *programInfo.getConcolicMethodImpls());
 
         outputPacketExpr->apply(concolicResolver);
@@ -84,10 +84,10 @@ bool TestBackEnd::run(const FinalState &state) {
         auto replacedState = concolicOptState.value().get();
         executionState = replacedState.getExecutionState();
         outputPacketExpr = executionState->getPacketBuffer();
-        const auto &completedModel = replacedState.getCompletedModel();
+        const auto &finalModel = replacedState.getFinalModel();
         outputPortExpr = executionState->get(programInfo.getTargetOutputPortVar());
 
-        auto testInfo = produceTestInfo(executionState, &completedModel, outputPacketExpr,
+        auto testInfo = produceTestInfo(executionState, &finalModel, outputPacketExpr,
                                         outputPortExpr, programTraces);
 
         // Add a list of tracked branches to the test output, too.
@@ -102,7 +102,7 @@ bool TestBackEnd::run(const FinalState &state) {
             printPerformanceReport(false);
             return needsToTerminate(testCount);
         }
-        const auto *testSpec = createTestSpec(executionState, &completedModel, testInfo);
+        const auto *testSpec = createTestSpec(executionState, &finalModel, testInfo);
 
         // Commit an update to the visited statements.
         // Only do this once we are sure we are generating a test.
@@ -139,17 +139,17 @@ bool TestBackEnd::run(const FinalState &state) {
 }
 
 TestBackEnd::TestInfo TestBackEnd::produceTestInfo(
-    const ExecutionState *executionState, const Model *completedModel,
+    const ExecutionState *executionState, const Model *finalModel,
     const IR::Expression *outputPacketExpr, const IR::Expression *outputPortExpr,
     const std::vector<std::reference_wrapper<const TraceEvent>> *programTraces) {
     // Evaluate all the important expressions necessary for program execution by using the
-    // completed model.
-    int calculatedPacketSize = IR::getIntFromLiteral(
-        completedModel->evaluate(ExecutionState::getInputPacketSizeVar(), true));
+    // final model.
+    int calculatedPacketSize =
+        IR::getIntFromLiteral(finalModel->evaluate(ExecutionState::getInputPacketSizeVar(), true));
     const auto *inputPacketExpr = executionState->getInputPacket();
     // The payload fills the space between the minimum input size needed and the symbolically
     // calculated packet size.
-    const auto *payloadExpr = completedModel->get(&PacketVars::PAYLOAD_SYMBOL, false);
+    const auto *payloadExpr = finalModel->get(&PacketVars::PAYLOAD_SYMBOL, false);
     if (payloadExpr != nullptr) {
         inputPacketExpr =
             new IR::Concat(IR::getBitType(calculatedPacketSize), inputPacketExpr, payloadExpr);
@@ -157,14 +157,14 @@ TestBackEnd::TestInfo TestBackEnd::produceTestInfo(
             IR::getBitType(outputPacketExpr->type->width_bits() + payloadExpr->type->width_bits()),
             outputPacketExpr, payloadExpr);
     }
-    const auto *inputPacket = completedModel->evaluate(inputPacketExpr, true);
-    const auto *outputPacket = completedModel->evaluate(outputPacketExpr, true);
+    const auto *inputPacket = finalModel->evaluate(inputPacketExpr, true);
+    const auto *outputPacket = finalModel->evaluate(outputPacketExpr, true);
     const auto *inputPort =
-        completedModel->evaluate(executionState->get(programInfo.getTargetInputPortVar()), true);
+        finalModel->evaluate(executionState->get(programInfo.getTargetInputPortVar()), true);
 
-    const auto *outputPortVar = completedModel->evaluate(outputPortExpr, true);
+    const auto *outputPortVar = finalModel->evaluate(outputPortExpr, true);
     // Build the taint mask by dissecting the program packet variable
-    const auto *evalMask = Taint::buildTaintMask(completedModel, outputPacketExpr);
+    const auto *evalMask = Taint::buildTaintMask(finalModel, outputPacketExpr);
 
     // Get the input/output port integers.
     auto inputPortInt = IR::getIntFromLiteral(inputPort);

@@ -255,7 +255,7 @@ TestgenOptions::TestgenOptions()
             saddlePoint = saddlePointTmp;
             return true;
         },
-        "Threshold to invoke multiPop on RANDOM_ACCESS_MAX_COVERAGE.");
+        "Threshold to invoke multiPop on RANDOM_STATEMENT_SEARCH.");
 
     registerOption(
         "--print-traces", nullptr,

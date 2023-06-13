@@ -46,7 +46,7 @@ std::vector<char> Bmv2Concolic::convertBigIntToBytes(big_int &dataInt, int targe
 }
 
 big_int Bmv2Concolic::computeChecksum(const std::vector<const IR::Expression *> &exprList,
-                                      const Model &completedModel, int algo,
+                                      const Model &finalModel, int algo,
                                       Model::ExpressionMap *resolvedExpressions) {
     // Pick a checksum according to the algorithm value.
     ChecksumFunction checksumFun = nullptr;
@@ -100,8 +100,8 @@ big_int Bmv2Concolic::computeChecksum(const std::vector<const IR::Expression *> 
             const auto *remainderExpr = IR::getConstant(IR::getBitType(fillWidth), 0);
             concatExpr = new IR::Concat(IR::getBitType(concatWidth), concatExpr, remainderExpr);
         }
-        auto dataInt = IR::getBigIntFromLiteral(
-            completedModel.evaluate(concatExpr, true, resolvedExpressions));
+        auto dataInt =
+            IR::getBigIntFromLiteral(finalModel.evaluate(concatExpr, true, resolvedExpressions));
         bytes = convertBigIntToBytes(dataInt, concatWidth);
     }
     return checksumFun(bytes.data(), bytes.size());
@@ -126,7 +126,7 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
     {"*method_hash",
      {"result", "algo", "base", "data", "max"},
      [](cstring /*concolicMethodName*/, const IR::ConcolicVariable *var,
-        const ExecutionState & /*state*/, const Model &completedModel,
+        const ExecutionState & /*state*/, const Model &finalModel,
         ConcolicVariableMap *resolvedConcolicVariables) {
          const auto *args = var->arguments;
          const auto *checksumVar = args->at(0)->expression;
@@ -138,11 +138,11 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
          auto algo = args->at(1)->expression->checkedTo<IR::Constant>()->asInt();
          Model::ExpressionMap resolvedExpressions;
          const auto *base =
-             completedModel.evaluate(args->at(2)->expression, true, &resolvedExpressions);
+             finalModel.evaluate(args->at(2)->expression, true, &resolvedExpressions);
          auto baseInt = IR::getBigIntFromLiteral(base);
          const auto *dataExpr = args->at(3)->expression;
          const auto *maxHash =
-             completedModel.evaluate(args->at(4)->expression, true, &resolvedExpressions);
+             finalModel.evaluate(args->at(4)->expression, true, &resolvedExpressions);
          auto maxHashInt = IR::getBigIntFromLiteral(maxHash);
 
          /// Flatten the data input and compute the byte array that will be used for
@@ -159,7 +159,7 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
          if (maxHashInt == 0) {
              computedResult = baseInt;
          } else {
-             computedResult = computeChecksum(exprList, completedModel, algo, &resolvedExpressions);
+             computedResult = computeChecksum(exprList, finalModel, algo, &resolvedExpressions);
              // Behavioral model uses this technique to limit the hash output.
              computedResult = (baseInt + (computedResult % maxHashInt));
          }
@@ -191,7 +191,7 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
     {"*method_checksum",
      {"result", "algo", "data"},
      [](cstring /*concolicMethodName*/, const IR::ConcolicVariable *var,
-        const ExecutionState & /*state*/, const Model &completedModel,
+        const ExecutionState & /*state*/, const Model &finalModel,
         ConcolicVariableMap *resolvedConcolicVariables) {
          // Assign arguments to concrete variables and perform type checking.
          const auto *args = var->arguments;
@@ -214,7 +214,7 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
          Model::ExpressionMap resolvedExpressions;
          big_int computedResult = 0;
          // If max is 0, the value written to computedResult will always be base.
-         computedResult = computeChecksum(exprList, completedModel, algo, &resolvedExpressions);
+         computedResult = computeChecksum(exprList, finalModel, algo, &resolvedExpressions);
          // Behavioral model uses this technique to limit the checksum output.
          computedResult = std::min(computedResult, maxHashInt);
          // Assign a value to the @param result using the computed result
@@ -239,7 +239,7 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
     {"*method_checksum_with_payload",
      {"result", "algo", "data"},
      [](cstring /*concolicMethodName*/, const IR::ConcolicVariable *var,
-        const ExecutionState & /*state*/, const Model &completedModel,
+        const ExecutionState & /*state*/, const Model &finalModel,
         ConcolicVariableMap *resolvedConcolicVariables) {
          // Assign arguments to concrete variables and perform type checking.
          const auto *args = var->arguments;
@@ -261,14 +261,14 @@ const ConcolicMethodImpls::ImplList Bmv2Concolic::BMV2_CONCOLIC_METHOD_IMPLS{
          // This is the maximum value this checksum can have.
          auto maxHashInt = IR::getMaxBvVal(checksumVarType);
          // If the payload is present, we need to add it to our checksum calculation.
-         const auto *payloadExpr = completedModel.get(&PacketVars::PAYLOAD_SYMBOL, false);
+         const auto *payloadExpr = finalModel.get(&PacketVars::PAYLOAD_SYMBOL, false);
          if (payloadExpr != nullptr) {
              exprList.push_back(payloadExpr);
          }
 
          big_int computedResult = 0;
          // If max is 0, the value written to computedResult will always be base.
-         computedResult = computeChecksum(exprList, completedModel, algo, &resolvedExpressions);
+         computedResult = computeChecksum(exprList, finalModel, algo, &resolvedExpressions);
          // Behavioral model uses this technique to limit the checksum output.
          computedResult = std::min(computedResult, maxHashInt);
          // Assign a value to the @param result using the computed result

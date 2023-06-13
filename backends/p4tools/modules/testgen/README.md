@@ -57,7 +57,7 @@ These are the current usage flags:
 --with-output-packet                   Produced tests must have an output packet.
 --path-selection pathSelectionPolicy   Selects a specific path selection strategy for test generation. Options are: DEPTH_FIRST, RANDOM_BACKTRACK, GREEDY_STATEMENT_SEARCH, and RANDOM_STATEMENT_SEARCH. Defaults to DEPTH_FIRST.
 --track-coverage coverageItem          Specifies, which IR nodes to track for coverage in the targeted P4 program. Multiple options are possible: Currently supported: STATEMENTS, TABLE_ENTRIES Defaults to no coverage.
---saddle-point saddlePoint             Threshold to invoke multiPop on RANDOM_ACCESS_MAX_COVERAGE.
+--saddle-point saddlePoint             Threshold to invoke multiPop on RANDOM_STATEMENT_SEARCH.
 --print-traces                         Print the associated traces and test information for each generated test.
 --print-steps                          Print the representation of each program node while the stepper steps through the program.
 --print-coverage                       Print detailed statement coverage statistics the interpreter collects while stepping through the program.

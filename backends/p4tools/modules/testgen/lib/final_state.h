@@ -26,7 +26,7 @@ class FinalState {
     std::reference_wrapper<const ExecutionState> state;
 
     /// The final model which has been augmented with environment completions.
-    std::reference_wrapper<const Model> completedModel;
+    std::reference_wrapper<const Model> finalModel;
 
     /// The final program trace.
     std::vector<std::reference_wrapper<const TraceEvent>> trace;
@@ -36,20 +36,19 @@ class FinalState {
     /// to the model. Only do this if the payload has not been set yet.
     static void calculatePayload(const ExecutionState &executionState, Model &evaluatedModel);
 
-    /// Complete the model according to target-specific completion criteria.
-    /// We first complete (this means we fill all the variables that have not been bound).
-    /// Then we evaluate the model (we assign values to the variables that have been bound).
+    /// Perform post processing on the final model and add custom sumbolic variables,
+    /// which may not be part of the symbolic executor's model.
+    /// For example, the payload is added once we have calculated the appropriate packet size.
     static Model &processModel(const ExecutionState &finalState, Model &model,
                                bool postProcess = true);
 
  public:
-    /// This constructor invokes @function completeModel() to produce the model based on the solver
+    /// This constructor invokes @ref processModel() to produce the model based on the solver
     /// and the executionState.
     FinalState(AbstractSolver &solver, const ExecutionState &finalState);
 
-    /// This constructor takes the input model as is and does not invoke @function completeModel().
-    FinalState(AbstractSolver &solver, const ExecutionState &finalState,
-               const Model &completedModel);
+    /// This constructor takes the input model as is and does not invoke @ref processModel().
+    FinalState(AbstractSolver &solver, const ExecutionState &finalState, const Model &finalModel);
 
     /// If there are concolic variables in the program, compute a new final state by rerunning the
     /// solver on the concolic assignments. If the concolic assignment is not satisfiable, return
@@ -61,7 +60,7 @@ class FinalState {
         const ConcolicVariableMap &resolvedConcolicVariables) const;
 
     /// @returns the model after it was augmented by completions from the symbolic environment.
-    [[nodiscard]] const Model &getCompletedModel() const;
+    [[nodiscard]] const Model &getFinalModel() const;
 
     /// @returns the solver associated with this final state.
     [[nodiscard]] AbstractSolver &getSolver() const;
