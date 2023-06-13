@@ -133,6 +133,7 @@ class ExprStepper : public AbstractStepper {
     bool preorder(const IR::BoolLiteral *boolLiteral) override;
     bool preorder(const IR::Constant *constant) override;
     bool preorder(const IR::Member *member) override;
+    bool preorder(const IR::ArrayIndex *arr) override;
     bool preorder(const IR::MethodCallExpression *call) override;
     bool preorder(const IR::Mux *mux) override;
     bool preorder(const IR::PathExpression *pathExpression) override;

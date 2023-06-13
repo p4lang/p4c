@@ -38,7 +38,7 @@ class HSIndexFinder : public Inspector {
     void addNewVariable();
 };
 
-/// This class substitutes index of a header stack in all occurence of found header stack.
+/// This class substitutes index of a header stack in all occurences of found header stack.
 class HSIndexTransform : public Transform {
     friend class HSIndexContretizer;
     size_t index;

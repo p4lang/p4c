@@ -87,13 +87,13 @@ std::vector<IR::StateVariable> AbstractExecutionState::getFlatFields(
         } else if (const auto *typeStack = fieldType->to<IR::Type_Stack>()) {
             const auto *stackElementsType = resolveType(typeStack->elementType);
             for (size_t arrayIndex = 0; arrayIndex < typeStack->getSize(); arrayIndex++) {
-                const auto *newMember = HSIndexToMember::produceStackIndex(
+                const auto *newArr = HSIndexToMember::produceStackIndex(
                     stackElementsType, new IR::Member(typeStack, parent, field->name), arrayIndex);
                 BUG_CHECK(stackElementsType->is<IR::Type_StructLike>(),
                           "Try to make the flat fields for non Type_StructLike element : %1%",
                           stackElementsType);
-                auto subFields = getFlatFields(
-                    newMember, stackElementsType->to<IR::Type_StructLike>(), validVector);
+                auto subFields = getFlatFields(newArr, stackElementsType->to<IR::Type_StructLike>(),
+                                               validVector);
                 flatFields.insert(flatFields.end(), subFields.begin(), subFields.end());
             }
         } else {
