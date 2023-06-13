@@ -13,6 +13,7 @@
 #include "backends/p4tools/common/compiler/convert_hs_index.h"
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
+#include "backends/p4tools/common/lib/taint.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "backends/p4tools/common/lib/variables.h"
@@ -207,7 +208,7 @@ bool CmdStepper::preorder(const IR::IfStatement *ifStatement) {
     // We insert a property that marks all execution as tainted until the if statement has
     // completed.
     // Because we may have nested taint, we need to check if we are already tainted.
-    if (state.hasTaint(ifStatement->condition)) {
+    if (Taint::hasTaint(ifStatement->condition)) {
         auto &nextState = state.clone();
         std::vector<Continuation::Command> cmds;
         auto currentTaint = state.getProperty<bool>("inUndefinedState");
@@ -512,7 +513,7 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
     // If the switch expression is tainted, we can not predict which case will be chosen. We taint
     // the program counter and execute all of the statements.
     P4::Coverage::CoverageSet coveredNodes;
-    if (state.hasTaint(switchStatement->expression)) {
+    if (Taint::hasTaint(switchStatement->expression)) {
         auto currentTaint = state.getProperty<bool>("inUndefinedState");
         cmds.emplace_back(Continuation::PropertyUpdate("inUndefinedState", true));
         for (const auto *switchCase : switchStatement->cases) {

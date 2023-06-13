@@ -39,7 +39,7 @@ const Expression *Expression::apply(Transform &visitor) const {
 }
 
 const Expression *Expression::evaluate(const Model &model, bool doComplete) const {
-    if (Taint::hasTaint(model, value)) {
+    if (Taint::hasTaint(value)) {
         return new Expression(&Taint::TAINTED_STRING_LITERAL, label);
     }
     return new Expression(model.evaluate(value, doComplete), label);
@@ -73,7 +73,7 @@ const IfStatementCondition *IfStatementCondition::apply(Transform &visitor) cons
 const IfStatementCondition *IfStatementCondition::evaluate(const Model &model,
                                                            bool doComplete) const {
     const IR::Literal *evaluatedPostVal = nullptr;
-    if (Taint::hasTaint(model, postEvalCond)) {
+    if (Taint::hasTaint(postEvalCond)) {
         evaluatedPostVal = &Taint::TAINTED_STRING_LITERAL;
     } else {
         evaluatedPostVal = model.evaluate(postEvalCond, doComplete);
@@ -134,7 +134,7 @@ const ExtractSuccess *ExtractSuccess::evaluate(const Model &model, bool doComple
     std::vector<std::pair<IR::StateVariable, const IR::Expression *>> applyFields;
     applyFields.reserve(fields.size());
     for (const auto &field : fields) {
-        if (Taint::hasTaint(model, field.second)) {
+        if (Taint::hasTaint(field.second)) {
             applyFields.emplace_back(field.first, &Taint::TAINTED_STRING_LITERAL);
         } else {
             applyFields.emplace_back(field.first, model.evaluate(field.second, doComplete));
@@ -205,7 +205,7 @@ const Emit *Emit::evaluate(const Model &model, bool doComplete) const {
     std::vector<std::pair<IR::StateVariable, const IR::Expression *>> applyFields;
     applyFields.reserve(fields.size());
     for (const auto &field : fields) {
-        if (Taint::hasTaint(model, field.second)) {
+        if (Taint::hasTaint(field.second)) {
             applyFields.emplace_back(field.first, &Taint::TAINTED_STRING_LITERAL);
         } else {
             applyFields.emplace_back(field.first, model.evaluate(field.second, doComplete));
@@ -240,7 +240,7 @@ const Packet *Packet::apply(Transform &visitor) const {
 }
 
 const Packet *Packet::evaluate(const Model &model, bool doComplete) const {
-    if (Taint::hasTaint(model, packetValue)) {
+    if (Taint::hasTaint(packetValue)) {
         return new Packet(direction, &Taint::TAINTED_STRING_LITERAL);
     }
     return new Packet(direction, model.evaluate(packetValue, doComplete));

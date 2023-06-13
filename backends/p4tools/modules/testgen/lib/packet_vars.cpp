@@ -17,6 +17,7 @@ const IR::Member PacketVars::PACKET_BUFFER_LABEL =
 const IR::Member PacketVars::EMIT_BUFFER_LABEL =
     IR::Member(new IR::PathExpression("*"), "emitBuffer");
 
-const IR::Member PacketVars::PAYLOAD_LABEL = IR::Member(new IR::PathExpression("*"), "payload");
+const IR::SymbolicVariable PacketVars::PAYLOAD_SYMBOL =
+    IR::SymbolicVariable(&PacketVars::PACKET_SIZE_VAR_TYPE, "*payload");
 
 }  // namespace P4Tools::P4Testgen

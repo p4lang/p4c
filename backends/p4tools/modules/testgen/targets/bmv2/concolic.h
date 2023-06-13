@@ -43,7 +43,7 @@ class Bmv2Concolic : public Concolic {
     /// Call into a behavioral model helper function to compute the appropriate checksum. The
     /// checksum is determined by @param algo.
     static big_int computeChecksum(const std::vector<const IR::Expression *> &exprList,
-                                   const Model &completedModel, int algo,
+                                   const Model &finalModel, int algo,
                                    Model::ExpressionMap *resolvedExpressions);
 
     /// Compute a payload using the provided model and update the resolved concolic variables. Then
@@ -51,8 +51,7 @@ class Bmv2Concolic : public Concolic {
     /// variable according to @param payloadSize is generated. If the variable exists already, it
     /// just returns the payload expression.
     static const IR::Expression *setAndComputePayload(
-        const Model &completedModel, ConcolicVariableMap *resolvedConcolicVariables,
-        int payloadSize);
+        const Model &finalModel, ConcolicVariableMap *resolvedConcolicVariables, int payloadSize);
 
     /// Converts a big integer input into a vector of bytes. This byte vector is fed into the
     /// hash function.

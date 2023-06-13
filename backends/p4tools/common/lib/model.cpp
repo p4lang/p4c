@@ -85,26 +85,25 @@ const IR::Literal *Model::evaluate(const IR::Expression *expr, bool doComplete,
     return literal;
 }
 
-Model *Model::evaluate(const SymbolicMapType &inputMap, bool doComplete,
-                       ExpressionMap *resolvedExpressions) const {
-    auto *result = new Model(*this);
-    for (const auto &inputTuple : inputMap) {
-        const auto &name = inputTuple.first;
-        const auto *expr = inputTuple.second;
-        (*result)[name] = evaluate(expr, doComplete, resolvedExpressions);
-    }
-    return result;
-}
-
-const IR::Expression *Model::get(const IR::StateVariable &var, bool checked) const {
-    auto it = find(var);
-    if (it != end()) {
+const IR::Expression *Model::get(const IR::SymbolicVariable *var, bool checked) const {
+    auto it = symbolicMap.find(var);
+    if (it != symbolicMap.end()) {
         return it->second;
     }
     BUG_CHECK(!checked, "Unable to find var %s in the model.", var);
     return nullptr;
 }
 
-const SymbolicMapping &Model::getSymbolicMap() { return symbolicMap; }
+void Model::set(const IR::SymbolicVariable *var, const IR::Expression *val) {
+    symbolicMap[var] = val;
+}
+
+const SymbolicMapping &Model::getSymbolicMap() const { return symbolicMap; }
+
+void Model::mergeMap(const SymbolicMapping &sourceMap) {
+    for (const auto &varTuple : sourceMap) {
+        symbolicMap.emplace(varTuple.first, varTuple.second);
+    }
+}
 
 }  // namespace P4Tools

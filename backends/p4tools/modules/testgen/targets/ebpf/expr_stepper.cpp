@@ -6,6 +6,7 @@
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/core/solver.h"
+#include "backends/p4tools/common/lib/taint.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/irutils.h"
 #include "lib/cstring.h"
@@ -100,7 +101,7 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
              const auto &validVar = state.get(ToolsVariables::getHeaderValidity(ipHdrRef));
              // Check whether the validity bit of the header is false.
              // If yes, do not bother evaluating the checksum.
-             auto emitIsTainted = state.hasTaint(validVar);
+             auto emitIsTainted = Taint::hasTaint(validVar);
              if (emitIsTainted || !validVar->checkedTo<IR::BoolLiteral>()->value) {
                  auto &nextState = state.clone();
                  nextState.replaceTopBody(Continuation::Return(IR::getBoolLiteral(false)));

@@ -9,6 +9,7 @@
 
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
+#include "backends/p4tools/common/lib/taint.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/irutils.h"
@@ -133,7 +134,7 @@ const ExternMethodImpls SharedPnaExprStepper::PNA_EXTERN_METHOD_IMPLS({
          const auto *directionVar = args->at(0)->expression;
          const auto *n2hValue = args->at(1)->expression;
          const auto *h2nValue = args->at(2)->expression;
-         if (state.hasTaint(directionVar)) {
+         if (Taint::hasTaint(directionVar)) {
              auto &taintedState = state.clone();
              taintedState.replaceTopBody(
                  Continuation::Return(ToolsVariables::getTaintExpression(n2hValue->type)));

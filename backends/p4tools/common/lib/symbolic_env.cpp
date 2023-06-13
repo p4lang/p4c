@@ -31,11 +31,6 @@ void SymbolicEnv::set(const IR::StateVariable &var, const IR::Expression *value)
     map[var] = P4::optimizeExpression(value);
 }
 
-Model *SymbolicEnv::evaluate(const Model &model) const {
-    // Produce a new model based on the input model
-    return model.evaluate(map, true);
-}
-
 const IR::Expression *SymbolicEnv::subst(const IR::Expression *expr) const {
     /// Traverses the IR to perform substitution.
     class SubstVisitor : public Transform {
@@ -53,6 +48,15 @@ const IR::Expression *SymbolicEnv::subst(const IR::Expression *expr) const {
                 return result;
             }
             return member;
+        }
+
+        const IR::Node *preorder(IR::PathExpression *path) override {
+            prune();
+            if (symbolicEnv.exists(path)) {
+                const auto *result = symbolicEnv.get(path);
+                return result;
+            }
+            return path;
         }
 
      public:

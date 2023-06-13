@@ -26,17 +26,17 @@ namespace P4Tools::P4Testgen {
 FinalState::FinalState(AbstractSolver &solver, const ExecutionState &finalState)
     : solver(solver),
       state(finalState),
-      completedModel(completeModel(finalState, new Model(solver.getSymbolicMapping()))) {
+      finalModel(processModel(finalState, *new Model(solver.getSymbolicMapping()))) {
     for (const auto &event : finalState.getTrace()) {
-        trace.emplace_back(*event.get().evaluate(completedModel, true));
+        trace.emplace_back(*event.get().evaluate(finalModel, true));
     }
 }
 
 FinalState::FinalState(AbstractSolver &solver, const ExecutionState &finalState,
-                       const Model &completedModel)
-    : solver(solver), state(finalState), completedModel(completedModel) {
+                       const Model &finalModel)
+    : solver(solver), state(finalState), finalModel(finalModel) {
     for (const auto &event : finalState.getTrace()) {
-        trace.emplace_back(*event.get().evaluate(completedModel, true));
+        trace.emplace_back(*event.get().evaluate(finalModel, true));
     }
 }
 
@@ -48,26 +48,21 @@ void FinalState::calculatePayload(const ExecutionState &executionState, Model &e
     int payloadSize = calculatedPacketSize - inputPacketExpr->type->width_bits();
     if (payloadSize > 0) {
         const auto *payloadType = IR::getBitType(payloadSize);
-        const IR::Expression *payloadExpr = evaluatedModel.get(&PacketVars::PAYLOAD_LABEL, false);
+        const IR::Expression *payloadExpr = evaluatedModel.get(&PacketVars::PAYLOAD_SYMBOL, false);
         if (payloadExpr == nullptr) {
             payloadExpr = Utils::getRandConstantForType(payloadType);
-            evaluatedModel.emplace(&PacketVars::PAYLOAD_LABEL, payloadExpr);
+            evaluatedModel.set(&PacketVars::PAYLOAD_SYMBOL, payloadExpr);
         }
     }
 }
 
-Model &FinalState::completeModel(const ExecutionState &finalState, const Model *model,
-                                 bool postProcess) {
-    // Now that the models initial values are completed evaluate the values that
-    // are part of the constraints that have been added to the solver.
-    auto *evaluatedModel = finalState.getSymbolicEnv().evaluate(*model);
-
+Model &FinalState::processModel(const ExecutionState &finalState, Model &model, bool postProcess) {
     if (postProcess) {
         // Append a payload, if requested.
-        calculatePayload(finalState, *evaluatedModel);
+        calculatePayload(finalState, model);
     }
 
-    return *evaluatedModel;
+    return model;
 }
 
 std::optional<std::reference_wrapper<const FinalState>> FinalState::computeConcolicState(
@@ -105,16 +100,14 @@ std::optional<std::reference_wrapper<const FinalState>> FinalState::computeConco
         ::warning("Concolic constraints for this path are unsatisfiable.");
         return std::nullopt;
     }
-    auto &model = completeModel(state, new Model(solver.get().getSymbolicMapping()), false);
+    auto &model = processModel(state, *new Model(solver.get().getSymbolicMapping()), false);
     /// Transfer any derived variables from that are missing  in this model.
     /// Do NOT update any variables that already exist.
-    for (const auto &varTuple : completedModel.get()) {
-        model.emplace(varTuple.first, varTuple.second);
-    }
+    model.mergeMap(finalModel.get().getSymbolicMap());
     return *new FinalState(solver, state, model);
 }
 
-const Model &FinalState::getCompletedModel() const { return completedModel; }
+const Model &FinalState::getFinalModel() const { return finalModel; }
 
 AbstractSolver &FinalState::getSolver() const { return solver; }
 

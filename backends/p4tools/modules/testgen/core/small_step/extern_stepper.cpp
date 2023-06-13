@@ -11,6 +11,7 @@
 
 #include "backends/p4tools/common/lib/constants.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
+#include "backends/p4tools/common/lib/taint.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/id.h"
@@ -265,8 +266,9 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
              auto &nextState = state.clone();
+             const auto *drop = state.getSymbolicEnv().subst(programInfo.dropIsActive());
              // If the drop variable is tainted, we also mark the port tainted.
-             if (state.hasTaint(programInfo.dropIsActive())) {
+             if (Taint::hasTaint(drop)) {
                  nextState.set(programInfo.getTargetOutputPortVar(),
                                programInfo.createTargetUninitialized(
                                    programInfo.getTargetOutputPortVar()->type, true));
@@ -446,7 +448,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  // Check whether advance expression is tainted.
                  // If that is the case, we have no control or idea how much the cursor can be
                  // advanced.
-                 auto advanceIsTainted = state.hasTaint(advanceExpr);
+                 auto advanceIsTainted = Taint::hasTaint(advanceExpr);
                  if (advanceIsTainted) {
                      TESTGEN_UNIMPLEMENTED(
                          "The advance expression of %1% is tainted. We can not predict how much "
@@ -613,7 +615,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  // Check whether advance expression is tainted.
                  // If that is the case, we have no control or idea how much the cursor can be
                  // advanced.
-                 auto advanceIsTainted = state.hasTaint(varbitExtractExpr);
+                 auto advanceIsTainted = Taint::hasTaint(varbitExtractExpr);
                  if (advanceIsTainted) {
                      TESTGEN_UNIMPLEMENTED(
                          "The varbit expression of %1% is tainted. We can not predict how much "
@@ -720,11 +722,11 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  TESTGEN_UNIMPLEMENTED("Emit input %1% of type %2% not supported", emitOutput,
                                        emitType);
              }
-             const auto &validVar = ToolsVariables::getHeaderValidity(emitOutput);
+             const auto *validVar = state.get(ToolsVariables::getHeaderValidity(emitOutput));
 
              // Check whether the validity bit of the header is tainted. If it is, the entire
              // emit is tainted. There is not much we can do here, so throw an error.
-             auto emitIsTainted = state.hasTaint(validVar);
+             auto emitIsTainted = Taint::hasTaint(validVar);
              if (emitIsTainted) {
                  TESTGEN_UNIMPLEMENTED(
                      "The validity bit of %1% is tainted. Tainted emit calls can not be "
@@ -776,7 +778,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  nextState.popBody();
                  // Only when the header is valid, the members are emitted and the packet
                  // delta is adjusted.
-                 result->emplace_back(state.get(validVar), state, nextState);
+                 result->emplace_back(validVar, state, nextState);
              }
              {
                  auto &invalidState = state.clone();
@@ -820,7 +822,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
              }
 
              // If the verify condition is tainted, the error is also tainted.
-             if (state.hasTaint(cond)) {
+             if (Taint::hasTaint(cond)) {
                  auto &taintedState = state.clone();
                  std::stringstream traceString;
                  traceString << "Tainted verify: ";
@@ -877,7 +879,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
 
              // If the assert/assume condition is tainted, we do not know whether we abort.
              // For now, throw an exception.
-             if (state.hasTaint(cond)) {
+             if (Taint::hasTaint(cond)) {
                  TESTGEN_UNIMPLEMENTED(
                      "Assert/assume can not be executed under a tainted condition.");
              }
@@ -925,7 +927,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
 
              // If the assert/assume condition is tainted, we do not know whether we abort.
              // For now, throw an exception.
-             if (state.hasTaint(cond)) {
+             if (Taint::hasTaint(cond)) {
                  TESTGEN_UNIMPLEMENTED(
                      "Assert/assume can not be executed under a tainted condition.");
              }
