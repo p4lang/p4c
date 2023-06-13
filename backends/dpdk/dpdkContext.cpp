@@ -18,6 +18,7 @@ limitations under the License.
 
 #include "backend.h"
 #include "control-plane/bfruntime_ext.h"
+#include "dpdkUtils.h"
 #include "printUtils.h"
 namespace DPDK {
 
@@ -349,12 +350,7 @@ Util::JsonObject *DpdkContextGenerator::addMatchAttributes(const IR::P4Table *ta
             for (auto param : *(attr.params)) {
                 if (param->type->is<IR::Type_Bits>()) {
                     param_width = param->type->width_bits();
-                    if (param_width % 8 != 0) {
-                        if (param_width < 32)
-                            param_width = 32;
-                        else
-                            param_width = 64;
-                    }
+                    param_width = getMetadataFieldWidth(param_width);
                 } else if (!param->type->is<IR::Type_Boolean>()) {
                     BUG("Unsupported parameter type %1%", param->type);
                 }
@@ -417,12 +413,7 @@ Util::JsonArray *DpdkContextGenerator::addActions(const IR::P4Table *table,
                 for (auto param : *(attr.params)) {
                     if (param->type->is<IR::Type_Bits>()) {
                         param_width = param->type->width_bits();
-                        if (param_width % 8 != 0) {
-                            if (param_width < 32)
-                                param_width = 32;
-                            else
-                                param_width = 64;
-                        }
+                        param_width = getMetadataFieldWidth(param_width);
                     } else if (!param->type->is<IR::Type_Boolean>()) {
                         BUG("Unsupported parameter type %1%", param->type);
                     }

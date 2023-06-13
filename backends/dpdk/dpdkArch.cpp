@@ -637,10 +637,7 @@ const IR::Node *ReplaceHdrMetaField::postorder(IR::Type_Struct *st) {
             if (auto t = (*field).type->to<IR::Type_Bits>()) {
                 auto width = t->width_bits();
                 if (width % 8 != 0) {
-                    if (width < 32)
-                        width = 32;
-                    else
-                        width = 64;
+                    width = getMetadataFieldWidth(width);
                     fields->push_back(
                         new IR::StructField(IR::ID(field->name), IR::Type_Bits::get(width)));
                 } else {

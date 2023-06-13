@@ -133,4 +133,16 @@ bool reservedNames(P4::ReferenceMap *refMap, std::vector<cstring> names, cstring
     return true;
 }
 
+// Update bitwidth of Metadata fields to 32 or 64 bits if it 8-bit aligned.
+int getMetadataFieldWidth(int width) {
+    BUG_CHECK(width <= 64, "Metadata bit-width expected to be within 64-bits");
+    if (width % 8 != 0) {
+        if (width < 32)
+            return 32;
+        else
+            return 64;
+    }
+    return width;
+}
+
 }  // namespace DPDK
