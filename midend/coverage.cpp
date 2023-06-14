@@ -7,7 +7,7 @@
 namespace P4::Coverage {
 
 bool SourceIdCmp::operator()(const IR::Node *s1, const IR::Node *s2) const {
-    return s1->clone_id < s2->clone_id;
+    return s1->srcInfo < s2->srcInfo;
 }
 
 CollectNodes::CollectNodes(CoverageOptions coverageOptions) : coverageOptions(coverageOptions) {}

@@ -168,7 +168,9 @@ class SourceInfo final {
         return *this;
     }
 
-    bool operator==(const SourceInfo &rhs) const { return start == rhs.start && end == rhs.end; }
+    bool operator==(const SourceInfo &rhs) const {
+        return start == rhs.start && end == rhs.end && getSourceFile() == rhs.getSourceFile();
+    }
 
     cstring toDebugString() const;
 
@@ -195,10 +197,15 @@ class SourceInfo final {
        'invalid' source positions come first.
        This is true if the start of other is strictly before
        the start of this. */
-    bool operator<(const SourceInfo &rhs) const {
-        if (!rhs.isValid()) return false;
-        if (!isValid()) return true;
-        return this->start < rhs.start;
+    inline bool operator<(const SourceInfo &rhs) const {
+        if (!rhs.isValid()) {
+            return false;
+        }
+        if (!isValid()) {
+            return true;
+        }
+        return this->start < rhs.start ||
+               ((this->start == rhs.start) && this->getSourceFile() < rhs.getSourceFile());
     }
     inline bool operator>(const SourceInfo &rhs) const { return rhs.operator<(*this); }
     inline bool operator<=(const SourceInfo &rhs) const { return !this->operator>(rhs); }
