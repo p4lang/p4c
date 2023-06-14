@@ -12,7 +12,7 @@ fi
 PROTOBUF_LIB="protobuf@21"
 
 $BREW update
-$BREW install autoconf automake bdw-gc bison boost ccache cmake \
+$BREW install autoconf automake bdw-gc bison boost@1.76 ccache cmake \
       libtool openssl pkg-config python coreutils grep
 $BREW install ${PROTOBUF_LIB}
 
