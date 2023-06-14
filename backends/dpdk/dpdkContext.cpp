@@ -18,6 +18,7 @@ limitations under the License.
 
 #include "backend.h"
 #include "control-plane/bfruntime_ext.h"
+#include "dpdkUtils.h"
 #include "printUtils.h"
 namespace DPDK {
 
@@ -190,7 +191,7 @@ void DpdkContextGenerator::addKeyField(Util::JsonArray *keyJson, const cstring n
 Util::JsonObject *DpdkContextGenerator::initTableCommonJson(const cstring name,
                                                             const struct TableAttributes &attr) {
     auto *tableJson = new Util::JsonObject();
-    cstring tableName = attr.controlName + "." + name;
+    cstring tableName = name;
     tableJson->emplace("name", attr.externalName);
     tableJson->emplace("target_name", tableName);
     tableJson->emplace("direction", attr.direction);
@@ -349,6 +350,7 @@ Util::JsonObject *DpdkContextGenerator::addMatchAttributes(const IR::P4Table *ta
             for (auto param : *(attr.params)) {
                 if (param->type->is<IR::Type_Bits>()) {
                     param_width = param->type->width_bits();
+                    param_width = getMetadataFieldWidth(param_width);
                 } else if (!param->type->is<IR::Type_Boolean>()) {
                     BUG("Unsupported parameter type %1%", param->type);
                 }
@@ -411,6 +413,7 @@ Util::JsonArray *DpdkContextGenerator::addActions(const IR::P4Table *table,
                 for (auto param : *(attr.params)) {
                     if (param->type->is<IR::Type_Bits>()) {
                         param_width = param->type->width_bits();
+                        param_width = getMetadataFieldWidth(param_width);
                     } else if (!param->type->is<IR::Type_Boolean>()) {
                         BUG("Unsupported parameter type %1%", param->type);
                     }
