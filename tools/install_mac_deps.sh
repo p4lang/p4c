@@ -10,14 +10,14 @@ fi
 # https://protobuf.dev/news/2022-08-03/#abseil-dep
 # We do not want abseil, so we stay with 21.x for now.
 PROTOBUF_LIB="protobuf@21"
+BOOST_LIB="boost@1.76"
 
 $BREW update
-$BREW install autoconf automake bdw-gc bison boost ccache cmake \
-      libtool openssl pkg-config python coreutils grep
-$BREW install ${PROTOBUF_LIB}
+$BREW install autoconf automake bdw-gc bison ${BOOST_LIB} ccache cmake \
+      libtool openssl pkg-config python coreutils grep ${PROTOBUF_LIB}
 
 # Prefer Homebrew's bison, grep, and protobuf over the macOS-provided version
-$BREW link --force bison grep ${PROTOBUF_LIB}
+$BREW link --force bison grep ${PROTOBUF_LIB} ${BOOST_LIB}
 echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' >> ~/.bash_profile
 echo 'export PATH="/usr/local/opt/${PROTOBUF_LIB}/bin:$PATH"' >> ~/.bash_profile
 eecho 'export PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"' >> ~/.bash_profile
