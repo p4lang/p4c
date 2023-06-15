@@ -112,6 +112,22 @@ bool Taint::hasTaint(const IR::Expression *expr) {
         return false;
     }
     if (const auto *binaryExpr = expr->to<IR::Operation_Binary>()) {
+        // We can short-circuit '&&'...
+        if (const auto *lAndExpr = binaryExpr->to<IR::LAnd>()) {
+            if (const auto *boolVal = lAndExpr->left->to<IR::BoolLiteral>()) {
+                if (!boolVal->value) {
+                    return false;
+                }
+            }
+        }
+        // ...and '||' in some cases.
+        if (const auto *lOrExpr = binaryExpr->to<IR::LOr>()) {
+            if (const auto *boolVal = lOrExpr->left->to<IR::BoolLiteral>()) {
+                if (boolVal->value) {
+                    return false;
+                }
+            }
+        }
         return hasTaint(binaryExpr->left) || hasTaint(binaryExpr->right);
     }
     if (const auto *unaryExpr = expr->to<IR::Operation_Unary>()) {

@@ -1489,6 +1489,17 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              const auto *algo = args->at(3)->expression;
              const auto *oneBitType = IR::getBitType(1);
 
+             // In some cases the condition is false already. No need to do complex processing then.
+             if (const auto *boolVal = verifyCond->to<IR::BoolLiteral>()) {
+                 if (!boolVal->value) {
+                     auto &taintedState = state.clone();
+                     taintedState.popBody();
+                     result->emplace_back(taintedState);
+                     return;
+                 }
+             }
+
+             // Handle the case where the condition might be true.
              // If the condition is tainted or the input data is tainted, the checksum error
              // will not be reliable.
              if (argsAreTainted) {
@@ -1501,8 +1512,6 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  result->emplace_back(taintedState);
                  return;
              }
-
-             // Handle the case where the condition is true.
 
              // Generate the checksum arguments.
              auto *checksumArgs = new IR::Vector<IR::Argument>();
@@ -1603,6 +1612,20 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              const auto *checksumVarType = checksumVar->type;
              const auto *data = args->at(1)->expression;
              const auto *algo = args->at(3)->expression;
+
+             // In some cases the condition is false already. No need to do complex processing then.
+             if (const auto *boolVal = updateCond->to<IR::BoolLiteral>()) {
+                 if (!boolVal->value) {
+                     auto &taintedState = state.clone();
+                     taintedState.popBody();
+                     result->emplace_back(taintedState);
+                     return;
+                 }
+             }
+
+             // Handle the case where the condition might be true.
+             // If the condition is tainted or the input data is tainted, the checksum error
+             // will not be reliable.
              // If the condition is tainted or the input data is tainted.
              // The checksum will also be tainted.
              if (argsAreTainted) {
