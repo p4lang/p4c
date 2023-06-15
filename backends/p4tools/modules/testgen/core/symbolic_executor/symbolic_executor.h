@@ -42,13 +42,14 @@ class SymbolicExecutor {
     /// Executes the P4 program along a randomly chosen path. When the program terminates, the
     /// given callback is invoked. If the callback returns true, then the executor terminates.
     /// Otherwise, execution of the P4 program continues on a different random path.
-    /// TODO there is a lot of code repetition in subclasses. Refactor and extract duplicates.
-    virtual void run(const Callback &callBack) = 0;
+    virtual void run(const Callback &callBack);
+
+    virtual void runImpl(const Callback &callBack, ExecutionStateReference executionState) = 0;
 
     explicit SymbolicExecutor(AbstractSolver &solver, const ProgramInfo &programInfo);
 
     /// Writes a list of the selected branches into @param out.
-    void printCurrentTraceAndBranches(std::ostream &out);
+    void printCurrentTraceAndBranches(std::ostream &out, const ExecutionState &executionState);
 
     /// Getter to access visitedNodes.
     const P4::Coverage::CoverageSet &getVisitedNodes();
@@ -62,9 +63,6 @@ class SymbolicExecutor {
 
     /// The SMT solver backing this executor.
     AbstractSolver &solver;
-
-    /// The current execution state.
-    std::reference_wrapper<ExecutionState> executionState;
 
     /// Set of all statements, to be retrieved from programInfo.
     const P4::Coverage::CoverageSet &coverableNodes;

@@ -20,14 +20,15 @@
 
 namespace P4Tools::P4Testgen {
 
-void RandomMaxStmtCoverage::run(const Callback &callback) {
+void RandomMaxStmtCoverage::runImpl(const Callback &callBack,
+                                    ExecutionStateReference executionState) {
     // Loop until we reach terminate, or until there are no more
     // branches to produce tests.
     while (true) {
         try {
             if (executionState.get().isTerminal()) {
                 // We've reached the end of the program. Call back and (if desired) end execution.
-                bool terminate = handleTerminalState(callback, executionState);
+                bool terminate = handleTerminalState(callBack, executionState);
                 uint64_t coverage = visitedNodes.size();
                 // We set the coverage saddle track accordingly.
                 if (coverage == coverageSaddleTrack.first) {

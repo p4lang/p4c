@@ -112,7 +112,7 @@ SmallStepEvaluator::REngineType SmallStepEvaluator::renginePreprocessing(
 class CommandVisitor {
  private:
     std::reference_wrapper<SmallStepEvaluator> self;
-    std::reference_wrapper<ExecutionState> state;
+    ExecutionStateReference state;
     using Branch = SmallStepEvaluator::Branch;
     using Result = SmallStepEvaluator::Result;
 

@@ -19,7 +19,7 @@ class DepthFirstSearch : public SymbolicExecutor {
     /// Executes the P4 program along a randomly chosen path. When the program terminates, the
     /// given callback is invoked. If the callback returns true, then the executor terminates.
     /// Otherwise, execution of the P4 program continues on a different random path.
-    void run(const Callback &callBack) override;
+    void runImpl(const Callback &callBack, ExecutionStateReference executionState) override;
 
     /// Constructor for this strategy, considering inheritance
     DepthFirstSearch(AbstractSolver &solver, const ProgramInfo &programInfo);
@@ -42,7 +42,7 @@ class DepthFirstSearch : public SymbolicExecutor {
     /// 2. If there are successors left, try to find a successor that covers new statements. Set the
     /// nextState as this successors state.
     /// 3. If no successor with new statements was found set a random successor.
-    [[nodiscard]] bool pickSuccessor(StepResult successors);
+    [[nodiscard]] std::optional<ExecutionStateReference> pickSuccessor(StepResult successors);
 };
 
 }  // namespace P4Tools::P4Testgen

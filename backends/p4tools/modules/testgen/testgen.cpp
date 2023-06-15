@@ -76,19 +76,8 @@ int generateAbstractTests(const TestgenOptions &testgenOptions, const ProgramInf
         return testBackend->run(std::forward<decltype(finalState)>(finalState));
     };
 
-    try {
-        // Run the symbolic executor with given exploration strategy.
-        symbex.run(callBack);
-    } catch (...) {
-        if (testgenOptions.trackBranches) {
-            // Print list of the selected branches and store all information into
-            // dumpFolder/selectedBranches.txt file.
-            // This printed list could be used for repeat this bug in arguments of --input-branches
-            // command line. For example, --input-branches "1,1".
-            symbex.printCurrentTraceAndBranches(std::cerr);
-        }
-        throw;
-    }
+    symbex.run(callBack);
+
     // Emit a performance report, if desired.
     testBackend->printPerformanceReport(true);
 

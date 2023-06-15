@@ -47,14 +47,13 @@ std::optional<SymbolicExecutor::Branch> GreedyStmtSelection::popPotentialBranch(
     return std::nullopt;
 }
 
-bool GreedyStmtSelection::pickSuccessor(StepResult successors) {
+std::optional<ExecutionStateReference> GreedyStmtSelection::pickSuccessor(StepResult successors) {
     if (successors->empty()) {
-        return false;
+        return std::nullopt;
     }
     // If there is only one successor, choose it and move on.
     if (successors->size() == 1) {
-        executionState = successors->at(0).nextState;
-        return true;
+        return successors->at(0).nextState;
     }
 
     stepsWithoutTest++;
@@ -66,25 +65,26 @@ bool GreedyStmtSelection::pickSuccessor(StepResult successors) {
         // If we succeed, pick the branch and add the remainder to the list of
         // potential branches.
         if (branch.has_value()) {
-            executionState = branch->nextState;
+            auto &nextState = branch->nextState;
             potentialBranches.insert(potentialBranches.end(), successors->begin(),
                                      successors->end());
-            return true;
+            return nextState;
         }
     }
     // If we can not cover anything new, pick a branch at random.
-    executionState = popRandomBranch(*successors).nextState;
+    auto nextState = popRandomBranch(*successors).nextState;
     // Add the remaining tests to the unexplored branches.
     unexploredBranches.insert(unexploredBranches.end(), successors->begin(), successors->end());
-    return true;
+    return nextState;
 }
 
-void GreedyStmtSelection::run(const Callback &callback) {
+void GreedyStmtSelection::runImpl(const Callback &callBack,
+                                  ExecutionStateReference executionState) {
     while (true) {
         try {
             if (executionState.get().isTerminal()) {
                 // We've reached the end of the program. Call back and (if desired) end execution.
-                bool terminate = handleTerminalState(callback, executionState);
+                bool terminate = handleTerminalState(callBack, executionState);
                 stepsWithoutTest = 0;
                 if (terminate) {
                     return;
