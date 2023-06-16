@@ -38,7 +38,7 @@ class Metadata : public TF {
     Metadata(std::filesystem::path basePath, std::optional<unsigned int> seed);
 
     /// Produce a Metadata test.
-    void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testIdx,
+    void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testId,
                     float currentCoverage) override;
 
  private:

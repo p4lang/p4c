@@ -38,7 +38,8 @@ PnaTestBackend::PnaTestBackend(const ProgramInfo &programInfo, SymbolicExecutor 
     if (testBackendString.isNullOrEmpty()) {
         ::error(
             "No test back end provided. Please provide a test back end using the --test-backend "
-            "parameter.");
+            "parameter. Supported back ends are %1%.",
+            Utils::containerToString(SUPPORTED_BACKENDS));
         exit(EXIT_FAILURE);
     }
 

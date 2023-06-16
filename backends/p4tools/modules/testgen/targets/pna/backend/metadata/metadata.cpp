@@ -147,7 +147,7 @@ void Metadata::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
         dataJson["seed"] = *seed;
     }
     dataJson["test_name"] = basePath.stem();
-    dataJson["test_id"] = testId + 1;
+    dataJson["test_id"] = testId;
     computeTraceData(testSpec, dataJson);
 
     dataJson["send"] = getSend(testSpec);
@@ -177,14 +177,14 @@ void Metadata::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
     metadataFile.flush();
 }
 
-void Metadata::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testIdx,
+void Metadata::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
                           float currentCoverage) {
     auto incrementedbasePath = basePath;
-    incrementedbasePath.concat("_" + std::to_string(testIdx));
+    incrementedbasePath.concat("_" + std::to_string(testId));
     incrementedbasePath.replace_extension(".yml");
     metadataFile = std::ofstream(incrementedbasePath);
     std::string testCase = getTestCaseTemplate();
-    emitTestcase(testSpec, selectedBranches, testIdx, testCase, currentCoverage);
+    emitTestcase(testSpec, selectedBranches, testId, testCase, currentCoverage);
 }
 
 }  // namespace P4Tools::P4Testgen::Pna

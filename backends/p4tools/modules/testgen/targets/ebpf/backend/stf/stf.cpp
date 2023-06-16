@@ -222,7 +222,7 @@ expect {{verify.eg_port}} {{verify.exp_pkt}}
     return TEST_CASE;
 }
 
-void STF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testIdx,
+void STF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
                        const std::string &testCase, float currentCoverage) {
     inja::json dataJson;
     if (selectedBranches != nullptr) {
@@ -232,7 +232,7 @@ void STF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
         dataJson["seed"] = *seed;
     }
 
-    dataJson["test_id"] = testIdx + 1;
+    dataJson["test_id"] = testId;
     dataJson["trace"] = getTrace(testSpec);
     dataJson["control_plane"] = getControlPlane(testSpec);
     dataJson["send"] = getSend(testSpec);
@@ -243,17 +243,18 @@ void STF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
     dataJson["coverage"] = coverageStr.str();
 
     LOG5("STF test back end: emitting testcase:" << std::setw(4) << dataJson);
-    auto stfFile = basePath;
-    stfFile.replace_extension("_" + std::to_string(testIdx) + ".stf");
-    auto stfFileStream = std::ofstream(stfFile);
+    auto incrementedbasePath = basePath;
+    incrementedbasePath.concat("_" + std::to_string(testId));
+    incrementedbasePath.replace_extension(".stf");
+    auto stfFileStream = std::ofstream(incrementedbasePath);
     inja::render_to(stfFileStream, testCase, dataJson);
     stfFileStream.flush();
 }
 
-void STF::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testIdx,
+void STF::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
                      float currentCoverage) {
     std::string testCase = getTestCaseTemplate();
-    emitTestcase(testSpec, selectedBranches, testIdx, testCase, currentCoverage);
+    emitTestcase(testSpec, selectedBranches, testId, testCase, currentCoverage);
 }
 
 }  // namespace P4Tools::P4Testgen::EBPF
