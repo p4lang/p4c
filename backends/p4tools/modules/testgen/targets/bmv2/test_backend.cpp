@@ -84,7 +84,8 @@ TestBackEnd::TestInfo Bmv2TestBackend::produceTestInfo(
 }
 
 const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionState,
-                                                const Model *completedModel, const TestInfo &testInfo) {
+                                                const Model *completedModel,
+                                                const TestInfo &testInfo) {
     // Create a testSpec.
     TestSpec *testSpec = nullptr;
 

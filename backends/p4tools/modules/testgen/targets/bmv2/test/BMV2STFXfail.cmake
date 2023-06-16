@@ -83,13 +83,8 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2"
-  "Computations are not supported in update_checksum"
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
   "Cast failed"
-  # push front can not handled tainted header validity.
+  # push front can not handle tainted header validity.
   header-stack-ops-bmv2.p4
 )
 
