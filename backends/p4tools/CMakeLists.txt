@@ -34,18 +34,20 @@ project(P4TOOLS VERSION ${P4C_SEM_VERSION_STRING})
 # inherit FindLibGc.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-# We need a fairly recent version of Z3.
-set(Z3_MIN_VERSION "4.8.14")
-# But 4.12+ is currently broken with libGC
-set(Z3_MAX_VERSION_EXCL "4.12")
-find_package(Z3 ${Z3_MIN_VERSION} REQUIRED)
-
-if(NOT DEFINED Z3_VERSION_STRING OR ${Z3_VERSION_STRING} VERSION_LESS ${Z3_MIN_VERSION})
-  message(FATAL_ERROR "The minimum required Z3 version is ${Z3_MIN_VERSION}. Has ${Z3_VERSION_STRING}.")
-endif()
-if (${Z3_VERSION_STRING} VERSION_GREATER_EQUAL ${Z3_MAX_VERSION_EXCL})
-  message(FATAL_ERROR "The Z3 version has to be lower than ${Z3_MAX_VERSION_EXCL} (the latter currently does no work with libGC). Has ${Z3_VERSION_STRING}.")
-endif()
+# Pull in a specific version of Z3 and link against it.
+set (P4TOOLS_Z3_VERSION "4.11.2")
+message("Fetching Z3 version ${P4TOOLS_Z3_VERSION} for P4Tools...")
+set(FETCHCONTENT_QUIET OFF CACHE BOOL "Silence FetchContent output" FORCE)
+FetchContent_Declare(z3
+    URL https://github.com/Z3Prover/z3/releases/download/z3-${P4TOOLS_Z3_VERSION}/z3-${P4TOOLS_Z3_VERSION}-x64-glibc-2.31.zip
+    URL_HASH SHA256=9d0f70e61e82b321f35e6cad1343615d2dead6f2c54337a24293725de2900fb6
+    USES_TERMINAL_DOWNLOAD      TRUE
+)
+FetchContent_MakeAvailable(z3)
+set(FETCHCONTENT_QUIET ON CACHE BOOL "Silence FetchContent output" FORCE)
+include_directories(BEFORE ${z3_SOURCE_DIR}/include)
+set (P4TOOLS_Z3_LIB ${z3_SOURCE_DIR}/bin/libz3.a)
+message("Done with setting up Z3 for P4Tools.")
 
 # Import common definitions.
 include(common)

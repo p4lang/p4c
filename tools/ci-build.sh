@@ -194,34 +194,19 @@ if [ "$VALIDATION" == "ON" ]; then
 fi
 # ! ------  END VALIDATION -----------------------------------------------
 
-# ! ------  BEGIN P4TESTGEN -----------------------------------------------
+# ! ------  BEGIN P4TOOLS -----------------------------------------------
 function build_tools_deps() {
-  # This is needed to pull Z3.
-  sudo apt-get install -y wget zip
-  # Install a recent version of Z3
-  Z3_VERSION="z3-4.8.14"
-  Z3_DIST="${Z3_VERSION}-x64-glibc-2.31"
-
-  # To run PTF tests.
+  # To run PTF nanomsg tests.
   sudo pip3 install nnpy
   sudo apt-get install -y libnanomsg-dev
-
-  pushd /tmp
-  wget https://github.com/Z3Prover/z3/releases/download/${Z3_VERSION}/${Z3_DIST}.zip
-  unzip ${Z3_DIST}.zip
-  sudo cp -r ${Z3_DIST}/bin/libz3.* /usr/local/lib/
-  sudo cp -r ${Z3_DIST}/include/* /usr/local/include/
-  popd
-  rm -rf /tmp/${Z3_DIST}
 }
-# ! ------  END P4TESTGEN -----------------------------------------------
+# ! ------  END P4TOOLS -----------------------------------------------
 
 
 # Build the dependencies necessary for the P4Tools platform.
 if [ "$ENABLE_TEST_TOOLS" == "ON" ]; then
   build_tools_deps
 fi
-# ! ------  END TOOLS -----------------------------------------------
 
 # Build with Clang instead of GCC.
 if [ "$COMPILE_WITH_CLANG" == "ON" ]; then

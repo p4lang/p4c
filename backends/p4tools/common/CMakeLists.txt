@@ -53,7 +53,7 @@ add_p4tools_library(p4tools-common ${P4C_TOOLS_COMMON_SOURCES})
 
 target_link_libraries(
   p4tools-common
-  PUBLIC z3::z3
+  PUBLIC ${P4TOOLS_Z3_LIB}
 )
 
 target_include_directories(
