@@ -424,7 +424,7 @@ void PTF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
         dataJson["selected_branches"] = selectedBranches.c_str();
     }
 
-    dataJson["test_id"] = testId + 1;
+    dataJson["test_id"] = testId;
     dataJson["trace"] = getTrace(testSpec);
     dataJson["control_plane"] = getControlPlane(testSpec);
     dataJson["send"] = getSend(testSpec);
