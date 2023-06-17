@@ -87,6 +87,22 @@ class STFLexer:
         "REMOVE",
         "SETDEFAULT",
         "WAIT",
+        "MIRRORING_ADD",
+        "MIRRORING_ADD_MC",
+        "MIRRORING_DELETE",
+        "MIRRORING_GET",
+        "MC_MGRP_CREATE",
+        "MC_NODE_CREATE",
+        "MC_NODE_UPDATE",
+        "MC_NODE_ASSOCIATE",
+        "COUNTER_READ",
+        "COUNTER_WRITE",
+        "REGISTER_READ",
+        "REGISTER_WRITE",
+        "REGISTER_RESET",
+        "METER_GET_RATES",
+        "METER_SET_RATES",
+        "METER_ARRAY_SET_RATES",
     )
 
     keywords_map = {}
@@ -102,6 +118,7 @@ class STFLexer:
         "DATA_DEC",
         "DATA_HEX",
         "DATA_TERN",
+        "DATA_EXACT",
         "DOT",
         "ID",
         "INT_CONST_BIN",
@@ -153,6 +170,7 @@ class STFLexer:
     dec_constant = r"([0-9]+)"
 
     identifier = r"([a-z$A-Z_][a-z$A-Z_0-9]*)"
+    quoted_identifier = r"\"[^\"]+\""
 
     @TOKEN(hex_tern_constant)
     def t_TERN_CONST_HEX(self, t):
@@ -195,6 +213,12 @@ class STFLexer:
         # print t, "pos:", t.lexpos, "col:", self.lexer.colno
         return t
 
+    @TOKEN(quoted_identifier)
+    def t_quoted_ID(self, t):
+        t.type = "ID"
+        t.value = t.value[1:-1]
+        return t
+
     # Discard comments.
     def t_COMMENT(self, t):
         r"\#.*$"
@@ -226,6 +250,10 @@ class STFLexer:
 
     def t_packetdata_DATA_TERN(self, t):
         r"\*"
+        return t
+
+    def t_packetdata_DATA_EXACT(self, t):
+        r"\$"
         return t
 
     def t_packetdata_newline(self, t):

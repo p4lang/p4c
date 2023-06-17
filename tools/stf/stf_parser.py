@@ -18,6 +18,8 @@
 # Parse an STF file.
 # -----------------------------------------------------------------------------
 
+import re
+
 import ply.yacc as yacc
 
 from .stf_lexer import STFLexer
@@ -34,7 +36,30 @@ from .stf_lexer import STFLexer
 #           | PACKET port packet_data
 #           | SETDEFAULT qualified_name action
 #           | WAIT
+#           | direct_cmd
 #
+# direct_cmd : MIRRORING_ADD number number
+#           | MIRRORING_ADD_MC number number
+#           | MIRRORING_DELETE number
+#           | MIRRORING_GET number
+#           | MC_MGRP_CREATE number
+#           | MC_NODE_CREATE number number_list
+#           | MC_NODE_UPDATE number number_list
+#           | MC_NODE_ASSOCIATE number number
+#           | COUNTER_READ qualified_name number
+#           | COUNTER_WRITE qualified_name number number number
+#           | REGISTER_READ qualified_name number
+#           | REGISTER_WRITE qualified_name number number
+#           | REGISTER_RESET qualified_name
+#           | METER_GET_RATES qualified_name number
+#           | METER_SET_RATES qualified_name number meter_rate
+#           | METER_ARRAY_SET_RATES qualified_name meter_rate
+#
+# meter_rate : number COLON number meter_rate
+#           | number COLON number
+#
+# number_list : match
+#            | number_list match
 # match_list : match
 #            | match_list match
 # match : qualified_name COLON number_or_lpm
@@ -44,6 +69,9 @@ from .stf_lexer import STFLexer
 #        | INT_CONST_BIN
 #        | INT_CONST_HEX
 #        | TERN_CONST_HEX
+#
+# number_or_float: number
+#                | float
 #
 # qualified_name : ID
 #                | ID '[' INT_CONST_DEC ']'
@@ -68,16 +96,19 @@ from .stf_lexer import STFLexer
 # arg : ID COLON number
 #
 # port : DATA_DEC
+# port_list : port DATA_DEC
 #
 # priority : INT_CONST_DEC
 #
 # expect_data : expect_datum
 #             | expect_data expect_datum
+#             | exact_datum
 # packet_data : packet_datum
 #             | packet_data packet_datum
 #
 # expect_datum : packet_datum | DATA_TERN
 # packet_datum : DATA_DEC | DATA_HEX
+# exact_datum : DATA_EXACT
 
 # PARSER ----------------------------------------------------------------------
 
@@ -85,7 +116,7 @@ from .stf_lexer import STFLexer
 class STFParser:
     def __init__(self):
         self.lexer = STFLexer()
-        self.lexer.build()
+        self.lexer.build(reflags=re.UNICODE)
         self.tokens = self.lexer.tokens
         self.parser = yacc.yacc(module=self)
         self.errors_cnt = 0
@@ -127,7 +158,7 @@ class STFParser:
             self.print_error(
                 p.lineno,
                 self.lexer.get_colno(),
-                "Syntax error while parsing at token '%s' (of type %s)." % (p.value, p.type),
+                "Unexpected token '%s' (of type %s)." % (p.value, p.type),
             )
             # Skip to the next statement.
             while True:
@@ -201,6 +232,82 @@ class STFParser:
     def p_statement_wait(self, p):
         "statement : WAIT"
         p[0] = (p[1].lower(),)
+
+    def p_statement_direct_cmd(self, p):
+        "statement : direct_cmd"
+        p[0] = p[1]
+
+    def p_direct_cmd_mirroring_add(self, p):
+        "direct_cmd : MIRRORING_ADD number number"
+        p[0] = (p[1].lower(), p[2], p[3])
+
+    def p_direct_cmd_mirroring_add_mc(self, p):
+        "direct_cmd : MIRRORING_ADD_MC number number"
+        p[0] = (p[1].lower(), p[2], p[3])
+
+    def p_direct_cmd_mirroring_delete(self, p):
+        "direct_cmd : MIRRORING_DELETE number"
+        p[0] = (p[1].lower(), p[2])
+
+    def p_direct_cmd_mirroring_get(self, p):
+        "direct_cmd : MIRRORING_GET number"
+        p[0] = (p[1].lower(), p[2])
+
+    def p_direct_cmd_mc_mgrp_create(self, p):
+        "direct_cmd : MC_MGRP_CREATE number"
+        p[0] = (p[1].lower(), p[2])
+
+    def p_direct_cmd_mc_node_create(self, p):
+        "direct_cmd : MC_NODE_CREATE number number_list"
+        p[0] = (p[1].lower(), p[2], p[3])
+
+    def p_direct_cmd_mc_node_update(self, p):
+        "direct_cmd : MC_NODE_UPDATE number number_list"
+        p[0] = (p[1].lower(), p[2], p[3])
+
+    def p_direct_cmd_mc_node_associate(self, p):
+        "direct_cmd : MC_NODE_ASSOCIATE number number"
+        p[0] = (p[1].lower(), p[2], p[3])
+
+    def p_direct_cmd_counter_read(self, p):
+        "direct_cmd : COUNTER_READ qualified_name number"
+        p[0] = (p[1].lower(), p[2], p[3])
+
+    def p_direct_cmd_counter_write(self, p):
+        "direct_cmd : COUNTER_WRITE qualified_name number number number"
+        p[0] = (p[1].lower(), p[2], p[3], p[4], p[5])
+
+    def p_direct_cmd_register_read(self, p):
+        "direct_cmd : REGISTER_READ qualified_name number"
+        p[0] = (p[1].lower(), p[2], p[3])
+
+    def p_direct_cmd_register_write(self, p):
+        "direct_cmd : REGISTER_WRITE qualified_name number number"
+        p[0] = (p[1].lower(), p[2], p[3], p[4])
+
+    def p_direct_cmd_register_reset(self, p):
+        "direct_cmd : REGISTER_RESET qualified_name"
+        p[0] = (p[1].lower(), p[2])
+
+    def p_direct_cmd_meter_get_rates(self, p):
+        "direct_cmd : METER_GET_RATES qualified_name number"
+        p[0] = (p[1].lower(), p[2], p[3])
+
+    def p_direct_cmd_meter_set_rates(self, p):
+        "direct_cmd : METER_SET_RATES qualified_name number meter_rate"
+        p[0] = (p[1].lower(), p[2], p[3], p[4])
+
+    def p_direct_cmd_meter_array_set_rates(self, p):
+        "direct_cmd : METER_ARRAY_SET_RATES qualified_name meter_rate"
+        p[0] = (p[1].lower(), p[2], p[3])
+
+    def p_meter_rate_many(self, p):
+        "meter_rate : number_or_float COLON number meter_rate"
+        p[0] = p[1] + ":" + p[3] + " " + p[4]
+
+    def p_meter_rate_one(self, p):
+        "meter_rate : number_or_float COLON number"
+        p[0] = p[1] + ":" + p[3]
 
     def p_id_or_index(self, p):
         """id_or_index : ID
@@ -293,9 +400,25 @@ class STFParser:
         | INT_CONST_HEX"""
         p[0] = p[1]
 
+    def p_float(self, p):
+        "number_or_float : number DOT number"
+        p[0] = p[1] + "." + p[3]
+
+    def p_number_or_float(self, p):
+        "number_or_float : number"
+        p[0] = p[1]
+
     def p_packet_data_port(self, p):
         "port : DATA_DEC"
         p[0] = p[1]
+
+    def p_number_list_one(self, p):
+        "number_list : number"
+        p[0] = p[1]
+
+    def p_number_list_many(self, p):
+        "number_list : number number_list"
+        p[0] = p[1] + " " + p[2]
 
     def p_packet_data_one(self, p):
         "packet_data : packet_datum"
@@ -315,12 +438,20 @@ class STFParser:
         p[0] = [p[1]]
 
     def p_expect_data_many(self, p):
-        "expect_data : expect_data expect_datum"
-        p[0] = p[1] + [p[2]]
+        "expect_data : expect_datum expect_data"
+        p[0] = [p[1]] + p[2]
 
-    def p_expect_dataum(self, p):
+    def p_expect_data_exact_one(self, p):
+        "expect_data : exact_datum"
+        p[0] = [p[1]]
+
+    def p_expect_datum(self, p):
         """expect_datum : packet_datum
         | DATA_TERN"""
+        p[0] = p[1]
+
+    def p_exact_datum(self, p):
+        """exact_datum : DATA_EXACT"""
         p[0] = p[1]
 
 
