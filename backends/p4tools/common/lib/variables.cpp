@@ -54,6 +54,9 @@ IR::StateVariable convertReference(const IR::Expression *ref) {
     if (const auto *member = ref->to<IR::Member>()) {
         return member;
     }
+    if (const auto *arrIndex = ref->to<IR::ArrayIndex>()) {
+        return arrIndex;
+    }
     // Local variable.
     const auto *path = ref->checkedTo<IR::PathExpression>();
     return path;

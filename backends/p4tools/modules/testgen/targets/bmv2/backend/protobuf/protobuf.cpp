@@ -378,7 +378,7 @@ entities : [
     return TEST_CASE;
 }
 
-void Protobuf::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testIdx,
+void Protobuf::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
                             const std::string &testCase, float currentCoverage) {
     inja::json dataJson;
     if (selectedBranches != nullptr) {
@@ -388,7 +388,7 @@ void Protobuf::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
         dataJson["seed"] = *seed;
     }
     dataJson["test_name"] = basePath.stem();
-    dataJson["test_id"] = testIdx + 1;
+    dataJson["test_id"] = testId;
     // TODO: Traces are disabled until we are able to escape illegal characters (e.g., '"').
     // dataJson["trace"] = getTrace(testSpec);
     dataJson["trace"] = inja::json::array();
@@ -401,17 +401,18 @@ void Protobuf::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
     dataJson["coverage"] = coverageStr.str();
 
     LOG5("Protobuf test back end: emitting testcase:" << std::setw(4) << dataJson);
-    auto protobufFile = basePath;
-    protobufFile.replace_extension("_" + std::to_string(testIdx) + ".proto");
-    auto protobufFileStream = std::ofstream(protobufFile);
+    auto incrementedbasePath = basePath;
+    incrementedbasePath.concat("_" + std::to_string(testId));
+    incrementedbasePath.replace_extension(".stf");
+    auto protobufFileStream = std::ofstream(incrementedbasePath);
     inja::render_to(protobufFileStream, testCase, dataJson);
     protobufFileStream.flush();
 }
 
-void Protobuf::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testIdx,
+void Protobuf::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
                           float currentCoverage) {
     std::string testCase = getTestCaseTemplate();
-    emitTestcase(testSpec, selectedBranches, testIdx, testCase, currentCoverage);
+    emitTestcase(testSpec, selectedBranches, testId, testCase, currentCoverage);
 }
 
 }  // namespace P4Tools::P4Testgen::Bmv2

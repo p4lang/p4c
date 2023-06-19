@@ -1046,7 +1046,6 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              result->emplace_back(cond, state, nextState);
              return;
          }},
-
         /* ======================================================================================
          *  digest
          *  Calling digest causes a message containing the values specified in

@@ -43,7 +43,7 @@ class PTF : public TF {
     PTF(std::filesystem::path basePath, std::optional<unsigned int> seed);
 
     /// Produce a PTF test.
-    void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testIdx,
+    void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testId,
                     float currentCoverage) override;
 
  private:
@@ -52,11 +52,11 @@ class PTF : public TF {
     void emitPreamble();
 
     /// Emits a test case.
-    /// @param testIdx specifies the test name.
+    /// @param testId specifies the test name.
     /// @param selectedBranches enumerates the choices the interpreter made for this path.
     /// @param currentCoverage contains statistics  about the current coverage of this test and its
     /// preceding tests.
-    void emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testIdx,
+    void emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
                       const std::string &testCase, float currentCoverage);
 
     /// @returns the inja test case template as a string.

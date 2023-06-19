@@ -30,6 +30,7 @@ make
 ## Dependencies
 * [inja](https://github.com/pantor/inja) template engine for testcase generation.
 * [z3](https://github.com/Z3Prover/z3) SMT solver to compute path constraints.
+    * Important: We currently only support Z3 versions 4.8.14 to 4.12.0.
 
 
 ## Development Style
