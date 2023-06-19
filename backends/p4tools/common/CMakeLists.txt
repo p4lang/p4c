@@ -5,16 +5,24 @@ include(common)
 
 project(p4tools-common)
 
-# Store the current git commit hash as part of version information.
-execute_process(
-  COMMAND git log --pretty=format:-%h -n 1
-  OUTPUT_VARIABLE P4TOOLS_VERSION_HASH
-  ERROR_QUIET
-)
+# Pull in a specific version of Z3 and link against it.
+set(P4TOOLS_Z3_VERSION "4.11.2")
+message("Fetching Z3 version ${P4TOOLS_Z3_VERSION} for P4Tools...")
 
-if(NOT "${P4TOOLS_VERSION_HASH}" STREQUAL "")
-  message(STATUS "Current git refpoint: ${P4TOOLS_VERSION_HASH}")
-endif()
+# Print out download state while setting up Z3.
+set(FETCHCONTENT_QUIET_PREV ${FETCHCONTENT_QUIET})
+set(FETCHCONTENT_QUIET OFF)
+fetchcontent_declare(
+  z3
+  URL https://github.com/Z3Prover/z3/releases/download/z3-${P4TOOLS_Z3_VERSION}/z3-${P4TOOLS_Z3_VERSION}-x64-glibc-2.31.zip
+  URL_HASH SHA256=9d0f70e61e82b321f35e6cad1343615d2dead6f2c54337a24293725de2900fb6
+  USES_TERMINAL_DOWNLOAD TRUE
+  GIT_PROGRESS TRUE
+)
+fetchcontent_makeavailable(z3)
+set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
+message("Done with setting up Z3 for P4Tools.")
+
 
 # Generate version information.
 configure_file(version.h.in version.h)
@@ -50,6 +58,11 @@ set(
 )
 
 add_p4tools_library(p4tools-common ${P4C_TOOLS_COMMON_SOURCES})
+
+# Other projects may also pull in Z3.
+# We have to make sure we only include our local version with p4tools.
+target_include_directories(p4tools-common SYSTEM BEFORE PUBLIC ${z3_SOURCE_DIR}/include)
+set(P4TOOLS_Z3_LIB ${z3_SOURCE_DIR}/bin/libz3.a)
 
 target_link_libraries(
   p4tools-common

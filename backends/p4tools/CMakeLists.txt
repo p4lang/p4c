@@ -30,24 +30,20 @@ endif()
 # CMake file for P4 tools.
 project(P4TOOLS VERSION ${P4C_SEM_VERSION_STRING})
 
+# Store the current git commit hash as part of version information.
+execute_process(
+  COMMAND git log --pretty=format:-%h -n 1
+  OUTPUT_VARIABLE P4TOOLS_VERSION_HASH
+  ERROR_QUIET
+)
+
+if(NOT "${P4TOOLS_VERSION_HASH}" STREQUAL "")
+  message(STATUS "Current git refpoint: ${P4TOOLS_VERSION_HASH}")
+endif()
+
 # Add cmake directory to our module path. Also add cmake directory from p4c to
 # inherit FindLibGc.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-
-# Pull in a specific version of Z3 and link against it.
-set (P4TOOLS_Z3_VERSION "4.11.2")
-message("Fetching Z3 version ${P4TOOLS_Z3_VERSION} for P4Tools...")
-set(FETCHCONTENT_QUIET OFF CACHE BOOL "Silence FetchContent output" FORCE)
-FetchContent_Declare(z3
-    URL https://github.com/Z3Prover/z3/releases/download/z3-${P4TOOLS_Z3_VERSION}/z3-${P4TOOLS_Z3_VERSION}-x64-glibc-2.31.zip
-    URL_HASH SHA256=9d0f70e61e82b321f35e6cad1343615d2dead6f2c54337a24293725de2900fb6
-    USES_TERMINAL_DOWNLOAD      TRUE
-)
-FetchContent_MakeAvailable(z3)
-set(FETCHCONTENT_QUIET ON CACHE BOOL "Silence FetchContent output" FORCE)
-include_directories(BEFORE ${z3_SOURCE_DIR}/include)
-set (P4TOOLS_Z3_LIB ${z3_SOURCE_DIR}/bin/libz3.a)
-message("Done with setting up Z3 for P4Tools.")
 
 # Import common definitions.
 include(common)
