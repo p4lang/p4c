@@ -202,6 +202,10 @@ function build_tools_deps() {
   Z3_VERSION="z3-4.8.14"
   Z3_DIST="${Z3_VERSION}-x64-glibc-2.31"
 
+  # To run PTF tests.
+  sudo pip3 install nnpy
+  sudo apt-get install -y libnanomsg-dev
+
   pushd /tmp
   wget https://github.com/Z3Prover/z3/releases/download/${Z3_VERSION}/${Z3_DIST}.zip
   unzip ${Z3_DIST}.zip
