@@ -12,48 +12,60 @@
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
+#include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4Tools::P4Testgen {
 
-void SelectedBranches::run(const Callback &callback) {
-    while (!executionState.get().isTerminal()) {
-        StepResult successors = step(executionState);
-        // Assign branch ids to the branches. These integer branch ids are used by track-branches
-        // and selected (input) branches features.
-        // Also populates exploredBranches from the initial set of branches.
-        for (uint64_t bIdx = 0; bIdx < successors->size(); ++bIdx) {
-            auto &succ = (*successors)[bIdx];
-            succ.nextState.get().pushBranchDecision(bIdx + 1);
+void SelectedBranches::runImpl(const Callback &callBack, ExecutionStateReference executionState) {
+    try {
+        while (!executionState.get().isTerminal()) {
+            StepResult successors = step(executionState);
+            // Assign branch ids to the branches. These integer branch ids are used by
+            // track-branches and selected (input) branches features. Also populates
+            // exploredBranches from the initial set of branches.
+            for (uint64_t bIdx = 0; bIdx < successors->size(); ++bIdx) {
+                auto &succ = (*successors)[bIdx];
+                succ.nextState.get().pushBranchDecision(bIdx + 1);
+            }
+            if (successors->size() == 1) {
+                // Non-branching states are not recorded by selected branches.
+                executionState = (*successors)[0].nextState;
+                continue;
+            }
+            if (selectedBranches.empty()) {
+                // Not enough steps in the input selected branches string, cannot continue.
+                ::warning("The selected path is incomplete, not emitting a testcase.");
+                break;
+            }
+            // If there are multiple, pop one branch decision from the input list and pick
+            // successor matching the given branch decision.
+            uint64_t nextBranch = selectedBranches.front();
+            selectedBranches.pop_front();
+            auto *next = chooseBranch(*successors, nextBranch);
+            if (next == nullptr) {
+                break;
+            }
+            executionState = *next;
         }
-        if (successors->size() == 1) {
-            // Non-branching states are not recorded by selected branches.
-            executionState = (*successors)[0].nextState;
-            continue;
+        if (executionState.get().isTerminal()) {
+            // We've reached the end of the program. Call back and (if desired) end execution.
+            handleTerminalState(callBack, executionState);
+            if (!selectedBranches.empty()) {
+                ::warning(
+                    "Execution reached a final state before executing whole "
+                    "selected path!");
+            }
+            return;
         }
-        if (selectedBranches.empty()) {
-            // Not enough steps in the input selected branches string, cannot continue.
-            ::warning("The selected path is incomplete, not emitting a testcase.");
-            break;
+    } catch (...) {
+        if (TestgenOptions::get().trackBranches) {
+            // Print list of the selected branches and store all information into
+            // dumpFolder/selectedBranches.txt file.
+            // This printed list could be used for repeat this bug in arguments of --input-branches
+            // command line. For example, --input-branches "1,1".
+            printCurrentTraceAndBranches(std::cerr, executionState);
         }
-        // If there are multiple, pop one branch decision from the input list and pick
-        // successor matching the given branch decision.
-        uint64_t nextBranch = selectedBranches.front();
-        selectedBranches.pop_front();
-        auto *next = chooseBranch(*successors, nextBranch);
-        if (next == nullptr) {
-            break;
-        }
-        executionState = *next;
-    }
-    if (executionState.get().isTerminal()) {
-        // We've reached the end of the program. Call back and (if desired) end execution.
-        handleTerminalState(callback, executionState);
-        if (!selectedBranches.empty()) {
-            ::warning(
-                "Execution reached a final state before executing whole "
-                "selected path!");
-        }
-        return;
+        throw;
     }
 }
 

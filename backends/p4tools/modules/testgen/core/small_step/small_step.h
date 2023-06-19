@@ -28,7 +28,7 @@ class SmallStepEvaluator {
     struct Branch {
         const Constraint *constraint;
 
-        std::reference_wrapper<ExecutionState> nextState;
+        ExecutionStateReference nextState;
 
         P4::Coverage::CoverageSet potentialStatements;
 

@@ -18,28 +18,27 @@ namespace P4Tools::P4Testgen {
 RandomBacktrack::RandomBacktrack(AbstractSolver &solver, const ProgramInfo &programInfo)
     : SymbolicExecutor(solver, programInfo) {}
 
-bool RandomBacktrack::pickSuccessor(StepResult successors) {
+std::optional<ExecutionStateReference> RandomBacktrack::pickSuccessor(StepResult successors) {
     if (successors->empty()) {
-        return false;
+        return std::nullopt;
     }
     // If there is only one successor, choose it and move on.
     if (successors->size() == 1) {
-        executionState = successors->at(0).nextState;
-        return true;
+        return successors->at(0).nextState;
     }
     // Pick a branch at random.
-    executionState = popRandomBranch(*successors).nextState;
+    auto nextState = popRandomBranch(*successors).nextState;
     // Add the remaining tests to the unexplored branches.
     unexploredBranches.insert(unexploredBranches.end(), successors->begin(), successors->end());
-    return true;
+    return nextState;
 }
 
-void RandomBacktrack::run(const Callback &callback) {
+void RandomBacktrack::runImpl(const Callback &callBack, ExecutionStateReference executionState) {
     while (true) {
         try {
             if (executionState.get().isTerminal()) {
                 // We've reached the end of the program. Call back and (if desired) end execution.
-                bool terminate = handleTerminalState(callback, executionState);
+                bool terminate = handleTerminalState(callBack, executionState);
                 if (terminate) {
                     return;
                 }

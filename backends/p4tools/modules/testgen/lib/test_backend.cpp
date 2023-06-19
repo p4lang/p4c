@@ -5,14 +5,12 @@
 
 #include "backends/p4tools/common/lib/format_int.h"
 #include "backends/p4tools/common/lib/model.h"
-#include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/taint.h"
 #include "backends/p4tools/common/lib/trace_event.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
-#include "lib/log.h"
 #include "lib/null.h"
 #include "lib/timer.h"
 #include "midend/coverage.h"
@@ -24,7 +22,6 @@
 #include "backends/p4tools/modules/testgen/lib/final_state.h"
 #include "backends/p4tools/modules/testgen/lib/logging.h"
 #include "backends/p4tools/modules/testgen/lib/packet_vars.h"
-#include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
@@ -93,7 +90,7 @@ bool TestBackEnd::run(const FinalState &state) {
         // Add a list of tracked branches to the test output, too.
         std::stringstream selectedBranches;
         if (TestgenOptions::get().trackBranches) {
-            symbex.printCurrentTraceAndBranches(selectedBranches);
+            symbex.printCurrentTraceAndBranches(selectedBranches, *executionState);
         }
 
         abort = printTestInfo(executionState, testInfo, outputPortExpr);

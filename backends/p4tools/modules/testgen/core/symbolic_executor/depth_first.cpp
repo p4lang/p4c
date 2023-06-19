@@ -19,32 +19,31 @@ namespace P4Tools::P4Testgen {
 DepthFirstSearch::DepthFirstSearch(AbstractSolver &solver, const ProgramInfo &programInfo)
     : SymbolicExecutor(solver, programInfo) {}
 
-bool DepthFirstSearch::pickSuccessor(StepResult successors) {
+std::optional<ExecutionStateReference> DepthFirstSearch::pickSuccessor(StepResult successors) {
     if (successors->empty()) {
-        return false;
+        return std::nullopt;
     }
 
     // If there is only one successor, choose it and move on.
     if (successors->size() == 1) {
-        executionState = successors->at(0).nextState;
-        return true;
+        return successors->at(0).nextState;
     }
 
     // If there are multiple successors, try to pick one.
     // Pick a successor branch at random to preserve some non-determinism.
-    executionState = popRandomBranch(*successors).nextState;
+    auto newState = popRandomBranch(*successors).nextState;
     // Add the remaining tests to the unexplored branches. Consume the remainder.
     unexploredBranches.insert(unexploredBranches.end(), make_move_iterator(successors->begin()),
                               make_move_iterator(successors->end()));
-    return true;
+    return newState;
 }
 
-void DepthFirstSearch::run(const Callback &callback) {
+void DepthFirstSearch::runImpl(const Callback &callBack, ExecutionStateReference executionState) {
     while (true) {
         try {
             if (executionState.get().isTerminal()) {
                 // We've reached the end of the program. Call back and (if desired) end execution.
-                bool terminate = handleTerminalState(callback, executionState);
+                bool terminate = handleTerminalState(callBack, executionState);
                 if (terminate) {
                     return;
                 }
@@ -56,8 +55,9 @@ void DepthFirstSearch::run(const Callback &callback) {
                 // State successors are accompanied by branch constraint which should be evaluated
                 // in the state before the step was taken - we copy the current symbolic state.
                 StepResult successors = step(executionState);
-                auto success = pickSuccessor(successors);
-                if (success) {
+                auto nextState = pickSuccessor(successors);
+                if (nextState.has_value()) {
+                    executionState = nextState.value();
                     continue;
                 }
             }

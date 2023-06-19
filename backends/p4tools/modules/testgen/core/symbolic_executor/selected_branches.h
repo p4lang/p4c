@@ -20,7 +20,7 @@ class SelectedBranches : public SymbolicExecutor {
     /// Executes the P4 program along a randomly chosen path. When the program terminates, the
     /// given callback is invoked. If the callback returns true, then the executor terminates.
     /// Otherwise, execution of the P4 program continues on a different random path.
-    void run(const Callback &callBack) override;
+    void runImpl(const Callback &callBack, ExecutionStateReference executionState) override;
 
     /// Constructor for this strategy, considering inheritance
     SelectedBranches(AbstractSolver &solver, const ProgramInfo &programInfo,

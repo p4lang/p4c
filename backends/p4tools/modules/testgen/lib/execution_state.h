@@ -406,6 +406,8 @@ class ExecutionState : public AbstractExecutionState {
     ExecutionState &operator=(const ExecutionState &) = default;
 };
 
+using ExecutionStateReference = std::reference_wrapper<ExecutionState>;
+
 }  // namespace P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_EXECUTION_STATE_H_ */
