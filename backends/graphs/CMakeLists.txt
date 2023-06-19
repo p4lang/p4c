@@ -20,19 +20,20 @@ set (GRAPHS_SRCS
   controls.cpp
   parsers.cpp
   graph_visitor.cpp
-  p4c-graphs.cpp
-  )
+)
 
 set (GRAPHS_HDRS
   graphs.h
   controls.h
   parsers.h
   graph_visitor.h
-  )
+)
 
+add_library(p4cgraphs STATIC ${GRAPHS_SRCS} ${EXTENSION_P4_14_CONV_SOURCES})
+add_dependencies(p4cgraphs ir-generated frontend)
 
-add_executable(p4c-graphs ${GRAPHS_SRCS} ${EXTENSION_P4_14_CONV_SOURCES})
-target_link_libraries (p4c-graphs ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
+add_executable(p4c-graphs p4c-graphs.cpp)
+target_link_libraries (p4c-graphs p4cgraphs ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 add_dependencies(p4c-graphs ir-generated frontend)
 
 install (TARGETS p4c-graphs

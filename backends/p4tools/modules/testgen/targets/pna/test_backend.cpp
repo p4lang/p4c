@@ -32,7 +32,7 @@ namespace P4Tools::P4Testgen::Pna {
 const std::set<std::string> PnaTestBackend::SUPPORTED_BACKENDS = {"METADATA"};
 
 PnaTestBackend::PnaTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                               const std::filesystem::path &testPath, std::optional<uint32_t> seed)
+                               const std::filesystem::path &testPath)
     : TestBackEnd(programInfo, symbex) {
     cstring testBackendString = TestgenOptions::get().testBackend;
     if (testBackendString.isNullOrEmpty()) {
@@ -43,7 +43,7 @@ PnaTestBackend::PnaTestBackend(const ProgramInfo &programInfo, SymbolicExecutor 
     }
 
     if (testBackendString == "METADATA") {
-        testWriter = new Metadata(testPath.c_str(), seed);
+        testWriter = new Metadata(testPath.c_str(), TestgenOptions::get().seed);
     } else {
         P4C_UNIMPLEMENTED(
             "Test back end %1% not implemented for this target. Supported back ends are %2%.",
@@ -52,17 +52,16 @@ PnaTestBackend::PnaTestBackend(const ProgramInfo &programInfo, SymbolicExecutor 
 }
 
 TestBackEnd::TestInfo PnaTestBackend::produceTestInfo(
-    const ExecutionState *executionState, const Model *completedModel,
+    const ExecutionState *executionState, const Model *finalModel,
     const IR::Expression *outputPacketExpr, const IR::Expression *outputPortExpr,
     const std::vector<std::reference_wrapper<const TraceEvent>> *programTraces) {
-    auto testInfo = TestBackEnd::produceTestInfo(executionState, completedModel, outputPacketExpr,
+    auto testInfo = TestBackEnd::produceTestInfo(executionState, finalModel, outputPacketExpr,
                                                  outputPortExpr, programTraces);
     return testInfo;
 }
 
 const TestSpec *PnaTestBackend::createTestSpec(const ExecutionState *executionState,
-                                               const Model *completedModel,
-                                               const TestInfo &testInfo) {
+                                               const Model *finalModel, const TestInfo &testInfo) {
     // Create a testSpec.
     TestSpec *testSpec = nullptr;
 
@@ -86,7 +85,7 @@ const TestSpec *PnaTestBackend::createTestSpec(const ExecutionState *executionSt
         const auto &flatFields = executionState->getFlatFields(
             localMetadataVar, localMetadataType->checkedTo<IR::Type_Struct>(), {});
         for (const auto &fieldRef : flatFields) {
-            const auto *fieldVal = completedModel->evaluate(executionState->get(fieldRef));
+            const auto *fieldVal = finalModel->evaluate(executionState->get(fieldRef), true);
             // Try to remove the leading internal name for the metadata field.
             // Thankfully, this string manipulation is safe if we are out of range.
             auto fieldString = fieldRef->toString();
@@ -104,7 +103,7 @@ const TestSpec *PnaTestBackend::createTestSpec(const ExecutionState *executionSt
     for (const auto &tablePair : uninterpretedTableConfigs) {
         const auto tableName = tablePair.first;
         const auto *uninterpretedTableConfig = tablePair.second->checkedTo<TableConfig>();
-        const auto *const tableConfig = uninterpretedTableConfig->evaluate(*completedModel);
+        const auto *const tableConfig = uninterpretedTableConfig->evaluate(*finalModel, true);
         testSpec->addTestObject("tables", tableName, tableConfig);
     }
 
@@ -112,7 +111,7 @@ const TestSpec *PnaTestBackend::createTestSpec(const ExecutionState *executionSt
     for (const auto &testObject : actionProfiles) {
         const auto profileName = testObject.first;
         const auto *actionProfile = testObject.second->checkedTo<PnaDpdkActionProfile>();
-        const auto *evaluatedProfile = actionProfile->evaluate(*completedModel);
+        const auto *evaluatedProfile = actionProfile->evaluate(*finalModel, true);
         testSpec->addTestObject("action_profiles", profileName, evaluatedProfile);
     }
 
@@ -120,7 +119,7 @@ const TestSpec *PnaTestBackend::createTestSpec(const ExecutionState *executionSt
     for (const auto &testObject : actionSelectors) {
         const auto selectorName = testObject.first;
         const auto *actionSelector = testObject.second->checkedTo<PnaDpdkActionSelector>();
-        const auto *evaluatedSelector = actionSelector->evaluate(*completedModel);
+        const auto *evaluatedSelector = actionSelector->evaluate(*finalModel, true);
         testSpec->addTestObject("action_selectors", selectorName, evaluatedSelector);
     }
 

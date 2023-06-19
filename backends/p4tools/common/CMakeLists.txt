@@ -31,11 +31,13 @@ set(
   compiler/midend.cpp
   compiler/reachability.cpp
 
+  core/abstract_execution_state.cpp
   core/target.cpp
   core/z3_solver.cpp
 
   lib/arch_spec.cpp
   lib/format_int.cpp
+  lib/gen_eq.cpp
   lib/model.cpp
   lib/namespace_context.cpp
   lib/symbolic_env.cpp

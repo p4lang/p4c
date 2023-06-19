@@ -36,7 +36,7 @@ control MyIngress(inout header_t hdr, inout metadata meta, inout standard_metada
         }
         const default_action = switch_0_case_0();
         const entries = {
-                        8w1 : switch_0_case();
+                        const 8w1 : switch_0_case();
         }
     }
     bit<8> switch_1_key;
@@ -54,7 +54,7 @@ control MyIngress(inout header_t hdr, inout metadata meta, inout standard_metada
         }
         const default_action = switch_1_case_0();
         const entries = {
-                        8w1 : switch_1_case();
+                        const 8w1 : switch_1_case();
         }
     }
     bit<8> switch_2_key;
@@ -75,8 +75,8 @@ control MyIngress(inout header_t hdr, inout metadata meta, inout standard_metada
         }
         const default_action = switch_2_case_1();
         const entries = {
-                        8w1 : switch_2_case();
-                        8w0 : switch_2_case_0();
+                        const 8w1 : switch_2_case();
+                        const 8w0 : switch_2_case_0();
         }
     }
     @hidden action issue3650l24() {

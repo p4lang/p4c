@@ -2128,6 +2128,11 @@ const IR::Node *TypeInference::postorder(IR::Entry *entry) {
         }
     if (nonConstantKeys) return entry;
 
+    if (entry->priority && !isCompileTimeConstant(entry->priority)) {
+        typeError("Entry priority must be a compile time constant: %1%", entry->priority);
+        return entry;
+    }
+
     TypeVariableSubstitution *tvs =
         unifyCast(entry, keyTuple, entryKeyType,
                   "Table entry has type '%1%' which is not the expected type '%2%'",
@@ -2138,8 +2143,8 @@ const IR::Node *TypeInference::postorder(IR::Entry *entry) {
     if (::errorCount() > 0) return entry;
 
     if (ks != keyset)
-        entry = new IR::Entry(entry->srcInfo, entry->annotations, ks->to<IR::ListExpression>(),
-                              entry->action, entry->singleton);
+        entry = new IR::Entry(entry->srcInfo, entry->annotations, entry->isConst, entry->priority,
+                              ks->to<IR::ListExpression>(), entry->action, entry->singleton);
 
     auto actionRef = entry->getAction();
     auto ale = validateActionInitializer(actionRef);

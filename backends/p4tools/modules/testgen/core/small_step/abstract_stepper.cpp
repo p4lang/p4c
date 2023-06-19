@@ -341,8 +341,7 @@ const IR::Literal *AbstractStepper::evaluateExpression(
     const IR::Literal *result = nullptr;
     if (solverResult != std::nullopt && *solverResult) {
         auto model = Model(solver.getSymbolicMapping());
-        model.complete(expr);
-        result = model.evaluate(expr);
+        result = model.evaluate(expr, true);
     }
     return result;
 }

@@ -38,7 +38,7 @@ class Packet : public TestObject {
  public:
     Packet(int port, const IR::Expression *payload, const IR::Expression *payloadIgnoreMask);
 
-    [[nodiscard]] const Packet *evaluate(const Model &model) const override;
+    [[nodiscard]] const Packet *evaluate(const Model &model, bool doComplete) const override;
 
     [[nodiscard]] cstring getObjectName() const override;
 
@@ -71,7 +71,7 @@ class ActionArg : public TestObject {
  public:
     ActionArg(const IR::Parameter *param, const IR::Expression *value);
 
-    [[nodiscard]] const ActionArg *evaluate(const Model &model) const override;
+    [[nodiscard]] const ActionArg *evaluate(const Model &model, bool doComplete) const override;
 
     [[nodiscard]] cstring getObjectName() const override;
 
@@ -102,7 +102,7 @@ class ActionCall : public TestObject {
 
     ActionCall(const IR::P4Action *action, std::vector<ActionArg> args);
 
-    [[nodiscard]] const ActionCall *evaluate(const Model &model) const override;
+    [[nodiscard]] const ActionCall *evaluate(const Model &model, bool doComplete) const override;
 
     [[nodiscard]] cstring getObjectName() const override;
 
@@ -143,7 +143,7 @@ class Ternary : public TableMatch {
     explicit Ternary(const IR::KeyElement *key, const IR::Expression *value,
                      const IR::Expression *mask);
 
-    [[nodiscard]] const Ternary *evaluate(const Model &model) const override;
+    [[nodiscard]] const Ternary *evaluate(const Model &model, bool doComplete) const override;
 
     [[nodiscard]] cstring getObjectName() const override;
 
@@ -170,7 +170,7 @@ class LPM : public TableMatch {
     explicit LPM(const IR::KeyElement *key, const IR::Expression *value,
                  const IR::Expression *prefixLength);
 
-    [[nodiscard]] const LPM *evaluate(const Model &model) const override;
+    [[nodiscard]] const LPM *evaluate(const Model &model, bool doComplete) const override;
 
     [[nodiscard]] cstring getObjectName() const override;
 
@@ -193,7 +193,7 @@ class Exact : public TableMatch {
  public:
     explicit Exact(const IR::KeyElement *key, const IR::Expression *value);
 
-    [[nodiscard]] const Exact *evaluate(const Model &model) const override;
+    [[nodiscard]] const Exact *evaluate(const Model &model, bool doComplete) const override;
 
     [[nodiscard]] cstring getObjectName() const override;
 
@@ -217,7 +217,7 @@ class TableRule : public TestObject {
  public:
     TableRule(TableMatchMap matches, int priority, ActionCall action, int ttl);
 
-    [[nodiscard]] const TableRule *evaluate(const Model &model) const override;
+    [[nodiscard]] const TableRule *evaluate(const Model &model, bool doComplete) const override;
 
     [[nodiscard]] cstring getObjectName() const override;
 
@@ -255,7 +255,7 @@ class TableConfig : public TestObject {
 
     [[nodiscard]] cstring getObjectName() const override;
 
-    [[nodiscard]] const TableConfig *evaluate(const Model &model) const override;
+    [[nodiscard]] const TableConfig *evaluate(const Model &model, bool doComplete) const override;
 
     /// @returns the table rules of this table.
     [[nodiscard]] const std::vector<TableRule> *getRules() const;

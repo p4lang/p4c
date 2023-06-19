@@ -1,0 +1,6 @@
+p4tc_samples/matchtype_errors.p4(98): [--Werror=target-error] error: match type range is not supported in this target
+            hdr.ipv4.protocol : range;
+                                ^^^^^
+p4tc_samples/matchtype_errors.p4(108): [--Werror=target-error] error: match type optional is not supported in this target
+            hdr.ipv4.srcAddr : optional;
+                               ^^^^^^^^

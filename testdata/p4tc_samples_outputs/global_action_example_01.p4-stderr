@@ -1,0 +1,6 @@
+p4tc_samples/global_action_example_01.p4(86): [--Wwarn=shadow] warning: 'send_nh' shadows 'send_nh'
+    action send_nh(@tc_type("dev") PortId_t port_id, @tc_type("macaddr") bit<48> dmac) {
+           ^^^^^^^
+p4tc_samples/global_action_example_01.p4(45)
+action send_nh(@tc_type("macaddr") inout bit<48> hdr_dmac, @tc_type("macaddr") inout bit<48> hdr_smac, @tc_type("dev") PortId_t port_id, @tc_type("macaddr") bit<48> dmac, @tc_type("macaddr") bit<48> smac) {
+       ^^^^^^^

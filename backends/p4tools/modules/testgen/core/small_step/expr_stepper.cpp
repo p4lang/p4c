@@ -7,7 +7,9 @@
 #include <vector>
 
 #include "backends/p4tools/common/core/solver.h"
+#include "backends/p4tools/common/lib/gen_eq.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
+#include "backends/p4tools/common/lib/taint.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/declaration.h"
 #include "ir/irutils.h"
@@ -27,7 +29,6 @@
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
-#include "backends/p4tools/modules/testgen/lib/gen_eq.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4Tools::P4Testgen {
@@ -53,7 +54,7 @@ void ExprStepper::handleHitMissActionRun(const IR::Member *member) {
     BUG_CHECK(method->method->is<IR::Member>(), "Method apply has unexpected format: %1%", method);
     replacements.emplace_back(new IR::MethodCallStatement(Util::SourceInfo(), method));
     const auto *methodName = method->method->to<IR::Member>();
-    const auto *table = state.getTableType(methodName);
+    const auto *table = state.findTable(methodName);
     CHECK_NULL(table);
     if (member->member.name == IR::Type_Table::hit) {
         replacements.emplace_back(Continuation::Return(TableStepper::getTableHitVar(table)));
@@ -87,17 +88,18 @@ bool ExprStepper::preorder(const IR::Member *member) {
     return stepSymbolicValue(state.get(member));
 }
 
+bool ExprStepper::preorder(const IR::ArrayIndex *arr) { return stepSymbolicValue(state.get(arr)); }
+
 void ExprStepper::evalActionCall(const IR::P4Action *action, const IR::MethodCallExpression *call) {
     const auto *actionNameSpace = action->to<IR::INamespace>();
     BUG_CHECK(actionNameSpace, "Does not instantiate an INamespace: %1%", actionNameSpace);
-    auto &nextState = state.clone();
     // If the action has arguments, these are usually directionless control plane input.
     // We introduce a symbolic variable that takes the argument value. This value is either
     // provided by a constant entry or synthesized by us.
     for (size_t argIdx = 0; argIdx < call->arguments->size(); ++argIdx) {
         const auto &parameters = action->parameters;
         const auto *param = parameters->getParameter(argIdx);
-        const auto *paramType = nextState.resolveType(param->type);
+        const auto *paramType = state.resolveType(param->type);
         // We do not use the control plane name here. We assume that UniqueParameters and
         // UniqueNames ensure uniqueness of parameter names.
         const auto paramName = param->name;
@@ -106,12 +108,12 @@ void ExprStepper::evalActionCall(const IR::P4Action *action, const IR::MethodCal
                   action);
         const auto *tableActionDataVar = new IR::PathExpression(paramType, new IR::Path(paramName));
         const auto *curArg = call->arguments->at(argIdx)->expression;
-        nextState.set(tableActionDataVar, curArg);
+        state.set(tableActionDataVar, curArg);
     }
-    nextState.replaceTopBody(action->body);
+    state.replaceTopBody(action->body);
     // Enter the action's namespace.
-    nextState.pushNamespace(actionNameSpace);
-    result->emplace_back(nextState);
+    state.pushNamespace(actionNameSpace);
+    result->emplace_back(state);
 }
 
 bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
@@ -137,10 +139,9 @@ bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
             BUG_CHECK(method->expr, "Method call has unexpected format: %1%", call);
 
             // Handle table calls.
-            if (const auto *table = state.getTableType(method)) {
-                auto &nextState = state.clone();
-                nextState.replaceTopBody(Continuation::Return(table));
-                result->emplace_back(nextState);
+            if (const auto *table = state.findTable(method)) {
+                state.replaceTopBody(Continuation::Return(table));
+                result->emplace_back(state);
                 return false;
             }
 
@@ -189,8 +190,8 @@ bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
     } else if (call->method->type->is<IR::Type_Action>()) {
         // Handle action calls. Actions are called by tables and are not inlined, unlike
         // functions.
-        const auto *action = state.getActionDecl(call);
-        evalActionCall(action, call);
+        const auto *actionType = state.getP4Action(call);
+        evalActionCall(actionType, call);
         return false;
     }
 
@@ -215,11 +216,10 @@ bool ExprStepper::preorder(const IR::Mux *mux) {
         });
     }
     // If the Mux condition  is tainted, just return a taint constant.
-    if (state.hasTaint(mux->e0)) {
-        auto &nextState = state.clone();
-        nextState.replaceTopBody(
+    if (Taint::hasTaint(mux->e0)) {
+        state.replaceTopBody(
             Continuation::Return(programInfo.createTargetUninitialized(mux->type, true)));
-        result->emplace_back(nextState);
+        result->emplace_back(state);
         return false;
     }
     // A list of path conditions paired with the resulting expression for each branch.
@@ -249,23 +249,9 @@ bool ExprStepper::preorder(const IR::Mux *mux) {
 
 bool ExprStepper::preorder(const IR::PathExpression *pathExpression) {
     logStep(pathExpression);
-
-    // If we are referencing a parser state, step into the state.
-    const auto *decl = state.findDecl(pathExpression)->getNode();
-    if (decl->is<IR::ParserState>()) {
-        return stepSymbolicValue(decl);
-    }
-    auto &nextState = state.clone();
-    // ValueSets can be declared in parsers and are usually set by the control plane.
-    // We simply return the contained valueSet.
-    if (const auto *valueSet = decl->to<IR::P4ValueSet>()) {
-        nextState.replaceTopBody(Continuation::Return(valueSet));
-        result->emplace_back(nextState);
-        return false;
-    }
     // Otherwise convert the path expression into a qualified member and return it.
-    nextState.replaceTopBody(Continuation::Return(nextState.get(pathExpression)));
-    result->emplace_back(nextState);
+    state.replaceTopBody(Continuation::Return(state.get(pathExpression)));
+    result->emplace_back(state);
     return false;
 }
 
@@ -273,15 +259,14 @@ bool ExprStepper::preorder(const IR::P4ValueSet *valueSet) {
     logStep(valueSet);
 
     auto vsSize = valueSet->size->checkedTo<IR::Constant>()->value;
-    auto &nextState = state.clone();
     IR::Vector<IR::Expression> components;
     // TODO: Fill components with values when we have an API.
     const auto *pvsType = valueSet->elementType;
     pvsType = state.resolveType(pvsType);
     TESTGEN_UNIMPLEMENTED("Value Set not yet fully implemented");
 
-    nextState.popBody();
-    result->emplace_back(nextState);
+    state.popBody();
+    result->emplace_back(state);
     return false;
 }
 
@@ -308,9 +293,8 @@ bool ExprStepper::preorder(const IR::Operation_Binary *binary) {
 
     // Handle saturating arithmetic expressions by translating them into Mux expressions.
     if (P4::SaturationElim::isSaturationOperation(binary)) {
-        auto &nextState = state.clone();
-        nextState.replaceTopBody(Continuation::Return(P4::SaturationElim::eliminate(binary)));
-        result->emplace_back(nextState);
+        state.replaceTopBody(Continuation::Return(P4::SaturationElim::eliminate(binary)));
+        result->emplace_back(state);
         return false;
     }
 
@@ -361,6 +345,8 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
             // TODO: Implement value sets.
             if (decl->is<IR::P4ValueSet>()) {
                 selectCases.erase(selectCases.begin() + idx);
+                // Since we erased an element from the vector, we need to reset the index.
+                idx = idx - 1;
                 continue;
             }
         }
@@ -389,7 +375,7 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
 
         // TODO: Implement the taint case for select expressions.
         // In the worst case, this means the entire parser is tainted.
-        if (state.hasTaint(matchCondition)) {
+        if (Taint::hasTaint(matchCondition)) {
             TESTGEN_UNIMPLEMENTED(
                 "The SelectExpression %1% is trying to match on a tainted key set."
                 " This means it is matching on uninitialized data."

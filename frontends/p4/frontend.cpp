@@ -38,6 +38,7 @@ limitations under the License.
 #include "deprecated.h"
 #include "directCalls.h"
 #include "dontcareArgs.h"
+#include "entryPriorities.h"
 #include "evaluator/evaluator.h"
 #include "frontends/common/constantFolding.h"
 #include "functionsInlining.h"
@@ -185,6 +186,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new ValidateValueSets(),
         new DefaultValues(&refMap, &typeMap),
         new BindTypeVariables(&refMap, &typeMap),
+        new EntryPriorities(&refMap),
         new PassRepeated(
             {new SpecializeGenericTypes(&refMap, &typeMap),
              new DefaultArguments(&refMap, &typeMap),  // add default argument values to parameters

@@ -43,6 +43,7 @@ PnaDpdkProgramInfo::PnaDpdkProgramInfo(
     int pipeIdx = 0;
 
     for (const auto &declTuple : *programmableBlocks) {
+        blockMap.emplace(declTuple.second->getName(), declTuple.first);
         // Iterate through the (ordered) pipes of the target architecture.
         auto subResult = processDeclaration(declTuple.second, pipeIdx);
         pipelineSequence.insert(pipelineSequence.end(), subResult.begin(), subResult.end());
@@ -61,21 +62,20 @@ std::vector<Continuation::Command> PnaDpdkProgramInfo::processDeclaration(
         TESTGEN_UNIMPLEMENTED("Constructed type %s of type %s not supported.", typeDecl,
                               typeDecl->node_type_name());
     }
-    const auto *params = applyBlock->getApplyParameters();
     // Retrieve the current canonical pipe in the architecture spec using the pipe index.
     const auto *archMember = archSpec->getArchMember(blockIdx);
 
     std::vector<Continuation::Command> cmds;
-    // Generate all the necessary copy-in/outs.
-    std::vector<Continuation::Command> copyOuts;
-    for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
-        const auto *param = params->getParameter(paramIdx);
-        produceCopyInOutCall(param, paramIdx, archMember, &cmds, &copyOuts);
-    }
+    // Copy-in.
+    const auto *copyInCall = new IR::MethodCallStatement(
+        Utils::generateInternalMethodCall("copy_in", {new IR::PathExpression(typeDecl->name)}));
+    cmds.emplace_back(copyInCall);
     // Insert the actual pipeline.
     cmds.emplace_back(typeDecl);
-    // Add the copy out assignments after the pipe has completed executing.
-    cmds.insert(cmds.end(), copyOuts.begin(), copyOuts.end());
+    // Copy-out.
+    const auto *copyOutCall = new IR::MethodCallStatement(
+        Utils::generateInternalMethodCall("copy_out", {new IR::PathExpression(typeDecl->name)}));
+    cmds.emplace_back(copyOutCall);
 
     auto *dropStmt =
         new IR::MethodCallStatement(Utils::generateInternalMethodCall("drop_and_exit", {}));

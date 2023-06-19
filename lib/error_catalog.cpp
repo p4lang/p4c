@@ -63,6 +63,8 @@ const int ErrorType::WARN_IGNORE = 1017;
 const int ErrorType::WARN_UNINITIALIZED_OUT_PARAM = 1018;
 const int ErrorType::WARN_UNINITIALIZED_USE = 1019;
 const int ErrorType::WARN_INVALID_HEADER = 1020;
+const int ErrorType::WARN_DUPLICATE_PRIORITIES = 1021;
+const int ErrorType::WARN_ENTRIES_OUT_OF_ORDER = 1022;
 const int ErrorType::WARN_MAX_WARNINGS = 2142;
 
 // map from errorCode to ErrorSig
@@ -107,4 +109,6 @@ std::map<int, cstring> ErrorCatalog::errorCatalog = {
     {ErrorType::WARN_UNINITIALIZED_USE, "uninitialized_use"},
     {ErrorType::WARN_UNINITIALIZED_OUT_PARAM, "uninitialized_out_param"},
     {ErrorType::WARN_IGNORE, "ignore"},
-    {ErrorType::WARN_INVALID_HEADER, "invalid_header"}};
+    {ErrorType::WARN_INVALID_HEADER, "invalid_header"},
+    {ErrorType::WARN_DUPLICATE_PRIORITIES, "duplicate_priorities"},
+    {ErrorType::WARN_ENTRIES_OUT_OF_ORDER, "entries_out_of_priority_order"}};

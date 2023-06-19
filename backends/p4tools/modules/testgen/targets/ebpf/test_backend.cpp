@@ -31,12 +31,12 @@ const big_int EBPFTestBackend::ZERO_PKT_MAX = 0xffffffff;
 const std::vector<std::string> EBPFTestBackend::SUPPORTED_BACKENDS = {"STF"};
 
 EBPFTestBackend::EBPFTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                                 const std::filesystem::path &testPath,
-                                 std::optional<uint32_t> seed)
+                                 const std::filesystem::path &testPath)
     : TestBackEnd(programInfo, symbex) {
     cstring testBackendString = TestgenOptions::get().testBackend;
+
     if (testBackendString == "STF") {
-        testWriter = new STF(testPath.c_str(), seed);
+        testWriter = new STF(testPath.c_str(), TestgenOptions::get().seed);
     } else {
         std::stringstream supportedBackendString;
         bool isFirst = true;
@@ -55,10 +55,10 @@ EBPFTestBackend::EBPFTestBackend(const ProgramInfo &programInfo, SymbolicExecuto
 }
 
 TestBackEnd::TestInfo EBPFTestBackend::produceTestInfo(
-    const ExecutionState *executionState, const Model *completedModel,
+    const ExecutionState *executionState, const Model *finalModel,
     const IR::Expression *outputPacketExpr, const IR::Expression *outputPortExpr,
     const std::vector<std::reference_wrapper<const TraceEvent>> *programTraces) {
-    auto testInfo = TestBackEnd::produceTestInfo(executionState, completedModel, outputPacketExpr,
+    auto testInfo = TestBackEnd::produceTestInfo(executionState, finalModel, outputPacketExpr,
                                                  outputPortExpr, programTraces);
     // This is a hack to deal with an virtual kernel interface quirk.
     // Packets that are too small are truncated to 02000000 (in hex) with width 32 bit.
@@ -78,8 +78,7 @@ TestBackEnd::TestInfo EBPFTestBackend::produceTestInfo(
 }
 
 const TestSpec *EBPFTestBackend::createTestSpec(const ExecutionState *executionState,
-                                                const Model *completedModel,
-                                                const TestInfo &testInfo) {
+                                                const Model *finalModel, const TestInfo &testInfo) {
     // Create a testSpec.
     TestSpec *testSpec = nullptr;
 
@@ -99,7 +98,7 @@ const TestSpec *EBPFTestBackend::createTestSpec(const ExecutionState *executionS
     for (const auto &tablePair : uninterpretedTableConfigs) {
         const auto tableName = tablePair.first;
         const auto *uninterpretedTableConfig = tablePair.second->checkedTo<TableConfig>();
-        const auto *const tableConfig = uninterpretedTableConfig->evaluate(*completedModel);
+        const auto *const tableConfig = uninterpretedTableConfig->evaluate(*finalModel, true);
         testSpec->addTestObject("tables", tableName, tableConfig);
     }
     return testSpec;

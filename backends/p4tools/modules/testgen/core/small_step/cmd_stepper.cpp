@@ -13,7 +13,9 @@
 #include "backends/p4tools/common/compiler/convert_hs_index.h"
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
+#include "backends/p4tools/common/lib/taint.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
+#include "backends/p4tools/common/lib/util.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
@@ -30,6 +32,7 @@
 #include "backends/p4tools/modules/testgen/core/small_step/abstract_stepper.h"
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
+#include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/collect_coverable_nodes.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
@@ -42,75 +45,6 @@ namespace P4Tools::P4Testgen {
 CmdStepper::CmdStepper(ExecutionState &state, AbstractSolver &solver,
                        const ProgramInfo &programInfo)
     : AbstractStepper(state, solver, programInfo) {}
-
-void CmdStepper::declareVariable(ExecutionState &nextState, const IR::Declaration_Variable *decl) {
-    if (decl->initializer != nullptr) {
-        TESTGEN_UNIMPLEMENTED("Unsupported initializer %s for declaration variable.",
-                              decl->initializer);
-    }
-    const auto *declType = state.resolveType(decl->type);
-
-    if (const auto *structType = declType->to<IR::Type_StructLike>()) {
-        const auto *parentExpr = new IR::PathExpression(structType, new IR::Path(decl->name.name));
-        declareStructLike(nextState, parentExpr, structType);
-    } else if (const auto *stackType = declType->to<IR::Type_Stack>()) {
-        const auto *stackSizeExpr = stackType->size;
-        auto stackSize = stackSizeExpr->checkedTo<IR::Constant>()->asInt();
-        const auto *stackElemType = stackType->elementType;
-        if (stackElemType->is<IR::Type_Name>()) {
-            stackElemType = nextState.resolveType(stackElemType->to<IR::Type_Name>());
-        }
-        const auto *structType = stackElemType->checkedTo<IR::Type_StructLike>();
-        for (auto idx = 0; idx < stackSize; idx++) {
-            const auto *parentExpr = HSIndexToMember::produceStackIndex(
-                structType, new IR::PathExpression(stackType, new IR::Path(decl->name.name)), idx);
-            declareStructLike(nextState, parentExpr, structType);
-        }
-    } else if (declType->is<IR::Type_Base>()) {
-        // If the variable does not have an initializer we need to create a new value for it. For
-        // now we just use the name directly.
-        const auto *left = new IR::PathExpression(declType, new IR::Path(decl->name.name));
-        nextState.set(left, programInfo.createTargetUninitialized(declType, false));
-    } else {
-        TESTGEN_UNIMPLEMENTED("Unsupported declaration type %1% node: %2%", declType,
-                              declType->node_type_name());
-    }
-}
-
-void CmdStepper::initializeBlockParams(const IR::Type_Declaration *typeDecl,
-                                       const std::vector<cstring> *blockParams,
-                                       ExecutionState &nextState, bool forceTaint) const {
-    // Collect parameters.
-    const auto *iApply = typeDecl->to<IR::IApply>();
-    BUG_CHECK(iApply != nullptr, "Constructed type %s of type %s not supported.", typeDecl,
-              typeDecl->node_type_name());
-    // Also push the namespace of the respective parameter.
-    nextState.pushNamespace(typeDecl->to<IR::INamespace>());
-    // Collect parameters.
-    const auto *params = iApply->getApplyParameters();
-    for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
-        const auto *param = params->getParameter(paramIdx);
-        const auto *paramType = param->type;
-        // Retrieve the identifier of the global architecture map using the parameter index.
-        auto archRef = blockParams->at(paramIdx);
-        // Irrelevant parameter. Ignore.
-        if (archRef == nullptr) {
-            continue;
-        }
-        // We need to resolve type names.
-        paramType = nextState.resolveType(paramType);
-
-        if (const auto *ts = paramType->to<IR::Type_StructLike>()) {
-            const auto *paramPath = new IR::PathExpression(paramType, new IR::Path(archRef));
-            declareStructLike(nextState, paramPath, ts, forceTaint);
-        } else if (paramType->is<IR::Type_Base>()) {
-            const auto &paramPath = ToolsVariables::getStateVariable(paramType, archRef);
-            nextState.set(paramPath, programInfo.createTargetUninitialized(paramType, forceTaint));
-        } else {
-            P4C_UNIMPLEMENTED("Unsupported initialization type %1%", paramType->node_type_name());
-        }
-    }
-}
 
 bool CmdStepper::preorder(const IR::AssignmentStatement *assign) {
     logStep(assign);
@@ -125,7 +59,7 @@ bool CmdStepper::preorder(const IR::AssignmentStatement *assign) {
     }
 
     state.markVisited(assign);
-    const auto &left = ExecutionState::convertReference(assign->left);
+    const auto &left = ToolsVariables::convertReference(assign->left);
     const auto *leftType = left->type;
 
     // Resolve the type of the left-and assignment, if it is a type name.
@@ -166,6 +100,12 @@ bool CmdStepper::preorder(const IR::P4Parser *p4parser) {
 
     auto &nextState = state.clone();
 
+    // Obtain the parser's namespace.
+    const auto *ns = p4parser->to<IR::INamespace>();
+    CHECK_NULL(ns);
+    // Enter the parser's namespace.
+    nextState.pushNamespace(ns);
+
     // Register and do target-specific initialization of the parser.
     const auto *constraint = startParser(p4parser, nextState);
 
@@ -179,12 +119,6 @@ bool CmdStepper::preorder(const IR::P4Parser *p4parser) {
     auto handlers = getExceptionHandlers(p4parser, nextState.getBody(), nextState);
     nextState.pushCurrentContinuation(handlers);
 
-    // Obtain the parser's namespace.
-    const auto *ns = p4parser->to<IR::INamespace>();
-    CHECK_NULL(ns);
-    // Enter the parser's namespace.
-    nextState.pushNamespace(ns);
-
     // Set the start state as the new body.
     const auto *startState = p4parser->states.getDeclaration<IR::ParserState>("start");
     std::vector<Continuation::Command> cmds;
@@ -192,10 +126,13 @@ bool CmdStepper::preorder(const IR::P4Parser *p4parser) {
     // Initialize parser-local declarations.
     for (const auto *decl : p4parser->parserLocals) {
         if (const auto *declVar = decl->to<IR::Declaration_Variable>()) {
-            declareVariable(nextState, declVar);
+            nextState.declareVariable(TestgenTarget::get(), *declVar);
         }
     }
+
+    // The actual execution.
     cmds.emplace_back(startState);
+
     nextState.replaceBody(Continuation::Body(cmds));
 
     result->emplace_back(constraint, state, nextState);
@@ -203,29 +140,28 @@ bool CmdStepper::preorder(const IR::P4Parser *p4parser) {
 }
 
 bool CmdStepper::preorder(const IR::P4Control *p4control) {
-    auto &nextState = state.clone();
-
+    const auto &target = TestgenTarget::get();
     auto blockName = p4control->getName().name;
 
     // Add trace events.
     std::stringstream controlName;
     controlName << "Control " << blockName << " start";
-    nextState.add(*new TraceEvents::Generic(controlName));
+    state.add(*new TraceEvents::Generic(controlName));
 
     // Set the emit buffer to be zero for the current control pipeline.
-    nextState.resetEmitBuffer();
+    state.resetEmitBuffer();
 
     // Obtain the control's namespace.
     const auto *ns = p4control->to<IR::INamespace>();
     CHECK_NULL(ns);
     // Enter the control's namespace.
-    nextState.pushNamespace(ns);
+    state.pushNamespace(ns);
 
     // Add control-local declarations.
     std::vector<Continuation::Command> cmds;
     for (const auto *decl : p4control->controlLocals) {
         if (const auto *declVar = decl->to<IR::Declaration_Variable>()) {
-            declareVariable(nextState, declVar);
+            state.declareVariable(target, *declVar);
         }
     }
     // Add the body, if it is not empty
@@ -234,25 +170,25 @@ bool CmdStepper::preorder(const IR::P4Control *p4control) {
     }
     // Remove the invocation of the control from the current body and push the resulting
     // continuation onto the continuation stack.
-    nextState.popBody();
+    state.popBody();
     // Exit terminates the entire control block (only the control).
     std::map<Continuation::Exception, Continuation> handlers;
     handlers.emplace(Continuation::Exception::Exit, Continuation::Body({}));
-    nextState.pushCurrentContinuation(handlers);
+    state.pushCurrentContinuation(handlers);
+
     // If the cmds are not empty, replace the body
     if (!cmds.empty()) {
         Continuation::Body newBody(cmds);
-        nextState.replaceBody(newBody);
+        state.replaceBody(newBody);
     }
 
-    result->emplace_back(nextState);
+    result->emplace_back(state);
     return false;
 }
 
 bool CmdStepper::preorder(const IR::EmptyStatement * /*empty*/) {
-    auto &nextState = state.clone();
-    nextState.popBody();
-    result->emplace_back(nextState);
+    state.popBody();
+    result->emplace_back(state);
     return false;
 }
 
@@ -272,7 +208,7 @@ bool CmdStepper::preorder(const IR::IfStatement *ifStatement) {
     // We insert a property that marks all execution as tainted until the if statement has
     // completed.
     // Because we may have nested taint, we need to check if we are already tainted.
-    if (state.hasTaint(ifStatement->condition)) {
+    if (Taint::hasTaint(ifStatement->condition)) {
         auto &nextState = state.clone();
         std::vector<Continuation::Command> cmds;
         auto currentTaint = state.getProperty<bool>("inUndefinedState");
@@ -333,9 +269,13 @@ bool CmdStepper::preorder(const IR::MethodCallStatement *methodCallStatement) {
     const auto *type = methodCallStatement->methodCall->type;
     // Table and action calls do not really return anything (for now).
     // TODO: We should not need these convoluted type checks in a method call statement.
-    if (type->is<IR::Type_Action>() ||
-        state.getTableType(methodCallStatement->methodCall->method) != nullptr) {
+    // We can directly jump to the respective visitor function instead of placing a continuation.
+    if (type->is<IR::Type_Action>()) {
         type = IR::Type::Void::get();
+    } else if (const auto *member = methodCallStatement->methodCall->method->to<IR::Member>()) {
+        if (state.findTable(member) != nullptr) {
+            type = IR::Type::Void::get();
+        }
     }
     state.pushCurrentContinuation(type);
     state.replaceBody(Continuation::Body({Continuation::Return(methodCallStatement->methodCall)}));
@@ -349,11 +289,8 @@ bool CmdStepper::preorder(const IR::P4Program * /*program*/) {
     // Get the initial constraints of the target. These constraints influence branch selection.
     std::optional<const Constraint *> cond = programInfo.getTargetConstraints();
 
-    // Have the target break apart the main declaration instance.
-    auto &nextState = state.clone();
-
     // Initialize all relevant environment variables for the respective target.
-    initializeTargetEnvironment(nextState);
+    initializeTargetEnvironment(state);
 
     // If this option is active, mandate that all packets conform to a fixed size.
     auto pktSize = TestgenOptions::get().minPktSize;
@@ -374,19 +311,19 @@ bool CmdStepper::preorder(const IR::P4Program * /*program*/) {
     // This segment inserts a special exception to deal with this case.
     // The drop exception just terminates execution completely.
     // We first pop the current body.
-    nextState.popBody();
+    state.popBody();
     // Then we insert the exception handlers.
     std::map<Continuation::Exception, Continuation> handlers;
     handlers.emplace(Continuation::Exception::Drop, Continuation::Body({}));
     handlers.emplace(Continuation::Exception::Exit, Continuation::Body({}));
     handlers.emplace(Continuation::Exception::Abort, Continuation::Body({}));
-    nextState.pushCurrentContinuation(handlers);
+    state.pushCurrentContinuation(handlers);
 
     // After, we insert the program commands into the new body and push them to the top.
     Continuation::Body newBody(*topLevelBlocks);
-    nextState.replaceBody(newBody);
+    state.replaceBody(newBody);
 
-    result->emplace_back(cond, state, nextState);
+    result->emplace_back(cond, state, state);
     return false;
 }
 
@@ -409,17 +346,6 @@ bool CmdStepper::preorder(const IR::ParserState *parserState) {
         return false;
     }
 
-    // Push a new continuation that will take the next state as an argument and execute the state
-    // as a command.
-    // Create a parameter for the continuation we're about to build.
-    const auto *v =
-        Continuation::genParameter(IR::Type_State::get(), "nextState", state.getNamespaceContext());
-
-    // Create the continuation itself.
-    Continuation::Body kBody({v->param});
-    Continuation k(v, kBody);
-    nextState.pushContinuation(*new ExecutionState::StackFrame(k, state.getNamespaceContext()));
-
     // Enter the parser state's namespace
     nextState.pushNamespace(parserState);
 
@@ -431,14 +357,32 @@ bool CmdStepper::preorder(const IR::ParserState *parserState) {
             continue;
         }
         if (const auto *declVar = component->to<IR::Declaration_Variable>()) {
-            declareVariable(nextState, declVar);
+            nextState.declareVariable(TestgenTarget::get(), *declVar);
         } else {
             cmds.emplace_back(component);
         }
     }
+    const auto *select = parserState->selectExpression;
+    if (select->is<IR::SelectExpression>()) {
+        // Push a new continuation that will take the next state as an argument and execute the
+        // state as a command. Create a parameter for the continuation we're about to build.
+        const auto *v = Continuation::genParameter(IR::Type_State::get(), "nextState",
+                                                   state.getNamespaceContext());
 
-    // Add the next parser state(s) to the cmds
-    cmds.emplace_back(Continuation::Return(parserState->selectExpression));
+        // Create the continuation itself.
+        Continuation::Body kBody({v->param});
+        Continuation k(v, kBody);
+        nextState.pushContinuation(*new ExecutionState::StackFrame(k, state.getNamespaceContext()));
+        // Add the next parser state(s) to the cmds
+        cmds.emplace_back(Continuation::Return(parserState->selectExpression));
+    } else if (const auto *pathExpression = select->to<IR::PathExpression>()) {
+        // Do not need a continuation here, just transition directly to the next state.
+        const auto *parserState = state.findDecl(pathExpression)->getNode();
+        cmds.emplace_back(parserState);
+    } else {
+        P4C_UNIMPLEMENTED("Select expression %1% of type %2% not implemented for parser states.",
+                          select, select->node_type_name());
+    }
 
     nextState.replaceTopBody(&cmds);
     result->emplace_back(nextState);
@@ -458,7 +402,7 @@ bool CmdStepper::preorder(const IR::BlockStatement *block) {
             continue;
         }
         if (const auto *declVar = component->to<IR::Declaration_Variable>()) {
-            declareVariable(nextState, declVar);
+            nextState.declareVariable(TestgenTarget::get(), *declVar);
         } else {
             cmds.emplace_back(component);
         }
@@ -522,7 +466,7 @@ IR::SwitchStatement *CmdStepper::replaceSwitchLabels(const IR::SwitchStatement *
     BUG_CHECK(methodCall, "Invalid format of %1% for action_run", member->expr);
     const auto *tableCall = methodCall->method->to<IR::Member>();
     BUG_CHECK(tableCall, "Invalid format of %1% for action_run", methodCall->method);
-    const auto *table = state.getTableType(methodCall->method->to<IR::Member>());
+    const auto *table = state.findTable(methodCall->method->to<IR::Member>());
     CHECK_NULL(table);
     auto actionVar = TableStepper::getTableActionVar(table);
     IR::Vector<IR::SwitchCase> newCases;
@@ -569,7 +513,7 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
     // If the switch expression is tainted, we can not predict which case will be chosen. We taint
     // the program counter and execute all of the statements.
     P4::Coverage::CoverageSet coveredNodes;
-    if (state.hasTaint(switchStatement->expression)) {
+    if (Taint::hasTaint(switchStatement->expression)) {
         auto currentTaint = state.getProperty<bool>("inUndefinedState");
         cmds.emplace_back(Continuation::PropertyUpdate("inUndefinedState", true));
         for (const auto *switchCase : switchStatement->cases) {

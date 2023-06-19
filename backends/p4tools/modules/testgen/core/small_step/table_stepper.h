@@ -91,14 +91,14 @@ class TableStepper {
     /// these do not match it steps through the default implementation. If it does not match either,
     /// a P4C_UNIMPLEMENTED is thrown.
     virtual const IR::Expression *computeTargetMatchType(
-        ExecutionState &nextState, const TableUtils::KeyProperties &keyProperties,
-        TableMatchMap *matches, const IR::Expression *hitCondition);
+        const TableUtils::KeyProperties &keyProperties, TableMatchMap *matches,
+        const IR::Expression *hitCondition);
 
     /// A helper function that computes whether a control-plane/table-key hits or not. This does not
     /// handle constant entries, it is specialized for control plane entries.
     /// The function also tracks the list of field matches created to achieve a  hit. We later use
     /// this to insert table entries using the STF/PTF framework.
-    const IR::Expression *computeHit(ExecutionState &nextState, TableMatchMap *matches);
+    const IR::Expression *computeHit(TableMatchMap *matches);
 
     /// Collects properties that may be set per table. Target back end may have different semantics
     /// for table execution that need to be collect before evaluation the table.

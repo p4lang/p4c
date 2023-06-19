@@ -35,6 +35,7 @@ OPTION (ENABLE_BMV2 "Build the BMV2 backend (required for the full test suite)" 
 OPTION (ENABLE_EBPF "Build the EBPF backend (required for the full test suite)" ON)
 OPTION (ENABLE_UBPF "Build the uBPF backend (required for the full test suite)" ON)
 OPTION (ENABLE_DPDK "Build the DPDK backend (required for the full test suite)" ON)
+OPTION (ENABLE_P4TC "Build the P4TC backend" ON)
 OPTION (ENABLE_P4TEST "Build the P4Test backend (required for the full test suite)" ON)
 OPTION (ENABLE_TEST_TOOLS "Build the P4Tools development platform" OFF)
 OPTION (ENABLE_P4C_GRAPHS "Build the p4c-graphs backend" ON)
@@ -232,13 +233,13 @@ add_cxx_compiler_option ("-Wextra")
 add_cxx_compiler_option ("-Wno-overloaded-virtual")
 add_cxx_compiler_option ("-Wno-deprecated")
 add_cxx_compiler_option ("-Wno-deprecated-declarations")
-# Make compiler follow the standard and not be too lenient. The increases
-# likelyhood that compilation will not break with other compilers (mainly clang)
+# Make compiler follow the standard and not be too lenient. The increases the
+# likelihood that compilation will not break with other compilers (mainly clang)
 # or in future versions of GCC.
 add_cxx_compiler_option ("-pedantic")
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  # The ##__VA_ARGS__ GNU extension is needed for IR. But clang compains about it.
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+  # The ##__VA_ARGS__ GNU extension is needed for IR. But clang complains about it.
   # FIXME: with C++20 we would be able to use standard __VA_OPT__
   add_cxx_compiler_option ("-Wno-gnu-zero-variadic-macro-arguments")
 endif()
@@ -400,6 +401,9 @@ endif ()
 if (ENABLE_P4C_GRAPHS AND HAVE_LIBBOOST_GRAPH EQUAL 1)
   add_subdirectory (backends/graphs)
 endif ()
+if (ENABLE_P4TC)
+    add_subdirectory (backends/tc)
+endif ()
 if (ENABLE_P4TEST)
     add_subdirectory (backends/p4test)
 endif ()
@@ -479,7 +483,7 @@ add_custom_target(dpdk_includes ALL
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/dpdk/pna.p4 ${P4C_BINARY_DIR}/p4include/dpdk
   DEPENDS update_includes
 )
-endif ()
+endif()
 
 # Installation
 # Targets install themselves. Here we install the core headers

@@ -151,7 +151,7 @@ const IR::Expression *makeConstant(Token input, const IR::Vector<IR::KeyElement>
             } else {
                 BUG("Unexpected key type %s.", keyType->node_type_name());
             }
-            return ToolsVariables::getSymbolicVariable(type, 0, std::string(inputStr));
+            return ToolsVariables::getSymbolicVariable(type, std::string(inputStr));
         }
     }
     if (input.is(Token::Kind::Number)) {
@@ -162,8 +162,7 @@ const IR::Expression *makeConstant(Token input, const IR::Vector<IR::KeyElement>
     }
     // TODO: Is this the right solution for priorities?
     if (input.is(Token::Kind::Priority)) {
-        return ToolsVariables::getSymbolicVariable(IR::Type_Bits::get(32), 0,
-                                                   std::string(inputStr));
+        return ToolsVariables::getSymbolicVariable(IR::Type_Bits::get(32), std::string(inputStr));
     }
     BUG_CHECK(result != nullptr,
               "Could not match restriction key label %s was not found in key list.",

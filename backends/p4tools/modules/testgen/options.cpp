@@ -16,7 +16,7 @@
 
 #include "backends/p4tools/modules/testgen/lib/logging.h"
 
-namespace P4Tools {
+namespace P4Tools::P4Testgen {
 
 TestgenOptions &TestgenOptions::get() {
     static TestgenOptions INSTANCE;
@@ -255,7 +255,7 @@ TestgenOptions::TestgenOptions()
             saddlePoint = saddlePointTmp;
             return true;
         },
-        "Threshold to invoke multiPop on RANDOM_ACCESS_MAX_COVERAGE.");
+        "Threshold to invoke multiPop on RANDOM_STATEMENT_SEARCH.");
 
     registerOption(
         "--print-traces", nullptr,
@@ -327,4 +327,4 @@ TestgenOptions::TestgenOptions()
         "produce no tests or only tests that contain counter examples.");
 }
 
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen

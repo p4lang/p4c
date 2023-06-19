@@ -265,7 +265,7 @@ const IR::IDeclaration *ResolutionContext::getDeclaration(const IR::This *pointe
 
 const IR::Type *ResolutionContext::resolveType(const IR::Type *type) const {
     if (auto tname = type->to<IR::Type_Name>())
-        return resolveUnique(tname->path->name, ResolutionType::Type)->to<IR::Type>();
+        return resolvePath(tname->path, true)->to<IR::Type>();
     return type;
 }
 
@@ -276,19 +276,22 @@ ResolveReferences::ResolveReferences(ReferenceMap *refMap, bool checkShadow)
     visitDagOnce = false;
 }
 
-void ResolveReferences::resolvePath(const IR::Path *path, bool isType) const {
+const IR::IDeclaration *ResolutionContext::resolvePath(const IR::Path *path, bool isType) const {
     LOG2("Resolving " << path << " " << (isType ? "as type" : "as identifier"));
     const IR::INamespace *ctxt = nullptr;
     if (path->absolute) ctxt = findContext<IR::P4Program>();
     ResolutionType k = isType ? ResolutionType::Type : ResolutionType::Any;
+    return resolveUnique(path->name, k, ctxt);
+}
 
-    const IR::IDeclaration *decl = resolveUnique(path->name, k, ctxt);
+const IR::IDeclaration *ResolveReferences::resolvePath(const IR::Path *path, bool isType) const {
+    auto decl = ResolutionContext::resolvePath(path, isType);
     if (decl == nullptr) {
         refMap->usedName(path->name.name);
-        return;
+    } else {
+        refMap->setDeclaration(path, decl);
     }
-
-    refMap->setDeclaration(path, decl);
+    return decl;
 }
 
 void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {

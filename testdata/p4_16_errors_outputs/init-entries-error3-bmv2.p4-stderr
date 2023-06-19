@@ -1,0 +1,3 @@
+init-entries-error3-bmv2.p4(65): [--Werror=overlimit] error: t1 Overflow in priority computation
+    table t1 {
+          ^^

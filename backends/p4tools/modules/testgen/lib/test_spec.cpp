@@ -45,9 +45,9 @@ const IR::Constant *Packet::getEvaluatedPayload() const {
     return constant;
 }
 
-const Packet *Packet::evaluate(const Model &model) const {
-    const auto *newPayload = model.evaluate(payload);
-    const auto *newPayloadIgnoreMask = model.evaluate(payloadIgnoreMask);
+const Packet *Packet::evaluate(const Model &model, bool doComplete) const {
+    const auto *newPayload = model.evaluate(payload, true);
+    const auto *newPayloadIgnoreMask = model.evaluate(payloadIgnoreMask, doComplete);
     return new Packet(port, newPayload, newPayloadIgnoreMask);
 }
 
@@ -76,8 +76,8 @@ const IR::Constant *ActionArg::getEvaluatedValue() const {
 
 cstring ActionArg::getObjectName() const { return "ActionArg"; }
 
-const ActionArg *ActionArg::evaluate(const Model &model) const {
-    const auto &newValue = model.evaluate(value);
+const ActionArg *ActionArg::evaluate(const Model &model, bool doComplete) const {
+    const auto &newValue = model.evaluate(value, doComplete);
     return new ActionArg(param, newValue);
 }
 
@@ -91,11 +91,11 @@ cstring ActionCall::getActionName() const { return identifier; }
 
 const IR::P4Action *ActionCall::getAction() const { return action; }
 
-const ActionCall *ActionCall::evaluate(const Model &model) const {
+const ActionCall *ActionCall::evaluate(const Model &model, bool doComplete) const {
     std::vector<ActionArg> evaluatedArgs;
     evaluatedArgs.reserve(args.size());
     for (const auto &actionArg : args) {
-        evaluatedArgs.emplace_back(*actionArg.evaluate(model));
+        evaluatedArgs.emplace_back(*actionArg.evaluate(model, doComplete));
     }
     return new ActionCall(identifier, action, evaluatedArgs);
 }
@@ -129,9 +129,9 @@ const IR::Constant *Ternary::getEvaluatedMask() const {
     return constant;
 }
 
-const Ternary *Ternary::evaluate(const Model &model) const {
-    const auto *evaluatedValue = model.evaluate(value);
-    const auto *evaluatedMask = model.evaluate(mask);
+const Ternary *Ternary::evaluate(const Model &model, bool doComplete) const {
+    const auto *evaluatedValue = model.evaluate(value, doComplete);
+    const auto *evaluatedMask = model.evaluate(mask, doComplete);
     return new Ternary(getKey(), evaluatedValue, evaluatedMask);
 }
 
@@ -158,9 +158,9 @@ const IR::Constant *LPM::getEvaluatedPrefixLength() const {
     return constant;
 }
 
-const LPM *LPM::evaluate(const Model &model) const {
-    const auto *evaluatedValue = model.evaluate(value);
-    const auto *evaluatedPrefixLength = model.evaluate(prefixLength);
+const LPM *LPM::evaluate(const Model &model, bool doComplete) const {
+    const auto *evaluatedValue = model.evaluate(value, doComplete);
+    const auto *evaluatedPrefixLength = model.evaluate(prefixLength, doComplete);
     return new LPM(getKey(), evaluatedValue, evaluatedPrefixLength);
 }
 
@@ -177,8 +177,8 @@ const IR::Constant *Exact::getEvaluatedValue() const {
     return constant;
 }
 
-const Exact *Exact::evaluate(const Model &model) const {
-    const auto *evaluatedValue = model.evaluate(value);
+const Exact *Exact::evaluate(const Model &model, bool doComplete) const {
+    const auto *evaluatedValue = model.evaluate(value, doComplete);
     return new Exact(getKey(), evaluatedValue);
 }
 
@@ -197,16 +197,16 @@ int TableRule::getTTL() const { return ttl; }
 
 cstring TableRule::getObjectName() const { return "TableRule"; }
 
-const TableRule *TableRule::evaluate(const Model &model) const {
+const TableRule *TableRule::evaluate(const Model &model, bool doComplete) const {
     TableMatchMap evaluatedMatches;
     for (const auto &matchTuple : matches) {
         auto name = matchTuple.first;
         const auto &match = matchTuple.second;
         // This is a lambda function that applies the visitor to each variant.
-        const auto *evaluatedMatch = match->evaluate(model)->checkedTo<TableMatch>();
+        const auto *evaluatedMatch = match->evaluate(model, doComplete)->checkedTo<TableMatch>();
         evaluatedMatches[name] = evaluatedMatch;
     }
-    const auto *evaluatedAction = action.evaluate(model);
+    const auto *evaluatedAction = action.evaluate(model, doComplete);
     return new TableRule(evaluatedMatches, priority, *evaluatedAction, ttl);
 }
 
@@ -240,10 +240,10 @@ void TableConfig::addTableProperty(cstring propertyName, const TestObject *prope
     tableProperties[propertyName] = property;
 }
 
-const TableConfig *TableConfig::evaluate(const Model &model) const {
+const TableConfig *TableConfig::evaluate(const Model &model, bool doComplete) const {
     std::vector<TableRule> evaluatedRules;
     for (const auto &rule : rules) {
-        const auto *evaluatedRule = rule.evaluate(model);
+        const auto *evaluatedRule = rule.evaluate(model, doComplete);
         evaluatedRules.emplace_back(*evaluatedRule);
     }
     TestObjectMap evaluatedProperties;
@@ -251,7 +251,7 @@ const TableConfig *TableConfig::evaluate(const Model &model) const {
         auto name = propertyTuple.first;
         const auto *property = propertyTuple.second;
         // This is a lambda function that applies the visitor to each variant.
-        const auto *evaluatedProperty = property->evaluate(model);
+        const auto *evaluatedProperty = property->evaluate(model, doComplete);
         evaluatedProperties.emplace(name, evaluatedProperty);
     }
     return new TableConfig(table, evaluatedRules, evaluatedProperties);

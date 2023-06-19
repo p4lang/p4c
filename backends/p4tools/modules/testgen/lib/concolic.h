@@ -34,7 +34,7 @@ class ConcolicMethodImpls {
  private:
     using MethodImpl = std::function<void(
         cstring concolicMethodName, const IR::ConcolicVariable *var, const ExecutionState &state,
-        const Model &completedModel, ConcolicVariableMap *resolvedConcolicVariables)>;
+        const Model &evaluatedModel, ConcolicVariableMap *resolvedConcolicVariables)>;
 
     ordered_map<cstring, ordered_map<uint, std::list<std::pair<std::vector<cstring>, MethodImpl>>>>
         impls;
@@ -48,7 +48,7 @@ class ConcolicMethodImpls {
     explicit ConcolicMethodImpls(const ImplList &implList);
 
     bool exec(cstring concolicMethodName, const IR::ConcolicVariable *var,
-              const ExecutionState &state, const Model &completedModel,
+              const ExecutionState &state, const Model &evaluatedModel,
               ConcolicVariableMap *resolvedConcolicVariables) const;
 
     void add(const ImplList &implList);
@@ -56,10 +56,10 @@ class ConcolicMethodImpls {
 
 class ConcolicResolver : public Inspector {
  public:
-    explicit ConcolicResolver(const Model &completedModel, const ExecutionState &state,
+    explicit ConcolicResolver(const Model &evaluatedModel, const ExecutionState &state,
                               const ConcolicMethodImpls &concolicMethodImpls);
 
-    ConcolicResolver(const Model &completedModel, const ExecutionState &state,
+    ConcolicResolver(const Model &evaluatedModel, const ExecutionState &state,
                      const ConcolicMethodImpls &concolicMethodImpls,
                      ConcolicVariableMap resolvedConcolicVariables);
 
@@ -71,8 +71,8 @@ class ConcolicResolver : public Inspector {
     /// Execution state may be used by concolic implementations to access specific state.
     const ExecutionState &state;
 
-    /// The completed model is queried to produce a (random) assignment for concolic inputs.
-    const Model &completedModel;
+    /// The evaluated model is queried to produce a (random) assignment for concolic inputs.
+    const Model &evaluatedModel;
 
     /// A map of the concolic variables and the assertion associated with the variable. These
     /// assertions are used to add constraints to the solver.

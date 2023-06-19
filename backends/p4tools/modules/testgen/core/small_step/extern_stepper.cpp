@@ -11,6 +11,7 @@
 
 #include "backends/p4tools/common/lib/constants.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
+#include "backends/p4tools/common/lib/taint.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/id.h"
@@ -27,6 +28,7 @@
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/expr_stepper.h"  // IWYU pragma: associated
 #include "backends/p4tools/modules/testgen/core/small_step/small_step.h"
+#include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/packet_vars.h"
@@ -142,20 +144,6 @@ ExprStepper::PacketCursorAdvanceInfo ExprStepper::calculateAdvanceExpression(
         notAdvanceCond = new IR::LAnd(notAdvanceCond, new IR::Equ(notAdvanceConst, advanceExpr));
     }
     return {advanceVal, advanceCond, notAdvanceVal, notAdvanceCond};
-}
-
-void ExprStepper::generateCopyIn(ExecutionState &nextState, const IR::StateVariable &targetPath,
-                                 const IR::StateVariable &srcPath, cstring dir,
-                                 bool forceTaint) const {
-    // If the direction is out, we do not copy in external values.
-    // We set the parameter to uninitialized.
-    if (dir == "out") {
-        nextState.set(targetPath,
-                      programInfo.createTargetUninitialized(targetPath->type, forceTaint));
-    } else {
-        // Otherwise we use a conventional assignment.
-        nextState.set(targetPath, nextState.get(srcPath));
-    }
 }
 
 void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *call,
@@ -278,8 +266,9 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> * /*args*/,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
              auto &nextState = state.clone();
+             const auto *drop = state.getSymbolicEnv().subst(programInfo.dropIsActive());
              // If the drop variable is tainted, we also mark the port tainted.
-             if (state.hasTaint(programInfo.dropIsActive())) {
+             if (Taint::hasTaint(drop)) {
                  nextState.set(programInfo.getTargetOutputPortVar(),
                                programInfo.createTargetUninitialized(
                                    programInfo.getTargetOutputPortVar()->type, true));
@@ -291,146 +280,73 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
          }},
         /* ======================================================================================
          *  copy_in
-         *  Copies values from @param srcRef to @param targetParam following the
-         *  copy-in/copy-out semantics of P4. We use this function to copy values in and out of
-         *  individual program pipes.
-         *  @param direction signifies the qualified class of the targetParam ("in", "inout", "out",
-         *  or "<none>").
-         *  All parameters that have direction "out" are set uninitialized.
+         *  Applies CopyIn to the provided reference to a control or parser block. The block
+         * reference is resolved and we iterate over all the parameters, copying in values
+         * appropriately.
          * ======================================================================================
          */
         {"*.copy_in",
-         {"srcRef", "targetParam", "direction", "forceUninitialized"},
+         {"blockRef"},
          [this](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
-             const auto *globalRef = args->at(0)->expression;
-             if (!(globalRef->is<IR::Member>() || globalRef->is<IR::PathExpression>())) {
-                 TESTGEN_UNIMPLEMENTED("Global input %1% of type %2% not supported", globalRef,
-                                       globalRef->type);
-             }
-             const auto &argRef = ExecutionState::convertReference(args->at(1)->expression);
-
-             const auto *direction = args->at(2)->expression->checkedTo<IR::StringLiteral>();
-             const auto *forceTaint = args->at(3)->expression->checkedTo<IR::BoolLiteral>();
-
+             const auto *blockRef = args->at(0)->expression->checkedTo<IR::PathExpression>();
+             const auto *block = state.findDecl(blockRef);
+             const auto *archSpec = TestgenTarget::getArchSpec();
+             auto blockName = block->getName().name;
              auto &nextState = state.clone();
+             auto canonicalName = getProgramInfo().getCanonicalBlockName(blockName);
+             const auto *blockApply = block->to<IR::IApply>();
+             CHECK_NULL(blockApply);
+             const auto *blockParams = blockApply->getApplyParameters();
+
+             // Copy-in.
              // Get the current level and disable it for these operations to avoid overtainting.
              auto currentTaint = state.getProperty<bool>("inUndefinedState");
              nextState.setProperty("inUndefinedState", false);
-
-             auto dir = direction->value;
-             const auto *assignType = globalRef->type;
-             if (const auto *ts = assignType->to<IR::Type_StructLike>()) {
-                 std::vector<IR::StateVariable> flatRefValids;
-                 std::vector<IR::StateVariable> flatParamValids;
-                 auto flatRefFields = nextState.getFlatFields(globalRef, ts, &flatRefValids);
-                 auto flatParamFields = nextState.getFlatFields(argRef, ts, &flatParamValids);
-                 // In case of a header, we also need to copy the validity bits.
-                 // The only difference here is that, in the case of a copy-in out parameter, we
-                 // set validity to false.
-                 // TODO: Find a more elegant method to handle this instead of code duplication.
-                 for (size_t idx = 0; idx < flatRefValids.size(); ++idx) {
-                     const auto &fieldGlobalValid = flatRefValids[idx];
-                     const auto &fieldParamValid = flatParamValids[idx];
-                     // If the validity bit did not exist before, initialize it to be false.
-                     if (!nextState.exists(fieldGlobalValid)) {
-                         nextState.set(fieldGlobalValid, IR::getBoolLiteral(false));
-                     }
-                     // Set them false in case of an out copy-in.
-                     if (dir == "out") {
-                         nextState.set(fieldParamValid, IR::getBoolLiteral(false));
-                     } else {
-                         nextState.set(fieldParamValid, nextState.get(fieldGlobalValid));
-                     }
-                 }
-                 // First, complete the assignments for the data structure.
-                 for (size_t idx = 0; idx < flatRefFields.size(); ++idx) {
-                     const auto &fieldGlobalRef = flatRefFields[idx];
-                     const auto &fieldargRef = flatParamFields[idx];
-                     generateCopyIn(nextState, fieldargRef, fieldGlobalRef, dir, forceTaint->value);
-                 }
-             } else if (const auto *tb = assignType->to<IR::Type_Base>()) {
-                 // If the type is a flat Type_Base, postfix it with a "*".
-                 globalRef = ToolsVariables::getStateVariable(
-                     tb, globalRef->checkedTo<IR::PathExpression>()->path->name);
-                 generateCopyIn(nextState, argRef, globalRef->checkedTo<IR::Member>(), dir,
-                                forceTaint->value);
-             } else {
-                 P4C_UNIMPLEMENTED("Unsupported copy_out type %1%", assignType->node_type_name());
+             for (size_t paramIdx = 0; paramIdx < blockParams->size(); ++paramIdx) {
+                 const auto *internalParam = blockParams->getParameter(paramIdx);
+                 auto externalParamName = archSpec->getParamName(canonicalName, paramIdx);
+                 nextState.copyIn(TestgenTarget::get(), internalParam, externalParamName);
              }
-             // Push back the current taint level.
              nextState.setProperty("inUndefinedState", currentTaint);
              nextState.popBody();
              result->emplace_back(nextState);
-             return false;
          }},
         /* ======================================================================================
          *  copy_out
-         *  copies values from @param srcRef to @param targetParam following the
-         *  copy-in/copy-out semantics of P4. We use this function to copy values in and out of
-         *  individual program pipes. We copy all values
-         *  that are (In)out from srcRef to inputRef. @param direction signifies the
-         *  qualified class of the srcRef ("in", "inout", "out", or "<none>").
+         *  Applies CopyOut to the provided reference to a control or parser block. The block
+         * reference is resolved and we iterate over all the parameters, copying out values
+         * appropriately.
          * ======================================================================================
          */
         {"*.copy_out",
-         {"targetParam", "srcRef", "direction"},
-         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
-            IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
-            const ExecutionState &state, SmallStepEvaluator::Result &result) {
-             const auto *globalRef = args->at(0)->expression;
-             if (!(globalRef->is<IR::Member>() || globalRef->is<IR::PathExpression>())) {
-                 TESTGEN_UNIMPLEMENTED("Global input %1% of type %2% not supported", globalRef,
-                                       globalRef->type);
-             }
-             const auto &argRef = ExecutionState::convertReference(args->at(1)->expression);
-
-             const auto *direction = args->at(2)->expression->checkedTo<IR::StringLiteral>();
-
+         {"blockRef"},
+         [this](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
+                IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
+                const ExecutionState &state, SmallStepEvaluator::Result &result) {
+             const auto *blockRef = args->at(0)->expression->checkedTo<IR::PathExpression>();
+             const auto *block = state.findDecl(blockRef);
+             const auto *archSpec = TestgenTarget::getArchSpec();
+             auto blockName = block->getName().name;
              auto &nextState = state.clone();
+             auto canonicalName = getProgramInfo().getCanonicalBlockName(blockName);
+             const auto *blockApply = block->to<IR::IApply>();
+             CHECK_NULL(blockApply);
+             const auto *blockParams = blockApply->getApplyParameters();
+
+             // Copy-in.
              // Get the current level and disable it for these operations to avoid overtainting.
              auto currentTaint = state.getProperty<bool>("inUndefinedState");
              nextState.setProperty("inUndefinedState", false);
-
-             auto dir = direction->value;
-             const auto *assignType = globalRef->type;
-             if (const auto *ts = assignType->to<IR::Type_StructLike>()) {
-                 std::vector<IR::StateVariable> flatRefValids;
-                 std::vector<IR::StateVariable> flatParamValids;
-                 auto flatRefFields = nextState.getFlatFields(globalRef, ts, &flatRefValids);
-                 auto flatParamFields = nextState.getFlatFields(argRef, ts, &flatParamValids);
-                 // In case of a header, we also need to copy the validity bits.
-                 for (size_t idx = 0; idx < flatRefValids.size(); ++idx) {
-                     const auto &fieldGlobalValid = flatRefValids[idx];
-                     const auto &fieldParamValid = flatParamValids[idx];
-                     if (dir == "inout" || dir == "out") {
-                         nextState.set(fieldGlobalValid, nextState.get(fieldParamValid));
-                     }
-                 }
-                 // First, complete the assignments for the data structure.
-                 for (size_t idx = 0; idx < flatRefFields.size(); ++idx) {
-                     const auto &fieldGlobalRef = flatRefFields[idx];
-                     const auto &fieldargRef = flatParamFields[idx];
-                     if (dir == "inout" || dir == "out") {
-                         nextState.set(fieldGlobalRef, nextState.get(fieldargRef));
-                     }
-                 }
-             } else if (assignType->is<IR::Type_Base>()) {
-                 if (dir == "inout" || dir == "out") {
-                     // If the type is a flat Type_Base, postfix it with a "*".
-                     globalRef = ToolsVariables::getStateVariable(
-                         assignType, globalRef->checkedTo<IR::PathExpression>()->path->name);
-                     nextState.set(globalRef->checkedTo<IR::Member>(), nextState.get(argRef));
-                 }
-             } else {
-                 P4C_UNIMPLEMENTED("Unsupported copy_out type %1%", assignType->node_type_name());
+             for (size_t paramIdx = 0; paramIdx < blockParams->size(); ++paramIdx) {
+                 const auto *internalParam = blockParams->getParameter(paramIdx);
+                 auto externalParamName = archSpec->getParamName(canonicalName, paramIdx);
+                 nextState.copyOut(internalParam, externalParamName);
              }
-             // Push back the current taint level.
              nextState.setProperty("inUndefinedState", currentTaint);
              nextState.popBody();
              result->emplace_back(nextState);
-             return false;
          }},
     });
     // Provides implementations of extern calls internal to the interpreter.
@@ -532,7 +448,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  // Check whether advance expression is tainted.
                  // If that is the case, we have no control or idea how much the cursor can be
                  // advanced.
-                 auto advanceIsTainted = state.hasTaint(advanceExpr);
+                 auto advanceIsTainted = Taint::hasTaint(advanceExpr);
                  if (advanceIsTainted) {
                      TESTGEN_UNIMPLEMENTED(
                          "The advance expression of %1% is tainted. We can not predict how much "
@@ -699,7 +615,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  // Check whether advance expression is tainted.
                  // If that is the case, we have no control or idea how much the cursor can be
                  // advanced.
-                 auto advanceIsTainted = state.hasTaint(varbitExtractExpr);
+                 auto advanceIsTainted = Taint::hasTaint(varbitExtractExpr);
                  if (advanceIsTainted) {
                      TESTGEN_UNIMPLEMENTED(
                          "The varbit expression of %1% is tainted. We can not predict how much "
@@ -802,15 +718,15 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
              const auto *emitOutput = args->at(0)->expression;
              const auto *emitType = emitOutput->type->checkedTo<IR::Type_StructLike>();
-             if (!emitOutput->is<IR::Member>()) {
+             if (!(emitOutput->is<IR::Member>() || emitOutput->is<IR::ArrayIndex>())) {
                  TESTGEN_UNIMPLEMENTED("Emit input %1% of type %2% not supported", emitOutput,
                                        emitType);
              }
-             const auto &validVar = ToolsVariables::getHeaderValidity(emitOutput);
+             const auto *validVar = state.get(ToolsVariables::getHeaderValidity(emitOutput));
 
              // Check whether the validity bit of the header is tainted. If it is, the entire
              // emit is tainted. There is not much we can do here, so throw an error.
-             auto emitIsTainted = state.hasTaint(validVar);
+             auto emitIsTainted = Taint::hasTaint(validVar);
              if (emitIsTainted) {
                  TESTGEN_UNIMPLEMENTED(
                      "The validity bit of %1% is tainted. Tainted emit calls can not be "
@@ -862,7 +778,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  nextState.popBody();
                  // Only when the header is valid, the members are emitted and the packet
                  // delta is adjusted.
-                 result->emplace_back(state.get(validVar), state, nextState);
+                 result->emplace_back(validVar, state, nextState);
              }
              {
                  auto &invalidState = state.clone();
@@ -906,7 +822,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
              }
 
              // If the verify condition is tainted, the error is also tainted.
-             if (state.hasTaint(cond)) {
+             if (Taint::hasTaint(cond)) {
                  auto &taintedState = state.clone();
                  std::stringstream traceString;
                  traceString << "Tainted verify: ";
@@ -963,7 +879,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
 
              // If the assert/assume condition is tainted, we do not know whether we abort.
              // For now, throw an exception.
-             if (state.hasTaint(cond)) {
+             if (Taint::hasTaint(cond)) {
                  TESTGEN_UNIMPLEMENTED(
                      "Assert/assume can not be executed under a tainted condition.");
              }
@@ -1011,7 +927,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
 
              // If the assert/assume condition is tainted, we do not know whether we abort.
              // For now, throw an exception.
-             if (state.hasTaint(cond)) {
+             if (Taint::hasTaint(cond)) {
                  TESTGEN_UNIMPLEMENTED(
                      "Assert/assume can not be executed under a tainted condition.");
              }

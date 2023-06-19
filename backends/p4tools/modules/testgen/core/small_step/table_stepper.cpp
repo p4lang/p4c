@@ -12,6 +12,7 @@
 
 #include "backends/p4tools/common/lib/constants.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
+#include "backends/p4tools/common/lib/taint.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/id.h"
@@ -81,12 +82,12 @@ const IR::StateVariable &TableStepper::getTableReachedVar(const IR::P4Table *tab
 }
 
 const IR::Expression *TableStepper::computeTargetMatchType(
-    ExecutionState &nextState, const TableUtils::KeyProperties &keyProperties,
-    TableMatchMap *matches, const IR::Expression *hitCondition) {
+    const TableUtils::KeyProperties &keyProperties, TableMatchMap *matches,
+    const IR::Expression *hitCondition) {
     const IR::Expression *keyExpr = keyProperties.key->expression;
     // Create a new variable constant that corresponds to the key expression.
     cstring keyName = properties.tableName + "_key_" + keyProperties.name;
-    const auto *ctrlPlaneKey = nextState.createSymbolicVariable(keyExpr->type, keyName);
+    const auto *ctrlPlaneKey = ToolsVariables::getSymbolicVariable(keyExpr->type, keyName);
 
     if (keyProperties.matchType == P4Constants::MATCH_KIND_EXACT) {
         hitCondition = new IR::LAnd(hitCondition, new IR::Equ(keyExpr, ctrlPlaneKey));
@@ -101,7 +102,7 @@ const IR::Expression *TableStepper::computeTargetMatchType(
             ternaryMask = IR::getConstant(keyExpr->type, 0);
             keyExpr = ternaryMask;
         } else {
-            ternaryMask = nextState.createSymbolicVariable(keyExpr->type, maskName);
+            ternaryMask = ToolsVariables::getSymbolicVariable(keyExpr->type, maskName);
         }
         matches->emplace(keyProperties.name,
                          new Ternary(keyProperties.key, ctrlPlaneKey, ternaryMask));
@@ -112,7 +113,8 @@ const IR::Expression *TableStepper::computeTargetMatchType(
         const auto *keyType = keyExpr->type->checkedTo<IR::Type_Bits>();
         auto keyWidth = keyType->width_bits();
         cstring maskName = properties.tableName + "_lpm_prefix_" + keyProperties.name;
-        const IR::Expression *maskVar = nextState.createSymbolicVariable(keyExpr->type, maskName);
+        const IR::Expression *maskVar =
+            ToolsVariables::getSymbolicVariable(keyExpr->type, maskName);
         // The maxReturn is the maximum vale for the given bit width. This value is shifted by
         // the mask variable to create a mask (and with that, a prefix).
         auto maxReturn = IR::getMaxBvVal(keyWidth);
@@ -139,10 +141,10 @@ const IR::Expression *TableStepper::computeTargetMatchType(
     TESTGEN_UNIMPLEMENTED("Match type %s not implemented for table keys.", keyProperties.matchType);
 }
 
-const IR::Expression *TableStepper::computeHit(ExecutionState &nextState, TableMatchMap *matches) {
+const IR::Expression *TableStepper::computeHit(TableMatchMap *matches) {
     const IR::Expression *hitCondition = IR::getBoolLiteral(!properties.resolvedKeys.empty());
     for (auto keyProperties : properties.resolvedKeys) {
-        hitCondition = computeTargetMatchType(nextState, keyProperties, matches, hitCondition);
+        hitCondition = computeTargetMatchType(keyProperties, matches, hitCondition);
     }
     return hitCondition;
 }
@@ -177,8 +179,8 @@ void TableStepper::setTableAction(ExecutionState &nextState,
 const IR::Expression *TableStepper::evalTableConstEntries() {
     const IR::Expression *tableMissCondition = IR::getBoolLiteral(true);
 
-    const auto *keys = table->getKey();
-    BUG_CHECK(keys != nullptr, "An empty key list should have been handled earlier.");
+    const auto *key = table->getKey();
+    BUG_CHECK(key != nullptr, "An empty key list should have been handled earlier.");
 
     const auto *entries = table->getEntries();
     // Sometimes, there are no entries. Just return.
@@ -188,9 +190,9 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
 
     auto entryVector = entries->entries;
 
-    // Sort entries if one of the keys contains an LPM match.
-    for (size_t idx = 0; idx < keys->keyElements.size(); ++idx) {
-        const auto *keyElement = keys->keyElements.at(idx);
+    // Sort entries if one of the key contains an LPM match.
+    for (size_t idx = 0; idx < key->keyElements.size(); ++idx) {
+        const auto *keyElement = key->keyElements.at(idx);
         if (keyElement->matchType->path->toString() == P4Constants::MATCH_KIND_LPM) {
             std::sort(entryVector.begin(), entryVector.end(), [idx](auto &&PH1, auto &&PH2) {
                 return TableUtils::compareLPMEntries(std::forward<decltype(PH1)>(PH1),
@@ -203,40 +205,14 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
     for (const auto *entry : entryVector) {
         const auto *action = entry->getAction();
         const auto *tableAction = action->checkedTo<IR::MethodCallExpression>();
-        const auto *actionType = stepper->state.getActionDecl(tableAction);
+        const auto *actionType = stepper->state.getP4Action(tableAction);
         auto &nextState = stepper->state.clone();
         nextState.markVisited(entry);
         // We need to set the table action in the state for eventual switch action_run hits.
         // We also will need it for control plane table entries.
         setTableAction(nextState, tableAction);
         // Compute the table key for a constant entry
-        BUG_CHECK(keys->keyElements.size() == entry->keys->size(),
-                  "The entry key list and key match list must be equal in size.");
-        const IR::Expression *hitCondition = IR::getBoolLiteral(true);
-        for (size_t idx = 0; idx < keys->keyElements.size(); ++idx) {
-            const auto *key = keys->keyElements.at(idx);
-            const auto *entryKey = entry->keys->components.at(idx);
-            BUG_CHECK(key->expression, "Null expression %1% for matching in the table %2%", entry,
-                      table);
-            // These always match, so do not even consider them in the equation.
-            if (entryKey->is<IR::DefaultExpression>()) {
-                continue;
-            }
-            const IR::Expression *keyExpr = key->expression;
-            if (const auto *rangeExpr = entryKey->to<IR::Range>()) {
-                const auto *minKey = rangeExpr->left;
-                const auto *maxKey = rangeExpr->right;
-                hitCondition = new IR::LAnd(
-                    hitCondition,
-                    new IR::LAnd(new IR::Leq(minKey, keyExpr), new IR::Leq(keyExpr, maxKey)));
-            } else if (const auto *maskExpr = entryKey->to<IR::Mask>()) {
-                hitCondition = new IR::LAnd(
-                    hitCondition, new IR::Equ(new IR::BAnd(keyExpr, maskExpr->right),
-                                              new IR::BAnd(maskExpr->left, maskExpr->right)));
-            } else {
-                hitCondition = new IR::LAnd(hitCondition, new IR::Equ(keyExpr, entryKey));
-            }
-        }
+        const auto *hitCondition = TableUtils::computeEntryMatch(*table, *entry, *key);
 
         // Update all the tracking variables for tables.
         std::vector<Continuation::Command> replacements;
@@ -255,7 +231,7 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
         std::stringstream tableStream;
         tableStream << "Constant Table Branch: " << properties.tableName;
         bool isFirstKey = true;
-        const auto &keyElements = keys->keyElements;
+        const auto &keyElements = key->keyElements;
 
         for (const auto *keyElement : keyElements) {
             if (isFirstKey) {
@@ -294,7 +270,7 @@ void TableStepper::setTableDefaultEntries(
     const std::vector<const IR::ActionListElement *> &tableActionList) {
     for (const auto *action : tableActionList) {
         const auto *tableAction = action->expression->checkedTo<IR::MethodCallExpression>();
-        const auto *actionType = stepper->state.getActionDecl(tableAction);
+        const auto *actionType = stepper->state.getP4Action(tableAction);
 
         auto &nextState = stepper->state.clone();
 
@@ -311,7 +287,7 @@ void TableStepper::setTableDefaultEntries(
             // Getting the unique name is needed to avoid generating duplicate arguments.
             cstring paramName =
                 properties.tableName + "_arg_" + actionName + std::to_string(argIdx);
-            const auto &actionArg = nextState.createSymbolicVariable(parameter->type, paramName);
+            const auto &actionArg = ToolsVariables::getSymbolicVariable(parameter->type, paramName);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
             // Note how we use the control plane name for the parameter here.
@@ -357,20 +333,21 @@ void TableStepper::setTableDefaultEntries(
 
 void TableStepper::evalTableControlEntries(
     const std::vector<const IR::ActionListElement *> &tableActionList) {
-    const auto *keys = table->getKey();
-    BUG_CHECK(keys != nullptr, "An empty key list should have been handled earlier.");
+    const auto *key = table->getKey();
+    BUG_CHECK(key != nullptr, "An empty key list should have been handled earlier.");
 
+    // First, we compute the hit condition to trigger this particular action call.
+    TableMatchMap matches;
+    const auto *hitCondition = computeHit(&matches);
+
+    // Now we iterate over all table actions and create a path per table action.
     for (const auto *action : tableActionList) {
+        // Create an execution state per action.
+        auto &nextState = stepper->state.clone();
         // Grab the path from the method call.
         const auto *tableAction = action->expression->checkedTo<IR::MethodCallExpression>();
         // Try to find the action declaration corresponding to the path reference in the table.
-        const auto *actionType = stepper->state.getActionDecl(tableAction);
-
-        auto &nextState = stepper->state.clone();
-
-        // First, we compute the hit condition to trigger this particular action call.
-        TableMatchMap matches;
-        const auto *hitCondition = computeHit(nextState, &matches);
+        const auto *actionType = stepper->state.getP4Action(tableAction);
 
         // We get the control plane name of the action we are calling.
         cstring actionName = actionType->controlPlaneName();
@@ -385,7 +362,7 @@ void TableStepper::evalTableControlEntries(
             // Getting the unique name is needed to avoid generating duplicate arguments.
             cstring paramName =
                 properties.tableName + "_arg_" + actionName + std::to_string(argIdx);
-            const auto &actionArg = nextState.createSymbolicVariable(parameter->type, paramName);
+            const auto &actionArg = ToolsVariables::getSymbolicVariable(parameter->type, paramName);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
             // Note how we use the control plane name for the parameter here.
@@ -424,7 +401,7 @@ void TableStepper::evalTableControlEntries(
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
         bool isFirstKey = true;
-        const auto &keyElements = keys->keyElements;
+        const auto &keyElements = key->keyElements;
 
         for (const auto *keyElement : keyElements) {
             if (isFirstKey) {
@@ -465,10 +442,7 @@ void TableStepper::evalTaintedTable() {
 
     for (const auto &entry : entryVector) {
         const auto *action = entry->getAction();
-        BUG_CHECK(action && action->is<IR::MethodCallExpression>(),
-                  "Unknown format of an action '%1%' in the table '%2%'", action, table);
-        const auto *tableAction = action->to<IR::MethodCallExpression>();
-        BUG_CHECK(tableAction, "Invalid action '%1%' in the table '%2%'", action, table);
+        const auto *tableAction = action->checkedTo<IR::MethodCallExpression>();
         replacements.emplace_back(new IR::MethodCallStatement(Util::SourceInfo(), tableAction));
     }
     // Since we do not know which table action was selected because of the tainted key, we also
@@ -502,7 +476,6 @@ bool TableStepper::resolveTableKeys() {
         return false;
     }
 
-    const auto *state = getExecutionState();
     auto keyElements = key->keyElements;
     for (size_t keyIdx = 0; keyIdx < keyElements.size(); ++keyIdx) {
         const auto *keyElement = keyElements.at(keyIdx);
@@ -546,7 +519,7 @@ bool TableStepper::resolveTableKeys() {
         // So we have to stay generic and produce a corresponding variable.
         cstring keyMatchType = keyElement->matchType->toString();
         // We can recover from taint for some match types, which is why we track taint.
-        bool keyHasTaint = state->hasTaint(keyElement->expression);
+        bool keyHasTaint = Taint::hasTaint(keyElement->expression);
 
         // Initialize the standard keyProperties.
         TableUtils::KeyProperties keyProperties(keyElement, fieldName, keyIdx, keyMatchType,
@@ -559,13 +532,12 @@ bool TableStepper::resolveTableKeys() {
 void TableStepper::addDefaultAction(std::optional<const IR::Expression *> tableMissCondition) {
     const auto *defaultAction = table->getDefaultAction();
     const auto *tableAction = defaultAction->checkedTo<IR::MethodCallExpression>();
-    const auto *actionType = stepper->state.getActionDecl(tableAction);
+    const auto *actionType = stepper->state.getP4Action(tableAction);
     auto &nextState = stepper->state.clone();
     // We need to set the table action in the state for eventual switch action_run hits.
     // We also will need it for control plane table entries.
     setTableAction(nextState, tableAction);
-    const auto *actionPath = tableAction->method->to<IR::PathExpression>();
-    BUG_CHECK(actionPath, "Unknown formation of action '%1%' in table %2%", tableAction, table);
+    const auto *actionPath = tableAction->method->checkedTo<IR::PathExpression>();
 
     std::vector<Continuation::Command> replacements;
     std::stringstream tableStream;

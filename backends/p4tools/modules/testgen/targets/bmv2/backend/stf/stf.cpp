@@ -292,9 +292,10 @@ void STF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
     }
 
     LOG5("STF test back end: emitting testcase:" << std::setw(4) << dataJson);
-    auto stfFile = basePath;
-    stfFile.replace_extension("_" + std::to_string(testIdx) + ".stf");
-    auto stfFileStream = std::ofstream(stfFile);
+    auto incrementedbasePath = basePath;
+    incrementedbasePath.concat("_" + std::to_string(testIdx));
+    incrementedbasePath.replace_extension(".stf");
+    auto stfFileStream = std::ofstream(incrementedbasePath);
     inja::render_to(stfFileStream, testCase, dataJson);
     stfFileStream.flush();
 }

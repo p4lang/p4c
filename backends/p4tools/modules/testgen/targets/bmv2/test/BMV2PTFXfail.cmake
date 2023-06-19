@@ -18,6 +18,13 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
+  "Error when adding match entry to target"
+  # Non-const entries not yet supported
+  init-entries-bmv2.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-ptf"
   "terminate called after throwing an instance"
   # terminate called after throwing an instance of 'std::out_of_range'
   # h.array[h.h.a].index

@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "backends/p4tools/common/compiler/reachability.h"
+#include "backends/p4tools/common/core/abstract_execution_state.h"
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/namespace_context.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
@@ -30,7 +31,7 @@
 namespace P4Tools::P4Testgen {
 
 /// Represents state of execution after having reached a program point.
-class ExecutionState {
+class ExecutionState : public AbstractExecutionState {
     friend class Test::SmallStepTest;
 
  public:
@@ -38,37 +39,39 @@ class ExecutionState {
      public:
         using ExceptionHandlers = std::map<Continuation::Exception, Continuation>;
 
+     private:
         Continuation normalContinuation;
         ExceptionHandlers exceptionHandlers;
         const NamespaceContext *namespaces = nullptr;
 
-        StackFrame(Continuation normalContinuation, const NamespaceContext *namespaces)
-            : StackFrame(normalContinuation, {}, namespaces) {}
+     public:
+        StackFrame(Continuation normalContinuation, const NamespaceContext *namespaces);
 
         StackFrame(Continuation normalContinuation, ExceptionHandlers exceptionHandlers,
-                   const NamespaceContext *namespaces)
-            : normalContinuation(normalContinuation),
-              exceptionHandlers(exceptionHandlers),
-              namespaces(namespaces) {}
+                   const NamespaceContext *namespaces);
+
+        StackFrame(const StackFrame &) = default;
+        StackFrame(StackFrame &&) noexcept = default;
+        StackFrame &operator=(const StackFrame &) = default;
+        StackFrame &operator=(StackFrame &&) = default;
+        ~StackFrame() = default;
+
+        /// @returns the top-level continuation of this particular stack frame.
+        [[nodiscard]] const Continuation &getContinuation() const;
+
+        /// @returns the exception handlers contained within this stack frame.
+        [[nodiscard]] const ExceptionHandlers &getExceptionHandlers() const;
+
+        /// @returns the namespaces contained within this stack frame.
+        [[nodiscard]] const NamespaceContext *getNameSpaces() const;
     };
 
     /// No move semantics because of constant members. We always need to clone a state.
     ExecutionState(ExecutionState &&) = delete;
     ExecutionState &operator=(ExecutionState &&) = delete;
-    ~ExecutionState() = default;
+    ~ExecutionState() override = default;
 
  private:
-    /// The namespace context in the IR for the current state. The innermost element is the P4
-    /// program, representing the top-level namespace.
-    const NamespaceContext *namespaces;
-
-    /// The symbolic environment. Maps program variables to their symbolic values.
-    SymbolicEnv env;
-
-    /// The list of variables that have been created in this state.
-    /// These variables are later fed to the model for completion.
-    SymbolicSet allocatedSymbolicVariables;
-
     /// The program trace for the current program point (i.e., how we got to the current state).
     std::vector<std::reference_wrapper<const TraceEvent>> trace;
 
@@ -125,6 +128,16 @@ class ExecutionState {
     /// State that is needed to track reachability of statements given a query.
     ReachabilityEngineState *reachabilityEngineState = nullptr;
 
+    /// The number of individual packet variables that have been created in this state.
+    /// Used to create unique symbolic variables in some cases.
+    uint16_t numAllocatedPacketVariables = 0;
+
+    /// Helper function to create a new, unique symbolic packet variable.
+    /// Keeps track of the allocated packet variables by incrementing @ref
+    /// numAllocatedPacketVariables.
+    /// @returns a fresh symbolic variable.
+    [[nodiscard]] const IR::SymbolicVariable *createPacketVariable(const IR::Type *type);
+
     /* =========================================================================================
      *  Accessors
      * ========================================================================================= */
@@ -151,7 +164,7 @@ class ExecutionState {
     [[nodiscard]] std::optional<const Continuation::Command> getNextCmd() const;
 
     /// @returns the symbolic value of the given state variable.
-    [[nodiscard]] const IR::Expression *get(const IR::StateVariable &var) const;
+    [[nodiscard]] const IR::Expression *get(const IR::StateVariable &var) const override;
 
     /// Checks whether the node has been visited in this state.
     void markVisited(const IR::Node *node);
@@ -161,19 +174,7 @@ class ExecutionState {
 
     /// Sets the symbolic value of the given state variable to the given value. Constant folding
     /// is done on the given value before updating the symbolic state.
-    void set(const IR::StateVariable &var, const IR::Expression *value);
-
-    /// Checks whether the given variable exists in the symbolic environment of this state.
-    [[nodiscard]] bool exists(const IR::StateVariable &var) const;
-
-    /// @see Taint::hasTaint
-    bool hasTaint(const IR::Expression *expr) const;
-
-    /// @returns the current symbolic environment.
-    [[nodiscard]] const SymbolicEnv &getSymbolicEnv() const;
-
-    /// Produce a formatted output of the current symbolic environment.
-    void printSymbolicEnv(std::ostream &out = std::cout) const;
+    void set(const IR::StateVariable &var, const IR::Expression *value) override;
 
     /// @returns the current event trace.
     [[nodiscard]] const std::vector<std::reference_wrapper<const TraceEvent>> &getTrace() const;
@@ -246,38 +247,14 @@ class ExecutionState {
     /* =========================================================================================
      *  Trace events.
      * ========================================================================================= */
- public:
     /// Add a new trace event to the state.
     void add(const TraceEvent &event);
 
     /* =========================================================================================
-     *  Namespaces and declarations
-     * ========================================================================================= */
- public:
-    /// Looks up a declaration from a path. A BUG occurs if no declaration is found.
-    [[nodiscard]] const IR::IDeclaration *findDecl(const IR::Path *path) const;
-
-    /// Looks up a declaration from a path expression. A BUG occurs if no declaration is found.
-    [[nodiscard]] const IR::IDeclaration *findDecl(const IR::PathExpression *pathExpr) const;
-
-    /// Resolves a Type in the current environment.
-    [[nodiscard]] const IR::Type *resolveType(const IR::Type *type) const;
-
-    /// @returns the current namespace context.
-    [[nodiscard]] const NamespaceContext *getNamespaceContext() const;
-
-    /// Replaces the namespace context in the current state with the given context.
-    void setNamespaceContext(const NamespaceContext *namespaces);
-
-    /// Enters a namespace of declarations.
-    void pushNamespace(const IR::INamespace *ns);
-
-    /* =========================================================================================
      *  Body operations
      * ========================================================================================= */
- public:
     /// Replaces the top element of @body with @cmd.
-    void replaceTopBody(const Continuation::Command cmd);
+    void replaceTopBody(const Continuation::Command &cmd);
 
     /// Replaces the topmost command in @body with the contents of @cmds. A BUG occurs if @body
     /// is empty or @cmds is empty.
@@ -311,7 +288,6 @@ class ExecutionState {
     /* =========================================================================================
      *  Continuation-stack operations
      * ========================================================================================= */
- public:
     /// Pushes a new frame onto the continuation stack.
     void pushContinuation(const StackFrame &frame);
 
@@ -341,7 +317,6 @@ class ExecutionState {
     /* =========================================================================================
      *  Packet manipulation
      * ========================================================================================= */
- public:
     /// @returns the symbolic constant representing the length of the input to the current parser,
     /// in bits.
     static const IR::SymbolicVariable *getInputPacketSizeVar();
@@ -408,59 +383,16 @@ class ExecutionState {
     [[nodiscard]] const IR::StateVariable &getCurrentParserErrorLabel() const;
 
     /* =========================================================================================
-     *  Variables and symbolic constants.
-     * =========================================================================================
-     *  These mirror what's available in IRUtils, but automatically fill in the incarnation number,
-     *  based on how many times newParser() has been called.
-     */
- public:
-    /// @returns the symbolic variables that were allocated in this state
-    [[nodiscard]] const SymbolicSet &getSymbolicVariables() const;
-
-    /// @see ToolsVariables::getSymbolicVariable.
-    /// We also place the symbolic variables in the set of allocated symbolic variables of this
-    /// state.
-    [[nodiscard]] const IR::SymbolicVariable *createSymbolicVariable(const IR::Type *type,
-                                                                     cstring name,
-                                                                     uint64_t instanceID = 0);
-
-    /* =========================================================================================
-     *  General utilities involving ExecutionState.
+     *  Constructors
      * ========================================================================================= */
- public:
-    /// Takes an input struct type @ts and a prefix @parent and appends each field of the struct
-    /// type to the provided vector @flatFields. The result is a vector of all in the bit and bool
-    /// members in canonical representation (e.g., {"prefix.h.ethernet.dst_address",
-    /// "prefix.h.ethernet.src_address", ...}).
-    /// If @arg validVector is provided, this function also collects the validity bits of the
-    /// headers.
-    [[nodiscard]] std::vector<IR::StateVariable> getFlatFields(
-        const IR::Expression *parent, const IR::Type_StructLike *ts,
-        std::vector<IR::StateVariable> *validVector = nullptr) const;
-
-    /// Gets table type from a member.
-    /// @returns nullptr is member type is not a IR::P4Table.
-    [[nodiscard]] const IR::P4Table *getTableType(const IR::Expression *expression) const;
-
-    /// Gets action type from an expression.
-    [[nodiscard]] const IR::P4Action *getActionDecl(
-        const IR::MethodCallExpression *actionExpr) const;
-
-    /// @returns an IR::Expression converted into a StateVariable. Currently only IR::PathExpression
-    /// and IR::Member can be converted into a state variable.
-    [[nodiscard]] static IR::StateVariable convertReference(const IR::Expression *ref);
-
     /// Allocate a new execution state object with the same state as this object.
     /// Returns a reference, not a pointer.
-    [[nodiscard]] ExecutionState &clone() const;
+    [[nodiscard]] ExecutionState &clone() const override;
 
     /// Create a new execution state object from the input program.
     /// Returns a reference not a pointer.
     [[nodiscard]] static ExecutionState &create(const IR::P4Program *program);
 
-    /* =========================================================================================
-     *  Constructors
-     * ========================================================================================= */
  private:
     /// Create an initial execution state with @param body for testing.
     explicit ExecutionState(Continuation::Body body);
@@ -469,6 +401,8 @@ class ExecutionState {
     /// Creates an initial execution state for the given program.
     explicit ExecutionState(const IR::P4Program *program);
     ExecutionState(const ExecutionState &) = default;
+
+    /// Do not accidentally copy-assign the execution state.
     ExecutionState &operator=(const ExecutionState &) = default;
 };
 

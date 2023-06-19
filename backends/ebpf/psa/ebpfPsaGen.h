@@ -29,32 +29,45 @@ namespace EBPF {
 
 enum pipeline_type { TC_INGRESS, TC_EGRESS, XDP_INGRESS, XDP_EGRESS, TC_TRAFFIC_MANAGER };
 
-class PSAEbpfGenerator {
+class EbpfCodeGenerator {
+ public:
+    const EbpfOptions &options;
+    std::vector<EBPF::EBPFType *> ebpfTypes;
+
+    EbpfCodeGenerator(const EbpfOptions &options, std::vector<EBPF::EBPFType *> &ebpfTypes)
+        : options(options), ebpfTypes(ebpfTypes) {}
+
+    virtual void emitCommonPreamble(EBPF::CodeBuilder *builder) const = 0;
+    virtual void emitPreamble(CodeBuilder *builder) const = 0;
+    virtual void emitInternalStructures(EBPF::CodeBuilder *pBuilder) const = 0;
+    virtual void emitTypes(EBPF::CodeBuilder *builder) const = 0;
+    virtual void emitGlobalHeadersMetadata(EBPF::CodeBuilder *builder) const = 0;
+    virtual void emitPipelineInstances(EBPF::CodeBuilder *builder) const = 0;
+};
+
+class PSAEbpfGenerator : public EbpfCodeGenerator {
  public:
     static const unsigned MaxClones = 64;
     static const unsigned MaxCloneSessions = 1024;
-
-    const EbpfOptions &options;
-    std::vector<EBPFType *> ebpfTypes;
 
     EBPFPipeline *ingress;
     EBPFPipeline *egress;
 
     PSAEbpfGenerator(const EbpfOptions &options, std::vector<EBPFType *> &ebpfTypes,
                      EBPFPipeline *ingress, EBPFPipeline *egress)
-        : options(options), ebpfTypes(ebpfTypes), ingress(ingress), egress(egress) {}
+        : EbpfCodeGenerator(options, ebpfTypes), ingress(ingress), egress(egress) {}
 
     virtual void emit(CodeBuilder *builder) const = 0;
+    virtual void emitInstances(EBPF::CodeBuilder *builder) const = 0;
 
     void emitPSAIncludes(CodeBuilder *builder) const;
-    virtual void emitPreamble(CodeBuilder *builder) const;
-    void emitCommonPreamble(CodeBuilder *builder) const;
-    void emitInternalStructures(CodeBuilder *pBuilder) const;
-    void emitTypes(CodeBuilder *builder) const;
-    void emitGlobalHeadersMetadata(CodeBuilder *builder) const;
-    virtual void emitInstances(CodeBuilder *builder) const = 0;
+    void emitPreamble(CodeBuilder *builder) const override;
+    void emitCommonPreamble(CodeBuilder *builder) const override;
+    void emitInternalStructures(CodeBuilder *pBuilder) const override;
+    void emitTypes(CodeBuilder *builder) const override;
+    void emitGlobalHeadersMetadata(CodeBuilder *builder) const override;
     void emitPacketReplicationTables(CodeBuilder *builder) const;
-    void emitPipelineInstances(CodeBuilder *builder) const;
+    void emitPipelineInstances(CodeBuilder *builder) const override;
     void emitInitializer(CodeBuilder *builder) const;
     virtual void emitInitializerSection(CodeBuilder *builder) const = 0;
     void emitHelperFunctions(CodeBuilder *builder) const;

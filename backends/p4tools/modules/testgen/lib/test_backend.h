@@ -1,8 +1,7 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TEST_BACKEND_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TEST_BACKEND_H_
 
-#include <stdint.h>
-
+#include <cstdint>
 #include <functional>
 #include <optional>
 #include <vector>
@@ -87,8 +86,7 @@ class TestBackEnd {
 
     /// @returns the test specification which is consumed by the test back ends.
     virtual const TestSpec *createTestSpec(const ExecutionState *executionState,
-                                           const Model *completedModel,
-                                           const TestInfo &testInfo) = 0;
+                                           const Model *finalModel, const TestInfo &testInfo) = 0;
 
     /// Prints information about this particular test path.
     /// @returns false if the test generation is to be aborted (for example when the port is
@@ -103,7 +101,7 @@ class TestBackEnd {
     /// @returns a TestInfo objects, which contains information about the input/output ports, the
     /// taint mask, the packet sizes, etc...
     virtual TestInfo produceTestInfo(
-        const ExecutionState *executionState, const Model *completedModel,
+        const ExecutionState *executionState, const Model *finalModel,
         const IR::Expression *outputPacketExpr, const IR::Expression *outputPortExpr,
         const std::vector<std::reference_wrapper<const TraceEvent>> *programTraces);
 

@@ -66,6 +66,7 @@ class Z3Translator : public virtual Inspector {
     /// Translates constants.
     bool preorder(const IR::Constant *constant) override;
     bool preorder(const IR::BoolLiteral *boolLiteral) override;
+    bool preorder(const IR::StringLiteral *stringLiteral) override;
 
     /// Translates variables.
     bool preorder(const IR::SymbolicVariable *var) override;
@@ -284,6 +285,7 @@ std::optional<bool> Z3Solver::checkSat(const std::vector<const Constraint *> &as
 }
 
 void Z3Solver::asrt(const Constraint *assertion) {
+    CHECK_NULL(assertion);
     try {
         Z3Translator z3translator(*this);
         assertion->apply(z3translator);
@@ -513,6 +515,11 @@ bool Z3Translator::preorder(const IR::Constant *constant) {
 
 bool Z3Translator::preorder(const IR::BoolLiteral *boolLiteral) {
     result = solver.z3context.bool_val(boolLiteral->value);
+    return false;
+}
+
+bool Z3Translator::preorder(const IR::StringLiteral *stringLiteral) {
+    result = solver.z3context.string_const(stringLiteral->value);
     return false;
 }
 

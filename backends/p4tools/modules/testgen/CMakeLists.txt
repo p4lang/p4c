@@ -35,7 +35,6 @@ set(
   lib/continuation.cpp
   lib/execution_state.cpp
   lib/final_state.cpp
-  lib/gen_eq.cpp
   lib/logging.cpp
   lib/packet_vars.cpp
   lib/test_backend.cpp
@@ -78,8 +77,8 @@ FetchContent_MakeAvailable(inja)
 # Testgen libraries.
 set(
   TESTGEN_LIBS
-  p4tools-common
-  inja
+  PRIVATE p4tools-common
+  PUBLIC inja
 )
 
 file(GLOB testgen_targets RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/targets ${CMAKE_CURRENT_SOURCE_DIR}/targets/*)
@@ -96,8 +95,8 @@ foreach(ext ${testgen_targets})
       message("-- Enabling target ${ext}")
       add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/targets/${ext})
       set(include_statements_var "${include_statements_var}#include \"backends/p4tools/modules/testgen/targets/${ext}/register.h\"\n")
-      set(compiler_targets_var "${compiler_targets_var}    ${ext}_registerCompilerTarget();\n")
-      set(testgen_targets_var "${testgen_targets_var}    ${ext}_registerTestgenTarget();\n")
+      set(compiler_targets_var "${compiler_targets_var}    ${ext}RegisterCompilerTarget();\n")
+      set(testgen_targets_var "${testgen_targets_var}    ${ext}RegisterTestgenTarget();\n")
     endif()
   endif()
 endforeach(ext)
@@ -114,16 +113,18 @@ configure_file(register.h.in register.h)
 
 # The library.
 add_p4tools_library(testgen ${TESTGEN_SOURCES})
-add_dependencies(testgen p4tools-common inja)
-target_include_directories(testgen SYSTEM PUBLIC ${inja_SOURCE_DIR}/include)
-target_include_directories(testgen SYSTEM PUBLIC ${inja_SOURCE_DIR}/third_party/include)
+# Make sure the testgen library and anything that links to it see both the Z3 and Inja includes.
+target_link_libraries(testgen PUBLIC p4tools-common inja)
 
 # The executable.
 add_p4tools_executable(p4testgen main.cpp)
 target_link_libraries(
   p4testgen
-  testgen
+  PRIVATE testgen
   ${TESTGEN_LIBS}
+  ${P4C_LIBRARIES}
+  ${P4C_LIB_DEPS}
+  ${CMAKE_THREAD_LIBS_INIT}
 )
 
 add_custom_target(
@@ -149,6 +150,9 @@ if(ENABLE_GTESTS)
     PRIVATE testgen
     PRIVATE gtest
     ${TESTGEN_LIBS}
+    ${P4C_LIBRARIES}
+    ${P4C_LIB_DEPS}
+    ${CMAKE_THREAD_LIBS_INIT}
   )
 
   if(ENABLE_TESTING)

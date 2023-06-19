@@ -11,10 +11,10 @@
 namespace P4Tools::P4Testgen {
 
 /// Register the ebpf compiler target with the tools framework.
-inline void ebpf_registerCompilerTarget() { EBPF::EBPFCompilerTarget::make(); }
+inline void ebpfRegisterCompilerTarget() { EBPF::EBPFCompilerTarget::make(); }
 
 /// Register the ebpf testgen target with the testgen framework.
-inline void ebpf_registerTestgenTarget() { EBPF::EBPFTestgenTarget::make(); }
+inline void ebpfRegisterTestgenTarget() { EBPF::EBPFTestgenTarget::make(); }
 
 }  // namespace P4Tools::P4Testgen
 

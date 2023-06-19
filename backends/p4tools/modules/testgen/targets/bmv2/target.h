@@ -29,11 +29,8 @@ class Bmv2V1ModelTestgenTarget : public TestgenTarget {
     const Bmv2V1ModelProgramInfo *initProgramImpl(
         const IR::P4Program *program, const IR::Declaration_Instance *mainDecl) const override;
 
-    [[nodiscard]] int getPortNumWidthBitsImpl() const override;
-
     Bmv2TestBackend *getTestBackendImpl(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                                        const std::filesystem::path &testPath,
-                                        std::optional<uint32_t> seed) const override;
+                                        const std::filesystem::path &testPath) const override;
 
     Bmv2V1ModelCmdStepper *getCmdStepperImpl(ExecutionState &state, AbstractSolver &solver,
                                              const ProgramInfo &programInfo) const override;

@@ -19,10 +19,10 @@ control c(inout bit<32> b) {
         }
         const default_action = switch_0_case_1();
         const entries = {
-                        32w16 : switch_0_case();
-                        32w32 : switch_0_case();
-                        32w64 : switch_0_case_0();
-                        32w92 : switch_0_case_1();
+                        const 32w16 : switch_0_case();
+                        const 32w32 : switch_0_case();
+                        const 32w64 : switch_0_case_0();
+                        const 32w92 : switch_0_case_1();
         }
     }
     @hidden action switchexpression7() {

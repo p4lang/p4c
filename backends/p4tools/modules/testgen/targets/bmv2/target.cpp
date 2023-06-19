@@ -67,14 +67,11 @@ const Bmv2V1ModelProgramInfo *Bmv2V1ModelTestgenTarget::initProgramImpl(
     return new Bmv2V1ModelProgramInfo(program, programmableBlocks, declIdToGress);
 }
 
-Bmv2TestBackend *Bmv2V1ModelTestgenTarget::getTestBackendImpl(const ProgramInfo &programInfo,
-                                                              SymbolicExecutor &symbex,
-                                                              const std::filesystem::path &testPath,
-                                                              std::optional<uint32_t> seed) const {
-    return new Bmv2TestBackend(programInfo, symbex, testPath, seed);
+Bmv2TestBackend *Bmv2V1ModelTestgenTarget::getTestBackendImpl(
+    const ProgramInfo &programInfo, SymbolicExecutor &symbex,
+    const std::filesystem::path &testPath) const {
+    return new Bmv2TestBackend(programInfo, symbex, testPath);
 }
-
-int Bmv2V1ModelTestgenTarget::getPortNumWidthBitsImpl() const { return 9; }
 
 Bmv2V1ModelCmdStepper *Bmv2V1ModelTestgenTarget::getCmdStepperImpl(
     ExecutionState &state, AbstractSolver &solver, const ProgramInfo &programInfo) const {

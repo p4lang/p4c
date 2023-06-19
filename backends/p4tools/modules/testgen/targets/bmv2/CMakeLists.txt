@@ -34,8 +34,5 @@ execute_process(COMMAND ln -sfn ${P4C_SOURCE_DIR}/backends/bmv2/run-bmv2-test.py
 
 set(
   TESTGEN_LIBS ${TESTGEN_LIBS}
-  ${P4C_LIBRARIES}
-  ${P4C_LIB_DEPS}
-  ${CMAKE_THREAD_LIBS_INIT}
   PARENT_SCOPE
 )

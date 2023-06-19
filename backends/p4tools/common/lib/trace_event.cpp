@@ -11,10 +11,10 @@ TraceEvent::TraceEvent() = default;
 
 const TraceEvent *TraceEvent::subst(const SymbolicEnv & /*env*/) const { return this; }
 
-void TraceEvent::complete(Model * /*model*/) const {}
-
 const TraceEvent *TraceEvent::apply(Transform & /*visitor*/) const { return this; }
 
-const TraceEvent *TraceEvent::evaluate(const Model & /*model*/) const { return this; }
+const TraceEvent *TraceEvent::evaluate(const Model & /*model*/, bool /*doComplete*/) const {
+    return this;
+}
 
 }  // namespace P4Tools

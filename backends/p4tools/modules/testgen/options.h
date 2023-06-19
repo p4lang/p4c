@@ -11,7 +11,7 @@
 
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
 
-namespace P4Tools {
+namespace P4Tools::P4Testgen {
 
 /// Encapsulates and processes command-line options for P4Testgen.
 class TestgenOptions : public AbstractP4cToolOptions {
@@ -84,6 +84,6 @@ class TestgenOptions : public AbstractP4cToolOptions {
     TestgenOptions();
 };
 
-}  // namespace P4Tools
+}  // namespace P4Tools::P4Testgen
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_OPTIONS_H_ */

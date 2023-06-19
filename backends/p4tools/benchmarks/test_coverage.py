@@ -206,6 +206,7 @@ def run_strategies_for_max_tests(options, test_args):
         f" --seed {test_args.seed} --print-performance-report"
         f" --max-tests {options.max_tests} --out-dir {test_args.test_dir}"
         f" --path-selection {test_args.strategy} --stop-metric MAX_STATEMENT_COVERAGE"
+        f" --track-coverage STATEMENTS"
         f"{test_args.extra_args} {test_args.p4_program}"
     )
     start_timestamp = datetime.datetime.now()
@@ -272,6 +273,8 @@ def main(args, extra_args):
     options.extra_args = extra_args
     options.test_mode = args.test_mode.upper()
 
+    # Create the output directory, if it does not exist.
+    testutils.check_and_create_dir(options.out_dir)
     # Configure logging.
     logging.basicConfig(
         filename=options.out_dir.joinpath("coverage.log"),
@@ -298,17 +301,14 @@ def main(args, extra_args):
     print(f"Chosen seeds: {seeds}")
 
     strategies = [
-        "GREEDY_POTENTIAL",
-        "UNBOUNDED_RANDOM_ACCESS_STACK",
-        "RANDOM_ACCESS_MAX_COVERAGE",
-        "INCREMENTAL_STACK",
+        "GREEDY_STATEMENT_SEARCH",
+        "RANDOM_BACKTRACK",
+        "DEPTH_FIRST",
     ]
     config = {
-        "INCREMENTAL_STACK": "",
-        "RANDOM_ACCESS_STACK": " --pop-level 3",
-        "UNBOUNDED_RANDOM_ACCESS_STACK": " --pop-level 3",
-        "RANDOM_ACCESS_MAX_COVERAGE": " --saddle-point 5",
-        "GREEDY_POTENTIAL": "",
+        "DEPTH_FIRST": "",
+        "RANDOM_BACKTRACK": "",
+        "GREEDY_STATEMENT_SEARCH": "",
     }
     p4_program = options.p4_programs[0]
     p4_program = testutils.check_if_file(p4_program)
@@ -333,7 +333,6 @@ def main(args, extra_args):
             ]
         )
         coverage_pairs = {}
-        timeseries_data = {}
         timeseries_frame = pd.DataFrame(columns=["Seed", "Time", "Coverage"])
         for seed in seeds:
             data_row = [p4_program_name, seed]

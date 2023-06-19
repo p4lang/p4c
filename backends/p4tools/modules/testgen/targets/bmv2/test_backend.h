@@ -36,15 +36,15 @@ class Bmv2TestBackend : public TestBackEnd {
 
  public:
     explicit Bmv2TestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                             const std::filesystem::path &testPath, std::optional<uint32_t> seed);
+                             const std::filesystem::path &testPath);
 
     TestBackEnd::TestInfo produceTestInfo(
-        const ExecutionState *executionState, const Model *completedModel,
+        const ExecutionState *executionState, const Model *finalModel,
         const IR::Expression *outputPacketExpr, const IR::Expression *outputPortExpr,
         const std::vector<std::reference_wrapper<const TraceEvent>> *programTraces) override;
 
-    const TestSpec *createTestSpec(const ExecutionState *executionState,
-                                   const Model *completedModel, const TestInfo &testInfo) override;
+    const TestSpec *createTestSpec(const ExecutionState *executionState, const Model *finalModel,
+                                   const TestInfo &testInfo) override;
 };
 
 }  // namespace P4Tools::P4Testgen::Bmv2

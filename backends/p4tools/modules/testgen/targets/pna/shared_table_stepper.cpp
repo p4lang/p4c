@@ -9,6 +9,7 @@
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/lib/trace_event_types.h"
+#include "backends/p4tools/common/lib/variables.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
 #include "ir/irutils.h"
@@ -36,8 +37,8 @@
 namespace P4Tools::P4Testgen::Pna {
 
 const IR::Expression *SharedPnaTableStepper::computeTargetMatchType(
-    ExecutionState &nextState, const TableUtils::KeyProperties &keyProperties,
-    TableMatchMap *matches, const IR::Expression *hitCondition) {
+    const TableUtils::KeyProperties &keyProperties, TableMatchMap *matches,
+    const IR::Expression *hitCondition) {
     const IR::Expression *keyExpr = keyProperties.key->expression;
 
     // TODO: We consider optional match types to be a no-op, but we could make them exact matches.
@@ -45,7 +46,7 @@ const IR::Expression *SharedPnaTableStepper::computeTargetMatchType(
         // We can recover from taint by simply not adding the optional match.
         // Create a new symbolic variable that corresponds to the key expression.
         cstring keyName = properties.tableName + "_key_" + keyProperties.name;
-        const auto *ctrlPlaneKey = nextState.createSymbolicVariable(keyExpr->type, keyName);
+        const auto *ctrlPlaneKey = ToolsVariables::getSymbolicVariable(keyExpr->type, keyName);
         if (keyProperties.isTainted) {
             matches->emplace(keyProperties.name,
                              new Optional(keyProperties.key, ctrlPlaneKey, false));
@@ -75,8 +76,8 @@ const IR::Expression *SharedPnaTableStepper::computeTargetMatchType(
             maxKey = IR::getConstant(keyExpr->type, IR::getMaxBvVal(keyExpr->type));
             keyExpr = minKey;
         } else {
-            minKey = nextState.createSymbolicVariable(keyExpr->type, minName);
-            maxKey = nextState.createSymbolicVariable(keyExpr->type, maxName);
+            minKey = ToolsVariables::getSymbolicVariable(keyExpr->type, minName);
+            maxKey = ToolsVariables::getSymbolicVariable(keyExpr->type, maxName);
         }
         matches->emplace(keyProperties.name, new Range(keyProperties.key, minKey, maxKey));
         return new IR::LAnd(hitCondition, new IR::LAnd(new IR::LAnd(new IR::Lss(minKey, maxKey),
@@ -84,18 +85,23 @@ const IR::Expression *SharedPnaTableStepper::computeTargetMatchType(
                                                        new IR::Leq(keyExpr, maxKey)));
     }
     // If the custom match type does not match, delete to the core match types.
-    return TableStepper::computeTargetMatchType(nextState, keyProperties, matches, hitCondition);
+    return TableStepper::computeTargetMatchType(keyProperties, matches, hitCondition);
 }
 
 void SharedPnaTableStepper::evalTableActionProfile(
     const std::vector<const IR::ActionListElement *> &tableActionList) {
     const auto *state = getExecutionState();
 
+    // First, we compute the hit condition to trigger this particular action call.
+    TableMatchMap matches;
+    const auto *hitCondition = computeHit(&matches);
+
+    // Now we iterate over all table actions and create a path per table action.
     for (const auto *action : tableActionList) {
         // Grab the path from the method call.
         const auto *tableAction = action->expression->checkedTo<IR::MethodCallExpression>();
         // Try to find the action declaration corresponding to the path reference in the table.
-        const auto *actionType = state->getActionDecl(tableAction);
+        const auto *actionType = state->getP4Action(tableAction);
 
         auto &nextState = state->clone();
         // We get the control plane name of the action we are calling.
@@ -113,7 +119,7 @@ void SharedPnaTableStepper::evalTableActionProfile(
             // Getting the unique name is needed to avoid generating duplicate arguments.
             cstring keyName =
                 properties.tableName + "_param_" + actionName + std::to_string(argIdx);
-            const auto &actionArg = nextState.createSymbolicVariable(parameter->type, keyName);
+            const auto &actionArg = ToolsVariables::getSymbolicVariable(parameter->type, keyName);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
             // Note how we use the control plane name for the parameter here.
@@ -128,10 +134,6 @@ void SharedPnaTableStepper::evalTableActionProfile(
         // We add the arguments to our action call, effectively creating a const entry call.
         auto *synthesizedAction = tableAction->clone();
         synthesizedAction->arguments = arguments;
-
-        // Now we compute the hit condition to trigger this particular action call.
-        TableMatchMap matches;
-        const auto *hitCondition = computeHit(nextState, &matches);
 
         // We need to set the table action in the state for eventual switch action_run hits.
         // We also will need it for control plane table entries.
@@ -175,11 +177,16 @@ void SharedPnaTableStepper::evalTableActionSelector(
     const std::vector<const IR::ActionListElement *> &tableActionList) {
     const auto *state = getExecutionState();
 
+    // First, we compute the hit condition to trigger this particular action call.
+    TableMatchMap matches;
+    const auto *hitCondition = computeHit(&matches);
+
+    // Now we iterate over all table actions and create a path per table action.
     for (const auto *action : tableActionList) {
         // Grab the path from the method call.
         const auto *tableAction = action->expression->checkedTo<IR::MethodCallExpression>();
         // Try to find the action declaration corresponding to the path reference in the table.
-        const auto *actionType = state->getActionDecl(tableAction);
+        const auto *actionType = state->getP4Action(tableAction);
 
         auto &nextState = state->clone();
         // We get the control plane name of the action we are calling.
@@ -199,7 +206,7 @@ void SharedPnaTableStepper::evalTableActionSelector(
             // Getting the unique name is needed to avoid generating duplicate arguments.
             cstring keyName =
                 properties.tableName + "_param_" + actionName + std::to_string(argIdx);
-            const auto &actionArg = nextState.createSymbolicVariable(parameter->type, keyName);
+            const auto &actionArg = ToolsVariables::getSymbolicVariable(parameter->type, keyName);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
             // Note how we use the control plane name for the parameter here.
@@ -220,10 +227,6 @@ void SharedPnaTableStepper::evalTableActionSelector(
         // We add the arguments to our action call, effectively creating a const entry call.
         auto *synthesizedAction = tableAction->clone();
         synthesizedAction->arguments = arguments;
-
-        // Now we compute the hit condition to trigger this particular action call.
-        TableMatchMap matches;
-        const auto *hitCondition = computeHit(nextState, &matches);
 
         // We need to set the table action in the state for eventual switch action_run hits.
         // We also will need it for control plane table entries.

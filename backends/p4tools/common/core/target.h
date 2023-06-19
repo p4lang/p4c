@@ -5,6 +5,7 @@
 #include <optional>
 #include <string>
 
+#include "ir/ir.h"
 #include "lib/exceptions.h"
 
 namespace P4Tools {
@@ -57,7 +58,14 @@ class Target {
 
     // A virtual destructor makes this class polymorphic, so that the dynamic cast in get() can
     // work.
-    virtual ~Target() {}
+    virtual ~Target() = default;
+
+    /// @returns the default value for uninitialized variables for this particular target. This can
+    /// be a taint variable or simply 0 (bits) or false (booleans).
+    /// If @param forceTaint is active, this function always returns a taint variable.
+    /// Can be overridden by sub-targets.
+    virtual const IR::Expression *createTargetUninitialized(const IR::Type *type,
+                                                            bool forceTaint) const;
 
  protected:
     /// Creates and registers a new Target instance for the given @toolName, @deviceName, and

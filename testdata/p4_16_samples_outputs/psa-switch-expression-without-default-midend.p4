@@ -135,9 +135,9 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
         }
         const default_action = switch_0_case_1();
         const entries = {
-                        16w16 : switch_0_case();
-                        16w32 : switch_0_case();
-                        16w64 : switch_0_case_0();
+                        const 16w16 : switch_0_case();
+                        const 16w32 : switch_0_case();
+                        const 16w64 : switch_0_case_0();
         }
     }
     @hidden action psaswitchexpressionwithoutdefault124() {

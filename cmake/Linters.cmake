@@ -22,6 +22,7 @@ list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/p4tools/submodules")
 list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/ebpf/runtime")
 list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/ubpf/runtime")
 list(FILTER P4C_LINT_LIST EXCLUDE REGEX "control-plane/p4runtime")
+list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/tc/runtime")
 list(FILTER P4C_LINT_LIST EXCLUDE REGEX "test/frameworks")
 
 #################### CPPLINT

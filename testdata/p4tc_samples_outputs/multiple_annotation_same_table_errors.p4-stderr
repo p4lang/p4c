@@ -1,0 +1,1 @@
+[--Werror=invalid] error: Table 'set_ct_options' cannot have both '@default_hit' action and '@default_hit_const' action

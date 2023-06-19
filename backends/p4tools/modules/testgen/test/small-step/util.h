@@ -156,11 +156,11 @@ void stepAndExamineOp(
     // Examine the resulting stack.
     ASSERT_EQ(executionState.get().getStack().size(), 1u);
     const auto stackFrame = executionState.get().getStack().top();
-    ASSERT_TRUE(stackFrame.get().exceptionHandlers.empty());
-    ASSERT_EQ(stackFrame.get().namespaces, NamespaceContext::Empty);
+    ASSERT_TRUE(stackFrame.get().getExceptionHandlers().empty());
+    ASSERT_EQ(stackFrame.get().getNameSpaces(), NamespaceContext::Empty);
 
     // Examine the pushed continuation.
-    Continuation pushedContinuation = stackFrame.get().normalContinuation;
+    Continuation pushedContinuation = stackFrame.get().getContinuation();
     ASSERT_TRUE(pushedContinuation.parameterOpt);
     Body pushedBody = pushedContinuation.body;
     ASSERT_EQ(pushedBody, Body({Return(rebuildNode(*pushedContinuation.parameterOpt))}));

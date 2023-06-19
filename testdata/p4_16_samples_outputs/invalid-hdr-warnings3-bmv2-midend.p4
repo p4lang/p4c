@@ -39,7 +39,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         }
         const default_action = switch_0_case_0();
         const entries = {
-                        32w0 : switch_0_case();
+                        const 32w0 : switch_0_case();
         }
     }
     bit<32> switch_1_key;
@@ -57,7 +57,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         }
         const default_action = switch_1_case_0();
         const entries = {
-                        32w0 : switch_1_case();
+                        const 32w0 : switch_1_case();
         }
     }
     @hidden action invalidhdrwarnings3bmv2l35() {

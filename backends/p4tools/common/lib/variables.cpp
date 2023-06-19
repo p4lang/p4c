@@ -6,31 +6,28 @@
 
 #include "ir/id.h"
 
-namespace P4Tools {
+namespace P4Tools::ToolsVariables {
 
-const IR::PathExpression ToolsVariables::VAR_PREFIX = IR::PathExpression("p4tools*var");
+/// The prefix used for state variables.
+static const IR::PathExpression VAR_PREFIX = IR::PathExpression("p4tools*var");
 
-const IR::StateVariable &ToolsVariables::getStateVariable(const IR::Type *type, cstring name) {
+const IR::StateVariable &getStateVariable(const IR::Type *type, cstring name) {
     // TODO: Is caching worth it here?
     // TODO: Do we really need to "allocate" a state variable? They are immediately consumed  by the
     // symbolic environment.
     return *new IR::StateVariable(new IR::Member(type, &VAR_PREFIX, name));
 }
 
-const IR::SymbolicVariable *ToolsVariables::getSymbolicVariable(const IR::Type *type,
-                                                                int incarnation, cstring name) {
+const IR::SymbolicVariable *getSymbolicVariable(const IR::Type *type, cstring name) {
     // TODO: Is caching worth it here?
-    auto symbolicName = name + "_" + std::to_string(incarnation);
-    return new IR::SymbolicVariable(type, symbolicName);
+    return new IR::SymbolicVariable(type, name);
 }
 
-const cstring ToolsVariables::VALID = "*valid";
-
-IR::StateVariable ToolsVariables::getHeaderValidity(const IR::Expression *headerRef) {
+IR::StateVariable getHeaderValidity(const IR::Expression *headerRef) {
     return new IR::Member(IR::Type::Boolean::get(), headerRef, VALID);
 }
 
-const IR::TaintExpression *ToolsVariables::getTaintExpression(const IR::Type *type) {
+const IR::TaintExpression *getTaintExpression(const IR::Type *type) {
     // Do not cache varbits.
     if (type->is<IR::Extracted_Varbits>()) {
         return new IR::TaintExpression(type);
@@ -53,4 +50,13 @@ const IR::TaintExpression *ToolsVariables::getTaintExpression(const IR::Type *ty
     return result;
 }
 
-}  // namespace P4Tools
+IR::StateVariable convertReference(const IR::Expression *ref) {
+    if (const auto *member = ref->to<IR::Member>()) {
+        return member;
+    }
+    // Local variable.
+    const auto *path = ref->checkedTo<IR::PathExpression>();
+    return path;
+}
+
+}  // namespace P4Tools::ToolsVariables

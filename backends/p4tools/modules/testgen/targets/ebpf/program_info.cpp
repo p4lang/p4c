@@ -50,6 +50,7 @@ EBPFProgramInfo::EBPFProgramInfo(const IR::P4Program *program,
     /// instantiations.
     int blockIdx = 0;
     for (const auto &declTuple : programmableBlocks) {
+        blockMap.emplace(declTuple.second->getName(), declTuple.first);
         // Iterate through the (ordered) pipes of the target architecture.
         auto subResult = processDeclaration(declTuple.second, blockIdx);
         pipelineSequence.insert(pipelineSequence.end(), subResult.begin(), subResult.end());
@@ -77,21 +78,21 @@ std::vector<Continuation::Command> EBPFProgramInfo::processDeclaration(
         TESTGEN_UNIMPLEMENTED("Constructed type %s of type %s not supported.", typeDecl,
                               typeDecl->node_type_name());
     }
-    const auto *params = applyBlock->getApplyParameters();
     // Retrieve the current canonical pipe in the architecture spec using the pipe index.
     const auto *archMember = archSpec->getArchMember(blockIdx);
 
     std::vector<Continuation::Command> cmds;
-    // Generate all the necessary copy-in/outs.
-    std::vector<Continuation::Command> copyOuts;
-    for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
-        const auto *param = params->getParameter(paramIdx);
-        produceCopyInOutCall(param, paramIdx, archMember, &cmds, &copyOuts);
-    }
+
+    // Copy-in.
+    const auto *copyInCall = new IR::MethodCallStatement(
+        Utils::generateInternalMethodCall("copy_in", {new IR::PathExpression(typeDecl->name)}));
+    cmds.emplace_back(copyInCall);
     // Insert the actual pipeline.
     cmds.emplace_back(typeDecl);
-    // Add the copy out assignments after the pipe has completed executing.
-    cmds.insert(cmds.end(), copyOuts.begin(), copyOuts.end());
+    // Copy-out.
+    const auto *copyOutCall = new IR::MethodCallStatement(
+        Utils::generateInternalMethodCall("copy_out", {new IR::PathExpression(typeDecl->name)}));
+    cmds.emplace_back(copyOutCall);
 
     // After some specific pipelines (filter), we check whether the packet has been dropped.
     // eBPF can not modify the packet, so we do not append any emit buffer here.
@@ -105,19 +106,17 @@ std::vector<Continuation::Command> EBPFProgramInfo::processDeclaration(
 }
 
 const IR::StateVariable &EBPFProgramInfo::getTargetInputPortVar() const {
-    return *new IR::StateVariable(
-        new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidthBits()),
-                       new IR::PathExpression("*"), "input_port"));
+    return *new IR::StateVariable(new IR::Member(IR::getBitType(EBPFConstants::PORT_BIT_WIDTH),
+                                                 new IR::PathExpression("*"), "input_port"));
 }
 
 const IR::StateVariable &EBPFProgramInfo::getTargetOutputPortVar() const {
-    return *new IR::StateVariable(
-        new IR::Member(IR::getBitType(TestgenTarget::getPortNumWidthBits()),
-                       new IR::PathExpression("*"), "output_port"));
+    return *new IR::StateVariable(new IR::Member(IR::getBitType(EBPFConstants::PORT_BIT_WIDTH),
+                                                 new IR::PathExpression("*"), "output_port"));
 }
 
 const IR::Expression *EBPFProgramInfo::dropIsActive() const {
-    return new IR::LNot(ToolsVariables::getStateVariable(IR::Type_Boolean::get(), "*accept"));
+    return new IR::LNot(new IR::PathExpression(IR::Type_Boolean::get(), new IR::Path("*accept")));
 }
 
 const IR::Type_Bits *EBPFProgramInfo::getParserErrorType() const { return &PARSER_ERR_BITS; }
