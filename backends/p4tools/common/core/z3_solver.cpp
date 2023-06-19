@@ -477,7 +477,7 @@ bool Z3Translator::preorder(const IR::Cast *cast) {
     if (cast->destType->is<IR::Type_Boolean>()) {
         if (const auto *exprType = castExtrType->to<IR::Type_Bits>()) {
             if (exprType->width_bits() == 1) {
-                castExpr = solver.z3context.bool_val(castExpr.bool_value() == Z3_L_TRUE);
+                castExpr = z3::operator==(castExpr, solver.z3context.bv_val(1, 1));
             } else {
                 BUG("Cast expression type %1% is not bit<1> : %2%", exprType, castExpr);
             }
