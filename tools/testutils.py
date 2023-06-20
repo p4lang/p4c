@@ -113,13 +113,13 @@ def compare_pkt(expected: str, received: str) -> int:
     return SUCCESS
 
 
-def is_tcp_port_in_use(addr :str, port: int) -> bool:
+def is_tcp_port_in_use(addr: str, port: int) -> bool:
     """Helper function to check whether a given TCP port number is in use on this system."""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as tcp_socket:
         return tcp_socket.connect_ex((addr, port)) == 0
 
 
-def pick_tcp_port(addr :str, default_port: int) -> int:
+def pick_tcp_port(addr: str, default_port: int) -> int:
     """Helper function to check pick a free TCP port."""
     while True:
         if not is_tcp_port_in_use(addr, default_port):
