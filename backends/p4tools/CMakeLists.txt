@@ -30,22 +30,20 @@ endif()
 # CMake file for P4 tools.
 project(P4TOOLS VERSION ${P4C_SEM_VERSION_STRING})
 
+# Store the current git commit hash as part of version information.
+execute_process(
+  COMMAND git log --pretty=format:-%h -n 1
+  OUTPUT_VARIABLE P4TOOLS_VERSION_HASH
+  ERROR_QUIET
+)
+
+if(NOT "${P4TOOLS_VERSION_HASH}" STREQUAL "")
+  message(STATUS "Current git refpoint: ${P4TOOLS_VERSION_HASH}")
+endif()
+
 # Add cmake directory to our module path. Also add cmake directory from p4c to
 # inherit FindLibGc.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-
-# We need a fairly recent version of Z3.
-set(Z3_MIN_VERSION "4.8.14")
-# But 4.12+ is currently broken with libGC
-set(Z3_MAX_VERSION_EXCL "4.12")
-find_package(Z3 ${Z3_MIN_VERSION} REQUIRED)
-
-if(NOT DEFINED Z3_VERSION_STRING OR ${Z3_VERSION_STRING} VERSION_LESS ${Z3_MIN_VERSION})
-  message(FATAL_ERROR "The minimum required Z3 version is ${Z3_MIN_VERSION}. Has ${Z3_VERSION_STRING}.")
-endif()
-if (${Z3_VERSION_STRING} VERSION_GREATER_EQUAL ${Z3_MAX_VERSION_EXCL})
-  message(FATAL_ERROR "The Z3 version has to be lower than ${Z3_MAX_VERSION_EXCL} (the latter currently does no work with libGC). Has ${Z3_VERSION_STRING}.")
-endif()
 
 # Import common definitions.
 include(common)

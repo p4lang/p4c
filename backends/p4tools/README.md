@@ -32,6 +32,7 @@ make
 * [z3](https://github.com/Z3Prover/z3) SMT solver to compute path constraints.
     * Important: We currently only support Z3 versions 4.8.14 to 4.12.0.
 
+These dependencies are automatically installed via CMakelist's [FetchContent](https://cmake.org/cmake/help/latest/module/FetchContent.html) module.
 
 ## Development Style
 Currently, each C++ source directory has a few subdirectories, including:

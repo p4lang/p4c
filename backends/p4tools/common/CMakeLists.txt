@@ -1,20 +1,5 @@
-# CMake file for common components of P4Tools.
-cmake_minimum_required(VERSION 3.0.2 FATAL_ERROR)
-
-include(common)
-
-project(p4tools-common)
-
-# Store the current git commit hash as part of version information.
-execute_process(
-  COMMAND git log --pretty=format:-%h -n 1
-  OUTPUT_VARIABLE P4TOOLS_VERSION_HASH
-  ERROR_QUIET
-)
-
-if(NOT "${P4TOOLS_VERSION_HASH}" STREQUAL "")
-  message(STATUS "Current git refpoint: ${P4TOOLS_VERSION_HASH}")
-endif()
+# Handle the Z3 installation with this macro. Users have the option to supply their own Z3.
+p4tools_obtain_z3()
 
 # Generate version information.
 configure_file(version.h.in version.h)
@@ -53,11 +38,12 @@ add_p4tools_library(p4tools-common ${P4C_TOOLS_COMMON_SOURCES})
 
 target_link_libraries(
   p4tools-common
-  PUBLIC z3::z3
+  PUBLIC ${P4TOOLS_Z3_LIB}
 )
 
 target_include_directories(
   p4tools-common
+  SYSTEM BEFORE PUBLIC ${P4TOOLS_Z3_INCLUDE_DIR}
   PUBLIC "${CMAKE_BINARY_DIR}/common"
   PUBLIC "${P4C_SOURCE_DIR}"
   PUBLIC "${P4C_SOURCE_DIR}/test/frameworks/gtest/googletest/include"
