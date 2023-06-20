@@ -66,6 +66,7 @@ PARSER.add_argument(
 
 GRPC_PORT: int = 28000
 THRIFT_PORT: int = 22000
+PTF_ADDR: str = "0.0.0.0"
 
 
 class Options:
@@ -119,14 +120,14 @@ class PTFTestEnv:
 class NNEnv(PTFTestEnv):
     def run_simple_switch_grpc(self, switchlog: Path, grpc_port: int) -> testutils.subprocess.Popen:
         """Start simple_switch_grpc and return the process handle."""
-        thrift_port = testutils.pick_tcp_port(THRIFT_PORT)
         testutils.log.info(
             "---------------------- Start simple_switch_grpc ----------------------",
         )
+        thrift_port = testutils.pick_tcp_port(PTF_ADDR, THRIFT_PORT)
         simple_switch_grpc = (
             f"simple_switch_grpc --thrift-port {thrift_port} --device-id 0 --log-file {switchlog} --log-flush "
             f"--packet-in ipc://{self.options.testdir}/bmv2_packets_1.ipc  --no-p4 "
-            f"-- --grpc-server-addr 0.0.0.0:{grpc_port} & "
+            f"-- --grpc-server-addr {PTF_ADDR}:{grpc_port} & "
         )
         self.switch_proc = testutils.open_process(simple_switch_grpc)
         return self.switch_proc
@@ -141,16 +142,16 @@ class NNEnv(PTFTestEnv):
         returncode = testutils.exec_process(testListCmd).returncode
         if returncode != testutils.SUCCESS:
             return returncode
-        test_params = f"grpcaddr='0.0.0.0:{grpc_port}';p4info='{info_name}';config='{json_name}';"
+        test_params = f"grpcaddr='{PTF_ADDR}:{grpc_port}';p4info='{info_name}';config='{json_name}';"
         # TODO: There is currently a bug where we can not support more than 344 ports at once.
         # The nanomsg test back end simply hangs, the reason is unclear.
         port_range = "0-50"
         run_ptf_cmd = (
             f"ptf --platform nn --device-socket 0-{{{port_range}}}@ipc://{self.options.testdir}/"
             f"bmv2_packets_1.ipc --pypath {pypath} "
-            f"--log-file {self.options.testdir.joinpath('ptf.log')}"
+            f"--log-file {self.options.testdir.joinpath('ptf.log')} "
+            f"--test-params={test_params} --test-dir {self.options.testdir}"
         )
-        run_ptf_cmd += f" --test-params={test_params} --test-dir {self.options.testdir}"
         return testutils.exec_process(run_ptf_cmd).returncode
 
 
@@ -194,15 +195,15 @@ class VethEnv(PTFTestEnv):
 
     def run_simple_switch_grpc(self, switchlog: Path, grpc_port: int) -> testutils.subprocess.Popen:
         """Start simple_switch_grpc and return the process handle."""
-        thrift_port = testutils.pick_tcp_port(THRIFT_PORT)
         testutils.log.info(
             "---------------------- Start simple_switch_grpc ----------------------",
         )
         ifaces = self.get_iface_str(num_ifaces=self.options.num_ifaces)
+        thrift_port = testutils.pick_tcp_port(PTF_ADDR, THRIFT_PORT)
         simple_switch_grpc = (
             f"simple_switch_grpc --thrift-port {thrift_port} --log-file {switchlog} --log-flush -i 0@0 "
             f"{ifaces} --no-p4 "
-            f"-- --grpc-server-addr 0.0.0.0:{grpc_port}"
+            f"-- --grpc-server-addr {PTF_ADDR}:{grpc_port}"
         )
         bridge_cmd = self.bridge.get_ns_prefix() + " " + simple_switch_grpc
         self.switch_proc = testutils.open_process(bridge_cmd)
@@ -219,11 +220,11 @@ class VethEnv(PTFTestEnv):
         if returncode != testutils.SUCCESS:
             return returncode
         ifaces = self.get_iface_str(num_ifaces=self.options.num_ifaces, prefix="br_")
-        test_params = f"grpcaddr='0.0.0.0:{grpc_port}';p4info='{info_name}';config='{json_name}';"
+        test_params = f"grpcaddr='{PTF_ADDR}:{grpc_port}';p4info='{info_name}';config='{json_name}';"
         run_ptf_cmd = (
-            f"ptf --pypath {pypath} {ifaces} --log-file {self.options.testdir.joinpath('ptf.log')}"
+            f"ptf --pypath {pypath} {ifaces} --log-file {self.options.testdir.joinpath('ptf.log')} "
+            f"--test-params={test_params} --test-dir {self.options.testdir}"
         )
-        run_ptf_cmd += f" --test-params={test_params} --test-dir {self.options.testdir}"
         returncode = self.bridge.ns_exec(run_ptf_cmd)
         return returncode
 
@@ -248,8 +249,8 @@ def run_test(options: Options) -> int:
         return returncode
 
     # Pick available ports for the gRPC switch.
-    grpc_port = testutils.pick_tcp_port(GRPC_PORT)
     switchlog = options.testdir.joinpath("switchlog")
+    grpc_port = testutils.pick_tcp_port(PTF_ADDR, GRPC_PORT)
     switch_proc = testenv.run_simple_switch_grpc(switchlog, grpc_port)
     if switch_proc is None:
         return testutils.FAILURE
