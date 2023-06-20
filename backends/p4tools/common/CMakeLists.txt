@@ -1,5 +1,5 @@
 # Handle the Z3 installation with this macro. Users have the option to supply their own Z3.
-p4tools_install_z3()
+p4tools_obtain_z3()
 
 # Generate version information.
 configure_file(version.h.in version.h)
