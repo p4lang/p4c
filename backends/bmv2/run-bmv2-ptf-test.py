@@ -6,6 +6,7 @@ import os
 import random
 import sys
 import tempfile
+import uuid
 from datetime import datetime
 from pathlib import Path
 
@@ -104,7 +105,7 @@ class PTFTestEnv:
             "---------------------- Creating a namespace ----------------------",
         )
         random.seed(datetime.now().timestamp())
-        bridge = Bridge(str(random.randint(0, sys.maxsize)))
+        bridge = Bridge(uuid.uuid4())
         result = bridge.create_virtual_env(num_ifaces)
         if result != testutils.SUCCESS:
             bridge.ns_del()
@@ -145,7 +146,8 @@ class NNEnv(PTFTestEnv):
         self.bridge = self.create_bridge(options.num_ifaces)
 
     def __del__(self):
-        self.bridge.ns_del()
+        if self.bridge:
+            self.bridge.ns_del()
         super().__del__()
 
     def run_simple_switch_grpc(self, switchlog: Path, grpc_port: int) -> testutils.subprocess.Popen:
@@ -198,7 +200,8 @@ class VethEnv(PTFTestEnv):
         self.bridge = self.create_bridge(options.num_ifaces)
 
     def __del__(self):
-        self.bridge.ns_del()
+        if self.bridge:
+            self.bridge.ns_del()
         super().__del__()
 
     def get_iface_str(self, num_ifaces: int, prefix: str = "") -> str:
