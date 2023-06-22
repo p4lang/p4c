@@ -404,10 +404,10 @@ class Test{{test_id}}(AbstractTest):
 ## else 
         ptfutils.verify_packet(self, exp_pkt, eg_port)
         bt.testutils.log.info("Verifying no other packets ...")
-        ptfutils.verify_no_other_packets(self, self.device_id, timeout=2)
+        ptfutils.verify_no_other_packets(self, self.device_id, timeout=0.1)
 ## endif
 ## else
-        ptfutils.verify_no_other_packets(self, self.device_id, timeout=2)
+        ptfutils.verify_no_other_packets(self, self.device_id, timeout=0.1)
 ## endif
 
     def runTest(self):
