@@ -47,7 +47,6 @@ const IR::Expression *Bmv2V1ModelTableStepper::computeTargetMatchType(
         const auto *ctrlPlaneKey = ToolsVariables::getSymbolicVariable(keyExpr->type, keyName);
         // We can recover from taint by simply not adding the optional match.
         // Create a new symbolic variable that corresponds to the key expression.
-        cstring maskName = properties.tableName + "_mask_" + keyProperties.name;
         const IR::Expression *ternaryMask = nullptr;
         // We can recover from taint by inserting a ternary match that is 0.
         const auto *wildCard = IR::getConstant(keyExpr->type, 0);
@@ -56,6 +55,7 @@ const IR::Expression *Bmv2V1ModelTableStepper::computeTargetMatchType(
                              new Ternary(keyProperties.key, ctrlPlaneKey, wildCard));
             return hitCondition;
         }
+        cstring maskName = properties.tableName + "_mask_" + keyProperties.name;
         const auto *fullMatch = IR::getMaxValueConstant(keyExpr->type);
         ternaryMask = ToolsVariables::getSymbolicVariable(keyExpr->type, maskName);
         auto *maskCond =
@@ -126,8 +126,7 @@ void Bmv2V1ModelTableStepper::evalTableActionProfile(
             // Synthesize a symbolic variable here that corresponds to a control plane argument.
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
-            cstring keyName =
-                properties.tableName + "_param_" + actionName + std::to_string(argIdx);
+            cstring keyName = properties.tableName + "_arg_" + actionName + std::to_string(argIdx);
             const auto &actionArg = ToolsVariables::getSymbolicVariable(parameter->type, keyName);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
@@ -213,8 +212,7 @@ void Bmv2V1ModelTableStepper::evalTableActionSelector(
             // Synthesize a symbolic variable here that corresponds to a control plane argument.
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
-            cstring keyName =
-                properties.tableName + "_param_" + actionName + std::to_string(argIdx);
+            cstring keyName = properties.tableName + "_arg_" + actionName + std::to_string(argIdx);
             const auto &actionArg = ToolsVariables::getSymbolicVariable(parameter->type, keyName);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
