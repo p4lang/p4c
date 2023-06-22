@@ -512,17 +512,23 @@ const IR::Node *AssertsParser::postorder(IR::P4Table *node) {
         return node;
     }
 
+    Z3Solver solver;
     for (const auto *restrStr : annotation->body) {
         auto restrictions =
             genIRStructs(node->controlPlaneName(), restrStr->text, key->keyElements);
-        /// Using Z3Solver, we check the feasibility of restrictions, if they are not
-        /// feasible, we delete keys and entries from the table to execute
-        /// default_action
-        Z3Solver solver;
+        // Using Z3Solver, we check the feasibility of restrictions, if they are not
+        // feasible, we delete keys and entries from the table to execute
+        // default_action
+        solver.push();
         if (solver.checkSat(restrictions) == true) {
             restrictionsVec.push_back(restrictions);
             continue;
         }
+        ::warning(
+            "Restriction %1% is not feasible. Not generating entries for table %2% and instead "
+            "using default action.",
+            restrStr, node);
+        solver.pop();
         auto *cloneTable = node->clone();
         auto *cloneProperties = node->properties->clone();
         IR::IndexedVector<IR::Property> properties;
