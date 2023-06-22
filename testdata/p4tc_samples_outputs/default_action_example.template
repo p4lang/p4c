@@ -17,7 +17,7 @@ $TC p4template update action/default_action_example/MainControlImpl/drop state a
 
 $TC p4template create table/default_action_example/MainControlImpl/ipv4_tbl_1 \
 	tblid 1 \
-	type EXACT_TYPE \
+	type exact \
 	keysz 32 nummasks 8 tentries 2048 \
 	table_acts act name default_action_example/MainControlImpl/next_hop \
 	act name default_action_example/MainControlImpl/default_route_drop
@@ -25,7 +25,7 @@ $TC p4template update table/default_action_example/MainControlImpl/ipv4_tbl_1 de
 
 $TC p4template create table/default_action_example/MainControlImpl/ipv4_tbl_2 \
 	tblid 2 \
-	type EXACT_TYPE \
+	type exact \
 	keysz 72 nummasks 8 tentries 2048 \
 	table_acts act name default_action_example/MainControlImpl/next_hop \
 	act name default_action_example/MainControlImpl/drop

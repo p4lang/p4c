@@ -21,7 +21,7 @@ $TC p4template update action/size_param_example/MainControlImpl/drop state activ
 
 $TC p4template create table/size_param_example/MainControlImpl/ipv4_tbl_1 \
 	tblid 1 \
-	type EXACT_TYPE \
+	type exact \
 	keysz 32 nummasks 8 tentries 2048 \
 	table_acts act name size_param_example/MainControlImpl/next_hop \
 	act name size_param_example/MainControlImpl/default_route_drop
@@ -29,7 +29,7 @@ $TC p4template update table/size_param_example/MainControlImpl/ipv4_tbl_1 defaul
 
 $TC p4template create table/size_param_example/MainControlImpl/ipv4_tbl_2 \
 	tblid 2 \
-	type EXACT_TYPE \
+	type exact \
 	keysz 67 nummasks 8 tentries 1024 \
 	table_acts act name size_param_example/MainControlImpl/sendtoport \
 	act name size_param_example/MainControlImpl/drop

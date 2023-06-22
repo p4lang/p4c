@@ -29,7 +29,7 @@ $TC p4template update action/multiple_tables_example_02/MainControlImpl/tcp_othe
 
 $TC p4template create table/multiple_tables_example_02/MainControlImpl/ipv4_tbl_1 \
 	tblid 1 \
-	type EXACT_TYPE \
+	type exact \
 	keysz 32 nummasks 8 tentries 2048 \
 	table_acts act name multiple_tables_example_02/MainControlImpl/next_hop flags tableonly \
 	act name multiple_tables_example_02/MainControlImpl/default_route_drop
@@ -37,7 +37,7 @@ $TC p4template update table/multiple_tables_example_02/MainControlImpl/ipv4_tbl_
 
 $TC p4template create table/multiple_tables_example_02/MainControlImpl/ipv4_tbl_2 \
 	tblid 2 \
-	type EXACT_TYPE \
+	type exact \
 	keysz 72 nummasks 8 tentries 2048 \
 	table_acts act name multiple_tables_example_02/MainControlImpl/next_hop \
 	act name multiple_tables_example_02/MainControlImpl/drop flags defaultonly
@@ -45,26 +45,26 @@ $TC p4template update table/multiple_tables_example_02/MainControlImpl/ipv4_tbl_
 
 $TC p4template create table/multiple_tables_example_02/MainControlImpl/ipv4_tbl_3 \
 	tblid 3 \
-	type EXACT_TYPE \
+	type exact \
 	keysz 67 nummasks 8 tentries 1024 \
 	table_acts act name multiple_tables_example_02/MainControlImpl/sendtoport \
 	act name multiple_tables_example_02/MainControlImpl/drop
 
 $TC p4template create table/multiple_tables_example_02/MainControlImpl/ipv4_tbl_4 \
 	tblid 4 \
-	type EXACT_TYPE \
+	type exact \
 	keysz 77 nummasks 8 tentries 1024 \
 	table_acts act name multiple_tables_example_02/MainControlImpl/sendtoport \
 	act name multiple_tables_example_02/MainControlImpl/drop
 
 $TC p4template create table/multiple_tables_example_02/MainControlImpl/ipv4_tbl_5 \
 	tblid 5 \
-	type EXACT_TYPE \
+	type exact \
 	keysz 13 nummasks 8 tentries 1024
 
 $TC p4template create table/multiple_tables_example_02/MainControlImpl/set_ct_options \
 	tblid 6 \
-	type TERNARY_TYPE \
+	type ternary \
 	keysz 8 nummasks 8 tentries 2048 \
 	table_acts act name multiple_tables_example_02/MainControlImpl/tcp_syn_packet \
 	act name multiple_tables_example_02/MainControlImpl/tcp_fin_or_rst_packet \
@@ -73,7 +73,7 @@ $TC p4template update table/multiple_tables_example_02/MainControlImpl/set_ct_op
 
 $TC p4template create table/multiple_tables_example_02/MainControlImpl/set_all_options \
 	tblid 7 \
-	type EXACT_TYPE \
+	type exact \
 	keysz 64 nummasks 8 tentries 2048 \
 	table_acts act name multiple_tables_example_02/MainControlImpl/next_hop \
 	act name multiple_tables_example_02/MainControlImpl/default_route_drop \

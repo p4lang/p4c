@@ -16,7 +16,7 @@ $TC p4template update action/nummask_annotation_example/MainControlImpl/tcp_othe
 
 $TC p4template create table/nummask_annotation_example/MainControlImpl/set_ct_options \
 	tblid 1 \
-	type LPM_TYPE \
+	type lpm \
 	keysz 8 nummasks 64 tentries 2048 \
 	table_acts act name nummask_annotation_example/MainControlImpl/tcp_syn_packet \
 	act name nummask_annotation_example/MainControlImpl/tcp_fin_or_rst_packet \
