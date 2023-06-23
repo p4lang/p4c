@@ -7,7 +7,11 @@
 namespace P4::Coverage {
 
 bool SourceIdCmp::operator()(const IR::Node *s1, const IR::Node *s2) const {
-    return s1->clone_id < s2->clone_id;
+    // We use source information as comparison operator since we want to trace coverage back to the
+    // original program.
+    // TODO: Some compiler passes may not preserve source information correctly (e.g.,
+    // copy_propagation). Fix these passes.
+    return s1->srcInfo < s2->srcInfo;
 }
 
 CollectNodes::CollectNodes(CoverageOptions coverageOptions) : coverageOptions(coverageOptions) {}
