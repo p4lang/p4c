@@ -17,64 +17,67 @@ and limitations under the License.
 #ifndef BACKENDS_TC_TC_DEFINES_H_
 #define BACKENDS_TC_TC_DEFINES_H_
 
-#define DEFAULT_TABLE_ENTRIES 2048
-#define DEFAULT_KEY_MASK 8
-#define PORTID_BITWIDTH 32
-#define DEFAULT_KEY_ID 1
-#define DEFAULT_PIPELINE_ID 1
-#define DEFAULT_METADATA_ID 1
-#define BITWIDTH 32
+namespace TC {
 
-// data types supported
-#define BIT_TYPE 0
-#define DEV_TYPE 1
-#define MACADDR_TYPE 2
-#define IPV4_TYPE 3
-#define IPV6_TYPE 4
-#define BE16_TYPE 5
-#define BE32_TYPE 6
-#define BE64_TYPE 7
+inline constexpr auto DEFAULT_TABLE_ENTRIES = 2048;
+inline constexpr auto DEFAULT_KEY_MASK = 8;
+inline constexpr auto PORTID_BITWIDTH = 32;
+inline constexpr auto DEFAULT_KEY_ID = 1;
+inline constexpr auto DEFAULT_PIPELINE_ID = 1;
+inline constexpr auto DEFAULT_METADATA_ID = 1;
+inline constexpr auto BITWIDTH = 32;
 
-#define PARAM_INDEX_0 0
-#define PARAM_INDEX_1 1
-#define PARAM_INDEX_2 2
-#define PARAM_INDEX_3 3
+// Supported data types.
+inline constexpr auto BIT_TYPE = 0;
+inline constexpr auto DEV_TYPE = 1;
+inline constexpr auto MACADDR_TYPE = 2;
+inline constexpr auto IPV4_TYPE = 3;
+inline constexpr auto IPV6_TYPE = 4;
+inline constexpr auto BE16_TYPE = 5;
+inline constexpr auto BE32_TYPE = 6;
+inline constexpr auto BE64_TYPE = 7;
 
-#define SET 1
-#define RESET 0
+inline constexpr auto PARAM_INDEX_0 = 0;
+inline constexpr auto PARAM_INDEX_1 = 1;
+inline constexpr auto PARAM_INDEX_2 = 2;
+inline constexpr auto PARAM_INDEX_3 = 3;
 
-// PNA parser metadata fields
-#define PARSER_RECIRCULATED 0
-#define PARSER_INPUT_PORT 1
+inline constexpr auto SET = 1;
+inline constexpr auto RESET = 0;
 
-// PNA input metadata fields
-#define INPUT_RECIRCULATED 0
-#define INPUT_TIMESTAMP 1
-#define INPUT_PARSER_ERROR 2
-#define INPUT_CLASS_OF_SERVICE 3
-#define INPUT_INPUT_PORT 4
+// PNA parser metadata fields.
+inline constexpr auto PARSER_RECIRCULATED = 0;
+inline constexpr auto PARSER_INPUT_PORT = 1;
 
-// PNA output metadata fields
-#define OUTPUT_CLASS_OF_SERVICE 0
+// PNA input metadata fields.
+inline constexpr auto INPUT_RECIRCULATED = 0;
+inline constexpr auto INPUT_TIMESTAMP = 1;
+inline constexpr auto INPUT_PARSER_ERROR = 2;
+inline constexpr auto INPUT_CLASS_OF_SERVICE = 3;
+inline constexpr auto INPUT_INPUT_PORT = 4;
 
-// kernel metadata fields
-#define UNDEFINED 0
-#define UNSUPPORTED 1
-#define SKBREDIR 2
-#define SKBIIF 3
-#define SKBTSTAMP 4
-#define SKBPRIO 5
+// PNA output metadata fields.
+inline constexpr auto OUTPUT_CLASS_OF_SERVICE = 0;
 
-#define MAX_PNA_PARSER_META 2
-#define MAX_PNA_INPUT_META 5
-#define MAX_PNA_OUTPUT_META 1
+// Kernel metadata fields.
+inline constexpr auto UNDEFINED = 0;
+inline constexpr auto UNSUPPORTED = 1;
+inline constexpr auto SKBREDIR = 2;
+inline constexpr auto SKBIIF = 3;
+inline constexpr auto SKBTSTAMP = 4;
+inline constexpr auto SKBPRIO = 5;
 
-#define TABLEDEFAULT 0
-#define TABLEONLY 1
-#define DEFAULTONLY 2
+inline constexpr auto MAX_PNA_PARSER_META = 2;
+inline constexpr auto MAX_PNA_INPUT_META = 5;
+inline constexpr auto MAX_PNA_OUTPUT_META = 1;
 
-#define EXACT_TYPE 0
-#define LPM_TYPE 1
-#define TERNARY_TYPE 2
+inline constexpr auto TABLEDEFAULT = 0;
+inline constexpr auto TABLEONLY = 1;
+inline constexpr auto DEFAULTONLY = 2;
+
+inline constexpr auto EXACT_TYPE = 0;
+inline constexpr auto LPM_TYPE = 1;
+inline constexpr auto TERNARY_TYPE = 2;
+}  // namespace TC
 
 #endif /* BACKENDS_TC_TC_DEFINES_H_ */

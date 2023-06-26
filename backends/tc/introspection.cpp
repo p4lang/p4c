@@ -182,35 +182,35 @@ Util::JsonObject *IntrospectionGenerator::genActionInfo(struct ActionAttributes 
         paramJson->emplace("id", param->id);
         paramJson->emplace("name", param->name);
         switch (param->dataType) {
-            case BIT_TYPE: {
+            case TC::BIT_TYPE: {
                 paramJson->emplace("type", "bit");
                 break;
             }
-            case DEV_TYPE: {
+            case TC::DEV_TYPE: {
                 paramJson->emplace("type", "dev");
                 break;
             }
-            case MACADDR_TYPE: {
+            case TC::MACADDR_TYPE: {
                 paramJson->emplace("type", "macaddr");
                 break;
             }
-            case IPV4_TYPE: {
+            case TC::IPV4_TYPE: {
                 paramJson->emplace("type", "ipv4");
                 break;
             }
-            case IPV6_TYPE: {
+            case TC::IPV6_TYPE: {
                 paramJson->emplace("type", "ipv6");
                 break;
             }
-            case BE16_TYPE: {
+            case TC::BE16_TYPE: {
                 paramJson->emplace("type", "be16");
                 break;
             }
-            case BE32_TYPE: {
+            case TC::BE32_TYPE: {
                 paramJson->emplace("type", "be32");
                 break;
             }
-            case BE64_TYPE: {
+            case TC::BE64_TYPE: {
                 paramJson->emplace("type", "be64");
                 break;
             }
