@@ -24,12 +24,12 @@ namespace TC {
 const cstring Extern::dropPacket = "drop_packet";
 const cstring Extern::sendToPort = "send_to_port";
 
-cstring pnaMainParserInputMetaFields[MAX_PNA_PARSER_META] = {"recirculated", "input_port"};
+cstring pnaMainParserInputMetaFields[TC::MAX_PNA_PARSER_META] = {"recirculated", "input_port"};
 
-cstring pnaMainInputMetaFields[MAX_PNA_INPUT_META] = {"recirculated", "timestamp", "parser_error",
-                                                      "class_of_service", "input_port"};
+cstring pnaMainInputMetaFields[TC::MAX_PNA_INPUT_META] = {
+    "recirculated", "timestamp", "parser_error", "class_of_service", "input_port"};
 
-cstring pnaMainOutputMetaFields[MAX_PNA_OUTPUT_META] = {"class_of_service"};
+cstring pnaMainOutputMetaFields[TC::MAX_PNA_OUTPUT_META] = {"class_of_service"};
 
 const cstring pnaParserMeta = "pna_main_parser_input_metadata_t";
 const cstring pnaInputMeta = "pna_main_input_metadata_t";
@@ -209,7 +209,7 @@ void ConvertToBackendIR::postorder(const IR::P4Action *action) {
                                 "%1% parameter with type other than bit is not supported", param);
                         return;
                     }
-                    tcActionParam->setDataType(BIT_TYPE);
+                    tcActionParam->setDataType(TC::BIT_TYPE);
                     unsigned int width = paramType->to<IR::Type_Bits>()->width_bits();
                     tcActionParam->setBitSize(width);
                 }
@@ -219,7 +219,7 @@ void ConvertToBackendIR::postorder(const IR::P4Action *action) {
                     auto expr = anno->expr[0];
                     if (auto typeLiteral = expr->to<IR::StringLiteral>()) {
                         auto val = getTcType(typeLiteral);
-                        if (val != BIT_TYPE) {
+                        if (val != TC::BIT_TYPE) {
                             tcActionParam->setDataType(val);
                         } else {
                             ::error(ErrorType::ERR_INVALID,
@@ -355,7 +355,7 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
         auto ctrl = findContext<IR::P4Control>();
         auto cName = ctrl->name.originalName;
         IR::TCTable *tableDefinition = new IR::TCTable(tId, tName, cName, pipelineName);
-        auto tEntriesCount = DEFAULT_TABLE_ENTRIES;
+        auto tEntriesCount = TC::DEFAULT_TABLE_ENTRIES;
         auto sizeProperty = t->getSizeProperty();
         if (sizeProperty) {
             if (sizeProperty->fitsUint64()) {
@@ -401,13 +401,13 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
                 auto actionName = externalName(adecl);
                 if (actionName != actionDef->actionName) continue;
                 auto annoList = action->getAnnotations()->annotations;
-                unsigned int tableFlag = TABLEDEFAULT;
+                unsigned int tableFlag = TC::TABLEDEFAULT;
                 for (auto anno : annoList) {
                     if (anno->name == IR::Annotation::tableOnlyAnnotation) {
-                        tableFlag = TABLEONLY;
+                        tableFlag = TC::TABLEONLY;
                     }
                     if (anno->name == IR::Annotation::defaultOnlyAnnotation) {
-                        tableFlag = DEFAULTONLY;
+                        tableFlag = TC::DEFAULTONLY;
                     }
                 }
                 tableDefinition->addAction(actionDef, tableFlag);
@@ -423,7 +423,7 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
 void ConvertToBackendIR::postorder(const IR::P4Program *p) {
     if (p != nullptr) {
         tcPipeline->setPipelineName(pipelineName);
-        tcPipeline->setPipelineId(DEFAULT_PIPELINE_ID);
+        tcPipeline->setPipelineId(TC::DEFAULT_PIPELINE_ID);
         tcPipeline->setNumTables(tableCount);
     }
 }
@@ -460,40 +460,40 @@ bool ConvertToBackendIR::isPnaMainOutputMeta(const IR::Member *mem) {
 
 unsigned int ConvertToBackendIR::findMappedKernelMeta(const IR::Member *mem) {
     if (isPnaParserMeta(mem)) {
-        for (auto i = 0; i < MAX_PNA_PARSER_META; i++) {
+        for (auto i = 0; i < TC::MAX_PNA_PARSER_META; i++) {
             if (mem->member.name == pnaMainParserInputMetaFields[i]) {
-                if (i == PARSER_RECIRCULATED) {
-                    return SKBREDIR;
-                } else if (i == PARSER_INPUT_PORT) {
-                    return SKBIIF;
+                if (i == TC::PARSER_RECIRCULATED) {
+                    return TC::SKBREDIR;
+                } else if (i == TC::PARSER_INPUT_PORT) {
+                    return TC::SKBIIF;
                 }
             }
         }
     } else if (isPnaMainInputMeta(mem)) {
-        for (auto i = 0; i < MAX_PNA_INPUT_META; i++) {
+        for (auto i = 0; i < TC::MAX_PNA_INPUT_META; i++) {
             if (mem->member.name == pnaMainInputMetaFields[i]) {
                 switch (i) {
-                    case INPUT_RECIRCULATED:
-                        return SKBREDIR;
-                    case INPUT_TIMESTAMP:
-                        return SKBTSTAMP;
-                    case INPUT_PARSER_ERROR:
+                    case TC::INPUT_RECIRCULATED:
+                        return TC::SKBREDIR;
+                    case TC::INPUT_TIMESTAMP:
+                        return TC::SKBTSTAMP;
+                    case TC::INPUT_PARSER_ERROR:
                         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                                 "%1% is not supported in this target", mem);
-                        return UNSUPPORTED;
-                    case INPUT_CLASS_OF_SERVICE:
-                        return SKBPRIO;
-                    case INPUT_INPUT_PORT:
-                        return SKBIIF;
+                        return TC::UNSUPPORTED;
+                    case TC::INPUT_CLASS_OF_SERVICE:
+                        return TC::SKBPRIO;
+                    case TC::INPUT_INPUT_PORT:
+                        return TC::SKBIIF;
                 }
             }
         }
     } else if (isPnaMainOutputMeta(mem)) {
-        if (mem->member.name == pnaMainOutputMetaFields[OUTPUT_CLASS_OF_SERVICE]) {
-            return SKBPRIO;
+        if (mem->member.name == pnaMainOutputMetaFields[TC::OUTPUT_CLASS_OF_SERVICE]) {
+            return TC::SKBPRIO;
         }
     }
-    return UNDEFINED;
+    return TC::UNDEFINED;
 }
 
 const IR::Expression *ConvertToBackendIR::ExtractExpFromCast(const IR::Expression *exp) {
@@ -506,21 +506,21 @@ const IR::Expression *ConvertToBackendIR::ExtractExpFromCast(const IR::Expressio
 
 unsigned ConvertToBackendIR::getTcType(const IR::StringLiteral *sl) {
     auto value = sl->value;
-    auto typeVal = BIT_TYPE;
+    auto typeVal = TC::BIT_TYPE;
     if (value == "dev") {
-        typeVal = DEV_TYPE;
+        typeVal = TC::DEV_TYPE;
     } else if (value == "macaddr") {
-        typeVal = MACADDR_TYPE;
+        typeVal = TC::MACADDR_TYPE;
     } else if (value == "ipv4") {
-        typeVal = IPV4_TYPE;
+        typeVal = TC::IPV4_TYPE;
     } else if (value == "ipv6") {
-        typeVal = IPV6_TYPE;
+        typeVal = TC::IPV6_TYPE;
     } else if (value == "be16") {
-        typeVal = BE16_TYPE;
+        typeVal = TC::BE16_TYPE;
     } else if (value == "be32") {
-        typeVal = BE32_TYPE;
+        typeVal = TC::BE32_TYPE;
     } else if (value == "be64") {
-        typeVal = BE64_TYPE;
+        typeVal = TC::BE64_TYPE;
     }
     return typeVal;
 }
@@ -547,19 +547,19 @@ unsigned ConvertToBackendIR::getTableKeysize(unsigned tableId) const {
 
 void ConvertToBackendIR::updateMatchType(const IR::P4Table *t, IR::TCTable *tabledef) {
     auto key = t->getKey();
-    auto tableMatchType = EXACT_TYPE;
+    auto tableMatchType = TC::EXACT_TYPE;
     if (key != nullptr && key->keyElements.size()) {
         if (key->keyElements.size() == 1) {
             auto matchTypeExp = key->keyElements[0]->matchType->path;
             auto mtdecl = refMap->getDeclaration(matchTypeExp, true);
             auto matchTypeInfo = mtdecl->getNode()->to<IR::Declaration_ID>();
             if (matchTypeInfo->name.name == P4::P4CoreLibrary::instance().exactMatch.name) {
-                tableMatchType = EXACT_TYPE;
+                tableMatchType = TC::EXACT_TYPE;
             } else if (matchTypeInfo->name.name == P4::P4CoreLibrary::instance().lpmMatch.name) {
-                tableMatchType = LPM_TYPE;
+                tableMatchType = TC::LPM_TYPE;
             } else if (matchTypeInfo->name.name ==
                        P4::P4CoreLibrary::instance().ternaryMatch.name) {
-                tableMatchType = TERNARY_TYPE;
+                tableMatchType = TC::TERNARY_TYPE;
             } else {
                 ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                         "match type %1% is not supported in this target",
@@ -572,22 +572,22 @@ void ConvertToBackendIR::updateMatchType(const IR::P4Table *t, IR::TCTable *tabl
             unsigned lpmKey = 0;
             unsigned ternaryKey = 0;
             unsigned keyCount = 0;
-            unsigned lastkeyMatchType = EXACT_TYPE;
+            unsigned lastkeyMatchType = TC::EXACT_TYPE;
             unsigned keyMatchType;
             for (auto k : key->keyElements) {
                 auto matchTypeExp = k->matchType->path;
                 auto mtdecl = refMap->getDeclaration(matchTypeExp, true);
                 auto matchTypeInfo = mtdecl->getNode()->to<IR::Declaration_ID>();
                 if (matchTypeInfo->name.name == P4::P4CoreLibrary::instance().exactMatch.name) {
-                    keyMatchType = EXACT_TYPE;
+                    keyMatchType = TC::EXACT_TYPE;
                     exactKey++;
                 } else if (matchTypeInfo->name.name ==
                            P4::P4CoreLibrary::instance().lpmMatch.name) {
-                    keyMatchType = LPM_TYPE;
+                    keyMatchType = TC::LPM_TYPE;
                     lpmKey++;
                 } else if (matchTypeInfo->name.name ==
                            P4::P4CoreLibrary::instance().ternaryMatch.name) {
-                    keyMatchType = TERNARY_TYPE;
+                    keyMatchType = TC::TERNARY_TYPE;
                     ternaryKey++;
                 } else {
                     ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
@@ -600,11 +600,11 @@ void ConvertToBackendIR::updateMatchType(const IR::P4Table *t, IR::TCTable *tabl
                 }
             }
             if (ternaryKey >= 1 || lpmKey > 1) {
-                tableMatchType = TERNARY_TYPE;
+                tableMatchType = TC::TERNARY_TYPE;
             } else if (exactKey == totalKey) {
-                tableMatchType = EXACT_TYPE;
-            } else if (lpmKey == 1 && lastkeyMatchType == LPM_TYPE) {
-                tableMatchType = LPM_TYPE;
+                tableMatchType = TC::EXACT_TYPE;
+            } else if (lpmKey == 1 && lastkeyMatchType == TC::LPM_TYPE) {
+                tableMatchType = TC::LPM_TYPE;
             }
         }
     }

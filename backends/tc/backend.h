@@ -33,9 +33,9 @@ and limitations under the License.
 
 namespace TC {
 
-extern cstring PnaMainParserInputMetaFields[MAX_PNA_PARSER_META];
-extern cstring PnaMainInputMetaFields[MAX_PNA_INPUT_META];
-extern cstring PnaMainOutputMetaFields[MAX_PNA_OUTPUT_META];
+extern cstring PnaMainParserInputMetaFields[TC::MAX_PNA_PARSER_META];
+extern cstring PnaMainInputMetaFields[TC::MAX_PNA_INPUT_META];
+extern cstring PnaMainOutputMetaFields[TC::MAX_PNA_OUTPUT_META];
 
 class PNAEbpfGenerator;
 

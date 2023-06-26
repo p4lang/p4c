@@ -23,19 +23,19 @@ class TCKernelMetadata {
     toString {
         std::string metaName = "kernel.";
         switch (metaField) {
-            case SKBREDIR: {
+            case TC::SKBREDIR: {
                 metaName += "skbredir";
                 break;
             }
-            case SKBIIF: {
+            case TC::SKBIIF: {
                 metaName += "skbiif";
                 break;
             }
-            case SKBTSTAMP: {
+            case TC::SKBTSTAMP: {
                 metaName += "skbtstamp";
                 break;
             }
-            case SKBPRIO: {
+            case TC::SKBPRIO: {
                 metaName += "skbprio";
                 break;
             }
@@ -74,28 +74,28 @@ class TCActionParam {
         tcActionParam += paramName;
         tcActionParam += " type ";
         switch(dataType) {
-            case BIT_TYPE :
+            case TC::BIT_TYPE :
                 tcActionParam += "bit" + Util::toString(bitSize);
                 break;
-            case DEV_TYPE :
+            case TC::DEV_TYPE :
                 tcActionParam += "dev";
                 break;
-            case MACADDR_TYPE :
+            case TC::MACADDR_TYPE :
                 tcActionParam += "macaddr";
                 break;
-            case IPV4_TYPE :
+            case TC::IPV4_TYPE :
                 tcActionParam += "ipv4";
                 break;
-            case IPV6_TYPE :
+            case TC::IPV6_TYPE :
                 tcActionParam += "ipv6";
                 break;
-            case BE16_TYPE :
+            case TC::BE16_TYPE :
                 tcActionParam += "be16";
                 break;
-            case BE32_TYPE :
+            case TC::BE32_TYPE :
                 tcActionParam += "be32";
                 break;
-            case BE64_TYPE :
+            case TC::BE64_TYPE :
                 tcActionParam += "be64";
                 break;
         }
@@ -203,13 +203,13 @@ class TCTable {
     cstring printMatchType(unsigned matchType) const {
         cstring matchTypeString = "";
         switch(matchType) {
-                case EXACT_TYPE :
+                case TC::EXACT_TYPE :
                     matchTypeString = "exact";
                     break;
-                case LPM_TYPE :
+                case TC::LPM_TYPE :
                     matchTypeString = "lpm";
                     break;
-                case TERNARY_TYPE :
+                case TC::TERNARY_TYPE :
                     matchTypeString = "ternary";
                     break;
         }
@@ -221,9 +221,9 @@ class TCTable {
         controlName = cN;
         pipelineName = pN;
         keySize = 0;
-        tableEntriesCount = DEFAULT_TABLE_ENTRIES;
-        numMask = DEFAULT_KEY_MASK;
-        matchType = EXACT_TYPE;
+        tableEntriesCount = TC::DEFAULT_TABLE_ENTRIES;
+        numMask = TC::DEFAULT_KEY_MASK;
+        matchType = TC::EXACT_TYPE;
         preaction = nullptr;
         postaction = nullptr;
         defaultHitAction = nullptr;
@@ -246,9 +246,9 @@ class TCTable {
             tcTable += "\n\ttable_acts ";
             for (auto iter = actionList.begin(); iter != actionList.end(); iter++) {
                 tcTable += "act name " + iter->first->getName();
-                if (iter->second == TABLEONLY) {
+                if (iter->second == TC::TABLEONLY) {
                     tcTable += " flags tableonly";
-                } else if (iter->second == DEFAULTONLY) {
+                } else if (iter->second == TC::DEFAULTONLY) {
                     tcTable += " flags defaultonly";
                 }
                 if (std::next(iter) != actionList.end()) {
