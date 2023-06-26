@@ -204,13 +204,13 @@ class TCTable {
         cstring matchTypeString = "";
         switch(matchType) {
                 case EXACT_TYPE :
-                    matchTypeString = "EXACT_TYPE";
+                    matchTypeString = "exact";
                     break;
                 case LPM_TYPE :
-                    matchTypeString = "LPM_TYPE";
+                    matchTypeString = "lpm";
                     break;
                 case TERNARY_TYPE :
-                    matchTypeString = "TERNARY_TYPE";
+                    matchTypeString = "ternary";
                     break;
         }
         return matchTypeString;

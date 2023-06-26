@@ -17,7 +17,7 @@ $TC p4template update action/mix_matchtype_example/MainControlImpl/drop state ac
 
 $TC p4template create table/mix_matchtype_example/MainControlImpl/ipv4_tbl_1 \
 	tblid 1 \
-	type EXACT_TYPE \
+	type exact \
 	keysz 32 nummasks 8 tentries 2048 \
 	table_acts act name mix_matchtype_example/MainControlImpl/next_hop \
 	act name mix_matchtype_example/MainControlImpl/default_route_drop
@@ -25,7 +25,7 @@ $TC p4template update table/mix_matchtype_example/MainControlImpl/ipv4_tbl_1 def
 
 $TC p4template create table/mix_matchtype_example/MainControlImpl/ipv4_tbl_2 \
 	tblid 2 \
-	type TERNARY_TYPE \
+	type ternary \
 	keysz 72 nummasks 8 tentries 2048 \
 	table_acts act name mix_matchtype_example/MainControlImpl/next_hop \
 	act name mix_matchtype_example/MainControlImpl/drop
@@ -33,7 +33,7 @@ $TC p4template update table/mix_matchtype_example/MainControlImpl/ipv4_tbl_2 def
 
 $TC p4template create table/mix_matchtype_example/MainControlImpl/ipv4_tbl_3 \
 	tblid 3 \
-	type TERNARY_TYPE \
+	type ternary \
 	keysz 40 nummasks 8 tentries 2048 \
 	table_acts act name mix_matchtype_example/MainControlImpl/next_hop \
 	act name mix_matchtype_example/MainControlImpl/drop
@@ -41,7 +41,7 @@ $TC p4template update table/mix_matchtype_example/MainControlImpl/ipv4_tbl_3 def
 
 $TC p4template create table/mix_matchtype_example/MainControlImpl/ipv4_tbl_4 \
 	tblid 4 \
-	type LPM_TYPE \
+	type lpm \
 	keysz 72 nummasks 8 tentries 2048 \
 	table_acts act name mix_matchtype_example/MainControlImpl/next_hop \
 	act name mix_matchtype_example/MainControlImpl/drop

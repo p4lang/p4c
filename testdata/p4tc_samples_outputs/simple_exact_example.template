@@ -16,7 +16,7 @@ $TC p4template update action/simple_exact_example/ingress/drop state active
 
 $TC p4template create table/simple_exact_example/ingress/nh_table \
 	tblid 1 \
-	type EXACT_TYPE \
+	type exact \
 	keysz 32 nummasks 8 tentries 262144 \
 	table_acts act name simple_exact_example/ingress/send_nh \
 	act name simple_exact_example/ingress/drop

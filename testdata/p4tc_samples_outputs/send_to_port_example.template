@@ -14,7 +14,7 @@ $TC p4template update action/send_to_port_example/MainControlImpl/default_route_
 
 $TC p4template create table/send_to_port_example/MainControlImpl/ipv4_tbl \
 	tblid 1 \
-	type EXACT_TYPE \
+	type exact \
 	keysz 72 nummasks 8 tentries 2048 \
 	table_acts act name send_to_port_example/MainControlImpl/next_hop \
 	act name send_to_port_example/MainControlImpl/default_route_drop
