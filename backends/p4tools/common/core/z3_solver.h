@@ -68,6 +68,10 @@ class Z3Solver : public AbstractSolver {
     /// Removes the last solver context.
     void pop();
 
+    /// Reset the internal Z3 solver state (memory and active assertions).
+    /// In incremental state, all active assertions are reapplied after resetting.
+    void clearMemory();
+
  private:
     /// Inserts an assertion into the topmost solver context.
     void asrt(const Constraint *assertion);

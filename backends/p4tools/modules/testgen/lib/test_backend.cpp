@@ -1,5 +1,7 @@
 #include "backends/p4tools/modules/testgen/lib/test_backend.h"
 
+#include <backends/p4tools/common/core/z3_solver.h>
+
 #include <iostream>
 #include <optional>
 
@@ -53,6 +55,14 @@ bool TestBackEnd::run(const FinalState &state) {
             }
             printFeature("test_info", 4,
                          "AssertionMode: Found an input that triggers an assertion.");
+        }
+
+        // For long-running tests periodically reset the solver state to free up memory.
+        if (testCount != 0 && testCount % RESET_THRESHOLD == 0) {
+            auto &solver = state.getSolver();
+            auto *z3Solver = solver.to<Z3Solver>();
+            CHECK_NULL(z3Solver);
+            z3Solver->clearMemory();
         }
 
         bool abort = false;

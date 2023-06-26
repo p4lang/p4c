@@ -184,6 +184,18 @@ void Z3Solver::reset() {
     z3Assertions.resize(0);
 }
 
+void Z3Solver::clearMemory() {
+    auto p4AssertionsBuf = p4Assertions;
+    reset();
+    Z3_finalize_memory();
+    z3solver = z3::solver(*new z3::context());
+    p4Assertions.clear();
+    for (const auto &assert : p4AssertionsBuf) {
+        push();
+        asrt(assert);
+    }
+}
+
 void Z3Solver::push() {
     if (isIncremental) {
         z3solver.push();

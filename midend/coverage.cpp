@@ -10,7 +10,7 @@ bool SourceIdCmp::operator()(const IR::Node *s1, const IR::Node *s2) const {
     // We use source information as comparison operator since we want to trace coverage back to the
     // original program.
     // TODO: Some compiler passes may not preserve source information correctly (e.g.,
-    // copy_propagation). Fix these passes.
+    // side effect ordering). Fix these passes.
     return s1->srcInfo < s2->srcInfo;
 }
 
