@@ -260,6 +260,7 @@ void Z3Solver::timeout(unsigned tm) {
 }
 
 std::optional<bool> Z3Solver::checkSat(const std::vector<const Constraint *> &asserts) {
+    Util::ScopedTimer ctZ3("z3");
     if (isIncremental) {
         // Find common prefix with the previous invocation's list of assertions
         auto from = asserts.begin();
@@ -281,7 +282,6 @@ std::optional<bool> Z3Solver::checkSat(const std::vector<const Constraint *> &as
     }
     Z3_LOG("checking satisfiability for %d assertions",
            isIncremental ? z3solver.assertions().size() : z3Assertions.size());
-    Util::ScopedTimer ctZ3("z3");
     Util::ScopedTimer ctCheckSat("checkSat");
     z3::check_result result = isIncremental ? z3solver.check() : z3solver.check(z3Assertions);
     switch (result) {
@@ -320,6 +320,7 @@ void Z3Solver::asrt(const Constraint *assertion) {
 }
 
 const SymbolicMapping &Z3Solver::getSymbolicMapping() const {
+    Util::ScopedTimer ctZ3("z3");
     auto *result = new SymbolicMapping();
     // First, collect a map of all the declared variables we have encountered in the stack.
     std::map<unsigned int, const IR::SymbolicVariable *> declaredVars;
@@ -331,7 +332,6 @@ const SymbolicMapping &Z3Solver::getSymbolicMapping() const {
     }
     // Then, get the model and match each declaration in the model to its IR::SymbolicVariable.
     try {
-        Util::ScopedTimer ctZ3("z3");
         Util::ScopedTimer ctCheckSat("getModel");
         auto z3Model = z3solver.get_model();
         Z3_LOG("z3 model:%s", toString(z3Model));
