@@ -30,6 +30,7 @@ limitations under the License.
 #include "lib/exceptions.h"
 #include "lib/null.h"
 #include "p4/config/v1/p4types.pb.h"
+#include "p4RuntimeArchHandler.h"
 
 namespace p4configv1 = ::p4::config::v1;
 
@@ -189,6 +190,11 @@ bool TypeSpecConverter::preorder(const IR::Type_Newtype *type) {
             visit(underlyingType);
             auto typeSpec = map.at(underlyingType);
             CHECK_NULL(typeSpec);
+
+            // the @p4runtime_translation annotation will set the
+            // translated_type so we ignore when handling the annotations.
+            Helpers::addAnnotations(newTypeSpec, type,
+                                    [](cstring name) { return name == "p4runtime_translation"; });
 
             if (isTranslatedType) {
                 auto translatedType = newTypeSpec->mutable_translated_type();
