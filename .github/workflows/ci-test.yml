@@ -129,7 +129,8 @@ jobs:
 
     - name: Build (Ubuntu 18.04, GCC)
       run: |
-        docker build -t p4c --build-arg BASE_IMAGE=ubuntu:18.04 --build-arg IMAGE_TYPE=test .
+        docker build -t p4c --build-arg BASE_IMAGE=ubuntu:18.04 --build-arg IMAGE_TYPE=test \
+        --build-arg ENABLE_TEST_TOOLS=OFF .
         ./tools/export_ccache.sh
 
       # run with sudo (...) --privileged
