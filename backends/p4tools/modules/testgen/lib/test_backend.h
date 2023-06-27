@@ -25,6 +25,9 @@ class TestBackEnd {
     /// The current test count. If it exceeds @var maxTests, the symbolic executor will stop.
     int64_t testCount = 0;
 
+    /// Indicates the number of generated tests after which we reset memory.
+    static const int64_t RESET_THRESHOLD = 10000;
+
  protected:
     /// ProgramInfo is used to access some target specific information for test generation.
     const ProgramInfo &programInfo;

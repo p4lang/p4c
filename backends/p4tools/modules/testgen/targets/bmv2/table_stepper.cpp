@@ -43,20 +43,29 @@ const IR::Expression *Bmv2V1ModelTableStepper::computeTargetMatchType(
 
     // TODO: We consider optional match types to be a no-op, but we could make them exact matches.
     if (keyProperties.matchType == BMv2Constants::MATCH_KIND_OPT) {
-        // We can recover from taint by simply not adding the optional match.
-        // Create a new symbolic variable that corresponds to the key expression.
         cstring keyName = properties.tableName + "_key_" + keyProperties.name;
         const auto *ctrlPlaneKey = ToolsVariables::getSymbolicVariable(keyExpr->type, keyName);
+        // We can recover from taint by simply not adding the optional match.
+        // Create a new symbolic variable that corresponds to the key expression.
+        const IR::Expression *ternaryMask = nullptr;
+        // We can recover from taint by inserting a ternary match that is 0.
+        const auto *wildCard = IR::getConstant(keyExpr->type, 0);
         if (keyProperties.isTainted) {
             matches->emplace(keyProperties.name,
-                             new Optional(keyProperties.key, ctrlPlaneKey, false));
-        } else {
-            const IR::Expression *keyExpr = keyProperties.key->expression;
-            matches->emplace(keyProperties.name,
-                             new Optional(keyProperties.key, ctrlPlaneKey, true));
-            hitCondition = new IR::LAnd(hitCondition, new IR::Equ(keyExpr, ctrlPlaneKey));
+                             new Ternary(keyProperties.key, ctrlPlaneKey, wildCard));
+            return hitCondition;
         }
-        return hitCondition;
+        cstring maskName = properties.tableName + "_mask_" + keyProperties.name;
+        const auto *fullMatch = IR::getMaxValueConstant(keyExpr->type);
+        ternaryMask = ToolsVariables::getSymbolicVariable(keyExpr->type, maskName);
+        auto *maskCond =
+            new IR::LOr(new IR::Equ(ternaryMask, wildCard), new IR::Equ(ternaryMask, fullMatch));
+        matches->emplace(keyProperties.name,
+                         new Ternary(keyProperties.key, ctrlPlaneKey, wildCard));
+        return new IR::LAnd(
+            hitCondition,
+            new IR::LAnd(maskCond, new IR::Equ(new IR::BAnd(keyExpr, ternaryMask),
+                                               new IR::BAnd(ctrlPlaneKey, ternaryMask))));
     }
     // Action selector entries are not part of the match.
     if (keyProperties.matchType == BMv2Constants::MATCH_KIND_SELECTOR) {
@@ -117,8 +126,7 @@ void Bmv2V1ModelTableStepper::evalTableActionProfile(
             // Synthesize a symbolic variable here that corresponds to a control plane argument.
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
-            cstring keyName =
-                properties.tableName + "_param_" + actionName + std::to_string(argIdx);
+            cstring keyName = properties.tableName + "_arg_" + actionName + std::to_string(argIdx);
             const auto &actionArg = ToolsVariables::getSymbolicVariable(parameter->type, keyName);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
@@ -204,8 +212,7 @@ void Bmv2V1ModelTableStepper::evalTableActionSelector(
             // Synthesize a symbolic variable here that corresponds to a control plane argument.
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
-            cstring keyName =
-                properties.tableName + "_param_" + actionName + std::to_string(argIdx);
+            cstring keyName = properties.tableName + "_arg_" + actionName + std::to_string(argIdx);
             const auto &actionArg = ToolsVariables::getSymbolicVariable(parameter->type, keyName);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.

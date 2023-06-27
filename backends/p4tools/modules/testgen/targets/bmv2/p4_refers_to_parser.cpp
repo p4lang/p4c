@@ -1,7 +1,6 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_refers_to_parser.h"
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <string>
@@ -13,7 +12,6 @@
 #include "ir/ir.h"
 #include "ir/vector.h"
 #include "lib/exceptions.h"
-#include "lib/log.h"
 #include "lib/null.h"
 
 namespace P4Tools::RefersToParser {
@@ -34,7 +32,7 @@ void RefersToParser::createConstraint(bool table, cstring currentName, cstring c
     } else {
         tmp = currentName + currentKeyName;
     }
-    auto left = ToolsVariables::getSymbolicVariable(type, tmp);
+    const auto *left = ToolsVariables::getSymbolicVariable(type, tmp);
     std::string str = currentName.c_str();
     std::vector<std::string> elems;
     std::stringstream ss(str);
@@ -47,7 +45,7 @@ void RefersToParser::createConstraint(bool table, cstring currentName, cstring c
         str += elems[i] + ".";
     }
     tmp = str + destTableName + "_key_" + destKeyName;
-    auto right = ToolsVariables::getSymbolicVariable(type, tmp);
+    const auto *right = ToolsVariables::getSymbolicVariable(type, tmp);
     auto *expr = new IR::Equ(left, right);
     std::vector<const IR::Expression *> constraint;
     constraint.push_back(expr);
@@ -64,9 +62,6 @@ cstring buildName(IR::Vector<IR::AnnotationToken> input) {
     return result;
 }
 
-/// An intermediate function that determines the type for future variables and partially
-/// collects their names for them, after which it calls the createConstraint function,
-/// which completes the construction of the constraint
 void RefersToParser::createRefersToConstraint(const IR::Annotation *annotation,
                                               const IR::Type *inputType, cstring controlPlaneName,
                                               bool isParameter, cstring inputName) {

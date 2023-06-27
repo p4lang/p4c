@@ -117,8 +117,7 @@ void SharedPnaTableStepper::evalTableActionProfile(
             // Synthesize a symbolic variable here that corresponds to a control plane argument.
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
-            cstring keyName =
-                properties.tableName + "_param_" + actionName + std::to_string(argIdx);
+            cstring keyName = properties.tableName + "_arg_" + actionName + std::to_string(argIdx);
             const auto &actionArg = ToolsVariables::getSymbolicVariable(parameter->type, keyName);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
@@ -204,8 +203,7 @@ void SharedPnaTableStepper::evalTableActionSelector(
             // Synthesize a symbolic variable here that corresponds to a control plane argument.
             // We get the unique name of the table coupled with the unique name of the action.
             // Getting the unique name is needed to avoid generating duplicate arguments.
-            cstring keyName =
-                properties.tableName + "_param_" + actionName + std::to_string(argIdx);
+            cstring keyName = properties.tableName + "_arg_" + actionName + std::to_string(argIdx);
             const auto &actionArg = ToolsVariables::getSymbolicVariable(parameter->type, keyName);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
