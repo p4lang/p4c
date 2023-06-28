@@ -88,7 +88,7 @@ filegroup(
             url = "https://github.com/Z3Prover/z3/archive/z3-4.8.12.tar.gz",
             strip_prefix = "z3-z3-4.8.12",
             sha256 = "e3aaefde68b839299cbc988178529535e66048398f7d083b40c69fe0da55f8b7",
-            build_file = "@//:bazel/BUILD.z3.bzl",
+            build_file = "@//:bazel/BUILD.z3.bazel",
         )
     if not native.existing_rule("com_github_pantor_inja"):
         http_archive(
@@ -96,7 +96,7 @@ filegroup(
             url = "https://github.com/pantor/inja/archive/refs/tags/v3.4.0.zip",
             strip_prefix = "inja-3.4.0/single_include",
             sha256 = "4ad04d380b8377874c7a097a662c1f67f40da5fb7d3abc3851544f59c3613a20",
-            build_file = "@//:bazel/BUILD.inja.bzl",
+            build_file = "@//:bazel/BUILD.inja.bazel",
         )
     if not native.existing_rule("nlohmann_json"):
         http_archive(
@@ -104,6 +104,6 @@ filegroup(
             url = "https://github.com/nlohmann/json/archive/refs/tags/v3.11.2.zip",
             strip_prefix = "json-3.11.2/single_include",
             sha256 = "95651d7d1fcf2e5c3163c3d37df6d6b3e9e5027299e6bd050d157322ceda9ac9",
-            build_file = "@//:bazel/BUILD.json.bzl",
+            build_file = "@//:bazel/BUILD.json.bazel",
         )
 

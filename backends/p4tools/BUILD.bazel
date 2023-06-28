@@ -3,12 +3,13 @@
 exports_files(["p4tools.def"])
 
 package(
-    #default_applicable_licenses = ["//:license"],
     licenses = ["notice"],
 )
 
 # Extend the list with the name of the desired targets (in "modules/testgen/targets/).
-TESTGEN_TARGETS = ["bmv2"]
+TESTGEN_TARGETS = [
+    "bmv2",
+]
 
 filegroup(
     name = "ir_extension",

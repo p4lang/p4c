@@ -1,10 +1,9 @@
 #include "backends/p4tools/modules/testgen/lib/test_backend.h"
 
-#include <backends/p4tools/common/core/z3_solver.h>
-
 #include <iostream>
 #include <optional>
 
+#include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/format_int.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/taint.h"
