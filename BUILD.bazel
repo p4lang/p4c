@@ -145,6 +145,7 @@ filegroup(
         "frontends/p4-14/ir-v1.def",
         "backends/bmv2/bmv2.def",
         "backends/dpdk/dpdk.def",
+        "//backends/p4tools:p4tools.def",
         # p4c extensions may set this target to a `filegroup` containing
         # additional .def files.
         "@com_github_p4lang_p4c_extension//:ir_extensions",
