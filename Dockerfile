@@ -25,7 +25,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 # Whether to install dependencies required to run PTF-ebpf tests
 ARG INSTALL_PTF_EBPF_DEPENDENCIES=OFF
 # Whether to build the P4Tools back end and platform.
-ARG ENABLE_TEST_TOOLS=OFF
+ARG ENABLE_TEST_TOOLS=ON
 # Whether to treat warnings as errors.
 ARG ENABLE_WERROR=ON
 # Compile with Clang compiler
