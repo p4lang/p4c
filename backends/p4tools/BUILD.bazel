@@ -11,12 +11,6 @@ TESTGEN_TARGETS = [
     "bmv2",
 ]
 
-filegroup(
-    name = "ir_extension",
-    srcs = ["common/testgen.def"],
-    visibility = ["//:__subpackages__"],  # So p4c can compile these.
-)
-
 genrule(
     name = "version",
     srcs = [
