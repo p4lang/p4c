@@ -12,8 +12,7 @@
 #include "ir/visitor.h"
 #include "lib/cstring.h"
 
-namespace P4Tools {
-namespace AssertsParser {
+namespace P4Tools::AssertsParser {
 
 class AssertsParser : public Transform {
     std::vector<std::vector<const IR::Expression *>> &restrictionsVec;
@@ -112,7 +111,6 @@ class Lexer {
     char prev() noexcept;
     char get() noexcept;
 };
-}  // namespace AssertsParser
-}  // namespace P4Tools
+}  // namespace P4Tools::AssertsParser
 
 #endif /* TESTGEN_TARGETS_BMV2_P4_ASSERTS_PARSER_H_ */

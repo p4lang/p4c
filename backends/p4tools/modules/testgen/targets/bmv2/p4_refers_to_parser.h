@@ -5,28 +5,23 @@
 
 #include "ir/ir.h"
 #include "ir/visitor.h"
-#include "lib/cstring.h"
 
 namespace P4Tools::RefersToParser {
 
 class RefersToParser : public Inspector {
     std::vector<std::vector<const IR::Expression *>> &restrictionsVec;
 
-    /// An intermediate function that determines the type for future variables and partially
-    /// collects their names for them, after which it calls the createConstraint function,
-    /// which completes the construction of the constraint
-    void createRefersToConstraint(const IR::Annotation *annotation, const IR::Type *inputType,
-                                  cstring controlPlaneName, bool isParameter, cstring inputName);
-
- public:
-    explicit RefersToParser(std::vector<std::vector<const IR::Expression *>> &output);
+    /// Build the referred table key by looking up the table referenced in the annotation @param
+    /// refersAnno in the
+    /// @param ctrlContext and retrieving the appropriate type. @returns a symbolic variable
+    /// corresponding to the control plane entry variable.
+    const IR::SymbolicVariable *buildReferredKey(const IR::P4Control &ctrlContext,
+                                                 const IR::Annotation &refersAnno);
 
     bool preorder(const IR::P4Table *table) override;
 
-    /// Builds names for the symbolic variable and then creates a symbolic variable and builds the
-    /// refers_to constraints based on them
-    void createConstraint(bool table, cstring currentName, cstring currentKeyName,
-                          cstring destKeyName, cstring destTableName, const IR::Type *type);
+ public:
+    explicit RefersToParser(std::vector<std::vector<const IR::Expression *>> &output);
 };
 
 }  // namespace P4Tools::RefersToParser
