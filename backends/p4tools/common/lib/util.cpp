@@ -1,7 +1,5 @@
 #include "backends/p4tools/common/lib/util.h"
 
-#include <lib/null.h>
-
 #include <chrono>  // NOLINT cpplint throws a warning because Google has a similar library...
 #include <cstdint>
 #include <ctime>
@@ -19,6 +17,7 @@
 #include "ir/irutils.h"
 #include "ir/vector.h"
 #include "lib/exceptions.h"
+#include "lib/null.h"
 
 namespace P4Tools {
 
