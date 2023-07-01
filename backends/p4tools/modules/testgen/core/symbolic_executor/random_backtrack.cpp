@@ -50,8 +50,9 @@ void RandomBacktrack::runImpl(const Callback &callBack, ExecutionStateReference 
                 // State successors are accompanied by branch constraint which should be evaluated
                 // in the state before the step was taken - we copy the current symbolic state.
                 StepResult successors = step(executionState);
-                auto success = pickSuccessor(successors);
-                if (success) {
+                auto nextState = pickSuccessor(successors);
+                if (nextState.has_value()) {
+                    executionState = nextState.value();
                     continue;
                 }
             }
