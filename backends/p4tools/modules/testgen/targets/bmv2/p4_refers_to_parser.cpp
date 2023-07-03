@@ -21,55 +21,42 @@ RefersToParser::RefersToParser(std::vector<std::vector<const IR::Expression *>> 
     setName("RefersToParser");
 }
 
-/// Builds names for the symbolic variable and then creates a symbolic variable and builds the
-/// refers_to constraints based on them
-void RefersToParser::createConstraint(bool table, cstring currentName, cstring currentKeyName,
-                                      cstring destKeyName, cstring destTableName,
-                                      const IR::Type *type) {
-    cstring tmp = "";
-    if (table) {
-        tmp = currentName + "_key_" + currentKeyName;
-    } else {
-        tmp = currentName + currentKeyName;
+const IR::SymbolicVariable *RefersToParser::buildReferredKey(const IR::P4Control &ctrlContext,
+                                                             const IR::Annotation &refersAnno) {
+    auto annotationList = refersAnno.body;
+    BUG_CHECK(annotationList.size() > 2,
+              "'@refers_to' annotation %1% does not have the correct format.", refersAnno);
+    auto srcTableRefStr = annotationList.at(0)->text;
+    // Build the referred key by assembling all remaining tokens.
+    // E.g., "hdr.eth.eth_type" is multiple tokens.
+    cstring referredKeyStr = "";
+    for (uint64_t i = 2; i < annotationList.size(); i++) {
+        referredKeyStr += annotationList[i]->text;
     }
-    const auto *left = ToolsVariables::getSymbolicVariable(type, tmp);
-    std::string str = currentName.c_str();
-    std::vector<std::string> elems;
-    std::stringstream ss(str);
-    std::string item;
-    while (std::getline(ss, item, '.')) {
-        elems.push_back(item);
+    const IR::IDeclaration *srcTableRef = nullptr;
+    for (const auto *decl : *ctrlContext.getDeclarations()) {
+        auto declName = decl->controlPlaneName();
+        if (declName.endsWith(srcTableRefStr)) {
+            srcTableRef = decl;
+            break;
+        }
     }
-    str = "";
-    for (uint64_t i = 0; i < elems.size() - 1; i++) {
-        str += elems[i] + ".";
+    BUG_CHECK(srcTableRef != nullptr, "Table %1% does not exist.", srcTableRefStr);
+    const auto *srcTable = srcTableRef->checkedTo<IR::P4Table>();
+    const auto *key = srcTable->getKey();
+    BUG_CHECK(key != nullptr, "Table %1% does not have any keys.", srcTable);
+    for (const auto *keyElement : key->keyElements) {
+        auto annotations = keyElement->annotations->annotations;
+        const auto *nameAnnot = keyElement->getAnnotation("name");
+        // Some hidden tables do not have any key name annotations.
+        BUG_CHECK(nameAnnot != nullptr, "Refers-to table key without a name annotation");
+        if (referredKeyStr == nameAnnot->getName()) {
+            auto referredKeyName = srcTable->controlPlaneName() + "_key_" + referredKeyStr;
+            return ToolsVariables::getSymbolicVariable(keyElement->expression->type,
+                                                       referredKeyName);
+        }
     }
-    tmp = str + destTableName + "_key_" + destKeyName;
-    const auto *right = ToolsVariables::getSymbolicVariable(type, tmp);
-    auto *expr = new IR::Equ(left, right);
-    std::vector<const IR::Expression *> constraint;
-    constraint.push_back(expr);
-    restrictionsVec.push_back(constraint);
-}
-
-// Builds a variable name from the body of the "refers_to" annotation.
-// The build starts at index 2 because 0 is the table name and 1 is ",".
-cstring buildName(IR::Vector<IR::AnnotationToken> input) {
-    cstring result = "";
-    for (uint64_t i = 2; i < input.size(); i++) {
-        result += input[i]->text;
-    }
-    return result;
-}
-
-void RefersToParser::createRefersToConstraint(const IR::Annotation *annotation,
-                                              const IR::Type *inputType, cstring controlPlaneName,
-                                              bool isParameter, cstring inputName) {
-    if (inputType->is<IR::Type_Boolean>()) {
-        inputType = IR::Type_Bits::get(1);
-    }
-    createConstraint(!isParameter, controlPlaneName, inputName, buildName(annotation->body),
-                     annotation->body[0]->text, inputType);
+    BUG("Did not find a matching key in table %1%. ", srcTable);
 }
 
 bool RefersToParser::preorder(const IR::P4Table *table) {
@@ -85,14 +72,15 @@ bool RefersToParser::preorder(const IR::P4Table *table) {
         for (const auto *annotation : annotations) {
             if (annotation->name.name == "refers_to") {
                 const auto *nameAnnot = keyElement->getAnnotation("name");
-                // Some hidden tables do not have any key name annotations.
-                BUG_CHECK(nameAnnot != nullptr, "Refers-to table key without a name annotation");
-                cstring fieldName;
-                if (nameAnnot != nullptr) {
-                    fieldName = nameAnnot->getName();
-                }
-                createRefersToConstraint(annotation, keyElement->expression->type,
-                                         table->controlPlaneName(), false, fieldName);
+                BUG_CHECK(nameAnnot != nullptr, "refers_to table key without a name annotation");
+                const auto *referredKey = buildReferredKey(*ctrl, *annotation);
+                auto srcKeyName = table->controlPlaneName() + "_key_" + nameAnnot->getName();
+                const auto *srcKey =
+                    ToolsVariables::getSymbolicVariable(keyElement->expression->type, srcKeyName);
+                auto *expr = new IR::Equ(srcKey, referredKey);
+                std::vector<const IR::Expression *> constraint;
+                constraint.push_back(expr);
+                restrictionsVec.push_back(constraint);
             }
         }
     }
@@ -116,10 +104,15 @@ bool RefersToParser::preorder(const IR::P4Table *table) {
             auto annotations = parameter->annotations->annotations;
             for (const auto *annotation : annotations) {
                 if (annotation->name.name == "refers_to") {
-                    cstring inputName =
-                        "_arg_" + actionCall->controlPlaneName() + std::to_string(idx);
-                    createRefersToConstraint(annotation, parameter->type, table->controlPlaneName(),
-                                             true, inputName);
+                    const auto *referredKey = buildReferredKey(*ctrl, *annotation);
+                    auto srcParamName = table->controlPlaneName() + "_arg_" +
+                                        actionCall->controlPlaneName() + std::to_string(idx);
+                    const auto *srcKey =
+                        ToolsVariables::getSymbolicVariable(parameter->type, srcParamName);
+                    auto *expr = new IR::Equ(srcKey, referredKey);
+                    std::vector<const IR::Expression *> constraint;
+                    constraint.push_back(expr);
+                    restrictionsVec.push_back(constraint);
                 }
             }
         }

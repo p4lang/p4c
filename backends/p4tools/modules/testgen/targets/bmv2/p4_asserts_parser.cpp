@@ -6,8 +6,6 @@
 #include <string>
 #include <utility>
 
-#include <boost/multiprecision/cpp_int.hpp>
-
 #include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/id.h"
@@ -20,7 +18,7 @@
 
 namespace P4Tools::AssertsParser {
 
-static std::vector<std::string> NAMES{
+static const std::vector<std::string> NAMES{
     "Priority",    "Text",           "True",         "False",       "LineStatementClose",
     "Id",          "Number",         "Minus",        "Plus",        "Dot",
     "FieldAcces",  "MetadataAccess", "LeftParen",    "RightParen",  "Equal",
@@ -47,14 +45,14 @@ bool Token::is(Token::Kind kind) const noexcept { return m_kind == kind; }
 
 /// Kind comparison function. Allows you to compare token kind with the specified kind and return
 /// bool values, replacement for !=
-bool Token::is_not(Token::Kind kind) const noexcept { return m_kind != kind; }
+bool Token::isNot(Token::Kind kind) const noexcept { return m_kind != kind; }
 
 /// Functions for multiple comparison kind
-bool Token::is_one_of(Token::Kind k1, Token::Kind k2) const noexcept { return is(k1) || is(k2); }
+bool Token::isOneOf(Token::Kind k1, Token::Kind k2) const noexcept { return is(k1) || is(k2); }
 
 template <typename... Ts>
-bool Token::is_one_of(Token::Kind k1, Token::Kind k2, Ts... ks) const noexcept {
-    return is(k1) || is_one_of(k2, ks...);
+bool Token::isOneOf(Token::Kind k1, Token::Kind k2, Ts... ks) const noexcept {
+    return is(k1) || isOneOf(k2, ks...);
 }
 
 /// The function to get lexeme from token
@@ -64,15 +62,15 @@ std::string_view Token::lexeme() const noexcept { return m_lexeme; }
 void Token::lexeme(std::string_view lexeme) noexcept { m_lexeme = lexeme; }
 
 /// Function to get the current character
-char Lexer::peek() const noexcept { return *m_beg; }
+char Lexer::peek() const noexcept { return *mBeg; }
 
 /// The function advances the iterator one index back and returns the character corresponding to the
 /// position of the iterator
-char Lexer::prev() noexcept { return *m_beg--; }
+char Lexer::prev() noexcept { return *mBeg--; }
 
 /// The function advances the iterator one index forward and returns the character corresponding to
 /// the position of the iterator
-char Lexer::get() noexcept { return *m_beg++; }
+char Lexer::get() noexcept { return *mBeg++; }
 
 bool isSpace(char c) noexcept {
     switch (c) {
@@ -138,7 +136,7 @@ const IR::Expression *makeConstant(Token input, const IR::Vector<IR::KeyElement>
             BUG_CHECK(keyName.size() > 0, "Key does not have a name annotation.");
             auto annoSize = keyName.size();
             auto tokenLength = inputStr.length();
-            if (inputStr.find(keyName, tokenLength - annoSize) == std::string::npos) {
+            if (inputStr.compare(tokenLength - annoSize, annoSize, keyName) != 0) {
                 continue;
             }
             const auto *keyType = key->expression->type;
@@ -156,9 +154,9 @@ const IR::Expression *makeConstant(Token input, const IR::Vector<IR::KeyElement>
     }
     if (input.is(Token::Kind::Number)) {
         if (leftType == nullptr) {
-            return IR::getConstant(IR::Type_Bits::get(32), static_cast<big_int>(inputStr));
+            return IR::getConstant(IR::Type_Bits::get(32), big_int(std::string(inputStr)));
         }
-        return IR::getConstant(leftType, static_cast<big_int>(inputStr));
+        return IR::getConstant(leftType, big_int(std::string(inputStr)));
     }
     // TODO: Is this the right solution for priorities?
     if (input.is(Token::Kind::Priority)) {
@@ -179,8 +177,8 @@ std::pair<std::vector<Token>, size_t> findRightPart(std::vector<Token> tokens, s
     bool flag = true;
     while (flag) {
         if (idx == tokens.size() ||
-            tokens[idx].is_one_of(Token::Kind::Conjunction, Token::Kind::Disjunction,
-                                  Token::Kind::RightParen)) {
+            tokens[idx].isOneOf(Token::Kind::Conjunction, Token::Kind::Disjunction,
+                                Token::Kind::RightParen)) {
             endIdx = idx;
             flag = false;
         }
@@ -252,15 +250,15 @@ const IR::Expression *getIR(std::vector<Token> tokens,
 
     for (size_t idx = 0; idx < tokens.size(); idx++) {
         auto token = tokens.at(idx);
-        if (token.is_one_of(
-                Token::Kind::Minus, Token::Kind::Plus, Token::Kind::Equal, Token::Kind::NotEqual,
-                Token::Kind::GreaterThan, Token::Kind::GreaterEqual, Token::Kind::LessThan,
-                Token::Kind::LessEqual, Token::Kind::Slash, Token::Kind::Percent, Token::Kind::Shr,
-                Token::Kind::Shl, Token::Kind::Mul, Token::Kind::NotEqual)) {
+        if (token.isOneOf(Token::Kind::Minus, Token::Kind::Plus, Token::Kind::Equal,
+                          Token::Kind::NotEqual, Token::Kind::GreaterThan,
+                          Token::Kind::GreaterEqual, Token::Kind::LessThan, Token::Kind::LessEqual,
+                          Token::Kind::Slash, Token::Kind::Percent, Token::Kind::Shr,
+                          Token::Kind::Shl, Token::Kind::Mul, Token::Kind::NotEqual)) {
             const IR::Expression *leftL = nullptr;
             const IR::Expression *rightL = nullptr;
             leftL = makeConstant(tokens[idx - 1], keyElements, nullptr);
-            if (tokens[idx + 1].is_one_of(Token::Kind::Text, Token::Kind::Number)) {
+            if (tokens[idx + 1].isOneOf(Token::Kind::Text, Token::Kind::Number)) {
                 rightL = makeConstant(tokens[idx + 1], keyElements, leftL->type);
                 if (const auto *constant = leftL->to<IR::Constant>()) {
                     auto *clone = constant->clone();
@@ -278,24 +276,24 @@ const IR::Expression *getIR(std::vector<Token> tokens,
             }
             exprVec.push_back(pickBinaryExpr(token, leftL, rightL));
         } else if (token.is(Token::Kind::LNot)) {
-            if (!tokens[idx + 1].is_one_of(Token::Kind::Text, Token::Kind::Number)) {
+            if (!tokens[idx + 1].isOneOf(Token::Kind::Text, Token::Kind::Number)) {
                 auto rightPart = findRightPart(tokens, idx);
                 const IR::Expression *exprLNot = getIR(rightPart.first, keyElements);
                 idx = rightPart.second;
                 exprVec.push_back(new IR::LNot(exprLNot));
             }
-        } else if (token.is_one_of(Token::Kind::Disjunction, Token::Kind::Implication)) {
+        } else if (token.isOneOf(Token::Kind::Disjunction, Token::Kind::Implication)) {
             if (token.is(Token::Kind::Implication)) {
                 const auto *tmp = exprVec[exprVec.size() - 1];
                 exprVec.pop_back();
                 exprVec.push_back(new IR::LNot(tmp));
             }
-            const IR::Expression *expr1 = new IR::PathExpression(new IR::Path("tmp"));
-            const IR::Expression *expr2 = new IR::PathExpression(new IR::Path("tmp"));
+            const IR::Expression *expr1 = new IR::PathExpression(new IR::Path("tmp1"));
+            const IR::Expression *expr2 = new IR::PathExpression(new IR::Path("tmp2"));
             exprVec.push_back(new IR::LOr(expr1, expr2));
         } else if (token.is(Token::Kind::Conjunction)) {
-            const IR::Expression *expr1 = new IR::PathExpression(new IR::Path("tmp"));
-            const IR::Expression *expr2 = new IR::PathExpression(new IR::Path("tmp"));
+            const IR::Expression *expr1 = new IR::PathExpression(new IR::Path("tmp1"));
+            const IR::Expression *expr2 = new IR::PathExpression(new IR::Path("tmp2"));
             exprVec.push_back(new IR::LAnd(expr1, expr2));
         }
     }
@@ -475,7 +473,7 @@ std::vector<const IR::Expression *> AssertsParser::genIRStructs(
     cstring tableName, cstring restrictionString, const IR::Vector<IR::KeyElement> &keyElements) {
     Lexer lex(restrictionString);
     std::vector<Token> tmp;
-    for (auto token = lex.next(); !token.is_one_of(Token::Kind::End, Token::Kind::Unknown);
+    for (auto token = lex.next(); !token.isOneOf(Token::Kind::End, Token::Kind::Unknown);
          token = lex.next()) {
         tmp.push_back(token);
     }
@@ -544,7 +542,7 @@ const IR::Node *AssertsParser::postorder(IR::P4Table *node) {
     return node;
 }
 
-Token Lexer::atom(Token::Kind kind) noexcept { return {kind, m_beg++, 1}; }
+Token Lexer::atom(Token::Kind kind) noexcept { return {kind, mBeg++, 1}; }
 
 Token Lexer::next() noexcept {
     while (isSpace(peek())) {
@@ -553,10 +551,10 @@ Token Lexer::next() noexcept {
 
     switch (peek()) {
         case '\0':
-            return {Token::Kind::End, m_beg, 1};
+            return {Token::Kind::End, mBeg, 1};
         case '\n':
             get();
-            return {Token::Kind::EndString, m_beg, 1};
+            return {Token::Kind::EndString, mBeg, 1};
         default:
             return atom(Token::Kind::Text);
         case '0':

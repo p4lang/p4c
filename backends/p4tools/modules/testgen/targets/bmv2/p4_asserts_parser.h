@@ -12,8 +12,7 @@
 #include "ir/visitor.h"
 #include "lib/cstring.h"
 
-namespace P4Tools {
-namespace AssertsParser {
+namespace P4Tools::AssertsParser {
 
 class AssertsParser : public Transform {
     std::vector<std::vector<const IR::Expression *>> &restrictionsVec;
@@ -72,6 +71,7 @@ class Token {
 
     Kind m_kind{};
     std::string_view m_lexeme{};
+
     explicit Token(Kind kind) noexcept : m_kind{kind} {}
 
     Token(Kind kind, const char *beg, std::size_t len) noexcept
@@ -80,39 +80,38 @@ class Token {
     Token(Kind kind, const char *beg, const char *end) noexcept
         : m_kind{kind}, m_lexeme(beg, std::distance(beg, end)) {}
 
-    Kind kind() const noexcept;
+    [[nodiscard]] Kind kind() const noexcept;
 
     void kind(Kind kind) noexcept;
 
-    bool is(Kind kind) const noexcept;
+    [[nodiscard]] bool is(Kind kind) const noexcept;
 
-    bool is_not(Kind kind) const noexcept;
+    [[nodiscard]] bool isNot(Kind kind) const noexcept;
 
-    bool is_one_of(Kind k1, Kind k2) const noexcept;
+    [[nodiscard]] bool isOneOf(Kind k1, Kind k2) const noexcept;
 
     template <typename... Ts>
-    bool is_one_of(Kind k1, Kind k2, Ts... ks) const noexcept;
+    bool isOneOf(Kind k1, Kind k2, Ts... ks) const noexcept;
 
-    std::string_view lexeme() const noexcept;
+    [[nodiscard]] std::string_view lexeme() const noexcept;
 
     void lexeme(std::string_view lexeme) noexcept;
 };
 
 class Lexer {
  public:
-    explicit Lexer(const char *beg) noexcept : m_beg{beg} {}
+    explicit Lexer(const char *beg) noexcept : mBeg{beg} {}
 
     Token next() noexcept;
-    const char *m_beg = nullptr;
+    const char *mBeg = nullptr;
 
  private:
     Token atom(Token::Kind) noexcept;
 
-    char peek() const noexcept;
+    [[nodiscard]] char peek() const noexcept;
     char prev() noexcept;
     char get() noexcept;
 };
-}  // namespace AssertsParser
-}  // namespace P4Tools
+}  // namespace P4Tools::AssertsParser
 
 #endif /* TESTGEN_TARGETS_BMV2_P4_ASSERTS_PARSER_H_ */

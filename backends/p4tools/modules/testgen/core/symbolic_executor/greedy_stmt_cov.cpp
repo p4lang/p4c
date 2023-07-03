@@ -65,7 +65,7 @@ std::optional<ExecutionStateReference> GreedyStmtSelection::pickSuccessor(StepRe
         // If we succeed, pick the branch and add the remainder to the list of
         // potential branches.
         if (branch.has_value()) {
-            auto &nextState = branch->nextState;
+            auto &nextState = branch.value().nextState;
             potentialBranches.insert(potentialBranches.end(), successors->begin(),
                                      successors->end());
             return nextState;
@@ -97,8 +97,9 @@ void GreedyStmtSelection::runImpl(const Callback &callBack,
                 // State successors are accompanied by branch constraint which should be evaluated
                 // in the state before the step was taken - we copy the current symbolic state.
                 StepResult successors = step(executionState);
-                auto success = pickSuccessor(successors);
-                if (success) {
+                auto nextState = pickSuccessor(successors);
+                if (nextState.has_value()) {
+                    executionState = nextState.value();
                     continue;
                 }
             }
