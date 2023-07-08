@@ -246,7 +246,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %type<IR::Expression*>      expression lvalue keysetExpression selectExpression
                             stateExpression optInitializer initializer
                             simpleKeysetExpression transitionStatement switchLabel
-                            p4rtControllerType reducedSimpleKeysetExpression optEntryPriority
+                            p4rtControllerType reducedSimpleKeysetExpression entryPriority
                             nonBraceExpression
 %type<ConstType*>           baseType typeOrVoid specializedType headerStackType
                             typeRef tupleType typeArg realTypeArg namedType p4listType
@@ -473,12 +473,12 @@ nonTypeName
     | STATE       { $$ = new IR::ID(@1, "state"); }
     | ENTRIES     { $$ = new IR::ID(@1, "entries"); }
     | TYPE        { $$ = new IR::ID(@1, "type"); }
+    | PRIORITY    { $$ = new IR::ID(@1, "priority"); }
     ;
 
 name
     : nonTypeName { $$ = $1; }
     | LIST { $$ = new IR::ID(@1, "list"); }
-    | PRIORITY { $$ = new IR::ID(@1, "priority"); }
     | TYPE_IDENTIFIER  { $$ = new IR::ID(@1, $1); }
     ;
 
@@ -1337,7 +1337,7 @@ actionRef
     ;
 
 entry
-    : optCONST optEntryPriority keysetExpression ":" actionRef optAnnotations ";"
+    : optCONST entryPriority keysetExpression ":" actionRef optAnnotations ";"
         // below we set the position starting at @3 because optional
         // fields generate weird position information.
         { if (auto l = $3->to<IR::ListExpression>())
@@ -1348,11 +1348,21 @@ entry
                    new IR::ListExpression(@3, le), $5, true);
           }
         }
+    | optCONST keysetExpression ":" actionRef optAnnotations ";"
+        // below we set the position starting at @2 because optional
+        // fields generate weird position information.
+        { if (auto l = $2->to<IR::ListExpression>())
+            $$ = new IR::Entry(@2+@5, $5, $1.isConst, nullptr, l, $4, false);
+          else {  // if not a tuple, make it a list of 1
+            IR::Vector<IR::Expression> le($2);
+            $$ = new IR::Entry(@2+@5, $5, $1.isConst, nullptr,
+                   new IR::ListExpression(@2, le), $4, true);
+          }
+        }
     ;
 
-optEntryPriority
-    : %empty                         { $$ = nullptr; }
-    | PRIORITY "=" INTEGER ":"       { $$ = new IR::Constant(parseConstantChecked(@3, $3)); }
+entryPriority
+    : PRIORITY "=" INTEGER ":"       { $$ = new IR::Constant(parseConstantChecked(@3, $3)); }
     | PRIORITY "=" "(" expression ")" ":" { $$ = $4; }
     ;
 
