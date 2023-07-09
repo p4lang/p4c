@@ -95,6 +95,9 @@ set (CONTROLPLANE_HDRS
   )
 
 add_library(controlplane-gen OBJECT ${P4RUNTIME_GEN_SRCS})
+target_include_directories(controlplane-gen
+  SYSTEM BEFORE PUBLIC ${Protobuf_INCLUDE_DIR}
+)
 
 include_directories (${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 # Silence -Warray-bounds as the root issue is out of our control: https://github.com/protocolbuffers/protobuf/issues/7140

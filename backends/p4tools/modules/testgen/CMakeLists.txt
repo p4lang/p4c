@@ -74,12 +74,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(inja)
 
-# Testgen libraries.
+# Testgen libraries and includes. Defined here such that targets can extend them.
 set(
   TESTGEN_LIBS
   PRIVATE p4tools-common
   PUBLIC inja
 )
+set(TESTGEN_INCLUDES)
 
 file(GLOB testgen_targets RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/targets ${CMAKE_CURRENT_SOURCE_DIR}/targets/*)
 foreach(ext ${testgen_targets})
@@ -104,10 +105,6 @@ endforeach(ext)
 # Propagate def files set by target extensions upwards.
 set(IR_DEF_FILES ${IR_DEF_FILES} PARENT_SCOPE)
 
-# Convert the list of files into #includes
-foreach(include_file ${include_files})
-endforeach()
-
 # Fill the template
 configure_file(register.h.in register.h)
 
@@ -115,6 +112,7 @@ configure_file(register.h.in register.h)
 add_p4tools_library(testgen ${TESTGEN_SOURCES})
 # Make sure the testgen library and anything that links to it see both the Z3 and Inja includes.
 target_link_libraries(testgen PUBLIC p4tools-common inja)
+target_include_directories(testgen ${TESTGEN_INCLUDES})
 
 # The executable.
 add_p4tools_executable(p4testgen main.cpp)
