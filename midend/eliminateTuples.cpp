@@ -87,7 +87,8 @@ const IR::Node *DoReplaceTuples::insertReplacements(const IR::Node *before) {
 }
 
 const IR::Node *DoReplaceTuples::postorder(IR::ArrayIndex *expression) {
-    auto type = repl->typeMap->getType(expression->left);
+    auto original = getOriginal<IR::ArrayIndex>();
+    auto type = repl->typeMap->getType(original->left);
     if (type->is<IR::Type_Tuple>()) {
         auto cst = expression->right->to<IR::Constant>();
         BUG_CHECK(cst, "%1%: Expected a constant", expression->right);
