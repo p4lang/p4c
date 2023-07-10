@@ -57,7 +57,14 @@ macro(p4c_obtain_protobuf)
       )
     endif()
 
-    fetchcontent_makeavailable(protobuf protoc)
+    fetchcontent_makeavailable(protoc)
+    # Exclude Protobuf from the main make install step. We only want to use it locally.
+    FetchContent_GetProperties(protobuf)
+    if(NOT protobuf_POPULATED)
+      FetchContent_Populate(protobuf)
+      add_subdirectory(${protobuf_SOURCE_DIR} ${protobuf_BINARY_DIR} EXCLUDE_FROM_ALL)
+    endif()
+
     # Reset unity builds to the previous state...
     set(CMAKE_UNITY_BUILD ${SAVED_CMAKE_UNITY_BUILD})
     set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
