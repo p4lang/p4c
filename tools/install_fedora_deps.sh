@@ -38,8 +38,6 @@ sudo dnf install -y -q \
     openssl-devel \
     pkg-config \
     procps-ng \
-    protobuf-devel \
-    protobuf-static \
     python3 \
     python3-pip \
     python3-thrift \

@@ -1,11 +1,12 @@
 macro(p4c_obtain_protobuf)
   option(
-    TOOLS_USE_PREINSTALLED_PROTOBUF
-    "Look for a preinstalled version of Protobuf instead of installing a prebuilt binary using FetchContent."
+    P4C_USE_PREINSTALLED_PROTOBUF
+    "Look for a preinstalled version of Protobuf in the system instead of installing a prebuilt binary using FetchContent."
     OFF
   )
 
-  if(TOOLS_USE_PREINSTALLED_PROTOBUF)
+  # If P4C_USE_PREINSTALLED_PROTOBUF is ON just try to find a preinstalled version of Protobuf.
+  if(P4C_USE_PREINSTALLED_PROTOBUF)
     if(ENABLE_PROTOBUF_STATIC)
       set(SAVED_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
       set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
@@ -19,9 +20,9 @@ macro(p4c_obtain_protobuf)
     # dependency. https://protobuf.dev/news/2022-08-03/#abseil-dep We do not want abseil, so we stay
     # with 21.x for now.
     set(P4C_PROTOBUF_VERSION "21.12")
-    message("Fetching Protobuf version ${P4C_PROTOBUF_VERSION} for P4Tools...")
+    message("Fetching Protobuf version ${P4C_PROTOBUF_VERSION} for P4C...")
 
-    # Print out download state while setting up Z3.
+    # Print out download state while setting up Protobuf.
     set(FETCHCONTENT_QUIET_PREV ${FETCHCONTENT_QUIET})
     set(FETCHCONTENT_QUIET OFF)
     set(protobuf_BUILD_TESTS OFF CACHE BOOL "Build tests.")
@@ -36,7 +37,8 @@ macro(p4c_obtain_protobuf)
       USES_TERMINAL_DOWNLOAD TRUE
       GIT_PROGRESS TRUE
     )
-    # Pull a different binary for MacOS.
+    # Pull a different protoc binary for MacOS.
+    # TODO: Should we build from scratch?
     if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
       fetchcontent_declare(
         protoc
