@@ -27,6 +27,8 @@ macro(p4c_obtain_protobuf)
     set(FETCHCONTENT_QUIET OFF)
     set(protobuf_BUILD_TESTS OFF CACHE BOOL "Build tests.")
     set(protobuf_BUILD_PROTOC_BINARIES OFF CACHE BOOL "Build libprotoc and protoc compiler.")
+    # Only ever build the static library. It is not safe to link with a local dynamic version.
+    set(protobuf_BUILD_SHARED_LIBS OFF CACHE BOOL "Build Shared Libraries")
     # Unity builds do not work for Protobuf...
     set(SAVED_CMAKE_UNITY_BUILD ${CMAKE_UNITY_BUILD})
     set(CMAKE_UNITY_BUILD OFF)
