@@ -191,6 +191,142 @@ tables {
 }
 tables {
   preamble {
+    id: 48776568
+    name: "dash_ingress.meter_policy|dash_meter"
+    alias: "meter_policy|dash_meter"
+    structured_annotations {
+      name: "Sai"
+      kv_pair_list {
+        kv_pairs {
+          key: "isobject"
+          value {
+            string_value: "true"
+          }
+        }
+      }
+    }
+  }
+  match_fields {
+    id: 1
+    name: "meta.meter_policy_id:meter_policy_id"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 31945207
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 47787652
+    name: "dash_ingress.meter_rule|dash_meter"
+    alias: "meter_rule|dash_meter"
+    structured_annotations {
+      name: "Sai"
+      kv_pair_list {
+        kv_pairs {
+          key: "isobject"
+          value {
+            string_value: "true"
+          }
+        }
+      }
+    }
+  }
+  match_fields {
+    id: 1
+    name: "meta.meter_policy_id:meter_policy_id"
+    bitwidth: 16
+    match_type: EXACT
+    structured_annotations {
+      name: "Sai"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+        kv_pairs {
+          key: "isresourcetype"
+          value {
+            string_value: "true"
+          }
+        }
+        kv_pairs {
+          key: "objects"
+          value {
+            string_value: "METER_POLICY"
+          }
+        }
+      }
+    }
+  }
+  match_fields {
+    id: 2
+    name: "hdr.ipv4.dst_addr:dip"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 24426589
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  const_default_action_id: 21257015
+  size: 1024
+}
+tables {
+  preamble {
+    id: 49926129
+    name: "dash_ingress.meter_bucket|dash_meter"
+    alias: "meter_bucket|dash_meter"
+    structured_annotations {
+      name: "Sai"
+      kv_pair_list {
+        kv_pairs {
+          key: "isobject"
+          value {
+            string_value: "true"
+          }
+        }
+      }
+    }
+  }
+  match_fields {
+    id: 1
+    name: "meta.eni_id:eni_id"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "meta.meter_class:meter_class"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 23500411
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  const_default_action_id: 21257015
+  size: 1024
+}
+tables {
+  preamble {
     id: 38612462
     name: "dash_ingress.eni_ether_address_map|dash_eni"
     alias: "eni_ether_address_map|dash_eni"
@@ -236,6 +372,50 @@ tables {
 }
 tables {
   preamble {
+    id: 47829983
+    name: "dash_ingress.src_tag|dash_tag"
+    alias: "src_tag|dash_tag"
+  }
+  match_fields {
+    id: 1
+    name: "meta.src_ip_addr:sip"
+    bitwidth: 128
+    match_type: LPM
+  }
+  action_refs {
+    id: 27783729
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 34314002
+    name: "dash_ingress.dst_tag|dash_tag"
+    alias: "dst_tag|dash_tag"
+  }
+  match_fields {
+    id: 1
+    name: "meta.dst_ip_addr:dip"
+    bitwidth: 128
+    match_type: LPM
+  }
+  action_refs {
+    id: 23256694
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+tables {
+  preamble {
     id: 42788937
     name: "dash_ingress.outbound.outbound_routing|dash_outbound_routing"
     alias: "outbound_routing|dash_outbound_routing"
@@ -266,6 +446,9 @@ tables {
   }
   action_refs {
     id: 22900588
+  }
+  action_refs {
+    id: 26447487
   }
   action_refs {
     id: 33407636
@@ -343,33 +526,68 @@ tables {
     name: "meta.dash_acl_group_id:dash_acl_group_id"
     bitwidth: 16
     match_type: EXACT
+    structured_annotations {
+      name: "Sai"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+        kv_pairs {
+          key: "isresourcetype"
+          value {
+            string_value: "true"
+          }
+        }
+        kv_pairs {
+          key: "objects"
+          value {
+            string_value: "SAI_OBJECT_TYPE_DASH_ACL_GROUP"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 2
+    name: "meta.dst_tag_map:dst_tag"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "meta.src_tag_map:src_tag"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
     name: "meta.dst_ip_addr:dip"
     bitwidth: 128
     match_type: OPTIONAL
   }
   match_fields {
-    id: 3
+    id: 5
     name: "meta.src_ip_addr:sip"
     bitwidth: 128
     match_type: OPTIONAL
   }
   match_fields {
-    id: 4
+    id: 6
     name: "meta.ip_protocol:protocol"
     bitwidth: 8
     match_type: OPTIONAL
   }
   match_fields {
-    id: 5
+    id: 7
     name: "meta.src_l4_port:src_port"
     bitwidth: 16
     match_type: OPTIONAL
   }
   match_fields {
-    id: 6
+    id: 8
     name: "meta.dst_l4_port:dst_port"
     bitwidth: 16
     match_type: OPTIONAL
@@ -400,33 +618,68 @@ tables {
     name: "meta.dash_acl_group_id:dash_acl_group_id"
     bitwidth: 16
     match_type: EXACT
+    structured_annotations {
+      name: "Sai"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+        kv_pairs {
+          key: "isresourcetype"
+          value {
+            string_value: "true"
+          }
+        }
+        kv_pairs {
+          key: "objects"
+          value {
+            string_value: "SAI_OBJECT_TYPE_DASH_ACL_GROUP"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 2
+    name: "meta.dst_tag_map:dst_tag"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "meta.src_tag_map:src_tag"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
     name: "meta.dst_ip_addr:dip"
     bitwidth: 128
     match_type: OPTIONAL
   }
   match_fields {
-    id: 3
+    id: 5
     name: "meta.src_ip_addr:sip"
     bitwidth: 128
     match_type: OPTIONAL
   }
   match_fields {
-    id: 4
+    id: 6
     name: "meta.ip_protocol:protocol"
     bitwidth: 8
     match_type: OPTIONAL
   }
   match_fields {
-    id: 5
+    id: 7
     name: "meta.src_l4_port:src_port"
     bitwidth: 16
     match_type: OPTIONAL
   }
   match_fields {
-    id: 6
+    id: 8
     name: "meta.dst_l4_port:dst_port"
     bitwidth: 16
     match_type: OPTIONAL
@@ -457,33 +710,68 @@ tables {
     name: "meta.dash_acl_group_id:dash_acl_group_id"
     bitwidth: 16
     match_type: EXACT
+    structured_annotations {
+      name: "Sai"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+        kv_pairs {
+          key: "isresourcetype"
+          value {
+            string_value: "true"
+          }
+        }
+        kv_pairs {
+          key: "objects"
+          value {
+            string_value: "SAI_OBJECT_TYPE_DASH_ACL_GROUP"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 2
+    name: "meta.dst_tag_map:dst_tag"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "meta.src_tag_map:src_tag"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
     name: "meta.dst_ip_addr:dip"
     bitwidth: 128
     match_type: OPTIONAL
   }
   match_fields {
-    id: 3
+    id: 5
     name: "meta.src_ip_addr:sip"
     bitwidth: 128
     match_type: OPTIONAL
   }
   match_fields {
-    id: 4
+    id: 6
     name: "meta.ip_protocol:protocol"
     bitwidth: 8
     match_type: OPTIONAL
   }
   match_fields {
-    id: 5
+    id: 7
     name: "meta.src_l4_port:src_port"
     bitwidth: 16
     match_type: OPTIONAL
   }
   match_fields {
-    id: 6
+    id: 8
     name: "meta.dst_l4_port:dst_port"
     bitwidth: 16
     match_type: OPTIONAL
@@ -514,33 +802,68 @@ tables {
     name: "meta.dash_acl_group_id:dash_acl_group_id"
     bitwidth: 16
     match_type: EXACT
+    structured_annotations {
+      name: "Sai"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+        kv_pairs {
+          key: "isresourcetype"
+          value {
+            string_value: "true"
+          }
+        }
+        kv_pairs {
+          key: "objects"
+          value {
+            string_value: "SAI_OBJECT_TYPE_DASH_ACL_GROUP"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 2
+    name: "meta.dst_tag_map:dst_tag"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "meta.src_tag_map:src_tag"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
     name: "meta.dst_ip_addr:dip"
     bitwidth: 128
     match_type: OPTIONAL
   }
   match_fields {
-    id: 3
+    id: 5
     name: "meta.src_ip_addr:sip"
     bitwidth: 128
     match_type: OPTIONAL
   }
   match_fields {
-    id: 4
+    id: 6
     name: "meta.ip_protocol:protocol"
     bitwidth: 8
     match_type: OPTIONAL
   }
   match_fields {
-    id: 5
+    id: 7
     name: "meta.src_l4_port:src_port"
     bitwidth: 16
     match_type: OPTIONAL
   }
   match_fields {
-    id: 6
+    id: 8
     name: "meta.dst_l4_port:dst_port"
     bitwidth: 16
     match_type: OPTIONAL
@@ -571,33 +894,68 @@ tables {
     name: "meta.dash_acl_group_id:dash_acl_group_id"
     bitwidth: 16
     match_type: EXACT
+    structured_annotations {
+      name: "Sai"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+        kv_pairs {
+          key: "isresourcetype"
+          value {
+            string_value: "true"
+          }
+        }
+        kv_pairs {
+          key: "objects"
+          value {
+            string_value: "SAI_OBJECT_TYPE_DASH_ACL_GROUP"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 2
+    name: "meta.dst_tag_map:dst_tag"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "meta.src_tag_map:src_tag"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
     name: "meta.dst_ip_addr:dip"
     bitwidth: 128
     match_type: OPTIONAL
   }
   match_fields {
-    id: 3
+    id: 5
     name: "meta.src_ip_addr:sip"
     bitwidth: 128
     match_type: OPTIONAL
   }
   match_fields {
-    id: 4
+    id: 6
     name: "meta.ip_protocol:protocol"
     bitwidth: 8
     match_type: OPTIONAL
   }
   match_fields {
-    id: 5
+    id: 7
     name: "meta.src_l4_port:src_port"
     bitwidth: 16
     match_type: OPTIONAL
   }
   match_fields {
-    id: 6
+    id: 8
     name: "meta.dst_l4_port:dst_port"
     bitwidth: 16
     match_type: OPTIONAL
@@ -628,33 +986,68 @@ tables {
     name: "meta.dash_acl_group_id:dash_acl_group_id"
     bitwidth: 16
     match_type: EXACT
+    structured_annotations {
+      name: "Sai"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+        kv_pairs {
+          key: "isresourcetype"
+          value {
+            string_value: "true"
+          }
+        }
+        kv_pairs {
+          key: "objects"
+          value {
+            string_value: "SAI_OBJECT_TYPE_DASH_ACL_GROUP"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 2
+    name: "meta.dst_tag_map:dst_tag"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "meta.src_tag_map:src_tag"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
     name: "meta.dst_ip_addr:dip"
     bitwidth: 128
     match_type: OPTIONAL
   }
   match_fields {
-    id: 3
+    id: 5
     name: "meta.src_ip_addr:sip"
     bitwidth: 128
     match_type: OPTIONAL
   }
   match_fields {
-    id: 4
+    id: 6
     name: "meta.ip_protocol:protocol"
     bitwidth: 8
     match_type: OPTIONAL
   }
   match_fields {
-    id: 5
+    id: 7
     name: "meta.src_l4_port:src_port"
     bitwidth: 16
     match_type: OPTIONAL
   }
   match_fields {
-    id: 6
+    id: 8
     name: "meta.dst_l4_port:dst_port"
     bitwidth: 16
     match_type: OPTIONAL
@@ -694,6 +1087,13 @@ actions {
     id: 29669127
     name: "vxlan_encap"
     alias: "vxlan_encap"
+  }
+}
+actions {
+  preamble {
+    id: 30611573
+    name: "nvgre_encap"
+    alias: "nvgre_encap"
   }
 }
 actions {
@@ -783,6 +1183,17 @@ actions {
     id: 6
     name: "vm_vni"
     bitwidth: 24
+    structured_annotations {
+      name: "Sai"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_uint32_t"
+          }
+        }
+      }
+    }
   }
   params {
     id: 7
@@ -791,101 +1202,111 @@ actions {
   }
   params {
     id: 8
-    name: "inbound_v4_stage1_dash_acl_group_id"
+    name: "v4_meter_policy_id"
     bitwidth: 16
   }
   params {
     id: 9
-    name: "inbound_v4_stage2_dash_acl_group_id"
+    name: "v6_meter_policy_id"
     bitwidth: 16
   }
   params {
     id: 10
-    name: "inbound_v4_stage3_dash_acl_group_id"
+    name: "inbound_v4_stage1_dash_acl_group_id"
     bitwidth: 16
   }
   params {
     id: 11
-    name: "inbound_v4_stage4_dash_acl_group_id"
+    name: "inbound_v4_stage2_dash_acl_group_id"
     bitwidth: 16
   }
   params {
     id: 12
-    name: "inbound_v4_stage5_dash_acl_group_id"
+    name: "inbound_v4_stage3_dash_acl_group_id"
     bitwidth: 16
   }
   params {
     id: 13
-    name: "inbound_v6_stage1_dash_acl_group_id"
+    name: "inbound_v4_stage4_dash_acl_group_id"
     bitwidth: 16
   }
   params {
     id: 14
-    name: "inbound_v6_stage2_dash_acl_group_id"
+    name: "inbound_v4_stage5_dash_acl_group_id"
     bitwidth: 16
   }
   params {
     id: 15
-    name: "inbound_v6_stage3_dash_acl_group_id"
+    name: "inbound_v6_stage1_dash_acl_group_id"
     bitwidth: 16
   }
   params {
     id: 16
-    name: "inbound_v6_stage4_dash_acl_group_id"
+    name: "inbound_v6_stage2_dash_acl_group_id"
     bitwidth: 16
   }
   params {
     id: 17
-    name: "inbound_v6_stage5_dash_acl_group_id"
+    name: "inbound_v6_stage3_dash_acl_group_id"
     bitwidth: 16
   }
   params {
     id: 18
-    name: "outbound_v4_stage1_dash_acl_group_id"
+    name: "inbound_v6_stage4_dash_acl_group_id"
     bitwidth: 16
   }
   params {
     id: 19
-    name: "outbound_v4_stage2_dash_acl_group_id"
+    name: "inbound_v6_stage5_dash_acl_group_id"
     bitwidth: 16
   }
   params {
     id: 20
-    name: "outbound_v4_stage3_dash_acl_group_id"
+    name: "outbound_v4_stage1_dash_acl_group_id"
     bitwidth: 16
   }
   params {
     id: 21
-    name: "outbound_v4_stage4_dash_acl_group_id"
+    name: "outbound_v4_stage2_dash_acl_group_id"
     bitwidth: 16
   }
   params {
     id: 22
-    name: "outbound_v4_stage5_dash_acl_group_id"
+    name: "outbound_v4_stage3_dash_acl_group_id"
     bitwidth: 16
   }
   params {
     id: 23
-    name: "outbound_v6_stage1_dash_acl_group_id"
+    name: "outbound_v4_stage4_dash_acl_group_id"
     bitwidth: 16
   }
   params {
     id: 24
-    name: "outbound_v6_stage2_dash_acl_group_id"
+    name: "outbound_v4_stage5_dash_acl_group_id"
     bitwidth: 16
   }
   params {
     id: 25
-    name: "outbound_v6_stage3_dash_acl_group_id"
+    name: "outbound_v6_stage1_dash_acl_group_id"
     bitwidth: 16
   }
   params {
     id: 26
-    name: "outbound_v6_stage4_dash_acl_group_id"
+    name: "outbound_v6_stage2_dash_acl_group_id"
     bitwidth: 16
   }
   params {
     id: 27
+    name: "outbound_v6_stage3_dash_acl_group_id"
+    bitwidth: 16
+  }
+  params {
+    id: 28
+    name: "outbound_v6_stage4_dash_acl_group_id"
+    bitwidth: 16
+  }
+  params {
+    id: 29
     name: "outbound_v6_stage5_dash_acl_group_id"
     bitwidth: 16
   }
@@ -911,6 +1332,120 @@ actions {
 }
 actions {
   preamble {
+    id: 31945207
+    name: "dash_ingress.check_ip_addr_family"
+    alias: "check_ip_addr_family"
+  }
+  params {
+    id: 1
+    name: "ip_addr_family"
+    bitwidth: 32
+    structured_annotations {
+      name: "Sai"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_ip_addr_family_t"
+          }
+        }
+        kv_pairs {
+          key: "isresourcetype"
+          value {
+            string_value: "true"
+          }
+        }
+      }
+    }
+  }
+}
+actions {
+  preamble {
+    id: 24426589
+    name: "dash_ingress.set_policy_meter_class"
+    alias: "set_policy_meter_class"
+  }
+  params {
+    id: 1
+    name: "meter_class"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 23500411
+    name: "dash_ingress.meter_bucket_action"
+    alias: "meter_bucket_action"
+  }
+  params {
+    id: 1
+    name: "outbound_bytes_counter"
+    bitwidth: 64
+    structured_annotations {
+      name: "Sai"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_uint64_t"
+          }
+        }
+        kv_pairs {
+          key: "isreadonly"
+          value {
+            string_value: "true"
+          }
+        }
+      }
+    }
+  }
+  params {
+    id: 2
+    name: "inbound_bytes_counter"
+    bitwidth: 64
+    structured_annotations {
+      name: "Sai"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_uint64_t"
+          }
+        }
+        kv_pairs {
+          key: "isreadonly"
+          value {
+            string_value: "true"
+          }
+        }
+      }
+    }
+  }
+  params {
+    id: 3
+    name: "meter_bucket_index"
+    bitwidth: 32
+    structured_annotations {
+      name: "Sai"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_uint32_t"
+          }
+        }
+        kv_pairs {
+          key: "skipattr"
+          value {
+            string_value: "true"
+          }
+        }
+      }
+    }
+  }
+}
+actions {
+  preamble {
     id: 18228884
     name: "dash_ingress.set_eni"
     alias: "set_eni"
@@ -931,6 +1466,47 @@ actions {
     id: 1
     name: "ip_addr_family"
     bitwidth: 32
+    structured_annotations {
+      name: "Sai"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_ip_addr_family_t"
+          }
+        }
+        kv_pairs {
+          key: "isresourcetype"
+          value {
+            string_value: "true"
+          }
+        }
+      }
+    }
+  }
+}
+actions {
+  preamble {
+    id: 27783729
+    name: "dash_ingress.set_src_tag"
+    alias: "set_src_tag"
+  }
+  params {
+    id: 1
+    name: "tag_map"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 23256694
+    name: "dash_ingress.set_dst_tag"
+    alias: "set_dst_tag"
+  }
+  params {
+    id: 1
+    name: "tag_map"
+    bitwidth: 32
   }
 }
 actions {
@@ -942,6 +1518,16 @@ actions {
   params {
     id: 1
     name: "dst_vnet_id"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "meter_policy_en"
+    bitwidth: 1
+  }
+  params {
+    id: 3
+    name: "meter_class"
     bitwidth: 16
   }
 }
@@ -966,6 +1552,16 @@ actions {
     name: "overlay_ip"
     bitwidth: 128
   }
+  params {
+    id: 4
+    name: "meter_policy_en"
+    bitwidth: 1
+  }
+  params {
+    id: 5
+    name: "meter_class"
+    bitwidth: 16
+  }
 }
 actions {
   preamble {
@@ -973,12 +1569,109 @@ actions {
     name: "dash_ingress.outbound.route_direct"
     alias: "route_direct"
   }
+  params {
+    id: 1
+    name: "meter_policy_en"
+    bitwidth: 1
+  }
+  params {
+    id: 2
+    name: "meter_class"
+    bitwidth: 16
+  }
 }
 actions {
   preamble {
     id: 33407636
     name: "dash_ingress.outbound.drop"
     alias: "drop"
+  }
+}
+actions {
+  preamble {
+    id: 26447487
+    name: "dash_ingress.outbound.route_service_tunnel"
+    alias: "route_service_tunnel"
+  }
+  params {
+    id: 1
+    name: "is_overlay_dip_v4_or_v6"
+    bitwidth: 1
+  }
+  params {
+    id: 2
+    name: "overlay_dip"
+    bitwidth: 128
+  }
+  params {
+    id: 3
+    name: "is_overlay_dip_mask_v4_or_v6"
+    bitwidth: 1
+  }
+  params {
+    id: 4
+    name: "overlay_dip_mask"
+    bitwidth: 128
+  }
+  params {
+    id: 5
+    name: "is_overlay_sip_v4_or_v6"
+    bitwidth: 1
+  }
+  params {
+    id: 6
+    name: "overlay_sip"
+    bitwidth: 128
+  }
+  params {
+    id: 7
+    name: "is_overlay_sip_mask_v4_or_v6"
+    bitwidth: 1
+  }
+  params {
+    id: 8
+    name: "overlay_sip_mask"
+    bitwidth: 128
+  }
+  params {
+    id: 9
+    name: "is_underlay_dip_v4_or_v6"
+    bitwidth: 1
+  }
+  params {
+    id: 10
+    name: "underlay_dip"
+    bitwidth: 128
+  }
+  params {
+    id: 11
+    name: "is_underlay_sip_v4_or_v6"
+    bitwidth: 1
+  }
+  params {
+    id: 12
+    name: "underlay_sip"
+    bitwidth: 128
+  }
+  params {
+    id: 13
+    name: "dash_encapsulation"
+    bitwidth: 16
+  }
+  params {
+    id: 14
+    name: "tunnel_key"
+    bitwidth: 24
+  }
+  params {
+    id: 15
+    name: "meter_policy_en"
+    bitwidth: 1
+  }
+  params {
+    id: 16
+    name: "meter_class"
+    bitwidth: 16
   }
 }
 actions {
@@ -1000,6 +1693,16 @@ actions {
   params {
     id: 3
     name: "use_dst_vnet_vni"
+    bitwidth: 1
+  }
+  params {
+    id: 4
+    name: "meter_class"
+    bitwidth: 16
+  }
+  params {
+    id: 5
+    name: "meter_class_override"
     bitwidth: 1
   }
 }
@@ -1070,6 +1773,28 @@ actions {
     name: "dash_ingress.inbound.acl.deny_and_continue"
     alias: "inbound.acl.deny_and_continue"
   }
+}
+counters {
+  preamble {
+    id: 318423147
+    name: "dash_ingress.meter_bucket_inbound"
+    alias: "meter_bucket_inbound"
+  }
+  spec {
+    unit: BYTES
+  }
+  size: 262144
+}
+counters {
+  preamble {
+    id: 317610666
+    name: "dash_ingress.meter_bucket_outbound"
+    alias: "meter_bucket_outbound"
+  }
+  spec {
+    unit: BYTES
+  }
+  size: 262144
 }
 direct_counters {
   preamble {
@@ -1172,7 +1897,7 @@ direct_counters {
 }
 type_info {
   serializable_enums {
-    key: "direction_t"
+    key: "dash_direction_t"
     value {
       underlying_type {
         bitwidth: 16
@@ -1187,6 +1912,26 @@ type_info {
       }
       members {
         name: "INBOUND"
+        value: "\000\002"
+      }
+    }
+  }
+  serializable_enums {
+    key: "dash_encapsulation_t"
+    value {
+      underlying_type {
+        bitwidth: 16
+      }
+      members {
+        name: "INVALID"
+        value: "\000\000"
+      }
+      members {
+        name: "VXLAN"
+        value: "\000\001"
+      }
+      members {
+        name: "NVGRE"
         value: "\000\002"
       }
     }
