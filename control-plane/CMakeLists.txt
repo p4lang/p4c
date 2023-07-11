@@ -98,11 +98,12 @@ add_library(controlplane-gen OBJECT ${P4RUNTIME_GEN_SRCS})
 target_include_directories(controlplane-gen
   SYSTEM BEFORE PUBLIC ${Protobuf_INCLUDE_DIR}
 )
+target_link_libraries (controlplane-gen PUBLIC ${PROTOBUF_LIBRARY})
 
 include_directories (${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 # Silence -Warray-bounds as the root issue is out of our control: https://github.com/protocolbuffers/protobuf/issues/7140
 set_source_files_properties (${P4RUNTIME_GEN_SRCS} PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-array-bounds")
 
 add_library (controlplane STATIC ${CONTROLPLANE_SRCS} )
-target_link_libraries (controlplane ${PROTOBUF_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} controlplane-gen)
+target_link_libraries (controlplane ${CMAKE_THREAD_LIBS_INIT} controlplane-gen)
 add_dependencies (controlplane mkP4configdir ir-generated controlplane-gen frontend-parser-gen)

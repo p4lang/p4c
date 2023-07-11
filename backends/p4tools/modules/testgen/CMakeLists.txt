@@ -72,7 +72,7 @@ FetchContent_Declare(
   GIT_TAG        3741c73ba78babd2ed88f2acf2fcd6dafdb878e8
   GIT_PROGRESS TRUE
 )
-FetchContent_MakeAvailable(inja)
+fetchcontent_makeavailable_but_exclude_install(inja)
 
 # Testgen libraries and includes. Defined here such that targets can extend them.
 set(

@@ -112,6 +112,10 @@ endif()
 if (CMAKE_UNITY_BUILD)
   set(CMAKE_UNITY_BUILD_BATCH_SIZE 10 CACHE UNINITIALIZED "Set the unity build batch size.")
 endif ()
+
+# Always build position-independent code. This is important when linking with Protobuf.
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 # set the required options for a static release build
 if (BUILD_STATIC_RELEASE)
   message(STATUS "Building static release binaries")
@@ -126,6 +130,8 @@ if (BUILD_STATIC_RELEASE)
   # Do not bring in dynamic libstdcc and libgcc
   set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++ -Wl,-z,muldefs")
   add_definitions(-DP4C_STATIC_BUILD)
+else ()
+  set(BUILD_SHARED_LIBS ON)
 endif ()
 
 # Required tools and libraries.

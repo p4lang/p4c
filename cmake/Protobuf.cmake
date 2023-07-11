@@ -43,8 +43,7 @@ macro(p4c_obtain_protobuf)
       fetchcontent_declare(
         protoc
         URL https://github.com/protocolbuffers/protobuf/releases/download/v${P4C_PROTOBUF_VERSION}/protoc-${P4C_PROTOBUF_VERSION}-osx-x86_64.zip
-            USES_TERMINAL_DOWNLOAD
-            TRUE
+        USES_TERMINAL_DOWNLOAD TRUE
         GIT_PROGRESS TRUE
       )
     else()
@@ -59,11 +58,7 @@ macro(p4c_obtain_protobuf)
 
     fetchcontent_makeavailable(protoc)
     # Exclude Protobuf from the main make install step. We only want to use it locally.
-    FetchContent_GetProperties(protobuf)
-    if(NOT protobuf_POPULATED)
-      FetchContent_Populate(protobuf)
-      add_subdirectory(${protobuf_SOURCE_DIR} ${protobuf_BINARY_DIR} EXCLUDE_FROM_ALL)
-    endif()
+    fetchcontent_makeavailable_but_exclude_install(protobuf)
 
     # Reset unity builds to the previous state...
     set(CMAKE_UNITY_BUILD ${SAVED_CMAKE_UNITY_BUILD})
