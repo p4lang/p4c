@@ -370,9 +370,10 @@ action nvgre_encap(inout headers_t hdr, in EthernetAddress underlay_dmac, in Eth
     hdr.ipv4.ihl = 5;
     hdr.ipv4.diffserv = 0;
     bit<16> inner_ip_len = 0;
-    if (hdr.inner_ipv4.isValid()) {
-        inner_ip_len = inner_ip_len + hdr.inner_ipv4.total_len;
-    }
+    // This code is non-functional.
+    // if (hdr.inner_ipv4.isValid()) {
+    //     inner_ip_len = inner_ip_len + hdr.inner_ipv4.total_len;
+    // }
     if (hdr.inner_ipv6.isValid()) {
         inner_ip_len = inner_ip_len + IPV6_HDR_SIZE + hdr.inner_ipv6.payload_length;
     }
