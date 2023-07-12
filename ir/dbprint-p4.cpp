@@ -224,8 +224,9 @@ void IR::P4Control::dbprint(std::ostream &out) const {
     if (constructorParams) out << '(' << constructorParams << ')';
     out << " " << type->annotations << "{" << indent;
     for (auto d : controlLocals) out << Log::endl << d;
+    out << Log::endl << "apply {" << indent;
     for (auto s : body->components) out << Log::endl << s;
-    out << " }" << unindent;
+    out << " } }" << unindent << unindent;
 }
 
 void IR::V1Program::dbprint(std::ostream &out) const {
