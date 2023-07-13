@@ -113,4 +113,4 @@ class ErrorCatalog {
     static std::map<int, cstring> errorCatalog;
 };
 
-#endif  /* LIB_ERROR_CATALOG_H_ */
+#endif /* LIB_ERROR_CATALOG_H_ */

@@ -323,4 +323,4 @@ auto bug_helper(boost::format &f, std::string message, std::string position, std
                       std::forward<Args>(args)...);
 }
 
-#endif  /* LIB_ERROR_HELPER_H_ */
+#endif /* LIB_ERROR_HELPER_H_ */

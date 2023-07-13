@@ -55,4 +55,4 @@ struct ID : Util::IHasSourceInfo {
 };
 
 }  // namespace IR
-#endif  /* IR_ID_H_ */
+#endif /* IR_ID_H_ */

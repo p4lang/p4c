@@ -225,4 +225,4 @@ class Graphs : public Inspector {
 
 }  // namespace graphs
 
-#endif  /* BACKENDS_GRAPHS_GRAPHS_H_ */
+#endif /* BACKENDS_GRAPHS_GRAPHS_H_ */

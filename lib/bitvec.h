@@ -681,4 +681,4 @@ inline bitvec operator-(bitvec &&a, const bitvec &b) {
     return rv;
 }
 
-#endif  /* LIB_BITVEC_H_ */
+#endif /* LIB_BITVEC_H_ */
