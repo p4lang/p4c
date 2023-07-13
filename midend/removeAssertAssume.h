@@ -36,4 +36,4 @@ class RemoveAssertAssume final : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_REMOVEASSERTASSUME_H_*/
+#endif /* MIDEND_REMOVEASSERTASSUME_H_ */

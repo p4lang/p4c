@@ -129,4 +129,4 @@ class CopyStructures : public PassRepeated {
 
 }  // namespace P4
 
-#endif /* _MIDEND_COPYSTRUCTURES_H__ */
+#endif /* MIDEND_COPYSTRUCTURES_H_ */

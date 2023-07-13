@@ -58,4 +58,4 @@ struct match_t {
 std::ostream &operator<<(std::ostream &, const match_t &);
 bool operator>>(const char *, match_t &);
 
-#endif /*_LIB_MATCH_H_ */
+#endif /* LIB_MATCH_H_ */

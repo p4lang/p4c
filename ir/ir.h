@@ -21,4 +21,4 @@ limitations under the License.
 #include "ir/ir-generated.h"  // IWYU pragma: export
 #include "ir/ir-inline.h"     // IWYU pragma: export
 
-#endif /* _IR_IR_H_*/
+#endif /* IR_IR_H_ */
