@@ -15,8 +15,8 @@
  * limitations under the License.
  *
  */
-#ifndef _MIDEND_REPLACESELECTRANGE_H_
-#define _MIDEND_REPLACESELECTRANGE_H_
+#ifndef MIDEND_REPLACESELECTRANGE_H_
+#define MIDEND_REPLACESELECTRANGE_H_
 
 #include <iomanip>
 #include <iostream>
@@ -68,4 +68,4 @@ class ReplaceSelectRange final : public PassManager {
 };
 
 }  // namespace P4
-#endif /* _MIDEND_REPLACESELECTRANGE_H_ */
+#endif /* MIDEND_REPLACESELECTRANGE_H_ */

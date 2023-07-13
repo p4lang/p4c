@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _LIB_SAFE_VECTOR_H_
-#define _LIB_SAFE_VECTOR_H_
+#ifndef LIB_SAFE_VECTOR_H_
+#define LIB_SAFE_VECTOR_H_
 
 #include <vector>
 
@@ -33,4 +33,4 @@ class safe_vector : public std::vector<T, _Alloc> {
     const_reference operator[](size_type n) const { return this->at(n); }
 };
 
-#endif /* _LIB_SAFE_VECTOR_H_ */
+#endif /* LIB_SAFE_VECTOR_H_ */

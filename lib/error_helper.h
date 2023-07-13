@@ -13,8 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef _LIB_ERROR_HELPER_H_
-#define _LIB_ERROR_HELPER_H_
+#ifndef LIB_ERROR_HELPER_H_
+#define LIB_ERROR_HELPER_H_
 
 #include <stdarg.h>
 
@@ -323,4 +323,4 @@ auto bug_helper(boost::format &f, std::string message, std::string position, std
                       std::forward<Args>(args)...);
 }
 
-#endif  // _LIB_ERROR_HELPER_H_
+#endif  /* LIB_ERROR_HELPER_H_ */

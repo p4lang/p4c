@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _TOOLS_IR_GENERATOR_TYPE_H_
-#define _TOOLS_IR_GENERATOR_TYPE_H_
+#ifndef TOOLS_IR_GENERATOR_TYPE_H_
+#define TOOLS_IR_GENERATOR_TYPE_H_
 
 #include <vector>
 
@@ -217,4 +217,4 @@ class FunctionType : public Type {
     }
 };
 
-#endif /* _TOOLS_IR_GENERATOR_TYPE_H_ */
+#endif /* TOOLS_IR_GENERATOR_TYPE_H_ */

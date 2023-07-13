@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_EBPF_EBPFMODEL_H_
-#define _BACKENDS_EBPF_EBPFMODEL_H_
+#ifndef BACKENDS_EBPF_EBPFMODEL_H_
+#define BACKENDS_EBPF_EBPFMODEL_H_
 
 #include "frontends/common/model.h"
 #include "frontends/p4/coreLibrary.h"
@@ -82,4 +82,4 @@ class EBPFModel : public ::Model::Model {
 
 }  // namespace EBPF
 
-#endif /* _BACKENDS_EBPF_EBPFMODEL_H_ */
+#endif /* BACKENDS_EBPF_EBPFMODEL_H_ */

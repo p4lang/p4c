@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _P4_FRONTEND_H_
-#define _P4_FRONTEND_H_
+#ifndef P4_FRONTEND_H_
+#define P4_FRONTEND_H_
 
 #include "../common/options.h"
 #include "ir/ir.h"
@@ -46,4 +46,4 @@ class FrontEnd {
 
 }  // namespace P4
 
-#endif /* _P4_FRONTEND_H_ */
+#endif /* P4_FRONTEND_H_ */

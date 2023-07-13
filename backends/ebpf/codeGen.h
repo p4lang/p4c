@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_EBPF_CODEGEN_H_
-#define _BACKENDS_EBPF_CODEGEN_H_
+#ifndef BACKENDS_EBPF_CODEGEN_H_
+#define BACKENDS_EBPF_CODEGEN_H_
 
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
@@ -139,4 +139,4 @@ class EBPFInitializerUtils {
 
 }  // namespace EBPF
 
-#endif /* _BACKENDS_EBPF_CODEGEN_H_ */
+#endif /* BACKENDS_EBPF_CODEGEN_H_ */

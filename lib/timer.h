@@ -1,5 +1,5 @@
-#ifndef _LIB_TIMER_H_
-#define _LIB_TIMER_H_
+#ifndef LIB_TIMER_H_
+#define LIB_TIMER_H_
 
 #include <cstddef>
 #include <functional>
@@ -53,4 +53,4 @@ class ScopedTimer {
 
 }  // namespace Util
 
-#endif /* _LIB_TIMER_H_ */
+#endif /* LIB_TIMER_H_ */

@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _P4_DEFAULTVALUES_H_
-#define _P4_DEFAULTVALUES_H_
+#ifndef P4_DEFAULTVALUES_H_
+#define P4_DEFAULTVALUES_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -53,4 +53,4 @@ class DefaultValues : public PassManager {
 
 }  // namespace P4
 
-#endif /* _P4_DEFAULTVALUES_H_ */
+#endif /* P4_DEFAULTVALUES_H_ */

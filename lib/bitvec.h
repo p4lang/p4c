@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _LIB_BITVEC_H_
-#define _LIB_BITVEC_H_
+#ifndef LIB_BITVEC_H_
+#define LIB_BITVEC_H_
 
 #include <assert.h>
 #include <limits.h>
@@ -681,4 +681,4 @@ inline bitvec operator-(bitvec &&a, const bitvec &b) {
     return rv;
 }
 
-#endif  // _LIB_BITVEC_H_
+#endif  /* LIB_BITVEC_H_ */

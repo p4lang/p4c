@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _LIB_OPTIONS_H_
-#define _LIB_OPTIONS_H_
+#ifndef LIB_OPTIONS_H_
+#define LIB_OPTIONS_H_
 
 #include <functional>
 #include <ostream>
@@ -103,4 +103,4 @@ class Options {
 
 }  // namespace Util
 
-#endif /* _LIB_OPTIONS_H_ */
+#endif /* LIB_OPTIONS_H_ */

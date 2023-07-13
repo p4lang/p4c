@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _LIB_COMPILE_CONTEXT_H_
-#define _LIB_COMPILE_CONTEXT_H_
+#ifndef LIB_COMPILE_CONTEXT_H_
+#define LIB_COMPILE_CONTEXT_H_
 
 #include <typeinfo>
 #include <vector>
@@ -109,4 +109,4 @@ class BaseCompileContext : public ICompileContext {
     ErrorReporter errorReporterInstance;
 };
 
-#endif /* _LIB_COMPILE_CONTEXT_H_ */
+#endif /* LIB_COMPILE_CONTEXT_H_ */

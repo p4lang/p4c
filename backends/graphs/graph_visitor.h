@@ -20,8 +20,8 @@
 #include "graphs.h"
 #include "lib/json.h"
 
-#ifndef _BACKENDS_GRAPHS_GRAPH_VISITOR_H_
-#define _BACKENDS_GRAPHS_GRAPH_VISITOR_H_
+#ifndef BACKENDS_GRAPHS_GRAPH_VISITOR_H_
+#define BACKENDS_GRAPHS_GRAPH_VISITOR_H_
 
 namespace graphs {
 
@@ -137,4 +137,4 @@ class Graph_visitor : public Graphs {
 
 }  // namespace graphs
 
-#endif /* _BACKENDS_GRAPHS_GRAPH_VISITOR_H_ */
+#endif /* BACKENDS_GRAPHS_GRAPH_VISITOR_H_ */

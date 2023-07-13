@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _LIB_RANGE_H_
-#define _LIB_RANGE_H_
+#ifndef LIB_RANGE_H_
+#define LIB_RANGE_H_
 
 #include <iostream>
 
@@ -61,4 +61,4 @@ std::ostream &operator<<(std::ostream &out, const RangeIter<T> &r) {
     return out;
 }
 
-#endif /* _LIB_RANGE_H_ */
+#endif /* LIB_RANGE_H_ */

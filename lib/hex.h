@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _LIB_HEX_H_
-#define _LIB_HEX_H_
+#ifndef LIB_HEX_H_
+#define LIB_HEX_H_
 
 #include <iomanip>
 #include <iostream>
@@ -59,4 +59,4 @@ class hexvec {
 
 std::ostream &operator<<(std::ostream &os, const hexvec &h);
 
-#endif /* _LIB_HEX_H_ */
+#endif /* LIB_HEX_H_ */

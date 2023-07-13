@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_GRAPHS_CONTROLS_H_
-#define _BACKENDS_GRAPHS_CONTROLS_H_
+#ifndef BACKENDS_GRAPHS_CONTROLS_H_
+#define BACKENDS_GRAPHS_CONTROLS_H_
 
 #include "graphs.h"
 
@@ -68,4 +68,4 @@ class ControlGraphs : public Graphs {
 
 }  // namespace graphs
 
-#endif /* _BACKENDS_GRAPHS_CONTROLS_H_ */
+#endif /* BACKENDS_GRAPHS_CONTROLS_H_ */

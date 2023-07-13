@@ -1,5 +1,5 @@
-#ifndef _MIDEND_REMOVEASSERTASSUME_H_
-#define _MIDEND_REMOVEASSERTASSUME_H_
+#ifndef MIDEND_REMOVEASSERTASSUME_H_
+#define MIDEND_REMOVEASSERTASSUME_H_
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"

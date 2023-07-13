@@ -14,8 +14,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef _BACKENDS_EBPF_EBPFDEPARSER_H_
-#define _BACKENDS_EBPF_EBPFDEPARSER_H_
+#ifndef BACKENDS_EBPF_EBPFDEPARSER_H_
+#define BACKENDS_EBPF_EBPFDEPARSER_H_
 
 #include "ebpfControl.h"
 
@@ -93,4 +93,4 @@ class EBPFDeparser : public EBPFControl {
 
 }  // namespace EBPF
 
-#endif /* _BACKENDS_EBPF_EBPFDEPARSER_H_ */
+#endif /* BACKENDS_EBPF_EBPFDEPARSER_H_ */

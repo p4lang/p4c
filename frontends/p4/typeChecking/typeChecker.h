@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _TYPECHECKING_TYPECHECKER_H_
-#define _TYPECHECKING_TYPECHECKER_H_
+#ifndef TYPECHECKING_TYPECHECKER_H_
+#define TYPECHECKING_TYPECHECKER_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/methodInstance.h"
@@ -371,4 +371,4 @@ class ApplyTypesToExpressions : public Transform {
 
 }  // namespace P4
 
-#endif /* _TYPECHECKING_TYPECHECKER_H_ */
+#endif /* TYPECHECKING_TYPECHECKER_H_ */

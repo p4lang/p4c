@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _LIB_MAP_H_
-#define _LIB_MAP_H_
+#ifndef LIB_MAP_H_
+#define LIB_MAP_H_
 
 #include <map>
 
@@ -222,4 +222,4 @@ MapForKey<M> ValuesForKey(M &m, typename M::key_type k) {
     return MapForKey<M>(m, k);
 }
 
-#endif /* _LIB_MAP_H_ */
+#endif /* LIB_MAP_H_ */

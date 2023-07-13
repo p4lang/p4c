@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_MIDENDLAST_H_
-#define _MIDEND_MIDENDLAST_H_
+#ifndef MIDEND_MIDENDLAST_H_
+#define MIDEND_MIDENDLAST_H_
 
 #include "ir/ir.h"
 
@@ -29,4 +29,4 @@ class MidEndLast : public Inspector {
 
 }  // namespace P4
 
-#endif /* _MIDEND_MIDENDLAST_H_ */
+#endif /* MIDEND_MIDENDLAST_H_ */

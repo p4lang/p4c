@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _LIB_CSTRING_H_
-#define _LIB_CSTRING_H_
+#ifndef LIB_CSTRING_H_
+#define LIB_CSTRING_H_
 
 #include <cstddef>
 #include <cstring>
@@ -366,4 +366,4 @@ struct hash<cstring> {
 };
 }  // namespace std
 
-#endif /* _LIB_CSTRING_H_ */
+#endif /* LIB_CSTRING_H_ */

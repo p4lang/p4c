@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _TYPECHECKING_TYPESUBSTITUTIONVISITOR_H_
-#define _TYPECHECKING_TYPESUBSTITUTIONVISITOR_H_
+#ifndef TYPECHECKING_TYPESUBSTITUTIONVISITOR_H_
+#define TYPECHECKING_TYPESUBSTITUTIONVISITOR_H_
 
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
@@ -93,4 +93,4 @@ class TypeSubstitutionVisitor : public TypeVariableSubstitutionVisitor {
 };
 
 }  // namespace P4
-#endif /* _TYPECHECKING_TYPESUBSTITUTIONVISITOR_H_ */
+#endif /* TYPECHECKING_TYPESUBSTITUTIONVISITOR_H_ */

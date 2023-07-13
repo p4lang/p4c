@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _LIB_MATCH_H_
-#define _LIB_MATCH_H_
+#ifndef LIB_MATCH_H_
+#define LIB_MATCH_H_
 
 #include <stdint.h>
 

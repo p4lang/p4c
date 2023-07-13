@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_REMOVELEFTSLICES_H_
-#define _MIDEND_REMOVELEFTSLICES_H_
+#ifndef MIDEND_REMOVELEFTSLICES_H_
+#define MIDEND_REMOVELEFTSLICES_H_
 
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
@@ -54,4 +54,4 @@ class RemoveLeftSlices : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_REMOVELEFTSLICES_H_ */
+#endif /* MIDEND_REMOVELEFTSLICES_H_ */

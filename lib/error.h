@@ -16,8 +16,8 @@ limitations under the License.
 
 /* -*-C++-*- */
 
-#ifndef _LIB_ERROR_H_
-#define _LIB_ERROR_H_
+#ifndef LIB_ERROR_H_
+#define LIB_ERROR_H_
 
 #include "lib/compile_context.h"
 #include "lib/cstring.h"
@@ -170,4 +170,4 @@ inline void diagnose(DiagnosticAction defaultAction, const char *diagnosticName,
     context.errorReporter().diagnose(action, diagnosticName, format, suffix, args...);
 }
 
-#endif /* _LIB_ERROR_H_ */
+#endif /* LIB_ERROR_H_ */

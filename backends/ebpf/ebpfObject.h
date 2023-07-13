@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_EBPF_EBPFOBJECT_H_
-#define _BACKENDS_EBPF_EBPFOBJECT_H_
+#ifndef BACKENDS_EBPF_EBPFOBJECT_H_
+#define BACKENDS_EBPF_EBPFOBJECT_H_
 
 #include "codeGen.h"
 #include "ebpfModel.h"
@@ -58,4 +58,4 @@ class EBPFObject : public ICastable {
 
 }  // namespace EBPF
 
-#endif /* _BACKENDS_EBPF_EBPFOBJECT_H_ */
+#endif /* BACKENDS_EBPF_EBPFOBJECT_H_ */

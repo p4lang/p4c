@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _IR_IR_H_
-#define _IR_IR_H_
+#ifndef IR_IR_H_
+#define IR_IR_H_
 
 // generated ir file
 #include "ir/ir-generated.h"  // IWYU pragma: export

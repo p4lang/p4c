@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _IR_IR_INLINE_H_
-#define _IR_IR_INLINE_H_
+#ifndef IR_IR_INLINE_H_
+#define IR_IR_INLINE_H_
 
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
@@ -325,4 +325,4 @@ void IR::NodeMap<KEY, VALUE, MAP, COMP, ALLOC>::visit_children(Visitor &v) const
         v.visit(k.second);
     }
 }
-#endif /* _IR_IR_INLINE_H_ */
+#endif /* IR_IR_INLINE_H_ */

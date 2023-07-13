@@ -16,8 +16,8 @@ limitations under the License.
 
 /* -*-C++-*- */
 
-#ifndef _P4_SYMBOL_TABLE_H_
-#define _P4_SYMBOL_TABLE_H_
+#ifndef P4_SYMBOL_TABLE_H_
+#define P4_SYMBOL_TABLE_H_
 
 /* A very simple symbol table that recognizes types; necessary because
    the v1.2 grammar is ambiguous without type information */
@@ -88,4 +88,4 @@ class ProgramStructure final {
 };
 
 }  // namespace Util
-#endif /* _P4_SYMBOL_TABLE_H_ */
+#endif /* P4_SYMBOL_TABLE_H_ */

@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_EBPF_EBPFBACKEND_H_
-#define _BACKENDS_EBPF_EBPFBACKEND_H_
+#ifndef BACKENDS_EBPF_EBPFBACKEND_H_
+#define BACKENDS_EBPF_EBPFBACKEND_H_
 
 #include "ebpfObject.h"
 #include "ebpfOptions.h"
@@ -29,4 +29,4 @@ void run_ebpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *tople
 
 }  // namespace EBPF
 
-#endif /* _BACKENDS_EBPF_EBPFBACKEND_H_ */
+#endif /* BACKENDS_EBPF_EBPFBACKEND_H_ */

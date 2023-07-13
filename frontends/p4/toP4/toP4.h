@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _P4_TOP4_TOP4_H_
-#define _P4_TOP4_TOP4_H_
+#ifndef P4_TOP4_TOP4_H_
+#define P4_TOP4_TOP4_H_
 
 #include "ir/ir.h"
 #include "ir/visitor.h"
@@ -272,4 +272,4 @@ void dumpP4(const IR::INode *node);
 
 }  // namespace P4
 
-#endif /* _P4_TOP4_TOP4_H_ */
+#endif /* P4_TOP4_TOP4_H_ */

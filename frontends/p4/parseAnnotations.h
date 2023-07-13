@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _P4_PARSEANNOTATIONS_H_
-#define _P4_PARSEANNOTATIONS_H_
+#ifndef P4_PARSEANNOTATIONS_H_
+#define P4_PARSEANNOTATIONS_H_
 
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/parsers/parserDriver.h"
@@ -178,4 +178,4 @@ class ParseAnnotationBodies final : public PassManager {
 
 }  // namespace P4
 
-#endif /* _P4_PARSEANNOTATIONS_H_ */
+#endif /* P4_PARSEANNOTATIONS_H_ */

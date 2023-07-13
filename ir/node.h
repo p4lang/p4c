@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _IR_NODE_H_
-#define _IR_NODE_H_
+#ifndef IR_NODE_H_
+#define IR_NODE_H_
 
 #include <iosfwd>
 #include <typeinfo>
@@ -205,4 +205,4 @@ inline bool equiv(const INode *a, const INode *b) {
 
 }  // namespace IR
 
-#endif /* _IR_NODE_H_ */
+#endif /* IR_NODE_H_ */

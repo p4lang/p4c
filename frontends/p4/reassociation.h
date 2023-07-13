@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _P4_REASSOCIATION_H_
-#define _P4_REASSOCIATION_H_
+#ifndef P4_REASSOCIATION_H_
+#define P4_REASSOCIATION_H_
 
 #include "ir/ir.h"
 #include "ir/visitor.h"
@@ -48,4 +48,4 @@ class Reassociation final : public Transform {
 
 }  // namespace P4
 
-#endif /* _P4_REASSOCIATION_H_ */
+#endif /* P4_REASSOCIATION_H_ */

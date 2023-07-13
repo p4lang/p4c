@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_P4_SPECIALIZE_H_
-#define _FRONTENDS_P4_SPECIALIZE_H_
+#ifndef FRONTENDS_P4_SPECIALIZE_H_
+#define FRONTENDS_P4_SPECIALIZE_H_
 
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
@@ -215,4 +215,4 @@ class SpecializeAll : public PassRepeated {
 
 }  // namespace P4
 
-#endif /* _FRONTENDS_P4_SPECIALIZE_H_ */
+#endif /* FRONTENDS_P4_SPECIALIZE_H_ */
