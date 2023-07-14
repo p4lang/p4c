@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _LIB_BACKTRACE_H_
-#define _LIB_BACKTRACE_H_
+#ifndef LIB_BACKTRACE_H_
+#define LIB_BACKTRACE_H_
 
 #include <exception>
 #include <string>
@@ -57,4 +57,4 @@ class backtrace_exception : public E {
     }
 };
 
-#endif /* _LIB_BACKTRACE_H_ */
+#endif /* LIB_BACKTRACE_H_ */

@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_P4_COMMONINLINING_H_
-#define _FRONTENDS_P4_COMMONINLINING_H_
+#ifndef FRONTENDS_P4_COMMONINLINING_H_
+#define FRONTENDS_P4_COMMONINLINING_H_
 
 #define DEBUG_INLINER 0
 
@@ -189,4 +189,4 @@ class InlineDriver : public Visitor {
 
 }  // namespace P4
 
-#endif /* _FRONTENDS_P4_COMMONINLINING_H_ */
+#endif /* FRONTENDS_P4_COMMONINLINING_H_ */

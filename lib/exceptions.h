@@ -16,8 +16,8 @@ limitations under the License.
 
 /* -*-c++-*- */
 
-#ifndef _LIB_EXCEPTIONS_H_
-#define _LIB_EXCEPTIONS_H_
+#ifndef LIB_EXCEPTIONS_H_
+#define LIB_EXCEPTIONS_H_
 
 #include <unistd.h>
 
@@ -147,4 +147,4 @@ class CompilationError : public P4CExceptionBase {
         throw Util::CompilationError(__VA_ARGS__); \
     } while (0)
 
-#endif /* _LIB_EXCEPTIONS_H_ */
+#endif /* LIB_EXCEPTIONS_H_ */

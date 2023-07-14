@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _IR_JSON_GENERATOR_H_
-#define _IR_JSON_GENERATOR_H_
+#ifndef IR_JSON_GENERATOR_H_
+#define IR_JSON_GENERATOR_H_
 
 #include <cassert>
 #include <optional>
@@ -309,4 +309,4 @@ class JSONGenerator {
     }
 };
 
-#endif /* _IR_JSON_GENERATOR_H_ */
+#endif /* IR_JSON_GENERATOR_H_ */

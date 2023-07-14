@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_P4_FROMV1_0_V1MODEL_H_
-#define _FRONTENDS_P4_FROMV1_0_V1MODEL_H_
+#ifndef FRONTENDS_P4_FROMV1_0_V1MODEL_H_
+#define FRONTENDS_P4_FROMV1_0_V1MODEL_H_
 
 #include "frontends/common/model.h"
 #include "frontends/p4/coreLibrary.h"
@@ -367,4 +367,4 @@ class getV1ModelVersion : public Inspector {
 
 }  // namespace P4V1
 
-#endif /* _FRONTENDS_P4_FROMV1_0_V1MODEL_H_ */
+#endif /* FRONTENDS_P4_FROMV1_0_V1MODEL_H_ */

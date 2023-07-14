@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _LIB_ORDERED_SET_H_
-#define _LIB_ORDERED_SET_H_
+#ifndef LIB_ORDERED_SET_H_
+#define LIB_ORDERED_SET_H_
 
 #include <cassert>
 #include <functional>
@@ -311,4 +311,4 @@ inline auto intersects(const ordered_set<T, C1, A1> &a, const U &b) -> decltype(
     return false;
 }
 
-#endif /* _LIB_ORDERED_SET_H_ */
+#endif /* LIB_ORDERED_SET_H_ */

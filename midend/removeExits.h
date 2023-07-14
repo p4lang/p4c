@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_REMOVEEXITS_H_
-#define _MIDEND_REMOVEEXITS_H_
+#ifndef MIDEND_REMOVEEXITS_H_
+#define MIDEND_REMOVEEXITS_H_
 
 #include "frontends/p4/removeReturns.h"
 
@@ -70,4 +70,4 @@ class RemoveExits : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_REMOVEEXITS_H_ */
+#endif /* MIDEND_REMOVEEXITS_H_ */

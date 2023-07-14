@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _LIB_JSON_H_
-#define _LIB_JSON_H_
+#ifndef LIB_JSON_H_
+#define LIB_JSON_H_
 
 #include <iostream>
 #include <stdexcept>
@@ -185,4 +185,4 @@ class JsonObject final : public IJson, public ordered_map<cstring, IJson *> {
 
 }  // namespace Util
 
-#endif /* _LIB_JSON_H_ */
+#endif /* LIB_JSON_H_ */

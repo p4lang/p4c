@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_COMMON_PARSEINPUT_H_
-#define _FRONTENDS_COMMON_PARSEINPUT_H_
+#ifndef FRONTENDS_COMMON_PARSEINPUT_H_
+#define FRONTENDS_COMMON_PARSEINPUT_H_
 
 #include "frontends/common/options.h"
 #include "frontends/p4/fromv1.0/converters.h"
@@ -109,4 +109,4 @@ const IR::P4Program *parseP4String(const std::string &input,
 
 }  // namespace P4
 
-#endif /* _FRONTENDS_COMMON_PARSEINPUT_H_ */
+#endif /* FRONTENDS_COMMON_PARSEINPUT_H_ */

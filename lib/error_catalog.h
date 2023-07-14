@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _LIB_ERROR_CATALOG_H_
-#define _LIB_ERROR_CATALOG_H_
+#ifndef LIB_ERROR_CATALOG_H_
+#define LIB_ERROR_CATALOG_H_
 
 #include <map>
 #include <string>
@@ -113,4 +113,4 @@ class ErrorCatalog {
     static std::map<int, cstring> errorCatalog;
 };
 
-#endif  // _LIB_ERROR_CATALOG_H_
+#endif /* LIB_ERROR_CATALOG_H_ */

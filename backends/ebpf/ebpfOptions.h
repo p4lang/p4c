@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_EBPF_EBPFOPTIONS_H_
-#define _BACKENDS_EBPF_EBPFOPTIONS_H_
+#ifndef BACKENDS_EBPF_EBPFOPTIONS_H_
+#define BACKENDS_EBPF_EBPFOPTIONS_H_
 
 #include <getopt.h>
 
@@ -71,4 +71,4 @@ class EbpfOptions : public CompilerOptions {
 
 using EbpfContext = P4CContextWithOptions<EbpfOptions>;
 
-#endif /* _BACKENDS_EBPF_EBPFOPTIONS_H_ */
+#endif /* BACKENDS_EBPF_EBPFOPTIONS_H_ */

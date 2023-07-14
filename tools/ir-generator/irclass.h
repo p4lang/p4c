@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _TOOLS_IR_GENERATOR_IRCLASS_H_
-#define _TOOLS_IR_GENERATOR_IRCLASS_H_
+#ifndef TOOLS_IR_GENERATOR_IRCLASS_H_
+#define TOOLS_IR_GENERATOR_IRCLASS_H_
 
 #include <map>
 #include <stdexcept>
@@ -386,4 +386,4 @@ inline std::ostream &operator<<(std::ostream &out, const LineDirective &l) {
     return out;
 }
 
-#endif /* _TOOLS_IR_GENERATOR_IRCLASS_H_ */
+#endif /* TOOLS_IR_GENERATOR_IRCLASS_H_ */

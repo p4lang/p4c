@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _IR_NODEMAP_H_
-#define _IR_NODEMAP_H_
+#ifndef IR_NODEMAP_H_
+#define IR_NODEMAP_H_
 
 #include "ir/node.h"
 #include "lib/cstring.h"
@@ -97,4 +97,4 @@ class NodeMap : public Node {
 
 }  // namespace IR
 
-#endif /* _IR_NODEMAP_H_ */
+#endif /* IR_NODEMAP_H_ */

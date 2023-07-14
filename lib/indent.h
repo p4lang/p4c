@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _LIB_INDENT_H_
-#define _LIB_INDENT_H_
+#ifndef LIB_INDENT_H_
+#define LIB_INDENT_H_
 
 #include <iomanip>
 #include <iostream>
@@ -120,4 +120,4 @@ class TempIndent {
 
 }  // end namespace IndentCtl
 
-#endif /* _LIB_INDENT_H_ */
+#endif /* LIB_INDENT_H_ */

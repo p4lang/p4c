@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_
-#define _COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_
+#ifndef COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_
+#define COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_
 
 #include "ir/ir.h"
 #include "lib/cstring.h"
@@ -133,4 +133,4 @@ class ResolveReferences : public Inspector, private ResolutionContext {
 
 }  // namespace P4
 
-#endif /* _COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_ */
+#endif /* COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_ */

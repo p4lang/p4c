@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_P4_MOVEDECLARATIONS_H_
-#define _FRONTENDS_P4_MOVEDECLARATIONS_H_
+#ifndef FRONTENDS_P4_MOVEDECLARATIONS_H_
+#define FRONTENDS_P4_MOVEDECLARATIONS_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "ir/ir.h"
@@ -121,4 +121,4 @@ class MoveInitializers : public Transform {
 
 }  // namespace P4
 
-#endif /* _FRONTENDS_P4_MOVEDECLARATIONS_H_ */
+#endif /* FRONTENDS_P4_MOVEDECLARATIONS_H_ */

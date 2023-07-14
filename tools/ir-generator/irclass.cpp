@@ -104,7 +104,7 @@ Util::Enumerator<IrClass *> *IrDefinitions::getClasses() const {
 }
 
 void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &impl) const {
-    std::string macroname = "_IR_GENERATED_H_";
+    std::string macroname = "IR_GENERATED_H_";
     out << "#ifndef " << macroname << "\n"
         << "#define " << macroname << "\n"
         << std::endl;

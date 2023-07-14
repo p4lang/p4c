@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _TYPECHECKING_TYPESUBSTITUTION_H_
-#define _TYPECHECKING_TYPESUBSTITUTION_H_
+#ifndef TYPECHECKING_TYPESUBSTITUTION_H_
+#define TYPECHECKING_TYPESUBSTITUTION_H_
 
 #include <map>
 #include <sstream>
@@ -92,4 +92,4 @@ class TypeVariableSubstitution final : public TypeSubstitution<const IR::ITypeVa
 
 }  // namespace P4
 
-#endif /* _TYPECHECKING_TYPESUBSTITUTION_H_ */
+#endif /* TYPECHECKING_TYPESUBSTITUTION_H_ */

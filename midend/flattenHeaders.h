@@ -15,8 +15,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_FLATTENHEADERS_H_
-#define _MIDEND_FLATTENHEADERS_H_
+#ifndef MIDEND_FLATTENHEADERS_H_
+#define MIDEND_FLATTENHEADERS_H_
 
 #include "flattenInterfaceStructs.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -151,4 +151,4 @@ class FlattenHeaders final : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_FLATTENHEADERS_H_ */
+#endif /* MIDEND_FLATTENHEADERS_H_ */

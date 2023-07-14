@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _LIB_STRINGREF_H_
-#define _LIB_STRINGREF_H_
+#ifndef LIB_STRINGREF_H_
+#define LIB_STRINGREF_H_
 
 #include <cstdlib>
 #include <cstring>
@@ -308,4 +308,4 @@ class StringRef::Split {
 inline StringRef::Split StringRef::split(char ch) const { return Split(*this, nullptr, find(ch)); }
 inline StringRef::Split StringRef::split(const char *s) const { return Split(*this, s, find(s)); }
 
-#endif /* _LIB_STRINGREF_H_ */
+#endif /* LIB_STRINGREF_H_ */

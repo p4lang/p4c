@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _P4_VALIDATEMATCHANNOTATIONS_H_
-#define _P4_VALIDATEMATCHANNOTATIONS_H_
+#ifndef P4_VALIDATEMATCHANNOTATIONS_H_
+#define P4_VALIDATEMATCHANNOTATIONS_H_
 
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
@@ -49,4 +49,4 @@ class ValidateMatchAnnotations final : public Inspector {
 
 }  // namespace P4
 
-#endif /* _P4_VALIDATEMATCHANNOTATIONS_H_ */
+#endif /* P4_VALIDATEMATCHANNOTATIONS_H_ */

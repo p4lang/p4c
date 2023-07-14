@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _LIB_MATCH_H_
-#define _LIB_MATCH_H_
+#ifndef LIB_MATCH_H_
+#define LIB_MATCH_H_
 
 #include <stdint.h>
 
@@ -58,4 +58,4 @@ struct match_t {
 std::ostream &operator<<(std::ostream &, const match_t &);
 bool operator>>(const char *, match_t &);
 
-#endif /*_LIB_MATCH_H_ */
+#endif /* LIB_MATCH_H_ */

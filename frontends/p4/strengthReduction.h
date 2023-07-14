@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _P4_STRENGTHREDUCTION_H_
-#define _P4_STRENGTHREDUCTION_H_
+#ifndef P4_STRENGTHREDUCTION_H_
+#define P4_STRENGTHREDUCTION_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/sideEffects.h"
@@ -116,4 +116,4 @@ class StrengthReduction : public PassManager {
 
 }  // namespace P4
 
-#endif /* _P4_STRENGTHREDUCTION_H_ */
+#endif /* P4_STRENGTHREDUCTION_H_ */

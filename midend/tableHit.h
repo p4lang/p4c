@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_TABLEHIT_H_
-#define _MIDEND_TABLEHIT_H_
+#ifndef MIDEND_TABLEHIT_H_
+#define MIDEND_TABLEHIT_H_
 
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
@@ -57,4 +57,4 @@ class TableHit : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_TABLEHIT_H_ */
+#endif /* MIDEND_TABLEHIT_H_ */

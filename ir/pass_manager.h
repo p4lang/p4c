@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _IR_PASS_MANAGER_H_
-#define _IR_PASS_MANAGER_H_
+#ifndef IR_PASS_MANAGER_H_
+#define IR_PASS_MANAGER_H_
 
 #include <functional>
 #include <initializer_list>
@@ -214,4 +214,4 @@ class DynamicVisitor : virtual public Visitor {
     DynamicVisitor *clone() const override { return new DynamicVisitor(*this); }
 };
 
-#endif /* _IR_PASS_MANAGER_H_ */
+#endif /* IR_PASS_MANAGER_H_ */

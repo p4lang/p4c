@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_EBPF_LOWER_H_
-#define _BACKENDS_EBPF_LOWER_H_
+#ifndef BACKENDS_EBPF_LOWER_H_
+#define BACKENDS_EBPF_LOWER_H_
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -57,4 +57,4 @@ class Lower : public PassManager {
 
 }  // namespace EBPF
 
-#endif /* _BACKENDS_EBPF_LOWER_H_ */
+#endif /* BACKENDS_EBPF_LOWER_H_ */

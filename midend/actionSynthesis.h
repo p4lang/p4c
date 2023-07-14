@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_ACTIONSYNTHESIS_H_
-#define _MIDEND_ACTIONSYNTHESIS_H_
+#ifndef MIDEND_ACTIONSYNTHESIS_H_
+#define MIDEND_ACTIONSYNTHESIS_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -185,4 +185,4 @@ class MoveActionsToTables : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_ACTIONSYNTHESIS_H_ */
+#endif /* MIDEND_ACTIONSYNTHESIS_H_ */

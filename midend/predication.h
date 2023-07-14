@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_PREDICATION_H_
-#define _MIDEND_PREDICATION_H_
+#ifndef MIDEND_PREDICATION_H_
+#define MIDEND_PREDICATION_H_
 
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
@@ -145,4 +145,4 @@ class Predication final : public Transform {
 
 }  // namespace P4
 
-#endif /* _MIDEND_PREDICATION_H_ */
+#endif /* MIDEND_PREDICATION_H_ */

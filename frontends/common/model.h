@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_COMMON_MODEL_H_
-#define _FRONTENDS_COMMON_MODEL_H_
+#ifndef FRONTENDS_COMMON_MODEL_H_
+#define FRONTENDS_COMMON_MODEL_H_
 
 #include "ir/id.h"
 #include "lib/cstring.h"
@@ -65,4 +65,4 @@ class Model {};
 
 }  // namespace Model
 
-#endif /* _FRONTENDS_COMMON_MODEL_H_ */
+#endif /* FRONTENDS_COMMON_MODEL_H_ */

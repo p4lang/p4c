@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _LIB_BITRANGE_H_
-#define _LIB_BITRANGE_H_
+#ifndef LIB_BITRANGE_H_
+#define LIB_BITRANGE_H_
 
 #include "bitvec.h"
 
@@ -51,4 +51,4 @@ class bitranges {
     iter end() const { return iter(bits.end()); }
 };
 
-#endif /* _LIB_BITRANGE_H_ */
+#endif /* LIB_BITRANGE_H_ */

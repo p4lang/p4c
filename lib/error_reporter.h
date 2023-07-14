@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _LIB_ERROR_REPORTER_H_
-#define _LIB_ERROR_REPORTER_H_
+#ifndef LIB_ERROR_REPORTER_H_
+#define LIB_ERROR_REPORTER_H_
 
 #include "error_catalog.h"
 #include "error_helper.h"
@@ -249,4 +249,4 @@ class ErrorReporter {
     std::unordered_map<cstring, DiagnosticAction> diagnosticActions;
 };
 
-#endif /* _LIB_ERROR_REPORTER_H_ */
+#endif /* LIB_ERROR_REPORTER_H_ */

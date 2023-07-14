@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _IR_NAMEMAP_H_
-#define _IR_NAMEMAP_H_
+#ifndef IR_NAMEMAP_H_
+#define IR_NAMEMAP_H_
 
 #include <map>
 
@@ -161,4 +161,4 @@ class NameMap : public Node {
 
 }  // namespace IR
 
-#endif /* _IR_NAMEMAP_H_ */
+#endif /* IR_NAMEMAP_H_ */

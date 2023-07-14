@@ -1,5 +1,5 @@
-#ifndef _MIDEND_REMOVEASSERTASSUME_H_
-#define _MIDEND_REMOVEASSERTASSUME_H_
+#ifndef MIDEND_REMOVEASSERTASSUME_H_
+#define MIDEND_REMOVEASSERTASSUME_H_
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -36,4 +36,4 @@ class RemoveAssertAssume final : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_REMOVEASSERTASSUME_H_*/
+#endif /* MIDEND_REMOVEASSERTASSUME_H_ */

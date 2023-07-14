@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _IR_ID_H_
-#define _IR_ID_H_
+#ifndef IR_ID_H_
+#define IR_ID_H_
 
 #include "lib/cstring.h"
 #include "lib/error.h"
@@ -55,4 +55,4 @@ struct ID : Util::IHasSourceInfo {
 };
 
 }  // namespace IR
-#endif  // _IR_ID_H_
+#endif /* IR_ID_H_ */

@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _COMMON_RESOLVEREFERENCES_REFERENCEMAP_H_
-#define _COMMON_RESOLVEREFERENCES_REFERENCEMAP_H_
+#ifndef COMMON_RESOLVEREFERENCES_REFERENCEMAP_H_
+#define COMMON_RESOLVEREFERENCES_REFERENCEMAP_H_
 
 #include "frontends/common/programMap.h"
 #include "ir/ir.h"
@@ -121,4 +121,4 @@ class ReferenceMap final : public ProgramMap, public NameGenerator, public Decla
 
 }  // namespace P4
 
-#endif /* _COMMON_RESOLVEREFERENCES_REFERENCEMAP_H_ */
+#endif /* COMMON_RESOLVEREFERENCES_REFERENCEMAP_H_ */

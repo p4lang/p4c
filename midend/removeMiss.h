@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_REMOVEMISS_H_
-#define _MIDEND_REMOVEMISS_H_
+#ifndef MIDEND_REMOVEMISS_H_
+#define MIDEND_REMOVEMISS_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -54,4 +54,4 @@ class RemoveMiss : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_REMOVEMISS_H_ */
+#endif /* MIDEND_REMOVEMISS_H_ */

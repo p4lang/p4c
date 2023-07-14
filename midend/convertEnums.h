@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_CONVERTENUMS_H_
-#define _MIDEND_CONVERTENUMS_H_
+#ifndef MIDEND_CONVERTENUMS_H_
+#define MIDEND_CONVERTENUMS_H_
 
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
@@ -146,4 +146,4 @@ class EnumOn32Bits : public P4::ChooseEnumRepresentation {
 
 }  // namespace P4
 
-#endif /* _MIDEND_CONVERTENUMS_H_ */
+#endif /* MIDEND_CONVERTENUMS_H_ */

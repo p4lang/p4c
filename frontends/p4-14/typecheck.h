@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_P4_14_TYPECHECK_H_
-#define _FRONTENDS_P4_14_TYPECHECK_H_
+#ifndef FRONTENDS_P4_14_TYPECHECK_H_
+#define FRONTENDS_P4_14_TYPECHECK_H_
 
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
@@ -37,4 +37,4 @@ class TypeCheck : public PassManager {
     const IR::Node *apply_visitor(const IR::Node *, const char *) override;
 };
 
-#endif /* _FRONTENDS_P4_14_TYPECHECK_H_ */
+#endif /* FRONTENDS_P4_14_TYPECHECK_H_ */

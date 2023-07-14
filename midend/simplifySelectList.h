@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_SIMPLIFYSELECTLIST_H_
-#define _MIDEND_SIMPLIFYSELECTLIST_H_
+#ifndef MIDEND_SIMPLIFYSELECTLIST_H_
+#define MIDEND_SIMPLIFYSELECTLIST_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -95,4 +95,4 @@ class SimplifySelectList : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_SIMPLIFYSELECTLIST_H_ */
+#endif /* MIDEND_SIMPLIFYSELECTLIST_H_ */

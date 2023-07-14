@@ -1,5 +1,5 @@
-#ifndef _LIB_HASH_H_
-#define _LIB_HASH_H_
+#ifndef LIB_HASH_H_
+#define LIB_HASH_H_
 
 #include <cstddef>
 #include <type_traits>
@@ -40,4 +40,4 @@ auto murmur(const T &obj, typename std::enable_if<std::is_standard_layout<T>::va
 }  // namespace Hash
 }  // namespace Util
 
-#endif /* _LIB_HASH_H_ */
+#endif /* LIB_HASH_H_ */

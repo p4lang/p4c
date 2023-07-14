@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_SIMPLIFYKEY_H_
-#define _MIDEND_SIMPLIFYKEY_H_
+#ifndef MIDEND_SIMPLIFYKEY_H_
+#define MIDEND_SIMPLIFYKEY_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/sideEffects.h"
@@ -194,4 +194,4 @@ class SimplifyKey : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_SIMPLIFYKEY_H_ */
+#endif /* MIDEND_SIMPLIFYKEY_H_ */

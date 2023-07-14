@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_PARSERUNROLL_H_
-#define _MIDEND_PARSERUNROLL_H_
+#ifndef MIDEND_PARSERUNROLL_H_
+#define MIDEND_PARSERUNROLL_H_
 
 #include <unordered_map>
 
@@ -308,4 +308,4 @@ class ParsersUnroll : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_PARSERUNROLL_H_ */
+#endif /* MIDEND_PARSERUNROLL_H_ */
