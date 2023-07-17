@@ -286,25 +286,11 @@ bool CmdStepper::preorder(const IR::MethodCallStatement *methodCallStatement) {
 bool CmdStepper::preorder(const IR::P4Program * /*program*/) {
     // Don't invoke logStep for the top-level program, as that would be overly verbose.
 
-    const auto &options = TestgenOptions::get();
     // Get the initial constraints of the target. These constraints influence branch selection.
     std::optional<const Constraint *> cond = programInfo.getTargetConstraints();
 
     // Initialize all relevant environment variables for the respective target.
     initializeTargetEnvironment(state);
-
-    if (!options.permittedPortRanges.empty()) {
-        if (cond == std::nullopt) {
-            cond = new IR::BoolLiteral(true);
-        }
-        const auto &inputPortVar = programInfo.getTargetInputPortVar();
-        for (auto portRange : options.permittedPortRanges) {
-            const auto *loVarIn = IR::getConstant(inputPortVar->type, portRange.first);
-            const auto *hiVarIn = IR::getConstant(inputPortVar->type, portRange.second);
-            cond = new IR::LAnd(new IR::LAnd(cond.value(), new IR::Leq(loVarIn, inputPortVar)),
-                                new IR::Leq(inputPortVar, hiVarIn));
-        }
-    }
 
     // If this option is active, mandate that all packets conform to a fixed size.
     auto pktSize = TestgenOptions::get().minPktSize;
@@ -315,7 +301,7 @@ bool CmdStepper::preorder(const IR::P4Program * /*program*/) {
         if (cond == std::nullopt) {
             cond = fixedSizeEqu;
         } else {
-            cond = new IR::LAnd(*cond, fixedSizeEqu);
+            cond = new IR::LAnd(cond.value(), fixedSizeEqu);
         }
     }
 
