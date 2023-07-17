@@ -22,20 +22,25 @@ limitations under the License.
 namespace DPDK {
 
 void TdiBfrtConf::generate(DPDK::DpdkOptions &options) {
+    if (options.outputFile.isNullOrEmpty()) {
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "No output file provided. Unable to generate correct TDI builder config file.");
+        return;
+    }
+    auto inputFile = std::filesystem::path(options.file.c_str());
     auto outFile = std::filesystem::path(options.outputFile.c_str());
-    auto tdiFile = std::filesystem::path(options.tdiFile.c_str());
-    auto programName = outFile.stem();
     auto outDir = outFile.parent_path();
-    auto configFile = outFile.replace_filename("spec");
+    auto tdiFile = std::filesystem::path(options.tdiBuilderConf.c_str());
+    auto programName = inputFile.stem();
 
-    if (options.bfRtSchema == nullptr) {
+    if (options.bfRtSchema.isNullOrEmpty()) {
         options.bfRtSchema = (outDir / programName).replace_filename("json").c_str();
         ::warning(
             "BF-Runtime Schema file name not provided, but is required for the TDI builder "
             "configuration. Generating file %1%",
             options.bfRtSchema);
     }
-    if (options.ctxtFile == nullptr) {
+    if (options.ctxtFile.isNullOrEmpty()) {
         options.ctxtFile = (outDir / "context.json").c_str();
         ::warning(
             "DPDK context file name not provided, but is required for the TDI builder "
@@ -48,8 +53,7 @@ void TdiBfrtConf::generate(DPDK::DpdkOptions &options) {
     // TODO: Ideally, this should be a template. We could use Inja, but this adds another
     // dependency.
     std::stringstream ss;
-    ss << R"""(
-{
+    ss << R"""({
     "chip_list": [
         {
             "chip_family": "dpdk"
@@ -63,16 +67,18 @@ void TdiBfrtConf::generate(DPDK::DpdkOptions &options) {
                 {
 )""";
     ss << R"""(                    "program-name" : )""";
-    ss << "\"" << programName << "\",";
+    ss << "" << programName << ",\n";
     ss << R"""(                    "bfrt-config" : )""";
-    ss << "\"" << bfRtSchema << "\",";
+    ss << "\"" << bfRtSchema << "\",\n";
     ss << R"""(                    "p4_pipelines": [
-                        {)""";
+                        {
+)""";
     ss << R"""(                            "p4_pipeline_name": "pipe",
                             "context": )""";
     ss << "\"" << contextFile << "\",";
-    ss << R"""(                            "config": )""";
-    ss << "\"" << configFile << "\",";
+    ss << R"""(
+                            "config": )""";
+    ss << "" << outFile << ",";
     ss << R"""(
                             "pipe_scope": [
                                 0,
