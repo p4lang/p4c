@@ -23,6 +23,7 @@ limitations under the License.
 #include "backends/dpdk/control-plane/bfruntime_arch_handler.h"
 #include "backends/dpdk/midend.h"
 #include "backends/dpdk/options.h"
+#include "backends/dpdk/tdiConf.h"
 #include "backends/dpdk/version.h"
 #include "control-plane/bfruntime_ext.h"
 #include "control-plane/p4RuntimeSerializer.h"
@@ -111,6 +112,10 @@ int main(int argc, char *const argv[]) {
 
     P4::serializeP4RuntimeIfRequired(program, options);
     if (::errorCount() > 0) return 1;
+
+    if (!options.tdiBuilderConf.isNullOrEmpty()) {
+        DPDK::TdiBfrtConf::generate(options);
+    }
 
     if (!options.bfRtSchema.isNullOrEmpty()) {
         generateTDIBfrtJson(false, program, options);
