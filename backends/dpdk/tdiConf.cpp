@@ -27,10 +27,10 @@ void TdiBfrtConf::generate(DPDK::DpdkOptions &options) {
                 "No output file provided. Unable to generate correct TDI builder config file.");
         return;
     }
-    auto inputFile = std::filesystem::path(options.file.c_str());
-    auto outFile = std::filesystem::path(options.outputFile.c_str());
+    auto inputFile = std::filesystem::absolute(options.file.c_str());
+    auto outFile = std::filesystem::absolute(options.outputFile.c_str());
     auto outDir = outFile.parent_path();
-    auto tdiFile = std::filesystem::path(options.tdiBuilderConf.c_str());
+    auto tdiFile = std::filesystem::absolute(options.tdiBuilderConf.c_str());
     auto programName = inputFile.stem();
 
     if (options.bfRtSchema.isNullOrEmpty()) {
@@ -48,8 +48,8 @@ void TdiBfrtConf::generate(DPDK::DpdkOptions &options) {
             options.ctxtFile);
     }
 
-    auto contextFile = options.ctxtFile;
-    auto bfRtSchema = options.bfRtSchema;
+    auto contextFile = std::filesystem::absolute(options.ctxtFile.c_str());
+    auto bfRtSchema = std::filesystem::absolute(options.bfRtSchema.c_str());
     // TODO: Ideally, this should be a template. We could use Inja, but this adds another
     // dependency.
     std::stringstream ss;
@@ -67,18 +67,18 @@ void TdiBfrtConf::generate(DPDK::DpdkOptions &options) {
                 {
 )""";
     ss << R"""(                    "program-name" : )""";
-    ss << "" << programName << ",\n";
+    ss << programName << ",\n";
     ss << R"""(                    "bfrt-config" : )""";
-    ss << "\"" << bfRtSchema << "\",\n";
+    ss << bfRtSchema << ",\n";
     ss << R"""(                    "p4_pipelines": [
                         {
 )""";
     ss << R"""(                            "p4_pipeline_name": "pipe",
                             "context": )""";
-    ss << "\"" << contextFile << "\",";
+    ss << contextFile << ",";
     ss << R"""(
                             "config": )""";
-    ss << "" << outFile << ",";
+    ss << outFile << ",";
     ss << R"""(
                             "pipe_scope": [
                                 0,
