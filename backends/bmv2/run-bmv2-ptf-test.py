@@ -181,7 +181,7 @@ class NNEnv(PTFTestEnv):
         )
         # TODO: There is currently a bug where we can not support more than 344 ports at once.
         # The nanomsg test back end simply hangs, the reason is unclear.
-        port_range = "0-50"
+        port_range = "0-8"
         run_ptf_cmd = (
             f"ptf --platform nn --device-socket 0-{{{port_range}}}@ipc://{self.options.testdir}/"
             f"bmv2_packets_1.ipc --pypath {pypath} "

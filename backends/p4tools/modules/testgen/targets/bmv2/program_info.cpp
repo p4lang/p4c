@@ -125,7 +125,7 @@ std::vector<Continuation::Command> Bmv2V1ModelProgramInfo::processDeclaration(
     const IR::Type_Declaration *typeDecl, size_t blockIdx) const {
     // Get the architecture specification for this target.
     const auto *archSpec = TestgenTarget::getArchSpec();
-
+    const auto &options = TestgenOptions::get();
     // Collect parameters.
     const auto *applyBlock = typeDecl->to<IR::IApply>();
     if (applyBlock == nullptr) {
@@ -157,10 +157,18 @@ std::vector<Continuation::Command> Bmv2V1ModelProgramInfo::processDeclaration(
                            new IR::PathExpression("*standard_metadata"), "egress_port");
         auto *portStmt = new IR::AssignmentStatement(egressPortVar, getTargetOutputPortVar());
         cmds.emplace_back(portStmt);
-        if (TestgenOptions::get().testBackend == "PTF") {
-            /// Set the restriction on the output port,
-            /// this is necessary since ptf tests use ports from 0 to 7
-            cmds.emplace_back(Continuation::Guard(getPortConstraint(getTargetOutputPortVar())));
+
+        /// If the option is not empty, set the restrictions on the output port.
+        if (!options.permittedPortRanges.empty()) {
+            const IR::Expression *cond = new IR::BoolLiteral(true);
+            const auto &outPortVar = getTargetOutputPortVar();
+            for (auto portRange : options.permittedPortRanges) {
+                const auto *loVarOut = IR::getConstant(outPortVar->type, portRange.first);
+                const auto *hiVarOut = IR::getConstant(outPortVar->type, portRange.second);
+                cond = new IR::LAnd(new IR::LAnd(cond, new IR::Leq(loVarOut, outPortVar)),
+                                    new IR::Leq(outPortVar, hiVarOut));
+            }
+            cmds.emplace_back(Continuation::Guard(cond));
         }
         // TODO: We have not implemented multi cast yet.
         // Drop the packet if the multicast group is set.
@@ -190,13 +198,6 @@ const IR::StateVariable &Bmv2V1ModelProgramInfo::getTargetInputPortVar() const {
     return *new IR::StateVariable(new IR::Member(IR::getBitType(BMv2Constants::PORT_BIT_WIDTH),
                                                  new IR::PathExpression("*standard_metadata"),
                                                  "ingress_port"));
-}
-
-const IR::Expression *Bmv2V1ModelProgramInfo::getPortConstraint(const IR::StateVariable &portVar) {
-    const IR::Operation_Binary *portConstraint =
-        new IR::LOr(new IR::Equ(portVar, new IR::Constant(portVar->type, BMv2Constants::DROP_PORT)),
-                    new IR::Lss(portVar, new IR::Constant(portVar->type, 8)));
-    return portConstraint;
 }
 
 const IR::StateVariable &Bmv2V1ModelProgramInfo::getTargetOutputPortVar() const {

@@ -63,6 +63,17 @@ class TestgenOptions : public AbstractP4cToolOptions {
     /// for statement reachability analysis.
     bool dcg = false;
 
+    /// The maximum permitted packet size, in bits.
+    // The default is the jumbo frame packet size, 9000 bytes.
+    int maxPktSize = 72000;
+
+    /// The minimum permitted packet size, in bits.
+    int minPktSize = 0;
+
+    /// The list of permitted port ranges.
+    /// TestGen will consider these when choosing input and output ports.
+    std::vector<std::pair<int, int>> permittedPortRanges;
+
     /// Enforces the test generation of tests with mandatory output packet.
     bool withOutputPacket = false;
 
