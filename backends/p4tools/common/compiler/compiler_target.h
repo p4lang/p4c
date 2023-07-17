@@ -23,7 +23,7 @@ class CompilerTarget : public Target {
     /// Initializes the P4 compiler with the given compiler-specific command-line arguments.
     ///
     /// @returns any unprocessed arguments, or nullptr if there was an error.
-    static std::vector<const char *> *initCompiler(int argc, char **argv);
+    static std::vector<const char *> *initCompiler(int argc, char *const argv[]);
 
     /// Runs the P4 compiler to produce an IR.
     ///
@@ -51,7 +51,7 @@ class CompilerTarget : public Target {
     /// This implementation just forwards the given arguments to the compiler.
     ///
     /// @see @initCompiler.
-    virtual std::vector<const char *> *initCompilerImpl(int argc, char **argv) const;
+    virtual std::vector<const char *> *initCompilerImpl(int argc, char *const argv[]) const;
 
     /// Parses the P4 program specified on the command line.
     ///

@@ -20,7 +20,7 @@ namespace P4Tools {
 
 ICompileContext *CompilerTarget::makeContext() { return get().makeContextImpl(); }
 
-std::vector<const char *> *CompilerTarget::initCompiler(int argc, char **argv) {
+std::vector<const char *> *CompilerTarget::initCompiler(int argc, char *const argv[]) {
     return get().initCompilerImpl(argc, argv);
 }
 
@@ -67,7 +67,7 @@ ICompileContext *CompilerTarget::makeContextImpl() const {
     return new CompileContext<CompilerOptions>();
 }
 
-std::vector<const char *> *CompilerTarget::initCompilerImpl(int argc, char **argv) const {
+std::vector<const char *> *CompilerTarget::initCompilerImpl(int argc, char *const argv[]) const {
     auto *result = P4CContext::get().options().process(argc, argv);
     return ::errorCount() > 0 ? nullptr : result;
 }

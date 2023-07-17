@@ -17,26 +17,7 @@
 
 namespace P4Tools {
 
-std::tuple<int, char **> AbstractP4cToolOptions::convertArgs(
-    const std::vector<const char *> &args) {
-    int argc = 0;
-    char **argv = new char *[args.size()];
-    for (const char *arg : args) {
-        argv[argc++] = strdup(arg);
-    }
-    return {argc, argv};
-}
-
-std::optional<ICompileContext *> AbstractP4cToolOptions::process(
-    const std::vector<const char *> &args) {
-    // Compiler expects path to executable as first element in argument list.
-    compilerArgs.push_back(args.at(0));
-
-    // Convert to the standard (argc, argv) pair.
-    int argc = 0;
-    char **argv = nullptr;
-    std::tie(argc, argv) = convertArgs(args);
-
+std::optional<ICompileContext *> AbstractP4cToolOptions::processToolOptions(int argc, char **argv) {
     // Establish a dummy compilation context so that we can use ::error to report errors while
     // processing command-line options.
     class DummyCompileContext : public BaseCompileContext {
@@ -53,13 +34,15 @@ std::optional<ICompileContext *> AbstractP4cToolOptions::process(
     auto *compilerContext = P4Tools::CompilerTarget::makeContext();
     AutoCompileContext autoContext(compilerContext);
 
-    // Initialize the compiler, forwarding any compiler-specific options.
-    std::tie(argc, argv) = convertArgs(compilerArgs);
-    auto *unprocessedCompilerArgs = P4Tools::CompilerTarget::initCompiler(argc, argv);
+    // Compiler expects path to executable as first element in argument list.
+    compilerArgs.insert(compilerArgs.begin(), argv[0]);
+    auto *unprocessedCompilerArgs = P4Tools::CompilerTarget::initCompiler(
+        compilerArgs.size(), const_cast<char *const *>(compilerArgs.data()));
 
     if ((unprocessedCompilerArgs == nullptr) || ::errorCount() > 0) {
         return std::nullopt;
     }
+
     BUG_CHECK(unprocessedCompilerArgs->empty(), "Compiler did not process all of its arguments: %s",
               cstring::join(unprocessedCompilerArgs->begin(), unprocessedCompilerArgs->end(), " "));
 
@@ -79,10 +62,6 @@ std::optional<ICompileContext *> AbstractP4cToolOptions::process(
     P4CContext::get().options().file = remainingArgs->at(0);
 
     return compilerContext;
-}
-
-std::vector<const char *> *AbstractP4cToolOptions::process(int argc, char *const argv[]) {
-    return Util::Options::process(argc, argv);
 }
 
 /// Specifies a command-line option to inherit from the compiler, and any special handling for the

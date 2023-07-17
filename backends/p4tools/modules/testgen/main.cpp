@@ -10,14 +10,8 @@
 int main(int argc, char **argv) {
     setup_signals();
 
-    std::vector<const char *> args;
-    args.reserve(argc);
-    for (int i = 0; i < argc; ++i) {
-        args.push_back(argv[i]);
-    }
-
     try {
-        return P4Tools::P4Testgen::Testgen().main(args);
+        return P4Tools::P4Testgen::Testgen().main(argc, argv);
     } catch (const Util::CompilerBug &e) {
         std::cerr << "Internal error: " << e.what() << "\n";
         std::cerr << "Please submit a bug report with your code."

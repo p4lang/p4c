@@ -27,12 +27,12 @@ class AbstractP4cTool {
     /// @param args
     ///     Contains the path to the executable, followed by the command-line arguments for this
     ///     tool.
-    int main(const std::vector<const char *> &args) {
+    int main(int argc, char **argv) {
         // Register supported compiler targets.
         registerTarget();
 
         // Process command-line options.
-        auto compileContext = Options::get().process(args);
+        auto compileContext = Options::get().processToolOptions(argc, argv);
         if (!compileContext) {
             return 1;
         }

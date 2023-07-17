@@ -21,27 +21,19 @@ class AbstractP4cToolOptions : protected Util::Options {
     /// A seed for the PRNG.
     std::optional<uint32_t> seed = std::nullopt;
 
-    /// Processes options.
-    ///
-    /// @returns a compilation context on success, std::nullopt on error.
-    std::optional<ICompileContext *> process(const std::vector<const char *> &args);
+    std::optional<ICompileContext *> processToolOptions(int argc, char **argv);
+
+    virtual ~AbstractP4cToolOptions() = default;
+
+    // No copy constructor and no self-assignments.
+    AbstractP4cToolOptions(const AbstractP4cToolOptions &) = delete;
+    AbstractP4cToolOptions &operator=(const AbstractP4cToolOptions &) = delete;
 
  protected:
     /// Command-line arguments to be sent to the compiler. Populated by @process.
     std::vector<const char *> compilerArgs;
 
-    /// Hook for customizing options processing.
-    std::vector<const char *> *process(int argc, char *const argv[]) override;
-
-    /// Converts a vector of command-line arguments into the traditional (argc, argv) format.
-    static std::tuple<int, char **> convertArgs(const std::vector<const char *> &args);
-
     explicit AbstractP4cToolOptions(cstring message);
-
-    // No copy constructor and no self-assignments.
-    AbstractP4cToolOptions(const AbstractP4cToolOptions &) = delete;
-
-    AbstractP4cToolOptions &operator=(const AbstractP4cToolOptions &) = delete;
 };
 
 }  // namespace P4Tools
