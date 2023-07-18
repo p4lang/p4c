@@ -28,6 +28,7 @@ bool CoverableNodesScanner::preorder(const IR::ParserState *parserState) {
         parserState->name == IR::ParserState::reject) {
         return true;
     }
+    seenParserIds.emplace(parserState->clone_id);
 
     CHECK_NULL(parserState->selectExpression);
     const auto &executionState = state.get();
@@ -44,7 +45,6 @@ bool CoverableNodesScanner::preorder(const IR::ParserState *parserState) {
         const auto *decl = executionState.findDecl(pathExpression)->getNode();
         decl->apply_visitor_preorder(*this);
     }
-    seenParserIds.emplace(parserState->clone_id);
     return true;
 }
 
