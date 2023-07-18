@@ -286,11 +286,37 @@ bool CmdStepper::preorder(const IR::MethodCallStatement *methodCallStatement) {
 bool CmdStepper::preorder(const IR::P4Program * /*program*/) {
     // Don't invoke logStep for the top-level program, as that would be overly verbose.
 
+    const auto &options = TestgenOptions::get();
     // Get the initial constraints of the target. These constraints influence branch selection.
     std::optional<const Constraint *> cond = programInfo.getTargetConstraints();
 
     // Initialize all relevant environment variables for the respective target.
     initializeTargetEnvironment(state);
+
+    /// If the the vector of permitted port ranges is not empty, set the restrictions on the
+    /// possible input port.
+    if (!options.permittedPortRanges.empty()) {
+        std::optional<const Constraint *> portRangeCond = std::nullopt;
+        const auto &inputPortVar = programInfo.getTargetInputPortVar();
+        for (auto portRange : options.permittedPortRanges) {
+            const auto *loVarIn = IR::getConstant(inputPortVar->type, portRange.first);
+            const auto *hiVarIn = IR::getConstant(inputPortVar->type, portRange.second);
+            if (portRangeCond.has_value()) {
+                portRangeCond = new IR::LOr(portRangeCond.value(),
+                                            new IR::LAnd(new IR::Leq(loVarIn, inputPortVar),
+                                                         new IR::Leq(inputPortVar, hiVarIn)));
+            } else {
+                portRangeCond = new IR::LAnd(new IR::Leq(loVarIn, inputPortVar),
+                                             new IR::Leq(inputPortVar, hiVarIn));
+            }
+        }
+        if (cond == std::nullopt) {
+            cond = portRangeCond;
+        } else {
+            BUG_CHECK(portRangeCond.has_value(), "Port range constraint has no value.");
+            cond = new IR::LAnd(cond.value(), portRangeCond.value());
+        }
+    }
 
     // If this option is active, mandate that all packets conform to a fixed size.
     auto pktSize = TestgenOptions::get().minPktSize;

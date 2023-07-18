@@ -98,12 +98,6 @@ Bmv2V1ModelProgramInfo::Bmv2V1ModelProgramInfo(
     auto mappedDirectExterns = directExternMapper.getdirectExternMap();
     directExternMap.insert(mappedDirectExterns.begin(), mappedDirectExterns.end());
 
-    /// If permittedPortRanges is not empty, set the restrictions on the output port.
-    if (!options.permittedPortRanges.empty()) {
-        constraint = new IR::LAnd(
-            constraint, getPortConstraint(getTargetOutputPortVar(), options.permittedPortRanges));
-    }
-
     /// Finally, set the target constraints.
     targetConstraints = constraint;
 }
@@ -164,10 +158,20 @@ std::vector<Continuation::Command> Bmv2V1ModelProgramInfo::processDeclaration(
         auto *portStmt = new IR::AssignmentStatement(egressPortVar, getTargetOutputPortVar());
         cmds.emplace_back(portStmt);
 
-        /// If permittedPortRanges is not empty, set the restrictions on the output port.
+        /// If the the vector of permitted port ranges is not empty, set the restrictions on the
+        /// possible output port.
         if (!options.permittedPortRanges.empty()) {
-            cmds.emplace_back(Continuation::Guard(
-                getPortConstraint(getTargetOutputPortVar(), options.permittedPortRanges)));
+            const auto &outPortVar = getTargetOutputPortVar();
+            /// The drop port is also always a valid port. Initialize the condition with it.
+            const IR::Expression *cond = new IR::Equ(
+                outPortVar, new IR::Constant(outPortVar->type, BMv2Constants::DROP_PORT));
+            for (auto portRange : options.permittedPortRanges) {
+                const auto *loVarOut = IR::getConstant(outPortVar->type, portRange.first);
+                const auto *hiVarOut = IR::getConstant(outPortVar->type, portRange.second);
+                cond = new IR::LOr(cond, new IR::LAnd(new IR::Leq(loVarOut, outPortVar),
+                                                      new IR::Leq(outPortVar, hiVarOut)));
+            }
+            cmds.emplace_back(Continuation::Guard(cond));
         }
         // TODO: We have not implemented multi cast yet.
         // Drop the packet if the multicast group is set.
@@ -199,19 +203,6 @@ const IR::StateVariable &Bmv2V1ModelProgramInfo::getTargetInputPortVar() const {
                                                  "ingress_port"));
 }
 
-const IR::Expression *Bmv2V1ModelProgramInfo::getPortConstraint(
-    const IR::StateVariable &portVar, const std::vector<std::pair<int, int>> &permittedPortRanges) {
-    /// The drop port is also a valid port. Initialize the condition with it.
-    const IR::Expression *portConstraint =
-        new IR::Equ(portVar, new IR::Constant(portVar->type, BMv2Constants::DROP_PORT));
-    for (auto portRange : permittedPortRanges) {
-        const auto *loVarOut = IR::getConstant(portVar->type, portRange.first);
-        const auto *hiVarOut = IR::getConstant(portVar->type, portRange.second);
-        portConstraint = new IR::LOr(portConstraint, new IR::LAnd(new IR::Leq(loVarOut, portVar),
-                                                                  new IR::Leq(portVar, hiVarOut)));
-    }
-    return portConstraint;
-}
 const IR::StateVariable &Bmv2V1ModelProgramInfo::getTargetOutputPortVar() const {
     return *new IR::StateVariable(new IR::Member(IR::getBitType(BMv2Constants::PORT_BIT_WIDTH),
                                                  new IR::PathExpression("*standard_metadata"),
