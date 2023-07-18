@@ -217,7 +217,6 @@ jobs:
           make -Cbuild -j2
 
     - name: Run tests (MacOS)
-      # TODO: Renable gtest. Unit tests currently fail on MacOS.
       run: |
-        ctest --output-on-failure --schedule-random -LE "bpf|gtest|ubpf"
+        ctest --output-on-failure --schedule-random -LE "bpf|ubpf"
       working-directory: ./build
