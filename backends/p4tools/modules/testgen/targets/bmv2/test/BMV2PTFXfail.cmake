@@ -278,7 +278,6 @@ p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
   "Expected packet was not received on device"
   # The packet has a zero width and is dropped by PTF.
-  issue281.p4
   parser-unroll-issue3537-1.p4
   parser-unroll-issue3537.p4
   parser-unroll-test2.p4

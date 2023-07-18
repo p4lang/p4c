@@ -18,13 +18,6 @@ namespace P4Tools {
 /// instance.
 class AbstractP4cToolOptions : protected Util::Options {
  public:
-    /// The maximum permitted packet size, in bits.
-    // The default is the jumbo frame packet size, 9000 bytes.
-    int maxPktSize = 72000;
-
-    /// The minimum permitted packet size, in bits.
-    int minPktSize = 0;
-
     /// A seed for the PRNG.
     std::optional<uint32_t> seed = std::nullopt;
 

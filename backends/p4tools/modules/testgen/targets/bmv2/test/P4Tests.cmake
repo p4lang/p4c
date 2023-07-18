@@ -74,10 +74,12 @@ if(P4TOOLS_TESTGEN_BMV2_TEST_PTF)
        # A particular test (or packet?) combination leads to an infinite loop in the simple switch.
        "${P4C_SOURCE_DIR}/testdata/p4_16_samples/v1model-special-ops-bmv2.p4"
   )
+  # Currently, the test back end only support ports 0-8.
+  # TODO: Support the full range of ports.
   p4tools_add_tests(
     TESTS "${P4C_V1_TEST_SUITES_P416_PTF}"
     TAG "testgen-p4c-bmv2-ptf" DRIVER ${P4TESTGEN_DRIVER}
-    TARGET "bmv2" ARCH "v1model" P416_PTF TEST_ARGS "--test-backend PTF --packet-size-range 0:12000 ${EXTRA_OPTS} "
+    TARGET "bmv2" ARCH "v1model" P416_PTF TEST_ARGS "--test-backend PTF --packet-size-range 0:12000 --port-ranges 0:8 ${EXTRA_OPTS} "
   )
   include(${CMAKE_CURRENT_LIST_DIR}/BMV2PTFXfail.cmake)
 endif()

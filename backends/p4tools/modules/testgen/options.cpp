@@ -104,8 +104,57 @@ TestgenOptions::TestgenOptions()
             }
             return true;
         },
-        "Specify the possible range of the input packet size in bits. The format is [min]:[max]. "
+        "Specify the possible range of the input packet size in bits. The format is [min]:[max] "
+        "inclusive. "
         "The default values are \"0:72000\". The maximum is set to jumbo frame size (9000 bytes).");
+
+    registerOption(
+        "--port-ranges", "portRanges",
+        [this](const char *arg) {
+            // Convert the input into a StringStream and split by comma (',').
+            // Each element is then again split by colon (':').
+            std::stringstream argStream(arg);
+            while (argStream.good()) {
+                std::string substr;
+                std::getline(argStream, substr, ',');
+                auto rangeStr = std::string(arg);
+                size_t portStr = rangeStr.find_first_of(':');
+                try {
+                    auto loPortStr = rangeStr.substr(0, portStr);
+                    auto loPortRange = std::stoi(loPortStr);
+                    if (loPortRange < 0) {
+                        ::error(
+                            "Invalid low port value %1%. low port value must be at "
+                            "least "
+                            "0.",
+                            loPortRange);
+                    }
+                    auto hiPortStr = rangeStr.substr(portStr + 1);
+                    auto hiPortRange = std::stoi(hiPortStr);
+                    if (hiPortRange < loPortRange) {
+                        ::error(
+                            "Invalid permitted port range %1%:%2%.  The high port value must "
+                            "be "
+                            "at "
+                            "least the size of the low port value.",
+                            loPortRange, hiPortRange);
+                    }
+                    permittedPortRanges.emplace_back(loPortRange, hiPortRange);
+                } catch (std::invalid_argument &) {
+                    ::error(
+                        "Invalid permitted port range %1%. Expected format is [lo]:[hi], where "
+                        "[lo] "
+                        "and [hi] are integers.",
+                        arg);
+                    return false;
+                }
+            }
+            return true;
+        },
+        "Specify the possible input/output ports. The format is [lo]:[hi],[lo]:[hi],... inclusive. "
+        "Ranges can overlap, but lo must always be below hi. If the value is too large for the "
+        "target-specific port variable, it will overflow. Default behavior is delegated to the "
+        "test back end. Some test back ends may restrict the available port ranges.");
 
     registerOption(
         "--out-dir", "outputDir",
