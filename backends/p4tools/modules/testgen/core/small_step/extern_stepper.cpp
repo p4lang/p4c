@@ -111,9 +111,10 @@ ExprStepper::PacketCursorAdvanceInfo ExprStepper::calculateAdvanceExpression(
     auto *minSize = new IR::Sub(packetSizeVarType, advanceSum, bufferSizeConst);
     // The packet size must be larger than the current parser cursor minus what is already
     // present in the buffer. The advance expression, i.e., the size of the advance can be freely
-    // chosen.
-    auto *cond =
-        new IR::Geq(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(), minSize);
+    // chosen. If bufferSizeConst is larger than the entire advance, this does not hold.
+    auto *cond = new IR::LOr(
+        new IR::Grt(bufferSizeConst, advanceSum),
+        new IR::Geq(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(), minSize));
 
     // Compute the accept case.
     int advanceVal = 0;
@@ -681,6 +682,9 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  // It also records the condition we are failing.
                  rejectState.add(*new TraceEvents::ExtractFailure(
                      extractOutput, state.getInputPacketCursor(), condInfo.advanceFailCond));
+                 std::stringstream condStream;
+                 condStream << "Reject Size: " << condInfo.advanceFailSize;
+                 rejectState.add(*new TraceEvents::Generic(condStream.str()));
                  rejectState.replaceTopBody(Continuation::Exception::PacketTooShort);
                  result->emplace_back(condInfo.advanceFailCond, state, rejectState);
              }
