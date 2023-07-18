@@ -81,7 +81,7 @@ void TdiBfrtConf::generate(DPDK::DpdkOptions &options) {
     ss << outFile << ",";
     ss << R"""(
                             "pipe_scope": [
-                                0,
+                                0
                             ]
                         }
                     ]
