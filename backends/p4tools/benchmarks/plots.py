@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import tikzplotlib
 
 # Append tools to the import path.
 FILE_DIR = Path(__file__).resolve().parent
@@ -18,7 +17,7 @@ TOOLS_PATH = FILE_DIR.joinpath("../../../tools")
 sys.path.append(str(TOOLS_PATH))
 import testutils
 
-OUTPUT_DIR = FILE_DIR.joinpath("../../../build/plots")
+OUTPUT_DIR = Path(".")
 
 PARSER = argparse.ArgumentParser()
 
@@ -39,8 +38,7 @@ PARSER.add_argument(
 )
 
 
-def plot_preconditions():
-    # Load the example car crash dataset
+def plot_preconditions(args, extra_args):
     preconditions = [
         "None",
         "1500B pkt",
@@ -49,7 +47,7 @@ def plot_preconditions():
         "P4-constraints + 1500B IPv4 pkt",
         "P4-constraints + 1500B IPv4-TCP pkt",
     ]
-    data = [237846, 178384, 135719, 101789, 50231, 12557]
+    data = [146784, 83784, 74472, 42486, 28216, 7054]
     target_frame = pd.DataFrame({"Precondition": preconditions, "Number of tests": data})
     _, ax = plt.subplots(figsize=(4, 1.2))
     ax = sns.barplot(
@@ -62,6 +60,7 @@ def plot_preconditions():
         # facecolor=(0,0,0,0),
         edgecolor="0",
     )
+    ax.set_xticks(np.arange(0, max(data) + 30000, 30000))
     hatches = ["/", ".", "//", "o", "x", "\\", "-", "+", "*", "O"]
     for idx, plot_bar in enumerate(ax.patches):
         # plot_bar.set_hatch(hatches[idx])
@@ -73,8 +72,9 @@ def plot_preconditions():
             va="top",
         )
     ax.set(yticklabels=[], yticks=[])
-    plt.savefig("precondition_reduction.png", bbox_inches="tight")
-    plt.savefig("precondition_reduction.pdf", bbox_inches="tight")
+    outdir = Path(args.out_dir).joinpath("precondition_reduction")
+    plt.savefig(outdir.with_suffix(".png"), bbox_inches="tight")
+    plt.savefig(outdir.with_suffix(".pdf"), bbox_inches="tight")
     plt.gcf().clear()
 
 
@@ -93,7 +93,7 @@ def get_strategy_data(input_dir):
             if m:
                 strategy_name = m.group(1)
             else:
-                print("Invalid strategy data file {strategy_file}.")
+                print(f"Invalid strategy data file {strategy_file}.")
                 sys.exit(1)
             df = pd.read_csv(strategy_file)
             df["Time"] = pd.to_timedelta(df["Time"], unit="milliseconds")
@@ -106,9 +106,14 @@ def plot_strategies(args, extra_args):
     program_data = get_strategy_data(args.input_dir)
     program_data = program_data["tna_simple_switch"]
     pruned_data = []
+    name_map = {
+        "depth_first": "DFS",
+        "random_backtrack": "Random",
+        "greedy_statement_search": "Coverage-Optimized",
+    }
     for strategy, candidate_data in program_data.items():
         candidate_data = candidate_data.drop("Seed", axis=1)
-        candidate_data["Strategy"] = strategy
+        candidate_data["Strategy"] = name_map[strategy]
         candidate_data.Time = pd.to_numeric(candidate_data.Time)
         candidate_data = candidate_data.sort_values(by=["Time"])
         bins = np.arange(
@@ -124,10 +129,11 @@ def plot_strategies(args, extra_args):
         candidate_data = candidate_data[candidate_data.Minutes <= 60]
         pruned_data.append(candidate_data)
     concat_data = pd.concat(pruned_data)
-    ax = sns.lineplot(x="Minutes", y="Coverage", hue="Strategy", data=concat_data, errorbar="sd")
-    sns.move_legend(ax, "lower center", bbox_to_anchor=(0.5, 0.98), ncol=2, title=None)
-    plt.savefig("strategy_coverage.png", bbox_inches="tight")
-    plt.savefig("strategy_coverage.pdf", bbox_inches="tight")
+    ax = sns.lineplot(x="Minutes", y="Coverage", hue="Strategy", data=concat_data, errorbar=None)
+    sns.move_legend(ax, "lower center", bbox_to_anchor=(0.5, 0.98), ncol=3, title=None)
+    outdir = Path(args.out_dir).joinpath("strategy_coverage")
+    plt.savefig(outdir.with_suffix(".png"), bbox_inches="tight")
+    plt.savefig(outdir.with_suffix(".pdf"), bbox_inches="tight")
     plt.gcf().clear()
 
 
@@ -141,14 +147,19 @@ def main(args, extra_args):
             "axes.spines.right": False,
             "axes.spines.top": False,
             "lines.markeredgewidth": 0.1,
-            "axes.labelsize": 8,  # -> axis labels
-            "font.size": 8,  # Set font size to 8pt
-            "xtick.labelsize": 8,  # -> tick labels
-            "ytick.labelsize": 8,  # -> tick labels
-            "legend.fontsize": 8,  # -> legends
+            "axes.labelsize": 7,
+            "font.size": 7,
+            "xtick.labelsize": 7,
+            "ytick.labelsize": 7,
+            "legend.fontsize": 7,
+            "font.family": "serif",
+            "font.serif": ["Computer Modern Roman"] + plt.rcParams['font.serif'],
         },
     )
-    plot_preconditions()
+    plt.rcParams['pdf.fonttype'] = 42
+    plt.rcParams['ps.fonttype'] = 42
+    print(plt.rcParams.keys())
+    plot_preconditions(args, extra_args)
     plot_strategies(args, extra_args)
 
 
