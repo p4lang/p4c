@@ -114,7 +114,7 @@ int main(int argc, char *const argv[]) {
     if (::errorCount() > 0) return 1;
 
     if (!options.tdiBuilderConf.isNullOrEmpty()) {
-        DPDK::TdiBfrtConf::generate(options);
+        DPDK::TdiBfrtConf::generate(program, options);
     }
 
     if (!options.bfRtSchema.isNullOrEmpty()) {
