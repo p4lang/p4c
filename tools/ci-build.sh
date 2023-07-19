@@ -102,7 +102,8 @@ if [[ "${DISTRIB_RELEASE}" == "18.04" ]] || [[ "$(which simple_switch 2> /dev/nu
 else
   sudo apt-get update && sudo apt-get install -y curl gnupg
   echo "deb https://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/ /" | sudo tee /etc/apt/sources.list.d/home:p4lang.list
-  curl -L "https://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/Release.key" | sudo apt-key add -
+  # Note that this fetch is insecure, for CI this may not matter.
+  curl --insecure -L "https://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/Release.key" | sudo apt-key add -
   # Try to avoid certificate errors.
   sudo apt install ca-certificates
   P4C_DEPS+=" p4lang-bmv2"
