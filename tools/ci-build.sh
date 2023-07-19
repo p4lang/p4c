@@ -100,11 +100,10 @@ if [[ "${DISTRIB_RELEASE}" == "18.04" ]] || [[ "$(which simple_switch 2> /dev/nu
   export CC=gcc-9
   export CXX=g++-9
 else
-  sudo apt-get update && sudo apt-get install -y curl gnupg
-  echo "deb https://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/ /" | sudo tee /etc/apt/sources.list.d/home:p4lang.list
-  curl -L "https://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/Release.key" | sudo apt-key add -
-  # Try to avoid certificate errors.
-  sudo apt install ca-certificates
+  sudo apt-get update && sudo apt-get install -y wget ca-certificates
+  # Add the p4lang opensuse repository.
+  echo "deb http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/ /" | sudo tee /etc/apt/sources.list.d/home:p4lang.list
+  curl -fsSL https://download.opensuse.org/repositories/home:p4lang/xUbuntu_${DISTRIB_RELEASE}/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_p4lang.gpg > /dev/null
   P4C_DEPS+=" p4lang-bmv2"
 fi
 
