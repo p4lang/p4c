@@ -20,7 +20,7 @@ $BREW install autoconf automake bdw-gc bison ${BOOST_LIB} ccache cmake \
 $BREW link --force bison grep ${PROTOBUF_LIB} ${BOOST_LIB}
 echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' >> ~/.bash_profile
 echo 'export PATH="/usr/local/opt/${PROTOBUF_LIB}/bin:$PATH"' >> ~/.bash_profile
-eecho 'export PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"' >> ~/.bash_profile
+echo 'export PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"' >> ~/.bash_profile
 export PATH="/usr/local/opt/bison/bin:$PATH"
 export PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"
 
