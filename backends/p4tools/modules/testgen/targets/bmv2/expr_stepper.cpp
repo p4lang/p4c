@@ -880,7 +880,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                      testBackend);
                  auto &nextState = state.clone();
                  nextState.set(meterResult, IR::getConstant(meterResult->type,
-                                                            BMv2Constants::METER_COLOR::GREEN));
+                                                            static_cast<big_int>(BMv2Constants::METER_COLOR::GREEN)));
                  nextState.popBody();
                  result->emplace_back(nextState);
                  return;
@@ -1002,7 +1002,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                      "(GREEN).",
                      testBackend);
                  nextState.set(meterResult, IR::getConstant(meterResult->type,
-                                                            BMv2Constants::METER_COLOR::GREEN));
+                                                            static_cast<big_int>(BMv2Constants::METER_COLOR::GREEN)));
                  nextState.popBody();
                  result->emplace_back(nextState);
                  return;
