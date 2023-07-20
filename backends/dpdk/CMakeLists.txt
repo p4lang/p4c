@@ -62,6 +62,7 @@ set(P4C_DPDK_SOURCES
     dpdkUtils.cpp
     options.cpp
     control-plane/bfruntime_ext.cpp
+    tdiConf.cpp
     )
 
 set(P4C_DPDK_HEADERS
@@ -82,6 +83,7 @@ set(P4C_DPDK_HEADERS
     options.h
     control-plane/bfruntime_ext.h
     control-plane/bfruntime_arch_handler.h
+    tdiConf.h
     )
 
 set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/dpdk.def PARENT_SCOPE)
