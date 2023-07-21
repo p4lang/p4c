@@ -7,7 +7,6 @@
 #include <fstream>
 #include <functional>
 
-#include "backends/p4test/version.h"
 #include "backends/p4tools/common/compiler/midend.h"
 #include "frontends/common/options.h"
 #include "frontends/common/parseInput.h"
@@ -61,7 +60,6 @@ ReturnedInfo loadExampleForReachability(const char *curFile) {
     std::string includeDir = std::string(buildPath) + std::string("p4include");
     auto *originalEnv = getenv("P4C_16_INCLUDE_PATH");
     setenv("P4C_16_INCLUDE_PATH", includeDir.c_str(), 1);
-    options.compilerVersion = P4TEST_VERSION_STRING;
     const IR::P4Program *program = nullptr;
     options.file = sourcePath;
     options.file += curFile;
