@@ -26,6 +26,7 @@ updates {
         }
       }
       priority: 10
+      is_const: true
     }
   }
 }
@@ -119,6 +120,7 @@ updates {
         }
       }
       priority: 40
+      is_const: true
     }
   }
 }
@@ -205,6 +207,7 @@ updates {
         }
       }
       priority: 10
+      is_const: true
     }
   }
 }
@@ -298,6 +301,7 @@ updates {
         }
       }
       priority: 40
+      is_const: true
     }
   }
 }
@@ -384,6 +388,7 @@ updates {
         }
       }
       priority: 11
+      is_const: true
     }
   }
 }
@@ -477,6 +482,7 @@ updates {
         }
       }
       priority: 41
+      is_const: true
     }
   }
 }
@@ -563,6 +569,7 @@ updates {
         }
       }
       priority: 11
+      is_const: true
     }
   }
 }
@@ -656,6 +663,7 @@ updates {
         }
       }
       priority: 41
+      is_const: true
     }
   }
 }
@@ -742,6 +750,7 @@ updates {
         }
       }
       priority: 11
+      is_const: true
     }
   }
 }
@@ -835,6 +844,7 @@ updates {
         }
       }
       priority: 14
+      is_const: true
     }
   }
 }
@@ -921,6 +931,7 @@ updates {
         }
       }
       priority: 11
+      is_const: true
     }
   }
 }
@@ -1014,6 +1025,7 @@ updates {
         }
       }
       priority: 14
+      is_const: true
     }
   }
 }
@@ -1100,6 +1112,7 @@ updates {
         }
       }
       priority: 2001
+      is_const: true
     }
   }
 }
@@ -1224,6 +1237,7 @@ updates {
         }
       }
       priority: 2001
+      is_const: true
     }
   }
 }
@@ -1279,6 +1293,7 @@ updates {
         }
       }
       priority: 2001
+      is_const: true
     }
   }
 }
@@ -1403,6 +1418,7 @@ updates {
         }
       }
       priority: 2001
+      is_const: true
     }
   }
 }

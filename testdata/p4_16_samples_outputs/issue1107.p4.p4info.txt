@@ -29,6 +29,7 @@ tables {
   }
   size: 1024
   is_const_table: true
+  has_initial_entries: true
 }
 actions {
   preamble {
