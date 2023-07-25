@@ -96,7 +96,7 @@ if [[ "${DISTRIB_RELEASE}" == "18.04" ]] || [[ "$(which simple_switch 2> /dev/nu
   # Use GCC 9 from https://launchpad.net/~ubuntu-toolchain-r/+archive/ubuntu/test
   sudo apt-get update && sudo apt-get install -y software-properties-common
   sudo add-apt-repository -uy ppa:ubuntu-toolchain-r/test
-  P4C_DEPS+=" libprotobuf-dev protobuf-compiler gcc-9 g++-9"
+  P4C_DEPS+=" gcc-9 g++-9"
   export CC=gcc-9
   export CXX=g++-9
 else

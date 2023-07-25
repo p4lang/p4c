@@ -191,8 +191,9 @@ sudo dpkg -i /path/to/package.deb
        library. Default is ON.
      - `-DENABLE_GTESTS=ON|OFF`. Enable building and running GTest unit tests.
        Default is ON.
-     - `-DENABLE_PROTOBUF_STATIC=ON|OFF`. Enable the use of static
-       protobuf libraries. Default is ON.
+     - `-DP4C_USE_PREINSTALLED_PROTOBUF=ON|OFF`. Try to find a system version of Protobuf instead of a CMake version.
+     - `-DENABLE_PROTOBUF_STATIC=ON|OFF`. Enable the use of static protobuf libraries. Default is ON.
+       Only has an effect when `P4C_USE_PREINSTALLED_PROTOBUF` is enabled.
      - `-DENABLE_MULTITHREAD=ON|OFF`. Use multithreading.  Default is
        OFF.
      - `-DBUILD_LINK_WITH_GOLD=ON|OFF`. Use Gold linker for build if available.
@@ -271,18 +272,16 @@ For documentation building:
 
 `p4c` also depends on Google Protocol Buffers (Protobuf). `p4c` requires version
 3.0 or higher, so the packaged version provided in Ubuntu 20.04 **should**
-work. However, all our CI testing is done with a more recent version of Protobuf
-(at the moment, 3.18.1), which we install from source. If you are experiencing
-issues with the Protobuf version shipped with your OS distribution, we recommend
-that we install Protobuf 3.18.1 from source. You can find instructions
-[here](https://github.com/protocolbuffers/protobuf/blob/v3.18.1/src/README.md).
-After cloning Protobuf and before you build, check-out version 3.18.1:
+work. However, P4C typically installs its own version of Protobuf using CMake's Fetchcontent module
+(at the moment, 3.21.12). If you are experiencing issues with the Protobuf version shipped with your OS distribution, we recommend that to install Protobuf 3.21.12 from source. You can find instructions
+[here](https://github.com/protocolbuffers/protobuf/blob/v3.21.12/src/README.md).
+After cloning Protobuf and before you build, check-out version 3.21.12:
 
-`git checkout v3.18.1`
+`git checkout v3.21.12`
 
 Please note that while all Protobuf versions newer than 3.0 should work for
 `p4c` itself, you may run into trouble with some extensions and other p4lang
-projects unless you install version 3.18.1.
+projects unless you install version 3.21.12.
 
 ### CMake
 p4c requires a CMake version of at least 3.16.3 or higher. On older systems, a newer version of CMake can be installed using `pip3 install --user cmake==3.16.3`. We have a CI test on Ubuntu 18.04 that uses this option, but there is no guarantee that this will lead to a successful build.
@@ -292,7 +291,7 @@ p4c requires a CMake version of at least 3.16.3 or higher. On older systems, a n
 ```bash
 sudo dnf install -y cmake g++ git automake libtool gc-devel bison flex \
 libfl-devel gmp-devel boost-devel boost-iostreams boost-graph llvm pkg-config \
-python3 python3-pip tcpdump protobuf-devel protobuf-static
+python3 python3-pip tcpdump
 
 sudo pip3 install -r requirements.txt
 ```
@@ -343,10 +342,7 @@ Installing on macOS:
   ```
   Homebrew offers a `protobuf` formula. It installs version 3.2, which should
   work for p4c itself but may cause problems with some extensions. It's
-  preferable to install Protocol Buffers 3.0 from source using the instructions
-  [here](https://github.com/google/protobuf/blob/master/src/README.md). Check
-  out the newest tag in the 3.0 series (`v3.0.2` as of this writing) before you
-  build.
+  preferable to use the version of Protobuf which is supplied with CMake's fetchcontent (3.21.12).
 
   The `protobuf` formula requires the following CMake variables to be set,
   otherwise CMake does not find the libraries or fails in linking. It is likely
