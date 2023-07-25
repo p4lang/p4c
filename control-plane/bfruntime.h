@@ -26,13 +26,13 @@ limitations under the License.
 #include <sstream>
 #include <string>
 
+#include "control-plane/p4/config/v1/p4info.pb.h"
 #include "control-plane/p4RuntimeSerializer.h"
 #include "lib/big_int_util.h"
 #include "lib/exceptions.h"
 #include "lib/json.h"
 #include "lib/log.h"
 #include "lib/null.h"
-#include "p4/config/v1/p4info.pb.h"
 
 namespace p4configv1 = ::p4::config::v1;
 
