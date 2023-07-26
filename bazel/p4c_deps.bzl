@@ -44,7 +44,7 @@ filegroup(
             name = "com_github_p4lang_p4runtime",
             remote = "https://github.com/p4lang/p4runtime",
             # Newest commit on main branch as of April 11, 2023.
-            commit = "90553b90a12ead5c19700e7fef21164dea5b6d22",
+            commit = "d76a3640a223f47a43dc34e5565b72e43796ba57",
             shallow_since = "1680213111 -0700",
             # strip_prefix is broken; we use patch_cmds as a workaround,
             # see https://github.com/bazelbuild/bazel/issues/10062.
