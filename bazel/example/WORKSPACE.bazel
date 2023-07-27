@@ -21,7 +21,7 @@ load("@com_github_nelhage_rules_boost//:boost/boost.bzl", "boost_deps")
 
 boost_deps()
 
-load("@com_github_p4lang_p4runtime//:p4runtime_deps.bzl", "p4runtime_deps")
+load("@com_github_p4lang_p4runtime//control-plane:p4runtime_deps.bzl", "p4runtime_deps")
 
 p4runtime_deps()
 

@@ -22,7 +22,7 @@ limitations under the License.
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-#include "p4/config/v1/p4info.pb.h"
+#include "control-plane/p4/config/v1/p4info.pb.h"
 #pragma GCC diagnostic pop
 
 #include "frontends/common/resolveReferences/referenceMap.h"
