@@ -122,8 +122,8 @@ target_link_libraries (controlplane-gen PUBLIC ${PROTOBUF_LIBRARY})
 # Needed for the correct import of google/status.pb.cc
 include_directories (${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
-# Silence -Warray-bounds as the root issue is out of our control: https://github.com/protocolbuffers/protobuf/issues/7140
-set_source_files_properties (${P4RUNTIME_GEN_SRCS} PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-array-bounds")
+# Silence various warnings as the root issue is out of our control, example https://github.com/protocolbuffers/protobuf/issues/7140
+set_source_files_properties (${P4RUNTIME_GEN_SRCS} PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-array-bounds -Wno-pedantic")
 
 add_library (controlplane STATIC ${CONTROLPLANE_SRCS} )
 target_link_libraries (controlplane ${CMAKE_THREAD_LIBS_INIT} controlplane-gen)
