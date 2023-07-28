@@ -49,7 +49,7 @@ filegroup(
             # strip_prefix is broken; we use patch_cmds as a workaround,
             # see https://github.com/bazelbuild/bazel/issues/10062.
             # strip_prefix = "proto",
-            patch_cmds = ["mkdir -p 'control-plane'", "mv proto/* control-plane"],
+            patch_cmds = ["mv proto/* ."],
         )
     if not native.existing_rule("com_google_googletest"):
         # Cannot currently use local_repository due to Bazel limitation,

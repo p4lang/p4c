@@ -215,9 +215,9 @@ cc_library(
         "@boost//:algorithm",
         "@boost//:functional",
         "@boost//:iostreams",
-        "@com_github_p4lang_p4runtime//control-plane:p4info_cc_proto",
-        "@com_github_p4lang_p4runtime//control-plane:p4runtime_cc_proto",
-        "@com_github_p4lang_p4runtime//control-plane:p4types_cc_proto",
+        "@com_github_p4lang_p4runtime//:p4info_cc_proto",
+        "@com_github_p4lang_p4runtime//:p4runtime_cc_proto",
+        "@com_github_p4lang_p4runtime//:p4types_cc_proto",
         "@com_google_protobuf//:protobuf",
     ],
     copts = [

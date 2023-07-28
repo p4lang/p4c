@@ -20,9 +20,9 @@ limitations under the License.
 #include <map>
 #include <string>
 
-#include "control-plane/p4/config/v1/p4info.pb.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
+#include "p4/config/v1/p4info.pb.h"
 
 namespace p4 {
 
