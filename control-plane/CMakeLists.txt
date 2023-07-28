@@ -80,7 +80,7 @@ add_custom_command(OUTPUT ${P4RUNTIME_GEN_SRCS} ${P4RUNTIME_GEN_HDRS}
           ${P4RUNTIME_PROTO}
   DEPENDS ${P4RUNTIME_PROTO}
   COMMENT "Generating protobuf files"
-  )
+)
 
 # These macros are much nicer than the custom command, but do not work for generating
 # files in a different directory (e.g. p4/config). If we are ok with just generating
@@ -123,7 +123,7 @@ target_link_libraries (controlplane-gen PUBLIC ${PROTOBUF_LIBRARY})
 include_directories (${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 # Silence various warnings as the root issue is out of our control, example https://github.com/protocolbuffers/protobuf/issues/7140
-set_source_files_properties (${P4RUNTIME_GEN_SRCS} PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-array-bounds -Wno-pedantic")
+set_source_files_properties (${P4RUNTIME_GEN_SRCS} {$P4RUNTIME_GEN_HDRS} PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-array-bounds -Wno-error")
 
 add_library (controlplane STATIC ${CONTROLPLANE_SRCS} )
 target_link_libraries (controlplane ${CMAKE_THREAD_LIBS_INIT} controlplane-gen)

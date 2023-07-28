@@ -22,6 +22,7 @@ limitations under the License.
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include "p4/config/v1/p4info.pb.h"
 #pragma GCC diagnostic pop
 

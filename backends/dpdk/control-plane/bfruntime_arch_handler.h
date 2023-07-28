@@ -21,7 +21,12 @@ limitations under the License.
 #include <unordered_map>
 #include <vector>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include "backends/dpdk/p4/config/p4info.pb.h"
+#pragma GCC diagnostic pop
+
 #include "control-plane/bfruntime.h"
 #include "control-plane/p4RuntimeArchHandler.h"
 #include "control-plane/p4RuntimeArchStandard.h"
