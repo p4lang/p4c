@@ -22,7 +22,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "ir/visitor.h"
-#include "p4/config/v1/p4types.pb.h"
+#include "p4/config/v1/p4info.pb.h"
 
 namespace p4 {
 

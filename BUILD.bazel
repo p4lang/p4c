@@ -280,14 +280,14 @@ cc_binary(
 genrule(
     name = "dest_dir_dpdk",
     srcs = ["backends/dpdk/control-plane/proto/p4info.proto"],
-    outs = ["p4/config/dpdk/p4info.proto"],
+    outs = ["backends/dpdk/p4/config/p4info.proto"],
     cmd = "mkdir -p p4/config/dpdk; cp $(SRCS) $(OUTS)",
     visibility = ["//visibility:private"],
 )
 
 proto_library(
     name = "p4info_dpdk_proto",
-    srcs = ["p4/config/dpdk/p4info.proto"],
+    srcs = ["backends/dpdk/p4/config/p4info.proto"],
     deps = [
         "@com_google_protobuf//:any_proto",
         "@com_google_protobuf//:descriptor_proto",
