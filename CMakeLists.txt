@@ -362,6 +362,10 @@ set(EXTENSION_IR_SOURCES)
 # extensions can provide specific conversions (e.g., for externs)
 set(EXTENSION_P4_14_CONV_SOURCES)
 
+########################################## P4Runtime Begin #########################################
+# TODO: Ideally, this code should be part of the control-plane CMakelists.txt file. However, because
+# extensions which may depend on P4Runtime variables are instantiated before the control-plane we
+# need to keep the P4Runtime installation in the top-level CMakelists file.
 # Print download state while setting up P4Runtime.
 set(FETCHCONTENT_QUIET_PREV ${FETCHCONTENT_QUIET})
 set(FETCHCONTENT_QUIET OFF)
@@ -381,6 +385,7 @@ message("Done with setting up P4Runtime for P4C.")
 set(P4RUNTIME_STD_DIR ${p4runtime_SOURCE_DIR}/proto CACHE INTERNAL
                                                           "Path to the P4Runtime directory."
 )
+########################################## P4Runtime End ##########################################
 
 file (GLOB p4c_extensions RELATIVE ${P4C_SOURCE_DIR}/extensions ${P4C_SOURCE_DIR}/extensions/*)
 MESSAGE ("-- Available extensions ${p4c_extensions}")
