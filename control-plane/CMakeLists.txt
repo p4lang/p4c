@@ -12,27 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-# Print download state while setting up P4Runtime.
-set(FETCHCONTENT_QUIET_PREV ${FETCHCONTENT_QUIET})
-set(FETCHCONTENT_QUIET OFF)
-# Fetch and declare the P4Runtime library.
-FetchContent_Declare(
-  p4runtime
-  GIT_REPOSITORY https://github.com/p4lang/p4runtime.git
-  GIT_TAG        d76a3640a223f47a43dc34e5565b72e43796ba57
-  GIT_PROGRESS TRUE
-  GIT_SHALLOW TRUE
-)
-FetchContent_MakeAvailable(p4runtime)
-set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
-message("Done with setting up P4Runtime for P4C.")
-
-# The standard P4Runtime protocol buffers message definitions live in the PI
-# repo, which is included in this repo as a git module.
-set(P4RUNTIME_STD_DIR ${p4runtime_SOURCE_DIR}/proto CACHE INTERNAL
-                                                          "Path to the P4Runtime directory."
-)
 set (P4RUNTIME_INFO_PROTO ${P4RUNTIME_STD_DIR}/p4/config/v1/p4info.proto)
 set (P4RUNTIME_INFO_GEN_SRCS ${CMAKE_CURRENT_BINARY_DIR}/p4/config/v1/p4info.pb.cc)
 set (P4RUNTIME_INFO_GEN_HDRS ${CMAKE_CURRENT_BINARY_DIR}/p4/config/v1/p4info.pb.h)
