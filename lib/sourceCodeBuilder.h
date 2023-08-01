@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _LIB_SOURCECODEBUILDER_H_
-#define _LIB_SOURCECODEBUILDER_H_
+#ifndef LIB_SOURCECODEBUILDER_H_
+#define LIB_SOURCECODEBUILDER_H_
 
 #include <ctype.h>
 
@@ -111,4 +111,4 @@ class SourceCodeBuilder {
 };
 }  // namespace Util
 
-#endif /* _LIB_SOURCECODEBUILDER_H_ */
+#endif /* LIB_SOURCECODEBUILDER_H_ */

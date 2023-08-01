@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _IR_DBPRINT_H_
-#define _IR_DBPRINT_H_
+#ifndef IR_DBPRINT_H_
+#define IR_DBPRINT_H_
 
 #include <cassert>
 #include <iosfwd>
@@ -94,4 +94,4 @@ inline std::ostream &operator<<(std::ostream &out, const DBPrint::dbprint_flags 
 
 }  // end namespace DBPrint
 
-#endif /* _IR_DBPRINT_H_ */
+#endif /* IR_DBPRINT_H_ */

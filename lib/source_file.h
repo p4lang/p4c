@@ -18,8 +18,8 @@ limitations under the License.
 
 /* Source-level information for a P4 program */
 
-#ifndef _LIB_SOURCE_FILE_H_
-#define _LIB_SOURCE_FILE_H_
+#ifndef LIB_SOURCE_FILE_H_
+#define LIB_SOURCE_FILE_H_
 
 #include <vector>
 
@@ -318,4 +318,4 @@ class InputSources final {
 
 inline void dbprint(const IHasDbPrint *o) { o->dbprint(std::cout); }
 
-#endif /* _LIB_SOURCE_FILE_H_ */
+#endif /* LIB_SOURCE_FILE_H_ */

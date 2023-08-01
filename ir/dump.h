@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _IR_DUMP_H_
-#define _IR_DUMP_H_
+#ifndef IR_DUMP_H_
+#define IR_DUMP_H_
 
 #include <cstdint>
 #include <iostream>
@@ -63,4 +63,4 @@ inline std::ostream &operator<<(std::ostream &out, const Dump &d) {
     return out;
 }
 
-#endif /* _IR_DUMP_H_ */
+#endif /* IR_DUMP_H_ */

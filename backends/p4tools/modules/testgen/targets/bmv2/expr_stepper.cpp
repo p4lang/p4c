@@ -879,8 +879,10 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                      "meter.execute_meter not implemented for %1%. Choosing default value (GREEN).",
                      testBackend);
                  auto &nextState = state.clone();
-                 nextState.set(meterResult, IR::getConstant(meterResult->type,
-                                                            BMv2Constants::METER_COLOR::GREEN));
+                 nextState.set(
+                     meterResult,
+                     IR::getConstant(meterResult->type,
+                                     static_cast<big_int>(BMv2Constants::METER_COLOR::GREEN)));
                  nextState.popBody();
                  result->emplace_back(nextState);
                  return;
@@ -1001,8 +1003,10 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                      "direct_meter.read configuration not possible for %1%. Choosing default value "
                      "(GREEN).",
                      testBackend);
-                 nextState.set(meterResult, IR::getConstant(meterResult->type,
-                                                            BMv2Constants::METER_COLOR::GREEN));
+                 nextState.set(
+                     meterResult,
+                     IR::getConstant(meterResult->type,
+                                     static_cast<big_int>(BMv2Constants::METER_COLOR::GREEN)));
                  nextState.popBody();
                  result->emplace_back(nextState);
                  return;

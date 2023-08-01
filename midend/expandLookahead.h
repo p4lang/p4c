@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_EXPANDLOOKAHEAD_H_
-#define _MIDEND_EXPANDLOOKAHEAD_H_
+#ifndef MIDEND_EXPANDLOOKAHEAD_H_
+#define MIDEND_EXPANDLOOKAHEAD_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -98,4 +98,4 @@ class ExpandLookahead : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_EXPANDLOOKAHEAD_H_ */
+#endif /* MIDEND_EXPANDLOOKAHEAD_H_ */

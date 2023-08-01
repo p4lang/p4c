@@ -13,8 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_CONVERTERRORS_H_
-#define _MIDEND_CONVERTERRORS_H_
+#ifndef MIDEND_CONVERTERRORS_H_
+#define MIDEND_CONVERTERRORS_H_
 
 #include <map>
 
@@ -96,4 +96,4 @@ class ConvertErrors : public PassManager {
 };
 }  // namespace P4
 
-#endif /* _MIDEND_CONVERTERRORS_H_ */
+#endif /* MIDEND_CONVERTERRORS_H_ */

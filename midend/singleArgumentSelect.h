@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_SINGLEARGUMENTSELECT_H_
-#define _MIDEND_SINGLEARGUMENTSELECT_H_
+#ifndef MIDEND_SINGLEARGUMENTSELECT_H_
+#define MIDEND_SINGLEARGUMENTSELECT_H_
 
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
@@ -68,4 +68,4 @@ class SingleArgumentSelect : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_SINGLEARGUMENTSELECT_H_ */
+#endif /* MIDEND_SINGLEARGUMENTSELECT_H_ */

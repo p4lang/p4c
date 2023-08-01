@@ -13,8 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_INTERPRETER_H_
-#define _MIDEND_INTERPRETER_H_
+#ifndef MIDEND_INTERPRETER_H_
+#define MIDEND_INTERPRETER_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"
@@ -580,4 +580,4 @@ class SymbolicPacketIn final : public SymbolicExtern {
 
 }  // namespace P4
 
-#endif /* _MIDEND_INTERPRETER_H_ */
+#endif /* MIDEND_INTERPRETER_H_ */

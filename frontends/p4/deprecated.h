@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_P4_DEPRECATED_H_
-#define _FRONTENDS_P4_DEPRECATED_H_
+#ifndef FRONTENDS_P4_DEPRECATED_H_
+#define FRONTENDS_P4_DEPRECATED_H_
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "ir/ir.h"
@@ -53,4 +53,4 @@ class Deprecated : public PassManager {
 
 }  // namespace P4
 
-#endif /* _FRONTENDS_P4_DEPRECATED_H_ */
+#endif /* FRONTENDS_P4_DEPRECATED_H_ */

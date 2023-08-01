@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-#ifndef _BACKENDS_GRAPHS_PARSERS_H_
-#define _BACKENDS_GRAPHS_PARSERS_H_
+#ifndef BACKENDS_GRAPHS_PARSERS_H_
+#define BACKENDS_GRAPHS_PARSERS_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "graphs.h"
@@ -61,4 +61,4 @@ class ParserGraphs : public Graphs {
 
 }  // namespace graphs
 
-#endif /* _BACKENDS_GRAPHS_PARSERS_H_ */
+#endif /* BACKENDS_GRAPHS_PARSERS_H_ */

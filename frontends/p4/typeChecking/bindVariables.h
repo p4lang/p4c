@@ -1,5 +1,5 @@
-#ifndef _FRONTENDS_P4_TYPECHECKING_BINDVARIABLES_H_
-#define _FRONTENDS_P4_TYPECHECKING_BINDVARIABLES_H_
+#ifndef FRONTENDS_P4_TYPECHECKING_BINDVARIABLES_H_
+#define FRONTENDS_P4_TYPECHECKING_BINDVARIABLES_H_
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -45,4 +45,4 @@ class BindTypeVariables : public PassManager {
 
 }  // namespace P4
 
-#endif /* _FRONTENDS_P4_TYPECHECKING_BINDVARIABLES_H_ */
+#endif /* FRONTENDS_P4_TYPECHECKING_BINDVARIABLES_H_ */

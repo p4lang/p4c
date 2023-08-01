@@ -112,6 +112,10 @@ endif()
 if (CMAKE_UNITY_BUILD)
   set(CMAKE_UNITY_BUILD_BATCH_SIZE 10 CACHE UNINITIALIZED "Set the unity build batch size.")
 endif ()
+
+# Always build position-independent code. This is important when linking with Protobuf.
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 # set the required options for a static release build
 if (BUILD_STATIC_RELEASE)
   message(STATUS "Building static release binaries")
@@ -128,19 +132,14 @@ if (BUILD_STATIC_RELEASE)
   add_definitions(-DP4C_STATIC_BUILD)
 endif ()
 
-# required tools and libraries
+# Required tools and libraries.
 find_package (PythonInterp 3 REQUIRED)
 find_package (FLEX 2.0 REQUIRED)
 find_package (BISON 3.0 REQUIRED)
-if (ENABLE_PROTOBUF_STATIC)
-  set(SAVED_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
-  set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
-endif ()
-find_package (Protobuf 3.0.0 REQUIRED)
-if (ENABLE_PROTOBUF_STATIC)
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ${SAVED_CMAKE_FIND_LIBRARY_SUFFIXES})
-endif ()
-# The boost graph headers are optional and only required by the graphs backend
+include(Protobuf)
+p4c_obtain_protobuf()
+
+# The boost graph headers are optional and only required by the graphs back end.
 find_package (Boost QUIET COMPONENTS graph)
 if (Boost_FOUND)
   set (HAVE_LIBBOOST_GRAPH 1)

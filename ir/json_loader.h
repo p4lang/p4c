@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _IR_JSON_LOADER_H_
-#define _IR_JSON_LOADER_H_
+#ifndef IR_JSON_LOADER_H_
+#define IR_JSON_LOADER_H_
 
 #include <assert.h>
 
@@ -377,4 +377,4 @@ IR::NameMap<T, MAP, COMP, ALLOC> *IR::NameMap<T, MAP, COMP, ALLOC>::fromJSON(JSO
     return new IR::NameMap<T, MAP, COMP, ALLOC>(json);
 }
 
-#endif /* _IR_JSON_LOADER_H_ */
+#endif /* IR_JSON_LOADER_H_ */

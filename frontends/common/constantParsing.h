@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_COMMON_CONSTANTPARSING_H_
-#define _FRONTENDS_COMMON_CONSTANTPARSING_H_
+#ifndef FRONTENDS_COMMON_CONSTANTPARSING_H_
+#define FRONTENDS_COMMON_CONSTANTPARSING_H_
 
 #include "lib/cstring.h"
 
@@ -86,4 +86,4 @@ IR::Constant *parseConstant(const Util::SourceInfo &srcInfo, const UnparsedConst
  */
 int parseConstantChecked(const Util::SourceInfo &srcInfo, const UnparsedConstant &constant);
 
-#endif /* _FRONTENDS_COMMON_CONSTANTPARSING_H_ */
+#endif /* FRONTENDS_COMMON_CONSTANTPARSING_H_ */

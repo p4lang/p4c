@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_FILLENUMMAP_H_
-#define _MIDEND_FILLENUMMAP_H_
+#ifndef MIDEND_FILLENUMMAP_H_
+#define MIDEND_FILLENUMMAP_H_
 
 #include "convertEnums.h"
 
@@ -37,4 +37,4 @@ class FillEnumMap : public Transform {
 
 }  // namespace P4
 
-#endif /* _MIDEND_FILLENUMMAP_H_ */
+#endif /* MIDEND_FILLENUMMAP_H_ */

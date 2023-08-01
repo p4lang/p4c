@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _LIB_CASTABLE_H_
-#define _LIB_CASTABLE_H_
+#ifndef LIB_CASTABLE_H_
+#define LIB_CASTABLE_H_
 
 #include <typeinfo>
 
@@ -59,4 +59,4 @@ class ICastable {
     }
 };
 
-#endif /* _LIB_CASTABLE_H_ */
+#endif /* LIB_CASTABLE_H_ */

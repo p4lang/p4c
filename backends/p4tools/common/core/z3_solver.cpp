@@ -149,11 +149,11 @@ z3::sort Z3Solver::toSort(const IR::Type *type) {
     BUG_CHECK(type, "Z3Solver::toSort with empty pointer");
 
     if (type->is<IR::Type_Boolean>()) {
-        return z3context.bool_sort();
+        return ctx().bool_sort();
     }
 
     if (const auto *bits = type->to<IR::Type_Bits>()) {
-        return z3context.bv_sort(bits->width_bits());
+        return ctx().bv_sort(bits->width_bits());
     }
 
     BUG("Z3Solver: unimplemented type %1%: %2% ", type->node_type_name(), type);
@@ -167,7 +167,7 @@ std::string Z3Solver::generateName(const IR::SymbolicVariable &var) {
 
 z3::expr Z3Solver::declareVar(const IR::SymbolicVariable &var) {
     auto sort = toSort(var.type);
-    auto expr = z3context.constant(generateName(var).c_str(), sort);
+    auto expr = ctx().constant(generateName(var).c_str(), sort);
     BUG_CHECK(
         !declaredVarsById.empty(),
         "DeclaredVarsById should have at least one entry! Check if push() was used correctly.");
@@ -184,12 +184,24 @@ void Z3Solver::reset() {
     z3Assertions.resize(0);
 }
 
+void Z3Solver::clearMemory() {
+    auto p4AssertionsBuf = p4Assertions;
+    reset();
+    Z3_finalize_memory();
+    z3solver = z3::solver(*new z3::context());
+    p4Assertions.clear();
+    for (const auto &assert : p4AssertionsBuf) {
+        push();
+        asrt(assert);
+    }
+}
+
 void Z3Solver::push() {
     if (isIncremental) {
         z3solver.push();
     }
     checkpoints.push_back(p4Assertions.size());
-    declaredVarsById.push_back({});
+    declaredVarsById.emplace_back();
 }
 
 void Z3Solver::pop() {
@@ -230,6 +242,7 @@ void Z3Solver::comment(cstring commentStr) {
 
 void Z3Solver::seed(unsigned seed) {
     Z3_LOG("set a new seed:'%d'", seed);
+    auto &z3context = z3solver.ctx();
     z3::params param(z3context);
     param.set("phase_selection", 5U);
     param.set("random_seed", seed);
@@ -239,6 +252,7 @@ void Z3Solver::seed(unsigned seed) {
 
 void Z3Solver::timeout(unsigned tm) {
     Z3_LOG("set a timeout:'%d'", tm);
+    auto &z3context = z3solver.ctx();
     z3::params param(z3context);
     param.set(":timeout", tm);
     z3solver.set(param);
@@ -246,6 +260,7 @@ void Z3Solver::timeout(unsigned tm) {
 }
 
 std::optional<bool> Z3Solver::checkSat(const std::vector<const Constraint *> &asserts) {
+    Util::ScopedTimer ctZ3("z3");
     if (isIncremental) {
         // Find common prefix with the previous invocation's list of assertions
         auto from = asserts.begin();
@@ -267,7 +282,6 @@ std::optional<bool> Z3Solver::checkSat(const std::vector<const Constraint *> &as
     }
     Z3_LOG("checking satisfiability for %d assertions",
            isIncremental ? z3solver.assertions().size() : z3Assertions.size());
-    Util::ScopedTimer ctZ3("z3");
     Util::ScopedTimer ctCheckSat("checkSat");
     z3::check_result result = isIncremental ? z3solver.check() : z3solver.check(z3Assertions);
     switch (result) {
@@ -306,6 +320,7 @@ void Z3Solver::asrt(const Constraint *assertion) {
 }
 
 const SymbolicMapping &Z3Solver::getSymbolicMapping() const {
+    Util::ScopedTimer ctZ3("z3");
     auto *result = new SymbolicMapping();
     // First, collect a map of all the declared variables we have encountered in the stack.
     std::map<unsigned int, const IR::SymbolicVariable *> declaredVars;
@@ -317,7 +332,6 @@ const SymbolicMapping &Z3Solver::getSymbolicMapping() const {
     }
     // Then, get the model and match each declaration in the model to its IR::SymbolicVariable.
     try {
-        Util::ScopedTimer ctZ3("z3");
         Util::ScopedTimer ctCheckSat("getModel");
         auto z3Model = z3solver.get_model();
         Z3_LOG("z3 model:%s", toString(z3Model));
@@ -400,12 +414,14 @@ void Z3Solver::addZ3Pushes(size_t &chkIndex, size_t asrtIndex) {
 
 const z3::solver &Z3Solver::getZ3Solver() const { return z3solver; }
 
-const z3::context &Z3Solver::getZ3Ctx() const { return z3context; }
+const z3::context &Z3Solver::getZ3Ctx() const { return z3solver.ctx(); }
+
+z3::context &Z3Solver::ctx() const { return z3solver.ctx(); }
 
 bool Z3Solver::isInIncrementalMode() const { return isIncremental; }
 
 Z3Solver::Z3Solver(bool isIncremental, std::optional<std::istream *> inOpt)
-    : z3solver(z3context), isIncremental(isIncremental), z3Assertions(z3context) {
+    : z3solver(*new z3::context), isIncremental(isIncremental), z3Assertions(ctx()) {
     // Add a top-level set to declaration vars that we can insert variables.
     // TODO: Think about whether this is necessary or it is not better to remove it.
     declaredVarsById.emplace_back();
@@ -434,7 +450,7 @@ Z3Solver::Z3Solver(bool isIncremental, std::optional<std::istream *> inOpt)
     addZ3Pushes(chkIndex, assertions.size());
 }
 
-Z3Translator::Z3Translator(Z3Solver &solver) : result(solver.z3context), solver(solver) {}
+Z3Translator::Z3Translator(Z3Solver &solver) : result(solver.ctx()), solver(solver) {}
 
 bool Z3Translator::preorder(const IR::Node *node) {
     BUG("%1%: Unhandled node type: %2%", node, node->node_type_name());
@@ -452,8 +468,8 @@ bool Z3Translator::preorder(const IR::Cast *cast) {
             exprSize = exprType->width_bits();
         } else if (castExtrType->is<IR::Type_Boolean>()) {
             exprSize = 1;
-            auto trueVal = solver.z3context.bv_val(1, exprSize);
-            auto falseVal = solver.z3context.bv_val(0, exprSize);
+            auto trueVal = solver.ctx().bv_val(1, exprSize);
+            auto falseVal = solver.ctx().bv_val(0, exprSize);
             castExpr = z3::ite(castExpr, trueVal, falseVal);
         } else if (const auto *exprType = castExtrType->to<IR::Extracted_Varbits>()) {
             exprSize = exprType->width_bits();
@@ -477,7 +493,7 @@ bool Z3Translator::preorder(const IR::Cast *cast) {
     if (cast->destType->is<IR::Type_Boolean>()) {
         if (const auto *exprType = castExtrType->to<IR::Type_Bits>()) {
             if (exprType->width_bits() == 1) {
-                castExpr = z3::operator==(castExpr, solver.z3context.bv_val(1, 1));
+                castExpr = z3::operator==(castExpr, solver.ctx().bv_val(1, 1));
             } else {
                 BUG("Cast expression type %1% is not bit<1> : %2%", exprType, castExpr);
             }
@@ -495,18 +511,18 @@ bool Z3Translator::preorder(const IR::Cast *cast) {
 bool Z3Translator::preorder(const IR::Constant *constant) {
     // Handle infinite-integer constants.
     if (constant->type->is<IR::Type_InfInt>()) {
-        result = solver.z3context.int_val(constant->value.str().c_str());
+        result = solver.ctx().int_val(constant->value.str().c_str());
         return false;
     }
 
     // Handle bit<n> constants.
     if (const auto *bits = constant->type->to<IR::Type_Bits>()) {
-        result = solver.z3context.bv_val(constant->value.str().c_str(), bits->size);
+        result = solver.ctx().bv_val(constant->value.str().c_str(), bits->size);
         return false;
     }
 
     if (const auto *bits = constant->type->to<IR::Extracted_Varbits>()) {
-        result = solver.z3context.bv_val(constant->value.str().c_str(), bits->width_bits());
+        result = solver.ctx().bv_val(constant->value.str().c_str(), bits->width_bits());
         return false;
     }
 
@@ -514,12 +530,12 @@ bool Z3Translator::preorder(const IR::Constant *constant) {
 }
 
 bool Z3Translator::preorder(const IR::BoolLiteral *boolLiteral) {
-    result = solver.z3context.bool_val(boolLiteral->value);
+    result = solver.ctx().bool_val(boolLiteral->value);
     return false;
 }
 
 bool Z3Translator::preorder(const IR::StringLiteral *stringLiteral) {
-    result = solver.z3context.string_const(stringLiteral->value);
+    result = solver.ctx().string_const(stringLiteral->value);
     return false;
 }
 

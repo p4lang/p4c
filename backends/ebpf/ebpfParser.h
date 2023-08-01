@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_EBPF_EBPFPARSER_H_
-#define _BACKENDS_EBPF_EBPFPARSER_H_
+#ifndef BACKENDS_EBPF_EBPFPARSER_H_
+#define BACKENDS_EBPF_EBPFPARSER_H_
 
 #include "ebpfObject.h"
 #include "ebpfProgram.h"
@@ -104,4 +104,4 @@ class EBPFParser : public EBPFObject {
 
 }  // namespace EBPF
 
-#endif /* _BACKENDS_EBPF_EBPFPARSER_H_ */
+#endif /* BACKENDS_EBPF_EBPFPARSER_H_ */

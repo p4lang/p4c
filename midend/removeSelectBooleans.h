@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_REMOVESELECTBOOLEANS_H_
-#define _MIDEND_REMOVESELECTBOOLEANS_H_
+#ifndef MIDEND_REMOVESELECTBOOLEANS_H_
+#define MIDEND_REMOVESELECTBOOLEANS_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -60,4 +60,4 @@ class RemoveSelectBooleans : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_REMOVESELECTBOOLEANS_H_ */
+#endif /* MIDEND_REMOVESELECTBOOLEANS_H_ */

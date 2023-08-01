@@ -109,12 +109,6 @@ std::optional<const Constraint *> Bmv2V1ModelCmdStepper::startParserImpl(
         parser, programInfo.getParserErrorType(), 3, "parser_error");
     nextState.setParserErrorLabel(errVar);
 
-    /// Set the restriction on the input port for PTF tests.
-    /// This is necessary since the PTF framework only allows a specific port range.
-    if (TestgenOptions::get().testBackend == "PTF") {
-        const auto &portVar = programInfo.getTargetInputPortVar();
-        return new IR::Lss(portVar, new IR::Constant(portVar->type, 8));
-    }
     return std::nullopt;
 }
 

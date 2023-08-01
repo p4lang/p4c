@@ -14,15 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _LIB_HEX_H_
-#define _LIB_HEX_H_
+#ifndef LIB_HEX_H_
+#define LIB_HEX_H_
 
+#include <cstdint>
 #include <iomanip>
 #include <iostream>
 #include <vector>
 
 class hex {
-    intmax_t val;
+    std::intmax_t val;
     int width;
     char fill;
 
@@ -59,4 +60,4 @@ class hexvec {
 
 std::ostream &operator<<(std::ostream &os, const hexvec &h);
 
-#endif /* _LIB_HEX_H_ */
+#endif /* LIB_HEX_H_ */

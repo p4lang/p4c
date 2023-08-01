@@ -17,8 +17,8 @@ limitations under the License.
 /* -*-c++-*-
    C#-like enumerator interface */
 
-#ifndef _LIB_ENUMERATOR_H_
-#define _LIB_ENUMERATOR_H_
+#ifndef LIB_ENUMERATOR_H_
+#define LIB_ENUMERATOR_H_
 
 #include <cstdint>
 #include <functional>
@@ -561,4 +561,4 @@ bool EnumeratorHandle<T>::operator!=(const EnumeratorHandle<T> &other) const {
 }
 
 }  // namespace Util
-#endif /* _LIB_ENUMERATOR_H_ */
+#endif /* LIB_ENUMERATOR_H_ */

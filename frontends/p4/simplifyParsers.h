@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_P4_SIMPLIFYPARSERS_H_
-#define _FRONTENDS_P4_SIMPLIFYPARSERS_H_
+#ifndef FRONTENDS_P4_SIMPLIFYPARSERS_H_
+#define FRONTENDS_P4_SIMPLIFYPARSERS_H_
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/parserCallGraph.h"
@@ -60,4 +60,4 @@ class SimplifyParsers : public PassManager {
 
 }  // namespace P4
 
-#endif /* _FRONTENDS_P4_SIMPLIFYPARSERS_H_ */
+#endif /* FRONTENDS_P4_SIMPLIFYPARSERS_H_ */

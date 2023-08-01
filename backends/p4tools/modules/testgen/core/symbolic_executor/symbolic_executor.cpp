@@ -23,8 +23,12 @@
 namespace P4Tools::P4Testgen {
 
 SymbolicExecutor::StepResult SymbolicExecutor::step(ExecutionState &state) {
-    Util::ScopedTimer st("step");
-    StepResult successors = evaluator.step(state);
+    StepResult successors = nullptr;
+    // Use a scope here to measure the time it takes for a step.
+    {
+        Util::ScopedTimer st("step");
+        successors = evaluator.step(state);
+    }
     // Remove any successors that are unsatisfiable.
     successors->erase(
         std::remove_if(successors->begin(), successors->end(),

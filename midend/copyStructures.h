@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_COPYSTRUCTURES_H_
-#define _MIDEND_COPYSTRUCTURES_H_
+#ifndef MIDEND_COPYSTRUCTURES_H_
+#define MIDEND_COPYSTRUCTURES_H_
 
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
@@ -129,4 +129,4 @@ class CopyStructures : public PassRepeated {
 
 }  // namespace P4
 
-#endif /* _MIDEND_COPYSTRUCTURES_H__ */
+#endif /* MIDEND_COPYSTRUCTURES_H_ */

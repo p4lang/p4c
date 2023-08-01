@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _TYPECHECKING_TYPEUNIFICATION_H_
-#define _TYPECHECKING_TYPEUNIFICATION_H_
+#ifndef TYPECHECKING_TYPEUNIFICATION_H_
+#define TYPECHECKING_TYPEUNIFICATION_H_
 
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
@@ -60,4 +60,4 @@ class TypeUnification final {
 
 }  // namespace P4
 
-#endif /* _TYPECHECKING_TYPEUNIFICATION_H_ */
+#endif /* TYPECHECKING_TYPEUNIFICATION_H_ */

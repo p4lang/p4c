@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _COMMON_CONSTANTFOLDING_H_
-#define _COMMON_CONSTANTFOLDING_H_
+#ifndef COMMON_CONSTANTFOLDING_H_
+#define COMMON_CONSTANTFOLDING_H_
 
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
@@ -167,4 +167,4 @@ class ConstantFolding : public PassManager {
 
 }  // namespace P4
 
-#endif /* _COMMON_CONSTANTFOLDING_H_ */
+#endif /* COMMON_CONSTANTFOLDING_H_ */

@@ -16,8 +16,8 @@ limitations under the License.
 
 /* -*-C++-*- */
 
-#ifndef _EVALUATOR_SUBSTITUTEPARAMETERS_H_
-#define _EVALUATOR_SUBSTITUTEPARAMETERS_H_
+#ifndef EVALUATOR_SUBSTITUTEPARAMETERS_H_
+#define EVALUATOR_SUBSTITUTEPARAMETERS_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/parameterSubstitution.h"
@@ -53,4 +53,4 @@ class SubstituteParameters : public TypeVariableSubstitutionVisitor {
 
 }  // namespace P4
 
-#endif /* _EVALUATOR_SUBSTITUTEPARAMETERS_H_ */
+#endif /* EVALUATOR_SUBSTITUTEPARAMETERS_H_ */

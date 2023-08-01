@@ -96,15 +96,14 @@ if [[ "${DISTRIB_RELEASE}" == "18.04" ]] || [[ "$(which simple_switch 2> /dev/nu
   # Use GCC 9 from https://launchpad.net/~ubuntu-toolchain-r/+archive/ubuntu/test
   sudo apt-get update && sudo apt-get install -y software-properties-common
   sudo add-apt-repository -uy ppa:ubuntu-toolchain-r/test
-  P4C_DEPS+=" libprotobuf-dev protobuf-compiler gcc-9 g++-9"
+  P4C_DEPS+=" gcc-9 g++-9"
   export CC=gcc-9
   export CXX=g++-9
 else
-  sudo apt-get update && sudo apt-get install -y curl gnupg
-  echo "deb https://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/ /" | sudo tee /etc/apt/sources.list.d/home:p4lang.list
-  curl -L "https://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/Release.key" | sudo apt-key add -
-  # Try to avoid certificate errors.
-  sudo apt install ca-certificates
+  sudo apt-get update && sudo apt-get install -y wget ca-certificates
+  # Add the p4lang opensuse repository.
+  echo "deb http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/ /" | sudo tee /etc/apt/sources.list.d/home:p4lang.list
+  curl -fsSL https://download.opensuse.org/repositories/home:p4lang/xUbuntu_${DISTRIB_RELEASE}/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_p4lang.gpg > /dev/null
   P4C_DEPS+=" p4lang-bmv2"
 fi
 

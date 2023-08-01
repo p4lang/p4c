@@ -44,7 +44,7 @@ filegroup(
             name = "com_github_p4lang_p4runtime",
             remote = "https://github.com/p4lang/p4runtime",
             # Newest commit on main branch as of April 11, 2023.
-            commit = "90553b90a12ead5c19700e7fef21164dea5b6d22",
+            commit = "d76a3640a223f47a43dc34e5565b72e43796ba57",
             shallow_since = "1680213111 -0700",
             # strip_prefix is broken; we use patch_cmds as a workaround,
             # see https://github.com/bazelbuild/bazel/issues/10062.
@@ -75,3 +75,35 @@ filegroup(
             strip_prefix = "protobuf-21.10",
             sha256 = "6fc9b6efc18acb2fd5fb3bcf981572539c3432600042b662a162c1226b362426",
         )
+    if not native.existing_rule("rules_foreign_cc"):
+        http_archive(
+            name = "rules_foreign_cc",
+            sha256 = "d54742ffbdc6924f222d2179f0e10e911c5c659c4ae74158e9fe827aad862ac6",
+            strip_prefix = "rules_foreign_cc-0.2.0",
+            url = "https://github.com/bazelbuild/rules_foreign_cc/archive/0.2.0.tar.gz",
+        )
+    if not native.existing_rule("com_github_z3prover_z3"):
+        http_archive(
+            name = "com_github_z3prover_z3",
+            url = "https://github.com/Z3Prover/z3/archive/z3-4.8.12.tar.gz",
+            strip_prefix = "z3-z3-4.8.12",
+            sha256 = "e3aaefde68b839299cbc988178529535e66048398f7d083b40c69fe0da55f8b7",
+            build_file = "@//:bazel/BUILD.z3.bazel",
+        )
+    if not native.existing_rule("com_github_pantor_inja"):
+        http_archive(
+            name = "com_github_pantor_inja",
+            url = "https://github.com/pantor/inja/archive/refs/tags/v3.4.0.zip",
+            strip_prefix = "inja-3.4.0/single_include",
+            sha256 = "4ad04d380b8377874c7a097a662c1f67f40da5fb7d3abc3851544f59c3613a20",
+            build_file = "@//:bazel/BUILD.inja.bazel",
+        )
+    if not native.existing_rule("nlohmann_json"):
+        http_archive(
+            name = "nlohmann_json",
+            url = "https://github.com/nlohmann/json/archive/refs/tags/v3.11.2.zip",
+            strip_prefix = "json-3.11.2/single_include",
+            sha256 = "95651d7d1fcf2e5c3163c3d37df6d6b3e9e5027299e6bd050d157322ceda9ac9",
+            build_file = "@//:bazel/BUILD.json.bazel",
+        )
+

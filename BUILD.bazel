@@ -145,6 +145,7 @@ filegroup(
         "frontends/p4-14/ir-v1.def",
         "backends/bmv2/bmv2.def",
         "backends/dpdk/dpdk.def",
+        "//backends/p4tools:p4tools.def",
         # p4c extensions may set this target to a `filegroup` containing
         # additional .def files.
         "@com_github_p4lang_p4c_extension//:ir_extensions",
@@ -279,14 +280,14 @@ cc_binary(
 genrule(
     name = "dest_dir_dpdk",
     srcs = ["backends/dpdk/control-plane/proto/p4info.proto"],
-    outs = ["p4/config/dpdk/p4info.proto"],
+    outs = ["backends/dpdk/p4/config/p4info.proto"],
     cmd = "mkdir -p p4/config/dpdk; cp $(SRCS) $(OUTS)",
     visibility = ["//visibility:private"],
 )
 
 proto_library(
     name = "p4info_dpdk_proto",
-    srcs = ["p4/config/dpdk/p4info.proto"],
+    srcs = ["backends/dpdk/p4/config/p4info.proto"],
     deps = [
         "@com_google_protobuf//:any_proto",
         "@com_google_protobuf//:descriptor_proto",

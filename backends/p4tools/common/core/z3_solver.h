@@ -58,7 +58,6 @@ class Z3Solver : public AbstractSolver {
     /// @returns the list of active assertions on this solver.
     [[nodiscard]] safe_vector<const Constraint *> getAssertions() const;
 
- private:
     /// Resets the internal state: pops all assertions from previous solver
     /// invocation, removes variable declarations.
     void reset();
@@ -69,11 +68,19 @@ class Z3Solver : public AbstractSolver {
     /// Removes the last solver context.
     void pop();
 
+    /// Reset the internal Z3 solver state (memory and active assertions).
+    /// In incremental state, all active assertions are reapplied after resetting.
+    void clearMemory();
+
+ private:
     /// Inserts an assertion into the topmost solver context.
     void asrt(const Constraint *assertion);
 
     /// Converts a P4 type to a Z3 sort.
     z3::sort toSort(const IR::Type *type);
+
+    /// Get the actual Z3 context that this class uses. This context can be manipulated.
+    [[nodiscard]] z3::context &ctx() const;
 
     /// Declares the given symbolic variable to Z3.
     ///
@@ -93,9 +100,6 @@ class Z3Solver : public AbstractSolver {
     //             that is greater than or equal to @asrtIndex.
     /// Helps to restore a state of incremental solver in a constructor.
     void addZ3Pushes(size_t &chkIndex, size_t asrtIndex);
-
-    /// Main Z3 context.
-    z3::context z3context;
 
     /// The underlying Z3 instance.
     z3::solver z3solver;

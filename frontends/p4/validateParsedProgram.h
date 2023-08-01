@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _P4_VALIDATEPARSEDPROGRAM_H_
-#define _P4_VALIDATEPARSEDPROGRAM_H_
+#ifndef P4_VALIDATEPARSEDPROGRAM_H_
+#define P4_VALIDATEPARSEDPROGRAM_H_
 
 #include "ir/ir.h"
 #include "ir/visitor.h"
@@ -93,4 +93,4 @@ class ValidateParsedProgram final : public Inspector {
 
 }  // namespace P4
 
-#endif /* _P4_VALIDATEPARSEDPROGRAM_H_ */
+#endif /* P4_VALIDATEPARSEDPROGRAM_H_ */

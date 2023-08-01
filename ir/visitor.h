@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _IR_VISITOR_H_
-#define _IR_VISITOR_H_
+#ifndef IR_VISITOR_H_
+#define IR_VISITOR_H_
 
 #include <cassert>
 #include <cstddef>
@@ -786,4 +786,4 @@ const IR::Node *transformAllMatching(const IR::Node *root, Func &&function) {
     return root->apply(NodeVisitor(std::forward<Func>(function)));
 }
 
-#endif /* _IR_VISITOR_H_ */
+#endif /* IR_VISITOR_H_ */

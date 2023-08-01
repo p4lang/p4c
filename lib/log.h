@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _LIB_LOG_H_
-#define _LIB_LOG_H_
+#ifndef LIB_LOG_H_
+#define LIB_LOG_H_
 
 #include <functional>
 #include <iostream>
@@ -212,4 +212,4 @@ std::ostream &operator<<(std::ostream &out, const std::set<T> &set) {
     return format_container(out, set, '(', ')');
 }
 
-#endif /* _LIB_LOG_H_ */
+#endif /* LIB_LOG_H_ */

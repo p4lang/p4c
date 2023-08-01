@@ -1,5 +1,5 @@
-#ifndef _MIDEND_HSINDEXSIMPLIFY_H_
-#define _MIDEND_HSINDEXSIMPLIFY_H_
+#ifndef MIDEND_HSINDEXSIMPLIFY_H_
+#define MIDEND_HSINDEXSIMPLIFY_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -104,4 +104,4 @@ class HSIndexSimplifier : public PassManager {
 
 }  // namespace P4
 
-#endif /*  _MIDEND_HSINDEXSIMPLIFY_H_ */
+#endif /* MIDEND_HSINDEXSIMPLIFY_H_ */

@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _IR_VECTOR_H_
-#define _IR_VECTOR_H_
+#ifndef IR_VECTOR_H_
+#define IR_VECTOR_H_
 
 #include "ir/dbprint.h"
 #include "ir/node.h"
@@ -234,4 +234,4 @@ const T *get(const IR::Vector<T> *vec, U name) {
 }  // namespace GetImpl
 using namespace GetImpl;  // NOLINT(build/namespaces)
 
-#endif /* _IR_VECTOR_H_ */
+#endif /* IR_VECTOR_H_ */

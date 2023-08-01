@@ -177,10 +177,11 @@ class NNEnv(PTFTestEnv):
             return returncode
         test_params = (
             f"grpcaddr='{PTF_ADDR}:{grpc_port}';p4info='{info_name}';config='{json_name}';"
+            f"packet_wait_time='0.1';"
         )
         # TODO: There is currently a bug where we can not support more than 344 ports at once.
         # The nanomsg test back end simply hangs, the reason is unclear.
-        port_range = "0-50"
+        port_range = "0-8"
         run_ptf_cmd = (
             f"ptf --platform nn --device-socket 0-{{{port_range}}}@ipc://{self.options.testdir}/"
             f"bmv2_packets_1.ipc --pypath {pypath} "
@@ -240,6 +241,7 @@ class VethEnv(PTFTestEnv):
         ifaces = self.get_iface_str(num_ifaces=self.options.num_ifaces, prefix="br_")
         test_params = (
             f"grpcaddr='{PTF_ADDR}:{grpc_port}';p4info='{info_name}';config='{json_name}';"
+            f"packet_wait_time='0.1';"
         )
         run_ptf_cmd = (
             f"ptf --pypath {pypath} {ifaces} --log-file {self.options.testdir.joinpath('ptf.log')} "

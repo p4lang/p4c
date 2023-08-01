@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_FLATTENUNIONS_H_
-#define _MIDEND_FLATTENUNIONS_H_
+#ifndef MIDEND_FLATTENUNIONS_H_
+#define MIDEND_FLATTENUNIONS_H_
 
 #include "./frontends/p4/parserControlFlow.h"
 #include "./frontends/p4/simplifyDefUse.h"
@@ -209,4 +209,4 @@ class FlattenHeaderUnion : public PassManager {
 };
 }  // namespace P4
 
-#endif /* _MIDEND_FLATTENUNIONS_H_ */
+#endif /* MIDEND_FLATTENUNIONS_H_ */

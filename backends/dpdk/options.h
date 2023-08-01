@@ -24,15 +24,17 @@ namespace DPDK {
 class DpdkOptions : public CompilerOptions {
  public:
     cstring bfRtSchema = "";
-    // file to output to
+    // File to output to.
     cstring outputFile = nullptr;
-    // file to ouput TDI Json to
+    // File to output TDI JSON to.
     cstring tdiFile = "";
-    // file to ouput context Json to
+    // File to output context JSON to.
     cstring ctxtFile = "";
-    // read from json
+    // File to output the TDI builder configuration to.
+    cstring tdiBuilderConf = "";
+    // Read from JSON.
     bool loadIRFromJson = false;
-    // Enable/Disable Egress pipeline in psa
+    // Enable/disable Egress pipeline in PSA.
     bool enableEgress = false;
 
     DpdkOptions() {
@@ -67,6 +69,13 @@ class DpdkOptions : public CompilerOptions {
                 return true;
             },
             "Write output to outfile");
+        registerOption(
+            "--tdi-builder-conf", "file",
+            [this](const char *arg) {
+                tdiBuilderConf = arg;
+                return true;
+            },
+            "Generate and write the TDI builder configuration to the specified file");
         registerOption(
             "--tdi", "file",
             [this](const char *arg) {

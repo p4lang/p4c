@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_PARSERS_PARSERDRIVER_H_
-#define _FRONTENDS_PARSERS_PARSERDRIVER_H_
+#ifndef FRONTENDS_PARSERS_PARSERDRIVER_H_
+#define FRONTENDS_PARSERS_PARSERDRIVER_H_
 
 #include <cstdio>
 #include <iostream>
@@ -289,4 +289,4 @@ class V1ParserDriver final : public P4::AbstractParserDriver {
 
 }  // namespace V1
 
-#endif /* _FRONTENDS_PARSERS_PARSERDRIVER_H_ */
+#endif /* FRONTENDS_PARSERS_PARSERDRIVER_H_ */

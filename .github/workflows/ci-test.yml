@@ -129,7 +129,8 @@ jobs:
 
     - name: Build (Ubuntu 18.04, GCC)
       run: |
-        docker build -t p4c --build-arg BASE_IMAGE=ubuntu:18.04 --build-arg IMAGE_TYPE=test .
+        docker build -t p4c --build-arg BASE_IMAGE=ubuntu:18.04 --build-arg IMAGE_TYPE=test \
+        --build-arg ENABLE_TEST_TOOLS=OFF .
         ./tools/export_ccache.sh
 
       # run with sudo (...) --privileged
@@ -201,22 +202,12 @@ jobs:
            echo "/usr/local/opt/bison/bin" >> $GITHUB_PATH
 
     - name: Build (MacOS)
-      # for some reason, brew does not install protobuf in a way cmake would be
-      # able to find it. Also, the library needs to be specified manually in
-      # order for the compiler to be correctly linked with protobuf.
-      # Also, there are no static protobuf libs in homebrew.
-      # See also https://github.com/Homebrew/homebrew-core/pull/122277
       run: |
-          PROTOBUF=`brew --prefix --installed protobuf@21`
           ./bootstrap.sh -DENABLE_GC=ON -DCMAKE_BUILD_TYPE=RELEASE \
-              -DCMAKE_UNITY_BUILD=ON \
-              -DProtobuf_INCLUDE_DIR=$PROTOBUF/include \
-              -DProtobuf_LIBRARY=$PROTOBUF/lib/libprotobuf.dylib \
-              -DENABLE_PROTOBUF_STATIC=OFF
+              -DCMAKE_UNITY_BUILD=ON
           make -Cbuild -j2
 
     - name: Run tests (MacOS)
-      # TODO: Renable gtest. Unit tests currently fail on MacOS.
       run: |
-        ctest --output-on-failure --schedule-random -LE "bpf|gtest|ubpf"
+        ctest --output-on-failure --schedule-random -LE "bpf|ubpf"
       working-directory: ./build

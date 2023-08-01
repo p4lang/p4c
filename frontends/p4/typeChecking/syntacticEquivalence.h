@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _TYPECHECKING_SYNTACTICEQUIVALENCE_H_
-#define _TYPECHECKING_SYNTACTICEQUIVALENCE_H_
+#ifndef TYPECHECKING_SYNTACTICEQUIVALENCE_H_
+#define TYPECHECKING_SYNTACTICEQUIVALENCE_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
@@ -44,4 +44,4 @@ class SameExpression {
 
 }  // namespace P4
 
-#endif /* _TYPECHECKING_SYNTACTICEQUIVALENCE_H_ */
+#endif /* TYPECHECKING_SYNTACTICEQUIVALENCE_H_ */

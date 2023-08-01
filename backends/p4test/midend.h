@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_P4TEST_MIDEND_H_
-#define _BACKENDS_P4TEST_MIDEND_H_
+#ifndef BACKENDS_P4TEST_MIDEND_H_
+#define BACKENDS_P4TEST_MIDEND_H_
 
 #include "frontends/common/options.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -42,4 +42,4 @@ class MidEnd : public PassManager {
 
 }  // namespace P4Test
 
-#endif /* _BACKENDS_P4TEST_MIDEND_H_ */
+#endif /* BACKENDS_P4TEST_MIDEND_H_ */
