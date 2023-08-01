@@ -20,12 +20,15 @@ limitations under the License.
 #include <gc/gc_mark.h>
 #endif /* HAVE_LIBGC */
 #include <sys/mman.h>
+#if HAVE_EXECINFO_H
+#include <execinfo.h>
+#endif
 
 #include <cstddef>
 #include <cstring>
 #include <new>
 
-#include "backtrace.h"
+#include "backtrace_exception.h"
 #include "cstring.h"
 #include "gc.h"
 #include "log.h"
@@ -44,6 +47,20 @@ static bool done_init, started_init;
 static char emergency_pool[16 * 1024];
 static char *emergency_ptr;
 
+static alloc_trace_cb_t trace_cb;
+static bool tracing = false;
+#if !HAVE_EXECINFO_H
+#define backtrace(BUFFER, SIZE) memset(BUFFER, 0, (SIZE) * sizeof(void *))
+#endif
+#define TRACE_ALLOC(size)                        \
+    if (trace_cb.fn && !tracing) {               \
+        void *buffer[ALLOC_TRACE_DEPTH];         \
+        tracing = true;                          \
+        backtrace(buffer, ALLOC_TRACE_DEPTH);    \
+        trace_cb.fn(trace_cb.arg, buffer, size); \
+        tracing = false;                         \
+    }
+
 // One can disable the GC, e.g., to run under Valgrind, by editing config.h
 void *operator new(std::size_t size) {
     /* DANGER -- on OSX, can't safely call the garbage collector allocation
@@ -55,6 +72,7 @@ void *operator new(std::size_t size) {
         GC_INIT();
         done_init = true;
     }
+    TRACE_ALLOC(size)
     auto *rv = ::operator new(size, UseGC, 0, 0);
     if (!rv && emergency_ptr && emergency_ptr + size < emergency_pool + sizeof(emergency_pool)) {
         rv = emergency_ptr;
@@ -66,6 +84,19 @@ void *operator new(std::size_t size) {
         throw backtrace_exception<std::bad_alloc>();
     }
     return rv;
+}
+
+alloc_trace_cb_t set_alloc_trace(alloc_trace_cb_t cb) {
+    alloc_trace_cb_t old = trace_cb;
+    trace_cb = cb;
+    return old;
+}
+
+alloc_trace_cb_t set_alloc_trace(void (*fn)(void *, void **, size_t), void *arg) {
+    alloc_trace_cb_t old = trace_cb;
+    trace_cb.fn = fn;
+    trace_cb.arg = arg;
+    return old;
 }
 
 // clang-format off
@@ -143,6 +174,7 @@ void *realloc(void *ptr, size_t size) {
             done_init = true;
         }
     }
+    TRACE_ALLOC(size)
     if (ptr) {
         if (GC_is_heap_ptr(ptr)) return GC_realloc(ptr, size);
         size_t max = raw_size(ptr);
@@ -160,6 +192,7 @@ void *realloc(void *ptr, size_t size) {
 void *malloc(size_t size) {
     if (!done_init) return realloc(nullptr, size);
 
+    TRACE_ALLOC(size)
     return GC_malloc(size);
 }
 void free(void *ptr) {

@@ -30,6 +30,12 @@ limitations under the License.
 #include <ucontext.h>
 #endif
 #include <unistd.h>
+#if HAVE_LIBBACKTRACE
+#include <backtrace.h>
+#endif
+#if HAVE_CXXABI_H
+#include <cxxabi.h>
+#endif
 
 #include <iostream>
 
@@ -61,6 +67,10 @@ void register_thread() {
 #define MTONLY(...)
 #endif  // MULTITHREAD
 
+#if HAVE_LIBBACKTRACE
+struct backtrace_state *global_backtrace_state = nullptr;
+#endif
+
 static MTONLY(__thread) int shutdown_loop = 0;  // avoid infinite loop if shutdown crashes
 
 static void sigint_shutdown(int sig, siginfo_t *, void *) {
@@ -69,6 +79,23 @@ static void sigint_shutdown(int sig, siginfo_t *, void *) {
     _exit(sig + 0x80);
 }
 
+#if HAVE_LIBBACKTRACE
+static int backtrace_log(void *, uintptr_t pc, const char *fname, int lineno, const char *func) {
+    char *demangled = nullptr;
+#if HAVE_CXXABI_H
+    int status;
+    demangled = func ? abi::__cxa_demangle(func, 0, 0, &status) : nullptr;
+#endif
+    LOG1("  0x" << hex(pc) << " " << (demangled ? demangled : func ? func : "??"));
+    free(demangled);
+    if (fname) {
+        LOG1("    " << fname << ":" << lineno);
+    }
+    return 0;
+}
+static void backtrace_error(void *, const char *msg, int) { perror(msg); }
+
+#elif HAVE_EXECINFO_H
 /*
  * call external program addr2line WITHOUT using malloc or stdio or anything
  * else that might be problematic if there's memory corruption or exhaustion
@@ -161,6 +188,7 @@ const char *addr2line(void *addr, const char *text) {
     if (buffer[0] == 0 || buffer[0] == '?') return 0;
     return buffer;
 }
+#endif /* HAVE_EXECINFO_H */
 
 #if HAVE_UCONTEXT_H
 
@@ -244,7 +272,12 @@ static void crash_shutdown(int sig, siginfo_t *info, void *uctxt) {
 #else
     (void)uctxt;  // Suppress unused parameter warning.
 #endif
-#if HAVE_EXECINFO_H
+
+#if HAVE_LIBBACKTRACE
+    if (LOGGING(1)) {
+        backtrace_full(global_backtrace_state, 1, backtrace_log, backtrace_error, nullptr);
+    }
+#elif HAVE_EXECINFO_H
     if (LOGGING(1)) {
         static void *buffer[64];
         int size = backtrace(buffer, 64);
@@ -284,4 +317,7 @@ void setup_signals() {
     sigaction(SIGBUS, &sigact, 0);
     sigaction(SIGTRAP, &sigact, 0);
     signal(SIGPIPE, SIG_IGN);
+#if HAVE_LIBBACKTRACE
+    if (LOGGING(1)) global_backtrace_state = backtrace_create_state(exename(), 1, nullptr, nullptr);
+#endif
 }
