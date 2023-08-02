@@ -327,7 +327,6 @@ include_directories (
   ${P4C_SOURCE_DIR}
   ${P4C_BINARY_DIR}
   )
-include_directories(SYSTEM ${P4C_SOURCE_DIR}/test/frameworks/gtest/googletest/include)
 add_definitions (-DCONFIG_PREFIX="${CMAKE_INSTALL_PREFIX}")
 add_definitions (-DCONFIG_PKGDATADIR="${CMAKE_INSTALL_PREFIX}/${P4C_ARTIFACTS_OUTPUT_DIRECTORY}")
 
@@ -346,15 +345,21 @@ configure_file ("${P4C_SOURCE_DIR}/cmake/config.h.cmake" "${P4C_BINARY_DIR}/conf
 set (IR_GENERATOR_DIRECTORY ${P4C_BINARY_DIR}/tools/ir-generator)
 set (IR_GENERATOR ${IR_GENERATOR_DIRECTORY}/irgenerator)
 
-# the order of adding subdirectories matters because of target dependencies
+# Component libraries: must be defined before being used in the back end executables.
+set (P4C_LIBRARIES controlplane midend frontend ir p4ctoolkit ir-generated)
+
+# If we enable GTest, install GoogleTest with the appropriate options.
+if (ENABLE_GTESTS)
+  include(GoogleTest)
+  p4c_obtain_googletest()
+endif ()
+
+# The order of adding subdirectories matters because of target dependencies.
 add_subdirectory (tools/driver)
 add_subdirectory (lib)
 add_subdirectory (tools/ir-generator)
 add_subdirectory (ir)
 
-# component libraries: must be defined before being used in the
-# backend executables
-set (P4C_LIBRARIES controlplane midend frontend ir p4ctoolkit ir-generated)
 
 # add extensions - before the frontends as they produce IR and extra frontend sources
 set(EXTENSION_IR_SOURCES)

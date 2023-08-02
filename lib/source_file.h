@@ -28,7 +28,9 @@ limitations under the License.
 #include "stringref.h"
 
 // GTest
+#ifdef P4C_GTEST_ENABLED
 #include "gtest/gtest_prod.h"
+#endif
 
 namespace Test {
 class UtilSourceFile;
@@ -261,7 +263,9 @@ class Comment final : IHasDbPrint {
   This class implements a singleton pattern: there is a single instance of this class.
 */
 class InputSources final {
+#ifdef P4C_GTEST_ENABLED
     FRIEND_TEST(UtilSourceFile, InputSources);
+#endif
 
  public:
     InputSources();

@@ -138,11 +138,6 @@ add_dependencies(p4testgen linkp4testgen)
 
 if(ENABLE_GTESTS)
   add_executable(testgen-gtest ${TESTGEN_GTEST_SOURCES})
-  target_include_directories(
-    testgen-gtest
-    PRIVATE ${P4C_SOURCE_DIR}/test/frameworks/gtest/googlemock/include
-    PRIVATE ${P4C_SOURCE_DIR}/test/frameworks/gtest/googletest/include
-  )
   target_link_libraries(
     testgen-gtest
     PRIVATE testgen
@@ -150,11 +145,9 @@ if(ENABLE_GTESTS)
     ${TESTGEN_LIBS}
     ${P4C_LIBRARIES}
     ${P4C_LIB_DEPS}
-    ${CMAKE_THREAD_LIBS_INIT}
   )
 
   if(ENABLE_TESTING)
-    add_definitions("-DGTEST_HAS_PTHREAD=0")
     add_test(NAME testgen-gtest COMMAND testgen-gtest)
     set_tests_properties(testgen-gtest PROPERTIES LABELS "gtest-testgen")
   endif()

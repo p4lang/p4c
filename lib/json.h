@@ -22,7 +22,9 @@ limitations under the License.
 #include <type_traits>
 #include <vector>
 
+#ifdef P4C_GTEST_ENABLED
 #include "gtest/gtest_prod.h"
+#endif
 #include "lib/big_int_util.h"
 #include "lib/castable.h"
 #include "lib/cstring.h"
@@ -43,7 +45,9 @@ class IJson : public ICastable {
 };
 
 class JsonValue final : public IJson {
+#ifdef P4C_GTEST_ENABLED
     FRIEND_TEST(Util, Json);
+#endif
 
  public:
     enum Kind { String, Number, True, False, Null };

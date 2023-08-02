@@ -221,7 +221,7 @@ else()
 endif()
 
 set (GTEST_BMV2_SOURCES
-  )
-
+  gtest/load_ir_from_json.cpp
+)
 set (GTEST_SOURCES ${GTEST_SOURCES} ${GTEST_BMV2_SOURCES} PARENT_SCOPE)
 set (GTEST_LDADD ${GTEST_LDADD} bmv2backend PARENT_SCOPE)

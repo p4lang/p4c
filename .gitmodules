@@ -1,7 +1,3 @@
-[submodule "test/frameworks/gtest"]
-	path = test/frameworks/gtest
-	url = https://github.com/google/googletest.git
-	ignored = untracked
 [submodule "backends/ebpf/runtime/contrib/libbpf"]
 	path = backends/ebpf/runtime/contrib/libbpf
 	url = https://github.com/libbpf/libbpf
