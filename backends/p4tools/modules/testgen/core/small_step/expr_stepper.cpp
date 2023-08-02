@@ -6,7 +6,6 @@
 #include <utility>
 #include <vector>
 
-#include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/gen_eq.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/taint.h"
@@ -17,6 +16,7 @@
 #include "lib/exceptions.h"
 #include "lib/log.h"
 #include "lib/null.h"
+#include "lib/solver.h"
 #include "lib/source_file.h"
 #include "midend/coverage.h"
 #include "midend/saturationElim.h"

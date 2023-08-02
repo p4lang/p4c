@@ -7,9 +7,9 @@
 
 #include <boost/container/flat_map.hpp>
 
-#include "backends/p4tools/common/core/solver.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
+#include "lib/solver.h"
 
 namespace P4Tools {
 

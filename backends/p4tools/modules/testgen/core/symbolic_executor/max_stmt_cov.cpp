@@ -6,10 +6,10 @@
 #include <optional>
 #include <vector>
 
-#include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/ir.h"
 #include "lib/error.h"
+#include "lib/solver.h"
 #include "lib/source_file.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"

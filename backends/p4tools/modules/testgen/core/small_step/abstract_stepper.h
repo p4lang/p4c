@@ -5,11 +5,11 @@
 #include <optional>
 #include <string>
 
-#include "backends/p4tools/common/core/solver.h"
 #include "ir/ir.h"
 #include "ir/node.h"
 #include "ir/vector.h"
 #include "ir/visitor.h"
+#include "lib/solver.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/small_step.h"

@@ -1,5 +1,5 @@
-#ifndef BACKENDS_P4TOOLS_COMMON_CORE_SOLVER_H_
-#define BACKENDS_P4TOOLS_COMMON_CORE_SOLVER_H_
+#ifndef LIB_SOLVER_H_
+#define LIB_SOLVER_H_
 
 #include <optional>
 #include <vector>
@@ -10,8 +10,6 @@
 #include "ir/ir.h"
 #include "lib/castable.h"
 #include "lib/cstring.h"
-
-namespace P4Tools {
 
 /// Represents a constraint that can be shipped to and asserted within a solver.
 // TODO: This should implement AbstractRepCheckedNode<Constraint>.
@@ -74,6 +72,4 @@ class AbstractSolver : public ICastable {
     }
 };
 
-}  // namespace P4Tools
-
-#endif /* BACKENDS_P4TOOLS_COMMON_CORE_SOLVER_H_ */
+#endif /* LIB_SOLVER_H_ */

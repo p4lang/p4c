@@ -14,7 +14,6 @@
 
 #include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/core/abstract_execution_state.h"
-#include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/namespace_context.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_event.h"
@@ -23,6 +22,7 @@
 #include "ir/node.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
+#include "lib/solver.h"
 #include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/lib/continuation.h"

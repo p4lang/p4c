@@ -7,12 +7,12 @@
 #include <string>
 #include <utility>
 
-#include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "frontends/common/parser_options.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
+#include "lib/solver.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/depth_first.h"

@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "backends/p4tools/common/core/solver.h"
+#include "lib/solver.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"

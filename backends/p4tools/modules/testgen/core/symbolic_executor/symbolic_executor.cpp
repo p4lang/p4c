@@ -7,10 +7,10 @@
 #include <string>
 #include <vector>
 
-#include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/ir.h"
 #include "lib/error.h"
+#include "lib/solver.h"
 #include "lib/timer.h"
 #include "midend/coverage.h"
 
