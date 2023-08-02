@@ -29,7 +29,6 @@ limitations under the License.
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/null.h"
-#include "p4/config/v1/p4types.pb.h"
 #include "p4RuntimeArchHandler.h"
 
 namespace p4configv1 = ::p4::config::v1;

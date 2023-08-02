@@ -71,6 +71,9 @@ macro(p4c_obtain_protobuf)
     )
     set(Protobuf_INCLUDE_DIR ${protobuf_SOURCE_DIR}/src/ CACHE STRING "Protobuf include directory.")
     set(PROTOBUF_LIBRARY libprotobuf)
+    # Protobuf source code may trigger warnings which we need to ignore.
+    set_target_properties(libprotobuf PROPERTIES COMPILE_FLAGS "-Wno-error")
+
     message("Done with setting up Protobuf for P4C.")
   endif()
 endmacro(p4c_obtain_protobuf)
