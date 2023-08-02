@@ -29,6 +29,62 @@ class STFLexer:
         self.last_token = None
         self.errors_cnt = 0
         self.lexer = None
+        self.states = (
+            # add a state to lex only keywords. By default, all keywords
+            # are IDs. Fortunately, in the current grammar all keywords
+            # are commands at the beginning of a line (except for packets and bytes!).
+            ("keyword", "inclusive"),
+            # lex only packet data
+            ("packetdata", "exclusive"),
+        )
+
+        self.keywords = [
+            "ADD",
+            "ALL",
+            "BYTES",
+            "CHECK_COUNTER",
+            "EXPECT",
+            "NO_PACKET",
+            "PACKET",
+            "PACKETS",
+            "REMOVE",
+            "SETDEFAULT",
+            "WAIT",
+        ]
+
+        self.keywords_map = {}
+        for keyword in self.keywords:
+            if keyword == "P4_PARSING_DONE":
+                self.keywords_map[keyword] = keyword
+            else:
+                self.keywords_map[keyword.lower()] = keyword
+
+        self.tokens = [
+            "COLON",
+            "COMMA",
+            "DATA_DEC",
+            "DATA_HEX",
+            "DATA_TERN",
+            "DATA_EXACT",
+            "DOT",
+            "ID",
+            "INT_CONST_BIN",
+            "INT_CONST_DEC",
+            "TERN_CONST_HEX",
+            "INT_CONST_HEX",
+            "LBRACKET",
+            "RBRACKET",
+            "LPAREN",
+            "RPAREN",
+            "SLASH",
+            "EQUAL",
+            "EQEQ",
+            "LE",
+            "LEQ",
+            "GT",
+            "GEQ",
+            "NEQ",
+        ] + self.keywords
 
     def reset_lineno(self):
         """Resets the internal line number counter of the lexer."""
@@ -65,79 +121,6 @@ class STFLexer:
     def _error(self, s, token):
         print(s, "in file", self.filename, "at line", self.get_lineno())
         self.errors_cnt += 1
-
-    states = (
-        # add a state to lex only keywords. By default, all keywords
-        # are IDs. Fortunately, in the current grammar all keywords
-        # are commands at the beginning of a line (except for packets and bytes!).
-        ("keyword", "inclusive"),
-        # lex only packet data
-        ("packetdata", "exclusive"),
-    )
-
-    keywords = (
-        "ADD",
-        "ALL",
-        "BYTES",
-        "CHECK_COUNTER",
-        "EXPECT",
-        "NO_PACKET",
-        "PACKET",
-        "PACKETS",
-        "REMOVE",
-        "SETDEFAULT",
-        "WAIT",
-        "MIRRORING_ADD",
-        "MIRRORING_ADD_MC",
-        "MIRRORING_DELETE",
-        "MIRRORING_GET",
-        "MC_MGRP_CREATE",
-        "MC_NODE_CREATE",
-        "MC_NODE_UPDATE",
-        "MC_NODE_ASSOCIATE",
-        "COUNTER_READ",
-        "COUNTER_WRITE",
-        "REGISTER_READ",
-        "REGISTER_WRITE",
-        "REGISTER_RESET",
-        "METER_GET_RATES",
-        "METER_SET_RATES",
-        "METER_ARRAY_SET_RATES",
-    )
-
-    keywords_map = {}
-    for keyword in keywords:
-        if keyword == "P4_PARSING_DONE":
-            keywords_map[keyword] = keyword
-        else:
-            keywords_map[keyword.lower()] = keyword
-
-    tokens = (
-        "COLON",
-        "COMMA",
-        "DATA_DEC",
-        "DATA_HEX",
-        "DATA_TERN",
-        "DATA_EXACT",
-        "DOT",
-        "ID",
-        "INT_CONST_BIN",
-        "INT_CONST_DEC",
-        "TERN_CONST_HEX",
-        "INT_CONST_HEX",
-        "LBRACKET",
-        "RBRACKET",
-        "LPAREN",
-        "RPAREN",
-        "SLASH",
-        "EQUAL",
-        "EQEQ",
-        "LE",
-        "LEQ",
-        "GT",
-        "GEQ",
-        "NEQ",
-    ) + keywords
 
     t_ignore_COMMENT = r"\#.*"
     t_COLON = r":"
