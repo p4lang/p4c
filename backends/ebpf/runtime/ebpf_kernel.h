@@ -41,7 +41,7 @@ limitations under the License.
 #define load_half(data, b) bpf_ntohs(*(u16 *)((u8*)(data) + (b)))
 #define load_word(data, b) bpf_ntohl(*(u32 *)((u8*)(data) + (b)))
 #define load_dword(data, b) bpf_be64_to_cpu(*(u64 *)((u8*)(data) + (b)))
-#define load_dword_le(data, b) bpf_le64_to_cpu(*(u64 *)((u8*)(data) + (b)))
+#define swap_endianess(x) ___bpf_swab64(x)
 
 
 /* If we operate in user space we only need to include bpf.h and

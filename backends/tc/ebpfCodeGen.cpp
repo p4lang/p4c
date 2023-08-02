@@ -407,7 +407,6 @@ void TCIngressPipelinePNA::emitLocalVariables(EBPF::CodeBuilder *builder) {
     builder->newline();
 }
 
-
 // =====================EBPFPnaParser=============================
 EBPFPnaParser::EBPFPnaParser(const EBPF::EBPFProgram *program, const IR::ParserBlock *block,
                              const P4::TypeMap *typeMap)
@@ -423,8 +422,8 @@ void EBPFPnaParser::emit(EBPF::CodeBuilder *builder) {
 }
 
 void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
-                                                  const IR::StructField *field, unsigned alignment,
-                                                  EBPF::EBPFType *type) {
+                                                     const IR::StructField *field,
+                                                     unsigned alignment, EBPF::EBPFType *type) {
     unsigned widthToExtract = dynamic_cast<EBPF::IHasWidth *>(type)->widthInBits();
     auto program = state->parser->program;
     cstring msgStr;
@@ -464,18 +463,14 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
             loadSize = 32;
         } else {
             if (wordsToRead > 64) BUG("Unexpected width %d", widthToExtract);
-            if (checkIfMAC == true) {
-                helper = "load_dword_le";
-            } else {
-                helper = "load_dword";
-            }
+            helper = "load_dword";
             loadSize = 64;
         }
 
         unsigned shift = loadSize - alignment - widthToExtract;
         builder->emitIndent();
         visit(expr);
-        builder->appendFormat(".%s = (", fieldName.c_str());
+        builder->appendFormat(".%s = (", fieldName);
         type->emit(builder);
         builder->appendFormat(")((%s(%s, BYTES(%s))", helper, program->packetStartVar.c_str(),
                               program->offsetVar.c_str());
@@ -490,6 +485,15 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
 
         builder->append(")");
         builder->endOfStatement(true);
+        if (checkIfMAC) {
+            builder->emitIndent();
+            visit(expr);
+            builder->appendFormat(".%s = %s(", fieldName, "swap_endianess");
+            visit(expr);
+            builder->appendFormat(".%s", fieldName);
+            builder->append(")");
+            builder->endOfStatement(true);
+        }
     } else {
         if (program->options.arch == "psa" && widthToExtract % 8 != 0) {
             // To explain the problem in error lets assume that we have bit<68> field with value:

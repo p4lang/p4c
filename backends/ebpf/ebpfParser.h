@@ -37,7 +37,7 @@ class StateTranslationVisitor : public CodeGenInspector {
     const EBPFParserState *state;
 
     virtual void compileExtractField(const IR::Expression *expr, const IR::StructField *field,
-                             unsigned alignment, EBPFType *type);
+                                     unsigned alignment, EBPFType *type);
     virtual void compileExtract(const IR::Expression *destination);
     void compileLookahead(const IR::Expression *destination);
     void compileAdvance(const P4::ExternMethod *ext);
