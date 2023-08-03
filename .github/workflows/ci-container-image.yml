@@ -20,6 +20,8 @@ jobs:
   build:
     if: ${{ github.repository == 'p4lang/p4c' }}
     runs-on: ubuntu-latest
+    env:
+      ENABLE_TEST_TOOLS: ON
     steps:
     - uses: actions/checkout@v3
       with:
