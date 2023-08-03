@@ -31,6 +31,7 @@ class Bmv2V1ModelProgramInfo : public ProgramInfo {
     std::vector<Continuation::Command> processDeclaration(const IR::Type_Declaration *typeDecl,
                                                           size_t blockIdx) const;
 
+    /// Map of direct extern declarations which are attached to a table.
     std::map<const IR::IDeclaration *, const IR::P4Table *> directExternMap;
 
  public:
