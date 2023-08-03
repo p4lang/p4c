@@ -72,8 +72,10 @@ genrule(
 filegroup(
     name = "testgen_targets_src",
     srcs =
-        glob(["modules/testgen/targets/%s/**/*.h" % target for target in TESTGEN_TARGETS]) +
-        glob(["modules/testgen/targets/%s/**/*.cpp" % target for target in TESTGEN_TARGETS]),
+        glob(["modules/testgen/targets/%s/**/*.h" % target for target in TESTGEN_TARGETS],
+             exclude = ["modules/testgen/targets/%s/test/**" % target for target in TESTGEN_TARGETS]) +
+        glob(["modules/testgen/targets/%s/**/*.cpp" % target for target in TESTGEN_TARGETS],
+             exclude = ["modules/testgen/targets/%s/test/**" % target for target in TESTGEN_TARGETS]),
 )
 
 cc_library(
