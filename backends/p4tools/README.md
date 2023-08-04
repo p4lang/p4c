@@ -4,8 +4,9 @@
 
 ```
 p4tools
+ ├─ benchmarks  ── General purpose measurements and plot generation scripts.
  ├─ cmake       ── Common CMake modules
- ├─ common      ── C++ source: common code for the various components of p4check
+ ├─ common      ── C++ source: common code for the various components P4Tools.
  ├─ modules     ── P4Tools extensions.
  │  └─ testgen  ── C++ source: P4Testgen.
  └─ submodules  ── External dependencies.
@@ -17,8 +18,7 @@ P4Tools is a collection of tools that make testing P4 targets and programs a lit
 - [P4Testgen](https://github.com/p4lang/p4c/tree/main/backends/p4tools/modules/testgen): An input-output test case generator for P4.
 
 ## Building
-
-P4Tools can be built using the following CMAKE configuration in the P4C repository.
+Please see the general installation instructions [here](https://github.com/p4lang/p4c#installing-p4c-from-source). P4Tools can be built using the following CMAKE configuration in the P4C repository.
 
 ```
 mkdir build

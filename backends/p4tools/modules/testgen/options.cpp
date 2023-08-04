@@ -27,7 +27,7 @@ const char *TestgenOptions::getIncludePath() {
     P4C_UNIMPLEMENTED("getIncludePath not implemented for P4Testgen.");
 }
 
-const std::set<cstring> TestgenOptions::SUPPORTED_STOP_METRICS = {"MAX_STATEMENT_COVERAGE"};
+const std::set<cstring> TestgenOptions::SUPPORTED_STOP_METRICS = {"MAX_NODE_COVERAGE"};
 
 TestgenOptions::TestgenOptions()
     : AbstractP4cToolOptions("Generate packet tests for a P4 program.") {
@@ -72,7 +72,7 @@ TestgenOptions::TestgenOptions()
             return true;
         },
         "Stops generating tests when a particular metric is satisifed. Currently supported options "
-        "are:\n\"MAX_STATEMENT_COVERAGE\".");
+        "are:\n\"MAX_NODE_COVERAGE\".");
 
     registerOption(
         "--packet-size-range", "packetSizeRange",

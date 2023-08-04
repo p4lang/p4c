@@ -205,7 +205,7 @@ def run_strategies_for_max_tests(options, test_args):
         f" -I/p4/p4c/build/p4include --test-backend {options.test_backend}"
         f" --seed {test_args.seed} --print-performance-report"
         f" --max-tests {options.max_tests} --out-dir {test_args.test_dir}"
-        f" --path-selection {test_args.strategy} --stop-metric MAX_STATEMENT_COVERAGE"
+        f" --path-selection {test_args.strategy} --stop-metric MAX_NODE_COVERAGE"
         f" --track-coverage STATEMENTS"
         f"{test_args.extra_args} {test_args.p4_program}"
     )
