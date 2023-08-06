@@ -97,13 +97,15 @@ target_include_directories(controlplane-gen
   SYSTEM BEFORE PUBLIC ${Protobuf_INCLUDE_DIR}
 )
 target_link_libraries (controlplane-gen PUBLIC ${PROTOBUF_LIBRARY})
-
 # Needed for the correct import of google/status.pb.cc
-include_directories (${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(
+  controlplane-gen PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
+)
+
 
 # Silence various warnings as the root issue is out of our control, example https://github.com/protocolbuffers/protobuf/issues/7140
 set_source_files_properties (${P4RUNTIME_GEN_SRCS} {$P4RUNTIME_GEN_HDRS} PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-array-bounds -Wno-error")
 
-add_library (controlplane STATIC ${CONTROLPLANE_SRCS} )
-target_link_libraries (controlplane ${CMAKE_THREAD_LIBS_INIT} controlplane-gen)
-add_dependencies (controlplane mkP4configdir ir-generated controlplane-gen frontend-parser-gen)
+add_library(controlplane STATIC ${CONTROLPLANE_SRCS})
+target_link_libraries(controlplane ${CMAKE_THREAD_LIBS_INIT} controlplane-gen)
+add_dependencies(controlplane mkP4configdir ir-generated controlplane-gen frontend-parser-gen)

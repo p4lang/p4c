@@ -46,7 +46,6 @@ target_include_directories(
   SYSTEM BEFORE PUBLIC ${P4TOOLS_Z3_INCLUDE_DIR}
   PUBLIC "${CMAKE_BINARY_DIR}/common"
   PUBLIC "${P4C_SOURCE_DIR}"
-  PUBLIC "${P4C_SOURCE_DIR}/test/frameworks/gtest/googletest/include"
   PUBLIC "${P4C_BINARY_DIR}"
 )
 
