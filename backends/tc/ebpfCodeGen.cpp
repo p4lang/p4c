@@ -473,15 +473,14 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
             builder->appendFormat("__builtin_memcpy(&");
             visit(expr);
             builder->appendFormat(".%s, %s + BYTES(%s), %d)", fieldName,
-                                      program->packetStartVar.c_str(), program->offsetVar.c_str(),
-                                      widthToExtract/8);
-            
+                                  program->packetStartVar.c_str(), program->offsetVar.c_str(),
+                                  widthToExtract / 8);
         } else {
             visit(expr);
             builder->appendFormat(".%s = (", fieldName);
             type->emit(builder);
             builder->appendFormat(")((%s(%s, BYTES(%s))", helper, program->packetStartVar.c_str(),
-                              program->offsetVar.c_str());
+                                  program->offsetVar.c_str());
             if (shift != 0) builder->appendFormat(" >> %d", shift);
             builder->append(")");
             if (widthToExtract != loadSize) {
@@ -555,9 +554,10 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
                               ? expr->to<IR::PathExpression>()->path->name.name
                               : expr->toString();
 
-        if (expr->is<IR::Member>() && expr->checkedTo<IR::Member>()->expr->is<IR::PathExpression>() &&
+        if (expr->is<IR::Member>() &&
+            expr->checkedTo<IR::Member>()->expr->is<IR::PathExpression>() &&
             isPointerVariable(
-                expr->to<IR::Member>()->expr->to<IR::PathExpression>()->path->name.name)) {
+                expr->to<IR::Member>()->expr->checkedTo<IR::PathExpression>()->path->name.name)) {
             exprStr = exprStr.replace(".", "->");
         }
         cstring tmp = Util::printf_format("(unsigned long long) %s.%s", exprStr, fieldName);
