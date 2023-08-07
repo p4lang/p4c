@@ -469,31 +469,29 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
 
         unsigned shift = loadSize - alignment - widthToExtract;
         builder->emitIndent();
-        visit(expr);
-        builder->appendFormat(".%s = (", fieldName);
-        type->emit(builder);
-        builder->appendFormat(")((%s(%s, BYTES(%s))", helper, program->packetStartVar.c_str(),
-                              program->offsetVar.c_str());
-        if (shift != 0) builder->appendFormat(" >> %d", shift);
-        builder->append(")");
-
-        if (widthToExtract != loadSize) {
-            builder->append(" & EBPF_MASK(");
-            type->emit(builder);
-            builder->appendFormat(", %d)", widthToExtract);
-        }
-
-        builder->append(")");
-        builder->endOfStatement(true);
         if (checkIfMAC) {
-            builder->emitIndent();
+            builder->appendFormat("__builtin_memcpy(&");
             visit(expr);
-            builder->appendFormat(".%s = %s(", fieldName, "swap_endianess");
+            builder->appendFormat(".%s, %s + BYTES(%s), %d)", fieldName,
+                                      program->packetStartVar.c_str(), program->offsetVar.c_str(),
+                                      widthToExtract/8);
+            
+        } else {
             visit(expr);
-            builder->appendFormat(".%s", fieldName);
+            builder->appendFormat(".%s = (", fieldName);
+            type->emit(builder);
+            builder->appendFormat(")((%s(%s, BYTES(%s))", helper, program->packetStartVar.c_str(),
+                              program->offsetVar.c_str());
+            if (shift != 0) builder->appendFormat(" >> %d", shift);
             builder->append(")");
-            builder->endOfStatement(true);
+            if (widthToExtract != loadSize) {
+                builder->append(" & EBPF_MASK(");
+                type->emit(builder);
+                builder->appendFormat(", %d)", widthToExtract);
+            }
+            builder->append(")");
         }
+        builder->endOfStatement(true);
     } else {
         if (program->options.arch == "psa" && widthToExtract % 8 != 0) {
             // To explain the problem in error lets assume that we have bit<68> field with value:
@@ -557,7 +555,7 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
                               ? expr->to<IR::PathExpression>()->path->name.name
                               : expr->toString();
 
-        if (expr->is<IR::Member>() && expr->to<IR::Member>()->expr->is<IR::PathExpression>() &&
+        if (expr->is<IR::Member>() && expr->checkedTo<IR::Member>()->expr->is<IR::PathExpression>() &&
             isPointerVariable(
                 expr->to<IR::Member>()->expr->to<IR::PathExpression>()->path->name.name)) {
             exprStr = exprStr.replace(".", "->");
