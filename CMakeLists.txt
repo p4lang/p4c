@@ -327,7 +327,6 @@ include_directories (
   ${P4C_SOURCE_DIR}
   ${P4C_BINARY_DIR}
   )
-include_directories(SYSTEM ${P4C_SOURCE_DIR}/test/frameworks/gtest/googletest/include)
 add_definitions (-DCONFIG_PREFIX="${CMAKE_INSTALL_PREFIX}")
 add_definitions (-DCONFIG_PKGDATADIR="${CMAKE_INSTALL_PREFIX}/${P4C_ARTIFACTS_OUTPUT_DIRECTORY}")
 
@@ -346,21 +345,51 @@ configure_file ("${P4C_SOURCE_DIR}/cmake/config.h.cmake" "${P4C_BINARY_DIR}/conf
 set (IR_GENERATOR_DIRECTORY ${P4C_BINARY_DIR}/tools/ir-generator)
 set (IR_GENERATOR ${IR_GENERATOR_DIRECTORY}/irgenerator)
 
-# the order of adding subdirectories matters because of target dependencies
+# Component libraries: must be defined before being used in the back end executables.
+set (P4C_LIBRARIES controlplane midend frontend ir p4ctoolkit ir-generated)
+
+# If we enable GTest, install GoogleTest with the appropriate options.
+if (ENABLE_GTESTS)
+  include(GoogleTest)
+  p4c_obtain_googletest()
+endif ()
+
+# The order of adding subdirectories matters because of target dependencies.
 add_subdirectory (tools/driver)
 add_subdirectory (lib)
 add_subdirectory (tools/ir-generator)
 add_subdirectory (ir)
 
-# component libraries: must be defined before being used in the
-# backend executables
-set (P4C_LIBRARIES controlplane midend frontend ir p4ctoolkit ir-generated)
 
 # add extensions - before the frontends as they produce IR and extra frontend sources
 set(EXTENSION_IR_SOURCES)
 # extra sources that need to be linked directly into p4test so that
 # extensions can provide specific conversions (e.g., for externs)
 set(EXTENSION_P4_14_CONV_SOURCES)
+
+########################################## P4Runtime Begin #########################################
+# TODO: Ideally, this code should be part of the control-plane CMakelists.txt file. However, because
+# extensions which may depend on P4Runtime variables are instantiated before the control-plane we
+# need to keep the P4Runtime installation in the top-level CMakelists file.
+# Print download state while setting up P4Runtime.
+set(FETCHCONTENT_QUIET_PREV ${FETCHCONTENT_QUIET})
+set(FETCHCONTENT_QUIET OFF)
+# Fetch and declare the P4Runtime library.
+FetchContent_Declare(
+  p4runtime
+  GIT_REPOSITORY https://github.com/p4lang/p4runtime.git
+  GIT_TAG        d76a3640a223f47a43dc34e5565b72e43796ba57
+  GIT_PROGRESS TRUE
+)
+FetchContent_MakeAvailable(p4runtime)
+set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
+message("Done with setting up P4Runtime for P4C.")
+# The standard P4Runtime protocol buffers message definitions live in the PI
+# repo, which is included in this repo as a git module.
+set(P4RUNTIME_STD_DIR ${p4runtime_SOURCE_DIR}/proto CACHE INTERNAL
+                                                          "Path to the P4Runtime directory."
+)
+########################################## P4Runtime End ##########################################
 
 file (GLOB p4c_extensions RELATIVE ${P4C_SOURCE_DIR}/extensions ${P4C_SOURCE_DIR}/extensions/*)
 MESSAGE ("-- Available extensions ${p4c_extensions}")

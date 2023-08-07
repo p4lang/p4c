@@ -1,13 +1,14 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TEST_GTEST_UTILS_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TEST_GTEST_UTILS_H_
 
+#include <gtest/gtest.h>
+
 #include <optional>
 #include <string>
 
 #include "backends/p4tools/common/lib/variables.h"
 #include "frontends/common/options.h"
 #include "ir/ir.h"
-#include "test/frameworks/gtest/googletest/include/gtest/gtest.h"
 
 namespace Test {
 

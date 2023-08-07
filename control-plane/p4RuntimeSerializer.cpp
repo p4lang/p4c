@@ -15,10 +15,12 @@ limitations under the License.
 */
 #include "p4RuntimeSerializer.h"
 
-#include <google/protobuf/text_format.h>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wpedantic"
+#include <google/protobuf/text_format.h>
 #include <google/protobuf/util/json_util.h>
+#pragma GCC diagnostic pop
 
 #include <algorithm>
 #include <iostream>
@@ -30,8 +32,9 @@ limitations under the License.
 #include <utility>
 #include <vector>
 
-#include "p4/config/v1/p4info.pb.h"
-#include "p4/config/v1/p4types.pb.h"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include "p4/v1/p4runtime.pb.h"
 #pragma GCC diagnostic pop
 

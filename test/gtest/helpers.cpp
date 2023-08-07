@@ -29,7 +29,7 @@ limitations under the License.
 #include "frontends/p4/frontend.h"
 #include "frontends/p4/parseAnnotations.h"
 
-namespace detail {
+namespace TestDetail {
 
 std::string makeP4Source(const char *file, unsigned line, P4Headers headers,
                          const char *rawSource) {
@@ -85,7 +85,7 @@ std::string makeP4Source(const char *file, unsigned line, const char *rawSource)
     return makeP4Source(file, line, P4Headers::NONE, rawSource);
 }
 
-}  // namespace detail
+}  // namespace TestDetail
 
 /* static */ P4CTestEnvironment *P4CTestEnvironment::get() {
     static P4CTestEnvironment *instance = new P4CTestEnvironment;
