@@ -21,4 +21,6 @@ macro(p4c_obtain_googletest)
 
   include_directories(BEFORE SYSTEM ${gtest_SOURCE_DIR}/googletest/include)
   include_directories(BEFORE SYSTEM ${gtest_SOURCE_DIR}/googlemock/include)
+  target_include_directories(gtest SYSTEM BEFORE PUBLIC ${gtest_SOURCE_DIR}/googletest/include)
+  target_include_directories(gtest SYSTEM BEFORE PUBLIC ${gtest_SOURCE_DIR}/googlemock/include)
 endmacro(p4c_obtain_googletest)

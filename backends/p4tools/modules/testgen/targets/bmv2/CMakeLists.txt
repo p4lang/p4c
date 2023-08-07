@@ -29,6 +29,15 @@ set(
   PARENT_SCOPE
 )
 
+set(
+  TESTGEN_GTEST_SOURCES
+  ${TESTGEN_GTEST_SOURCES}
+  ${CMAKE_CURRENT_SOURCE_DIR}/test/backend/ptf.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test/backend/stf.cpp
+  PARENT_SCOPE
+)
+
+
 # Link the run-bmv2-test binary
 execute_process(COMMAND ln -sfn ${P4C_SOURCE_DIR}/backends/bmv2/run-bmv2-test.py ${CMAKE_BINARY_DIR}/run-bmv2-test.py)
 
