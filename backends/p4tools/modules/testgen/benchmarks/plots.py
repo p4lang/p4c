@@ -13,7 +13,7 @@ import seaborn as sns
 
 # Append tools to the import path.
 FILE_DIR = Path(__file__).resolve().parent
-TOOLS_PATH = FILE_DIR.joinpath("../../../tools")
+TOOLS_PATH = FILE_DIR.joinpath("../../../../../tools")
 sys.path.append(str(TOOLS_PATH))
 import testutils
 
@@ -86,6 +86,9 @@ def get_strategy_data(input_dir):
     for folder in folders:
         folder = Path(folder)
         program_name = folder.stem
+        # Make sure we escape hyphens
+        program_name = program_name.replace("-", "\-")
+        # exit(0)
         strategy_files = folder.glob("*_coverage_over_time.csv")
         strategy_data = {}
         for strategy_file in strategy_files:
