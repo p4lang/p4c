@@ -29,6 +29,62 @@ class STFLexer:
         self.last_token = None
         self.errors_cnt = 0
         self.lexer = None
+        self.states = (
+            # add a state to lex only keywords. By default, all keywords
+            # are IDs. Fortunately, in the current grammar all keywords
+            # are commands at the beginning of a line (except for packets and bytes!).
+            ("keyword", "inclusive"),
+            # lex only packet data
+            ("packetdata", "exclusive"),
+        )
+
+        self.keywords = [
+            "ADD",
+            "ALL",
+            "BYTES",
+            "CHECK_COUNTER",
+            "EXPECT",
+            "NO_PACKET",
+            "PACKET",
+            "PACKETS",
+            "REMOVE",
+            "SETDEFAULT",
+            "WAIT",
+        ]
+
+        self.keywords_map = {}
+        for keyword in self.keywords:
+            if keyword == "P4_PARSING_DONE":
+                self.keywords_map[keyword] = keyword
+            else:
+                self.keywords_map[keyword.lower()] = keyword
+
+        self.tokens = [
+            "COLON",
+            "COMMA",
+            "DATA_DEC",
+            "DATA_HEX",
+            "DATA_TERN",
+            "DATA_EXACT",
+            "DOT",
+            "ID",
+            "INT_CONST_BIN",
+            "INT_CONST_DEC",
+            "TERN_CONST_HEX",
+            "INT_CONST_HEX",
+            "LBRACKET",
+            "RBRACKET",
+            "LPAREN",
+            "RPAREN",
+            "SLASH",
+            "EQUAL",
+            "EQEQ",
+            "LE",
+            "LEQ",
+            "GT",
+            "GEQ",
+            "NEQ",
+        ] + self.keywords
 
     def reset_lineno(self):
         """Resets the internal line number counter of the lexer."""
@@ -66,62 +122,6 @@ class STFLexer:
         print(s, "in file", self.filename, "at line", self.get_lineno())
         self.errors_cnt += 1
 
-    states = (
-        # add a state to lex only keywords. By default, all keywords
-        # are IDs. Fortunately, in the current grammar all keywords
-        # are commands at the beginning of a line (except for packets and bytes!).
-        ("keyword", "inclusive"),
-        # lex only packet data
-        ("packetdata", "exclusive"),
-    )
-
-    keywords = (
-        "ADD",
-        "ALL",
-        "BYTES",
-        "CHECK_COUNTER",
-        "EXPECT",
-        "NO_PACKET",
-        "PACKET",
-        "PACKETS",
-        "REMOVE",
-        "SETDEFAULT",
-        "WAIT",
-    )
-
-    keywords_map = {}
-    for keyword in keywords:
-        if keyword == "P4_PARSING_DONE":
-            keywords_map[keyword] = keyword
-        else:
-            keywords_map[keyword.lower()] = keyword
-
-    tokens = (
-        "COLON",
-        "COMMA",
-        "DATA_DEC",
-        "DATA_HEX",
-        "DATA_TERN",
-        "DOT",
-        "ID",
-        "INT_CONST_BIN",
-        "INT_CONST_DEC",
-        "TERN_CONST_HEX",
-        "INT_CONST_HEX",
-        "LBRACKET",
-        "RBRACKET",
-        "LPAREN",
-        "RPAREN",
-        "SLASH",
-        "EQUAL",
-        "EQEQ",
-        "LE",
-        "LEQ",
-        "GT",
-        "GEQ",
-        "NEQ",
-    ) + keywords
-
     t_ignore_COMMENT = r"\#.*"
     t_COLON = r":"
     t_COMMA = r","
@@ -153,6 +153,7 @@ class STFLexer:
     dec_constant = r"([0-9]+)"
 
     identifier = r"([a-z$A-Z_][a-z$A-Z_0-9]*)"
+    quoted_identifier = r"\"[^\"]+\""
 
     @TOKEN(hex_tern_constant)
     def t_TERN_CONST_HEX(self, t):
@@ -195,6 +196,12 @@ class STFLexer:
         # print t, "pos:", t.lexpos, "col:", self.lexer.colno
         return t
 
+    @TOKEN(quoted_identifier)
+    def t_quoted_ID(self, t):
+        t.type = "ID"
+        t.value = t.value[1:-1]
+        return t
+
     # Discard comments.
     def t_COMMENT(self, t):
         r"\#.*$"
@@ -226,6 +233,10 @@ class STFLexer:
 
     def t_packetdata_DATA_TERN(self, t):
         r"\*"
+        return t
+
+    def t_packetdata_DATA_EXACT(self, t):
+        r"\$"
         return t
 
     def t_packetdata_newline(self, t):

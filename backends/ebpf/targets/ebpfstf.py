@@ -127,9 +127,9 @@ def parse_stf_file(raw_stf):
     expected = {}
     for stf_entry in stf_map:
         if stf_entry[0] == "packet":
-            input_pkts.setdefault(stf_entry[1], []).append(
-                bytes.fromhex("".join(stf_entry[2].split()))
-            )
+            interface = int(stf_entry[1])
+            data = stf_entry[2]
+            input_pkts.setdefault(interface, []).append(bytes.fromhex("".join(data.split())))
         elif stf_entry[0] == "expect":
             interface = int(stf_entry[1])
             pkt_data = stf_entry[2]
