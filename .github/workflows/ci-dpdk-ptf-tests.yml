@@ -1,0 +1,97 @@
+name: "p4c-dpdk-ptf-tests"
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+      
+concurrency:
+  # if workflow for PR or push is already running stop it, and start new one
+  group: p4c_dpdk_ptf_ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Envs for infrap4d and dpdk libs
+# DEPEND_INSTALL is put to a default searching directory for 
+#   visibility of different libs like libprotobuf
+env:
+    SDE: ${{ github.workspace }}
+    P4C_DIR: ${{ github.workspace }}/p4c
+    SDE_INSTALL: ${{ github.workspace }}/sde_install
+    IPDK_RECIPE: ${{ github.workspace }}/ipdk.recipe
+    DEPEND_INSTALL: /usr/local
+
+jobs:
+  build_p4dpdk_ubuntu:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: 'ccache'
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: ptf-${{ runner.os }}-test
+          max-size: 1000M
+
+      - name: 'Checkout DPDK-target'
+        uses: actions/checkout@v3
+        with:
+             repository: p4lang/p4-dpdk-target
+             path: p4sde
+             submodules: 'recursive'
+             
+      - name: 'Checkout ipdk-recipe'
+        uses: actions/checkout@v3
+        with:
+             repository: ipdk-io/networking-recipe
+             path: ipdk.recipe
+             submodules: 'recursive'
+
+      - name: checkout P4C
+        uses: actions/checkout@v3
+        with:
+             path: p4c
+             submodules: recursive
+
+      - name: 'Install DPDK dependencies'
+        working-directory: p4sde/tools/setup
+        run: |
+              sudo apt update -y
+              python install_dep.py
+
+      - name: 'Compile p4sde dpdk target'
+        working-directory: p4sde
+        run: |
+             mkdir ${GITHUB_WORKSPACE}/install
+             ./autogen.sh
+             ./configure --prefix=$SDE_INSTALL
+             make 
+             make install
+
+      - name: 'Build infrap4d dependencies'
+        working-directory: ipdk.recipe
+        run: |
+             echo "Install infrap4d dependencies"
+             sudo apt install libatomic1 libnl-route-3-dev openssl
+             sudo pip3 install -r requirements.txt
+             cd $IPDK_RECIPE/setup
+             echo "Build infrap4d dependencies"
+             cmake -B build -DCMAKE_INSTALL_PREFIX="$DEPEND_INSTALL" -DUSE_SUDO=ON
+             cmake --build build 
+
+      - name: 'Build infrap4d'
+        working-directory: ipdk.recipe
+        run: |       
+             sudo ./make-all.sh --target=dpdk --no-krnlmon --no-ovs -S $SDE_INSTALL -D $DEPEND_INSTALL
+
+      - name: Build p4c with only the DPDK backend
+        working-directory: p4c
+        run: |
+          sudo -E tools/dpdk-ci-build.sh $P4C_DIR $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
+
+      - name: 'Run DPDK PTF tests'
+        working-directory: p4c/build
+        run: |
+             sudo $IPDK_RECIPE/install/sbin/copy_config_files.sh $IPDK_RECIPE/install $SDE_INSTALL
+             sudo $IPDK_RECIPE/install/sbin/set_hugepages.sh
+             sudo -E ctest --output-on-failure --schedule-random -R dpdk-ptf*

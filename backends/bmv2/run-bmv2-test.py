@@ -17,6 +17,7 @@
 # behavioral model simulator
 
 import argparse
+import logging
 import os
 import shutil
 import sys
@@ -233,10 +234,15 @@ def run_model(options, tmpdir, jsonfile):
             # If no empty.stf present, don't try to run the model at all
             return SUCCESS
     bmv2 = RunBMV2(tmpdir, options, jsonfile)
-    result = bmv2.generate_model_inputs(testFile)
+
+    stf_map, result = bmv2.parse_stf_file(testFile)
     if result != SUCCESS:
         return result
-    result = bmv2.run()
+
+    result = bmv2.generate_model_inputs(stf_map)
+    if result != SUCCESS:
+        return result
+    result = bmv2.run(stf_map)
     if result != SUCCESS:
         return result
     result = bmv2.checkOutputs()
@@ -374,6 +380,17 @@ if __name__ == "__main__":
     if not config.ok:
         print("Error parsing config.h")
         sys.exit(FAILURE)
+
+    # Configure logging.
+    logging.basicConfig(
+        filename="test.log",
+        format="%(levelname)s: %(message)s",
+        level=getattr(logging, "INFO"),
+        filemode="w",
+    )
+    stderr_log = logging.StreamHandler()
+    stderr_log.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
+    logging.getLogger().addHandler(stderr_log)
 
     options.hasBMv2 = "HAVE_SIMPLE_SWITCH" in config.vars
     if not options.hasBMv2:
