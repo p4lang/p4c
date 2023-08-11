@@ -138,11 +138,6 @@ if [[ "${DISTRIB_RELEASE}" == "22.04" ]] ; then
   sudo pip3 install --upgrade grpcio==1.51.1
 fi
 
-# Build libbpf for eBPF tests.
-pushd ${P4C_DIR}
-backends/ebpf/build_libbpf
-popd
-
 # ! ------  BEGIN PTF_EBPF -----------------------------------------------
 function install_ptf_ebpf_test_deps() (
   P4C_PTF_PACKAGES="gcc-multilib \
