@@ -421,10 +421,14 @@ void EBPFPnaParser::emit(EBPF::CodeBuilder *builder) {
     builder->blockEnd(true);
 }
 
+//  This code is similar to compileExtractField function in PsaStateTranslationVisitor.
+//  Handled TC "macaddr" annotation.
 void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
                                                      const IR::StructField *field,
                                                      unsigned alignment, EBPF::EBPFType *type) {
-    unsigned widthToExtract = dynamic_cast<EBPF::IHasWidth *>(type)->widthInBits();
+    auto width = dynamic_cast<EBPF::IHasWidth *>(type);
+    if (width == nullptr) return;
+    unsigned widthToExtract = width->widthInBits();
     auto program = state->parser->program;
     cstring msgStr;
     cstring fieldName = field->name.name;
