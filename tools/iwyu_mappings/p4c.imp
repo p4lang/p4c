@@ -9,10 +9,11 @@
 
     ### P4C customization
     { include: ["\"ir/ir-generated.h\"", "private", "\"ir/ir.h\"", "public"] },
+    { include: ["<ir/ir-generated.h>", "private", "\"ir/ir.h\"", "public"] },
     { include: ["\"ir/ir-inline.h\"", "private", "\"ir/ir.h\"", "public"] },
     { include: ["\"frontends/parsers/p4/p4lexer_internal.hpp\"", "private", "\"frontends/parsers/p4/p4lexer.hpp\"", "public"] },
     { include: ["\"frontends/parsers/v1/v1lexer_internal.hpp\"", "private", "\"frontends/parsers/v1/v1lexer.hpp\"", "public"] },
-    { include: ["\"ir/ir-inline.h\"", "private", "\"ir/ir.h\"", "public"] },
+    { include: ["\"net/proto2/public/repeated_field.h\"", "private", "<google/protobuf/repeated_field.h>", "public"]},
 
     ##### Fixes imported from https://gitlab.cs.fau.de/flow/emper/-/blob/master/iwyu-mappings.imp
     { include: ["<bits/chrono.h>", "private", "<chrono>", "public"]},
@@ -36,8 +37,6 @@
     { include: ["<boost/program_options/positional_options.hpp>", "private", "<boost/program_options.hpp>", "public"], },
     { include: ["<boost/type_index/type_index_facade.hpp>", "private", "<boost/program_options.hpp>", "public"], },
     { include: ["<boost/cstdint.hpp>", "private", "<cstdint>", "public"], },
-
     { symbol: ["__kernel_timespec", "private", "<liburing.h>", "public" ] },
     { symbol: ["__s32", "private", "<liburing.h>", "public" ] },
-    { symbol: ["std::filesystem", "private", "<filesystem>", "public" ] },
 ]
