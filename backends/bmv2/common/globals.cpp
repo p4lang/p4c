@@ -16,8 +16,12 @@ limitations under the License.
 
 #include "globals.h"
 
+#include <ostream>
+
 #include "extern.h"
-#include "sharedActionSelectorCheck.h"
+#include "ir/node.h"
+#include "lib/json.h"
+#include "lib/log.h"
 
 namespace BMV2 {
 

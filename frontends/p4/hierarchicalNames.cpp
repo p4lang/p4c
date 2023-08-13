@@ -16,6 +16,9 @@ limitations under the License.
 
 #include "hierarchicalNames.h"
 
+#include <ostream>
+
+#include "ir/id.h"
 #include "lib/log.h"
 
 namespace P4 {

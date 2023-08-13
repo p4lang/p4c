@@ -9,6 +9,7 @@
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/indexed_vector.h"
+#include "ir/ir.h"
 #include "ir/irutils.h"
 #include "ir/node.h"
 #include "ir/vector.h"

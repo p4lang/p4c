@@ -2,25 +2,32 @@
 
 #include <cerrno>
 #include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <iostream>
-#include <sstream>
+#include <utility>
 
-#include <boost/algorithm/string/predicate.hpp>
 #include <boost/format.hpp>
+#include <boost/iostreams/stream_buffer.hpp>
+#include <boost/range/algorithm/equal.hpp>
 
+#include "config.h"
 #include "frontends/common/constantFolding.h"
-#include "frontends/common/options.h"
+#include "frontends/common/parser_options.h"
 #include "frontends/parsers/p4/p4AnnotationLexer.hpp"
 #include "frontends/parsers/p4/p4lexer.hpp"
 #include "frontends/parsers/p4/p4parser.hpp"
 #include "frontends/parsers/v1/v1lexer.hpp"
 #include "frontends/parsers/v1/v1parser.hpp"
-#include "lib/error.h"
+#include "ir/id.h"
+#include "lib/compile_context.h"
+#include "lib/error_reporter.h"
+#include "lib/log.h"
+#include "lib/safe_vector.h"
 
 #ifdef HAVE_LIBBOOST_IOSTREAMS
 
 #include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/stream.hpp>
 
 namespace {
 

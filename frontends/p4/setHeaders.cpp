@@ -16,6 +16,15 @@ limitations under the License.
 
 #include "setHeaders.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "lib/cstring.h"
+#include "lib/log.h"
+
 namespace P4 {
 
 void DoSetHeaders::generateSetValid(const IR::Expression *dest, const IR::Expression *src,

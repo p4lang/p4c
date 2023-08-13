@@ -16,9 +16,24 @@ limitations under the License.
 
 #include "ubpfParser.h"
 
+#include <stddef.h>
+
+#include <string>
+
+#include "backends/ebpf/ebpfParser.h"
+#include "backends/ebpf/target.h"
+#include "frontends/common/model.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
-#include "ubpfHelpers.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
+#include "lib/algorithm.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
 #include "ubpfModel.h"
 #include "ubpfType.h"
 

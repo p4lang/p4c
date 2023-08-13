@@ -14,6 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <stdint.h>
+
+#include <climits>
+#include <memory>
+
 #include "gtest/gtest.h"
 #include "helpers.h"
 #include "ir/ir.h"

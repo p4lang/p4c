@@ -17,7 +17,13 @@ limitations under the License.
 #ifndef MIDEND_EXPR_USES_H_
 #define MIDEND_EXPR_USES_H_
 
+#include <ctype.h>
+#include <stdlib.h>
+
+#include "ir/id.h"
 #include "ir/ir.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
 
 /* Should this be a method on IR::Expression? */
 

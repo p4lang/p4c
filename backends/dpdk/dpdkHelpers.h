@@ -17,20 +17,25 @@ limitations under the License.
 #ifndef BACKENDS_DPDK_DPDKHELPERS_H_
 #define BACKENDS_DPDK_DPDKHELPERS_H_
 
-#include "constants.h"
+#include <ostream>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "dpdkProgramStructure.h"
-#include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/coreLibrary.h"
-#include "frontends/p4/enumInstance.h"
-#include "frontends/p4/evaluator/evaluator.h"
-#include "frontends/p4/methodInstance.h"
-#include "frontends/p4/simplify.h"
 #include "frontends/p4/typeMap.h"
-#include "frontends/p4/unusedDeclarations.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
-#include "lib/big_int_util.h"
-#include "lib/json.h"
+#include "ir/node.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/log.h"
+#include "lib/null.h"
 #include "midend/removeComplexExpressions.h"
 
 #define TOSTR_DECLA(NAME) std::ostream &toStr(std::ostream &, IR::NAME *)

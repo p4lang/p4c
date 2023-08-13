@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "target.h"
 
-#include "ebpfType.h"
+#include <stdarg.h>
 
 namespace EBPF {
 

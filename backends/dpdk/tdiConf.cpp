@@ -17,7 +17,14 @@ limitations under the License.
 
 #include <filesystem>
 #include <fstream>
-#include <iostream>
+
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/vector.h"
+#include "lib/enumerator.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
 
 namespace DPDK {
 

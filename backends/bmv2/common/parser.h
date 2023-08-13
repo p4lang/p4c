@@ -17,16 +17,18 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_COMMON_PARSER_H_
 #define BACKENDS_BMV2_COMMON_PARSER_H_
 
-#include "expression.h"
-#include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/typeMap.h"
+#include <vector>
+
+#include "frontends/p4/coreLibrary.h"
 #include "helpers.h"
+#include "ir/id.h"
 #include "ir/ir.h"
+#include "ir/visitor.h"
+#include "lib/big_int_util.h"
+#include "lib/cstring.h"
 #include "lib/json.h"
 
 namespace BMV2 {
-
-class JsonObjects;
 
 class ParserConverter : public Inspector {
     ConversionContext *ctxt;

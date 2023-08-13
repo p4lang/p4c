@@ -17,7 +17,14 @@ limitations under the License.
 #ifndef BACKENDS_DPDK_OPTIONS_H_
 #define BACKENDS_DPDK_OPTIONS_H_
 
+#include <stdlib.h>
+
+#include <vector>
+
 #include "backends/dpdk/midend.h"
+#include "frontends/common/options.h"
+#include "frontends/common/parser_options.h"
+#include "lib/cstring.h"
 
 namespace DPDK {
 

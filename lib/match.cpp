@@ -16,6 +16,10 @@ limitations under the License.
 
 #include "match.h"
 
+#include <boost/multiprecision/cpp_int/bitwise.hpp>
+
+#include "lib/big_int_util.h"
+
 static int chkmask(const match_t &m, int maskbits) {
     big_int mask = (big_int(1) << maskbits) - 1;
     int shift = 0;

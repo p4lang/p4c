@@ -16,6 +16,19 @@ and limitations under the License.
 
 #include "introspection.h"
 
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "backends/tc/tcAnnotations.h"
+#include "backends/tc/tc_defines.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/stringify.h"
+
 /// This file defines functions for the pass to generate the introspection file
 
 namespace TC {

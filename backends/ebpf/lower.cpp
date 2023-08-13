@@ -16,6 +16,17 @@ limitations under the License.
 
 #include "lower.h"
 
+#include <ostream>
+
+#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/multiprecision/number.hpp>
+
+#include "lib/big_int_util.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+
 namespace EBPF {
 
 const IR::Expression *LowerExpressions::shift(const IR::Operation_Binary *expression) const {

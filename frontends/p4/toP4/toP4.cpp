@@ -16,14 +16,29 @@ limitations under the License.
 
 #include "toP4.h"
 
-#include <deque>
-#include <sstream>
+#include <string.h>
+
+#include <list>
+#include <map>
+#include <set>
 #include <string>
 
-#include "frontends/common/options.h"
+#include "frontends/common/model.h"
+#include "frontends/common/parser_options.h"
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/parsers/p4/p4parser.hpp"
+#include "ir/declaration.h"
 #include "ir/dump.h"
+#include "ir/id.h"
+#include "ir/namemap.h"
+#include "lib/enumerator.h"
+#include "lib/error_catalog.h"
+#include "lib/indent.h"
+#include "lib/log.h"
+#include "lib/map.h"
+#include "lib/null.h"
+#include "lib/source_file.h"
+#include "lib/stringify.h"
 
 namespace P4 {
 

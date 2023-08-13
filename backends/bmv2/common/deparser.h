@@ -17,11 +17,12 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_COMMON_DEPARSER_H_
 #define BACKENDS_BMV2_COMMON_DEPARSER_H_
 
-#include "backend.h"
-#include "expression.h"
-#include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/typeMap.h"
+#include "backends/bmv2/common/helpers.h"
+#include "frontends/p4/coreLibrary.h"
 #include "ir/ir.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
 #include "lib/json.h"
 
 namespace BMV2 {

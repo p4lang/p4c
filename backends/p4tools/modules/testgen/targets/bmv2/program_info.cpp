@@ -12,13 +12,16 @@
 
 #include "backends/p4tools/common/lib/arch_spec.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "ir/declaration.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
+#include "lib/log.h"
 #include "lib/null.h"
+#include "lib/ordered_map.h"
 
 #include "backends/p4tools/modules/testgen//lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"

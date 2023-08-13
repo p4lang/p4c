@@ -17,11 +17,15 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_PSA_EXTERNS_EBPFPSACOUNTER_H_
 #define BACKENDS_EBPF_PSA_EXTERNS_EBPFPSACOUNTER_H_
 
+#include "backends/ebpf/codeGen.h"
+#include "backends/ebpf/ebpfProgram.h"
 #include "backends/ebpf/ebpfTable.h"
+#include "backends/ebpf/ebpfType.h"
+#include "frontends/p4/methodInstance.h"
+#include "ir/ir.h"
+#include "lib/cstring.h"
 
 namespace EBPF {
-
-class ControlBodyTranslatorPSA;
 
 class EBPFCounterPSA : public EBPFCounterTable {
  protected:

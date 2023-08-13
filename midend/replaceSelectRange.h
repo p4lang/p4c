@@ -18,14 +18,20 @@
 #ifndef MIDEND_REPLACESELECTRANGE_H_
 #define MIDEND_REPLACESELECTRANGE_H_
 
-#include <iomanip>
-#include <iostream>
-#include <utility>
+#include <sys/types.h>
+
+#include <set>
 #include <vector>
 
-#include "../lib/big_int_util.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/pass_manager.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
+#include "lib/safe_vector.h"
 
 namespace P4 {
 

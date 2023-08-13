@@ -17,11 +17,10 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_PSA_SWITCH_MIDEND_H_
 #define BACKENDS_BMV2_PSA_SWITCH_MIDEND_H_
 
+#include <iosfwd>
+
 #include "backends/bmv2/common/midend.h"
-#include "backends/bmv2/common/options.h"
 #include "frontends/common/options.h"
-#include "ir/ir.h"
-#include "midend/convertEnums.h"
 
 namespace BMV2 {
 

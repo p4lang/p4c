@@ -17,17 +17,20 @@ and limitations under the License.
 #ifndef BACKENDS_TC_BACKEND_H_
 #define BACKENDS_TC_BACKEND_H_
 
-#include "backends/ebpf/psa/ebpfPsaGen.h"
-#include "ebpfCodeGen.h"
-#include "frontends/p4/evaluator/evaluator.h"
-#include "frontends/p4/parseAnnotations.h"
-#include "frontends/p4/parserCallGraph.h"
+#include <iosfwd>
+
+#include "backends/ebpf/ebpfOptions.h"
+#include "backends/ebpf/target.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
 #include "introspection.h"
+#include "ir/declaration.h"
 #include "ir/ir.h"
-#include "lib/error.h"
-#include "lib/nullstream.h"
+#include "ir/pass_manager.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/ordered_map.h"
 #include "options.h"
-#include "pnaProgramStructure.h"
 #include "tcAnnotations.h"
 #include "tc_defines.h"
 
@@ -37,7 +40,7 @@ extern cstring PnaMainParserInputMetaFields[TC::MAX_PNA_PARSER_META];
 extern cstring PnaMainInputMetaFields[TC::MAX_PNA_INPUT_META];
 extern cstring PnaMainOutputMetaFields[TC::MAX_PNA_OUTPUT_META];
 
-class PNAEbpfGenerator;
+class PNAEbpfGenerator;  // IWYU pragma: keep
 
 /**
  * Backend code generation from midend IR

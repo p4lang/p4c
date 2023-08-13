@@ -16,7 +16,23 @@ limitations under the License.
 
 #include "dpdkAsmOpt.h"
 
+#include <map>
+#include <stdexcept>
+
+#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/multiprecision/detail/et_ops.hpp>
+#include <boost/multiprecision/number.hpp>
+#include <boost/multiprecision/traits/explicit_conversion.hpp>
+
 #include "dpdkUtils.h"
+#include "frontends/common/model.h"
+#include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/enumInstance.h"
+#include "ir/declaration.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
 
 namespace DPDK {
 // The assumption is compiler can only produce forward jumps.

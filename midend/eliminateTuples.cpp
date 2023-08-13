@@ -1,6 +1,19 @@
 #include "eliminateTuples.h"
 
+#include <stddef.h>
+
+#include <list>
+#include <ostream>
 #include <string>
+#include <utility>
+#include <vector>
+
+#include "ir/id.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/stringify.h"
 
 namespace P4 {
 

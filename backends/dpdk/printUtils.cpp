@@ -15,6 +15,16 @@ limitations under the License.
 
 #include "printUtils.h"
 
+#include <string>
+
+#include <boost/multiprecision/number.hpp>
+
+#include "ir/id.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+
 namespace DPDK {
 
 bool ConvertToString::preorder(const IR::Expression *e) {

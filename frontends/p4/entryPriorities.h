@@ -18,9 +18,14 @@ limitations under the License.
 #define FRONTENDS_P4_ENTRYPRIORITIES_H_
 
 #include "coreLibrary.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "ir/ir.h"
+#include "ir/node.h"
 #include "ir/pass_manager.h"
+#include "ir/visitor.h"
+#include "lib/null.h"
+#include "lib/safe_vector.h"
 
 namespace P4 {
 

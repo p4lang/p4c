@@ -1,9 +1,7 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_TARGET_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_TARGET_H_
 
-#include <cstdint>
 #include <filesystem>
-#include <optional>
 #include <string>
 #include <vector>
 

@@ -1,7 +1,6 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/greedy_stmt_cov.h"
 
 #include <cstddef>
-#include <functional>
 #include <map>
 #include <optional>
 #include <vector>
@@ -9,6 +8,7 @@
 #include "backends/p4tools/common/core/solver.h"
 #include "lib/error.h"
 #include "lib/timer.h"
+#include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"

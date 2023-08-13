@@ -1,6 +1,17 @@
 #include "dpdkProgramStructure.h"
 
+#include <string.h>
+
+#include <list>
+#include <ostream>
+
+#include "frontends/common/parser_options.h"
 #include "ir/ir.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/stringify.h"
 #include "options.h"
 
 bool ParseDpdkArchitecture::preorder(const IR::ToplevelBlock *block) {

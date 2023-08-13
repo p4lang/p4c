@@ -17,8 +17,17 @@ limitations under the License.
 #ifndef MIDEND_PREDICATION_H_
 #define MIDEND_PREDICATION_H_
 
-#include "frontends/p4/typeChecking/typeChecker.h"
+#include <map>
+#include <vector>
+
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/null.h"
 
 namespace P4 {
 

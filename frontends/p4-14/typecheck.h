@@ -17,7 +17,10 @@ limitations under the License.
 #ifndef FRONTENDS_P4_14_TYPECHECK_H_
 #define FRONTENDS_P4_14_TYPECHECK_H_
 
+#include <map>
+
 #include "ir/ir.h"
+#include "ir/node.h"
 #include "ir/pass_manager.h"
 
 /* This is the P4 v1.0/v1.1 typechecker/type inference algorithm */

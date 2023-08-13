@@ -16,6 +16,17 @@ limitations under the License.
 
 #include "checkNamedArgs.h"
 
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+
 namespace P4 {
 
 bool CheckNamedArgs::checkArguments(const IR::Vector<IR::Argument> *arguments) {

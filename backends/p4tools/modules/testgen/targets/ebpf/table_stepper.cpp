@@ -3,12 +3,11 @@
 #include <optional>
 #include <vector>
 
+#include "backends/p4tools/common/lib/table_utils.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
 
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
-#include "backends/p4tools/modules/testgen/lib/execution_state.h"
-#include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/expr_stepper.h"
 
 namespace P4Tools::P4Testgen::EBPF {

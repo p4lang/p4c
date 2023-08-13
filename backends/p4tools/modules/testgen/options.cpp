@@ -11,9 +11,12 @@
 
 #include "backends/p4tools/common/lib/util.h"
 #include "backends/p4tools/common/options.h"
+#include "lib/cstring.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
+#include "midend/coverage.h"
 
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
 #include "backends/p4tools/modules/testgen/lib/logging.h"
 
 namespace P4Tools::P4Testgen {

@@ -21,12 +21,14 @@
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
+#include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"
 #include "nlohmann/json.hpp"
 
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/test_object.h"
+#include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 
 namespace P4Tools::P4Testgen::EBPF {

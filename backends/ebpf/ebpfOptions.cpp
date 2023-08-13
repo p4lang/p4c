@@ -16,6 +16,10 @@ limitations under the License.
 
 #include "ebpfOptions.h"
 
+#include <string.h>
+
+#include <cstdlib>
+
 #include "midend.h"
 
 EbpfOptions::EbpfOptions() {

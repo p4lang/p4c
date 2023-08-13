@@ -16,8 +16,29 @@ limitations under the License.
 
 #include "header.h"
 
-#include "backend.h"
+#include <algorithm>
+#include <map>
+#include <ostream>
+#include <string>
+#include <vector>
+
+#include "backends/bmv2/common/JsonObjects.h"
+#include "backends/bmv2/common/helpers.h"
+#include "backends/bmv2/common/options.h"
+#include "backends/bmv2/common/programStructure.h"
+#include "frontends/common/parser_options.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
+#include "ir/vector.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/null.h"
+#include "lib/stringify.h"
 
 namespace BMV2 {
 

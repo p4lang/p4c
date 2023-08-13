@@ -16,12 +16,36 @@ limitations under the License.
 
 #include "simplifyDefUse.h"
 
+#include <stddef.h>
+#include <stdint.h>
+
+#include <list>
+#include <map>
+#include <set>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
 #include "frontends/p4/def_use.h"
 #include "frontends/p4/methodInstance.h"
+#include "frontends/p4/parameterSubstitution.h"
 #include "frontends/p4/parserCallGraph.h"
 #include "frontends/p4/sideEffects.h"
 #include "frontends/p4/tableApply.h"
 #include "frontends/p4/ternaryBool.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
+#include "lib/enumerator.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/indent.h"
+#include "lib/map.h"
+#include "lib/ordered_map.h"
+#include "lib/ordered_set.h"
+#include "lib/source_file.h"
 
 namespace P4 {
 

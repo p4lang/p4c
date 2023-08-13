@@ -16,8 +16,39 @@ and limitations under the License.
 
 #include "backend.h"
 
+#include <functional>
+#include <list>
+#include <ostream>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "backends/bmv2/common/programStructure.h"
+#include "backends/ebpf/codeGen.h"
 #include "backends/ebpf/ebpfOptions.h"
+#include "backends/ebpf/ebpfType.h"
 #include "backends/ebpf/target.h"
+#include "backends/tc/ebpfCodeGen.h"
+#include "backends/tc/introspection.h"
+#include "backends/tc/options.h"
+#include "backends/tc/pnaProgramStructure.h"
+#include "backends/tc/tcAnnotations.h"
+#include "backends/tc/tc_defines.h"
+#include "frontends/common/model.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/evaluator/evaluator.h"
+#include "frontends/p4/methodInstance.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/node.h"
+#include "ir/vector.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/null.h"
+#include "lib/nullstream.h"
+#include "lib/safe_vector.h"
 
 namespace TC {
 

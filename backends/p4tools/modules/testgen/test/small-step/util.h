@@ -18,7 +18,6 @@
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"
 #include "ir/vector.h"
-#include "lib/cstring.h"
 #include "lib/enumerator.h"
 
 #include "backends/p4tools/modules/testgen/core/small_step/small_step.h"

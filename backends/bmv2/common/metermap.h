@@ -17,6 +17,9 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_COMMON_METERMAP_H_
 #define BACKENDS_BMV2_COMMON_METERMAP_H_
 
+#include <map>
+
+#include "ir/declaration.h"
 #include "ir/ir.h"
 
 namespace BMV2 {

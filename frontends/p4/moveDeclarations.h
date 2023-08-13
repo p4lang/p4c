@@ -17,8 +17,18 @@ limitations under the License.
 #ifndef FRONTENDS_P4_MOVEDECLARATIONS_H_
 #define FRONTENDS_P4_MOVEDECLARATIONS_H_
 
+#include <string>
+#include <vector>
+
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
+#include "lib/null.h"
 
 namespace P4 {
 

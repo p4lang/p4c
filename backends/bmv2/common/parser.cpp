@@ -16,12 +16,34 @@ limitations under the License.
 
 #include "parser.h"
 
+#include <ostream>
+#include <string>
+
+#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/multiprecision/detail/et_ops.hpp>
+#include <boost/multiprecision/number.hpp>
+#include <boost/multiprecision/traits/explicit_conversion.hpp>
+
 #include "JsonObjects.h"
-#include "backend.h"
+#include "backends/bmv2/common/expression.h"
+#include "backends/bmv2/common/helpers.h"
+#include "backends/bmv2/common/programStructure.h"
 #include "extern.h"
+#include "frontends/common/model.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/fromv1.0/v1model.h"
+#include "frontends/p4/methodInstance.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/declaration.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
 #include "lib/algorithm.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/null.h"
 
 namespace BMV2 {
 

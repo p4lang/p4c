@@ -18,10 +18,17 @@ limitations under the License.
 #define FRONTENDS_P4_PARSERCONTROLFLOW_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/simplify.h"
+#include "frontends/p4/typeMap.h"
 #include "frontends/p4/uniqueNames.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/pass_manager.h"
+#include "ir/visitor.h"
+#include "lib/null.h"
+#include "lib/safe_vector.h"
 
 namespace P4 {
 

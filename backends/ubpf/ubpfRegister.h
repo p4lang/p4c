@@ -17,8 +17,12 @@ limitations under the License.
 #ifndef BACKENDS_UBPF_UBPFREGISTER_H_
 #define BACKENDS_UBPF_UBPFREGISTER_H_
 
+#include "backends/ebpf/codeGen.h"
+#include "backends/ubpf/ubpfProgram.h"
+#include "frontends/p4/methodInstance.h"
+#include "ir/ir.h"
+#include "lib/cstring.h"
 #include "ubpfTable.h"
-#include "ubpfType.h"
 
 namespace UBPF {
 

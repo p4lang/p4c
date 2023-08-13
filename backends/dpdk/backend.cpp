@@ -15,9 +15,14 @@ limitations under the License.
 */
 #include "backend.h"
 
-#include <unordered_map>
+#include <functional>
+#include <ostream>
+#include <set>
 
 #include "../bmv2/common/lower.h"
+#include "backends/dpdk/constants.h"
+#include "backends/dpdk/dpdkProgramStructure.h"
+#include "backends/dpdk/options.h"
 #include "dpdkArch.h"
 #include "dpdkAsmOpt.h"
 #include "dpdkCheckExternInvocation.h"
@@ -25,10 +30,19 @@ limitations under the License.
 #include "dpdkHelpers.h"
 #include "dpdkMetadata.h"
 #include "dpdkProgram.h"
+#include "frontends/common/constantFolding.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/moveDeclarations.h"
-#include "ir/dbprint.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/unusedDeclarations.h"
 #include "ir/ir.h"
-#include "lib/stringify.h"
+#include "ir/node.h"
+#include "ir/pass_manager.h"
+#include "lib/cstring.h"
+#include "lib/null.h"
+#include "lib/nullstream.h"
+#include "lib/ordered_map.h"
+#include "lib/ordered_set.h"
 #include "midend/eliminateTypedefs.h"
 #include "midend/removeComplexExpressions.h"
 #include "midend/simplifyKey.h"

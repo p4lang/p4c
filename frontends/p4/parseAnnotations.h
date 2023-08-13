@@ -17,14 +17,26 @@ limitations under the License.
 #ifndef P4_PARSEANNOTATIONS_H_
 #define P4_PARSEANNOTATIONS_H_
 
+#include <functional>
+#include <set>
+#include <string>
+#include <unordered_map>
+
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/typeMap.h"
 #include "frontends/parsers/parserDriver.h"
 #include "ir/ir.h"
+#include "ir/pass_manager.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/safe_vector.h"
 
 /*
  * Parses known/predefined annotations used by the compiler.
  */
 namespace P4 {
+class ParseAnnotations;
 
 // A no-op handler. Useful for avoiding warnings about ignored annotations.
 #define PARSE_SKIP(aname) \

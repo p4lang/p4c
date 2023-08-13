@@ -11,6 +11,7 @@
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
+#include "lib/ordered_map.h"
 
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
@@ -18,6 +19,7 @@
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/targets/pna/concolic.h"
 #include "backends/p4tools/modules/testgen/targets/pna/constants.h"
+#include "backends/p4tools/modules/testgen/targets/pna/shared_program_info.h"
 
 namespace P4Tools::P4Testgen::Pna {
 

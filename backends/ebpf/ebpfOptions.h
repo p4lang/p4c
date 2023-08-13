@@ -17,9 +17,12 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_EBPFOPTIONS_H_
 #define BACKENDS_EBPF_EBPFOPTIONS_H_
 
-#include <getopt.h>
+#include <iostream>
 
 #include "frontends/common/options.h"
+#include "frontends/common/parser_options.h"
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
 
 enum XDP2TC { XDP2TC_NONE, XDP2TC_META, XDP2TC_HEAD, XDP2TC_CPUMAP };
 

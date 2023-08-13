@@ -16,7 +16,16 @@ limitations under the License.
 
 #include "simplifySelectCases.h"
 
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "frontends/p4/enumInstance.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/null.h"
 
 namespace P4 {
 

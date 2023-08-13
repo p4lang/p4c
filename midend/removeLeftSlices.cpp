@@ -16,6 +16,11 @@ limitations under the License.
 
 #include "removeLeftSlices.h"
 
+#include <ostream>
+
+#include "lib/big_int_util.h"
+#include "lib/log.h"
+
 namespace P4 {
 
 const IR::Node *DoRemoveLeftSlices::postorder(IR::AssignmentStatement *stat) {

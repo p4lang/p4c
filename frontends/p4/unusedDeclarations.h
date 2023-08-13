@@ -17,9 +17,18 @@ limitations under the License.
 #ifndef P4_UNUSEDDECLARATIONS_H_
 #define P4_UNUSEDDECLARATIONS_H_
 
+#include <set>
+
 #include "../common/resolveReferences/resolveReferences.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "ir/declaration.h"
 #include "ir/ir.h"
+#include "ir/node.h"
 #include "ir/pass_manager.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/null.h"
+#include "lib/safe_vector.h"
 
 namespace P4 {
 

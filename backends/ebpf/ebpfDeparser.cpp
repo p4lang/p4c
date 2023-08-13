@@ -17,6 +17,25 @@ limitations under the License.
 
 #include "ebpfDeparser.h"
 
+#include <string>
+#include <vector>
+
+#include "backends/ebpf/ebpfControl.h"
+#include "backends/ebpf/ebpfModel.h"
+#include "backends/ebpf/ebpfOptions.h"
+#include "backends/ebpf/target.h"
+#include "frontends/common/model.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/stringify.h"
+
 namespace EBPF {
 
 DeparserBodyTranslator::DeparserBodyTranslator(const EBPFDeparser *deparser)

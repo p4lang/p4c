@@ -6,7 +6,9 @@
 #include "backends/p4tools/common/lib/namespace_context.h"
 #include "backends/p4tools/common/lib/trace_event.h"
 #include "ir/id.h"
+#include "ir/node.h"
 #include "ir/visitor.h"
+#include "lib/cstring.h"
 #include "lib/exceptions.h"
 
 namespace P4Tools::P4Testgen {

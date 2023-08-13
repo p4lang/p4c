@@ -17,21 +17,29 @@ limitations under the License.
 #ifndef BACKENDS_DPDK_DPDKASMOPT_H_
 #define BACKENDS_DPDK_DPDKASMOPT_H_
 
-#include <fstream>
+#include <stddef.h>
 
-#include "dpdkUtils.h"
-#include "frontends/common/constantFolding.h"
+#include <fstream>
+#include <list>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/coreLibrary.h"
-#include "frontends/p4/enumInstance.h"
-#include "frontends/p4/evaluator/evaluator.h"
-#include "frontends/p4/methodInstance.h"
-#include "frontends/p4/simplify.h"
 #include "frontends/p4/typeMap.h"
-#include "frontends/p4/unusedDeclarations.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/pass_manager.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
 #include "lib/big_int_util.h"
-#include "lib/json.h"
+#include "lib/cstring.h"
+#include "lib/ordered_map.h"
+#include "lib/ordered_set.h"
+#include "lib/safe_vector.h"
 
 #define DPDK_TABLE_MAX_KEY_SIZE 64 * 8
 

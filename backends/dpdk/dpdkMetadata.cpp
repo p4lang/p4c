@@ -16,7 +16,13 @@ limitations under the License.
 
 #include "dpdkMetadata.h"
 
-#include "dpdkUtils.h"
+#include <boost/multiprecision/cpp_int.hpp>
+
+#include "backends/dpdk/dpdkUtils.h"
+#include "ir/id.h"
+#include "ir/vector.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
 
 namespace DPDK {
 

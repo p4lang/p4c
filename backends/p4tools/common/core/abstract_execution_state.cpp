@@ -1,9 +1,25 @@
 #include "backends/p4tools/common/core/abstract_execution_state.h"
 
+#include <stddef.h>
+
+#include <string>
+#include <utility>
+
+#include <boost/container/vector.hpp>
+
 #include "backends/p4tools/common/compiler/convert_hs_index.h"
 #include "backends/p4tools/common/core/target.h"
+#include "backends/p4tools/common/lib/namespace_context.h"
+#include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/variables.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/ir.h"
 #include "ir/irutils.h"
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
 
 namespace P4Tools {
 

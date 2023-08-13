@@ -17,11 +17,39 @@ and limitations under the License.
 #ifndef BACKENDS_TC_EBPFCODEGEN_H_
 #define BACKENDS_TC_EBPFCODEGEN_H_
 
-#include "backend.h"
+#include <string>
+#include <vector>
+
+#include "backends/ebpf/codeGen.h"
+#include "backends/ebpf/ebpfControl.h"
+#include "backends/ebpf/ebpfDeparser.h"
+#include "backends/ebpf/ebpfOptions.h"
+#include "backends/ebpf/ebpfParser.h"
+#include "backends/ebpf/ebpfProgram.h"
+#include "backends/ebpf/ebpfTable.h"
+#include "backends/ebpf/ebpfType.h"
+#include "backends/ebpf/psa/ebpfPipeline.h"
+#include "backends/ebpf/psa/ebpfPsaControl.h"
+#include "backends/ebpf/psa/ebpfPsaDeparser.h"
+#include "backends/ebpf/psa/ebpfPsaGen.h"
+#include "backends/ebpf/psa/ebpfPsaParser.h"
+#include "backends/ebpf/psa/ebpfPsaTable.h"
+#include "backends/ebpf/psa/xdpHelpProgram.h"
+#include "backends/tc/backend.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/methodInstance.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/source_file.h"
 
 namespace TC {
-
-class ConvertToBackendIR;
 
 //  Similar to class PSAEbpfGenerator in backends/ebpf/psa/ebpfPsaGen.h
 

@@ -1,5 +1,7 @@
 #include "midend/saturationElim.h"
 
+#include <boost/multiprecision/cpp_int.hpp>
+
 #include "ir/irutils.h"
 #include "lib/exceptions.h"
 #include "lib/null.h"

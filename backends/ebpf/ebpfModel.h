@@ -19,7 +19,6 @@ limitations under the License.
 
 #include "frontends/common/model.h"
 #include "frontends/p4/coreLibrary.h"
-#include "ir/ir.h"
 #include "lib/cstring.h"
 
 namespace EBPF {

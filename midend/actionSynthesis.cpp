@@ -16,8 +16,19 @@ limitations under the License.
 
 #include "actionSynthesis.h"
 
-#include "frontends/p4/coreLibrary.h"
+#include <ctype.h>
+
+#include <ostream>
+#include <string>
+
 #include "frontends/p4/methodInstance.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/source_file.h"
 
 namespace P4 {
 

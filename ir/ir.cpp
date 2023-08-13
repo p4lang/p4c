@@ -19,7 +19,6 @@ limitations under the License.
 #include <strings.h>
 
 #include <functional>
-#include <iterator>
 #include <list>
 #include <map>
 #include <sstream>
@@ -27,8 +26,6 @@ limitations under the License.
 #include <unordered_map>
 #include <utility>
 #include <vector>
-
-#include <boost/format.hpp>
 
 #include "ir/declaration.h"
 #include "ir/id.h"
@@ -43,7 +40,6 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/null.h"
 #include "lib/ordered_map.h"
-#include "lib/safe_vector.h"
 
 namespace IR {
 

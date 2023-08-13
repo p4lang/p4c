@@ -1,10 +1,13 @@
 #ifndef CONTROL_PLANE_ADDMISSINGIDS_H_
 #define CONTROL_PLANE_ADDMISSINGIDS_H_
 
-#include "frontends/common/resolveReferences/resolveReferences.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
+#include "control-plane/p4RuntimeArchHandler.h"
+#include "control-plane/p4RuntimeSymbolTable.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
-#include "p4RuntimeSymbolTable.h"
+#include "ir/pass_manager.h"
+#include "ir/visitor.h"
 
 namespace P4 {
 

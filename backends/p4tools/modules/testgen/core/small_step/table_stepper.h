@@ -1,7 +1,6 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SMALL_STEP_TABLE_STEPPER_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SMALL_STEP_TABLE_STEPPER_H_
 
-#include <cstddef>
 #include <optional>
 #include <vector>
 

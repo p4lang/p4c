@@ -17,17 +17,36 @@ limitations under the License.
 #ifndef FRONTENDS_P4_DEF_USE_H_
 #define FRONTENDS_P4_DEF_USE_H_
 
+#include <cstddef>
+#include <list>
+#include <ostream>
+#include <string>
 #include <typeindex>  // IWYU pragma: keep
+#include <unordered_map>
 #include <unordered_set>
+#include <utility>
+#include <variant>
+#include <vector>
 
-#include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/map.h"
+#include "lib/null.h"
 #include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
+#include "lib/source_file.h"
 
 namespace P4 {
 
-class StorageFactory;
 class LocationSet;
 
 /// Abstraction for something that is has a left value (variable, parameter)

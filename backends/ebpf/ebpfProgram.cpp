@@ -18,13 +18,27 @@ limitations under the License.
 
 #include <chrono>
 #include <ctime>
+#include <string>
+#include <vector>
 
+#include "backends/ebpf/codeGen.h"
+#include "backends/ebpf/ebpfModel.h"
+#include "backends/ebpf/ebpfOptions.h"
+#include "backends/ebpf/target.h"
 #include "ebpfControl.h"
 #include "ebpfParser.h"
-#include "ebpfTable.h"
 #include "ebpfType.h"
-#include "frontends/common/options.h"
+#include "frontends/common/model.h"
 #include "frontends/p4/coreLibrary.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/node.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
+#include "lib/enumerator.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
 
 namespace EBPF {
 

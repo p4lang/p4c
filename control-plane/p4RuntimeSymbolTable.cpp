@@ -15,15 +15,26 @@ limitations under the License.
 */
 #include "p4RuntimeSymbolTable.h"
 
-#include <iosfwd>
-#include <unordered_map>
+#include <algorithm>
+#include <string>
+#include <vector>
 
 #include <boost/algorithm/string/split.hpp>
+#include <boost/iterator/iterator_facade.hpp>
+#include <boost/iterator/reverse_iterator.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 
+#include "control-plane/p4RuntimeArchHandler.h"
+#include "frontends/p4/methodInstance.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
 #include "lib/cstring.h"
-#include "p4RuntimeArchHandler.h"
-#include "typeSpecConverter.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/null.h"
 
 namespace P4 {
 

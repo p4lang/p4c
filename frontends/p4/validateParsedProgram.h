@@ -17,8 +17,14 @@ limitations under the License.
 #ifndef P4_VALIDATEPARSEDPROGRAM_H_
 #define P4_VALIDATEPARSEDPROGRAM_H_
 
+#include <string>
+#include <vector>
+
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
 
 namespace P4 {
 

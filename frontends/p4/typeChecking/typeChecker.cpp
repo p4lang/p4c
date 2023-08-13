@@ -16,18 +16,35 @@ limitations under the License.
 
 #include "typeChecker.h"
 
+#include <stddef.h>
+
+#include <list>
+#include <map>
+#include <ostream>
+#include <string>
+#include <vector>
+
+#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/multiprecision/number.hpp>
+
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
-#include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/enumInstance.h"
 #include "frontends/p4/methodInstance.h"
-#include "frontends/p4/toP4/toP4.h"
+#include "frontends/p4/parameterSubstitution.h"
+#include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/namemap.h"
 #include "lib/algorithm.h"
+#include "lib/enumerator.h"
+#include "lib/exceptions.h"
 #include "lib/log.h"
+#include "lib/ordered_map.h"
+#include "lib/source_file.h"
 #include "syntacticEquivalence.h"
 #include "typeConstraints.h"
 #include "typeSubstitution.h"
-#include "typeUnification.h"
 
 namespace P4 {
 

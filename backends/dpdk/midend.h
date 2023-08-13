@@ -17,8 +17,13 @@ limitations under the License.
 #ifndef BACKENDS_DPDK_MIDEND_H_
 #define BACKENDS_DPDK_MIDEND_H_
 
+#include <iosfwd>
+
 #include "frontends/common/options.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
+#include "ir/pass_manager.h"
 #include "midend/convertEnums.h"
 
 namespace DPDK {

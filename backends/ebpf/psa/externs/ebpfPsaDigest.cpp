@@ -16,8 +16,18 @@ limitations under the License.
 
 #include "ebpfPsaDigest.h"
 
-#include "backends/ebpf/ebpfType.h"
+#include <string>
+#include <vector>
+
 #include "backends/ebpf/psa/ebpfPsaDeparser.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/stringify.h"
 
 namespace EBPF {
 

@@ -17,12 +17,19 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_COMMON_EXTERN_H_
 #define BACKENDS_BMV2_COMMON_EXTERN_H_
 
+#include <map>
+
 #include "frontends/p4/methodInstance.h"
 #include "helpers.h"
+#include "ir/id.h"
 #include "ir/ir.h"
-#include "programStructure.h"
+#include "ir/node.h"
+#include "lib/cstring.h"
+#include "lib/json.h"
 
 namespace BMV2 {
+class ExternConverter_assert;
+class ExternConverter_assume;
 
 class ExternConverter {
     static std::map<cstring, ExternConverter *> *cvtForType;

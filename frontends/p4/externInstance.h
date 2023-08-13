@@ -20,18 +20,9 @@ limitations under the License.
 #include <optional>
 
 #include "frontends/p4/parameterSubstitution.h"
+#include "ir/ir.h"
+#include "ir/vector.h"
 #include "lib/cstring.h"
-
-namespace IR {
-class ConstructorCallExpression;
-class Expression;
-class IAnnotated;
-class PathExpression;
-class Type_Extern;
-class TypeMap;
-template <typename T>
-class Vector;
-}  // namespace IR
 
 namespace P4 {
 

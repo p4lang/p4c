@@ -2,7 +2,6 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_SMALL_STEP_SMALL_STEP_H_
 
 #include <cstdint>
-#include <functional>
 #include <optional>
 #include <utility>
 #include <vector>

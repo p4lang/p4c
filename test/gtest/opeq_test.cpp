@@ -14,10 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <string>
+#include <vector>
+
+#include <boost/multiprecision/cpp_int.hpp>
+
 #include "gtest/gtest.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
-#include "ir/visitor.h"
-#include "lib/exceptions.h"
+#include "ir/node.h"
+#include "ir/vector.h"
 
 TEST(IR, OperatorEq) {
     auto *t = IR::Type::Bits::get(16);

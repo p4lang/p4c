@@ -16,23 +16,29 @@ limitations under the License.
 
 #include "parser_options.h"
 
-#include <getopt.h>
-#include <unistd.h>
+#include <limits.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/wait.h>
 
+#include <functional>
+#include <iostream>
 #include <regex>
+#include <string>
 #include <unordered_set>
 
 #include "frontends/p4/toP4/toP4.h"
-#include "ir/json_generator.h"
+#include "ir/id.h"
+#include "ir/ir.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
 #include "lib/exceptions.h"
 #include "lib/exename.h"
 #include "lib/log.h"
 #include "lib/nullstream.h"
 #include "lib/path.h"
+#include "lib/stringify.h"
 
 /* CONFIG_PKGDATADIR is defined by cmake at compile time to be the same as
  * CMAKE_INSTALL_PREFIX This is only valid when the compiler is built and

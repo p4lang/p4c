@@ -1,6 +1,8 @@
 #include "options.h"
 
+#include "frontends/common/options.h"
 #include "frontends/common/parser_options.h"
+#include "lib/cstring.h"
 #include "lib/exename.h"
 
 namespace BMV2 {

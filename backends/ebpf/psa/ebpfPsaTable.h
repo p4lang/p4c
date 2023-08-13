@@ -17,10 +17,18 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_PSA_EBPFPSATABLE_H_
 #define BACKENDS_EBPF_PSA_EBPFPSATABLE_H_
 
+#include <algorithm>
+#include <utility>
+#include <vector>
+
+#include "backends/ebpf/codeGen.h"
+#include "backends/ebpf/ebpfProgram.h"
 #include "backends/ebpf/ebpfTable.h"
 #include "backends/ebpf/psa/externs/ebpfPsaCounter.h"
 #include "backends/ebpf/psa/externs/ebpfPsaMeter.h"
-#include "frontends/p4/methodInstance.h"
+#include "ir/id.h"
+#include "ir/ir.h"
+#include "lib/cstring.h"
 
 namespace EBPF {
 

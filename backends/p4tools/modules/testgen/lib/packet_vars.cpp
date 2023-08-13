@@ -1,6 +1,7 @@
 #include "backends/p4tools/modules/testgen/lib/packet_vars.h"
 
 #include "ir/id.h"
+#include "lib/cstring.h"
 
 namespace P4Tools::P4Testgen {
 

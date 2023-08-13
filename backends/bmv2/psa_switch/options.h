@@ -17,8 +17,13 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_PSA_SWITCH_OPTIONS_H_
 #define BACKENDS_BMV2_PSA_SWITCH_OPTIONS_H_
 
+#include <stdlib.h>
+
+#include <vector>
+
 #include "backends/bmv2/common/options.h"
 #include "backends/bmv2/psa_switch/midend.h"
+#include "frontends/common/parser_options.h"
 
 namespace BMV2 {
 

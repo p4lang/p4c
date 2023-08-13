@@ -17,17 +17,23 @@ limitations under the License.
 #ifndef TYPECHECKING_TYPECHECKER_H_
 #define TYPECHECKING_TYPECHECKER_H_
 
+#include <functional>
+#include <initializer_list>
+#include <utility>
+
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeChecking/typeSubstitution.h"
-#include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
+#include "ir/node.h"
 #include "ir/pass_manager.h"
+#include "ir/vector.h"
 #include "ir/visitor.h"
 #include "lib/cstring.h"
-#include "lib/exceptions.h"
-#include "typeUnification.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/null.h"
 
 namespace P4 {
 

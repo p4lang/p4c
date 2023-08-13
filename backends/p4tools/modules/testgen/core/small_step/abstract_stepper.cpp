@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "backends/p4tools/common/compiler/convert_hs_index.h"
+#include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/variables.h"
@@ -14,7 +15,10 @@
 #include "ir/dump.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
+#include "ir/ir-inline.h"
 #include "ir/irutils.h"
+#include "ir/node.h"
+#include "ir/vector.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"

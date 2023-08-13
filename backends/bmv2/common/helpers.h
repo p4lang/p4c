@@ -17,15 +17,26 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_COMMON_HELPERS_H_
 #define BACKENDS_BMV2_COMMON_HELPERS_H_
 
+#include <stddef.h>
+
+#include <algorithm>
+#include <map>
+#include <optional>
+#include <utility>
+#include <vector>
+
 #include "JsonObjects.h"
 #include "controlFlowGraph.h"
 #include "expression.h"
 #include "frontends/common/model.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/fromv1.0/v1model.h"
+#include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "lib/big_int_util.h"
 #include "lib/cstring.h"
 #include "lib/json.h"
-#include "lib/ordered_map.h"
 #include "programStructure.h"
 
 namespace BMV2 {

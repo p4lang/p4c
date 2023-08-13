@@ -1,7 +1,7 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/selected_branches.h"
 
 #include <cstdlib>
-#include <functional>
+#include <iostream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -12,6 +12,7 @@
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
+#include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4Tools::P4Testgen {

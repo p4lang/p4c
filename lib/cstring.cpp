@@ -16,10 +16,13 @@ limitations under the License.
 
 #include "cstring.h"
 
+#include <ctype.h>
+
 #include <algorithm>
-#include <ios>
+#include <iomanip>
 #include <string>
 #include <unordered_set>
+#include <utility>
 
 #include "hash.h"
 

@@ -16,7 +16,14 @@ limitations under the License.
 
 #include "nullstream.h"
 
+#include <errno.h>
+#include <string.h>
+
 #include <fstream>  // IWYU pragma: keep
+
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
 
 std::ostream *openFile(cstring name, bool nullOnError) {
     if (name.isNullOrEmpty()) {

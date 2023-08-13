@@ -22,6 +22,7 @@ limitations under the License.
 #include "extern.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/enumInstance.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
 #include "helpers.h"

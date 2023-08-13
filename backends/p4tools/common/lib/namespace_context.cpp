@@ -3,7 +3,10 @@
 #include <set>
 #include <vector>
 
+#include "ir/declaration.h"
 #include "ir/id.h"
+#include "ir/ir.h"
+#include "lib/cstring.h"
 #include "lib/enumerator.h"
 #include "lib/exceptions.h"
 

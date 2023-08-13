@@ -14,8 +14,11 @@
 #include <boost/random/uniform_int_distribution.hpp>
 
 #include "ir/id.h"
+#include "ir/ir.h"
 #include "ir/irutils.h"
 #include "ir/vector.h"
+#include "lib/big_int_util.h"
+#include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/null.h"
 

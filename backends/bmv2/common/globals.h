@@ -17,8 +17,13 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_COMMON_GLOBALS_H_
 #define BACKENDS_BMV2_COMMON_GLOBALS_H_
 
-#include "backend.h"
+#include <list>
+#include <utility>
+
+#include "backends/bmv2/common/helpers.h"
 #include "ir/ir.h"
+#include "ir/visitor.h"
+#include "lib/ordered_map.h"
 
 namespace BMV2 {
 

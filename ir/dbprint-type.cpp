@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include <ostream>
+#include <string>
 #include <vector>
 
 #include "dbprint.h"
@@ -25,7 +26,6 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/indent.h"
 #include "lib/log.h"
-#include "lib/safe_vector.h"
 
 using namespace DBPrint;
 using namespace IndentCtl;

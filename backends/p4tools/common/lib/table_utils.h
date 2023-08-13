@@ -1,6 +1,10 @@
 #ifndef BACKENDS_P4TOOLS_COMMON_LIB_TABLE_UTILS_H_
 #define BACKENDS_P4TOOLS_COMMON_LIB_TABLE_UTILS_H_
 
+#include <stddef.h>
+
+#include <vector>
+
 #include "ir/ir.h"
 #include "lib/cstring.h"
 

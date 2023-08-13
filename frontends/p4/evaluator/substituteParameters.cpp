@@ -16,6 +16,10 @@ limitations under the License.
 
 #include "substituteParameters.h"
 
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "lib/cstring.h"
+
 namespace P4 {
 
 const IR::Node *SubstituteParameters::postorder(IR::This *t) {

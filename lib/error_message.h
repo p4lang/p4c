@@ -17,8 +17,10 @@ limitations under the License.
 #define LIB_ERROR_MESSAGE_H_
 
 #include <cstring>
+#include <string>
 #include <vector>
 
+#include "lib/cstring.h"
 #include "lib/source_file.h"
 
 /**

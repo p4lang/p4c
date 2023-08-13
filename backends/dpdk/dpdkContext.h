@@ -17,13 +17,25 @@ limitations under the License.
 #ifndef BACKENDS_DPDK_DPDKCONTEXT_H_
 #define BACKENDS_DPDK_DPDKCONTEXT_H_
 
-#include <regex>
+#include <stddef.h>
 
-#include "constants.h"
-#include "control-plane/bfruntime.h"
+#include <algorithm>
+#include <iosfwd>
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "control-plane/p4RuntimeSerializer.h"
 #include "dpdkProgramStructure.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/ir.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
 #include "lib/json.h"
-#include "lib/nullstream.h"
+#include "lib/map.h"
 #include "options.h"
 #include "p4/config/v1/p4info.pb.h"
 

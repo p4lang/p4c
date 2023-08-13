@@ -17,10 +17,19 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_PSA_EBPFPSAPARSER_H_
 #define BACKENDS_EBPF_PSA_EBPFPSAPARSER_H_
 
+#include <map>
+
+#include "backends/ebpf/codeGen.h"
 #include "backends/ebpf/ebpfParser.h"
-#include "backends/ebpf/ebpfType.h"
-#include "backends/ebpf/psa/ebpfPsaTable.h"
+#include "backends/ebpf/ebpfProgram.h"
 #include "backends/ebpf/psa/externs/ebpfPsaChecksum.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/methodInstance.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
+#include "lib/map.h"
 
 namespace EBPF {
 

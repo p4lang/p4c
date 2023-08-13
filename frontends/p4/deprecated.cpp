@@ -16,7 +16,14 @@ limitations under the License.
 
 #include "deprecated.h"
 
-#include "frontends/common/resolveReferences/resolveReferences.h"
+#include <string>
+#include <vector>
+
+#include "ir/declaration.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
 
 namespace P4 {
 

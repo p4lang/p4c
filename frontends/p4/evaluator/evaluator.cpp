@@ -16,8 +16,23 @@ limitations under the License.
 
 #include "evaluator.h"
 
+#include <ostream>
+#include <string>
+#include <utility>
+
 #include "frontends/common/constantFolding.h"
+#include "frontends/p4/parameterSubstitution.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "lib/cstring.h"
+#include "lib/enumerator.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/safe_vector.h"
 
 namespace P4 {
 

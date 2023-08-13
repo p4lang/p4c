@@ -2,6 +2,7 @@
 
 #include <utility>
 
+#include "lib/cstring.h"
 #include "lib/exceptions.h"
 
 namespace P4Tools {

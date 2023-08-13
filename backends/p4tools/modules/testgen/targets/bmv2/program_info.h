@@ -3,8 +3,10 @@
 
 #include <cstddef>
 #include <map>
+#include <utility>
 #include <vector>
 
+#include "ir/declaration.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/ordered_map.h"

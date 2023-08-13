@@ -16,7 +16,18 @@ limitations under the License.
 */
 #include "backend.h"
 
-#include "backends/bmv2/psa_switch/psaSwitch.h"
+#include <functional>
+
+#include "backends/bmv2/common/programStructure.h"
+#include "backends/bmv2/psa_switch/psaProgramStructure.h"
+#include "backends/ebpf/ebpfType.h"
+#include "backends/ebpf/psa/ebpfPsaGen.h"
+#include "frontends/p4/evaluator/evaluator.h"
+#include "ir/id.h"
+#include "ir/pass_manager.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/null.h"
 
 namespace EBPF {
 

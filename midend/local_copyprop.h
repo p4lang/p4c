@@ -16,10 +16,21 @@ limitations under the License.
 #ifndef MIDEND_LOCAL_COPYPROP_H_
 #define MIDEND_LOCAL_COPYPROP_H_
 
+#include <functional>
+#include <map>
+#include <set>
+
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/typeMap.h"
 #include "has_side_effects.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/pass_manager.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/safe_vector.h"
+#include "lib/source_file.h"
 
 namespace P4 {
 

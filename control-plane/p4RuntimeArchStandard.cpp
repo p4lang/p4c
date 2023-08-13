@@ -17,16 +17,15 @@ limitations under the License.
 #include "p4RuntimeArchStandard.h"
 
 #include <optional>
-#include <set>
 #include <unordered_map>
 
+#include "control-plane/p4RuntimeArchHandler.h"
+#include "control-plane/typeSpecConverter.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/id.h"
 #include "ir/ir.h"
-#include "lib/log.h"
-#include "p4RuntimeArchHandler.h"
-#include "typeSpecConverter.h"
 
 namespace P4 {
 

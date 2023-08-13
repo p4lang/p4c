@@ -17,8 +17,21 @@ limitations under the License.
 
 #include "ebpfPsaCounter.h"
 
+#include <string>
+#include <vector>
+
+#include "backends/ebpf/ebpfTable.h"
 #include "backends/ebpf/ebpfType.h"
 #include "backends/ebpf/psa/ebpfPipeline.h"
+#include "backends/ebpf/target.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "ir/id.h"
+#include "ir/vector.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/null.h"
+#include "lib/stringify.h"
 
 namespace EBPF {
 

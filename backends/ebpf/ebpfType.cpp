@@ -16,6 +16,13 @@ limitations under the License.
 
 #include "ebpfType.h"
 
+#include <string>
+
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+
 namespace EBPF {
 
 EBPFTypeFactory *EBPFTypeFactory::instance;

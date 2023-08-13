@@ -16,6 +16,15 @@ limitations under the License.
 
 #include "typeSubstitutionVisitor.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
+#include "frontends/p4/typeChecking/typeSubstitution.h"
+#include "ir/indexed_vector.h"
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
+
 namespace P4 {
 
 bool TypeOccursVisitor::preorder(const IR::Type_Var *typeVariable) {

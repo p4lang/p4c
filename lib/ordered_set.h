@@ -20,9 +20,9 @@ limitations under the License.
 #include <cassert>
 #include <functional>
 #include <initializer_list>
+#include <iterator>
 #include <list>
 #include <map>
-#include <set>
 #include <utility>
 
 // Remembers items in insertion order

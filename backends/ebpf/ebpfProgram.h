@@ -21,19 +21,16 @@ limitations under the License.
 #include "ebpfModel.h"
 #include "ebpfObject.h"
 #include "ebpfOptions.h"
-#include "frontends/common/options.h"
-#include "frontends/p4/evaluator/evaluator.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
+#include "lib/cstring.h"
 #include "target.h"
 
 namespace EBPF {
 
-class EBPFProgram;
 class EBPFParser;
 class EBPFControl;
-class EBPFTable;
-class EBPFType;
 
 class EBPFProgram : public EBPFObject {
  public:

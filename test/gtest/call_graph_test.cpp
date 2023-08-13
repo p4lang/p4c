@@ -14,6 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <algorithm>
+#include <list>
+#include <set>
+#include <unordered_set>
 #include <vector>
 
 #include "frontends/p4/callGraph.h"

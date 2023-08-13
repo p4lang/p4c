@@ -15,10 +15,13 @@
 #include "backends/p4tools/common/lib/format_int.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/ir.h"
+#include "lib/cstring.h"
 #include "lib/log.h"
 #include "nlohmann/json.hpp"
 
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
+#include "backends/p4tools/modules/testgen/lib/test_object.h"
+#include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 

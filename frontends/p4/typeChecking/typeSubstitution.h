@@ -17,11 +17,17 @@ limitations under the License.
 #ifndef TYPECHECKING_TYPESUBSTITUTION_H_
 #define TYPECHECKING_TYPESUBSTITUTION_H_
 
-#include <map>
+#include <list>
 #include <sstream>
 
 #include "ir/ir.h"
-#include "lib/exceptions.h"
+#include "ir/node.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
+#include "lib/log.h"
+#include "lib/null.h"
+#include "lib/ordered_map.h"
+#include "lib/source_file.h"
 
 namespace P4 {
 

@@ -5,21 +5,21 @@
 #include <optional>
 #include <ostream>
 #include <string>
+#include <utility>
 #include <variant>
 #include <vector>
 
 #include <boost/multiprecision/cpp_int.hpp>
 
-#include "backends/p4tools/common/compiler/convert_hs_index.h"
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/taint.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
-#include "backends/p4tools/common/lib/util.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
+#include "ir/ir-inline.h"
 #include "ir/irutils.h"
 #include "ir/vector.h"
 #include "lib/cstring.h"

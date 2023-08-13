@@ -17,20 +17,23 @@ limitations under the License.
 #ifndef BACKENDS_DPDK_DPDKPROGRAM_H_
 #define BACKENDS_DPDK_DPDKPROGRAM_H_
 
-#include "dpdkArch.h"
+#include <list>
+#include <optional>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "dpdkProgramStructure.h"
-#include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/coreLibrary.h"
-#include "frontends/p4/enumInstance.h"
-#include "frontends/p4/evaluator/evaluator.h"
-#include "frontends/p4/methodInstance.h"
-#include "frontends/p4/simplify.h"
 #include "frontends/p4/typeMap.h"
-#include "frontends/p4/unusedDeclarations.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
-#include "lib/big_int_util.h"
-#include "lib/json.h"
+#include "ir/node.h"
+#include "ir/pass_manager.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/ordered_set.h"
 #include "options.h"
 
 namespace DPDK {

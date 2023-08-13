@@ -1,5 +1,9 @@
 #include "eliminateNewtype.h"
 
+#include <ostream>
+
+#include "lib/log.h"
+
 namespace P4 {
 
 const IR::Node *DoReplaceNewtype::postorder(IR::Cast *expression) {

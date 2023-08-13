@@ -16,10 +16,22 @@ limitations under the License.
 
 #include "stringify.h"
 
+#include <stdio.h>
+
+#include <algorithm>
 #include <deque>
 #include <sstream>
+#include <stdexcept>
+
+#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/multiprecision/detail/et_ops.hpp>
+#include <boost/multiprecision/number.hpp>
+#include <boost/multiprecision/traits/explicit_conversion.hpp>
 
 #include "exceptions.h"
+#include "lib/big_int_util.h"
+#include "lib/cstring.h"
+#include "lib/stringref.h"
 
 namespace Util {
 cstring toString(bool value) {

@@ -15,19 +15,23 @@ limitations under the License.
 */
 
 #include "config.h"
+#include "lib/indent.h"
 #if HAVE_LIBGC
-#include <gc/gc_cpp.h>
 #define NOGC_ARGS (NoGC, 0, 0)
 #else
 #define NOGC_ARGS
 #endif /* HAVE_LIBGC */
 
+#include <algorithm>
+#include <cctype>
+#include <cstdint>
+#include <cstdlib>
 #include <cstring>
+#include <ctime>
 #include <fstream>  // IWYU pragma: keep
 #include <iomanip>
 #include <iostream>
 #include <memory>
-#include <sstream>
 #include <string>
 #include <unordered_map>
 #include <vector>

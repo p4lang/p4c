@@ -16,8 +16,20 @@ limitations under the License.
 */
 #include "ebpfPsaHashAlgorithm.h"
 
+#include <stddef.h>
+
+#include <string>
+
 #include "backends/ebpf/ebpfProgram.h"
 #include "backends/ebpf/ebpfType.h"
+#include "backends/ebpf/target.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/stringify.h"
 
 namespace EBPF {
 

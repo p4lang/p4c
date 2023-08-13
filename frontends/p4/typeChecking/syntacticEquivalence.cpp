@@ -16,6 +16,18 @@ limitations under the License.
 
 #include "syntacticEquivalence.h"
 
+#include <string>
+#include <vector>
+
+#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/multiprecision/number.hpp>
+
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
+
 namespace P4 {
 
 bool SameExpression::sameType(const IR::Type *left, const IR::Type *right) const {

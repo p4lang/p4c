@@ -3,8 +3,10 @@
 
 #include <map>
 
+#include "ir/declaration.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
+#include "lib/cstring.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
 

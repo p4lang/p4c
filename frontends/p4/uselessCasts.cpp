@@ -16,6 +16,11 @@ limitations under the License.
 
 #include "uselessCasts.h"
 
+#include <ostream>
+
+#include "lib/cstring.h"
+#include "lib/log.h"
+
 namespace P4 {
 
 const IR::Node *RemoveUselessCasts::postorder(IR::Cast *cast) {

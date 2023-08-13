@@ -1,6 +1,7 @@
 #include "backends/p4tools/modules/testgen/core/small_step/table_stepper.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <optional>
 #include <ostream>
 #include <string>
@@ -8,17 +9,19 @@
 #include <vector>
 
 #include <boost/multiprecision/cpp_int.hpp>
-#include <boost/multiprecision/number.hpp>
 
 #include "backends/p4tools/common/lib/constants.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
+#include "backends/p4tools/common/lib/table_utils.h"
 #include "backends/p4tools/common/lib/taint.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
+#include "ir/ir-inline.h"
 #include "ir/irutils.h"
 #include "ir/vector.h"
+#include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"
 #include "lib/null.h"

@@ -17,11 +17,44 @@ limitations under the License.
 #ifndef CONTROL_PLANE_P4RUNTIMEARCHSTANDARD_H_
 #define CONTROL_PLANE_P4RUNTIMEARCHSTANDARD_H_
 
+#include <stddef.h>
+#include <stdint.h>
+
+#include <algorithm>
+#include <optional>
+#include <set>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
+#include <boost/multiprecision/cpp_int.hpp>
+
+#include "frontends/common/model.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/fromv1.0/v1model.h"
+#include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
 #include "ir/ir.h"
-#include "p4RuntimeArchHandler.h"
+#include "ir/node.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/null.h"
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wpedantic"
+#include "p4/config/v1/p4info.pb.h"
+#include "p4/config/v1/p4types.pb.h"
+
+#pragma GCC diagnostic pop
+#include "control-plane/p4RuntimeArchHandler.h"
+#include "control-plane/typeSpecConverter.h"
 
 namespace p4configv1 = ::p4::config::v1;
 

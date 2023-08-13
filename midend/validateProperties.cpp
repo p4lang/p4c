@@ -1,5 +1,8 @@
 #include "validateProperties.h"
 
+#include "ir/id.h"
+#include "lib/error_catalog.h"
+
 namespace P4 {
 
 void ValidateTableProperties::postorder(const IR::Property *property) {

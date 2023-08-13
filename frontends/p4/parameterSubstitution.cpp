@@ -16,7 +16,11 @@ limitations under the License.
 
 #include "parameterSubstitution.h"
 
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
 #include "lib/log.h"
+#include "lib/null.h"
 
 namespace P4 {
 

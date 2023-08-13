@@ -17,10 +17,17 @@ limitations under the License.
 #include "symbol_table.h"
 
 #include <sstream>
+#include <string>
+#include <typeinfo>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 #include "lib/error.h"
+#include "lib/error_catalog.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"
+#include "lib/null.h"
 
 namespace Util {
 

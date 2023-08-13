@@ -17,11 +17,15 @@ limitations under the License.
 #ifndef FRONTENDS_P4_CALLGRAPH_H_
 #define FRONTENDS_P4_CALLGRAPH_H_
 
-#include <algorithm>
+#include <cstddef>
+#include <map>
+#include <ostream>
+#include <set>
 #include <unordered_set>
 #include <vector>
 
-#include "ir/ir.h"
+#include "ir/node.h"
+#include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"
 #include "lib/map.h"  // IWYU pragma: keep

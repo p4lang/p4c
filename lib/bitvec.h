@@ -19,11 +19,13 @@ limitations under the License.
 
 #include <assert.h>
 #include <limits.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include <algorithm>
+#include <cstdint>
 #include <iostream>
+#include <iterator>
 #include <type_traits>
 #include <utility>
 
@@ -31,6 +33,7 @@ limitations under the License.
 
 #if HAVE_LIBGC
 #include <gc/gc_cpp.h>
+
 #define IF_HAVE_LIBGC(X) X
 #else
 #define IF_HAVE_LIBGC(X)

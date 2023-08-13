@@ -16,9 +16,20 @@ limitations under the License.
 
 #include "constantParsing.h"
 
-#include "frontends/common/options.h"
+#include <stdlib.h>
+#include <string.h>
+
+#include <ostream>
+
+#include <boost/multiprecision/cpp_int.hpp>
+
+#include "frontends/common/parser_options.h"
+#include "ir/configuration.h"
 #include "ir/ir.h"
 #include "lib/big_int_util.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
 #include "lib/source_file.h"
 
 std::ostream &operator<<(std::ostream &out, const UnparsedConstant &constant) {

@@ -16,6 +16,13 @@ limitations under the License.
 
 #include "parserCallGraph.h"
 
+#include <string>
+#include <vector>
+
+#include "ir/declaration.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
+
 namespace P4 {
 
 bool ComputeParserCG::preorder(const IR::PathExpression *expression) {

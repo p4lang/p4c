@@ -1,6 +1,8 @@
 #include "nestedStructs.h"
 
 #include "frontends/p4/methodInstance.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
 
 namespace P4 {
 

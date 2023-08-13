@@ -16,20 +16,27 @@ limitations under the License.
 
 #include "typeSpecConverter.h"
 
-#include <limits>
 #include <map>
+#include <optional>
 #include <string>
+#include <vector>
 
-#include "bytestrings.h"
+#include <boost/multiprecision/cpp_int.hpp>
+
+#include "control-plane/bytestrings.h"
+#include "control-plane/p4RuntimeArchHandler.h"
 #include "flattenHeader.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
-#include "ir/visitor.h"
+#include "ir/vector.h"
 #include "lib/error.h"
+#include "lib/error_catalog.h"
 #include "lib/exceptions.h"
 #include "lib/null.h"
-#include "p4RuntimeArchHandler.h"
 
 namespace p4configv1 = ::p4::config::v1;
 

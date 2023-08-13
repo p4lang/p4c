@@ -16,17 +16,22 @@ limitations under the License.
 
 #include "midend.h"
 
+#include <ostream>
+#include <set>
+
 #include "frontends/common/constantFolding.h"
-#include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/common/model.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/simplifyParsers.h"
 #include "frontends/p4/strengthReduction.h"
-#include "frontends/p4/toP4/toP4.h"
-#include "frontends/p4/typeMap.h"
-#include "frontends/p4/unusedDeclarations.h"
+#include "ir/id.h"
+#include "ir/node.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/null.h"
 #include "midend/actionSynthesis.h"
 #include "midend/compileTimeOps.h"
 #include "midend/complexComparison.h"

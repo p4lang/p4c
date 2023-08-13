@@ -19,6 +19,7 @@
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/null.h"
+#include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/cmd_stepper.h"

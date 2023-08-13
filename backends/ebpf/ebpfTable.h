@@ -17,9 +17,23 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_EBPFTABLE_H_
 #define BACKENDS_EBPF_EBPFTABLE_H_
 
+#include <cstddef>
+#include <map>
+#include <utility>
+#include <vector>
+
+#include "backends/ebpf/codeGen.h"
+#include "backends/ebpf/target.h"
 #include "ebpfObject.h"
 #include "ebpfProgram.h"
+#include "ebpfType.h"
+#include "frontends/common/model.h"
+#include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
+#include "ir/id.h"
+#include "ir/ir.h"
+#include "lib/cstring.h"
+#include "lib/null.h"
 
 namespace EBPF {
 

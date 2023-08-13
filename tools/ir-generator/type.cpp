@@ -16,6 +16,10 @@ limitations under the License.
 
 #include "type.h"
 
+#include <stdio.h>
+
+#include <string>
+
 #include "irclass.h"
 
 LookupScope::LookupScope(const IrNamespace *ns)

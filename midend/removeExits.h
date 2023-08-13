@@ -17,7 +17,18 @@ limitations under the License.
 #ifndef MIDEND_REMOVEEXITS_H_
 #define MIDEND_REMOVEEXITS_H_
 
+#include <set>
+
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/removeReturns.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/pass_manager.h"
+#include "lib/cstring.h"
+#include "lib/null.h"
+#include "lib/safe_vector.h"
 
 namespace P4 {
 

@@ -16,6 +16,9 @@ limitations under the License.
 
 #include "typeConstraints.h"
 
+#include "frontends/p4/typeChecking/typeSubstitution.h"
+#include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
+#include "lib/log.h"
 #include "typeUnification.h"
 
 namespace P4 {

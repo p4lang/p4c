@@ -19,6 +19,9 @@ limitations under the License.
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/visitor.h"
+#include "lib/null.h"
 
 namespace P4 {
 

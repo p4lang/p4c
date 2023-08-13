@@ -14,8 +14,10 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_PSA_EXTERNS_EBPFPSARANDOM_H_
 #define BACKENDS_EBPF_PSA_EXTERNS_EBPFPSARANDOM_H_
 
+#include "backends/ebpf/codeGen.h"
 #include "backends/ebpf/ebpfObject.h"
 #include "frontends/p4/methodInstance.h"
+#include "ir/ir.h"
 
 namespace EBPF {
 

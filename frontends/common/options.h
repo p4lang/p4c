@@ -19,9 +19,12 @@ limitations under the License.
 #ifndef FRONTENDS_COMMON_OPTIONS_H_
 #define FRONTENDS_COMMON_OPTIONS_H_
 
+#include <vector>
+
 #include "parser_options.h"
 // for p4::P4RuntimeFormat definition
 #include "control-plane/p4RuntimeSerializer.h"
+#include "lib/cstring.h"
 
 class CompilerOptions : public ParserOptions {
  protected:

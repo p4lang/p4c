@@ -1,6 +1,5 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/random_backtrack.h"
 
-#include <functional>
 #include <vector>
 
 #include "backends/p4tools/common/core/solver.h"

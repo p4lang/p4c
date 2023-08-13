@@ -16,8 +16,24 @@ limitations under the License.
 
 #include "deparser.h"
 
-#include "backend.h"
+#include <algorithm>
+#include <string>
+#include <vector>
+
+#include "backends/bmv2/common/JsonObjects.h"
+#include "backends/bmv2/common/expression.h"
+#include "backends/bmv2/common/programStructure.h"
 #include "extern.h"
+#include "frontends/common/model.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/methodInstance.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/null.h"
 
 namespace BMV2 {
 

@@ -16,6 +16,14 @@ limitations under the License.
 
 #include "simplifySelectList.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
+#include "ir/indexed_vector.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+
 namespace P4 {
 
 void SubstituteStructures::explode(const IR::Expression *expression, const IR::Type *type,

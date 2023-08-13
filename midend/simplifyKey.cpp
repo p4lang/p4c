@@ -16,8 +16,18 @@ limitations under the License.
 
 #include "simplifyKey.h"
 
+#include <ostream>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/sideEffects.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "lib/cstring.h"
+#include "lib/log.h"
+#include "lib/map.h"
 
 namespace P4 {
 

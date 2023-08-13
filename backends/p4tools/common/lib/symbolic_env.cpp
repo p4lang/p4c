@@ -10,10 +10,13 @@
 #include "backends/p4tools/common/lib/model.h"
 #include "frontends/p4/optimizeExpressions.h"
 #include "ir/indexed_vector.h"
+#include "ir/ir.h"
+#include "ir/node.h"
 #include "ir/vector.h"
 #include "ir/visitor.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
+#include "lib/log.h"
 
 namespace P4Tools {
 

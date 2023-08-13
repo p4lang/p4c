@@ -14,6 +14,14 @@ limitations under the License.
 */
 #include "bfruntime.h"
 
+#include <limits>
+#include <ostream>
+#include <regex>
+#include <set>
+
+#include "lib/exceptions.h"
+#include "lib/null.h"
+
 namespace P4 {
 
 namespace BFRT {

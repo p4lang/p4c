@@ -14,16 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <string>
+
+#include "control-plane/p4RuntimeSerializer.h"
+#include "frontends/common/options.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/common/resolveReferences/resolveReferences.h"
-#include "frontends/p4/createBuiltins.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
 #include "gtest/gtest.h"
 #include "helpers.h"
 #include "ir/ir.h"
-#include "lib/log.h"
+#include "ir/pass_manager.h"
+#include "lib/error.h"
 
 using namespace P4;
 

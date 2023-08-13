@@ -19,7 +19,9 @@ limitations under the License.
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeMap.h"
-#include "ir/ir.h"
+#include "ir/declaration.h"
+#include "lib/exceptions.h"
+#include "lib/null.h"
 
 namespace P4 {
 

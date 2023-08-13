@@ -16,13 +16,16 @@ limitations under the License.
 
 #include "config.h"
 #if HAVE_LIBGC
+#include <gc/gc.h>
 #include <gc/gc_cpp.h>
 #include <gc/gc_mark.h>
 #endif /* HAVE_LIBGC */
 #include <sys/mman.h>
 
 #include <cstddef>
+#include <cstdlib>
 #include <cstring>
+#include <iostream>
 #include <new>
 
 #include "backtrace.h"

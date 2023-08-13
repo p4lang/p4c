@@ -16,7 +16,12 @@ limitations under the License.
 
 #include "removeReturns.h"
 
-#include "frontends/p4/methodInstance.h"
+#include <ostream>
+#include <string>
+
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
+#include "lib/log.h"
 
 namespace P4 {
 

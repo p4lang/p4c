@@ -17,10 +17,23 @@ limitations under the License.
 #ifndef FRONTENDS_P4_UNIQUENAMES_H_
 #define FRONTENDS_P4_UNIQUENAMES_H_
 
-#include "frontends/common/resolveReferences/resolveReferences.h"
+#include <map>
+#include <string>
+#include <vector>
+
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
+#include "ir/node.h"
 #include "ir/pass_manager.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
+#include "lib/map.h"
+#include "lib/null.h"
 
 namespace P4 {
 

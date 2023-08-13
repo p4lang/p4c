@@ -1,10 +1,11 @@
 #include "backends/p4tools/common/lib/variables.h"
 
 #include <map>
-#include <string>
 #include <tuple>
 
 #include "ir/id.h"
+#include "ir/ir.h"
+#include "lib/cstring.h"
 
 namespace P4Tools::ToolsVariables {
 

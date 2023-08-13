@@ -1,7 +1,13 @@
 #ifndef MIDEND_ELIMINATETYPEDEFS_H_
 #define MIDEND_ELIMINATETYPEDEFS_H_
 
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
+#include "ir/pass_manager.h"
+#include "ir/visitor.h"
+#include "lib/safe_vector.h"
 
 namespace P4 {
 

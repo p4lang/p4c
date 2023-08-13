@@ -17,10 +17,23 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_PSA_EBPFPIPELINE_H_
 #define BACKENDS_EBPF_PSA_EBPFPIPELINE_H_
 
+#include <algorithm>
+#include <map>
+#include <utility>
+#include <vector>
+
+#include "backends/ebpf/codeGen.h"
+#include "backends/ebpf/ebpfModel.h"
+#include "backends/ebpf/ebpfOptions.h"
 #include "backends/ebpf/ebpfProgram.h"
+#include "backends/ebpf/ebpfTable.h"
+#include "backends/ebpf/psa/ebpfPsaTable.h"
 #include "backends/ebpf/target.h"
 #include "ebpfPsaControl.h"
 #include "ebpfPsaDeparser.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
+#include "lib/cstring.h"
 
 namespace EBPF {
 

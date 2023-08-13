@@ -17,8 +17,17 @@ limitations under the License.
 #ifndef FRONTENDS_P4_TYPEMAP_H_
 #define FRONTENDS_P4_TYPEMAP_H_
 
+#include <stddef.h>
+
+#include <iosfwd>
+#include <vector>
+
 #include "frontends/common/programMap.h"
 #include "frontends/p4/typeChecking/typeSubstitution.h"
+#include "ir/ir.h"
+#include "ir/node.h"
+#include "lib/cstring.h"
+#include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
 
 namespace P4 {

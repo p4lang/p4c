@@ -17,7 +17,9 @@ limitations under the License.
 #ifndef P4_CREATEBUILTINS_H_
 #define P4_CREATEBUILTINS_H_
 
+#include "ir/declaration.h"
 #include "ir/ir.h"
+#include "ir/node.h"
 #include "ir/visitor.h"
 
 /*

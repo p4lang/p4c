@@ -17,10 +17,24 @@ and limitations under the License.
 #ifndef BACKENDS_TC_PNAPROGRAMSTRUCTURE_H_
 #define BACKENDS_TC_PNAPROGRAMSTRUCTURE_H_
 
+#include <string.h>
+
+#include <set>
+#include <vector>
+
 #include "backends/bmv2/common/backend.h"
 #include "backends/bmv2/common/programStructure.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/id.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/visitor.h"
 #include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/null.h"
+#include "lib/ordered_map.h"
 
 namespace TC {
 

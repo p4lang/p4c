@@ -16,7 +16,17 @@ limitations under the License.
 
 #include "fillEnumMap.h"
 
-#include "frontends/p4/enumInstance.h"
+#include <string.h>
+
+#include <string>
+#include <vector>
+
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
+#include "lib/source_file.h"
+#include "midend/convertEnums.h"
 
 namespace P4 {
 

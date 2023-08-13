@@ -16,8 +16,29 @@ limitations under the License.
 
 #include "typecheck.h"
 
+#include <stddef.h>
+
+#include <algorithm>
+#include <list>
+#include <ostream>
+#include <set>
+#include <string>
+#include <vector>
+
+#include <boost/multiprecision/cpp_int.hpp>
+
 #include "ir/dump.h"
+#include "ir/id.h"
+#include "ir/namemap.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
 #include "lib/log.h"
+#include "lib/safe_vector.h"
+#include "lib/source_file.h"
 
 /// P4-14 (v1.0 and v1.1) type checking algorithm
 /// Initial type setting based on immediate context:

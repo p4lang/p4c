@@ -16,10 +16,22 @@ limitations under the License.
 
 #include "dpdkContext.h"
 
-#include "backend.h"
-#include "control-plane/bfruntime_ext.h"
+#include <list>
+#include <ostream>
+#include <regex>
+
+#include "backends/dpdk/constants.h"
+#include "backends/dpdk/dpdkProgramStructure.h"
+#include "backends/dpdk/options.h"
 #include "dpdkUtils.h"
+#include "ir/declaration.h"
+#include "ir/vector.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/ordered_map.h"
 #include "printUtils.h"
+
 namespace DPDK {
 
 cstring DpdkContextGenerator::removePipePrefix(cstring tableName) {

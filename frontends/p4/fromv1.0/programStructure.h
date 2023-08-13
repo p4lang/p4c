@@ -17,14 +17,26 @@ limitations under the License.
 #ifndef FRONTENDS_P4_FROMV1_0_PROGRAMSTRUCTURE_H_
 #define FRONTENDS_P4_FROMV1_0_PROGRAMSTRUCTURE_H_
 
+#include <functional>
+#include <map>
 #include <set>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "frontends/p4/callGraph.h"
 #include "frontends/p4/coreLibrary.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/vector.h"
 #include "lib/cstring.h"
-#include "lib/map.h"
+#include "lib/log.h"
+#include "lib/ordered_set.h"
+#include "lib/source_file.h"
 #include "v1model.h"
 
 namespace P4V1 {

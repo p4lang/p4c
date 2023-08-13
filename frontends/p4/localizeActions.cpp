@@ -16,7 +16,15 @@ limitations under the License.
 
 #include "localizeActions.h"
 
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "frontends/p4/cloner.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "lib/exceptions.h"
 
 namespace P4 {
 

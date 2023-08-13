@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "coreLibrary.h"
 #include "fromv1.0/v1model.h"
 
 /* These must be in the same compiliation unit to ensure that P4CoreLibrary::instance

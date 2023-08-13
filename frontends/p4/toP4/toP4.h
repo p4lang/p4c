@@ -17,8 +17,20 @@ limitations under the License.
 #ifndef P4_TOP4_TOP4_H_
 #define P4_TOP4_TOP4_H_
 
+#include <stddef.h>
+
+#include <iostream>
+#include <string>
+#include <vector>
+
+#include "ir/dbprint.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/vector.h"
 #include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
 #include "lib/sourceCodeBuilder.h"
 
 namespace P4 {

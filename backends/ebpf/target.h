@@ -17,8 +17,11 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_TARGET_H_
 #define BACKENDS_EBPF_TARGET_H_
 
+#include <string>
+
 #include "lib/cstring.h"
 #include "lib/error.h"
+#include "lib/error_catalog.h"
 #include "lib/exceptions.h"
 #include "lib/sourceCodeBuilder.h"
 

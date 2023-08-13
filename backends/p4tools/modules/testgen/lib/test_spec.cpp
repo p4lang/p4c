@@ -6,13 +6,14 @@
 #include <utility>
 #include <vector>
 
-#include <boost/multiprecision/cpp_int.hpp>
-
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/trace_event.h"
 #include "ir/irutils.h"
+#include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/ordered_map.h"
+
+#include "backends/p4tools/modules/testgen/lib/test_object.h"
 
 namespace P4Tools::P4Testgen {
 

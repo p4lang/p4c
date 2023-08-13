@@ -16,10 +16,26 @@ limitations under the License.
 
 #include "ebpfParser.h"
 
-#include "ebpfModel.h"
+#include <string>
+#include <utility>
+
+#include "backends/ebpf/ebpfObject.h"
+#include "backends/ebpf/ebpfOptions.h"
+#include "backends/ebpf/ebpfProgram.h"
+#include "backends/ebpf/ebpfTable.h"
+#include "backends/ebpf/target.h"
 #include "ebpfType.h"
+#include "frontends/common/model.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
+#include "lib/algorithm.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/stringify.h"
 
 namespace EBPF {
 

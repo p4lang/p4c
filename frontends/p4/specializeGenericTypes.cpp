@@ -16,7 +16,14 @@ limitations under the License.
 
 #include "specializeGenericTypes.h"
 
+#include <stddef.h>
+
+#include "frontends/p4/typeChecking/typeSubstitution.h"
 #include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
+#include "ir/id.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
 
 namespace P4 {
 

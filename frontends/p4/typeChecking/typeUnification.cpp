@@ -16,8 +16,27 @@ limitations under the License.
 
 #include "typeUnification.h"
 
-#include "frontends/p4/typeChecking/typeChecker.h"
+#include <unistd.h>
+
+#include <map>
+#include <ostream>
+#include <string>
+#include <typeinfo>
+#include <utility>
+#include <vector>
+
+#include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
+#include "lib/enumerator.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/null.h"
 #include "typeConstraints.h"
 
 namespace P4 {

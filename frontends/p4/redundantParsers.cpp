@@ -16,8 +16,16 @@ limitations under the License.
 
 #include "redundantParsers.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/methodInstance.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "lib/log.h"
 
 namespace P4 {
 bool FindRedundantParsers::preorder(const IR::P4Parser *parser) {

@@ -16,8 +16,22 @@ limitations under the License.
 
 #include "bytestrings.h"
 
+#include <stddef.h>
+#include <stdint.h>
+
+#include <algorithm>
+#include <vector>
+
+#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/multiprecision/detail/et_ops.hpp>
+#include <boost/multiprecision/number.hpp>
+#include <boost/multiprecision/traits/explicit_conversion.hpp>
+
 #include "ir/ir.h"
 #include "lib/algorithm.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
 
 namespace P4 {
 

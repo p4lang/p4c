@@ -14,11 +14,14 @@
 #include "backends/p4tools/common/lib/trace_event.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "ir/id.h"
 #include "ir/ir.h"
+#include "lib/cstring.h"
 #include "lib/log.h"
 #include "nlohmann/json.hpp"
 
 #include "backends/p4tools/modules/testgen/lib/test_object.h"
+#include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 #include "backends/p4tools/modules/testgen/targets/pna/test_spec.h"
 

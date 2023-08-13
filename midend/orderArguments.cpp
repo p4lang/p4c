@@ -16,7 +16,15 @@ limitations under the License.
 
 #include "orderArguments.h"
 
+#include <string>
+#include <vector>
+
 #include "frontends/p4/methodInstance.h"
+#include "frontends/p4/parameterSubstitution.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
+#include "lib/enumerator.h"
+#include "lib/exceptions.h"
 
 namespace P4 {
 

@@ -6,8 +6,11 @@
 
 #include "backends/p4tools/common/lib/model.h"
 #include "ir/id.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/null.h"
+#include "lib/ordered_map.h"
 
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 

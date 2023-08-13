@@ -17,9 +17,12 @@ limitations under the License.
 #ifndef MIDEND_VALIDATEPROPERTIES_H_
 #define MIDEND_VALIDATEPROPERTIES_H_
 
-#include "frontends/p4/typeMap.h"
+#include <initializer_list>
+#include <set>
+
 #include "ir/ir.h"
 #include "ir/visitor.h"
+#include "lib/cstring.h"
 
 namespace P4 {
 
