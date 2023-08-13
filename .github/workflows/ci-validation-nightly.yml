@@ -1,10 +1,9 @@
 name: "validate-p4c"
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  schedule:
+    # Every day on midnight UTC
+    - cron: '0 0 * * *'
 
 # Cancel any preceding run on the pull request.
 concurrency:
