@@ -17,8 +17,15 @@ limitations under the License.
 #ifndef FRONTENDS_P4_REDUNDANTPARSERS_H_
 #define FRONTENDS_P4_REDUNDANTPARSERS_H_
 
+#include <set>
+
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/pass_manager.h"
+#include "ir/visitor.h"
 
 namespace P4 {
 

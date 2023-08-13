@@ -17,16 +17,24 @@ limitations under the License.
 #ifndef FRONTENDS_COMMON_PARSEINPUT_H_
 #define FRONTENDS_COMMON_PARSEINPUT_H_
 
-#include "frontends/common/options.h"
-#include "frontends/p4/fromv1.0/converters.h"
-#include "frontends/p4/frontend.h"
-#include "frontends/parsers/parserDriver.h"
-#include "lib/error.h"
-#include "lib/source_file.h"
+#include <stdio.h>
 
-namespace IR {
-class P4Program;
-}  // namespace IR
+#include <iostream>
+#include <optional>
+#include <string>
+
+#include "frontends/common/options.h"
+#include "frontends/common/parser_options.h"
+#include "frontends/p4/fromv1.0/converters.h"
+#include "frontends/parsers/parserDriver.h"
+#include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/pass_manager.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
 
 namespace P4 {
 

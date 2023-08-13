@@ -16,6 +16,14 @@ limitations under the License.
 
 #include "eliminateInvalidHeaders.h"
 
+#include <ostream>
+
+#include "ir/id.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/log.h"
+#include "lib/source_file.h"
+
 namespace P4 {
 
 const IR::Node *DoEliminateInvalidHeaders::postorder(IR::P4Control *control) {

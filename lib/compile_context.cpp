@@ -16,7 +16,6 @@ limitations under the License.
 
 #include "lib/compile_context.h"
 
-#include "lib/error.h"
 #include "lib/exceptions.h"
 
 ICompileContext::~ICompileContext() {}

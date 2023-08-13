@@ -19,9 +19,6 @@ limitations under the License.
 #include <stdlib.h>
 #include <time.h>
 
-#include "ir/ir-generated.h"
-#include "lib/source_file.h"
-
 #if HAVE_LIBGC
 #include <gc/gc.h>
 #endif
@@ -617,6 +614,12 @@ std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> *v)
 }
 
 #include <config.h>
+
+#include <cassert>
+#include <iostream>
+#include <string>
+#include <tuple>
+#include <vector>
 #if HAVE_CXXABI_H
 #include <cxxabi.h>
 

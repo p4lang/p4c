@@ -16,10 +16,35 @@ limitations under the License.
 
 #include "constantFolding.h"
 
-#include "frontends/common/options.h"
+#include <stddef.h>
+
+#include <ostream>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/multiprecision/cpp_int/add.hpp>
+#include <boost/multiprecision/cpp_int/bitwise.hpp>
+#include <boost/multiprecision/detail/et_ops.hpp>
+#include <boost/multiprecision/number.hpp>
+#include <boost/multiprecision/traits/explicit_conversion.hpp>
+
+#include "frontends/common/parser_options.h"
 #include "frontends/p4/enumInstance.h"
+#include "ir/configuration.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
 #include "lib/big_int_util.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
 #include "lib/log.h"
+#include "lib/map.h"
+#include "lib/null.h"
 
 namespace P4 {
 

@@ -13,7 +13,22 @@ limitations under the License.
 */
 #include "ebpfPsaMeter.h"
 
+#include <initializer_list>
+#include <string>
+#include <vector>
+
+#include "backends/ebpf/ebpfControl.h"
+#include "backends/ebpf/ebpfTable.h"
+#include "backends/ebpf/ebpfType.h"
 #include "backends/ebpf/psa/ebpfPipeline.h"
+#include "backends/ebpf/psa/ebpfPsaControl.h"
+#include "backends/ebpf/target.h"
+#include "ir/id.h"
+#include "ir/vector.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/null.h"
 
 namespace EBPF {
 

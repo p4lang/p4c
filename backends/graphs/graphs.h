@@ -18,6 +18,8 @@ limitations under the License.
 #define BACKENDS_GRAPHS_GRAPHS_H_
 
 #include "config.h"
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
 
 // Shouldn't happen as cmake will not try to build this backend if the boost
 // graph headers couldn't be found.
@@ -25,25 +27,25 @@ limitations under the License.
 #error "This backend requires the boost graph headers, which could not be found"
 #endif
 
+#include <iosfwd>
 #include <map>
 #include <optional>
 #include <utility>  // std::pair
 #include <vector>
 
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/detail/adj_list_edge_iterator.hpp>
+#include <boost/graph/graph_selectors.hpp>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/graphviz.hpp>
+#include <boost/graph/properties.hpp>
+#include <boost/graph/subgraph.hpp>
+#include <boost/iterator/iterator_facade.hpp>
+#include <boost/pending/property.hpp>
+#include <boost/range/irange.hpp>
 
-#include "frontends/p4/parserCallGraph.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
-
-namespace P4 {
-
-class ReferenceMap;
-class TypeMap;
-
-}  // namespace P4
 
 namespace graphs {
 

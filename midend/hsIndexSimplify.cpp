@@ -1,8 +1,14 @@
 #include "midend/hsIndexSimplify.h"
 
 #include <iostream>
-#include <sstream>
+#include <string>
+#include <vector>
 
+#include <boost/multiprecision/cpp_int.hpp>
+
+#include "ir/id.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
 #include "midend/simplifyKey.h"
 
 namespace P4 {

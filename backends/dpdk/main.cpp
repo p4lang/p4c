@@ -14,10 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <cstdio>
+#include <exception>
 #include <fstream>  // IWYU pragma: keep
 #include <iostream>
-#include <string>
 
 #include "backends/dpdk/backend.h"
 #include "backends/dpdk/control-plane/bfruntime_arch_handler.h"
@@ -28,16 +27,18 @@ limitations under the License.
 #include "control-plane/bfruntime_ext.h"
 #include "control-plane/p4RuntimeSerializer.h"
 #include "frontends/common/applyOptionsPragmas.h"
+#include "frontends/common/options.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/common/parser_options.h"
 #include "frontends/p4/frontend.h"
 #include "ir/ir.h"
+#include "ir/json_generator.h"
 #include "ir/json_loader.h"
+#include "lib/compile_context.h"
+#include "lib/cstring.h"
 #include "lib/error.h"
-#include "lib/exceptions.h"
-#include "lib/exename.h"
+#include "lib/error_catalog.h"
 #include "lib/gc.h"
-#include "lib/log.h"
 #include "lib/nullstream.h"
 
 void generateTDIBfrtJson(bool isTDI, const IR::P4Program *program, DPDK::DpdkOptions &options) {

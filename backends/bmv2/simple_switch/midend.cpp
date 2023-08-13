@@ -16,20 +16,22 @@ limitations under the License.
 
 #include "midend.h"
 
+#include <ostream>
+
+#include "backends/bmv2/common/midend.h"
 #include "backends/bmv2/simple_switch/options.h"
 #include "frontends/common/constantFolding.h"
+#include "frontends/common/parser_options.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/evaluator/evaluator.h"
-#include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/simplifyParsers.h"
 #include "frontends/p4/strengthReduction.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
-#include "frontends/p4/typeMap.h"
-#include "frontends/p4/uniqueNames.h"
-#include "frontends/p4/unusedDeclarations.h"
-#include "midend/actionSynthesis.h"
+#include "ir/pass_manager.h"
+#include "lib/cstring.h"
 #include "midend/checkSize.h"
 #include "midend/compileTimeOps.h"
 #include "midend/complexComparison.h"

@@ -17,6 +17,8 @@ limitations under the License.
 #ifndef TOOLS_IR_GENERATOR_TYPE_H_
 #define TOOLS_IR_GENERATOR_TYPE_H_
 
+#include <stddef.h>
+
 #include <vector>
 
 #include "lib/cstring.h"
@@ -30,6 +32,7 @@ class IrNamespace;
     M(TemplateInstantiation) M(ReferenceType) M(PointerType) M(ArrayType) M(FunctionType)
 #define FORWARD_DECLARE(T) class T;
 ALL_TYPES(FORWARD_DECLARE)
+
 #undef FORWARD_DECLARE
 
 class Type : public Util::IHasSourceInfo {

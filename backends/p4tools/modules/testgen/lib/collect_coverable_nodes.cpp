@@ -1,18 +1,20 @@
 #include "backends/p4tools/modules/testgen/lib/collect_coverable_nodes.h"
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "backends/p4tools/common/lib/table_utils.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
-#include "ir/indexed_vector.h"
 #include "ir/node.h"
 #include "ir/vector.h"
 #include "lib/cstring.h"
 #include "lib/null.h"
 #include "lib/source_file.h"
+#include "midend/coverage.h"
 
+#include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4Tools::P4Testgen {

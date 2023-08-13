@@ -18,7 +18,9 @@ limitations under the License.
 #define FRONTENDS_P4_ENUMINSTANCE_H_
 
 #include "frontends/p4/typeMap.h"
+#include "ir/id.h"
 #include "ir/ir.h"
+#include "lib/cstring.h"
 #include "methodInstance.h"
 
 namespace P4 {

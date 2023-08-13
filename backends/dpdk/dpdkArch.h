@@ -17,19 +17,48 @@ limitations under the License.
 #ifndef BACKENDS_DPDK_DPDKARCH_H_
 #define BACKENDS_DPDK_DPDKARCH_H_
 
-#include "constants.h"
+#include <stddef.h>
+
+#include <list>
+#include <map>
+#include <ostream>
+#include <set>
+#include <string>
+#include <tuple>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
 #include "dpdkProgramStructure.h"
 #include "dpdkUtils.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/evaluator/evaluator.h"
+#include "frontends/p4/methodInstance.h"
 #include "frontends/p4/sideEffects.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/pass_manager.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
 #include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/null.h"
 #include "lib/ordered_map.h"
+#include "lib/safe_vector.h"
+#include "lib/source_file.h"
 #include "midend/flattenInterfaceStructs.h"
 #include "midend/removeLeftSlices.h"
 
 namespace DPDK {
+struct fieldInfo;
 
 cstring TypeStruct2Name(const cstring *s);
 bool isSimpleExpression(const IR::Expression *e);
@@ -37,8 +66,6 @@ bool isNonConstantSimpleExpression(const IR::Expression *e);
 void expressionUnrollSanityCheck(const IR::Expression *e);
 
 using UserMeta = std::set<cstring>;
-
-class CollectMetadataHeaderInfo;
 
 /* According to the implementation of DPDK backend, for a control block, there
  * are only two parameters: header and metadata. Therefore, first we need to

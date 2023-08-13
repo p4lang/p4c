@@ -1,6 +1,16 @@
 #include "convertEnums.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
+#include <boost/multiprecision/cpp_int.hpp>
+
 #include "frontends/p4/enumInstance.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
 
 namespace P4 {
 

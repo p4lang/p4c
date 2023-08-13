@@ -16,6 +16,37 @@ and limitations under the License.
 
 #include "midend.h"
 
+#include <ostream>
+
+#include "backends/ebpf/lower.h"
+#include "backends/tc/options.h"
+#include "frontends/common/constantFolding.h"
+#include "frontends/p4/evaluator/evaluator.h"
+#include "frontends/p4/moveDeclarations.h"
+#include "frontends/p4/simplify.h"
+#include "frontends/p4/simplifyParsers.h"
+#include "frontends/p4/strengthReduction.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "lib/error.h"
+#include "midend/complexComparison.h"
+#include "midend/convertEnums.h"
+#include "midend/eliminateInvalidHeaders.h"
+#include "midend/eliminateNewtype.h"
+#include "midend/eliminateTuples.h"
+#include "midend/expandEmit.h"
+#include "midend/midEndLast.h"
+#include "midend/noMatch.h"
+#include "midend/parserUnroll.h"
+#include "midend/removeExits.h"
+#include "midend/removeLeftSlices.h"
+#include "midend/removeMiss.h"
+#include "midend/removeSelectBooleans.h"
+#include "midend/simplifyKey.h"
+#include "midend/simplifySelectCases.h"
+#include "midend/simplifySelectList.h"
+#include "midend/singleArgumentSelect.h"
+#include "midend/tableHit.h"
+
 namespace TC {
 
 const IR::ToplevelBlock *MidEnd::run(TCOptions &options, const IR::P4Program *program,

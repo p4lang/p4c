@@ -18,14 +18,11 @@ limitations under the License.
 #define LIB_OPTIONS_H_
 
 #include <functional>
-#include <ostream>
-#include <stdexcept>
-#include <string>
+#include <iostream>
+#include <map>
 #include <vector>
 
 #include "cstring.h"
-#include "error.h"
-#include "map.h"
 
 namespace Util {
 

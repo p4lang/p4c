@@ -16,6 +16,17 @@ limitations under the License.
 
 #include "options.h"
 
+#include <string.h>
+#include <time.h>
+
+#include <stdexcept>
+#include <string>
+
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/map.h"
+
 void Util::Options::registerOption(const char *option, const char *argName,
                                    OptionProcessor processor, const char *description,
                                    OptionFlags flags /* = OptionFlags::Default */) {

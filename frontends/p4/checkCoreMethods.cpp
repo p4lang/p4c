@@ -16,8 +16,16 @@ limitations under the License.
 
 #include "frontends/p4/checkCoreMethods.h"
 
+#include <string>
+#include <vector>
+
+#include "frontends/common/model.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
 
 namespace P4 {
 

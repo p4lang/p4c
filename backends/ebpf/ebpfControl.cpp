@@ -16,13 +16,32 @@ limitations under the License.
 
 #include "ebpfControl.h"
 
+#include <list>
+#include <string>
+#include <utility>
+
+#include "backends/ebpf/ebpfModel.h"
+#include "backends/ebpf/ebpfObject.h"
+#include "backends/ebpf/ebpfOptions.h"
+#include "backends/ebpf/target.h"
 #include "ebpfTable.h"
 #include "ebpfType.h"
+#include "frontends/common/model.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/parameterSubstitution.h"
 #include "frontends/p4/tableApply.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/node.h"
+#include "lib/enumerator.h"
 #include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/null.h"
+#include "lib/ordered_map.h"
+#include "lib/stringify.h"
 
 namespace EBPF {
 

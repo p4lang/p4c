@@ -17,10 +17,20 @@ limitations under the License.
 #ifndef FRONTENDS_P4_METHODINSTANCE_H_
 #define FRONTENDS_P4_METHODINSTANCE_H_
 
+#include <vector>
+
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/parameterSubstitution.h"
+#include "frontends/p4/typeChecking/typeSubstitution.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
 #include "ir/ir.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
+#include "lib/castable.h"
+#include "lib/exceptions.h"
+#include "lib/null.h"
 
 namespace P4 {
 

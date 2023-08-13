@@ -17,19 +17,22 @@ limitations under the License.
 #ifndef TOOLS_IR_GENERATOR_IRCLASS_H_
 #define TOOLS_IR_GENERATOR_IRCLASS_H_
 
+#include <functional>
+#include <initializer_list>
 #include <map>
-#include <stdexcept>
+#include <ostream>
+#include <set>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "lib/cstring.h"
 #include "lib/enumerator.h"
-#include "lib/exceptions.h"
 #include "lib/map.h"
 #include "lib/ordered_map.h"
 #include "lib/source_file.h"
 #include "type.h"
 
-class IrClass;
 class IrField;
 
 class IrNamespace {

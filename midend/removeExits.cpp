@@ -16,7 +16,20 @@ limitations under the License.
 
 #include "removeExits.h"
 
+#include <ostream>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "frontends/p4/methodInstance.h"
+#include "frontends/p4/ternaryBool.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
 
 namespace P4 {
 

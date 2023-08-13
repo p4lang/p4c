@@ -1,9 +1,17 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
+#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/multiprecision/number.hpp>
+
 #include "backends/p4tools/common/lib/model.h"
+#include "ir/declaration.h"
+#include "lib/big_int_util.h"
+#include "lib/cstring.h"
 #include "lib/exceptions.h"
 
+#include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/constants.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
 

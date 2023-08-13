@@ -17,10 +17,14 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_MIDEND_H_
 #define BACKENDS_EBPF_MIDEND_H_
 
+#include <iosfwd>
+#include <vector>
+
 #include "ebpfOptions.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
+#include "ir/pass_manager.h"
 
 namespace EBPF {
 

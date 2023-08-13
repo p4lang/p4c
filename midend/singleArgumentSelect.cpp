@@ -1,5 +1,19 @@
 #include "singleArgumentSelect.h"
 
+#include <stddef.h>
+
+#include <string>
+#include <vector>
+
+#include <boost/multiprecision/cpp_int.hpp>
+
+#include "ir/vector.h"
+#include "lib/big_int_util.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+
 namespace P4 {
 
 DoSingleArgumentSelect::Pair::Pair(const IR::Expression *e, const IR::Type *type) {

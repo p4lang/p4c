@@ -14,10 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <getopt.h>
 #include <stdio.h>
+#include <unistd.h>
 
-#include <fstream>
+#include <iostream>
 
 #include "ir-generator.h"
 #include "irclass.h"

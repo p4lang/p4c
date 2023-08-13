@@ -1,8 +1,18 @@
 #include "interpreter.h"
 
+#include <algorithm>
+#include <string>
+
+#include <boost/multiprecision/cpp_int.hpp>
+
 #include "frontends/common/constantFolding.h"
+#include "frontends/common/model.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
+#include "frontends/p4/parameterSubstitution.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
+#include "lib/enumerator.h"
 #include "lib/exceptions.h"
 
 namespace P4 {

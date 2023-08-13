@@ -16,9 +16,15 @@ limitations under the License.
 
 #include "frontends/p4/sideEffects.h"
 
+#include <utility>
+
 #include "frontends/p4/alias.h"
 #include "frontends/p4/cloner.h"
+#include "frontends/p4/parameterSubstitution.h"
 #include "frontends/p4/tableApply.h"
+#include "ir/vector.h"
+#include "lib/enumerator.h"
+#include "lib/map.h"
 
 namespace P4 {
 

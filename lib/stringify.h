@@ -19,9 +19,9 @@ limitations under the License.
 #ifndef LIB_STRINGIFY_H_
 #define LIB_STRINGIFY_H_
 
-#include <stdint.h>
-
 #include <cstdarg>
+#include <string>
+#include <type_traits>
 
 #include "big_int_util.h"
 #include "cstring.h"
@@ -35,6 +35,7 @@ template <typename T>
 class HasToString final {
     template <typename U, cstring (U::*)() const>
     struct Check;
+
     template <typename U>
     static char func(Check<U, &U::toString> *);
     template <typename U>

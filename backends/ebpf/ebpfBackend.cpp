@@ -16,14 +16,18 @@ limitations under the License.
 
 #include "ebpfBackend.h"
 
-#include "backends/bmv2/psa_switch/psaSwitch.h"
+#include <ostream>
+#include <string>
+
+#include "backends/ebpf/codeGen.h"
+#include "backends/ebpf/ebpfOptions.h"
 #include "ebpfProgram.h"
 #include "ebpfType.h"
-#include "frontends/p4/evaluator/evaluator.h"
+#include "lib/cstring.h"
 #include "lib/error.h"
+#include "lib/error_catalog.h"
 #include "lib/nullstream.h"
 #include "psa/backend.h"
-#include "psa/ebpfPsaGen.h"
 #include "target.h"
 
 namespace EBPF {

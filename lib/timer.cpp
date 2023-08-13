@@ -1,6 +1,5 @@
 #include "lib/timer.h"
 
-#include <algorithm>
 #include <chrono>  // NOLINT linter forbids using chrono, but we don't have alternatives
 #include <memory>
 #include <unordered_map>

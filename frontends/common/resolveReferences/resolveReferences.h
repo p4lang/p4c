@@ -17,9 +17,15 @@ limitations under the License.
 #ifndef COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_
 #define COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_
 
+#include <vector>
+
+#include "ir/declaration.h"
+#include "ir/id.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
 #include "lib/cstring.h"
-#include "lib/exceptions.h"
 #include "referenceMap.h"
 
 namespace P4 {

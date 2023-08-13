@@ -11,6 +11,7 @@
 #include "backends/p4tools/common/lib/model.h"
 #include "ir/declaration.h"
 #include "ir/ir.h"
+#include "lib/big_int_util.h"
 #include "lib/cstring.h"
 
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"

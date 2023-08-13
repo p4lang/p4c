@@ -16,8 +16,14 @@ limitations under the License.
 
 #include "converters.h"
 
+#include <algorithm>
+#include <set>
+#include <typeindex>
+
+#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/multiprecision/number.hpp>
+
 #include "frontends/common/constantFolding.h"
-#include "frontends/common/options.h"
 #include "frontends/p4-14/header_type.h"
 #include "frontends/p4-14/typecheck.h"
 #include "frontends/p4/coreLibrary.h"

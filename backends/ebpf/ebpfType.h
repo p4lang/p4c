@@ -17,10 +17,16 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_EBPFTYPE_H_
 #define BACKENDS_EBPF_EBPFTYPE_H_
 
+#include <vector>
+
+#include "backends/ebpf/codeGen.h"
 #include "ebpfObject.h"
+#include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 #include "lib/algorithm.h"
-#include "lib/sourceCodeBuilder.h"
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
+#include "lib/null.h"
 
 namespace EBPF {
 

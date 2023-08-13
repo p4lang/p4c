@@ -16,7 +16,24 @@ limitations under the License.
 
 #include "ubpfDeparser.h"
 
+#include <map>
+#include <string>
+#include <vector>
+
+#include "backends/ubpf/ubpfProgram.h"
+#include "frontends/common/model.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/methodInstance.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/node.h"
+#include "lib/algorithm.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/map.h"
+#include "lib/null.h"
 #include "ubpfType.h"
 
 namespace UBPF {

@@ -16,7 +16,20 @@ limitations under the License.
 
 #include "typeMap.h"
 
-#include "lib/map.h"
+#include <algorithm>
+#include <list>
+#include <ostream>
+#include <string>
+#include <utility>
+
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/null.h"
 
 namespace P4 {
 

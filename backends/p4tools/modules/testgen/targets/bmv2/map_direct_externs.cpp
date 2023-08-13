@@ -1,5 +1,12 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/map_direct_externs.h"
 
+#include <utility>
+
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
+
 namespace P4Tools::P4Testgen::Bmv2 {
 
 bool MapDirectExterns::preorder(const IR::Declaration_Instance *declInstance) {

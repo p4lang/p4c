@@ -15,6 +15,25 @@ limitations under the License.
 
 #include "bfruntime_ext.h"
 
+#include <stdint.h>
+
+#include <string>
+#include <vector>
+
+#include "backends/dpdk/constants.h"
+#include "backends/dpdk/options.h"
+#include "control-plane/bfruntime.h"
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
+#include "lib/null.h"
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wpedantic"
+#include "backends/dpdk/p4/config/p4info.pb.h"
+
+#pragma GCC diagnostic pop
+
 namespace P4 {
 
 namespace BFRT {

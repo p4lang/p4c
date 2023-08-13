@@ -2,7 +2,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <iostream>
 #include <string>
 
 #include "backends/p4tools/common/lib/variables.h"
@@ -11,7 +10,10 @@
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"
 #include "ir/vector.h"
+#include "lib/cstring.h"
+#include "lib/enumerator.h"
 #include "lib/exceptions.h"
+#include "lib/log.h"
 #include "lib/null.h"
 
 namespace P4Tools::RefersToParser {

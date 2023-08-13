@@ -1,13 +1,15 @@
 #include "backends/p4tools/common/lib/model.h"
 
-#include <ostream>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include <boost/container/vector.hpp>
 
+#include "backends/p4tools/common/core/solver.h"
 #include "frontends/p4/optimizeExpressions.h"
 #include "ir/indexed_vector.h"
+#include "ir/ir.h"
 #include "ir/irutils.h"
 #include "ir/vector.h"
 #include "lib/cstring.h"

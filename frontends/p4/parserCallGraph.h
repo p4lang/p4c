@@ -17,9 +17,13 @@ limitations under the License.
 #ifndef FRONTENDS_P4_PARSERCALLGRAPH_H_
 #define FRONTENDS_P4_PARSERCALLGRAPH_H_
 
-#include "frontends/common/resolveReferences/resolveReferences.h"
+#include <list>
+
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/callGraph.h"
 #include "ir/ir.h"
+#include "ir/visitor.h"
+#include "lib/null.h"
 
 namespace P4 {
 

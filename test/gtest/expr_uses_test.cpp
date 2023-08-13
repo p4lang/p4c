@@ -16,9 +16,13 @@ limitations under the License.
 
 #include "midend/expr_uses.h"
 
+#include <memory>
+
 #include "gtest/gtest.h"
+#include "ir/id.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
+#include "lib/cstring.h"
 #include "lib/exceptions.h"
 
 TEST(expr_uses, expr_uses) {

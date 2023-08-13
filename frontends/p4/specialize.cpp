@@ -17,13 +17,22 @@ limitations under the License.
 #include "specialize.h"
 
 #include <iostream>
+#include <list>
+#include <utility>
 
+#include "frontends/common/constantFolding.h"
 #include "frontends/p4/enumInstance.h"
 #include "frontends/p4/evaluator/substituteParameters.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/parameterSubstitution.h"
-#include "frontends/p4/toP4/toP4.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/typeChecking/typeSubstitution.h"
 #include "frontends/p4/unusedDeclarations.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/safe_vector.h"
 
 namespace P4 {
 

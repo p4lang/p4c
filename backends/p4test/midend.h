@@ -17,9 +17,14 @@ limitations under the License.
 #ifndef BACKENDS_P4TEST_MIDEND_H_
 #define BACKENDS_P4TEST_MIDEND_H_
 
+#include <iosfwd>
+#include <vector>
+
 #include "frontends/common/options.h"
-#include "frontends/p4/evaluator/evaluator.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
+#include "ir/pass_manager.h"
 
 namespace P4Test {
 

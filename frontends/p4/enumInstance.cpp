@@ -16,6 +16,9 @@ limitations under the License.
 
 #include "enumInstance.h"
 
+#include "ir/declaration.h"
+#include "lib/null.h"
+
 namespace P4 {
 
 // static

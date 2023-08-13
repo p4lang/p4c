@@ -18,7 +18,7 @@ and limitations under the License.
 #define BACKENDS_TC_TCANNOTATIONS_H_
 
 #include "frontends/p4/parseAnnotations.h"
-#include "ir/ir.h"
+#include "lib/cstring.h"
 
 namespace TC {
 

@@ -16,9 +16,15 @@ limitations under the License.
 
 #include "ubpfBackend.h"
 
+#include <stddef.h>
+
+#include <ostream>
+
+#include "backends/ebpf/ebpfOptions.h"
 #include "codeGen.h"
-#include "frontends/p4/evaluator/evaluator.h"
+#include "lib/cstring.h"
 #include "lib/error.h"
+#include "lib/error_catalog.h"
 #include "lib/nullstream.h"
 #include "target.h"
 #include "ubpfProgram.h"

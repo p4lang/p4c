@@ -18,7 +18,11 @@ limitations under the License.
 #define BACKENDS_BMV2_COMMON_JSONOBJECTS_H_
 
 #include <map>
+#include <string>
+#include <vector>
 
+#include "lib/big_int_util.h"
+#include "lib/cstring.h"
 #include "lib/json.h"
 #include "lib/ordered_map.h"
 

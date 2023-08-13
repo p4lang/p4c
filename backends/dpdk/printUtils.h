@@ -18,9 +18,10 @@ limitations under the License.
 
 #include <iostream>
 
-#include "ir/dbprint.h"
 #include "ir/ir.h"
+#include "ir/node.h"
 #include "ir/visitor.h"
+#include "lib/cstring.h"
 
 namespace DPDK {
 // this function translates nodes of different subclass of Expression, Type

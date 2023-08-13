@@ -1,5 +1,18 @@
 #include "global_copyprop.h"
 
+#include <string.h>
+
+#include <ostream>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "frontends/p4/methodInstance.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
+#include "lib/log.h"
+
 namespace P4 {
 
 namespace GlobalCopyProp {

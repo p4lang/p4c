@@ -16,9 +16,17 @@ limitations under the License.
 
 #include "referenceMap.h"
 
+#include <string.h>
+
+#include <list>
 #include <sstream>
+#include <utility>
 
 #include "frontends/p4/reservedWords.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/map.h"
+#include "lib/null.h"
 
 namespace P4 {
 

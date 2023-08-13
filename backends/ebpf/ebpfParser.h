@@ -17,15 +17,24 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_EBPFPARSER_H_
 #define BACKENDS_EBPF_EBPFPARSER_H_
 
+#include <map>
+#include <vector>
+
+#include "backends/ebpf/codeGen.h"
+#include "backends/ebpf/ebpfType.h"
 #include "ebpfObject.h"
 #include "ebpfProgram.h"
 #include "ebpfTable.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
+#include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
+#include "lib/cstring.h"
+#include "lib/map.h"
 
 namespace EBPF {
 
-class EBPFParser;
 class EBPFParserState;
 
 class StateTranslationVisitor : public CodeGenInspector {

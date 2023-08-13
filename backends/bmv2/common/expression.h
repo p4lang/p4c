@@ -17,15 +17,17 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_COMMON_EXPRESSION_H_
 #define BACKENDS_BMV2_COMMON_EXPRESSION_H_
 
+#include <map>
+
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"
-#include "frontends/p4/enumInstance.h"
-#include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
-#include "lib/big_int_util.h"
+#include "ir/node.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
 #include "lib/json.h"
-#include "lower.h"
+#include "lib/null.h"
 #include "programStructure.h"
 
 namespace BMV2 {

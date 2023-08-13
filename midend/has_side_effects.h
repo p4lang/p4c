@@ -18,6 +18,7 @@ limitations under the License.
 #define MIDEND_HAS_SIDE_EFFECTS_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 

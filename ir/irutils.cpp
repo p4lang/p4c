@@ -1,22 +1,28 @@
 #include "ir/irutils.h"
 
+#include <stddef.h>
+
 #include <algorithm>
 #include <cmath>
 #include <map>
+#include <string>
 #include <tuple>
 #include <typeindex>
 #include <vector>
 
-#include <boost/core/enable_if.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/multiprecision/detail/default_ops.hpp>
 #include <boost/multiprecision/detail/et_ops.hpp>
 #include <boost/multiprecision/number.hpp>
 #include <boost/multiprecision/traits/explicit_conversion.hpp>
 
+#include "ir/id.h"
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"
 #include "ir/vector.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
 #include "lib/exceptions.h"
 
 namespace IR {

@@ -17,12 +17,23 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_PSA_EBPFPSAGEN_H_
 #define BACKENDS_EBPF_PSA_EBPFPSAGEN_H_
 
-#include "backends/bmv2/psa_switch/psaSwitch.h"
+#include <vector>
+
 #include "backends/ebpf/codeGen.h"
-#include "backends/ebpf/ebpfObject.h"
 #include "backends/ebpf/ebpfOptions.h"
+#include "backends/ebpf/ebpfParser.h"
+#include "backends/ebpf/ebpfProgram.h"
+#include "backends/ebpf/ebpfType.h"
+#include "backends/ebpf/psa/ebpfPsaControl.h"
+#include "backends/ebpf/psa/ebpfPsaDeparser.h"
 #include "ebpfPipeline.h"
 #include "ebpfPsaParser.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
 #include "xdpHelpProgram.h"
 
 namespace EBPF {

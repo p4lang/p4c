@@ -16,18 +16,19 @@ limitations under the License.
 
 #include "test/gtest/helpers.h"
 
-#include <sys/wait.h>
+#include <stdlib.h>
 
 #include <cstdio>
 #include <filesystem>
 #include <fstream>  // IWYU pragma: keep
-#include <sstream>
+#include <iostream>
 #include <stdexcept>
 
 #include "frontends/common/applyOptionsPragmas.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/p4/frontend.h"
 #include "frontends/p4/parseAnnotations.h"
+#include "lib/error.h"
 
 namespace TestDetail {
 

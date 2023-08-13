@@ -17,24 +17,26 @@ limitations under the License.
 #ifndef CONTROL_PLANE_P4RUNTIMESYMBOLTABLE_H_
 #define CONTROL_PLANE_P4RUNTIMESYMBOLTABLE_H_
 
+#include <stddef.h>
+#include <stdint.h>
+
+#include <map>
+#include <optional>
+#include <set>
+#include <utility>
+
+#include "control-plane/p4RuntimeArchHandler.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/declaration.h"
+#include "ir/ir.h"
+#include "ir/node.h"
 #include "lib/cstring.h"
-#include "p4RuntimeArchHandler.h"
-#include "typeSpecConverter.h"
-
-namespace p4 {
-namespace config {
-namespace v1 {
-class P4Info;
-}  // namespace v1
-}  // namespace config
-namespace v1 {
-class WriteRequest;
-}  // namespace v1
-}  // namespace p4
-
-namespace IR {
-class P4Program;
-}  // namespace IR
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wpedantic"
+#include "p4/config/v1/p4info.pb.h"
+#pragma GCC diagnostic pop
 
 namespace P4 {
 

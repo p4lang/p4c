@@ -16,8 +16,15 @@ limitations under the License.
 
 #include "expandLookahead.h"
 
+#include "frontends/common/model.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
+#include "ir/id.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
 
 namespace P4 {
 

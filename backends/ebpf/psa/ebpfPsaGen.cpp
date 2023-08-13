@@ -16,6 +16,21 @@ limitations under the License.
 */
 #include "ebpfPsaGen.h"
 
+#include <list>
+#include <map>
+#include <string>
+#include <utility>
+
+#include "backends/ebpf/codeGen.h"
+#include "backends/ebpf/ebpfControl.h"
+#include "backends/ebpf/ebpfObject.h"
+#include "backends/ebpf/ebpfOptions.h"
+#include "backends/ebpf/ebpfTable.h"
+#include "backends/ebpf/psa/ebpfPipeline.h"
+#include "backends/ebpf/psa/externs/ebpfPsaChecksum.h"
+#include "backends/ebpf/psa/externs/ebpfPsaDigest.h"
+#include "backends/ebpf/psa/externs/ebpfPsaRegister.h"
+#include "backends/ebpf/target.h"
 #include "ebpfPsaControl.h"
 #include "ebpfPsaDeparser.h"
 #include "ebpfPsaParser.h"
@@ -25,6 +40,15 @@ limitations under the License.
 #include "externs/ebpfPsaMeter.h"
 #include "externs/ebpfPsaRandom.h"
 #include "externs/ebpfPsaTableImplementation.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/null.h"
+#include "lib/ordered_map.h"
+#include "lib/source_file.h"
 #include "xdpHelpProgram.h"
 
 namespace EBPF {

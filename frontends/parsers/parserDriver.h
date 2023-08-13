@@ -20,18 +20,22 @@ limitations under the License.
 #include <cstdio>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include "frontends/p4/symbol_table.h"
 #include "frontends/parsers/p4/abstractP4Lexer.hpp"
 #include "frontends/parsers/p4/p4AnnotationLexer.hpp"
+#include "frontends/parsers/p4/p4parser.hpp"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/vector.h"
 #include "lib/cstring.h"
 #include "lib/source_file.h"
 
 namespace P4 {
 
 class P4Lexer;
-class P4Parser;
 
 /// The base class of ParserDrivers, which provide a high level interface to
 /// parsers and lexers and manage their state.

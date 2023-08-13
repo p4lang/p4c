@@ -17,13 +17,24 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_EBPFCONTROL_H_
 #define BACKENDS_EBPF_EBPFCONTROL_H_
 
+#include <map>
+#include <set>
+#include <vector>
+
+#include "backends/ebpf/codeGen.h"
+#include "backends/ebpf/ebpfProgram.h"
 #include "ebpfObject.h"
 #include "ebpfTable.h"
 #include "ebpfType.h"
+#include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/methodInstance.h"
+#include "ir/ir.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
+#include "lib/map.h"
 
 namespace EBPF {
-
-class EBPFControl;
 
 class ControlBodyTranslator : public virtual CodeGenInspector {
  protected:

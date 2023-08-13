@@ -16,7 +16,16 @@ limitations under the License.
 
 #include "eliminateSwitch.h"
 
+#include <string>
+
+#include "frontends/common/model.h"
 #include "frontends/p4/coreLibrary.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
 
 namespace P4 {
 

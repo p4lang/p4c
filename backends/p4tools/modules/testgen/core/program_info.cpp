@@ -1,9 +1,13 @@
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 
+#include <list>
+#include <utility>
+
 #include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/lib/arch_spec.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "backends/p4tools/common/lib/variables.h"
+#include "ir/declaration.h"
 #include "ir/id.h"
 #include "ir/irutils.h"
 #include "lib/cstring.h"

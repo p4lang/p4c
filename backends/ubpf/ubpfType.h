@@ -17,8 +17,13 @@ limitations under the License.
 #ifndef BACKENDS_UBPF_UBPFTYPE_H_
 #define BACKENDS_UBPF_UBPFTYPE_H_
 
+#include <vector>
+
+#include "backends/ebpf/codeGen.h"
 #include "backends/ebpf/ebpfType.h"
-#include "lib/sourceCodeBuilder.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
+#include "lib/cstring.h"
 
 namespace UBPF {
 

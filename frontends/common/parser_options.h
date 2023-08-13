@@ -19,13 +19,18 @@ limitations under the License.
 #ifndef FRONTENDS_COMMON_PARSER_OPTIONS_H_
 #define FRONTENDS_COMMON_PARSER_OPTIONS_H_
 
+#include <stdio.h>
+
 #include <set>
-#include <unordered_map>
+#include <vector>
 
 #include "ir/configuration.h"
+#include "ir/gen-tree-macro.h"
+#include "ir/node.h"
 #include "ir/pass_manager.h"
 #include "lib/compile_context.h"
 #include "lib/cstring.h"
+#include "lib/error_reporter.h"
 #include "lib/options.h"
 
 // Standard include paths for .p4 header files. The values are determined by

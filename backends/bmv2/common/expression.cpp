@@ -15,12 +15,35 @@ limitations under the License.
 
 #include "expression.h"
 
+#include <list>
+#include <ostream>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <boost/multiprecision/cpp_int.hpp>
+
+#include "backends/bmv2/common/programStructure.h"
+#include "frontends/common/model.h"
+#include "frontends/p4/methodInstance.h"
 #include "helpers.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
 #include "lib/algorithm.h"
+#include "lib/big_int_util.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/map.h"
+#include "lib/ordered_map.h"
+#include "lib/ordered_set.h"
+#include "lib/stringify.h"
 
 namespace BMV2 {
-
-class ArithmeticFixup;
 
 const IR::Expression *ArithmeticFixup::fix(const IR::Expression *expr, const IR::Type_Bits *type) {
     unsigned width = type->size;

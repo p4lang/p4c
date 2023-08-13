@@ -1,6 +1,11 @@
 #include "midend/flattenLogMsg.h"
 
+#include <ostream>
+
 #include "flattenLogMsg.h"
+#include "ir/vector.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
 
 namespace P4 {
 

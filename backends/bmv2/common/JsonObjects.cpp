@@ -16,8 +16,16 @@ limitations under the License.
 
 #include "JsonObjects.h"
 
+#include <list>
+#include <ostream>
+#include <utility>
+
 #include "helpers.h"
+#include "ir/ir.h"
+#include "lib/exceptions.h"
 #include "lib/json.h"
+#include "lib/log.h"
+#include "lib/null.h"
 
 namespace BMV2 {
 

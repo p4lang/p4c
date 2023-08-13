@@ -1,8 +1,11 @@
 #include "backends/p4tools/modules/testgen/lib/test_backend.h"
 
+#include <math.h>
+
 #include <iostream>
 #include <optional>
 
+#include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/format_int.h"
 #include "backends/p4tools/common/lib/model.h"
@@ -23,6 +26,7 @@
 #include "backends/p4tools/modules/testgen/lib/final_state.h"
 #include "backends/p4tools/modules/testgen/lib/logging.h"
 #include "backends/p4tools/modules/testgen/lib/packet_vars.h"
+#include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 #include "backends/p4tools/modules/testgen/options.h"
 

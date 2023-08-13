@@ -16,8 +16,13 @@ limitations under the License.
 
 #include "uniqueNames.h"
 
+#include <ostream>
+
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "lib/log.h"
+#include "lib/safe_vector.h"
 
 namespace P4 {
 

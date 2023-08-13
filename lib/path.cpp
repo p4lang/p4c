@@ -18,7 +18,7 @@ limitations under the License.
 
 #include <stdexcept>
 
-#include "algorithm.h"
+#include "lib/cstring.h"
 
 namespace Util {
 

@@ -17,22 +17,41 @@ limitations under the License.
 #ifndef CONTROL_PLANE_P4RUNTIMEARCHHANDLER_H_
 #define CONTROL_PLANE_P4RUNTIMEARCHHANDLER_H_
 
+#include <stdint.h>
+
+#include <list>
 #include <optional>
 #include <set>
+#include <string>
+#include <utility>
+#include <vector>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wpedantic"
 #include "p4/config/v1/p4info.pb.h"
+#include "p4/config/v1/p4types.pb.h"
 #pragma GCC diagnostic pop
 
+#include "control-plane/typeSpecConverter.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/externInstance.h"
 #include "frontends/p4/methodInstance.h"
+#include "frontends/p4/parameterSubstitution.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/vector.h"
+#include "lib/big_int_util.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/null.h"
+#include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
-#include "typeSpecConverter.h"
 
 namespace P4 {
 

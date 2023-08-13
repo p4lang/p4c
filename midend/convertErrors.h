@@ -21,6 +21,7 @@ limitations under the License.
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
 #include "ir/node.h"
 #include "ir/pass_manager.h"

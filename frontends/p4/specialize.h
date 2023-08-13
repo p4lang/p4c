@@ -17,10 +17,20 @@ limitations under the License.
 #ifndef FRONTENDS_P4_SPECIALIZE_H_
 #define FRONTENDS_P4_SPECIALIZE_H_
 
-#include "frontends/common/constantFolding.h"
+#include <string>
+#include <vector>
+
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/pass_manager.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/null.h"
+#include "lib/ordered_map.h"
 
 namespace P4 {
 

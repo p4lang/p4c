@@ -24,6 +24,7 @@ limitations under the License.
 #include <functional>
 #include <list>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 #include "lib/cstring.h"

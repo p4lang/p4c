@@ -16,13 +16,26 @@ limitations under the License.
 
 #include "controlFlowGraph.h"
 
+#include <map>
+#include <ostream>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/tableApply.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
-#include "lib/ordered_map.h"
+#include "ir/node.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/log.h"
 #include "lib/ordered_set.h"
 
 namespace BMV2 {

@@ -16,11 +16,25 @@ limitations under the License.
 
 #include "codeGen.h"
 
-#include "ebpfObject.h"
+#include <stddef.h>
+
+#include <ios>
+#include <string>
+#include <vector>
+
 #include "ebpfType.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/enumInstance.h"
 #include "frontends/p4/methodInstance.h"
+#include "frontends/p4/parameterSubstitution.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
+#include "lib/algorithm.h"
+#include "lib/enumerator.h"
+#include "lib/exceptions.h"
+#include "lib/stringify.h"
 
 namespace EBPF {
 

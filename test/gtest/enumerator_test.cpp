@@ -17,6 +17,8 @@ limitations under the License.
 #include "lib/enumerator.h"
 
 #include <exception>
+#include <functional>
+#include <stdexcept>
 #include <vector>
 
 #include "gtest/gtest.h"

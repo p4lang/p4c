@@ -19,6 +19,7 @@ limitations under the License.
 #include <iostream>
 #include <list>
 #include <set>
+#include <string>
 #include <utility>
 #include <vector>
 

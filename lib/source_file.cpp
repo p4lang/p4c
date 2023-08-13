@@ -16,11 +16,16 @@ limitations under the License.
 
 #include "source_file.h"
 
+#include <stddef.h>
+
 #include <algorithm>
-#include <sstream>
+#include <utility>
 
 #include "exceptions.h"
+#include "lib/cstring.h"
 #include "lib/log.h"
+#include "lib/stringify.h"
+#include "lib/stringref.h"
 
 void IHasDbPrint::print() const {
     dbprint(std::cout);

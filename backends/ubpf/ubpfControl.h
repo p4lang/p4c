@@ -17,12 +17,23 @@ limitations under the License.
 #ifndef BACKENDS_UBPF_UBPFCONTROL_H_
 #define BACKENDS_UBPF_UBPFCONTROL_H_
 
+#include <map>
+#include <set>
+#include <vector>
+
+#include "backends/ebpf/codeGen.h"
 #include "backends/ebpf/ebpfControl.h"
+#include "backends/ubpf/ubpfProgram.h"
+#include "backends/ubpf/ubpfTable.h"
+#include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/methodInstance.h"
+#include "ir/ir.h"
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
+#include "lib/map.h"
 #include "ubpfRegister.h"
 
 namespace UBPF {
-
-class UBPFControl;
 
 class UBPFControlBodyTranslator : public EBPF::ControlBodyTranslator {
  public:

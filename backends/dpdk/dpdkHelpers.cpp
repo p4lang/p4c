@@ -16,10 +16,23 @@ limitations under the License.
 #include "dpdkHelpers.h"
 
 #include <iostream>
+#include <map>
+#include <utility>
 
+#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/multiprecision/detail/et_ops.hpp>
+#include <boost/multiprecision/number.hpp>
+#include <boost/multiprecision/traits/explicit_conversion.hpp>
+
+#include "backends/dpdk/constants.h"
+#include "backends/dpdk/dpdkProgramStructure.h"
 #include "dpdkUtils.h"
+#include "frontends/p4/methodInstance.h"
 #include "frontends/p4/tableApply.h"
+#include "ir/declaration.h"
 #include "ir/ir.h"
+#include "lib/exceptions.h"
+#include "lib/ordered_map.h"
 
 namespace DPDK {
 

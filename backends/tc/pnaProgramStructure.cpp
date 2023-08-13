@@ -16,6 +16,18 @@ and limitations under the License.
 
 #include "pnaProgramStructure.h"
 
+#include <algorithm>
+#include <list>
+#include <map>
+#include <ostream>
+#include <string>
+#include <utility>
+
+#include "ir/indexed_vector.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/stringify.h"
+
 namespace TC {
 
 void InspectPnaProgram::postorder(const IR::Declaration_Instance *di) {

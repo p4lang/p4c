@@ -25,13 +25,24 @@ limitations under the License.
 
 #include "dpdkArch.h"
 
+#include <iostream>
+#include <optional>
+
+#include <boost/multiprecision/cpp_int.hpp>
+
+#include "backends/dpdk/constants.h"
+#include "backends/dpdk/dpdkProgramStructure.h"
 #include "dpdkHelpers.h"
 #include "dpdkUtils.h"
+#include "frontends/common/model.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/externInstance.h"
 #include "frontends/p4/tableApply.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/declaration.h"
+#include "lib/map.h"
+#include "lib/ordered_set.h"
 
 namespace DPDK {
 

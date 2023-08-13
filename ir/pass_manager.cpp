@@ -17,7 +17,6 @@ limitations under the License.
 #include "pass_manager.h"
 
 #include <cstddef>
-#include <memory>
 #include <ostream>
 #include <stdexcept>
 #include <string>

@@ -13,16 +13,22 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 
+#include "backends/p4tools/common/core/solver.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
+#include "ir/json_generator.h"
 #include "ir/json_loader.h"  // IWYU pragma: keep
 #include "ir/json_parser.h"  // IWYU pragma: keep
 #include "ir/node.h"
 #include "ir/visitor.h"
 #include "lib/big_int_util.h"
+#include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/indent.h"
 #include "lib/log.h"
+#include "lib/null.h"
+#include "lib/ordered_map.h"
+#include "lib/safe_vector.h"
 #include "lib/timer.h"
 
 namespace P4Tools {

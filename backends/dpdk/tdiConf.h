@@ -16,9 +16,13 @@ limitations under the License.
 #ifndef BACKENDS_DPDK_TDICONF_H_
 #define BACKENDS_DPDK_TDICONF_H_
 
-#include <string>
+#include <optional>
+#include <vector>
 
 #include "backends/dpdk/options.h"
+#include "ir/ir.h"
+#include "lib/cstring.h"
+
 namespace DPDK {
 
 class TdiBfrtConf {

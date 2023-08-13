@@ -22,6 +22,8 @@ limitations under the License.
   This code is not portable, but at least the interfaces should be.
 */
 
+#include <string>
+
 #include "cstring.h"
 
 namespace Util {

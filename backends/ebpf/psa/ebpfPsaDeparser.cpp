@@ -16,7 +16,26 @@ limitations under the License.
 */
 #include "ebpfPsaDeparser.h"
 
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "backends/ebpf/ebpfDeparser.h"
+#include "backends/ebpf/ebpfModel.h"
+#include "backends/ebpf/ebpfObject.h"
+#include "backends/ebpf/ebpfOptions.h"
+#include "backends/ebpf/ebpfType.h"
+#include "backends/ebpf/psa/externs/ebpfPsaChecksum.h"
+#include "backends/ebpf/target.h"
 #include "ebpfPipeline.h"
+#include "frontends/common/model.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/null.h"
 
 namespace EBPF {
 

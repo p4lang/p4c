@@ -17,8 +17,31 @@ limitations under the License.
 
 #include "ebpfPsaTableImplementation.h"
 
-#include "backends/ebpf/psa/ebpfPsaControl.h"
+#include <algorithm>
+#include <string>
+#include <utility>
+
+#include "backends/ebpf/ebpfControl.h"
+#include "backends/ebpf/ebpfOptions.h"
+#include "backends/ebpf/ebpfType.h"
+#include "backends/ebpf/psa/ebpfPsaTable.h"
+#include "backends/ebpf/target.h"
 #include "ebpfPsaHashAlgorithm.h"
+#include "frontends/common/model.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/methodInstance.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/node.h"
+#include "ir/vector.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/null.h"
+#include "lib/stringify.h"
 
 namespace EBPF {
 

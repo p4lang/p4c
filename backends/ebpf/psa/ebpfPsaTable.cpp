@@ -16,11 +16,46 @@ limitations under the License.
 */
 #include "ebpfPsaTable.h"
 
-#include <algorithm>
+#include <stddef.h>
 
+#include <algorithm>
+#include <map>
+#include <string>
+#include <unordered_map>
+
+#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/multiprecision/number.hpp>
+
+#include "backends/ebpf/ebpfControl.h"
+#include "backends/ebpf/ebpfObject.h"
+#include "backends/ebpf/ebpfOptions.h"
+#include "backends/ebpf/ebpfTable.h"
 #include "backends/ebpf/ebpfType.h"
+#include "backends/ebpf/psa/ebpfPsaControl.h"
+#include "backends/ebpf/psa/externs/ebpfPsaCounter.h"
+#include "backends/ebpf/psa/externs/ebpfPsaMeter.h"
+#include "backends/ebpf/target.h"
 #include "ebpfPipeline.h"
 #include "externs/ebpfPsaTableImplementation.h"
+#include "frontends/common/model.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/methodInstance.h"
+#include "frontends/p4/parameterSubstitution.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/declaration.h"
+#include "ir/node.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
+#include "lib/algorithm.h"
+#include "lib/big_int_util.h"
+#include "lib/enumerator.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/map.h"
+#include "lib/null.h"
+#include "lib/stringify.h"
 
 namespace EBPF {
 

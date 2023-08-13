@@ -16,16 +16,35 @@ limitations under the License.
 #ifndef MIDEND_INTERPRETER_H_
 #define MIDEND_INTERPRETER_H_
 
+#include <stddef.h>
+
+#include <algorithm>
+#include <functional>
+#include <map>
+#include <ostream>
+#include <utility>
+#include <vector>
+
+#include <boost/multiprecision/number.hpp>
+
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/map.h"
+#include "lib/null.h"
+#include "lib/source_file.h"
 
 // Symbolic P4 program evaluation.
 
 namespace P4 {
-
-class SymbolicValueFactory;
 
 // Base class for all abstract values
 class SymbolicValue : public IHasDbPrint {

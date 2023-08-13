@@ -19,10 +19,31 @@ limitations under the License.
 
 /* makes explicit side effect ordering */
 
+#include <map>
+#include <ostream>
+#include <set>
+#include <string>
+#include <vector>
+
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/pass_manager.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/null.h"
+#include "lib/safe_vector.h"
+#include "lib/source_file.h"
 
 namespace P4 {
 

@@ -16,7 +16,19 @@ limitations under the License.
 
 #include "noMatch.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
 #include "frontends/p4/coreLibrary.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
+#include "lib/enumerator.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/log.h"
 
 namespace P4 {
 

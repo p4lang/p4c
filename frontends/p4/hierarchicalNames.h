@@ -17,8 +17,13 @@ limitations under the License.
 #ifndef FRONTENDS_P4_HIERARCHICALNAMES_H_
 #define FRONTENDS_P4_HIERARCHICALNAMES_H_
 
+#include <vector>
+
+#include "ir/declaration.h"
 #include "ir/ir.h"
+#include "ir/node.h"
 #include "ir/visitor.h"
+#include "lib/cstring.h"
 
 namespace P4 {
 

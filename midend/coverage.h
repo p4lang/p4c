@@ -2,11 +2,10 @@
 #define MIDEND_COVERAGE_H_
 
 #include <set>
-#include <vector>
 
 #include "ir/ir.h"
+#include "ir/node.h"
 #include "ir/visitor.h"
-#include "lib/source_file.h"
 
 /// This file is a collection of utilities for coverage tracking in P4 programs.
 /// Currently, this class tracks statement and constant table entry coverage.

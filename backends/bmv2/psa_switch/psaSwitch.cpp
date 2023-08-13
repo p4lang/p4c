@@ -16,8 +16,46 @@ limitations under the License.
 
 #include "psaSwitch.h"
 
-#include "frontends/common/model.h"
+#include <stddef.h>
+
+#include <algorithm>
+#include <list>
+#include <map>
+#include <ostream>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <boost/multiprecision/number.hpp>
+
+#include "backends/bmv2/common/action.h"
+#include "backends/bmv2/common/control.h"
+#include "backends/bmv2/common/deparser.h"
+#include "backends/bmv2/common/extern.h"
+#include "backends/bmv2/common/helpers.h"
+#include "backends/bmv2/common/lower.h"
+#include "backends/bmv2/common/metermap.h"
+#include "backends/bmv2/common/parser.h"
+#include "backends/bmv2/common/programStructure.h"
+#include "backends/bmv2/psa_switch/psaProgramStructure.h"
+#include "frontends/common/constantFolding.h"
 #include "frontends/p4/cloner.h"
+#include "frontends/p4/evaluator/evaluator.h"
+#include "frontends/p4/methodInstance.h"
+#include "frontends/p4/simplify.h"
+#include "frontends/p4/strengthReduction.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/unusedDeclarations.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/pass_manager.h"
+#include "ir/vector.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/ordered_map.h"
+#include "midend/actionSynthesis.h"
+#include "midend/removeComplexExpressions.h"
 
 namespace BMV2 {
 

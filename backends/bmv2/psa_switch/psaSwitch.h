@@ -17,28 +17,26 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_PSA_SWITCH_PSASWITCH_H_
 #define BACKENDS_BMV2_PSA_SWITCH_PSASWITCH_H_
 
-#include "backends/bmv2/common/action.h"
-#include "backends/bmv2/common/control.h"
-#include "backends/bmv2/common/deparser.h"
+#include <boost/multiprecision/cpp_int.hpp>
+
+#include "backends/bmv2/common/JsonObjects.h"
+#include "backends/bmv2/common/backend.h"
+#include "backends/bmv2/common/expression.h"
 #include "backends/bmv2/common/extern.h"
-#include "backends/bmv2/common/header.h"
 #include "backends/bmv2/common/helpers.h"
-#include "backends/bmv2/common/lower.h"
-#include "backends/bmv2/common/parser.h"
+#include "backends/bmv2/common/options.h"
 #include "backends/bmv2/common/programStructure.h"
-#include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/coreLibrary.h"
-#include "frontends/p4/enumInstance.h"
-#include "frontends/p4/evaluator/evaluator.h"
-#include "frontends/p4/methodInstance.h"
-#include "frontends/p4/simplify.h"
-#include "frontends/p4/strengthReduction.h"
 #include "frontends/p4/typeMap.h"
-#include "frontends/p4/unusedDeclarations.h"
 #include "ir/ir.h"
-#include "lib/big_int_util.h"
+#include "ir/visitor.h"
+#include "lib/algorithm.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
 #include "lib/json.h"
+#include "lib/null.h"
+#include "midend/convertEnums.h"
 #include "psaProgramStructure.h"
 
 namespace BMV2 {

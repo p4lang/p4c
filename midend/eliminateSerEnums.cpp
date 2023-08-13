@@ -16,7 +16,10 @@ limitations under the License.
 
 #include "eliminateSerEnums.h"
 
+#include <ostream>
+
 #include "frontends/p4/enumInstance.h"
+#include "lib/log.h"
 
 namespace P4 {
 

@@ -17,10 +17,14 @@ limitations under the License.
 #ifndef TYPECHECKING_TYPESUBSTITUTIONVISITOR_H_
 #define TYPECHECKING_TYPESUBSTITUTIONVISITOR_H_
 
+#include <ostream>
+
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
+#include "ir/node.h"
 #include "ir/visitor.h"
 #include "lib/log.h"
+#include "lib/null.h"
 #include "typeSubstitution.h"
 
 namespace P4 {

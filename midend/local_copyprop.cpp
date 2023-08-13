@@ -16,13 +16,24 @@ limitations under the License.
 
 #include "local_copyprop.h"
 
+#include <string.h>
+
+#include <ostream>
+#include <string>
 #include <unordered_set>
+#include <utility>
+#include <vector>
 
 #include "expr_uses.h"
 #include "frontends/common/copySrcInfo.h"
 #include "frontends/p4/methodInstance.h"
-#include "has_side_effects.h"
-#include "ir/ir-generated.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/map.h"
 
 namespace P4 {
 

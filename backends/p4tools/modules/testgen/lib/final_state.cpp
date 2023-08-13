@@ -5,8 +5,6 @@
 #include <variant>
 #include <vector>
 
-#include <boost/container/vector.hpp>
-
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
@@ -17,7 +15,9 @@
 #include "ir/irutils.h"
 #include "lib/error.h"
 #include "lib/null.h"
+#include "midend/coverage.h"
 
+#include "backends/p4tools/modules/testgen/lib/concolic.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/packet_vars.h"
 

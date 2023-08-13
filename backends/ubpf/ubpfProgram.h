@@ -17,13 +17,14 @@ limitations under the License.
 #ifndef BACKENDS_UBPF_UBPFPROGRAM_H_
 #define BACKENDS_UBPF_UBPFPROGRAM_H_
 
+#include "backends/ebpf/codeGen.h"
 #include "backends/ebpf/ebpfOptions.h"
 #include "backends/ebpf/ebpfProgram.h"
 #include "codeGen.h"
-#include "frontends/p4/evaluator/evaluator.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
-#include "target.h"
+#include "lib/cstring.h"
 #include "ubpfModel.h"
 
 namespace UBPF {
@@ -31,8 +32,6 @@ namespace UBPF {
 class UBPFControl;
 class UBPFParser;
 class UBPFDeparser;
-class UBPFTable;
-class UBPFType;
 
 class UBPFProgram : public EBPF::EBPFProgram {
  public:

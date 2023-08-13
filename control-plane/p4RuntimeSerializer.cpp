@@ -18,54 +18,77 @@ limitations under the License.
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wpedantic"
+#include <google/protobuf/descriptor.h>
+#include <google/protobuf/message.h>
+#include <google/protobuf/stubs/status.h>
 #include <google/protobuf/text_format.h>
 #include <google/protobuf/util/json_util.h>
+
 #pragma GCC diagnostic pop
 
-#include <algorithm>
+#include <cstdint>
+#include <cstdlib>
 #include <iostream>
 #include <iterator>
+#include <map>
 #include <optional>
 #include <set>
-#include <typeinfo>
+#include <string>
+#include <type_traits>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
+
+#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/multiprecision/detail/et_ops.hpp>
+#include <boost/multiprecision/number.hpp>
+#include <boost/multiprecision/traits/explicit_conversion.hpp>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wpedantic"
+#include "p4/config/v1/p4info.pb.h"
+#include "p4/config/v1/p4types.pb.h"
 #include "p4/v1/p4runtime.pb.h"
-#pragma GCC diagnostic pop
 
-#include <boost/algorithm/string.hpp>
-#include <boost/range/adaptor/reversed.hpp>
+#pragma GCC diagnostic pop
 
 // TODO(antonin): this include should go away when we cleanup getMatchFields
 // and tableNeedsPriority implementations.
 #include "control-plane/bytestrings.h"
 #include "control-plane/flattenHeader.h"
+#include "control-plane/p4RuntimeAnnotations.h"
+#include "control-plane/p4RuntimeArchHandler.h"
+#include "control-plane/p4RuntimeArchStandard.h"
+#include "control-plane/p4RuntimeSymbolTable.h"
+#include "control-plane/typeSpecConverter.h"
+#include "frontends/common/model.h"
 #include "frontends/common/options.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/enumInstance.h"
 #include "frontends/p4/evaluator/evaluator.h"
-#include "frontends/p4/externInstance.h"
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/methodInstance.h"
-#include "frontends/p4/parseAnnotations.h"
-#include "frontends/p4/simplify.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/pass_manager.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
+#include "lib/big_int_util.h"
+#include "lib/enumerator.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
 #include "lib/log.h"
+#include "lib/null.h"
 #include "lib/nullstream.h"
-#include "lib/ordered_set.h"
-#include "p4RuntimeAnnotations.h"
-#include "p4RuntimeArchHandler.h"
-#include "p4RuntimeArchStandard.h"
-#include "p4RuntimeSymbolTable.h"
-#include "typeSpecConverter.h"
 
 namespace p4v1 = ::p4::v1;
 namespace p4configv1 = ::p4::config::v1;

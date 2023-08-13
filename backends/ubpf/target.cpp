@@ -16,6 +16,10 @@ limitations under the License.
 
 #include "target.h"
 
+#include "backends/ebpf/target.h"
+#include "backends/ubpf/ubpfHelpers.h"
+#include "lib/exceptions.h"
+
 namespace UBPF {
 
 void UbpfTarget::emitIncludes(Util::SourceCodeBuilder *builder) const {

@@ -19,6 +19,10 @@ limitations under the License.
 
 #include "helpers.h"
 #include "ir/ir.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/json.h"
 
 namespace BMV2 {
 

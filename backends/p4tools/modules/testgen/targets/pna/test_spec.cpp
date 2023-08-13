@@ -1,6 +1,8 @@
 #include "backends/p4tools/modules/testgen/targets/pna/test_spec.h"
 
 #include "backends/p4tools/common/lib/model.h"
+#include "ir/declaration.h"
+#include "lib/cstring.h"
 #include "lib/exceptions.h"
 
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"

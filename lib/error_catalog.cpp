@@ -17,7 +17,8 @@ limitations under the License.
 #include "error_catalog.h"
 
 #include <map>
-#include <string>
+
+#include "lib/cstring.h"
 
 // -------- Errors -------------
 const int ErrorType::LEGACY_ERROR = 0;

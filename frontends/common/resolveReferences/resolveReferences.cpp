@@ -16,11 +16,24 @@ limitations under the License.
 
 #include "resolveReferences.h"
 
+#include <functional>
+#include <map>
 #include <sstream>
+#include <string>
 
+#include <boost/iterator/iterator_facade.hpp>
+#include <boost/iterator/reverse_iterator.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 
-#include "frontends/common/options.h"
+#include "frontends/common/parser_options.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "lib/enumerator.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/null.h"
+#include "lib/source_file.h"
 
 namespace P4 {
 

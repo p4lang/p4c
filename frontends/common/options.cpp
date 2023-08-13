@@ -16,7 +16,13 @@ limitations under the License.
 
 #include "options.h"
 
+#include <stdlib.h>
+#include <string.h>
+
+#include "frontends/common/parser_options.h"
 #include "frontends/p4/frontend.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
 
 CompilerOptions::CompilerOptions() : ParserOptions() {
     registerOption(

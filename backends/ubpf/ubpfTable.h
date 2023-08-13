@@ -17,8 +17,18 @@ limitations under the License.
 #ifndef BACKENDS_UBPF_UBPFTABLE_H_
 #define BACKENDS_UBPF_UBPFTABLE_H_
 
+#include <stddef.h>
+
+#include <map>
+
+#include "backends/ebpf/codeGen.h"
 #include "backends/ebpf/ebpfObject.h"
-#include "frontends/p4/methodInstance.h"
+#include "backends/ebpf/ebpfType.h"
+#include "backends/ebpf/target.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "ir/ir.h"
+#include "lib/cstring.h"
+#include "lib/null.h"
 #include "ubpfProgram.h"
 
 namespace UBPF {

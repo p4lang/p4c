@@ -7,6 +7,7 @@
 #include "frontends/p4/createBuiltins.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/fromv1.0/v1model.h"
+#include "frontends/p4/frontend.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/simplifyParsers.h"
@@ -67,9 +68,8 @@ class SkipControls : public P4::ActionSynthesisPolicy {
 
  public:
     explicit SkipControls(const std::set<cstring> *skip) : skip(skip) { CHECK_NULL(skip); }
-    bool convert(const Visitor::Context *, const IR::P4Control *control) override {
-        if (skip->find(control->name) != skip->end()) return false;
-        return true;
+    bool convert(const Visitor::Context * /*ctxt*/, const IR::P4Control *control) override {
+        return skip->find(control->name) == skip->end();
     }
 };
 

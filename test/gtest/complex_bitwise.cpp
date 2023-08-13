@@ -1,8 +1,10 @@
 #include <optional>
+#include <string>
 
 #include <boost/algorithm/string/replace.hpp>
 
-#include "frontends/common/parseInput.h"
+#include "control-plane/p4RuntimeSerializer.h"
+#include "frontends/common/options.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/toP4/toP4.h"
 #include "frontends/p4/typeChecking/typeChecker.h"

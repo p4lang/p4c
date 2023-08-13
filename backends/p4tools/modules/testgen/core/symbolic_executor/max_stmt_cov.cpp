@@ -1,7 +1,6 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/max_stmt_cov.h"
 
 #include <ctime>
-#include <functional>
 #include <map>
 #include <optional>
 #include <vector>
@@ -9,7 +8,9 @@
 #include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/ir.h"
+#include "ir/node.h"
 #include "lib/error.h"
+#include "lib/ordered_map.h"
 #include "lib/source_file.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"

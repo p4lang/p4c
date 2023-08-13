@@ -17,20 +17,16 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_COMMON_HEADER_H_
 #define BACKENDS_BMV2_COMMON_HEADER_H_
 
-#include <list>
+#include <set>
 
-#include "JsonObjects.h"
-#include "backends/bmv2/common/options.h"
-#include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/typeMap.h"
 #include "helpers.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
 #include "lib/json.h"
-#include "programStructure.h"
 
 namespace BMV2 {
-
-class Backend;
 
 class HeaderConverter : public Inspector {
     ConversionContext *ctxt;

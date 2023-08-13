@@ -17,6 +17,19 @@ limitations under the License.
 
 #include "flattenHeaders.h"
 
+#include <ostream>
+#include <string>
+#include <vector>
+
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/map.h"
+#include "midend/flattenInterfaceStructs.h"
+
 namespace P4 {
 
 void FindHeaderTypesToReplace::createReplacement(const IR::Type_Header *type,

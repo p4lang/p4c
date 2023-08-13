@@ -17,9 +17,18 @@ limitations under the License.
 #ifndef FRONTENDS_P4_DIRECTCALLS_H_
 #define FRONTENDS_P4_DIRECTCALLS_H_
 
+#include <string>
+#include <vector>
+
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
+#include "ir/node.h"
 #include "ir/pass_manager.h"
+#include "ir/visitor.h"
+#include "lib/null.h"
+#include "lib/safe_vector.h"
 
 namespace P4 {
 

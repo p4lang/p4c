@@ -14,22 +14,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <stdio.h>
+#include <stdlib.h>
 
+#include <exception>
 #include <iostream>
-#include <string>
 
 #include "backends/ebpf/version.h"
 #include "ebpfBackend.h"
 #include "ebpfOptions.h"
 #include "frontends/common/applyOptionsPragmas.h"
+#include "frontends/common/options.h"
 #include "frontends/common/parseInput.h"
+#include "frontends/common/parser_options.h"
 #include "frontends/p4/frontend.h"
 #include "fstream"
 #include "ir/ir.h"
+#include "ir/json_generator.h"
 #include "ir/json_loader.h"
+#include "lib/compile_context.h"
 #include "lib/crash.h"
-#include "lib/exceptions.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
 #include "lib/gc.h"
 #include "lib/log.h"
 #include "lib/nullstream.h"

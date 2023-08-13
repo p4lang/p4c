@@ -16,17 +16,23 @@ limitations under the License.
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+#include <stddef.h>
+
 #include <google/protobuf/util/message_differencer.h>
 
+#include <algorithm>
+#include <initializer_list>
 #include <iterator>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <boost/algorithm/string/replace.hpp>
 
 #include "control-plane/p4/config/v1/p4types.pb.h"
 #include "control-plane/p4/v1/p4runtime.pb.h"
+#include "frontends/common/options.h"
 #include "gtest/gtest.h"
 #include "p4/config/v1/p4info.pb.h"
 #pragma GCC diagnostic pop

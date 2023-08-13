@@ -15,34 +15,33 @@ limitations under the License.
 #ifndef CONTROL_PLANE_BFRUNTIME_H_
 #define CONTROL_PLANE_BFRUNTIME_H_
 
+#include <stddef.h>
+
 #include <algorithm>
-#include <iomanip>
+#include <cstdint>
 #include <iosfwd>
 #include <iterator>
-#include <limits>
 #include <optional>
-#include <ostream>
-#include <regex>
-#include <sstream>
 #include <string>
+#include <type_traits>
+#include <utility>
+#include <vector>
 
 #include "control-plane/p4RuntimeSerializer.h"
-#include "lib/big_int_util.h"
-#include "lib/exceptions.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
 #include "lib/json.h"
-#include "lib/log.h"
-#include "lib/null.h"
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wpedantic"
 #include "p4/config/v1/p4info.pb.h"
+#include "p4/config/v1/p4types.pb.h"
+
 #pragma GCC diagnostic pop
 
 namespace p4configv1 = ::p4::config::v1;
-
-namespace P4 {
-struct P4RuntimeAPI;
-}  // namespace P4
 
 namespace P4 {
 

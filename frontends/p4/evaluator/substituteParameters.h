@@ -19,10 +19,16 @@ limitations under the License.
 #ifndef EVALUATOR_SUBSTITUTEPARAMETERS_H_
 #define EVALUATOR_SUBSTITUTEPARAMETERS_H_
 
+#include <ostream>
+
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/parameterSubstitution.h"
+#include "frontends/p4/typeChecking/typeSubstitution.h"
 #include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "lib/log.h"
+#include "lib/null.h"
 
 namespace P4 {
 

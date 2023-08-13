@@ -16,10 +16,8 @@
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"
 #include "lib/big_int_util.h"
-#include "lib/cstring.h"
 #include "lib/enumerator.h"
 #include "lib/exceptions.h"
-#include "lib/log.h"
 #include "test/gtest/helpers.h"
 
 #include "backends/p4tools/modules/testgen/core/target.h"

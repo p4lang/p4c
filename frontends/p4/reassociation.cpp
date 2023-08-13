@@ -16,6 +16,8 @@ limitations under the License.
 
 #include "reassociation.h"
 
+#include "lib/cstring.h"
+
 namespace P4 {
 
 const IR::Node *Reassociation::reassociate(IR::Operation_Binary *root) {

@@ -1,5 +1,13 @@
 #include "directCalls.h"
 
+#include <ostream>
+
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
+#include "lib/log.h"
+
 namespace P4 {
 
 const IR::Node *DoInstantiateCalls::postorder(IR::P4Parser *parser) {

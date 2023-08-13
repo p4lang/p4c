@@ -17,7 +17,13 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_EBPFDEPARSER_H_
 #define BACKENDS_EBPF_EBPFDEPARSER_H_
 
+#include "backends/ebpf/codeGen.h"
+#include "backends/ebpf/ebpfProgram.h"
+#include "backends/ebpf/ebpfType.h"
 #include "ebpfControl.h"
+#include "frontends/p4/methodInstance.h"
+#include "ir/ir.h"
+#include "lib/cstring.h"
 
 namespace EBPF {
 

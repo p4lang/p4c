@@ -16,6 +16,25 @@ limitations under the License.
 
 #include "ubpfRegister.h"
 
+#include <string>
+#include <vector>
+
+#include "backends/ebpf/ebpfType.h"
+#include "backends/ebpf/target.h"
+#include "backends/ubpf/target.h"
+#include "backends/ubpf/ubpfModel.h"
+#include "backends/ubpf/ubpfTable.h"
+#include "backends/ubpf/ubpfType.h"
+#include "frontends/common/model.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/id.h"
+#include "ir/node.h"
+#include "ir/vector.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+
 namespace UBPF {
 
 static cstring last_key_name;

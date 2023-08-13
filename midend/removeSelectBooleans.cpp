@@ -16,6 +16,12 @@ limitations under the License.
 
 #include "removeSelectBooleans.h"
 
+#include <string>
+#include <vector>
+
+#include "ir/vector.h"
+#include "lib/cstring.h"
+
 namespace P4 {
 
 // cast all boolean values to bit values, but only at the top-level

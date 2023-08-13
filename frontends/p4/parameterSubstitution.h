@@ -18,11 +18,18 @@ limitations under the License.
 #define FRONTENDS_P4_PARAMETERSUBSTITUTION_H_
 
 #include <iostream>
+#include <map>
+#include <utility>
+#include <vector>
 
+#include "ir/id.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/vector.h"
 #include "lib/cstring.h"
 #include "lib/enumerator.h"
-#include "lib/exceptions.h"
+#include "lib/map.h"
+#include "lib/source_file.h"
 
 namespace P4 {
 

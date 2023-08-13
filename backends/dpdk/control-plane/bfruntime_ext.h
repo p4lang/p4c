@@ -16,10 +16,23 @@ limitations under the License.
 #ifndef DPDK_CONTROL_PLANE_BFRUNTIME_EXT_H_
 #define DPDK_CONTROL_PLANE_BFRUNTIME_EXT_H_
 
-#include "backends/dpdk/constants.h"
-#include "backends/dpdk/options.h"
-#include "backends/dpdk/p4/config/p4info.pb.h"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wpedantic"
+#include <google/protobuf/any.pb.h>
+
+#include <algorithm>
+#include <optional>
+
 #include "control-plane/bfruntime.h"
+#include "p4/config/v1/p4info.pb.h"
+#pragma GCC diagnostic pop
+
+#include "backends/dpdk/options.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/json.h"
 
 namespace P4 {
 

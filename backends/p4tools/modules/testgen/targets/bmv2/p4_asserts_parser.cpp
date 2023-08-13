@@ -6,15 +6,21 @@
 #include <string>
 #include <utility>
 
+#include <boost/multiprecision/cpp_int.hpp>
+
 #include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
+#include "ir/node.h"
+#include "ir/vector.h"
 #include "lib/big_int_util.h"
+#include "lib/cstring.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
+#include "lib/log.h"
 
 namespace P4Tools::AssertsParser {
 

@@ -17,6 +17,8 @@ limitations under the License.
 
 #include <config.h>
 #include <errno.h>
+#include <stdint.h>
+#include <stdlib.h>
 #if HAVE_EXECINFO_H
 #include <execinfo.h>
 #endif
@@ -24,8 +26,6 @@ limitations under the License.
 #include <limits.h>
 #include <signal.h>
 #include <string.h>
-
-#include <sys/wait.h>
 #if HAVE_UCONTEXT_H
 #include <ucontext.h>
 #endif
@@ -47,6 +47,7 @@ static const char *signames[] = {
 #include <pthread.h>
 
 #include <mutex>
+
 std::vector<pthread_t> thread_ids;
 __thread int my_id;
 

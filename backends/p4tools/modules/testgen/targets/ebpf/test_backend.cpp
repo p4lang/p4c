@@ -1,8 +1,9 @@
 #include "backends/p4tools/modules/testgen/targets/ebpf/test_backend.h"
 
+#include <stdlib.h>
+
 #include <list>
 #include <optional>
-#include <ostream>
 #include <string>
 #include <utility>
 
@@ -13,7 +14,9 @@
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
+#include "lib/big_int_util.h"
 #include "lib/cstring.h"
+#include "lib/error.h"
 #include "lib/exceptions.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"

@@ -17,6 +17,8 @@ limitations under the License.
 #ifndef BACKENDS_UBPF_MIDEND_H_
 #define BACKENDS_UBPF_MIDEND_H_
 
+#include <iosfwd>
+
 #include "backends/ebpf/ebpfOptions.h"
 #include "backends/ebpf/midend.h"
 #include "ir/ir.h"

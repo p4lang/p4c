@@ -17,14 +17,19 @@ limitations under the License.
 #ifndef BACKENDS_UBPF_UBPFDEPARSER_H_
 #define BACKENDS_UBPF_UBPFDEPARSER_H_
 
+#include "backends/ebpf/codeGen.h"
 #include "backends/ebpf/ebpfObject.h"
+#include "backends/ebpf/ebpfType.h"
+#include "frontends/p4/coreLibrary.h"
 #include "ir/ir.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
 #include "ubpfHelpers.h"
 #include "ubpfProgram.h"
 
 namespace UBPF {
-
-class UBPFDeparser;
 
 class UBPFDeparserTranslationVisitor : public EBPF::CodeGenInspector {
  public:

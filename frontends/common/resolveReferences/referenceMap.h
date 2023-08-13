@@ -17,11 +17,19 @@ limitations under the License.
 #ifndef COMMON_RESOLVEREFERENCES_REFERENCEMAP_H_
 #define COMMON_RESOLVEREFERENCES_REFERENCEMAP_H_
 
+#include <iosfwd>
+#include <map>
+#include <set>
+#include <unordered_map>
+
 #include "frontends/common/programMap.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
 #include "ir/ir.h"
+#include "ir/node.h"
 #include "ir/visitor.h"
 #include "lib/cstring.h"
-#include "lib/map.h"
+#include "lib/ordered_map.h"
 
 namespace P4 {
 

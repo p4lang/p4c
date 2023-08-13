@@ -2,7 +2,9 @@
 
 #include <ostream>
 
+#include "lib/cstring.h"
 #include "lib/log.h"
+#include "lib/source_file.h"
 
 namespace P4::Coverage {
 

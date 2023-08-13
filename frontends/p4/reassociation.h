@@ -18,6 +18,7 @@ limitations under the License.
 #define P4_REASSOCIATION_H_
 
 #include "ir/ir.h"
+#include "ir/node.h"
 #include "ir/visitor.h"
 
 namespace P4 {

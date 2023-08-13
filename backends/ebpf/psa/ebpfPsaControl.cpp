@@ -17,6 +17,21 @@ limitations under the License.
 
 #include "ebpfPsaControl.h"
 
+#include <utility>
+
+#include "backends/ebpf/ebpfControl.h"
+#include "backends/ebpf/ebpfObject.h"
+#include "backends/ebpf/psa/externs/ebpfPsaChecksum.h"
+#include "backends/ebpf/psa/externs/ebpfPsaCounter.h"
+#include "backends/ebpf/psa/externs/ebpfPsaRandom.h"
+#include "backends/ebpf/psa/externs/ebpfPsaRegister.h"
+#include "backends/ebpf/target.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "ir/id.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/stringify.h"
+
 namespace EBPF {
 
 ControlBodyTranslatorPSA::ControlBodyTranslatorPSA(const EBPFControlPSA *control)

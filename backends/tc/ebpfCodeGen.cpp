@@ -16,6 +16,29 @@ and limitations under the License.
 
 #include "ebpfCodeGen.h"
 
+#include <list>
+#include <map>
+#include <set>
+#include <utility>
+
+#include "backends/ebpf/ebpfModel.h"
+#include "backends/ebpf/ebpfObject.h"
+#include "backends/ebpf/psa/externs/ebpfPsaDigest.h"
+#include "backends/ebpf/target.h"
+#include "backends/tc/backend.h"
+#include "backends/tc/tcAnnotations.h"
+#include "frontends/common/model.h"
+#include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/parameterSubstitution.h"
+#include "ir/declaration.h"
+#include "ir/vector.h"
+#include "lib/enumerator.h"
+#include "lib/exceptions.h"
+#include "lib/map.h"
+#include "lib/null.h"
+#include "lib/ordered_map.h"
+#include "lib/stringify.h"
+
 namespace TC {
 
 // =====================PNAEbpfGenerator=============================

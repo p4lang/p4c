@@ -16,6 +16,11 @@ limitations under the License.
 
 #include "programStructure.h"
 
+#include <ostream>
+
+#include "ir/id.h"
+#include "lib/enumerator.h"
+#include "lib/exceptions.h"
 #include "lib/log.h"
 
 namespace BMV2 {

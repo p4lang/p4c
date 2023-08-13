@@ -1,9 +1,26 @@
 #ifndef BACKENDS_DPDK_DPDKPROGRAMSTRUCTURE_H_
 #define BACKENDS_DPDK_DPDKPROGRAMSTRUCTURE_H_
 
+#include <map>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/null.h"
+#include "lib/ordered_map.h"
+#include "lib/ordered_set.h"
+
+struct hdrFieldInfo;
 
 // DPDK target implementation treats tables with keys lying non-contiguous in underlying
 // structure as wildcard even if all keys are exact match keys.

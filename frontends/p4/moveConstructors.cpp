@@ -16,6 +16,23 @@ limitations under the License.
 
 #include "moveConstructors.h"
 
+#include <list>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "frontends/common/resolveReferences/resolveReferences.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/null.h"
+#include "lib/ordered_map.h"
+#include "lib/safe_vector.h"
+
 namespace P4 {
 
 struct ConstructorMap {

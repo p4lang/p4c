@@ -11,6 +11,8 @@
 #include <boost/multiprecision/number.hpp>
 #include <boost/multiprecision/traits/explicit_conversion.hpp>
 
+#include "ir/ir.h"
+#include "lib/big_int_util.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 

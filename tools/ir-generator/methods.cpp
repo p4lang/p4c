@@ -14,8 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <functional>
+#include <list>
+#include <ostream>
+#include <utility>
+#include <vector>
+
 #include "irclass.h"
 #include "lib/algorithm.h"
+#include "lib/cstring.h"
+#include "lib/enumerator.h"
+#include "lib/exceptions.h"
+#include "lib/ordered_map.h"
+#include "lib/source_file.h"
+#include "tools/ir-generator/type.h"
 
 enum flags {
     // flags that control the creation of auto-created methods

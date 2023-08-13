@@ -20,14 +20,52 @@ limitations under the License.
 
 #include "simpleSwitch.h"
 
-#include <algorithm>
-#include <cstring>
+#include <list>
+#include <map>
+#include <ostream>
 #include <set>
+#include <utility>
+#include <vector>
 
+#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/multiprecision/number.hpp>
+
+#include "backends/bmv2/common/JsonObjects.h"
+#include "backends/bmv2/common/action.h"
 #include "backends/bmv2/common/annotations.h"
-#include "backends/bmv2/simple_switch/options.h"
+#include "backends/bmv2/common/backend.h"
+#include "backends/bmv2/common/control.h"
+#include "backends/bmv2/common/deparser.h"
+#include "backends/bmv2/common/extern.h"
+#include "backends/bmv2/common/globals.h"
+#include "backends/bmv2/common/header.h"
+#include "backends/bmv2/common/lower.h"
+#include "backends/bmv2/common/metermap.h"
+#include "backends/bmv2/common/options.h"
+#include "backends/bmv2/common/parser.h"
+#include "backends/bmv2/common/programStructure.h"
+#include "frontends/common/constantFolding.h"
+#include "frontends/common/model.h"
+#include "frontends/common/parser_options.h"
 #include "frontends/p4/cloner.h"
+#include "frontends/p4/enumInstance.h"
+#include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/fromv1.0/v1model.h"
+#include "frontends/p4/methodInstance.h"
+#include "frontends/p4/simplify.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/unusedDeclarations.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/pass_manager.h"
+#include "ir/vector.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/map.h"
+#include "lib/null.h"
+#include "lib/ordered_map.h"
+#include "lib/stringify.h"
+#include "midend/actionSynthesis.h"
 #include "midend/flattenLogMsg.h"
 
 using BMV2::mkArrayField;

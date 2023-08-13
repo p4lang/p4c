@@ -1,10 +1,8 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_BACKEND_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_BACKEND_H_
 
-#include <cstdint>
 #include <filesystem>
 #include <functional>
-#include <optional>
 #include <set>
 #include <string>
 #include <vector>

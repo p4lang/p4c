@@ -17,9 +17,15 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_LOWER_H_
 #define BACKENDS_EBPF_LOWER_H_
 
-#include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/pass_manager.h"
+#include "ir/visitor.h"
+#include "lib/null.h"
+#include "lib/safe_vector.h"
 
 namespace EBPF {
 

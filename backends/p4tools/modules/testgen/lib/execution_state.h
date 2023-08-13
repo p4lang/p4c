@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <functional>
 #include <initializer_list>
-#include <iostream>
 #include <map>
 #include <optional>
 #include <stack>
@@ -14,11 +13,8 @@
 
 #include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/core/abstract_execution_state.h"
-#include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/namespace_context.h"
-#include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/trace_event.h"
-#include "ir/declaration.h"
 #include "ir/ir.h"
 #include "ir/node.h"
 #include "lib/cstring.h"

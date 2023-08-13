@@ -16,16 +16,11 @@ limitations under the License.
 
 #include "parseInput.h"
 
-#include <cstdio>
 #include <iostream>
-#include <optional>
-#include <sstream>
 
 #include "frontends/p4/fromv1.0/converters.h"
-#include "frontends/p4/frontend.h"
 #include "frontends/parsers/parserDriver.h"
 #include "lib/error.h"
-#include "lib/source_file.h"
 
 namespace P4 {
 

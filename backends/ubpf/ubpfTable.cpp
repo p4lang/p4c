@@ -16,12 +16,34 @@ limitations under the License.
 
 #include "ubpfTable.h"
 
+#include <stdint.h>
+
+#include <iterator>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "backends/ebpf/ebpfObject.h"
+#include "backends/ubpf/ubpfModel.h"
+#include "backends/ubpf/ubpfProgram.h"
+#include "frontends/common/model.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/enumInstance.h"
 #include "frontends/p4/methodInstance.h"
+#include "frontends/p4/parameterSubstitution.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/vector.h"
+#include "lib/enumerator.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/map.h"
 #include "ubpfControl.h"
-#include "ubpfParser.h"
 #include "ubpfType.h"
 
 namespace UBPF {

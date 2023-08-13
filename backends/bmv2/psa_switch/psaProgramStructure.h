@@ -18,10 +18,25 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_PSA_SWITCH_PSAPROGRAMSTRUCTURE_H_
 #define BACKENDS_BMV2_PSA_SWITCH_PSAPROGRAMSTRUCTURE_H_
 
+#include <string.h>
+
+#include <set>
+#include <utility>
+#include <vector>
+
 #include "backends/bmv2/common/backend.h"
 #include "backends/bmv2/common/programStructure.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/id.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/visitor.h"
 #include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/null.h"
+#include "lib/ordered_map.h"
 
 // TODO: this is not really specific to BMV2, it should reside somewhere else
 namespace BMV2 {

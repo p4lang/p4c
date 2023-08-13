@@ -18,6 +18,7 @@ limitations under the License.
 
 #include "lib/enumerator.h"
 #include "lib/exceptions.h"
+#include "tools/ir-generator/type.h"
 
 const char *IrClass::indent = "    ";
 IrNamespace &IrNamespace::global() {

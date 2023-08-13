@@ -16,6 +16,26 @@ limitations under the License.
 
 #include "simplifyParsers.h"
 
+#include <list>
+#include <map>
+#include <ostream>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "frontends/p4/parserCallGraph.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/log.h"
+#include "lib/map.h"
+#include "lib/ordered_set.h"
+
 namespace P4 {
 
 namespace {

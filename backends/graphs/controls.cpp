@@ -17,14 +17,29 @@ limitations under the License.
 #include "controls.h"
 
 #include <iostream>
+#include <list>
+#include <map>
+#include <string>
+#include <utility>
 
+#include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graphviz.hpp>
+#include <boost/graph/properties.hpp>
+#include <boost/graph/subgraph.hpp>
 
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/tableApply.h"
+#include "frontends/p4/typeMap.h"
 #include "graphs.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
 #include "lib/log.h"
-#include "lib/nullstream.h"
+#include "lib/ordered_map.h"
 
 namespace graphs {
 

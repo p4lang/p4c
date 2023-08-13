@@ -16,8 +16,11 @@ limitations under the License.
 #ifndef BACKENDS_DPDK_DPDKUTILS_H_
 #define BACKENDS_DPDK_DPDKUTILS_H_
 
-#include "frontends/common/resolveReferences/resolveReferences.h"
+#include <vector>
+
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "ir/ir.h"
+#include "lib/cstring.h"
 
 namespace DPDK {
 bool isSimpleExpression(const IR::Expression *e);

@@ -2,8 +2,10 @@
 #define MIDEND_SIMPLIFYBITWISE_H_
 
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/vector.h"
 #include "ir/visitor.h"
-#include "lib/ordered_set.h"
+#include "lib/big_int_util.h"
 
 namespace P4 {
 

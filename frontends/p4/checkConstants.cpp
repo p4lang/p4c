@@ -16,6 +16,11 @@ limitations under the License.
 
 #include "checkConstants.h"
 
+#include "ir/id.h"
+#include "ir/vector.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
 #include "methodInstance.h"
 
 namespace P4 {

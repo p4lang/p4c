@@ -21,20 +21,16 @@ limitations under the License.
 #ifndef LIB_SOURCE_FILE_H_
 #define LIB_SOURCE_FILE_H_
 
+#ifdef P4C_GTEST_ENABLED
+#include <gtest/gtest.h>
+#endif
+#include <iostream>
+#include <map>
+#include <string>
 #include <vector>
 
 #include "cstring.h"
-#include "map.h"
 #include "stringref.h"
-
-// GTest
-#ifdef P4C_GTEST_ENABLED
-#include "gtest/gtest_prod.h"
-#endif
-
-namespace Test {
-class UtilSourceFile;
-}
 
 class IHasDbPrint {
  public:
@@ -45,6 +41,7 @@ class IHasDbPrint {
 
 namespace Util {
 struct SourceFileLine;
+
 /**
 A character position within some InputSources: a pair of
 line/column positions.  Can only be interpreted in the context

@@ -17,9 +17,14 @@ limitations under the License.
 #ifndef BACKENDS_UBPF_UBPFPARSER_H_
 #define BACKENDS_UBPF_UBPFPARSER_H_
 
+#include <vector>
+
+#include "backends/ebpf/codeGen.h"
 #include "backends/ebpf/ebpfParser.h"
+#include "backends/ebpf/ebpfProgram.h"
+#include "backends/ebpf/ebpfType.h"
+#include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
-#include "ubpfType.h"
 
 namespace UBPF {
 

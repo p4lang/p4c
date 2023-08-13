@@ -17,7 +17,17 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_PSA_BACKEND_H_
 #define BACKENDS_EBPF_PSA_BACKEND_H_
 
+#include <iosfwd>
+#include <string>
+
+#include "backends/ebpf/codeGen.h"
+#include "backends/ebpf/ebpfOptions.h"
+#include "backends/ebpf/target.h"
 #include "ebpfPsaGen.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
 
 namespace EBPF {
 

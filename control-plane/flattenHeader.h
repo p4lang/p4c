@@ -20,6 +20,7 @@ limitations under the License.
 #include <vector>
 
 #include "ir/ir.h"
+#include "lib/cstring.h"
 
 namespace P4 {
 

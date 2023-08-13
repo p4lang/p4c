@@ -14,9 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <memory>
+
 #include "gtest/gtest.h"
 #include "helpers.h"
 #include "ir/ir.h"
+#include "ir/node.h"
 #include "ir/visitor.h"
 #include "lib/source_file.h"
 

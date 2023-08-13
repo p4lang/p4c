@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <set>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "backends/p4tools/common/options.h"
 #include "lib/cstring.h"

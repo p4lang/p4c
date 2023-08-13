@@ -16,7 +16,12 @@ limitations under the License.
 
 #include "flattenHeader.h"
 
+#include <string>
+
 #include "frontends/p4/typeMap.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
 
 namespace P4 {
 

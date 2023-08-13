@@ -22,9 +22,10 @@ limitations under the License.
 /* A very simple symbol table that recognizes types; necessary because
    the v1.2 grammar is ambiguous without type information */
 
-#include <unordered_map>
-#include <vector>
+#include <stdio.h>
 
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/source_file.h"

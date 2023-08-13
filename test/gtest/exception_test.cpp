@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include <exception>
+#include <string>
 
 #include "gtest/gtest.h"
 #include "lib/cstring.h"

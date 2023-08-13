@@ -22,7 +22,6 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "ir/visitor.h"
-#include "lib/cstring.h"
 
 namespace P4 {
 

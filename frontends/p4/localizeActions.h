@@ -17,11 +17,25 @@ limitations under the License.
 #ifndef FRONTENDS_P4_LOCALIZEACTIONS_H_
 #define FRONTENDS_P4_LOCALIZEACTIONS_H_
 
-#include "frontends/p4/callGraph.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
+#include <algorithm>
+#include <list>
+#include <map>
+#include <ostream>
+#include <set>
+
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/unusedDeclarations.h"
 #include "ir/ir.h"
-#include "lib/ordered_set.h"
+#include "ir/node.h"
+#include "ir/pass_manager.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/log.h"
+#include "lib/map.h"
+#include "lib/null.h"
+#include "lib/ordered_map.h"
+#include "lib/safe_vector.h"
 
 namespace P4 {
 

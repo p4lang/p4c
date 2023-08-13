@@ -17,14 +17,33 @@ limitations under the License.
 #ifndef TYPECHECKING_TYPECONSTRAINTS_H_
 #define TYPECHECKING_TYPECONSTRAINTS_H_
 
-#include <optional>
+#include <stddef.h>
+
+#include <algorithm>
+#include <initializer_list>
+#include <set>
 #include <sstream>
+#include <string>
+#include <vector>
 
-#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/format.hpp>
 
+#include "frontends/p4/typeChecking/typeConstraints.h"
+#include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/visitor.h"
 #include "lib/castable.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
 #include "lib/error_helper.h"
+#include "lib/error_message.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/null.h"
+#include "lib/source_file.h"
 #include "typeConstraints.h"
 #include "typeSubstitution.h"
 #include "typeSubstitutionVisitor.h"

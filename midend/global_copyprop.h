@@ -1,9 +1,17 @@
 #ifndef MIDEND_GLOBAL_COPYPROP_H_
 #define MIDEND_GLOBAL_COPYPROP_H_
 
+#include <map>
+
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/pass_manager.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/safe_vector.h"
 
 namespace P4 {
 /**

@@ -17,6 +17,8 @@ limitations under the License.
 
 #include "lib/bitvec.h"
 
+#include <memory>
+
 #include "gtest/gtest.h"
 
 namespace Test {

@@ -16,8 +16,15 @@ limitations under the License.
 
 #include "typeSubstitution.h"
 
-#include "frontends/p4/typeMap.h"
-#include "typeConstraints.h"
+#include <iostream>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "ir/indexed_vector.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
 #include "typeSubstitutionVisitor.h"
 
 namespace P4 {

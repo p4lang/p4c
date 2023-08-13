@@ -1,9 +1,12 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_COLLECT_COVERABLE_NODES_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_COLLECT_COVERABLE_NODES_H_
 
+#include <functional>
+#include <map>
 #include <set>
 
 #include "ir/ir.h"
+#include "ir/node.h"
 #include "ir/visitor.h"
 #include "midend/coverage.h"
 

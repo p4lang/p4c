@@ -10,7 +10,6 @@
 #include "ir/declaration.h"
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"
-#include "lib/cstring.h"
 #include "lib/enumerator.h"
 #include "test/gtest/helpers.h"
 

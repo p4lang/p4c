@@ -8,6 +8,7 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 
+#include "backends/p4tools/common/lib/table_utils.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/declaration.h"
@@ -16,8 +17,6 @@
 #include "ir/vector.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
-#include "lib/log.h"
-#include "lib/null.h"
 #include "lib/source_file.h"
 #include "midend/coverage.h"
 

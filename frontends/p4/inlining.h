@@ -17,14 +17,37 @@ limitations under the License.
 #ifndef FRONTENDS_P4_INLINING_H_
 #define FRONTENDS_P4_INLINING_H_
 
+#include <cstddef>
+#include <map>
+#include <ostream>
+#include <set>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
 #include "commonInlining.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
-#include "frontends/p4/evaluator/substituteParameters.h"
+#include "frontends/p4/parameterSubstitution.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/typeChecking/typeSubstitution.h"
+#include "frontends/p4/typeMap.h"
 #include "frontends/p4/unusedDeclarations.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/pass_manager.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/map.h"
+#include "lib/null.h"
 #include "lib/ordered_map.h"
+#include "lib/source_file.h"
 
 // These are various data structures needed by the parser/parser and control/control inliners.
 // This only works correctly after local variable initializers have been removed,

@@ -12,7 +12,6 @@
 #include "ir/ir.h"
 #include "ir/node.h"
 #include "ir/visitor.h"
-#include "lib/cstring.h"
 #include "lib/enumerator.h"
 #include "midend/saturationElim.h"
 #include "test/gtest/helpers.h"

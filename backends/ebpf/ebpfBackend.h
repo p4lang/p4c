@@ -17,9 +17,9 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_EBPFBACKEND_H_
 #define BACKENDS_EBPF_EBPFBACKEND_H_
 
-#include "ebpfObject.h"
 #include "ebpfOptions.h"
-#include "frontends/p4/evaluator/evaluator.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
 namespace EBPF {

@@ -17,8 +17,11 @@ limitations under the License.
 #ifndef BACKENDS_UBPF_UBPFBACKEND_H_
 #define BACKENDS_UBPF_UBPFBACKEND_H_
 
+#include <string>
+
 #include "backends/ebpf/ebpfOptions.h"
-#include "frontends/p4/evaluator/evaluator.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 
 namespace UBPF {

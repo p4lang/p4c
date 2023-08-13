@@ -16,8 +16,17 @@ limitations under the License.
 
 #include "defaultArguments.h"
 
+#include <string>
+#include <vector>
+
 #include "frontends/p4/methodInstance.h"
+#include "frontends/p4/parameterSubstitution.h"
+#include "frontends/p4/typeChecking/typeSubstitution.h"
 #include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
+#include "ir/id.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
+#include "lib/enumerator.h"
 
 namespace P4 {
 

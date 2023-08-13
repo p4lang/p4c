@@ -17,7 +17,13 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_PSA_EXTERNS_EBPFPSAHASHALGORITHM_H_
 #define BACKENDS_EBPF_PSA_EXTERNS_EBPFPSAHASHALGORITHM_H_
 
+#include <vector>
+
+#include "backends/ebpf/codeGen.h"
 #include "backends/ebpf/ebpfObject.h"
+#include "ir/ir.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
 
 namespace EBPF {
 

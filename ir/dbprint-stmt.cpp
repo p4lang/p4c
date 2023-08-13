@@ -15,12 +15,14 @@ limitations under the License.
 */
 
 #include <ostream>
+#include <string>
 #include <vector>
 
 #include "dbprint.h"
 #include "ir/indexed_vector.h"
 #include "ir/ir.h"
 #include "ir/vector.h"
+#include "lib/cstring.h"
 #include "lib/indent.h"
 #include "lib/log.h"
 

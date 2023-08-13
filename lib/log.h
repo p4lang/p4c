@@ -17,13 +17,13 @@ limitations under the License.
 #ifndef LIB_LOG_H_
 #define LIB_LOG_H_
 
+#include <algorithm>
 #include <functional>
 #include <iostream>
 #include <set>
-#include <sstream>
+#include <string>
 #include <vector>
 
-#include "config.h"
 #include "indent.h"
 
 #ifndef __GNUC__

@@ -16,6 +16,9 @@ limitations under the License.
 
 #include "tableApply.h"
 
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "lib/cstring.h"
 #include "methodInstance.h"
 
 namespace P4 {

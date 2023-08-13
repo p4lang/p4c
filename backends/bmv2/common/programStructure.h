@@ -17,7 +17,21 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_COMMON_PROGRAMSTRUCTURE_H_
 #define BACKENDS_BMV2_COMMON_PROGRAMSTRUCTURE_H_
 
+#include <list>
+#include <map>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "ir/declaration.h"
+#include "ir/indexed_vector.h"
+#include "ir/ir.h"
+#include "ir/node.h"
 #include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/null.h"
+#include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
 #include "metermap.h"
 

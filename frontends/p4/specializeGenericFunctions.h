@@ -17,9 +17,27 @@ limitations under the License.
 #ifndef FRONTENDS_P4_SPECIALIZEGENERICFUNCTIONS_H_
 #define FRONTENDS_P4_SPECIALIZEGENERICFUNCTIONS_H_
 
+#include <list>
+#include <ostream>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/id.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/pass_manager.h"
+#include "ir/vector.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/log.h"
+#include "lib/null.h"
+#include "lib/ordered_map.h"
+#include "lib/safe_vector.h"
 
 namespace P4 {
 

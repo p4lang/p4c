@@ -1,7 +1,6 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 
 #include <algorithm>
-#include <cstddef>
 #include <initializer_list>
 #include <list>
 #include <map>
@@ -11,27 +10,26 @@
 #include <variant>
 #include <vector>
 
-#include <boost/container/vector.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 
-#include "backends/p4tools/common/compiler/convert_hs_index.h"
 #include "backends/p4tools/common/compiler/reachability.h"
+#include "backends/p4tools/common/core/abstract_execution_state.h"
 #include "backends/p4tools/common/lib/namespace_context.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
-#include "backends/p4tools/common/lib/taint.h"
 #include "backends/p4tools/common/lib/trace_event.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/id.h"
-#include "ir/indexed_vector.h"
 #include "ir/irutils.h"
-#include "lib/log.h"
-#include "lib/null.h"
+#include "ir/node.h"
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
 #include "lib/ordered_map.h"
 #include "lib/source_file.h"
+#include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 #include "backends/p4tools/modules/testgen/lib/packet_vars.h"
-#include "backends/p4tools/modules/testgen/lib/test_spec.h"
+#include "backends/p4tools/modules/testgen/lib/test_object.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4Tools::P4Testgen {

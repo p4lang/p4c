@@ -17,25 +17,27 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_SIMPLE_SWITCH_SIMPLESWITCH_H_
 #define BACKENDS_BMV2_SIMPLE_SWITCH_SIMPLESWITCH_H_
 
-#include <algorithm>
-#include <cstring>
+#include <set>
+#include <string>
+#include <vector>
 
-#include "backends/bmv2/common/action.h"
 #include "backends/bmv2/common/backend.h"
-#include "backends/bmv2/common/control.h"
-#include "backends/bmv2/common/deparser.h"
+#include "backends/bmv2/common/expression.h"
 #include "backends/bmv2/common/extern.h"
-#include "backends/bmv2/common/globals.h"
-#include "backends/bmv2/common/header.h"
+#include "backends/bmv2/common/helpers.h"
 #include "backends/bmv2/common/options.h"
-#include "backends/bmv2/common/parser.h"
 #include "backends/bmv2/common/programStructure.h"
-#include "backends/bmv2/common/sharedActionSelectorCheck.h"
-#include "frontends/common/constantFolding.h"
-#include "frontends/p4/evaluator/evaluator.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/fromv1.0/v1model.h"
-#include "frontends/p4/simplify.h"
-#include "frontends/p4/unusedDeclarations.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/indexed_vector.h"
+#include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/json.h"
 #include "midend/convertEnums.h"
 
 namespace BMV2 {

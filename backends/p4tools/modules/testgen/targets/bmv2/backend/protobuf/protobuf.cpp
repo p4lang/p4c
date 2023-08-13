@@ -21,6 +21,7 @@
 #include "ir/declaration.h"
 #include "ir/ir.h"
 #include "ir/vector.h"
+#include "lib/cstring.h"
 #include "lib/error.h"
 #include "lib/error_catalog.h"
 #include "lib/exceptions.h"
@@ -30,6 +31,7 @@
 
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/test_object.h"
+#include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 

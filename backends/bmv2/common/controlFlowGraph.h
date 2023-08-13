@@ -17,11 +17,22 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_COMMON_CONTROLFLOWGRAPH_H_
 #define BACKENDS_BMV2_COMMON_CONTROLFLOWGRAPH_H_
 
+#include <stddef.h>
+
+#include <iosfwd>
+#include <list>
+#include <set>
+
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 #include "lib/castable.h"
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
+#include "lib/null.h"
 #include "lib/ordered_set.h"
+#include "lib/source_file.h"
+#include "lib/stringify.h"
 
 namespace BMV2 {
 

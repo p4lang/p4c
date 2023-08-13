@@ -17,10 +17,14 @@ limitations under the License.
 #ifndef BACKENDS_UBPF_UBPFMODEL_H_
 #define BACKENDS_UBPF_UBPFMODEL_H_
 
+#include <boost/multiprecision/cpp_int.hpp>
+
 #include "frontends/common/model.h"
 #include "frontends/p4/coreLibrary.h"
+#include "ir/id.h"
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
+#include "ir/visitor.h"
 #include "lib/cstring.h"
 
 namespace UBPF {

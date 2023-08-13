@@ -102,7 +102,9 @@ typedef const IR::Type ConstType;
 #include "frontends/common/constantParsing.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
+#include "lib/log.h"
 #include "lib/source_file.h"
+
 }
 
 %param { V1::V1ParserDriver& driver }

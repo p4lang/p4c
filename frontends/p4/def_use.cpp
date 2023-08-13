@@ -16,11 +16,26 @@ limitations under the License.
 
 #include "def_use.h"
 
+#include <iostream>
+
+#include <boost/version.hpp>
+
+// TODO: Remove this once we migrate away from Ubuntu 18.
+#if BOOST_VERSION >= 106700
+#include <boost/container_hash/hash.hpp>
+#else
 #include <boost/functional/hash.hpp>
+#endif
 
 #include "frontends/p4/methodInstance.h"
+#include "frontends/p4/parameterSubstitution.h"
 #include "frontends/p4/tableApply.h"
+#include "ir/dbprint.h"
+#include "ir/vector.h"
+#include "lib/enumerator.h"
+#include "lib/indent.h"
 #include "lib/ordered_set.h"
+#include "lib/stringify.h"
 #include "parserCallGraph.h"
 
 namespace P4 {

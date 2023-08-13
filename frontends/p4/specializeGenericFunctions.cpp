@@ -16,6 +16,10 @@ limitations under the License.
 
 #include "specializeGenericFunctions.h"
 
+#include "frontends/p4/methodInstance.h"
+#include "frontends/p4/typeChecking/typeSubstitution.h"
+#include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
+
 namespace P4 {
 
 bool FindFunctionSpecializations::preorder(const IR::MethodCallExpression *mce) {

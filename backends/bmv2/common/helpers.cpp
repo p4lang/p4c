@@ -16,6 +16,22 @@ limitations under the License.
 
 #include "helpers.h"
 
+#include <ostream>
+#include <string>
+
+#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/multiprecision/detail/et_ops.hpp>
+#include <boost/multiprecision/number.hpp>
+#include <boost/multiprecision/traits/explicit_conversion.hpp>
+
+#include "backends/bmv2/common/JsonObjects.h"
+#include "backends/bmv2/common/controlFlowGraph.h"
+#include "backends/bmv2/common/expression.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
+#include "lib/error.h"
+#include "lib/exceptions.h"
+
 namespace BMV2 {
 
 /// constant definition for bmv2

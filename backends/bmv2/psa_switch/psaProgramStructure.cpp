@@ -17,6 +17,18 @@ limitations under the License.
 
 #include "psaProgramStructure.h"
 
+#include <algorithm>
+#include <list>
+#include <map>
+#include <ostream>
+#include <string>
+
+#include "backends/bmv2/common/backend.h"
+#include "ir/indexed_vector.h"
+#include "lib/exceptions.h"
+#include "lib/log.h"
+#include "lib/stringify.h"
+
 namespace BMV2 {
 
 void InspectPsaProgram::postorder(const IR::Declaration_Instance *di) {

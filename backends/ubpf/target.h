@@ -17,13 +17,13 @@ limitations under the License.
 #ifndef BACKENDS_UBPF_TARGET_H_
 #define BACKENDS_UBPF_TARGET_H_
 
-#include "backends/ebpf/ebpfObject.h"
+#include "backends/ebpf/codeGen.h"
 #include "backends/ebpf/target.h"
+#include "lib/cstring.h"
+#include "lib/sourceCodeBuilder.h"
 #include "ubpfHelpers.h"
 
 namespace UBPF {
-
-class UBPFControlBodyTranslator;
 
 class UbpfTarget : public EBPF::Target {
  public:

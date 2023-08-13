@@ -16,6 +16,15 @@ limitations under the License.
 
 #include "ubpfType.h"
 
+#include <algorithm>
+#include <string>
+
+#include "backends/ebpf/ebpfType.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
 #include "ubpfHelpers.h"
 
 namespace UBPF {

@@ -17,11 +17,25 @@ limitations under the License.
 #ifndef MIDEND_FLATTENUNIONS_H_
 #define MIDEND_FLATTENUNIONS_H_
 
+#include <map>
+#include <string>
+#include <vector>
+
 #include "./frontends/p4/parserControlFlow.h"
-#include "./frontends/p4/simplifyDefUse.h"
 #include "./frontends/p4/unusedDeclarations.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/declaration.h"
+#include "ir/indexed_vector.h"
 #include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/pass_manager.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
+#include "lib/safe_vector.h"
+
 namespace P4 {
 
 /**

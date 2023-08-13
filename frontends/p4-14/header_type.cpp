@@ -16,6 +16,13 @@ limitations under the License.
 
 #include "header_type.h"
 
+#include <string>
+#include <vector>
+
+#include "ir/indexed_vector.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
+
 bool HeaderTypeMaxLengthCalculator::preorder(IR::Type_StructLike *hdr_type) {
     IR::Annotations *annot = nullptr;
     auto *max_length = hdr_type->getAnnotation("max_length");

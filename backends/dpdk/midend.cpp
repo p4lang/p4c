@@ -16,21 +16,25 @@ limitations under the License.
 
 #include "midend.h"
 
-#include "dpdkArch.h"
+#include <functional>
+#include <ostream>
+#include <utility>
+#include <vector>
+
 #include "frontends/common/constantFolding.h"
+#include "frontends/common/parser_options.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/evaluator/evaluator.h"
-#include "frontends/p4/fromv1.0/v1model.h"
+#include "frontends/p4/methodInstance.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/simplifyParsers.h"
 #include "frontends/p4/simplifySwitch.h"
 #include "frontends/p4/strengthReduction.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
-#include "frontends/p4/typeMap.h"
-#include "frontends/p4/uniqueNames.h"
-#include "frontends/p4/unusedDeclarations.h"
-#include "midend/actionSynthesis.h"
+#include "ir/id.h"
+#include "ir/visitor.h"
+#include "lib/cstring.h"
 #include "midend/compileTimeOps.h"
 #include "midend/complexComparison.h"
 #include "midend/convertEnums.h"
@@ -39,7 +43,6 @@ limitations under the License.
 #include "midend/eliminateInvalidHeaders.h"
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateSerEnums.h"
-#include "midend/eliminateSwitch.h"
 #include "midend/eliminateTuples.h"
 #include "midend/eliminateTypedefs.h"
 #include "midend/expandEmit.h"
@@ -55,13 +58,11 @@ limitations under the License.
 #include "midend/noMatch.h"
 #include "midend/orderArguments.h"
 #include "midend/parserUnroll.h"
-#include "midend/predication.h"
 #include "midend/removeAssertAssume.h"
 #include "midend/removeExits.h"
 #include "midend/removeLeftSlices.h"
 #include "midend/removeMiss.h"
 #include "midend/removeSelectBooleans.h"
-#include "midend/removeUnusedParameters.h"
 #include "midend/replaceSelectRange.h"
 #include "midend/simplifyKey.h"
 #include "midend/simplifySelectCases.h"

@@ -17,9 +17,21 @@
 
 #include "parsers.h"
 
+#include <iosfwd>
+#include <string>
+#include <utility>
+
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/graphviz.hpp>
+#include <boost/graph/properties.hpp>
+#include <boost/graph/subgraph.hpp>
+
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/toP4/toP4.h"
-#include "lib/nullstream.h"
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/vector.h"
+#include "lib/null.h"
 
 namespace graphs {
 

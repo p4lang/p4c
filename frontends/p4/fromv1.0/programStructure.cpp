@@ -16,22 +16,39 @@ limitations under the License.
 
 #include "programStructure.h"
 
-#include <algorithm>
-#include <set>
+#include <stdio.h>
+#include <stdlib.h>
 
-#include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/iostreams/stream.hpp>
+#include <algorithm>
+#include <list>
+#include <ostream>
+#include <set>
+#include <string>
+#include <typeinfo>
+
+#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/multiprecision/detail/et_ops.hpp>
+#include <boost/multiprecision/number.hpp>
+#include <boost/multiprecision/traits/explicit_conversion.hpp>
 
 #include "converters.h"
+#include "frontends/common/model.h"
 #include "frontends/common/options.h"
+#include "frontends/common/parser_options.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/reservedWords.h"
-#include "frontends/p4/tableKeyNames.h"
 #include "frontends/parsers/parserDriver.h"
+#include "ir/declaration.h"
 #include "lib/big_int_util.h"
-#include "lib/bitops.h"
+#include "lib/error.h"
+#include "lib/error_catalog.h"
+#include "lib/exceptions.h"
+#include "lib/map.h"
+#include "lib/null.h"
 #include "lib/path.h"
+#include "lib/safe_vector.h"
 
 namespace P4V1 {
 

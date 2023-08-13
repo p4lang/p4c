@@ -1,6 +1,5 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/depth_first.h"
 
-#include <functional>
 #include <iterator>
 #include <vector>
 
