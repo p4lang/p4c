@@ -41,7 +41,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/path_test.cpp
   gtest/p4runtime.cpp
   gtest/source_file_test.cpp
-  gtest/transforms.cpp
+  gtest/visitor.cpp
   gtest/stringify.cpp
 )
 
