@@ -1,12 +1,12 @@
-div0.p4(18): [--Werror=expr] error: /: Division by zero
+div0.p4(18): [--Werror=expr] error: a / 0: Division by zero
     a = a / 0;
         ^^^^^
-div0.p4(19): [--Werror=expr] error: %: Modulo by zero
+div0.p4(19): [--Werror=expr] error: a % 0: Modulo by zero
     a = a % 0;
         ^^^^^
-div0.p4(20): [--Werror=expr] error: /: Division by zero
+div0.p4(20): [--Werror=expr] error: a / 0: Division by zero
     a = a / 8w0;
         ^^^^^^^
-div0.p4(21): [--Werror=expr] error: %: Modulo by zero
+div0.p4(21): [--Werror=expr] error: a % 0: Modulo by zero
     a = a % 8w0;
         ^^^^^^^

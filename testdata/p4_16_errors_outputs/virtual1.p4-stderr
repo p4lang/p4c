@@ -1,4 +1,4 @@
-virtual1.p4(24): [--Werror=type-error] error: return +
+virtual1.p4(24): [--Werror=type-error] error: return ix + 1
             return (ix + 1);
             ^^^^^^
   ---- Actual error:
@@ -6,7 +6,7 @@ virtual1.p4(23): Cannot cast implicitly type 'bit<16>' to type 'bool'
           bool f(in bit<16> ix) {
           ^^^^
   ---- Originating from:
-virtual1.p4(24): Source expression '+' produces a result of type 'bit<16>' which cannot be assigned to a left-value with type 'bool'
+virtual1.p4(24): Source expression 'ix + 1' produces a result of type 'bit<16>' which cannot be assigned to a left-value with type 'bool'
               return (ix + 1);
                       ^^^^^^
 virtual1.p4(23)
