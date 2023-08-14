@@ -57,7 +57,6 @@ set(
   test/small-step/unary.cpp
   test/small-step/util.cpp
   test/small-step/value.cpp
-  test/small-step/p4_asserts_parser_test.cpp
   test/transformations/saturation_arithm.cpp
   test/z3-solver/asrt_model.cpp
   test/z3-solver/expressions.cpp

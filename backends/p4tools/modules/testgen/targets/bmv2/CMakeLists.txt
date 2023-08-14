@@ -34,6 +34,7 @@ set(
   ${TESTGEN_GTEST_SOURCES}
   ${CMAKE_CURRENT_SOURCE_DIR}/test/backend/ptf.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test/backend/stf.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test/small-step/p4_asserts_parser_test.cpp
   PARENT_SCOPE
 )
 
