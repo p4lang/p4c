@@ -13,7 +13,8 @@
 # limitations under the License.
 
 set (LIBP4CTOOLKIT_SRCS
-    backtrace.cpp
+    alloc_trace.cpp
+    backtrace_exception.cpp
     bitvec.cpp
     compile_context.cpp
     crash.cpp
@@ -39,6 +40,8 @@ set (LIBP4CTOOLKIT_SRCS
 
 set (LIBP4CTOOLKIT_HDRS
     algorithm.h
+    alloc_trace.h
+    backtrace_exception.h
     bitops.h
     bitrange.h
     bitvec.h

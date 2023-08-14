@@ -22,6 +22,7 @@ limitations under the License.
 
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
+#include "lib/alloc_trace.h"
 #include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
 
@@ -404,6 +405,7 @@ class Definitions : public IHasDbPrint {
     Definitions *cloneDefinitions() const { return new Definitions(*this); }
     void removeLocation(const StorageLocation *loc);
     bool empty() const { return definitions.empty(); }
+    size_t size() const { return definitions.size(); }
 };
 
 class AllDefinitions : public IHasDbPrint {
@@ -469,6 +471,9 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     /// For each expression the location set it writes
     ordered_map<const IR::Expression *, const LocationSet *> writes;
     bool virtualMethod;  /// True if we are analyzing a virtual method
+    AllocTrace memuse;
+    alloc_trace_cb_t nested_trace;
+    static int nest_count;
 
     /// Creates new visitor, but with same underlying data structures.
     /// Needed to visit some program fragments repeatedly.
@@ -508,6 +513,22 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     void dbprint(std::ostream &out) const override {
         if (writes.empty()) out << "No writes";
         for (auto &it : writes) out << it.first << " writes " << it.second << Log::endl;
+    }
+    profile_t init_apply(const IR::Node *root) override {
+        auto rv = Inspector::init_apply(root);
+        LOG1("starting ComputWriteSet" << Log::indent);
+        if (nest_count++ == 0 && LOGGING(2)) {
+            memuse.clear();
+            nested_trace = memuse.start();
+        }
+        return rv;
+    }
+    void end_apply() override {
+        LOG1("finished CWS" << Log::unindent);
+        if (--nest_count == 0 && LOGGING(2)) {
+            memuse.stop(nested_trace);
+            LOG2(memuse);
+        }
     }
 
  public:
