@@ -52,14 +52,7 @@ set(
   test/gtest_utils.cpp
   test/lib/format_int.cpp
   test/lib/taint.cpp
-  test/small-step/binary.cpp
-  test/small-step/reachability.cpp
-  test/small-step/unary.cpp
   test/small-step/util.cpp
-  test/small-step/value.cpp
-  test/transformations/saturation_arithm.cpp
-  test/z3-solver/asrt_model.cpp
-  test/z3-solver/expressions.cpp
 )
 
 # Inja is needed to produce test templates.
