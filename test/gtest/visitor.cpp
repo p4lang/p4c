@@ -14,10 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "ir/visitor.h"
+
 #include "gtest/gtest.h"
 #include "helpers.h"
 #include "ir/ir.h"
-#include "ir/visitor.h"
 #include "ir/pass_manager.h"
 #include "lib/source_file.h"
 
@@ -52,8 +53,8 @@ TEST_F(P4C_IR, VisitorRefProcess) {
         }
     };
     PassManager::VisitorRef ref(new TestModif());
-    auto *node = new IR::AssignmentStatement(new IR::PathExpression(IR::ID("foo")),
-                                             new IR::Constant(42));
+    auto *node =
+        new IR::AssignmentStatement(new IR::PathExpression(IR::ID("foo")), new IR::Constant(42));
     auto *out = ref.process(node);
     ASSERT_TRUE(out);
     auto *asgn = out->to<IR::AssignmentStatement>();
