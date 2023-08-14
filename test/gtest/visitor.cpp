@@ -18,6 +18,7 @@ limitations under the License.
 #include "helpers.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
+#include "ir/pass_manager.h"
 #include "lib/source_file.h"
 
 namespace Test {
@@ -41,6 +42,29 @@ TEST_F(P4C_IR, Transform) {
     IR::Expression *e = new IR::Add(Util::SourceInfo(), c, c);
     auto *n = e->apply(TestTrans(c));
     EXPECT_EQ(e, n);
+}
+
+TEST_F(P4C_IR, VisitorRefProcess) {
+    struct TestModif : Modifier {
+        bool preorder(IR::AssignmentStatement *asgn) {
+            asgn->right = new IR::Cast(IR::Type_Bits::get(32, false), asgn->right);
+            return true;
+        }
+    };
+    PassManager::VisitorRef ref(new TestModif());
+    auto *node = new IR::AssignmentStatement(new IR::PathExpression(IR::ID("foo")),
+                                             new IR::Constant(42));
+    auto *out = ref.process(node);
+    ASSERT_TRUE(out);
+    auto *asgn = out->to<IR::AssignmentStatement>();
+    ASSERT_TRUE(asgn);
+
+    EXPECT_EQ(asgn->left, node->left);
+    EXPECT_NE(asgn->right, node->right);
+    auto *cast = asgn->right->to<IR::Cast>();
+    ASSERT_TRUE(cast);
+    EXPECT_TRUE(cast->destType->is<IR::Type_Bits>());
+    EXPECT_EQ(cast->expr, node->right);
 }
 
 }  // namespace Test

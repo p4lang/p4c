@@ -89,6 +89,13 @@ class PassManager : virtual public Visitor, virtual public Backtrack {
                       t();
                       return n;
                   })) {}
+
+        /// Apply the visitor held in this VisitorRef on a given IR root node. It returns the
+        /// modified node.
+        const IR::Node *process(const IR::Node *root) {
+            CHECK_NULL(visitor);
+            return root->apply(*visitor);
+        }
     };
     PassManager(const std::initializer_list<VisitorRef> &init) { addPasses(init); }
     void addPasses(const std::initializer_list<VisitorRef> &init) {
