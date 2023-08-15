@@ -12,6 +12,7 @@ abstract Operation_Unary : Operation {
         if (!srcInfo && expr) srcInfo = expr->srcInfo;
         if (type->is<Type::Unknown>() && expr) type = expr->type; }
     precedence = DBPrint::Prec_Prefix;
+    toString{ return getStringOp() + expr->toString(); }
 }
 
 class Neg : Operation_Unary {
@@ -37,6 +38,11 @@ abstract Operation_Binary : Operation {
         if (!srcInfo && left && right) srcInfo = left->srcInfo + right->srcInfo;
         if (type->is<Type::Unknown>() && left && right && left->type == right->type)
             type = left->type; }
+    toString {
+        std::stringstream tmp;
+        tmp << DBPrint::Prec_Low << *this;
+        return tmp.str();
+    }
 }
 
 abstract Operation_Ternary : Operation {
@@ -374,7 +380,7 @@ class Cast : Operation_Unary {
     /// type, and 'type' will only be updated later when type inferencing occurs
     precedence = DBPrint::Prec_Prefix;
     stringOp = "(cast)";
-    toString{ return "cast"; }
+    toString{ return "(" + destType->toString() + ")" + expr->toString(); }
     validate{ BUG_CHECK(!destType->is<Type_Unknown>(), "%1%: Cannot cast to unknown type", this); }
 }
 

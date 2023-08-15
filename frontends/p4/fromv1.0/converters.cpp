@@ -221,8 +221,7 @@ const IR::Node *ExpressionConverter::postorder(IR::GlobalRef *ref) {
     // FIXME -- has put into a different control.  In that case, ResolveReferences on this
     // FIXME -- path will later fail as the declaration is not in scope.  We should at
     // FIXME -- least detect that here and give a warning or other indication of the problem.
-    return new IR::PathExpression(
-        ref->srcInfo, new IR::Path(ref->srcInfo, IR::ID(ref->srcInfo, ref->toString())));
+    return new IR::PathExpression(ref->srcInfo, new IR::Path(ref->srcInfo, ref->Name()));
 }
 
 /// P4_16 is stricter on comparing booleans with ints

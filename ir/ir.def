@@ -404,7 +404,7 @@ class Declaration_Instance : Declaration, IAnnotated, IInstance {
 
     Annotations getAnnotations() const override { return annotations; }
     Type getType() const override { return type; }
-    cstring Name() const override { return name; }
+    ID Name() const override { return name; }
     validate{ BUG_CHECK(type->is<Type_Name>() ||
                         type->is<Type_Specialized>() ||
                         type->is<Type_Extern>(),        // P4_14 only?
