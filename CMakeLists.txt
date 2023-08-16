@@ -176,8 +176,13 @@ p4c_add_library (rt clock_gettime HAVE_CLOCK_GETTIME)
 include (CheckIncludeFile)
 check_include_file (execinfo.h HAVE_EXECINFO_H)
 check_include_file (ucontext.h HAVE_UCONTEXT_H)
+check_include_file (backtrace-supported.h HAVE_LIBBACKTRACE)
 include (CheckIncludeFileCXX)
 check_include_file_cxx (cxxabi.h HAVE_CXXABI_H)
+
+if (HAVE_LIBBACKTRACE)
+set (P4C_LIB_DEPS "${P4C_LIB_DEPS};-lbacktrace")
+endif ()
 
 # check functions
 

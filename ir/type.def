@@ -533,6 +533,8 @@ class Type_Specialized : Type {
         result += ">";
         return result;
     }
+    Type_Specialized(cstring bt, std::initializer_list<Type> args)
+    : baseType(new Type_Name(bt)), arguments(new Vector<Type>(args)) {}
 }
 
 /** Canonical representation of a Type_Specialized;

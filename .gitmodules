@@ -1,4 +1,0 @@
-[submodule "backends/ebpf/runtime/contrib/libbpf"]
-	path = backends/ebpf/runtime/contrib/libbpf
-	url = https://github.com/libbpf/libbpf
-	ignore = dirty

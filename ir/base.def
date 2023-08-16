@@ -379,7 +379,7 @@ interface IAnnotated {
 }
 
 interface IInstance {
-    virtual cstring Name() const = 0;
+    virtual ID Name() const = 0;
     virtual Type getType() const = 0;
 }
 

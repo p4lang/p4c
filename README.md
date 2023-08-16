@@ -367,6 +367,13 @@ may become impractical for compiling large programs.  **Do not disable
 the GC**, unless you really have to.  We have noticed that this may be
 a problem on MacOS.
 
+## Crash dumps
+
+P4c will use [libbacktrace](https://github.com/ianlancetaylor/libbacktrace.git)
+to produce readable crash dumps if it is available.  This is an optional
+dependency; if it is not available everything should build just fine, but
+crash dumps will not be very readable.
+
 # Development tools
 
 There is a variety of design and development documentation [here](docs/README.md).

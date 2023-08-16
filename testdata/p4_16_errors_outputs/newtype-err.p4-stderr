@@ -6,7 +6,7 @@ newtype-err.p4(2): Cannot cast implicitly type 'bit<32>' to type 'N32'
   type bit<32> N32;
                ^^^
   ---- Originating from:
-newtype-err.p4(10): Source expression '+' produces a result of type 'bit<32>' which cannot be assigned to a left-value with type 'N32'
+newtype-err.p4(10): Source expression 'b + b' produces a result of type 'bit<32>' which cannot be assigned to a left-value with type 'N32'
           n = b + b;
               ^^^^^
 newtype-err.p4(2)
