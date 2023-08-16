@@ -297,6 +297,15 @@ static bool getConstTable(const IR::P4Table *table) {
     return ep->isConstant;
 }
 
+/// @return true if @table has an 'entries' or 'const entries'
+/// property, and there is at least one entry.
+static bool getHasInitialEntries(const IR::P4Table *table) {
+    BUG_CHECK(table != nullptr, "Failed precondition for getHasInitialEntries");
+    auto entriesList = table->getEntries();
+    if (entriesList == nullptr) return false;
+    return (entriesList->entries.size() >= 1);
+}
+
 static std::vector<ActionRef> getActionRefs(const IR::P4Table *table, ReferenceMap *refMap) {
     std::vector<ActionRef> actions;
     for (auto action : table->getActionList()->actionList) {
@@ -655,6 +664,7 @@ class P4RuntimeAnalyzer {
         auto actions = getActionRefs(tableDeclaration, refMap);
 
         bool isConstTable = getConstTable(tableDeclaration);
+        bool hasInitialEntries = getHasInitialEntries(tableDeclaration);
 
         auto name = archHandler->getControlPlaneName(tableBlock);
         auto annotations = tableDeclaration->to<IR::IAnnotated>();
@@ -711,6 +721,9 @@ class P4RuntimeAnalyzer {
 
         if (isConstTable) {
             table->set_is_const_table(true);
+        }
+        if (hasInitialEntries) {
+            table->set_has_initial_entries(true);
         }
 
         archHandler->addTableProperties(symbols, p4Info, table, tableBlock);
@@ -973,9 +986,9 @@ static void analyzeParser(P4RuntimeAnalyzer &analyzer, const IR::ParserBlock *pa
     }
 }
 
-/// A converter which translates the 'const entries' for P4 tables (if any)
-/// into a P4Runtime WriteRequest message which can be used by a target to
-/// initialize its tables.
+/// A converter which translates the 'entries' or 'const entries' for
+/// P4 tables (if any) into a P4Runtime WriteRequest message which can
+/// be used by a target to initialize its tables.
 class P4RuntimeEntriesConverter {
  private:
     friend class P4RuntimeAnalyzer;
@@ -1012,6 +1025,7 @@ class P4RuntimeEntriesConverter {
             protoEntry->set_table_id(tableId);
             addMatchKey(protoEntry, table, e->getKeys(), refMap, typeMap);
             addAction(protoEntry, e->getAction(), refMap, typeMap);
+            protoEntry->set_is_const(isConst || e->isConst);
             if (needsPriority) {
                 if (!isConst) {
                     // The entry has a priority, use it.

@@ -22,6 +22,7 @@ tables {
   const_default_action_id: 25652968
   size: 1024
   is_const_table: true
+  has_initial_entries: true
 }
 actions {
   preamble {

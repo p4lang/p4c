@@ -22,6 +22,7 @@ tables {
   const_default_action_id: 21257015
   size: 1024
   is_const_table: true
+  has_initial_entries: true
 }
 tables {
   preamble {
@@ -44,6 +45,7 @@ tables {
   const_default_action_id: 21257015
   size: 1024
   is_const_table: true
+  has_initial_entries: true
 }
 actions {
   preamble {

@@ -26,6 +26,7 @@ tables {
     id: 26776898
   }
   size: 1024
+  has_initial_entries: true
 }
 tables {
   preamble {
@@ -52,6 +53,7 @@ tables {
     id: 26776898
   }
   size: 1024
+  has_initial_entries: true
 }
 tables {
   preamble {
@@ -78,6 +80,7 @@ tables {
     id: 26776898
   }
   size: 1024
+  has_initial_entries: true
 }
 tables {
   preamble {
@@ -104,6 +107,7 @@ tables {
     id: 26776898
   }
   size: 1024
+  has_initial_entries: true
 }
 tables {
   preamble {
@@ -130,6 +134,7 @@ tables {
     id: 26776898
   }
   size: 1024
+  has_initial_entries: true
 }
 tables {
   preamble {
@@ -156,6 +161,7 @@ tables {
     id: 26776898
   }
   size: 1024
+  has_initial_entries: true
 }
 tables {
   preamble {
@@ -182,6 +188,7 @@ tables {
     id: 26776898
   }
   size: 1024
+  has_initial_entries: true
 }
 tables {
   preamble {
@@ -208,6 +215,7 @@ tables {
     id: 26776898
   }
   size: 1024
+  has_initial_entries: true
 }
 tables {
   preamble {
@@ -234,6 +242,7 @@ tables {
     id: 26776898
   }
   size: 1024
+  has_initial_entries: true
 }
 actions {
   preamble {
