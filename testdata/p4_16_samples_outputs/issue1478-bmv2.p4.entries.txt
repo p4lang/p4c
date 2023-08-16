@@ -14,6 +14,7 @@ updates {
           action_id: 21257015
         }
       }
+      is_const: true
     }
   }
 }
