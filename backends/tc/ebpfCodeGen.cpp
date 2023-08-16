@@ -554,15 +554,13 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
     // eBPF can pass 64 bits of data as one argument passed in 64 bit register,
     // so value of the field is printed only when it fits into that register
     if (widthToExtract <= 64) {
-        cstring exprStr = expr->is<IR::PathExpression>()
-                              ? expr->to<IR::PathExpression>()->path->name.name
-                              : expr->toString();
-
-        if (expr->is<IR::Member>() &&
-            expr->checkedTo<IR::Member>()->expr->is<IR::PathExpression>() &&
-            isPointerVariable(
-                expr->to<IR::Member>()->expr->checkedTo<IR::PathExpression>()->path->name.name)) {
-            exprStr = exprStr.replace(".", "->");
+        cstring exprStr = expr->toString();
+        if (auto member = expr->to<IR::Member>()) {
+            if (auto pathExpr = member->expr->to<IR::PathExpression>()) {
+                if (isPointerVariable(pathExpr->path->name.name)) {
+                    exprStr = exprStr.replace(".", "->");
+                }
+            }
         }
         cstring tmp = Util::printf_format("(unsigned long long) %s.%s", exprStr, fieldName);
 
