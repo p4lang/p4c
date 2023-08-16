@@ -300,8 +300,10 @@ static bool getConstTable(const IR::P4Table *table) {
 /// @return true if @table has an 'entries' or 'const entries'
 /// property, and there is at least one entry.
 static bool getHasInitialEntries(const IR::P4Table *table) {
-    BUG_CHECK(table != nullptr, "Failed precondition for getConstTable");
+    BUG_CHECK(table != nullptr, "Failed precondition for getHasInitialEntries");
     auto entriesList = table->getEntries();
+    if (entriesList == nullptr)
+        return false;
     return (entriesList->entries.size() >= 1);
 }
 
