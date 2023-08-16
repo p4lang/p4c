@@ -18,6 +18,8 @@
 # Parse an STF file.
 # -----------------------------------------------------------------------------
 
+import re
+
 import ply.yacc as yacc
 
 from .stf_lexer import STFLexer
@@ -35,6 +37,8 @@ from .stf_lexer import STFLexer
 #           | SETDEFAULT qualified_name action
 #           | WAIT
 #
+# number_list : number
+#            | number_list number
 # match_list : match
 #            | match_list match
 # match : qualified_name COLON number_or_lpm
@@ -44,6 +48,9 @@ from .stf_lexer import STFLexer
 #        | INT_CONST_BIN
 #        | INT_CONST_HEX
 #        | TERN_CONST_HEX
+#
+# number_or_float: number
+#                | float
 #
 # qualified_name : ID
 #                | ID '[' INT_CONST_DEC ']'
@@ -73,19 +80,21 @@ from .stf_lexer import STFLexer
 #
 # expect_data : expect_datum
 #             | expect_data expect_datum
+#             | exact_datum
 # packet_data : packet_datum
 #             | packet_data packet_datum
 #
 # expect_datum : packet_datum | DATA_TERN
 # packet_datum : DATA_DEC | DATA_HEX
+# exact_datum : DATA_EXACT
 
 # PARSER ----------------------------------------------------------------------
 
 
 class STFParser:
-    def __init__(self):
-        self.lexer = STFLexer()
-        self.lexer.build()
+    def __init__(self, lexer=STFLexer()):
+        self.lexer = lexer
+        self.lexer.build(reflags=re.UNICODE)
         self.tokens = self.lexer.tokens
         self.parser = yacc.yacc(module=self)
         self.errors_cnt = 0
@@ -127,7 +136,7 @@ class STFParser:
             self.print_error(
                 p.lineno,
                 self.lexer.get_colno(),
-                "Syntax error while parsing at token '%s' (of type %s)." % (p.value, p.type),
+                "Unexpected token '%s' (of type %s)." % (p.value, p.type),
             )
             # Skip to the next statement.
             while True:
@@ -169,38 +178,6 @@ class STFParser:
     def p_statement_remove(self, p):
         "statement : REMOVE ALL"
         p[0] = (p[1].lower(), p[2])
-
-    def p_statement_check_counter(self, p):
-        "statement : CHECK_COUNTER ID LPAREN id_or_index RPAREN"
-        p[0] = (p[1].lower(), p[2], p[4], (None, "==", 0))
-
-    def p_statement_check_counter_with_check(self, p):
-        "statement : CHECK_COUNTER ID LPAREN id_or_index RPAREN count_type logical_cond number"
-        p[0] = (p[1].lower(), p[2], p[4], (p[6], p[7], p[8]))
-
-    def p_statement_expect(self, p):
-        "statement : EXPECT port"
-        p[0] = (p[1].lower(), p[2], None)
-
-    def p_statement_expect_data(self, p):
-        "statement : EXPECT port expect_data"
-        p[0] = (p[1].lower(), p[2], "".join(p[3]))
-
-    def p_statement_no_packet(self, p):
-        "statement : NO_PACKET"
-        p[0] = ("expect", None, None)
-
-    def p_statement_packet(self, p):
-        "statement : PACKET port packet_data"
-        p[0] = (p[1].lower(), p[2], "".join(p[3]))
-
-    def p_statement_setdefault(self, p):
-        "statement : SETDEFAULT qualified_name action"
-        p[0] = (p[1].lower(), p[2], p[3])
-
-    def p_statement_wait(self, p):
-        "statement : WAIT"
-        p[0] = (p[1].lower(),)
 
     def p_id_or_index(self, p):
         """id_or_index : ID
@@ -293,9 +270,25 @@ class STFParser:
         | INT_CONST_HEX"""
         p[0] = p[1]
 
+    def p_float(self, p):
+        "number_or_float : number DOT number"
+        p[0] = p[1] + "." + p[3]
+
+    def p_number_or_float(self, p):
+        "number_or_float : number"
+        p[0] = p[1]
+
     def p_packet_data_port(self, p):
         "port : DATA_DEC"
         p[0] = p[1]
+
+    def p_number_list_one(self, p):
+        "number_list : number"
+        p[0] = p[1]
+
+    def p_number_list_many(self, p):
+        "number_list : number number_list"
+        p[0] = p[1] + " " + p[2]
 
     def p_packet_data_one(self, p):
         "packet_data : packet_datum"
@@ -315,13 +308,45 @@ class STFParser:
         p[0] = [p[1]]
 
     def p_expect_data_many(self, p):
-        "expect_data : expect_data expect_datum"
-        p[0] = p[1] + [p[2]]
+        "expect_data : expect_datum expect_data"
+        p[0] = [p[1]] + p[2]
 
-    def p_expect_dataum(self, p):
+    def p_expect_data_exact_one(self, p):
+        "expect_data : exact_datum"
+        p[0] = [p[1]]
+
+    def p_expect_datum(self, p):
         """expect_datum : packet_datum
         | DATA_TERN"""
         p[0] = p[1]
+
+    def p_exact_datum(self, p):
+        """exact_datum : DATA_EXACT"""
+        p[0] = p[1]
+
+    def p_statement_expect(self, p):
+        "statement : EXPECT port"
+        p[0] = (p[1].lower(), p[2], None)
+
+    def p_statement_expect_data(self, p):
+        "statement : EXPECT port expect_data"
+        p[0] = (p[1].lower(), p[2], "".join(p[3]))
+
+    def p_statement_no_packet(self, p):
+        "statement : NO_PACKET"
+        p[0] = ("expect", None, None)
+
+    def p_statement_packet(self, p):
+        "statement : PACKET port packet_data"
+        p[0] = (p[1].lower(), p[2], "".join(p[3]))
+
+    def p_statement_setdefault(self, p):
+        "statement : SETDEFAULT qualified_name action"
+        p[0] = (p[1].lower(), p[2], p[3])
+
+    def p_statement_wait(self, p):
+        "statement : WAIT"
+        p[0] = (p[1].lower(),)
 
 
 # TESTING ---------------------------------------------------------------------

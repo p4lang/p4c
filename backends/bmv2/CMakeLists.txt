@@ -82,7 +82,7 @@ set (BMV2_BACKEND_COMMON_HDRS
 
 set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/bmv2.def PARENT_SCOPE)
 
-add_library(bmv2backend ${P4C_STATIC_BUILD} ${BMV2_BACKEND_COMMON_SRCS})
+add_library(bmv2backend STATIC ${BMV2_BACKEND_COMMON_SRCS})
 add_dependencies(bmv2backend ir-generated frontend)
 
 add_executable(p4c-bm2-ss ${BMV2_SIMPLE_SWITCH_SRCS})
@@ -221,7 +221,7 @@ else()
 endif()
 
 set (GTEST_BMV2_SOURCES
-  )
-
+  gtest/load_ir_from_json.cpp
+)
 set (GTEST_SOURCES ${GTEST_SOURCES} ${GTEST_BMV2_SOURCES} PARENT_SCOPE)
 set (GTEST_LDADD ${GTEST_LDADD} bmv2backend PARENT_SCOPE)

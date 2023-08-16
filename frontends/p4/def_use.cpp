@@ -361,6 +361,8 @@ bool Definitions::operator==(const Definitions &other) const {
 //////////////////////////////////////////////////////////////////////////////////////////////
 // ComputeWriteSet implementation
 
+int ComputeWriteSet::nest_count = 0;
+
 // This assumes that all variable declarations have been pushed to the top.
 // We could remove this constraint if we also scanned variable declaration initializers.
 void ComputeWriteSet::enterScope(const IR::ParameterList *parameters,
@@ -404,7 +406,10 @@ void ComputeWriteSet::enterScope(const IR::ParameterList *parameters,
     }
     allDefinitions->setDefinitionsAt(entryPoint, defs, false);
     currentDefinitions = defs;
-    LOG3("CWS Entered scope " << entryPoint << " definitions are " << Log::endl << defs);
+    if (LOGGING(5))
+        LOG5("CWS Entered scope " << entryPoint << " definitions are " << Log::endl << defs);
+    else
+        LOG3("CWS Entered scope " << entryPoint << " with " << defs->size() << " definitions");
 }
 
 void ComputeWriteSet::exitScope(const IR::ParameterList *parameters,
@@ -454,7 +459,10 @@ bool ComputeWriteSet::setDefinitions(Definitions *defs, const IR::Node *node, bo
     // that the definitions are monotonically increasing.
     if (findContext<IR::ParserState>()) overwrite = true;
     allDefinitions->setDefinitionsAt(point, currentDefinitions, overwrite);
-    LOG3("CWS Definitions at " << point << " are " << Log::endl << defs);
+    if (LOGGING(5))
+        LOG5("CWS Definitions at " << point << " are " << Log::endl << defs);
+    else
+        LOG3("CWS " << defs->size() << " definitions at " << point);
     return false;  // always returns false
 }
 
@@ -693,8 +701,12 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression *expression) {
         for (auto c : callees) (void)c->getNode()->apply(cw);
         currentDefinitions = cw.currentDefinitions;
         exitDefinitions = exitDefinitions->joinDefinitions(cw.exitDefinitions);
-        LOG3("Definitions after call of " << DBPrint::Brief << expression << ":" << Log::endl
-                                          << currentDefinitions << DBPrint::Reset);
+        if (LOGGING(5))
+            LOG5("Definitions after call of " << DBPrint::Brief << expression << ":" << Log::endl
+                                              << currentDefinitions << DBPrint::Reset);
+        else
+            LOG3(currentDefinitions->size() << " definitions after call of " << DBPrint::Brief
+                                            << expression << DBPrint::Reset);
     }
 
     auto result = LocationSet::empty;
@@ -815,7 +827,10 @@ bool ComputeWriteSet::preorder(const IR::BlockStatement *statement) {
 bool ComputeWriteSet::preorder(const IR::ReturnStatement *statement) {
     if (statement->expression != nullptr) visit(statement->expression);
     returnedDefinitions = returnedDefinitions->joinDefinitions(currentDefinitions);
-    LOG3("Return definitions " << returnedDefinitions);
+    if (LOGGING(5))
+        LOG5("Return definitions " << returnedDefinitions);
+    else
+        LOG3("Return " << returnedDefinitions->size() << " definitions");
     auto defs = currentDefinitions->cloneDefinitions();
     defs->setUnreachable();
     return setDefinitions(defs);
@@ -824,7 +839,10 @@ bool ComputeWriteSet::preorder(const IR::ReturnStatement *statement) {
 bool ComputeWriteSet::preorder(const IR::ExitStatement *) {
     if (currentDefinitions->isUnreachable()) return setDefinitions(currentDefinitions);
     exitDefinitions = exitDefinitions->joinDefinitions(currentDefinitions);
-    LOG3("Exit definitions " << exitDefinitions);
+    if (LOGGING(5))
+        LOG5("Exit definitions " << exitDefinitions);
+    else
+        LOG3("Exit with " << exitDefinitions->size() << " definitions");
     auto defs = currentDefinitions->cloneDefinitions();
     defs->setUnreachable();
     return setDefinitions(defs);
@@ -944,7 +962,10 @@ bool ComputeWriteSet::preorder(const IR::Function *function) {
     returnedDefinitions = new Definitions();
     visit(function->body);
     currentDefinitions = currentDefinitions->joinDefinitions(returnedDefinitions);
-    LOG3("CWS @" << point.after() << "=" << currentDefinitions);
+    if (LOGGING(5))
+        LOG5("CWS @" << point.after() << "=" << currentDefinitions);
+    else
+        LOG3("CWS @" << point.after() << " with " << currentDefinitions->size() << " defs");
     allDefinitions->setDefinitionsAt(point.after(), currentDefinitions, false);
     exitScope(function->type->parameters, locals);
 

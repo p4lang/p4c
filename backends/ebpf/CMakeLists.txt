@@ -13,9 +13,34 @@
 # limitations under the License.
 
 # CMakefile for the EBPF P4-16 back-end.
-# To be included in the main P4C compiler CMakefile
+message(STATUS "Start configuring the eBPF back end")
 
-message(STATUS "Start configuring eBPF back end")
+if(NOT APPLE)
+  # Fetch and declare the libbpf library. Print out download state while setting up libbpf.
+  set(FETCHCONTENT_QUIET_PREV ${FETCHCONTENT_QUIET})
+  set(FETCHCONTENT_QUIET OFF)
+  fetchcontent_declare(
+    bpfrepo
+    URL https://github.com/libbpf/libbpf/archive/refs/tags/v1.2.2.tar.gz
+    URL_HASH SHA256=32b0c41eabfbbe8e0c8aea784d7495387ff9171b5a338480a8fbaceb9da8d5e5
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/runtime/contrib/libbpf
+    USES_TERMINAL_DOWNLOAD TRUE
+    GIT_PROGRESS TRUE
+  )
+  fetchcontent_makeavailable(bpfrepo)
+  set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
+  # Build libbpf as necessary.
+  add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/runtime/usr/lib64/libbpf.a
+    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build_libbpf
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMENT "Building libbpf..."
+  )
+  add_custom_target(genlibbpf ALL
+    DEPENDS  ${CMAKE_CURRENT_SOURCE_DIR}/runtime/usr/lib64/libbpf.a
+  )
+  message("Done with setting up libbpf for P4C.")
+endif()
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version.h.cmake"
   "${CMAKE_CURRENT_BINARY_DIR}/version.h" @ONLY)
@@ -95,6 +120,9 @@ set (P4C_EBPF_DIST_HEADERS p4include/ebpf_model.p4)
 add_executable(p4c-ebpf ${P4C_EBPF_SRCS})
 target_link_libraries (p4c-ebpf ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 add_dependencies(p4c-ebpf ir-generated frontend)
+if (NOT APPLE)
+  add_dependencies(p4c-ebpf genlibbpf)
+endif()
 
 install (TARGETS p4c-ebpf
   RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
@@ -193,7 +221,7 @@ endif()
 # check for the libbpf library
 find_library(LIBBPF NAMES bpf HINTS "${CMAKE_CURRENT_SOURCE_DIR}/runtime/usr/lib64/")
 if (LIBBPF)
-  message(STATUS "Found libbpf library")
+  message(STATUS "Found libbpf library at ${LIBBPF}")
 else()
   message(WARNING "Missing the libbpf dependency, disabling kernel tests."
   " You can install libbpf by running './build_libbpf' in the "

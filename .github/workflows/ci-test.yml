@@ -202,18 +202,9 @@ jobs:
            echo "/usr/local/opt/bison/bin" >> $GITHUB_PATH
 
     - name: Build (MacOS)
-      # for some reason, brew does not install protobuf in a way cmake would be
-      # able to find it. Also, the library needs to be specified manually in
-      # order for the compiler to be correctly linked with protobuf.
-      # Also, there are no static protobuf libs in homebrew.
-      # See also https://github.com/Homebrew/homebrew-core/pull/122277
       run: |
-          PROTOBUF=`brew --prefix --installed protobuf@21`
           ./bootstrap.sh -DENABLE_GC=ON -DCMAKE_BUILD_TYPE=RELEASE \
-              -DCMAKE_UNITY_BUILD=ON \
-              -DProtobuf_INCLUDE_DIR=$PROTOBUF/include \
-              -DProtobuf_LIBRARY=$PROTOBUF/lib/libprotobuf.dylib \
-              -DENABLE_PROTOBUF_STATIC=OFF
+              -DCMAKE_UNITY_BUILD=ON
           make -Cbuild -j2
 
     - name: Run tests (MacOS)

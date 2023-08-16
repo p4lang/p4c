@@ -18,8 +18,9 @@ limitations under the License.
 
 #include "backends/dpdk/constants.h"
 #include "backends/dpdk/options.h"
+#include "backends/dpdk/p4/config/p4info.pb.h"
 #include "control-plane/bfruntime.h"
-#include "p4/config/dpdk/p4info.pb.h"
+
 namespace P4 {
 
 namespace BFRT {

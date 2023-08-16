@@ -22,7 +22,11 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "ir/visitor.h"
-#include "p4/config/v1/p4types.pb.h"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wpedantic"
+#include "p4/config/v1/p4info.pb.h"
+#pragma GCC diagnostic pop
 
 namespace p4 {
 

@@ -52,15 +52,7 @@ set(
   test/gtest_utils.cpp
   test/lib/format_int.cpp
   test/lib/taint.cpp
-  test/small-step/binary.cpp
-  test/small-step/reachability.cpp
-  test/small-step/unary.cpp
   test/small-step/util.cpp
-  test/small-step/value.cpp
-  test/small-step/p4_asserts_parser_test.cpp
-  test/transformations/saturation_arithm.cpp
-  test/z3-solver/asrt_model.cpp
-  test/z3-solver/expressions.cpp
 )
 
 # Inja is needed to produce test templates.
@@ -72,14 +64,15 @@ FetchContent_Declare(
   GIT_TAG        3741c73ba78babd2ed88f2acf2fcd6dafdb878e8
   GIT_PROGRESS TRUE
 )
-FetchContent_MakeAvailable(inja)
+fetchcontent_makeavailable_but_exclude_install(inja)
 
-# Testgen libraries.
+# Testgen libraries and includes. Defined here such that targets can extend them.
 set(
   TESTGEN_LIBS
   PRIVATE p4tools-common
   PUBLIC inja
 )
+set(TESTGEN_INCLUDES)
 
 file(GLOB testgen_targets RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/targets ${CMAKE_CURRENT_SOURCE_DIR}/targets/*)
 foreach(ext ${testgen_targets})
@@ -104,10 +97,6 @@ endforeach(ext)
 # Propagate def files set by target extensions upwards.
 set(IR_DEF_FILES ${IR_DEF_FILES} PARENT_SCOPE)
 
-# Convert the list of files into #includes
-foreach(include_file ${include_files})
-endforeach()
-
 # Fill the template
 configure_file(register.h.in register.h)
 
@@ -115,6 +104,9 @@ configure_file(register.h.in register.h)
 add_p4tools_library(testgen ${TESTGEN_SOURCES})
 # Make sure the testgen library and anything that links to it see both the Z3 and Inja includes.
 target_link_libraries(testgen PUBLIC p4tools-common inja)
+if (TESTGEN_INCLUDES)
+  target_include_directories(testgen ${TESTGEN_INCLUDES})
+endif()
 
 # The executable.
 add_p4tools_executable(p4testgen main.cpp)
@@ -140,11 +132,6 @@ add_dependencies(p4testgen linkp4testgen)
 
 if(ENABLE_GTESTS)
   add_executable(testgen-gtest ${TESTGEN_GTEST_SOURCES})
-  target_include_directories(
-    testgen-gtest
-    PRIVATE ${P4C_SOURCE_DIR}/test/frameworks/gtest/googlemock/include
-    PRIVATE ${P4C_SOURCE_DIR}/test/frameworks/gtest/googletest/include
-  )
   target_link_libraries(
     testgen-gtest
     PRIVATE testgen
@@ -152,11 +139,9 @@ if(ENABLE_GTESTS)
     ${TESTGEN_LIBS}
     ${P4C_LIBRARIES}
     ${P4C_LIB_DEPS}
-    ${CMAKE_THREAD_LIBS_INIT}
   )
 
   if(ENABLE_TESTING)
-    add_definitions("-DGTEST_HAS_PTHREAD=0")
     add_test(NAME testgen-gtest COMMAND testgen-gtest)
     set_tests_properties(testgen-gtest PROPERTIES LABELS "gtest-testgen")
   endif()

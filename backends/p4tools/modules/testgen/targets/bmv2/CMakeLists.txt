@@ -29,10 +29,33 @@ set(
   PARENT_SCOPE
 )
 
+set(
+  TESTGEN_GTEST_SOURCES
+  ${TESTGEN_GTEST_SOURCES}
+  ${CMAKE_CURRENT_SOURCE_DIR}/test/backend/ptf.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test/backend/stf.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test/small-step/binary.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test/small-step/unary.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test/small-step/p4_asserts_parser_test.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test/small-step/value.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test/small-step/reachability.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test/transformations/saturation_arithm.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test/z3-solver/expressions.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test/z3-solver/asrt_model.cpp
+  PARENT_SCOPE
+)
+
+
 # Link the run-bmv2-test binary
 execute_process(COMMAND ln -sfn ${P4C_SOURCE_DIR}/backends/bmv2/run-bmv2-test.py ${CMAKE_BINARY_DIR}/run-bmv2-test.py)
 
 set(
   TESTGEN_LIBS ${TESTGEN_LIBS}
+  PARENT_SCOPE
+)
+
+set(
+  TESTGEN_INCLUDES ${TESTGEN_INCLUDES}
+  SYSTEM BEFORE PUBLIC ${Protobuf_INCLUDE_DIR}
   PARENT_SCOPE
 )

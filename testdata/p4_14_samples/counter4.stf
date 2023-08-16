@@ -2,9 +2,6 @@ add tab1 ethernet.dstAddr:0xa1a2a3a4a5a6 act(port:2, idx:10)
 add tab1 ethernet.dstAddr:0xb1b2b3b4b5b6 act(port:3, idx:11)
 add tab1 ethernet.dstAddr:0xc1c2c3c4c5c6 act(port:5, idx:10)
 
-expect 2
-expect 3
-expect 5
 packet 0 a1a2a3a4a5a6 0000
 wait
 check_counter cntDum(10) packets == 1

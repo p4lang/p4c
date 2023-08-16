@@ -14,9 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "backtrace.h"
+#include "backtrace_exception.h"
 
 #include <stdarg.h>
+#if HAVE_LIBBACKTRACE
+#include <backtrace.h>
+extern struct backtrace_state *global_backtrace_state;
+#endif
 
 #include <functional>
 #include <regex>
@@ -25,10 +29,29 @@ limitations under the License.
 #include <typeinfo>
 
 #include "crash.h"
+#include "exename.h"
+#include "hex.h"
+
+#if HAVE_LIBBACKTRACE
+int append_message(void *msg_, uintptr_t pc, const char *file, int line, const char *func) {
+    std::string &msg = *static_cast<std::string *>(msg_);
+    std::stringstream tmp;
+    tmp << "\n  0x" << hex(pc) << "  " << (func ? func : "??");
+    if (file) tmp << "\n    " << file << ":" << line;
+    msg += tmp.str();
+    return 0;
+}
+#endif
 
 void backtrace_fill_stacktrace(std::string &msg, void *const *backtrace, int size) {
     // backtrace_symbols is only available with libexecinfo
-#if HAVE_EXECINFO_H
+#if HAVE_LIBBACKTRACE
+    if (!global_backtrace_state)
+        global_backtrace_state = backtrace_create_state(exename(), 1, nullptr, nullptr);
+    backtrace_full(global_backtrace_state, 1, append_message, nullptr, &msg);
+    (void)backtrace;
+    (void)size;
+#elif HAVE_EXECINFO_H
     char **strings = backtrace_symbols(backtrace, size);
     for (int i = 0; i < size; i++) {
         if (strings) {

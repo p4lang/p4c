@@ -112,6 +112,10 @@ endif()
 if (CMAKE_UNITY_BUILD)
   set(CMAKE_UNITY_BUILD_BATCH_SIZE 10 CACHE UNINITIALIZED "Set the unity build batch size.")
 endif ()
+
+# Always build position-independent code. This is important when linking with Protobuf.
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 # set the required options for a static release build
 if (BUILD_STATIC_RELEASE)
   message(STATUS "Building static release binaries")
@@ -128,19 +132,14 @@ if (BUILD_STATIC_RELEASE)
   add_definitions(-DP4C_STATIC_BUILD)
 endif ()
 
-# required tools and libraries
+# Required tools and libraries.
 find_package (PythonInterp 3 REQUIRED)
 find_package (FLEX 2.0 REQUIRED)
 find_package (BISON 3.0 REQUIRED)
-if (ENABLE_PROTOBUF_STATIC)
-  set(SAVED_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
-  set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
-endif ()
-find_package (Protobuf 3.0.0 REQUIRED)
-if (ENABLE_PROTOBUF_STATIC)
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ${SAVED_CMAKE_FIND_LIBRARY_SUFFIXES})
-endif ()
-# The boost graph headers are optional and only required by the graphs backend
+include(Protobuf)
+p4c_obtain_protobuf()
+
+# The boost graph headers are optional and only required by the graphs back end.
 find_package (Boost QUIET COMPONENTS graph)
 if (Boost_FOUND)
   set (HAVE_LIBBOOST_GRAPH 1)
@@ -177,8 +176,13 @@ p4c_add_library (rt clock_gettime HAVE_CLOCK_GETTIME)
 include (CheckIncludeFile)
 check_include_file (execinfo.h HAVE_EXECINFO_H)
 check_include_file (ucontext.h HAVE_UCONTEXT_H)
+check_include_file (backtrace-supported.h HAVE_LIBBACKTRACE)
 include (CheckIncludeFileCXX)
 check_include_file_cxx (cxxabi.h HAVE_CXXABI_H)
+
+if (HAVE_LIBBACKTRACE)
+set (P4C_LIB_DEPS "${P4C_LIB_DEPS};-lbacktrace")
+endif ()
 
 # check functions
 
@@ -328,7 +332,6 @@ include_directories (
   ${P4C_SOURCE_DIR}
   ${P4C_BINARY_DIR}
   )
-include_directories(SYSTEM ${P4C_SOURCE_DIR}/test/frameworks/gtest/googletest/include)
 add_definitions (-DCONFIG_PREFIX="${CMAKE_INSTALL_PREFIX}")
 add_definitions (-DCONFIG_PKGDATADIR="${CMAKE_INSTALL_PREFIX}/${P4C_ARTIFACTS_OUTPUT_DIRECTORY}")
 
@@ -347,21 +350,51 @@ configure_file ("${P4C_SOURCE_DIR}/cmake/config.h.cmake" "${P4C_BINARY_DIR}/conf
 set (IR_GENERATOR_DIRECTORY ${P4C_BINARY_DIR}/tools/ir-generator)
 set (IR_GENERATOR ${IR_GENERATOR_DIRECTORY}/irgenerator)
 
-# the order of adding subdirectories matters because of target dependencies
+# Component libraries: must be defined before being used in the back end executables.
+set (P4C_LIBRARIES controlplane midend frontend ir p4ctoolkit ir-generated)
+
+# If we enable GTest, install GoogleTest with the appropriate options.
+if (ENABLE_GTESTS)
+  include(GoogleTest)
+  p4c_obtain_googletest()
+endif ()
+
+# The order of adding subdirectories matters because of target dependencies.
 add_subdirectory (tools/driver)
 add_subdirectory (lib)
 add_subdirectory (tools/ir-generator)
 add_subdirectory (ir)
 
-# component libraries: must be defined before being used in the
-# backend executables
-set (P4C_LIBRARIES controlplane midend frontend ir p4ctoolkit ir-generated)
 
 # add extensions - before the frontends as they produce IR and extra frontend sources
 set(EXTENSION_IR_SOURCES)
 # extra sources that need to be linked directly into p4test so that
 # extensions can provide specific conversions (e.g., for externs)
 set(EXTENSION_P4_14_CONV_SOURCES)
+
+########################################## P4Runtime Begin #########################################
+# TODO: Ideally, this code should be part of the control-plane CMakelists.txt file. However, because
+# extensions which may depend on P4Runtime variables are instantiated before the control-plane we
+# need to keep the P4Runtime installation in the top-level CMakelists file.
+# Print download state while setting up P4Runtime.
+set(FETCHCONTENT_QUIET_PREV ${FETCHCONTENT_QUIET})
+set(FETCHCONTENT_QUIET OFF)
+# Fetch and declare the P4Runtime library.
+FetchContent_Declare(
+  p4runtime
+  GIT_REPOSITORY https://github.com/p4lang/p4runtime.git
+  GIT_TAG        d76a3640a223f47a43dc34e5565b72e43796ba57
+  GIT_PROGRESS TRUE
+)
+FetchContent_MakeAvailable(p4runtime)
+set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
+message("Done with setting up P4Runtime for P4C.")
+# The standard P4Runtime protocol buffers message definitions live in the PI
+# repo, which is included in this repo as a git module.
+set(P4RUNTIME_STD_DIR ${p4runtime_SOURCE_DIR}/proto CACHE INTERNAL
+                                                          "Path to the P4Runtime directory."
+)
+########################################## P4Runtime End ##########################################
 
 file (GLOB p4c_extensions RELATIVE ${P4C_SOURCE_DIR}/extensions ${P4C_SOURCE_DIR}/extensions/*)
 MESSAGE ("-- Available extensions ${p4c_extensions}")

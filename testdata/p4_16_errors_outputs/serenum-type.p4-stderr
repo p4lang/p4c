@@ -1,7 +1,7 @@
 serenum-type.p4(8): [--Werror=type-error] error: EthT: Illegal type for enum; only bit<> and int<> are allowed
 enum EthT EthTypes {
      ^^^^
-serenum-type.p4(49): [--Werror=type-error] error: cast
+serenum-type.p4(49): [--Werror=type-error] error: (EthTypes)16w0
             h.eth.type = (EthTypes)(bit<16>)0;
                          ^^^^^^^^^^^^^^^^^^^^
   ---- Actual error:

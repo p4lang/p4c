@@ -195,29 +195,7 @@ class JSONGenerator {
 
     void generate(cstring v) {
         if (v) {
-            out << "\"";
-            for (auto ch : v) {
-                switch (ch) {
-                    case '\n':
-                        out << "\\n";
-                        break;
-                    case '\r':
-                        out << "\\r";
-                        break;
-                    case '\t':
-                        out << "\\t";
-                        break;
-                    case '\"':
-                        out << "\\\"";
-                        break;
-                    case '\\':
-                        out << "\\\\";
-                        break;
-                    default:
-                        out << ch;
-                }
-            }
-            out << "\"";
+            out << "\"" << v.escapeJson() << "\"";
         } else {
             out << "null";
         }

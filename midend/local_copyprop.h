@@ -150,6 +150,9 @@ class LocalCopyPropagation : public PassManager {
         passes.push_back(typeChecking);
         passes.push_back(new DoLocalCopyPropagation(refMap, typeMap, policy, elimUnusedTables));
     }
+    LocalCopyPropagation(ReferenceMap *refMap, TypeMap *typeMap,
+                         std::function<bool(const Context *, const IR::Expression *)> policy)
+        : LocalCopyPropagation(refMap, typeMap, nullptr, policy) {}
 };
 
 }  // namespace P4

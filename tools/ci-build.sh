@@ -96,7 +96,7 @@ if [[ "${DISTRIB_RELEASE}" == "18.04" ]] || [[ "$(which simple_switch 2> /dev/nu
   # Use GCC 9 from https://launchpad.net/~ubuntu-toolchain-r/+archive/ubuntu/test
   sudo apt-get update && sudo apt-get install -y software-properties-common
   sudo add-apt-repository -uy ppa:ubuntu-toolchain-r/test
-  P4C_DEPS+=" libprotobuf-dev protobuf-compiler gcc-9 g++-9"
+  P4C_DEPS+=" gcc-9 g++-9"
   export CC=gcc-9
   export CXX=g++-9
 else
@@ -137,11 +137,6 @@ if [[ "${DISTRIB_RELEASE}" == "22.04" ]] ; then
   sudo pip3 install --upgrade googleapis-common-protos==1.50.0
   sudo pip3 install --upgrade grpcio==1.51.1
 fi
-
-# Build libbpf for eBPF tests.
-pushd ${P4C_DIR}
-backends/ebpf/build_libbpf
-popd
 
 # ! ------  BEGIN PTF_EBPF -----------------------------------------------
 function install_ptf_ebpf_test_deps() (

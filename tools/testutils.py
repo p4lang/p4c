@@ -37,6 +37,9 @@ FAILURE: int = 1
 SKIPPED: int = 999
 
 
+import scapy.packet
+
+
 class LogPipe(threading.Thread):
     """A log utility class that allows subprocesses to directly write into a log.
     Derived from https://codereview.stackexchange.com/a/17959."""
@@ -89,11 +92,26 @@ def hex_to_byte(hex_str: str) -> str:
     return "".join(byte_vals)
 
 
-def compare_pkt(expected: str, received: str) -> int:
+def compare_pkt(expected: str, received: scapy.packet.Packet) -> int:
     """Compare two given byte sequences and check if they are the same.
     Report errors if this is not the case."""
-    received = bytes(received).hex().upper()
+
+    # If the expected packet string ends with a '$' it means that the packets are only equal,
+    # if they are the exact same length.
+    strict_length_check = False
+    if expected[-1] == '$':
+        strict_length_check = True
+        expected = expected[:-1]
+
+    received = received.build().hex().upper()
     expected = "".join(expected.split()).upper()
+    if strict_length_check and len(received) > len(expected):
+        log.error(
+            "Received packet too long %s vs %s (in units of hex digits)",
+            len(received),
+            len(expected),
+        )
+        return FAILURE
     if len(received) < len(expected):
         log.error("Received packet too short %s vs %s", len(received), len(expected))
         return FAILURE

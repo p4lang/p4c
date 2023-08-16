@@ -17,12 +17,13 @@ limitations under the License.
 #ifndef LIB_HEX_H_
 #define LIB_HEX_H_
 
+#include <cstdint>
 #include <iomanip>
 #include <iostream>
 #include <vector>
 
 class hex {
-    intmax_t val;
+    std::intmax_t val;
     int width;
     char fill;
 

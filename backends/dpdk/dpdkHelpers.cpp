@@ -217,6 +217,8 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
             add_instr(new IR::DpdkAndStatement(left, src1Op, src2Op));
         } else if (right->is<IR::BXor>()) {
             add_instr(new IR::DpdkXorStatement(left, src1Op, src2Op));
+        } else if (right->is<IR::ArrayIndex>()) {
+            add_instr(new IR::DpdkMovStatement(a->left, a->right));
         } else {
             BUG("%1% not implemented.", right);
         }

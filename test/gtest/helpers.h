@@ -36,7 +36,7 @@ enum class P4Headers {
     PSA       // Both core.p4 and psa.p4
 };
 
-namespace detail {
+namespace TestDetail {
 
 /**
  * Transforms the P4 program (or program fragment) in @rawSource to turn it into
@@ -59,12 +59,12 @@ std::string makeP4Source(const char *file, unsigned line, P4Headers headers, con
 /// `makeP4Source(file, line, P4Headers::NONE, rawSource);`.
 std::string makeP4Source(const char *file, unsigned line, const char *rawSource);
 
-}  // namespace detail
+}  // namespace TestDetail
 
 // A macro which should be used by unit tests to define P4 source code. It adds
 // additional information to the source code to aid in debugging; see
 // makeP4Source for more information and parameter details.
-#define P4_SOURCE(...) detail::makeP4Source(__FILE__, __LINE__, __VA_ARGS__)
+#define P4_SOURCE(...) TestDetail::makeP4Source(__FILE__, __LINE__, __VA_ARGS__)
 
 class P4CTestEnvironment {
     // XXX(seth): Ideally this would be a ::testing::Environment subclass, but
