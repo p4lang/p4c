@@ -24,6 +24,7 @@ limitations under the License.
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wpedantic"
 #include "p4/config/v1/p4info.pb.h"
+#include "p4/v1/p4runtime.pb.h"
 #pragma GCC diagnostic pop
 
 #include "frontends/common/resolveReferences/referenceMap.h"
@@ -137,6 +138,12 @@ class P4RuntimeArchHandlerIface {
     /// Collects architecture-specific @externBlock instance in @symbols table.
     virtual void collectExternInstance(P4RuntimeSymbolTableIface *symbols,
                                        const IR::ExternBlock *externBlock) = 0;
+    /// Collects architecture-specific used in assignment statements
+    virtual void collectAssignmentStatement(P4RuntimeSymbolTableIface *symbols,
+                                            const IR::AssignmentStatement *assign) = 0;
+    /// Collects architecture-specific @externMethod instance in @symbols table.
+    virtual void collectExternMethod(P4RuntimeSymbolTableIface *symbols,
+                                     const P4::ExternMethod *externMethod) = 0;
     /// Collects extern method call @externFunction in @symbols table in case it
     /// needs to be exposed to the control-plane (e.g. digest call for v1model).
     virtual void collectExternFunction(P4RuntimeSymbolTableIface *symbols,
@@ -167,6 +174,12 @@ class P4RuntimeArchHandlerIface {
     /// requires some logic to be performed then.
     virtual void postAdd(const P4RuntimeSymbolTableIface &symbols,
                          ::p4::config::v1::P4Info *p4info) = 0;
+    /// This method is called to add target specific extern entries
+    virtual void addExternEntries(const p4::v1::WriteRequest *entries,
+                                  const P4RuntimeSymbolTableIface &symbols,
+                                  const IR::ExternBlock *externBlock) = 0;
+    /// called when processing annotations via setPreamble
+    virtual bool filterAnnotations(cstring anno) = 0;
 };
 
 /// A functor interface that needs to be implemented for each
