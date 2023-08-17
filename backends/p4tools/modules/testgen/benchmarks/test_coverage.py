@@ -17,12 +17,12 @@ import seaborn as sns
 
 # Append tools to the import path.
 FILE_DIR = Path(__file__).resolve().parent
-TOOLS_PATH = FILE_DIR.joinpath("../../../tools")
+TOOLS_PATH = FILE_DIR.joinpath("../../../../../tools")
 sys.path.append(str(TOOLS_PATH))
 import testutils
 
-TESTGEN_BIN = FILE_DIR.joinpath("../../../build/p4testgen")
-OUTPUT_DIR = FILE_DIR.joinpath("../../../build/results")
+TESTGEN_BIN = FILE_DIR.joinpath("../../../../../build/p4testgen")
+OUTPUT_DIR = FILE_DIR.joinpath("../../../../../build/results")
 # generate random seeds, increase the number for extra sampling
 ITERATIONS = 1
 MAX_TESTS = 0
@@ -85,6 +85,14 @@ PARSER.add_argument(
     help="Which test back end to generate tests for.",
 )
 PARSER.add_argument(
+    "-m",
+    "--large-memory",
+    dest="large_memory",
+    action="store_true",
+    type=bool,
+    help="Run tests with a large memory configuration.",
+)
+PARSER.add_argument(
     "-tm",
     "--test-mode",
     dest="test_mode",
@@ -125,6 +133,8 @@ class Options:
     test_backend = None
     # Generic test config.
     test_mode = "bmv2"
+    # Whether to execute tests with a large memory configuration for the garbage collector.
+    large_memory = False
     # The target.
     target = "bmv2"
     # The architecture.
@@ -205,7 +215,7 @@ def run_strategies_for_max_tests(options, test_args):
         f" -I/p4/p4c/build/p4include --test-backend {options.test_backend}"
         f" --seed {test_args.seed} --print-performance-report"
         f" --max-tests {options.max_tests} --out-dir {test_args.test_dir}"
-        f" --path-selection {test_args.strategy} --stop-metric MAX_STATEMENT_COVERAGE"
+        f" --path-selection {test_args.strategy} --stop-metric MAX_NODE_COVERAGE"
         f" --track-coverage STATEMENTS"
         f"{test_args.extra_args} {test_args.p4_program}"
     )
@@ -214,9 +224,10 @@ def run_strategies_for_max_tests(options, test_args):
     # TODO: Use result
     custom_env = os.environ.copy()
     # Some executions may need a lot of memory.
-    # custom_env["GC_INITIAL_HEAP_SIZE"] = "30G"
-    # custom_env["GC_MAXIMUM_HEAP_SIZE"] = "50G"
-    testutils.exec_process(cmd, env=custom_env, capture_output=True)
+    if options.large_memory:
+        custom_env["GC_INITIAL_HEAP_SIZE"] = "30G"
+        custom_env["GC_MAXIMUM_HEAP_SIZE"] = "50G"
+    testutils.exec_process(cmd, env=custom_env, capture_output=True, timeout=3600)
     end_timestamp = datetime.datetime.now()
 
     statements_cov, timestamps = collect_data_from_folder(test_args.test_dir, options.test_backend)
@@ -272,6 +283,7 @@ def main(args, extra_args):
     options.test_backend = args.test_backend.upper()
     options.extra_args = extra_args
     options.test_mode = args.test_mode.upper()
+    options.large_memory = args.large_memory
 
     # Create the output directory, if it does not exist.
     testutils.check_and_create_dir(options.out_dir)
@@ -290,6 +302,11 @@ def main(args, extra_args):
         options.target = "tofino"
         options.arch = "tna"
         options.test_backend = "PTF"
+
+    if options.test_mode == "DPDK":
+        options.target = "dpdk"
+        options.arch = "pna"
+        options.test_backend = "METADATA"
 
     # 7189 is an example of a good seed, which gets cov 1 with less than 100 tests
     # in random access stack.

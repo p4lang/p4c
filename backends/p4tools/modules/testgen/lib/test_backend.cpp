@@ -136,8 +136,8 @@ bool TestBackEnd::run(const FinalState &state) {
         P4::Coverage::printCoverageReport(coverableNodes, visitedNodes);
         printPerformanceReport(false);
 
-        // If MAX_STATEMENT_COVERAGE is enabled, terminate early if we hit max coverage already.
-        if (TestgenOptions::get().stopMetric == "MAX_STATEMENT_COVERAGE" && coverage == 1.0) {
+        // If MAX_NODE_COVERAGE is enabled, terminate early if we hit max node coverage already.
+        if (TestgenOptions::get().stopMetric == "MAX_NODE_COVERAGE" && coverage == 1.0) {
             return true;
         }
         return needsToTerminate(testCount);
