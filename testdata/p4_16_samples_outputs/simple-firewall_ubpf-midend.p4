@@ -1,11 +1,10 @@
 #include <core.p4>
 #include <ubpf_model.p4>
 
-typedef bit<48> EthernetAddress;
 header Ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header Ipv4_t {
@@ -233,4 +232,3 @@ control dprs(packet_out packet, in Headers_t headers) {
 }
 
 ubpf<Headers_t, metadata>(prs(), pipe(), dprs()) main;
-

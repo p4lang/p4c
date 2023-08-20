@@ -30,7 +30,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     @name("cIngress.tmp_0") bool tmp_0;
     @name("cIngress.meta") psa_ingress_output_metadata_t meta_0;
     @name("cIngress.egress_port") PortId_t egress_port_0;
-    @noWarnUnused @name(".send_to_port") action send_to_port_0() {
+    @noWarn("unused") @name(".send_to_port") action send_to_port_0() {
         meta_0 = ostd;
         egress_port_0 = (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr;
         meta_0.drop = false;
@@ -75,8 +75,5 @@ control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_met
 }
 
 IngressPipeline<headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), cIngress(), IngressDeparserImpl()) ip;
-
 EgressPipeline<headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), cEgress(), EgressDeparserImpl()) ep;
-
 PSA_Switch<headers_t, metadata_t, headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

@@ -30,7 +30,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     @name("cIngress.egress_port") PortId_t egress_port_0;
     @name("cIngress.meta") psa_ingress_output_metadata_t meta_1;
     @name("cIngress.egress_port") PortId_t egress_port_3;
-    @noWarnUnused @name(".send_to_port") action send_to_port_1() {
+    @noWarn("unused") @name(".send_to_port") action send_to_port_1() {
         meta_0 = ostd;
         egress_port_0 = (PortId_t)32w0xfffffffa;
         meta_0.drop = false;
@@ -38,7 +38,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
         meta_0.egress_port = egress_port_0;
         ostd = meta_0;
     }
-    @noWarnUnused @name(".send_to_port") action send_to_port_2() {
+    @noWarn("unused") @name(".send_to_port") action send_to_port_2() {
         meta_1 = ostd;
         egress_port_3 = (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr;
         meta_1.drop = false;
@@ -64,7 +64,7 @@ parser EgressParserImpl(packet_in buffer, out headers_t hdr, inout metadata_t us
 
 control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
     @name("cEgress.meta") psa_egress_output_metadata_t meta_5;
-    @noWarnUnused @name(".egress_drop") action egress_drop_0() {
+    @noWarn("unused") @name(".egress_drop") action egress_drop_0() {
         meta_5 = ostd;
         meta_5.drop = true;
         ostd = meta_5;
@@ -108,8 +108,5 @@ control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_met
 }
 
 IngressPipeline<headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), cIngress(), IngressDeparserImpl()) ip;
-
 EgressPipeline<headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), cEgress(), EgressDeparserImpl()) ep;
-
 PSA_Switch<headers_t, metadata_t, headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

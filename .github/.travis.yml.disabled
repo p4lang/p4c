@@ -23,13 +23,10 @@ cache:
 env:
   - CTEST_PARALLEL_LEVEL=4
     UNIFIED=ON
-    ENABLE_GMP=ON
   - CTEST_PARALLEL_LEVEL=4
     UNIFIED=OFF
-    ENABLE_GMP=ON
   - CTEST_PARALLEL_LEVEL=4
     UNIFIED=ON
-    ENABLE_GMP=OFF
 
 before_install:
   - tools/install_os_deps.sh
@@ -40,8 +37,8 @@ install:
   # To flush out issues with unified vs. non-unified builds, do a non-unified
   # build before continuing with the rest, which produces a unified build.
   # This is done here on MacOS; for Linux, this is done in Dockerfile.
-  - if [[ $TRAVIS_OS_NAME == 'linux' ]] ; then docker build --network ccache_network -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=$UNIFIED --build-arg ENABLE_GMP=$ENABLE_GMP . ; fi
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]] ; then ./bootstrap.sh -DCMAKE_BUILD_TYPE=RELEASE -DENABLE_UNIFIED_COMPILATION=$UNIFIED -DENABLE_GMP=$ENABLE_GMP && cd build && make -j2; fi
+  - if [[ $TRAVIS_OS_NAME == 'linux' ]] ; then docker build --network ccache_network -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=$UNIFIED . ; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]] ; then ./bootstrap.sh -DCMAKE_BUILD_TYPE=RELEASE -DENABLE_UNIFIED_COMPILATION=$UNIFIED && cd build && make -j2; fi
 
 script:
   # run with sudo (...) --privileged so that we can create network namespaces for the ebpf tests
@@ -57,6 +54,6 @@ jobs:
       os: linux
       install:
         - tools/start_ccache
-        - docker build --network ccache_network -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=$UNIFIED --build-arg ENABLE_GMP=$ENABLE_GMP --build-arg VALIDATION=ON . || { echo "Building Gauntlet failed." ; travis_terminate 0; }
+        - docker build --network ccache_network -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=$UNIFIED --build-arg VALIDATION=ON . || { echo "Building Gauntlet failed." ; travis_terminate 0; }
       script:
-        - docker run -w /gauntlet p4c python3.6 -m pytest test.py -vrf -k "test_p4c" -n $CTEST_PARALLEL_LEVEL --suppress-crashes
+        - docker run -w /gauntlet p4c python3 -m pytest test.py -vrf -k "test_p4c" -n $CTEST_PARALLEL_LEVEL --suppress-crashes

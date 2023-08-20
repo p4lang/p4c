@@ -1,0 +1,28 @@
+issue3045.p4(16): [--Werror=type-error] error: f
+        f(r, 8w2);
+        ^^^^^^^^^
+  ---- Actual error:
+issue3045.p4(13): Cannot cast implicitly type 'bool' to type 'bit<8>'
+      register<bool>(1) r;
+               ^^^^
+  ---- Originating from:
+issue3045.p4(16): Type of argument 'r' (register<...>) does not match type of parameter 'r' (register<...>)
+          f(r, 8w2);
+            ^
+issue3045.p4(13)
+      register<bool>(1) r;
+      ^^^^^^^^^^^^^^
+issue3045.p4(8)
+  void f<T>(register<T> r, in T t) {
+                        ^
+issue3045.p4(8)
+  void f<T>(register<T> r, in T t) {
+            ^^^^^^^^^^^
+  Where 'T' is bound to 'bit<8>'
+  ---- Originating from:
+issue3045.p4(8): Function type 'f' does not match invocation type '<Method call>'
+  void f<T>(register<T> r, in T t) {
+       ^
+issue3045.p4(16)
+          f(r, 8w2);
+          ^^^^^^^^^

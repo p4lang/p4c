@@ -12,7 +12,7 @@ struct metadata {
 }
 
 struct headers {
-    @name(".hdr2") 
+    @name(".hdr2")
     hdr2_t hdr2;
 }
 
@@ -42,7 +42,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.hdr2.f1: exact @name("hdr2.f1") ;
+            hdr.hdr2.f1: exact @name("hdr2.f1");
         }
         size = 64;
         default_action = NoAction();
@@ -69,4 +69,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

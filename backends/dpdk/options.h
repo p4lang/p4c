@@ -14,24 +14,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef BACKENDS_DPDK_PSA_SWITCH_OPTIONS_H_
-#define BACKENDS_DPDK_PSA_SWITCH_OPTIONS_H_
+#ifndef BACKENDS_DPDK_OPTIONS_H_
+#define BACKENDS_DPDK_OPTIONS_H_
 
 #include "backends/dpdk/midend.h"
 
 namespace DPDK {
 
 class DpdkOptions : public CompilerOptions {
-  public:
+ public:
     cstring bfRtSchema = "";
-    // file to output to
+    // File to output to.
     cstring outputFile = nullptr;
-    // file to ouput context Json to
+    // File to output TDI JSON to.
+    cstring tdiFile = "";
+    // File to output context JSON to.
     cstring ctxtFile = "";
-    // read from json
+    // File to output the TDI builder configuration to.
+    cstring tdiBuilderConf = "";
+    // Read from JSON.
     bool loadIRFromJson = false;
-    // Compilation command line
-    static cstring DpdkCompCmd;
+    // Enable/disable Egress pipeline in PSA.
+    bool enableEgress = false;
 
     DpdkOptions() {
         registerOption(
@@ -43,29 +47,68 @@ class DpdkOptions : public CompilerOptions {
                 return false;
             },
             "[Dpdk back-end] Lists exact name of all midend passes.\n");
-        registerOption("--bf-rt-schema", "file",
-                [this](const char *arg) { bfRtSchema = arg; return true; },
-                "Generate and write BF-RT JSON schema to the specified file");
-        registerOption("-o", "outfile",
-                [this](const char* arg) { outputFile = arg; return true; },
-                "Write output to outfile");
-        registerOption("--context", "file",
-                [this](const char *arg) { ctxtFile = arg; return true; },
-                "Generate and write context JSON to the specified file");
-        registerOption("--fromJSON", "file",
-                [this](const char* arg) { loadIRFromJson = true; file = arg; return true; },
-                "Use IR representation from JsonFile dumped previously,"\
-                "the compilation starts with reduced midEnd.");
+        registerOption(
+            "--enableEgress", nullptr,
+            [this](const char *) {
+                enableEgress = true;
+                return true;
+            },
+            "[Dpdk back-end] Enable egress pipeline's codegen\n", OptionFlags::Hide);
+
+        registerOption(
+            "--bf-rt-schema", "file",
+            [this](const char *arg) {
+                bfRtSchema = arg;
+                return true;
+            },
+            "Generate and write BF-RT JSON schema to the specified file");
+        registerOption(
+            "-o", "outfile",
+            [this](const char *arg) {
+                outputFile = arg;
+                return true;
+            },
+            "Write output to outfile");
+        registerOption(
+            "--tdi-builder-conf", "file",
+            [this](const char *arg) {
+                tdiBuilderConf = arg;
+                return true;
+            },
+            "Generate and write the TDI builder configuration to the specified file");
+        registerOption(
+            "--tdi", "file",
+            [this](const char *arg) {
+                tdiFile = arg;
+                return true;
+            },
+            "Generate and write TDI JSON to the specified file");
+        registerOption(
+            "--context", "file",
+            [this](const char *arg) {
+                ctxtFile = arg;
+                return true;
+            },
+            "Generate and write context JSON to the specified file");
+        registerOption(
+            "--fromJSON", "file",
+            [this](const char *arg) {
+                loadIRFromJson = true;
+                file = arg;
+                return true;
+            },
+            "Use IR representation from JsonFile dumped previously,"
+            "the compilation starts with reduced midEnd.");
     }
 
     /// Process the command line arguments and set options accordingly.
-    std::vector<const char*>* process(int argc, char* const argv[]) override;
+    std::vector<const char *> *process(int argc, char *const argv[]) override;
 
-    const char* getIncludePath() override;
+    const char *getIncludePath() override;
 };
 
 using DpdkContext = P4CContextWithOptions<DpdkOptions>;
 
-}; // namespace DPDK
+}  // namespace DPDK
 
-#endif /* BACKENDS_DPDK_PSA_SWITCH_OPTIONS_H_ */
+#endif /* BACKENDS_DPDK_OPTIONS_H_ */

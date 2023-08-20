@@ -48,8 +48,14 @@ macro (p4c_add_library name symbol var)
   endif()
 endmacro(p4c_add_library)
 
-# Add files with the appropriate path to the list of linted files
-macro(add_cpplint_files dir filelist)
+# Add files with the appropriate path to the list of cpplint-linted files.
+function(add_cpplint_files dir filelist)
+  if (NOT filelist)
+    message(WARNING "Input file list is empty. Returning.")
+    return()
+  endif()
+  # Initialize an empty list.
+  set (__cpplintFileList "")
   foreach(__f ${filelist})
     string(REGEX MATCH "^/.*" abs_path "${__f}")
     if (NOT ${abs_path} EQUAL "")
@@ -58,12 +64,71 @@ macro(add_cpplint_files dir filelist)
       list (APPEND __cpplintFileList "${dir}/${__f}")
     endif()
   endforeach(__f)
-  set (CPPLINT_FILES ${CPPLINT_FILES} ${__cpplintFileList} PARENT_SCOPE)
-endmacro(add_cpplint_files)
+
+  # Get the global cpplint property and append to it.
+  get_property(CPPLINT_FILES GLOBAL PROPERTY cpplint-files)
+  list (APPEND CPPLINT_FILES "${__cpplintFileList}")
+  list(REMOVE_DUPLICATES CPPLINT_FILES)
+  set_property(GLOBAL PROPERTY cpplint-files "${CPPLINT_FILES}")
+endfunction(add_cpplint_files)
+
+# Add files with the appropriate path to the list of clang-format-linted files.
+function(add_clang_format_files dir filelist)
+  if (NOT filelist)
+    message(WARNING "Input file list is empty. Returning.")
+    return()
+  endif()
+  # Initialize an empty list.
+  set (__clangFormatFileList "")
+  foreach(__f ${filelist})
+    string(REGEX MATCH "^/.*" abs_path "${__f}")
+    if (NOT ${abs_path} EQUAL "")
+      list (APPEND __clangFormatFileList "${__f}")
+    else()
+      list (APPEND __clangFormatFileList "${dir}/${__f}")
+    endif()
+  endforeach(__f)
+
+  # Get the global clang-format property and append to it.
+  get_property(CLANG_FORMAT_FILES GLOBAL PROPERTY clang-format-files)
+  list (APPEND CLANG_FORMAT_FILES "${__clangFormatFileList}")
+  list(REMOVE_DUPLICATES CLANG_FORMAT_FILES)
+  set_property(GLOBAL PROPERTY clang-format-files "${CLANG_FORMAT_FILES}")
+endfunction(add_clang_format_files)
+
+# Add files with the appropriate path to the list of black-linted files.
+function(add_black_files dir filelist)
+  if (NOT filelist)
+    message(WARNING "Input file list is empty. Returning.")
+    return()
+  endif()
+  # Initialize an empty list.
+  set (__blackFileList "")
+  foreach(__f ${filelist})
+    string(REGEX MATCH "^/.*" abs_path "${__f}")
+    if (NOT ${abs_path} EQUAL "")
+      list (APPEND __blackFileList "${__f}")
+    else()
+      list (APPEND __blackFileList "${dir}/${__f}")
+    endif()
+  endforeach(__f)
+
+  # Get the global clang-format property and append to it.
+  get_property(BLACK_FILES GLOBAL PROPERTY black-files)
+  list (APPEND BLACK_FILES "${__blackFileList}")
+  list(REMOVE_DUPLICATES BLACK_FILES)
+  set_property(GLOBAL PROPERTY black-files "${BLACK_FILES}")
+endfunction(add_black_files)
 
 macro(p4c_test_set_name name tag alias)
   set(${name} ${tag}/${alias})
 endmacro(p4c_test_set_name)
+
+function(append value)
+  foreach(variable ${ARGN})
+    set(${variable} "${${variable}} ${value}" PARENT_SCOPE)
+  endforeach(variable)
+endfunction()
 
 # add a single test to the testsuite
 # Arguments:
@@ -341,3 +406,11 @@ macro(p4c_add_xfail_reason tag reason)
   endforeach()
 endmacro(p4c_add_xfail_reason)
 
+# Effectively emulates fetchcontent_makeavailable but does not add the module to install.
+macro(fetchcontent_makeavailable_but_exclude_install content)
+  FetchContent_GetProperties(${content})
+  if(NOT ${content}_POPULATED)
+    FetchContent_Populate(${content})
+    add_subdirectory(${${content}_SOURCE_DIR} ${${content}_BINARY_DIR} EXCLUDE_FROM_ALL)
+  endif()
+endmacro(fetchcontent_makeavailable_but_exclude_install)

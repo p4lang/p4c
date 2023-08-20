@@ -6,12 +6,18 @@ on:
       - main
     paths:
       - 'Version.txt'
+
+# Cancel any preceding run on the pull request.
+concurrency:
+  group: release-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Get version
         run: |

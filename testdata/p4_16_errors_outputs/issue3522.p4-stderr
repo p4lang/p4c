@@ -1,0 +1,3 @@
+issue3522.p4(10): [--Werror=type-error] error: v.field.lastIndex: 'lastIndex' for stacks can only be used in a parser
+    bit<32> t = v.field.lastIndex;
+                ^^^^^^^^^^^^^^^^^

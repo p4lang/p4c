@@ -3,9 +3,6 @@ add tab1 600 ethernet.dstAddr:0xa1a2a3a4a5a6 act(port:2) = A
 add tab1 400 ethernet.dstAddr:0xb1b2b3b4b5b6 act(port:3) = B
 add tab1 200 ethernet.dstAddr:0xc1c2c3c4c5c6 act(port:5) = C
 
-expect 2
-expect 3
-expect 5
 check_counter cnt($A)
 packet 0 a1a2a3a4a5a6 0000
 wait

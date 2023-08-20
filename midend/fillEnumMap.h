@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_FILLENUMMAP_H_
-#define _MIDEND_FILLENUMMAP_H_
+#ifndef MIDEND_FILLENUMMAP_H_
+#define MIDEND_FILLENUMMAP_H_
 
 #include "convertEnums.h"
 
@@ -23,15 +23,18 @@ namespace P4 {
 
 class FillEnumMap : public Transform {
  public:
-    std::map<const IR::Type_Enum*, EnumRepresentation*> repr;
-    ChooseEnumRepresentation* policy;
-    TypeMap* typeMap;
-    FillEnumMap(ChooseEnumRepresentation* policy, TypeMap* typeMap)
-            : policy(policy), typeMap(typeMap)
-    { CHECK_NULL(policy); CHECK_NULL(typeMap); setName("FillEnumMap"); }
-    const IR::Node* preorder(IR::Type_Enum* type) override;
+    ConvertEnums::EnumMapping repr;
+    ChooseEnumRepresentation *policy;
+    TypeMap *typeMap;
+    FillEnumMap(ChooseEnumRepresentation *policy, TypeMap *typeMap)
+        : policy(policy), typeMap(typeMap) {
+        CHECK_NULL(policy);
+        CHECK_NULL(typeMap);
+        setName("FillEnumMap");
+    }
+    const IR::Node *preorder(IR::Type_Enum *type) override;
 };
 
 }  // namespace P4
 
-#endif /* _MIDEND_FILLENUMMAP_H_ */
+#endif /* MIDEND_FILLENUMMAP_H_ */

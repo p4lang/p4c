@@ -1,20 +1,21 @@
-#include "ir/ir.h"
-#include "options.h"
 #include "dpdkProgramStructure.h"
 
-bool ParseDpdkArchitecture::preorder(const IR::ToplevelBlock* block) {
+#include "ir/ir.h"
+#include "options.h"
+
+bool ParseDpdkArchitecture::preorder(const IR::ToplevelBlock *block) {
     /// Blocks are not in IR tree, use a custom visitor to traverse
     for (auto it : block->constantValue) {
-        if (it.second->is<IR::Block>())
-            visit(it.second->getNode());
+        if (it.second->is<IR::Block>()) visit(it.second->getNode());
     }
     return false;
 }
 
 void ParseDpdkArchitecture::parse_pna_block(const IR::PackageBlock *block) {
+    structure->p4arch = "pna";
     auto p = block->findParameterValue("main_parser");
     if (p == nullptr) {
-        ::error("Package %1% has no parameter named 'main_parser'", block);
+        ::error(ErrorType::ERR_MODEL, "Package %1% has no parameter named 'main_parser'", block);
         return;
     }
     auto parser = p->to<IR::ParserBlock>();
@@ -33,22 +34,25 @@ void ParseDpdkArchitecture::parse_pna_block(const IR::PackageBlock *block) {
 }
 
 void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
+    structure->p4arch = "psa";
     auto pkg = block->findParameterValue("ingress");
     if (pkg == nullptr) {
-        ::error("Package %1% has no parameter named 'ingress'", block);
+        ::error(ErrorType::ERR_MODEL, "Package %1% has no parameter named 'ingress'", block);
         return;
     }
     if (auto ingress = pkg->to<IR::PackageBlock>()) {
         auto p = ingress->findParameterValue("ip");
         if (!p) {
-            ::error("'ingress' package %1% has no parameter named 'ip'", block);
+            ::error(ErrorType::ERR_MODEL, "'ingress' package %1% has no parameter named 'ip'",
+                    block);
             return;
         }
         auto parser = p->to<IR::ParserBlock>();
         structure->parsers.emplace("IngressParser", parser->container);
         p = ingress->findParameterValue("ig");
         if (!p) {
-            ::error("'ingress' package %1% has no parameter named 'ig'", block);
+            ::error(ErrorType::ERR_MODEL, "'ingress' package %1% has no parameter named 'ig'",
+                    block);
             return;
         }
         auto pipeline = p->to<IR::ControlBlock>();
@@ -56,7 +60,8 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
         structure->pipeline_controls.emplace(pipeline->container->name);
         p = ingress->findParameterValue("id");
         if (!p) {
-            ::error("'ingress' package %1% has no parameter named 'id'", block);
+            ::error(ErrorType::ERR_MODEL, "'ingress' package %1% has no parameter named 'id'",
+                    block);
             return;
         }
         auto deparser = p->to<IR::ControlBlock>();
@@ -67,14 +72,16 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
     if (auto egress = pkg->to<IR::PackageBlock>()) {
         auto p = egress->findParameterValue("ep");
         if (!p) {
-            ::error("'egress' package %1% has no parameter named 'ep'", block);
+            ::error(ErrorType::ERR_MODEL, "'egress' package %1% has no parameter named 'ep'",
+                    block);
             return;
         }
         auto parser = p->to<IR::ParserBlock>();
         structure->parsers.emplace("EgressParser", parser->container);
         p = egress->findParameterValue("eg");
         if (!p) {
-            ::error("'egress' package %1% has no parameter named 'eg'", block);
+            ::error(ErrorType::ERR_MODEL, "'egress' package %1% has no parameter named 'eg'",
+                    block);
             return;
         }
         auto pipeline = p->to<IR::ControlBlock>();
@@ -82,7 +89,8 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
         structure->pipeline_controls.emplace(pipeline->container->name);
         p = egress->findParameterValue("ed");
         if (!p) {
-            ::error("'egress' package %1% has no parameter named 'ed'", block);
+            ::error(ErrorType::ERR_MODEL, "'egress' package %1% has no parameter named 'ed'",
+                    block);
             return;
         }
         auto deparser = p->to<IR::ControlBlock>();
@@ -91,21 +99,21 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
     }
 }
 
-bool ParseDpdkArchitecture::preorder(const IR::PackageBlock* block) {
+bool ParseDpdkArchitecture::preorder(const IR::PackageBlock *block) {
     auto &options = DPDK::DpdkContext::get().options();
     if (options.arch == "psa" ||
         block->instanceType->to<IR::Type_Package>()->name == "PSA_Switch") {
         parse_psa_block(block);
     } else if (options.arch == "pna" ||
-        block->instanceType->to<IR::Type_Package>()->name == "PNA_NIC") {
+               block->instanceType->to<IR::Type_Package>()->name == "PNA_NIC") {
         parse_pna_block(block);
     } else {
-        ::error("Unknown architecture %1%", options.arch);
+        ::error(ErrorType::ERR_MODEL, "Unknown architecture %1%", options.arch);
     }
     return false;
 }
 
-bool InspectDpdkProgram::isHeaders(const IR::Type_StructLike* st) {
+bool InspectDpdkProgram::isHeaders(const IR::Type_StructLike *st) {
     bool result = false;
     for (auto f : st->fields) {
         if (f->type->is<IR::Type_Header>() || f->type->is<IR::Type_Stack>()) {
@@ -146,7 +154,7 @@ void InspectDpdkProgram::addHeaderInstance(const IR::Type_StructLike *st, cstrin
         structure->header_unions.emplace(name, inst);
 }
 
-void InspectDpdkProgram::addTypesAndInstances(const IR::Type_StructLike* type, bool isHeader) {
+void InspectDpdkProgram::addTypesAndInstances(const IR::Type_StructLike *type, bool isHeader) {
     LOG5("Adding type " << type->toString() << " and isHeader " << isHeader);
     for (auto f : type->fields) {
         LOG5("Iterating through field " << f->toString());
@@ -177,13 +185,13 @@ void InspectDpdkProgram::addTypesAndInstances(const IR::Type_StructLike* type, b
                     if (auto h_type = uft->to<IR::Type_Header>()) {
                         addHeaderInstance(h_type, uf->controlPlaneName());
                     } else {
-                        ::error(ErrorType::ERR_INVALID,
-                                "Type %1% cannot contain type %2%", ft, uft);
+                        ::error(ErrorType::ERR_INVALID, "Type %1% cannot contain type %2%", ft,
+                                uft);
                         return;
                     }
                 }
                 structure->header_union_types.emplace(type->getName(),
-                                                  type->to<IR::Type_HeaderUnion>());
+                                                      type->to<IR::Type_HeaderUnion>());
                 addHeaderInstance(type, f->controlPlaneName());
             } else {
                 LOG5("Adding struct with type " << type);
@@ -238,52 +246,52 @@ bool InspectDpdkProgram::isStandardMetadata(cstring ptName) {
             !strcmp(ptName, "psa_egress_output_metadata_t"));
 }
 
-bool InspectDpdkProgram::preorder(const IR::Declaration_Variable* dv) {
-        auto ft = typeMap->getType(dv->getNode(), true);
-        cstring scalarsName = refMap->newName("scalars");
+bool InspectDpdkProgram::preorder(const IR::Declaration_Variable *dv) {
+    auto ft = typeMap->getType(dv->getNode(), true);
+    cstring scalarsName = refMap->newName("scalars");
 
-        if (ft->is<IR::Type_Bits>()) {
-            LOG5("Adding " << dv << " into scalars map");
-            structure->scalars.emplace(scalarsName, dv);
-        } else if (ft->is<IR::Type_Boolean>()) {
-            LOG5("Adding " << dv << " into scalars map");
-            structure->scalars.emplace(scalarsName, dv);
-        } else {
-            BUG("Unhandled type %1%", dv);
-        }
+    if (ft->is<IR::Type_Bits>()) {
+        LOG5("Adding " << dv << " into scalars map");
+        structure->scalars.emplace(scalarsName, dv);
+    } else if (ft->is<IR::Type_Boolean>()) {
+        LOG5("Adding " << dv << " into scalars map");
+        structure->scalars.emplace(scalarsName, dv);
+    } else {
+        BUG("Unhandled type %1%", dv);
+    }
 
-        return false;
+    return false;
 }
 
 // This visitor only visits the parameter in the statement from architecture.
-bool InspectDpdkProgram::preorder(const IR::Parameter* param) {
+bool InspectDpdkProgram::preorder(const IR::Parameter *param) {
     auto ft = typeMap->getType(param->getNode(), true);
     LOG3("add param " << ft);
     // only convert parameters that are IR::Type_StructLike
     if (!ft->is<IR::Type_StructLike>()) {
-      return false;
+        return false;
     }
     auto st = ft->to<IR::Type_StructLike>();
     // check if it is psa specific standard metadata
     cstring ptName = param->type->toString();
     // parameter must be a type that we have not seen before
     if (structure->hasVisited(st)) {
-      LOG5("Parameter is visited, returning");
-      return false;
+        LOG5("Parameter is visited, returning");
+        return false;
     }
     if (isStandardMetadata(ptName)) {
-      LOG5("Parameter is psa standard metadata");
-      addHeaderType(st);
-      // remove _t from type name
-      cstring headerName = ptName.exceptLast(2);
-      addHeaderInstance(st, headerName);
+        LOG5("Parameter is psa standard metadata");
+        addHeaderType(st);
+        // remove _t from type name
+        cstring headerName = ptName.exceptLast(2);
+        addHeaderInstance(st, headerName);
     }
     auto isHeader = isHeaders(st);
     addTypesAndInstances(st, isHeader);
     return false;
 }
 
-bool InspectDpdkProgram::preorder(const IR::P4Action* action) {
+bool InspectDpdkProgram::preorder(const IR::P4Action *action) {
     structure->actions.emplace(action->name, action);
     return false;
 }

@@ -1,6 +1,6 @@
 # Options to control unified compilation. More information is available in the
 # documentation for `build_unified`.
-OPTION (ENABLE_UNIFIED_COMPILATION "Merge source files to speed up compilation" ON)
+OPTION (ENABLE_UNIFIED_COMPILATION "Merge source files to speed up compilation" OFF)
 set(UNIFIED_SOURCE_CHUNK_SIZE "10" CACHE STRING "Target unified compilation chunk size (an integer or ALL)")
 
 # Helper function: compute `divided / divisor`, round up to the next highest
@@ -82,6 +82,10 @@ endfunction(write_chunk_file)
 #     dependency tracking, while the NONUNIFIED property allows callers
 #     fine-grained control over which files get unified.
 function(build_unified sources)
+  message(
+    WARNING
+    "build_unified has been deprecated. Please use CMake's unity builds instead."
+  )
   # The ENABLE_UNIFIED_COMPILATION option is a global switch that turns this
   # feature off. By just returning here, `sources` remains unchanged, and we'll
   # build each file in it individually.

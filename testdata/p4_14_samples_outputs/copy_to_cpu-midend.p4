@@ -65,7 +65,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @defaultonly NoAction_2();
         }
         key = {
-            standard_metadata.instance_type: exact @name("standard_metadata.instance_type") ;
+            standard_metadata.instance_type: exact @name("standard_metadata.instance_type");
         }
         size = 16;
         default_action = NoAction_2();
@@ -79,7 +79,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
     @name(".do_copy_to_cpu") action do_copy_to_cpu() {
-        clone_preserving_field_list(CloneType.I2E, 32w250, 8w0);
+        clone_preserving_field_list(CloneType.I2E, 32w250, 8w1);
     }
     @name(".copy_to_cpu") table copy_to_cpu_0 {
         actions = {

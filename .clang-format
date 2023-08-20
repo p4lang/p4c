@@ -1,0 +1,37 @@
+# SPDX-License-Identifier: GPL-2.0
+#
+# clang-format configuration file. Intended for clang-format >= 4.
+#
+# For more information, see:
+#
+#   Documentation/process/clang-format.rst
+#   https://clang.llvm.org/docs/ClangFormat.html
+#   https://clang.llvm.org/docs/ClangFormatStyleOptions.html
+#
+---
+BasedOnStyle: Google
+IndentWidth: 4
+FixNamespaceComments: true
+ColumnLimit: 100
+SpacesBeforeTrailingComments: 2
+AccessModifierOffset: -3
+
+IncludeBlocks: Regroup
+# Force pointers to the type for C++.
+DerivePointerAlignment: false
+PointerAlignment: Right
+Standard: c++17
+IncludeCategories:
+# Matches common headers first and sorts them before project includes
+- Regex: '^<.+/.*\.h>'
+  Priority: 2000
+- Regex: '^<.+/.*>'
+  Priority: 4000
+- Regex: '^<.*\.h>'
+  Priority: 1000
+- Regex: '^<.*>'
+  Priority: 3000
+- Regex: 'testgen/.*'
+  Priority: 6000
+- Regex: '.*'
+  Priority: 5000

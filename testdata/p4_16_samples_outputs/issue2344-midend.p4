@@ -20,12 +20,14 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @name("ingress.simple_action") action simple_action() {
         tmp1_0.setInvalid();
-        tmp1_0.a = (tmp1_0.a != 32w10 ? tmp1_0.a + 32w10 : tmp1_0.a);
+        if (tmp1_0.a != 32w10) {
+            tmp1_0.a = tmp1_0.a + 32w10;
+        }
         h.h.a = tmp1_0.a;
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
-            h.h.b: exact @name("key") ;
+            h.h.b: exact @name("key");
         }
         actions = {
             simple_action();
@@ -66,4 +68,3 @@ control deparser(packet_out b, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

@@ -3,7 +3,7 @@
 #include <v1model.p4>
 
 typedef bit<48> EthD_t;
-@p4runtime_translation("p4.org/psa/v1/EthT_t" , 48) type bit<48> EthT_t;
+@p4runtime_translation("p4.org/psa/v1/EthT_t" , 48) @custom_annotation_0 @custom_annotation_1("my annon") type bit<48> EthT_t;
 typedef bit<8> CustomD_t;
 type bit<8> CustomT_t;
 typedef CustomD_t CustomDD_t;
@@ -147,4 +147,3 @@ control computeChecksum(inout headers_t hdr, inout meta_t meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

@@ -16,12 +16,12 @@ struct B {
 }
 
 struct metadata {
-    @name(".meta") 
+    @name(".meta")
     B meta;
 }
 
 struct headers {
-    @name(".A") 
+    @name(".A")
     A_0 A;
 }
 
@@ -36,7 +36,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 @name(".B") counter<bit<10>>(32w1024, CounterType.packets_and_bytes) B_1;
-
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".A") action A_3(bit<8> val, bit<9> port, bit<10> idx) {
         hdr.A.b1 = val;
@@ -55,7 +54,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.A.A: exact @name("A.A") ;
+            hdr.A.A: exact @name("A.A");
         }
         default_action = NoAction();
     }
@@ -93,4 +92,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

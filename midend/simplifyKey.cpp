@@ -15,37 +15,34 @@ limitations under the License.
 */
 
 #include "simplifyKey.h"
+
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/sideEffects.h"
 
 namespace P4 {
 
-bool IsValid::isSimple(const IR::Expression* expression, const Visitor::Context *) {
-    if (!expression->is<IR::MethodCallExpression>())
-        return false;
+bool IsValid::isSimple(const IR::Expression *expression, const Visitor::Context *) {
+    if (!expression->is<IR::MethodCallExpression>()) return false;
     auto mi = MethodInstance::resolve(expression->to<IR::MethodCallExpression>(), refMap, typeMap);
-    if (!mi->is<BuiltInMethod>())
-        return false;
+    if (!mi->is<BuiltInMethod>()) return false;
     auto bi = mi->to<BuiltInMethod>();
     if (bi->name.name == IR::Type_Header::isValid) {
         // isValid() is simple when applied to headers, but complicated when applied to unions.
         auto baseType = typeMap->getType(bi->appliedTo, true);
-        if (baseType->is<IR::Type_HeaderUnion>())
-            return false;
+        if (baseType->is<IR::Type_HeaderUnion>()) return false;
         return true;
     }
     return false;
 }
 
-const IR::Node* DoSimplifyKey::postorder(IR::KeyElement* element) {
+const IR::Node *DoSimplifyKey::postorder(IR::KeyElement *element) {
     LOG1("Key element " << element);
     bool simple = key_policy->isSimple(element->expression, getContext());
-    if (simple)
-        return element;
+    if (simple) return element;
 
     auto table = findOrigCtxt<IR::P4Table>();
     CHECK_NULL(table);
-    TableInsertions* insertions;
+    TableInsertions *insertions;
     auto it = toInsert.find(table);
     if (it == toInsert.end()) {
         insertions = new TableInsertions();
@@ -70,33 +67,28 @@ const IR::Node* DoSimplifyKey::postorder(IR::KeyElement* element) {
     return element;
 }
 
-const IR::Node* DoSimplifyKey::postorder(IR::P4Table* table) {
+const IR::Node *DoSimplifyKey::postorder(IR::P4Table *table) {
     auto insertions = ::get(toInsert, getOriginal<IR::P4Table>());
-    if (insertions == nullptr)
-        return table;
+    if (insertions == nullptr) return table;
 
     auto result = new IR::IndexedVector<IR::Declaration>();
-    for (auto d : insertions->declarations)
-        result->push_back(d);
+    for (auto d : insertions->declarations) result->push_back(d);
     result->push_back(table);
     return result;
 }
 
-const IR::Node* DoSimplifyKey::doStatement(const IR::Statement* statement,
+const IR::Node *DoSimplifyKey::doStatement(const IR::Statement *statement,
                                            const IR::Expression *expression) {
     LOG3("Visiting " << getOriginal());
     HasTableApply hta(refMap, typeMap);
     hta.setCalledBy(this);
     (void)expression->apply(hta);
-    if (hta.table == nullptr)
-        return statement;
+    if (hta.table == nullptr) return statement;
     auto insertions = get(toInsert, hta.table);
-    if (insertions == nullptr)
-        return statement;
+    if (insertions == nullptr) return statement;
 
     auto result = new IR::IndexedVector<IR::StatOrDecl>();
-    for (auto assign : insertions->statements)
-        result->push_back(assign);
+    for (auto assign : insertions->statements) result->push_back(assign);
     result->push_back(statement);
     auto block = new IR::BlockStatement(*result);
     return block;

@@ -150,7 +150,11 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         hdr_0_h2[4].setInvalid();
     }
     @hidden action act() {
-        hdr_0_h2 = hdr.h2;
+        hdr_0_h2[0] = hdr.h2[0];
+        hdr_0_h2[1] = hdr.h2[1];
+        hdr_0_h2[2] = hdr.h2[2];
+        hdr_0_h2[3] = hdr.h2[3];
+        hdr_0_h2[4] = hdr.h2[4];
     }
     @hidden action headerstackopsbmv2l94_0() {
         hdr_0_h2.push_front(1);
@@ -239,7 +243,11 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         hdr_0_h2[4].setInvalid();
     }
     @hidden action act_0() {
-        hdr.h2 = hdr_0_h2;
+        hdr.h2[0] = hdr_0_h2[0];
+        hdr.h2[1] = hdr_0_h2[1];
+        hdr.h2[2] = hdr_0_h2[2];
+        hdr.h2[3] = hdr_0_h2[3];
+        hdr.h2[4] = hdr_0_h2[4];
     }
     @hidden action headerstackopsbmv2l94_1() {
         hdr_0_h2.push_front(1);
@@ -328,13 +336,21 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         hdr_0_h2[4].setInvalid();
     }
     @hidden action act_1() {
-        hdr.h2 = hdr_0_h2;
+        hdr.h2[0] = hdr_0_h2[0];
+        hdr.h2[1] = hdr_0_h2[1];
+        hdr.h2[2] = hdr_0_h2[2];
+        hdr.h2[3] = hdr_0_h2[3];
+        hdr.h2[4] = hdr_0_h2[4];
     }
     @hidden action headerstackopsbmv2l186() {
         hdr.h1.h2_valid_bits[0:0] = 1w1;
     }
     @hidden action headerstackopsbmv2l184() {
-        hdr.h2 = hdr_0_h2;
+        hdr.h2[0] = hdr_0_h2[0];
+        hdr.h2[1] = hdr_0_h2[1];
+        hdr.h2[2] = hdr_0_h2[2];
+        hdr.h2[3] = hdr_0_h2[3];
+        hdr.h2[4] = hdr_0_h2[4];
         hdr.h1.h2_valid_bits = 8w0;
     }
     @hidden action headerstackopsbmv2l189() {
@@ -1015,4 +1031,3 @@ control DeparserI(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
-

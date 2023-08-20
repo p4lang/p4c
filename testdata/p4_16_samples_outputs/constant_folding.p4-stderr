@@ -1,4 +1,4 @@
-constant_folding.p4(95): [--Wwarn=overflow] warning: <<: Shifting 8-bit value with 9
+constant_folding.p4(95): [--Wwarn=overflow] warning: 1 << 9: Shifting 8-bit value with 9
         z = 8w1 << 9;
             ^^^^^^^^
 constant_folding.p4(95): [--Wwarn=mismatch] warning: 8w512: value does not fit in 8 bits

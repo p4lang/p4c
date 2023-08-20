@@ -14,39 +14,38 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _P4_REASSOCIATION_H_
-#define _P4_REASSOCIATION_H_
+#ifndef P4_REASSOCIATION_H_
+#define P4_REASSOCIATION_H_
 
 #include "ir/ir.h"
+#include "ir/visitor.h"
 
 namespace P4 {
 
 /** Implements a pass that reorders associative operations when beneficial.
-  * For example, (a + c0) + c1 is rewritten as a + (c0 + c1) when cs are constants.
-  */
+ * For example, (a + c0) + c1 is rewritten as a + (c0 + c1) when cs are constants.
+ */
 class Reassociation final : public Transform {
  public:
-    Reassociation() { visitDagOnce = true; setName("Reassociation"); }
+    Reassociation() {
+        visitDagOnce = true;
+        setName("Reassociation");
+    }
     using Transform::postorder;
 
-    const IR::Node* reassociate(IR::Operation_Binary* root);
+    const IR::Node *reassociate(IR::Operation_Binary *root);
 
-    const IR::Node* postorder(IR::Add* expr) override
-    { return reassociate(expr); }
-    const IR::Node* postorder(IR::Mul* expr) override
-    { return reassociate(expr); }
-    const IR::Node* postorder(IR::BOr* expr) override
-    { return reassociate(expr); }
-    const IR::Node* postorder(IR::BAnd* expr) override
-    { return reassociate(expr); }
-    const IR::Node* postorder(IR::BXor* expr) override
-    { return reassociate(expr); }
+    const IR::Node *postorder(IR::Add *expr) override { return reassociate(expr); }
+    const IR::Node *postorder(IR::Mul *expr) override { return reassociate(expr); }
+    const IR::Node *postorder(IR::BOr *expr) override { return reassociate(expr); }
+    const IR::Node *postorder(IR::BAnd *expr) override { return reassociate(expr); }
+    const IR::Node *postorder(IR::BXor *expr) override { return reassociate(expr); }
     const IR::BlockStatement *preorder(IR::BlockStatement *bs) override {
-        if (bs->annotations->getSingle("disable_optimization"))
-            prune();
-        return bs; }
+        if (bs->annotations->getSingle("disable_optimization")) prune();
+        return bs;
+    }
 };
 
 }  // namespace P4
 
-#endif /* _P4_REASSOCIATION_H_ */
+#endif /* P4_REASSOCIATION_H_ */

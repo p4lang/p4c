@@ -1,0 +1,3 @@
+issue3813.p4(1): [--Werror=invalid] error: a: optional parameter not allowed here
+bit f(@optional bit a)
+                    ^

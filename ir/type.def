@@ -62,6 +62,42 @@ inline bool operator>>(cstring s, IR::Direction &d) {
 }
 #end
 
+/// This represents a type that can unify with any other type.
+/// It is the original type of Dots (...) expressions.
+/// There is no syntax to represent this type.
+/// Treated like a type variable so that unification can assign it a value.
+class Type_Any : Type, ITypeVar {
+    long declid = nextId++;
+ private:
+    static long nextId;
+ public:
+    cstring getVarName() const override { return "int_" + Util::toString(declid); }
+    int getDeclId() const override { return declid; }
+    dbprint { out << "ANYTYPE/" << declid; }
+    toString { return "ANYTYPE"; }
+    operator== { return declid == a.declid; }
+    static Type_Any get();
+    const Type* getP4Type() const override { return nullptr; }
+}
+
+/// This type is a fragment of another type.
+/// This is used in conjunction with Type_Any to typecheck
+/// expressions containing ... (Dots).
+/// After unification this type replaces Type_Any.
+/// For example:
+/// struct S { bit<32> s; bit<16> t; }
+/// S s = { s = 2, ... };
+/// The type assigned to 'type' by unification will be
+/// Type_Fragment { type = Type_UnknownStruct { t: Type_Bits<15> } }.
+/// In other words, the type of the ... expression is a
+/// fragment of a struct that contains just the field t.
+class Type_Fragment : Type {
+    Type type;
+    dbprint { out << "FRAGMENT(" << type << ")"; }
+    toString { return "FRAGMENT(" + type->toString() + ")"; }
+    const Type* getP4Type() const override { return nullptr; }
+}
+
 /// Represents the type of a type.
 /// For example, in a declaration like
 /// bit<32> x;
@@ -73,7 +109,7 @@ class Type_Type : Type {
     Type type;
     toString { return "Type(" + type->toString() + ")"; }
     dbprint { out << "Type(" << type << ")"; }
-    Type getP4Type() const override { return type; }
+    const Type* getP4Type() const override { return type; }
     validate { BUG_CHECK(!type->is<IR::Type_Type>(), "%1%: nested Type_Type", type); }
 }
 
@@ -175,9 +211,9 @@ class Type_Var : Type_Declaration, ITypeVar {
 /// type unification to discover the correct type for the constants
 /// in some contexts.
 class Type_InfInt : Type, ITypeVar {
-    int declid = nextId++;
+    long declid = nextId++;
  private:
-    static int nextId;
+    static long nextId;
  public:
     cstring getVarName() const override { return "int_" + Util::toString(declid); }
     int getDeclId() const override { return declid; }
@@ -347,7 +383,7 @@ interface Type_Indexed {
     Type at(size_t index) const;
 }
 
-/// Base class for Type_List and Type_Tuple
+/// Base class for Type_List, and Type_Tuple
 abstract Type_BaseList : Type, Type_Indexed {
     optional inline Vector<Type> components;
     validate{ components.check_null(); }
@@ -360,8 +396,9 @@ abstract Type_BaseList : Type, Type_Indexed {
             rv += f->width_bits();
         }
         return rv; }
-    toString{
-        std::string result = "tuple<";
+    cstring asString(const char* name) const {
+        std::string result = name;
+        result += "<";
         bool first = true;
         for (auto t : components) {
             if (!first)
@@ -371,17 +408,36 @@ abstract Type_BaseList : Type, Type_Indexed {
         }
         return result + ">";
     }
+    toString{
+        return asString("baselist");
+    }
 }
 
 /// The type of an expressionList; can be unified with both Type_Tuple and Type_Struct
 class Type_List : Type_BaseList {
-    // In error messages this is shown as if it is a Tuple
     const Type* getP4Type() const override;
+    // shown as a tuple
+    toString{
+        return asString("tuple");
+    }
 }
 
 /// The type of a tuple.
 class Type_Tuple : Type_BaseList {
     const Type* getP4Type() const override;
+    toString{
+        return asString("tuple");
+    }
+}
+
+/// The type of a P4ListExpression.
+class Type_P4List : Type {
+    Type elementType;
+    const Type* getP4Type() const override;
+    toString{
+        std::string result = "list<" + elementType->toString() + ">";
+        return result;
+    }
 }
 
 /// The type of an architectural block.
@@ -398,6 +454,7 @@ abstract Type_ArchBlock : Type_Declaration, IMayBeGenericType, IAnnotated, ISimp
 }
 
 class Type_Package : Type_ArchBlock, IContainer, ISimpleNamespace {
+    Type getType() const override { return this; }
     ParameterList constructorParams;
     Type_Method getConstructorMethodType() const override;
     ParameterList getConstructorParameters() const override { return constructorParams; }
@@ -460,13 +517,24 @@ class Type_Stack : Type_Indexed, Type {
    extern E<T> { ... }
    Type_Specialized represents a type such
    E<bit<32>>
-   baseType is Type_Extern E, arguments is a vector containing Type_Bits(32) */
+   baseType is Type_Name E, arguments is a vector containing Type_Bits(32) */
 class Type_Specialized : Type {
     Type_Name    baseType;
     Vector<Type> arguments;
-    toString{ return baseType->toString() + "<...>"; }
     validate{ arguments->check_null(); }
     const Type* getP4Type() const override;
+    toString{
+        cstring result = baseType->toString() + "<";
+        cstring sep = "";
+        for (auto t : *arguments) {
+            result += sep + t->toString();
+            sep = ", ";
+        }
+        result += ">";
+        return result;
+    }
+    Type_Specialized(cstring bt, std::initializer_list<Type> args)
+    : baseType(new Type_Name(bt)), arguments(new Vector<Type>(args)) {}
 }
 
 /** Canonical representation of a Type_Specialized;
@@ -484,6 +552,7 @@ class Type_SpecializedCanonical : Type {
         BUG_CHECK(substituted->is<IMayBeGenericType>(), "substituted %1% is not generic", substituted);
     }
     const Type* getP4Type() const override;
+    toString{ return baseType->toString() + "<...>"; }
 }
 
 /// A declaration that consists of just an identifier, e.g., an enum member

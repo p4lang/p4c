@@ -14,58 +14,60 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import sys
 from glob import glob
+from pathlib import Path
+
 from .target import EBPFTarget
+
 # path to the tools folder of the compiler
-sys.path.insert(0, os.path.dirname(
-    os.path.realpath(__file__)) + '/../../../tools')
-from testutils import *
+# Append tools to the import path.
+FILE_DIR = Path(__file__).resolve().parent
+# Append tools to the import path.
+sys.path.append(str(FILE_DIR.joinpath("../../../tools")))
+import testutils
 
 
 class Target(EBPFTarget):
-    def __init__(self, tmpdir, options, template, outputs):
-        EBPFTarget.__init__(self, tmpdir, options, template, outputs)
+    def __init__(self, tmpdir, options, template):
+        EBPFTarget.__init__(self, tmpdir, options, template)
 
     def compile_dataplane(self):
         args = self.get_make_args(self.runtimedir, self.options.target)
         # List of bpf programs to attach to the interface
-        args += "BPFOBJ=" + self.template + " "
+        args += f"BPFOBJ={self.template} "
         args += "CFLAGS+=-DCONTROL_PLANE "
         # these files are specific to the test target
-        args += "SOURCES+=%s/ebpf_registry.c " % self.runtimedir
-        args += "SOURCES+=%s/ebpf_map.c " % self.runtimedir
-        args += "SOURCES+=%s.c " % self.template
+        args += f"SOURCES+={ self.runtimedir}/ebpf_registry.c "
+        args += f"SOURCES+={ self.runtimedir}/ebpf_map.c "
+        args += f"SOURCES+={self.template}.c "
         # include the src of libbpf directly, does not require installation
-        args += "INCLUDES+=-I%s/contrib/libbpf/src " % self.runtimedir
+        args += f"INCLUDES+=-I{self.runtimedir}/contrib/libbpf/src "
         if self.options.extern:
             # we inline the extern so we need a direct include
-            args += "INCLUDES+=-include" + self.options.extern + " "
+            args += f"INCLUDES+=-include{self.options.extern} "
             # need to include the temporary dir because of the tmp import
-            args += "INCLUDES+=-I" + self.tmpdir + " "
-        errmsg = "Failed to build the filter:"
-        return run_timeout(self.options.verbose, args, TIMEOUT,
-                           self.outputs, errmsg)
+            args += f"INCLUDES+=-I{self.tmpdir} "
+        result = testutils.exec_process(args)
+        if result.returncode != testutils.SUCCESS:
+            testutils.log.error("Failed to build the filter")
+        return result.returncode
 
     def run(self):
-        report_output(self.outputs["stdout"],
-                      self.options.verbose, "Running model")
+        testutils.log.info("Running model")
         direction = "in"
-        pcap_pattern = self.filename('', direction)
-        num_files = len(glob(self.filename('*', direction)))
-        report_output(self.outputs["stdout"],
-                      self.options.verbose,
-                      "Input file: %s" % pcap_pattern)
+        pcap_pattern = self.filename("", direction)
+        num_files = len(glob(self.filename("*", direction)))
+        testutils.log.info("Input file: %s", pcap_pattern)
         # Main executable
-        args = self.template + " "
+        args = f"{self.template} "
         # Input pcap pattern
-        args += "-f " + pcap_pattern + " "
+        args += f"-f {pcap_pattern} "
         # Number of input interfaces
-        args += "-n " + str(num_files) + " "
+        args += f"-n {num_files} "
         # Debug flag (verbose output)
         args += "-d"
-        errmsg = "Failed to execute the filter:"
-        result = run_timeout(self.options.verbose, args,
-                             TIMEOUT, self.outputs, errmsg)
-        return result
+        result = testutils.exec_process(args)
+        if result.returncode != testutils.SUCCESS:
+            testutils.log.error("Failed to execute the filter")
+        return result.returncode

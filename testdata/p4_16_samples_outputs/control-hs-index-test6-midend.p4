@@ -39,7 +39,6 @@ parser p(packet_in pkt, out headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
     bit<32> hsiVar;
-    bit<32> hsiVar_0;
     bit<32> hsVar;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
@@ -52,7 +51,7 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
             @defaultonly NoAction_1();
         }
         key = {
-            key_0: exact @name("h.h[h.i.index].a") ;
+            key_0: exact @name("h.h[h.i.index].a");
         }
         default_action = NoAction_1();
     }
@@ -66,7 +65,7 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
         key_0 = hsVar;
     }
     @hidden action controlhsindextest6l48_2() {
-        hsiVar_0 = h.i.index;
+        hsiVar = h.i.index;
     }
     @hidden table tbl_controlhsindextest6l48 {
         actions = {
@@ -94,11 +93,11 @@ control ingress(inout headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         tbl_controlhsindextest6l48.apply();
-        if (hsiVar_0 == 32w0) {
+        if (hsiVar == 32w0) {
             tbl_controlhsindextest6l48_0.apply();
-        } else if (hsiVar_0 == 32w1) {
+        } else if (hsiVar == 32w1) {
             tbl_controlhsindextest6l48_1.apply();
-        } else if (hsiVar_0 >= 32w1) {
+        } else if (hsiVar >= 32w1) {
             tbl_controlhsindextest6l48_2.apply();
         }
         t_0.apply();
@@ -130,4 +129,3 @@ control deparser(packet_out pkt, in headers h) {
 }
 
 V1Switch<headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

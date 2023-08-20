@@ -28,8 +28,6 @@ set (IRGENERATOR_HDRS
   type.h
   )
 
-add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${IRGENERATOR_SRCS};${IRGENERATOR_HDRS}")
-
 BISON_TARGET(IRgenParser ir-generator.ypp ${CMAKE_CURRENT_BINARY_DIR}/ir-generator.cpp)
 FLEX_TARGET(IRgenLexer ir-generator-lex.l  ${CMAKE_CURRENT_BINARY_DIR}/ir-generator-lex.c)
 ADD_FLEX_BISON_DEPENDENCY(IRgenLexer IRgenParser)
@@ -39,9 +37,7 @@ set (IRGENERATOR_GEN_SRCS
   )
 
 include_directories (${CMAKE_CURRENT_BINARY_DIR})
-set_source_files_properties(${IRGENERATOR_GEN_SRCS} PROPERTIES GENERATED TRUE)
 set_source_files_properties(${IRGENERATOR_GEN_SRCS} PROPERTIES OBJECT_DEPENDS ${FLEX_IRgenLexer_OUTPUTS})
-build_unified(IRGENERATOR_SRCS ALL)
 add_executable (irgenerator ${IRGENERATOR_SRCS} ${IRGENERATOR_GEN_SRCS})
 # Unconditionally set the output directory for the irgenerator to the path
 # where the custom command that generates IR sources expects to find it.

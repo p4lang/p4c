@@ -3,9 +3,10 @@
 #include <v1model.p4>
 
 enum bit<8> FieldLists {
-    clone_e2e_FL = 0,
-    recirculate_FL = 1,
-    resubmit_FL = 2
+    none = 0,
+    clone_e2e_FL = 1,
+    recirculate_FL = 2,
+    resubmit_FL = 3
 }
 
 struct intrinsic_metadata_t {
@@ -77,15 +78,15 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name(".put_debug_vals_in_eth_dstaddr") action put_debug_vals_in_eth_dstaddr() {
         hdr.ethernet.dstAddr = 48w0;
         meta.temporaries.temp1 = (bit<48>)meta.mymeta.resubmit_count << 40;
-        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | meta.temporaries.temp1;
+        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | (bit<48>)meta.temporaries.temp1;
         meta.temporaries.temp1 = (bit<48>)meta.mymeta.recirculate_count << 32;
-        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | meta.temporaries.temp1;
+        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | (bit<48>)meta.temporaries.temp1;
         meta.temporaries.temp1 = (bit<48>)meta.mymeta.clone_e2e_count << 24;
-        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | meta.temporaries.temp1;
+        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | (bit<48>)meta.temporaries.temp1;
         meta.temporaries.temp1 = (bit<48>)meta.mymeta.f1 << 16;
-        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | meta.temporaries.temp1;
+        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | (bit<48>)meta.temporaries.temp1;
         meta.temporaries.temp1 = (bit<48>)meta.mymeta.last_ing_instance_type << 8;
-        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | meta.temporaries.temp1;
+        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr | (bit<48>)meta.temporaries.temp1;
     }
     @name(".mark_egr_resubmit_packet") action mark_egr_resubmit_packet() {
         put_debug_vals_in_eth_dstaddr();

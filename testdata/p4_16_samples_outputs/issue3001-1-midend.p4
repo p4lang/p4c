@@ -2,25 +2,20 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header H {
     bit<8> x;
 }
 
-header_union U {
-    H h;
-}
-
 struct headers_t {
     ethernet_t ethernet;
     H          h1;
-    U          u1;
+    H          u1_h;
 }
 
 struct metadata_t {
@@ -40,10 +35,10 @@ control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     @name("ingressImpl.tmp") H tmp;
-    @name("ingressImpl.tmp_1") U tmp_1;
+    H tmp_1_h;
     @name("ingressImpl.tmp_3") H[1] tmp_3;
     @name("ingressImpl.h") H h_0;
-    @name("ingressImpl.u") U u_0;
+    H u_0_h;
     @name("ingressImpl.s") H[1] s_0;
     @hidden action issue30011l84() {
         log_msg("hdr.ethernet is valid");
@@ -68,8 +63,13 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         log_msg("g() returned a header_union with invalid member h");
     }
     @hidden action issue30011l45() {
-        u_0.h.setInvalid();
-        tmp_1.h = u_0.h;
+        u_0_h.setInvalid();
+        if (u_0_h.isValid()) {
+            tmp_1_h.setValid();
+            tmp_1_h = u_0_h;
+        } else {
+            tmp_1_h.setInvalid();
+        }
     }
     @hidden action issue30011l109() {
         log_msg("h() returned a header stack with valid element 0");
@@ -79,7 +79,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     @hidden action issue30011l50() {
         s_0[0].setInvalid();
-        tmp_3 = s_0;
+        tmp_3[0] = s_0[0];
     }
     @hidden table tbl_issue30011l84 {
         actions = {
@@ -160,7 +160,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
             tbl_issue30011l101.apply();
         }
         tbl_issue30011l45.apply();
-        if (tmp_1.h.isValid()) {
+        if (tmp_1_h.isValid()) {
             tbl_issue30011l104.apply();
         } else {
             tbl_issue30011l106.apply();
@@ -191,4 +191,3 @@ control deparserImpl(packet_out packet, in headers_t hdr) {
 }
 
 V1Switch<headers_t, metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
-

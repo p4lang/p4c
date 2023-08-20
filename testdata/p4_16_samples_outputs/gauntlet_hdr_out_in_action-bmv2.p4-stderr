@@ -1,0 +1,6 @@
+gauntlet_hdr_out_in_action-bmv2.p4(35): [--Wwarn=unused] warning: 'val' is unused
+    action do_action(out ethernet_t val) {
+                                    ^^^
+gauntlet_hdr_out_in_action-bmv2.p4(35): [--Wwarn=uninitialized_use] warning: val may not be completely initialized
+    action do_action(out ethernet_t val) {
+                                    ^^^

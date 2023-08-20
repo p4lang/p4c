@@ -1,0 +1,27 @@
+issue3304.p4(10): [--Werror=type-error] error: s<p<bit<1>>>: Cannot use parser p as a type parameter
+s<p<bit>> f()
+^^^^^^^^^
+issue3304.p4(1)
+parser p<t>(in t a);
+       ^
+issue3304.p4(12): [--Werror=type-error] error: s<p<bit<1>>>: Cannot use parser p as a type parameter
+    s<p<bit>> v = gen<s<p<bit>>>();
+    ^^^^^^^^^
+issue3304.p4(1)
+parser p<t>(in t a);
+       ^
+issue3304.p4(12): [--Werror=type-error] error: s<p<bit<1>>>: Cannot use parser p as a type parameter
+    s<p<bit>> v = gen<s<p<bit>>>();
+                      ^^^^^^^^^
+issue3304.p4(1)
+parser p<t>(in t a);
+       ^
+issue3304.p4(16): [--Werror=type-error] error: s<p<bit<1>>>: Cannot use parser p as a type parameter
+control c(out s<p<bit>> v) {
+              ^^^^^^^^^
+issue3304.p4(1)
+parser p<t>(in t a);
+       ^
+issue3304.p4(25): [--Werror=type-error] error: c: cannot evaluate to a compile-time constant
+top(c()) main;
+    ^^^

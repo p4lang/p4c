@@ -12,9 +12,7 @@
    - some simple leaf classes used frequently
 */
 
-#emit
 #include "frontends/common/constantParsing.h"
-#end
 
 /// a value that can be evaluated at compile-time
 interface CompileTimeValue {
@@ -104,6 +102,7 @@ interface ITypeVar {
 
 /// Implemented by P4Parser, P4Control and Type_Package
 interface IContainer : IMayBeGenericType, IDeclaration, IFunctional {
+    virtual Type getType() const = 0;
     /// The type of the constructor as a method
     virtual Type_Method getConstructorMethodType() const = 0;
     virtual ParameterList getConstructorParameters() const = 0;
@@ -131,11 +130,11 @@ abstract StatOrDecl {}
 /// That's why declid is used to distinguish them.
 abstract Declaration : StatOrDecl, IDeclaration {
     ID          name;
-    int declid = nextId++;
+    long declid = nextId++;
     ID getName() const override { return name; }
     equiv { return name == a.name; /* ignore declid */ }
  private:
-    static int nextId;
+    static long nextId;
  public:
     toString { return externalName(); }
 }
@@ -147,11 +146,11 @@ abstract Declaration : StatOrDecl, IDeclaration {
 /// inherit both Type and Declaration.)
 abstract Type_Declaration : Type, IDeclaration {
     ID name;
-    int declid = nextId++;
+    long declid = nextId++;
     ID getName() const override { return name; }
     equiv { return name == a.name; /* ignore declid */ }
  private:
-    static int nextId;
+    static long nextId;
  public:
     toString { return externalName(); }
     const Type* getP4Type() const override { return new Type_Name(name); }
@@ -288,6 +287,7 @@ class Annotation {
     static const cstring noWarnAnnotation;  /// noWarn annotation.
     static const cstring matchAnnotation;  /// Match annotation (for value sets).
     static const cstring fieldListAnnotation;  /// Used for recirculate, etc.
+    static const cstring debugLoggingAnnotation;  /// Used by compiler implementer to limit debug log to the annotated IR context.
     toString{ return cstring("@") + name; }
     validate{
         BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name");
@@ -302,13 +302,12 @@ class Annotation {
     /// Extracts a single string argument; error if the argument is not a string
     cstring getSingleString() const;
 
-#emit
     enum class Kind {
         Unstructured,
         StructuredEmpty,
         StructuredKVList,
         StructuredExpressionList
-    };
+    }
 
     Kind annotationKind() const {
         if (!structured)
@@ -319,7 +318,6 @@ class Annotation {
             return Kind::StructuredKVList;
         return Kind::StructuredEmpty;
     }
-#end
 }
 
 /// There can be several annotations with the same "name", so this is a vector.
@@ -381,7 +379,7 @@ interface IAnnotated {
 }
 
 interface IInstance {
-    virtual cstring Name() const = 0;
+    virtual ID Name() const = 0;
     virtual Type getType() const = 0;
 }
 

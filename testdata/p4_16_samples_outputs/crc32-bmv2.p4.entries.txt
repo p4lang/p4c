@@ -14,6 +14,7 @@ updates {
           action_id: 24785092
         }
       }
+      is_const: true
     }
   }
 }
@@ -33,6 +34,7 @@ updates {
           action_id: 22867470
         }
       }
+      is_const: true
     }
   }
 }
@@ -52,6 +54,7 @@ updates {
           action_id: 32601303
         }
       }
+      is_const: true
     }
   }
 }
@@ -71,6 +74,7 @@ updates {
           action_id: 17405675
         }
       }
+      is_const: true
     }
   }
 }
@@ -90,6 +94,7 @@ updates {
           action_id: 31935968
         }
       }
+      is_const: true
     }
   }
 }
@@ -109,6 +114,7 @@ updates {
           action_id: 24997060
         }
       }
+      is_const: true
     }
   }
 }

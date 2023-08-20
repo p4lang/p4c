@@ -4,16 +4,15 @@
 struct EMPTY {
 }
 
-typedef bit<48> EthernetAddress;
 struct user_meta_t {
     bit<16> data;
     bit<16> data1;
 }
 
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv4_t {
@@ -101,9 +100,9 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
     }
     @name("MyIC.tbl") table tbl_0 {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
-            b.data              : exact @name("b.data") ;
-            b.data1             : lpm @name("b.data1") ;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
+            b.data              : exact @name("b.data");
+            b.data1             : lpm @name("b.data1");
         }
         actions = {
             NoAction_1();
@@ -114,9 +113,9 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
     }
     @name("MyIC.foo") table foo_0 {
         key = {
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
-            b.data              : exact @name("b.data") ;
-            b.data1             : lpm @name("b.data1") ;
+            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr");
+            b.data              : exact @name("b.data");
+            b.data1             : lpm @name("b.data1");
         }
         actions = {
             NoAction_2();
@@ -179,8 +178,5 @@ control MyED(packet_out buffer, out EMPTY a, out EMPTY b, inout EMPTY c, in EMPT
 }
 
 IngressPipeline<headers_t, user_meta_t, EMPTY, EMPTY, EMPTY, EMPTY>(MyIP(), MyIC(), MyID()) ip;
-
 EgressPipeline<EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(MyEP(), MyEC(), MyED()) ep;
-
 PSA_Switch<headers_t, user_meta_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

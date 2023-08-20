@@ -50,4 +50,3 @@ control SnvsDeparser(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(SnvsParser(), SnvsVerifyChecksum(), SnvsIngress(), SnvsEgress(), SnvsComputeChecksum(), SnvsDeparser()) main;
-

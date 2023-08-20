@@ -40,8 +40,6 @@ control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_m
         hdr.ethernet.srcAddr = 48w0x215241100ff2;
     }
     table tbl1 {
-        key = {
-        }
         actions = {
             foo();
             NoAction();
@@ -70,4 +68,3 @@ control uc(inout Parsed_packet hdr, inout mystruct1 meta) {
 }
 
 V1Switch<Parsed_packet, mystruct1>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
-

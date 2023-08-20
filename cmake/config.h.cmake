@@ -7,6 +7,9 @@
 /* Define to 1 if you have the execinfo.h header */
 #cmakedefine HAVE_EXECINFO_H 1
 
+/* Define to 1 if you have libbacktrace */
+#cmakedefine HAVE_LIBBACKTRACE 1
+
 /* Define to 1 if you have the LIBGC library. */
 #cmakedefine HAVE_LIBGC 1
 

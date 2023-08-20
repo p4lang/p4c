@@ -8,7 +8,6 @@ error {
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<32> IPv4Address;
 header ethernet_t {
     bit<48> dstAddr;
     bit<48> srcAddr;
@@ -26,8 +25,8 @@ header ipv4_t {
     bit<8>      ttl;
     bit<8>      protocol;
     bit<16>     hdrChecksum;
-    IPv4Address srcAddr;
-    IPv4Address dstAddr;
+    bit<32>     srcAddr;
+    bit<32>     dstAddr;
     varbit<320> options;
 }
 
@@ -148,7 +147,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     @name("cIngress.guh") table guh_0 {
         key = {
-            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort") ;
+            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort");
         }
         actions = {
             foot();
@@ -161,7 +160,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     @name("cIngress.huh") table huh_0 {
         key = {
-            hdr.udp.dstPort: exact @name("hdr.udp.dstPort") ;
+            hdr.udp.dstPort: exact @name("hdr.udp.dstPort");
         }
         actions = {
             foou();
@@ -258,4 +257,3 @@ control DeparserI(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
-

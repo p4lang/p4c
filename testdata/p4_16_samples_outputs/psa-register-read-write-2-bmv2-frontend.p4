@@ -48,7 +48,7 @@ control MyIC(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_inp
     @name("MyIC.validAction") bool validAction_0;
     @name("MyIC.meta") psa_ingress_output_metadata_t meta_0;
     @name("MyIC.egress_port") PortId_t egress_port_0;
-    @noWarnUnused @name(".send_to_port") action send_to_port_0() {
+    @noWarn("unused") @name(".send_to_port") action send_to_port_0() {
         meta_0 = ostd;
         egress_port_0 = (PortId_t)32w1;
         meta_0.drop = false;
@@ -101,8 +101,5 @@ control MyED(packet_out pkt, out EMPTY clone_e2e_meta, out EMPTY recirculate_met
 }
 
 IngressPipeline<headers_t, metadata_t, EMPTY, EMPTY, EMPTY, EMPTY>(MyIP(), MyIC(), MyID()) ip;
-
 EgressPipeline<headers_t, metadata_t, EMPTY, EMPTY, EMPTY, EMPTY>(MyEP(), MyEC(), MyED()) ep;
-
 PSA_Switch<headers_t, metadata_t, headers_t, metadata_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

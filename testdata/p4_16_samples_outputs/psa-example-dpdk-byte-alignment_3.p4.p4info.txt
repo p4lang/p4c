@@ -1,0 +1,123 @@
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 44506256
+    name: "ingress.tbl"
+    alias: "tbl"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.srcAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "hdr.ipv4.hdrChecksum[4:0]"
+    bitwidth: 5
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "hdr.ipv4.version"
+    bitwidth: 4
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21257015
+  }
+  action_refs {
+    id: 29480552
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 29480552
+    name: "ingress.execute"
+    alias: "execute"
+  }
+  params {
+    id: 1
+    name: "index"
+    bitwidth: 12
+  }
+}
+actions {
+  preamble {
+    id: 30967736
+    name: "ingress.test"
+    alias: "test"
+  }
+}
+counters {
+  preamble {
+    id: 314114784
+    name: "ingress.counter0"
+    alias: "counter0"
+  }
+  spec {
+    unit: BOTH
+  }
+  size: 1024
+}
+counters {
+  preamble {
+    id: 318473483
+    name: "ingress.counter1"
+    alias: "counter1"
+  }
+  spec {
+    unit: PACKETS
+  }
+  size: 1024
+}
+counters {
+  preamble {
+    id: 313911423
+    name: "ingress.counter2"
+    alias: "counter2"
+  }
+  spec {
+    unit: BYTES
+  }
+  size: 1024
+}
+meters {
+  preamble {
+    id: 344514043
+    name: "ingress.meter0"
+    alias: "meter0"
+  }
+  spec {
+    unit: BYTES
+  }
+  size: 1024
+}
+registers {
+  preamble {
+    id: 382856063
+    name: "ingress.reg"
+    alias: "reg"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 1024
+}
+type_info {
+}

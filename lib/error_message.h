@@ -13,11 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef _LIB_ERROR_MESSAGE_H_
-#define _LIB_ERROR_MESSAGE_H_
+#ifndef LIB_ERROR_MESSAGE_H_
+#define LIB_ERROR_MESSAGE_H_
 
-#include <vector>
 #include <cstring>
+#include <vector>
 
 #include "lib/source_file.h"
 
@@ -37,10 +37,10 @@ struct ErrorMessage {
     enum class MessageType : std::size_t { None, Error, Warning };
 
     MessageType type = MessageType::None;
-    std::string prefix = "";  /// Typically error/warning type from catalog
-    std::string message = "";  /// Particular formatted message
+    std::string prefix = "";                       /// Typically error/warning type from catalog
+    std::string message = "";                      /// Particular formatted message
     std::vector<Util::SourceInfo> locations = {};  /// Relevant source locations for this error
-    std::string suffix = "";  /// Used by errorWithSuffix
+    std::string suffix = "";                       /// Used by errorWithSuffix
 
     ErrorMessage() {}
     // Invoked from backwards compatible error_helper
@@ -71,4 +71,4 @@ struct ParserErrorMessage {
     std::string toString() const;
 };
 
-#endif  /* _LIB_ERROR_MESSAGE_H_ */
+#endif /* LIB_ERROR_MESSAGE_H_ */

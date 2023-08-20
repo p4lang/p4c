@@ -10,51 +10,43 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """ This programs builds a libbpf static library and places it in the runtime
     folder. The library and its headers are required by the kernel target.
 """
 
-import os
 import sys
-sys.path.insert(0, os.path.dirname(
-    os.path.realpath(__file__)) + '/../../tools')
+import logging
+from pathlib import Path
+
+FILE_DIR = Path(__file__).resolve().parent
+# Append tools to the import path.
+sys.path.append(str(FILE_DIR.joinpath("../../tools")))
 import testutils
 
-VERBOSE = True
 
-
-def create_dir(directory):
-    """ Create the folder, if it does not exit yet"""
-    if not directory == "" and not os.path.exists(directory):
-        os.makedirs(directory)
-
-
-def main():
-    outputs = {"stdout": None, "stderr": None}
-    file_dir = os.path.dirname(os.path.realpath(__file__))
-    libbpf_dir = "%s/runtime/contrib/libbpf" % file_dir
-    libbpf_src_dir = "%s/src" % libbpf_dir
-    libbpf_build_dir = "%s/build" % libbpf_src_dir
-    libbpf_target_dir = "%s/runtime" % file_dir
-    # Download submodule if it has not been initialized yet
-    git_cmd = "git submodule update --init %s" % libbpf_dir
-    # We ignore the error that is thrown here
-    testutils.run_timeout(verbose=VERBOSE, args=git_cmd,
-                          timeout=20, outputs=outputs,
-                          errmsg="Could not initialize libbpf submodule")
+def main() -> int:
+    # Configure logging.
+    logging.basicConfig(
+        format="%(levelname)s:%(message)s",
+        level=logging.WARN,
+        filemode="w",
+    )
+    libbpf_dir = FILE_DIR.joinpath("runtime/contrib/libbpf")
+    libbpf_src_dir = libbpf_dir.joinpath("src")
+    libbpf_build_dir = libbpf_src_dir.joinpath("build")
+    libbpf_target_dir = FILE_DIR.joinpath("runtime")
     # Create the libbpf build directory
-    create_dir(libbpf_build_dir)
+    testutils.check_and_create_dir(libbpf_build_dir)
     # Build libbpf
-    mk_cmd = "make -C %s install " % libbpf_src_dir
+    mk_cmd = f"make -C {libbpf_src_dir} install "
     mk_cmd += "BUILD_STATIC_ONLY=y "
-    mk_cmd += "OBJDIR=%s " % libbpf_build_dir
-    mk_cmd += "DESTDIR=%s " % libbpf_target_dir
-    err = testutils.run_timeout(verbose=VERBOSE, args=mk_cmd,
-                                timeout=20, outputs=outputs,
-                                errmsg="Could not build libbpf")
-    return err
+    mk_cmd += f"OBJDIR={libbpf_build_dir} "
+    mk_cmd += f"DESTDIR={libbpf_target_dir} "
+    result = testutils.exec_process(args=mk_cmd)
+    if result.returncode != testutils.SUCCESS:
+        testutils.log.error("Could not build libbpf")
+    return result.returncode
 
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    sys.exit(main())

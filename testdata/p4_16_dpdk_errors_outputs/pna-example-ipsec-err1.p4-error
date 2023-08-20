@@ -1,0 +1,1 @@
+[--Werror=reserved] error: platform_hdr_t type name is reserved for DPDK platform header

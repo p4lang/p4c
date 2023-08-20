@@ -8,11 +8,6 @@ header hdr {
     bit<32> c;
 }
 
-enum Choice {
-    First,
-    Second
-}
-
 struct Headers {
     hdr h;
 }
@@ -65,4 +60,3 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

@@ -32,7 +32,7 @@ control ingress(inout parsed_packet_t hdr,
         local_metadata.row.alt0 = local_metadata.row.alt1;
         local_metadata.row.alt0.valid = 1;
         local_metadata.row.alt1.port = local_metadata.row.alt1.port + 1;
-        clone_preserving_field_list(CloneType.I2E, 0, 0);
+        clone_preserving_field_list(CloneType.I2E, 1, 0);
     }
 }
 

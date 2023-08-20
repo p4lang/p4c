@@ -133,4 +133,3 @@ control deparser(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(p(), vc(), ingress(), egress(), uc(), deparser()) main;
-

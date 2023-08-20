@@ -1,0 +1,3 @@
+pna-ipv6-actions.p4(136): [--Wwarn=uninitialized_use] warning: tmp1 may be uninitialized
+        headers.ipv6.srcAddr = (bit<128>)tmp1;
+                                         ^^^^

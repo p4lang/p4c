@@ -1,0 +1,3 @@
+gauntlet_index_5-bmv2.p4(33): [--Wwarn=unused] warning: 'dummy' is unused
+    action simple_action(inout bit<32> dummy) {}
+                                       ^^^^^

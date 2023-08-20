@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_ORDERARGUMENTS_H_
-#define _MIDEND_ORDERARGUMENTS_H_
+#ifndef MIDEND_ORDERARGUMENTS_H_
+#define MIDEND_ORDERARGUMENTS_H_
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -29,24 +29,25 @@ namespace P4 {
  * This only works if all optional parameters are at the end.
  */
 class DoOrderArguments : public Transform {
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
- public:
-    DoOrderArguments(ReferenceMap* refMap, TypeMap* typeMap):
-            refMap(refMap), typeMap(typeMap)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("DoOrderArguments"); }
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
 
-    const IR::Node* postorder(IR::MethodCallExpression* expression) override;
-    const IR::Node* postorder(IR::ConstructorCallExpression* expression) override;
-    const IR::Node* postorder(IR::Declaration_Instance* instance) override;
+ public:
+    DoOrderArguments(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
+        setName("DoOrderArguments");
+    }
+
+    const IR::Node *postorder(IR::MethodCallExpression *expression) override;
+    const IR::Node *postorder(IR::ConstructorCallExpression *expression) override;
+    const IR::Node *postorder(IR::Declaration_Instance *instance) override;
 };
 
 class OrderArguments : public PassManager {
  public:
-    OrderArguments(ReferenceMap* refMap, TypeMap* typeMap,
-            TypeChecking* typeChecking = nullptr) {
-        if (!typeChecking)
-            typeChecking = new TypeChecking(refMap, typeMap);
+    OrderArguments(ReferenceMap *refMap, TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoOrderArguments(refMap, typeMap));
         setName("OrderArguments");
@@ -55,4 +56,4 @@ class OrderArguments : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_ORDERARGUMENTS_H_ */
+#endif /* MIDEND_ORDERARGUMENTS_H_ */

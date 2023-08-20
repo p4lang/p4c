@@ -3,7 +3,8 @@
 #include <v1model.p4>
 
 enum bit<8> FieldLists {
-    resubmit_FL = 8w0
+    none = 8w0,
+    resubmit_FL = 8w1
 }
 
 struct intrinsic_metadata_t {
@@ -12,7 +13,7 @@ struct intrinsic_metadata_t {
 }
 
 struct mymeta_t {
-    @field_list(FieldLists.resubmit_FL) 
+    @field_list(FieldLists.resubmit_FL)
     bit<8> f1;
 }
 
@@ -23,12 +24,12 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name(".mymeta") 
+    @name(".mymeta")
     mymeta_t mymeta;
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
 }
 
@@ -55,7 +56,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("._resubmit") action _resubmit() {
         meta.mymeta.f1 = 8w1;
-        resubmit_preserving_field_list((bit<8>)FieldLists.resubmit_FL);
+        resubmit_preserving_field_list(8w1);
     }
     @name(".t_ingress_1") table t_ingress_1 {
         actions = {
@@ -64,7 +65,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            meta.mymeta.f1: exact @name("mymeta.f1") ;
+            meta.mymeta.f1: exact @name("mymeta.f1");
         }
         size = 128;
         default_action = NoAction();
@@ -76,7 +77,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            meta.mymeta.f1: exact @name("mymeta.f1") ;
+            meta.mymeta.f1: exact @name("mymeta.f1");
         }
         size = 128;
         default_action = NoAction();
@@ -104,4 +105,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

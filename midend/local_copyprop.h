@@ -16,10 +16,10 @@ limitations under the License.
 #ifndef MIDEND_LOCAL_COPYPROP_H_
 #define MIDEND_LOCAL_COPYPROP_H_
 
-#include "ir/ir.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 #include "has_side_effects.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -50,52 +50,55 @@ if legal to do so.
 
  */
 class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteContext {
-    ReferenceMap                *refMap;
-    TypeMap                     *typeMap;
-    bool                        working = false;
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
+    bool working = false;
     struct VarInfo {
-        bool                    local = false;
-        bool                    live = false;
-        const IR::Expression    *val = nullptr;
+        bool local = false;
+        bool live = false;
+        const IR::Expression *val = nullptr;
     };
     struct TableInfo {
-        std::set<cstring>       keyreads, actions;
-        int                                             apply_count = 0;
-        std::map<cstring, const IR::Expression *>       key_remap;
+        std::set<cstring> keyreads, actions;
+        int apply_count = 0;
+        std::map<cstring, const IR::Expression *> key_remap;
     };
     struct FuncInfo {
-        std::set<cstring>       reads, writes;
-        int                     apply_count = 0;
+        std::set<cstring> reads, writes;
+        int apply_count = 0;
 
         /// This field is used in assignments. If is_first_write_insert is true, then the
         /// last inserted expression into the writes set was not in that set before. In
         /// that case, that expression will be removed from it if, after propagation of the
         /// values on the left and the right side, the assignment becomes a self-assignment
-        bool                    is_first_write_insert = false;
+        bool is_first_write_insert = false;
     };
-    std::map<cstring, VarInfo>          available;
-    std::map<cstring, TableInfo>        &tables;
-    std::map<cstring, FuncInfo>         &actions;
-    std::map<cstring, FuncInfo>         &methods;
-    std::map<cstring, FuncInfo>         &states;
-    TableInfo                           *inferForTable = nullptr;
-    FuncInfo                            *inferForFunc = nullptr;
-    bool                                need_key_rewrite = false;
+    std::map<cstring, VarInfo> available;
+    std::map<cstring, TableInfo> &tables;
+    std::map<cstring, FuncInfo> &actions;
+    std::map<cstring, FuncInfo> &methods;
+    std::map<cstring, FuncInfo> &states;
+    TableInfo *inferForTable = nullptr;
+    FuncInfo *inferForFunc = nullptr;
+    bool need_key_rewrite = false;
     std::function<bool(const Context *, const IR::Expression *)> policy;
-    bool                                elimUnusedTables = false;
+    bool elimUnusedTables = false;
 
     DoLocalCopyPropagation *clone() const override { return new DoLocalCopyPropagation(*this); }
     void flow_merge(Visitor &) override;
+    void flow_copy(ControlFlowVisitor &) override;
     bool name_overlap(cstring, cstring);
     void forOverlapAvail(cstring, std::function<void(cstring, VarInfo *)>);
     void dropValuesUsing(cstring);
     bool hasSideEffects(const IR::Expression *e) {
-        return bool(::hasSideEffects(refMap, typeMap, e)); }
+        return bool(::hasSideEffects(refMap, typeMap, e));
+    }
+    bool isHeaderUnionIsValid(const IR::Expression *e);
 
     void visit_local_decl(const IR::Declaration_Variable *);
     const IR::Node *postorder(IR::Declaration_Variable *) override;
     IR::Expression *preorder(IR::Expression *m) override;
-    const IR::Expression *copyprop_name(cstring name);
+    const IR::Expression *copyprop_name(cstring name, const Util::SourceInfo &srcInfo);
     const IR::Expression *postorder(IR::PathExpression *) override;
     const IR::Expression *preorder(IR::Member *) override;
     const IR::Expression *preorder(IR::ArrayIndex *) override;
@@ -116,33 +119,40 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     const IR::P4Parser *postorder(IR::P4Parser *) override;
     IR::ParserState *preorder(IR::ParserState *) override;
     IR::ParserState *postorder(IR::ParserState *) override;
-    Visitor::profile_t init_apply(const IR::Node* node) override;
+    Visitor::profile_t init_apply(const IR::Node *node) override;
     class ElimDead;
     class RewriteTableKeys;
 
     DoLocalCopyPropagation(const DoLocalCopyPropagation &) = default;
 
  public:
-    DoLocalCopyPropagation(ReferenceMap* refMap, TypeMap* typeMap,
-        std::function<bool(const Context *, const IR::Expression *)> policy, bool eut)
-    : refMap(refMap), typeMap(typeMap), tables(*new std::map<cstring, TableInfo>),
-      actions(*new std::map<cstring, FuncInfo>), methods(*new std::map<cstring, FuncInfo>),
-      states(*new std::map<cstring, FuncInfo>), policy(policy), elimUnusedTables(eut) {}
+    DoLocalCopyPropagation(ReferenceMap *refMap, TypeMap *typeMap,
+                           std::function<bool(const Context *, const IR::Expression *)> policy,
+                           bool eut)
+        : refMap(refMap),
+          typeMap(typeMap),
+          tables(*new std::map<cstring, TableInfo>),
+          actions(*new std::map<cstring, FuncInfo>),
+          methods(*new std::map<cstring, FuncInfo>),
+          states(*new std::map<cstring, FuncInfo>),
+          policy(policy),
+          elimUnusedTables(eut) {}
 };
 
 class LocalCopyPropagation : public PassManager {
  public:
-    LocalCopyPropagation(ReferenceMap* refMap, TypeMap* typeMap,
-        TypeChecking* typeChecking = nullptr,
+    LocalCopyPropagation(
+        ReferenceMap *refMap, TypeMap *typeMap, TypeChecking *typeChecking = nullptr,
         std::function<bool(const Context *, const IR::Expression *)> policy =
             [](const Context *, const IR::Expression *) -> bool { return true; },
-        bool elimUnusedTables = false
-    ) {
-        if (!typeChecking)
-            typeChecking = new TypeChecking(refMap, typeMap, true);
+        bool elimUnusedTables = false) {
+        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap, true);
         passes.push_back(typeChecking);
         passes.push_back(new DoLocalCopyPropagation(refMap, typeMap, policy, elimUnusedTables));
     }
+    LocalCopyPropagation(ReferenceMap *refMap, TypeMap *typeMap,
+                         std::function<bool(const Context *, const IR::Expression *)> policy)
+        : LocalCopyPropagation(refMap, typeMap, nullptr, policy) {}
 };
 
 }  // namespace P4

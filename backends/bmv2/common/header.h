@@ -18,46 +18,47 @@ limitations under the License.
 #define BACKENDS_BMV2_COMMON_HEADER_H_
 
 #include <list>
+
+#include "JsonObjects.h"
+#include "backends/bmv2/common/options.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
+#include "helpers.h"
 #include "ir/ir.h"
 #include "lib/json.h"
-#include "frontends/p4/typeMap.h"
-#include "frontends/common/resolveReferences/referenceMap.h"
-#include "helpers.h"
-#include "JsonObjects.h"
 #include "programStructure.h"
-#include "backends/bmv2/common/options.h"
 
 namespace BMV2 {
 
 class Backend;
 
 class HeaderConverter : public Inspector {
-    ConversionContext*   ctxt;
-    cstring              scalarsName;
-    cstring              scalarsTypeName;
-    std::set<cstring>    visitedHeaders;
+    ConversionContext *ctxt;
+    cstring scalarsName;
+    cstring scalarsTypeName;
+    std::set<cstring> visitedHeaders;
 
-    const unsigned       boolWidth = 1;    // convert booleans to 1-bit integers
-    const unsigned       errorWidth = 32;  // convert errors to 32-bit integers
-    unsigned             scalars_width = 0;
+    const unsigned boolWidth = 1;    // convert booleans to 1-bit integers
+    const unsigned errorWidth = 32;  // convert errors to 32-bit integers
+    unsigned scalars_width = 0;
 
  protected:
-    Util::JsonArray* pushNewArray(Util::JsonArray* parent);
-    void addHeaderType(const IR::Type_StructLike* st);
-    void addHeaderField(const cstring& header, const cstring& name, int size, bool is_signed);
-    Util::JsonArray* addHeaderUnionFields(cstring hdrName, const IR::Type_HeaderUnion* type);
+    Util::JsonArray *pushNewArray(Util::JsonArray *parent);
+    void addHeaderType(const IR::Type_StructLike *st);
+    void addHeaderField(const cstring &header, const cstring &name, int size, bool is_signed);
+    Util::JsonArray *addHeaderUnionFields(cstring hdrName, const IR::Type_HeaderUnion *type);
 
  public:
-    void addTypesAndInstances(const IR::Type_StructLike* type, bool meta);
-    void addHeaderStacks(const IR::Type_Struct* type);
-    bool isHeaders(const IR::Type_StructLike* st);
+    void addTypesAndInstances(const IR::Type_StructLike *type, bool meta);
+    void addHeaderStacks(const IR::Type_Struct *type);
+    bool isHeaders(const IR::Type_StructLike *st);
 
-    Visitor::profile_t init_apply(const IR::Node* node) override;
-    void end_apply(const IR::Node* node) override;
+    Visitor::profile_t init_apply(const IR::Node *node) override;
+    void end_apply(const IR::Node *node) override;
 
-    bool preorder(const IR::Parameter* param) override;
+    bool preorder(const IR::Parameter *param) override;
 
-    HeaderConverter(ConversionContext* ctxt, cstring scalarsName);
+    HeaderConverter(ConversionContext *ctxt, cstring scalarsName);
 };
 
 }  // namespace BMV2

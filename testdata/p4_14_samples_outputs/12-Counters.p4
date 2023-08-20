@@ -12,7 +12,7 @@ struct metadata {
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
 }
 
@@ -29,7 +29,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 @name(".c1") counter<bit<10>>(32w1024, CounterType.packets) c1;
-
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".count_c1_1") action count_c1_1() {
         c1.count((bit<10>)10w1);
@@ -73,4 +72,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

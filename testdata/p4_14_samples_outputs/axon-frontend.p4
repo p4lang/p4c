@@ -21,16 +21,16 @@ header axon_hop_t {
 }
 
 struct metadata {
-    @name(".my_metadata") 
+    @name(".my_metadata")
     my_metadata_t my_metadata;
 }
 
 struct headers {
-    @name(".axon_head") 
+    @name(".axon_head")
     axon_head_t    axon_head;
-    @name(".axon_fwdHop") 
+    @name(".axon_fwdHop")
     axon_hop_t[64] axon_fwdHop;
-    @name(".axon_revHop") 
+    @name(".axon_revHop")
     axon_hop_t[64] axon_revHop;
 }
 
@@ -46,7 +46,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         packet.extract<axon_head_t>(hdr.axon_head);
         meta.my_metadata.fwdHopCount = hdr.axon_head.fwdHopCount;
         meta.my_metadata.revHopCount = hdr.axon_head.revHopCount;
-        meta.my_metadata.headerLen = (bit<16>)(8w2 + hdr.axon_head.fwdHopCount + hdr.axon_head.revHopCount);
+        meta.my_metadata.headerLen = (bit<16>)(8w2 + hdr.axon_head.fwdHopCount) + (bit<16>)hdr.axon_head.revHopCount;
         transition select(hdr.axon_head.fwdHopCount) {
             8w0: accept;
             default: parse_next_fwdHop;
@@ -119,8 +119,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_2();
         }
         key = {
-            hdr.axon_head.isValid()     : exact @name("axon_head.$valid$") ;
-            hdr.axon_fwdHop[0].isValid(): exact @name("axon_fwdHop[0].$valid$") ;
+            hdr.axon_head.isValid()     : exact @name("axon_head.$valid$");
+            hdr.axon_fwdHop[0].isValid(): exact @name("axon_fwdHop[0].$valid$");
         }
         size = 1;
         default_action = NoAction_2();
@@ -153,4 +153,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

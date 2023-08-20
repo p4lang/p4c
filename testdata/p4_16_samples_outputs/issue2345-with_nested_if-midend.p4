@@ -23,21 +23,27 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    @name("ingress.hasReturned") bool hasReturned;
     ethernet_t val1_eth_hdr;
     ethernet_t val_eth_hdr;
     @name("ingress.simple_action") action simple_action() {
-        h.eth_hdr.src_addr = 48w1;
-        val1_eth_hdr = h.eth_hdr;
-        val_eth_hdr = h.eth_hdr;
-        val_eth_hdr.eth_type = 16w0;
-        val_eth_hdr.eth_type = 16w0;
-        val_eth_hdr.eth_type = 16w2;
-        val_eth_hdr.eth_type = 16w5;
-        val_eth_hdr.eth_type = 16w5;
-        val_eth_hdr.eth_type = 16w5;
-        val1_eth_hdr = val_eth_hdr;
-        val1_eth_hdr.dst_addr = 48w3;
-        h.eth_hdr = val1_eth_hdr;
+        hasReturned = false;
+        if (h.eth_hdr.eth_type == 16w1) {
+            hasReturned = true;
+        }
+        if (hasReturned) {
+            ;
+        } else {
+            h.eth_hdr.src_addr = 48w1;
+            val1_eth_hdr = h.eth_hdr;
+            val_eth_hdr = h.eth_hdr;
+            val_eth_hdr.eth_type = 16w0;
+            val_eth_hdr.eth_type = 16w2;
+            val_eth_hdr.eth_type = 16w5;
+            val1_eth_hdr = val_eth_hdr;
+            val1_eth_hdr.dst_addr = 48w3;
+            h.eth_hdr = val1_eth_hdr;
+        }
     }
     @hidden action issue2345with_nested_if65() {
         h.eth_hdr.src_addr = 48w2;
@@ -84,4 +90,3 @@ control deparser(packet_out b, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

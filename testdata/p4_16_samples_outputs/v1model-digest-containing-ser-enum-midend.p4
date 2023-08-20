@@ -5,28 +5,25 @@ error {
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<9> egressSpec_t;
-typedef bit<48> macAddr_t;
-typedef bit<32> ip4Addr_t;
 header ethernet_t {
-    macAddr_t dstAddr;
-    macAddr_t srcAddr;
-    bit<16>   etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>    version;
-    bit<4>    ihl;
-    bit<8>    diffserv;
-    bit<16>   totalLen;
-    bit<16>   identification;
-    bit<3>    flags;
-    bit<13>   fragOffset;
-    bit<8>    ttl;
-    bit<8>    protocol;
-    bit<16>   hdrChecksum;
-    ip4Addr_t srcAddr;
-    ip4Addr_t dstAddr;
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<8>  diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
 }
 
 enum MyPacketTypes {
@@ -35,14 +32,14 @@ enum MyPacketTypes {
 }
 
 struct test_digest_t {
-    macAddr_t     in_mac_srcAddr;
+    bit<48>       in_mac_srcAddr;
     error         my_parser_error;
     MyPacketTypes pkt_type;
 }
 
 struct test_digest2_t {
-    macAddr_t in_mac_dstAddr;
-    bit<8>    my_thing;
+    bit<48> in_mac_dstAddr;
+    bit<8>  my_thing;
 }
 
 struct test_digest3_t {
@@ -87,7 +84,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @name("MyIngress.set_dmac") action set_dmac(@name("dstAddr") macAddr_t dstAddr_2) {
+    @name("MyIngress.set_dmac") action set_dmac(@name("dstAddr") bit<48> dstAddr_2) {
         hdr.ethernet.dstAddr = dstAddr_2;
     }
     @name("MyIngress.drop") action drop() {
@@ -96,7 +93,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     @name("MyIngress.forward") table forward_0 {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
         }
         actions = {
             set_dmac();
@@ -106,13 +103,13 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         size = 1024;
         default_action = NoAction_2();
     }
-    @name("MyIngress.set_nhop") action set_nhop(@name("dstAddr") ip4Addr_t dstAddr_3, @name("port") egressSpec_t port) {
+    @name("MyIngress.set_nhop") action set_nhop(@name("dstAddr") bit<32> dstAddr_3, @name("port") bit<9> port) {
         hdr.ipv4.dstAddr = dstAddr_3;
         standard_metadata.egress_spec = port;
     }
     @name("MyIngress.ipv4_lpm") table ipv4_lpm_0 {
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr");
         }
         actions = {
             set_nhop();
@@ -149,13 +146,13 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
 control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @noWarn("unused") @name(".NoAction") action NoAction_4() {
     }
-    @name("MyEgress.rewrite_mac") action rewrite_mac(@name("srcAddr") macAddr_t srcAddr_1) {
+    @name("MyEgress.rewrite_mac") action rewrite_mac(@name("srcAddr") bit<48> srcAddr_1) {
         hdr.ethernet.srcAddr = srcAddr_1;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name("MyEgress.send_frame") table send_frame_0 {
         key = {
-            standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
+            standard_metadata.egress_port: exact @name("standard_metadata.egress_port");
         }
         actions = {
             rewrite_mac();
@@ -197,4 +194,3 @@ control MyDeparser(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

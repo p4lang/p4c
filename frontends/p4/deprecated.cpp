@@ -14,37 +14,33 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "deprecated.h"
+
+#include "frontends/common/resolveReferences/resolveReferences.h"
 
 namespace P4 {
 
-void CheckDeprecated::warnIfDeprecated(
-    const IR::IAnnotated* annotated, const IR::Node* errorNode) {
-    if (annotated == nullptr)
-        return;
-    auto anno =
-        annotated->getAnnotations()->getSingle(IR::Annotation::deprecatedAnnotation);
-    if (anno == nullptr)
-        return;
+void CheckDeprecated::warnIfDeprecated(const IR::IAnnotated *annotated, const IR::Node *errorNode) {
+    if (annotated == nullptr) return;
+    auto anno = annotated->getAnnotations()->getSingle(IR::Annotation::deprecatedAnnotation);
+    if (anno == nullptr) return;
 
     cstring message = "";
     for (auto a : anno->expr) {
-        if (auto str = a->to<IR::StringLiteral>())
-            message += str->value;
+        if (auto str = a->to<IR::StringLiteral>()) message += str->value;
     }
-    ::warning(ErrorType::WARN_DEPRECATED, "%1%: Using deprecated feature %2%. %3%",
-              errorNode, annotated->getNode(), message);
+    ::warning(ErrorType::WARN_DEPRECATED, "%1%: Using deprecated feature %2%. %3%", errorNode,
+              annotated->getNode(), message);
 }
 
-bool CheckDeprecated::preorder(const IR::PathExpression* expression) {
+bool CheckDeprecated::preorder(const IR::PathExpression *expression) {
     auto decl = refMap->getDeclaration(expression->path);
     CHECK_NULL(decl);
     warnIfDeprecated(decl->to<IR::IAnnotated>(), expression);
     return false;
 }
 
-bool CheckDeprecated::preorder(const IR::Type_Name* name) {
+bool CheckDeprecated::preorder(const IR::Type_Name *name) {
     auto decl = refMap->getDeclaration(name->path);
     CHECK_NULL(decl);
     warnIfDeprecated(decl->to<IR::IAnnotated>(), name);

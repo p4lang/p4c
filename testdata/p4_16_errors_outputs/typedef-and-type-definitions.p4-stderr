@@ -16,27 +16,12 @@ type serializable_enum1_t serializable_enum1T_t; // error
 typedef-and-type-definitions.p4(120): [--Werror=type-error] error: H1T_t: `type' can only be applied to base types
 type h1_t H1T_t; // error
           ^^^^^
-typedef-and-type-definitions.p4(121): [--Werror=type-error] error: H2bT_t: `type' can only be applied to base types
-type header h2b_t { bit<16> f2; bit<8> f3; } H2bT_t; // error
-                                             ^^^^^^
-typedef-and-type-definitions.p4(122): [--Werror=type-error] error: h1StackT_t: `type' can only be applied to base types
-type h1_t[3] h1StackT_t; // error
-             ^^^^^^^^^^
 typedef-and-type-definitions.p4(123): [--Werror=type-error] error: hu1T_t: `type' can only be applied to base types
 type hu1_t hu1T_t; // error
            ^^^^^^
 typedef-and-type-definitions.p4(124): [--Werror=type-error] error: s1T_t: `type' can only be applied to base types
 type s1_t s1T_t; // error
           ^^^^^
-typedef-and-type-definitions.p4(125): [--Werror=type-error] error: PointBD_t: `type' can only be applied to base types
-type struct PointB_t { int<32> x; int<32> y; } PointBD_t; // error
-                                               ^^^^^^^^^
-typedef-and-type-definitions.p4(126): [--Werror=type-error] error: Tuple1T_t: `type' can only be applied to base types
-type tuple<bit<8>, bit<17> > Tuple1T_t; // error
-                             ^^^^^^^^^
-typedef-and-type-definitions.p4(127): [--Werror=type-error] error: Tuple2T_t: `type' can only be applied to base types
-type tuple<bit<8>, varbit<17> > Tuple2T_t; // error
-                                ^^^^^^^^^
 typedef-and-type-definitions.p4(146): [--Werror=type-error] error: vDT_t: `type' can only be applied to base types
 type vD_t vDT_t; // error
           ^^^^^

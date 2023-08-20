@@ -21,7 +21,7 @@ struct metadata {
 }
 
 struct headers {
-    @name(".hdr0") 
+    @name(".hdr0")
     hdr0_t hdr0;
 }
 
@@ -77,7 +77,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_1();
         }
         key = {
-            hdr.hdr0.a: ternary @name("hdr0.a") ;
+            hdr.hdr0.a: ternary @name("hdr0.a");
         }
         size = 512;
         default_action = NoAction_1();
@@ -89,7 +89,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_2();
         }
         key = {
-            hdr.hdr0.a: ternary @name("hdr0.a") ;
+            hdr.hdr0.a: ternary @name("hdr0.a");
         }
         size = 512;
         default_action = NoAction_2();
@@ -101,8 +101,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_3();
         }
         key = {
-            meta._meta_y1: ternary @name("meta.y") ;
-            meta._meta_z2: exact @name("meta.z") ;
+            meta._meta_y1: ternary @name("meta.y");
+            meta._meta_z2: exact @name("meta.z");
         }
         size = 512;
         default_action = NoAction_3();
@@ -114,7 +114,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_4();
         }
         key = {
-            hdr.hdr0.a: ternary @name("hdr0.a") ;
+            hdr.hdr0.a: ternary @name("hdr0.a");
         }
         size = 512;
         default_action = NoAction_4();
@@ -154,4 +154,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

@@ -1,3 +1,8 @@
+struct Header<St> {
+    St     data;
+    bit<1> valid;
+}
+
 struct S {
     bit<32> b;
 }
@@ -11,6 +16,15 @@ struct U {
     Header_0 f;
 }
 
+struct H2<G> {
+    Header<G> g;
+    bit<1>    invalid;
+}
+
+struct H4<T> {
+    T x;
+}
+
 struct Header_1 {
     bit<16> data;
     bit<1>  valid;
@@ -22,6 +36,18 @@ struct H2_0 {
 }
 
 typedef H2_0 R;
+struct H3<T> {
+    R           r;
+    T           s;
+    H2<T>       h2;
+    H4<H2<T>>   h3;
+    tuple<T, T> t;
+}
+
+header GH<T> {
+    T data;
+}
+
 header X {
     bit<32> b;
 }
@@ -47,6 +73,11 @@ struct H3_0 {
     tuple<S, S> t;
 }
 
+header_union HU<T> {
+    X     xu;
+    GH<T> h3u;
+}
+
 header_union HU_0 {
     X    xu;
     GH_0 h3u;
@@ -70,4 +101,3 @@ control c(out bit<1> x) {
 control ctrl(out bit<1> x);
 package top(ctrl _c);
 top(c()) main;
-

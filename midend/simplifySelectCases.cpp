@@ -15,18 +15,16 @@ limitations under the License.
 */
 
 #include "simplifySelectCases.h"
+
 #include "frontends/p4/enumInstance.h"
 
 namespace P4 {
 
-void DoSimplifySelectCases::checkSimpleConstant(const IR::Expression* expr) const {
+void DoSimplifySelectCases::checkSimpleConstant(const IR::Expression *expr) const {
     CHECK_NULL(expr);
-    if (expr->is<IR::DefaultExpression>())
-        return;
-    if (expr->is<IR::Constant>())
-        return;
-    if (expr->is<IR::BoolLiteral>())
-        return;
+    if (expr->is<IR::DefaultExpression>()) return;
+    if (expr->is<IR::Constant>()) return;
+    if (expr->is<IR::BoolLiteral>()) return;
     if (expr->is<IR::Mask>() || expr->is<IR::Range>()) {
         auto bin = expr->to<IR::Operation_Binary>();
         checkSimpleConstant(bin->left);
@@ -35,13 +33,11 @@ void DoSimplifySelectCases::checkSimpleConstant(const IR::Expression* expr) cons
     }
     if (expr->is<IR::ListExpression>()) {
         auto list = expr->to<IR::ListExpression>();
-        for (auto e : list->components)
-            checkSimpleConstant(e);
+        for (auto e : list->components) checkSimpleConstant(e);
         return;
     }
     auto ei = EnumInstance::resolve(expr, typeMap);
-    if (ei != nullptr)
-        return;
+    if (ei != nullptr) return;
 
     // we allow value_set name to be used in place of select case;
     if (expr->is<IR::PathExpression>()) {
@@ -53,7 +49,7 @@ void DoSimplifySelectCases::checkSimpleConstant(const IR::Expression* expr) cons
     ::error(ErrorType::ERR_INVALID, "%1%: must be a compile-time constant", expr);
 }
 
-const IR::Node* DoSimplifySelectCases::preorder(IR::SelectExpression* expression) {
+const IR::Node *DoSimplifySelectCases::preorder(IR::SelectExpression *expression) {
     IR::Vector<IR::SelectCase> cases;
 
     bool seenDefault = false;
@@ -65,16 +61,14 @@ const IR::Node* DoSimplifySelectCases::preorder(IR::SelectExpression* expression
             continue;
         }
         cases.push_back(c);
-        if (c->keyset->is<IR::DefaultExpression>())
-            seenDefault = true;
-        if (requireConstants)
-            checkSimpleConstant(c->keyset);
+        if (c->keyset->is<IR::DefaultExpression>()) seenDefault = true;
+        if (requireConstants) checkSimpleConstant(c->keyset);
     }
     if (changes) {
         if (cases.size() == 1) {
             // just one default label
             warn(ErrorType::WARN_PARSER_TRANSITION,
-                 "%1%: transition does not depend on select argument", expression->select);
+                 "'%1%': transition does not depend on select argument", expression->select);
             return cases.at(0)->state;
         }
         expression->selectCases = std::move(cases);

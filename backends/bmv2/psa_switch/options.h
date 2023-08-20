@@ -25,22 +25,24 @@ namespace BMV2 {
 class PsaSwitchOptions : public BMV2Options {
  public:
     PsaSwitchOptions() {
-        registerOption("--listMidendPasses", nullptr,
-                [this](const char*) {
-                    listMidendPasses = true;
-                    loadIRFromJson = false;
-                    PsaSwitchMidEnd midEnd(*this, outStream);
-                    exit(0);
-                    return false; },
-                "[PsaSwitch back-end] Lists exact name of all midend passes.\n");
+        registerOption(
+            "--listMidendPasses", nullptr,
+            [this](const char *) {
+                listMidendPasses = true;
+                loadIRFromJson = false;
+                PsaSwitchMidEnd midEnd(*this, outStream);
+                exit(0);
+                return false;
+            },
+            "[PsaSwitch back-end] Lists exact name of all midend passes.\n");
     }
 
     /// Process the command line arguments and set options accordingly.
-    std::vector<const char*>* process(int argc, char* const argv[]) override;
+    std::vector<const char *> *process(int argc, char *const argv[]) override;
 };
 
 using PsaSwitchContext = P4CContextWithOptions<PsaSwitchOptions>;
 
-};  // namespace BMV2
+}  // namespace BMV2
 
 #endif /* BACKENDS_BMV2_PSA_SWITCH_OPTIONS_H_ */

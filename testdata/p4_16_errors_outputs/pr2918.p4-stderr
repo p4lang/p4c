@@ -1,0 +1,12 @@
+pr2918.p4(16): [--Wwarn=shadow] warning: 'p' shadows 'parser p'
+parser p(packet_in p, out Headers h) {
+                   ^
+pr2918.p4(16)
+parser p(packet_in p, out Headers h) {
+       ^
+pr2918.p4(19): [--Werror=type-error] error: Expression 'ListExpression' with a component of type 'struct S' cannot be used in 'select'
+        transition select (h.h.s) {
+                           ^^^^^
+pr2918.p4(3)
+struct S {
+       ^

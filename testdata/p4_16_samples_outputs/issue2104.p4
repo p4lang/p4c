@@ -1,6 +1,4 @@
 #include <core.p4>
-#define V1MODEL_VERSION 20180101
-#include <v1model.p4>
 
 control c() {
     bit<16> F = 0;
@@ -21,4 +19,3 @@ control c() {
 control e();
 package top(e e);
 top(c()) main;
-

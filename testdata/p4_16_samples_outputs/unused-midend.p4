@@ -48,4 +48,3 @@ control c(inout S s) {
 control cproto<T>(inout T v);
 package top(cproto<_> _c);
 top(c()) main;
-

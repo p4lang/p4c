@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_COMMON_MODEL_H_
-#define _FRONTENDS_COMMON_MODEL_H_
+#ifndef FRONTENDS_COMMON_MODEL_H_
+#define FRONTENDS_COMMON_MODEL_H_
 
-#include "lib/cstring.h"
 #include "ir/id.h"
+#include "lib/cstring.h"
 
 // Classes for representing various P4 program models inside the compiler
 
@@ -32,7 +32,10 @@ struct Elem {
     cstring name;
     IR::ID Id() const { return IR::ID(name); }
     IR::ID Id(Util::SourceInfo srcInfo) const { return IR::ID(srcInfo, name); }
-    const char* str() const { return name.c_str(); }
+    IR::ID Id(Util::SourceInfo srcInfo, cstring originalName) const {
+        return IR::ID(srcInfo, name, originalName);
+    }
+    const char *str() const { return name.c_str(); }
     cstring toString() const { return name; }
 };
 
@@ -53,13 +56,13 @@ struct Extern_Model : public Type_Model {
 /// Param_Model : Elem
 struct Param_Model : public Elem {
     const Type_Model type;
-    const unsigned   index;
-    Param_Model(cstring name, Type_Model type, unsigned index) :
-            Elem(name), type(type), index(index) {}
+    const unsigned index;
+    Param_Model(cstring name, Type_Model type, unsigned index)
+        : Elem(name), type(type), index(index) {}
 };
 
 class Model {};
 
 }  // namespace Model
 
-#endif /* _FRONTENDS_COMMON_MODEL_H_ */
+#endif /* FRONTENDS_COMMON_MODEL_H_ */

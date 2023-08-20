@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,17 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <stdio.h>
 #include <getopt.h>
+#include <stdio.h>
+
 #include <fstream>
 
-#include "lib/nullstream.h"
-#include "irclass.h"
 #include "ir-generator.h"
+#include "irclass.h"
+#include "lib/nullstream.h"
 
-void usage(const char* progname) {
-    fprintf(stderr, "%s: generate C++ classes for representing\n"
-            "the P4 compiler intermediate representation\n", progname);
+void usage(const char *progname) {
+    fprintf(stderr,
+            "%s: generate C++ classes for representing\n"
+            "the P4 compiler intermediate representation\n",
+            progname);
     fprintf(stderr, "usage:\n");
     fprintf(stderr, "%s [options] file.def file2.def ... >ir.h\n", progname);
     fprintf(stderr, "options supported:\n");
@@ -35,15 +38,14 @@ void usage(const char* progname) {
     fprintf(stderr, "     -P: don't generate #line directives\n");
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
     std::ostream *t = new nullstream();
     std::ostream *header = new nullstream();
     std::ostream *impl = new nullstream();
 
     while (true) {
         int opt = getopt(argc, argv, "o:i:t:hP");
-        if (opt == -1)
-            break;
+        if (opt == -1) break;
 
         switch (opt) {
             case 'h':
@@ -71,9 +73,8 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    IrDefinitions* defs = parse(argv + optind, argc - optind);
-    if (defs == nullptr)
-        return 1;
+    IrDefinitions *defs = parse(argv + optind, argc - optind);
+    if (defs == nullptr) return 1;
 
     defs->resolve();
     defs->generate(*t, *header, *impl);

@@ -15,12 +15,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_FLATTENHEADERS_H_
-#define _MIDEND_FLATTENHEADERS_H_
+#ifndef MIDEND_FLATTENHEADERS_H_
+#define MIDEND_FLATTENHEADERS_H_
 
-#include "ir/ir.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
 #include "flattenInterfaceStructs.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -28,21 +28,21 @@ namespace P4 {
 Find the types to replace and insert them in the nested struct map.
  */
 class FindHeaderTypesToReplace : public Inspector {
-    P4::TypeMap* typeMap;
+    P4::TypeMap *typeMap;
     AnnotationSelectionPolicy *policy;
-    ordered_map<cstring, StructTypeReplacement<IR::Type_StructLike>*> replacement;
+    ordered_map<cstring, StructTypeReplacement<IR::Type_StructLike> *> replacement;
 
  public:
-    explicit FindHeaderTypesToReplace(P4::TypeMap *typeMap,
-            AnnotationSelectionPolicy *policy):
-        typeMap(typeMap), policy(policy) {
+    explicit FindHeaderTypesToReplace(P4::TypeMap *typeMap, AnnotationSelectionPolicy *policy)
+        : typeMap(typeMap), policy(policy) {
         setName("FindHeaderTypesToReplace");
         CHECK_NULL(typeMap);
     }
-    bool preorder(const IR::Type_Header* type) override;
-    void createReplacement(const IR::Type_Header* type, AnnotationSelectionPolicy *policy);
-    StructTypeReplacement<IR::Type_StructLike>* getReplacement(const cstring name) const {
-        return ::get(replacement, name); }
+    bool preorder(const IR::Type_Header *type) override;
+    void createReplacement(const IR::Type_Header *type, AnnotationSelectionPolicy *policy);
+    StructTypeReplacement<IR::Type_StructLike> *getReplacement(const cstring name) const {
+        return ::get(replacement, name);
+    }
     bool empty() const { return replacement.empty(); }
 };
 
@@ -120,26 +120,26 @@ struct local_metadata_t {
 */
 class ReplaceHeaders : public Transform, P4WriteContext {
     P4::TypeMap *typeMap;
-    FindHeaderTypesToReplace* findHeaderTypesToReplace;
+    FindHeaderTypesToReplace *findHeaderTypesToReplace;
 
  public:
     explicit ReplaceHeaders(P4::TypeMap *typeMap,
-                            FindHeaderTypesToReplace* findHeaderTypesToReplace):
-                            typeMap(typeMap),
-                            findHeaderTypesToReplace(findHeaderTypesToReplace) {
-        CHECK_NULL(typeMap); CHECK_NULL(findHeaderTypesToReplace);
+                            FindHeaderTypesToReplace *findHeaderTypesToReplace)
+        : typeMap(typeMap), findHeaderTypesToReplace(findHeaderTypesToReplace) {
+        CHECK_NULL(typeMap);
+        CHECK_NULL(findHeaderTypesToReplace);
         setName("ReplaceHeaders");
     }
 
-    const IR::Node* preorder(IR::P4Program* program) override;
-    const IR::Node* postorder(IR::Member* expression) override;
-    const IR::Node* postorder(IR::Type_Header* type) override;
+    const IR::Node *preorder(IR::P4Program *program) override;
+    const IR::Node *postorder(IR::Member *expression) override;
+    const IR::Node *postorder(IR::Type_Header *type) override;
 };
 
 class FlattenHeaders final : public PassManager {
  public:
-    FlattenHeaders(ReferenceMap* refMap, TypeMap* typeMap,
-            AnnotationSelectionPolicy *policy = nullptr) {
+    FlattenHeaders(ReferenceMap *refMap, TypeMap *typeMap,
+                   AnnotationSelectionPolicy *policy = nullptr) {
         auto findHeadersToReplace = new FindHeaderTypesToReplace(typeMap, policy);
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(findHeadersToReplace);
@@ -151,4 +151,4 @@ class FlattenHeaders final : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_FLATTENHEADERS_H_ */
+#endif /* MIDEND_FLATTENHEADERS_H_ */

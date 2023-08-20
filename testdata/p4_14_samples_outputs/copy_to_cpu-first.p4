@@ -3,7 +3,8 @@
 #include <v1model.p4>
 
 enum bit<8> FieldLists {
-    copy_to_cpu_fields = 8w0
+    none = 8w0,
+    copy_to_cpu_fields = 8w1
 }
 
 struct intrinsic_metadata_t {
@@ -65,7 +66,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @defaultonly NoAction();
         }
         key = {
-            standard_metadata.instance_type: exact @name("standard_metadata.instance_type") ;
+            standard_metadata.instance_type: exact @name("standard_metadata.instance_type");
         }
         size = 16;
         default_action = NoAction();
@@ -77,7 +78,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".do_copy_to_cpu") action do_copy_to_cpu() {
-        clone_preserving_field_list(CloneType.I2E, 32w250, (bit<8>)FieldLists.copy_to_cpu_fields);
+        clone_preserving_field_list(CloneType.I2E, 32w250, 8w1);
     }
     @name(".copy_to_cpu") table copy_to_cpu {
         actions = {

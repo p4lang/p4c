@@ -6,7 +6,7 @@ control p() {
         bit<32> f;
         bit<16> e;
         bool d;
-        c = b;
+        c = +b;
         c = -b;
         f = ~(bit<32>)b;
         f = (bit<32>)a & (bit<32>)b;

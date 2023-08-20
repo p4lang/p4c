@@ -1,0 +1,3 @@
+issue3378.p4(2): [--Werror=type-error] error: f: not supported as a tuple field
+package g(tuple<f,f> b);
+                ^

@@ -19,7 +19,7 @@ treatment of these topics is outside the scope of this text.
 
 ### P4
 
-[P4] (http://p4.org) is a domain-specific programming language for
+[P4](http://p4.org) is a domain-specific programming language for
 specifying the behavior of the dataplanes of network-forwarding
 elements.  The name of the programming language comes from the title
 of a paper published in the proceedings of SIGCOMM Computer

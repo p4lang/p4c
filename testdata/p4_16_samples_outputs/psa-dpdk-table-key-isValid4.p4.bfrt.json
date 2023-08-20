@@ -16,7 +16,7 @@
           "repeated" : false,
           "annotations" : [],
           "mandatory" : false,
-          "match_type" : "Optional",
+          "match_type" : "Ternary",
           "type" : {
             "type" : "bytes",
             "width" : 1

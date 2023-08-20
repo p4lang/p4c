@@ -70,4 +70,3 @@ control MyDeparser(packet_out packet, in headers hdr) {
 }
 
 V1Switch(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

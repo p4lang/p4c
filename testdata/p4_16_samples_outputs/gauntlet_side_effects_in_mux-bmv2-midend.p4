@@ -30,28 +30,19 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    @name("ingress.tmp") bit<16> tmp;
     @name("ingress.hPSe_0") bit<8> hPSe;
     @name("ingress.hPSe_1") bit<8> hPSe_2;
-    @hidden action act() {
-        h.h.a = hPSe;
-    }
-    @hidden action act_0() {
-        h.h.b = hPSe_2;
-    }
     @hidden action gauntlet_side_effects_in_muxbmv2l36() {
-        h.eth_hdr.eth_type = 16w2;
+        h.h.a = hPSe;
+        tmp = 16w2;
     }
-    @hidden table tbl_act {
-        actions = {
-            act();
-        }
-        const default_action = act();
+    @hidden action gauntlet_side_effects_in_muxbmv2l36_0() {
+        h.h.b = hPSe_2;
+        tmp = 16w2;
     }
-    @hidden table tbl_act_0 {
-        actions = {
-            act_0();
-        }
-        const default_action = act_0();
+    @hidden action gauntlet_side_effects_in_muxbmv2l36_1() {
+        h.eth_hdr.eth_type = tmp;
     }
     @hidden table tbl_gauntlet_side_effects_in_muxbmv2l36 {
         actions = {
@@ -59,13 +50,25 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = gauntlet_side_effects_in_muxbmv2l36();
     }
+    @hidden table tbl_gauntlet_side_effects_in_muxbmv2l36_0 {
+        actions = {
+            gauntlet_side_effects_in_muxbmv2l36_0();
+        }
+        const default_action = gauntlet_side_effects_in_muxbmv2l36_0();
+    }
+    @hidden table tbl_gauntlet_side_effects_in_muxbmv2l36_1 {
+        actions = {
+            gauntlet_side_effects_in_muxbmv2l36_1();
+        }
+        const default_action = gauntlet_side_effects_in_muxbmv2l36_1();
+    }
     apply {
         if (h.eth_hdr.src_addr == 48w5) {
-            tbl_act.apply();
+            tbl_gauntlet_side_effects_in_muxbmv2l36.apply();
         } else {
-            tbl_act_0.apply();
+            tbl_gauntlet_side_effects_in_muxbmv2l36_0.apply();
         }
-        tbl_gauntlet_side_effects_in_muxbmv2l36.apply();
+        tbl_gauntlet_side_effects_in_muxbmv2l36_1.apply();
     }
 }
 
@@ -92,4 +95,3 @@ control deparser(packet_out b, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

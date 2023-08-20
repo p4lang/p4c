@@ -6,13 +6,11 @@ struct ethernet_t {
 }
 
 struct ipv4_base_t {
-	bit<4> version
-	bit<4> ihl
+	bit<8> version_ihl
 	bit<8> diffserv
 	bit<16> totalLen
 	bit<16> identification
-	bit<3> flags
-	bit<13> fragOffset
+	bit<16> flags_fragOffset
 	bit<8> ttl
 	bit<8> protocol
 	bit<16> hdrChecksum
@@ -26,6 +24,15 @@ struct ipv4_option_timestamp_t {
 	varbit<304> data
 }
 
+struct option_t {
+	bit<8> value
+	bit<8> len
+}
+
+struct lookahead_tmp_hdr {
+	bit<8> f
+}
+
 struct a1_arg_t {
 	bit<48> param
 }
@@ -35,40 +42,22 @@ struct a2_arg_t {
 }
 
 struct main_metadata_t {
-	bit<32> pna_pre_input_metadata_input_port
-	bit<16> pna_pre_input_metadata_parser_error
-	bit<32> pna_pre_input_metadata_direction
-	bit<3> pna_pre_input_metadata_pass
-	bit<8> pna_pre_input_metadata_loopedback
-	bit<8> pna_pre_output_metadata_decrypt
-	bit<32> pna_pre_output_metadata_said
-	bit<16> pna_pre_output_metadata_decrypt_start_offset
-	bit<32> pna_main_parser_input_metadata_direction
-	bit<3> pna_main_parser_input_metadata_pass
-	bit<8> pna_main_parser_input_metadata_loopedback
-	bit<32> pna_main_parser_input_metadata_input_port
-	bit<32> pna_main_input_metadata_direction
-	bit<3> pna_main_input_metadata_pass
-	bit<8> pna_main_input_metadata_loopedback
-	bit<64> pna_main_input_metadata_timestamp
-	bit<16> pna_main_input_metadata_parser_error
-	bit<8> pna_main_input_metadata_class_of_service
 	bit<32> pna_main_input_metadata_input_port
-	bit<8> pna_main_output_metadata_class_of_service
 	bit<32> pna_main_output_metadata_output_port
-	bit<8> MainParserT_parser_tmp_1
-	bit<32> MainParserT_parser_tmp_2
-	bit<32> MainParserT_parser_tmp_3
-	bit<32> MainParserT_parser_tmp
-	bit<16> MainParserT_parser_tmp16_0
-	bit<8> MainParserT_parser_tmp_0
+	bit<32> MainParserT_parser_tmp_0
+	bit<32> MainParserT_parser_tmp_1
+	bit<32> MainParserT_parser_tmp_1_extract_tmp
 }
 metadata instanceof main_metadata_t
 
 header ethernet instanceof ethernet_t
 header ipv4_base instanceof ipv4_base_t
 header ipv4_option_timestamp instanceof ipv4_option_timestamp_t
+header MainParserT_parser_tmp_hdr instanceof option_t
+;oldname:MainParserT_parser_lookahead_tmp
+header MainParserT_parser_lookahead_0 instanceof lookahead_tmp_hdr
 
+regarray direction size 0x100 initval 0
 action NoAction args none {
 	return
 }
@@ -115,18 +104,18 @@ apply {
 	jmpeq MAINPARSERIMPL_PARSE_IPV4 h.ethernet.etherType 0x800
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4_base
-	jmpeq MAINPARSERIMPL_ACCEPT h.ipv4_base.ihl 0x5
-	lookahead m.MainParserT_parser_tmp_0
-	jmpeq MAINPARSERIMPL_PARSE_IPV4_OPTION_TIMESTAMP m.MainParserT_parser_tmp_0 0x44
+	jmpeq MAINPARSERIMPL_ACCEPT h.ipv4_base.version_ihl 0x45
+	lookahead h.MainParserT_parser_lookahead_0
+	jmpeq MAINPARSERIMPL_PARSE_IPV4_OPTION_TIMESTAMP h.MainParserT_parser_lookahead_0.f 0x44
 	jmp MAINPARSERIMPL_ACCEPT
-	MAINPARSERIMPL_PARSE_IPV4_OPTION_TIMESTAMP :	lookahead m.MainParserT_parser_tmp16_0
-	mov m.MainParserT_parser_tmp_1 m.MainParserT_parser_tmp16_0
-	mov m.MainParserT_parser_tmp_2 m.MainParserT_parser_tmp_1
-	mov m.MainParserT_parser_tmp_3 m.MainParserT_parser_tmp_2
-	shl m.MainParserT_parser_tmp_3 0x3
-	mov m.MainParserT_parser_tmp m.MainParserT_parser_tmp_3
-	add m.MainParserT_parser_tmp 0xfffffff0
-	extract h.ipv4_option_timestamp m.MainParserT_parser_tmp
+	MAINPARSERIMPL_PARSE_IPV4_OPTION_TIMESTAMP :	lookahead h.MainParserT_parser_tmp_hdr
+	mov m.MainParserT_parser_tmp_0 h.MainParserT_parser_tmp_hdr.len
+	shl m.MainParserT_parser_tmp_0 0x3
+	mov m.MainParserT_parser_tmp_1 m.MainParserT_parser_tmp_0
+	add m.MainParserT_parser_tmp_1 0xFFFFFFF0
+	mov m.MainParserT_parser_tmp_1_extract_tmp m.MainParserT_parser_tmp_1
+	shr m.MainParserT_parser_tmp_1_extract_tmp 0x3
+	extract h.ipv4_option_timestamp m.MainParserT_parser_tmp_1_extract_tmp
 	MAINPARSERIMPL_ACCEPT :	mov m.pna_main_output_metadata_output_port 0x0
 	table tbl
 	table tbl2

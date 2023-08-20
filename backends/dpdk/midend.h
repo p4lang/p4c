@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef BACKENDS_DPDK_PSA_SWITCH_MIDEND_H_
-#define BACKENDS_DPDK_PSA_SWITCH_MIDEND_H_
+#ifndef BACKENDS_DPDK_MIDEND_H_
+#define BACKENDS_DPDK_MIDEND_H_
 
 #include "frontends/common/options.h"
 #include "ir/ir.h"
@@ -24,23 +24,23 @@ limitations under the License.
 namespace DPDK {
 
 class DpdkMidEnd : public PassManager {
-  public:
+ public:
     // These will be accurate when the mid-end completes evaluation
-    P4::ReferenceMap    refMap;
-    P4::TypeMap         typeMap;
-    const IR::ToplevelBlock   *toplevel = nullptr;
+    P4::ReferenceMap refMap;
+    P4::TypeMap typeMap;
+    const IR::ToplevelBlock *toplevel = nullptr;
     P4::ConvertEnums::EnumMapping enumMap;
 
     // If p4c is run with option '--listMidendPasses', outStream is used for
     // printing passes names
-    explicit DpdkMidEnd(CompilerOptions &options,
-                             std::ostream *outStream = nullptr);
+    explicit DpdkMidEnd(CompilerOptions &options, std::ostream *outStream = nullptr);
 
-    const IR::ToplevelBlock* process(const IR::P4Program *&program) {
+    const IR::ToplevelBlock *process(const IR::P4Program *&program) {
         program = program->apply(*this);
-        return toplevel; }
+        return toplevel;
+    }
 };
 
-} // namespace DPDK
+}  // namespace DPDK
 
-#endif /* BACKENDS_DPDK_PSA_SWITCH_MIDEND_H_ */
+#endif /* BACKENDS_DPDK_MIDEND_H_ */

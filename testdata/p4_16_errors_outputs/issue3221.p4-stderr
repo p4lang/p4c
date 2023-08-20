@@ -1,0 +1,9 @@
+issue3221.p4(8): [--Werror=type-error] error: (t1)a
+  return (t1)a;
+         ^^^^^
+  ---- Actual error:
+  Cannot unify type 'bit<2>' with type 'bit<1>'
+  ---- Originating from:
+issue3221.p4(3): Cannot cast from 'bit<2>' to 't1'
+  type b1 t1;
+          ^^

@@ -25,6 +25,7 @@ updates {
         }
       }
       priority: 4
+      is_const: true
     }
   }
 }
@@ -49,6 +50,7 @@ updates {
         }
       }
       priority: 3
+      is_const: true
     }
   }
 }
@@ -73,6 +75,7 @@ updates {
         }
       }
       priority: 2
+      is_const: true
     }
   }
 }
@@ -91,6 +94,7 @@ updates {
         }
       }
       priority: 1
+      is_const: true
     }
   }
 }

@@ -65,11 +65,11 @@ struct metadata {
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
-    @name(".ipv4") 
+    @name(".ipv4")
     ipv4_t     ipv4;
-    @name(".ipv6") 
+    @name(".ipv6")
     ipv6_t     ipv6;
 }
 
@@ -111,7 +111,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_1();
         }
         key = {
-            hdr.ethernet.isValid(): exact @name("ethernet.$valid$") ;
+            hdr.ethernet.isValid(): exact @name("ethernet.$valid$");
         }
         default_action = NoAction_1();
     }
@@ -147,9 +147,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_2();
         }
         key = {
-            meta._egress_metadata_smac_idx1: exact @name("egress_metadata.smac_idx") ;
-            hdr.ipv4.isValid()             : exact @name("ipv4.$valid$") ;
-            hdr.ipv6.isValid()             : exact @name("ipv6.$valid$") ;
+            meta._egress_metadata_smac_idx1: exact @name("egress_metadata.smac_idx");
+            hdr.ipv4.isValid()             : exact @name("ipv4.$valid$");
+            hdr.ipv6.isValid()             : exact @name("ipv6.$valid$");
         }
         size = 512;
         default_action = NoAction_2();
@@ -186,4 +186,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

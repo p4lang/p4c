@@ -14,16 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _LIB_CSTRING_H_
-#define _LIB_CSTRING_H_
+#ifndef LIB_CSTRING_H_
+#define LIB_CSTRING_H_
 
-#include <cstring>
 #include <cstddef>
-
+#include <cstring>
 #include <functional>
 #include <iomanip>
-#include <string>
 #include <sstream>
+#include <string>
 
 /**
  * A cstring is a reference to a zero-terminated, immutable, interned string.
@@ -108,9 +107,8 @@ class cstring {
     // Just helper function, for lazies, who do not like to write .str()
     // Do not use it, implicit std::string construction with implicit overhead
     // TODO (DanilLutsenko): Remove it?
-    cstring(const std::stringstream& stream)  // NOLINT(runtime/explicit)
-        : cstring(stream.str()) {
-    }
+    cstring(const std::stringstream &stream)  // NOLINT(runtime/explicit)
+        : cstring(stream.str()) {}
 
     // TODO (DanilLutsenko): Construct from StringRef?
 
@@ -118,7 +116,7 @@ class cstring {
     // cstring will control lifetime of passed object
     static cstring own(const char *string, std::size_t length) {
         if (string == nullptr) {
-            return{};
+            return {};
         }
 
         cstring result;
@@ -127,11 +125,11 @@ class cstring {
     }
 
     // construct cstring wrapper for literal
-    template<typename T, std::size_t N,
-        typename = typename std::enable_if<std::is_same<T, const char>::value>::type>
+    template <typename T, std::size_t N,
+              typename = typename std::enable_if<std::is_same<T, const char>::value>::type>
     static cstring literal(T (&string)[N]) {  // NOLINT(runtime/explicit)
         cstring result;
-        result.construct_from_literal(string, N - 1  /* String length without null terminator */);
+        result.construct_from_literal(string, N - 1 /* String length without null terminator */);
         return result;
     }
 
@@ -151,7 +149,8 @@ class cstring {
     /// the enclosing quotes).
     cstring escapeJson() const;
 
-    template <typename Iter> cstring(Iter begin, Iter end) {
+    template <typename Iter>
+    cstring(Iter begin, Iter end) {
         *this = std::string(begin, end);
     }
 
@@ -203,8 +202,8 @@ class cstring {
     bool operator>(const std::string &a) const { return *this > a.c_str(); }
     bool operator>=(const std::string &a) const { return *this >= a.c_str(); }
 
-    bool startsWith(const cstring& prefix) const;
-    bool endsWith(const cstring& suffix) const;
+    bool startsWith(const cstring &prefix) const;
+    bool endsWith(const cstring &suffix) const;
 
     // FIXME (DanilLutsenko): We really need mutations for immutable string?
     // Probably better do transformation in std::string-like containter and
@@ -219,9 +218,10 @@ class cstring {
     cstring operator+=(std::string a);
     cstring operator+=(char a);
 
-    cstring before(const char* at) const;
-    cstring substr(size_t start) const
-    { return (start >= size()) ? "" : substr(start, size() - start); }
+    cstring before(const char *at) const;
+    cstring substr(size_t start) const {
+        return (start >= size()) ? "" : substr(start, size() - start);
+    }
     cstring substr(size_t start, size_t length) const;
     cstring replace(char find, char replace) const;
     cstring replace(cstring find, cstring replace) const;
@@ -232,81 +232,138 @@ class cstring {
         if (!str) return *this;
         const char *start = str + strspn(str, ws);
         size_t len = strlen(start);
-        while (len > 0 && strchr(ws, start[len-1])) --len;
-        return cstring(start, len); }
+        while (len > 0 && strchr(ws, start[len - 1])) --len;
+        return cstring(start, len);
+    }
 
     // Useful singletons.
     static cstring newline;
     static cstring empty;
 
     // Static factory functions.
-    template<typename T>
+    template <typename T>
     static cstring to_cstring(const T &t) {
         std::stringstream ss;
         ss << t;
-        return cstring(ss.str()); }
-    template<typename Iterator>
+        return cstring(ss.str());
+    }
+    template <typename Iterator>
     static cstring join(Iterator begin, Iterator end, const char *delim = ", ") {
         std::stringstream ss;
         for (auto current = begin; current != end; ++current) {
             if (begin != current) ss << delim;
-            ss << *current; }
-        return cstring(ss.str()); }
-    template<class T> static cstring make_unique(const T &inuse, cstring base, char sep = '.');
+            ss << *current;
+        }
+        return cstring(ss.str());
+    }
+    template <class T>
+    static cstring make_unique(const T &inuse, cstring base, char sep = '.');
+    template <class T>
+    static cstring make_unique(const T &inuse, cstring base, int &counter, char sep = '.');
 
     /// @return the total size in bytes of all interned strings. @count is set
     /// to the total number of interned strings.
     static size_t cache_size(size_t &count);
 
-    // convert the cstring to upper case
-    cstring toUpper();
+    /// convert the cstring to upper case
+    cstring toUpper() const;
+    /// capitalize the first symbol
+    cstring capitalize() const;
+    /// Append this many spaces after each newline (and before the first string).
+    cstring indent(size_t amount) const;
 };
 
 inline bool operator==(const char *a, cstring b) { return b == a; }
 inline bool operator!=(const char *a, cstring b) { return b != a; }
 
 inline std::string operator+(cstring a, cstring b) {
-    std::string rv(a); rv += b; return rv; }
+    std::string rv(a);
+    rv += b;
+    return rv;
+}
 inline std::string operator+(cstring a, const char *b) {
-    std::string rv(a); rv += b; return rv; }
+    std::string rv(a);
+    rv += b;
+    return rv;
+}
 inline std::string operator+(cstring a, const std::string &b) {
-    std::string rv(a); rv += b; return rv; }
+    std::string rv(a);
+    rv += b;
+    return rv;
+}
 inline std::string operator+(cstring a, char b) {
-    std::string rv(a); rv += b; return rv; }
+    std::string rv(a);
+    rv += b;
+    return rv;
+}
 inline std::string operator+(const char *a, cstring b) {
-    std::string rv(a); rv += b; return rv; }
-inline std::string operator+(std::string a, cstring b) { a += b; return a; }
+    std::string rv(a);
+    rv += b;
+    return rv;
+}
+inline std::string operator+(std::string a, cstring b) {
+    a += b;
+    return a;
+}
 inline std::string operator+(char a, cstring b) {
-    std::string rv(1, a); rv += b; return rv; }
+    std::string rv(1, a);
+    rv += b;
+    return rv;
+}
 
-inline cstring cstring::operator+=(cstring a) { *this = *this + a; return *this; }
-inline cstring cstring::operator+=(const char *a) { *this = *this + a; return *this; }
-inline cstring cstring::operator+=(std::string a) { *this = *this + a; return *this; }
-inline cstring cstring::operator+=(char a) { *this = *this + a; return *this; }
+inline cstring cstring::operator+=(cstring a) {
+    *this = *this + a;
+    return *this;
+}
+inline cstring cstring::operator+=(const char *a) {
+    *this = *this + a;
+    return *this;
+}
+inline cstring cstring::operator+=(std::string a) {
+    *this = *this + a;
+    return *this;
+}
+inline cstring cstring::operator+=(char a) {
+    *this = *this + a;
+    return *this;
+}
 
-inline std::string& operator+=(std::string& a, cstring b) {
+inline std::string &operator+=(std::string &a, cstring b) {
     a.append(b.c_str());
-    return a; }
+    return a;
+}
 
-template<class T> cstring cstring::make_unique(const T &inuse, cstring base, char sep) {
+template <class T>
+cstring cstring::make_unique(const T &inuse, cstring base, int &counter, char sep) {
+    if (!inuse.count(base)) return base;
+
     char suffix[12];
     cstring rv = base;
+    do {
+        snprintf(suffix, sizeof(suffix) / sizeof(suffix[0]), "%c%d", sep, counter++);
+        rv = base + suffix;
+    } while (inuse.count(rv));
+    return rv;
+}
+
+template <class T>
+cstring cstring::make_unique(const T &inuse, cstring base, char sep) {
     int counter = 0;
-    while (inuse.count(rv)) {
-        snprintf(suffix, sizeof(suffix)/sizeof(suffix[0]), "%c%d", sep, counter++);
-        rv = base + suffix; }
-    return rv; }
+    return make_unique(inuse, base, counter, sep);
+}
 
 inline std::ostream &operator<<(std::ostream &out, cstring s) {
-    return out << (s ? s.c_str() : "<null>"); }
+    return out << (s ? s.c_str() : "<null>");
+}
 
 namespace std {
-template<> struct hash<cstring> {
-    std::size_t operator()(const cstring& c) const {
+template <>
+struct hash<cstring> {
+    std::size_t operator()(const cstring &c) const {
         // This implementation is good for cstring, since the strings are internalized
         return hash<const void *>()(c.c_str());
     }
 };
 }  // namespace std
 
-#endif /* _LIB_CSTRING_H_ */
+#endif /* LIB_CSTRING_H_ */

@@ -4,3 +4,4 @@ psa-dpdk-table-key-consolidation-mixed-keys-4.p4(119): [--Wwarn=ignore-prop] war
 psa-dpdk-table-key-consolidation-mixed-keys-4.p4(119): [--Wwarn=mismatch] warning: 8w0x48: Constant key field
             8w0x48 : exact;
             ^^^^^^
+[--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table tbl. Copying all match fields to metadata

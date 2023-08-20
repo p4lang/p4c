@@ -14,33 +14,69 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "ebpfBackend.h"
+
+#include "backends/bmv2/psa_switch/psaSwitch.h"
+#include "ebpfProgram.h"
+#include "ebpfType.h"
+#include "frontends/p4/evaluator/evaluator.h"
 #include "lib/error.h"
 #include "lib/nullstream.h"
-#include "frontends/p4/evaluator/evaluator.h"
-
-#include "ebpfBackend.h"
+#include "psa/backend.h"
+#include "psa/ebpfPsaGen.h"
 #include "target.h"
-#include "ebpfType.h"
-#include "ebpfProgram.h"
 
 namespace EBPF {
 
-void run_ebpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* toplevel,
-                      P4::ReferenceMap* refMap, P4::TypeMap* typeMap) {
-    if (toplevel == nullptr)
-        return;
+void emitFilterModel(const EbpfOptions &options, Target *target, const IR::ToplevelBlock *toplevel,
+                     P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
+    CodeBuilder c(target);
+    CodeBuilder h(target);
+
+    EBPFTypeFactory::createFactory(typeMap);
+    auto ebpfprog = new EBPFProgram(options, toplevel->getProgram(), refMap, typeMap, toplevel);
+    if (!ebpfprog->build()) return;
+
+    if (options.outputFile.isNullOrEmpty()) return;
+
+    cstring cfile = options.outputFile;
+    auto cstream = openFile(cfile, false);
+    if (cstream == nullptr) return;
+
+    cstring hfile;
+    const char *dot = cfile.findlast('.');
+    if (dot == nullptr)
+        hfile = cfile + ".h";
+    else
+        hfile = cfile.before(dot) + ".h";
+    auto hstream = openFile(hfile, false);
+    if (hstream == nullptr) return;
+
+    ebpfprog->emitH(&h, hfile);
+    ebpfprog->emitC(&c, hfile);
+    *cstream << c.toString();
+    *hstream << h.toString();
+    cstream->flush();
+    hstream->flush();
+}
+
+void run_ebpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *toplevel,
+                      P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
+    if (toplevel == nullptr) return;
 
     auto main = toplevel->getMain();
     if (main == nullptr) {
         ::warning(ErrorType::WARN_MISSING,
-                  "Could not locate top-level block; is there a %1% module?",
-                  IR::P4Program::main);
+                  "Could not locate top-level block; is there a %1% module?", IR::P4Program::main);
         return;
     }
 
-    Target* target;
+    Target *target;
     if (options.target.isNullOrEmpty() || options.target == "kernel") {
-        target = new KernelSamplesTarget();
+        if (!options.generateToXDP)
+            target = new KernelSamplesTarget(options.emitTraceMessages);
+        else
+            target = new XdpTarget(options.emitTraceMessages);
     } else if (options.target == "bcc") {
         target = new BccTarget();
     } else if (options.target == "test") {
@@ -51,38 +87,25 @@ void run_ebpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* tople
         return;
     }
 
-    CodeBuilder c(target);
-    CodeBuilder h(target);
+    if (options.arch.isNullOrEmpty() || options.arch == "filter") {
+        emitFilterModel(options, target, toplevel, refMap, typeMap);
+    } else if (options.arch == "psa") {
+        auto backend = new EBPF::PSASwitchBackend(options, target, refMap, typeMap);
+        backend->convert(toplevel);
 
-    EBPFTypeFactory::createFactory(typeMap);
-    auto ebpfprog = new EBPFProgram(options, toplevel->getProgram(), refMap, typeMap, toplevel);
-    if (!ebpfprog->build())
+        if (options.outputFile.isNullOrEmpty()) return;
+
+        cstring cfile = options.outputFile;
+        auto cstream = openFile(cfile, false);
+        if (cstream == nullptr) return;
+
+        backend->codegen(*cstream);
+        cstream->flush();
+    } else {
+        ::error(ErrorType::ERR_UNKNOWN,
+                "Unknown architecture %s; legal choices are 'filter', and 'psa'", options.arch);
         return;
-
-    if (options.outputFile.isNullOrEmpty())
-        return;
-
-    cstring cfile = options.outputFile;
-    auto cstream = openFile(cfile, false);
-    if (cstream == nullptr)
-        return;
-
-    cstring hfile;
-    const char* dot = cfile.findlast('.');
-    if (dot == nullptr)
-        hfile = cfile + ".h";
-    else
-        hfile = cfile.before(dot) + ".h";
-    auto hstream = openFile(hfile, false);
-    if (hstream == nullptr)
-        return;
-
-    ebpfprog->emitH(&h, hfile);
-    ebpfprog->emitC(&c, hfile);
-    *cstream << c.toString();
-    *hstream << h.toString();
-    cstream->flush();
-    hstream->flush();
+    }
 }
 
 }  // namespace EBPF

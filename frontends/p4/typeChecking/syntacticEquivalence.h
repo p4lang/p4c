@@ -14,30 +14,34 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _TYPECHECKING_SYNTACTICEQUIVALENCE_H_
-#define _TYPECHECKING_SYNTACTICEQUIVALENCE_H_
+#ifndef TYPECHECKING_SYNTACTICEQUIVALENCE_H_
+#define TYPECHECKING_SYNTACTICEQUIVALENCE_H_
 
-#include "ir/ir.h"
-#include "frontends/p4/typeMap.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
 // Check if two expressions are syntactically equivalent
 class SameExpression {
-    const ReferenceMap* refMap;
-    const TypeMap* typeMap;
+    const ReferenceMap *refMap;
+    const TypeMap *typeMap;
+
  public:
-    explicit SameExpression(const ReferenceMap* refMap, const TypeMap* typeMap) :
-            refMap(refMap), typeMap(typeMap) { CHECK_NULL(refMap); CHECK_NULL(typeMap); }
-    bool sameType(const IR::Type* left, const IR::Type* right) const;
-    bool sameExpression(const IR::Expression* left, const IR::Expression* right) const;
-    bool sameExpressions(const IR::Vector<IR::Expression>* left,
-                         const IR::Vector<IR::Expression>* right) const;
-    bool sameExpressions(const IR::Vector<IR::Argument>* left,
-                         const IR::Vector<IR::Argument>* right) const;
+    explicit SameExpression(const ReferenceMap *refMap, const TypeMap *typeMap)
+        : refMap(refMap), typeMap(typeMap) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
+    }
+    bool sameType(const IR::Type *left, const IR::Type *right) const;
+    bool sameExpression(const IR::Expression *left, const IR::Expression *right) const;
+    bool sameExpressions(const IR::Vector<IR::Expression> *left,
+                         const IR::Vector<IR::Expression> *right) const;
+    bool sameExpressions(const IR::Vector<IR::Argument> *left,
+                         const IR::Vector<IR::Argument> *right) const;
 };
 
 }  // namespace P4
 
-#endif /* _TYPECHECKING_SYNTACTICEQUIVALENCE_H_ */
+#endif /* TYPECHECKING_SYNTACTICEQUIVALENCE_H_ */

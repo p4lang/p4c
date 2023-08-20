@@ -2,12 +2,10 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<48> macAddr_t;
-typedef bit<32> ip4Addr_t;
 header ethernet_t {
-    macAddr_t dstAddr;
-    macAddr_t srcAddr;
-    bit<16>   etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header srcRoute_t {
@@ -16,18 +14,18 @@ header srcRoute_t {
 }
 
 header ipv4_t {
-    bit<4>    version;
-    bit<4>    ihl;
-    bit<8>    diffserv;
-    bit<16>   totalLen;
-    bit<16>   identification;
-    bit<3>    flags;
-    bit<13>   fragOffset;
-    bit<8>    ttl;
-    bit<8>    protocol;
-    bit<16>   hdrChecksum;
-    ip4Addr_t srcAddr;
-    ip4Addr_t dstAddr;
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<8>  diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
 }
 
 struct metadata {
@@ -49,7 +47,7 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
         packet.extract<ipv4_t>(hdr.ipv4);
         transition accept;
     }
-    state parse_srcRouting {
+    @name(".parse_srcRouting") state parse_srcRouting {
         packet.extract<srcRoute_t>(hdr.srcRoutes[32s0]);
         index_0 = index_0 + 32s1;
         transition select(hdr.srcRoutes[32s0].bos) {
@@ -76,7 +74,7 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
     state parse_srcRouting3 {
         transition stateOutOfBound;
     }
-    state start {
+    @name(".start") state start {
         index_0 = 32s0;
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -107,4 +105,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(MyParser(), verifyChecksum(), mau(), mau(), computeChecksum(), deparse()) main;
-

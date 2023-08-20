@@ -1,0 +1,6 @@
+issue3188.p4(3): [--Werror=expected] error: static_assert: V1 model version is not >= 20200000
+const bool test = static_assert(20180101 >= 20200000, "V1 model version is not >= 20200000");
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+issue3188.p4(8): [--Werror=expected] error: static_assert: static_assert failed
+        static_assert(3 == 1);
+        ^^^^^^^^^^^^^^^^^^^^^

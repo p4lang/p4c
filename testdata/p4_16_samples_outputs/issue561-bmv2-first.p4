@@ -161,8 +161,8 @@ parser Tcp_option_parser(packet_in b, in bit<4> tcp_hdr_data_offset, out Tcp_opt
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("Tcp_option_parser") Tcp_option_parser() Tcp_option_parser_inst;
     const bit<16> ETHERTYPE_IPV4 = 16w0x800;
+    @name("Tcp_option_parser") Tcp_option_parser() Tcp_option_parser_inst;
     state start {
         transition parse_ethernet;
     }
@@ -196,7 +196,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     table ipv4_da_lpm {
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr");
         }
         actions = {
             set_l2ptr();
@@ -212,7 +212,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     table mac_da {
         key = {
-            meta.fwd_metadata.l2ptr: exact @name("meta.fwd_metadata.l2ptr") ;
+            meta.fwd_metadata.l2ptr: exact @name("meta.fwd_metadata.l2ptr");
         }
         actions = {
             set_bd_dmac_intf();
@@ -232,7 +232,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     table send_frame {
         key = {
-            meta.fwd_metadata.out_bd: exact @name("meta.fwd_metadata.out_bd") ;
+            meta.fwd_metadata.out_bd: exact @name("meta.fwd_metadata.out_bd");
         }
         actions = {
             rewrite_mac();
@@ -266,4 +266,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

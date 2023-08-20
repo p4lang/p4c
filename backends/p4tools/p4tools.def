@@ -1,0 +1,243 @@
+/// Represents a reference to an object in a P4 program.
+///
+/// This is a thin wrapper around a 'const Member*' to (1) enforce invariants on which forms of
+/// Members can represent state variables and (2) enable the use of StateVariables as map keys.
+class StateVariable : Expression {
+    #noconstructor
+
+    /// The wrapped reference.
+    const Expression *ref;
+
+    /// The expression type is derived from the member.
+    /// Implicit conversions to allow implementations to be treated like a Member*.
+#emit
+    operator const Expression *() const { return ref; }
+#end
+    Expression const &operator*() const { return *ref; }
+    Expression operator->() const { return ref; }
+
+    /// StateVariables can be Members, PathExpressions, or ArrayIndices.
+    StateVariable(Member member) : Expression(member->getSourceInfo(), member->type), ref(member) {}
+    /// The expression type is derived from the path.
+    StateVariable(PathExpression path) : Expression(path->getSourceInfo(), path->type), ref(path) {}
+    StateVariable(ArrayIndex arr) : Expression(arr->getSourceInfo(), arr->type), ref(arr) {}
+
+    /// Implements comparisons so that StateVariables can be used as map keys.
+    bool operator==(const StateVariable &other) const override {
+        // Delegate to IR's notion of equality.
+        return *ref == *other.ref;
+    }
+
+    /// Implements comparisons so that StateVariables can be used as map keys.
+    bool operator<(const StateVariable &other) const {
+        // We use a custom compare function.
+        // TODO: Is there a faster way to implement this comparison?
+        return compare(ref, other.ref) < 0;
+    }
+
+    int compare(const Expression *e1, const Expression *e2) const {
+        // e1 is a Member.
+        if (const auto *m1 = e1->to<Member>()) {
+            if (const auto *m2 = e2->to<Member>()) {
+                return compare(m1, m2);
+            }
+            if (e2->is<PathExpression>()) {
+                return 1;
+            }
+            if (e2->is<ArrayIndex>()) {
+                return 1;
+            }
+        }
+        // e1 is a PathExpression.
+        if (const auto *p1 = e1->to<PathExpression>()) {
+            if (const auto *p2 = e2->to<PathExpression>()) {
+                return compare(p1, p2);
+            }
+            if (e2->is<Member>()) {
+                return -1;
+            }
+            if (e2->is<ArrayIndex>()) {
+                return 1;
+            }
+        }
+        // e1 is a ArrayIndex.
+        if (const auto *a1 = e1->to<ArrayIndex>()) {
+            if (const auto *a2 = e2->to<ArrayIndex>()) {
+                return compare(a1, a2);
+            }
+            if (e2->is<Member>()) {
+                return -1;
+            }
+            if (e2->is<PathExpression>()) {
+                return -1;
+            }
+        }
+        BUG("Either %1% of type %2% or %3% of type %4% is not a valid StateVariable", e1, e1->node_type_name(), e2, e2->node_type_name());
+    }
+
+    int compare(const Member *m1, const Member *m2) const {
+        auto result = compare(m1->expr, m2->expr);
+        if (result != 0) {
+            return result;
+        }
+        if (m1->member.name < m2->member.name) {
+            return -1;
+        }
+        if (m1->member.name > m2->member.name) {
+            return 1;
+        }
+        return 0;
+    }
+
+    int compare(const PathExpression *p1, const PathExpression *p2) const {
+        if (p1->path->name.name < p2->path->name.name) {
+            return -1;
+        }
+        if (p1->path->name.name > p2->path->name.name) {
+            return 1;
+        }
+        return 0;
+    }
+
+    int compare(const ArrayIndex *a1, const ArrayIndex *a2) const {
+        auto result = compare(a1->left, a2->left);
+        if (result != 0) {
+            return result;
+        }
+        auto a1Val = a1->right->to<Constant>();
+        BUG_CHECK(a1Val != nullptr, "Value %1% is not a constant. Only constants are supported as part of a state variable.", a1->right);
+        auto a2Val = a2->right->to<Constant>();
+        BUG_CHECK(a2Val != nullptr, "Value %1% is not a constant. Only constants are supported as part of a state variable.", a2->right);
+        if (a1Val->value < a2Val->value) {
+            return -1;
+        }
+        if (a1Val->value > a2Val->value) {
+            return 1;
+        }
+        return 0;
+    }
+
+    toString { return ref->toString(); }
+
+    dbprint { ref->dbprint(out); }
+}
+
+/// Signifies that a particular expression is tainted.
+/// This tainted expression must be resolved explicitly.
+class TaintExpression : Expression {
+    toString { return "TaintedExpression(" + type->toString() + ")"; }
+
+    dbprint { out << "TaintedExpression(" << type << ")"; }
+}
+
+/// Signifies that a particular expression is a symbolic variable with a label.
+/// These variables are intended to be consumed by SMT/SAT solvers.
+class SymbolicVariable : Expression {
+#noconstructor
+
+    /// The label of the symbolic variable.
+    cstring label;
+
+    /// A symbolic variable always has a type and no source info.
+    SymbolicVariable(Type type, cstring label) : Expression(type), label(label) {}
+
+    /// Implements comparisons so that SymbolicVariables can be used as map keys.
+    bool operator<(const SymbolicVariable &other) const {
+        return label < other.label;
+    }
+
+    toString { return "|" + label +"(" + type->toString() + ")|"; }
+
+    dbprint { out << "|" + label +"(" << type << ")|"; }
+}
+
+/// This type replaces Type_Varbits and can store information about the current size
+class Extracted_Varbits : Type_Bits {
+    /// The assigned size of this varbit (assigned by extract calls).
+    int assignedSize;
+
+    /// Returns the current width this variable bit type has.
+    int width_bits() const override { return assignedSize; }
+
+    equiv {
+        // Ignore the current size and only check for equivalence of the assigned size.
+        return size == a.size;
+    }
+
+    operator== {
+        // Ignore the current size and only check for equivalence of the assigned size.
+        return size == a.size;
+    }
+
+    cstring baseName() const { return "SizedVarbit"; }
+
+    toString {
+        return baseName() + "<" + Util::toString(size) + ">" + "<" + Util::toString(assignedSize) +
+               ">";
+    }
+
+    dbprint { out << toString(); }
+}
+
+/// Defines a concolic variable that may be part of expressions.
+/// This variable must later be resolved and is converted into a symbolic expression.
+class ConcolicVariable : SymbolicVariable {
+    #noconstructor
+
+private:
+    static cstring produceLabel(cstring methodName, int srcIdentifier, int concolicId ) {
+        std::stringstream sstr;
+        sstr << methodName << "_" << srcIdentifier << "_" << concolicId;
+        return sstr.str();
+    }
+
+public:
+    /// Arguments to the concolic method.
+    Vector<Argument> arguments;
+
+    /// The unique identifier of the source the produces this concolic variable.
+    int srcIdentifier;
+
+    /// Some identifiers produce multiple concolic variables. This ID keeps track of the offsets.
+    int concolicId;
+
+    /// Nodes that are associated with this concolic variable. This may be declarations.
+    optional inline IndexedVector<Node> associatedNodes;
+
+    /// The name of the concolic method that this variable targets.
+    inline cstring concolicMethodName = "";
+
+    toString {
+        cstring argumentStr;
+        cstring sep = "";
+        for (const auto *arg : *arguments) {
+            argumentStr += sep + arg->toString();
+            sep = ", ";
+        }
+        return "Concolic_" + label + "(" + argumentStr + ")";
+    }
+
+    dbprint {
+        out << "Concolic_" << label << "(" << arguments << ")";
+    }
+
+    visit_children { v.visit(type, "type"); }
+
+    ConcolicVariable(const Type *type, cstring methodName,
+                     const Vector<Argument> *arguments, int srcIdentifier, int concolicId,
+                     const IndexedVector<Node> &associatedNodes)
+        : SymbolicVariable(type, produceLabel(methodName, srcIdentifier, concolicId)),
+          arguments(arguments),
+          srcIdentifier(srcIdentifier),
+          concolicId(concolicId),
+          associatedNodes(associatedNodes),
+          concolicMethodName(methodName) {}
+
+    ConcolicVariable(const Type *type, cstring methodName,
+                     const Vector<Argument> *arguments, int srcIdentifier, int concolicId)
+        : SymbolicVariable(type, produceLabel(methodName, srcIdentifier, concolicId)),
+          arguments(arguments),
+          srcIdentifier(srcIdentifier),
+          concolicId(concolicId),
+          concolicMethodName(methodName) {}
+}

@@ -37,16 +37,16 @@ header vlan_tag_t {
 }
 
 struct metadata {
-    @name(".ing_metadata") 
+    @name(".ing_metadata")
     ingress_metadata_t ing_metadata;
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
-    @name(".ipv4") 
+    @name(".ipv4")
     ipv4_t     ipv4;
-    @name(".vlan_tag") 
+    @name(".vlan_tag")
     vlan_tag_t vlan_tag;
 }
 
@@ -130,4 +130,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

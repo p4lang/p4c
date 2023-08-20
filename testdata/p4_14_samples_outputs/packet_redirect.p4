@@ -3,7 +3,8 @@
 #include <v1model.p4>
 
 enum bit<8> FieldLists {
-    redirect_FL = 0
+    none = 0,
+    redirect_FL = 1
 }
 
 struct intrinsic_metadata_t {

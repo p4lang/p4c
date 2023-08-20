@@ -21,11 +21,12 @@ namespace P4 {
 // Keep this in sync with the lexer
 std::set<cstring> reservedWords = {
     "abstract",  // experimental
-    "action", "actions", "apply", "bool", "bit", "const", "control", "default",
-    "else", "enum", "error", "exit", "extern", "false", "header", "header_union",
-    "if", "in", "inout", "int", "key", "match_kind", "out", "parser", "package",
-    "return", "select", "set", "state", "struct", "switch", "table", "this",  // experimental
-    "transition", "true", "tuple", "typedef", "varbit", "verify", "void", "_",
+    "action",     "actions", "apply",  "bool",    "bit",    "const",      "control", "default",
+    "else",       "enum",    "error",  "exit",    "extern", "false",      "header",  "header_union",
+    "if",         "in",      "inout",  "int",     "key",    "match_kind", "out",     "parser",
+    "package",    "return",  "select", "set",     "state",  "struct",     "switch",  "table",
+    "this",  // experimental
+    "transition", "true",    "tuple",  "typedef", "varbit", "verify",     "void",    "_",
     "NoAction"  // core.p4
 };
 

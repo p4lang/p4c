@@ -21,7 +21,7 @@ limitations under the License.
 #ifndef __PNA_P4__
 #define __PNA_P4__
 
-#include<core.p4>
+#include <core.p4>
 
 /**
  *   P4-16 declaration of the Portable NIC Architecture
@@ -263,8 +263,9 @@ enum PNA_IdleTimeout_t {
 
 // BEGIN:Match_kinds
 match_kind {
-    range,   /// Used to represent min..max intervals
-    selector /// Used for dynamic action selection via the ActionSelector extern
+    range,    /// Used to represent min..max intervals
+    selector, /// Used for dynamic action selection via the ActionSelector extern
+    optional  /// Either an exact match, or a wildcard matching any value for the entire field
 }
 // END:Match_kinds
 
@@ -370,16 +371,18 @@ enum PNA_CounterType_t {
 /// Indirect counter with n_counters independent counter values, where
 /// every counter value has a data plane size specified by type W.
 
+@noWarn("unused")
 extern Counter<W, S> {
   Counter(bit<32> n_counters, PNA_CounterType_t type);
-  void count(in S index);
+  void count(in S index, @optional in bit<32> increment);
 }
 // END:Counter_extern
 
 // BEGIN:DirectCounter_extern
+@noWarn("unused")
 extern DirectCounter<W> {
   DirectCounter(PNA_CounterType_t type);
-  void count();
+  void count(@optional in bit<32> increment);
 }
 // END:DirectCounter_extern
 
@@ -416,8 +419,8 @@ extern Meter<S> {
 extern DirectMeter {
   DirectMeter(PNA_MeterType_t type);
   // See the corresponding methods for extern Meter.
-  PNA_MeterColor_t execute(in PNA_MeterColor_t color);
-  PNA_MeterColor_t execute();
+  PNA_MeterColor_t execute(in PNA_MeterColor_t color, @optional in bit<32> pkt_len);
+  PNA_MeterColor_t execute(@optional in bit<32> pkt_len);
 }
 // END:DirectMeter_extern
 
@@ -579,6 +582,8 @@ extern void send_to_port(PortId_t dest_port);
 extern void mirror_packet(MirrorSlotId_t mirror_slot_id,
                           MirrorSessionId_t mirror_session_id);
 
+extern void recirculate();
+
 // TBD: Does it make sense to have a data plane add of a hit action
 // that has in, out, or inout parameters?
 //
@@ -594,7 +599,8 @@ extern void mirror_packet(MirrorSlotId_t mirror_slot_id,
 // entry's initial expire_time_profile_id.
 
 extern bool add_entry<T>(string action_name,
-                         in T action_params);
+                         in T action_params,
+                         in ExpireTimeProfileId_t expire_time_profile_id);
 
 extern FlowId_t allocate_flow_id();
 
@@ -670,14 +676,14 @@ control PreControlT<PH, PM>(
     in    pna_pre_input_metadata_t  istd,
     inout pna_pre_output_metadata_t ostd);
 
-parser MainParserT<PM, MH, MM>(
+parser MainParserT<MH, MM>(
     packet_in pkt,
     //in    PM pre_user_meta,
     out   MH main_hdr,
     inout MM main_user_meta,
     in    pna_main_parser_input_metadata_t istd);
 
-control MainControlT<PM, MH, MM>(
+control MainControlT<MH, MM>(
     //in    PM pre_user_meta,
     inout MH main_hdr,
     inout MM main_user_meta,
@@ -691,9 +697,9 @@ control MainDeparserT<MH, MM>(
     in    pna_main_output_metadata_t ostd);
 
 package PNA_NIC<PH, PM, MH, MM>(
-    MainParserT<PM, MH, MM> main_parser,
+    MainParserT<MH, MM> main_parser,
     PreControlT<PH, PM> pre_control,
-    MainControlT<PM, MH, MM> main_control,
+    MainControlT<MH, MM> main_control,
     MainDeparserT<MH, MM> main_deparser);
 // END:Programmable_blocks
 

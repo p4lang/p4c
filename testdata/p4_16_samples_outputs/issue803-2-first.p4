@@ -89,12 +89,7 @@ control egr_deparse(in egr_out_headers ohdr, packet_out b) {
 }
 
 Ingress<ing_to_egr, ing_in_headers, ing_out_headers>(ing_parse(), ingress(), ing_deparse()) ig1;
-
 Ingress<ing_to_egr, ing_in_headers, ing_out_headers>(ing_parse(), ingress(), ing_deparse()) ig2;
-
 Egress<ing_to_egr, egr_in_headers, egr_out_headers>(egr_parse(), egress(), egr_deparse()) eg1;
-
 Egress<ing_to_egr, egr_in_headers, egr_out_headers>(egr_parse(), egress(), egr_deparse()) eg2;
-
 Switch<ing_to_egr>(ig1, eg1) main;
-

@@ -1,0 +1,41 @@
+{
+  "schema_version" : "1.0.0",
+  "tables" : [
+    {
+      "name" : "pipe.MainControlImpl.stub",
+      "id" : 48042732,
+      "table_type" : "MatchAction_Direct",
+      "size" : 10000,
+      "annotations" : [],
+      "depends_on" : [],
+      "has_const_default_action" : true,
+      "key" : [
+        {
+          "id" : 1,
+          "name" : "hdrs.vlan_tag[meta.depth].vid",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : false,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "bytes",
+            "width" : 12
+          }
+        }
+      ],
+      "action_specs" : [
+        {
+          "id" : 28198379,
+          "name" : "MainControlImpl.execute",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        }
+      ],
+      "data" : [],
+      "supported_operations" : [],
+      "attributes" : ["EntryScope"]
+    }
+  ],
+  "learn_filters" : []
+}

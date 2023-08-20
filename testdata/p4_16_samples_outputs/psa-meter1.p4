@@ -30,8 +30,9 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 
 control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
     Meter<bit<12>>(1024, PSA_MeterType_t.PACKETS) meter0;
+    PSA_MeterColor_t c1;
     action execute(bit<12> index, PSA_MeterColor_t color) {
-        meter0.execute(index, color);
+        c1 = meter0.execute(index, color);
     }
     table tbl {
         key = {
@@ -63,8 +64,5 @@ control MyED(packet_out buffer, out EMPTY a, out EMPTY b, inout EMPTY c, in EMPT
 }
 
 IngressPipeline(MyIP(), MyIC(), MyID()) ip;
-
 EgressPipeline(MyEP(), MyEC(), MyED()) ep;
-
 PSA_Switch(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

@@ -93,7 +93,7 @@ struct l3_metadata_t {
     bit<1>  routed;
     bit<1>  outer_routed;
     bit<8>  mtu_index;
-    @saturating 
+    @saturating
     bit<16> l3_mtu_check;
 }
 
@@ -134,28 +134,28 @@ header data_t {
 }
 
 struct metadata {
-    @pa_solitary("ingress", "acl_metadata.if_label") @name(".acl_metadata") 
+    @pa_solitary("ingress", "acl_metadata.if_label") @name(".acl_metadata")
     acl_metadata_t      acl_metadata;
-    @name(".fabric_metadata") 
+    @name(".fabric_metadata")
     fabric_metadata_t   fabric_metadata;
-    @name(".ingress_metadata") 
+    @name(".ingress_metadata")
     ingress_metadata_t  ingress_metadata;
-    @name(".ipv4_metadata") 
+    @name(".ipv4_metadata")
     ipv4_metadata_t     ipv4_metadata;
-    @name(".ipv6_metadata") 
+    @name(".ipv6_metadata")
     ipv6_metadata_t     ipv6_metadata;
-    @name(".l2_metadata") 
+    @name(".l2_metadata")
     l2_metadata_t       l2_metadata;
-    @name(".l3_metadata") 
+    @name(".l3_metadata")
     l3_metadata_t       l3_metadata;
-    @name(".security_metadata") 
+    @name(".security_metadata")
     security_metadata_t security_metadata;
-    @name(".tunnel_metadata") 
+    @name(".tunnel_metadata")
     tunnel_metadata_t   tunnel_metadata;
 }
 
 struct headers {
-    @name(".data") 
+    @name(".data")
     data_t data;
 }
 
@@ -167,12 +167,10 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 @name(".drop_stats") counter<bit<8>>(32w256, CounterType.packets) drop_stats;
-
 @name(".drop_stats_2") counter<bit<8>>(32w256, CounterType.packets) drop_stats_2;
-
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".drop_stats_update") action drop_stats_update() {
-        drop_stats_2.count((bit<8>)meta.ingress_metadata.drop_reason);
+        drop_stats_2.count((bit<8>)(bit<8>)meta.ingress_metadata.drop_reason);
     }
     @name(".nop") action nop() {
     }
@@ -268,4 +266,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

@@ -8,4 +8,3 @@ control my(out bit<32> x) {
 }
 
 top(my()) main;
-

@@ -1,0 +1,6 @@
+inverted-range.p4(11): [--Wwarn=invalid] warning: 16w10-16w0: Range with end less than start is treated as an empty range
+            10 .. 0: accept;
+            ^^
+inverted-range.p4(11)
+            10 .. 0: accept;
+                  ^

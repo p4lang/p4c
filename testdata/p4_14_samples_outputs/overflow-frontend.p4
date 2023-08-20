@@ -8,7 +8,7 @@ struct metadata_t {
 }
 
 struct metadata {
-    @name(".md") 
+    @name(".md")
     metadata_t md;
 }
 
@@ -38,8 +38,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             action_0();
             @defaultonly NoAction_1();
         }
-        key = {
-        }
         default_action = NoAction_1();
     }
     apply {
@@ -63,4 +61,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

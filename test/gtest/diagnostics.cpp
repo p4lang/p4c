@@ -14,14 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <optional>
 #include <vector>
 
 #include <boost/algorithm/string/replace.hpp>
-#include <boost/optional.hpp>
-
-#include "gtest/gtest.h"
 
 #include "frontends/common/applyOptionsPragmas.h"
+#include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "test/gtest/helpers.h"
 
@@ -29,8 +28,7 @@ namespace Test {
 
 namespace {
 
-boost::optional<FrontendTestCase>
-createP4_16DiagnosticsTestCase(const std::string& pragmaSource) {
+std::optional<FrontendTestCase> createP4_16DiagnosticsTestCase(const std::string &pragmaSource) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
 %PRAGMA_SOURCE%
         struct Headers { bit<8> value; }
@@ -50,8 +48,7 @@ createP4_16DiagnosticsTestCase(const std::string& pragmaSource) {
     return FrontendTestCase::create(source);
 }
 
-boost::optional<FrontendTestCase>
-createP4_14DiagnosticsTestCase(const std::string& pragmaSource) {
+std::optional<FrontendTestCase> createP4_14DiagnosticsTestCase(const std::string &pragmaSource) {
     auto source = P4_SOURCE(R"(
 %PRAGMA_SOURCE%
         header_type headers_t { fields { value : 8; } }
@@ -70,7 +67,7 @@ createP4_14DiagnosticsTestCase(const std::string& pragmaSource) {
 
 }  // namespace
 
-class Diagnostics : public P4CTest { };
+class Diagnostics : public P4CTest {};
 
 TEST_F(Diagnostics, P4_16_Disable) {
     auto test = createP4_16DiagnosticsTestCase(P4_SOURCE(R"(
@@ -164,10 +161,10 @@ TEST_F(Diagnostics, NestedCompileContexts) {
 TEST_F(Diagnostics, CompilerOptions) {
     using CommandLineOptions = P4::IOptionPragmaParser::CommandLineOptions;
 
-    auto parseWithCompilerOptions = [](const CommandLineOptions& args)
-                                        -> boost::optional<FrontendTestCase> {
-        auto& options = GTestContext::get().options();
-        options.process(args.size(), const_cast<char* const*>(args.data()));
+    auto parseWithCompilerOptions =
+        [](const CommandLineOptions &args) -> std::optional<FrontendTestCase> {
+        auto &options = GTestContext::get().options();
+        options.process(args.size(), const_cast<char *const *>(args.data()));
         return createP4_16DiagnosticsTestCase(P4_SOURCE(R"()"));
     };
 
@@ -176,14 +173,14 @@ TEST_F(Diagnostics, CompilerOptions) {
 
     {
         AutoCompileContext autoContext(new GTestContext);
-        auto test = parseWithCompilerOptions({ "(test)", "--Wdisable" });
+        auto test = parseWithCompilerOptions({"(test)", "--Wdisable"});
         EXPECT_TRUE(test);
         EXPECT_EQ(0u, ::diagnosticCount());
     }
 
     {
         AutoCompileContext autoContext(new GTestContext);
-        auto test = parseWithCompilerOptions({ "(test)", "--Wwarn" });
+        auto test = parseWithCompilerOptions({"(test)", "--Wwarn"});
         EXPECT_TRUE(test);
         EXPECT_EQ(1u, ::diagnosticCount());
         EXPECT_EQ(0u, ::errorCount());
@@ -191,7 +188,7 @@ TEST_F(Diagnostics, CompilerOptions) {
 
     {
         AutoCompileContext autoContext(new GTestContext);
-        auto test = parseWithCompilerOptions({ "(test)", "--Werror" });
+        auto test = parseWithCompilerOptions({"(test)", "--Werror"});
         EXPECT_FALSE(test);
         EXPECT_EQ(1u, ::diagnosticCount());
         EXPECT_EQ(1u, ::errorCount());
@@ -202,18 +199,14 @@ TEST_F(Diagnostics, CompilerOptions) {
 
     {
         AutoCompileContext autoContext(new GTestContext);
-        auto test = parseWithCompilerOptions({
-            "(test)", "--Wdisable=uninitialized_out_param"
-        });
+        auto test = parseWithCompilerOptions({"(test)", "--Wdisable=uninitialized_out_param"});
         EXPECT_TRUE(test);
         EXPECT_EQ(0u, ::diagnosticCount());
     }
 
     {
         AutoCompileContext autoContext(new GTestContext);
-        auto test = parseWithCompilerOptions({
-            "(test)", "--Wdisable=unknown_diagnostic"
-        });
+        auto test = parseWithCompilerOptions({"(test)", "--Wdisable=unknown_diagnostic"});
         EXPECT_TRUE(test);
         EXPECT_EQ(1u, ::diagnosticCount());
         EXPECT_EQ(0u, ::errorCount());
@@ -221,9 +214,7 @@ TEST_F(Diagnostics, CompilerOptions) {
 
     {
         AutoCompileContext autoContext(new GTestContext);
-        auto test = parseWithCompilerOptions({
-            "(test)", "--Wwarn=uninitialized_out_param"
-        });
+        auto test = parseWithCompilerOptions({"(test)", "--Wwarn=uninitialized_out_param"});
         EXPECT_TRUE(test);
         EXPECT_EQ(1u, ::diagnosticCount());
         EXPECT_EQ(0u, ::errorCount());
@@ -231,9 +222,7 @@ TEST_F(Diagnostics, CompilerOptions) {
 
     {
         AutoCompileContext autoContext(new GTestContext);
-        auto test = parseWithCompilerOptions({
-            "(test)", "--Werror=uninitialized_out_param"
-        });
+        auto test = parseWithCompilerOptions({"(test)", "--Werror=uninitialized_out_param"});
         EXPECT_FALSE(test);
         EXPECT_EQ(1u, ::diagnosticCount());
         EXPECT_EQ(1u, ::errorCount());
@@ -241,9 +230,7 @@ TEST_F(Diagnostics, CompilerOptions) {
 
     {
         AutoCompileContext autoContext(new GTestContext);
-        auto test = parseWithCompilerOptions({
-            "(test)", "--Werror=unknown_diagnostic"
-        });
+        auto test = parseWithCompilerOptions({"(test)", "--Werror=unknown_diagnostic"});
         EXPECT_TRUE(test);
         EXPECT_EQ(1u, ::diagnosticCount());
         EXPECT_EQ(0u, ::errorCount());
@@ -254,9 +241,7 @@ TEST_F(Diagnostics, CompilerOptions) {
 
     {
         AutoCompileContext autoContext(new GTestContext);
-        auto test = parseWithCompilerOptions({
-            "(test)", "--Wdisable", "unknown_diagnostic"
-        });
+        auto test = parseWithCompilerOptions({"(test)", "--Wdisable", "unknown_diagnostic"});
         EXPECT_TRUE(test);
 
         // We expect all warnings to be disabled. If `unknown_diagnostic` was

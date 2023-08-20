@@ -1,0 +1,43 @@
+[
+    ### Generic includes
+    { ref: "boost-1.75-all.imp" },
+    { ref: "gcc.libc.imp" },
+    { ref: "gcc.stl.headers.imp" },
+    { ref: "gcc.symbols.imp" },
+    { ref: "libcxx.imp" },
+    { ref: "stl.c.headers.imp" },
+
+    ### P4C customization
+    { include: ["\"ir/ir-generated.h\"", "private", "\"ir/ir.h\"", "public"] },
+    { include: ["\"ir/ir-inline.h\"", "private", "\"ir/ir.h\"", "public"] },
+    { include: ["\"frontends/parsers/p4/p4lexer_internal.hpp\"", "private", "\"frontends/parsers/p4/p4lexer.hpp\"", "public"] },
+    { include: ["\"frontends/parsers/v1/v1lexer_internal.hpp\"", "private", "\"frontends/parsers/v1/v1lexer.hpp\"", "public"] },
+    { include: ["\"ir/ir-inline.h\"", "private", "\"ir/ir.h\"", "public"] },
+
+    ##### Fixes imported from https://gitlab.cs.fau.de/flow/emper/-/blob/master/iwyu-mappings.imp
+    { include: ["<bits/chrono.h>", "private", "<chrono>", "public"]},
+    { include: ["<bits/getopt_core.h>", "private", "<unistd.h>", "public"] },
+    { include: ["@<gtest/.*>", "private", "<gtest/gtest.h>", "public"] },
+    { include: ["<urcu/map/urcu-memb.h>", "private", "<urcu.h>", "public"] },
+    { include: ["<bits/cxxabi_forced.h>", "private", "<ctime>", "public" ] },
+    { include: ["<bits/this_thread_sleep.h>", "private", "<thread>", "public" ] },
+    { include: ["<ext/alloc_traits.h>", "private", "<memory>", "public" ] },
+    { include: ["<bits/types/struct_sched_param.h>", "private", "<sched.h>", "public" ] },
+    { include: ["<bits/types/struct_tm.h>", "private", "<ctime>", "public" ] },
+    { include: ["<bits/types/siginfo_t.h>", "private", "<signal.h>", "public" ] },
+    { include: ["<bits/types/stack_t.h>", "private", "<signal.h>", "public" ] },
+    { include: ["<bits/chrono.h>", "private", "<chrono>", "public" ] },
+    { include: ["<boost/detail/basic_pointerbuf.hpp>", "private", "<boost/program_options.hpp>", "public"], },
+    { include: ["<boost/lexical_cast/bad_lexical_cast.hpp>", "private", "<boost/program_options.hpp>", "public"], },
+    { include: ["<boost/program_options/detail/parsers.hpp>", "private", "<boost/program_options.hpp>", "public"], },
+    { include: ["<boost/program_options/errors.hpp>", "private", "<boost/program_options.hpp>", "public"], },
+    { include: ["<boost/program_options/options_description.hpp>", "private", "<boost/program_options.hpp>", "public"], },
+    { include: ["<boost/program_options/variables_map.hpp>", "private", "<boost/program_options.hpp>", "public"], },
+    { include: ["<boost/program_options/positional_options.hpp>", "private", "<boost/program_options.hpp>", "public"], },
+    { include: ["<boost/type_index/type_index_facade.hpp>", "private", "<boost/program_options.hpp>", "public"], },
+    { include: ["<boost/cstdint.hpp>", "private", "<cstdint>", "public"], },
+
+    { symbol: ["__kernel_timespec", "private", "<liburing.h>", "public" ] },
+    { symbol: ["__s32", "private", "<liburing.h>", "public" ] },
+    { symbol: ["std::filesystem", "private", "<filesystem>", "public" ] },
+]

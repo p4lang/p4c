@@ -6,19 +6,34 @@ on:
   pull_request:
     branches: [ main ]
 
+
+# Cancel any preceding run on the pull request.
+concurrency:
+  group: static-build-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
-  # Build a p4c release on Ubuntu 16.04
+  # Build a p4c release on Ubuntu 20.04.
   build-linux:
     strategy:
       fail-fast: false
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
-      CTEST_PARALLEL_LEVEL: 4
+      IMAGE_TYPE: test
+      CMAKE_UNITY_BUILD: ON
+      BUILD_STATIC_RELEASE: ON
+      ENABLE_TEST_TOOLS: ON
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
-    - name: Build (Linux)
+
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: test-static-${{ runner.os }}
+        max-size: 1000M
+
+    - name: Build (Ubuntu 20.04)
       run: |
-        tools/start_ccache
-        docker build --network ccache_network -t p4c --build-arg IMAGE_TYPE=build --build-arg ENABLE_UNIFIED_COMPILATION=ON --build-arg BUILD_STATIC_RELEASE=ON --build-arg ENABLE_GMP=ON .
+        sudo -E tools/ci-build.sh

@@ -93,7 +93,7 @@ parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     @name("ingress.meta") psa_ingress_output_metadata_t meta_0;
-    @noWarnUnused @name(".ingress_drop") action ingress_drop_0() {
+    @noWarn("unused") @name(".ingress_drop") action ingress_drop_0() {
         meta_0 = ostd;
         meta_0.drop = true;
         ostd = meta_0;
@@ -104,7 +104,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     @name("ingress.parser_error_count_and_convert") table parser_error_count_and_convert_0 {
         key = {
-            istd.parser_error: exact @name("istd.parser_error") ;
+            istd.parser_error: exact @name("istd.parser_error");
         }
         actions = {
             set_error_idx();
@@ -163,8 +163,5 @@ control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_met
 }
 
 IngressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-
 EgressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-
 PSA_Switch<headers, metadata, headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

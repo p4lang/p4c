@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_P4_CHECKCONSTANTS_H_
-#define _FRONTENDS_P4_CHECKCONSTANTS_H_
+#ifndef FRONTENDS_P4_CHECKCONSTANTS_H_
+#define FRONTENDS_P4_CHECKCONSTANTS_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -26,23 +26,24 @@ namespace P4 {
 /// arguments have constant arguments (e.g., push_front).
 /// Checks that table sizes are constant integers.
 class DoCheckConstants : public Inspector {
-    ReferenceMap*  refMap;
-    TypeMap*       typeMap;
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
+
  public:
-    DoCheckConstants(ReferenceMap* refMap, TypeMap* typeMap) :
-            refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(refMap); CHECK_NULL(typeMap);
+    DoCheckConstants(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
         setName("DoCheckConstants");
     }
 
-    void postorder(const IR::MethodCallExpression* expr) override;
-    void postorder(const IR::KeyElement* expr) override;
-    void postorder(const IR::P4Table* table) override;
+    void postorder(const IR::MethodCallExpression *expr) override;
+    void postorder(const IR::KeyElement *expr) override;
+    void postorder(const IR::P4Table *table) override;
 };
 
 class CheckConstants : public PassManager {
  public:
-    CheckConstants(ReferenceMap* refMap, TypeMap* typeMap) {
+    CheckConstants(ReferenceMap *refMap, TypeMap *typeMap) {
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DoCheckConstants(refMap, typeMap));
         setName("CheckConstants");
@@ -51,4 +52,4 @@ class CheckConstants : public PassManager {
 
 }  // namespace P4
 
-#endif /* _FRONTENDS_P4_CHECKCONSTANTS_H_ */
+#endif /* FRONTENDS_P4_CHECKCONSTANTS_H_ */

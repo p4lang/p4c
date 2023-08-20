@@ -14,9 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef BACKENDS_DPDK_HELPER_H_
-#define BACKENDS_DPDK_HELPER_H_
+#ifndef BACKENDS_DPDK_DPDKHELPERS_H_
+#define BACKENDS_DPDK_DPDKHELPERS_H_
 
+#include "constants.h"
 #include "dpdkProgramStructure.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
@@ -27,10 +28,10 @@ limitations under the License.
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/unusedDeclarations.h"
-#include "midend/removeComplexExpressions.h"
 #include "ir/ir.h"
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 #include "lib/json.h"
+#include "midend/removeComplexExpressions.h"
 
 #define TOSTR_DECLA(NAME) std::ostream &toStr(std::ostream &, IR::NAME *)
 
@@ -47,6 +48,7 @@ namespace DPDK {
  * - use this metadata field with 'tx' instruction
  */
 const char PnaMainOutputMetadataOutputPortName[] = "pna_main_output_metadata_output_port";
+const char DirectResourceTableEntryIndex[] = "table_entry_index";
 
 /* This class will generate a optimized jmp and label control flow.
  * Couple of examples here
@@ -125,12 +127,21 @@ class BranchingInstructionGeneration {
         }
     }
 
-  public:
+ public:
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
-    BranchingInstructionGeneration(P4::ReferenceMap *refMap,
-                                   P4::TypeMap *typeMap)
+    BranchingInstructionGeneration(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
         : refMap(refMap), typeMap(typeMap) {}
     bool generate(const IR::Expression *, cstring, cstring, bool);
+};
+
+class TypeWidthValidator : public Inspector {
+    void postorder(const IR::Type_Varbits *type) override {
+        LOG3("Validating Type_Varbits: " << type);
+        if (type->size % 8 != 0) {
+            ::error(ErrorType::ERR_UNSUPPORTED, "%1% varbit width (%2%) not aligned to 8 bits",
+                    type->srcInfo, type->size);
+        }
+    }
 };
 
 class ConvertStatementToDpdk : public Inspector {
@@ -139,28 +150,41 @@ class ConvertStatementToDpdk : public Inspector {
     P4::ReferenceMap *refmap;
     DpdkProgramStructure *structure;
     const IR::P4Parser *parser = nullptr;
+    IR::Type_Struct *metadataStruct = nullptr;
 
-  public:
-    ConvertStatementToDpdk(
-        P4::ReferenceMap *refmap, P4::TypeMap *typemap,
-        DpdkProgramStructure *structure)
-        : typemap(typemap), refmap(refmap), structure(structure) {}
-    IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() {
-        return instructions;
+ private:
+    void processHashParams(const IR::Argument *field, IR::Vector<IR::Expression> &components);
+    bool checkIfBelongToSameHdrMdStructure(const IR::Argument *field);
+    void updateMdStrAndGenInstr(const IR::Argument *field, IR::Vector<IR::Expression> &components);
+    cstring getHdrMdStrName(const IR::Member *mem);
+    bool checkIfConsecutiveHdrMdfields(const IR::Argument *field);
+
+ public:
+    ConvertStatementToDpdk(P4::ReferenceMap *refmap, P4::TypeMap *typemap,
+                           DpdkProgramStructure *structure)
+        : typemap(typemap), refmap(refmap), structure(structure) {
+        visitDagOnce = false;
     }
+    ConvertStatementToDpdk(P4::ReferenceMap *refmap, P4::TypeMap *typemap,
+                           DpdkProgramStructure *structure, IR::Type_Struct *metadataStruct)
+        : typemap(typemap), refmap(refmap), structure(structure), metadataStruct(metadataStruct) {
+        visitDagOnce = false;
+    }
+    IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() { return instructions; }
     void branchingInstructionGeneration(cstring true_label, cstring false_label,
                                         const IR::Expression *expr);
     bool preorder(const IR::AssignmentStatement *a) override;
     bool preorder(const IR::IfStatement *a) override;
     bool preorder(const IR::MethodCallStatement *a) override;
-    bool preorder(const IR::SwitchStatement* a) override;
+    bool preorder(const IR::SwitchStatement *a) override;
 
     void add_instr(const IR::DpdkAsmStatement *s) { instructions.push_back(s); }
     IR::IndexedVector<IR::DpdkAsmStatement> &get_instr() { return instructions; }
-    void process_logical_operation(const IR::Expression*, const IR::Operation_Binary*);
-    void process_relation_operation(const IR::Expression*, const IR::Operation_Relation*);
-    cstring append_parser_name(const IR::P4Parser* p, cstring);
-    void set_parser(const IR::P4Parser* p) { parser = p; }
+    void process_logical_operation(const IR::Expression *, const IR::Operation_Binary *);
+    void process_relation_operation(const IR::Expression *, const IR::Operation_Relation *);
+    cstring append_parser_name(const IR::P4Parser *p, cstring);
+    void set_parser(const IR::P4Parser *p) { parser = p; }
+    bool handleConstSwitch(const IR::SwitchStatement *a);
 };
 
 /**
@@ -173,12 +197,11 @@ class ProcessControls : public P4::RemoveComplexExpressionsPolicy {
     explicit ProcessControls(const std::set<cstring> *process) : process(process) {
         CHECK_NULL(process);
     }
-    bool convert(const IR::P4Control* control) const {
-        if (process->find(control->name) != process->end())
-            return true;
+    bool convert(const IR::P4Control *control) const {
+        if (process->find(control->name) != process->end()) return true;
         return false;
     }
 };
 
-} // namespace DPDK
-#endif
+}  // namespace DPDK
+#endif /* BACKENDS_DPDK_DPDKHELPERS_H_ */

@@ -157,7 +157,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @defaultonly NoAction_2();
         }
         key = {
-            standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
+            standard_metadata.egress_port: exact @name("standard_metadata.egress_port");
         }
         size = 256;
         default_action = NoAction_2();
@@ -213,7 +213,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name(".nat_miss_int_to_ext") action nat_miss_int_to_ext() {
-        clone_preserving_field_list(CloneType.I2E, 32w250, 8w0);
+        clone_preserving_field_list(CloneType.I2E, 32w250, 8w1);
     }
     @name(".nat_miss_ext_to_int") action nat_miss_ext_to_int() {
         meta._meta_do_forward0 = 1w0;
@@ -239,7 +239,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_4();
         }
         key = {
-            meta._meta_nhop_ipv45: exact @name("meta.nhop_ipv4") ;
+            meta._meta_nhop_ipv45: exact @name("meta.nhop_ipv4");
         }
         size = 512;
         default_action = NoAction_4();
@@ -251,7 +251,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_5();
         }
         key = {
-            meta._meta_if_index10: exact @name("meta.if_index") ;
+            meta._meta_if_index10: exact @name("meta.if_index");
         }
         default_action = NoAction_5();
     }
@@ -262,7 +262,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_6();
         }
         key = {
-            meta._meta_ipv4_da2: lpm @name("meta.ipv4_da") ;
+            meta._meta_ipv4_da2: lpm @name("meta.ipv4_da");
         }
         size = 1024;
         default_action = NoAction_6();
@@ -278,13 +278,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_7();
         }
         key = {
-            meta._meta_is_ext_if8: exact @name("meta.is_ext_if") ;
-            hdr.ipv4.isValid()   : exact @name("ipv4.$valid$") ;
-            hdr.tcp.isValid()    : exact @name("tcp.$valid$") ;
-            hdr.ipv4.srcAddr     : ternary @name("ipv4.srcAddr") ;
-            hdr.ipv4.dstAddr     : ternary @name("ipv4.dstAddr") ;
-            hdr.tcp.srcPort      : ternary @name("tcp.srcPort") ;
-            hdr.tcp.dstPort      : ternary @name("tcp.dstPort") ;
+            meta._meta_is_ext_if8: exact @name("meta.is_ext_if");
+            hdr.ipv4.isValid()   : exact @name("ipv4.$valid$");
+            hdr.tcp.isValid()    : exact @name("tcp.$valid$");
+            hdr.ipv4.srcAddr     : ternary @name("ipv4.srcAddr");
+            hdr.ipv4.dstAddr     : ternary @name("ipv4.dstAddr");
+            hdr.tcp.srcPort      : ternary @name("tcp.srcPort");
+            hdr.tcp.dstPort      : ternary @name("tcp.dstPort");
         }
         size = 128;
         default_action = NoAction_7();

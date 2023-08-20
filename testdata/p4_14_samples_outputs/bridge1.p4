@@ -15,12 +15,12 @@ header data_t {
 }
 
 struct metadata {
-    @name(".meta") 
+    @name(".meta")
     metadata_t meta;
 }
 
 struct headers {
-    @name(".data") 
+    @name(".data")
     data_t data;
 }
 
@@ -33,7 +33,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".copyb1") action copyb1() {
-        hdr.data.b1 = meta.meta.val;
+        hdr.data.b1 = (bit<8>)meta.meta.val;
     }
     @name(".output") table output {
         actions = {
@@ -93,4 +93,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

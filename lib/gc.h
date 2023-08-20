@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,5 +21,13 @@ limitations under the License.
 
 void setup_gc_logging();
 size_t gc_mem_inuse(size_t *max = 0);  // trigger GC, return inuse after
+
+#define ALLOC_TRACE_DEPTH 5
+struct alloc_trace_cb_t {
+    void (*fn)(void *, void **, size_t);
+    void *arg;
+};
+alloc_trace_cb_t set_alloc_trace(alloc_trace_cb_t cb);
+alloc_trace_cb_t set_alloc_trace(void (*fn)(void *, void **, size_t), void *arg);
 
 #endif /* LIB_GC_H_ */

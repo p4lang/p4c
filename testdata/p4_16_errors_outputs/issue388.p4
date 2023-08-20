@@ -30,7 +30,6 @@ control C() {
 }
 
 C() c;
-
 control MyIngress(inout my_packet p, inout my_metadata m, inout standard_metadata_t s) {
     apply {
         c.apply();
@@ -53,4 +52,3 @@ control MyDeparser(packet_out b, in my_packet p) {
 }
 
 V1Switch(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

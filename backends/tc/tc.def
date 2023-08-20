@@ -1,0 +1,365 @@
+/*
+Copyright (C) 2023 Intel Corporation
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions
+and limitations under the License.
+*/
+
+#emit
+#include "backends/tc/tc_defines.h"
+#end
+
+class TCKernelMetadata {
+    unsigned metaField;
+    toString {
+        std::string metaName = "kernel.";
+        switch (metaField) {
+            case TC::SKBREDIR: {
+                metaName += "skbredir";
+                break;
+            }
+            case TC::SKBIIF: {
+                metaName += "skbiif";
+                break;
+            }
+            case TC::SKBTSTAMP: {
+                metaName += "skbtstamp";
+                break;
+            }
+            case TC::SKBPRIO: {
+                metaName += "skbprio";
+                break;
+            }
+        }
+        return metaName;
+    }
+    dbprint { out << toString(); }
+}
+
+class TCActionParam {
+    cstring paramName;
+    unsigned dataType;
+    unsigned bitSize;
+    void setParamName(cstring pN) {
+        paramName = pN;
+    }
+    void setBitSize(unsigned bS) {
+        bitSize = bS;
+    }
+    void setDataType(unsigned d) {
+        dataType = d;
+    }
+    TCActionParam() {
+        paramName = nullptr;
+        bitSize = 0;
+    }
+    cstring getParamName() const {
+        return paramName;
+    }
+    cstring getName() const {
+        return "param." + paramName;
+    }
+    toString {
+        std::string tcActionParam = "";
+        tcActionParam += "\n\tparam ";
+        tcActionParam += paramName;
+        tcActionParam += " type ";
+        switch(dataType) {
+            case TC::BIT_TYPE :
+                tcActionParam += "bit" + Util::toString(bitSize);
+                break;
+            case TC::DEV_TYPE :
+                tcActionParam += "dev";
+                break;
+            case TC::MACADDR_TYPE :
+                tcActionParam += "macaddr";
+                break;
+            case TC::IPV4_TYPE :
+                tcActionParam += "ipv4";
+                break;
+            case TC::IPV6_TYPE :
+                tcActionParam += "ipv6";
+                break;
+            case TC::BE16_TYPE :
+                tcActionParam += "be16";
+                break;
+            case TC::BE32_TYPE :
+                tcActionParam += "be32";
+                break;
+            case TC::BE64_TYPE :
+                tcActionParam += "be64";
+                break;
+        }
+        return tcActionParam;
+    }
+    dbprint { out << toString(); }
+}
+
+class TCAction {
+    cstring actionName;
+    cstring pipelineName;
+    unsigned actId;
+    optional safe_vector<TCActionParam> actionParams;
+    cstring getName() const {
+        cstring tcAction = pipelineName;
+        tcAction += "/" + actionName;
+        return tcAction;
+    }
+    void setPipelineName(cstring pN) {
+        pipelineName = pN;
+    }
+    void addActionParams(TCActionParam tca) {
+        actionParams.push_back(tca);
+    }
+    void setActionId(unsigned id) {
+        actId = id;
+    }
+    TCAction(cstring aN) {
+        actionName = aN;
+        pipelineName = nullptr;
+        actId = 0;
+    }
+    toString {
+        std::string tcAction = "";
+        tcAction += "\n$TC p4template create action/";
+        tcAction += pipelineName;
+        tcAction += "/" + actionName;
+        if (actId != 0) {
+            tcAction += " actid " + Util::toString(actId);
+        }
+        if (!actionParams.empty()) {
+            for (auto actParam : actionParams) {
+                tcAction += " \\";
+                tcAction += actParam->toString();
+            }
+        }
+        tcAction += "\n$TC p4template update action/";
+        tcAction += pipelineName;
+        tcAction += "/" + actionName + " state active";
+
+        return tcAction;
+    }
+    dbprint { out << toString(); }
+}
+
+class TCTable {
+    unsigned tableID;
+    cstring tableName;
+    cstring controlName;
+    cstring pipelineName;
+    unsigned keySize;
+    unsigned tableEntriesCount;
+    unsigned numMask;
+    unsigned matchType;
+    TCAction preaction;
+    TCAction postaction;
+    TCAction defaultHitAction;
+    bool isDefaultHitConst;
+    TCAction defaultMissAction;
+    bool isDefaultMissConst;
+    ordered_map<TCAction, unsigned> actionList;
+    void setKeySize(unsigned k) {
+        keySize = k;
+    }
+    void setTableEntriesCount(unsigned t) {
+        tableEntriesCount = t;
+    }
+    void setNumMask(unsigned n) {
+        numMask = n;
+    }
+    void setMatchType(unsigned m) {
+        matchType = m;
+    }
+    void setPreaction(TCAction p) {
+        preaction = p;
+    }
+    void setPostaction(TCAction p) {
+        postaction = p;
+    }
+    void setDefaultHitAction(TCAction d) {
+        defaultHitAction = d;
+    }
+    void setDefaultMissAction(TCAction d) {
+        defaultMissAction = d;
+    }
+    void setDefaultHitConst(bool i) {
+        isDefaultHitConst = i;
+    }
+    void setDefaultMissConst(bool i) {
+        isDefaultMissConst = i;
+    }
+    void addAction(TCAction action, unsigned flag) {
+        actionList.emplace(action, flag);
+    }
+    cstring printMatchType(unsigned matchType) const {
+        cstring matchTypeString = "";
+        switch(matchType) {
+                case TC::EXACT_TYPE :
+                    matchTypeString = "exact";
+                    break;
+                case TC::LPM_TYPE :
+                    matchTypeString = "lpm";
+                    break;
+                case TC::TERNARY_TYPE :
+                    matchTypeString = "ternary";
+                    break;
+        }
+        return matchTypeString;
+    }
+    TCTable(unsigned tId, cstring tN, cstring cN, cstring pN) {
+        tableID = tId;
+        tableName = tN;
+        controlName = cN;
+        pipelineName = pN;
+        keySize = 0;
+        tableEntriesCount = TC::DEFAULT_TABLE_ENTRIES;
+        numMask = TC::DEFAULT_KEY_MASK;
+        matchType = TC::EXACT_TYPE;
+        preaction = nullptr;
+        postaction = nullptr;
+        defaultHitAction = nullptr;
+        defaultMissAction = nullptr;
+        isDefaultHitConst = false;
+        isDefaultMissConst = false;
+    }
+    toString {
+        std::string tcTable = "";
+        tcTable += "\n$TC p4template create table/";
+        tcTable += pipelineName + "/" + controlName + "/" + tableName + " \\";
+        tcTable += "\n\ttblid " + Util::toString(tableID) + " \\";
+        tcTable += "\n\ttype " + printMatchType(matchType) + " \\";
+        tcTable += "\n\tkeysz " + Util::toString(keySize);
+        tcTable += " nummasks " + Util::toString(numMask);
+        tcTable += " tentries " + Util::toString(tableEntriesCount);
+
+        if (!actionList.empty()) {
+            tcTable += " \\";
+            tcTable += "\n\ttable_acts ";
+            for (auto iter = actionList.begin(); iter != actionList.end(); iter++) {
+                tcTable += "act name " + iter->first->getName();
+                if (iter->second == TC::TABLEONLY) {
+                    tcTable += " flags tableonly";
+                } else if (iter->second == TC::DEFAULTONLY) {
+                    tcTable += " flags defaultonly";
+                }
+                if (std::next(iter) != actionList.end()) {
+                    tcTable += " \\";
+                    tcTable += "\n\t";
+                }
+            }
+        }
+
+        if (preaction != nullptr) {
+            tcTable += "\n" + preaction->toString();
+            tcTable += "\n$TC p4template update table/" + pipelineName
+                      + "/" + controlName + "/" + tableName
+                      + " preactions action " + preaction->getName();
+        }
+        if (postaction != nullptr) {
+            tcTable += "\n" + postaction->toString();
+            tcTable += "\n$TC p4template update table/" + pipelineName
+                      + "/" + controlName + "/" + tableName
+                      + " postactions action " + postaction->getName();
+        }
+        if (defaultHitAction != nullptr) {
+            tcTable += "\n$TC p4template update table/" + pipelineName
+                      + "/" + controlName + "/" + tableName
+                      + " default_hit_action";
+            if (isDefaultHitConst) {
+                tcTable += " permissions 0x109";
+            }
+            tcTable += " action " + defaultHitAction->getName();
+        }
+        if (defaultMissAction != nullptr) {
+            tcTable += "\n$TC p4template update table/" + pipelineName
+                      + "/" + controlName + "/" + tableName
+                      + " default_miss_action";
+            if (isDefaultMissConst) {
+                tcTable += " permissions 0x109";
+            }
+            tcTable += " action " + defaultMissAction->getName();
+        }
+        return tcTable;
+    }
+    dbprint { out << toString(); }
+}
+
+class TCPipeline {
+    cstring pipelineName;
+    unsigned pipelineId;
+    unsigned numTables;
+    safe_vector<TCAction> actionDefs;
+    safe_vector<TCTable> tableDefs;
+    TCAction preaction;
+    TCAction postaction;
+    void setPipelineName(cstring pName) {
+        pipelineName = pName;
+    }
+    void setPipelineId(unsigned p) {
+        pipelineId = p;
+    }
+    void setNumTables(unsigned n) {
+        numTables = n;
+    }
+    void addActionDefinition(TCAction actionDef) {
+        actionDefs.push_back(actionDef);
+    }
+    void addTableDefinition(TCTable tableDef) {
+        tableDefs.push_back(tableDef);
+    }
+    void setPipelinePreAction(TCAction action) {
+        preaction = action;
+    }
+    void setPipelinePostAction(TCAction action) {
+        postaction = action;
+    }
+    TCPipeline() {
+        Util::SourceInfo* srcinfo = new Util::SourceInfo();
+        Node::srcInfo = *srcinfo;
+        pipelineName = nullptr;
+        numTables = 0;
+        preaction = nullptr;
+        postaction = nullptr;
+    }
+    toString {
+        std::string tcCode = "#!/bin/bash -x\n";
+        tcCode += "\nset -e\n";
+        tcCode += "\nTC=\"tc\"";
+        tcCode += "\n$TC p4template create pipeline/" + pipelineName + " pipeid ";
+        tcCode += Util::toString(pipelineId);
+        tcCode += " numtables ";
+        tcCode += Util::toString(numTables);
+        if (!actionDefs.empty()) {
+            for (auto a : actionDefs) {
+                tcCode += "\n" + a->toString();
+            }
+        }
+        if (!tableDefs.empty()) {
+            for (auto t : tableDefs) {
+                tcCode += "\n" + t->toString();
+            }
+        }
+        if (preaction != nullptr) {
+            tcCode += "\n" + preaction->toString();
+            tcCode += "\n$TC p4template update pipeline/" + pipelineName
+                      + " preactions action " + pipelineName + "/preaction";
+        }
+        if (postaction != nullptr) {
+            tcCode += "\n" + postaction->toString();
+            tcCode += "\n$TC p4template update pipeline/" + pipelineName
+                      + " postactions action " + pipelineName + "/postaction";
+        }
+        tcCode += "\n$TC p4template update pipeline/" + pipelineName + " state ready";
+        return tcCode;
+    }
+    dbprint { out << toString(); }
+}

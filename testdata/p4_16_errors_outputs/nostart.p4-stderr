@@ -1,6 +1,3 @@
-nostart.p4(18): [--Wwarn=parser-transition] warning: next: implicit transition to `reject'
-    state next {}
-          ^^^^
-nostart.p4(17): [--Werror=not-found] error: parser p: parser does not have a `start' state
+nostart.p4(17): [--Werror=invalid] error: Parser parser p has no 'start' state
 parser p() {
        ^

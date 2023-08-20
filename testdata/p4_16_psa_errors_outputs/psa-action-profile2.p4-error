@@ -1,0 +1,6 @@
+psa-action-profile2.p4(59): [--Werror=invalid] error: Expected psa_implementation property value for table MyIC.tbl to resolve to an extern instance: psa_implementation
+        psa_implementation = { ap, ap1 };
+        ^^^^^^^^^^^^^^^^^^
+psa-action-profile2.p4(59): [--Werror=invalid] error: Expected psa_implementation property value for table MyIC.tbl to resolve to an extern instance: psa_implementation
+        psa_implementation = { ap, ap1 };
+        ^^^^^^^^^^^^^^^^^^

@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ indent_t &indent_t::getindent(std::ostream &out) {
      * a callback */
     if (!p) {
         p = new NOGC_ARGS indent_t();
-        out.register_callback(delete_indent, indentctl_index); }
+        out.register_callback(delete_indent, indentctl_index);
+    }
     return *static_cast<indent_t *>(p);
 }
-

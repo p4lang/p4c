@@ -45,7 +45,7 @@ struct headers {
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     int<32> index;
-    state start {
+    @name(".start") state start {
         transition parse_ethernet;
     }
     state parse_ethernet {
@@ -56,7 +56,7 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
             default: accept;
         }
     }
-    state parse_srcRouting {
+    @name(".parse_srcRouting") state parse_srcRouting {
         packet.extract<srcRoute_t>(hdr.srcRoutes[index]);
         index = index + 32s1;
         transition select(hdr.srcRoutes[index + -32s1].bos) {
@@ -91,4 +91,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(MyParser(), verifyChecksum(), mau(), mau(), computeChecksum(), deparse()) main;
-

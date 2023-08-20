@@ -27,55 +27,129 @@ struct M {
 parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t smeta) {
     state start {
         hdr.u[0].h1.setValid();
+        hdr.u[0].h2.setInvalid();
+        hdr.u[0].h3.setInvalid();
         pkt.extract<Header1>(hdr.u[0].h3);
+        hdr.u[0].h3.setValid();
         hdr.u[0].h3.data = 32w1;
-        hdr.u[0].h1 = hdr.u[0].h3;
-        hdr.u[0].h1.data = 32w1;
-        transition last;
+        hdr.u[0].h1.setInvalid();
+        hdr.u[0].h2.setInvalid();
+        transition select(hdr.u[0].h3.isValid()) {
+            true: start_true;
+            false: start_false;
+        }
     }
-    state next {
-        pkt.extract<Header2>(hdr.u[0].h2);
+    state start_true {
+        hdr.u[0].h1.setValid();
+        hdr.u[0].h1 = hdr.u[0].h3;
+        hdr.u[0].h2.setInvalid();
+        hdr.u[0].h3.setInvalid();
+        transition start_join;
+    }
+    state start_false {
+        hdr.u[0].h1.setInvalid();
+        transition start_join;
+    }
+    state start_join {
+        hdr.u[0].h1.setValid();
+        hdr.u[0].h1.data = 32w1;
+        hdr.u[0].h2.setInvalid();
+        hdr.u[0].h3.setInvalid();
         transition last;
     }
     state last {
+        hdr.u[0].h1.setValid();
         hdr.u[0].h1.data = 32w1;
+        hdr.u[0].h2.setInvalid();
+        hdr.u[0].h3.setInvalid();
+        hdr.u[0].h2.setValid();
         hdr.u[0].h2.data = 16w1;
+        hdr.u[0].h1.setInvalid();
+        hdr.u[0].h3.setInvalid();
+        hdr.u[0].h3.setValid();
         hdr.u[0].h3.data = 32w1;
+        hdr.u[0].h1.setInvalid();
+        hdr.u[0].h2.setInvalid();
         transition accept;
     }
 }
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    @name("IngressI.u") Union[2] u_0;
-    @hidden action invalidhdrwarnings6l57() {
-        u_0[0].h1.setInvalid();
-        u_0[0].h2.setInvalid();
-        u_0[0].h3.setInvalid();
-        u_0[1].h1.setInvalid();
-        u_0[1].h2.setInvalid();
-        u_0[1].h3.setInvalid();
-        u_0[0].h1.setValid();
-        u_0[0].h1.data = 32w1;
-        u_0[1].h1 = u_0[0].h1;
-        u_0[1].h1.data = 32w1;
-        u_0[0].h2.setValid();
-        u_0[1].h1 = u_0[1w0].h1;
-        u_0[1].h2 = u_0[1w0].h2;
-        u_0[1].h3 = u_0[1w0].h3;
-        u_0[1].h2.data = 16w1;
-        u_0[1w0].h2.setValid();
-        u_0[1].h1.setInvalid();
-        u_0[1w0].h1.setInvalid();
-        u_0[1w0].h1.setValid();
-    }
-    @hidden table tbl_invalidhdrwarnings6l57 {
-        actions = {
-            invalidhdrwarnings6l57();
+    @name("IngressI.u") Union[2] u_1;
+    @hidden @name("invalidhdrwarnings6l57") action invalidhdrwarnings6l57_0() {
+        u_1[0].h1.setInvalid();
+        u_1[0].h2.setInvalid();
+        u_1[0].h3.setInvalid();
+        u_1[1].h1.setInvalid();
+        u_1[1].h2.setInvalid();
+        u_1[1].h3.setInvalid();
+        u_1[0].h1.setValid();
+        u_1[0].h2.setInvalid();
+        u_1[0].h3.setInvalid();
+        u_1[0].h1.setValid();
+        u_1[0].h1.data = 32w1;
+        u_1[0].h2.setInvalid();
+        u_1[0].h3.setInvalid();
+        if (u_1[0].h1.isValid()) {
+            u_1[1].h1.setValid();
+            u_1[1].h1 = u_1[0].h1;
+            u_1[1].h2.setInvalid();
+            u_1[1].h3.setInvalid();
+        } else {
+            u_1[1].h1.setInvalid();
         }
-        const default_action = invalidhdrwarnings6l57();
+        u_1[1].h1.setValid();
+        u_1[1].h1.data = 32w1;
+        u_1[1].h2.setInvalid();
+        u_1[1].h3.setInvalid();
+        u_1[0].h2.setValid();
+        u_1[0].h1.setInvalid();
+        u_1[0].h3.setInvalid();
+        if (u_1[1w0].h1.isValid()) {
+            u_1[1].h1.setValid();
+            u_1[1].h1 = u_1[1w0].h1;
+            u_1[1].h2.setInvalid();
+            u_1[1].h3.setInvalid();
+        } else {
+            u_1[1].h1.setInvalid();
+        }
+        if (u_1[1w0].h2.isValid()) {
+            u_1[1].h2.setValid();
+            u_1[1].h2 = u_1[1w0].h2;
+            u_1[1].h1.setInvalid();
+            u_1[1].h3.setInvalid();
+        } else {
+            u_1[1].h2.setInvalid();
+        }
+        if (u_1[1w0].h3.isValid()) {
+            u_1[1].h3.setValid();
+            u_1[1].h3 = u_1[1w0].h3;
+            u_1[1].h1.setInvalid();
+            u_1[1].h2.setInvalid();
+        } else {
+            u_1[1].h3.setInvalid();
+        }
+        u_1[1].h2.setValid();
+        u_1[1].h2.data = 16w1;
+        u_1[1].h1.setInvalid();
+        u_1[1].h3.setInvalid();
+        u_1[1w0].h2.setValid();
+        u_1[1w0].h1.setInvalid();
+        u_1[1w0].h3.setInvalid();
+        u_1[1].h1.setInvalid();
+        u_1[1w0].h1.setInvalid();
+        u_1[1w0].h1.setValid();
+        u_1[1w0].h2.setInvalid();
+        u_1[1w0].h3.setInvalid();
+    }
+    @hidden @name("tbl_invalidhdrwarnings6l57") table tbl_invalidhdrwarnings6l57_0 {
+        actions = {
+            invalidhdrwarnings6l57_0();
+        }
+        const default_action = invalidhdrwarnings6l57_0();
     }
     apply {
-        tbl_invalidhdrwarnings6l57.apply();
+        tbl_invalidhdrwarnings6l57_0.apply();
     }
 }
 
@@ -100,4 +174,3 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

@@ -1,15 +1,18 @@
+issue2176-bmv2.p4(38): [--Wwarn=unused] warning: 'val_0' is unused
+    action do_action_2(inout bit<8> val_0, inout bit<8> val_1, inout bit<8> val_2) {
+                                    ^^^^^
 issue2176-bmv2.p4(43): [--Wwarn=ordering] warning: h.h.b: 'out' argument has fields in common with h.h.b
         do_action_2(h.h.b, h.h.b, h.h.b);
                     ^^^^^
 issue2176-bmv2.p4(43)
         do_action_2(h.h.b, h.h.b, h.h.b);
-                           ^^^^^
+                                  ^^^^^
 issue2176-bmv2.p4(43): [--Wwarn=ordering] warning: h.h.b: 'out' argument has fields in common with h.h.b
         do_action_2(h.h.b, h.h.b, h.h.b);
                            ^^^^^
 issue2176-bmv2.p4(43)
         do_action_2(h.h.b, h.h.b, h.h.b);
-                    ^^^^^
+                                  ^^^^^
 issue2176-bmv2.p4(43): [--Wwarn=ordering] warning: h.h.b: 'out' argument has fields in common with h.h.b
         do_action_2(h.h.b, h.h.b, h.h.b);
                                   ^^^^^

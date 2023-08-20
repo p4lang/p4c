@@ -14,9 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ir.h"
 #include "dbprint.h"
-#include "lib/hex.h"
+
+#include <iostream>
+#include <list>
+#include <set>
+#include <utility>
+#include <vector>
+
+#include "ir/declaration.h"
+#include "ir/id.h"
+#include "ir/ir.h"
+#include "ir/node.h"
+#include "ir/vector.h"
+#include "lib/cstring.h"
+#include "lib/indent.h"
+#include "lib/log.h"
+#include "lib/ordered_map.h"
 
 using namespace DBPrint;
 using namespace IndentCtl;
@@ -40,26 +54,27 @@ void IR::Node::dbprint(std::ostream &out) const {
     out << "<" << node_type_name() << ">(" << id << ")";
 }
 
-void IR::Block::dbprint(std::ostream& out) const {
+void IR::Block::dbprint(std::ostream &out) const {
     IR::Node::dbprint(out);
     out << " " << node;
 }
 
-void IR::InstantiatedBlock::dbprint(std::ostream& out) const {
+void IR::InstantiatedBlock::dbprint(std::ostream &out) const {
     IR::Node::dbprint(out);
     out << " " << node << " instance type=" << instanceType;
 }
 
-void IR::Annotation::dbprint(std::ostream& out) const {
+void IR::Annotation::dbprint(std::ostream &out) const {
     out << '@' << name;
     const char *sep = "(";
     for (auto e : expr) {
         out << sep << e;
-        sep = ", "; }
+        sep = ", ";
+    }
     if (*sep != '(') out << ')';
 }
 
-void IR::Block::dbprint_recursive(std::ostream& out) const {
+void IR::Block::dbprint_recursive(std::ostream &out) const {
     out << dbp(this);
     out << indent;
     for (auto it : constantValue) {
@@ -81,21 +96,17 @@ std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> &v)
     if (prec) {
         if (v.size() == 1) {
             out << v[0];
-            return out; }
-        out << "{"; }
-    for (auto e : v)
-        out << Log::endl << setprec(0) << e << setprec(prec);
-    if (prec)
-        out << " }";
+            return out;
+        }
+        out << "{";
+    }
+    for (auto e : v) out << Log::endl << setprec(0) << e << setprec(prec);
+    if (prec) out << " }";
     return out;
 }
 
-void dbprint(const IR::Node *n) {
-  std::cout << n << std::endl;
-}
-void dbprint(const IR::Node &n) {
-  std::cout << n << std::endl;
-}
+void dbprint(const IR::Node *n) { std::cout << n << std::endl; }
+void dbprint(const IR::Node &n) { std::cout << n << std::endl; }
 void dbprint(const std::set<const IR::Expression *> s) {
     std::cout << indent << " {";
     int i = 0;

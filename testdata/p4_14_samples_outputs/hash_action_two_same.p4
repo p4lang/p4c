@@ -23,14 +23,14 @@ header data_t {
 }
 
 struct metadata {
-    @name(".counter_metadata") 
+    @name(".counter_metadata")
     counter_metadata_t counter_metadata;
-    @name(".meter_metadata") 
+    @name(".meter_metadata")
     meter_metadata_t   meter_metadata;
 }
 
 struct headers {
-    @name(".data") 
+    @name(".data")
     data_t data;
 }
 
@@ -42,13 +42,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 @name(".count1") @min_width(32) counter<bit<14>>(32w16384, CounterType.packets) count1;
-
 @name(".meter1") meter<bit<10>>(32w1024, MeterType.bytes) meter1;
-
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".set_index") action set_index(bit<16> index, bit<9> port) {
         meta.counter_metadata.counter_index = index;
-        meta.meter_metadata.meter_index = index;
+        meta.meter_metadata.meter_index = (bit<16>)index;
         standard_metadata.egress_spec = port;
     }
     @name(".count_entries") action count_entries() {
@@ -98,4 +96,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

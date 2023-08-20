@@ -15,37 +15,39 @@
 
 # Runs the compiler on a sample P4 V1.2 program
 
-
-from subprocess import Popen,PIPE
-from threading import Thread
-import errno
-import sys
-import re
-import os
-import stat
-import tempfile
-import shutil
 import difflib
-import subprocess
+import errno
 import glob
+import os
+import re
+import shutil
+import stat
+import subprocess
+import sys
+import tempfile
+from os import environ
+from subprocess import PIPE, Popen
+from threading import Thread, Timer
 
 SUCCESS = 0
 FAILURE = 1
 
+
 class Options(object):
     def __init__(self):
-        self.binary = ""                # this program's name
-        self.cleanupTmp = True          # if false do not remote tmp folder created
-        self.p4filename = ""            # file that is being compiled
-        self.compilerSrcDir = ""        # path to compiler source tree
+        self.binary = ""  # this program's name
+        self.cleanupTmp = True  # if false do not remote tmp folder created
+        self.p4filename = ""  # file that is being compiled
+        self.compilerSrcDir = ""  # path to compiler source tree
         self.verbose = False
-        self.replace = False            # replace previous outputs
+        self.replace = False  # replace previous outputs
         self.dumpToJson = False
         self.compilerOptions = []
         self.runDebugger = False
         self.runDebugger_skip = 0
         self.generateP4Runtime = False
         self.generateBfRt = False
+
 
 def usage(options):
     name = options.binary
@@ -57,13 +59,15 @@ def usage(options):
     print("          -b: do not remove temporary results for failing tests")
     print("          -v: verbose operation")
     print("          -f: replace reference outputs with newly generated ones")
-    print("          -a \"args\": pass args to the compiler")
+    print('          -a "args": pass args to the compiler')
     print("          --p4runtime: generate P4Info message in text format")
     print("          --bfrt: generate BfRt message in text format")
+
 
 def isError(p4filename):
     # True if the filename represents a p4 program that should fail
     return "_errors" in p4filename
+
 
 def ignoreStderr(options):
     for line in open(options.p4filename):
@@ -71,9 +75,11 @@ def ignoreStderr(options):
             return True
     return False
 
+
 class Local(object):
     # object to hold local vars accessable to nested functions
     pass
+
 
 def run_timeout(options, args, timeout, stderr):
     if options.verbose:
@@ -82,6 +88,7 @@ def run_timeout(options, args, timeout, stderr):
     local = Local()
     local.process = None
     local.filter = None
+
     def target():
         procstderr = None
         if stderr is not None:
@@ -93,15 +100,22 @@ def run_timeout(options, args, timeout, stderr):
             # sed. BSD sed's character class support is not great; for some
             # reason, even some character classes that the man page claims are
             # available don't seem to actually work.
-            local.filter = Popen(['sed', '-E',
-                                  r's|^[-[:alnum:][:punct:][:space:]_/]*/([-[:alnum:][:punct:][:space:]_]+\.[ph]4?[:(][[:digit:]]+)|\1|'],
-                stdin=PIPE, stdout=outfile)
+            local.filter = Popen(
+                [
+                    "sed",
+                    "-E",
+                    r"s|^[-[:alnum:][:punct:][:space:]_/]*/([-[:alnum:][:punct:][:space:]_]+\.[ph]4?[:(][[:digit:]]+)|\1|",
+                ],
+                stdin=PIPE,
+                stdout=outfile,
+            )
             procstderr = local.filter.stdin
         local.process = Popen(args, stderr=procstderr)
         local.process.wait()
         if local.filter is not None:
             local.filter.stdin.close()
             local.filter.wait()
+
     thread = Thread(target=target)
     thread.start()
     thread.join(timeout)
@@ -118,7 +132,9 @@ def run_timeout(options, args, timeout, stderr):
         print("Exit code ", local.process.returncode)
     return local.process.returncode
 
+
 timeout = 10 * 60
+
 
 def compare_files(options, produced, expected, ignore_case):
     if options.replace:
@@ -133,7 +149,7 @@ def compare_files(options, produced, expected, ignore_case):
     args = "-B -u -w"
     if ignore_case:
         args = args + " -i"
-    cmd = ("diff " + args + " " + expected + " " + produced + " >&2")
+    cmd = "diff " + args + " " + expected + " " + produced + " >&2"
     if options.verbose:
         print(cmd)
     exitcode = subprocess.call(cmd, shell=True)
@@ -142,6 +158,7 @@ def compare_files(options, produced, expected, ignore_case):
     else:
         return FAILURE
 
+
 def check_generated_files(options, tmpdir, expecteddir):
     files = os.listdir(tmpdir)
     for file in files:
@@ -149,21 +166,96 @@ def check_generated_files(options, tmpdir, expecteddir):
             print("Checking", file)
         produced = os.path.join(tmpdir, file)
         expected = os.path.join(expecteddir, file)
-        if not os.path.isfile(expected):
+        if options.replace:
+            # Only create files when explicitly asked to do so
             if options.verbose:
                 print("Expected file does not exist; creating", expected)
             shutil.copy2(produced, expected)
-        else:
-            result = compare_files(options, produced, expected, file[-7:] == "-stderr")
-            # We do not want to compare stderr output generated by p4c-dpdk
-            if result != SUCCESS and (file[-7:] == "-error"):
-                return SUCCESS
-            if result != SUCCESS and not ignoreStderr(options):
-                return result
+        elif not os.path.isfile(expected):
+            # The file is missing and we do not replace. This is an error.
+            print(
+                'Missing reference for file %s. Please rerun the test with the -f option turned on'
+                ' or rerun all tests using "P4TEST_REPLACE=True make check".' % expected
+            )
+            return FAILURE
+        result = compare_files(options, produced, expected, file[-6:] == "-error")
+        # We do not want to compare stderr output generated by p4c-dpdk
+        if result != SUCCESS and (file[-6:] == "-error"):
+            return SUCCESS
+        if result != SUCCESS and not ignoreStderr(options):
+            return result
+        if produced.endswith(".spec") and environ.get("DPDK_PIPELINE") is not None:
+            clifile = os.path.splitext(produced)[0] + ".cli"
+            with open(clifile, "w", encoding="utf-8") as f:
+                f.write("; SPDX-License-Identifier: BSD-3-Clause\n")
+                f.write("; Copyright(c) 2020 Intel Corporation\n")
+                f.write("\n")
+                f.write("mempool MEMPOOL0 buffer 9304 pool 32K cache 256 cpu 0\n")
+                f.write("\n")
+                f.write("link LINK0 dev 0000:00:04.0 rxq 1 128 MEMPOOL0 txq 1 512 promiscuous on\n")
+                f.write("link LINK1 dev 0000:00:05.0 rxq 1 128 MEMPOOL0 txq 1 512 promiscuous on\n")
+                f.write("link LINK2 dev 0000:00:06.0 rxq 1 128 MEMPOOL0 txq 1 512 promiscuous on\n")
+                f.write("link LINK3 dev 0000:00:07.0 rxq 1 128 MEMPOOL0 txq 1 512 promiscuous on\n")
+                f.write("\n")
+                f.write("pipeline PIPELINE0 create 0\n")
+                f.write("\n")
+                f.write("pipeline PIPELINE0 port in 0 link LINK0 rxq 0 bsz 32\n")
+                f.write("pipeline PIPELINE0 port in 1 link LINK1 rxq 0 bsz 32\n")
+                f.write("pipeline PIPELINE0 port in 2 link LINK2 rxq 0 bsz 32\n")
+                f.write("pipeline PIPELINE0 port in 3 link LINK3 rxq 0 bsz 32\n")
+                f.write("\n")
+                f.write("pipeline PIPELINE0 port out 0 link LINK0 txq 0 bsz 32\n")
+                f.write("pipeline PIPELINE0 port out 1 link LINK1 txq 0 bsz 32\n")
+                f.write("pipeline PIPELINE0 port out 2 link LINK2 txq 0 bsz 32\n")
+                f.write("pipeline PIPELINE0 port out 3 link LINK3 txq 0 bsz 32\n")
+                f.write("\n")
+                f.write("pipeline PIPELINE0 build ")
+                f.write(str(expected))
+                f.write("\n")
+                f.write("pipeline PIPELINE0 commit\n")
+                f.write("thread 1 pipeline PIPELINE0 enable\n")
+                f.write("pipeline PIPELINE0 abort\n")
+                f.close()
+            dpdk_log = os.path.splitext(produced)[0] + ".log"
+
+            def kill(process):
+                process.kill()
+
+            print(
+                "exec "
+                + environ.get("DPDK_PIPELINE")
+                + " -n 4 -c 0x3 -- -s "
+                + str(clifile)
+                + " 1>"
+                + dpdk_log
+            )
+            pipe = subprocess.Popen(
+                "exec "
+                + environ.get("DPDK_PIPELINE")
+                + " -n 4 -c 0x3 -- -s "
+                + str(clifile)
+                + " 1>"
+                + dpdk_log,
+                cwd=".",
+                shell=True,
+            )
+            timer = Timer(5, kill, [pipe])
+            try:
+                timer.start()
+                out, err = pipe.communicate()
+            finally:
+                timer.cancel()
+            with open(dpdk_log, "r") as f:
+                readfile = f.read()
+                if "Error" in readfile:
+                    print(readfile)
+                    return FAILURE
     return SUCCESS
+
 
 def file_name(tmpfolder, base, suffix, ext):
     return os.path.join(tmpfolder, base + "-" + suffix + ext)
+
 
 def process_file(options, argv):
     assert isinstance(options, Options)
@@ -192,16 +284,20 @@ def process_file(options, argv):
     p4runtimeFile = os.path.join(tmpdir, basename + ".p4info.txt")
     p4runtimeEntriesFile = os.path.join(tmpdir, basename + ".entries.txt")
     bfRtSchemaFile = os.path.join(tmpdir, basename + ".bfrt.json")
+
     def getArch(path):
-        v1Pattern = re.compile('include.*v1model\.p4')
-        psaPattern = re.compile('include.*psa\.p4')
-        ubpfPattern = re.compile('include.*ubpf_model\.p4')
-        with open(path, 'r', encoding='utf-8') as f:
+        v1Pattern = re.compile("include.*v1model\.p4")
+        pnaPattern = re.compile("include.*pna\.p4")
+        psaPattern = re.compile("include.*psa\.p4")
+        ubpfPattern = re.compile("include.*ubpf_model\.p4")
+        with open(path, "r", encoding="utf-8") as f:
             for line in f:
                 if v1Pattern.search(line):
                     return "v1model"
                 elif psaPattern.search(line):
                     return "psa"
+                elif pnaPattern.search(line):
+                    return "pna"
                 elif ubpfPattern.search(line):
                     return "ubpf"
             return None
@@ -233,13 +329,17 @@ def process_file(options, argv):
         print("Error compiling")
         print("".join(open(stderr).readlines()))
         # If the compiler crashed fail the test
-        if 'Compiler Bug' in open(stderr).readlines():
+        if "Compiler Bug" in open(stderr).readlines():
             return FAILURE
 
     # invert result
     expected_error = isError(options.p4filename)
-    if expected_error and result == SUCCESS:
-        result = FAILURE
+    if expected_error:
+        # invert result
+        if result == SUCCESS:
+            result = FAILURE
+        else:
+            result = SUCCESS
 
     if result == SUCCESS:
         result = check_generated_files(options, tmpdir, expected_dirname)
@@ -250,13 +350,16 @@ def process_file(options, argv):
         shutil.rmtree(tmpdir)
     return result
 
+
 def isdir(path):
     try:
         return stat.S_ISDIR(os.stat(path).st_mode)
     except OSError:
         return False
 
+
 ######################### main
+
 
 def main(argv):
     options = Options()
@@ -273,7 +376,7 @@ def main(argv):
         usage(options)
         sys.exit(FAILURE)
 
-    while argv[0][0] == '-':
+    while argv[0][0] == "-":
         if argv[0] == "-b":
             options.cleanupTmp = False
         elif argv[0] == "-v":
@@ -290,7 +393,7 @@ def main(argv):
             else:
                 options.compilerOptions += argv[1].split()
                 argv = argv[1:]
-        elif argv[0][1] == 'D' or argv[0][1] == 'I' or argv[0][1] == 'T':
+        elif argv[0][1] == "D" or argv[0][1] == "I" or argv[0][1] == "T":
             options.compilerOptions.append(argv[0])
         elif argv[0][0:4] == "-gdb":
             options.runDebugger = "gdb --args"
@@ -306,16 +409,16 @@ def main(argv):
             sys.exit(FAILURE)
         argv = argv[1:]
 
-    if 'P4TEST_REPLACE' in os.environ:
+    if "P4TEST_REPLACE" in os.environ:
         options.replace = True
 
-    options.p4filename=argv[-1]
+    options.p4filename = argv[-1]
     options.testName = None
     if options.p4filename.startswith(options.compilerSrcdir):
-        options.testName = options.p4filename[len(options.compilerSrcdir):]
-        if options.testName.startswith('/'):
+        options.testName = options.p4filename[len(options.compilerSrcdir) :]
+        if options.testName.startswith("/"):
             options.testName = options.testName[1:]
-        if options.testName.endswith('.p4'):
+        if options.testName.endswith(".p4"):
             options.testName = options.testName[:-3]
 
     result = process_file(options, argv)
@@ -323,6 +426,7 @@ def main(argv):
         print("Program was expected to fail")
 
     sys.exit(result)
+
 
 if __name__ == "__main__":
     main(sys.argv)

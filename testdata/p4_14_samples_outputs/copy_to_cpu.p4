@@ -3,7 +3,8 @@
 #include <v1model.p4>
 
 enum bit<8> FieldLists {
-    copy_to_cpu_fields = 0
+    none = 0,
+    copy_to_cpu_fields = 1
 }
 
 struct intrinsic_metadata_t {

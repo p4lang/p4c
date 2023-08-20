@@ -12,34 +12,42 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """ Converts the commands in an stf file which populate tables into a C
     program that manipulates ebpf tables. """
 
-
-import os
 import sys
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)) + '/../../tools')
-from testutils import *
+from pathlib import Path
+
+# Append tools to the import path.
+FILE_DIR = Path(__file__).resolve().parent
+# Append tools to the import path.
+sys.path.append(str(FILE_DIR.joinpath("../../../tools")))
+import testutils
 from stf.stf_parser import STFParser
 
 
 class eBPFCommand(object):
-    """ Defines a match-action command for eBPF programs"""
+    """Defines a match-action command for eBPF programs."""
 
     def __init__(self, a_type, table, action, priority="", match=[], extra=""):
-        self.a_type = a_type            # dir in which all files are stored
-        self.table = table          # contains meta information
-        self.action = action          # contains meta information
-        self.priority = priority    # template to generate a filter
-        self.match = match          # contains standard and error output
-        self.extra = extra          # could also be "pcapng"
+        # Dir in which all files are stored.
+        self.a_type = a_type
+        # Contains meta information.
+        self.table = table
+        # Contains meta information.
+        self.action = action
+        # Template to generate a filter.
+        self.priority = priority
+        # Contains standard and error output.
+        self.match = match
+        # Could also be "pcapng".
+        self.extra = extra
 
 
 def _generate_control_actions(cmds):
-    """ Generates the actual control plane commands.
+    """Generates the actual control plane commands.
     This function inserts C code for all the "add" commands that have
-    been parsed. """
+    been parsed."""
     generated = ""
     for index, cmd in enumerate(cmds):
         key_name = "key_%s%d" % (cmd.table, index)
@@ -51,40 +59,50 @@ def _generate_control_actions(cmds):
             generated += "struct %s_key %s = {};\n\t" % (cmd.table, key_name)
             tbl_name = cmd.table
             for key_num, key_field in enumerate(cmd.match):
-                field = key_field[0].split('.')[1]
-                generated += ("%s.%s = %s;\n\t"
-                              % (key_name, field, key_field[1]))
-        generated += ("tableFileDescriptor = "
-                      "BPF_OBJ_GET(MAP_PATH \"/%s\");\n\t" %
-                      tbl_name)
-        generated += ("if (tableFileDescriptor < 0) {"
-                      "fprintf(stderr, \"map %s not loaded\");"
-                      " exit(1); }\n\t" % tbl_name)
-        generated += ("struct %s_value %s = {\n\t\t" % (
-            cmd.table, value_name))
-        generated += ".action = %s,\n\t\t" % (cmd.action[0])
+                field = key_field[0].split(".")[1]
+                key_field_val = key_field[1]
+                # Support for LPM key
+                if isinstance(key_field_val, tuple):
+                    generated += (
+                        "%s.prefixlen = (offsetof(struct %s_key, %s) - 4) * 8 + %s;\n\t"
+                        % (key_name, cmd.table, field, key_field_val[1])
+                    )
+                    key_field_val = key_field_val[0]
+                generated += "%s.%s = %s;\n\t" % (key_name, field, key_field_val)
+        generated += "tableFileDescriptor = BPF_OBJ_GET(MAP_PATH \"/%s\");\n\t" % tbl_name
+        generated += (
+            "if (tableFileDescriptor < 0) {fprintf(stderr, \"map %s not loaded\"); exit(1); }\n\t"
+            % tbl_name
+        )
+        generated += "struct %s_value %s = {\n\t\t" % (cmd.table, value_name)
+        if cmd.action[0] == "_NoAction":
+            generated += ".action = 0,\n\t\t"
+        else:
+            action_full_name = "{}_ACT_{}".format(cmd.table.upper(), cmd.action[0].upper())
+            generated += ".action = %s,\n\t\t" % action_full_name
         generated += ".u = {.%s = {" % cmd.action[0]
         for val_num, val_field in enumerate(cmd.action[1]):
             generated += "%s," % val_field[1]
         generated += "}},\n\t"
         generated += "};\n\t"
-        generated += ("ok = BPF_USER_MAP_UPDATE_ELEM"
-                      "(tableFileDescriptor, &%s, &%s, BPF_ANY);\n\t"
-                      % (key_name, value_name))
-        generated += ("if (ok != 0) { perror(\"Could not write in %s\");"
-                      "exit(1); }\n" % tbl_name)
+        generated += (
+            "ok = BPF_USER_MAP_UPDATE_ELEM(tableFileDescriptor, &%s, &%s, BPF_ANY);\n\t"
+            % (key_name, value_name)
+        )
+        generated += 'if (ok != 0) { perror("Could not write in %s");exit(1); }\n' % tbl_name
     return generated
 
 
 def create_table_file(actions, tmpdir, file_name):
-    """ Create the control plane file.
+    """Create the control plane file.
     The control commands are provided by the stf parser.
     This generated file is required by ebpf_runtime.c to initialize
-    the control plane. """
+    the control plane."""
     err = ""
     try:
         with open(tmpdir + "/" + file_name, "w+") as control_file:
-            control_file.write("#include \"test.h\"\n\n")
+            control_file.write('#include "test.h"\n')
+            control_file.write("#include <stddef.h>\n\n")
             control_file.write("static inline void setup_control_plane() {")
             control_file.write("\n\t")
             control_file.write("int ok;\n\t")
@@ -94,13 +112,13 @@ def create_table_file(actions, tmpdir, file_name):
             control_file.write("}\n")
     except OSError as e:
         err = e
-        return FAILURE, err
-    return SUCCESS, err
+        return testutils.FAILURE, err
+    return testutils.SUCCESS, err
 
 
 def parse_stf_file(raw_stf):
-    """ Uses the .stf parsing tool to acquire a pre-formatted list.
-        Processing entries according to their specified cmd. """
+    """Uses the .stf parsing tool to acquire a pre-formatted list.
+    Processing entries according to their specified cmd."""
     parser = STFParser()
     stf_str = raw_stf.read()
     stf_map, errs = parser.parse(stf_str)
@@ -109,25 +127,29 @@ def parse_stf_file(raw_stf):
     expected = {}
     for stf_entry in stf_map:
         if stf_entry[0] == "packet":
-            input_pkts.setdefault(stf_entry[1], []).append(bytes.fromhex(''.join(stf_entry[2].split())))
+            interface = int(stf_entry[1])
+            data = stf_entry[2]
+            input_pkts.setdefault(interface, []).append(bytes.fromhex("".join(data.split())))
         elif stf_entry[0] == "expect":
             interface = int(stf_entry[1])
             pkt_data = stf_entry[2]
             expected.setdefault(interface, {})
-            if pkt_data != '':
+            if pkt_data != "":
                 expected[interface]["any"] = False
-                expected[interface].setdefault(
-                    "pkts", []).append(pkt_data)
+                expected[interface].setdefault("pkts", []).append(pkt_data)
             else:
                 expected[interface]["any"] = True
         elif stf_entry[0] == "add":
             cmd = eBPFCommand(
-                a_type=stf_entry[0], table=stf_entry[1],
-                priority=stf_entry[2], match=stf_entry[3],
-                action=stf_entry[4], extra=stf_entry[5])
+                a_type=stf_entry[0],
+                table=stf_entry[1],
+                priority=stf_entry[2],
+                match=stf_entry[3],
+                action=stf_entry[4],
+                extra=stf_entry[5],
+            )
             cmds.append(cmd)
         elif stf_entry[0] == "setdefault":
-            cmd = eBPFCommand(
-                a_type=stf_entry[0], table=stf_entry[1], action=stf_entry[2])
+            cmd = eBPFCommand(a_type=stf_entry[0], table=stf_entry[1], action=stf_entry[2])
             cmds.append(cmd)
     return input_pkts, cmds, expected

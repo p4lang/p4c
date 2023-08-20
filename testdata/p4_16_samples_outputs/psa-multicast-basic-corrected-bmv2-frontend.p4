@@ -28,7 +28,7 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     @name("cIngress.meta") psa_ingress_output_metadata_t meta_0;
     @name("cIngress.multicast_group") MulticastGroup_t multicast_group_0;
-    @noWarnUnused @name(".multicast") action multicast_0() {
+    @noWarn("unused") @name(".multicast") action multicast_0() {
         meta_0 = ostd;
         multicast_group_0 = (MulticastGroup_t)(MulticastGroupUint_t)hdr.ethernet.dstAddr;
         meta_0.drop = false;
@@ -65,8 +65,5 @@ control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_met
 }
 
 IngressPipeline<headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), cIngress(), IngressDeparserImpl()) ip;
-
 EgressPipeline<headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), cEgress(), EgressDeparserImpl()) ep;
-
 PSA_Switch<headers_t, metadata_t, headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

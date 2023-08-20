@@ -2,12 +2,11 @@ header H {
     bit<32> isValid;
 }
 
-typedef bit<32> T;
 header H1 {
     bit<16> f;
     bit<8>  minSizeInBytes;
     bit<8>  minSizeInBits;
-    T       f1;
+    bit<32> f1;
     bit<16> e;
 }
 
@@ -59,4 +58,3 @@ control c(out bit<32> size) {
 control _c(out bit<32> s);
 package top(_c c);
 top(c()) main;
-

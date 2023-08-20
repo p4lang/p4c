@@ -14,35 +14,35 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_P4_CHECKCOREMETHODS_H_
-#define _FRONTENDS_P4_CHECKCOREMETHODS_H_
+#ifndef FRONTENDS_P4_CHECKCOREMETHODS_H_
+#define FRONTENDS_P4_CHECKCOREMETHODS_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
 /// Check types for arguments of core.p4 methods
 class DoCheckCoreMethods : public Inspector {
-    ReferenceMap*  refMap;
-    TypeMap*       typeMap;
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
 
-    void checkEmitType(const IR::Expression* emit, const IR::Type* type) const;
-    void checkCorelibMethods(const ExternMethod* em) const;
+    void checkEmitType(const IR::Expression *emit, const IR::Type *type) const;
+    void checkCorelibMethods(const ExternMethod *em) const;
 
  public:
-    DoCheckCoreMethods(ReferenceMap* refMap, TypeMap* typeMap) :
-            refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(refMap); CHECK_NULL(typeMap);
+    DoCheckCoreMethods(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
         setName("DoCheckCoreMethods");
     }
 
-    void postorder(const IR::MethodCallExpression* expr) override;
+    void postorder(const IR::MethodCallExpression *expr) override;
 };
 
 class CheckCoreMethods : public PassManager {
  public:
-    CheckCoreMethods(ReferenceMap* refMap, TypeMap* typeMap) {
+    CheckCoreMethods(ReferenceMap *refMap, TypeMap *typeMap) {
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DoCheckCoreMethods(refMap, typeMap));
         setName("CheckCoreMethods");
@@ -51,4 +51,4 @@ class CheckCoreMethods : public PassManager {
 
 }  // namespace P4
 
-#endif /* _FRONTENDS_P4_CHECKCOREMETHODS_H_ */
+#endif /* FRONTENDS_P4_CHECKCOREMETHODS_H_ */

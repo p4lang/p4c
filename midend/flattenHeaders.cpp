@@ -19,15 +19,14 @@ limitations under the License.
 
 namespace P4 {
 
-void FindHeaderTypesToReplace::createReplacement(const IR::Type_Header* type,
-        AnnotationSelectionPolicy *policy) {
-    if (replacement.count(type->name))
-        return;
+void FindHeaderTypesToReplace::createReplacement(const IR::Type_Header *type,
+                                                 AnnotationSelectionPolicy *policy) {
+    if (replacement.count(type->name)) return;
     replacement.emplace(type->name,
                         new StructTypeReplacement<IR::Type_StructLike>(typeMap, type, policy));
 }
 
-bool FindHeaderTypesToReplace::preorder(const IR::Type_Header* type) {
+bool FindHeaderTypesToReplace::preorder(const IR::Type_Header *type) {
     // check if header has structs in it and create flat replacement if it does
     for (auto f : type->fields) {
         auto ft = typeMap->getType(f, true);
@@ -41,7 +40,7 @@ bool FindHeaderTypesToReplace::preorder(const IR::Type_Header* type) {
 
 /////////////////////////////////
 
-const IR::Node* ReplaceHeaders::preorder(IR::P4Program* program) {
+const IR::Node *ReplaceHeaders::preorder(IR::P4Program *program) {
     if (findHeaderTypesToReplace->empty()) {
         // nothing to do
         prune();
@@ -49,7 +48,7 @@ const IR::Node* ReplaceHeaders::preorder(IR::P4Program* program) {
     return program;
 }
 
-const IR::Node* ReplaceHeaders::postorder(IR::Type_Header* type) {
+const IR::Node *ReplaceHeaders::postorder(IR::Type_Header *type) {
     auto canon = typeMap->getTypeType(getOriginal(), true);
     auto name = canon->to<IR::Type_Header>()->name;
     auto repl = findHeaderTypesToReplace->getReplacement(name);
@@ -61,19 +60,18 @@ const IR::Node* ReplaceHeaders::postorder(IR::Type_Header* type) {
     return type;
 }
 
-const IR::Node* ReplaceHeaders::postorder(IR::Member* expression) {
+const IR::Node *ReplaceHeaders::postorder(IR::Member *expression) {
     // Find out if this applies to one of the parameters that are being replaced.
-    const IR::Expression* e = expression;
+    const IR::Expression *e = expression;
     cstring prefix = "";
-    const IR::Type_Header* h = nullptr;
+    const IR::Type_Header *h = nullptr;
     while (auto mem = e->to<IR::Member>()) {
         e = mem->expr;
         prefix = cstring(".") + mem->member + prefix;
         auto type = typeMap->getType(e, true);
         if ((h = type->to<IR::Type_Header>())) break;
     }
-    if (h == nullptr)
-        return expression;
+    if (h == nullptr) return expression;
 
     auto repl = findHeaderTypesToReplace->getReplacement(h->name);
     if (repl == nullptr) {
@@ -82,12 +80,11 @@ const IR::Node* ReplaceHeaders::postorder(IR::Member* expression) {
     // At this point we know that e is an expression of the form
     // param.field1.etc.hdr, where hdr needs to be replaced.
     auto newFieldName = ::get(repl->fieldNameRemap, prefix);
-    const IR::Expression* result;
+    const IR::Expression *result;
     if (newFieldName.isNullOrEmpty()) {
         auto type = typeMap->getType(getOriginal(), true);
         // This could be, for example, a method like setValid.
-        if (!type->is<IR::Type_Struct>())
-            return expression;
+        if (!type->is<IR::Type_Struct>()) return expression;
         if (getParent<IR::Member>() != nullptr)
             // We only want to process the outermost Member
             return expression;

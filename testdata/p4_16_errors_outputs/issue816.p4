@@ -9,7 +9,6 @@ extern BoolRegister {
 }
 
 BoolRegister() r;
-
 action a(in C c1, in C c2) {
     r.flip();
     if (r.get()) {
@@ -35,4 +34,3 @@ control MyC3() {
 }
 
 S(MyC3()) main;
-

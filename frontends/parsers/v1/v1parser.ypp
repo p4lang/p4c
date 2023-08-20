@@ -21,6 +21,7 @@ limitations under the License.
 // Set up names.
 %defines
 %define api.namespace {V1}
+// TODO: Update, once we drop Ubuntu 18.04 support.
 %define parser_class_name {V1Parser}
 
 // Use the C++-native variant representation of tokens.
@@ -31,10 +32,12 @@ limitations under the License.
 %define parse.assert true
 
 // Enable verbose error reporting.
-%error-verbose
+%define parse.error verbose
 
 // Declare dependencies.
 %code requires {
+#include "ir/ir.h"
+
 namespace V1 {
 class V1Lexer;
 class V1ParserDriver;
@@ -846,8 +849,10 @@ control_statement:
 
 apply_case_list: /* epsilon */ { $$ = new IR::Apply; }
     | apply_case_list name_list control_statement
-        { for (auto name : $2->names)
+        { for (auto name : $2->names) {
               $1->actions[name] = $3;
+              $1->position[name] = new IR::Path(name);
+          }
           $$ = $1; }
     | apply_case_list DEFAULT control_statement
         { ($$=$1)->actions["default"] = $3; }

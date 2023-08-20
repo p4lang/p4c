@@ -1,0 +1,16 @@
+/build
+/.vscode
+/.cache
+p4c
+# Emacs auto-save
+*~
+
+# vim savefiles
+.*.sw?
+
+# Compiled Python files
+*.pyc
+
+# Mac OS files
+.DS_Store
+._*

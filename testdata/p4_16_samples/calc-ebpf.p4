@@ -146,6 +146,7 @@ control Ingress(inout headers hdr,
         }
 	/* this is required in XDP model */
 	implementation = hash_table(8);
+        size = 100;
     }
 
     apply {

@@ -16,8 +16,8 @@ limitations under the License.
 
 /* -*-C++-*- */
 
-#ifndef _LIB_ERROR_H_
-#define _LIB_ERROR_H_
+#ifndef LIB_ERROR_H_
+#define LIB_ERROR_H_
 
 #include "lib/compile_context.h"
 #include "lib/cstring.h"
@@ -28,9 +28,7 @@ limitations under the License.
 
 /// @return the number of errors encountered so far in the current compilation
 /// context.
-inline unsigned errorCount() {
-    return BaseCompileContext::get().errorReporter().getErrorCount();
-}
+inline unsigned errorCount() { return BaseCompileContext::get().errorReporter().getErrorCount(); }
 
 /// @return the number of diagnostics (either errors or warnings) encountered so
 /// far in the current compilation context.
@@ -46,8 +44,8 @@ inline unsigned diagnosticCount() {
 // LEGACY: once we transition to error types, this should be deprecated
 #if LEGACY
 template <typename... T>
-inline void error(const char* format, T... args) {
-    auto& context = BaseCompileContext::get();
+inline void error(const char *format, T... args) {
+    auto &context = BaseCompileContext::get();
     auto action = context.getDefaultErrorDiagnosticAction();
     context.errorReporter().diagnose(action, nullptr, format, "", args...);
 }
@@ -55,30 +53,30 @@ inline void error(const char* format, T... args) {
 
 /// Report errors of type kind. Requires that the node argument have source info.
 /// The message format is declared in the error catalog.
-template<class T,
-         typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
-         class... Args>
+template <class T,
+          typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
+          class... Args>
 void error(const int kind, const char *format, const T *node, Args... args) {
-    auto& context = BaseCompileContext::get();
+    auto &context = BaseCompileContext::get();
     auto action = context.getDefaultErrorDiagnosticAction();
     context.errorReporter().diagnose(action, kind, format, "", node, args...);
 }
 
 /// This is similar to the above method, but also has a suffix
-template<class T,
-         typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
-         class... Args>
-void errorWithSuffix(const int kind, const char *format, const char* suffix,
-                     const T *node, Args... args) {
-    auto& context = BaseCompileContext::get();
+template <class T,
+          typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
+          class... Args>
+void errorWithSuffix(const int kind, const char *format, const char *suffix, const T *node,
+                     Args... args) {
+    auto &context = BaseCompileContext::get();
     auto action = context.getDefaultErrorDiagnosticAction();
     context.errorReporter().diagnose(action, kind, format, suffix, node, args...);
 }
 
 /// The const ref variant of the above
-template<class T,
-         typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
-         class... Args>
+template <class T,
+          typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
+          class... Args>
 void error(const int kind, const char *format, const T &node, Args... args) {
     error(kind, format, &node, std::forward<Args>(args)...);
 }
@@ -88,18 +86,18 @@ void error(const int kind, const char *format, const T &node, Args... args) {
 /// This allows incremental migration toward minimizing the number of errors and warnings
 /// reported when passes are repeated, as typed errors are filtered.
 // LEGACY: once we transition to error types, this should be deprecated
-template<class T,
-         typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
-         class... Args>
+template <class T,
+          typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
+          class... Args>
 void error(const char *format, const T *node, Args... args) {
     error(ErrorType::LEGACY_ERROR, format, node, std::forward<Args>(args)...);
 }
 
 /// The const ref variant of the above
 // LEGACY: once we transition to error types, this should be deprecated
-template<class T,
-         typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
-         class... Args>
+template <class T,
+          typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
+          class... Args>
 void error(const char *format, const T &node, Args... args) {
     error(ErrorType::LEGACY_ERROR, format, node, std::forward<Args>(args)...);
 }
@@ -107,9 +105,9 @@ void error(const char *format, const T &node, Args... args) {
 
 /// Report errors of type kind for messages that do not have a node.
 /// These will not be filtered
-template<typename... Args>
+template <typename... Args>
 void error(const int kind, const char *format, Args... args) {
-    auto& context = BaseCompileContext::get();
+    auto &context = BaseCompileContext::get();
     auto action = context.getDefaultErrorDiagnosticAction();
     context.errorReporter().diagnose(action, kind, format, "", std::forward<Args>(args)...);
 }
@@ -117,36 +115,36 @@ void error(const int kind, const char *format, Args... args) {
 #if LEGACY
 /// Report a warning with the given message.
 template <typename... T>
-inline void warning(const char* format, T... args) {
-    auto& context = BaseCompileContext::get();
+inline void warning(const char *format, T... args) {
+    auto &context = BaseCompileContext::get();
     auto action = context.getDefaultWarningDiagnosticAction();
     context.errorReporter().diagnose(action, nullptr, format, "", args...);
 }
 #endif
 
 /// Report warnings of type kind. Requires that the node argument have source info.
-template<class T,
-         typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
-         class... Args>
+template <class T,
+          typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
+          class... Args>
 void warning(const int kind, const char *format, const T *node, Args... args) {
-    auto& context = BaseCompileContext::get();
+    auto &context = BaseCompileContext::get();
     auto action = context.getDefaultWarningDiagnosticAction();
     context.errorReporter().diagnose(action, kind, format, "", node, args...);
 }
 
 /// The const ref variant of the above
-template<class T,
-         typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
-         class... Args>
+template <class T,
+          typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
+          class... Args>
 void warning(const int kind, const char *format, const T &node, Args... args) {
     ::warning(kind, format, &node, std::forward<Args>(args)...);
 }
 
 /// Report warnings of type kind, for messages that do not have a node.
 /// These will not be filtered
-template<typename... Args>
+template <typename... Args>
 void warning(const int kind, const char *format, Args... args) {
-    auto& context = BaseCompileContext::get();
+    auto &context = BaseCompileContext::get();
     auto action = context.getDefaultWarningDiagnosticAction();
     context.errorReporter().diagnose(action, kind, format, "", std::forward<Args>(args)...);
 }
@@ -165,11 +163,11 @@ void warning(const int kind, const char *format, Args... args) {
  * @param suffix  A message that is appended at the end.
  */
 template <typename... T>
-inline void diagnose(DiagnosticAction defaultAction, const char* diagnosticName,
-                     const char* format, const char* suffix, T... args) {
-    auto& context = BaseCompileContext::get();
+inline void diagnose(DiagnosticAction defaultAction, const char *diagnosticName, const char *format,
+                     const char *suffix, T... args) {
+    auto &context = BaseCompileContext::get();
     auto action = context.getDiagnosticAction(diagnosticName, defaultAction);
     context.errorReporter().diagnose(action, diagnosticName, format, suffix, args...);
 }
 
-#endif /* _LIB_ERROR_H_ */
+#endif /* LIB_ERROR_H_ */

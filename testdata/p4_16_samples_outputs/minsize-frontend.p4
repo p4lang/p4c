@@ -10,4 +10,3 @@ control c(out bit<32> v) {
 control cproto(out bit<32> v);
 package top(cproto _c);
 top(c()) main;
-

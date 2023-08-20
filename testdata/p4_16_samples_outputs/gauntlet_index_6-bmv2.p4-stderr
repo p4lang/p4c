@@ -1,0 +1,3 @@
+gauntlet_index_6-bmv2.p4(34): [--Wwarn=unused] warning: 'val' is unused
+    action simple_action(inout bit<8> val) { }
+                                      ^^^

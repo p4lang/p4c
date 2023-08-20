@@ -1,0 +1,3 @@
+issue3051.p4(4): [--Wwarn=uninitialized_use] warning: b_0 may be uninitialized
+control MyC(@optional inout bool b) {
+                                 ^

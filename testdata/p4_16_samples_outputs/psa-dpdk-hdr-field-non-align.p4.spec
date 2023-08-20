@@ -1,0 +1,88 @@
+
+struct ethernet_t {
+	bit<8> x0
+	bit<16> x1_x2_x3
+	bit<48> dst_addr
+	bit<48> src_addr
+	bit<16> ether_type
+}
+
+struct psa_ingress_output_metadata_t {
+	bit<8> class_of_service
+	bit<8> clone
+	bit<16> clone_session_id
+	bit<8> drop
+	bit<8> resubmit
+	bit<32> multicast_group
+	bit<32> egress_port
+}
+
+struct psa_egress_output_metadata_t {
+	bit<8> clone
+	bit<16> clone_session_id
+	bit<8> drop
+}
+
+struct psa_egress_deparser_input_metadata_t {
+	bit<32> egress_port
+}
+
+header ethernet instanceof ethernet_t
+
+struct user_meta_data_t {
+	bit<32> psa_ingress_input_metadata_ingress_port
+	bit<8> psa_ingress_output_metadata_drop
+	bit<32> psa_ingress_output_metadata_egress_port
+	bit<48> local_metadata_addr
+	bit<8> local_metadata_x2
+	bit<8> local_metadata_flg
+	bit<16> Ingress_tmp
+	bit<16> Ingress_tmp_0
+	bit<16> Ingress_tmp_1
+}
+metadata instanceof user_meta_data_t
+
+action NoAction args none {
+	return
+}
+
+action macswp args none {
+	jmpneq LABEL_END m.local_metadata_flg 0x2
+	mov m.Ingress_tmp h.ethernet.x1_x2_x3
+	shr m.Ingress_tmp 0x4
+	mov m.Ingress_tmp_0 m.Ingress_tmp
+	and m.Ingress_tmp_0 0xFF
+	mov m.Ingress_tmp_1 m.Ingress_tmp_0
+	and m.Ingress_tmp_1 0xFF
+	mov m.local_metadata_x2 m.Ingress_tmp_1
+	mov m.local_metadata_addr h.ethernet.dst_addr
+	mov h.ethernet.dst_addr h.ethernet.src_addr
+	mov h.ethernet.src_addr m.local_metadata_addr
+	LABEL_END :	return
+}
+
+table stub {
+	actions {
+		macswp
+		NoAction
+	}
+	default_action NoAction args none 
+	size 0xF4240
+}
+
+
+apply {
+	rx m.psa_ingress_input_metadata_ingress_port
+	mov m.psa_ingress_output_metadata_drop 0x1
+	extract h.ethernet
+	mov m.local_metadata_flg 0x2
+	mov m.psa_ingress_output_metadata_egress_port m.psa_ingress_input_metadata_ingress_port
+	xor m.psa_ingress_output_metadata_egress_port 0x1
+	table stub
+	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	emit h.ethernet
+	tx m.psa_ingress_output_metadata_egress_port
+	LABEL_DROP :	drop
+}
+
+

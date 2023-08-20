@@ -18,6 +18,7 @@ updates {
           }
         }
       }
+      is_const: true
     }
   }
 }

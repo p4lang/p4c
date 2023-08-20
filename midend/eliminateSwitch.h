@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_ELIMINATESWITCH_H_
-#define _MIDEND_ELIMINATESWITCH_H_
+#ifndef MIDEND_ELIMINATESWITCH_H_
+#define MIDEND_ELIMINATESWITCH_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -75,23 +75,28 @@ switch1_case_default: { ... }
 
  */
 class DoEliminateSwitch final : public Transform {
-    ReferenceMap* refMap;
-    const TypeMap* typeMap;
-    std::vector<const IR::Declaration*> toInsert;
+    ReferenceMap *refMap;
+    const TypeMap *typeMap;
+    std::vector<const IR::Declaration *> toInsert;
+
  public:
-    explicit DoEliminateSwitch(ReferenceMap* refMap, const TypeMap* typeMap):
-            refMap(refMap), typeMap(typeMap)
-    { setName("DoEliminateSwitch"); CHECK_NULL(refMap); CHECK_NULL(typeMap); }
-    const IR::Node* postorder(IR::SwitchStatement* statement) override;
-    const IR::Node* postorder(IR::P4Control* control) override;
+    bool exactNeeded = false;
+
+    DoEliminateSwitch(ReferenceMap *refMap, const TypeMap *typeMap)
+        : refMap(refMap), typeMap(typeMap) {
+        setName("DoEliminateSwitch");
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
+    }
+    const IR::Node *postorder(IR::SwitchStatement *statement) override;
+    const IR::Node *postorder(IR::P4Control *control) override;
+    const IR::Node *postorder(IR::P4Program *program) override;
 };
 
 class EliminateSwitch final : public PassManager {
  public:
-    EliminateSwitch(ReferenceMap* refMap, TypeMap* typeMap,
-                    TypeChecking* typeChecking = nullptr) {
-        if (!typeChecking)
-            typeChecking = new TypeChecking(refMap, typeMap);
+    EliminateSwitch(ReferenceMap *refMap, TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoEliminateSwitch(refMap, typeMap));
         passes.push_back(new ClearTypeMap(typeMap));
@@ -101,4 +106,4 @@ class EliminateSwitch final : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_ELIMINATESWITCH_H_ */
+#endif /* MIDEND_ELIMINATESWITCH_H_ */

@@ -1,11 +1,10 @@
 #include <core.p4>
 #include <pna.p4>
 
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv4_t {
@@ -27,6 +26,7 @@ struct empty_metadata_t {
 }
 
 struct main_metadata_t {
+    bit<8> timeout;
 }
 
 struct headers_t {
@@ -59,15 +59,15 @@ struct tuple_0 {
 }
 
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @name("MainControlImpl.next_hop") action next_hop(@name("vport") PortId_t vport) {
+    @name("MainControlImpl.next_hop") action next_hop(@name("vport") bit<32> vport) {
         send_to_port(vport);
     }
     @name("MainControlImpl.add_on_miss_action") action add_on_miss_action() {
-        add_entry<bit<32>>(action_name = "next_hop", action_params = 32w0);
+        add_entry<bit<32>>(action_name = "next_hop", action_params = 32w0, expire_time_profile_id = user_meta.timeout);
     }
     @name("MainControlImpl.ipv4_da") table ipv4_da_0 {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
         }
         actions = {
             @tableonly next_hop();
@@ -76,16 +76,16 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         add_on_miss = true;
         const default_action = add_on_miss_action();
     }
-    @name("MainControlImpl.next_hop2") action next_hop2(@name("vport") PortId_t vport_2, @name("newAddr") bit<32> newAddr) {
+    @name("MainControlImpl.next_hop2") action next_hop2(@name("vport") bit<32> vport_2, @name("newAddr") bit<32> newAddr) {
         send_to_port(vport_2);
         hdr.ipv4.srcAddr = newAddr;
     }
     @name("MainControlImpl.add_on_miss_action2") action add_on_miss_action2() {
-        add_entry<tuple_0>(action_name = "next_hop", action_params = (tuple_0){f0 = 32w0,f1 = 32w1234});
+        add_entry<tuple_0>(action_name = "next_hop2", action_params = (tuple_0){f0 = 32w0,f1 = 32w1234}, expire_time_profile_id = user_meta.timeout);
     }
     @name("MainControlImpl.ipv4_da2") table ipv4_da2_0 {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
         }
         actions = {
             @tableonly next_hop2();
@@ -103,20 +103,19 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaaddonmiss185() {
+    @hidden action pnaaddonmiss186() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnaaddonmiss185 {
+    @hidden table tbl_pnaaddonmiss186 {
         actions = {
-            pnaaddonmiss185();
+            pnaaddonmiss186();
         }
-        const default_action = pnaaddonmiss185();
+        const default_action = pnaaddonmiss186();
     }
     apply {
-        tbl_pnaaddonmiss185.apply();
+        tbl_pnaaddonmiss186.apply();
     }
 }
 
 PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
-

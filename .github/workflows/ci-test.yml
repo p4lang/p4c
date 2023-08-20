@@ -6,62 +6,195 @@ on:
   pull_request:
     branches: [ main ]
 
+# Cancel any preceding run on the pull request.
+concurrency:
+  group: test-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
-  # Build and test p4c on Ubuntu 16.04
-  build-linux:
+  # Build with gcc and test p4c on Ubuntu 22.04.
+  test-ubuntu22:
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-22.04
+    env:
+      CTEST_PARALLEL_LEVEL: 4
+      IMAGE_TYPE: test
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+        fetch-depth: 0
+
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: test-${{ runner.os }}-gcc
+        max-size: 1000M
+
+    - name: Build (Ubuntu 22.04, GCC)
+      run: |
+        tools/ci-build.sh
+
+    - name: Run tests (Ubuntu 22.04)
+      # Need to use sudo for the eBPF kernel tests.
+      run: sudo -E ctest --output-on-failure --schedule-random
+      working-directory: ./build
+
+  # Build with gcc and test p4c on Ubuntu 20.04.
+  test-ubuntu20:
+    name: test-ubuntu20 (Unity ${{ matrix.unity }})
     strategy:
       fail-fast: false
       matrix:
-        unified: [ON, OFF]
-        enable_gmp: [ON, OFF]
-        exclude:
-          - unified: OFF
-            enable_gmp: OFF
+        unity: [ON, OFF]
+    runs-on: ubuntu-20.04
+    env:
+      CTEST_PARALLEL_LEVEL: 4
+      IMAGE_TYPE: test
+      CMAKE_UNITY_BUILD: ${{ matrix.unity }}
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+        fetch-depth: 0
+
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: test-${{ matrix.unity }}-${{ runner.os }}-gcc
+        max-size: 1000M
+
+    - name: Build (Ubuntu 20.04, GCC)
+      run: |
+        tools/ci-build.sh
+
+    - name: Run tests (Ubuntu 20.04)
+      # Need to use sudo for the eBPF kernel tests.
+      run: sudo -E ctest --output-on-failure --schedule-random
+      working-directory: ./build
+      if: matrix.unity == 'ON'
+
+  # Build with clang and test p4c on Ubuntu 20.04.
+  test-ubuntu20-clang-sanitizers:
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-20.04
+    env:
+      CTEST_PARALLEL_LEVEL: 2
+      IMAGE_TYPE: test
+      COMPILE_WITH_CLANG: ON
+      BUILD_AUTO_VAR_INIT_PATTERN: ON
+      ENABLE_SANITIZERS: ON
+      UBSAN_OPTIONS: print_stacktrace=1
+      ASAN_OPTIONS: print_stacktrace=1:detect_leaks=0
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: test-${{ runner.os }}-clang
+        max-size: 1000M
+
+    - name: Build (Ubuntu 20.04, Clang, Sanitizers)
+      run: |
+        tools/ci-build.sh
+
+    - name: Run tests (Ubuntu 20.04)
+      # Need to use sudo for the eBPF kernel tests.
+      run: sudo -E ctest --output-on-failure --schedule-random
+      working-directory: ./build
+
+  # Build with gcc and test p4c on Ubuntu 18.04.
+  test-ubuntu18:
+    strategy:
+      fail-fast: false
     runs-on: ubuntu-latest
     env:
       CTEST_PARALLEL_LEVEL: 4
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
+        fetch-depth: 0
 
-    - name: Cancel previous runs
-      uses: styfle/cancel-workflow-action@0.9.0
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
       with:
-        access_token: ${{ github.token }}
+        key: test-ubuntu-18.04-gcc
+        max-size: 1000M
 
-    - name: Build (Linux)
+    - name: Build (Ubuntu 18.04, GCC)
       run: |
-        tools/start_ccache
-        # To flush out issues with unified vs. non-unified builds,
-        # do a non-unified build before continuing with the rest,
-        # which produces a unified build.
-        docker build --network ccache_network -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=${{matrix.unified}} --build-arg ENABLE_GMP=${{ matrix.enable_gmp }} .
+        docker build -t p4c --build-arg BASE_IMAGE=ubuntu:18.04 --build-arg IMAGE_TYPE=test \
+        --build-arg ENABLE_TEST_TOOLS=OFF .
+        ./tools/export_ccache.sh
 
       # run with sudo (...) --privileged
-      # this is needed to create network namespaces for the ebpf tests
-    - name: Run tests (Linux)
+      # this is needed to create network namespaces for the ebpf tests.
+    - name: Run tests (Ubuntu 18.04)
       run: |
-        sudo docker run --privileged -w /p4c/build -e $CTEST_PARALLEL_LEVEL p4c ctest --output-on-failure --schedule-random
-      if: matrix.unified == 'ON'
+        sudo -E docker run --privileged -w /p4c/build -e $CTEST_PARALLEL_LEVEL p4c ctest --output-on-failure --schedule-random
 
-  # Build and test p4c on MacOS 10.15
-  build-mac-os:
+  # Build and test p4c on Fedora.
+  test-fedora-linux:
     strategy:
       fail-fast: false
-      matrix:
-        unified: [ON, OFF]
-        enable_gmp: [ON, OFF]
-        exclude:
-          - unified: OFF
-            enable_gmp: OFF
-    runs-on: macos-10.15
+    # This job runs in Fedora container that runs in Ubuntu VM.
+    runs-on: ubuntu-latest
+    container:
+      image: registry.fedoraproject.org/fedora:latest
+      options: --privileged
     env:
       CTEST_PARALLEL_LEVEL: 4
     steps:
-    - uses: actions/checkout@v2
+    # We need to install git here because it is not provided out of the box in Fedora container.
+    - name: Install git
+      run: dnf install -y -q git
+
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
+
+    - name: Install dependencies (Fedora Linux)
+      run: tools/install_fedora_deps.sh
+
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: fedora-test-${{ runner.os }}
+        max-size: 1000M
+
+    - name: Build p4c (Fedora Linux)
+      run: |
+        ./bootstrap.sh -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_UNITY_BUILD=ON
+        make -j2 -C build
+
+    - name: Run p4c tests (Fedora Linux)
+      # Need to use sudo for the eBPF kernel tests.
+      run: sudo -E ctest --output-on-failure --schedule-random
+      working-directory: ./build
+
+  # Build and test p4c on MacOS 11
+  test-mac-os:
+    strategy:
+      fail-fast: false
+    runs-on: macos-11
+    env:
+      CTEST_PARALLEL_LEVEL: 4
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: test-${{ runner.os }}
+        max-size: 1000M
 
     - name: Install dependencies (MacOS)
       run: |
@@ -70,14 +203,11 @@ jobs:
 
     - name: Build (MacOS)
       run: |
-          # To flush out issues with unified vs. non-unified builds,
-          # do a non-unified build before continuing with the rest,
-          # which produces a unified build.
-          # On MacOS we have noticed problems with the C++
-          # garbage-collector, so we disable it
-          ./bootstrap.sh -DENABLE_GC=OFF -DCMAKE_BUILD_TYPE=RELEASE -DENABLE_UNIFIED_COMPILATION=${{matrix.unified}} -DENABLE_GMP=${{ matrix.enable_gmp }} && cd build && make -j2
+          ./bootstrap.sh -DENABLE_GC=ON -DCMAKE_BUILD_TYPE=RELEASE \
+              -DCMAKE_UNITY_BUILD=ON
+          make -Cbuild -j2
 
     - name: Run tests (MacOS)
       run: |
-        ctest --output-on-failure -j 2 --schedule-random -LE "bpf$"
-      if: matrix.unified == 'ON'
+        ctest --output-on-failure --schedule-random -LE "bpf|ubpf"
+      working-directory: ./build

@@ -42,7 +42,25 @@ class DpdkTable {
     ActionList actions;
     Expression default_action;
     TableProperties properties;
-
+    inline ParameterList default_action_paraList;
+    Key getKey() const {
+        auto kp = properties->getProperty(TableProperties::keyPropertyName);
+        if (kp == nullptr)
+            return nullptr;
+        if (!kp->value->is<IR::Key>()) {
+            ::error(ErrorType::ERR_INVALID, "%1%: must be a key", kp);
+            return nullptr; }
+        return kp->value->to<IR::Key>(); }
+    EntriesList getEntries() const {
+        auto ep = properties->getProperty(TableProperties::entriesPropertyName);
+        if (ep == nullptr)
+            return nullptr;
+        if (!ep->value->is<IR::EntriesList>()) {
+            ::error(ErrorType::ERR_INVALID, "%1%: must be a list of entries", ep);
+            return nullptr;
+        }
+        return ep->value->to<IR::EntriesList>();
+    }
     std::ostream& toSpec(std::ostream& out) const;
 #nodbprint
 #novalidate
@@ -50,13 +68,13 @@ class DpdkTable {
 
 class DpdkSelector {
     inline cstring name;
-    inline cstring group_id;
-    inline cstring member_id;
+    Expression group_id;
+    Expression member_id;
     Key selectors;
     int n_groups_max;
     int n_members_per_group_max;
 
-	std::ostream& toSpec(std::ostream& out) const;
+    std::ostream& toSpec(std::ostream& out) const;
 #nodbprint
 #novalidate
 }
@@ -102,8 +120,15 @@ class DpdkApplyStatement : DpdkAsmStatement, IDPDKNode {
 }
 
 class DpdkLearnStatement : DpdkAsmStatement, IDPDKNode {
-    cstring action;
-    optional Expression argument;
+    ID action;
+    Expression timeout;
+    NullOK optional Expression argument;
+    std::ostream& toSpec(std::ostream& out) const override;
+}
+
+class DpdkMirrorStatement : DpdkAsmStatement, IDPDKNode {
+    Expression slotId;
+    Expression sessionId;
     std::ostream& toSpec(std::ostream& out) const override;
 }
 
@@ -153,11 +178,11 @@ class DpdkJmpMissStatement : DpdkJmpStatement {
 }
 
 abstract DpdkJmpActionStatement : DpdkJmpStatement {
-    cstring action;
+    ID action;
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 #noconstructor
-    DpdkJmpActionStatement(cstring instruction, cstring label, cstring action) :
+    DpdkJmpActionStatement(cstring instruction, cstring label, ID action) :
         DpdkJmpStatement(instruction, label), action(action) { }
 }
 
@@ -432,7 +457,24 @@ class DpdkExternFuncStatement : DpdkAsmStatement, IDPDKNode {
 #nodbprint
 }
 
+class DpdkRecircidStatement : DpdkAsmStatement, IDPDKNode {
+    Expression pass;
+    std::ostream& toSpec(std::ostream& out) const override;
+#nodbprint
+}
+
 class DpdkReturnStatement : DpdkAsmStatement, IDPDKNode {
+    std::ostream& toSpec(std::ostream& out) const override;
+#nodbprint
+}
+
+class DpdkRearmStatement : DpdkAsmStatement, IDPDKNode {
+    NullOK optional Expression timeout;
+    std::ostream& toSpec(std::ostream& out) const override;
+#nodbprint
+}
+
+class DpdkRecirculateStatement : DpdkAsmStatement, IDPDKNode {
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }
@@ -467,7 +509,15 @@ class DpdkChecksumClearStatement : DpdkAsmStatement, IDPDKNode {
 #nodbprint
 }
 
+class DpdkHashDeclStatement: DpdkAsmStatement {
+    cstring hash;
+    std::ostream& toSpec(std::ostream& out) const override;
+#nodbprint
+}
+
+
 class DpdkGetHashStatement : DpdkAsmStatement, IDPDKNode {
+    cstring instr;
     cstring hash;
     Expression fields;
     Expression dst;
@@ -511,6 +561,12 @@ class DpdkMeterExecuteStatement: DpdkAsmStatement, IDPDKNode {
     NullOK Expression length;
     Expression color_in;
     Expression color_out;
+    std::ostream& toSpec(std::ostream& out) const override;
+#nodbprint
+}
+
+class DpdkGetTableEntryIndex: DpdkAsmStatement, IDPDKNode {
+    Expression index;
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }

@@ -1,0 +1,6 @@
+issue2375-bmv2.p4(31): [--Wwarn=unused] warning: 'val1' is unused
+    action do_action(inout bool val1, inout bool val2) {
+                                ^^^^
+issue2375-bmv2.p4(31): [--Wwarn=unused] warning: 'val2' is unused
+    action do_action(inout bool val1, inout bool val2) {
+                                                 ^^^^

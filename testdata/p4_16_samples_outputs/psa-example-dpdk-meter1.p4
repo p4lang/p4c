@@ -12,7 +12,7 @@ header ipv4_t {
     bit<4>  version;
     bit<4>  ihl;
     bit<8>  diffserv;
-    bit<32> totalLen;
+    bit<16> totalLen;
     bit<16> identification;
     bit<3>  flags;
     bit<13> fragOffset;
@@ -55,7 +55,7 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
     PSA_MeterColor_t color_out;
     PSA_MeterColor_t color_in = PSA_MeterColor_t.RED;
     action execute(bit<12> index) {
-        color_out = meter0.execute(index, color_in, hdr.ipv4.totalLen);
+        color_out = meter0.dpdk_execute(index, color_in, (bit<32>)hdr.ipv4.totalLen);
         user_meta.port_out = (color_out == PSA_MeterColor_t.GREEN ? 32w1 : 32w0);
     }
     table tbl {
@@ -100,8 +100,5 @@ control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_met
 }
 
 IngressPipeline(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-
 EgressPipeline(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-
 PSA_Switch(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

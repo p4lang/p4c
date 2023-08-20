@@ -1,0 +1,9 @@
+###### Python3 dependencies with version specifiers ######
+# Install with pip3 install --user -r requirements.txt
+pyroute2==0.7.3
+ply==3.11
+ptf==0.9.4
+scapy==2.4.5
+clang-format==15.0.6
+black==22.3.0
+isort==5.10.0

@@ -19,10 +19,10 @@ control c(inout bit<32> b) {
         }
         const default_action = switch_0_case_1();
         const entries = {
-                        32w16 : switch_0_case();
-                        32w32 : switch_0_case();
-                        32w64 : switch_0_case_0();
-                        32w92 : switch_0_case_1();
+                        const 32w16 : switch_0_case();
+                        const 32w32 : switch_0_case();
+                        const 32w64 : switch_0_case_0();
+                        const 32w92 : switch_0_case_1();
         }
     }
     @hidden action switchexpression7() {
@@ -62,18 +62,16 @@ control c(inout bit<32> b) {
         const default_action = switchexpression10();
     }
     apply {
-        {
-            tbl_switchexpression5.apply();
-            switch (switch_0_table.apply().action_run) {
-                switch_0_case: {
-                    tbl_switchexpression7.apply();
-                }
-                switch_0_case_0: {
-                    tbl_switchexpression8.apply();
-                }
-                switch_0_case_1: {
-                    tbl_switchexpression10.apply();
-                }
+        tbl_switchexpression5.apply();
+        switch (switch_0_table.apply().action_run) {
+            switch_0_case: {
+                tbl_switchexpression7.apply();
+            }
+            switch_0_case_0: {
+                tbl_switchexpression8.apply();
+            }
+            switch_0_case_1: {
+                tbl_switchexpression10.apply();
             }
         }
     }
@@ -82,4 +80,3 @@ control c(inout bit<32> b) {
 control ct(inout bit<32> b);
 package top(ct _c);
 top(c()) main;
-

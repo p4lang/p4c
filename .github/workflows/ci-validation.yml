@@ -6,34 +6,37 @@ on:
   pull_request:
     branches: [ main ]
 
+# Cancel any preceding run on the pull request.
+concurrency:
+  group: validation-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 jobs:
-  # We run validation in parallel with the normal tests
+  # We run validation in parallel with the normal tests.
   # Validation ensures that P4C compiles P4-16 programs correctly.
   # We only test the front end and some mid end passes for now.
   validate:
     env:
-      UNIFIED: ON
-      ENABLE_GMP: ON
-      BUILD_SUCCESS: true
       CTEST_PARALLEL_LEVEL: 4
-    runs-on: ubuntu-latest
+      IMAGE_TYPE: test
+      VALIDATION: ON
+    runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
 
-    - name: Build (Linux)
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1
+      with:
+        key: validation-${{ runner.os }}
+        max-size: 1000M
+
+    - name: Build (Ubuntu 20.04)
       run: |
-        tools/start_ccache
-        docker build --network ccache_network -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=$UNIFIED --build-arg ENABLE_GMP=$ENABLE_GMP --build-arg VALIDATION=ON . || echo "BUILD_SUCCESS=false" >> $GITHUB_ENV
+        tools/ci-build.sh
 
     - name: Validate
-      if: env.BUILD_SUCCESS == 'true'
       run: |
-          docker run -w /gauntlet p4c python3.6 -m pytest test.py -vrf -k "test_p4c" -n $CTEST_PARALLEL_LEVEL --suppress-crashes
-
-    - name: Build Failed
-      if: env.BUILD_SUCCESS == 'false'
-      run: |
-          echo "Building Gauntlet failed."
-
+          ctest  -R toz3-validate-p4c --output-on-failure --schedule-random
+      working-directory: ./build

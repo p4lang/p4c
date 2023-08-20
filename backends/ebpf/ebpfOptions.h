@@ -14,12 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_EBPF_EBPFOPTIONS_H_
-#define _BACKENDS_EBPF_EBPFOPTIONS_H_
+#ifndef BACKENDS_EBPF_EBPFOPTIONS_H_
+#define BACKENDS_EBPF_EBPFOPTIONS_H_
 
 #include <getopt.h>
+
 #include "frontends/common/options.h"
 
+enum XDP2TC { XDP2TC_NONE, XDP2TC_META, XDP2TC_HEAD, XDP2TC_CPUMAP };
 
 class EbpfOptions : public CompilerOptions {
  public:
@@ -29,9 +31,44 @@ class EbpfOptions : public CompilerOptions {
     bool loadIRFromJson = false;
     // Externs generation
     bool emitExterns = false;
+    // tracing eBPF code execution
+    bool emitTraceMessages = false;
+    // generate program to XDP layer
+    bool generateToXDP = false;
+    // XDP2TC mode for PSA-eBPF
+    enum XDP2TC xdp2tcMode = XDP2TC_NONE;
+    // maximum number of unique ternary masks
+    unsigned int maxTernaryMasks = 128;
+    // Enable table cache for LPM and ternary tables
+    bool enableTableCache = false;
+
     EbpfOptions();
+
+    void calculateXDP2TCMode() {
+        if (arch != "psa") {
+            return;
+        }
+
+        if (generateToXDP && xdp2tcMode == XDP2TC_META) {
+            std::cerr
+                << "XDP2TC 'meta' mode cannot be used if XDP is enabled. "
+                   "Falling back to 'head' mode. For more information see "
+                   "https://github.com/p4lang/p4c/blob/main/backends/ebpf/psa/README.md#xdp2tc-mode"
+                << std::endl;
+            xdp2tcMode = XDP2TC_HEAD;
+        } else if (generateToXDP && xdp2tcMode == XDP2TC_NONE) {
+            // use 'head' mode by default; it's the safest option.
+            std::cout << "Setting XDP2TC 'head' mode by default for XDP-based hook." << std::endl;
+            xdp2tcMode = XDP2TC_HEAD;
+        } else if (!generateToXDP && xdp2tcMode == XDP2TC_NONE) {
+            std::cout << "Setting XDP2TC 'meta' mode by default for TC-based hook." << std::endl;
+            // For TC, use 'meta' mode by default.
+            xdp2tcMode = XDP2TC_META;
+        }
+        BUG_CHECK(xdp2tcMode != XDP2TC_NONE, "xdp2tc mode should not be set to NONE, bug?");
+    }
 };
 
 using EbpfContext = P4CContextWithOptions<EbpfOptions>;
 
-#endif /* _BACKENDS_EBPF_EBPFOPTIONS_H_ */
+#endif /* BACKENDS_EBPF_EBPFOPTIONS_H_ */

@@ -14,50 +14,50 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_P4_CALLGRAPH_H_
-#define _FRONTENDS_P4_CALLGRAPH_H_
+#ifndef FRONTENDS_P4_CALLGRAPH_H_
+#define FRONTENDS_P4_CALLGRAPH_H_
 
-#include <vector>
-#include <unordered_set>
 #include <algorithm>
-#include "lib/log.h"
+#include <unordered_set>
+#include <vector>
+
+#include "ir/ir.h"
 #include "lib/exceptions.h"
-#include "lib/map.h"
+#include "lib/log.h"
+#include "lib/map.h"  // IWYU pragma: keep
+#include "lib/null.h"
 #include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
-#include "lib/null.h"
-#include "ir/ir.h"
 
 namespace P4 {
 
 // I could not get Util::toString() to work properly
 cstring cgMakeString(cstring s);
 cstring cgMakeString(char c);
-cstring cgMakeString(const IR::Node* node);
-cstring cgMakeString(const IR::INode* node);
+cstring cgMakeString(const IR::Node *node);
+cstring cgMakeString(const IR::INode *node);
 
 template <class T>
 class CallGraph {
  protected:
     cstring name;
     // Use an ordered map to make this deterministic
-    ordered_map<T, std::vector<T>*> out_edges;  // map caller to list of callees
-    ordered_map<T, std::vector<T>*> in_edges;
+    ordered_map<T, std::vector<T> *> out_edges;  // map caller to list of callees
+    ordered_map<T, std::vector<T> *> in_edges;
 
  public:
-    ordered_set<T> nodes;    // all nodes; do not modify this directly
-    typedef typename ordered_map<T, std::vector<T>*>::const_iterator const_iterator;
+    ordered_set<T> nodes;  // all nodes; do not modify this directly
+    typedef typename ordered_map<T, std::vector<T> *>::const_iterator const_iterator;
 
     explicit CallGraph(cstring name) : name(name) {}
 
-    const cstring& getName() const { return name; }
+    const cstring &getName() const { return name; }
 
     // Graph construction.
 
     // node that may call no-one
     void add(T caller) {
-        if (nodes.find(caller) != nodes.end())
-            return;
+        if (nodes.find(caller) != nodes.end()) return;
         LOG1(name << ": " << cgMakeString(caller));
         out_edges[caller] = new std::vector<T>();
         in_edges[caller] = new std::vector<T>();
@@ -101,25 +101,22 @@ class CallGraph {
     // Graph querying
 
     bool isCallee(T callee) const {
-        auto callees =::get(in_edges, callee);
-        return callees != nullptr && !callees->empty(); }
+        auto callees = ::get(in_edges, callee);
+        return callees != nullptr && !callees->empty();
+    }
     bool isCaller(T caller) const {
         auto edges = ::get(out_edges, caller);
-        if (edges == nullptr)
-            return false;
+        if (edges == nullptr) return false;
         return !edges->empty();
     }
     // Iterators over the out_edges
     const_iterator begin() const { return out_edges.cbegin(); }
-    const_iterator end()   const { return out_edges.cend(); }
-    std::vector<T>* getCallees(T caller)
-    { return out_edges[caller]; }
-    std::vector<T>* getCallers(T callee)
-    { return in_edges[callee]; }
+    const_iterator end() const { return out_edges.cend(); }
+    std::vector<T> *getCallees(T caller) { return out_edges[caller]; }
+    std::vector<T> *getCallers(T callee) { return in_edges[callee]; }
     // Callees are appended to 'toAppend'
     void getCallees(T caller, std::set<T> &toAppend) {
-        if (isCaller(caller))
-            toAppend.insert(out_edges[caller]->begin(), out_edges[caller]->end());
+        if (isCaller(caller)) toAppend.insert(out_edges[caller]->begin(), out_edges[caller]->end());
     }
     size_t size() const { return nodes.size(); }
     // out will contain all nodes reachable from start
@@ -129,24 +126,19 @@ class CallGraph {
         while (!work.empty()) {
             T node = *work.begin();
             work.erase(node);
-            if (out.find(node) != out.end())
-                continue;
+            if (out.find(node) != out.end()) continue;
             out.emplace(node);
             auto edges = out_edges.find(node);
-            if (edges == out_edges.end())
-                continue;
-            for (auto c : *(edges->second))
-                work.emplace(c);
+            if (edges == out_edges.end()) continue;
+            for (auto c : *(edges->second)) work.emplace(c);
         }
     }
     // remove all nodes not in 'to'
     void restrict(const std::set<T> &to) {
         std::vector<T> toRemove;
         for (auto n : nodes)
-            if (to.find(n) == to.end())
-                toRemove.push_back(n);
-        for (auto n : toRemove)
-            remove(n);
+            if (to.find(n) == to.end()) toRemove.push_back(n);
+        for (auto n : toRemove) remove(n);
     }
 
     typedef std::unordered_set<T> Set;
@@ -170,14 +162,11 @@ class CallGraph {
             changes = false;
             for (auto node : nodes) {
                 auto vec = in_edges[node];
-                if (vec == nullptr)
-                    continue;
+                if (vec == nullptr) continue;
                 auto size = dominators[node].size();
-                for (auto c : *vec)
-                    insersectWith(dominators[node], dominators[c]);
+                for (auto c : *vec) insersectWith(dominators[node], dominators[c]);
                 dominators[node].emplace(node);
-                if (dominators[node].size() != size)
-                    changes = true;
+                if (dominators[node].size() != size) changes = true;
             }
         }
     }
@@ -194,32 +183,30 @@ class CallGraph {
 
     // All natural loops in a call-graph.
     struct Loops {
-        std::vector<Loop*> loops;
+        std::vector<Loop *> loops;
 
         // Return loop index if 'node' is a loop entry point
         // else return -1
         int isLoopEntryPoint(T node) const {
-            for (size_t i=0; i < loops.size(); i++) {
+            for (size_t i = 0; i < loops.size(); i++) {
                 auto loop = loops.at(i);
-                if (loop->entry == node)
-                    return i;
+                if (loop->entry == node) return i;
             }
             return -1;
         }
         bool isInLoop(int loopIndex, T node) const {
-            if (loopIndex == -1)
-                return false;
+            if (loopIndex == -1) return false;
             auto loop = loops.at(loopIndex);
             return (loop->body.find(node) != loop->body.end());
         }
     };
 
-    Loops* compute_loops(T start) {
+    Loops *compute_loops(T start) {
         auto result = new Loops();
         std::map<T, Set> dom;
         dominators(start, dom);
 
-        std::map<T, Loop*> entryToLoop;
+        std::map<T, Loop *> entryToLoop;
 
         for (auto e : nodes) {
             auto next = out_edges[e];
@@ -244,8 +231,7 @@ class CallGraph {
                         loop->body.emplace(crt);
                         if (crt == n) continue;
                         for (auto i : *in_edges[crt])
-                            if (loop->body.find(i) == loop->body.end())
-                                work.emplace(i);
+                            if (loop->body.find(i) == loop->body.end()) work.emplace(i);
                     }
                 }
             }
@@ -255,21 +241,19 @@ class CallGraph {
 
  protected:
     // intersect in place
-    static void insersectWith(Set &set, Set& with) {
+    static void insersectWith(Set &set, Set &with) {
         std::vector<T> toRemove;
         for (auto e : set)
-            if (with.find(e) == with.end())
-                toRemove.push_back(e);
-        for (auto e : toRemove)
-            set.erase(e);
+            if (with.find(e) == with.end()) toRemove.push_back(e);
+        for (auto e : toRemove) set.erase(e);
     }
 
     // Helper for computing strongly-connected components
     // using Tarjan's algorithm.
     struct sccInfo {
-        unsigned       crtIndex;
+        unsigned crtIndex;
         std::vector<T> stack;
-        std::set<T>    onStack;
+        std::set<T> onStack;
         std::map<T, unsigned> index;
         std::map<T, unsigned> lowlink;
 
@@ -278,10 +262,8 @@ class CallGraph {
             stack.push_back(node);
             onStack.emplace(node);
         }
-        bool isOnStack(T node)
-        { return onStack.count(node) != 0; }
-        bool unknown(T node)
-        { return index.count(node) == 0; }
+        bool isOnStack(T node) { return onStack.count(node) != 0; }
+        bool unknown(T node) { return index.count(node) == 0; }
         void setLowLink(T node, unsigned value) {
             lowlink[node] = value;
             LOG1(node << ".lowlink = " << value << " = " << get(lowlink, node));
@@ -289,8 +271,7 @@ class CallGraph {
         void setLowLink(T node, T successor) {
             unsigned nlink = get(lowlink, node);
             unsigned slink = get(lowlink, successor);
-            if (slink < nlink)
-                setLowLink(node, slink);
+            if (slink < nlink) setLowLink(node, slink);
         }
         T pop() {
             T result = stack.back();
@@ -301,7 +282,7 @@ class CallGraph {
     };
 
     // helper for scSort
-    bool strongConnect(T node, sccInfo& helper, std::vector<T>& out) {
+    bool strongConnect(T node, sccInfo &helper, std::vector<T> &out) {
         bool loop = false;
 
         LOG1("scc " << cgMakeString(node));
@@ -328,13 +309,12 @@ class CallGraph {
 
         if (get(helper.lowlink, node) == get(helper.index, node)) {
             LOG1(cgMakeString(node) << " index=" << get(helper.index, node)
-                      << " lowlink=" << get(helper.lowlink, node));
+                                    << " lowlink=" << get(helper.lowlink, node));
             while (true) {
                 T sccMember = helper.pop();
                 LOG1("Scc order " << cgMakeString(sccMember) << "[" << cgMakeString(node) << "]");
                 out.push_back(sccMember);
-                if (sccMember == node)
-                    break;
+                if (sccMember == node) break;
                 loop = true;
             }
         }
@@ -377,4 +357,4 @@ class CallGraph {
 
 }  // namespace P4
 
-#endif  /* _FRONTENDS_P4_CALLGRAPH_H_ */
+#endif /* FRONTENDS_P4_CALLGRAPH_H_ */

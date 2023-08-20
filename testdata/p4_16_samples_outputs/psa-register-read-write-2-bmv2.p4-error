@@ -1,0 +1,9 @@
+psa-register-read-write-2-bmv2.p4(85): [--Wwarn=uninitialized_use] warning: orig_data may be uninitialized
+                next_data = orig_data;
+                            ^^^^^^^^^
+psa-register-read-write-2-bmv2.p4(88): [--Wwarn=uninitialized_use] warning: orig_data may be uninitialized
+                next_data = orig_data + 1;
+                            ^^^^^^^^^
+psa-register-read-write-2-bmv2.p4(95): [--Wwarn=uninitialized_use] warning: orig_data may be uninitialized
+            hdr.output_data.word0 = (bit<32>) orig_data;
+                                              ^^^^^^^^^

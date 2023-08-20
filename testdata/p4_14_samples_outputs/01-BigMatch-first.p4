@@ -25,14 +25,14 @@ header vag_t {
 }
 
 struct metadata {
-    @name(".ing_metadata") 
+    @name(".ing_metadata")
     ingress_metadata_t ing_metadata;
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
-    @name(".vag") 
+    @name(".vag")
     vag_t      vag;
 }
 
@@ -52,7 +52,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @defaultonly NoAction();
         }
         key = {
-            hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr") ;
+            hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr");
         }
         default_action = NoAction();
     }
@@ -83,7 +83,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.vag.f1: exact @name("vag.f1") ;
+            hdr.vag.f1: exact @name("vag.f1");
         }
         default_action = NoAction();
     }
@@ -94,7 +94,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.vag.f2: exact @name("vag.f2") ;
+            hdr.vag.f2: exact @name("vag.f2");
         }
         default_action = NoAction();
     }
@@ -105,7 +105,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.vag.f3: exact @name("vag.f3") ;
+            hdr.vag.f3: exact @name("vag.f3");
         }
         default_action = NoAction();
     }
@@ -116,7 +116,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction();
         }
         key = {
-            hdr.vag.f4: ternary @name("vag.f4") ;
+            hdr.vag.f4: ternary @name("vag.f4");
         }
         default_action = NoAction();
     }
@@ -145,4 +145,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

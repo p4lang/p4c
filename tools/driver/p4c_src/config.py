@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-import sys
 import os
+import sys
+
 
 class Config(object):
     """
@@ -26,14 +26,14 @@ class Config(object):
     """
 
     def __init__(self, config_prefix):
-        self.config_prefix = config_prefix or 'p4c'
+        self.config_prefix = config_prefix or "p4c"
         self.target = []
 
     def load_from_config(self, path, argParser):
         cfg_globals = dict(globals())
-        cfg_globals['config'] = self
-        cfg_globals['__file__'] = path
-        cfg_globals['argParser'] = argParser
+        cfg_globals["config"] = self
+        cfg_globals["__file__"] = path
+        cfg_globals["argParser"] = argParser
 
         data = None
         f = open(path)
@@ -44,11 +44,12 @@ class Config(object):
         f.close()
 
         try:
-            exec(compile(data, path, 'exec'), cfg_globals, None)
+            exec(compile(data, path, "exec"), cfg_globals, None)
         except SystemExit:
             e = sys.exc_info()[1]
             if e.args:
                 raise
         except:
             import traceback
+
             print(traceback.format_exc())

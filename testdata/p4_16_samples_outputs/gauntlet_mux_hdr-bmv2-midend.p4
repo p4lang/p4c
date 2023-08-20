@@ -30,12 +30,14 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         tmp1_0[1].setInvalid();
         tmp2_0[0].setInvalid();
         tmp2_0[1].setInvalid();
-        tmp1_0[0] = (tmp2_0[0].a <= 32w3 ? tmp2_0[1] : tmp1_0[0]);
+        if (tmp2_0[0].a <= 32w3) {
+            tmp1_0[0] = tmp2_0[1];
+        }
         h.h.a = tmp1_0[0].a;
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
-            sm.egress_spec: exact @name("key") ;
+            sm.egress_spec: exact @name("key");
         }
         actions = {
             simple_action();
@@ -79,4 +81,3 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

@@ -16,6 +16,8 @@ limitations under the License.
 
 #include "programStructure.h"
 
+#include "lib/log.h"
+
 namespace BMV2 {
 
 void DiscoverStructure::postorder(const IR::ParameterList *paramList) {
@@ -23,8 +25,7 @@ void DiscoverStructure::postorder(const IR::ParameterList *paramList) {
     unsigned index = 0;
     for (auto p : *paramList->getEnumerator()) {
         structure->index.emplace(p, index);
-        if (!inAction)
-            structure->nonActionParameters.emplace(p);
+        if (!inAction) structure->nonActionParameters.emplace(p);
         index++;
     }
 }
@@ -47,7 +48,7 @@ void DiscoverStructure::postorder(const IR::Type_Error *errors) {
     }
 }
 
-void DiscoverStructure::postorder(const IR::Declaration_MatchKind* kind) {
+void DiscoverStructure::postorder(const IR::Declaration_MatchKind *kind) {
     for (auto member : kind->members) {
         structure->match_kinds.insert(member->name);
     }

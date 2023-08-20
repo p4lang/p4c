@@ -1,0 +1,4 @@
+[--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table flowTable. Copying all match fields to metadata
+pna-example-mirror-packet-ctxt-error1.p4(114): [--Werror=unsupported] error:  mirror_packet cannot be used in the MainDeparserImpl main deparser
+ mirror_packet(MIRROR_SLOT_ID, MIRROR_SESSION2);
+ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

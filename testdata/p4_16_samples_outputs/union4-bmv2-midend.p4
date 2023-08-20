@@ -10,14 +10,10 @@ header Hdr2 {
     bit<16> b;
 }
 
-header_union U {
-    Hdr1 h1;
-    Hdr2 h2;
-}
-
 struct Headers {
     Hdr1 h1;
-    U    u;
+    Hdr1 u_h1;
+    Hdr2 u_h2;
     Hdr2 h2;
 }
 
@@ -33,11 +29,11 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
         }
     }
     state getH1 {
-        b.extract<Hdr1>(h.u.h1);
+        b.extract<Hdr1>(h.u_h1);
         transition accept;
     }
     state getH2 {
-        b.extract<Hdr2>(h.u.h2);
+        b.extract<Hdr2>(h.u_h2);
         transition accept;
     }
 }
@@ -60,8 +56,8 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 control deparser(packet_out b, in Headers h) {
     apply {
         b.emit<Hdr1>(h.h1);
-        b.emit<Hdr1>(h.u.h1);
-        b.emit<Hdr2>(h.u.h2);
+        b.emit<Hdr1>(h.u_h1);
+        b.emit<Hdr2>(h.u_h2);
         b.emit<Hdr2>(h.h2);
     }
 }
@@ -69,10 +65,11 @@ control deparser(packet_out b, in Headers h) {
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @hidden action union4bmv2l77() {
         h.h2.setValid();
-        h.h2.b = h.u.h2.b;
-        h.u.h1.setValid();
-        h.u.h1.a = h.u.h2.b[7:0];
-        h.u.h2.setInvalid();
+        h.h2.b = h.u_h2.b;
+        h.u_h1.setValid();
+        h.u_h2.setInvalid();
+        h.u_h1.a = h.u_h2.b[7:0];
+        h.u_h2.setInvalid();
     }
     @hidden table tbl_union4bmv2l77 {
         actions = {
@@ -81,11 +78,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = union4bmv2l77();
     }
     apply {
-        if (h.u.h2.isValid()) {
+        if (h.u_h2.isValid()) {
             tbl_union4bmv2l77.apply();
         }
     }
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

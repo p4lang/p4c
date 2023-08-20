@@ -1,0 +1,135 @@
+# The BUILD file for p4testgen, inspired by the tool's cmake build rules.
+
+exports_files(["p4tools.def"])
+
+package(
+    licenses = ["notice"],
+)
+
+# Extend the list with the name of the desired targets (in "modules/testgen/targets/).
+TESTGEN_TARGETS = [
+    "bmv2",
+]
+
+genrule(
+    name = "version",
+    srcs = [
+        "common/version.h.in",
+    ],
+    outs = ["common/version.h"],
+    cmd = " | ".join([
+        "cat $(location common/version.h.in)",
+        "sed 's/@P4TOOLS_VERSION_MAJOR@/0/'",
+        "sed 's/@P4TOOLS_VERSION_MINOR@/0/'",
+        "sed 's/@P4TOOLS_VERSION_PATCH@/0/'",
+        "sed 's/@P4TOOLS_VERSION_HASH@/0.0.0/'",
+        "tee > $(location common/version.h)",
+    ]),
+    output_to_bindir = False,
+)
+
+cc_library(
+    name = "common",
+    srcs = glob([
+        "common/**/*.h",
+        "common/**/*.cpp",
+    ]) + [":version"],
+    copts = [
+        "-fexceptions",
+        "-w",
+    ],
+    features = ["-use_header_modules"],
+    deps = [
+        "@boost//:multiprecision",
+        "//:ir_frontend_midend_control_plane",
+        "//:lib",
+        "@com_github_z3prover_z3//:api",
+    ],
+)
+
+filegroup(
+    name = "target_register_headers",
+    srcs = ["modules/testgen/targets/%s/register.h" % target for target in TESTGEN_TARGETS],
+)
+
+genrule(
+    name = "register_testgen_targets",
+    srcs = [
+        ":target_register_headers",
+        "modules/testgen/register.h.in",
+    ],
+    outs = ["modules/testgen/register.h"],
+    cmd = " | ".join([
+        "cat $(location modules/testgen/register.h.in)",
+        "sed 's/@include_statements_var@/%s/'" % "".join(["#include \"backends\\/p4tools\\/modules\\/testgen\\/targets\\/%s\\/register.h\"\\n" % target for target in TESTGEN_TARGETS]),
+        "sed 's/@compiler_targets_var@/%s/'" % "".join(["%sRegisterCompilerTarget();\\n" % target for target in TESTGEN_TARGETS]),
+        "sed 's/@testgen_targets_var@/%s/' " % "".join(["%sRegisterTestgenTarget();\\n" % target for target in TESTGEN_TARGETS]),
+        "tee > $(location modules/testgen/register.h)",
+    ]),
+    output_to_bindir = False,
+)
+
+filegroup(
+    name = "testgen_targets_src",
+    srcs =
+        glob(["modules/testgen/targets/%s/**/*.h" % target for target in TESTGEN_TARGETS],
+             exclude = ["modules/testgen/targets/%s/test/**" % target for target in TESTGEN_TARGETS]) +
+        glob(["modules/testgen/targets/%s/**/*.cpp" % target for target in TESTGEN_TARGETS],
+             exclude = ["modules/testgen/targets/%s/test/**" % target for target in TESTGEN_TARGETS]),
+)
+
+cc_library(
+    name = "testgen_lib",
+    srcs = glob([
+        "modules/testgen/backend/*.h",
+        "modules/testgen/core/**/*.h",
+        "modules/testgen/lib/*.h",
+        "modules/testgen/*.h",
+    ]) + glob([
+        "modules/testgen/core/*.cpp",
+        "modules/testgen/core/small_step/*.cpp",
+        "modules/testgen/core/symbolic_executor/*.cpp",
+        "modules/testgen/lib/*.cpp",
+        "modules/testgen/backend/*.cpp",
+    ]) + [
+        "common/options.h",
+        "modules/testgen/options.cpp",
+        "modules/testgen/testgen.cpp",
+        ":register_testgen_targets",
+        ":target_register_headers",
+        ":testgen_targets_src",
+    ],
+    copts = [
+        "-fexceptions",
+        "-w",
+    ],
+    features = ["-use_header_modules"],
+    deps = [
+        ":common",
+        ":register_testgen_targets",
+        "@boost//:multiprecision",
+        "@com_github_pantor_inja//:inja",
+        "@nlohmann_json//:json",
+        "//:ir_frontend_midend_control_plane",
+        "//:lib",
+    ],
+)
+
+cc_binary(
+    name = "p4testgen",
+    srcs = [
+        "modules/testgen/main.cpp",
+    ],
+    copts = [
+        "-fexceptions",
+        "-w",
+    ],
+    features = ["-use_header_modules"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":testgen_lib",
+        "@boost//:multiprecision",
+        "@boost//:filesystem",
+        "//:lib",
+    ],
+)

@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_REMOVESELECTBOOLEANS_H_
-#define _MIDEND_REMOVESELECTBOOLEANS_H_
+#ifndef MIDEND_REMOVESELECTBOOLEANS_H_
+#define MIDEND_REMOVESELECTBOOLEANS_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -32,25 +32,25 @@ We assume that this pass is run after SimplifySelectLists, so there
 are only scalar types in the select expression.
 */
 class DoRemoveSelectBooleans : public Transform {
-    const P4::TypeMap* typeMap;
+    const P4::TypeMap *typeMap;
 
-    const IR::Expression* addToplevelCasts(const IR::Expression* expression);
+    const IR::Expression *addToplevelCasts(const IR::Expression *expression);
+
  public:
-    explicit DoRemoveSelectBooleans(const P4::TypeMap* typeMap): typeMap(typeMap) {
+    explicit DoRemoveSelectBooleans(const P4::TypeMap *typeMap) : typeMap(typeMap) {
         CHECK_NULL(typeMap);
         setName("DoRemoveSelectBooleans");
     }
 
-    const IR::Node* postorder(IR::SelectExpression* expression) override;
-    const IR::Node* postorder(IR::SelectCase* selectCase) override;
+    const IR::Node *postorder(IR::SelectExpression *expression) override;
+    const IR::Node *postorder(IR::SelectCase *selectCase) override;
 };
 
 class RemoveSelectBooleans : public PassManager {
  public:
-    RemoveSelectBooleans(ReferenceMap* refMap, TypeMap* typeMap,
-                         TypeChecking* typeChecking = nullptr) {
-        if (!typeChecking)
-            typeChecking = new TypeChecking(refMap, typeMap);
+    RemoveSelectBooleans(ReferenceMap *refMap, TypeMap *typeMap,
+                         TypeChecking *typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoRemoveSelectBooleans(typeMap));
         passes.push_back(new ClearTypeMap(typeMap));  // some types have changed
@@ -60,4 +60,4 @@ class RemoveSelectBooleans : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_REMOVESELECTBOOLEANS_H_ */
+#endif /* MIDEND_REMOVESELECTBOOLEANS_H_ */

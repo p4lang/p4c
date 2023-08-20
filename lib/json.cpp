@@ -14,11 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <stdexcept>
-#include <sstream>
 #include "json.h"
+
+#include <sstream>
+#include <stdexcept>
+
 #include "indent.h"
-#include "lib/gmputil.h"
+#include "lib/big_int_util.h"
 
 namespace Util {
 
@@ -28,11 +30,9 @@ cstring IJson::toString() const {
     return cstring(str.str());
 }
 
-void IJson::dump() const {
-    std::cout << toString();
-}
+void IJson::dump() const { std::cout << toString(); }
 
-JsonValue* JsonValue::null = new JsonValue();
+JsonValue *JsonValue::null = new JsonValue();
 
 big_int JsonValue::makeValue(long long v) {
     if (v >= 0) {
@@ -58,13 +58,11 @@ big_int JsonValue::makeValue(unsigned long long v) {
 // https://stackoverflow.com/questions/6598265/convert-uint64-to-gmp-mpir-number
 // Because the "value" member is const, we use a helper (makeValue) to
 // initialize it.
-JsonValue::JsonValue(long long v)
-    : tag(Kind::Number), value(makeValue(v)) { }
+JsonValue::JsonValue(long long v) : tag(Kind::Number), value(makeValue(v)) {}
 
-JsonValue::JsonValue(unsigned long long v)
-    : tag(Kind::Number), value(makeValue(v)) { }
+JsonValue::JsonValue(unsigned long long v) : tag(Kind::Number), value(makeValue(v)) {}
 
-void JsonValue::serialize(std::ostream& out) const {
+void JsonValue::serialize(std::ostream &out) const {
     switch (tag) {
         case Kind::String:
             out << "\"" << str << "\"";
@@ -84,19 +82,25 @@ void JsonValue::serialize(std::ostream& out) const {
     }
 }
 
-bool JsonValue::operator==(const big_int& v) const
-{ return tag == Kind::Number ? v == value : false; }
-bool JsonValue::operator==(const double& v) const
-{ return tag == Kind::Number ? big_int(v) == value : false; }
-bool JsonValue::operator==(const float& v) const
-{ return tag == Kind::Number ? big_int(v) == value : false; }
-bool JsonValue::operator==(const cstring& s) const
-{ return tag == Kind::String ? s == str : false; }
-bool JsonValue::operator==(const std::string& s) const
-{ return tag == Kind::String ? cstring(s) == str : false; }
-bool JsonValue::operator==(const char* s) const
-{ return tag == Kind::String ? cstring(s) == str : false; }
-bool JsonValue::operator==(const JsonValue& other) const {
+bool JsonValue::operator==(const big_int &v) const {
+    return tag == Kind::Number ? v == value : false;
+}
+bool JsonValue::operator==(const double &v) const {
+    return tag == Kind::Number ? big_int(v) == value : false;
+}
+bool JsonValue::operator==(const float &v) const {
+    return tag == Kind::Number ? big_int(v) == value : false;
+}
+bool JsonValue::operator==(const cstring &s) const {
+    return tag == Kind::String ? s == str : false;
+}
+bool JsonValue::operator==(const std::string &s) const {
+    return tag == Kind::String ? cstring(s) == str : false;
+}
+bool JsonValue::operator==(const char *s) const {
+    return tag == Kind::String ? cstring(s) == str : false;
+}
+bool JsonValue::operator==(const JsonValue &other) const {
     if (tag != other.tag) return false;
     switch (tag) {
         case Kind::String:
@@ -112,74 +116,65 @@ bool JsonValue::operator==(const JsonValue& other) const {
     }
 }
 
-void JsonArray::serialize(std::ostream& out) const {
+void JsonArray::serialize(std::ostream &out) const {
     bool isSmall = true;
     for (auto v : *this) {
-        if (!v->is<JsonValue>())
-            isSmall = false;
+        if (!v->is<JsonValue>()) isSmall = false;
     }
     out << "[";
-    if (!isSmall)
-        out << IndentCtl::indent;
+    if (!isSmall) out << IndentCtl::indent;
     bool first = true;
     for (auto v : *this) {
         if (!first) {
             out << ",";
-            if (isSmall)
-                out << " ";
+            if (isSmall) out << " ";
         }
-        if (!isSmall)
-            out << IndentCtl::endl;
+        if (!isSmall) out << IndentCtl::endl;
         if (v == nullptr)
             out << "null";
         else
             v->serialize(out);
         first = false;
     }
-    if (!isSmall)
-        out << IndentCtl::unindent << IndentCtl::endl;
+    if (!isSmall) out << IndentCtl::unindent << IndentCtl::endl;
     out << "]";
 }
 
 bool JsonValue::getBool() const {
-    if (!isBool())
-        throw std::logic_error("Incorrect json value kind");
+    if (!isBool()) throw std::logic_error("Incorrect json value kind");
     return tag == Kind::True;
 }
 
 cstring JsonValue::getString() const {
-    if (!isString())
-        throw std::logic_error("Incorrect json value kind");
+    if (!isString()) throw std::logic_error("Incorrect json value kind");
     return str;
 }
 
 big_int JsonValue::getValue() const {
-    if (!isNumber())
-        throw std::logic_error("Incorrect json value kind");
+    if (!isNumber()) throw std::logic_error("Incorrect json value kind");
     return value;
 }
 
 int JsonValue::getInt() const {
     big_int val = getValue();
-    if (val < INT_MIN || val > INT_MAX)
-        throw std::logic_error("Value too large for an int");
+    if (val < INT_MIN || val > INT_MAX) throw std::logic_error("Value too large for an int");
     return int(val);
 }
 
-JsonArray* JsonArray::append(IJson* value) {
+JsonArray *JsonArray::append(IJson *value) {
     push_back(value);
     return this;
 }
 
-void JsonObject::serialize(std::ostream& out) const {
+void JsonObject::serialize(std::ostream &out) const {
     out << "{" << IndentCtl::indent;
     bool first = true;
     for (auto &it : *this) {
-        if (!first)
-            out << ",";
+        if (!first) out << ",";
         first = false;
         out << IndentCtl::endl;
-        out << "\"" << it.first << "\"" << " : ";
+        out << "\"" << it.first << "\""
+            << " : ";
         if (it.second == nullptr)
             out << "null";
         else
@@ -188,21 +183,20 @@ void JsonObject::serialize(std::ostream& out) const {
     out << IndentCtl::unindent << IndentCtl::endl << "}";
 }
 
-JsonObject* JsonObject::emplace(cstring label, IJson* value) {
-    if (label.isNullOrEmpty())
-        throw std::logic_error("Empty label");
+JsonObject *JsonObject::emplace(cstring label, IJson *value) {
+    if (label.isNullOrEmpty()) throw std::logic_error("Empty label");
     auto j = get(label);
     if (j != nullptr) {
-      cstring s = value->toString();
-      throw std::logic_error(cstring("Attempt to add to json object a value "
-                                     "for a label which already exists ")
-                             + label.c_str() + " " + s.c_str());
+        cstring s = value->toString();
+        throw std::logic_error(cstring("Attempt to add to json object a value "
+                                       "for a label which already exists ") +
+                               label.c_str() + " " + s.c_str());
     }
-    ordered_map<cstring, IJson*>::emplace(label, value);
+    ordered_map<cstring, IJson *>::emplace(label, value);
     return this;
 }
 
-JsonObject* JsonObject::emplace_non_null(cstring label, IJson* value) {
+JsonObject *JsonObject::emplace_non_null(cstring label, IJson *value) {
     if (value != nullptr) {
         return emplace(label, value);
     }

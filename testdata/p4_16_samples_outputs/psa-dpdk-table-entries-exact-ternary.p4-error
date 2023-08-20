@@ -1,0 +1,6 @@
+psa-dpdk-table-entries-exact-ternary.p4(79): [--Wwarn=mismatch] warning: P4Runtime requires that Ternary matches have masked-off bits set to 0, updating value 16w0x1111 to conform to the P4Runtime specification
+            ((bit<8>)32w0x01, 0x1111 &&& 0xF ) : a_with_control_params(1);
+                              ^^^^^^
+psa-dpdk-table-entries-exact-ternary.p4(81): [--Wwarn=mismatch] warning: P4Runtime requires that Ternary matches have masked-off bits set to 0, updating value 16w0x1111 to conform to the P4Runtime specification
+            (0x03, 0x1111 &&& 0xF000) : a_with_control_params(3);
+                   ^^^^^^
