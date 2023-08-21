@@ -191,7 +191,7 @@ void ControlBodyTranslator::compileEmitField(const IR::Expression *expr, cstring
             builder->appendFormat("write_byte(%s, BYTES(%s) + %d, (%s) << %d)",
                                   program->packetStartVar.c_str(), program->offsetVar.c_str(), i,
                                   program->byteVar.c_str(), 8 - bitsToWrite);
-        else
+        else  // FIXME change to use write_partial_ex
             builder->appendFormat("write_partial(%s + BYTES(%s) + %d, %d, (%s) << %d)",
                                   program->packetStartVar.c_str(), program->offsetVar.c_str(), i,
                                   alignment, program->byteVar.c_str(), 8 - bitsToWrite);

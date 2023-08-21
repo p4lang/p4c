@@ -90,6 +90,7 @@ class EBPFProgram : public EBPFObject {
     virtual void emitPipeline(CodeBuilder *builder);
 
  public:
+    virtual void emitCommonPreamble(CodeBuilder *builder);
     virtual void emitGeneratedComment(CodeBuilder *builder);
     virtual void emitH(CodeBuilder *builder, cstring headerFile);  // emits C headers
     virtual void emitC(CodeBuilder *builder, cstring headerFile);  // emits C program
