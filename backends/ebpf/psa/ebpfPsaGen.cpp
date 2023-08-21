@@ -87,16 +87,7 @@ void PSAEbpfGenerator::emitPreamble(CodeBuilder *builder) const {
 }
 
 void PSAEbpfGenerator::emitCommonPreamble(CodeBuilder *builder) const {
-    builder->newline();
-    builder->appendLine("#define EBPF_MASK(t, w) ((((t)(1)) << (w)) - (t)1)");
-    builder->appendLine("#define BYTES(w) ((w) / 8)");
-    builder->appendLine(
-        "#define write_partial(a, w, s, v) do { *((u8*)a) = ((*((u8*)a)) "
-        "& ~(EBPF_MASK(u8, w) << s)) | (v << s) ; } while (0)");
-    builder->appendLine(
-        "#define write_byte(base, offset, v) do { "
-        "*(u8*)((base) + (offset)) = (v); "
-        "} while (0)");
+    ingress->emitCommonPreamble(builder);  // from ebpfProgram
     builder->target->emitPreamble(builder);
 }
 
