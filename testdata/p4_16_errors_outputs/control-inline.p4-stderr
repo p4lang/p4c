@@ -1,3 +1,3 @@
-control-inline.p4(35): [--Werror=invalid] error: vc: invalid declaration. Instantiations cannot be in a control 'apply' block.
-        VC() vc;
+control-inline.p4(34): [--Werror=invalid] error: vc: invalid declaration. Instantiations cannot be in a control 'apply' block.
+        VC() vc; // illegal instance within an apply block
              ^^
