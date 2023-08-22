@@ -20,6 +20,7 @@ limitations under the License.
 #include <string>
 
 #include "backends/ebpf/version.h"
+#include "control-plane/p4RuntimeSerializer.h"
 #include "ebpfBackend.h"
 #include "ebpfOptions.h"
 #include "frontends/common/applyOptionsPragmas.h"
@@ -71,6 +72,10 @@ void compile(EbpfOptions &options) {
         program = frontend.run(options, program);
         if (::errorCount() > 0) return;
     }
+
+    P4::serializeP4RuntimeIfRequired(program, options);
+    if (::errorCount() > 0) return;
+
     EBPF::MidEnd midend;
     midend.addDebugHook(hook);
     auto toplevel = midend.run(options, program);
