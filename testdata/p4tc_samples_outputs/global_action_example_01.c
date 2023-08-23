@@ -236,8 +236,6 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
 
     accept: {
         u8 hit;
-        u64 hdr_dmac_0 = 0;
-        u64 hdr_smac_0 = 0;
         {
 /* nh_table_0.apply() */
             {
@@ -266,13 +264,11 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                     switch (value->action) {
                         case INGRESS_NH_TABLE_ACT__SEND_NH: 
                             {
-                                hdr_dmac_0 = value->u._send_nh.smac;
-                                                                hdr_smac_0 = value->u._send_nh.dmac;
-                                /* send_to_port(value->u._send_nh.port_id) */
+/* send_to_port(value->u._send_nh.port_id) */
                                 compiler_meta__->drop = false;
                                 send_to_port(value->u._send_nh.port_id);
-                                                                hdr->ethernet.srcAddr = hdr_dmac_0;
-                                                                hdr->ethernet.dstAddr = hdr_smac_0;
+                                                                hdr->ethernet.srcAddr = value->u._send_nh.smac;
+                                                                hdr->ethernet.dstAddr = value->u._send_nh.dmac;
                             }
                             break;
                         case INGRESS_NH_TABLE_ACT_INGRESS_DROP: 
