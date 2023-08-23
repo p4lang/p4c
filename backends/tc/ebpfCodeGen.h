@@ -22,6 +22,7 @@ and limitations under the License.
 namespace TC {
 
 class ConvertToBackendIR;
+class EBPFPnaParser;
 
 //  Similar to class PSAEbpfGenerator in backends/ebpf/psa/ebpfPsaGen.h
 
@@ -103,11 +104,21 @@ class TCIngressPipelinePNA : public EBPF::TCIngressPipeline {
     void emitTrafficManager(EBPF::CodeBuilder *builder) override;
 };
 
+class PnaStateTranslationVisitor : public EBPF::PsaStateTranslationVisitor {
+ public:
+    explicit PnaStateTranslationVisitor(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                                        EBPF::EBPFPsaParser *prsr)
+        : EBPF::PsaStateTranslationVisitor(refMap, typeMap, prsr) {}
+
+ protected:
+    void compileExtractField(const IR::Expression *expr, const IR::StructField *field,
+                             unsigned alignment, EBPF::EBPFType *type) override;
+};
+
 class EBPFPnaParser : public EBPF::EBPFPsaParser {
  public:
     EBPFPnaParser(const EBPF::EBPFProgram *program, const IR::ParserBlock *block,
-                  const P4::TypeMap *typeMap)
-        : EBPF::EBPFPsaParser(program, block, typeMap) {}
+                  const P4::TypeMap *typeMap);
     void emit(EBPF::CodeBuilder *builder) override;
 };
 

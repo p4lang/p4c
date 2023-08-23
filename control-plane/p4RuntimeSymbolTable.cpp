@@ -104,12 +104,20 @@ void collectControlSymbols(P4RuntimeSymbolTable &symbols, P4RuntimeArchHandlerIf
             });
     });
 
+    // Collect any use of something in an assignment statement
+    forAllMatching<IR::AssignmentStatement>(
+        control->body, [&](const IR::AssignmentStatement *assign) {
+            archHandler->collectAssignmentStatement(&symbols, assign);
+        });
+
     // Collect any extern function invoked directly from the control.
     forAllMatching<IR::MethodCallExpression>(
         control->body, [&](const IR::MethodCallExpression *call) {
             auto *instance = P4::MethodInstance::resolve(call, refMap, typeMap);
             if (instance->is<P4::ExternFunction>()) {
                 archHandler->collectExternFunction(&symbols, instance->to<P4::ExternFunction>());
+            } else if (instance->is<P4::ExternMethod>()) {
+                archHandler->collectExternMethod(&symbols, instance->to<P4::ExternMethod>());
             }
         });
 }

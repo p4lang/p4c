@@ -551,7 +551,8 @@ class P4RuntimeAnalyzer {
         serializedActions.insert(id);
 
         auto action = p4Info->add_actions();
-        setPreamble(action->mutable_preamble(), id, name, symbols.getAlias(name), annotations);
+        setPreamble(action->mutable_preamble(), id, name, symbols.getAlias(name), annotations,
+                    [this](cstring anno) { return archHandler->filterAnnotations(anno); });
 
         // Allocate ids for all action parameters.
         std::vector<const IR::Parameter *> actionParams;
@@ -618,7 +619,8 @@ class P4RuntimeAnalyzer {
         // the annotation for the p4info preamble, not the P4 fully-qualified
         // name.
         setPreamble(header->mutable_preamble(), id, controllerName /* name */,
-                    controllerName /* alias */, annotations);
+                    controllerName /* alias */, annotations,
+                    [this](cstring anno) { return archHandler->filterAnnotations(anno); });
 
         FieldIdAllocator<decltype(flattenedHeaderType->fields)::value_type> idAllocator(
             flattenedHeaderType->fields.begin(), flattenedHeaderType->fields.end());
@@ -672,7 +674,8 @@ class P4RuntimeAnalyzer {
         auto table = p4Info->add_tables();
         setPreamble(table->mutable_preamble(),
                     symbols.getId(P4RuntimeSymbolType::P4RT_TABLE(), name), name,
-                    symbols.getAlias(name), annotations);
+                    symbols.getAlias(name), annotations,
+                    [this](cstring anno) { return archHandler->filterAnnotations(anno); });
         table->set_size(tableSize);
 
         if (defaultAction && defaultAction->isConst) {
@@ -789,7 +792,8 @@ class P4RuntimeAnalyzer {
 
         auto id = symbols.getId(P4RuntimeSymbolType::P4RT_VALUE_SET(), name);
         setPreamble(vs->mutable_preamble(), id, name, symbols.getAlias(name),
-                    inst->to<IR::IAnnotated>());
+                    inst->to<IR::IAnnotated>(),
+                    [this](cstring anno) { return archHandler->filterAnnotations(anno); });
         vs->set_size(size);
 
         /// Look for a @match annotation on the struct field and set the match
@@ -1401,6 +1405,11 @@ class P4RuntimeEntriesConverter {
         if (block->is<IR::TableBlock>())
             entriesConverter.addTableEntries(block->to<IR::TableBlock>(), refMap, typeMap,
                                              archHandler);
+        else if (block->is<IR::ExternBlock>()) {
+            // add entries for arch specific extern types
+            archHandler->addExternEntries(entriesConverter.getEntries(), *symbols,
+                                          block->to<IR::ExternBlock>());
+        }
     });
 
     auto *p4Info = analyzer.getP4Info();

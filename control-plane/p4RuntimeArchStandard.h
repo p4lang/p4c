@@ -583,6 +583,11 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         }
     }
 
+    void collectAssignmentStatement(P4RuntimeSymbolTableIface *,
+                                    const IR::AssignmentStatement *) override {}
+
+    void collectExternMethod(P4RuntimeSymbolTableIface *, const P4::ExternMethod *) override {}
+
     void collectExternInstance(P4RuntimeSymbolTableIface *symbols,
                                const IR::ExternBlock *externBlock) override {
         CHECK_NULL(externBlock);
@@ -694,20 +699,14 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         }
     }
 
-    void addExternFunction(const P4RuntimeSymbolTableIface &symbols, p4configv1::P4Info *p4info,
-                           const P4::ExternFunction *externFunction) override {
-        // no common task
-        (void)symbols;
-        (void)p4info;
-        (void)externFunction;
-    }
+    void addExternFunction(const P4RuntimeSymbolTableIface &, p4configv1::P4Info *,
+                           const P4::ExternFunction *) override {}
 
-    void postAdd(const P4RuntimeSymbolTableIface &symbols,
-                 ::p4::config::v1::P4Info *p4info) override {
-        // nothing to do
-        (void)symbols;
-        (void)p4info;
-    }
+    void postAdd(const P4RuntimeSymbolTableIface &, ::p4::config::v1::P4Info *) override {}
+
+    void addExternEntries(const p4::v1::WriteRequest *, const P4RuntimeSymbolTableIface &,
+                          const IR::ExternBlock *) override {}
+    bool filterAnnotations(cstring) override { return false; }
 
     static std::optional<ActionProfile> getActionProfile(cstring name, const IR::Type_Extern *type,
                                                          int64_t size,
