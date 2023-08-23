@@ -130,7 +130,6 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
     u32 ebpf_one = 1;
     unsigned char ebpf_byte;
     u32 pkt_len = skb->len;
-    u32 ebpf_input_port = skb->ifindex;
 
     struct metadata_t *meta;
     struct hdr_md *hdrMd;
@@ -293,7 +292,7 @@ if (((u32)istd.input_port == 2 && /* hdr->ipv4.isValid() */
                     /* value */
                     struct MainControlImpl_set_ct_options_value *value = NULL;
                     /* perform lookup */
-                    act_bpf = bpf_skb_p4tc_tbl_lookup(skb, &params, &key, sizeof(key));
+                    act_bpf = bpf_skb_p4tc_tbl_read(skb, &params, &key, sizeof(key));
                     value = (struct MainControlImpl_set_ct_options_value *)act_bpf;
                     if (value == NULL) {
                         /* miss; find default action */
