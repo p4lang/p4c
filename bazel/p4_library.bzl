@@ -1,6 +1,6 @@
 """P4 compilation rule."""
 
-load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain", "use_cpp_toolchain")
+load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "CPP_TOOLCHAIN_TYPE", "find_cpp_toolchain", "use_cpp_toolchain")
 
 def _extract_common_p4c_args(ctx):
     """Extract common arguments for p4c build rules."""
@@ -54,6 +54,7 @@ def _run_shell_cmd_with_p4c(ctx, command, **run_shell_kwargs):
             transitive = [cpp_toolchain.all_files],
         ),
         use_default_shell_env = True,
+        toolchain = CPP_TOOLCHAIN_TYPE,
         **run_shell_kwargs
     )
 
