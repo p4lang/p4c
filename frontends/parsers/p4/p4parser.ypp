@@ -1283,6 +1283,10 @@ statementOrDeclaration
     : variableDeclaration      { $$ = $1; }
     | constantDeclaration      { $$ = $1; }
     | statement                { $$ = $1; }
+      // The transition to instantiation below is not required by the
+      // languge spec, but it does help p4c give a more clear error
+      // message if one erroneously attempts to perform an
+      // instantiation inside of a block.
     | instantiation            { $$ = $1; }
     ;
 

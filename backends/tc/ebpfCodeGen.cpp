@@ -408,11 +408,171 @@ void TCIngressPipelinePNA::emitLocalVariables(EBPF::CodeBuilder *builder) {
 }
 
 // =====================EBPFPnaParser=============================
+EBPFPnaParser::EBPFPnaParser(const EBPF::EBPFProgram *program, const IR::ParserBlock *block,
+                             const P4::TypeMap *typeMap)
+    : EBPFPsaParser(program, block, typeMap) {
+    visitor = new PnaStateTranslationVisitor(program->refMap, program->typeMap, this);
+}
+
 void EBPFPnaParser::emit(EBPF::CodeBuilder *builder) {
     builder->emitIndent();
     builder->blockStart();
     EBPF::EBPFParser::emit(builder);
     builder->blockEnd(true);
+}
+
+//  This code is similar to compileExtractField function in PsaStateTranslationVisitor.
+//  Handled TC "macaddr" annotation.
+void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
+                                                     const IR::StructField *field,
+                                                     unsigned alignment, EBPF::EBPFType *type) {
+    auto width = dynamic_cast<EBPF::IHasWidth *>(type);
+    if (width == nullptr) return;
+    unsigned widthToExtract = width->widthInBits();
+    auto program = state->parser->program;
+    cstring msgStr;
+    cstring fieldName = field->name.name;
+
+    bool checkIfMAC = false;
+    auto annolist = field->getAnnotations()->annotations;
+    for (auto anno : annolist) {
+        if (anno->name != ParseTCAnnotations::tcType) continue;
+        auto annoBody = anno->body;
+        for (auto annoVal : annoBody) {
+            if (annoVal->text == "macaddr") {
+                checkIfMAC = true;
+                break;
+            }
+        }
+    }
+
+    msgStr = Util::printf_format("Parser: extracting field %s", fieldName);
+    builder->target->emitTraceMessage(builder, msgStr.c_str());
+
+    if (widthToExtract <= 64) {
+        unsigned lastBitIndex = widthToExtract + alignment - 1;
+        unsigned lastWordIndex = lastBitIndex / 8;
+        unsigned wordsToRead = lastWordIndex + 1;
+        unsigned loadSize;
+
+        const char *helper = nullptr;
+        if (wordsToRead <= 1) {
+            helper = "load_byte";
+            loadSize = 8;
+        } else if (wordsToRead <= 2) {
+            helper = "load_half";
+            loadSize = 16;
+        } else if (wordsToRead <= 4) {
+            helper = "load_word";
+            loadSize = 32;
+        } else {
+            if (wordsToRead > 64) BUG("Unexpected width %d", widthToExtract);
+            helper = "load_dword";
+            loadSize = 64;
+        }
+
+        unsigned shift = loadSize - alignment - widthToExtract;
+        builder->emitIndent();
+        if (checkIfMAC) {
+            builder->appendFormat("__builtin_memcpy(&");
+            visit(expr);
+            builder->appendFormat(".%s, %s + BYTES(%s), %d)", fieldName,
+                                  program->packetStartVar.c_str(), program->offsetVar.c_str(),
+                                  widthToExtract / 8);
+        } else {
+            visit(expr);
+            builder->appendFormat(".%s = (", fieldName);
+            type->emit(builder);
+            builder->appendFormat(")((%s(%s, BYTES(%s))", helper, program->packetStartVar.c_str(),
+                                  program->offsetVar.c_str());
+            if (shift != 0) builder->appendFormat(" >> %d", shift);
+            builder->append(")");
+            if (widthToExtract != loadSize) {
+                builder->append(" & EBPF_MASK(");
+                type->emit(builder);
+                builder->appendFormat(", %d)", widthToExtract);
+            }
+            builder->append(")");
+        }
+        builder->endOfStatement(true);
+    } else {
+        if (program->options.arch == "psa" && widthToExtract % 8 != 0) {
+            // To explain the problem in error lets assume that we have bit<68> field with value:
+            //   0x11223344556677889
+            //                     ^ this digit will be parsed into a half of byte
+            // Such fields are parsed into a table of bytes in network byte order, so possible
+            // values in dataplane are (note the position of additional '0' at the end):
+            //   0x112233445566778809
+            //   0x112233445566778890
+            // To correctly insert that padding, the length of field must be known, but tools like
+            // nikss-ctl (and the nikss library) don't consume P4info.txt to have such knowledge.
+            // There is also a bug in (de)parser causing such fields to be deparsed incorrectly.
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "%1%: fields wider than 64 bits must have a size multiple of 8 bits (1 byte) "
+                    "due to ambiguous padding in the LSB byte when the condition is not met",
+                    field);
+        }
+
+        // wide values; read all bytes one by one.
+        unsigned shift;
+        if (alignment == 0)
+            shift = 0;
+        else
+            shift = 8 - alignment;
+
+        const char *helper;
+        if (shift == 0)
+            helper = "load_byte";
+        else
+            helper = "load_half";
+        auto bt = EBPF::EBPFTypeFactory::instance->create(IR::Type_Bits::get(8));
+        unsigned bytes = ROUNDUP(widthToExtract, 8);
+        for (unsigned i = 0; i < bytes; i++) {
+            builder->emitIndent();
+            visit(expr);
+            builder->appendFormat(".%s[%d] = (", fieldName.c_str(), i);
+            bt->emit(builder);
+            builder->appendFormat(")((%s(%s, BYTES(%s) + %d) >> %d)", helper,
+                                  program->packetStartVar.c_str(), program->offsetVar.c_str(), i,
+                                  shift);
+
+            if ((i == bytes - 1) && (widthToExtract % 8 != 0)) {
+                builder->append(" & EBPF_MASK(");
+                bt->emit(builder);
+                builder->appendFormat(", %d)", widthToExtract % 8);
+            }
+
+            builder->append(")");
+            builder->endOfStatement(true);
+        }
+    }
+
+    builder->emitIndent();
+    builder->appendFormat("%s += %d", program->offsetVar.c_str(), widthToExtract);
+    builder->endOfStatement(true);
+
+    // eBPF can pass 64 bits of data as one argument passed in 64 bit register,
+    // so value of the field is printed only when it fits into that register
+    if (widthToExtract <= 64) {
+        cstring exprStr = expr->toString();
+        if (auto member = expr->to<IR::Member>()) {
+            if (auto pathExpr = member->expr->to<IR::PathExpression>()) {
+                if (isPointerVariable(pathExpr->path->name.name)) {
+                    exprStr = exprStr.replace(".", "->");
+                }
+            }
+        }
+        cstring tmp = Util::printf_format("(unsigned long long) %s.%s", exprStr, fieldName);
+
+        msgStr = Util::printf_format("Parser: extracted %s=0x%%llx (%u bits)", fieldName,
+                                     widthToExtract);
+        builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, tmp.c_str());
+    } else {
+        msgStr = Util::printf_format("Parser: extracted %s (%u bits)", fieldName, widthToExtract);
+        builder->target->emitTraceMessage(builder, msgStr.c_str());
+    }
+
+    builder->newline();
 }
 
 // =====================EBPFTablePNA=============================

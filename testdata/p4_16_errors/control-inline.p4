@@ -31,8 +31,7 @@ control VC(in H hdr, inout M meta) {
 
 control Main(inout H hdr, inout M meta, inout std_m smeta) {
     apply { 
-        // these two lines trigger a bug in the inliner, see 
-        VC() vc;
+        VC() vc;  // illegal instance within an apply block
         vc.apply(hdr, meta);
     }
 }
