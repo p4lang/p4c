@@ -3,7 +3,7 @@
 [![Validation](https://github.com/p4lang/p4c/actions/workflows/ci-validation.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-validation.yml)
 
 # p4c
-
+ 
 p4c is a reference compiler for the P4 programming language.
 It supports both P4-14 and P4-16; you can find more information about P4
 [here](http://p4.org) and the specifications for both versions of the language
@@ -12,7 +12,7 @@ One fact attesting to the level of quality and completeness of p4c's
 code is that its front-end code, mid-end code, and p4c-graphs back end
 are used as the basis for at least one commercially supported P4
 compiler.
- 
+
 p4c is modular; it provides a standard frontend and midend which can be combined
 with a target-specific backend to create a complete P4 compiler. The goal is to
 make adding new backends easy.
