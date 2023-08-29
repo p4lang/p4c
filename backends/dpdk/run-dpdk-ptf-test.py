@@ -209,7 +209,7 @@ class PTFTestEnv:
         bridge_cmd = self.bridge.get_ns_prefix() + " " + run_infrap4d_cmd
         self.switch_proc = testutils.open_process(bridge_cmd, env=proc_env_vars)
         cnt = 1
-        while not is_port_alive(self.bridge.ns_name, GRPC_PORT) and cnt != 5:
+        while not is_port_alive(self.bridge.ns_name, GRPC_PORT) and cnt != 10:
             time.sleep(2)
             cnt += 1
             testutils.log.info("Cannot connect to Infrap4d: " + str(cnt) + " try")
@@ -233,6 +233,8 @@ class PTFTestEnv:
             return returncode
 
         # Load pipeline.
+        # NOTE: in generated PTF tests, the pipelines are loaded in individual test cases.
+        # This should be commented when working with Testgen.
         command = (
             f"{self.options.ipdk_install_dir}/bin/p4rt-ctl "
             "set-pipe br0 "
@@ -245,7 +247,7 @@ class PTFTestEnv:
             return returncode
         return testutils.SUCCESS
 
-    def run_ptf(self, grpc_port: int) -> int:
+    def run_ptf(self, grpc_port: int, info_name, conf_bin) -> int:
         """Run the PTF test."""
         testutils.log.info("---------------------- Run PTF test ----------------------")
         # Add the file location to the python path.
@@ -258,7 +260,7 @@ class PTFTestEnv:
         taps: str = ""
         for index in range(self.options.num_taps):
             taps += f" -i {index}@TAP{index}"
-        test_params = f"grpcaddr='{PTF_ADDR}:{grpc_port}'"
+        test_params = f"grpcaddr='{PTF_ADDR}:{grpc_port}';p4info='{info_name}';config='{conf_bin}'"
         run_ptf_cmd = (
             f"ptf --pypath {pypath} {taps} --log-file {self.options.testdir.joinpath('ptf.log')} "
             f"--test-params={test_params} --test-dir {self.options.testdir}"
@@ -318,11 +320,14 @@ def run_test(options: Options) -> int:
         return returncode
 
     # Run the PTF test and retrieve the result.
-    result = testenv.run_ptf(GRPC_PORT)
+    result = testenv.run_ptf(GRPC_PORT, info_name, conf_bin)
     # Delete the test environment and trigger a clean up.
     del testenv
     # Print switch log if the results were not successful.
     if result != testutils.SUCCESS:
+        # Get errno
+        errno, _ = testutils.exec_process('echo $?', shell=True, capture_output=True, text=True)
+        testutils.log.error("######## Errno (in case it is a OS error) ######## \n%s", errno)
         if switch_proc.stdout:
             out = switch_proc.stdout.read()
             # Do not bother to print whitespace.

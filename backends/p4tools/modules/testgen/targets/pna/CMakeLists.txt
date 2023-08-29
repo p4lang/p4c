@@ -1,6 +1,5 @@
 if(ENABLE_TESTING)
   # Include the test subdirectory.
-  message("-- Adding p4testgen pna test suite")
   include(test/P4Tests.cmake)
 endif()
 
@@ -9,6 +8,7 @@ set(
   TESTGEN_SOURCES
   ${TESTGEN_SOURCES}
   ${CMAKE_CURRENT_SOURCE_DIR}/backend/metadata/metadata.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/backend/ptf/ptf.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/dpdk/cmd_stepper.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/dpdk/expr_stepper.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/dpdk/program_info.cpp
