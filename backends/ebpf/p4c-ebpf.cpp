@@ -73,8 +73,10 @@ void compile(EbpfOptions &options) {
         if (::errorCount() > 0) return;
     }
 
-    P4::serializeP4RuntimeIfRequired(program, options);
-    if (::errorCount() > 0) return;
+    if (!options.arch.isNullOrEmpty() && options.arch != "filter") {
+        P4::serializeP4RuntimeIfRequired(program, options);
+        if (::errorCount() > 0) return;
+    }
 
     EBPF::MidEnd midend;
     midend.addDebugHook(hook);
