@@ -80,6 +80,7 @@ class P4EbpfTest(BaseTest):
     switch_ns = "test"
     p4_file_path = ""
     p4c_additional_args = ""
+    p4info_reference_file_path = ""
 
     def setUp(self):
         super(P4EbpfTest, self).setUp()
@@ -128,6 +129,10 @@ class P4EbpfTest(BaseTest):
         if self.is_xdp_test():
             p4args += " --xdp"
 
+        if self.p4info_reference_file_path:
+            self.p4info_p4c_generated = os.path.join("ptf_out", filename + ".p4info.txt")
+            p4args += " --p4runtime-files {}".format(self.p4info_p4c_generated)
+
         p4args = p4args + " " + self.p4c_additional_args
 
         logger.info("P4ARGS=" + p4args)
@@ -143,6 +148,16 @@ class P4EbpfTest(BaseTest):
             ),
             "Compilation error",
         )
+
+        if self.p4info_reference_file_path:
+            self.exec_cmd(
+                "diff -B -u -w {expected} {produced}".format(
+                    expected=self.p4info_reference_file_path,
+                    produced=self.p4info_p4c_generated,
+                ),
+                "Compiler produced incorrect P4info file",
+            )
+            logger.info("Generated P4info file is correct")
 
         self.dataplane = ptf.dataplane_instance
         self.dataplane.flush()
