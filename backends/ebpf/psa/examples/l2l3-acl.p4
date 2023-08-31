@@ -350,7 +350,7 @@ control egress(inout headers_t headers, inout local_metadata_t local_metadata, i
             mod_vlan;
         }
 
-        psa_direct_counter = { out_pkts };
+        psa_direct_counter = out_pkts;
     }
 
     apply {
