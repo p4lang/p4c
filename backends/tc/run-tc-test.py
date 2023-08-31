@@ -106,6 +106,9 @@ def compare_files(options, produced, expected):
     if produced.endswith(".c"):
         sedcommand = "sed -i.bak '1d;2d' " + produced
         call(sedcommand, shell=True)
+    if produced.endswith(".h"):
+        sedcommand = "sed -i.bak '1d;2d' " + produced
+        call(sedcommand, shell=True)
     sedcommand = "sed -i -e 's/[a-zA-Z0-9_\/\-]*testdata\///g' " + produced
     call(sedcommand, shell=True)
     diff = difflib.Differ().compare(open(produced).readlines(), open(expected).readlines())
@@ -155,7 +158,7 @@ def process_file(options, argv):
     if options.verbose:
         print("Writing temporary files into ", tmpdir)
     ppfile = tmpdir + "/" + base + ".template"
-    cfile = tmpdir + "/" + base + ".c"
+    cfile = tmpdir + "/"
     introfile = tmpdir + "/" + base + "_introspection.json"
     stderr = tmpdir + "/" + basename + "-stderr"
 

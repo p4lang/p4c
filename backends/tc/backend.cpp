@@ -55,7 +55,6 @@ bool Backend::process() {
 }
 
 bool Backend::ebpfCodeGen(P4::ReferenceMap *refMapEBPF, P4::TypeMap *typeMapEBPF) {
-    if (options.cFile.isNullOrEmpty()) return true;
     target = new EBPF::KernelSamplesTarget(options.emitTraceMessages);
     ebpfOption.xdp2tcMode = options.xdp2tcMode;
     ebpfOption.exe_name = options.exe_name;
@@ -122,15 +121,34 @@ void Backend::serialize() const {
             outstream->flush();
         }
     }
+    auto progName = options.file;
+    auto filename = progName.findlast('/');
+    if (filename) progName = filename;
+    progName = progName.exceptLast(3);
+    progName = progName.trim("/\t\n\r");
+    cstring parserFile = progName + "_parser.c";
+    cstring postParserFile = progName + "_post_parser.c";
+    cstring headerFile = progName + "_parser.h";
     if (!options.cFile.isNullOrEmpty()) {
-        auto cstream = openFile(options.cFile, false);
-        if (cstream == nullptr) return;
-        if (ebpf_program == nullptr) return;
-        EBPF::CodeBuilder c(target);
-        ebpf_program->emit(&c);
-        *cstream << c.toString();
-        cstream->flush();
+        parserFile = options.cFile + parserFile;
+        postParserFile = options.cFile + postParserFile;
+        headerFile = options.cFile + headerFile;
     }
+    auto cstream = openFile(postParserFile, false);
+    auto pstream = openFile(parserFile, false);
+    auto hstream = openFile(headerFile, false);
+    if (cstream == nullptr) return;
+    if (ebpf_program == nullptr) return;
+    EBPF::CodeBuilder c(target), p(target), h(target);
+    ebpf_program->emit(&c);
+    ebpf_program->emitParser(&p);
+    ebpf_program->emitHeader(&h);
+    *cstream << c.toString();
+    *pstream << p.toString();
+    *hstream << h.toString();
+    cstream->flush();
+    pstream->flush();
+    hstream->flush();
 }
 
 bool Backend::serializeIntrospectionJson(std::ostream &out) const {

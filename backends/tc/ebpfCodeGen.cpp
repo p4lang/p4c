@@ -20,6 +20,7 @@ namespace TC {
 
 // =====================PNAEbpfGenerator=============================
 void PNAEbpfGenerator::emitPNAIncludes(EBPF::CodeBuilder *builder) const {
+    builder->appendLine("#include \"header.h\"");
     builder->appendLine("#include <stdbool.h>");
     builder->appendLine("#include <linux/if_ether.h>");
     builder->appendLine("#include \"pna.h\"");
@@ -57,9 +58,9 @@ void PNAEbpfGenerator::emitTypes(EBPF::CodeBuilder *builder) const {
     PNAErrorCodesGen errorGen(builder);
     pipeline->program->apply(errorGen);
 
-    for (auto type : ebpfTypes) {
-        type->emit(builder);
-    }
+    // for (auto type : ebpfTypes) {
+    //     type->emit(builder);
+    // }
 
     pipeline->parser->emitTypes(builder);
     pipeline->control->emitTableTypes(builder);
@@ -102,14 +103,13 @@ void PNAEbpfGenerator::emitPipelineInstances(EBPF::CodeBuilder *builder) const {
 // =====================PNAArchTC=============================
 void PNAArchTC::emit(EBPF::CodeBuilder *builder) const {
     /**
-     * Structure of a single C program for PNA
+     * Structure of a C Post Parser program for PNA
      * 1. Automatically generated comment
      * 2. Includes
-     * 3. Macro definitions (it's called "preamble")
-     * 4. Headers, structs, types
-     * 5. BPF map definitions.
-     * 6. XDP helper program.
-     * 7. TC Pipeline program.
+     * 3. Headers, structs
+     * 4. BPF map definitions.
+     * 5. XDP helper program.
+     * 6. TC Pipeline program for post-parser.
      */
 
     // 1. Automatically generated comment.
@@ -119,33 +119,27 @@ void PNAArchTC::emit(EBPF::CodeBuilder *builder) const {
     /*
      * 2. Includes.
      */
-    builder->target->emitIncludes(builder);
     emitPNAIncludes(builder);
 
     /*
-     * 3. Macro definitions (it's called "preamble")
-     */
-    emitPreamble(builder);
-
-    /*
-     * 4. Headers, structs, types
+     * 3. Headers, structs
      */
     emitInternalStructures(builder);
     emitTypes(builder);
     emitGlobalHeadersMetadata(builder);
 
     /*
-     * 5. BPF map definitions.
+     * 4. BPF map definitions.
      */
     emitInstances(builder);
 
     /*
-     * 6. XDP helper program.
+     * 5. XDP helper program.
      */
     xdp->emit(builder);
 
     /*
-     * 7. TC Pipeline program.
+     * 6. TC Pipeline program for post-parser.
      */
     pipeline->emit(builder);
 
@@ -165,6 +159,34 @@ void PNAArchTC::emitInstances(EBPF::CodeBuilder *builder) const {
     builder->newline();
 }
 
+void PNAArchTC::emitParser(EBPF::CodeBuilder *builder) const {
+    /**
+     * Structure of a C Parser program for PNA
+     * 1. Automatically generated comment
+     * 2. Includes
+     * 3. BPF map definitions.
+     * 4. TC Pipeline program for parser.
+     */
+    xdp->emitGeneratedComment(builder);
+    emitPNAIncludes(builder);
+    builder->newline();
+    emitInstances(builder);
+    pipeline->name = "tc-parse";
+    pipeline->sectionName = "classifier/" + pipeline->name;
+    pipeline->functionName = pipeline->name.replace("-", "_") + "_func";
+    pipeline->emit(builder);
+    builder->target->emitLicense(builder, pipeline->license);
+}
+
+void PNAArchTC::emitHeader(EBPF::CodeBuilder *builder) const {
+    xdp->emitGeneratedComment(builder);
+    builder->target->emitIncludes(builder);
+    emitPreamble(builder);
+    for (auto type : ebpfTypes) {
+        type->emit(builder);
+    }
+}
+
 // =====================TCIngressPipelinePNA=============================
 void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
     cstring msgStr, varStr;
@@ -173,10 +195,11 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
     builder->append("static __always_inline");
     builder->spc();
     // FIXME: use Target to generate metadata type
+    cstring func_name = (name == "tc-parse") ? "run_parser" : "process";
     builder->appendFormat(
-        "int process(%s *%s, %s %s *%s, "
+        "int %s(%s *%s, %s %s *%s, "
         "struct pna_global_metadata *%s",
-        builder->target->packetDescriptorType(), model.CPacketName.str(),
+        func_name, builder->target->packetDescriptorType(), model.CPacketName.str(),
         parser->headerType->to<EBPF::EBPFStructType>()->kind,
         parser->headerType->to<EBPF::EBPFStructType>()->name, parser->headers->name.name,
         compilerGlobalMetadata);
@@ -199,99 +222,144 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
     emitMetadataFromCPUMAP(builder);
     builder->newline();
 
-    msgStr = Util::printf_format(
-        "%s parser: parsing new packet, input_port=%%d, path=%%d, "
-        "pkt_len=%%d",
-        sectionName);
-    varStr = Util::printf_format("%s->packet_path", compilerGlobalMetadata);
-    builder->target->emitTraceMessage(builder, msgStr.c_str(), 3, inputPortVar.c_str(), varStr,
-                                      lengthVar.c_str());
+    if (name == "tc-parse") {
+        msgStr = Util::printf_format(
+            "%s parser: parsing new packet, input_port=%%d, path=%%d, "
+            "pkt_len=%%d",
+            sectionName);
+        varStr = Util::printf_format("%s->packet_path", compilerGlobalMetadata);
+        builder->target->emitTraceMessage(builder, msgStr.c_str(), 3, inputPortVar.c_str(), varStr,
+                                          lengthVar.c_str());
 
-    // PARSER
-    parser->emit(builder);
-    builder->newline();
+        // PARSER
+        parser->emit(builder);
+        builder->newline();
 
-    // CONTROL
-    builder->emitIndent();
-    builder->append(IR::ParserState::accept);
-    builder->append(":");
-    builder->spc();
-    builder->blockStart();
-    msgStr = Util::printf_format("%s control: packet processing started", sectionName);
-    builder->target->emitTraceMessage(builder, msgStr.c_str());
-    control->emit(builder);
-    builder->blockEnd(true);
-    msgStr = Util::printf_format("%s control: packet processing finished", sectionName);
-    builder->target->emitTraceMessage(builder, msgStr.c_str());
+        builder->emitIndent();
+        builder->append(IR::ParserState::accept);
+        builder->append(":");
+        builder->newline();
+    }
 
-    // DEPARSER
-    builder->emitIndent();
-    builder->blockStart();
-    msgStr = Util::printf_format("%s deparser: packet deparsing started", sectionName);
-    builder->target->emitTraceMessage(builder, msgStr.c_str());
-    deparser->emit(builder);
-    msgStr = Util::printf_format("%s deparser: packet deparsing finished", sectionName);
-    builder->target->emitTraceMessage(builder, msgStr.c_str());
-    builder->blockEnd(true);
+    if (name == "tc-ingress") {
+        // CONTROL
+        builder->blockStart();
+        msgStr = Util::printf_format("%s control: packet processing started", sectionName);
+        builder->target->emitTraceMessage(builder, msgStr.c_str());
+        control->emit(builder);
+        builder->blockEnd(true);
+        msgStr = Util::printf_format("%s control: packet processing finished", sectionName);
+        builder->target->emitTraceMessage(builder, msgStr.c_str());
+
+        // DEPARSER
+        builder->emitIndent();
+        builder->blockStart();
+        msgStr = Util::printf_format("%s deparser: packet deparsing started", sectionName);
+        builder->target->emitTraceMessage(builder, msgStr.c_str());
+        deparser->emit(builder);
+        msgStr = Util::printf_format("%s deparser: packet deparsing finished", sectionName);
+        builder->target->emitTraceMessage(builder, msgStr.c_str());
+        builder->blockEnd(true);
+    }
 
     builder->emitIndent();
     builder->appendFormat("return %d;", actUnspecCode);
     builder->newline();
     builder->blockEnd(true);
-    builder->target->emitCodeSection(builder, sectionName);
-    builder->emitIndent();
-    builder->appendFormat("int %s(%s *%s)", functionName, builder->target->packetDescriptorType(),
-                          model.CPacketName.str());
-    builder->spc();
 
-    builder->blockStart();
+    if (name == "tc-ingress") {
+        builder->target->emitCodeSection(builder, sectionName);
+        builder->emitIndent();
+        builder->appendFormat("int %s(%s *%s)", functionName,
+                              builder->target->packetDescriptorType(), model.CPacketName.str());
+        builder->spc();
 
-    emitGlobalMetadataInitializer(builder);
+        builder->blockStart();
 
-    emitHeaderInstances(builder);
-    builder->newline();
+        emitGlobalMetadataInitializer(builder);
 
-    builder->emitIndent();
-    builder->appendFormat("int ret = %d;", actUnspecCode);
-    builder->newline();
-    builder->emitIndent();
-    builder->appendFormat("int i;");
-    builder->newline();
-    builder->emitIndent();
-    builder->appendLine("#pragma clang loop unroll(disable)");
-    builder->emitIndent();
-    builder->appendFormat("for (i = 0; i < %d; i++) ", maxResubmitDepth);
-    builder->blockStart();
-    builder->emitIndent();
-    builder->append("ret = process(skb, ");
+        emitHeaderInstances(builder);
+        builder->newline();
 
-    builder->appendFormat("(%s %s *) %s, %s);",
-                          parser->headerType->to<EBPF::EBPFStructType>()->kind,
-                          parser->headerType->to<EBPF::EBPFStructType>()->name,
-                          parser->headers->name.name, compilerGlobalMetadata);
+        builder->emitIndent();
+        builder->appendFormat("int ret = %d;", actUnspecCode);
+        builder->newline();
+        builder->emitIndent();
+        builder->appendFormat("int i;");
+        builder->newline();
+        builder->emitIndent();
+        builder->appendLine("#pragma clang loop unroll(disable)");
+        builder->emitIndent();
+        builder->appendFormat("for (i = 0; i < %d; i++) ", maxResubmitDepth);
+        builder->blockStart();
+        builder->emitIndent();
+        builder->appendFormat("ret = %s(skb, ", func_name);
 
-    builder->newline();
-    builder->appendFormat(
-        "        if (%s->drop == 1) {\n"
-        "            break;\n"
-        "        }\n",
-        compilerGlobalMetadata);
-    builder->blockEnd(true);
-    builder->newline();
-    builder->emitIndent();
-    builder->appendFormat("%s->recirculated = (i > 0);", compilerGlobalMetadata);
-    builder->newline();
-    builder->emitIndent();
-    builder->appendFormat(
-        "if (ret != %d) {\n"
-        "        return ret;\n"
-        "    }",
-        actUnspecCode);
-    builder->newline();
+        builder->appendFormat("(%s %s *) %s, %s);",
+                              parser->headerType->to<EBPF::EBPFStructType>()->kind,
+                              parser->headerType->to<EBPF::EBPFStructType>()->name,
+                              parser->headers->name.name, compilerGlobalMetadata);
 
-    this->emitTrafficManager(builder);
+        builder->newline();
+        builder->appendFormat(
+            "        if (%s->drop == 1) {\n"
+            "            break;\n"
+            "        }\n",
+            compilerGlobalMetadata);
+        builder->blockEnd(true);
+        builder->newline();
+        builder->emitIndent();
+        builder->appendFormat("%s->recirculated = (i > 0);", compilerGlobalMetadata);
+        builder->newline();
+        builder->emitIndent();
+        builder->appendFormat(
+            "if (ret != %d) {\n"
+            "        return ret;\n"
+            "    }",
+            actUnspecCode);
+        builder->newline();
 
-    builder->blockEnd(true);
+        this->emitTrafficManager(builder);
+
+        builder->blockEnd(true);
+    } else {
+        builder->newline();
+        builder->target->emitCodeSection(builder, sectionName);
+        builder->emitIndent();
+        builder->appendFormat("int %s(%s *%s)", functionName,
+                              builder->target->packetDescriptorType(), model.CPacketName.str());
+        builder->spc();
+
+        builder->blockStart();
+
+        emitHeaderInstances(builder);
+        builder->newline();
+
+        builder->emitIndent();
+        builder->appendFormat("int ret = %d;", actUnspecCode);
+        builder->newline();
+        builder->emitIndent();
+        builder->appendFormat("ret = %s(skb, ", func_name);
+
+        builder->appendFormat("(%s %s *) %s, %s);",
+                              parser->headerType->to<EBPF::EBPFStructType>()->kind,
+                              parser->headerType->to<EBPF::EBPFStructType>()->name,
+                              parser->headers->name.name, compilerGlobalMetadata);
+
+        builder->newline();
+        builder->emitIndent();
+        builder->appendFormat(
+            "if (ret != %d) {\n"
+            "        return ret;\n"
+            "    }",
+            actUnspecCode);
+        builder->newline();
+        builder->emitIndent();
+        builder->appendFormat("return TC_ACT_PIPE;");
+        builder->newline();
+        builder->emitIndent();
+        builder->blockEnd(true);
+    }
 }
 
 void TCIngressPipelinePNA::emitGlobalMetadataInitializer(EBPF::CodeBuilder *builder) {

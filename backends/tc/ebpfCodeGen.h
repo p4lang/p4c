@@ -36,6 +36,8 @@ class PNAEbpfGenerator : public EBPF::EbpfCodeGenerator {
 
     virtual void emit(EBPF::CodeBuilder *builder) const = 0;
     virtual void emitInstances(EBPF::CodeBuilder *builder) const = 0;
+    virtual void emitParser(EBPF::CodeBuilder *builder) const = 0;
+    virtual void emitHeader(EBPF::CodeBuilder *builder) const = 0;
     void emitPNAIncludes(EBPF::CodeBuilder *builder) const;
     void emitPreamble(EBPF::CodeBuilder *builder) const override;
     void emitCommonPreamble(EBPF::CodeBuilder *builder) const override;
@@ -89,6 +91,8 @@ class PNAArchTC : public PNAEbpfGenerator {
         : PNAEbpfGenerator(options, ebpfTypes, pipeline), xdp(xdp) {}
 
     void emit(EBPF::CodeBuilder *builder) const override;
+    void emitParser(EBPF::CodeBuilder *builder) const override;
+    void emitHeader(EBPF::CodeBuilder *builder) const override;
     void emitInstances(EBPF::CodeBuilder *builder) const override;
 };
 
