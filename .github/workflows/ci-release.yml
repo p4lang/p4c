@@ -44,9 +44,10 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Build and push Docker image to registry
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v4
       with:
         context: .
+        push: true
         tags: p4lang/p4c:${{ env.VERSION }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
