@@ -219,8 +219,7 @@ class P4RuntimeTest(BaseTest):
         testutils.log.info(f"Reading p4info from {proto_txt_path}")
         self.p4info = p4info_pb2.P4Info()
         with open(proto_txt_path, "rb") as fin:
-            google.protobuf.text_format.Merge(fin.read(), self.p4info,
-                                              allow_unknown_field=True)
+            google.protobuf.text_format.Merge(fin.read(), self.p4info, allow_unknown_field=True)
 
         self.import_p4info_names()
 
@@ -248,8 +247,7 @@ class P4RuntimeTest(BaseTest):
         # config.p4info = self.p4info
         proto_txt_path = ptfutils.test_param_get("p4info")
         with open(proto_txt_path, "r", encoding="utf-8") as fin:
-            google.protobuf.text_format.Merge(fin.read(), config.p4info,
-                                              allow_unknown_field=True)
+            google.protobuf.text_format.Merge(fin.read(), config.p4info, allow_unknown_field=True)
         config_path = ptfutils.test_param_get("config")
         testutils.log.info(f"Reading config (compiled P4 program) from {config_path}")
         with open(config_path, "rb") as config_f:
@@ -1121,8 +1119,7 @@ def update_config(config_path, p4info_path, grpc_addr, device_id):
     request.device_id = device_id
     config = request.config
     with open(p4info_path, "r", encoding="utf-8") as p4info_f:
-        google.protobuf.text_format.Merge(p4info_f.read(), config.p4info,
-                                          allow_unknown_field=True)
+        google.protobuf.text_format.Merge(p4info_f.read(), config.p4info, allow_unknown_field=True)
     with open(config_path, "rb") as config_f:
         config.p4_device_config = config_f.read()
     request.action = p4runtime_pb2.SetForwardingPipelineConfigRequest.VERIFY_AND_COMMIT
