@@ -401,10 +401,6 @@ void TCIngressPipelinePNA::emitLocalVariables(EBPF::CodeBuilder *builder) {
         emitTimestamp(builder);
         builder->endOfStatement(true);
     }
-
-    builder->emitIndent();
-    builder->appendFormat("u32 %s = %s;", inputPortVar.c_str(), ifindexVar.c_str());
-    builder->newline();
 }
 
 // =====================EBPFPnaParser=============================
@@ -1164,6 +1160,17 @@ cstring ControlBodyTranslatorPNA::getParamName(const IR::PathExpression *expr) {
     return expr->path->name.name;
 }
 
+bool ControlBodyTranslatorPNA::checkPnaPortMem(const IR::Member *m) {
+    if (m->expr != nullptr && m->expr->type != nullptr) {
+        if (auto str_type = m->expr->type->to<IR::Type_Struct>()) {
+            if (str_type->name == "pna_main_input_metadata_t" && m->member.name == "input_port") {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *function) {
     if (function->expr->toString() == "send_to_port" ||
         function->expr->toString() == "drop_packet") {
@@ -1178,7 +1185,12 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
         for (auto a : *function->expr->arguments) {
             if (!first) builder->append(", ");
             first = false;
-            visit(a);
+            if (a->expression->is<IR::Member>() &&
+                checkPnaPortMem(a->expression->to<IR::Member>())) {
+                builder->append("skb->ifindex");
+            } else {
+                visit(a);
+            }
         }
         builder->append(")");
         return;
@@ -1311,7 +1323,7 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
         builder->appendLine("/* perform lookup */");
         builder->target->emitTraceMessage(builder, "Control: performing table lookup");
         builder->emitIndent();
-        builder->appendLine("act_bpf = bpf_skb_p4tc_tbl_lookup(skb, &params, &key, sizeof(key));");
+        builder->appendLine("act_bpf = bpf_skb_p4tc_tbl_read(skb, &params, &key, sizeof(key));");
         builder->emitIndent();
         builder->appendFormat("value = (struct %s *)act_bpf;", table->valueTypeName.c_str());
         builder->newline();

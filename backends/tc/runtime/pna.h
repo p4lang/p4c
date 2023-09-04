@@ -106,7 +106,7 @@ struct p4tc_table_entry_act_bpf {
     u8 params[124];
 };
 
-extern struct p4tc_table_entry_act_bpf *bpf_skb_p4tc_tbl_lookup(
+extern struct p4tc_table_entry_act_bpf *bpf_skb_p4tc_tbl_read(
     struct __sk_buff *skb, struct p4tc_table_entry_act_bpf_params__local *params, void *key,
     const u32 key__sz) __ksym;
 extern struct p4tc_table_entry_act_bpf *bpf_xdp_p4tc_tbl_lookup(
