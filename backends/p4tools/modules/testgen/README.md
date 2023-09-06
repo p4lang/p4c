@@ -30,7 +30,7 @@ P4Testgen is an extensible [test oracle](https://en.wikipedia.org/wiki/Test_orac
 
 ## Installation
 
-P4Testgen depends on the P4Tools framework and is automatically installed with P4Tools. Please follow the instructions listed [here](https://github.com/p4lang/p4c#installing-p4c-from-source) to install P4Testgen. The main binary `p4testgen` can be found in the `build` folder after a successful installation.
+P4Testgen depends on the P4Tools framework and is automatically installed with P4Tools. Please follow the instructions listed [here]([https://github.com/p4lang/p4c#installing-p4c-from-source](https://github.com/p4lang/p4c/tree/main/backends/p4tools#building)) to install P4Testgen. The main binary `p4testgen` can be found in the `build` folder after a successful installation.
 
 P4Testgen is available as part of the [official P4C docker image](https://hub.docker.com/r/p4lang/p4c/). On Debian-based systems, it is also possible to install a P4Testgen binary by following [these](https://github.com/p4lang/p4c#installing-packaged-versions-of-p4c) instructions.
 
