@@ -20,10 +20,22 @@ namespace TC {
 
 // =====================PNAEbpfGenerator=============================
 void PNAEbpfGenerator::emitPNAIncludes(EBPF::CodeBuilder *builder) const {
-    builder->appendLine("#include \"header.h\"");
+    builder->newline();
+    cstring headerFile = getProgramName() + "_parser.h";
+    builder->appendFormat("#include \"%s\"", headerFile);
+    builder->endOfStatement(true);
     builder->appendLine("#include <stdbool.h>");
     builder->appendLine("#include <linux/if_ether.h>");
     builder->appendLine("#include \"pna.h\"");
+}
+
+cstring PNAEbpfGenerator::getProgramName() const {
+    auto progName = options.file;
+    auto filename = progName.findlast('/');
+    if (filename) progName = filename;
+    progName = progName.exceptLast(3);
+    progName = progName.trim("/\t\n\r");
+    return progName;
 }
 
 void PNAEbpfGenerator::emitPreamble(EBPF::CodeBuilder *builder) const {
@@ -57,10 +69,6 @@ void PNAEbpfGenerator::emitInternalStructures(EBPF::CodeBuilder *builder) const 
 void PNAEbpfGenerator::emitTypes(EBPF::CodeBuilder *builder) const {
     PNAErrorCodesGen errorGen(builder);
     pipeline->program->apply(errorGen);
-
-    // for (auto type : ebpfTypes) {
-    //     type->emit(builder);
-    // }
 
     pipeline->parser->emitTypes(builder);
     pipeline->control->emitTableTypes(builder);
@@ -214,8 +222,18 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
     emitUserMetadataInstance(builder);
 
     emitCPUMAPHeadersInitializers(builder);
-    builder->newline();
-    emitCPUMAPInitializers(builder);
+    if (name == "tc-parse") {
+        builder->newline();
+        emitCPUMAPInitializers(builder);
+    } else {
+        emitCPUMAPLookup(builder);
+        builder->emitIndent();
+        builder->append("if (!hdrMd)");
+        builder->newline();
+        builder->emitIndent();
+        builder->emitIndent();
+        builder->appendFormat("return %s;", dropReturnCode());
+    }
     builder->newline();
     emitHeadersFromCPUMAP(builder);
     builder->newline();

@@ -1,4 +1,5 @@
-#include "header.h"
+
+#include "default_action_example_parser.h";
 #include <stdbool.h>
 #include <linux/if_ether.h>
 #include "pna.h"
@@ -103,12 +104,9 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
 
     struct main_metadata_t *user_meta;
     struct hdr_md *hdrMd;
-
     hdrMd = BPF_MAP_LOOKUP_ELEM(hdr_md_cpumap, &ebpf_zero);
     if (!hdrMd)
         return TC_ACT_SHOT;
-    __builtin_memset(hdrMd, 0, sizeof(struct hdr_md));
-
     hdr = &(hdrMd->cpumap_hdr);
     user_meta = &(hdrMd->cpumap_usermeta);
 {

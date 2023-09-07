@@ -137,7 +137,18 @@ void Backend::serialize() const {
     auto cstream = openFile(postParserFile, false);
     auto pstream = openFile(parserFile, false);
     auto hstream = openFile(headerFile, false);
-    if (cstream == nullptr) return;
+    if (cstream == nullptr) {
+        ::error ("Unable to open File %1%", postParserFile);
+        return;
+    }
+    if (pstream == nullptr) {
+        ::error ("Unable to open File %1%", parserFile);
+        return;
+    }
+    if (hstream == nullptr) {
+        ::error ("Unable to open File %1%", headerFile);
+        return;
+    }
     if (ebpf_program == nullptr) return;
     EBPF::CodeBuilder c(target), p(target), h(target);
     ebpf_program->emit(&c);
