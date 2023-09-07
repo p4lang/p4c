@@ -59,7 +59,6 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
     u32 ebpf_one = 1;
     unsigned char ebpf_byte;
     u32 pkt_len = skb->len;
-    u32 ebpf_input_port = skb->ifindex;
 
     struct main_metadata_t *user_meta;
     struct hdr_md *hdrMd;

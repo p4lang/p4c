@@ -294,6 +294,7 @@ class ControlBodyTranslatorPNA : public EBPF::ControlBodyTranslator {
                                       const ConvertToBackendIR *tcIR);
     void processFunction(const P4::ExternFunction *function);
     void processApply(const P4::ApplyMethod *method);
+    bool checkPnaPortMem(const IR::Member *m);
     virtual cstring getParamName(const IR::PathExpression *);
 };
 
