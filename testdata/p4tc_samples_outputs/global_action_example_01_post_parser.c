@@ -101,7 +101,6 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
     u32 ebpf_one = 1;
     unsigned char ebpf_byte;
     u32 pkt_len = skb->len;
-    u32 ebpf_input_port = skb->ifindex;
 
     struct my_ingress_metadata_t *meta;
     struct hdr_md *hdrMd;
@@ -112,8 +111,6 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
     meta = &(hdrMd->cpumap_usermeta);
 {
         u8 hit;
-        u64 hdr_dmac_0 = 0;
-        u64 hdr_smac_0 = 0;
         {
 /* nh_table_0.apply() */
             {
@@ -129,7 +126,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                 /* value */
                 struct ingress_nh_table_value *value = NULL;
                 /* perform lookup */
-                act_bpf = bpf_skb_p4tc_tbl_lookup(skb, &params, &key, sizeof(key));
+                act_bpf = bpf_skb_p4tc_tbl_read(skb, &params, &key, sizeof(key));
                 value = (struct ingress_nh_table_value *)act_bpf;
                 if (value == NULL) {
                     /* miss; find default action */
@@ -142,13 +139,11 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                     switch (value->action) {
                         case INGRESS_NH_TABLE_ACT__SEND_NH: 
                             {
-                                hdr_dmac_0 = value->u._send_nh.smac;
-                                                                hdr_smac_0 = value->u._send_nh.dmac;
-                                /* send_to_port(value->u._send_nh.port_id) */
+/* send_to_port(value->u._send_nh.port_id) */
                                 compiler_meta__->drop = false;
                                 send_to_port(value->u._send_nh.port_id);
-                                                                hdr->ethernet.srcAddr = hdr_dmac_0;
-                                                                hdr->ethernet.dstAddr = hdr_smac_0;
+                                                                hdr->ethernet.srcAddr = value->u._send_nh.smac;
+                                                                hdr->ethernet.dstAddr = value->u._send_nh.dmac;
                             }
                             break;
                         case INGRESS_NH_TABLE_ACT_INGRESS_DROP: 
@@ -180,7 +175,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                 /* value */
                 struct ingress_nh_table2_value *value = NULL;
                 /* perform lookup */
-                act_bpf = bpf_skb_p4tc_tbl_lookup(skb, &params, &key, sizeof(key));
+                act_bpf = bpf_skb_p4tc_tbl_read(skb, &params, &key, sizeof(key));
                 value = (struct ingress_nh_table2_value *)act_bpf;
                 if (value == NULL) {
                     /* miss; find default action */

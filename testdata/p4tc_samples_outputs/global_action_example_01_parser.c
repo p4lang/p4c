@@ -20,7 +20,6 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
     u32 ebpf_one = 1;
     unsigned char ebpf_byte;
     u32 pkt_len = skb->len;
-    u32 ebpf_input_port = skb->ifindex;
 
     struct my_ingress_metadata_t *meta;
     struct hdr_md *hdrMd;

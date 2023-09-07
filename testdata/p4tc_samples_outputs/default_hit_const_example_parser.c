@@ -20,7 +20,6 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
     u32 ebpf_one = 1;
     unsigned char ebpf_byte;
     u32 pkt_len = skb->len;
-    u32 ebpf_input_port = skb->ifindex;
 
     struct metadata_t *meta;
     struct hdr_md *hdrMd;
