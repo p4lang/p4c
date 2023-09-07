@@ -138,15 +138,15 @@ void Backend::serialize() const {
     auto pstream = openFile(parserFile, false);
     auto hstream = openFile(headerFile, false);
     if (cstream == nullptr) {
-        ::error ("Unable to open File %1%", postParserFile);
+        ::error("Unable to open File %1%", postParserFile);
         return;
     }
     if (pstream == nullptr) {
-        ::error ("Unable to open File %1%", parserFile);
+        ::error("Unable to open File %1%", parserFile);
         return;
     }
     if (hstream == nullptr) {
-        ::error ("Unable to open File %1%", headerFile);
+        ::error("Unable to open File %1%", headerFile);
         return;
     }
     if (ebpf_program == nullptr) return;
