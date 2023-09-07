@@ -130,7 +130,7 @@ void Backend::serialize() const {
     cstring postParserFile = progName + "_post_parser.c";
     cstring headerFile = progName + "_parser.h";
     if (!options.cFile.isNullOrEmpty()) {
-        if (options.cFile.get(options.cFile.size()-1) != '/') {
+        if (options.cFile.get(options.cFile.size() - 1) != '/') {
             options.cFile = options.cFile + '/';
         }
         parserFile = options.cFile + parserFile;
