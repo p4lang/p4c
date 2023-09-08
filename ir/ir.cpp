@@ -278,7 +278,7 @@ const IR::PackageBlock *ToplevelBlock::getMain() const {
         return nullptr;
     }
     if (!main->is<IR::Declaration_Instance>()) {
-        ::error(ErrorType::ERR_INVALID, "%1$: must be a package declaration", main->getNode());
+        ::error(ErrorType::ERR_INVALID, "%1%: must be a package declaration", main->getNode());
         return nullptr;
     }
     auto block = getValue(main->getNode());
