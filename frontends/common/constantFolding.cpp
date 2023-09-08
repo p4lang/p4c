@@ -608,6 +608,10 @@ const IR::Node *DoConstantFolding::postorder(IR::Slice *e) {
         ::error(ErrorType::ERR_EXPECTED, "%1%: bit slicing should be specified as [msb:lsb]", e);
         return e;
     }
+    if (l < 0) {
+        ::error(ErrorType::ERR_EXPECTED, "%1%: expected slice indexes to be non-negative", e->e2);
+        return e;
+    }
     if (overflowWidth(e, m) || overflowWidth(e, l)) return e;
     big_int value = cbase->value >> l;
     big_int mask = 1;
