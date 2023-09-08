@@ -1,0 +1,3 @@
+issue4144.p4(3): [--Werror=invalid] error: main: must be a package declaration
+extern main {}
+       ^^^^
