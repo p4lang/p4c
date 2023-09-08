@@ -283,7 +283,10 @@ const IR::PackageBlock *ToplevelBlock::getMain() const {
     }
     auto block = getValue(main->getNode());
     if (block == nullptr) return nullptr;
-    BUG_CHECK(block->is<IR::PackageBlock>(), "%1%: toplevel block is not a package", block);
+    if (!block->is<IR::PackageBlock>()) {
+        ::error(ErrorType::ERR_EXPECTED, "%1%: expected package declaration", block);
+        return nullptr;
+    }
     return block->to<IR::PackageBlock>();
 }
 
