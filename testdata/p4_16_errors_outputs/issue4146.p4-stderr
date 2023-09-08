@@ -1,0 +1,3 @@
+issue4146.p4(8): [--Werror=type-error] error: void: illegal type argument for 'lookahead'
+       packet.lookahead<void>();
+                        ^^^^

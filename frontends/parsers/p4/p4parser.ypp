@@ -1035,7 +1035,7 @@ baseType
 
 typeOrVoid
     : typeRef     { $$ = $1; }
-    | VOID        { $$ = IR::Type_Void::get(); }
+    | VOID        { $$ = new IR::Type_Void(@1); }
     | IDENTIFIER  { $$ = new IR::Type_Name(@1, new IR::Path(*(new IR::ID(@1, $1)))); }
         // This is necessary because template arguments may introduce the return type
     ;
@@ -1059,7 +1059,7 @@ typeArg
     : typeRef                     { $$ = $1; }
     | nonTypeName                 { $$ = new IR::Type_Name(@1, new IR::Path(*$1)); }
         // This is necessary because template arguments may introduce the return type
-    | VOID                        { $$ = IR::Type_Void::get(); }
+    | VOID                        { $$ = new IR::Type_Void(@1); }
     | "_"                         { $$ = new IR::Type_Dontcare(@1); }
     ;
 
@@ -1071,7 +1071,7 @@ typeArgumentList
 
 realTypeArg
     : typeRef                     { $$ = $1; }
-    | VOID                        { $$ = IR::Type_Void::get(); }
+    | VOID                        { $$ = new IR::Type_Void(@1); }
     | "_"                         { $$ = new IR::Type_Dontcare(@1); }
     ;
 
@@ -1135,10 +1135,10 @@ enumDeclaration
         ENUM name { driver.structure->declareType(*$3); }
         "{" identifierList optTrailingComma "}" { $$ = new IR::Type_Enum(@3, *$3, *$6); }
     | optAnnotations ENUM typeRef name { driver.structure->declareType(*$4); }
-	 "{" specifiedIdentifierList optTrailingComma "}" {
+         "{" specifiedIdentifierList optTrailingComma "}" {
               auto type = $typeRef;
               $$ = new IR::Type_SerEnum(@4, *$4, type, *$7);
-	  }
+          }
     ;
 
 specifiedIdentifierList
