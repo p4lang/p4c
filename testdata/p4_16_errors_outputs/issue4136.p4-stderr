@@ -1,0 +1,3 @@
+issue4136.p4(12): [--Werror=expected] error: -1: expected slice indexes to be non-negative
+      meta.f0 = 7[1:-1];
+                     ^
