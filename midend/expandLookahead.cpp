@@ -43,7 +43,7 @@ void DoExpandLookahead::expand(
         }
     } else if (type->is<IR::Type_Bits>() || type->is<IR::Type_Boolean>()) {
         unsigned size = type->width_bits();
-        BUG_CHECK(size > 0, "%1%: unexpected size %2%", type, size);
+        if (size == 0) return;
         const IR::Expression *expression =
             new IR::Slice(bitvector->clone(), *offset - 1, *offset - size);
         auto tb = type->to<IR::Type_Bits>();
