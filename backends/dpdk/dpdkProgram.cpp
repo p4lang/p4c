@@ -495,6 +495,7 @@ bool ConvertToDpdkParser::preorder(const IR::ParserState *) { return false; }
 bool ConvertToDpdkControl::preorder(const IR::P4Action *a) {
     auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure, metadataStruct);
     helper->setCalledBy(this);
+    helper->set_parent(a);
     a->body->apply(*helper);
     auto stmt_list = new IR::IndexedVector<IR::DpdkAsmStatement>();
     for (auto i : helper->get_instr()) stmt_list->push_back(i);

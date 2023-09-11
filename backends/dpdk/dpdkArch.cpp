@@ -2620,6 +2620,7 @@ void ValidateDirectCounterMeter::postorder(const IR::MethodCallStatement *mcs) {
 void CollectAddOnMissTable::postorder(const IR::P4Table *t) {
     bool use_add_on_miss = false;
     auto add_on_miss = t->properties->getProperty("add_on_miss");
+    cstring default_actname = "NoAction";
     if (add_on_miss == nullptr) return;
     if (add_on_miss->value->is<IR::ExpressionValue>()) {
         auto expr = add_on_miss->value->to<IR::ExpressionValue>()->expression;
@@ -2650,11 +2651,13 @@ void CollectAddOnMissTable::postorder(const IR::P4Table *t) {
             P4::MethodInstance::resolve(expr->to<IR::MethodCallExpression>(), refMap, typeMap);
         BUG_CHECK(mi->is<P4::ActionCall>(), "%1%: expected action in default_action",
                   default_action);
+        auto ac = mi->to<P4::ActionCall>()->action;
         if (mi->to<P4::ActionCall>()->action->parameters->parameters.size() != 0) {
             ::error(ErrorType::ERR_UNEXPECTED,
                     "%1%: action cannot have action argument when used with add_on_miss",
                     default_action);
         }
+        default_actname = ac->name.name;
     }
     if (use_add_on_miss) {
         for (auto action : t->getActionList()->actionList) {
@@ -2665,7 +2668,8 @@ void CollectAddOnMissTable::postorder(const IR::P4Table *t) {
             cstring userVisibleName = action_decl->externalName();
             userVisibleName = userVisibleName.findlast('.');
             userVisibleName = userVisibleName.trim(".\t\n\r");
-            structure->learner_action_map.emplace(userVisibleName, action_decl->name.name);
+            structure->learner_action_map.emplace(std::make_pair(userVisibleName, default_actname),
+                                                  action_decl->name.name);
             structure->learner_action_table.emplace(action_decl->externalName(), t);
         }
     }

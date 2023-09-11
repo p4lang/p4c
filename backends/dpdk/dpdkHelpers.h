@@ -150,6 +150,7 @@ class ConvertStatementToDpdk : public Inspector {
     P4::ReferenceMap *refmap;
     DpdkProgramStructure *structure;
     const IR::P4Parser *parser = nullptr;
+    const IR::Node *parent = nullptr;
     IR::Type_Struct *metadataStruct = nullptr;
 
  private:
@@ -184,6 +185,7 @@ class ConvertStatementToDpdk : public Inspector {
     void process_relation_operation(const IR::Expression *, const IR::Operation_Relation *);
     cstring append_parser_name(const IR::P4Parser *p, cstring);
     void set_parser(const IR::P4Parser *p) { parser = p; }
+    void set_parent(const IR::Node *p) { parent = p; }
     bool handleConstSwitch(const IR::SwitchStatement *a);
 };
 

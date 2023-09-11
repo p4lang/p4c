@@ -29,7 +29,7 @@ struct DpdkProgramStructure {
     // table and action info for learner tables
     ordered_set<cstring> learner_tables;
     ordered_set<cstring> learner_actions;
-    ordered_map<cstring, cstring> learner_action_map;
+    ordered_map<std::pair<cstring, cstring>, cstring> learner_action_map;
     ordered_map<cstring, std::vector<cstring>> learner_action_params;
     ordered_map<cstring, const IR::P4Table *> learner_action_table;
     ordered_map<cstring, enum InternalTableType> table_type_map;
