@@ -1264,7 +1264,10 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             }
             auto action = a->expr->arguments->at(0)->expression;
             auto action_name = action->to<IR::StringLiteral>()->value;
-            action_name = ::get(structure->learner_action_map, action_name);
+            auto act = parent->to<IR::P4Action>();
+            cstring parent_act = act->name.name;
+            action_name =
+                ::get(structure->learner_action_map, std::make_pair(action_name, parent_act));
             auto param = a->expr->arguments->at(1)->expression;
             auto timeout_id = a->expr->arguments->at(2)->expression;
             if (timeout_id->is<IR::Constant>()) {

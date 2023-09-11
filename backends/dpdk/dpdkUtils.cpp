@@ -135,8 +135,9 @@ bool reservedNames(P4::ReferenceMap *refMap, std::vector<cstring> names, cstring
 
 // Update bitwidth of Metadata fields to 32 or 64 bits if it 8-bit aligned.
 int getMetadataFieldWidth(int width) {
-    BUG_CHECK(width <= 64, "Metadata bit-width expected to be within 64-bits");
     if (width % 8 != 0) {
+        BUG_CHECK(width <= 64, "Metadata bit-width expected to be within 64-bits, found %1%",
+                  width);
         if (width < 32)
             return 32;
         else
