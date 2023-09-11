@@ -188,21 +188,27 @@ def main():
         action="append",
         default=[],
     )
+    p4c_default_target = os.environ.get("P4C_DEFAULT_TARGET")
+    if p4c_default_target is None:
+        p4c_default_target = "bmv2"
     parser.add_argument(
         "-b",
         "--target",
         dest="target",
         help="specify target device",
         action="store",
-        default="bmv2",
+        default=p4c_default_target,
     )
+    p4c_default_arch = os.environ.get("P4C_DEFAULT_ARCH")
+    if p4c_default_arch is None:
+        p4c_default_arch = "v1model"
     parser.add_argument(
         "-a",
         "--arch",
         dest="arch",
         help="specify target architecture",
         action="store",
-        default="v1model",
+        default=p4c_default_arch,
     )
     parser.add_argument(
         "-c",
@@ -351,6 +357,9 @@ def main():
         action="store_true",
         default=False,
     )
+    p4c_default_language = os.environ.get("P4C_DEFAULT_LANGUAGE")
+    if p4c_default_language is None:
+        p4c_default_language = "p4-16"
     parser.add_argument(
         "--std",
         "-x",
@@ -362,6 +371,8 @@ def main():
             ### underscore separator
             "p4_14",
             "p4_16",
+            "14",
+            "16",
             "P4₁₄",
             "P4₁₆",
         ],  ### Unicode, for fun
@@ -371,7 +382,7 @@ def main():
             "the parameter to this argument."
         ),
         action="store",
-        default="p4-16",
+        default=p4c_default_language,
     )
     parser.add_argument(
         "--ndebug",
@@ -432,14 +443,6 @@ def main():
     # parse the arguments
     opts = parser.parse_args()
 
-    user_defined_version = os.environ.get("P4C_DEFAULT_VERSION")
-    ### Note: the next line of real code _was_τhe clear and easy-to-understand
-    ###       “if user_defined_version != None:”, but “pycodestyle”
-    ###       complained about that idiom so I rewrote it to something
-    ###       semantically-equivalent but with different syntax.
-    if not (user_defined_version is None):
-        opts.language = user_defined_version
-
     ### Accept multiple ways of specifying which language,
     ###   and ensure that it is a consistent string from now on.
     ###
@@ -462,7 +465,9 @@ def main():
     ###   ... or, probably even better, providing that Python≥3.4
     ###   is an acceptable requirement:
     ###     <https://docs.python.org/3/library/enum.html>
-    if (len(opts.language) > 2) and ("_" == opts.language[2]):
+    if len(opts.language) == 2:
+        opts.language = "p4-" + opts.language
+    elif (len(opts.language) > 2) and ("_" == opts.language[2]):
         opts.language = opts.language[:2] + "-" + opts.language[3:]
 
     ### Support for specifying the P4 version using Unicode: map to what the
@@ -472,18 +477,6 @@ def main():
     ###   “.keys()” is implied [by Python] after “Unicode_to_internal”.
     if opts.language in Unicode_to_internal:
         opts.language = Unicode_to_internal[opts.language]
-
-    user_defined_target = os.environ.get("P4C_DEFAULT_TARGET")
-    ### Re the next line of real code: please see the 4-line comment, above,
-    ###   about “pycodestyle”.
-    if not (user_defined_target is None):
-        opts.target = user_defined_target
-
-    user_defined_arch = os.environ.get("P4C_DEFAULT_ARCH")
-    ### Re the next line of real code: please see the 4-line comment, above,
-    ###   about “pycodestyle”.
-    if not (user_defined_arch is None):
-        opts.arch = user_defined_arch
 
     # deal with early exits
     if opts.show_version:
