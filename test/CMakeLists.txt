@@ -31,6 +31,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/expr_uses_test.cpp
   gtest/format_test.cpp
   gtest/helpers.cpp
+  gtest/hvec_map.cpp
   gtest/indexed_vector.cpp
   gtest/json_test.cpp
   gtest/midend_test.cpp
