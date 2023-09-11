@@ -44,7 +44,7 @@ class TCOptions : public CompilerOptions {
             },
             "Write pipeline template output to outfile");
         registerOption(
-            "-c", "cfile",
+            "-c", "output Directory",
             [this](const char *arg) {
                 cFile = arg;
                 return true;
