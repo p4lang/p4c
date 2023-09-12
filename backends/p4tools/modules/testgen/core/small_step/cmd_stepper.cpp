@@ -318,11 +318,11 @@ bool CmdStepper::preorder(const IR::P4Program * /*program*/) {
         }
     }
 
-    // If this option is active, mandate that all packets conform to a fixed size.
+    // If this option is active, mandate that all packets must be larger than a minimum size.
     auto pktSize = TestgenOptions::get().minPktSize;
     if (pktSize != 0) {
         const auto *fixedSizeEqu =
-            new IR::Equ(ExecutionState::getInputPacketSizeVar(),
+            new IR::Geq(ExecutionState::getInputPacketSizeVar(),
                         IR::getConstant(&PacketVars::PACKET_SIZE_VAR_TYPE, pktSize));
         if (cond == std::nullopt) {
             cond = fixedSizeEqu;
