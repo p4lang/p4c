@@ -1142,6 +1142,17 @@ class ElimHeaderCopy : public Transform {
     const IR::Node *postorder(IR::Member *m) override;
 };
 
+class EliminateHeaderCopy : public PassManager {
+ public:
+    EliminateHeaderCopy(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
+        passes.push_back(new P4::ClearTypeMap(typeMap));
+        passes.push_back(new P4::ResolveReferences(refMap));
+        passes.push_back(new P4::TypeInference(refMap, typeMap, false));
+        passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
+        passes.push_back(new ElimHeaderCopy(typeMap));
+    }
+};
+
 /// This pass checks whether an assignment statement has large operands (>64-bit).
 // If one operand is >64-bit and other is <= 64-bit, the smaller operand should be a header field
 // to maintain the endianness for copy. This pass detects if these conditions are satisfied or not.
