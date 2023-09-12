@@ -79,6 +79,7 @@ def pkt_route(pkt, mac_src, mac_dst):
 
 class UPFTest(P4EbpfTest):
     p4_file_path = "../psa/examples/upf.p4"
+    p4info_reference_file_path = "../psa/examples/upf.p4info.txt"
 
     def setup_pfcp_session(self, seid, teid, ue_ip):
         self.table_add(
