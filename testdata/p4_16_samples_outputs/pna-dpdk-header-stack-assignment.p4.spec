@@ -74,9 +74,48 @@ action NoAction args none {
 }
 
 action encap_one_tunnel_layer_ipv4 args instanceof encap_one_tunnel_layer_ipv4_arg_t {
-	mov h.ipv4_3 h.ipv4_2
-	mov h.ipv4_2 h.ipv4_1
-	mov h.ipv4_1 h.ipv4_0
+	jmpnv LABEL_FALSE_0 h.ipv4_2
+	validate h.ipv4_3
+	jmp LABEL_END_0
+	LABEL_FALSE_0 :	invalidate h.ipv4_3
+	LABEL_END_0 :	mov h.ipv4_3.version_ihl h.ipv4_2.version_ihl
+	mov h.ipv4_3.dscp_ecn h.ipv4_2.dscp_ecn
+	mov h.ipv4_3.length h.ipv4_2.length
+	mov h.ipv4_3.identification h.ipv4_2.identification
+	mov h.ipv4_3.rsvd_df_mf_frag_off h.ipv4_2.rsvd_df_mf_frag_off
+	mov h.ipv4_3.ttl h.ipv4_2.ttl
+	mov h.ipv4_3.protocol h.ipv4_2.protocol
+	mov h.ipv4_3.csum h.ipv4_2.csum
+	mov h.ipv4_3.src_ip h.ipv4_2.src_ip
+	mov h.ipv4_3.dst_ip h.ipv4_2.dst_ip
+	jmpnv LABEL_FALSE_1 h.ipv4_1
+	validate h.ipv4_2
+	jmp LABEL_END_1
+	LABEL_FALSE_1 :	invalidate h.ipv4_2
+	LABEL_END_1 :	mov h.ipv4_2.version_ihl h.ipv4_1.version_ihl
+	mov h.ipv4_2.dscp_ecn h.ipv4_1.dscp_ecn
+	mov h.ipv4_2.length h.ipv4_1.length
+	mov h.ipv4_2.identification h.ipv4_1.identification
+	mov h.ipv4_2.rsvd_df_mf_frag_off h.ipv4_1.rsvd_df_mf_frag_off
+	mov h.ipv4_2.ttl h.ipv4_1.ttl
+	mov h.ipv4_2.protocol h.ipv4_1.protocol
+	mov h.ipv4_2.csum h.ipv4_1.csum
+	mov h.ipv4_2.src_ip h.ipv4_1.src_ip
+	mov h.ipv4_2.dst_ip h.ipv4_1.dst_ip
+	jmpnv LABEL_FALSE_2 h.ipv4_0
+	validate h.ipv4_1
+	jmp LABEL_END_2
+	LABEL_FALSE_2 :	invalidate h.ipv4_1
+	LABEL_END_2 :	mov h.ipv4_1.version_ihl h.ipv4_0.version_ihl
+	mov h.ipv4_1.dscp_ecn h.ipv4_0.dscp_ecn
+	mov h.ipv4_1.length h.ipv4_0.length
+	mov h.ipv4_1.identification h.ipv4_0.identification
+	mov h.ipv4_1.rsvd_df_mf_frag_off h.ipv4_0.rsvd_df_mf_frag_off
+	mov h.ipv4_1.ttl h.ipv4_0.ttl
+	mov h.ipv4_1.protocol h.ipv4_0.protocol
+	mov h.ipv4_1.csum h.ipv4_0.csum
+	mov h.ipv4_1.src_ip h.ipv4_0.src_ip
+	mov h.ipv4_1.dst_ip h.ipv4_0.dst_ip
 	invalidate h.ipv4_0
 	mov h.mac.da t.mac_da
 	mov h.mac.sa t.mac_sa
