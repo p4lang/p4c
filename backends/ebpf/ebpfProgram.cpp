@@ -90,9 +90,6 @@ void EBPFProgram::emitC(CodeBuilder *builder, cstring header) {
 
     emitLocalVariables(builder);
     builder->newline();
-    builder->emitIndent();
-    builder->appendFormat("goto %s;", IR::ParserState::start.c_str());
-    builder->newline();
 
     parser->emit(builder);
     emitPipeline(builder);
