@@ -89,7 +89,7 @@ bool CmdStepper::preorder(const IR::AssignmentStatement *assign) {
         TESTGEN_UNIMPLEMENTED("Unsupported assign type %1% node: %2%", leftType,
                               leftType->node_type_name());
     }
-
+    state.add(*new TraceEvents::AssignmentStatement(*assign));
     state.popBody();
     result->emplace_back(state);
     return false;
@@ -279,6 +279,7 @@ bool CmdStepper::preorder(const IR::MethodCallStatement *methodCallStatement) {
     }
     state.pushCurrentContinuation(type);
     state.replaceBody(Continuation::Body({Continuation::Return(methodCallStatement->methodCall)}));
+    state.add(*new TraceEvents::MethodCall(methodCallStatement->methodCall));
     result->emplace_back(state);
     return false;
 }

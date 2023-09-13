@@ -51,6 +51,21 @@ void Expression::print(std::ostream &os) const {
 }
 
 /* =============================================================================================
+ *   MethodCall
+ * ============================================================================================= */
+
+MethodCall::MethodCall(const IR::MethodCallExpression *call) : call(call) {}
+
+void MethodCall::print(std::ostream &os) const {
+    const auto &srcInfo = call->getSourceInfo();
+    if (srcInfo.isValid()) {
+        os << "[MethodCall]: " << call;
+    } else {
+        os << "[P4Testgen MethodCall]: " << call;
+    }
+}
+
+/* =============================================================================================
  *   IfStatementCondition
  * ============================================================================================= */
 
@@ -91,13 +106,59 @@ void IfStatementCondition::print(std::ostream &os) const {
     CHECK_NULL(preEvalCond);
     const auto &srcInfo = preEvalCond->getSourceInfo();
     if (srcInfo.isValid()) {
-        os << "[If Statement]: " << preEvalCond->getSourceInfo().toBriefSourceFragment();
+        os << "[If Statement]: " << srcInfo.toBriefSourceFragment();
     } else {
-        os << "[Internal If Statement]: " << preEvalCond;
+        os << "[P4Testgen If Statement]: " << preEvalCond;
     }
-    os << " -> " << preEvalCond;
+    os << " Condition: " << preEvalCond;
     const auto *boolResult = postEvalCond->checkedTo<IR::BoolLiteral>()->value ? "true" : "false";
-    os << " -> " << boolResult;
+    os << " Result: " << boolResult;
+}
+
+/* =============================================================================================
+ *   AssignmentStatement
+ * ============================================================================================= */
+
+AssignmentStatement::AssignmentStatement(const IR::AssignmentStatement &stmt) : stmt(stmt) {}
+
+const AssignmentStatement *AssignmentStatement::subst(const SymbolicEnv &env) const {
+    const auto *right = env.subst(stmt.right);
+    auto *traceEvent =
+        new AssignmentStatement(*new IR::AssignmentStatement(stmt.srcInfo, stmt.left, right));
+    return traceEvent;
+}
+
+const AssignmentStatement *AssignmentStatement::apply(Transform &visitor) const {
+    const auto *right = stmt.right->apply(visitor);
+    auto *traceEvent =
+        new AssignmentStatement(*new IR::AssignmentStatement(stmt.srcInfo, stmt.left, right));
+    return traceEvent;
+}
+
+const AssignmentStatement *AssignmentStatement::evaluate(const Model &model,
+                                                         bool doComplete) const {
+    const IR::Literal *right = nullptr;
+    if (Taint::hasTaint(stmt.right)) {
+        right = &Taint::TAINTED_STRING_LITERAL;
+    } else {
+        right = model.evaluate(stmt.right, doComplete);
+    }
+
+    auto *traceEvent =
+        new AssignmentStatement(*new IR::AssignmentStatement(stmt.srcInfo, stmt.left, right));
+    return traceEvent;
+}
+
+void AssignmentStatement::print(std::ostream &os) const {
+    const auto &srcInfo = stmt.getSourceInfo();
+    if (srcInfo.isValid()) {
+        auto fragment = srcInfo.toSourceFragment();
+        fragment = fragment.exceptLast(2);
+        fragment = fragment.trim();
+        os << "[AssignmentStatement]: " << fragment << "| Computed: " << stmt;
+    } else {
+        os << "[P4Testgen AssignmentStatement]: " << stmt;
+    }
 }
 
 /* =============================================================================================

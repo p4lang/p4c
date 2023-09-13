@@ -61,6 +61,27 @@ class Expression : public Generic {
 };
 
 /* =============================================================================================
+ *   MethodCallExpression
+ * ============================================================================================= */
+
+/// Label dedicated to method call expression.
+class MethodCall : public TraceEvent {
+ private:
+    const IR::MethodCallExpression *call;
+
+ public:
+    explicit MethodCall(const IR::MethodCallExpression *call);
+    ~MethodCall() override = default;
+    MethodCall(const MethodCall &) = default;
+    MethodCall(MethodCall &&) = default;
+    MethodCall &operator=(const MethodCall &) = default;
+    MethodCall &operator=(MethodCall &&) = default;
+
+ protected:
+    void print(std::ostream &os) const override;
+};
+
+/* =============================================================================================
  *   IfStatementCondition
  * ============================================================================================= */
 
@@ -79,6 +100,27 @@ class IfStatementCondition : public TraceEvent {
                                                        bool doComplete) const override;
 
     explicit IfStatementCondition(const IR::Expression *cond);
+
+ protected:
+    void print(std::ostream &os) const override;
+};
+
+/* =============================================================================================
+ *   AssignmentStatement
+ * ============================================================================================= */
+
+/// Represents an assignment statement.
+class AssignmentStatement : public TraceEvent {
+ private:
+    const IR::AssignmentStatement &stmt;
+
+ public:
+    [[nodiscard]] const AssignmentStatement *subst(const SymbolicEnv &env) const override;
+    const AssignmentStatement *apply(Transform &visitor) const override;
+    [[nodiscard]] const AssignmentStatement *evaluate(const Model &model,
+                                                      bool doComplete) const override;
+
+    explicit AssignmentStatement(const IR::AssignmentStatement &stmt);
 
  protected:
     void print(std::ostream &os) const override;
