@@ -4,11 +4,11 @@
 #include <utility>
 #include <vector>
 
-#include "backends/p4tools/common/core/solver.h"
 #include "ir/id.h"
 #include "ir/ir.h"
 #include "ir/vector.h"
 #include "lib/cstring.h"
+#include "lib/solver.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/abstract_stepper.h"

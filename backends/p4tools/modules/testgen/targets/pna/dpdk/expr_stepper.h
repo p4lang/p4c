@@ -3,10 +3,10 @@
 
 #include <string>
 
-#include "backends/p4tools/common/core/solver.h"
 #include "ir/id.h"
 #include "ir/ir.h"
 #include "ir/vector.h"
+#include "lib/solver.h"
 
 #include "backends/p4tools/modules/testgen/core/externs.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"

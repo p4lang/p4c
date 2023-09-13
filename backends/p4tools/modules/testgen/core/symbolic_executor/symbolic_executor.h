@@ -5,7 +5,7 @@
 #include <iosfwd>
 #include <vector>
 
-#include "backends/p4tools/common/core/solver.h"
+#include "lib/solver.h"
 #include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"

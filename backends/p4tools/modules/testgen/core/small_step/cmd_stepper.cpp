@@ -11,7 +11,6 @@
 #include <boost/multiprecision/cpp_int.hpp>
 
 #include "backends/p4tools/common/compiler/convert_hs_index.h"
-#include "backends/p4tools/common/core/solver.h"
 #include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/taint.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
@@ -26,6 +25,7 @@
 #include "lib/exceptions.h"
 #include "lib/log.h"
 #include "lib/null.h"
+#include "lib/solver.h"
 #include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"

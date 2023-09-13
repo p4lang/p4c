@@ -133,7 +133,7 @@ TEST_F(Z3SolverTest, Assertion2Model) {
     Z3Solver solver;
     Z3SolverAccessor solverAccessor(solver);
 
-    std::vector<const P4Tools::Constraint *> asserts;
+    std::vector<const Constraint *> asserts;
     asserts.push_back(opLss);
 
     // getting right variable
