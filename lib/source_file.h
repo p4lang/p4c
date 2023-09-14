@@ -176,7 +176,7 @@ class SourceInfo final {
 
     void dbprint(std::ostream &out) const { out << this->toDebugString(); }
 
-    cstring toSourceFragment() const;
+    cstring toSourceFragment(bool useMarker = true) const;
     cstring toBriefSourceFragment() const;
     cstring toPositionString() const;
     cstring toSourcePositionData(unsigned *outLineNumber, unsigned *outColumnNumber) const;
@@ -294,8 +294,8 @@ class InputSources final {
        string describing a position in the sources, e.g.:
        int<32> variable;
                ^^^^^^^^ */
-    cstring getSourceFragment(const SourcePosition &position) const;
-    cstring getSourceFragment(const SourceInfo &position) const;
+    cstring getSourceFragment(const SourcePosition &position, bool useMarker) const;
+    cstring getSourceFragment(const SourceInfo &position, bool useMarker) const;
     cstring getBriefSourceFragment(const SourceInfo &position) const;
 
     cstring toDebugString() const;

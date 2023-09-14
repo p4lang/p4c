@@ -179,9 +179,9 @@ SourcePosition InputSources::getCurrentPosition() const {
     return SourcePosition(line, column);
 }
 
-cstring InputSources::getSourceFragment(const SourcePosition &position) const {
+cstring InputSources::getSourceFragment(const SourcePosition &position, bool useMarker) const {
     SourceInfo info(this, position, position);
-    return getSourceFragment(info);
+    return getSourceFragment(info, useMarker);
 }
 
 cstring carets(cstring source, unsigned start, unsigned end) {
@@ -202,12 +202,12 @@ cstring carets(cstring source, unsigned start, unsigned end) {
     return builder.str();
 }
 
-cstring InputSources::getSourceFragment(const SourceInfo &position) const {
+cstring InputSources::getSourceFragment(const SourceInfo &position, bool useMarker) const {
     if (!position.isValid()) return "";
 
     // If the position spans multiple lines, truncate to just the first line
     if (position.getEnd().getLineNumber() > position.getStart().getLineNumber())
-        return getSourceFragment(position.getStart());
+        return getSourceFragment(position.getStart(), useMarker);
 
     cstring result = getLine(position.getStart().getLineNumber());
     // Normally result has a newline, but if not
@@ -216,7 +216,11 @@ cstring InputSources::getSourceFragment(const SourceInfo &position) const {
     if (result.find('\n') == nullptr) toadd = cstring::newline;
     cstring marker =
         carets(result, position.getStart().getColumnNumber(), position.getEnd().getColumnNumber());
-    return result + toadd + marker + cstring::newline;
+    if (useMarker) {
+        return result + toadd + marker + cstring::newline;
+    } else {
+        return result + toadd + cstring::newline;
+    }
 }
 
 cstring InputSources::getBriefSourceFragment(const SourceInfo &position) const {
@@ -259,9 +263,9 @@ cstring InputSources::toDebugString() const {
 
 ///////////////////////////////////////////////////
 
-cstring SourceInfo::toSourceFragment() const {
+cstring SourceInfo::toSourceFragment(bool useMarker) const {
     if (!isValid()) return "";
-    return sources->getSourceFragment(*this);
+    return sources->getSourceFragment(*this, useMarker);
 }
 
 cstring SourceInfo::toBriefSourceFragment() const {

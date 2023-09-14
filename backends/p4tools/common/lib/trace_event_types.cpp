@@ -168,8 +168,7 @@ const AssignmentStatement *AssignmentStatement::evaluate(const Model &model,
 void AssignmentStatement::print(std::ostream &os) const {
     const auto &srcInfo = stmt.getSourceInfo();
     if (srcInfo.isValid()) {
-        auto fragment = srcInfo.toSourceFragment();
-        fragment = fragment.exceptLast(2);
+        auto fragment = srcInfo.toSourceFragment(false);
         fragment = fragment.trim();
         os << "[AssignmentStatement]: " << fragment << "| Computed: " << stmt;
     } else {
