@@ -83,10 +83,7 @@ class EBPFDeparser : public EBPFControl {
     // require to have an original packet.
     virtual void emitPreDeparser(CodeBuilder *builder) { (void)builder; }
 
-    virtual void emitDeparserExternCalls(CodeBuilder *builder) {
-        controlBlock->container->body->apply(*codeGen);
-        builder->newline();
-    }
+    virtual void emitDeparserExternCalls(CodeBuilder *builder) { (void)builder; }
 
     void emitBufferAdjusts(CodeBuilder *builder) const;
 };
