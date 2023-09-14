@@ -69,10 +69,15 @@ MethodCall::MethodCall(const IR::MethodCallExpression *call) : call(call) {}
 
 void MethodCall::print(std::ostream &os) const {
     const auto &srcInfo = call->getSourceInfo();
+    // Convert the method call to a string and strip any new lines.
+    std::stringstream callStream;
+    call->dbprint(callStream);
+    auto callString = callStream.str();
+    callString.erase(std::remove(callString.begin(), callString.end(), '\n'), callString.cend());
     if (srcInfo.isValid()) {
-        os << "[MethodCall]: " << call;
+        os << "[MethodCall]: " << callString;
     } else {
-        os << "[P4Testgen MethodCall]: " << call;
+        os << "[P4Testgen MethodCall]: " << callString;
     }
 }
 
