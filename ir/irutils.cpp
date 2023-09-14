@@ -40,11 +40,11 @@ const Type_Bits *getBitTypeToFit(int value) {
  *  Expressions
  * ============================================================================================= */
 
-const Constant *getConstant(const Type *type, big_int v) {
+const Constant *getConstant(const Type *type, big_int v, const Util::SourceInfo &srcInfo) {
     // Only cache bits with width lower than 16 bit to restrict the size of the cache.
     const auto *tb = type->to<Type_Bits>();
     if (type->width_bits() > 16 || tb == nullptr) {
-        return new Constant(type, v);
+        return new Constant(srcInfo, type, v);
     }
     // Constants are interned. Keys in the intern map are pairs of types and values.
     using key_t = std::tuple<int, std::type_index, bool, big_int>;
@@ -52,25 +52,35 @@ const Constant *getConstant(const Type *type, big_int v) {
 
     auto *&result = CONSTANTS[{tb->width_bits(), typeid(*type), tb->isSigned, v}];
     if (result == nullptr) {
-        result = new Constant(tb, v);
+        result = new Constant(srcInfo, tb, v);
     }
 
     return result;
 }
 
-const BoolLiteral *getBoolLiteral(bool value) {
+const IR::Constant *getMaxValueConstant(const Type *t, const Util::SourceInfo &srcInfo) {
+    if (t->is<Type_Bits>()) {
+        return IR::getConstant(t, IR::getMaxBvVal(t), srcInfo);
+    }
+    if (t->is<Type_Boolean>()) {
+        return IR::getConstant(IR::getBitType(1), 1, srcInfo);
+    }
+    P4C_UNIMPLEMENTED("Maximum value calculation for type %1% not implemented.", t);
+}
+
+const BoolLiteral *getBoolLiteral(bool value, const Util::SourceInfo &srcInfo) {
     // Boolean literals are interned.
     static std::map<bool, const BoolLiteral *> LITERALS;
 
     auto *&result = LITERALS[value];
     if (result == nullptr) {
-        result = new BoolLiteral(Type::Boolean::get(), value);
+        result = new BoolLiteral(srcInfo, Type::Boolean::get(), value);
     }
     return result;
 }
 
 const IR::Constant *convertBoolLiteral(const IR::BoolLiteral *lit) {
-    return IR::getConstant(IR::getBitType(1), lit->value ? 1 : 0);
+    return IR::getConstant(IR::getBitType(1), lit->value ? 1 : 0, lit->getSourceInfo());
 }
 
 const IR::Expression *getDefaultValue(const IR::Type *type, const Util::SourceInfo &srcInfo,
@@ -162,16 +172,6 @@ const IR::Expression *getDefaultValue(const IR::Type *type, const Util::SourceIn
     ::error(ErrorType::ERR_INVALID, "%1%: No default value for type %2% (%3%)", srcInfo, type,
             type->node_type_name());
     return nullptr;
-}
-
-const IR::Constant *getMaxValueConstant(const Type *t) {
-    if (t->is<Type_Bits>()) {
-        return IR::getConstant(t, IR::getMaxBvVal(t));
-    }
-    if (t->is<Type_Boolean>()) {
-        return IR::getConstant(IR::getBitType(1), 1);
-    }
-    P4C_UNIMPLEMENTED("Maximum value calculation for type %1% not implemented.", t);
 }
 
 std::vector<const Expression *> flattenStructExpression(const StructExpression *structExpr) {

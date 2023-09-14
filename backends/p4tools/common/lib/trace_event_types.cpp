@@ -25,6 +25,17 @@ Generic::Generic(cstring label) : label(label) {}
 void Generic::print(std::ostream &os) const { os << "[" << label << "]"; }
 
 /* =============================================================================================
+ *   GenericDescription
+ * ============================================================================================= */
+
+GenericDescription::GenericDescription(cstring label, cstring description)
+    : Generic(label), description(description) {}
+
+void GenericDescription::print(std::ostream &os) const {
+    Generic::print(os);
+    os << ": " << description;
+}
+/* =============================================================================================
  *   Expression
  * ============================================================================================= */
 
@@ -47,7 +58,7 @@ const Expression *Expression::evaluate(const Model &model, bool doComplete) cons
 
 void Expression::print(std::ostream &os) const {
     Generic::print(os);
-    os << " = " << formatHexExpr(value, true);
+    os << ": " << formatHexExpr(value, true);
 }
 
 /* =============================================================================================

@@ -19,11 +19,12 @@ namespace P4Tools::TraceEvents {
  *   Generic
  * ============================================================================================= */
 
-/// A generic event that only takes in a string.
+/// A generic event that only takes in a string as label.
 class Generic : public TraceEvent {
  protected:
     // A label that specifies the type of this generic trace event.
     cstring label;
+
     void print(std::ostream &os) const override;
 
  public:
@@ -33,6 +34,22 @@ class Generic : public TraceEvent {
     Generic(Generic &&) = default;
     Generic &operator=(const Generic &) = default;
     Generic &operator=(Generic &&) = default;
+};
+
+/* =============================================================================================
+ *   GenericDescription
+ * ============================================================================================= */
+
+/// A generic event that takes in two strings, the first is the label, the second a description of
+/// the label.
+class GenericDescription : public Generic {
+ protected:
+    cstring description;
+
+    void print(std::ostream &os) const override;
+
+ public:
+    explicit GenericDescription(cstring description, cstring label);
 };
 
 /* =============================================================================================

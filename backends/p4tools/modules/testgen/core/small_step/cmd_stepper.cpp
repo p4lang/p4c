@@ -507,7 +507,8 @@ IR::SwitchStatement *CmdStepper::replaceSwitchLabels(const IR::SwitchStatement *
         // Do not replace default expression labels.
         if (!newSwitchCase->label->is<IR::DefaultExpression>()) {
             newSwitchCase->label =
-                IR::getConstant(actionVar->type, actionsIds[switchCase->label->toString()]);
+                IR::getConstant(actionVar->type, actionsIds[switchCase->label->toString()],
+                                switchCase->label->getSourceInfo());
         }
         newCases.push_back(newSwitchCase);
     }
@@ -548,6 +549,7 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
                 cmds.emplace_back(switchCase->statement);
             }
         }
+        nextState.add(*new TraceEvents::Generic("TaintedSwitchCase"));
         cmds.emplace_back(Continuation::PropertyUpdate("inUndefinedState", currentTaint));
     } else {
         // Otherwise, we pick the switch statement case in a normal fashion.
@@ -567,6 +569,8 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
             }
             // If any of the values in the match list hits, execute the switch case block.
             if (hasMatched) {
+                nextState.add(*new TraceEvents::GenericDescription(
+                    "SwitchCase", switchCase->label->getSourceInfo().toBriefSourceFragment()));
                 cmds.emplace_back(switchCase->statement);
                 // If the statement is a block, we do not fall through and terminate execution.
                 if (switchCase->statement->is<IR::BlockStatement>()) {
@@ -575,6 +579,7 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
             }
             // The default label must be last. Always break here.
             if (switchCase->label->is<IR::DefaultExpression>()) {
+                nextState.add(*new TraceEvents::GenericDescription("SwitchCase", "default"));
                 cmds.emplace_back(switchCase->statement);
                 break;
             }
