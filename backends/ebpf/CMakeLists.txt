@@ -177,6 +177,10 @@ set (XFAIL_TESTS_TEST
 set (EBPF_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*_ebpf.p4"
   )
+# Kernel tests for XDP won't work on other targets (e.g. missing bpf_xdp_* helpers).
+set (EBPF_KERNEL_TEST_SUITES
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*_ebpf-kernel.p4"
+  )
 
 # determine the kernel version
 execute_process(COMMAND uname -r
@@ -232,6 +236,7 @@ endif()
 # Only add the kernel tests if the two requirements are met
 if (SUPPORTS_KERNEL)
   p4c_add_tests("ebpf-kernel" ${EBPF_DRIVER_KERNEL} ${EBPF_TEST_SUITES} "${XFAIL_TESTS_KERNEL}")
+  p4c_add_tests("ebpf-kernel" ${EBPF_DRIVER_KERNEL} ${EBPF_KERNEL_TEST_SUITES} "${XFAIL_TESTS_KERNEL}")
   # These are special tests with args that are not included
   # in the default ebpf tests
   p4c_add_test_with_args("ebpf-kernel" ${EBPF_DRIVER_KERNEL} FALSE "testdata/p4_16_samples/ebpf_conntrack_extern.p4" "testdata/p4_16_samples/ebpf_conntrack_extern.p4" "--extern-file ${P4C_SOURCE_DIR}/testdata/extern_modules/extern-conntrack-ebpf.c" "")

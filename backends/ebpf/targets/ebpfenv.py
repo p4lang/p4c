@@ -92,7 +92,7 @@ class Bridge:
     def ns_proc_close(self, proc: testutils.subprocess.Popen, **extra_args) -> int:
         """Close and actually run the process in the namespace. Returns the
         exit code."""
-        testutils.log.info("Executing command.")
+        testutils.log.info("Executing command: "+str(proc))
         result = testutils.run_process(proc, timeout=testutils.TIMEOUT, **extra_args)
         if result.returncode != testutils.SUCCESS:
             testutils.log.error(

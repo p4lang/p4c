@@ -78,7 +78,11 @@ void EBPFProgram::emitC(CodeBuilder *builder, cstring header) {
     builder->append("REGISTER_END()\n");
     builder->newline();
     builder->emitIndent();
-    builder->target->emitCodeSection(builder, "prog");
+    // Use different section name for XDP - this is used by the runtime test framework.
+    if (model.arch == ModelArchitecture::XdpSwitch)
+        builder->target->emitCodeSection(builder, "xdp");
+    else
+        builder->target->emitCodeSection(builder, "prog");
     builder->emitIndent();
     builder->target->emitMain(builder, functionName, model.CPacketName.str());
     builder->blockStart();
