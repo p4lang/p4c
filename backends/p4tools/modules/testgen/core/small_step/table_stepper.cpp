@@ -64,21 +64,18 @@ const IR::StateVariable &TableStepper::getTableStateVariable(const IR::Type *typ
 
 const IR::StateVariable &TableStepper::getTableActionVar(const IR::P4Table *table) {
     auto numActions = table->getActionList()->size();
-    const auto *type = IR::getBitTypeToFit(numActions);
-    return getTableStateVariable(type, table, "*action");
+    size_t max = 255;
+    BUG_CHECK(numActions < max, "Number of actions in the table (%1%) exceeds the maximum of %2%.",
+              numActions, max);
+    return getTableStateVariable(IR::getBitType(8), table, "*action");
+}
+
+const IR::StateVariable &TableStepper::getTableResultVar(const IR::P4Table *table) {
+    return getTableStateVariable(IR::Type::Boolean::get(), table, "*result");
 }
 
 const IR::StateVariable &TableStepper::getTableHitVar(const IR::P4Table *table) {
     return getTableStateVariable(IR::Type::Boolean::get(), table, "*hit");
-}
-
-const IR::StateVariable &TableStepper::getTableKeyReadVar(const IR::P4Table *table, int keyIdx) {
-    const auto *key = table->getKey()->keyElements.at(keyIdx);
-    return getTableStateVariable(key->expression->type, table, "*keyRead", keyIdx);
-}
-
-const IR::StateVariable &TableStepper::getTableReachedVar(const IR::P4Table *table) {
-    return getTableStateVariable(IR::Type::Boolean::get(), table, "*reached");
 }
 
 const IR::Expression *TableStepper::computeTargetMatchType(
@@ -149,31 +146,10 @@ const IR::Expression *TableStepper::computeHit(TableMatchMap *matches) {
     return hitCondition;
 }
 
-void TableStepper::setTableAction(ExecutionState &nextState,
-                                  const IR::MethodCallExpression *actionCall) {
-    // Figure out the index of the selected action within the table's action list.
-    // TODO: Simplify this. We really only need to work with indexes and names for the
-    // respective table.
-    const auto &actionList = table->getActionList()->actionList;
-    size_t actionIdx = 0;
-    for (; actionIdx < actionList.size(); ++actionIdx) {
-        // Expect the expression within the ActionListElement to be a MethodCallExpression.
-        const auto *expr = actionList.at(actionIdx)->expression;
-        const auto *curCall = expr->to<IR::MethodCallExpression>();
-        BUG_CHECK(curCall, "Action at index %1% for table %2% is not a MethodCallExpression: %3%",
-                  actionIdx, table, expr);
-
-        // Stop looping if the current action matches the selected action.
-        if (curCall->method->equiv(*actionCall->method)) {
-            break;
-        }
-    }
-
-    BUG_CHECK(actionIdx < actionList.size(), "%1%: not a valid action for table %2%", actionCall,
-              table);
-    // Store the selected action.
-    const auto &tableActionVar = getTableActionVar(table);
-    nextState.set(tableActionVar, IR::getConstant(tableActionVar.type, actionIdx));
+const IR::StringLiteral *TableStepper::getTableActionString(
+    const IR::MethodCallExpression *actionCall) {
+    cstring actionName = actionCall->method->toString();
+    return new IR::StringLiteral(actionName);
 }
 
 const IR::Expression *TableStepper::evalTableConstEntries() {
@@ -208,9 +184,6 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
         const auto *actionType = stepper->state.getP4Action(tableAction);
         auto &nextState = stepper->state.clone();
         nextState.markVisited(entry);
-        // We need to set the table action in the state for eventual switch action_run hits.
-        // We also will need it for control plane table entries.
-        setTableAction(nextState, tableAction);
         // Compute the table key for a constant entry
         const auto *hitCondition = TableUtils::computeEntryMatch(*table, *entry, *key);
 
@@ -218,7 +191,8 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
         std::vector<Continuation::Command> replacements;
         replacements.emplace_back(new IR::MethodCallStatement(Util::SourceInfo(), tableAction));
         nextState.set(getTableHitVar(table), IR::getBoolLiteral(true));
-        nextState.set(getTableReachedVar(table), IR::getBoolLiteral(true));
+        nextState.set(getTableActionVar(table), getTableActionString(tableAction));
+
         // Some path selection strategies depend on looking ahead and collecting potential
         // nodes. If that is the case, apply the CoverableNodesScanner visitor.
         P4::Coverage::CoverageSet coveredNodes;
@@ -299,10 +273,6 @@ void TableStepper::setTableDefaultEntries(
         auto *synthesizedAction = tableAction->clone();
         synthesizedAction->arguments = arguments;
 
-        // We need to set the table action in the state for eventual switch action_run hits.
-        // We also will need it for control plane table entries.
-        setTableAction(nextState, tableAction);
-
         // Finally, add all the new rules to the execution stepper->state.
         auto *tableConfig = new TableConfig(table, {});
         // Add the action selector to the table. This signifies a slightly different implementation.
@@ -321,7 +291,7 @@ void TableStepper::setTableDefaultEntries(
             collector.updateNodeCoverage(actionType, coveredNodes);
         }
         nextState.set(getTableHitVar(table), IR::getBoolLiteral(false));
-        nextState.set(getTableReachedVar(table), IR::getBoolLiteral(true));
+        nextState.set(getTableActionVar(table), getTableActionString(tableAction));
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
         tableStream << "| Overriding default action: " << actionName;
@@ -374,10 +344,6 @@ void TableStepper::evalTableControlEntries(
         auto *synthesizedAction = tableAction->clone();
         synthesizedAction->arguments = arguments;
 
-        // We need to set the table action in the state for eventual switch action_run hits.
-        // We also will need it for control plane table entries.
-        setTableAction(nextState, tableAction);
-
         // Finally, add all the new rules to the execution stepper->state.
         auto tableRule =
             TableRule(matches, TestSpec::LOW_PRIORITY, ctrlPlaneActionCall, TestSpec::TTL);
@@ -397,7 +363,8 @@ void TableStepper::evalTableControlEntries(
         }
 
         nextState.set(getTableHitVar(table), IR::getBoolLiteral(true));
-        nextState.set(getTableReachedVar(table), IR::getBoolLiteral(true));
+        nextState.set(getTableActionVar(table), getTableActionString(tableAction));
+
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
         bool isFirstKey = true;
@@ -534,10 +501,8 @@ void TableStepper::addDefaultAction(std::optional<const IR::Expression *> tableM
     const auto *tableAction = defaultAction->checkedTo<IR::MethodCallExpression>();
     const auto *actionType = stepper->state.getP4Action(tableAction);
     auto &nextState = stepper->state.clone();
-    // We need to set the table action in the state for eventual switch action_run hits.
-    // We also will need it for control plane table entries.
-    setTableAction(nextState, tableAction);
-    const auto *actionPath = tableAction->method->checkedTo<IR::PathExpression>();
+    const auto *actionPath = tableAction->method->to<IR::PathExpression>();
+    BUG_CHECK(actionPath, "Unknown formation of action '%1%' in table %2%", tableAction, table);
 
     std::vector<Continuation::Command> replacements;
     std::stringstream tableStream;
@@ -553,7 +518,8 @@ void TableStepper::addDefaultAction(std::optional<const IR::Expression *> tableM
         collector.updateNodeCoverage(actionType, coveredNodes);
     }
     nextState.set(getTableHitVar(table), IR::getBoolLiteral(false));
-    nextState.set(getTableReachedVar(table), IR::getBoolLiteral(true));
+    nextState.set(getTableActionVar(table), getTableActionString(tableAction));
+
     nextState.replaceTopBody(&replacements);
     stepper->result->emplace_back(tableMissCondition, stepper->state, nextState, coveredNodes);
 }
@@ -608,6 +574,10 @@ bool TableStepper::eval() {
 TableStepper::TableStepper(ExprStepper *stepper, const IR::P4Table *table)
     : stepper(stepper), table(table) {
     properties.tableName = table->controlPlaneName();
+    for (size_t index = 0; index < table->getActionList()->size(); index++) {
+        const auto *action = table->getActionList()->actionList.at(index);
+        properties.actionIdMap.emplace(action->controlPlaneName(), index);
+    }
 }
 
 }  // namespace P4Tools::P4Testgen

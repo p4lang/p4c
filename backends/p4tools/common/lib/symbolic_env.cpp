@@ -87,11 +87,14 @@ bool SymbolicEnv::isSymbolicValue(const IR::Node *node) {
 
     // Concrete constants and symbolic constants form the basis of symbolic values.
     //
-    // Constants and BoolLiterals are concrete constants.
+    // Constants, StringLiterals, and BoolLiterals are concrete constants.
     if (expr->is<IR::Constant>()) {
         return true;
     }
     if (expr->is<IR::BoolLiteral>()) {
+        return true;
+    }
+    if (expr->is<IR::StringLiteral>()) {
         return true;
     }
     // Tainted expressions are symbolic values.
