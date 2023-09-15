@@ -23,7 +23,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 #include "lib/alloc_trace.h"
-#include "lib/ordered_map.h"
+#include "lib/hvec_map.h"
 #include "lib/ordered_set.h"
 
 namespace P4 {
@@ -93,7 +93,7 @@ class BaseLocation : public StorageLocation {
 /// Base class for location sets that contain fields
 class WithFieldsLocation : public StorageLocation {
  protected:
-    ordered_map<cstring, const StorageLocation *> fieldLocations;
+    hvec_map<cstring, const StorageLocation *> fieldLocations;
     friend class StorageFactory;
     WithFieldsLocation(const IR::Type *type, cstring name) : StorageLocation(type, name) {}
 
@@ -105,7 +105,7 @@ class WithFieldsLocation : public StorageLocation {
     void replaceField(cstring field, StorageLocation *replacement) {
         fieldLocations[field] = replacement;
     }
-    IterValues<ordered_map<cstring, const StorageLocation *>::const_iterator> fields() const {
+    IterValues<hvec_map<cstring, const StorageLocation *>::const_iterator> fields() const {
         return Values(fieldLocations);
     }
     void dbprint(std::ostream &out) const override {
@@ -232,7 +232,7 @@ class LocationSet : public IHasDbPrint {
 /// Maps a declaration to its associated storage.
 class StorageMap : public IHasDbPrint {
     /// Storage location for each declaration.
-    ordered_map<const IR::IDeclaration *, StorageLocation *> storage;
+    hvec_map<const IR::IDeclaration *, StorageLocation *> storage;
     StorageFactory factory;
 
  public:
@@ -357,7 +357,7 @@ class ProgramPoints : public IHasDbPrint {
 class Definitions : public IHasDbPrint {
     /// Set of program points that have written last to each location
     /// (conservative approximation).
-    ordered_map<const BaseLocation *, const ProgramPoints *> definitions;
+    hvec_map<const BaseLocation *, const ProgramPoints *> definitions;
     /// If true the current program point is actually unreachable.
     bool unreachable = false;
 
@@ -413,7 +413,7 @@ class AllDefinitions : public IHasDbPrint {
     /// However, for ProgramPoints representing P4Control, P4Action,
     /// P4Table, P4Function -- the definitions are BEFORE the
     /// ProgramPoint.
-    std::unordered_map<ProgramPoint, Definitions *> atPoint;
+    hvec_map<ProgramPoint, Definitions *> atPoint;
 
  public:
     StorageMap *storageMap;
@@ -469,7 +469,7 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     /// if true we are processing an expression on the lhs of an assignment
     bool lhs;
     /// For each expression the location set it writes
-    ordered_map<const IR::Expression *, const LocationSet *> writes;
+    hvec_map<const IR::Expression *, const LocationSet *> writes;
     bool virtualMethod;  /// True if we are analyzing a virtual method
     AllocTrace memuse;
     alloc_trace_cb_t nested_trace;

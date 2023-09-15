@@ -25,6 +25,7 @@ set (LIBP4CTOOLKIT_SRCS
     gc.cpp
     big_int_util.cpp
     hash.cpp
+    hashvec.cpp
     hex.cpp
     indent.cpp
     json.cpp
@@ -59,7 +60,9 @@ set (LIBP4CTOOLKIT_HDRS
     gc.h
     big_int_util.h
     hash.h
+    hashvec.h
     hex.h
+    hvec_map.h
     indent.h
     json.h
     log.h
