@@ -96,6 +96,7 @@ class Target {
                           cstring argName) const = 0;
     virtual cstring dataOffset(cstring base) const = 0;
     virtual cstring dataEnd(cstring base) const = 0;
+    virtual cstring dataLength(cstring base) const = 0;
     virtual cstring forwardReturnCode() const = 0;
     virtual cstring dropReturnCode() const = 0;
     virtual cstring abortReturnCode() const = 0;
@@ -183,6 +184,7 @@ class KernelSamplesTarget : public Target {
     cstring dataEnd(cstring base) const override {
         return cstring("((void*)(long)") + base + "->data_end)";
     }
+    cstring dataLength(cstring base) const override { return cstring(base) + "->len"; }
     cstring forwardReturnCode() const override { return "TC_ACT_OK"; }
     cstring dropReturnCode() const override { return "TC_ACT_SHOT"; }
     cstring abortReturnCode() const override { return "TC_ACT_SHOT"; }
@@ -206,6 +208,9 @@ class XdpTarget : public KernelSamplesTarget {
     cstring sysMapPath() const override { return "/sys/fs/bpf/xdp/globals"; }
     cstring packetDescriptorType() const override { return "struct xdp_md"; }
 
+    cstring dataLength(cstring base) const override {
+        return cstring("(") + base + "->data_end - " + base + "->data)";
+    }
     void emitResizeBuffer(Util::SourceCodeBuilder *builder, cstring buffer,
                           cstring offsetVar) const override;
     void emitMain(Util::SourceCodeBuilder *builder, cstring functionName,
@@ -237,6 +242,7 @@ class BccTarget : public Target {
     cstring dataEnd(cstring base) const override {
         return cstring("(") + base + " + " + base + "->len)";
     }
+    cstring dataLength(cstring base) const override { return cstring(base) + "->len"; }
     cstring forwardReturnCode() const override { return "0"; }
     cstring dropReturnCode() const override { return "1"; }
     cstring abortReturnCode() const override { return "1"; }

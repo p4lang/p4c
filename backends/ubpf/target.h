@@ -54,6 +54,7 @@ class UbpfTarget : public EBPF::Target {
 
     cstring dataOffset(UNUSED cstring base) const override { return cstring(""); }
     cstring dataEnd(UNUSED cstring base) const override { return cstring(""); }
+    cstring dataLength(UNUSED cstring base) const override { return cstring(""); }
     cstring dropReturnCode() const override { return "0"; }
     cstring abortReturnCode() const override { return "1"; }
     cstring forwardReturnCode() const override { return "1"; }
