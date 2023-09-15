@@ -88,7 +88,7 @@ endif()
 if(P4TOOLS_TESTGEN_BMV2_TEST_STF)
   p4tools_add_tests(
     TESTS "${P4C_V1_TEST_SUITES_P416}"
-    TAG "testgen-p4c-bmv2" DRIVER ${P4TESTGEN_DRIVER}
+    TAG "testgen-p4c-bmv2-stf" DRIVER ${P4TESTGEN_DRIVER}
     TARGET "bmv2" ARCH "v1model" ENABLE_RUNNER TEST_ARGS "--test-backend STF ${EXTRA_OPTS} "
   )
   include(${CMAKE_CURRENT_LIST_DIR}/BMV2STFXfail.cmake)
