@@ -64,8 +64,8 @@ class TestgenOptions : public AbstractP4cToolOptions {
     bool dcg = false;
 
     /// The maximum permitted packet size, in bits.
-    // The default is the jumbo frame packet size, 9000 bytes.
-    int maxPktSize = 72000;
+    // The default is the standard MTU, 1500 bytes.
+    int maxPktSize = 12000;
 
     /// The minimum permitted packet size, in bits.
     int minPktSize = 0;
