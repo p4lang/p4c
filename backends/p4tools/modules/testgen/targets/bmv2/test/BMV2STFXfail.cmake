@@ -9,7 +9,7 @@
 ####################################################################################################
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "Non-numeric, non-boolean member expression: .* Type: Type_Stack"
   # We can not expand stacks in parsers because information about .next is lost.
   # P4Testgen needs to maintain its own internal .next variable for stacks.
@@ -17,7 +17,7 @@ p4tools_add_xfail_reason(
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "simple_switch died with return code -6"
   # Assertion 'Default switch case should not be reachable' failed,
   # file '../../include/bm/bm_sim/actions.h' line '369'.
@@ -37,7 +37,7 @@ p4tools_add_xfail_reason(
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "terminate called after throwing an instance of"
   # terminate called after throwing an instance of 'std::runtime_error'
   # in Json::Value::operator[](ArrayIndex)const: requires arrayValue
@@ -54,18 +54,18 @@ p4tools_add_xfail_reason(
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "bad json"
   control-hs-index-test5.p4
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "Exception"
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "Invalid reference to object of type"
   extract_for_header_union.p4
 )
@@ -76,20 +76,20 @@ p4tools_add_xfail_reason(
 ####################################################################################################
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "Cast failed"
   # push front can not handle tainted header validity.
   header-stack-ops-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "Match type range not implemented for table keys"
   up4.p4
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "is trying to match on a tainted key set"
   # unimlemented feature (for select statement)
   invalid-hdr-warnings1.p4
@@ -97,14 +97,14 @@ p4tools_add_xfail_reason(
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "differs|Expected ([0-9]+) packets on port ([0-9]+) got ([0-9]+)"
   # Issue with the clone implementation.
   v1model-special-ops-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "Only registers with bit or int types are currently supported"
   issue907-bmv2.p4
 )
@@ -115,48 +115,48 @@ p4tools_add_xfail_reason(
 ####################################################################################################
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "Assert/assume can not be executed under a tainted condition"
   # Assert/Assume error: assert/assume(false).
   bmv2_assert.p4
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "simple_switch died with return code -6"
   # Assert/Assume error: assert/assume(false).
   bmv2_assume.p4
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "Computations are not supported in update_checksum"
   issue1765-bmv2.p4
   issue1765-1-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "error: exit"
   # exit: Conditional execution in actions unsupported on this target.
   issue2359.p4
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "Error compiling"
   # IfStatement: not supported within a deparser on this target.
   issue887.p4
 )
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "Checksum16.get is deprecated and not supported."
   # Not supported
   issue841.p4
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "Unknown or unimplemented extern method: increment"
   # user defined externs
   issue1882-1-bmv2.p4
@@ -164,47 +164,47 @@ p4tools_add_xfail_reason(
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "Unknown or unimplemented extern method: update"
   issue2664-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "Unknown or unimplemented extern method: count"
   # user defined extern
   issue1193-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "Unknown or unimplemented extern method: fn_foo"
   # user defined extern
   issue3091.p4
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "BMv2 target only supports headers with fields totaling a multiple of 8 bits"
   custom-type-restricted-fields.p4
   issue3225.p4
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "with type Type_Specialized is not a Type_Declaration"
   # Pipeline as a parameter of a switch, not a valid v1model program
   issue1304.p4
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "Program is not supported by this target"
   issue986-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "Program can not be implemented on this target"
   # The error appears because the table calls itself:
   # apply {
@@ -217,19 +217,19 @@ p4tools_add_xfail_reason(
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "error.NoError: unsupported exact key expression"
   issue1062-bmv2.p4
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "expected type to be a struct"
   issue3394.p4
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "expected a struct"
   hashing-non-tuple-bmv2.p4
   issue584-1-bmv2.p4
@@ -241,7 +241,7 @@ p4tools_add_xfail_reason(
 # These tests require additional input parameters to compile properly.
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "uninitialized: next field read"
   # error: parsedHdr.hstack.next uninitialized: next field read
   # next not implemented in p4c/backends/bmv2/common/expression.cpp line 367
@@ -249,7 +249,7 @@ p4tools_add_xfail_reason(
 )
 
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "headers: the type should be a struct of headers, stacks, or unions"
   parser-unroll-test3.p4
   parser-unroll-test5.p4
@@ -258,7 +258,7 @@ p4tools_add_xfail_reason(
 
 # TODO: For these test we should add the --permissive flag.
 p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2"
+  "testgen-p4c-bmv2-stf"
   "The validity bit of .* is tainted"
   control-hs-index-test3.p4
   control-hs-index-test5.p4
