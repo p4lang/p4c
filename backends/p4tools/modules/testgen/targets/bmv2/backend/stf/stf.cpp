@@ -216,7 +216,7 @@ std::string STF::getTestCaseTemplate() {
 ## if length(selected_branches) > 0
     # {{selected_branches}}
 ## endif
-# Current statement coverage: {{coverage}}
+# Current node coverage: {{coverage}}
 # Traces
 ## for trace_item in trace
 # {{trace_item}}

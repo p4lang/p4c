@@ -81,7 +81,6 @@ bool SymbolicExecutor::evaluateBranch(const SymbolicExecutor::Branch &branch,
 
 SymbolicExecutor::Branch SymbolicExecutor::popRandomBranch(
     std::vector<SymbolicExecutor::Branch> &candidateBranches) {
-    // If we did not find any new statements, fall back to random.
     auto branchIdx = Utils::getRandInt(candidateBranches.size() - 1);
     auto branch = candidateBranches[branchIdx];
     candidateBranches[branchIdx] = candidateBranches.back();

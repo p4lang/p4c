@@ -181,12 +181,12 @@ def parse_coverage_and_timestamps(test_files, parse_type):
                         datestr = datestr.replace("\n", "")
                     datestr = datestr.strip()
                     datestrs.append(datestr)
-                if "Current statement coverage:" in line:
+                if "Current node coverage:" in line:
                     if parse_type == "PROTOBUF":
-                        covstr = line.replace('metadata: "Current statement coverage: ', "")
+                        covstr = line.replace('metadata: "Current node coverage: ', "")
                         covstr = covstr.replace('"\n', "")
                     else:
-                        covstr = line.replace("# Current statement coverage: ", "")
+                        covstr = line.replace("# Current node coverage: ", "")
                     covstr = covstr.replace("\n", "")
                     cov_percentages.append(float(covstr))
     return cov_percentages, datestrs
@@ -230,15 +230,15 @@ def run_strategies_for_max_tests(options, test_args):
     testutils.exec_process(cmd, env=custom_env, capture_output=True, timeout=3600)
     end_timestamp = datetime.datetime.now()
 
-    statements_cov, timestamps = collect_data_from_folder(test_args.test_dir, options.test_backend)
-    if not statements_cov:
+    nodes_cov, timestamps = collect_data_from_folder(test_args.test_dir, options.test_backend)
+    if not nodes_cov:
         print("No errors found!")
         return [], [], []
     num_tests = len(timestamps)
-    final_cov = str(statements_cov[-1])
+    final_cov = str(nodes_cov[-1])
     time_needed = (end_timestamp - start_timestamp).total_seconds()
     print(
-        f"Pct Statements Covered: {final_cov} Number of tests: {num_tests} Time needed:"
+        f"Pct Nodes Covered: {final_cov} Number of tests: {num_tests} Time needed:"
         f" {time_needed}"
     )
 
@@ -252,7 +252,7 @@ def run_strategies_for_max_tests(options, test_args):
         perf["Percentage"]["step"],
         perf["Percentage"]["backend"],
     ]
-    return summarized_data, statements_cov, timestamps
+    return summarized_data, nodes_cov, timestamps
 
 
 def plot_coverage(out_dir, coverage_pairs):
@@ -362,15 +362,15 @@ def main(args, extra_args):
             test_args.extra_args = config[strategy]
             if options.extra_args:
                 test_args.extra_args += " " + " ".join(options.extra_args[1:])
-            summarized_data, statements_cov, timestamps = run_strategies_for_max_tests(
+            summarized_data, nodes_cov, timestamps = run_strategies_for_max_tests(
                 options, test_args
             )
             data_row.extend(summarized_data)
             summary_frame.loc[len(summary_frame)] = data_row
-            coverage_pairs[str(seed)] = statements_cov
+            coverage_pairs[str(seed)] = nodes_cov
             sub_frame = pd.DataFrame()
-            sub_frame["Seed"] = [seed] * len(statements_cov)
-            sub_frame["Coverage"] = statements_cov
+            sub_frame["Seed"] = [seed] * len(nodes_cov)
+            sub_frame["Coverage"] = nodes_cov
             sub_frame["Time"] = convert_timestamps_to_timedelta(timestamps)
             sub_frame["Time"] = sub_frame["Time"] / pd.Timedelta(milliseconds=1)
 

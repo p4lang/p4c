@@ -71,7 +71,7 @@ class FinalState {
     /// @returns the computed traces of this final state.
     [[nodiscard]] const std::vector<std::reference_wrapper<const TraceEvent>> *getTraces() const;
 
-    /// @returns the list of visited statements of this state.
+    /// @returns the list of visited nodes of this state.
     [[nodiscard]] const P4::Coverage::CoverageSet &getVisited() const;
 };
 

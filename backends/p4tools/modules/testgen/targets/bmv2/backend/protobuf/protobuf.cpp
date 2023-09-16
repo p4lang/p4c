@@ -260,7 +260,7 @@ metadata: "Date generated: {{timestamp}}"
 ## if length(selected_branches) > 0
 metadata: "{{selected_branches}}"
 ## endif
-metadata: "Current statement coverage: {{coverage}}"
+metadata: "Current node coverage: {{coverage}}"
 
 ## for trace_item in trace
 traces: "{{trace_item}}"

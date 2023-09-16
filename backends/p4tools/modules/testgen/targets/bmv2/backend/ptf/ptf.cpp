@@ -329,7 +329,7 @@ class Test{{test_id}}(AbstractTest):
     # {{selected_branches}}
 ## endif
     '''
-    # Current statement coverage: {{coverage}}
+    # Current node coverage: {{coverage}}
 ## for trace_item in trace
     {{trace_item}}
 ##endfor

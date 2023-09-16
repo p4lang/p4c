@@ -125,7 +125,7 @@ class ExecutionState : public AbstractExecutionState {
     /// List of branch decisions leading into this state.
     std::vector<uint64_t> selectedBranches;
 
-    /// State that is needed to track reachability of statements given a query.
+    /// State that is needed to track reachability of nodes given a query.
     ReachabilityEngineState *reachabilityEngineState = nullptr;
 
     /// The number of individual packet variables that have been created in this state.
@@ -169,7 +169,7 @@ class ExecutionState : public AbstractExecutionState {
     /// Checks whether the node has been visited in this state.
     void markVisited(const IR::Node *node);
 
-    /// @returns list of all statements visited before reaching this state.
+    /// @returns list of all nodes visited before reaching this state.
     [[nodiscard]] const P4::Coverage::CoverageSet &getVisited() const;
 
     /// Sets the symbolic value of the given state variable to the given value. Constant folding

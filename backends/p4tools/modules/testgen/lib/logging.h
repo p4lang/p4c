@@ -16,7 +16,7 @@ void printTraces(const std::string &fmt, Arguments &&...args) {
 }
 
 /// Helper functions that prints strings associated with basic test generation information., for
-/// example the covered statements or tests number.
+/// example the covered nodes or tests number.
 template <typename... Arguments>
 void printInfo(const std::string &fmt, Arguments &&...args) {
     printFeature("test_info", 4, fmt, std::forward<Arguments>(args)...);
@@ -26,7 +26,7 @@ void printInfo(const std::string &fmt, Arguments &&...args) {
 void enableTraceLogging();
 
 /// Enable the printing of basic test case generation information, for example the covered
-/// statements or test number.
+/// nodes or test number.
 void enableInformationLogging();
 
 /// Enable printing of the individual program node steps of the interpreter.

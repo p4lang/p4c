@@ -234,7 +234,7 @@ bool ExprStepper::preorder(const IR::Mux *mux) {
 
         auto &nextState = state.clone();
         // Some path selection strategies depend on looking ahead and collecting potential
-        // statements. If that is the case, apply the CoverableNodesScanner visitor.
+        // nodes. If that is the case, apply the CoverableNodesScanner visitor.
         P4::Coverage::CoverageSet coveredNodes;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
             auto collector = CoverableNodesScanner(state);
@@ -386,7 +386,7 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
         const auto *decl = state.findDecl(selectCase->state)->getNode();
         nextState.replaceTopBody(Continuation::Return(decl));
         // Some path selection strategies depend on looking ahead and collecting potential
-        // statements. If that is the case, apply the CoverableNodesScanner visitor.
+        // nodes. If that is the case, apply the CoverableNodesScanner visitor.
         P4::Coverage::CoverageSet coveredNodes;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
             auto collector = CoverableNodesScanner(state);

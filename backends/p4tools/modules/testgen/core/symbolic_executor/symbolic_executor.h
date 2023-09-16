@@ -54,7 +54,7 @@ class SymbolicExecutor {
     /// Getter to access visitedNodes.
     const P4::Coverage::CoverageSet &getVisitedNodes();
 
-    /// Update the set of visited statements.
+    /// Update the set of visited nodes.
     void updateVisitedNodes(const P4::Coverage::CoverageSet &newNodes);
 
  protected:
@@ -64,10 +64,10 @@ class SymbolicExecutor {
     /// The SMT solver backing this executor.
     AbstractSolver &solver;
 
-    /// Set of all statements, to be retrieved from programInfo.
+    /// Set of all nodes, to be retrieved from programInfo.
     const P4::Coverage::CoverageSet &coverableNodes;
 
-    /// Set of all statements executed in any testcase that has been outputted.
+    /// Set of all nodes executed in any testcase that has been outputted.
     P4::Coverage::CoverageSet visitedNodes;
 
     /// Handles processing at the end of a P4 program.

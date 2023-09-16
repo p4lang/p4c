@@ -232,7 +232,7 @@ bool CmdStepper::preorder(const IR::IfStatement *ifStatement) {
         nextState.replaceTopBody(&cmds);
 
         // Some path selection strategies depend on looking ahead and collecting potential
-        // statements. If that is the case, apply the CoverableNodesScanner visitor.
+        // nodes. If that is the case, apply the CoverableNodesScanner visitor.
         P4::Coverage::CoverageSet coveredNodes;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
             auto collector = CoverableNodesScanner(state);
@@ -250,7 +250,7 @@ bool CmdStepper::preorder(const IR::IfStatement *ifStatement) {
         nextState.replaceTopBody((ifStatement->ifFalse == nullptr) ? new IR::BlockStatement()
                                                                    : ifStatement->ifFalse);
         // Some path selection strategies depend on looking ahead and collecting potential
-        // statements. If that is the case, apply the CoverableNodesScanner visitor.
+        // nodes. If that is the case, apply the CoverableNodesScanner visitor.
         P4::Coverage::CoverageSet coveredNodes;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
             auto collector = CoverableNodesScanner(state);
@@ -554,7 +554,7 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
         for (const auto *switchCase : switchStatement->cases) {
             if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
                 // Some path selection strategies depend on looking ahead and collecting potential
-                // statements. If that is the case, apply the CoverableNodesScanner visitor.
+                // nodes. If that is the case, apply the CoverableNodesScanner visitor.
                 auto collector = CoverableNodesScanner(state);
                 collector.updateNodeCoverage(switchCase->statement, coveredNodes);
             }
