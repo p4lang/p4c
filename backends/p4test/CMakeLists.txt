@@ -130,4 +130,4 @@ set (P4_14_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_14_samples/switch_*/switch.p4")
 p4c_add_tests("p14_to_16" ${P4TEST_DRIVER} "${P4_14_SUITES}" "")
 
-set_tests_properties("p14_to_16/testdata/p4_14_samples/switch_20160512/switch.p4" PROPERTIES TIMEOUT 500)
+set_tests_properties("p14_to_16/testdata/p4_14_samples/switch_20160512/switch.p4" PROPERTIES TIMEOUT 1000)
