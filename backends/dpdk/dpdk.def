@@ -304,27 +304,6 @@ class DpdkMovStatement : DpdkUnaryStatement {
 #noconstructor
 }
 
-class DpdkNegStatement: DpdkUnaryStatement {
-#nodbprint
-#noconstructor
-    DpdkNegStatement(Expression dst, Expression src) :
-        DpdkUnaryStatement("neg", dst, src) { }
-}
-
-class DpdkCmplStatement: DpdkUnaryStatement {
-#nodbprint
-#noconstructor
-    DpdkCmplStatement(Expression dst, Expression src) :
-        DpdkUnaryStatement("compl", dst, src) { }
-}
-
-class DpdkLNotStatement: DpdkUnaryStatement {
-#nodbprint
-#noconstructor
-    DpdkLNotStatement(Expression dst, Expression src) :
-        DpdkUnaryStatement("lnot", dst, src) { }
-}
-
 abstract DpdkBinaryStatement : DpdkAssignmentStatement {
     Expression src1;
     Expression src2;
@@ -376,85 +355,11 @@ class DpdkOrStatement : DpdkBinaryStatement, IDPDKNode {
         DpdkBinaryStatement("or", dst, src1, src2) { }
 }
 
-class DpdkEquStatement : DpdkBinaryStatement, IDPDKNode {
-#nodbprint
-#noconstructor
-    DpdkEquStatement(Expression dst, Expression src1, Expression src2) :
-        DpdkBinaryStatement("equ", dst, src1, src2) { }
-}
-
 class DpdkXorStatement : DpdkBinaryStatement, IDPDKNode {
 #nodbprint
 #noconstructor
     DpdkXorStatement(Expression dst, Expression src1, Expression src2) :
         DpdkBinaryStatement("xor", dst, src1, src2) { }
-}
-
-class DpdkCmpStatement: DpdkBinaryStatement, IDPDKNode {
-#nodbprint
-#noconstructor
-    DpdkCmpStatement(Expression dst, Expression src1, Expression src2) :
-        DpdkBinaryStatement("cmp", dst, src1, src2) { }
-}
-
-class DpdkLAndStatement: DpdkBinaryStatement {
-#nodbprint
-#noconstructor
-    DpdkLAndStatement(Expression dst, Expression src1, Expression src2) :
-        DpdkBinaryStatement("land", dst, src1, src2) { }
-}
-
-class DpdkLOrStatement: DpdkBinaryStatement {
-#nodbprint
-#noconstructor
-    DpdkLOrStatement(Expression dst, Expression src1, Expression src2) :
-        DpdkBinaryStatement("lor", dst, src1, src2) { }
-}
-
-class DpdkLeqStatement: DpdkBinaryStatement {
-#nodbprint
-#noconstructor
-    DpdkLeqStatement(Expression dst, Expression src1, Expression src2) :
-        DpdkBinaryStatement("leq", dst, src1, src2) { }
-}
-
-class DpdkLssStatement: DpdkBinaryStatement {
-#nodbprint
-#noconstructor
-    DpdkLssStatement(Expression dst, Expression src1, Expression src2) :
-        DpdkBinaryStatement("lss", dst, src1, src2) { }
-}
-
-class DpdkGrtStatement: DpdkBinaryStatement {
-#nodbprint
-#noconstructor
-    DpdkGrtStatement(Expression dst, Expression src1, Expression src2) :
-        DpdkBinaryStatement("grt", dst, src1, src2) { }
-}
-
-class DpdkGeqStatement: DpdkBinaryStatement {
-#nodbprint
-#noconstructor
-    DpdkGeqStatement(Expression dst, Expression src1, Expression src2) :
-        DpdkBinaryStatement("geq", dst, src1, src2) { }
-}
-
-class DpdkNeqStatement: DpdkBinaryStatement {
-#nodbprint
-#noconstructor
-    DpdkNeqStatement(Expression dst, Expression src1, Expression src2) :
-        DpdkBinaryStatement("neq", dst, src1, src2) { }
-}
-
-class DpdkExternObjStatement : DpdkAsmStatement, IDPDKNode {
-    Expression methodCall;
-    std::ostream& toSpec(std::ostream& out) const override;
-#nodbprint
-}
-
-class DpdkExternFuncStatement : DpdkAsmStatement, IDPDKNode {
-    std::ostream& toSpec(std::ostream& out) const override;
-#nodbprint
 }
 
 class DpdkRecircidStatement : DpdkAsmStatement, IDPDKNode {

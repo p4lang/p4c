@@ -353,16 +353,6 @@ std::ostream &IR::DpdkTxStatement::toSpec(std::ostream &out) const {
     return out;
 }
 
-std::ostream &IR::DpdkExternObjStatement::toSpec(std::ostream &out) const {
-    out << "extern_obj ";
-    return out;
-}
-
-std::ostream &IR::DpdkExternFuncStatement::toSpec(std::ostream &out) const {
-    out << "extern_func ";
-    return out;
-}
-
 std::ostream &IR::DpdkReturnStatement::toSpec(std::ostream &out) const {
     out << "return ";
     return out;
