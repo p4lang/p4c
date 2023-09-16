@@ -17,7 +17,6 @@
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/depth_first.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/greedy_stmt_cov.h"
-#include "backends/p4tools/modules/testgen/core/symbolic_executor/max_stmt_cov.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/random_backtrack.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/selected_branches.h"
@@ -44,9 +43,6 @@ SymbolicExecutor *pickExecutionEngine(const TestgenOptions &testgenOptions,
     }
     if (pathSelectionPolicy == PathSelectionPolicy::RandomBacktrack) {
         return new RandomBacktrack(solver, *programInfo);
-    }
-    if (pathSelectionPolicy == PathSelectionPolicy::RandomMaxStmtCoverage) {
-        return new RandomMaxStmtCoverage(solver, *programInfo, testgenOptions.saddlePoint);
     }
     if (!testgenOptions.selectedBranches.empty()) {
         std::string selectedBranchesStr = testgenOptions.selectedBranches;
