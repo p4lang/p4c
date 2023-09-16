@@ -54,8 +54,8 @@ class SymbolicExecutor {
     /// Getter to access visitedNodes.
     const P4::Coverage::CoverageSet &getVisitedNodes();
 
-    /// Update the set of visited nodes.
-    void updateVisitedNodes(const P4::Coverage::CoverageSet &newNodes);
+    /// Update the set of visited nodes. Returns true if there was an update.
+    [[nodiscard]] bool updateVisitedNodes(const P4::Coverage::CoverageSet &newNodes);
 
  protected:
     /// Target-specific information about the P4 program.

@@ -79,7 +79,7 @@ class TestgenOptions : public AbstractP4cToolOptions {
     /// This will either produce no tests or only tests that contain counter examples.
     bool assertionModeEnabled = false;
 
-    /// Specifies, which IR nodes to track for coverage in the targeted P4 program.
+    /// Specifies general options which IR nodes to track for coverage in the targeted P4 program.
     /// Multiple options are possible. Currently supported: STATEMENTS, TABLE_ENTRIES.
     P4::Coverage::CoverageOptions coverageOptions;
 

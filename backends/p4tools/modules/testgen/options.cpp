@@ -283,6 +283,15 @@ TestgenOptions::TestgenOptions()
         "Defaults to no coverage.");
 
     registerOption(
+        "--only-covering-tests", nullptr,
+        [this](const char *) {
+            coverageOptions.onlyCoveringTests = true;
+            return true;
+        },
+        "If coverage tracking is enabled only generate tests which update the total number of "
+        "covered nodes.");
+
+    registerOption(
         "--print-traces", nullptr,
         [](const char *) {
             P4Testgen::enableTraceLogging();

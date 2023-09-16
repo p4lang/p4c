@@ -100,8 +100,12 @@ SymbolicExecutor::SymbolicExecutor(AbstractSolver &solver, const ProgramInfo &pr
     }
 }
 
-void SymbolicExecutor::updateVisitedNodes(const P4::Coverage::CoverageSet &newNodes) {
-    visitedNodes.insert(newNodes.begin(), newNodes.end());
+bool SymbolicExecutor::updateVisitedNodes(const P4::Coverage::CoverageSet &newNodes) {
+    auto hasUpdated = false;
+    for (auto newNode : newNodes) {
+        hasUpdated |= visitedNodes.insert(newNode).second;
+    }
+    return hasUpdated;
 }
 
 const P4::Coverage::CoverageSet &SymbolicExecutor::getVisitedNodes() { return visitedNodes; }
