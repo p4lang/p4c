@@ -620,12 +620,12 @@ class SplitFlowVisit : public SplitFlowVisit_base {
         const_nodes.emplace_back(&node);
     }
     template <class T1, class T2, class... Args>
-    void addNode(T1 &&t1, T2 &&t2, Args &&...args) {
+    void addNode(T1 &&t1, T2 &&t2, Args &&... args) {
         addNode(std::forward<T1>(t1));
         addNode(std::forward<T2>(t2), std::forward<Args>(args)...);
     }
     template <class... Args>
-    explicit SplitFlowVisit(Visitor &v, Args &&...args) : SplitFlowVisit(v) {
+    explicit SplitFlowVisit(Visitor &v, Args &&... args) : SplitFlowVisit(v) {
         addNode(std::forward<Args>(args)...);
     }
     void do_visit() override {

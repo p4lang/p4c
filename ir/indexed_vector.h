@@ -135,7 +135,7 @@ class IndexedVector : public Vector<T> {
         return Vector<T>::insert(i, v);
     }
     template <class... Args>
-    void emplace_back(Args &&...args) {
+    void emplace_back(Args &&... args) {
         auto el = new T(std::forward<Args>(args)...);
         push_back(el);
     }

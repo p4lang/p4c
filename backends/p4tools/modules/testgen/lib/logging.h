@@ -11,14 +11,14 @@ namespace P4Tools::P4Testgen {
 /// Helper functions that prints strings associated with verbose test information, for example
 /// traces, or the test values themselves.
 template <typename... Arguments>
-void printTraces(const std::string &fmt, Arguments &&...args) {
+void printTraces(const std::string &fmt, Arguments &&... args) {
     printFeature("test_traces", 4, fmt, std::forward<Arguments>(args)...);
 }
 
 /// Helper functions that prints strings associated with basic test generation information., for
 /// example the covered statements or tests number.
 template <typename... Arguments>
-void printInfo(const std::string &fmt, Arguments &&...args) {
+void printInfo(const std::string &fmt, Arguments &&... args) {
     printFeature("test_info", 4, fmt, std::forward<Arguments>(args)...);
 }
 

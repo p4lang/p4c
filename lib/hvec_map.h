@@ -190,7 +190,7 @@ class hvec_map : hash_vector_base {
 
     // FIXME -- how to do this without duplicating the code for lvalue/rvalue?
     template <typename... VV>
-    std::pair<iterator, bool> emplace(const KEY &k, VV &&...v) {
+    std::pair<iterator, bool> emplace(const KEY &k, VV &&... v) {
         bool new_key = false;
         size_t idx = hv_insert(&k);
         if (idx >= data.size()) {
@@ -210,7 +210,7 @@ class hvec_map : hash_vector_base {
         return std::make_pair(iterator(*this, idx), new_key);
     }
     template <typename... VV>
-    std::pair<iterator, bool> emplace(KEY &&k, VV &&...v) {
+    std::pair<iterator, bool> emplace(KEY &&k, VV &&... v) {
         bool new_key = false;
         size_t idx = hv_insert(&k);
         if (idx >= data.size()) {

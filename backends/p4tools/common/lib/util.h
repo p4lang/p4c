@@ -25,7 +25,7 @@ inline std::string logHelper(boost::format &f) { return f.str(); }
 
 /// Helper function for @printFeature
 template <class T, class... Args>
-std::string logHelper(boost::format &f, T &&t, Args &&...args) {
+std::string logHelper(boost::format &f, T &&t, Args &&... args) {
     return logHelper(f % std::forward<T>(t), std::forward<Args>(args)...);
 }
 
@@ -34,7 +34,7 @@ std::string logHelper(boost::format &f, T &&t, Args &&...args) {
 // https://stackoverflow.com/a/25859856
 template <typename... Arguments>
 void printFeature(const std::string &label, int level, const std::string &fmt,
-                  Arguments &&...args) {
+                  Arguments &&... args) {
     boost::format f(fmt);
 
     auto result = logHelper(f, std::forward<Arguments>(args)...);

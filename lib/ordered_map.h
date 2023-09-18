@@ -172,7 +172,7 @@ class ordered_map {
     const V &at(const K &x) const { return data_map.at(&x)->second; }
 
     template <typename KK, typename... VV>
-    std::pair<iterator, bool> emplace(KK &&k, VV &&...v) {
+    std::pair<iterator, bool> emplace(KK &&k, VV &&... v) {
         auto it = find(k);
         if (it == data.end()) {
             it = data.emplace(data.end(), std::piecewise_construct_t(), std::forward_as_tuple(k),
@@ -183,7 +183,7 @@ class ordered_map {
         return std::make_pair(it, false);
     }
     template <typename KK, typename... VV>
-    std::pair<iterator, bool> emplace_hint(iterator pos, KK &&k, VV &&...v) {
+    std::pair<iterator, bool> emplace_hint(iterator pos, KK &&k, VV &&... v) {
         /* should be const_iterator pos, but glibc++ std::list is broken */
         auto it = find(k);
         if (it == data.end()) {

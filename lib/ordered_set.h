@@ -234,7 +234,7 @@ class ordered_set {
     }
 
     template <class... Args>
-    std::pair<iterator, bool> emplace(Args &&...args) {
+    std::pair<iterator, bool> emplace(Args &&... args) {
         auto it = data.emplace(data.end(), std::forward<Args>(args)...);
         auto old = find(*it);
         if (old == data.end()) {
@@ -247,7 +247,7 @@ class ordered_set {
     }
 
     template <class... Args>
-    std::pair<iterator, bool> emplace_back(Args &&...args) {
+    std::pair<iterator, bool> emplace_back(Args &&... args) {
         auto it = data.emplace(data.end(), std::forward<Args>(args)...);
         auto old = find(*it);
         if (old != data.end()) {

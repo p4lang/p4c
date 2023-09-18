@@ -147,7 +147,7 @@ class Vector : public VectorBase {
     const T *const &at(size_t idx) const { return vec.at(idx); }
     const T *&at(size_t idx) { return vec.at(idx); }
     template <class... Args>
-    void emplace_back(Args &&...args) {
+    void emplace_back(Args &&... args) {
         vec.emplace_back(new T(std::forward<Args>(args)...));
     }
     void push_back(T *a) { vec.push_back(a); }
