@@ -145,6 +145,9 @@ void ValidateParsedProgram::postorder(const IR::Declaration_Variable *decl) {
 /// Instance names cannot be don't care
 /// Do not declare instances in apply {} blocks, parser states or actions
 void ValidateParsedProgram::postorder(const IR::Declaration_Instance *decl) {
+    if (!decl->type->is<IR::Type_Name>() && !decl->type->is<IR::Type_Specialized>() &&
+        !decl->type->is<IR::Type_Extern>())  // P4_14 only?
+        ::error(ErrorType::ERR_INVALID, "%1%: invalid type for declaration", decl->type);
     if (decl->name.isDontCare())
         ::error(ErrorType::ERR_INVALID, "%1%: invalid instance name.", decl);
     if (findContext<IR::BlockStatement>() &&         // we're looking for the apply block
