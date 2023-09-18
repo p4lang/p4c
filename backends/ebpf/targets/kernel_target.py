@@ -121,7 +121,7 @@ class Target(EBPFTarget):
         result = testutils.exec_process(f"objdump -hj xdp {self.template}.o")
         if result.returncode == testutils.SUCCESS:
             # NB: XDP programs attach to the Rx end (but TC below attaches to Tx).
-            cmd = ( f"ip link set br_{port_name} xdpgeneric obj {self.template}.o sec xdp" )
+            cmd = f"ip link set br_{port_name} xdpgeneric obj {self.template}.o sec xdp"
         else:
             # Add the qdisc. MUST be clsact layer.
             bridge.ns_exec(f"tc qdisc add dev {port_name} clsact")
