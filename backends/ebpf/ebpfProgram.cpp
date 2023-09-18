@@ -180,6 +180,24 @@ class ErrorCodesVisitor : public Inspector {
 };
 }  // namespace
 
+void EBPFProgram::emitCommonPreamble(CodeBuilder *builder) {
+    builder->newline();
+    builder->appendLine("#define EBPF_MASK(t, w) ((((t)(1)) << (w)) - (t)1)");
+    builder->appendLine("#define BYTES(w) ((w) / 8)");
+    builder->appendLine(
+        "#define write_partial(a, s, v) do "
+        "{ u8 mask = EBPF_MASK(u8, s); "
+        "*((u8*)a) = ((*((u8*)a)) & ~mask) | (((v) >> (8 - (s))) & mask); "
+        "} while (0)");
+    builder->appendLine(
+        "#define write_partial_ex(a, w, s, v) do { *((u8*)a) = ((*((u8*)a)) "
+        "& ~(EBPF_MASK(u8, w) << s)) | (v << s) ; } while (0)");
+    builder->appendLine(
+        "#define write_byte(base, offset, v) do { "
+        "*(u8*)((base) + (offset)) = (v); "
+        "} while (0)");
+}
+
 void EBPFProgram::emitPreamble(CodeBuilder *builder) {
     builder->emitIndent();
     builder->appendFormat("enum %s ", errorEnum.c_str());
@@ -190,18 +208,9 @@ void EBPFProgram::emitPreamble(CodeBuilder *builder) {
 
     builder->blockEnd(false);
     builder->endOfStatement(true);
-    builder->newline();
-    builder->appendLine("#define EBPF_MASK(t, w) ((((t)(1)) << (w)) - (t)1)");
-    builder->appendLine("#define BYTES(w) ((w) / 8)");
-    builder->appendLine(
-        "#define write_partial(a, s, v) do "
-        "{ u8 mask = EBPF_MASK(u8, s); "
-        "*((u8*)a) = ((*((u8*)a)) & ~mask) | (((v) >> (8 - (s))) & mask); "
-        "} while (0)");
-    builder->appendLine(
-        "#define write_byte(base, offset, v) do { "
-        "*(u8*)((base) + (offset)) = (v); "
-        "} while (0)");
+
+    emitCommonPreamble(builder);
+
     builder->newline();
     builder->appendLine("void* memcpy(void* dest, const void* src, size_t num);");
     builder->newline();
