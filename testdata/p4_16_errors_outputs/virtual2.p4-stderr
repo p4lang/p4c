@@ -5,7 +5,9 @@ virtual2.p4(22): [--Werror=type-error] error: cntr
     Virtual() cntr = {
               ^^^^
   ---- Actual error:
-  Cannot unify type 'void' with type 'bit<16>'
+virtual2.p4(23): Cannot unify type 'void' with type 'bit<16>'
+          void f(in bit<16> ix) {
+          ^^^^
   ---- Originating from:
 virtual2.p4(23): Method 'f' does not have the expected type 'f'
           void f(in bit<16> ix) {

@@ -90,6 +90,10 @@ void DoCheckCoreMethods::checkCorelibMethods(const ExternMethod *em) const {
             }
             auto targ = em->expr->typeArguments->at(0);
             auto typearg = typeMap->getTypeType(targ, true);
+            if (typearg->is<IR::Type_Void>()) {
+                typeError("%1%: illegal type argument for 'lookahead'", targ);
+                return;
+            }
             if (hasVarbitsOrUnions(typeMap, typearg)) {
                 typeError("%1%: type argument must be a fixed-width type", targ);
                 return;
