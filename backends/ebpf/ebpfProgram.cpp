@@ -20,6 +20,7 @@ limitations under the License.
 #include <ctime>
 
 #include "ebpfControl.h"
+#include "ebpfDeparser.h"
 #include "ebpfParser.h"
 #include "ebpfTable.h"
 #include "ebpfType.h"
@@ -30,29 +31,53 @@ namespace EBPF {
 
 bool EBPFProgram::build() {
     auto pack = toplevel->getMain();
-    if (pack->type->name != "ebpfFilter")
-        ::warning(ErrorType::WARN_INVALID,
-                  "%1%: the main ebpf package should be called ebpfFilter"
-                  "; are you using the wrong architecture?",
-                  pack->type->name);
+    if (pack->type->name == "xdp") {
+        if (pack->getConstructorParameters()->size() != 3) {
+            ::error(ErrorType::ERR_EXPECTED,
+                    "Expected toplevel xdp package %1% to have 3 parameters", pack->type);
+            return false;
+        }
+        model.arch = ModelArchitecture::XdpSwitch;
+        progTarget = new XdpTarget(options.emitTraceMessages);
+    } else {
+        if (pack->type->name != "ebpfFilter")
+            ::warning(ErrorType::WARN_INVALID,
+                      "%1%: the main ebpf package should be called ebpfFilter or xdp"
+                      "; are you using the wrong architecture?",
+                      pack->type->name);
 
-    if (pack->getConstructorParameters()->size() != 2) {
-        ::error(ErrorType::ERR_EXPECTED, "Expected toplevel package %1% to have 2 parameters",
-                pack->type);
-        return false;
+        if (pack->getConstructorParameters()->size() != 2) {
+            ::error(ErrorType::ERR_EXPECTED,
+                    "Expected toplevel ebpfFilter package %1% to have 2 parameters", pack->type);
+            return false;
+        }
+        model.arch = ModelArchitecture::EbpfFilter;
     }
 
-    auto pb = pack->getParameterValue(model.filter.parser.name)->to<IR::ParserBlock>();
+    auto prsName = (model.arch == ModelArchitecture::XdpSwitch) ? model.xdp.parser.name
+                                                                : model.filter.parser.name;
+    auto ctlName = (model.arch == ModelArchitecture::XdpSwitch) ? model.xdp.switch_.name
+                                                                : model.filter.filter.name;
+
+    auto pb = pack->getParameterValue(prsName)->to<IR::ParserBlock>();
     BUG_CHECK(pb != nullptr, "No parser block found");
     parser = new EBPFParser(this, pb, typeMap);
     bool success = parser->build();
     if (!success) return success;
 
-    auto cb = pack->getParameterValue(model.filter.filter.name)->to<IR::ControlBlock>();
+    auto cb = pack->getParameterValue(ctlName)->to<IR::ControlBlock>();
     BUG_CHECK(cb != nullptr, "No control block found");
     control = new EBPFControl(this, cb, parser->headers);
     success = control->build();
     if (!success) return success;
+
+    if (model.arch == ModelArchitecture::XdpSwitch) {
+        auto db = pack->getParameterValue(model.xdp.deparser.name)->to<IR::ControlBlock>();
+        BUG_CHECK(db != nullptr, "No deparser block found");
+        deparser = new EBPFDeparser(this, db, parser->headers);
+        bool success = deparser->build();
+        if (!success) return success;
+    }
 
     return true;
 }
@@ -101,17 +126,24 @@ void EBPFProgram::emitC(CodeBuilder *builder, cstring header) {
     builder->emitIndent();
     builder->appendFormat("%s:\n", endLabel.c_str());
     builder->emitIndent();
-    builder->appendFormat("if (%s)\n", control->accept->name.name.c_str());
-    builder->increaseIndent();
-    builder->emitIndent();
-    builder->appendFormat("return %s;\n", builder->target->forwardReturnCode().c_str());
-    builder->decreaseIndent();
-    builder->emitIndent();
-    builder->appendLine("else");
-    builder->increaseIndent();
-    builder->emitIndent();
-    builder->appendFormat("return %s;\n", builder->target->dropReturnCode().c_str());
-    builder->decreaseIndent();
+    if (model.arch == ModelArchitecture::EbpfFilter) {
+        builder->appendFormat("if (%s)\n", control->accept->name.name.c_str());
+        builder->increaseIndent();
+        builder->emitIndent();
+        builder->appendFormat("return %s;\n", builder->target->forwardReturnCode().c_str());
+        builder->decreaseIndent();
+        builder->emitIndent();
+        builder->appendLine("else");
+        builder->increaseIndent();
+        builder->emitIndent();
+        builder->appendFormat("return %s;\n", builder->target->dropReturnCode().c_str());
+        builder->decreaseIndent();
+    } else if (model.arch == ModelArchitecture::XdpSwitch) {
+        builder->append("return omd.output_action;");
+        builder->newline();
+    } else {
+        ::error(ErrorType::ERR_MODEL, "Unexpected value %d for model.arch !", model.arch);
+    }
     builder->blockEnd(true);  // end of function
 
     builder->target->emitLicense(builder, license);
@@ -159,6 +191,8 @@ void EBPFProgram::emitTypes(CodeBuilder *builder) {
             !d->is<IR::Type_Error>()) {
             auto type = EBPFTypeFactory::instance->create(d->to<IR::Type>());
             if (type == nullptr) continue;
+            if (d->is<IR::Type_Enum>() && d->to<IR::Type_Enum>()->name == "xdp_action")
+                continue;  // already in linux/bpf.h
             type->emit(builder);
             builder->newline();
         }
@@ -239,9 +273,20 @@ void EBPFProgram::emitLocalVariables(CodeBuilder *builder) {
                           builder->target->dataEnd(model.CPacketName.str()).c_str());
     builder->newline();
 
-    builder->emitIndent();
-    builder->appendFormat("u8 %s = 0;", control->accept->name.name.c_str());
-    builder->newline();
+    if (model.arch == ModelArchitecture::EbpfFilter) {
+        builder->emitIndent();
+        builder->appendFormat("u8 %s = 0;", control->accept->name.name.c_str());
+        builder->newline();
+    } else if (model.arch == ModelArchitecture::XdpSwitch) {
+        builder->emitIndent();
+        builder->append("struct xdp_input imd = { .input_port = skb->ingress_ifindex };");
+        builder->newline();
+        builder->emitIndent();
+        builder->append("struct xdp_output omd = { };");
+        builder->newline();
+    } else {
+        ::error(ErrorType::ERR_MODEL, "Unexpected value %d for model.arch !", model.arch);
+    }
 
     builder->emitIndent();
     builder->appendFormat("u32 %s = 0;", zeroKey.c_str());
@@ -272,8 +317,20 @@ void EBPFProgram::emitPipeline(CodeBuilder *builder) {
     builder->target->emitTraceMessage(builder, "Control: packet processing started");
     control->emit(builder);
     builder->blockEnd(true);
-    builder->target->emitTraceMessage(builder, "Control: packet processing finished, pass=%d", 1,
-                                      control->accept->name.name.c_str());
+
+    if (model.arch == ModelArchitecture::XdpSwitch) {
+        BUG_CHECK(deparser != nullptr, "XDP program can't be missing deparser");
+        builder->emitIndent();
+        builder->append("/* deparser */");
+        builder->newline();
+        builder->emitIndent();
+        builder->blockStart();
+        deparser->emit(builder);
+        builder->blockEnd(true);
+    } else {
+        builder->target->emitTraceMessage(builder, "Control: packet processing finished, pass=%d",
+                                          1, control->accept->name.name.c_str());
+    }
 }
 
 }  // namespace EBPF

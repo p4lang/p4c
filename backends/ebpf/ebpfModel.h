@@ -42,13 +42,25 @@ struct CounterArray_Model : public ::Model::Extern_Model {
     ::Model::Elem sparse;
 };
 
+enum ModelArchitecture {
+    EbpfFilter,
+    XdpSwitch,
+};
+
+struct Xdp_Model : public ::Model::Elem {
+    Xdp_Model() : Elem("xdp"), parser("p"), switch_("s"), deparser("d") {}
+    ::Model::Elem parser;
+    ::Model::Elem switch_;
+    ::Model::Elem deparser;
+};
+
 struct Filter_Model : public ::Model::Elem {
     Filter_Model() : Elem("ebpf_filter"), parser("prs"), filter("filt") {}
     ::Model::Elem parser;
     ::Model::Elem filter;
 };
 
-// Keep this in sync with ebpf_model.p4
+// Keep this in sync with ebpf_model.p4 and xdp_model.p4
 class EBPFModel : public ::Model::Model {
  protected:
     EBPFModel()
@@ -58,7 +70,9 @@ class EBPFModel : public ::Model::Model {
           tableImplProperty("implementation"),
           CPacketName("skb"),
           packet("packet", P4::P4CoreLibrary::instance().packetIn, 0),
+          arch(EbpfFilter),
           filter(),
+          xdp(),
           counterIndexType("u32"),
           counterValueType("u32") {}
 
@@ -72,7 +86,10 @@ class EBPFModel : public ::Model::Model {
     ::Model::Elem tableImplProperty;
     ::Model::Elem CPacketName;
     ::Model::Param_Model packet;
+    ModelArchitecture arch;
+    // Only one of these should be used, depending on arch value.
     Filter_Model filter;
+    Xdp_Model xdp;
 
     cstring counterIndexType;
     cstring counterValueType;

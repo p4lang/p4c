@@ -115,7 +115,10 @@ set (P4C_EBPF_HDRS
   psa/externs/ebpfPsaMeter.h
 )
 
-set (P4C_EBPF_DIST_HEADERS p4include/ebpf_model.p4)
+set (P4C_EBPF_DIST_HEADERS
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../p4include/ebpf_model.p4
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../p4include/xdp_model.p4
+)
 
 add_executable(p4c-ebpf ${P4C_EBPF_SRCS})
 target_link_libraries (p4c-ebpf ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
@@ -147,7 +150,7 @@ file(RELATIVE_PATH
 add_custom_target(linkp4cebpf
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${CURRENT_BINARY_DIR_PATH_REL}/p4c-ebpf ${P4C_BINARY_DIR}/p4c-ebpf
   COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4include &&
-          ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${P4C_EBPF_DIST_HEADERS} ${P4C_BINARY_DIR}/p4include
+          ${CMAKE_COMMAND} -E copy ${P4C_EBPF_DIST_HEADERS} ${P4C_BINARY_DIR}/p4include
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR_PATH_REL}/p4include ${CMAKE_CURRENT_BINARY_DIR}/p4include
   DEPENDS update_includes
   )

@@ -33,6 +33,7 @@ set(P4C_UBPF_SOURCES
         ../../backends/ebpf/ebpfProgram.cpp
         ../../backends/ebpf/ebpfTable.cpp
         ../../backends/ebpf/ebpfParser.cpp
+        ../../backends/ebpf/ebpfDeparser.cpp
         ../../backends/ebpf/ebpfControl.cpp
         ../../backends/ebpf/ebpfOptions.cpp
         ../../backends/ebpf/target.cpp

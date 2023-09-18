@@ -59,7 +59,9 @@ class EBPFControl : public EBPFObject {
     const EBPFProgram *program;
     const IR::ControlBlock *controlBlock;
     const IR::Parameter *headers;
-    const IR::Parameter *accept;
+    const IR::Parameter *accept;         // only for ebpfFilter progs
+    const IR::Parameter *xdpInputMeta;   // only for xdp progs
+    const IR::Parameter *xdpOutputMeta;  // only for xdp progs
     const IR::Parameter *parserHeaders;
     // replace references to headers with references to parserHeaders
     cstring hitVariable;
