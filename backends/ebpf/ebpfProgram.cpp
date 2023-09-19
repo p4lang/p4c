@@ -142,7 +142,7 @@ void EBPFProgram::emitC(CodeBuilder *builder, cstring header) {
         builder->append("return omd.output_action;");
         builder->newline();
     } else {
-        ::error(ErrorType::ERR_MODEL, "Unexpected value %d for model.arch !", model.arch);
+        BUG("Invalid value for model.arch !");
     }
     builder->blockEnd(true);  // end of function
 
@@ -285,7 +285,7 @@ void EBPFProgram::emitLocalVariables(CodeBuilder *builder) {
         builder->append("struct xdp_output omd = { };");
         builder->newline();
     } else {
-        ::error(ErrorType::ERR_MODEL, "Unexpected value %d for model.arch !", model.arch);
+        BUG("Invalid value for model.arch !");
     }
 
     builder->emitIndent();
