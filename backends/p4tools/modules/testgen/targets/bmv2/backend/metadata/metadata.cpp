@@ -84,8 +84,8 @@ std::string Metadata::getTestCaseTemplate() {
 seed: {{ default(seed, "none") }}
 # Test timestamp.
 data: {{timestamp}}
-# Percentage of statements covered at the time of this test.
-statement_coverage: {{coverage}}
+# Percentage of nodes covered at the time of this test.
+node_coverage: {{coverage}}
 
 # Trace associated with this test.
 #

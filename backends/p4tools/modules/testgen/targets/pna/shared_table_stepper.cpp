@@ -154,7 +154,7 @@ void SharedPnaTableStepper::evalTableActionProfile(
         replacements.emplace_back(
             new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
         // Some path selection strategies depend on looking ahead and collecting potential
-        // statements. If that is the case, apply the CoverableNodesScanner visitor.
+        // nodes. If that is the case, apply the CoverableNodesScanner visitor.
         P4::Coverage::CoverageSet coveredNodes;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
             auto collector = CoverableNodesScanner(*state);
@@ -248,7 +248,7 @@ void SharedPnaTableStepper::evalTableActionSelector(
         replacements.emplace_back(
             new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
         // Some path selection strategies depend on looking ahead and collecting potential
-        // statements. If that is the case, apply the CoverableNodesScanner visitor.
+        // nodes. If that is the case, apply the CoverableNodesScanner visitor.
         P4::Coverage::CoverageSet coveredNodes;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
             auto collector = CoverableNodesScanner(*state);

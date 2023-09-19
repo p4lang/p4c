@@ -74,7 +74,7 @@ To access the possible options for `p4testgen` use `p4testgen --help`. To genera
 Where `ARCH` specifies the P4 architecture (e.g., v1model.p4) and `TARGET` represents the targeted network device (e.g., BMv2). Choosing `0` as the option for max-tests will cause P4Testgen to generate tests until it has exhausted all possible paths.
 
 ### Coverage
-P4Testgen is able to track the (source code) coverage of the program it is generating tests for. With each test, P4Testgen can emit the cumulative program coverage it has achieved so far. Test 1 may have covered 2 out 10 P4 statements, test 2 5 out of 10 P4 statements, and so on. To enable program coverage, P4Testgen provides the `--track-coverage [NODE_TYPE]` option where `NODE_TYPE` refers to a particular P4 source node. Currently, `STATEMENTS` for P4 program statements and `TABLE_ENTRIES` for constant P4 table entries are supported. Multiple uses of `--track-coverage` are possible.
+P4Testgen is able to track the (source code) coverage of the program it is generating tests for. With each test, P4Testgen can emit the cumulative program coverage it has achieved so far. Test 1 may have covered 2 out 10 P4 nodes, test 2 5 out of 10 P4 nodes, and so on. To enable program coverage, P4Testgen provides the `--track-coverage [NODE_TYPE]` option where `NODE_TYPE` refers to a particular P4 source node. Currently, `STATEMENTS` for P4 program statements and `TABLE_ENTRIES` for constant P4 table entries are supported. Multiple uses of `--track-coverage` are possible.
 
 The option `--stop-metric MAX_NODE_COVERAGE` makes P4Testgen stop once it has hit 100% coverage as determined by `--track-coverage`.
 

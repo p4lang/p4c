@@ -31,12 +31,6 @@ class TestgenOptions : public AbstractP4cToolOptions {
     // listed in @var SUPPORTED_STOP_METRICS.
     cstring stopMetric;
 
-    /// To be used with randomAccessMaxCoverage. It specifies after how many
-    /// tests (saddle point) we should randomly explore the program and pick
-    /// a random branch ranked by how many unique non-visited statements it
-    /// has.
-    uint64_t saddlePoint = 5;
-
     /// @returns the singleton instance of this class.
     static TestgenOptions &get();
 

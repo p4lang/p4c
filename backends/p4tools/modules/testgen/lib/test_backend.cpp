@@ -110,7 +110,7 @@ bool TestBackEnd::run(const FinalState &state) {
         }
         const auto *testSpec = createTestSpec(executionState, &finalModel, testInfo);
 
-        // Commit an update to the visited statements.
+        // Commit an update to the visited nodes.
         // Only do this once we are sure we are generating a test.
         symbex.updateVisitedNodes(replacedState.getVisited());
         const P4::Coverage::CoverageSet &visitedNodes = symbex.getVisitedNodes();

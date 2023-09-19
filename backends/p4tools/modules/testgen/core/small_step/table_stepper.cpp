@@ -220,7 +220,7 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
         nextState.set(getTableHitVar(table), IR::getBoolLiteral(true));
         nextState.set(getTableReachedVar(table), IR::getBoolLiteral(true));
         // Some path selection strategies depend on looking ahead and collecting potential
-        // statements. If that is the case, apply the CoverableNodesScanner visitor.
+        // nodes. If that is the case, apply the CoverableNodesScanner visitor.
         P4::Coverage::CoverageSet coveredNodes;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
             auto collector = CoverableNodesScanner(stepper->state);
@@ -314,7 +314,7 @@ void TableStepper::setTableDefaultEntries(
         replacements.emplace_back(
             new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
         // Some path selection strategies depend on looking ahead and collecting potential
-        // statements. If that is the case, apply the CoverableNodesScanner visitor.
+        // nodes. If that is the case, apply the CoverableNodesScanner visitor.
         P4::Coverage::CoverageSet coveredNodes;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
             auto collector = CoverableNodesScanner(stepper->state);
@@ -389,7 +389,7 @@ void TableStepper::evalTableControlEntries(
         replacements.emplace_back(
             new IR::MethodCallStatement(Util::SourceInfo(), synthesizedAction));
         // Some path selection strategies depend on looking ahead and collecting potential
-        // statements. If that is the case, apply the CoverableNodesScanner visitor.
+        // nodes. If that is the case, apply the CoverableNodesScanner visitor.
         P4::Coverage::CoverageSet coveredNodes;
         if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
             auto collector = CoverableNodesScanner(stepper->state);
@@ -546,7 +546,7 @@ void TableStepper::addDefaultAction(std::optional<const IR::Expression *> tableM
     nextState.add(*new TraceEvents::Generic(tableStream.str()));
     replacements.emplace_back(new IR::MethodCallStatement(Util::SourceInfo(), tableAction));
     // Some path selection strategies depend on looking ahead and collecting potential
-    // statements.
+    // nodes.
     P4::Coverage::CoverageSet coveredNodes;
     if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
         auto collector = CoverableNodesScanner(stepper->state);

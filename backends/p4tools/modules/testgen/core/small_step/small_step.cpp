@@ -50,10 +50,10 @@ SmallStepEvaluator::Branch::Branch(std::optional<const Constraint *> c,
 
 SmallStepEvaluator::Branch::Branch(std::optional<const Constraint *> c,
                                    const ExecutionState &prevState, ExecutionState &nextState,
-                                   P4::Coverage::CoverageSet potentialStatements)
+                                   P4::Coverage::CoverageSet potentialNodes)
     : constraint(IR::getBoolLiteral(true)),
       nextState(nextState),
-      potentialStatements(std::move(potentialStatements)) {
+      potentialNodes(std::move(potentialNodes)) {
     if (c) {
         // Evaluate the branch constraint in the current state of symbolic environment.
         // Substitutes all variables to their symbolic value (expression on the program's initial

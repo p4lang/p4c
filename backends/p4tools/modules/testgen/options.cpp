@@ -188,7 +188,7 @@ TestgenOptions::TestgenOptions()
             }
             return true;
         },
-        "List of the selected branches which should be chosen for selection.");
+        "[EXPERIMENTAL] List of the selected branches which should be chosen for selection.");
 
     registerOption(
         "--track-branches", nullptr,
@@ -203,8 +203,8 @@ TestgenOptions::TestgenOptions()
             }
             return true;
         },
-        "Track the branches that are chosen in the symbolic executor. This can be used for "
-        "deterministic replay.");
+        "[EXPERIMENTAL] Track the branches that are chosen in the symbolic executor. This can be "
+        "used for deterministic replay.");
 
     registerOption(
         "--with-output-packet", nullptr,
@@ -229,7 +229,6 @@ TestgenOptions::TestgenOptions()
                 {"DEPTH_FIRST", PathSelectionPolicy::DepthFirst},
                 {"RANDOM_BACKTRACK", PathSelectionPolicy::RandomBacktrack},
                 {"GREEDY_STATEMENT_SEARCH", PathSelectionPolicy::GreedyStmtCoverage},
-                {"RANDOM_STATEMENT_SEARCH", PathSelectionPolicy::RandomMaxStmtCoverage},
             };
             auto selectionString = cstring(arg).toUpper();
             auto it = PATH_SELECTION_OPTIONS.find(selectionString);
@@ -250,7 +249,7 @@ TestgenOptions::TestgenOptions()
             return false;
         },
         "Selects a specific path selection strategy for test generation. Options are: "
-        "DEPTH_FIRST, RANDOM_BACKTRACK, GREEDY_STATEMENT_SEARCH, and RANDOM_STATEMENT_SEARCH. "
+        "DEPTH_FIRST, RANDOM_BACKTRACK, and GREEDY_STATEMENT_SEARCH. "
         "Defaults to DEPTH_FIRST.");
 
     registerOption(
@@ -282,29 +281,6 @@ TestgenOptions::TestgenOptions()
         "Specifies, which IR nodes to track for coverage in the targeted P4 program. Multiple "
         "options are possible: Currently supported: STATEMENTS, TABLE_ENTRIES "
         "Defaults to no coverage.");
-
-    registerOption(
-        "--saddle-point", "saddlePoint",
-        [this](const char *arg) {
-            int64_t saddlePointTmp = 0;
-            try {
-                // Unfortunately, we can not use std::stoul because negative inputs are okay
-                // according to the C++ standard.
-                saddlePointTmp = std::stoll(arg);
-                if (saddlePointTmp <= 1) {
-                    throw std::invalid_argument("Invalid input.");
-                }
-            } catch (std::invalid_argument &) {
-                ::error(
-                    "Invalid input value %1% for --saddle-point. Expected an integer greater than "
-                    "1.",
-                    arg);
-                return false;
-            }
-            saddlePoint = saddlePointTmp;
-            return true;
-        },
-        "Threshold to invoke multiPop on RANDOM_STATEMENT_SEARCH.");
 
     registerOption(
         "--print-traces", nullptr,
@@ -346,8 +322,8 @@ TestgenOptions::TestgenOptions()
             dcg = true;
             return true;
         },
-        R"(Build a DCG for input graph. This control flow graph directed cyclic graph can be used
-        for statement reachability analysis.)");
+        "[EXPERIMENTAL] Build a DCG for input graph. This control flow graph directed cyclic graph "
+        "can be used for statement reachability analysis.");
 
     registerOption(
         "--pattern", "pattern",

@@ -1,4 +1,4 @@
-#include "backends/p4tools/modules/testgen/core/symbolic_executor/greedy_stmt_cov.h"
+#include "backends/p4tools/modules/testgen/core/symbolic_executor/greedy_node_cov.h"
 
 #include <cstddef>
 #include <functional>
@@ -18,26 +18,26 @@
 
 namespace P4Tools::P4Testgen {
 
-GreedyStmtSelection::GreedyStmtSelection(AbstractSolver &solver, const ProgramInfo &programInfo)
+GreedyNodeSelection::GreedyNodeSelection(AbstractSolver &solver, const ProgramInfo &programInfo)
     : SymbolicExecutor(solver, programInfo) {}
 
-std::optional<SymbolicExecutor::Branch> GreedyStmtSelection::popPotentialBranch(
-    const P4::Coverage::CoverageSet &coveredStatements,
+std::optional<SymbolicExecutor::Branch> GreedyNodeSelection::popPotentialBranch(
+    const P4::Coverage::CoverageSet &coveredNodes,
     std::vector<SymbolicExecutor::Branch> &candidateBranches) {
     for (size_t idx = 0; idx < candidateBranches.size(); ++idx) {
         auto branch = candidateBranches.at(idx);
-        // First check all the potential set of statements we can cover by looking ahead.
-        for (const auto &stmt : branch.potentialStatements) {
-            if (coveredStatements.count(stmt) == 0U) {
+        // First check all the potential set of nodes we can cover by looking ahead.
+        for (const auto &stmt : branch.potentialNodes) {
+            if (coveredNodes.count(stmt) == 0U) {
                 candidateBranches[idx] = candidateBranches.back();
                 candidateBranches.pop_back();
                 return branch;
             }
         }
-        // If we did not find anything, check whether this state covers any new statements
+        // If we did not find anything, check whether this state covers any new nodes
         // already.
         for (const auto &stmt : branch.nextState.get().getVisited()) {
-            if (coveredStatements.count(stmt) == 0U) {
+            if (coveredNodes.count(stmt) == 0U) {
                 candidateBranches[idx] = candidateBranches.back();
                 candidateBranches.pop_back();
                 return branch;
@@ -47,7 +47,7 @@ std::optional<SymbolicExecutor::Branch> GreedyStmtSelection::popPotentialBranch(
     return std::nullopt;
 }
 
-std::optional<ExecutionStateReference> GreedyStmtSelection::pickSuccessor(StepResult successors) {
+std::optional<ExecutionStateReference> GreedyNodeSelection::pickSuccessor(StepResult successors) {
     if (successors->empty()) {
         return std::nullopt;
     }
@@ -60,7 +60,7 @@ std::optional<ExecutionStateReference> GreedyStmtSelection::pickSuccessor(StepRe
     // Only perform a greedy search if we are still producing tests consistently.
     // This guard is necessary to avoid getting caught in parser loops.
     if (stepsWithoutTest < MAX_STEPS_WITHOUT_TEST) {
-        // Try to find a branch that covers new statements.
+        // Try to find a branch that covers new nodes.
         auto branch = popPotentialBranch(getVisitedNodes(), *successors);
         // If we succeed, pick the branch and add the remainder to the list of
         // potential branches.
@@ -78,7 +78,7 @@ std::optional<ExecutionStateReference> GreedyStmtSelection::pickSuccessor(StepRe
     return nextState;
 }
 
-void GreedyStmtSelection::runImpl(const Callback &callBack,
+void GreedyNodeSelection::runImpl(const Callback &callBack,
                                   ExecutionStateReference executionState) {
     while (true) {
         try {
@@ -130,7 +130,7 @@ void GreedyStmtSelection::runImpl(const Callback &callBack,
         unexploredBranches.insert(unexploredBranches.end(), potentialBranches.begin(),
                                   potentialBranches.end());
         potentialBranches.clear();
-        // If we did not find any new statements, fall back to random.
+        // If we did not find any new nodes, fall back to random.
         executionState = popRandomBranch(unexploredBranches).nextState;
     }
 }
