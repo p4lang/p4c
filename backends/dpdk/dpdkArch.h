@@ -1081,6 +1081,39 @@ class ValidateAddOnMissExterns : public Inspector {
     }
 };
 
+// Dpdk does not allow operations (arithmetic, logical, bitwise, relational etc) on operands
+// greater than 64-bit.
+class ValidateOperandSize : public Inspector {
+ public:
+    ValidateOperandSize() { setName("ValidateOperandSize"); }
+    void isValidOperandSize(const IR::Expression *e) {
+        if (auto t = e->type->to<IR::Type_Bits>()) {
+            if (t->width_bits() > dpdk_max_operand_size) {
+                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Unsupported bitwidth %1% in %2%",
+                        t->width_bits(), e);
+                return;
+            }
+        }
+    }
+
+    void postorder(const IR::Operation_Binary *binop) override {
+        isValidOperandSize(binop->left);
+        isValidOperandSize(binop->right);
+    }
+
+    // Reject all operations except typecast if the operand size is beyond the supported limit
+    void postorder(const IR::Operation_Unary *unop) override {
+        if (unop->is<IR::Cast>()) return;
+        isValidOperandSize(unop->expr);
+    }
+
+    void postorder(const IR::Operation_Ternary *top) override {
+        isValidOperandSize(top->e0);
+        isValidOperandSize(top->e1);
+        isValidOperandSize(top->e2);
+    }
+};
+
 class CollectErrors : public Inspector {
     DpdkProgramStructure *structure;
 

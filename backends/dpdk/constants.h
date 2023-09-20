@@ -58,4 +58,7 @@ const unsigned initial_group_id = 0xFFFFFFFF;
 #define IPSEC_PORT_REG_INITVAL_BITWIDTH 32
 #define NET_TO_HOST 0
 
+// Maximum operand size for unary, binary and ternary operations
+const unsigned dpdk_max_operand_size = 64;
+
 #endif /* BACKENDS_DPDK_CONSTANTS_H_ */

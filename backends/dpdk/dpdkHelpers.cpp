@@ -573,19 +573,6 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
     } else if (right->is<IR::Operation_Unary>() && !right->is<IR::Member>()) {
         if (auto ca = right->to<IR::Cast>()) {
             i = new IR::DpdkCastStatement(left, ca->expr, ca->destType);
-        } else if (auto n = right->to<IR::Neg>()) {
-            if (!n->expr->type->is<IR::Type_Bits>()) {
-                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                        "Negate operation is only supported on BIT types");
-                return false;
-            }
-            BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
-            IR::ID zero(refmap->newName("zero"));
-            auto zero1 = new IR::Member(new IR::PathExpression("m"), zero);
-            metadataStruct->fields.push_back(new IR::StructField(zero, n->expr->type));
-            add_instr(new IR::DpdkMovStatement(zero1, new IR::Constant(0)));
-            add_instr(new IR::DpdkSubStatement(zero1, zero1, n->expr));
-            i = new IR::DpdkMovStatement(left, zero1);
         } else if (auto n = right->to<IR::Cmpl>()) {
             if (!n->expr->type->is<IR::Type_Bits>()) {
                 ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,

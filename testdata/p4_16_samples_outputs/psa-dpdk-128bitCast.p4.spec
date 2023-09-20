@@ -5,6 +5,10 @@ struct ethernet_t {
 	bit<16> ether_type
 }
 
+struct dpdk_pseudo_header_t {
+	bit<64> pseudo
+}
+
 struct psa_ingress_output_metadata_t {
 	bit<8> class_of_service
 	bit<8> clone
@@ -26,13 +30,17 @@ struct psa_egress_deparser_input_metadata_t {
 }
 
 header ethernet instanceof ethernet_t
+header dpdk_pseudo_header instanceof dpdk_pseudo_header_t
 
 struct user_meta_data_t {
 	bit<32> psa_ingress_input_metadata_ingress_port
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<48> local_metadata_addr
-	bit<64> Ingress_flg
+	bit<128> Ingress_tmp
+	bit<128> Ingress_tmp_0
+	bit<128> Ingress_tmp_1
+	bit<128> Ingress_flg
 }
 metadata instanceof user_meta_data_t
 
@@ -41,7 +49,14 @@ action NoAction args none {
 }
 
 action macswp args none {
-	jmpneq LABEL_END m.Ingress_flg 0x2
+	mov m.Ingress_tmp m.Ingress_flg
+	and m.Ingress_tmp 0xFFFFFFFFFFFFFFFF
+	mov m.Ingress_tmp_0 m.Ingress_tmp
+	and m.Ingress_tmp_0 0xFFFFFFFFFFFFFFFF
+	mov m.Ingress_tmp_1 m.Ingress_tmp_0
+	and m.Ingress_tmp_1 0xFFFFFFFFFFFFFFFF
+	mov h.dpdk_pseudo_header.pseudo m.Ingress_tmp_1
+	jmpneq LABEL_END h.dpdk_pseudo_header.pseudo 0x2
 	mov m.local_metadata_addr h.ethernet.dst_addr
 	mov h.ethernet.dst_addr h.ethernet.src_addr
 	mov h.ethernet.src_addr m.local_metadata_addr
