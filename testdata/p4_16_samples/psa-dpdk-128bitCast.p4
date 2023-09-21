@@ -45,10 +45,10 @@ control MyIngressControl(
     inout user_meta_data_t m,
     in psa_ingress_input_metadata_t c,
     inout psa_ingress_output_metadata_t d) {
-    bit<64> flg;
+    bit<128> flg;
 	action macswp() {
 		//if (m.val == 0x1 && hdr.ethernet.val == 0x2) {
-		if (flg == 0x2) {
+		if ((bit<64>)flg == 0x2) {
 			m.addr = hdr.ethernet.dst_addr;
 			hdr.ethernet.dst_addr = hdr.ethernet.src_addr;
 			hdr.ethernet.src_addr = m.addr;

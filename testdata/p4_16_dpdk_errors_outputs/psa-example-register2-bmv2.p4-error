@@ -1,0 +1,54 @@
+psa-example-register2-bmv2.p4(84): [--Werror=target-error] error: Unsupported bitwidth 80 in 80w0xffffffff000000000000
+    s[(80 -1):48] = s[(80 -1):48] + 1;
+    ^^^^^^^^^^^^^
+psa-example-register2-bmv2.p4(84): [--Werror=target-error] error: Unsupported bitwidth 80 in s
+    s[(80 -1):48] = s[(80 -1):48] + 1;
+    ^
+psa-example-register2-bmv2.p4(84): [--Werror=target-error] error: Unsupported bitwidth 80 in ~80w0xffffffff000000000000
+    s[(80 -1):48] = s[(80 -1):48] + 1;
+    ^^^^^^^^^^^^^
+psa-example-register2-bmv2.p4(84): [--Werror=target-error] error: Unsupported bitwidth 80 in tmp
+    s[(80 -1):48] = s[(80 -1):48] + 1;
+                    ^
+psa-example-register2-bmv2.p4(84): [--Werror=target-error] error: Unsupported bitwidth 80 in (bit<80>)tmp_0/tmp[79:48] + 1
+    s[(80 -1):48] = s[(80 -1):48] + 1;
+                    ^^^^^^^^^^^^^^^^^
+psa-example-register2-bmv2.p4(84): [--Werror=target-error] error: Unsupported bitwidth 80 in (bit<80>)(tmp_0/tmp[79:48] + 1) << 48
+    s[(80 -1):48] = s[(80 -1):48] + 1;
+                    ^^^^^^^^^^^^^^^^^
+psa-example-register2-bmv2.p4(84): [--Werror=target-error] error: Unsupported bitwidth 80 in 80w0xffffffff000000000000
+    s[(80 -1):48] = s[(80 -1):48] + 1;
+    ^^^^^^^^^^^^^
+psa-example-register2-bmv2.p4(84): [--Werror=target-error] error: Unsupported bitwidth 80 in s_0/s & ~1208925819333154197995520
+    s[(80 -1):48] = s[(80 -1):48] + 1;
+    ^^^^^^^^^^^^^
+psa-example-register2-bmv2.p4(84): [--Werror=target-error] error: Unsupported bitwidth 80 in (bit<80>)(tmp_0/tmp[79:48] + 1) << 48 & 1208925819333154197995520
+    s[(80 -1):48] = s[(80 -1):48] + 1;
+                    ^^^^^^^^^^^^^^^^^
+psa-example-register2-bmv2.p4(85): [--Werror=target-error] error: Unsupported bitwidth 80 in 80w0xffffffffffff
+    s[(48 -1):0] = (s[(48 -1):0] +
+    ^^^^^^^^^^^^
+psa-example-register2-bmv2.p4(85): [--Werror=target-error] error: Unsupported bitwidth 80 in s
+    s[(48 -1):0] = (s[(48 -1):0] +
+    ^
+psa-example-register2-bmv2.p4(85): [--Werror=target-error] error: Unsupported bitwidth 80 in ~80w0xffffffffffff
+    s[(48 -1):0] = (s[(48 -1):0] +
+    ^^^^^^^^^^^^
+psa-example-register2-bmv2.p4(85): [--Werror=target-error] error: Unsupported bitwidth 80 in s
+    s[(48 -1):0] = (s[(48 -1):0] +
+                    ^
+psa-example-register2-bmv2.p4(85): [--Werror=target-error] error: Unsupported bitwidth 80 in (bit<80>)s_0/s[47:0] + (bit<48>)hdr.ipv4.totalLen
+    s[(48 -1):0] = (s[(48 -1):0] +
+                    ^
+psa-example-register2-bmv2.p4(85): [--Werror=target-error] error: Unsupported bitwidth 80 in (bit<80>)(s_0/s[47:0] + (bit<48>)hdr.ipv4.totalLen) << 0
+    s[(48 -1):0] = (s[(48 -1):0] +
+                    ^
+psa-example-register2-bmv2.p4(85): [--Werror=target-error] error: Unsupported bitwidth 80 in 80w0xffffffffffff
+    s[(48 -1):0] = (s[(48 -1):0] +
+    ^^^^^^^^^^^^
+psa-example-register2-bmv2.p4(85): [--Werror=target-error] error: Unsupported bitwidth 80 in s_0/s & ~281474976710655
+    s[(48 -1):0] = (s[(48 -1):0] +
+    ^^^^^^^^^^^^
+psa-example-register2-bmv2.p4(85): [--Werror=target-error] error: Unsupported bitwidth 80 in (bit<80>)(s_0/s[47:0] + (bit<48>)hdr.ipv4.totalLen) << 0 & 281474976710655
+    s[(48 -1):0] = (s[(48 -1):0] +
+                    ^

@@ -1,0 +1,3 @@
+psa-dpdk-128bitCast.p4(51): [--Wwarn=uninitialized_use] warning: flg may be uninitialized
+  if ((bit<64>)flg == 0x2) {
+               ^^^

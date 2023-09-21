@@ -207,8 +207,6 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
             add_instr(new IR::DpdkShlStatement(left, src1Op, src2Op));
         } else if (right->is<IR::Shr>()) {
             add_instr(new IR::DpdkShrStatement(left, src1Op, src2Op));
-        } else if (right->is<IR::Equ>()) {
-            add_instr(new IR::DpdkEquStatement(left, src1Op, src2Op));
         } else if (right->is<IR::LOr>() || right->is<IR::LAnd>()) {
             process_logical_operation(left, r);
         } else if (right->is<IR::BOr>()) {
@@ -575,10 +573,20 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
     } else if (right->is<IR::Operation_Unary>() && !right->is<IR::Member>()) {
         if (auto ca = right->to<IR::Cast>()) {
             i = new IR::DpdkCastStatement(left, ca->expr, ca->destType);
-        } else if (auto n = right->to<IR::Neg>()) {
-            i = new IR::DpdkNegStatement(left, n->expr);
-        } else if (auto c = right->to<IR::Cmpl>()) {
-            i = new IR::DpdkCmplStatement(left, c->expr);
+        } else if (auto n = right->to<IR::Cmpl>()) {
+            if (!n->expr->type->is<IR::Type_Bits>()) {
+                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                        "Negate operation is only supported on BIT types");
+                return false;
+            }
+            BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
+            IR::ID tmpxor(refmap->newName("tmpxor"));
+            auto xor1 = new IR::Member(new IR::PathExpression("m"), tmpxor);
+            metadataStruct->fields.push_back(new IR::StructField(tmpxor, n->expr->type));
+            add_instr(new IR::DpdkMovStatement(
+                xor1, new IR::Constant(Util::mask(n->expr->type->width_bits()))));
+            add_instr(new IR::DpdkXorStatement(xor1, xor1, n->expr));
+            i = new IR::DpdkMovStatement(left, xor1);
         } else if (auto ln = right->to<IR::LNot>()) {
             /* DPDK target does not support storing result of logical NOT operation.
                Hence we convert the expression var = !a into if-else statement.

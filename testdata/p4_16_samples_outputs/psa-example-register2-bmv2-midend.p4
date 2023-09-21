@@ -51,15 +51,15 @@ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadat
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @name("ingress.tmp") bit<80> tmp_0;
-    @name("ingress.s") bit<80> s_0;
+    @name("ingress.tmp") bit<64> tmp_0;
+    @name("ingress.s") bit<64> s_0;
     @name(".update_pkt_ip_byte_count") action update_pkt_ip_byte_count_0() {
         s_0 = tmp_0;
-        s_0[79:48] = tmp_0[79:48] + 32w1;
+        s_0[63:48] = tmp_0[63:48] + 16w1;
         s_0[47:0] = s_0[47:0] + 48w14;
         tmp_0 = s_0;
     }
-    @name("ingress.port_pkt_ip_bytes_in") Register<bit<80>, bit<32>>(32w512) port_pkt_ip_bytes_in_0;
+    @name("ingress.port_pkt_ip_bytes_in") Register<bit<64>, bit<32>>(32w512) port_pkt_ip_bytes_in_0;
     @hidden action psaexampleregister2bmv2l130() {
         tmp_0 = port_pkt_ip_bytes_in_0.read(istd.ingress_port);
     }

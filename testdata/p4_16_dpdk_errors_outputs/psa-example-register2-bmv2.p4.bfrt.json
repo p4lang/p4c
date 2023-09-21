@@ -32,7 +32,7 @@
             "annotations" : [],
             "type" : {
               "type" : "bytes",
-              "width" : 64
+              "width" : 80
             }
           }
         }
