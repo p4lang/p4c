@@ -1,0 +1,6 @@
+header_unaligned.p4(15): [--Werror=target-error] error: Header headers.foo size 3 is not a multiple of 8 bits.
+        p.extract(headers.foo);
+                  ^^^^^^^^^^^
+header_unaligned.p4(16): [--Werror=target-error] error: Header headers.bar size 3 is not a multiple of 8 bits.
+        p.extract(headers.bar);
+                  ^^^^^^^^^^^
