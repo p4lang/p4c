@@ -501,6 +501,8 @@ EBPFControl::EBPFControl(const EBPFProgram *program, const IR::ControlBlock *blo
       controlBlock(block),
       headers(nullptr),
       accept(nullptr),
+      xdpInputMeta(nullptr),
+      xdpOutputMeta(nullptr),
       parserHeaders(parserHeaders),
       codeGen(nullptr),
       emitExterns(program->options.emitExterns) {}
@@ -532,15 +534,29 @@ void EBPFControl::scanConstants() {
 bool EBPFControl::build() {
     hitVariable = program->refMap->newName("hit");
     auto pl = controlBlock->container->type->applyParams;
-    if (pl->size() != 2) {
-        ::error(ErrorType::ERR_EXPECTED, "Expected control block to have exactly 2 parameters");
-        return false;
-    }
-
     auto it = pl->parameters.begin();
-    headers = *it;
-    ++it;
-    accept = *it;
+
+    if (program->model.arch == ModelArchitecture::XdpSwitch) {
+        if (pl->size() != 3) {
+            ::error(ErrorType::ERR_EXPECTED,
+                    "Expected control block %s to have exactly 3 parameters",
+                    controlBlock->getName());
+            return false;
+        }
+        headers = *it;
+        ++it;
+        xdpInputMeta = *it;
+        ++it;
+        xdpOutputMeta = *it;
+    } else {
+        if (pl->size() != 2) {
+            ::error(ErrorType::ERR_EXPECTED, "Expected control block to have exactly 2 parameters");
+            return false;
+        }
+        headers = *it;
+        ++it;
+        accept = *it;
+    }
 
     codeGen = new ControlBodyTranslator(this);
     codeGen->substitute(headers, parserHeaders);

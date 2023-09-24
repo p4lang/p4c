@@ -32,6 +32,7 @@ namespace EBPF {
 class EBPFProgram;
 class EBPFParser;
 class EBPFControl;
+class EBPFDeparser;
 class EBPFTable;
 class EBPFType;
 
@@ -49,6 +50,8 @@ class EBPFProgram : public EBPFObject {
     EBPFParser *parser;
     EBPFControl *control;
     EBPFModel &model;
+    // Deparser may be NULL if not supported (e.g. ebpfFilter package)
+    EBPFDeparser *deparser;
 
     cstring endLabel, offsetVar, lengthVar;
     cstring zeroKey, functionName, errorVar;
@@ -69,7 +72,8 @@ class EBPFProgram : public EBPFObject {
           typeMap(typeMap),
           parser(nullptr),
           control(nullptr),
-          model(EBPFModel::instance) {
+          model(EBPFModel::instance),
+          deparser(nullptr) {
         offsetVar = EBPFModel::reserved("packetOffsetInBits");
         zeroKey = EBPFModel::reserved("zero");
         functionName = EBPFModel::reserved("filter");

@@ -126,7 +126,7 @@ def compare_pkt(expected: str, received: scapy.packet.Packet) -> int:
                 val,
                 received[idx],
             )
-            log.error("Expected packet %s", expected)
+            log.error("Expected packet\n %s", expected)
             return FAILURE
     return SUCCESS
 

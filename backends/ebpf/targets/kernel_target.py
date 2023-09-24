@@ -117,12 +117,18 @@ class Target(EBPFTarget):
         # Load the specified eBPF object to "port_name" egress
         # As a side-effect, this may create maps in /sys/fs/bpf/
 
-        # Add the qdisc. MUST be clsact layer.
-        bridge.ns_exec(f"tc qdisc add dev {port_name} clsact")
-        cmd = (
-            f"tc filter add dev {port_name} egress"
-            f" bpf da obj {self.template}.o section prog verbose"
-        )
+        # Is this a XDP or TC (ebpf_filter) program?
+        result = testutils.exec_process(f"objdump -hj xdp {self.template}.o")
+        if result.returncode == testutils.SUCCESS:
+            # NB: XDP programs attach to the Rx end (but TC below attaches to Tx).
+            cmd = f"ip link set br_{port_name} xdpgeneric obj {self.template}.o sec xdp"
+        else:
+            # Add the qdisc. MUST be clsact layer.
+            bridge.ns_exec(f"tc qdisc add dev {port_name} clsact")
+            cmd = (
+                f"tc filter add dev {port_name} egress"
+                f" bpf da obj {self.template}.o section prog verbose"
+            )
         return bridge.ns_proc_write(proc, cmd)
 
     def _attach_filters(self, bridge, proc):

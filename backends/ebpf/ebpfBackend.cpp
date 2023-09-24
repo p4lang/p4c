@@ -71,9 +71,12 @@ void run_ebpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *tople
         return;
     }
 
+    // We don't require --xdp option to be used if we can auto-detect it.
+    bool mainIsXdp = (main->type->name == "xdp");
+
     Target *target;
     if (options.target.isNullOrEmpty() || options.target == "kernel") {
-        if (!options.generateToXDP)
+        if (!options.generateToXDP && !mainIsXdp)
             target = new KernelSamplesTarget(options.emitTraceMessages);
         else
             target = new XdpTarget(options.emitTraceMessages);

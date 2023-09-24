@@ -64,6 +64,11 @@ class EBPFDeparserPSA : public EBPFDeparser {
         BUG_CHECK(result != nullptr, "No digest named %1%", name);
         return result;
     }
+
+    void emitDeparserExternCalls(EBPF::CodeBuilder *builder) override {
+        controlBlock->container->body->apply(*codeGen);
+        builder->newline();
+    }
 };
 
 class IngressDeparserPSA : public EBPFDeparserPSA {

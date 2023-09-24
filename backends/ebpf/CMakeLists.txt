@@ -115,7 +115,10 @@ set (P4C_EBPF_HDRS
   psa/externs/ebpfPsaMeter.h
 )
 
-set (P4C_EBPF_DIST_HEADERS p4include/ebpf_model.p4)
+set (P4C_EBPF_DIST_HEADERS
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../p4include/ebpf_model.p4
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../p4include/xdp_model.p4
+)
 
 add_executable(p4c-ebpf ${P4C_EBPF_SRCS})
 target_link_libraries (p4c-ebpf ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
@@ -147,7 +150,7 @@ file(RELATIVE_PATH
 add_custom_target(linkp4cebpf
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${CURRENT_BINARY_DIR_PATH_REL}/p4c-ebpf ${P4C_BINARY_DIR}/p4c-ebpf
   COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4include &&
-          ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${P4C_EBPF_DIST_HEADERS} ${P4C_BINARY_DIR}/p4include
+          ${CMAKE_COMMAND} -E copy ${P4C_EBPF_DIST_HEADERS} ${P4C_BINARY_DIR}/p4include
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR_PATH_REL}/p4include ${CMAKE_CURRENT_BINARY_DIR}/p4include
   DEPENDS update_includes
   )
@@ -176,6 +179,10 @@ set (XFAIL_TESTS_TEST
 
 set (EBPF_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*_ebpf.p4"
+  )
+# Kernel tests for XDP won't work on other targets (e.g. missing bpf_xdp_* helpers).
+set (EBPF_KERNEL_TEST_SUITES
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*_ebpf-kernel.p4"
   )
 
 # determine the kernel version
@@ -232,6 +239,7 @@ endif()
 # Only add the kernel tests if the two requirements are met
 if (SUPPORTS_KERNEL)
   p4c_add_tests("ebpf-kernel" ${EBPF_DRIVER_KERNEL} ${EBPF_TEST_SUITES} "${XFAIL_TESTS_KERNEL}")
+  p4c_add_tests("ebpf-kernel" ${EBPF_DRIVER_KERNEL} ${EBPF_KERNEL_TEST_SUITES} "${XFAIL_TESTS_KERNEL}")
   # These are special tests with args that are not included
   # in the default ebpf tests
   p4c_add_test_with_args("ebpf-kernel" ${EBPF_DRIVER_KERNEL} FALSE "testdata/p4_16_samples/ebpf_conntrack_extern.p4" "testdata/p4_16_samples/ebpf_conntrack_extern.p4" "--extern-file ${P4C_SOURCE_DIR}/testdata/extern_modules/extern-conntrack-ebpf.c" "")

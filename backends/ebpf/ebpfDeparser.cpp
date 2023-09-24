@@ -283,6 +283,26 @@ void DeparserHdrEmitTranslator::emitField(CodeBuilder *builder, cstring field,
     builder->newline();
 }
 
+bool EBPFDeparser::build() {
+    hitVariable = program->refMap->newName("hit");
+    auto pl = controlBlock->container->type->applyParams;
+    if (pl->size() != 2) {
+        ::error(ErrorType::ERR_EXPECTED, "Expected deparser block to have exactly 2 parameters");
+        return false;
+    }
+
+    auto it = pl->parameters.begin();
+    headers = *it;
+    ++it;
+    packet_out = *it;
+
+    codeGen = new EBPF::ControlBodyTranslator(this);
+    codeGen->substitute(headers, parserHeaders);
+
+    scanConstants();
+    return ::errorCount() == 0;
+}
+
 void EBPFDeparser::emitBufferAdjusts(CodeBuilder *builder) const {
     builder->newline();
     builder->emitIndent();
