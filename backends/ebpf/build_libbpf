@@ -42,6 +42,7 @@ def main() -> int:
     mk_cmd += "BUILD_STATIC_ONLY=y "
     mk_cmd += f"OBJDIR={libbpf_build_dir} "
     mk_cmd += f"DESTDIR={libbpf_target_dir} "
+    mk_cmd += "EXTRA_CFLAGS=-fPIE"
     result = testutils.exec_process(args=mk_cmd)
     if result.returncode != testutils.SUCCESS:
         testutils.log.error("Could not build libbpf")

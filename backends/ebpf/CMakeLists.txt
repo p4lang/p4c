@@ -29,18 +29,19 @@ if(NOT APPLE)
   )
   fetchcontent_makeavailable(bpfrepo)
   set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
-  # Build libbpf as necessary.
-  add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/runtime/usr/lib64/libbpf.a
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build_libbpf
-    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-    COMMENT "Building libbpf..."
-  )
-  add_custom_target(genlibbpf ALL
-    DEPENDS  ${CMAKE_CURRENT_SOURCE_DIR}/runtime/usr/lib64/libbpf.a
-  )
+  # Check if we have already built the libbpf library.
+  find_library(LIBBPF NAMES bpf HINTS "${CMAKE_CURRENT_SOURCE_DIR}/runtime/usr/lib64/")
+  if (NOT LIBBPF)
+    message("Building libbpf...")
+    execute_process(
+      COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build_libbpf
+      WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    )
+  endif()
   message("Done with setting up libbpf for P4C.")
 endif()
+
+
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version.h.cmake"
   "${CMAKE_CURRENT_BINARY_DIR}/version.h" @ONLY)
@@ -123,9 +124,6 @@ set (P4C_EBPF_DIST_HEADERS
 add_executable(p4c-ebpf ${P4C_EBPF_SRCS})
 target_link_libraries (p4c-ebpf ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 add_dependencies(p4c-ebpf ir-generated frontend)
-if (NOT APPLE)
-  add_dependencies(p4c-ebpf genlibbpf)
-endif()
 
 install (TARGETS p4c-ebpf
   RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
