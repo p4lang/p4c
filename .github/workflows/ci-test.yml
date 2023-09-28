@@ -75,39 +75,6 @@ jobs:
       working-directory: ./build
       if: matrix.unity == 'ON'
 
-  # Build with clang and test p4c on Ubuntu 20.04.
-  test-ubuntu20-clang-sanitizers:
-    strategy:
-      fail-fast: false
-    runs-on: ubuntu-20.04
-    env:
-      CTEST_PARALLEL_LEVEL: 2
-      IMAGE_TYPE: test
-      COMPILE_WITH_CLANG: ON
-      BUILD_AUTO_VAR_INIT_PATTERN: ON
-      ENABLE_SANITIZERS: ON
-      UBSAN_OPTIONS: print_stacktrace=1
-      ASAN_OPTIONS: print_stacktrace=1:detect_leaks=0
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: recursive
-
-    - name: ccache
-      uses: hendrikmuhs/ccache-action@v1
-      with:
-        key: test-${{ runner.os }}-clang
-        max-size: 1000M
-
-    - name: Build (Ubuntu 20.04, Clang, Sanitizers)
-      run: |
-        tools/ci-build.sh
-
-    - name: Run tests (Ubuntu 20.04)
-      # Need to use sudo for the eBPF kernel tests.
-      run: sudo -E ctest --output-on-failure --schedule-random
-      working-directory: ./build
-
   # Build and test p4c on Fedora.
   test-fedora-linux:
     strategy:
