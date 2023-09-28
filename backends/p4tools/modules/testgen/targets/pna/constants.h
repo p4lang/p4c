@@ -23,7 +23,7 @@ class PnaConstants {
     /// PNA-internal parser error label.
     static const IR::Member PARSER_ERROR;
     /// Port width in bits.
-    static constexpr int PORT_BIT_WIDTH = 9;
+    static constexpr int PORT_BIT_WIDTH = 32;
 };
 
 /// variabless are variables that can be controlled and set by P4Testgen.
