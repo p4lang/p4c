@@ -17,9 +17,11 @@ concurrency:
 # IPDK_INSTALL_DIR is put to a default searching directory for
 # visibility of different libs like libprotobuf
 env:
-    SDE: ${{ github.workspace }}
-    IPDK_INSTALL_DIR: ${{ github.workspace }}/ipdk_install
-    IPDK_RECIPE: ${{ github.workspace }}/ipdk.recipe
+    IPDK_INSTALL_DIR: ${{github.workspace}}/ipdk_install
+    CMAKE_UNITY_BUILD: ON
+    ENABLE_TEST_TOOLS: ON
+    IMAGE_TYPE: test
+    CTEST_PARALLEL_LEVEL: 4
 
 jobs:
   build_p4dpdk_ubuntu:
@@ -72,7 +74,7 @@ jobs:
              echo "Install infrap4d dependencies"
              sudo apt install libatomic1 libnl-route-3-dev openssl
              pip3 install -r requirements.txt
-             cd $IPDK_RECIPE/setup
+             cd setup
              echo "Build infrap4d dependencies"
              cmake -B build -DCMAKE_INSTALL_PREFIX="$IPDK_INSTALL_DIR"
              cmake --build build 
@@ -85,7 +87,16 @@ jobs:
       - name: Build p4c with only the DPDK backend
         working-directory: p4c
         run: |
-          tools/dpdk-ci-build.sh $IPDK_INSTALL_DIR
+          export CMAKE_FLAGS+="-DENABLE_BMV2=OFF "
+          export CMAKE_FLAGS+="-DENABLE_EBPF=OFF "
+          export CMAKE_FLAGS+="-DENABLE_UBPF=OFF "
+          export CMAKE_FLAGS+="-DENABLE_GTESTS=OFF "
+          export CMAKE_FLAGS+="-DENABLE_P4TEST=OFF "
+          export CMAKE_FLAGS+="-DENABLE_P4TC=OFF "
+          export CMAKE_FLAGS+="-DENABLE_P4C_GRAPHS=OFF "
+          export CMAKE_FLAGS+="-DENABLE_TEST_TOOLS=ON "
+          export CMAKE_FLAGS+="-DIPDK_INSTALL_DIR=$IPDK_INSTALL_DIR "
+          tools/ci-build.sh
 
       - name: 'Run DPDK PTF tests'
         working-directory: p4c/build

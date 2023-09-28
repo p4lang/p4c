@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 
 import argparse
-import json
 import logging
 import os
 import random
-import socket
-import subprocess
 import sys
 import tempfile
 import time
@@ -42,12 +39,15 @@ PARSER.add_argument(
 PARSER.add_argument(
     "--ipdk-install-dir",
     dest="ipdk_install_dir",
+    required=True,
     help="The location of the IPDK installation folder for infrap4d-related executables.",
 )
 PARSER.add_argument(
     "--ld-library-path",
     dest="ld_library_path",
-    help="The location of the shared libs for ipdk and dpdk",
+    type=str,
+    help="The location of the shared libs for ipdk and dpdk. "
+    "By default, these libraries are located in `ipdk_install_dir`.",
 )
 PARSER.add_argument(
     "-b",
@@ -80,7 +80,7 @@ PTF_ADDR: str = "0.0.0.0"
 # Check if target ports are ready to be connected (make sure infrap4d is on)
 def is_port_alive(ns, port) -> bool:
     command = f"sudo ip netns exec {ns} netstat -tuln"
-    out, result = testutils.exec_process(command, timeout=10, capture_output=True)
+    out, _ = testutils.exec_process(command, timeout=10, capture_output=True)
     if str(port) in out:
         return True
     return False
@@ -100,7 +100,7 @@ class Options:
     # Folder containing the IPDK binaries.
     ipdk_install_dir: Path = Path(".")
     # LD_LIBRARY_PATH.
-    ld_library_path: Path = Path(".")
+    ld_library_path: str = ""
     # Number of TAPs to create.
     num_taps: int = 2
 
@@ -150,7 +150,8 @@ class PTFTestEnv:
             tap_name = f"TAP{index}"
             cmd = (
                 f"{self.options.ipdk_install_dir}/bin/gnmi-ctl set "
-                f"device:virtual-device,name:{tap_name},pipeline-name:pipe,mempool-name:MEMPOOL0,mtu:1500,port-type:TAP "
+                f"device:virtual-device,name:{tap_name}"
+                f",pipeline-name:pipe,mempool-name:MEMPOOL0,mtu:1500,port-type:TAP "
                 f"-grpc_use_insecure_mode={insecure_mode}"
             )
             returncode = self.bridge.ns_exec(cmd, env=proc_env_vars)
@@ -267,7 +268,7 @@ class PTFTestEnv:
 
 
 def run_test(options: Options) -> int:
-    """Add necessary environment variables for libs and executables"""
+    # Add necessary environment variables for libs and executables
     proc_env_vars: dict = os.environ.copy()
     if "LD_LIBRARY_PATH" in proc_env_vars:
         proc_env_vars["LD_LIBRARY_PATH"] += f"{options.ld_library_path}"
@@ -280,12 +281,12 @@ def run_test(options: Options) -> int:
     proc_env_vars["PATH"] += f"{options.ipdk_install_dir}/sbin"
     proc_env_vars["SDE_INSTALL"] = f"{options.ipdk_install_dir}"
 
-    """Define the test environment and compile the P4 target"""
+    # Define the test environment and compile the P4 target
     test_name = Path(options.p4_file.name)
     info_name = options.testdir.joinpath("p4Info.txt")
     bf_rt_schema = options.testdir.joinpath("bf-rt.json")
     conf_bin = options.testdir.joinpath(test_name.with_suffix(".pb.bin"))
-    """ Files needed by the pipeline"""
+    # Files needed by the pipeline
     context = options.testdir.joinpath("pipe/context.json")
     p4c_conf = options.testdir.joinpath(test_name.with_suffix(".conf"))
     dpdk_spec = options.testdir.joinpath(f"pipe/{test_name.with_suffix('.spec')}")
@@ -356,7 +357,12 @@ def create_options(test_args) -> testutils.Optional[Options]:
     options.testdir = Path(testdir)
     options.p4c_dir = Path(test_args.p4c_dir)
     options.ipdk_install_dir = Path(test_args.ipdk_install_dir)
-    options.ld_library_path = Path(test_args.ld_library_path)
+    if test_args.ld_library_path:
+        options.ld_library_path = test_args.ld_library_path
+    else:
+        options.ld_library_path = (
+            f"{options.ipdk_install_dir}/lib;{options.ipdk_install_dir}/lib/x86_64-linux-gnu"
+        )
     options.num_taps = test_args.num_taps
 
     # Configure logging.

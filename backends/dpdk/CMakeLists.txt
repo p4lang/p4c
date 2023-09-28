@@ -136,9 +136,7 @@ if(INFRAP4D AND EXISTS ${IPDK_INSTALL_DIR})
   set (DPDK_LIB_PATH "${IPDK_INSTALL_DIR}/lib;${IPDK_INSTALL_DIR}/lib/x86_64-linux-gnu")
   p4c_add_tests(
     "dpdk-ptf" ${DPDK_PTF_DRIVER} "${DPDK_PTF_TEST_SUITES}" ""
-    "--ipdk-install-dir=${IPDK_INSTALL_DIR}  \
-      --ld-library-path=\"${DPDK_LIB_PATH}\" \
-      -ll=DEBUG "
+    "--ipdk-install-dir=${IPDK_INSTALL_DIR} -ll=DEBUG "
   )
 else()
   message(WARNING "Either infrap4d or dpdk-target is not available (required environment variables are not defined). Skipping DPDK PTF tests")
