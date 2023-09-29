@@ -20,6 +20,8 @@ env:
     IPDK_INSTALL_DIR: ${{github.workspace}}/ipdk_install
     CMAKE_UNITY_BUILD: ON
     ENABLE_TEST_TOOLS: ON
+    INSTALL_BMV2: OFF
+    INSTALL_EBPF: OFF
     IMAGE_TYPE: test
     CTEST_PARALLEL_LEVEL: 4
 

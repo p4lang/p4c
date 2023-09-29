@@ -30,7 +30,6 @@ P4C_DIR=$(readlink -f ${THIS_DIR}/..)
 : "${INSTALL_PTF_EBPF_DEPENDENCIES:=OFF}"
 # Whether to build the P4Tools back end and platform.
 : "${ENABLE_TEST_TOOLS:=OFF}"
-
 # Whether to treat warnings as errors.
 : "${ENABLE_WERROR:=ON}"
 # Compile with Clang compiler
@@ -42,6 +41,10 @@ P4C_DIR=$(readlink -f ${THIS_DIR}/..)
 # Build with -ftrivial-auto-var-init=pattern to catch more bugs caused by
 # uninitialized variables.
 : "${BUILD_AUTO_VAR_INIT_PATTERN:=OFF}"
+# Install BMv2 and its dependencies.
+: "${INSTALL_BMV2:=ON}"
+# Install eBPF and its dependencies.
+: "${INSTALL_EBPF:=ON}"
 
 . /etc/lsb-release
 
@@ -63,48 +66,10 @@ P4C_DEPS="bison \
           python3-setuptools \
           tcpdump"
 
-P4C_EBPF_DEPS="libpcap-dev \
-               libelf-dev \
-               zlib1g-dev \
-               llvm \
-               clang \
-               iproute2 \
-               iptables \
-               net-tools"
-
 # In Docker builds, sudo is not available. So make it a noop.
 if [ "$IN_DOCKER" == "TRUE" ]; then
   echo "Executing within docker container."
   function sudo() { command "$@"; }
-fi
-
-# TODO: Remove this check once 18.04 is deprecated.
-if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
-  P4C_RUNTIME_DEPS_BOOST="libboost-graph1.65.1 libboost-iostreams1.65.1"
-else
-  P4C_RUNTIME_DEPS_BOOST="libboost-graph1.7* libboost-iostreams1.7*"
-fi
-
-P4C_RUNTIME_DEPS="cpp \
-                  ${P4C_RUNTIME_DEPS_BOOST} \
-                  libgc1* \
-                  libgmp-dev \
-                  python3"
-
-# TODO: Remove this check once 18.04 is deprecated.
-if [[ "${DISTRIB_RELEASE}" == "18.04" ]] || [[ "$(which simple_switch 2> /dev/null)" != "" ]] ; then
-  # Use GCC 9 from https://launchpad.net/~ubuntu-toolchain-r/+archive/ubuntu/test
-  sudo apt-get update && sudo apt-get install -y software-properties-common
-  sudo add-apt-repository -uy ppa:ubuntu-toolchain-r/test
-  P4C_DEPS+=" gcc-9 g++-9"
-  export CC=gcc-9
-  export CXX=g++-9
-else
-  sudo apt-get update && sudo apt-get install -y wget ca-certificates
-  # Add the p4lang opensuse repository.
-  echo "deb http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/ /" | sudo tee /etc/apt/sources.list.d/home:p4lang.list
-  curl -fsSL https://download.opensuse.org/repositories/home:p4lang/xUbuntu_${DISTRIB_RELEASE}/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_p4lang.gpg > /dev/null
-  P4C_DEPS+=" p4lang-bmv2"
 fi
 
 # TODO: Remove this check once 18.04 is deprecated.
@@ -113,60 +78,109 @@ if [[ "${DISTRIB_RELEASE}" != "18.04" ]] ; then
 fi
 
 sudo apt-get update
-sudo apt-get install -y --no-install-recommends \
-  ${P4C_DEPS} \
-  ${P4C_EBPF_DEPS} \
-  ${P4C_RUNTIME_DEPS}
+sudo apt-get install -y --no-install-recommends ${P4C_DEPS}
+sudo -E pip3 install --upgrade pip
+sudo -E pip3 install -r ${P4C_DIR}/requirements.txt
 
-sudo pip3 install --upgrade pip
-sudo pip3 install -r ${P4C_DIR}/requirements.txt
 
-# TODO: Remove this check once 18.04 is deprecated.
-if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
-  ccache --set-config cache_dir=.ccache
-  # For Ubuntu 18.04 install the pypi-supplied version of cmake instead.
-  sudo pip3 install cmake==3.16.3
+# ! ------  BEGIN BMV2 -----------------------------------------------
+if [[ "${INSTALL_BMV2}" == "ON" ]] ; then
+
+  # TODO: Remove this check once 18.04 is deprecated.
+  if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
+    P4C_RUNTIME_DEPS_BOOST="libboost-graph1.65.1 libboost-iostreams1.65.1"
+  else
+    P4C_RUNTIME_DEPS_BOOST="libboost-graph1.7* libboost-iostreams1.7*"
+  fi
+
+  P4C_RUNTIME_DEPS="cpp \
+                    ${P4C_RUNTIME_DEPS_BOOST} \
+                    libgc1* \
+                    libgmp-dev"
+
+  # TODO: Remove this check once 18.04 is deprecated.
+  if [[ "${DISTRIB_RELEASE}" == "18.04" ]] || [[ "$(which simple_switch 2> /dev/null)" != "" ]] ; then
+    # Use GCC 9 from https://launchpad.net/~ubuntu-toolchain-r/+archive/ubuntu/test
+    sudo apt-get update && sudo apt-get install -y software-properties-common
+    sudo add-apt-repository -uy ppa:ubuntu-toolchain-r/test
+    P4C_RUNTIME_DEPS+=" gcc-9 g++-9"
+    export CC=gcc-9
+    export CXX=g++-9
+  else
+    sudo apt-get update && sudo apt-get install -y wget ca-certificates
+    # Add the p4lang opensuse repository.
+    echo "deb http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/ /" | sudo tee /etc/apt/sources.list.d/home:p4lang.list
+    curl -fsSL https://download.opensuse.org/repositories/home:p4lang/xUbuntu_${DISTRIB_RELEASE}/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_p4lang.gpg > /dev/null
+    P4C_RUNTIME_DEPS+=" p4lang-bmv2"
+  fi
+
+
+  # TODO: Remove this check once 18.04 is deprecated.
+  if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
+    ccache --set-config cache_dir=.ccache
+    # For Ubuntu 18.04 install the pypi-supplied version of cmake instead.
+    sudo -E pip3 install cmake==3.16.3
+  fi
+  ccache --set-config max_size=1G
+
+
+  # Install add-ons to communicate with simple_switch_grpc via P4Runtime.
+  # These packages are necessary because of a protobuf version mismatch in more recent Ubuntu distributions.
+  if [[ "${DISTRIB_RELEASE}" == "22.04" ]] ; then
+    sudo -E pip3 install --upgrade protobuf==3.20.1
+    sudo -E pip3 install --upgrade googleapis-common-protos==1.50.0
+    sudo -E pip3 install --upgrade grpcio==1.51.1
+  fi
+
+sudo apt-get install -y --no-install-recommends ${P4C_RUNTIME_DEPS}
 fi
-ccache --set-config max_size=1G
+# ! ------  END BMV2 -----------------------------------------------
 
+# ! ------  BEGIN EBPF -----------------------------------------------
+if [[ "${INSTALL_EBPF}" == "ON" ]] ; then
 
-# Install add-ons to communicate with simple_switch_grpc via P4Runtime.
-# These packages are necessary because of a protobuf version mismatch in more recent Ubuntu distributions.
-if [[ "${DISTRIB_RELEASE}" == "22.04" ]] ; then
-  sudo pip3 install --upgrade protobuf==3.20.1
-  sudo pip3 install --upgrade googleapis-common-protos==1.50.0
-  sudo pip3 install --upgrade grpcio==1.51.1
+  P4C_EBPF_DEPS="libpcap-dev \
+                 libelf-dev \
+                 zlib1g-dev \
+                 llvm \
+                 clang \
+                 iproute2 \
+                 iptables \
+                 net-tools"
+
+  sudo apt-get install -y --no-install-recommends ${P4C_EBPF_DEPS}
+
+  # ! ------  BEGIN PTF_EBPF -----------------------------------------------
+  function install_ptf_ebpf_test_deps() (
+    P4C_PTF_PACKAGES="gcc-multilib \
+                             python3-six \
+                             libgmp-dev \
+                             libjansson-dev"
+    sudo apt-get install -y --no-install-recommends ${P4C_PTF_PACKAGES}
+
+    git clone --depth 1 --recursive --branch v0.3.1 https://github.com/NIKSS-vSwitch/nikss /tmp/nikss
+    pushd /tmp/nikss
+    ./build_libbpf.sh
+    mkdir build
+    cd build
+    cmake -DCMAKE_BUILD_TYPE=Release ..
+    make "-j$(nproc)"
+    sudo make install
+
+    # install bpftool
+    git clone --recurse-submodules https://github.com/libbpf/bpftool.git /tmp/bpftool
+    cd /tmp/bpftool/src
+    make "-j$(nproc)"
+    sudo make install
+    popd
+  )
+  # ! ------  END PTF_EBPF -----------------------------------------------
+
+  if [[ "${INSTALL_PTF_EBPF_DEPENDENCIES}" == "ON" ]] ; then
+    install_ptf_ebpf_test_deps
+  fi
 fi
-
-# ! ------  BEGIN PTF_EBPF -----------------------------------------------
-function install_ptf_ebpf_test_deps() (
-  P4C_PTF_PACKAGES="gcc-multilib \
-                           python3-six \
-                           libgmp-dev \
-                           libjansson-dev"
-  sudo apt-get install -y --no-install-recommends ${P4C_PTF_PACKAGES}
-
-  git clone --depth 1 --recursive --branch v0.3.1 https://github.com/NIKSS-vSwitch/nikss /tmp/nikss
-  pushd /tmp/nikss
-  ./build_libbpf.sh
-  mkdir build
-  cd build
-  cmake -DCMAKE_BUILD_TYPE=Release ..
-  make "-j$(nproc)"
-  sudo make install
-
-  # install bpftool
-  git clone --recurse-submodules https://github.com/libbpf/bpftool.git /tmp/bpftool
-  cd /tmp/bpftool/src
-  make "-j$(nproc)"
-  sudo make install
-  popd
-)
-# ! ------  END PTF_EBPF -----------------------------------------------
-
-if [[ "${INSTALL_PTF_EBPF_DEPENDENCIES}" == "ON" ]] ; then
-  install_ptf_ebpf_test_deps
-fi
+# ! ------  END EBPF -----------------------------------------------
 
 # ! ------  BEGIN VALIDATION -----------------------------------------------
 function build_gauntlet() {
@@ -191,8 +205,8 @@ fi
 # ! ------  BEGIN P4TOOLS -----------------------------------------------
 function build_tools_deps() {
   # To run PTF nanomsg tests.
-  sudo pip3 install nnpy
   sudo apt-get install -y libnanomsg-dev
+  sudo -E pip3 install nnpy
 }
 # ! ------  END P4TOOLS -----------------------------------------------
 
