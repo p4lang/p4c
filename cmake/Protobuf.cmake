@@ -44,20 +44,25 @@ macro(p4c_obtain_protobuf)
       USES_TERMINAL_DOWNLOAD TRUE
       GIT_PROGRESS TRUE
     )
+    # Derive the target architecture in order to download the right zip.
+    set(protobuf_ARCH "x86_64")
+    if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "aarch64")
+      set(protobuf_ARCH "aarch_64")
+    endif()
+
     # Pull a different protoc binary for MacOS.
     # TODO: Should we build from scratch?
     if(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
       fetchcontent_declare(
         protoc
-        URL https://github.com/protocolbuffers/protobuf/releases/download/v${P4C_PROTOBUF_VERSION}/protoc-${P4C_PROTOBUF_VERSION}-osx-x86_64.zip
+        URL https://github.com/protocolbuffers/protobuf/releases/download/v${P4C_PROTOBUF_VERSION}/protoc-${P4C_PROTOBUF_VERSION}-osx-${protobuf_ARCH}.zip
         USES_TERMINAL_DOWNLOAD TRUE
         GIT_PROGRESS TRUE
       )
     else()
       fetchcontent_declare(
         protoc
-        URL https://github.com/protocolbuffers/protobuf/releases/download/v${P4C_PROTOBUF_VERSION}/protoc-${P4C_PROTOBUF_VERSION}-linux-x86_64.zip
-        URL_HASH SHA256=3a4c1e5f2516c639d3079b1586e703fc7bcfa2136d58bda24d1d54f949c315e8
+        URL https://github.com/protocolbuffers/protobuf/releases/download/v${P4C_PROTOBUF_VERSION}/protoc-${P4C_PROTOBUF_VERSION}-linux-${protobuf_ARCH}.zip
         USES_TERMINAL_DOWNLOAD TRUE
         GIT_PROGRESS TRUE
       )
