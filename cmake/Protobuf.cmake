@@ -46,9 +46,10 @@ macro(p4c_obtain_protobuf)
     )
 
     # Derive the target architecture in order to download the right zip.
-    set(protobuf_ARCH "x86_64")
     if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "aarch64" OR CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64")
       set(protobuf_ARCH "aarch_64")
+    elseif(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "x86_64" OR CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "amd64")
+      set(protobuf_ARCH "x86_64")
     else()
       MESSAGE(FATAL_ERROR "Unsupported host architecture `${CMAKE_HOST_SYSTEM_PROCESSOR}`")
     endif()
