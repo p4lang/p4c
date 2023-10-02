@@ -19,13 +19,6 @@ limitations under the License.
 
 #include <map>
 
-// XXX(seth): We use this namespace to hide our get() overloads from ADL. GCC
-// 4.8 has a bug which causes these overloads to be considered when get() is
-// called on a type in the global namespace, even if the number of arguments
-// doesn't match up, which can trigger template instantiations that cause
-// errors.
-namespace GetImpl {
-
 template <class K, class T, class V, class Comp, class Alloc>
 inline V get(const std::map<K, V, Comp, Alloc> &m, T key, V def = V()) {
     auto it = m.find(key);
@@ -61,9 +54,6 @@ template <class K, class T, class V, class Comp, class Alloc>
 inline const V *getref(const std::map<K, V, Comp, Alloc> *m, T key) {
     return m ? getref(*m, key) : 0;
 }
-
-}  // namespace GetImpl
-using namespace GetImpl;  // NOLINT(build/namespaces)
 
 /* iterate over the keys in a map */
 template <class PairIter>
