@@ -36,10 +36,11 @@ bool TestBackEnd::run(const FinalState &state) {
         const auto *outputPortExpr = executionState->get(programInfo.getTargetOutputPortVar());
         const auto &coverableNodes = programInfo.getCoverableNodes();
         const auto *programTraces = state.getTraces();
+        const auto &testgenOptions = TestgenOptions::get();
 
         // Don't increase the test count if --with-output-packet is enabled and we don't
         // produce a test with an output packet.
-        if (TestgenOptions::get().withOutputPacket) {
+        if (testgenOptions.withOutputPacket) {
             auto outputPacketSize = executionState->getPacketBufferSize();
             bool packetIsDropped = executionState->getProperty<bool>("drop");
             if (outputPacketSize <= 0 || packetIsDropped) {
@@ -48,7 +49,7 @@ bool TestBackEnd::run(const FinalState &state) {
         }
 
         // If assertion mode is active, ignore any test that does not trigger an assertion.
-        if (TestgenOptions::get().assertionModeEnabled) {
+        if (testgenOptions.assertionModeEnabled) {
             if (!executionState->getProperty<bool>("assertionTriggered")) {
                 return needsToTerminate(testCount);
             }
@@ -98,7 +99,7 @@ bool TestBackEnd::run(const FinalState &state) {
 
         // Add a list of tracked branches to the test output, too.
         std::stringstream selectedBranches;
-        if (TestgenOptions::get().trackBranches) {
+        if (testgenOptions.trackBranches) {
             symbex.printCurrentTraceAndBranches(selectedBranches, *executionState);
         }
 
@@ -112,7 +113,15 @@ bool TestBackEnd::run(const FinalState &state) {
 
         // Commit an update to the visited nodes.
         // Only do this once we are sure we are generating a test.
-        symbex.updateVisitedNodes(replacedState.getVisited());
+        auto hasUpdated = symbex.updateVisitedNodes(replacedState.getVisited());
+
+        // Skip test case generation if the --only-covering-tests is enabled and we do not increase
+        // coverage.
+        if (!coverableNodes.empty() && testgenOptions.coverageOptions.onlyCoveringTests &&
+            !hasUpdated) {
+            return needsToTerminate(testCount);
+        }
+
         const P4::Coverage::CoverageSet &visitedNodes = symbex.getVisitedNodes();
         float coverage = NAN;
         if (coverableNodes.empty()) {
@@ -137,7 +146,7 @@ bool TestBackEnd::run(const FinalState &state) {
         printPerformanceReport(false);
 
         // If MAX_NODE_COVERAGE is enabled, terminate early if we hit max node coverage already.
-        if (TestgenOptions::get().stopMetric == "MAX_NODE_COVERAGE" && coverage == 1.0) {
+        if (testgenOptions.stopMetric == "MAX_NODE_COVERAGE" && coverage == 1.0) {
             return true;
         }
         return needsToTerminate(testCount);
