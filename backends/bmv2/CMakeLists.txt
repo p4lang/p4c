@@ -130,7 +130,7 @@ p4c_find_tests("${P4TESTS_FOR_V1MODEL}" v1tests INCLUDE "${V1_INCLUDE_PATTERNS}"
 
 set (BMV2_V1MODEL_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_bmv_errors/*-bmv2.p4"
-  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/dash/*.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/dash/*-bmv2.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/fabric_*/fabric.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/omec/*.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pins/*.p4"
