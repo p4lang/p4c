@@ -4,8 +4,7 @@ error {
     InvalidIPv4Header
 }
 #include <core.p4>
-#define V1MODEL_VERSION 20180101
-#include <v1model.p4>
+#include <pna.p4>
 
 header ethernet_t {
     bit<48> dst_addr;
@@ -173,7 +172,7 @@ struct metadata_t {
     bit<32>  _dst_tag_map47;
 }
 
-parser dash_parser(packet_in packet, out headers_t hd, inout metadata_t meta, inout standard_metadata_t standard_meta) {
+parser dash_parser(packet_in packet, out headers_t hd, inout metadata_t meta, in pna_main_parser_input_metadata_t istd) {
     state start {
         packet.extract<ethernet_t>(hd.ethernet);
         transition select(hd.ethernet.ether_type) {
@@ -258,8 +257,8 @@ parser dash_parser(packet_in packet, out headers_t hd, inout metadata_t meta, in
     }
 }
 
-control dash_deparser(packet_out packet, in headers_t hdr) {
-    apply {
+control dash_deparser(packet_out packet, in headers_t hdr, in metadata_t meta, in pna_main_output_metadata_t ostd) {
+    @hidden action dashpipelinepnadpdk275() {
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_t>(hdr.ipv4);
         packet.emit<ipv4options_t>(hdr.ipv4options);
@@ -274,6 +273,15 @@ control dash_deparser(packet_out packet, in headers_t hdr) {
         packet.emit<tcp_t>(hdr.inner_tcp);
         packet.emit<udp_t>(hdr.inner_udp);
     }
+    @hidden table tbl_dashpipelinepnadpdk275 {
+        actions = {
+            dashpipelinepnadpdk275();
+        }
+        const default_action = dashpipelinepnadpdk275();
+    }
+    apply {
+        tbl_dashpipelinepnadpdk275.apply();
+    }
 }
 
 match_kind {
@@ -281,7 +289,11 @@ match_kind {
     range_list
 }
 
-control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
+control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
+    @name("dash_ingress.inner_ip_len") bit<16> inner_ip_len_0;
+    @name("dash_ingress.inner_ip_len") bit<16> inner_ip_len_1;
+    @name("dash_ingress.inner_ip_len") bit<16> inner_ip_len_5;
+    @name("dash_ingress.inner_ip_len") bit<16> inner_ip_len_6;
     @name("dash_ingress.tmp_2") bit<48> tmp_0;
     @name("dash_ingress.outbound.tmp") bit<32> outbound_tmp;
     @name("dash_ingress.outbound.tmp_0") bit<32> outbound_tmp_0;
@@ -489,7 +501,14 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         hdr_12_ipv4.version = 4w4;
         hdr_12_ipv4.ihl = 4w5;
         hdr_12_ipv4.diffserv = 8w0;
-        hdr_12_ipv4.total_len = hdr_12_inner_ipv4.total_len * (bit<16>)(bit<1>)hdr_12_inner_ipv4.isValid() + hdr_12_inner_ipv6.payload_length * (bit<16>)(bit<1>)hdr_12_inner_ipv6.isValid() + 16w40 * (bit<16>)(bit<1>)hdr_12_inner_ipv6.isValid() + 16w50;
+        inner_ip_len_0 = 16w0;
+        if (hdr_12_inner_ipv4.isValid()) {
+            inner_ip_len_0 = hdr_12_inner_ipv4.total_len;
+        }
+        if (hdr_12_inner_ipv6.isValid()) {
+            inner_ip_len_0 = inner_ip_len_0 + 16w40 + hdr_12_inner_ipv6.payload_length;
+        }
+        hdr_12_ipv4.total_len = 16w50 + inner_ip_len_0;
         hdr_12_ipv4.identification = 16w1;
         hdr_12_ipv4.flags = 3w0;
         hdr_12_ipv4.frag_offset = 13w0;
@@ -501,7 +520,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         hdr_12_udp.setValid();
         hdr_12_udp.src_port = 16w0;
         hdr_12_udp.dst_port = 16w4789;
-        hdr_12_udp.length = hdr_12_inner_ipv4.total_len * (bit<16>)(bit<1>)hdr_12_inner_ipv4.isValid() + hdr_12_inner_ipv6.payload_length * (bit<16>)(bit<1>)hdr_12_inner_ipv6.isValid() + 16w40 * (bit<16>)(bit<1>)hdr_12_inner_ipv6.isValid() + 16w30;
+        hdr_12_udp.length = 16w30 + inner_ip_len_0;
         hdr_12_udp.checksum = 16w0;
         hdr_12_vxlan.setValid();
         hdr_12_vxlan.reserved = 24w0;
@@ -551,7 +570,14 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         hdr_13_ipv4.version = 4w4;
         hdr_13_ipv4.ihl = 4w5;
         hdr_13_ipv4.diffserv = 8w0;
-        hdr_13_ipv4.total_len = hdr_13_inner_ipv4.total_len * (bit<16>)(bit<1>)hdr_13_inner_ipv4.isValid() + hdr_13_inner_ipv6.payload_length * (bit<16>)(bit<1>)hdr_13_inner_ipv6.isValid() + 16w40 * (bit<16>)(bit<1>)hdr_13_inner_ipv6.isValid() + 16w50;
+        inner_ip_len_1 = 16w0;
+        if (hdr_13_inner_ipv4.isValid()) {
+            inner_ip_len_1 = hdr_13_inner_ipv4.total_len;
+        }
+        if (hdr_13_inner_ipv6.isValid()) {
+            inner_ip_len_1 = inner_ip_len_1 + 16w40 + hdr_13_inner_ipv6.payload_length;
+        }
+        hdr_13_ipv4.total_len = 16w50 + inner_ip_len_1;
         hdr_13_ipv4.identification = 16w1;
         hdr_13_ipv4.flags = 3w0;
         hdr_13_ipv4.frag_offset = 13w0;
@@ -563,7 +589,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         hdr_13_udp.setValid();
         hdr_13_udp.src_port = 16w0;
         hdr_13_udp.dst_port = 16w4789;
-        hdr_13_udp.length = hdr_13_inner_ipv4.total_len * (bit<16>)(bit<1>)hdr_13_inner_ipv4.isValid() + hdr_13_inner_ipv6.payload_length * (bit<16>)(bit<1>)hdr_13_inner_ipv6.isValid() + 16w40 * (bit<16>)(bit<1>)hdr_13_inner_ipv6.isValid() + 16w30;
+        hdr_13_udp.length = 16w30 + inner_ip_len_1;
         hdr_13_udp.checksum = 16w0;
         hdr_13_vxlan.setValid();
         hdr_13_vxlan.reserved = 24w0;
@@ -613,7 +639,14 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         hdr_14_ipv4.version = 4w4;
         hdr_14_ipv4.ihl = 4w5;
         hdr_14_ipv4.diffserv = 8w0;
-        hdr_14_ipv4.total_len = hdr_14_inner_ipv4.total_len * (bit<16>)(bit<1>)hdr_14_inner_ipv4.isValid() + hdr_14_inner_ipv6.payload_length * (bit<16>)(bit<1>)hdr_14_inner_ipv6.isValid() + 16w40 * (bit<16>)(bit<1>)hdr_14_inner_ipv6.isValid() + 16w50;
+        inner_ip_len_5 = 16w0;
+        if (hdr_14_inner_ipv4.isValid()) {
+            inner_ip_len_5 = hdr_14_inner_ipv4.total_len;
+        }
+        if (hdr_14_inner_ipv6.isValid()) {
+            inner_ip_len_5 = inner_ip_len_5 + 16w40 + hdr_14_inner_ipv6.payload_length;
+        }
+        hdr_14_ipv4.total_len = 16w50 + inner_ip_len_5;
         hdr_14_ipv4.identification = 16w1;
         hdr_14_ipv4.flags = 3w0;
         hdr_14_ipv4.frag_offset = 13w0;
@@ -625,7 +658,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         hdr_14_udp.setValid();
         hdr_14_udp.src_port = 16w0;
         hdr_14_udp.dst_port = 16w4789;
-        hdr_14_udp.length = hdr_14_inner_ipv4.total_len * (bit<16>)(bit<1>)hdr_14_inner_ipv4.isValid() + hdr_14_inner_ipv6.payload_length * (bit<16>)(bit<1>)hdr_14_inner_ipv6.isValid() + 16w40 * (bit<16>)(bit<1>)hdr_14_inner_ipv6.isValid() + 16w30;
+        hdr_14_udp.length = 16w30 + inner_ip_len_5;
         hdr_14_udp.checksum = 16w0;
         hdr_14_vxlan.setValid();
         hdr_14_vxlan.reserved = 24w0;
@@ -675,7 +708,11 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         hdr_15_ipv4.version = 4w4;
         hdr_15_ipv4.ihl = 4w5;
         hdr_15_ipv4.diffserv = 8w0;
-        hdr_15_ipv4.total_len = hdr_15_inner_ipv4.total_len * (bit<16>)(bit<1>)hdr_15_inner_ipv4.isValid() + hdr_15_inner_ipv6.payload_length * (bit<16>)(bit<1>)hdr_15_inner_ipv6.isValid() + 16w40 * (bit<16>)(bit<1>)hdr_15_inner_ipv6.isValid() + 16w42;
+        inner_ip_len_6 = 16w0;
+        if (hdr_15_inner_ipv6.isValid()) {
+            inner_ip_len_6 = 16w40 + hdr_15_inner_ipv6.payload_length;
+        }
+        hdr_15_ipv4.total_len = 16w50 + inner_ip_len_6;
         hdr_15_ipv4.identification = 16w1;
         hdr_15_ipv4.flags = 3w0;
         hdr_15_ipv4.frag_offset = 13w0;
@@ -704,7 +741,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         hdr.inner_tcp = hdr_15_inner_tcp;
     }
     @name("dash_ingress.drop_action") action drop_action() {
-        mark_to_drop(standard_metadata);
+        drop_packet();
     }
     @name("dash_ingress.deny") action deny() {
         meta._dropped0 = true;
@@ -816,7 +853,6 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         }
         const default_action = deny_0();
     }
-    @name("dash_ingress.eni_counter") direct_counter(CounterType.packets_and_bytes) eni_counter_0;
     @name("dash_ingress.eni_meter") table eni_meter_0 {
         key = {
             meta._eni_id16  : exact @name("meta.eni_id:eni_id");
@@ -826,7 +862,6 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         actions = {
             NoAction_2();
         }
-        counters = eni_counter_0;
         default_action = NoAction_2();
     }
     @name("dash_ingress.permit") action permit() {
@@ -891,8 +926,6 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         }
         const default_action = NoAction_4();
     }
-    @name("dash_ingress.meter_bucket_inbound") counter(32w262144, CounterType.bytes) meter_bucket_inbound_0;
-    @name("dash_ingress.meter_bucket_outbound") counter(32w262144, CounterType.bytes) meter_bucket_outbound_0;
     @name("dash_ingress.meter_bucket_action") action meter_bucket_action(@Sai[type="sai_uint64_t", isreadonly="true"] @name("outbound_bytes_counter") bit<64> outbound_bytes_counter, @Sai[type="sai_uint64_t", isreadonly="true"] @name("inbound_bytes_counter") bit<64> inbound_bytes_counter, @Sai[type="sai_uint32_t", skipattr="true"] @name("meter_bucket_index") bit<32> meter_bucket_index_1) {
         meta._meter_bucket_index45 = meter_bucket_index_1;
     }
@@ -1028,7 +1061,6 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         meta._meter_policy_en38 = meter_policy_en_7;
         meta._route_meter_class42 = meter_class_10;
     }
-    @name("dash_ingress.outbound.routing_counter") direct_counter(CounterType.packets_and_bytes) outbound_routing_counter;
     @name("dash_ingress.outbound.outbound_routing|dash_outbound_routing") table outbound_outbound_routing_dash_outbound_routing {
         key = {
             meta._eni_id16          : exact @name("meta.eni_id:eni_id");
@@ -1043,7 +1075,6 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
             outbound_drop_0();
         }
         const default_action = outbound_drop_0();
-        counters = outbound_routing_counter;
     }
     @name("dash_ingress.outbound.set_tunnel_mapping") action outbound_set_tunnel_mapping_0(@name("underlay_dip") bit<32> underlay_dip_9, @name("overlay_dmac") bit<48> overlay_dmac_7, @name("use_dst_vnet_vni") bit<1> use_dst_vnet_vni, @name("meter_class") bit<16> meter_class_11, @name("meter_class_override") bit<1> meter_class_override) {
         if (use_dst_vnet_vni == 1w1) {
@@ -1054,7 +1085,6 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         meta._mapping_meter_class43 = meter_class_11;
         meta._mapping_meter_class_override39 = meter_class_override;
     }
-    @name("dash_ingress.outbound.ca_to_pa_counter") direct_counter(CounterType.packets_and_bytes) outbound_ca_to_pa_counter;
     @name("dash_ingress.outbound.outbound_ca_to_pa|dash_outbound_ca_to_pa") table outbound_outbound_ca_to_pa_dash_outbound_ca_to_pa {
         key = {
             meta._dst_vnet_id15      : exact @name("meta.dst_vnet_id:dst_vnet_id");
@@ -1066,7 +1096,6 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
             @defaultonly outbound_drop_1();
         }
         const default_action = outbound_drop_1();
-        counters = outbound_ca_to_pa_counter;
     }
     @name("dash_ingress.outbound.set_vnet_attrs") action outbound_set_vnet_attrs_0(@name("vni") bit<24> vni_5) {
         meta._encap_data_vni2 = vni_5;
@@ -1111,17 +1140,14 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
     @name("dash_ingress.outbound.acl.deny_and_continue") action outbound_acl_deny_and_continue_2() {
         meta._dropped0 = true;
     }
-    @name("dash_ingress.outbound.acl.stage1_counter") direct_counter(CounterType.packets_and_bytes) outbound_acl_stage1_counter;
     @name("dash_ingress.outbound.acl.stage1:dash_acl_rule|dash_acl") table outbound_acl_stage1_dash_acl_rule_dash_acl {
         key = {
-            meta._stage1_dash_acl_group_id33: exact @name("meta.dash_acl_group_id:dash_acl_group_id") @Sai[type="sai_object_id_t", isresourcetype="true", objects="SAI_OBJECT_TYPE_DASH_ACL_GROUP"];
-            meta._dst_tag_map47             : ternary @name("meta.dst_tag_map:dst_tag");
-            meta._src_tag_map46             : ternary @name("meta.src_tag_map:src_tag");
-            meta._dst_ip_addr26             : optional @name("meta.dst_ip_addr:dip");
-            meta._src_ip_addr27             : optional @name("meta.src_ip_addr:sip");
-            meta._ip_protocol25             : optional @name("meta.ip_protocol:protocol");
-            meta._src_l4_port31             : optional @name("meta.src_l4_port:src_port");
-            meta._dst_l4_port32             : optional @name("meta.dst_l4_port:dst_port");
+            meta._stage1_dash_acl_group_id33: exact @name("meta.dash_acl_group_id:dash_acl_group_id");
+            meta._dst_ip_addr26             : ternary @name("meta.dst_ip_addr:dip");
+            meta._src_ip_addr27             : ternary @name("meta.src_ip_addr:sip");
+            meta._ip_protocol25             : ternary @name("meta.ip_protocol:protocol");
+            meta._src_l4_port31             : range @name("meta.src_l4_port:src_port");
+            meta._dst_l4_port32             : range @name("meta.dst_l4_port:dst_port");
         }
         actions = {
             outbound_acl_permit_0();
@@ -1130,19 +1156,15 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
             outbound_acl_deny_and_continue_0();
         }
         default_action = outbound_acl_deny_0();
-        counters = outbound_acl_stage1_counter;
     }
-    @name("dash_ingress.outbound.acl.stage2_counter") direct_counter(CounterType.packets_and_bytes) outbound_acl_stage2_counter;
     @name("dash_ingress.outbound.acl.stage2:dash_acl_rule|dash_acl") table outbound_acl_stage2_dash_acl_rule_dash_acl {
         key = {
-            meta._stage2_dash_acl_group_id34: exact @name("meta.dash_acl_group_id:dash_acl_group_id") @Sai[type="sai_object_id_t", isresourcetype="true", objects="SAI_OBJECT_TYPE_DASH_ACL_GROUP"];
-            meta._dst_tag_map47             : ternary @name("meta.dst_tag_map:dst_tag");
-            meta._src_tag_map46             : ternary @name("meta.src_tag_map:src_tag");
-            meta._dst_ip_addr26             : optional @name("meta.dst_ip_addr:dip");
-            meta._src_ip_addr27             : optional @name("meta.src_ip_addr:sip");
-            meta._ip_protocol25             : optional @name("meta.ip_protocol:protocol");
-            meta._src_l4_port31             : optional @name("meta.src_l4_port:src_port");
-            meta._dst_l4_port32             : optional @name("meta.dst_l4_port:dst_port");
+            meta._stage2_dash_acl_group_id34: exact @name("meta.dash_acl_group_id:dash_acl_group_id");
+            meta._dst_ip_addr26             : ternary @name("meta.dst_ip_addr:dip");
+            meta._src_ip_addr27             : ternary @name("meta.src_ip_addr:sip");
+            meta._ip_protocol25             : ternary @name("meta.ip_protocol:protocol");
+            meta._src_l4_port31             : range @name("meta.src_l4_port:src_port");
+            meta._dst_l4_port32             : range @name("meta.dst_l4_port:dst_port");
         }
         actions = {
             outbound_acl_permit_1();
@@ -1151,19 +1173,15 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
             outbound_acl_deny_and_continue_1();
         }
         default_action = outbound_acl_deny_1();
-        counters = outbound_acl_stage2_counter;
     }
-    @name("dash_ingress.outbound.acl.stage3_counter") direct_counter(CounterType.packets_and_bytes) outbound_acl_stage3_counter;
     @name("dash_ingress.outbound.acl.stage3:dash_acl_rule|dash_acl") table outbound_acl_stage3_dash_acl_rule_dash_acl {
         key = {
-            meta._stage3_dash_acl_group_id35: exact @name("meta.dash_acl_group_id:dash_acl_group_id") @Sai[type="sai_object_id_t", isresourcetype="true", objects="SAI_OBJECT_TYPE_DASH_ACL_GROUP"];
-            meta._dst_tag_map47             : ternary @name("meta.dst_tag_map:dst_tag");
-            meta._src_tag_map46             : ternary @name("meta.src_tag_map:src_tag");
-            meta._dst_ip_addr26             : optional @name("meta.dst_ip_addr:dip");
-            meta._src_ip_addr27             : optional @name("meta.src_ip_addr:sip");
-            meta._ip_protocol25             : optional @name("meta.ip_protocol:protocol");
-            meta._src_l4_port31             : optional @name("meta.src_l4_port:src_port");
-            meta._dst_l4_port32             : optional @name("meta.dst_l4_port:dst_port");
+            meta._stage3_dash_acl_group_id35: exact @name("meta.dash_acl_group_id:dash_acl_group_id");
+            meta._dst_ip_addr26             : ternary @name("meta.dst_ip_addr:dip");
+            meta._src_ip_addr27             : ternary @name("meta.src_ip_addr:sip");
+            meta._ip_protocol25             : ternary @name("meta.ip_protocol:protocol");
+            meta._src_l4_port31             : range @name("meta.src_l4_port:src_port");
+            meta._dst_l4_port32             : range @name("meta.dst_l4_port:dst_port");
         }
         actions = {
             outbound_acl_permit_2();
@@ -1172,7 +1190,6 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
             outbound_acl_deny_and_continue_2();
         }
         default_action = outbound_acl_deny_2();
-        counters = outbound_acl_stage3_counter;
     }
     @name("dash_ingress.inbound.acl.permit") action inbound_acl_permit_0() {
     }
@@ -1204,17 +1221,14 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
     @name("dash_ingress.inbound.acl.deny_and_continue") action inbound_acl_deny_and_continue_2() {
         meta._dropped0 = true;
     }
-    @name("dash_ingress.inbound.acl.stage1_counter") direct_counter(CounterType.packets_and_bytes) inbound_acl_stage1_counter;
     @name("dash_ingress.inbound.acl.stage1:dash_acl_rule|dash_acl") table inbound_acl_stage1_dash_acl_rule_dash_acl {
         key = {
-            meta._stage1_dash_acl_group_id33: exact @name("meta.dash_acl_group_id:dash_acl_group_id") @Sai[type="sai_object_id_t", isresourcetype="true", objects="SAI_OBJECT_TYPE_DASH_ACL_GROUP"];
-            meta._dst_tag_map47             : ternary @name("meta.dst_tag_map:dst_tag");
-            meta._src_tag_map46             : ternary @name("meta.src_tag_map:src_tag");
-            meta._dst_ip_addr26             : optional @name("meta.dst_ip_addr:dip");
-            meta._src_ip_addr27             : optional @name("meta.src_ip_addr:sip");
-            meta._ip_protocol25             : optional @name("meta.ip_protocol:protocol");
-            meta._src_l4_port31             : optional @name("meta.src_l4_port:src_port");
-            meta._dst_l4_port32             : optional @name("meta.dst_l4_port:dst_port");
+            meta._stage1_dash_acl_group_id33: exact @name("meta.dash_acl_group_id:dash_acl_group_id");
+            meta._dst_ip_addr26             : ternary @name("meta.dst_ip_addr:dip");
+            meta._src_ip_addr27             : ternary @name("meta.src_ip_addr:sip");
+            meta._ip_protocol25             : ternary @name("meta.ip_protocol:protocol");
+            meta._src_l4_port31             : range @name("meta.src_l4_port:src_port");
+            meta._dst_l4_port32             : range @name("meta.dst_l4_port:dst_port");
         }
         actions = {
             inbound_acl_permit_0();
@@ -1223,19 +1237,15 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
             inbound_acl_deny_and_continue_0();
         }
         default_action = inbound_acl_deny_0();
-        counters = inbound_acl_stage1_counter;
     }
-    @name("dash_ingress.inbound.acl.stage2_counter") direct_counter(CounterType.packets_and_bytes) inbound_acl_stage2_counter;
     @name("dash_ingress.inbound.acl.stage2:dash_acl_rule|dash_acl") table inbound_acl_stage2_dash_acl_rule_dash_acl {
         key = {
-            meta._stage2_dash_acl_group_id34: exact @name("meta.dash_acl_group_id:dash_acl_group_id") @Sai[type="sai_object_id_t", isresourcetype="true", objects="SAI_OBJECT_TYPE_DASH_ACL_GROUP"];
-            meta._dst_tag_map47             : ternary @name("meta.dst_tag_map:dst_tag");
-            meta._src_tag_map46             : ternary @name("meta.src_tag_map:src_tag");
-            meta._dst_ip_addr26             : optional @name("meta.dst_ip_addr:dip");
-            meta._src_ip_addr27             : optional @name("meta.src_ip_addr:sip");
-            meta._ip_protocol25             : optional @name("meta.ip_protocol:protocol");
-            meta._src_l4_port31             : optional @name("meta.src_l4_port:src_port");
-            meta._dst_l4_port32             : optional @name("meta.dst_l4_port:dst_port");
+            meta._stage2_dash_acl_group_id34: exact @name("meta.dash_acl_group_id:dash_acl_group_id");
+            meta._dst_ip_addr26             : ternary @name("meta.dst_ip_addr:dip");
+            meta._src_ip_addr27             : ternary @name("meta.src_ip_addr:sip");
+            meta._ip_protocol25             : ternary @name("meta.ip_protocol:protocol");
+            meta._src_l4_port31             : range @name("meta.src_l4_port:src_port");
+            meta._dst_l4_port32             : range @name("meta.dst_l4_port:dst_port");
         }
         actions = {
             inbound_acl_permit_1();
@@ -1244,19 +1254,15 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
             inbound_acl_deny_and_continue_1();
         }
         default_action = inbound_acl_deny_1();
-        counters = inbound_acl_stage2_counter;
     }
-    @name("dash_ingress.inbound.acl.stage3_counter") direct_counter(CounterType.packets_and_bytes) inbound_acl_stage3_counter;
     @name("dash_ingress.inbound.acl.stage3:dash_acl_rule|dash_acl") table inbound_acl_stage3_dash_acl_rule_dash_acl {
         key = {
-            meta._stage3_dash_acl_group_id35: exact @name("meta.dash_acl_group_id:dash_acl_group_id") @Sai[type="sai_object_id_t", isresourcetype="true", objects="SAI_OBJECT_TYPE_DASH_ACL_GROUP"];
-            meta._dst_tag_map47             : ternary @name("meta.dst_tag_map:dst_tag");
-            meta._src_tag_map46             : ternary @name("meta.src_tag_map:src_tag");
-            meta._dst_ip_addr26             : optional @name("meta.dst_ip_addr:dip");
-            meta._src_ip_addr27             : optional @name("meta.src_ip_addr:sip");
-            meta._ip_protocol25             : optional @name("meta.ip_protocol:protocol");
-            meta._src_l4_port31             : optional @name("meta.src_l4_port:src_port");
-            meta._dst_l4_port32             : optional @name("meta.dst_l4_port:dst_port");
+            meta._stage3_dash_acl_group_id35: exact @name("meta.dash_acl_group_id:dash_acl_group_id");
+            meta._dst_ip_addr26             : ternary @name("meta.dst_ip_addr:dip");
+            meta._src_ip_addr27             : ternary @name("meta.src_ip_addr:sip");
+            meta._ip_protocol25             : ternary @name("meta.ip_protocol:protocol");
+            meta._src_l4_port31             : range @name("meta.src_l4_port:src_port");
+            meta._dst_l4_port32             : range @name("meta.dst_l4_port:dst_port");
         }
         actions = {
             inbound_acl_permit_2();
@@ -1265,111 +1271,95 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
             inbound_acl_deny_and_continue_2();
         }
         default_action = inbound_acl_deny_2();
-        counters = inbound_acl_stage3_counter;
     }
-    @hidden action dashpipelinebmv2l892() {
+    @hidden action dashpipelinepnadpdk885() {
         meta._encap_data_underlay_sip4 = hdr.ipv4.dst_addr;
     }
-    @hidden action dashpipelinebmv2l890() {
-        standard_metadata.egress_spec = standard_metadata.ingress_port;
-    }
-    @hidden action dashpipelinebmv2l911() {
+    @hidden action dashpipelinepnadpdk904() {
         meta._ip_protocol25 = hdr.ipv6.next_header;
         meta._src_ip_addr27 = hdr.ipv6.src_addr;
         meta._dst_ip_addr26 = hdr.ipv6.dst_addr;
         meta._is_overlay_ip_v623 = 1w1;
     }
-    @hidden action dashpipelinebmv2l916() {
+    @hidden action dashpipelinepnadpdk909() {
         meta._ip_protocol25 = hdr.ipv4.protocol;
         meta._src_ip_addr27 = (bit<128>)hdr.ipv4.src_addr;
         meta._dst_ip_addr26 = (bit<128>)hdr.ipv4.dst_addr;
     }
-    @hidden action dashpipelinebmv2l906() {
+    @hidden action dashpipelinepnadpdk899() {
         meta._is_overlay_ip_v623 = 1w0;
         meta._ip_protocol25 = 8w0;
         meta._dst_ip_addr26 = 128w0;
         meta._src_ip_addr27 = 128w0;
     }
-    @hidden action dashpipelinebmv2l921() {
+    @hidden action dashpipelinepnadpdk914() {
         meta._src_l4_port31 = hdr.tcp.src_port;
         meta._dst_l4_port32 = hdr.tcp.dst_port;
     }
-    @hidden action dashpipelinebmv2l924() {
+    @hidden action dashpipelinepnadpdk917() {
         meta._src_l4_port31 = hdr.udp.src_port;
         meta._dst_l4_port32 = hdr.udp.dst_port;
     }
-    @hidden action dashpipelinebmv2l927() {
+    @hidden action dashpipelinepnadpdk920() {
         tmp_0 = hdr.ethernet.src_addr;
     }
-    @hidden action dashpipelinebmv2l927_0() {
+    @hidden action dashpipelinepnadpdk920_0() {
         tmp_0 = hdr.ethernet.dst_addr;
     }
-    @hidden action dashpipelinebmv2l927_1() {
+    @hidden action dashpipelinepnadpdk920_1() {
         meta._eni_addr13 = tmp_0;
     }
-    @hidden action dashpipelinebmv2l466() {
+    @hidden action dashpipelinepnadpdk468() {
         outbound_acl_hasReturned = true;
     }
-    @hidden action dashpipelinebmv2l469() {
+    @hidden action dashpipelinepnadpdk471() {
         outbound_acl_hasReturned = true;
     }
     @hidden action act() {
         outbound_acl_hasReturned = false;
     }
-    @hidden action dashpipelinebmv2l476() {
+    @hidden action dashpipelinepnadpdk478() {
         outbound_acl_hasReturned = true;
     }
-    @hidden action dashpipelinebmv2l479() {
+    @hidden action dashpipelinepnadpdk481() {
         outbound_acl_hasReturned = true;
     }
-    @hidden action dashpipelinebmv2l613() {
+    @hidden action dashpipelinepnadpdk611() {
         meta._lkup_dst_ip_addr28 = meta._dst_ip_addr26;
         meta._is_lkup_dst_ip_v624 = meta._is_overlay_ip_v623;
     }
-    @hidden action dashpipelinebmv2l466_0() {
+    @hidden action dashpipelinepnadpdk468_0() {
         inbound_acl_hasReturned = true;
     }
-    @hidden action dashpipelinebmv2l469_0() {
+    @hidden action dashpipelinepnadpdk471_0() {
         inbound_acl_hasReturned = true;
     }
     @hidden action act_0() {
         inbound_acl_hasReturned = false;
     }
-    @hidden action dashpipelinebmv2l476_0() {
+    @hidden action dashpipelinepnadpdk478_0() {
         inbound_acl_hasReturned = true;
     }
-    @hidden action dashpipelinebmv2l479_0() {
+    @hidden action dashpipelinepnadpdk481_0() {
         inbound_acl_hasReturned = true;
     }
     @hidden action act_1() {
         inbound_tmp = hdr.ethernet.dst_addr;
     }
-    @hidden action dashpipelinebmv2l947() {
+    @hidden action dashpipelinepnadpdk940() {
         meta._meter_class44 = meta._policy_meter_class41;
     }
-    @hidden action dashpipelinebmv2l949() {
+    @hidden action dashpipelinepnadpdk942() {
         meta._meter_class44 = meta._route_meter_class42;
     }
-    @hidden action dashpipelinebmv2l952() {
+    @hidden action dashpipelinepnadpdk945() {
         meta._meter_class44 = meta._mapping_meter_class43;
     }
-    @hidden action dashpipelinebmv2l957() {
-        meter_bucket_outbound_0.count(meta._meter_bucket_index45);
-    }
-    @hidden action dashpipelinebmv2l959() {
-        meter_bucket_inbound_0.count(meta._meter_bucket_index45);
-    }
-    @hidden table tbl_dashpipelinebmv2l890 {
+    @hidden table tbl_dashpipelinepnadpdk885 {
         actions = {
-            dashpipelinebmv2l890();
+            dashpipelinepnadpdk885();
         }
-        const default_action = dashpipelinebmv2l890();
-    }
-    @hidden table tbl_dashpipelinebmv2l892 {
-        actions = {
-            dashpipelinebmv2l892();
-        }
-        const default_action = dashpipelinebmv2l892();
+        const default_action = dashpipelinepnadpdk885();
     }
     @hidden table tbl_vxlan_decap {
         actions = {
@@ -1383,53 +1373,53 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         }
         const default_action = vxlan_decap_3();
     }
-    @hidden table tbl_dashpipelinebmv2l906 {
+    @hidden table tbl_dashpipelinepnadpdk899 {
         actions = {
-            dashpipelinebmv2l906();
+            dashpipelinepnadpdk899();
         }
-        const default_action = dashpipelinebmv2l906();
+        const default_action = dashpipelinepnadpdk899();
     }
-    @hidden table tbl_dashpipelinebmv2l911 {
+    @hidden table tbl_dashpipelinepnadpdk904 {
         actions = {
-            dashpipelinebmv2l911();
+            dashpipelinepnadpdk904();
         }
-        const default_action = dashpipelinebmv2l911();
+        const default_action = dashpipelinepnadpdk904();
     }
-    @hidden table tbl_dashpipelinebmv2l916 {
+    @hidden table tbl_dashpipelinepnadpdk909 {
         actions = {
-            dashpipelinebmv2l916();
+            dashpipelinepnadpdk909();
         }
-        const default_action = dashpipelinebmv2l916();
+        const default_action = dashpipelinepnadpdk909();
     }
-    @hidden table tbl_dashpipelinebmv2l921 {
+    @hidden table tbl_dashpipelinepnadpdk914 {
         actions = {
-            dashpipelinebmv2l921();
+            dashpipelinepnadpdk914();
         }
-        const default_action = dashpipelinebmv2l921();
+        const default_action = dashpipelinepnadpdk914();
     }
-    @hidden table tbl_dashpipelinebmv2l924 {
+    @hidden table tbl_dashpipelinepnadpdk917 {
         actions = {
-            dashpipelinebmv2l924();
+            dashpipelinepnadpdk917();
         }
-        const default_action = dashpipelinebmv2l924();
+        const default_action = dashpipelinepnadpdk917();
     }
-    @hidden table tbl_dashpipelinebmv2l927 {
+    @hidden table tbl_dashpipelinepnadpdk920 {
         actions = {
-            dashpipelinebmv2l927();
+            dashpipelinepnadpdk920();
         }
-        const default_action = dashpipelinebmv2l927();
+        const default_action = dashpipelinepnadpdk920();
     }
-    @hidden table tbl_dashpipelinebmv2l927_0 {
+    @hidden table tbl_dashpipelinepnadpdk920_0 {
         actions = {
-            dashpipelinebmv2l927_0();
+            dashpipelinepnadpdk920_0();
         }
-        const default_action = dashpipelinebmv2l927_0();
+        const default_action = dashpipelinepnadpdk920_0();
     }
-    @hidden table tbl_dashpipelinebmv2l927_1 {
+    @hidden table tbl_dashpipelinepnadpdk920_1 {
         actions = {
-            dashpipelinebmv2l927_1();
+            dashpipelinepnadpdk920_1();
         }
-        const default_action = dashpipelinebmv2l927_1();
+        const default_action = dashpipelinepnadpdk920_1();
     }
     @hidden table tbl_deny {
         actions = {
@@ -1443,35 +1433,35 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         }
         const default_action = act();
     }
-    @hidden table tbl_dashpipelinebmv2l466 {
+    @hidden table tbl_dashpipelinepnadpdk468 {
         actions = {
-            dashpipelinebmv2l466();
+            dashpipelinepnadpdk468();
         }
-        const default_action = dashpipelinebmv2l466();
+        const default_action = dashpipelinepnadpdk468();
     }
-    @hidden table tbl_dashpipelinebmv2l469 {
+    @hidden table tbl_dashpipelinepnadpdk471 {
         actions = {
-            dashpipelinebmv2l469();
+            dashpipelinepnadpdk471();
         }
-        const default_action = dashpipelinebmv2l469();
+        const default_action = dashpipelinepnadpdk471();
     }
-    @hidden table tbl_dashpipelinebmv2l476 {
+    @hidden table tbl_dashpipelinepnadpdk478 {
         actions = {
-            dashpipelinebmv2l476();
+            dashpipelinepnadpdk478();
         }
-        const default_action = dashpipelinebmv2l476();
+        const default_action = dashpipelinepnadpdk478();
     }
-    @hidden table tbl_dashpipelinebmv2l479 {
+    @hidden table tbl_dashpipelinepnadpdk481 {
         actions = {
-            dashpipelinebmv2l479();
+            dashpipelinepnadpdk481();
         }
-        const default_action = dashpipelinebmv2l479();
+        const default_action = dashpipelinepnadpdk481();
     }
-    @hidden table tbl_dashpipelinebmv2l613 {
+    @hidden table tbl_dashpipelinepnadpdk611 {
         actions = {
-            dashpipelinebmv2l613();
+            dashpipelinepnadpdk611();
         }
-        const default_action = dashpipelinebmv2l613();
+        const default_action = dashpipelinepnadpdk611();
     }
     @hidden table tbl_vxlan_encap {
         actions = {
@@ -1503,29 +1493,29 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         }
         const default_action = act_0();
     }
-    @hidden table tbl_dashpipelinebmv2l466_0 {
+    @hidden table tbl_dashpipelinepnadpdk468_0 {
         actions = {
-            dashpipelinebmv2l466_0();
+            dashpipelinepnadpdk468_0();
         }
-        const default_action = dashpipelinebmv2l466_0();
+        const default_action = dashpipelinepnadpdk468_0();
     }
-    @hidden table tbl_dashpipelinebmv2l469_0 {
+    @hidden table tbl_dashpipelinepnadpdk471_0 {
         actions = {
-            dashpipelinebmv2l469_0();
+            dashpipelinepnadpdk471_0();
         }
-        const default_action = dashpipelinebmv2l469_0();
+        const default_action = dashpipelinepnadpdk471_0();
     }
-    @hidden table tbl_dashpipelinebmv2l476_0 {
+    @hidden table tbl_dashpipelinepnadpdk478_0 {
         actions = {
-            dashpipelinebmv2l476_0();
+            dashpipelinepnadpdk478_0();
         }
-        const default_action = dashpipelinebmv2l476_0();
+        const default_action = dashpipelinepnadpdk478_0();
     }
-    @hidden table tbl_dashpipelinebmv2l479_0 {
+    @hidden table tbl_dashpipelinepnadpdk481_0 {
         actions = {
-            dashpipelinebmv2l479_0();
+            dashpipelinepnadpdk481_0();
         }
-        const default_action = dashpipelinebmv2l479_0();
+        const default_action = dashpipelinepnadpdk481_0();
     }
     @hidden table tbl_act_1 {
         actions = {
@@ -1539,35 +1529,23 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         }
         const default_action = vxlan_encap_3();
     }
-    @hidden table tbl_dashpipelinebmv2l947 {
+    @hidden table tbl_dashpipelinepnadpdk940 {
         actions = {
-            dashpipelinebmv2l947();
+            dashpipelinepnadpdk940();
         }
-        const default_action = dashpipelinebmv2l947();
+        const default_action = dashpipelinepnadpdk940();
     }
-    @hidden table tbl_dashpipelinebmv2l949 {
+    @hidden table tbl_dashpipelinepnadpdk942 {
         actions = {
-            dashpipelinebmv2l949();
+            dashpipelinepnadpdk942();
         }
-        const default_action = dashpipelinebmv2l949();
+        const default_action = dashpipelinepnadpdk942();
     }
-    @hidden table tbl_dashpipelinebmv2l952 {
+    @hidden table tbl_dashpipelinepnadpdk945 {
         actions = {
-            dashpipelinebmv2l952();
+            dashpipelinepnadpdk945();
         }
-        const default_action = dashpipelinebmv2l952();
-    }
-    @hidden table tbl_dashpipelinebmv2l957 {
-        actions = {
-            dashpipelinebmv2l957();
-        }
-        const default_action = dashpipelinebmv2l957();
-    }
-    @hidden table tbl_dashpipelinebmv2l959 {
-        actions = {
-            dashpipelinebmv2l959();
-        }
-        const default_action = dashpipelinebmv2l959();
+        const default_action = dashpipelinepnadpdk945();
     }
     @hidden table tbl_drop_action {
         actions = {
@@ -1576,9 +1554,8 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         const default_action = drop_action();
     }
     apply {
-        tbl_dashpipelinebmv2l890.apply();
         if (vip_0.apply().hit) {
-            tbl_dashpipelinebmv2l892.apply();
+            tbl_dashpipelinepnadpdk885.apply();
         }
         direction_lookup_0.apply();
         appliance_0.apply();
@@ -1594,23 +1571,23 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
                 }
             }
         }
-        tbl_dashpipelinebmv2l906.apply();
+        tbl_dashpipelinepnadpdk899.apply();
         if (hdr.ipv6.isValid()) {
-            tbl_dashpipelinebmv2l911.apply();
+            tbl_dashpipelinepnadpdk904.apply();
         } else if (hdr.ipv4.isValid()) {
-            tbl_dashpipelinebmv2l916.apply();
+            tbl_dashpipelinepnadpdk909.apply();
         }
         if (hdr.tcp.isValid()) {
-            tbl_dashpipelinebmv2l921.apply();
+            tbl_dashpipelinepnadpdk914.apply();
         } else if (hdr.udp.isValid()) {
-            tbl_dashpipelinebmv2l924.apply();
+            tbl_dashpipelinepnadpdk917.apply();
         }
         if (meta._direction1 == 16w1) {
-            tbl_dashpipelinebmv2l927.apply();
+            tbl_dashpipelinepnadpdk920.apply();
         } else {
-            tbl_dashpipelinebmv2l927_0.apply();
+            tbl_dashpipelinepnadpdk920_0.apply();
         }
-        tbl_dashpipelinebmv2l927_1.apply();
+        tbl_dashpipelinepnadpdk920_1.apply();
         eni_ether_address_map_0.apply();
         eni_0.apply();
         if (meta._eni_data_admin_state20 == 1w0) {
@@ -1627,10 +1604,10 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
                 if (meta._stage1_dash_acl_group_id33 != 16w0) {
                     switch (outbound_acl_stage1_dash_acl_rule_dash_acl.apply().action_run) {
                         outbound_acl_permit_0: {
-                            tbl_dashpipelinebmv2l466.apply();
+                            tbl_dashpipelinepnadpdk468.apply();
                         }
                         outbound_acl_deny_0: {
-                            tbl_dashpipelinebmv2l469.apply();
+                            tbl_dashpipelinepnadpdk471.apply();
                         }
                         default: {
                         }
@@ -1641,10 +1618,10 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
                 } else if (meta._stage2_dash_acl_group_id34 != 16w0) {
                     switch (outbound_acl_stage2_dash_acl_rule_dash_acl.apply().action_run) {
                         outbound_acl_permit_1: {
-                            tbl_dashpipelinebmv2l476.apply();
+                            tbl_dashpipelinepnadpdk478.apply();
                         }
                         outbound_acl_deny_1: {
-                            tbl_dashpipelinebmv2l479.apply();
+                            tbl_dashpipelinepnadpdk481.apply();
                         }
                         default: {
                         }
@@ -1663,7 +1640,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
                     }
                 }
             }
-            tbl_dashpipelinebmv2l613.apply();
+            tbl_dashpipelinepnadpdk611.apply();
             switch (outbound_outbound_routing_dash_outbound_routing.apply().action_run) {
                 outbound_route_vnet_direct_0: 
                 outbound_route_vnet_0: {
@@ -1691,10 +1668,10 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
                 if (meta._stage1_dash_acl_group_id33 != 16w0) {
                     switch (inbound_acl_stage1_dash_acl_rule_dash_acl.apply().action_run) {
                         inbound_acl_permit_0: {
-                            tbl_dashpipelinebmv2l466_0.apply();
+                            tbl_dashpipelinepnadpdk468_0.apply();
                         }
                         inbound_acl_deny_0: {
-                            tbl_dashpipelinebmv2l469_0.apply();
+                            tbl_dashpipelinepnadpdk471_0.apply();
                         }
                         default: {
                         }
@@ -1705,10 +1682,10 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
                 } else if (meta._stage2_dash_acl_group_id34 != 16w0) {
                     switch (inbound_acl_stage2_dash_acl_rule_dash_acl.apply().action_run) {
                         inbound_acl_permit_1: {
-                            tbl_dashpipelinebmv2l476_0.apply();
+                            tbl_dashpipelinepnadpdk478_0.apply();
                         }
                         inbound_acl_deny_1: {
-                            tbl_dashpipelinebmv2l479_0.apply();
+                            tbl_dashpipelinepnadpdk481_0.apply();
                         }
                         default: {
                         }
@@ -1735,19 +1712,14 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
             meter_rule_0.apply();
         }
         if (meta._meter_policy_en38 == 1w1) {
-            tbl_dashpipelinebmv2l947.apply();
+            tbl_dashpipelinepnadpdk940.apply();
         } else {
-            tbl_dashpipelinebmv2l949.apply();
+            tbl_dashpipelinepnadpdk942.apply();
         }
         if (meta._meter_class44 == 16w0 || meta._mapping_meter_class_override39 == 1w1) {
-            tbl_dashpipelinebmv2l952.apply();
+            tbl_dashpipelinepnadpdk945.apply();
         }
         meter_bucket_0.apply();
-        if (meta._direction1 == 16w1) {
-            tbl_dashpipelinebmv2l957.apply();
-        } else if (meta._direction1 == 16w2) {
-            tbl_dashpipelinebmv2l959.apply();
-        }
         eni_meter_0.apply();
         if (meta._dropped0) {
             tbl_drop_action.apply();
@@ -1755,19 +1727,9 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
     }
 }
 
-control dash_verify_checksum(inout headers_t hdr, inout metadata_t meta) {
+control dash_precontrol(in headers_t pre_hdr, inout metadata_t pre_user_meta, in pna_pre_input_metadata_t istd, inout pna_pre_output_metadata_t ostd) {
     apply {
     }
 }
 
-control dash_compute_checksum(inout headers_t hdr, inout metadata_t meta) {
-    apply {
-    }
-}
-
-control dash_egress(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
-    apply {
-    }
-}
-
-V1Switch<headers_t, metadata_t>(dash_parser(), dash_verify_checksum(), dash_ingress(), dash_egress(), dash_compute_checksum(), dash_deparser()) main;
+PNA_NIC<headers_t, metadata_t, headers_t, metadata_t>(dash_parser(), dash_precontrol(), dash_ingress(), dash_deparser()) main;
