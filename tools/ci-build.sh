@@ -198,6 +198,7 @@ fi
 # ! ------  BEGIN DPDK -----------------------------------------------
 function build_dpdk() {
   # Replace existing Protobuf to match the one specified in the runtime shell.
+  # TODO: Do we really need the shell?
   sudo -E pip3 uninstall -y protobuf
   sudo pip3 install protobuf==3.20.3 p4runtime-shell==0.0.3 netaddr==0.9.0
 }
@@ -210,13 +211,9 @@ fi
 
 # ! ------  BEGIN VALIDATION -----------------------------------------------
 function build_gauntlet() {
-  # For add-apt-repository.
-  sudo apt-get install -y software-properties-common
   # Symlink the toz3 extension for the p4 compiler.
   mkdir -p ${P4C_DIR}/extensions
   git clone -b stable https://github.com/p4gauntlet/toz3 extensions/toz3
-  # The interpreter requires boost filesystem for file management.
-  sudo apt-get install -y libboost-filesystem-dev
   # Disable failures on crashes
   CMAKE_FLAGS+="-DVALIDATION_IGNORE_CRASHES=ON "
 }
