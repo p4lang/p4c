@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 
 import argparse
-import json
 import logging
 import os
 import random
-import socket
-import subprocess
 import sys
 import tempfile
 import time
@@ -40,22 +37,18 @@ PARSER.add_argument(
     help="The location of the test directory.",
 )
 PARSER.add_argument(
-    "--ipdk-recipe",
-    dest="ipdk_recipe",
-    help="The location of the IPDK_RECIPE folder for infrap4d-related executables.",
+    "--ipdk-install-dir",
+    dest="ipdk_install_dir",
+    required=True,
+    help="The location of the IPDK installation folder for infrap4d-related executables.",
 )
-PARSER.add_argument(
-    "--sde-install",
-    dest="sde_install",
-    help="The location of the SDE_INSTALL folder, which is used for locating the dpdk libs.",
-)
-
 PARSER.add_argument(
     "--ld-library-path",
     dest="ld_library_path",
-    help="The location of the shared libs for ipdk and dpdk",
+    type=str,
+    help="The location of the shared libs for ipdk and dpdk. "
+    "By default, these libraries are located in `ipdk_install_dir`.",
 )
-
 PARSER.add_argument(
     "-b",
     "--nocleanup",
@@ -87,10 +80,10 @@ PTF_ADDR: str = "0.0.0.0"
 # Check if target ports are ready to be connected (make sure infrap4d is on)
 def is_port_alive(ns, port) -> bool:
     command = f"sudo ip netns exec {ns} netstat -tuln"
-    out, result = testutils.exec_process(command, timeout=10, capture_output=True)
+    out, _ = testutils.exec_process(command, timeout=10, capture_output=True)
     if str(port) in out:
-        return 1
-    return 0
+        return True
+    return False
 
 
 class Options:
@@ -104,20 +97,18 @@ class Options:
     testdir: Path = Path(".")
     # The base directory where tests are executed.
     p4c_dir: Path = Path(".")
-    # IPDK Recipe folder
-    ipdk_recipe: Path = Path(".")
-    # SDE_INSTALL folder
-    sde_install: Path = Path(".")
-    # LD_LIBRARY_PATH
-    ld_library_path: Path = Path(".")
-    # Number of TAPs to create
+    # Folder containing the IPDK binaries.
+    ipdk_install_dir: Path = Path(".")
+    # LD_LIBRARY_PATH.
+    ld_library_path: str = ""
+    # Number of TAPs to create.
     num_taps: int = 2
 
 
 class PTFTestEnv:
     options: Options = Options()
     switch_proc: testutils.subprocess.Popen = None
-    proc_env_vars: dict = None
+    proc_env_vars: dict = {}
 
     def __init__(self, options):
         self.options = options
@@ -158,8 +149,9 @@ class PTFTestEnv:
         for index in range(self.options.num_taps):
             tap_name = f"TAP{index}"
             cmd = (
-                f"{self.options.ipdk_recipe}/install/bin/gnmi-ctl set "
-                f"device:virtual-device,name:{tap_name},pipeline-name:pipe,mempool-name:MEMPOOL0,mtu:1500,port-type:TAP "
+                f"{self.options.ipdk_install_dir}/bin/gnmi-ctl set "
+                f"device:virtual-device,name:{tap_name}"
+                f",pipeline-name:pipe,mempool-name:MEMPOOL0,mtu:1500,port-type:TAP "
                 f"-grpc_use_insecure_mode={insecure_mode}"
             )
             returncode = self.bridge.ns_exec(cmd, env=proc_env_vars)
@@ -175,7 +167,7 @@ class PTFTestEnv:
     def compile_program(
         self, info_name: Path, bf_rt_schema: Path, context: Path, dpdk_spec: Path
     ) -> int:
-        """Create /pipe directory"""
+        # Create /pipe directory
         _, returncode = testutils.exec_process(
             f"mkdir {self.options.testdir.joinpath('pipe')}", timeout=30
         )
@@ -183,7 +175,7 @@ class PTFTestEnv:
             testutils.log.error("Failed to create /pipe directory")
             return returncode
 
-        """Compile the input P4 program using p4c-dpdk."""
+        # Compile the input P4 program using p4c-dpdk.
         testutils.log.info("---------------------- Compile with p4c-dpdk ----------------------")
         compilation_cmd = f"{self.options.p4c_dir}/build/p4c-dpdk --arch pna --target dpdk \
             --p4runtime-files {info_name} \
@@ -197,15 +189,22 @@ class PTFTestEnv:
         return returncode
 
     def run_infrap4d(
-        self, proc_env_vars: dict, insecure_mode: bool = True
+        self, proc_env_vars: dict, options: Options, insecure_mode: bool = True
     ) -> testutils.subprocess.Popen:
-        """Start infrap4d and return the process handle."""
+        # Start infrap4d and return the process handle.
         testutils.log.info(
             "---------------------- Start infrap4d ----------------------",
         )
+        log_dir = options.testdir.joinpath("infrap4d")
+        testutils.check_and_create_dir(log_dir)
+
         run_infrap4d_cmd = (
-            f"{self.options.ipdk_recipe}/install/sbin/infrap4d "
-            f"-grpc_open_insecure_mode={insecure_mode}"
+            f"{self.options.ipdk_install_dir}/sbin/infrap4d "
+            f"-grpc_open_insecure_mode={insecure_mode} "
+            f"-log_dir={log_dir} "
+            f"-dpdk_sde_install={options.ipdk_install_dir} "
+            f"-dpdk_infrap4d_cfg={options.ipdk_install_dir}/share/stratum/dpdk/dpdk_skip_p4.conf "
+            f"-chassis_config_file={options.ipdk_install_dir}/share/stratum/dpdk/dpdk_port_config.pb.txt "
         )
         bridge_cmd = self.bridge.get_ns_prefix() + " " + run_infrap4d_cmd
         self.switch_proc = testutils.open_process(bridge_cmd, env=proc_env_vars)
@@ -221,9 +220,9 @@ class PTFTestEnv:
     def build_and_load_pipeline(
         self, p4c_conf: Path, conf_bin: Path, info_name: Path, proc_env_vars: dict
     ) -> int:
-        testutils.log.info("---------------------- Build and Load Pipleline ----------------------")
+        testutils.log.info("---------------------- Build and Load Pipeline ----------------------")
         command = (
-            f"{self.options.ipdk_recipe}/install/bin/tdi_pipeline_builder "
+            f"{self.options.ipdk_install_dir}/bin/tdi_pipeline_builder "
             f"--p4c_conf_file={p4c_conf} "
             f"--bf_pipeline_config_binary_file={conf_bin}"
         )
@@ -233,9 +232,9 @@ class PTFTestEnv:
             testutils.log.error("Failed to build pipeline")
             return returncode
 
-        # load pipeline
+        # Load pipeline.
         command = (
-            f"{self.options.ipdk_recipe}/install/bin/p4rt-ctl "
+            f"{self.options.ipdk_install_dir}/bin/p4rt-ctl "
             "set-pipe br0 "
             f"{conf_bin} "
             f"{info_name} "
@@ -269,17 +268,25 @@ class PTFTestEnv:
 
 
 def run_test(options: Options) -> int:
-    """Add necessary environment variables for libs and executables"""
+    # Add necessary environment variables for libs and executables
     proc_env_vars: dict = os.environ.copy()
-    proc_env_vars["LD_LIBRARY_PATH"] = f"{options.ld_library_path}"
-    proc_env_vars["SDE_INSTALL"] = f"{options.sde_install}"
+    if "LD_LIBRARY_PATH" in proc_env_vars:
+        proc_env_vars["LD_LIBRARY_PATH"] += f"{options.ld_library_path}"
+    else:
+        proc_env_vars["LD_LIBRARY_PATH"] = f"{options.ld_library_path}"
+    if "PATH" in proc_env_vars:
+        proc_env_vars["PATH"] += f"{options.ipdk_install_dir}/bin"
+    else:
+        proc_env_vars["PATH"] = f"{options.ipdk_install_dir}/bin"
+    proc_env_vars["PATH"] += f"{options.ipdk_install_dir}/sbin"
+    proc_env_vars["SDE_INSTALL"] = f"{options.ipdk_install_dir}"
 
-    """Define the test environment and compile the P4 target"""
+    # Define the test environment and compile the P4 target
     test_name = Path(options.p4_file.name)
     info_name = options.testdir.joinpath("p4Info.txt")
     bf_rt_schema = options.testdir.joinpath("bf-rt.json")
     conf_bin = options.testdir.joinpath(test_name.with_suffix(".pb.bin"))
-    """ Files needed by the pipeline"""
+    # Files needed by the pipeline
     context = options.testdir.joinpath("pipe/context.json")
     p4c_conf = options.testdir.joinpath(test_name.with_suffix(".conf"))
     dpdk_spec = options.testdir.joinpath(f"pipe/{test_name.with_suffix('.spec')}")
@@ -296,7 +303,7 @@ def run_test(options: Options) -> int:
         return returncode
 
     # Run the switch.
-    switch_proc = testenv.run_infrap4d(proc_env_vars)
+    switch_proc = testenv.run_infrap4d(proc_env_vars, options)
     if switch_proc is None:
         return testutils.FAILURE
 
@@ -349,9 +356,13 @@ def create_options(test_args) -> testutils.Optional[Options]:
         os.chmod(testdir, 0o755)
     options.testdir = Path(testdir)
     options.p4c_dir = Path(test_args.p4c_dir)
-    options.ipdk_recipe = Path(test_args.ipdk_recipe)
-    options.sde_install = Path(test_args.sde_install)
-    options.ld_library_path = Path(test_args.ld_library_path)
+    options.ipdk_install_dir = Path(test_args.ipdk_install_dir)
+    if test_args.ld_library_path:
+        options.ld_library_path = test_args.ld_library_path
+    else:
+        options.ld_library_path = (
+            f"{options.ipdk_install_dir}/lib;{options.ipdk_install_dir}/lib/x86_64-linux-gnu"
+        )
     options.num_taps = test_args.num_taps
 
     # Configure logging.

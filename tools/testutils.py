@@ -149,7 +149,7 @@ def pick_tcp_port(addr: str, default_port: int) -> int:
 def open_process(args: str, **extra_args) -> Optional[subprocess.Popen]:
     """Start the given argument string as a subprocess and return the handle to the process.
     @param extra_args is forwarded to the subprocess.communicate command"""
-    log.info("Writing %s", " ".join(args))
+    log.info("Writing %s", args)
     proc = None
     output_args = {
         "stdout": subprocess.PIPE,

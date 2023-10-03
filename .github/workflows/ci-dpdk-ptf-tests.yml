@@ -14,14 +14,17 @@ concurrency:
   cancel-in-progress: true
 
 # Envs for infrap4d and dpdk libs
-# DEPEND_INSTALL is put to a default searching directory for 
-#   visibility of different libs like libprotobuf
+# IPDK_INSTALL_DIR is put to a default searching directory for
+# visibility of different libs like libprotobuf
 env:
-    SDE: ${{ github.workspace }}
-    P4C_DIR: ${{ github.workspace }}/p4c
-    SDE_INSTALL: ${{ github.workspace }}/sde_install
-    IPDK_RECIPE: ${{ github.workspace }}/ipdk.recipe
-    DEPEND_INSTALL: /usr/local
+    IPDK_INSTALL_DIR: ${{github.workspace}}/ipdk_install
+    CMAKE_UNITY_BUILD: ON
+    ENABLE_TEST_TOOLS: ON
+    INSTALL_DPDK: ON
+    INSTALL_BMV2: OFF
+    INSTALL_EBPF: OFF
+    IMAGE_TYPE: test
+    CTEST_PARALLEL_LEVEL: 4
 
 jobs:
   build_p4dpdk_ubuntu:
@@ -57,14 +60,14 @@ jobs:
         working-directory: p4sde/tools/setup
         run: |
               sudo apt update -y
-              python install_dep.py
+              python3 install_dep.py
 
       - name: 'Compile p4sde dpdk target'
         working-directory: p4sde
         run: |
              mkdir ${GITHUB_WORKSPACE}/install
              ./autogen.sh
-             ./configure --prefix=$SDE_INSTALL
+             ./configure --prefix=$IPDK_INSTALL_DIR
              make 
              make install
 
@@ -73,25 +76,33 @@ jobs:
         run: |
              echo "Install infrap4d dependencies"
              sudo apt install libatomic1 libnl-route-3-dev openssl
-             sudo pip3 install -r requirements.txt
-             cd $IPDK_RECIPE/setup
+             pip3 install -r requirements.txt
+             cd setup
              echo "Build infrap4d dependencies"
-             cmake -B build -DCMAKE_INSTALL_PREFIX="$DEPEND_INSTALL" -DUSE_SUDO=ON
+             cmake -B build -DCMAKE_INSTALL_PREFIX="$IPDK_INSTALL_DIR"
              cmake --build build 
 
       - name: 'Build infrap4d'
         working-directory: ipdk.recipe
-        run: |       
-             sudo ./make-all.sh --target=dpdk --no-krnlmon --no-ovs -S $SDE_INSTALL -D $DEPEND_INSTALL
+        run: |
+             ./make-all.sh --target=dpdk --no-krnlmon --no-ovs -S $IPDK_INSTALL_DIR -D $IPDK_INSTALL_DIR --prefix=$IPDK_INSTALL_DIR
 
       - name: Build p4c with only the DPDK backend
         working-directory: p4c
         run: |
-          sudo -E tools/dpdk-ci-build.sh $P4C_DIR $IPDK_RECIPE $SDE_INSTALL $DEPEND_INSTALL
+          export CMAKE_FLAGS+="-DENABLE_BMV2=OFF "
+          export CMAKE_FLAGS+="-DENABLE_EBPF=OFF "
+          export CMAKE_FLAGS+="-DENABLE_UBPF=OFF "
+          export CMAKE_FLAGS+="-DENABLE_GTESTS=OFF "
+          export CMAKE_FLAGS+="-DENABLE_P4TEST=OFF "
+          export CMAKE_FLAGS+="-DENABLE_P4TC=OFF "
+          export CMAKE_FLAGS+="-DENABLE_P4C_GRAPHS=OFF "
+          export CMAKE_FLAGS+="-DENABLE_TEST_TOOLS=ON "
+          export CMAKE_FLAGS+="-DIPDK_INSTALL_DIR=$IPDK_INSTALL_DIR "
+          tools/ci-build.sh
 
       - name: 'Run DPDK PTF tests'
         working-directory: p4c/build
         run: |
-             sudo $IPDK_RECIPE/install/sbin/copy_config_files.sh $IPDK_RECIPE/install $SDE_INSTALL
-             sudo $IPDK_RECIPE/install/sbin/set_hugepages.sh
+             sudo $IPDK_INSTALL_DIR/sbin/set_hugepages.sh
              sudo -E ctest --output-on-failure --schedule-random -R dpdk-ptf*
