@@ -589,9 +589,6 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, in pna_main_inp
         hdr_15.ipv4.ihl = 4w5;
         hdr_15.ipv4.diffserv = 8w0;
         inner_ip_len_6 = 16w0;
-        if (hdr_15.inner_ipv4.isValid()) {
-            inner_ip_len_6 = inner_ip_len_6 + hdr_15.inner_ipv4.total_len;
-        }
         if (hdr_15.inner_ipv6.isValid()) {
             inner_ip_len_6 = inner_ip_len_6 + 16w40 + hdr_15.inner_ipv6.payload_length;
         }
