@@ -19,11 +19,12 @@ namespace P4Tools::TraceEvents {
  *   Generic
  * ============================================================================================= */
 
-/// A generic event that only takes in a string.
+/// A generic event that only takes in a string as label.
 class Generic : public TraceEvent {
  protected:
     // A label that specifies the type of this generic trace event.
     cstring label;
+
     void print(std::ostream &os) const override;
 
  public:
@@ -33,6 +34,22 @@ class Generic : public TraceEvent {
     Generic(Generic &&) = default;
     Generic &operator=(const Generic &) = default;
     Generic &operator=(Generic &&) = default;
+};
+
+/* =============================================================================================
+ *   GenericDescription
+ * ============================================================================================= */
+
+/// A generic event that takes in two strings, the first is the label, the second a description of
+/// the label.
+class GenericDescription : public Generic {
+ protected:
+    cstring description;
+
+    void print(std::ostream &os) const override;
+
+ public:
+    explicit GenericDescription(cstring description, cstring label);
 };
 
 /* =============================================================================================
@@ -61,6 +78,27 @@ class Expression : public Generic {
 };
 
 /* =============================================================================================
+ *   MethodCallExpression
+ * ============================================================================================= */
+
+/// Label dedicated to method call expression.
+class MethodCall : public TraceEvent {
+ private:
+    const IR::MethodCallExpression *call;
+
+ public:
+    explicit MethodCall(const IR::MethodCallExpression *call);
+    ~MethodCall() override = default;
+    MethodCall(const MethodCall &) = default;
+    MethodCall(MethodCall &&) = default;
+    MethodCall &operator=(const MethodCall &) = default;
+    MethodCall &operator=(MethodCall &&) = default;
+
+ protected:
+    void print(std::ostream &os) const override;
+};
+
+/* =============================================================================================
  *   IfStatementCondition
  * ============================================================================================= */
 
@@ -79,6 +117,27 @@ class IfStatementCondition : public TraceEvent {
                                                        bool doComplete) const override;
 
     explicit IfStatementCondition(const IR::Expression *cond);
+
+ protected:
+    void print(std::ostream &os) const override;
+};
+
+/* =============================================================================================
+ *   AssignmentStatement
+ * ============================================================================================= */
+
+/// Represents an assignment statement.
+class AssignmentStatement : public TraceEvent {
+ private:
+    const IR::AssignmentStatement &stmt;
+
+ public:
+    [[nodiscard]] const AssignmentStatement *subst(const SymbolicEnv &env) const override;
+    const AssignmentStatement *apply(Transform &visitor) const override;
+    [[nodiscard]] const AssignmentStatement *evaluate(const Model &model,
+                                                      bool doComplete) const override;
+
+    explicit AssignmentStatement(const IR::AssignmentStatement &stmt);
 
  protected:
     void print(std::ostream &os) const override;

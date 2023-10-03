@@ -176,6 +176,9 @@ def parse_coverage_and_timestamps(test_files, parse_type):
                     if parse_type == "PROTOBUF":
                         datestr = line.replace('metadata: "Date generated: ', "")
                         datestr = datestr.replace('"\n', "")
+                    elif parse_type == "PTF":
+                        datestr = line.replace("Date generated: ", "")
+                        datestr = datestr.replace("\n", "")
                     else:
                         datestr = line.replace("# Date generated: ", "")
                         datestr = datestr.replace("\n", "")
@@ -185,6 +188,8 @@ def parse_coverage_and_timestamps(test_files, parse_type):
                     if parse_type == "PROTOBUF":
                         covstr = line.replace('metadata: "Current node coverage: ', "")
                         covstr = covstr.replace('"\n', "")
+                    elif parse_type == "PTF":
+                        covstr = line.replace("Current statement coverage: ", "")
                     else:
                         covstr = line.replace("# Current node coverage: ", "")
                     covstr = covstr.replace("\n", "")

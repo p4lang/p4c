@@ -324,12 +324,13 @@ std::string PTF::getTestCaseTemplate() {
     static std::string TEST_CASE(
         R"""(
 class Test{{test_id}}(AbstractTest):
-    # Date generated: {{timestamp}}
-## if length(selected_branches) > 0
-    # {{selected_branches}}
-## endif
     '''
-    # Current node coverage: {{coverage}}
+    Date generated: {{timestamp}}
+    Current node coverage: {{coverage}}
+## if length(selected_branches) > 0
+    Selected branches: {{selected_branches}}
+## endif
+    Trace:
 ## for trace_item in trace
     {{trace_item}}
 ##endfor

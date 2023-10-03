@@ -38,10 +38,14 @@ const Type_Bits *getBitTypeToFit(int value);
  * ========================================================================================= */
 
 /// @returns a constant. The value is cached.
-const Constant *getConstant(const Type *type, big_int v);
+const Constant *getConstant(const Type *type, big_int v, const Util::SourceInfo &srcInfo = {});
 
 /// @returns a bool literal. The value is cached.
-const BoolLiteral *getBoolLiteral(bool value);
+const BoolLiteral *getBoolLiteral(bool value, const Util::SourceInfo &srcInfo = {});
+
+/// @returns a constant with the maximum big_int value that can fit into this bit width.
+/// Implicitly converts boolean types to a bit vector of width one with value 1.
+const IR::Constant *getMaxValueConstant(const Type *t, const Util::SourceInfo &srcInfo = {});
 
 /// @returns the "default" value for a given type.
 /// The resulting expression will have the specified srcInfo position.
@@ -66,10 +70,6 @@ const IR::Expression *getDefaultValue(const Type *type, const Util::SourceInfo &
 /// Converts a bool literal into a constant of type Type_Bits and width 1.
 /// The value is 1, if the bool literal is true, 0 otherwise.
 const IR::Constant *convertBoolLiteral(const IR::BoolLiteral *lit);
-
-/// @returns a constant with the maximum big_int value that can fit into this bit width.
-/// Implicitly converts boolean types to a bit vector of width one with value 1.
-const IR::Constant *getMaxValueConstant(const Type *t);
 
 /// Given an StructExpression, returns a flat vector of the expressions contained in that
 /// struct. Unfortunately, list and struct expressions are similar but have no common ancestors.
