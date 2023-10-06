@@ -60,7 +60,7 @@ control ingress(inout headers hdr,
 {
 
     apply {
-         send_to_port(ostdx, (PortId_t) 5);
+         send_to_port(ostdx, (PortId_t) PORT1);
 
          if (hdr.ethernet.etherType == 0x0800) {
             ostdx.class_of_service = (ClassOfService_t) 100;

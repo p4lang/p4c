@@ -15,9 +15,9 @@ struct metadata {
 }
 
 struct headers {
-    @name(".easyroute_head") 
+    @name(".easyroute_head")
     easyroute_head_t easyroute_head;
-    @name(".easyroute_port") 
+    @name(".easyroute_port")
     easyroute_port_t easyroute_port;
 }
 
@@ -88,4 +88,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

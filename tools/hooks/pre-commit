@@ -1,0 +1,101 @@
+#!/usr/bin/env python3
+
+"""pre-commit linter
+
+Catches some basic coding style by running `tools/cpplint.py` on code being
+committed.
+"""
+
+import sys
+import os
+import subprocess
+import re
+import shlex
+from pathlib import Path
+
+# This is the path of the pre-commit file.
+FILE_DIR = Path(__file__).resolve().parent
+TOOLS_DIR = FILE_DIR.parent
+
+# The githook is executed from this location.
+repo = os.getcwd()
+
+
+class Linter:
+    def __init__(self, basedir, verbose=False):
+        self._basedir = basedir
+        self._fileSet = re.compile(r'.*\.(cpp|cc|h|hpp|ypp|l)$')
+        self._verbose = verbose
+
+    def runCmd(self, cmd, basedir=repo):
+        """
+        Run a command, capture its output and return it in a tuple with
+        the command return code (return code, out).
+        """
+        if self._verbose:
+            print(' '.join(cmd))
+
+        args = shlex.split(" ".join(cmd))
+        try:
+            p = subprocess.Popen(args, stdout=subprocess.PIPE, cwd=basedir)
+        except:
+            import traceback
+            print("error invoking {}".format(" ".join(cmd)), file=sys.stderr)
+            print(traceback.format_exc(), file=sys.stderr)
+            return (1, None)
+
+        (out, err) = p.communicate()  # now wait
+        return (p.returncode, out.decode())
+
+    def getFiles(self):
+        (rc, allFiles) = self.runCmd(('git', 'diff', '--cached', '--name-only'))
+        allFiles = [f for f in allFiles.strip().split(
+            '\n') if self._fileSet.match(f)]
+        if self._verbose:
+            print('All:', allFiles)
+        return allFiles
+
+    def run_cpplint(self):
+        print("Checking C++ code style...\n")
+        files = self.getFiles()
+        if len(files) == 0:
+            return 0
+
+        linter = [os.path.join(TOOLS_DIR, 'cpplint.py'),
+                  '--quiet', '--root', self._basedir]
+        args = linter + files
+        if self._verbose:
+            print(args)
+        (rc, out) = self.runCmd(args, self._basedir)
+        print(out)
+        return rc
+
+    def run_clang_format(self):
+        print("Checking if C++ code format is correct...\n")
+        files = self.getFiles()
+        if len(files) == 0:
+            return 0
+
+        formatter = ['git', 'clang-format', '--diff']
+        args = formatter
+        if self._verbose:
+            print(args)
+        (rc, out) = self.runCmd(args, self._basedir)
+        # git-clang-format only returns an exit code in later version.
+        # We need to check for diff patterns.
+        if rc != 0 and ("+++" in out or "---" in out):
+            print(out)
+            print(
+                f"Return code {rc}. Found formatting issues. Run make clang-format-fix-errors, then commit.")
+            return 1
+        else:
+            return 0
+
+
+linter = Linter(repo)
+result = linter.run_cpplint()
+if result != 0:
+    sys.exit(result)
+
+# Once we pass cpplint, format the files with clang-format.
+sys.exit(linter.run_clang_format())

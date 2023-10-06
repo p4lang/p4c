@@ -15,56 +15,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 #include "ebpfPsaParser.h"
+
 #include "backends/ebpf/ebpfType.h"
+#include "backends/ebpf/psa/ebpfPipeline.h"
 #include "frontends/p4/enumInstance.h"
 
 namespace EBPF {
 
-bool PsaStateTranslationVisitor::preorder(const IR::Expression* expression) {
-    // Allow for friendly error name in comment before verify() call, e.g. error.NoMatch
-    if (expression->is<IR::TypeNameExpression>()) {
-        auto tne = expression->to<IR::TypeNameExpression>();
-        builder->append(tne->typeName->path->name.name);
-        return false;
-    }
-
-    return CodeGenInspector::preorder(expression);
-}
-
-bool PsaStateTranslationVisitor::preorder(const IR::Mask *mask) {
-    if (currentSelectExpression == nullptr) {
-        ::error(ErrorType::ERR_UNSUPPORTED,
-                "%1%: Masks outside of select expression are not supported.",
-                mask);
-        return false;
-    }
-
-    BUG_CHECK(currentSelectExpression->select->components.size() == 1,
-              "%1%: tuple not eliminated in select",
-              currentSelectExpression->select);
-
-    builder->append("(");
-    visit(currentSelectExpression->select->components.at(0));
-    builder->append(" & ");
-    visit(mask->right);
-    builder->append(") == (");
-    visit(mask->left);
-    builder->append(" & ");
-    visit(mask->right);
-    builder->append(")");
-    return false;
-}
-
-void PsaStateTranslationVisitor::processFunction(const P4::ExternFunction* function) {
-    if (function->method->name.name == "verify") {
-        compileVerify(function->expr);
-        return;
-    }
-
-    StateTranslationVisitor::processFunction(function);
-}
-
-void PsaStateTranslationVisitor::processMethod(const P4::ExternMethod* ext) {
+void PsaStateTranslationVisitor::processMethod(const P4::ExternMethod *ext) {
     auto externName = ext->originalExternType->name.name;
 
     if (externName == "Checksum" || externName == "InternetChecksum") {
@@ -77,46 +35,51 @@ void PsaStateTranslationVisitor::processMethod(const P4::ExternMethod* ext) {
     StateTranslationVisitor::processMethod(ext);
 }
 
-void PsaStateTranslationVisitor::compileVerify(const IR::MethodCallExpression * expression) {
-    BUG_CHECK(expression->arguments->size() == 2, "Expected 2 arguments: %1%", expression);
-
-    builder->emitIndent();
-    builder->append("if (!(");
-    visit(expression->arguments->at(0));
-    builder->append(")) ");
-
-    builder->blockStart();
-
-    builder->emitIndent();
-    builder->appendFormat("%s = ", parser->program->errorVar.c_str());
-
-    auto errorType = expression->arguments->at(1)->expression;
-    auto ei = P4::EnumInstance::resolve(errorType, typeMap);
-    if (ei == nullptr) {
-        ::error(ErrorType::ERR_MODEL, "%1%: must be a constant on this target", errorType);
-        return;
-    }
-
-    builder->append(ei->name);
-
-    builder->endOfStatement(true);
-
-    cstring msg = Util::printf_format("Verify: condition failed, parser_error=%%u (%s)",
-                                      ei->name.name);
-    builder->target->emitTraceMessage(builder, msg.c_str(), 1, parser->program->errorVar.c_str());
-
-    builder->emitIndent();
-    builder->appendFormat("goto %s", IR::ParserState::reject.c_str());
-    builder->endOfStatement(true);
-    builder->blockEnd(true);
-}
-
-EBPFPsaParser::EBPFPsaParser(const EBPFProgram* program, const IR::ParserBlock* block,
-                             const P4::TypeMap* typeMap) : EBPFParser(program, block, typeMap) {
+// =====================EBPFPsaParser=============================
+EBPFPsaParser::EBPFPsaParser(const EBPFProgram *program, const IR::ParserBlock *block,
+                             const P4::TypeMap *typeMap)
+    : EBPFParser(program, block, typeMap), inputMetadata(nullptr) {
     visitor = new PsaStateTranslationVisitor(program->refMap, program->typeMap, this);
 }
 
-void EBPFPsaParser::emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl) {
+void EBPFPsaParser::emit(CodeBuilder *builder) {
+    builder->emitIndent();
+    builder->blockStart();
+    emitParserInputMetadata(builder);
+    EBPFParser::emit(builder);
+    builder->blockEnd(true);
+}
+
+void EBPFPsaParser::emitParserInputMetadata(CodeBuilder *builder) {
+    bool isIngress = program->is<EBPFIngressPipeline>();
+
+    builder->emitIndent();
+    if (isIngress) {
+        builder->append("struct psa_ingress_parser_input_metadata_t ");
+    } else {
+        builder->append("struct psa_egress_parser_input_metadata_t ");
+    }
+    builder->append(inputMetadata->name.name);
+    builder->append(" = ");
+    builder->blockStart();
+
+    builder->emitIndent();
+    if (isIngress) {
+        builder->append(".ingress_port = ");
+    } else {
+        builder->append(".egress_port = ");
+    }
+    builder->append(program->to<EBPFPipeline>()->inputPortVar);
+    builder->appendLine(",");
+
+    builder->emitIndent();
+    builder->appendLine(".packet_path = compiler_meta__->packet_path,");
+
+    builder->blockEnd(false);
+    builder->endOfStatement(true);
+}
+
+void EBPFPsaParser::emitDeclaration(CodeBuilder *builder, const IR::Declaration *decl) {
     if (auto di = decl->to<IR::Declaration_Instance>()) {
         cstring name = di->name.name;
         if (EBPFObject::getSpecializedTypeName(di) == "Checksum") {
@@ -135,12 +98,12 @@ void EBPFPsaParser::emitDeclaration(CodeBuilder* builder, const IR::Declaration*
     EBPFParser::emitDeclaration(builder, decl);
 }
 
-void EBPFPsaParser::emitRejectState(CodeBuilder* builder) {
+void EBPFPsaParser::emitRejectState(CodeBuilder *builder) {
     builder->emitIndent();
     builder->appendFormat("if (%s == 0) ", program->errorVar.c_str());
     builder->blockStart();
-    builder->target->emitTraceMessage(builder,
-        "Parser: Explicit transition to reject state, dropping packet..");
+    builder->target->emitTraceMessage(
+        builder, "Parser: Explicit transition to reject state, dropping packet..");
     builder->emitIndent();
     builder->appendFormat("return %s", builder->target->abortReturnCode().c_str());
     builder->endOfStatement(true);

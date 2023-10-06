@@ -87,6 +87,7 @@ control MyIC(
         a.dstAddr = (bit<48>)b.meta;
         a.srcAddr = (bit<48>)b.meta1;
         a.etherType = b.meta2;
+        b.meta = b.meta2 ++ b.meta7;
     }
 }
 

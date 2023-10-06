@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_CHECKSIZE_H_
-#define _MIDEND_CHECKSIZE_H_
+#ifndef MIDEND_CHECKSIZE_H_
+#define MIDEND_CHECKSIZE_H_
 
 #include "ir/ir.h"
 
@@ -25,17 +25,16 @@ namespace P4 {
 class CheckTableSize : public Modifier {
  public:
     CheckTableSize() { setName("CheckTableSize"); }
-    bool preorder(IR::P4Table* table) override {
+    bool preorder(IR::P4Table *table) override {
         auto size = table->getSizeProperty();
-        if (size == nullptr)
-            return false;
+        if (size == nullptr) return false;
 
         bool deleteSize = false;
         auto key = table->getKey();
         if (key == nullptr) {
             if (size->value != 1) {
-                warn(ErrorType::WARN_MISMATCH,
-                     "%1%: size %2% specified for table without keys", table, size);
+                warn(ErrorType::WARN_MISMATCH, "%1%: size %2% specified for table without keys",
+                     table, size);
                 deleteSize = true;
             }
         }
@@ -56,4 +55,4 @@ class CheckTableSize : public Modifier {
 
 }  // namespace P4
 
-#endif /* _MIDEND_CHECKSIZE_H_ */
+#endif /* MIDEND_CHECKSIZE_H_ */

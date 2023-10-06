@@ -14,14 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_P4_DEFAULTARGUMENTS_H_
-#define _FRONTENDS_P4_DEFAULTARGUMENTS_H_
+#ifndef FRONTENDS_P4_DEFAULTARGUMENTS_H_
+#define FRONTENDS_P4_DEFAULTARGUMENTS_H_
 
-#include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -35,30 +35,33 @@ namespace P4 {
  * f(a = 0);
  */
 class DoDefaultArguments : public Transform {
-    ReferenceMap* refMap;
-    TypeMap*      typeMap;
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
 
  public:
-    DoDefaultArguments(ReferenceMap* refMap, TypeMap* typeMap): refMap(refMap), typeMap(typeMap)
-    { setName("DoDefaultArguments"); CHECK_NULL(refMap); CHECK_NULL(typeMap); }
-    const IR::Node* postorder(IR::MethodCallExpression* expression) override;
-    const IR::Node* postorder(IR::Declaration_Instance* inst) override;
-    const IR::Node* postorder(IR::ConstructorCallExpression* ccc) override;
+    DoDefaultArguments(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
+        setName("DoDefaultArguments");
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
+    }
+    const IR::Node *postorder(IR::MethodCallExpression *expression) override;
+    const IR::Node *postorder(IR::Declaration_Instance *inst) override;
+    const IR::Node *postorder(IR::ConstructorCallExpression *ccc) override;
 };
 
 class DefaultArguments : public PassManager {
  public:
-    DefaultArguments(ReferenceMap* refMap, TypeMap* typeMap) {
+    DefaultArguments(ReferenceMap *refMap, TypeMap *typeMap) {
         setName("DefaultArguments");
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DoDefaultArguments(refMap, typeMap));
         passes.push_back(new ClearTypeMap(typeMap));
         // this may insert casts into the new arguments
         passes.push_back(new ResolveReferences(refMap)),
-        passes.push_back(new TypeInference(refMap, typeMap, false));
+            passes.push_back(new TypeInference(refMap, typeMap, false));
     }
 };
 
 }  // namespace P4
 
-#endif /* _FRONTENDS_P4_DEFAULTARGUMENTS_H_ */
+#endif /* FRONTENDS_P4_DEFAULTARGUMENTS_H_ */

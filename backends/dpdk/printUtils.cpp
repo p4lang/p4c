@@ -33,7 +33,7 @@ bool ConvertToString::preorder(const IR::PropertyValue *p) {
 }
 
 bool ConvertToString::preorder(const IR::Constant *e) {
-    out << "0x" << std::hex << e->value;
+    out << "0x" << std::hex << std::uppercase << e->value;
     return false;
 }
 
@@ -42,7 +42,7 @@ bool ConvertToString::preorder(const IR::BoolLiteral *e) {
     return false;
 }
 
-bool ConvertToString::preorder(const IR::Member *e){
+bool ConvertToString::preorder(const IR::Member *e) {
     out << toStr(e->expr) << "." << e->member.toString();
     return false;
 }
@@ -53,7 +53,11 @@ bool ConvertToString::preorder(const IR::PathExpression *e) {
 }
 
 bool ConvertToString::preorder(const IR::TypeNameExpression *e) {
-    out << e->typeName->path->name;
+    if (auto tn = e->typeName->to<IR::Type_Name>()) {
+        out << tn->path->name;
+    } else {
+        BUG("%1%: unexpected typeNameExpression", e);
+    }
     return false;
 }
 
@@ -62,7 +66,7 @@ bool ConvertToString::preorder(const IR::MethodCallExpression *e) {
     if (auto path = e->method->to<IR::PathExpression>()) {
         out << path->path->name.name;
     } else {
-        ::error("%1% is not a PathExpression", e->toString());
+        ::error(ErrorType::ERR_INVALID, "%1% is not a PathExpression", e->toString());
     }
     return false;
 }
@@ -74,9 +78,9 @@ bool ConvertToString::preorder(const IR::Cast *e) {
 
 bool ConvertToString::preorder(const IR::ArrayIndex *e) {
     if (auto cst = e->right->to<IR::Constant>()) {
-        out << toStr(e->left) <<  "_" << cst->value;
+        out << toStr(e->left) << "_" << cst->value;
     } else {
-        ::error("%1% is not a constant", e->right);
+        ::error(ErrorType::ERR_INVALID, "%1% is not a constant", e->right);
     }
     return false;
 }

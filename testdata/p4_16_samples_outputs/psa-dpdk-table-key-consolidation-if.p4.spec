@@ -67,6 +67,8 @@ struct user_meta_t {
 	bit<16> local_metadata_data
 	bit<16> local_metadata_data1
 	bit<48> MyIC_tbl_ethernet_srcAddr
+	bit<16> tmpMask
+	bit<8> tmpMask_0
 }
 metadata instanceof user_meta_t
 
@@ -124,16 +126,16 @@ table bar {
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
 	mov m.tmpMask h.ethernet.etherType
-	and m.tmpMask 0xf00
+	and m.tmpMask 0xF00
 	jmpeq MYIP_PARSE_IPV4 m.tmpMask 0x800
-	jmpeq MYIP_PARSE_TCP h.ethernet.etherType 0xd00
+	jmpeq MYIP_PARSE_TCP h.ethernet.etherType 0xD00
 	jmp MYIP_ACCEPT
 	MYIP_PARSE_IPV4 :	extract h.ipv4
 	mov m.tmpMask_0 h.ipv4.protocol
-	and m.tmpMask_0 0xfc
+	and m.tmpMask_0 0xFC
 	jmpeq MYIP_PARSE_TCP m.tmpMask_0 0x4
 	jmp MYIP_ACCEPT
 	MYIP_PARSE_TCP :	extract h.tcp
@@ -141,14 +143,17 @@ apply {
 	table tbl
 	jmpnh LABEL_END
 	table foo
-	LABEL_END :	table tbl
+	LABEL_END :	mov m.MyIC_tbl_ethernet_srcAddr h.ethernet.srcAddr
+	table tbl
 	jmpnh LABEL_END_0
 	table foo
-	LABEL_END_0 :	table tbl
+	LABEL_END_0 :	mov m.MyIC_tbl_ethernet_srcAddr h.ethernet.srcAddr
+	table tbl
 	jmpnh LABEL_FALSE_1
 	jmp LABEL_END_1
 	LABEL_FALSE_1 :	table bar
-	LABEL_END_1 :	table tbl
+	LABEL_END_1 :	mov m.MyIC_tbl_ethernet_srcAddr h.ethernet.srcAddr
+	table tbl
 	jmpnh LABEL_FALSE_2
 	jmp LABEL_END_2
 	LABEL_FALSE_2 :	table bar

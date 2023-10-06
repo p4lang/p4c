@@ -18,7 +18,7 @@ stack2.p4(22)
 stack2.p4(21)
           h[5] stack1;
           ^^^^
-stack2.p4(25): [--Werror=type-error] error: Expression stack1.lastIndex cannot be the target of an assignment
+stack2.p4(25): [--Werror=type-error] error: stack1.lastIndex: 'lastIndex' for stacks can only be used in a parser
         stack1.lastIndex = 3; // not an l-value
         ^^^^^^^^^^^^^^^^
 stack2.p4(26): [--Werror=type-error] error: Expression stack2.size cannot be the target of an assignment

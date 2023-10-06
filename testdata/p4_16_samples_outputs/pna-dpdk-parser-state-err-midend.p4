@@ -1,11 +1,10 @@
 #include <core.p4>
-#include <pna.p4>
+#include <dpdk/pna.p4>
 
-typedef bit<48> EthernetAddress;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv4_t {
@@ -44,6 +43,7 @@ struct main_metadata_t {
     bit<1>  rng_result1;
     bit<16> min1;
     bit<16> max1;
+    bit<8>  timeout;
 }
 
 struct headers_t {
@@ -84,18 +84,18 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         hdr_3_tcp = hdr.tcp;
         user_meta.rng_result1 = (bit<1>)(min1_2 <= hdr_3_tcp.srcPort && hdr_3_tcp.srcPort <= max1_2);
     }
-    @name("MainControlImpl.next_hop") action next_hop(@name("vport") PortId_t vport) {
+    @name("MainControlImpl.next_hop") action next_hop(@name("vport") bit<32> vport) {
         send_to_port(vport);
     }
     @name("MainControlImpl.add_on_miss_action") action add_on_miss_action() {
-        add_entry<bit<32>>(action_name = "next_hop", action_params = 32w0);
+        add_entry<bit<32>>(action_name = "next_hop", action_params = 32w0, expire_time_profile_id = user_meta.timeout);
     }
     @name("MainControlImpl.do_range_checks_1") action do_range_checks_2(@name("min1") bit<16> min1_3, @name("max1") bit<16> max1_3) {
         user_meta.rng_result1 = (bit<1>)(min1_3 <= hdr.tcp.srcPort && hdr.tcp.srcPort <= max1_3);
     }
     @name("MainControlImpl.ipv4_da") table ipv4_da_0 {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
         }
         actions = {
             @tableonly next_hop();
@@ -104,16 +104,16 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         add_on_miss = true;
         const default_action = add_on_miss_action();
     }
-    @name("MainControlImpl.next_hop2") action next_hop2(@name("vport") PortId_t vport_2, @name("newAddr") bit<32> newAddr) {
+    @name("MainControlImpl.next_hop2") action next_hop2(@name("vport") bit<32> vport_2, @name("newAddr") bit<32> newAddr) {
         send_to_port(vport_2);
         hdr.ipv4.srcAddr = newAddr;
     }
     @name("MainControlImpl.add_on_miss_action2") action add_on_miss_action2() {
-        add_entry<tuple_0>(action_name = "next_hop", action_params = (tuple_0){f0 = 32w0,f1 = 32w1234});
+        add_entry<tuple_0>(action_name = "next_hop2", action_params = (tuple_0){f0 = 32w0,f1 = 32w1234}, expire_time_profile_id = user_meta.timeout);
     }
     @name("MainControlImpl.ipv4_da2") table ipv4_da2_0 {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
         }
         actions = {
             @tableonly next_hop2();
@@ -124,17 +124,17 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
         add_on_miss = true;
         const default_action = add_on_miss_action2();
     }
-    @hidden action pnadpdkparserstateerr190() {
+    @hidden action pnadpdkparserstateerr191() {
         user_meta.rng_result1 = (bit<1>)(16w100 <= hdr.tcp.srcPort && hdr.tcp.srcPort <= 16w200);
     }
-    @hidden table tbl_pnadpdkparserstateerr190 {
+    @hidden table tbl_pnadpdkparserstateerr191 {
         actions = {
-            pnadpdkparserstateerr190();
+            pnadpdkparserstateerr191();
         }
-        const default_action = pnadpdkparserstateerr190();
+        const default_action = pnadpdkparserstateerr191();
     }
     apply {
-        tbl_pnadpdkparserstateerr190.apply();
+        tbl_pnadpdkparserstateerr191.apply();
         if (hdr.ipv4.isValid()) {
             ipv4_da_0.apply();
             ipv4_da2_0.apply();
@@ -143,20 +143,19 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnadpdkparserstateerr205() {
+    @hidden action pnadpdkparserstateerr206() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnadpdkparserstateerr205 {
+    @hidden table tbl_pnadpdkparserstateerr206 {
         actions = {
-            pnadpdkparserstateerr205();
+            pnadpdkparserstateerr206();
         }
-        const default_action = pnadpdkparserstateerr205();
+        const default_action = pnadpdkparserstateerr206();
     }
     apply {
-        tbl_pnadpdkparserstateerr205.apply();
+        tbl_pnadpdkparserstateerr206.apply();
     }
 }
 
 PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
-

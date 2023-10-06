@@ -17,8 +17,8 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_PSA_EBPFPSAPARSER_H_
 #define BACKENDS_EBPF_PSA_EBPFPSAPARSER_H_
 
-#include "backends/ebpf/ebpfType.h"
 #include "backends/ebpf/ebpfParser.h"
+#include "backends/ebpf/ebpfType.h"
 #include "backends/ebpf/psa/ebpfPsaTable.h"
 #include "backends/ebpf/psa/externs/ebpfPsaChecksum.h"
 
@@ -28,34 +28,29 @@ class EBPFPsaParser;
 
 class PsaStateTranslationVisitor : public StateTranslationVisitor {
  public:
-    EBPFPsaParser * parser;
+    EBPFPsaParser *parser;
 
-    const IR::SelectExpression* currentSelectExpression = nullptr;
+    explicit PsaStateTranslationVisitor(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                                        EBPFPsaParser *prsr)
+        : StateTranslationVisitor(refMap, typeMap), parser(prsr) {}
 
-    explicit PsaStateTranslationVisitor(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                                        EBPFPsaParser * prsr) :
-        StateTranslationVisitor(refMap, typeMap), parser(prsr) {}
-
-    bool preorder(const IR::Expression* expression) override;
-    bool preorder(const IR::Mask* expression) override;
-
-    void processFunction(const P4::ExternFunction* function) override;
-    void processMethod(const P4::ExternMethod* ext) override;
-
-    void compileVerify(const IR::MethodCallExpression * expression);
+    void processMethod(const P4::ExternMethod *ext) override;
 };
 
 class EBPFPsaParser : public EBPFParser {
  public:
-    std::map<cstring, EBPFChecksumPSA*> checksums;
+    std::map<cstring, EBPFChecksumPSA *> checksums;
+    const IR::Parameter *inputMetadata;
 
-    EBPFPsaParser(const EBPFProgram* program, const IR::ParserBlock* block,
-                  const P4::TypeMap* typeMap);
+    EBPFPsaParser(const EBPFProgram *program, const IR::ParserBlock *block,
+                  const P4::TypeMap *typeMap);
 
-    void emitDeclaration(CodeBuilder* builder, const IR::Declaration* decl) override;
-    void emitRejectState(CodeBuilder* builder) override;
+    void emit(CodeBuilder *builder) override;
+    void emitParserInputMetadata(CodeBuilder *builder);
+    void emitDeclaration(CodeBuilder *builder, const IR::Declaration *decl) override;
+    void emitRejectState(CodeBuilder *builder) override;
 
-    EBPFChecksumPSA* getChecksum(cstring name) const {
+    EBPFChecksumPSA *getChecksum(cstring name) const {
         auto result = ::get(checksums, name);
         BUG_CHECK(result != nullptr, "No checksum named %1%", name);
         return result;
@@ -64,4 +59,4 @@ class EBPFPsaParser : public EBPFParser {
 
 }  // namespace EBPF
 
-#endif  /* BACKENDS_EBPF_PSA_EBPFPSAPARSER_H_ */
+#endif /* BACKENDS_EBPF_PSA_EBPFPSAPARSER_H_ */

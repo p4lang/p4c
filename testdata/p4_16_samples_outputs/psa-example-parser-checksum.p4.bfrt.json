@@ -1,0 +1,69 @@
+{
+  "schema_version" : "1.0.0",
+  "tables" : [
+    {
+      "name" : "ip.ingress.parser_error_count_and_convert",
+      "id" : 47967574,
+      "table_type" : "MatchAction_Direct",
+      "size" : 1024,
+      "annotations" : [],
+      "depends_on" : [],
+      "has_const_default_action" : false,
+      "key" : [
+        {
+          "id" : 1,
+          "name" : "istd.parser_error",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : false,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "bytes",
+            "width" : 0
+          }
+        }
+      ],
+      "action_specs" : [
+        {
+          "id" : 31609776,
+          "name" : "ingress.set_error_idx",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : [
+            {
+              "id" : 1,
+              "name" : "idx",
+              "repeated" : false,
+              "mandatory" : true,
+              "read_only" : false,
+              "annotations" : [],
+              "type" : {
+                "type" : "bytes",
+                "width" : 8
+              }
+            }
+          ]
+        }
+      ],
+      "data" : [
+        {
+          "mandatory" : false,
+          "read_only" : false,
+          "singleton" : {
+            "id" : 65554,
+            "name" : "$COUNTER_SPEC_PKTS",
+            "repeated" : false,
+            "annotations" : [],
+            "type" : {
+              "type" : "uint64",
+              "default_value" : 0
+            }
+          }
+        }
+      ],
+      "supported_operations" : ["SyncCounters"],
+      "attributes" : ["EntryScope"]
+    }
+  ],
+  "learn_filters" : []
+}

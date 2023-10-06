@@ -22,14 +22,21 @@ struct Meta {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp_key") bit<128> tmp_key_0;
+    @name("ingress.val") bit<8> val_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.do_action") action do_action() {
-        h.h.a = (h.h.a > 8w10 ? 8w2 : 8w3);
+        val_0 = h.h.a;
+        if (h.h.a > 8w10) {
+            val_0 = 8w2;
+        } else {
+            val_0 = 8w3;
+        }
+        h.h.a = val_0;
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
-            tmp_key_0: exact @name("bKiScA") ;
+            tmp_key_0: exact @name("bKiScA");
         }
         actions = {
             do_action();
@@ -83,4 +90,3 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

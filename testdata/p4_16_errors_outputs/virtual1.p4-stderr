@@ -1,21 +1,28 @@
-virtual1.p4(23): [--Werror=type-error] error: return +
+virtual1.p4(24): [--Werror=type-error] error: return ix + 1
             return (ix + 1);
             ^^^^^^
   ---- Actual error:
-  Cannot unify type 'bit<16>' with type 'bool'
+virtual1.p4(23): Cannot cast implicitly type 'bit<16>' to type 'bool'
+          bool f(in bit<16> ix) {
+          ^^^^
   ---- Originating from:
-virtual1.p4(23): Source expression '+' produces a result of type 'bit<16>' which cannot be assigned to a left-value with type 'bool'
+virtual1.p4(24): Source expression 'ix + 1' produces a result of type 'bit<16>' which cannot be assigned to a left-value with type 'bool'
               return (ix + 1);
                       ^^^^^^
-virtual1.p4(21): [--Werror=type-error] error: cntr
+virtual1.p4(23)
+          bool f(in bit<16> ix) {
+          ^^^^
+virtual1.p4(22): [--Werror=type-error] error: cntr
     Virtual() cntr = {
               ^^^^
   ---- Actual error:
-  Cannot unify type 'bool' with type 'bit<16>'
+virtual1.p4(23): Cannot unify type 'bool' with type 'bit<16>'
+          bool f(in bit<16> ix) {
+          ^^^^
   ---- Originating from:
-virtual1.p4(22): Method 'f' does not have the expected type 'f'
+virtual1.p4(23): Method 'f' does not have the expected type 'f'
           bool f(in bit<16> ix) {
                ^
-virtual1.p4(17)
+virtual1.p4(18)
       abstract bit<16> f(in bit<16> ix);
                        ^

@@ -1,4 +1,4 @@
-issue1542.p4(27): [--Werror=type-error] error: 32w2: argument does not match declaration in actions list: 1
+issue1542.p4(27): [--Werror=type-error] error: (bit<32>)32w2: argument does not match declaration in actions list: (bit<32>)32w1
             ( true, 1, true ) : multicast(2);
                                           ^
 issue1542.p4(22)

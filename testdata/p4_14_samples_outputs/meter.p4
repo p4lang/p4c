@@ -18,12 +18,12 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name(".meta") 
+    @name(".meta")
     meta_t meta;
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
 }
 
@@ -43,7 +43,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 @name(".my_meter") meter<bit<14>>(32w16384, MeterType.packets) my_meter;
-
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("._drop") action _drop() {
         mark_to_drop(standard_metadata);
@@ -97,4 +96,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

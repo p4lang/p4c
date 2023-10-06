@@ -20,16 +20,9 @@ package switch2(Extractor<bool> e);
 package switch3(Extractor2<bool, bool> e);
 package switch4<S>(Extractor2<bool, S> e);
 switch0(f()) main1;
-
 switch1<bool>(f()) main3;
-
 switch2(f()) main4;
-
 switch3(f2()) main5;
-
 switch4<bool>(f2()) main6;
-
 switch1<bool>(f()) main2;
-
 switch4<bool>(f2()) main7;
-

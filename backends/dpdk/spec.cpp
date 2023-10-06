@@ -1,21 +1,22 @@
+#include "constants.h"
+#include "dpdkArch.h"
+#include "dpdkAsmOpt.h"
 #include "dpdkHelpers.h"
 #include "ir/dbprint.h"
 #include "printUtils.h"
-#include "dpdkAsmOpt.h"
 using namespace DBPrint;
 
-static constexpr unsigned DEFAULT_LEARNER_TABLE_SIZE = 0x10000;
-static constexpr unsigned DEFAULT_LEARNER_TABLE_TIMEOUT = 120;
+ordered_map<cstring, int> DPDK::CollectDirectCounterMeter::directMeterCounterSizeMap = {};
+auto &directMeterCounterSizeMap = DPDK::CollectDirectCounterMeter::directMeterCounterSizeMap;
+
 ordered_map<cstring, cstring> DPDK::ShortenTokenLength::origNameMap = {};
-auto& origNameMap =  DPDK::ShortenTokenLength::origNameMap;
+auto &origNameMap = DPDK::ShortenTokenLength::origNameMap;
 
-void add_space(std::ostream &out, int size) {
-    out << std::setfill(' ') << std::setw(size) << " ";
-}
+void add_space(std::ostream &out, int size) { out << std::setfill(' ') << std::setw(size) << " "; }
 
-void add_comment(std::ostream& out, cstring str, cstring sep = "") {
+void add_comment(std::ostream &out, cstring str, cstring sep = "") {
     if (origNameMap.count(str)) {
-        out<<sep<<";oldname:"<<origNameMap.at(str)<<"\n";
+        out << sep << ";oldname:" << origNameMap.at(str) << "\n";
     }
 }
 
@@ -34,7 +35,7 @@ std::ostream &IR::DpdkAsmProgram::toSpec(std::ostream &out) const {
     }
     for (auto s : externDeclarations) {
         add_comment(out, s->name.toString());
-        s->toSpec(out) << std::endl;
+        s->toSpec(out);
     }
     for (auto a : actions) {
         add_comment(out, a->name.toString());
@@ -69,22 +70,39 @@ std::ostream &IR::DpdkDeclaration::toSpec(std::ostream &out) const {
 }
 
 std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
-    if (DPDK::toStr(this->getType()) == "Register") {
-        auto args = this->arguments;
+    if (DPDK::toStr(getType()) == "Hash") {
+        auto args = arguments;
         if (args->size() == 0) {
-            ::error("Register extern declaration %1% must contain a size parameter\n",
-                this->Name());
+            ::error(ErrorType::ERR_INVALID,
+                    "Hash extern declaration %1% must contain hash algorithm \n", Name());
+        } else {
+            auto hashAlg = args->at(0)->expression;
+            unsigned hashAlgValue = CRC1;
+            if (hashAlg->is<IR::Constant>())
+                hashAlgValue = hashAlg->to<IR::Constant>()->asUnsigned();
+            if (hashAlgValue == TOEPLITZ) {
+                auto hashDecl = new IR::DpdkHashDeclStatement(Name());
+                hashDecl->toSpec(out) << std::endl;
+            }
+        }
+
+    } else if (DPDK::toStr(getType()) == "Register") {
+        auto args = arguments;
+        if (args->size() == 0) {
+            ::error(ErrorType::ERR_INVALID,
+                    "Register extern declaration %1% must contain a size parameter\n", Name());
         } else {
             auto size = args->at(0)->expression;
-            auto init_val = args->size() == 2? args->at(1)->expression: nullptr;
-            auto regDecl = new IR::DpdkRegisterDeclStatement(this->Name(), size, init_val);
+            auto init_val = args->size() == 2 ? args->at(1)->expression : nullptr;
+            auto regDecl = new IR::DpdkRegisterDeclStatement(Name(), size, init_val);
             regDecl->toSpec(out) << std::endl;
         }
-    } else if (DPDK::toStr(this->getType()) == "Counter") {
-        auto args = this->arguments;
+    } else if (DPDK::toStr(getType()) == "Counter") {
+        auto args = arguments;
         unsigned value = 0;
         if (args->size() < 2) {
-            ::error("Counter extern declaration %1% must contain 2 parameters\n", this->Name());
+            ::error(ErrorType::ERR_INVALID,
+                    "Counter extern declaration %1% must contain 2 parameters\n", Name());
         } else {
             auto n_counters = args->at(0)->expression;
             auto counter_type = args->at(1)->expression;
@@ -93,26 +111,77 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
             if (value == 2) {
                 /* For PACKETS_AND_BYTES counter type, two regarray declarations are emitted and
                    the counter name is suffixed with _packets and _bytes */
-                auto regDecl = new IR::DpdkRegisterDeclStatement(this->Name() + "_packets",
-                                   n_counters, new IR::Constant(0));
+                auto regDecl = new IR::DpdkRegisterDeclStatement(Name() + "_packets", n_counters,
+                                                                 new IR::Constant(0));
                 regDecl->toSpec(out) << std::endl << std::endl;
-                regDecl = new IR::DpdkRegisterDeclStatement(this->Name() + "_bytes", n_counters,
+                regDecl = new IR::DpdkRegisterDeclStatement(Name() + "_bytes", n_counters,
                                                             new IR::Constant(0));
                 regDecl->toSpec(out) << std::endl;
             } else {
-                auto regDecl = new IR::DpdkRegisterDeclStatement(this->Name(), n_counters,
-                                                                 new IR::Constant(0));
+                auto regDecl =
+                    new IR::DpdkRegisterDeclStatement(Name(), n_counters, new IR::Constant(0));
                 regDecl->toSpec(out) << std::endl;
             }
         }
-    } else if (DPDK::toStr(this->getType()) == "Meter") {
-        auto args = this->arguments;
+    } else if (DPDK::toStr(getType()) == "DirectCounter") {
+        auto args = arguments;
+        unsigned value = 0;
+        if (args->size() != 1) {
+            ::error(ErrorType::ERR_INVALID,
+                    "Counter extern declaration %1% must contain 1 parameters\n", Name());
+        } else {
+            IR::Expression *n_counters = nullptr;
+            if (directMeterCounterSizeMap.count(Name())) {
+                n_counters = new IR::Constant(directMeterCounterSizeMap.at(Name()));
+            } else {
+                BUG("%1%: Direct Counter size is not populated", Name());
+            }
+
+            auto counter_type = args->at(0)->expression;
+            if (counter_type->is<IR::Constant>())
+                value = counter_type->to<IR::Constant>()->asUnsigned();
+            if (value == 2) {
+                /* For PACKETS_AND_BYTES counter type, two regarray declarations are emitted and
+                   the counter name is suffixed with _packets and _bytes */
+                auto regDecl = new IR::DpdkRegisterDeclStatement(Name() + "_packets", n_counters,
+                                                                 new IR::Constant(0));
+                regDecl->toSpec(out) << std::endl << std::endl;
+                regDecl = new IR::DpdkRegisterDeclStatement(Name() + "_bytes", n_counters,
+                                                            new IR::Constant(0));
+                regDecl->toSpec(out) << std::endl;
+            } else {
+                auto regDecl =
+                    new IR::DpdkRegisterDeclStatement(Name(), n_counters, new IR::Constant(0));
+                regDecl->toSpec(out) << std::endl;
+            }
+        }
+    } else if (DPDK::toStr(getType()) == "Meter") {
+        auto args = arguments;
         if (args->size() < 2) {
-            ::error("Meter extern declaration %1% must contain a size parameter"
-                    " and meter type parameter", this->Name());
+            ::error(ErrorType::ERR_INVALID,
+                    "Meter extern declaration %1% must contain a size parameter"
+                    " and meter type parameter",
+                    Name());
         } else {
             auto n_meters = args->at(0)->expression;
-            auto metDecl = new IR::DpdkMeterDeclStatement(this->Name(), n_meters);
+            auto metDecl = new IR::DpdkMeterDeclStatement(Name(), n_meters);
+            metDecl->toSpec(out) << std::endl;
+        }
+    } else if (DPDK::toStr(getType()) == "DirectMeter") {
+        auto args = arguments;
+        if (args->size() < 1) {
+            ::error(ErrorType::ERR_INVALID,
+                    "Meter extern declaration %1% must have "
+                    "meter type parameter",
+                    Name());
+        } else {
+            IR::Expression *n_meters = nullptr;
+            if (directMeterCounterSizeMap.count(Name())) {
+                n_meters = new IR::Constant(directMeterCounterSizeMap.at(Name()));
+            } else {
+                BUG("%1%, Direct Meter size is not populated", Name());
+            }
+            auto metDecl = new IR::DpdkMeterDeclStatement(Name(), n_meters);
             metDecl->toSpec(out) << std::endl;
         }
     }
@@ -146,8 +215,7 @@ std::ostream &IR::DpdkStructType::toSpec(std::ostream &out) const {
         for (auto it = fields.begin(); it != fields.end(); ++it) {
             add_comment(out, (*it)->name.toString());
             if (auto t = (*it)->type->to<IR::Type_Name>()) {
-                out << "header " << (*it)->name << " instanceof "
-                    << t->path->name;
+                out << "header " << (*it)->name << " instanceof " << t->path->name;
             } else if (auto t = (*it)->type->to<IR::Type_Stack>()) {
                 if (!t->elementType->is<IR::Type_Name>())
                     BUG("%1% Unsupported type", t->elementType);
@@ -156,8 +224,8 @@ std::ostream &IR::DpdkStructType::toSpec(std::ostream &out) const {
                     BUG("Header stack index in %1% must be compile-time constant", t);
                 }
                 for (auto i = 0; i < t->size->to<IR::Constant>()->value; i++) {
-                    out << "header " << (*it)->name << "_" << i << " instanceof "
-                        << type_name << std::endl;
+                    out << "header " << (*it)->name << "_" << i << " instanceof " << type_name
+                        << std::endl;
                 }
             } else {
                 BUG("Unsupported type %1%", *it);
@@ -202,8 +270,7 @@ std::ostream &IR::DpdkListStatement::toSpec(std::ostream &out) const {
     for (auto s : statements) {
         out << "\t";
         s->toSpec(out);
-        if (!s->to<IR::DpdkLabelStatement>())
-            out << std::endl;
+        if (!s->to<IR::DpdkLabelStatement>()) out << std::endl;
     }
     out << "}" << std::endl;
     return out;
@@ -220,7 +287,9 @@ std::ostream &IR::DpdkMirrorStatement::toSpec(std::ostream &out) const {
 }
 
 std::ostream &IR::DpdkLearnStatement::toSpec(std::ostream &out) const {
-    out << "learn " << action << " " << DPDK::toStr(argument);
+    out << "learn " << action << " ";
+    if (argument) out << DPDK::toStr(argument) << " ";
+    out << DPDK::toStr(timeout);
     return out;
 }
 
@@ -231,8 +300,7 @@ std::ostream &IR::DpdkEmitStatement::toSpec(std::ostream &out) const {
 
 std::ostream &IR::DpdkExtractStatement::toSpec(std::ostream &out) const {
     out << "extract " << DPDK::toStr(header);
-    if (length)
-        out << " " << DPDK::toStr(length);
+    if (length) out << " " << DPDK::toStr(length);
     return out;
 }
 
@@ -246,32 +314,31 @@ std::ostream &IR::DpdkJmpStatement::toSpec(std::ostream &out) const {
     return out;
 }
 
-std::ostream& IR::DpdkJmpHeaderStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkJmpHeaderStatement::toSpec(std::ostream &out) const {
     out << instruction << " " << label << " " << DPDK::toStr(header);
     return out;
 }
 
-std::ostream& IR::DpdkJmpActionStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkJmpActionStatement::toSpec(std::ostream &out) const {
     out << instruction << " " << label << " " << action;
     return out;
 }
 
-std::ostream& IR::DpdkJmpCondStatement::toSpec(std::ostream& out) const {
-    out << instruction << " " << label << " " << DPDK::toStr(src1)
-        << " " << DPDK::toStr(src2);
+std::ostream &IR::DpdkJmpCondStatement::toSpec(std::ostream &out) const {
+    out << instruction << " " << label << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2);
     return out;
 }
 
-std::ostream& IR::DpdkBinaryStatement::toSpec(std::ostream& out) const {
-    BUG_CHECK(dst->equiv(*src1), "The first source field %1% in a binary operation"
-            "must be the same as the destination field %2% to be supported by DPDK",
-            src1, dst);
-    out << instruction << " " << DPDK::toStr(dst)
-        << " " << DPDK::toStr(src2);
+std::ostream &IR::DpdkBinaryStatement::toSpec(std::ostream &out) const {
+    BUG_CHECK(dst->equiv(*src1),
+              "The first source field %1% in a binary operation"
+              "must be the same as the destination field %2% to be supported by DPDK",
+              src1, dst);
+    out << instruction << " " << DPDK::toStr(dst) << " " << DPDK::toStr(src2);
     return out;
 }
 
-std::ostream& IR::DpdkUnaryStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkUnaryStatement::toSpec(std::ostream &out) const {
     out << instruction << " " << DPDK::toStr(dst) << " " << DPDK::toStr(src);
     return out;
 }
@@ -286,18 +353,24 @@ std::ostream &IR::DpdkTxStatement::toSpec(std::ostream &out) const {
     return out;
 }
 
-std::ostream &IR::DpdkExternObjStatement::toSpec(std::ostream &out) const {
-    out << "extern_obj ";
-    return out;
-}
-
-std::ostream &IR::DpdkExternFuncStatement::toSpec(std::ostream &out) const {
-    out << "extern_func ";
-    return out;
-}
-
 std::ostream &IR::DpdkReturnStatement::toSpec(std::ostream &out) const {
     out << "return ";
+    return out;
+}
+
+std::ostream &IR::DpdkRearmStatement::toSpec(std::ostream &out) const {
+    out << "rearm";
+    if (timeout) out << " " << DPDK::toStr(timeout);
+    return out;
+}
+
+std::ostream &IR::DpdkRecirculateStatement::toSpec(std::ostream &out) const {
+    out << "recirculate";
+    return out;
+}
+
+std::ostream &IR::DpdkRecircidStatement::toSpec(std::ostream &out) const {
+    out << "recircid " << DPDK::toStr(pass);
     return out;
 }
 
@@ -312,7 +385,9 @@ std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
         out << "\tkey {" << std::endl;
         for (auto key : match_keys->keyElements) {
             out << "\t\t" << DPDK::toStr(key->expression) << " ";
-            if ((key->matchType)->toString() == "ternary") {
+            if ((key->matchType)->toString() == "ternary" ||
+                (key->matchType)->toString() == "optional" ||
+                (key->matchType)->toString() == "range") {
                 out << "wildcard" << std::endl;
             } else {
                 out << DPDK::toStr(key->matchType) << std::endl;
@@ -327,10 +402,8 @@ std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
         } else {
             out << "\t\t" << DPDK::toStr(action->expression);
         }
-        if (action->annotations->getAnnotation("tableonly"))
-            out << " @tableonly";
-        if (action->annotations->getAnnotation("defaultonly"))
-            out << " @defaultonly";
+        if (action->annotations->getAnnotation("tableonly")) out << " @tableonly";
+        if (action->annotations->getAnnotation("defaultonly")) out << " @defaultonly";
         out << std::endl;
     }
     out << "\t}" << std::endl;
@@ -339,17 +412,43 @@ std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
         out << "\tdefault_action NoAction";
     else
         out << "\tdefault_action " << DPDK::toStr(default_action);
-    if (default_action->to<IR::MethodCallExpression>()->arguments->size() ==
-        0) {
+    if (default_action->to<IR::MethodCallExpression>()->arguments->size() == 0) {
         out << " args none ";
     } else {
-        BUG("non-zero default action arguments not supported yet");
+        out << " args ";
+        auto mce = default_action->to<IR::MethodCallExpression>();
+        auto earg = mce->arguments->at(0)->expression;
+        if (earg->is<IR::ListExpression>()) {
+            auto paramCount = earg->to<IR::ListExpression>()->components.size();
+            for (unsigned i = 0; i < paramCount; i++) {
+                if (earg->to<IR::ListExpression>()->components.at(i)->is<IR::Constant>()) {
+                    auto val = earg->to<IR::ListExpression>()
+                                   ->components.at(i)
+                                   ->to<IR::Constant>()
+                                   ->asUnsigned();
+                    out << default_action_paraList.parameters.at(i)->toString() << " ";
+                    out << "0x" << std::hex << std::uppercase << val << " ";
+                } else if (earg->to<IR::ListExpression>()
+                               ->components.at(i)
+                               ->is<IR::BoolLiteral>()) {
+                    earg->dbprint(std::cout);
+                    auto val = earg->to<IR::ListExpression>()
+                                   ->components.at(i)
+                                   ->to<IR::BoolLiteral>()
+                                   ->value;
+                    out << default_action_paraList.parameters.at(i)->toString() << " ";
+                    out << "0x" << std::hex << std::uppercase << val << " ";
+                } else {
+                    BUG("Unsupported parameter type in default action in DPDK Target");
+                }
+            }
+        }
     }
+    auto def = properties->getProperty("default_action");
+    if (def->isConstant) out << "const";
     out << std::endl;
-    if (auto psa_implementation =
-            properties->getProperty("psa_implementation")) {
-        out << "\taction_selector " << DPDK::toStr(psa_implementation->value)
-            << std::endl;
+    if (auto psa_implementation = properties->getProperty("psa_implementation")) {
+        out << "\taction_selector " << DPDK::toStr(psa_implementation->value) << std::endl;
     }
     if (auto size = properties->getProperty("size")) {
         out << "\tsize " << DPDK::toStr(size->value) << "" << std::endl;
@@ -371,13 +470,14 @@ std::ostream &IR::DpdkSelector::toSpec(std::ostream &out) const {
         out << "\t}" << std::endl;
     }
     out << "\tmember_id " << DPDK::toStr(member_id) << std::endl;
-    out << "\tn_groups_max " << n_groups_max << std::endl;
-    out << "\tn_members_per_group_max " << n_members_per_group_max << std::endl;
+    out << "\tn_groups_max 0x" << std::hex << std::uppercase << n_groups_max << std::endl;
+    out << "\tn_members_per_group_max 0x" << std::hex << std::uppercase << n_members_per_group_max
+        << std::endl;
     out << "}" << std::endl;
     return out;
 }
 
-std::ostream& IR::DpdkLearner::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkLearner::toSpec(std::ostream &out) const {
     out << "learner " << name << " {" << std::endl;
     if (match_keys) {
         out << "\tkey {" << std::endl;
@@ -389,17 +489,14 @@ std::ostream& IR::DpdkLearner::toSpec(std::ostream& out) const {
     out << "\tactions {" << std::endl;
     for (auto action : actions->actionList) {
         out << "\t\t" << DPDK::toStr(action->expression);
-        if (action->getAnnotation("tableonly"))
-            out << " @tableonly";
-        if (action->getAnnotation("defaultonly"))
-            out << " @defaultonly";
+        if (action->getAnnotation("tableonly")) out << " @tableonly";
+        if (action->getAnnotation("defaultonly")) out << " @defaultonly";
         out << std::endl;
     }
     out << "\t}" << std::endl;
 
     out << "\tdefault_action " << DPDK::toStr(default_action);
-    if (default_action->to<IR::MethodCallExpression>()->arguments->size() ==
-        0) {
+    if (default_action->to<IR::MethodCallExpression>()->arguments->size() == 0) {
         out << " args none ";
     } else {
         BUG("non-zero default action arguments not supported yet");
@@ -408,35 +505,33 @@ std::ostream& IR::DpdkLearner::toSpec(std::ostream& out) const {
     if (auto size = properties->getProperty("size")) {
         out << "\tsize " << DPDK::toStr(size->value) << "" << std::endl;
     } else {
-        out << "\tsize " << DEFAULT_LEARNER_TABLE_SIZE << std::endl;
-    }
-    if (auto size = properties->getProperty("psa_idle_timeout")) {
-        out << "\ttimeout " << DPDK::toStr(size->value) << "" << std::endl;
-    } else {
-        out << "\ttimeout " << DEFAULT_LEARNER_TABLE_TIMEOUT << std::endl;
+        out << "\tsize 0x" << std::hex << std::uppercase << default_learner_table_size << std::endl;
     }
 
-    out << "}" << std::endl;
+    // The initial timeout values
+    // This initializes 8 timeout values which can later be configured through control plane APIs.
+    out << "\ttimeout {" << std::endl;
+    for (unsigned int i = 0; i < dpdk_learner_max_configurable_timeout_values; i++)
+        out << "\t\t" << std::dec << default_learner_table_timeout[i] << std::endl;
+    out << "\n\t\t}";
+    out << "\n}" << std::endl;
     return out;
 }
 
 std::ostream &IR::DpdkAction::toSpec(std::ostream &out) const {
     out << "action " << name.toString() << " args ";
 
-    if (para.parameters.size() == 0)
-        out << "none ";
+    if (para.parameters.size() == 0) out << "none ";
 
     for (auto p : para.parameters) {
         out << "instanceof " << p->type << " ";
-        if (p != para.parameters.back())
-            out << " ";
+        if (p != para.parameters.back()) out << " ";
     }
     out << "{" << std::endl;
     for (auto i : statements) {
         out << "\t";
         i->toSpec(out);
-        if (!i->to<IR::DpdkLabelStatement>())
-            out << std::endl;
+        if (!i->to<IR::DpdkLabelStatement>()) out << std::endl;
     }
     out << "\treturn" << std::endl;
     out << "}";
@@ -458,20 +553,30 @@ std::ostream &IR::DpdkChecksumSubStatement::toSpec(std::ostream &out) const {
 
 std::ostream &IR::DpdkChecksumClearStatement::toSpec(std::ostream &out) const {
     out << "mov "
-        << "h.cksum_state." << intermediate_value << " " << "0x0";
+        << "h.cksum_state." << intermediate_value << " "
+        << "0x0";
+    return out;
+}
+
+std::ostream &IR::DpdkHashDeclStatement::toSpec(std::ostream &out) const {
+    add_comment(out, hash);
+    out << "rss " << hash;
     return out;
 }
 
 std::ostream &IR::DpdkGetHashStatement::toSpec(std::ostream &out) const {
-    out << "hash_get " << DPDK::toStr(dst) << " " << hash << " (";
+    out << instr << " " << hash << " " << DPDK::toStr(dst) << " ";
     if (auto l = fields->to<IR::ListExpression>()) {
-        for (auto c : l->components) {
-            out << " " << DPDK::toStr(c);
+        if (l->components.size() == 1) {
+            out << " " << DPDK::toStr(l->components.at(0));
+            out << " " << DPDK::toStr(l->components.at(0));
+        } else {
+            out << " " << DPDK::toStr(l->components.at(0));
+            out << " " << DPDK::toStr(l->components.at(l->components.size() - 1));
         }
     } else {
-        ::error("get_hash's arg is not a ListExpression.");
+        ::error(ErrorType::ERR_INVALID, "%1%: get_hash's arg is not a ListExpression.", this);
     }
-    out << ")";
     return out;
 }
 
@@ -516,6 +621,11 @@ std::ostream &IR::DpdkCounterCountStatement::toSpec(std::ostream &out) const {
     return out;
 }
 
+std::ostream &IR::DpdkGetTableEntryIndex::toSpec(std::ostream &out) const {
+    out << "entryid " << DPDK::toStr(index) << " ";
+    return out;
+}
+
 std::ostream &IR::DpdkRegisterDeclStatement::toSpec(std::ostream &out) const {
     add_comment(out, reg);
     out << "regarray " << reg << " size " << DPDK::toStr(size) << " initval ";
@@ -527,29 +637,26 @@ std::ostream &IR::DpdkRegisterDeclStatement::toSpec(std::ostream &out) const {
 }
 
 std::ostream &IR::DpdkRegisterReadStatement::toSpec(std::ostream &out) const {
-    out << "regrd " << DPDK::toStr(dst) << " " << reg << " "
-        << DPDK::toStr(index);
+    out << "regrd " << DPDK::toStr(dst) << " " << reg << " " << DPDK::toStr(index);
     return out;
 }
 
 std::ostream &IR::DpdkRegisterWriteStatement::toSpec(std::ostream &out) const {
-    out << "regwr " << reg << " " << DPDK::toStr(index) << " "
-        << DPDK::toStr(src);
+    out << "regwr " << reg << " " << DPDK::toStr(index) << " " << DPDK::toStr(src);
     return out;
 }
 
-std::ostream& IR::DpdkValidateStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkValidateStatement::toSpec(std::ostream &out) const {
     out << "validate " << DPDK::toStr(header);
     return out;
 }
 
-std::ostream& IR::DpdkInvalidateStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkInvalidateStatement::toSpec(std::ostream &out) const {
     out << "invalidate " << DPDK::toStr(header);
     return out;
 }
 
-std::ostream& IR::DpdkDropStatement::toSpec(std::ostream& out) const {
+std::ostream &IR::DpdkDropStatement::toSpec(std::ostream &out) const {
     out << "drop";
     return out;
 }
-

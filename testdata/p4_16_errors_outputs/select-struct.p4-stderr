@@ -1,4 +1,4 @@
-select-struct.p4(11): [--Werror=type-error] error: Expression 'ListExpression' with type 'struct H' cannot be used in select
+select-struct.p4(11): [--Werror=type-error] error: Expression 'ListExpression' with a component of type 'struct H' cannot be used in 'select'
         transition select (h1) {
                            ^^
 select-struct.p4(3)

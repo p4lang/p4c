@@ -1,0 +1,14 @@
+pna-example-mirror-packet-error3.p4(79): [--Werror=type-error] error: mirror_packet
+ mirror_packet(MIRROR_SLOT_ID);
+ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+pna.p4(583): mirror_session_id: No argument supplied for parameter
+                            MirrorSessionId_t mirror_session_id);
+                                              ^^^^^^^^^^^^^^^^^
+  ---- Originating from:
+pna.p4(582): Function type 'mirror_packet' does not match invocation type '<Method call>'
+  extern void mirror_packet(MirrorSlotId_t mirror_slot_id,
+              ^^^^^^^^^^^^^
+pna-example-mirror-packet-error3.p4(79)
+   mirror_packet(MIRROR_SLOT_ID);
+   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

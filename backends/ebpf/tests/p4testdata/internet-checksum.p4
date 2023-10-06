@@ -18,12 +18,6 @@ limitations under the License.
 #include <psa.p4>
 #include "common_headers.p4"
 
-header clone_i2e_metadata_t {
-}
-
-struct empty_metadata_t {
-}
-
 struct metadata {
     bit<16> checksum;
     bit<16> state;
@@ -35,13 +29,17 @@ struct headers {
     udp_t      udp;
 }
 
+error {
+    BadIPv4HeaderChecksum
+}
+
 parser IngressParserImpl(
     packet_in buffer,
     out headers parsed_hdr,
     inout metadata user_meta,
     in psa_ingress_parser_input_metadata_t istd,
-    in empty_metadata_t resubmit_meta,
-    in empty_metadata_t recirculate_meta)
+    in empty_t resubmit_meta,
+    in empty_t recirculate_meta)
 {
     InternetChecksum() ck;
 
@@ -68,6 +66,7 @@ parser IngressParserImpl(
             /* 16-bit words 6-7 */  parsed_hdr.ipv4.srcAddr,
             /* 16-bit words 8-9 */  parsed_hdr.ipv4.dstAddr
             });
+        verify(parsed_hdr.ipv4.hdrChecksum == ck.get(), error.BadIPv4HeaderChecksum);
         parsed_hdr.ipv4.hdrChecksum = ck.get_state();
         transition accept;
     }
@@ -80,14 +79,18 @@ control ingress(inout headers hdr,
                 inout psa_ingress_output_metadata_t ostd)
 {
     apply {
-        send_to_port(ostd, (PortId_t) 5);
+        if (istd.parser_error != error.NoError) {
+            return;
+        }
+
+        send_to_port(ostd, (PortId_t) PORT1);
     }
 }
 
 control IngressDeparserImpl(
     packet_out packet,
-    out clone_i2e_metadata_t clone_i2e_meta,
-    out empty_metadata_t resubmit_meta,
+    out empty_t clone_i2e_meta,
+    out empty_t resubmit_meta,
     out metadata normal_meta,
     inout headers parsed_hdr,
     in metadata meta,
@@ -105,8 +108,8 @@ parser EgressParserImpl(
     inout metadata user_meta,
     in psa_egress_parser_input_metadata_t istd,
     in metadata normal_meta,
-    in clone_i2e_metadata_t clone_i2e_meta,
-    in empty_metadata_t clone_e2e_meta)
+    in empty_t clone_i2e_meta,
+    in empty_t clone_e2e_meta)
 {
     InternetChecksum() ck;
 
@@ -158,8 +161,8 @@ control egress(inout headers hdr,
 
 control EgressDeparserImpl(
     packet_out packet,
-    out empty_metadata_t clone_e2e_meta,
-    out empty_metadata_t recirculate_meta,
+    out empty_t clone_e2e_meta,
+    out empty_t recirculate_meta,
     inout headers parsed_hdr,
     in metadata meta,
     in psa_egress_output_metadata_t istd,

@@ -20,7 +20,7 @@ sudo apt-get -y install flex bison
 sudo python -m pip install scapy
 
 # P4c dependencies
-sudo apt-get -y install cmake g++ git automake libtool libgc-dev bison flex libfl-dev libgmp-dev libboost-dev libboost-iostreams-dev libboost-graph-dev llvm pkg-config python python-scapy python-ipaddr python-ply tcpdump
+sudo apt-get -y install cmake g++ git automake libtool libgc-dev bison flex libfl-dev libboost-dev libboost-iostreams-dev libboost-graph-dev llvm pkg-config python python-scapy python-ply tcpdump
 
 # Protobuf
 cd /home/vagrant

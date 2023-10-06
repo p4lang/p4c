@@ -14,11 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _P4_UNUSEDDECLARATIONS_H_
-#define _P4_UNUSEDDECLARATIONS_H_
+#ifndef P4_UNUSEDDECLARATIONS_H_
+#define P4_UNUSEDDECLARATIONS_H_
 
-#include "ir/ir.h"
 #include "../common/resolveReferences/resolveReferences.h"
+#include "ir/ir.h"
+#include "ir/pass_manager.h"
 
 namespace P4 {
 
@@ -45,13 +46,13 @@ namespace P4 {
  * @pre Requires an up-to-date ReferenceMap.
  */
 class RemoveUnusedDeclarations : public Transform {
-    const ReferenceMap* refMap;
+    const ReferenceMap *refMap;
 
     /** If not null, logs the following unused elements in @warn:
      *  - unused IR::P4Table nodes
      *  - unused IR::Declaration_Instance nodes
      */
-    std::set<const IR::Node*>* warned;
+    std::set<const IR::Node *> *warned;
 
     /** Stores @node in @warned if:
      *   - @warned is non-null,
@@ -60,52 +61,72 @@ class RemoveUnusedDeclarations : public Transform {
      *
      * @return true if @node is added to @warned.
      */
-    bool giveWarning(const IR::Node* node);
-    const IR::Node* process(const IR::IDeclaration* decl);
-    const IR::Node* warnIfUnused(const IR::Node* node);
+    bool giveWarning(const IR::Node *node);
+    const IR::Node *process(const IR::IDeclaration *decl);
+    const IR::Node *warnIfUnused(const IR::Node *node);
+
+ protected:
+    // Prevent direct instantiations of this class.
+    friend class RemoveAllUnusedDeclarations;
+    explicit RemoveUnusedDeclarations(const ReferenceMap *refMap,
+                                      std::set<const IR::Node *> *warned = nullptr)
+        : refMap(refMap), warned(warned) {
+        CHECK_NULL(refMap);
+        setName("RemoveUnusedDeclarations");
+    }
 
  public:
-    explicit RemoveUnusedDeclarations(const ReferenceMap* refMap,
-                                      std::set<const IR::Node*>* warned = nullptr) :
-            refMap(refMap), warned(warned)
-    { CHECK_NULL(refMap); setName("RemoveUnusedDeclarations"); }
-
+    using Transform::init_apply;
     using Transform::postorder;
     using Transform::preorder;
-    using Transform::init_apply;
 
     Visitor::profile_t init_apply(const IR::Node *root) override;
 
-    const IR::Node* preorder(IR::P4Control* cont) override;
-    const IR::Node* preorder(IR::P4Parser* cont) override;
-    const IR::Node* preorder(IR::P4Table* cont) override;
-    const IR::Node* preorder(IR::ParserState* state)  override;
-    const IR::Node* preorder(IR::Type_Enum* type)  override;
-    const IR::Node* preorder(IR::Type_SerEnum* type)  override;
+    const IR::Node *preorder(IR::P4Control *cont) override;
+    const IR::Node *preorder(IR::P4Parser *cont) override;
+    const IR::Node *preorder(IR::P4Table *cont) override;
+    const IR::Node *preorder(IR::ParserState *state) override;
+    const IR::Node *preorder(IR::Type_Enum *type) override;
+    const IR::Node *preorder(IR::Type_SerEnum *type) override;
 
-    const IR::Node* preorder(IR::Declaration_Instance* decl) override;
-    const IR::Node* preorder(IR::Method* decl) override;
+    const IR::Node *preorder(IR::Declaration_Instance *decl) override;
+    const IR::Node *preorder(IR::Method *decl) override;
 
     // The following kinds of nodes are not deleted even if they are unreferenced
-    const IR::Node* preorder(IR::Type_Error* type) override
-    { prune(); return type; }
-    const IR::Node* preorder(IR::Declaration_MatchKind* decl) override
-    { prune(); return decl; }
-    const IR::Node* preorder(IR::Type_StructLike* type) override
-    { visit(type->typeParameters); prune(); return type; }
-    const IR::Node* preorder(IR::Type_Extern* type) override
-    { visit(type->typeParameters); prune(); return type; }
-    const IR::Node* preorder(IR::Type_Method* type) override
-    { visit(type->typeParameters); prune(); return type; }
-    const IR::Node* preorder(IR::Parameter* param) override;
-    const IR::Node* preorder(IR::NamedExpression* ne) override { return ne; }  // never dead
-    const IR::Node* preorder(IR::Type_Var* p) override { prune(); return warnIfUnused(p); }
+    const IR::Node *preorder(IR::Type_Error *type) override {
+        prune();
+        return type;
+    }
+    const IR::Node *preorder(IR::Declaration_MatchKind *decl) override {
+        prune();
+        return decl;
+    }
+    const IR::Node *preorder(IR::Type_StructLike *type) override {
+        visit(type->typeParameters);
+        prune();
+        return type;
+    }
+    const IR::Node *preorder(IR::Type_Extern *type) override {
+        visit(type->typeParameters);
+        prune();
+        return type;
+    }
+    const IR::Node *preorder(IR::Type_Method *type) override {
+        visit(type->typeParameters);
+        prune();
+        return type;
+    }
+    const IR::Node *preorder(IR::Parameter *param) override;
+    const IR::Node *preorder(IR::NamedExpression *ne) override { return ne; }  // never dead
+    const IR::Node *preorder(IR::Type_Var *p) override {
+        prune();
+        return warnIfUnused(p);
+    }
 
-    const IR::Node* preorder(IR::Declaration_Variable* decl)  override;
-    const IR::Node* preorder(IR::Declaration* decl) override { return process(decl); }
-    const IR::Node* preorder(IR::Type_Declaration* decl) override { return process(decl); }
-    bool isSystemFile(cstring file);
-    cstring ifSystemFile(const IR::Node* node);  // return file containing node if system file
+    const IR::Node *preorder(IR::Declaration_Variable *decl) override;
+    const IR::Node *preorder(IR::Declaration *decl) override { return process(decl); }
+    const IR::Node *preorder(IR::Type_Declaration *decl) override { return process(decl); }
+    cstring ifSystemFile(const IR::Node *node);  // return file containing node if system file
 };
 
 /** @brief Iterates RemoveUnusedDeclarations until convergence.
@@ -115,21 +136,18 @@ class RemoveUnusedDeclarations : public Transform {
  */
 class RemoveAllUnusedDeclarations : public PassManager {
  public:
-    explicit RemoveAllUnusedDeclarations(ReferenceMap* refMap, bool warn = false) {
+    explicit RemoveAllUnusedDeclarations(ReferenceMap *refMap, bool warn = false) {
         CHECK_NULL(refMap);
 
         // Unused extern instances are not removed but may still trigger
         // warnings.  The @warned set keeps track of warnings emitted in
         // previous iterations to avoid emitting duplicate warnings.
-        std::set<const IR::Node*> *warned = nullptr;
-        if (warn)
-            warned = new std::set<const IR::Node*>();
+        std::set<const IR::Node *> *warned = nullptr;
+        if (warn) warned = new std::set<const IR::Node *>();
 
-        passes.emplace_back(
-            new PassRepeated {
-                new ResolveReferences(refMap),
-                new RemoveUnusedDeclarations(refMap, warned)
-             });
+        refMap->clear();
+        passes.emplace_back(new PassRepeated{new ResolveReferences(refMap),
+                                             new RemoveUnusedDeclarations(refMap, warned)});
         setName("RemoveAllUnusedDeclarations");
         setStopOnError(true);
     }
@@ -137,4 +155,4 @@ class RemoveAllUnusedDeclarations : public PassManager {
 
 }  // namespace P4
 
-#endif /* _P4_UNUSEDDECLARATIONS_H_ */
+#endif /* P4_UNUSEDDECLARATIONS_H_ */

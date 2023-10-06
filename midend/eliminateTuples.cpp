@@ -1,20 +1,19 @@
-#include <string>
 #include "eliminateTuples.h"
+
+#include <string>
 
 namespace P4 {
 
-const IR::Type* ReplacementMap::convertType(const IR::Type* type) {
+const IR::Type *ReplacementMap::convertType(const IR::Type *type) {
     auto it = replacement.find(type);
-    if (it != replacement.end())
-        return it->second;
+    if (it != replacement.end()) return it->second;
     if (auto st = type->to<IR::Type_Struct>()) {
         bool changes = false;
         IR::IndexedVector<IR::StructField> fields;
         for (auto f : st->fields) {
             auto ftype = typeMap->getType(f);
             auto cftype = convertType(ftype);
-            if (cftype != ftype)
-                changes = true;
+            if (cftype != ftype) changes = true;
             auto field = new IR::StructField(f->name, f->annotations, cftype->getP4Type());
             fields.push_back(field);
         }
@@ -45,14 +44,14 @@ const IR::Type* ReplacementMap::convertType(const IR::Type* type) {
     return type;
 }
 
-const IR::Type_Struct* ReplacementMap::getReplacement(const IR::Type_BaseList* tt) {
+const IR::Type_Struct *ReplacementMap::getReplacement(const IR::Type_BaseList *tt) {
     auto st = convertType(tt)->to<IR::Type_Struct>();
     CHECK_NULL(st);
     replacement.emplace(tt, st);
     return st;
 }
 
-IR::IndexedVector<IR::Node>* ReplacementMap::getNewReplacements() {
+IR::IndexedVector<IR::Node> *ReplacementMap::getNewReplacements() {
     auto retval = new IR::IndexedVector<IR::Node>();
     for (auto t : replacement) {
         if (inserted.find(t.second) == inserted.end()) {
@@ -60,39 +59,36 @@ IR::IndexedVector<IR::Node>* ReplacementMap::getNewReplacements() {
             inserted.emplace(t.second);
         }
     }
-    if (retval->empty())
-        return nullptr;
+    if (retval->empty()) return nullptr;
     return retval;
 }
 
-const IR::Node* DoReplaceTuples::postorder(IR::Type_BaseList* bl) {
+const IR::Node *DoReplaceTuples::postorder(IR::Type_BaseList *bl) {
     auto type = getOriginal<IR::Type_BaseList>();
     // If any of the arguments is a type variable leave the type unchanged
     for (auto arg : type->components) {
         auto targ = repl->typeMap->getTypeType(arg, true);
-        if (targ->is<IR::Type_Var>())
-            return bl;
+        if (targ->is<IR::Type_Var>()) return bl;
     }
     auto canon = repl->typeMap->getTypeType(type, true)->to<IR::Type_BaseList>();
     auto st = repl->getReplacement(canon)->getP4Type();
     return st;
 }
 
-const IR::Node* DoReplaceTuples::insertReplacements(const IR::Node* before) {
+const IR::Node *DoReplaceTuples::insertReplacements(const IR::Node *before) {
     // Check that we are in the top-level P4Program list of declarations.
-    if (!getParent<IR::P4Program>())
-        return before;
+    if (!getParent<IR::P4Program>()) return before;
 
     auto result = repl->getNewReplacements();
-    if (result == nullptr)
-        return before;
+    if (result == nullptr) return before;
     LOG3("Inserting replacements before " << dbp(before));
     result->push_back(before);
     return result;
 }
 
-const IR::Node* DoReplaceTuples::postorder(IR::ArrayIndex* expression) {
-    auto type = repl->typeMap->getType(expression->left);
+const IR::Node *DoReplaceTuples::postorder(IR::ArrayIndex *expression) {
+    auto original = getOriginal<IR::ArrayIndex>();
+    auto type = repl->typeMap->getType(original->left);
     if (type->is<IR::Type_Tuple>()) {
         auto cst = expression->right->to<IR::Constant>();
         BUG_CHECK(cst, "%1%: Expected a constant", expression->right);

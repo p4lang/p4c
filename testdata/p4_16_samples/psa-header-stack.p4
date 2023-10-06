@@ -85,6 +85,7 @@ control MyIC(
     table tbl {
         key = {
             a.ethernet.srcAddr : exact;
+            a.vlan_tag[0].ether_type : exact;
         }
         actions = {
             NoAction;

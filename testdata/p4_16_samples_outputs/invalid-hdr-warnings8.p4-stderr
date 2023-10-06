@@ -40,4 +40,3 @@ invalid-hdr-warnings8.p4(68): [--Wwarn=invalid_header] warning: accessing a fiel
 invalid-hdr-warnings8.p4(69): [--Wwarn=invalid_header] warning: accessing a field of an invalid header us1[1].h1
                  ^ us1[0].h2.a ^ us1[1].h1.a ^ us1[1].h2.a;
                                  ^^^^^^^^^
-

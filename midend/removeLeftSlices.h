@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_REMOVELEFTSLICES_H_
-#define _MIDEND_REMOVELEFTSLICES_H_
+#ifndef MIDEND_REMOVELEFTSLICES_H_
+#define MIDEND_REMOVELEFTSLICES_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -33,16 +33,19 @@ namespace P4 {
  * @post no field slice operator in the lhs of assignment statement
  */
 class DoRemoveLeftSlices : public Transform {
-    P4::TypeMap* typeMap;
+    P4::TypeMap *typeMap;
+
  public:
-    explicit DoRemoveLeftSlices(P4::TypeMap* typeMap) : typeMap(typeMap)
-    { CHECK_NULL(typeMap); setName("DoRemoveLeftSlices"); }
-    const IR::Node* postorder(IR::AssignmentStatement* stat) override;
+    explicit DoRemoveLeftSlices(P4::TypeMap *typeMap) : typeMap(typeMap) {
+        CHECK_NULL(typeMap);
+        setName("DoRemoveLeftSlices");
+    }
+    const IR::Node *postorder(IR::AssignmentStatement *stat) override;
 };
 
 class RemoveLeftSlices : public PassManager {
  public:
-    RemoveLeftSlices(ReferenceMap* refMap, TypeMap* typeMap) {
+    RemoveLeftSlices(ReferenceMap *refMap, TypeMap *typeMap) {
         passes.push_back(new P4::TypeChecking(refMap, typeMap));
         passes.push_back(new DoRemoveLeftSlices(typeMap));
         setName("RemoveLeftSlices");
@@ -51,4 +54,4 @@ class RemoveLeftSlices : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_REMOVELEFTSLICES_H_ */
+#endif /* MIDEND_REMOVELEFTSLICES_H_ */

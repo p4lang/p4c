@@ -14,12 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _IR_DBPRINT_H_
-#define _IR_DBPRINT_H_
+#ifndef IR_DBPRINT_H_
+#define IR_DBPRINT_H_
 
-#include <assert.h>
-#include "lib/log.h"  // to get operator<< templates that call dbprint methods
-#include "lib/indent.h"
+#include <cassert>
+#include <iosfwd>
+
+#include "lib/log.h"
 
 namespace DBPrint {
 
@@ -29,15 +30,24 @@ enum dbprint_flags {
     Precedence = 0xf,
     Prec_Postfix = 15,
     Prec_Prefix = 14,
-    Prec_Mul = 13, Prec_Div = 13, Prec_Mod = 13,
-    Prec_Add = 12, Prec_Sub = 12,
-    Prec_AddSat = 12, Prec_SubSat = 12,
-    Prec_Shl = 11, Prec_Shr = 11,
+    Prec_Mul = 13,
+    Prec_Div = 13,
+    Prec_Mod = 13,
+    Prec_Add = 12,
+    Prec_Sub = 12,
+    Prec_AddSat = 12,
+    Prec_SubSat = 12,
+    Prec_Shl = 11,
+    Prec_Shr = 11,
     Prec_BAnd = 10,
     Prec_BXor = 9,
     Prec_BOr = 8,
-    Prec_Lss = 7, Prec_Leq = 7, Prec_Grt = 7, Prec_Geq = 7,
-    Prec_Equ = 6, Prec_Neq = 6,
+    Prec_Lss = 7,
+    Prec_Leq = 7,
+    Prec_Grt = 7,
+    Prec_Geq = 7,
+    Prec_Equ = 6,
+    Prec_Neq = 6,
     Prec_LAnd = 5,
     Prec_LOr = 4,
     Prec_Cond = 3,
@@ -55,8 +65,10 @@ inline int getprec(std::ostream &out) { return dbgetflags(out) & DBPrint::Preced
 class setflags_helper {
     int val, mask;
     setflags_helper() = delete;
+
  protected:
     setflags_helper(int v, int m) : val(v), mask(m) { assert((val & ~mask) == 0); }
+
  public:
     void set(std::ostream &out) const { dbsetflags(out, val, mask); }
 };
@@ -71,12 +83,15 @@ struct clrflag : public setflags_helper {
 };
 
 inline std::ostream &operator<<(std::ostream &out, const DBPrint::setflags_helper &p) {
-    p.set(out); return out; }
+    p.set(out);
+    return out;
+}
 
 inline std::ostream &operator<<(std::ostream &out, const DBPrint::dbprint_flags fl) {
     DBPrint::dbsetflags(out, fl, fl ? fl : ~0);
-    return out; }
+    return out;
+}
 
 }  // end namespace DBPrint
 
-#endif /* _IR_DBPRINT_H_ */
+#endif /* IR_DBPRINT_H_ */

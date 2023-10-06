@@ -12,6 +12,7 @@ abstract Operation_Unary : Operation {
         if (!srcInfo && expr) srcInfo = expr->srcInfo;
         if (type->is<Type::Unknown>() && expr) type = expr->type; }
     precedence = DBPrint::Prec_Prefix;
+    toString{ return getStringOp() + expr->toString(); }
 }
 
 class Neg : Operation_Unary {
@@ -37,6 +38,11 @@ abstract Operation_Binary : Operation {
         if (!srcInfo && left && right) srcInfo = left->srcInfo + right->srcInfo;
         if (type->is<Type::Unknown>() && left && right && left->type == right->type)
             type = left->type; }
+    toString {
+        std::stringstream tmp;
+        tmp << DBPrint::Prec_Low << *this;
+        return tmp.str();
+    }
 }
 
 abstract Operation_Ternary : Operation {
@@ -134,9 +140,23 @@ class LOr : Operation_Binary {
     precedence = DBPrint::Prec_LOr;
 }
 
-abstract Literal : Expression, CompileTimeValue {
-#nodbprint
+/// Represents the ... default initializer expression
+class Dots : Expression {
+    dbprint { out << "..."; }
+    toString { return "..."; }
 }
+
+/// Represents the ... default initializer expression
+/// when used in a StructExpression.
+class NamedDots : NamedExpression {
+    NamedDots() : NamedExpression("...", new Dots()) {}
+    NamedDots(Util::SourceInfo srcInfo, Dots dots) : NamedExpression(srcInfo, "...", dots) { CHECK_NULL(dots); }
+    NamedDots(Util::SourceInfo srcInfo) : NamedExpression(srcInfo, "...", new Dots()) {}
+    dbprint { out << "..."; }
+    toString { return "..."; }
+}
+
+abstract Literal : Expression, CompileTimeValue {}
 
 /// This is an integer literal on arbitrary-precision.
 class Constant : Literal {
@@ -243,7 +263,7 @@ class BoolLiteral : Literal {
 class StringLiteral : Literal {
     cstring value;
     validate{ if (value.isNull()) BUG("null StringLiteral"); }
-    toString{ return cstring("\"") + value + "\""; }
+    toString{ return cstring("\"") + value.escapeJson() + "\""; }
     StringLiteral(ID v) : Literal(v.srcInfo), value(v.name) {}
 #emit
     operator IR::ID() const { return IR::ID(srcInfo, value); }
@@ -261,12 +281,14 @@ class PathExpression : Expression {
 // X.a
 // The 'X' portion is a TypeNameExpression
 class TypeNameExpression : Expression {
-    Type_Name typeName;
+    Type typeName;
     TypeNameExpression { if (!srcInfo && typeName) srcInfo = typeName->srcInfo; }
     TypeNameExpression(ID id) : Expression(id.srcInfo),
                                 typeName(new IR::Type_Name(new IR::Path(id))) {}
     dbprint{ out << typeName; }
     toString { return typeName->toString(); }
+    validate { BUG_CHECK(typeName->is<Type_Name>() || typeName->is<Type_Specialized>(),
+                         "%1 unexpected type in TypeNameExpression", typeName); }
 }
 
 class Slice : Operation_Ternary {
@@ -336,10 +358,7 @@ class Mux : Operation_Ternary {
     precedence = DBPrint::Prec_Low;
     visit_children {
         v.visit(e0, "e0");
-        auto &clone(v.flow_clone());
-        v.visit(e1, "e1");
-        clone.visit(e2, "e2");
-        v.flow_merge(clone); }
+        SplitFlowVisit<Expression>(v, e1, e2).run_visit(); }
     Mux { if (type->is<Type::Unknown>() && e1 && e2 && e1->type == e2->type) type = e1->type; }
 }
 
@@ -348,10 +367,11 @@ class DefaultExpression : Expression {}
 // Two different This should not be equal.
 // That's why we use a hidden id field to distinguish them.
 class This : Expression {
-    int id = nextId++;
+    long id = nextId++;
+    toString { return "this"; }
  private:
-    static int nextId;
-}  // experimental
+    static long nextId;
+}
 
 class Cast : Operation_Unary {
     Type destType = type;
@@ -360,7 +380,7 @@ class Cast : Operation_Unary {
     /// type, and 'type' will only be updated later when type inferencing occurs
     precedence = DBPrint::Prec_Prefix;
     stringOp = "(cast)";
-    toString{ return "cast"; }
+    toString{ return "(" + destType->toString() + ")" + expr->toString(); }
     validate{ BUG_CHECK(!destType->is<Type_Unknown>(), "%1%: Cannot cast to unknown type", this); }
 }
 
@@ -375,7 +395,7 @@ class SelectExpression : Expression {
     inline Vector<SelectCase> selectCases;
     visit_children {
         v.visit(select, "select");
-        v.parallel_visit(selectCases, "selectCases"); }
+        SplitFlowVisitVector<SelectCase>(v, selectCases).run_visit(); }
 }
 
 class MethodCallExpression : Expression {
@@ -406,9 +426,22 @@ class ConstructorCallExpression : Expression {
         arguments->check_null(); }
 }
 
-/// Represents a list of expressions separated by commas
-class ListExpression : Expression {
+class BaseListExpression : Expression {
     inline Vector<Expression> components;
+    validate { components.check_null(); }
+    size_t size() const { return components.size(); }
+    void push_back(Expression e) { components.push_back(e); }
+    bool containsDots() const {
+        if (components.empty())
+            return false;
+        size_t size = components.size();
+        return components.at(size - 1)->is<IR::Dots>();
+    }
+#nodbprint
+}
+
+/// Represents a list of expressions separated by commas
+class ListExpression : BaseListExpression {
     ListExpression {
         validate();
         if (type->is<Type::Unknown>()) {
@@ -416,9 +449,16 @@ class ListExpression : Expression {
             for (auto e : components)
                 tuple.push_back(e->type);
             type = new Type_List(tuple); } }
-    validate { components.check_null(); }
-    size_t size() const { return components.size(); }
-    void push_back(Expression e) { components.push_back(e); }
+}
+
+/// Represents P4 list expression, not to be confused with
+/// ListExpression from above.
+class P4ListExpression : BaseListExpression {
+    Type elementType;
+    P4ListExpression {
+        validate();
+        if (type->is<Type::Unknown>()) {
+            type = new Type_P4List(elementType); } }
 }
 
 /// An expression that evaluates to a struct.
@@ -434,11 +474,52 @@ class StructExpression : Expression {
                   "%1%: unexpected struct type", this);
     }
     size_t size() const { return components.size(); }
+    NamedExpression getField(cstring name) const {
+        return components.getDeclaration<NamedExpression>(name); }
+    bool containsDots() const {
+        if (components.empty())
+            return false;
+        size_t size = components.size();
+        return components.at(size - 1)->is<IR::NamedDots>();
+    }
+}
+
+/// Can be an invalid header or header_union
+class Invalid : Expression {
+}
+
+/// An expression that evaluates to an invalid header with the specified type.
+class InvalidHeader : Expression {
+    Type headerType;
+}
+
+/// An expression that evaluates to an invalid header union with the specified type.
+class InvalidHeaderUnion : Expression {
+    Type headerUnionType;
+}
+
+/// An expression that evaluates to a header stack
+class HeaderStackExpression : BaseListExpression {
+    /// May only be known after type checking; so it can be nullptr.
+    NullOK Type headerStackType;
+    validate {
+        components.check_null();
+    }
 }
 
 /// A ListExpression where all the components are compile-time values.
 /// This is used by the evaluator pass.
 class ListCompileTimeValue : CompileTimeValue {
+    inline Vector<Node> components;
+    validate {
+        for (auto v : components)
+            BUG_CHECK(v->is<CompileTimeValue>(), "%1%: not a compile-time value", v); }
+#nodbprint
+}
+
+/// A P4ListExpression where all the components are compile-time values.
+/// This is used by the evaluator pass.
+class P4ListCompileTimeValue : CompileTimeValue {
     inline Vector<Node> components;
     validate {
         for (auto v : components)

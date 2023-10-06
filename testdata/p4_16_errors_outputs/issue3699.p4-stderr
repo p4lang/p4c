@@ -1,0 +1,69 @@
+issue3699.p4(10): [--Werror=type-error] error: Width must be specified for at least one of 1 or -1
+void f(in h[value == max ? 1 : -1] a){}
+                           ^
+issue3699.p4(10)
+void f(in h[value == max ? 1 : -1] a){}
+                                ^
+issue3699.p4(11): [--Werror=type-error] error: Width must be specified for at least one of 1 or -1
+void f1(in h[(max |+| max) == max ? 1 : -1] a){}
+                                    ^
+issue3699.p4(11)
+void f1(in h[(max |+| max) == max ? 1 : -1] a){}
+                                         ^
+issue3699.p4(11): [--Werror=type-error] error: header h[?]: Size of header stack type should be a constant
+void f1(in h[(max |+| max) == max ? 1 : -1] a){}
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+issue3699.p4(12): [--Werror=type-error] error: Width must be specified for at least one of 1 or -1
+void f1(in h[(max |+| 0) == max ? 1 : -1] a){}
+                                  ^
+issue3699.p4(12)
+void f1(in h[(max |+| 0) == max ? 1 : -1] a){}
+                                       ^
+issue3699.p4(12): [--Werror=type-error] error: header h[?]: Size of header stack type should be a constant
+void f1(in h[(max |+| 0) == max ? 1 : -1] a){}
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+issue3699.p4(13): [--Werror=type-error] error: Width must be specified for at least one of 1 or -1
+void f1(in h[value1 == max ? 1 : -1] a){}
+                             ^
+issue3699.p4(13)
+void f1(in h[value1 == max ? 1 : -1] a){}
+                                  ^
+issue3699.p4(13): [--Werror=type-error] error: header h[?]: Size of header stack type should be a constant
+void f1(in h[value1 == max ? 1 : -1] a){}
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+issue3699.p4(20): [--Werror=type-error] error: Width must be specified for at least one of 1 or -1
+void f(in h[values == maxs ? 1 : -1] a){}
+                             ^
+issue3699.p4(20)
+void f(in h[values == maxs ? 1 : -1] a){}
+                                  ^
+issue3699.p4(20): [--Werror=type-error] error: header h[?]: Size of header stack type should be a constant
+void f(in h[values == maxs ? 1 : -1] a){}
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+issue3699.p4(21): [--Werror=type-error] error: Width must be specified for at least one of 1 or -1
+void f1(in h[(maxs |+| maxs) == maxs ? 1 : -1] a){}
+                                       ^
+issue3699.p4(21)
+void f1(in h[(maxs |+| maxs) == maxs ? 1 : -1] a){}
+                                            ^
+issue3699.p4(21): [--Werror=type-error] error: header h[?]: Size of header stack type should be a constant
+void f1(in h[(maxs |+| maxs) == maxs ? 1 : -1] a){}
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+issue3699.p4(22): [--Werror=type-error] error: Width must be specified for at least one of 1 or -1
+void f1(in h[(maxs |+| 0) == maxs ? 1 : -1] a){}
+                                    ^
+issue3699.p4(22)
+void f1(in h[(maxs |+| 0) == maxs ? 1 : -1] a){}
+                                         ^
+issue3699.p4(22): [--Werror=type-error] error: header h[?]: Size of header stack type should be a constant
+void f1(in h[(maxs |+| 0) == maxs ? 1 : -1] a){}
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+issue3699.p4(23): [--Werror=type-error] error: Width must be specified for at least one of 1 or -1
+void f1(in h[values1 == maxs ? 1 : -1] a){}
+                               ^
+issue3699.p4(23)
+void f1(in h[values1 == maxs ? 1 : -1] a){}
+                                    ^
+issue3699.p4(23): [--Werror=type-error] error: header h[?]: Size of header stack type should be a constant
+void f1(in h[values1 == maxs ? 1 : -1] a){}
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^

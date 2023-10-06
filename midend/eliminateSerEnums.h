@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_ELIMINATESERENUMS_H_
-#define _MIDEND_ELIMINATESERENUMS_H_
+#ifndef MIDEND_ELIMINATESERENUMS_H_
+#define MIDEND_ELIMINATESERENUMS_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -26,22 +26,23 @@ namespace P4 {
  * Replaces serializable enum constants with their values.
  */
 class DoEliminateSerEnums final : public Transform {
-    const TypeMap* typeMap;
+    const TypeMap *typeMap;
+
  public:
-    explicit DoEliminateSerEnums(const TypeMap* typeMap): typeMap(typeMap) {
+    explicit DoEliminateSerEnums(const TypeMap *typeMap) : typeMap(typeMap) {
         setName("DoEliminateSerEnums");
-        visitDagOnce = false; }
-    const IR::Node* preorder(IR::Type_SerEnum* type) override;
-    const IR::Node* postorder(IR::Type_Name* type) override;
-    const IR::Node* postorder(IR::Member* expression) override;
+        visitDagOnce = false;
+    }
+    const IR::Node *preorder(IR::Type_SerEnum *type) override;
+    const IR::Node *postorder(IR::Type_Name *type) override;
+    const IR::Node *postorder(IR::Member *expression) override;
 };
 
 class EliminateSerEnums final : public PassManager {
  public:
-    EliminateSerEnums(ReferenceMap* refMap, TypeMap* typeMap,
-                      TypeChecking* typeChecking = nullptr) {
-        if (!typeChecking)
-            typeChecking = new TypeChecking(refMap, typeMap);
+    EliminateSerEnums(ReferenceMap *refMap, TypeMap *typeMap,
+                      TypeChecking *typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoEliminateSerEnums(typeMap));
         passes.push_back(new ClearTypeMap(typeMap));
@@ -51,4 +52,4 @@ class EliminateSerEnums final : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_ELIMINATESERENUMS_H_ */
+#endif /* MIDEND_ELIMINATESERENUMS_H_ */

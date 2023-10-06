@@ -24,11 +24,8 @@ parser p(packet_in pkt, out Headers hdr) {
 control ingress(inout Headers h) {
     @name("ingress.tmp") bit<8> tmp;
     @name("ingress.tmp_0") bit<8> tmp_0;
-    @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.retval") bit<8> retval;
     apply {
-        hasReturned = false;
-        hasReturned = true;
         retval = ((H){a = 8w1}).a;
         tmp = retval;
         tmp_0 = tmp;
@@ -40,4 +37,3 @@ parser Parser(packet_in b, out Headers hdr);
 control Ingress(inout Headers hdr);
 package top(Parser p, Ingress ig);
 top(p(), ingress()) main;
-

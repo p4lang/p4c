@@ -15,7 +15,6 @@
 # limitations under the License.
 
 from common import *
-
 from scapy.layers.l2 import Ether
 
 PORT0 = 0
@@ -26,7 +25,6 @@ PORT4 = 4
 PORT5 = 5
 ALL_PORTS = [PORT0, PORT1, PORT2, PORT3, PORT4, PORT5]
 
-
 # ----------------------------- Action Profile -----------------------------
 
 
@@ -34,63 +32,66 @@ class SimpleActionProfilePSATest(P4EbpfTest):
     """
     Basic usage of ActionProfile extern
     """
+
     p4_file_path = "p4testdata/action-profile1.p4"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet(eth_src="11:22:33:44:55:66", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
-        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
-        # FIXME: API/CLI for ActionProfile is not done yet, we are using table API/CLI for now
-        self.table_add(table="MyIC_ap", keys=[0x10], action=2, data=[0x1122])
-        self.table_add(table="MyIC_tbl", keys=["11:22:33:44:55:66"], references=[0x10])
+        ref = self.action_profile_add_action(ap="MyIC_ap", action=2, data=[0x1122])
+        self.table_add(table="MyIC_tbl", key=["11:22:33:44:55:66"], references=[ref])
 
         testutils.send_packet(self, PORT0, pkt)
         pkt[Ether].type = 0x1122
-        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
 
 class ActionProfileTwoTablesSameInstancePSATest(P4EbpfTest):
     """
     ActionProfile extern instance can be shared between tables under some circumstances
     """
+
     p4_file_path = "p4testdata/action-profile2.p4"
+    p4info_reference_file_path = "p4testdata/action-profile2.p4info.txt"
 
     def runTest(self):
-        self.table_add(table="MyIC_ap", keys=[0x10], action=2, data=[0x1122])
-        self.table_add(table="MyIC_tbl", keys=["11:22:33:44:55:66"], references=[0x10])
-        self.table_add(table="MyIC_tbl2", keys=["AA:BB:CC:DD:EE:FF"], references=[0x10])
+        ref = self.action_profile_add_action(ap="MyIC_ap", action=2, data=[0x1122])
+        self.table_add(table="MyIC_tbl", key=["11:22:33:44:55:66"], references=[ref])
+        self.table_add(table="MyIC_tbl2", key=["AA:BB:CC:DD:EE:FF"], references=[ref])
 
         pkt = testutils.simple_ip_packet(eth_src="11:22:33:44:55:66", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
         pkt[Ether].type = 0x1122
-        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
         pkt = testutils.simple_ip_packet(eth_src="AA:BB:CC:DD:EE:FF", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
         pkt[Ether].type = 0x1122
-        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
 
 class ActionProfileLPMTablePSATest(P4EbpfTest):
     """
     LPM key match
     """
+
     p4_file_path = "p4testdata/action-profile-lpm.p4"
 
     def runTest(self):
         # Match all 11:22:33:44:55:xx MAC addresses
-        self.table_add(table="MyIC_tbl", keys=["0x112233445500/40"], references=[0x10])
-        self.table_add(table="MyIC_ap", keys=[0x10], action=2, data=[0x1122])
+        ref = self.action_profile_add_action(ap="MyIC_ap", action=2, data=[0x1122])
+        self.table_add(table="MyIC_tbl", key=["0x112233445500/40"], references=[ref])
 
         pkt = testutils.simple_ip_packet(eth_src="AA:BB:CC:DD:EE:FF", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
-        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
         pkt[Ether].src = "11:22:33:44:55:66"
         testutils.send_packet(self, PORT0, pkt)
         pkt[Ether].type = 0x1122
-        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
 
 # TODO: add test with ternary table
@@ -100,13 +101,14 @@ class ActionProfileActionRunPSATest(P4EbpfTest):
     """
     Test statement table.apply().action_run
     """
+
     p4_file_path = "p4testdata/action-profile-action-run.p4"
 
     def runTest(self):
-        self.table_add(table="MyIC_ap", keys=[0x10], action=2, data=[0x1122])
-        self.table_add(table="MyIC_ap", keys=[0x20], action=1, data=["AA:BB:CC:DD:EE:FF"])
-        self.table_add(table="MyIC_tbl", keys=["11:22:33:44:55:66"], references=[0x10])
-        self.table_add(table="MyIC_tbl", keys=["AA:BB:CC:DD:EE:FF"], references=[0x20])
+        ref1 = self.action_profile_add_action(ap="MyIC_ap", action=2, data=[0x1122])
+        ref2 = self.action_profile_add_action(ap="MyIC_ap", action=1, data=["AA:BB:CC:DD:EE:FF"])
+        self.table_add(table="MyIC_tbl", key=["11:22:33:44:55:66"], references=[ref1])
+        self.table_add(table="MyIC_tbl", key=["AA:BB:CC:DD:EE:FF"], references=[ref2])
 
         # action MyIC_a1
         pkt = testutils.simple_ip_packet(eth_src="AA:BB:CC:DD:EE:FF", eth_dst="22:33:44:55:66:77")
@@ -125,6 +127,7 @@ class ActionProfileHitPSATest(P4EbpfTest):
     """
     Test statement table.apply().hit
     """
+
     p4_file_path = "p4testdata/action-profile-hit.p4"
 
     def runTest(self):
@@ -132,12 +135,12 @@ class ActionProfileHitPSATest(P4EbpfTest):
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_no_other_packets(self)
 
-        self.table_add(table="MyIC_ap", keys=[0x10], action=2, data=[0x1122])
-        self.table_add(table="MyIC_tbl", keys=["11:22:33:44:55:66"], references=[0x10])
+        ref = self.action_profile_add_action(ap="MyIC_ap", action=2, data=[0x1122])
+        self.table_add(table="MyIC_tbl", key=["11:22:33:44:55:66"], references=[ref])
 
         testutils.send_packet(self, PORT0, pkt)
         pkt[Ether].type = 0x1122
-        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
 
 # ----------------------------- Action Selector -----------------------------
@@ -150,8 +153,8 @@ class ActionSelectorTest(P4EbpfTest):
 
     def create_actions(self, selector):
         for i in range(1, 7):
-            # i: member reference; 3+i: output port
-            ref = self.action_selector_add_action(selector, action=1, data=[i+3])
+            # i: member reference; output port from DP_PORTS
+            ref = self.action_selector_add_action(selector, action=1, data=[DP_PORTS[i - 1]])
             if i != ref:
                 self.fail("Invalid member reference: expected {}, got {}".format(i, ref))
 
@@ -166,14 +169,19 @@ class ActionSelectorTest(P4EbpfTest):
         self.default_group_ports = [PORT3, PORT4, PORT5]
 
         if table:
-            self.table_add(table=table, keys=["02:22:33:44:55:66"], references=["0x2"])
-            self.table_add(table=table, keys=["07:22:33:44:55:66"], references=["group {}".format(self.group_id)])
+            self.table_add(table=table, key=["02:22:33:44:55:66"], references=["0x2"])
+            self.table_add(
+                table=table,
+                key=["07:22:33:44:55:66"],
+                references=["group {}".format(self.group_id)],
+            )
 
 
 class SimpleActionSelectorPSATest(ActionSelectorTest):
     """
     Basic usage of ActionSelector: match action directly and from group
     """
+
     p4_file_path = "p4testdata/action-selector1.p4"
 
     def runTest(self):
@@ -202,7 +210,22 @@ class SimpleActionSelectorPSATest(ActionSelectorTest):
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet_any_port(self, pkt, output_ports)
 
-        # TODO: test cache
+        if "--table-caching" in self.p4c_additional_args:
+            # modify cache directly and verify its usage
+            self.table_update(
+                table="MyIC_as_cache",
+                key=[1, "22:33:44:55:66:78"],
+                action=1,
+                data=[DP_PORTS[1]],
+            )
+            testutils.send_packet(self, PORT0, pkt)
+            testutils.verify_packet(self, pkt, PORT1)
+
+
+class CacheActionSelectorPSATest(SimpleActionSelectorPSATest):
+    """Test ActionSelector in the same way as in the base class but also test cache after it"""
+
+    p4c_additional_args = "--table-caching"
 
 
 class ActionSelectorTwoTablesSameInstancePSATest(ActionSelectorTest):
@@ -211,11 +234,13 @@ class ActionSelectorTwoTablesSameInstancePSATest(ActionSelectorTest):
     Tests basic sharing of ActionSelector instance. For test purpose tables has also defined
     default empty group action "psa_empty_group_action" (not used).
     """
+
     p4_file_path = "p4testdata/action-selector2.p4"
+    p4info_reference_file_path = "p4testdata/action-selector2.p4info.txt"
 
     def runTest(self):
         self.create_default_rule_set(table="MyIC_tbl", selector="MyIC_as")
-        self.table_add(table="MyIC_tbl2", keys=[0x1122], references=[3])
+        self.table_add(table="MyIC_tbl2", key=[0x1122], references=[3])
 
         pkt = testutils.simple_ip_packet(eth_src="02:22:33:44:55:66", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
@@ -227,10 +252,11 @@ class ActionSelectorTwoTablesSameInstancePSATest(ActionSelectorTest):
         testutils.verify_packet(self, pkt, PORT2)
 
 
-class ActionSelectorDefaultEmptyGroupActionPSATest(ActionSelectorTest):
+class ActionSelectorEmptyGroupActionPSATest(ActionSelectorTest):
     """
     Tests behaviour of default empty group action, aka table property "psa_empty_group_action".
     """
+
     p4_file_path = "p4testdata/action-selector3.p4"
 
     def runTest(self):
@@ -240,13 +266,19 @@ class ActionSelectorDefaultEmptyGroupActionPSATest(ActionSelectorTest):
         testutils.verify_no_other_packets(self)
 
         gid = self.action_selector_create_empty_group(selector="MyIC_as")
-        self.table_add(table="MyIC_tbl", keys=["08:22:33:44:55:66"], references=["group {}".format(gid)])
+        self.table_add(
+            table="MyIC_tbl",
+            key=["08:22:33:44:55:66"],
+            references=["group {}".format(gid)],
+        )
 
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT1)
 
-        cmd = "psabpf-ctl action-selector default_group_action pipe {} MyIC_as id 1 data 6".format(TEST_PIPELINE_ID)
-        self.exec_ns_cmd(cmd, "default group action update failed")
+        cmd = "nikss-ctl action-selector empty-group-action pipe {} MyIC_as action id 1 data {}".format(
+            TEST_PIPELINE_ID, DP_PORTS[2]
+        )
+        self.exec_ns_cmd(cmd, "empty group action update failed")
 
         testutils.send_packet(self, PORT0, pkt)
         testutils.verify_packet(self, pkt, PORT2)
@@ -256,11 +288,16 @@ class ActionSelectorMultipleSelectorsPSATest(ActionSelectorTest):
     """
     Tests if multiple selectors are allowed and used.
     """
+
     p4_file_path = "p4testdata/action-selector4.p4"
 
     def runTest(self):
         self.create_default_rule_set(table="MyIC_tbl", selector="MyIC_as")
-        self.table_add(table="MyIC_tbl", keys=["07:22:33:44:55:67"], references=["group {}".format(self.group_id)])
+        self.table_add(
+            table="MyIC_tbl",
+            key=["07:22:33:44:55:67"],
+            references=["group {}".format(self.group_id)],
+        )
 
         allowed_ports = self.default_group_ports
         pkt = testutils.simple_ip_packet(eth_src="07:22:33:44:55:66", eth_dst="22:33:44:55:66:77")
@@ -289,11 +326,16 @@ class ActionSelectorMultipleSelectorsTwoTablesPSATest(ActionSelectorTest):
     Similar to ActionSelectorTwoTablesSameInstancePSATest, but tables has two selectors
     and the same match key. Tests order of selectors in both tables.
     """
+
     p4_file_path = "p4testdata/action-selector5.p4"
 
     def runTest(self):
         self.create_default_rule_set(table="MyIC_tbl", selector="MyIC_as")
-        self.table_add(table="MyIC_tbl2", keys=["AA:BB:CC:DD:EE:FF"], references=["group {}".format(self.group_id)])
+        self.table_add(
+            table="MyIC_tbl2",
+            key=["AA:BB:CC:DD:EE:FF"],
+            references=["group {}".format(self.group_id)],
+        )
 
         pkt = testutils.simple_ip_packet(eth_src="07:22:33:44:55:66", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
@@ -308,14 +350,19 @@ class ActionSelectorLPMTablePSATest(ActionSelectorTest):
     """
     Tests table with LPM match key.
     """
+
     p4_file_path = "p4testdata/action-selector-lpm.p4"
 
     def runTest(self):
         self.create_default_rule_set(table=None, selector="MyIC_as")
         # Match all 00:22:02:44:55:xx MAC addresses into action ref 2
-        self.table_add(table="MyIC_tbl", keys=["0x002202445500/40"], references=[2])
+        self.table_add(table="MyIC_tbl", key=["0x002202445500/40"], references=[2])
         # Match all 00:22:07:44:55:xx MAC addresses into group g7
-        self.table_add(table="MyIC_tbl", keys=["0x2207445500/40"], references=["group {}".format(self.group_id)])
+        self.table_add(
+            table="MyIC_tbl",
+            key=["0x2207445500/40"],
+            references=["group {}".format(self.group_id)],
+        )
 
         pkt = testutils.simple_ip_packet(eth_src="00:22:07:44:55:66", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
@@ -333,17 +380,18 @@ class ActionSelectorActionRunPSATest(ActionSelectorTest):
     """
     Tests action_run statement on table apply().
     """
+
     p4_file_path = "p4testdata/action-selector-action-run.p4"
 
     def runTest(self):
-        ref1 = self.action_selector_add_action(selector="MyIC_as", action=1, data=[5])
+        ref1 = self.action_selector_add_action(selector="MyIC_as", action="MyIC_fwd", data=[5])
         ref2 = self.action_selector_add_action(selector="MyIC_as", action=0, data=[])
-        self.table_add(table="MyIC_tbl", keys=["02:22:33:44:55:66"], references=[ref1])
-        self.table_add(table="MyIC_tbl", keys=["03:22:33:44:55:66"], references=[ref2])
+        self.table_add(table="MyIC_tbl", key=["02:22:33:44:55:66"], references=[ref1])
+        self.table_add(table="MyIC_tbl", key=["03:22:33:44:55:66"], references=[ref2])
 
         pkt = testutils.simple_ip_packet(eth_src="02:22:33:44:55:66", eth_dst="22:33:44:55:66:77")
         testutils.send_packet(self, PORT0, pkt)
-        testutils.verify_packet_any_port(self, pkt, ALL_PORTS)
+        testutils.verify_packet_any_port(self, pkt, PTF_PORTS)
 
         pkt[Ether].src = "03:22:33:44:55:66"
         testutils.send_packet(self, PORT0, pkt)
@@ -354,6 +402,7 @@ class ActionSelectorHitPSATest(ActionSelectorTest):
     """
     Tests hit statement on table apply().
     """
+
     p4_file_path = "p4testdata/action-selector-hit.p4"
 
     def runTest(self):

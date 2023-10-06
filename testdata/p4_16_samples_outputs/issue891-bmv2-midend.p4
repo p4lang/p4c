@@ -7,7 +7,7 @@ header mpls {
 }
 
 struct my_packet {
-    @name("mpls_data") 
+    @name("mpls_data")
     mpls[8] data;
 }
 
@@ -54,4 +54,3 @@ control MyDeparser(packet_out b, in my_packet p) {
 }
 
 V1Switch<my_packet, my_metadata>(MyParser(), MyVerifyChecksum(), MyIngress(), MyEgress(), MyComputeChecksum(), MyDeparser()) main;
-

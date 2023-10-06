@@ -14,18 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4C_UBPFBACKEND_H
-#define P4C_UBPFBACKEND_H
+#ifndef BACKENDS_UBPF_UBPFBACKEND_H_
+#define BACKENDS_UBPF_UBPFBACKEND_H_
 
 #include "backends/ebpf/ebpfOptions.h"
-#include "ir/ir.h"
 #include "frontends/p4/evaluator/evaluator.h"
+#include "ir/ir.h"
 
 namespace UBPF {
-    void run_ubpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *toplevel,
-                          P4::ReferenceMap *refMap, P4::TypeMap *typeMap);
 
-    std::string extract_file_name(const std::string &fullPath);
-} // namespace UBPF
+void run_ubpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *toplevel,
+                      P4::ReferenceMap *refMap, P4::TypeMap *typeMap);
+std::string extract_file_name(const std::string &fullPath);
 
-#endif //P4C_UBPFBACKEND_H
+}  // namespace UBPF
+
+#endif /* BACKENDS_UBPF_UBPFBACKEND_H_ */

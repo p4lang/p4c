@@ -18,7 +18,7 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Node* DontcareArgs::postorder(IR::MethodCallExpression* expression) {
+const IR::Node *DontcareArgs::postorder(IR::MethodCallExpression *expression) {
     bool changes = false;
     auto vec = new IR::Vector<IR::Argument>();
 
@@ -35,14 +35,13 @@ const IR::Node* DontcareArgs::postorder(IR::MethodCallExpression* expression) {
             auto decl = new IR::Declaration_Variable(IR::ID(name), ptype, nullptr);
             toAdd.push_back(decl);
             changes = true;
-            vec->push_back(new IR::Argument(
-                a->srcInfo, a->name, new IR::PathExpression(IR::ID(name))));
+            vec->push_back(
+                new IR::Argument(a->srcInfo, a->name, new IR::PathExpression(IR::ID(name))));
         } else {
             vec->push_back(a);
         }
     }
-    if (changes)
-        expression->arguments = vec;
+    if (changes) expression->arguments = vec;
     return expression;
 }
 

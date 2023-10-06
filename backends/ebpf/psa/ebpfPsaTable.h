@@ -17,9 +17,10 @@ limitations under the License.
 #ifndef BACKENDS_EBPF_PSA_EBPFPSATABLE_H_
 #define BACKENDS_EBPF_PSA_EBPFPSATABLE_H_
 
-#include "frontends/p4/methodInstance.h"
 #include "backends/ebpf/ebpfTable.h"
 #include "backends/ebpf/psa/externs/ebpfPsaCounter.h"
+#include "backends/ebpf/psa/externs/ebpfPsaMeter.h"
+#include "frontends/p4/methodInstance.h"
 
 namespace EBPF {
 
@@ -27,64 +28,94 @@ class EBPFTableImplementationPSA;
 
 class EBPFTablePSA : public EBPFTable {
  private:
-    void emitTableDecl(CodeBuilder *builder,
-                       cstring tblName,
-                       TableKind kind,
-                       cstring keyTypeName,
-                       cstring valueTypeName,
-                       size_t size) const;
+    struct ConstTernaryEntryDesc {
+        const IR::Entry *entry;
+        unsigned priority;
+    };
+    typedef std::vector<ConstTernaryEntryDesc> EntriesGroup_t;
+    typedef std::vector<EntriesGroup_t> EntriesGroupedByMask_t;
+    EntriesGroupedByMask_t getConstEntriesGroupedByMask();
+    bool hasConstEntries();
+    const cstring addPrefixFunctionName = "add_prefix_and_entries";
+    const cstring tuplesMapName = instanceName + "_tuples_map";
+    const cstring prefixesMapName = instanceName + "_prefixes";
 
  protected:
-    ActionTranslationVisitor* createActionTranslationVisitor(
-            cstring valueName, const EBPFProgram* program) const override;
+    ActionTranslationVisitor *createActionTranslationVisitor(
+        cstring valueName, const EBPFProgram *program) const override;
 
     void initDirectCounters();
+    void initDirectMeters();
     void initImplementation();
 
-    void emitTableValue(CodeBuilder* builder, const IR::MethodCallExpression* actionMce,
-                        cstring valueName);
+    bool tableCacheEnabled = false;
+    cstring cacheValueTypeName;
+    cstring cacheTableName;
+    cstring cacheKeyTypeName;
+    void tryEnableTableCache();
+    void createCacheTypeNames(bool isCacheKeyType, bool isCacheValueType);
+
+    void emitTableValue(CodeBuilder *builder, const IR::Expression *expr, cstring valueName);
     void emitDefaultActionInitializer(CodeBuilder *builder);
     void emitConstEntriesInitializer(CodeBuilder *builder);
-    void emitMapUpdateTraceMsg(CodeBuilder *builder, cstring mapName,
-                               cstring returnCode) const;
+    void emitTernaryConstEntriesInitializer(CodeBuilder *builder);
+    void emitMapUpdateTraceMsg(CodeBuilder *builder, cstring mapName, cstring returnCode) const;
+    void emitValueMask(CodeBuilder *builder, cstring valueMask, cstring nextMask,
+                       int tupleId) const;
+    void emitKeyMasks(CodeBuilder *builder, EntriesGroupedByMask_t &entriesGroupedByMask,
+                      std::vector<cstring> &keyMasksNames);
+    void emitKeysAndValues(CodeBuilder *builder, EntriesGroup_t &sameMaskEntries,
+                           std::vector<cstring> &keyNames, std::vector<cstring> &valueNames);
 
-    const IR::PathExpression* getActionNameExpression(const IR::Expression* expr) const;
+    const IR::PathExpression *getActionNameExpression(const IR::Expression *expr) const;
 
  public:
+    // We use vectors to keep an order of Direct Meters or Counters from a P4 program.
+    // This order is important from CLI tool point of view.
     std::vector<std::pair<cstring, EBPFCounterPSA *>> counters;
-    // TODO: DirectMeter is not implemented now, but
-    //  this is needed in table implementation to validate table properties
-    std::vector<cstring> meters;
-    EBPFTableImplementationPSA* implementation;
+    std::vector<std::pair<cstring, EBPFMeterPSA *>> meters;
+    EBPFTableImplementationPSA *implementation;
 
-    EBPFTablePSA(const EBPFProgram* program, const IR::TableBlock* table,
-                 CodeGenInspector* codeGen);
-    EBPFTablePSA(const EBPFProgram* program, CodeGenInspector* codeGen, cstring name);
+    EBPFTablePSA(const EBPFProgram *program, const IR::TableBlock *table,
+                 CodeGenInspector *codeGen);
+    EBPFTablePSA(const EBPFProgram *program, CodeGenInspector *codeGen, cstring name);
 
-    void emitInstance(CodeBuilder* builder) override;
-    void emitTypes(CodeBuilder* builder) override;
-    void emitValueStructStructure(CodeBuilder* builder) override;
-    void emitAction(CodeBuilder* builder, cstring valueName, cstring actionRunVariable) override;
-    void emitInitializer(CodeBuilder* builder) override;
-    void emitDirectValueTypes(CodeBuilder* builder) override;
-    void emitLookup(CodeBuilder* builder, cstring key, cstring value) override;
-    void emitLookupDefault(CodeBuilder* builder, cstring key, cstring value,
+    void emitInstance(CodeBuilder *builder) override;
+    void emitTypes(CodeBuilder *builder) override;
+    void emitValueStructStructure(CodeBuilder *builder) override;
+    void emitAction(CodeBuilder *builder, cstring valueName, cstring actionRunVariable) override;
+    void emitInitializer(CodeBuilder *builder) override;
+    void emitDirectValueTypes(CodeBuilder *builder) override;
+    void emitLookupDefault(CodeBuilder *builder, cstring key, cstring value,
                            cstring actionRunVariable) override;
     bool dropOnNoMatchingEntryFound() const override;
+    static cstring addPrefixFunc(bool trace);
 
-    EBPFCounterPSA* getDirectCounter(cstring name) const {
+    virtual void emitCacheTypes(CodeBuilder *builder);
+    void emitCacheInstance(CodeBuilder *builder);
+    void emitCacheLookup(CodeBuilder *builder, cstring key, cstring value) override;
+    void emitCacheUpdate(CodeBuilder *builder, cstring key, cstring value) override;
+    bool cacheEnabled() override { return tableCacheEnabled; }
+
+    EBPFCounterPSA *getDirectCounter(cstring name) const {
         auto result = std::find_if(counters.begin(), counters.end(),
-            [name](std::pair<cstring, EBPFCounterPSA *> elem)->bool {
-                return name == elem.first;
-            });
-        if (result != counters.end())
-            return result->second;
+                                   [name](std::pair<cstring, EBPFCounterPSA *> elem) -> bool {
+                                       return name == elem.first;
+                                   });
+        if (result != counters.end()) return result->second;
         return nullptr;
     }
 
-    bool isMatchTypeSupported(const IR::Declaration_ID* matchType) override {
-        return EBPFTable::isMatchTypeSupported(matchType) ||
-               matchType->name.name == "selector";
+    EBPFMeterPSA *getMeter(cstring name) const {
+        auto result = std::find_if(
+            meters.begin(), meters.end(),
+            [name](std::pair<cstring, EBPFMeterPSA *> elem) -> bool { return name == elem.first; });
+        if (result != meters.end()) return result->second;
+        return nullptr;
+    }
+
+    bool isMatchTypeSupported(const IR::Declaration_ID *matchType) override {
+        return EBPFTable::isMatchTypeSupported(matchType) || matchType->name.name == "selector";
     }
 };
 

@@ -15,17 +15,18 @@ limitations under the License.
 */
 
 #include <cstdio>
-#include <fstream>
+#include <fstream>  // IWYU pragma: keep
 #include <iostream>
 #include <string>
 
-#include "backends/dpdk/version.h"
 #include "backends/dpdk/backend.h"
+#include "backends/dpdk/control-plane/bfruntime_arch_handler.h"
 #include "backends/dpdk/midend.h"
 #include "backends/dpdk/options.h"
-#include "backends/dpdk/control-plane/bfruntime_arch_handler.h"
-#include "control-plane/p4RuntimeSerializer.h"
+#include "backends/dpdk/tdiConf.h"
+#include "backends/dpdk/version.h"
 #include "control-plane/bfruntime_ext.h"
+#include "control-plane/p4RuntimeSerializer.h"
 #include "frontends/common/applyOptionsPragmas.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/common/parser_options.h"
@@ -39,6 +40,26 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/nullstream.h"
 
+void generateTDIBfrtJson(bool isTDI, const IR::P4Program *program, DPDK::DpdkOptions &options) {
+    auto p4RuntimeSerializer = P4::P4RuntimeSerializer::get();
+    if (options.arch == "psa")
+        p4RuntimeSerializer->registerArch(
+            "psa", new P4::ControlPlaneAPI::Standard::PSAArchHandlerBuilderForDPDK());
+    if (options.arch == "pna")
+        p4RuntimeSerializer->registerArch(
+            "pna", new P4::ControlPlaneAPI::Standard::PNAArchHandlerBuilderForDPDK());
+    auto p4Runtime = P4::generateP4Runtime(program, options.arch);
+
+    cstring filename = isTDI ? options.tdiFile : options.bfRtSchema;
+    auto p4rt = new P4::BFRT::BFRuntimeSchemaGenerator(*p4Runtime.p4Info, isTDI, options);
+    std::ostream *out = openFile(filename, false);
+    if (!out) {
+        ::error(ErrorType::ERR_IO, "Could not open file: %1%", filename);
+        return;
+    }
+    p4rt->serializeBFRuntimeSchema(out);
+}
+
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
 
@@ -48,11 +69,9 @@ int main(int argc, char *const argv[]) {
     options.compilerVersion = DPDK_VERSION_STRING;
 
     if (options.process(argc, argv) != nullptr) {
-        if (options.loadIRFromJson == false)
-            options.setInputFile();
+        if (options.loadIRFromJson == false) options.setInputFile();
     }
-    if (::errorCount() > 0)
-        return 1;
+    if (::errorCount() > 0) return 1;
 
     auto hook = options.getDebugHook();
 
@@ -62,8 +81,7 @@ int main(int argc, char *const argv[]) {
     if (options.loadIRFromJson == false) {
         program = P4::parseP4File(options);
 
-        if (program == nullptr || ::errorCount() > 0)
-            return 1;
+        if (program == nullptr || ::errorCount() > 0) return 1;
         try {
             P4::P4COptionPragmaParser optionsPragmaParser;
             program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
@@ -75,18 +93,17 @@ int main(int argc, char *const argv[]) {
             std::cerr << bug.what() << std::endl;
             return 1;
         }
-        if (program == nullptr || ::errorCount() > 0)
-            return 1;
+        if (program == nullptr || ::errorCount() > 0) return 1;
     } else {
         std::filebuf fb;
         if (fb.open(options.file, std::ios::in) == nullptr) {
-            ::error("%s: No such file or directory.", options.file);
+            ::error(ErrorType::ERR_NOT_FOUND, "%s: No such file or directory.", options.file);
             return 1;
         }
         std::istream inJson(&fb);
         JSONLoader jsonFileLoader(inJson);
         if (jsonFileLoader.json == nullptr) {
-            ::error("Not valid input file");
+            ::error(ErrorType::ERR_INVALID, "Not valid input file");
             return 1;
         }
         program = new IR::P4Program(jsonFileLoader);
@@ -94,50 +111,38 @@ int main(int argc, char *const argv[]) {
     }
 
     P4::serializeP4RuntimeIfRequired(program, options);
-    if (::errorCount() > 0)
-        return 1;
+    if (::errorCount() > 0) return 1;
 
-    if (!options.bfRtSchema.isNullOrEmpty()) {
-        auto p4RuntimeSerializer = P4::P4RuntimeSerializer::get();
-        if (options.arch == "psa")
-            p4RuntimeSerializer->registerArch("psa",
-                new P4::ControlPlaneAPI::Standard::PSAArchHandlerBuilderForDPDK());
-        if (options.arch == "pna")
-            p4RuntimeSerializer->registerArch("pna",
-                new P4::ControlPlaneAPI::Standard::PNAArchHandlerBuilderForDPDK());
-        auto p4Runtime = P4::generateP4Runtime(program, options.arch);
-        auto p4rt = new P4::BFRT::BFRuntimeSchemaGenerator(*p4Runtime.p4Info);
-        std::ostream* out = openFile(options.bfRtSchema, false);
-        if (!out) {
-            ::error("Could not open BF-RT schema file: %1%", options.bfRtSchema);
-            return 1;
-        }
-        p4rt->serializeBFRuntimeSchema(out);
+    if (!options.tdiBuilderConf.isNullOrEmpty()) {
+        DPDK::TdiBfrtConf::generate(program, options);
     }
 
+    if (!options.bfRtSchema.isNullOrEmpty()) {
+        generateTDIBfrtJson(false, program, options);
+    }
+    if (!options.tdiFile.isNullOrEmpty()) {
+        generateTDIBfrtJson(true, program, options);
+    }
+
+    if (::errorCount() > 0) return 1;
+    auto p4info = *P4::generateP4Runtime(program, options.arch).p4Info;
     DPDK::DpdkMidEnd midEnd(options);
     midEnd.addDebugHook(hook);
     try {
         toplevel = midEnd.process(program);
-        if (::errorCount() > 1 || toplevel == nullptr ||
-            toplevel->getMain() == nullptr)
-            return 1;
+        if (::errorCount() > 1 || toplevel == nullptr || toplevel->getMain() == nullptr) return 1;
         if (options.dumpJsonFile)
-            JSONGenerator(*openFile(options.dumpJsonFile, true), true)
-                << program << std::endl;
+            JSONGenerator(*openFile(options.dumpJsonFile, true), true) << program << std::endl;
     } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
     }
-    if (::errorCount() > 0)
-        return 1;
+    if (::errorCount() > 0) return 1;
 
-    auto backend = new DPDK::DpdkBackend(options, &midEnd.refMap,
-                                         &midEnd.typeMap, &midEnd.enumMap);
+    auto backend = new DPDK::DpdkBackend(options, &midEnd.refMap, &midEnd.typeMap, p4info);
 
     backend->convert(toplevel);
-    if (::errorCount() > 0)
-        return 1;
+    if (::errorCount() > 0) return 1;
 
     if (!options.outputFile.isNullOrEmpty()) {
         std::ostream *out = openFile(options.outputFile, false);

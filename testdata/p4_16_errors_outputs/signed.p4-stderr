@@ -2,7 +2,7 @@ signed.p4(5): [--Werror=type-error] error: AssignmentStatement
         signed_int1[7:0] = signed_int2;
                          ^
   ---- Actual error:
-  Cannot unify type 'int<8>' with type 'bit<8>'
+  Cannot cast implicitly type 'int<8>' to type 'bit<8>'
   ---- Originating from:
 signed.p4(5): Source expression 'signed_int2' produces a result of type 'int<8>' which cannot be assigned to a left-value with type 'bit<8>'
           signed_int1[7:0] = signed_int2;

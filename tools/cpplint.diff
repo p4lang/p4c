@@ -1,17 +1,19 @@
 This diff file tracks the modifications that have been applied to cpplint.py compared to the original found here:
- https://github.com/cpplint/cpplint/blob/f7061b185758f855690be8625af360f9cb942b5b/cpplint.py
+https://github.com/cpplint/cpplint/blob/7b88b68187e3516540fab3caa900988d2179ed24/cpplint.py
 Please update this file, whenever you make changes to cpplint.
---- cpplint_old.py	2021-03-30 12:51:28.324307600 -0400
-+++ modules/p4c/tools/cpplint.py	2021-03-30 12:51:57.322335400 -0400
-@@ -55,6 +55,7 @@ import sys
+diff --git a/tools/cpplint.py b/tools/cpplint.py
+index 8158eb7cd..f013773ba 100755
+--- a/tools/cpplint.py
++++ b/tools/cpplint.py
+@@ -60,6 +60,7 @@ import sys
  import sysconfig
  import unicodedata
  import xml.etree.ElementTree
 +import fnmatch
-
+ 
  # if empty, use defaults
  _valid_extensions = set([])
-@@ -328,6 +329,8 @@ _ERROR_CATEGORIES = [
+@@ -335,6 +336,8 @@ _ERROR_CATEGORIES = [
      'runtime/memset',
      'runtime/indentation_namespace',
      'runtime/operator',
@@ -20,30 +22,30 @@ Please update this file, whenever you make changes to cpplint.
      'runtime/printf',
      'runtime/printf_format',
      'runtime/references',
-@@ -2422,11 +2425,15 @@ def CheckForHeaderGuard(filename, clean_
+@@ -2456,11 +2459,15 @@ def CheckForHeaderGuard(filename, clean_lines, error):
      error_level = 0
      if ifndef != cppvar + '_':
        error_level = 5
 +    if ifndef == ('P4C_' + cppvar)[-len(ifndef):]:
 +      error_level = 0
-
+ 
      ParseNolintSuppressions(filename, raw_lines[ifndef_linenum], ifndef_linenum,
                              error)
      error(filename, ifndef_linenum, 'build/header_guard', error_level,
            '#ifndef header guard has wrong style, please use: %s' % cppvar)
 +    if error_level < 1:
 +      cppvar = ifndef
-
+ 
    # Check for "//" comments on endif line.
    ParseNolintSuppressions(filename, raw_lines[endif_linenum], endif_linenum,
-@@ -2436,18 +2443,19 @@ def CheckForHeaderGuard(filename, clean_
+@@ -2470,18 +2477,19 @@ def CheckForHeaderGuard(filename, clean_lines, error):
      if match.group(1) == '_':
        # Issue low severity warning for deprecated double trailing underscore
        error(filename, endif_linenum, 'build/header_guard', 0,
 -            '#endif line should be "#endif  // %s"' % cppvar)
 +            '#endif line should be "#endif  /* %s */"' % cppvar)
      return
-
+ 
    # Didn't find the corresponding "//" comment.  If this file does not
    # contain any "//" comments at all, it could be that the compiler
    # only wants "/**/" comments, look for those instead.
@@ -59,22 +61,22 @@ Please update this file, whenever you make changes to cpplint.
 +  #  if Match(r'^(?:(?:\'(?:\.|[^\'])*\')|(?:"(?:\.|[^"])*")|[^\'"])*//', line):
 +  #    no_single_line_comments = False
 +  #    break
-
+ 
    if no_single_line_comments:
      match = Match(r'#endif\s*/\*\s*' + cppvar + r'(_)?\s*\*/', endif)
-@@ -2460,7 +2468,7 @@ def CheckForHeaderGuard(filename, clean_
-
+@@ -2494,7 +2502,7 @@ def CheckForHeaderGuard(filename, clean_lines, error):
+ 
    # Didn't find anything
    error(filename, endif_linenum, 'build/header_guard', 5,
 -        '#endif line should be "#endif  // %s"' % cppvar)
 +        '#endif line should be "#endif  /* %s */"' % cppvar)
-
-
+ 
+ 
  def CheckHeaderFileIncluded(filename, include_state, error):
-@@ -6238,6 +6246,30 @@ def CheckRedundantVirtual(filename, clea
+@@ -6276,6 +6284,30 @@ def CheckRedundantVirtual(filename, clean_lines, linenum, error):
      if Search(r'[^\w]\s*$', line):
        break
-
+ 
 +def CheckMissingOverrideOrFinal(filename, clean_lines, linenum, nesting_state, error):
 +  """Check if a line is missing a required "override" or "final" virt-specifier.
 +
@@ -99,10 +101,10 @@ Please update this file, whenever you make changes to cpplint.
 +    error(filename, linenum, 'runtime/override', 4,
 +          ('missing "override" on postorder function'))
 +
-
+ 
  def CheckRedundantOverrideOrFinal(filename, clean_lines, linenum, error):
    """Check if line contains a redundant "override" or "final" virt-specifier.
-@@ -6373,6 +6405,7 @@ def ProcessLine(filename, file_extension
+@@ -6411,6 +6443,7 @@ def ProcessLine(filename, file_extension, clean_lines, line,
    CheckMakePairUsesDeduction(filename, clean_lines, line, error)
    CheckRedundantVirtual(filename, clean_lines, line, error)
    CheckRedundantOverrideOrFinal(filename, clean_lines, line, error)
@@ -110,7 +112,7 @@ Please update this file, whenever you make changes to cpplint.
    if extra_check_functions:
      for check_fn in extra_check_functions:
        check_fn(filename, clean_lines, line, error)
-@@ -6570,6 +6603,8 @@ def ProcessConfigOverrides(filename):
+@@ -6608,6 +6641,8 @@ def ProcessConfigOverrides(filename):
              ProcessHppHeadersOption(val)
            elif name == 'includeorder':
              ProcessIncludeOrderOption(val)

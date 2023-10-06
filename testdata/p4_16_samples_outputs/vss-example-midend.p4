@@ -5,13 +5,12 @@ error {
 }
 #include <core.p4>
 
-typedef bit<4> PortId;
 struct InControl {
-    PortId inputPort;
+    bit<4> inputPort;
 }
 
 struct OutControl {
-    PortId outputPort;
+    bit<4> outputPort;
 }
 
 parser Parser<H>(packet_in b, out H parsedHeaders);
@@ -25,27 +24,25 @@ extern Ck16 {
     bit<16> get();
 }
 
-typedef bit<48> EthernetAddress;
-typedef bit<32> IPv4Address;
 header Ethernet_h {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header Ipv4_h {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     totalLen;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     fragOffset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdrChecksum;
-    IPv4Address srcAddr;
-    IPv4Address dstAddr;
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<8>  diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
 }
 
 struct Parsed_packet {
@@ -80,7 +77,7 @@ parser TopParser(packet_in b, out Parsed_packet p) {
 }
 
 control TopPipe(inout Parsed_packet headers, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
-    @name("TopPipe.nextHop") IPv4Address nextHop_0;
+    @name("TopPipe.nextHop") bit<32> nextHop_0;
     @name("TopPipe.hasReturned") bool hasReturned;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
@@ -96,14 +93,14 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     @name("TopPipe.Drop_action") action Drop_action_3() {
         outCtrl.outputPort = 4w0xf;
     }
-    @name("TopPipe.Set_nhop") action Set_nhop(@name("ipv4_dest") IPv4Address ipv4_dest, @name("port") PortId port) {
+    @name("TopPipe.Set_nhop") action Set_nhop(@name("ipv4_dest") bit<32> ipv4_dest, @name("port") bit<4> port) {
         nextHop_0 = ipv4_dest;
         headers.ip.ttl = headers.ip.ttl + 8w255;
         outCtrl.outputPort = port;
     }
     @name("TopPipe.ipv4_match") table ipv4_match_0 {
         key = {
-            headers.ip.dstAddr: lpm @name("headers.ip.dstAddr") ;
+            headers.ip.dstAddr: lpm @name("headers.ip.dstAddr");
         }
         actions = {
             Drop_action();
@@ -117,7 +114,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     }
     @name("TopPipe.check_ttl") table check_ttl_0 {
         key = {
-            headers.ip.ttl: exact @name("headers.ip.ttl") ;
+            headers.ip.ttl: exact @name("headers.ip.ttl");
         }
         actions = {
             Send_to_cpu();
@@ -125,12 +122,12 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         }
         const default_action = NoAction_1();
     }
-    @name("TopPipe.Set_dmac") action Set_dmac(@name("dmac") EthernetAddress dmac_0) {
+    @name("TopPipe.Set_dmac") action Set_dmac(@name("dmac") bit<48> dmac_0) {
         headers.ethernet.dstAddr = dmac_0;
     }
     @name("TopPipe.dmac") table dmac_1 {
         key = {
-            nextHop_0: exact @name("nextHop") ;
+            nextHop_0: exact @name("nextHop");
         }
         actions = {
             Drop_action_1();
@@ -139,12 +136,12 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         size = 1024;
         default_action = Drop_action_1();
     }
-    @name("TopPipe.Set_smac") action Set_smac(@name("smac") EthernetAddress smac_0) {
+    @name("TopPipe.Set_smac") action Set_smac(@name("smac") bit<48> smac_0) {
         headers.ethernet.srcAddr = smac_0;
     }
     @name("TopPipe.smac") table smac_1 {
         key = {
-            outCtrl.outputPort: exact @name("outCtrl.outputPort") ;
+            outCtrl.outputPort: exact @name("outCtrl.outputPort");
         }
         actions = {
             Drop_action_2();
@@ -284,4 +281,3 @@ control TopDeparser(inout Parsed_packet p, packet_out b) {
 }
 
 VSS<Parsed_packet>(TopParser(), TopPipe(), TopDeparser()) main;
-

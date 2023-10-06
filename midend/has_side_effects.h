@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,18 +17,21 @@ limitations under the License.
 #ifndef MIDEND_HAS_SIDE_EFFECTS_H_
 #define MIDEND_HAS_SIDE_EFFECTS_H_
 
-#include "ir/ir.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 /* Should this be a method on IR::Expression?  Maybe after the refMap/typeMap go away */
 
 class hasSideEffects : public Inspector {
-    P4::ReferenceMap    *refMap = nullptr;
-    P4::TypeMap         *typeMap = nullptr;
+    P4::ReferenceMap *refMap = nullptr;
+    P4::TypeMap *typeMap = nullptr;
 
     bool result = false;
-    bool preorder(const IR::AssignmentStatement *) override { result = true; return false; }
+    bool preorder(const IR::AssignmentStatement *) override {
+        result = true;
+        return false;
+    }
     bool preorder(const IR::MethodCallExpression *mc) override {
         if (result) {
             return false;
@@ -42,28 +45,32 @@ class hasSideEffects : public Inspector {
                 }
             }
             if (auto *em = mi->to<P4::ExternMethod>()) {
-                if (em->method->getAnnotation(IR::Annotation::noSideEffectsAnnotation))
-                    return true;
-                }
+                if (em->method->getAnnotation(IR::Annotation::noSideEffectsAnnotation)) return true;
             }
+        }
         result = true;
         return false;
     }
 
-    bool preorder(const IR::Primitive *) override { result = true; return false; }
+    bool preorder(const IR::Primitive *) override {
+        result = true;
+        return false;
+    }
     bool preorder(const IR::Expression *) override { return !result; }
 
  public:
     explicit hasSideEffects(const IR::Expression *e) { e->apply(*this); }
     hasSideEffects(P4::ReferenceMap *rm, P4::TypeMap *tm) : refMap(rm), typeMap(tm) {}
     hasSideEffects(P4::ReferenceMap *rm, P4::TypeMap *tm, const IR::Expression *e)
-    : refMap(rm), typeMap(tm) { e->apply(*this); }
+        : refMap(rm), typeMap(tm) {
+        e->apply(*this);
+    }
     bool operator()(const IR::Expression *e) {
         result = false;
         e->apply(*this);
-        return result; }
-    explicit operator bool () { return result; }
+        return result;
+    }
+    explicit operator bool() { return result; }
 };
-
 
 #endif /* MIDEND_HAS_SIDE_EFFECTS_H_ */

@@ -34,7 +34,7 @@ control MyIC(inout headers_t hdr, inout EMPTY b, in psa_ingress_input_metadata_t
     Counter<bit<10>, bit<12>>(1024, PSA_CounterType_t.BYTES) counter2;
     apply {
         counter0.count(1023, 20);
-        counter1.count(512);
+        counter1.count(512, 32);
         counter2.count(1023, 64);
     }
 }
@@ -55,8 +55,5 @@ control MyED(packet_out buffer, out EMPTY a, out EMPTY b, inout EMPTY c, in EMPT
 }
 
 IngressPipeline(MyIP(), MyIC(), MyID()) ip;
-
 EgressPipeline(MyEP(), MyEC(), MyED()) ep;
-
 PSA_Switch(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

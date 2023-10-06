@@ -11,11 +11,12 @@ struct Headers {
 }
 
 control ingress(inout Headers h) {
+    @name("ingress.retval_0") ethernet_t retval_0;
     apply {
+        retval_0.setValid();
     }
 }
 
 control Ingress(inout Headers hdr);
 package top(Ingress ig);
 top(ingress()) main;
-

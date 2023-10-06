@@ -19,13 +19,11 @@ limitations under the License.
 namespace P4 {
 
 // static
-EnumInstance* EnumInstance::resolve(const IR::Expression* expression, const P4::TypeMap* typeMap) {
+EnumInstance *EnumInstance::resolve(const IR::Expression *expression, const P4::TypeMap *typeMap) {
     CHECK_NULL(typeMap);
-    if (!expression->is<IR::Member>())
-        return nullptr;
+    if (!expression->is<IR::Member>()) return nullptr;
     auto member = expression->to<IR::Member>();
-    if (!member->expr->is<IR::TypeNameExpression>())
-        return nullptr;
+    if (!member->expr->is<IR::TypeNameExpression>()) return nullptr;
     auto type = typeMap->getType(expression, true);
     if (auto et = type->to<IR::Type_Enum>()) {
         return new SimpleEnumInstance(et, member->member, typeMap);

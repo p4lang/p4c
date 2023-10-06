@@ -18,7 +18,7 @@ limitations under the License.
 
 namespace P4 {
 
-bool ComputeParserCG::preorder(const IR::PathExpression* expression) {
+bool ComputeParserCG::preorder(const IR::PathExpression *expression) {
     auto state = findContext<IR::ParserState>();
     if (state != nullptr) {
         auto decl = refMap->getDeclaration(expression->path);
@@ -28,7 +28,7 @@ bool ComputeParserCG::preorder(const IR::PathExpression* expression) {
     return false;
 }
 
-void ComputeParserCG::postorder(const IR::SelectExpression* expression) {
+void ComputeParserCG::postorder(const IR::SelectExpression *expression) {
     // transition (..) { ... } may imply a transition to
     // "reject" - if none of the cases matches.
     for (auto c : expression->selectCases) {

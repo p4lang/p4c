@@ -56,6 +56,8 @@ struct metadata {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<16> local_metadata_data
+	bit<16> tmpMask
+	bit<8> tmpMask_0
 }
 metadata instanceof metadata
 
@@ -87,15 +89,15 @@ table tbl {
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
 	mov m.tmpMask h.ethernet.etherType
-	and m.tmpMask 0xf00
+	and m.tmpMask 0xF00
 	jmpeq INGRESSPARSERIMPL_PARSE_IPV4 m.tmpMask 0x800
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	mov m.tmpMask_0 h.ipv4.protocol
-	and m.tmpMask_0 0xfc
+	and m.tmpMask_0 0xFC
 	jmpeq INGRESSPARSERIMPL_PARSE_TCP m.tmpMask_0 0x4
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp

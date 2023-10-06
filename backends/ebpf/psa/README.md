@@ -11,9 +11,16 @@ This directory implements PSA (Portable Switch Architecture) for the eBPF backen
 
 # Design
 
+The PSA to eBPF compiler provides two flavors of generated eBPF code: TC-based design and XDP-based design.
+The TC-based design leverages eBPF TC (Traffic Control) hook and is able to implement any PSA program. 
+The XDP-based design offloads packet processing to eBPF XDP (eXpress Data Path) hook and provides better performance than the TC-based flavor.
+However, the XDP-based design lacks support for packet recirculation, QoS (no integration with TC qdisc) and CLONE_E2E packet path.
+
+## TC-based design (default)
+
 P4 packet processing is translated into a set of eBPF programs attached to the TC hook. The eBPF programs implement packet processing defined
 in a P4 program written according to the PSA model. The TC hook is used as a main engine, because it enables a full implementation of the PSA specification.
-We also plan to contribute the XDP-based version of the PSA implementation that does not implement the full specification, but provides better performance.
+The XDP-based version of the PSA implementation does not implement the full specification, but provides better performance.
 
 The TC-based design of PSA for eBPF is depicted in Figure below.
 
@@ -32,16 +39,56 @@ The TC-based design of PSA for eBPF is depicted in Figure below.
   The role of Traffic Manager is to redirect traffic between the Ingress (TC) and Egress (TC).
   It is also responsible for packet replication via clone sessions or multicast groups and sending packet to CPU.
 - `tc-egress` - The PSA Egress pipeline (composed of Parser, Control block and Deparser) is attached to the TC Egress hook. As there is no
-  XDP hook in the Egress path, the use of TC is mandatory for the egress processing.
-  
+  XDP hook in the Egress path, the use of TC is mandatory for the egress processing. **Note!** If the PSA Egress pipeline is not used (i.e. it is left empty by a developer),
+  the PSA-eBPF compiler will not generate the TC Egress program. This brings a noticeable performance gain, if the egress pipeline is not used.
+
+## XDP-based design
+
+The XDP-based design of PSA for eBPF is depicted in Figure below.
+
+![XDP-based PSA-eBPF design](psa-ebpf-xdp-design.png)
+
+`xdp-helper` does not exist in this design, instead the PSA Ingress pipeline is attached to XDP hook.
+Since XDP does not provide a hook on the egress path, we mimic the PSA Egress pipeline by using eBPF program
+attached to `BPF_MAP_TYPE_DEVMAP`, a special type of BPF map used to perform packet redirection with `bpf_redirect_map()` helper.
+Also, XDP hook in the currently supported kernel version (up to 5.13) does not support packet cloning. Therefore, packets to be cloned
+are passed up to the TC hook, where the Packet Replication Engine is implemented. Once a packet reaches the TC hook,
+it is further processed by TC exclusively. Thus, the PSA-eBPF compiler generates a TC Egress program, which is a mirror reflection of the 
+PSA Egress pipeline attached to the XDP DEVMAP. The packets to be cloned are passed up to TC with additional metadata. The mechanism used to 
+transfer the metadata depends on the XDP2TC mode, we support `cpumap` and `head` modes for XDP-based design (`meta` mode is not supported).
+
+There is no difference (comparing to TC-based design) in how PSA externs, P4 match kinds and parser primitives are implemented for XDP-based design.
+
+To compile P4 programs for XDP, use `--xdp` compiler option.
+
 ## Packet paths
 
+### NTK (Normal Packet To Kernel) 
+
+**WARNING!** The NTK packet path is a custom packet path used for the PSA-eBPF only! It is not a standardized PSA packet path. 
+
+The NTK packet path allows integrating P4/PSA programs for eBPF with the standard Linux kernel stack. The main use case is handling 
+ICMP/ARP requests and sending packet to the userspace process listening on a socket.
+
+The NTK path is enforced if `drop` is set to `false` and `egress_port` is left unchanged or set to 0 (it's a special implicit port number that forwards packets to the kernel stack).
+Since packets can be modified in the PSA ingress pipeline before they are sent to the kernel stack, a P4 programmer should make sure that packets use standard headers and are properly formatted.
+Otherwise, the kernel stack will drop them. 
+
+**NOTE!** There is no symmetric packet path *from kernel* - once a packet enters the kernel network stack, it is further processed exclusively by the kernel. 
+As a consequence, all packets that have not been processed by the PSA Ingress pipeline (e.g., packets sent from userspace application) will not be handled by the PSA Egress pipeline!
+
 ### NFP (Normal Packet From Port)
+
+**TC-based design**
 
 Packet arriving on an interface is intercepted in the XDP hook by the `xdp-helper` program. It performs pre-processing and
 packet is passed for further processing to the TC ingress. Note that there is no P4-related processing done in the `xdp-helper` program.
 
 By default, a packet is further passed to the TC subsystem. It is done by `XDP_PASS` action and packet is further handled by `tc-ingress` program.
+
+**XDP-based design** 
+
+No specific processing is done. Packets are just received by the eBPF programm attached to XDP.
 
 ### RESUBMIT
 
@@ -64,7 +111,11 @@ for (i = 0; i < MAX_RESUBMIT_DEPTH; i++) {
 }
 ```
 
+The same mechanism for RESUBMIT is used in the TC-based and XDP-based design.
+
 ### NU (Normal Unicast), NM (Normal Multicast), CI2E (Clone Ingress to Egress)
+
+**TC-based design**
 
 NU, NM and CI2E refer to process of sending packet from the PSA Ingress Pipeline (more specifically from the Traffic Manager)
 to the PSA Egress pipeline. The NU path is implemented in the eBPF subsystem by invoking the `bpf_redirect()` helper from
@@ -82,12 +133,25 @@ are stored in the inner hash map.
 While performing the packet replication, the eBPF program does a lookup to the outer map based on the clone session/multicast group identifier and, then,
 does another lookup to the inner map to find all members.
 
+**XDP-based design**
+
+The NU path is implemented by calling `bpf_redirect_map()` after the ingress processing is completed.
+The NM and CI2E paths are not possible in the XDP layer. Packets marked to be cloned are sent up to the TC hook
+with additional metadata (e.g., parsed headers) and they are cloned by the eBPF program attached to the TC Ingress by using `bpf_clone_redirect()`.
+The clone sessions and multicast groups are implemented exactly like for the TC-based design.
+
 ### CE2E (Clone Egress to Egress)
+
+**TC-based design**
 
 CE2E refers to process of copying a packet that was handled by the Egress pipeline and resubmitting the cloned packet to the Egress Parser.
 
 CE2E is implemented by invoking `bpf_clone_redirect()` helper in the Egress path. Output ports are determined based on the
 `clone_session_id` and lookup to "clone_session" BPF map, which is shared among TC ingress and egress (eBPF subsystem allows for map sharing between programs).
+
+**XDP-based design**
+
+CE2E is not supported by the XDP-based design.
 
 ### Sending packet to CPU
 
@@ -96,7 +160,11 @@ a control plane application and data plane. Sending packet to CPU does not diffe
 A control plane application should listen for new packets on the interface identified by `PSA_PORT_CPU` in a P4 program. 
 By redirecting a packet to `PSA_PORT_CPU` in the Ingress pipeline the packet is forwarded via Traffic Manager to the Egress pipeline and then, sent to the "CPU" interface.
 
+The mechanism is common for both design options (TC/XDP).
+
 ### NTP (Normal packet to port)
+
+**TC-based design**
 
 Packets from `tc-egress` are sent out to the egress port. The egress port is determined in the Ingress pipeline and is not changed in the Egress pipeline.
 
@@ -105,12 +173,22 @@ The eBPF programs generated by P4-eBPF compiler sets `skb->priority` value based
 The `skb->priority` is used to interact between eBPF programs and `TC qdisc`. A user can configure different QoS behaviors via TC CLI and 
 send a packet from PSA pipeline to a specific QoS class identified by `skb->priority`. 
 
+**XDP-based design**
+
+Packets from the XDP egress program attached to BPF_DEVMAP are directly sent out to the egress port. There is no equivalent of Buffering & Queueing Engine in the XDP-based design.
+
 ### RECIRCULATE
+
+**TC-based design**
 
 The purpose of `RECIRCULATE` is to transfer packet processing back from the Egress Deparser to the Ingress Parser.
 
 In order to implement `RECIRCULATE` we assume the existence of `PSA_PORT_RECIRCULATE` ports. Therefore, packet recirculation is simply performed by
 invoking `bpf_redirect()` to the `PSA_PORT_RECIRCULATE` port with `BPF_F_INGRESS` flag to enforce processing a packet by the Ingress pipeline.
+
+**XDP-based design**
+
+The RECIRCULATE path is not supported by the XDP-based design.
 
 ## Metadata
 
@@ -142,7 +220,7 @@ To sum up, the `--xdp2tc` compiler flag can take the following values:
 
 The PSA-eBPF compiler assumes that any control plane software managing eBPF programs generated by the 
 P4 compiler must be in line with the Control-plane API (a kind of contract or set of instructions that must be followed
-to make use of PSA-eBPF programs). The Control-plane API is summarized below, but we suggest using the [psabpf API](https://github.com/P4-Research/psabpf) that
+to make use of PSA-eBPF programs). The Control-plane API is summarized below, but we suggest using the [NIKSS API](https://github.com/NIKSS-vSwitch/nikss) that
 already implements the control-plane API and exposes higher level C API. 
 
 - **Pipeline initialization** - eBPF programs must be first loaded to the eBPF subsystem. The C files generated by the P4 compiler
@@ -164,6 +242,105 @@ a new element to the outer map (indexed by clone session or multicast group iden
 or `multicast_group` in a PSA program) and initialize an inner map. To add a new clone session/multicast group member,
 a con1trol plane must add new element to the inner map.
 
+## P4 match kinds
+
+The PSA-eBPF compiler currently supports the following P4 match kinds: `exact`, `lpm`, `ternary`.
+
+### exact
+
+An `exact` table is implemented using the BPF hash map. A P4 table is considered an `exact` table if all its match fields are defined as `exact`.
+Then, the PSA-eBPF compiler generates a BPF hash map instance for each P4 table instance. The hash map key as a concatenation of P4 match fields translated to eBPF representation.
+Each `apply()` operation is translated into a lookup to the BPF hash map. The value is used to determine an action and its parameters. 
+
+### lpm
+
+An `lpm` table is implemented using the BPF `LPM_TRIE` map. A P4 table is considered an `lpm` table if it contains a single `lpm` field and no `ternary` fields.
+The PSA-eBPF compiler generates a BPF `LPM_TRIE` map instance for each P4 table instance. The hash map key as a concatenation of P4 match fields translated to eBPF representation.
+Moreover, the PSA-eBPF compiler shuffles the match fields and places the `lpm` field in the last position. Each `apply()` operation is translated into a lookup to the `LPM_TRIE` map.
+A control plane should populate the `LPM_TRIE` map with entries composed of a value and prefix. 
+
+### ternary
+
+There is no built-in BPF map for ternary (wildcard) matching. Hence, the PSA-eBPF compiler leverages the Tuple Space Search (TSS) algorithm for ternary matching (refer to the [research paper](https://dl.acm.org/doi/10.1145/316194.316216) to learn more about the TSS algorithm). 
+A `ternary` table is implemented using a combination of hash and array BPF maps that realizes the TSS algorithm. A P4 table is considered a `ternary` table if it contains at least one `ternary` field (exact and lpm fields are converted to ternary fields with an appropriate mask). 
+
+**Note!** The PSA-eBPF compiler requires match keys in a ternary table to be sorted by size in descending order.
+
+The PSA-eBPF compiler generates 2 BPF maps for each ternary table instance (+ the default action map):
+- the `<TBL-NAME>_prefixes` map is a BPF hash map that stores all unique ternary masks. The ternary masks are created based on the runtime table entries that are installed by a user.
+- the `<TBL-NAME>_tuples_map` map is a BPF array map of maps that stores all "tuples". A single tuple is a BPF hash map that stores all flow rules with the same ternary mask. 
+
+Note that the `nikss-ctl table add` CLI command greatly simplifies the process of adding/removing flow rules to ternary tables. 
+
+For each `apply()` operation, the PSA-eBPF compiler generates the piece of code performing lookup to the above maps. The lookup code iterates over the `<TBL-NAME>_prefixes` map to 
+retrieve a ternary mask. Next, the lookup key (a concatenation of match keys) is masked with the obtained ternary mask and lookup to a corresponding tuple map is performed. 
+If a match is found, the best match with the highest priority is saved, and the algorithm continues to examine other tuples. If an entry with a higher priority is found,
+the best match is overwritten. The algorithm exists when there is no more tuples left.
+
+The snippet below shows the C code generated by the PSA-eBPF compiler for a lookup into a ternary table. The steps are explained below.
+
+```c
+struct ingress_tbl_ternary_1_key key = {};
+key.field0 = hdr->ipv4.dstAddr;
+key.field1 = hdr->ipv4.diffserv;
+struct ingress_tbl_ternary_1_value *value = NULL;
+struct ingress_tbl_ternary_1_key_mask head = {0};
+struct ingress_tbl_ternary_1_value_mask *val = BPF_MAP_LOOKUP_ELEM(ingress_tbl_ternary_1_prefixes, &head);
+if (val && val->has_next != 0) {
+    struct ingress_tbl_ternary_1_key_mask next = val->next_tuple_mask;
+    #pragma clang loop unroll(disable)
+    for (int i = 0; i < MAX_INGRESS_TBL_TERNARY_1_KEY_MASKS; i++) {  // (1)
+        struct ingress_tbl_ternary_1_value_mask *v = BPF_MAP_LOOKUP_ELEM(ingress_tbl_ternary_1_prefixes, &next);
+        if (!v) {
+            break;
+        }
+        // (2)
+        struct ingress_tbl_ternary_1_key k = {};
+        __u32 *chunk = ((__u32 *) &k);
+        __u32 *mask = ((__u32 *) &next);
+        #pragma clang loop unroll(disable)
+        for (int i = 0; i < sizeof(struct ingress_tbl_ternary_1_key_mask) / 4; i++) {
+            chunk[i] = ((__u32 *) &key)[i] & mask[i];
+        }
+        __u32 tuple_id = v->tuple_id;
+        next = v->next_tuple_mask;
+        // (3)
+        struct bpf_elf_map *tuple = BPF_MAP_LOOKUP_ELEM(ingress_tbl_ternary_1_tuples_map, &tuple_id);
+        if (!tuple) {
+            break;
+        }
+        
+        // (4)
+        struct ingress_tbl_ternary_1_value *tuple_entry = bpf_map_lookup_elem(tuple, &k);
+        if (!tuple_entry) {
+            if (v->has_next == 0) {
+                break;
+            }
+            continue;
+        }
+        // (5)
+        if (value == NULL || tuple_entry->priority > value->priority) {
+            value = tuple_entry;
+        }
+        if (v->has_next == 0) {
+            break;
+        }
+    }
+}
+
+// (6): go to default action if value == NULL
+```
+
+The description of annotated lines:
+1. The algorithm starts to iterate over the ternary masks map. The loop is bounded by the `MAX_INGRESS_TBL_TERNARY_1_KEY_MASKS` which is configured by `--max-ternary-masks` compiler option (defaults to 128).
+   Note that the eBPF program complexity (instruction count) depends on this constant, so some more complex P4 program may not compile if the max ternary masks value is too high (see the Limitations section).
+2. A lookup key to a next tuple map is created by masking the concatenation of match keys with the ternary masks retrieved from the `<TBL-NAME>_prefixes` map. Note that the key is masked in 4-byte chunks.
+3. A lookup to the `<TBL-NAME>_tuples_map` outer BPF map is done to find a tuple map based on the tuple ID. The lookup returns the inner BPF map, which stores all entries related to a tuple.
+4. Next, a lookup to the inner BPF map (a tuple map) is performed. The returned value stores the action ID, action params and priority. 
+5. The priority of an obtained value is compared with a current "best match" entry. An entry that is returned from the ternary classification is the one with the highest priority among different tuples.
+
+Note that the TSS algorithm has linear O(n) packet classification complexity, where "n" is a number of unique ternary masks.
+
 ## PSA externs
 
 ### ActionProfile
@@ -177,16 +354,13 @@ member reference to be returned. Next, the eBPF programs uses the obtained membe
 map to retrieve the action specification. Hence, the eBPF program does one additional lookup to the additional BPF map,
 if the ActionProfile is specified for a P4 table.
 
-**Note:** As of April 2022, support for ActionProfile extern in `psabpf-ctl` CLI/API is not implemented yet. As a workaround
-you can use `psabpf-ctl table` command for this extern.
-
 ### ActionSelector
 
 [ActionSelector](https://p4.org/p4-spec/docs/PSA-v1.1.0.html#sec-action-selector) is a table implementation similar to
 an ActionProfile, but extends its functionality with support for groups of actions. If a table entry contains a member
 reference, the ActionSelector behaves in the same way as an ActionProfile. In case of group references, the PSA-eBPF compiler
 generates additional BPF maps. One of additional BPF maps (hash map of maps) maps a group reference ID to an inner map 
-that contains a group of entries. The inner map (might be created at runtime by `psabpf-ctl`) stores a number of all
+that contains a group of entries. The inner map (might be created at runtime by `nikss-ctl`) stores a number of all
 members in a group as the first element of the inner map. The rest of entries contains members of the ActionSelector group.
 To choose a member from a group, a checksum is calculated from all `selector` match keys. Next, the obtained member from
 the group map is used to get and execute an action.
@@ -260,7 +434,7 @@ Description of marked lines:
 7. For an empty group (without members), action data is read from the `_defaultActionGroup` table.
 
 To manage the ActionSelector instance (do not confuse with a table that uses this implementation), you can use 
-`psabpf-ctl action-selector` command or C API from psabpf.
+`nikss-ctl action-selector` command or C API from NIKSS.
 
 ### Digest
 
@@ -268,7 +442,38 @@ To manage the ActionSelector instance (do not confuse with a table that uses thi
 The PSA-eBPF compiler translates each Digest instance into `BPF_MAP_TYPE_QUEUE` that implements a FIFO queue.
 If a deparser triggers the `pack()` method, an eBPF program inserts data defined for a Digest into the BPF queue map using `bpf_map_push_elem`.
 A user space application is responsible for performing periodic queries to this map to read a Digest message. It can use either
-`psabpf-ctl digest get pipe`, `psabpf_digest_get_next` from psabpf C API or `bpf_map_lookup_and_delete_elem` from `libbpf` API.
+`nikss-ctl digest get pipe`, `nikss_digest_get_next` from NIKSS C API or `bpf_map_lookup_and_delete_elem` from `libbpf` API.
+
+### Meters
+
+[Meters](https://p4.org/p4-spec/docs/PSA.html#sec-meters) are a mechanism for "marking" packets that exceed an average packet or bit rate.
+Meters implement Dual Token Bucket Algorithm with both "color aware" and "color blind" modes. The PSA-eBPF implementation uses a BPF hash map
+to store a Meter state. The current implementation in eBPF uses BPF spinlocks to make operations on Meters atomic. The `bpf_ktime_get_ns()` helper is used to get a packet arrival timestamp. 
+
+The best way to configure a Meter is to use `nikss-ctl meter` tool as in the following example:
+```bash
+# 1Mb/s -> 128 000 bytes/s (132 kbytes/s PIR, 128 kbytes/s CIR), let CBS, PBS -> 10 kbytes
+$ nikss-ctl meter update pipe "$PIPELINE" DemoIngress_meter index 0 132000:10000 128000:10000
+```
+
+`nikss-ctl` accepts PIR and CIR values in bytes/s units or packets/s. PBS and CBS in bytes or packets.
+
+#### Direct Meter
+[Direct Meter](https://p4.org/p4-spec/docs/PSA.html#sec-direct-meters) is always associated with the table entry that matched. 
+The Direct Meter state is stored within the table entry value.
+
+### value_set
+
+[value_set](https://p4.org/p4-spec/docs/P4-16-v1.2.2.html#sec-value-set) is a P4 lang construct allowing to determine next
+parser state based on runtime values. The P4-eBPF compiler generates additional hash map for each `ValueSet` instance. In
+select case expression each `select()` on `ValueSet` is translated into a lookup into the BPF hash map to check if an entry
+for a given key exists. A value of the BPF map is ignored.
+
+### Random 
+
+The [Random](https://p4.org/p4-spec/docs/PSA.html#sec-random) extern is a mean to retrieve a pseudo-random number in a specified range within a P4 program.
+The PSA-eBPF compiler uses the `bpf_get_prandom_u32()` BPF helper to get a pseudo-random number. 
+Each `read()` operation on the Random extern in a P4 program is translated into a call to the BPF helper.
 
 # Getting started
 
@@ -283,43 +488,70 @@ Follow standard steps for the P4 compiler to install the eBPF backend with the P
 The PSA implemented for eBPF backend is verified to work with the kernel version 5.8+ and `x86-64` CPU architecture.
 Moreover, make sure that the BPF filesystem is mounted under `/sys/fs/bpf`.
 
+Also, make sure you have the following packages installed:
+
+```bash
+$ sudo apt install -y clang llvm libelf-dev
+```
+
+You should also install a static `libbpf` library. Run the following commands:
+
+```bash
+$ python3 backends/ebpf/build_libbpf
+```
+
 ### Compilation
 
 You can compile a P4-16 PSA program for eBPF in a single step using:
 
 ```bash
-make -f backends/ebpf/runtime/kernel.mk BPFOBJ={output} ARGS="-DPSA_PORT_RECIRCULATE=<RECIRCULATE_PORT_IDX>" P4FILE=<P4-PROGRAM>.p4 P4C=p4c-ebpf psa
+make -f backends/ebpf/runtime/kernel.mk BPFOBJ=out.o P4FILE=<P4-PROGRAM>.p4 P4C=p4c-ebpf psa
 ```
 
 You can also perform compilation step by step:
 
 ```
 $ p4c-ebpf --arch psa --target kernel -o out.c <program>.p4
-$ clang -O2 -g -c -emit-llvm -DBTF -DPSA_PORT_RECIRCULATE=<RECIRCULATE_PORT_IDX> -c -o out.bc out.c
-$ llc -march=bpf -filetype=obj -o out.o out.bc
+$ clang -Ibackends/ebpf/runtime -Ibackends/ebpf/runtime/usr/include -O2 -g -c -emit-llvm -o out.bc out.c
+$ llc -march=bpf -mcpu=generic -filetype=obj -o out.o out.bc
 ```
+
+Note that you can use `-mcpu` flag to define the eBPF instruction set. Visit [this blog post](https://pchaigno.github.io/bpf/2021/10/20/ebpf-instruction-sets.html) to learn more about eBPF instruction sets.
 
 The above steps generate `out.o` BPF object file that can be loaded to the kernel. 
 
-### psabpf API and psabpf-ctl
+#### Optional flags
 
-We provide the `psabpf` C API and the `psabpf-ctl` CLI tool that can be used to manage eBPF programs generated by P4-eBPF compiler.
-To install the CLI tool, follow the guide in [the psabpf repository](https://github.com/P4-Research/psabpf). Use `psabpf-ctl help` to get all possible commands.
+Supposing we want to use a packet recirculation we have to specify the `PSA_PORT_RECIRCULATE` port.
+We can use `-DPSA_PORT_RECIRCULATE=<RECIRCULATE_PORT_IDX>` Clang flag via `kernel.mk`
+```bash
+make -f backends/ebpf/runtime/kernel.mk BPFOBJ=out.o ARGS="-DPSA_PORT_RECIRCULATE=<RECIRCULATE_PORT_IDX>" P4FILE=<P4-PROGRAM>.p4 P4C=p4c-ebpf psa
+```
+or directly:
+`clang ... -DPSA_PORT_RECIRCULATE=<RECIRCULATE_PORT_IDX> ...`,  
+where `RECIRCULATE_PORT_IDX` is a number of a `psa_recirc` interface (this number can be obtained from `ip -n switch link`).
 
-**Note!** Although eBPF objects can be loaded and managed by other tools (e.g. `bpftool`), we recommend using `psabpf-ctl`. Some features
-(e.g., default actions) will only work when using `psabpf-ctl`.
+By default `PSA_PORT_RECIRCULATE` is set to 0.
+
+### NIKSS API and nikss-ctl
+
+We provide the `NIKSS` C API and the `nikss-ctl` CLI tool that can be used to manage eBPF programs generated by P4-eBPF compiler.
+To install the CLI tool, follow the guide in [the NIKSS repository](https://github.com/NIKSS-vSwitch/nikss). Use `nikss-ctl help` to get all possible commands.
+
+**Note!** Although eBPF objects can be loaded and managed by other tools (e.g. `bpftool`), we recommend using `nikss-ctl`. Some features
+(e.g., default actions) will only work when using `nikss-ctl`.
 
 To load eBPF programs generated by P4-eBPF compiler run:
 
 ```bash
-psabpf-ctl pipeline load id <PIPELINE-ID> out.o
+nikss-ctl pipeline load id <PIPELINE-ID> out.o
 ```
 
 `PIPELINE-ID` is a user-defined value used to uniquely identify PSA-eBPF pipeline (we are going to support for multiple PSA-eBPF pipelines running in parallel).
 In the next step, for each interface that should be attached to PSA-eBPF run:
 
 ```bash
-psabpf-ctl add-port pipe <PIPELINE-ID> dev <INTF>
+nikss-ctl add-port pipe <PIPELINE-ID> dev <INTF>
 ```
 
 ## Running PTF tests
@@ -366,18 +598,48 @@ $ bpftool help
 
 Refer to [the bpftool guide](https://manpages.ubuntu.com/manpages/focal/man8/bpftool-prog.8.html) for more examples how to use it.
 
+# Performance optimizations
+
+## Table caching
+
+Table caching optimizes P4 table lookups by adding a cache with all `exact` matches for time-consuming lookups including:
+- table with `ternary` (and/or lpm, exact) key - skip slow TSS algorithm if the key was matched earlier.
+- table with `lpm` (and/or exact) key - skip slow `LPM_TRIE` map (especially when there is many entries) if the key was matched earlier.
+- `ActionSelector` member selection from group - skip slow checksum calculation for `selector` key if it was calculated earlier.
+
+The fast exact-match map is added in front of each instance of a table that contains a `lpm`, `ternary` or `selector` match
+key. The table cache is implemented with `BPF_MAP_TYPE_LRU_HASH`, which shares its implementation with the BPF hash map.
+The LRU map provides a good lookup performance, but lower performance on map updates due to a maintenance process. Thus,
+this optimization fits into use cases, where a value of table key changes infrequently between packets.
+
+This optimization may not improve performance in every case, so it must be explicitly enabled by compiler option. To enable
+table caching pass `--table-caching` to the compiler.
+
 # TODO / Limitations
 
 We list the known bugs/limitations below. Refer to the Roadmap section for features planned in the near future.
 
-- Larger bit fields (e.g. IPv6 addresses) may not work properly.
-- We noticed that `bpf_xdp_adjust_meta()` isn't implemented by some NIC drivers, so the PSA impl may not work 
-with some NICs. So far, we have verified the correct behavior with Intel 82599ES.
+- Fields wider than 64 bits must have size multiple of 8 bits, otherwise they may have unexpected value in the LSB byte.
+  These fields may not work with all the externs and not all the operations on them are possible.
+- We noticed that `bpf_xdp_adjust_meta()` isn't implemented by some NIC drivers, so the `meta` XDP2TC mode may not work 
+with some NICs. So far, we have verified the correct behavior with Intel 82599ES. If a NIC doesn't support the `meta` XDP2TC mode you can use `head` or `cpumap` modes.
 - `lookahead()` with bit fields (e.g., `bit<16>`) doesn't work.
 - `@atomic` operation is not supported yet.
 - `psa_idle_timeout` is not supported yet.
-- DirectCounter and DirectMeter externs are not supported for P4 tables with implementation (ActionProfile).
+- DirectCounter and DirectMeter externs are not supported for P4 tables with implementation (ActionProfile or ActionSelector).
 - The `xdp2tc=head` mode works only for packets larger than 34 bytes (the size of Ethernet and IPv4 header).
+- `value_set` only supports the exact match type and can only match on a single field in the `select()` expression.
+- The number of entries in ternary tables are limited by the number of unique ternary masks. If a P4 program uses many ternary tables and the `--max-ternary-masks` (default: 128) is set 
+  to a high value, the P4 program may not load into the BPF subsystem due to the BPF complexity issue (the 1M instruction limit exceeded). This is the limitation of the current implementation of the TSS algorithm that
+  requires iteration over BPF maps. Note that the recent kernel introduced the [bpf_for_each_map_elem()](https://lwn.net/Articles/846504/) helper that should simplify the iteration process and help to overcome the current limitation.
+- Setting a size of ternary tables does not currently work. 
+- DirectMeter cannot be used if a table defines `ternary` match fields, as [BPF spinlocks are not allowed in inner maps of map-in-map](https://patchwork.ozlabs.org/project/netdev/patch/20190124041403.2100609-2-ast@kernel.org/).
+- Table cache optimization can't be enabled on tables with DirectCounter or DirectMeter due to two different states of a
+  table entry. Tables with these externs will not have enabled cache optimization even when enabled by compiler option.
+- When table cache optimization is enabled for a table, the number of cached entries is determined as a half of table size.
+  This would be more configurable or smart during compilation.
+- Updates to tables or ActionSelector with enabled table cache optimization require cache invalidation. `nikss` library
+  will remove all cached entries if it detects cache.
 
 # Roadmap
 
@@ -385,14 +647,7 @@ with some NICs. So far, we have verified the correct behavior with Intel 82599ES
 
 All the below features are already implemented and will be contributed to the P4 compiler in subsequent pull requests.
 
-- **XDP support.** The current version of P4-eBPF compiler leverages the BPF TC hook for P4-programmable packet processing. 
-The TC subsystem enables implementation of the full PSA specification, contrary to XDP, but offers lower throughput. We're going to 
-contribute the XDP-based version of P4-eBPF that is not fully spec-compliant, but provides higher throughput.
-- **XDP2TC mode.** the generated eBPF programs use `bpf_xdp_adjust_meta()` to transfer original EtherType from XDP to TC. This mode 
-may not be supported by some NIC drivers. We will add two other modes that can be used alternatively. 
-- **ValueSet support.** The parser generated by P4-eBPF does not support ValueSet. We plan to contribute ValueSet implementation for eBPF.
-- **All PSA externs.** We plan to contribute implementation of [all PSA externs defined by the PSA specification](https://p4.org/p4-spec/docs/PSA.html#sec-psa-externs). 
-- **Ternary matching.** The PSA implementation for eBPF backend currently supports `exact` and `lpm` only. We will add support for `ternary` match kind. 
+- **Extended ValueSet support.** We plan to extend implementation to support other match kinds and multiple fields in the `select()` expression.
 
 ## Long-term goals
 
@@ -403,7 +658,7 @@ The below features are not implemented yet, but they are considered for the futu
 - **Investigate support for PNA.** We plan to investigate the PNA implementation for eBPF backend. We believe that the PNA implementation can be significantly based on the PSA implementation. 
 - **Meet parity with the latest version of Linux kernel.** The latest Linux kernel brings a few improvements/extensions to eBPF subsystem.
 We plan to incorporate them to the P4-eBPF compiler to extend functionalities or improve performance.
-- **P4Runtime support.** Currently, PSA-eBPF programs can only be managed by `psabpf API`. We plan to integrate PSA-eBPF with the P4Runtime software stack (e.g., Stratum, TDI or P4-OvS).
+- **P4Runtime support.** Currently, PSA-eBPF programs can only be managed by `NIKSS API`. We plan to integrate PSA-eBPF with the P4Runtime software stack (e.g., Stratum, TDI or P4-OvS).
 
 ## Support
 

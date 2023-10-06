@@ -31,4 +31,3 @@ parser proto(packet_in p, out Header h);
 control cproto<T>(inout T v);
 package top(cproto<_> _c);
 top(c()) main;
-

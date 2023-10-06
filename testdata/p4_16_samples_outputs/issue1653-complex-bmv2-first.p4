@@ -59,8 +59,8 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
     }
     table tns {
         key = {
-            h.bvh1.row.alt1.valid         : exact @name("h.bvh1.row.alt1.valid") ;
-            local_metadata.row0.alt0.valid: exact @name("local_metadata.row0.alt0.valid") ;
+            h.bvh1.row.alt1.valid         : exact @name("h.bvh1.row.alt1.valid");
+            local_metadata.row0.alt0.valid: exact @name("local_metadata.row0.alt0.valid");
         }
         actions = {
             do_act();
@@ -74,7 +74,7 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
         bh.row.alt1.type = EthTypes.IPv4;
         h.bvh0.row.alt1.type = bh.row.alt1.type;
         local_metadata.row0.alt0.useHash = true;
-        clone_preserving_field_list(CloneType.I2E, 32w0, 8w0);
+        clone_preserving_field_list(CloneType.I2E, 32w1, 8w0);
     }
 }
 

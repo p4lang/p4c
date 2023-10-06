@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_P4_RESETHEADERS_H_
-#define _FRONTENDS_P4_RESETHEADERS_H_
+#ifndef FRONTENDS_P4_RESETHEADERS_H_
+#define FRONTENDS_P4_RESETHEADERS_H_
 
-#include "ir/ir.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -54,24 +54,25 @@ state X {
  * statements that invalidate those headers.
  */
 class DoResetHeaders : public Transform {
-    const TypeMap* typeMap;
+    const TypeMap *typeMap;
     IR::IndexedVector<IR::StatOrDecl> insert;
 
  public:
-    static void generateResets(
-        const TypeMap* typeMap, const IR::Type* type,
-        const IR::Expression* expr, IR::Vector<IR::StatOrDecl>* resets);
-    explicit DoResetHeaders(const TypeMap* typeMap) : typeMap(typeMap) {
-        CHECK_NULL(typeMap); setName("DoResetHeaders"); }
-    const IR::Node* postorder(IR::Declaration_Variable* decl) override;
-    const IR::Node* postorder(IR::P4Control* control) override;
-    const IR::Node* postorder(IR::ParserState* state) override;
+    static void generateResets(const TypeMap *typeMap, const IR::Type *type,
+                               const IR::Expression *expr, IR::Vector<IR::StatOrDecl> *resets);
+    explicit DoResetHeaders(const TypeMap *typeMap) : typeMap(typeMap) {
+        CHECK_NULL(typeMap);
+        setName("DoResetHeaders");
+    }
+    const IR::Node *postorder(IR::Declaration_Variable *decl) override;
+    const IR::Node *postorder(IR::P4Control *control) override;
+    const IR::Node *postorder(IR::ParserState *state) override;
 };
 
 /// Invokes TypeChecking followed by DoResetHeaders.
 class ResetHeaders : public PassManager {
  public:
-    ResetHeaders(ReferenceMap* refMap, TypeMap* typeMap) {
+    ResetHeaders(ReferenceMap *refMap, TypeMap *typeMap) {
         passes.push_back(new P4::TypeChecking(refMap, typeMap));
         passes.push_back(new P4::DoResetHeaders(typeMap));
         setName("ResetHeaders");
@@ -80,4 +81,4 @@ class ResetHeaders : public PassManager {
 
 }  // namespace P4
 
-#endif /* _FRONTENDS_P4_RESETHEADERS_H_ */
+#endif /* FRONTENDS_P4_RESETHEADERS_H_ */

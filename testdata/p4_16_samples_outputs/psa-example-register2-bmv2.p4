@@ -39,9 +39,9 @@ struct headers {
 }
 
 const bit<32> NUM_PORTS = 512;
-typedef bit<80> PacketByteCountState_t;
+typedef bit<64> PacketByteCountState_t;
 action update_pkt_ip_byte_count(inout PacketByteCountState_t s, in bit<16> ip_length_bytes) {
-    s[80 - 1:48] = s[80 - 1:48] + 1;
+    s[64 - 1:48] = s[64 - 1:48] + 1;
     s[48 - 1:0] = s[48 - 1:0] + (bit<48>)ip_length_bytes;
 }
 parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
@@ -111,8 +111,5 @@ control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_met
 }
 
 IngressPipeline(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-
 EgressPipeline(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-
 PSA_Switch(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

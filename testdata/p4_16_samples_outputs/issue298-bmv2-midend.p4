@@ -2,27 +2,25 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<48> EthernetAddress;
-typedef bit<32> IPv4Address;
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv4_t {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     totalLen;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     fragOffset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdrChecksum;
-    IPv4Address srcAddr;
-    IPv4Address dstAddr;
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<8>  diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
 }
 
 header udp_t {
@@ -39,13 +37,13 @@ header myhdr_t {
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
-    @name("ipv4") 
+    @name("ipv4")
     ipv4_t     ipv4;
-    @name("udp") 
+    @name("udp")
     udp_t      udp;
-    @name("myhdr") 
+    @name("myhdr")
     myhdr_t    myhdr;
 }
 
@@ -134,7 +132,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name("egress.drop_tbl") table drop_tbl_0 {
         key = {
-            meta._local_metadata_set_drop1: exact @name("meta.ingress_metadata.set_drop") ;
+            meta._local_metadata_set_drop1: exact @name("meta.ingress_metadata.set_drop");
         }
         actions = {
             _drop();
@@ -154,8 +152,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         registerRound_0.read(meta._local_metadata_round0, hdr.myhdr.inst);
     }
     @name("ingress.round_tbl") table round_tbl_0 {
-        key = {
-        }
         actions = {
             read_round();
         }
@@ -172,4 +168,3 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 }
 
 V1Switch<headers, metadata>(TopParser(), verifyChecksum(), ingress(), egress(), computeChecksum(), TopDeparser()) main;
-

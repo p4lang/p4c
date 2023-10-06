@@ -52,8 +52,6 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         smeta.priority = smeta_0.priority;
     }
     @name("IngressI.forward") table forward_0 {
-        key = {
-        }
         actions = {
             drop_0();
         }
@@ -85,4 +83,3 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

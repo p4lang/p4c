@@ -112,15 +112,17 @@ table tbl2 {
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
 	mov m.Ingress_ap_member_id 0x0
 	table tbl
+	jmpnh LABEL_END
 	table ap
-	mov m.Ingress_ap_member_id 0x0
+	LABEL_END :	mov m.Ingress_ap_member_id 0x0
 	table tbl2
+	jmpnh LABEL_END_0
 	table ap
-	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	LABEL_END_0 :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP :	drop

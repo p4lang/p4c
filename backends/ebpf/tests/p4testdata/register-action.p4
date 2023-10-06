@@ -77,6 +77,8 @@ control ingress(inout headers hdr,
     Register<bit<32>, PortId_t>(10) reg;
 
     action do_forward(PortId_t egress_port) {
+        // Values used there are arbitrary chosen just for PTF tests
+        // See PTF test description
         bit<32> tmp;
         tmp = reg.read(egress_port);
         if (tmp < 5) {
@@ -94,7 +96,7 @@ control ingress(inout headers hdr,
             istd.ingress_port : exact;
         }
         actions = { do_forward; NoAction; }
-        default_action = do_forward((PortId_t) 6);
+        default_action = do_forward((PortId_t) PORT2);
         size = 100;
     }
 
@@ -111,16 +113,7 @@ control egress(inout headers hdr,
     apply { }
 }
 
-control CommonDeparserImpl(packet_out packet,
-                           inout headers hdr)
-{
-    apply {
-        packet.emit(hdr.ethernet);
-        packet.emit(hdr.ipv4);
-    }
-}
-
-control IngressDeparserImpl(packet_out buffer,
+control IngressDeparserImpl(packet_out packet,
                             out empty_t clone_i2e_meta,
                             out empty_t resubmit_meta,
                             out empty_t normal_meta,
@@ -128,13 +121,13 @@ control IngressDeparserImpl(packet_out buffer,
                             in metadata meta,
                             in psa_ingress_output_metadata_t istd)
 {
-    CommonDeparserImpl() cp;
     apply {
-        cp.apply(buffer, hdr);
+        packet.emit(hdr.ethernet);
+        packet.emit(hdr.ipv4);
     }
 }
 
-control EgressDeparserImpl(packet_out buffer,
+control EgressDeparserImpl(packet_out packet,
                            out empty_t clone_e2e_meta,
                            out empty_t recirculate_meta,
                            inout headers hdr,
@@ -142,9 +135,9 @@ control EgressDeparserImpl(packet_out buffer,
                            in psa_egress_output_metadata_t istd,
                            in psa_egress_deparser_input_metadata_t edstd)
 {
-    CommonDeparserImpl() cp;
     apply {
-        cp.apply(buffer, hdr);
+        packet.emit(hdr.ethernet);
+        packet.emit(hdr.ipv4);
     }
 }
 

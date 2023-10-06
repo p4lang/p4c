@@ -28,16 +28,16 @@ header h2_t {
 }
 
 struct metadata {
-    @name(".m") 
+    @name(".m")
     metadata_t m;
 }
 
 struct headers {
-    @name(".h1") 
+    @name(".h1")
     h1_t    h1;
-    @name(".h3") 
+    @name(".h3")
     h3_t    h3;
-    @name(".h2") 
+    @name(".h2")
     h2_t[5] h2;
 }
 
@@ -1217,13 +1217,13 @@ control op3_do(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".op1_a_record_op") action op1_a_record_op() {
-        meta.m.op = hdr.h1.op1;
+        meta.m.op = (bit<8>)hdr.h1.op1;
     }
     @name(".op2_a_record_op") action op2_a_record_op() {
-        meta.m.op = hdr.h1.op2;
+        meta.m.op = (bit<8>)hdr.h1.op2;
     }
     @name(".op3_a_record_op") action op3_a_record_op() {
-        meta.m.op = hdr.h1.op3;
+        meta.m.op = (bit<8>)hdr.h1.op3;
     }
     @name(".a_clear_h2_valid") action a_clear_h2_valid() {
         hdr.h1.h2_valid_bits = 8w0;
@@ -1345,4 +1345,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

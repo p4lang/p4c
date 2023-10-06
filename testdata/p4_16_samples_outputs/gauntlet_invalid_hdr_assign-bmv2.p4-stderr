@@ -1,0 +1,4 @@
+[--Wwarn=uninitialized_use] warning: tmp_0 may not be completely initialized
+gauntlet_invalid_hdr_assign-bmv2.p4(39): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header h.h
+        h.eth_hdr.eth_type = (bit<16>)h.h.a;
+                                      ^^^

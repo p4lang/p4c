@@ -14,14 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <p4/enumInstance.h>
 #include "ubpfTable.h"
-#include "ubpfType.h"
-#include "ubpfParser.h"
-#include "ir/ir.h"
+
 #include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/enumInstance.h"
 #include "frontends/p4/methodInstance.h"
+#include "ir/ir.h"
 #include "ubpfControl.h"
+#include "ubpfParser.h"
+#include "ubpfType.h"
 
 namespace UBPF {
 
@@ -34,13 +35,15 @@ class UbpfActionTranslationVisitor : public EBPF::CodeGenInspector {
     cstring valueName;
 
  public:
-    UbpfActionTranslationVisitor(cstring valueName, const UBPFProgram *program) :
-            EBPF::CodeGenInspector(program->refMap, program->typeMap), program(program),
-            action(nullptr), valueName(valueName) {
+    UbpfActionTranslationVisitor(cstring valueName, const UBPFProgram *program)
+        : EBPF::CodeGenInspector(program->refMap, program->typeMap),
+          program(program),
+          action(nullptr),
+          valueName(valueName) {
         CHECK_NULL(program);
     }
 
-    bool preorder(const IR::Member* expression) override {
+    bool preorder(const IR::Member *expression) override {
         cstring name = "";
         if (expression->expr->is<IR::PathExpression>()) {
             name = expression->expr->to<IR::PathExpression>()->path->name.name;
@@ -79,8 +82,7 @@ class UbpfActionTranslationVisitor : public EBPF::CodeGenInspector {
     }
 
     bool preorder(const IR::MethodCallExpression *expression) override {
-        auto mi = P4::MethodInstance::resolve(expression, refMap,
-                                              typeMap);
+        auto mi = P4::MethodInstance::resolve(expression, refMap, typeMap);
         auto ef = mi->to<P4::ExternFunction>();
         if (ef != nullptr) {
             if (ef->method->name.name == program->model.drop.name) {
@@ -89,8 +91,7 @@ class UbpfActionTranslationVisitor : public EBPF::CodeGenInspector {
             } else if (ef->method->name.name == program->model.pass.name) {
                 builder->appendFormat("%s = true", program->control->passVariable);
                 return false;
-            } else if (ef->method->name.name ==
-                       program->model.ubpf_time_get_ns.name) {
+            } else if (ef->method->name.name == program->model.ubpf_time_get_ns.name) {
                 builder->emitIndent();
                 builder->append(program->model.ubpf_time_get_ns.name + "()");
                 return false;
@@ -122,9 +123,7 @@ class UbpfActionTranslationVisitor : public EBPF::CodeGenInspector {
         }
     }
 
-    void convertAction() {
-        convertActionBody(&action->body->components);
-    }
+    void convertAction() { convertActionBody(&action->body->components); }
 
     bool preorder(const IR::P4Action *act) override {
         action = act;
@@ -144,7 +143,7 @@ void UBPFTableBase::emitInstance(EBPF::CodeBuilder *builder, EBPF::TableKind tab
         auto scalar = new UBPFScalarType(tb);
         keyTypeStr = scalar->getAsString();
     } else if (keyType->is<IR::Type_StructLike>()) {
-        keyTypeStr = cstring("struct ") + keyTypeName.c_str();;
+        keyTypeStr = cstring("struct ") + keyTypeName.c_str();
     }
     // Key type is not null, but we didn't handle it
     BUG_CHECK(!keyTypeStr.isNullOrEmpty(), "Key type %1% not supported", keyType->toString());
@@ -160,15 +159,12 @@ void UBPFTableBase::emitInstance(EBPF::CodeBuilder *builder, EBPF::TableKind tab
     // Value type is not null, but we didn't handle it
     BUG_CHECK(!valueTypeStr.isNullOrEmpty(), "Value type %1% not supported", valueType->toString());
 
-    builder->target->emitTableDecl(builder, dataMapName, tableKind,
-                                   keyTypeStr, valueTypeStr, size);
+    builder->target->emitTableDecl(builder, dataMapName, tableKind, keyTypeStr, valueTypeStr, size);
 }
 
-UBPFTable::UBPFTable(const UBPFProgram *program,
-                     const IR::TableBlock *table,
-                     EBPF::CodeGenInspector *codeGen) :
-        UBPFTableBase(program, EBPFObject::externalName(table->container),
-                      codeGen), table(table) {
+UBPFTable::UBPFTable(const UBPFProgram *program, const IR::TableBlock *table,
+                     EBPF::CodeGenInspector *codeGen)
+    : UBPFTableBase(program, EBPFObject::externalName(table->container), codeGen), table(table) {
     cstring base = instanceName + "_defaultAction";
     defaultActionMapName = program->refMap->newName(base);
 
@@ -191,25 +187,24 @@ UBPFTable::UBPFTable(const UBPFProgram *program,
 void UBPFTable::emitInstance(EBPF::CodeBuilder *builder) {
     UBPFTableBase::emitInstance(builder, tableKind);
     builder->target->emitTableDecl(builder, defaultActionMapName, EBPF::TableArray,
-                                   program->arrayIndexType,
-                                   cstring("struct ") + valueTypeName, 1);
+                                   program->arrayIndexType, cstring("struct ") + valueTypeName, 1);
 }
 
 void UBPFTable::setTableKind() {
+    // Set table kind to HASH by default
+    this->tableKind = EBPF::TableHash;
     if (keyGenerator == nullptr) {
         return;
     }
-    // set table kind to HASH by default
-    EBPF::TableKind tableKind = EBPF::TableHash;
 
+    EBPF::TableKind tableKind = EBPF::TableHash;
     // If any key field is LPM we will generate an LPM table
     for (auto it : keyGenerator->keyElements) {
         auto mtdecl = program->refMap->getDeclaration(it->matchType->path, true);
         auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
-        if (matchType->name.name == P4::P4CoreLibrary::instance.lpmMatch.name) {
+        if (matchType->name.name == P4::P4CoreLibrary::instance().lpmMatch.name) {
             if (tableKind == EBPF::TableLPMTrie) {
-                ::error(ErrorType::ERR_UNSUPPORTED,
-                        "only one LPM field allowed", it->matchType);
+                ::error(ErrorType::ERR_UNSUPPORTED, "only one LPM field allowed", it->matchType);
                 return;
             }
             tableKind = EBPF::TableLPMTrie;
@@ -224,8 +219,7 @@ void UBPFTable::setTableSize(const IR::TableBlock *table) {
                               // For instance, 2^17 causes error while loading program.
 
     auto sz = table->container->getSizeProperty();
-    if (sz == nullptr)
-        return;
+    if (sz == nullptr) return;
 
     auto pConstant = sz->to<IR::Constant>();
     if (pConstant->asInt() <= 0) {
@@ -235,8 +229,8 @@ void UBPFTable::setTableSize(const IR::TableBlock *table) {
 
     this->size = pConstant->asInt();
     if (this->size > UINT16_MAX) {
-        ::error(ErrorType::ERR_UNSUPPORTED, "size too large. Using default value (%2%).",
-                pConstant, UINT16_MAX);
+        ::error(ErrorType::ERR_UNSUPPORTED, "size too large. Using default value (%2%).", pConstant,
+                UINT16_MAX);
         return;
     }
 }
@@ -252,7 +246,6 @@ void UBPFTable::emitKeyType(EBPF::CodeBuilder *builder) {
     if (keyGenerator != nullptr) {
         // Use this to order elements by size
         std::multimap<size_t, const IR::KeyElement *> ordered;
-        unsigned fieldNumber = 0;
         for (auto c : keyGenerator->keyElements) {
             auto type = program->typeMap->getType(c->expression);
             auto ebpfType = UBPFTypeFactory::instance->create(type);
@@ -265,7 +258,6 @@ void UBPFTable::emitKeyType(EBPF::CodeBuilder *builder) {
             ordered.emplace(width, c);
             keyTypes.emplace(c, ebpfType);
             keyFieldNames.emplace(c, fieldName);
-            fieldNumber++;
         }
 
         // Emit key in decreasing order size - this way there will be no gaps
@@ -286,13 +278,12 @@ void UBPFTable::emitKeyType(EBPF::CodeBuilder *builder) {
             builder->append(" */");
             builder->newline();
 
-            auto mtdecl = program->refMap->getDeclaration(
-                    c->matchType->path, true);
+            auto mtdecl = program->refMap->getDeclaration(c->matchType->path, true);
             auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
-            if (matchType->name.name != P4::P4CoreLibrary::instance.exactMatch.name &&
-                matchType->name.name != P4::P4CoreLibrary::instance.lpmMatch.name)
-                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                        "Match of type %1% not supported", c->matchType);
+            if (matchType->name.name != P4::P4CoreLibrary::instance().exactMatch.name &&
+                matchType->name.name != P4::P4CoreLibrary::instance().lpmMatch.name)
+                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Match of type %1% not supported",
+                        c->matchType);
             key_idx++;
         }
     }
@@ -301,8 +292,7 @@ void UBPFTable::emitKeyType(EBPF::CodeBuilder *builder) {
     builder->endOfStatement(true);
 }
 
-void UBPFTable::emitActionArguments(EBPF::CodeBuilder *builder,
-                                    const IR::P4Action *action,
+void UBPFTable::emitActionArguments(EBPF::CodeBuilder *builder, const IR::P4Action *action,
                                     cstring name) {
     builder->emitIndent();
     builder->append("struct ");
@@ -322,7 +312,7 @@ void UBPFTable::emitActionArguments(EBPF::CodeBuilder *builder,
 }
 
 cstring UBPFTable::generateActionName(const IR::P4Action *action) {
-    if (action->getName().originalName == P4::P4CoreLibrary::instance.noAction.name) {
+    if (action->getName().originalName == P4::P4CoreLibrary::instance().noAction.name) {
         return this->noActionName;
     } else {
         return EBPF::EBPFObject::externalName(action);
@@ -374,7 +364,6 @@ void UBPFTable::emitValueType(EBPF::CodeBuilder *builder) {
     builder->spc();
     builder->appendLine("u;");
 
-
     builder->blockEnd(false);
     builder->endOfStatement(true);
 }
@@ -385,8 +374,7 @@ void UBPFTable::emitTypes(EBPF::CodeBuilder *builder) {
 }
 
 void UBPFTable::emitKey(EBPF::CodeBuilder *builder, cstring keyName) {
-    if (keyGenerator == nullptr)
-        return;
+    if (keyGenerator == nullptr) return;
     for (auto c : keyGenerator->keyElements) {
         auto ebpfType = ::get(keyTypes, c);
         cstring fieldName = ::get(keyFieldNames, c);
@@ -402,13 +390,11 @@ void UBPFTable::emitKey(EBPF::CodeBuilder *builder, cstring keyName) {
 
         builder->emitIndent();
         if (memcpy) {
-            builder->appendFormat("memcpy(&%s.%s, &", keyName.c_str(),
-                                  fieldName.c_str());
+            builder->appendFormat("memcpy(&%s.%s, &", keyName.c_str(), fieldName.c_str());
             codeGen->visit(c->expression);
             builder->appendFormat(", %d)", scalar->bytesRequired());
         } else {
-            builder->appendFormat("%s.%s = ", keyName.c_str(),
-                                  fieldName.c_str());
+            builder->appendFormat("%s.%s = ", keyName.c_str(), fieldName.c_str());
             codeGen->visit(c->expression);
         }
         builder->endOfStatement(true);
@@ -443,18 +429,17 @@ void UBPFTable::emitAction(EBPF::CodeBuilder *builder, cstring valueName) {
     }
 
     builder->emitIndent();
-    builder->appendFormat("default: return %s",
-                          builder->target->abortReturnCode().c_str());
+    builder->appendFormat("default: return %s", builder->target->abortReturnCode().c_str());
     builder->endOfStatement(true);
 
     builder->blockEnd(true);
 }
 
 void UBPFTable::emitInitializer(EBPF::CodeBuilder *builder) {
-    const IR::P4Table* t = table->container;
-    const IR::Expression* defaultAction = t->getDefaultAction();
-    BUG_CHECK(defaultAction->is<IR::MethodCallExpression>(),
-              "%1%: expected an action call", defaultAction);
+    const IR::P4Table *t = table->container;
+    const IR::Expression *defaultAction = t->getDefaultAction();
+    BUG_CHECK(defaultAction->is<IR::MethodCallExpression>(), "%1%: expected an action call",
+              defaultAction);
     auto mce = defaultAction->to<IR::MethodCallExpression>();
     auto mi = P4::MethodInstance::resolve(mce, program->refMap, program->typeMap);
 
@@ -465,7 +450,8 @@ void UBPFTable::emitInitializer(EBPF::CodeBuilder *builder) {
     if (defact->isConstant) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                 "%1%: uBPF target does not allow 'const default_action'. "
-                "Use `default_action` instead.", defact);
+                "Use `default_action` instead.",
+                defact);
     }
     auto ac = mi->to<P4::ActionCall>();
     BUG_CHECK(ac != nullptr, "%1%: expected an action call", mce);
@@ -498,14 +484,13 @@ void UBPFTable::emitInitializer(EBPF::CodeBuilder *builder) {
 
     builder->emitIndent();
     builder->appendFormat("INIT_UBPF_TABLE(\"%s\", sizeof(%s), sizeof(%s));", defaultTable,
-            program->zeroKey.c_str(), value);
+                          program->zeroKey.c_str(), value);
     builder->newline();
 
     builder->emitIndent();
     builder->target->emitTableUpdate(builder, defaultTable, program->zeroKey, "&" + value);
     builder->endOfStatement(true);
     builder->blockEnd(true);
-
 
     // Check if there are const entries.
     auto entries = t->getEntries();
@@ -516,6 +501,5 @@ void UBPFTable::emitInitializer(EBPF::CodeBuilder *builder) {
                 entries);
     }
 }
-
 
 }  // namespace UBPF

@@ -54,8 +54,8 @@ control MyIC(inout headers a, inout empty_t bc,
 
     apply {
         switch(tbl.apply().action_run) {
-            a1: { send_to_port(ostd, (PortId_t) 5); }
-            a2: { send_to_port(ostd, (PortId_t) 6); }
+            a1: { send_to_port(ostd, (PortId_t) PORT1); }
+            a2: { send_to_port(ostd, (PortId_t) PORT2); }
             default: {}
         }
     }

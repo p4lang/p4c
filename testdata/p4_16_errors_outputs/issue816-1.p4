@@ -29,4 +29,3 @@ control MyC3() {
 }
 
 S(MyC3()) main;
-

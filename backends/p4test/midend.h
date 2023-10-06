@@ -14,27 +14,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_P4TEST_MIDEND_H_
-#define _BACKENDS_P4TEST_MIDEND_H_
+#ifndef BACKENDS_P4TEST_MIDEND_H_
+#define BACKENDS_P4TEST_MIDEND_H_
 
-#include "ir/ir.h"
 #include "frontends/common/options.h"
 #include "frontends/p4/evaluator/evaluator.h"
+#include "ir/ir.h"
 
 namespace P4Test {
 
 class MidEnd : public PassManager {
- public:
-    P4::ReferenceMap    refMap;
-    P4::TypeMap         typeMap;
-    IR::ToplevelBlock   *toplevel = nullptr;
+    std::vector<DebugHook> hooks;
 
-    explicit MidEnd(CompilerOptions& options, std::ostream* outStream = nullptr);
-    IR::ToplevelBlock* process(const IR::P4Program *&program) {
+ public:
+    P4::ReferenceMap refMap;
+    P4::TypeMap typeMap;
+    IR::ToplevelBlock *toplevel = nullptr;
+
+    void addDebugHook(DebugHook hook) { hooks.push_back(hook); }
+    explicit MidEnd(CompilerOptions &options, std::ostream *outStream = nullptr);
+    IR::ToplevelBlock *process(const IR::P4Program *&program) {
+        addDebugHooks(hooks, true);
         program = program->apply(*this);
-        return toplevel; }
+        return toplevel;
+    }
 };
 
-}   // namespace P4Test
+}  // namespace P4Test
 
-#endif /* _BACKENDS_P4TEST_MIDEND_H_ */
+#endif /* BACKENDS_P4TEST_MIDEND_H_ */

@@ -31,6 +31,10 @@ struct tbl_set_group_id_arg_t {
 	bit<32> group_id
 }
 
+struct tbl_set_member_id_arg_t {
+	bit<32> member_id
+}
+
 struct main_metadata_t {
 	bit<32> pna_main_input_metadata_input_port
 	bit<16> local_metadata_data
@@ -43,6 +47,7 @@ metadata instanceof main_metadata_t
 header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
 
+regarray direction size 0x100 initval 0
 action NoAction args none {
 	return
 }
@@ -62,12 +67,18 @@ action tbl_set_group_id args instanceof tbl_set_group_id_arg_t {
 	return
 }
 
+action tbl_set_member_id args instanceof tbl_set_member_id_arg_t {
+	mov m.MainControlT_as_member_id t.member_id
+	return
+}
+
 table tbl {
 	key {
 		h.ethernet.srcAddr exact
 	}
 	actions {
 		tbl_set_group_id
+		tbl_set_member_id
 		NoAction
 	}
 	default_action NoAction args none 
@@ -95,8 +106,8 @@ selector as_sel {
 		m.local_metadata_data
 	}
 	member_id m.MainControlT_as_member_id
-	n_groups_max 1024
-	n_members_per_group_max 65536
+	n_groups_max 0x400
+	n_members_per_group_max 0x10000
 }
 
 apply {
@@ -106,11 +117,13 @@ apply {
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	MAINPARSERIMPL_ACCEPT :	mov m.MainControlT_as_member_id 0x0
-	mov m.MainControlT_as_group_id 0x0
+	mov m.MainControlT_as_group_id 0xFFFFFFFF
 	table tbl
+	jmpnh LABEL_END
+	jmpeq LABEL_END_0 m.MainControlT_as_group_id 0xFFFFFFFF
 	table as_sel
-	table as
-	emit h.ethernet
+	LABEL_END_0 :	table as
+	LABEL_END :	emit h.ethernet
 	emit h.ipv4
 	tx m.pna_main_output_metadata_output_port
 }

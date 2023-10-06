@@ -3,7 +3,7 @@
 #include <v1model.p4>
 
 typedef bit<48> EthD_t;
-@p4runtime_translation("p4.org/psa/v1/EthT_t" , 48) type bit<48> EthT_t;
+@p4runtime_translation("p4.org/psa/v1/EthT_t" , 48) @custom_annotation_0 @custom_annotation_1("my annon") type bit<48> EthT_t;
 typedef bit<8> CustomD_t;
 type bit<8> CustomT_t;
 typedef CustomD_t CustomDD_t;
@@ -90,19 +90,19 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
     }
     @name("ingress.custom_table") table custom_table_0 {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
-            hdr.custom.e        : exact @name("hdr.custom.e") ;
-            hdr.custom.ed       : exact @name("hdr.custom.ed") ;
-            hdr.custom.et       : exact @name("hdr.custom.et") ;
-            hdr.custom.edd      : exact @name("hdr.custom.edd") ;
-            hdr.custom.eddt     : exact @name("hdr.custom.eddt") ;
-            hdr.custom.edtd     : exact @name("hdr.custom.edtd") ;
-            hdr.custom.edtt     : exact @name("hdr.custom.edtt") ;
-            hdr.custom.etdd     : exact @name("hdr.custom.etdd") ;
-            hdr.custom.etdt     : exact @name("hdr.custom.etdt") ;
-            hdr.custom.ettd     : exact @name("hdr.custom.ettd") ;
-            hdr.custom.ettt     : exact @name("hdr.custom.ettt") ;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
+            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr");
+            hdr.custom.e        : exact @name("hdr.custom.e");
+            hdr.custom.ed       : exact @name("hdr.custom.ed");
+            hdr.custom.et       : exact @name("hdr.custom.et");
+            hdr.custom.edd      : exact @name("hdr.custom.edd");
+            hdr.custom.eddt     : exact @name("hdr.custom.eddt");
+            hdr.custom.edtd     : exact @name("hdr.custom.edtd");
+            hdr.custom.edtt     : exact @name("hdr.custom.edtt");
+            hdr.custom.etdd     : exact @name("hdr.custom.etdd");
+            hdr.custom.etdt     : exact @name("hdr.custom.etdt");
+            hdr.custom.ettd     : exact @name("hdr.custom.ettd");
+            hdr.custom.ettt     : exact @name("hdr.custom.ettt");
         }
         actions = {
             set_output();
@@ -143,4 +143,3 @@ control computeChecksum(inout headers_t hdr, inout meta_t meta) {
 }
 
 V1Switch<headers_t, meta_t>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

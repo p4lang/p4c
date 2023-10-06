@@ -14,15 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4C_UBPFHELPERS_H
-#define P4C_UBPFHELPERS_H
+#ifndef BACKENDS_UBPF_UBPFHELPERS_H_
+#define BACKENDS_UBPF_UBPFHELPERS_H_
 
 namespace UBPF {
 
-    #ifndef UNUSED
-    #   define UNUSED __attribute__((__unused__))
-    #endif
+#ifndef UNUSED
+#define UNUSED __attribute__((__unused__))
+#endif
 
-}
+}  // namespace UBPF
 
-#endif //P4C_UBPFHELPERS_H
+#endif  // BACKENDS_UBPF_UBPFHELPERS_H_

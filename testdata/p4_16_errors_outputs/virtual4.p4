@@ -1,4 +1,5 @@
 extern Virtual {
+    Virtual();
     abstract bit<16> f(in bit<16> ix);
 }
 
@@ -16,4 +17,3 @@ control c(inout bit<16> p) {
 control ctr(inout bit<16> x);
 package top(ctr ctrl);
 top(c()) main;
-

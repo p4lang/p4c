@@ -1,0 +1,69 @@
+init-entries-bmv2.p4(81): [--Wwarn=duplicate_priorities] warning: Entry and Entry have the same priority 40
+            const (0x04, 0x0210 &&& 0x02F0) : a_params(4); // priority=40
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+init-entries-bmv2.p4(82)
+                  priority=40: (0x04, 0x0010 &&& 0x02F0) : a_params(5);
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+init-entries-bmv2.p4(124): [--Wwarn=entries_out_of_priority_order] warning: Entry (priority 41) and Entry (priority 40) have priorities out of order
+            const (0x04, 0x0210 &&& 0x02F0) : a_params(4); // priority=41
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+init-entries-bmv2.p4(125)
+                  priority=40: (0x04, 0x0010 &&& 0x02F0) : a_params(5);
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+init-entries-bmv2.p4(167): [--Wwarn=duplicate_priorities] warning: Entry and Entry have the same priority 13
+                               (0x03, 0x1000 &&& 0xF000) : a_params(3); // priority=13
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+init-entries-bmv2.p4(169)
+                  priority=13: (0x04, 0x0010 &&& 0x02F0) : a_params(5);
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+init-entries-bmv2.p4(168): [--Wwarn=entries_out_of_priority_order] warning: Entry (priority 14) and Entry (priority 13) have priorities out of order
+            const (0x04, 0x0210 &&& 0x02F0) : a_params(4); // priority=14
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+init-entries-bmv2.p4(169)
+                  priority=13: (0x04, 0x0010 &&& 0x02F0) : a_params(5);
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+init-entries-bmv2.p4(168): [--Wwarn=duplicate_priorities] warning: Entry and Entry have the same priority 14
+            const (0x04, 0x0210 &&& 0x02F0) : a_params(4); // priority=14
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+init-entries-bmv2.p4(170)
+                               (0x06, _ ) : a_params(6); // priority=14
+                               ^^^^^^^^^^^^^^^^^^^^^^^^
+init-entries-bmv2.p4(207): [--Wwarn=duplicate_priorities] warning: Entry and Entry have the same priority 2001
+            const priority=2001: (0x01, 0x1111 &&& 0xF ) : a_params(1);
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+init-entries-bmv2.p4(208)
+                  priority=2001: (0x02, 0x1181 ) : a_params(2);
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+init-entries-bmv2.p4(253): [--Wwarn=entries_out_of_priority_order] warning: Entry (priority 700) and Entry (priority 901) have priorities out of order
+                           (0x04, 0x0210 &&& 0x02F0) : a_params(4); // prio 700
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+init-entries-bmv2.p4(254)
+            priority= 901: (0x04, 0x0010 &&& 0x02F0) : a_params(5);
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+init-entries-bmv2.p4(78): [--Wwarn=mismatch] warning: P4Runtime requires that Ternary matches have masked-off bits set to 0, updating value 16w0x1111 to conform to the P4Runtime specification
+            const priority=10: (0x01, 0x1111 &&& 0xF ) : a_params(1);
+                                      ^^^^^^
+init-entries-bmv2.p4(100): [--Wwarn=mismatch] warning: P4Runtime requires that Ternary matches have masked-off bits set to 0, updating value 16w0x1111 to conform to the P4Runtime specification
+            const priority=10: (0x01, 0x1111 &&& 0xF ) : a_params(1);
+                                      ^^^^^^
+init-entries-bmv2.p4(121): [--Wwarn=mismatch] warning: P4Runtime requires that Ternary matches have masked-off bits set to 0, updating value 16w0x1111 to conform to the P4Runtime specification
+            const priority=11: (0x01, 0x1111 &&& 0xF ) : a_params(1);
+                                      ^^^^^^
+init-entries-bmv2.p4(144): [--Wwarn=mismatch] warning: P4Runtime requires that Ternary matches have masked-off bits set to 0, updating value 16w0x1111 to conform to the P4Runtime specification
+            const priority=11: (0x01, 0x1111 &&& 0xF ) : a_params(1);
+                                      ^^^^^^
+init-entries-bmv2.p4(165): [--Wwarn=mismatch] warning: P4Runtime requires that Ternary matches have masked-off bits set to 0, updating value 16w0x1111 to conform to the P4Runtime specification
+            const priority=11: (0x01, 0x1111 &&& 0xF ) : a_params(1);
+                                      ^^^^^^
+init-entries-bmv2.p4(187): [--Wwarn=mismatch] warning: P4Runtime requires that Ternary matches have masked-off bits set to 0, updating value 16w0x1111 to conform to the P4Runtime specification
+            const priority=11: (0x01, 0x1111 &&& 0xF ) : a_params(1);
+                                      ^^^^^^
+init-entries-bmv2.p4(207): [--Wwarn=mismatch] warning: P4Runtime requires that Ternary matches have masked-off bits set to 0, updating value 16w0x1111 to conform to the P4Runtime specification
+            const priority=2001: (0x01, 0x1111 &&& 0xF ) : a_params(1);
+                                        ^^^^^^
+init-entries-bmv2.p4(228): [--Wwarn=mismatch] warning: P4Runtime requires that Ternary matches have masked-off bits set to 0, updating value 16w0x1111 to conform to the P4Runtime specification
+            const priority=2001: (0x01, 0x1111 &&& 0xF ) : a_params(1);
+                                        ^^^^^^
+init-entries-bmv2.p4(250): [--Wwarn=mismatch] warning: P4Runtime requires that Ternary matches have masked-off bits set to 0, updating value 16w0x1111 to conform to the P4Runtime specification
+            priority=1000: (0x01, 0x1111 &&& 0xF ) : a_params(1);
+                                  ^^^^^^

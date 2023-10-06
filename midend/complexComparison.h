@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_COMPLEXCOMPARISON_H_
-#define _MIDEND_COMPLEXCOMPARISON_H_
+#ifndef MIDEND_COMPLEXCOMPARISON_H_
+#define MIDEND_COMPLEXCOMPARISON_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -28,35 +28,35 @@ namespace P4 {
  */
 class RemoveComplexComparisons : public Transform {
  protected:
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
 
     /// Expands left == right into sub-field comparisons
-    const IR::Expression* explode(
-        Util::SourceInfo srcInfo,
-        const IR::Type* leftType, const IR::Expression* left,
-        const IR::Type* rightType, const IR::Expression* right);
+    const IR::Expression *explode(Util::SourceInfo srcInfo, const IR::Type *leftType,
+                                  const IR::Expression *left, const IR::Type *rightType,
+                                  const IR::Expression *right);
 
  public:
-    RemoveComplexComparisons(ReferenceMap* refMap, TypeMap* typeMap):
-            refMap(refMap), typeMap(typeMap)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("RemoveComplexComparisons"); }
-    const IR::Node* postorder(IR::Operation_Binary* expression) override;
+    RemoveComplexComparisons(ReferenceMap *refMap, TypeMap *typeMap)
+        : refMap(refMap), typeMap(typeMap) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
+        setName("RemoveComplexComparisons");
+    }
+    const IR::Node *postorder(IR::Operation_Binary *expression) override;
 };
 
 class SimplifyComparisons final : public PassManager {
  public:
-    SimplifyComparisons(ReferenceMap* refMap, TypeMap* typeMap,
-            TypeChecking* typeChecking = nullptr) {
-        if (!typeChecking)
-            typeChecking = new TypeChecking(refMap, typeMap);
+    SimplifyComparisons(ReferenceMap *refMap, TypeMap *typeMap,
+                        TypeChecking *typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new RemoveComplexComparisons(refMap, typeMap));
         setName("SimplifyComparisons");
     }
 };
 
-
 }  // namespace P4
 
-#endif /* _MIDEND_COMPLEXCOMPARISON_H_ */
+#endif /* MIDEND_COMPLEXCOMPARISON_H_ */

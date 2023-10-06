@@ -15,12 +15,12 @@ header hdr0_t {
 }
 
 struct metadata {
-    @name(".meta") 
+    @name(".meta")
     meta_t meta;
 }
 
 struct headers {
-    @name(".hdr0") 
+    @name(".hdr0")
     hdr0_t hdr0;
 }
 
@@ -47,10 +47,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.meta.y = 16w2;
     }
     @name(".action_1") action action_1(bit<8> p) {
-        meta.meta.z = meta.meta.y + meta.meta.x;
+        meta.meta.z = (bit<16>)meta.meta.y + (bit<16>)meta.meta.x;
     }
     @name(".action_2") action action_2(bit<8> p) {
-        hdr.hdr0.a = meta.meta.z;
+        hdr.hdr0.a = (bit<16>)meta.meta.z;
     }
     @name(".t0") table t0 {
         actions = {
@@ -126,4 +126,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

@@ -36,8 +36,6 @@ control c3(inout headers hdr, inout metadata meta, inout standard_metadata_t std
         hdr.h.x = 8w0;
     }
     @name("c3.t") table t_0 {
-        key = {
-        }
         actions = {
             a();
             @defaultonly NoAction_1();
@@ -60,4 +58,3 @@ control c5(packet_out pkt, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(p(), c1(), c2(), c3(), c4(), c5()) main;
-

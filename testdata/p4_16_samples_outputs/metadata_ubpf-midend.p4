@@ -1,11 +1,10 @@
 #include <core.p4>
 #include <ubpf_model.p4>
 
-@ethernetaddress typedef bit<48> EthernetAddress;
 header Ethernet_h {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 struct Headers_t {
@@ -33,7 +32,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     }
     @name("pipe.tbl") table tbl_0 {
         key = {
-            headers.ethernet.etherType: exact @name("headers.ethernet.etherType") ;
+            headers.ethernet.etherType: exact @name("headers.ethernet.etherType");
         }
         actions = {
             fill_metadata();
@@ -46,7 +45,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     }
     @name("pipe.meta_based_tbl") table meta_based_tbl_0 {
         key = {
-            meta.etherType: exact @name("meta.etherType") ;
+            meta.etherType: exact @name("meta.etherType");
         }
         actions = {
             change_etherType();
@@ -76,4 +75,3 @@ control DeparserImpl(packet_out packet, in Headers_t headers) {
 }
 
 ubpf<Headers_t, metadata>(prs(), pipe(), DeparserImpl()) main;
-

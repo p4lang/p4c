@@ -16,4 +16,3 @@ control c_0(out bit<3> x) {
 }
 
 top(c_0()) main;
-

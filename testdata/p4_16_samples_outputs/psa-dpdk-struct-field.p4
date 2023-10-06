@@ -26,7 +26,7 @@ parser MyIngressParser(packet_in pkt, out headers_t hdr, inout user_meta_data_t 
 }
 
 control MyIngressControl(inout headers_t hdr, inout user_meta_data_t m, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    bit<80> flg;
+    bit<64> flg;
     action macswp() {
         if (flg == 0x2) {
             m.addr = hdr.ethernet.dst_addr;
@@ -71,8 +71,5 @@ control MyEgressDeparser(packet_out pkt, out EMPTY a, out EMPTY b, inout EMPTY c
 }
 
 IngressPipeline(MyIngressParser(), MyIngressControl(), MyIngressDeparser()) ip;
-
 EgressPipeline(MyEgressParser(), MyEgressControl(), MyEgressDeparser()) ep;
-
 PSA_Switch(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

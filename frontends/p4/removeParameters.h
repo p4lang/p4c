@@ -14,13 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_P4_REMOVEPARAMETERS_H_
-#define _FRONTENDS_P4_REMOVEPARAMETERS_H_
+#ifndef FRONTENDS_P4_REMOVEPARAMETERS_H_
+#define FRONTENDS_P4_REMOVEPARAMETERS_H_
 
-#include "ir/ir.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -30,25 +30,24 @@ namespace P4 {
  * this is done by LocalizeActions.
  */
 class ActionInvocation {
-    std::map<const IR::P4Action*, const IR::MethodCallExpression*> invocations;
-    std::set<const IR::P4Action*> all;  // for these actions remove all parameters
-    std::set<const IR::MethodCallExpression*> calls;
+    std::map<const IR::P4Action *, const IR::MethodCallExpression *> invocations;
+    std::set<const IR::P4Action *> all;  // for these actions remove all parameters
+    std::set<const IR::MethodCallExpression *> calls;
     /// how many arguments to remove from each default action
-    std::map<const IR::MethodCallExpression*, unsigned> defaultActions;
+    std::map<const IR::MethodCallExpression *, unsigned> defaultActions;
 
  public:
-    void bind(const IR::P4Action* action, const IR::MethodCallExpression* invocation,
+    void bind(const IR::P4Action *action, const IR::MethodCallExpression *invocation,
               bool allParams) {
         CHECK_NULL(action);
-        BUG_CHECK(invocations.find(action) == invocations.end(),
-                  "%1%: action called twice", action);
+        BUG_CHECK(invocations.find(action) == invocations.end(), "%1%: action called twice",
+                  action);
         invocations.emplace(action, invocation);
-        if (allParams)
-            all.emplace(action);
+        if (allParams) all.emplace(action);
         calls.emplace(invocation);
     }
-    void bindDefaultAction(const IR::P4Action* action,
-                           const IR::MethodCallExpression* defaultInvocation) {
+    void bindDefaultAction(const IR::P4Action *action,
+                           const IR::MethodCallExpression *defaultInvocation) {
         // We must have a binding for this action already.
         auto actionCallInvocation = ::get(invocations, action);
         CHECK_NULL(actionCallInvocation);
@@ -56,35 +55,37 @@ class ActionInvocation {
         unsigned boundArgs = actionCallInvocation->arguments->size();
         defaultActions.emplace(defaultInvocation, boundArgs);
     }
-    const IR::MethodCallExpression* get(const IR::P4Action* action) const {
+    const IR::MethodCallExpression *get(const IR::P4Action *action) const {
         return ::get(invocations, action);
     }
-    bool removeAllParameters(const IR::P4Action* action) const {
+    bool removeAllParameters(const IR::P4Action *action) const {
         return all.find(action) != all.end();
     }
-    bool isCall(const IR::MethodCallExpression* expression) const {
+    bool isCall(const IR::MethodCallExpression *expression) const {
         return calls.find(expression) != calls.end();
     }
-    unsigned argsToRemove(const IR::MethodCallExpression* defaultCall) const {
-        if (defaultActions.find(defaultCall) == defaultActions.end())
-            return 0;
+    unsigned argsToRemove(const IR::MethodCallExpression *defaultCall) const {
+        if (defaultActions.find(defaultCall) == defaultActions.end()) return 0;
         return ::get(defaultActions, defaultCall);
     }
 };
 
 class FindActionParameters : public Inspector {
-    ReferenceMap*     refMap;
-    TypeMap*          typeMap;
-    ActionInvocation* invocations;
- public:
-    FindActionParameters(ReferenceMap* refMap,
-                         TypeMap* typeMap, ActionInvocation* invocations) :
-            refMap(refMap), typeMap(typeMap), invocations(invocations) {
-        CHECK_NULL(refMap); CHECK_NULL(invocations); CHECK_NULL(typeMap);
-        setName("FindActionParameters"); }
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
+    ActionInvocation *invocations;
 
-    void postorder(const IR::ActionListElement* element) override;
-    void postorder(const IR::MethodCallExpression* expression) override;
+ public:
+    FindActionParameters(ReferenceMap *refMap, TypeMap *typeMap, ActionInvocation *invocations)
+        : refMap(refMap), typeMap(typeMap), invocations(invocations) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(invocations);
+        CHECK_NULL(typeMap);
+        setName("FindActionParameters");
+    }
+
+    void postorder(const IR::ActionListElement *element) override;
+    void postorder(const IR::MethodCallExpression *expression) override;
 };
 
 /**
@@ -114,26 +115,26 @@ class FindActionParameters : public Inspector {
  * @post in/inout/out parameters of an action are removed.
  */
 class DoRemoveActionParameters : public Transform {
-    ActionInvocation* invocations;
- public:
-    explicit DoRemoveActionParameters(ActionInvocation* invocations) :
-            invocations(invocations)
-    { CHECK_NULL(invocations); setName("DoRemoveActionParameters"); }
+    ActionInvocation *invocations;
 
-    const IR::Node* postorder(IR::P4Action* table) override;
-    const IR::Node* postorder(IR::ActionListElement* element) override;
-    const IR::Node* postorder(IR::MethodCallExpression* expression) override;
-    ActionInvocation* getInvocations() {
-        return invocations;
+ public:
+    explicit DoRemoveActionParameters(ActionInvocation *invocations) : invocations(invocations) {
+        CHECK_NULL(invocations);
+        setName("DoRemoveActionParameters");
     }
+
+    const IR::Node *postorder(IR::P4Action *table) override;
+    const IR::Node *postorder(IR::ActionListElement *element) override;
+    const IR::Node *postorder(IR::MethodCallExpression *expression) override;
+    ActionInvocation *getInvocations() { return invocations; }
 };
 
 class RemoveActionParameters : public PassManager {
  public:
-    RemoveActionParameters(ReferenceMap* refMap, TypeMap* typeMap,
-                           TypeChecking* typeChecking = nullptr);
+    RemoveActionParameters(ReferenceMap *refMap, TypeMap *typeMap,
+                           TypeChecking *typeChecking = nullptr);
 };
 
 }  // namespace P4
 
-#endif /* _FRONTENDS_P4_REMOVEPARAMETERS_H_ */
+#endif /* FRONTENDS_P4_REMOVEPARAMETERS_H_ */

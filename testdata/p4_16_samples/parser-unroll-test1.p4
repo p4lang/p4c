@@ -60,7 +60,7 @@ parser MyParser(packet_in packet,
     
     int<32>                 index;
 
-    state start {
+    @name (".start") state start {
         transition parse_ethernet;
     }
 
@@ -73,7 +73,7 @@ parser MyParser(packet_in packet,
         }
     }
 
-    state parse_srcRouting {
+    @name (".parse_srcRouting") state parse_srcRouting {
         packet.extract(hdr.srcRoutes[index]);
         index = index + 1;
         transition select(hdr.srcRoutes[index - 1].bos) {

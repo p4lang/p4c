@@ -15,13 +15,14 @@ limitations under the License.
 */
 
 #include "expandEmit.h"
+
 #include "frontends/p4/coreLibrary.h"
 
 namespace P4 {
 
-bool DoExpandEmit::expandArg(
-    const IR::Type* type, const IR::Argument* arg,
-    std::vector<const IR::Argument*> *result, std::vector<const IR::Type*> *resultTypes) {
+bool DoExpandEmit::expandArg(const IR::Type *type, const IR::Argument *arg,
+                             std::vector<const IR::Argument *> *result,
+                             std::vector<const IR::Type *> *resultTypes) {
     if (type->is<IR::Type_Header>()) {
         result->push_back(arg);
         resultTypes->push_back(type);
@@ -30,8 +31,8 @@ bool DoExpandEmit::expandArg(
         int size = st->getSize();
         for (int i = 0; i < size; i++) {
             auto index = new IR::Constant(i);
-            auto element = new IR::Argument(
-                arg->srcInfo, arg->name, new IR::ArrayIndex(arg->expression, index));
+            auto element = new IR::Argument(arg->srcInfo, arg->name,
+                                            new IR::ArrayIndex(arg->expression, index));
             expandArg(st->elementType, element, result, resultTypes);
         }
         return true;
@@ -45,12 +46,12 @@ bool DoExpandEmit::expandArg(
         }
         return true;
     } else {
-        BUG_CHECK(type->is<IR::Type_StructLike>(),
-                  "%1%: expected a struct or header_union type", type);
+        BUG_CHECK(type->is<IR::Type_StructLike>(), "%1%: expected a struct or header_union type",
+                  type);
         auto strct = type->to<IR::Type_StructLike>();
         for (auto f : strct->fields) {
-            auto expr = new IR::Argument(
-                arg->srcInfo, arg->name, new IR::Member(arg->expression, f->name));
+            auto expr =
+                new IR::Argument(arg->srcInfo, arg->name, new IR::Member(arg->expression, f->name));
             auto type = typeMap->getTypeType(f->type, true);
             expandArg(type, expr, result, resultTypes);
         }
@@ -58,11 +59,11 @@ bool DoExpandEmit::expandArg(
     }
 }
 
-const IR::Node* DoExpandEmit::postorder(IR::MethodCallStatement* statement) {
+const IR::Node *DoExpandEmit::postorder(IR::MethodCallStatement *statement) {
     auto mi = MethodInstance::resolve(statement->methodCall, refMap, typeMap);
     if (auto em = mi->to<P4::ExternMethod>()) {
-        if (em->originalExternType->name.name == P4::P4CoreLibrary::instance.packetOut.name &&
-            em->method->name.name == P4::P4CoreLibrary::instance.packetOut.emit.name) {
+        if (em->originalExternType->name.name == P4::P4CoreLibrary::instance().packetOut.name &&
+            em->method->name.name == P4::P4CoreLibrary::instance().packetOut.emit.name) {
             if (em->expr->arguments->size() != 1) {
                 ::error(ErrorType::ERR_UNEXPECTED, "%1%: expected exactly 1 argument", statement);
                 return statement;
@@ -70,8 +71,8 @@ const IR::Node* DoExpandEmit::postorder(IR::MethodCallStatement* statement) {
 
             auto arg0 = em->expr->arguments->at(0);
             auto type = typeMap->getType(arg0, true);
-            std::vector<const IR::Argument*> expansion;
-            std::vector<const IR::Type*> expansionTypes;
+            std::vector<const IR::Argument *> expansion;
+            std::vector<const IR::Type *> expansionTypes;
             if (expandArg(type, arg0, &expansion, &expansionTypes)) {
                 auto vec = new IR::IndexedVector<IR::StatOrDecl>();
                 auto it = expansionTypes.begin();
@@ -82,8 +83,8 @@ const IR::Node* DoExpandEmit::postorder(IR::MethodCallStatement* statement) {
                     args->push_back(e);
                     auto typeArgs = new IR::Vector<IR::Type>();
                     typeArgs->push_back(argType->getP4Type());
-                    auto mce = new IR::MethodCallExpression(
-                        statement->methodCall->srcInfo, method, typeArgs, args);
+                    auto mce = new IR::MethodCallExpression(statement->methodCall->srcInfo, method,
+                                                            typeArgs, args);
                     auto stat = new IR::MethodCallStatement(mce);
                     vec->push_back(stat);
                     ++it;
@@ -94,6 +95,5 @@ const IR::Node* DoExpandEmit::postorder(IR::MethodCallStatement* statement) {
     }
     return statement;
 }
-
 
 }  // namespace P4

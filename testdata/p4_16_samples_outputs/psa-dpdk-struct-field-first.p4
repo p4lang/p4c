@@ -26,17 +26,15 @@ parser MyIngressParser(packet_in pkt, out headers_t hdr, inout user_meta_data_t 
 }
 
 control MyIngressControl(inout headers_t hdr, inout user_meta_data_t m, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    bit<80> flg;
+    bit<64> flg;
     action macswp() {
-        if (flg == 80w0x2) {
+        if (flg == 64w0x2) {
             m.addr = hdr.ethernet.dst_addr;
             hdr.ethernet.dst_addr = hdr.ethernet.src_addr;
             hdr.ethernet.src_addr = m.addr;
         }
     }
     table stub {
-        key = {
-        }
         actions = {
             macswp();
             @defaultonly NoAction();
@@ -73,8 +71,5 @@ control MyEgressDeparser(packet_out pkt, out EMPTY a, out EMPTY b, inout EMPTY c
 }
 
 IngressPipeline<headers_t, user_meta_data_t, EMPTY, EMPTY, EMPTY, EMPTY>(MyIngressParser(), MyIngressControl(), MyIngressDeparser()) ip;
-
 EgressPipeline<EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(MyEgressParser(), MyEgressControl(), MyEgressDeparser()) ep;
-
 PSA_Switch<headers_t, user_meta_data_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

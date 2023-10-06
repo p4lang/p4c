@@ -25,8 +25,24 @@ header ethernet_t {
     bit<16>         etherType;
 }
 
+header ipv4_t {
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<8>  diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
+}
+
 struct headers_t {
     ethernet_t    ethernet;
+    ipv4_t        ipv4;
 }
 
 struct metadata_t {
@@ -39,6 +55,13 @@ parser parserImpl(packet_in packet,
 {
     state start {
         packet.extract(hdr.ethernet);
+        transition select(hdr.ethernet.etherType) {
+            0x0800: parse_ipv4;
+            default: accept;
+        }
+    }
+    state parse_ipv4 {
+        packet.extract(hdr.ipv4);
         transition accept;
     }
 }
@@ -71,40 +94,45 @@ control ingressImpl(inout headers_t hdr,
     bit<8> unsigned1;
 
     apply {
-        // bool
+        // Comments below describe how each type is printed as of
+        // p4c-bm2-ss and behavioral-model (aka BMv2) simple_switch as
+        // of 2022-Oct latest code.
+
+        log_msg("GREPME Packet ingress begin");
+        
+        // bool value prints as 1 for true, 0 for false
         bool1 = (bool) hdr.ethernet.dstAddr[0:0];
-        // TBD: Currently gives no error/warning from p4c, but
-        // simple_switch gives error when trying to read the BMv2 JSON
-        // file.
-        log_msg("bool1={}", {bool1});
+        log_msg("GREPME bool1={}", {bool1});
 
-        // Casting a bool to a bit<1> and logging that bit<1> value
-        // works fine, printing 1 for true, 0 for false.
-        log_msg("(bit<1>) bool1={}", {(bit<1>) bool1});
-        log_msg("(bit<1>) (!bool1)={}", {(bit<1>) (!bool1)});
+        // bool cast to bit<1> value prints as 1 for true, 0 for false
+        log_msg("GREPME (bit<1>) bool1={}", {(bit<1>) bool1});
+        log_msg("GREPME (bit<1>) (!bool1)={}", {(bit<1>) (!bool1)});
 
-        // bit<1>
+        // bit<1> prints as 0 or 1
         bit1 = hdr.ethernet.dstAddr[0:0];
-        log_msg("bit1={}", {bit1});
+        log_msg("GREPME bit1={}", {bit1});
 
         // signed int<W>
         signed1 = 127;
         signed1 = signed1 + 1;
         // Should wrap around to -128 in 2's complement, for 8-bit value.
-        // Ideally should print that way, too, and it does in my
-        // testing with simple_switch.
-        log_msg("signed1={}", {signed1});
+        // Does print as -128 with simple_switch
+        log_msg("GREPME signed1={}", {signed1});
 
         // unsigned int<W>
         unsigned1 = 127;
         unsigned1 = unsigned1 + 1;
-        // Should be unsigned 128, for unsigned int<8>, and it prints
-        // that way in my simple_switch testing.
-        log_msg("unsigned1={}", {unsigned1});
+        // Should be unsigned 128, for unsigned bit<8>
+        // Prints as 128 with simple_switch
+        log_msg("GREPME unsigned1={}", {unsigned1});
 
         // infinite precision int, compile-time constant value
         // p4c gives error "could not infer width"
-//        log_msg("infint1={}", {5});
+        //log_msg("GREPME infint1={}", {5});
+
+        // bit<2> from slice
+        // Prints as unsigned decimal number
+        log_msg("GREPME hdr.ethernet.dstAddr[1:0]={}", {hdr.ethernet.dstAddr[1:0]});
 
         // enum
         if (hdr.ethernet.dstAddr[1:0] == 0) {
@@ -115,11 +143,13 @@ control ingressImpl(inout headers_t hdr,
             enum1 = MyEnum_t.VAL3;
         }
         // In my testing, this prints the numeric code that p4c
-        // selected for the MyEnum_t values at compile time, which can
-        // change from run to run, although tends to be stable, I
-        // think.  I would recommend against anyone _relying_ on it
-        // being stable.
-        log_msg("enum1={}", {enum1});
+        // selected for the MyEnum_t values at compile time, which has
+        // is a BMv2-implementation-specific integer value.  I would
+        // recommend against anyone _relying_ on it being stable.  For
+        // an enum with 3 members, I believe this
+        // BMv2-implementation-specific value will always be 0, 1, or
+        // 2.
+        log_msg("GREPME enum1={}", {enum1});
 
         // serializable enum
         if (hdr.ethernet.dstAddr[1:0] == 0) {
@@ -129,50 +159,44 @@ control ingressImpl(inout headers_t hdr,
         } else {
             serenum1 = MySerializableEnum_t.VAL19;
         }
-        // Prints the value of the underlying bit<10> value, as it
-        // should.
-        log_msg("serenum1={}", {serenum1});
+        // Prints the value of the underlying bit<10> value as
+        // unsigned decimal number, as it should.
+        log_msg("GREPME serenum1={}", {serenum1});
 
         // header
 
-        // TBD: Currently gives no error/warning from p4c, but
-        // simple_switch gives the run-time error below when
-        // attempting to execute this statement:
+        // An ipv4 header prints as shown in this example.  All field
+        // values are shown as unsigned decimal integers for this
+        // program, since ipv4_t's fields are all of type bit<W> for
+        // some bit width W.
+        // (version:4,ihl:5,diffserv:0,totalLen:20,identification:1,flags:0,fragOffset:0,ttl:64,protocol:0,hdrChecksum:31975,srcAddr:2130706433,dstAddr:2130706433)
 
-        // Assertion 'Default switch case should not be reachable' failed, file '../../include/bm/bm_sim/actions.h' line '334'.
-        // Aborted
-
-        // If simple_switch does not support this, and if it does not
-        // seem worth the effort to enhance it for this, it seems
-        // better if p4c would give an error that this is not
-        // supported.
-
-        log_msg("hdr.ethernet={}", {hdr.ethernet});
+        // Unfortunately an invalid ipv4 header also prints the same
+        // way in simple_switch, with all field values equal to 0.
+        // However, that is not actually enough information to
+        // determine from the printed representation whether
+        // hdr.ipv4.isValid() is true or false.
+        
+        log_msg("GREPME hdr.ethernet.isValid()={}", {hdr.ethernet.isValid()});
+        log_msg("GREPME hdr.ethernet={}", {hdr.ethernet});
+        log_msg("GREPME hdr.ipv4.isValid()={}", {hdr.ipv4.isValid()});
+        log_msg("GREPME hdr.ipv4={}", {hdr.ipv4});
 
         // struct - as of this writing, v1model.p4 standard_metadata_t
         // struct is defined such that all fields are of type bit<W>
         // for varying widths W.
 
-        // TBD: Currently gives no error/warning from p4c, but
-        // simple_switch gives the run-time error below when
-        // attempting to execute this statement:
-
-        // Assertion 'Default switch case should not be reachable' failed, file '../../include/bm/bm_sim/actions.h' line '334'.
-        // Aborted
-
-        // Same comments for this as for header types above.
-
-        log_msg("stdmeta={}", {stdmeta});
+        // The stdmeta struct prints as shown in this example by
+        // simple_switch:
+        // (ingress_port:1,egress_spec:0,egress_port:0,instance_type:0,packet_length:34,enq_timestamp:0,enq_qdepth:0,deq_timedelta:0,deq_qdepth:0,ingress_global_timestamp:26469967,egress_global_timestamp:0,mcast_grp:0,egress_rid:0,checksum_error:0,parser_error:0,priority:0)
+        log_msg("GREPME stdmeta={}", {stdmeta});
 
         // error
 
-        // No error/warning from p4c, and simple_switch prints out the
-        // numeric value that is assigned to the error code by p4c and
-        // stored in the BMv2 JSON file, which can change over
-        // different compilation runs of the same program, perhaps.
-        // Not sure.  I am pretty sure it has changed across different
-        // versions of p4c source code, occasionally.
-        log_msg("error.PacketTooShort={}", {error.PacketTooShort});
+        // simple_switch prints out the numeric value that is assigned
+        // to the error code by p4c and stored in the BMv2 JSON file,
+        // which is a BMv2-implementation-specific numeric value.
+        log_msg("GREPME error.PacketTooShort={}", {error.PacketTooShort});
     }
 }
 

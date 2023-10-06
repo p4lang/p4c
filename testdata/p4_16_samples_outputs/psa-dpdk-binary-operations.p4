@@ -75,6 +75,7 @@ control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata
         a.dstAddr = (bit<48>)b.meta;
         a.srcAddr = (bit<48>)b.meta1;
         a.etherType = b.meta2;
+        b.meta = b.meta2 ++ b.meta7;
     }
 }
 
@@ -94,8 +95,5 @@ control MyED(packet_out buffer, out EMPTY_CLONE a, out EMPTY_RECIRC b, inout EMP
 }
 
 IngressPipeline(MyIP(), MyIC(), MyID()) ip;
-
 EgressPipeline(MyEP(), MyEC(), MyED()) ep;
-
 PSA_Switch(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

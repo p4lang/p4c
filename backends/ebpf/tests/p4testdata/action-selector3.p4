@@ -52,7 +52,7 @@ control MyIC(inout headers a, inout empty_t bc,
         }
         actions = { NoAction; fwd; }
         psa_implementation = as;
-        psa_empty_group_action = fwd((PortId_t) 5);
+        psa_empty_group_action = fwd((PortId_t) PORT1);
     }
 
     apply {

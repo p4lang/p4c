@@ -1,0 +1,3 @@
+p4tc_samples/tc_type_annotation_errors.p4(138): [--Werror=invalid] error: tc_type annotation cannot have '"tcp"' as value
+            hdr.tcp.flags : ternary @tc_type("tcp");
+                                                 ^

@@ -98,7 +98,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     table guh {
         key = {
-            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort") ;
+            hdr.tcp.dstPort: exact @name("hdr.tcp.dstPort");
         }
         actions = {
             foo();
@@ -136,4 +136,3 @@ control DeparserI(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
-

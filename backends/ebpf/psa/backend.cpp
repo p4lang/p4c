@@ -25,8 +25,7 @@ void PSASwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     BMV2::PsaProgramStructure structure(refMap, typeMap);
     auto parsePsaArch = new BMV2::ParsePsaArchitecture(&structure);
     auto main = tlb->getMain();
-    if (!main)
-        return;
+    if (!main) return;
 
     if (main->type->name != "PSA_Switch") {
         ::warning(ErrorType::WARN_INVALID,
@@ -42,9 +41,8 @@ void PSASwitchBackend::convert(const IR::ToplevelBlock *tlb) {
 
     PassManager rewriteToEBPF = {
         evaluator,
-        new VisitFunctor([this, evaluator, structure]() {
-            toplevel = evaluator->getToplevelBlock();
-        }),
+        new VisitFunctor(
+            [this, evaluator, structure]() { toplevel = evaluator->getToplevelBlock(); }),
     };
 
     auto hook = options.getDebugHook();
@@ -55,21 +53,20 @@ void PSASwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     toplevel->apply(*new BMV2::BuildResourceMap(&structure.resourceMap));
 
     main = toplevel->getMain();
-    if (!main)
-        return;  // no main
+    if (!main) return;  // no main
     main->apply(*parsePsaArch);
     program = toplevel->getProgram();
 
     EBPFTypeFactory::createFactory(typeMap);
-    auto convertToEbpfPSA = new ConvertToEbpfPSA(options, structure, refMap, typeMap);
+    auto convertToEbpfPSA = new ConvertToEbpfPSA(options, refMap, typeMap);
     PassManager toEBPF = {
-            new BMV2::DiscoverStructure(&structure),
-            new BMV2::InspectPsaProgram(refMap, typeMap, &structure),
-            // convert to EBPF objects
-            new VisitFunctor([evaluator, convertToEbpfPSA]() {
-                auto tlb = evaluator->getToplevelBlock();
-                tlb->apply(*convertToEbpfPSA);
-            }),
+        new BMV2::DiscoverStructure(&structure),
+        new BMV2::InspectPsaProgram(refMap, typeMap, &structure),
+        // convert to EBPF objects
+        new VisitFunctor([evaluator, convertToEbpfPSA]() {
+            auto tlb = evaluator->getToplevelBlock();
+            tlb->apply(*convertToEbpfPSA);
+        }),
     };
 
     toEBPF.addDebugHook(hook, true);
@@ -79,4 +76,3 @@ void PSASwitchBackend::convert(const IR::ToplevelBlock *tlb) {
 }
 
 }  // namespace EBPF
-

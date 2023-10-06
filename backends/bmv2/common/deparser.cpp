@@ -14,14 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "backend.h"
 #include "deparser.h"
+
+#include "backend.h"
 #include "extern.h"
 
 namespace BMV2 {
 
-void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* body,
-                                          Util::JsonArray* order, Util::JsonArray* primitives) {
+void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl> *body,
+                                            Util::JsonArray *order, Util::JsonArray *primitives) {
     ctxt->conv->simpleExpressionsOnly = true;
     for (auto s : *body) {
         auto isR = false;
@@ -40,10 +41,10 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* bo
                 auto minst = P4::MethodInstance::resolve(mce, ctxt->refMap, ctxt->typeMap);
                 if (minst->is<P4::ExternMethod>()) {
                     auto extmeth = minst->to<P4::ExternMethod>();
-                // PSA backend extern
-                if ((extmeth->method->name.name == "get"
-                    || extmeth->method->name.name == "get_state")
-                    && extmeth->originalExternType->name == "InternetChecksum") {
+                    // PSA backend extern
+                    if ((extmeth->method->name.name == "get" ||
+                         extmeth->method->name.name == "get_state") &&
+                        extmeth->originalExternType->name == "InternetChecksum") {
                         const IR::Expression *l;
                         l = assign->left;
                         isR = true;
@@ -78,8 +79,8 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* bo
                 auto em = mi->to<P4::ExternMethod>();
                 if (em->originalExternType->name.name == corelib.packetOut.name) {
                     if (em->method->name.name == corelib.packetOut.emit.name) {
-                        BUG_CHECK(mc->arguments->size() == 1,
-                                  "Expected exactly 1 argument for %1%", mc);
+                        BUG_CHECK(mc->arguments->size() == 1, "Expected exactly 1 argument for %1%",
+                                  mc);
                         auto arg = mc->arguments->at(0);
                         auto type = ctxt->typeMap->getType(arg, true);
                         if (type->is<IR::Type_Header>()) {
@@ -91,49 +92,45 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* bo
                             // like header unions or stacks; they were
                             // expanded by the expandEmit pass.
                             ::error(ErrorType::ERR_UNSUPPORTED,
-                                    "%1%: emit only supports header arguments, not %2%",
-                                    arg, type);
+                                    "%1%: emit only supports header arguments, not %2%", arg, type);
                         }
                     }
                     continue;
-                } else  if (em->originalExternType->name == "InternetChecksum"
-                            && (em->method->name.name == "clear"
-                            || em->method->name.name == "add"
-                            || em->method->name.name == "subtract"
-                            || em->method->name.name == "get_state"
-                            || em->method->name.name == "set_state"
-                            || em->method->name.name == "get")) {
+                } else if (em->originalExternType->name == "InternetChecksum" &&
+                           (em->method->name.name == "clear" || em->method->name.name == "add" ||
+                            em->method->name.name == "subtract" ||
+                            em->method->name.name == "get_state" ||
+                            em->method->name.name == "set_state" ||
+                            em->method->name.name == "get")) {
                     // PSA backend extern
                     ctxt->conv->simpleExpressionsOnly = false;
-                    Util::IJson* json;
+                    Util::IJson *json;
                     if (isR) {
                         json = ExternConverter::cvtExternObject(ctxt, em, mce2, s, true);
                     } else {
                         json = ExternConverter::cvtExternObject(ctxt, em, mc, s, true);
                     }
-                    if (json)
-                        primitives->append(json);
+                    if (json) primitives->append(json);
                     ctxt->conv->simpleExpressionsOnly = true;
                     continue;
                 }
             } else if (mi->is<P4::ExternFunction>()) {
                 auto ef = mi->to<P4::ExternFunction>();
                 ctxt->conv->simpleExpressionsOnly = false;
-                auto json = ExternConverter::cvtExternFunction(ctxt, ef, mc,
-                                                                s, /* emitExterns */ true);
+                auto json =
+                    ExternConverter::cvtExternFunction(ctxt, ef, mc, s, /* emitExterns */ true);
                 ctxt->conv->simpleExpressionsOnly = true;
-                if (json)
-                    primitives->append(json);
+                if (json) primitives->append(json);
                 continue;
             }
         }
-        ::error(ErrorType::ERR_UNSUPPORTED,
-                "%1%: not supported within a deparser on this target", s);
+        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: not supported within a deparser on this target",
+                s);
     }
     ctxt->conv->simpleExpressionsOnly = false;
 }
 
-Util::IJson* DeparserConverter::convertDeparser(const IR::P4Control* ctrl) {
+Util::IJson *DeparserConverter::convertDeparser(const IR::P4Control *ctrl) {
     auto result = new Util::JsonObject();
     result->emplace("name", name);
     result->emplace("id", nextId("deparser"));
@@ -144,14 +141,12 @@ Util::IJson* DeparserConverter::convertDeparser(const IR::P4Control* ctrl) {
     return result;
 }
 
-bool DeparserConverter::preorder(const IR::P4Control* control) {
+bool DeparserConverter::preorder(const IR::P4Control *control) {
     auto deparserJson = convertDeparser(control);
     ctxt->json->deparsers->append(deparserJson);
     for (auto c : control->controlLocals) {
-        if (c->is<IR::Declaration_Constant>() ||
-            c->is<IR::Declaration_Variable>() ||
-            c->is<IR::P4Action>() ||
-            c->is<IR::P4Table>())
+        if (c->is<IR::Declaration_Constant>() || c->is<IR::Declaration_Variable>() ||
+            c->is<IR::P4Action>() || c->is<IR::P4Table>())
             continue;
         if (c->is<IR::Declaration_Instance>()) {
             auto bl = ctxt->structure->resourceMap.at(c);

@@ -2,7 +2,7 @@ issue2036-1.p4(10): [--Werror=type-error] error: f
         f(b);
         ^^^^
   ---- Actual error:
-issue2036-1.p4(9): Cannot unify type 'tuple<bit<8>>' with type 'struct s'
+issue2036-1.p4(9): Cannot cast implicitly type 'tuple<bit<8>>' to type 'struct s'
           tuple<bit<8>> b = { 0 };
           ^^^^^^^^^^^^^
 issue2036-1.p4(1)

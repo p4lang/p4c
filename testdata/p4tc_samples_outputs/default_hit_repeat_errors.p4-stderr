@@ -1,0 +1,1 @@
+[--Werror=invalid] error: Table 'set_ct_options' can have only one '@default_hit' action

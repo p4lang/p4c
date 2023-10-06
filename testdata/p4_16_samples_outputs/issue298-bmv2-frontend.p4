@@ -39,13 +39,13 @@ header myhdr_t {
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
-    @name("ipv4") 
+    @name("ipv4")
     ipv4_t     ipv4;
-    @name("udp") 
+    @name("udp")
     udp_t      udp;
-    @name("myhdr") 
+    @name("myhdr")
     myhdr_t    myhdr;
 }
 
@@ -55,7 +55,7 @@ struct ingress_metadata_t {
 }
 
 struct metadata {
-    @name("ingress_metadata") 
+    @name("ingress_metadata")
     ingress_metadata_t local_metadata;
 }
 
@@ -115,7 +115,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name("egress.drop_tbl") table drop_tbl_0 {
         key = {
-            meta.local_metadata.set_drop: exact @name("meta.ingress_metadata.set_drop") ;
+            meta.local_metadata.set_drop: exact @name("meta.ingress_metadata.set_drop");
         }
         actions = {
             _drop();
@@ -135,8 +135,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         registerRound_0.read(meta.local_metadata.round, hdr.myhdr.inst);
     }
     @name("ingress.round_tbl") table round_tbl_0 {
-        key = {
-        }
         actions = {
             read_round();
         }
@@ -153,4 +151,3 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 }
 
 V1Switch<headers, metadata>(TopParser(), verifyChecksum(), ingress(), egress(), computeChecksum(), TopDeparser()) main;
-

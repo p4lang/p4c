@@ -72,7 +72,7 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
         bh.row.alt1.type = EthTypes.IPv4;
         h.bvh0.row.alt1.type = bh.row.alt1.type;
         local_metadata.row0.alt0.useHash = true;
-        clone_preserving_field_list(CloneType.I2E, 0, 0);
+        clone_preserving_field_list(CloneType.I2E, 1, 0);
     }
 }
 

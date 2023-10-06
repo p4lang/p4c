@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_P4_CLONER_H_
-#define _FRONTENDS_P4_CLONER_H_
+#ifndef FRONTENDS_P4_CLONER_H_
+#define FRONTENDS_P4_CLONER_H_
 
 #include "ir/ir.h"
 
@@ -25,17 +25,21 @@ namespace P4 {
 /// into distinct nodes.
 class ClonePathExpressions : public Transform {
  public:
-    ClonePathExpressions()
-    { visitDagOnce = false; setName("ClonePathExpressions"); }
-    const IR::Node* postorder(IR::PathExpression* path) override
-    { path->path = path->path->clone();
-      return path; }
+    ClonePathExpressions() {
+        visitDagOnce = false;
+        setName("ClonePathExpressions");
+    }
+    const IR::Node *postorder(IR::PathExpression *path) override {
+        path->path = path->path->clone();
+        return path;
+    }
 
-    template<typename T>
-    const T* clone(const IR::Node* node)
-    { return node->apply(*this)->to<T>(); }
+    template <typename T>
+    const T *clone(const IR::Node *node) {
+        return node->apply(*this)->to<T>();
+    }
 };
 
 }  // namespace P4
 
-#endif /* _FRONTENDS_P4_CLONER_H_ */
+#endif /* FRONTENDS_P4_CLONER_H_ */

@@ -14,11 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_NESTEDSTRUCTS_H_
-#define _MIDEND_NESTEDSTRUCTS_H_
+#ifndef MIDEND_NESTEDSTRUCTS_H_
+#define MIDEND_NESTEDSTRUCTS_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -29,30 +29,29 @@ class ComplexValues final {
      * has a struct type.
      */
     struct Component : public IHasDbPrint {
-        virtual const IR::Expression* convertToExpression() = 0;
-        virtual Component* getComponent(cstring name) = 0;
-        virtual void dbprint(std::ostream& out) const = 0;
+        virtual const IR::Expression *convertToExpression() = 0;
+        virtual Component *getComponent(cstring name) = 0;
+        virtual void dbprint(std::ostream &out) const = 0;
     };
 
     struct FinalName : public Component {
         cstring newName;
         explicit FinalName(cstring name) : newName(name) {}
-        const IR::Expression* convertToExpression() override
-        { return new IR::PathExpression(IR::ID(newName)); }
-        Component* getComponent(cstring) override
-        { return nullptr; }
-        void dbprint(std::ostream& out) const override
-        { out << newName << IndentCtl::endl; }
+        const IR::Expression *convertToExpression() override {
+            return new IR::PathExpression(IR::ID(newName));
+        }
+        Component *getComponent(cstring) override { return nullptr; }
+        void dbprint(std::ostream &out) const override { out << newName << Log::endl; }
     };
 
     struct FieldsMap : public Component {
-        ordered_map<cstring, Component*> members;
-        const IR::Type* type;
-        explicit FieldsMap(const IR::Type* type): type(type) {
+        ordered_map<cstring, Component *> members;
+        const IR::Type *type;
+        explicit FieldsMap(const IR::Type *type) : type(type) {
             CHECK_NULL(type);
             BUG_CHECK(type->is<IR::Type_Struct>(), "%1%: expected a struct", type);
         }
-        const IR::Expression* convertToExpression() override {
+        const IR::Expression *convertToExpression() override {
             IR::IndexedVector<IR::NamedExpression> vec;
             for (auto m : members) {
                 auto e = m.second->convertToExpression();
@@ -60,41 +59,43 @@ class ComplexValues final {
             }
             return new IR::StructExpression(type->getP4Type(), vec);
         }
-        Component* getComponent(cstring name) override
-        { return ::get(members, name); }
-        void dbprint(std::ostream& out) const override {
-            out << IndentCtl::indent;
-            for (auto m : members)
-                out << m.first << "=>" << m.second;
-            out << IndentCtl::unindent;
+        Component *getComponent(cstring name) override { return ::get(members, name); }
+        void dbprint(std::ostream &out) const override {
+            out << Log::indent;
+            for (auto m : members) out << m.first << "=>" << m.second;
+            out << Log::unindent;
         }
     };
 
-    std::map<const IR::Declaration_Variable*, Component*> values;
-    std::map<const IR::Expression*, Component*> translation;
+    std::map<const IR::Declaration_Variable *, Component *> values;
+    std::map<const IR::Expression *, Component *> translation;
 
-    ReferenceMap* refMap;
-    TypeMap* typeMap;
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
 
-    ComplexValues(ReferenceMap* refMap, TypeMap* typeMap)  : refMap(refMap), typeMap(typeMap)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); }
+    ComplexValues(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
+    }
     /// Helper function that test if a struct is nested
-    bool isNestedStruct(const IR::Type* type);
+    bool isNestedStruct(const IR::Type *type);
     /// Flatten a nested struct to only contain field declaration or non-nested struct
     template <class T>
-    void explode(cstring prefix, const IR::Type_Struct* type,
-                 FieldsMap* map, IR::Vector<T>* result);
-    Component* getTranslation(const IR::IDeclaration* decl) {
+    void explode(cstring prefix, const IR::Type_Struct *type, FieldsMap *map,
+                 IR::Vector<T> *result);
+    Component *getTranslation(const IR::IDeclaration *decl) {
         auto dv = decl->to<IR::Declaration_Variable>();
-        if (dv == nullptr)
-            return nullptr;
+        if (dv == nullptr) return nullptr;
         return ::get(values, dv);
     }
-    Component* getTranslation(const IR::Expression* expression)
-    {  LOG2("Check translation " << dbp(expression)); return ::get(translation, expression); }
-    void setTranslation(const IR::Expression* expression, Component* comp) {
+    Component *getTranslation(const IR::Expression *expression) {
+        LOG2("Check translation " << dbp(expression));
+        return ::get(translation, expression);
+    }
+    void setTranslation(const IR::Expression *expression, Component *comp) {
         translation.emplace(expression, comp);
-        LOG2("Translated " << dbp(expression) << " to " << comp); }
+        LOG2("Translated " << dbp(expression) << " to " << comp);
+    }
 };
 
 /**
@@ -127,27 +128,28 @@ class ComplexValues final {
  *    - all variables whose types are nested structs are flattened.
  */
 class RemoveNestedStructs final : public Transform {
-    ComplexValues* values;
+    ComplexValues *values;
+
  public:
-    explicit RemoveNestedStructs(ComplexValues* values) : values(values)
-    { CHECK_NULL(values); setName("RemoveNestedStructs"); }
+    explicit RemoveNestedStructs(ComplexValues *values) : values(values) {
+        CHECK_NULL(values);
+        setName("RemoveNestedStructs");
+    }
 
     /// rewrite nested structs to non-nested structs
-    const IR::Node* postorder(IR::Declaration_Variable* decl) override;
+    const IR::Node *postorder(IR::Declaration_Variable *decl) override;
     /// replace reference to nested structs with the corresponding non-nested version
-    const IR::Node* postorder(IR::Member* expression) override;
+    const IR::Node *postorder(IR::Member *expression) override;
     /// replace reference to nested structs with the corresponding non-nested version
-    const IR::Node* postorder(IR::PathExpression* expression) override;
-    const IR::Node* postorder(IR::MethodCallExpression* expression) override;
+    const IR::Node *postorder(IR::PathExpression *expression) override;
+    const IR::Node *postorder(IR::MethodCallExpression *expression) override;
 };
 
 class NestedStructs final : public PassManager {
  public:
-    NestedStructs(ReferenceMap* refMap, TypeMap* typeMap,
-            TypeChecking* typeChecking = nullptr) {
+    NestedStructs(ReferenceMap *refMap, TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
         auto values = new ComplexValues(refMap, typeMap);
-        if (!typeChecking)
-            typeChecking = new TypeChecking(refMap, typeMap);
+        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new RemoveNestedStructs(values));
         passes.push_back(new ClearTypeMap(typeMap));
@@ -157,4 +159,4 @@ class NestedStructs final : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_NESTEDSTRUCTS_H_ */
+#endif /* MIDEND_NESTEDSTRUCTS_H_ */

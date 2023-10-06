@@ -53,6 +53,7 @@ struct main_metadata_t {
 	bit<32> local_metadata_rng_result1
 	bit<32> local_metadata_val1
 	bit<32> local_metadata_val2
+	bit<8> local_metadata_timeout
 	bit<32> pna_main_output_metadata_output_port
 	bit<32> MainControlT_tmp
 	bit<32> MainControlT_tmp_0
@@ -67,12 +68,11 @@ metadata instanceof main_metadata_t
 header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
 header tcp instanceof tcp_t
-header MainControlT_hdr_3_tcp instanceof tcp_t
 
+regarray direction size 0x100 initval 0
 action do_range_checks_1 args instanceof do_range_checks_1_arg_t {
-	mov h.MainControlT_hdr_3_tcp h.tcp
-	jmpgt LABEL_FALSE_1 t.min1 h.MainControlT_hdr_3_tcp.srcPort
-	jmpgt LABEL_FALSE_1 h.MainControlT_hdr_3_tcp.srcPort t.max1
+	jmpgt LABEL_FALSE_1 t.min1 h.tcp.srcPort
+	jmpgt LABEL_FALSE_1 h.tcp.srcPort t.max1
 	mov m.MainControlT_tmp_3 0x1
 	jmp LABEL_END_1
 	LABEL_FALSE_1 :	mov m.MainControlT_tmp_3 0x0
@@ -87,7 +87,7 @@ action next_hop args instanceof next_hop_arg_t {
 
 action add_on_miss_action args none {
 	mov m.learnArg 0x0
-	learn next_hop m.learnArg
+	learn next_hop m.learnArg m.local_metadata_timeout
 	return
 }
 
@@ -114,8 +114,8 @@ action next_hop2 args instanceof next_hop2_arg_t {
 
 action add_on_miss_action2 args none {
 	mov m.MainControlT_tmp 0x0
-	mov m.MainControlT_tmp_0 0x4d2
-	learn next_hop m.MainControlT_tmp
+	mov m.MainControlT_tmp_0 0x4D2
+	learn next_hop2 m.MainControlT_tmp m.local_metadata_timeout
 	return
 }
 
@@ -128,8 +128,18 @@ learner ipv4_da {
 		add_on_miss_action @defaultonly
 	}
 	default_action add_on_miss_action args none 
-	size 65536
-	timeout 120
+	size 0x10000
+	timeout {
+		10
+		30
+		60
+		120
+		300
+		43200
+		120
+		120
+
+		}
 }
 
 learner ipv4_da2 {
@@ -143,8 +153,18 @@ learner ipv4_da2 {
 		do_range_checks_1
 	}
 	default_action add_on_miss_action2 args none 
-	size 65536
-	timeout 120
+	size 0x10000
+	timeout {
+		10
+		30
+		60
+		120
+		300
+		43200
+		120
+		120
+
+		}
 }
 
 apply {
@@ -154,7 +174,7 @@ apply {
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	MAINPARSERIMPL_ACCEPT :	jmpgt LABEL_FALSE 0x64 h.tcp.srcPort
-	jmpgt LABEL_FALSE h.tcp.srcPort 0xc8
+	jmpgt LABEL_FALSE h.tcp.srcPort 0xC8
 	mov m.MainControlT_tmp_4 0x1
 	jmp LABEL_END
 	LABEL_FALSE :	mov m.MainControlT_tmp_4 0x0

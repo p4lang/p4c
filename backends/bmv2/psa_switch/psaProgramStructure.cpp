@@ -19,9 +19,8 @@ limitations under the License.
 
 namespace BMV2 {
 
-void InspectPsaProgram::postorder(const IR::Declaration_Instance* di) {
-    if (!pinfo->resourceMap.count(di))
-        return;
+void InspectPsaProgram::postorder(const IR::Declaration_Instance *di) {
+    if (!pinfo->resourceMap.count(di)) return;
     auto blk = pinfo->resourceMap.at(di);
     if (blk->is<IR::ExternBlock>()) {
         auto eb = blk->to<IR::ExternBlock>();
@@ -30,7 +29,7 @@ void InspectPsaProgram::postorder(const IR::Declaration_Instance* di) {
     }
 }
 
-bool InspectPsaProgram::isHeaders(const IR::Type_StructLike* st) {
+bool InspectPsaProgram::isHeaders(const IR::Type_StructLike *st) {
     bool result = false;
     for (auto f : st->fields) {
         if (f->type->is<IR::Type_Header>() || f->type->is<IR::Type_Stack>()) {
@@ -43,7 +42,7 @@ bool InspectPsaProgram::isHeaders(const IR::Type_StructLike* st) {
 void InspectPsaProgram::addHeaderType(const IR::Type_StructLike *st) {
     LOG5("In addHeaderType with struct " << st->toString());
     if (st->is<IR::Type_HeaderUnion>()) {
-      LOG5("Struct is Type_HeaderUnion");
+        LOG5("Struct is Type_HeaderUnion");
         for (auto f : st->fields) {
             auto ftype = typeMap->getType(f, true);
             auto ht = ftype->to<IR::Type_Header>();
@@ -53,10 +52,10 @@ void InspectPsaProgram::addHeaderType(const IR::Type_StructLike *st) {
         pinfo->header_union_types.emplace(st->getName(), st->to<IR::Type_HeaderUnion>());
         return;
     } else if (st->is<IR::Type_Header>()) {
-      LOG5("Struct is Type_Header");
-      pinfo->header_types.emplace(st->getName(), st->to<IR::Type_Header>());
+        LOG5("Struct is Type_Header");
+        pinfo->header_types.emplace(st->getName(), st->to<IR::Type_Header>());
     } else if (st->is<IR::Type_Struct>()) {
-      LOG5("Struct is Type_Struct");
+        LOG5("Struct is Type_Struct");
         pinfo->metadata_types.emplace(st->getName(), st->to<IR::Type_Struct>());
     }
 }
@@ -71,7 +70,7 @@ void InspectPsaProgram::addHeaderInstance(const IR::Type_StructLike *st, cstring
         pinfo->header_unions.emplace(name, inst);
 }
 
-void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bool isHeader) {
+void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike *type, bool isHeader) {
     LOG5("Adding type " << type->toString() << " and isHeader " << isHeader);
     for (auto f : type->fields) {
         LOG5("Iterating through field " << f->toString());
@@ -102,8 +101,8 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bo
                     if (auto h_type = uft->to<IR::Type_Header>()) {
                         addHeaderInstance(h_type, uf->controlPlaneName());
                     } else {
-                        ::error(ErrorType::ERR_INVALID,
-                                "Type %1% cannot contain type %2%", ft, uft);
+                        ::error(ErrorType::ERR_INVALID, "Type %1% cannot contain type %2%", ft,
+                                uft);
                         return;
                     }
                 }
@@ -158,24 +157,23 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bo
     }
 }
 
+bool InspectPsaProgram::preorder(const IR::Declaration_Variable *dv) {
+    auto ft = typeMap->getType(dv->getNode(), true);
+    cstring scalarsName = refMap->newName("scalars");
 
-bool InspectPsaProgram::preorder(const IR::Declaration_Variable* dv) {
-        auto ft = typeMap->getType(dv->getNode(), true);
-        cstring scalarsName = refMap->newName("scalars");
+    if (ft->is<IR::Type_Bits>()) {
+        LOG5("Adding " << dv << " into scalars map");
+        pinfo->scalars.emplace(scalarsName, dv);
+    } else if (ft->is<IR::Type_Boolean>()) {
+        LOG5("Adding " << dv << " into scalars map");
+        pinfo->scalars.emplace(scalarsName, dv);
+    }
 
-        if (ft->is<IR::Type_Bits>()) {
-            LOG5("Adding " << dv << " into scalars map");
-            pinfo->scalars.emplace(scalarsName, dv);
-        } else if (ft->is<IR::Type_Boolean>()) {
-            LOG5("Adding " << dv << " into scalars map");
-            pinfo->scalars.emplace(scalarsName, dv);
-        }
-
-        return false;
+    return false;
 }
 
 // This visitor only visits the parameter in the statement from architecture.
-bool InspectPsaProgram::preorder(const IR::Parameter* param) {
+bool InspectPsaProgram::preorder(const IR::Parameter *param) {
     auto ft = typeMap->getType(param->getNode(), true);
     LOG3("add param " << ft);
     // only convert parameters that are IR::Type_StructLike
@@ -202,7 +200,7 @@ bool InspectPsaProgram::preorder(const IR::Parameter* param) {
     return false;
 }
 
-void InspectPsaProgram::postorder(const IR::P4Parser* p) {
+void InspectPsaProgram::postorder(const IR::P4Parser *p) {
     if (pinfo->block_type.count(p)) {
         auto info = pinfo->block_type.at(p);
         if (info.first == INGRESS && info.second == PARSER)
@@ -226,22 +224,20 @@ void InspectPsaProgram::postorder(const IR::P4Control *c) {
     }
 }
 
-bool ParsePsaArchitecture::preorder(const IR::ToplevelBlock* block) {
+bool ParsePsaArchitecture::preorder(const IR::ToplevelBlock *block) {
     /// Blocks are not in IR tree, use a custom visitor to traverse
     for (auto it : block->constantValue) {
-        if (it.second->is<IR::Block>())
-            visit(it.second->getNode());
+        if (it.second->is<IR::Block>()) visit(it.second->getNode());
     }
     return false;
 }
 
-bool ParsePsaArchitecture::preorder(const IR::ExternBlock* block) {
-    if (block->node->is<IR::Declaration>())
-        structure->globals.push_back(block);
+bool ParsePsaArchitecture::preorder(const IR::ExternBlock *block) {
+    if (block->node->is<IR::Declaration>()) structure->globals.push_back(block);
     return false;
 }
 
-bool ParsePsaArchitecture::preorder(const IR::PackageBlock* block) {
+bool ParsePsaArchitecture::preorder(const IR::PackageBlock *block) {
     auto pkg = block->findParameterValue("ingress");
     if (pkg == nullptr) {
         modelError("Package %1% has no parameter named 'ingress'", block);

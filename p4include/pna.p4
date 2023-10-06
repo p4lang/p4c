@@ -263,8 +263,9 @@ enum PNA_IdleTimeout_t {
 
 // BEGIN:Match_kinds
 match_kind {
-    range,   /// Used to represent min..max intervals
-    selector /// Used for dynamic action selection via the ActionSelector extern
+    range,    /// Used to represent min..max intervals
+    selector, /// Used for dynamic action selection via the ActionSelector extern
+    optional  /// Either an exact match, or a wildcard matching any value for the entire field
 }
 // END:Match_kinds
 
@@ -373,7 +374,7 @@ enum PNA_CounterType_t {
 @noWarn("unused")
 extern Counter<W, S> {
   Counter(bit<32> n_counters, PNA_CounterType_t type);
-  void count(in S index);
+  void count(in S index, @optional in bit<32> increment);
 }
 // END:Counter_extern
 
@@ -381,7 +382,7 @@ extern Counter<W, S> {
 @noWarn("unused")
 extern DirectCounter<W> {
   DirectCounter(PNA_CounterType_t type);
-  void count();
+  void count(@optional in bit<32> increment);
 }
 // END:DirectCounter_extern
 
@@ -418,8 +419,8 @@ extern Meter<S> {
 extern DirectMeter {
   DirectMeter(PNA_MeterType_t type);
   // See the corresponding methods for extern Meter.
-  PNA_MeterColor_t execute(in PNA_MeterColor_t color);
-  PNA_MeterColor_t execute();
+  PNA_MeterColor_t execute(in PNA_MeterColor_t color, @optional in bit<32> pkt_len);
+  PNA_MeterColor_t execute(@optional in bit<32> pkt_len);
 }
 // END:DirectMeter_extern
 
@@ -581,6 +582,8 @@ extern void send_to_port(PortId_t dest_port);
 extern void mirror_packet(MirrorSlotId_t mirror_slot_id,
                           MirrorSessionId_t mirror_session_id);
 
+extern void recirculate();
+
 // TBD: Does it make sense to have a data plane add of a hit action
 // that has in, out, or inout parameters?
 //
@@ -596,7 +599,8 @@ extern void mirror_packet(MirrorSlotId_t mirror_slot_id,
 // entry's initial expire_time_profile_id.
 
 extern bool add_entry<T>(string action_name,
-                         in T action_params);
+                         in T action_params,
+                         in ExpireTimeProfileId_t expire_time_profile_id);
 
 extern FlowId_t allocate_flow_id();
 

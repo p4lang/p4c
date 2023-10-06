@@ -30,8 +30,14 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    @name("ingress.tmp") bit<32> tmp;
     @name("ingress.do_something") action do_something() {
-        h.h[0].a = (h.eth_hdr.eth_type == 16w1 ? 32w1 : 32w2);
+        if (h.eth_hdr.eth_type == 16w1) {
+            tmp = 32w1;
+        } else {
+            tmp = 32w2;
+        }
+        h.h[0].a = tmp;
     }
     @hidden table tbl_do_something {
         actions = {
@@ -68,4 +74,3 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

@@ -4,16 +4,15 @@
 struct EMPTY {
 }
 
-typedef bit<48> EthernetAddress;
 struct user_meta_t {
     bit<16> data;
     bit<16> data1;
 }
 
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header ipv4_t {
@@ -96,8 +95,8 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
     }
     @name("MyIC.tbl") table tbl_0 {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
-            b.data              : lpm @name("b.data") ;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
+            b.data              : lpm @name("b.data");
         }
         actions = {
             NoAction_1();
@@ -136,9 +135,9 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
         }
         const default_action = switch_0_case_1();
         const entries = {
-                        16w16 : switch_0_case();
-                        16w32 : switch_0_case();
-                        16w64 : switch_0_case_0();
+                        const 16w16 : switch_0_case();
+                        const 16w32 : switch_0_case();
+                        const 16w64 : switch_0_case_0();
         }
     }
     @hidden action psaswitchexpressionwithoutdefault124() {
@@ -179,17 +178,15 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
     }
     apply {
         tbl_psaswitchexpressionwithoutdefault102.apply();
-        {
-            tbl_psaswitchexpressionwithoutdefault122.apply();
-            switch (switch_0_table.apply().action_run) {
-                switch_0_case: {
-                    tbl_psaswitchexpressionwithoutdefault124.apply();
-                }
-                switch_0_case_0: {
-                    tbl_psaswitchexpressionwithoutdefault125.apply();
-                }
-                switch_0_case_1: {
-                }
+        tbl_psaswitchexpressionwithoutdefault122.apply();
+        switch (switch_0_table.apply().action_run) {
+            switch_0_case: {
+                tbl_psaswitchexpressionwithoutdefault124.apply();
+            }
+            switch_0_case_0: {
+                tbl_psaswitchexpressionwithoutdefault125.apply();
+            }
+            switch_0_case_1: {
             }
         }
         switch (tbl_0.apply().action_run) {
@@ -233,8 +230,5 @@ control MyED(packet_out buffer, out EMPTY a, out EMPTY b, inout EMPTY c, in EMPT
 }
 
 IngressPipeline<headers_t, user_meta_t, EMPTY, EMPTY, EMPTY, EMPTY>(MyIP(), MyIC(), MyID()) ip;
-
 EgressPipeline<EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(MyEP(), MyEC(), MyED()) ep;
-
 PSA_Switch<headers_t, user_meta_t, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

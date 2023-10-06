@@ -17,6 +17,7 @@ limitations under the License.
 #include "bytestrings.h"
 
 #include "ir/ir.h"
+#include "lib/algorithm.h"
 
 namespace P4 {
 
@@ -25,16 +26,16 @@ namespace ControlPlaneAPI {
 /// Convert a bignum to the P4Runtime bytes representation. The value must fit
 /// within the provided @width expressed in bits. Padding will be added as
 /// necessary (as the most significant bits).
-boost::optional<std::string> stringReprConstant(big_int value, int width) {
+std::optional<std::string> stringReprConstant(big_int value, int width) {
     // TODO(antonin): support negative values
     if (value < 0) {
         ::error(ErrorType::ERR_UNSUPPORTED, "%1%: Negative values not supported yet", value);
-        return boost::none;
+        return std::nullopt;
     }
     BUG_CHECK(width > 0, "Unexpected width 0");
     size_t bitsRequired = floor_log2(value) + 1;
-    BUG_CHECK(static_cast<size_t>(width) >= bitsRequired,
-              "Cannot represent %1% on %2% bits", value, width);
+    BUG_CHECK(static_cast<size_t>(width) >= bitsRequired, "Cannot represent %1% on %2% bits", value,
+              width);
     // TODO(antonin): P4Runtime defines the canonical representation for bit<W>
     // value as the smallest binary string required to represent the value (no 0
     // padding). Unfortunately the reference P4Runtime implementation
@@ -47,19 +48,20 @@ boost::optional<std::string> stringReprConstant(big_int value, int width) {
     std::vector<char> data(bytes);
     for (auto &d : data) {
         big_int v = (value >> (--bytes * 8)) & 0xff;
-        d = static_cast<uint8_t>(v); }
+        d = static_cast<uint8_t>(v);
+    }
     return std::string(data.begin(), data.end());
 }
 
 /// Convert a Constant to the P4Runtime bytes representation by calling
 /// stringReprConstant.
-boost::optional<std::string> stringRepr(const IR::Constant* constant, int width) {
+std::optional<std::string> stringRepr(const IR::Constant *constant, int width) {
     return stringReprConstant(constant->value, width);
 }
 
 /// Convert a BoolLiteral to the P4Runtime bytes representation by calling
 /// stringReprConstant.
-boost::optional<std::string> stringRepr(const IR::BoolLiteral* constant, int width) {
+std::optional<std::string> stringRepr(const IR::BoolLiteral *constant, int width) {
     auto v = static_cast<big_int>(constant->value ? 1 : 0);
     return stringReprConstant(v, width);
 }

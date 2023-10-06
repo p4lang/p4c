@@ -25,4 +25,3 @@ control c() {
 control empty();
 package top(empty e);
 top(c()) main;
-

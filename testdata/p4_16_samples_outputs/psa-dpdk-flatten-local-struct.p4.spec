@@ -52,16 +52,17 @@ struct local_metadata_t {
 	bit<32> psa_ingress_input_metadata_ingress_port
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
-	bit<16> Ingress_host_info_rx_bytes_0_flex_up_flex_up1_flex_0
+	;oldname:local_metadata__host_info_rx_bytes_0_flex_up_flex_up1_flex_02
+	bit<16> local_metadata__host_info_rx_bytes_0_flex_up_flex_up1_flex_0
 }
 metadata instanceof local_metadata_t
 
 action action1 args instanceof action1_arg_t {
 	jmpneq LABEL_FALSE t.field 0x1
-	mov m.Ingress_host_info_rx_bytes_0_flex_up_flex_up1_flex_0 t.field
+	mov m.local_metadata__host_info_rx_bytes_0_flex_up_flex_up1_flex_0 t.field
 	jmp LABEL_END
-	LABEL_FALSE :	mov m.Ingress_host_info_rx_bytes_0_flex_up_flex_up1_flex_0 t.field1
-	LABEL_END :	mov h.outer_ethernet.ether_type m.Ingress_host_info_rx_bytes_0_flex_up_flex_up1_flex_0
+	LABEL_FALSE :	mov m.local_metadata__host_info_rx_bytes_0_flex_up_flex_up1_flex_0 t.field1
+	LABEL_END :	mov h.outer_ethernet.ether_type m.local_metadata__host_info_rx_bytes_0_flex_up_flex_up1_flex_0
 	return
 }
 
@@ -78,14 +79,14 @@ table table1 {
 		action1
 		drop_1
 	}
-	default_action drop_1 args none 
+	default_action drop_1 args none const
 	size 0x100000
 }
 
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	mov m.psa_ingress_output_metadata_drop 0x1
 	table table1
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	tx m.psa_ingress_output_metadata_egress_port

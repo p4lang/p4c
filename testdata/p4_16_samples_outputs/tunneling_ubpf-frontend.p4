@@ -78,7 +78,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     }
     @name("pipe.upstream_tbl") table upstream_tbl_0 {
         key = {
-            headers.mpls.label: exact @name("headers.mpls.label") ;
+            headers.mpls.label: exact @name("headers.mpls.label");
         }
         actions = {
             mpls_decap();
@@ -88,7 +88,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     }
     @name("pipe.downstream_tbl") table downstream_tbl_0 {
         key = {
-            headers.ipv4.dstAddr: exact @name("headers.ipv4.dstAddr") ;
+            headers.ipv4.dstAddr: exact @name("headers.ipv4.dstAddr");
         }
         actions = {
             mpls_encap();
@@ -114,4 +114,3 @@ control dprs(packet_out packet, in Headers_t headers) {
 }
 
 ubpf<Headers_t, metadata>(prs(), pipe(), dprs()) main;
-

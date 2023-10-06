@@ -21,17 +21,15 @@ control ingress(inout Headers h) {
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.simple_assign") action simple_assign() {
-        h.eth_hdr.eth_type = 16w1;
     }
     @name("ingress.simple_assign") action simple_assign_1() {
-        h.eth_hdr.eth_type = 16w1;
     }
     @name("ingress.simple_assign") action simple_assign_2() {
         h.eth_hdr.eth_type = 16w1;
     }
     @name("ingress.dummy_table") table dummy_table_0 {
         key = {
-            h.eth_hdr.src_addr: exact @name("key") ;
+            h.eth_hdr.src_addr: exact @name("key");
         }
         actions = {
             NoAction_1();
@@ -67,4 +65,3 @@ parser Parser(packet_in b, out Headers hdr);
 control Ingress(inout Headers hdr);
 package top(Parser p, Ingress ig);
 top(p(), ingress()) main;
-

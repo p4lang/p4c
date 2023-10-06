@@ -1,0 +1,10 @@
+pna-example-tcp-connection-tracking.p4(206): [--Wwarn=uninitialized_use] warning: update_aging_info may be uninitialized
+        if (update_aging_info) {
+            ^^^^^^^^^^^^^^^^^
+pna-example-tcp-connection-tracking.p4(208): [--Wwarn=uninitialized_use] warning: new_expire_time_profile_id may not be completely initialized
+                set_entry_expire_time(new_expire_time_profile_id);
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+pna-example-tcp-connection-tracking.p4(240): [--Wwarn=uninitialized_use] warning: new_expire_time_profile_id may not be completely initialized
+                          expire_time_profile_id = new_expire_time_profile_id);
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+[--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table ct_tcp_table. Copying all match fields to metadata

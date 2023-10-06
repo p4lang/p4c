@@ -9,10 +9,6 @@ parser p(out bit<32> b) {
         a_0 = 32w1;
         transition start_0_false;
     }
-    state start_0_true {
-        tmp = 32w2;
-        transition start_0_join;
-    }
     state start_0_false {
         tmp = 32w3;
         transition start_0_join;
@@ -62,4 +58,3 @@ parser p(out bit<32> b) {
 parser proto(out bit<32> b);
 package top(proto _p);
 top(p()) main;
-

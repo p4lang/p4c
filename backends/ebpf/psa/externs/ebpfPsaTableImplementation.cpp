@@ -16,27 +16,27 @@ limitations under the License.
 */
 
 #include "ebpfPsaTableImplementation.h"
+
 #include "backends/ebpf/psa/ebpfPsaControl.h"
 #include "ebpfPsaHashAlgorithm.h"
 
 namespace EBPF {
 
-EBPFTableImplementationPSA::EBPFTableImplementationPSA(const EBPFProgram* program,
-        CodeGenInspector* codeGen, const IR::Declaration_Instance* decl) :
-        EBPFTablePSA(program, codeGen, externalName(decl)), declaration(decl) {
+EBPFTableImplementationPSA::EBPFTableImplementationPSA(const EBPFProgram *program,
+                                                       CodeGenInspector *codeGen,
+                                                       const IR::Declaration_Instance *decl)
+    : EBPFTablePSA(program, codeGen, externalName(decl)), declaration(decl) {
     referenceName = instanceName + "_key";
 }
 
-void EBPFTableImplementationPSA::emitTypes(CodeBuilder* builder) {
-    if (table == nullptr)
-        return;
+void EBPFTableImplementationPSA::emitTypes(CodeBuilder *builder) {
+    if (table == nullptr) return;
     // key is u32, so do not emit type for it
     emitValueType(builder);
+    emitCacheTypes(builder);
 }
 
-void EBPFTableImplementationPSA::emitInitializer(CodeBuilder *builder) {
-    (void) builder;
-}
+void EBPFTableImplementationPSA::emitInitializer(CodeBuilder *builder) { (void)builder; }
 
 void EBPFTableImplementationPSA::emitReferenceEntry(CodeBuilder *builder) {
     builder->emitIndent();
@@ -44,7 +44,7 @@ void EBPFTableImplementationPSA::emitReferenceEntry(CodeBuilder *builder) {
     builder->endOfStatement(true);
 }
 
-void EBPFTableImplementationPSA::registerTable(const EBPFTablePSA * instance) {
+void EBPFTableImplementationPSA::registerTable(const EBPFTablePSA *instance) {
     // verify table instance
     verifyTableNoEntries(instance);
     verifyTableNoDefaultAction(instance);
@@ -60,12 +60,11 @@ void EBPFTableImplementationPSA::registerTable(const EBPFTablePSA * instance) {
     }
 }
 
-void EBPFTableImplementationPSA::verifyTableActionList(const EBPFTablePSA * instance) {
+void EBPFTableImplementationPSA::verifyTableActionList(const EBPFTablePSA *instance) {
     bool printError = false;
-    if (actionList == nullptr)
-        return;
+    if (actionList == nullptr) return;
 
-    auto getActionName = [this](const IR::ActionList * al, size_t id)->cstring {
+    auto getActionName = [this](const IR::ActionList *al, size_t id) -> cstring {
         auto pe = this->getActionNameExpression(al->actionList.at(id)->expression);
         CHECK_NULL(pe);
         return pe->path->name.originalName;
@@ -75,8 +74,7 @@ void EBPFTableImplementationPSA::verifyTableActionList(const EBPFTablePSA * inst
         for (size_t i = 0; i < actionList->size(); ++i) {
             auto left = getActionName(instance->actionList, i);
             auto right = getActionName(actionList, i);
-            if (left != right)
-                printError = true;
+            if (left != right) printError = true;
         }
     } else {
         printError = true;
@@ -91,24 +89,24 @@ void EBPFTableImplementationPSA::verifyTableActionList(const EBPFTablePSA * inst
     }
 }
 
-void EBPFTableImplementationPSA::verifyTableNoDefaultAction(const EBPFTablePSA * instance) {
+void EBPFTableImplementationPSA::verifyTableNoDefaultAction(const EBPFTablePSA *instance) {
     auto defaultAction = instance->table->container->getDefaultAction();
-    BUG_CHECK(defaultAction->is<IR::MethodCallExpression>(),
-              "%1%: expected an action call", defaultAction);
+    BUG_CHECK(defaultAction->is<IR::MethodCallExpression>(), "%1%: expected an action call",
+              defaultAction);
 
     auto mi = P4::MethodInstance::resolve(defaultAction->to<IR::MethodCallExpression>(),
                                           program->refMap, program->typeMap);
     auto ac = mi->to<P4::ActionCall>();
     BUG_CHECK(ac != nullptr, "%1%: expected an action call", mi);
 
-    if (ac->action->name.originalName != P4::P4CoreLibrary::instance.noAction.name) {
+    if (ac->action->name.originalName != P4::P4CoreLibrary::instance().noAction.name) {
         ::error(ErrorType::ERR_UNSUPPORTED,
                 "%1%: Default action cannot be defined for table %2% with implementation %3%",
                 defaultAction, instance->table->container->name, declaration);
     }
 }
 
-void EBPFTableImplementationPSA::verifyTableNoDirectObjects(const EBPFTablePSA * instance) {
+void EBPFTableImplementationPSA::verifyTableNoDirectObjects(const EBPFTablePSA *instance) {
     if (!instance->counters.empty() || !instance->meters.empty()) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                 "%1%: DirectCounter and DirectMeter externs are not supported "
@@ -117,7 +115,7 @@ void EBPFTableImplementationPSA::verifyTableNoDirectObjects(const EBPFTablePSA *
     }
 }
 
-void EBPFTableImplementationPSA::verifyTableNoEntries(const EBPFTablePSA * instance) {
+void EBPFTableImplementationPSA::verifyTableNoEntries(const EBPFTablePSA *instance) {
     // PSA documentation v1.1 says: "Directly specifying the action as part of the table
     //    entry is not allowed for tables with an action profile implementation."
     // I believe that this sentence forbids (const) entries in a table in P4 code at all.
@@ -130,7 +128,7 @@ void EBPFTableImplementationPSA::verifyTableNoEntries(const EBPFTablePSA * insta
     }
 }
 
-unsigned EBPFTableImplementationPSA::getUintFromExpression(const IR::Expression * expr,
+unsigned EBPFTableImplementationPSA::getUintFromExpression(const IR::Expression *expr,
                                                            unsigned defaultValue) {
     if (!expr->is<IR::Constant>()) {
         ::error(ErrorType::ERR_UNSUPPORTED, "Must be constant value: %1%", expr);
@@ -146,9 +144,9 @@ unsigned EBPFTableImplementationPSA::getUintFromExpression(const IR::Expression 
 
 // ===============================ActionProfile===============================
 
-EBPFActionProfilePSA::EBPFActionProfilePSA(const EBPFProgram* program, CodeGenInspector* codeGen,
-                                           const IR::Declaration_Instance* decl) :
-        EBPFTableImplementationPSA(program, codeGen, decl) {
+EBPFActionProfilePSA::EBPFActionProfilePSA(const EBPFProgram *program, CodeGenInspector *codeGen,
+                                           const IR::Declaration_Instance *decl)
+    : EBPFTableImplementationPSA(program, codeGen, decl) {
     size = getUintFromExpression(decl->arguments->at(0)->expression, 1);
 }
 
@@ -165,17 +163,16 @@ void EBPFActionProfilePSA::emitInstance(CodeBuilder *builder) {
                                    cstring("struct ") + valueTypeName, size);
 }
 
-void EBPFActionProfilePSA::applyImplementation(CodeBuilder* builder, cstring tableValueName,
+void EBPFActionProfilePSA::applyImplementation(CodeBuilder *builder, cstring tableValueName,
                                                cstring actionRunVariable) {
     cstring msg = Util::printf_format("ActionProfile: applying %s", instanceName.c_str());
     builder->target->emitTraceMessage(builder, msg.c_str());
 
     cstring apValueName = program->refMap->newName("ap_value");
-    cstring apKeyName = Util::printf_format("%s->%s",
-        tableValueName.c_str(), referenceName.c_str());
+    cstring apKeyName =
+        Util::printf_format("%s->%s", tableValueName.c_str(), referenceName.c_str());
 
-    builder->target->emitTraceMessage(builder, "ActionProfile: entry id %u",
-                                      1, apKeyName.c_str());
+    builder->target->emitTraceMessage(builder, "ActionProfile: entry id %u", 1, apKeyName.c_str());
 
     builder->emitIndent();
     builder->appendFormat("struct %s *%s = NULL", valueTypeName.c_str(), apValueName.c_str());
@@ -196,8 +193,8 @@ void EBPFActionProfilePSA::applyImplementation(CodeBuilder* builder, cstring tab
     builder->append(" else ");
 
     builder->blockStart();
-    builder->target->emitTraceMessage(builder,
-        "ActionProfile: entry not found, executing implicit NoAction");
+    builder->target->emitTraceMessage(
+        builder, "ActionProfile: entry not found, executing implicit NoAction");
     builder->emitIndent();
     builder->appendFormat("%s = 0", program->control->hitVariable.c_str());
     builder->endOfStatement(true);
@@ -209,17 +206,17 @@ void EBPFActionProfilePSA::applyImplementation(CodeBuilder* builder, cstring tab
 
 // ===============================ActionSelector===============================
 
-EBPFActionSelectorPSA::EBPFActionSelectorPSA(const EBPFProgram* program, CodeGenInspector* codeGen,
-                                             const IR::Declaration_Instance* decl) :
-        EBPFTableImplementationPSA(program, codeGen, decl), emptyGroupAction(nullptr) {
+EBPFActionSelectorPSA::EBPFActionSelectorPSA(const EBPFProgram *program, CodeGenInspector *codeGen,
+                                             const IR::Declaration_Instance *decl)
+    : EBPFTableImplementationPSA(program, codeGen, decl), emptyGroupAction(nullptr) {
     hashEngine = EBPFHashAlgorithmTypeFactoryPSA::instance()->create(
-            getUintFromExpression(decl->arguments->at(0)->expression, 0),
-            program, instanceName + "_hash");
+        getUintFromExpression(decl->arguments->at(0)->expression, 0), program,
+        instanceName + "_hash");
     if (hashEngine != nullptr) {
         hashEngine->setVisitor(codeGen);
     } else {
-        ::error(ErrorType::ERR_UNSUPPORTED,
-                "Algorithm not yet implemented: %1%", decl->arguments->at(0));
+        ::error(ErrorType::ERR_UNSUPPORTED, "Algorithm not yet implemented: %1%",
+                decl->arguments->at(0));
     }
 
     size = getUintFromExpression(decl->arguments->at(1)->expression, 1);
@@ -234,7 +231,8 @@ EBPFActionSelectorPSA::EBPFActionSelectorPSA(const EBPFProgram* program, CodeGen
                 decl->arguments->at(2)->expression);
     }
     if (outputHashWidth < 1) {
-        ::error(ErrorType::ERR_INVALID, "%1%: invalid output width used for checksum "
+        ::error(ErrorType::ERR_INVALID,
+                "%1%: invalid output width used for checksum "
                 "value truncation, must be at least 1 bit",
                 decl->arguments->at(2)->expression);
     }
@@ -250,11 +248,15 @@ EBPFActionSelectorPSA::EBPFActionSelectorPSA(const EBPFProgram* program, CodeGen
     isGroupEntryName = instanceName + "_is_group_ref";
 
     groupsMapSize = 0;
+
+    if (program->options.enableTableCache) {
+        tableCacheEnabled = true;
+        createCacheTypeNames(true, false);
+    }
 }
 
 void EBPFActionSelectorPSA::emitInitializer(CodeBuilder *builder) {
-    if (emptyGroupAction == nullptr)
-        return;  // no entry to initialize
+    if (emptyGroupAction == nullptr) return;  // no entry to initialize
 
     auto ev = emptyGroupAction->value->to<IR::ExpressionValue>()->expression;
     cstring value = program->refMap->newName("value");
@@ -265,8 +267,7 @@ void EBPFActionSelectorPSA::emitInitializer(CodeBuilder *builder) {
         BUG_CHECK(action != nullptr, "%1%: not an action", ev);
 
         if (!action->getParameters()->empty()) {
-            ::error(ErrorType::ERR_UNINITIALIZED,
-                    "%1%: missing value for action parameters: %2%",
+            ::error(ErrorType::ERR_UNINITIALIZED, "%1%: missing value for action parameters: %2%",
                     ev, action->getParameters());
             return;
         }
@@ -275,7 +276,7 @@ void EBPFActionSelectorPSA::emitInitializer(CodeBuilder *builder) {
         builder->appendFormat("struct %s %s = ", valueTypeName.c_str(), value.c_str());
         builder->blockStart();
         builder->emitIndent();
-        if (action->name.originalName == P4::P4CoreLibrary::instance.noAction.name) {
+        if (action->name.originalName == P4::P4CoreLibrary::instance().noAction.name) {
             builder->append(".action = 0,");
         } else {
             builder->appendFormat(".action = %s,", p4ActionToActionIDName(action));
@@ -290,8 +291,7 @@ void EBPFActionSelectorPSA::emitInitializer(CodeBuilder *builder) {
     cstring ret = program->refMap->newName("ret");
     builder->emitIndent();
     builder->appendFormat("int %s = ", ret.c_str());
-    builder->target->emitTableUpdate(builder, emptyGroupActionMapName,
-                                     program->zeroKey, value);
+    builder->target->emitTableUpdate(builder, emptyGroupActionMapName, program->zeroKey, value);
     builder->newline();
 
     emitMapUpdateTraceMsg(builder, emptyGroupActionMapName, ret);
@@ -304,19 +304,18 @@ void EBPFActionSelectorPSA::emitInstance(CodeBuilder *builder) {
     // group map (group ref -> {action refs})
     // TODO: group size (inner size) is assumed to be 128. Make more logic for this.
     //  One additional entry is for group size.
-    builder->target->emitMapInMapDecl(builder, groupsMapName + "_inner", TableArray,
-                                      "u32", "u32", 128 + 1,
-                                      groupsMapName, TableHash,
-                                      "u32", groupsMapSize);
+    builder->target->emitMapInMapDecl(builder, groupsMapName + "_inner", TableArray, "u32", "u32",
+                                      128 + 1, groupsMapName, TableHash, "u32", groupsMapSize);
 
     // default empty group action (0 -> action)
     builder->target->emitTableDecl(builder, emptyGroupActionMapName, TableArray,
-                                   program->arrayIndexType,
-                                   cstring("struct ") + valueTypeName, 1);
+                                   program->arrayIndexType, cstring("struct ") + valueTypeName, 1);
 
     // action map (ref -> action)
     builder->target->emitTableDecl(builder, actionsMapName, TableHash, "u32",
                                    cstring("struct ") + valueTypeName, size);
+
+    emitCacheInstance(builder);
 }
 
 void EBPFActionSelectorPSA::emitReferenceEntry(CodeBuilder *builder) {
@@ -326,10 +325,9 @@ void EBPFActionSelectorPSA::emitReferenceEntry(CodeBuilder *builder) {
     builder->endOfStatement(true);
 }
 
-void EBPFActionSelectorPSA::applyImplementation(CodeBuilder* builder, cstring tableValueName,
+void EBPFActionSelectorPSA::applyImplementation(CodeBuilder *builder, cstring tableValueName,
                                                 cstring actionRunVariable) {
-    if (hashEngine == nullptr)
-        return;
+    if (hashEngine == nullptr) return;
 
     cstring msg = Util::printf_format("ActionSelector: applying %s", instanceName.c_str());
     builder->target->emitTraceMessage(builder, msg.c_str());
@@ -344,12 +342,14 @@ void EBPFActionSelectorPSA::applyImplementation(CodeBuilder* builder, cstring ta
     cstring checksumValName = "as_checksum_val";
     cstring mapEntryName = "as_map_entry";
 
+    emitCacheVariables(builder);
+
     builder->emitIndent();
     builder->appendFormat("struct %s * %s = NULL", valueTypeName.c_str(), asValueName.c_str());
     builder->endOfStatement(true);
     builder->emitIndent();
-    builder->appendFormat("u32 %s = %s->%s", effectiveActionRefName.c_str(),
-                          tableValueName.c_str(), referenceName.c_str());
+    builder->appendFormat("u32 %s = %s->%s", effectiveActionRefName.c_str(), tableValueName.c_str(),
+                          referenceName.c_str());
     builder->endOfStatement(true);
     builder->emitIndent();
     builder->appendFormat("u8 %s = 0", groupStateVarName.c_str());
@@ -360,8 +360,10 @@ void EBPFActionSelectorPSA::applyImplementation(CodeBuilder* builder, cstring ta
     builder->emitIndent();
     builder->appendFormat("if (%s->%s != 0) ", tableValueName.c_str(), isGroupEntryName.c_str());
     builder->blockStart();
-    builder->target->emitTraceMessage(builder, "ActionSelector: group reference %u",
-                                      1, effectiveActionRefName.c_str());
+    builder->target->emitTraceMessage(builder, "ActionSelector: group reference %u", 1,
+                                      effectiveActionRefName.c_str());
+
+    emitCacheLookup(builder, tableValueName, asValueName);
 
     builder->emitIndent();
     builder->append("void * ");
@@ -405,8 +407,8 @@ void EBPFActionSelectorPSA::applyImplementation(CodeBuilder* builder, cstring ta
     builder->appendFormat("%s = 1 + (%s %% (*%s))", effectiveActionRefName.c_str(),
                           checksumValName.c_str(), mapEntryName.c_str());
     builder->endOfStatement(true);
-    builder->target->emitTraceMessage(builder, "ActionSelector: selected action %u from group",
-                                      1, effectiveActionRefName.c_str());
+    builder->target->emitTraceMessage(builder, "ActionSelector: selected action %u from group", 1,
+                                      effectiveActionRefName.c_str());
     builder->emitIndent();
     // innerGroupName is a pointer to a map, so can't use emitTableLookup() - it expects a map
     builder->appendFormat("%s = bpf_map_lookup_elem(%s, &%s)", mapEntryName.c_str(),
@@ -424,7 +426,8 @@ void EBPFActionSelectorPSA::applyImplementation(CodeBuilder* builder, cstring ta
     builder->blockStart();
     builder->emitIndent();
     builder->appendLine("/* Not found, probably bug. Skip further execution of the extern. */");
-    builder->target->emitTraceMessage(builder,
+    builder->target->emitTraceMessage(
+        builder,
         "ActionSelector: Entry with action reference was not found, dropping packet. Bug?");
     builder->emitIndent();
     builder->appendFormat("return %s", builder->target->abortReturnCode().c_str());
@@ -444,8 +447,8 @@ void EBPFActionSelectorPSA::applyImplementation(CodeBuilder* builder, cstring ta
     builder->blockEnd(false);  // found number of elements
     builder->append(" else ");
     builder->blockStart();
-    builder->target->emitTraceMessage(builder,
-        "ActionSelector: entry with number of elements not found, dropping packet. Bug?");
+    builder->target->emitTraceMessage(
+        builder, "ActionSelector: entry with number of elements not found, dropping packet. Bug?");
     builder->emitIndent();
     builder->appendFormat("return %s", builder->target->abortReturnCode().c_str());
     builder->endOfStatement(true);
@@ -454,8 +457,8 @@ void EBPFActionSelectorPSA::applyImplementation(CodeBuilder* builder, cstring ta
     builder->blockEnd(false);  // group found
     builder->append(" else ");
     builder->blockStart();
-    builder->target->emitTraceMessage(builder,
-        "ActionSelector: group map was not found, dropping packet. Bug?");
+    builder->target->emitTraceMessage(
+        builder, "ActionSelector: group map was not found, dropping packet. Bug?");
     builder->emitIndent();
     builder->appendFormat("return %s", builder->target->abortReturnCode().c_str());
     builder->endOfStatement(true);
@@ -463,26 +466,32 @@ void EBPFActionSelectorPSA::applyImplementation(CodeBuilder* builder, cstring ta
 
     builder->blockEnd(true);  // is group reference
 
+    if (tableCacheEnabled) {
+        builder->blockEnd(true);
+    }
+
     // 4. Use group state and action ref to get an action data.
 
     builder->emitIndent();
     builder->appendFormat("if (%s == 0) ", groupStateVarName.c_str());
     builder->blockStart();
-    builder->target->emitTraceMessage(builder, "ActionSelector: member reference %u",
-                                      1, effectiveActionRefName.c_str());
+    builder->target->emitTraceMessage(builder, "ActionSelector: member reference %u", 1,
+                                      effectiveActionRefName.c_str());
     builder->emitIndent();
     builder->target->emitTableLookup(builder, actionsMapName, effectiveActionRefName, asValueName);
     builder->endOfStatement(true);
     builder->blockEnd(false);
     builder->appendFormat(" else if (%s == 1) ", groupStateVarName.c_str());
     builder->blockStart();
-    builder->target->emitTraceMessage(builder,
-        "ActionSelector: empty group, executing default group action");
+    builder->target->emitTraceMessage(
+        builder, "ActionSelector: empty group, executing default group action");
     builder->emitIndent();
-    builder->target->emitTableLookup(builder, emptyGroupActionMapName,
-                                     program->zeroKey, asValueName);
+    builder->target->emitTableLookup(builder, emptyGroupActionMapName, program->zeroKey,
+                                     asValueName);
     builder->endOfStatement(true);
     builder->blockEnd(true);
+
+    emitCacheUpdate(builder, cacheKeyVar, asValueName);
 
     // 5. Execute action.
 
@@ -496,8 +505,8 @@ void EBPFActionSelectorPSA::applyImplementation(CodeBuilder* builder, cstring ta
     builder->append(" else ");
 
     builder->blockStart();
-    builder->target->emitTraceMessage(builder,
-        "ActionSelector: member not found, executing implicit NoAction");
+    builder->target->emitTraceMessage(
+        builder, "ActionSelector: member not found, executing implicit NoAction");
     builder->emitIndent();
     builder->appendFormat("%s = 0", program->control->hitVariable.c_str());
     builder->endOfStatement(true);
@@ -520,26 +529,25 @@ EBPFHashAlgorithmPSA::ArgumentsList EBPFActionSelectorPSA::unpackSelectors() {
     return result;
 }
 
-EBPFActionSelectorPSA::SelectorsListType
-EBPFActionSelectorPSA::getSelectorsFromTable(const EBPFTablePSA * instance) {
+EBPFActionSelectorPSA::SelectorsListType EBPFActionSelectorPSA::getSelectorsFromTable(
+    const EBPFTablePSA *instance) {
     SelectorsListType ret;
 
     for (auto k : instance->keyGenerator->keyElements) {
         auto mkdecl = program->refMap->getDeclaration(k->matchType->path, true);
         auto matchType = mkdecl->getNode()->to<IR::Declaration_ID>();
 
-        if (matchType->name.name == "selector")
-            ret.emplace_back(k);
+        if (matchType->name.name == "selector") ret.emplace_back(k);
     }
 
     return ret;
 }
 
-void EBPFActionSelectorPSA::registerTable(const EBPFTablePSA * instance) {
+void EBPFActionSelectorPSA::registerTable(const EBPFTablePSA *instance) {
     if (table == nullptr) {
         selectors = getSelectorsFromTable(instance);
         emptyGroupAction =
-                instance->table->container->properties->getProperty("psa_empty_group_action");
+            instance->table->container->properties->getProperty("psa_empty_group_action");
         groupsMapSize = instance->size;
     } else {
         verifyTableSelectorKeySet(instance);
@@ -556,7 +564,7 @@ void EBPFActionSelectorPSA::registerTable(const EBPFTablePSA * instance) {
     EBPFTableImplementationPSA::registerTable(instance);
 }
 
-void EBPFActionSelectorPSA::verifyTableSelectorKeySet(const EBPFTablePSA * instance) {
+void EBPFActionSelectorPSA::verifyTableSelectorKeySet(const EBPFTablePSA *instance) {
     bool printError = false;
     auto foreignSelectors = getSelectorsFromTable(instance);
 
@@ -564,8 +572,7 @@ void EBPFActionSelectorPSA::verifyTableSelectorKeySet(const EBPFTablePSA * insta
         for (size_t i = 0; i < selectors.size(); ++i) {
             auto left = foreignSelectors.at(i)->expression->toString();
             auto right = selectors.at(i)->expression->toString();
-            if (left != right)
-                printError = true;
+            if (left != right) printError = true;
         }
     } else {
         printError = true;
@@ -579,11 +586,10 @@ void EBPFActionSelectorPSA::verifyTableSelectorKeySet(const EBPFTablePSA * insta
     }
 }
 
-void EBPFActionSelectorPSA::verifyTableEmptyGroupAction(const EBPFTablePSA * instance) {
+void EBPFActionSelectorPSA::verifyTableEmptyGroupAction(const EBPFTablePSA *instance) {
     auto iega = instance->table->container->properties->getProperty("psa_empty_group_action");
 
-    if (emptyGroupAction == nullptr && iega == nullptr)
-        return;  // nothing to do here
+    if (emptyGroupAction == nullptr && iega == nullptr) return;  // nothing to do here
     if (emptyGroupAction == nullptr && iega != nullptr) {
         ::error(ErrorType::ERR_UNEXPECTED,
                 "%1%: property not specified in previous table %2% "
@@ -594,8 +600,9 @@ void EBPFActionSelectorPSA::verifyTableEmptyGroupAction(const EBPFTablePSA * ins
     if (emptyGroupAction != nullptr && iega == nullptr) {
         ::error(ErrorType::ERR_EXPECTED,
                 "%1%: missing property %2%, defined in previous table %3% "
-                "(tables use the same implementation %4%)", instance->table->container,
-                emptyGroupAction, table->container->toString(), declaration);
+                "(tables use the same implementation %4%)",
+                instance->table->container, emptyGroupAction, table->container->toString(),
+                declaration);
         return;
     }
 
@@ -616,8 +623,7 @@ void EBPFActionSelectorPSA::verifyTableEmptyGroupAction(const EBPFTablePSA * ins
     auto lmce = lev->to<IR::MethodCallExpression>();
 
     if (lpe != nullptr && rpe != nullptr) {
-        if (lpe->toString() != rpe->toString())
-            same = false;
+        if (lpe->toString() != rpe->toString()) same = false;
     } else if (lmce != nullptr && rmce != nullptr) {
         if (lmce->method->to<IR::PathExpression>()->path->name.originalName !=
             rmce->method->to<IR::PathExpression>()->path->name.originalName) {
@@ -635,8 +641,9 @@ void EBPFActionSelectorPSA::verifyTableEmptyGroupAction(const EBPFTablePSA * ins
         }
     } else {
         same = false;
-        additionalNote = "; note: action name can\'t be mixed with "
-                         "action call expression (compiler backend limitation)";
+        additionalNote =
+            "; note: action name can\'t be mixed with "
+            "action call expression (compiler backend limitation)";
     }
 
     if (!same) {
@@ -645,6 +652,140 @@ void EBPFActionSelectorPSA::verifyTableEmptyGroupAction(const EBPFTablePSA * ins
                 "previous table %3% (tables use the same implementation %4%)%5%",
                 rev, lev, table->container->toString(), declaration, additionalNote);
     }
+}
+
+void EBPFActionSelectorPSA::emitCacheTypes(CodeBuilder *builder) {
+    if (!tableCacheEnabled) return;
+
+    CodeGenInspector commentGen(program->refMap, program->typeMap);
+    commentGen.setBuilder(builder);
+
+    // construct cache key type - we need group reference and selector keys
+    builder->emitIndent();
+    builder->appendFormat("struct %s ", cacheKeyTypeName.c_str());
+    builder->blockStart();
+
+    builder->emitIndent();
+    builder->appendFormat("u32 group_ref");
+    builder->endOfStatement(true);
+
+    unsigned int fieldNumber = 0;
+    for (auto s : selectors) {
+        auto type = program->typeMap->getType(s->expression);
+        auto ebpfType = EBPFTypeFactory::instance->create(type);
+        cstring fieldName = Util::printf_format("field%u", fieldNumber++);
+
+        builder->emitIndent();
+        ebpfType->declare(builder, fieldName, false);
+        builder->endOfStatement(false);
+        builder->append(" /* ");
+        s->expression->apply(commentGen);
+        builder->append(" */");
+        builder->newline();
+    }
+
+    builder->blockEnd(false);
+    builder->append(" __attribute__((aligned(4)))");
+    builder->endOfStatement(true);
+
+    // value can be used from Action Selector because there is no need to cache hit variable
+}
+
+void EBPFActionSelectorPSA::emitCacheVariables(CodeBuilder *builder) {
+    if (!tableCacheEnabled) return;
+
+    cacheKeyVar = program->refMap->newName("key_cache");
+    cacheDoUpdateVar = program->refMap->newName("do_update_cache");
+
+    builder->emitIndent();
+    builder->appendFormat("struct %s %s = {0}", cacheKeyTypeName.c_str(), cacheKeyVar.c_str());
+    builder->endOfStatement(true);
+
+    builder->emitIndent();
+    builder->appendFormat("u8 %s = 0", cacheDoUpdateVar.c_str());
+    builder->endOfStatement(true);
+}
+
+void EBPFActionSelectorPSA::emitCacheLookup(CodeBuilder *builder, cstring key, cstring value) {
+    if (!tableCacheEnabled) return;
+
+    builder->emitIndent();
+    builder->appendFormat("%s.group_ref = %s->%s", cacheKeyVar.c_str(), key.c_str(),
+                          referenceName.c_str());
+    builder->endOfStatement(true);
+
+    unsigned int fieldNumber = 0;
+    for (auto s : selectors) {
+        auto type = program->typeMap->getType(s->expression);
+        auto ebpfType = EBPFTypeFactory::instance->create(type);
+        cstring fieldName = Util::printf_format("field%u", fieldNumber++);
+
+        bool memcpy = false;
+        auto scalar = ebpfType->to<EBPFScalarType>();
+        unsigned width = 0;
+        if (scalar != nullptr) {
+            width = scalar->implementationWidthInBits();
+            memcpy = !EBPFScalarType::generatesScalar(width);
+        }
+
+        builder->emitIndent();
+        if (memcpy) {
+            builder->appendFormat("__builtin_memcpy(&%s.%s, &", cacheKeyVar.c_str(),
+                                  fieldName.c_str());
+            codeGen->visit(s->expression);
+            builder->appendFormat(", %d)", scalar->bytesRequired());
+        } else {
+            builder->appendFormat("%s.%s = ", cacheKeyVar.c_str(), fieldName.c_str());
+            codeGen->visit(s->expression);
+        }
+        builder->endOfStatement(true);
+    }
+
+    builder->target->emitTraceMessage(builder, "ActionSelector: trying cache...");
+
+    builder->emitIndent();
+    builder->target->emitTableLookup(builder, cacheTableName, cacheKeyVar, value);
+    builder->endOfStatement(true);
+
+    builder->emitIndent();
+    builder->appendFormat("if (%s != NULL) ", value.c_str());
+    builder->blockStart();
+
+    builder->target->emitTraceMessage(builder,
+                                      "ActionSelector: cache hit, skipping later lookup(s)");
+
+    builder->emitIndent();
+    builder->appendFormat("%s = 2", groupStateVarName.c_str());
+    builder->endOfStatement(true);
+
+    builder->blockEnd(false);
+    builder->append(" else ");
+    builder->blockStart();
+
+    builder->target->emitTraceMessage(builder, "ActionSelector: cache miss, nevermind");
+
+    builder->emitIndent();
+    builder->appendFormat("%s = 1", cacheDoUpdateVar.c_str());
+    builder->endOfStatement(true);
+
+    // do normal lookup at this indent level and then end block
+}
+
+void EBPFActionSelectorPSA::emitCacheUpdate(CodeBuilder *builder, cstring key, cstring value) {
+    if (!tableCacheEnabled) return;
+
+    builder->emitIndent();
+    builder->appendFormat("if (%s != NULL && %s != 0) ", value.c_str(), cacheDoUpdateVar.c_str());
+    builder->blockStart();
+
+    builder->emitIndent();
+    builder->appendFormat("BPF_MAP_UPDATE_ELEM(%s, &%s, %s, BPF_ANY);", cacheTableName.c_str(),
+                          key.c_str(), value.c_str());
+    builder->newline();
+
+    builder->target->emitTraceMessage(builder, "ActionSelector: cache updated");
+
+    builder->blockEnd(true);
 }
 
 }  // namespace EBPF

@@ -27,6 +27,7 @@ metadata instanceof main_metadata_t
 header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
 
+regarray direction size 0x100 initval 0
 apply {
 	rx m.pna_main_input_metadata_input_port
 	invalidate h.ethernet

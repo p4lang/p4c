@@ -4,8 +4,6 @@ control c() {
     action a() {
     }
     table t {
-        key = {
-        }
         actions = {
             a();
             @defaultonly NoAction();

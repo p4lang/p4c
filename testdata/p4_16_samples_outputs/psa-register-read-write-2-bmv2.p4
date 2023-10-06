@@ -90,8 +90,5 @@ control MyED(packet_out pkt, out EMPTY clone_e2e_meta, out EMPTY recirculate_met
 }
 
 IngressPipeline(MyIP(), MyIC(), MyID()) ip;
-
 EgressPipeline(MyEP(), MyEC(), MyED()) ep;
-
 PSA_Switch(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

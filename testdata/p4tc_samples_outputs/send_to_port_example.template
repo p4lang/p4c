@@ -1,0 +1,22 @@
+#!/bin/bash -x
+
+set -e
+
+TC="tc"
+$TC p4template create pipeline/send_to_port_example pipeid 1 numtables 1
+
+$TC p4template create action/send_to_port_example/MainControlImpl/next_hop actid 1 \
+	param vport type bit32
+$TC p4template update action/send_to_port_example/MainControlImpl/next_hop state active
+
+$TC p4template create action/send_to_port_example/MainControlImpl/default_route_drop actid 2
+$TC p4template update action/send_to_port_example/MainControlImpl/default_route_drop state active
+
+$TC p4template create table/send_to_port_example/MainControlImpl/ipv4_tbl \
+	tblid 1 \
+	type exact \
+	keysz 72 nummasks 8 tentries 2048 \
+	table_acts act name send_to_port_example/MainControlImpl/next_hop \
+	act name send_to_port_example/MainControlImpl/default_route_drop
+$TC p4template update table/send_to_port_example/MainControlImpl/ipv4_tbl default_miss_action permissions 0x109 action send_to_port_example/MainControlImpl/default_route_drop
+$TC p4template update pipeline/send_to_port_example state ready

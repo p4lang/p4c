@@ -1,0 +1,3 @@
+p4tc_samples/nummask_annotation_errors.p4(136): [--Werror=invalid] error: nummask annotation cannot have '"ct"' as value. Only integer constants are allowed
+    @nummask("ct")
+                ^

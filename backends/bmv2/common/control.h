@@ -17,33 +17,33 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_COMMON_CONTROL_H_
 #define BACKENDS_BMV2_COMMON_CONTROL_H_
 
-#include "ir/ir.h"
-#include "lib/json.h"
 #include "controlFlowGraph.h"
-#include "frontends/p4/coreLibrary.h"
-#include "frontends/p4/typeMap.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
-#include "frontends/common/resolveReferences/referenceMap.h"
-#include "midend/convertEnums.h"
 #include "expression.h"
 #include "extern.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/typeMap.h"
 #include "helpers.h"
+#include "ir/ir.h"
+#include "lib/algorithm.h"
+#include "lib/json.h"
+#include "midend/convertEnums.h"
 #include "sharedActionSelectorCheck.h"
 
 namespace BMV2 {
 
 static constexpr unsigned INVALID_ACTION_ID = 0xffffffff;
 
-template<Standard::Arch arch>
+template <Standard::Arch arch>
 class ControlConverter : public Inspector {
-    ConversionContext* ctxt;
-    cstring            name;
-    P4::P4CoreLibrary& corelib;
+    ConversionContext *ctxt;
+    cstring name;
+    P4::P4CoreLibrary &corelib;
 
  protected:
-    Util::IJson* convertTable(const CFG::TableNode* node,
-                              Util::JsonArray* action_profiles,
-                              BMV2::SharedActionSelectorCheck<arch>* selector_check) {
+    Util::IJson *convertTable(const CFG::TableNode *node, Util::JsonArray *action_profiles,
+                              BMV2::SharedActionSelectorCheck<arch> *selector_check) {
         auto table = node->table;
         LOG3("Processing " << dbp(table));
         auto result = new Util::JsonObject();
@@ -63,20 +63,20 @@ class ControlConverter : public Inspector {
                 auto ket = ctxt->typeMap->getType(expr, true);
                 if (!ket->is<IR::Type_Bits>() && !ket->is<IR::Type_Boolean>() &&
                     !ket->is<IR::Type_Error>())
-                    ::error(ErrorType::ERR_UNSUPPORTED, "%1%: unsupporded key type %2%. "
-                            "Supported key types are be bit<> or boolean, or error.", expr, ket);
+                    ::error(ErrorType::ERR_UNSUPPORTED,
+                            "%1%: unsupporded key type %2%. "
+                            "Supported key types are be bit<> or boolean, or error.",
+                            expr, ket);
 
                 auto match_type = getKeyMatchType(ke);
-                if (match_type == BMV2::MatchImplementation::selectorMatchTypeName)
-                    continue;
+                if (match_type == BMV2::MatchImplementation::selectorMatchTypeName) continue;
                 // Decreasing order of precedence (bmv2 specification):
                 // 0) more than one LPM field is an error
                 // 1) if there is at least one RANGE field, then the table is RANGE
                 // 2) if there is at least one TERNARY or OPTIONAL field, then the table is TERNARY
                 // 3) if there is a LPM field, then the table is LPM
                 // 4) otherwise the table is EXACT
-                if (match_type == corelib.lpmMatch.name)
-                    count_lpm++;
+                if (match_type == corelib.lpmMatch.name) count_lpm++;
                 if (count_lpm > 1)
                     ::error(ErrorType::ERR_UNSUPPORTED,
                             "multiple LPM keys in table %1% not supported", table);
@@ -101,7 +101,8 @@ class ControlConverter : public Inspector {
                         mask = mexp->left->to<IR::Constant>()->value;
                         expr = mexp->right;
                     } else {
-                        ::error(ErrorType::ERR_EXPECTED, "%1% must be a constant", expr); }
+                        ::error(ErrorType::ERR_EXPECTED, "%1% must be a constant", expr);
+                    }
                 } else if (auto slice = expr->to<IR::Slice>()) {
                     expr = slice->e0;
                     int h = slice->getH();
@@ -131,7 +132,7 @@ class ControlConverter : public Inspector {
                 keyelement->emplace("target", jk->to<Util::JsonObject>()->get("value"));
                 if (mask != 0)
                     keyelement->emplace("mask",
-                            stringRepr(mask, ROUNDUP(expr->type->width_bits(), 8)));
+                                        stringRepr(mask, ROUNDUP(expr->type->width_bits(), 8)));
                 else
                     keyelement->emplace("mask", Util::JsonValue::null);
                 tkey->append(keyelement);
@@ -163,8 +164,7 @@ class ControlConverter : public Inspector {
         if (auto entries = table->getEntries()) {
             size = entries->entries.size();
         }
-        if (size == 0)
-            size = BMV2::TableAttributes::defaultTableSize;
+        if (size == 0) size = BMV2::TableAttributes::defaultTableSize;
 
         result->emplace("max_size", size);
         auto ctrs = table->properties->getProperty("counters");
@@ -176,17 +176,20 @@ class ControlConverter : public Inspector {
                 auto expr = ctrs->value->to<IR::ExpressionValue>()->expression;
                 if (expr->is<IR::ConstructorCallExpression>()) {
                     auto type = ctxt->typeMap->getType(expr, true);
-                    if (type == nullptr)
-                        return result;
+                    if (type == nullptr) return result;
                     if (!type->is<IR::Type_Extern>()) {
-                        ::error(ErrorType::ERR_UNEXPECTED, "%1%: Unexpected type %2% for property. "
-                                "Must be extern.", ctrs, type);
+                        ::error(ErrorType::ERR_UNEXPECTED,
+                                "%1%: Unexpected type %2% for property. "
+                                "Must be extern.",
+                                ctrs, type);
                         return result;
                     }
                     auto te = type->to<IR::Type_Extern>();
                     if (te->name != "direct_counter" && te->name != "counter") {
-                        ::error(ErrorType::ERR_UNEXPECTED, "%1%: Unexpected type %2% for property. "
-                                "Must be 'counter' or 'direct_counter'.", ctrs, type);
+                        ::error(ErrorType::ERR_UNEXPECTED,
+                                "%1%: Unexpected type %2% for property. "
+                                "Must be 'counter' or 'direct_counter'.",
+                                ctrs, type);
                         return result;
                     }
                     auto jctr = new Util::JsonObject();
@@ -204,8 +207,8 @@ class ControlConverter : public Inspector {
                     auto pe = expr->to<IR::PathExpression>();
                     auto decl = ctxt->refMap->getDeclaration(pe->path, true);
                     if (!decl->is<IR::Declaration_Instance>()) {
-                        ::error(ErrorType::ERR_EXPECTED,
-                                "%1%: expected an instance", decl->getNode());
+                        ::error(ErrorType::ERR_EXPECTED, "%1%: expected an instance",
+                                decl->getNode());
                         return result;
                     }
                     cstring ctrname = decl->controlPlaneName();
@@ -216,7 +219,7 @@ class ControlConverter : public Inspector {
                                 "%1%: Direct counters cannot be attached to multiple tables"
                                 " %2% and %3%",
                                 decl, it->second, table);
-                       return result;
+                        return result;
                     }
                     ctxt->structure->directCounterMap.emplace(ctrname, table);
                 } else {
@@ -226,208 +229,209 @@ class ControlConverter : public Inspector {
             result->emplace("with_counters", true);
         } else {
             result->emplace("with_counters", false);
-    }
-
-    bool sup_to = false;
-    auto timeout = table->properties->getProperty("support_timeout");
-    if (timeout != nullptr) {
-        if (timeout->value->is<IR::ExpressionValue>()) {
-            auto expr = timeout->value->to<IR::ExpressionValue>()->expression;
-            if (!expr->is<IR::BoolLiteral>()) {
-                ::error(ErrorType::ERR_EXPECTED, "%1%: must true/false", timeout);
-            } else {
-                sup_to = expr->to<IR::BoolLiteral>()->value;
-            }
-        } else {
-            ::error(ErrorType::ERR_EXPECTED, "%1%: expected a Boolean", timeout);
-        }
-    }
-    result->emplace("support_timeout", sup_to);
-
-    auto dm = table->properties->getProperty("meters");
-    if (dm != nullptr) {
-        if (dm->value->is<IR::ExpressionValue>()) {
-            auto expr = dm->value->to<IR::ExpressionValue>()->expression;
-            if (!expr->is<IR::PathExpression>()) {
-                ::error(ErrorType::ERR_EXPECTED,
-                        "%1%: expected a reference to a meter declaration", expr);
-            } else {
-                auto pe = expr->to<IR::PathExpression>();
-                auto decl = ctxt->refMap->getDeclaration(pe->path, true);
-                auto type = ctxt->typeMap->getType(expr, true);
-                if (type == nullptr)
-                    return result;
-                if (type->is<IR::Type_SpecializedCanonical>())
-                    type = type->to<IR::Type_SpecializedCanonical>()->baseType;
-                if (!type->is<IR::Type_Extern>()) {
-                    ::error(ErrorType::ERR_UNEXPECTED, "%1%: Unexpected type %2% for property",
-                            dm, type);
-                    return result;
-                }
-                auto te = type->to<IR::Type_Extern>();
-                if (te->name != "direct_meter") {
-                    ::error(ErrorType::ERR_UNEXPECTED, "%1%: Unexpected type %2% for property",
-                            dm, type);
-                    return result;
-                }
-                if (!decl->is<IR::Declaration_Instance>()) {
-                    ::error(ErrorType::ERR_EXPECTED, "%1%: expected an instance", decl->getNode());
-                    return result;
-                }
-                ctxt->structure->directMeterMap.setTable(decl, table);
-                ctxt->structure->directMeterMap.setSize(decl, size);
-                BUG_CHECK(decl->is<IR::Declaration_Instance>(),
-                          "%1%: expected an instance", decl->getNode());
-                cstring name = decl->controlPlaneName();
-                result->emplace("direct_meters", name);
-            }
-        } else {
-            ::error(ErrorType::ERR_EXPECTED, "%1%: expected a meter", dm);
-        }
-    } else {
-        result->emplace("direct_meters", Util::JsonValue::null);
-    }
-
-    auto action_ids = mkArrayField(result, "action_ids");
-    auto actions = mkArrayField(result, "actions");
-    auto al = table->getActionList();
-
-    std::map<cstring, cstring> useActionName;
-    for (auto a : al->actionList) {
-        if (a->expression->is<IR::MethodCallExpression>()) {
-            auto mce = a->expression->to<IR::MethodCallExpression>();
-            if (mce->arguments->size() > 0)
-                ::error(ErrorType::ERR_UNSUPPORTED,
-                        "%1%: actions in action list with arguments not supported", a);
-        }
-        auto decl = ctxt->refMap->getDeclaration(a->getPath(), true);
-        BUG_CHECK(decl->is<IR::P4Action>(), "%1%: should be an action name", a);
-        auto action = decl->to<IR::P4Action>();
-        unsigned id = get(ctxt->structure->ids, action, INVALID_ACTION_ID);
-        LOG3("look up id " << action << " " << id);
-        BUG_CHECK(id != INVALID_ACTION_ID, "Could not find id for %1%", action);
-        action_ids->append(id);
-        auto name = action->controlPlaneName();
-        actions->append(name);
-        useActionName.emplace(action->name, name);
-    }
-
-    auto next_tables = new Util::JsonObject();
-
-    CFG::Node* nextDestination = nullptr;  // if no action is executed
-    CFG::Node* defaultLabelDestination = nullptr;  // if the "default" label is executed
-    // Note: the "default" label is not the default_action.
-    bool hitMiss = false;
-    for (auto s : node->successors.edges) {
-        if (s->isUnconditional())
-            nextDestination = s->endpoint;
-        else if (s->isBool())
-            hitMiss = true;
-        else if (s->label == "default")
-            defaultLabelDestination = s->endpoint;
-    }
-
-    Util::IJson* nextLabel = nullptr;
-    if (!hitMiss) {
-        BUG_CHECK(nextDestination, "Could not find default destination for %1%", node->invocation);
-        nextLabel = nodeName(nextDestination);
-        result->emplace("base_default_next", nextLabel);
-        // So if a "default:" switch case exists we set the nextLabel
-        // to be the destination of the default: label.
-        if (defaultLabelDestination != nullptr)
-            nextLabel = nodeName(defaultLabelDestination);
-    } else {
-        result->emplace("base_default_next", Util::JsonValue::null);
-    }
-
-    std::set<cstring> labelsDone;
-    for (auto s : node->successors.edges) {
-        cstring label;
-        if (s->isBool()) {
-            label = s->getBool() ? "__HIT__" : "__MISS__";
-        } else if (s->isUnconditional()) {
-            continue;
-        } else {
-            label = s->label;
-            if (label == "default")
-                continue;
-            label = ::get(useActionName, label);
-        }
-        next_tables->emplace(label, nodeName(s->endpoint));
-        labelsDone.emplace(label);
-    }
-
-    // Generate labels which don't show up and send them to
-    // the nextLabel.
-    if (!hitMiss) {
-        for (auto a : al->actionList) {
-            cstring name = a->getName().name;
-            cstring label = ::get(useActionName, name);
-            if (labelsDone.find(label) == labelsDone.end())
-                next_tables->emplace(label, nextLabel);
-        }
-    }
-
-    result->emplace("next_tables", next_tables);
-    auto defact = table->properties->getProperty(IR::TableProperties::defaultActionPropertyName);
-    if (defact != nullptr) {
-        if (!simple) {
-            ::warning(ErrorType::WARN_UNSUPPORTED,
-                      "Target does not support default_action for %1% (due to action profiles)",
-                      table);
-            return result;
         }
 
-        if (!defact->value->is<IR::ExpressionValue>()) {
-            ::error(ErrorType::ERR_EXPECTED, "%1%: expected an action", defact);
-            return result;
-        }
-        auto expr = defact->value->to<IR::ExpressionValue>()->expression;
-        const IR::P4Action* action = nullptr;
-        const IR::Vector<IR::Argument>* args = nullptr;
-
-        if (expr->is<IR::PathExpression>()) {
-            auto path = expr->to<IR::PathExpression>()->path;
-            auto decl = ctxt->refMap->getDeclaration(path, true);
-            BUG_CHECK(decl->is<IR::P4Action>(), "%1%: should be an action name", expr);
-            action = decl->to<IR::P4Action>();
-        } else if (expr->is<IR::MethodCallExpression>()) {
-            auto mce = expr->to<IR::MethodCallExpression>();
-            auto mi = P4::MethodInstance::resolve(mce,
-                    ctxt->refMap, ctxt->typeMap);
-            BUG_CHECK(mi->is<P4::ActionCall>(), "%1%: expected an action", expr);
-            action = mi->to<P4::ActionCall>()->action;
-            args = mce->arguments;
-        } else {
-            BUG("%1%: unexpected expression", expr);
-        }
-
-        unsigned actionid = get(ctxt->structure->ids, action,
-                                INVALID_ACTION_ID);
-        BUG_CHECK(actionid != INVALID_ACTION_ID,
-                  "Could not find id for %1%", action);
-        auto entry = new Util::JsonObject();
-        entry->emplace("action_id", actionid);
-        entry->emplace("action_const", defact->isConstant);
-        auto fields = mkArrayField(entry, "action_data");
-        if (args != nullptr) {
-            // TODO: use argument names
-            for (auto a : *args) {
-                if (a->expression->is<IR::Constant>()) {
-                    cstring repr = stringRepr(a->expression->to<IR::Constant>()->value);
-                    fields->append(repr);
+        bool sup_to = false;
+        auto timeout = table->properties->getProperty("support_timeout");
+        if (timeout != nullptr) {
+            if (timeout->value->is<IR::ExpressionValue>()) {
+                auto expr = timeout->value->to<IR::ExpressionValue>()->expression;
+                if (!expr->is<IR::BoolLiteral>()) {
+                    ::error(ErrorType::ERR_EXPECTED, "%1%: must true/false", timeout);
                 } else {
-                    ::error(ErrorType::ERR_EXPECTED,
-                            "%1%: argument must evaluate to a constant integer", a);
-                    return result;
+                    sup_to = expr->to<IR::BoolLiteral>()->value;
                 }
+            } else {
+                ::error(ErrorType::ERR_EXPECTED, "%1%: expected a Boolean", timeout);
             }
         }
-        entry->emplace("action_entry_const", defact->isConstant);
-        result->emplace("default_entry", entry);
-    }
-    convertTableEntries(table, result);
-    return result;
+        result->emplace("support_timeout", sup_to);
+
+        auto dm = table->properties->getProperty("meters");
+        if (dm != nullptr) {
+            if (dm->value->is<IR::ExpressionValue>()) {
+                auto expr = dm->value->to<IR::ExpressionValue>()->expression;
+                if (!expr->is<IR::PathExpression>()) {
+                    ::error(ErrorType::ERR_EXPECTED,
+                            "%1%: expected a reference to a meter declaration", expr);
+                } else {
+                    auto pe = expr->to<IR::PathExpression>();
+                    auto decl = ctxt->refMap->getDeclaration(pe->path, true);
+                    auto type = ctxt->typeMap->getType(expr, true);
+                    if (type == nullptr) return result;
+                    if (type->is<IR::Type_SpecializedCanonical>())
+                        type = type->to<IR::Type_SpecializedCanonical>()->baseType;
+                    if (!type->is<IR::Type_Extern>()) {
+                        ::error(ErrorType::ERR_UNEXPECTED, "%1%: Unexpected type %2% for property",
+                                dm, type);
+                        return result;
+                    }
+                    auto te = type->to<IR::Type_Extern>();
+                    if (te->name != "direct_meter") {
+                        ::error(ErrorType::ERR_UNEXPECTED, "%1%: Unexpected type %2% for property",
+                                dm, type);
+                        return result;
+                    }
+                    if (!decl->is<IR::Declaration_Instance>()) {
+                        ::error(ErrorType::ERR_EXPECTED, "%1%: expected an instance",
+                                decl->getNode());
+                        return result;
+                    }
+                    ctxt->structure->directMeterMap.setTable(decl, table);
+                    ctxt->structure->directMeterMap.setSize(decl, size);
+                    BUG_CHECK(decl->is<IR::Declaration_Instance>(), "%1%: expected an instance",
+                              decl->getNode());
+                    cstring name = decl->controlPlaneName();
+                    result->emplace("direct_meters", name);
+                }
+            } else {
+                ::error(ErrorType::ERR_EXPECTED, "%1%: expected a meter", dm);
+            }
+        } else {
+            result->emplace("direct_meters", Util::JsonValue::null);
+        }
+
+        auto action_ids = mkArrayField(result, "action_ids");
+        auto actions = mkArrayField(result, "actions");
+        auto al = table->getActionList();
+
+        std::map<cstring, cstring> useActionName;
+        for (auto a : al->actionList) {
+            if (a->expression->is<IR::MethodCallExpression>()) {
+                auto mce = a->expression->to<IR::MethodCallExpression>();
+                if (mce->arguments->size() > 0)
+                    ::error(ErrorType::ERR_UNSUPPORTED,
+                            "%1%: actions in action list with arguments not supported", a);
+            }
+            auto decl = ctxt->refMap->getDeclaration(a->getPath(), true);
+            BUG_CHECK(decl->is<IR::P4Action>(), "%1%: should be an action name", a);
+            auto action = decl->to<IR::P4Action>();
+            unsigned id = get(ctxt->structure->ids, action, INVALID_ACTION_ID);
+            LOG3("look up id " << action << " " << id);
+            BUG_CHECK(id != INVALID_ACTION_ID, "Could not find id for %1%", action);
+            action_ids->append(id);
+            auto name = action->controlPlaneName();
+            actions->append(name);
+            useActionName.emplace(action->name, name);
+        }
+
+        auto next_tables = new Util::JsonObject();
+
+        CFG::Node *nextDestination = nullptr;          // if no action is executed
+        CFG::Node *defaultLabelDestination = nullptr;  // if the "default" label is executed
+        // Note: the "default" label is not the default_action.
+        bool hitMiss = false;
+        for (auto s : node->successors.edges) {
+            if (s->isUnconditional()) {
+                nextDestination = s->endpoint;
+                LOG3("nextDestination " << s->endpoint);
+            } else if (s->isBool()) {
+                hitMiss = true;
+                LOG3("hitmiss");
+            } else if (s->label == "default") {
+                defaultLabelDestination = s->endpoint;
+                LOG3("default " << s->endpoint);
+            }
+        }
+
+        Util::IJson *nextLabel = nullptr;
+        if (!hitMiss) {
+            BUG_CHECK(nextDestination, "Could not find default destination for %1%",
+                      node->invocation);
+            nextLabel = nodeName(nextDestination);
+            result->emplace("base_default_next", nextLabel);
+            // So if a "default:" switch case exists we set the nextLabel
+            // to be the destination of the default: label.
+            if (defaultLabelDestination != nullptr) nextLabel = nodeName(defaultLabelDestination);
+        } else {
+            result->emplace("base_default_next", Util::JsonValue::null);
+        }
+
+        std::set<cstring> labelsDone;
+        for (auto s : node->successors.edges) {
+            cstring label;
+            if (s->isBool()) {
+                label = s->getBool() ? "__HIT__" : "__MISS__";
+            } else if (s->isUnconditional()) {
+                continue;
+            } else {
+                label = s->label;
+                if (label == "default") continue;
+                label = ::get(useActionName, label);
+            }
+            next_tables->emplace(label, nodeName(s->endpoint));
+            labelsDone.emplace(label);
+        }
+
+        // Generate labels which don't show up and send them to
+        // the nextLabel.
+        if (!hitMiss) {
+            for (auto a : al->actionList) {
+                cstring name = a->getName().name;
+                cstring label = ::get(useActionName, name);
+                if (labelsDone.find(label) == labelsDone.end())
+                    next_tables->emplace(label, nextLabel);
+            }
+        }
+
+        result->emplace("next_tables", next_tables);
+        auto defact =
+            table->properties->getProperty(IR::TableProperties::defaultActionPropertyName);
+        if (defact != nullptr) {
+            if (!simple) {
+                ::warning(ErrorType::WARN_UNSUPPORTED,
+                          "Target does not support default_action for %1% (due to action profiles)",
+                          table);
+                return result;
+            }
+
+            if (!defact->value->is<IR::ExpressionValue>()) {
+                ::error(ErrorType::ERR_EXPECTED, "%1%: expected an action", defact);
+                return result;
+            }
+            auto expr = defact->value->to<IR::ExpressionValue>()->expression;
+            const IR::P4Action *action = nullptr;
+            const IR::Vector<IR::Argument> *args = nullptr;
+
+            if (expr->is<IR::PathExpression>()) {
+                auto path = expr->to<IR::PathExpression>()->path;
+                auto decl = ctxt->refMap->getDeclaration(path, true);
+                BUG_CHECK(decl->is<IR::P4Action>(), "%1%: should be an action name", expr);
+                action = decl->to<IR::P4Action>();
+            } else if (expr->is<IR::MethodCallExpression>()) {
+                auto mce = expr->to<IR::MethodCallExpression>();
+                auto mi = P4::MethodInstance::resolve(mce, ctxt->refMap, ctxt->typeMap);
+                BUG_CHECK(mi->is<P4::ActionCall>(), "%1%: expected an action", expr);
+                action = mi->to<P4::ActionCall>()->action;
+                args = mce->arguments;
+            } else {
+                BUG("%1%: unexpected expression", expr);
+            }
+
+            unsigned actionid = get(ctxt->structure->ids, action, INVALID_ACTION_ID);
+            BUG_CHECK(actionid != INVALID_ACTION_ID, "Could not find id for %1%", action);
+            auto entry = new Util::JsonObject();
+            entry->emplace("action_id", actionid);
+            entry->emplace("action_const", defact->isConstant);
+            auto fields = mkArrayField(entry, "action_data");
+            if (args != nullptr) {
+                // TODO: use argument names
+                for (auto a : *args) {
+                    if (a->expression->is<IR::Constant>()) {
+                        cstring repr = stringRepr(a->expression->to<IR::Constant>()->value);
+                        fields->append(repr);
+                    } else {
+                        ::error(ErrorType::ERR_EXPECTED,
+                                "%1%: argument must evaluate to a constant integer", a);
+                        return result;
+                    }
+                }
+            }
+            entry->emplace("action_entry_const", defact->isConstant);
+            result->emplace("default_entry", entry);
+        }
+        convertTableEntries(table, result);
+        return result;
     }
     void convertTableEntries(const IR::P4Table *table, Util::JsonObject *jsonTable) {
         auto entriesList = table->getEntries();
@@ -462,10 +466,10 @@ class ControlConverter : public Inspector {
                     else if (k->is<IR::BoolLiteral>())
                         // booleans are converted to ints
                         key->emplace("key",
-                                stringRepr(k->to<IR::BoolLiteral>()->value ? 1 : 0, k8));
+                                     stringRepr(k->to<IR::BoolLiteral>()->value ? 1 : 0, k8));
                     else
-                        ::error(ErrorType::ERR_UNSUPPORTED,
-                                "%1%: unsupported exact key expression", k);
+                        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: unsupported exact key expression",
+                                k);
                 } else if (matchType == corelib.ternaryMatch.name) {
                     if (k->is<IR::Mask>()) {
                         auto km = k->to<IR::Mask>();
@@ -485,10 +489,12 @@ class ControlConverter : public Inspector {
                     if (k->is<IR::Mask>()) {
                         auto km = k->to<IR::Mask>();
                         key->emplace("key", stringRepr(km->left->to<IR::Constant>()->value, k8));
-                        auto trailing_zeros = [](unsigned long n, unsigned long keyWidth)
-                            { return n ? __builtin_ctzl(n) : static_cast<int>(keyWidth); };
-                        auto count_ones = [](unsigned long n)
-                            { return n ? __builtin_popcountl(n) : 0;};
+                        auto trailing_zeros = [](unsigned long n, unsigned long keyWidth) {
+                            return n ? __builtin_ctzl(n) : static_cast<int>(keyWidth);
+                        };
+                        auto count_ones = [](unsigned long n) {
+                            return n ? __builtin_popcountl(n) : 0;
+                        };
                         auto mask =
                             static_cast<unsigned long>(km->right->to<IR::Constant>()->value);
                         auto len = trailing_zeros(mask, keyWidth);
@@ -503,8 +509,8 @@ class ControlConverter : public Inspector {
                         key->emplace("key", stringRepr(0, k8));
                         key->emplace("prefix_length", 0);
                     } else {
-                        ::error(ErrorType::ERR_UNSUPPORTED,
-                                "%1%: unsupported LPM key expression", k);
+                        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: unsupported LPM key expression",
+                                k);
                     }
                 } else if (matchType == "range") {
                     if (k->is<IR::Range>()) {
@@ -516,10 +522,10 @@ class ControlConverter : public Inspector {
                         key->emplace("end", stringRepr(k->to<IR::Constant>()->value, k8));
                     } else if (k->is<IR::DefaultExpression>()) {
                         key->emplace("start", stringRepr(0, k8));
-                        key->emplace("end", stringRepr((1 << keyWidth)-1, k8));  // 2^N -1
+                        key->emplace("end", stringRepr((1 << keyWidth) - 1, k8));  // 2^N -1
                     } else {
-                        ::error(ErrorType::ERR_UNSUPPORTED,
-                                "%1% unsupported range key expression", k);
+                        ::error(ErrorType::ERR_UNSUPPORTED, "%1% unsupported range key expression",
+                                k);
                     }
                 } else if (matchType == "optional") {
                     // Table key fields with match_kind optional with
@@ -540,8 +546,8 @@ class ControlConverter : public Inspector {
                                 "%1%: unsupported optional key expression", k);
                     }
                 } else {
-                    ::error(ErrorType::ERR_UNKNOWN,
-                            "unknown key match type '%2%' for key %1%", k, matchType);
+                    ::error(ErrorType::ERR_UNKNOWN, "unknown key match type '%2%' for key %1%", k,
+                            matchType);
                 }
                 matchKeys->append(key);
                 keyIndex++;
@@ -556,8 +562,7 @@ class ControlConverter : public Inspector {
             auto decl = ctxt->refMap->getDeclaration(method, true);
             auto actionDecl = decl->to<IR::P4Action>();
             unsigned id = get(ctxt->structure->ids, actionDecl, INVALID_ACTION_ID);
-            BUG_CHECK(id != INVALID_ACTION_ID,
-                      "Could not find id for %1%", actionDecl);
+            BUG_CHECK(id != INVALID_ACTION_ID, "Could not find id for %1%", actionDecl);
             action->emplace("action_id", id);
             auto actionData = mkArrayField(action, "action_data");
             for (auto arg : *actionCall->arguments) {
@@ -589,8 +594,7 @@ class ControlConverter : public Inspector {
         BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
 
         if (mt->name.name == corelib.exactMatch.name ||
-            mt->name.name == corelib.ternaryMatch.name ||
-            mt->name.name == corelib.lpmMatch.name ||
+            mt->name.name == corelib.ternaryMatch.name || mt->name.name == corelib.lpmMatch.name ||
             ctxt->structure->match_kinds.count(mt->name.name)) {
             return mt->name.name;
         }
@@ -599,32 +603,32 @@ class ControlConverter : public Inspector {
         return "invalid";
     }
     /// Return 'true' if the table is 'simple'
-    bool handleTableImplementation(const IR::Property* implementation, const IR::Key* key,
-                                   Util::JsonObject* table, Util::JsonArray* action_profiles,
-                                   BMV2::SharedActionSelectorCheck<arch>*) {
+    bool handleTableImplementation(const IR::Property *implementation, const IR::Key *key,
+                                   Util::JsonObject *table, Util::JsonArray *action_profiles,
+                                   BMV2::SharedActionSelectorCheck<arch> *) {
         if (implementation == nullptr) {
             table->emplace("type", "simple");
             return true;
         }
 
         if (!implementation->value->is<IR::ExpressionValue>()) {
-            ::error(ErrorType::ERR_EXPECTED,
-                    "%1%: expected expression for property", implementation);
+            ::error(ErrorType::ERR_EXPECTED, "%1%: expected expression for property",
+                    implementation);
             return false;
         }
         auto propv = implementation->value->to<IR::ExpressionValue>();
 
         bool isSimpleTable = true;
-        Util::JsonObject* action_profile;
+        Util::JsonObject *action_profile;
         cstring apname;
 
         if (propv->expression->is<IR::ConstructorCallExpression>()) {
-            auto cc = P4::ConstructorCall::resolve(
-                propv->expression->to<IR::ConstructorCallExpression>(),
-                ctxt->refMap, ctxt->typeMap);
+            auto cc =
+                P4::ConstructorCall::resolve(propv->expression->to<IR::ConstructorCallExpression>(),
+                                             ctxt->refMap, ctxt->typeMap);
             if (!cc->is<P4::ExternConstructorCall>()) {
-                ::error(ErrorType::ERR_EXPECTED,
-                        "%1%: expected extern object for property", implementation);
+                ::error(ErrorType::ERR_EXPECTED, "%1%: expected extern object for property",
+                        implementation);
                 return false;
             }
             auto ecc = cc->to<P4::ExternConstructorCall>();
@@ -662,8 +666,8 @@ class ControlConverter : public Inspector {
                 auto hash = arguments->at(0)->expression;
                 auto ei = P4::EnumInstance::resolve(hash, ctxt->typeMap);
                 if (ei == nullptr) {
-                    ::error(ErrorType::ERR_EXPECTED,
-                            "%1%: hash must be a constant on this target", hash);
+                    ::error(ErrorType::ERR_EXPECTED, "%1%: hash must be a constant on this target",
+                            hash);
                 } else {
                     cstring algo = ei->name;
                     selector->emplace("algo", algo);
@@ -671,17 +675,16 @@ class ControlConverter : public Inspector {
                 auto input = mkArrayField(selector, "input");
                 for (auto ke : key->keyElements) {
                     auto mt = ctxt->refMap->getDeclaration(ke->matchType->path, true)
-                            ->to<IR::Declaration_ID>();
+                                  ->to<IR::Declaration_ID>();
                     BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
-                    if (mt->name.name != BMV2::MatchImplementation::selectorMatchTypeName)
-                        continue;
+                    if (mt->name.name != BMV2::MatchImplementation::selectorMatchTypeName) continue;
 
                     auto expr = ke->expression;
                     auto jk = ctxt->conv->convert(expr);
                     input->append(jk);
                 }
             } else if (implementationType->name ==
-                    Standard::ActionProfileTraits<arch>::typeName()) {
+                       Standard::ActionProfileTraits<arch>::typeName()) {
                 isSimpleTable = false;
                 table->emplace("type", "indirect");
                 add_size(0);
@@ -692,15 +695,14 @@ class ControlConverter : public Inspector {
             auto pathe = propv->expression->to<IR::PathExpression>();
             auto decl = ctxt->refMap->getDeclaration(pathe->path, true);
             if (!decl->is<IR::Declaration_Instance>()) {
-                ::error(ErrorType::ERR_EXPECTED,
-                        "%1%: expected a reference to an instance", pathe);
+                ::error(ErrorType::ERR_EXPECTED, "%1%: expected a reference to an instance", pathe);
                 return false;
             }
             apname = decl->controlPlaneName();
             auto dcltype = ctxt->typeMap->getType(pathe, true);
             if (!dcltype->is<IR::Type_Extern>()) {
-                ::error(ErrorType::ERR_UNEXPECTED,
-                        "%1%: unexpected type for implementation", dcltype);
+                ::error(ErrorType::ERR_UNEXPECTED, "%1%: unexpected type for implementation",
+                        dcltype);
                 return false;
             }
             auto type_extern_name = dcltype->to<IR::Type_Extern>()->name;
@@ -711,8 +713,8 @@ class ControlConverter : public Inspector {
             } else if (type_extern_name == actionSelectorName) {
                 table->emplace("type", "indirect_ws");
             } else {
-                ::error(ErrorType::ERR_UNEXPECTED,
-                        "%1%: unexpected type for implementation", dcltype);
+                ::error(ErrorType::ERR_UNEXPECTED, "%1%: unexpected type for implementation",
+                        dcltype);
                 return false;
             }
             isSimpleTable = false;
@@ -720,7 +722,7 @@ class ControlConverter : public Inspector {
                 auto eb = ctxt->toplevel->getValue(decl->getNode());
                 BUG_CHECK(eb->is<IR::ExternBlock>(), "Not an extern block?");
                 ExternConverter::cvtExternInstance(ctxt, decl->to<IR::Declaration>(),
-                    eb->to<IR::ExternBlock>(), emitExterns);
+                                                   eb->to<IR::ExternBlock>(), emitExterns);
             }
         } else {
             ::error(ErrorType::ERR_UNEXPECTED, "%1%: unexpected value for property", propv);
@@ -730,8 +732,8 @@ class ControlConverter : public Inspector {
         return isSimpleTable;
     }
 
-    Util::IJson* convertIf(const CFG::IfNode* node, cstring prefix) {
-        (void) prefix;
+    Util::IJson *convertIf(const CFG::IfNode *node, cstring prefix) {
+        (void)prefix;
         auto result = new Util::JsonObject();
         result->emplace("name", node->name);
         result->emplace("id", nextId("conditionals"));
@@ -740,7 +742,7 @@ class ControlConverter : public Inspector {
         CHECK_NULL(j);
         result->emplace("expression", j);
         for (auto e : node->successors.edges) {
-            Util::IJson* dest = nodeName(e->endpoint);
+            Util::IJson *dest = nodeName(e->endpoint);
             cstring label = Util::toString(e->getBool());
             label += "_next";
             result->emplace(label, dest);
@@ -750,7 +752,7 @@ class ControlConverter : public Inspector {
 
  public:
     const bool emitExterns;
-    bool preorder(const IR::P4Control* cont) override {
+    bool preorder(const IR::P4Control *cont) override {
         auto result = new Util::JsonObject();
 
         result->emplace("name", name);
@@ -760,14 +762,13 @@ class ControlConverter : public Inspector {
         auto cfg = new CFG();
         cfg->build(cont, ctxt->refMap, ctxt->typeMap);
         bool success = cfg->checkImplementable();
-        if (!success)
-            return false;
+        if (!success) return false;
 
         if (cfg->entryPoint->successors.size() == 0) {
             result->emplace("init_table", Util::JsonValue::null);
         } else {
-            BUG_CHECK(cfg->entryPoint->successors.size() == 1,
-                    "Expected 1 start node for %1%", cont);
+            BUG_CHECK(cfg->entryPoint->successors.size() == 1, "Expected 1 start node for %1%",
+                      cont);
             auto start = (*(cfg->entryPoint->successors.edges.begin()))->endpoint;
             result->emplace("init_table", nodeName(start));
         }
@@ -780,7 +781,7 @@ class ControlConverter : public Inspector {
         auto selector_check = new BMV2::SharedActionSelectorCheck<arch>(ctxt);
         cont->apply(*selector_check);
 
-        std::set<const IR::P4Table*> done;
+        std::set<const IR::P4Table *> done;
 
         // Tables are created prior to the other local declarations
         for (auto node : cfg->allNodes) {
@@ -793,22 +794,18 @@ class ControlConverter : public Inspector {
                     continue;
                 done.emplace(tn->table);
                 auto j = convertTable(tn, action_profiles, selector_check);
-                if (::errorCount() > 0)
-                    return false;
+                if (::errorCount() > 0) return false;
                 tables->append(j);
             } else if (node->is<CFG::IfNode>()) {
                 auto j = convertIf(node->to<CFG::IfNode>(), cont->name);
-                if (::errorCount() > 0)
-                    return false;
+                if (::errorCount() > 0) return false;
                 conditionals->append(j);
             }
         }
 
         for (auto c : cont->controlLocals) {
-            if (c->is<IR::Declaration_Constant>() ||
-                c->is<IR::Declaration_Variable>() ||
-                c->is<IR::P4Action>() ||
-                c->is<IR::P4Table>())
+            if (c->is<IR::Declaration_Constant>() || c->is<IR::Declaration_Variable>() ||
+                c->is<IR::P4Action>() || c->is<IR::P4Table>())
                 continue;
             if (c->is<IR::Declaration_Instance>()) {
                 auto bl = ctxt->structure->resourceMap.at(c);
@@ -830,11 +827,15 @@ class ControlConverter : public Inspector {
         return false;
     }
 
-    explicit ControlConverter(ConversionContext* ctxt, cstring name, const bool& emitExterns_) :
-        ctxt(ctxt), name(name), corelib(P4::P4CoreLibrary::instance), emitExterns(emitExterns_)
-    { setName("ControlConverter"); }
+    explicit ControlConverter(ConversionContext *ctxt, cstring name, const bool &emitExterns_)
+        : ctxt(ctxt),
+          name(name),
+          corelib(P4::P4CoreLibrary::instance()),
+          emitExterns(emitExterns_) {
+        setName("ControlConverter");
+    }
 };
 
 }  // namespace BMV2
 
-#endif  /* BACKENDS_BMV2_COMMON_CONTROL_H_ */
+#endif /* BACKENDS_BMV2_COMMON_CONTROL_H_ */

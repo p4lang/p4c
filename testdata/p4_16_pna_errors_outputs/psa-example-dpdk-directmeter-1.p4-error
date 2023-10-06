@@ -1,0 +1,3 @@
+psa-example-dpdk-directmeter-1.p4(66): [--Werror=unexpected] error: implementation property cannot co-exist with direct counter and direct meter property for table tbl
+    table tbl {
+          ^^^

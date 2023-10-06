@@ -33,6 +33,14 @@ struct cksum_state_t {
 	bit<16> state_0
 }
 
+struct dpdk_pseudo_header_t {
+	bit<8> pseudo
+	bit<8> pseudo_0
+	bit<8> pseudo_1
+	bit<16> pseudo_2
+	bit<32> pseudo_3
+}
+
 struct psa_ingress_output_metadata_t {
 	bit<8> class_of_service
 	bit<8> clone
@@ -71,6 +79,7 @@ header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
 header tcp instanceof tcp_t
 header cksum_state instanceof cksum_state_t
+header dpdk_pseudo_header instanceof dpdk_pseudo_header_t
 
 action NoAction args none {
 	return
@@ -106,7 +115,7 @@ table route {
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
 	jmpeq INGRESSPARSERIMPL_PARSE_IPV4 h.ethernet.etherType 0x800
 	jmp INGRESSPARSERIMPL_ACCEPT

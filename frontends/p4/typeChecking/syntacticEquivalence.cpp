@@ -18,98 +18,91 @@ limitations under the License.
 
 namespace P4 {
 
-bool SameExpression::sameType(const IR::Type* left, const IR::Type* right) const {
+bool SameExpression::sameType(const IR::Type *left, const IR::Type *right) const {
     auto lt = typeMap->getType(left, true);
     auto rt = typeMap->getType(right, true);
     return typeMap->equivalent(lt, rt);
 }
 
-bool SameExpression::sameExpressions(const IR::Vector<IR::Expression>* left,
-                                     const IR::Vector<IR::Expression>* right) const {
-    if (left->size() != right->size())
-        return false;
+bool SameExpression::sameExpressions(const IR::Vector<IR::Expression> *left,
+                                     const IR::Vector<IR::Expression> *right) const {
+    if (left->size() != right->size()) return false;
     for (unsigned i = 0; i < left->size(); i++)
-        if (!sameExpression(left->at(i), right->at(i)))
-            return false;
+        if (!sameExpression(left->at(i), right->at(i))) return false;
     return true;
 }
 
-bool SameExpression::sameExpressions(const IR::Vector<IR::Argument>* left,
-                                     const IR::Vector<IR::Argument>* right) const {
-    if (left->size() != right->size())
-        return false;
+bool SameExpression::sameExpressions(const IR::Vector<IR::Argument> *left,
+                                     const IR::Vector<IR::Argument> *right) const {
+    if (left->size() != right->size()) return false;
     for (unsigned i = 0; i < left->size(); i++)
-        if (!sameExpression(left->at(i)->expression, right->at(i)->expression))
-            return false;
+        if (!sameExpression(left->at(i)->expression, right->at(i)->expression)) return false;
     return true;
 }
 
-bool SameExpression::sameExpression(const IR::Expression* left, const IR::Expression* right) const {
-    CHECK_NULL(left); CHECK_NULL(right);
-    if (left->node_type_name() != right->node_type_name())
-        return false;
-    if (left->is<IR::Operation_Unary>()) {
-        auto lu = left->to<IR::Operation_Unary>();
+bool SameExpression::sameExpression(const IR::Expression *left, const IR::Expression *right) const {
+    CHECK_NULL(left);
+    CHECK_NULL(right);
+    if (left->node_type_name() != right->node_type_name()) return false;
+    if (auto lu = left->to<IR::Operation_Unary>()) {
         auto ru = right->to<IR::Operation_Unary>();
-        if (left->is<IR::Member>()) {
-            auto lm = left->to<IR::Member>();
+        if (auto lm = left->to<IR::Member>()) {
             auto rm = right->to<IR::Member>();
-            if (lm->member != rm->member)
-                return false;
-        } else if (left->is<IR::Cast>()) {
-            auto lc = left->to<IR::Cast>();
+            if (lm->member != rm->member) return false;
+        } else if (auto lc = left->to<IR::Cast>()) {
             auto rc = right->to<IR::Cast>();
-            if (!sameType(lc->type, rc->type))
-                return false;
+            if (!sameType(lc->type, rc->type)) return false;
         }
         return sameExpression(lu->expr, ru->expr);
-    } else if (left->is<IR::Operation_Binary>()) {
-        auto lb = left->to<IR::Operation_Binary>();
+    } else if (auto lb = left->to<IR::Operation_Binary>()) {
         auto rb = right->to<IR::Operation_Binary>();
         return sameExpression(lb->left, rb->left) && sameExpression(lb->right, rb->right);
-    } else if (left->is<IR::Operation_Ternary>()) {
-        auto lt = left->to<IR::Operation_Ternary>();
+    } else if (auto lt = left->to<IR::Operation_Ternary>()) {
         auto rt = right->to<IR::Operation_Ternary>();
-        return sameExpression(lt->e0, rt->e0) &&
-                sameExpression(lt->e1, rt->e1) &&
-                sameExpression(lt->e2, rt->e2);
-    } else if (left->is<IR::Constant>()) {
-        return left->to<IR::Constant>()->value == right->to<IR::Constant>()->value;
+        return sameExpression(lt->e0, rt->e0) && sameExpression(lt->e1, rt->e1) &&
+               sameExpression(lt->e2, rt->e2);
+    } else if (auto lc = left->to<IR::Constant>()) {
+        return lc->value == right->to<IR::Constant>()->value;
     } else if (left->is<IR::Literal>()) {
         return *left == *right;
-    } else if (left->is<IR::PathExpression>()) {
-        auto ld = refMap->getDeclaration(left->to<IR::PathExpression>()->path, true);
+    } else if (auto lp = left->to<IR::PathExpression>()) {
+        auto ld = refMap->getDeclaration(lp->path, true);
         auto rd = refMap->getDeclaration(right->to<IR::PathExpression>()->path, true);
         return ld == rd;
-    } else if (left->is<IR::TypeNameExpression>()) {
-        auto ld = refMap->getDeclaration(left->to<IR::TypeNameExpression>()->typeName->path, true);
-        auto rd = refMap->getDeclaration(right->to<IR::TypeNameExpression>()->typeName->path, true);
-        return ld == rd;
-    } else if (left->is<IR::ListExpression>()) {
-        auto ll = left->to<IR::ListExpression>();
+    } else if (auto tn = left->to<IR::TypeNameExpression>()) {
+        auto lt = tn->typeName;
+        auto rt = right->to<IR::TypeNameExpression>()->typeName;
+        return sameType(lt, rt);
+    } else if (auto ll = left->to<IR::ListExpression>()) {
         auto rl = right->to<IR::ListExpression>();
         return sameExpressions(&ll->components, &rl->components);
-    } else if (left->is<IR::MethodCallExpression>()) {
-        auto lm = left->to<IR::MethodCallExpression>();
+    } else if (auto lm = left->to<IR::MethodCallExpression>()) {
         auto rm = right->to<IR::MethodCallExpression>();
-        if (!sameExpression(lm->method, rm->method))
-            return false;
-        if (lm->typeArguments->size() != rm->typeArguments->size())
-            return false;
+        if (!sameExpression(lm->method, rm->method)) return false;
+        if (lm->typeArguments->size() != rm->typeArguments->size()) return false;
         for (unsigned i = 0; i < lm->typeArguments->size(); i++)
-            if (!sameType(lm->typeArguments->at(i), rm->typeArguments->at(i)))
-                return false;
+            if (!sameType(lm->typeArguments->at(i), rm->typeArguments->at(i))) return false;
         return sameExpressions(lm->arguments, rm->arguments);
-    } else if (left->is<IR::ConstructorCallExpression>()) {
-        auto lc = left->to<IR::ConstructorCallExpression>();
+    } else if (auto lc = left->to<IR::ConstructorCallExpression>()) {
         auto rc = right->to<IR::ConstructorCallExpression>();
-        if (!sameType(lc->constructedType, rc->constructedType))
-            return false;
+        if (!sameType(lc->constructedType, rc->constructedType)) return false;
         return sameExpressions(lc->arguments, rc->arguments);
+    } else if (auto ls = left->to<IR::StructExpression>()) {
+        auto rs = right->to<IR::StructExpression>();
+        if (ls->structType != nullptr && rs->structType != nullptr &&
+            !sameType(ls->structType, rs->structType))
+            return false;
+        if (ls->components.size() != rs->components.size()) return false;
+        for (auto lne : ls->components) {
+            auto rne = rs->components.getDeclaration(lne->name);
+            if (!rne) return false;
+            if (!sameExpression(lne->expression, rne->to<IR::NamedExpression>()->expression))
+                return false;
+        }
+        return true;
     } else {
         BUG("%1%: Unexpected expression", left);
     }
 }
-
 
 }  // namespace P4

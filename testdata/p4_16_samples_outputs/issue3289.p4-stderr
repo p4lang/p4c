@@ -1,0 +1,13 @@
+issue3289.p4(3): [--Wwarn=overflow] warning: 1 << 5: Shifting 5-bit value with 5
+  return (5w1) << 5;
+         ^^^^^^^^^^
+issue3289.p4(3): [--Wwarn=mismatch] warning: 5w32: value does not fit in 5 bits
+  return (5w1) << 5;
+         ^^^^^^^^^^
+issue3289.p4(8): [--Wwarn=overflow] warning: 1 << 6: Shifting 5-bit value with 6
+  return (5w1) << 6;
+         ^^^^^^^^^^
+issue3289.p4(8): [--Wwarn=mismatch] warning: 5w64: value does not fit in 5 bits
+  return (5w1) << 6;
+         ^^^^^^^^^^
+[--Wwarn=missing] warning: Program does not contain a `main' module

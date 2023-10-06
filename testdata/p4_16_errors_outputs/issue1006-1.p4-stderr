@@ -2,7 +2,7 @@ issue1006-1.p4(14): [--Werror=type-error] error: reg2
     R<bit<8>>(16w1) reg2;
                     ^^^^
   ---- Actual error:
-  Cannot unify type 'bit<16>' with type 'bit<8>'
+  Cannot cast implicitly type 'bit<16>' to type 'bit<8>'
   ---- Originating from:
 issue1006-1.p4(14): Type of argument '16w1' (bit<16>) does not match type of parameter 'init' (bit<8>)
       R<bit<8>>(16w1) reg2;

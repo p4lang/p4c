@@ -78,6 +78,9 @@ done
 cleanup
 trap cleanup EXIT
 
+# Make sure BPF file system is mounted
+mount bpffs /sys/fs/bpf -t bpf
+
 # Remove any temporary files from previous run. It might be useful to
 # preserve these files after test run for inspection
 rm -rf ptf_out/*
@@ -102,15 +105,19 @@ ip netns exec switch ip link add name psa_cpu type dummy
 ip netns exec switch ip link set dev psa_cpu up
 
 # Normal ports
+idx=1
 for intf in "${INTERFACES[@]}" ; do
   ip link add "s1-$intf" type veth peer name "$intf" netns switch
   ip netns exec switch ip link set "$intf" up
+  ip netns exec switch ifconfig "$intf" hw ether 00:00:00:00:00:0${idx}
   ip link set dev "s1-$intf" up
 
   # Disable trash traffic
   sysctl -w net.ipv6.conf."s1-$intf".disable_ipv6=1
   sysctl -w net.ipv6.conf."s1-$intf".autoconf=0
   sysctl -w net.ipv6.conf."s1-$intf".accept_ra=0
+
+  idx=$(expr $idx + 1)
 done
 
 # Disable trash traffic
@@ -140,6 +147,8 @@ TRACE_LOGS="False"
 if [ ! -z "$BPF_HOOK" ]; then
   if [ "$BPF_HOOK" == "tc" ]; then
     XDP=( "False" )
+  elif [ "$BPF_HOOK" == "xdp" ]; then
+    XDP=( "True" )
   else
     echo "Wrong --bpf-hook value provided; running script for both hooks."
   fi
@@ -164,17 +173,17 @@ if [ ! -z "$TRACE_LOGS_ARGS" ]; then
 fi
 
 TEST_CASE=$@
-xdp_enabled="False"
-
-for xdp2tc_mode in "${XDP2TC_MODE[@]}" ; do
-  TEST_PARAMS='interfaces="'"$interface_list"'";namespace="switch";trace="'"$TRACE_LOGS"'"'
-  TEST_PARAMS+=";xdp2tc='$xdp2tc_mode'"
-  # Start tests
-  ptf \
-    --test-dir ptf/ \
-    --test-params="$TEST_PARAMS" \
-    --interface 0@s1-eth0 --interface 1@s1-eth1 --interface 2@s1-eth2 --interface 3@s1-eth3 \
-    --interface 4@s1-eth4 --interface 5@s1-eth5 $TEST_CASE
-  exit_on_error
-  rm -rf ptf_out
+for xdp_enabled in "${XDP[@]}" ; do
+  for xdp2tc_mode in "${XDP2TC_MODE[@]}" ; do
+    TEST_PARAMS='interfaces="'"$interface_list"'";namespace="switch";trace="'"$TRACE_LOGS"'"'
+    TEST_PARAMS+=";xdp='$xdp_enabled';xdp2tc='$xdp2tc_mode'"
+    # Start tests
+    ptf \
+      --test-dir ptf/ \
+      --test-params="$TEST_PARAMS" \
+      --interface 0@s1-eth0 --interface 1@s1-eth1 --interface 2@s1-eth2 --interface 3@s1-eth3 \
+      --interface 4@s1-eth4 --interface 5@s1-eth5 $TEST_CASE
+    exit_on_error
+    rm -rf ptf_out
+  done
 done

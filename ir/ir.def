@@ -44,8 +44,8 @@
 
   inline      The field (of IR class type) should be defined directly in the object
               rather than being converted to a const T * as described above.
-  NullOK      The field is a ppointer and may be null (verify will check that it is not otherwise)
-  optional    The field may be proveded as an argument to the constructor but need not be.
+  NullOK      The field is a pointer and may be null (verify will check that it is not otherwise)
+  optional    The field may be provided as an argument to the constructor but need not be.
               (overloaded constructors will be created as needed)
 
   Unless there is a '#noconstructor' tag in the class, a constructor
@@ -254,9 +254,12 @@ class Key : PropertyValue {
 class Entry : IAnnotated {
     /// annotations are optional (supported annotations: @priority(value))
     optional Annotations annotations = Annotations::empty;
+    bool                isConst;      /// optional const annotation
+    NullOK Expression   priority;     /// optional entry priority
     ListExpression      keys;         /// must be a tuple expression
     Expression          action;       /// typically a MethodCallExpression.
                                       /// The action must be defined in action list
+    bool                singleton;    /// True if the entry is not a list.
 
     Annotations     getAnnotations() const override { return annotations; }
     ListExpression  getKeys() const { return keys; }
@@ -337,6 +340,13 @@ class P4Table : Declaration, IAnnotated, IApply {
                     return k; } }
             error(ErrorType::ERR_INVALID, "%1% must be a constant numeric expression", d); }
         return nullptr; }
+    BoolLiteral getBooleanProperty(cstring name) const {
+        if (auto d = properties->getProperty(name)) {
+            if (auto ev = d->value->to<IR::ExpressionValue>()) {
+                if (auto k = ev->expression->to<IR::BoolLiteral>()) {
+                    return k; } }
+            error(ErrorType::ERR_INVALID, "%1% must be a boolean expression", d); }
+        return nullptr; }
     Constant getSizeProperty() const {
         return getConstantProperty(TableProperties::sizePropertyName);
     }
@@ -394,12 +404,8 @@ class Declaration_Instance : Declaration, IAnnotated, IInstance {
 
     Annotations getAnnotations() const override { return annotations; }
     Type getType() const override { return type; }
-    cstring Name() const override { return name; }
-    validate{ BUG_CHECK(type->is<Type_Name>() ||
-                        type->is<Type_Specialized>() ||
-                        type->is<Type_Extern>(),        // P4_14 only?
-                        "%1%: unexpected type", type);
-        arguments->check_null(); }
+    ID Name() const override { return name; }
+    validate{ arguments->check_null(); }
 }
 
 /// Toplevel program representation
@@ -445,11 +451,7 @@ class IfStatement : Statement {
     NullOK Statement ifFalse;
     visit_children {
         v.visit(condition, "condition");
-        auto &clone(v.flow_clone());
-        v.visit(ifTrue, "ifTrue");
-        clone.visit(ifFalse, "ifFalse");
-        v.flow_merge(clone);
-    }
+        SplitFlowVisit<Statement>(v, ifTrue, ifFalse).run_visit(); }
 }
 
 class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
@@ -461,6 +463,7 @@ class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
         return components.getDeclarations(); }
     void push_back(StatOrDecl st) { components.push_back(st); }
     Annotations getAnnotations() const override { return annotations; }
+    bool empty() const { return components.empty(); }
 }
 
 class MethodCallStatement : Statement {
@@ -492,7 +495,9 @@ class SwitchStatement : Statement {
     inline Vector<SwitchCase> cases;
     visit_children {
         v.visit(expression, "expression");
-        v.parallel_visit(cases, "cases"); }
+        SplitFlowVisit<SwitchCase> split(v);
+        for (auto &c : cases) split.addNode(c);
+        split.run_visit(); }
 }
 
 class Function : Declaration, IFunctional, ISimpleNamespace, INestedNamespace {

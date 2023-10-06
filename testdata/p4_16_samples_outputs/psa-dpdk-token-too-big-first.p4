@@ -51,6 +51,7 @@ struct headers_t {
 struct local_metadata__dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_t {
     ethernet_addr_t dst_addr;
     ethernet_addr_t src_addr;
+    bit<8>          tmp;
 }
 
 parser packet_parser(packet_in packet, out headers_t headers, inout local_metadata__dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_t local_metadata, in psa_ingress_parser_input_metadata_t standard_metadata, in empty_metadata_t resub_meta, in empty_metadata_t recirc_meta) {
@@ -113,7 +114,7 @@ control ingress(inout headers_t headers, inout local_metadata__dpdk_dpdk_dpdk_dp
     }
     table vxlan_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk {
         key = {
-            headers.ethernet.dst_addr: exact @name("headers.ethernet.dst_addr") ;
+            headers.ethernet.dst_addr: exact @name("headers.ethernet.dst_addr");
         }
         actions = {
             vxlan_encap_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk();
@@ -123,7 +124,13 @@ control ingress(inout headers_t headers, inout local_metadata__dpdk_dpdk_dpdk_dp
         size = 1048576;
     }
     apply {
-        vxlan_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk.apply();
+        switch (vxlan_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk.apply().action_run) {
+            vxlan_encap_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk: {
+                local_metadata1.tmp = 8w0;
+            }
+            default: {
+            }
+        }
     }
 }
 
@@ -144,8 +151,5 @@ control egress_deparser(packet_out packet, out empty_metadata_t clone_e2e_meta, 
 }
 
 IngressPipeline<headers_t, local_metadata__dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(packet_parser(), ingress(), packet_deparser()) ip;
-
 EgressPipeline<headers_t, local_metadata__dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(egress_parser(), egress(), egress_deparser()) ep;
-
 PSA_Switch<headers_t, local_metadata__dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_t, headers_t, local_metadata__dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

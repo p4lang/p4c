@@ -16,8 +16,10 @@ limitations under the License.
 #ifndef DPDK_CONTROL_PLANE_BFRUNTIME_EXT_H_
 #define DPDK_CONTROL_PLANE_BFRUNTIME_EXT_H_
 
+#include "backends/dpdk/constants.h"
+#include "backends/dpdk/options.h"
+#include "backends/dpdk/p4/config/p4info.pb.h"
 #include "control-plane/bfruntime.h"
-#include "p4/config/dpdk/p4info.pb.h"
 
 namespace P4 {
 
@@ -27,13 +29,16 @@ namespace BFRT {
 /// the context of P4Runtime to the BF-RT info JSON used by the BF-RT API.
 class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
  public:
-    explicit BFRuntimeSchemaGenerator(const p4configv1::P4Info& p4info)
-        : BFRuntimeGenerator(p4info) { }
+    BFRuntimeSchemaGenerator(const p4configv1::P4Info &p4info, bool isTDI,
+                             DPDK::DpdkOptions &options)
+        : BFRuntimeGenerator(p4info), isTDI(isTDI), options(options) {}
 
     /// Generates the schema as a Json object for the provided P4Info instance.
-    const Util::JsonObject* genSchema() const override;
+    const Util::JsonObject *genSchema() const override;
 
  private:
+    bool isTDI;
+    DPDK::DpdkOptions &options;
     // TODO(antonin): these values may need to be available to the BF-RT
     // implementation as well, if they want to expose them as enums.
 
@@ -57,31 +62,32 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
     // Externs only for DPDK backend
     struct ActionSelector;
 
-    void addDPDKExterns(Util::JsonArray* tablesJson, Util::JsonArray* learnFiltersJson) const;
-    void addActionSelectorCommon(Util::JsonArray* tablesJson,
-                                 const ActionSelector& actionProf) const;
-    void addActionSelectorGetMemberCommon(Util::JsonArray* tablesJson,
-                                          const ActionSelector& actionProf) const;
-    void addActionProfs(Util::JsonArray* tablesJson) const override;
-    bool addActionProfIds(const p4configv1::Table& table,
-                          Util::JsonObject* tableJson) const override;
-    void addMatchActionData(const p4configv1::Table& table,
-            Util::JsonObject* tableJson, Util::JsonArray* dataJson,
-            P4Id maxActionParamId) const ;
+    void addDPDKExterns(Util::JsonArray *tablesJson, Util::JsonArray *learnFiltersJson) const;
+    void addActionSelectorCommon(Util::JsonArray *tablesJson,
+                                 const ActionSelector &actionProf) const;
+    void addActionSelectorGetMemberCommon(Util::JsonArray *tablesJson,
+                                          const ActionSelector &actionProf) const;
+    void addConstTableAttr(Util::JsonArray *attrJson) const override;
+    bool addMatchTypePriority(std::optional<cstring> &matchType) const override;
+    void addActionProfs(Util::JsonArray *tablesJson) const override;
+    bool addActionProfIds(const p4configv1::Table &table,
+                          Util::JsonObject *tableJson) const override;
+    void addMatchActionData(const p4configv1::Table &table, Util::JsonObject *tableJson,
+                            Util::JsonArray *dataJson, P4Id maxActionParamId) const;
 
-    boost::optional<bool> actProfHasSelector(P4Id actProfId) const override;
+    std::optional<bool> actProfHasSelector(P4Id actProfId) const override;
 
-    static boost::optional<ActionProf>
-    fromDPDKActionProfile(const p4configv1::P4Info& p4info,
-            const p4configv1::ExternInstance& externInstance) {
-        const auto& pre = externInstance.preamble();
+    static std::optional<ActionProf> fromDPDKActionProfile(
+        const p4configv1::P4Info &p4info, const p4configv1::ExternInstance &externInstance) {
+        const auto &pre = externInstance.preamble();
         p4configv1::ActionProfile actionProfile;
         if (!externInstance.info().UnpackTo(&actionProfile)) {
-            ::error("Extern instance %1% does not pack an ActionProfile object", pre.name());
-            return boost::none;
+            ::error(ErrorType::ERR_NOT_FOUND,
+                    "Extern instance %1% does not pack an ActionProfile object", pre.name());
+            return std::nullopt;
         }
-        auto tableIds = collectTableIds(
-            p4info, actionProfile.table_ids().begin(), actionProfile.table_ids().end());
+        auto tableIds = collectTableIds(p4info, actionProfile.table_ids().begin(),
+                                        actionProfile.table_ids().end());
         return ActionProf{pre.name(), pre.id(), actionProfile.size(), tableIds,
                           transformAnnotations(pre)};
     };

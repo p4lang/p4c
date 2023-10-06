@@ -32,8 +32,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action simple_action(in bit<16> val) {
     }
     table simple_table {
-        key = {
-        }
         actions = {
             simple_action(simple_function());
             @defaultonly NoAction();
@@ -67,4 +65,3 @@ control deparser(packet_out b, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

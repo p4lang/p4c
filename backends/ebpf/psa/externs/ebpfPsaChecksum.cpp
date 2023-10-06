@@ -15,11 +15,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 #include "ebpfPsaChecksum.h"
+
 #include "ebpfPsaHashAlgorithm.h"
 
 namespace EBPF {
 
-void EBPFChecksumPSA::init(const EBPFProgram* program, cstring name, int type) {
+void EBPFChecksumPSA::init(const EBPFProgram *program, cstring name, int type) {
     engine = EBPFHashAlgorithmTypeFactoryPSA::instance()->create(type, program, name);
 
     if (engine == nullptr) {
@@ -31,9 +32,9 @@ void EBPFChecksumPSA::init(const EBPFProgram* program, cstring name, int type) {
     }
 }
 
-EBPFChecksumPSA::EBPFChecksumPSA(const EBPFProgram* program, const IR::Declaration_Instance* block,
-                                 cstring name) :
-        engine(nullptr), declaration(block) {
+EBPFChecksumPSA::EBPFChecksumPSA(const EBPFProgram *program, const IR::Declaration_Instance *block,
+                                 cstring name)
+    : engine(nullptr), declaration(block) {
     auto di = block->to<IR::Declaration_Instance>();
     if (di->arguments->size() != 1) {
         ::error(ErrorType::ERR_UNEXPECTED, "Expected exactly 1 argument %1%", block);
@@ -43,16 +44,15 @@ EBPFChecksumPSA::EBPFChecksumPSA(const EBPFProgram* program, const IR::Declarati
     init(program, name, type);
 }
 
-EBPFChecksumPSA::EBPFChecksumPSA(const EBPFProgram* program, const IR::Declaration_Instance* block,
-                                 cstring name, int type) :
-        engine(nullptr), declaration(block) {
+EBPFChecksumPSA::EBPFChecksumPSA(const EBPFProgram *program, const IR::Declaration_Instance *block,
+                                 cstring name, int type)
+    : engine(nullptr), declaration(block) {
     init(program, name, type);
 }
 
-void EBPFChecksumPSA::processMethod(CodeBuilder* builder, cstring method,
-                                    const IR::MethodCallExpression * expr, Visitor * visitor) {
-    if (engine == nullptr)
-        return;
+void EBPFChecksumPSA::processMethod(CodeBuilder *builder, cstring method,
+                                    const IR::MethodCallExpression *expr, Visitor *visitor) {
+    if (engine == nullptr) return;
 
     engine->setVisitor(visitor);
 
@@ -67,9 +67,9 @@ void EBPFChecksumPSA::processMethod(CodeBuilder* builder, cstring method,
     }
 }
 
-void EBPFInternetChecksumPSA::processMethod(CodeBuilder* builder, cstring method,
-                                            const IR::MethodCallExpression * expr,
-                                            Visitor * visitor) {
+void EBPFInternetChecksumPSA::processMethod(CodeBuilder *builder, cstring method,
+                                            const IR::MethodCallExpression *expr,
+                                            Visitor *visitor) {
     engine->setVisitor(visitor);
 
     if (method == "add") {
@@ -85,8 +85,8 @@ void EBPFInternetChecksumPSA::processMethod(CodeBuilder* builder, cstring method
     }
 }
 
-void EBPFHashPSA::processMethod(CodeBuilder* builder, cstring method,
-                                const IR::MethodCallExpression * expr, Visitor * visitor) {
+void EBPFHashPSA::processMethod(CodeBuilder *builder, cstring method,
+                                const IR::MethodCallExpression *expr, Visitor *visitor) {
     engine->setVisitor(visitor);
 
     if (method == "get_hash") {
@@ -99,8 +99,8 @@ void EBPFHashPSA::processMethod(CodeBuilder* builder, cstring method,
 /**
  * This method calculates a hash value and saves it to the registerVar.
  */
-void EBPFHashPSA::calculateHash(CodeBuilder* builder, const IR::MethodCallExpression * expr,
-                                Visitor * visitor) {
+void EBPFHashPSA::calculateHash(CodeBuilder *builder, const IR::MethodCallExpression *expr,
+                                Visitor *visitor) {
     engine->setVisitor(visitor);
     // Every call of "get_hash" method should be independent out another. This means that
     // we need to set hash instance to default value.
@@ -108,8 +108,8 @@ void EBPFHashPSA::calculateHash(CodeBuilder* builder, const IR::MethodCallExpres
     engine->emitAddData(builder, expr->arguments->size() == 3 ? 1 : 0, expr);
 }
 
-void EBPFHashPSA::emitGetMethod(CodeBuilder* builder, const IR::MethodCallExpression * expr,
-                                Visitor * visitor) {
+void EBPFHashPSA::emitGetMethod(CodeBuilder *builder, const IR::MethodCallExpression *expr,
+                                Visitor *visitor) {
     BUG_CHECK(expr->arguments->size() == 1 || expr->arguments->size() == 3,
               "Expected 1 or 3 arguments: %1%", expr);
 

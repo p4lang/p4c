@@ -1,0 +1,7 @@
+issue3727.p4(7): [--Werror=type-error] error: f2 is not invoking an action
+    actions = {f2(1);}
+               ^^^^
+issue3727.p4(7): [--Werror=type-error] error: f2 is not invoking an action
+    actions = {f2(1);}
+               ^^^^
+[--Werror=type-error] error: Error while analyzing t

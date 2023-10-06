@@ -2,45 +2,29 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<48> EthD_t;
-typedef bit<48> EthT_t;
-typedef bit<8> CustomD_t;
-typedef bit<8> CustomT_t;
-typedef CustomD_t CustomDD_t;
-typedef CustomD_t CustomDT_t;
-typedef CustomT_t CustomTD_t;
-typedef CustomT_t CustomTT_t;
-typedef CustomDD_t CustomDDD_t;
-typedef CustomDD_t CustomDDT_t;
-typedef CustomDT_t CustomDTD_t;
-typedef CustomDT_t CustomDTT_t;
-typedef CustomTD_t CustomTDD_t;
-typedef CustomTD_t CustomTDT_t;
-typedef CustomTT_t CustomTTD_t;
-typedef CustomTT_t CustomTTT_t;
 header ethernet_t {
-    EthD_t  dstAddr;
-    EthT_t  srcAddr;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
     bit<16> etherType;
 }
 
 header custom_t {
-    bit<8>      e;
-    CustomD_t   ed;
-    CustomT_t   et;
-    CustomDD_t  edd;
-    CustomDT_t  edt;
-    CustomTD_t  etd;
-    CustomTT_t  ett;
-    CustomDDD_t eddd;
-    CustomDDT_t eddt;
-    CustomDTD_t edtd;
-    CustomDTT_t edtt;
-    CustomTDD_t etdd;
-    CustomTDT_t etdt;
-    CustomTTD_t ettd;
-    CustomTTT_t ettt;
-    bit<16>     checksum;
+    bit<8>  e;
+    bit<8>  ed;
+    bit<8>  et;
+    bit<8>  edd;
+    bit<8>  edt;
+    bit<8>  etd;
+    bit<8>  ett;
+    bit<8>  eddd;
+    bit<8>  eddt;
+    bit<8>  edtd;
+    bit<8>  edtt;
+    bit<8>  etdd;
+    bit<8>  etdt;
+    bit<8>  ettd;
+    bit<8>  ettt;
+    bit<16> checksum;
 }
 
 struct meta_t {
@@ -69,7 +53,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
     @name("ingress.set_output") action set_output(@name("out_port") bit<9> out_port) {
         standard_metadata.egress_spec = out_port;
     }
-    @name("ingress.set_headers") action set_headers(@name("e") bit<8> e_1, @name("ed") CustomD_t ed_1, @name("et") CustomT_t et_1, @name("edd") CustomDD_t edd_1, @name("edt") CustomDT_t edt_1, @name("etd") CustomTD_t etd_1, @name("ett") CustomTT_t ett_1, @name("eddd") CustomDDD_t eddd_1, @name("eddt") CustomDDT_t eddt_1, @name("edtd") CustomDTD_t edtd_1, @name("edtt") CustomDTT_t edtt_1, @name("etdd") CustomTDD_t etdd_1, @name("etdt") CustomTDT_t etdt_1, @name("ettd") CustomTTD_t ettd_1, @name("ettt") CustomTTT_t ettt_1) {
+    @name("ingress.set_headers") action set_headers(@name("e") bit<8> e_1, @name("ed") bit<8> ed_1, @name("et") bit<8> et_1, @name("edd") bit<8> edd_1, @name("edt") bit<8> edt_1, @name("etd") bit<8> etd_1, @name("ett") bit<8> ett_1, @name("eddd") bit<8> eddd_1, @name("eddt") bit<8> eddt_1, @name("edtd") bit<8> edtd_1, @name("edtt") bit<8> edtt_1, @name("etdd") bit<8> etdd_1, @name("etdt") bit<8> etdt_1, @name("ettd") bit<8> ettd_1, @name("ettt") bit<8> ettt_1) {
         hdr.custom.e = e_1;
         hdr.custom.ed = ed_1;
         hdr.custom.et = et_1;
@@ -90,19 +74,19 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
     }
     @name("ingress.custom_table") table custom_table_0 {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
-            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
-            hdr.custom.e        : exact @name("hdr.custom.e") ;
-            hdr.custom.ed       : exact @name("hdr.custom.ed") ;
-            hdr.custom.et       : exact @name("hdr.custom.et") ;
-            hdr.custom.edd      : exact @name("hdr.custom.edd") ;
-            hdr.custom.eddt     : exact @name("hdr.custom.eddt") ;
-            hdr.custom.edtd     : exact @name("hdr.custom.edtd") ;
-            hdr.custom.edtt     : exact @name("hdr.custom.edtt") ;
-            hdr.custom.etdd     : exact @name("hdr.custom.etdd") ;
-            hdr.custom.etdt     : exact @name("hdr.custom.etdt") ;
-            hdr.custom.ettd     : exact @name("hdr.custom.ettd") ;
-            hdr.custom.ettt     : exact @name("hdr.custom.ettt") ;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
+            hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr");
+            hdr.custom.e        : exact @name("hdr.custom.e");
+            hdr.custom.ed       : exact @name("hdr.custom.ed");
+            hdr.custom.et       : exact @name("hdr.custom.et");
+            hdr.custom.edd      : exact @name("hdr.custom.edd");
+            hdr.custom.eddt     : exact @name("hdr.custom.eddt");
+            hdr.custom.edtd     : exact @name("hdr.custom.edtd");
+            hdr.custom.edtt     : exact @name("hdr.custom.edtt");
+            hdr.custom.etdd     : exact @name("hdr.custom.etdd");
+            hdr.custom.etdt     : exact @name("hdr.custom.etdt");
+            hdr.custom.ettd     : exact @name("hdr.custom.ettd");
+            hdr.custom.ettt     : exact @name("hdr.custom.ettt");
         }
         actions = {
             set_output();
@@ -161,4 +145,3 @@ control computeChecksum(inout headers_t hdr, inout meta_t meta) {
 }
 
 V1Switch<headers_t, meta_t>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

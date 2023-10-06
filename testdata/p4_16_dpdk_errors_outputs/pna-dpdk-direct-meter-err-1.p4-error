@@ -1,0 +1,6 @@
+[--Werror=unexpected] error: dpdk_execute method for different DirectMeter instances (meter0_0 and meter1_0) called within same action
+[--Werror=unexpected] error: dpdk_execute method for different DirectMeter instances (meter0_0 and meter1_0) called within same action
+pna-dpdk-direct-meter-err-1.p4(116): [--Werror=target-error] error: Direct counters and direct meters are unsupported for wildcard match table ipv4_da_lpm
+    table ipv4_da_lpm {
+          ^^^^^^^^^^^
+[--Werror=unexpected] error: dpdk_execute method for different DirectMeter instances (meter0_0 and meter1_0) called within same action

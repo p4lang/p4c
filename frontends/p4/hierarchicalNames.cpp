@@ -16,22 +16,19 @@ limitations under the License.
 
 #include "hierarchicalNames.h"
 
+#include "lib/log.h"
+
 namespace P4 {
 
-cstring HierarchicalNames::getName(const IR::IDeclaration* decl) {
-    return decl->getName();
-}
+cstring HierarchicalNames::getName(const IR::IDeclaration *decl) { return decl->getName(); }
 
-const IR::Node* HierarchicalNames::postorder(IR::Annotation* annotation) {
-    if (annotation->name != IR::Annotation::nameAnnotation)
-        return annotation;
+const IR::Node *HierarchicalNames::postorder(IR::Annotation *annotation) {
+    if (annotation->name != IR::Annotation::nameAnnotation) return annotation;
 
     cstring name = annotation->getName();
-    if (name.startsWith("."))
-        return annotation;
+    if (name.startsWith(".")) return annotation;
     cstring newName = "";
-    for (cstring s : stack)
-        newName += s + ".";
+    for (cstring s : stack) newName += s + ".";
     newName += name;
     LOG2("Changing " << name << " to " << newName);
     annotation = new IR::Annotation(annotation->name, newName);

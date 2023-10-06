@@ -73,7 +73,8 @@ control MyIC(inout header_t a, inout EMPTY_M b, in psa_ingress_input_metadata_t 
     }
     table tbl {
         key = {
-            a.ethernet.srcAddr: exact @name("a.ethernet.srcAddr") ;
+            a.ethernet.srcAddr      : exact @name("a.ethernet.srcAddr");
+            a.vlan_tag[0].ether_type: exact @name("a.vlan_tag[0].ether_type");
         }
         actions = {
             NoAction();
@@ -108,8 +109,5 @@ control MyED(packet_out buffer, out EMPTY_CLONE a, out EMPTY_RECIRC b, inout EMP
 }
 
 IngressPipeline<header_t, EMPTY_M, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_RESUB, EMPTY_RECIRC>(MyIP(), MyIC(), MyID()) ip;
-
 EgressPipeline<EMPTY_H, EMPTY_M, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_CLONE, EMPTY_RECIRC>(MyEP(), MyEC(), MyED()) ep;
-
 PSA_Switch<header_t, EMPTY_M, EMPTY_H, EMPTY_M, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_CLONE, EMPTY_RESUB, EMPTY_RECIRC>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

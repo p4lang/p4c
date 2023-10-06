@@ -2,42 +2,37 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<48> mac_addr_t;
-typedef bit<32> ipv4_addr_t;
-typedef bit<128> ipv6_addr_t;
-typedef bit<9> port_t;
-typedef bit<16> task_t;
 header ethernet_t {
-    mac_addr_t dst_addr;
-    mac_addr_t src_addr;
-    bit<16>    ethertype;
+    bit<48> dst_addr;
+    bit<48> src_addr;
+    bit<16> ethertype;
 }
 
 header ipv4_t {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<6>      diff_serv;
-    bit<2>      ecn;
-    bit<16>     totalLen;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     fragOffset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdrChecksum;
-    ipv4_addr_t src_addr;
-    ipv4_addr_t dst_addr;
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<6>  diff_serv;
+    bit<2>  ecn;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    bit<32> src_addr;
+    bit<32> dst_addr;
 }
 
 header ipv6_t {
-    bit<4>      version;
-    bit<8>      traffic_class;
-    bit<20>     flow_label;
-    bit<16>     payload_length;
-    bit<8>      next_header;
-    bit<8>      hop_limit;
-    ipv6_addr_t src_addr;
-    ipv6_addr_t dst_addr;
+    bit<4>   version;
+    bit<8>   traffic_class;
+    bit<20>  flow_label;
+    bit<16>  payload_length;
+    bit<8>   next_header;
+    bit<8>   hop_limit;
+    bit<128> src_addr;
+    bit<128> dst_addr;
 }
 
 header tcp_t {
@@ -81,7 +76,7 @@ header icmp_t {
 }
 
 header cpu_t {
-    task_t  task;
+    bit<16> task;
     bit<16> ingress_port;
     bit<16> ethertype;
 }
@@ -99,9 +94,9 @@ struct headers {
 
 struct metadata {
     @field_list(0)
-    port_t  ingress_port;
+    bit<9>  ingress_port;
     @field_list(0)
-    task_t  task;
+    bit<16> task;
     @field_list(0)
     bit<16> tcp_length;
     @field_list(0)
@@ -190,18 +185,18 @@ control MyComputeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("MyIngress.mac_tmp") mac_addr_t mac_tmp_0;
-    @name("MyIngress.addr_tmp") ipv6_addr_t addr_tmp_0;
+    @name("MyIngress.mac_tmp") bit<48> mac_tmp_0;
+    @name("MyIngress.addr_tmp") bit<128> addr_tmp_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @name("MyIngress.set_egress_port") action set_egress_port(@name("out_port") port_t out_port) {
+    @name("MyIngress.set_egress_port") action set_egress_port(@name("out_port") bit<9> out_port) {
         standard_metadata.egress_spec = out_port;
     }
-    @name("MyIngress.set_egress_port") action set_egress_port_1(@name("out_port") port_t out_port_1) {
+    @name("MyIngress.set_egress_port") action set_egress_port_1(@name("out_port") bit<9> out_port_1) {
         standard_metadata.egress_spec = out_port_1;
     }
     @name("MyIngress.controller_debug") action controller_debug() {
@@ -214,12 +209,12 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         meta.ingress_port = standard_metadata.ingress_port;
         clone_preserving_field_list(CloneType.I2E, 32w100, 8w0);
     }
-    @name("MyIngress.controller_reply") action controller_reply(@name("task") task_t task_1) {
+    @name("MyIngress.controller_reply") action controller_reply(@name("task") bit<16> task_1) {
         meta.task = task_1;
         meta.ingress_port = standard_metadata.ingress_port;
         clone_preserving_field_list(CloneType.I2E, 32w100, 8w0);
     }
-    @name("MyIngress.controller_reply") action controller_reply_1(@name("task") task_t task_2) {
+    @name("MyIngress.controller_reply") action controller_reply_1(@name("task") bit<16> task_2) {
         meta.task = task_2;
         meta.ingress_port = standard_metadata.ingress_port;
         clone_preserving_field_list(CloneType.I2E, 32w100, 8w0);
@@ -236,7 +231,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     @name("MyIngress.v6_addresses") table v6_addresses_0 {
         key = {
-            hdr.ipv6.dst_addr: exact @name("hdr.ipv6.dst_addr") ;
+            hdr.ipv6.dst_addr: exact @name("hdr.ipv6.dst_addr");
         }
         actions = {
             controller_debug();
@@ -249,7 +244,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     @name("MyIngress.v6_networks") table v6_networks_0 {
         key = {
-            hdr.ipv6.dst_addr: lpm @name("hdr.ipv6.dst_addr") ;
+            hdr.ipv6.dst_addr: lpm @name("hdr.ipv6.dst_addr");
         }
         actions = {
             set_egress_port();
@@ -262,7 +257,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     @name("MyIngress.v4_networks") table v4_networks_0 {
         key = {
-            hdr.ipv4.dst_addr: lpm @name("hdr.ipv4.dst_addr") ;
+            hdr.ipv4.dst_addr: lpm @name("hdr.ipv4.dst_addr");
         }
         actions = {
             set_egress_port_1();

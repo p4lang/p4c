@@ -41,6 +41,17 @@ header ipv4_t {
     bit<32> dstAddr;
 }
 
+header ipv6_t {
+    bit<4>   version;
+    bit<8>   trafficClass;
+    bit<20>  flowLabel;
+    bit<16>  payloadLength;
+    bit<8>   nextHeader;
+    bit<8>   hopLimit;
+    bit<128> srcAddr;
+    bit<128> dstAddr;
+}
+
 header mpls_t {
     bit<20> label;
     bit<3>  tc;

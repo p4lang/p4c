@@ -17,12 +17,12 @@ header data_t {
 }
 
 struct metadata {
-    @name(".counter_metadata") 
+    @name(".counter_metadata")
     counter_metadata_t counter_metadata;
 }
 
 struct headers {
-    @name(".data") 
+    @name(".data")
     data_t data;
 }
 
@@ -34,9 +34,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 @name(".count1") @min_width(32) counter<bit<14>>(32w16384, CounterType.packets) count1;
-
 @name(".count2") @min_width(32) counter<bit<14>>(32w16384, CounterType.packets) count2;
-
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
@@ -57,8 +55,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_1();
         }
         key = {
-            hdr.data.f1: exact @name("data.f1") ;
-            hdr.data.f2: exact @name("data.f2") ;
+            hdr.data.f1: exact @name("data.f1");
+            hdr.data.f2: exact @name("data.f2");
         }
         size = 2048;
         default_action = NoAction_1();
@@ -104,4 +102,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

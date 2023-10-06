@@ -17,9 +17,8 @@ limitations under the License.
 #ifndef FRONTENDS_COMMON_APPLYOPTIONSPRAGMAS_H_
 #define FRONTENDS_COMMON_APPLYOPTIONSPRAGMAS_H_
 
+#include <optional>
 #include <vector>
-
-#include <boost/optional.hpp>
 
 #include "ir/ir.h"
 #include "ir/visitor.h"
@@ -31,10 +30,9 @@ namespace P4 {
 /// behavior of ApplyOptionsPragmas.
 class IOptionPragmaParser {
  public:
-    using CommandLineOptions = std::vector<const char*>;
+    using CommandLineOptions = std::vector<const char *>;
 
-    virtual boost::optional<CommandLineOptions>
-    tryToParse(const IR::Annotation* annotation) = 0;
+    virtual std::optional<CommandLineOptions> tryToParse(const IR::Annotation *annotation) = 0;
 };
 
 /**
@@ -55,13 +53,13 @@ class IOptionPragmaParser {
  */
 class ApplyOptionsPragmas : public Inspector {
  public:
-    explicit ApplyOptionsPragmas(IOptionPragmaParser& parser);
+    explicit ApplyOptionsPragmas(IOptionPragmaParser &parser);
 
-    bool preorder(const IR::Annotation* annotation) override;
+    bool preorder(const IR::Annotation *annotation) override;
     void end_apply() override;
 
  private:
-    IOptionPragmaParser& parser;
+    IOptionPragmaParser &parser;
     IOptionPragmaParser::CommandLineOptions options;
 };
 
@@ -79,12 +77,10 @@ class ApplyOptionsPragmas : public Inspector {
  */
 class P4COptionPragmaParser : public IOptionPragmaParser {
  public:
-    boost::optional<CommandLineOptions>
-    tryToParse(const IR::Annotation* annotation) override;
+    std::optional<CommandLineOptions> tryToParse(const IR::Annotation *annotation) override;
 
  private:
-    boost::optional<CommandLineOptions>
-    parseDiagnostic(const IR::Annotation* annotation);
+    std::optional<CommandLineOptions> parseDiagnostic(const IR::Annotation *annotation);
 };
 
 }  // namespace P4

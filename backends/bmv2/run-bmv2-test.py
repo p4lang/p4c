@@ -16,98 +16,98 @@
 # Runs the compiler on a sample P4 program generating code for the BMv2
 # behavioral model simulator
 
+import argparse
+import logging
+import os
+import shutil
+import sys
+import tempfile
 from subprocess import Popen
 from threading import Thread
-import sys
-import os
-import tempfile
-import shutil
-import argparse
 
+from bmv2stf import RunBMV2
 from scapy.layers.all import *
 from scapy.utils import *
-from bmv2stf import RunBMV2
-sys.path.insert(0,
-                os.path.dirname(os.path.realpath(__file__)) + '/../../tools')
-from testutils import SUCCESS, FAILURE, check_if_dir, check_if_file
+
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)) + "/../../tools")
+from testutils import FAILURE, SUCCESS, check_if_dir, check_if_file
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("rootdir",
-                        help="the root directory of "
-                        "the compiler source tree")
+    parser.add_argument("rootdir", help="the root directory of the compiler source tree")
     parser.add_argument("p4filename", help="the p4 file to process")
     parser.add_argument(
         "-b",
         "--nocleanup",
         action="store_false",
-        help="do not remove temporary results for failing tests")
-    parser.add_argument("-bd",
-                        "--buildir",
-                        dest="builddir",
-                        help="The path to the compiler build directory, "
-                        "default is \"build\".")
-    parser.add_argument("-v",
-                        "--verbose",
-                        action="store_true",
-                        help="verbose operation")
+        help="do not remove temporary results for failing tests",
+    )
+    parser.add_argument(
+        "-bd",
+        "--buildir",
+        dest="builddir",
+        help="The path to the compiler build directory, default is \"build\".",
+    )
+    parser.add_argument("-v", "--verbose", action="store_true", help="verbose operation")
     parser.add_argument(
         "-f",
         "--replace",
         action="store_true",
-        help="replace reference outputs with newly generated ones")
-    parser.add_argument("-p",
-                        "--usePsa",
-                        dest="use_psa",
-                        action="store_true",
-                        help="Use psa switch")
-    parser.add_argument("-pp",
-                        dest="pp",
-                        help="pass this option to the compiler")
-    parser.add_argument("-gdb",
-                        "--gdb",
-                        action="store_true",
-                        help="Run the compiler under gdb.")
-    parser.add_argument("-a",
-                        dest="compiler_options",
-                        default=[],
-                        action='append',
-                        nargs="?",
-                        help="Pass this option string to the compiler")
-    parser.add_argument("--target-specific-switch-arg",
-                        dest="switch_options",
-                        default=[],
-                        action='append',
-                        nargs="?",
-                        help="Pass this target-specific option to the switch")
-    parser.add_argument("--init",
-                        dest="init_cmds",
-                        default=[],
-                        action='append',
-                        nargs="?",
-                        help="Run <cmd> before the start of the test")
-    parser.add_argument("--observation-log",
-                        dest="obs_log",
-                        help="save packet output to <file>")
+        help="replace reference outputs with newly generated ones",
+    )
+    parser.add_argument(
+        "-p", "--usePsa", dest="use_psa", action="store_true", help="Use psa switch"
+    )
+    parser.add_argument("-pp", dest="pp", help="pass this option to the compiler")
+    parser.add_argument("-gdb", "--gdb", action="store_true", help="Run the compiler under gdb.")
+    parser.add_argument(
+        "-a",
+        dest="compiler_options",
+        default=[],
+        action="append",
+        nargs="?",
+        help="Pass this option string to the compiler",
+    )
+    parser.add_argument(
+        "--target-specific-switch-arg",
+        dest="switch_options",
+        default=[],
+        action="append",
+        nargs="?",
+        help="Pass this target-specific option to the switch",
+    )
+    parser.add_argument(
+        "--init",
+        dest="init_cmds",
+        default=[],
+        action="append",
+        nargs="?",
+        help="Run <cmd> before the start of the test",
+    )
+    parser.add_argument("--observation-log", dest="obs_log", help="save packet output to <file>")
     parser.add_argument(
         "-tf",
-        "--testfile",
-        dest="testfile",
-        help="Provide the path for the stf file for this test. "
-        "If no path is provided, the script will search for an"
-        " stf file in the same folder.")
+        "--testFile",
+        dest="testFile",
+        help=(
+            "Provide the path for the stf file for this test. "
+            "If no path is provided, the script will search for an"
+            " stf file in the same folder."
+        ),
+    )
     return parser.parse_known_args()
 
 
-class Options():
+class Options:
     def __init__(self):
         self.binary = ""  # this program's name
         self.cleanupTmp = True  # if false do not remote tmp folder created
         self.p4filename = ""  # file that is being compiled
         self.compilerSrcDir = ""  # path to compiler source tree
         self.compilerBuildDir = ""  # path to compiler build directory
-        self.testfile = ""  # path to stf test file that is used
+        self.testFile = ""  # path to stf test file that is used
+        self.testName = None  # Name of the test
         self.verbose = False
         self.replace = False  # replace previous outputs
         self.compilerOptions = []
@@ -127,18 +127,18 @@ def nextWord(text, sep=" "):
     pos = text.find(sep)
     if pos < 0:
         return text, ""
-    l, r = text[0:pos].strip(), text[pos + len(sep):len(text)].strip()
+    l, r = text[0:pos].strip(), text[pos + len(sep) : len(text)].strip()
     # print(text, "/", sep, "->", l, "#", r)
     return l, r
 
 
-class ConfigH():
+class ConfigH:
     # Represents an autoconf config.h file
     # fortunately the structure of these files is very constrained
     def __init__(self, file):
         self.file = file
         self.vars = {}
-        with open(file) as a:
+        with open(file, "r", encoding="utf-8") as a:
             self.text = a.read()
         self.ok = False
         self.parse()
@@ -151,7 +151,7 @@ class ConfigH():
                 if end < 1:
                     reportError("Unterminated comment in config file")
                     return
-                self.text = self.text[end + 2:len(self.text)]
+                self.text = self.text[end + 2 : len(self.text)]
             elif self.text.startswith("#define"):
                 _, self.text = nextWord(self.text)
                 macro, self.text = nextWord(self.text)
@@ -177,21 +177,20 @@ def reportError(*message):
     print("***", *message)
 
 
-class Local():
+class Local:
     # object to hold local vars accessible to nested functions
-    pass
+    process = None
 
 
 def run_timeout(options, args, timeout, stderr):
     if options.verbose:
         print("Executing ", " ".join(args))
     local = Local()
-    local.process = None
 
     def target():
         procstderr = None
         if stderr is not None:
-            procstderr = open(stderr, "w")
+            procstderr = open(stderr, "w", encoding="utf-8")
         local.process = Popen(args, stderr=procstderr)
         local.process.wait()
 
@@ -223,22 +222,27 @@ def run_model(options, tmpdir, jsonfile):
     base, _ = os.path.splitext(basename)
     dirname = os.path.dirname(options.p4filename)
 
-    testfile = options.testfile
+    testFile = options.testFile
     # If no test file is provided, try to find it in the folder.
-    if not testfile:
-        testfile = dirname + "/" + base + ".stf"
-        print("Check for ", testfile)
-        if not os.path.isfile(testfile):
+    if not testFile:
+        testFile = dirname + "/" + base + ".stf"
+        print("Check for ", testFile)
+        if not os.path.isfile(testFile):
             # If no stf file is present just use the empty file
-            testfile = dirname + "/empty.stf"
-        if not os.path.isfile(testfile):
+            testFile = dirname + "/empty.stf"
+        if not os.path.isfile(testFile):
             # If no empty.stf present, don't try to run the model at all
             return SUCCESS
     bmv2 = RunBMV2(tmpdir, options, jsonfile)
-    result = bmv2.generate_model_inputs(testfile)
+
+    stf_map, result = bmv2.parse_stf_file(testFile)
     if result != SUCCESS:
         return result
-    result = bmv2.run()
+
+    result = bmv2.generate_model_inputs(stf_map)
+    if result != SUCCESS:
+        return result
+    result = bmv2.run(stf_map)
     if result != SUCCESS:
         return result
     result = bmv2.checkOutputs()
@@ -259,14 +263,11 @@ def run_init_commands(options):
 def process_file(options, argv):
     assert isinstance(options, Options)
 
-    if (run_init_commands(options) != SUCCESS):
+    if run_init_commands(options) != SUCCESS:
         return FAILURE
     tmpdir = tempfile.mkdtemp(dir=".")
     basename = os.path.basename(options.p4filename)
-    base, ext = os.path.splitext(basename)
-    dirname = os.path.dirname(options.p4filename)
-    # expected outputs are here
-    expected_dirname = dirname + "_outputs"
+    base, _ = os.path.splitext(basename)
 
     if options.verbose:
         print("Writing temporary files into ", tmpdir)
@@ -296,10 +297,11 @@ def process_file(options, argv):
 
     if result != SUCCESS:
         print("Error compiling")
-        print(open(stderr).read())
-        # If the compiler crashed fail the test
-        if 'Compiler Bug' in open(stderr).read():
-            return FAILURE
+        with open(stderr, mode="r", encoding="utf-8") as stderr_file:
+            print(stderr_file.read())
+            # If the compiler crashed fail the test
+            if "Compiler Bug" in stderr_file.read():
+                return FAILURE
 
     expected_error = isError(options.p4filename)
     if expected_error:
@@ -320,39 +322,11 @@ def process_file(options, argv):
 
 
 def main(argv):
-
-    config = ConfigH(options.compilerBuildDir + "/config.h")
-    if not config.ok:
-        print("Error parsing config.h")
-        sys.exit(FAILURE)
-
-    options.hasBMv2 = "HAVE_SIMPLE_SWITCH" in config.vars
-    if not options.hasBMv2:
-        reportError("config.h indicates that BMv2 is not installed"
-                    "will skip running BMv2 tests")
-    options.testName = None
-    if options.p4filename.startswith(options.compilerBuildDir):
-        options.testName = options.p4filename[len(options.compilerBuildDir):]
-        if options.testName.startswith('/'):
-            options.testName = options.testName[1:]
-        if options.testName.endswith('.p4'):
-            options.testName = options.testName[:-3]
-        options.testName = "bmv2/" + options.testName
-    if not options.observationLog:
-        if options.testName:
-            options.observationLog = os.path.join('%s.p4.obs' %
-                                                  options.testName)
-        else:
-            basename = os.path.basename(options.p4filename)
-            base, ext = os.path.splitext(basename)
-            dirname = os.path.dirname(options.p4filename)
-            options.observationLog = os.path.join(dirname, '%s.p4.obs' % base)
-
     try:
         result = process_file(options, argv)
     except Exception as e:
-        print("Exception ", e)
-        sys.exit(FAILURE)
+        print(f"There was a problem executing the STF test {options.testFile}:")
+        raise e
 
     if result != SUCCESS:
         reportError("Test failed")
@@ -364,8 +338,9 @@ if __name__ == "__main__":
     args, argv = parse_args()
     options = Options()
     options.binary = ""
-    options.p4filename = check_if_file(args.p4filename)
-    options.compilerSrcDir = check_if_dir(args.rootdir)
+    # TODO: Convert these paths to pathlib's Path.
+    options.p4filename = check_if_file(args.p4filename).as_posix()
+    options.compilerSrcDir = check_if_dir(args.rootdir).as_posix()
 
     # If no build directory is provided, append build to the compiler src dir.
     if args.builddir:
@@ -375,7 +350,7 @@ if __name__ == "__main__":
     options.verbose = args.verbose
     options.replace = args.replace
     options.cleanupTmp = args.nocleanup
-    options.testfile = args.testfile
+    options.testFile = args.testFile
 
     # We have to be careful here, passing compiler options is ambiguous in
     # argparse because the parser is not positional.
@@ -396,9 +371,45 @@ if __name__ == "__main__":
     options.observationLog = args.obs_log
     residual_argv = []
     for arg in argv:
-        if arg in ('-D', '-I', '-T'):
+        if arg in ("-D", "-I", "-T"):
             options.compilerOptions.append(arg)
         else:
             residual_argv.append(arg)
+
+    config = ConfigH(options.compilerBuildDir + "/config.h")
+    if not config.ok:
+        print("Error parsing config.h")
+        sys.exit(FAILURE)
+
+    # Configure logging.
+    logging.basicConfig(
+        filename="test.log",
+        format="%(levelname)s: %(message)s",
+        level=getattr(logging, "INFO"),
+        filemode="w",
+    )
+    stderr_log = logging.StreamHandler()
+    stderr_log.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
+    logging.getLogger().addHandler(stderr_log)
+
+    options.hasBMv2 = "HAVE_SIMPLE_SWITCH" in config.vars
+    if not options.hasBMv2:
+        reportError("config.h indicates that BMv2 is not installedwill skip running BMv2 tests")
+    if options.p4filename.startswith(options.compilerBuildDir):
+        options.testName = options.p4filename[len(options.compilerBuildDir) :]
+        if options.testName.startswith("/"):
+            options.testName = options.testName[1:]
+        if options.testName.endswith(".p4"):
+            options.testName = options.testName[:-3]
+        options.testName = "bmv2/" + options.testName
+    if not options.observationLog:
+        if options.testName:
+            options.observationLog = os.path.join(f"{options.testName}.p4.obs")
+        else:
+            basename = os.path.basename(options.p4filename)
+            base, _ = os.path.splitext(basename)
+            dirname = os.path.dirname(options.p4filename)
+            options.observationLog = os.path.join(dirname, f"{base}.p4.obs")
+
     # All args after '--' are intended for the p4 compiler
     main(residual_argv)

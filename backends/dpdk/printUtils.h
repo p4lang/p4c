@@ -17,8 +17,10 @@ limitations under the License.
 #define BACKENDS_DPDK_PRINTUTILS_H_
 
 #include <iostream>
-#include "ir/ir.h"
+
 #include "ir/dbprint.h"
+#include "ir/ir.h"
+#include "ir/visitor.h"
 
 namespace DPDK {
 // this function translates nodes of different subclass of Expression, Type
@@ -48,4 +50,4 @@ class ConvertToString : public Inspector {
 };
 }  // namespace DPDK
 
-#endif  /* BACKENDS_DPDK_PRINTUTILS_H_ */
+#endif /* BACKENDS_DPDK_PRINTUTILS_H_ */

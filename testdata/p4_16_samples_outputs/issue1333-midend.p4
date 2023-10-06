@@ -26,4 +26,3 @@ control c_0() {
 }
 
 top(c_0()) main;
-

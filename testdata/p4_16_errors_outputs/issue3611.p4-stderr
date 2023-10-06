@@ -1,0 +1,21 @@
+issue3611.p4(13): [--Wwarn=ordering] warning: 1: label following 'default' DefaultExpression label.
+      1: {} // { dg-error "" }
+      ^
+issue3611.p4(12)
+      default: {}
+      ^^^^^^^
+issue3611.p4(13): [--Werror=type-error] error: 1: 'switch' label must be an action name or 'default'
+      1: {} // { dg-error "" }
+      ^
+issue3611.p4(14): [--Werror=type-error] error: DefaultExpression: multiple 'default' labels DefaultExpression
+      default: {}
+      ^^^^^^^
+issue3611.p4(12)
+      default: {}
+      ^^^^^^^
+issue3611.p4(16): [--Werror=type-error] error: a: 'switch' label duplicates a
+      a: {}
+      ^
+issue3611.p4(15)
+      a: {}
+      ^

@@ -4,11 +4,10 @@
 struct empty_metadata_t {
 }
 
-typedef bit<48> ethernet_addr_t;
 header ethernet_t {
-    ethernet_addr_t dst_addr;
-    ethernet_addr_t src_addr;
-    bit<16>         ether_type;
+    bit<48> dst_addr;
+    bit<48> src_addr;
+    bit<16> ether_type;
 }
 
 header ipv4_t {
@@ -61,8 +60,8 @@ struct host_info_rx_bytes_t {
 }
 
 struct local_metadata_t {
-    ethernet_addr_t dst_addr;
-    ethernet_addr_t src_addr;
+    bit<48> dst_addr;
+    bit<48> src_addr;
 }
 
 parser packet_parser(packet_in packet, out headers_t headers, inout local_metadata_t local_metadata, in psa_ingress_parser_input_metadata_t standard_metadata, in empty_metadata_t resub_meta, in empty_metadata_t recirc_meta) {
@@ -77,15 +76,21 @@ control packet_deparser(packet_out packet, out empty_metadata_t clone_i2e_meta, 
 }
 
 control ingress(inout headers_t headers, inout local_metadata_t local_metadata1, in psa_ingress_input_metadata_t standard_metadata, inout psa_ingress_output_metadata_t ostd) {
+    host_info_rx_bytes_t2 host_info_rx_bytes_0_flex_up_flex_up1;
     @name("ingress.action1") action action1(@name("field") bit<16> field, @name("field1") bit<16> field1) {
-        headers.outer_ethernet.ether_type = (field == 16w1 ? field : field1);
+        if (field == 16w1) {
+            host_info_rx_bytes_0_flex_up_flex_up1.flex_0 = field;
+        } else {
+            host_info_rx_bytes_0_flex_up_flex_up1.flex_0 = field1;
+        }
+        headers.outer_ethernet.ether_type = host_info_rx_bytes_0_flex_up_flex_up1.flex_0;
     }
     @name("ingress.drop") action drop_1() {
         ostd.egress_port = 32w4;
     }
     @name("ingress.table1") table table1_0 {
         key = {
-            headers.ethernet.dst_addr: exact @name("headers.ethernet.dst_addr") ;
+            headers.ethernet.dst_addr: exact @name("headers.ethernet.dst_addr");
         }
         actions = {
             action1();
@@ -116,8 +121,5 @@ control egress_deparser(packet_out packet, out empty_metadata_t clone_e2e_meta, 
 }
 
 IngressPipeline<headers_t, local_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(packet_parser(), ingress(), packet_deparser()) ip;
-
 EgressPipeline<headers_t, local_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(egress_parser(), egress(), egress_deparser()) ep;
-
 PSA_Switch<headers_t, local_metadata_t, headers_t, local_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

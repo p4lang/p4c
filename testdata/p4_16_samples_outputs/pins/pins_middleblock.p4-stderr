@@ -1,0 +1,36 @@
+pins_middleblock.p4(586): [--Wwarn=shadow] warning: 'ttl' shadows 'control ttl'
+    bit<8> ttl = 0;
+    ^^^^^^^^^^^^^^^
+pins_middleblock.p4(552)
+control ttl(inout headers_t headers, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
+        ^^^
+pins_middleblock.p4(314): [--Wwarn=deprecated] warning: set_nexthop: Using deprecated feature set_nexthop. Use set_ip_nexthop instead.
+            @proto_id(1) set_nexthop;
+                         ^^^^^^^^^^^
+pins_middleblock.p4(306)
+    @id(0x01000003) @deprecated("Use set_ip_nexthop instead.") action set_nexthop(@id(1) @refers_to(router_interface_table , router_interface_id) @refers_to(neighbor_table , router_interface_id) router_interface_id_t router_interface_id, @id(2) @format(IPV6_ADDRESS) @refers_to(neighbor_table , neighbor_id) ipv6_addr_t neighbor_id) {
+                                                                      ^^^^^^^^^^^
+pins_middleblock.p4(592): [--Wwarn=unused] warning: 'qos_queue' is unused
+    @id(0x01000101) @sai_action(SAI_PACKET_ACTION_COPY , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_YELLOW) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_RED) action acl_copy(@sai_action_param(QOS_QUEUE) @id(1) qos_queue_t qos_queue) {
+                                                                                                                                                                                                                                                                                ^^^^^^^^^
+pins_middleblock.p4(333): [--Wwarn=uninitialized_use] warning: wcmp_group_id_value may not be completely initialized
+            wcmp_group_id_value : exact @id(1) @name("wcmp_group_id");
+            ^^^^^^^^^^^^^^^^^^^
+pins_middleblock.p4(311): [--Wwarn=uninitialized_use] warning: nexthop_id_value may not be completely initialized
+            nexthop_id_value: exact @id(1) @name("nexthop_id");
+            ^^^^^^^^^^^^^^^^
+pins_middleblock.p4(291): [--Wwarn=uninitialized_use] warning: router_interface_id_value may not be completely initialized
+            router_interface_id_value: exact @id(1) @name("router_interface_id");
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+pins_middleblock.p4(275): [--Wwarn=uninitialized_use] warning: router_interface_id_value may not be completely initialized
+            router_interface_id_value: exact @id(1) @name("router_interface_id") @refers_to(router_interface_table , router_interface_id);
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+pins_middleblock.p4(276): [--Wwarn=uninitialized_use] warning: neighbor_id_value may be uninitialized
+            neighbor_id_value : exact @id(2) @format(IPV6_ADDRESS) @name("neighbor_id");
+            ^^^^^^^^^^^^^^^^^
+pins_middleblock.p4(512): [--Wwarn=uninitialized_use] warning: mirror_port may not be completely initialized
+            mirror_port: exact @id(1);
+            ^^^^^^^^^^^
+pins_middleblock.p4(524): [--Wwarn=uninitialized_use] warning: pre_session may be uninitialized
+                    clone_preserving_field_list(CloneType.I2E, pre_session, (bit<8>)PreservedFieldList.CLONE_I2E);
+                                                               ^^^^^^^^^^^

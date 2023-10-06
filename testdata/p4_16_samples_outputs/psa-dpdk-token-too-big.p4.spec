@@ -39,6 +39,11 @@ struct cksum_state_t {
 	bit<16> state_0
 }
 
+struct dpdk_pseudo_header_t {
+	bit<16> pseudo
+	bit<16> pseudo_0
+}
+
 struct psa_ingress_output_metadata_t {
 	bit<8> class_of_service
 	bit<8> clone
@@ -94,12 +99,14 @@ header outer_ipv4_dpdk_dpdk_dpdk_dpd3 instanceof ipv4_t
 header outer_udp instanceof udp_t
 header outer_vxlan instanceof vxlan_t
 header cksum_state instanceof cksum_state_t
+header dpdk_pseudo_header instanceof dpdk_pseudo_header_t
 
 ;oldname:local_metadata__dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_t
 struct local_metadata__dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpd4 {
 	bit<32> psa_ingress_input_metadata_ingress_port
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
+	bit<8> local_metadata_tmp
 	bit<16> Ingress_tmp
 	bit<16> Ingress_tmp_0
 }
@@ -131,8 +138,10 @@ action vxlan_encap_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dp5 args instanc
 	mov m.psa_ingress_output_metadata_egress_port t.port_out
 	mov m.Ingress_tmp h.outer_ipv4_dpdk_dpdk_dpdk_dpd3.hdr_checksum
 	mov m.Ingress_tmp_0 h.ipv4.total_len
-	ckadd h.cksum_state.state_0 m.Ingress_tmp
-	ckadd h.cksum_state.state_0 m.Ingress_tmp_0
+	mov h.dpdk_pseudo_header.pseudo m.Ingress_tmp
+	mov h.dpdk_pseudo_header.pseudo_0 m.Ingress_tmp_0
+	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo
+	ckadd h.cksum_state.state_0 h.dpdk_pseudo_header.pseudo_0
 	mov h.outer_ipv4_dpdk_dpdk_dpdk_dpd3.hdr_checksum h.cksum_state.state_0
 	mov h.outer_ipv4_dpdk_dpdk_dpdk_dpd3.total_len t.ipv4_total_len
 	add h.outer_ipv4_dpdk_dpdk_dpdk_dpd3.total_len h.ipv4.total_len
@@ -155,18 +164,21 @@ table vxlan_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpd6 {
 		vxlan_encap_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dp5
 		drop_1
 	}
-	default_action drop_1 args none 
+	default_action drop_1 args none const
 	size 0x100000
 }
 
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
-	mov m.psa_ingress_output_metadata_drop 0x0
+	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
 	extract h.ipv4
 	table vxlan_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpd6
-	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	jmpa LABEL_SWITCH vxlan_encap_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dpdk_dp5
+	jmp LABEL_ENDSWITCH
+	LABEL_SWITCH :	mov m.local_metadata_tmp 0x0
+	LABEL_ENDSWITCH :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.outer_ethernet
 	emit h.outer_ipv4_dpdk_dpdk_dpdk_dpd3
 	emit h.outer_udp

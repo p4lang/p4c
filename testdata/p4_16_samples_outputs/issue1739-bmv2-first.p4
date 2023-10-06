@@ -63,7 +63,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
     }
     table ipv4_da_lpm {
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr");
         }
         actions = {
             set_output();
@@ -73,7 +73,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
     }
     table ipv4_sa_filter {
         key = {
-            hdr.ipv4.srcAddr: ternary @name("hdr.ipv4.srcAddr") ;
+            hdr.ipv4.srcAddr: ternary @name("hdr.ipv4.srcAddr");
         }
         actions = {
             my_drop(standard_metadata);
@@ -114,4 +114,3 @@ control computeChecksum(inout headers_t hdr, inout meta_t meta) {
 }
 
 V1Switch<headers_t, meta_t>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

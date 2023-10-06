@@ -1,7 +1,7 @@
 %{
 #include "frontends/common/constantParsing.h"
 #include "frontends/parsers/parserDriver.h"
-#include "frontends/parsers/p4/p4lexer.hpp"
+#include "frontends/parsers/p4/p4lexer_internal.hpp"
 #include "frontends/parsers/p4/p4parser.hpp"
 
 using Parser = P4::P4Parser;
@@ -24,8 +24,10 @@ using Parser = P4::P4Parser;
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #pragma GCC diagnostic ignored "-Wtautological-undefined-compare"
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 #ifdef __clang__
 #pragma clang diagnostic ignored "-Wnull-conversion"
+#pragma clang diagnostic ignored "-Wregister"
 #endif
 
 %}
@@ -157,6 +159,8 @@ using Parser = P4::P4Parser;
                   return makeToken(PARSER); }
 "package"       { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(PACKAGE); }
+"priority"      { BEGIN(driver.saveState); driver.template_args = false;
+                  return makeToken(PRIORITY); }
 "return"        { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(RETURN); }
 "select"        { BEGIN(driver.saveState); driver.template_args = false;
@@ -185,6 +189,8 @@ using Parser = P4::P4Parser;
                   return makeToken(VARBIT); }
 "value_set"     { BEGIN(driver.saveState); driver.template_args = true;
                   return makeToken(VALUESET); }
+"list"          { BEGIN(driver.saveState); driver.template_args = true;
+                  return makeToken(LIST); }
 "void"          { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(VOID); }
 "_"             { BEGIN(driver.saveState); driver.template_args = false;
@@ -258,6 +264,7 @@ using Parser = P4::P4Parser;
                           return Parser::make_INTEGER(constant, driver.yylloc); }
 
 "&&&"   { BEGIN(driver.saveState); driver.template_args = false; return makeToken(MASK); }
+"..."   { BEGIN(driver.saveState); driver.template_args = false; return makeToken(DOTS); }
 ".."    { BEGIN(driver.saveState); driver.template_args = false; return makeToken(RANGE); }
 "<<"    { BEGIN(driver.saveState); driver.template_args = false; return makeToken(SHL); }
 "&&"    { BEGIN(driver.saveState); driver.template_args = false; return makeToken(AND); }
@@ -269,6 +276,7 @@ using Parser = P4::P4Parser;
 "++"    { BEGIN(driver.saveState); driver.template_args = false; return makeToken(PP); }
 
 "+"     { BEGIN(driver.saveState); driver.template_args = false; return makeToken(PLUS); }
+"{#}"   { BEGIN(driver.saveState); driver.template_args = false; return makeToken(INVALID); }
 "|+|"   { BEGIN(driver.saveState); driver.template_args = false; return makeToken(PLUS_SAT); }
 "-"     { BEGIN(driver.saveState); driver.template_args = false; return makeToken(MINUS); }
 "|-|"   { BEGIN(driver.saveState); driver.template_args = false; return makeToken(MINUS_SAT); }

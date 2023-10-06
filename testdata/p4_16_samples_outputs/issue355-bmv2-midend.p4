@@ -60,4 +60,3 @@ control uc(inout H hdr, inout M meta) {
 }
 
 V1Switch<H, M>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
-

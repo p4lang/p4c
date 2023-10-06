@@ -38,7 +38,7 @@ struct headers {
     ipv4_t     ipv4;
 }
 
-typedef bit<80> PacketByteCountState_t;
+typedef bit<64> PacketByteCountState_t;
 parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
     state start {
         buffer.extract<ethernet_t>(parsed_hdr.ethernet);
@@ -60,7 +60,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     @name(".update_pkt_ip_byte_count") action update_pkt_ip_byte_count_0() {
         s_0 = tmp_0;
         ip_length_bytes_0 = hdr.ipv4.totalLen;
-        s_0[79:48] = s_0[79:48] + 32w1;
+        s_0[63:48] = s_0[63:48] + 16w1;
         s_0[47:0] = s_0[47:0] + (bit<48>)ip_length_bytes_0;
         tmp_0 = s_0;
     }
@@ -103,8 +103,5 @@ control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_met
 }
 
 IngressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-
 EgressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-
 PSA_Switch<headers, metadata, headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

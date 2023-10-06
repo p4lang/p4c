@@ -18,7 +18,10 @@
 # Parse an STF file.
 # -----------------------------------------------------------------------------
 
+import re
+
 import ply.yacc as yacc
+
 from .stf_lexer import STFLexer
 
 # PARSER GRAMMAR --------------------------------------------------------------
@@ -34,6 +37,8 @@ from .stf_lexer import STFLexer
 #           | SETDEFAULT qualified_name action
 #           | WAIT
 #
+# number_list : number
+#            | number_list number
 # match_list : match
 #            | match_list match
 # match : qualified_name COLON number_or_lpm
@@ -43,6 +48,9 @@ from .stf_lexer import STFLexer
 #        | INT_CONST_BIN
 #        | INT_CONST_HEX
 #        | TERN_CONST_HEX
+#
+# number_or_float: number
+#                | float
 #
 # qualified_name : ID
 #                | ID '[' INT_CONST_DEC ']'
@@ -72,25 +80,27 @@ from .stf_lexer import STFLexer
 #
 # expect_data : expect_datum
 #             | expect_data expect_datum
+#             | exact_datum
 # packet_data : packet_datum
 #             | packet_data packet_datum
 #
 # expect_datum : packet_datum | DATA_TERN
 # packet_datum : DATA_DEC | DATA_HEX
+# exact_datum : DATA_EXACT
 
 # PARSER ----------------------------------------------------------------------
 
 
 class STFParser:
-    def __init__(self):
-        self.lexer = STFLexer()
-        self.lexer.build()
+    def __init__(self, lexer=STFLexer()):
+        self.lexer = lexer
+        self.lexer.build(reflags=re.UNICODE)
         self.tokens = self.lexer.tokens
         self.parser = yacc.yacc(module=self)
         self.errors_cnt = 0
 
-    def parse(self, data=None, filename=''):
-        if data is None and filename == '':
+    def parse(self, data=None, filename=""):
+        if data is None and filename == "":
             raise ValueError("Please specify either a filename or data")
 
         # if we specified only the filename, initialize the data
@@ -100,29 +110,34 @@ class STFParser:
 
         self.lexer.filename = filename
         self.lexer.reset_lineno()
-        stf_ast = self.parser.parse(input=data,
-                                    lexer=self.lexer)
+        stf_ast = self.parser.parse(input=data, lexer=self.lexer)
         self.errors_cnt += self.lexer.errors_cnt
         return stf_ast, self.errors_cnt
 
     def print_error(self, lineno, lexpos, msg):
         self.errors_cnt += 1
-        print("parse error (%s%s:%s): %s" % (
-            '%s:' % self.lexer.filename if self.lexer.filename else '',
-            lineno,
-            lexpos,
-            msg))
+        print(
+            "parse error (%s%s:%s): %s"
+            % (
+                "%s:" % self.lexer.filename if self.lexer.filename else "",
+                lineno,
+                lexpos,
+                msg,
+            )
+        )
 
     def get_filename(self):
         return self.lexer.filename
 
     def p_error(self, p):
         if p is None:
-            self.print_error(self.lexer.get_lineno(), 0,
-                             "Unexpected end-of-file.  Missing paren?")
+            self.print_error(self.lexer.get_lineno(), 0, "Unexpected end-of-file.  Missing paren?")
         else:
-            self.print_error(p.lineno, self.lexer.get_colno(),
-                             "Syntax error while parsing at token '%s' (of type %s)." % (p.value, p.type))
+            self.print_error(
+                p.lineno,
+                self.lexer.get_colno(),
+                "Unexpected token '%s' (of type %s)." % (p.value, p.type),
+            )
             # Skip to the next statement.
             while True:
                 tok = self.parser.token()
@@ -131,198 +146,214 @@ class STFParser:
                 self.parser.restart()
 
     def p_statements_none(self, p):
-        'statements : '
+        "statements :"
         p[0] = []
 
     def p_statements_one(self, p):
-        'statements : statement'
+        "statements : statement"
         p[0] = [p[1]]
 
     def p_statements_many(self, p):
-        'statements : statements statement'
+        "statements : statements statement"
         p[0] = p[1] + [p[2]]
 
     def p_statement_add(self, p):
-        'statement : ADD qualified_name match_list action'
+        "statement : ADD qualified_name match_list action"
         p[0] = (p[1].lower(), p[2], None, p[3], p[4], None)
 
     def p_statement_add_with_priority(self, p):
-        'statement : ADD qualified_name priority match_list action'
+        "statement : ADD qualified_name priority match_list action"
         p[0] = (p[1].lower(), p[2], p[3], p[4], p[5], None)
 
     def p_statement_add_with_id(self, p):
-        'statement : ADD qualified_name match_list action EQUAL ID'
+        "statement : ADD qualified_name match_list action EQUAL ID"
         p[0] = (p[1].lower(), p[2], None, p[3], p[4], p[6])
 
     def p_statement_add_with_priority_and_id(self, p):
-        'statement : ADD qualified_name priority match_list action EQUAL ID'
+        "statement : ADD qualified_name priority match_list action EQUAL ID"
         p[0] = (p[1].lower(), p[2], p[3], p[4], p[5], p[7])
 
     # remove all entries.
     # \TODO: removal of individual entries
     def p_statement_remove(self, p):
-        'statement : REMOVE ALL'
+        "statement : REMOVE ALL"
         p[0] = (p[1].lower(), p[2])
 
-    def p_statement_check_counter(self, p):
-        'statement : CHECK_COUNTER ID LPAREN id_or_index RPAREN'
-        p[0] = (p[1].lower(), p[2], p[4], (None, '==', 0))
-
-    def p_statement_check_counter_with_check(self, p):
-        'statement : CHECK_COUNTER ID LPAREN id_or_index RPAREN count_type logical_cond number'
-        p[0] = (p[1].lower(), p[2], p[4], (p[6], p[7], p[8]))
-
-    def p_statement_expect(self, p):
-        'statement : EXPECT port'
-        p[0] = (p[1].lower(), p[2], None)
-
-    def p_statement_expect_data(self, p):
-        'statement : EXPECT port expect_data'
-        p[0] = (p[1].lower(), p[2], ''.join(p[3]))
-
-    def p_statement_no_packet(self, p):
-        'statement : NO_PACKET'
-        p[0] = ('expect', None, None)
-
-    def p_statement_packet(self, p):
-        'statement : PACKET port packet_data'
-        p[0] = (p[1].lower(), p[2], ''.join(p[3]))
-
-    def p_statement_setdefault(self, p):
-        'statement : SETDEFAULT qualified_name action'
-        p[0] = (p[1].lower(), p[2], p[3])
-
-    def p_statement_wait(self, p):
-        'statement : WAIT'
-        p[0] = (p[1].lower(),)
-
     def p_id_or_index(self, p):
-        '''id_or_index : ID
-                       | number
-        '''
+        """id_or_index : ID
+        | number
+        """
         p[0] = p[1]
 
     def p_count_type(self, p):
-        '''count_type : BYTES
-                      | PACKETS
-        '''
+        """count_type : BYTES
+        | PACKETS
+        """
         p[0] = p[1]
 
     def p_logical_cond(self, p):
-        '''logical_cond : EQEQ
-                        | NEQ
-                        | LEQ
-                        | LE
-                        | GEQ
-                        | GT
-        '''
+        """logical_cond : EQEQ
+        | NEQ
+        | LEQ
+        | LE
+        | GEQ
+        | GT
+        """
         p[0] = p[1]
 
     def p_match_list_one(self, p):
-        'match_list : match'
+        "match_list : match"
         p[0] = [p[1]]
 
     def p_match_list_many(self, p):
-        'match_list : match_list match'
+        "match_list : match_list match"
         p[0] = p[1] + [p[2]]
 
     def p_match(self, p):
-        'match : qualified_name COLON number_or_lpm'
+        "match : qualified_name COLON number_or_lpm"
         p[0] = (p[1], p[3])
 
     def p_qualified_name_one(self, p):
-        'qualified_name : ID'
+        "qualified_name : ID"
         p[0] = p[1]
 
     # \TODO: how do we handle stacks in either PD or PI??
     # for now we escape the brackets ...
     def p_qualified_name_array(self, p):
-        'qualified_name : ID LBRACKET INT_CONST_DEC RBRACKET'
-        p[0] = p[1] + '[' + p[3] + ']'
+        "qualified_name : ID LBRACKET INT_CONST_DEC RBRACKET"
+        p[0] = p[1] + "[" + p[3] + "]"
 
     def p_qualified_name_many(self, p):
-        'qualified_name : qualified_name DOT ID'
-        p[0] = p[1] + '.' + p[3]
+        "qualified_name : qualified_name DOT ID"
+        p[0] = p[1] + "." + p[3]
 
     def p_action(self, p):
-        'action : qualified_name LPAREN args RPAREN'
+        "action : qualified_name LPAREN args RPAREN"
         p[0] = (p[1], p[3])
 
     def p_args_none(self, p):
-        'args :'
+        "args :"
         p[0] = []
 
     def p_args_many(self, p):
-        'args : arg_list'
+        "args : arg_list"
         p[0] = p[1]
 
     def p_arg_list_one(self, p):
-        'arg_list : arg'
+        "arg_list : arg"
         p[0] = [p[1]]
 
     def p_arg_list_many(self, p):
-        'arg_list : arg_list COMMA arg'
+        "arg_list : arg_list COMMA arg"
         p[0] = p[1] + [p[3]]
 
     def p_arg(self, p):
-        'arg : ID COLON number'
+        "arg : ID COLON number"
         p[0] = (p[1], p[3])
 
     def p_priority(self, p):
-        'priority : INT_CONST_DEC'
+        "priority : INT_CONST_DEC"
         p[0] = p[1]
 
     def p_lpm(self, p):
-        'number_or_lpm : number SLASH number'
+        "number_or_lpm : number SLASH number"
         p[0] = (p[1], p[3])
 
     def p_number_or_lpm(self, p):
-        'number_or_lpm : number'
+        "number_or_lpm : number"
         p[0] = p[1]
 
     def p_number(self, p):
-        '''number : INT_CONST_DEC
-                  | INT_CONST_BIN
-                  | TERN_CONST_HEX
-                  | INT_CONST_HEX'''
+        """number : INT_CONST_DEC
+        | INT_CONST_BIN
+        | TERN_CONST_HEX
+        | INT_CONST_HEX"""
+        p[0] = p[1]
+
+    def p_float(self, p):
+        "number_or_float : number DOT number"
+        p[0] = p[1] + "." + p[3]
+
+    def p_number_or_float(self, p):
+        "number_or_float : number"
         p[0] = p[1]
 
     def p_packet_data_port(self, p):
-        'port : DATA_DEC'
+        "port : DATA_DEC"
         p[0] = p[1]
 
+    def p_number_list_one(self, p):
+        "number_list : number"
+        p[0] = p[1]
+
+    def p_number_list_many(self, p):
+        "number_list : number number_list"
+        p[0] = p[1] + " " + p[2]
+
     def p_packet_data_one(self, p):
-        'packet_data : packet_datum'
+        "packet_data : packet_datum"
         p[0] = [p[1]]
 
     def p_packet_data_many(self, p):
-        'packet_data : packet_data packet_datum'
+        "packet_data : packet_data packet_datum"
         p[0] = p[1] + [p[2]]
 
     def p_packet_datum(self, p):
-        '''packet_datum : DATA_HEX
-                        | DATA_DEC'''
+        """packet_datum : DATA_HEX
+        | DATA_DEC"""
         p[0] = p[1]
 
     def p_expect_data_one(self, p):
-        'expect_data : expect_datum'
+        "expect_data : expect_datum"
         p[0] = [p[1]]
 
     def p_expect_data_many(self, p):
-        'expect_data : expect_data expect_datum'
-        p[0] = p[1] + [p[2]]
+        "expect_data : expect_datum expect_data"
+        p[0] = [p[1]] + p[2]
 
-    def p_expect_dataum(self, p):
-        '''expect_datum : packet_datum
-                        | DATA_TERN'''
+    def p_expect_data_exact_one(self, p):
+        "expect_data : exact_datum"
+        p[0] = [p[1]]
+
+    def p_expect_datum(self, p):
+        """expect_datum : packet_datum
+        | DATA_TERN"""
         p[0] = p[1]
+
+    def p_exact_datum(self, p):
+        """exact_datum : DATA_EXACT"""
+        p[0] = p[1]
+
+    def p_statement_expect(self, p):
+        "statement : EXPECT port"
+        p[0] = (p[1].lower(), p[2], None)
+
+    def p_statement_expect_data(self, p):
+        "statement : EXPECT port expect_data"
+        p[0] = (p[1].lower(), p[2], "".join(p[3]))
+
+    def p_statement_no_packet(self, p):
+        "statement : NO_PACKET"
+        p[0] = ("expect", None, None)
+
+    def p_statement_packet(self, p):
+        "statement : PACKET port packet_data"
+        p[0] = (p[1].lower(), p[2], "".join(p[3]))
+
+    def p_statement_setdefault(self, p):
+        "statement : SETDEFAULT qualified_name action"
+        p[0] = (p[1].lower(), p[2], p[3])
+
+    def p_statement_wait(self, p):
+        "statement : WAIT"
+        p[0] = (p[1].lower(),)
 
 
 # TESTING ---------------------------------------------------------------------
 #
 
-if __name__ == '__main__':
-    data = '''
+if __name__ == "__main__":
+    data = """
     ADD test2 100 data.f2:0x04040404 c4_6(val4:0x4040, val5:0x5050, val6:0x6060, port:2)
     add tab1 dstAddr:0xa1a2a3a4a5a6 act(port:2) = A
     # multiple match fields and ids with $
@@ -339,9 +370,9 @@ if __name__ == '__main__':
     check_counter cntDum(10) packets == 2
     check_counter cntDum($A)
     wait
-    '''
+    """
 
     parser = STFParser()
     stf, errs = parser.parse(data)
     if errs == 0:
-        print('\n'.join(map(str, stf)))
+        print("\n".join(map(str, stf)))

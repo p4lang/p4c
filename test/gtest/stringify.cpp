@@ -13,13 +13,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#include <cstdarg>
-#include "gtest/gtest.h"
 #include "lib/stringify.h"
+
+#include <cstdarg>
+
+#include "gtest/gtest.h"
 #include "lib/cstring.h"
 
 namespace Test {
-cstring appendFormat(const char* format, ...) {
+cstring appendFormat(const char *format, ...) {
     va_list ap;
     va_start(ap, format);
     cstring str = Util::vprintf_format(format, ap);

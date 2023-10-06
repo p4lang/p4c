@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_P4_CORELIBRARY_H_
-#define _FRONTENDS_P4_CORELIBRARY_H_
+#ifndef FRONTENDS_P4_CORELIBRARY_H_
+#define FRONTENDS_P4_CORELIBRARY_H_
 
-#include "lib/cstring.h"
 #include "frontends/common/model.h"
 #include "ir/ir.h"
+#include "lib/cstring.h"
 
 namespace P4 {
 enum class StandardExceptions {
@@ -33,7 +33,7 @@ enum class StandardExceptions {
 };
 }  // namespace P4
 
-inline std::ostream& operator<<(std::ostream &out, P4::StandardExceptions e) {
+inline std::ostream &operator<<(std::ostream &out, P4::StandardExceptions e) {
     switch (e) {
         case P4::StandardExceptions::NoError:
             out << "NoError";
@@ -66,10 +66,12 @@ namespace P4 {
 
 class PacketIn : public Model::Extern_Model {
  public:
-    PacketIn() :
-            Extern_Model("packet_in"),
-            extract("extract"), lookahead("lookahead"),
-            advance("advance"), length("length") {}
+    PacketIn()
+        : Extern_Model("packet_in"),
+          extract("extract"),
+          lookahead("lookahead"),
+          advance("advance"),
+          length("length") {}
     Model::Elem extract;
     Model::Elem lookahead;
     Model::Elem advance;
@@ -97,26 +99,33 @@ class P4Exception_Model : public ::Model::Elem {
 // To be kept in sync with core.p4
 class P4CoreLibrary : public ::Model::Model {
  protected:
-    P4CoreLibrary() :
-            noAction("NoAction"), exactMatch("exact"),
-            ternaryMatch("ternary"), lpmMatch("lpm"), packetIn(PacketIn()),
-            packetOut(PacketOut()), noError(StandardExceptions::NoError),
-            packetTooShort(StandardExceptions::PacketTooShort),
-            noMatch(StandardExceptions::NoMatch),
-            stackOutOfBounds(StandardExceptions::StackOutOfBounds),
-            overwritingHeader(StandardExceptions::OverwritingHeader),
-            headerTooShort(StandardExceptions::HeaderTooShort) {}
+    P4CoreLibrary()
+        : noAction("NoAction"),
+          exactMatch("exact"),
+          ternaryMatch("ternary"),
+          lpmMatch("lpm"),
+          packetIn(PacketIn()),
+          packetOut(PacketOut()),
+          noError(StandardExceptions::NoError),
+          packetTooShort(StandardExceptions::PacketTooShort),
+          noMatch(StandardExceptions::NoMatch),
+          stackOutOfBounds(StandardExceptions::StackOutOfBounds),
+          overwritingHeader(StandardExceptions::OverwritingHeader),
+          headerTooShort(StandardExceptions::HeaderTooShort) {}
 
  public:
-    static P4CoreLibrary instance;
+    static P4CoreLibrary &instance() {
+        static P4CoreLibrary *corelib = new P4CoreLibrary();
+        return *corelib;
+    }
     ::Model::Elem noAction;
 
     ::Model::Elem exactMatch;
     ::Model::Elem ternaryMatch;
     ::Model::Elem lpmMatch;
 
-    PacketIn    packetIn;
-    PacketOut   packetOut;
+    PacketIn packetIn;
+    PacketOut packetOut;
 
     P4Exception_Model noError;
     P4Exception_Model packetTooShort;
@@ -128,4 +137,4 @@ class P4CoreLibrary : public ::Model::Model {
 
 }  // namespace P4
 
-#endif /* _FRONTENDS_P4_CORELIBRARY_H_ */
+#endif /* FRONTENDS_P4_CORELIBRARY_H_ */

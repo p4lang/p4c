@@ -126,7 +126,12 @@ class HeaderStackItemRef : HeaderRef {
             if (auto *hr = base_->to<HeaderRef>())
                 type = hr->baseRef()->type; }
     Expression base() const { return base_; }
-    HeaderOrMetadata baseRef() const override { return base_->to<HeaderRef>()->baseRef(); }
+    /// Returns `nullptr` if the base is not `HeaderOrMetadata` (e.g. when this
+    /// is stack ref of an expression such as `lookahead`).
+    HeaderOrMetadata baseRef() const override {
+        auto hdrRef = base_->to<HeaderRef>();
+        return hdrRef ? hdrRef->baseRef() : nullptr;
+    }
     Expression index() const { return index_; }
     void set_base(Expression b) { base_ = b; }
     toString{ return base_->toString() + "[" + index_->toString() + "]"; }
@@ -138,10 +143,7 @@ class If :  Expression {
     NullOK Vector<Expression>    ifFalse;
     visit_children {
         v.visit(pred, "pred");
-        auto &clone(v.flow_clone());
-        v.visit(ifTrue, "ifTrue");
-        clone.visit(ifFalse, "ifFalse");
-        v.flow_merge(clone);
+        SplitFlowVisit<Vector<Expression>>(v, ifTrue, ifFalse).run_visit();
         Expression::visit_children(v);
     }
 }
@@ -270,7 +272,7 @@ class ParserException {}
 abstract Attached : IInstance, IAnnotated {
     optional ID                 name;
     optional Annotations        annotations = Annotations::empty;
-    cstring Name() const override { return name; }
+    ID Name() const override { return name; }
     virtual const char *kind() const = 0;
     Type getType() const override { return Type_Unknown::get(); }
     Annotations getAnnotations() const override { return annotations; }
@@ -405,7 +407,7 @@ class V1Table : IInstance, IAnnotated {
     void addProperty(Property prop) { properties.push_back(prop); }
     Annotations getAnnotations() const override { return annotations; }
     toString { return node_type_name() + " " + name; }
-    cstring Name() const override { return name; }
+    ID Name() const override { return name; }
     Type getType() const override { return Type_AnyTable::get(); }
 }
 
@@ -447,7 +449,8 @@ class GlobalRef : Expression {
                                 // FIXME -- interface references directly in the IR
     GlobalRef { type = obj->to<IInstance>()->getType(); }
     validate { obj->is<IInstance>(); }
-    toString { return obj->to<IInstance>()->Name(); }
+    toString { return obj->to<IInstance>()->toString(); }
+    ID Name() const { return obj->to<IInstance>()->Name(); }
     dbprint { out << obj->to<IInstance>()->Name(); }
 }
 

@@ -1,0 +1,6 @@
+issue3808-1.p4(15): [--Werror=type-error] error: t: Could not infer a type for parameter a (inferred type is don't care '_')
+    tt.g(t);
+         ^
+issue3808-1.p4(6)
+  void g(in T a);
+              ^

@@ -34,4 +34,3 @@ control d(out bool b) {
 }
 
 top(d()) main;
-

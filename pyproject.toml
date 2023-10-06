@@ -1,0 +1,15 @@
+[project]
+name = "p4c"
+requires-python = ">=3.8"
+
+[flake8]
+max-line-length = 100
+max-complexity = 10
+extend-ignore = "E203"
+
+[tool.isort]
+profile = 'black'
+
+[tool.black]
+line-length = 100
+skip-string-normalization = true

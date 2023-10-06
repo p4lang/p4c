@@ -17,7 +17,7 @@ registers {
   type_spec {
     bitstring {
       bit {
-        bitwidth: 80
+        bitwidth: 64
       }
     }
   }

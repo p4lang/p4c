@@ -6,25 +6,18 @@ if [[ ! -x $BREW ]]; then
     /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 fi
 
+BOOST_LIB="boost@1.76"
+
 $BREW update
-$BREW install autoconf automake bdw-gc bison boost ccache cmake git \
-      libtool openssl pkg-config python
-$BREW install gmp --c++11
+$BREW install autoconf automake bdw-gc bison ${BOOST_LIB} ccache cmake \
+      libtool openssl pkg-config python coreutils grep
 
-# Install specific version of Protobuf, since newer versions break compatibility
-wget https://github.com/protocolbuffers/protobuf/releases/download/v3.6.1/protobuf-all-3.6.1.tar.gz
-tar xfz protobuf-all-3.6.1.tar.gz
-cd protobuf-3.6.1
-./configure
-make
-sudo make install
-cd ..
-rm -rf protobuf-3.6.1
-
-# Prefer Homebrew's bison over the macOS-provided version
-$BREW link --force bison
+# Prefer Homebrew's bison and grep over the macOS-provided version
+$BREW link --force bison grep ${BOOST_LIB}
 echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' >> ~/.bash_profile
+echo 'export PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"' >> ~/.bash_profile
 export PATH="/usr/local/opt/bison/bin:$PATH"
+export PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"
 
 # install pip and required pip packages
 # curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py

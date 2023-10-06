@@ -64,4 +64,3 @@ control deparserImpl(packet_out packet, in headers_t hdr) {
 }
 
 MySwitch(p = parserImpl(), ig = ingressImpl(), eg = egressImpl(), ck = updateChecksum(), dep = deparserImpl()) main;
-

@@ -14,32 +14,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4C_UBPFREGISTER_H
-#define P4C_UBPFREGISTER_H
+#ifndef BACKENDS_UBPF_UBPFREGISTER_H_
+#define BACKENDS_UBPF_UBPFREGISTER_H_
 
 #include "ubpfTable.h"
 #include "ubpfType.h"
 
 namespace UBPF {
 
-    class UBPFRegister final : public UBPFTableBase {
-    public:
-        UBPFRegister(const UBPFProgram *program, const IR::ExternBlock *block,
-                     cstring name, EBPF::CodeGenInspector *codeGen);
+class UBPFRegister final : public UBPFTableBase {
+ public:
+    UBPFRegister(const UBPFProgram *program, const IR::ExternBlock *block, cstring name,
+                 EBPF::CodeGenInspector *codeGen);
 
-        void emitInstance(EBPF::CodeBuilder *builder);
-        void emitRegisterRead(EBPF::CodeBuilder *builder,
-                              const IR::MethodCallExpression *expression);
-        void emitRegisterWrite(EBPF::CodeBuilder *builder,
-                               const IR::MethodCallExpression *expression);
-        void emitMethodInvocation(EBPF::CodeBuilder *builder,
-                                  const P4::ExternMethod *method);
-        void emitKeyInstance(EBPF::CodeBuilder *builder,
-                             const IR::MethodCallExpression *expression);
-        cstring emitValueInstanceIfNeeded(EBPF::CodeBuilder *builder,
-                                          const IR::Argument *arg_value);
+    void emitInstance(EBPF::CodeBuilder *builder);
+    void emitRegisterRead(EBPF::CodeBuilder *builder, const IR::MethodCallExpression *expression);
+    void emitRegisterWrite(EBPF::CodeBuilder *builder, const IR::MethodCallExpression *expression);
+    void emitMethodInvocation(EBPF::CodeBuilder *builder, const P4::ExternMethod *method);
+    void emitKeyInstance(EBPF::CodeBuilder *builder, const IR::MethodCallExpression *expression);
+    cstring emitValueInstanceIfNeeded(EBPF::CodeBuilder *builder, const IR::Argument *arg_value);
+};
 
-    };
-}
+}  // namespace UBPF
 
-#endif //P4C_UBPFREGISTER_H
+#endif /* BACKENDS_UBPF_UBPFREGISTER_H_ */

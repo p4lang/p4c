@@ -1,0 +1,2 @@
+[--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table outbound_conntrack_ct_tcp_table. Copying all match fields to metadata
+[--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table inbound_conntrack_ct_tcp_table. Copying all match fields to metadata

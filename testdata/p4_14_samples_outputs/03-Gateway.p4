@@ -25,14 +25,14 @@ header vag_t {
 }
 
 struct metadata {
-    @name(".ing_metadata") 
+    @name(".ing_metadata")
     ingress_metadata_t ing_metadata;
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
-    @name(".vag") 
+    @name(".vag")
     vag_t      vag;
 }
 
@@ -125,9 +125,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         i_t1.apply();
-        if (meta.ing_metadata.f1 == hdr.vag.f1) {
+        if ((bit<8>)meta.ing_metadata.f1 == hdr.vag.f1) {
             i_t2.apply();
-            if (meta.ing_metadata.f2 == hdr.vag.f2) {
+            if ((bit<16>)meta.ing_metadata.f2 == hdr.vag.f2) {
                 i_t3.apply();
             }
         } else {
@@ -154,4 +154,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

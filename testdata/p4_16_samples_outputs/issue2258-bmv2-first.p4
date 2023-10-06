@@ -31,7 +31,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     table simple_table {
         key = {
-            simple_action(): exact @name("dummy_name") ;
+            simple_action(): exact @name("dummy_name");
         }
         actions = {
             @defaultonly NoAction();
@@ -65,4 +65,3 @@ control deparser(packet_out b, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

@@ -22,12 +22,15 @@ control ingress(inout Headers h) {
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.do_action") action do_action() {
-        hasExited = (h.eth_hdr.src_addr == 48w1 ? true : hasExited);
-        h.eth_hdr.src_addr = (h.eth_hdr.src_addr == 48w1 ? h.eth_hdr.src_addr : 48w1);
+        if (h.eth_hdr.src_addr == 48w1) {
+            hasExited = true;
+        } else {
+            h.eth_hdr.src_addr = 48w1;
+        }
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
-            h.eth_hdr.eth_type: exact @name("tyhSfv") ;
+            h.eth_hdr.eth_type: exact @name("tyhSfv");
         }
         actions = {
             do_action();
@@ -73,4 +76,3 @@ parser Parser(packet_in b, out Headers hdr);
 control Ingress(inout Headers hdr);
 package top(Parser p, Ingress ig);
 top(p(), ingress()) main;
-

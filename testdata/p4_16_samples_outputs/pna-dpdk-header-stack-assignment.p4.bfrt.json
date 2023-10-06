@@ -1,0 +1,112 @@
+{
+  "schema_version" : "1.0.0",
+  "tables" : [
+    {
+      "name" : "pipe.MainControlImpl.header_mod",
+      "id" : 44999172,
+      "table_type" : "MatchAction_Direct",
+      "size" : 1024,
+      "annotations" : [],
+      "depends_on" : [],
+      "has_const_default_action" : true,
+      "key" : [
+        {
+          "id" : 1,
+          "name" : "hdrs.mac.da",
+          "repeated" : false,
+          "annotations" : [],
+          "mandatory" : false,
+          "match_type" : "Exact",
+          "type" : {
+            "type" : "bytes",
+            "width" : 48
+          }
+        }
+      ],
+      "action_specs" : [
+        {
+          "id" : 31465837,
+          "name" : "MainControlImpl.encap_one_tunnel_layer_ipv4",
+          "action_scope" : "TableOnly",
+          "annotations" : [
+            {
+              "name" : "@tableonly"
+            }
+          ],
+          "data" : [
+            {
+              "id" : 1,
+              "name" : "mac_da",
+              "repeated" : false,
+              "mandatory" : true,
+              "read_only" : false,
+              "annotations" : [],
+              "type" : {
+                "type" : "bytes",
+                "width" : 48
+              }
+            },
+            {
+              "id" : 2,
+              "name" : "mac_sa",
+              "repeated" : false,
+              "mandatory" : true,
+              "read_only" : false,
+              "annotations" : [],
+              "type" : {
+                "type" : "bytes",
+                "width" : 48
+              }
+            },
+            {
+              "id" : 3,
+              "name" : "ipv4_sa",
+              "repeated" : false,
+              "mandatory" : true,
+              "read_only" : false,
+              "annotations" : [],
+              "type" : {
+                "type" : "bytes",
+                "width" : 32
+              }
+            },
+            {
+              "id" : 4,
+              "name" : "ipv4_da",
+              "repeated" : false,
+              "mandatory" : true,
+              "read_only" : false,
+              "annotations" : [],
+              "type" : {
+                "type" : "bytes",
+                "width" : 32
+              }
+            }
+          ]
+        },
+        {
+          "id" : 29167000,
+          "name" : "MainControlImpl.decap_one_tunnel_layer_just_before_eth",
+          "action_scope" : "TableOnly",
+          "annotations" : [
+            {
+              "name" : "@tableonly"
+            }
+          ],
+          "data" : []
+        },
+        {
+          "id" : 21257015,
+          "name" : "NoAction",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        }
+      ],
+      "data" : [],
+      "supported_operations" : [],
+      "attributes" : ["EntryScope"]
+    }
+  ],
+  "learn_filters" : []
+}

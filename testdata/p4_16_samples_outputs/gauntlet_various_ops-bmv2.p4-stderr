@@ -1,16 +1,16 @@
-gauntlet_various_ops-bmv2.p4(120): [--Wwarn=overflow] warning: >>: Shifting 4-bit value with 16
+gauntlet_various_ops-bmv2.p4(120): [--Wwarn=overflow] warning: 1 >> 16: Shifting 4-bit value with 16
         h.rshift.g = 4w1 >> 8w16;
                      ^^^^^^^^^^^
 gauntlet_various_ops-bmv2.p4(123): [--Wwarn=mismatch] warning: 4w16: value does not fit in 4 bits
         h.lshift.a = (bit<8>)(4w4 << 8w2);
                               ^^^^^^^^^^
-gauntlet_various_ops-bmv2.p4(124): [--Wwarn=overflow] warning: <<: Shifting 4-bit value with 16
+gauntlet_various_ops-bmv2.p4(124): [--Wwarn=overflow] warning: 4 << 16: Shifting 4-bit value with 16
         h.lshift.b = (bit<8>)(4w4 << 8w16);
                               ^^^^^^^^^^^
 gauntlet_various_ops-bmv2.p4(124): [--Wwarn=mismatch] warning: 4w262144: value does not fit in 4 bits
         h.lshift.b = (bit<8>)(4w4 << 8w16);
                               ^^^^^^^^^^^
-gauntlet_various_ops-bmv2.p4(126): [--Wwarn=overflow] warning: <<: Shifting 8-bit value with 256
+gauntlet_various_ops-bmv2.p4(126): [--Wwarn=overflow] warning: 1 << 256: Shifting 8-bit value with 256
         h.lshift.d = (bit<8>)1 << 256;
                      ^^^^^^^^^^^^^^^^
 gauntlet_various_ops-bmv2.p4(126): [--Wwarn=mismatch] warning: 8w115792089237316195423570985008687907853269984665640564039457584007913129639936: value does not fit in 8 bits

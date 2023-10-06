@@ -1,0 +1,33 @@
+#!/bin/bash -x
+
+set -e
+
+TC="tc"
+$TC p4template create pipeline/name_annotation_example pipeid 1 numtables 2
+
+$TC p4template create action/name_annotation_example/MainControlImpl/next_hop actid 1 \
+	param vport type bit32
+$TC p4template update action/name_annotation_example/MainControlImpl/next_hop state active
+
+$TC p4template create action/name_annotation_example/MainControlImpl/default_route_drop actid 2
+$TC p4template update action/name_annotation_example/MainControlImpl/default_route_drop state active
+
+$TC p4template create action/name_annotation_example/MainControlImpl/drop actid 3
+$TC p4template update action/name_annotation_example/MainControlImpl/drop state active
+
+$TC p4template create table/name_annotation_example/MainControlImpl/ipv4_tbl_1 \
+	tblid 1 \
+	type exact \
+	keysz 32 nummasks 8 tentries 2048 \
+	table_acts act name name_annotation_example/MainControlImpl/next_hop \
+	act name name_annotation_example/MainControlImpl/default_route_drop
+$TC p4template update table/name_annotation_example/MainControlImpl/ipv4_tbl_1 default_miss_action action name_annotation_example/MainControlImpl/default_route_drop
+
+$TC p4template create table/name_annotation_example/MainControlImpl/ipv4_tbl_2 \
+	tblid 2 \
+	type exact \
+	keysz 72 nummasks 8 tentries 2048 \
+	table_acts act name name_annotation_example/MainControlImpl/next_hop \
+	act name name_annotation_example/MainControlImpl/drop
+$TC p4template update table/name_annotation_example/MainControlImpl/ipv4_tbl_2 default_miss_action action name_annotation_example/MainControlImpl/drop
+$TC p4template update pipeline/name_annotation_example state ready

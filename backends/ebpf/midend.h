@@ -14,29 +14,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _BACKENDS_EBPF_MIDEND_H_
-#define _BACKENDS_EBPF_MIDEND_H_
+#ifndef BACKENDS_EBPF_MIDEND_H_
+#define BACKENDS_EBPF_MIDEND_H_
 
-#include "ir/ir.h"
 #include "ebpfOptions.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
 
 namespace EBPF {
 
 class MidEnd {
  public:
     std::vector<DebugHook> hooks;
-    P4::ReferenceMap       refMap;
-    P4::TypeMap            typeMap;
+    P4::ReferenceMap refMap;
+    P4::TypeMap typeMap;
 
     void addDebugHook(DebugHook hook) { hooks.push_back(hook); }
     // If p4c is run with option '--listMidendPasses', outStream is used for printing passes names
-    const IR::ToplevelBlock* run(EbpfOptions& options,
-                                 const IR::P4Program* program,
-                                 std::ostream* outStream = nullptr);
+    const IR::ToplevelBlock *run(EbpfOptions &options, const IR::P4Program *program,
+                                 std::ostream *outStream = nullptr);
 };
 
 }  // namespace EBPF
 
-#endif /* _BACKENDS_EBPF_MIDEND_H_ */
+#endif /* BACKENDS_EBPF_MIDEND_H_ */

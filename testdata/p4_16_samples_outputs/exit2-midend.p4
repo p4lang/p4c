@@ -3,9 +3,6 @@ control ctrl(out bit<32> c) {
     @name("ctrl.e") action e() {
         hasExited = true;
     }
-    @name("ctrl.e") action e_1() {
-        hasExited = true;
-    }
     @hidden action exit2l31() {
         hasExited = false;
         c = 32w2;
@@ -45,4 +42,3 @@ control ctrl(out bit<32> c) {
 control noop(out bit<32> c);
 package p(noop _n);
 p(ctrl()) main;
-

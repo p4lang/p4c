@@ -21,7 +21,7 @@ header ipv4_t {
     bit<4>  version;
     bit<4>  ihl;
     bit<8>  diffserv;
-    bit<32> totalLen;
+    bit<16> totalLen;
     bit<16> identification;
     bit<3>  flags;
     bit<13> fragOffset;
@@ -74,7 +74,7 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
     PSA_MeterColor_t color_in = PSA_MeterColor_t.RED;
     action execute(bit<12> index) {
         hdr.ipv4.ihl = 4w5;
-        color_out = meter0.execute(index, color_in, hdr.ipv4.totalLen);
+        color_out = meter0.dpdk_execute(index, color_in, (bit<32>)hdr.ipv4.totalLen);
         user_meta.port_out = (color_out == PSA_MeterColor_t.GREEN ? 32w1 : 32w0);
         reg.write(index, user_meta.port_out);
         if (hdr.ipv4.version == 4w6) {
@@ -93,7 +93,7 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
     }
     table tbl {
         key = {
-            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
         }
         actions = {
             NoAction();
@@ -105,7 +105,7 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
         if (user_meta.port_out == 32w1) {
             tbl.apply();
             counter0.count(12w1023, 32w20);
-            counter1.count(12w512);
+            counter1.count(12w512, 32w32);
             counter2.count(12w1023, 32w64);
             user_meta.port_out = reg.read(12w1);
             test(hdr.ipv4.version);
@@ -140,8 +140,5 @@ control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_met
 }
 
 IngressPipeline<headers, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(IngressParserImpl(), ingress(), IngressDeparserImpl()) ip;
-
 EgressPipeline<headers, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
-
 PSA_Switch<headers, metadata_t, headers, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

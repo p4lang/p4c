@@ -31,6 +31,8 @@ limitations under the License.
 
 typedef bit<48> EthD_t;
 @p4runtime_translation("p4.org/psa/v1/EthT_t", 48)
+@custom_annotation_0
+@custom_annotation_1("my annon")
 type    bit<48> EthT_t;
 
 typedef bit<8>     CustomD_t;

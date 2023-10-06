@@ -19,7 +19,7 @@ struct metadata {
 }
 
 struct headers {
-    @name(".ethernet") 
+    @name(".ethernet")
     ethernet_t ethernet;
 }
 
@@ -36,10 +36,17 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name("ingress.tmp") bit<8> tmp;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name(".table0_actionlist") action table0_actionlist(@name("do_goto_table") bit<1> do_goto_table_1, @name("goto_table_id") bit<8> goto_table_id_1) {
         meta._metadata_global_do_goto_table0 = do_goto_table_1;
+        if (do_goto_table_1 != 1w0) {
+            tmp = goto_table_id_1;
+        } else {
+            tmp = meta._metadata_global_goto_table_id1;
+        }
+        meta._metadata_global_goto_table_id1 = tmp;
     }
     @name(".table0") table table0_0 {
         actions = {
@@ -47,7 +54,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_1();
         }
         key = {
-            hdr.ethernet.etherType: ternary @name("ethernet.etherType") ;
+            hdr.ethernet.etherType: ternary @name("ethernet.etherType");
         }
         size = 2000;
         default_action = NoAction_1();
@@ -76,4 +83,3 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
-

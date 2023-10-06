@@ -1,0 +1,12 @@
+invalid-hdr-warnings3-bmv2.p4(30): [--Wwarn=invalid_header] warning: accessing a field of an invalid header h1
+        h1.data = 0;
+        ^^
+invalid-hdr-warnings3-bmv2.p4(40): [--Wwarn=invalid_header] warning: accessing a field of an invalid header h2
+        hdr.h1.data = h2.data;
+                      ^^
+invalid-hdr-warnings3-bmv2.p4(48): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header h1
+        hdr.h1.data = h1.data;
+                      ^^
+invalid-hdr-warnings3-bmv2.p4(49): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header h2
+        hdr.h1.data = h2.data;
+                      ^^

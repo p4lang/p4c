@@ -16,8 +16,8 @@ limitations under the License.
 
 /* -*-C++-*- */
 
-#ifndef _P4_SYMBOL_TABLE_H_
-#define _P4_SYMBOL_TABLE_H_
+#ifndef P4_SYMBOL_TABLE_H_
+#define P4_SYMBOL_TABLE_H_
 
 /* A very simple symbol table that recognizes types; necessary because
    the v1.2 grammar is ambiguous without type information */
@@ -39,19 +39,19 @@ class Namespace;
 class ProgramStructure final {
  private:
     bool debug;
-    FILE* debugStream;
-    Namespace* rootNamespace;
-    Namespace* currentNamespace;
+    FILE *debugStream;
+    Namespace *rootNamespace;
+    Namespace *currentNamespace;
 
     struct PathContext {
-        const NamedSymbol* previousSymbol;
-        const Namespace* lookupContext;
+        const NamedSymbol *previousSymbol;
+        const Namespace *lookupContext;
         PathContext() : previousSymbol(nullptr), lookupContext(nullptr) {}
     } identifierContext;
 
-    void push(Namespace* ns);
-    NamedSymbol* lookup(const cstring identifier);
-    void declare(NamedSymbol* symbol);
+    void push(Namespace *ns);
+    NamedSymbol *lookup(const cstring identifier);
+    void declare(NamedSymbol *symbol);
 
  public:
     enum class SymbolKind {
@@ -73,8 +73,8 @@ class ProgramStructure final {
     // the last namespace has been exited
     void pop();
     // Declares these types in the current scope
-    void declareTypes(const IR::IndexedVector<IR::Type_Var>* typeVars);
-    void declareParameters(const IR::IndexedVector<IR::Parameter>* params);
+    void declareTypes(const IR::IndexedVector<IR::Type_Var> *typeVars);
+    void declareParameters(const IR::IndexedVector<IR::Parameter> *params);
     SymbolKind lookupIdentifier(cstring identifier);
 
     void startAbsolutePath();
@@ -88,4 +88,4 @@ class ProgramStructure final {
 };
 
 }  // namespace Util
-#endif /* _P4_SYMBOL_TABLE_H_ */
+#endif /* P4_SYMBOL_TABLE_H_ */

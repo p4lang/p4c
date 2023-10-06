@@ -31,8 +31,11 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.simple_action") action simple_action() {
-        h.h[0].a = (h.eth_hdr.src_addr != h.eth_hdr.dst_addr ? 8w2 : h.h[0].a);
-        h.h[1].a = (h.eth_hdr.src_addr != h.eth_hdr.dst_addr ? h.h[1].a : 8w1);
+        if (h.eth_hdr.src_addr != h.eth_hdr.dst_addr) {
+            h.h[0].a = 8w2;
+        } else {
+            h.h[1].a = 8w1;
+        }
     }
     @hidden table tbl_simple_action {
         actions = {
@@ -69,4 +72,3 @@ control deparser(packet_out b, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
-

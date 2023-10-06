@@ -1,0 +1,3 @@
+issue3430.p4(10): [--Werror=invalid] error: x: expression must evaluate to a constant
+            x &&& x: accept;
+            ^

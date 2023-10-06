@@ -14,22 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_
-#define _COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_
+#ifndef COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_
+#define COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_
 
 #include "ir/ir.h"
-#include "referenceMap.h"
-#include "lib/exceptions.h"
 #include "lib/cstring.h"
+#include "lib/exceptions.h"
+#include "referenceMap.h"
 
 namespace P4 {
 
 /// Helper class to indicate types of nodes that may be returned during resolution.
-enum class ResolutionType {
-    Any,
-    Type,
-    TypeVariable
-};
+enum class ResolutionType { Any, Type, TypeVariable };
 
 /// Visitor mixin for looking up names in enclosing scopes from the Visitor::Context
 class ResolutionContext : virtual public Visitor, public DeclarationLookup {
@@ -37,14 +33,13 @@ class ResolutionContext : virtual public Visitor, public DeclarationLookup {
     // Note that all errors have been merged by the parser into
     // a single error { } namespace.
 
-    const std::vector<const IR::IDeclaration*>*
-    lookup(const IR::INamespace *ns, IR::ID name, ResolutionType type) const;
+    const std::vector<const IR::IDeclaration *> *lookup(const IR::INamespace *ns, IR::ID name,
+                                                        ResolutionType type) const;
 
     // match kinds exist in their own special namespace, made from all the match_kind
     // declarations in the global scope.  Unlike errors, we don't merge those scopes in
     // the parser, so we have to find them and scan them here.
-    const std::vector<const IR::IDeclaration*>*
-    lookupMatchKind(IR::ID name) const;
+    const std::vector<const IR::IDeclaration *> *lookupMatchKind(IR::ID name) const;
 
     // P4_14 allows things to be used before their declaration while P4_16 (generally)
     // does not, so we will resolve names to things declared later only when translating
@@ -55,18 +50,20 @@ class ResolutionContext : virtual public Visitor, public DeclarationLookup {
     ResolutionContext();
     explicit ResolutionContext(bool ao) : anyOrder(ao) {}
 
-
     /// We are resolving a method call.  Find the arguments from the context.
     const IR::Vector<IR::Argument> *methodArguments(cstring name) const;
 
+ public:
     /// Resolve references for @p name, restricted to @p type declarations.
-    const std::vector<const IR::IDeclaration*> *resolve(IR::ID name, ResolutionType type) const;
+    const std::vector<const IR::IDeclaration *> *resolve(IR::ID name, ResolutionType type) const;
 
     /// Resolve reference for @p name, restricted to @p type declarations, and expect one result.
-    const IR::IDeclaration*
-    resolveUnique(IR::ID name, ResolutionType type, const IR::INamespace * = nullptr) const;
+    const IR::IDeclaration *resolveUnique(IR::ID name, ResolutionType type,
+                                          const IR::INamespace * = nullptr) const;
 
-    const IR::IDeclaration *resolvePath(const IR::Path *path, bool isType) const;
+    /// Resolve @p path; if @p isType is `true` then resolution will
+    /// only return type nodes.
+    virtual const IR::IDeclaration *resolvePath(const IR::Path *path, bool isType) const;
 
     // Resolve a refrence to a type @p type.
     const IR::Type *resolveType(const IR::Type *type) const;
@@ -92,7 +89,7 @@ class ResolveReferences : public Inspector, private ResolutionContext {
  private:
     /// Resolve @p path; if @p isType is `true` then resolution will
     /// only return type nodes.
-    void resolvePath(const IR::Path *path, bool isType) const;
+    const IR::IDeclaration *resolvePath(const IR::Path *path, bool isType) const override;
 
  public:
     explicit ResolveReferences(/* out */ P4::ReferenceMap *refMap, bool checkShadow = false);
@@ -122,14 +119,18 @@ class ResolveReferences : public Inspector, private ResolutionContext {
     bool preorder(const IR::BlockStatement *t) override;
 
     bool preorder(const IR::P4Table *table) override;
-    bool preorder(const IR::Declaration *d) override
-    { refMap->usedName(d->getName().name); return true; }
-    bool preorder(const IR::Type_Declaration *d) override
-    { refMap->usedName(d->getName().name); return true; }
+    bool preorder(const IR::Declaration *d) override {
+        refMap->usedName(d->getName().name);
+        return true;
+    }
+    bool preorder(const IR::Type_Declaration *d) override {
+        refMap->usedName(d->getName().name);
+        return true;
+    }
 
-    void checkShadowing(const IR::INamespace*ns) const;
+    void checkShadowing(const IR::INamespace *ns) const;
 };
 
 }  // namespace P4
 
-#endif /* _COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_ */
+#endif /* COMMON_RESOLVEREFERENCES_RESOLVEREFERENCES_H_ */

@@ -14,7 +14,7 @@ To run and test this back-end you need some additional tools:
   https://github.com/p4lang/behavioral-model.git.  You may need to update your
   dynamic libraries after installing bmv2: `sudo ldconfig`
 
-- the Python scapy and ipaddr libraries `sudo pip3 install scapy ipaddr`
+- the Python scapy library `sudo pip3 install scapy`
 
 # Unsupported P4_16 language features
 

@@ -5,9 +5,7 @@
 typedef bit<48> EthernetAddress;
 typedef bit<32> IPv4Address;
 register<bit<32>>(32w100) debug;
-
 register<bit<32>>(32w1) reg;
-
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
@@ -94,4 +92,3 @@ control Compute(inout Headers hdr, inout Metadata meta) {
 }
 
 V1Switch(P(), Verify(), Ing(), Eg(), Compute(), DP()) main;
-

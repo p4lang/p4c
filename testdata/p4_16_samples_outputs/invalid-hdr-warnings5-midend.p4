@@ -10,16 +10,14 @@ header Header2 {
     bit<16> data;
 }
 
-header_union Union {
-    Header1 h1;
-    Header2 h2;
-    Header1 h3;
-}
-
 struct H {
     Header1 h1;
-    Union   u1;
-    Union   u2;
+    Header1 u1_h1;
+    Header2 u1_h2;
+    Header1 u1_h3;
+    Header1 u2_h1;
+    Header2 u2_h2;
+    Header1 u2_h3;
 }
 
 struct M {
@@ -27,53 +25,119 @@ struct M {
 
 parser ParserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t smeta) {
     state start {
-        hdr.u1.h1.setValid();
-        pkt.extract<Header1>(hdr.u1.h3);
-        hdr.u1.h3.data = 32w1;
-        hdr.u1.h1 = hdr.u1.h3;
-        hdr.u1.h1.data = 32w1;
-        transition last;
+        hdr.u1_h1.setValid();
+        hdr.u1_h2.setInvalid();
+        hdr.u1_h3.setInvalid();
+        pkt.extract<Header1>(hdr.u1_h3);
+        hdr.u1_h3.setValid();
+        hdr.u1_h3.data = 32w1;
+        hdr.u1_h1.setInvalid();
+        hdr.u1_h2.setInvalid();
+        transition select(hdr.u1_h3.isValid()) {
+            true: start_true;
+            false: start_false;
+        }
     }
-    state next {
-        pkt.extract<Header2>(hdr.u1.h2);
+    state start_true {
+        hdr.u1_h1.setValid();
+        hdr.u1_h1 = hdr.u1_h3;
+        hdr.u1_h2.setInvalid();
+        hdr.u1_h3.setInvalid();
+        transition start_join;
+    }
+    state start_false {
+        hdr.u1_h1.setInvalid();
+        transition start_join;
+    }
+    state start_join {
+        hdr.u1_h1.setValid();
+        hdr.u1_h1.data = 32w1;
+        hdr.u1_h2.setInvalid();
+        hdr.u1_h3.setInvalid();
         transition last;
     }
     state last {
-        hdr.u1.h1.data = 32w1;
-        hdr.u1.h2.data = 16w1;
-        hdr.u1.h3.data = 32w1;
+        hdr.u1_h1.setValid();
+        hdr.u1_h1.data = 32w1;
+        hdr.u1_h2.setInvalid();
+        hdr.u1_h3.setInvalid();
+        hdr.u1_h2.setValid();
+        hdr.u1_h2.data = 16w1;
+        hdr.u1_h1.setInvalid();
+        hdr.u1_h3.setInvalid();
+        hdr.u1_h3.setValid();
+        hdr.u1_h3.data = 32w1;
+        hdr.u1_h1.setInvalid();
+        hdr.u1_h2.setInvalid();
         transition accept;
     }
 }
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    @name("IngressI.u1") Union u1_0;
-    @name("IngressI.u2") Union u2_0;
-    @hidden action invalidhdrwarnings5l58() {
-        u1_0.h1.setInvalid();
-        u1_0.h2.setInvalid();
-        u1_0.h3.setInvalid();
-        u2_0.h1.setInvalid();
-        u2_0.h2.setInvalid();
-        u2_0.h3.setInvalid();
-        u1_0.h1.setValid();
-        u1_0.h1.data = 32w1;
-        u1_0.h2.setValid();
-        u2_0.h1 = u1_0.h1;
-        u2_0.h2 = u1_0.h2;
-        u2_0.h3 = u1_0.h3;
-        u2_0.h2.data = 16w1;
-        u1_0.h2.setValid();
-        u1_0.h3.setInvalid();
-    }
-    @hidden table tbl_invalidhdrwarnings5l58 {
-        actions = {
-            invalidhdrwarnings5l58();
+    @name("u1_0_h1") Header1 u1_0_h1_0;
+    @name("u1_0_h2") Header2 u1_0_h2_0;
+    @name("u1_0_h3") Header1 u1_0_h3_0;
+    @name("u2_0_h1") Header1 u2_0_h1_0;
+    @name("u2_0_h2") Header2 u2_0_h2_0;
+    @name("u2_0_h3") Header1 u2_0_h3_0;
+    @hidden @name("invalidhdrwarnings5l58") action invalidhdrwarnings5l58_0() {
+        u1_0_h1_0.setInvalid();
+        u1_0_h2_0.setInvalid();
+        u1_0_h3_0.setInvalid();
+        u2_0_h1_0.setInvalid();
+        u2_0_h2_0.setInvalid();
+        u2_0_h3_0.setInvalid();
+        u1_0_h1_0.setValid();
+        u1_0_h2_0.setInvalid();
+        u1_0_h3_0.setInvalid();
+        u1_0_h1_0.setValid();
+        u1_0_h1_0.data = 32w1;
+        u1_0_h2_0.setInvalid();
+        u1_0_h3_0.setInvalid();
+        u1_0_h2_0.setValid();
+        u1_0_h1_0.setInvalid();
+        u1_0_h3_0.setInvalid();
+        if (u1_0_h1_0.isValid()) {
+            u2_0_h1_0.setValid();
+            u2_0_h1_0 = u1_0_h1_0;
+            u2_0_h2_0.setInvalid();
+            u2_0_h3_0.setInvalid();
+        } else {
+            u2_0_h1_0.setInvalid();
         }
-        const default_action = invalidhdrwarnings5l58();
+        if (u1_0_h2_0.isValid()) {
+            u2_0_h2_0.setValid();
+            u2_0_h2_0 = u1_0_h2_0;
+            u2_0_h1_0.setInvalid();
+            u2_0_h3_0.setInvalid();
+        } else {
+            u2_0_h2_0.setInvalid();
+        }
+        if (u1_0_h3_0.isValid()) {
+            u2_0_h3_0.setValid();
+            u2_0_h3_0 = u1_0_h3_0;
+            u2_0_h1_0.setInvalid();
+            u2_0_h2_0.setInvalid();
+        } else {
+            u2_0_h3_0.setInvalid();
+        }
+        u2_0_h2_0.setValid();
+        u2_0_h2_0.data = 16w1;
+        u2_0_h1_0.setInvalid();
+        u2_0_h3_0.setInvalid();
+        u1_0_h2_0.setValid();
+        u1_0_h1_0.setInvalid();
+        u1_0_h3_0.setInvalid();
+        u1_0_h3_0.setInvalid();
+    }
+    @hidden @name("tbl_invalidhdrwarnings5l58") table tbl_invalidhdrwarnings5l58_0 {
+        actions = {
+            invalidhdrwarnings5l58_0();
+        }
+        const default_action = invalidhdrwarnings5l58_0();
     }
     apply {
-        tbl_invalidhdrwarnings5l58.apply();
+        tbl_invalidhdrwarnings5l58_0.apply();
     }
 }
 
@@ -98,4 +162,3 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 V1Switch<H, M>(ParserI(), VerifyChecksumI(), IngressI(), EgressI(), ComputeChecksumI(), DeparserI()) main;
-

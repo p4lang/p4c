@@ -17,9 +17,8 @@ limitations under the License.
 #ifndef TEST_GTEST_HELPERS_H_
 #define TEST_GTEST_HELPERS_H_
 
+#include <optional>
 #include <string>
-
-#include <boost/optional.hpp>
 
 #include "frontends/common/options.h"
 #include "frontends/p4/parseAnnotations.h"
@@ -31,13 +30,13 @@ class P4Program;
 
 /// Specifies which standard headers should be included by a GTest.
 enum class P4Headers {
-    NONE,    // No headers.
-    CORE,    // Just core.p4.
+    NONE,     // No headers.
+    CORE,     // Just core.p4.
     V1MODEL,  // Both core.p4 and v1model.p4.
-    PSA      // Both core.p4 and psa.p4
+    PSA       // Both core.p4 and psa.p4
 };
 
-namespace detail {
+namespace TestDetail {
 
 /**
  * Transforms the P4 program (or program fragment) in @rawSource to turn it into
@@ -52,21 +51,20 @@ namespace detail {
  *                   find it convenient to specify this as a raw string.
  * @return the transformed P4 program.
  */
-std::string makeP4Source(const char* file, unsigned line,
-                         const char* headers, const char* rawSource);
-std::string makeP4Source(const char* file, unsigned line,
-                         P4Headers headers, const char* rawSource);
+std::string makeP4Source(const char *file, unsigned line, const char *headers,
+                         const char *rawSource);
+std::string makeP4Source(const char *file, unsigned line, P4Headers headers, const char *rawSource);
 
 /// An overload of makeP4Source which doesn't prepend any headers; equivalent to
 /// `makeP4Source(file, line, P4Headers::NONE, rawSource);`.
-std::string makeP4Source(const char* file, unsigned line, const char* rawSource);
+std::string makeP4Source(const char *file, unsigned line, const char *rawSource);
 
-}  // namespace detail
+}  // namespace TestDetail
 
 // A macro which should be used by unit tests to define P4 source code. It adds
 // additional information to the source code to aid in debugging; see
 // makeP4Source for more information and parameter details.
-#define P4_SOURCE(...) detail::makeP4Source(__FILE__, __LINE__, __VA_ARGS__)
+#define P4_SOURCE(...) TestDetail::makeP4Source(__FILE__, __LINE__, __VA_ARGS__)
 
 class P4CTestEnvironment {
     // XXX(seth): Ideally this would be a ::testing::Environment subclass, but
@@ -75,19 +73,19 @@ class P4CTestEnvironment {
     // same, resulting in a double delete that's not easy to resolve cleanly.
  public:
     /// @return the global instance of P4CTestEnvironment.
-    static P4CTestEnvironment* get();
+    static P4CTestEnvironment *get();
 
-    static std::string readHeader(const char* filename, bool preprocess = false,
+    static std::string readHeader(const char *filename, bool preprocess = false,
                                   const char *macro = nullptr, int macro_val = 1);
 
     /// @return a string containing the "core.p4" P4 standard header.
-    const std::string& coreP4() const { return _coreP4; }
+    const std::string &coreP4() const { return _coreP4; }
 
     /// @return a string containing the "v1model.p4" P4 standard header.
-    const std::string& v1Model() const { return _v1Model; }
+    const std::string &v1Model() const { return _v1Model; }
 
     /// @return a string containing the "psa.p4" P4 standard header.
-    const std::string& psaP4() const { return _psaP4; }
+    const std::string &psaP4() const { return _psaP4; }
 
  private:
     P4CTestEnvironment();
@@ -105,7 +103,7 @@ namespace Test {
 /// context for the test to run in.
 class P4CTest : public ::testing::Test {
  public:
-    P4CTest() : autoGTestContext(new GTestContext(GTestContext::get())) { }
+    P4CTest() : autoGTestContext(new GTestContext(GTestContext::get())) {}
 
  private:
     AutoCompileContext autoGTestContext;
@@ -116,18 +114,17 @@ struct FrontendTestCase {
         CompilerOptions::FrontendVersion::P4_16;
 
     /// Create a test case that only requires the frontend to run.
-    static boost::optional<FrontendTestCase>
-    create(const std::string& source,
-           CompilerOptions::FrontendVersion langVersion = defaultVersion,
-           P4::ParseAnnotations parseAnnotations = P4::ParseAnnotations());
+    static std::optional<FrontendTestCase> create(
+        const std::string &source, CompilerOptions::FrontendVersion langVersion = defaultVersion,
+        P4::ParseAnnotations parseAnnotations = P4::ParseAnnotations());
 
-    static boost::optional<FrontendTestCase>
-    create(const std::string& source, P4::ParseAnnotations parseAnnotations) {
+    static std::optional<FrontendTestCase> create(const std::string &source,
+                                                  P4::ParseAnnotations parseAnnotations) {
         return create(source, defaultVersion, parseAnnotations);
     }
 
     /// The output of the frontend.
-    const IR::P4Program* program;
+    const IR::P4Program *program;
 };
 
 }  // namespace Test

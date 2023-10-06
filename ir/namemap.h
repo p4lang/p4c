@@ -14,24 +14,37 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _IR_NAMEMAP_H_
-#define _IR_NAMEMAP_H_
+#ifndef IR_NAMEMAP_H_
+#define IR_NAMEMAP_H_
+
+#include <map>
+
+#include "ir/node.h"
+#include "lib/cstring.h"
+#include "lib/enumerator.h"
+#include "lib/error.h"
+#include "lib/exceptions.h"
 
 class JSONLoader;
 
 namespace IR {
 
-template<class T, template<class K, class V, class COMP, class ALLOC> class MAP = std::map,
-         class COMP = std::less<cstring>,
-         class ALLOC = std::allocator<std::pair<const cstring, const T*>>>
+template <class T, template <class K, class V, class COMP, class ALLOC> class MAP = std::map,
+          class COMP = std::less<cstring>,
+          class ALLOC = std::allocator<std::pair<const cstring, const T *>>>
 class NameMap : public Node {
-    typedef MAP<cstring, const T *, COMP, ALLOC>        map_t;
-    map_t       symbols;
+    typedef MAP<cstring, const T *, COMP, ALLOC> map_t;
+    map_t symbols;
     /* if the object has a 'name' field, is it the same as name? */
-    template<class U> auto match_name(cstring name, const U *obj) -> decltype(name == obj->name) {
-        return name == obj->name; }
+    template <class U>
+    auto match_name(cstring name, const U *obj) -> decltype(name == obj->name) {
+        return name == obj->name;
+    }
     bool match_name(cstring, const void *) { return true; }
-    template<class U> auto obj_name(const U *obj) -> decltype(obj->name) { return obj->name; }
+    template <class U>
+    auto obj_name(const U *obj) -> decltype(obj->name) {
+        return obj->name;
+    }
     cstring obj_name(const void *) { return cstring(0); }
 
  public:
@@ -41,21 +54,21 @@ class NameMap : public Node {
     explicit NameMap(JSONLoader &);
     NameMap &operator=(const NameMap &) = default;
     NameMap &operator=(NameMap &&) = default;
-    typedef typename map_t::value_type          value_type;
-    typedef typename map_t::iterator            iterator;
-    typedef typename map_t::const_iterator      const_iterator;
-    typedef typename map_t::reverse_iterator            reverse_iterator;
-    typedef typename map_t::const_reverse_iterator      const_reverse_iterator;
+    typedef typename map_t::value_type value_type;
+    typedef typename map_t::iterator iterator;
+    typedef typename map_t::const_iterator const_iterator;
+    typedef typename map_t::reverse_iterator reverse_iterator;
+    typedef typename map_t::const_reverse_iterator const_reverse_iterator;
 
  private:
     struct elem_ref {
-        NameMap         &self;
-        cstring         name;
+        NameMap &self;
+        cstring name;
         elem_ref(NameMap &s, cstring n) : self(s), name(n) {}
         const T *operator=(const T *v) const {
-            if (!self.match_name(name, v))
-                BUG("Inserting into NameMap with incorrect name");
-            return self.symbols[name] = v; }
+            if (!self.match_name(name, v)) BUG("Inserting into NameMap with incorrect name");
+            return self.symbols[name] = v;
+        }
         operator const T *() const { return self.count(name) ? self.at(name) : nullptr; }
     };
 
@@ -65,8 +78,9 @@ class NameMap : public Node {
     iterator begin() { return symbols.begin(); }
     iterator end() { return symbols.end(); }
     // For multimaps
-    std::pair<const_iterator, const_iterator> equal_range(cstring key) const
-    { return symbols.equal_range(key); }
+    std::pair<const_iterator, const_iterator> equal_range(cstring key) const {
+        return symbols.equal_range(key);
+    }
     const_reverse_iterator rbegin() const { return symbols.rbegin(); }
     const_reverse_iterator rend() const { return symbols.rend(); }
     reverse_iterator rbegin() { return symbols.rbegin(); }
@@ -80,36 +94,39 @@ class NameMap : public Node {
     iterator erase(iterator p) { return symbols.erase(p); }
     iterator erase(iterator f, iterator l) { return symbols.erase(f, l); }
     const_iterator find(cstring name) const { return symbols.find(name); }
-    template<class U> const U *get(cstring name) const {
+    template <class U>
+    const U *get(cstring name) const {
         for (auto it = symbols.find(name); it != symbols.end() && it->first == name; it++)
-            if (auto rv = dynamic_cast<const U *>(it->second))
-                return rv;
-        return nullptr; }
+            if (auto rv = dynamic_cast<const U *>(it->second)) return rv;
+        return nullptr;
+    }
     void add(cstring name, const T *n) {
-        if (!match_name(name, n))
-            BUG("Inserting into NameMap with incorrect name");
-        symbols.emplace(std::move(name), std::move(n)); }
+        if (!match_name(name, n)) BUG("Inserting into NameMap with incorrect name");
+        symbols.emplace(std::move(name), std::move(n));
+    }
     // Expects to have a single node with each name.
     // Only works for map and unordered_map
     void addUnique(cstring name, const T *n) {
         auto prev = symbols.find(name);
         if (prev != symbols.end())
-            ::error(ErrorType::ERR_DUPLICATE,
-                    "%1%: duplicated name (%2% is previous instance)", n, prev->second);
-        symbols.emplace(std::move(name), std::move(n)); }
+            ::error(ErrorType::ERR_DUPLICATE, "%1%: duplicated name (%2% is previous instance)", n,
+                    prev->second);
+        symbols.emplace(std::move(name), std::move(n));
+    }
     // Expects to have a single node with each name.
     // Only works for map and unordered_map
     const T *getUnique(cstring name) const {
         auto it = symbols.find(name);
-        if (it == symbols.end())
-            return nullptr;
+        if (it == symbols.end()) return nullptr;
         return it->second;
     }
     elem_ref operator[](cstring name) { return elem_ref(*this, name); }
     const T *operator[](cstring name) const { return count(name) ? at(name) : nullptr; }
     const T *&at(cstring name) { return symbols.at(name); }
     const T *const &at(cstring name) const { return symbols.at(name); }
-    void check_null() const { for (auto &e : symbols) CHECK_NULL(e.second); }
+    void check_null() const {
+        for (auto &e : symbols) CHECK_NULL(e.second);
+    }
 
     IRNODE_SUBCLASS(NameMap)
     bool operator==(const Node &a) const override { return a == *this; }
@@ -121,27 +138,27 @@ class NameMap : public Node {
         if (size() != a.size()) return false;
         auto it = a.begin();
         for (auto &el : *this)
-            if (el.first != it->first || !el.second->equiv(*(it++)->second))
-                return false;
-        return true; }
-    cstring node_type_name() const override {
-        return "NameMap<" + T::static_type_name() + ">"; }
-    static cstring static_type_name() {
-        return "NameMap<" + T::static_type_name() + ">"; }
+            if (el.first != it->first || !el.second->equiv(*(it++)->second)) return false;
+        return true;
+    }
+    cstring node_type_name() const override { return "NameMap<" + T::static_type_name() + ">"; }
+    static cstring static_type_name() { return "NameMap<" + T::static_type_name() + ">"; }
     void visit_children(Visitor &v) override;
     void visit_children(Visitor &v) const override;
     void toJSON(JSONGenerator &json) const override;
     static NameMap<T, MAP, COMP, ALLOC> *fromJSON(JSONLoader &json);
 
-    Util::Enumerator<const T*>* valueEnumerator() const {
-        return Util::Enumerator<const T*>::createEnumerator(Values(symbols).begin(),
-                                                            Values(symbols).end()); }
+    Util::Enumerator<const T *> *valueEnumerator() const {
+        return Util::Enumerator<const T *>::createEnumerator(Values(symbols).begin(),
+                                                             Values(symbols).end());
+    }
     template <typename S>
-    Util::Enumerator<const S*>* only() const {
-        std::function<bool(const T*)> filter = [](const T* d) { return d->template is<S>(); };
-        return valueEnumerator()->where(filter)->template as<const S*>(); }
+    Util::Enumerator<const S *> *only() const {
+        std::function<bool(const T *)> filter = [](const T *d) { return d->template is<S>(); };
+        return valueEnumerator()->where(filter)->template as<const S *>();
+    }
 };
 
 }  // namespace IR
 
-#endif /* _IR_NAMEMAP_H_ */
+#endif /* IR_NAMEMAP_H_ */

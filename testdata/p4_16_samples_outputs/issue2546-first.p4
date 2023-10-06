@@ -23,7 +23,7 @@ parser p(packet_in pkt, out Headers hdr) {
 control ingress(inout Headers h) {
     table simple_table_1 {
         key = {
-            48w1: exact @name("KOXpQP") ;
+            48w1: exact @name("KOXpQP");
         }
         actions = {
             @defaultonly NoAction();
@@ -32,7 +32,7 @@ control ingress(inout Headers h) {
     }
     table simple_table_2 {
         key = {
-            (simple_table_1.apply().hit ? 8w1 : 8w2): exact @name("key") ;
+            (simple_table_1.apply().hit ? 8w1 : 8w2): exact @name("key");
         }
         actions = {
             @defaultonly NoAction();
@@ -50,4 +50,3 @@ parser Parser(packet_in b, out Headers hdr);
 control Ingress(inout Headers hdr);
 package top(Parser p, Ingress ig);
 top(p(), ingress()) main;
-

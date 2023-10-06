@@ -15,12 +15,12 @@ limitations under the License.
 */
 
 #include "ubpfParser.h"
-#include "ubpfType.h"
-#include "ubpfHelpers.h"
-#include "ubpfModel.h"
+
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
-
+#include "ubpfHelpers.h"
+#include "ubpfModel.h"
+#include "ubpfType.h"
 
 namespace UBPF {
 
@@ -29,59 +29,58 @@ class UBPFStateTranslationVisitor : public EBPF::CodeGenInspector {
     // stores the result of evaluating the select argument
     cstring selectValue;
 
-    P4::P4CoreLibrary& p4lib;
-    const UBPFParserState* state;
+    P4::P4CoreLibrary &p4lib;
+    const UBPFParserState *state;
 
-    void emitCheckPacketLength(const IR::Expression* expr, const char * varname, unsigned width);
-    void emitCheckPacketLength(const IR::Expression* expr)
-    { emitCheckPacketLength(expr, nullptr, 0); }
-    void emitCheckPacketLength(unsigned width)
-    { emitCheckPacketLength(nullptr, nullptr, width); }
-    void emitCheckPacketLength(const char * varname)
-    { emitCheckPacketLength(nullptr, varname, 0); }
+    void emitCheckPacketLength(const IR::Expression *expr, const char *varname, unsigned width);
+    void emitCheckPacketLength(const IR::Expression *expr) {
+        emitCheckPacketLength(expr, nullptr, 0);
+    }
+    void emitCheckPacketLength(unsigned width) { emitCheckPacketLength(nullptr, nullptr, width); }
+    void emitCheckPacketLength(const char *varname) { emitCheckPacketLength(nullptr, varname, 0); }
 
-    void compileExtractField(const IR::Expression* expr, cstring field,
-                             unsigned alignment, EBPF::EBPFType* type, bool advanceCursor = true);
-    void compileExtract(const IR::Expression* destination);
+    void compileExtractField(const IR::Expression *expr, cstring field, unsigned alignment,
+                             EBPF::EBPFType *type, bool advanceCursor = true);
+    void compileExtract(const IR::Expression *destination);
 
-    void compileLookahead(const IR::Expression* destination);
+    void compileLookahead(const IR::Expression *destination);
 
-    void compileAdvance(const IR::Expression* expr);
+    void compileAdvance(const IR::Expression *expr);
 
  public:
-    explicit UBPFStateTranslationVisitor(const UBPFParserState* state) :
-            CodeGenInspector(state->parser->program->refMap, state->parser->program->typeMap),
-            p4lib(P4::P4CoreLibrary::instance), state(state) {}
-    bool preorder(const IR::ParserState* state) override;
-    bool preorder(const IR::SelectCase* selectCase) override;
-    bool preorder(const IR::SelectExpression* expression) override;
-    bool preorder(const IR::Member* expression) override;
-    bool preorder(const IR::MethodCallExpression* expression) override;
-    bool preorder(const IR::MethodCallStatement* stat) override
-    { visit(stat->methodCall); return false; }
-    bool preorder(const IR::AssignmentStatement* stat) override;
+    explicit UBPFStateTranslationVisitor(const UBPFParserState *state)
+        : CodeGenInspector(state->parser->program->refMap, state->parser->program->typeMap),
+          p4lib(P4::P4CoreLibrary::instance()),
+          state(state) {}
+    bool preorder(const IR::ParserState *state) override;
+    bool preorder(const IR::SelectCase *selectCase) override;
+    bool preorder(const IR::SelectExpression *expression) override;
+    bool preorder(const IR::Member *expression) override;
+    bool preorder(const IR::MethodCallExpression *expression) override;
+    bool preorder(const IR::MethodCallStatement *stat) override {
+        visit(stat->methodCall);
+        return false;
+    }
+    bool preorder(const IR::AssignmentStatement *stat) override;
 };
 }  // namespace
 
 // if expr is nullprt, width is used instead
-void UBPFStateTranslationVisitor::emitCheckPacketLength(const IR::Expression* expr,
-        const char * varname, unsigned width) {
+void UBPFStateTranslationVisitor::emitCheckPacketLength(const IR::Expression *expr,
+                                                        const char *varname, unsigned width) {
     auto program = state->parser->program;
 
     builder->emitIndent();
     if (expr != nullptr) {
-        builder->appendFormat("if (%s < BYTES(%s + ",
-                              program->lengthVar.c_str(),
+        builder->appendFormat("if (%s < BYTES(%s + ", program->lengthVar.c_str(),
                               program->offsetVar.c_str());
         visit(expr);
         builder->append(")) ");
     } else if (varname != nullptr) {
-        builder->appendFormat("if (%s < BYTES(%s + %s)) ",
-                              program->lengthVar.c_str(),
+        builder->appendFormat("if (%s < BYTES(%s + %s)) ", program->lengthVar.c_str(),
                               program->offsetVar.c_str(), varname);
     } else {
-        builder->appendFormat("if (%s < BYTES(%s + %d)) ",
-                              program->lengthVar.c_str(),
+        builder->appendFormat("if (%s < BYTES(%s + %d)) ", program->lengthVar.c_str(),
                               program->offsetVar.c_str(), width);
     }
 
@@ -95,7 +94,7 @@ void UBPFStateTranslationVisitor::emitCheckPacketLength(const IR::Expression* ex
     builder->newline();
 }
 
-bool UBPFStateTranslationVisitor::preorder(const IR::ParserState* parserState) {
+bool UBPFStateTranslationVisitor::preorder(const IR::ParserState *parserState) {
     if (parserState->isBuiltin()) return false;
 
     builder->emitIndent();
@@ -126,7 +125,7 @@ bool UBPFStateTranslationVisitor::preorder(const IR::ParserState* parserState) {
     return false;
 }
 
-bool UBPFStateTranslationVisitor::preorder(const IR::SelectCase* selectCase) {
+bool UBPFStateTranslationVisitor::preorder(const IR::SelectCase *selectCase) {
     builder->emitIndent();
     if (auto mask = selectCase->keyset->to<IR::Mask>()) {
         builder->appendFormat("if ((%s", selectValue);
@@ -149,9 +148,8 @@ bool UBPFStateTranslationVisitor::preorder(const IR::SelectCase* selectCase) {
     return false;
 }
 
-bool UBPFStateTranslationVisitor::preorder(const IR::SelectExpression* expression) {
-    BUG_CHECK(expression->select->components.size() == 1,
-              "%1%: tuple not eliminated in select",
+bool UBPFStateTranslationVisitor::preorder(const IR::SelectExpression *expression) {
+    BUG_CHECK(expression->select->components.size() == 1, "%1%: tuple not eliminated in select",
               expression->select);
     selectValue = state->parser->program->refMap->newName("select");
     auto type = state->parser->program->typeMap->getType(expression->select, true);
@@ -167,8 +165,7 @@ bool UBPFStateTranslationVisitor::preorder(const IR::SelectExpression* expressio
     builder->appendFormat("%s = ", selectValue);
     visit(expression->select);
     builder->endOfStatement(true);
-    for (auto e : expression->selectCases)
-        visit(e);
+    for (auto e : expression->selectCases) visit(e);
 
     builder->emitIndent();
     builder->appendFormat("else goto %s;", IR::ParserState::reject.c_str());
@@ -176,7 +173,7 @@ bool UBPFStateTranslationVisitor::preorder(const IR::SelectExpression* expressio
     return false;
 }
 
-bool UBPFStateTranslationVisitor::preorder(const IR::Member* expression) {
+bool UBPFStateTranslationVisitor::preorder(const IR::Member *expression) {
     if (expression->expr->is<IR::PathExpression>()) {
         auto pe = expression->expr->to<IR::PathExpression>();
         auto decl = state->parser->program->refMap->getDeclaration(pe->path, true);
@@ -192,11 +189,10 @@ bool UBPFStateTranslationVisitor::preorder(const IR::Member* expression) {
     return false;
 }
 
-void
-UBPFStateTranslationVisitor::compileExtractField(
-        const IR::Expression* expr, cstring field, unsigned alignment, EBPF::EBPFType* type,
-        bool advanceCursor) {
-    unsigned widthToExtract = dynamic_cast<EBPF::IHasWidth*>(type)->widthInBits();
+void UBPFStateTranslationVisitor::compileExtractField(const IR::Expression *expr, cstring field,
+                                                      unsigned alignment, EBPF::EBPFType *type,
+                                                      bool advanceCursor) {
+    unsigned widthToExtract = dynamic_cast<EBPF::IHasWidth *>(type)->widthInBits();
     auto program = state->parser->program;
 
     if (widthToExtract <= 64) {
@@ -205,11 +201,11 @@ UBPFStateTranslationVisitor::compileExtractField(
         unsigned wordsToRead = lastWordIndex + 1;
         unsigned loadSize;
 
-        const char* helper = nullptr;
+        const char *helper = nullptr;
         if (wordsToRead <= 1) {
             helper = "load_byte";
             loadSize = 8;
-        } else if (wordsToRead <= 2)  {
+        } else if (wordsToRead <= 2) {
             helper = "load_half";
             loadSize = 16;
         } else if (wordsToRead <= 4) {
@@ -229,12 +225,9 @@ UBPFStateTranslationVisitor::compileExtractField(
             builder->append("(");
         }
         type->emit(builder);
-        builder->appendFormat(")((%s(%s, BYTES(%s))",
-                              helper,
-                              program->packetStartVar.c_str(),
+        builder->appendFormat(")((%s(%s, BYTES(%s))", helper, program->packetStartVar.c_str(),
                               program->offsetVar.c_str());
-        if (shift != 0)
-            builder->appendFormat(" >> %d", shift);
+        if (shift != 0) builder->appendFormat(" >> %d", shift);
         builder->append(")");
 
         if (widthToExtract != loadSize) {
@@ -244,8 +237,7 @@ UBPFStateTranslationVisitor::compileExtractField(
         }
 
         builder->append(")");
-        if (advanceCursor)
-            builder->endOfStatement(true);
+        if (advanceCursor) builder->endOfStatement(true);
     } else {
         // wide values; read all bytes one by one.
         unsigned shift;
@@ -254,22 +246,21 @@ UBPFStateTranslationVisitor::compileExtractField(
         else
             shift = 8 - alignment;
 
-        const char* helper;
+        const char *helper;
         if (shift == 0)
             helper = "load_byte";
         else
             helper = "load_half";
         auto bt = UBPFTypeFactory::instance->create(IR::Type_Bits::get(8));
         unsigned bytes = ROUNDUP(widthToExtract, 8);
-        for (unsigned i=0; i < bytes; i++) {
+        for (unsigned i = 0; i < bytes; i++) {
             builder->emitIndent();
             visit(expr);
             builder->appendFormat(".%s[%d] = (", field.c_str(), i);
             bt->emit(builder);
-            builder->appendFormat(")((%s(%s, BYTES(%s) + %d) >> %d)",
-                                  helper,
-                                  program->packetStartVar.c_str(),
-                                  program->offsetVar.c_str(), bytes - i - 1, shift);
+            builder->appendFormat(")((%s(%s, BYTES(%s) + %d) >> %d)", helper,
+                                  program->packetStartVar.c_str(), program->offsetVar.c_str(),
+                                  bytes - i - 1, shift);
 
             if ((i == bytes - 1) && (widthToExtract % 8 != 0)) {
                 builder->append(" & BPF_MASK(");
@@ -290,14 +281,13 @@ UBPFStateTranslationVisitor::compileExtractField(
     }
 }
 
-void
-UBPFStateTranslationVisitor::compileExtract(const IR::Expression* destination) {
+void UBPFStateTranslationVisitor::compileExtract(const IR::Expression *destination) {
     auto type = state->parser->typeMap->getType(destination);
     auto ht = type->to<IR::Type_StructLike>();
 
     if (ht == nullptr) {
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "Cannot extract to a non-struct type %1%", destination);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Cannot extract to a non-struct type %1%",
+                destination);
         return;
     }
 
@@ -308,7 +298,7 @@ UBPFStateTranslationVisitor::compileExtract(const IR::Expression* destination) {
     for (auto f : ht->fields) {
         auto ftype = state->parser->typeMap->getType(f);
         auto etype = UBPFTypeFactory::instance->create(ftype);
-        auto et = dynamic_cast<EBPF::IHasWidth*>(etype);
+        auto et = dynamic_cast<EBPF::IHasWidth *>(etype);
         if (et == nullptr) {
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                     "Only headers with fixed widths supported %1%", f);
@@ -326,17 +316,15 @@ UBPFStateTranslationVisitor::compileExtract(const IR::Expression* destination) {
     }
 }
 
-void
-UBPFStateTranslationVisitor::compileLookahead(const IR::Expression* destination) {
+void UBPFStateTranslationVisitor::compileLookahead(const IR::Expression *destination) {
     auto type = state->parser->typeMap->getType(destination);
     auto etype = UBPFTypeFactory::instance->create(type);
 
     if (type->to<IR::Type_Bits>() == nullptr)
         BUG("lookahead<%1%>(): only bit type is supported yet", type);
 
-    unsigned width = dynamic_cast<EBPF::IHasWidth*>(etype)->widthInBits();
-    if (width > 64)
-        BUG("lookahead<%1%>(): more than 64 bits not supported yet", type);
+    unsigned width = dynamic_cast<EBPF::IHasWidth *>(etype)->widthInBits();
+    if (width > 64) BUG("lookahead<%1%>(): more than 64 bits not supported yet", type);
 
     // check packet's length
     emitCheckPacketLength(width);
@@ -350,8 +338,7 @@ UBPFStateTranslationVisitor::compileLookahead(const IR::Expression* destination)
     builder->endOfStatement(true);
 }
 
-void
-UBPFStateTranslationVisitor::compileAdvance(const IR::Expression* expr) {
+void UBPFStateTranslationVisitor::compileAdvance(const IR::Expression *expr) {
     auto type = state->parser->typeMap->getType(expr);
     auto etype = UBPFTypeFactory::instance->create(type);
     cstring tmpVarName = refMap->newName("tmp");
@@ -369,22 +356,21 @@ UBPFStateTranslationVisitor::compileAdvance(const IR::Expression* expr) {
     emitCheckPacketLength(tmpVarName.c_str());
 
     builder->emitIndent();
-    builder->appendFormat("%s += %s",
-            state->parser->program->offsetVar.c_str(), tmpVarName.c_str());
+    builder->appendFormat("%s += %s", state->parser->program->offsetVar.c_str(),
+                          tmpVarName.c_str());
     builder->endOfStatement(true);
     builder->blockEnd(true);
     builder->newline();
 }
 
-bool UBPFStateTranslationVisitor::preorder(const IR::MethodCallExpression* expression) {
+bool UBPFStateTranslationVisitor::preorder(const IR::MethodCallExpression *expression) {
     builder->emitIndent();
     builder->append("/* ");
     visit(expression->method);
     builder->append("(");
     bool first = true;
-    for (auto a  : *expression->arguments) {
-        if (!first)
-            builder->append(", ");
+    for (auto a : *expression->arguments) {
+        if (!first) builder->append(", ");
         first = false;
         visit(a);
     }
@@ -392,8 +378,7 @@ bool UBPFStateTranslationVisitor::preorder(const IR::MethodCallExpression* expre
     builder->append("*/");
     builder->newline();
 
-    auto mi = P4::MethodInstance::resolve(expression,
-                                          state->parser->program->refMap,
+    auto mi = P4::MethodInstance::resolve(expression, state->parser->program->refMap,
                                           state->parser->program->typeMap);
 
     auto extMethod = mi->to<P4::ExternMethod>();
@@ -429,14 +414,12 @@ bool UBPFStateTranslationVisitor::preorder(const IR::MethodCallExpression* expre
     return false;
 }
 
-bool UBPFStateTranslationVisitor::preorder(const IR::AssignmentStatement* stat) {
+bool UBPFStateTranslationVisitor::preorder(const IR::AssignmentStatement *stat) {
     if (auto mce = stat->right->to<IR::MethodCallExpression>()) {
-        auto mi = P4::MethodInstance::resolve(mce,
-                                              state->parser->program->refMap,
+        auto mi = P4::MethodInstance::resolve(mce, state->parser->program->refMap,
                                               state->parser->program->typeMap);
         auto extMethod = mi->to<P4::ExternMethod>();
-        if (extMethod == nullptr)
-            BUG("Unhandled method %1%", mce);
+        if (extMethod == nullptr) BUG("Unhandled method %1%", mce);
 
         auto decl = extMethod->object;
         if (decl == state->parser->packet) {
@@ -445,8 +428,7 @@ bool UBPFStateTranslationVisitor::preorder(const IR::AssignmentStatement* stat) 
                 return false;
             }
         }
-        ::error(ErrorType::ERR_UNEXPECTED,
-                "Unexpected method call in parser %1%", stat->right);
+        ::error(ErrorType::ERR_UNEXPECTED, "Unexpected method call in parser %1%", stat->right);
     } else {
         builder->emitIndent();
         visit(stat->left);
@@ -458,22 +440,20 @@ bool UBPFStateTranslationVisitor::preorder(const IR::AssignmentStatement* stat) 
     return false;
 }
 
-void UBPFParserState::emit(EBPF::CodeBuilder* builder) {
+void UBPFParserState::emit(EBPF::CodeBuilder *builder) {
     UBPFStateTranslationVisitor visitor(this);
     visitor.setBuilder(builder);
     state->apply(visitor);
 }
 
 void UBPFParser::emit(EBPF::CodeBuilder *builder) {
-    for (auto s : states)
-        s->emit(builder);
+    for (auto s : states) s->emit(builder);
 
     builder->newline();
 
     // Create a synthetic reject state
     builder->emitIndent();
-    builder->appendFormat("%s: { return %s; }",
-                          IR::ParserState::reject.c_str(),
+    builder->appendFormat("%s: { return %s; }", IR::ParserState::reject.c_str(),
                           builder->target->abortReturnCode().c_str());
     builder->newline();
     builder->newline();
@@ -483,14 +463,16 @@ bool UBPFParser::build() {
     auto pl = parserBlock->container->type->applyParams;
     size_t numberOfArgs = UBPFModel::instance.numberOfParserArguments();
     if (pl->size() != numberOfArgs) {
-        ::error(ErrorType::ERR_EXPECTED,
-                "Expected parser to have exactly %d parameters", numberOfArgs);
+        ::error(ErrorType::ERR_EXPECTED, "Expected parser to have exactly %d parameters",
+                numberOfArgs);
         return false;
     }
 
     auto it = pl->parameters.begin();
-    packet = *it; ++it;
-    headers = *it; ++it;
+    packet = *it;
+    ++it;
+    headers = *it;
+    ++it;
     metadata = *it;
     for (auto state : parserBlock->container->states) {
         auto ps = new UBPFParserState(state, this);
@@ -498,13 +480,11 @@ bool UBPFParser::build() {
     }
 
     auto ht = typeMap->getType(headers);
-    if (ht == nullptr)
-        return false;
+    if (ht == nullptr) return false;
     headerType = UBPFTypeFactory::instance->create(ht);
 
     auto md = typeMap->getType(metadata);
-    if (md == nullptr)
-        return false;
+    if (md == nullptr) return false;
     metadataType = UBPFTypeFactory::instance->create(md);
     return true;
 }

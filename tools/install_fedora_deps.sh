@@ -13,6 +13,7 @@ sudo dnf install -y -q \
     boost-system \
     boost-test \
     boost-thread \
+    ccache \
     clang \
     cmake \
     cpp \
@@ -36,8 +37,7 @@ sudo dnf install -y -q \
     net-tools \
     openssl-devel \
     pkg-config \
-    protobuf-devel \
-    protobuf-static \
+    procps-ng \
     python3 \
     python3-pip \
     python3-thrift \
@@ -47,7 +47,12 @@ sudo dnf install -y -q \
     valgrind \
     zlib-devel
 
-sudo pip3 install ipaddr ply ptf scapy==2.4.5 wheel
+sudo pip3 install ply ptf scapy==2.4.5 wheel
+
+# Install dependencies for the BMv2 PTF runner and P4Runtime.
+sudo pip3 install --upgrade protobuf==3.20.1
+sudo pip3 install --upgrade googleapis-common-protos==1.50.0
+sudo pip3 install --upgrade grpcio==1.51.1
 
 MAKEFLAGS="-j$(nproc)"
 export MAKEFLAGS
@@ -69,7 +74,7 @@ pushd "${tmp_dir}"
 git clone --depth=1 https://github.com/p4lang/behavioral-model
 cd behavioral-model
 ./autogen.sh
-./configure --with-pdfixed --with-thrift --with-pi --with-stress-tests --enable-debugger
+./configure --with-pdfixed --with-thrift --with-pi --with-stress-tests --enable-debugger CC="ccache gcc" CXX="ccache g++"
 make
 make install-strip
 popd

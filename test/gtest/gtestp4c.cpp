@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,9 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "gtest/gtest.h"
-
 #include "frontends/common/options.h"
+#include "gtest/gtest.h"
 #include "helpers.h"
 #include "lib/log.h"
 
@@ -28,7 +27,7 @@ int main(int argc, char **argv) {
     if (diagnosticCount() > 0) return -1;
 
     // Initialize the global test environment.
-    (void) P4CTestEnvironment::get();
+    (void)P4CTestEnvironment::get();
 
     return RUN_ALL_TESTS();
 }

@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_P4_TYPEMAP_H_
-#define _FRONTENDS_P4_TYPEMAP_H_
+#ifndef FRONTENDS_P4_TYPEMAP_H_
+#define FRONTENDS_P4_TYPEMAP_H_
 
-#include "ir/ir.h"
 #include "frontends/common/programMap.h"
 #include "frontends/p4/typeChecking/typeSubstitution.h"
+#include "lib/ordered_set.h"
 
 namespace P4 {
 /**
@@ -40,25 +40,26 @@ Objects that have a type in the map:
 class TypeMap final : public ProgramMap {
  protected:
     // We want to have the same canonical type for two
-    // different tuples, lists, or stacks with the same signature.
-    std::vector<const IR::Type*> canonicalTuples;
-    std::vector<const IR::Type*> canonicalStacks;
-    std::vector<const IR::Type*> canonicalLists;
+    // different tuples, lists, stacks, or p4lists with the same signature.
+    std::vector<const IR::Type *> canonicalTuples;
+    std::vector<const IR::Type *> canonicalStacks;
+    std::vector<const IR::Type *> canonicalP4lists;
+    std::vector<const IR::Type *> canonicalLists;
 
     // Map each node to its canonical type
-    ordered_map<const IR::Node*, const IR::Type*> typeMap;
+    ordered_map<const IR::Node *, const IR::Type *> typeMap;
     // All left-values in the program.
-    ordered_set<const IR::Expression*> leftValues;
+    ordered_set<const IR::Expression *> leftValues;
     // All compile-time constants.  A compile-time constant
     // is not necessarily a constant - it could be a directionless
     // parameter as well.
-    ordered_set<const IR::Expression*> constants;
+    ordered_set<const IR::Expression *> constants;
     // For each type variable in the program the actual
     // type that is substituted for it.
     TypeVariableSubstitution allTypeVariables;
 
     // checks some preconditions before setting the type
-    void checkPrecondition(const IR::Node* element, const IR::Type* type) const;
+    void checkPrecondition(const IR::Node *element, const IR::Type *type) const;
 
  public:
     TypeMap() : ProgramMap("TypeMap"), strictStruct(false) {}
@@ -67,47 +68,47 @@ class TypeMap final : public ProgramMap {
     /// equivalent, if false only that the have the same fields.
     bool strictStruct;
     void setStrictStruct(bool value) { strictStruct = value; }
-    bool contains(const IR::Node* element) { return typeMap.count(element) != 0; }
-    void setType(const IR::Node* element, const IR::Type* type);
-    const IR::Type* getType(const IR::Node* element, bool notNull = false) const;
+    bool contains(const IR::Node *element) { return typeMap.count(element) != 0; }
+    void setType(const IR::Node *element, const IR::Type *type);
+    const IR::Type *getType(const IR::Node *element, bool notNull = false) const;
     // unwraps a TypeType into its contents
-    const IR::Type* getTypeType(const IR::Node* element, bool notNull) const;
-    void dbprint(std::ostream& out) const;
+    const IR::Type *getTypeType(const IR::Node *element, bool notNull) const;
+    void dbprint(std::ostream &out) const;
     void clear();
-    bool isLeftValue(const IR::Expression* expression) const
-    { return leftValues.count(expression) > 0; }
-    bool isCompileTimeConstant(const IR::Expression* expression) const;
-    size_t size() const
-    { return typeMap.size(); }
+    bool isLeftValue(const IR::Expression *expression) const {
+        return leftValues.count(expression) > 0;
+    }
+    bool isCompileTimeConstant(const IR::Expression *expression) const;
+    size_t size() const { return typeMap.size(); }
 
-    void setLeftValue(const IR::Expression* expression);
-    void cloneExpressionProperties(const IR::Expression* to,
-                                   const IR::Expression* from);
-    void setCompileTimeConstant(const IR::Expression* expression);
-    void addSubstitutions(const TypeVariableSubstitution* tvs);
-    const IR::Type* getSubstitution(const IR::Type_Var* var)
-    { return allTypeVariables.lookup(var); }
-    const TypeVariableSubstitution* getSubstitutions() const { return &allTypeVariables; }
+    void setLeftValue(const IR::Expression *expression);
+    void cloneExpressionProperties(const IR::Expression *to, const IR::Expression *from);
+    void setCompileTimeConstant(const IR::Expression *expression);
+    void addSubstitutions(const TypeVariableSubstitution *tvs);
+    const IR::Type *getSubstitution(const IR::ITypeVar *var) {
+        return allTypeVariables.lookup(var);
+    }
+    const TypeVariableSubstitution *getSubstitutions() const { return &allTypeVariables; }
 
     /// Check deep structural equivalence; defined between canonical types only.
     /// @param strict  If true use strict equivalence checks, irrespective
     ///        of the strictStruct flag, else use the strictStruct flag value.
-    bool equivalent(const IR::Type* left, const IR::Type* right, bool strict = false) const;
+    bool equivalent(const IR::Type *left, const IR::Type *right, bool strict = false) const;
     /// This is the same as equivalence, but it also allows some legal
     /// implicit conversions, such as a tuple type to a struct type, which
     /// is used when initializing a struct with a list expression.
-    bool implicitlyConvertibleTo(const IR::Type* from, const IR::Type* to) const;
+    bool implicitlyConvertibleTo(const IR::Type *from, const IR::Type *to) const;
 
     // Used for tuples and stacks only
-    const IR::Type* getCanonical(const IR::Type* type);
+    const IR::Type *getCanonical(const IR::Type *type);
     /// The width in bits of this type.  If the width is not
     /// well-defined this will report an error and return -1.
     /// max indicates whether we want the max width or min width.
-    int widthBits(const IR::Type* type, const IR::Node* errorPosition, bool max);
+    int widthBits(const IR::Type *type, const IR::Node *errorPosition, bool max);
 
     /// True is type occupies no storage.
-    bool typeIsEmpty(const IR::Type* type) const;
+    bool typeIsEmpty(const IR::Type *type) const;
 };
 }  // namespace P4
 
-#endif /* _FRONTENDS_P4_TYPEMAP_H_ */
+#endif /* FRONTENDS_P4_TYPEMAP_H_ */

@@ -14,33 +14,34 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_P4_PARSERCALLGRAPH_H_
-#define _FRONTENDS_P4_PARSERCALLGRAPH_H_
+#ifndef FRONTENDS_P4_PARSERCALLGRAPH_H_
+#define FRONTENDS_P4_PARSERCALLGRAPH_H_
 
-#include "ir/ir.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/callGraph.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
-typedef CallGraph<const IR::ParserState*> ParserCallGraph;
+typedef CallGraph<const IR::ParserState *> ParserCallGraph;
 
 /** @brief Builds a CallGraph of ParserState nodes.
-  */
+ */
 class ComputeParserCG : public Inspector {
-    const ReferenceMap* refMap;
-    ParserCallGraph* transitions;
+    const ReferenceMap *refMap;
+    ParserCallGraph *transitions;
 
  public:
-    ComputeParserCG(const ReferenceMap* refMap, /* out */ParserCallGraph* transitions) :
-            refMap(refMap), transitions(transitions) {
-        CHECK_NULL(refMap); CHECK_NULL(transitions);
+    ComputeParserCG(const ReferenceMap *refMap, /* out */ ParserCallGraph *transitions)
+        : refMap(refMap), transitions(transitions) {
+        CHECK_NULL(refMap);
+        CHECK_NULL(transitions);
         setName("ComputeParserCG");
     }
-    bool preorder(const IR::PathExpression* expression) override;
-    void postorder(const IR::SelectExpression* expression) override;
+    bool preorder(const IR::PathExpression *expression) override;
+    void postorder(const IR::SelectExpression *expression) override;
 };
 
 }  // namespace P4
 
-#endif /* _FRONTENDS_P4_PARSERCALLGRAPH_H_ */
+#endif /* FRONTENDS_P4_PARSERCALLGRAPH_H_ */

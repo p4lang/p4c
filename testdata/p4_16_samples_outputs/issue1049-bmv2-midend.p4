@@ -2,7 +2,6 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<32> IPv4Address;
 header ethernet_t {
     bit<48> dstAddr;
     bit<48> srcAddr;
@@ -10,18 +9,18 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     totalLen;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     fragOffset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdrChecksum;
-    IPv4Address srcAddr;
-    IPv4Address dstAddr;
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<8>  diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
 }
 
 struct headers {
@@ -68,7 +67,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     @name("cIngress.guh") table guh_0 {
         key = {
-            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr") ;
+            hdr.ipv4.dstAddr: exact @name("hdr.ipv4.dstAddr");
         }
         actions = {
             hash_drop_decision();
@@ -77,8 +76,8 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     @name("cIngress.debug_table") table debug_table_0 {
         key = {
-            meta._mystruct1_hash10    : exact @name("meta.mystruct1.hash1") ;
-            meta._mystruct1_hash_drop1: exact @name("meta.mystruct1.hash_drop") ;
+            meta._mystruct1_hash10    : exact @name("meta.mystruct1.hash1");
+            meta._mystruct1_hash_drop1: exact @name("meta.mystruct1.hash_drop");
         }
         actions = {
             NoAction_1();
@@ -139,4 +138,3 @@ control DeparserI(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(parserI(), verifyChecksum(), cIngress(), cEgress(), updateChecksum(), DeparserI()) main;
-

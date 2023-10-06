@@ -1,0 +1,35 @@
+#!/bin/bash -x
+
+set -e
+
+TC="tc"
+$TC p4template create pipeline/global_action_example_02 pipeid 1 numtables 2
+
+$TC p4template create action/global_action_example_02/drop actid 1
+$TC p4template update action/global_action_example_02/drop state active
+
+$TC p4template create action/global_action_example_02/ingress/send_nh actid 2 \
+	param port_id type dev \
+	param dmac type macaddr \
+	param smac type macaddr
+$TC p4template update action/global_action_example_02/ingress/send_nh state active
+
+$TC p4template create action/global_action_example_02/ingress/drop actid 3
+$TC p4template update action/global_action_example_02/ingress/drop state active
+
+$TC p4template create table/global_action_example_02/ingress/nh_table \
+	tblid 1 \
+	type exact \
+	keysz 32 nummasks 8 tentries 262144 \
+	table_acts act name global_action_example_02/ingress/send_nh \
+	act name global_action_example_02/drop
+$TC p4template update table/global_action_example_02/ingress/nh_table default_miss_action permissions 0x109 action global_action_example_02/drop
+
+$TC p4template create table/global_action_example_02/ingress/nh_table2 \
+	tblid 2 \
+	type exact \
+	keysz 32 nummasks 8 tentries 262144 \
+	table_acts act name global_action_example_02/ingress/send_nh \
+	act name global_action_example_02/ingress/drop
+$TC p4template update table/global_action_example_02/ingress/nh_table2 default_miss_action permissions 0x109 action global_action_example_02/ingress/drop
+$TC p4template update pipeline/global_action_example_02 state ready

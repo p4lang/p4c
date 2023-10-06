@@ -14,32 +14,34 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_P4_SIMPLIFYSWITCH_H_
-#define _FRONTENDS_P4_SIMPLIFYSWITCH_H_
+#ifndef FRONTENDS_P4_SIMPLIFYSWITCH_H_
+#define FRONTENDS_P4_SIMPLIFYSWITCH_H_
 
-#include "ir/ir.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
 /** @brief Simplify select and switch statements that have constant arguments.
  */
 class DoSimplifySwitch : public Transform {
-    TypeMap* typeMap;
+    TypeMap *typeMap;
 
-    bool matches(const IR::Expression* left, const IR::Expression* right) const;
+    bool matches(const IR::Expression *left, const IR::Expression *right) const;
+
  public:
-    explicit DoSimplifySwitch(TypeMap* typeMap): typeMap(typeMap) {
-        setName("DoSimplifySwitch"); CHECK_NULL(typeMap);
+    explicit DoSimplifySwitch(TypeMap *typeMap) : typeMap(typeMap) {
+        setName("DoSimplifySwitch");
+        CHECK_NULL(typeMap);
     }
 
-    const IR::Node* postorder(IR::SwitchStatement* stat) override;
+    const IR::Node *postorder(IR::SwitchStatement *stat) override;
 };
 
 class SimplifySwitch : public PassManager {
  public:
-    SimplifySwitch(ReferenceMap* refMap, TypeMap* typeMap) {
+    SimplifySwitch(ReferenceMap *refMap, TypeMap *typeMap) {
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DoSimplifySwitch(typeMap));
         setName("SimplifySwitch");
@@ -48,4 +50,4 @@ class SimplifySwitch : public PassManager {
 
 }  // namespace P4
 
-#endif /* _FRONTENDS_P4_SIMPLIFYSWITCH_H_ */
+#endif /* FRONTENDS_P4_SIMPLIFYSWITCH_H_ */

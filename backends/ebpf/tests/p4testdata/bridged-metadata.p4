@@ -83,7 +83,7 @@ control ingress(inout headers hdr,
                 inout psa_ingress_output_metadata_t ostd)
 {
     apply {
-        send_to_port(ostd, (PortId_t) 5);
+        send_to_port(ostd, (PortId_t) PORT1);
         hdr.bridged_metadata.setValid();
         hdr.bridged_metadata.drop = 0;
         if (hdr.ethernet.dstAddr == 0xffffffffffff) {

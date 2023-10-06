@@ -55,4 +55,3 @@ control TestDeparser(packet_out b, in headers_t hdr) {
 }
 
 V1Switch<headers_t, metadata_t>(TestParser(), TestVerifyChecksum(), TestIngress(), TestEgress(), TestComputeChecksum(), TestDeparser()) main;
-

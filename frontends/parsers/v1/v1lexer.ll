@@ -1,7 +1,7 @@
 %{
 #include "frontends/common/constantParsing.h"
 #include "frontends/parsers/parserDriver.h"
-#include "frontends/parsers/v1/v1lexer.hpp"
+#include "frontends/parsers/v1/v1lexer_internal.hpp"
 #include "frontends/parsers/v1/v1parser.hpp"
 #include "lib/stringref.h"
 
@@ -20,8 +20,10 @@ using Parser = V1::V1Parser;
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #pragma GCC diagnostic ignored "-Wtautological-undefined-compare"
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 #ifdef __clang__
 #pragma clang diagnostic ignored "-Wnull-conversion"
+#pragma clang diagnostic ignored "-Wregister"
 #endif
 
 %}

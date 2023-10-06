@@ -14,13 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_P4_ACTIONSINLINING_H_
-#define _FRONTENDS_P4_ACTIONSINLINING_H_
+#ifndef FRONTENDS_P4_ACTIONSINLINING_H_
+#define FRONTENDS_P4_ACTIONSINLINING_H_
 
-#include "ir/ir.h"
+#include "commonInlining.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/unusedDeclarations.h"
-#include "commonInlining.h"
+#include "ir/ir.h"
 
 namespace P4 {
 
@@ -29,45 +29,52 @@ typedef SimpleInlineWorkList<IR::P4Action, IR::MethodCallStatement, ActionCallIn
 typedef SimpleInlineList<IR::P4Action, ActionCallInfo, AInlineWorkList> ActionsInlineList;
 
 class DiscoverActionsInlining : public Inspector {
-    ActionsInlineList* toInline;  // output
-    P4::ReferenceMap*  refMap;    // input
-    P4::TypeMap*       typeMap;   // input
+    ActionsInlineList *toInline;  // output
+    P4::ReferenceMap *refMap;     // input
+    P4::TypeMap *typeMap;         // input
  public:
-    DiscoverActionsInlining(ActionsInlineList* toInline,
-                            P4::ReferenceMap* refMap,
-                            P4::TypeMap* typeMap) :
-            toInline(toInline), refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(toInline); CHECK_NULL(refMap); CHECK_NULL(typeMap);
-        setName("DiscoverActionsInlining"); }
-    bool preorder(const IR::P4Parser*) override { return false; }  // skip
-    void postorder(const IR::MethodCallStatement* mcs) override;
+    DiscoverActionsInlining(ActionsInlineList *toInline, P4::ReferenceMap *refMap,
+                            P4::TypeMap *typeMap)
+        : toInline(toInline), refMap(refMap), typeMap(typeMap) {
+        CHECK_NULL(toInline);
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
+        setName("DiscoverActionsInlining");
+    }
+    bool preorder(const IR::P4Parser *) override { return false; }  // skip
+    void postorder(const IR::MethodCallStatement *mcs) override;
 };
 
 // General-purpose actions inliner.
 class ActionsInliner : public AbstractInliner<ActionsInlineList, AInlineWorkList> {
-    P4::ReferenceMap* refMap;
-    std::map<const IR::MethodCallStatement*, const IR::P4Action*>* replMap;
+    P4::ReferenceMap *refMap;
+    std::map<const IR::MethodCallStatement *, const IR::P4Action *> *replMap;
+
  public:
-    explicit ActionsInliner(bool isv1) : refMap(new P4::ReferenceMap()), replMap(nullptr)
-    { refMap->setIsV1(isv1); }
-    Visitor::profile_t init_apply(const IR::Node* node) override;
-    const IR::Node* preorder(IR::P4Parser* cont) override
-    { prune(); return cont; }  // skip
-    const IR::Node* preorder(IR::P4Action* action) override;
-    const IR::Node* postorder(IR::P4Action* action) override;
-    const IR::Node* preorder(IR::MethodCallStatement* statement) override;
+    explicit ActionsInliner(bool isv1) : refMap(new P4::ReferenceMap()), replMap(nullptr) {
+        refMap->setIsV1(isv1);
+    }
+    Visitor::profile_t init_apply(const IR::Node *node) override;
+    const IR::Node *preorder(IR::P4Parser *cont) override {
+        prune();
+        return cont;
+    }  // skip
+    const IR::Node *preorder(IR::P4Action *action) override;
+    const IR::Node *postorder(IR::P4Action *action) override;
+    const IR::Node *preorder(IR::MethodCallStatement *statement) override;
 };
 
 typedef InlineDriver<ActionsInlineList, AInlineWorkList> InlineActionsDriver;
 
 class InlineActions : public PassManager {
     ActionsInlineList actionsToInline;
+
  public:
-    InlineActions(ReferenceMap* refMap, TypeMap* typeMap) {
+    InlineActions(ReferenceMap *refMap, TypeMap *typeMap) {
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DiscoverActionsInlining(&actionsToInline, refMap, typeMap));
-        passes.push_back(new InlineActionsDriver(&actionsToInline,
-                                                 new ActionsInliner(refMap->isV1())));
+        passes.push_back(
+            new InlineActionsDriver(&actionsToInline, new ActionsInliner(refMap->isV1())));
         passes.push_back(new RemoveAllUnusedDeclarations(refMap));
         setName("InlineActions");
     }
@@ -79,19 +86,20 @@ namespace P4_14 {
 
 /// Special inliner which works directly on P4-14 representation
 class InlineActions : public Transform {
-    const IR::V1Program    *global;
+    const IR::V1Program *global;
     class SubstActionArgs : public Transform {
         const IR::ActionFunction *function;
         const IR::Primitive *callsite;
         const IR::Node *postorder(IR::ActionArg *arg) override {
             for (unsigned i = 0; i < function->args.size(); ++i)
-                if (function->args[i] == getOriginal())
-                    return callsite->operands[i];
+                if (function->args[i] == getOriginal()) return callsite->operands[i];
             BUG("Action arg not argument of action");
-            return arg; }
+            return arg;
+        }
+
      public:
         SubstActionArgs(const IR::ActionFunction *f, const IR::Primitive *c)
-        : function(f), callsite(c) {}
+            : function(f), callsite(c) {}
     };
     const IR::V1Program *preorder(IR::V1Program *gl) override { return global = gl; }
     const IR::Node *preorder(IR::Primitive *p) override {
@@ -100,9 +108,10 @@ class InlineActions : public Transform {
             saa.setCalledBy(this);
             return af->action.clone()->apply(saa);
         }
-        return p; }
+        return p;
+    }
 };
 
 }  // namespace P4_14
 
-#endif /* _FRONTENDS_P4_ACTIONSINLINING_H_ */
+#endif /* FRONTENDS_P4_ACTIONSINLINING_H_ */
