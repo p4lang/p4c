@@ -150,9 +150,9 @@ void warning(const int kind, const char *format, Args... args) {
 }
 
 /// Report info messages of type kind. Requires that the node argument have source info.
-template<class T,
-         typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
-         class... Args>
+template <class T,
+          typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
+          class... Args>
 void info(const int kind, const char *format, const T *node, Args... args) {
     auto &context = BaseCompileContext::get();
     auto action = context.getDefaultInfoDiagnosticAction();
@@ -160,16 +160,16 @@ void info(const int kind, const char *format, const T *node, Args... args) {
 }
 
 /// The const ref variant of the above
-template<class T,
-         typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
-         class... Args>
+template <class T,
+          typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
+          class... Args>
 void info(const int kind, const char *format, const T &node, Args... args) {
     ::info(kind, format, &node, std::forward<Args>(args)...);
 }
 
 /// Report info messages of type kind, for messages that do not have a node.
 /// These will not be filtered
-template<typename... Args>
+template <typename... Args>
 void info(const int kind, const char *format, Args... args) {
     auto &context = BaseCompileContext::get();
     auto action = context.getDefaultInfoDiagnosticAction();

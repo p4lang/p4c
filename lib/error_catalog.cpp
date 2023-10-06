@@ -118,4 +118,4 @@ std::map<int, cstring> ErrorCatalog::errorCatalog = {
     {ErrorType::WARN_ENTRIES_OUT_OF_ORDER, "entries_out_of_priority_order"},
 
     // Info messages
-    { ErrorType::INFO_INFERRED,          "inferred" }};
+    {ErrorType::INFO_INFERRED, "inferred"}};

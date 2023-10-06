@@ -206,13 +206,11 @@ ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
         "--Winfo", "diagnostic",
         [](const char *diagnostic) {
             if (diagnostic) {
-                P4CContext::get().setDiagnosticAction(diagnostic,
-                                                      DiagnosticAction::Info);
+                P4CContext::get().setDiagnosticAction(diagnostic, DiagnosticAction::Info);
             }
             return true;
         },
-        "Report an info message for a compiler diagnostic.",
-        OptionFlags::OptionalArgument);
+        "Report an info message for a compiler diagnostic.", OptionFlags::OptionalArgument);
     registerOption(
         "--Wwarn", "diagnostic",
         [](const char *diagnostic) {

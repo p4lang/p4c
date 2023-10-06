@@ -82,7 +82,7 @@ class ErrorType {
 
     // -------- Info messages -------------
     // info messages as initially defined with a format string
-    static const int INFO_INFERRED;           // information inferred by compiler
+    static const int INFO_INFERRED;  // information inferred by compiler
 
     static const int INFO_MAX_INFOS;
 };

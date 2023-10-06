@@ -37,8 +37,8 @@ enum class DiagnosticAction {
 class ErrorReporter {
  protected:
     unsigned int infoCount;
-    unsigned int errorCount;
     unsigned int warningCount;
+    unsigned int errorCount;
     unsigned int maxErrorCount;  /// the maximum number of errors that we print before fail
 
     std::ostream *outputstream;
