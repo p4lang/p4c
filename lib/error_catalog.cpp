@@ -63,6 +63,10 @@ const int ErrorType::WARN_UNINITIALIZED_USE = 1019;
 const int ErrorType::WARN_INVALID_HEADER    = 1020;
 const int ErrorType::WARN_MAX_WARNINGS      = 2142;
 
+// ------ Info message -----------
+const int ErrorType::INFO_INFERRED          = WARN_MAX_WARNINGS + 1;
+const int ErrorType::INFO_MAX_INFOS         = 3999;
+
 // map from errorCode to ErrorSig
 std::map<int, cstring> ErrorCatalog::errorCatalog = {
     // Errors
@@ -104,5 +108,8 @@ std::map<int, cstring> ErrorCatalog::errorCatalog = {
     { ErrorType::WARN_UNINITIALIZED_USE, "uninitialized_use"},
     { ErrorType::WARN_UNINITIALIZED_OUT_PARAM,     "uninitialized_out_param"},
     { ErrorType::WARN_IGNORE,            "ignore"},
-    { ErrorType::WARN_INVALID_HEADER,    "invalid_header" }
+    { ErrorType::WARN_INVALID_HEADER,    "invalid_header" },
+
+    // Info messages
+    { ErrorType::INFO_INFERRED,          "inferred" }
 };

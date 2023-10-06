@@ -24,6 +24,7 @@ limitations under the License.
 /// An action to take when a diagnostic message is triggered.
 enum class DiagnosticAction {
     Ignore,  /// Take no action and continue compilation.
+    Info,    /// Print an info message and continue compilation.
     Warn,    /// Print a warning and continue compilation.
     Error    /// Print an error and signal that compilation should be aborted.
 };
@@ -70,9 +71,11 @@ class ErrorReporter {
 
  public:
     ErrorReporter()
-        : errorCount(0),
+        : infoCount(0),
           warningCount(0),
+          errorCount(0),
           maxErrorCount(20),
+          defaultInfoDiagnosticAction(DiagnosticAction::Info),
           defaultWarningDiagnosticAction(DiagnosticAction::Warn)
     { outputstream = &std::cerr; }
 
@@ -135,7 +138,14 @@ class ErrorReporter {
         if (action == DiagnosticAction::Ignore) return;
 
         ErrorMessage::MessageType msgType = ErrorMessage::MessageType::None;
-        if (action == DiagnosticAction::Warn) {
+        if (action == DiagnosticAction::Info) {
+            // Avoid burying errors in a pile of info messages:
+            // don't emit any more info messages if we've emitted errors.
+            if (errorCount > 0) return;
+
+            infoCount++;
+            msgType = ErrorMessage::MessageType::Info;
+        } else if (action == DiagnosticAction::Warn) {
             // Avoid burying errors in a pile of warnings: don't emit any more warnings if we've
             // emitted errors.
             if (errorCount > 0) return;
@@ -169,9 +179,11 @@ class ErrorReporter {
 
     unsigned getWarningCount() const { return warningCount; }
 
+    unsigned getInfoCount() const { return infoCount; }
+
     /// @return the number of diagnostics (warnings and errors) encountered
     /// in the current CompileContext.
-    unsigned getDiagnosticCount() const { return errorCount + warningCount; }
+    unsigned getDiagnosticCount() const { return errorCount + warningCount + infoCount; }
 
     void setOutputStream(std::ostream* stream) { outputstream = stream; }
 
@@ -241,10 +253,22 @@ class ErrorReporter {
         defaultWarningDiagnosticAction = action;
     }
 
+    /// @return the default diagnostic action for calls to `::info()`.
+    DiagnosticAction getDefaultInfoDiagnosticAction() { return defaultInfoDiagnosticAction; }
+
+    /// set the default diagnostic action for calls to `::info()`.
+    void setDefaultInfoDiagnosticAction(DiagnosticAction action) {
+        defaultInfoDiagnosticAction = action;
+    }
+
  private:
-    unsigned errorCount;
+    unsigned infoCount;
     unsigned warningCount;
+    unsigned errorCount;
     unsigned maxErrorCount;  /// the maximum number of errors that we print before fail
+
+    /// The default diagnostic action for calls to `::info()`.
+    DiagnosticAction defaultInfoDiagnosticAction;
 
     /// The default diagnostic action for calls to `::warning()`.
     DiagnosticAction defaultWarningDiagnosticAction;

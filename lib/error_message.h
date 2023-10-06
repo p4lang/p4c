@@ -34,7 +34,7 @@ limitations under the License.
  *  directly and those uses need to call toString() on returned object.
  */
 struct ErrorMessage {
-    enum class MessageType : std::size_t { None, Error, Warning };
+    enum class MessageType : std::size_t { None, Error, Warning, Info };
 
     MessageType type = MessageType::None;
     std::string prefix = "";  /// Typically error/warning type from catalog

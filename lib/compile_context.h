@@ -95,6 +95,9 @@ class BaseCompileContext : public ICompileContext {
     /// @return the error reporter for this compilation context.
     virtual ErrorReporter& errorReporter();
 
+    /// @return the default diagnostic action for calls to `::info()`.
+    virtual DiagnosticAction getDefaultInfoDiagnosticAction();
+
     /// @return the default diagnostic action for calls to `::warning()`.
     virtual DiagnosticAction getDefaultWarningDiagnosticAction();
 

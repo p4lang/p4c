@@ -75,6 +75,12 @@ class ErrorType {
     static const int WARN_INVALID_HEADER;     // access to fields of an invalid header
 
     static const int WARN_MAX_WARNINGS;
+
+    // -------- Info messages -------------
+    // info messages as initially defined with a format string
+    static const int INFO_INFERRED;           // information inferred by compiler
+
+    static const int INFO_MAX_INFOS;
 };
 
 class ErrorCatalog {
