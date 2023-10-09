@@ -114,9 +114,6 @@ bool SymbolicEnv::isSymbolicValue(const IR::Node *node) {
                isSymbolicValue(unary->expr);
     }
     if (const auto *binary = expr->to<IR::Operation_Binary>()) {
-        if (binary->is<IR::ArrayIndex>()) {
-            return isSymbolicValue(binary->right);
-        }
         return (binary->is<IR::Add>() || binary->is<IR::Sub>() || binary->is<IR::Mul>() ||
                 binary->is<IR::Div>() || binary->is<IR::Mod>() || binary->is<IR::Equ>() ||
                 binary->is<IR::Neq>() || binary->is<IR::Lss>() || binary->is<IR::Leq>() ||
