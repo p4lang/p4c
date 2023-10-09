@@ -103,7 +103,7 @@ class EBPFTarget:
         if returncode != testutils.SUCCESS:
             testutils.log.error("Failed to compile the P4 program.")
             # If the compiler crashed fail the test
-            if "Compiler Bug" in out:
+            if out is not None and "Compiler Bug" in out:
                 sys.exit(testutils.FAILURE)
 
         # Check if we expect the p4 compilation of the p4 file to fail
@@ -114,7 +114,7 @@ class EBPFTarget:
                 returncode = testutils.FAILURE
             else:
                 returncode = testutils.SUCCESS
-        return returncode, expected_error
+        return returncode, expected_error, out
 
     def _write_pcap_files(self, iface_pkts_map):
         """Writes the collected packets to their respective interfaces.
