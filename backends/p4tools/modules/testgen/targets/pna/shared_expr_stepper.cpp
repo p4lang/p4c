@@ -12,8 +12,8 @@
 #include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/irutils.h"
+#include "ir/solver.h"
 #include "lib/cstring.h"
-#include "lib/solver.h"
 
 #include "backends/p4tools/modules/testgen/core/externs.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"

@@ -13,9 +13,9 @@
 #include "ir/id.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
+#include "ir/solver.h"
 #include "lib/cstring.h"
 #include "lib/ordered_map.h"
-#include "lib/solver.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/cmd_stepper.h"
