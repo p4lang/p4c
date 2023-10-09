@@ -178,17 +178,38 @@ def run_test(options, argv):
     if options.extern:
         argv.append("--emit-externs")
     # Compile the p4 file to the specified target
-    result, expected_error = ebpf.compile_p4(argv)
+    result, expected_error, out = ebpf.compile_p4(argv)
 
     # Compile and run the generated output
-    if result == testutils.SUCCESS and not expected_error:
-        # If no empty.stf present, don't try to run the model at all
-        if not os.path.isfile(testfile):
-            msg = "No stf file present!"
-            testutils.log.info(msg)
-            result = testutils.SUCCESS
-        else:
-            result = run_model(ebpf, testfile)
+    if result == testutils.SUCCESS:
+        if not expected_error:
+            # If no empty.stf present, don't try to run the model at all
+            if not os.path.isfile(testfile):
+                msg = "No stf file present!"
+                testutils.log.info(msg)
+                result = testutils.SUCCESS
+            else:
+                result = run_model(ebpf, testfile)
+        else:  # Expected error, check output matches
+            exp_file = options.p4filename.replace("_errors/", "_errors_outputs/", 1) + "-stderr"
+            with open(exp_file, 'r') as f:
+                exp_stderr = f.read().strip()
+            # Output will have full path which differs
+            out = out.replace(options.p4filename, basename).strip()
+            # Output will have one extra line with make error, trim that
+            out = out[: len(exp_stderr)]
+            if exp_stderr != out:
+                testutils.log.error("Error output mismatch!")
+                testutils.log.error(f"Expected output({len(exp_stderr)}):\n{exp_stderr}")
+                testutils.log.error(f"Actual output({len(out)}):\n{out}")
+                for i in range(0, min(len(exp_stderr), len(out))):
+                    if exp_stderr[i] != out[i]:
+                        testutils.log.error(
+                            f"First mismatch at index {i}: {exp_stderr[i]} vs {out[i]}"
+                        )
+                        break
+                testutils.log.error("Failing test.")
+                result = testutils.FAILURE
     # Only if we did not expect it to fail
     if result != testutils.SUCCESS:
         return result
