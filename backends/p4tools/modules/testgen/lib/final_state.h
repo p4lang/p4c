@@ -7,7 +7,7 @@
 
 #include "backends/p4tools/common/lib/model.h"
 #include "backends/p4tools/common/lib/trace_event.h"
-#include "lib/solver.h"
+#include "ir/solver.h"
 #include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/lib/concolic.h"

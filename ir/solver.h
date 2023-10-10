@@ -1,5 +1,5 @@
-#ifndef LIB_SOLVER_H_
-#define LIB_SOLVER_H_
+#ifndef IR_SOLVER_H_
+#define IR_SOLVER_H_
 
 #include <optional>
 #include <vector>
@@ -72,4 +72,4 @@ class AbstractSolver : public ICastable {
     }
 };
 
-#endif /* LIB_SOLVER_H_ */
+#endif /* IR_SOLVER_H_ */

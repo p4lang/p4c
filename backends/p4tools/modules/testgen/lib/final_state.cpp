@@ -14,9 +14,9 @@
 #include "frontends/p4/optimizeExpressions.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
+#include "ir/solver.h"
 #include "lib/error.h"
 #include "lib/null.h"
-#include "lib/solver.h"
 
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/packet_vars.h"

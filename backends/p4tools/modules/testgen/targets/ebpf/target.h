@@ -7,7 +7,7 @@
 
 #include "backends/p4tools/common/lib/arch_spec.h"
 #include "ir/ir.h"
-#include "lib/solver.h"
+#include "ir/solver.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"

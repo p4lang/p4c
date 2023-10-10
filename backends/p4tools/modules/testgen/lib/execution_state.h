@@ -20,9 +20,9 @@
 #include "ir/declaration.h"
 #include "ir/ir.h"
 #include "ir/node.h"
+#include "ir/solver.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
-#include "lib/solver.h"
 #include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
