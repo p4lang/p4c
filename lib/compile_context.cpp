@@ -67,6 +67,10 @@ BaseCompileContext::BaseCompileContext(const BaseCompileContext &other)
 
 ErrorReporter &BaseCompileContext::errorReporter() { return errorReporterInstance; }
 
+DiagnosticAction BaseCompileContext::getDefaultInfoDiagnosticAction() {
+    return DiagnosticAction::Info;
+}
+
 DiagnosticAction BaseCompileContext::getDefaultWarningDiagnosticAction() {
     return DiagnosticAction::Warn;
 }

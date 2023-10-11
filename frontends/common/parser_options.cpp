@@ -203,18 +203,27 @@ ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
         "diagnostic is specified.",
         OptionFlags::OptionalArgument);
     registerOption(
+        "--Winfo", "diagnostic",
+        [](const char *diagnostic) {
+            if (diagnostic) {
+                P4CContext::get().setDiagnosticAction(diagnostic, DiagnosticAction::Info);
+            }
+            return true;
+        },
+        "Report an info message for a compiler diagnostic.", OptionFlags::OptionalArgument);
+    registerOption(
         "--Wwarn", "diagnostic",
         [](const char *diagnostic) {
             if (diagnostic) {
                 P4CContext::get().setDiagnosticAction(diagnostic, DiagnosticAction::Warn);
             } else {
                 auto action = DiagnosticAction::Warn;
-                P4CContext::get().setDefaultWarningDiagnosticAction(action);
+                P4CContext::get().setDefaultInfoDiagnosticAction(action);
             }
             return true;
         },
-        "Report a warning for a compiler diagnostic, or treat all warnings "
-        "as warnings (the default) if no diagnostic is specified.",
+        "Report a warning for a compiler diagnostic, or treat all info messages as "
+        "warnings if no diagnostic is specified.",
         OptionFlags::OptionalArgument);
     registerOption(
         "--Werror", "diagnostic",
