@@ -105,4 +105,22 @@ jobs:
         working-directory: p4c/build
         run: |
              sudo $IPDK_INSTALL_DIR/sbin/set_hugepages.sh
-             sudo -E ctest --output-on-failure --schedule-random -R dpdk-ptf*
+             sudo -E ctest --output-on-failure --schedule-random -R testgen-p4c-pna-ptf -V
+
+      - name: 'Get ERROR log'
+        continue-on-error: true
+        working-directory: /var/log/stratum
+        run: |
+          cat *ERROR
+          
+      - name: 'Get INFO log'
+        continue-on-error: true
+        working-directory: /var/log/stratum
+        run: |
+          cat *INFO
+          
+      - name: 'Get WARNING log'
+        continue-on-error: true
+        working-directory: /var/log/stratum
+        run: |
+          cat *WARNING

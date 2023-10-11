@@ -81,6 +81,8 @@ PTF_ADDR: str = "0.0.0.0"
 def is_port_alive(ns, port) -> bool:
     command = f"sudo ip netns exec {ns} netstat -tuln"
     out, _ = testutils.exec_process(command, timeout=10, capture_output=True)
+    if not out:
+        return False
     if str(port) in out:
         return True
     return False
@@ -202,6 +204,7 @@ class PTFTestEnv:
             f"{self.options.ipdk_install_dir}/sbin/infrap4d "
             f"-grpc_open_insecure_mode={insecure_mode} "
             f"-log_dir={log_dir} "
+            f"-detach=false "
             f"-dpdk_sde_install={options.ipdk_install_dir} "
             f"-dpdk_infrap4d_cfg={options.ipdk_install_dir}/share/stratum/dpdk/dpdk_skip_p4.conf "
             f"-chassis_config_file={options.ipdk_install_dir}/share/stratum/dpdk/dpdk_port_config.pb.txt "
@@ -214,6 +217,18 @@ class PTFTestEnv:
             cnt += 1
             testutils.log.info("Cannot connect to Infrap4d: " + str(cnt) + " try")
         if not is_port_alive(self.bridge.ns_name, GRPC_PORT):
+            # Print the log files.
+            error_file = log_dir.joinpath("infrap4d.ERROR")
+            if error_file.exists():
+                testutils.log.error("######## Infrap4d Error ######## \n%s", error_file.read_text())
+            info_file = log_dir.joinpath("infrap4d.INFO")
+            if info_file.exists():
+                testutils.log.error("######## Infrap4d Info ######## \n%s", info_file.read_text())
+            warning_file = log_dir.joinpath("infrap4d.WARNING")
+            if warning_file.exists():
+                testutils.log.error(
+                    "######## Infrap4d Warning ######## \n%s", warning_file.read_text()
+                )
             return testutils.FAILURE
         return self.switch_proc
 
@@ -235,16 +250,16 @@ class PTFTestEnv:
         # Load pipeline.
         # NOTE: in generated PTF tests, the pipelines are loaded in individual test cases.
         # This should be commented when working with Testgen.
-        command = (
-            f"{self.options.ipdk_install_dir}/bin/p4rt-ctl "
-            "set-pipe br0 "
-            f"{conf_bin} "
-            f"{info_name} "
-        )
-        returncode = self.bridge.ns_exec(command, timeout=30)
-        if returncode != testutils.SUCCESS:
-            testutils.log.error("Failed to load pipeline")
-            return returncode
+        # command = (
+        #     f"{self.options.ipdk_install_dir}/bin/p4rt-ctl "
+        #     "set-pipe br0 "
+        #     f"{conf_bin} "
+        #     f"{info_name} "
+        # )
+        # returncode = self.bridge.ns_exec(command, timeout=30)
+        # if returncode != testutils.SUCCESS:
+        #     testutils.log.error("Failed to load pipeline")
+        #     return returncode
         return testutils.SUCCESS
 
     def run_ptf(self, grpc_port: int, info_name, conf_bin) -> int:
@@ -276,11 +291,6 @@ def run_test(options: Options) -> int:
         proc_env_vars["LD_LIBRARY_PATH"] += f"{options.ld_library_path}"
     else:
         proc_env_vars["LD_LIBRARY_PATH"] = f"{options.ld_library_path}"
-    if "PATH" in proc_env_vars:
-        proc_env_vars["PATH"] += f"{options.ipdk_install_dir}/bin"
-    else:
-        proc_env_vars["PATH"] = f"{options.ipdk_install_dir}/bin"
-    proc_env_vars["PATH"] += f"{options.ipdk_install_dir}/sbin"
     proc_env_vars["SDE_INSTALL"] = f"{options.ipdk_install_dir}"
 
     # Define the test environment and compile the P4 target

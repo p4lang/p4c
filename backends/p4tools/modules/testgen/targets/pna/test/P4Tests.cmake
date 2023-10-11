@@ -26,10 +26,9 @@ set(P4C_PNA_TEST_SUITES_P416 ${PNA_TESTS} ${CUSTOM_PNA_TESTS})
 option(P4TOOLS_TESTGEN_PNA_TEST_METADATA "Run tests on the Metadata test back end" OFF)
 
 # check for infrap4d
-find_program (INFRAP4D infrap4d
-        PATHS $ENV{IPDK_RECIPE} )
+find_program(INFRAP4D infrap4d PATHS ${IPDK_INSTALL_DIR}/sbin)
 # SDE_INSTALL is the path to the dpdk-target install directory
-if(TRUE AND INFRAP4D AND DEFINED ENV{SDE_INSTALL})
+if(INFRAP4D AND EXISTS ${IPDK_INSTALL_DIR})
   set(DPDK_ENV_SETUP TRUE)
 else()
   set(DPDK_ENV_SETUP FALSE)

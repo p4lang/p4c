@@ -22,9 +22,7 @@ macro(check_pna_with_ptf testfile testfolder p4test)
   file(APPEND ${testfile} "do\n")
   file(APPEND ${testfile} "\techo \"Found \${item}\"\n")
   file(APPEND ${testfile} "\t python3 ${__dpdk_runner} -tf \${item} ${P4C_SOURCE_DIR} \
-      --ipdk-recipe=$ENV{IPDK_RECIPE}  \
-      --sde-install=$ENV{SDE_INSTALL} \
-      --ld-library-path=$ENV{LD_LIBRARY_PATH} \
+      --ipdk-install-dir=${IPDK_INSTALL_DIR} \
       -ll=DEBUG ${p4test}\n")
   file(APPEND ${testfile} "done\n")
 endmacro(check_pna_with_ptf)
