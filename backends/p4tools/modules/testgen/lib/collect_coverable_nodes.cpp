@@ -128,6 +128,8 @@ const P4::Coverage::CoverageSet &CoverableNodesScanner::getCoverableNodes() {
 
 void CoverableNodesScanner::updateNodeCoverage(const IR::Node *node,
                                                P4::Coverage::CoverageSet &nodes) {
+    CHECK_NULL(node);
+
     static NodeCache CACHED_NODES;
     // If the node is already in the cache, return it.
     auto it = CACHED_NODES.find(node);
