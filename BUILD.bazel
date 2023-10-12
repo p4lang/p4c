@@ -1,9 +1,19 @@
+load("@rules_license//rules:license.bzl", "license")
 load("//:bazel/flex.bzl", "genlex")
 load("//:bazel/bison.bzl", "genyacc")
 
 package(
+    default_applicable_licenses = ["//:license"],
     default_visibility = ["//visibility:public"],
-    licenses = ["notice"],
+)
+
+license(
+    name = "license",
+    package_name = "com_github_p4lang_p4c",
+    license_kinds = [
+        "@rules_license//licenses/spdx:Apache-2.0",
+    ],
+    license_text = "LICENSE",
 )
 
 filegroup(

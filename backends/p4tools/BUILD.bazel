@@ -3,13 +3,12 @@
 exports_files(["p4tools.def"])
 
 package(
+    default_applicable_licenses = ["//:license"],
     licenses = ["notice"],
 )
 
 # Extend the list with the name of the desired targets (in "modules/testgen/targets/).
-TESTGEN_TARGETS = [
-    "bmv2",
-]
+TESTGEN_TARGETS = ["bmv2"]
 
 genrule(
     name = "version",
@@ -72,10 +71,14 @@ genrule(
 filegroup(
     name = "testgen_targets_src",
     srcs =
-        glob(["modules/testgen/targets/%s/**/*.h" % target for target in TESTGEN_TARGETS],
-             exclude = ["modules/testgen/targets/%s/test/**" % target for target in TESTGEN_TARGETS]) +
-        glob(["modules/testgen/targets/%s/**/*.cpp" % target for target in TESTGEN_TARGETS],
-             exclude = ["modules/testgen/targets/%s/test/**" % target for target in TESTGEN_TARGETS]),
+        glob(
+            ["modules/testgen/targets/%s/**/*.h" % target for target in TESTGEN_TARGETS],
+            exclude = ["modules/testgen/targets/%s/test/**" % target for target in TESTGEN_TARGETS],
+        ) +
+        glob(
+            ["modules/testgen/targets/%s/**/*.cpp" % target for target in TESTGEN_TARGETS],
+            exclude = ["modules/testgen/targets/%s/test/**" % target for target in TESTGEN_TARGETS],
+        ),
 )
 
 cc_library(
