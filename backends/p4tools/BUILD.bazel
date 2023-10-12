@@ -1,6 +1,6 @@
 # The BUILD file for p4testgen, inspired by the tool's cmake build rules.
 
-exports_files(["p4tools.def"])
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -9,6 +9,12 @@ package(
 
 # Extend the list with the name of the desired targets (in "modules/testgen/targets/).
 TESTGEN_TARGETS = ["bmv2"]
+
+filegroup(
+    name = "ir_extension",
+    srcs = ["p4tools.def"],
+    visibility = ["//visibility:public"],  # So p4c can compile these.
+)
 
 genrule(
     name = "version",
@@ -134,5 +140,12 @@ cc_binary(
         "@boost//:multiprecision",
         "@boost//:filesystem",
         "//:lib",
+    ],
+)
+
+build_test(
+    name = "p4testgen_build_test",
+    targets = [
+        ":p4testgen",
     ],
 )
