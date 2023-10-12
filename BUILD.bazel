@@ -157,6 +157,7 @@ filegroup(
         "backends/bmv2/bmv2.def",
         "backends/dpdk/dpdk.def",
         "//backends/p4tools:ir_extension",
+        "@com_github_p4lang_p4c_extension//:ir_extension",
     ],
 )
 
