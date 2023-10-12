@@ -542,14 +542,14 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
             helper = "load_byte";
             loadSize = 8;
         } else if (wordsToRead <= 2) {
-            helper = "load_half";
+            helper = "load_half_ne";
             loadSize = 16;
         } else if (wordsToRead <= 4) {
-            helper = "load_word";
+            helper = "load_word_ne";
             loadSize = 32;
         } else {
             if (wordsToRead > 64) BUG("Unexpected width %d", widthToExtract);
-            helper = "load_dword";
+            helper = "load_dword_ne";
             loadSize = 64;
         }
 
@@ -606,7 +606,7 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
         if (shift == 0)
             helper = "load_byte";
         else
-            helper = "load_half";
+            helper = "load_half_ne";
         auto bt = EBPF::EBPFTypeFactory::instance->create(IR::Type_Bits::get(8));
         unsigned bytes = ROUNDUP(widthToExtract, 8);
         for (unsigned i = 0; i < bytes; i++) {
