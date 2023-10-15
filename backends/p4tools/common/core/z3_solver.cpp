@@ -156,7 +156,7 @@ z3::sort Z3Solver::toSort(const IR::Type *type) {
         return ctx().bv_sort(bits->width_bits());
     }
 
-    if (const auto *string = type->to<IR::Type_String>()) {
+    if (type->is<IR::Type_String>()) {
         return ctx().string_sort();
     }
 
