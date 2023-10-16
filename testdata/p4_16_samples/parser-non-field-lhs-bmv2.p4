@@ -1,4 +1,4 @@
-// Test that non-field-access assignment LHS works in parser block on BMv2.
+// Test that non-field LHS works in parser on BMv2.
 
 #include <core.p4>
 #include <v1model.p4>
