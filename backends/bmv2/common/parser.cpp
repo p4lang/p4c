@@ -25,6 +25,41 @@ limitations under the License.
 
 namespace BMV2 {
 
+/*
+Determines whether an lvalue type is also a field expr.
+
+In BMv2, field expr will be converted to type "field" instead of "expression".
+
+Production rule for lvalue in P4:
+
+lvalue
+    : prefixedNonTypeName                { $$ = new IR::PathExpression($1); }
+    | THIS                               { $$ = new IR::This(@1); }
+    | lvalue dot_name %prec DOT          { $$ = new IR::Member(@1 + @2, $1, *$2); }
+    | lvalue "[" expression "]"          { $$ = new IR::ArrayIndex(@1 + @4, $1, $3); }
+    | lvalue "[" expression ":" expression "]" { $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
+    ;
+
+Production rule for field expr in BMv2:
+
+field_expr
+    : prefixedNonTypeName
+    : field_expr dot_name
+    : field_expr "[" constant "]"
+*/
+bool isFieldExpr(const IR::Type *type) {
+    if (type->is<IR::PathExpression>()) return true;
+    if (type->is<IR::Member>()) {
+        auto mem = type->to<IR::Member>();
+        return isFieldExpr(mem->expr->type);
+    }
+    if (type->is<IR::ArrayIndex>()) {
+        auto array_index = type->to<IR::ArrayIndex>();
+        return isFieldExpr(array_index->left->type) && array_index->right->is<IR::Constant>();
+    }
+    return false;
+}
+
 cstring ParserConverter::jsonAssignment(const IR::Type *type, bool inParser) {
     if (!inParser && type->is<IR::Type_Varbits>()) return "assign_VL";
     if (type->is<IR::Type_HeaderUnion>()) return "assign_union";
@@ -36,9 +71,10 @@ cstring ParserConverter::jsonAssignment(const IR::Type *type, bool inParser) {
         else
             return "assign_header_stack";
     }
-    if (inParser)
+    if (inParser && isFieldExpr(type))
         // Unfortunately set can do some things that assign cannot,
         // e.g., handle lookahead on the RHS.
+        // One limitation of set is that its LHS has to be a field expr.
         return "set";
     else
         return "assign";
@@ -109,8 +145,13 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
         auto type = ctxt->typeMap->getType(assign->left, true);
         cstring operation = jsonAssignment(type, true);
         result->emplace("op", operation);
-        auto l = ctxt->conv->convertLeftValue(assign->left);
         bool convertBool = type->is<IR::Type_Boolean>();
+        Util::IJson *l;
+        if (ctxt->conv->isArrayIndexRuntime(assign->left)) {
+            l = ctxt->conv->convert(assign->left, true, true, convertBool);
+        } else {
+            l = ctxt->conv->convertLeftValue(assign->left);
+        }
         auto r = ctxt->conv->convert(assign->right, true, true, convertBool);
         params->append(l);
         params->append(r);
