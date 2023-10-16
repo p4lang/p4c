@@ -26,9 +26,9 @@ limitations under the License.
 namespace BMV2 {
 
 /*
-Determines whether an lvalue type is also a field expr.
+Determines whether an lvalue is also a field expr.
 
-In BMv2, field expr will be converted to type "field" instead of "expression".
+In BMv2 JSON, field expr will be converted to type "field" instead of "expression".
 
 Production rule for lvalue in P4:
 
@@ -40,7 +40,7 @@ lvalue
     | lvalue "[" expression ":" expression "]" { $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
     ;
 
-Production rule for field expr in BMv2:
+Explanatory (not definitive) production rule for field expr in BMv2:
 
 field_expr
     : prefixedNonTypeName

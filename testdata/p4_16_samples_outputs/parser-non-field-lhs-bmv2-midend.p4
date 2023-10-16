@@ -17,30 +17,29 @@ struct metadata_t {
 parser TestParser(packet_in pkt, out header_t hdr, inout metadata_t meta, inout standard_metadata_t std_meta) {
     state start {
         hdr.hs[meta.hs_next_index].setValid();
-        hdr.hs[meta.hs_next_index] = (test_h){field = 8w0};
-        meta.hs_next_index = meta.hs_next_index + 2w1;
-        transition p1;
-    }
-    state p1 {
-        hdr.hs[hdr.hs[0].field + 8w1].setValid();
-        hdr.hs[hdr.hs[0].field + 8w1] = (test_h){field = 8w1};
-        meta.hs_next_index = meta.hs_next_index + 2w1;
-        transition accept;
-    }
-}
-
-control TestControl(inout header_t hdr, inout metadata_t meta, inout standard_metadata_t std_meta) {
-    apply {
         hdr.hs[meta.hs_next_index].setValid();
-        hdr.hs[meta.hs_next_index] = (test_h){field = 8w3};
-        hdr.hs[hdr.hs[2].field + 8w1].setValid();
-        hdr.hs[hdr.hs[2].field + 8w1] = (test_h){field = 8w3};
+        hdr.hs[meta.hs_next_index].field = 8w0;
+        meta.hs_next_index = meta.hs_next_index + 2w1;
+        hdr.hs[meta.hs_next_index].setValid();
+        hdr.hs[meta.hs_next_index].field = 8w1;
+        meta.hs_next_index = meta.hs_next_index + 2w1;
+        hdr.hs[meta.hs_next_index].setValid();
+        hdr.hs[meta.hs_next_index].field = 8w0;
+        hdr.hs[meta.hs_next_index].field[2:0] = 3w2;
+        meta.hs_next_index = meta.hs_next_index + 2w1;
+        hdr.hs[hdr.hs[0].field + 8w3].setValid();
+        hdr.hs[hdr.hs[1].field + 8w2].field = 8w0;
+        hdr.hs[hdr.hs[2].field + 8w1].field[3:0] = 4w3;
+        transition accept;
     }
 }
 
 control DefaultDeparser(packet_out pkt, in header_t hdr) {
     apply {
-        pkt.emit<header_t>(hdr);
+        pkt.emit<test_h>(hdr.hs[0]);
+        pkt.emit<test_h>(hdr.hs[1]);
+        pkt.emit<test_h>(hdr.hs[2]);
+        pkt.emit<test_h>(hdr.hs[3]);
     }
 }
 
@@ -54,4 +53,4 @@ control EmptyChecksum(inout header_t hdr, inout metadata_t meta) {
     }
 }
 
-V1Switch<header_t, metadata_t>(TestParser(), EmptyChecksum(), TestControl(), EmptyControl(), EmptyChecksum(), DefaultDeparser()) main;
+V1Switch<header_t, metadata_t>(TestParser(), EmptyChecksum(), EmptyControl(), EmptyControl(), EmptyChecksum(), DefaultDeparser()) main;

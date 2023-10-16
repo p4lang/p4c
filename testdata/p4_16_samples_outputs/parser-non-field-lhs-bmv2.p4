@@ -19,22 +19,26 @@ parser TestParser(packet_in pkt, out header_t hdr, inout metadata_t meta, inout 
         hdr.hs[meta.hs_next_index].setValid();
         hdr.hs[meta.hs_next_index] = { 8w0 };
         meta.hs_next_index = meta.hs_next_index + 1;
-        transition p1;
+        transition hs_1;
     }
-    state p1 {
-        hdr.hs[hdr.hs[0].field + 1].setValid();
-        hdr.hs[hdr.hs[0].field + 1] = { 8w1 };
-        meta.hs_next_index = meta.hs_next_index + 1;
-        transition accept;
-    }
-}
-
-control TestControl(inout header_t hdr, inout metadata_t meta, inout standard_metadata_t std_meta) {
-    apply {
+    state hs_1 {
         hdr.hs[meta.hs_next_index].setValid();
-        hdr.hs[meta.hs_next_index] = { 8w3 };
-        hdr.hs[hdr.hs[2].field + 1].setValid();
-        hdr.hs[hdr.hs[2].field + 1] = { 8w3 };
+        hdr.hs[meta.hs_next_index].field = 8w1;
+        meta.hs_next_index = meta.hs_next_index + 1;
+        transition hs_2;
+    }
+    state hs_2 {
+        hdr.hs[meta.hs_next_index].setValid();
+        hdr.hs[meta.hs_next_index].field = 8w0;
+        hdr.hs[meta.hs_next_index].field[2:0] = 3w2;
+        meta.hs_next_index = meta.hs_next_index + 1;
+        transition hs_3;
+    }
+    state hs_3 {
+        hdr.hs[hdr.hs[0].field + 3].setValid();
+        hdr.hs[hdr.hs[1].field + 2].field = 8w0;
+        hdr.hs[hdr.hs[2].field + 1].field[3:0] = 4w3;
+        transition accept;
     }
 }
 
@@ -54,4 +58,4 @@ control EmptyChecksum(inout header_t hdr, inout metadata_t meta) {
     }
 }
 
-V1Switch(TestParser(), EmptyChecksum(), TestControl(), EmptyControl(), EmptyChecksum(), DefaultDeparser()) main;
+V1Switch(TestParser(), EmptyChecksum(), EmptyControl(), EmptyControl(), EmptyChecksum(), DefaultDeparser()) main;
