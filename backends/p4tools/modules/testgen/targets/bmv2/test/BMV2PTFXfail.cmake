@@ -109,14 +109,6 @@ p4tools_add_xfail_reason(
   issue907-bmv2.p4
 )
 
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-ptf"
-  "Compiler Bug: Exiting with SIGSEGV"
-  # Potentially resulting from cloning uninitialized SymbolicInteger.
-  # See https://github.com/p4lang/p4c/pull/4196 for more details.
-  parser-non-field-lhs-bmv2.p4
-)
-
 ####################################################################################################
 # 3. WONTFIX
 # These are failures that can not be solved by changing P4Testgen
