@@ -16,6 +16,7 @@ struct metadata_t {
 
 parser TestParser(packet_in pkt, out header_t hdr, inout metadata_t meta, inout standard_metadata_t std_meta) {
     state start {
+        meta.hs_next_index = 2w0;
         hdr.hs[meta.hs_next_index].setValid();
         hdr.hs[meta.hs_next_index].setValid();
         hdr.hs[meta.hs_next_index] = (test_h){field = 8w0};
@@ -25,7 +26,7 @@ parser TestParser(packet_in pkt, out header_t hdr, inout metadata_t meta, inout 
         meta.hs_next_index = meta.hs_next_index + 2w1;
         hdr.hs[meta.hs_next_index].setValid();
         hdr.hs[meta.hs_next_index].field = 8w0;
-        hdr.hs[meta.hs_next_index].field[2:0] = 3w2;
+        hdr.hs[meta.hs_next_index].field[3:0] = 4w2;
         meta.hs_next_index = meta.hs_next_index + 2w1;
         hdr.hs[hdr.hs[0].field + 8w3].setValid();
         hdr.hs[hdr.hs[1].field + 8w2].field = 8w0;

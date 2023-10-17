@@ -20,6 +20,7 @@ parser TestParser(packet_in pkt,
                   inout metadata_t meta,
                   inout standard_metadata_t std_meta) {
     state start {
+        meta.hs_next_index = 0;
         hdr.hs[meta.hs_next_index].setValid();
         hdr.hs[meta.hs_next_index] = {8w0};
         meta.hs_next_index = meta.hs_next_index + 1;
@@ -36,7 +37,7 @@ parser TestParser(packet_in pkt,
     state hs_2 {
         hdr.hs[meta.hs_next_index].setValid();
         hdr.hs[meta.hs_next_index].field = 8w0;
-        hdr.hs[meta.hs_next_index].field[2:0] = 3w2;
+        hdr.hs[meta.hs_next_index].field[3:0] = 4w2;
         meta.hs_next_index = meta.hs_next_index + 1;
         transition hs_3;
     }
