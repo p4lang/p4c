@@ -252,7 +252,8 @@ bool CmdStepper::preorder(const IR::IfStatement *ifStatement) {
         // Some path selection strategies depend on looking ahead and collecting potential
         // nodes. If that is the case, apply the CoverableNodesScanner visitor.
         P4::Coverage::CoverageSet coveredNodes;
-        if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
+        if (ifStatement->ifFalse != nullptr &&
+            requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
             auto collector = CoverableNodesScanner(state);
             collector.updateNodeCoverage(ifStatement->ifFalse, coveredNodes);
         }
