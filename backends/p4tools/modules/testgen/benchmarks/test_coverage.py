@@ -85,11 +85,10 @@ PARSER.add_argument(
     help="Which test back end to generate tests for.",
 )
 PARSER.add_argument(
-    "-m",
+    "-lm",
     "--large-memory",
     dest="large_memory",
     action="store_true",
-    type=bool,
     help="Run tests with a large memory configuration.",
 )
 PARSER.add_argument(
@@ -189,7 +188,7 @@ def parse_coverage_and_timestamps(test_files, parse_type):
                         covstr = line.replace('metadata: "Current node coverage: ', "")
                         covstr = covstr.replace('"\n', "")
                     elif parse_type == "PTF":
-                        covstr = line.replace("Current statement coverage: ", "")
+                        covstr = line.replace("Current node coverage: ", "")
                     else:
                         covstr = line.replace("# Current node coverage: ", "")
                     covstr = covstr.replace("\n", "")
@@ -216,7 +215,7 @@ def convert_timestamps_to_timedelta(timestamps):
 
 def run_strategies_for_max_tests(options, test_args):
     cmd = (
-        f"{options.p4testgen_bin} --target {options.target} --arch {options.arch} --std p4-16"
+        f"{options.p4testgen_bin} --target {options.target} --arch {options.arch}"
         f" -I/p4/p4c/build/p4include --test-backend {options.test_backend}"
         f" --seed {test_args.seed} --print-performance-report"
         f" --max-tests {options.max_tests} --out-dir {test_args.test_dir}"
@@ -284,7 +283,10 @@ def main(args, extra_args):
     options.max_tests = args.max_tests
     options.out_dir = Path(args.out_dir).absolute()
     options.seed = args.seed
-    options.p4testgen_bin = Path(testutils.check_if_file(args.p4testgen_bin))
+    p4testgen_bin = testutils.check_if_file(args.p4testgen_bin)
+    if not p4testgen_bin:
+        return
+    options.p4testgen_bin = Path(p4testgen_bin)
     options.test_backend = args.test_backend.upper()
     options.extra_args = extra_args
     options.test_mode = args.test_mode.upper()

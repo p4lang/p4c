@@ -17,7 +17,7 @@ TOOLS_PATH = FILE_DIR.joinpath("../../../../../tools")
 sys.path.append(str(TOOLS_PATH))
 import testutils
 
-OUTPUT_DIR = Path(".")
+OUTPUT_DIR = Path("plots")
 
 PARSER = argparse.ArgumentParser()
 
@@ -26,7 +26,6 @@ PARSER.add_argument(
     "--input-dir",
     dest="input_dir",
     help="The folder containing measurement data.",
-    required=True,
 )
 
 PARSER.add_argument(
@@ -161,9 +160,13 @@ def main(args, extra_args):
     )
     plt.rcParams['pdf.fonttype'] = 42
     plt.rcParams['ps.fonttype'] = 42
-    print(plt.rcParams.keys())
+
+    testutils.check_and_create_dir(args.out_dir)
     plot_preconditions(args, extra_args)
-    plot_strategies(args, extra_args)
+    if args.input_dir:
+        plot_strategies(args, extra_args)
+    else:
+        print("No input directory provided. Not plotting coverage data.")
 
 
 if __name__ == "__main__":
