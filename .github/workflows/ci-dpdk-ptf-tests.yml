@@ -56,6 +56,17 @@ jobs:
              path: p4c
              submodules: recursive
 
+      - name: Check Transparent Hugepages
+        run: cat /sys/kernel/mm/transparent_hugepage/enabled
+
+      - name: Re-install Hugepages and disable Transparent Hugepages
+        run: |
+            sudo apt-get install libhugetlbfs-bin
+            sudo hugeadm --thp-never
+
+      - name: Check Transparent Hugepages again
+        run: cat /sys/kernel/mm/transparent_hugepage/enabled
+
       - name: 'Install DPDK dependencies'
         working-directory: p4sde/tools/setup
         run: |
@@ -105,7 +116,7 @@ jobs:
         working-directory: p4c/build
         run: |
              sudo $IPDK_INSTALL_DIR/sbin/set_hugepages.sh
-             sudo -E ctest --output-on-failure --schedule-random -R testgen-p4c-pna-ptf -V
+             sudo -E ctest --output-on-failure --schedule-random -R testgen-p4c-pna-ptf
 
       - name: 'Get ERROR log'
         continue-on-error: true
