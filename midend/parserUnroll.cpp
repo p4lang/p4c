@@ -175,7 +175,7 @@ class ParserStateRewriter : public Transform {
         if (!value->is<SymbolicInteger>()) return expression;
         if (!value->to<SymbolicInteger>()->isKnown()) {
             ::warning(ErrorType::ERR_INVALID,
-                      "ParserUnroll can't concretize uninitialized value:\n%1%", expression->right);
+                      "Uninitialized value prevents loop unrolling:\n%1%", expression->right);
             wasError = true;
             return expression;
         }
