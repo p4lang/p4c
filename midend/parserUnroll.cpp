@@ -174,9 +174,8 @@ class ParserStateRewriter : public Transform {
         auto *value = ev.evaluate(expression->right, false);
         if (!value->is<SymbolicInteger>()) return expression;
         if (!value->to<SymbolicInteger>()->isKnown()) {
-            ::warning(ErrorType::ERR_INVALID,
-                     "ParserUnroll can't conretize uninitialized value:\n%1%",
-                     expression->right);
+            ::warning(ErrorType::ERR_INVALID, "ParserUnroll can't conretize uninitialized value:\n%1%",
+                      expression->right);
             wasError = true;
             return expression;
         }
@@ -238,7 +237,7 @@ class ParserStateRewriter : public Transform {
     }
     inline size_t getIndex() { return currentIndex; }
     bool isOutOfBound() { return wasOutOfBound; }
-    bool checkError() {return wasError;}
+    bool checkError() { return wasError; }
 
  protected:
     const IR::Type *getTypeArray(const IR::Node *element) {
