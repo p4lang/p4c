@@ -153,7 +153,8 @@ bool ControlBodyTranslator::preorder(const IR::MethodCallExpression *expression)
 }
 
 void ControlBodyTranslator::compileEmitField(const IR::Expression *expr, cstring field,
-                                             unsigned alignment, EBPFType *type) {
+                                             unsigned hdrOffsetBits, EBPFType *type) {
+    unsigned alignment = hdrOffsetBits % 8;
     unsigned widthToEmit = type->as<IHasWidth>().widthInBits();
     cstring swap = "";
     if (widthToEmit == 16)
@@ -188,21 +189,21 @@ void ControlBodyTranslator::compileEmitField(const IR::Expression *expr, cstring
         BUG_CHECK((bitsToWrite > 0) && (bitsToWrite <= 8), "invalid bitsToWrite %d", bitsToWrite);
         builder->emitIndent();
         if (alignment == 0)
-            builder->appendFormat("write_byte(%s, BYTES(%s) + %d, (%s) << %d)",
-                                  program->packetStartVar.c_str(), program->offsetVar.c_str(), i,
+            builder->appendFormat("write_byte(%s, BYTES(%u) + %d, (%s) << %d)",
+                                  program->headerStartVar.c_str(), hdrOffsetBits, i,
                                   program->byteVar.c_str(), 8 - bitsToWrite);
         else  // FIXME change to use write_partial_ex
-            builder->appendFormat("write_partial(%s + BYTES(%s) + %d, %d, (%s) << %d)",
-                                  program->packetStartVar.c_str(), program->offsetVar.c_str(), i,
-                                  alignment, program->byteVar.c_str(), 8 - bitsToWrite);
+            builder->appendFormat("write_partial(%s + BYTES(%u) + %d, %d, (%s) << %d)",
+                                  program->headerStartVar.c_str(), hdrOffsetBits, i, alignment,
+                                  program->byteVar.c_str(), 8 - bitsToWrite);
         builder->endOfStatement(true);
         left -= bitsToWrite;
         bitsInCurrentByte -= bitsToWrite;
 
         if (bitsInCurrentByte > 0) {
             builder->emitIndent();
-            builder->appendFormat("write_byte(%s, BYTES(%s) + %d + 1, (%s << %d))",
-                                  program->packetStartVar.c_str(), program->offsetVar.c_str(), i,
+            builder->appendFormat("write_byte(%s, BYTES(%u) + %d + 1, (%s << %d))",
+                                  program->headerStartVar.c_str(), hdrOffsetBits, i,
                                   program->byteVar.c_str(), 8 - alignment % 8);
             builder->endOfStatement(true);
             left -= bitsInCurrentByte;
@@ -235,10 +236,17 @@ void ControlBodyTranslator::compileEmit(const IR::Vector<IR::Argument> *args) {
     builder->append(".ebpf_valid) ");
     builder->blockStart();
 
+    // We expect all headers to start on a byte boundary.
     unsigned width = ht->width_bits();
+    if (width % 8 != 0) {
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "Header %1% size %2% is not a multiple of 8 bits.", expr, width);
+        return;
+    }
+
     builder->emitIndent();
-    builder->appendFormat("if (%s < %s + BYTES(%s + %d)) ", program->packetEndVar.c_str(),
-                          program->packetStartVar.c_str(), program->offsetVar.c_str(), width);
+    builder->appendFormat("if (%s < %s + BYTES(%d)) ", program->packetEndVar.c_str(),
+                          program->headerStartVar.c_str(), width);
     builder->blockStart();
 
     builder->emitIndent();
@@ -250,7 +258,7 @@ void ControlBodyTranslator::compileEmit(const IR::Vector<IR::Argument> *args) {
     builder->newline();
     builder->blockEnd(true);
 
-    unsigned alignment = 0;
+    unsigned hdrOffsetBits = 0;
     for (auto f : ht->fields) {
         auto ftype = typeMap->getType(f);
         auto etype = EBPFTypeFactory::instance->create(ftype);
@@ -260,10 +268,14 @@ void ControlBodyTranslator::compileEmit(const IR::Vector<IR::Argument> *args) {
                     "Only headers with fixed widths supported %1%", f);
             return;
         }
-        compileEmitField(expr, f->name, alignment, etype);
-        alignment += et->widthInBits();
-        alignment %= 8;
+        compileEmitField(expr, f->name, hdrOffsetBits, etype);
+        hdrOffsetBits += et->widthInBits();
     }
+
+    // Increment header pointer
+    builder->emitIndent();
+    builder->appendFormat("%s += BYTES(%s);", program->headerStartVar.c_str(), width);
+    builder->newline();
 
     builder->blockEnd(true);
     return;

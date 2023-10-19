@@ -269,6 +269,9 @@ void EBPFProgram::emitLocalVariables(CodeBuilder *builder) {
                           builder->target->dataOffset(model.CPacketName.str()).c_str());
     builder->newline();
     builder->emitIndent();
+    builder->appendFormat("u8* %s = %s;", headerStartVar.c_str(), packetStartVar.c_str());
+    builder->newline();
+    builder->emitIndent();
     builder->appendFormat("void* %s = %s;", packetEndVar.c_str(),
                           builder->target->dataEnd(model.CPacketName.str()).c_str());
     builder->newline();
