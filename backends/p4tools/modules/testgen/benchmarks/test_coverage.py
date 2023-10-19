@@ -200,7 +200,7 @@ def collect_data_from_folder(input_dir, parse_type):
     if parse_type == "PTF":
         files = get_test_files(input_dir, "*.py")
     elif parse_type == "PROTOBUF":
-        files = get_test_files(input_dir, "*.proto")
+        files = get_test_files(input_dir, "*.txtpb")
     else:
         files = get_test_files(input_dir, "*.stf")
     return parse_coverage_and_timestamps(files, parse_type)
