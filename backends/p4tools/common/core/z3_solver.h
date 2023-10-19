@@ -11,10 +11,10 @@
 
 #include "ir/ir.h"
 #include "ir/json_generator.h"
+#include "ir/solver.h"
 #include "lib/cstring.h"
 #include "lib/ordered_map.h"
 #include "lib/safe_vector.h"
-#include "lib/solver.h"
 
 namespace P4Tools {
 

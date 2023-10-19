@@ -12,6 +12,11 @@ std::string ErrorMessage::getPrefix() const {
             p = "warning: ";
         else
             p = "[--Wwarn=" + p + "] warning: ";
+    } else if (type == MessageType::Info) {
+        if (p.empty())
+            p = "info: ";
+        else
+            p = "[--Winfo=" + p + "] info: ";
     }
     return p;
 }

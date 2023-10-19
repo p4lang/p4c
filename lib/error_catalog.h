@@ -79,6 +79,12 @@ class ErrorType {
     static const int WARN_ENTRIES_OUT_OF_ORDER;     // entries with priorities out of order
 
     static const int WARN_MAX_WARNINGS;
+
+    // -------- Info messages -------------
+    // info messages as initially defined with a format string
+    static const int INFO_INFERRED;  // information inferred by compiler
+
+    static const int INFO_MAX_INFOS;
 };
 
 class ErrorCatalog {

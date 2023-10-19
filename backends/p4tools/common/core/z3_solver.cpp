@@ -156,6 +156,10 @@ z3::sort Z3Solver::toSort(const IR::Type *type) {
         return ctx().bv_sort(bits->width_bits());
     }
 
+    if (type->is<IR::Type_String>()) {
+        return ctx().string_sort();
+    }
+
     BUG("Z3Solver: unimplemented type %1%: %2% ", type->node_type_name(), type);
 }
 

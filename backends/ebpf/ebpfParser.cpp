@@ -407,7 +407,14 @@ void StateTranslationVisitor::compileExtract(const IR::Expression *destination) 
         return;
     }
 
+    // We expect all headers to start on a byte boundary.
     unsigned width = ht->width_bits();
+    if ((width % 8) != 0) {
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "Header %1% size %2% is not a multiple of 8 bits.", destination, width);
+        return;
+    }
+
     auto program = state->parser->program;
 
     cstring offsetStr =

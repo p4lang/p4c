@@ -14,10 +14,10 @@
 #include "ir/declaration.h"
 #include "ir/irutils.h"
 #include "ir/node.h"
+#include "ir/solver.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"
 #include "lib/null.h"
-#include "lib/solver.h"
 #include "lib/source_file.h"
 #include "midend/coverage.h"
 #include "midend/saturationElim.h"
@@ -89,7 +89,17 @@ bool ExprStepper::preorder(const IR::Member *member) {
     return stepSymbolicValue(state.get(member));
 }
 
-bool ExprStepper::preorder(const IR::ArrayIndex *arr) { return stepSymbolicValue(state.get(arr)); }
+bool ExprStepper::preorder(const IR::ArrayIndex *arrIndex) {
+    if (!SymbolicEnv::isSymbolicValue(arrIndex->right)) {
+        return stepToSubexpr(arrIndex->right, result, state,
+                             [arrIndex](const Continuation::Parameter *v) {
+                                 auto *result = arrIndex->clone();
+                                 result->right = v->param;
+                                 return Continuation::Return(result);
+                             });
+    }
+    return stepSymbolicValue(state.get(arrIndex));
+}
 
 void ExprStepper::evalActionCall(const IR::P4Action *action, const IR::MethodCallExpression *call) {
     const auto *actionNameSpace = action->to<IR::INamespace>();

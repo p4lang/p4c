@@ -49,10 +49,12 @@ class LogPipe(threading.Thread):
         and start the thread
         """
         threading.Thread.__init__(self)
-        self.daemon = False
-        self.level = level
+        self.daemon: bool = False
+        self.level: int = level
         self.fd_read, self.fd_write = os.pipe()
         self.pipe_reader = os.fdopen(self.fd_read)
+        # We capture what we log to this string.
+        self.out: str = ""
         self.start()
 
     def fileno(self) -> int:
@@ -60,10 +62,10 @@ class LogPipe(threading.Thread):
         return self.fd_write
 
     def run(self) -> None:
-        """Run the thread, logging everything."""
+        """Run the thread, logging and record everything."""
         for line in iter(self.pipe_reader.readline, ""):
             log.log(self.level, line.strip("\n"))
-
+            self.out += line
         self.pipe_reader.close()
 
     def close(self) -> None:
@@ -216,6 +218,8 @@ def exec_process(args: str, **extra_args) -> ProcessResult:
         args = list(filter(None, args))
 
     # Set up log pipes for both stdout and stderr.
+    outpipe: Optional[LogPipe] = None
+    errpipe: Optional[LogPipe] = None
     if "capture_output" not in extra_args:
         if "stdout" not in extra_args:
             outpipe = LogPipe(logging.INFO)
@@ -225,10 +229,14 @@ def exec_process(args: str, **extra_args) -> ProcessResult:
             output_args["stderr"] = errpipe
     try:
         result = subprocess.run(args, check=True, **output_args)
-        out = result.stdout
+        if outpipe:
+            out = outpipe.out
+        else:
+            out = result.stdout
         returncode = result.returncode
     except subprocess.CalledProcessError as exception:
-        out = exception.stderr
+        if errpipe:
+            out = errpipe.out
         returncode = exception.returncode
         cmd = exception.cmd
         # Rejoin the list for better readability.
@@ -236,7 +244,8 @@ def exec_process(args: str, **extra_args) -> ProcessResult:
             cmd = " ".join(cmd)
         log.error('Error %s when executing "%s".', returncode, cmd)
     except subprocess.TimeoutExpired as exception:
-        out = exception.stderr
+        if errpipe:
+            out = errpipe.out
         returncode = FAILURE
         cmd = exception.cmd
         # Rejoin the list for better readability.
@@ -245,9 +254,9 @@ def exec_process(args: str, **extra_args) -> ProcessResult:
         log.error("Timed out when executing %s.", cmd)
     finally:
         if "capture_output" not in extra_args:
-            if "stdout" not in extra_args:
+            if outpipe:
                 outpipe.close()
-            if "stderr" not in extra_args:
+            if errpipe:
                 errpipe.close()
     return ProcessResult(out, returncode)
 

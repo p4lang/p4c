@@ -6,8 +6,8 @@
 
 #include "ir/id.h"
 #include "ir/ir.h"
+#include "ir/solver.h"
 #include "ir/vector.h"
-#include "lib/solver.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/expr_stepper.h"

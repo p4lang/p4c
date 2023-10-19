@@ -115,6 +115,16 @@ class P4CContext : public BaseCompileContext {
     /// @return the compiler options for this compilation context.
     virtual ParserOptions &options() = 0;
 
+    /// @return the default diagnostic action for calls to `::info()`.
+    DiagnosticAction getDefaultInfoDiagnosticAction() final {
+        return errorReporter().getDefaultInfoDiagnosticAction();
+    }
+
+    /// set the default diagnostic action for calls to `::info()`.
+    void setDefaultInfoDiagnosticAction(DiagnosticAction action) {
+        errorReporter().setDefaultInfoDiagnosticAction(action);
+    }
+
     /// @return the default diagnostic action for calls to `::warning()`.
     DiagnosticAction getDefaultWarningDiagnosticAction() final {
         return errorReporter().getDefaultWarningDiagnosticAction();

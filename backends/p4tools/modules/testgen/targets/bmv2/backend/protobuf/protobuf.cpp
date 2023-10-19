@@ -403,7 +403,7 @@ void Protobuf::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
     LOG5("Protobuf test back end: emitting testcase:" << std::setw(4) << dataJson);
     auto incrementedbasePath = basePath;
     incrementedbasePath.concat("_" + std::to_string(testId));
-    incrementedbasePath.replace_extension(".stf");
+    incrementedbasePath.replace_extension(".proto");
     auto protobufFileStream = std::ofstream(incrementedbasePath);
     inja::render_to(protobufFileStream, testCase, dataJson);
     protobufFileStream.flush();

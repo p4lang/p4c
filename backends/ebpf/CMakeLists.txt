@@ -182,6 +182,9 @@ set (EBPF_TEST_SUITES
 set (EBPF_KERNEL_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*_ebpf-kernel.p4"
   )
+set (EBPF_ERRORS_SUITES
+  "${P4C_SOURCE_DIR}/testdata/p4_16_ebpf_errors/*.p4"
+  )
 
 # determine the kernel version
 execute_process(COMMAND uname -r
@@ -247,6 +250,7 @@ endif()
 # Ideally, this is done via check for the python package
 p4c_add_tests("ebpf-bcc" ${EBPF_DRIVER_BCC} ${EBPF_TEST_SUITES} "${XFAIL_TESTS_BCC}")
 p4c_add_tests("ebpf" ${EBPF_DRIVER_TEST} ${EBPF_TEST_SUITES} "${XFAIL_TESTS_TEST}")
+p4c_add_tests("ebpf-errors" ${EBPF_DRIVER_TEST} ${EBPF_ERRORS_SUITES} "${XFAIL_TESTS_TEST}")
 
 # These are special tests with args that are not included in the default ebpf tests
 p4c_add_test_with_args("ebpf" ${EBPF_DRIVER_TEST} FALSE "testdata/p4_16_samples/ebpf_checksum_extern.p4" "testdata/p4_16_samples/ebpf_checksum_extern.p4" "--extern-file ${P4C_SOURCE_DIR}/testdata/extern_modules/extern-checksum-ebpf.c" "")
