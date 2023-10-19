@@ -14,17 +14,17 @@ See the License for the specific language governing permissions
 and limitations under the License.
 */
 
-#ifndef BACKENDS_TC_ADDEXTERNANNOTATIONS_H
-#define BACKENDS_TC_ADDEXTERNANNOTATIONS_H
+#ifndef BACKENDS_TC_ADDEXTERNANNOTATIONS_H_
+#define BACKENDS_TC_ADDEXTERNANNOTATIONS_H_
 
-#include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
 
 namespace TC {
 
 class AddExternAnnotations : public Transform {
-public:
+ public:
     struct Extern_field {
         cstring field_name;
         cstring annotation;
@@ -46,18 +46,17 @@ public:
     safe_vector<PNA_extern_struct *> new_pna_extern_structs;
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
+
  public:
-    AddExternAnnotations(P4::ReferenceMap *refMap,
-                           P4::TypeMap *typeMap)
+    AddExternAnnotations(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
         : refMap(refMap), typeMap(typeMap) {}
-    
+
     const IR::Node *postorder(IR::P4Program *program) override;
     const IR::Node *postorder(IR::Type_Extern *te) override;
-    const IR::Type_Method* GetAnnotatedType(const IR::Type_Method *type);
+    const IR::Type_Method *GetAnnotatedType(const IR::Type_Method *type);
     void GetExternStructures();
 };
 
-
-}
+}  // namespace TC
 
 #endif /* BACKENDS_TC_ADDEXTERNANNOTATIONS_H_ */

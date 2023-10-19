@@ -40,21 +40,14 @@ class ParseTCAnnotations : public P4::ParseAnnotations {
     static const cstring tc_numel;
     static const cstring tc_acl;
     ParseTCAnnotations()
-        : P4::ParseAnnotations("TC", true,
-                               {PARSE_EMPTY(default_hit), PARSE_EMPTY(default_hit_const),
-                                PARSE_CONSTANT_OR_STRING_LITERAL(tcType),
-                                PARSE_CONSTANT_OR_STRING_LITERAL(numMask),
-                                PARSE_EMPTY(tc_md_write),
-                                PARSE_EMPTY(tc_md_read),
-                                PARSE_EMPTY(tc_md_write),
-                                PARSE_EMPTY(tc_md_exec),
-                                PARSE_EMPTY(tc_ContrlPath),
-                                PARSE_EMPTY(tc_key),
-                                PARSE_EMPTY(tc_data),
-                                PARSE_EMPTY(tc_data_scalar),
-                                PARSE_EMPTY(tc_init_val),
-                                PARSE_EMPTY(tc_numel),
-                                PARSE(tc_acl, StringLiteral)}) {}
+        : P4::ParseAnnotations(
+              "TC", true,
+              {PARSE_EMPTY(default_hit), PARSE_EMPTY(default_hit_const),
+               PARSE_CONSTANT_OR_STRING_LITERAL(tcType), PARSE_CONSTANT_OR_STRING_LITERAL(numMask),
+               PARSE_EMPTY(tc_md_write), PARSE_EMPTY(tc_md_read), PARSE_EMPTY(tc_md_write),
+               PARSE_EMPTY(tc_md_exec), PARSE_EMPTY(tc_ContrlPath), PARSE_EMPTY(tc_key),
+               PARSE_EMPTY(tc_data), PARSE_EMPTY(tc_data_scalar), PARSE_EMPTY(tc_init_val),
+               PARSE_EMPTY(tc_numel), PARSE(tc_acl, StringLiteral)}) {}
 };
 
 }  // namespace TC
