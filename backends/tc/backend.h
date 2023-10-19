@@ -30,6 +30,7 @@ and limitations under the License.
 #include "pnaProgramStructure.h"
 #include "tcAnnotations.h"
 #include "tc_defines.h"
+#include "addExternAnnotations.h"
 
 namespace TC {
 
@@ -44,6 +45,19 @@ class PNAEbpfGenerator;
  */
 class ConvertToBackendIR : public Inspector {
  public:
+
+   struct ExternInstance {
+      int numelements;
+      ordered_map<cstring, cstring> type_per_field;
+      ordered_map<cstring, safe_vector<cstring>> annotation_per_field;
+   };
+   struct ExternBlock {
+      unsigned externId;
+      cstring control_name;
+      unsigned no_of_instances;
+      cstring permissions = "0x18A6";
+      safe_vector<struct ExternInstance *> eInstance;
+   };
     const IR::ToplevelBlock *tlb;
     IR::TCPipeline *tcPipeline;
     P4::ReferenceMap *refMap;
@@ -53,12 +67,16 @@ class ConvertToBackendIR : public Inspector {
     unsigned int actionCount = 0;
     unsigned int metadataCount = 0;
     unsigned int labelCount = 0;
+    unsigned int externCount = 0;
     cstring pipelineName = nullptr;
     cstring mainParserName = nullptr;
     ordered_map<cstring, const IR::P4Action *> actions;
     ordered_map<unsigned, cstring> tableIDList;
     ordered_map<unsigned, cstring> actionIDList;
     ordered_map<unsigned, unsigned> tableKeysizeList;
+    ordered_map<cstring, cstring> externAccessPermisson;
+    ordered_map<cstring, const IR::Type_Struct*> structPerExterns;
+    ordered_map<cstring, struct ExternBlock*> externsInfo;
 
  public:
     ConvertToBackendIR(const IR::ToplevelBlock *tlb, IR::TCPipeline *pipe, P4::ReferenceMap *refMap,
@@ -69,6 +87,11 @@ class ConvertToBackendIR : public Inspector {
     void postorder(const IR::P4Action *a) override;
     void postorder(const IR::P4Table *t) override;
     void postorder(const IR::P4Program *p) override;
+    void postorder(const IR::Declaration_Instance *d) override;
+    void postorder(const IR::Type_Struct *ts) override;
+    void postorder(const IR::Type_Extern *ext);
+    int getNumElemens(const IR::Type_Extern* extn, const IR::Declaration_Instance *decl);
+    unsigned GetAccessNumericValue(cstring access);
     bool isDuplicateOrNoAction(const IR::P4Action *action);
     void updateDefaultHitAction(const IR::P4Table *t, IR::TCTable *tdef);
     void updateDefaultMissAction(const IR::P4Table *t, IR::TCTable *tdef);
@@ -100,6 +123,7 @@ class Backend : public PassManager {
     IR::TCPipeline *pipeline = new IR::TCPipeline();
     TC::ConvertToBackendIR *tcIR;
     TC::IntrospectionGenerator *genIJ;
+    TC::AddExternAnnotations *extAnno;
     TC::ParseTCAnnotations *parseTCAnno;
     const IR::ToplevelBlock *top = nullptr;
     EbpfOptions ebpfOption;

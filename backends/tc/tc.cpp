@@ -89,7 +89,17 @@ int main(int argc, char *const argv[]) {
         return 1;
     }
     TC::Backend backend(toplevel, &midEnd.refMap, &midEnd.typeMap, options);
-    if (!backend.process()) return 1;
+
+    try {
+        backend.addDebugHook(hook);
+        backend.process();
+    } catch (const Util::P4CExceptionBase &bug) {
+        std::cerr << bug.what() << std::endl;
+        return 1;
+    }
+    if (::errorCount() > 0) {
+        return 1;
+    }
 
     if (!options.introspecFile.isNullOrEmpty()) {
         std::ostream *outIntro = openFile(options.introspecFile, false);
