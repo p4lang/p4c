@@ -1,5 +1,6 @@
 if(ENABLE_TESTING)
   # Include the test subdirectory.
+  message("-- Adding p4testgen pna test suite")
   include(test/P4Tests.cmake)
 endif()
 

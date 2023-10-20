@@ -1,4 +1,4 @@
-name: "p4c-dpdk-ptf-tests"
+name: "p4c-dpdk-ptf-p4testgen-tests"
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - main
       
 concurrency:
-  # if workflow for PR or push is already running stop it, and start new one
+  # If workflow for PR or push is already running stop it, and start new one.
   group: p4c_dpdk_ptf_ci-${{ github.ref }}
   cancel-in-progress: true
 
@@ -30,27 +30,27 @@ jobs:
   build_p4dpdk_ubuntu:
     runs-on: ubuntu-22.04
     steps:
-      - name: 'ccache'
+      - name: ccache
         uses: hendrikmuhs/ccache-action@v1
         with:
           key: ptf-${{ runner.os }}-test
           max-size: 1000M
 
-      - name: 'Checkout DPDK-target'
+      - name: Checkout DPDK-target
         uses: actions/checkout@v3
         with:
              repository: p4lang/p4-dpdk-target
              path: p4sde
-             submodules: 'recursive'
+             submodules: recursive
              
-      - name: 'Checkout ipdk-recipe'
+      - name: Checkout ipdk-recipe
         uses: actions/checkout@v3
         with:
              repository: ipdk-io/networking-recipe
              path: ipdk.recipe
-             submodules: 'recursive'
+             submodules: recursive
 
-      - name: checkout P4C
+      - name: Checkout P4C
         uses: actions/checkout@v3
         with:
              path: p4c
@@ -61,13 +61,13 @@ jobs:
             sudo apt-get install libhugetlbfs-bin
             sudo hugeadm --thp-madvise
 
-      - name: 'Install DPDK dependencies'
+      - name: Install DPDK dependencies
         working-directory: p4sde/tools/setup
         run: |
               sudo apt update -y
               python3 install_dep.py
 
-      - name: 'Compile p4sde dpdk target'
+      - name: Compile p4sde dpdk target
         working-directory: p4sde
         run: |
              mkdir ${GITHUB_WORKSPACE}/install
@@ -76,7 +76,7 @@ jobs:
              make 
              make install
 
-      - name: 'Build infrap4d dependencies'
+      - name: Build infrap4d dependencies
         working-directory: ipdk.recipe
         run: |
              echo "Install infrap4d dependencies"
@@ -87,12 +87,12 @@ jobs:
              cmake -B build -DCMAKE_INSTALL_PREFIX="$IPDK_INSTALL_DIR"
              cmake --build build 
 
-      - name: 'Build infrap4d'
+      - name: Build infrap4d
         working-directory: ipdk.recipe
         run: |
              ./make-all.sh --target=dpdk --no-krnlmon --no-ovs -S $IPDK_INSTALL_DIR -D $IPDK_INSTALL_DIR --prefix=$IPDK_INSTALL_DIR
 
-      - name: Build p4c with only the DPDK backend
+      - name: Build P4C with only the DPDK backend
         working-directory: p4c
         run: |
           export CMAKE_FLAGS+="-DENABLE_BMV2=OFF "
@@ -106,26 +106,8 @@ jobs:
           export CMAKE_FLAGS+="-DIPDK_INSTALL_DIR=$IPDK_INSTALL_DIR "
           tools/ci-build.sh
 
-      - name: 'Run DPDK PTF tests'
+      - name: Run DPDK PTF tests using P4Testgen
         working-directory: p4c/build
         run: |
              sudo $IPDK_INSTALL_DIR/sbin/set_hugepages.sh
              sudo -E ctest -j1 --output-on-failure --schedule-random -R testgen-p4c-pna-ptf
-
-      - name: 'Get ERROR log'
-        continue-on-error: true
-        working-directory: /var/log/stratum
-        run: |
-          cat *ERROR
-          
-      - name: 'Get INFO log'
-        continue-on-error: true
-        working-directory: /var/log/stratum
-        run: |
-          cat *INFO
-          
-      - name: 'Get WARNING log'
-        continue-on-error: true
-        working-directory: /var/log/stratum
-        run: |
-          cat *WARNING

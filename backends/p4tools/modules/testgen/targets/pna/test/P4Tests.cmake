@@ -42,9 +42,9 @@ endif()
 # PTF
 # TODO: The PTF test back end currently does not support packet sizes over 12000 bits, so we limit
 # the range (at least it is the case in Bmv2).
-# check for infrap4d
+# Check for infrap4d.
 find_program(INFRAP4D infrap4d PATHS ${IPDK_INSTALL_DIR}/sbin)
-# SDE_INSTALL is the path to the dpdk-target install directory
+# SDE_INSTALL is the path to the dpdk-target install directory.
 if(P4TOOLS_TESTGEN_PNA_TEST_PTF AND INFRAP4D AND EXISTS ${IPDK_INSTALL_DIR})
   set(PNA_DPDK_SEARCH_PATTERNS "include.*dpdk/pna.p4")
   set(
