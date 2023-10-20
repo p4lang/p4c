@@ -157,14 +157,12 @@ def process_file(options, argv):
 
     if options.verbose:
         print("Writing temporary files into ", tmpdir)
-    ppfile = tmpdir + "/" + base + ".template"
-    cfile = tmpdir + "/"
-    introfile = tmpdir + "/" + base + "_introspection.json"
+    outputfolder = tmpdir + "/"
     stderr = tmpdir + "/" + basename + "-stderr"
 
     if not os.path.isfile(options.p4filename):
         raise Exception("No such file " + options.p4filename)
-    args = ["./p4c-pna-p4tc", "-o", ppfile, "-c", cfile, "-i", introfile]
+    args = ["./p4c-pna-p4tc", "-o", outputfolder, "-c", outputfolder, "-i", outputfolder]
     args.extend(argv)
     print("input: ", options, args, timeout, stderr)
     result = run_timeout(options, args, timeout, stderr)

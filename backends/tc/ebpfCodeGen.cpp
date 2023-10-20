@@ -23,7 +23,7 @@ void PNAEbpfGenerator::emitPNAIncludes(EBPF::CodeBuilder *builder) const {
     builder->newline();
     cstring headerFile = getProgramName() + "_parser.h";
     builder->appendFormat("#include \"%s\"", headerFile);
-    builder->endOfStatement(true);
+    builder->newline();
     builder->appendLine("#include <stdbool.h>");
     builder->appendLine("#include <linux/if_ether.h>");
     builder->appendLine("#include \"pna.h\"");
@@ -349,6 +349,12 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
         builder->spc();
 
         builder->blockStart();
+
+        builder->emitIndent();
+        builder->appendFormat(
+            "struct pna_global_metadata *%s = (struct pna_global_metadata *) skb->cb;",
+            compilerGlobalMetadata);
+        builder->newline();
 
         emitHeaderInstances(builder);
         builder->newline();

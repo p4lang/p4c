@@ -1,5 +1,5 @@
 
-#include "simple_lpm_example_parser.h";
+#include "simple_lpm_example_parser.h"
 #include <stdbool.h>
 #include <linux/if_ether.h>
 #include "pna.h"

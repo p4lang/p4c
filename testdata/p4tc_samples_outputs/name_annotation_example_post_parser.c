@@ -1,5 +1,5 @@
 
-#include "name_annotation_example_parser.h";
+#include "name_annotation_example_parser.h"
 #include <stdbool.h>
 #include <linux/if_ether.h>
 #include "pna.h"

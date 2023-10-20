@@ -16,6 +16,8 @@ and limitations under the License.
 
 #include "backend.h"
 
+#include <filesystem>
+
 #include "backends/ebpf/ebpfOptions.h"
 #include "backends/ebpf/target.h"
 
@@ -114,18 +116,24 @@ bool Backend::ebpfCodeGen(P4::ReferenceMap *refMapEBPF, P4::TypeMap *typeMapEBPF
 }
 
 void Backend::serialize() const {
-    if (!options.outputFile.isNullOrEmpty()) {
-        auto outstream = openFile(options.outputFile, false);
-        if (outstream != nullptr) {
-            *outstream << pipeline->toString();
-            outstream->flush();
+    cstring progName = tcIR->getPipelineName();
+    cstring outputFile = progName + ".template";
+    if (!options.outputFolder.isNullOrEmpty()) {
+        if (options.outputFolder.get(options.outputFolder.size() - 1) != '/') {
+            options.outputFolder = options.outputFolder + '/';
         }
+        outputFile = options.outputFolder + outputFile;
     }
-    auto progName = options.file;
-    auto filename = progName.findlast('/');
-    if (filename) progName = filename;
-    progName = progName.exceptLast(3);
-    progName = progName.trim("/\t\n\r");
+    auto outstream = openFile(outputFile, false);
+    if (outstream != nullptr) {
+        *outstream << pipeline->toString();
+        outstream->flush();
+        std::filesystem::permissions(outputFile.c_str(),
+                                     std::filesystem::perms::owner_all |
+                                         std::filesystem::perms::group_all |
+                                         std::filesystem::perms::others_all,
+                                     std::filesystem::perm_options::add);
+    }
     cstring parserFile = progName + "_parser.c";
     cstring postParserFile = progName + "_post_parser.c";
     cstring headerFile = progName + "_parser.h";
@@ -190,6 +198,8 @@ void ConvertToBackendIR::setPipelineName() {
     pipelineName = pipelineName.replace(fileext, "");
     pipelineName = pipelineName.trim();
 }
+
+cstring ConvertToBackendIR::getPipelineName() { return pipelineName; }
 
 bool ConvertToBackendIR::preorder(const IR::P4Program *p) {
     if (p != nullptr) {

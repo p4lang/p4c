@@ -1,5 +1,5 @@
 
-#include "size_param_example_parser.h";
+#include "size_param_example_parser.h"
 #include <stdbool.h>
 #include <linux/if_ether.h>
 #include "pna.h"
