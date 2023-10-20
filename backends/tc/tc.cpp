@@ -93,11 +93,11 @@ int main(int argc, char *const argv[]) {
 
     cstring progName = backend.tcIR->getPipelineName();
     cstring introspecFile = progName + ".json";
-    if (!options.introspecFolder.isNullOrEmpty()) {
-        if (options.introspecFolder.get(options.introspecFolder.size() - 1) != '/') {
-            options.introspecFolder = options.introspecFolder + '/';
+    if (!options.outputFolder.isNullOrEmpty()) {
+        if (options.outputFolder.get(options.outputFolder.size() - 1) != '/') {
+            options.outputFolder = options.outputFolder + '/';
         }
-        introspecFile = options.introspecFolder + introspecFile;
+        introspecFile = options.outputFolder + introspecFile;
     }
     std::ostream *outIntro = openFile(introspecFile, false);
     if (outIntro != nullptr) {

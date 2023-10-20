@@ -137,13 +137,13 @@ void Backend::serialize() const {
     cstring parserFile = progName + "_parser.c";
     cstring postParserFile = progName + "_post_parser.c";
     cstring headerFile = progName + "_parser.h";
-    if (!options.cFile.isNullOrEmpty()) {
-        if (options.cFile.get(options.cFile.size() - 1) != '/') {
-            options.cFile = options.cFile + '/';
+    if (!options.outputFolder.isNullOrEmpty()) {
+        if (options.outputFolder.get(options.outputFolder.size() - 1) != '/') {
+            options.outputFolder = options.outputFolder + '/';
         }
-        parserFile = options.cFile + parserFile;
-        postParserFile = options.cFile + postParserFile;
-        headerFile = options.cFile + headerFile;
+        parserFile = options.outputFolder + parserFile;
+        postParserFile = options.outputFolder + postParserFile;
+        headerFile = options.outputFolder + headerFile;
     }
     auto cstream = openFile(postParserFile, false);
     auto pstream = openFile(parserFile, false);

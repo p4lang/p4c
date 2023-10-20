@@ -162,7 +162,7 @@ def process_file(options, argv):
 
     if not os.path.isfile(options.p4filename):
         raise Exception("No such file " + options.p4filename)
-    args = ["./p4c-pna-p4tc", "-o", outputfolder, "-c", outputfolder, "-i", outputfolder]
+    args = ["./p4c-pna-p4tc", "-o", outputfolder]
     args.extend(argv)
     print("input: ", options, args, timeout, stderr)
     result = run_timeout(options, args, timeout, stderr)
