@@ -119,9 +119,6 @@ void Backend::serialize() const {
     cstring progName = tcIR->getPipelineName();
     cstring outputFile = progName + ".template";
     if (!options.outputFolder.isNullOrEmpty()) {
-        if (options.outputFolder.get(options.outputFolder.size() - 1) != '/') {
-            options.outputFolder = options.outputFolder + '/';
-        }
         outputFile = options.outputFolder + outputFile;
     }
     auto outstream = openFile(outputFile, false);
@@ -138,9 +135,6 @@ void Backend::serialize() const {
     cstring postParserFile = progName + "_post_parser.c";
     cstring headerFile = progName + "_parser.h";
     if (!options.outputFolder.isNullOrEmpty()) {
-        if (options.outputFolder.get(options.outputFolder.size() - 1) != '/') {
-            options.outputFolder = options.outputFolder + '/';
-        }
         parserFile = options.outputFolder + parserFile;
         postParserFile = options.outputFolder + postParserFile;
         headerFile = options.outputFolder + headerFile;
@@ -198,8 +192,6 @@ void ConvertToBackendIR::setPipelineName() {
     pipelineName = pipelineName.replace(fileext, "");
     pipelineName = pipelineName.trim();
 }
-
-cstring ConvertToBackendIR::getPipelineName() { return pipelineName; }
 
 bool ConvertToBackendIR::preorder(const IR::P4Program *p) {
     if (p != nullptr) {
