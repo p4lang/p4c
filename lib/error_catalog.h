@@ -112,6 +112,23 @@ class ErrorCatalog {
         return "--unknown--";
     }
 
+    /// retrieve the code for name
+    int getCode(cstring name) {
+        auto it =
+            std::find_if(errorCatalog.begin(), errorCatalog.end(),
+                         [name](const std::pair<int, cstring> &p) { return p.second == name; });
+        if (it != errorCatalog.end()) return it->first;
+        return -1;
+    }
+
+    /// return true if the name is an error; false otherwise
+    bool isError(cstring name) {
+        int code = getCode(name);
+        if (code == -1) return false;
+        if (code >= ErrorType::ERR_MAX_ERRORS) return false;
+        return true;
+    }
+
  private:
     ErrorCatalog() {}
 
