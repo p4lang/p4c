@@ -72,8 +72,8 @@ PARSER.add_argument(
     help="The log level to choose.",
 )
 
-# 9559 is the default P4Runtime API server port
-GRPC_PORT: int = 9559
+# 28000 is the default P4Runtime API server port
+GRPC_PORT: int = 28000
 PTF_ADDR: str = "0.0.0.0"
 
 
@@ -154,6 +154,7 @@ class PTFTestEnv:
                 f"{self.options.ipdk_install_dir}/bin/gnmi-ctl set "
                 f"device:virtual-device,name:{tap_name}"
                 f",pipeline-name:pipe,mempool-name:MEMPOOL0,mtu:1500,port-type:TAP "
+                f"-grpc_addr={PTF_ADDR}:{GRPC_PORT} "
                 f"-grpc_use_insecure_mode={insecure_mode}"
             )
             returncode = self.bridge.ns_exec(cmd, env=proc_env_vars)
@@ -205,6 +206,7 @@ class PTFTestEnv:
             f"-grpc_open_insecure_mode={insecure_mode} "
             f"-log_dir={log_dir} "
             f"-detach=false "
+            f"-external_stratum_urls={PTF_ADDR}:{GRPC_PORT} "
             f"-dpdk_sde_install={options.ipdk_install_dir} "
             f"-dpdk_infrap4d_cfg={options.ipdk_install_dir}/share/stratum/dpdk/dpdk_skip_p4.conf "
             f"-chassis_config_file={options.ipdk_install_dir}/share/stratum/dpdk/dpdk_port_config.pb.txt "
@@ -265,8 +267,8 @@ class PTFTestEnv:
     def run_ptf(self, grpc_port: int, info_name, conf_bin) -> int:
         """Run the PTF test."""
         testutils.log.info("---------------------- Run PTF test ----------------------")
-        # Add the file location to the python path.
-        pypath = FILE_DIR
+        # Add the tools PTF folder to the python path, it contains the base test.
+        pypath = TOOLS_PATH.joinpath("ptf")
         # Show list of the tests
         testListCmd = f"ptf --pypath {pypath} --test-dir {self.options.testdir} --list"
         returncode = self.bridge.ns_exec(testListCmd)
@@ -275,7 +277,8 @@ class PTFTestEnv:
         taps: str = ""
         for index in range(self.options.num_taps):
             taps += f" -i {index}@TAP{index}"
-        test_params = f"grpcaddr='{PTF_ADDR}:{grpc_port}';p4info='{info_name}';config='{conf_bin}'"
+        test_params = f"grpcaddr='{PTF_ADDR}:{grpc_port}';p4info='{info_name}';config='{conf_bin}';"
+        test_params += "device_id=1"
         run_ptf_cmd = (
             f"ptf --pypath {pypath} {taps} --log-file {self.options.testdir.joinpath('ptf.log')} "
             f"--test-params={test_params} --test-dir {self.options.testdir}"

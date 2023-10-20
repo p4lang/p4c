@@ -24,7 +24,7 @@ from ptf import testutils as ptfutils
 from ptf.base_tests import BaseTest
 
 FILE_DIR = Path(__file__).resolve().parent
-TOOLS_PATH = FILE_DIR.joinpath("../../tools")
+TOOLS_PATH = FILE_DIR.joinpath("..")
 sys.path.append(str(TOOLS_PATH))
 import testutils
 
@@ -197,7 +197,13 @@ class _AssertP4RuntimeErrorContext:
 class P4RuntimeTest(BaseTest):
     def setUp(self):
         BaseTest.setUp(self)
-        self.device_id = 0
+
+        device_id = ptfutils.test_param_get("device_id")
+        if device_id is None:
+            self.device_id = 0
+        else:
+            assert isinstance(device_id, int)
+            self.device_id = device_id
 
         # Setting up PTF dataplane
         self.dataplane = ptf.dataplane_instance
@@ -240,6 +246,9 @@ class P4RuntimeTest(BaseTest):
         request = p4runtime_pb2.SetForwardingPipelineConfigRequest()
         request.device_id = self.device_id
         config = request.config
+        election_id = request.election_id
+        election_id.high = 0
+        election_id.low = 1
         # TBD: It seems like there should be a way to do this without
         # reading the P4info file again, instead getting the data from
         # self.p4info as saved when executing the setUp() method
@@ -317,12 +326,10 @@ class P4RuntimeTest(BaseTest):
         req = p4runtime_pb2.StreamMessageRequest()
         arbitration = req.arbitration
         arbitration.device_id = self.device_id
-        # TODO(antonin): we currently allow 0 as the election id in P4Runtime;
-        # if this changes we will need to use an election id > 0 and update the
         # Write message to include the election id
-        # election_id = arbitration.election_id
-        # election_id.high = 0
-        # election_id.low = 1
+        election_id = arbitration.election_id
+        election_id.high = 0
+        election_id.low = 1
         self.stream_out_q.put(req)
 
         logging.debug("handshake() checking whether arbitration msg received from server")
@@ -808,6 +815,9 @@ class P4RuntimeTest(BaseTest):
         testutils.log.info(f"table_add: table_entry={table_entry}")
         req = p4runtime_pb2.WriteRequest()
         req.device_id = self.device_id
+        election_id = req.election_id
+        election_id.high = 0
+        election_id.low = 1
         update = req.updates.add()
         update.type = p4runtime_pb2.Update.INSERT
         update.entity.table_entry.CopyFrom(table_entry)
@@ -1034,6 +1044,9 @@ class P4RuntimeTest(BaseTest):
                     updates.append(update)
         new_req = p4runtime_pb2.WriteRequest()
         new_req.device_id = self.device_id
+        election_id = new_req.election_id
+        election_id.high = 0
+        election_id.low = 1
         for update in updates:
             update.type = p4runtime_pb2.Update.DELETE
             new_req.updates.add().CopyFrom(update)
@@ -1050,7 +1063,7 @@ class P4RuntimeTest(BaseTest):
         req.device_id = self.device_id
         election_id = req.election_id
         election_id.high = 0
-        election_id.low = 0
+        election_id.low = 1
         return req
 
 
