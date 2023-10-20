@@ -40,13 +40,6 @@ class TableStepper {
         const IR::Type *type, const IR::P4Table *table, cstring name,
         std::optional<int> idx1_opt = std::nullopt, std::optional<int> idx2_opt = std::nullopt);
 
-    /// @returns the boolean-typed state variable that tracks whether given table is reached.
-    static const IR::StateVariable &getTableReachedVar(const IR::P4Table *table);
-
-    /// @returns the state variable that tracks the value read by the key at the given index in the
-    /// given the table.
-    static const IR::StateVariable &getTableKeyReadVar(const IR::P4Table *table, int keyIdx);
-
     /// @returns the boolean-typed state variable that tracks whether a table has resulted in a hit.
     /// The value of this variable is false if the table misses or is not reached.
     static const IR::StateVariable &getTableHitVar(const IR::P4Table *table);
@@ -56,6 +49,8 @@ class TableStepper {
     /// This variable is initially set to the number of actions in the table, indicating that no
     /// action has been selected. It is set by setTableAction and read by getTableAction.
     static const IR::StateVariable &getTableActionVar(const IR::P4Table *table);
+
+    static const IR::StateVariable &getTableResultVar(const IR::P4Table *table);
 
  protected:
     /* =========================================================================================
@@ -78,7 +73,7 @@ class TableStepper {
 
     /// Sets the action taken by the given table. The arguments in the given MethodCallExpression
     /// are assumed to be symbolic values.
-    void setTableAction(ExecutionState &nextState, const IR::MethodCallExpression *actionCall);
+    const IR::StringLiteral *getTableActionString(const IR::MethodCallExpression *actionCall);
 
     /// A helper function to iteratively resolve table keys into symbolic values.
     /// This function returns false, if no key needs to be resolved.
