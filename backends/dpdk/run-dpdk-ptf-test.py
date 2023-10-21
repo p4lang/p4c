@@ -72,8 +72,9 @@ PARSER.add_argument(
     help="The log level to choose.",
 )
 
-# 28000 is the default P4Runtime API server port
-GRPC_PORT: int = 28000
+# 9559 is the default P4Runtime API server port
+P4RUNTIME_PORT: int = 9559
+GNMI_PORT: int = 9339
 PTF_ADDR: str = "0.0.0.0"
 
 
@@ -154,7 +155,7 @@ class PTFTestEnv:
                 f"{self.options.ipdk_install_dir}/bin/gnmi-ctl set "
                 f"device:virtual-device,name:{tap_name}"
                 f",pipeline-name:pipe,mempool-name:MEMPOOL0,mtu:1500,port-type:TAP "
-                f"-grpc_addr={PTF_ADDR}:{GRPC_PORT} "
+                f"-grpc_addr={PTF_ADDR}:{GNMI_PORT} "
                 f"-grpc_use_insecure_mode={insecure_mode}"
             )
             returncode = self.bridge.ns_exec(cmd, env=proc_env_vars)
@@ -206,7 +207,7 @@ class PTFTestEnv:
             f"-grpc_open_insecure_mode={insecure_mode} "
             f"-log_dir={log_dir} "
             f"-detach=false "
-            f"-external_stratum_urls={PTF_ADDR}:{GRPC_PORT} "
+            f"-external_stratum_urls={PTF_ADDR}:{P4RUNTIME_PORT},{PTF_ADDR}:{GNMI_PORT} "
             f"-dpdk_sde_install={options.ipdk_install_dir} "
             f"-dpdk_infrap4d_cfg={options.ipdk_install_dir}/share/stratum/dpdk/dpdk_skip_p4.conf "
             f"-chassis_config_file={options.ipdk_install_dir}/share/stratum/dpdk/dpdk_port_config.pb.txt "
@@ -214,11 +215,11 @@ class PTFTestEnv:
         bridge_cmd = self.bridge.get_ns_prefix() + " " + run_infrap4d_cmd
         self.switch_proc = testutils.open_process(bridge_cmd, env=proc_env_vars)
         cnt = 1
-        while not is_port_alive(self.bridge.ns_name, GRPC_PORT) and cnt != 10:
+        while not is_port_alive(self.bridge.ns_name, P4RUNTIME_PORT) and cnt != 10:
             time.sleep(2)
             cnt += 1
             testutils.log.info("Cannot connect to Infrap4d: " + str(cnt) + " try")
-        if not is_port_alive(self.bridge.ns_name, GRPC_PORT):
+        if not is_port_alive(self.bridge.ns_name, P4RUNTIME_PORT):
             # Print the log files.
             error_file = log_dir.joinpath("infrap4d.ERROR")
             if error_file.exists():
@@ -264,7 +265,7 @@ class PTFTestEnv:
         #     return returncode
         return testutils.SUCCESS
 
-    def run_ptf(self, grpc_port: int, info_name, conf_bin) -> int:
+    def run_ptf(self, P4RUNTIME_PORT: int, info_name, conf_bin) -> int:
         """Run the PTF test."""
         testutils.log.info("---------------------- Run PTF test ----------------------")
         # Add the tools PTF folder to the python path, it contains the base test.
@@ -277,7 +278,7 @@ class PTFTestEnv:
         taps: str = ""
         for index in range(self.options.num_taps):
             taps += f" -i {index}@TAP{index}"
-        test_params = f"grpcaddr='{PTF_ADDR}:{grpc_port}';p4info='{info_name}';config='{conf_bin}';"
+        test_params = f"grpcaddr='{PTF_ADDR}:{P4RUNTIME_PORT}';p4info='{info_name}';config='{conf_bin}';"
         test_params += "device_id=1"
         run_ptf_cmd = (
             f"ptf --pypath {pypath} {taps} --log-file {self.options.testdir.joinpath('ptf.log')} "
@@ -333,7 +334,7 @@ def run_test(options: Options) -> int:
         return returncode
 
     # Run the PTF test and retrieve the result.
-    result = testenv.run_ptf(GRPC_PORT, info_name, conf_bin)
+    result = testenv.run_ptf(P4RUNTIME_PORT, info_name, conf_bin)
     # Delete the test environment and trigger a clean up.
     del testenv
     # Print switch log if the results were not successful.

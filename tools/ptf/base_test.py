@@ -216,7 +216,7 @@ class P4RuntimeTest(BaseTest):
 
         grpc_addr = ptfutils.test_param_get("grpcaddr")
         if grpc_addr is None:
-            grpc_addr = "0.0.0.0:28000"
+            grpc_addr = "0.0.0.0:9559"
 
         self.channel = grpc.insecure_channel(grpc_addr)
         self.stub = p4runtime_pb2_grpc.P4RuntimeStub(self.channel)

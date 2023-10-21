@@ -65,7 +65,8 @@ PARSER.add_argument(
     help="The log level to choose.",
 )
 
-GRPC_PORT: int = 28000
+# 9559 is the default P4Runtime API server port
+P4RUNTIME_PORT: int = 9559
 THRIFT_PORT: int = 22000
 PTF_ADDR: str = "0.0.0.0"
 
@@ -272,7 +273,7 @@ def run_test(options: Options) -> int:
 
     # Pick available ports for the gRPC switch.
     switchlog = options.testdir.joinpath("switchlog")
-    grpc_port = testutils.pick_tcp_port(PTF_ADDR, GRPC_PORT)
+    grpc_port = testutils.pick_tcp_port(PTF_ADDR, P4RUNTIME_PORT)
     switch_proc = testenv.run_simple_switch_grpc(switchlog, grpc_port)
     if switch_proc is None:
         return testutils.FAILURE
