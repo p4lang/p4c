@@ -204,19 +204,19 @@ BASE_TEST_PATH = FILE_DIR.joinpath("../../backends/dpdk/base_test.py")
 sys.path.append(str(BASE_TEST_PATH))
 import base_test as bt
 
-# This global variable ensure that the forwarding pipeline will only be pushed once in one tes
-pipeline_pushed = False
+# This global variable ensures that the forwarding pipeline will only be pushed once in one test.
+PIPELINE_PUSHED = False
 
 class AbstractTest(bt.P4RuntimeTest):
     EnumColor = Enum("EnumColor", ["GREEN", "YELLOW", "RED"], start=0)
 
     def setUp(self):
         bt.P4RuntimeTest.setUp(self)
-        global pipeline_pushed
-        if not pipeline_pushed:
+        global PIPELINE_PUSHED
+        if not PIPELINE_PUSHED:
             success = bt.P4RuntimeTest.updateConfig(self)
             assert success
-            pipeline_pushed = True
+            PIPELINE_PUSHED = True
         packet_wait_time = ptfutils.test_param_get("packet_wait_time")
         if not packet_wait_time:
             self.packet_wait_time = 0.1

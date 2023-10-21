@@ -278,7 +278,9 @@ class PTFTestEnv:
         taps: str = ""
         for index in range(self.options.num_taps):
             taps += f" -i {index}@TAP{index}"
-        test_params = f"grpcaddr='{PTF_ADDR}:{P4RUNTIME_PORT}';p4info='{info_name}';config='{conf_bin}';"
+        test_params = (
+            f"grpcaddr='{PTF_ADDR}:{P4RUNTIME_PORT}';p4info='{info_name}';config='{conf_bin}';"
+        )
         test_params += "device_id=1"
         run_ptf_cmd = (
             f"ptf --pypath {pypath} {taps} --log-file {self.options.testdir.joinpath('ptf.log')} "
