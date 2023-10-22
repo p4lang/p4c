@@ -8,6 +8,24 @@ function(check_empty_folder testfile testfolder)
   file(APPEND ${testfile} "exit $(ls -A ${testfolder})\n")
 endfunction(check_empty_folder)
 
+# Write the script to check PNA/DPDK PTF tests to the designated test file.
+# Arguments:
+#   - testfile is the testing script that this script is written to.
+#   - testfolder is target folder of the test.
+#   - p4test is the file that is to be tested.
+macro(check_pna_with_ptf testfile testfolder p4test)
+  set(__p4cdpdkpath "${P4C_BINARY_DIR}")
+  set(__dpdk_runner " ${P4C_SOURCE_DIR}/backends/dpdk/run-dpdk-ptf-test.py")
+  # Find all the ptf tests generated for this P4 file and test them
+  file(APPEND ${testfile} "ptffiles=($(find ${testfolder} -name \"*.py\"  | sort -n ))\n")
+  file(APPEND ${testfile} "for item in \${ptffiles[@]}\n")
+  file(APPEND ${testfile} "do\n")
+  file(APPEND ${testfile} "\techo \"Found \${item}\"\n")
+  file(APPEND ${testfile} "\t python3 ${__dpdk_runner} -tf \${item} ${P4C_SOURCE_DIR} \
+      --ipdk-install-dir=${IPDK_INSTALL_DIR} \
+      -ll=DEBUG ${p4test}\n")
+  file(APPEND ${testfile} "done\n")
+endmacro(check_pna_with_ptf)
 
 # Add a single test to the testsuite.
 # Arguments:
@@ -45,7 +63,7 @@ function(p4tools_add_test_with_args)
   set(test_args ${TOOLS_PNA_TESTS_TEST_ARGS})
   set(cmake_args ${TOOLS_PNA_TESTS_CMAKE_ARGS})
 
-  # This is the actual test processing.
+  # This is the actual test processing for one P4 program.
   p4c_test_set_name(__testname ${tag} ${alias})
   string(REGEX REPLACE ".p4" "" aliasname ${alias})
   set(__testfile "${P4TESTGEN_DIR}/${tag}/${alias}.test")
@@ -55,11 +73,17 @@ function(p4tools_add_test_with_args)
   file(APPEND ${__testfile} "# Generated file, modify with care\n\n")
   file(APPEND ${__testfile} "set -e\n")
   file(APPEND ${__testfile} "cd ${P4C_BINARY_DIR}\n")
-
+  # Generate tests
   file(
     APPEND ${__testfile} "${driver} --target ${target} --arch ${arch} "
     "${test_args} --out-dir ${__testfolder} \"$@\" ${p4test}\n"
   )
+
+  # TODO: not sure if we have assert/assume mode for PNA/DPDK as well
+  # If P416_PTF is active, run the PTF PNA/DPDK runner.
+  if(${TOOLS_PNA_TESTS_P416_PTF})
+    check_pna_with_ptf(${__testfile} ${__testfolder} ${p4test} ${__ptfRunerFolder})
+  endif()
 
   execute_process(COMMAND chmod +x ${__testfile})
   separate_arguments(__args UNIX_COMMAND ${cmake_args})
@@ -73,3 +97,4 @@ function(p4tools_add_test_with_args)
   endif()
   set_tests_properties(${__testname} PROPERTIES LABELS ${tag} TIMEOUT ${${tag}_timeout})
 endfunction(p4tools_add_test_with_args)
+

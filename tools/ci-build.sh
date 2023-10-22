@@ -197,10 +197,10 @@ fi
 
 # ! ------  BEGIN DPDK -----------------------------------------------
 function build_dpdk() {
-  # Replace existing Protobuf to match the one specified in the runtime shell.
-  # TODO: Do we really need the shell?
+  # Replace existing Protobuf with one that works.
+  # TODO: Debug protobuf mismatch.
   sudo -E pip3 uninstall -y protobuf
-  sudo pip3 install protobuf==3.20.3 p4runtime-shell==0.0.3 netaddr==0.9.0
+  sudo pip3 install protobuf==3.20.3 netaddr==0.9.0
 }
 
 if [ "$INSTALL_DPDK" == "ON" ]; then
