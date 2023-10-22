@@ -508,7 +508,6 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
     std::vector<Continuation::Command> cmds;
     // If the switch expression is tainted, we can not predict which case will be chosen. We taint
     // the program counter and execute all of the statements.
-    P4::Coverage::CoverageSet coveredNodes;
     if (Taint::hasTaint(switchExpr)) {
         auto currentTaint = state.getProperty<bool>("inUndefinedState");
         cmds.emplace_back(Continuation::PropertyUpdate("inUndefinedState", true));
@@ -522,20 +521,14 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
         state.replaceTopBody(&cmds);
         return false;
     }
-
+    // Otherwise, we pick the switch statement case in a normal fashion.
+    auto &nextState = state.clone();
+    P4::Coverage::CoverageSet coveredNodes;
+    bool hasMatched = false;
     /// Get the action list associated with this switch/case.
     auto switchActionString = switchExpr->checkedTo<IR::StringLiteral>();
 
-    auto &nextState = state.clone();
-    // Otherwise, we pick the switch statement case in a normal fashion.
-    bool hasMatched = false;
     for (const auto *switchCase : switchCases) {
-        if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
-            // Some path selection strategies depend on looking ahead and collecting potential
-            // nodes. If that is the case, apply the CoverableNodesScanner visitor.
-            auto collector = CoverableNodesScanner(state);
-            collector.updateNodeCoverage(switchCase->statement, coveredNodes);
-        }
         // We have either matched already, or still need to match.
         hasMatched = hasMatched || switchActionString->value == switchCase->label->toString();
         // Nothing to do with this statement. Fall through to the next case.
@@ -544,6 +537,12 @@ bool CmdStepper::preorder(const IR::SwitchStatement *switchStatement) {
         }
         // If any of the values in the match list hits, execute the switch case block.
         if (hasMatched) {
+            // Some path selection strategies depend on looking ahead and collecting potential
+            // nodes. If that is the case, apply the CoverableNodesScanner visitor.
+            if (requiresLookahead(TestgenOptions::get().pathSelectionPolicy)) {
+                auto collector = CoverableNodesScanner(state);
+                collector.updateNodeCoverage(switchCase->statement, coveredNodes);
+            }
             nextState.add(*new TraceEvents::GenericDescription(
                 "SwitchCase", switchCase->label->getSourceInfo().toBriefSourceFragment()));
             cmds.emplace_back(switchCase->statement);
