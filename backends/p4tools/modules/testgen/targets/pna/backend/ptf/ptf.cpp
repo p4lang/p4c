@@ -296,12 +296,13 @@ std::string PTF::getTestCaseTemplate() {
     static std::string TEST_CASE(
         R"""(
 class Test{{test_id}}(AbstractTest):
-    # Date generated: {{timestamp}}
-## if length(selected_branches) > 0
-    # {{selected_branches}}
-## endif
     '''
-    # Current statement coverage: {{coverage}}
+    Date generated: {{timestamp}}
+    Current node coverage: {{coverage}}
+## if length(selected_branches) > 0
+    Selected branches: {{selected_branches}}
+## endif
+    Trace:
 ## for trace_item in trace
     {{trace_item}}
 ##endfor
@@ -344,11 +345,6 @@ class Test{{test_id}}(AbstractTest):
 ## endfor
 ## endfor
 ## endif
-## if exists("clone_specs")
-## for clone_pkt in clone_specs.clone_pkts
-        self.insert_pre_clone_session({{clone_pkt.session_id}}, [{{clone_pkt.clone_port}}])
-## endfor
-## endif
 
 
     def sendPacket(self):
@@ -367,20 +363,9 @@ class Test{{test_id}}(AbstractTest):
 ## for ignore_mask in verify.ignore_masks
         exp_pkt.set_do_not_care({{ignore_mask.0}}, {{ignore_mask.1}})
 ## endfor
-## if exists("clone_specs")
-## for clone_pkt in clone_specs.clone_pkts
-## if clone_pkt.cloned
-        ptfutils.verify_packet(self, exp_pkt, {{clone_pkt.clone_port}})
-##endif
-##endfor
-## if not clone_specs.has_clone
-        ptfutils.verify_packet(self, exp_pkt, eg_port)
-##endif
-## else
         ptfutils.verify_packet(self, exp_pkt, eg_port)
         bt.testutils.log.info("Verifying no other packets ...")
         ptfutils.verify_no_other_packets(self, self.device_id, timeout=self.packet_wait_time)
-## endif
 ## else
         ptfutils.verify_no_other_packets(self, self.device_id, timeout=self.packet_wait_time)
 ## endif
@@ -408,18 +393,6 @@ void PTF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
     std::stringstream coverageStr;
     coverageStr << std::setprecision(2) << currentCoverage;
     dataJson["coverage"] = coverageStr.str();
-
-    // The following few lins are commented temporarily, they are copied from BMv2
-    // Check whether this test has a clone configuration.
-    // These are special because they require additional instrumentation and produce two output
-    // packets.
-    // auto cloneSpecs = testSpec->getTestObjectCategory("clone_specs");
-
-    // if (!cloneSpecs.empty()) {
-    //    dataJson["clone_specs"] = getClone(cloneSpecs);
-    // }
-    // auto meterValues = testSpec->getTestObjectCategory("meter_values");
-    // dataJson["meter_values"] = getMeter(meterValues);
 
     LOG5("PTF backend: emitting testcase:" << std::setw(4) << dataJson);
 
