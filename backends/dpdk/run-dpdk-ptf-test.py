@@ -214,11 +214,17 @@ class PTFTestEnv:
         )
         bridge_cmd = self.bridge.get_ns_prefix() + " " + run_infrap4d_cmd
         self.switch_proc = testutils.open_process(bridge_cmd, env=proc_env_vars)
-        cnt = 1
-        while not is_port_alive(self.bridge.ns_name, P4RUNTIME_PORT) and cnt != 10:
-            time.sleep(2)
+        cnt = 0
+        cnt_max = 9
+        retry_cnt = 5
+        time.sleep(1)
+        while not is_port_alive(self.bridge.ns_name, P4RUNTIME_PORT) and cnt <= cnt_max:
             cnt += 1
-            testutils.log.info("Cannot connect to Infrap4d: " + str(cnt) + " try")
+            testutils.log.warning("Cannot connect to Infrap4d: %s try", cnt)
+            if cnt % retry_cnt == 0:
+                testutils.log.warning("Timed out %s times: Trying to start infrap4d again...", cnt)
+                self.switch_proc = testutils.open_process(bridge_cmd, env=proc_env_vars)
+            time.sleep(1)
         if not is_port_alive(self.bridge.ns_name, P4RUNTIME_PORT):
             # Print the log files.
             error_file = log_dir.joinpath("infrap4d.ERROR")
@@ -235,9 +241,7 @@ class PTFTestEnv:
             return testutils.FAILURE
         return self.switch_proc
 
-    def build_and_load_pipeline(
-        self, p4c_conf: Path, conf_bin: Path, info_name: Path, proc_env_vars: dict
-    ) -> int:
+    def build_and_load_pipeline(self, p4c_conf: Path, conf_bin: Path, proc_env_vars: dict) -> int:
         testutils.log.info("---------------------- Build and Load Pipeline ----------------------")
         command = (
             f"{self.options.ipdk_install_dir}/bin/tdi_pipeline_builder "
@@ -249,23 +253,9 @@ class PTFTestEnv:
         if returncode != testutils.SUCCESS:
             testutils.log.error("Failed to build pipeline")
             return returncode
-
-        # Load pipeline.
-        # NOTE: in generated PTF tests, the pipelines are loaded in individual test cases.
-        # This should be commented when working with Testgen.
-        # command = (
-        #     f"{self.options.ipdk_install_dir}/bin/p4rt-ctl "
-        #     "set-pipe br0 "
-        #     f"{conf_bin} "
-        #     f"{info_name} "
-        # )
-        # returncode = self.bridge.ns_exec(command, timeout=30)
-        # if returncode != testutils.SUCCESS:
-        #     testutils.log.error("Failed to load pipeline")
-        #     return returncode
         return testutils.SUCCESS
 
-    def run_ptf(self, P4RUNTIME_PORT: int, info_name, conf_bin) -> int:
+    def run_ptf(self, p4runtime_port: int, info_name: Path, conf_bin: Path) -> int:
         """Run the PTF test."""
         testutils.log.info("---------------------- Run PTF test ----------------------")
         # Add the tools PTF folder to the python path, it contains the base test.
@@ -279,7 +269,7 @@ class PTFTestEnv:
         for index in range(self.options.num_taps):
             taps += f" -i {index}@TAP{index}"
         test_params = (
-            f"grpcaddr='{PTF_ADDR}:{P4RUNTIME_PORT}';p4info='{info_name}';config='{conf_bin}';"
+            f"grpcaddr='{PTF_ADDR}:{p4runtime_port}';p4info='{info_name}';config='{conf_bin}';"
         )
         test_params += "device_id=1"
         run_ptf_cmd = (
@@ -331,7 +321,7 @@ def run_test(options: Options) -> int:
         return returncode
 
     # Build and load the pipeline
-    returncode = testenv.build_and_load_pipeline(p4c_conf, conf_bin, info_name, proc_env_vars)
+    returncode = testenv.build_and_load_pipeline(p4c_conf, conf_bin, proc_env_vars)
     if returncode != testutils.SUCCESS:
         return returncode
 
