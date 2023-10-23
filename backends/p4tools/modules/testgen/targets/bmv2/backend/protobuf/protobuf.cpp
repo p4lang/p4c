@@ -263,7 +263,7 @@ metadata: "{{selected_branches}}"
 metadata: "Current node coverage: {{coverage}}"
 
 ## for trace_item in trace
-traces: "{{trace_item}}"
+traces: '{{trace_item}}'
 ## endfor
 
 input_packet {
@@ -389,9 +389,7 @@ void Protobuf::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
     }
     dataJson["test_name"] = basePath.stem();
     dataJson["test_id"] = testId;
-    // TODO: Traces are disabled until we are able to escape illegal characters (e.g., '"').
-    // dataJson["trace"] = getTrace(testSpec);
-    dataJson["trace"] = inja::json::array();
+    dataJson["trace"] = getTrace(testSpec);
     dataJson["control_plane"] = getControlPlane(testSpec);
     dataJson["send"] = getSend(testSpec);
     dataJson["verify"] = getVerify(testSpec);
