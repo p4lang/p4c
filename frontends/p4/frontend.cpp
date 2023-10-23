@@ -187,22 +187,26 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new DefaultValues(&refMap, &typeMap),
         new BindTypeVariables(&refMap, &typeMap),
         new EntryPriorities(&refMap),
-        new PassRepeated(
-            {new SpecializeGenericTypes(&refMap, &typeMap),
-             new DefaultArguments(&refMap, &typeMap),  // add default argument values to parameters
-             new ResolveReferences(&refMap),
-             new SetStrictStruct(&typeMap, true),          // Next pass uses strict struct checking
-             new TypeInference(&refMap, &typeMap, false),  // more casts may be needed
-             new SetStrictStruct(&typeMap, false),
-             new SpecializeGenericFunctions(&refMap, &typeMap)}),
+        new PassRepeated({
+            new SpecializeGenericTypes(&refMap, &typeMap),
+            new DefaultArguments(&refMap, &typeMap),  // add default argument values to parameters
+            new ResolveReferences(&refMap),
+            new SetStrictStruct(&typeMap, true),          // Next pass uses strict struct checking
+            new TypeInference(&refMap, &typeMap, false),  // more casts may be needed
+            new SetStrictStruct(&typeMap, false),
+            new SpecializeGenericFunctions(&refMap, &typeMap),
+        }),
         new CheckCoreMethods(&refMap, &typeMap),
         new StaticAssert(&refMap, &typeMap),
         new RemoveParserIfs(&refMap, &typeMap),
         new StructInitializers(&refMap, &typeMap),
         new TableKeyNames(&refMap, &typeMap),
-        new PassRepeated({new ConstantFolding(&refMap, &typeMap),
-                          new StrengthReduction(&refMap, &typeMap), new Reassociation(),
-                          new UselessCasts(&refMap, &typeMap)}),
+        new PassRepeated({
+            new ConstantFolding(&refMap, &typeMap),
+            new StrengthReduction(&refMap, &typeMap),
+            new Reassociation(),
+            new UselessCasts(&refMap, &typeMap),
+        }),
         new SimplifyControlFlow(&refMap, &typeMap),
         new SwitchAddDefault,
         new FrontEndDump(),  // used for testing the program at this point
@@ -228,26 +232,32 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new RemoveRedundantParsers(&refMap, &typeMap),
         new ClearTypeMap(&typeMap),
         evaluator,
-        new Inline(&refMap, &typeMap, evaluator, options.optimizeParserInlining),
-        new InlineActions(&refMap, &typeMap),
-        new LocalizeAllActions(&refMap),
-        new UniqueNames(&refMap),
-        new UniqueParameters(&refMap, &typeMap),
-        // Must be done before inlining functions, to allow
-        // function calls used as action arguments to be inlined
-        // in the proper place.
-        new RemoveActionParameters(&refMap, &typeMap),
-        new InlineFunctions(&refMap, &typeMap),
-        new SetHeaders(&refMap, &typeMap),
-        // Check for constants only after inlining
-        new CheckConstants(&refMap, &typeMap),
-        new SimplifyControlFlow(&refMap, &typeMap),
-        new RemoveParserControlFlow(&refMap, &typeMap),  // more ifs may have been added to parsers
-        new UniqueNames(&refMap),                        // needed again after inlining
-        new MoveDeclarations(),                          // needed again after inlining
-        new SimplifyDefUse(&refMap, &typeMap),
-        new RemoveAllUnusedDeclarations(&refMap),
-        new SimplifyControlFlow(&refMap, &typeMap),
+    });
+    if (options.optimizationLevel > 0)
+        passes.addPasses({
+            new Inline(&refMap, &typeMap, evaluator, options.optimizeParserInlining),
+            new InlineActions(&refMap, &typeMap),
+            new LocalizeAllActions(&refMap),
+            new UniqueNames(&refMap),
+            new UniqueParameters(&refMap, &typeMap),
+            // Must be done before inlining functions, to allow
+            // function calls used as action arguments to be inlined
+            // in the proper place.
+            new RemoveActionParameters(&refMap, &typeMap),
+            new InlineFunctions(&refMap, &typeMap),
+            new SetHeaders(&refMap, &typeMap),
+            // Check for constants only after inlining
+            new CheckConstants(&refMap, &typeMap),
+            new SimplifyControlFlow(&refMap, &typeMap),
+            // more ifs may have been added to parsers
+            new RemoveParserControlFlow(&refMap, &typeMap),
+            new UniqueNames(&refMap),  // needed again after inlining
+            new MoveDeclarations(),    // needed again after inlining
+            new SimplifyDefUse(&refMap, &typeMap),
+            new RemoveAllUnusedDeclarations(&refMap),
+            new SimplifyControlFlow(&refMap, &typeMap),
+        });
+    passes.addPasses({
         new HierarchicalNames(),
         new FrontEndLast(),
     });

@@ -78,6 +78,11 @@ class CompilerOptions : public ParserOptions {
     // If true, unroll all parser loops inside the midend.
     bool loopsUnrolling = false;
 
+    // General optimization options -- can be interpreted by backends in various ways
+    int optimizationLevel = 1;
+    bool optimizeDebug = false;  // optimize favoring debuggability
+    bool optimizeSize = false;   // optimize favoring size
+
     virtual bool enable_intrinsic_metadata_fix();
 };
 #endif /* FRONTENDS_COMMON_OPTIONS_H_ */
