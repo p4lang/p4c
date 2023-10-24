@@ -1,0 +1,55 @@
+name: "p4c-dpdk-ptf-p4testgen-tests"
+
+on:
+  push:
+    branches:
+      - dpdk_ptf_container
+  pull_request:
+    branches:
+      - dpdk_ptf_container
+      
+concurrency:
+  # If workflow for PR or push is already running stop it, and start new one.
+  group: p4c_dpdk_ptf_ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Envs for infrap4d and dpdk libs
+# IPDK_INSTALL_DIR is put to a default searching directory for
+# visibility of different libs like libprotobuf
+env:
+    IPDK_INSTALL_DIR: ${{github.workspace}}/ipdk_install
+    CMAKE_UNITY_BUILD: ON
+    ENABLE_TEST_TOOLS: ON
+    INSTALL_DPDK: ON
+    INSTALL_BMV2: OFF
+    INSTALL_EBPF: OFF
+    IMAGE_TYPE: test
+    CTEST_PARALLEL_LEVEL: 4
+
+jobs:
+  build_p4dpdk_ubuntu:
+    runs-on: ubuntu-22.04
+    steps:
+    # TODO: Cache for container
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: ptf-${{ runner.os }}-test
+          max-size: 1000M
+
+      - name: Checkout P4C
+        uses: actions/checkout@v3
+        with:
+             submodules: recursive
+
+      - name: Build IPDK
+        working-directory: ./tools
+        run: |
+             docker build -t dpdk_ptf -f dpdk_ptf.Dockerfile .
+
+      # hugepage has to be set in the same shell session
+      - name: Run DPDK PTF tests using P4Testgen
+        run: |
+             sudo -E docker run --privileged -w /root/p4c/build dpdk_ptf bash -c "../../scripts/set_hugepages.sh && ctest -j1 --output-on-failure --schedule-random -R testgen-p4c-pna-ptf"
+
+             
