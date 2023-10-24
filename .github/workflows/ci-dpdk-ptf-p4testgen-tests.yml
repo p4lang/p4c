@@ -110,4 +110,4 @@ jobs:
         working-directory: p4c/build
         run: |
              sudo $IPDK_INSTALL_DIR/sbin/set_hugepages.sh
-             sudo -E ctest -V -j1 --output-on-failure --schedule-random -R testgen-p4c-pna-ptf
+             sudo -E ctest -V -j1 --output-on-failure  -R testgen-p4c-pna-ptf
