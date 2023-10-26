@@ -34,10 +34,6 @@ class CmdStepper : public AbstractStepper {
     bool preorder(const IR::SwitchStatement *switchStatement) override;
 
  protected:
-    /// This call replaces the action labels of cases in a switch statement with the corresponding
-    /// indices. We need this to match the executed action with the appropriate label.
-    IR::SwitchStatement *replaceSwitchLabels(const IR::SwitchStatement *switchStatement);
-
     /// Initializes the given state for entry into the given parser.
     ///
     /// @returns constraints for associating packet data with symbolic state.

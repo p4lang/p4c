@@ -124,6 +124,13 @@ p4tools_add_xfail_reason(
   issue1304.p4
 )
 
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-metadata"
+  "is not a constant"
+  # Using an uninitialized variable as a header stack index in the parser.
+  parser-unroll-test10.p4
+)
+
 ####################################################################################################
 # 4. PARAMETERS NEEDED
 ####################################################################################################

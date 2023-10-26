@@ -41,10 +41,10 @@ def plot_preconditions(args, extra_args):
     preconditions = [
         "None",
         "1500B pkt",
-        "P4-constraints",
-        "P4-constraints + 1500B pkt",
-        "P4-constraints + 1500B IPv4 pkt",
-        "P4-constraints + 1500B IPv4-TCP pkt",
+        "P4Constraints",
+        "P4Constraints + 1500B pkt",
+        "P4Constraints + 1500B IPv4 pkt",
+        "P4Constraints + 1500B IPv4-TCP pkt",
     ]
     data = [146784, 83784, 74472, 42486, 28216, 7054]
     target_frame = pd.DataFrame({"Precondition": preconditions, "Number of tests": data})

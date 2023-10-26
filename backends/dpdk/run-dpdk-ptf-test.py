@@ -73,7 +73,8 @@ PARSER.add_argument(
 )
 
 # 9559 is the default P4Runtime API server port
-GRPC_PORT: int = 9559
+P4RUNTIME_PORT: int = 9559
+GNMI_PORT: int = 9339
 PTF_ADDR: str = "0.0.0.0"
 
 
@@ -81,6 +82,8 @@ PTF_ADDR: str = "0.0.0.0"
 def is_port_alive(ns, port) -> bool:
     command = f"sudo ip netns exec {ns} netstat -tuln"
     out, _ = testutils.exec_process(command, timeout=10, capture_output=True)
+    if not out:
+        return False
     if str(port) in out:
         return True
     return False
@@ -152,6 +155,7 @@ class PTFTestEnv:
                 f"{self.options.ipdk_install_dir}/bin/gnmi-ctl set "
                 f"device:virtual-device,name:{tap_name}"
                 f",pipeline-name:pipe,mempool-name:MEMPOOL0,mtu:1500,port-type:TAP "
+                f"-grpc_addr={PTF_ADDR}:{GNMI_PORT} "
                 f"-grpc_use_insecure_mode={insecure_mode}"
             )
             returncode = self.bridge.ns_exec(cmd, env=proc_env_vars)
@@ -202,6 +206,8 @@ class PTFTestEnv:
             f"{self.options.ipdk_install_dir}/sbin/infrap4d "
             f"-grpc_open_insecure_mode={insecure_mode} "
             f"-log_dir={log_dir} "
+            f"-detach=false "
+            f"-external_stratum_urls={PTF_ADDR}:{P4RUNTIME_PORT},{PTF_ADDR}:{GNMI_PORT} "
             f"-dpdk_sde_install={options.ipdk_install_dir} "
             f"-dpdk_infrap4d_cfg={options.ipdk_install_dir}/share/stratum/dpdk/dpdk_skip_p4.conf "
             f"-chassis_config_file={options.ipdk_install_dir}/share/stratum/dpdk/dpdk_port_config.pb.txt "
@@ -209,11 +215,23 @@ class PTFTestEnv:
         bridge_cmd = self.bridge.get_ns_prefix() + " " + run_infrap4d_cmd
         self.switch_proc = testutils.open_process(bridge_cmd, env=proc_env_vars)
         cnt = 1
-        while not is_port_alive(self.bridge.ns_name, GRPC_PORT) and cnt != 5:
+        while not is_port_alive(self.bridge.ns_name, P4RUNTIME_PORT) and cnt != 10:
             time.sleep(2)
             cnt += 1
             testutils.log.info("Cannot connect to Infrap4d: " + str(cnt) + " try")
-        if not is_port_alive(self.bridge.ns_name, GRPC_PORT):
+        if not is_port_alive(self.bridge.ns_name, P4RUNTIME_PORT):
+            # Print the log files.
+            error_file = log_dir.joinpath("infrap4d.ERROR")
+            if error_file.exists():
+                testutils.log.error("######## Infrap4d Error ######## \n%s", error_file.read_text())
+            info_file = log_dir.joinpath("infrap4d.INFO")
+            if info_file.exists():
+                testutils.log.error("######## Infrap4d Info ######## \n%s", info_file.read_text())
+            warning_file = log_dir.joinpath("infrap4d.WARNING")
+            if warning_file.exists():
+                testutils.log.error(
+                    "######## Infrap4d Warning ######## \n%s", warning_file.read_text()
+                )
             return testutils.FAILURE
         return self.switch_proc
 
@@ -233,23 +251,25 @@ class PTFTestEnv:
             return returncode
 
         # Load pipeline.
-        command = (
-            f"{self.options.ipdk_install_dir}/bin/p4rt-ctl "
-            "set-pipe br0 "
-            f"{conf_bin} "
-            f"{info_name} "
-        )
-        returncode = self.bridge.ns_exec(command, timeout=30)
-        if returncode != testutils.SUCCESS:
-            testutils.log.error("Failed to load pipeline")
-            return returncode
+        # NOTE: in generated PTF tests, the pipelines are loaded in individual test cases.
+        # This should be commented when working with Testgen.
+        # command = (
+        #     f"{self.options.ipdk_install_dir}/bin/p4rt-ctl "
+        #     "set-pipe br0 "
+        #     f"{conf_bin} "
+        #     f"{info_name} "
+        # )
+        # returncode = self.bridge.ns_exec(command, timeout=30)
+        # if returncode != testutils.SUCCESS:
+        #     testutils.log.error("Failed to load pipeline")
+        #     return returncode
         return testutils.SUCCESS
 
-    def run_ptf(self, grpc_port: int) -> int:
+    def run_ptf(self, P4RUNTIME_PORT: int, info_name, conf_bin) -> int:
         """Run the PTF test."""
         testutils.log.info("---------------------- Run PTF test ----------------------")
-        # Add the file location to the python path.
-        pypath = FILE_DIR
+        # Add the tools PTF folder to the python path, it contains the base test.
+        pypath = TOOLS_PATH.joinpath("ptf")
         # Show list of the tests
         testListCmd = f"ptf --pypath {pypath} --test-dir {self.options.testdir} --list"
         returncode = self.bridge.ns_exec(testListCmd)
@@ -258,7 +278,10 @@ class PTFTestEnv:
         taps: str = ""
         for index in range(self.options.num_taps):
             taps += f" -i {index}@TAP{index}"
-        test_params = f"grpcaddr='{PTF_ADDR}:{grpc_port}'"
+        test_params = (
+            f"grpcaddr='{PTF_ADDR}:{P4RUNTIME_PORT}';p4info='{info_name}';config='{conf_bin}';"
+        )
+        test_params += "device_id=1"
         run_ptf_cmd = (
             f"ptf --pypath {pypath} {taps} --log-file {self.options.testdir.joinpath('ptf.log')} "
             f"--test-params={test_params} --test-dir {self.options.testdir}"
@@ -274,11 +297,6 @@ def run_test(options: Options) -> int:
         proc_env_vars["LD_LIBRARY_PATH"] += f"{options.ld_library_path}"
     else:
         proc_env_vars["LD_LIBRARY_PATH"] = f"{options.ld_library_path}"
-    if "PATH" in proc_env_vars:
-        proc_env_vars["PATH"] += f"{options.ipdk_install_dir}/bin"
-    else:
-        proc_env_vars["PATH"] = f"{options.ipdk_install_dir}/bin"
-    proc_env_vars["PATH"] += f"{options.ipdk_install_dir}/sbin"
     proc_env_vars["SDE_INSTALL"] = f"{options.ipdk_install_dir}"
 
     # Define the test environment and compile the P4 target
@@ -318,11 +336,14 @@ def run_test(options: Options) -> int:
         return returncode
 
     # Run the PTF test and retrieve the result.
-    result = testenv.run_ptf(GRPC_PORT)
+    result = testenv.run_ptf(P4RUNTIME_PORT, info_name, conf_bin)
     # Delete the test environment and trigger a clean up.
     del testenv
     # Print switch log if the results were not successful.
     if result != testutils.SUCCESS:
+        # Get errno
+        errno, _ = testutils.exec_process('echo $?', shell=True, capture_output=True, text=True)
+        testutils.log.error("######## Errno (in case it is a OS error) ######## \n%s", errno)
         if switch_proc.stdout:
             out = switch_proc.stdout.read()
             # Do not bother to print whitespace.
