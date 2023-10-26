@@ -35,12 +35,6 @@ struct __attribute__((__packed__)) MainControlImpl_set_ct_options_value {
     } u;
 };
 
-struct hdr_md {
-    struct headers_t cpumap_hdr;
-    struct metadata_t cpumap_usermeta;
-    __u8 __hook;
-};
-
 REGISTER_START()
 REGISTER_TABLE(hdr_md_cpumap, BPF_MAP_TYPE_PERCPU_ARRAY, u32, struct hdr_md, 2)
 BPF_ANNOTATE_KV_PAIR(hdr_md_cpumap, u32, struct hdr_md)
@@ -114,7 +108,7 @@ if (/* hdr->ipv4.isValid() */
                     /* value */
                     struct MainControlImpl_set_ct_options_value *value = NULL;
                     /* perform lookup */
-                    act_bpf = bpf_skb_p4tc_tbl_read(skb, &params, &key, sizeof(key));
+                    act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
                     value = (struct MainControlImpl_set_ct_options_value *)act_bpf;
                     if (value == NULL) {
                         /* miss; find default action */

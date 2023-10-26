@@ -43,3 +43,9 @@ struct headers_t {
     struct ipv4_t ipv4; /* ipv4_t */
     struct udp_t udp; /* udp_t */
 };
+struct hdr_md {
+    struct headers_t cpumap_hdr;
+    struct main_metadata_t cpumap_usermeta;
+    __u8 __hook;
+};
+

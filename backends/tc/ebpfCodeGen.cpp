@@ -134,7 +134,6 @@ void PNAArchTC::emit(EBPF::CodeBuilder *builder) const {
      */
     emitInternalStructures(builder);
     emitTypes(builder);
-    emitGlobalHeadersMetadata(builder);
 
     /*
      * 4. BPF map definitions.
@@ -193,6 +192,7 @@ void PNAArchTC::emitHeader(EBPF::CodeBuilder *builder) const {
     for (auto type : ebpfTypes) {
         type->emit(builder);
     }
+    emitGlobalHeadersMetadata(builder);
 }
 
 // =====================TCIngressPipelinePNA=============================
@@ -1415,7 +1415,7 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
         builder->appendLine("/* perform lookup */");
         builder->target->emitTraceMessage(builder, "Control: performing table lookup");
         builder->emitIndent();
-        builder->appendLine("act_bpf = bpf_skb_p4tc_tbl_read(skb, &params, &key, sizeof(key));");
+        builder->appendLine("act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));");
         builder->emitIndent();
         builder->appendFormat("value = (struct %s *)act_bpf;", table->valueTypeName.c_str());
         builder->newline();

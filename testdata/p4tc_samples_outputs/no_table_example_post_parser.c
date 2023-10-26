@@ -9,12 +9,6 @@ struct internal_metadata {
 
 
 
-struct hdr_md {
-    struct headers_t cpumap_hdr;
-    struct main_metadata_t cpumap_usermeta;
-    __u8 __hook;
-};
-
 REGISTER_START()
 REGISTER_TABLE(hdr_md_cpumap, BPF_MAP_TYPE_PERCPU_ARRAY, u32, struct hdr_md, 2)
 BPF_ANNOTATE_KV_PAIR(hdr_md_cpumap, u32, struct hdr_md)
