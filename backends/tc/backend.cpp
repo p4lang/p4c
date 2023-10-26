@@ -132,7 +132,7 @@ void Backend::serialize() const {
                                      std::filesystem::perm_options::add);
     }
     cstring parserFile = progName + "_parser.c";
-    cstring postParserFile = progName + "_post_parser.c";
+    cstring postParserFile = progName + "_control_blocks.c";
     cstring headerFile = progName + "_parser.h";
     if (!options.outputFolder.isNullOrEmpty()) {
         parserFile = options.outputFolder + parserFile;
