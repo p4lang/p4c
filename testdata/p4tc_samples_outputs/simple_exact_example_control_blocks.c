@@ -1,5 +1,5 @@
 
-#include "simple_lpm_example_parser.h";
+#include "simple_exact_example_parser.h"
 #include <stdbool.h>
 #include <linux/if_ether.h>
 #include "pna.h"
@@ -28,12 +28,6 @@ struct __attribute__((__packed__)) ingress_nh_table_value {
         struct {
         } ingress_drop;
     } u;
-};
-
-struct hdr_md {
-    struct my_ingress_headers_t cpumap_hdr;
-    struct my_ingress_metadata_t cpumap_usermeta;
-    __u8 __hook;
 };
 
 REGISTER_START()
@@ -101,12 +95,12 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                 };
                 struct ingress_nh_table_key key = {};
                 key.keysz = 32;
-                key.field0 = bpf_htonl(hdr->ipv4.srcAddr);
+                key.field0 = hdr->ipv4.srcAddr;
                 struct p4tc_table_entry_act_bpf *act_bpf;
                 /* value */
                 struct ingress_nh_table_value *value = NULL;
                 /* perform lookup */
-                act_bpf = bpf_skb_p4tc_tbl_read(skb, &params, &key, sizeof(key));
+                act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
                 value = (struct ingress_nh_table_value *)act_bpf;
                 if (value == NULL) {
                     /* miss; find default action */

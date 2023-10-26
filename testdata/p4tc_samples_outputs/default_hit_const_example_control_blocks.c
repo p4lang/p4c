@@ -1,5 +1,5 @@
 
-#include "nummask_annotation_example_parser.h";
+#include "default_hit_const_example_parser.h"
 #include <stdbool.h>
 #include <linux/if_ether.h>
 #include "pna.h"
@@ -13,11 +13,16 @@ struct __attribute__((__packed__)) MainControlImpl_set_ct_options_key {
     u32 maskid;
     u8 field0; /* hdr.tcp.flags */
 } __attribute__((aligned(4)));
+#define MAX_MAINCONTROLIMPL_SET_CT_OPTIONS_KEY_MASKS 128
+struct MainControlImpl_set_ct_options_key_mask {
+    __u8 mask[sizeof(struct MainControlImpl_set_ct_options_key)];
+} __attribute__((aligned(4)));
 #define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_MAINCONTROLIMPL_TCP_SYN_PACKET 1
 #define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_MAINCONTROLIMPL_TCP_FIN_OR_RST_PACKET 2
 #define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_MAINCONTROLIMPL_TCP_OTHER_PACKETS 3
 struct __attribute__((__packed__)) MainControlImpl_set_ct_options_value {
     unsigned int action;
+    __u32 priority;
     union {
         struct {
         } _NoAction;
@@ -28,12 +33,6 @@ struct __attribute__((__packed__)) MainControlImpl_set_ct_options_value {
         struct {
         } MainControlImpl_tcp_other_packets;
     } u;
-};
-
-struct hdr_md {
-    struct headers_t cpumap_hdr;
-    struct metadata_t cpumap_usermeta;
-    __u8 __hook;
 };
 
 REGISTER_START()
@@ -92,8 +91,8 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
 {
         u8 hit;
         {
-if (((u32)istd.input_port == 2 && /* hdr->ipv4.isValid() */
-            hdr->ipv4.ebpf_valid) && /* hdr->tcp.isValid() */
+if (/* hdr->ipv4.isValid() */
+            hdr->ipv4.ebpf_valid && /* hdr->tcp.isValid() */
             hdr->tcp.ebpf_valid) {
 /* set_ct_options_0.apply() */
                 {
@@ -104,12 +103,12 @@ if (((u32)istd.input_port == 2 && /* hdr->ipv4.isValid() */
                     };
                     struct MainControlImpl_set_ct_options_key key = {};
                     key.keysz = 8;
-                    key.field0 = (hdr->tcp.flags);
+                    key.field0 = hdr->tcp.flags;
                     struct p4tc_table_entry_act_bpf *act_bpf;
                     /* value */
                     struct MainControlImpl_set_ct_options_value *value = NULL;
                     /* perform lookup */
-                    act_bpf = bpf_skb_p4tc_tbl_read(skb, &params, &key, sizeof(key));
+                    act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
                     value = (struct MainControlImpl_set_ct_options_value *)act_bpf;
                     if (value == NULL) {
                         /* miss; find default action */

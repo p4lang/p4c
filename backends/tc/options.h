@@ -26,9 +26,7 @@ namespace TC {
 class TCOptions : public CompilerOptions {
  public:
     // file to output to
-    cstring outputFile = nullptr;
-    cstring cFile = nullptr;
-    cstring introspecFile = nullptr;
+    cstring outputFolder = nullptr;
     bool DebugOn = false;
     // tracing eBPF code execution
     bool emitTraceMessages = false;
@@ -37,19 +35,12 @@ class TCOptions : public CompilerOptions {
 
     TCOptions() {
         registerOption(
-            "-o", "outfile",
+            "-o", "output Directory",
             [this](const char *arg) {
-                outputFile = arg;
+                outputFolder = arg;
                 return true;
             },
-            "Write pipeline template output to outfile");
-        registerOption(
-            "-c", "output Directory",
-            [this](const char *arg) {
-                cFile = arg;
-                return true;
-            },
-            "Write c output to the given file");
+            "Write pipeline template, introspection json and C output to given directory");
         registerOption(
             "-g", nullptr,
             [this](const char *) {
@@ -57,13 +48,6 @@ class TCOptions : public CompilerOptions {
                 return true;
             },
             "Generates debug information");
-        registerOption(
-            "-i", "introspecFile",
-            [this](const char *arg) {
-                introspecFile = arg;
-                return true;
-            },
-            "Write introspection json to the given file");
         registerOption(
             "--trace", nullptr,
             [this](const char *) {

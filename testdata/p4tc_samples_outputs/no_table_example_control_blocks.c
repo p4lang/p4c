@@ -1,5 +1,5 @@
 
-#include "drop_packet_example_parser.h";
+#include "no_table_example_parser.h"
 #include <stdbool.h>
 #include <linux/if_ether.h>
 #include "pna.h"
@@ -8,31 +8,6 @@ struct internal_metadata {
 } __attribute__((aligned(4)));
 
 
-struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_key {
-    u32 keysz;
-    u32 maskid;
-    u32 field0; /* hdr.ipv4.dstAddr */
-} __attribute__((aligned(4)));
-#define MAINCONTROLIMPL_IPV4_TBL_ACT_MAINCONTROLIMPL_NEXT_HOP 1
-#define MAINCONTROLIMPL_IPV4_TBL_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP 2
-struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_value {
-    unsigned int action;
-    union {
-        struct {
-        } _NoAction;
-        struct __attribute__((__packed__)) {
-            u32 vport;
-        } MainControlImpl_next_hop;
-        struct {
-        } MainControlImpl_default_route_drop;
-    } u;
-};
-
-struct hdr_md {
-    struct headers_t cpumap_hdr;
-    struct main_metadata_t cpumap_usermeta;
-    __u8 __hook;
-};
 
 REGISTER_START()
 REGISTER_TABLE(hdr_md_cpumap, BPF_MAP_TYPE_PERCPU_ARRAY, u32, struct hdr_md, 2)
@@ -90,61 +65,15 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
 {
         u8 hit;
         {
-if (/* hdr->ipv4.isValid() */
-            hdr->ipv4.ebpf_valid) {
-/* ipv4_tbl_0.apply() */
-                {
-                    /* construct key */
-                    struct p4tc_table_entry_act_bpf_params__local params = {
-                        .pipeid = 1,
-                        .tblid = 1
-                    };
-                    struct MainControlImpl_ipv4_tbl_key key = {};
-                    key.keysz = 32;
-                    key.field0 = hdr->ipv4.dstAddr;
-                    struct p4tc_table_entry_act_bpf *act_bpf;
-                    /* value */
-                    struct MainControlImpl_ipv4_tbl_value *value = NULL;
-                    /* perform lookup */
-                    act_bpf = bpf_skb_p4tc_tbl_read(skb, &params, &key, sizeof(key));
-                    value = (struct MainControlImpl_ipv4_tbl_value *)act_bpf;
-                    if (value == NULL) {
-                        /* miss; find default action */
-                        hit = 0;
-                    } else {
-                        hit = 1;
-                    }
-                    if (value != NULL) {
-                        /* run action */
-                        switch (value->action) {
-                            case MAINCONTROLIMPL_IPV4_TBL_ACT_MAINCONTROLIMPL_NEXT_HOP: 
-                                {
-/* send_to_port(value->u.MainControlImpl_next_hop.vport) */
-                                    compiler_meta__->drop = false;
-                                    send_to_port(value->u.MainControlImpl_next_hop.vport);
-                                }
-                                break;
-                            case MAINCONTROLIMPL_IPV4_TBL_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP: 
-                                {
-/* drop_packet() */
-                                    drop_packet();
-                                }
-                                break;
-                            default:
-                                return TC_ACT_SHOT;
-                        }
-                    } else {
-                        return TC_ACT_SHOT;
-;
-                    }
-                }
-;            }
+if ((u32)istd.input_port == 4) {
+                hdr->udp.src_port = (hdr->udp.src_port + 1);            }
 
         }
     }
     {
 {
 ;
+            ;
             ;
         }
 
@@ -157,6 +86,9 @@ if (/* hdr->ipv4.isValid() */
         }
 ;        if (hdr->ipv4.ebpf_valid) {
             outHeaderLength += 160;
+        }
+;        if (hdr->udp.ebpf_valid) {
+            outHeaderLength += 64;
         }
 ;
         int outHeaderOffset = BYTES(outHeaderLength) - BYTES(ebpf_packetOffsetInBits);
@@ -292,6 +224,40 @@ if (/* hdr->ipv4.isValid() */
             ebpf_byte = ((char*)(&hdr->ipv4.dstAddr))[3];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
             ebpf_packetOffsetInBits += 32;
+
+        }
+;        if (hdr->udp.ebpf_valid) {
+            if (ebpf_packetEnd < pkt + BYTES(ebpf_packetOffsetInBits + 64)) {
+                return TC_ACT_SHOT;
+            }
+            
+            hdr->udp.src_port = bpf_htons(hdr->udp.src_port);
+            ebpf_byte = ((char*)(&hdr->udp.src_port))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->udp.src_port))[1];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_packetOffsetInBits += 16;
+
+            hdr->udp.dst_port = bpf_htons(hdr->udp.dst_port);
+            ebpf_byte = ((char*)(&hdr->udp.dst_port))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->udp.dst_port))[1];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_packetOffsetInBits += 16;
+
+            hdr->udp.length = bpf_htons(hdr->udp.length);
+            ebpf_byte = ((char*)(&hdr->udp.length))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->udp.length))[1];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_packetOffsetInBits += 16;
+
+            hdr->udp.checksum = bpf_htons(hdr->udp.checksum);
+            ebpf_byte = ((char*)(&hdr->udp.checksum))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->udp.checksum))[1];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_packetOffsetInBits += 16;
 
         }
 ;

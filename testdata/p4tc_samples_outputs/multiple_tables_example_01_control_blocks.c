@@ -1,5 +1,5 @@
 
-#include "multiple_tables_example_02_parser.h";
+#include "multiple_tables_example_01_parser.h"
 #include <stdbool.h>
 #include <linux/if_ether.h>
 #include "pna.h"
@@ -62,7 +62,8 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_3_value {
     union {
         struct {
         } _NoAction;
-        struct {
+        struct __attribute__((__packed__)) {
+            u32 vport;
         } MainControlImpl_sendtoport;
         struct {
         } MainControlImpl_drop;
@@ -82,7 +83,8 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_4_value {
     union {
         struct {
         } _NoAction;
-        struct {
+        struct __attribute__((__packed__)) {
+            u32 vport;
         } MainControlImpl_sendtoport;
         struct {
         } MainControlImpl_drop;
@@ -131,7 +133,8 @@ struct __attribute__((__packed__)) MainControlImpl_set_all_options_value {
         } MainControlImpl_tcp_fin_or_rst_packet;
         struct {
         } MainControlImpl_tcp_other_packets;
-        struct {
+        struct __attribute__((__packed__)) {
+            u32 vport;
         } MainControlImpl_sendtoport;
         struct {
         } MainControlImpl_drop;
@@ -162,12 +165,6 @@ struct __attribute__((__packed__)) MainControlImpl_set_ct_options_value {
         struct {
         } MainControlImpl_tcp_other_packets;
     } u;
-};
-
-struct hdr_md {
-    struct headers_t cpumap_hdr;
-    struct main_metadata_t cpumap_usermeta;
-    __u8 __hook;
 };
 
 REGISTER_START()
@@ -242,7 +239,7 @@ if (/* hdr->ipv4.isValid() */
                     /* value */
                     struct MainControlImpl_ipv4_tbl_1_value *value = NULL;
                     /* perform lookup */
-                    act_bpf = bpf_skb_p4tc_tbl_read(skb, &params, &key, sizeof(key));
+                    act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
                     value = (struct MainControlImpl_ipv4_tbl_1_value *)act_bpf;
                     if (value == NULL) {
                         /* miss; find default action */
@@ -255,15 +252,14 @@ if (/* hdr->ipv4.isValid() */
                         switch (value->action) {
                             case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_NEXT_HOP: 
                                 {
-                                    hdr->ipv4.version = 1;
-                                    /* send_to_port(value->u.MainControlImpl_next_hop.vport) */
+/* send_to_port(value->u.MainControlImpl_next_hop.vport) */
                                     compiler_meta__->drop = false;
                                     send_to_port(value->u.MainControlImpl_next_hop.vport);
                                 }
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP: 
                                 {
-if (hdr->ipv4.protocol != 6) {
+if (hdr->ipv4.protocol == 6 && (hdr->tcp.srcPort > 0)) {
 /* drop_packet() */
                                         drop_packet();                                    }
 
@@ -294,7 +290,7 @@ if (hdr->ipv4.protocol != 6) {
                     /* value */
                     struct MainControlImpl_ipv4_tbl_2_value *value = NULL;
                     /* perform lookup */
-                    act_bpf = bpf_skb_p4tc_tbl_read(skb, &params, &key, sizeof(key));
+                    act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
                     value = (struct MainControlImpl_ipv4_tbl_2_value *)act_bpf;
                     if (value == NULL) {
                         /* miss; find default action */
@@ -307,15 +303,14 @@ if (hdr->ipv4.protocol != 6) {
                         switch (value->action) {
                             case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_NEXT_HOP: 
                                 {
-                                    hdr->ipv4.version = 1;
-                                    /* send_to_port(value->u.MainControlImpl_next_hop.vport) */
+/* send_to_port(value->u.MainControlImpl_next_hop.vport) */
                                     compiler_meta__->drop = false;
                                     send_to_port(value->u.MainControlImpl_next_hop.vport);
                                 }
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP: 
                                 {
-if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))) {
+if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
 /* drop_packet() */
                                         drop_packet();                                    }
 
@@ -346,7 +341,7 @@ if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))
                     /* value */
                     struct MainControlImpl_ipv4_tbl_3_value *value = NULL;
                     /* perform lookup */
-                    act_bpf = bpf_skb_p4tc_tbl_read(skb, &params, &key, sizeof(key));
+                    act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
                     value = (struct MainControlImpl_ipv4_tbl_3_value *)act_bpf;
                     if (value == NULL) {
                         /* miss; find default action */
@@ -359,14 +354,14 @@ if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))
                         switch (value->action) {
                             case MAINCONTROLIMPL_IPV4_TBL_3_ACT_MAINCONTROLIMPL_SENDTOPORT: 
                                 {
-/* send_to_port(istd.input_port) */
+/* send_to_port(value->u.MainControlImpl_sendtoport.vport) */
                                     compiler_meta__->drop = false;
-                                    send_to_port(skb->ifindex);
+                                    send_to_port(value->u.MainControlImpl_sendtoport.vport);
                                 }
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_3_ACT_MAINCONTROLIMPL_DROP: 
                                 {
-if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))) {
+if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
 /* drop_packet() */
                                         drop_packet();                                    }
 
@@ -401,7 +396,7 @@ if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))
                     /* value */
                     struct MainControlImpl_ipv4_tbl_4_value *value = NULL;
                     /* perform lookup */
-                    act_bpf = bpf_skb_p4tc_tbl_read(skb, &params, &key, sizeof(key));
+                    act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
                     value = (struct MainControlImpl_ipv4_tbl_4_value *)act_bpf;
                     if (value == NULL) {
                         /* miss; find default action */
@@ -414,14 +409,14 @@ if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))
                         switch (value->action) {
                             case MAINCONTROLIMPL_IPV4_TBL_4_ACT_MAINCONTROLIMPL_SENDTOPORT: 
                                 {
-/* send_to_port(istd.input_port) */
+/* send_to_port(value->u.MainControlImpl_sendtoport.vport) */
                                     compiler_meta__->drop = false;
-                                    send_to_port(skb->ifindex);
+                                    send_to_port(value->u.MainControlImpl_sendtoport.vport);
                                 }
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_4_ACT_MAINCONTROLIMPL_DROP: 
                                 {
-if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))) {
+if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
 /* drop_packet() */
                                         drop_packet();                                    }
 
@@ -454,7 +449,7 @@ if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))
                     /* value */
                     struct MainControlImpl_ipv4_tbl_5_value *value = NULL;
                     /* perform lookup */
-                    act_bpf = bpf_skb_p4tc_tbl_read(skb, &params, &key, sizeof(key));
+                    act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
                     value = (struct MainControlImpl_ipv4_tbl_5_value *)act_bpf;
                     if (value == NULL) {
                         /* miss; find default action */
@@ -492,7 +487,7 @@ if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))
                     /* value */
                     struct MainControlImpl_set_ct_options_value *value = NULL;
                     /* perform lookup */
-                    act_bpf = bpf_skb_p4tc_tbl_read(skb, &params, &key, sizeof(key));
+                    act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
                     value = (struct MainControlImpl_set_ct_options_value *)act_bpf;
                     if (value == NULL) {
                         /* miss; find default action */
@@ -541,7 +536,7 @@ if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))
                     /* value */
                     struct MainControlImpl_set_all_options_value *value = NULL;
                     /* perform lookup */
-                    act_bpf = bpf_skb_p4tc_tbl_read(skb, &params, &key, sizeof(key));
+                    act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
                     value = (struct MainControlImpl_set_all_options_value *)act_bpf;
                     if (value == NULL) {
                         /* miss; find default action */
@@ -554,15 +549,14 @@ if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))
                         switch (value->action) {
                             case MAINCONTROLIMPL_SET_ALL_OPTIONS_ACT_MAINCONTROLIMPL_NEXT_HOP: 
                                 {
-                                    hdr->ipv4.version = 1;
-                                    /* send_to_port(value->u.MainControlImpl_next_hop.vport) */
+/* send_to_port(value->u.MainControlImpl_next_hop.vport) */
                                     compiler_meta__->drop = false;
                                     send_to_port(value->u.MainControlImpl_next_hop.vport);
                                 }
                                 break;
                             case MAINCONTROLIMPL_SET_ALL_OPTIONS_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP: 
                                 {
-if (hdr->ipv4.protocol != 6) {
+if (hdr->ipv4.protocol == 6 && (hdr->tcp.srcPort > 0)) {
 /* drop_packet() */
                                         drop_packet();                                    }
 
@@ -582,14 +576,14 @@ if (hdr->ipv4.protocol != 6) {
                                 break;
                             case MAINCONTROLIMPL_SET_ALL_OPTIONS_ACT_MAINCONTROLIMPL_SENDTOPORT: 
                                 {
-/* send_to_port(istd.input_port) */
+/* send_to_port(value->u.MainControlImpl_sendtoport.vport) */
                                     compiler_meta__->drop = false;
-                                    send_to_port(skb->ifindex);
+                                    send_to_port(value->u.MainControlImpl_sendtoport.vport);
                                 }
                                 break;
                             case MAINCONTROLIMPL_SET_ALL_OPTIONS_ACT_MAINCONTROLIMPL_DROP: 
                                 {
-if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))) {
+if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
 /* drop_packet() */
                                         drop_packet();                                    }
 

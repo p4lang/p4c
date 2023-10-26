@@ -1,5 +1,5 @@
 
-#include "noaction_example_01_parser.h";
+#include "noaction_example_02_parser.h"
 #include <stdbool.h>
 #include <linux/if_ether.h>
 #include "pna.h"
@@ -30,29 +30,14 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_value {
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_key {
     u32 keysz;
     u32 maskid;
-    u32 field0; /* hdr.ipv4.dstAddr */
-    u32 field1; /* hdr.ipv4.srcAddr */
-    u8 field2; /* hdr.ipv4.flags */
+    u8 field0; /* hdr.ipv4.flags */
 } __attribute__((aligned(4)));
-#define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_SENDTOPORT 3
-#define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP 4
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_value {
     unsigned int action;
     union {
         struct {
         } _NoAction;
-        struct __attribute__((__packed__)) {
-            u32 vport;
-        } MainControlImpl_sendtoport;
-        struct {
-        } MainControlImpl_drop;
     } u;
-};
-
-struct hdr_md {
-    struct headers_t cpumap_hdr;
-    struct main_metadata_t cpumap_usermeta;
-    __u8 __hook;
 };
 
 REGISTER_START()
@@ -127,7 +112,7 @@ if (/* hdr->ipv4.isValid() */
                     /* value */
                     struct MainControlImpl_ipv4_tbl_1_value *value = NULL;
                     /* perform lookup */
-                    act_bpf = bpf_skb_p4tc_tbl_read(skb, &params, &key, sizeof(key));
+                    act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
                     value = (struct MainControlImpl_ipv4_tbl_1_value *)act_bpf;
                     if (value == NULL) {
                         /* miss; find default action */
@@ -168,15 +153,13 @@ if (/* hdr->ipv4.isValid() */
                         .tblid = 2
                     };
                     struct MainControlImpl_ipv4_tbl_2_key key = {};
-                    key.keysz = 67;
-                    key.field0 = hdr->ipv4.dstAddr;
-                    key.field1 = hdr->ipv4.srcAddr;
-                    key.field2 = hdr->ipv4.flags;
+                    key.keysz = 3;
+                    key.field0 = hdr->ipv4.flags;
                     struct p4tc_table_entry_act_bpf *act_bpf;
                     /* value */
                     struct MainControlImpl_ipv4_tbl_2_value *value = NULL;
                     /* perform lookup */
-                    act_bpf = bpf_skb_p4tc_tbl_read(skb, &params, &key, sizeof(key));
+                    act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
                     value = (struct MainControlImpl_ipv4_tbl_2_value *)act_bpf;
                     if (value == NULL) {
                         /* miss; find default action */
@@ -187,19 +170,6 @@ if (/* hdr->ipv4.isValid() */
                     if (value != NULL) {
                         /* run action */
                         switch (value->action) {
-                            case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_SENDTOPORT: 
-                                {
-/* send_to_port(value->u.MainControlImpl_sendtoport.vport) */
-                                    compiler_meta__->drop = false;
-                                    send_to_port(value->u.MainControlImpl_sendtoport.vport);
-                                }
-                                break;
-                            case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP: 
-                                {
-/* drop_packet() */
-                                    drop_packet();
-                                }
-                                break;
                             case 0: 
                                 {
                                 }

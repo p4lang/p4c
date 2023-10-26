@@ -1,5 +1,5 @@
 
-#include "multiple_tables_example_01_parser.h";
+#include "multiple_tables_example_01_parser.h"
 #include <stdbool.h>
 #include <linux/if_ether.h>
 #include "pna.h"
@@ -168,6 +168,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
 
 SEC("classifier/tc-parse")
 int tc_parse_func(struct __sk_buff *skb) {
+    struct pna_global_metadata *compiler_meta__ = (struct pna_global_metadata *) skb->cb;
     struct hdr_md *hdrMd;
     struct headers_t *hdr;
     int ret = -1;
