@@ -365,15 +365,15 @@ class FindUninitialized : public Inspector {
     ReferenceMap *refMap;
     TypeMap *typeMap;
     AllDefinitions *definitions;
-    bool lhs;                   // checking the lhs of an assignment
+    bool lhs = false;           // checking the lhs of an assignment
     ProgramPoint currentPoint;  // context of the current expression/statement
     /// For some simple expresssions keep here the read location sets.
     /// This does not include location sets read by subexpressions.
     std::map<const IR::Expression *, const LocationSet *> readLocations;
     HasUses *hasUses;  // output
     /// If true the current statement is unreachable
-    bool unreachable;
-    bool virtualMethod;
+    bool unreachable = false;
+    bool virtualMethod = false;
 
     HeaderDefinitions *headerDefs;
     bool reportInvalidHeaders = true;
@@ -407,10 +407,8 @@ class FindUninitialized : public Inspector {
           refMap(parent->definitions->storageMap->refMap),
           typeMap(parent->definitions->storageMap->typeMap),
           definitions(parent->definitions),
-          lhs(false),
           currentPoint(context),
           hasUses(parent->hasUses),
-          virtualMethod(false),
           headerDefs(parent->headerDefs),
           reportInvalidHeaders(parent->reportInvalidHeaders) {
         visitDagOnce = false;
@@ -421,10 +419,8 @@ class FindUninitialized : public Inspector {
         : refMap(definitions->storageMap->refMap),
           typeMap(definitions->storageMap->typeMap),
           definitions(definitions),
-          lhs(false),
           currentPoint(),
           hasUses(hasUses),
-          virtualMethod(false),
           headerDefs(new HeaderDefinitions(refMap, typeMap, definitions->storageMap)) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);

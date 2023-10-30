@@ -40,7 +40,7 @@ class KeyIsSimple {
  */
 class IsLikeLeftValue : public KeyIsSimple, public Inspector {
  protected:
-    bool simple;
+    bool simple = false;
 
  public:
     IsLikeLeftValue() { setName("IsLikeLeftValue"); }
