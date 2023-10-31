@@ -70,8 +70,8 @@ TestBackEnd::TestInfo EBPFTestBackend::produceTestInfo(
         // eBPF actually can not modify the input packet. It can only filter. Thus we reuse our
         // input packet here.
         testInfo.outputPacket = testInfo.inputPacket;
-        testInfo.packetTaintMask =
-            IR::getConstant(testInfo.inputPacket->type, IR::getMaxBvVal(testInfo.inputPacket->type));
+        testInfo.packetTaintMask = IR::getConstant(testInfo.inputPacket->type,
+                                                   IR::getMaxBvVal(testInfo.inputPacket->type));
     }
     return testInfo;
 }
