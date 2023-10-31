@@ -463,15 +463,20 @@ class P4ListExpression : BaseListExpression {
 
 /// An expression that evaluates to a struct.
 class StructExpression : Expression {
-    /// The struct or header type that is being intialized.
+    /// The struct or header type that is being initialized.
     /// May only be known after type checking; so it can be nullptr.
     NullOK Type structType;
+
+    /// Allow the struct expression to have a Type_StructLike type.
+    optional bool structOkay = false;
+
     inline IndexedVector<NamedExpression> components;
     validate {
         components.check_null(); components.validate();
         BUG_CHECK(structType == nullptr || structType->is<IR::Type_Name>() ||
-                  structType->is<IR::Type_Specialized>(),
-                  "%1%: unexpected struct type", this);
+                  structType->is<IR::Type_Specialized>()
+                  || (structOkay && structType->is<IR::Type_StructLike>()),
+                  "%1%: unexpected struct type %2%", this, structType->node_type_name());
     }
     size_t size() const { return components.size(); }
     NamedExpression getField(cstring name) const {
