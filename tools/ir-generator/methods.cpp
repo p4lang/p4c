@@ -314,7 +314,7 @@ void IrClass::generateMethods() {
                     auto *m = new IrMethod(def.first, body);
                     if (def.second.flags & FRIEND) m->isFriend = true;
                     m->clss = this;
-                    if (!(def.second.flags & CONSTRUCTOR) || !shouldSkip("constructor")) {
+                    if (!(def.second.flags & CONSTRUCTOR) || !shouldSkip("method_constructor")) {
                         elements.push_back(m);
                     }
                 }
