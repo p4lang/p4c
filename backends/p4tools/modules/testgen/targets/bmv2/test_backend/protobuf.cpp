@@ -1,10 +1,8 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/protobuf.h"
 
-#include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
-#include <list>
 #include <map>
 #include <optional>
 #include <string>
@@ -17,7 +15,6 @@
 #include "backends/p4tools/common/lib/format_int.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "control-plane/p4RuntimeArchHandler.h"
-#include "control-plane/p4RuntimeArchStandard.h"
 #include "ir/declaration.h"
 #include "ir/ir.h"
 #include "ir/vector.h"
@@ -30,7 +27,6 @@
 
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/test_object.h"
-#include "backends/p4tools/modules/testgen/lib/tf.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
@@ -40,8 +36,8 @@ std::string formatHexExprWithSep(const IR::Expression *expr) {
     return insertHexSeparators(formatHexExpr(expr, false, true, false));
 }
 
-Protobuf::Protobuf(std::filesystem::path basePath, std::optional<unsigned int> seed = std::nullopt)
-    : TF(std::move(basePath), seed) {}
+Protobuf::Protobuf(std::filesystem::path basePath, std::optional<unsigned int> seed)
+    : Bmv2TF(std::move(basePath), seed) {}
 
 std::optional<p4rt_id_t> Protobuf::getIdAnnotation(const IR::IAnnotated *node) {
     const auto *idAnnotation = node->getAnnotation("id");
@@ -84,31 +80,7 @@ std::optional<p4rt_id_t> Protobuf::externalId(const P4::ControlPlaneAPI::P4Runti
     return id;
 }
 
-std::vector<std::pair<size_t, size_t>> Protobuf::getIgnoreMasks(const IR::Constant *mask) {
-    std::vector<std::pair<size_t, size_t>> ignoreMasks;
-    if (mask == nullptr) {
-        return ignoreMasks;
-    }
-    auto maskBinStr = formatBinExpr(mask, false, true, false);
-    int countZeroes = 0;
-    size_t offset = 0;
-    for (; offset < maskBinStr.size(); ++offset) {
-        if (maskBinStr.at(offset) == '0') {
-            countZeroes++;
-        } else {
-            if (countZeroes > 0) {
-                ignoreMasks.emplace_back(offset - countZeroes, countZeroes);
-                countZeroes = 0;
-            }
-        }
-    }
-    if (countZeroes > 0) {
-        ignoreMasks.emplace_back(offset - countZeroes, countZeroes);
-    }
-    return ignoreMasks;
-}
-
-inja::json Protobuf::getControlPlane(const TestSpec *testSpec) {
+inja::json Protobuf::getControlPlane(const TestSpec *testSpec) const {
     inja::json controlPlaneJson = inja::json::object();
 
     // Map of actionProfiles and actionSelectors for easy reference.
@@ -164,7 +136,7 @@ inja::json Protobuf::getControlPlane(const TestSpec *testSpec) {
 }
 
 inja::json Protobuf::getControlPlaneForTable(const TableMatchMap &matches,
-                                             const std::vector<ActionArg> &args) {
+                                             const std::vector<ActionArg> &args) const {
     inja::json rulesJson;
 
     rulesJson["single_exact_matches"] = inja::json::array();
@@ -228,7 +200,7 @@ inja::json Protobuf::getControlPlaneForTable(const TableMatchMap &matches,
     return rulesJson;
 }
 
-inja::json Protobuf::getSend(const TestSpec *testSpec) {
+inja::json Protobuf::getSend(const TestSpec *testSpec) const {
     const auto *iPacket = testSpec->getIngressPacket();
     const auto *payload = iPacket->getEvaluatedPayload();
     inja::json sendJson;
@@ -239,7 +211,7 @@ inja::json Protobuf::getSend(const TestSpec *testSpec) {
     return sendJson;
 }
 
-inja::json Protobuf::getVerify(const TestSpec *testSpec) {
+inja::json Protobuf::getExpectedPacket(const TestSpec *testSpec) const {
     inja::json verifyData = inja::json::object();
     if (testSpec->getEgressPacket() != std::nullopt) {
         const auto &packet = **testSpec->getEgressPacket();
@@ -392,7 +364,7 @@ void Protobuf::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
     dataJson["trace"] = getTrace(testSpec);
     dataJson["control_plane"] = getControlPlane(testSpec);
     dataJson["send"] = getSend(testSpec);
-    dataJson["verify"] = getVerify(testSpec);
+    dataJson["verify"] = getExpectedPacket(testSpec);
     dataJson["timestamp"] = Utils::getTimeStamp();
     std::stringstream coverageStr;
     coverageStr << std::setprecision(2) << currentCoverage;

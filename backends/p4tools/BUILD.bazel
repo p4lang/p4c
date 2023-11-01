@@ -90,7 +90,6 @@ filegroup(
 cc_library(
     name = "testgen_lib",
     srcs = glob([
-        "modules/testgen/backend/*.h",
         "modules/testgen/core/**/*.h",
         "modules/testgen/lib/*.h",
         "modules/testgen/*.h",
@@ -99,7 +98,6 @@ cc_library(
         "modules/testgen/core/small_step/*.cpp",
         "modules/testgen/core/symbolic_executor/*.cpp",
         "modules/testgen/lib/*.cpp",
-        "modules/testgen/backend/*.cpp",
     ]) + [
         "common/options.h",
         "modules/testgen/options.cpp",

@@ -19,62 +19,12 @@
 #include "nlohmann/json.hpp"
 
 #include "backends/p4tools/modules/testgen/lib/test_object.h"
-#include "backends/p4tools/modules/testgen/lib/tf.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-Metadata::Metadata(std::filesystem::path basePath, std::optional<unsigned int> seed = std::nullopt)
-    : TF(std::move(basePath), seed) {}
-
-std::vector<std::pair<size_t, size_t>> Metadata::getIgnoreMasks(const IR::Constant *mask) {
-    std::vector<std::pair<size_t, size_t>> ignoreMasks;
-    if (mask == nullptr) {
-        return ignoreMasks;
-    }
-    auto maskBinStr = formatBinExpr(mask, false, true, false);
-    int countZeroes = 0;
-    size_t offset = 0;
-    for (; offset < maskBinStr.size(); ++offset) {
-        if (maskBinStr.at(offset) == '0') {
-            countZeroes++;
-        } else {
-            if (countZeroes > 0) {
-                ignoreMasks.emplace_back(offset - countZeroes, countZeroes);
-                countZeroes = 0;
-            }
-        }
-    }
-    if (countZeroes > 0) {
-        ignoreMasks.emplace_back(offset - countZeroes, countZeroes);
-    }
-    return ignoreMasks;
-}
-
-inja::json Metadata::getSend(const TestSpec *testSpec) {
-    const auto *iPacket = testSpec->getIngressPacket();
-    const auto *payload = iPacket->getEvaluatedPayload();
-    inja::json sendJson;
-    sendJson["ig_port"] = iPacket->getPort();
-    auto dataStr = formatHexExpr(payload);
-    sendJson["pkt"] = dataStr;
-    sendJson["pkt_size"] = payload->type->width_bits();
-    return sendJson;
-}
-
-inja::json Metadata::getVerify(const TestSpec *testSpec) {
-    inja::json verifyData = inja::json::object();
-    auto egressPacket = testSpec->getEgressPacket();
-    if (egressPacket.has_value()) {
-        const auto *packet = egressPacket.value();
-        verifyData["eg_port"] = packet->getPort();
-        const auto *payload = packet->getEvaluatedPayload();
-        const auto *payloadMask = packet->getEvaluatedPayloadMask();
-        verifyData["ignore_mask"] = formatHexExpr(payloadMask);
-        verifyData["exp_pkt"] = formatHexExpr(payload);
-    }
-    return verifyData;
-}
+Metadata::Metadata(std::filesystem::path basePath, std::optional<unsigned int> seed)
+    : Bmv2TF(std::move(basePath), seed) {}
 
 std::string Metadata::getTestCaseTemplate() {
     static std::string TEST_CASE(
@@ -151,7 +101,7 @@ void Metadata::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
     computeTraceData(testSpec, dataJson);
 
     dataJson["send"] = getSend(testSpec);
-    dataJson["verify"] = getVerify(testSpec);
+    dataJson["verify"] = getExpectedPacket(testSpec);
     dataJson["timestamp"] = Utils::getTimeStamp();
     std::stringstream coverageStr;
     coverageStr << std::setprecision(2) << currentCoverage;

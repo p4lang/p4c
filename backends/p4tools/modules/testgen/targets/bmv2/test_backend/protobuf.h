@@ -5,7 +5,6 @@
 #include <filesystem>
 #include <optional>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include <inja/inja.hpp>
@@ -17,7 +16,7 @@
 #include "lib/cstring.h"
 
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
-#include "backends/p4tools/modules/testgen/lib/tf.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/common.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
@@ -25,19 +24,10 @@ using P4::ControlPlaneAPI::p4rt_id_t;
 using P4::ControlPlaneAPI::Standard::SymbolType;
 
 /// Extracts information from the @testSpec to emit a Protobuf test case.
-class Protobuf : public TF {
+class Protobuf : public Bmv2TF {
  public:
-    virtual ~Protobuf() = default;
-
-    Protobuf(const Protobuf &) = delete;
-
-    Protobuf(Protobuf &&) = delete;
-
-    Protobuf &operator=(const Protobuf &) = delete;
-
-    Protobuf &operator=(Protobuf &&) = delete;
-
-    Protobuf(std::filesystem::path basePath, std::optional<unsigned int> seed);
+    explicit Protobuf(std::filesystem::path basePath,
+                      std::optional<unsigned int> seed = std::nullopt);
 
     /// Produce a Protobuf test.
     void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testId,
@@ -59,22 +49,15 @@ class Protobuf : public TF {
     /// @returns the inja test case template as a string.
     static std::string getTestCaseTemplate();
 
-    /// Converts all the control plane objects into Inja format.
-    static inja::json getControlPlane(const TestSpec *testSpec);
+    inja::json getSend(const TestSpec *testSpec) const override;
 
-    /// Converts the input packet and port into Inja format.
-    static inja::json getSend(const TestSpec *testSpec);
+    inja::json getControlPlane(const TestSpec *testSpec) const override;
 
-    /// Converts the output packet, port, and mask into Inja format.
-    static inja::json getVerify(const TestSpec *testSpec);
-
-    /// Helper function for @getVerify. Matches the mask value against the input packet value and
-    /// generates the appropriate ignore ranges.
-    static std::vector<std::pair<size_t, size_t>> getIgnoreMasks(const IR::Constant *mask);
+    inja::json getExpectedPacket(const TestSpec *testSpec) const override;
 
     /// Helper function for the control plane table inja objects.
-    static inja::json getControlPlaneForTable(const TableMatchMap &matches,
-                                              const std::vector<ActionArg> &args);
+    inja::json getControlPlaneForTable(const TableMatchMap &matches,
+                                       const std::vector<ActionArg> &args) const override;
 
     /// @return the id allocated to the object through the @id annotation if any, or
     /// std::nullopt.
