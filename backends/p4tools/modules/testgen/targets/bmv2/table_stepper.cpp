@@ -63,7 +63,8 @@ const IR::Expression *Bmv2V1ModelTableStepper::computeTargetMatchType(
             keyExpr->type, properties.tableName + "_mask_" + keyProperties.name);
         // Encode P4Runtime constraints for PTF and Protobuf tests.
         // (https://p4.org/p4-spec/docs/p4runtime-spec-working-draft-html-version.html#sec-match-format)
-        if (testgenOptions.testBackend == "PTF" || testgenOptions.testBackend == "PROTOBUF") {
+        if (testgenOptions.testBackend == "PTF" || testgenOptions.testBackend == "PROTOBUF" ||
+            testgenOptions.testBackend == "PROTOBUF_IR") {
             hitCondition = new IR::LAnd(
                 hitCondition, new IR::Equ(new IR::BAnd(ctrlPlaneKey, ternaryMask), ctrlPlaneKey));
         }

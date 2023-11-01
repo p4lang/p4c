@@ -10,6 +10,7 @@ set(
   ${TESTGEN_SOURCES}
   ${CMAKE_CURRENT_SOURCE_DIR}/test_backend/common.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test_backend/protobuf.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test_backend/protobuf_ir.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test_backend/metadata.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test_backend/ptf.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test_backend/stf.cpp
