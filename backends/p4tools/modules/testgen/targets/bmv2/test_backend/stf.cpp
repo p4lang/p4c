@@ -1,4 +1,4 @@
-#include "backends/p4tools/modules/testgen/targets/bmv2/backend/stf/stf.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/stf.h"
 
 #include <fstream>
 #include <iomanip>

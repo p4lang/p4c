@@ -1,8 +1,9 @@
-#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_BACKEND_PROTOBUF_PROTOBUF_H_
-#define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_BACKEND_PROTOBUF_PROTOBUF_H_
+#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_BACKEND_PTF_H_
+#define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_BACKEND_PTF_H_
 
 #include <cstddef>
 #include <filesystem>
+#include <fstream>
 #include <optional>
 #include <string>
 #include <utility>
@@ -10,43 +11,45 @@
 
 #include <inja/inja.hpp>
 
-#include "control-plane/p4RuntimeArchHandler.h"
-#include "control-plane/p4RuntimeArchStandard.h"
-#include "ir/declaration.h"
+/// Inja
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
+#include "backends/p4tools/modules/testgen/lib/test_object.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/lib/tf.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-using P4::ControlPlaneAPI::p4rt_id_t;
-using P4::ControlPlaneAPI::Standard::SymbolType;
+/// Extracts information from the @testSpec to emit a PTF test case.
+class PTF : public TF {
+    /// Has the preamble been generated already?
+    bool preambleEmitted = false;
 
-/// Extracts information from the @testSpec to emit a Protobuf test case.
-class Protobuf : public TF {
+    /// The output file.
+    std::ofstream ptfFileStream;
+
  public:
-    virtual ~Protobuf() = default;
+    virtual ~PTF() = default;
 
-    Protobuf(const Protobuf &) = delete;
+    PTF(const PTF &) = delete;
 
-    Protobuf(Protobuf &&) = delete;
+    PTF(PTF &&) = delete;
 
-    Protobuf &operator=(const Protobuf &) = delete;
+    PTF &operator=(const PTF &) = delete;
 
-    Protobuf &operator=(Protobuf &&) = delete;
+    PTF &operator=(PTF &&) = delete;
 
-    Protobuf(std::filesystem::path basePath, std::optional<unsigned int> seed);
+    PTF(std::filesystem::path basePath, std::optional<unsigned int> seed);
 
-    /// Produce a Protobuf test.
+    /// Produce a PTF test.
     void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testId,
                     float currentCoverage) override;
 
  private:
     /// Emits the test preamble. This is only done once for all generated tests.
-    /// For the protobuf back end this is the "p4testgen.proto" file.
-    void emitPreamble(const std::string &preamble);
+    /// For the PTF back end this is the test setup Python script..
+    void emitPreamble();
 
     /// Emits a test case.
     /// @param testId specifies the test name.
@@ -68,6 +71,12 @@ class Protobuf : public TF {
     /// Converts the output packet, port, and mask into Inja format.
     static inja::json getVerify(const TestSpec *testSpec);
 
+    /// @returns the configuration for a meter call (may set the meter to GREEN, YELLOW, or RED)
+    static inja::json::array_t getMeter(const TestObjectMap &meterValues);
+
+    /// @returns the configuration for a cloned packet configuration.
+    static inja::json getClone(const TestObjectMap &cloneSpecs);
+
     /// Helper function for @getVerify. Matches the mask value against the input packet value and
     /// generates the appropriate ignore ranges.
     static std::vector<std::pair<size_t, size_t>> getIgnoreMasks(const IR::Constant *mask);
@@ -75,18 +84,8 @@ class Protobuf : public TF {
     /// Helper function for the control plane table inja objects.
     static inja::json getControlPlaneForTable(const TableMatchMap &matches,
                                               const std::vector<ActionArg> &args);
-
-    /// @return the id allocated to the object through the @id annotation if any, or
-    /// std::nullopt.
-    static std::optional<p4rt_id_t> getIdAnnotation(const IR::IAnnotated *node);
-
-    /// @return the value of any P4 '@id' annotation @declaration may have, and
-    /// ensure that the value is correct with respect to the P4Runtime
-    /// specification. The name 'externalId' is in analogy with externalName().
-    static std::optional<p4rt_id_t> externalId(const P4::ControlPlaneAPI::P4RuntimeSymbolType &type,
-                                               const IR::IDeclaration *declaration);
 };
 
 }  // namespace P4Tools::P4Testgen::Bmv2
 
-#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_BACKEND_PROTOBUF_PROTOBUF_H_ */
+#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_BACKEND_PTF_H_ */
