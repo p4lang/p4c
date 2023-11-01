@@ -3,10 +3,10 @@ name: "p4c-dpdk-ptf-container-p4testgen-tests"
 on:
   push:
     branches:
-      - dpdk_ptf_container
+      - main
   pull_request:
     branches:
-      - dpdk_ptf_container
+      - main
       
 concurrency:
   # If workflow for PR or push is already running stop it, and start new one.
