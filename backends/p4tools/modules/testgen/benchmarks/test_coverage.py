@@ -247,15 +247,26 @@ def run_strategies_for_max_tests(options, test_args):
     )
 
     perf_file = test_args.test_dir.joinpath(test_args.p4_program.stem + "_perf").with_suffix(".csv")
-    perf = pd.read_csv(perf_file, index_col=0)
-    summarized_data = [
-        float(final_cov) * 100,
-        num_tests,
-        time_needed,
-        perf["Percentage"]["z3"],
-        perf["Percentage"]["step"],
-        perf["Percentage"]["backend"],
-    ]
+    if perf_file.exists():
+        perf = pd.read_csv(perf_file, index_col=0)
+        summarized_data = [
+            float(final_cov) * 100,
+            num_tests,
+            time_needed,
+            perf["Percentage"]["z3"],
+            perf["Percentage"]["step"],
+            perf["Percentage"]["backend"],
+        ]
+    else:
+        # In some cases, we do not have performance data. Nullify it.
+        summarized_data = [
+            float(final_cov) * 100,
+            num_tests,
+            time_needed,
+            None,
+            None,
+            None,
+        ]
     return summarized_data, nodes_cov, timestamps
 
 
@@ -313,7 +324,7 @@ def main(args, extra_args):
     if options.test_mode == "DPDK":
         options.target = "dpdk"
         options.arch = "pna"
-        options.test_backend = "METADATA"
+        options.test_backend = "PTF"
 
     # 7189 is an example of a good seed, which gets cov 1 with less than 100 tests
     # in random access stack.
