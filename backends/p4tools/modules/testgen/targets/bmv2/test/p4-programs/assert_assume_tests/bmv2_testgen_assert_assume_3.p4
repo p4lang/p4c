@@ -1,4 +1,5 @@
 #include <v1model.p4>
+#include <testgen.p4>
 
 header ethernet_t {
     bit<48> dst_addr;
@@ -18,11 +19,6 @@ struct Headers {
 }
 
 struct Meta {}
-
-// Custom extern definitions.
-extern void testgen_assert(in bool check);
-extern void testgen_assume(in bool check);
-
 
 parser p(packet_in pkt, out Headers h, inout Meta meta, inout standard_metadata_t stdmeta) {
     state start {
