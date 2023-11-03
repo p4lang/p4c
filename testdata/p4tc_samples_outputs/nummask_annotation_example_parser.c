@@ -12,7 +12,6 @@ REGISTER_END()
 static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *hdr, struct pna_global_metadata *compiler_meta__)
 {
     unsigned ebpf_packetOffsetInBits = 0;
-    unsigned ebpf_packetOffsetInBits_save = 0;
     ParserError_t ebpf_errorCode = NoError;
     void* pkt = ((void*)(long)skb->data);
     void* ebpf_packetEnd = ((void*)(long)skb->data_end);
@@ -163,6 +162,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
     }
 
     accept:
+    hdrMd->ebpf_packetOffsetInBits = ebpf_packetOffsetInBits
     return -1;
 }
 

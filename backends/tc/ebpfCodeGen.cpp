@@ -90,6 +90,10 @@ void PNAEbpfGenerator::emitGlobalHeadersMetadata(EBPF::CodeBuilder *builder) con
     userMetadataType->declare(builder, "cpumap_usermeta", false);
     builder->endOfStatement(true);
 
+    builder->emitIndent();
+    builder->appendFormat("unsigned %s", pipeline->offsetVar.c_str());
+    builder->endOfStatement(true);
+
     // additional field to avoid compiler errors when both headers and user_metadata are empty.
     builder->emitIndent();
     builder->append("__u8 __hook");
@@ -281,6 +285,9 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
     }
 
     builder->emitIndent();
+    builder->appendFormat("hdrMd->%s = %s", offsetVar.c_str(), offsetVar.c_str());
+    builder->newline();
+    builder->emitIndent();
     builder->appendFormat("return %d;", actUnspecCode);
     builder->newline();
     builder->blockEnd(true);
@@ -455,10 +462,11 @@ void TCIngressPipelinePNA::emitTrafficManager(EBPF::CodeBuilder *builder) {
 
 void TCIngressPipelinePNA::emitLocalVariables(EBPF::CodeBuilder *builder) {
     builder->emitIndent();
-    builder->appendFormat("unsigned %s = 0;", offsetVar.c_str());
-    builder->newline();
-    builder->emitIndent();
-    builder->appendFormat("unsigned %s_save = 0;", offsetVar.c_str());
+    if (name == "tc-parse") {
+        builder->appendFormat("unsigned %s = 0;", offsetVar.c_str());
+    } else if (name == "tc-ingress") {
+        builder->appendFormat("unsigned %s = hdrMd->%s;", offsetVar.c_str(), offsetVar.c_str());
+    }
     builder->newline();
     builder->emitIndent();
     builder->appendFormat("%s %s = %s;", errorEnum.c_str(), errorVar.c_str(),
