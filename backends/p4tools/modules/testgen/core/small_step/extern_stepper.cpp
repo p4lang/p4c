@@ -164,19 +164,15 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
              const auto *prependVar = args->at(0)->expression;
-             if (!(prependVar->is<IR::Member>() || prependVar->is<IR::PathExpression>() ||
-                   prependVar->is<IR::TaintExpression>() || prependVar->is<IR::Constant>())) {
-                 TESTGEN_UNIMPLEMENTED("Prepend input %1% of type %2% not supported", prependVar,
-                                       prependVar->type);
-             }
 
              auto &nextState = state.clone();
              const auto *prependType = state.resolveType(prependVar->type);
 
-             if (const auto *ts = prependType->to<IR::Type_StructLike>()) {
+             if (prependType->is<IR::Type_StructLike>()) {
+                 auto prependRef = ToolsVariables::convertReference(prependVar);
                  // We only support flat assignments, so retrieve all fields from the input
                  // argument.
-                 const auto flatFields = nextState.getFlatFields(prependVar, ts);
+                 const auto flatFields = nextState.getFlatFields(prependRef);
                  // Iterate through the fields in reverse order.
                  // We need to append in reverse order since we are prepending to the input
                  // packet.
@@ -186,6 +182,11 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
                      nextState.prependToPacketBuffer(nextState.get(fieldRef));
                  }
              } else if (prependType->is<IR::Type_Bits>()) {
+                 if (!(prependVar->is<IR::Member>() || prependVar->is<IR::PathExpression>() ||
+                       prependVar->is<IR::TaintExpression>() || prependVar->is<IR::Constant>())) {
+                     TESTGEN_UNIMPLEMENTED("Prepend input %1% of type %2% not supported",
+                                           prependVar, prependVar->type);
+                 }
                  // Prepend the field to the packet buffer.
                  nextState.add(*new TraceEvents::Expression(prependVar, "PrependToProgramHeader"));
                  nextState.prependToPacketBuffer(prependVar);
@@ -209,23 +210,24 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
              const auto *appendVar = args->at(0)->expression;
-             if (!(appendVar->is<IR::Member>() || appendVar->is<IR::PathExpression>() ||
-                   appendVar->is<IR::TaintExpression>() || appendVar->is<IR::Constant>())) {
-                 TESTGEN_UNIMPLEMENTED("append input %1% of type %2% not supported", appendVar,
-                                       appendVar->type);
-             }
 
              auto &nextState = state.clone();
              const auto *appendType = state.resolveType(appendVar->type);
 
-             if (const auto *ts = appendType->to<IR::Type_StructLike>()) {
+             if (appendType->is<IR::Type_StructLike>()) {
+                 auto appendRef = ToolsVariables::convertReference(appendVar);
                  // We only support flat assignments, so retrieve all fields from the input
                  // argument.
-                 const auto flatFields = nextState.getFlatFields(appendVar, ts);
+                 const auto flatFields = nextState.getFlatFields(appendRef);
                  for (const auto &fieldRef : flatFields) {
                      nextState.appendToPacketBuffer(nextState.get(fieldRef));
                  }
              } else if (appendType->is<IR::Type_Bits>()) {
+                 if (!(appendVar->is<IR::Member>() || appendVar->is<IR::PathExpression>() ||
+                       appendVar->is<IR::TaintExpression>() || appendVar->is<IR::Constant>())) {
+                     TESTGEN_UNIMPLEMENTED("append input %1% of type %2% not supported", appendVar,
+                                           appendVar->type);
+                 }
                  nextState.add(*new TraceEvents::Expression(appendVar, "AppendToProgramHeader"));
                  nextState.appendToPacketBuffer(appendVar);
              } else {
@@ -516,7 +518,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
              // This argument is the structure being written by the extract.
-             const auto *extractOutput = args->at(0)->expression;
+             const auto &extractOutput = ToolsVariables::convertReference(args->at(0)->expression);
 
              // Get the extractedType
              const auto *typeArgs = call->typeArguments;
@@ -544,7 +546,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  // We only support flat assignments, so retrieve all fields from the input
                  // argument.
                  const std::vector<IR::StateVariable> flatFields =
-                     nextState.getFlatFields(extractOutput, extractedType);
+                     nextState.getFlatFields(extractOutput);
                  /// Iterate over all the fields that need to be set.
                  auto fields = setFields(nextState, flatFields, 0);
                  nextState.add(*new TraceEvents::ExtractSuccess(extractOutput, pktCursor,
@@ -572,7 +574,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
              // This argument is the structure being written by the extract.
-             const auto *extractOutput = args->at(0)->expression;
+             const auto &extractOutput = ToolsVariables::convertReference(args->at(0)->expression);
              const auto *varbitExtractExpr = args->at(1)->expression;
              if (!SymbolicEnv::isSymbolicValue(varbitExtractExpr)) {
                  stepToSubexpr(varbitExtractExpr, result, state,
@@ -662,7 +664,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  // We only support flat assignments, so retrieve all fields from the input
                  // argument.
                  const std::vector<IR::StateVariable> flatFields =
-                     nextState.getFlatFields(extractOutput, extractedType);
+                     nextState.getFlatFields(extractOutput);
 
                  /// Iterate over all the fields that need to be set.
                  auto fields = setFields(nextState, flatFields, varBitFieldSize);
