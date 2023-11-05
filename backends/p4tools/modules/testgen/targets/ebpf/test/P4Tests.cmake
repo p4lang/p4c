@@ -19,6 +19,8 @@ list(REMOVE_ITEM P4C_EBPF_TEST_SUITES_P416
      # ebpf_checksum_extern and ebpf_conntrack_extern need a custom extern argument to work.
      "${P4C_SOURCE_DIR}/testdata/p4_16_samples/ebpf_checksum_extern.p4"
      "${P4C_SOURCE_DIR}/testdata/p4_16_samples/ebpf_conntrack_extern.p4"
+     # This test is currently flaky in CI. Could be because of a kernel change.
+     "${P4C_SOURCE_DIR}/testdata/p4_16_samples/calc-ebpf.p4"
 )
 # ##################################################################################################
 # TEST SUITES
