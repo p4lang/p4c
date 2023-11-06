@@ -91,21 +91,25 @@ int main(int argc, char *const argv[]) {
     TC::Backend backend(toplevel, &midEnd.refMap, &midEnd.typeMap, options);
     if (!backend.process()) return 1;
 
-    if (!options.introspecFile.isNullOrEmpty()) {
-        std::ostream *outIntro = openFile(options.introspecFile, false);
-        if (outIntro != nullptr) {
-            bool serialized = backend.serializeIntrospectionJson(*outIntro);
-            if (!serialized) {
-                std::remove(options.introspecFile);
-                return 1;
-            }
+    cstring progName = backend.tcIR->getPipelineName();
+    cstring introspecFile = progName + ".json";
+    if (!options.outputFolder.isNullOrEmpty()) {
+        if (options.outputFolder.get(options.outputFolder.size() - 1) != '/') {
+            options.outputFolder = options.outputFolder + '/';
+        }
+        introspecFile = options.outputFolder + introspecFile;
+    }
+    std::ostream *outIntro = openFile(introspecFile, false);
+    if (outIntro != nullptr) {
+        bool serialized = backend.serializeIntrospectionJson(*outIntro);
+        if (!serialized) {
+            std::remove(introspecFile);
+            return 1;
         }
     }
     if (::errorCount() > 0) {
         return 1;
     }
-    if (!options.outputFile.isNullOrEmpty() || !options.cFile.isNullOrEmpty()) {
-        backend.serialize();
-    }
+    backend.serialize();
     return ::errorCount() > 0;
 }

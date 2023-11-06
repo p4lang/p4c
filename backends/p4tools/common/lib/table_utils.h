@@ -45,6 +45,10 @@ struct TableProperties {
 
     /// Ordered list of key fields with useful properties.
     std::vector<KeyProperties> resolvedKeys;
+
+    /// Maps an action in the action list to a numerical identifier.
+    /// We do not use IR::MethodCallExpression here because we also look up switch labels.
+    std::map<cstring, int> actionIdMap;
 };
 
 /// Checks whether certain table properties are immutable and sets the properties param

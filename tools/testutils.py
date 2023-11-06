@@ -246,6 +246,8 @@ def exec_process(args: str, **extra_args) -> ProcessResult:
     except subprocess.TimeoutExpired as exception:
         if errpipe:
             out = errpipe.out
+        else:
+            out = str(exception.stderr)
         returncode = FAILURE
         cmd = exception.cmd
         # Rejoin the list for better readability.

@@ -65,7 +65,8 @@ PARSER.add_argument(
     help="The log level to choose.",
 )
 
-GRPC_PORT: int = 28000
+# 9559 is the default P4Runtime API server port
+P4RUNTIME_PORT: int = 9559
 THRIFT_PORT: int = 22000
 PTF_ADDR: str = "0.0.0.0"
 
@@ -168,8 +169,8 @@ class NNEnv(PTFTestEnv):
     def run_ptf(self, grpc_port: int, json_name: Path, info_name: Path) -> int:
         """Run the PTF test."""
         testutils.log.info("---------------------- Run PTF test ----------------------")
-        # Add the file location to the python path.
-        pypath = FILE_DIR
+        # Add the tools PTF folder to the python path, it contains the base test.
+        pypath = TOOLS_PATH.joinpath("ptf")
         # Show list of the tests
         testListCmd = f"ptf --pypath {pypath} --test-dir {self.options.testdir} --list"
         returncode = self.bridge.ns_exec(testListCmd)
@@ -220,8 +221,8 @@ class VethEnv(PTFTestEnv):
         ifaces = self.get_iface_str(num_ifaces=self.options.num_ifaces)
         thrift_port = testutils.pick_tcp_port(PTF_ADDR, THRIFT_PORT)
         simple_switch_grpc = (
-            f"simple_switch_grpc --thrift-port {thrift_port} --log-file {switchlog} --log-flush -i 0@0 "
-            f"{ifaces} --no-p4 "
+            f"simple_switch_grpc --thrift-port {thrift_port} --device-id 0 --log-file {switchlog} "
+            f"{ifaces} --log-flush -i 0@0 --no-p4 "
             f"-- --grpc-server-addr {PTF_ADDR}:{grpc_port}"
         )
         bridge_cmd = self.bridge.get_ns_prefix() + " " + simple_switch_grpc
@@ -231,8 +232,8 @@ class VethEnv(PTFTestEnv):
     def run_ptf(self, grpc_port: int, json_name: Path, info_name: Path) -> int:
         """Run the PTF test."""
         testutils.log.info("---------------------- Run PTF test ----------------------")
-        # Add the file location to the python path.
-        pypath = FILE_DIR
+        # Add the tools PTF folder to the python path, it contains the base test.
+        pypath = TOOLS_PATH.joinpath("ptf")
         # Show list of the tests
         testListCmd = f"ptf --pypath {pypath} --test-dir {self.options.testdir} --list"
         returncode = self.bridge.ns_exec(testListCmd)
@@ -272,7 +273,7 @@ def run_test(options: Options) -> int:
 
     # Pick available ports for the gRPC switch.
     switchlog = options.testdir.joinpath("switchlog")
-    grpc_port = testutils.pick_tcp_port(PTF_ADDR, GRPC_PORT)
+    grpc_port = testutils.pick_tcp_port(PTF_ADDR, P4RUNTIME_PORT)
     switch_proc = testenv.run_simple_switch_grpc(switchlog, grpc_port)
     if switch_proc is None:
         return testutils.FAILURE

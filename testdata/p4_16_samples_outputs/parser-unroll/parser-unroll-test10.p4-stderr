@@ -1,0 +1,4 @@
+parser-unroll-test10.p4(23): [--Wwarn=invalid] warning: Uninitialized value prevents loop unrolling:
+meta.hs_next_index
+        hdr.hs[meta.hs_next_index].setValid();
+               ^^^^^^^^^^^^^^^^^^

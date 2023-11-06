@@ -16,6 +16,8 @@ and limitations under the License.
 
 #include "backend.h"
 
+#include <filesystem>
+
 #include "backends/ebpf/ebpfOptions.h"
 #include "backends/ebpf/target.h"
 
@@ -114,28 +116,28 @@ bool Backend::ebpfCodeGen(P4::ReferenceMap *refMapEBPF, P4::TypeMap *typeMapEBPF
 }
 
 void Backend::serialize() const {
-    if (!options.outputFile.isNullOrEmpty()) {
-        auto outstream = openFile(options.outputFile, false);
-        if (outstream != nullptr) {
-            *outstream << pipeline->toString();
-            outstream->flush();
-        }
+    cstring progName = tcIR->getPipelineName();
+    cstring outputFile = progName + ".template";
+    if (!options.outputFolder.isNullOrEmpty()) {
+        outputFile = options.outputFolder + outputFile;
     }
-    auto progName = options.file;
-    auto filename = progName.findlast('/');
-    if (filename) progName = filename;
-    progName = progName.exceptLast(3);
-    progName = progName.trim("/\t\n\r");
+    auto outstream = openFile(outputFile, false);
+    if (outstream != nullptr) {
+        *outstream << pipeline->toString();
+        outstream->flush();
+        std::filesystem::permissions(outputFile.c_str(),
+                                     std::filesystem::perms::owner_all |
+                                         std::filesystem::perms::group_all |
+                                         std::filesystem::perms::others_all,
+                                     std::filesystem::perm_options::add);
+    }
     cstring parserFile = progName + "_parser.c";
-    cstring postParserFile = progName + "_post_parser.c";
+    cstring postParserFile = progName + "_control_blocks.c";
     cstring headerFile = progName + "_parser.h";
-    if (!options.cFile.isNullOrEmpty()) {
-        if (options.cFile.get(options.cFile.size() - 1) != '/') {
-            options.cFile = options.cFile + '/';
-        }
-        parserFile = options.cFile + parserFile;
-        postParserFile = options.cFile + postParserFile;
-        headerFile = options.cFile + headerFile;
+    if (!options.outputFolder.isNullOrEmpty()) {
+        parserFile = options.outputFolder + parserFile;
+        postParserFile = options.outputFolder + postParserFile;
+        headerFile = options.outputFolder + headerFile;
     }
     auto cstream = openFile(postParserFile, false);
     auto pstream = openFile(parserFile, false);

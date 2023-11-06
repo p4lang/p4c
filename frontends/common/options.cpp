@@ -152,6 +152,25 @@ CompilerOptions::CompilerOptions() : ParserOptions() {
             return true;
         },
         "Unrolling all parser's loops");
+    registerOption(
+        "-O", nullptr,
+        [this](const char *level) {
+            if (!level) {
+                ++optimizationLevel;
+                return true;
+            }
+            if (isdigit(*level)) optimizationLevel = *level++ - '0';
+            if (*level == 'g') {
+                optimizeDebug = true;
+                ++level;
+            }
+            if (*level == 'z') {
+                optimizeSize = true;
+                ++level;
+            }
+            return *level == 0;
+        },
+        "Optimization level");
 }
 
 bool CompilerOptions::enable_intrinsic_metadata_fix() { return true; }

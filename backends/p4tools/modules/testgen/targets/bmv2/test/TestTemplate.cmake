@@ -36,17 +36,17 @@ macro(check_bmv2_with_ptf testfile testfolder p4test)
   file(APPEND ${testfile} "done\n")
 endmacro(check_bmv2_with_ptf)
 
-# Write the script to validate whether a given protobuf file has a valid format.
+# Write the script to validate whether a given protobuf text format file has a valid format.
 # Arguments:
 #   - testfile is the testing script that this script is written to.
 #   - testfolder is target folder of the test.
 function(validate_protobuf testfile testfolder)
   # Find all the proto tests generated for this P4 file and validate their correctness.
-  file(APPEND ${testfile} "stffiles=($(find ${testfolder} -name \"*.proto\"  | sort -n ))\n")
-  file(APPEND ${testfile} "for item in \${stffiles[@]}\n")
+  file(APPEND ${testfile} "txtpbfiles=($(find ${testfolder} -name \"*.txtpb\"  | sort -n ))\n")
+  file(APPEND ${testfile} "for item in \${txtpbfiles[@]}\n")
   file(APPEND ${testfile} "do\n")
   file(APPEND ${testfile} "\techo \"Found \${item}\"\n")
-  file(APPEND ${testfile} "\tprotoc --proto_path=${CMAKE_CURRENT_LIST_DIR}/../proto --proto_path=${P4C_SOURCE_DIR}/control-plane/p4runtime/proto --proto_path=${P4C_SOURCE_DIR}/control-plane --encode=p4testgen.TestCase p4testgen.proto < \${item}\n")
+  file(APPEND ${testfile} "\tprotoc --proto_path=${CMAKE_CURRENT_LIST_DIR}/../proto --proto_path=${P4RUNTIME_STD_DIR} --proto_path=${P4C_SOURCE_DIR}/control-plane --encode=p4testgen.TestCase p4testgen.proto < \${item}\n")
   file(APPEND ${testfile} "done\n")
 endfunction(validate_protobuf)
 

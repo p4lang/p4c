@@ -3,7 +3,7 @@ syntax = "proto3";
 
 package p4testgen;
 
-import "p4runtime/proto/p4/v1/p4runtime.proto";
+import "p4/v1/p4runtime.proto";
 
 message InputPacketAtPort {
     // The raw bytes of the test packet.

@@ -153,10 +153,6 @@ void Bmv2V1ModelTableStepper::evalTableActionProfile(
         auto *synthesizedAction = tableAction->clone();
         synthesizedAction->arguments = arguments;
 
-        // We need to set the table action in the state for eventual switch action_run hits.
-        // We also will need it for control plane table entries.
-        setTableAction(nextState, tableAction);
-
         // Finally, add all the new rules to the execution state.
         const ActionCall ctrlPlaneActionCall(actionName, actionType, ctrlPlaneArgs);
         auto tableRule =
@@ -181,7 +177,7 @@ void Bmv2V1ModelTableStepper::evalTableActionProfile(
         }
 
         nextState.set(getTableHitVar(table), IR::getBoolLiteral(true));
-        nextState.set(getTableReachedVar(table), IR::getBoolLiteral(true));
+        nextState.set(getTableActionVar(table), getTableActionString(tableAction));
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
         tableStream << " Chosen action: " << actionName;
@@ -245,10 +241,6 @@ void Bmv2V1ModelTableStepper::evalTableActionSelector(
         auto *synthesizedAction = tableAction->clone();
         synthesizedAction->arguments = arguments;
 
-        // We need to set the table action in the state for eventual switch action_run hits.
-        // We also will need it for control plane table entries.
-        setTableAction(nextState, tableAction);
-
         // Finally, add all the new rules to the execution state.
         ActionCall ctrlPlaneActionCall(actionName, actionType, ctrlPlaneArgs);
         auto tableRule =
@@ -275,7 +267,7 @@ void Bmv2V1ModelTableStepper::evalTableActionSelector(
         }
 
         nextState.set(getTableHitVar(table), IR::getBoolLiteral(true));
-        nextState.set(getTableReachedVar(table), IR::getBoolLiteral(true));
+        nextState.set(getTableActionVar(table), getTableActionString(tableAction));
         std::stringstream tableStream;
         tableStream << "Table Branch: " << properties.tableName;
         tableStream << " Chosen action: " << actionName;

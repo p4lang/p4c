@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import os
 import re
 import sys
 from operator import attrgetter
@@ -17,7 +18,7 @@ TOOLS_PATH = FILE_DIR.joinpath("../../../../../tools")
 sys.path.append(str(TOOLS_PATH))
 import testutils
 
-OUTPUT_DIR = Path(".")
+OUTPUT_DIR = Path("plots")
 
 PARSER = argparse.ArgumentParser()
 
@@ -26,7 +27,6 @@ PARSER.add_argument(
     "--input-dir",
     dest="input_dir",
     help="The folder containing measurement data.",
-    required=True,
 )
 
 PARSER.add_argument(
@@ -42,10 +42,10 @@ def plot_preconditions(args, extra_args):
     preconditions = [
         "None",
         "1500B pkt",
-        "P4-constraints",
-        "P4-constraints + 1500B pkt",
-        "P4-constraints + 1500B IPv4 pkt",
-        "P4-constraints + 1500B IPv4-TCP pkt",
+        "P4Constraints",
+        "P4Constraints + 1500B pkt",
+        "P4Constraints + 1500B IPv4 pkt",
+        "P4Constraints + 1500B IPv4-TCP pkt",
     ]
     data = [146784, 83784, 74472, 42486, 28216, 7054]
     target_frame = pd.DataFrame({"Precondition": preconditions, "Number of tests": data})
@@ -84,6 +84,8 @@ def get_strategy_data(input_dir):
     folders = input_dir.glob("*/")
     program_data = {}
     for folder in folders:
+        if not os.path.isdir(folder):
+            continue
         folder = Path(folder)
         program_name = folder.stem
         # Make sure we escape hyphens
@@ -106,38 +108,40 @@ def get_strategy_data(input_dir):
 
 
 def plot_strategies(args, extra_args):
-    program_data = get_strategy_data(args.input_dir)
-    program_data = program_data["tna_simple_switch"]
-    pruned_data = []
-    name_map = {
-        "depth_first": "DFS",
-        "random_backtrack": "Random",
-        "greedy_statement_search": "Coverage-Optimized",
-    }
-    for strategy, candidate_data in program_data.items():
-        candidate_data = candidate_data.drop("Seed", axis=1)
-        candidate_data["Strategy"] = name_map[strategy]
-        candidate_data.Time = pd.to_numeric(candidate_data.Time)
-        candidate_data = candidate_data.sort_values(by=["Time"])
-        bins = np.arange(
-            0,
-            candidate_data.Time.max() + candidate_data.Time.max() / 1000,
-            candidate_data.Time.max() / 1000,
+    program_datas = get_strategy_data(args.input_dir)
+    for program_name, program_data in program_datas.items():
+        pruned_data = []
+        name_map = {
+            "depth_first": "DFS",
+            "random_backtrack": "Random",
+            "greedy_statement_search": "Coverage-Optimized",
+        }
+        for strategy, candidate_data in program_data.items():
+            candidate_data = candidate_data.drop("Seed", axis=1)
+            candidate_data["Strategy"] = name_map[strategy]
+            candidate_data.Time = pd.to_numeric(candidate_data.Time)
+            candidate_data = candidate_data.sort_values(by=["Time"])
+            bins = np.arange(
+                0,
+                candidate_data.Time.max() + candidate_data.Time.max() / 1000,
+                candidate_data.Time.max() / 1000,
+            )
+            candidate_data["Minutes"] = pd.cut(
+                candidate_data.Time, bins.astype(np.int64), include_lowest=True
+            ).map(attrgetter("right"))
+            candidate_data.Minutes = pd.to_timedelta(candidate_data.Minutes, unit="nanoseconds")
+            candidate_data.Minutes = candidate_data.Minutes / pd.Timedelta(minutes=1)
+            candidate_data = candidate_data[candidate_data.Minutes <= 60]
+            pruned_data.append(candidate_data)
+        concat_data = pd.concat(pruned_data)
+        ax = sns.lineplot(
+            x="Minutes", y="Coverage", hue="Strategy", data=concat_data, errorbar=None
         )
-        candidate_data["Minutes"] = pd.cut(
-            candidate_data.Time, bins.astype(np.int64), include_lowest=True
-        ).map(attrgetter("right"))
-        candidate_data.Minutes = pd.to_timedelta(candidate_data.Minutes, unit="nanoseconds")
-        candidate_data.Minutes = candidate_data.Minutes / pd.Timedelta(minutes=1)
-        candidate_data = candidate_data[candidate_data.Minutes <= 60]
-        pruned_data.append(candidate_data)
-    concat_data = pd.concat(pruned_data)
-    ax = sns.lineplot(x="Minutes", y="Coverage", hue="Strategy", data=concat_data, errorbar=None)
-    sns.move_legend(ax, "lower center", bbox_to_anchor=(0.5, 0.98), ncol=3, title=None)
-    outdir = Path(args.out_dir).joinpath("strategy_coverage")
-    plt.savefig(outdir.with_suffix(".png"), bbox_inches="tight")
-    plt.savefig(outdir.with_suffix(".pdf"), bbox_inches="tight")
-    plt.gcf().clear()
+        sns.move_legend(ax, "lower center", bbox_to_anchor=(0.5, 0.98), ncol=3, title=None)
+        outdir = Path(args.out_dir).joinpath(f"{program_name}_strategy_coverage")
+        plt.savefig(outdir.with_suffix(".png"), bbox_inches="tight")
+        plt.savefig(outdir.with_suffix(".pdf"), bbox_inches="tight")
+        plt.gcf().clear()
 
 
 def main(args, extra_args):
@@ -161,9 +165,13 @@ def main(args, extra_args):
     )
     plt.rcParams['pdf.fonttype'] = 42
     plt.rcParams['ps.fonttype'] = 42
-    print(plt.rcParams.keys())
+
+    testutils.check_and_create_dir(args.out_dir)
     plot_preconditions(args, extra_args)
-    plot_strategies(args, extra_args)
+    if args.input_dir:
+        plot_strategies(args, extra_args)
+    else:
+        print("No input directory provided. Not plotting coverage data.")
 
 
 if __name__ == "__main__":

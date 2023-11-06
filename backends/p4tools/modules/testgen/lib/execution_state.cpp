@@ -223,9 +223,8 @@ TestObjectMap ExecutionState::getTestObjectCategory(cstring category) const {
 void ExecutionState::deleteTestObject(cstring category, cstring objectLabel) {
     auto it = testObjects.find(category);
     if (it != testObjects.end()) {
-        return;
+        it->second.erase(objectLabel);
     }
-    it->second.erase(objectLabel);
 }
 
 void ExecutionState::deleteTestObjectCategory(cstring category) { testObjects.erase(category); }

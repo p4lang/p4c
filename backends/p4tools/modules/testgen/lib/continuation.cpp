@@ -104,18 +104,21 @@ Continuation::Body Continuation::apply(std::optional<const IR::Node *> value_opt
     const IR::Type *argType = nullptr;
     if (const auto *valueExpr = (*value_opt)->to<IR::Expression>()) {
         argType = valueExpr->type;
+        // We step into an action enum type when resolving switch expressions. However, we return a
+        // bit of unknown width. So, for this particular continuation, we have to take on the type
+        // of the argument.
+        // TODO: Resolve this in a cleaner fashion. Maybe we should not step at all?
+        if (paramType->is<IR::Type_ActionEnum>()) {
+            argType = paramType;
+            auto clone = valueExpr->clone();
+            clone->type = paramType;
+            value_opt = clone;
+        }
+
     } else if ((*value_opt)->is<IR::ParserState>()) {
         argType = IR::Type_State::get();
     } else {
         BUG("Unexpected node passed to continuation: %1%", *value_opt);
-    }
-
-    // We step into an action enum type when resolving switch expressions. However, we return a bit
-    // of unknown width. So, for this particular continuation, we have to take on the type of the
-    // argument.
-    // TODO: Resolve this in a cleaner fashion. Maybe we should not step at all?
-    if (paramType->is<IR::Type_ActionEnum>()) {
-        paramType = argType;
     }
 
     BUG_CHECK(
