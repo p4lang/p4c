@@ -1,18 +1,15 @@
-#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_BACKEND_PTF_PTF_H_
-#define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_BACKEND_PTF_PTF_H_
+#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_BACKEND_STF_H_
+#define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_BACKEND_STF_H_
 
 #include <cstddef>
 #include <filesystem>
-#include <fstream>
+#include <map>
 #include <optional>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include <inja/inja.hpp>
 
-/// Inja
-#include "ir/ir.h"
 #include "lib/cstring.h"
 
 #include "backends/p4tools/modules/testgen/lib/test_object.h"
@@ -21,36 +18,26 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-/// Extracts information from the @testSpec to emit a PTF test case.
-class PTF : public TF {
-    /// Has the preamble been generated already?
-    bool preambleEmitted = false;
-
-    /// The output file.
-    std::ofstream ptfFileStream;
-
+/// Extracts information from the @testSpec to emit a STF test case.
+class STF : public TF {
  public:
-    virtual ~PTF() = default;
+    virtual ~STF() = default;
 
-    PTF(const PTF &) = delete;
+    STF(const STF &) = delete;
 
-    PTF(PTF &&) = delete;
+    STF(STF &&) = delete;
 
-    PTF &operator=(const PTF &) = delete;
+    STF &operator=(const STF &) = delete;
 
-    PTF &operator=(PTF &&) = delete;
+    STF &operator=(STF &&) = delete;
 
-    PTF(std::filesystem::path basePath, std::optional<unsigned int> seed);
+    STF(std::filesystem::path basePath, std::optional<unsigned int> seed);
 
-    /// Produce a PTF test.
+    /// Produce an STF test.
     void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testId,
                     float currentCoverage) override;
 
  private:
-    /// Emits the test preamble. This is only done once for all generated tests.
-    /// For the PTF back end this is the test setup Python script..
-    void emitPreamble();
-
     /// Emits a test case.
     /// @param testId specifies the test name.
     /// @param selectedBranches enumerates the choices the interpreter made for this path.
@@ -71,15 +58,8 @@ class PTF : public TF {
     /// Converts the output packet, port, and mask into Inja format.
     static inja::json getVerify(const TestSpec *testSpec);
 
-    /// @returns the configuration for a meter call (may set the meter to GREEN, YELLOW, or RED)
-    static inja::json::array_t getMeter(const TestObjectMap &meterValues);
-
-    /// @returns the configuration for a cloned packet configuration.
-    static inja::json getClone(const TestObjectMap &cloneSpecs);
-
-    /// Helper function for @getVerify. Matches the mask value against the input packet value and
-    /// generates the appropriate ignore ranges.
-    static std::vector<std::pair<size_t, size_t>> getIgnoreMasks(const IR::Constant *mask);
+    /// Returns the configuration for a cloned packet configuration.
+    static inja::json::array_t getClone(const TestObjectMap &cloneSpecs);
 
     /// Helper function for the control plane table inja objects.
     static inja::json getControlPlaneForTable(const TableMatchMap &matches,
@@ -88,4 +68,4 @@ class PTF : public TF {
 
 }  // namespace P4Tools::P4Testgen::Bmv2
 
-#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_BACKEND_PTF_PTF_H_ */
+#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_BACKEND_STF_H_ */

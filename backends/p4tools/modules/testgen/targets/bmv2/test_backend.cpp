@@ -24,11 +24,11 @@
 #include "backends/p4tools/modules/testgen/lib/test_backend.h"
 #include "backends/p4tools/modules/testgen/lib/test_object.h"
 #include "backends/p4tools/modules/testgen/options.h"
-#include "backends/p4tools/modules/testgen/targets/bmv2/backend/metadata/metadata.h"
-#include "backends/p4tools/modules/testgen/targets/bmv2/backend/protobuf/protobuf.h"
-#include "backends/p4tools/modules/testgen/targets/bmv2/backend/ptf/ptf.h"
-#include "backends/p4tools/modules/testgen/targets/bmv2/backend/stf/stf.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/program_info.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/metadata.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/protobuf.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/ptf.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/stf.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {

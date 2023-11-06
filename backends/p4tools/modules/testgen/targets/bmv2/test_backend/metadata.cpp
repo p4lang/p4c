@@ -1,4 +1,4 @@
-#include "backends/p4tools/modules/testgen/targets/bmv2/backend/metadata/metadata.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/metadata.h"
 
 #include <algorithm>
 #include <functional>

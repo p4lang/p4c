@@ -1,4 +1,4 @@
-#include "backends/p4tools/modules/testgen/targets/bmv2/backend/ptf/ptf.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/ptf.h"
 
 #include <algorithm>
 #include <filesystem>
