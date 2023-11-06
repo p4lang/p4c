@@ -200,17 +200,6 @@ inja::json Protobuf::getControlPlaneForTable(const TableMatchMap &matches,
     return rulesJson;
 }
 
-inja::json Protobuf::getSend(const TestSpec *testSpec) const {
-    const auto *iPacket = testSpec->getIngressPacket();
-    const auto *payload = iPacket->getEvaluatedPayload();
-    inja::json sendJson;
-    sendJson["ig_port"] = iPacket->getPort();
-    auto dataStr = formatHexExprWithSep(payload);
-    sendJson["pkt"] = dataStr;
-    sendJson["pkt_size"] = payload->type->width_bits();
-    return sendJson;
-}
-
 inja::json Protobuf::getExpectedPacket(const TestSpec *testSpec) const {
     inja::json verifyData = inja::json::object();
     if (testSpec->getEgressPacket() != std::nullopt) {

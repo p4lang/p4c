@@ -13,6 +13,9 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
+/// BMV2TF extends the TF (TestFramework) class.
+/// It provides common utility functions for BMv2-style test frameworks.
+/// TODO: Clean up naming, do not use TF, use "TestFramework" instead.
 class Bmv2TF : public TF {
  public:
     explicit Bmv2TF(std::filesystem::path basePath,

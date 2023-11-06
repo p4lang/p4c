@@ -49,8 +49,6 @@ class Protobuf : public Bmv2TF {
     /// @returns the inja test case template as a string.
     static std::string getTestCaseTemplate();
 
-    inja::json getSend(const TestSpec *testSpec) const override;
-
     inja::json getControlPlane(const TestSpec *testSpec) const override;
 
     inja::json getExpectedPacket(const TestSpec *testSpec) const override;
