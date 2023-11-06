@@ -40,12 +40,12 @@ lvalue
     | lvalue "[" expression ":" expression "]" { $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
     ;
 
-Explanatory (not definitive) production rule for field expr in BMv2:
+To determine a field expr, we assume it corresponds to the following production rule:
 
 field_expr
     : prefixedNonTypeName
-    : field_expr dot_name
-    : field_expr "[" constant "]"
+    | field_expr dot_name
+    | field_expr "[" constant "]"
 */
 bool ParserConverter::isFieldExpr(const IR::Expression *expr) {
     if (expr->is<IR::PathExpression>()) return true;
