@@ -3,7 +3,6 @@
 
 #include <cstddef>
 #include <filesystem>
-#include <map>
 #include <optional>
 #include <string>
 #include <vector>
@@ -12,26 +11,15 @@
 
 #include "lib/cstring.h"
 
-#include "backends/p4tools/modules/testgen/lib/test_object.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
-#include "backends/p4tools/modules/testgen/lib/tf.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/common.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
 /// Extracts information from the @testSpec to emit a STF test case.
-class STF : public TF {
+class STF : public Bmv2TF {
  public:
-    virtual ~STF() = default;
-
-    STF(const STF &) = delete;
-
-    STF(STF &&) = delete;
-
-    STF &operator=(const STF &) = delete;
-
-    STF &operator=(STF &&) = delete;
-
-    STF(std::filesystem::path basePath, std::optional<unsigned int> seed);
+    explicit STF(std::filesystem::path basePath, std::optional<unsigned int> seed = std::nullopt);
 
     /// Produce an STF test.
     void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testId,
@@ -49,21 +37,13 @@ class STF : public TF {
     /// @returns the inja test case template as a string.
     static std::string getTestCaseTemplate();
 
-    /// Converts all the control plane objects into Inja format.
-    static inja::json getControlPlane(const TestSpec *testSpec);
+    inja::json getExpectedPacket(const TestSpec *testSpec) const override;
 
-    /// Converts the input packet and port into Inja format.
-    static inja::json getSend(const TestSpec *testSpec);
+    /// TODO: Fix how BMv2 parses packet strings. We should support hex and octal prefixes.
+    inja::json getSend(const TestSpec *testSpec) const override;
 
-    /// Converts the output packet, port, and mask into Inja format.
-    static inja::json getVerify(const TestSpec *testSpec);
-
-    /// Returns the configuration for a cloned packet configuration.
-    static inja::json::array_t getClone(const TestObjectMap &cloneSpecs);
-
-    /// Helper function for the control plane table inja objects.
-    static inja::json getControlPlaneForTable(const TableMatchMap &matches,
-                                              const std::vector<ActionArg> &args);
+    inja::json getControlPlaneForTable(const TableMatchMap &matches,
+                                       const std::vector<ActionArg> &args) const override;
 };
 
 }  // namespace P4Tools::P4Testgen::Bmv2

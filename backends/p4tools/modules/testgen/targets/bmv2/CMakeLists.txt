@@ -8,6 +8,7 @@ endif()
 set(
   TESTGEN_SOURCES
   ${TESTGEN_SOURCES}
+  ${CMAKE_CURRENT_SOURCE_DIR}/test_backend/common.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test_backend/protobuf.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test_backend/metadata.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test_backend/ptf.cpp

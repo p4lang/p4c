@@ -10,14 +10,6 @@
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-stf"
-  "Non-numeric, non-boolean member expression: .* Type: Type_Stack"
-  # We can not expand stacks in parsers because information about .next is lost.
-  # P4Testgen needs to maintain its own internal .next variable for stacks.
-  array-copy-bmv2.p4
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-stf"
   "simple_switch died with return code -6"
   # Assertion 'Default switch case should not be reachable' failed,
   # file '../../include/bm/bm_sim/actions.h' line '369'.
@@ -74,6 +66,14 @@ p4tools_add_xfail_reason(
 # 2. P4Testgen Issues
 # These are failures in P4Testgen that need to be fixed.
 ####################################################################################################
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-stf"
+  "Non-numeric, non-boolean member expression: .* Type: Type_Stack"
+  # We can not expand stacks in parsers because information about .next is lost.
+  # P4Testgen needs to maintain its own internal .next variable for stacks.
+  array-copy-bmv2.p4
+)
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-stf"
