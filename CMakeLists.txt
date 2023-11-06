@@ -396,6 +396,10 @@ set(P4RUNTIME_STD_DIR ${p4runtime_SOURCE_DIR}/proto CACHE INTERNAL
 )
 ########################################## P4Runtime End ##########################################
 
+add_subdirectory (frontends)
+add_subdirectory (midend)
+add_subdirectory (control-plane)
+
 file (GLOB p4c_extensions RELATIVE ${P4C_SOURCE_DIR}/extensions ${P4C_SOURCE_DIR}/extensions/*)
 MESSAGE ("-- Available extensions ${p4c_extensions}")
 foreach (ext ${p4c_extensions})
@@ -412,10 +416,6 @@ foreach (ext ${p4c_extensions})
     endif()
   endif()
 endforeach(ext)
-
-add_subdirectory (frontends)
-add_subdirectory (midend)
-add_subdirectory (control-plane)
 
 # With the current implementation of ir-generator, all targets share the
 # same ir-generated.h and ir-generated.cpp file, which means all targets
