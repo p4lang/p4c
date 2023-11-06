@@ -25,7 +25,7 @@
   #emit/#end      -> copy text literally to output header file
   #emit_impl/#end -> copy text literally to output C++ file
   #noXXX          -> do not emit the specified implementation for the XXX method
-                     e.g., #noconstructor, #nodbprint, #novisit_children
+                     e.g., #noconstructor, #nodbprint, #novisit_children, #nomethod_constructor
   #apply          -> generate apply overload for visitors
   method{ ... }   -> specifies an implementation for a default method
                      method can be 'operator=='
@@ -51,8 +51,7 @@
   Unless there is a '#noconstructor' tag in the class, a constructor
   will automatically be generated that takes as arguments values to
   initialize all fields of the IR class and its bases that do not have
-  explicit initializers.  Fields marked 'optional' will create multiple
-  constructors both with and without an argument for that field.
+  explicit initializers. There are some special method constructors which ignore #noconstructor, such as Class(JSONLoader &json). #nomethod_constructor will prevent these files from being generated. Fields marked 'optional' will create multiple constructors both with and without an argument for that field.
  */
 
 class ParserState : ISimpleNamespace, Declaration, IAnnotated {
