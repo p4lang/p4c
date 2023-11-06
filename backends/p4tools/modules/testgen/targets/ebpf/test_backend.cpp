@@ -66,12 +66,13 @@ TestBackEnd::TestInfo EBPFTestBackend::produceTestInfo(
             IR::getConstant(IR::getBitType(outPktSize), EBPFTestBackend::ZERO_PKT_VAL);
         testInfo.packetTaintMask =
             IR::getConstant(IR::getBitType(outPktSize), EBPFTestBackend::ZERO_PKT_MAX);
+    } else {
+        // eBPF actually can not modify the input packet. It can only filter. Thus we reuse our
+        // input packet here.
+        testInfo.outputPacket = testInfo.inputPacket;
+        testInfo.packetTaintMask = IR::getConstant(testInfo.inputPacket->type,
+                                                   IR::getMaxBvVal(testInfo.inputPacket->type));
     }
-    // eBPF actually can not modify the input packet. It can only filter. Thus we reuse our input
-    // packet here.
-    testInfo.outputPacket = testInfo.inputPacket;
-    testInfo.packetTaintMask =
-        IR::getConstant(testInfo.inputPacket->type, IR::getMaxBvVal(testInfo.inputPacket->type));
     return testInfo;
 }
 
