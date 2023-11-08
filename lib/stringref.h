@@ -51,7 +51,7 @@ struct StringRef {
         len = 0;
     }
     StringRef(const StringRef &a) : p(a.p), len(a.len) {}
-    StringRef &operator=(const StringRef &a) {
+    StringRef &operator=(const StringRef &a) {  // NOLINT(bugprone-unhandled-self-assignment)
         p = a.p;
         len = a.len;
         return *this;
