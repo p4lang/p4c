@@ -99,6 +99,7 @@ class P4Exception_Model : public ::Model::Elem {
 // To be kept in sync with core.p4
 class P4CoreLibrary : public ::Model::Model {
  protected:
+    // NOLINTBEGIN(bugprone-throw-keyword-missing)
     P4CoreLibrary()
         : noAction("NoAction"),
           exactMatch("exact"),
@@ -112,6 +113,7 @@ class P4CoreLibrary : public ::Model::Model {
           stackOutOfBounds(StandardExceptions::StackOutOfBounds),
           overwritingHeader(StandardExceptions::OverwritingHeader),
           headerTooShort(StandardExceptions::HeaderTooShort) {}
+    // NOLINTEND(bugprone-throw-keyword-missing)
 
  public:
     static P4CoreLibrary &instance() {
