@@ -205,7 +205,6 @@ class ProgramStructure {
     const IR::Parameter *parserPacketIn = nullptr;
     const IR::Parameter *parserHeadersOut = nullptr;
 
- public:
     // output is constructed here
     IR::Vector<IR::Node> *declarations;
 
