@@ -1023,9 +1023,7 @@ class FindRecirculated : public Inspector {
     }
 
     void postorder(const IR::Primitive *primitive) override {
-        if (primitive->name == "recirculate") {
-            add(primitive, 0);
-        } else if (primitive->name == "resubmit") {
+        if (primitive->name == "recirculate" || primitive->name == "resubmit") {
             add(primitive, 0);
         } else if (primitive->name.startsWith("clone") && primitive->operands.size() == 2) {
             add(primitive, 1);
