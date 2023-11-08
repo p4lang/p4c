@@ -158,17 +158,18 @@ inline bool equiv(const Node *a, const Node *b) { return a == b || (a && b && a-
 inline bool equiv(const INode *a, const INode *b) {
     return a == b || (a && b && a->getNode()->equiv(*b->getNode()));
 }
-
+// NOLINTBEGIN(bugprone-macro-parentheses)
 /* common things that ALL Node subclasses must define */
 #define IRNODE_SUBCLASS(T)                             \
  public:                                               \
     T *clone() const override { return new T(*this); } \
     IRNODE_COMMON_SUBCLASS(T)
-
 #define IRNODE_ABSTRACT_SUBCLASS(T) \
  public:                            \
     T *clone() const override = 0;  \
     IRNODE_COMMON_SUBCLASS(T)
+
+// NOLINTEND(bugprone-macro-parentheses)
 #define IRNODE_COMMON_SUBCLASS(T)                                           \
  public:                                                                    \
     using Node::operator==;                                                 \
