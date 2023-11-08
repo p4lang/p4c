@@ -64,12 +64,13 @@ int dbsetflags(std::ostream &out, int val, int mask = ~0U);
 inline int getprec(std::ostream &out) { return dbgetflags(out) & DBPrint::Precedence; }
 class setflags_helper {
     int val, mask;
-    setflags_helper() = delete;
 
  protected:
     setflags_helper(int v, int m) : val(v), mask(m) { assert((val & ~mask) == 0); }
 
  public:
+    setflags_helper() = delete;
+
     void set(std::ostream &out) const { dbsetflags(out, val, mask); }
 };
 struct setprec : public setflags_helper {

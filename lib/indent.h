@@ -89,9 +89,9 @@ inline std::ostream &unindent(std::ostream &out) {
 class TempIndent {
     // an indent that can be added to any stream and unrolls when the object is destroyed
     std::vector<std::ostream *> streams;      // streams that have been indented
-    TempIndent(const TempIndent &) = delete;  // not copyable
 
  public:
+    TempIndent(const TempIndent &) = delete;  // not copyable
     TempIndent() = default;
     friend std::ostream &operator<<(std::ostream &out, TempIndent &ti) {
         ti.streams.push_back(&out);
