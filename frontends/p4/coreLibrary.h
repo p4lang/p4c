@@ -100,20 +100,19 @@ class P4Exception_Model : public ::Model::Elem {
 class P4CoreLibrary : public ::Model::Model {
  protected:
     // NOLINTBEGIN(bugprone-throw-keyword-missing)
-    P4CoreLibrary()
-        : noAction("NoAction"),
-          exactMatch("exact"),
-          ternaryMatch("ternary"),
-          lpmMatch("lpm"),
-          packetIn(PacketIn()),
-          packetOut(PacketOut()),
-          noError(StandardExceptions::NoError),
-          packetTooShort(StandardExceptions::PacketTooShort),
-          noMatch(StandardExceptions::NoMatch),
-          stackOutOfBounds(StandardExceptions::StackOutOfBounds),
-          overwritingHeader(StandardExceptions::OverwritingHeader),
-          headerTooShort(StandardExceptions::HeaderTooShort) {}
-    // NOLINTEND(bugprone-throw-keyword-missing)
+     P4CoreLibrary()
+         : noAction("NoAction"),
+           exactMatch("exact"),
+           ternaryMatch("ternary"),
+           lpmMatch("lpm"),
+           noError(StandardExceptions::NoError),
+           packetTooShort(StandardExceptions::PacketTooShort),
+           noMatch(StandardExceptions::NoMatch),
+           stackOutOfBounds(StandardExceptions::StackOutOfBounds),
+           overwritingHeader(StandardExceptions::OverwritingHeader),
+           headerTooShort(StandardExceptions::HeaderTooShort)
+     {}
+     // NOLINTEND(bugprone-throw-keyword-missing)
 
  public:
     static P4CoreLibrary &instance() {

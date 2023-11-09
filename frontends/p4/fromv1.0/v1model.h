@@ -125,8 +125,7 @@ struct CounterOrMeter_Model : public ::Model::Extern_Model {
         : Extern_Model(name),
           sizeParam("size"),
           typeParam("type"),
-          size_type(IR::Type_Bits::get(32)),
-          counterType() {}
+          size_type(IR::Type_Bits::get(32)) {}
     ::Model::Elem sizeParam;
     ::Model::Elem typeParam;
     const IR::Type *size_type;
@@ -218,7 +217,7 @@ struct Cloner_Model : public ::Model::Extern_Model {
     Cloner_Model()
         : Extern_Model("clone"),
           clone3("clone_preserving_field_list"),
-          cloneType(),
+
           sessionType(IR::Type_Bits::get(32)) {}
     ::Model::Elem clone3;
     CloneType_Model cloneType;

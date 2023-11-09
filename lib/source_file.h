@@ -138,7 +138,7 @@ class SourceInfo final {
         this->srcBrief = srcBrief;
     }
     /// Creates an "invalid" SourceInfo
-    SourceInfo() : sources(nullptr), start(SourcePosition()), end(SourcePosition()) {}
+    SourceInfo() : sources(nullptr) {}
 
     /// Creates a SourceInfo for a 'point' in the source, or invalid
     SourceInfo(const InputSources *sources, SourcePosition point)
