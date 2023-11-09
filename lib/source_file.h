@@ -153,7 +153,7 @@ class SourceInfo final {
     /**
         A SourceInfo that spans both this and rhs.
         However, if this or rhs is invalid, it is not taken into account */
-    const SourceInfo operator+(const SourceInfo &rhs) const {
+    SourceInfo operator+(const SourceInfo &rhs) const {
         if (!this->isValid()) return rhs;
         if (!rhs.isValid()) return *this;
         SourcePosition s = start.min(rhs.start);
