@@ -1,47 +1,35 @@
-#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_BACKEND_METADATA_METADATA_H_
-#define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_BACKEND_METADATA_METADATA_H_
+#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_BACKEND_METADATA_H_
+#define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_BACKEND_METADATA_H_
 
 #include <cstddef>
 #include <filesystem>
 #include <fstream>
 #include <optional>
 #include <string>
-#include <utility>
-#include <vector>
 
 #include <inja/inja.hpp>
 
-#include "ir/ir.h"
 #include "lib/cstring.h"
 
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
-#include "backends/p4tools/modules/testgen/lib/tf.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/common.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
 /// Extracts information from the @testSpec to emit a Metadata test case.
-class Metadata : public TF {
-    /// The output file.
-    std::ofstream metadataFile;
-
+class Metadata : public Bmv2TF {
  public:
-    virtual ~Metadata() = default;
-
-    Metadata(const Metadata &) = delete;
-
-    Metadata(Metadata &&) = delete;
-
-    Metadata &operator=(const Metadata &) = delete;
-
-    Metadata &operator=(Metadata &&) = delete;
-
-    Metadata(std::filesystem::path basePath, std::optional<unsigned int> seed);
+    explicit Metadata(std::filesystem::path basePath,
+                      std::optional<unsigned int> seed = std::nullopt);
 
     /// Produce a Metadata test.
     void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testId,
                     float currentCoverage) override;
 
  private:
+    /// The output file.
+    std::ofstream metadataFile;
+
     /// Emits the test preamble. This is only done once for all generated tests.
     /// For the Metadata back end this is the "p4testgen.proto" file.
     void emitPreamble(const std::string &preamble);
@@ -61,18 +49,8 @@ class Metadata : public TF {
 
     /// @returns the inja test case template as a string.
     static std::string getTestCaseTemplate();
-
-    /// Converts the input packet and port into Inja format.
-    static inja::json getSend(const TestSpec *testSpec);
-
-    /// Converts the output packet, port, and mask into Inja format.
-    static inja::json getVerify(const TestSpec *testSpec);
-
-    /// Helper function for @getVerify. Matches the mask value against the input packet value and
-    /// generates the appropriate ignore ranges.
-    static std::vector<std::pair<size_t, size_t>> getIgnoreMasks(const IR::Constant *mask);
 };
 
 }  // namespace P4Tools::P4Testgen::Bmv2
 
-#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_BACKEND_METADATA_METADATA_H_ */
+#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_BACKEND_METADATA_H_ */

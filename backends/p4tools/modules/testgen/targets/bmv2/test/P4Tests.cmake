@@ -28,7 +28,7 @@ set(P4C_V1_TEST_SUITES_P416 ${P4_16_V1_TESTS} ${BMV2_P4_16_V1_TESTS})
 # TEST SUITES
 #############################################################################
 option(P4TOOLS_TESTGEN_BMV2_TEST_METADATA "Run tests on the Metadata test back end" ON)
-option(P4TOOLS_TESTGEN_BMV2_TEST_PROTOBUF "Run tests on the Protobuf test back end" OFF)
+option(P4TOOLS_TESTGEN_BMV2_TEST_PROTOBUF "Run tests on the Protobuf test back end" ON)
 option(P4TOOLS_TESTGEN_BMV2_TEST_PTF "Run tests on the PTF test back end" ON)
 option(P4TOOLS_TESTGEN_BMV2_TEST_STF "Run tests on the STF test back end" ON)
 # Test settings.

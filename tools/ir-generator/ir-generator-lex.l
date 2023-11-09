@@ -84,7 +84,7 @@ static std::string      comment_block;
 "virtual"       { return VIRTUAL; }
 "NullOK"        { return NULLOK; }
 "#apply"        { return APPLY; }
-"#no"[a-z_]*    { yylval.str = yytext+3; return NO; }
+"#no"[a-zA-Z_]*    { yylval.str = yytext+3; return NO; }
 "#nooperator==" { yylval.str = yytext+3; return NO; }
 "0"             { yylval.str = yytext; return ZERO; }
 -?[0-9]+        { yylval.str = yytext; return INTEGER; }

@@ -227,10 +227,10 @@ class CalculatedField : IAnnotated {
     optional NullOK Expression  field;
     class update_or_verify {
         Util::SourceInfo        srcInfo;
-        bool                    update;
+        optional bool           update = false;
         ID                      name;
         Expression              cond;
-        update_or_verify() {}  // FIXME -- needed by umpack_json(safe_vector) -- should not be
+        update_or_verify() { }  // FIXME -- needed by umpack_json(safe_vector) -- should not be
     }
     safe_vector<update_or_verify> specs = {};
     Annotations                 annotations;
@@ -448,7 +448,7 @@ class GlobalRef : Expression {
     Node        obj;            // FIXME -- should be IInstance, but IRgen doesn't allow
                                 // FIXME -- interface references directly in the IR
     GlobalRef { type = obj->to<IInstance>()->getType(); }
-    validate { obj->is<IInstance>(); }
+    validate { BUG_CHECK(obj->is<IInstance>(), "Invalid object %1%", obj); }
     toString { return obj->to<IInstance>()->toString(); }
     ID Name() const { return obj->to<IInstance>()->Name(); }
     dbprint { out << obj->to<IInstance>()->Name(); }

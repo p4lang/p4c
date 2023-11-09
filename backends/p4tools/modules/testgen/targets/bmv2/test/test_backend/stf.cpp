@@ -1,4 +1,4 @@
-#include "backends/p4tools/modules/testgen/targets/bmv2/test/backend/stf.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/test/test_backend/stf.h"
 
 #include <gmock/gmock-matchers.h>
 #include <gtest/gtest-message.h>

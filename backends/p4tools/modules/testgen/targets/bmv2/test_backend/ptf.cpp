@@ -1,10 +1,7 @@
-#include "backends/p4tools/modules/testgen/targets/bmv2/backend/ptf/ptf.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/ptf.h"
 
-#include <algorithm>
 #include <filesystem>
 #include <iomanip>
-#include <list>
-#include <map>
 #include <optional>
 #include <string>
 #include <utility>
@@ -18,54 +15,10 @@
 #include "lib/log.h"
 #include "nlohmann/json.hpp"
 
-#include "backends/p4tools/modules/testgen/lib/exceptions.h"
-#include "backends/p4tools/modules/testgen/lib/tf.h"
-#include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
-
 namespace P4Tools::P4Testgen::Bmv2 {
 
-PTF::PTF(std::filesystem::path basePath, std::optional<unsigned int> seed = std::nullopt)
-    : TF(std::move(basePath), seed) {}
-
-inja::json PTF::getClone(const TestObjectMap &cloneSpecs) {
-    auto cloneSpec = inja::json::object();
-    auto cloneJsons = inja::json::array_t();
-    auto hasClone = false;
-    for (auto cloneSpecTuple : cloneSpecs) {
-        inja::json cloneSpecJson;
-        const auto *cloneSpec = cloneSpecTuple.second->checkedTo<Bmv2V1ModelCloneSpec>();
-        cloneSpecJson["session_id"] = cloneSpec->getEvaluatedSessionId()->asUint64();
-        cloneSpecJson["clone_port"] = cloneSpec->getEvaluatedClonePort()->asInt();
-        cloneSpecJson["cloned"] = cloneSpec->isClonedPacket();
-        hasClone = hasClone || cloneSpec->isClonedPacket();
-        cloneJsons.push_back(cloneSpecJson);
-    }
-    cloneSpec["clone_pkts"] = cloneJsons;
-    cloneSpec["has_clone"] = hasClone;
-    return cloneSpec;
-}
-
-inja::json::array_t PTF::getMeter(const TestObjectMap &meterValues) {
-    auto meterJson = inja::json::array_t();
-    for (auto meterValueInfoTuple : meterValues) {
-        const auto *meterValue = meterValueInfoTuple.second->checkedTo<Bmv2V1ModelMeterValue>();
-
-        const auto meterEntries = meterValue->unravelMap();
-        for (const auto &meterEntry : meterEntries) {
-            inja::json meterInfoJson;
-            meterInfoJson["name"] = meterValueInfoTuple.first;
-            meterInfoJson["value"] = formatHexExpr(meterEntry.second.second);
-            meterInfoJson["index"] = formatHex(meterEntry.first, meterEntry.second.first);
-            if (meterValue->isDirectMeter()) {
-                meterInfoJson["is_direct"] = "True";
-            } else {
-                meterInfoJson["is_direct"] = "False";
-            }
-            meterJson.push_back(meterInfoJson);
-        }
-    }
-    return meterJson;
-}
+PTF::PTF(std::filesystem::path basePath, std::optional<unsigned int> seed)
+    : Bmv2TF(std::move(basePath), seed) {}
 
 std::vector<std::pair<size_t, size_t>> PTF::getIgnoreMasks(const IR::Constant *mask) {
     std::vector<std::pair<size_t, size_t>> ignoreMasks;
@@ -91,125 +44,7 @@ std::vector<std::pair<size_t, size_t>> PTF::getIgnoreMasks(const IR::Constant *m
     return ignoreMasks;
 }
 
-inja::json PTF::getControlPlane(const TestSpec *testSpec) {
-    inja::json controlPlaneJson = inja::json::object();
-
-    // Map of actionProfiles and actionSelectors for easy reference.
-    std::map<cstring, cstring> apAsMap;
-
-    auto tables = testSpec->getTestObjectCategory("tables");
-    if (!tables.empty()) {
-        controlPlaneJson["tables"] = inja::json::array();
-    }
-    for (const auto &testObject : tables) {
-        inja::json tblJson;
-        tblJson["table_name"] = testObject.first.c_str();
-        const auto *const tblConfig = testObject.second->checkedTo<TableConfig>();
-        const auto *tblRules = tblConfig->getRules();
-        tblJson["rules"] = inja::json::array();
-        for (const auto &tblRule : *tblRules) {
-            inja::json rule;
-            const auto *matches = tblRule.getMatches();
-            const auto *actionCall = tblRule.getActionCall();
-            const auto *actionArgs = actionCall->getArgs();
-            rule["action_name"] = actionCall->getActionName().c_str();
-            auto j = getControlPlaneForTable(*matches, *actionArgs);
-            rule["rules"] = std::move(j);
-            rule["priority"] = tblRule.getPriority();
-            tblJson["rules"].push_back(rule);
-        }
-
-        // Collect action profiles and selectors associated with the table.
-        checkForTableActionProfile<Bmv2V1ModelActionProfile, Bmv2V1ModelActionSelector>(
-            tblJson, apAsMap, tblConfig);
-
-        // Check whether the default action is overridden for this table.
-        checkForDefaultActionOverride(tblJson, tblConfig);
-
-        controlPlaneJson["tables"].push_back(tblJson);
-    }
-
-    // Collect declarations of action profiles.
-    collectActionProfileDeclarations<Bmv2V1ModelActionProfile>(testSpec, controlPlaneJson, apAsMap);
-
-    return controlPlaneJson;
-}
-
-inja::json PTF::getControlPlaneForTable(const TableMatchMap &matches,
-                                        const std::vector<ActionArg> &args) {
-    inja::json rulesJson;
-
-    rulesJson["single_exact_matches"] = inja::json::array();
-    rulesJson["multiple_exact_matches"] = inja::json::array();
-    rulesJson["range_matches"] = inja::json::array();
-    rulesJson["ternary_matches"] = inja::json::array();
-    rulesJson["lpm_matches"] = inja::json::array();
-    rulesJson["optional_matches"] = inja::json::array();
-
-    rulesJson["act_args"] = inja::json::array();
-    rulesJson["needs_priority"] = false;
-
-    // Iterate over the match fields and segregate them.
-    for (const auto &match : matches) {
-        const auto fieldName = match.first;
-        const auto &fieldMatch = match.second;
-
-        inja::json j;
-        j["field_name"] = fieldName;
-        if (const auto *elem = fieldMatch->to<Exact>()) {
-            j["value"] = formatHexExpr(elem->getEvaluatedValue()).c_str();
-            rulesJson["single_exact_matches"].push_back(j);
-        } else if (const auto *elem = fieldMatch->to<Range>()) {
-            j["lo"] = formatHexExpr(elem->getEvaluatedLow()).c_str();
-            j["hi"] = formatHexExpr(elem->getEvaluatedHigh()).c_str();
-            rulesJson["range_matches"].push_back(j);
-        } else if (const auto *elem = fieldMatch->to<Ternary>()) {
-            j["value"] = formatHexExpr(elem->getEvaluatedValue()).c_str();
-            j["mask"] = formatHexExpr(elem->getEvaluatedMask()).c_str();
-            rulesJson["ternary_matches"].push_back(j);
-            // If the rule has a ternary match we need to add the priority.
-            rulesJson["needs_priority"] = true;
-        } else if (const auto *elem = fieldMatch->to<LPM>()) {
-            j["value"] = formatHexExpr(elem->getEvaluatedValue()).c_str();
-            j["prefix_len"] = elem->getEvaluatedPrefixLength()->value.str();
-            rulesJson["lpm_matches"].push_back(j);
-        } else if (const auto *elem = fieldMatch->to<Optional>()) {
-            j["value"] = formatHexExpr(elem->getEvaluatedValue()).c_str();
-            if (elem->addAsExactMatch()) {
-                j["use_exact"] = "True";
-            } else {
-                j["use_exact"] = "False";
-            }
-            rulesJson["needs_priority"] = true;
-            rulesJson["optional_matches"].push_back(j);
-        } else {
-            TESTGEN_UNIMPLEMENTED("Unsupported table key match type \"%1%\"",
-                                  fieldMatch->getObjectName());
-        }
-    }
-
-    for (const auto &actArg : args) {
-        inja::json j;
-        j["param"] = actArg.getActionParamName().c_str();
-        j["value"] = formatHexExpr(actArg.getEvaluatedValue()).c_str();
-        rulesJson["act_args"].push_back(j);
-    }
-
-    return rulesJson;
-}
-
-inja::json PTF::getSend(const TestSpec *testSpec) {
-    const auto *iPacket = testSpec->getIngressPacket();
-    const auto *payload = iPacket->getEvaluatedPayload();
-    inja::json sendJson;
-    sendJson["ig_port"] = iPacket->getPort();
-    auto dataStr = formatHexExpr(payload, false, true, false);
-    sendJson["pkt"] = insertHexSeparators(dataStr);
-    sendJson["pkt_size"] = payload->type->width_bits();
-    return sendJson;
-}
-
-inja::json PTF::getVerify(const TestSpec *testSpec) {
+inja::json PTF::getExpectedPacket(const TestSpec *testSpec) const {
     inja::json verifyData = inja::json::object();
     auto egressPacket = testSpec->getEgressPacket();
     if (egressPacket.has_value()) {
@@ -435,7 +270,7 @@ void PTF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
     dataJson["trace"] = getTrace(testSpec);
     dataJson["control_plane"] = getControlPlane(testSpec);
     dataJson["send"] = getSend(testSpec);
-    dataJson["verify"] = getVerify(testSpec);
+    dataJson["verify"] = getExpectedPacket(testSpec);
     dataJson["timestamp"] = Utils::getTimeStamp();
     std::stringstream coverageStr;
     coverageStr << std::setprecision(2) << currentCoverage;

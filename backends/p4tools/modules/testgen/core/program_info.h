@@ -53,7 +53,7 @@ class ProgramInfo : public ICastable {
     const IR::P4Program *program;
 
     /// The generated dcg.
-    const NodesCallGraph *dcg;
+    const NodesCallGraph *dcg = nullptr;
 
     /// @returns the series of nodes that has been computed by this particular target.
     [[nodiscard]] const std::vector<Continuation::Command> *getPipelineSequence() const;
