@@ -171,7 +171,8 @@ const IR::Node *TypeInference::apply_visitor(const IR::Node *orig, const char *n
     const auto *transformed = Transform::apply_visitor(orig, name);
     BUG_CHECK(!readOnly || orig == transformed,
               "At this point in the compilation typechecking should not infer new types anymore, "
-              "but it did: node %1% changed to %2%", orig, transformed);
+              "but it did: node %1% changed to %2%",
+              orig, transformed);
     return transformed;
 }
 
