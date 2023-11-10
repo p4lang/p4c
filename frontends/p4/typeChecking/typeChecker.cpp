@@ -167,6 +167,14 @@ void TypeInference::end_apply(const IR::Node *node) {
     if (node->is<IR::P4Program>()) LOG3("Typemap: " << std::endl << typeMap);
 }
 
+const IR::Node *TypeInference::apply_visitor(const IR::Node *orig, const char *name) {
+    const auto *transformed = Transform::apply_visitor(orig, name);
+    BUG_CHECK(!readOnly || orig == transformed,
+              "At this point in the compilation typechecking should not infer new types anymore, "
+              "but it did: node %1% changed to %2%", orig, transformed);
+    return transformed;
+}
+
 TypeInference *TypeInference::clone() const {
     return new TypeInference(this->refMap, this->typeMap, true);
 }
