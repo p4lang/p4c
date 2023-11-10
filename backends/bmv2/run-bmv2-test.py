@@ -22,6 +22,7 @@ import os
 import shutil
 import sys
 import tempfile
+from pathlib import Path
 from subprocess import Popen
 from threading import Thread
 
@@ -267,7 +268,8 @@ def process_file(options, argv):
 
     if run_init_commands(options) != SUCCESS:
         return FAILURE
-    tmpdir = tempfile.mkdtemp(dir=".")
+    # ensure that tempfile.mkdtemp returns an absolute path, regardless of the py3 version
+    tmpdir = tempfile.mkdtemp(dir=Path(".").absolute())
     basename = os.path.basename(options.p4filename)
     base, _ = os.path.splitext(basename)
 
