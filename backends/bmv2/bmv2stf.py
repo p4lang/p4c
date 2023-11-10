@@ -748,7 +748,7 @@ class RunBMV2(object):
                     str(rand),
                 ]
                 + self.interfaceArgs()
-                + ["../" + self.jsonfile]
+                + [self.jsonfile]
             )
             if self.cmd_line_args:
                 runswitch += self.cmd_line_args
