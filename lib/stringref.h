@@ -51,11 +51,14 @@ struct StringRef {
         len = 0;
     }
     StringRef(const StringRef &a) : p(a.p), len(a.len) {}
-    StringRef &operator=(const StringRef &a) {  // NOLINT(bugprone-unhandled-self-assignment)
+    // avoid clang-tidy complaining
+    // NOLINTBEGIN(bugprone-unhandled-self-assignment)
+    StringRef &operator=(const StringRef &a) {
         p = a.p;
         len = a.len;
         return *this;
     }
+    // NOLINTEND(bugprone-unhandled-self-assignment)
     explicit operator bool() const { return p != 0; }
 
     bool operator==(const StringRef &a) const {
