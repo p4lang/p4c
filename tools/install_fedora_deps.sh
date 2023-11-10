@@ -47,7 +47,7 @@ sudo dnf install -y -q \
     valgrind \
     zlib-devel
 
-sudo pip3 install ply ptf scapy==2.4.5 wheel
+sudo pip3 install ply ptf scapy==2.5.0 wheel
 
 # Install dependencies for the BMv2 PTF runner and P4Runtime.
 sudo pip3 install --upgrade protobuf==3.20.3
