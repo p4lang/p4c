@@ -27,7 +27,7 @@ class ActionConverter : public Inspector {
 
     void convertActionBody(const IR::Vector<IR::StatOrDecl> *body, Util::JsonArray *result);
     void convertActionParams(const IR::ParameterList *parameters, Util::JsonArray *params);
-    cstring jsonAssignment(const IR::Type *type, bool inParser);
+    cstring jsonAssignment(const IR::Type *type);
     void postorder(const IR::P4Action *action) override;
 
  public:

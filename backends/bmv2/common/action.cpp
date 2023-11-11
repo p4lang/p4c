@@ -20,8 +20,8 @@ limitations under the License.
 
 namespace BMV2 {
 
-cstring ActionConverter::jsonAssignment(const IR::Type *type, bool inParser) {
-    if (!inParser && type->is<IR::Type_Varbits>()) return "assign_VL";
+cstring ActionConverter::jsonAssignment(const IR::Type *type) {
+    if (type->is<IR::Type_Varbits>()) return "assign_VL";
     if (type->is<IR::Type_HeaderUnion>()) return "assign_union";
     if (type->is<IR::Type_Header>() || type->is<IR::Type_Struct>()) return "assign_header";
     if (auto ts = type->to<IR::Type_Stack>()) {
@@ -31,12 +31,7 @@ cstring ActionConverter::jsonAssignment(const IR::Type *type, bool inParser) {
         else
             return "assign_header_stack";
     }
-    if (inParser)
-        // Unfortunately set can do some things that assign cannot,
-        // e.g., handle lookahead on the RHS.
-        return "set";
-    else
-        return "assign";
+    return "assign";
 }
 
 void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
@@ -113,7 +108,7 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
             l = assign->left;
             r = assign->right;
             auto type = ctxt->typeMap->getType(l, true);
-            cstring operation = jsonAssignment(type, false);
+            cstring operation = jsonAssignment(type);
             auto primitive = mkPrimitive(operation, result);
             auto parameters = mkParameters(primitive);
             primitive->emplace_non_null("source_info", assign->sourceInfoJsonObj());
