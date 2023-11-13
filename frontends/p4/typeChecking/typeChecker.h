@@ -334,6 +334,7 @@ class TypeInference : public Transform {
 
     Visitor::profile_t init_apply(const IR::Node *node) override;
     void end_apply(const IR::Node *Node) override;
+    const IR::Node *apply_visitor(const IR::Node *, const char *name = 0) override;
 
     TypeInference *clone() const override;
     // Apply recursively the typechecker to the newly created node
