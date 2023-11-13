@@ -57,6 +57,14 @@ class ICastable {
         BUG_CHECK(result, "Cast failed: %1% is not a %2%", this, typeid(T).name());
         return result;
     }
+
+    /// Performs a checked cast. A BUG occurs if the cast fails.
+    template <typename T>
+    T *checkedTo() {
+        auto *result = to<T>();
+        BUG_CHECK(result, "Cast failed: %1% is not a %2%", this, typeid(T).name());
+        return result;
+    }
 };
 
 #endif /* LIB_CASTABLE_H_ */
