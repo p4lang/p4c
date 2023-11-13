@@ -51,7 +51,7 @@ struct StringRef {
         len = 0;
     }
     StringRef(const StringRef &a) : p(a.p), len(a.len) {}
-    // avoid clang-tidy complaining
+    // avoid clang-tidy complaining about assignment that is actually safe
     // NOLINTBEGIN(bugprone-unhandled-self-assignment)
     StringRef &operator=(const StringRef &a) {
         p = a.p;
