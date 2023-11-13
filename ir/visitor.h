@@ -78,13 +78,14 @@ class Visitor {
         Visitor &v;
         uint64_t start;
         explicit profile_t(Visitor &);
+        friend class Visitor;
+
+     public:
         profile_t() = delete;
         profile_t(const profile_t &) = delete;
         profile_t &operator=(const profile_t &) = delete;
         profile_t &operator=(profile_t &&) = delete;
-        friend class Visitor;
 
-     public:
         ~profile_t();
         profile_t(profile_t &&);
     };

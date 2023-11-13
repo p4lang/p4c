@@ -57,7 +57,7 @@ class SourceCodeBuilder {
         newline();
     }
     void append(const std::string &str) {
-        if (str.size() == 0) return;
+        if (str.empty()) return;
         endsInSpace = ::isspace(str.at(str.size() - 1));
         buffer << str;
     }

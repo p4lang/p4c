@@ -21,13 +21,13 @@ limitations under the License.
 
 /// An enhanced version of std::vector that performs bounds checking for
 /// operator[].
-template <class T, class _Alloc = std::allocator<T>>
-class safe_vector : public std::vector<T, _Alloc> {
+template <class T, class Alloc = std::allocator<T>>
+class safe_vector : public std::vector<T, Alloc> {
  public:
-    using std::vector<T, _Alloc>::vector;
-    typedef typename std::vector<T, _Alloc>::reference reference;
-    typedef typename std::vector<T, _Alloc>::const_reference const_reference;
-    typedef typename std::vector<T, _Alloc>::size_type size_type;
+    using std::vector<T, Alloc>::vector;
+    typedef typename std::vector<T, Alloc>::reference reference;
+    typedef typename std::vector<T, Alloc>::const_reference const_reference;
+    typedef typename std::vector<T, Alloc>::size_type size_type;
     typedef typename std::vector<T>::const_iterator const_iterator;
     reference operator[](size_type n) { return this->at(n); }
     const_reference operator[](size_type n) const { return this->at(n); }

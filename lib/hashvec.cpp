@@ -216,28 +216,32 @@ hash_vector_base::hash_vector_base(hash_vector_base &&a)
 }
 
 hash_vector_base &hash_vector_base::operator=(const hash_vector_base &a) {
-    freehash();
-    info = a.info;
-    hashsize = a.hashsize;
-    inuse = a.inuse;
-    collisions = a.collisions;
-    log_hashsize = a.log_hashsize;
-    erased = a.erased;
-    allochash();
-    memcpy(hash.s1, a.hash.s1, hashsize * info->hashelsize);
+    if (this != &a) {
+        freehash();
+        info = a.info;
+        hashsize = a.hashsize;
+        inuse = a.inuse;
+        collisions = a.collisions;
+        log_hashsize = a.log_hashsize;
+        erased = a.erased;
+        allochash();
+        memcpy(hash.s1, a.hash.s1, hashsize * info->hashelsize);
+    }
     return *this;
 }
 
 hash_vector_base &hash_vector_base::operator=(hash_vector_base &&a) {
-    freehash();
-    info = a.info;
-    hashsize = a.hashsize;
-    inuse = a.inuse;
-    collisions = a.collisions;
-    log_hashsize = a.log_hashsize;
-    erased = a.erased;
-    hash.s1 = a.hash.s1;
-    a.hash.s1 = nullptr;
+    if (this != &a) {
+        freehash();
+        info = a.info;
+        hashsize = a.hashsize;
+        inuse = a.inuse;
+        collisions = a.collisions;
+        log_hashsize = a.log_hashsize;
+        erased = a.erased;
+        hash.s1 = a.hash.s1;
+        a.hash.s1 = nullptr;
+    }
     return *this;
 }
 
