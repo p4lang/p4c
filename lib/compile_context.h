@@ -36,6 +36,8 @@ class ICompileContext {
 /// Compilation contexts can be nested to allow composing programs without
 /// intermingling their stack.
 struct CompileContextStack final {
+    CompileContextStack() = delete;
+
     /// @return the current compilation context (i.e., the top of the
     /// compilation context stack), cast to the requested type. If the current
     /// compilation context is of the wrong type, or the stack is empty, an
@@ -64,8 +66,6 @@ struct CompileContextStack final {
     static void push(ICompileContext *context);
     static void pop();
     static StackType &getStack();
-
-    CompileContextStack() = delete;
 };
 
 /// A RAII helper which pushes a compilation context onto the stack when it's

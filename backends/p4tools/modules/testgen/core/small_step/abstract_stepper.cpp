@@ -179,7 +179,7 @@ bool AbstractStepper::stepToStructSubexpr(
         });
 }
 
-bool AbstractStepper::stepGetHeaderValidity(const IR::Expression *headerRef) {
+bool AbstractStepper::stepGetHeaderValidity(const IR::StateVariable &headerRef) {
     // The top of the body should be a Return command containing a call to getValid on the given
     // header ref. Replace this with the variable representing the header ref's validity.
     if (const auto *headerUnion = headerRef->type->to<IR::Type_HeaderUnion>()) {
@@ -211,14 +211,14 @@ bool AbstractStepper::stepGetHeaderValidity(const IR::Expression *headerRef) {
     return false;
 }
 
-void AbstractStepper::setHeaderValidity(const IR::Expression *expr, bool validity,
+void AbstractStepper::setHeaderValidity(const IR::StateVariable &headerRef, bool validity,
                                         ExecutionState &nextState) {
-    const auto &headerRefValidity = ToolsVariables::getHeaderValidity(expr);
+    const auto &headerRefValidity = ToolsVariables::getHeaderValidity(headerRef);
     nextState.set(headerRefValidity, IR::getBoolLiteral(validity));
 
-    // In some cases, the header may be part of a union.
+    // In some cases, the header may be `part of a union.
     if (validity) {
-        const auto *headerBaseMember = expr->to<IR::Member>();
+        const auto *headerBaseMember = headerRef.ref->to<IR::Member>();
         if (headerBaseMember == nullptr) {
             return;
         }
@@ -228,7 +228,7 @@ void AbstractStepper::setHeaderValidity(const IR::Expression *expr, bool validit
             for (const auto *field : hdrUnion->fields) {
                 auto *member = new IR::Member(field->type, headerBase, field->name);
                 // Ignore the member we are setting to valid.
-                if (expr->equiv(*member)) {
+                if (headerRef->equiv(*member)) {
                     continue;
                 }
                 // Set all other members to invalid.
@@ -237,9 +237,8 @@ void AbstractStepper::setHeaderValidity(const IR::Expression *expr, bool validit
         }
         return;
     }
-    const auto *exprType = expr->type->checkedTo<IR::Type_StructLike>();
     std::vector<IR::StateVariable> validityVector;
-    auto fieldsVector = nextState.getFlatFields(expr, exprType, &validityVector);
+    auto fieldsVector = nextState.getFlatFields(headerRef, &validityVector);
     // The header is going to be invalid. Set all fields to taint constants.
     // TODO: Should we make this target specific? Some targets set the header fields to 0.
     for (const auto &field : fieldsVector) {
@@ -247,7 +246,7 @@ void AbstractStepper::setHeaderValidity(const IR::Expression *expr, bool validit
     }
 }
 
-bool AbstractStepper::stepSetHeaderValidity(const IR::Expression *headerRef, bool validity) {
+bool AbstractStepper::stepSetHeaderValidity(const IR::StateVariable &headerRef, bool validity) {
     // The top of the body should be a Return command containing a call to setValid or setInvalid
     // on the given header ref. Update the symbolic environment to reflect the changed validity
     // bit, and replace the command with an expressionless Return.
@@ -286,9 +285,8 @@ void generateStackAssigmentStatement(ExecutionState &nextState,
     replacements.emplace_back(generateStacksetValid(stackRef, leftIndex, true));
 
     // Unfold fields.
-    const auto *structType = elemType->checkedTo<IR::Type_StructLike>();
-    auto leftVector = nextState.getFlatFields(leftArIndex, structType);
-    auto rightVector = nextState.getFlatFields(rightArrIndex, structType);
+    auto leftVector = nextState.getFlatFields(leftArIndex);
+    auto rightVector = nextState.getFlatFields(rightArrIndex);
     for (size_t i = 0; i < leftVector.size(); i++) {
         replacements.emplace_back(new IR::AssignmentStatement(leftVector[i], rightVector[i]));
     }
@@ -350,9 +348,9 @@ void AbstractStepper::setTargetUninitialized(ExecutionState &nextState,
                                              const IR::StateVariable &ref, bool forceTaint) const {
     // Resolve the type of the left-and assignment, if it is a type name.
     const auto *refType = nextState.resolveType(ref->type);
-    if (const auto *structType = refType->to<const IR::Type_StructLike>()) {
+    if (refType->is<const IR::Type_StructLike>()) {
         std::vector<IR::StateVariable> validFields;
-        auto fields = nextState.getFlatFields(ref, structType, &validFields);
+        auto fields = nextState.getFlatFields(ref, &validFields);
         // We also need to initialize the validity bits of the headers. These are false.
         for (const auto &validField : validFields) {
             nextState.set(validField, IR::getBoolLiteral(false));
@@ -370,11 +368,11 @@ void AbstractStepper::setTargetUninitialized(ExecutionState &nextState,
     }
 }
 
-void AbstractStepper::declareStructLike(ExecutionState &nextState, const IR::Expression *parentExpr,
-                                        const IR::Type_StructLike *structType,
+void AbstractStepper::declareStructLike(ExecutionState &nextState,
+                                        const IR::StateVariable &parentExpr,
                                         bool forceTaint) const {
     std::vector<IR::StateVariable> validFields;
-    auto fields = nextState.getFlatFields(parentExpr, structType, &validFields);
+    auto fields = nextState.getFlatFields(parentExpr, &validFields);
     // We also need to initialize the validity bits of the headers. These are false.
     for (const auto &validField : validFields) {
         nextState.set(validField, IR::getBoolLiteral(false));

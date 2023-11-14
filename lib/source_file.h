@@ -138,7 +138,7 @@ class SourceInfo final {
         this->srcBrief = srcBrief;
     }
     /// Creates an "invalid" SourceInfo
-    SourceInfo() : sources(nullptr), start(SourcePosition()), end(SourcePosition()) {}
+    SourceInfo() : sources(nullptr) {}
 
     /// Creates a SourceInfo for a 'point' in the source, or invalid
     SourceInfo(const InputSources *sources, SourcePosition point)
@@ -153,7 +153,7 @@ class SourceInfo final {
     /**
         A SourceInfo that spans both this and rhs.
         However, if this or rhs is invalid, it is not taken into account */
-    const SourceInfo operator+(const SourceInfo &rhs) const {
+    SourceInfo operator+(const SourceInfo &rhs) const {
         if (!this->isValid()) return rhs;
         if (!rhs.isValid()) return *this;
         SourcePosition s = start.min(rhs.start);

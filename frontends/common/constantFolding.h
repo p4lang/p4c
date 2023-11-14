@@ -65,7 +65,6 @@ class DoConstantFolding : public Transform {
     // we substituting constants there.
     bool assignmentTarget;
 
- protected:
     /// @returns a constant equivalent to @p expr or `nullptr`
     const IR::Expression *getConstant(const IR::Expression *expr) const;
 

@@ -86,7 +86,6 @@ class ordered_map {
  public:
     typedef typename map_type::size_type size_type;
 
- public:
     ordered_map() {}
     ordered_map(const ordered_map &a) : data(a.data) { init_data_map(); }
     template <typename InputIt>

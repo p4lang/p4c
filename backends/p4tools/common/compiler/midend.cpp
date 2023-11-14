@@ -15,6 +15,7 @@
 #include "midend/convertEnums.h"
 #include "midend/convertErrors.h"
 #include "midend/copyStructures.h"
+#include "midend/eliminateInvalidHeaders.h"
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateSerEnums.h"
 #include "midend/eliminateSwitch.h"
@@ -95,6 +96,8 @@ void MidEnd::addDefaultPasses() {
         new P4::EliminateSwitch(&refMap, &typeMap),
         // Replace types introduced by 'type' with 'typedef'.
         new P4::EliminateNewtype(&refMap, &typeMap),
+        // Remove the invalid header / header-union literal, except for constant expressions
+        new P4::EliminateInvalidHeaders(&refMap, &typeMap),
         // Replace serializable enum constants with their values.
         new P4::EliminateSerEnums(&refMap, &typeMap),
         // Make sure that we have no TypeDef left in the program.

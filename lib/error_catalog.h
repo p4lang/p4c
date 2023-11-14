@@ -107,7 +107,7 @@ class ErrorCatalog {
     }
 
     /// retrieve the name for errorCode
-    const cstring getName(int errorCode) {
+    cstring getName(int errorCode) {
         if (errorCatalog.count(errorCode)) return errorCatalog.at(errorCode);
         return "--unknown--";
     }

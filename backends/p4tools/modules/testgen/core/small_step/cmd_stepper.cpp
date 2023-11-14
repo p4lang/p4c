@@ -69,11 +69,11 @@ bool CmdStepper::preorder(const IR::AssignmentStatement *assign) {
     // not always expand these return values as we do with the expandLookahead pass.
     // Correspondingly, we need to retrieve the fields and set each member individually. This
     // assumes that all headers and structures have been flattened and no nesting is left.
-    if (const auto *structType = leftType->to<IR::Type_StructLike>()) {
+    if (leftType->is<IR::Type_StructLike>()) {
         const auto *listExpr = assign->right->checkedTo<IR::ListExpression>();
 
         std::vector<IR::StateVariable> flatRefValids;
-        auto flatRefFields = state.getFlatFields(left, structType, &flatRefValids);
+        auto flatRefFields = state.getFlatFields(left, &flatRefValids);
         // First, complete the assignments for the data structure.
         for (size_t idx = 0; idx < flatRefFields.size(); ++idx) {
             const auto &leftFieldRef = flatRefFields[idx];

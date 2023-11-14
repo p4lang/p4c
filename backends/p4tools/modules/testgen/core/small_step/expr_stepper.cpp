@@ -166,16 +166,17 @@ bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
             // Handle calls to header methods.
             if (method->expr->type->is<IR::Type_Header>() ||
                 method->expr->type->is<IR::Type_HeaderUnion>()) {
+                auto ref = ToolsVariables::convertReference(method->expr);
                 if (method->member == "isValid") {
-                    return stepGetHeaderValidity(method->expr);
+                    return stepGetHeaderValidity(ref);
                 }
 
                 if (method->member == "setInvalid") {
-                    return stepSetHeaderValidity(method->expr, false);
+                    return stepSetHeaderValidity(ref, false);
                 }
 
                 if (method->member == "setValid") {
-                    return stepSetHeaderValidity(method->expr, true);
+                    return stepSetHeaderValidity(ref, true);
                 }
 
                 BUG("Unknown method call on header instance: %1%", call);
