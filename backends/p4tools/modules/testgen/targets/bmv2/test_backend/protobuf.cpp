@@ -37,7 +37,7 @@ std::string formatHexExprWithSep(const IR::Expression *expr) {
 }
 
 Protobuf::Protobuf(std::filesystem::path basePath, std::optional<unsigned int> seed)
-    : Bmv2TF(std::move(basePath), seed) {}
+    : Bmv2TestFramework(std::move(basePath), seed) {}
 
 std::optional<p4rt_id_t> Protobuf::getIdAnnotation(const IR::IAnnotated *node) {
     const auto *idAnnotation = node->getAnnotation("id");

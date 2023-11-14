@@ -27,7 +27,7 @@
 namespace P4Tools::P4Testgen::Bmv2 {
 
 STF::STF(std::filesystem::path basePath, std::optional<unsigned int> seed)
-    : Bmv2TF(std::move(basePath), seed) {}
+    : Bmv2TestFramework(std::move(basePath), seed) {}
 
 inja::json STF::getSend(const TestSpec *testSpec) const {
     const auto *iPacket = testSpec->getIngressPacket();

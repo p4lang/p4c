@@ -11,13 +11,13 @@
 
 #include "lib/cstring.h"
 
+#include "backends/p4tools/modules/testgen/lib/test_framework.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
-#include "backends/p4tools/modules/testgen/lib/tf.h"
 
 namespace P4Tools::P4Testgen::EBPF {
 
 /// Extracts information from the @testSpec to emit a STF test case.
-class STF : public TF {
+class STF : public TestFramework {
  public:
     virtual ~STF() = default;
 

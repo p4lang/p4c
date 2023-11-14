@@ -1,5 +1,5 @@
-#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TF_H_
-#define BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TF_H_
+#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TEST_FRAMEWORK_H_
+#define BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TEST_FRAMEWORK_H_
 
 #include <cstddef>
 #include <filesystem>
@@ -24,9 +24,9 @@
 
 namespace P4Tools::P4Testgen {
 
-/// THe default base class for the various test frameworks (TF). Every test framework has a test
+/// THe default base class for the various test frameworks. Every test framework has a test
 /// name and a seed associated with it. Also contains a variety of common utility functions.
-class TF {
+class TestFramework {
  protected:
     /// The @basePath to be used in test case generation.
     std::filesystem::path basePath;
@@ -35,7 +35,7 @@ class TF {
     std::optional<unsigned int> seed;
 
     /// Creates a generic test framework.
-    TF(std::filesystem::path basePath, std::optional<unsigned int> seed);
+    TestFramework(std::filesystem::path basePath, std::optional<unsigned int> seed);
 
     /// Converts the traces of this test into a string representation and Inja object.
     static inja::json getTrace(const TestSpec *testSpec) {
@@ -154,4 +154,4 @@ class TF {
 
 }  // namespace P4Tools::P4Testgen
 
-#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TF_H_ */
+#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TEST_FRAMEWORK_H_ */
