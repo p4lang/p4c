@@ -195,7 +195,7 @@ std::vector<const Expression *> flattenStructExpression(const StructExpression *
     return exprList;
 }
 
-std::vector<const Expression *> flattenListExpression(const ListExpression *listExpr) {
+std::vector<const Expression *> flattenListExpression(const BaseListExpression *listExpr) {
     std::vector<const Expression *> exprList;
     for (const auto *listElem : listExpr->components) {
         if (const auto *subListExpr = listElem->to<ListExpression>()) {

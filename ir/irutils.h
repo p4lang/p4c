@@ -12,7 +12,7 @@ namespace IR {
 class BoolLiteral;
 class Constant;
 class Expression;
-class ListExpression;
+class BaseListExpression;
 class Literal;
 class StructExpression;
 class Type;
@@ -76,9 +76,9 @@ const IR::Constant *convertBoolLiteral(const IR::BoolLiteral *lit);
 /// This is why we require two separate methods.
 std::vector<const Expression *> flattenStructExpression(const StructExpression *structExpr);
 
-/// Given an ListExpression, returns a flat vector of the expressions contained in that
+/// Given an BaseListExpression, returns a flat vector of the expressions contained in that
 /// list.
-std::vector<const Expression *> flattenListExpression(const ListExpression *listExpr);
+std::vector<const Expression *> flattenListExpression(const BaseListExpression *listExpr);
 
 /* =========================================================================================
  *  Other helper functions
