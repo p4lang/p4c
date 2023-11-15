@@ -72,6 +72,7 @@ const int ErrorType::WARN_MAX = 2141;
 
 // ------ Info messages -----------
 const int ErrorType::INFO_INFERRED = WARN_MAX + 1;
+const int ErrorType::INFO_PROGRESS = 2143;
 
 // Backends should extend this class with additional info messages in the range 3000-3999.
 const int ErrorType::INFO_MIN_BACKEND = 3000;
@@ -124,4 +125,5 @@ std::map<int, cstring> ErrorCatalog::errorCatalog = {
     {ErrorType::WARN_ENTRIES_OUT_OF_ORDER, "entries_out_of_priority_order"},
 
     // Info messages
-    {ErrorType::INFO_INFERRED, "inferred"}};
+    {ErrorType::INFO_INFERRED, "inferred"},
+    {ErrorType::INFO_PROGRESS, "progress"}};

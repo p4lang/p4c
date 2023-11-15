@@ -86,6 +86,7 @@ class ErrorType {
     // -------- Info messages -------------
     // info messages as initially defined with a format string
     static const int INFO_INFERRED;  // information inferred by compiler
+    static const int INFO_PROGRESS;  // compilation progress
 
     static const int INFO_MIN_BACKEND;  // first allowed backend info code
     static const int INFO_MAX;          // last allowed info code
