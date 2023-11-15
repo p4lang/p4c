@@ -29,16 +29,6 @@ namespace P4Tools::P4Testgen::Bmv2 {
 STF::STF(std::filesystem::path basePath, std::optional<unsigned int> seed)
     : Bmv2TF(std::move(basePath), seed) {}
 
-inja::json STF::getSend(const TestSpec *testSpec) const {
-    const auto *iPacket = testSpec->getIngressPacket();
-    const auto *payload = iPacket->getEvaluatedPayload();
-    inja::json sendJson;
-    sendJson["ig_port"] = iPacket->getPort();
-    sendJson["pkt"] = formatHexExpr(payload, false, true, false);
-    sendJson["pkt_size"] = payload->type->width_bits();
-    return sendJson;
-}
-
 inja::json STF::getExpectedPacket(const TestSpec *testSpec) const {
     inja::json verifyData = inja::json::object();
     if (testSpec->getEgressPacket() != std::nullopt) {
@@ -46,13 +36,15 @@ inja::json STF::getExpectedPacket(const TestSpec *testSpec) const {
         verifyData["eg_port"] = packet.getPort();
         const auto *payload = packet.getEvaluatedPayload();
         const auto *payloadMask = packet.getEvaluatedPayloadMask();
-        auto dataStr = formatHexExpr(payload, false, true, false);
+        auto dataStr = formatHexExpr(payload, false, true, true);
         if (payloadMask != nullptr) {
             // If a mask is present, construct the packet data  with wildcard `*` where there are
             // non zero nibbles
-            auto maskStr = formatHexExpr(payloadMask, false, true, false);
+            auto maskStr = formatHexExpr(payloadMask, false, true, true);
             std::string packetData;
-            for (size_t dataPos = 0; dataPos < dataStr.size(); ++dataPos) {
+            BUG_CHECK(dataStr.size() > 2 && maskStr.size() > 2,
+                      "Data strings must have at least three characters.");
+            for (size_t dataPos = 2; dataPos < dataStr.size(); ++dataPos) {
                 if (maskStr.at(dataPos) != 'F') {
                     // TODO: We are being conservative here and adding a wildcard for any 0
                     // in the 4b nibble

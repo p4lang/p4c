@@ -54,8 +54,7 @@ inja::json PTF::getExpectedPacket(const TestSpec *testSpec) const {
         const auto *payloadMask = packet->getEvaluatedPayloadMask();
         verifyData["ignore_masks"] = getIgnoreMasks(payloadMask);
 
-        auto dataStr = formatHexExpr(payload, false, true, false);
-        verifyData["exp_pkt"] = insertHexSeparators(dataStr);
+        verifyData["exp_pkt"] = formatHexExpr(payload, false, true, true);
     }
     return verifyData;
 }

@@ -39,9 +39,6 @@ class STF : public Bmv2TF {
 
     inja::json getExpectedPacket(const TestSpec *testSpec) const override;
 
-    /// TODO: Fix how BMv2 parses packet strings. We should support hex and octal prefixes.
-    inja::json getSend(const TestSpec *testSpec) const override;
-
     inja::json getControlPlaneForTable(const TableMatchMap &matches,
                                        const std::vector<ActionArg> &args) const override;
 };

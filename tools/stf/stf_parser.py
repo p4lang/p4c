@@ -22,7 +22,7 @@ import re
 
 import ply.yacc as yacc
 
-from .stf_lexer import STFLexer
+from stf.stf_lexer import STFLexer
 
 # PARSER GRAMMAR --------------------------------------------------------------
 
@@ -300,7 +300,8 @@ class STFParser:
 
     def p_packet_datum(self, p):
         """packet_datum : DATA_HEX
-        | DATA_DEC"""
+        | DATA_DEC
+        | DATA_HEX_PREFIX"""
         p[0] = p[1]
 
     def p_expect_data_one(self, p):
@@ -353,7 +354,7 @@ class STFParser:
 #
 
 if __name__ == "__main__":
-    data = """
+    DATA = """
     ADD test2 100 data.f2:0x04040404 c4_6(val4:0x4040, val5:0x5050, val6:0x6060, port:2)
     add tab1 dstAddr:0xa1a2a3a4a5a6 act(port:2) = A
     # multiple match fields and ids with $
@@ -361,18 +362,16 @@ if __name__ == "__main__":
 
     setdefault ethertype_match l2_packet()
 
-    expect 1 *1010101 03030303 0101 0202 0303 0404 0505 0606
-    packet 0 01010101 03030303 9999 8888 7777 6666 5555 4444
+    packet 0 01010101 030303F3 9999 8888 7777 6666 5555 4444
+    expect 1 0x0*AFADDEBCCCC
 
     # expect with out data
     expect 5
 
-    check_counter cntDum(10) packets == 2
-    check_counter cntDum($A)
     wait
     """
 
     parser = STFParser()
-    stf, errs = parser.parse(data)
+    stf, errs = parser.parse(DATA)
     if errs == 0:
         print("\n".join(map(str, stf)))

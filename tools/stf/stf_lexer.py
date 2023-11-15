@@ -65,6 +65,7 @@ class STFLexer:
             "DATA_DEC",
             "DATA_HEX",
             "DATA_TERN",
+            "DATA_HEX_PREFIX",
             "DATA_EXACT",
             "DOT",
             "ID",
@@ -139,7 +140,7 @@ class STFLexer:
     t_GEQ = r">="
     t_SLASH = r"/"
 
-    # binary constants with ternary (don't care) bits
+    # Constants can all have ternary (don't care) bits
     binary_constant = r"(0[bB][*01]+)"
 
     hex_prefix = r"0[xX]"
@@ -222,6 +223,12 @@ class STFLexer:
         self._error("Illegal character '%s'" % t.value[0], t)
 
     # PACKET DATA ------------------------------------------------------------
+
+    def t_packetdata_DATA_HEX_PREFIX(self, t):
+        r'0x[0-9a-fA-F]+'
+        t.value = t.value[2:]
+        t.type = "DATA_HEX_PREFIX"
+        return t
 
     @TOKEN(dec_constant)
     def t_packetdata_DATA_DEC(self, t):
