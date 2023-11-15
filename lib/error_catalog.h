@@ -21,10 +21,12 @@ limitations under the License.
 #include <string>
 
 #include "cstring.h"
+#include "lib/error_message.h"
+#include "lib/exceptions.h"
+
+using MessageType = ErrorMessage::MessageType;
 
 /// enumerate supported errors
-/// Backends should extend this class with additional errors in the range 500-999 and
-/// warnings in the range 1500-2141.
 /// It is a class and not an enum class because in C++11 you can't extend an enum class
 class ErrorType {
  public:
@@ -49,8 +51,8 @@ class ErrorType {
     static const int ERR_MODEL;                  // something is wrong with the target model
     static const int ERR_RESERVED;               // Reserved for target use
 
-    // If we specialize for 1000 error types we're good!
-    static const int ERR_MAX_ERRORS;
+    static const int ERR_MIN_BACKEND;  // first allowed backend error code
+    static const int ERR_MAX;          // last allowed error code
 
     // -------- Warnings -----------
     // warnings as initially defined with a format string
@@ -78,13 +80,15 @@ class ErrorType {
     static const int WARN_DUPLICATE_PRIORITIES;     // two entries with the same priority
     static const int WARN_ENTRIES_OUT_OF_ORDER;     // entries with priorities out of order
 
-    static const int WARN_MAX_WARNINGS;
+    static const int WARN_MIN_BACKEND;  // first allowed backend warning code
+    static const int WARN_MAX;          // last allowed warning code
 
     // -------- Info messages -------------
     // info messages as initially defined with a format string
     static const int INFO_INFERRED;  // information inferred by compiler
 
-    static const int INFO_MAX_INFOS;
+    static const int INFO_MIN_BACKEND;  // first allowed backend info code
+    static const int INFO_MAX;          // last allowed info code
 };
 
 class ErrorCatalog {
@@ -97,10 +101,24 @@ class ErrorCatalog {
 
     /// add to the catalog
     /// returns false if the code already exists and forceReplace was not set to true
+    /// @param type      - error/warning/info message
     /// @param errorCode - integer value for the error/warning
     /// @param name      - name for the error. Used to enable/disable all errors of that type
     /// @param forceReplace - override an existing error type in the catalog
-    bool add(int errorCode, const char *name, bool forceReplace = false) {
+    bool add(MessageType type, int errorCode, const char *name, bool forceReplace = false) {
+        if (type == MessageType::Error &&
+            (errorCode < ErrorType::ERR_MIN_BACKEND || errorCode > ErrorType::ERR_MAX))
+            BUG("Adding error code %1% outside allowed range %2%-%3%", errorCode,
+                ErrorType::ERR_MIN_BACKEND, ErrorType::ERR_MAX);
+        if (type == MessageType::Warning &&
+            (errorCode < ErrorType::WARN_MIN_BACKEND || errorCode > ErrorType::WARN_MAX))
+            BUG("Adding warning code %1% outside allowed range %2%-%3%", errorCode,
+                ErrorType::WARN_MIN_BACKEND, ErrorType::WARN_MAX);
+        if (type == MessageType::Info &&
+            (errorCode < ErrorType::INFO_MIN_BACKEND || errorCode > ErrorType::INFO_MAX))
+            BUG("Adding info message code %1% outside allowed range %2%-%3%", errorCode,
+                ErrorType::INFO_MIN_BACKEND, ErrorType::INFO_MAX);
+        if (type == MessageType::None) BUG("Adding error code %1% for type None", errorCode);
         if (forceReplace) errorCatalog.erase(errorCode);
         auto it = errorCatalog.emplace(errorCode, name);
         return it.second;
@@ -125,7 +143,7 @@ class ErrorCatalog {
     bool isError(cstring name) {
         int code = getCode(name);
         if (code == -1) return false;
-        if (code >= ErrorType::ERR_MAX_ERRORS) return false;
+        if (code >= ErrorType::ERR_MAX) return false;
         return true;
     }
 

@@ -38,11 +38,12 @@ const int ErrorType::ERR_IO = 14;
 const int ErrorType::ERR_UNREACHABLE = 15;
 const int ErrorType::ERR_MODEL = 16;
 const int ErrorType::ERR_RESERVED = 17;
-// If we specialize for 1000 error types we're good!
-const int ErrorType::ERR_MAX_ERRORS = 999;
+// Backends should extend this class with additional errors in the range 500-999.
+const int ErrorType::ERR_MIN_BACKEND = 500;
+const int ErrorType::ERR_MAX = 999;
 
 // ------ Warnings -----------
-const int ErrorType::LEGACY_WARNING = ERR_MAX_ERRORS + 1;
+const int ErrorType::LEGACY_WARNING = ERR_MAX + 1;
 const int ErrorType::WARN_FAILED = 1001;
 const int ErrorType::WARN_UNKNOWN = 1002;
 const int ErrorType::WARN_INVALID = 1003;
@@ -65,11 +66,16 @@ const int ErrorType::WARN_UNINITIALIZED_USE = 1019;
 const int ErrorType::WARN_INVALID_HEADER = 1020;
 const int ErrorType::WARN_DUPLICATE_PRIORITIES = 1021;
 const int ErrorType::WARN_ENTRIES_OUT_OF_ORDER = 1022;
-const int ErrorType::WARN_MAX_WARNINGS = 2142;
+// Backends should extend this class with additional warnings in the range 1500-2141.
+const int ErrorType::WARN_MIN_BACKEND = 1500;
+const int ErrorType::WARN_MAX = 2141;
 
-// ------ Info message -----------
-const int ErrorType::INFO_INFERRED = WARN_MAX_WARNINGS + 1;
-const int ErrorType::INFO_MAX_INFOS = 3999;
+// ------ Info messages -----------
+const int ErrorType::INFO_INFERRED = WARN_MAX + 1;
+
+// Backends should extend this class with additional info messages in the range 3000-3999.
+const int ErrorType::INFO_MIN_BACKEND = 3000;
+const int ErrorType::INFO_MAX = 3999;
 
 // map from errorCode to ErrorSig
 std::map<int, cstring> ErrorCatalog::errorCatalog = {
