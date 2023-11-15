@@ -74,6 +74,68 @@ void AbstractExecutionState::popNamespace() { namespaces = namespaces->pop(); }
  *  General utilities involving execution state.
  * ========================================================================================= */
 
+const IR::Expression *AbstractExecutionState::convertToComplexExpression(
+    const IR::StateVariable &parent) const {
+    if (auto ts = parent->type->to<IR::Type_StructLike>()) {
+        IR::IndexedVector<IR::NamedExpression> components;
+        for (auto structField : ts->fields) {
+            auto fieldName = structField->name;
+            const auto *fieldType = resolveType(structField->type);
+            auto ref = new IR::Member(fieldType, parent, fieldName);
+            if (fieldType->is<IR::Type_StructLike>() || fieldType->to<IR::Type_Stack>()) {
+                components.push_back(
+                    new IR::NamedExpression(fieldName, convertToComplexExpression(ref)));
+            } else {
+                components.push_back(new IR::NamedExpression(fieldName, get(ref)));
+            }
+        }
+        if (ts->is<IR::Type_Header>()) {
+            auto validity = ToolsVariables::getHeaderValidity(parent);
+            // We do not know the underlying type name of the struct, so keep it anonymous.
+            return new IR::HeaderExpression(ts, nullptr, components, get(validity));
+        } else {
+            // We do not know the underlying type name of the struct, so keep it anonymous.
+            return new IR::StructExpression(ts, nullptr, components);
+        }
+    } else if (auto ts = parent->type->to<IR::Type_Stack>()) {
+        IR::Vector<IR::Expression> components;
+        const auto *elementType = resolveType(ts->elementType);
+        for (size_t idx = 0; idx < ts->getSize(); idx++) {
+            auto ref = new IR::ArrayIndex(elementType, parent, new IR::Constant(idx));
+            if (elementType->is<IR::Type_StructLike>() || elementType->to<IR::Type_Stack>()) {
+                components.push_back(convertToComplexExpression(ref));
+            } else {
+                components.push_back(get(ref));
+            }
+        }
+        return new IR::HeaderStackExpression(parent->type, components, parent->type);
+    }
+    P4C_UNIMPLEMENTED("Unsupported struct-like type %1% for member %2%",
+                      parent->type->node_type_name(), parent);
+}
+
+std::vector<const IR::Expression *> AbstractExecutionState::flattenComplexExpression(
+    const IR::Expression *inputExpression, std::vector<const IR::Expression *> &flatValids) {
+    std::vector<const IR::Expression *> exprList;
+    if (const auto *structExpr = inputExpression->to<IR::StructExpression>()) {
+        for (const auto *listElem : structExpr->components) {
+            auto subList = flattenComplexExpression(listElem->expression, flatValids);
+            exprList.insert(exprList.end(), subList.begin(), subList.end());
+        }
+        if (auto richStructExpr = structExpr->to<IR::HeaderExpression>()) {
+            flatValids.emplace_back(richStructExpr->validity);
+        }
+    } else if (const auto *headerStackExpr = inputExpression->to<IR::HeaderStackExpression>()) {
+        for (const auto *headerStackElem : headerStackExpr->components) {
+            auto subList = flattenComplexExpression(headerStackElem, flatValids);
+            exprList.insert(exprList.end(), subList.begin(), subList.end());
+        }
+    } else {
+        exprList.emplace_back(inputExpression);
+    }
+    return exprList;
+}
+
 std::vector<IR::StateVariable> AbstractExecutionState::getFlatFields(
     const IR::StateVariable &parent, std::vector<IR::StateVariable> *validVector) const {
     std::vector<IR::StateVariable> flatFields;
@@ -120,19 +182,54 @@ void AbstractExecutionState::initializeStructLike(const Target &target,
     }
 }
 
-const IR::P4Table *AbstractExecutionState::findTable(const IR::Member *member) const {
-    if (member->member != IR::IApply::applyMethodName) {
-        return nullptr;
+void AbstractExecutionState::assignStructLike(const IR::StateVariable &left,
+                                              const IR::Expression *right) {
+    if (const auto *structExpr = right->to<IR::StructExpression>()) {
+        std::vector<IR::StateVariable> flatLeftValids;
+        std::vector<const IR::Expression *> flatRightValids;
+        auto flatTargetFields = getFlatFields(left, &flatLeftValids);
+        auto flatStructFields = flattenComplexExpression(structExpr, flatRightValids);
+        auto flatTargetSize = flatTargetFields.size();
+        auto flatStructSize = flatStructFields.size();
+        BUG_CHECK(flatTargetSize == flatStructSize,
+                  "The size of target fields (%1%) and the size of source fields (%2%) are "
+                  "different.",
+                  flatTargetSize, flatStructSize);
+        auto flatLeftValidSize = flatLeftValids.size();
+        auto flatRightValidSize = flatRightValids.size();
+        BUG_CHECK(
+            flatLeftValidSize == flatRightValidSize,
+            "The size of target valid fields (%1%) and the size of source valid fields (%2%) are "
+            "different.",
+            flatLeftValidSize, flatRightValidSize);
+        // First, complete the validity assignments for the data structure.
+        for (size_t idx = 0; idx < flatLeftValids.size(); ++idx) {
+            const auto &flatLeftValidRef = flatLeftValids[idx];
+            const auto *flatRightValidExpr = flatRightValids[idx];
+            set(flatLeftValidRef, flatRightValidExpr);
+        }
+
+        // Then, complete the assignments for the data structure.
+        for (size_t idx = 0; idx < flatTargetFields.size(); ++idx) {
+            const auto &flatTargetRef = flatTargetFields[idx];
+            const auto *flatStructField = flatStructFields[idx];
+            set(flatTargetRef, flatStructField);
+        }
+    } else if (auto stackExpression = right->to<IR::HeaderStackExpression>()) {
+        auto stackType = stackExpression->headerStackType->checkedTo<IR::Type_Stack>();
+        auto stackSize = stackExpression->components.size();
+        for (size_t idx = 0; idx < stackSize; idx++) {
+            const auto *ref = HSIndexToMember::produceStackIndex(stackType->elementType, left, idx);
+            const auto *rightElem = stackExpression->components.at(idx);
+            assignStructLike(ref, rightElem);
+        }
+    } else if (right->is<IR::PathExpression>() || right->is<IR::Member>() ||
+               right->is<IR::ArrayIndex>()) {
+        setStructLike(left, ToolsVariables::convertReference(right));
+    } else {
+        P4C_UNIMPLEMENTED("Unsupported assignment rval %1% of type %2%", right,
+                          right->node_type_name());
     }
-    if (member->expr->is<IR::PathExpression>()) {
-        const auto *declaration = findDecl(member->expr->to<IR::PathExpression>());
-        return declaration->to<IR::P4Table>();
-    }
-    const auto *type = member->expr->type;
-    if (const auto *tableType = type->to<IR::Type_Table>()) {
-        return tableType->table;
-    }
-    return nullptr;
 }
 
 void AbstractExecutionState::setStructLike(const IR::StateVariable &targetVar,
@@ -284,6 +381,21 @@ const IR::P4Action *AbstractExecutionState::getP4Action(
     const auto *actionPath = tableAction->method->checkedTo<IR::PathExpression>();
     const auto *declaration = findDecl(actionPath);
     return declaration->checkedTo<IR::P4Action>();
+}
+
+const IR::P4Table *AbstractExecutionState::findTable(const IR::Member *member) const {
+    if (member->member != IR::IApply::applyMethodName) {
+        return nullptr;
+    }
+    if (member->expr->is<IR::PathExpression>()) {
+        const auto *declaration = findDecl(member->expr->to<IR::PathExpression>());
+        return declaration->to<IR::P4Table>();
+    }
+    const auto *type = member->expr->type;
+    if (const auto *tableType = type->to<IR::Type_Table>()) {
+        return tableType->table;
+    }
+    return nullptr;
 }
 
 }  // namespace P4Tools

@@ -153,8 +153,12 @@ const AssignmentStatement *AssignmentStatement::apply(Transform &visitor) const 
 
 const AssignmentStatement *AssignmentStatement::evaluate(const Model &model,
                                                          bool doComplete) const {
-    const IR::Literal *right = nullptr;
-    if (Taint::hasTaint(stmt.right)) {
+    const IR::Expression *right = nullptr;
+    if (auto structExpr = stmt.right->to<IR::StructExpression>()) {
+        right = model.evaluateStructExpr(structExpr, doComplete);
+    } else if (auto listExpr = stmt.right->to<IR::BaseListExpression>()) {
+        right = model.evaluateListExpr(listExpr, doComplete);
+    } else if (Taint::hasTaint(stmt.right)) {
         right = &Taint::TAINTED_STRING_LITERAL;
     } else {
         right = model.evaluate(stmt.right, doComplete);
@@ -167,12 +171,19 @@ const AssignmentStatement *AssignmentStatement::evaluate(const Model &model,
 
 void AssignmentStatement::print(std::ostream &os) const {
     const auto &srcInfo = stmt.getSourceInfo();
+    // Convert the assignment to a string and strip any new lines.
+    // TODO: Maybe there is a better way to format newlines?
+    std::stringstream assignStream;
+    stmt.dbprint(assignStream);
+    auto assignString = assignStream.str();
+    assignString.erase(std::remove(assignString.begin(), assignString.end(), '\n'),
+                       assignString.cend());
     if (srcInfo.isValid()) {
         auto fragment = srcInfo.toSourceFragment(false);
         fragment = fragment.trim();
-        os << "[AssignmentStatement]: " << fragment << "| Computed: " << stmt;
+        os << "[AssignmentStatement]: " << fragment << "| Computed: " << assignString;
     } else {
-        os << "[P4Testgen AssignmentStatement]: " << stmt;
+        os << "[P4Testgen AssignmentStatement]: " << assignString;
     }
 }
 

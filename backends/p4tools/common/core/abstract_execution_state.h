@@ -87,11 +87,20 @@ class AbstractExecutionState {
     /* =========================================================================================
      *  General utilities involving ExecutionState.
      * ========================================================================================= */
+ protected:
+    /// Convert the input reference into a complex expression such as a HeaderExpression,
+    /// StructExpression, or HeaderStackExpression. @returns nullptr if the expression is not
+    /// complex.
+    const IR::Expression *convertToComplexExpression(const IR::StateVariable &parent) const;
 
-    /// Looks up the @param member in the environment of @param state. Returns nullptr if the member
-    /// is not a table type.
-    const IR::P4Table *findTable(const IR::Member *member) const;
+    /// Takes in a complex expression as a StructExpression, ListExpression, or
+    /// HeaderStackExpression, flattens it into a vector and @returns this vector. In parallel this
+    /// function fills a vector of the validity variables of any Type_Header encountered in this
+    /// expression.
+    static std::vector<const IR::Expression *> flattenComplexExpression(
+        const IR::Expression *inputExpression, std::vector<const IR::Expression *> &flatValids);
 
+ public:
     /// Takes an input struct type @ts and a prefix @parent and returns a vector of references to
     /// members of the struct. The vector contains all the Type_Base (bit and bool) members in
     /// canonical representation (e.g.,
@@ -105,6 +114,10 @@ class AbstractExecutionState {
     /// the active target. Headers validity is set to "false".
     void initializeStructLike(const Target &target, const IR::StateVariable &targetVar,
                               bool forceTaint);
+
+    /// Assign a struct-like expression to @param left. Unrolls @param right into a series of
+    /// individual assignments.
+    void assignStructLike(const IR::StateVariable &left, const IR::Expression *right);
 
     /// Set the members of struct-like @target with the values of struct-like @source.
     void setStructLike(const IR::StateVariable &targetVar, const IR::StateVariable &sourceVar);
@@ -126,6 +139,10 @@ class AbstractExecutionState {
     /// default values are specified by the target.
     void initializeBlockParams(const Target &target, const IR::Type_Declaration *typeDecl,
                                const std::vector<cstring> *blockParams);
+
+    /// Looks up the @param member in the environment of @param state. Returns nullptr if the member
+    /// is not a table type.
+    const IR::P4Table *findTable(const IR::Member *member) const;
 
     // Try to extract and @return the IR::P4Action from the action call.
     /// This is done by looking up the reference in the execution state.

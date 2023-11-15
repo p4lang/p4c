@@ -60,34 +60,17 @@ bool CmdStepper::preorder(const IR::AssignmentStatement *assign) {
 
     state.markVisited(assign);
     const auto &left = ToolsVariables::convertReference(assign->left);
-    const auto *leftType = left->type;
 
     // Resolve the type of the left-and assignment, if it is a type name.
-    leftType = state.resolveType(leftType);
-    // Although we typically expand structure assignments into individual member assignments using
-    // the copyHeaders pass, some extern functions may return a list or struct expression. We can
-    // not always expand these return values as we do with the expandLookahead pass.
-    // Correspondingly, we need to retrieve the fields and set each member individually. This
-    // assumes that all headers and structures have been flattened and no nesting is left.
-    if (leftType->is<IR::Type_StructLike>()) {
-        const auto *listExpr = assign->right->checkedTo<IR::ListExpression>();
-
-        std::vector<IR::StateVariable> flatRefValids;
-        auto flatRefFields = state.getFlatFields(left, &flatRefValids);
-        // First, complete the assignments for the data structure.
-        for (size_t idx = 0; idx < flatRefFields.size(); ++idx) {
-            const auto &leftFieldRef = flatRefFields[idx];
-            state.set(leftFieldRef, listExpr->components[idx]);
-        }
-        // In case of a header, we also need to set the validity bits to true.
-        for (const auto &headerValid : flatRefValids) {
-            state.set(headerValid, IR::getBoolLiteral(true));
-        }
-    } else if (leftType->is<IR::Type_Base>()) {
+    const auto *assignType = state.resolveType(left->type);
+    if (assign->right->is<IR::StructExpression>() ||
+        assign->right->to<IR::HeaderStackExpression>()) {
+        state.assignStructLike(left, assign->right);
+    } else if (assignType->is<IR::Type_Base>()) {
         state.set(left, assign->right);
     } else {
-        TESTGEN_UNIMPLEMENTED("Unsupported assign type %1% node: %2%", leftType,
-                              leftType->node_type_name());
+        TESTGEN_UNIMPLEMENTED("Unsupported assignment %1% of type %2%", assign,
+                              assignType->node_type_name());
     }
     state.add(*new TraceEvents::AssignmentStatement(*assign));
     state.popBody();

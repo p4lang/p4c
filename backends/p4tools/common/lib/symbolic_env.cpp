@@ -130,16 +130,22 @@ bool SymbolicEnv::isSymbolicValue(const IR::Node *node) {
         return isSymbolicValue(slice->e0) && isSymbolicValue(slice->e1) &&
                isSymbolicValue(slice->e2);
     }
-    if (const auto *listExpr = expr->to<IR::ListExpression>()) {
+    if (const auto *listExpr = expr->to<IR::BaseListExpression>()) {
         return std::all_of(
             listExpr->components.begin(), listExpr->components.end(),
             [](const IR::Expression *component) { return isSymbolicValue(component); });
     }
     if (const auto *structExpr = expr->to<IR::StructExpression>()) {
-        return std::all_of(structExpr->components.begin(), structExpr->components.end(),
-                           [](const IR::NamedExpression *component) {
-                               return isSymbolicValue(component->expression);
-                           });
+        auto symbolicMembers =
+            std::all_of(structExpr->components.begin(), structExpr->components.end(),
+                        [](const IR::NamedExpression *component) {
+                            return isSymbolicValue(component->expression);
+                        });
+        if (const auto *headerExpr = structExpr->to<IR::HeaderExpression>()) {
+            auto isValid = isSymbolicValue(headerExpr->validity);
+            return isValid && symbolicMembers;
+        }
+        return symbolicMembers;
     }
 
     return false;

@@ -42,29 +42,36 @@ const IR::Literal *Model::SubstVisitor::preorder(IR::TaintExpression *var) {
 const IR::StructExpression *Model::evaluateStructExpr(const IR::StructExpression *structExpr,
                                                       bool doComplete,
                                                       ExpressionMap *resolvedExpressions) const {
-    auto *resolvedStructExpr =
-        new IR::StructExpression(structExpr->srcInfo, structExpr->type, structExpr->structType, {});
+    auto *resolvedStructExpr = structExpr->clone();
+    resolvedStructExpr->components.clear();
     for (const auto *namedExpr : structExpr->components) {
         const IR::Expression *resolvedExpr = nullptr;
         if (const auto *subStructExpr = namedExpr->expression->to<IR::StructExpression>()) {
             resolvedExpr = evaluateStructExpr(subStructExpr, doComplete, resolvedExpressions);
+        } else if (const auto *subListExpr = namedExpr->expression->to<IR::BaseListExpression>()) {
+            resolvedExpr = evaluateListExpr(subListExpr, doComplete, resolvedExpressions);
         } else {
             resolvedExpr = evaluate(namedExpr->expression, doComplete, resolvedExpressions);
         }
         resolvedStructExpr->components.push_back(
             new IR::NamedExpression(namedExpr->srcInfo, namedExpr->name, resolvedExpr));
     }
+    if (auto headerExpr = resolvedStructExpr->to<IR::HeaderExpression>()) {
+        headerExpr->validity = evaluate(headerExpr->validity, doComplete);
+    }
     return resolvedStructExpr;
 }
 
-const IR::ListExpression *Model::evaluateListExpr(const IR::ListExpression *listExpr,
-                                                  bool doComplete,
-                                                  ExpressionMap *resolvedExpressions) const {
-    auto *resolvedListExpr = new IR::ListExpression(listExpr->srcInfo, listExpr->type, {});
+const IR::BaseListExpression *Model::evaluateListExpr(const IR::BaseListExpression *listExpr,
+                                                      bool doComplete,
+                                                      ExpressionMap *resolvedExpressions) const {
+    auto *resolvedListExpr = new IR::BaseListExpression(listExpr->srcInfo, listExpr->type, {});
     for (const auto *expr : listExpr->components) {
         const IR::Expression *resolvedExpr = nullptr;
-        if (const auto *subStructExpr = expr->to<IR::ListExpression>()) {
-            resolvedExpr = evaluateListExpr(subStructExpr, doComplete, resolvedExpressions);
+        if (const auto *subListExpr = expr->to<IR::BaseListExpression>()) {
+            resolvedExpr = evaluateListExpr(subListExpr, doComplete, resolvedExpressions);
+        } else if (const auto *subStructExpr = expr->to<IR::StructExpression>()) {
+            resolvedExpr = evaluateStructExpr(subStructExpr, doComplete, resolvedExpressions);
         } else {
             resolvedExpr = evaluate(expr, doComplete, resolvedExpressions);
         }

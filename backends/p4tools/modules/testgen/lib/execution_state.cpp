@@ -122,10 +122,18 @@ std::optional<const Continuation::Command> ExecutionState::getNextCmd() const {
 }
 
 const IR::Expression *ExecutionState::get(const IR::StateVariable &var) const {
+    auto varType = resolveType(var->type);
+
+    // In some cases, we may reference a complex expression. Convert it to a struct expression.
+    if (varType->is<IR::Type_StructLike>() || varType->to<IR::Type_Stack>()) {
+        return convertToComplexExpression(var);
+    }
+
     // TODO: This is a convoluted (and expensive?) check because struct members are not directly
     // associated with a header. We should be using runtime objects instead of flat assignments.
     if (const auto *member = var->to<IR::Member>()) {
-        if (member->expr->type->is<IR::Type_Header>() && member->member != ToolsVariables::VALID) {
+        auto memberType = resolveType(member->expr->type);
+        if (memberType->is<IR::Type_Header>() && member->member != ToolsVariables::VALID) {
             // If we are setting the member of a header, we need to check whether the
             // header is valid.
             // If the header is invalid, the get returns a tainted expression.
@@ -139,7 +147,7 @@ const IR::Expression *ExecutionState::get(const IR::StateVariable &var) const {
                 isTainted = !validBool->value;
             }
             if (isTainted) {
-                return ToolsVariables::getTaintExpression(var->type);
+                return ToolsVariables::getTaintExpression(varType);
             }
         }
     }
