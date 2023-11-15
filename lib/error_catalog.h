@@ -144,7 +144,7 @@ class ErrorCatalog {
     bool isError(cstring name) {
         int code = getCode(name);
         if (code == -1) return false;
-        if (code >= ErrorType::ERR_MAX) return false;
+        if (code > ErrorType::ERR_MAX) return false;
         return true;
     }
 
