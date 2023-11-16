@@ -308,7 +308,7 @@ TestgenOptions::TestgenOptions()
             }
             return true;
         },
-        "Specifies minimum coverage that needs to be achived for testgen to exit successuflly. "
+        "Specifies minimum coverage that needs to be achieved for P4Testgen to exit successfully. "
         "The input needs to be value in range [0, 1] (where 1 means the metric is fully covered). "
         "Defaults to 0 which means no checking.");
 
