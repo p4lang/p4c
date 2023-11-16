@@ -3,7 +3,7 @@ syntax = "proto3";
 
 package p4testgen_ir;
 
-import "ir.proto";
+import "backends/p4tools/modules/testgen/targets/bmv2/proto/ir.proto";
 
 message InputPacketAtPort {
     // The raw bytes of the test packet.
