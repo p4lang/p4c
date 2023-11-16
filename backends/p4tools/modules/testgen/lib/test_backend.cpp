@@ -149,6 +149,7 @@ bool TestBackEnd::run(const FinalState &state) {
         if (testgenOptions.stopMetric == "MAX_NODE_COVERAGE" && coverage == 1.0) {
             return true;
         }
+        maxCoverage = std::max(maxCoverage, coverage);
         return needsToTerminate(testCount);
     }
 }
@@ -244,5 +245,7 @@ void TestBackEnd::printPerformanceReport(bool write) const {
 }
 
 int64_t TestBackEnd::getTestCount() const { return testCount; }
+
+float TestBackEnd::getCoverage() const { return maxCoverage; }
 
 }  // namespace P4Tools::P4Testgen
