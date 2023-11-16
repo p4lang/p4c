@@ -377,12 +377,14 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
     }
 
     const IR::Expression *missCondition = IR::getBoolLiteral(true);
+    bool hasDefault = false;
     for (const auto *selectCase : selectCases) {
         auto &nextState = state.clone();
 
         // Handle case where the first select case matches: proceed to the next parser state,
         // guarded by its path condition.
         const auto *matchCondition = GenEq::equate(selectExpression->select, selectCase->keyset);
+        hasDefault = hasDefault || selectCase->keyset->is<IR::DefaultExpression>();
 
         // TODO: Implement the taint case for select expressions.
         // In the worst case, this means the entire parser is tainted.
@@ -406,6 +408,13 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
         result->emplace_back(new IR::LAnd(missCondition, matchCondition), state, nextState,
                              coveredNodes);
         missCondition = new IR::LAnd(new IR::LNot(matchCondition), missCondition);
+    }
+
+    // generate implicit NoMatch
+    if (!hasDefault) {
+        auto &nextState = state.clone();
+        nextState.replaceTopBody(Continuation::Exception::NoMatch);
+        result->emplace_back(missCondition, state, nextState);
     }
 
     return false;
