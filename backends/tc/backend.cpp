@@ -594,6 +594,10 @@ void ConvertToBackendIR::updateMatchType(const IR::P4Table *t, IR::TCTable *tabl
             } else if (matchTypeInfo->name.name ==
                        P4::P4CoreLibrary::instance().ternaryMatch.name) {
                 tableMatchType = TC::TERNARY_TYPE;
+            } else if (matchTypeInfo->name.name == "range" ||
+                       matchTypeInfo->name.name == "rangelist" ||
+                       matchTypeInfo->name.name == "optional") {
+                tableMatchType = TC::TERNARY_TYPE;
             } else {
                 ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                         "match type %1% is not supported in this target",
@@ -621,6 +625,11 @@ void ConvertToBackendIR::updateMatchType(const IR::P4Table *t, IR::TCTable *tabl
                     lpmKey++;
                 } else if (matchTypeInfo->name.name ==
                            P4::P4CoreLibrary::instance().ternaryMatch.name) {
+                    keyMatchType = TC::TERNARY_TYPE;
+                    ternaryKey++;
+                } else if (matchTypeInfo->name.name == "range" ||
+                           matchTypeInfo->name.name == "rangelist" ||
+                           matchTypeInfo->name.name == "optional") {
                     keyMatchType = TC::TERNARY_TYPE;
                     ternaryKey++;
                 } else {

@@ -107,6 +107,8 @@ class EBPFScalarType : public EBPFType, public IHasWidth {
     const bool isSigned;
     explicit EBPFScalarType(const IR::Type_Bits *bits)
         : EBPFType(bits), width(bits->size), isSigned(bits->isSigned) {}
+    explicit EBPFScalarType(const IR::Type_Varbits *bits)
+        : EBPFType(bits), width(bits->size), isSigned(false) {}
     unsigned bytesRequired() const { return ROUNDUP(width, 8); }
     unsigned alignment() const;
     void emit(CodeBuilder *builder) override;

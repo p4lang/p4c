@@ -1341,36 +1341,31 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
             bool memcpy = false;
             EBPF::EBPFScalarType *scalar = nullptr;
             cstring swap;
-            if (ebpfType->is<EBPF::EBPFScalarType>()) {
-                scalar = ebpfType->to<EBPF::EBPFScalarType>();
-                unsigned width = scalar->implementationWidthInBits();
-                memcpy = !EBPF::EBPFScalarType::generatesScalar(width);
-
-                if (width <= 8) {
-                    swap = "";  // single byte, nothing to swap
-                } else if (width <= 16) {
-                    swap = "bpf_htons";
-                } else if (width <= 32) {
-                    swap = "bpf_htonl";
-                } else if (width <= 64) {
-                    swap = "bpf_htonll";
-                } else {
-                    // The code works with fields wider than 64 bits for PSA architecture. It is
-                    // shared with filter model, so should work but has not been tested. Error
-                    // message is preserved for filter model because existing tests expect it.
-                    // TODO: handle width > 64 bits for filter model
-                    if (table->program->options.arch.isNullOrEmpty() ||
-                        table->program->options.arch == "filter") {
-                        ::error(ErrorType::ERR_UNSUPPORTED,
-                                "%1%: fields wider than 64 bits are not supported yet", fieldName);
-                    }
-                }
-            }
 
             bool isLPMKeyBigEndian = false;
             if (table->isLPMTable()) {
                 if (c->matchType->path->name.name == P4::P4CoreLibrary::instance().lpmMatch.name)
                     isLPMKeyBigEndian = true;
+            }
+
+            if (ebpfType->is<EBPF::EBPFScalarType>()) {
+                scalar = ebpfType->to<EBPF::EBPFScalarType>();
+                unsigned width = scalar->implementationWidthInBits();
+                memcpy = !EBPF::EBPFScalarType::generatesScalar(width);
+
+                if (isLPMKeyBigEndian) {
+                    if (width <= 8) {
+                        swap = "";  // single byte, nothing to swap
+                    } else if (width <= 16) {
+                        swap = "bpf_htons";
+                    } else if (width <= 32) {
+                        swap = "bpf_htonl";
+                    } else if (width <= 64) {
+                        swap = "bpf_htonll";
+                    }
+                    /* For width greater than 64 bit, there is no need of conversion.
+                        and the value will be copied directly from memory.*/
+                }
             }
 
             builder->emitIndent();

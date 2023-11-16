@@ -145,6 +145,9 @@ class EBPFTablePNA : public EBPF::EBPFTablePSA {
     void emitActionArguments(EBPF::CodeBuilder *builder, const IR::P4Action *action, cstring name);
     void emitKeyPNA(EBPF::CodeBuilder *builder, cstring keyName);
     bool isMatchTypeSupported(const IR::Declaration_ID *matchType) override {
+        if (matchType->name.name == "range" || matchType->name.name == "rangelist" ||
+            matchType->name.name == "optional")
+            return 1;
         return EBPF::EBPFTable::isMatchTypeSupported(matchType);
     }
     void emitAction(EBPF::CodeBuilder *builder, cstring valueName,

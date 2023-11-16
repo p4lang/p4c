@@ -30,6 +30,7 @@ const IR::ToplevelBlock *MidEnd::run(TCOptions &options, const IR::P4Program *pr
          new P4::RemoveMiss(&refMap, &typeMap),
          new P4::EliminateInvalidHeaders(&refMap, &typeMap),
          new P4::EliminateNewtype(&refMap, &typeMap),
+         new P4::EliminateSerEnums(&refMap, &typeMap),
          new P4::SimplifyControlFlow(&refMap, &typeMap),
          new P4::SimplifyKey(
              &refMap, &typeMap,
