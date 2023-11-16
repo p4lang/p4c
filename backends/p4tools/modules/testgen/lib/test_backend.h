@@ -42,7 +42,8 @@ class TestBackEnd {
     /// Test maximum number of tests that are to be produced.
     int64_t maxTests;
 
-    float maxCoverage = 0;
+    /// The accumulated coverage of all finished test cases. Number in range [0, 1].
+    float coverage = 0;
 
     explicit TestBackEnd(const ProgramInfo &programInfo, SymbolicExecutor &symbex)
         : programInfo(programInfo), symbex(symbex), maxTests(TestgenOptions::get().maxTests) {
@@ -118,7 +119,7 @@ class TestBackEnd {
     /// enabled.
     void printPerformanceReport(bool write) const;
 
-    /// Accessors.
+    /// Returns test count.
     [[nodiscard]] int64_t getTestCount() const;
 
     /// Returns coverage achieved by all the processed tests.
