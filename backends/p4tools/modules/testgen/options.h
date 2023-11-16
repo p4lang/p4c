@@ -83,6 +83,7 @@ class TestgenOptions : public AbstractP4cToolOptions {
     /// Multiple options are possible. Currently supported: STATEMENTS, TABLE_ENTRIES.
     P4::Coverage::CoverageOptions coverageOptions;
 
+    /// Specifies minimum coverage that needs to be achieved for P4Testgen to exit successfully.
     float minCoverage = 0;
 
     const char *getIncludePath() override;
