@@ -50,9 +50,9 @@ class ErrorType {
     static const int ERR_UNREACHABLE;            // unreachable parser state
     static const int ERR_MODEL;                  // something is wrong with the target model
     static const int ERR_RESERVED;               // Reserved for target use
-
-    static const int ERR_MIN_BACKEND;  // first allowed backend error code
-    static const int ERR_MAX;          // last allowed error code
+    // Backends should extend this class with additional errors in the range 500-999.
+    static const int ERR_MIN_BACKEND = 500;  // first allowed backend error code
+    static const int ERR_MAX = 999;          // last allowed error code
 
     // -------- Warnings -----------
     // warnings as initially defined with a format string
@@ -79,17 +79,18 @@ class ErrorType {
     static const int WARN_INVALID_HEADER;           // access to fields of an invalid header
     static const int WARN_DUPLICATE_PRIORITIES;     // two entries with the same priority
     static const int WARN_ENTRIES_OUT_OF_ORDER;     // entries with priorities out of order
-
-    static const int WARN_MIN_BACKEND;  // first allowed backend warning code
-    static const int WARN_MAX;          // last allowed warning code
+    // Backends should extend this class with additional warnings in the range 1500-2141.
+    static const int WARN_MIN_BACKEND = 1500;  // first allowed backend warning code
+    static const int WARN_MAX = 2141;          // last allowed warning code
 
     // -------- Info messages -------------
     // info messages as initially defined with a format string
     static const int INFO_INFERRED;  // information inferred by compiler
     static const int INFO_PROGRESS;  // compilation progress
 
-    static const int INFO_MIN_BACKEND;  // first allowed backend info code
-    static const int INFO_MAX;          // last allowed info code
+    // Backends should extend this class with additional info messages in the range 3000-3999.
+    static const int INFO_MIN_BACKEND = 3000;  // first allowed backend info code
+    static const int INFO_MAX = 3999;          // last allowed info code
 };
 
 class ErrorCatalog {
@@ -106,20 +107,15 @@ class ErrorCatalog {
     /// @param errorCode - integer value for the error/warning
     /// @param name      - name for the error. Used to enable/disable all errors of that type
     /// @param forceReplace - override an existing error type in the catalog
-    bool add(MessageType type, int errorCode, const char *name, bool forceReplace = false) {
-        if (type == MessageType::Error &&
-            (errorCode < ErrorType::ERR_MIN_BACKEND || errorCode > ErrorType::ERR_MAX))
-            BUG("Adding error code %1% outside allowed range %2%-%3%", errorCode,
-                ErrorType::ERR_MIN_BACKEND, ErrorType::ERR_MAX);
-        if (type == MessageType::Warning &&
-            (errorCode < ErrorType::WARN_MIN_BACKEND || errorCode > ErrorType::WARN_MAX))
-            BUG("Adding warning code %1% outside allowed range %2%-%3%", errorCode,
-                ErrorType::WARN_MIN_BACKEND, ErrorType::WARN_MAX);
-        if (type == MessageType::Info &&
-            (errorCode < ErrorType::INFO_MIN_BACKEND || errorCode > ErrorType::INFO_MAX))
-            BUG("Adding info message code %1% outside allowed range %2%-%3%", errorCode,
-                ErrorType::INFO_MIN_BACKEND, ErrorType::INFO_MAX);
-        if (type == MessageType::None) BUG("Adding error code %1% for type None", errorCode);
+    template <MessageType type, int errorCode>
+    bool add(const char *name, bool forceReplace = false) {
+        static_assert(type != MessageType::Error ||
+                      (errorCode >= ErrorType::ERR_MIN_BACKEND && errorCode <= ErrorType::ERR_MAX));
+        static_assert(type != MessageType::Warning || (errorCode >= ErrorType::WARN_MIN_BACKEND &&
+                                                       errorCode <= ErrorType::WARN_MAX));
+        static_assert(type != MessageType::Info || (errorCode >= ErrorType::INFO_MIN_BACKEND &&
+                                                    errorCode <= ErrorType::INFO_MAX));
+        static_assert(type != MessageType::None);
         if (forceReplace) errorCatalog.erase(errorCode);
         auto it = errorCatalog.emplace(errorCode, name);
         return it.second;
