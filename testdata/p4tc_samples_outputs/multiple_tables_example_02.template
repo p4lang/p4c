@@ -69,7 +69,7 @@ $TC p4template create table/multiple_tables_example_02/MainControlImpl/set_ct_op
 	table_acts act name multiple_tables_example_02/MainControlImpl/tcp_syn_packet \
 	act name multiple_tables_example_02/MainControlImpl/tcp_fin_or_rst_packet \
 	act name multiple_tables_example_02/MainControlImpl/tcp_other_packets
-$TC p4template update table/multiple_tables_example_02/MainControlImpl/set_ct_options default_miss_action permissions 0x109 action multiple_tables_example_02/MainControlImpl/tcp_other_packets
+$TC p4template update table/multiple_tables_example_02/MainControlImpl/set_ct_options default_miss_action permissions 0x1024 action multiple_tables_example_02/MainControlImpl/tcp_other_packets
 
 $TC p4template create table/multiple_tables_example_02/MainControlImpl/set_all_options \
 	tblid 7 \
@@ -82,5 +82,5 @@ $TC p4template create table/multiple_tables_example_02/MainControlImpl/set_all_o
 	act name multiple_tables_example_02/MainControlImpl/tcp_other_packets \
 	act name multiple_tables_example_02/MainControlImpl/sendtoport \
 	act name multiple_tables_example_02/MainControlImpl/drop
-$TC p4template update table/multiple_tables_example_02/MainControlImpl/set_all_options default_miss_action permissions 0x109 action multiple_tables_example_02/MainControlImpl/drop
+$TC p4template update table/multiple_tables_example_02/MainControlImpl/set_all_options default_miss_action permissions 0x1024 action multiple_tables_example_02/MainControlImpl/drop
 $TC p4template update pipeline/multiple_tables_example_02 state ready

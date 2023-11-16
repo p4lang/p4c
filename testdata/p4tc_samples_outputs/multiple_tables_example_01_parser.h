@@ -52,6 +52,7 @@ struct headers_t {
 struct hdr_md {
     struct headers_t cpumap_hdr;
     struct main_metadata_t cpumap_usermeta;
+    unsigned ebpf_packetOffsetInBits;
     __u8 __hook;
 };
 

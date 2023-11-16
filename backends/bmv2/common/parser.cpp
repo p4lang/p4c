@@ -25,8 +25,7 @@ limitations under the License.
 
 namespace BMV2 {
 
-cstring ParserConverter::jsonAssignment(const IR::Type *type, bool inParser) {
-    if (!inParser && type->is<IR::Type_Varbits>()) return "assign_VL";
+cstring ParserConverter::jsonAssignment(const IR::Type *type) {
     if (type->is<IR::Type_HeaderUnion>()) return "assign_union";
     if (type->is<IR::Type_Header>() || type->is<IR::Type_Struct>()) return "assign_header";
     if (auto ts = type->to<IR::Type_Stack>()) {
@@ -36,12 +35,9 @@ cstring ParserConverter::jsonAssignment(const IR::Type *type, bool inParser) {
         else
             return "assign_header_stack";
     }
-    if (inParser)
-        // Unfortunately set can do some things that assign cannot,
-        // e.g., handle lookahead on the RHS.
-        return "set";
-    else
-        return "assign";
+    // Unfortunately set can do some things that assign cannot, e.g., handle
+    // lookahead on the RHS.
+    return "set";
 }
 
 Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat) {
@@ -107,7 +103,7 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
     if (stat->is<IR::AssignmentStatement>()) {
         auto assign = stat->to<IR::AssignmentStatement>();
         auto type = ctxt->typeMap->getType(assign->left, true);
-        cstring operation = jsonAssignment(type, true);
+        cstring operation = jsonAssignment(type);
         result->emplace("op", operation);
         auto l = ctxt->conv->convertLeftValue(assign->left);
         bool convertBool = type->is<IR::Type_Boolean>();

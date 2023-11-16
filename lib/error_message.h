@@ -37,10 +37,10 @@ struct ErrorMessage {
     enum class MessageType : std::size_t { None, Error, Warning, Info };
 
     MessageType type = MessageType::None;
-    std::string prefix = "";                       /// Typically error/warning type from catalog
-    std::string message = "";                      /// Particular formatted message
+    std::string prefix;                            /// Typically error/warning type from catalog
+    std::string message;                           /// Particular formatted message
     std::vector<Util::SourceInfo> locations = {};  /// Relevant source locations for this error
-    std::string suffix = "";                       /// Used by errorWithSuffix
+    std::string suffix;                            /// Used by errorWithSuffix
 
     ErrorMessage() {}
     // Invoked from backwards compatible error_helper

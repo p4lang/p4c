@@ -21,6 +21,7 @@ import shutil
 import stat
 import sys
 import tempfile
+from pathlib import Path
 from subprocess import Popen, call
 from threading import Thread
 
@@ -149,7 +150,7 @@ def check_generated_files(options, tmpdir, expecteddir):
 def process_file(options, argv):
     assert isinstance(options, Options)
 
-    tmpdir = tempfile.mkdtemp(dir=".")
+    tmpdir = tempfile.mkdtemp(dir=Path(".").absolute())
     basename = os.path.basename(options.p4filename)
     base, ext = os.path.splitext(basename)
     dirname = os.path.dirname(options.p4filename)
