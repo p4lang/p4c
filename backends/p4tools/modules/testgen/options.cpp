@@ -301,7 +301,7 @@ TestgenOptions::TestgenOptions()
                 }
             } catch (std::invalid_argument &) {
                 ::error(
-                    "Invalid input value %1% for --assert-min-coverag. "
+                    "Invalid input value %1% for --assert-min-coverage. "
                     "Expected float in range [0, 1].",
                     arg);
                 return false;

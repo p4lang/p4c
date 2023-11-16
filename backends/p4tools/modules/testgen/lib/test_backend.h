@@ -121,7 +121,7 @@ class TestBackEnd {
     /// Accessors.
     [[nodiscard]] int64_t getTestCount() const;
 
-    /// Retuns coverage achieved by all the processed tests
+    /// Returns coverage achieved by all the processed tests.
     [[nodiscard]] float getCoverage() const;
 };
 
