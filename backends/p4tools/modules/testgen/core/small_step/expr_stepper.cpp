@@ -125,6 +125,36 @@ bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
     logStep(call);
     // A method call expression represents an invocation of an action, a table, an extern, or
     // setValid/setInvalid.
+
+    // Resolve all arguments to the method call.
+    IR::Vector<IR::Argument> resolvedArgs;
+    auto method = call->method->type->checkedTo<IR::Type_MethodBase>();
+    auto &methodParams = method->parameters->parameters;
+    const auto *callArguments = call->arguments;
+    for (size_t idx = 0; idx < callArguments->size(); ++idx) {
+        auto arg = callArguments->at(idx);
+        auto param = methodParams.at(idx);
+        auto argExpr = arg->expression;
+        if (!(param->direction == IR::Direction::Out || SymbolicEnv::isSymbolicValue(argExpr))) {
+            stepToSubexpr(argExpr, result, state,
+                          [call, idx, param](const Continuation::Parameter *v) {
+                              auto *clonedCall = call->clone();
+                              auto *arguments = clonedCall->arguments->clone();
+                              auto *arg = arguments->at(idx)->clone();
+                              const IR::Expression *computedExpr = v->param;
+                              if (param->direction == IR::Direction::InOut) {
+                                  auto stateVar = ToolsVariables::convertReference(arg->expression);
+                                  computedExpr = new IR::InOutReference(stateVar, computedExpr);
+                              }
+                              arg->expression = computedExpr;
+                              (*arguments)[idx] = arg;
+                              clonedCall->arguments = arguments;
+                              return Continuation::Return(clonedCall);
+                          });
+            return false;
+        }
+    }
+
     // Handle method calls. These are either table invocations or extern calls.
     if (call->method->type->is<IR::Type_Method>()) {
         if (const auto *path = call->method->to<IR::PathExpression>()) {
@@ -255,6 +285,13 @@ bool ExprStepper::preorder(const IR::Mux *mux) {
 
 bool ExprStepper::preorder(const IR::PathExpression *pathExpression) {
     logStep(pathExpression);
+    // If the path expression is a Type_MatchKind, convert it to a StringLiteral.
+    if (pathExpression->type->is<IR::Type_MatchKind>()) {
+        state.replaceTopBody(Continuation::Return(
+            new IR::StringLiteral(IR::Type_MatchKind::get(), pathExpression->path->name)));
+        result->emplace_back(state);
+        return false;
+    }
     // Otherwise convert the path expression into a qualified member and return it.
     state.replaceTopBody(Continuation::Return(state.get(pathExpression)));
     result->emplace_back(state);
