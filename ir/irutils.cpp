@@ -257,4 +257,15 @@ big_int getMinBvVal(const Type *t) {
     P4C_UNIMPLEMENTED("Maximum value calculation for type %1% not implemented.", t);
 }
 
+std::vector<const Expression *> flattenListOrStructExpression(const Expression *listLikeExpr) {
+    if (const auto *listExpr = listLikeExpr->to<IR::BaseListExpression>()) {
+        return IR::flattenListExpression(listExpr);
+    }
+    if (const auto *structExpr = listLikeExpr->to<IR::StructExpression>()) {
+        return IR::flattenStructExpression(structExpr);
+    }
+    P4C_UNIMPLEMENTED("Unsupported list-like expression %1% of type %2%.", listLikeExpr,
+                      listLikeExpr->node_type_name());
+}
+
 }  // namespace IR

@@ -80,6 +80,8 @@ std::vector<const Expression *> flattenStructExpression(const StructExpression *
 /// list.
 std::vector<const Expression *> flattenListExpression(const BaseListExpression *listExpr);
 
+std::vector<const Expression *> flattenListOrStructExpression(const Expression *listLikeExpr);
+
 /* =========================================================================================
  *  Other helper functions
  * ========================================================================================= */

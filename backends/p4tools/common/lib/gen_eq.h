@@ -15,7 +15,7 @@ class GenEq {
 
  private:
     /// Recursively resolve lists of size 1 by returning the expression contained within.
-    static const IR::Expression *checkSingleton(const IR::Expression *expr);
+    static const IR::Expression *resolveSingletonList(const IR::Expression *expr);
 
     /// Flatten and compare two lists.
     /// Important, this equation assumes that struct expressions have been ordered.
