@@ -42,6 +42,9 @@ class TestBackEnd {
     /// Test maximum number of tests that are to be produced.
     int64_t maxTests;
 
+    /// The accumulated coverage of all finished test cases. Number in range [0, 1].
+    float coverage = 0;
+
     explicit TestBackEnd(const ProgramInfo &programInfo, SymbolicExecutor &symbex)
         : programInfo(programInfo), symbex(symbex), maxTests(TestgenOptions::get().maxTests) {
         // If we select a specific branch, the number of tests should be 1.
@@ -116,8 +119,11 @@ class TestBackEnd {
     /// enabled.
     void printPerformanceReport(bool write) const;
 
-    /// Accessors.
+    /// Returns test count.
     [[nodiscard]] int64_t getTestCount() const;
+
+    /// Returns coverage achieved by all the processed tests.
+    [[nodiscard]] float getCoverage() const;
 };
 
 }  // namespace P4Tools::P4Testgen
