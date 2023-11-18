@@ -24,8 +24,8 @@ const IR::Expression *GenEq::resolveSingletonList(const IR::Expression *expr) {
 
 const IR::Expression *GenEq::equateListTypes(const IR::Expression *left,
                                              const IR::Expression *right) {
-    std::vector<const IR::Expression *> leftElems = flattenListOrStructExpression(left);
-    std::vector<const IR::Expression *> rightElems = flattenListOrStructExpression(right);
+    std::vector<const IR::Expression *> leftElems = IR::flattenListOrStructExpression(left);
+    std::vector<const IR::Expression *> rightElems = IR::flattenListOrStructExpression(right);
 
     auto leftElemsSize = leftElems.size();
     auto rightElemsSize = rightElems.size();

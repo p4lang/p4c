@@ -1,6 +1,5 @@
 #include "ir/irutils.h"
 
-#include <algorithm>
 #include <cmath>
 #include <map>
 #include <tuple>
@@ -176,18 +175,21 @@ const IR::Expression *getDefaultValue(const IR::Type *type, const Util::SourceIn
 
 std::vector<const Expression *> flattenStructExpression(const StructExpression *structExpr) {
     std::vector<const Expression *> exprList;
-    for (const auto *listElem : structExpr->components) {
+    // Ensure that the underlying type is a Type_StructLike.
+    // TODO: How do fail gracefully if we get a Type_Name?
+    const auto *structType = structExpr->type->to<IR::Type_StructLike>();
+    BUG_CHECK(structType != nullptr, "%1%: expected a struct type, received %2%", structExpr->type,
+              structExpr->node_type_name());
+
+    // We use the underlying struct type, which will gives us the right field ordering.
+    for (const auto *typeField : structType->fields) {
+        const auto *listElem = structExpr->getField(typeField->name);
         if (const auto *subStructExpr = listElem->expression->to<StructExpression>()) {
             auto subList = flattenStructExpression(subStructExpr);
             exprList.insert(exprList.end(), subList.begin(), subList.end());
-        } else if (const auto *headerStackExpr =
-                       listElem->expression->to<HeaderStackExpression>()) {
-            for (const auto *headerStackElem : headerStackExpr->components) {
-                // We assume there are no nested header stacks.
-                auto subList =
-                    flattenStructExpression(headerStackElem->checkedTo<IR::StructExpression>());
-                exprList.insert(exprList.end(), subList.begin(), subList.end());
-            }
+        } else if (const auto *subListExpr = listElem->to<BaseListExpression>()) {
+            auto subList = flattenListExpression(subListExpr);
+            exprList.insert(exprList.end(), subList.begin(), subList.end());
         } else {
             exprList.emplace_back(listElem->expression);
         }
@@ -198,8 +200,11 @@ std::vector<const Expression *> flattenStructExpression(const StructExpression *
 std::vector<const Expression *> flattenListExpression(const BaseListExpression *listExpr) {
     std::vector<const Expression *> exprList;
     for (const auto *listElem : listExpr->components) {
-        if (const auto *subListExpr = listElem->to<ListExpression>()) {
+        if (const auto *subListExpr = listElem->to<BaseListExpression>()) {
             auto subList = flattenListExpression(subListExpr);
+            exprList.insert(exprList.end(), subList.begin(), subList.end());
+        } else if (const auto *subStructExpr = listElem->to<IR::StructExpression>()) {
+            auto subList = flattenStructExpression(subStructExpr);
             exprList.insert(exprList.end(), subList.begin(), subList.end());
         } else {
             exprList.emplace_back(listElem);

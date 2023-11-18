@@ -5,7 +5,7 @@
 
 namespace P4Tools {
 
-/// Generates an equality on two input expressions, recursing into lists and structs.
+/// Generates an semantic equality on two input expressions, recursing into lists and structs.
 /// This supports fuzzy matching on singleton lists: singleton lists are considered the same as
 /// their singleton elements. This is implemented by eagerly recursing into singleton lists before
 /// attempting to generate the equality.
