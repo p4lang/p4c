@@ -1,0 +1,6 @@
+compound-assignment.p4(65): [--Werror=invalid] error: /: could not evaluate expression at compilation time
+        hdr.p4calc.res = result;
+                         ^^^^^^
+compound-assignment.p4(71): [--Werror=invalid] error: %: could not evaluate expression at compilation time
+        hdr.p4calc.res = result;
+                         ^^^^^^
