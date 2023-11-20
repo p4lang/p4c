@@ -162,7 +162,10 @@ class TypeInference : public Transform {
     // various helpers
     bool onlyBitsOrBitStructs(const IR::Type *type) const;
     bool containsHeader(const IR::Type *canonType);
-    bool validateFields(const IR::Type *type, std::function<bool(const IR::Type *)> checker) const;
+    bool validateStructLikeFields(const IR::Type *type,
+                                  std::function<bool(const IR::Type *)> checker) const;
+    bool validateIndexedFields(const IR::Type *type,
+                               std::function<bool(const IR::Type *)> checker) const;
     const IR::Node *binaryBool(const IR::Operation_Binary *op);
     const IR::Node *binaryArith(const IR::Operation_Binary *op);
     const IR::Node *unsBinaryArith(const IR::Operation_Binary *op);
@@ -193,6 +196,9 @@ class TypeInference : public Transform {
     /// on success.
     const IR::ActionListElement *validateActionInitializer(const IR::Expression *actionCall);
     bool containsActionEnum(const IR::Type *type) const;
+
+    /// Checks type nesting rules for structs and tuples
+    static bool isStructTupleField(const IR::Type *t);
 
     //////////////////////////////////////////////////////////////
 
@@ -253,11 +259,11 @@ class TypeInference : public Transform {
     const IR::Node *postorder(IR::Type_Header *type) override;
     const IR::Node *postorder(IR::Type_Stack *type) override;
     const IR::Node *postorder(IR::Type_Struct *type) override;
+    const IR::Node *postorder(IR::Type_Tuple *type) override;
     const IR::Node *postorder(IR::Type_HeaderUnion *type) override;
     const IR::Node *postorder(IR::Type_Typedef *type) override;
     const IR::Node *postorder(IR::Type_Specialized *type) override;
     const IR::Node *postorder(IR::Type_SpecializedCanonical *type) override;
-    const IR::Node *postorder(IR::Type_Tuple *type) override;
     const IR::Node *postorder(IR::Type_P4List *type) override;
     const IR::Node *postorder(IR::Type_List *type) override;
     const IR::Node *postorder(IR::Type_Set *type) override;
