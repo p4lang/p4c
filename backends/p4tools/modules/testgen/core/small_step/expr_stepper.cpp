@@ -333,7 +333,7 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
     // If there are no select cases, then the select expression has failed to match on anything.
     // Delegate to stepNoMatch.
     if (selectCases.empty()) {
-        stepNoMatch();
+        stepNoMatch("Parser select expression has no alternatives.");
         return false;
     }
     if (!SymbolicEnv::isSymbolicValue(selectExpression->select)) {
@@ -412,11 +412,7 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
 
     // Generate implicit NoMatch.
     if (!hasDefault) {
-        auto &nextState = state.clone();
-        nextState.add(*new TraceEvents::GenericDescription("NoMatch",
-            "Parser select expression did not match any alternatives."));
-        nextState.replaceTopBody(Continuation::Exception::NoMatch);
-        result->emplace_back(missCondition, state, nextState);
+        stepNoMatch("Parser select expression did not match any alternatives.", missCondition);
     }
 
     return false;
@@ -466,6 +462,15 @@ bool ExprStepper::preorder(const IR::Slice *slice) {
     return stepSymbolicValue(slice);
 }
 
-void ExprStepper::stepNoMatch() { stepToException(Continuation::Exception::NoMatch); }
+void ExprStepper::stepNoMatch(std::string traceLog, const IR::Expression *condition) {
+    auto &noMatchState = condition ? state.clone() : state;
+    noMatchState.add(*new TraceEvents::GenericDescription("NoMatch", traceLog));
+    noMatchState.replaceTopBody(Continuation::Exception::NoMatch);
+    if (condition) {
+        result->emplace_back(condition, state, noMatchState);
+    } else {
+        result->emplace_back(state);
+    }
+}
 
 }  // namespace P4Tools::P4Testgen
