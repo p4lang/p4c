@@ -1,6 +1,14 @@
-issue3750-1.p4(9): [--Werror=type-error] error: ct: not supported as a tuple field
+issue3750-1.p4(1): [--Werror=type-error] error: Field '0' of 'tuple<ct>' cannot have type 'ct'
+extern ct {
+       ^^
+issue3750-1.p4(9): [--Werror=type-error] error: Error while analyzing tuple<ct>
 void f(tuple<ct> t)
-             ^^
-issue3750-1.p4(14): [--Werror=type-error] error: E<bit<32>>: not supported as a tuple field
-void g(tuple<E<bit<32>>> t)
-             ^^^^^^^^^^
+       ^^^^^^^^^
+issue3750-1.p4(1): [--Werror=type-error] error: Field '0' of 'tuple<ct>' cannot have type 'ct'
+extern ct {
+       ^^
+In file: /home/runner/work/p4c/p4c/frontends/p4/methodInstance.cpp:86
+issue3750-1.p4(11): unexpected expression t[0]; resolving method instance
+    t[0].apply();
+    ^^^^
+
