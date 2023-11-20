@@ -158,8 +158,11 @@ size_t Type_Stack::getSize() const {
         ::error(ErrorType::ERR_OVERLIMIT, "Index too large: %1%", cst);
         return 0;
     }
-    int size = cst->asInt();
-    if (size < 0) ::error(ErrorType::ERR_OVERLIMIT, "Illegal array size: %1%", cst);
+    auto size = cst->asInt();
+    if (size < 0) {
+        ::error(ErrorType::ERR_OVERLIMIT, "Illegal array size: %1%", cst);
+        return 0;
+    }
     return static_cast<size_t>(size);
 }
 
