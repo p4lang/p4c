@@ -28,7 +28,7 @@ add_custom_target (dpdk_runtime_dir
 # placed in the build directory inside `control-plane` directory
 add_custom_command(
     OUTPUT ${DPDK_P4RUNTIME_INFO_GEN_SRCS} ${DPDK_P4RUNTIME_INFO_GEN_HDRS}
-  COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
+  COMMAND ${Protobuf_PROTOC_EXECUTABLE}
     --proto_path ${DPDK_P4RUNTIME_DIR}
     --proto_path ${P4RUNTIME_STD_DIR}
     --cpp_out ${CMAKE_CURRENT_BINARY_DIR}/p4/config
