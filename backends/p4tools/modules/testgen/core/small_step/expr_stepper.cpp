@@ -413,6 +413,8 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
     // Generate implicit NoMatch.
     if (!hasDefault) {
         auto &nextState = state.clone();
+        nextState.add(*new TraceEvents::GenericDescription("NoMatch",
+            "Parser select expression did not match any alternatives."));
         nextState.replaceTopBody(Continuation::Exception::NoMatch);
         result->emplace_back(missCondition, state, nextState);
     }
