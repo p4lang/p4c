@@ -1625,9 +1625,15 @@ const IR::Node *TypeInference::postorder(IR::Type_Stack *type) {
     return type;
 }
 
-/// Validate the fields of a struct type using the supplied checker.
-/// The checker returns "false" when a field is invalid.
-/// Return true on success
+bool TypeInference::isStructTupleField(const IR::Type *t) {
+    return t->is<IR::Type_Struct>() || t->is<IR::Type_Bits>() || t->is<IR::Type_Header>() ||
+           t->is<IR::Type_HeaderUnion>() || t->is<IR::Type_Enum>() || t->is<IR::Type_Error>() ||
+           t->is<IR::Type_Boolean>() || t->is<IR::Type_Stack>() || t->is<IR::Type_Varbits>() ||
+           t->is<IR::Type_ActionEnum>() || t->is<IR::Type_Tuple>() || t->is<IR::Type_SerEnum>() ||
+           t->is<IR::Type_Var>() || t->is<IR::Type_SpecializedCanonical>() ||
+           t->is<IR::Type_MatchKind>();
+}
+
 bool TypeInference::validateStructLikeFields(const IR::Type *type,
                                              std::function<bool(const IR::Type *)> checker) const {
     if (type == nullptr) return false;
@@ -1684,15 +1690,6 @@ const IR::Node *TypeInference::postorder(IR::Type_Header *type) {
     };
     (void)validateStructLikeFields(canon, validator);
     return type;
-}
-
-bool TypeInference::isStructTupleField(const IR::Type *t) {
-    return t->is<IR::Type_Struct>() || t->is<IR::Type_Bits>() || t->is<IR::Type_Header>() ||
-           t->is<IR::Type_HeaderUnion>() || t->is<IR::Type_Enum>() || t->is<IR::Type_Error>() ||
-           t->is<IR::Type_Boolean>() || t->is<IR::Type_Stack>() || t->is<IR::Type_Varbits>() ||
-           t->is<IR::Type_ActionEnum>() || t->is<IR::Type_Tuple>() || t->is<IR::Type_SerEnum>() ||
-           t->is<IR::Type_Var>() || t->is<IR::Type_SpecializedCanonical>() ||
-           t->is<IR::Type_MatchKind>();
 }
 
 const IR::Node *TypeInference::postorder(IR::Type_Struct *type) {
