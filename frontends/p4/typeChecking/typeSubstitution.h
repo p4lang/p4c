@@ -33,7 +33,8 @@ class TypeSubstitution : public IHasDbPrint {
 
  public:
     TypeSubstitution() = default;
-    TypeSubstitution(const TypeSubstitution &other) : binding(other.binding) {}
+    TypeSubstitution(const TypeSubstitution &other) = default;
+    TypeSubstitution &operator=(const TypeSubstitution &other) = default;
 
     /** True if this is the empty substitution, which does not replace anything. */
     bool isIdentity() const { return binding.size() == 0; }
