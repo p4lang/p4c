@@ -334,7 +334,7 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
     // If there are no select cases, then the select expression has failed to match on anything.
     // Delegate to stepNoMatch.
     if (selectCases.empty()) {
-        stepNoMatch();
+        stepNoMatch("Parser select expression has no alternatives.");
         return false;
     }
     if (!SymbolicEnv::isSymbolicValue(selectExpression->select)) {
@@ -378,12 +378,14 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
     }
 
     const IR::Expression *missCondition = IR::getBoolLiteral(true);
+    bool hasDefault = false;
     for (const auto *selectCase : selectCases) {
         auto &nextState = state.clone();
 
         // Handle case where the first select case matches: proceed to the next parser state,
         // guarded by its path condition.
         const auto *matchCondition = GenEq::equate(selectExpression->select, selectCase->keyset);
+        hasDefault = hasDefault || selectCase->keyset->is<IR::DefaultExpression>();
 
         // TODO: Implement the taint case for select expressions.
         // In the worst case, this means the entire parser is tainted.
@@ -407,6 +409,11 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
         result->emplace_back(new IR::LAnd(missCondition, matchCondition), state, nextState,
                              coveredNodes);
         missCondition = new IR::LAnd(new IR::LNot(matchCondition), missCondition);
+    }
+
+    // Generate implicit NoMatch.
+    if (!hasDefault) {
+        stepNoMatch("Parser select expression did not match any alternatives.", missCondition);
     }
 
     return false;
@@ -456,6 +463,15 @@ bool ExprStepper::preorder(const IR::Slice *slice) {
     return stepSymbolicValue(slice);
 }
 
-void ExprStepper::stepNoMatch() { stepToException(Continuation::Exception::NoMatch); }
+void ExprStepper::stepNoMatch(std::string traceLog, const IR::Expression *condition) {
+    auto &noMatchState = condition ? state.clone() : state;
+    noMatchState.add(*new TraceEvents::GenericDescription("NoMatch", traceLog));
+    noMatchState.replaceTopBody(Continuation::Exception::NoMatch);
+    if (condition) {
+        result->emplace_back(condition, state, noMatchState);
+    } else {
+        result->emplace_back(state);
+    }
+}
 
 }  // namespace P4Tools::P4Testgen
