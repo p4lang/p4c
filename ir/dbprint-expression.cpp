@@ -143,8 +143,8 @@ void IR::Apply::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     if (!actions.empty()) {
         out << " {" << indent << setprec(0);
-        for (auto act : actions)
-            out << Log::endl << act.first << " {" << indent << act.second << unindent << " }";
+        for (const auto &[actName, actExprs] : actions)
+            out << Log::endl << actName << " {" << indent << actExprs << unindent << " }";
         out << setprec(prec) << " }" << unindent;
     } else if (prec == 0) {
         out << ';';

@@ -120,8 +120,7 @@ bool IFunctional::callMatches(const Vector<Argument> *arguments) const {
     }
     // Check if all remaining parameters have default values
     // or are optional.
-    for (auto it : paramNames) {
-        auto param = it.second;
+    for (const auto &[_, param] : paramNames) {
         if (!param->isOptional() && !param->defaultValue) return false;
     }
     return true;
