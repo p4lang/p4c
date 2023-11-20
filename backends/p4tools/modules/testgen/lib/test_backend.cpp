@@ -123,7 +123,6 @@ bool TestBackEnd::run(const FinalState &state) {
         }
 
         const P4::Coverage::CoverageSet &visitedNodes = symbex.getVisitedNodes();
-        float coverage = NAN;
         if (coverableNodes.empty()) {
             printFeature("test_info", 4, "============ Test %1% ============", testCount);
         } else {
@@ -136,7 +135,7 @@ bool TestBackEnd::run(const FinalState &state) {
         }
 
         // Output the test.
-        Util::withTimer("backend", [this, &testSpec, &selectedBranches, &coverage] {
+        Util::withTimer("backend", [this, &testSpec, &selectedBranches] {
             testWriter->outputTest(testSpec, selectedBranches, testCount, coverage);
         });
 
@@ -244,5 +243,7 @@ void TestBackEnd::printPerformanceReport(bool write) const {
 }
 
 int64_t TestBackEnd::getTestCount() const { return testCount; }
+
+float TestBackEnd::getCoverage() const { return coverage; }
 
 }  // namespace P4Tools::P4Testgen

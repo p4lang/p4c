@@ -115,9 +115,10 @@ class ExprStepper : public AbstractStepper {
     void generateCopyIn(ExecutionState &nextState, const IR::StateVariable &targetPath,
                         const IR::StateVariable &srcPath, cstring dir, bool forceTaint) const;
 
-    /// Takes a step to reflect a "select" expression failing to match. The default implementation
+    /// Takes a step to reflect a "select" expression failing to match. If condition is given, this
+    /// will create a new state that is guarded by the given condition. The default implementation
     /// raises Continuation::Exception::NoMatch.
-    virtual void stepNoMatch();
+    virtual void stepNoMatch(std::string traceLog, const IR::Expression *condition = nullptr);
 
  public:
     ExprStepper(const ExprStepper &) = default;
