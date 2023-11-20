@@ -220,12 +220,12 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
     builder->newline();
     builder->blockStart();
 
+    emitCPUMAPHeadersInitializers(builder);
     emitLocalVariables(builder);
 
     builder->newline();
     emitUserMetadataInstance(builder);
 
-    emitCPUMAPHeadersInitializers(builder);
     if (name == "tc-parse") {
         builder->newline();
         emitCPUMAPInitializers(builder);
@@ -284,9 +284,11 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
         builder->blockEnd(true);
     }
 
-    builder->emitIndent();
-    builder->appendFormat("hdrMd->%s = %s", offsetVar.c_str(), offsetVar.c_str());
-    builder->newline();
+    if (name == "tc-parse") {
+        builder->emitIndent();
+        builder->appendFormat("hdrMd->%s = %s;", offsetVar.c_str(), offsetVar.c_str());
+        builder->newline();
+    }
     builder->emitIndent();
     builder->appendFormat("return %d;", actUnspecCode);
     builder->newline();
@@ -315,9 +317,6 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
         builder->emitIndent();
         builder->appendLine("#pragma clang loop unroll(disable)");
         builder->emitIndent();
-        builder->appendFormat("for (i = 0; i < %d; i++) ", maxResubmitDepth);
-        builder->blockStart();
-        builder->emitIndent();
         builder->appendFormat("ret = %s(skb, ", func_name);
 
         builder->appendFormat("(%s %s *) %s, %s);",
@@ -327,11 +326,10 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
 
         builder->newline();
         builder->appendFormat(
-            "        if (%s->drop == 1) {\n"
-            "            break;\n"
-            "        }\n",
+            "    if (%s->drop == 1) {\n"
+            "        break;\n"
+            "    }\n",
             compilerGlobalMetadata);
-        builder->blockEnd(true);
         builder->newline();
         builder->emitIndent();
         builder->appendFormat("%s->recirculated = (i > 0);", compilerGlobalMetadata);
@@ -1376,12 +1374,16 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
                 }
             }
 
+            auto mem = c->expression->to<IR::Member>();
             builder->emitIndent();
             if (memcpy) {
                 builder->appendFormat("__builtin_memcpy(&(%s.%s[0]), &(", keyname.c_str(),
                                       fieldName.c_str());
                 table->codeGen->visit(c->expression);
                 builder->appendFormat("[0]), %d)", scalar->bytesRequired());
+            } else if (mem && checkPnaPortMem(mem)) {
+                builder->appendFormat("%s.%s = ", keyname.c_str(), fieldName.c_str());
+                builder->append("skb->ifindex");
             } else {
                 builder->appendFormat("%s.%s = ", keyname.c_str(), fieldName.c_str());
                 if (isLPMKeyBigEndian) builder->appendFormat("%s(", swap.c_str());

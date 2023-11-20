@@ -8,11 +8,18 @@
       "id" : 1,
       "tentries" : 2048,
       "nummask" : 8,
-      "keysize" : 32,
+      "keysize" : 64,
       "keyfields" : [
         {
           "id" : 1,
           "name" : "hdr.ipv4.dstAddr",
+          "type" : "bit32",
+          "match_type" : "exact",
+          "bitwidth" : 32
+        },
+        {
+          "id" : 2,
+          "name" : "istd.input_port",
           "type" : "bit32",
           "match_type" : "exact",
           "bitwidth" : 32

@@ -45,6 +45,7 @@ int xdp_func(struct xdp_md *skb) {
 }
 static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr, struct pna_global_metadata *compiler_meta__)
 {
+    struct hdr_md *hdrMd;
     unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
     ParserError_t ebpf_errorCode = NoError;
     void* pkt = ((void*)(long)skb->data);
@@ -55,7 +56,6 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
     u32 pkt_len = skb->len;
 
     struct main_metadata_t *user_meta;
-    struct hdr_md *hdrMd;
     hdrMd = BPF_MAP_LOOKUP_ELEM(hdr_md_cpumap, &ebpf_zero);
     if (!hdrMd)
         return TC_ACT_SHOT;
@@ -261,7 +261,6 @@ if ((u32)istd.input_port == 4) {
         }
 ;
     }
-    hdrMd->ebpf_packetOffsetInBits = ebpf_packetOffsetInBits
     return -1;
 }
 SEC("classifier/tc-ingress")
@@ -284,11 +283,9 @@ int tc_ingress_func(struct __sk_buff *skb) {
     int ret = -1;
     int i;
     #pragma clang loop unroll(disable)
-    for (i = 0; i < 4; i++) {
-        ret = process(skb, (struct headers_t *) hdr, compiler_meta__);
-        if (compiler_meta__->drop == 1) {
-            break;
-        }
+    ret = process(skb, (struct headers_t *) hdr, compiler_meta__);
+    if (compiler_meta__->drop == 1) {
+        break;
     }
 
     compiler_meta__->recirculated = (i > 0);

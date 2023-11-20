@@ -84,6 +84,7 @@ control MainControlImpl(
     table ipv4_tbl_1 {
         key = {
             hdr.ipv4.dstAddr : exact;
+            istd.input_port : exact;
         }
         actions = {
             next_hop;

@@ -182,7 +182,6 @@ class ConvertToEbpfPNA : public Transform {
 
     const PNAEbpfGenerator *build(const IR::ToplevelBlock *prog);
     const IR::Node *preorder(IR::ToplevelBlock *p) override;
-
     const PNAEbpfGenerator *getEBPFProgram() { return ebpf_program; }
 };
 
