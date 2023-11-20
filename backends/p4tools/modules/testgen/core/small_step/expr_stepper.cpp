@@ -410,7 +410,7 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
         missCondition = new IR::LAnd(new IR::LNot(matchCondition), missCondition);
     }
 
-    // generate implicit NoMatch
+    // Generate implicit NoMatch.
     if (!hasDefault) {
         auto &nextState = state.clone();
         nextState.replaceTopBody(Continuation::Exception::NoMatch);
