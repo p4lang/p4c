@@ -49,7 +49,7 @@ class GenericDescription : public Generic {
     void print(std::ostream &os) const override;
 
  public:
-    explicit GenericDescription(cstring description, cstring label);
+    explicit GenericDescription(cstring label, cstring description);
 };
 
 /* =============================================================================================
