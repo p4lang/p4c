@@ -37,8 +37,8 @@ set(
   lib/logging.cpp
   lib/packet_vars.cpp
   lib/test_backend.cpp
+  lib/test_framework.cpp
   lib/test_spec.cpp
-  lib/tf.cpp
 )
 
 # GTest source files for p4testgen.

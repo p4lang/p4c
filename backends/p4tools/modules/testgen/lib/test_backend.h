@@ -14,8 +14,8 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/final_state.h"
+#include "backends/p4tools/modules/testgen/lib/test_framework.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
-#include "backends/p4tools/modules/testgen/lib/tf.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4Tools::P4Testgen {
@@ -33,7 +33,7 @@ class TestBackEnd {
     const ProgramInfo &programInfo;
 
     /// Writes the tests out to a file.
-    TF *testWriter = nullptr;
+    TestFramework *testWriter = nullptr;
 
     /// Pointer to the symbolic executor.
     /// TODO: Remove this.

@@ -14,13 +14,13 @@
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
+#include "backends/p4tools/modules/testgen/lib/test_framework.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
-#include "backends/p4tools/modules/testgen/lib/tf.h"
 
 namespace P4Tools::P4Testgen::Pna {
 
 /// Extracts information from the @testSpec to emit a Metadata test case.
-class Metadata : public TF {
+class Metadata : public TestFramework {
     /// The output file.
     std::ofstream metadataFile;
 

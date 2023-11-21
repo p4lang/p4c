@@ -1,4 +1,4 @@
-#include "backends/p4tools/modules/testgen/lib/tf.h"
+#include "backends/p4tools/modules/testgen/lib/test_framework.h"
 
 #include <algorithm>
 #include <cctype>
@@ -13,10 +13,11 @@
 
 namespace P4Tools::P4Testgen {
 
-TF::TF(std::filesystem::path basePath, std::optional<unsigned int> seed = std::nullopt)
+TestFramework::TestFramework(std::filesystem::path basePath,
+                             std::optional<unsigned int> seed = std::nullopt)
     : basePath(std::move(basePath)), seed(seed) {}
 
-void TF::printPerformanceReport(bool write) const {
+void TestFramework::printPerformanceReport(bool write) const {
     // Do not emit a report if performance logging is not enabled.
     if (!Log::fileLogLevelIsAtLeast("performance", 4)) {
         return;

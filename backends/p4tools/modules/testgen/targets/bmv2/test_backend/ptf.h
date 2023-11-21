@@ -22,7 +22,7 @@
 namespace P4Tools::P4Testgen::Bmv2 {
 
 /// Extracts information from the @testSpec to emit a PTF test case.
-class PTF : public Bmv2TF {
+class PTF : public Bmv2TestFramework {
  public:
     explicit PTF(std::filesystem::path basePath, std::optional<unsigned int> seed = std::nullopt);
 
