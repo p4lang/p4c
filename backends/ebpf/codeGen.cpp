@@ -141,7 +141,7 @@ bool CodeGenInspector::preorder(const IR::Mux *b) {
 }
 
 bool CodeGenInspector::preorder(const IR::Operation_Unary *u) {
-    widthCheck(u);
+    if (!u->is<IR::Cmpl>()) widthCheck(u);
     int prec = expressionPrecedence;
     cstring mask = getMask(typeMap, u);
     bool useParens = prec > u->getPrecedence() || mask != "";
