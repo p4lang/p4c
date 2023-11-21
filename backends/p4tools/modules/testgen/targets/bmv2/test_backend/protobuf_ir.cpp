@@ -19,7 +19,10 @@ ProtobufIr::ProtobufIr(std::filesystem::path basePath, std::optional<unsigned in
 
 std::string ProtobufIr::getTestCaseTemplate() {
     static std::string TEST_CASE(
-        R"""(# A P4TestGen-generated test case for {{test_name}}.p4
+        R"""(# proto-file: p4testgen_ir.proto
+# proto-message: TestCase
+
+# A P4TestGen-generated test case for {{test_name}}.p4
 metadata: "p4testgen seed: {{ default(seed, "none") }}"
 metadata: "Date generated: {{timestamp}}"
 ## if length(selected_branches) > 0
@@ -45,95 +48,93 @@ expected_output_packet {
 ## endif
 
 ## if control_plane
-entities : [
 ## for table in control_plane.tables
 ## for rule in table.rules
-  # Table {{table.table_name}}
-  {
-    table_entry {
-      table_name: "{{table.table_name}}"
+# Table {{table.table_name}}
+entities {
+  table_entry {
+    table_name: "{{table.table_name}}"
 ## if rule.rules.needs_priority
-      priority: {{rule.priority}}
+    priority: {{rule.priority}}
 ## endif
 ## for r in rule.rules.single_exact_matches
-      # Match field {{r.field_name}}
-      matches {
-        name: "{{r.field_name}}"
-        exact: { hex_str: "{{r.value}}" }
-      }
-## endfor
-## for r in rule.rules.optional_matches
     # Match field {{r.field_name}}
     matches {
       name: "{{r.field_name}}"
-      optional {
-        value: { hex_str: "{{r.value}}" }
-      }
+      exact: { hex_str: "{{r.value}}" }
     }
+## endfor
+## for r in rule.rules.optional_matches
+  # Match field {{r.field_name}}
+  matches {
+    name: "{{r.field_name}}"
+    optional {
+      value: { hex_str: "{{r.value}}" }
+    }
+  }
 ## endfor
 ## for r in rule.rules.range_matches
-      # Match field {{r.field_name}}
-      matches {
-        name: "{{r.field_name}}"
-        range {
-          low: { hex_str: "{{r.lo}}" }
-          high: { hex_str:  "{{r.hi}}" }
-        }
+    # Match field {{r.field_name}}
+    matches {
+      name: "{{r.field_name}}"
+      range {
+        low: { hex_str: "{{r.lo}}" }
+        high: { hex_str:  "{{r.hi}}" }
       }
+    }
 ## endfor
 ## for r in rule.rules.ternary_matches
-      # Match field {{r.field_name}}
-      matches {
-        name: "{{r.field_name}}"
-        ternary {
-          value: { hex_str: "{{r.value}}" }
-          mask: { hex_str: "{{r.mask}}" }
-        }
+    # Match field {{r.field_name}}
+    matches {
+      name: "{{r.field_name}}"
+      ternary {
+        value: { hex_str: "{{r.value}}" }
+        mask: { hex_str: "{{r.mask}}" }
       }
+    }
 ## endfor
 ## for r in rule.rules.lpm_matches
-      # Match field {{r.field_name}}
-      matches {
-        name: "{{r.field_name}}"
-        lpm {
-          value: { hex_str: "{{r.value}}" }
-          prefix_length: {{r.prefix_len}}
+    # Match field {{r.field_name}}
+    matches {
+      name: "{{r.field_name}}"
+      lpm {
+        value: { hex_str: "{{r.value}}" }
+        prefix_length: {{r.prefix_len}}
+      }
+    }
+## endfor
+    # Action {{rule.action_name}}
+## if existsIn(table, "has_ap")
+      action_set {
+        actions {
+          action {
+            name: "{{rule.action_name}}"
+## for act_param in rule.rules.act_args
+            # Param {{act_param.param}}
+            params {
+              name: "{{act_param.param}}"
+              value: { hex_str: "{{act_param.value}}" }
+            }
+## endfor
+          }
         }
       }
-## endfor
-      # Action {{rule.action_name}}
-## if existsIn(table, "has_ap")
-        action_set {
-          actions {
-            action {
-              name: "{{rule.action_name}}"
-## for act_param in rule.rules.act_args
-              # Param {{act_param.param}}
-              params {
-                name: "{{act_param.param}}"
-                value: { hex_str: "{{act_param.value}}" }
-              }
-## endfor
-            }
-          }
-        }
 ## else
-        action {
-          name: "{{rule.action_name}}"
+      action {
+        name: "{{rule.action_name}}"
 ## for act_param in rule.rules.act_args
-          # Param {{act_param.param}}
-          params {
-            name: "{{act_param.param}}"
-            value: { hex_str: "{{act_param.value}}" }
-          }
-## endfor
-        }
-## endif
+        # Param {{act_param.param}}
+        params {
+          name: "{{act_param.param}}"
+          value: { hex_str: "{{act_param.value}}" }
+      }
 ## endfor
     }
-  }{% if not loop.is_last %},{% endif %}
+## endif
 ## endfor
-]
+  }
+}
+## endfor
 ## endif
 )""");
     return TEST_CASE;
