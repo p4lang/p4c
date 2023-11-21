@@ -1,5 +1,6 @@
 #include "backends/p4tools/common/compiler/midend.h"
 
+#include "backends/p4tools/common/compiler/convert_struct_expr.h"
 #include "backends/p4tools/common/compiler/convert_varbits.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/options.h"
@@ -30,7 +31,6 @@
 #include "midend/orderArguments.h"
 #include "midend/parserUnroll.h"
 #include "midend/removeLeftSlices.h"
-#include "midend/removeMiss.h"
 #include "midend/removeSelectBooleans.h"
 #include "midend/replaceSelectRange.h"
 #include "midend/simplifyBitwise.h"
@@ -162,6 +162,8 @@ void MidEnd::addDefaultPasses() {
         new P4::HSIndexSimplifier(&refMap, &typeMap),
         // Convert Type_Varbits into a type that contains information about the assigned width.
         new ConvertVarbits(),
+        // Convert any StructExpressions with Type_Header into a HeaderExpression.
+        new ConvertStructExpr(&typeMap),
         // Cast all boolean table keys with a bit<1>.
         new P4::CastBooleanTableKeys(),
     });
