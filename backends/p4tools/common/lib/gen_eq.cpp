@@ -6,9 +6,10 @@
 #include "ir/vector.h"
 #include "lib/exceptions.h"
 
-namespace P4Tools {
+namespace P4Tools::GenEq {
 
-const IR::Expression *GenEq::resolveSingletonList(const IR::Expression *expr) {
+/// Recursively resolve lists of size 1 by returning the expression contained within.
+const IR::Expression *resolveSingletonList(const IR::Expression *expr) {
     if (const auto *listExpr = expr->to<IR::BaseListExpression>()) {
         if (listExpr->size() == 1) {
             return resolveSingletonList(listExpr->components.at(0));
@@ -22,8 +23,9 @@ const IR::Expression *GenEq::resolveSingletonList(const IR::Expression *expr) {
     return expr;
 }
 
-const IR::Expression *GenEq::equateListTypes(const IR::Expression *left,
-                                             const IR::Expression *right) {
+/// Flatten and compare two lists.
+/// Members of struct expressions are ordered and compared based on the underlying type.
+const IR::Expression *equateListTypes(const IR::Expression *left, const IR::Expression *right) {
     std::vector<const IR::Expression *> leftElems = IR::flattenListOrStructExpression(left);
     std::vector<const IR::Expression *> rightElems = IR::flattenListOrStructExpression(right);
 
@@ -48,7 +50,12 @@ const IR::Expression *GenEq::equateListTypes(const IR::Expression *left,
     return result;
 }
 
-const IR::Expression *GenEq::equate(const IR::Expression *left, const IR::Expression *right) {
+/// Construct an equality expression.
+const IR::Equ *mkEq(const IR::Expression *e1, const IR::Expression *e2) {
+    return new IR::Equ(IR::Type::Boolean::get(), e1, e2);
+}
+
+const IR::Expression *equate(const IR::Expression *left, const IR::Expression *right) {
     // First, recursively unroll any singleton elements.
     left = resolveSingletonList(left);
     right = resolveSingletonList(right);
@@ -83,8 +90,4 @@ const IR::Expression *GenEq::equate(const IR::Expression *left, const IR::Expres
     return mkEq(left, right);
 }
 
-const IR::Equ *GenEq::mkEq(const IR::Expression *e1, const IR::Expression *e2) {
-    return new IR::Equ(IR::Type::Boolean::get(), e1, e2);
-}
-
-}  // namespace P4Tools
+}  // namespace P4Tools::GenEq

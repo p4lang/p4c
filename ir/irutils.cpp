@@ -176,10 +176,9 @@ const IR::Expression *getDefaultValue(const IR::Type *type, const Util::SourceIn
 std::vector<const Expression *> flattenStructExpression(const StructExpression *structExpr) {
     std::vector<const Expression *> exprList;
     // Ensure that the underlying type is a Type_StructLike.
-    // TODO: How do fail gracefully if we get a Type_Name?
     const auto *structType = structExpr->type->to<IR::Type_StructLike>();
-    BUG_CHECK(structType != nullptr, "%1%: expected a struct type, received %2%", structExpr->type,
-              structExpr->node_type_name());
+    BUG_CHECK(structType != nullptr, "%1%: expected a struct-like type, received %2%",
+              structExpr->type, structExpr->node_type_name());
 
     // We use the underlying struct type, which will gives us the right field ordering.
     for (const auto *typeField : structType->fields) {
