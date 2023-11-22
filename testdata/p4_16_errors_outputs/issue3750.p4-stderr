@@ -1,14 +1,6 @@
-issue3750.p4(1): [--Werror=type-error] error: Field '0' of 'tuple<control ct>' cannot have type 'control ct'
+issue3750.p4(1): [--Werror=type-error] error: Field '0' of 'tuple<ct>' cannot have type 'control ct'
 control ct();
         ^^
-issue3750.p4(2): [--Werror=type-error] error: Error while analyzing tuple<control ct>
-void f(tuple<ct> t)
-       ^^^^^^^^^
-issue3750.p4(1): [--Werror=type-error] error: Field '0' of 'tuple<control ct>' cannot have type 'control ct'
+issue3750.p4(1): [--Werror=type-error] error: Field '0' of 'tuple<ct>' cannot have type 'control ct'
 control ct();
         ^^
-In file: /home/runner/work/p4c/p4c/frontends/p4/methodInstance.cpp:86
-issue3750.p4(4): unexpected expression t[0]; resolving method instance
-  t[0].apply();
-  ^^^^
-
