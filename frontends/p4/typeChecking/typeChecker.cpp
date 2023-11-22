@@ -1626,6 +1626,7 @@ const IR::Node *TypeInference::postorder(IR::Type_Stack *type) {
 }
 
 bool TypeInference::isStructTupleField(const IR::Type *t) {
+    if (auto spec = t->to<IR::Type_SpecializedCanonical>()) t = spec->baseType;
     return t->is<IR::Type_Struct>() || t->is<IR::Type_Bits>() || t->is<IR::Type_Header>() ||
            t->is<IR::Type_HeaderUnion>() || t->is<IR::Type_Enum>() || t->is<IR::Type_Error>() ||
            t->is<IR::Type_Boolean>() || t->is<IR::Type_Stack>() || t->is<IR::Type_Varbits>() ||
@@ -1703,12 +1704,13 @@ const IR::Node *TypeInference::postorder(IR::Type_Struct *type) {
 }
 
 const IR::Node *TypeInference::postorder(IR::Type_Tuple *type) {
-    auto canon = setTypeType(type);
     auto validator = [this](const IR::Type *t) {
         while (t->is<IR::Type_Newtype>()) t = getTypeType(t->to<IR::Type_Newtype>()->type);
         return isStructTupleField(t);
     };
-    (void)validateIndexedFields(canon, validator);
+    // Call setTypeType only after a successful call to validateIndexedFields.
+    // It prevents further bugs to show up when maxErrorCount > 1.
+    if (validateIndexedFields(type, validator)) (void)setTypeType(type);
     return type;
 }
 
