@@ -5,7 +5,7 @@
 namespace P4Tools {
 
 const IR::Node *ConvertStructExpr::postorder(IR::StructExpression *structExpr) {
-    auto structType = structExpr->type;
+    const auto *structType = structExpr->type;
     bool resolved = false;
     if (structType->is<IR::Type_Name>()) {
         structType = typeMap->getTypeType(structType, true);
