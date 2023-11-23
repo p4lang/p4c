@@ -31,7 +31,8 @@ class FrontEnd {
 
  public:
     FrontEnd() = default;
-    explicit FrontEnd(const ParseAnnotations &parseAnnotations) : parseAnnotations(parseAnnotations) {}
+    explicit FrontEnd(const ParseAnnotations &parseAnnotations)
+        : parseAnnotations(parseAnnotations) {}
     explicit FrontEnd(const DebugHook &hook) { hooks.push_back(hook); }
     explicit FrontEnd(const ParseAnnotations &parseAnnotations, const DebugHook &hook)
         : FrontEnd(parseAnnotations) {
