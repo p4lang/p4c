@@ -3,7 +3,6 @@
 
 #include <map>
 #include <utility>
-#include <vector>
 
 #include <boost/container/flat_map.hpp>
 

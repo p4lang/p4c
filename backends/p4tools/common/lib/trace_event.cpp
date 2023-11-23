@@ -1,5 +1,11 @@
 #include "backends/p4tools/common/lib/trace_event.h"
 
+#include <ostream>
+
+#include "backends/p4tools/common/lib/model.h"
+#include "backends/p4tools/common/lib/symbolic_env.h"
+#include "ir/visitor.h"
+
 namespace P4Tools {
 
 std::ostream &operator<<(std::ostream &os, const TraceEvent &event) {

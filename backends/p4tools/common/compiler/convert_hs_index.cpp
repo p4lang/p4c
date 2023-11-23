@@ -1,10 +1,10 @@
 #include "backends/p4tools/common/compiler/convert_hs_index.h"
 
-#include <string>
+#include <cstddef>
 
-#include "ir/id.h"
+#include "ir/ir.h"
 #include "ir/irutils.h"
-#include "lib/cstring.h"
+#include "ir/node.h"
 
 namespace P4Tools {
 

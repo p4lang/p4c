@@ -10,6 +10,7 @@
 
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/irutils.h"
+#include "lib/exceptions.h"
 
 namespace P4Tools {
 

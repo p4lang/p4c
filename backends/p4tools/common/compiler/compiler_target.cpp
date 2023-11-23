@@ -1,6 +1,6 @@
 #include "backends/p4tools/common/compiler/compiler_target.h"
 
-#include <functional>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>

@@ -1,10 +1,11 @@
 #include "backends/p4tools/common/lib/variables.h"
 
 #include <map>
-#include <string>
 #include <tuple>
 
 #include "ir/id.h"
+#include "ir/ir.h"
+#include "lib/cstring.h"
 
 namespace P4Tools::ToolsVariables {
 
@@ -12,14 +13,14 @@ namespace P4Tools::ToolsVariables {
 static const IR::PathExpression VAR_PREFIX = IR::PathExpression("p4tools*var");
 
 const IR::StateVariable &getStateVariable(const IR::Type *type, cstring name) {
-    // TODO: Is caching worth it here?
-    // TODO: Do we really need to "allocate" a state variable? They are immediately consumed  by the
-    // symbolic environment.
+    // TODO(fruffy): Is caching worth it here?
+    // TODO(fruffy): Do we really need to "allocate" a state variable? They are immediately consumed
+    // by the symbolic environment.
     return *new IR::StateVariable(new IR::Member(type, &VAR_PREFIX, name));
 }
 
 const IR::SymbolicVariable *getSymbolicVariable(const IR::Type *type, cstring name) {
-    // TODO: Is caching worth it here?
+    // TODO(fruffy): Is caching worth it here?
     return new IR::SymbolicVariable(type, name);
 }
 

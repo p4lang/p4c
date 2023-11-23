@@ -346,7 +346,7 @@ class ParserState : public TraceEvent {
     ParserState &operator=(ParserState &&) = default;
 
     /// @returns the parser state associated with this event.
-    const IR::ParserState *getParserState() const;
+    [[nodiscard]] const IR::ParserState *getParserState() const;
 
  protected:
     void print(std::ostream &os) const override;

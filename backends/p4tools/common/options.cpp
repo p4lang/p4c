@@ -1,8 +1,11 @@
 #include "backends/p4tools/common/options.h"
 
+#include <string.h>
+
 #include <cstdlib>
 #include <cstring>
 #include <functional>
+#include <optional>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -12,8 +15,11 @@
 #include "backends/p4tools/common/lib/util.h"
 #include "backends/p4tools/common/version.h"
 #include "frontends/common/parser_options.h"
+#include "lib/compile_context.h"
+#include "lib/cstring.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
+#include "lib/options.h"
 
 namespace P4Tools {
 
