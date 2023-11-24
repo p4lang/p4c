@@ -327,8 +327,10 @@ class ComputeCallGraph : public Inspector {
                 ctr = gr->obj->to<IR::Counter>();
             else if (auto nr = ctrref->to<IR::PathExpression>())
                 ctr = structure->counters.get(nr->path->name);
-            if (ctr == nullptr)
+            if (ctr == nullptr) {
                 ::error(ErrorType::ERR_NOT_FOUND, "%1%: Cannot find counter", ctrref);
+                return;
+            }
             auto parent = findContext<IR::ActionFunction>();
             BUG_CHECK(parent != nullptr, "%1%: Counter call not within action", primitive);
             structure->calledCounters.calls(parent->name, ctr->name.name);
@@ -340,7 +342,10 @@ class ComputeCallGraph : public Inspector {
                 mtr = gr->obj->to<IR::Meter>();
             else if (auto nr = mtrref->to<IR::PathExpression>())
                 mtr = structure->meters.get(nr->path->name);
-            if (mtr == nullptr) ::error(ErrorType::ERR_NOT_FOUND, "%1%: Cannot find meter", mtrref);
+            if (mtr == nullptr) {
+                ::error(ErrorType::ERR_NOT_FOUND, "%1%: Cannot find meter", mtrref);
+                return;
+            }
             auto parent = findContext<IR::ActionFunction>();
             BUG_CHECK(parent != nullptr, "%1%: not within action", primitive);
             structure->calledMeters.calls(parent->name, mtr->name.name);
@@ -356,8 +361,10 @@ class ComputeCallGraph : public Inspector {
                 reg = gr->obj->to<IR::Register>();
             else if (auto nr = regref->to<IR::PathExpression>())
                 reg = structure->registers.get(nr->path->name);
-            if (reg == nullptr)
+            if (reg == nullptr) {
                 ::error(ErrorType::ERR_NOT_FOUND, "%1%: Cannot find register", regref);
+                return;
+            }
             auto parent = findContext<IR::ActionFunction>();
             BUG_CHECK(parent != nullptr, "%1%: not within action", primitive);
             structure->calledRegisters.calls(parent->name, reg->name.name);
@@ -407,11 +414,15 @@ class ComputeTableCallGraph : public Inspector {
     void postorder(const IR::Apply *apply) override {
         LOG3("Scanning " << apply->name);
         auto tbl = structure->tables.get(apply->name.name);
-        if (tbl == nullptr)
+        if (tbl == nullptr) {
             ::error(ErrorType::ERR_NOT_FOUND, "%1%: Could not find table", apply->name);
+            return;
+        }
         auto parent = findContext<IR::V1Control>();
-        if (!parent)
+        if (!parent) {
             ::error(ErrorType::ERR_UNEXPECTED, "%1%: Apply not within a control block?", apply);
+            return;
+        }
 
         auto ctrl = get(structure->tableMapping, tbl);
 
