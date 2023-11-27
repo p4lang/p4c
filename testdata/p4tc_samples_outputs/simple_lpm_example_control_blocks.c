@@ -66,8 +66,7 @@ int xdp_func(struct xdp_md *skb) {
 }
 static __always_inline int process(struct __sk_buff *skb, struct my_ingress_headers_t *hdr, struct pna_global_metadata *compiler_meta__)
 {
-    unsigned ebpf_packetOffsetInBits = 0;
-    unsigned ebpf_packetOffsetInBits_save = 0;
+    unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
     ParserError_t ebpf_errorCode = NoError;
     void* pkt = ((void*)(long)skb->data);
     void* ebpf_packetEnd = ((void*)(long)skb->data_end);
@@ -289,6 +288,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
         }
 ;
     }
+    hdrMd->ebpf_packetOffsetInBits = ebpf_packetOffsetInBits
     return -1;
 }
 SEC("classifier/tc-ingress")

@@ -21,7 +21,6 @@ google-*,
 FormatStyle: file
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
-AnalyzeTemporaryDtors: false
 UseColor: true
 CheckOptions:
   - { key: misc-const-correctness.AnalyzeValues,              value: false }
@@ -33,6 +32,4 @@ CheckOptions:
   - { key: readability-identifier-naming.GlobalConstantCase,  value: UPPER_CASE }
   - { key: readability-identifier-naming.StaticConstantCase,  value: UPPER_CASE }
   - { key: readability-identifier-naming.StaticVariableCase,  value: UPPER_CASE }
-ExtraArgs:
-  - '--std=c++17'
 ...

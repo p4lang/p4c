@@ -292,6 +292,27 @@ TestgenOptions::TestgenOptions()
         "covered nodes.");
 
     registerOption(
+        "--assert-min-coverage", "minCoverage",
+        [this](const char *arg) {
+            try {
+                minCoverage = std::stof(arg);
+                if (minCoverage < 0 || minCoverage > 1) {
+                    throw std::invalid_argument("Invalid input.");
+                }
+            } catch (std::invalid_argument &) {
+                ::error(
+                    "Invalid input value %1% for --assert-min-coverage. "
+                    "Expected float in range [0, 1].",
+                    arg);
+                return false;
+            }
+            return true;
+        },
+        "Specifies minimum coverage that needs to be achieved for P4Testgen to exit successfully. "
+        "The input needs to be value in range [0, 1] (where 1 means the metric is fully covered). "
+        "Defaults to 0 which means no checking.");
+
+    registerOption(
         "--print-traces", nullptr,
         [](const char *) {
             P4Testgen::enableTraceLogging();

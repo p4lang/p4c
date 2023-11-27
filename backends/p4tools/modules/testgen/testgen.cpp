@@ -83,6 +83,11 @@ int generateAbstractTests(const TestgenOptions &testgenOptions, const ProgramInf
             "Unable to generate tests with given inputs. Double-check provided options and "
             "parameters.\n");
     }
+    if (testBackend->getCoverage() < testgenOptions.minCoverage) {
+        ::error("The tests did not achieve requested coverage of %1%, the coverage is %2%.",
+                testgenOptions.minCoverage, testBackend->getCoverage());
+    }
+
     return ::errorCount() == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 

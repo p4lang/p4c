@@ -275,7 +275,7 @@ class TCTable {
                       + "/" + controlName + "/" + tableName
                       + " default_hit_action";
             if (isDefaultHitConst) {
-                tcTable += " permissions 0x109";
+                tcTable += " permissions 0x1024";
             }
             tcTable += " action " + defaultHitAction->getName();
         }
@@ -284,7 +284,7 @@ class TCTable {
                       + "/" + controlName + "/" + tableName
                       + " default_miss_action";
             if (isDefaultMissConst) {
-                tcTable += " permissions 0x109";
+                tcTable += " permissions 0x1024";
             }
             tcTable += " action " + defaultMissAction->getName();
         }

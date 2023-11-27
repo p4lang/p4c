@@ -24,11 +24,11 @@
 #include "backends/p4tools/modules/testgen/lib/test_backend.h"
 #include "backends/p4tools/modules/testgen/lib/test_object.h"
 #include "backends/p4tools/modules/testgen/options.h"
-#include "backends/p4tools/modules/testgen/targets/bmv2/backend/metadata/metadata.h"
-#include "backends/p4tools/modules/testgen/targets/bmv2/backend/protobuf/protobuf.h"
-#include "backends/p4tools/modules/testgen/targets/bmv2/backend/ptf/ptf.h"
-#include "backends/p4tools/modules/testgen/targets/bmv2/backend/stf/stf.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/program_info.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/metadata.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/protobuf.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/ptf.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/stf.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
@@ -106,9 +106,7 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
         auto *metadataCollection = new MetadataCollection();
         const auto *bmv2ProgInfo = programInfo.checkedTo<Bmv2V1ModelProgramInfo>();
         const auto *localMetadataVar = bmv2ProgInfo->getBlockParam("Parser", 2);
-        const auto *localMetadataType = executionState->resolveType(localMetadataVar->type);
-        const auto &flatFields = executionState->getFlatFields(
-            localMetadataVar, localMetadataType->checkedTo<IR::Type_Struct>(), {});
+        const auto &flatFields = executionState->getFlatFields(localMetadataVar, {});
         for (const auto &fieldRef : flatFields) {
             const auto *fieldVal = completedModel->evaluate(executionState->get(fieldRef), true);
             // Try to remove the leading internal name for the metadata field.

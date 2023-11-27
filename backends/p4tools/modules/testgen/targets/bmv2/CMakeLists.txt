@@ -8,10 +8,11 @@ endif()
 set(
   TESTGEN_SOURCES
   ${TESTGEN_SOURCES}
-  ${CMAKE_CURRENT_SOURCE_DIR}/backend/protobuf/protobuf.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/backend/metadata/metadata.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/backend/ptf/ptf.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/backend/stf/stf.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test_backend/common.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test_backend/protobuf.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test_backend/metadata.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test_backend/ptf.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test_backend/stf.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/bmv2.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/cmd_stepper.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/concolic.cpp
@@ -32,8 +33,8 @@ set(
 set(
   TESTGEN_GTEST_SOURCES
   ${TESTGEN_GTEST_SOURCES}
-  ${CMAKE_CURRENT_SOURCE_DIR}/test/backend/ptf.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/test/backend/stf.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test/test_backend/ptf.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/test/test_backend/stf.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test/small-step/binary.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test/small-step/unary.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test/small-step/p4_asserts_parser_test.cpp

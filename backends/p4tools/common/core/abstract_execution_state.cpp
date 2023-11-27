@@ -75,45 +75,43 @@ void AbstractExecutionState::popNamespace() { namespaces = namespaces->pop(); }
  * ========================================================================================= */
 
 std::vector<IR::StateVariable> AbstractExecutionState::getFlatFields(
-    const IR::Expression *parent, const IR::Type_StructLike *ts,
-    std::vector<IR::StateVariable> *validVector) const {
+    const IR::StateVariable &parent, std::vector<IR::StateVariable> *validVector) const {
     std::vector<IR::StateVariable> flatFields;
-    for (const auto *field : ts->fields) {
-        const auto *fieldType = resolveType(field->type);
-        if (const auto *ts = fieldType->to<IR::Type_StructLike>()) {
+    const auto *resolvedType = resolveType(parent->type);
+    if (const auto *structType = resolvedType->to<IR::Type_StructLike>()) {
+        for (const auto *field : structType->fields) {
+            const auto *fieldType = resolveType(field->type);
             auto subFields =
-                getFlatFields(new IR::Member(fieldType, parent, field->name), ts, validVector);
+                getFlatFields(new IR::Member(fieldType, parent, field->name), validVector);
             flatFields.insert(flatFields.end(), subFields.begin(), subFields.end());
-        } else if (const auto *typeStack = fieldType->to<IR::Type_Stack>()) {
-            const auto *stackElementsType = resolveType(typeStack->elementType);
-            for (size_t arrayIndex = 0; arrayIndex < typeStack->getSize(); arrayIndex++) {
-                const auto *newArr = HSIndexToMember::produceStackIndex(
-                    stackElementsType, new IR::Member(typeStack, parent, field->name), arrayIndex);
-                BUG_CHECK(stackElementsType->is<IR::Type_StructLike>(),
-                          "Try to make the flat fields for non Type_StructLike element : %1%",
-                          stackElementsType);
-                auto subFields = getFlatFields(newArr, stackElementsType->to<IR::Type_StructLike>(),
-                                               validVector);
-                flatFields.insert(flatFields.end(), subFields.begin(), subFields.end());
-            }
-        } else {
-            flatFields.push_back(new IR::Member(fieldType, parent, field->name));
         }
-    }
-    // If we are dealing with a header we also include the validity bit in the list of
-    // fields.
-    if (validVector != nullptr && ts->is<IR::Type_Header>()) {
-        validVector->push_back(ToolsVariables::getHeaderValidity(parent));
+        // If we are dealing with a header we also include the validity bit in the list of
+        // fields.
+        if (validVector != nullptr && structType->is<IR::Type_Header>()) {
+            validVector->push_back(ToolsVariables::getHeaderValidity(parent));
+        }
+    } else if (const auto *typeStack = resolvedType->to<IR::Type_Stack>()) {
+        const auto *stackElementsType = resolveType(typeStack->elementType);
+        for (size_t arrayIndex = 0; arrayIndex < typeStack->getSize(); arrayIndex++) {
+            const auto *newArr =
+                HSIndexToMember::produceStackIndex(stackElementsType, parent, arrayIndex);
+            BUG_CHECK(stackElementsType->is<IR::Type_StructLike>(),
+                      "Trying to get the flat fields for a non Type_StructLike element : %1%",
+                      stackElementsType);
+            auto subFields = getFlatFields(newArr, validVector);
+            flatFields.insert(flatFields.end(), subFields.begin(), subFields.end());
+        }
+    } else {
+        flatFields.push_back(parent);
     }
     return flatFields;
 }
 
 void AbstractExecutionState::initializeStructLike(const Target &target,
-                                                  const IR::Expression *targetVar,
+                                                  const IR::StateVariable &targetVar,
                                                   bool forceTaint) {
-    const auto *typeTarget = targetVar->type->checkedTo<IR::Type_StructLike>();
     std::vector<IR::StateVariable> flatTargetValids;
-    auto flatTargetFields = getFlatFields(targetVar, typeTarget, &flatTargetValids);
+    auto flatTargetFields = getFlatFields(targetVar, &flatTargetValids);
     for (const auto &fieldTargetValid : flatTargetValids) {
         set(fieldTargetValid, IR::getBoolLiteral(false));
     }
@@ -137,14 +135,12 @@ const IR::P4Table *AbstractExecutionState::findTable(const IR::Member *member) c
     return nullptr;
 }
 
-void AbstractExecutionState::setStructLike(const IR::Expression *targetVar,
-                                           const IR::Expression *sourceVar) {
-    const auto *typeTarget = targetVar->type->checkedTo<IR::Type_StructLike>();
-    const auto *typeSource = targetVar->type->checkedTo<IR::Type_StructLike>();
+void AbstractExecutionState::setStructLike(const IR::StateVariable &targetVar,
+                                           const IR::StateVariable &sourceVar) {
     std::vector<IR::StateVariable> flatTargetValids;
     std::vector<IR::StateVariable> flatSourceValids;
-    auto flatTargetFields = getFlatFields(targetVar, typeTarget, &flatTargetValids);
-    auto flatSourceFields = getFlatFields(sourceVar, typeSource, &flatSourceValids);
+    auto flatTargetFields = getFlatFields(targetVar, &flatTargetValids);
+    auto flatSourceFields = getFlatFields(sourceVar, &flatSourceValids);
     BUG_CHECK(flatTargetFields.size() == flatSourceFields.size(),
               "The list of target fields and the list of source fields have "
               "different sizes.");

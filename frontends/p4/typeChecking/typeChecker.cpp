@@ -159,12 +159,21 @@ Visitor::profile_t TypeInference::init_apply(const IR::Node *node) {
 }
 
 void TypeInference::end_apply(const IR::Node *node) {
-    if (readOnly && !(*node == *initialNode)) {
-        BUG("At this point in the compilation typechecking "
-            "should not infer new types anymore, but it did.");
-    }
+    BUG_CHECK(!readOnly || node == initialNode,
+              "At this point in the compilation typechecking should not infer new types anymore, "
+              "but it did.");
     typeMap->updateMap(node);
     if (node->is<IR::P4Program>()) LOG3("Typemap: " << std::endl << typeMap);
+    Transform::end_apply(node);
+}
+
+const IR::Node *TypeInference::apply_visitor(const IR::Node *orig, const char *name) {
+    const auto *transformed = Transform::apply_visitor(orig, name);
+    BUG_CHECK(!readOnly || orig == transformed,
+              "At this point in the compilation typechecking should not infer new types anymore, "
+              "but it did: node %1% changed to %2%",
+              orig, transformed);
+    return transformed;
 }
 
 TypeInference *TypeInference::clone() const {

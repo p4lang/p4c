@@ -311,7 +311,7 @@ class ComputeCallGraph : public Inspector {
         auto name = primitive->name;
         const IR::GlobalRef *glob = nullptr;
         const IR::Declaration_Instance *extrn = nullptr;
-        if (primitive->operands.size() >= 1) glob = primitive->operands[0]->to<IR::GlobalRef>();
+        if (!primitive->operands.empty()) glob = primitive->operands[0]->to<IR::GlobalRef>();
         if (glob) extrn = glob->obj->to<IR::Declaration_Instance>();
 
         if (extrn) {
@@ -327,8 +327,10 @@ class ComputeCallGraph : public Inspector {
                 ctr = gr->obj->to<IR::Counter>();
             else if (auto nr = ctrref->to<IR::PathExpression>())
                 ctr = structure->counters.get(nr->path->name);
-            if (ctr == nullptr)
+            if (ctr == nullptr) {
                 ::error(ErrorType::ERR_NOT_FOUND, "%1%: Cannot find counter", ctrref);
+                return;
+            }
             auto parent = findContext<IR::ActionFunction>();
             BUG_CHECK(parent != nullptr, "%1%: Counter call not within action", primitive);
             structure->calledCounters.calls(parent->name, ctr->name.name);
@@ -340,7 +342,10 @@ class ComputeCallGraph : public Inspector {
                 mtr = gr->obj->to<IR::Meter>();
             else if (auto nr = mtrref->to<IR::PathExpression>())
                 mtr = structure->meters.get(nr->path->name);
-            if (mtr == nullptr) ::error(ErrorType::ERR_NOT_FOUND, "%1%: Cannot find meter", mtrref);
+            if (mtr == nullptr) {
+                ::error(ErrorType::ERR_NOT_FOUND, "%1%: Cannot find meter", mtrref);
+                return;
+            }
             auto parent = findContext<IR::ActionFunction>();
             BUG_CHECK(parent != nullptr, "%1%: not within action", primitive);
             structure->calledMeters.calls(parent->name, mtr->name.name);
@@ -356,8 +361,10 @@ class ComputeCallGraph : public Inspector {
                 reg = gr->obj->to<IR::Register>();
             else if (auto nr = regref->to<IR::PathExpression>())
                 reg = structure->registers.get(nr->path->name);
-            if (reg == nullptr)
+            if (reg == nullptr) {
                 ::error(ErrorType::ERR_NOT_FOUND, "%1%: Cannot find register", regref);
+                return;
+            }
             auto parent = findContext<IR::ActionFunction>();
             BUG_CHECK(parent != nullptr, "%1%: not within action", primitive);
             structure->calledRegisters.calls(parent->name, reg->name.name);
@@ -407,11 +414,15 @@ class ComputeTableCallGraph : public Inspector {
     void postorder(const IR::Apply *apply) override {
         LOG3("Scanning " << apply->name);
         auto tbl = structure->tables.get(apply->name.name);
-        if (tbl == nullptr)
+        if (tbl == nullptr) {
             ::error(ErrorType::ERR_NOT_FOUND, "%1%: Could not find table", apply->name);
+            return;
+        }
         auto parent = findContext<IR::V1Control>();
-        if (!parent)
+        if (!parent) {
             ::error(ErrorType::ERR_UNEXPECTED, "%1%: Apply not within a control block?", apply);
+            return;
+        }
 
         auto ctrl = get(structure->tableMapping, tbl);
 
@@ -798,7 +809,7 @@ class InsertCompilerGeneratedStartState : public Transform {
 
     // rename original start state
     const IR::Node *postorder(IR::ParserState *state) override {
-        if (!structure->parserEntryPoints.size()) return state;
+        if (structure->parserEntryPoints.empty()) return state;
         if (state->name == IR::ParserState::start) {
             state->name = newStartState;
         }
@@ -807,7 +818,7 @@ class InsertCompilerGeneratedStartState : public Transform {
 
     // Rename any path refering to original start state
     const IR::Node *postorder(IR::Path *path) override {
-        if (!structure->parserEntryPoints.size()) return path;
+        if (structure->parserEntryPoints.empty()) return path;
         // At this point any identifier called start should have been renamed
         // to unique name (e.g. start_1) => we can safely assume that any
         // "start" refers to the parser state
@@ -825,7 +836,7 @@ class InsertCompilerGeneratedStartState : public Transform {
     }
 
     const IR::Node *postorder(IR::P4Parser *parser) override {
-        if (!structure->parserEntryPoints.size()) return parser;
+        if (structure->parserEntryPoints.empty()) return parser;
         IR::IndexedVector<IR::SerEnumMember> members;
         // transition to original start state
         members.push_back(new IR::SerEnumMember("START", new IR::Constant(0)));
@@ -1023,9 +1034,7 @@ class FindRecirculated : public Inspector {
     }
 
     void postorder(const IR::Primitive *primitive) override {
-        if (primitive->name == "recirculate") {
-            add(primitive, 0);
-        } else if (primitive->name == "resubmit") {
+        if (primitive->name == "recirculate" || primitive->name == "resubmit") {
             add(primitive, 0);
         } else if (primitive->name.startsWith("clone") && primitive->operands.size() == 2) {
             add(primitive, 1);

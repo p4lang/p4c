@@ -98,16 +98,16 @@ class AbstractExecutionState {
     /// {"prefix.h.ethernet.dst_address", "prefix.h.ethernet.src_address", ...}). If @arg
     /// validVector is provided, this function also collects the validity bits of the headers.
     [[nodiscard]] std::vector<IR::StateVariable> getFlatFields(
-        const IR::Expression *parent, const IR::Type_StructLike *ts,
+        const IR::StateVariable &parent,
         std::vector<IR::StateVariable> *validVector = nullptr) const;
 
     /// Initialize all the members of a struct-like object by calling the initialization function of
     /// the active target. Headers validity is set to "false".
-    void initializeStructLike(const Target &target, const IR::Expression *targetVar,
+    void initializeStructLike(const Target &target, const IR::StateVariable &targetVar,
                               bool forceTaint);
 
     /// Set the members of struct-like @target with the values of struct-like @source.
-    void setStructLike(const IR::Expression *targetVar, const IR::Expression *sourceVar);
+    void setStructLike(const IR::StateVariable &targetVar, const IR::StateVariable &sourceVar);
 
     /// Initialize a Declaration_Variable to its default value.
     /// Does not expect an initializer.

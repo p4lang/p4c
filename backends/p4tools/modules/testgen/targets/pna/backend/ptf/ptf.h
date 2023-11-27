@@ -15,14 +15,14 @@
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
+#include "backends/p4tools/modules/testgen/lib/test_framework.h"
 #include "backends/p4tools/modules/testgen/lib/test_object.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
-#include "backends/p4tools/modules/testgen/lib/tf.h"
 
 namespace P4Tools::P4Testgen::Pna {
 
 /// Extracts information from the @testSpec to emit a PTF test case.
-class PTF : public TF {
+class PTF : public TestFramework {
     /// Has the preamble been generated already?
     bool preambleEmitted = false;
 

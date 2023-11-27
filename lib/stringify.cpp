@@ -145,6 +145,7 @@ cstring vprintf_format(const char *fmt_str, va_list ap) {
     if (static_cast<size_t>(size) >= sizeof(buf)) {
         char *formatted = new char[size + 1];
         vsnprintf(formatted, size + 1, fmt_str, ap_copy);
+        va_end(ap_copy);
         return cstring::own(formatted, size);
     }
     va_end(ap_copy);

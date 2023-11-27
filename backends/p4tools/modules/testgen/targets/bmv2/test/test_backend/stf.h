@@ -1,7 +1,7 @@
-#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_BACKEND_PTF_H_
-#define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_BACKEND_PTF_H_
+#ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_TEST_BACKEND_STF_H_
+#define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_TEST_BACKEND_STF_H_
 
-#include "backends/p4tools/modules/testgen/targets/bmv2/backend/ptf/ptf.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/stf.h"
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"
 
 namespace Test {
@@ -16,10 +16,10 @@ using TableMatchMap = P4Tools::P4Testgen::TableMatchMap;
 using TableRule = P4Tools::P4Testgen::TableRule;
 using TableConfig = P4Tools::P4Testgen::TableConfig;
 using TestSpec = P4Tools::P4Testgen::TestSpec;
-using PTF = P4Tools::P4Testgen::Bmv2::PTF;
+using STF = P4Tools::P4Testgen::Bmv2::STF;
 
-/// Helper methods to build configurations for PTF Tests.
-class PTFTest : public P4ToolsTest {
+/// Helper methods to build configurations for STF Tests.
+class STFTest : public P4ToolsTest {
  public:
     TableConfig getForwardTableConfig();
     TableConfig getIPRouteTableConfig();
@@ -29,4 +29,4 @@ class PTFTest : public P4ToolsTest {
 
 }  // namespace Test
 
-#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_BACKEND_PTF_H_ */
+#endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_TEST_BACKEND_STF_H_ */

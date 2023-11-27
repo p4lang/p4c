@@ -26,13 +26,13 @@
 #include "nlohmann/json.hpp"
 
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
+#include "backends/p4tools/modules/testgen/lib/test_framework.h"
 #include "backends/p4tools/modules/testgen/lib/test_object.h"
-#include "backends/p4tools/modules/testgen/lib/tf.h"
 
 namespace P4Tools::P4Testgen::EBPF {
 
 STF::STF(std::filesystem::path basePath, std::optional<unsigned int> seed = std::nullopt)
-    : TF(std::move(basePath), seed) {}
+    : TestFramework(std::move(basePath), seed) {}
 
 inja::json STF::getControlPlane(const TestSpec *testSpec) {
     inja::json controlPlaneJson = inja::json::object();

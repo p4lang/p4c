@@ -46,7 +46,7 @@ function(validate_protobuf testfile testfolder)
   file(APPEND ${testfile} "for item in \${txtpbfiles[@]}\n")
   file(APPEND ${testfile} "do\n")
   file(APPEND ${testfile} "\techo \"Found \${item}\"\n")
-  file(APPEND ${testfile} "\tprotoc --proto_path=${CMAKE_CURRENT_LIST_DIR}/../proto --proto_path=${P4RUNTIME_STD_DIR} --proto_path=${P4C_SOURCE_DIR}/control-plane --encode=p4testgen.TestCase p4testgen.proto < \${item}\n")
+  file(APPEND ${testfile} "\t${PROTOBUF_PROTOC_EXECUTABLE} --proto_path=${CMAKE_CURRENT_LIST_DIR}/../proto --proto_path=${P4RUNTIME_STD_DIR} --proto_path=${P4C_SOURCE_DIR}/control-plane --encode=p4testgen.TestCase p4testgen.proto < \${item}\n")
   file(APPEND ${testfile} "done\n")
 endfunction(validate_protobuf)
 

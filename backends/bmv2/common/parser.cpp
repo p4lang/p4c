@@ -60,9 +60,7 @@ bool ParserConverter::isFieldExpr(const IR::Expression *expr) {
     return false;
 }
 
-cstring ParserConverter::jsonAssignment(const IR::Type *type, const IR::Expression *expr,
-                                        bool inParser) {
-    if (!inParser && type->is<IR::Type_Varbits>()) return "assign_VL";
+cstring ParserConverter::jsonAssignment(const IR::Type *type) {
     if (type->is<IR::Type_HeaderUnion>()) return "assign_union";
     if (type->is<IR::Type_Header>() || type->is<IR::Type_Struct>()) return "assign_header";
     if (auto ts = type->to<IR::Type_Stack>()) {
@@ -72,7 +70,7 @@ cstring ParserConverter::jsonAssignment(const IR::Type *type, const IR::Expressi
         else
             return "assign_header_stack";
     }
-    if (inParser && isFieldExpr(expr))
+    if (isFieldExpr(expr))
         // Unfortunately set can do some things that assign cannot,
         // e.g., handle lookahead on the RHS.
         // One limitation of set is that its LHS has to be a field expr.
@@ -143,9 +141,8 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
     }
     if (stat->is<IR::AssignmentStatement>()) {
         auto assign = stat->to<IR::AssignmentStatement>();
-        auto expr = assign->left;
-        auto type = ctxt->typeMap->getType(expr, true);
-        cstring operation = jsonAssignment(type, expr, true);
+        auto type = ctxt->typeMap->getType(assign->left, true);
+        cstring operation = jsonAssignment(type);
         result->emplace("op", operation);
         bool convertBool = type->is<IR::Type_Boolean>();
         Util::IJson *l;
