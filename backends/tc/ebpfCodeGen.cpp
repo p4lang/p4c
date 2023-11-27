@@ -527,14 +527,14 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
     cstring msgStr;
     cstring fieldName = field->name.name;
 
-    bool checkIfMACOrIPV4 = false;
+    bool noEndiannessConversion = false;
     auto annolist = field->getAnnotations()->annotations;
     for (auto anno : annolist) {
         if (anno->name != ParseTCAnnotations::tcType) continue;
         auto annoBody = anno->body;
         for (auto annoVal : annoBody) {
             if (annoVal->text == "macaddr" || annoVal->text == "ipv4") {
-                checkIfMACOrIPV4 = true;
+                noEndiannessConversion = true;
                 break;
             }
         }
@@ -567,7 +567,7 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
 
         unsigned shift = loadSize - alignment - widthToExtract;
         builder->emitIndent();
-        if (checkIfMACOrIPV4) {
+        if (noEndiannessConversion) {
             builder->appendFormat("__builtin_memcpy(&");
             visit(expr);
             builder->appendFormat(".%s, %s + BYTES(%s), %d)", fieldName,
