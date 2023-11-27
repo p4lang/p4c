@@ -18,7 +18,7 @@
 namespace P4Tools::P4Testgen::Bmv2 {
 
 PTF::PTF(std::filesystem::path basePath, std::optional<unsigned int> seed)
-    : Bmv2TF(std::move(basePath), seed) {}
+    : Bmv2TestFramework(std::move(basePath), seed) {}
 
 std::vector<std::pair<size_t, size_t>> PTF::getIgnoreMasks(const IR::Constant *mask) {
     std::vector<std::pair<size_t, size_t>> ignoreMasks;

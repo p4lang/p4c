@@ -154,7 +154,7 @@ namespace Test {
     const std::string &source,
     CompilerOptions::FrontendVersion langVersion
     /* = CompilerOptions::FrontendVersion::P4_16 */,
-    P4::ParseAnnotations parseAnnotations
+    const P4::ParseAnnotations &parseAnnotations
     /* = P4::ParseAnnotations() */) {
     auto *program = P4::parseP4String(source, langVersion);
     if (program == nullptr) {

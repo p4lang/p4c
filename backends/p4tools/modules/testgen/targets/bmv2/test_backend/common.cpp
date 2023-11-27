@@ -14,15 +14,16 @@
 #include "nlohmann/json.hpp"
 
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
-#include "backends/p4tools/modules/testgen/lib/tf.h"
+#include "backends/p4tools/modules/testgen/lib/test_framework.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-Bmv2TF::Bmv2TF(std::filesystem::path basePath, std::optional<unsigned int> seed)
-    : TF(std::move(basePath), seed) {}
+Bmv2TestFramework::Bmv2TestFramework(std::filesystem::path basePath,
+                                     std::optional<unsigned int> seed)
+    : TestFramework(std::move(basePath), seed) {}
 
-inja::json Bmv2TF::getClone(const TestObjectMap &cloneSpecs) const {
+inja::json Bmv2TestFramework::getClone(const TestObjectMap &cloneSpecs) const {
     auto cloneSpec = inja::json::object();
     auto cloneJsons = inja::json::array_t();
     auto hasClone = false;
@@ -40,7 +41,7 @@ inja::json Bmv2TF::getClone(const TestObjectMap &cloneSpecs) const {
     return cloneSpec;
 }
 
-inja::json::array_t Bmv2TF::getMeter(const TestObjectMap &meterValues) const {
+inja::json::array_t Bmv2TestFramework::getMeter(const TestObjectMap &meterValues) const {
     auto meterJson = inja::json::array_t();
     for (auto meterValueInfoTuple : meterValues) {
         const auto *meterValue = meterValueInfoTuple.second->checkedTo<Bmv2V1ModelMeterValue>();
@@ -62,7 +63,7 @@ inja::json::array_t Bmv2TF::getMeter(const TestObjectMap &meterValues) const {
     return meterJson;
 }
 
-inja::json Bmv2TF::getControlPlane(const TestSpec *testSpec) const {
+inja::json Bmv2TestFramework::getControlPlane(const TestSpec *testSpec) const {
     auto controlPlaneJson = inja::json::object();
     // Map of actionProfiles and actionSelectors for easy reference.
     std::map<cstring, cstring> apAsMap;
@@ -105,8 +106,8 @@ inja::json Bmv2TF::getControlPlane(const TestSpec *testSpec) const {
     return controlPlaneJson;
 }
 
-inja::json Bmv2TF::getControlPlaneForTable(const TableMatchMap &matches,
-                                           const std::vector<ActionArg> &args) const {
+inja::json Bmv2TestFramework::getControlPlaneForTable(const TableMatchMap &matches,
+                                                      const std::vector<ActionArg> &args) const {
     inja::json rulesJson;
 
     rulesJson["single_exact_matches"] = inja::json::array();
@@ -168,7 +169,7 @@ inja::json Bmv2TF::getControlPlaneForTable(const TableMatchMap &matches,
     return rulesJson;
 }
 
-inja::json Bmv2TF::getSend(const TestSpec *testSpec) const {
+inja::json Bmv2TestFramework::getSend(const TestSpec *testSpec) const {
     const auto *iPacket = testSpec->getIngressPacket();
     const auto *payload = iPacket->getEvaluatedPayload();
     inja::json sendJson;
@@ -179,7 +180,7 @@ inja::json Bmv2TF::getSend(const TestSpec *testSpec) const {
     return sendJson;
 }
 
-inja::json Bmv2TF::getExpectedPacket(const TestSpec *testSpec) const {
+inja::json Bmv2TestFramework::getExpectedPacket(const TestSpec *testSpec) const {
     inja::json verifyData = inja::json::object();
     auto egressPacket = testSpec->getEgressPacket();
     if (egressPacket.has_value()) {

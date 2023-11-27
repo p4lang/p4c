@@ -19,13 +19,13 @@
 #include "nlohmann/json.hpp"
 
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
-#include "backends/p4tools/modules/testgen/lib/tf.h"
+#include "backends/p4tools/modules/testgen/lib/test_framework.h"
 #include "backends/p4tools/modules/testgen/targets/pna/test_spec.h"
 
 namespace P4Tools::P4Testgen::Pna {
 
 PTF::PTF(std::filesystem::path basePath, std::optional<unsigned int> seed = std::nullopt)
-    : TF(std::move(basePath), seed) {}
+    : TestFramework(std::move(basePath), seed) {}
 
 std::vector<std::pair<size_t, size_t>> PTF::getIgnoreMasks(const IR::Constant *mask) {
     std::vector<std::pair<size_t, size_t>> ignoreMasks;

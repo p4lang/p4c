@@ -23,7 +23,7 @@
 #include "backends/p4tools/modules/testgen/lib/final_state.h"
 #include "backends/p4tools/modules/testgen/lib/logging.h"
 #include "backends/p4tools/modules/testgen/lib/packet_vars.h"
-#include "backends/p4tools/modules/testgen/lib/tf.h"
+#include "backends/p4tools/modules/testgen/lib/test_framework.h"
 #include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4Tools::P4Testgen {

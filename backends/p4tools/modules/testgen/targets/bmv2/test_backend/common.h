@@ -7,19 +7,17 @@
 
 #include <inja/inja.hpp>
 
+#include "backends/p4tools/modules/testgen/lib/test_framework.h"
 #include "backends/p4tools/modules/testgen/lib/test_object.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
-#include "backends/p4tools/modules/testgen/lib/tf.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-/// BMV2TF extends the TF (TestFramework) class.
-/// It provides common utility functions for BMv2-style test frameworks.
-/// TODO: Clean up naming, do not use TF, use "TestFramework" instead.
-class Bmv2TF : public TF {
+/// Bmv2TestFramework provides common utility functions for BMv2-style test frameworks.
+class Bmv2TestFramework : public TestFramework {
  public:
-    explicit Bmv2TF(std::filesystem::path basePath,
-                    std::optional<unsigned int> seed = std::nullopt);
+    explicit Bmv2TestFramework(std::filesystem::path basePath,
+                               std::optional<unsigned int> seed = std::nullopt);
 
  protected:
     /// Converts all the control plane objects into Inja format.

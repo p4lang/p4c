@@ -82,8 +82,9 @@ struct AutoCompileContext {
 /// BaseCompileContext.
 class BaseCompileContext : public ICompileContext {
  protected:
-    BaseCompileContext();
-    BaseCompileContext(const BaseCompileContext &other);
+    BaseCompileContext() = default;
+    BaseCompileContext(const BaseCompileContext &other) = default;
+    BaseCompileContext &operator=(const BaseCompileContext &other) = default;
 
  public:
     /// @return the current compilation context, which must inherit from
