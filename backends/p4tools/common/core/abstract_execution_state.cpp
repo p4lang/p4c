@@ -122,8 +122,8 @@ std::vector<const IR::Expression *> AbstractExecutionState::flattenComplexExpres
             auto subList = flattenComplexExpression(listElem->expression, flatValids);
             exprList.insert(exprList.end(), subList.begin(), subList.end());
         }
-        if (auto richStructExpr = structExpr->to<IR::HeaderExpression>()) {
-            flatValids.emplace_back(richStructExpr->validity);
+        if (auto headerExpr = structExpr->to<IR::HeaderExpression>()) {
+            flatValids.emplace_back(headerExpr->validity);
         }
     } else if (const auto *headerStackExpr = inputExpression->to<IR::HeaderStackExpression>()) {
         for (const auto *headerStackElem : headerStackExpr->components) {
@@ -189,19 +189,15 @@ void AbstractExecutionState::assignStructLike(const IR::StateVariable &left,
         std::vector<const IR::Expression *> flatRightValids;
         auto flatTargetFields = getFlatFields(left, &flatLeftValids);
         auto flatStructFields = flattenComplexExpression(structExpr, flatRightValids);
-        auto flatTargetSize = flatTargetFields.size();
-        auto flatStructSize = flatStructFields.size();
-        BUG_CHECK(flatTargetSize == flatStructSize,
+        BUG_CHECK(flatTargetFields.size() == flatStructFields.size(),
                   "The size of target fields (%1%) and the size of source fields (%2%) are "
                   "different.",
-                  flatTargetSize, flatStructSize);
-        auto flatLeftValidSize = flatLeftValids.size();
-        auto flatRightValidSize = flatRightValids.size();
+                  flatTargetFields.size(), flatStructFields.size());
         BUG_CHECK(
-            flatLeftValidSize == flatRightValidSize,
+            flatLeftValids.size() == flatRightValids.size(),
             "The size of target valid fields (%1%) and the size of source valid fields (%2%) are "
             "different.",
-            flatLeftValidSize, flatRightValidSize);
+            flatLeftValids.size(), flatRightValids.size());
         // First, complete the validity assignments for the data structure.
         for (size_t idx = 0; idx < flatLeftValids.size(); ++idx) {
             const auto &flatLeftValidRef = flatLeftValids[idx];

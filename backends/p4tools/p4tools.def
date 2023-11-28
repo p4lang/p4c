@@ -248,9 +248,12 @@ class HeaderExpression : StructExpression {
     Expression validity;
 
     dbprint {
-        out << "(" << validity << "){" << IndentCtl::indent;
-        for (auto &field : components) out << Log::endl << field << ';';
-        out << " }" << IndentCtl::unindent;
+        out <<"{" << Log::endl << IndentCtl::indent;
+        out << "$headerValid:" << validity <<";" << Log::endl;
+        for (auto &field : components) {
+            out << Log::endl << field << ';';
+        }
+        out << Log::endl << IndentCtl::unindent << "}";
     }
 
     validate {
