@@ -150,8 +150,8 @@ struct local_metadata_t {
 
 parser ParserImpl(packet_in packet, out parsed_headers_t hdr, inout local_metadata_t local_meta, inout standard_metadata_t std_meta) {
     @name("ParserImpl.gtpu") gtpu_t gtpu_0;
-    @name("ParserImpl.gtpu_ext_len") bit<8> gtpu_ext_len_0;
     bit<64> tmp;
+    bit<8> tmp_0;
     state start {
         transition select(std_meta.ingress_port) {
             9w255: parse_packet_out;
@@ -219,8 +219,8 @@ parser ParserImpl(packet_in packet, out parsed_headers_t hdr, inout local_metada
     }
     state parse_gtpu_options {
         packet.extract<gtpu_options_t>(hdr.gtpu_options);
-        gtpu_ext_len_0 = packet.lookahead<bit<8>>();
-        transition select(hdr.gtpu_options.next_ext, gtpu_ext_len_0) {
+        tmp_0 = packet.lookahead<bit<8>>();
+        transition select(hdr.gtpu_options.next_ext, tmp_0) {
             (8w0x85, 8w1): parse_gtpu_ext_psc;
             default: accept;
         }
