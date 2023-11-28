@@ -43,7 +43,7 @@ class ParserConverter : public Inspector {
     Util::IJson *convertPathExpression(const IR::PathExpression *expr);
     Util::IJson *createDefaultTransition();
     bool isFieldExpr(const IR::Expression *expr);
-    cstring jsonAssignment(const IR::Type *type);
+    cstring jsonAssignment(const IR::Type *type, const IR::Expression *expr);
     std::vector<Util::IJson *> convertSelectExpression(const IR::SelectExpression *expr);
     void addValueSets(const IR::P4Parser *parser);
 

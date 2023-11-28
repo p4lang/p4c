@@ -1,0 +1,2 @@
+packet 0  DEADBEEF
+expect 0  00010203 DEDEDEDE DEADBEEF $

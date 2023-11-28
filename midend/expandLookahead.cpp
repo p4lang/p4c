@@ -18,6 +18,7 @@ limitations under the License.
 
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
+#include "midend/interpreter.h"
 
 namespace P4 {
 
@@ -78,7 +79,7 @@ DoExpandLookahead::ExpansionInfo *DoExpandLookahead::convertLookahead(
               em->method);
     auto targ = expression->typeArguments->at(0);
     auto typearg = typeMap->getTypeType(targ, true);
-    if (!typearg->is<IR::Type_StructLike>() && !typearg->is<IR::Type_Tuple>()) return nullptr;
+    if (!SymbolicValueFactory(typeMap).isFixedWidth(typearg)) return nullptr;
 
     if (typearg->is<IR::Type_Header>() && !expandHeader) return nullptr;
 

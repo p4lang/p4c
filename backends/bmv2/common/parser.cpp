@@ -49,18 +49,16 @@ field_expr
 */
 bool ParserConverter::isFieldExpr(const IR::Expression *expr) {
     if (expr->is<IR::PathExpression>()) return true;
-    if (expr->is<IR::Member>()) {
-        auto member = expr->to<IR::Member>();
+    if (auto member = expr->to<IR::Member>()) {
         return isFieldExpr(member->expr);
     }
-    if (expr->is<IR::ArrayIndex>()) {
-        auto array_index = expr->to<IR::ArrayIndex>();
+    if (auto array_index = expr->to<IR::ArrayIndex>()) {
         return isFieldExpr(array_index->left) && array_index->right->is<IR::Constant>();
     }
     return false;
 }
 
-cstring ParserConverter::jsonAssignment(const IR::Type *type) {
+cstring ParserConverter::jsonAssignment(const IR::Type *type, const IR::Expression *expr) {
     if (type->is<IR::Type_HeaderUnion>()) return "assign_union";
     if (type->is<IR::Type_Header>() || type->is<IR::Type_Struct>()) return "assign_header";
     if (auto ts = type->to<IR::Type_Stack>()) {
@@ -71,9 +69,13 @@ cstring ParserConverter::jsonAssignment(const IR::Type *type) {
             return "assign_header_stack";
     }
     if (isFieldExpr(expr))
-        // Unfortunately set can do some things that assign cannot,
-        // e.g., handle lookahead on the RHS.
-        // One limitation of set is that its LHS has to be a field expr.
+        // Unlike "assign", "set" is implemented more efficiently in bmv2, and can handle a
+        // lookahead expression as the RHS. However, "set" requires its LHS to be a field
+        // expression.
+        // The RemoveComplexExpressions pass guarantees that all lookahead() expressions are lifted
+        // into tmp = lookahead(). Therefore, we are guaranteed that anytime the RHS includes a
+        // lookahead, it will be a bare lookahead call and the LHS will be a simple field
+        // expression. These assignments will be handled by this if branch, using "set".
         return "set";
     else
         return "assign";
@@ -141,8 +143,9 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
     }
     if (stat->is<IR::AssignmentStatement>()) {
         auto assign = stat->to<IR::AssignmentStatement>();
-        auto type = ctxt->typeMap->getType(assign->left, true);
-        cstring operation = jsonAssignment(type);
+        auto expr = assign->left;
+        auto type = ctxt->typeMap->getType(expr, true);
+        cstring operation = jsonAssignment(type, expr);
         result->emplace("op", operation);
         bool convertBool = type->is<IR::Type_Boolean>();
         Util::IJson *l;
