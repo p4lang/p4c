@@ -115,6 +115,9 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
             bool convertBool = type->is<IR::Type_Boolean>();
             Util::IJson *left;
             if (ctxt->conv->isArrayIndexRuntime(l)) {
+                // This is needed to deal with the case when a runtime index is a left value and is
+                // the only expression in JSON (without any other arithmetic operations). The JSON
+                // format needs an extra wrapping "type": "expression".
                 left = ctxt->conv->convert(l, true, true, convertBool);
             } else {
                 left = ctxt->conv->convertLeftValue(l);

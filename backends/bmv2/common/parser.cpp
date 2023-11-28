@@ -150,6 +150,9 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
         bool convertBool = type->is<IR::Type_Boolean>();
         Util::IJson *l;
         if (ctxt->conv->isArrayIndexRuntime(assign->left)) {
+            // This is needed to deal with the case when a runtime index is a left value and is
+            // the only expression in JSON (without any other arithmetic operations). The JSON
+            // format needs an extra wrapping "type": "expression".
             l = ctxt->conv->convert(assign->left, true, true, convertBool);
         } else {
             l = ctxt->conv->convertLeftValue(assign->left);
