@@ -17,6 +17,7 @@ struct main_metadata_t {
 	bit<32> pna_main_input_metadata_input_port
 	bit<8> local_metadata_f1
 	bit<32> pna_main_output_metadata_output_port
+	bit<8> MainParserT_parser_tmp
 }
 metadata instanceof main_metadata_t
 
