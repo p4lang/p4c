@@ -330,6 +330,7 @@ class DeparserHdrEmitTranslatorPNA : public EBPF::DeparserPrepareBufferTranslato
     void processMethod(const P4::ExternMethod *method) override;
     void emitField(EBPF::CodeBuilder *builder, cstring field, const IR::Expression *hdrExpr,
                    unsigned alignment, EBPF::EBPFType *type, bool isMAC);
+    cstring GetVariableName(cstring keyname);
 };
 
 }  // namespace TC

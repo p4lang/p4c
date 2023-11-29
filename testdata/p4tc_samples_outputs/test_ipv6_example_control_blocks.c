@@ -142,16 +142,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
 ;        if (hdr->ipv6.ebpf_valid) {
             outHeaderLength += 320;
         }
-;
-        int outHeaderOffset = BYTES(outHeaderLength) - BYTES(ebpf_packetOffsetInBits);
-        if (outHeaderOffset != 0) {
-            int returnCode = 0;
-            returnCode = bpf_skb_adjust_room(skb, outHeaderOffset, 1, 0);
-            if (returnCode) {
-                return TC_ACT_SHOT;
-            }
-        }
-        pkt = ((void*)(long)skb->data);
+;        pkt = ((void*)(long)skb->data);
         ebpf_packetEnd = ((void*)(long)skb->data_end);
         ebpf_packetOffsetInBits = 0;
         if (hdr->ethernet.ebpf_valid) {
@@ -326,14 +317,7 @@ int tc_ingress_func(struct __sk_buff *skb) {
     struct hdr_md *hdrMd;
     struct headers_t *hdr;
     int ret = -1;
-    int i;
-    #pragma clang loop unroll(disable)
     ret = process(skb, (struct headers_t *) hdr, compiler_meta__);
-    if (compiler_meta__->drop == 1) {
-        break;
-    }
-
-    compiler_meta__->recirculated = (i > 0);
     if (ret != -1) {
         return ret;
     }

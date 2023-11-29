@@ -31,8 +31,8 @@ header ipv6_t {
     bit<16>  payloadLength;
     bit<8>   nextHeader;
     bit<8>   hopLimit;
-    bit<128> srcAddr;
-    bit<128> dstAddr;
+    @tc_type ("ipv6") bit<128> srcAddr;
+    @tc_type ("ipv6") bit<128> dstAddr;
 }
 
 //////////////////////////////////////////////////////////////////////

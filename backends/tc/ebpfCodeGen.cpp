@@ -312,11 +312,6 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
         builder->appendFormat("int ret = %d;", actUnspecCode);
         builder->newline();
         builder->emitIndent();
-        builder->appendFormat("int i;");
-        builder->newline();
-        builder->emitIndent();
-        builder->appendLine("#pragma clang loop unroll(disable)");
-        builder->emitIndent();
         builder->appendFormat("ret = %s(skb, ", func_name);
 
         builder->appendFormat("(%s %s *) %s, %s);",
@@ -324,15 +319,6 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
                               parser->headerType->to<EBPF::EBPFStructType>()->name,
                               parser->headers->name.name, compilerGlobalMetadata);
 
-        builder->newline();
-        builder->appendFormat(
-            "    if (%s->drop == 1) {\n"
-            "        break;\n"
-            "    }\n",
-            compilerGlobalMetadata);
-        builder->newline();
-        builder->emitIndent();
-        builder->appendFormat("%s->recirculated = (i > 0);", compilerGlobalMetadata);
         builder->newline();
         builder->emitIndent();
         builder->appendFormat(
@@ -533,7 +519,7 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
         if (anno->name != ParseTCAnnotations::tcType) continue;
         auto annoBody = anno->body;
         for (auto annoVal : annoBody) {
-            if (annoVal->text == "macaddr" || annoVal->text == "ipv4") {
+            if (annoVal->text == "macaddr" || annoVal->text == "ipv4" || annoVal->text == "ipv6") {
                 noEndiannessConversion = true;
                 break;
             }
@@ -971,8 +957,6 @@ void IngressDeparserPNA::emit(EBPF::CodeBuilder *builder) {
     prepareBufferTranslator->copyPointerVariables(codeGen);
     prepareBufferTranslator->substitute(this->headers, this->parserHeaders);
     controlBlock->container->body->apply(*prepareBufferTranslator);
-
-    emitBufferAdjusts(builder);
 
     builder->emitIndent();
     builder->appendFormat("%s = %s;", program->packetStartVar,
@@ -1529,6 +1513,13 @@ DeparserHdrEmitTranslatorPNA::DeparserHdrEmitTranslatorPNA(const EBPF::EBPFDepar
     setName("DeparserHdrEmitTranslatorPNA");
 }
 
+cstring DeparserHdrEmitTranslatorPNA::GetVariableName(cstring keyname) {
+    const char *strToken = keyname.findlast('.');
+    if (strToken != nullptr) {
+        return cstring(strToken + 1);
+    }
+    return keyname;
+}
 void DeparserHdrEmitTranslatorPNA::processMethod(const P4::ExternMethod *method) {
     // This method handles packet_out.emit() only and is intended to skip other externs
     if (method->method->name.name == p4lib.packetOut.emit.name) {
@@ -1578,19 +1569,19 @@ void DeparserHdrEmitTranslatorPNA::processMethod(const P4::ExternMethod *method)
                             "Only headers with fixed widths supported %1%", f);
                     return;
                 }
-                bool checkIfMAC = false;
-                auto annolist = f->getAnnotations()->annotations;
-                for (auto anno : annolist) {
+                bool noEndiannessConversion = false;
+                auto annotations = f->getAnnotations()->annotations;
+                for (auto anno : annotations) {
                     if (anno->name != ParseTCAnnotations::tcType) continue;
-                    auto annoBody = anno->body;
-                    for (auto annoVal : annoBody) {
-                        if (annoVal->text == "macaddr") {
-                            checkIfMAC = true;
+                    for (auto annoVal : anno->body) {
+                        if (annoVal->text == "macaddr" || annoVal->text == "ipv4" ||
+                            annoVal->text == "ipv6") {
+                            noEndiannessConversion = true;
                             break;
                         }
                     }
                 }
-                emitField(builder, f->name, expr, alignment, etype, checkIfMAC);
+                emitField(builder, f->name, expr, alignment, etype, noEndiannessConversion);
                 alignment += et->widthInBits();
                 alignment %= 8;
             }
@@ -1603,7 +1594,7 @@ void DeparserHdrEmitTranslatorPNA::processMethod(const P4::ExternMethod *method)
 
 void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring field,
                                              const IR::Expression *hdrExpr, unsigned int alignment,
-                                             EBPF::EBPFType *type, bool isMAC) {
+                                             EBPF::EBPFType *type, bool noEndiannessConversion) {
     auto program = deparser->program;
 
     auto et = dynamic_cast<EBPF::IHasWidth *>(type);
@@ -1650,7 +1641,7 @@ void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring
     unsigned shift =
         widthToEmit < 8 ? (emitSize - alignment - widthToEmit) : (emitSize - widthToEmit);
 
-    if (!swap.isNullOrEmpty() && !isMAC) {
+    if (!swap.isNullOrEmpty() && !noEndiannessConversion) {
         builder->emitIndent();
         visit(hdrExpr);
         builder->appendFormat(".%s = %s(", field, swap);
