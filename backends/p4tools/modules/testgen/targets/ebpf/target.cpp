@@ -15,6 +15,7 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/lib/util.h"
 #include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/cmd_stepper.h"
 #include "backends/p4tools/modules/testgen/targets/ebpf/expr_stepper.h"
@@ -41,8 +42,7 @@ const EBPFProgramInfo *EBPFTestgenTarget::initProgramImpl(
     // The blocks in the main declaration are just the arguments in the constructor call.
     // Convert mainDecl->arguments into a vector of blocks, represented as constructor-call
     // expressions.
-    std::vector<const IR::Type_Declaration *> blocks;
-    argumentsToTypeDeclarations(program, mainDecl->arguments, blocks);
+    const auto blocks = argumentsToTypeDeclarations(program, mainDecl->arguments);
 
     // We should have six arguments.
     BUG_CHECK(blocks.size() == 2, "%1%: The EBPF architecture requires 2 blocks. Received %2%.",

@@ -13,6 +13,7 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/lib/util.h"
 #include "backends/p4tools/modules/testgen/targets/pna/dpdk/cmd_stepper.h"
 #include "backends/p4tools/modules/testgen/targets/pna/dpdk/expr_stepper.h"
 #include "backends/p4tools/modules/testgen/targets/pna/dpdk/program_info.h"
@@ -38,8 +39,7 @@ const PnaDpdkProgramInfo *PnaDpdkTestgenTarget::initProgramImpl(
     // The blocks in the main declaration are just the arguments in the constructor call.
     // Convert mainDecl->arguments into a vector of blocks, represented as constructor-call
     // expressions.
-    std::vector<const IR::Type_Declaration *> blocks;
-    argumentsToTypeDeclarations(program, mainDecl->arguments, blocks);
+    const auto blocks = argumentsToTypeDeclarations(program, mainDecl->arguments);
 
     // We should have six arguments.
     BUG_CHECK(blocks.size() == 4, "%1%: The PNA architecture requires 4 pipes. Received %2%.",

@@ -39,6 +39,7 @@ set(
   lib/test_backend.cpp
   lib/test_framework.cpp
   lib/test_spec.cpp
+  lib/util.cpp
 )
 
 # GTest source files for p4testgen.

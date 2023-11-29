@@ -14,6 +14,7 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/lib/util.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/cmd_stepper.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/constants.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/expr_stepper.h"
@@ -40,8 +41,7 @@ const Bmv2V1ModelProgramInfo *Bmv2V1ModelTestgenTarget::initProgramImpl(
     // The blocks in the main declaration are just the arguments in the constructor call.
     // Convert mainDecl->arguments into a vector of blocks, represented as constructor-call
     // expressions.
-    std::vector<const IR::Type_Declaration *> blocks;
-    argumentsToTypeDeclarations(program, mainDecl->arguments, blocks);
+    const auto blocks = argumentsToTypeDeclarations(program, mainDecl->arguments);
 
     // We should have six arguments.
     BUG_CHECK(blocks.size() == 6, "%1%: The BMV2 architecture requires 6 pipes. Received %2%.",
