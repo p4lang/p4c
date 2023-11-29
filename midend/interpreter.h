@@ -78,8 +78,6 @@ class SymbolicValueFactory {
         CHECK_NULL(typeMap);
     }
     SymbolicValue *create(const IR::Type *type, bool uninitialized) const;
-    // True if type has a fixed width, i.e., it does not contain a Varbit.
-    bool isFixedWidth(const IR::Type *type) const;
     // If type has a fixed width return width in bits.
     // varbit types are assumed to have width 0 when counting.
     // Does not count the size for the "valid" bit for headers.

@@ -46,6 +46,28 @@ bool TypeMap::typeIsEmpty(const IR::Type *type) const {
     return false;
 }
 
+bool TypeMap::typeIsFixedWidth(const IR::Type *type) const {
+    type = this->getTypeType(type, true);
+    if (type->is<IR::Type_Varbits>()) return false;
+    if (type->is<IR::Type_Extern>()) return false;
+    if (type->is<IR::Type_Stack>())
+        return typeIsFixedWidth(type->to<IR::Type_Stack>()->elementType);
+    if (type->is<IR::Type_StructLike>()) {
+        auto st = type->to<IR::Type_StructLike>();
+        for (auto f : st->fields)
+            if (!typeIsFixedWidth(f->type)) return false;
+        return true;
+    }
+    if (type->is<IR::Type_Tuple>()) {
+        auto tt = type->to<IR::Type_Tuple>();
+        for (auto f : tt->components) {
+            if (!typeIsFixedWidth(f)) return false;
+        }
+        return true;
+    }
+    return true;
+}
+
 void TypeMap::dbprint(std::ostream &out) const {
     out << "TypeMap for " << dbp(program) << std::endl;
     for (auto it : typeMap) out << "\t" << dbp(it.first) << "->" << dbp(it.second) << std::endl;

@@ -108,6 +108,8 @@ class TypeMap final : public ProgramMap {
 
     /// True is type occupies no storage.
     bool typeIsEmpty(const IR::Type *type) const;
+    /// True if type has a fixed width, i.e., it does not contain a Varbit.
+    bool typeIsFixedWidth(const IR::Type *type) const;
 };
 }  // namespace P4
 

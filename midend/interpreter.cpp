@@ -52,27 +52,6 @@ SymbolicValue *SymbolicValueFactory::create(const IR::Type *type, bool uninitial
     BUG("%1%: unexpected type", type);
 }
 
-bool SymbolicValueFactory::isFixedWidth(const IR::Type *type) const {
-    type = typeMap->getTypeType(type, true);
-    if (type->is<IR::Type_Varbits>()) return false;
-    if (type->is<IR::Type_Extern>()) return false;
-    if (type->is<IR::Type_Stack>()) return isFixedWidth(type->to<IR::Type_Stack>()->elementType);
-    if (type->is<IR::Type_StructLike>()) {
-        auto st = type->to<IR::Type_StructLike>();
-        for (auto f : st->fields)
-            if (!isFixedWidth(f->type)) return false;
-        return true;
-    }
-    if (type->is<IR::Type_Tuple>()) {
-        auto tt = type->to<IR::Type_Tuple>();
-        for (auto f : tt->components) {
-            if (!isFixedWidth(f)) return false;
-        }
-        return true;
-    }
-    return true;
-}
-
 unsigned SymbolicValueFactory::getWidth(const IR::Type *type) const {
     type = typeMap->getTypeType(type, true);
     if (type->is<IR::Type_Bits>()) return type->to<IR::Type_Bits>()->size;
@@ -1093,7 +1072,7 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression *expression) 
                 auto arg0 = expression->arguments->at(0);
                 auto argType = typeMap->getType(arg0, true);
                 auto hdr = get(arg0->expression);
-                bool fixed = factory->isFixedWidth(argType);
+                bool fixed = typeMap->typeIsFixedWidth(argType);
                 unsigned width = factory->getWidth(argType);
                 // For variable-sized objects width is the "minimum" width.
 
