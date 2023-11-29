@@ -64,6 +64,7 @@ int xdp_func(struct xdp_md *skb) {
 }
 static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr, struct pna_global_metadata *compiler_meta__)
 {
+    struct hdr_md *hdrMd;
     unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
     ParserError_t ebpf_errorCode = NoError;
     void* pkt = ((void*)(long)skb->data);
@@ -74,7 +75,6 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
     u32 pkt_len = skb->len;
 
     struct main_metadata_t *user_meta;
-    struct hdr_md *hdrMd;
     hdrMd = BPF_MAP_LOOKUP_ELEM(hdr_md_cpumap, &ebpf_zero);
     if (!hdrMd)
         return TC_ACT_SHOT;
@@ -151,16 +151,7 @@ if (/* hdr->ipv4.isValid() */
 ;        if (hdr->ipv4.ebpf_valid) {
             outHeaderLength += 160;
         }
-;
-        int outHeaderOffset = BYTES(outHeaderLength) - BYTES(ebpf_packetOffsetInBits);
-        if (outHeaderOffset != 0) {
-            int returnCode = 0;
-            returnCode = bpf_skb_adjust_room(skb, outHeaderOffset, 1, 0);
-            if (returnCode) {
-                return TC_ACT_SHOT;
-            }
-        }
-        pkt = ((void*)(long)skb->data);
+;        pkt = ((void*)(long)skb->data);
         ebpf_packetEnd = ((void*)(long)skb->data_end);
         ebpf_packetOffsetInBits = 0;
         if (hdr->ethernet.ebpf_valid) {
@@ -264,7 +255,6 @@ if (/* hdr->ipv4.isValid() */
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
             ebpf_packetOffsetInBits += 16;
 
-            hdr->ipv4.srcAddr = htonl(hdr->ipv4.srcAddr);
             ebpf_byte = ((char*)(&hdr->ipv4.srcAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ipv4.srcAddr))[1];
@@ -275,7 +265,6 @@ if (/* hdr->ipv4.isValid() */
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
             ebpf_packetOffsetInBits += 32;
 
-            hdr->ipv4.dstAddr = htonl(hdr->ipv4.dstAddr);
             ebpf_byte = ((char*)(&hdr->ipv4.dstAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ipv4.dstAddr))[1];
@@ -289,7 +278,6 @@ if (/* hdr->ipv4.isValid() */
         }
 ;
     }
-    hdrMd->ebpf_packetOffsetInBits = ebpf_packetOffsetInBits
     return -1;
 }
 SEC("classifier/tc-ingress")
@@ -310,16 +298,7 @@ int tc_ingress_func(struct __sk_buff *skb) {
     struct hdr_md *hdrMd;
     struct headers_t *hdr;
     int ret = -1;
-    int i;
-    #pragma clang loop unroll(disable)
-    for (i = 0; i < 4; i++) {
-        ret = process(skb, (struct headers_t *) hdr, compiler_meta__);
-        if (compiler_meta__->drop == 1) {
-            break;
-        }
-    }
-
-    compiler_meta__->recirculated = (i > 0);
+    ret = process(skb, (struct headers_t *) hdr, compiler_meta__);
     if (ret != -1) {
         return ret;
     }

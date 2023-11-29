@@ -1,5 +1,5 @@
 
-#include "size_param_example_parser.h"
+#include "matchtype_parser.h"
 #include <stdbool.h>
 #include <linux/if_ether.h>
 #include "pna.h"
@@ -32,18 +32,63 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_key {
     u32 maskid;
     u32 field0; /* hdr.ipv4.dstAddr */
     u32 field1; /* hdr.ipv4.srcAddr */
-    u8 field2; /* hdr.ipv4.flags */
+    u8 field2; /* hdr.ipv4.protocol */
 } __attribute__((aligned(4)));
-#define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_SENDTOPORT 3
-#define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP 4
+#define MAX_MAINCONTROLIMPL_IPV4_TBL_2_KEY_MASKS 128
+struct MainControlImpl_ipv4_tbl_2_key_mask {
+    __u8 mask[sizeof(struct MainControlImpl_ipv4_tbl_2_key)];
+} __attribute__((aligned(4)));
+#define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_NEXT_HOP 1
+#define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP 3
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_value {
+    unsigned int action;
+    __u32 priority;
+    union {
+        struct {
+        } _NoAction;
+        struct __attribute__((__packed__)) {
+            u32 vport;
+        } MainControlImpl_next_hop;
+        struct {
+        } MainControlImpl_drop;
+    } u;
+};
+struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_3_key {
+    u32 keysz;
+    u32 maskid;
+    u32 field0; /* hdr.ipv4.srcAddr */
+} __attribute__((aligned(4)));
+#define MAINCONTROLIMPL_IPV4_TBL_3_ACT_MAINCONTROLIMPL_NEXT_HOP 1
+#define MAINCONTROLIMPL_IPV4_TBL_3_ACT_MAINCONTROLIMPL_DROP 3
+struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_3_value {
     unsigned int action;
     union {
         struct {
         } _NoAction;
         struct __attribute__((__packed__)) {
             u32 vport;
-        } MainControlImpl_sendtoport;
+        } MainControlImpl_next_hop;
+        struct {
+        } MainControlImpl_drop;
+    } u;
+};
+struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_4_key {
+    u32 keysz;
+    u32 maskid;
+    u32 field0; /* hdr.ipv4.dstAddr */
+    u32 field1; /* hdr.ipv4.srcAddr */
+    u8 field2; /* hdr.ipv4.protocol */
+} __attribute__((aligned(4)));
+#define MAINCONTROLIMPL_IPV4_TBL_4_ACT_MAINCONTROLIMPL_NEXT_HOP 1
+#define MAINCONTROLIMPL_IPV4_TBL_4_ACT_MAINCONTROLIMPL_DROP 3
+struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_4_value {
+    unsigned int action;
+    union {
+        struct {
+        } _NoAction;
+        struct __attribute__((__packed__)) {
+            u32 vport;
+        } MainControlImpl_next_hop;
         struct {
         } MainControlImpl_drop;
     } u;
@@ -161,10 +206,10 @@ if (/* hdr->ipv4.isValid() */
                         .tblid = 2
                     };
                     struct MainControlImpl_ipv4_tbl_2_key key = {};
-                    key.keysz = 67;
+                    key.keysz = 72;
                     key.field0 = hdr->ipv4.dstAddr;
                     key.field1 = hdr->ipv4.srcAddr;
-                    key.field2 = hdr->ipv4.flags;
+                    key.field2 = hdr->ipv4.protocol;
                     struct p4tc_table_entry_act_bpf *act_bpf;
                     /* value */
                     struct MainControlImpl_ipv4_tbl_2_value *value = NULL;
@@ -180,14 +225,110 @@ if (/* hdr->ipv4.isValid() */
                     if (value != NULL) {
                         /* run action */
                         switch (value->action) {
-                            case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_SENDTOPORT: 
+                            case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_NEXT_HOP: 
                                 {
-/* send_to_port(value->u.MainControlImpl_sendtoport.vport) */
+/* send_to_port(value->u.MainControlImpl_next_hop.vport) */
                                     compiler_meta__->drop = false;
-                                    send_to_port(value->u.MainControlImpl_sendtoport.vport);
+                                    send_to_port(value->u.MainControlImpl_next_hop.vport);
                                 }
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP: 
+                                {
+/* drop_packet() */
+                                    drop_packet();
+                                }
+                                break;
+                            default:
+                                return TC_ACT_SHOT;
+                        }
+                    } else {
+                        return TC_ACT_SHOT;
+;
+                    }
+                }
+;
+                /* ipv4_tbl_5.apply() */
+                {
+                    /* construct key */
+                    struct p4tc_table_entry_act_bpf_params__local params = {
+                        .pipeid = 1,
+                        .tblid = 3
+                    };
+                    struct MainControlImpl_ipv4_tbl_3_key key = {};
+                    key.keysz = 32;
+                    key.field0 = hdr->ipv4.srcAddr;
+                    struct p4tc_table_entry_act_bpf *act_bpf;
+                    /* value */
+                    struct MainControlImpl_ipv4_tbl_3_value *value = NULL;
+                    /* perform lookup */
+                    act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
+                    value = (struct MainControlImpl_ipv4_tbl_3_value *)act_bpf;
+                    if (value == NULL) {
+                        /* miss; find default action */
+                        hit = 0;
+                    } else {
+                        hit = 1;
+                    }
+                    if (value != NULL) {
+                        /* run action */
+                        switch (value->action) {
+                            case MAINCONTROLIMPL_IPV4_TBL_3_ACT_MAINCONTROLIMPL_NEXT_HOP: 
+                                {
+/* send_to_port(value->u.MainControlImpl_next_hop.vport) */
+                                    compiler_meta__->drop = false;
+                                    send_to_port(value->u.MainControlImpl_next_hop.vport);
+                                }
+                                break;
+                            case MAINCONTROLIMPL_IPV4_TBL_3_ACT_MAINCONTROLIMPL_DROP: 
+                                {
+/* drop_packet() */
+                                    drop_packet();
+                                }
+                                break;
+                            default:
+                                return TC_ACT_SHOT;
+                        }
+                    } else {
+                        return TC_ACT_SHOT;
+;
+                    }
+                }
+;
+                /* ipv4_tbl_6.apply() */
+                {
+                    /* construct key */
+                    struct p4tc_table_entry_act_bpf_params__local params = {
+                        .pipeid = 1,
+                        .tblid = 4
+                    };
+                    struct MainControlImpl_ipv4_tbl_4_key key = {};
+                    key.keysz = 72;
+                    key.field0 = hdr->ipv4.dstAddr;
+                    key.field1 = hdr->ipv4.srcAddr;
+                    key.field2 = (hdr->ipv4.protocol);
+                    struct p4tc_table_entry_act_bpf *act_bpf;
+                    /* value */
+                    struct MainControlImpl_ipv4_tbl_4_value *value = NULL;
+                    /* perform lookup */
+                    act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
+                    value = (struct MainControlImpl_ipv4_tbl_4_value *)act_bpf;
+                    if (value == NULL) {
+                        /* miss; find default action */
+                        hit = 0;
+                    } else {
+                        hit = 1;
+                    }
+                    if (value != NULL) {
+                        /* run action */
+                        switch (value->action) {
+                            case MAINCONTROLIMPL_IPV4_TBL_4_ACT_MAINCONTROLIMPL_NEXT_HOP: 
+                                {
+/* send_to_port(value->u.MainControlImpl_next_hop.vport) */
+                                    compiler_meta__->drop = false;
+                                    send_to_port(value->u.MainControlImpl_next_hop.vport);
+                                }
+                                break;
+                            case MAINCONTROLIMPL_IPV4_TBL_4_ACT_MAINCONTROLIMPL_DROP: 
                                 {
 /* drop_packet() */
                                     drop_packet();

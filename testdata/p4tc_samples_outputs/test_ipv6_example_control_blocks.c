@@ -1,5 +1,5 @@
 
-#include "global_action_example_01_parser.h"
+#include "test_ipv6_example_parser.h"
 #include <stdbool.h>
 #include <linux/if_ether.h>
 #include "pna.h"
@@ -8,45 +8,20 @@ struct internal_metadata {
 } __attribute__((aligned(4)));
 
 
-struct __attribute__((__packed__)) ingress_nh_table2_key {
+struct __attribute__((__packed__)) MainControlImpl_tbl_default_key {
     u32 keysz;
     u32 maskid;
-    u32 field0; /* hdr.ipv4.srcAddr */
+    u8 field0[16]; /* hdr.ipv6.srcAddr */
 } __attribute__((aligned(4)));
-#define INGRESS_NH_TABLE2_ACT_INGRESS_SEND_NH 2
-#define INGRESS_NH_TABLE2_ACT_INGRESS_DROP 3
-struct __attribute__((__packed__)) ingress_nh_table2_value {
+#define MAINCONTROLIMPL_TBL_DEFAULT_ACT_MAINCONTROLIMPL_SET_DST 1
+struct __attribute__((__packed__)) MainControlImpl_tbl_default_value {
     unsigned int action;
     union {
         struct {
         } _NoAction;
         struct __attribute__((__packed__)) {
-            u32 port_id;
-            u64 dmac;
-        } ingress_send_nh;
-        struct {
-        } ingress_drop;
-    } u;
-};
-struct __attribute__((__packed__)) ingress_nh_table_key {
-    u32 keysz;
-    u32 maskid;
-    u32 field0; /* hdr.ipv4.srcAddr */
-} __attribute__((aligned(4)));
-#define INGRESS_NH_TABLE_ACT__SEND_NH 1
-#define INGRESS_NH_TABLE_ACT_INGRESS_DROP 3
-struct __attribute__((__packed__)) ingress_nh_table_value {
-    unsigned int action;
-    union {
-        struct {
-        } _NoAction;
-        struct __attribute__((__packed__)) {
-            u32 port_id;
-            u64 dmac;
-            u64 smac;
-        } _send_nh;
-        struct {
-        } ingress_drop;
+            u8 addr6[16];
+        } MainControlImpl_set_dst;
     } u;
 };
 
@@ -84,7 +59,7 @@ int xdp_func(struct xdp_md *skb) {
 
     return XDP_PASS;
 }
-static __always_inline int process(struct __sk_buff *skb, struct my_ingress_headers_t *hdr, struct pna_global_metadata *compiler_meta__)
+static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr, struct pna_global_metadata *compiler_meta__)
 {
     struct hdr_md *hdrMd;
     unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
@@ -96,31 +71,31 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
     unsigned char ebpf_byte;
     u32 pkt_len = skb->len;
 
-    struct my_ingress_metadata_t *meta;
+    struct main_metadata_t *user_meta;
     hdrMd = BPF_MAP_LOOKUP_ELEM(hdr_md_cpumap, &ebpf_zero);
     if (!hdrMd)
         return TC_ACT_SHOT;
     hdr = &(hdrMd->cpumap_hdr);
-    meta = &(hdrMd->cpumap_usermeta);
+    user_meta = &(hdrMd->cpumap_usermeta);
 {
         u8 hit;
         {
-/* nh_table_0.apply() */
+/* tbl_default_0.apply() */
             {
                 /* construct key */
                 struct p4tc_table_entry_act_bpf_params__local params = {
                     .pipeid = 1,
                     .tblid = 1
                 };
-                struct ingress_nh_table_key key = {};
-                key.keysz = 32;
-                key.field0 = hdr->ipv4.srcAddr;
+                struct MainControlImpl_tbl_default_key key = {};
+                key.keysz = 128;
+                __builtin_memcpy(&(key.field0[0]), &(hdr->ipv6.srcAddr[0]), 16);
                 struct p4tc_table_entry_act_bpf *act_bpf;
                 /* value */
-                struct ingress_nh_table_value *value = NULL;
+                struct MainControlImpl_tbl_default_value *value = NULL;
                 /* perform lookup */
                 act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
-                value = (struct ingress_nh_table_value *)act_bpf;
+                value = (struct MainControlImpl_tbl_default_value *)act_bpf;
                 if (value == NULL) {
                     /* miss; find default action */
                     hit = 0;
@@ -130,67 +105,14 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                 if (value != NULL) {
                     /* run action */
                     switch (value->action) {
-                        case INGRESS_NH_TABLE_ACT__SEND_NH: 
+                        case MAINCONTROLIMPL_TBL_DEFAULT_ACT_MAINCONTROLIMPL_SET_DST: 
                             {
-/* send_to_port(value->u._send_nh.port_id) */
-                                compiler_meta__->drop = false;
-                                send_to_port(value->u._send_nh.port_id);
-                                                                hdr->ethernet.srcAddr = value->u._send_nh.smac;
-                                                                hdr->ethernet.dstAddr = value->u._send_nh.dmac;
+                                __builtin_memcpy(&hdr->ipv6.dstAddr, &value->u.MainControlImpl_set_dst.addr6, 16);
+                                                                hdr->ipv6.hopLimit = (hdr->ipv6.hopLimit + 255);
                             }
                             break;
-                        case INGRESS_NH_TABLE_ACT_INGRESS_DROP: 
+                        case 0: 
                             {
-/* drop_packet() */
-                                drop_packet();
-                            }
-                            break;
-                        default:
-                            return TC_ACT_SHOT;
-                    }
-                } else {
-                    return TC_ACT_SHOT;
-;
-                }
-            }
-;
-            /* nh_table2_0.apply() */
-            {
-                /* construct key */
-                struct p4tc_table_entry_act_bpf_params__local params = {
-                    .pipeid = 1,
-                    .tblid = 2
-                };
-                struct ingress_nh_table2_key key = {};
-                key.keysz = 32;
-                key.field0 = hdr->ipv4.srcAddr;
-                struct p4tc_table_entry_act_bpf *act_bpf;
-                /* value */
-                struct ingress_nh_table2_value *value = NULL;
-                /* perform lookup */
-                act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
-                value = (struct ingress_nh_table2_value *)act_bpf;
-                if (value == NULL) {
-                    /* miss; find default action */
-                    hit = 0;
-                } else {
-                    hit = 1;
-                }
-                if (value != NULL) {
-                    /* run action */
-                    switch (value->action) {
-                        case INGRESS_NH_TABLE2_ACT_INGRESS_SEND_NH: 
-                            {
-                                hdr->ethernet.dstAddr = value->u.ingress_send_nh.dmac;
-                                /* send_to_port(value->u.ingress_send_nh.port_id) */
-                                compiler_meta__->drop = false;
-                                send_to_port(value->u.ingress_send_nh.port_id);
-                            }
-                            break;
-                        case INGRESS_NH_TABLE2_ACT_INGRESS_DROP: 
-                            {
-/* drop_packet() */
-                                drop_packet();
                             }
                             break;
                         default:
@@ -217,8 +139,8 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
         if (hdr->ethernet.ebpf_valid) {
             outHeaderLength += 112;
         }
-;        if (hdr->ipv4.ebpf_valid) {
-            outHeaderLength += 160;
+;        if (hdr->ipv6.ebpf_valid) {
+            outHeaderLength += 320;
         }
 ;        pkt = ((void*)(long)skb->data);
         ebpf_packetEnd = ((void*)(long)skb->data_end);
@@ -264,83 +186,113 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
             ebpf_packetOffsetInBits += 16;
 
         }
-;        if (hdr->ipv4.ebpf_valid) {
-            if (ebpf_packetEnd < pkt + BYTES(ebpf_packetOffsetInBits + 160)) {
+;        if (hdr->ipv6.ebpf_valid) {
+            if (ebpf_packetEnd < pkt + BYTES(ebpf_packetOffsetInBits + 320)) {
                 return TC_ACT_SHOT;
             }
             
-            ebpf_byte = ((char*)(&hdr->ipv4.version))[0];
+            ebpf_byte = ((char*)(&hdr->ipv6.version))[0];
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 4, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 4;
 
-            ebpf_byte = ((char*)(&hdr->ipv4.ihl))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 0));
-            ebpf_packetOffsetInBits += 4;
-
-            ebpf_byte = ((char*)(&hdr->ipv4.diffserv))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.trafficClass))[0];
+            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 4));
+            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0 + 1, 4, 4, (ebpf_byte));
             ebpf_packetOffsetInBits += 8;
 
-            hdr->ipv4.totalLen = bpf_htons(hdr->ipv4.totalLen);
-            ebpf_byte = ((char*)(&hdr->ipv4.totalLen))[0];
+            hdr->ipv6.flowLabel = htonl(hdr->ipv6.flowLabel << 12);
+            ebpf_byte = ((char*)(&hdr->ipv6.flowLabel))[0];
+            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 4));
+            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0 + 1, 4, 4, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.flowLabel))[1];
+            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 1, 4, 0, (ebpf_byte >> 4));
+            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 1 + 1, 4, 4, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.flowLabel))[2];
+            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 2, 4, 0, (ebpf_byte >> 4));
+            ebpf_packetOffsetInBits += 20;
+
+            hdr->ipv6.payloadLength = bpf_htons(hdr->ipv6.payloadLength);
+            ebpf_byte = ((char*)(&hdr->ipv6.payloadLength))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv4.totalLen))[1];
+            ebpf_byte = ((char*)(&hdr->ipv6.payloadLength))[1];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
             ebpf_packetOffsetInBits += 16;
 
-            hdr->ipv4.identification = bpf_htons(hdr->ipv4.identification);
-            ebpf_byte = ((char*)(&hdr->ipv4.identification))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv4.identification))[1];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_packetOffsetInBits += 16;
-
-            ebpf_byte = ((char*)(&hdr->ipv4.flags))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 3, 5, (ebpf_byte >> 0));
-            ebpf_packetOffsetInBits += 3;
-
-            hdr->ipv4.fragOffset = bpf_htons(hdr->ipv4.fragOffset << 3);
-            ebpf_byte = ((char*)(&hdr->ipv4.fragOffset))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 5, 0, (ebpf_byte >> 3));
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0 + 1, 3, 5, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv4.fragOffset))[1];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 1, 5, 0, (ebpf_byte >> 3));
-            ebpf_packetOffsetInBits += 13;
-
-            ebpf_byte = ((char*)(&hdr->ipv4.ttl))[0];
+            ebpf_byte = ((char*)(&hdr->ipv6.nextHeader))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 8;
 
-            ebpf_byte = ((char*)(&hdr->ipv4.protocol))[0];
+            ebpf_byte = ((char*)(&hdr->ipv6.hopLimit))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 8;
 
-            hdr->ipv4.hdrChecksum = bpf_htons(hdr->ipv4.hdrChecksum);
-            ebpf_byte = ((char*)(&hdr->ipv4.hdrChecksum))[0];
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv4.hdrChecksum))[1];
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[1];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_packetOffsetInBits += 16;
-
-            ebpf_byte = ((char*)(&hdr->ipv4.srcAddr))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv4.srcAddr))[1];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv4.srcAddr))[2];
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[2];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv4.srcAddr))[3];
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[3];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
-            ebpf_packetOffsetInBits += 32;
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[4];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[5];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[6];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 6, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[7];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 7, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[8];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 8, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[9];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 9, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[10];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 10, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[11];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 11, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[12];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 12, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[13];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 13, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[14];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 14, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.srcAddr))[15];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 15, (ebpf_byte));
+            ebpf_packetOffsetInBits += 128;
 
-            ebpf_byte = ((char*)(&hdr->ipv4.dstAddr))[0];
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv4.dstAddr))[1];
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[1];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv4.dstAddr))[2];
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[2];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv4.dstAddr))[3];
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[3];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
-            ebpf_packetOffsetInBits += 32;
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[4];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 4, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[5];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[6];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 6, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[7];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 7, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[8];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 8, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[9];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 9, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[10];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 10, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[11];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 11, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[12];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 12, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[13];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 13, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[14];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 14, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->ipv6.dstAddr))[15];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 15, (ebpf_byte));
+            ebpf_packetOffsetInBits += 128;
 
         }
 ;
@@ -363,9 +315,9 @@ int tc_ingress_func(struct __sk_buff *skb) {
         }
     }
     struct hdr_md *hdrMd;
-    struct my_ingress_headers_t *hdr;
+    struct headers_t *hdr;
     int ret = -1;
-    ret = process(skb, (struct my_ingress_headers_t *) hdr, compiler_meta__);
+    ret = process(skb, (struct headers_t *) hdr, compiler_meta__);
     if (ret != -1) {
         return ret;
     }

@@ -4,9 +4,9 @@
 typedef bit<48>  EthernetAddress;
 
 header ethernet_t {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    @tc_type("macaddr") EthernetAddress dstAddr;
+    @tc_type("macaddr") EthernetAddress srcAddr;
+    bit<16> etherType;
 }
 
 header ipv4_t {
@@ -22,6 +22,17 @@ header ipv4_t {
     bit<16> hdrChecksum;
     @tc_type ("ipv4") bit<32> srcAddr;
     @tc_type ("ipv4") bit<32> dstAddr;
+}
+
+header ipv6_t {
+    bit<4>   version;
+    bit<8>   trafficClass;
+    bit<20>  flowLabel;
+    bit<16>  payloadLength;
+    bit<8>   nextHeader;
+    bit<8>   hopLimit;
+    @tc_type ("ipv6") bit<128> srcAddr;
+    @tc_type ("ipv6") bit<128> dstAddr;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -43,7 +54,7 @@ struct main_metadata_t {
 // main parser.
 struct headers_t {
     ethernet_t ethernet;
-    ipv4_t     ipv4;
+    ipv6_t     ipv6;
 }
 
 parser MainParserImpl(
@@ -55,12 +66,13 @@ parser MainParserImpl(
     state start {
         pkt.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
-            0x0800  : parse_ipv4;
-            default : accept;
+            0x86DD: parse_ipv6;
+            default: accept;
         }
     }
-    state parse_ipv4 {
-        pkt.extract(hdr.ipv4);
+
+    state parse_ipv6 {
+        pkt.extract(hdr.ipv6);
         transition accept;
     }
 }
@@ -71,45 +83,23 @@ control MainControlImpl(
     in    pna_main_input_metadata_t istd,
     inout pna_main_output_metadata_t ostd)
 {
-    action next_hop(PortId_t vport) {
-        send_to_port(vport);
-    }
-    action default_route_drop() {
-        drop_packet();
-    }
-    action drop() {
-        drop_packet();
+
+    action set_dst(bit<128> addr6) {
+        hdr.ipv6.dstAddr = addr6;
+        hdr.ipv6.hopLimit = hdr.ipv6.hopLimit - 1;  // validate number of matches
     }
 
-    table ipv4_tbl_1 {
+    table tbl_default {
         key = {
-            hdr.ipv4.dstAddr : exact;
-            istd.input_port : exact;
+            hdr.ipv6.srcAddr : exact;
         }
-        actions = {
-            next_hop;
-            default_route_drop;
-        }
-        default_action = default_route_drop;
-    }
-    table ipv4_tbl_2 {
-        key = {
-            hdr.ipv4.dstAddr  : exact;
-            hdr.ipv4.srcAddr  : exact;
-            hdr.ipv4.protocol : exact;
-        }
-        actions = {
-            next_hop;
-            drop;
-        }
-        default_action = drop;
+        actions = { set_dst; NoAction; }
+        default_action = set_dst(128w0xffff_1111_2222_3333_4444_5555_6666_aaaa);
+        size = 100;
     }
 
     apply {
-        if (hdr.ipv4.isValid()) {
-            ipv4_tbl_1.apply();
-            ipv4_tbl_2.apply();
-        }
+        tbl_default.apply();
     }
 }
 
@@ -121,7 +111,7 @@ control MainDeparserImpl(
 {
     apply {
         pkt.emit(hdr.ethernet);
-        pkt.emit(hdr.ipv4);
+        pkt.emit(hdr.ipv6);
     }
 }
 

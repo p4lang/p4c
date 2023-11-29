@@ -1,0 +1,41 @@
+{
+  "schema_version" : "1.0.0",
+  "pipeline_name" : "test_ipv6_example",
+  "id" : 1,
+  "tables" : [
+    {
+      "name" : "MainControlImpl/tbl_default",
+      "id" : 1,
+      "tentries" : 100,
+      "nummask" : 8,
+      "keysize" : 128,
+      "keyfields" : [
+        {
+          "id" : 1,
+          "name" : "hdr.ipv6.srcAddr",
+          "type" : "bit128",
+          "match_type" : "exact",
+          "bitwidth" : 128
+        }
+      ],
+      "actions" : [
+        {
+          "id" : 1,
+          "name" : "MainControlImpl/set_dst",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "params" : [
+            {
+              "id" : 1,
+              "name" : "addr6",
+              "type" : "bit",
+              "bitwidth" : 128
+            }
+          ],
+          "default_hit_action" : false,
+          "default_miss_action" : true
+        }
+      ]
+    }
+  ]
+}
