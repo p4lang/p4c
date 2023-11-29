@@ -1513,13 +1513,6 @@ DeparserHdrEmitTranslatorPNA::DeparserHdrEmitTranslatorPNA(const EBPF::EBPFDepar
     setName("DeparserHdrEmitTranslatorPNA");
 }
 
-cstring DeparserHdrEmitTranslatorPNA::GetVariableName(cstring keyname) {
-    const char *strToken = keyname.findlast('.');
-    if (strToken != nullptr) {
-        return cstring(strToken + 1);
-    }
-    return keyname;
-}
 void DeparserHdrEmitTranslatorPNA::processMethod(const P4::ExternMethod *method) {
     // This method handles packet_out.emit() only and is intended to skip other externs
     if (method->method->name.name == p4lib.packetOut.emit.name) {
