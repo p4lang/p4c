@@ -62,9 +62,9 @@ const IR::PathExpression *SharedPnaProgramInfo::getBlockParam(cstring blockLabel
         paramType = resolveProgramType(program, tn);
     }
 
-    const auto *archSpec = TestgenTarget::getArchSpec();
-    auto archIndex = archSpec->getBlockIndex(blockLabel);
-    auto archRef = archSpec->getParamName(archIndex, paramIndex);
+    const auto &archSpec = getArchSpec();
+    auto archIndex = archSpec.getBlockIndex(blockLabel);
+    auto archRef = archSpec.getParamName(archIndex, paramIndex);
     return new IR::PathExpression(paramType, new IR::Path(archRef));
 }
 

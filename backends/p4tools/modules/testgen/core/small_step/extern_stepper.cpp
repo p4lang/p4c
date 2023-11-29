@@ -292,10 +292,10 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
              const auto *blockRef = args->at(0)->expression->checkedTo<IR::StringLiteral>();
              const auto *block = state.findDecl(new IR::Path(blockRef->value));
-             const auto *archSpec = TestgenTarget::getArchSpec();
              auto blockName = block->getName().name;
              auto &nextState = state.clone();
              auto canonicalName = getProgramInfo().getCanonicalBlockName(blockName);
+             const auto &archSpec = getProgramInfo().getArchSpec();
              const auto *blockApply = block->to<IR::IApply>();
              CHECK_NULL(blockApply);
              const auto *blockParams = blockApply->getApplyParameters();
@@ -306,7 +306,7 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
              nextState.setProperty("inUndefinedState", false);
              for (size_t paramIdx = 0; paramIdx < blockParams->size(); ++paramIdx) {
                  const auto *internalParam = blockParams->getParameter(paramIdx);
-                 auto externalParamName = archSpec->getParamName(canonicalName, paramIdx);
+                 auto externalParamName = archSpec.getParamName(canonicalName, paramIdx);
                  nextState.copyIn(TestgenTarget::get(), internalParam, externalParamName);
              }
              nextState.setProperty("inUndefinedState", currentTaint);
@@ -327,7 +327,7 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
              const auto *blockRef = args->at(0)->expression->checkedTo<IR::StringLiteral>();
              const auto *block = state.findDecl(new IR::Path(blockRef->value));
-             const auto *archSpec = TestgenTarget::getArchSpec();
+             const auto &archSpec = getProgramInfo().getArchSpec();
              auto blockName = block->getName().name;
              auto &nextState = state.clone();
              auto canonicalName = getProgramInfo().getCanonicalBlockName(blockName);
@@ -341,7 +341,7 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
              nextState.setProperty("inUndefinedState", false);
              for (size_t paramIdx = 0; paramIdx < blockParams->size(); ++paramIdx) {
                  const auto *internalParam = blockParams->getParameter(paramIdx);
-                 auto externalParamName = archSpec->getParamName(canonicalName, paramIdx);
+                 auto externalParamName = archSpec.getParamName(canonicalName, paramIdx);
                  nextState.copyOut(internalParam, externalParamName);
              }
              nextState.setProperty("inUndefinedState", currentTaint);

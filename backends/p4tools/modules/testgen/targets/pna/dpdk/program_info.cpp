@@ -28,12 +28,12 @@ PnaDpdkProgramInfo::PnaDpdkProgramInfo(
 
     // Just concatenate everything together.
     // Iterate through the (ordered) pipes of the target architecture.
-    const auto *archSpec = TestgenTarget::getArchSpec();
+    const auto &archSpec = getArchSpec();
     const auto *programmableBlocks = getProgrammableBlocks();
 
-    BUG_CHECK(archSpec->getArchVectorSize() == programmableBlocks->size(),
+    BUG_CHECK(archSpec.getArchVectorSize() == programmableBlocks->size(),
               "The PNA architecture requires %1% pipes (provided %2% pipes).",
-              archSpec->getArchVectorSize(), programmableBlocks->size());
+              archSpec.getArchVectorSize(), programmableBlocks->size());
 
     /// Compute the series of nodes corresponding to the in-order execution of top-level
     /// pipeline-component instantiations. For a standard pna, this produces
@@ -51,11 +51,10 @@ PnaDpdkProgramInfo::PnaDpdkProgramInfo(
     }
 }
 
+const ArchSpec &PnaDpdkProgramInfo::getArchSpec() const { return ARCH_SPEC; }
+
 std::vector<Continuation::Command> PnaDpdkProgramInfo::processDeclaration(
     const IR::Type_Declaration *typeDecl, size_t blockIdx) const {
-    // Get the architecture specification for this target.
-    const auto *archSpec = TestgenTarget::getArchSpec();
-
     // Collect parameters.
     const auto *applyBlock = typeDecl->to<IR::IApply>();
     if (applyBlock == nullptr) {
@@ -63,7 +62,7 @@ std::vector<Continuation::Command> PnaDpdkProgramInfo::processDeclaration(
                               typeDecl->node_type_name());
     }
     // Retrieve the current canonical pipe in the architecture spec using the pipe index.
-    const auto *archMember = archSpec->getArchMember(blockIdx);
+    const auto *archMember = getArchSpec().getArchMember(blockIdx);
 
     std::vector<Continuation::Command> cmds;
     // Copy-in.
@@ -110,5 +109,35 @@ std::vector<Continuation::Command> PnaDpdkProgramInfo::processDeclaration(
     }
     return cmds;
 }
+
+const ArchSpec PnaDpdkProgramInfo::ARCH_SPEC = ArchSpec(
+    "PNA_NIC", {
+                   // parser MainParserT<MH, MM>(
+                   //     packet_in pkt,
+                   //     //in    PM pre_user_meta,
+                   //     out   MH main_hdr,
+                   //     inout MM main_user_meta,
+                   //     in    pna_main_parser_input_metadata_t istd);
+                   {"MainParserT", {nullptr, "*main_hdr", "*main_user_meta", "*parser_istd"}},
+                   // control PreControlT<PH, PM>(
+                   //     in    PH pre_hdr,
+                   //     inout PM pre_user_meta,
+                   //     in    pna_pre_input_metadata_t  istd,
+                   //     inout pna_pre_output_metadata_t ostd);
+                   {"PreControlT", {"*main_hdr", "*main_user_meta", "*pre_istd", "*pre_ostd"}},
+                   // control MainControlT<MH, MM>(
+                   //     //in    PM pre_user_meta,
+                   //     inout MH main_hdr,
+                   //     inout MM main_user_meta,
+                   //     in    pna_main_input_metadata_t  istd,
+                   //     inout pna_main_output_metadata_t ostd);
+                   {"MainControlT", {"*main_hdr", "*main_user_meta", "*main_istd", "*ostd"}},
+                   // control MainDeparserT<MH, MM>(
+                   //     packet_out pkt,
+                   //     in    MH main_hdr,
+                   //     in    MM main_user_meta,
+                   //     in    pna_main_output_metadata_t ostd);
+                   {"MainDeparserT", {nullptr, "*main_hdr", "*main_user_meta", "*ostd"}},
+               });
 
 }  // namespace P4Tools::P4Testgen::Pna

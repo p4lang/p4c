@@ -38,12 +38,8 @@ class PnaDpdkTestgenTarget : public TestgenTarget {
     PnaDpdkExprStepper *getExprStepperImpl(ExecutionState &state, AbstractSolver &solver,
                                            const ProgramInfo &programInfo) const override;
 
-    [[nodiscard]] const ArchSpec *getArchSpecImpl() const override;
-
  private:
     PnaDpdkTestgenTarget();
-
-    static const ArchSpec ARCH_SPEC;
 };
 
 }  // namespace P4Tools::P4Testgen::Pna

@@ -55,6 +55,13 @@ class ProgramInfo : public ICastable {
     /// The generated dcg.
     const NodesCallGraph *dcg = nullptr;
 
+    /// A vector that maps the architecture parameters of each pipe to the corresponding
+    /// global architecture variables. For example, this map specifies which parameter of each pipe
+    /// refers to the input header.
+    // The arch map needs to be public to be subclassed.
+    /// @returns a reference to the architecture map defined in this target
+    [[nodiscard]] virtual const ArchSpec &getArchSpec() const = 0;
+
     /// @returns the series of nodes that has been computed by this particular target.
     [[nodiscard]] const std::vector<Continuation::Command> *getPipelineSequence() const;
 
