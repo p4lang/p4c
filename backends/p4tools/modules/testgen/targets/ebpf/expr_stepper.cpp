@@ -174,9 +174,10 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
              }
              // Input must be the headers struct.
              headers->type->checkedTo<IR::Type_Struct>();
+             const auto *oneBitType = IR::getBitType(1);
              const auto *tcpRef = new IR::Member(headers, "tcp");
-             const auto *syn = state.get(new IR::Member(tcpRef, "syn"));
-             const auto *ack = state.get(new IR::Member(tcpRef, "ack"));
+             const auto *syn = state.get(new IR::Member(oneBitType, tcpRef, "syn"));
+             const auto *ack = state.get(new IR::Member(oneBitType, tcpRef, "ack"));
 
              // Implement the simple conntrack case since we do not support multiple packets here
              // yet.

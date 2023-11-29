@@ -241,3 +241,23 @@ public:
           concolicId(concolicId),
           concolicMethodName(methodName) {}
 }
+
+/// An extension of a struct expression. Also tracks validity as an expression.
+class HeaderExpression : StructExpression {
+    /// Whether this struct expression is valid. Mostly relevant to header expressions.
+    Expression validity;
+
+    dbprint {
+        out <<"{" << Log::endl << IndentCtl::indent;
+        out << "$headerValid:" << validity <<";" << Log::endl;
+        for (auto &field : components) {
+            out << Log::endl << field << ';';
+        }
+        out << Log::endl << IndentCtl::unindent << "}";
+    }
+
+    validate {
+        components.check_null(); components.validate();
+        BUG_CHECK(structType == nullptr || structType->is<IR::Type_Header>(), "%1%: unexpected header type", structType->node_type_name());
+    }
+}
