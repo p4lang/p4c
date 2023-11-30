@@ -66,12 +66,12 @@ bool TypeMap::typeIsFixedWidth(const IR::Type *type) const {
         }
         return true;
     }
-    if (type->is<IR::Type_Stack>())
+    if (type->is<IR::Type_Stack>()) {
         return typeIsFixedWidth(type->to<IR::Type_Stack>()->elementType);
+    }
 
     // Typedef cases:
-    if (type->is<IR::Type_Typedef>())
-        return typeIsFixedWidth(type->to<IR::Type_Typedef>()->type);
+    if (type->is<IR::Type_Typedef>()) return typeIsFixedWidth(type->to<IR::Type_Typedef>()->type);
 
     return false;
 }
