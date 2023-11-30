@@ -80,12 +80,6 @@ bool ExprStepper::preorder(const IR::Member *member) {
         return false;
     }
 
-    // TODO: Do we want to handle non-numeric, non-boolean expressions?
-    BUG_CHECK(member->type->is<IR::Type::Bits>() || member->type->is<IR::Type::Boolean>() ||
-                  member->type->is<IR::Extracted_Varbits>(),
-              "Non-numeric, non-boolean member expression: %1% Type: %2%", member,
-              member->type->node_type_name());
-
     return stepSymbolicValue(state.get(member));
 }
 
@@ -340,9 +334,9 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
     if (!SymbolicEnv::isSymbolicValue(selectExpression->select)) {
         // Evaluate the expression being selected.
         return stepToListSubexpr(selectExpression->select, result, state,
-                                 [selectExpression](const IR::ListExpression *listExpr) {
+                                 [selectExpression](const IR::BaseListExpression *listExpr) {
                                      auto *result = selectExpression->clone();
-                                     result->select = listExpr;
+                                     result->select = listExpr->checkedTo<IR::ListExpression>();
                                      return Continuation::Return(result);
                                  });
     }
@@ -419,27 +413,26 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
     return false;
 }
 
-bool ExprStepper::preorder(const IR::ListExpression *listExpression) {
+bool ExprStepper::preorder(const IR::BaseListExpression *listExpression) {
+    logStep(listExpression);
+
     if (!SymbolicEnv::isSymbolicValue(listExpression)) {
         // Evaluate the expression being selected.
-        return stepToListSubexpr(listExpression, result, state,
-                                 [listExpression](const IR::ListExpression *listExpr) {
-                                     const auto *result = listExpression->clone();
-                                     result = listExpr;
-                                     return Continuation::Return(result);
-                                 });
+        return stepToListSubexpr(
+            listExpression, result, state,
+            [](const IR::BaseListExpression *listExpr) { return Continuation::Return(listExpr); });
     }
     return stepSymbolicValue(listExpression);
 }
 
 bool ExprStepper::preorder(const IR::StructExpression *structExpression) {
+    logStep(structExpression);
+
     if (!SymbolicEnv::isSymbolicValue(structExpression)) {
         // Evaluate the expression being selected.
         return stepToStructSubexpr(structExpression, result, state,
-                                   [structExpression](const IR::StructExpression *structExpr) {
-                                       const auto *result = structExpression->clone();
-                                       result = structExpr;
-                                       return Continuation::Return(result);
+                                   [](const IR::StructExpression *structExpr) {
+                                       return Continuation::Return(structExpr);
                                    });
     }
     return stepSymbolicValue(structExpression);

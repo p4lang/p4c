@@ -106,12 +106,12 @@ class AbstractStepper : public Inspector {
     ///
     /// @returns false
     static bool stepToListSubexpr(
-        const IR::ListExpression *subexpr, SmallStepEvaluator::Result &result,
+        const IR::BaseListExpression *subexpr, SmallStepEvaluator::Result &result,
         const ExecutionState &state,
-        std::function<const Continuation::Command(const IR::ListExpression *)> rebuildCmd);
+        std::function<const Continuation::Command(const IR::BaseListExpression *)> rebuildCmd);
 
-    /// @see stepToListSubexpr.IR::StructExpression differs slightly from IR::ListExpression in that
-    /// the components are IR::NamedExpression instead of just IR::Expression.  To keep things
+    /// @see stepToListSubexpr.IR::StructExpression differs slightly from IR::BaseListExpression in
+    /// that the components are IR::NamedExpression instead of just IR::Expression.  To keep things
     /// simple, and to avoid excessive type casting, these two functions are kept separate.
     static bool stepToStructSubexpr(
         const IR::StructExpression *subexpr, SmallStepEvaluator::Result &result,

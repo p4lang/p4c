@@ -146,7 +146,7 @@ class ExprStepper : public AbstractStepper {
     bool preorder(const IR::Operation_Binary *binary) override;
     bool preorder(const IR::Operation_Unary *unary) override;
     bool preorder(const IR::SelectExpression *selectExpression) override;
-    bool preorder(const IR::ListExpression *listExpression) override;
+    bool preorder(const IR::BaseListExpression *listExpression) override;
     bool preorder(const IR::StructExpression *structExpression) override;
     bool preorder(const IR::Slice *slice) override;
     bool preorder(const IR::P4Table *table) override;

@@ -102,9 +102,9 @@ bool AbstractStepper::stepToSubexpr(
 }
 
 bool AbstractStepper::stepToListSubexpr(
-    const IR::ListExpression *subexpr, SmallStepEvaluator::Result &result,
+    const IR::BaseListExpression *subexpr, SmallStepEvaluator::Result &result,
     const ExecutionState &state,
-    std::function<const Continuation::Command(const IR::ListExpression *)> rebuildCmd) {
+    std::function<const Continuation::Command(const IR::BaseListExpression *)> rebuildCmd) {
     // Rewrite the list expression to replace the first non-value expression with the continuation
     // parameter.
     // XXX This results in the small-step evaluator evaluating list expressions in quadratic time.
