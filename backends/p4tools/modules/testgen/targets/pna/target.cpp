@@ -3,13 +3,13 @@
 #include <cstddef>
 #include <vector>
 
+#include "backends/p4tools/common/lib/util.h"
 #include "ir/ir.h"
 #include "ir/solver.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/ordered_map.h"
 
-#include "backends/p4tools/common/lib/util.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/core/target.h"

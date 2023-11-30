@@ -3,13 +3,13 @@
 #include <utility>
 
 #include "backends/p4tools/common/lib/arch_spec.h"
+#include "backends/p4tools/common/lib/util.h"
 #include "ir/id.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/null.h"
 
-#include "backends/p4tools/common/lib/util.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
