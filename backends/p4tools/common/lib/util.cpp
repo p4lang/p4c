@@ -104,4 +104,68 @@ const IR::MethodCallExpression *Utils::generateInternalMethodCall(
         args);
 }
 
+std::vector<const IR::Type_Declaration *> argumentsToTypeDeclarations(
+    const IR::IGeneralNamespace *ns, const IR::Vector<IR::Argument> *inputArgs) {
+    std::vector<const IR::Type_Declaration *> resultDecls;
+    for (const auto *arg : *inputArgs) {
+        const auto *expr = arg->expression;
+
+        const IR::Type_Declaration *declType = nullptr;
+
+        if (const auto *ctorCall = expr->to<IR::ConstructorCallExpression>()) {
+            const auto *constructedTypeName = ctorCall->constructedType->checkedTo<IR::Type_Name>();
+
+            // Find the corresponding type declaration in the top-level namespace.
+            declType =
+                findProgramDecl(ns, constructedTypeName->path)->checkedTo<IR::Type_Declaration>();
+        } else if (const auto *pathExpr = expr->to<IR::PathExpression>()) {
+            // Look up the path expression in the top-level namespace and expect to find a
+            // declaration instance.
+            const auto *declInstance =
+                findProgramDecl(ns, pathExpr->path)->checkedTo<IR::Declaration_Instance>();
+            declType = declInstance->type->checkedTo<IR::Type_Declaration>();
+        } else {
+            BUG("Unexpected main-declaration argument node type: %1%", expr->node_type_name());
+        }
+
+        // The constructor's parameter list should be empty, since the compiler should have
+        // substituted the constructor arguments for us.
+        if (const auto *iApply = declType->to<IR::IContainer>()) {
+            const IR::ParameterList *ctorParams = iApply->getConstructorParameters();
+            BUG_CHECK(ctorParams->empty(), "Compiler did not eliminate constructor parameters: %1%",
+                      ctorParams);
+        } else {
+            BUG("Does not instantiate an IContainer: %1%", expr);
+        }
+
+        resultDecls.emplace_back(declType);
+    }
+    return resultDecls;
+}
+
+const IR::IDeclaration *findProgramDecl(const IR::IGeneralNamespace *ns, const IR::Path *path) {
+    auto name = path->name.name;
+    const auto *decls = ns->getDeclsByName(name)->toVector();
+    if (!decls->empty()) {
+        // TODO: Figure out what to do with multiple results. Maybe return all of them and
+        // let the caller sort it out?
+        BUG_CHECK(decls->size() == 1, "Handling of overloaded names not implemented");
+        return decls->at(0);
+    }
+    BUG("Variable %1% not found in the available namespaces.", path);
+}
+
+const IR::IDeclaration *findProgramDecl(const IR::IGeneralNamespace *ns,
+                                        const IR::PathExpression *pathExpr) {
+    return findProgramDecl(ns, pathExpr->path);
+}
+
+const IR::Type_Declaration *resolveProgramType(const IR::IGeneralNamespace *ns,
+                                               const IR::Type_Name *type) {
+    const auto *path = type->path;
+    const auto *decl = findProgramDecl(ns, path)->to<IR::Type_Declaration>();
+    BUG_CHECK(decl, "Not a type: %1%", path);
+    return decl;
+}
+
 }  // namespace P4Tools

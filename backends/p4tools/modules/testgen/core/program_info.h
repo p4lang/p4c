@@ -87,18 +87,6 @@ class ProgramInfo : public ICastable {
     // @returns the width of the parser error for this specific target.
     [[nodiscard]] virtual const IR::Type_Bits *getParserErrorType() const = 0;
 
-    /// Looks up a declaration from a path. A BUG occurs if no declaration is found.
-    static const IR::IDeclaration *findProgramDecl(const IR::IGeneralNamespace *ns,
-                                                   const IR::Path *path);
-
-    /// Looks up a declaration from a path expression. A BUG occurs if no declaration is found.
-    static const IR::IDeclaration *findProgramDecl(const IR::IGeneralNamespace *ns,
-                                                   const IR::PathExpression *pathExpr);
-
-    /// Resolves a Type_Name in the top-level namespace.
-    static const IR::Type_Declaration *resolveProgramType(const IR::IGeneralNamespace *ns,
-                                                          const IR::Type_Name *type);
-
     /// @returns the canonical name of the program block that is passed in.
     /// Throws a BUG, if the name can not be found.
     [[nodiscard]] cstring getCanonicalBlockName(cstring programBlockName) const;
