@@ -48,24 +48,33 @@ bool TypeMap::typeIsEmpty(const IR::Type *type) const {
 
 bool TypeMap::typeIsFixedWidth(const IR::Type *type) const {
     type = this->getTypeType(type, true);
-    if (type->is<IR::Type_Varbits>()) return false;
-    if (type->is<IR::Type_Extern>()) return false;
-    if (type->is<IR::Type_Stack>())
-        return typeIsFixedWidth(type->to<IR::Type_Stack>()->elementType);
+
+    // Base type cases:
+    if (type->is<IR::Type_Boolean>() || type->is<IR::Type_Bits>()) return true;
+
+    // Derived type cases:
+    if (type->is<IR::Type_SerEnum>()) return true;
     if (type->is<IR::Type_StructLike>()) {
         auto st = type->to<IR::Type_StructLike>();
         for (auto f : st->fields)
             if (!typeIsFixedWidth(f->type)) return false;
         return true;
     }
-    if (type->is<IR::Type_Tuple>()) {
-        auto tt = type->to<IR::Type_Tuple>();
+    if (type->is<IR::Type_BaseList>()) {
+        auto tt = type->to<IR::Type_BaseList>();
         for (auto f : tt->components) {
             if (!typeIsFixedWidth(f)) return false;
         }
         return true;
     }
-    return true;
+    if (type->is<IR::Type_Stack>())
+        return typeIsFixedWidth(type->to<IR::Type_Stack>()->elementType);
+
+    // Typedef cases:
+    if (type->is<IR::Type_Typedef>())
+        return typeIsFixedWidth(type->to<IR::Type_Typedef>()->type);
+
+    return false;
 }
 
 void TypeMap::dbprint(std::ostream &out) const {
