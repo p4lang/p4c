@@ -285,7 +285,7 @@ class InOutReference : Expression {
         Expression(ref.type), ref(ref), resolvedRef(resolvedRef)
         { validate(); }
 
-    toString { return resolvedRef->toString() + "(" + ref->toString() + ")"; }
+    toString { return ref->toString() + "(" + resolvedRef->toString() + ")"; }
 
-    dbprint { out << resolvedRef << "(" << ref << ")"; }
+    dbprint { out << ref << "(" << resolvedRef << ")"; }
 }

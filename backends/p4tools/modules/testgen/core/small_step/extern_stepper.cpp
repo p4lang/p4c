@@ -740,12 +740,14 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
              {
                  auto &nextState = state.clone();
                  // Append to the emit buffer.
-                 std::vector<std::pair<IR::StateVariable, const IR::Expression *>> fields;
                  auto flatFields = IR::flattenStructExpression(emitHeader);
                  for (const auto *fieldExpr : flatFields) {
                      const auto *fieldType = fieldExpr->type;
                      if (fieldType->is<IR::Type_StructLike>()) {
                          BUG("Unexpected emit field %1% of type %2%", fieldExpr, fieldType);
+                     }
+                     if (const auto *varbits = fieldType->to<IR::Extracted_Varbits>()) {
+                         fieldType = IR::getBitType(varbits->assignedSize);
                      }
                      auto fieldWidth = fieldType->width_bits();
                      // If the width is zero, do not bother with emitting.
@@ -770,7 +772,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                      // Append to the emit buffer.
                      nextState.appendToEmitBuffer(fieldExpr);
                  }
-                 nextState.add(*new TraceEvents::Emit(emitHeader, fields));
+                 nextState.add(*new TraceEvents::Emit(emitHeader));
                  nextState.popBody();
                  // Only when the header is valid, the members are emitted and the packet
                  // delta is adjusted.
