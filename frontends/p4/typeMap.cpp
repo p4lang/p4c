@@ -55,15 +55,14 @@ bool TypeMap::typeIsFixedWidth(const IR::Type *type) const {
     // Derived type cases:
     if (type->is<IR::Type_SerEnum>()) return true;
     if (type->is<IR::Type_StructLike>()) {
-        auto st = type->to<IR::Type_StructLike>();
-        for (auto f : st->fields)
+        for (auto f : type->to<IR::Type_StructLike>()->fields) {
             if (!typeIsFixedWidth(f->type)) return false;
+        }
         return true;
     }
     if (type->is<IR::Type_BaseList>()) {
-        auto tt = type->to<IR::Type_BaseList>();
-        for (auto f : tt->components) {
-            if (!typeIsFixedWidth(f)) return false;
+        for (auto c : type->to<IR::Type_BaseList>()->components) {
+            if (!typeIsFixedWidth(c)) return false;
         }
         return true;
     }
