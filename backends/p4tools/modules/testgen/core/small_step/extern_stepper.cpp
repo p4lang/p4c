@@ -3,7 +3,6 @@
 #include <functional>
 #include <optional>
 #include <ostream>
-#include <string>
 #include <utility>
 #include <vector>
 
@@ -15,13 +14,11 @@
 #include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/id.h"
-#include "ir/indexed_vector.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "ir/vector.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
-#include "lib/log.h"
 
 #include "backends/p4tools/modules/testgen//lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/core/externs.h"
@@ -743,9 +740,8 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                  auto flatFields = IR::flattenStructExpression(emitHeader);
                  for (const auto *fieldExpr : flatFields) {
                      const auto *fieldType = fieldExpr->type;
-                     if (fieldType->is<IR::Type_StructLike>()) {
-                         BUG("Unexpected emit field %1% of type %2%", fieldExpr, fieldType);
-                     }
+                     BUG_CHECK(!fieldType->is<IR::Type_StructLike>(),
+                               "Unexpected emit field %1% of type %2%", fieldExpr, fieldType);
                      if (const auto *varbits = fieldType->to<IR::Extracted_Varbits>()) {
                          fieldType = IR::getBitType(varbits->assignedSize);
                      }
