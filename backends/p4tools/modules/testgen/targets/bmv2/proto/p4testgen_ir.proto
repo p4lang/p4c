@@ -1,0 +1,36 @@
+// P4Testgen Protobuf IR template.
+syntax = "proto3";
+
+package p4testgen_ir;
+
+import "backends/p4tools/modules/testgen/targets/bmv2/proto/ir.proto";
+
+message InputPacketAtPort {
+    // The raw bytes of the test packet.
+    bytes packet = 1;
+    // The raw bytes of the port associated with the packet.
+    int32 port = 2;
+}
+
+message OutputPacketAtPort {
+    // The raw bytes of the test packet.
+    bytes packet = 1;
+    // The raw bytes of the port associated with the packet.
+    int32 port = 2;
+    // The don't care mask of the packet.
+    bytes packet_mask = 3;
+}
+
+message TestCase {
+    // The input packet.
+    InputPacketAtPort input_packet = 1;
+    // The corresponding expected output packet.
+    repeated OutputPacketAtPort expected_output_packet = 2;
+    // The entities (e.g., table entries) to install on the switch before
+    // injecting the `input_packet`.
+    repeated pdpi.IrEntity entities = 3;
+    // The trace associated with this particular test.
+    repeated string traces = 4;
+    // Additional metadata and information.
+    repeated string metadata = 5;
+}

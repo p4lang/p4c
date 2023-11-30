@@ -1,0 +1,564 @@
+// Copyright 2023 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package pdpi;
+
+import "google/rpc/code.proto";
+import "google/rpc/status.proto";
+import "p4/config/v1/p4info.proto";
+import "p4/v1/p4runtime.proto";
+
+// -- P4Info -------------------------------------------------------------------
+
+// Describes the format of a value which has a bit width `num_bits` (unless for
+// the STRING format, which has no limit in the number of characters).
+enum Format {
+  // Hex string, e.g. 0x0a8b. All lowercase, and always of length
+  // ceil(num_bits/4)+2 (1 character for every 4 bits, zero-padded to be
+  // divisible by 4, and 2 characters for the '0x' prefix).
+  HEX_STRING = 0;
+  // MAC address, e.g. 00:11:ab:cd:ef:22. All lowercase, and always 17
+  // characters long.
+  MAC = 1;
+  // IPv4 address, e.g. 10.0.0.2.
+  IPV4 = 2;
+  // IPv6 address, e.g. fe80::21a:11ff:fe17:5f80. All lowercase, formatted
+  // according to RFC5952. This can be used for any num_bits of 128 or less. If
+  // num_bits is less than 128, then by convention only the upper num_bits bits
+  // can be set.
+  IPV6 = 3;
+  // String format, only printable characters.
+  STRING = 4;
+}
+
+// Describes a match field that is being referred to from an action parameter or
+// another match field.
+// TODO: b/306016407 - Remove this message once all P4 infrastructure has been
+// moved to `IrTableReference`.
+message IrMatchFieldReference {
+  option deprecated = true;  // Use `IrTableReference` instead.
+
+  string table = 1;
+  string match_field = 2;
+  uint32 table_id = 3;
+  uint32 match_field_id = 4;
+}
+
+// Uniquely identifies a user-defined (not built-in) match field within the
+// context of a table.
+message IrMatchField {
+  string field_name = 1;
+  uint32 field_id = 2;
+}
+
+// Uniquely identifies a user-defined (not built-in) parameter of an action
+// within the context of a table.
+message IrActionField {
+  string action_name = 1;
+  uint32 action_id = 2;
+  string parameter_name = 3;
+  uint32 parameter_id = 4;
+}
+
+// Uniquely identifies a built-in (not user-defined) field within the
+// context of a table. Each field corresponds to a field in the P4Runtime proto
+// and has a unique string representation to be used within
+// `@refers_to`/`@referenced_by` annotations.
+enum IrBuiltInField {
+  BUILT_IN_FIELD_UNSPECIFIED = 0;
+  // Corresponds to p4::v1::MulticastGroupEntry::multicast_group_id.
+  // String representation in annotations: "multicast_group_id"
+  BUILT_IN_FIELD_MULTICAST_GROUP_ID = 1;
+  // Corresponds to p4::v1::Replica::port.
+  // String representation in annotations: "replica.port"
+  BUILT_IN_FIELD_REPLICA_PORT = 2;
+  // Corresponds to p4::v1::Replica::instance.
+  // String representation in annotations: "replica.instance"
+  BUILT_IN_FIELD_REPLICA_INSTANCE = 3;
+}
+
+// Uniquely identifies a field within the context of a table.
+message IrField {
+  oneof field {
+    IrMatchField match_field = 1;
+    IrActionField action_field = 2;
+    IrBuiltInField built_in_field = 3;
+  }
+}
+
+// Uniquely identifies a user-defined (not built-in) table in the scope of a P4
+// program.
+message IrP4Table {
+  string table_name = 1;
+  uint32 table_id = 2;
+}
+
+// Uniquely identifies a built-in (not user-defined) table in the scope of a P4
+// program. Each table corresponds to a field in the P4Runtime proto and has a
+// unique string representation to be used within `@refers_to`/`@referenced_by`
+// annotations.
+enum IrBuiltInTable {
+  BUILT_IN_TABLE_UNSPECIFIED = 0;
+  // Corresponds to p4::v1::MulticastGroupEntry
+  // String representation in annotations: "builtin::multicast_group_table"
+  BUILT_IN_TABLE_MULTICAST_GROUP_TABLE = 1;
+}
+
+// Uniquely identifies a table in the scope of a P4 program.
+message IrTable {
+  oneof table {
+    IrP4Table p4_table = 1;
+    IrBuiltInTable built_in_table = 2;
+  }
+}
+
+// Describles a reference from one table to another. References are
+// generated from @refers_to/@referenced_by annotations. There exists at most
+// one `IrTableReference` for a given ordered pair of tables.
+//
+// Semantics: For each entry in the `source_table`, there must exist an entry in
+// the `destination_table` such that for each field reference, if the `source`
+// field exists in the source entry, the `destination` field must exist with
+// the same value in the destination entry.
+message IrTableReference {
+  IrTable source_table = 1;
+  IrTable destination_table = 2;
+
+  // The set of ALL references from a field in the `source_table` to a field in
+  // the `destination_table`. Each reference is encoded In P4 via either:
+  //   (a) an `@refers_to(dst_table, dst_field)` annotation on a match or action
+  //       field of the source table,
+  //   (b) an `@referenced_by(src_table, src_field)` annotation on a match field
+  //       of the destination table.
+  repeated FieldReference field_references = 3;
+  message FieldReference {
+    IrField source = 1;
+    IrField destination = 2;
+  }
+}
+
+// Describes a match field.
+message IrMatchFieldDefinition {
+  // Required. From P4Info.
+  p4.config.v1.MatchField match_field = 1;
+  // Required, the format of this field as deduced from the match field type
+  // and annotations.
+  Format format = 2;
+  // Optional. The set of references.
+  // TODO: b/306016407 - Remove this message once all P4 infrastructure has been
+  // moved to `IrTableReference`.
+  repeated IrMatchFieldReference references = 3 [deprecated = true];
+  // True if match field has @unsupported annotation, otherwise false. Indicates
+  // that the match field is not (yet) supported by the target.
+  // See go/unblocking-sai-p4 for more details.
+  bool is_unsupported = 14;
+}
+
+// Describes a meter.
+message IrMeter {
+  // Required. Unit of the meter.
+  p4.config.v1.MeterSpec.Unit unit = 1;
+}
+
+// Describes a counter
+message IrCounter {
+  // Required. Unit for the counter.
+  p4.config.v1.CounterSpec.Unit unit = 1;
+}
+
+// Describes a P4 table.
+message IrTableDefinition {
+  // Required. From P4Info.
+  p4.config.v1.Preamble preamble = 1;
+  // Required. Maps match field IDs to match fields.
+  map<uint32, IrMatchFieldDefinition> match_fields_by_id = 2;
+  // Required. Maps match field names to match fields.
+  map<string, IrMatchFieldDefinition> match_fields_by_name = 3;
+  // Optional. The set of actions for this table usable by table entries, if
+  // any.
+  repeated IrActionReference entry_actions = 4;
+  // Optional. These actions are only available for the default action.
+  repeated IrActionReference default_only_actions = 5;
+  // Required. Max number of entries in table.
+  int64 size = 6;
+  // Required. Does this table use one-shot action selector programming? Implies
+  // that this is a WCMP table. Only oneshot WCMP tables are supported.
+  bool uses_oneshot = 7;
+  // Optional. P4 id of the "implementation" for this table (i.e. action profile
+  // id, since this is the only currently supported implementation); if this
+  // value does not exist, the table is a regular (direct) match table,
+  // otherwise, this is a WCMP table.
+  oneof implementation_id {
+    uint32 action_profile_id = 13;
+  }
+  // Required. Does this table require priority?
+  bool requires_priority = 8;
+  // Optional. Meter configuration.
+  IrMeter meter = 9;
+  // Optional. Counter configuration.
+  IrCounter counter = 10;
+  // Optional. Constant default action for this table. Cannot be overridden.
+  IrActionDefinition const_default_action = 11;
+  // Optional. P4Runtime role of this table.
+  string role = 12;
+  // True if table has @unsupported annotation, otherwise false. Indicates that
+  // the table is not (yet) supported by the target.
+  // See go/unblocking-sai-p4 for more details.
+  bool is_unsupported = 14;
+  // `IrTableReference` where this table is the `source_table`.
+  repeated IrTableReference outgoing_references = 15;
+  // `IrTableReference` where this table is the `destination_table`.
+  repeated IrTableReference incoming_references = 16;
+  // Next: 17
+}
+
+// Describes a reference to an action (from a table).
+message IrActionReference {
+  // Required. From P4Info.
+  p4.config.v1.ActionRef ref = 1;
+  // Required. The definition of this action.
+  IrActionDefinition action = 2;
+  // Required for non-default-only actions. Proto ID for this action reference.
+  uint32 proto_id = 3;
+}
+
+// Describes an action definition.
+message IrActionDefinition {
+  // Describes an action parameter definition.
+  message IrActionParamDefinition {
+    // Required. From P4Info.
+    p4.config.v1.Action.Param param = 1;
+    // Required, the format of this parameter as deduced from the parameter type
+    // and annotations.
+    Format format = 2;
+    // Optional. The set of references.
+    // TODO: b/306016407 - Remove this message once all P4 infrastructure has
+    // been moved to `IrTableReference`.
+    repeated IrMatchFieldReference references = 3 [deprecated = true];
+  }
+  // Required. From P4Info.
+  p4.config.v1.Preamble preamble = 1;
+  // Required. Maps parameter IDs to parameters.
+  map<uint32, IrActionParamDefinition> params_by_id = 2;
+  // Required. Maps parameter names to parameters.
+  map<string, IrActionParamDefinition> params_by_name = 3;
+  // True if action has @unsupported annotation, otherwise false. Indicates that
+  // the action is not (yet) supported by the target.
+  // See go/unblocking-sai-p4 for more details.
+  bool is_unsupported = 4;
+}
+
+// Describes an action profile definition.
+message IrActionProfileDefinition {
+  // Required. The action profile from the P4Info.
+  p4.config.v1.ActionProfile action_profile = 1;
+}
+
+// Describes a packet-io metadata header.
+message IrPacketIoMetadataDefinition {
+  // Required. From P4Info.
+  p4.config.v1.ControllerPacketMetadata.Metadata metadata = 1;
+  // Required, the format of this parameter as deduced from the parameter type
+  // and annotations.
+  Format format = 2;
+  // True if metadata field has @padding (go/pdpi-padding) annotation present,
+  // otherwise false. Indicates that metadata is excluded from IR and PD proto,
+  // and zero-valued in PI proto.
+  bool is_padding = 3;
+}
+
+// Describes a built-in table.
+message IrBuiltInTableDefinition {
+  IrBuiltInTable built_in_table = 1;
+  // `IrTableReference` where this table is the `source_table`.
+  repeated IrTableReference outgoing_references = 2;
+  // `IrTableReference` where this table is the `destination_table`.
+  repeated IrTableReference incoming_references = 3;
+}
+
+// Describes an entire P4 program.
+message IrP4Info {
+  // Top-level package documentation describing the forwarding pipeline config.
+  p4.config.v1.PkgInfo pkg_info = 1;
+  // Maps table IDs to tables.
+  map<uint32, IrTableDefinition> tables_by_id = 2;
+  // Maps table names to tables.
+  map<string, IrTableDefinition> tables_by_name = 3;
+  // Maps action IDs to actions.
+  map<uint32, IrActionDefinition> actions_by_id = 4;
+  // Maps action names to actions.
+  map<string, IrActionDefinition> actions_by_name = 5;
+  // Maps action profile IDs to action profiles.
+  map<uint32, IrActionProfileDefinition> action_profiles_by_id = 11;
+  // Maps action profile names to action profiles.
+  map<string, IrActionProfileDefinition> action_profiles_by_name = 12;
+  // Maps packet-in metadata IDs to metadata.
+  map<uint32, IrPacketIoMetadataDefinition> packet_in_metadata_by_id = 6;
+  // Maps packet-in metadata names to metadata.
+  map<string, IrPacketIoMetadataDefinition> packet_in_metadata_by_name = 7;
+  // Maps packet-out metadata IDs to metadata.
+  map<uint32, IrPacketIoMetadataDefinition> packet_out_metadata_by_id = 8;
+  // Maps packet-out metadata names to metadata.
+  map<string, IrPacketIoMetadataDefinition> packet_out_metadata_by_name = 9;
+  // All match field references.
+  // TODO: b/306016407 - Remove this message once all P4 infrastructure has been
+  // moved to `IrTableReference`.
+  repeated IrMatchFieldReference references = 10 [deprecated = true];
+  // Maps built-in table name to definitions. Refer to `IrBuiltInTable` for
+  // valid built-in table names.
+  map<string, IrBuiltInTableDefinition> built_in_tables = 13;
+}
+
+// -- Table entries ------------------------------------------------------------
+
+// Describes a value.
+message IrValue {
+  // Required. Parallel to Format enum.
+  oneof format {
+    string hex_str = 1;
+    string ipv4 = 2;
+    string ipv6 = 3;
+    string mac = 4;
+    string str = 5;
+  }
+}
+
+// Describes a match of a table entry
+message IrMatch {
+  // Required. The name of the field being matched on.
+  string name = 1;
+
+  message IrTernaryMatch {
+    IrValue value = 1;
+    IrValue mask = 2;
+  }
+
+  message IrLpmMatch {
+    IrValue value = 1;
+    int32 prefix_length = 2;
+  }
+
+  message IrOptionalMatch {
+    IrValue value = 1;
+  }
+
+  // Required. Described the value being matched.
+  oneof match_value {
+    IrValue exact = 2;
+    IrLpmMatch lpm = 3;
+    IrTernaryMatch ternary = 4;
+    IrOptionalMatch optional = 5;
+  }
+}
+
+// Describes an invocation of table action, with a concrete set of parameters.
+message IrActionInvocation {
+  // Required, the name of the action that is invoked.
+  string name = 1;
+
+  // Describes a concrete value to be passed as a parameter.
+  message IrActionParam {
+    // Required, the name of the parameter.
+    string name = 1;
+    // Required, the value of the parameter.
+    IrValue value = 2;
+  }
+  // Set of parameters for the action.
+  repeated IrActionParam params = 2;
+}
+
+// Describes an action invocation of an action set.
+message IrActionSetInvocation {
+  // The actual action invocation.
+  IrActionInvocation action = 1;
+  // Required. Weight of this action. Must be positive.
+  int32 weight = 2;
+  // Optional. Watch port.
+  string watch_port = 3;
+}
+
+// Describes an action profile action set (for WCMP tables).
+message IrActionSet {
+  // Required. The set of actions.
+  repeated IrActionSetInvocation actions = 1;
+}
+
+// Describes a table entry (matches, priority and action, plus some metadata).
+message IrTableEntry {
+  // Required, the name of the table this entry belong to.
+  string table_name = 1;
+  // Required, the set of matches.
+  repeated IrMatch matches = 2;
+  // The priority. 0 for tables with only exact matches, and required otherwise.
+  int32 priority = 3;
+  // Required, the action to be invoked.
+  oneof type {
+    IrActionInvocation action = 4;
+    IrActionSet action_set = 5;
+  }
+  // Meter config (required for tables with a meter, absent otherwise).
+  p4.v1.MeterConfig meter_config = 6;
+  // Optional. Counter data.
+  p4.v1.CounterData counter_data = 7;
+  // Optional. Meter counter data.
+  p4.v1.MeterCounterData meter_counter_data = 9;
+  // Optional, the metadata from the controller.
+  bytes controller_metadata = 8;
+}
+
+// Describes a list of table entries.
+message IrTableEntries {
+  repeated IrTableEntry entries = 1;
+}
+
+//-- Packet Replication Engine -------------------------------------------------
+
+// Describes a PacketReplicationEngine (PRE) entry. Currently, the only
+// supported PRE entry is multicast group entry.
+message IrPacketReplicationEngineEntry {
+  oneof type {
+    IrMulticastGroupEntry multicast_group_entry = 1;
+  }
+}
+
+message IrReplica {
+  string port = 1;
+  uint32 instance = 2;
+}
+
+message IrMulticastGroupEntry {
+  uint32 multicast_group_id = 1;
+  repeated IrReplica replicas = 2;
+}
+
+// -- Packet IO ----------------------------------------------------------------
+
+// Describes a packet in.
+message IrPacketIn {
+  bytes payload = 1;
+  repeated IrPacketMetadata metadata = 2;
+}
+// Describes a packet out.
+message IrPacketOut {
+  bytes payload = 1;
+  repeated IrPacketMetadata metadata = 2;
+}
+
+// A single packet io metadata header.
+message IrPacketMetadata {
+  string name = 1;
+  IrValue value = 2;
+}
+
+// -- RPC messages -------------------------------------------------------------
+
+// Describes an entity within an Update.
+message IrEntity {
+  oneof entity {
+    IrTableEntry table_entry = 1;
+    IrPacketReplicationEngineEntry packet_replication_engine_entry = 2;
+  }
+}
+
+// Describes a list of entities.
+message IrEntities {
+  repeated IrEntity entities = 1;
+}
+
+// Describes an update in a Write RPC request.
+message IrUpdate {
+  // Required.
+  p4.v1.Update.Type type = 1;
+  // Required.
+  IrEntity entity = 2;
+}
+
+// Describes a Write RPC request.
+message IrWriteRequest {
+  // Required.
+  uint64 device_id = 1;
+  // Required.
+  p4.v1.Uint128 election_id = 2;
+  // Required.
+  repeated IrUpdate updates = 3;
+}
+
+// Describes the status of a single update in a Write RPC.
+message IrUpdateStatus {
+  // Required.
+  google.rpc.Code code = 1;
+  // Required for non-OK status.
+  string message = 2;
+}
+
+// Describes the result of a Write RPC.
+message IrWriteRpcStatus {
+  oneof status {
+    google.rpc.Status rpc_wide_error = 1;
+    IrWriteResponse rpc_response = 2;
+  }
+}
+
+// Describes a Write RPC response.
+message IrWriteResponse {
+  // Same order as `updates` in `WriteRequest`.
+  repeated IrUpdateStatus statuses = 1;
+}
+
+// Read requests.
+message IrReadRequest {
+  // Required.
+  uint64 device_id = 1;
+  // Indicates if counter data should be read.
+  bool read_counter_data = 2;
+  // Indicates if meter configs should be read.
+  bool read_meter_configs = 3;
+}
+
+// A read request response.
+message IrReadResponse {
+  // The table entries read by the switch.
+  repeated IrEntity entities = 1;
+}
+
+// A stream message request
+message IrStreamMessageRequest {
+  oneof update {
+    p4.v1.MasterArbitrationUpdate arbitration = 1;
+    IrPacketOut packet = 2;
+  }
+}
+
+// A stream error message
+message IrStreamError {
+  google.rpc.Status status = 1;
+  // Used by the server to convey additional information about the error.
+  // The field must be set (so that the client can identify which type of
+  // stream message triggered the error), but that field may be set to its
+  // default value.
+  IrPacketOut packet_out = 2;
+}
+
+// A stream message response
+message IrStreamMessageResponse {
+  oneof update {
+    p4.v1.MasterArbitrationUpdate arbitration = 1;
+    IrPacketIn packet = 2;
+    // Used by the server to asynchronously report errors which occur when
+    // processing StreamMessageRequest messages.
+    IrStreamError error = 3;
+  }
+}

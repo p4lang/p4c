@@ -46,9 +46,25 @@ function(validate_protobuf testfile testfolder)
   file(APPEND ${testfile} "for item in \${txtpbfiles[@]}\n")
   file(APPEND ${testfile} "do\n")
   file(APPEND ${testfile} "\techo \"Found \${item}\"\n")
-  file(APPEND ${testfile} "\t${PROTOBUF_PROTOC_EXECUTABLE} --proto_path=${CMAKE_CURRENT_LIST_DIR}/../proto --proto_path=${P4RUNTIME_STD_DIR} --proto_path=${P4C_SOURCE_DIR}/control-plane --encode=p4testgen.TestCase p4testgen.proto < \${item}\n")
+  file(APPEND ${testfile} "\t${PROTOBUF_PROTOC_EXECUTABLE} --proto_path=${CMAKE_CURRENT_LIST_DIR}/../proto --proto_path=${P4RUNTIME_STD_DIR} --proto_path=${P4C_SOURCE_DIR}/control-plane --encode=p4testgen.TestCase p4testgen.proto < \${item} > /dev/null\n")
   file(APPEND ${testfile} "done\n")
 endfunction(validate_protobuf)
+
+# Write the script to validate whether a given protobuf IR text format file has a valid format.
+# Arguments:
+#   - testfile is the testing script that this script is written to.
+#   - testfolder is target folder of the test.
+function(validate_protobuf_ir testfile testfolder)
+  # Find all the proto tests generated for this P4 file and validate their correctness.
+  file(APPEND ${testfile} "txtpbfiles=($(find ${testfolder} -name \"*.txtpb\"  | sort -n ))\n")
+  file(APPEND ${testfile} "for item in \${txtpbfiles[@]}\n")
+  file(APPEND ${testfile} "do\n")
+  file(APPEND ${testfile} "\techo \"Found \${item}\"\n")
+  file(APPEND ${testfile} "\t${PROTOBUF_PROTOC_EXECUTABLE} --proto_path=${CMAKE_CURRENT_LIST_DIR}/../proto --proto_path=${P4RUNTIME_STD_DIR} --proto_path=${P4C_SOURCE_DIR} --proto_path=${P4C_SOURCE_DIR}/control-plane --encode=p4testgen_ir.TestCase p4testgen_ir.proto < \${item} > /dev/null\n")
+  file(APPEND ${testfile} "done\n")
+endfunction(validate_protobuf_ir)
+
+
 
 # Write the script to validate whether a given protobuf file has a valid format.
 # Arguments:
@@ -72,6 +88,7 @@ endfunction(check_empty_folder)
 #   - ARCH is the p4 architecture
 #   - ENABLE_RUNNER is the flag to  execute BMv2 on the generated tests.
 #   - VALIDATE_PROTOBUF is the flag to check whether the generated Protobuf tests are valid.
+#   - VALIDATE_PROTOBUF is the flag to check whether the generated Protobuf IR tests are valid.
 #   - TEST_ARGS is a list of arguments to pass to the test
 #   - CMAKE_ARGS are additional arguments to pass to the test
 #
@@ -80,7 +97,7 @@ endfunction(check_empty_folder)
 # Sets the timeout on tests at 300s. For the slow CI machines.
 function(p4tools_add_test_with_args)
   # Parse arguments.
-  set(options ENABLE_RUNNER VALIDATE_PROTOBUF P416_PTF USE_ASSERT_MODE DISABLE_ASSUME_MODE CHECK_EMPTY)
+  set(options ENABLE_RUNNER VALIDATE_PROTOBUF VALIDATE_PROTOBUF_IR P416_PTF USE_ASSERT_MODE DISABLE_ASSUME_MODE CHECK_EMPTY)
   set(oneValueArgs TAG DRIVER ALIAS P4TEST TARGET ARCH)
   set(multiValueArgs TEST_ARGS CMAKE_ARGS)
   cmake_parse_arguments(
@@ -139,6 +156,9 @@ function(p4tools_add_test_with_args)
     # If VALIDATE_PROTOBUF is active, check whether the format of the generated tests is valid.
     if(${TOOLS_BMV2_TESTS_VALIDATE_PROTOBUF})
       validate_protobuf(${__testfile} ${__testfolder})
+    endif()
+    if(${TOOLS_BMV2_TESTS_VALIDATE_PROTOBUF_IR})
+      validate_protobuf_ir(${__testfile} ${__testfolder})
     endif()
   endif()
 
