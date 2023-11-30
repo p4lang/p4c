@@ -192,7 +192,7 @@ if (/* hdr->ipv4.isValid() */
                                     /* construct key */
                                     struct p4tc_table_entry_create_bpf_params__local update_params = {
                                         .pipeid = 1,
-                                        .tblid = 1,
+                                        .tblid = 2,
                                         .aging_ms = 2
                                     };
                                     bpf_p4tc_entry_update(skb, &update_params, &key, sizeof(key), act_bpf);

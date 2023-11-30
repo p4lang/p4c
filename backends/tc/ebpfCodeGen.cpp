@@ -1238,6 +1238,14 @@ ControlBodyTranslatorPNA::ControlBodyTranslatorPNA(const EBPF::EBPFControlPSA *c
       EBPF::ControlBodyTranslator(control),
       tcIR(tcIR) {}
 
+ControlBodyTranslatorPNA::ControlBodyTranslatorPNA(const EBPF::EBPFControlPSA *control,
+                                                   const ConvertToBackendIR *tcIR,
+                                                   const EBPF::EBPFTablePSA *table)
+    : EBPF::CodeGenInspector(control->program->refMap, control->program->typeMap),
+      EBPF::ControlBodyTranslator(control),
+      tcIR(tcIR),
+      table(table) {}
+
 cstring ControlBodyTranslatorPNA::getParamName(const IR::PathExpression *expr) {
     return expr->path->name.name;
 }
@@ -1277,8 +1285,7 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
         builder->append(")");
         return;
     } else if (function->expr->toString() == "set_entry_expire_time") {
-        auto action = findContext<IR::P4Action>();
-        if (action) {
+        if (table) {
             builder->emitIndent();
             builder->appendLine("/* construct key */");
             builder->emitIndent();
@@ -1287,9 +1294,11 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
             builder->emitIndent();
             builder->appendLine("    .pipeid = 1,");
             builder->emitIndent();
-            auto table = tcIR->getTableForAction(action->name.originalName);
-            BUG_CHECK(table != nullptr, "Action not found");
-            auto tblId = tcIR->getTableId(table->getName().originalName);
+            auto controlName = control->controlBlock->getName().originalName;
+            /* Table instanceName is control_block_name + "_" + original table name.
+            Truncating control name to get the table name.*/
+            auto tableName = table->instanceName.substr(controlName.size() + 1);
+            auto tblId = tcIR->getTableId(tableName);
             BUG_CHECK(tblId != 0, "Table ID not found");
             builder->appendFormat("    .tblid = %d,", tblId);
             builder->newline();
@@ -1499,7 +1508,7 @@ ActionTranslationVisitorPNA::ActionTranslationVisitorPNA(const EBPF::EBPFProgram
                                                          const ConvertToBackendIR *tcIR)
     : EBPF::CodeGenInspector(program->refMap, program->typeMap),
       EBPF::ActionTranslationVisitor(valueName, program),
-      ControlBodyTranslatorPNA(program->to<EBPF::EBPFPipeline>()->control, tcIR),
+      ControlBodyTranslatorPNA(program->to<EBPF::EBPFPipeline>()->control, tcIR, table),
       table(table) {}
 
 bool ActionTranslationVisitorPNA::preorder(const IR::PathExpression *pe) {

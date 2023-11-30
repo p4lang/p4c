@@ -291,9 +291,13 @@ class ConvertToEBPFDeparserPNA : public Inspector {
 class ControlBodyTranslatorPNA : public EBPF::ControlBodyTranslator {
  public:
     const ConvertToBackendIR *tcIR;
+    const EBPF::EBPFTablePSA *table;
     explicit ControlBodyTranslatorPNA(const EBPF::EBPFControlPSA *control);
     explicit ControlBodyTranslatorPNA(const EBPF::EBPFControlPSA *control,
                                       const ConvertToBackendIR *tcIR);
+    explicit ControlBodyTranslatorPNA(const EBPF::EBPFControlPSA *control,
+                                      const ConvertToBackendIR *tcIR,
+                                      const EBPF::EBPFTablePSA *table);
     void processFunction(const P4::ExternFunction *function);
     void processApply(const P4::ApplyMethod *method);
     bool checkPnaPortMem(const IR::Member *m);
