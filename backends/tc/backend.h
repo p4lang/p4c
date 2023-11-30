@@ -59,6 +59,7 @@ class ConvertToBackendIR : public Inspector {
     ordered_map<unsigned, cstring> tableIDList;
     ordered_map<unsigned, cstring> actionIDList;
     ordered_map<unsigned, unsigned> tableKeysizeList;
+    ordered_map<const IR::P4Table *, safe_vector<cstring>> actionsPerTable;
 
  public:
     ConvertToBackendIR(const IR::ToplevelBlock *tlb, IR::TCPipeline *pipe, P4::ReferenceMap *refMap,
@@ -84,6 +85,7 @@ class ConvertToBackendIR : public Inspector {
     unsigned getActionId(cstring actionName) const;
     unsigned getTableKeysize(unsigned tableId) const;
     cstring externalName(const IR::IDeclaration *declaration) const;
+    const IR::P4Table *getTableForAction(cstring action) const;
 };
 
 class Extern {

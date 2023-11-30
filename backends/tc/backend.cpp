@@ -428,6 +428,7 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
                         expr);
             }
         }
+        safe_vector<cstring> action_list;
         auto actionlist = t->getActionList();
         for (auto action : actionlist->actionList) {
             for (auto actionDef : tcPipeline->actionDefs) {
@@ -446,12 +447,25 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
                 }
                 tableDefinition->addAction(actionDef, tableFlag);
             }
+            action_list.push_back(action->toString());
         }
         updateDefaultHitAction(t, tableDefinition);
         updateDefaultMissAction(t, tableDefinition);
         updateMatchType(t, tableDefinition);
         tcPipeline->addTableDefinition(tableDefinition);
+        actionsPerTable.emplace(t, action_list);
     }
+}
+
+const IR::P4Table *ConvertToBackendIR::getTableForAction(cstring action) const {
+    for (auto entry : actionsPerTable) {
+        for (auto act : entry.second) {
+            if (action.find(act)) {
+                return entry.first;
+            }
+        }
+    }
+    return nullptr;
 }
 
 void ConvertToBackendIR::postorder(const IR::P4Program *p) {
