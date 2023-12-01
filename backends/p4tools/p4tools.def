@@ -265,7 +265,8 @@ class HeaderExpression : StructExpression {
 /// An wrapper which models an InOut argument.
 /// Contains both a copy of the original reference as well as the resolved value of that reference.
 class InOutReference : Expression {
-/// Because we do not use a reference we need to construct the value normally.
+/// Because we do not use a reference for "ref" and also inline the member the irgenerator produces
+/// a constructor that does not compile. We need to write the constructor manually instead.
 #noconstructor
 #nomethod_constructor
     /// The original reference.
