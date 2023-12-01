@@ -261,3 +261,32 @@ class HeaderExpression : StructExpression {
         BUG_CHECK(structType == nullptr || structType->is<IR::Type_Header>(), "%1%: unexpected header type", structType->node_type_name());
     }
 }
+
+/// An wrapper which models an InOut argument.
+/// Contains both a copy of the original reference as well as the resolved value of that reference.
+class InOutReference : Expression {
+/// Because we do not use a reference for "ref" and also inline the member the irgenerator produces
+/// a constructor that does not compile. We need to write the constructor manually instead.
+#noconstructor
+#nomethod_constructor
+    /// The original reference.
+    inline StateVariable ref;
+    /// The value of the reference after it was resolved.
+    Expression resolvedRef;
+
+    InOutReference(JSONLoader & json) : Expression(json), ref(json) {
+        json.load("resolvedRef", resolvedRef);
+    }
+
+    InOutReference(Util::SourceInfo srcInfo, IR::StateVariable &ref, const Expression* resolvedRef) :
+        Expression(srcInfo, ref.type), ref(ref), resolvedRef(resolvedRef)
+        { validate(); }
+
+    InOutReference(IR::StateVariable &ref, const Expression* resolvedRef) :
+        Expression(ref.type), ref(ref), resolvedRef(resolvedRef)
+        { validate(); }
+
+    toString { return ref->toString() + "(" + resolvedRef->toString() + ")"; }
+
+    dbprint { out << ref << "(" << resolvedRef << ")"; }
+}

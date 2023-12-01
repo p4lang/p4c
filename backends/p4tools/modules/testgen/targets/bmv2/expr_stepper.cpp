@@ -25,7 +25,6 @@
 #include "lib/cstring.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
-#include "lib/log.h"
 #include "lib/ordered_map.h"
 
 #include "backends/p4tools/modules/testgen/core/externs.h"
@@ -37,11 +36,9 @@
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/packet_vars.h"
-#include "backends/p4tools/modules/testgen/lib/test_spec.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/constants.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/program_info.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/table_stepper.h"
-#include "backends/p4tools/modules/testgen/targets/bmv2/target.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
@@ -298,22 +295,10 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                                                   const IR::Vector<IR::Argument> *args,
                                                   ExecutionState &state) {
     const ExternMethodImpls::MethodImpl assertAssumeExecute =
-        [](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
+        [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
            IR::ID &methodName, const IR::Vector<IR::Argument> *args, const ExecutionState &state,
            SmallStepEvaluator::Result &result) {
             const auto *cond = args->at(0)->expression;
-
-            if (!SymbolicEnv::isSymbolicValue(cond)) {
-                // Evaluate the condition.
-                stepToSubexpr(cond, result, state, [call](const Continuation::Parameter *v) {
-                    auto *clonedCall = call->clone();
-                    auto *arguments = new IR::Vector<IR::Argument>();
-                    arguments->push_back(new IR::Argument(v->param));
-                    clonedCall->arguments = arguments;
-                    return Continuation::Return(clonedCall);
-                });
-                return;
-            }
 
             // If the assert/assume condition is tainted, we do not know whether we abort.
             if (Taint::hasTaint(cond)) {
@@ -359,14 +344,10 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
              auto &nextState = state.clone();
              const auto *nineBitType = IR::getBitType(BMv2Constants::PORT_BIT_WIDTH);
-             const auto *metadataLabel = args->at(0)->expression;
-             if (!(metadataLabel->is<IR::Member>() || metadataLabel->is<IR::PathExpression>())) {
-                 TESTGEN_UNIMPLEMENTED("Drop input %1% of type %2% not supported", metadataLabel,
-                                       metadataLabel->type);
-             }
+             const auto *metadataLabel = args->at(0)->expression->checkedTo<IR::InOutReference>();
              // Use an assignment to set egress_spec to true.
              // This variable will be processed in the deparser.
-             const auto *portVar = new IR::Member(nineBitType, metadataLabel, "egress_spec");
+             const auto *portVar = new IR::Member(nineBitType, metadataLabel->ref, "egress_spec");
              nextState.set(portVar, IR::getConstant(nineBitType, BMv2Constants::DROP_PORT));
              nextState.add(*new TraceEvents::Generic("mark_to_drop executed."));
              nextState.popBody();
@@ -479,25 +460,18 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
              auto msg = args->at(0)->expression->checkedTo<IR::StringLiteral>()->value;
-             std::stringstream totalStream;
-             if (const auto *structExpr = args->at(1)->expression->to<IR::StructExpression>()) {
-                 int exprNumber = 0;
-                 for (size_t i = 0; i < msg.size(); i++) {
-                     if (i + 1 < msg.size() && msg.get(i) == '{' && msg.get(i + 1) == '}') {
-                         structExpr->components.at(exprNumber)->expression->dbprint(totalStream);
-                         exprNumber += 1;
-                         i += 1;
-                     } else {
-                         totalStream << msg.get(i);
-                     }
-                 }
-             } else {
-                 msg = msg.replace("{}", args->at(1)->toString());
-                 totalStream << msg;
-             }
+             auto value = args->at(1)->expression;
+             std::stringstream assignStream;
+             assignStream << msg << ": ";
+
+             // Strip any newlines in the value we want to record.
+             value->dbprint(assignStream);
+             auto assignString = assignStream.str();
+             assignString.erase(std::remove(assignString.begin(), assignString.end(), '\n'),
+                                assignString.cend());
 
              auto &nextState = state.clone();
-             nextState.add(*new TraceEvents::Generic(totalStream.str()));
+             nextState.add(*new TraceEvents::Generic(assignString.c_str()));
              nextState.popBody();
              result->emplace_back(nextState);
          }},
@@ -537,23 +511,6 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              // If any of the input arguments is tainted, the entire extern is unreliable.
              for (size_t idx = 1; idx < args->size(); ++idx) {
                  const auto *arg = args->at(idx);
-                 const auto *argExpr = arg->expression;
-
-                 // TODO: Frontload this in the expression stepper for method call expressions.
-                 if (!SymbolicEnv::isSymbolicValue(argExpr)) {
-                     // Evaluate the condition.
-                     stepToSubexpr(argExpr, result, state,
-                                   [call, idx](const Continuation::Parameter *v) {
-                                       auto *clonedCall = call->clone();
-                                       auto *arguments = clonedCall->arguments->clone();
-                                       auto *arg = arguments->at(idx)->clone();
-                                       arg->expression = v->param;
-                                       (*arguments)[idx] = arg;
-                                       clonedCall->arguments = arguments;
-                                       return Continuation::Return(clonedCall);
-                                   });
-                     return;
-                 }
                  argsAreTainted = argsAreTainted || Taint::hasTaint(arg->expression);
              }
              const auto *hashOutput = args->at(0)->expression;
@@ -604,29 +561,9 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          */
         {"register.read",
          {"result", "index"},
-         [this](const IR::MethodCallExpression *call, const IR::Expression *receiver,
+         [this](const IR::MethodCallExpression * /*call*/, const IR::Expression *receiver,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
-             for (size_t idx = 1; idx < args->size(); ++idx) {
-                 const auto *arg = args->at(idx);
-                 const auto *argExpr = arg->expression;
-
-                 // TODO: Frontload this in the expression stepper for method call expressions.
-                 if (!SymbolicEnv::isSymbolicValue(argExpr)) {
-                     // Evaluate the condition.
-                     stepToSubexpr(argExpr, result, state,
-                                   [call, idx](const Continuation::Parameter *v) {
-                                       auto *clonedCall = call->clone();
-                                       auto *arguments = clonedCall->arguments->clone();
-                                       auto *arg = arguments->at(idx)->clone();
-                                       arg->expression = v->param;
-                                       (*arguments)[idx] = arg;
-                                       clonedCall->arguments = arguments;
-                                       return Continuation::Return(clonedCall);
-                                   });
-                     return;
-                 }
-             }
              const auto *readOutput = args->at(0)->expression;
              const auto *index = args->at(1)->expression;
              auto &nextState = state.clone();
@@ -699,7 +636,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          */
         {"register.write",
          {"index", "value"},
-         [this](const IR::MethodCallExpression *call, const IR::Expression *receiver,
+         [this](const IR::MethodCallExpression * /*call*/, const IR::Expression *receiver,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
              const auto *index = args->at(0)->expression;
@@ -710,26 +647,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                      "Only registers with bit or int types are currently supported for "
                      "v1model.");
              }
-             for (size_t idx = 0; idx < args->size(); ++idx) {
-                 const auto *arg = args->at(idx);
-                 const auto *argExpr = arg->expression;
 
-                 // TODO: Frontload this in the expression stepper for method call expressions.
-                 if (!SymbolicEnv::isSymbolicValue(argExpr)) {
-                     // Evaluate the condition.
-                     stepToSubexpr(argExpr, result, state,
-                                   [call, idx](const Continuation::Parameter *v) {
-                                       auto *clonedCall = call->clone();
-                                       auto *arguments = clonedCall->arguments->clone();
-                                       auto *arg = arguments->at(idx)->clone();
-                                       arg->expression = v->param;
-                                       (*arguments)[idx] = arg;
-                                       clonedCall->arguments = arguments;
-                                       return Continuation::Return(clonedCall);
-                                   });
-                     return;
-                 }
-             }
              const auto *receiverPath = receiver->checkedTo<IR::PathExpression>();
              const auto &externInstance = state.findDecl(receiverPath);
              auto &nextState = state.clone();
@@ -888,24 +806,10 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
                  return;
              }
 
-             // TODO: Frontload this in the expression stepper for method call expressions.
-             const auto *index = args->at(0)->expression;
-             if (!SymbolicEnv::isSymbolicValue(index)) {
-                 // Evaluate the condition.
-                 stepToSubexpr(index, result, state, [call](const Continuation::Parameter *v) {
-                     auto *clonedCall = call->clone();
-                     auto *arguments = clonedCall->arguments->clone();
-                     auto *arg = arguments->at(0)->clone();
-                     arg->expression = v->param;
-                     (*arguments)[0] = arg;
-                     clonedCall->arguments = arguments;
-                     return Continuation::Return(clonedCall);
-                 });
-                 return;
-             }
              auto &nextState = state.clone();
              std::vector<Continuation::Command> replacements;
 
+             const auto *index = args->at(0)->expression;
              const auto *receiverPath = receiver->checkedTo<IR::PathExpression>();
              const auto &externInstance = nextState.findDecl(receiverPath);
 
@@ -1123,7 +1027,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          */
         {"*method.clone_preserving_field_list",
          {"type", "session", "data"},
-         [](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
+         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
              // Grab the recirculate count. Stop after more than 1 circulation loop to avoid
@@ -1143,23 +1047,6 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              bool argsAreTainted = false;
              for (size_t idx = 0; idx < args->size(); ++idx) {
                  const auto *arg = args->at(idx);
-                 const auto *argExpr = arg->expression;
-
-                 // TODO: Frontload this in the expression stepper for method call expressions.
-                 if (!SymbolicEnv::isSymbolicValue(argExpr)) {
-                     // Evaluate the condition.
-                     stepToSubexpr(argExpr, result, state,
-                                   [call, idx](const Continuation::Parameter *v) {
-                                       auto *clonedCall = call->clone();
-                                       auto *arguments = clonedCall->arguments->clone();
-                                       auto *arg = arguments->at(idx)->clone();
-                                       arg->expression = v->param;
-                                       (*arguments)[idx] = arg;
-                                       clonedCall->arguments = arguments;
-                                       return Continuation::Return(clonedCall);
-                                   });
-                     return;
-                 }
                  argsAreTainted = argsAreTainted || Taint::hasTaint(arg->expression);
              }
              // If any of the input arguments is tainted, the entire extern is unreliable.
@@ -1330,7 +1217,7 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
          */
         {"*method.clone",
          {"type", "session"},
-         [](const IR::MethodCallExpression *call, const IR::Expression * /*receiver*/,
+         [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
              // Grab the recirculate count. Stop after more than 1 circulation loop to avoid
@@ -1350,23 +1237,6 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              bool argsAreTainted = false;
              for (size_t idx = 0; idx < args->size(); ++idx) {
                  const auto *arg = args->at(idx);
-                 const auto *argExpr = arg->expression;
-
-                 // TODO: Frontload this in the expression stepper for method call expressions.
-                 if (!SymbolicEnv::isSymbolicValue(argExpr)) {
-                     // Evaluate the condition.
-                     stepToSubexpr(argExpr, result, state,
-                                   [call, idx](const Continuation::Parameter *v) {
-                                       auto *clonedCall = call->clone();
-                                       auto *arguments = clonedCall->arguments->clone();
-                                       auto *arg = arguments->at(idx)->clone();
-                                       arg->expression = v->param;
-                                       (*arguments)[idx] = arg;
-                                       clonedCall->arguments = arguments;
-                                       return Continuation::Return(clonedCall);
-                                   });
-                     return;
-                 }
                  argsAreTainted = argsAreTainted || Taint::hasTaint(arg->expression);
              }
              // If any of the input arguments is tainted, the entire extern is unreliable.
@@ -1465,23 +1335,6 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              // If any of the input arguments is tainted, the entire extern is unreliable.
              for (size_t idx = 0; idx < args->size(); ++idx) {
                  const auto *arg = args->at(idx);
-                 const auto *argExpr = arg->expression;
-
-                 // TODO: Frontload this in the expression stepper for method call expressions.
-                 if (!SymbolicEnv::isSymbolicValue(argExpr)) {
-                     // Evaluate the condition.
-                     stepToSubexpr(argExpr, result, state,
-                                   [call, idx](const Continuation::Parameter *v) {
-                                       auto *clonedCall = call->clone();
-                                       auto *arguments = clonedCall->arguments->clone();
-                                       auto *arg = arguments->at(idx)->clone();
-                                       arg->expression = v->param;
-                                       (*arguments)[idx] = arg;
-                                       clonedCall->arguments = arguments;
-                                       return Continuation::Return(clonedCall);
-                                   });
-                     return;
-                 }
                  argsAreTainted = argsAreTainted || Taint::hasTaint(arg->expression);
              }
 
@@ -1590,27 +1443,11 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              // If any of the input arguments is tainted, the entire extern is unreliable.
              for (size_t idx = 0; idx < args->size() - 2; ++idx) {
                  const auto *arg = args->at(idx);
-                 const auto *argExpr = arg->expression;
-
-                 // TODO: Frontload this in the expression stepper for method call expressions.
-                 if (!SymbolicEnv::isSymbolicValue(argExpr)) {
-                     // Evaluate the condition.
-                     stepToSubexpr(argExpr, result, state,
-                                   [call, idx](const Continuation::Parameter *v) {
-                                       auto *clonedCall = call->clone();
-                                       auto *arguments = clonedCall->arguments->clone();
-                                       auto *arg = arguments->at(idx)->clone();
-                                       arg->expression = v->param;
-                                       (*arguments)[idx] = arg;
-                                       clonedCall->arguments = arguments;
-                                       return Continuation::Return(clonedCall);
-                                   });
-                     return;
-                 }
                  argsAreTainted = argsAreTainted || Taint::hasTaint(arg->expression);
              }
 
-             const auto &checksumVar = ToolsVariables::convertReference(args->at(2)->expression);
+             const auto &checksumVar =
+                 args->at(2)->expression->checkedTo<IR::InOutReference>()->ref;
              const auto *updateCond = args->at(0)->expression;
              const auto *checksumVarType = checksumVar->type;
              const auto *data = args->at(1)->expression;
@@ -1682,27 +1519,11 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              // If any of the input arguments is tainted, the entire extern is unreliable.
              for (size_t idx = 0; idx < args->size() - 2; ++idx) {
                  const auto *arg = args->at(idx);
-                 const auto *argExpr = arg->expression;
-
-                 // TODO: Frontload this in the expression stepper for method call expressions.
-                 if (!SymbolicEnv::isSymbolicValue(argExpr)) {
-                     // Evaluate the condition.
-                     stepToSubexpr(argExpr, result, state,
-                                   [call, idx](const Continuation::Parameter *v) {
-                                       auto *clonedCall = call->clone();
-                                       auto *arguments = clonedCall->arguments->clone();
-                                       auto *arg = arguments->at(idx)->clone();
-                                       arg->expression = v->param;
-                                       (*arguments)[idx] = arg;
-                                       clonedCall->arguments = arguments;
-                                       return Continuation::Return(clonedCall);
-                                   });
-                     return;
-                 }
                  argsAreTainted = argsAreTainted || Taint::hasTaint(arg->expression);
              }
 
-             const auto &checksumVar = ToolsVariables::convertReference(args->at(2)->expression);
+             const auto &checksumVar =
+                 args->at(2)->expression->checkedTo<IR::InOutReference>()->ref;
              const auto *updateCond = args->at(0)->expression;
              const auto *checksumVarType = checksumVar->type;
              const auto *data = args->at(1)->expression;
@@ -1761,23 +1582,6 @@ void Bmv2V1ModelExprStepper::evalExternMethodCall(const IR::MethodCallExpression
              // If any of the input arguments is tainted, the entire extern is unreliable.
              for (size_t idx = 0; idx < args->size(); ++idx) {
                  const auto *arg = args->at(idx);
-                 const auto *argExpr = arg->expression;
-
-                 // TODO: Frontload this in the expression stepper for method call expressions.
-                 if (!SymbolicEnv::isSymbolicValue(argExpr)) {
-                     // Evaluate the condition.
-                     stepToSubexpr(argExpr, result, state,
-                                   [call, idx](const Continuation::Parameter *v) {
-                                       auto *clonedCall = call->clone();
-                                       auto *arguments = clonedCall->arguments->clone();
-                                       auto *arg = arguments->at(idx)->clone();
-                                       arg->expression = v->param;
-                                       (*arguments)[idx] = arg;
-                                       clonedCall->arguments = arguments;
-                                       return Continuation::Return(clonedCall);
-                                   });
-                     return;
-                 }
                  argsAreTainted = argsAreTainted || Taint::hasTaint(arg->expression);
              }
 
