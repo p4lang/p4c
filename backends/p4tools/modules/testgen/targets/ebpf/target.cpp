@@ -4,6 +4,7 @@
 
 #include <vector>
 
+#include "backends/p4tools/common/lib/util.h"
 #include "ir/ir.h"
 #include "ir/solver.h"
 #include "lib/cstring.h"
@@ -41,8 +42,7 @@ const EBPFProgramInfo *EBPFTestgenTarget::initProgramImpl(
     // The blocks in the main declaration are just the arguments in the constructor call.
     // Convert mainDecl->arguments into a vector of blocks, represented as constructor-call
     // expressions.
-    std::vector<const IR::Type_Declaration *> blocks;
-    argumentsToTypeDeclarations(program, mainDecl->arguments, blocks);
+    const auto blocks = argumentsToTypeDeclarations(program, mainDecl->arguments);
 
     // We should have six arguments.
     BUG_CHECK(blocks.size() == 2, "%1%: The EBPF architecture requires 2 blocks. Received %2%.",

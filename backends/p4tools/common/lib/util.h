@@ -125,6 +125,23 @@ class Utils {
     }
 };
 
+/// Converts the list of arguments @inputArgs to a list of type declarations. Any names appearing in
+/// the arguments are resolved with @ns.
+/// This is mainly useful for inspecting package instances.
+std::vector<const IR::Type_Declaration *> argumentsToTypeDeclarations(
+    const IR::IGeneralNamespace *ns, const IR::Vector<IR::Argument> *inputArgs);
+
+/// Looks up a declaration from a path. A BUG occurs if no declaration is found.
+const IR::IDeclaration *findProgramDecl(const IR::IGeneralNamespace *ns, const IR::Path *path);
+
+/// Looks up a declaration from a path expression. A BUG occurs if no declaration is found.
+const IR::IDeclaration *findProgramDecl(const IR::IGeneralNamespace *ns,
+                                        const IR::PathExpression *pathExpr);
+
+/// Resolves a Type_Name in the top-level namespace.
+const IR::Type_Declaration *resolveProgramType(const IR::IGeneralNamespace *ns,
+                                               const IR::Type_Name *type);
+
 }  // namespace P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_LIB_UTIL_H_ */
