@@ -29,6 +29,10 @@ struct CoverageOptions {
     bool coverTableEntries = false;
     /// Skip tests which do not increase coverage.
     bool onlyCoveringTests = false;
+
+    /// @returns true if and only if at least one of the coverage-collection options (cover*) is
+    /// enabled
+    bool coverageEnabled() const { return coverStatements || coverTableEntries; }
 };
 
 /// Set of nodes used for coverage purposes. Compares nodes based on their
