@@ -123,7 +123,8 @@ bool TestBackEnd::run(const FinalState &state) {
 
         const P4::Coverage::CoverageSet &visitedNodes = symbex.getVisitedNodes();
         if (coverableNodes.empty()) {
-            printFeature("test_info", 4, "============ Test %1% ============", testCount);
+            printFeature("test_info", 4, "============ Test %1%: No nodes ============", testCount);
+            coverage = 1; // all 0 nodes covered
         } else {
             coverage =
                 static_cast<float>(visitedNodes.size()) / static_cast<float>(coverableNodes.size());
