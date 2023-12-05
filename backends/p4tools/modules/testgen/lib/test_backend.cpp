@@ -127,7 +127,8 @@ bool TestBackEnd::run(const FinalState &state) {
         } else if (coverableNodes.empty()) {
             printFeature("test_info", 4,
                          "============ Test %1%: No coverable nodes ============", testCount);
-            coverage = 1;  // all 0 nodes covered
+            // All 0 nodes covered.
+            coverage = 1.0;
         } else {
             coverage =
                 static_cast<float>(visitedNodes.size()) / static_cast<float>(coverableNodes.size());
