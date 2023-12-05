@@ -15,30 +15,8 @@ macro(p4c_obtain_protobuf)
     if(NOT Protobuf_FOUND)
       find_package(Protobuf REQUIRED)
     endif()
-    # Backwards compatibility
-    # Define camel case versions of input variables
-    foreach(UPPER
-        PROTOBUF_SRC_ROOT_FOLDER
-        PROTOBUF_IMPORT_DIRS
-        PROTOBUF_DEBUG
-        PROTOBUF_LIBRARY
-        PROTOBUF_PROTOC_LIBRARY
-        PROTOBUF_INCLUDE_DIR
-        PROTOBUF_PROTOC_EXECUTABLE
-        PROTOBUF_LIBRARY_DEBUG
-        PROTOBUF_PROTOC_LIBRARY_DEBUG
-        PROTOBUF_LITE_LIBRARY
-        PROTOBUF_LITE_LIBRARY_DEBUG
-        )
-        if (DEFINED ${UPPER})
-            string(REPLACE "PROTOBUF_" "Protobuf_" Camel ${UPPER})
-            if (NOT DEFINED ${Camel})
-                set(${Camel} ${${UPPER}})
-            endif()
-        endif()
-    endforeach()
-    # Protobuf sets the protoc binary to a generator expression, which are highly problematic.
-    # They are problematic because they are basically evaluated at build time.
+    # Protobuf sets the protoc binary to a generator expression, which are problematic.
+    # They are problematic because they are only evaluated at build time.
     # However, we may have scripts that depend on the actual build time during the configure phase.
     # Hard code a custom binary instead.
     find_program(PROTOC_BINARY protoc)
@@ -69,18 +47,6 @@ macro(p4c_obtain_protobuf)
     set(protobuf_BUILD_SHARED_LIBS OFF CACHE BOOL "Build Shared Libraries")
     # This is necessary to be able to call FindPackage.
     set(protobuf_INSTALL ON CACHE BOOL "Install Protobuf")
-    # Derive the target architecture in order to build the right architecture.
-    if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "aarch64" OR CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL
-                                                         "arm64"
-    )
-      set(protobuf_ARCH "aarch_64")
-    elseif(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "x86_64" OR CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL
-                                                            "amd64"
-    )
-      set(protobuf_ARCH "x86_64")
-    else()
-      message(FATAL_ERROR "Unsupported host architecture `${CMAKE_HOST_SYSTEM_PROCESSOR}`")
-    endif()
 
     fetchcontent_declare(
       protobuf
@@ -105,10 +71,10 @@ macro(p4c_obtain_protobuf)
     set(Protobuf_LIBRARY "protobuf::libprotobuf")
     set(Protobuf_PROTOC_LIBRARY "protobuf::libprotoc")
     set(Protobuf_PROTOC_EXECUTABLE $<TARGET_FILE:protoc>)
-    # Protobuf sets the protoc binary to a generator expression, which are highly problematic.
-    # They are problematic because they are basically evaluated at build time.
+    # Protobuf sets the protoc binary to a generator expression, which are problematic.
+    # They are problematic because they are only evaluated at build time.
     # However, we may have scripts that depend on the actual build time during the configure phase.
-    # Hard code a custom binary instead.
+    # Hard code a custom binary which we can use in addition to the generator expression.
     set(PROTOC_BINARY ${protobuf_BINARY_DIR}/protoc)
     set(Protobuf_INCLUDE_DIR "${protobuf_SOURCE_DIR}/src/")
 
