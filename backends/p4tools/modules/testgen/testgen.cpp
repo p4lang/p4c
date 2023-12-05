@@ -115,6 +115,14 @@ int Testgen::mainImpl(const IR::P4Program *program) {
     if (seed) {
         printFeature("test_info", 4, "============ Program seed %1% =============\n", *seed);
     }
+    if (testgenOptions.minCoverage > 0 && !testgenOptions.coverageOptions.coverageEnabled()) {
+        ::error(
+            ErrorType::ERR_INVALID,
+            "It is not allowed to have --assert-min-coverage set to non-zero without a coverage "
+            "tracking enabled with --track-coverage option. Without coverage tracking, the "
+            "--assert-min-coverage is meaningless.");
+        return EXIT_FAILURE;
+    }
 
     // Need to declare the solver here to ensure its lifetime.
     Z3Solver solver;
