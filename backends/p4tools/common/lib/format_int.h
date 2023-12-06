@@ -77,6 +77,23 @@ std::string insertOctalSeparators(const std::string &dataStr);
 /// Takes a hex-formatted string as input and inserts slashes as separators.
 std::string insertHexSeparators(const std::string &dataStr);
 
+/// Converts a big integer input into a vector of bytes with the size targetWidthBits /8.
+/// If the integer value is smaller than the request bit size, padding is added on the left-hand
+/// side.
+std::vector<uint8_t> convertBigIntToBytes(const big_int &dataInt, int targetWidthBits);
+
+/// Convert a byte array into a IPv4 string of the form "x.x.x.x".
+/// @returns std::nullopt if the conversion fails.
+std::optional<std::string> convertToIpv4String(const std::vector<uint8_t> &byteArray);
+
+/// Convert a byte array into a IPv4 string of the form "xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx".
+/// @returns std::nullopt if the conversion fails.
+std::optional<std::string> convertToIpv6String(const std::vector<uint8_t> &byteArray);
+
+/// Convert a byte array into a MAC string of the form "xx:xx:xx:xx:xx:xx".
+/// @returns std::nullopt if the conversion fails.
+std::optional<std::string> convertToMacString(const std::vector<uint8_t> &byteArray);
+
 }  // namespace P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_LIB_FORMAT_INT_H_ */

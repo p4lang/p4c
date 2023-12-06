@@ -21,9 +21,17 @@ class ProtobufIr : public Bmv2TestFramework {
     explicit ProtobufIr(std::filesystem::path basePath,
                         std::optional<unsigned int> seed = std::nullopt);
 
-    /// Produce a ProtobufIr test.
+    virtual ~ProtobufIr() = default;
+    ProtobufIr(const ProtobufIr &) = default;
+    ProtobufIr(ProtobufIr &&) = default;
+    ProtobufIr &operator=(const ProtobufIr &) = default;
+    ProtobufIr &operator=(ProtobufIr &&) = default;
+
     void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testId,
                     float currentCoverage) override;
+
+    [[nodiscard]] inja::json getControlPlaneForTable(
+        const TableMatchMap &matches, const std::vector<ActionArg> &args) const override;
 
  private:
     /// Emits a test case.
@@ -36,6 +44,18 @@ class ProtobufIr : public Bmv2TestFramework {
 
     /// @returns the inja test case template as a string.
     static std::string getTestCaseTemplate();
+
+    /// Tries to find the @format annotation of a node and, if present, returns the format specified
+    /// in this annotation. Returns "hex" by default.
+    static std::string getFormatOfNode(const IR::IAnnotated *node);
+
+    /// Converts an IR::Expression into a formatted string value. The format depends on @param type.
+    static std::string formatNetworkValue(const std::string &type, const IR::Expression *value);
+
+    /// Fill in @param rulesJson by iterating over @param fieldMatch and creating the appropriate
+    /// match key.
+    static void createKeyMatch(cstring fieldName, const TableMatch &fieldMatch,
+                               inja::json &rulesJson);
 };
 
 }  // namespace P4Tools::P4Testgen::Bmv2
