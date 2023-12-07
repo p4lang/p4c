@@ -122,7 +122,7 @@ bool TestBackEnd::run(const FinalState &state) {
         }
 
         const P4::Coverage::CoverageSet &visitedNodes = symbex.getVisitedNodes();
-        if (!testgenOptions.coverageOptions.coverageEnabled()) {
+        if (!testgenOptions.hasCoverageTracking) {
             printFeature("test_info", 4, "============ Test %1% ============", testCount);
         } else if (coverableNodes.empty()) {
             printFeature("test_info", 4,

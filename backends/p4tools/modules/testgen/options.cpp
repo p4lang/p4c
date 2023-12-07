@@ -259,6 +259,7 @@ TestgenOptions::TestgenOptions()
                 "STATEMENTS",
                 "TABLE_ENTRIES",
             };
+            hasCoverageTracking = true;
             auto selectionString = cstring(arg).toUpper();
             auto it = COVERAGE_OPTIONS.find(selectionString);
             if (it != COVERAGE_OPTIONS.end()) {
@@ -383,7 +384,7 @@ TestgenOptions::TestgenOptions()
 }
 
 void TestgenOptions::validate() const {
-    if (minCoverage > 0 && !coverageOptions.coverageEnabled()) {
+    if (minCoverage > 0 && !hasCoverageTracking) {
         ::error(
             ErrorType::ERR_INVALID,
             "It is not allowed to have --assert-min-coverage set to non-zero without a coverage "
