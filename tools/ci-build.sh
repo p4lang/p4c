@@ -180,7 +180,9 @@ function install_ptf_ebpf_test_deps() (
     sudo make install
 
     # install bpftool
-    git clone --recurse-submodules https://github.com/libbpf/bpftool.git /tmp/bpftool
+    # get tag for latest release, see https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28#get-the-latest-release
+    BPFTOOL_RELEASE_TAG=$(curl -s https://api.github.com/repos/libbpf/bpftool/releases/latest | jq '.tag_name' | sed 's/\"//g')
+    git clone --recurse-submodules --branch "$BPFTOOL_RELEASE_TAG" https://github.com/libbpf/bpftool.git /tmp/bpftool
     cd /tmp/bpftool/src
     make "-j$(nproc)"
     sudo make install
