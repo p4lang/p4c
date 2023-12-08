@@ -153,8 +153,12 @@ const AssignmentStatement *AssignmentStatement::apply(Transform &visitor) const 
 
 const AssignmentStatement *AssignmentStatement::evaluate(const Model &model,
                                                          bool doComplete) const {
-    const IR::Literal *right = nullptr;
-    if (Taint::hasTaint(stmt.right)) {
+    const IR::Expression *right = nullptr;
+    if (auto structExpr = stmt.right->to<IR::StructExpression>()) {
+        right = model.evaluateStructExpr(structExpr, doComplete);
+    } else if (auto listExpr = stmt.right->to<IR::BaseListExpression>()) {
+        right = model.evaluateListExpr(listExpr, doComplete);
+    } else if (Taint::hasTaint(stmt.right)) {
         right = &Taint::TAINTED_STRING_LITERAL;
     } else {
         right = model.evaluate(stmt.right, doComplete);
@@ -167,12 +171,19 @@ const AssignmentStatement *AssignmentStatement::evaluate(const Model &model,
 
 void AssignmentStatement::print(std::ostream &os) const {
     const auto &srcInfo = stmt.getSourceInfo();
+    // Convert the assignment to a string and strip any new lines.
+    // TODO: Maybe there is a better way to format newlines?
+    std::stringstream assignStream;
+    stmt.dbprint(assignStream);
+    auto assignString = assignStream.str();
+    assignString.erase(std::remove(assignString.begin(), assignString.end(), '\n'),
+                       assignString.cend());
     if (srcInfo.isValid()) {
         auto fragment = srcInfo.toSourceFragment(false);
         fragment = fragment.trim();
-        os << "[AssignmentStatement]: " << fragment << "| Computed: " << stmt;
+        os << "[AssignmentStatement]: " << fragment << "| Computed: " << assignString;
     } else {
-        os << "[P4Testgen AssignmentStatement]: " << stmt;
+        os << "[P4Testgen AssignmentStatement]: " << assignString;
     }
 }
 
@@ -255,49 +266,31 @@ void ExtractFailure::print(std::ostream &os) const {
  *   Emit
  * ============================================================================================= */
 
-Emit::Emit(const IR::Expression *emitHeader,
-           std::vector<std::pair<IR::StateVariable, const IR::Expression *>> fields)
-    : emitHeader(emitHeader), fields(std::move(fields)) {}
+Emit::Emit(const IR::HeaderExpression *emitHeader) : emitHeader(emitHeader) {}
 
 const Emit *Emit::subst(const SymbolicEnv &env) const {
     std::vector<std::pair<IR::StateVariable, const IR::Expression *>> applyFields;
-    applyFields.reserve(fields.size());
-    for (const auto &field : fields) {
-        applyFields.emplace_back(field.first, env.subst(field.second));
-    }
-    return new Emit(emitHeader, applyFields);
+    return new Emit(env.subst(emitHeader)->checkedTo<IR::HeaderExpression>());
 }
 
 const Emit *Emit::apply(Transform &visitor) const {
-    std::vector<std::pair<IR::StateVariable, const IR::Expression *>> applyFields;
-    applyFields.reserve(fields.size());
-    for (const auto &field : fields) {
-        applyFields.emplace_back(field.first, field.second->apply(visitor));
-    }
-    return new Emit(emitHeader, applyFields);
+    return new Emit(emitHeader->apply(visitor)->checkedTo<IR::HeaderExpression>());
 }
 
 const Emit *Emit::evaluate(const Model &model, bool doComplete) const {
-    std::vector<std::pair<IR::StateVariable, const IR::Expression *>> applyFields;
-    applyFields.reserve(fields.size());
-    for (const auto &field : fields) {
-        if (Taint::hasTaint(field.second)) {
-            applyFields.emplace_back(field.first, &Taint::TAINTED_STRING_LITERAL);
-        } else {
-            applyFields.emplace_back(field.first, model.evaluate(field.second, doComplete));
-        }
-    }
-    return new Emit(emitHeader, applyFields);
+    return new Emit(
+        model.evaluateStructExpr(emitHeader, doComplete)->checkedTo<IR::HeaderExpression>());
 }
 
 void Emit::print(std::ostream &os) const {
-    os << "[Emit] " << emitHeader->toString() << " -> ";
-    for (const auto &field : fields) {
-        os << field.first->toString() << " = " << formatHexExpr(field.second, true);
-        if (field != fields.back()) {
-            os << " | ";
-        }
-    }
+    // Convert the header expression to a string and strip any new lines.
+    // TODO: Maybe there is a better way to format newlines?
+    std::stringstream assignStream;
+    emitHeader->dbprint(assignStream);
+    auto headerString = assignStream.str();
+    headerString.erase(std::remove(headerString.begin(), headerString.end(), '\n'),
+                       headerString.cend());
+    os << "[Emit]: " << headerString;
 }
 
 /* =============================================================================================

@@ -17,7 +17,7 @@
 namespace P4Tools::P4Testgen::Bmv2 {
 
 /// Extracts information from the @testSpec to emit a STF test case.
-class STF : public Bmv2TF {
+class STF : public Bmv2TestFramework {
  public:
     explicit STF(std::filesystem::path basePath, std::optional<unsigned int> seed = std::nullopt);
 

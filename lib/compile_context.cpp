@@ -56,11 +56,6 @@ AutoCompileContext::AutoCompileContext(ICompileContext *context) {
 
 AutoCompileContext::~AutoCompileContext() { CompileContextStack::pop(); }
 
-BaseCompileContext::BaseCompileContext() {}
-
-BaseCompileContext::BaseCompileContext(const BaseCompileContext &other)
-    : errorReporterInstance(other.errorReporterInstance) {}
-
 /* static */ BaseCompileContext &BaseCompileContext::get() {
     return CompileContextStack::top<BaseCompileContext>();
 }

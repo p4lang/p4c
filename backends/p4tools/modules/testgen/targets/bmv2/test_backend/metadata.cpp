@@ -24,7 +24,7 @@
 namespace P4Tools::P4Testgen::Bmv2 {
 
 Metadata::Metadata(std::filesystem::path basePath, std::optional<unsigned int> seed)
-    : Bmv2TF(std::move(basePath), seed) {}
+    : Bmv2TestFramework(std::move(basePath), seed) {}
 
 std::string Metadata::getTestCaseTemplate() {
     static std::string TEST_CASE(

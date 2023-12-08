@@ -49,7 +49,7 @@ class GenericDescription : public Generic {
     void print(std::ostream &os) const override;
 
  public:
-    explicit GenericDescription(cstring description, cstring label);
+    explicit GenericDescription(cstring label, cstring description);
 };
 
 /* =============================================================================================
@@ -228,19 +228,15 @@ class ExtractFailure : public TraceEvent {
 /// A field being emitted by a deparser.
 class Emit : public TraceEvent {
  private:
-    /// The label of the emitted header. Either a PathExpression or a member.
-    const IR::Expression *emitHeader;
-
-    /// The list of fields and their values of the emitted header.
-    std::vector<std::pair<IR::StateVariable, const IR::Expression *>> fields;
+    /// The emitted header structure.
+    const IR::HeaderExpression *emitHeader;
 
  public:
     [[nodiscard]] const Emit *subst(const SymbolicEnv &env) const override;
     const Emit *apply(Transform &visitor) const override;
     [[nodiscard]] const Emit *evaluate(const Model &model, bool doComplete) const override;
 
-    Emit(const IR::Expression *emitHeader,
-         std::vector<std::pair<IR::StateVariable, const IR::Expression *>> fields);
+    explicit Emit(const IR::HeaderExpression *emitHeader);
     ~Emit() override = default;
     Emit(const Emit &) = default;
     Emit(Emit &&) = default;

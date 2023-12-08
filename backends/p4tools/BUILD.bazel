@@ -16,6 +16,41 @@ filegroup(
     visibility = ["//visibility:public"],  # So p4c can compile these.
 )
 
+proto_library(
+    name = "ir_proto",
+    srcs = ["modules/testgen/targets/bmv2/proto/ir.proto"],
+    deps = [
+        "@com_github_p4lang_p4runtime//:p4info_proto",
+        "@com_github_p4lang_p4runtime//:p4runtime_proto",
+        "@com_google_googleapis//google/rpc:code_proto",
+        "@com_google_googleapis//google/rpc:status_proto",
+    ],
+)
+
+proto_library(
+    name = "p4testgen_proto",
+    srcs = ["modules/testgen/targets/bmv2/proto/p4testgen.proto"],
+    deps = ["@com_github_p4lang_p4runtime//:p4runtime_proto"],
+)
+
+proto_library(
+    name = "p4testgen_ir_proto",
+    srcs = ["modules/testgen/targets/bmv2/proto/p4testgen_ir.proto"],
+    deps = [":ir_proto"],
+)
+
+cc_proto_library(
+    name = "p4testgen_cc_proto",
+    visibility = ["//visibility:public"],
+    deps = [":p4testgen_proto"],
+)
+
+cc_proto_library(
+    name = "p4testgen_ir_cc_proto",
+    visibility = ["//visibility:public"],
+    deps = [":p4testgen_ir_proto"],
+)
+
 genrule(
     name = "version",
     srcs = [

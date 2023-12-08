@@ -12,6 +12,7 @@ set(
 
   compiler/compiler_target.cpp
   compiler/convert_hs_index.cpp
+  compiler/convert_struct_expr.cpp
   compiler/convert_varbits.cpp
   compiler/midend.cpp
   compiler/reachability.cpp

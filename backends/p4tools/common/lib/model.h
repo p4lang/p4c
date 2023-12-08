@@ -71,10 +71,11 @@ class Model {
         const IR::StructExpression *structExpr, bool doComplete,
         ExpressionMap *resolvedExpressions = nullptr) const;
 
-    // Evaluates a P4 ListExpression in the context of this model. Recursively calls into @evaluate
-    // and substitutes all members of this list with a Value type.
-    const IR::ListExpression *evaluateListExpr(const IR::ListExpression *listExpr, bool doComplete,
-                                               ExpressionMap *resolvedExpressions = nullptr) const;
+    // Evaluates a P4 BaseListExpression in the context of this model. Recursively calls into
+    // @evaluate and substitutes all members of this list with a Value type.
+    const IR::BaseListExpression *evaluateListExpr(
+        const IR::BaseListExpression *listExpr, bool doComplete,
+        ExpressionMap *resolvedExpressions = nullptr) const;
 
     /// Tries to retrieve @param var from the model.
     /// If @param checked is true, this function throws a BUG if the variable can not be found.

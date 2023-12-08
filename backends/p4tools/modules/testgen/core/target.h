@@ -75,16 +75,7 @@ class TestgenTarget : public Target {
     /// @see getArchSpec
     [[nodiscard]] virtual const ArchSpec *getArchSpecImpl() const = 0;
 
-    /// Utility function. Converts the list of arguments @inputArgs to a list of type declarations
-    ///  and appends the result to @v. Any names appearing in the arguments are
-    /// resolved with @ns.
-    static void argumentsToTypeDeclarations(const IR::IGeneralNamespace *ns,
-                                            const IR::Vector<IR::Argument> *inputArgs,
-                                            std::vector<const IR::Type_Declaration *> &resultDecls);
-
     explicit TestgenTarget(std::string deviceName, std::string archName);
-
- private:
 };
 
 }  // namespace P4Tools::P4Testgen

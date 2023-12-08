@@ -12,7 +12,7 @@ namespace IR {
 class BoolLiteral;
 class Constant;
 class Expression;
-class ListExpression;
+class BaseListExpression;
 class Literal;
 class StructExpression;
 class Type;
@@ -74,11 +74,17 @@ const IR::Constant *convertBoolLiteral(const IR::BoolLiteral *lit);
 /// Given an StructExpression, returns a flat vector of the expressions contained in that
 /// struct. Unfortunately, list and struct expressions are similar but have no common ancestors.
 /// This is why we require two separate methods.
+/// Note that this function will fail if the type of @param structExpr is not a Type_Name.
 std::vector<const Expression *> flattenStructExpression(const StructExpression *structExpr);
 
-/// Given an ListExpression, returns a flat vector of the expressions contained in that
+/// Given an BaseListExpression, returns a flat vector of the expressions contained in that
 /// list.
-std::vector<const Expression *> flattenListExpression(const ListExpression *listExpr);
+std::vector<const Expression *> flattenListExpression(const BaseListExpression *listExpr);
+
+/// Given a StructExpression or BaseListExpression, returns a flat vector of the expressions
+/// contained in that list.
+/// Note that this function will fail if the type of any input struct expression is not a Type_Name.
+std::vector<const Expression *> flattenListOrStructExpression(const Expression *listLikeExpr);
 
 /* =========================================================================================
  *  Other helper functions

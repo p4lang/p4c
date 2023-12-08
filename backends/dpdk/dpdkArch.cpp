@@ -2640,7 +2640,7 @@ void CollectAddOnMissTable::postorder(const IR::P4Table *t) {
         ::error(ErrorType::ERR_UNEXPECTED,
                 "%1%: add_on_miss property is defined, "
                 "but default_action not specificed for table %2%",
-                default_action, t->name);
+                add_on_miss, t->name);
         return;
     }
     if (default_action->value->is<IR::ExpressionValue>()) {

@@ -167,23 +167,25 @@ void EBPFExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
-             const auto *headers = args->at(0)->expression;
-             if (!(headers->is<IR::Member>() || headers->is<IR::PathExpression>())) {
-                 TESTGEN_UNIMPLEMENTED("IP header input %1% of type %2% not supported", headers,
-                                       headers->type);
-             }
              // Input must be the headers struct.
-             headers->type->checkedTo<IR::Type_Struct>();
-             const auto *tcpRef = new IR::Member(headers, "tcp");
-             const auto *syn = state.get(new IR::Member(tcpRef, "syn"));
-             const auto *ack = state.get(new IR::Member(tcpRef, "ack"));
+             const auto *headers = args->at(0)->expression->checkedTo<IR::StructExpression>();
+             const auto *tcpRef = headers->getField("tcp");
+             CHECK_NULL(tcpRef);
+             const auto *tcpHeader = tcpRef->expression->checkedTo<IR::HeaderExpression>();
+             const auto *syn = tcpHeader->getField("syn");
+             CHECK_NULL(syn);
+             const auto *ack = tcpHeader->getField("ack");
+             CHECK_NULL(ack);
+             const auto *synExpr = syn->expression;
+             const auto *ackExpr = ack->expression;
 
              // Implement the simple conntrack case since we do not support multiple packets here
              // yet.
              // TODO: We need custom test objects to implement richer, stateful testing here.
              auto &nextState = state.clone();
-             const auto *cond = new IR::LAnd(new IR::Equ(syn, IR::getConstant(syn->type, 1)),
-                                             new IR::Equ(ack, IR::getConstant(ack->type, 0)));
+             const auto *cond =
+                 new IR::LAnd(new IR::Equ(synExpr, IR::getConstant(synExpr->type, 1)),
+                              new IR::Equ(ackExpr, IR::getConstant(ackExpr->type, 0)));
              nextState.replaceTopBody(Continuation::Return(cond));
              result->emplace_back(nextState);
          }},

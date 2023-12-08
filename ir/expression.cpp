@@ -60,7 +60,7 @@ int IR::Member::offset_bits() const {
 
 int IR::Member::lsb() const {
     int rv = 0;
-    auto header_type = dynamic_cast<const IR::Type_StructLike *>(expr->type);
+    auto header_type = expr->type->checkedTo<IR::Type_StructLike>();
     auto field_iter = header_type->fields.rbegin();
     // This assumes little-endian number for bits.
     while ((*field_iter)->name != member) {

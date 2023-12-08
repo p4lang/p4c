@@ -3,7 +3,6 @@
 #include <functional>
 #include <optional>
 #include <ostream>
-#include <string>
 #include <utility>
 #include <vector>
 
@@ -15,13 +14,11 @@
 #include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/id.h"
-#include "ir/indexed_vector.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "ir/vector.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
-#include "lib/log.h"
 
 #include "backends/p4tools/modules/testgen//lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/core/externs.h"
@@ -293,8 +290,8 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
          [this](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
-             const auto *blockRef = args->at(0)->expression->checkedTo<IR::PathExpression>();
-             const auto *block = state.findDecl(blockRef);
+             const auto *blockRef = args->at(0)->expression->checkedTo<IR::StringLiteral>();
+             const auto *block = state.findDecl(new IR::Path(blockRef->value));
              const auto *archSpec = TestgenTarget::getArchSpec();
              auto blockName = block->getName().name;
              auto &nextState = state.clone();
@@ -328,8 +325,8 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
          [this](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
                 IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
                 const ExecutionState &state, SmallStepEvaluator::Result &result) {
-             const auto *blockRef = args->at(0)->expression->checkedTo<IR::PathExpression>();
-             const auto *block = state.findDecl(blockRef);
+             const auto *blockRef = args->at(0)->expression->checkedTo<IR::StringLiteral>();
+             const auto *block = state.findDecl(new IR::Path(blockRef->value));
              const auto *archSpec = TestgenTarget::getArchSpec();
              auto blockName = block->getName().name;
              auto &nextState = state.clone();
@@ -722,13 +719,8 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
          [](const IR::MethodCallExpression * /*call*/, const IR::Expression * /*receiver*/,
             IR::ID & /*methodName*/, const IR::Vector<IR::Argument> *args,
             const ExecutionState &state, SmallStepEvaluator::Result &result) {
-             const auto *emitOutput = args->at(0)->expression;
-             const auto *emitType = emitOutput->type->checkedTo<IR::Type_StructLike>();
-             if (!(emitOutput->is<IR::Member>() || emitOutput->is<IR::ArrayIndex>())) {
-                 TESTGEN_UNIMPLEMENTED("Emit input %1% of type %2% not supported", emitOutput,
-                                       emitType);
-             }
-             const auto *validVar = state.get(ToolsVariables::getHeaderValidity(emitOutput));
+             const auto *emitHeader = args->at(0)->expression->checkedTo<IR::HeaderExpression>();
+             const auto *validVar = emitHeader->validity;
 
              // Check whether the validity bit of the header is tainted. If it is, the entire
              // emit is tainted. There is not much we can do here, so throw an error.
@@ -738,25 +730,21 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                      "The validity bit of %1% is tainted. Tainted emit calls can not be "
                      "mitigated "
                      "because it is unclear whether the header will be emitted. Abort.",
-                     emitOutput);
+                     emitHeader);
              }
              // This call assumes that the "expandEmit" midend pass is being used. expandEmit
              // unravels emit calls on structs into emit calls on the header members.
              {
                  auto &nextState = state.clone();
-                 std::vector<std::pair<IR::StateVariable, const IR::Expression *>> fields;
-                 for (const auto *field : emitType->fields) {
-                     const auto *fieldType = field->type;
-                     if (fieldType->is<IR::Type_StructLike>()) {
-                         BUG("Unexpected emit field %1% of type %2%", field, fieldType);
-                     }
-                     const auto *fieldRef = new IR::Member(fieldType, emitOutput, field->name);
-                     const IR::Expression *fieldExpr = nextState.get(fieldRef);
-                     fieldType = fieldExpr->type;
+                 // Append to the emit buffer.
+                 auto flatFields = IR::flattenStructExpression(emitHeader);
+                 for (const auto *fieldExpr : flatFields) {
+                     const auto *fieldType = fieldExpr->type;
+                     BUG_CHECK(!fieldType->is<IR::Type_StructLike>(),
+                               "Unexpected emit field %1% of type %2%", fieldExpr, fieldType);
                      if (const auto *varbits = fieldType->to<IR::Extracted_Varbits>()) {
                          fieldType = IR::getBitType(varbits->assignedSize);
                      }
-                     fields.emplace_back(fieldRef, fieldExpr);
                      auto fieldWidth = fieldType->width_bits();
                      // If the width is zero, do not bother with emitting.
                      if (fieldWidth == 0) {
@@ -780,7 +768,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
                      // Append to the emit buffer.
                      nextState.appendToEmitBuffer(fieldExpr);
                  }
-                 nextState.add(*new TraceEvents::Emit(emitOutput, fields));
+                 nextState.add(*new TraceEvents::Emit(emitHeader));
                  nextState.popBody();
                  // Only when the header is valid, the members are emitted and the packet
                  // delta is adjusted.
@@ -789,7 +777,7 @@ void ExprStepper::evalExternMethodCall(const IR::MethodCallExpression *call,
              {
                  auto &invalidState = state.clone();
                  std::stringstream traceString;
-                 traceString << "Invalid emit: " << emitOutput->toString();
+                 traceString << "Invalid emit: " << emitHeader->toString();
                  invalidState.add(*new TraceEvents::Generic(traceString));
                  invalidState.popBody();
                  result->emplace_back(new IR::LNot(IR::Type::Boolean::get(), validVar), state,

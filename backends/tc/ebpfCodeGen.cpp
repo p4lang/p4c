@@ -220,12 +220,12 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
     builder->newline();
     builder->blockStart();
 
+    emitCPUMAPHeadersInitializers(builder);
     emitLocalVariables(builder);
 
     builder->newline();
     emitUserMetadataInstance(builder);
 
-    emitCPUMAPHeadersInitializers(builder);
     if (name == "tc-parse") {
         builder->newline();
         emitCPUMAPInitializers(builder);
@@ -284,9 +284,11 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
         builder->blockEnd(true);
     }
 
-    builder->emitIndent();
-    builder->appendFormat("hdrMd->%s = %s", offsetVar.c_str(), offsetVar.c_str());
-    builder->newline();
+    if (name == "tc-parse") {
+        builder->emitIndent();
+        builder->appendFormat("hdrMd->%s = %s;", offsetVar.c_str(), offsetVar.c_str());
+        builder->newline();
+    }
     builder->emitIndent();
     builder->appendFormat("return %d;", actUnspecCode);
     builder->newline();
@@ -310,14 +312,6 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
         builder->appendFormat("int ret = %d;", actUnspecCode);
         builder->newline();
         builder->emitIndent();
-        builder->appendFormat("int i;");
-        builder->newline();
-        builder->emitIndent();
-        builder->appendLine("#pragma clang loop unroll(disable)");
-        builder->emitIndent();
-        builder->appendFormat("for (i = 0; i < %d; i++) ", maxResubmitDepth);
-        builder->blockStart();
-        builder->emitIndent();
         builder->appendFormat("ret = %s(skb, ", func_name);
 
         builder->appendFormat("(%s %s *) %s, %s);",
@@ -325,16 +319,6 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
                               parser->headerType->to<EBPF::EBPFStructType>()->name,
                               parser->headers->name.name, compilerGlobalMetadata);
 
-        builder->newline();
-        builder->appendFormat(
-            "        if (%s->drop == 1) {\n"
-            "            break;\n"
-            "        }\n",
-            compilerGlobalMetadata);
-        builder->blockEnd(true);
-        builder->newline();
-        builder->emitIndent();
-        builder->appendFormat("%s->recirculated = (i > 0);", compilerGlobalMetadata);
         builder->newline();
         builder->emitIndent();
         builder->appendFormat(
@@ -529,14 +513,14 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
     cstring msgStr;
     cstring fieldName = field->name.name;
 
-    bool checkIfMAC = false;
+    bool noEndiannessConversion = false;
     auto annolist = field->getAnnotations()->annotations;
     for (auto anno : annolist) {
         if (anno->name != ParseTCAnnotations::tcType) continue;
         auto annoBody = anno->body;
         for (auto annoVal : annoBody) {
-            if (annoVal->text == "macaddr") {
-                checkIfMAC = true;
+            if (annoVal->text == "macaddr" || annoVal->text == "ipv4" || annoVal->text == "ipv6") {
+                noEndiannessConversion = true;
                 break;
             }
         }
@@ -569,7 +553,7 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
 
         unsigned shift = loadSize - alignment - widthToExtract;
         builder->emitIndent();
-        if (checkIfMAC) {
+        if (noEndiannessConversion) {
             builder->appendFormat("__builtin_memcpy(&");
             visit(expr);
             builder->appendFormat(".%s, %s + BYTES(%s), %d)", fieldName,
@@ -974,8 +958,6 @@ void IngressDeparserPNA::emit(EBPF::CodeBuilder *builder) {
     prepareBufferTranslator->substitute(this->headers, this->parserHeaders);
     controlBlock->container->body->apply(*prepareBufferTranslator);
 
-    emitBufferAdjusts(builder);
-
     builder->emitIndent();
     builder->appendFormat("%s = %s;", program->packetStartVar,
                           builder->target->dataOffset(program->model.CPacketName.str()));
@@ -1349,31 +1331,6 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
             bool memcpy = false;
             EBPF::EBPFScalarType *scalar = nullptr;
             cstring swap;
-            if (ebpfType->is<EBPF::EBPFScalarType>()) {
-                scalar = ebpfType->to<EBPF::EBPFScalarType>();
-                unsigned width = scalar->implementationWidthInBits();
-                memcpy = !EBPF::EBPFScalarType::generatesScalar(width);
-
-                if (width <= 8) {
-                    swap = "";  // single byte, nothing to swap
-                } else if (width <= 16) {
-                    swap = "bpf_htons";
-                } else if (width <= 32) {
-                    swap = "bpf_htonl";
-                } else if (width <= 64) {
-                    swap = "bpf_htonll";
-                } else {
-                    // The code works with fields wider than 64 bits for PSA architecture. It is
-                    // shared with filter model, so should work but has not been tested. Error
-                    // message is preserved for filter model because existing tests expect it.
-                    // TODO: handle width > 64 bits for filter model
-                    if (table->program->options.arch.isNullOrEmpty() ||
-                        table->program->options.arch == "filter") {
-                        ::error(ErrorType::ERR_UNSUPPORTED,
-                                "%1%: fields wider than 64 bits are not supported yet", fieldName);
-                    }
-                }
-            }
 
             bool isLPMKeyBigEndian = false;
             if (table->isLPMTable()) {
@@ -1381,12 +1338,36 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
                     isLPMKeyBigEndian = true;
             }
 
+            if (ebpfType->is<EBPF::EBPFScalarType>()) {
+                scalar = ebpfType->to<EBPF::EBPFScalarType>();
+                unsigned width = scalar->implementationWidthInBits();
+                memcpy = !EBPF::EBPFScalarType::generatesScalar(width);
+
+                if (isLPMKeyBigEndian) {
+                    if (width <= 8) {
+                        swap = "";  // single byte, nothing to swap
+                    } else if (width <= 16) {
+                        swap = "bpf_htons";
+                    } else if (width <= 32) {
+                        swap = "bpf_htonl";
+                    } else if (width <= 64) {
+                        swap = "bpf_htonll";
+                    }
+                    /* For width greater than 64 bit, there is no need of conversion.
+                        and the value will be copied directly from memory.*/
+                }
+            }
+
+            auto mem = c->expression->to<IR::Member>();
             builder->emitIndent();
             if (memcpy) {
                 builder->appendFormat("__builtin_memcpy(&(%s.%s[0]), &(", keyname.c_str(),
                                       fieldName.c_str());
                 table->codeGen->visit(c->expression);
                 builder->appendFormat("[0]), %d)", scalar->bytesRequired());
+            } else if (mem && checkPnaPortMem(mem)) {
+                builder->appendFormat("%s.%s = ", keyname.c_str(), fieldName.c_str());
+                builder->append("skb->ifindex");
             } else {
                 builder->appendFormat("%s.%s = ", keyname.c_str(), fieldName.c_str());
                 if (isLPMKeyBigEndian) builder->appendFormat("%s(", swap.c_str());
@@ -1581,19 +1562,19 @@ void DeparserHdrEmitTranslatorPNA::processMethod(const P4::ExternMethod *method)
                             "Only headers with fixed widths supported %1%", f);
                     return;
                 }
-                bool checkIfMAC = false;
-                auto annolist = f->getAnnotations()->annotations;
-                for (auto anno : annolist) {
+                bool noEndiannessConversion = false;
+                auto annotations = f->getAnnotations()->annotations;
+                for (auto anno : annotations) {
                     if (anno->name != ParseTCAnnotations::tcType) continue;
-                    auto annoBody = anno->body;
-                    for (auto annoVal : annoBody) {
-                        if (annoVal->text == "macaddr") {
-                            checkIfMAC = true;
+                    for (auto annoVal : anno->body) {
+                        if (annoVal->text == "macaddr" || annoVal->text == "ipv4" ||
+                            annoVal->text == "ipv6") {
+                            noEndiannessConversion = true;
                             break;
                         }
                     }
                 }
-                emitField(builder, f->name, expr, alignment, etype, checkIfMAC);
+                emitField(builder, f->name, expr, alignment, etype, noEndiannessConversion);
                 alignment += et->widthInBits();
                 alignment %= 8;
             }
@@ -1606,7 +1587,7 @@ void DeparserHdrEmitTranslatorPNA::processMethod(const P4::ExternMethod *method)
 
 void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring field,
                                              const IR::Expression *hdrExpr, unsigned int alignment,
-                                             EBPF::EBPFType *type, bool isMAC) {
+                                             EBPF::EBPFType *type, bool noEndiannessConversion) {
     auto program = deparser->program;
 
     auto et = dynamic_cast<EBPF::IHasWidth *>(type);
@@ -1653,7 +1634,7 @@ void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring
     unsigned shift =
         widthToEmit < 8 ? (emitSize - alignment - widthToEmit) : (emitSize - widthToEmit);
 
-    if (!swap.isNullOrEmpty() && !isMAC) {
+    if (!swap.isNullOrEmpty() && !noEndiannessConversion) {
         builder->emitIndent();
         visit(hdrExpr);
         builder->appendFormat(".%s = %s(", field, swap);

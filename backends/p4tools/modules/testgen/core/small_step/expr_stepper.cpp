@@ -80,12 +80,6 @@ bool ExprStepper::preorder(const IR::Member *member) {
         return false;
     }
 
-    // TODO: Do we want to handle non-numeric, non-boolean expressions?
-    BUG_CHECK(member->type->is<IR::Type::Bits>() || member->type->is<IR::Type::Boolean>() ||
-                  member->type->is<IR::Extracted_Varbits>(),
-              "Non-numeric, non-boolean member expression: %1% Type: %2%", member,
-              member->type->node_type_name());
-
     return stepSymbolicValue(state.get(member));
 }
 
@@ -127,10 +121,54 @@ void ExprStepper::evalActionCall(const IR::P4Action *action, const IR::MethodCal
     result->emplace_back(state);
 }
 
+bool ExprStepper::resolveMethodCallArguments(const IR::MethodCallExpression *call) {
+    IR::Vector<IR::Argument> resolvedArgs;
+    const auto *method = call->method->type->checkedTo<IR::Type_MethodBase>();
+    const auto &methodParams = method->parameters->parameters;
+    const auto *callArguments = call->arguments;
+    for (size_t idx = 0; idx < callArguments->size(); ++idx) {
+        const auto *arg = callArguments->at(idx);
+        const auto *param = methodParams.at(idx);
+        const auto *argExpr = arg->expression;
+        if (param->direction == IR::Direction::Out || SymbolicEnv::isSymbolicValue(argExpr)) {
+            continue;
+        }
+        // If the parameter is not an out parameter (meaning we do not care about its content) and
+        // the argument is not yet symbolic, try to resolve it.
+        return stepToSubexpr(
+            argExpr, result, state, [call, idx, param](const Continuation::Parameter *v) {
+                // TODO: It seems expensive to copy the function every time we resolve an argument.
+                // We should do this all at once. But how?
+                // This is the same problem as in stepToListSubexpr
+                // Thankfully, most method calls have less than 10 arguments.
+                auto *clonedCall = call->clone();
+                auto *arguments = clonedCall->arguments->clone();
+                auto *arg = arguments->at(idx)->clone();
+                const IR::Expression *computedExpr = v->param;
+                // A parameter with direction InOut might be read and also written to.
+                // We capture this ambiguity with an InOutReference.
+                if (param->direction == IR::Direction::InOut) {
+                    auto stateVar = ToolsVariables::convertReference(arg->expression);
+                    computedExpr = new IR::InOutReference(stateVar, computedExpr);
+                }
+                arg->expression = computedExpr;
+                (*arguments)[idx] = arg;
+                clonedCall->arguments = arguments;
+                return Continuation::Return(clonedCall);
+            });
+    }
+    return true;
+}
+
 bool ExprStepper::preorder(const IR::MethodCallExpression *call) {
     logStep(call);
     // A method call expression represents an invocation of an action, a table, an extern, or
     // setValid/setInvalid.
+
+    if (!resolveMethodCallArguments(call)) {
+        return false;
+    }
+
     // Handle method calls. These are either table invocations or extern calls.
     if (call->method->type->is<IR::Type_Method>()) {
         if (const auto *path = call->method->to<IR::PathExpression>()) {
@@ -261,6 +299,13 @@ bool ExprStepper::preorder(const IR::Mux *mux) {
 
 bool ExprStepper::preorder(const IR::PathExpression *pathExpression) {
     logStep(pathExpression);
+    // If the path expression is a Type_MatchKind, convert it to a StringLiteral.
+    if (pathExpression->type->is<IR::Type_MatchKind>()) {
+        state.replaceTopBody(Continuation::Return(
+            new IR::StringLiteral(IR::Type_MatchKind::get(), pathExpression->path->name)));
+        result->emplace_back(state);
+        return false;
+    }
     // Otherwise convert the path expression into a qualified member and return it.
     state.replaceTopBody(Continuation::Return(state.get(pathExpression)));
     result->emplace_back(state);
@@ -334,15 +379,15 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
     // If there are no select cases, then the select expression has failed to match on anything.
     // Delegate to stepNoMatch.
     if (selectCases.empty()) {
-        stepNoMatch();
+        stepNoMatch("Parser select expression has no alternatives.");
         return false;
     }
     if (!SymbolicEnv::isSymbolicValue(selectExpression->select)) {
         // Evaluate the expression being selected.
         return stepToListSubexpr(selectExpression->select, result, state,
-                                 [selectExpression](const IR::ListExpression *listExpr) {
+                                 [selectExpression](const IR::BaseListExpression *listExpr) {
                                      auto *result = selectExpression->clone();
-                                     result->select = listExpr;
+                                     result->select = listExpr->checkedTo<IR::ListExpression>();
                                      return Continuation::Return(result);
                                  });
     }
@@ -378,12 +423,14 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
     }
 
     const IR::Expression *missCondition = IR::getBoolLiteral(true);
+    bool hasDefault = false;
     for (const auto *selectCase : selectCases) {
         auto &nextState = state.clone();
 
         // Handle case where the first select case matches: proceed to the next parser state,
         // guarded by its path condition.
         const auto *matchCondition = GenEq::equate(selectExpression->select, selectCase->keyset);
+        hasDefault = hasDefault || selectCase->keyset->is<IR::DefaultExpression>();
 
         // TODO: Implement the taint case for select expressions.
         // In the worst case, this means the entire parser is tainted.
@@ -409,30 +456,34 @@ bool ExprStepper::preorder(const IR::SelectExpression *selectExpression) {
         missCondition = new IR::LAnd(new IR::LNot(matchCondition), missCondition);
     }
 
+    // Generate implicit NoMatch.
+    if (!hasDefault) {
+        stepNoMatch("Parser select expression did not match any alternatives.", missCondition);
+    }
+
     return false;
 }
 
-bool ExprStepper::preorder(const IR::ListExpression *listExpression) {
+bool ExprStepper::preorder(const IR::BaseListExpression *listExpression) {
+    logStep(listExpression);
+
     if (!SymbolicEnv::isSymbolicValue(listExpression)) {
         // Evaluate the expression being selected.
-        return stepToListSubexpr(listExpression, result, state,
-                                 [listExpression](const IR::ListExpression *listExpr) {
-                                     const auto *result = listExpression->clone();
-                                     result = listExpr;
-                                     return Continuation::Return(result);
-                                 });
+        return stepToListSubexpr(
+            listExpression, result, state,
+            [](const IR::BaseListExpression *listExpr) { return Continuation::Return(listExpr); });
     }
     return stepSymbolicValue(listExpression);
 }
 
 bool ExprStepper::preorder(const IR::StructExpression *structExpression) {
+    logStep(structExpression);
+
     if (!SymbolicEnv::isSymbolicValue(structExpression)) {
         // Evaluate the expression being selected.
         return stepToStructSubexpr(structExpression, result, state,
-                                   [structExpression](const IR::StructExpression *structExpr) {
-                                       const auto *result = structExpression->clone();
-                                       result = structExpr;
-                                       return Continuation::Return(result);
+                                   [](const IR::StructExpression *structExpr) {
+                                       return Continuation::Return(structExpr);
                                    });
     }
     return stepSymbolicValue(structExpression);
@@ -456,6 +507,15 @@ bool ExprStepper::preorder(const IR::Slice *slice) {
     return stepSymbolicValue(slice);
 }
 
-void ExprStepper::stepNoMatch() { stepToException(Continuation::Exception::NoMatch); }
+void ExprStepper::stepNoMatch(std::string traceLog, const IR::Expression *condition) {
+    auto &noMatchState = condition ? state.clone() : state;
+    noMatchState.add(*new TraceEvents::GenericDescription("NoMatch", traceLog));
+    noMatchState.replaceTopBody(Continuation::Exception::NoMatch);
+    if (condition) {
+        result->emplace_back(condition, state, noMatchState);
+    } else {
+        result->emplace_back(state);
+    }
+}
 
 }  // namespace P4Tools::P4Testgen

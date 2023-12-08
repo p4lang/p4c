@@ -176,6 +176,11 @@ class P4CContextWithOptions final : public P4CContext {
         optionsInstance = context.options();
     }
 
+    template <typename OptionsDerivedType>
+    P4CContextWithOptions &operator=(P4CContextWithOptions<OptionsDerivedType> &context) {
+        optionsInstance = context.options();
+    }
+
     /// @return the compiler options for this compilation context.
     OptionsType &options() override { return optionsInstance; }
 

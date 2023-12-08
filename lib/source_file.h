@@ -57,13 +57,12 @@ position are the "smallest", which is a reasonable choice.
 class SourcePosition final {
  public:
     /// Creates an invalid source position
-    SourcePosition() : lineNumber(0), columnNumber(0) {}
+    SourcePosition() = default;
 
     SourcePosition(unsigned lineNumber, unsigned columnNumber);
-    SourcePosition &operator=(const SourcePosition &) = default;
 
-    SourcePosition(const SourcePosition &other)
-        : lineNumber(other.lineNumber), columnNumber(other.columnNumber) {}
+    SourcePosition(const SourcePosition &other) = default;
+    SourcePosition &operator=(const SourcePosition &) = default;
 
     inline bool operator==(const SourcePosition &rhs) const {
         return columnNumber == rhs.columnNumber && lineNumber == rhs.lineNumber;
@@ -109,8 +108,8 @@ class SourcePosition final {
 
  private:
     // Input sources where this character position is interpreted.
-    unsigned lineNumber;
-    unsigned columnNumber;
+    unsigned lineNumber = 0;
+    unsigned columnNumber = 0;
 };
 
 class InputSources;
@@ -138,7 +137,7 @@ class SourceInfo final {
         this->srcBrief = srcBrief;
     }
     /// Creates an "invalid" SourceInfo
-    SourceInfo() : sources(nullptr) {}
+    SourceInfo() = default;
 
     /// Creates a SourceInfo for a 'point' in the source, or invalid
     SourceInfo(const InputSources *sources, SourcePosition point)
@@ -147,8 +146,8 @@ class SourceInfo final {
     SourceInfo(const InputSources *sources, SourcePosition start, SourcePosition end);
 
     SourceInfo(const SourceInfo &other) = default;
-    ~SourceInfo() = default;
     SourceInfo &operator=(const SourceInfo &other) = default;
+    ~SourceInfo() = default;
 
     /**
         A SourceInfo that spans both this and rhs.

@@ -24,7 +24,7 @@ using P4::ControlPlaneAPI::p4rt_id_t;
 using P4::ControlPlaneAPI::Standard::SymbolType;
 
 /// Extracts information from the @testSpec to emit a Protobuf test case.
-class Protobuf : public Bmv2TF {
+class Protobuf : public Bmv2TestFramework {
  public:
     explicit Protobuf(std::filesystem::path basePath,
                       std::optional<unsigned int> seed = std::nullopt);
