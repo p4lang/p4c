@@ -24,6 +24,7 @@ set(
   lib/arch_spec.cpp
   lib/format_int.cpp
   lib/gen_eq.cpp
+  lib/logging.cpp
   lib/model.cpp
   lib/namespace_context.cpp
   lib/symbolic_env.cpp

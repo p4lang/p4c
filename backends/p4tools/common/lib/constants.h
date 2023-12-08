@@ -1,8 +1,6 @@
 #ifndef BACKENDS_P4TOOLS_COMMON_LIB_CONSTANTS_H_
 #define BACKENDS_P4TOOLS_COMMON_LIB_CONSTANTS_H_
 
-#include "ir/ir.h"
-
 namespace P4Tools {
 
 class P4Constants {
