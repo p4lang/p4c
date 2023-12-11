@@ -45,7 +45,9 @@ OPTION (ENABLE_MULTITHREAD "Use multithreading" OFF)
 OPTION (ENABLE_LTO "Enable Link Time Optimization (LTO)" OFF)
 OPTION (ENABLE_WERROR "Treat warnings as errors" OFF)
 OPTION (ENABLE_SANITIZERS "Enable sanitizers" OFF)
-OPTION (BUILD_STATIC_RELEASE "Build a statically linked release binary" OFF)
+option(BUILD_STATIC_RELEASE_SANS_GLIBC
+       "Build a (mostly) statically linked release binary. Glibc is linked dynamically." OFF
+)
 OPTION (BUILD_AUTO_VAR_INIT_PATTERN "Initialize variables with pattern during build" OFF)
 OPTION (ENABLE_IWYU "Enable checking includes with IWYU" OFF)
 # Support a legacy option. TODO: Remove?
@@ -116,8 +118,8 @@ endif ()
 # Always build position-independent code. This is important when linking with Protobuf.
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# set the required options for a static release build
-if (BUILD_STATIC_RELEASE)
+# Set the required options for a (mostly) static release build.
+if(BUILD_STATIC_RELEASE_SANS_GLIBC)
   message(STATUS "Building static release binaries")
   set(BUILD_SHARED_LIBS OFF)
   set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
@@ -127,10 +129,13 @@ if (BUILD_STATIC_RELEASE)
   set(Boost_USE_STATIC_RUNTIME OFF)
   # Set the static variable
   set(P4C_STATIC_BUILD STATIC)
+  # TODO: We can not use -static here because of compilation and portability problems:
+  # TODO: Keep track of https://stackoverflow.com/questions/3430400/linux-static-linking-is-dead
+  # and see whether static linking improves on Linux.
   # Do not bring in dynamic libstdcc and libgcc
-  set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++ -Wl,-z,muldefs")
+  set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -Wl,-z,muldefs")
   add_definitions(-DP4C_STATIC_BUILD)
-endif ()
+endif()
 
 # Required tools and libraries.
 find_package (PythonInterp 3 REQUIRED)
@@ -280,7 +285,7 @@ endif ()
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     # We want to optimize the binary size for a static release binary.
     # This only works with modern versions of GCC.
-    if (BUILD_STATIC_RELEASE AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)
+    if (BUILD_STATIC_RELEASE_SANS_GLIBC AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)
         if (BUILD_LINK_WITH_LLD)
           message(WARNING "LLD does not work with GCC's LTO object format, switching to Gold.")
           set(BUILD_LINK_WITH_LLD OFF)
