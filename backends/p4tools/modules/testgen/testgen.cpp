@@ -75,7 +75,7 @@ int generateAbstractTests(const TestgenOptions &testgenOptions, const ProgramInf
     symbex.run(callBack);
 
     // Emit a performance report, if desired.
-    testBackend->printPerformanceReport(true);
+    printPerformanceReport(testPath);
 
     // Do not print this warning if assertion mode is enabled.
     if (testBackend->getTestCount() == 0 && !testgenOptions.assertionModeEnabled) {
