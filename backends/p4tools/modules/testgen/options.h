@@ -93,7 +93,7 @@ class TestgenOptions : public AbstractP4cToolOptions {
     const char *getIncludePath() override;
 
  protected:
-    void validate() const override;
+    void validateOptions() const override;
 
  private:
     TestgenOptions();

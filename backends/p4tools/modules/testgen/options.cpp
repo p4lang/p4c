@@ -383,7 +383,7 @@ TestgenOptions::TestgenOptions()
         "produce no tests or only tests that contain counter examples.");
 }
 
-void TestgenOptions::validate() const {
+void TestgenOptions::validateOptions() const {
     if (minCoverage > 0 && !hasCoverageTracking) {
         ::error(
             ErrorType::ERR_INVALID,

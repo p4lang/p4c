@@ -78,7 +78,7 @@ std::optional<ICompileContext *> AbstractP4cToolOptions::process(
     }
     P4CContext::get().options().file = remainingArgs->at(0);
 
-    validate();
+    validateOptions();
 
     return compilerContext;
 }
