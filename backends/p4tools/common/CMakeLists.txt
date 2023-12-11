@@ -45,6 +45,9 @@ target_link_libraries(
 target_include_directories(
   p4tools-common
   SYSTEM BEFORE PUBLIC ${P4TOOLS_Z3_INCLUDE_DIR}
+)
+target_include_directories(
+  p4tools-common
   PUBLIC "${CMAKE_BINARY_DIR}/common"
   PUBLIC "${P4C_SOURCE_DIR}"
   PUBLIC "${P4C_BINARY_DIR}"
