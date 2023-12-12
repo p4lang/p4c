@@ -13,6 +13,8 @@
 
 namespace Test {
 
+P4ToolsTestCase::P4ToolsTestCase(const IR::P4Program &program) : program(program) {}
+
 std::optional<const P4ToolsTestCase> P4ToolsTestCase::create(
     std::string deviceName, std::string archName, CompilerOptions::FrontendVersion langVersion,
     const std::string &source) {
@@ -25,12 +27,14 @@ std::optional<const P4ToolsTestCase> P4ToolsTestCase::create(
     AutoCompileContext autoCompileContext(P4Tools::CompilerTarget::makeContext());
     P4CContext::get().options().langVersion = langVersion;
 
-    auto program = P4Tools::CompilerTarget::runCompiler(source);
-    if (!program) {
+    auto compilerResults = P4Tools::CompilerTarget::runCompiler(source);
+    if (!compilerResults.has_value()) {
         return std::nullopt;
     }
-    return P4ToolsTestCase{*program};
+    return P4ToolsTestCase{compilerResults.value()->getProgram()};
 }
+
+const IR::P4Program &P4ToolsTestCase::getProgram() const { return program.get(); }
 
 std::optional<const P4ToolsTestCase> P4ToolsTestCase::create_14(std::string deviceName,
                                                                 std::string archName,
@@ -45,8 +49,8 @@ std::optional<const P4ToolsTestCase> P4ToolsTestCase::create_16(std::string devi
 }
 
 void P4ToolsTestCase::ensureInit() {
-    static bool initialized = false;
-    if (initialized) {
+    static bool INITIALIZED = false;
+    if (INITIALIZED) {
         return;
     }
     // Register supported compiler targets.
@@ -55,7 +59,7 @@ void P4ToolsTestCase::ensureInit() {
     // Register supported Testgen targets.
     P4Tools::P4Testgen::registerTestgenTargets();
 
-    initialized = true;
+    INITIALIZED = true;
 }
 
 const IR::SymbolicVariable *SymbolicConverter::preorder(IR::Member *member) {

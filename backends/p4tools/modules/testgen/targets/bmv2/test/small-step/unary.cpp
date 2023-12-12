@@ -21,12 +21,12 @@ TEST_F(SmallStepTest, Unary01) {
     const auto test = createSmallStepExprTest("bit<8> f;", "-(hdr.h.f)");
     ASSERT_TRUE(test);
 
-    const auto *opUn = extractExpr<IR::Operation_Unary>(test->program);
+    const auto *opUn = extractExpr<IR::Operation_Unary>(test->getProgram());
     ASSERT_TRUE(opUn);
 
     // Step on the unary operation and examine the resulting continuation
     // to include the rebuilt IR::Neg node.
-    stepAndExamineOp(opUn, opUn->expr, test->program,
+    stepAndExamineOp(opUn, opUn->expr, test->getProgram(),
                      [](const IR::PathExpression *expr) { return new IR::Neg(expr); });
 }
 
@@ -35,12 +35,12 @@ TEST_F(SmallStepTest, Unary02) {
     const auto test = createSmallStepExprTest("bool f;", "!(hdr.h.f)");
     ASSERT_TRUE(test);
 
-    const auto *opUn = extractExpr<IR::Operation_Unary>(test->program);
+    const auto *opUn = extractExpr<IR::Operation_Unary>(test->getProgram());
     ASSERT_TRUE(opUn);
 
     // Step on the unary operation and examine the resulting continuation
     // to include the rebuilt IR::LNot node.
-    stepAndExamineOp(opUn, opUn->expr, test->program, [](const IR::PathExpression *expr) {
+    stepAndExamineOp(opUn, opUn->expr, test->getProgram(), [](const IR::PathExpression *expr) {
         return new IR::LNot(IR::Type_Boolean::get(), expr);
     });
 }
@@ -50,12 +50,12 @@ TEST_F(SmallStepTest, Unary03) {
     const auto test = createSmallStepExprTest("bit<8> f;", "~(hdr.h.f)");
     ASSERT_TRUE(test);
 
-    const auto *opUn = extractExpr<IR::Operation_Unary>(test->program);
+    const auto *opUn = extractExpr<IR::Operation_Unary>(test->getProgram());
     ASSERT_TRUE(opUn);
 
     // Step on the unary operation and examine the resulting continuation
     // to include the rebuilt IR::Cmpl node.
-    stepAndExamineOp(opUn, opUn->expr, test->program,
+    stepAndExamineOp(opUn, opUn->expr, test->getProgram(),
                      [](const IR::PathExpression *expr) { return new IR::Cmpl(expr); });
 }
 
