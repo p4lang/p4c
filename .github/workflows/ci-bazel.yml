@@ -42,7 +42,7 @@ jobs:
       run: sudo apt-get update && sudo apt-get install bison flex libfl-dev
 
     - name: Build p4c
-      run: bazel build //... --verbose_failures --distinct_host_configuration=false
+      run: bazel build //... --verbose_failures
 
   build_indirect:  # Build 3rd party Bazel project depending on p4c as a subproject.
     runs-on: ubuntu-latest
@@ -74,4 +74,4 @@ jobs:
       run: sudo apt-get update && sudo apt-get install bison flex libfl-dev
 
     - name: Build bazel/example
-      run: cd ./bazel/example && bazel build //... --verbose_failures --distinct_host_configuration=false
+      run: cd ./bazel/example && bazel build //... --verbose_failures

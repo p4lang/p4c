@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script for building in a Docker container on Travis.
+# Script for building P4C for continuous integration builds.
 
 set -e  # Exit on error.
 set -x  # Make command execution verbose

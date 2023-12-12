@@ -114,11 +114,11 @@ jobs:
       run: sudo -E ctest --output-on-failure --schedule-random
       working-directory: ./build
 
-  # Build and test p4c on MacOS 11
+  # Build and test p4c on MacOS 12
   test-mac-os:
     strategy:
       fail-fast: false
-    runs-on: macos-11
+    runs-on: macos-12
     env:
       CTEST_PARALLEL_LEVEL: 4
     steps:
@@ -135,15 +135,16 @@ jobs:
     - name: Install dependencies (MacOS)
       run: |
            tools/install_mac_deps.sh
-           echo "/usr/local/opt/bison/bin" >> $GITHUB_PATH
 
     - name: Build (MacOS)
       run: |
+          source ~/.bash_profile
           ./bootstrap.sh -DENABLE_GC=ON -DCMAKE_BUILD_TYPE=RELEASE \
               -DCMAKE_UNITY_BUILD=ON
           make -Cbuild -j2
 
     - name: Run tests (MacOS)
       run: |
+        source ~/.bash_profile
         ctest --output-on-failure --schedule-random -LE "bpf|ubpf"
       working-directory: ./build
