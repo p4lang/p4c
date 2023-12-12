@@ -38,7 +38,7 @@ SymbolicExecutor::StepResult SymbolicExecutor::step(ExecutionState &state) {
 }
 
 void SymbolicExecutor::run(const Callback &callBack) {
-    runImpl(callBack, ExecutionState::create(programInfo.program));
+    runImpl(callBack, ExecutionState::create(&programInfo.getP4Program()));
 }
 
 bool SymbolicExecutor::handleTerminalState(const Callback &callback,

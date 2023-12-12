@@ -81,7 +81,7 @@ class Z3SolverTests : public ::testing::Test {
         }
 
         // Produce a ProgramInfo, which is needed to create a SmallStepEvaluator.
-        const auto *progInfo = TestgenTarget::initProgram(&test->getProgram());
+        const auto *progInfo = TestgenTarget::produceProgramInfo(test->getCompilerResult());
         if (progInfo == nullptr) {
             return;
         }

@@ -87,7 +87,7 @@ class Z3SolverTest : public P4ToolsTest {
         }
 
         // Produce a ProgramInfo, which is needed to create a SmallStepEvaluator.
-        const auto *progInfo = TestgenTarget::initProgram(&test->getProgram());
+        const auto *progInfo = TestgenTarget::produceProgramInfo(test->getCompilerResult());
         if (progInfo == nullptr) {
             return;
         }

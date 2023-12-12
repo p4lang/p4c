@@ -29,7 +29,7 @@ class EBPFProgramInfo : public ProgramInfo {
                                                           size_t blockIdx) const;
 
  public:
-    EBPFProgramInfo(const IR::P4Program *program,
+    EBPFProgramInfo(const CompilerResult &compilerResult,
                     ordered_map<cstring, const IR::Type_Declaration *> inputBlocks);
 
     /// @see ProgramInfo::getArchSpec

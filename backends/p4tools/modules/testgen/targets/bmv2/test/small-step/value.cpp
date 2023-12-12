@@ -25,7 +25,7 @@ TEST_F(SmallStepTest, Value01) {
     ASSERT_TRUE(opValue);
 
     // Step on the value and examine the resulting state.
-    stepAndExamineValue(opValue, test->getProgram());
+    stepAndExamineValue(opValue, test->getCompilerResult());
 }
 
 /// Test the step function for a bool value.
@@ -37,7 +37,7 @@ TEST_F(SmallStepTest, Value02) {
     ASSERT_TRUE(opValue);
 
     // Step on the value and examine the resulting state.
-    stepAndExamineValue(opValue, test->getProgram());
+    stepAndExamineValue(opValue, test->getCompilerResult());
 }
 
 }  // anonymous namespace

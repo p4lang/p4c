@@ -21,7 +21,7 @@ class PnaDpdkProgramInfo : public SharedPnaProgramInfo {
                                                           size_t blockIdx) const;
 
  public:
-    PnaDpdkProgramInfo(const IR::P4Program *program,
+    PnaDpdkProgramInfo(const CompilerResult &compilerResult,
                        ordered_map<cstring, const IR::Type_Declaration *> inputBlocks);
 
     /// @see ProgramInfo::getArchSpec
