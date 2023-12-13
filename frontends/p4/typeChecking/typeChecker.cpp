@@ -1532,7 +1532,7 @@ const IR::Node *TypeInference::postorder(IR::SerEnumMember *member) {
             note = "; note that the used type is unsized integral type";
         }
         if (resolvedType->is<IR::Type_Newtype>()) {
-            note = "; note that a type-declared types are not allowed even if they are fixed-size";
+            note = "; note that type-declared types are not allowed even if they are fixed-size";
         }
         typeError("%1%: Illegal type for enum; only bit<> and int<> are allowed%2%", serEnum->type,
                   note);
