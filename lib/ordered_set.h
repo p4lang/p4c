@@ -53,7 +53,7 @@ class ordered_set {
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
  private:
-    struct mapcmp : std::binary_function<const T *, const T *, bool> {
+    struct mapcmp {
         COMP comp;
         bool operator()(const T *a, const T *b) const { return comp(*a, *b); }
     };

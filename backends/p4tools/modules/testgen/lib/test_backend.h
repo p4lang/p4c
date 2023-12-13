@@ -114,11 +114,6 @@ class TestBackEnd {
     /// The callback that is executed by the symbolic executor.
     virtual bool run(const FinalState &state);
 
-    /// Print out some performance numbers if logging feature "performance" is enabled.
-    /// Also log performance numbers to a separate file in the test folder if @param write is
-    /// enabled.
-    void printPerformanceReport(bool write) const;
-
     /// Returns test count.
     [[nodiscard]] int64_t getTestCount() const;
 

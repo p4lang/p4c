@@ -3,20 +3,16 @@
 
 #include <cstddef>
 #include <filesystem>
-#include <functional>
 #include <iosfwd>
-#include <list>
 #include <map>
 #include <optional>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include <inja/inja.hpp>
 
 #include "backends/p4tools/common/lib/format_int.h"
 #include "backends/p4tools/common/lib/trace_event.h"
-#include "ir/ir.h"
 #include "lib/cstring.h"
 
 #include "backends/p4tools/modules/testgen/lib/test_object.h"
@@ -145,11 +141,6 @@ class TestFramework {
     // attaches arbitrary string data to the test preamble.
     virtual void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testIdx,
                             float currentCoverage) = 0;
-
-    /// Print out some performance numbers if logging feature "performance" is enabled.
-    /// Also log performance numbers to a separate file in the test folder if @param write is
-    /// enabled.
-    void printPerformanceReport(bool write) const;
 };
 
 }  // namespace P4Tools::P4Testgen

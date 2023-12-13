@@ -24,6 +24,7 @@ set(
   lib/arch_spec.cpp
   lib/format_int.cpp
   lib/gen_eq.cpp
+  lib/logging.cpp
   lib/model.cpp
   lib/namespace_context.cpp
   lib/symbolic_env.cpp
@@ -45,6 +46,9 @@ target_link_libraries(
 target_include_directories(
   p4tools-common
   SYSTEM BEFORE PUBLIC ${P4TOOLS_Z3_INCLUDE_DIR}
+)
+target_include_directories(
+  p4tools-common
   PUBLIC "${CMAKE_BINARY_DIR}/common"
   PUBLIC "${P4C_SOURCE_DIR}"
   PUBLIC "${P4C_BINARY_DIR}"

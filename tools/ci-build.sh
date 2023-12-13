@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script for building in a Docker container on Travis.
+# Script for building P4C for continuous integration builds.
 
 set -e  # Exit on error.
 set -x  # Make command execution verbose
@@ -180,7 +180,7 @@ function install_ptf_ebpf_test_deps() (
     sudo make install
 
     # install bpftool
-    git clone --recurse-submodules https://github.com/libbpf/bpftool.git /tmp/bpftool
+    git clone --recurse-submodules --branch v7.3.0 https://github.com/libbpf/bpftool.git /tmp/bpftool
     cd /tmp/bpftool/src
     make "-j$(nproc)"
     sudo make install

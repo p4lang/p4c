@@ -105,11 +105,14 @@ bool SymbolicEnv::isSymbolicValue(const IR::Node *node) {
     if (expr->is<IR::ConcolicVariable>()) {
         return true;
     }
-    // DefaultExpresssions are symbolic values.
+    // DefaultExpressions are symbolic values.
     if (expr->is<IR::DefaultExpression>()) {
         return true;
     }
-
+    // InOut references are symbolic when the resolved input argument is symbolic.
+    if (const auto *inout = expr->to<IR::InOutReference>()) {
+        return isSymbolicValue(inout->resolvedRef);
+    }
     // Symbolic values can be composed using several IR nodes.
     if (const auto *unary = expr->to<IR::Operation_Unary>()) {
         return (unary->is<IR::Neg>() || unary->is<IR::LNot>() || unary->is<IR::Cmpl>() ||

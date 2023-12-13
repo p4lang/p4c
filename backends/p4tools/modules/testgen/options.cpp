@@ -341,7 +341,7 @@ TestgenOptions::TestgenOptions()
     registerOption(
         "--print-performance-report", nullptr,
         [](const char *) {
-            P4Testgen::enablePerformanceLogging();
+            enablePerformanceLogging();
             return true;
         },
         "Print timing report summary at the end of the program.");

@@ -1,6 +1,5 @@
 #include "backends/p4tools/modules/testgen/lib/test_backend.h"
 
-#include <iostream>
 #include <optional>
 
 #include "backends/p4tools/common/core/z3_solver.h"
@@ -85,7 +84,7 @@ bool TestBackEnd::run(const FinalState &state) {
         auto concolicOptState = state.computeConcolicState(*resolvedConcolicVariables);
         if (!concolicOptState.has_value()) {
             testCount++;
-            printPerformanceReport(false);
+            printPerformanceReport(std::nullopt);
             return needsToTerminate(testCount);
         }
         auto replacedState = concolicOptState.value().get();
@@ -106,7 +105,7 @@ bool TestBackEnd::run(const FinalState &state) {
         abort = printTestInfo(executionState, testInfo, outputPortExpr);
         if (abort) {
             testCount++;
-            printPerformanceReport(false);
+            printPerformanceReport(std::nullopt);
             return needsToTerminate(testCount);
         }
         const auto *testSpec = createTestSpec(executionState, &finalModel, testInfo);
@@ -142,7 +141,7 @@ bool TestBackEnd::run(const FinalState &state) {
         printTraces("============ End Test %1% ============\n", testCount);
         testCount++;
         P4::Coverage::printCoverageReport(coverableNodes, visitedNodes);
-        printPerformanceReport(false);
+        printPerformanceReport(std::nullopt);
 
         // If MAX_NODE_COVERAGE is enabled, terminate early if we hit max node coverage already.
         if (testgenOptions.stopMetric == "MAX_NODE_COVERAGE" && coverage == 1.0) {
@@ -236,10 +235,6 @@ bool TestBackEnd::printTestInfo(const ExecutionState * /*executionState*/, const
     printTraces("=======================================");
 
     return false;
-}
-
-void TestBackEnd::printPerformanceReport(bool write) const {
-    testWriter->printPerformanceReport(write);
 }
 
 int64_t TestBackEnd::getTestCount() const { return testCount; }

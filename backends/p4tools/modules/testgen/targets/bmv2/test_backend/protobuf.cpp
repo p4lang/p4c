@@ -215,7 +215,10 @@ inja::json Protobuf::getExpectedPacket(const TestSpec *testSpec) const {
 
 std::string Protobuf::getTestCaseTemplate() {
     static std::string TEST_CASE(
-        R"""(# A P4TestGen-generated test case for {{test_name}}.p4
+        R"""(
+# proto-file: p4testgen.proto
+# proto-message: TestCase
+# A P4TestGen-generated test case for {{test_name}}.p4
 metadata: "p4testgen seed: {{ default(seed, "none") }}"
 metadata: "Date generated: {{timestamp}}"
 ## if length(selected_branches) > 0
@@ -241,99 +244,97 @@ expected_output_packet {
 ## endif
 
 ## if control_plane
-entities : [
 ## for table in control_plane.tables
 ## for rule in table.rules
-  # Table {{table.table_name}}
-  {
-    table_entry {
-      table_id: {{table.id}}
+# Table {{table.table_name}}
+entities {
+  table_entry {
+    table_id: {{table.id}}
 ## if rule.rules.needs_priority
-      priority: {{rule.priority}}
+    priority: {{rule.priority}}
 ## endif
 ## for r in rule.rules.single_exact_matches
-      # Match field {{r.field_name}}
-      match {
-        field_id: {{r.id}}
-        exact {
-          value: "{{r.value}}"
-        }
-      }
-## endfor
-## for r in rule.rules.optional_matches
     # Match field {{r.field_name}}
     match {
       field_id: {{r.id}}
-      optional {
+      exact {
         value: "{{r.value}}"
       }
     }
 ## endfor
+## for r in rule.rules.optional_matches
+  # Match field {{r.field_name}}
+  match {
+    field_id: {{r.id}}
+    optional {
+      value: "{{r.value}}"
+    }
+  }
+## endfor
 ## for r in rule.rules.range_matches
-      # Match field {{r.field_name}}
-      match {
-        field_id: {{r.id}}
-        range {
-          low: "{{r.lo}}"
-          high: "{{r.hi}}"
-        }
+    # Match field {{r.field_name}}
+    match {
+      field_id: {{r.id}}
+      range {
+        low: "{{r.lo}}"
+        high: "{{r.hi}}"
       }
+    }
 ## endfor
 ## for r in rule.rules.ternary_matches
-      # Match field {{r.field_name}}
-      match {
-        field_id: {{r.id}}
-        ternary {
-          value: "{{r.value}}"
-          mask: "{{r.mask}}"
-        }
+    # Match field {{r.field_name}}
+    match {
+      field_id: {{r.id}}
+      ternary {
+        value: "{{r.value}}"
+        mask: "{{r.mask}}"
       }
+    }
 ## endfor
 ## for r in rule.rules.lpm_matches
-      # Match field {{r.field_name}}
-      match {
-        field_id: {{r.id}}
-        lpm {
-          value: "{{r.value}}"
-          prefix_len: {{r.prefix_len}}
-        }
+    # Match field {{r.field_name}}
+    match {
+      field_id: {{r.id}}
+      lpm {
+        value: "{{r.value}}"
+        prefix_len: {{r.prefix_len}}
       }
-## endfor
-      # Action {{rule.action_name}}
-      action {
-## if existsIn(table, "has_ap")
-        action_profile_action_set {
-          action_profile_actions {
-            action {
-              action_id: {{rule.action_id}}
-## for act_param in rule.rules.act_args
-              # Param {{act_param.param}}
-              params {
-                param_id: {{act_param.id}}
-                value: "{{act_param.value}}"
-              }
-## endfor
-            }
-          }
-        }
-## else
-        action {
-          action_id: {{rule.action_id}}
-## for act_param in rule.rules.act_args
-          # Param {{act_param.param}}
-          params {
-            param_id: {{act_param.id}}
-            value: "{{act_param.value}}"
-          }
-## endfor
-        }
-## endif
-      }
-## endfor
     }
-  }{% if not loop.is_last %},{% endif %}
 ## endfor
-]
+    # Action {{rule.action_name}}
+    action {
+## if existsIn(table, "has_ap")
+      action_profile_action_set {
+        action_profile_actions {
+          action {
+            action_id: {{rule.action_id}}
+## for act_param in rule.rules.act_args
+            # Param {{act_param.param}}
+            params {
+              param_id: {{act_param.id}}
+              value: "{{act_param.value}}"
+            }
+## endfor
+          }
+        }
+      }
+## else
+      action {
+        action_id: {{rule.action_id}}
+## for act_param in rule.rules.act_args
+        # Param {{act_param.param}}
+        params {
+          param_id: {{act_param.id}}
+          value: "{{act_param.value}}"
+        }
+## endfor
+      }
+## endif
+    }
+## endfor
+  }
+}
+## endfor
 ## endif
 )""");
     return TEST_CASE;

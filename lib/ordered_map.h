@@ -48,7 +48,7 @@ class ordered_map {
     typedef std::reverse_iterator<iterator> reverse_iterator;
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
-    class value_compare : std::binary_function<value_type, value_type, bool> {
+    class value_compare {
         friend class ordered_map;
 
      protected:
@@ -62,7 +62,7 @@ class ordered_map {
     };
 
  private:
-    struct mapcmp : std::binary_function<const K *, const K *, bool> {
+    struct mapcmp {
         COMP comp;
         bool operator()(const K *a, const K *b) const { return comp(*a, *b); }
     };
