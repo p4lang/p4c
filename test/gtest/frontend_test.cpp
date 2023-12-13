@@ -2,7 +2,7 @@
 #include "frontends/common/parseInput.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
-#include "frontends/p4/validateSerEnums.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 #include "gtest/gtest.h"
 #include "helpers.h"
 #include "ir/ir.h"
@@ -30,10 +30,12 @@ struct P4CFrontend : P4CTest {
 struct P4CFrontendEnumValidation : P4CFrontend {
     P4CFrontendEnumValidation() {
         addPasses({new P4::ResolveReferences(&refMap), new P4::ConstantFolding(&refMap, nullptr),
-                   new P4::ValidateSerEnums(&refMap)});
+                   new P4::ResolveReferences(&refMap),
+                   new P4::TypeInference(&refMap, &typeMap, false, false)});
     }
 
     P4::ReferenceMap refMap;
+    P4::TypeMap typeMap;
 };
 
 TEST_F(P4CFrontendEnumValidation, Bit) {

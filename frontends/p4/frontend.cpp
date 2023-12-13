@@ -75,7 +75,6 @@ limitations under the License.
 #include "uselessCasts.h"
 #include "validateMatchAnnotations.h"
 #include "validateParsedProgram.h"
-#include "validateSerEnums.h"
 #include "validateValueSets.h"
 
 namespace P4 {
@@ -178,10 +177,6 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new ResolveReferences(&refMap),  // check shadowing
         new Deprecated(&refMap),
         new CheckNamedArgs(),
-        // Validate if constant values fit into serialized enum type. Has to run before type
-        // inference as the type inference would make the constants fit the derived type. Has to run
-        // after ConstantFolding to be able to handle negative values and constant expressions.
-        new ValidateSerEnums(&refMap),
         // Type checking and type inference.  Also inserts
         // explicit casts where implicit casts exist.
         new SetStrictStruct(&typeMap, true),  // Next pass uses strict struct checking

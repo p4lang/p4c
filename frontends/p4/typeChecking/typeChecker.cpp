@@ -1510,10 +1510,23 @@ const IR::Node *TypeInference::postorder(IR::SerEnumMember *member) {
     */
     auto serEnum = findContext<IR::Type_SerEnum>();
     CHECK_NULL(serEnum);
-    auto type = getTypeType(serEnum->type);
-    if (!type->is<IR::Type_Bits>()) {
+    const auto *type = getTypeType(serEnum->type)->to<IR::Type_Bits>();
+    if (!type) {
         typeError("%1%: Illegal type for enum; only bit<> and int<> are allowed", serEnum->type);
         return member;
+    }
+    // validate the constant fits -- non-fitting enum constants should pruce error
+    if (const auto *constant = member->value->to<IR::Constant>()) {
+        // signed values are two's complement, so [-2^(n-1)..2^(n-1)-1]
+        big_int low = type->isSigned ? -(big_int(1) << type->size - 1) : big_int(0);
+        big_int high = (big_int(1) << (type->isSigned ? type->size - 1 : type->size)) - 1;
+
+        if (constant->value < low || constant->value > high) {
+            ::error(ErrorType::ERR_TYPE_ERROR,
+                    "%1%: Serialized enum constant value %2% is out of bounds of the underlying "
+                    "type %3%.",
+                    member, constant->value, serEnum->type);
+        }
     }
     auto exprType = getType(member->value);
     auto tvs = unifyCast(member, type, exprType,
