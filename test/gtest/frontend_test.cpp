@@ -48,9 +48,26 @@ TEST_F(P4CFrontendEnumValidation, Bit) {
     )");
     RedirectStderr errors;
     const auto *prog = parseAndProcess(program);
-    ASSERT_TRUE(prog) << errors.str();
-    ASSERT_EQ(::errorCount(), 1) << errors.str();
+    errors.dumpAndReset();
+    ASSERT_TRUE(prog);
+    ASSERT_EQ(::errorCount(), 1);
     ASSERT_TRUE(errors.contains("unrepresentable = 256"));
+}
+
+TEST_F(P4CFrontendEnumValidation, BitNeg) {
+    std::string program = P4_SOURCE(R"(
+        enum bit<8> FailingExample {
+            zero = 0,
+            representable = 255,
+            unrepresentable = -1
+        }
+    )");
+    RedirectStderr errors;
+    const auto *prog = parseAndProcess(program);
+    errors.dumpAndReset();
+    ASSERT_TRUE(prog);
+    ASSERT_EQ(::errorCount(), 1);
+    ASSERT_TRUE(errors.contains("unrepresentable = -1"));
 }
 
 TEST_F(P4CFrontendEnumValidation, IntPos) {
@@ -63,8 +80,9 @@ TEST_F(P4CFrontendEnumValidation, IntPos) {
     )");
     RedirectStderr errors;
     const auto *prog = parseAndProcess(program);
-    ASSERT_TRUE(prog) << errors.str();
-    ASSERT_EQ(::errorCount(), 1) << errors.str();
+    errors.dumpAndReset();
+    ASSERT_TRUE(prog);
+    ASSERT_EQ(::errorCount(), 1);
     ASSERT_TRUE(errors.contains("unrepresentable_p = 128"));
 }
 
@@ -78,8 +96,9 @@ TEST_F(P4CFrontendEnumValidation, IntNeg) {
     )");
     RedirectStderr errors;
     const auto *prog = parseAndProcess(program);
-    ASSERT_TRUE(prog) << errors.str();
-    ASSERT_EQ(::errorCount(), 1) << errors.str();
+    errors.dumpAndReset();
+    ASSERT_TRUE(prog);
+    ASSERT_EQ(::errorCount(), 1);
     ASSERT_TRUE(errors.contains("unrepresentable_n = -129"));
 }
 
@@ -97,10 +116,12 @@ TEST_F(P4CFrontendEnumValidation, TypeDef) {
     )");
     RedirectStderr errors;
     const auto *prog = parseAndProcess(program);
-    ASSERT_TRUE(prog) << errors.str();
-    ASSERT_EQ(::errorCount(), 2) << errors.str();
+    errors.dumpAndReset();
+    ASSERT_TRUE(prog);
+    ASSERT_EQ(::errorCount(), 2);
     ASSERT_TRUE(errors.contains("unrepresentable_p = 64"));
     ASSERT_TRUE(errors.contains("unrepresentable_n = -65"));
+    std::clog << errors.str();
 }
 
 TEST_F(P4CFrontendEnumValidation, ExplicitCast) {
@@ -111,8 +132,40 @@ TEST_F(P4CFrontendEnumValidation, ExplicitCast) {
     )");
     RedirectStderr errors;
     const auto *prog = parseAndProcess(program);
-    ASSERT_TRUE(prog) << errors.str();
-    ASSERT_EQ(::errorCount(), 0) << errors.str();
+    errors.dumpAndReset();
+    ASSERT_TRUE(prog);
+    ASSERT_EQ(::errorCount(), 0);
+}
+
+TEST_F(P4CFrontendEnumValidation, InvalidUnderlyingUnsized) {
+    std::string program = P4_SOURCE(R"(
+        enum int FailingExample {
+            val = 4
+        }
+    )");
+    RedirectStderr errors;
+    const auto *prog = parseAndProcess(program);
+    errors.dumpAndReset();
+    ASSERT_TRUE(prog);
+    ASSERT_EQ(::errorCount(), 1);
+    ASSERT_TRUE(errors.contains("Illegal type for enum;"));
+    ASSERT_TRUE(errors.contains("is unsized integral"));
+}
+
+TEST_F(P4CFrontendEnumValidation, InvalidType) {
+    std::string program = P4_SOURCE(R"(
+        type bit<4> MyBit4;
+        enum MyBit4 FailingExample {
+            val = 4
+        }
+    )");
+    RedirectStderr errors;
+    const auto *prog = parseAndProcess(program);
+    errors.dumpAndReset();
+    ASSERT_TRUE(prog);
+    ASSERT_EQ(::errorCount(), 1);
+    ASSERT_TRUE(errors.contains("Illegal type for enum;"));
+    ASSERT_TRUE(errors.contains("type-declared types"));
 }
 
 }  // namespace Test
