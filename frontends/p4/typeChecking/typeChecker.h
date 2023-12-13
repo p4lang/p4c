@@ -194,6 +194,10 @@ class TypeInference : public Transform {
     const IR::ActionListElement *validateActionInitializer(const IR::Expression *actionCall);
     bool containsActionEnum(const IR::Type *type) const;
 
+    /// Check if the underlying type for enum is bit<> or int<> and emit error if it is not.
+    /// @returns the resolved type, or nullptr if the type is invalid
+    const IR::Type_Bits *checkUnderlyingEnumType(const IR::Type *enumType);
+
     //////////////////////////////////////////////////////////////
 
  public:

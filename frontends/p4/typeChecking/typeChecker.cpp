@@ -1504,7 +1504,8 @@ const IR::Node *TypeInference::postorder(IR::Type_Set *type) {
     return type;
 }
 
-static int getReqSize(big_int val) {
+/// get size int bits required to represent given constant
+static int getConstantsRepresentationSize(big_int val, bool isSigned) {
     if (val < 0) {
         val = -val;
     }
@@ -1513,39 +1514,38 @@ static int getReqSize(big_int val) {
         ++cnt;
         val >>= 1;
     }
-    return cnt;
+    return cnt + int(isSigned);
 }
 
-const IR::Node *TypeInference::postorder(IR::SerEnumMember *member) {
-    /*
-      The type of the member is initially set in the Type_SerEnum preorder visitor.
-      Here we check additional constraints and we may correct the member.
-      if (done()) return member;
-    */
-    auto serEnum = findContext<IR::Type_SerEnum>();
-    CHECK_NULL(serEnum);
-    const auto *resolvedType = getTypeType(serEnum->type);
-    const auto *type = resolvedType->to<IR::Type_Bits>();
-    if (!type) {
-        std::string note;
-        if (resolvedType->is<IR::Type_InfInt>()) {
-            note = "; note that the used type is unsized integral type";
-        }
-        if (resolvedType->is<IR::Type_Newtype>()) {
-            note = "; note that type-declared types are not allowed even if they are fixed-size";
-        }
-        typeError("%1%: Illegal type for enum; only bit<> and int<> are allowed%2%", serEnum->type,
-                  note);
-        return member;
+const IR::Type_Bits *TypeInference::checkUnderlyingEnumType(const IR::Type *enumType) {
+    const auto *resolvedType = getTypeType(enumType);
+    CHECK_NULL(resolvedType);
+    if (const auto *type = resolvedType->to<IR::Type_Bits>()) {
+        return type;
     }
+    std::string note;
+    if (resolvedType->is<IR::Type_InfInt>()) {
+        note = "; note that the used type is unsized integral type";
+    } else if (resolvedType->is<IR::Type_Newtype>()) {
+        note = "; note that type-declared types are not allowed even if they are fixed-size";
+    }
+    typeError("%1%: Illegal type for enum; only bit<> and int<> are allowed%2%", enumType, note);
+    return nullptr;
+}
+
+/// Check if the value initializer fits into the underlying enum type. Emits error and returns false
+/// if it does not fit. Returns true if it fits.
+static bool checkEnumValueInitializer(const IR::Type_Bits *type, const IR::Expression *initializer,
+                                      const IR::Type_SerEnum *serEnum,
+                                      const IR::SerEnumMember *member) {
     // validate the constant fits -- non-fitting enum constants should produce error
-    if (const auto *constant = member->value->to<IR::Constant>()) {
+    if (const auto *constant = initializer->to<IR::Constant>()) {
         // signed values are two's complement, so [-2^(n-1)..2^(n-1)-1]
         big_int low = type->isSigned ? -(big_int(1) << type->size - 1) : big_int(0);
         big_int high = (big_int(1) << (type->isSigned ? type->size - 1 : type->size)) - 1;
 
         if (constant->value < low || constant->value > high) {
-            int required = int(type->isSigned) + getReqSize(constant->value);
+            int required = getConstantsRepresentationSize(constant->value, type->isSigned);
             std::string extraMsg;
             if (!type->isSigned && constant->value < low) {
                 extraMsg =
@@ -1563,12 +1563,28 @@ const IR::Node *TypeInference::postorder(IR::SerEnumMember *member) {
                     "%1%: Serialized enum constant value %2% is out of bounds of the underlying "
                     "type %3%; %4%",
                     member, constant->value, serEnum->type, extraMsg);
+            return false;
         }
     }
-    auto exprType = getType(member->value);
-    auto tvs = unifyCast(member, type, exprType,
-                         "Enum member '%1%' has type '%2%' and not the expected type '%3%'",
-                         {member, exprType, type});
+    return true;
+}
+
+const IR::Node *TypeInference::postorder(IR::SerEnumMember *member) {
+    /*
+      The type of the member is initially set in the Type_SerEnum preorder visitor.
+      Here we check additional constraints and we may correct the member.
+      if (done()) return member;
+    */
+    const auto *serEnum = findContext<IR::Type_SerEnum>();
+    CHECK_NULL(serEnum);
+    const auto *type = checkUnderlyingEnumType(serEnum->type);
+    if (!type || !checkEnumValueInitializer(type, member->value, serEnum, member)) {
+        return member;
+    }
+    const auto *exprType = getType(member->value);
+    auto *tvs = unifyCast(member, type, exprType,
+                          "Enum member '%1%' has type '%2%' and not the expected type '%3%'",
+                          {member, exprType, type});
     if (tvs == nullptr)
         // error already signalled
         return member;
