@@ -131,7 +131,7 @@ class EBPFTablePNA : public EBPF::EBPFTablePSA {
  protected:
     EBPF::ActionTranslationVisitor *createActionTranslationVisitor(
         cstring valueName, const EBPF::EBPFProgram *program) const override;
-    virtual void validateKeys() const override;
+    void validateKeys() const override;
     const ConvertToBackendIR *tcIR;
 
  public:
