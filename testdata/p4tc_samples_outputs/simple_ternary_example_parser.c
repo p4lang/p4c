@@ -13,6 +13,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
 {
     struct hdr_md *hdrMd;
     unsigned ebpf_packetOffsetInBits = 0;
+    unsigned ebpf_packetOffsetInBits_save = 0;
     ParserError_t ebpf_errorCode = NoError;
     void* pkt = ((void*)(long)skb->data);
     void* ebpf_packetEnd = ((void*)(long)skb->data_end);

@@ -131,6 +131,7 @@ class EBPFTablePNA : public EBPF::EBPFTablePSA {
  protected:
     EBPF::ActionTranslationVisitor *createActionTranslationVisitor(
         cstring valueName, const EBPF::EBPFProgram *program) const override;
+    virtual void validateKeys() const override;
     const ConvertToBackendIR *tcIR;
 
  public:
@@ -153,6 +154,7 @@ class EBPFTablePNA : public EBPF::EBPFTablePSA {
     void emitAction(EBPF::CodeBuilder *builder, cstring valueName,
                     cstring actionRunVariable) override;
     void emitValueActionIDNames(EBPF::CodeBuilder *builder) override;
+    cstring p4ActionToActionIDName(const IR::P4Action *action) const;
 };
 
 class IngressDeparserPNA : public EBPF::EBPFDeparserPSA {

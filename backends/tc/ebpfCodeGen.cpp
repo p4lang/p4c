@@ -453,6 +453,9 @@ void TCIngressPipelinePNA::emitLocalVariables(EBPF::CodeBuilder *builder) {
     }
     builder->newline();
     builder->emitIndent();
+    builder->appendFormat("unsigned %s_save = 0;", offsetVar.c_str());
+    builder->newline();
+    builder->emitIndent();
     builder->appendFormat("%s %s = %s;", errorEnum.c_str(), errorVar.c_str(),
                           P4::P4CoreLibrary::instance().noError.str());
     builder->newline();
@@ -774,6 +777,12 @@ void EBPFTablePNA::emitValueStructStructure(EBPF::CodeBuilder *builder) {
     builder->appendLine("u;");
 }
 
+cstring EBPFTablePNA::p4ActionToActionIDName(const IR::P4Action *action) const {
+    cstring actionName = EBPFObject::externalName(action);
+    cstring tableInstance = dataMapName;
+    return Util::printf_format("%s_ACT_%s", tableInstance.toUpper(), actionName.toUpper());
+}
+
 void EBPFTablePNA::emitActionArguments(EBPF::CodeBuilder *builder, const IR::P4Action *action,
                                        cstring name) {
     builder->emitIndent();
@@ -890,11 +899,6 @@ void EBPFTablePNA::emitValueActionIDNames(EBPF::CodeBuilder *builder) {
     for (auto a : actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->to<IR::P4Action>();
-        // no need to define a constant for NoAction,
-        // "case 0" will be explicitly generated in the action handling switch
-        if (action->name.originalName == P4::P4CoreLibrary::instance().noAction.name) {
-            continue;
-        }
         unsigned int action_idx = tcIR->getActionId(tcIR->externalName(action));
         builder->emitIndent();
         builder->appendFormat("#define %s %d", p4ActionToActionIDName(action), action_idx);
@@ -1544,6 +1548,24 @@ EBPF::ActionTranslationVisitor *EBPFTablePNA::createActionTranslationVisitor(
     cstring valueName, const EBPF::EBPFProgram *program) const {
     return new ActionTranslationVisitorPNA(program->to<EBPF::EBPFPipeline>(), valueName, this,
                                            tcIR);
+}
+
+void EBPFTablePNA::validateKeys() const {
+    if (keyGenerator == nullptr) return;
+
+    auto lastKey = std::find_if(
+        keyGenerator->keyElements.rbegin(), keyGenerator->keyElements.rend(),
+        [](const IR::KeyElement *key) { return key->matchType->path->name.name != "selector"; });
+    for (auto it : keyGenerator->keyElements) {
+        auto mtdecl = program->refMap->getDeclaration(it->matchType->path, true);
+        auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
+        if (matchType->name.name == P4::P4CoreLibrary::instance().lpmMatch.name) {
+            if (it != *lastKey) {
+                ::error(ErrorType::ERR_UNSUPPORTED, "%1% field key must be at the end of whole key",
+                        it->matchType);
+            }
+        }
+    }
 }
 
 // =====================DeparserHdrEmitTranslatorPNA=============================

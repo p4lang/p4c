@@ -14,6 +14,7 @@ struct __attribute__((__packed__)) MainControlImpl_tbl_default_key {
     u8 field0[16]; /* hdr.ipv6.srcAddr */
 } __attribute__((aligned(4)));
 #define MAINCONTROLIMPL_TBL_DEFAULT_ACT_MAINCONTROLIMPL_SET_DST 1
+#define MAINCONTROLIMPL_TBL_DEFAULT_ACT__NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_tbl_default_value {
     unsigned int action;
     union {
@@ -63,6 +64,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
 {
     struct hdr_md *hdrMd;
     unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
+    unsigned ebpf_packetOffsetInBits_save = 0;
     ParserError_t ebpf_errorCode = NoError;
     void* pkt = ((void*)(long)skb->data);
     void* ebpf_packetEnd = ((void*)(long)skb->data_end);
@@ -111,7 +113,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
                                                                 hdr->ipv6.hopLimit = (hdr->ipv6.hopLimit + 255);
                             }
                             break;
-                        case 0: 
+                        case MAINCONTROLIMPL_TBL_DEFAULT_ACT__NOACTION: 
                             {
                             }
                             break;
