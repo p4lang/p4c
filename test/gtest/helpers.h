@@ -137,8 +137,9 @@ struct RedirectStderr {
     bool contains(std::string other) { return stream.str().find(other) != std::string::npos; }
 
     void reset() {
-        if (old)
+        if (old) {
             std::cerr.rdbuf(old);
+        }
         old = nullptr;
     }
 

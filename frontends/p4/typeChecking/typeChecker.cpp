@@ -16,6 +16,8 @@ limitations under the License.
 
 #include "typeChecker.h"
 
+#include <boost/format.hpp>
+
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/coreLibrary.h"
@@ -28,8 +30,6 @@ limitations under the License.
 #include "typeConstraints.h"
 #include "typeSubstitution.h"
 #include "typeUnification.h"
-
-#include <boost/format.hpp>
 
 namespace P4 {
 
@@ -1505,8 +1505,9 @@ const IR::Node *TypeInference::postorder(IR::Type_Set *type) {
 }
 
 static int getReqSize(big_int val) {
-    if (val < 0)
+    if (val < 0) {
         val = -val;
+    }
     int cnt = 0;
     while (val > 0) {
         ++cnt;
@@ -1547,12 +1548,16 @@ const IR::Node *TypeInference::postorder(IR::SerEnumMember *member) {
             int required = int(type->isSigned) + getReqSize(constant->value);
             std::string extraMsg;
             if (!type->isSigned && constant->value < low) {
-                extraMsg = str(boost::format("the value %1% is negative, but the underlying type "
-                    "%2% is unsigned") % constant->value % type->toString());
+                extraMsg =
+                    str(boost::format(
+                            "the value %1% is negative, but the underlying type %2% is unsigned") %
+                        constant->value % type->toString());
             } else {
-                extraMsg = str(boost::format("the value %1% requires %2% bits but the underlying "
-                    "%3% type %4% only contains %5% bits") % constant->value % required
-                    % (type->isSigned ? "signed" : "unsigned") % type->toString() % type->size);
+                extraMsg =
+                    str(boost::format("the value %1% requires %2% bits but the underlying "
+                                      "%3% type %4% only contains %5% bits") %
+                        constant->value % required % (type->isSigned ? "signed" : "unsigned") %
+                        type->toString() % type->size);
             }
             ::error(ErrorType::ERR_TYPE_ERROR,
                     "%1%: Serialized enum constant value %2% is out of bounds of the underlying "
