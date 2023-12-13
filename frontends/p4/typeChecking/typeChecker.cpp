@@ -1538,7 +1538,7 @@ const IR::Node *TypeInference::postorder(IR::SerEnumMember *member) {
                   note);
         return member;
     }
-    // validate the constant fits -- non-fitting enum constants should pruce error
+    // validate the constant fits -- non-fitting enum constants should produce error
     if (const auto *constant = member->value->to<IR::Constant>()) {
         // signed values are two's complement, so [-2^(n-1)..2^(n-1)-1]
         big_int low = type->isSigned ? -(big_int(1) << type->size - 1) : big_int(0);
