@@ -1,4 +1,4 @@
-serenum-typedef.p4(8): [--Werror=type-error] error: EthT: Illegal type for enum; only bit<> and int<> are allowed
+serenum-typedef.p4(8): [--Werror=type-error] error: EthT: Illegal type for enum; only bit<> and int<> are allowed; note that type-declared types are not allowed even if they are fixed-size
 enum EthT EthTypes {
      ^^^^
 serenum-typedef.p4(49): [--Werror=type-error] error: (EthTypes)16w0
