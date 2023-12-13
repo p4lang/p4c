@@ -29,6 +29,8 @@ limitations under the License.
 #include "typeSubstitution.h"
 #include "typeUnification.h"
 
+#include <boost/format.hpp>
+
 namespace P4 {
 
 namespace {
@@ -1502,6 +1504,17 @@ const IR::Node *TypeInference::postorder(IR::Type_Set *type) {
     return type;
 }
 
+static int getReqSize(big_int val) {
+    if (val < 0)
+        val = -val;
+    int cnt = 0;
+    while (val > 0) {
+        ++cnt;
+        val >>= 1;
+    }
+    return cnt;
+}
+
 const IR::Node *TypeInference::postorder(IR::SerEnumMember *member) {
     /*
       The type of the member is initially set in the Type_SerEnum preorder visitor.
@@ -1522,10 +1535,20 @@ const IR::Node *TypeInference::postorder(IR::SerEnumMember *member) {
         big_int high = (big_int(1) << (type->isSigned ? type->size - 1 : type->size)) - 1;
 
         if (constant->value < low || constant->value > high) {
+            int required = int(type->isSigned) + getReqSize(constant->value);
+            std::string extraMsg;
+            if (!type->isSigned && constant->value < low) {
+                extraMsg = str(boost::format("the value %1% is negative, but the underlying type "
+                    "%2% is unsigned") % constant->value % type->toString());
+            } else {
+                extraMsg = str(boost::format("the value %1% requires %2% bits but the underlying "
+                    "%3% type %4% only contains %5% bits") % constant->value % required
+                    % (type->isSigned ? "signed" : "unsigned") % type->toString() % type->size);
+            }
             ::error(ErrorType::ERR_TYPE_ERROR,
                     "%1%: Serialized enum constant value %2% is out of bounds of the underlying "
-                    "type %3%.",
-                    member, constant->value, serEnum->type);
+                    "type %3%; %4%",
+                    member, constant->value, serEnum->type, extraMsg);
         }
     }
     auto exprType = getType(member->value);
