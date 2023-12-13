@@ -1,7 +1,31 @@
 serenum-typedef.p4(8): [--Werror=type-error] error: EthT: Illegal type for enum; only bit<> and int<> are allowed; note that type-declared types are not allowed even if they are fixed-size
 enum EthT EthTypes {
      ^^^^
-serenum-typedef.p4(49): [--Werror=type-error] error: (EthTypes)16w0
+serenum-typedef.p4(23): [--Werror=type-error] error: unrepresentable_p: Serialized enum constant value 128 is out of bounds of the underlying type I8; the value 128 requires 9 bits but the underlying signed type int<8> only contains 8 bits
+    unrepresentable_p = 128,
+    ^^^^^^^^^^^^^^^^^^^^^^^
+serenum-typedef.p4(20)
+enum I8 UnrepresentableInt {
+     ^^
+serenum-typedef.p4(24): [--Werror=type-error] error: unrepresentable_n: Serialized enum constant value -129 is out of bounds of the underlying type I8; the value -129 requires 9 bits but the underlying signed type int<8> only contains 8 bits
+    unrepresentable_n = -129,
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+serenum-typedef.p4(20)
+enum I8 UnrepresentableInt {
+     ^^
+serenum-typedef.p4(29): [--Werror=type-error] error: unrepresentable_n: Serialized enum constant value -1 is out of bounds of the underlying type bit<4>; the value -1 is negative, but the underlying type bit<4> is unsigned
+    unrepresentable_n = -1,
+    ^^^^^^^^^^^^^^^^^^^^^^
+serenum-typedef.p4(28)
+enum bit<4> UnrepresentableBit {
+     ^^^^^^
+serenum-typedef.p4(31): [--Werror=type-error] error: unrepresentable_p: Serialized enum constant value 16 is out of bounds of the underlying type bit<4>; the value 16 requires 5 bits but the underlying unsigned type bit<4> only contains 4 bits
+    unrepresentable_p = 16
+    ^^^^^^^^^^^^^^^^^^^^^^
+serenum-typedef.p4(28)
+enum bit<4> UnrepresentableBit {
+     ^^^^^^
+serenum-typedef.p4(65): [--Werror=type-error] error: (EthTypes)16w0
             h.eth.type = (EthTypes)(bit<16>)0;
                          ^^^^^^^^^^^^^^^^^^^^
   ---- Actual error:

@@ -15,6 +15,22 @@ enum EthT EthTypes {
     IPv6 = 0x86DD
 }
 
+typedef int<8> I8;
+
+enum I8 UnrepresentableInt {
+    representable_p = 127,
+    representable_n = -128,
+    unrepresentable_p = 128,
+    unrepresentable_n = -129,
+    explicit_cast = (I8)4*4*4*4
+}
+
+enum bit<4> UnrepresentableBit {
+    unrepresentable_n = -1,
+    representable_p = 15,
+    unrepresentable_p = 16
+}
+
 header Ethernet {
     bit<48> src;
     bit<48> dest;
