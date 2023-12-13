@@ -130,14 +130,25 @@ struct FrontendTestCase {
 /// Redirects std::cerr temporarily
 struct RedirectStderr {
     RedirectStderr() : old(std::cerr.rdbuf(stream.rdbuf())) {}
-    ~RedirectStderr() { std::cerr.rdbuf(old); }
+    ~RedirectStderr() { reset(); }
 
     std::string str() { return stream.str(); }
 
     bool contains(std::string other) { return stream.str().find(other) != std::string::npos; }
 
+    void reset() {
+        if (old)
+            std::cerr.rdbuf(old);
+        old = nullptr;
+    }
+
+    void dumpAndReset() {
+        reset();
+        std::cerr << stream.str();
+    }
+
  private:
-    std::streambuf *old;
+    std::streambuf *old = nullptr;
     std::stringstream stream;
 };
 
