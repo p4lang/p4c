@@ -1523,9 +1523,18 @@ const IR::Node *TypeInference::postorder(IR::SerEnumMember *member) {
     */
     auto serEnum = findContext<IR::Type_SerEnum>();
     CHECK_NULL(serEnum);
-    const auto *type = getTypeType(serEnum->type)->to<IR::Type_Bits>();
+    const auto *resolvedType = getTypeType(serEnum->type);
+    const auto *type = resolvedType->to<IR::Type_Bits>();
     if (!type) {
-        typeError("%1%: Illegal type for enum; only bit<> and int<> are allowed", serEnum->type);
+        std::string note;
+        if (resolvedType->is<IR::Type_InfInt>()) {
+            note = "; note that the used type is unsized integral type";
+        }
+        if (resolvedType->is<IR::Type_Newtype>()) {
+            note = "; note that a type-declared types are not allowed even if they are fixed-size";
+        }
+        typeError("%1%: Illegal type for enum; only bit<> and int<> are allowed%2%", serEnum->type,
+                  note);
         return member;
     }
     // validate the constant fits -- non-fitting enum constants should pruce error
