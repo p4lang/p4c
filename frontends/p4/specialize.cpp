@@ -284,6 +284,8 @@ SpecializeAll::SpecializeAll(ReferenceMap *refMap, TypeMap *typeMap) : PassRepea
     passes.emplace_back(new TypeChecking(refMap, typeMap));
     passes.emplace_back(new FindSpecializations(&specMap));
     passes.emplace_back(new Specialize(&specMap));
+    passes.emplace_back(new ResolveReferences(refMap));
+    passes.emplace_back(new TypeInference(refMap, typeMap, false));  // more casts may be needed
     passes.emplace_back(new RemoveAllUnusedDeclarations(refMap));
     specMap.refMap = refMap;
     specMap.typeMap = typeMap;
