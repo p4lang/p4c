@@ -39,8 +39,8 @@ const big_int Bmv2TestBackend::ZERO_PKT_MAX = 0xffffffff;
 const std::set<std::string> Bmv2TestBackend::SUPPORTED_BACKENDS = {"PTF", "STF", "PROTOBUF",
                                                                    "PROTOBUF_IR", "METADATA"};
 
-Bmv2TestBackend::Bmv2TestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                                 const std::filesystem::path &testPath)
+Bmv2TestBackend::Bmv2TestBackend(const Bmv2V1ModelProgramInfo &programInfo,
+                                 SymbolicExecutor &symbex, const std::filesystem::path &testPath)
     : TestBackEnd(programInfo, symbex) {
     cstring testBackendString = TestgenOptions::get().testBackend;
     if (testBackendString.isNullOrEmpty()) {
@@ -57,10 +57,8 @@ Bmv2TestBackend::Bmv2TestBackend(const ProgramInfo &programInfo, SymbolicExecuto
     } else if (testBackendString == "STF") {
         testWriter = new STF(testPath, seed);
     } else if (testBackendString == "PROTOBUF") {
-        ::warning(
-            "The PROTOBUF test back end is deprecated. "
-            "Please use the PROTOBUF_IR test back end, which uses P4_PDPI.");
-        testWriter = new Protobuf(testPath, seed);
+        auto p4RuntimeAPI = programInfo.getP4RuntimeAPI();
+        testWriter = new Protobuf(testPath, p4RuntimeAPI, seed);
     } else if (testBackendString == "PROTOBUF_IR") {
         testWriter = new ProtobufIr(testPath, seed);
     } else if (testBackendString == "METADATA") {

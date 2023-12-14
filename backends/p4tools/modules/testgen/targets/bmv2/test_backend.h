@@ -19,6 +19,7 @@
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/test_backend.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/program_info.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
@@ -35,7 +36,7 @@ class Bmv2TestBackend : public TestBackEnd {
     static const std::set<std::string> SUPPORTED_BACKENDS;
 
  public:
-    explicit Bmv2TestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
+    explicit Bmv2TestBackend(const Bmv2V1ModelProgramInfo &programInfo, SymbolicExecutor &symbex,
                              const std::filesystem::path &testPath);
 
     TestBackEnd::TestInfo produceTestInfo(

@@ -230,6 +230,10 @@ const BMv2V1ModelCompilerResult &Bmv2V1ModelProgramInfo::getCompilerResult() con
     return *ProgramInfo::getCompilerResult().checkedTo<BMv2V1ModelCompilerResult>();
 }
 
+P4::P4RuntimeAPI Bmv2V1ModelProgramInfo::getP4RuntimeAPI() const {
+    return getCompilerResult().getP4RuntimeApi();
+}
+
 const IR::Member *Bmv2V1ModelProgramInfo::getParserParamVar(const IR::P4Parser *parser,
                                                             const IR::Type *type, size_t paramIndex,
                                                             cstring paramLabel) {
