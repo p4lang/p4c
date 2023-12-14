@@ -20,7 +20,7 @@ limitations under the License.
 
 namespace Test {
 
-TEST(ordered_map, map_equal) {
+TEST(OrderedMap, MapEqual) {
     ordered_map<unsigned, unsigned> a;
     ordered_map<unsigned, unsigned> b;
 
@@ -49,7 +49,7 @@ TEST(ordered_map, map_equal) {
     EXPECT_TRUE(a == b);
 }
 
-TEST(ordered_map, map_not_equal) {
+TEST(OrderedMap, MapNotEqual) {
     ordered_map<unsigned, unsigned> a;
     ordered_map<unsigned, unsigned> b;
 
@@ -116,11 +116,11 @@ TEST(ordered_map, map_not_equal) {
     EXPECT_TRUE(a != b);
 }
 
-TEST(ordered_map, insert_emplace_erase) {
+TEST(OrderedMap, InsertEmplaceErase) {
     ordered_map<unsigned, unsigned> om;
     std::map<unsigned, unsigned> sm;
 
-    typename ordered_map<unsigned, unsigned>::const_iterator it = om.end();
+    auto it = om.end();
     for (auto v : {0, 1, 2, 3, 4, 5, 6, 7, 8}) {
         sm.emplace(v, 2 * v);
         std::pair<unsigned, unsigned> pair{v, 2 * v};
@@ -134,7 +134,7 @@ TEST(ordered_map, insert_emplace_erase) {
             if ((v / 2) % 2 == 0) {
                 it = om.insert(std::move(pair)).first;
             } else {
-                it = om.emplace(std::move(v), v * 2).first;
+                it = om.emplace(v, v * 2).first;
             }
         }
     }
@@ -147,6 +147,20 @@ TEST(ordered_map, insert_emplace_erase) {
 
     EXPECT_TRUE(om.size() == sm.size());
     EXPECT_TRUE(std::equal(om.begin(), om.end(), sm.begin(), sm.end()));
+}
+
+TEST(OrderedMap, ExistingKey) {
+    ordered_map<int, std::string> myMap{{1, "One"}, {2, "Two"}, {3, "Three"}};
+
+    EXPECT_EQ(get(myMap, 1), "One");
+    EXPECT_EQ(get(myMap, 2), "Two");
+    EXPECT_EQ(get(myMap, 3), "Three");
+}
+
+TEST(OrderedMap, NonExistingKey) {
+    ordered_map<int, std::string> myMap{{1, "One"}, {2, "Two"}, {3, "Three"}};
+
+    EXPECT_EQ(get(myMap, 4), "");
 }
 
 }  // namespace Test
