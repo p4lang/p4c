@@ -66,6 +66,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
 {
     struct hdr_md *hdrMd;
     unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
+    unsigned ebpf_packetOffsetInBits_save = 0;
     ParserError_t ebpf_errorCode = NoError;
     void* pkt = ((void*)(long)skb->data);
     void* ebpf_packetEnd = ((void*)(long)skb->data_end);

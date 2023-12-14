@@ -1,5 +1,5 @@
 
-#include "noaction_example_02_parser.h"
+#include "set_entry_timer_example_parser.h"
 #include <stdbool.h>
 #include <linux/if_ether.h>
 #include "pna.h"
@@ -12,6 +12,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_key {
     u32 keysz;
     u32 maskid;
     u32 field0; /* hdr.ipv4.dstAddr */
+    u32 field1; /* istd.input_port */
 } __attribute__((aligned(4)));
 #define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_NEXT_HOP 1
 #define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP 2
@@ -20,8 +21,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_value {
     union {
         struct {
         } _NoAction;
-        struct __attribute__((__packed__)) {
-            u32 vport;
+        struct {
         } MainControlImpl_next_hop;
         struct {
         } MainControlImpl_default_route_drop;
@@ -30,14 +30,21 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_value {
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_key {
     u32 keysz;
     u32 maskid;
-    u8 field0; /* hdr.ipv4.flags */
+    u32 field0; /* hdr.ipv4.dstAddr */
+    u32 field1; /* hdr.ipv4.srcAddr */
+    u8 field2; /* hdr.ipv4.protocol */
 } __attribute__((aligned(4)));
-#define MAINCONTROLIMPL_IPV4_TBL_2_ACT__NOACTION 0
+#define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_NEXT_HOP 1
+#define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP 3
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_value {
     unsigned int action;
     union {
         struct {
         } _NoAction;
+        struct {
+        } MainControlImpl_next_hop;
+        struct {
+        } MainControlImpl_drop;
     } u;
 };
 
@@ -107,8 +114,9 @@ if (/* hdr->ipv4.isValid() */
                         .tblid = 1
                     };
                     struct MainControlImpl_ipv4_tbl_1_key key = {};
-                    key.keysz = 32;
+                    key.keysz = 64;
                     key.field0 = hdr->ipv4.dstAddr;
+                    key.field1 = skb->ifindex;
                     struct p4tc_table_entry_act_bpf *act_bpf;
                     /* value */
                     struct MainControlImpl_ipv4_tbl_1_value *value = NULL;
@@ -126,9 +134,15 @@ if (/* hdr->ipv4.isValid() */
                         switch (value->action) {
                             case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_NEXT_HOP: 
                                 {
-/* send_to_port(value->u.MainControlImpl_next_hop.vport) */
-                                    compiler_meta__->drop = false;
-                                    send_to_port(value->u.MainControlImpl_next_hop.vport);
+/* set_entry_expire_time(2) */
+                                    /* construct key */
+                                    struct p4tc_table_entry_create_bpf_params__local update_params = {
+                                        .pipeid = 1,
+                                        .tblid = 1,
+                                        .aging_ms = 2
+                                    };
+                                    bpf_p4tc_entry_update(skb, &update_params, &key, sizeof(key), act_bpf);
+;
                                 }
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP: 
@@ -154,8 +168,10 @@ if (/* hdr->ipv4.isValid() */
                         .tblid = 2
                     };
                     struct MainControlImpl_ipv4_tbl_2_key key = {};
-                    key.keysz = 3;
-                    key.field0 = hdr->ipv4.flags;
+                    key.keysz = 72;
+                    key.field0 = hdr->ipv4.dstAddr;
+                    key.field1 = hdr->ipv4.srcAddr;
+                    key.field2 = hdr->ipv4.protocol;
                     struct p4tc_table_entry_act_bpf *act_bpf;
                     /* value */
                     struct MainControlImpl_ipv4_tbl_2_value *value = NULL;
@@ -171,8 +187,23 @@ if (/* hdr->ipv4.isValid() */
                     if (value != NULL) {
                         /* run action */
                         switch (value->action) {
-                            case MAINCONTROLIMPL_IPV4_TBL_2_ACT__NOACTION: 
+                            case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_NEXT_HOP: 
                                 {
+/* set_entry_expire_time(2) */
+                                    /* construct key */
+                                    struct p4tc_table_entry_create_bpf_params__local update_params = {
+                                        .pipeid = 1,
+                                        .tblid = 2,
+                                        .aging_ms = 2
+                                    };
+                                    bpf_p4tc_entry_update(skb, &update_params, &key, sizeof(key), act_bpf);
+;
+                                }
+                                break;
+                            case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP: 
+                                {
+/* drop_packet() */
+                                    drop_packet();
                                 }
                                 break;
                             default:

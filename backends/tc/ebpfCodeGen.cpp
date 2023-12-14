@@ -453,6 +453,9 @@ void TCIngressPipelinePNA::emitLocalVariables(EBPF::CodeBuilder *builder) {
     }
     builder->newline();
     builder->emitIndent();
+    builder->appendFormat("unsigned %s_save = 0;", offsetVar.c_str());
+    builder->newline();
+    builder->emitIndent();
     builder->appendFormat("%s %s = %s;", errorEnum.c_str(), errorVar.c_str(),
                           P4::P4CoreLibrary::instance().noError.str());
     builder->newline();
@@ -774,6 +777,12 @@ void EBPFTablePNA::emitValueStructStructure(EBPF::CodeBuilder *builder) {
     builder->appendLine("u;");
 }
 
+cstring EBPFTablePNA::p4ActionToActionIDName(const IR::P4Action *action) const {
+    cstring actionName = EBPFObject::externalName(action);
+    cstring tableInstance = dataMapName;
+    return Util::printf_format("%s_ACT_%s", tableInstance.toUpper(), actionName.toUpper());
+}
+
 void EBPFTablePNA::emitActionArguments(EBPF::CodeBuilder *builder, const IR::P4Action *action,
                                        cstring name) {
     builder->emitIndent();
@@ -890,11 +899,6 @@ void EBPFTablePNA::emitValueActionIDNames(EBPF::CodeBuilder *builder) {
     for (auto a : actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->to<IR::P4Action>();
-        // no need to define a constant for NoAction,
-        // "case 0" will be explicitly generated in the action handling switch
-        if (action->name.originalName == P4::P4CoreLibrary::instance().noAction.name) {
-            continue;
-        }
         unsigned int action_idx = tcIR->getActionId(tcIR->externalName(action));
         builder->emitIndent();
         builder->appendFormat("#define %s %d", p4ActionToActionIDName(action), action_idx);
@@ -1238,6 +1242,14 @@ ControlBodyTranslatorPNA::ControlBodyTranslatorPNA(const EBPF::EBPFControlPSA *c
       EBPF::ControlBodyTranslator(control),
       tcIR(tcIR) {}
 
+ControlBodyTranslatorPNA::ControlBodyTranslatorPNA(const EBPF::EBPFControlPSA *control,
+                                                   const ConvertToBackendIR *tcIR,
+                                                   const EBPF::EBPFTablePSA *table)
+    : EBPF::CodeGenInspector(control->program->refMap, control->program->typeMap),
+      EBPF::ControlBodyTranslator(control),
+      tcIR(tcIR),
+      table(table) {}
+
 cstring ControlBodyTranslatorPNA::getParamName(const IR::PathExpression *expr) {
     return expr->path->name.name;
 }
@@ -1275,6 +1287,37 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
             }
         }
         builder->append(")");
+        return;
+    } else if (function->expr->toString() == "set_entry_expire_time") {
+        if (table) {
+            builder->emitIndent();
+            builder->appendLine("/* construct key */");
+            builder->emitIndent();
+            builder->appendLine(
+                "struct p4tc_table_entry_create_bpf_params__local update_params = {");
+            builder->emitIndent();
+            builder->appendLine("    .pipeid = 1,");
+            builder->emitIndent();
+            auto controlName = control->controlBlock->getName().originalName;
+            /* Table instanceName is control_block_name + "_" + original table name.
+            Truncating control name to get the table name.*/
+            auto tableName = table->instanceName.substr(controlName.size() + 1);
+            auto tblId = tcIR->getTableId(tableName);
+            BUG_CHECK(tblId != 0, "Table ID not found");
+            builder->appendFormat("    .tblid = %d,", tblId);
+            builder->newline();
+            builder->emitIndent();
+            builder->append("    .aging_ms = ");
+            for (auto a : *function->expr->arguments) {
+                visit(a);
+            }
+            builder->newline();
+            builder->emitIndent();
+            builder->appendLine("};");
+            builder->emitIndent();
+            builder->appendLine(
+                "bpf_p4tc_entry_update(skb, &update_params, &key, sizeof(key), act_bpf);");
+        }
         return;
     }
     processCustomExternFunction(function, EBPF::EBPFTypeFactory::instance);
@@ -1465,10 +1508,11 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
 // =====================ActionTranslationVisitorPNA=============================
 ActionTranslationVisitorPNA::ActionTranslationVisitorPNA(const EBPF::EBPFProgram *program,
                                                          cstring valueName,
-                                                         const EBPF::EBPFTablePSA *table)
+                                                         const EBPF::EBPFTablePSA *table,
+                                                         const ConvertToBackendIR *tcIR)
     : EBPF::CodeGenInspector(program->refMap, program->typeMap),
       EBPF::ActionTranslationVisitor(valueName, program),
-      ControlBodyTranslatorPNA(program->to<EBPF::EBPFPipeline>()->control),
+      ControlBodyTranslatorPNA(program->to<EBPF::EBPFPipeline>()->control, tcIR, table),
       table(table) {}
 
 bool ActionTranslationVisitorPNA::preorder(const IR::PathExpression *pe) {
@@ -1502,7 +1546,26 @@ cstring ActionTranslationVisitorPNA::getParamName(const IR::PathExpression *expr
 
 EBPF::ActionTranslationVisitor *EBPFTablePNA::createActionTranslationVisitor(
     cstring valueName, const EBPF::EBPFProgram *program) const {
-    return new ActionTranslationVisitorPNA(program->to<EBPF::EBPFPipeline>(), valueName, this);
+    return new ActionTranslationVisitorPNA(program->to<EBPF::EBPFPipeline>(), valueName, this,
+                                           tcIR);
+}
+
+void EBPFTablePNA::validateKeys() const {
+    if (keyGenerator == nullptr) return;
+
+    auto lastKey = std::find_if(
+        keyGenerator->keyElements.rbegin(), keyGenerator->keyElements.rend(),
+        [](const IR::KeyElement *key) { return key->matchType->path->name.name != "selector"; });
+    for (auto it : keyGenerator->keyElements) {
+        auto mtdecl = program->refMap->getDeclaration(it->matchType->path, true);
+        auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
+        if (matchType->name.name == P4::P4CoreLibrary::instance().lpmMatch.name) {
+            if (it != *lastKey) {
+                ::error(ErrorType::ERR_UNSUPPORTED, "%1% field key must be at the end of whole key",
+                        it->matchType);
+            }
+        }
+    }
 }
 
 // =====================DeparserHdrEmitTranslatorPNA=============================
