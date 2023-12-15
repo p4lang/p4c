@@ -37,12 +37,21 @@ jobs:
     - name: Build (Ubuntu 20.04)
       run: |
         sudo -E tools/ci-build.sh
-        # Disabling checks until we find a better way to build a fully static binary.
-        ldd ./build/p4c-bm2-psa 2>&1 # | grep -E -qi "(not a dynamic executable)|(statically linked)"
-        ldd ./build/p4c-bm2-ss 2>&1 # | grep -E -qi "(not a dynamic executable)|(statically linked)"
-        ldd ./build/p4c-dpdk 2>&1 # | grep -E -qi "(not a dynamic executable)|(statically linked)"
-        ldd ./build/p4c-ebpf 2>&1 # | grep -E -qi "(not a dynamic executable)|(statically linked)"
-        ldd ./build/p4c-pna-p4tc 2>&1 # | grep -E -qi "(not a dynamic executable)|(statically linked)"
-        ldd ./build/p4c-ubpf 2>&1 # | grep -E -qi "(not a dynamic executable)|(statically linked)"
-        ldd ./build/p4test 2>&1 # | grep -E -qi "(not a dynamic executable)|(statically linked)"
-        ldd ./build/p4testgen 2>&1 # | grep -E -qi "(not a dynamic executable)|(statically linked)"
+        # Disabling these checks until we find a better way to build a fully static binary.
+        # ldd ./build/p4c-bm2-psa 2>&1  | grep -E -qi "(not a dynamic executable)|(statically linked)"
+        # ldd ./build/p4c-bm2-ss 2>&1  | grep -E -qi "(not a dynamic executable)|(statically linked)"
+        # ldd ./build/p4c-dpdk 2>&1  | grep -E -qi "(not a dynamic executable)|(statically linked)"
+        # ldd ./build/p4c-ebpf 2>&1  | grep -E -qi "(not a dynamic executable)|(statically linked)"
+        # ldd ./build/p4c-pna-p4tc 2>&1  | grep -E -qi "(not a dynamic executable)|(statically linked)"
+        # ldd ./build/p4c-ubpf 2>&1  | grep -E -qi "(not a dynamic executable)|(statically linked)"
+        # ldd ./build/p4test 2>&1  | grep -E -qi "(not a dynamic executable)|(statically linked)"
+        # ldd ./build/p4testgen 2>&1  | grep -E -qi "(not a dynamic executable)|(statically linked)"
+
+        ldd ./build/p4c-bm2-psa 2>&1 | ! grep -E "libgc|libboost_iostreams"
+        ldd ./build/p4c-bm2-ss 2>&1 | ! grep -E "libgc|libboost_iostreams"
+        ldd ./build/p4c-dpdk 2>&1 | ! grep -E "libgc|libboost_iostreams"
+        ldd ./build/p4c-ebpf 2>&1 | ! grep -E "libgc|libboost_iostreams"
+        ldd ./build/p4c-pna-p4tc 2>&1 | ! grep -E "libgc|libboost_iostreams"
+        ldd ./build/p4c-ubpf 2>&1 | ! grep -E "libgc|libboost_iostreams"
+        ldd ./build/p4test 2>&1 | ! grep -E "libgc|libboost_iostreams"
+        ldd ./build/p4testgen 2>&1 | ! grep -E "libgc|libboost_iostreams"

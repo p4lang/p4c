@@ -133,7 +133,9 @@ if(BUILD_STATIC_RELEASE_SANS_GLIBC)
   # TODO: Keep track of https://stackoverflow.com/questions/3430400/linux-static-linking-is-dead
   # and see whether static linking improves on Linux.
   # Do not bring in dynamic libstdcc and libgcc
-  set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -Wl,-z,muldefs")
+  set(CMAKE_EXE_LINKER_FLAGS
+      "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++ -Wl,-z,muldefs"
+  )
   add_definitions(-DP4C_STATIC_BUILD)
 endif()
 
