@@ -383,15 +383,16 @@ TestgenOptions::TestgenOptions()
         "produce no tests or only tests that contain counter examples.");
 }
 
-void TestgenOptions::validateOptions() const {
+bool TestgenOptions::validateOptions() const {
     if (minCoverage > 0 && !hasCoverageTracking) {
         ::error(
             ErrorType::ERR_INVALID,
             "It is not allowed to have --assert-min-coverage set to non-zero without a coverage "
             "tracking enabled with --track-coverage option. Without coverage tracking, the "
             "--assert-min-coverage is meaningless.");
-        FATAL_ERROR("Incompatible options given.");
+        return false;
     }
+    return true;
 }
 
 }  // namespace P4Tools::P4Testgen
