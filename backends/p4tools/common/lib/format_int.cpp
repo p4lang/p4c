@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/multiprecision/cpp_int/bitwise.hpp>
@@ -18,7 +19,7 @@ namespace P4Tools {
 
 static constexpr uint8_t IPV4_BYTE_SIZE = 4U;
 static constexpr uint8_t IPV6_BYTE_SIZE = 16U;
-static constexpr uint8_t MAC_BYTE_SIZE = 16U;
+static constexpr uint8_t MAC_BYTE_SIZE = 6U;
 /// Chunk size is 8 bits, i.e., a byte.
 static constexpr uint8_t CHUNK_SIZE = 8U;
 
@@ -284,7 +285,7 @@ std::vector<uint8_t> convertBigIntToBytes(const big_int &dataInt, int targetWidt
     auto diff = targetWidthBytes - bytes.size();
     if (targetWidthBytes > bytes.size() && diff > 0UL) {
         for (size_t i = 0; i < diff; ++i) {
-            bytes.insert(bytes.begin(), 0);
+            bytes.push_back(0);
         }
     }
     return bytes;

@@ -78,8 +78,8 @@ std::string insertOctalSeparators(const std::string &dataStr);
 std::string insertHexSeparators(const std::string &dataStr);
 
 /// Converts a big integer input into a vector of bytes with the size targetWidthBits /8.
-/// If the integer value is smaller than the request bit size, padding is added on the left-hand
-/// side.
+/// If the integer value is smaller than the request bit size, padding is added on the right-hand
+/// side of the vector (the "least-significant" side).
 std::vector<uint8_t> convertBigIntToBytes(const big_int &dataInt, int targetWidthBits);
 
 /// Convert a byte array into a IPv4 string of the form "x.x.x.x".
