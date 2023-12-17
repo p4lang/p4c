@@ -149,8 +149,8 @@ struct RedirectStderr {
     }
 
  private:
-    std::streambuf *old = nullptr;
     std::stringstream stream;
+    std::streambuf *old = nullptr;
 };
 
 }  // namespace Test
