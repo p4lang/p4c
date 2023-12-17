@@ -259,6 +259,7 @@ TestgenOptions::TestgenOptions()
                 "STATEMENTS",
                 "TABLE_ENTRIES",
             };
+            hasCoverageTracking = true;
             auto selectionString = cstring(arg).toUpper();
             auto it = COVERAGE_OPTIONS.find(selectionString);
             if (it != COVERAGE_OPTIONS.end()) {
@@ -380,6 +381,18 @@ TestgenOptions::TestgenOptions()
         },
         "Produce only tests that violate the condition defined in assert calls. This will either "
         "produce no tests or only tests that contain counter examples.");
+}
+
+bool TestgenOptions::validateOptions() const {
+    if (minCoverage > 0 && !hasCoverageTracking) {
+        ::error(
+            ErrorType::ERR_INVALID,
+            "It is not allowed to have --assert-min-coverage set to non-zero without a coverage "
+            "tracking enabled with --track-coverage option. Without coverage tracking, the "
+            "--assert-min-coverage is meaningless.");
+        return false;
+    }
+    return true;
 }
 
 }  // namespace P4Tools::P4Testgen

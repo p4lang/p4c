@@ -33,6 +33,10 @@ class AbstractP4cToolOptions : protected Util::Options {
     /// Hook for customizing options processing.
     std::vector<const char *> *process(int argc, char *const argv[]) override;
 
+    /// Checks if parsed options make sense with respect to each-other.
+    /// @returns true if the validation was successfull and false otherwise.
+    virtual bool validateOptions() const { return true; }
+
     /// Converts a vector of command-line arguments into the traditional (argc, argv) format.
     static std::tuple<int, char **> convertArgs(const std::vector<const char *> &args);
 
