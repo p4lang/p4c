@@ -6,9 +6,7 @@
 #include <vector>
 
 #include "backends/p4tools/common/core/z3_solver.h"
-#include "backends/p4tools/common/lib/model.h"
 #include "ir/declaration.h"
-#include "ir/indexed_vector.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/enumerator.h"
@@ -19,7 +17,6 @@
 
 namespace Test {
 
-using P4Tools::Model;
 using P4Tools::Z3Solver;
 using P4Tools::P4Testgen::TestgenTarget;
 using Value = IR::Literal;
