@@ -231,6 +231,11 @@ class CalculatedField : IAnnotated {
         ID                      name;
         Expression              cond;
         update_or_verify() { }  // FIXME -- needed by umpack_json(safe_vector) -- should not be
+        bool operator<(update_or_verify const & a) const {
+            return update < a.update
+            || name < a.name
+            || (cond != nullptr ? a.cond != nullptr ? cond->operator<(*a.cond) : false : a.cond != nullptr);
+        }
     }
     safe_vector<update_or_verify> specs = {};
     Annotations                 annotations;

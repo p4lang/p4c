@@ -17,6 +17,8 @@ limitations under the License.
 #ifndef IR_VECTOR_H_
 #define IR_VECTOR_H_
 
+#include <algorithm>
+
 #include "ir/dbprint.h"
 #include "ir/node.h"
 #include "lib/enumerator.h"
@@ -187,11 +189,28 @@ class Vector : public VectorBase {
         if (static_cast<const Node *>(this) == &a_) return true;
         if (this->typeId() != a_.typeId()) return false;
         auto &a = static_cast<const Vector<T> &>(a_);
-        if (size() != a.size()) return false;
+        if (size() != a.size()) {
+            return false;
+        }
         auto it = a.begin();
-        for (auto *el : *this)
-            if (!el->equiv(**it++)) return false;
+        for (auto *el : *this) {
+            if (!el->equiv(**it++)) {
+                return false;
+            }
+        }
         return true;
+    }
+    bool operator<(const Node &a_) const override {
+        if (static_cast<const Node *>(this) == &a_) {
+            return false;
+        }
+        if (VectorBase::operator<(a_)) {
+            return true;
+        }
+        auto &a = static_cast<const Vector<T> &>(a_);
+        return std::lexicographical_compare(
+            vec.begin(), vec.end(), a.vec.begin(), a.vec.end(),
+            [](const T *a, const T *b) { return a->operator<(*b); });
     }
     cstring node_type_name() const override { return "Vector<" + T::static_type_name() + ">"; }
     static cstring static_type_name() { return "Vector<" + T::static_type_name() + ">"; }

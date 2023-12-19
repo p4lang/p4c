@@ -1,8 +1,6 @@
 #include "backends/p4tools/modules/testgen/lib/final_state.h"
 
-#include <list>
 #include <utility>
-#include <variant>
 #include <vector>
 
 #include <boost/container/vector.hpp>
@@ -78,13 +76,7 @@ std::optional<std::reference_wrapper<const FinalState>> FinalState::computeConco
         const auto *concolicAssignment = resolvedConcolicVariable.second;
         const IR::Expression *pathConstraint = nullptr;
         // We need to differentiate between state variables and expressions here.
-        if (std::holds_alternative<IR::ConcolicVariable>(concolicVariable)) {
-            pathConstraint = new IR::Equ(std::get<IR::ConcolicVariable>(concolicVariable).clone(),
-                                         concolicAssignment);
-        } else if (std::holds_alternative<const IR::Expression *>(concolicVariable)) {
-            pathConstraint =
-                new IR::Equ(std::get<const IR::Expression *>(concolicVariable), concolicAssignment);
-        }
+        pathConstraint = new IR::Equ(&concolicVariable.get(), concolicAssignment);
         CHECK_NULL(pathConstraint);
         pathConstraint = state.get().getSymbolicEnv().subst(pathConstraint);
         pathConstraint = P4::optimizeExpression(pathConstraint);

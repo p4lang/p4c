@@ -246,6 +246,7 @@ class IrClass : public IrElement {
     int generateConstructor(const ctor_args_t &args, const IrMethod *user, unsigned skip_opt);
     void generateMethods();
     bool shouldSkip(cstring feature) const;
+    bool hasNoDirective(cstring feature) const;
 
  public:
     const IrClass *getParent() const {

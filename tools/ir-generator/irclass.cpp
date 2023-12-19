@@ -516,18 +516,25 @@ Util::Enumerator<IrMethod *> *IrClass::getUserMethods() const {
         ->map<IrMethod *>([](IrElement *e) -> IrMethod * { return e->to<IrMethod>(); });
 }
 
-bool IrClass::shouldSkip(cstring feature) const {
-    // skip if there is a 'no' directive
+bool IrClass::hasNoDirective(cstring feature) const {
     auto *e = Util::Enumerator<IrElement *>::createEnumerator(elements);
-    bool explicitNo =
-        e->where([](IrElement *el) { return el->is<IrNo>(); })
-            ->where([feature](IrElement *el) { return el->to<IrNo>()->text == feature; })
-            ->any();
-    if (explicitNo) return true;
-    // also, skip if the user provided an implementation manually
-    // (except for validate)
-    if (feature == "validate") return false;
+    return e->where([](IrElement *el) { return el->is<IrNo>(); })
+        ->where([feature](IrElement *el) { return el->to<IrNo>()->text == feature; })
+        ->any();
+}
 
+bool IrClass::shouldSkip(cstring feature) const {
+    // Validate is special, it is never skipped.
+    if (feature == "validate") {
+        return false;
+    }
+
+    // Skip if there is a '#no' directive.
+    if (hasNoDirective(feature)) {
+        return true;
+    }
+    // Also skip if the user provided an implementation manually
+    auto *e = Util::Enumerator<IrElement *>::createEnumerator(elements);
     e = Util::Enumerator<IrElement *>::createEnumerator(elements);
     bool provided =
         e->where([](IrElement *e) { return e->is<IrMethod>(); })

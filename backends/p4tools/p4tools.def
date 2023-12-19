@@ -28,11 +28,11 @@ class StateVariable : Expression {
         return *ref == *other.ref;
     }
 
-    /// Implements comparisons so that StateVariables can be used as map keys.
-    bool operator<(const StateVariable &other) const {
-        // We use a custom compare function.
-        // TODO: Is there a faster way to implement this comparison?
-        return compare(ref, other.ref) < 0;
+    operator< {
+        if (static_cast<const Node *>(this) == &a_) return false;
+        if (node_type_name() != a_.node_type_name()) return node_type_name() < a_.node_type_name();
+        auto &a = static_cast<const StateVariable &>(a_);
+        return compare(ref, a.ref) < 0;
     }
 
     int compare(const Expression *e1, const Expression *e2) const {
@@ -135,16 +135,19 @@ class TaintExpression : Expression {
 class SymbolicVariable : Expression {
 #noconstructor
 
+    operator< {
+        if (static_cast<const Node *>(this) == &a_) return false;
+        if (node_type_name() !=  a_.node_type_name()) return node_type_name() <  a_.node_type_name();
+        auto &a = static_cast<const SymbolicVariable &>(a_);
+        return label < a.label; /* ignore type */
+    }
+
+
     /// The label of the symbolic variable.
     cstring label;
 
     /// A symbolic variable always has a type and no source info.
     SymbolicVariable(Type type, cstring label) : Expression(type), label(label) {}
-
-    /// Implements comparisons so that SymbolicVariables can be used as map keys.
-    bool operator<(const SymbolicVariable &other) const {
-        return label < other.label;
-    }
 
     toString { return "|" + label +"(" + type->toString() + ")|"; }
 
@@ -219,6 +222,13 @@ public:
 
     dbprint {
         out << "Concolic_" << label << "(" << arguments << ")";
+    }
+
+    operator< {
+        if (static_cast<const Node *>(this) == &a_) return false;
+        if (node_type_name() !=  a_.node_type_name()) return node_type_name() <  a_.node_type_name();
+        auto &a = static_cast<const ConcolicVariable &>(a_);
+        return label < a.label; /* ignore type */
     }
 
     visit_children { v.visit(type, "type"); }

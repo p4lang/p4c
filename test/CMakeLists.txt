@@ -37,6 +37,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/midend_test.cpp
   gtest/frontend_test.cpp
   gtest/opeq_test.cpp
+  gtest/opless_test.cpp
   gtest/ordered_map.cpp
   gtest/ordered_set.cpp
   gtest/parser_unroll.cpp

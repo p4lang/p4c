@@ -26,8 +26,8 @@ namespace P4Tools::P4Testgen {
 /// unique keys. Using this map, you can look up particular state variables and check whether
 /// they actually are present, but not expressions. The reason expressions need to be keys is
 /// that sometimes entire expressions are mapped to a particular constant.
-using ConcolicVariableMap =
-    ordered_map<std::variant<IR::ConcolicVariable, const IR::Expression *>, const IR::Expression *>;
+using ConcolicVariableMap = ordered_map<std::reference_wrapper<const IR::Expression>,
+                                        const IR::Expression *, std::less<const IR::Expression>>;
 
 /// Encapsulates a set of concolic method implementations.
 class ConcolicMethodImpls {

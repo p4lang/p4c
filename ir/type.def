@@ -82,6 +82,11 @@ class Type_Any : Type, ITypeVar {
         (void)a;  // silence unused warning
         return true; /* ignore declid */
     }
+    operator< {
+        if (static_cast<const Node *>(this) == &a_) return false;
+        if (Type::operator<(a_)) return true;
+        return node_type_name() < a_.node_type_name(); /* ignore declid */
+    }
 }
 
 /// This type is a fragment of another type.
@@ -227,6 +232,11 @@ class Type_InfInt : Type, ITypeVar {
     equiv {
         (void)a;  // silence unused warning
         return true; /* ignore declid */
+    }
+    operator< {
+        if (static_cast<const Node *>(this) == &a_) return false;
+        if (Type::operator<(a_)) return true;
+        return node_type_name() < a_.node_type_name(); /* ignore declid */
     }
     const Type* getP4Type() const override { return this; }
 }

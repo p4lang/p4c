@@ -133,6 +133,12 @@ abstract Declaration : StatOrDecl, IDeclaration {
     long declid = nextId++;
     ID getName() const override { return name; }
     equiv { return name == a.name; /* ignore declid */ }
+    operator< {
+        if (static_cast<const Node *>(this) == &a_) return false;
+        if (StatOrDecl::operator<(a_)) return true;
+        auto &a = static_cast<const Declaration &>(a_);
+        return name < a.name;  /* ignore declid */
+    }
  private:
     static long nextId;
  public:
@@ -149,6 +155,12 @@ abstract Type_Declaration : Type, IDeclaration {
     long declid = nextId++;
     ID getName() const override { return name; }
     equiv { return name == a.name; /* ignore declid */ }
+    operator< {
+        if (static_cast<const Node *>(this) == &a_) return false;
+        if (Type::operator<(a_)) return true;
+        auto &a = static_cast<const Declaration &>(a_);
+        return name < a.name;  /* ignore declid */
+    }
  private:
     static long nextId;
  public:
