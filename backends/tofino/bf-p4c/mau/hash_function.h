@@ -41,6 +41,10 @@ struct HashFunction {
                poly == a.poly && init == a.init && final_xor == a.final_xor;
     }
     bool operator!=(const HashFunction &a) const { return !(*this == a); }
+    bool operator<(const HashFunction &a) const {
+        return std::tie(type, size, msb, reverse, poly, init, final_xor) <
+               std::tie(a.type, a.size, a.msb, a.reverse, a.poly, a.init, a.final_xor);
+    }
     void toJSON(JSONGenerator &json) const;
     static HashFunction *fromJSON(JSONLoader &);
     bool setup(const IR::Expression *exp);

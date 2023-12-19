@@ -9,6 +9,7 @@
 #define IR_VECTOR_H_
 
 #include "ir/node.h"
+#include "ir/structural_compare.h"
 #include "lib/enumerator.h"
 #include "lib/indent.h"
 #include "lib/null.h"
@@ -170,11 +171,22 @@ class Vector : public VectorBase {
         if (static_cast<const Node *>(this) == &a_) return true;
         if (this->typeId() != a_.typeId()) return false;
         auto &a = static_cast<const Vector<T> &>(a_);
-        if (size() != a.size()) return false;
+        if (size() != a.size()) {
+            return false;
+        }
         auto it = a.begin();
-        for (auto *el : *this)
-            if (!el->equiv(**it++)) return false;
+        for (auto *el : *this) {
+            if (!el->equiv(**it++)) {
+                return false;
+            }
+        }
         return true;
+    }
+    std::weak_ordering structuralCompare(const Node &a_) const override {
+        if (static_cast<const Node *>(this) == &a_) return std::weak_ordering::equivalent;
+        if (this->typeId() != a_.typeId()) return this->typeId() <=> a_.typeId();
+        auto &a = static_cast<const Vector<T> &>(a_);
+        return IR::structuralCompare(vec, a.vec);
     }
     cstring node_type_name() const override { return "Vector<" + T::static_type_name() + ">"; }
     static cstring static_type_name() { return "Vector<" + T::static_type_name() + ">"; }

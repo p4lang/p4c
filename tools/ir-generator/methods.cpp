@@ -151,6 +151,36 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
           buf << cl->indent << "}";
           return {buf};
       }}},
+    {"structuralCompare"_cs,
+     {new NamedType("std::weak_ordering"_cs),
+      {new IrField(new ReferenceType(new NamedType(IrClass::nodeClass()), true), "a_"_cs)},
+      CONST + IN_IMPL + OVERRIDE,
+      [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
+          std::stringstream buf;
+          buf << "{\n"
+              << cl->indent << cl->indent
+              << "if (static_cast<const Node *>(this) == &a_) return "
+                 "std::weak_ordering::equivalent;\n"
+              << cl->indent << cl->indent
+              << "if (typeId() != a_.typeId()) return typeId() <=> a_.typeId();\n"
+              << cl->indent << cl->indent << "auto &a = static_cast<const " << cl->name
+              << " &>(a_);\n";
+          if (auto parent = cl->getParent(); parent && parent->name != "Node") {
+              auto name = parent->qualified_name(cl->containedIn);
+              buf << cl->indent << cl->indent << "if (auto cmp = " << name
+                  << "::structuralCompare(a); cmp != 0) return cmp;\n";
+          }
+          for (const auto *f : *cl->getFields()) {
+              // Source locations do not affect structural ordering.
+              if (f->type && *f->type == NamedType::SourceInfo()) continue;
+              buf << cl->indent << cl->indent << "if (auto cmp = IR::structuralCompare(" << f->name
+                  << ", a." << f->name << "); cmp != 0) return cmp;\n";
+          }
+          buf << cl->indent << cl->indent << "(void)a;\n"
+              << cl->indent << cl->indent << "return std::weak_ordering::equivalent;\n"
+              << cl->indent << "}";
+          return buf.str();
+      }}},
     {"operator<<"_cs,
      {&ReferenceType::OstreamRef,
       {new IrField(&ReferenceType::OstreamRef, "out"_cs)},

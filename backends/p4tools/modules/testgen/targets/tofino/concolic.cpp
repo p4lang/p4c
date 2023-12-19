@@ -20,6 +20,7 @@
 #include "backends/p4tools/modules/testgen/targets/tofino/concolic.h"
 
 #include <cstddef>
+#include <functional>
 #include <utility>
 #include <vector>
 
@@ -165,7 +166,8 @@ const ConcolicMethodImpls::ImplList SharedTofinoConcolic::SharedTofinoConcolicMe
          for (const auto &variable : resolvedExpressions) {
              const auto *varName = variable.first;
              const auto *varExpr = variable.second;
-             (*resolvedConcolicVariables)[varName] = varExpr;
+             // Fixme: std::cref should not be necessary here.
+             (*resolvedConcolicVariables)[std::cref(*varName)] = varExpr;
          }
      }},
 };

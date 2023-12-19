@@ -101,6 +101,9 @@ class Type_Any : Type, ITypeVar {
         (void)a;  // silence unused warning
         return true; /* ignore declid */
     }
+    structuralCompare {
+        return Type::structuralCompare(a_); /* ignore declid */
+    }
 }
 
 /// This type is a fragment of another type.
@@ -317,6 +320,9 @@ class Type_InfInt : Type, ITypeVar {
     equiv {
         (void)a;  // silence unused warning
         return true; /* ignore declid */
+    }
+    structuralCompare {
+        return Type::structuralCompare(a_); /* ignore declid */
     }
     const Type* getP4Type() const override { return this; }
     int width_bits() const override { return 0; }

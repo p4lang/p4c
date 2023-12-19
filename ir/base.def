@@ -26,6 +26,9 @@ interface CompileTimeValue {
     bool equiv(const CompileTimeValue& other) const {
         return this->getNode()->equiv(*other.getNode());
     }
+    std::weak_ordering structuralCompare(const CompileTimeValue& other) const {
+        return this->getNode()->structuralCompare(*other.getNode());
+    }
 }
 
 /// Base class for P4 types
@@ -147,6 +150,12 @@ abstract Declaration : StatOrDecl, IDeclaration {
     long declid = nextId++;
     ID getName() const override { return name; }
     equiv { return name == a.name; /* ignore declid */ }
+    structuralCompare {
+        if (static_cast<const Node *>(this) == &a_) return std::weak_ordering::equivalent;
+        if (typeId() != a_.typeId()) return typeId() <=> a_.typeId();
+        auto &a = static_cast<const Declaration &>(a_);
+        return IR::structuralCompare(name, a.name);  /* ignore declid */
+    }
  private:
     static long nextId;
  public:
@@ -163,6 +172,12 @@ abstract Type_Declaration : Type, IDeclaration {
     long declid = nextId++;
     ID getName() const override { return name; }
     equiv { return name == a.name; /* ignore declid */ }
+    structuralCompare {
+        if (static_cast<const Node *>(this) == &a_) return std::weak_ordering::equivalent;
+        if (typeId() != a_.typeId()) return typeId() <=> a_.typeId();
+        auto &a = static_cast<const Type_Declaration &>(a_);
+        return IR::structuralCompare(name, a.name);  /* ignore declid */
+    }
  private:
     static long nextId;
  public:

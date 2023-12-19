@@ -67,6 +67,155 @@ cloning the entire IR graph, as modifying a leaf involves cloning the
 object containing the leaf, and then any object referring to that
 object, recursively.
 
+## Structural comparison and ordered collections
+
+Use `Node::structuralCompare` to compare IR contents independently of allocation
+identity. It returns `std::weak_ordering`: compare the result with zero to test
+for less, equivalent, or greater. Include `ir/compare.h` to use
+`IR::StructuralLess` as the comparator for an ordered map or set:
+
+```cpp
+const IR::Node *a = /* ... */;
+const IR::Node *b = /* ... */;
+bool sameStructure = a->structuralCompare(*b) == 0;
+std::set<const IR::Node *, IR::StructuralLess> nodes;
+nodes.insert(a);
+nodes.insert(b);  // Does not add another key if a and b are structurally equivalent.
+```
+
+The free function `IR::structuralCompare(a, b)` in `ir/structural_compare.h`
+also compares nullable pointers, containers, tuples, and other field values.
+`IR::StructuralLess` accepts node pointers or node references, including derived
+nodes. A null pointer sorts before a non-null pointer.
+
+### What equivalence means
+
+Structural comparison provides a strict weak ordering of selected IR contents.
+It does not prove that two programs compute the same result. For example,
+`x + 0` and `x` have different structures. Paths compare by their stored names;
+comparison does not resolve declarations or account for scopes, alpha-renaming,
+or commutativity. Structurally equivalent subtrees from different scopes are
+not necessarily interchangeable.
+
+The compiler's comparison APIs have distinct contracts:
+
+| API | Meaning |
+| --- | --- |
+| Pointer `==` | Same allocation. |
+| Node `operator==` | Shallow comparison, with node-specific overrides; pointer fields generally compare by identity. |
+| Node `equiv` | Recursive equality with its own node-specific overrides. |
+| `structuralCompare` equal to zero | Equivalent under the structural ordering, including the exclusions below. |
+
+Structural equivalence is deliberately separate from `operator==`. For example,
+two separately created declarations can have different `declid` values and
+compare unequal with `operator==`, yet occupy one key in a structural set.
+It can also differ from `equiv`: constants with the same type and value but
+different display bases compare structurally equivalent, while `equiv` includes
+the base. Consequently this API is a named member and an explicit comparator;
+it does not define `Node::operator<` or `Node::operator<=>`. Use
+`structuralCompare(...) == 0` when equality must agree with `StructuralLess`.
+Existing hashes must not be assumed to agree with this equivalence. A matching
+structural hash is separate work.
+
+This terminology follows the distinction between identity and structure used by
+[TVM's structural equality](https://tvm.apache.org/ffi/concepts/structural_eq_hash.html).
+The three-way result also follows the comparison approach used by
+[LLVM's FunctionComparator](https://llvm.org/docs/MergeFunctions.html).
+The details of p4c's equivalence are specified here, rather than inherited from
+those frameworks.
+
+### Ordering rules
+
+Generated comparisons first check for the same node, then compare runtime
+`typeId()` values. For equal runtime types they compare the base class once,
+then fields in declaration order, stopping at the first difference.
+Cross-type ordering is an implementation detail: it is not alphabetical,
+a language-level ordering of types, or a stable serialization order across
+compiler versions and build configurations.
+
+Field comparison follows these rules:
+
+- Pointers compare their pointees recursively; identical pointers short-circuit.
+  Pointer addresses never break ties between distinct allocations.
+- Tuples compare element by element. Ranges, including vectors and maps,
+  compare lexicographically in iteration order; a proper prefix sorts first.
+  Map entries compare their keys and then values. This is an order of the
+  sequence exposed by the container, not an order-independent comparison of
+  sets or maps. In particular, an address-ordered or unordered container of
+  pointers does not become canonical just by comparing its elements deeply.
+- Optionals order absence before presence, then compare contained values.
+  Variants compare alternative indices first and then the active value.
+  A valueless variant sorts last, as its index is `std::variant_npos`.
+- Strings use their value order, preserving `cstring`'s distinction between
+  null and empty. Scalars use their value comparison. A custom
+  `structuralCompare` member takes priority over generic traversal.
+
+Generated comparisons inspect fields declared to the IR generator. C++ members
+written inside `#emit` blocks are not included automatically. They omit
+`SourceInfo` fields and the identity metadata in `Node`. Custom comparisons also
+exclude selected fields:
+
+| Node or value | Excluded information |
+| --- | --- |
+| `ID` | Source location and original spelling; compares the current name. |
+| `Declaration`, `Type_Declaration` | Unique declaration IDs. Derived fields still participate. |
+| `Type_Any`, `Type_InfInt` | Unique declaration IDs. |
+| `Constant` | Display base; type and numerical value still participate. |
+| `SymbolicVariable`, `ConcolicVariable` | Fields other than the label, within the same runtime type. |
+| P4Tools `StateVariable` | Type; uses the existing reference/path comparison. |
+| P4Tools `Extracted_Varbits` | Assigned size from execution state. |
+| Tofino `AliasMember` | Alias source; compares the inherited member expression. |
+| Tofino `TableSeq` | Sequence tracking ID. |
+| Tofino `HashGenExpression` | Static hash tracking ID and `any_alg_allowed`; dynamic hash IDs participate. |
+| Tofino `Table` | Physical resource-allocation records (`resources`). |
+
+The Tofino resource exclusion has a TODO in the implementation to determine
+whether allocation contents need comparison. Comparing that separate graph
+would require its own equivalence contract.
+
+### Extending and using the comparison safely
+
+For most new nodes, the generated implementation is sufficient. A custom
+`.def` `structuralCompare` body must return `std::weak_ordering`, check runtime
+types before casting, and preserve strict weak ordering. Compare a base class
+or child **once** and return a nonzero result immediately:
+
+```cpp
+if (auto order = Parent::structuralCompare(a_); order != 0) return order;
+auto &a = static_cast<const MyNode &>(a_);
+return IR::structuralCompare(field, a.field);
+```
+
+This fragment assumes the usual identity and runtime-type checks precede it.
+If a field type has no supported value comparison, supply a custom comparison
+instead of ordering it by address. Document intentional field exclusions and
+add gtests for equivalence and the first differing field. Custom scalar `<`
+operators used by the generic helper must themselves be strict weak orderings.
+
+Do not modify a key, or any transitively compared child, while it is stored in
+an ordered container. Remove it before mutation and reinsert it afterward.
+The ordering supports acyclic IR trees and DAGs; cycles are unsupported.
+
+### Performance
+
+Each recursive comparison produces all three outcomes in one traversal.
+This avoids comparing an equal subtree again in the reverse direction to
+establish equivalence. Repeating two boolean comparisons at each recursive
+level can multiply the work exponentially even on a simple unary chain.
+The gtests count leaf comparisons in equal unary chains, containers, and tuples,
+and check that shared pointers and an earlier difference stop traversal.
+
+Work is proportional to the inspected portion of the unfolded structure,
+including field-value comparisons, and recursion uses stack space proportional
+to its depth. Comparing the same pointer is constant-time. Comparing two
+separately allocated DAGs may revisit the same node pair along multiple paths;
+the implementation does not promise linear work in the number of unique DAG
+nodes. It does not allocate a memoization table on each comparison or cache
+results across mutations. If profiling shows repeated DAG pairs dominate,
+a per-comparison pair cache is a possible follow-up; any structural hashing or
+persistent cache must respect exactly the same field exclusions and mutation
+rules.
+
 ## Visitors and Transforms
 
 The compiler is organized as a series of `Visitor` and `Transform`

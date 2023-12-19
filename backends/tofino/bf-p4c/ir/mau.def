@@ -121,6 +121,10 @@ class Table : BFN::Unit, IAnnotated  {
         int address_bits = 0;
         bool per_flow_enable = false;
         int meter_type_bits = 0;
+        std::weak_ordering structuralCompare(IndirectAddress const &a) const {
+            return std::tie(shifter_enabled, address_bits, per_flow_enable, meter_type_bits) <=>
+                   std::tie(a.shifter_enabled, a.address_bits, a.per_flow_enable, a.meter_type_bits);
+        }
 #emit
         IndirectAddress &operator+=(const IndirectAddress &a);
 #end
@@ -285,6 +289,7 @@ class Table : BFN::Unit, IAnnotated  {
             return out;
         }
         Layout &operator+=(const Layout &a);
+        std::weak_ordering structuralCompare(const Layout &a) const;
 #end
     }
     Layout layout;
@@ -293,8 +298,12 @@ class Table : BFN::Unit, IAnnotated  {
         int             match_groups = 0;
         int             entries = 0;
         int             width = 0;
+        std::weak_ordering structuralCompare(Way const & a) const {
+            return std::tie(match_groups, entries, width) <=> std::tie(a.match_groups, a.entries, a.width);
+        }
     }
     safe_vector<Way>    ways;
+    // Physical allocation metadata is ignored by structuralCompare.
     const TableResourceAlloc            *resources = nullptr;
     bool is_placed() const { return resources != nullptr; }
     bool hit_miss_p4() const;
@@ -387,6 +396,7 @@ class Table : BFN::Unit, IAnnotated  {
     bool operator==(const IR::BFN::Unit &a) const override { return a == *this; }
     bool operator==(const IR::Node &a) const override { return a == *this; }
 #end
+    std::weak_ordering structuralCompare(IR::Node const &a_) const override;
     cstring get_table_type_string() const;
     bool uses_gateway() const { return !gateway_rows.empty(); }
     bool uses_gateway_payload() const {
@@ -660,6 +670,9 @@ class StatefulAlu : MeterBus2Port {
             out << mu.valid;
             return out;
         }
+        bool operator<(const MathUnit &mu) const {
+            return std::tie(valid, exp_invert, exp_shift, scale, table) < std::tie(mu.valid, mu.exp_invert, mu.exp_shift, mu.scale, mu.table);
+        }
 #end
     }
     MathUnit            math = MathUnit();
@@ -776,6 +789,12 @@ class TableSeq {
     // FIXME -- should add irgenerator field modifier to get it ignored in autogen code
     operator== { return tables == a.tables && deps == a.deps; }
     equiv { return tables.equiv(a.tables) && deps == a.deps; }
+    structuralCompare {
+        if (static_cast<const Node *>(this) == &a_) return std::weak_ordering::equivalent;
+        if (typeId() != a_.typeId()) return typeId() <=> a_.typeId();
+        auto &a = static_cast<const TableSeq &>(a_);
+        return IR::structuralCompare(std::tie(tables, deps), std::tie(a.tables, a.deps));
+    }
 #apply
 }
 
@@ -991,6 +1010,10 @@ class SaluAction : VLIWInstruction, IAnnotated {
         Type_Enum                       return_type;
         std::map<cstring, unsigned>     tag_used = {};  // bits that might be set for each tag
         unsigned                        cmp_used = 0;   // bits that might be set for instr
+        std::weak_ordering structuralCompare(ReturnEnumEncoding const &a) const {
+            return IR::structuralCompare(std::tie(return_type, tag_used, cmp_used),
+                                         std::tie(a.return_type, a.tag_used, a.cmp_used));
+        }
         bool operator<=(const ReturnEnumEncoding &a) const;  // partial ordering
         const ReturnEnumEncoding *merge(const ReturnEnumEncoding *a) const;
     }
@@ -1057,6 +1080,17 @@ class HashGenExpression : Expression {
                   : a.alg_names == nullptr;
         rv &= dynamic && a.dynamic ? id == a.id : true;
         return rv;
+    }
+
+    structuralCompare {
+        if (static_cast<const Node *>(this) == &a_) return std::weak_ordering::equivalent;
+        if (typeId() != a_.typeId()) return typeId() <=> a_.typeId();
+        if (auto cmp = Expression::structuralCompare(a_); cmp != 0) return cmp;
+        auto &a = static_cast<const HashGenExpression &>(a_);
+        const auto fields = std::tie(expr, dynamic, algorithm, hash_output_width, alg_names);
+        const auto other = std::tie(a.expr, a.dynamic, a.algorithm, a.hash_output_width, a.alg_names);
+        if (auto cmp = IR::structuralCompare(fields, other); cmp != 0) return cmp;
+        return dynamic ? IR::structuralCompare(id, a.id) : std::weak_ordering::equivalent;  // static hash IDs are only for tracking
     }
 
  private:
