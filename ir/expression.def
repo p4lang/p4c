@@ -279,6 +279,13 @@ class Constant : Literal {
         return Util::toString(value, width, sign, base);
     }
     visit_children { v.visit(type, "type"); }
+    isSemanticallyLess {
+        if (static_cast<const Node *>(this) == &a_) return false;
+        if (typeId() != a_.typeId()) return typeId() < a_.typeId();
+        if (!Literal::equiv(a_)) return Literal::isSemanticallyLess(a_);
+        auto &a = static_cast<const Constant &>(a_);
+        return value < a.value; /* ignore base */
+    }
 }
 
 class BoolLiteral : Literal {
