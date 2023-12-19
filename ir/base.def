@@ -138,6 +138,12 @@ abstract Declaration : StatOrDecl, IDeclaration {
     long declid = nextId++;
     ID getName() const override { return name; }
     equiv { return name == a.name; /* ignore declid */ }
+    isSemanticallyLess {
+        if (static_cast<const Node *>(this) == &a_) return false;
+        if (StatOrDecl::isSemanticallyLess(a_)) return true;
+        auto &a = static_cast<const Declaration &>(a_);
+        return name < a.name;  /* ignore declid */
+    }
  private:
     static long nextId;
  public:
@@ -154,6 +160,12 @@ abstract Type_Declaration : Type, IDeclaration {
     long declid = nextId++;
     ID getName() const override { return name; }
     equiv { return name == a.name; /* ignore declid */ }
+    isSemanticallyLess {
+        if (static_cast<const Node *>(this) == &a_) return false;
+        if (Type::isSemanticallyLess(a_)) return true;
+        auto &a = static_cast<const Declaration &>(a_);
+        return name < a.name;  /* ignore declid */
+    }
  private:
     static long nextId;
  public:
@@ -217,6 +229,12 @@ class AnnotationToken {
     cstring text;
     optional NullOK UnparsedConstant* constInfo = nullptr;
     dbprint { out << text; }
+    isSemanticallyLess {
+        if (static_cast<const Node *>(this) == &a_) return false;
+        if (typeId() != a_.typeId()) return typeId() < a_.typeId();
+        auto &a = static_cast<const AnnotationToken &>(a_);
+        return std::tie(token_type, text) < std::tie(a.token_type, a.text) || (!(std::tie(a.token_type, a.text) < std::tie(token_type, text)) && IR::isSemanticallyLess(constInfo, a.constInfo));
+    }
 }
 
 /// Annotations are used to provide additional information to the compiler
