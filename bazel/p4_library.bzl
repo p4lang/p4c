@@ -172,7 +172,6 @@ p4_library = rule(
         ),
         "_cc_toolchain": attr.label(default = Label("@bazel_tools//tools/cpp:current_cc_toolchain")),
     },
-    incompatible_use_toolchain_transition = True,
     toolchains = use_cpp_toolchain(),
 )
 
@@ -253,6 +252,5 @@ p4_graphs = rule(
         ),
         "_cc_toolchain": attr.label(default = Label("@bazel_tools//tools/cpp:current_cc_toolchain")),
     },
-    incompatible_use_toolchain_transition = True,
     toolchains = use_cpp_toolchain(),
 )
