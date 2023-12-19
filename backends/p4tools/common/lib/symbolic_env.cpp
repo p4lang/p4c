@@ -28,7 +28,18 @@ const IR::Expression *SymbolicEnv::get(const IR::StateVariable &var) const {
 bool SymbolicEnv::exists(const IR::StateVariable &var) const { return map.find(var) != map.end(); }
 
 void SymbolicEnv::set(const IR::StateVariable &var, const IR::Expression *value) {
-    map[var] = P4::optimizeExpression(value);
+    const auto *type = value->type;
+    BUG_CHECK(type && !type->is<IR::Type_Unknown>(), "Cannot set value with unspecified type: %1%",
+              value);
+    value = P4::optimizeExpression(value);
+    // The P4 passes used in optimizeExpression can strip types which then breaks P4Tools, make sure
+    // at least the top-level type is set.
+    if (value->type->is<IR::Type_Unknown>()) {
+        auto *clone = value->clone();
+        clone->type = type;
+        value = clone;
+    }
+    map[var] = value;
 }
 
 const IR::Expression *SymbolicEnv::subst(const IR::Expression *expr) const {
