@@ -6,7 +6,6 @@
 #include <cstdint>
 #include <exception>
 #include <iterator>
-#include <list>
 #include <map>
 #include <string>
 #include <utility>
@@ -539,7 +538,7 @@ bool Z3Translator::preorder(const IR::BoolLiteral *boolLiteral) {
 }
 
 bool Z3Translator::preorder(const IR::StringLiteral *stringLiteral) {
-    result = solver.ctx().string_const(stringLiteral->value);
+    result = solver.ctx().string_val(stringLiteral->value);
     return false;
 }
 
