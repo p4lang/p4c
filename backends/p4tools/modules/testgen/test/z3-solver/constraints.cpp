@@ -61,7 +61,7 @@ TEST_F(Z3SolverSatisfiabilityChecks, BitVectors) {
     {
         auto *expression = new IR::Equ(fooVar, barVar);
         auto *constraint1 = new IR::Equ(fooVar, IR::getConstant(eightBitType, 1));
-        auto *constraint2 = new IR::Equ(fooVar, IR::getConstant(eightBitType, 1));
+        auto *constraint2 = new IR::Equ(barVar, IR::getConstant(eightBitType, 1));
         ConstraintVector inputExpression = {expression, constraint1, constraint2};
         testCheckSat(inputExpression, true);
     }
@@ -74,7 +74,7 @@ TEST_F(Z3SolverSatisfiabilityChecks, BitVectors) {
     {
         auto *expression = new IR::Equ(fooVar, barVar);
         auto *constraint1 = new IR::Equ(fooVar, IR::getConstant(eightBitType, 1));
-        auto *constraint2 = new IR::Equ(fooVar, IR::getConstant(eightBitType, 2));
+        auto *constraint2 = new IR::Equ(barVar, IR::getConstant(eightBitType, 2));
         ConstraintVector inputExpression = {expression, constraint1, constraint2};
         testCheckSat(inputExpression, false);
     }
@@ -116,7 +116,7 @@ TEST_F(Z3SolverSatisfiabilityChecks, Strings) {
     {
         auto *expression = new IR::Equ(fooVar, barVar);
         auto *constraint1 = new IR::Equ(fooVar, new IR::StringLiteral(stringType, "dead"));
-        auto *constraint2 = new IR::Equ(fooVar, new IR::StringLiteral(stringType, "dead"));
+        auto *constraint2 = new IR::Equ(barVar, new IR::StringLiteral(stringType, "dead"));
         ConstraintVector inputExpression = {expression, constraint1, constraint2};
         testCheckSat(inputExpression, true);
     }
@@ -129,7 +129,7 @@ TEST_F(Z3SolverSatisfiabilityChecks, Strings) {
     {
         auto *expression = new IR::Equ(fooVar, barVar);
         auto *constraint1 = new IR::Equ(fooVar, new IR::StringLiteral(stringType, "dead"));
-        auto *constraint2 = new IR::Equ(fooVar, new IR::StringLiteral(stringType, "beef"));
+        auto *constraint2 = new IR::Equ(barVar, new IR::StringLiteral(stringType, "beef"));
         ConstraintVector inputExpression = {expression, constraint1, constraint2};
         testCheckSat(inputExpression, false);
     }
@@ -169,7 +169,7 @@ TEST_F(Z3SolverSatisfiabilityChecks, Bools) {
     {
         auto *expression = new IR::Equ(fooVar, barVar);
         auto *constraint1 = new IR::Equ(fooVar, IR::getBoolLiteral(true));
-        auto *constraint2 = new IR::Equ(fooVar, IR::getBoolLiteral(true));
+        auto *constraint2 = new IR::Equ(barVar, IR::getBoolLiteral(true));
         ConstraintVector inputExpression = {expression, constraint1, constraint2};
         testCheckSat(inputExpression, true);
     }
@@ -182,7 +182,7 @@ TEST_F(Z3SolverSatisfiabilityChecks, Bools) {
     {
         auto *expression = new IR::Equ(fooVar, barVar);
         auto *constraint1 = new IR::Equ(fooVar, IR::getBoolLiteral(true));
-        auto *constraint2 = new IR::Equ(fooVar, IR::getBoolLiteral(false));
+        auto *constraint2 = new IR::Equ(barVar, IR::getBoolLiteral(false));
         ConstraintVector inputExpression = {expression, constraint1, constraint2};
         testCheckSat(inputExpression, false);
     }
