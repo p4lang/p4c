@@ -110,11 +110,12 @@ struct local_metadata_t {
 	bit<32> local_metadata_mem1
 	bit<8> Ingress_tmp
 	bit<8> Ingress_tmp_0
-	bit<16> Ingress_tmp_1
+	bit<8> Ingress_tmp_1
 	bit<16> Ingress_tmp_2
-	bit<32> Ingress_tmp_3
+	bit<16> Ingress_tmp_3
 	bit<32> Ingress_tmp_4
 	bit<32> Ingress_tmp_5
+	bit<32> Ingress_tmp_6
 }
 metadata instanceof local_metadata_t
 
@@ -143,20 +144,22 @@ action vxlan_encap args instanceof vxlan_encap_arg_t {
 	ckadd h.cksum_state.state_1 h.outer_ipv4
 	mov h.dpdk_pseudo_header.pseudo_0 0x7
 	ckadd h.cksum_state.state_1 h.dpdk_pseudo_header.pseudo_0
-	mov m.Ingress_tmp_1 h.outer_ipv4.hdr_checksum
-	mov m.Ingress_tmp_2 h.ipv4.total_len
+	mov m.Ingress_tmp_2 h.outer_ipv4.hdr_checksum
+	mov m.Ingress_tmp_3 h.ipv4.total_len
 	mov m.Ingress_tmp h.ipv4.ver_ihl
-	and m.Ingress_tmp 0xF
+	shr m.Ingress_tmp 0x4
 	mov m.Ingress_tmp_0 m.Ingress_tmp
 	and m.Ingress_tmp_0 0xF
-	mov m.Ingress_tmp_3 m.Ingress_tmp_0
-	mov m.Ingress_tmp_4 0x6
-	mov m.Ingress_tmp_5 m.local_metadata_mem1
-	mov h.dpdk_pseudo_header.pseudo_1 m.Ingress_tmp_1
-	mov h.dpdk_pseudo_header.pseudo_2 m.Ingress_tmp_2
-	mov h.dpdk_pseudo_header.pseudo_3 m.Ingress_tmp_3
-	mov h.dpdk_pseudo_header.pseudo_4 m.Ingress_tmp_4
-	mov h.dpdk_pseudo_header.pseudo_5 m.Ingress_tmp_5
+	mov m.Ingress_tmp_1 m.Ingress_tmp_0
+	and m.Ingress_tmp_1 0xF
+	mov m.Ingress_tmp_4 m.Ingress_tmp_1
+	mov m.Ingress_tmp_5 0x6
+	mov m.Ingress_tmp_6 m.local_metadata_mem1
+	mov h.dpdk_pseudo_header.pseudo_1 m.Ingress_tmp_2
+	mov h.dpdk_pseudo_header.pseudo_2 m.Ingress_tmp_3
+	mov h.dpdk_pseudo_header.pseudo_3 m.Ingress_tmp_4
+	mov h.dpdk_pseudo_header.pseudo_4 m.Ingress_tmp_5
+	mov h.dpdk_pseudo_header.pseudo_5 m.Ingress_tmp_6
 	ckadd h.cksum_state.state_1 h.dpdk_pseudo_header.pseudo_1
 	ckadd h.cksum_state.state_1 h.dpdk_pseudo_header.pseudo_2
 	ckadd h.cksum_state.state_1 h.dpdk_pseudo_header.pseudo_3
