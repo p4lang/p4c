@@ -18,10 +18,19 @@ struct SymbolicVariableEqual {
 /// Less for SymbolicVariable pointers. We only compare the label.
 struct SymbolicVariableLess {
     bool operator()(const IR::SymbolicVariable *s1, const IR::SymbolicVariable *s2) const {
-        return *s1 < *s2;
+        return s1->isSemanticallyLess(*s2);
     }
     bool operator()(const IR::SymbolicVariable &s1, const IR::SymbolicVariable &s2) const {
-        return s1 < s2;
+        return s1.isSemanticallyLess(s2);
+    }
+};
+
+struct IsSemanticallyLessComparator {
+    bool operator()(const IR::Node *s1, const IR::Node *s2) const {
+        return s1->isSemanticallyLess(*s2);
+    }
+    bool operator()(const IR::Node &s1, const IR::Node &s2) const {
+        return s1.isSemanticallyLess(s2);
     }
 };
 
