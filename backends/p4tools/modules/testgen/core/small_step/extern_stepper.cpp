@@ -164,29 +164,15 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
              auto &nextState = state.clone();
              const auto *prependType = state.resolveType(prependVar->type);
 
-             if (prependType->is<IR::Type_StructLike>()) {
-                 auto prependRef = ToolsVariables::convertReference(prependVar);
-                 // We only support flat assignments, so retrieve all fields from the input
-                 // argument.
-                 const auto flatFields = nextState.getFlatFields(prependRef);
-                 // Iterate through the fields in reverse order.
-                 // We need to append in reverse order since we are prepending to the input
-                 // packet.
-                 for (auto fieldIt = flatFields.rbegin(); fieldIt != flatFields.rend(); ++fieldIt) {
-                     const auto &fieldRef = *fieldIt;
-                     // Prepend the field to the packet buffer.
-                     nextState.prependToPacketBuffer(nextState.get(fieldRef));
+             nextState.add(*new TraceEvents::Expression(prependVar, "PrependToProgramHeader"));
+             // Prepend the field to the packet buffer.
+             if (const auto *structExpr = prependVar->to<IR::StructExpression>()) {
+                 auto exprList = IR::flattenStructExpression(structExpr);
+                 for (const auto *expr : exprList) {
+                     nextState.prependToPacketBuffer(expr);
                  }
              } else if (prependType->is<IR::Type_Bits>()) {
-                 if (!(prependVar->is<IR::Member>() || prependVar->is<IR::PathExpression>() ||
-                       prependVar->is<IR::TaintExpression>() || prependVar->is<IR::Constant>())) {
-                     TESTGEN_UNIMPLEMENTED("Prepend input %1% of type %2% not supported",
-                                           prependVar, prependVar->type);
-                 }
-                 // Prepend the field to the packet buffer.
-                 nextState.add(*new TraceEvents::Expression(prependVar, "PrependToProgramHeader"));
                  nextState.prependToPacketBuffer(prependVar);
-
              } else {
                  TESTGEN_UNIMPLEMENTED("Prepend input %1% of type %2% not supported", prependVar,
                                        prependType);
@@ -210,21 +196,14 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
              auto &nextState = state.clone();
              const auto *appendType = state.resolveType(appendVar->type);
 
-             if (appendType->is<IR::Type_StructLike>()) {
-                 auto appendRef = ToolsVariables::convertReference(appendVar);
-                 // We only support flat assignments, so retrieve all fields from the input
-                 // argument.
-                 const auto flatFields = nextState.getFlatFields(appendRef);
-                 for (const auto &fieldRef : flatFields) {
-                     nextState.appendToPacketBuffer(nextState.get(fieldRef));
+             nextState.add(*new TraceEvents::Expression(appendVar, "AppendToProgramHeader"));
+             // Append the field to the packet buffer.
+             if (const auto *structExpr = appendVar->to<IR::StructExpression>()) {
+                 auto exprList = IR::flattenStructExpression(structExpr);
+                 for (const auto *expr : exprList) {
+                     nextState.appendToPacketBuffer(expr);
                  }
              } else if (appendType->is<IR::Type_Bits>()) {
-                 if (!(appendVar->is<IR::Member>() || appendVar->is<IR::PathExpression>() ||
-                       appendVar->is<IR::TaintExpression>() || appendVar->is<IR::Constant>())) {
-                     TESTGEN_UNIMPLEMENTED("append input %1% of type %2% not supported", appendVar,
-                                           appendVar->type);
-                 }
-                 nextState.add(*new TraceEvents::Expression(appendVar, "AppendToProgramHeader"));
                  nextState.appendToPacketBuffer(appendVar);
              } else {
                  TESTGEN_UNIMPLEMENTED("Append input %1% of type %2% not supported", appendVar,
