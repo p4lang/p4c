@@ -34,6 +34,8 @@ std::string ProtobufIr::getFormatOfNode(const IR::IAnnotated *node) {
             formatString = "ipv6";
         } else if (formatString == "MAC_ADDRESS") {
             formatString = "mac";
+        } else if (formatString == "HEX_STR") {
+            formatString = "hex_str";
         } else {
             TESTGEN_UNIMPLEMENTED("Unsupported @format string %1%", formatString);
         }
@@ -175,21 +177,21 @@ std::string ProtobufIr::formatNetworkValue(const std::string &type, const IR::Ex
         if (convertedString.has_value()) {
             return convertedString.value();
         }
-        BUG("Failed to convert IPv4 string.");
+        BUG("Failed to convert \"%1%\" to an IPv4 string.", value);
     }
     if (type == "ipv6") {
         auto convertedString = convertToIpv6String(convertBigIntToBytes(constant->value, 128));
         if (convertedString.has_value()) {
             return convertedString.value();
         }
-        BUG("Failed to convert IPv6 string.");
+        BUG("Failed to convert \"%1%\" to an IPv6 string.", value);
     }
     if (type == "mac") {
         auto convertedString = convertToMacString(convertBigIntToBytes(constant->value, 48));
         if (convertedString.has_value()) {
             return convertedString.value();
         }
-        BUG("Failed to convert MAC string.");
+        BUG("Failed to convert \"%1%\" to an MAC string.", value);
     }
     TESTGEN_UNIMPLEMENTED("Unsupported network value type %1%", type);
 }
