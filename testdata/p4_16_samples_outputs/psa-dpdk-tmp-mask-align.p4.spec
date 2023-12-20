@@ -59,7 +59,8 @@ struct metadata {
 	bit<16> local_metadata_data
 	bit<16> IngressParser_parser_tmp
 	bit<16> IngressParser_parser_tmp_0
-	bit<8> IngressParser_parser_tmp_2
+	bit<16> IngressParser_parser_tmp_1
+	bit<8> IngressParser_parser_tmp_3
 	bit<8> Ingress_err
 	bit<16> tmpMask
 	bit<8> tmpMask_0
@@ -99,10 +100,10 @@ apply {
 	mov m.psa_ingress_output_metadata_drop 0x1
 	extract h.ethernet
 	jmplt LABEL_FALSE h.ethernet.etherType 0x800
-	mov m.IngressParser_parser_tmp_2 0x1
+	mov m.IngressParser_parser_tmp_3 0x1
 	jmp LABEL_END
-	LABEL_FALSE :	mov m.IngressParser_parser_tmp_2 0x0
-	LABEL_END :	jmpneq LABEL_END_0 m.IngressParser_parser_tmp_2 0
+	LABEL_FALSE :	mov m.IngressParser_parser_tmp_3 0x0
+	LABEL_END :	jmpneq LABEL_END_0 m.IngressParser_parser_tmp_3 0
 	mov m.psa_ingress_input_metadata_parser_error 0x7
 	jmp INGRESSPARSERIMPL_ACCEPT
 	LABEL_END_0 :	mov m.tmpMask h.ethernet.etherType
@@ -111,10 +112,12 @@ apply {
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
 	mov m.IngressParser_parser_tmp h.ipv4.flags_fragOffset
-	and m.IngressParser_parser_tmp 0x7
+	shr m.IngressParser_parser_tmp 0xD
 	mov m.IngressParser_parser_tmp_0 m.IngressParser_parser_tmp
 	and m.IngressParser_parser_tmp_0 0x7
-	mov m.tmpMask_0 m.IngressParser_parser_tmp_0
+	mov m.IngressParser_parser_tmp_1 m.IngressParser_parser_tmp_0
+	and m.IngressParser_parser_tmp_1 0x7
+	mov m.tmpMask_0 m.IngressParser_parser_tmp_1
 	and m.tmpMask_0 0x4
 	jmpeq INGRESSPARSERIMPL_PARSE_TCP m.tmpMask_0 0x4
 	jmp INGRESSPARSERIMPL_ACCEPT

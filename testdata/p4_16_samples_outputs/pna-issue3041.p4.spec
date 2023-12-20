@@ -42,10 +42,9 @@ struct main_metadata_t {
 	bit<32> pna_main_output_metadata_output_port
 	bit<8> MainParserT_parser_tmp
 	bit<8> MainParserT_parser_tmp_0
-	bit<8> MainParserT_parser_tmp_1
-	bit<32> MainParserT_parser_tmp_3
-	bit<32> MainParserT_parser_tmp_5
-	bit<32> MainParserT_parser_tmp_5_extract_tmp
+	bit<32> MainParserT_parser_tmp_2
+	bit<32> MainParserT_parser_tmp_4
+	bit<32> MainParserT_parser_tmp_4_extract_tmp
 }
 metadata instanceof main_metadata_t
 
@@ -102,22 +101,20 @@ apply {
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_IPV4 :	extract h.ipv4_base
 	mov m.MainParserT_parser_tmp h.ipv4_base.version_ihl
-	shr m.MainParserT_parser_tmp 0x4
+	and m.MainParserT_parser_tmp 0xF
 	mov m.MainParserT_parser_tmp_0 m.MainParserT_parser_tmp
 	and m.MainParserT_parser_tmp_0 0xF
-	mov m.MainParserT_parser_tmp_1 m.MainParserT_parser_tmp_0
-	and m.MainParserT_parser_tmp_1 0xF
-	jmpeq MAINPARSERIMPL_ACCEPT m.MainParserT_parser_tmp_1 0x5
+	jmpeq MAINPARSERIMPL_ACCEPT m.MainParserT_parser_tmp_0 0x5
 	lookahead h.option
 	jmpeq MAINPARSERIMPL_PARSE_IPV4_OPTION_TIMESTAMP h.option.type 0x44
 	jmp MAINPARSERIMPL_ACCEPT
-	MAINPARSERIMPL_PARSE_IPV4_OPTION_TIMESTAMP :	mov m.MainParserT_parser_tmp_3 h.option.len
-	shl m.MainParserT_parser_tmp_3 0x3
-	mov m.MainParserT_parser_tmp_5 m.MainParserT_parser_tmp_3
-	add m.MainParserT_parser_tmp_5 0xFFFFFFF0
-	mov m.MainParserT_parser_tmp_5_extract_tmp m.MainParserT_parser_tmp_5
-	shr m.MainParserT_parser_tmp_5_extract_tmp 0x3
-	extract h.ipv4_option_timestamp m.MainParserT_parser_tmp_5_extract_tmp
+	MAINPARSERIMPL_PARSE_IPV4_OPTION_TIMESTAMP :	mov m.MainParserT_parser_tmp_2 h.option.len
+	shl m.MainParserT_parser_tmp_2 0x3
+	mov m.MainParserT_parser_tmp_4 m.MainParserT_parser_tmp_2
+	add m.MainParserT_parser_tmp_4 0xFFFFFFF0
+	mov m.MainParserT_parser_tmp_4_extract_tmp m.MainParserT_parser_tmp_4
+	shr m.MainParserT_parser_tmp_4_extract_tmp 0x3
+	extract h.ipv4_option_timestamp m.MainParserT_parser_tmp_4_extract_tmp
 	MAINPARSERIMPL_ACCEPT :	mov m.pna_main_output_metadata_output_port 0x0
 	table tbl
 	table tbl2
