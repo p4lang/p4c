@@ -80,7 +80,7 @@ bool CoverableNodesScanner::preorder(const IR::MethodCallExpression *call) {
                         const auto *tableAction =
                             entry->action->checkedTo<IR::MethodCallExpression>();
                         const auto *actionType = executionState.getP4Action(tableAction);
-                        actionType->body->apply_visitor_preorder(*this);
+                        actionType->apply_visitor_preorder(*this);
                     }
                 }
             } else {
@@ -88,19 +88,19 @@ bool CoverableNodesScanner::preorder(const IR::MethodCallExpression *call) {
                     const auto *tableAction =
                         action->expression->checkedTo<IR::MethodCallExpression>();
                     const auto *actionType = executionState.getP4Action(tableAction);
-                    actionType->body->apply_visitor_preorder(*this);
+                    actionType->apply_visitor_preorder(*this);
                 }
             }
             const auto *defaultAction = table->getDefaultAction();
             const auto *tableAction = defaultAction->checkedTo<IR::MethodCallExpression>();
             const auto *actionType = executionState.getP4Action(tableAction);
-            actionType->body->apply_visitor_preorder(*this);
+            actionType->apply_visitor_preorder(*this);
         }
         return false;
     }
     if (call->method->type->is<IR::Type_Action>()) {
         const auto *actionType = executionState.getP4Action(call);
-        actionType->body->apply_visitor_preorder(*this);
+        actionType->apply_visitor_preorder(*this);
         return false;
     }
     return false;
@@ -120,6 +120,16 @@ bool CoverableNodesScanner::preorder(const IR::ExitStatement *stmt) {
         coverableNodes.insert(stmt);
     }
     return true;
+}
+
+bool CoverableNodesScanner::preorder(const IR::P4Action *act) {
+    // Only track actions, which have a valid source position in the P4 program.
+    if (coverageOptions.coverActions && act->getSourceInfo().isValid()) {
+        coverableNodes.insert(act);
+    }
+    // visit body only
+    act->body->apply_visitor_preorder(*this);
+    return false;
 }
 
 const P4::Coverage::CoverageSet &CoverableNodesScanner::getCoverableNodes() {
