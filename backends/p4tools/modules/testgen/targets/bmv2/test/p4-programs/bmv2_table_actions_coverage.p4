@@ -42,7 +42,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t s) {
     table t0 {
         actions = { t0_a0; t0_a1; t0_a2; }
         size = 8;
-        default_action = t0_a1();
+        default_action = t0_a0();
     }
 
     action t1_a0() { /* empty */ }
