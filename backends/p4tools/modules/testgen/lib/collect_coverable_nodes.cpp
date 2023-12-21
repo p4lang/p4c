@@ -127,7 +127,7 @@ bool CoverableNodesScanner::preorder(const IR::P4Action *act) {
     if (coverageOptions.coverActions && act->getSourceInfo().isValid()) {
         coverableNodes.insert(act);
     }
-    // visit body only
+    // Visit body only.
     act->body->apply_visitor_preorder(*this);
     return false;
 }
