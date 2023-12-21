@@ -234,14 +234,14 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
     } else {
         emitCPUMAPLookup(builder);
         builder->emitIndent();
-        builder->appendFormat("unsigned %s = hdrMd->%s;", offsetVar.c_str(), offsetVar.c_str());
-        builder->newline();
-        builder->emitIndent();
         builder->append("if (!hdrMd)");
         builder->newline();
         builder->emitIndent();
         builder->emitIndent();
         builder->appendFormat("return %s;", dropReturnCode());
+        builder->newline();
+        builder->emitIndent();
+        builder->appendFormat("unsigned %s = hdrMd->%s;", offsetVar.c_str(), offsetVar.c_str());
     }
     builder->newline();
     emitHeadersFromCPUMAP(builder);
@@ -930,9 +930,6 @@ void EBPFTablePNA::emitDefaultAction(EBPF::CodeBuilder *builder, cstring valueNa
     }
     if (visitDefaultAction == false) {
         builder->blockStart();
-        builder->emitIndent();
-        builder->appendFormat("return %s", builder->target->forwardReturnCode().c_str());
-        builder->endOfStatement(true);
         builder->blockEnd(true);
     }
 }

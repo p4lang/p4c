@@ -215,9 +215,9 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
 
     struct main_metadata_t *user_meta;
     hdrMd = BPF_MAP_LOOKUP_ELEM(hdr_md_cpumap, &ebpf_zero);
-    unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
     if (!hdrMd)
         return TC_ACT_SHOT;
+    unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
     hdr = &(hdrMd->cpumap_hdr);
     user_meta = &(hdrMd->cpumap_usermeta);
 {
@@ -379,7 +379,6 @@ if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
                                 return TC_ACT_SHOT;
                         }
                     } else {
-                        return TC_ACT_OK;
                     }
                 }
 ;
@@ -433,7 +432,6 @@ if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
                                 return TC_ACT_SHOT;
                         }
                     } else {
-                        return TC_ACT_OK;
                     }
                 }
 ;
@@ -470,7 +468,6 @@ if (hdr->ipv4.protocol != 4 || (hdr->tcp.srcPort <= 3)) {
                                 return TC_ACT_SHOT;
                         }
                     } else {
-                        return TC_ACT_OK;
                     }
                 }
 ;
