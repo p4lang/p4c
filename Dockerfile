@@ -19,7 +19,7 @@ ARG CMAKE_UNITY_BUILD=ON
 ARG VALIDATION=OFF
 # This creates a release build that includes link time optimization and links
 # all libraries statically.
-ARG BUILD_STATIC_RELEASE=OFF
+ARG BUILD_STATIC_RELEASE_SANS_GLIBC=OFF
 # No questions asked during package installation.
 ARG DEBIAN_FRONTEND=noninteractive
 # Whether to install dependencies required to run PTF-ebpf tests
