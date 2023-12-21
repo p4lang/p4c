@@ -1,8 +1,8 @@
+#include "ebpf_kernel.h"
+
 #include <stdbool.h>
 #include <linux/if_ether.h>
 #include "pna.h"
-#include "ebpf_kernel.h"
-
 
 #define EBPF_MASK(t, w) ((((t)(1)) << (w)) - (t)1)
 #define BYTES(w) ((w) / 8)

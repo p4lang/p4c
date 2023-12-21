@@ -187,8 +187,8 @@ void PNAArchTC::emitParser(EBPF::CodeBuilder *builder) const {
 
 void PNAArchTC::emitHeader(EBPF::CodeBuilder *builder) const {
     xdp->emitGeneratedComment(builder);
-    emitPNAIncludes(builder);
     builder->target->emitIncludes(builder);
+    emitPNAIncludes(builder);
     emitPreamble(builder);
     for (auto type : ebpfTypes) {
         type->emit(builder);
