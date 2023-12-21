@@ -1,3 +1,6 @@
+#include <stdbool.h>
+#include <linux/if_ether.h>
+#include "pna.h"
 #include "ebpf_kernel.h"
 
 
@@ -37,6 +40,7 @@ struct my_ingress_metadata_t {
 };
 struct empty_metadata_t {
 };
+
 struct hdr_md {
     struct my_ingress_headers_t cpumap_hdr;
     struct my_ingress_metadata_t cpumap_usermeta;

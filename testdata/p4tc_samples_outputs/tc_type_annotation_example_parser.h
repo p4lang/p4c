@@ -1,3 +1,6 @@
+#include <stdbool.h>
+#include <linux/if_ether.h>
+#include "pna.h"
 #include "ebpf_kernel.h"
 
 
@@ -35,6 +38,7 @@ struct headers_t {
     struct ethernet_t ethernet; /* ethernet_t */
     struct ipv4_t ipv4; /* ipv4_t */
 };
+
 struct hdr_md {
     struct headers_t cpumap_hdr;
     struct main_metadata_t cpumap_usermeta;

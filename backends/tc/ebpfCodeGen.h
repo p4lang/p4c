@@ -153,6 +153,7 @@ class EBPFTablePNA : public EBPF::EBPFTablePSA {
     void emitAction(EBPF::CodeBuilder *builder, cstring valueName,
                     cstring actionRunVariable) override;
     void emitValueActionIDNames(EBPF::CodeBuilder *builder) override;
+    void emitDefaultAction(EBPF::CodeBuilder *builder, cstring valueName);
 };
 
 class IngressDeparserPNA : public EBPF::EBPFDeparserPSA {

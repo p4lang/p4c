@@ -20,10 +20,6 @@ namespace TC {
 
 // =====================PNAEbpfGenerator=============================
 void PNAEbpfGenerator::emitPNAIncludes(EBPF::CodeBuilder *builder) const {
-    builder->newline();
-    cstring headerFile = getProgramName() + "_parser.h";
-    builder->appendFormat("#include \"%s\"", headerFile);
-    builder->newline();
     builder->appendLine("#include <stdbool.h>");
     builder->appendLine("#include <linux/if_ether.h>");
     builder->appendLine("#include \"pna.h\"");
@@ -67,9 +63,6 @@ void PNAEbpfGenerator::emitInternalStructures(EBPF::CodeBuilder *builder) const 
 
 /* Generate headers and structs in p4 prog */
 void PNAEbpfGenerator::emitTypes(EBPF::CodeBuilder *builder) const {
-    PNAErrorCodesGen errorGen(builder);
-    pipeline->program->apply(errorGen);
-
     pipeline->parser->emitTypes(builder);
     pipeline->control->emitTableTypes(builder);
     pipeline->deparser->emitTypes(builder);
@@ -129,10 +122,11 @@ void PNAArchTC::emit(EBPF::CodeBuilder *builder) const {
     xdp->emitGeneratedComment(builder);
 
     /*
-     * 2. Includes.
+     * 2. Include header file.
      */
-    emitPNAIncludes(builder);
-
+    cstring headerFile = getProgramName() + "_parser.h";
+    builder->appendFormat("#include \"%s\"", headerFile);
+    builder->newline();
     /*
      * 3. Headers, structs
      */
@@ -179,7 +173,9 @@ void PNAArchTC::emitParser(EBPF::CodeBuilder *builder) const {
      * 4. TC Pipeline program for parser.
      */
     xdp->emitGeneratedComment(builder);
-    emitPNAIncludes(builder);
+    cstring headerFile = getProgramName() + "_parser.h";
+    builder->appendFormat("#include \"%s\"", headerFile);
+    builder->newline();
     builder->newline();
     emitInstances(builder);
     pipeline->name = "tc-parse";
@@ -191,11 +187,14 @@ void PNAArchTC::emitParser(EBPF::CodeBuilder *builder) const {
 
 void PNAArchTC::emitHeader(EBPF::CodeBuilder *builder) const {
     xdp->emitGeneratedComment(builder);
+    emitPNAIncludes(builder);
     builder->target->emitIncludes(builder);
     emitPreamble(builder);
     for (auto type : ebpfTypes) {
         type->emit(builder);
     }
+    PNAErrorCodesGen errorGen(builder);
+    pipeline->program->apply(errorGen);
     emitGlobalHeadersMetadata(builder);
 }
 
@@ -229,8 +228,14 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
     if (name == "tc-parse") {
         builder->newline();
         emitCPUMAPInitializers(builder);
+        builder->newline();
+        builder->emitIndent();
+        builder->appendFormat("unsigned %s = 0;", offsetVar.c_str());
     } else {
         emitCPUMAPLookup(builder);
+        builder->emitIndent();
+        builder->appendFormat("unsigned %s = hdrMd->%s;", offsetVar.c_str(), offsetVar.c_str());
+        builder->newline();
         builder->emitIndent();
         builder->append("if (!hdrMd)");
         builder->newline();
@@ -445,13 +450,6 @@ void TCIngressPipelinePNA::emitTrafficManager(EBPF::CodeBuilder *builder) {
 }
 
 void TCIngressPipelinePNA::emitLocalVariables(EBPF::CodeBuilder *builder) {
-    builder->emitIndent();
-    if (name == "tc-parse") {
-        builder->appendFormat("unsigned %s = 0;", offsetVar.c_str());
-    } else if (name == "tc-ingress") {
-        builder->appendFormat("unsigned %s = hdrMd->%s;", offsetVar.c_str(), offsetVar.c_str());
-    }
-    builder->newline();
     builder->emitIndent();
     builder->appendFormat("%s %s = %s;", errorEnum.c_str(), errorVar.c_str(),
                           P4::P4CoreLibrary::instance().noError.str());
@@ -798,6 +796,9 @@ void EBPFTablePNA::emitActionArguments(EBPF::CodeBuilder *builder, const IR::P4A
 
 void EBPFTablePNA::emitAction(EBPF::CodeBuilder *builder, cstring valueName,
                               cstring actionRunVariable) {
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendLine("/* run action */");
     builder->emitIndent();
     builder->appendFormat("switch (%s->action) ", valueName.c_str());
     builder->blockStart();
@@ -862,6 +863,16 @@ void EBPFTablePNA::emitAction(EBPF::CodeBuilder *builder, cstring valueName,
         builder->appendFormat("%s = %s->action", actionRunVariable.c_str(), valueName.c_str());
         builder->endOfStatement(true);
     }
+
+    builder->blockEnd(false);
+    builder->appendFormat(" else ");
+    if (dropOnNoMatchingEntryFound()) {
+        builder->target->emitTraceMessage(builder, "Control: Entry not found, aborting");
+        emitDefaultAction(builder, valueName);
+    } else {
+        builder->target->emitTraceMessage(builder,
+                                          "Control: Entry not found, executing implicit NoAction");
+    }
 }
 
 void EBPFTablePNA::emitInitializer(EBPF::CodeBuilder *builder) {
@@ -881,6 +892,38 @@ void EBPFTablePNA::emitDefaultActionStruct(EBPF::CodeBuilder *builder) {
     if (actionName->path->name.originalName != P4::P4CoreLibrary::instance().noAction.name) {
         auto value = program->refMap->newName("value");
         emitTableValue(builder, defaultAction, value);
+    }
+}
+
+void EBPFTablePNA::emitDefaultAction(EBPF::CodeBuilder *builder, cstring valueName) {
+    const IR::P4Table *t = table->container;
+    const IR::Expression *default_action = t->getDefaultAction();
+    bool visitDefaultAction = false;
+    if (default_action) {
+        if (auto mc = default_action->to<IR::MethodCallExpression>()) {
+            default_action = mc->method;
+        }
+        auto path = default_action->to<IR::PathExpression>();
+        BUG_CHECK(path, "Default action path %s cannot be found", default_action);
+        if (auto defaultActionDecl =
+                program->refMap->getDeclaration(path->path)->to<IR::P4Action>()) {
+            if (defaultActionDecl->name.originalName != "NoAction") {
+                visitDefaultAction = true;
+                auto visitor = createActionTranslationVisitor(valueName, program);
+                visitor->setBuilder(builder);
+                visitor->copySubstitutions(codeGen);
+                visitor->copyPointerVariables(codeGen);
+                defaultActionDecl->apply(*visitor);
+                builder->newline();
+            }
+        }
+    }
+    if (visitDefaultAction == false) {
+        builder->blockStart();
+        builder->emitIndent();
+        builder->appendFormat("return %s", builder->target->forwardReturnCode().c_str());
+        builder->endOfStatement(true);
+        builder->blockEnd(true);
     }
 }
 
@@ -958,6 +1001,7 @@ void IngressDeparserPNA::emit(EBPF::CodeBuilder *builder) {
     prepareBufferTranslator->substitute(this->headers, this->parserHeaders);
     controlBlock->container->body->apply(*prepareBufferTranslator);
 
+    emitBufferAdjusts(builder);
     builder->emitIndent();
     builder->appendFormat("%s = %s;", program->packetStartVar,
                           builder->target->dataOffset(program->model.CPacketName.str()));
@@ -1436,26 +1480,8 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
 
     builder->emitIndent();
     builder->appendFormat("if (%s != NULL) ", valueName.c_str());
-    builder->blockStart();
-    builder->emitIndent();
-    builder->appendLine("/* run action */");
     table->emitAction(builder, valueName, actionVariableName);
     toDereference.clear();
-
-    builder->blockEnd(false);
-    builder->appendFormat(" else ");
-    builder->blockStart();
-    if (table->dropOnNoMatchingEntryFound()) {
-        builder->target->emitTraceMessage(builder, "Control: Entry not found, aborting");
-        builder->emitIndent();
-        builder->appendFormat("return %s", builder->target->abortReturnCode().c_str());
-        builder->endOfStatement(true);
-    } else {
-        builder->target->emitTraceMessage(builder,
-                                          "Control: Entry not found, executing implicit NoAction");
-    }
-    builder->endOfStatement(true);
-    builder->blockEnd(true);
     builder->blockEnd(true);
 
     msgStr = Util::printf_format("Control: %s applied", method->object->getName().name);
