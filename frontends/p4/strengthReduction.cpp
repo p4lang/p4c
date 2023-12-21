@@ -239,13 +239,13 @@ const IR::Node *DoStrengthReduction::postorder(IR::Mul *expr) {
     if (isOne(expr->right)) return expr->left;
     auto exp = isPowerOf2(expr->left);
     if (exp >= 0) {
-        auto amt = new IR::Constant(expr->left->srcInfo, expr->left->type, exp);
+        auto amt = new IR::Constant(expr->left->srcInfo, exp);
         auto sh = new IR::Shl(expr->srcInfo, expr->type, expr->right, amt);
         return sh;
     }
     exp = isPowerOf2(expr->right);
     if (exp >= 0) {
-        auto amt = new IR::Constant(expr->right->srcInfo, expr->right->type, exp);
+        auto amt = new IR::Constant(expr->right->srcInfo, exp);
         auto sh = new IR::Shl(expr->srcInfo, expr->type, expr->left, amt);
         return sh;
     }
@@ -263,7 +263,7 @@ const IR::Node *DoStrengthReduction::postorder(IR::Div *expr) {
     if (isOne(expr->right)) return expr->left;
     auto exp = isPowerOf2(expr->right);
     if (exp >= 0) {
-        auto amt = new IR::Constant(expr->right->srcInfo, expr->right->type, exp);
+        auto amt = new IR::Constant(expr->right->srcInfo, exp);
         auto sh = new IR::Shr(expr->srcInfo, expr->type, expr->left, amt);
         return sh;
     }
