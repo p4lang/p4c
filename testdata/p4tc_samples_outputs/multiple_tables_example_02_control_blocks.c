@@ -52,6 +52,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_3_key {
 } __attribute__((aligned(4)));
 #define MAINCONTROLIMPL_IPV4_TBL_3_ACT_MAINCONTROLIMPL_SENDTOPORT 3
 #define MAINCONTROLIMPL_IPV4_TBL_3_ACT_MAINCONTROLIMPL_DROP 4
+#define MAINCONTROLIMPL_IPV4_TBL_3_ACT__NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_3_value {
     unsigned int action;
     union {
@@ -72,6 +73,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_4_key {
 } __attribute__((aligned(4)));
 #define MAINCONTROLIMPL_IPV4_TBL_4_ACT_MAINCONTROLIMPL_SENDTOPORT 3
 #define MAINCONTROLIMPL_IPV4_TBL_4_ACT_MAINCONTROLIMPL_DROP 4
+#define MAINCONTROLIMPL_IPV4_TBL_4_ACT__NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_4_value {
     unsigned int action;
     union {
@@ -88,6 +90,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_5_key {
     u32 maskid;
     u16 field0; /* hdr.ipv4.fragOffset */
 } __attribute__((aligned(4)));
+#define MAINCONTROLIMPL_IPV4_TBL_5_ACT__NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_5_value {
     unsigned int action;
     union {
@@ -110,6 +113,7 @@ struct __attribute__((__packed__)) MainControlImpl_set_all_options_key {
 #define MAINCONTROLIMPL_SET_ALL_OPTIONS_ACT_MAINCONTROLIMPL_TCP_OTHER_PACKETS 7
 #define MAINCONTROLIMPL_SET_ALL_OPTIONS_ACT_MAINCONTROLIMPL_SENDTOPORT 3
 #define MAINCONTROLIMPL_SET_ALL_OPTIONS_ACT_MAINCONTROLIMPL_DROP 4
+#define MAINCONTROLIMPL_SET_ALL_OPTIONS_ACT__NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_set_all_options_value {
     unsigned int action;
     union {
@@ -196,6 +200,8 @@ int xdp_func(struct xdp_md *skb) {
 static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr, struct pna_global_metadata *compiler_meta__)
 {
     struct hdr_md *hdrMd;
+
+    unsigned ebpf_packetOffsetInBits_save = 0;
     ParserError_t ebpf_errorCode = NoError;
     void* pkt = ((void*)(long)skb->data);
     void* ebpf_packetEnd = ((void*)(long)skb->data_end);
@@ -364,7 +370,7 @@ if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))
 
                                 }
                                 break;
-                            case 0: 
+                            case MAINCONTROLIMPL_IPV4_TBL_3_ACT__NOACTION: 
                                 {
                                 }
                                 break;
@@ -418,7 +424,7 @@ if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))
 
                                 }
                                 break;
-                            case 0: 
+                            case MAINCONTROLIMPL_IPV4_TBL_4_ACT__NOACTION: 
                                 {
                                 }
                                 break;
@@ -455,7 +461,7 @@ if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))
                     if (value != NULL) {
                         /* run action */
                         switch (value->action) {
-                            case 0: 
+                            case MAINCONTROLIMPL_IPV4_TBL_5_ACT__NOACTION: 
                                 {
                                 }
                                 break;
@@ -582,7 +588,7 @@ if (hdr->ipv4.protocol == 6 || ((hdr->ipv4.version > 1) && (hdr->ipv4.ihl <= 2))
 
                                 }
                                 break;
-                            case 0: 
+                            case MAINCONTROLIMPL_SET_ALL_OPTIONS_ACT__NOACTION: 
                                 {
                                 }
                                 break;

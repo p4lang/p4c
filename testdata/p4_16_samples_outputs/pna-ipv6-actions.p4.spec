@@ -75,15 +75,14 @@ struct main_metadata_t {
 	bit<32> MainControlT_tmp
 	bit<32> MainControlT_tmp_1
 	bit<32> MainControlT_tmp_2
-	bit<32> MainControlT_tmp_3
+	bit<32> MainControlT_tmp_4
 	bit<32> MainControlT_tmp_5
 	bit<32> MainControlT_tmp_6
-	bit<32> MainControlT_tmp_7
+	bit<32> MainControlT_tmp_8
 	bit<32> MainControlT_tmp_9
-	bit<32> MainControlT_tmp_10
 	bit<32> MainControlT_tmp_11
-	bit<32> MainControlT_tmp_13
-	bit<128> MainControlT_tmp_14
+	bit<32> MainControlT_tmp_12
+	bit<128> MainControlT_tmp_13
 	bit<32> MainControlT_tmp1
 }
 metadata instanceof main_metadata_t
@@ -106,51 +105,49 @@ action ipv6_modify_dstAddr args instanceof ipv6_modify_dstAddr_arg_t {
 
 action ipv6_swap_addr args none {
 	mov h.ipv6.dstAddr h.ipv6.srcAddr
-	mov h.ipv6.srcAddr m.MainControlT_tmp_14
+	mov h.ipv6.srcAddr m.MainControlT_tmp_13
 	return
 }
 
 action set_flowlabel args instanceof set_flowlabel_arg_t {
 	mov m.MainControlT_tmp h.ipv6.version_trafficClass_flowLabel
-	and m.MainControlT_tmp 0xFFF
+	and m.MainControlT_tmp 0xFFF00000
 	mov m.MainControlT_tmp_1 t.label
-	shl m.MainControlT_tmp_1 0xC
-	mov m.MainControlT_tmp_2 m.MainControlT_tmp_1
-	and m.MainControlT_tmp_2 0xFFFFF000
+	and m.MainControlT_tmp_1 0xFFFFF
 	mov h.ipv6.version_trafficClass_flowLabel m.MainControlT_tmp
-	or h.ipv6.version_trafficClass_flowLabel m.MainControlT_tmp_2
+	or h.ipv6.version_trafficClass_flowLabel m.MainControlT_tmp_1
 	return
 }
 
 action set_traffic_class_flow_label args instanceof set_traffic_class_flow_label_arg_t {
-	mov m.MainControlT_tmp_3 h.ipv6.version_trafficClass_flowLabel
-	and m.MainControlT_tmp_3 0xFFFFF00F
-	mov m.MainControlT_tmp_5 t.trafficClass
-	shl m.MainControlT_tmp_5 0x4
-	mov m.MainControlT_tmp_6 m.MainControlT_tmp_5
-	and m.MainControlT_tmp_6 0xFF0
-	mov h.ipv6.version_trafficClass_flowLabel m.MainControlT_tmp_3
-	or h.ipv6.version_trafficClass_flowLabel m.MainControlT_tmp_6
-	mov m.MainControlT_tmp_7 h.ipv6.version_trafficClass_flowLabel
-	and m.MainControlT_tmp_7 0xFFF
-	mov m.MainControlT_tmp_9 t.label
-	shl m.MainControlT_tmp_9 0xC
-	mov m.MainControlT_tmp_10 m.MainControlT_tmp_9
-	and m.MainControlT_tmp_10 0xFFFFF000
-	mov h.ipv6.version_trafficClass_flowLabel m.MainControlT_tmp_7
-	or h.ipv6.version_trafficClass_flowLabel m.MainControlT_tmp_10
+	mov m.MainControlT_tmp_2 h.ipv6.version_trafficClass_flowLabel
+	and m.MainControlT_tmp_2 0xF00FFFFF
+	mov m.MainControlT_tmp_4 t.trafficClass
+	shl m.MainControlT_tmp_4 0x14
+	mov m.MainControlT_tmp_5 m.MainControlT_tmp_4
+	and m.MainControlT_tmp_5 0xFF00000
+	mov h.ipv6.version_trafficClass_flowLabel m.MainControlT_tmp_2
+	or h.ipv6.version_trafficClass_flowLabel m.MainControlT_tmp_5
+	mov m.MainControlT_tmp_6 h.ipv6.version_trafficClass_flowLabel
+	and m.MainControlT_tmp_6 0xFFF00000
+	mov m.MainControlT_tmp_8 t.label
+	and m.MainControlT_tmp_8 0xFFFFF
+	mov h.ipv6.version_trafficClass_flowLabel m.MainControlT_tmp_6
+	or h.ipv6.version_trafficClass_flowLabel m.MainControlT_tmp_8
 	mov h.dpdk_pseudo_header.pseudo_0 m.MainControlT_tmp1
 	mov h.ipv6.srcAddr h.dpdk_pseudo_header.pseudo_0
 	return
 }
 
 action set_ipv6_version args instanceof set_ipv6_version_arg_t {
-	mov m.MainControlT_tmp_11 h.ipv6.version_trafficClass_flowLabel
-	and m.MainControlT_tmp_11 0xFFFFFFF0
-	mov m.MainControlT_tmp_13 t.version
-	and m.MainControlT_tmp_13 0xF
-	mov h.ipv6.version_trafficClass_flowLabel m.MainControlT_tmp_11
-	or h.ipv6.version_trafficClass_flowLabel m.MainControlT_tmp_13
+	mov m.MainControlT_tmp_9 h.ipv6.version_trafficClass_flowLabel
+	and m.MainControlT_tmp_9 0xFFFFFFF
+	mov m.MainControlT_tmp_11 t.version
+	shl m.MainControlT_tmp_11 0x1C
+	mov m.MainControlT_tmp_12 m.MainControlT_tmp_11
+	and m.MainControlT_tmp_12 0xF0000000
+	mov h.ipv6.version_trafficClass_flowLabel m.MainControlT_tmp_9
+	or h.ipv6.version_trafficClass_flowLabel m.MainControlT_tmp_12
 	return
 }
 
@@ -196,7 +193,7 @@ apply {
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_IPV6 :	extract h.ipv6
 	MAINPARSERIMPL_ACCEPT :	mov h.dpdk_pseudo_header.pseudo_1 0x76
-	mov m.MainControlT_tmp_14 h.dpdk_pseudo_header.pseudo_1
+	mov m.MainControlT_tmp_13 h.dpdk_pseudo_header.pseudo_1
 	table filter_tbl
 	emit h.ethernet
 	emit h.mpls

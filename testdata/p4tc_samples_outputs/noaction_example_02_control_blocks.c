@@ -27,6 +27,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_key {
     u32 maskid;
     u8 field0; /* hdr.ipv4.flags */
 } __attribute__((aligned(4)));
+#define MAINCONTROLIMPL_IPV4_TBL_2_ACT__NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_value {
     unsigned int action;
     union {
@@ -72,6 +73,8 @@ int xdp_func(struct xdp_md *skb) {
 static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr, struct pna_global_metadata *compiler_meta__)
 {
     struct hdr_md *hdrMd;
+
+    unsigned ebpf_packetOffsetInBits_save = 0;
     ParserError_t ebpf_errorCode = NoError;
     void* pkt = ((void*)(long)skb->data);
     void* ebpf_packetEnd = ((void*)(long)skb->data_end);
@@ -164,7 +167,7 @@ if (/* hdr->ipv4.isValid() */
                     if (value != NULL) {
                         /* run action */
                         switch (value->action) {
-                            case 0: 
+                            case MAINCONTROLIMPL_IPV4_TBL_2_ACT__NOACTION: 
                                 {
                                 }
                                 break;

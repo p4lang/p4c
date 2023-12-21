@@ -83,10 +83,17 @@ class TestgenOptions : public AbstractP4cToolOptions {
     /// Multiple options are possible. Currently supported: STATEMENTS, TABLE_ENTRIES.
     P4::Coverage::CoverageOptions coverageOptions;
 
+    /// Indicates that coverage tracking is enabled for some coverage criteria. This is used for
+    /// sanity checking and it also affects information printed to output.
+    bool hasCoverageTracking = false;
+
     /// Specifies minimum coverage that needs to be achieved for P4Testgen to exit successfully.
     float minCoverage = 0;
 
     const char *getIncludePath() override;
+
+ protected:
+    bool validateOptions() const override;
 
  private:
     TestgenOptions();

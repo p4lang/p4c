@@ -52,6 +52,7 @@ set(
   test/lib/format_int.cpp
   test/lib/taint.cpp
   test/small-step/util.cpp
+  test/z3-solver/constraints.cpp
 )
 
 # Inja is needed to produce test templates.

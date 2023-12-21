@@ -78,6 +78,10 @@ std::optional<ICompileContext *> AbstractP4cToolOptions::process(
     }
     P4CContext::get().options().file = remainingArgs->at(0);
 
+    if (!validateOptions()) {
+        return std::nullopt;
+    }
+
     return compilerContext;
 }
 

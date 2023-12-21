@@ -127,6 +127,32 @@ struct FrontendTestCase {
     const IR::P4Program *program;
 };
 
+/// Redirects std::cerr temporarily
+struct RedirectStderr {
+    RedirectStderr() : old(std::cerr.rdbuf(stream.rdbuf())) {}
+    ~RedirectStderr() { reset(); }
+
+    std::string str() { return stream.str(); }
+
+    bool contains(std::string other) { return stream.str().find(other) != std::string::npos; }
+
+    void reset() {
+        if (old) {
+            std::cerr.rdbuf(old);
+        }
+        old = nullptr;
+    }
+
+    void dumpAndReset() {
+        reset();
+        std::cerr << stream.str();
+    }
+
+ private:
+    std::stringstream stream;
+    std::streambuf *old = nullptr;
+};
+
 }  // namespace Test
 
 #endif /* TEST_GTEST_HELPERS_H_ */

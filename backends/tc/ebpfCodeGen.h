@@ -131,6 +131,7 @@ class EBPFTablePNA : public EBPF::EBPFTablePSA {
  protected:
     EBPF::ActionTranslationVisitor *createActionTranslationVisitor(
         cstring valueName, const EBPF::EBPFProgram *program) const override;
+    void validateKeys() const override;
     const ConvertToBackendIR *tcIR;
 
  public:
@@ -154,6 +155,7 @@ class EBPFTablePNA : public EBPF::EBPFTablePSA {
                     cstring actionRunVariable) override;
     void emitValueActionIDNames(EBPF::CodeBuilder *builder) override;
     void emitDefaultAction(EBPF::CodeBuilder *builder, cstring valueName);
+    cstring p4ActionToActionIDName(const IR::P4Action *action) const;
 };
 
 class IngressDeparserPNA : public EBPF::EBPFDeparserPSA {
@@ -292,9 +294,13 @@ class ConvertToEBPFDeparserPNA : public Inspector {
 class ControlBodyTranslatorPNA : public EBPF::ControlBodyTranslator {
  public:
     const ConvertToBackendIR *tcIR;
+    const EBPF::EBPFTablePSA *table;
     explicit ControlBodyTranslatorPNA(const EBPF::EBPFControlPSA *control);
     explicit ControlBodyTranslatorPNA(const EBPF::EBPFControlPSA *control,
                                       const ConvertToBackendIR *tcIR);
+    explicit ControlBodyTranslatorPNA(const EBPF::EBPFControlPSA *control,
+                                      const ConvertToBackendIR *tcIR,
+                                      const EBPF::EBPFTablePSA *table);
     void processFunction(const P4::ExternFunction *function);
     void processApply(const P4::ApplyMethod *method);
     bool checkPnaPortMem(const IR::Member *m);
@@ -309,8 +315,9 @@ class ActionTranslationVisitorPNA : public EBPF::ActionTranslationVisitor,
     const EBPF::EBPFTablePSA *table;
 
  public:
+    const ConvertToBackendIR *tcIR;
     ActionTranslationVisitorPNA(const EBPF::EBPFProgram *program, cstring valueName,
-                                const EBPF::EBPFTablePSA *table);
+                                const EBPF::EBPFTablePSA *table, const ConvertToBackendIR *tcIR);
 
     bool preorder(const IR::PathExpression *pe) override;
     bool isActionParameter(const IR::Expression *expression) const;
