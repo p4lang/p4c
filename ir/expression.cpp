@@ -90,17 +90,32 @@ void IR::Constant::handleOverflow(bool noWarning) {
     big_int mask = Util::mask(width);
 
     if (tb->isSigned) {
+        auto masked_value = value;
+        bool is_overflow = false;
         big_int max = (one << (width - 1)) - 1;
         big_int min = -(one << (width - 1));
-        if (value < min || value > max) {
+
+        if (value >= 0) {
+            if (value != (value & mask)) {
+                is_overflow = true;
+                masked_value = value & mask;
+            }
+            if (masked_value > max) masked_value -= (one << width);
+        } else {
+            if (value < min) {
+                is_overflow = true;
+                masked_value = value & mask;
+            }
+        }
+        if (is_overflow) {
             if (!noWarning)
                 ::warning(ErrorType::WARN_OVERFLOW, "%1%: signed value does not fit in %2% bits",
                           this, width);
             LOG2("value=" << value << ", min=" << min << ", max=" << max << ", masked="
-                          << (value & mask) << ", adj=" << ((value & mask) - (one << width)));
-            value = value & mask;
-            if (value > max) value -= (one << width);
+                          << (value & mask) << ", adj=" << ((value & mask) - (one << width))
+                          << ", processed value=" << masked_value);
         }
+        value = masked_value;
     } else {
         if (value < 0) {
             if (!noWarning)
