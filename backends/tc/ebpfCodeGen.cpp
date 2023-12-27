@@ -1315,8 +1315,78 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
             builder->emitIndent();
             builder->appendLine("};");
             builder->emitIndent();
+            builder->append(
+                "bpf_p4tc_entry_update(skb, &update_params, &key, sizeof(key), act_bpf)");
+        }
+        return;
+    } else if (function->expr->toString() == "add_entry") {
+        auto act = findContext<IR::P4Action>();
+        BUG_CHECK(act != nullptr, "%1% add_entry extern can only be used in an action", function);
+        BUG_CHECK(function->expr->arguments->size() == 3,
+                  "%1%: expected 3 arguments in add_entry extern", function);
+
+        auto action = function->expr->arguments->at(0);
+        auto actionName = action->expression->to<IR::StringLiteral>()->value;
+        auto param = function->expr->arguments->at(1)->expression;
+        auto expire_time_profile_id = function->expr->arguments->at(2);
+        auto controlName = control->controlBlock->getName().originalName;
+
+        if (table) {
+            auto actID = 0;
+            for (auto a : table->actionList->actionList) {
+                auto adecl = control->program->refMap->getDeclaration(a->getPath(), true);
+                auto action = adecl->getNode()->to<IR::P4Action>();
+                if (a->toString() == actionName) {
+                    cstring name = tcIR->externalName(action);
+                    actID = tcIR->getActionId(name);
+                    BUG_CHECK(actID != 0, "Action ID not found");
+                    break;
+                }
+            }
+
+            builder->emitIndent();
+            builder->appendLine("struct p4tc_table_entry_act_bpf update_act_bpf = {");
+            builder->emitIndent();
+            builder->appendFormat("    .act_id = %d,", actID);
+            builder->newline();
+            builder->emitIndent();
+            builder->append("    .params = ");
+            if (auto struct_params = param->to<IR::StructExpression>()) {
+                builder->append("{");
+                auto components = struct_params->components;
+                for (size_t index = 0; index < components.size(); index++) {
+                    visit(components.at(index)->expression);
+                    if (index < components.size() - 1) builder->append(", ");
+                }
+                builder->append("}");
+            }
+            builder->newline();
+            builder->emitIndent();
+            builder->appendLine("};");
+
+            builder->emitIndent();
+            builder->appendLine("/* construct key */");
+            builder->emitIndent();
             builder->appendLine(
-                "bpf_p4tc_entry_update(skb, &update_params, &key, sizeof(key), act_bpf);");
+                "struct p4tc_table_entry_create_bpf_params__local update_params = {");
+            builder->emitIndent();
+            builder->appendLine("    .pipeid = 1,");
+            builder->emitIndent();
+            auto tableName = table->instanceName.substr(controlName.size() + 1);
+            auto tblId = tcIR->getTableId(tableName);
+            BUG_CHECK(tblId != 0, "Table ID not found");
+            builder->appendFormat("    .tblid = %d,", tblId);
+            builder->newline();
+            builder->emitIndent();
+            builder->append("    .aging_ms = ");
+            visit(expire_time_profile_id);
+            builder->newline();
+            builder->emitIndent();
+            builder->appendLine("};");
+            builder->emitIndent();
+            builder->append(
+                "bpf_p4tc_entry_create_on_miss(skb, &update_params, &key, sizeof(key), "
+                "&update_act_bpf)");
         }
         return;
     }

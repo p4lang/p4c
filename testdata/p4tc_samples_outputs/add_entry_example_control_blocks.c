@@ -1,5 +1,5 @@
 
-#include "set_entry_timer_example_parser.h"
+#include "add_entry_example_parser.h"
 #include <stdbool.h>
 #include <linux/if_ether.h>
 #include "pna.h"
@@ -134,14 +134,18 @@ if (/* hdr->ipv4.isValid() */
                         switch (value->action) {
                             case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_NEXT_HOP: 
                                 {
-/* set_entry_expire_time(2) */
+/* add_entry(""default_route_drop"", {}, 2) */
+                                    struct p4tc_table_entry_act_bpf update_act_bpf = {
+                                        .act_id = 2,
+                                        .params = {}
+                                    };
                                     /* construct key */
                                     struct p4tc_table_entry_create_bpf_params__local update_params = {
                                         .pipeid = 1,
                                         .tblid = 1,
                                         .aging_ms = 2
                                     };
-                                    bpf_p4tc_entry_update(skb, &update_params, &key, sizeof(key), act_bpf);
+                                    bpf_p4tc_entry_create_on_miss(skb, &update_params, &key, sizeof(key), &update_act_bpf);
                                 }
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP: 
@@ -188,14 +192,18 @@ if (/* hdr->ipv4.isValid() */
                         switch (value->action) {
                             case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_NEXT_HOP: 
                                 {
-/* set_entry_expire_time(2) */
+/* add_entry(""default_route_drop"", {}, 2) */
+                                    struct p4tc_table_entry_act_bpf update_act_bpf = {
+                                        .act_id = 0,
+                                        .params = {}
+                                    };
                                     /* construct key */
                                     struct p4tc_table_entry_create_bpf_params__local update_params = {
                                         .pipeid = 1,
                                         .tblid = 2,
                                         .aging_ms = 2
                                     };
-                                    bpf_p4tc_entry_update(skb, &update_params, &key, sizeof(key), act_bpf);
+                                    bpf_p4tc_entry_create_on_miss(skb, &update_params, &key, sizeof(key), &update_act_bpf);
                                 }
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP: 
