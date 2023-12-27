@@ -269,7 +269,8 @@ std::string insertHexSeparators(const std::string &dataStr) {
     return insertSeparators(dataStr, "\\x", 2, false);
 }
 
-std::vector<uint8_t> convertBigIntToBytes(const big_int &dataInt, int targetWidthBits) {
+std::vector<uint8_t> convertBigIntToBytes(const big_int &dataInt, int targetWidthBits,
+                                          bool padLeft) {
     /// Chunk size is 8 bits, i.e., a byte.
     constexpr uint8_t chunkSize = 8U;
 
@@ -282,7 +283,11 @@ std::vector<uint8_t> convertBigIntToBytes(const big_int &dataInt, int targetWidt
     auto diff = targetWidthBytes - bytes.size();
     if (targetWidthBytes > bytes.size() && diff > 0UL) {
         for (size_t i = 0; i < diff; ++i) {
-            bytes.push_back(0);
+            if (padLeft) {
+                bytes.insert(bytes.begin(), 0);
+            } else {
+                bytes.push_back(0);
+            }
         }
     }
     return bytes;
