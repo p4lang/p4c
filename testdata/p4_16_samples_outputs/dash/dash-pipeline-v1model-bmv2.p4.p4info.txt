@@ -5,15 +5,49 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 38937816
-    name: "dash_ingress.vip|dash_vip"
-    alias: "vip|dash_vip"
+    id: 45245089
+    name: "dash_ingress.vip"
+    alias: "vip"
+    structured_annotations {
+      name: "SaiTable"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "vip"
+          }
+        }
+        kv_pairs {
+          key: "api"
+          value {
+            string_value: "dash_vip"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 1
-    name: "hdr.ipv4.dst_addr:VIP"
+    name: "hdr.ipv4.dst_addr"
     bitwidth: 32
     match_type: EXACT
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "VIP"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_ip_address_t"
+          }
+        }
+      }
+    }
   }
   action_refs {
     id: 26041632
@@ -28,15 +62,43 @@ tables {
 }
 tables {
   preamble {
-    id: 38960243
-    name: "dash_ingress.direction_lookup|dash_direction_lookup"
-    alias: "direction_lookup|dash_direction_lookup"
+    id: 45670434
+    name: "dash_ingress.direction_lookup"
+    alias: "direction_lookup"
+    structured_annotations {
+      name: "SaiTable"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "direction_lookup"
+          }
+        }
+        kv_pairs {
+          key: "api"
+          value {
+            string_value: "dash_direction_lookup"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 1
-    name: "hdr.vxlan.vni:VNI"
+    name: "hdr.vxlan.vni"
     bitwidth: 24
     match_type: EXACT
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "VNI"
+          }
+        }
+      }
+    }
   }
   action_refs {
     id: 21912829
@@ -54,10 +116,21 @@ tables {
     id: 42701762
     name: "dash_ingress.appliance"
     alias: "appliance"
+    structured_annotations {
+      name: "SaiTable"
+      kv_pair_list {
+        kv_pairs {
+          key: "ignored"
+          value {
+            string_value: "true"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 1
-    name: "meta.appliance_id:appliance_id"
+    name: "meta.appliance_id"
     bitwidth: 8
     match_type: TERNARY
   }
@@ -73,15 +146,55 @@ tables {
 }
 tables {
   preamble {
-    id: 47336097
-    name: "dash_ingress.eni|dash_eni"
-    alias: "eni|dash_eni"
+    id: 45859274
+    name: "dash_ingress.eni"
+    alias: "eni"
+    structured_annotations {
+      name: "SaiTable"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "eni"
+          }
+        }
+        kv_pairs {
+          key: "api"
+          value {
+            string_value: "dash_eni"
+          }
+        }
+        kv_pairs {
+          key: "api_order"
+          value {
+            int64_value: 1
+          }
+        }
+        kv_pairs {
+          key: "isobject"
+          value {
+            string_value: "true"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 1
-    name: "meta.eni_id:eni_id"
+    name: "meta.eni_id"
     bitwidth: 16
     match_type: EXACT
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   action_refs {
     id: 27167550
@@ -99,22 +212,44 @@ tables {
     id: 40418231
     name: "dash_ingress.eni_meter"
     alias: "eni_meter"
+    structured_annotations {
+      name: "SaiTable"
+      kv_pair_list {
+        kv_pairs {
+          key: "ignored"
+          value {
+            string_value: "true"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 1
-    name: "meta.eni_id:eni_id"
+    name: "meta.eni_id"
     bitwidth: 16
     match_type: EXACT
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 2
-    name: "meta.direction:direction"
+    name: "meta.direction"
     bitwidth: 16
     match_type: EXACT
   }
   match_fields {
     id: 3
-    name: "meta.dropped:dropped"
+    name: "meta.dropped"
     bitwidth: 1
     match_type: EXACT
   }
@@ -126,21 +261,66 @@ tables {
 }
 tables {
   preamble {
-    id: 48948181
-    name: "dash_ingress.pa_validation|dash_pa_validation"
-    alias: "pa_validation|dash_pa_validation"
+    id: 35526612
+    name: "dash_ingress.pa_validation"
+    alias: "pa_validation"
+    structured_annotations {
+      name: "SaiTable"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "pa_validation"
+          }
+        }
+        kv_pairs {
+          key: "api"
+          value {
+            string_value: "dash_pa_validation"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 1
-    name: "meta.vnet_id:vnet_id"
+    name: "meta.vnet_id"
     bitwidth: 16
     match_type: EXACT
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 2
-    name: "hdr.ipv4.src_addr:sip"
+    name: "hdr.ipv4.src_addr"
     bitwidth: 32
     match_type: EXACT
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "sip"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_ip_address_t"
+          }
+        }
+      }
+    }
   }
   action_refs {
     id: 32591400
@@ -155,27 +335,83 @@ tables {
 }
 tables {
   preamble {
-    id: 42758350
-    name: "dash_ingress.inbound_routing|dash_inbound_routing"
-    alias: "inbound_routing|dash_inbound_routing"
+    id: 38920290
+    name: "dash_ingress.inbound_routing"
+    alias: "inbound_routing"
+    structured_annotations {
+      name: "SaiTable"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "inbound_routing"
+          }
+        }
+        kv_pairs {
+          key: "api"
+          value {
+            string_value: "dash_inbound_routing"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 1
-    name: "meta.eni_id:eni_id"
+    name: "meta.eni_id"
     bitwidth: 16
     match_type: EXACT
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 2
-    name: "hdr.vxlan.vni:VNI"
+    name: "hdr.vxlan.vni"
     bitwidth: 24
     match_type: EXACT
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "VNI"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 3
-    name: "hdr.ipv4.src_addr:sip"
+    name: "hdr.ipv4.src_addr"
     bitwidth: 32
     match_type: TERNARY
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "sip"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_ip_address_t"
+          }
+        }
+      }
+    }
   }
   action_refs {
     id: 28528336
@@ -193,12 +429,30 @@ tables {
 }
 tables {
   preamble {
-    id: 48776568
-    name: "dash_ingress.meter_policy|dash_meter"
-    alias: "meter_policy|dash_meter"
+    id: 39168708
+    name: "dash_ingress.meter_policy"
+    alias: "meter_policy"
     structured_annotations {
-      name: "Sai"
+      name: "SaiTable"
       kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "meter_policy"
+          }
+        }
+        kv_pairs {
+          key: "api"
+          value {
+            string_value: "dash_meter"
+          }
+        }
+        kv_pairs {
+          key: "api_order"
+          value {
+            int64_value: 1
+          }
+        }
         kv_pairs {
           key: "isobject"
           value {
@@ -210,7 +464,7 @@ tables {
   }
   match_fields {
     id: 1
-    name: "meta.meter_policy_id:meter_policy_id"
+    name: "meta.meter_policy_id"
     bitwidth: 16
     match_type: EXACT
   }
@@ -226,12 +480,30 @@ tables {
 }
 tables {
   preamble {
-    id: 47787652
-    name: "dash_ingress.meter_rule|dash_meter"
-    alias: "meter_rule|dash_meter"
+    id: 34535910
+    name: "dash_ingress.meter_rule"
+    alias: "meter_rule"
     structured_annotations {
-      name: "Sai"
+      name: "SaiTable"
       kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "meter_rule"
+          }
+        }
+        kv_pairs {
+          key: "api"
+          value {
+            string_value: "dash_meter"
+          }
+        }
+        kv_pairs {
+          key: "api_order"
+          value {
+            int64_value: 2
+          }
+        }
         kv_pairs {
           key: "isobject"
           value {
@@ -243,11 +515,11 @@ tables {
   }
   match_fields {
     id: 1
-    name: "meta.meter_policy_id:meter_policy_id"
+    name: "meta.meter_policy_id"
     bitwidth: 16
     match_type: EXACT
     structured_annotations {
-      name: "Sai"
+      name: "SaiVal"
       kv_pair_list {
         kv_pairs {
           key: "type"
@@ -272,9 +544,26 @@ tables {
   }
   match_fields {
     id: 2
-    name: "hdr.ipv4.dst_addr:dip"
+    name: "hdr.ipv4.dst_addr"
     bitwidth: 32
     match_type: TERNARY
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dip"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_ip_address_t"
+          }
+        }
+      }
+    }
   }
   action_refs {
     id: 24426589
@@ -289,12 +578,30 @@ tables {
 }
 tables {
   preamble {
-    id: 49926129
-    name: "dash_ingress.meter_bucket|dash_meter"
-    alias: "meter_bucket|dash_meter"
+    id: 38547152
+    name: "dash_ingress.meter_bucket"
+    alias: "meter_bucket"
     structured_annotations {
-      name: "Sai"
+      name: "SaiTable"
       kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "meter_bucket"
+          }
+        }
+        kv_pairs {
+          key: "api"
+          value {
+            string_value: "dash_meter"
+          }
+        }
+        kv_pairs {
+          key: "api_order"
+          value {
+            int64_value: 0
+          }
+        }
         kv_pairs {
           key: "isobject"
           value {
@@ -306,13 +613,24 @@ tables {
   }
   match_fields {
     id: 1
-    name: "meta.eni_id:eni_id"
+    name: "meta.eni_id"
     bitwidth: 16
     match_type: EXACT
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 2
-    name: "meta.meter_class:meter_class"
+    name: "meta.meter_class"
     bitwidth: 16
     match_type: EXACT
   }
@@ -329,15 +647,55 @@ tables {
 }
 tables {
   preamble {
-    id: 38612462
-    name: "dash_ingress.eni_ether_address_map|dash_eni"
-    alias: "eni_ether_address_map|dash_eni"
+    id: 46804748
+    name: "dash_ingress.eni_ether_address_map"
+    alias: "eni_ether_address_map"
+    structured_annotations {
+      name: "SaiTable"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "eni_ether_address_map"
+          }
+        }
+        kv_pairs {
+          key: "api"
+          value {
+            string_value: "dash_eni"
+          }
+        }
+        kv_pairs {
+          key: "api_order"
+          value {
+            int64_value: 0
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 1
-    name: "meta.eni_addr:address"
+    name: "meta.eni_addr"
     bitwidth: 48
     match_type: EXACT
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "address"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_mac_t"
+          }
+        }
+      }
+    }
   }
   action_refs {
     id: 18228884
@@ -352,15 +710,55 @@ tables {
 }
 tables {
   preamble {
-    id: 45323240
-    name: "dash_ingress.dash_acl_group|dash_acl"
-    alias: "dash_acl_group|dash_acl"
+    id: 50200087
+    name: "dash_ingress.acl_group"
+    alias: "acl_group"
+    structured_annotations {
+      name: "SaiTable"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dash_acl_group"
+          }
+        }
+        kv_pairs {
+          key: "api"
+          value {
+            string_value: "dash_acl"
+          }
+        }
+        kv_pairs {
+          key: "api_order"
+          value {
+            int64_value: 0
+          }
+        }
+        kv_pairs {
+          key: "isobject"
+          value {
+            string_value: "true"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 1
-    name: "meta.stage1_dash_acl_group_id:dash_acl_group_id"
+    name: "meta.stage1_dash_acl_group_id"
     bitwidth: 16
     match_type: EXACT
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dash_acl_group_id"
+          }
+        }
+      }
+    }
   }
   action_refs {
     id: 25655048
@@ -374,71 +772,77 @@ tables {
 }
 tables {
   preamble {
-    id: 47829983
-    name: "dash_ingress.src_tag|dash_tag"
-    alias: "src_tag|dash_tag"
+    id: 44067785
+    name: "dash_ingress.outbound.routing"
+    alias: "routing"
+    structured_annotations {
+      name: "SaiTable"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "outbound_routing"
+          }
+        }
+        kv_pairs {
+          key: "api"
+          value {
+            string_value: "dash_outbound_routing"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 1
-    name: "meta.src_ip_addr:sip"
-    bitwidth: 128
-    match_type: LPM
-  }
-  action_refs {
-    id: 27783729
-  }
-  action_refs {
-    id: 21257015
-    annotations: "@defaultonly"
-    scope: DEFAULT_ONLY
-  }
-  size: 1024
-}
-tables {
-  preamble {
-    id: 34314002
-    name: "dash_ingress.dst_tag|dash_tag"
-    alias: "dst_tag|dash_tag"
-  }
-  match_fields {
-    id: 1
-    name: "meta.dst_ip_addr:dip"
-    bitwidth: 128
-    match_type: LPM
-  }
-  action_refs {
-    id: 23256694
-  }
-  action_refs {
-    id: 21257015
-    annotations: "@defaultonly"
-    scope: DEFAULT_ONLY
-  }
-  size: 1024
-}
-tables {
-  preamble {
-    id: 42788937
-    name: "dash_ingress.outbound.outbound_routing|dash_outbound_routing"
-    alias: "outbound_routing|dash_outbound_routing"
-  }
-  match_fields {
-    id: 1
-    name: "meta.eni_id:eni_id"
+    name: "meta.eni_id"
     bitwidth: 16
     match_type: EXACT
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 2
-    name: "meta.is_overlay_ip_v6:is_destination_v4_or_v6"
+    name: "meta.is_overlay_ip_v6"
     bitwidth: 1
     match_type: EXACT
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "destination_is_v6"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 3
-    name: "meta.dst_ip_addr:destination"
+    name: "meta.dst_ip_addr"
     bitwidth: 128
     match_type: LPM
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "destination"
+          }
+        }
+      }
+    }
   }
   action_refs {
     id: 25364446
@@ -461,30 +865,83 @@ tables {
 }
 tables {
   preamble {
-    id: 48860231
-    name: "dash_ingress.outbound.outbound_ca_to_pa|dash_outbound_ca_to_pa"
-    alias: "outbound_ca_to_pa|dash_outbound_ca_to_pa"
+    id: 39175949
+    name: "dash_ingress.outbound.ca_to_pa"
+    alias: "ca_to_pa"
+    structured_annotations {
+      name: "SaiTable"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "outbound_ca_to_pa"
+          }
+        }
+        kv_pairs {
+          key: "api"
+          value {
+            string_value: "dash_outbound_ca_to_pa"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 1
-    name: "meta.dst_vnet_id:dst_vnet_id"
+    name: "meta.dst_vnet_id"
     bitwidth: 16
     match_type: EXACT
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 2
-    name: "meta.is_lkup_dst_ip_v6:is_dip_v4_or_v6"
+    name: "meta.is_lkup_dst_ip_v6"
     bitwidth: 1
     match_type: EXACT
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dip_is_v6"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 3
-    name: "meta.lkup_dst_ip_addr:dip"
+    name: "meta.lkup_dst_ip_addr"
     bitwidth: 128
     match_type: EXACT
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dip"
+          }
+        }
+      }
+    }
   }
   action_refs {
     id: 25450412
+  }
+  action_refs {
+    id: 27544913
   }
   action_refs {
     id: 33407636
@@ -497,15 +954,49 @@ tables {
 }
 tables {
   preamble {
-    id: 34579306
-    name: "dash_ingress.outbound.vnet|dash_vnet"
-    alias: "vnet|dash_vnet"
+    id: 34815711
+    name: "dash_ingress.outbound.vnet"
+    alias: "vnet"
+    structured_annotations {
+      name: "SaiTable"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "vnet"
+          }
+        }
+        kv_pairs {
+          key: "api"
+          value {
+            string_value: "dash_vnet"
+          }
+        }
+        kv_pairs {
+          key: "isobject"
+          value {
+            string_value: "true"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 1
-    name: "meta.vnet_id:vnet_id"
+    name: "meta.vnet_id"
     bitwidth: 16
     match_type: EXACT
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   action_refs {
     id: 17187022
@@ -519,18 +1010,59 @@ tables {
 }
 tables {
   preamble {
-    id: 33810473
-    name: "dash_ingress.outbound.acl.stage1:dash_acl_rule|dash_acl"
-    alias: "outbound.acl.stage1:dash_acl_rule|dash_acl"
+    id: 49209582
+    name: "dash_ingress.outbound.acl.stage1"
+    alias: "outbound.acl.stage1"
+    structured_annotations {
+      name: "SaiTable"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dash_acl_rule"
+          }
+        }
+        kv_pairs {
+          key: "stage"
+          value {
+            string_value: "acl.stage1"
+          }
+        }
+        kv_pairs {
+          key: "api"
+          value {
+            string_value: "dash_acl"
+          }
+        }
+        kv_pairs {
+          key: "api_order"
+          value {
+            int64_value: 1
+          }
+        }
+        kv_pairs {
+          key: "isobject"
+          value {
+            string_value: "true"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 1
-    name: "meta.dash_acl_group_id:dash_acl_group_id"
+    name: "meta.stage1_dash_acl_group_id"
     bitwidth: 16
     match_type: EXACT
     structured_annotations {
-      name: "Sai"
+      name: "SaiVal"
       kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dash_acl_group_id"
+          }
+        }
         kv_pairs {
           key: "type"
           value {
@@ -554,45 +1086,148 @@ tables {
   }
   match_fields {
     id: 2
-    name: "meta.dst_tag_map:dst_tag"
-    bitwidth: 32
-    match_type: TERNARY
+    name: "meta.dst_ip_addr"
+    bitwidth: 128
+    match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dip"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_ip_prefix_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "list"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 3
-    name: "meta.src_tag_map:src_tag"
-    bitwidth: 32
-    match_type: TERNARY
+    name: "meta.src_ip_addr"
+    bitwidth: 128
+    match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "sip"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_ip_prefix_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "list"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 4
-    name: "meta.dst_ip_addr:dip"
-    bitwidth: 128
+    name: "meta.ip_protocol"
+    bitwidth: 8
     match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "protocol"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_u8_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "list"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 5
-    name: "meta.src_ip_addr:sip"
-    bitwidth: 128
+    name: "meta.src_l4_port"
+    bitwidth: 16
     match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "src_port"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_u16_range_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "range_list"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 6
-    name: "meta.ip_protocol:protocol"
-    bitwidth: 8
-    match_type: OPTIONAL
-  }
-  match_fields {
-    id: 7
-    name: "meta.src_l4_port:src_port"
+    name: "meta.dst_l4_port"
     bitwidth: 16
     match_type: OPTIONAL
-  }
-  match_fields {
-    id: 8
-    name: "meta.dst_l4_port:dst_port"
-    bitwidth: 16
-    match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dst_port"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_u16_range_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "range_list"
+          }
+        }
+      }
+    }
   }
   action_refs {
     id: 18858683
@@ -611,18 +1246,59 @@ tables {
 }
 tables {
   preamble {
-    id: 49812549
-    name: "dash_ingress.outbound.acl.stage2:dash_acl_rule|dash_acl"
-    alias: "outbound.acl.stage2:dash_acl_rule|dash_acl"
+    id: 36478314
+    name: "dash_ingress.outbound.acl.stage2"
+    alias: "outbound.acl.stage2"
+    structured_annotations {
+      name: "SaiTable"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dash_acl_rule"
+          }
+        }
+        kv_pairs {
+          key: "stage"
+          value {
+            string_value: "acl.stage2"
+          }
+        }
+        kv_pairs {
+          key: "api"
+          value {
+            string_value: "dash_acl"
+          }
+        }
+        kv_pairs {
+          key: "api_order"
+          value {
+            int64_value: 1
+          }
+        }
+        kv_pairs {
+          key: "isobject"
+          value {
+            string_value: "true"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 1
-    name: "meta.dash_acl_group_id:dash_acl_group_id"
+    name: "meta.stage2_dash_acl_group_id"
     bitwidth: 16
     match_type: EXACT
     structured_annotations {
-      name: "Sai"
+      name: "SaiVal"
       kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dash_acl_group_id"
+          }
+        }
         kv_pairs {
           key: "type"
           value {
@@ -646,45 +1322,148 @@ tables {
   }
   match_fields {
     id: 2
-    name: "meta.dst_tag_map:dst_tag"
-    bitwidth: 32
-    match_type: TERNARY
+    name: "meta.dst_ip_addr"
+    bitwidth: 128
+    match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dip"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_ip_prefix_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "list"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 3
-    name: "meta.src_tag_map:src_tag"
-    bitwidth: 32
-    match_type: TERNARY
+    name: "meta.src_ip_addr"
+    bitwidth: 128
+    match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "sip"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_ip_prefix_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "list"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 4
-    name: "meta.dst_ip_addr:dip"
-    bitwidth: 128
+    name: "meta.ip_protocol"
+    bitwidth: 8
     match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "protocol"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_u8_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "list"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 5
-    name: "meta.src_ip_addr:sip"
-    bitwidth: 128
+    name: "meta.src_l4_port"
+    bitwidth: 16
     match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "src_port"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_u16_range_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "range_list"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 6
-    name: "meta.ip_protocol:protocol"
-    bitwidth: 8
-    match_type: OPTIONAL
-  }
-  match_fields {
-    id: 7
-    name: "meta.src_l4_port:src_port"
+    name: "meta.dst_l4_port"
     bitwidth: 16
     match_type: OPTIONAL
-  }
-  match_fields {
-    id: 8
-    name: "meta.dst_l4_port:dst_port"
-    bitwidth: 16
-    match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dst_port"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_u16_range_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "range_list"
+          }
+        }
+      }
+    }
   }
   action_refs {
     id: 18858683
@@ -703,18 +1482,59 @@ tables {
 }
 tables {
   preamble {
-    id: 40782112
-    name: "dash_ingress.outbound.acl.stage3:dash_acl_rule|dash_acl"
-    alias: "outbound.acl.stage3:dash_acl_rule|dash_acl"
+    id: 39012793
+    name: "dash_ingress.outbound.acl.stage3"
+    alias: "outbound.acl.stage3"
+    structured_annotations {
+      name: "SaiTable"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dash_acl_rule"
+          }
+        }
+        kv_pairs {
+          key: "stage"
+          value {
+            string_value: "acl.stage3"
+          }
+        }
+        kv_pairs {
+          key: "api"
+          value {
+            string_value: "dash_acl"
+          }
+        }
+        kv_pairs {
+          key: "api_order"
+          value {
+            int64_value: 1
+          }
+        }
+        kv_pairs {
+          key: "isobject"
+          value {
+            string_value: "true"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 1
-    name: "meta.dash_acl_group_id:dash_acl_group_id"
+    name: "meta.stage3_dash_acl_group_id"
     bitwidth: 16
     match_type: EXACT
     structured_annotations {
-      name: "Sai"
+      name: "SaiVal"
       kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dash_acl_group_id"
+          }
+        }
         kv_pairs {
           key: "type"
           value {
@@ -738,45 +1558,148 @@ tables {
   }
   match_fields {
     id: 2
-    name: "meta.dst_tag_map:dst_tag"
-    bitwidth: 32
-    match_type: TERNARY
+    name: "meta.dst_ip_addr"
+    bitwidth: 128
+    match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dip"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_ip_prefix_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "list"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 3
-    name: "meta.src_tag_map:src_tag"
-    bitwidth: 32
-    match_type: TERNARY
+    name: "meta.src_ip_addr"
+    bitwidth: 128
+    match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "sip"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_ip_prefix_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "list"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 4
-    name: "meta.dst_ip_addr:dip"
-    bitwidth: 128
+    name: "meta.ip_protocol"
+    bitwidth: 8
     match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "protocol"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_u8_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "list"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 5
-    name: "meta.src_ip_addr:sip"
-    bitwidth: 128
+    name: "meta.src_l4_port"
+    bitwidth: 16
     match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "src_port"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_u16_range_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "range_list"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 6
-    name: "meta.ip_protocol:protocol"
-    bitwidth: 8
-    match_type: OPTIONAL
-  }
-  match_fields {
-    id: 7
-    name: "meta.src_l4_port:src_port"
+    name: "meta.dst_l4_port"
     bitwidth: 16
     match_type: OPTIONAL
-  }
-  match_fields {
-    id: 8
-    name: "meta.dst_l4_port:dst_port"
-    bitwidth: 16
-    match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dst_port"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_u16_range_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "range_list"
+          }
+        }
+      }
+    }
   }
   action_refs {
     id: 18858683
@@ -795,18 +1718,59 @@ tables {
 }
 tables {
   preamble {
-    id: 33901322
-    name: "dash_ingress.inbound.acl.stage1:dash_acl_rule|dash_acl"
-    alias: "inbound.acl.stage1:dash_acl_rule|dash_acl"
+    id: 41950136
+    name: "dash_ingress.inbound.acl.stage1"
+    alias: "inbound.acl.stage1"
+    structured_annotations {
+      name: "SaiTable"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dash_acl_rule"
+          }
+        }
+        kv_pairs {
+          key: "stage"
+          value {
+            string_value: "acl.stage1"
+          }
+        }
+        kv_pairs {
+          key: "api"
+          value {
+            string_value: "dash_acl"
+          }
+        }
+        kv_pairs {
+          key: "api_order"
+          value {
+            int64_value: 1
+          }
+        }
+        kv_pairs {
+          key: "isobject"
+          value {
+            string_value: "true"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 1
-    name: "meta.dash_acl_group_id:dash_acl_group_id"
+    name: "meta.stage1_dash_acl_group_id"
     bitwidth: 16
     match_type: EXACT
     structured_annotations {
-      name: "Sai"
+      name: "SaiVal"
       kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dash_acl_group_id"
+          }
+        }
         kv_pairs {
           key: "type"
           value {
@@ -830,45 +1794,148 @@ tables {
   }
   match_fields {
     id: 2
-    name: "meta.dst_tag_map:dst_tag"
-    bitwidth: 32
-    match_type: TERNARY
+    name: "meta.dst_ip_addr"
+    bitwidth: 128
+    match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dip"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_ip_prefix_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "list"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 3
-    name: "meta.src_tag_map:src_tag"
-    bitwidth: 32
-    match_type: TERNARY
+    name: "meta.src_ip_addr"
+    bitwidth: 128
+    match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "sip"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_ip_prefix_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "list"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 4
-    name: "meta.dst_ip_addr:dip"
-    bitwidth: 128
+    name: "meta.ip_protocol"
+    bitwidth: 8
     match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "protocol"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_u8_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "list"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 5
-    name: "meta.src_ip_addr:sip"
-    bitwidth: 128
+    name: "meta.src_l4_port"
+    bitwidth: 16
     match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "src_port"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_u16_range_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "range_list"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 6
-    name: "meta.ip_protocol:protocol"
-    bitwidth: 8
-    match_type: OPTIONAL
-  }
-  match_fields {
-    id: 7
-    name: "meta.src_l4_port:src_port"
+    name: "meta.dst_l4_port"
     bitwidth: 16
     match_type: OPTIONAL
-  }
-  match_fields {
-    id: 8
-    name: "meta.dst_l4_port:dst_port"
-    bitwidth: 16
-    match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dst_port"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_u16_range_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "range_list"
+          }
+        }
+      }
+    }
   }
   action_refs {
     id: 32161567
@@ -887,18 +1954,59 @@ tables {
 }
 tables {
   preamble {
-    id: 44184066
-    name: "dash_ingress.inbound.acl.stage2:dash_acl_rule|dash_acl"
-    alias: "inbound.acl.stage2:dash_acl_rule|dash_acl"
+    id: 43016664
+    name: "dash_ingress.inbound.acl.stage2"
+    alias: "inbound.acl.stage2"
+    structured_annotations {
+      name: "SaiTable"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dash_acl_rule"
+          }
+        }
+        kv_pairs {
+          key: "stage"
+          value {
+            string_value: "acl.stage2"
+          }
+        }
+        kv_pairs {
+          key: "api"
+          value {
+            string_value: "dash_acl"
+          }
+        }
+        kv_pairs {
+          key: "api_order"
+          value {
+            int64_value: 1
+          }
+        }
+        kv_pairs {
+          key: "isobject"
+          value {
+            string_value: "true"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 1
-    name: "meta.dash_acl_group_id:dash_acl_group_id"
+    name: "meta.stage2_dash_acl_group_id"
     bitwidth: 16
     match_type: EXACT
     structured_annotations {
-      name: "Sai"
+      name: "SaiVal"
       kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dash_acl_group_id"
+          }
+        }
         kv_pairs {
           key: "type"
           value {
@@ -922,45 +2030,148 @@ tables {
   }
   match_fields {
     id: 2
-    name: "meta.dst_tag_map:dst_tag"
-    bitwidth: 32
-    match_type: TERNARY
+    name: "meta.dst_ip_addr"
+    bitwidth: 128
+    match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dip"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_ip_prefix_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "list"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 3
-    name: "meta.src_tag_map:src_tag"
-    bitwidth: 32
-    match_type: TERNARY
+    name: "meta.src_ip_addr"
+    bitwidth: 128
+    match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "sip"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_ip_prefix_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "list"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 4
-    name: "meta.dst_ip_addr:dip"
-    bitwidth: 128
+    name: "meta.ip_protocol"
+    bitwidth: 8
     match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "protocol"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_u8_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "list"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 5
-    name: "meta.src_ip_addr:sip"
-    bitwidth: 128
+    name: "meta.src_l4_port"
+    bitwidth: 16
     match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "src_port"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_u16_range_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "range_list"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 6
-    name: "meta.ip_protocol:protocol"
-    bitwidth: 8
-    match_type: OPTIONAL
-  }
-  match_fields {
-    id: 7
-    name: "meta.src_l4_port:src_port"
+    name: "meta.dst_l4_port"
     bitwidth: 16
     match_type: OPTIONAL
-  }
-  match_fields {
-    id: 8
-    name: "meta.dst_l4_port:dst_port"
-    bitwidth: 16
-    match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dst_port"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_u16_range_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "range_list"
+          }
+        }
+      }
+    }
   }
   action_refs {
     id: 32161567
@@ -979,18 +2190,59 @@ tables {
 }
 tables {
   preamble {
-    id: 46150034
-    name: "dash_ingress.inbound.acl.stage3:dash_acl_rule|dash_acl"
-    alias: "inbound.acl.stage3:dash_acl_rule|dash_acl"
+    id: 49695908
+    name: "dash_ingress.inbound.acl.stage3"
+    alias: "inbound.acl.stage3"
+    structured_annotations {
+      name: "SaiTable"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dash_acl_rule"
+          }
+        }
+        kv_pairs {
+          key: "stage"
+          value {
+            string_value: "acl.stage3"
+          }
+        }
+        kv_pairs {
+          key: "api"
+          value {
+            string_value: "dash_acl"
+          }
+        }
+        kv_pairs {
+          key: "api_order"
+          value {
+            int64_value: 1
+          }
+        }
+        kv_pairs {
+          key: "isobject"
+          value {
+            string_value: "true"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 1
-    name: "meta.dash_acl_group_id:dash_acl_group_id"
+    name: "meta.stage3_dash_acl_group_id"
     bitwidth: 16
     match_type: EXACT
     structured_annotations {
-      name: "Sai"
+      name: "SaiVal"
       kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dash_acl_group_id"
+          }
+        }
         kv_pairs {
           key: "type"
           value {
@@ -1014,45 +2266,148 @@ tables {
   }
   match_fields {
     id: 2
-    name: "meta.dst_tag_map:dst_tag"
-    bitwidth: 32
-    match_type: TERNARY
+    name: "meta.dst_ip_addr"
+    bitwidth: 128
+    match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dip"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_ip_prefix_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "list"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 3
-    name: "meta.src_tag_map:src_tag"
-    bitwidth: 32
-    match_type: TERNARY
+    name: "meta.src_ip_addr"
+    bitwidth: 128
+    match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "sip"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_ip_prefix_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "list"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 4
-    name: "meta.dst_ip_addr:dip"
-    bitwidth: 128
+    name: "meta.ip_protocol"
+    bitwidth: 8
     match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "protocol"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_u8_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "list"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 5
-    name: "meta.src_ip_addr:sip"
-    bitwidth: 128
+    name: "meta.src_l4_port"
+    bitwidth: 16
     match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "src_port"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_u16_range_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "range_list"
+          }
+        }
+      }
+    }
   }
   match_fields {
     id: 6
-    name: "meta.ip_protocol:protocol"
-    bitwidth: 8
-    match_type: OPTIONAL
-  }
-  match_fields {
-    id: 7
-    name: "meta.src_l4_port:src_port"
+    name: "meta.dst_l4_port"
     bitwidth: 16
     match_type: OPTIONAL
-  }
-  match_fields {
-    id: 8
-    name: "meta.dst_l4_port:dst_port"
-    bitwidth: 16
-    match_type: OPTIONAL
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "dst_port"
+          }
+        }
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_u16_range_list_t"
+          }
+        }
+        kv_pairs {
+          key: "match_type"
+          value {
+            string_value: "range_list"
+          }
+        }
+      }
+    }
   }
   action_refs {
     id: 32161567
@@ -1067,6 +2422,67 @@ tables {
     id: 31424218
   }
   direct_resource_ids: 328370481
+  size: 1024
+}
+tables {
+  preamble {
+    id: 49279256
+    name: "dash_ingress.underlay.underlay_routing"
+    alias: "underlay_routing"
+    structured_annotations {
+      name: "SaiTable"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "route"
+          }
+        }
+        kv_pairs {
+          key: "api"
+          value {
+            string_value: "route"
+          }
+        }
+        kv_pairs {
+          key: "api_type"
+          value {
+            string_value: "underlay"
+          }
+        }
+      }
+    }
+  }
+  match_fields {
+    id: 1
+    name: "meta.dst_ip_addr"
+    bitwidth: 128
+    match_type: LPM
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "name"
+          value {
+            string_value: "destination"
+          }
+        }
+      }
+    }
+  }
+  action_refs {
+    id: 32404057
+  }
+  action_refs {
+    id: 25628750
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
   size: 1024
 }
 actions {
@@ -1180,13 +2596,24 @@ actions {
     id: 5
     name: "vm_underlay_dip"
     bitwidth: 32
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_ip_address_t"
+          }
+        }
+      }
+    }
   }
   params {
     id: 6
     name: "vm_vni"
     bitwidth: 24
     structured_annotations {
-      name: "Sai"
+      name: "SaiVal"
       kv_pair_list {
         kv_pairs {
           key: "type"
@@ -1201,116 +2628,395 @@ actions {
     id: 7
     name: "vnet_id"
     bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   params {
     id: 8
-    name: "v4_meter_policy_id"
-    bitwidth: 16
+    name: "pl_sip"
+    bitwidth: 128
   }
   params {
     id: 9
-    name: "v6_meter_policy_id"
-    bitwidth: 16
+    name: "pl_sip_mask"
+    bitwidth: 128
   }
   params {
     id: 10
-    name: "inbound_v4_stage1_dash_acl_group_id"
-    bitwidth: 16
+    name: "pl_underlay_sip"
+    bitwidth: 32
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_ip_address_t"
+          }
+        }
+      }
+    }
   }
   params {
     id: 11
-    name: "inbound_v4_stage2_dash_acl_group_id"
+    name: "v4_meter_policy_id"
     bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   params {
     id: 12
-    name: "inbound_v4_stage3_dash_acl_group_id"
+    name: "v6_meter_policy_id"
     bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   params {
     id: 13
-    name: "inbound_v4_stage4_dash_acl_group_id"
+    name: "inbound_v4_stage1_dash_acl_group_id"
     bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   params {
     id: 14
-    name: "inbound_v4_stage5_dash_acl_group_id"
+    name: "inbound_v4_stage2_dash_acl_group_id"
     bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   params {
     id: 15
-    name: "inbound_v6_stage1_dash_acl_group_id"
+    name: "inbound_v4_stage3_dash_acl_group_id"
     bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   params {
     id: 16
-    name: "inbound_v6_stage2_dash_acl_group_id"
+    name: "inbound_v4_stage4_dash_acl_group_id"
     bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   params {
     id: 17
-    name: "inbound_v6_stage3_dash_acl_group_id"
+    name: "inbound_v4_stage5_dash_acl_group_id"
     bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   params {
     id: 18
-    name: "inbound_v6_stage4_dash_acl_group_id"
+    name: "inbound_v6_stage1_dash_acl_group_id"
     bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   params {
     id: 19
-    name: "inbound_v6_stage5_dash_acl_group_id"
+    name: "inbound_v6_stage2_dash_acl_group_id"
     bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   params {
     id: 20
-    name: "outbound_v4_stage1_dash_acl_group_id"
+    name: "inbound_v6_stage3_dash_acl_group_id"
     bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   params {
     id: 21
-    name: "outbound_v4_stage2_dash_acl_group_id"
+    name: "inbound_v6_stage4_dash_acl_group_id"
     bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   params {
     id: 22
-    name: "outbound_v4_stage3_dash_acl_group_id"
+    name: "inbound_v6_stage5_dash_acl_group_id"
     bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   params {
     id: 23
-    name: "outbound_v4_stage4_dash_acl_group_id"
+    name: "outbound_v4_stage1_dash_acl_group_id"
     bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   params {
     id: 24
-    name: "outbound_v4_stage5_dash_acl_group_id"
+    name: "outbound_v4_stage2_dash_acl_group_id"
     bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   params {
     id: 25
-    name: "outbound_v6_stage1_dash_acl_group_id"
+    name: "outbound_v4_stage3_dash_acl_group_id"
     bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   params {
     id: 26
-    name: "outbound_v6_stage2_dash_acl_group_id"
+    name: "outbound_v4_stage4_dash_acl_group_id"
     bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   params {
     id: 27
-    name: "outbound_v6_stage3_dash_acl_group_id"
+    name: "outbound_v4_stage5_dash_acl_group_id"
     bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   params {
     id: 28
-    name: "outbound_v6_stage4_dash_acl_group_id"
+    name: "outbound_v6_stage1_dash_acl_group_id"
     bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   params {
     id: 29
+    name: "outbound_v6_stage2_dash_acl_group_id"
+    bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
+  }
+  params {
+    id: 30
+    name: "outbound_v6_stage3_dash_acl_group_id"
+    bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
+  }
+  params {
+    id: 31
+    name: "outbound_v6_stage4_dash_acl_group_id"
+    bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
+  }
+  params {
+    id: 32
     name: "outbound_v6_stage5_dash_acl_group_id"
     bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
 }
 actions {
@@ -1330,6 +3036,17 @@ actions {
     id: 1
     name: "src_vnet_id"
     bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
 }
 actions {
@@ -1343,7 +3060,7 @@ actions {
     name: "ip_addr_family"
     bitwidth: 32
     structured_annotations {
-      name: "Sai"
+      name: "SaiVal"
       kv_pair_list {
         kv_pairs {
           key: "type"
@@ -1384,7 +3101,7 @@ actions {
     name: "outbound_bytes_counter"
     bitwidth: 64
     structured_annotations {
-      name: "Sai"
+      name: "SaiVal"
       kv_pair_list {
         kv_pairs {
           key: "type"
@@ -1406,7 +3123,7 @@ actions {
     name: "inbound_bytes_counter"
     bitwidth: 64
     structured_annotations {
-      name: "Sai"
+      name: "SaiVal"
       kv_pair_list {
         kv_pairs {
           key: "type"
@@ -1428,7 +3145,7 @@ actions {
     name: "meter_bucket_index"
     bitwidth: 32
     structured_annotations {
-      name: "Sai"
+      name: "SaiVal"
       kv_pair_list {
         kv_pairs {
           key: "type"
@@ -1456,6 +3173,17 @@ actions {
     id: 1
     name: "eni_id"
     bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
 }
 actions {
@@ -1469,7 +3197,7 @@ actions {
     name: "ip_addr_family"
     bitwidth: 32
     structured_annotations {
-      name: "Sai"
+      name: "SaiVal"
       kv_pair_list {
         kv_pairs {
           key: "type"
@@ -1489,30 +3217,6 @@ actions {
 }
 actions {
   preamble {
-    id: 27783729
-    name: "dash_ingress.set_src_tag"
-    alias: "set_src_tag"
-  }
-  params {
-    id: 1
-    name: "tag_map"
-    bitwidth: 32
-  }
-}
-actions {
-  preamble {
-    id: 23256694
-    name: "dash_ingress.set_dst_tag"
-    alias: "set_dst_tag"
-  }
-  params {
-    id: 1
-    name: "tag_map"
-    bitwidth: 32
-  }
-}
-actions {
-  preamble {
     id: 25364446
     name: "dash_ingress.outbound.route_vnet"
     alias: "route_vnet"
@@ -1521,6 +3225,17 @@ actions {
     id: 1
     name: "dst_vnet_id"
     bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_object_id_t"
+          }
+        }
+      }
+    }
   }
   params {
     id: 2
@@ -1546,13 +3261,24 @@ actions {
   }
   params {
     id: 2
-    name: "is_overlay_ip_v4_or_v6"
+    name: "overlay_ip_is_v6"
     bitwidth: 1
   }
   params {
     id: 3
     name: "overlay_ip"
     bitwidth: 128
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_ip_address_t"
+          }
+        }
+      }
+    }
   }
   params {
     id: 4
@@ -1597,7 +3323,7 @@ actions {
   }
   params {
     id: 1
-    name: "is_overlay_dip_v4_or_v6"
+    name: "overlay_dip_is_v6"
     bitwidth: 1
   }
   params {
@@ -1607,7 +3333,7 @@ actions {
   }
   params {
     id: 3
-    name: "is_overlay_dip_mask_v4_or_v6"
+    name: "overlay_dip_mask_is_v6"
     bitwidth: 1
   }
   params {
@@ -1617,7 +3343,7 @@ actions {
   }
   params {
     id: 5
-    name: "is_overlay_sip_v4_or_v6"
+    name: "overlay_sip_is_v6"
     bitwidth: 1
   }
   params {
@@ -1627,7 +3353,7 @@ actions {
   }
   params {
     id: 7
-    name: "is_overlay_sip_mask_v4_or_v6"
+    name: "overlay_sip_mask_is_v6"
     bitwidth: 1
   }
   params {
@@ -1637,7 +3363,7 @@ actions {
   }
   params {
     id: 9
-    name: "is_underlay_dip_v4_or_v6"
+    name: "underlay_dip_is_v6"
     bitwidth: 1
   }
   params {
@@ -1647,7 +3373,7 @@ actions {
   }
   params {
     id: 11
-    name: "is_underlay_sip_v4_or_v6"
+    name: "underlay_sip_is_v6"
     bitwidth: 1
   }
   params {
@@ -1659,6 +3385,23 @@ actions {
     id: 13
     name: "dash_encapsulation"
     bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_dash_encapsulation_t"
+          }
+        }
+        kv_pairs {
+          key: "default_value"
+          value {
+            string_value: "SAI_DASH_ENCAPSULATION_VXLAN"
+          }
+        }
+      }
+    }
   }
   params {
     id: 14
@@ -1686,6 +3429,17 @@ actions {
     id: 1
     name: "underlay_dip"
     bitwidth: 32
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_ip_address_t"
+          }
+        }
+      }
+    }
   }
   params {
     id: 2
@@ -1704,6 +3458,70 @@ actions {
   }
   params {
     id: 5
+    name: "meter_class_override"
+    bitwidth: 1
+  }
+}
+actions {
+  preamble {
+    id: 27544913
+    name: "dash_ingress.outbound.set_private_link_mapping"
+    alias: "set_private_link_mapping"
+  }
+  params {
+    id: 1
+    name: "underlay_dip"
+    bitwidth: 32
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_ip_address_t"
+          }
+        }
+      }
+    }
+  }
+  params {
+    id: 2
+    name: "overlay_sip"
+    bitwidth: 128
+  }
+  params {
+    id: 3
+    name: "overlay_dip"
+    bitwidth: 128
+  }
+  params {
+    id: 4
+    name: "dash_encapsulation"
+    bitwidth: 16
+    structured_annotations {
+      name: "SaiVal"
+      kv_pair_list {
+        kv_pairs {
+          key: "type"
+          value {
+            string_value: "sai_dash_encapsulation_t"
+          }
+        }
+      }
+    }
+  }
+  params {
+    id: 5
+    name: "tunnel_key"
+    bitwidth: 24
+  }
+  params {
+    id: 6
+    name: "meter_class"
+    bitwidth: 16
+  }
+  params {
+    id: 7
     name: "meter_class_override"
     bitwidth: 1
   }
@@ -1776,6 +3594,30 @@ actions {
     alias: "inbound.acl.deny_and_continue"
   }
 }
+actions {
+  preamble {
+    id: 32404057
+    name: "dash_ingress.underlay.pkt_act"
+    alias: "pkt_act"
+  }
+  params {
+    id: 1
+    name: "packet_action"
+    bitwidth: 9
+  }
+  params {
+    id: 2
+    name: "next_hop_id"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 25628750
+    name: "dash_ingress.underlay.def_act"
+    alias: "def_act"
+  }
+}
 counters {
   preamble {
     id: 318423147
@@ -1818,7 +3660,7 @@ direct_counters {
   spec {
     unit: BOTH
   }
-  direct_table_id: 42788937
+  direct_table_id: 44067785
 }
 direct_counters {
   preamble {
@@ -1829,7 +3671,7 @@ direct_counters {
   spec {
     unit: BOTH
   }
-  direct_table_id: 48860231
+  direct_table_id: 39175949
 }
 direct_counters {
   preamble {
@@ -1840,7 +3682,7 @@ direct_counters {
   spec {
     unit: BOTH
   }
-  direct_table_id: 33810473
+  direct_table_id: 49209582
 }
 direct_counters {
   preamble {
@@ -1851,7 +3693,7 @@ direct_counters {
   spec {
     unit: BOTH
   }
-  direct_table_id: 49812549
+  direct_table_id: 36478314
 }
 direct_counters {
   preamble {
@@ -1862,7 +3704,7 @@ direct_counters {
   spec {
     unit: BOTH
   }
-  direct_table_id: 40782112
+  direct_table_id: 39012793
 }
 direct_counters {
   preamble {
@@ -1873,7 +3715,7 @@ direct_counters {
   spec {
     unit: BOTH
   }
-  direct_table_id: 33901322
+  direct_table_id: 41950136
 }
 direct_counters {
   preamble {
@@ -1884,7 +3726,7 @@ direct_counters {
   spec {
     unit: BOTH
   }
-  direct_table_id: 44184066
+  direct_table_id: 43016664
 }
 direct_counters {
   preamble {
@@ -1895,7 +3737,7 @@ direct_counters {
   spec {
     unit: BOTH
   }
-  direct_table_id: 46150034
+  direct_table_id: 49695908
 }
 type_info {
   serializable_enums {
