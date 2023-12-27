@@ -16,7 +16,7 @@ namespace P4Tools::P4Testgen::Bmv2 {
 class Bmv2Concolic : public Concolic {
  private:
     /// In the behavioral model, checksum functions have the following signature.
-    using ChecksumFunction = std::function<big_int(const char *buf, size_t len)>;
+    using ChecksumFunction = std::function<big_int(const uint8_t *buf, size_t len)>;
 
     /// Chunk size is 8 bits, i.e., a byte.
     static constexpr int CHUNK_SIZE = 8;
@@ -52,11 +52,6 @@ class Bmv2Concolic : public Concolic {
     /// just returns the payload expression.
     static const IR::Expression *setAndComputePayload(
         const Model &finalModel, ConcolicVariableMap *resolvedConcolicVariables, int payloadSize);
-
-    /// Converts a big integer input into a vector of bytes. This byte vector is fed into the
-    /// hash function.
-    /// This function mimics the conversion of data structures to bytes in the behavioral model.
-    static std::vector<char> convertBigIntToBytes(big_int &dataInt, int targetWidthBits);
 
  public:
     /// @returns the concolic  functions that are implemented for this particular target.

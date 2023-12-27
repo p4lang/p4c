@@ -9,13 +9,39 @@
 #include <inja/inja.hpp>
 
 #include "backends/p4tools/common/lib/util.h"
+#include "lib/exceptions.h"
 #include "lib/log.h"
 #include "nlohmann/json.hpp"
+
+#include "backends/p4tools/modules/testgen/lib/exceptions.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
 ProtobufIr::ProtobufIr(std::filesystem::path basePath, std::optional<unsigned int> seed)
     : Bmv2TestFramework(std::move(basePath), seed) {}
+
+std::string ProtobufIr::getFormatOfNode(const IR::IAnnotated *node) {
+    const auto *formatAnnotation = node->getAnnotation("format");
+    std::string formatString = "hex_str";
+    if (formatAnnotation != nullptr) {
+        BUG_CHECK(formatAnnotation->body.size() == 1,
+                  "@format annotation can only have one member.");
+        auto formatString = formatAnnotation->body.at(0)->text;
+        if (formatString == "IPV4_ADDRESS") {
+            formatString = "ipv4";
+        } else if (formatString == "IPV6_ADDRESS") {
+            formatString = "ipv6";
+        } else if (formatString == "MAC_ADDRESS") {
+            formatString = "mac";
+        } else if (formatString == "HEX_STR") {
+            formatString = "hex_str";
+        } else {
+            TESTGEN_UNIMPLEMENTED("Unsupported @format string %1%", formatString);
+        }
+    }
+    return formatString;
+}
 
 std::string ProtobufIr::getTestCaseTemplate() {
     static std::string TEST_CASE(
@@ -61,7 +87,7 @@ entities {
     # Match field {{r.field_name}}
     matches {
       name: "{{r.field_name}}"
-      exact: { hex_str: "{{r.value}}" }
+      exact: { {{r.format}}: "{{r.value}}" }
     }
 ## endfor
 ## for r in rule.rules.optional_matches
@@ -69,7 +95,7 @@ entities {
   matches {
     name: "{{r.field_name}}"
     optional {
-      value: { hex_str: "{{r.value}}" }
+      value: { {{r.format}}: "{{r.value}}" }
     }
   }
 ## endfor
@@ -78,8 +104,8 @@ entities {
     matches {
       name: "{{r.field_name}}"
       range {
-        low: { hex_str: "{{r.lo}}" }
-        high: { hex_str:  "{{r.hi}}" }
+        low: { {{r.format}}: "{{r.lo}}" }
+        high: { {{r.format}}:  "{{r.hi}}" }
       }
     }
 ## endfor
@@ -88,8 +114,8 @@ entities {
     matches {
       name: "{{r.field_name}}"
       ternary {
-        value: { hex_str: "{{r.value}}" }
-        mask: { hex_str: "{{r.mask}}" }
+        value: { {{r.format}}: "{{r.value}}" }
+        mask: { {{r.format}}: "{{r.mask}}" }
       }
     }
 ## endfor
@@ -98,7 +124,7 @@ entities {
     matches {
       name: "{{r.field_name}}"
       lpm {
-        value: { hex_str: "{{r.value}}" }
+        value: { {{r.format}}: "{{r.value}}" }
         prefix_length: {{r.prefix_len}}
       }
     }
@@ -113,7 +139,7 @@ entities {
             # Param {{act_param.param}}
             params {
               name: "{{act_param.param}}"
-              value: { hex_str: "{{act_param.value}}" }
+              value: { {{act_param.format}}: "{{act_param.value}}" }
             }
 ## endfor
           }
@@ -126,7 +152,7 @@ entities {
         # Param {{act_param.param}}
         params {
           name: "{{act_param.param}}"
-          value: { hex_str: "{{act_param.value}}" }
+          value: { {{act_param.format}}: "{{act_param.value}}" }
       }
 ## endfor
     }
@@ -138,6 +164,105 @@ entities {
 ## endif
 )""");
     return TEST_CASE;
+}
+
+std::string ProtobufIr::formatNetworkValue(const std::string &type, const IR::Expression *value) {
+    if (type == "hex_str") {
+        return formatHexExpr(value);
+    }
+    // At this point, any value must be a constant.
+    const auto *constant = value->checkedTo<IR::Constant>();
+    if (type == "ipv4") {
+        auto convertedString = convertToIpv4String(convertBigIntToBytes(constant->value, 32));
+        if (convertedString.has_value()) {
+            return convertedString.value();
+        }
+        BUG("Failed to convert \"%1%\" to an IPv4 string.", value);
+    }
+    if (type == "ipv6") {
+        auto convertedString = convertToIpv6String(convertBigIntToBytes(constant->value, 128));
+        if (convertedString.has_value()) {
+            return convertedString.value();
+        }
+        BUG("Failed to convert \"%1%\" to an IPv6 string.", value);
+    }
+    if (type == "mac") {
+        auto convertedString = convertToMacString(convertBigIntToBytes(constant->value, 48));
+        if (convertedString.has_value()) {
+            return convertedString.value();
+        }
+        BUG("Failed to convert \"%1%\" to an MAC string.", value);
+    }
+    TESTGEN_UNIMPLEMENTED("Unsupported network value type %1%", type);
+}
+
+void ProtobufIr::createKeyMatch(cstring fieldName, const TableMatch &fieldMatch,
+                                inja::json &rulesJson) {
+    inja::json j;
+    j["field_name"] = fieldName;
+    j["format"] = getFormatOfNode(fieldMatch.getKey());
+
+    if (const auto *elem = fieldMatch.to<Exact>()) {
+        j["value"] = formatNetworkValue(j["format"], elem->getEvaluatedValue()).c_str();
+        rulesJson["single_exact_matches"].push_back(j);
+    } else if (const auto *elem = fieldMatch.to<Range>()) {
+        j["lo"] = formatNetworkValue(j["format"], elem->getEvaluatedLow()).c_str();
+        j["hi"] = formatNetworkValue(j["format"], elem->getEvaluatedHigh()).c_str();
+        rulesJson["range_matches"].push_back(j);
+    } else if (const auto *elem = fieldMatch.to<Ternary>()) {
+        j["value"] = formatNetworkValue(j["format"], elem->getEvaluatedValue()).c_str();
+        j["mask"] = formatNetworkValue(j["format"], elem->getEvaluatedMask()).c_str();
+        rulesJson["ternary_matches"].push_back(j);
+        // If the rule has a ternary match we need to add the priority.
+        rulesJson["needs_priority"] = true;
+    } else if (const auto *elem = fieldMatch.to<LPM>()) {
+        j["value"] = formatNetworkValue(j["format"], elem->getEvaluatedValue()).c_str();
+        j["prefix_len"] = elem->getEvaluatedPrefixLength()->value.str();
+        rulesJson["lpm_matches"].push_back(j);
+    } else if (const auto *elem = fieldMatch.to<Optional>()) {
+        j["value"] = formatNetworkValue(j["format"], elem->getEvaluatedValue()).c_str();
+        if (elem->addAsExactMatch()) {
+            j["use_exact"] = "True";
+        } else {
+            j["use_exact"] = "False";
+        }
+        rulesJson["needs_priority"] = true;
+        rulesJson["optional_matches"].push_back(j);
+    } else {
+        TESTGEN_UNIMPLEMENTED("Unsupported table key match type \"%1%\"",
+                              fieldMatch.getObjectName());
+    }
+}
+
+inja::json ProtobufIr::getControlPlaneForTable(const TableMatchMap &matches,
+                                               const std::vector<ActionArg> &args) const {
+    inja::json rulesJson;
+
+    rulesJson["single_exact_matches"] = inja::json::array();
+    rulesJson["multiple_exact_matches"] = inja::json::array();
+    rulesJson["range_matches"] = inja::json::array();
+    rulesJson["ternary_matches"] = inja::json::array();
+    rulesJson["lpm_matches"] = inja::json::array();
+    rulesJson["optional_matches"] = inja::json::array();
+
+    rulesJson["act_args"] = inja::json::array();
+    rulesJson["needs_priority"] = false;
+
+    // Iterate over the match fields and segregate them.
+    for (const auto &match : matches) {
+        createKeyMatch(match.first, *match.second, rulesJson);
+    }
+
+    for (const auto &actArg : args) {
+        inja::json j;
+        j["format"] = getFormatOfNode(actArg.getActionParam());
+
+        j["param"] = actArg.getActionParamName().c_str();
+        j["value"] = formatNetworkValue(j["format"], actArg.getEvaluatedValue()).c_str();
+        rulesJson["act_args"].push_back(j);
+    }
+
+    return rulesJson;
 }
 
 void ProtobufIr::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testId,

@@ -16,6 +16,10 @@ namespace Test {
 
 namespace {
 
+using P4Tools::convertBigIntToBytes;
+using P4Tools::convertToIpv4String;
+using P4Tools::convertToIpv6String;
+using P4Tools::convertToMacString;
 using P4Tools::formatBinExpr;
 using P4Tools::formatHexExpr;
 using P4Tools::formatOctalExpr;
@@ -247,6 +251,105 @@ TEST_F(FormatTest, Format04) {
         ASSERT_STREQ(insertSeparators("0712522321", "\\", 2, true).c_str(), "07\\12\\52\\23\\21");
         ASSERT_STREQ(insertSeparators("E3D4", "\\x", 2, true).c_str(), "E3\\xD4");
         ASSERT_STREQ(insertSeparators("AEC192", "\\x", 2, true).c_str(), "AE\\xC1\\x92");
+    }
+}
+
+// Tests for conversion of integers into IPv4 addresses.
+TEST_F(FormatTest, TestIPv4Conversion) {
+    {
+        std::vector<uint8_t> bytes = {192, 168, 1, 1};
+        auto result = convertToIpv4String(bytes);
+        ASSERT_TRUE(result.has_value());
+        EXPECT_EQ(result, "192.168.1.1");
+    }
+    {
+        auto result = convertToIpv4String(convertBigIntToBytes(big_int("3232235777"), 32));
+        ASSERT_TRUE(result.has_value());
+        EXPECT_EQ(result, "192.168.1.1");
+    }
+    {
+        auto result = convertToIpv4String(convertBigIntToBytes(big_int("65535"), 32));
+        ASSERT_TRUE(result.has_value());
+        EXPECT_EQ(result, "255.255.0.0");
+    }
+    {
+        std::vector<uint8_t> bytes = {0x01, 0x00, 0x00, 0x00};
+        auto result = convertToIpv4String(bytes);
+        ASSERT_TRUE(result.has_value());
+        EXPECT_EQ(result, "1.0.0.0");
+    }
+    {
+        auto result = convertToIpv4String(convertBigIntToBytes(big_int("1"), 32));
+        ASSERT_TRUE(result.has_value());
+        EXPECT_EQ(result, "1.0.0.0");
+    }
+}
+
+TEST_F(FormatTest, TestIPv6Conversion) {
+    {
+        std::vector<uint8_t> bytes = {
+            0x20, 0x01, 0x0d, 0xb8, 0x85, 0xa3, 0x00, 0x00,
+            0x00, 0x00, 0x8a, 0x2e, 0x03, 0x70, 0x73, 0x34,
+        };
+        auto result = convertToIpv6String(bytes);
+        ASSERT_TRUE(result.has_value());
+        EXPECT_EQ(result, "2001:0db8:85a3:0000:0000:8a2e:0370:7334");
+    }
+    {
+        auto result = convertToIpv6String(
+            convertBigIntToBytes(big_int("42540766452641154071740215577757643572"), 128));
+        ASSERT_TRUE(result.has_value());
+        EXPECT_EQ(result, "2001:0db8:85a3:0000:0000:8a2e:0370:7334");
+    }
+    {
+        auto result =
+            convertToIpv6String(convertBigIntToBytes(big_int("18446744073709551615"), 128));
+        ASSERT_TRUE(result.has_value());
+        EXPECT_EQ(result, "ffff:ffff:ffff:ffff:0000:0000:0000:0000");
+    }
+    {
+        std::vector<uint8_t> bytes = {
+            0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        };
+        auto result = convertToIpv6String(bytes);
+        ASSERT_TRUE(result.has_value());
+        EXPECT_EQ(result, "0100:0000:0000:0000:0000:0000:0000:0000");
+    }
+    {
+        auto result = convertToIpv6String(convertBigIntToBytes(big_int("1"), 128));
+        ASSERT_TRUE(result.has_value());
+        EXPECT_EQ(result, "0100:0000:0000:0000:0000:0000:0000:0000");
+    }
+}
+
+TEST_F(FormatTest, TestMACConversion) {
+    {
+        std::vector<uint8_t> bytes = {0xFF, 0x11, 0x22, 0x33, 0x44, 0x55};
+        auto result = convertToMacString(bytes);
+        ASSERT_TRUE(result.has_value());
+        EXPECT_EQ(result, "ff:11:22:33:44:55");
+    }
+    {
+        auto result = convertToMacString(convertBigIntToBytes(big_int("280449053312085"), 48));
+        ASSERT_TRUE(result.has_value());
+        EXPECT_EQ(result, "ff:11:22:33:44:55");
+    }
+    {
+        auto result = convertToMacString(convertBigIntToBytes(big_int("4294967295"), 48));
+        ASSERT_TRUE(result.has_value());
+        EXPECT_EQ(result, "ff:ff:ff:ff:00:00");
+    }
+    {
+        std::vector<uint8_t> bytes = {0x01, 0x00, 0x00, 0x00, 0x00, 0x00};
+        auto result = convertToMacString(bytes);
+        ASSERT_TRUE(result.has_value());
+        EXPECT_EQ(result, "01:00:00:00:00:00");
+    }
+    {
+        auto result = convertToMacString(convertBigIntToBytes(big_int("1"), 48));
+        ASSERT_TRUE(result.has_value());
+        EXPECT_EQ(result, "01:00:00:00:00:00");
     }
 }
 

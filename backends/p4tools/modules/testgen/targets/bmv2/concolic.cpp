@@ -13,12 +13,12 @@
 #include <boost/multiprecision/number.hpp>
 #include <boost/multiprecision/traits/explicit_conversion.hpp>
 
+#include "backends/p4tools/common/lib/format_int.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "ir/irutils.h"
 #include "ir/vector.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
-#include "lib/log.h"
 
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
@@ -27,23 +27,6 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/contrib/bmv2_hash/calculations.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
-
-std::vector<char> Bmv2Concolic::convertBigIntToBytes(big_int &dataInt, int targetWidthBits) {
-    std::vector<char> bytes;
-    // Convert the input bit width to bytes and round up.
-    size_t targetWidthBytes = (targetWidthBits + CHUNK_SIZE - 1) / CHUNK_SIZE;
-    boost::multiprecision::export_bits(dataInt, std::back_inserter(bytes), CHUNK_SIZE);
-    // If the number of bytes produced by the export is lower than the desired width pad the byte
-    // array with zeroes.
-    auto diff = targetWidthBytes - bytes.size();
-    if (targetWidthBytes > bytes.size() && diff > 0UL) {
-        for (size_t i = 0; i < diff; ++i) {
-            bytes.insert(bytes.begin(), 0);
-        }
-    }
-
-    return bytes;
-}
 
 big_int Bmv2Concolic::computeChecksum(const std::vector<const IR::Expression *> &exprList,
                                       const Model &finalModel, int algo,
@@ -80,7 +63,7 @@ big_int Bmv2Concolic::computeChecksum(const std::vector<const IR::Expression *> 
             TESTGEN_UNIMPLEMENTED("Algorithm %1% not implemented for hash.", algo);
     }
 
-    std::vector<char> bytes;
+    std::vector<uint8_t> bytes;
     if (!exprList.empty()) {
         const auto *concatExpr = exprList.at(0);
         for (size_t idx = 1; idx < exprList.size(); idx++) {
@@ -102,7 +85,7 @@ big_int Bmv2Concolic::computeChecksum(const std::vector<const IR::Expression *> 
         }
         auto dataInt =
             IR::getBigIntFromLiteral(finalModel.evaluate(concatExpr, true, resolvedExpressions));
-        bytes = convertBigIntToBytes(dataInt, concatWidth);
+        bytes = convertBigIntToBytes(dataInt, concatWidth, true);
     }
     return checksumFun(bytes.data(), bytes.size());
 }
