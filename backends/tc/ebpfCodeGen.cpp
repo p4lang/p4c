@@ -1345,25 +1345,46 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
             }
 
             builder->emitIndent();
-            builder->appendLine("struct p4tc_table_entry_act_bpf update_act_bpf = {");
-            builder->emitIndent();
-            builder->appendFormat("    .act_id = %d,", actID);
-            builder->newline();
-            builder->emitIndent();
-            builder->append("    .params = ");
-            if (auto struct_params = param->to<IR::StructExpression>()) {
-                builder->append("{");
-                auto components = struct_params->components;
-                for (size_t index = 0; index < components.size(); index++) {
-                    visit(components.at(index)->expression);
-                    if (index < components.size() - 1) builder->append(", ");
+            builder->appendLine("struct p4tc_table_entry_act_bpf update_act_bpf = {};");
+            if (param->is<IR::StructExpression>()) {
+                if (param->to<IR::StructExpression>()->components.size() != 0) {
+                    builder->emitIndent();
+                    builder->appendLine("struct act_param {");
+                    builder->emitIndent();
+                    auto components = param->to<IR::StructExpression>()->components;
+                    for (size_t index = 0; index < components.size(); index++) {
+                        auto type = components.at(index)->expression->type;
+                        auto etype = EBPF::EBPFTypeFactory::instance->create(type);
+                        std::stringstream paramName;
+                        paramName << "param" << index;
+                        builder->append("    ");
+                        etype->declare(builder, paramName.str().c_str(), false);
+                        builder->endOfStatement();
+                        builder->newline();
+                        builder->emitIndent();
+                    }
+                    builder->appendLine("};");
+                    builder->emitIndent();
+                    builder->appendLine(
+                        "struct act_param* params = (struct act_param *) update_act_bpf.params;");
+                    // Assign Variables
+                    for (size_t index = 0; index < components.size(); index++) {
+                        std::stringstream paramName;
+                        paramName << "param" << index;
+                        builder->emitIndent();
+                        builder->appendFormat("params->%s = ", paramName.str().c_str());
+                        visit(components.at(index)->expression);
+                        builder->endOfStatement();
+                        builder->newline();
+                    }
                 }
-                builder->append("}");
             }
-            builder->newline();
-            builder->emitIndent();
-            builder->appendLine("};");
 
+            builder->emitIndent();
+            builder->appendFormat("update_act_bpf.act_id = %d;", actID);
+            builder->newline();
+
+            builder->newline();
             builder->emitIndent();
             builder->appendLine("/* construct key */");
             builder->emitIndent();

@@ -1,5 +1,5 @@
 
-#include "add_entry_example_parser.h"
+#include "add_entry_1_example_parser.h"
 #include <stdbool.h>
 #include <linux/if_ether.h>
 #include "pna.h"
@@ -14,8 +14,9 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_key {
     u32 field0; /* hdr.ipv4.dstAddr */
     u32 field1; /* istd.input_port */
 } __attribute__((aligned(4)));
-#define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_NEXT_HOP 1
-#define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP 2
+#define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_NEXT_HOP 2
+#define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_SEND_NH 1
+#define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP 3
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_value {
     unsigned int action;
     union {
@@ -23,6 +24,10 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_value {
         } _NoAction;
         struct {
         } MainControlImpl_next_hop;
+        struct __attribute__((__packed__)) {
+            u64 dmac;
+            u64 smac;
+        } MainControlImpl_send_nh;
         struct {
         } MainControlImpl_default_route_drop;
     } u;
@@ -34,8 +39,8 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_key {
     u32 field1; /* hdr.ipv4.srcAddr */
     u8 field2; /* hdr.ipv4.protocol */
 } __attribute__((aligned(4)));
-#define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_NEXT_HOP 1
-#define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP 3
+#define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_NEXT_HOP 2
+#define MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_DROP 4
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_value {
     unsigned int action;
     union {
@@ -134,9 +139,16 @@ if (/* hdr->ipv4.isValid() */
                         switch (value->action) {
                             case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_NEXT_HOP: 
                                 {
-/* add_entry(""default_route_drop"", {}, 2) */
+/* add_entry(""send_nh"", {hdr->ethernet.srcAddr, hdr->ethernet.dstAddr}, 2) */
                                     struct p4tc_table_entry_act_bpf update_act_bpf = {};
-                                    update_act_bpf.act_id = 2;
+                                    struct act_param {
+                                        u64 param0;
+                                        u64 param1;
+                                    };
+                                    struct act_param* params = (struct act_param *) update_act_bpf.params;
+                                    params->param0 = hdr->ethernet.srcAddr;
+                                    params->param1 = hdr->ethernet.dstAddr;
+                                    update_act_bpf.act_id = 1;
 
                                     /* construct key */
                                     struct p4tc_table_entry_create_bpf_params__local update_params = {
@@ -145,6 +157,12 @@ if (/* hdr->ipv4.isValid() */
                                         .aging_ms = 2
                                     };
                                     bpf_p4tc_entry_create_on_miss(skb, &update_params, &key, sizeof(key), &update_act_bpf);
+                                }
+                                break;
+                            case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_SEND_NH: 
+                                {
+                                    hdr->ethernet.srcAddr = value->u.MainControlImpl_send_nh.smac;
+                                                                        hdr->ethernet.dstAddr = value->u.MainControlImpl_send_nh.dmac;
                                 }
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP: 
@@ -191,8 +209,15 @@ if (/* hdr->ipv4.isValid() */
                         switch (value->action) {
                             case MAINCONTROLIMPL_IPV4_TBL_2_ACT_MAINCONTROLIMPL_NEXT_HOP: 
                                 {
-/* add_entry(""default_route_drop"", {}, 2) */
+/* add_entry(""send_nh"", {hdr->ethernet.srcAddr, hdr->ethernet.dstAddr}, 2) */
                                     struct p4tc_table_entry_act_bpf update_act_bpf = {};
+                                    struct act_param {
+                                        u64 param0;
+                                        u64 param1;
+                                    };
+                                    struct act_param* params = (struct act_param *) update_act_bpf.params;
+                                    params->param0 = hdr->ethernet.srcAddr;
+                                    params->param1 = hdr->ethernet.dstAddr;
                                     update_act_bpf.act_id = 0;
 
                                     /* construct key */
