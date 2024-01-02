@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <ostream>
 #include <string>
+#include <vector>
 
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/multiprecision/cpp_int/bitwise.hpp>
@@ -268,4 +269,83 @@ std::string insertHexSeparators(const std::string &dataStr) {
     return insertSeparators(dataStr, "\\x", 2, false);
 }
 
+std::vector<uint8_t> convertBigIntToBytes(const big_int &dataInt, int targetWidthBits,
+                                          bool padLeft) {
+    /// Chunk size is 8 bits, i.e., a byte.
+    constexpr uint8_t chunkSize = 8U;
+
+    std::vector<uint8_t> bytes;
+    // Convert the input bit width to bytes and round up.
+    size_t targetWidthBytes = (targetWidthBits + chunkSize - 1) / chunkSize;
+    boost::multiprecision::export_bits(dataInt, std::back_inserter(bytes), chunkSize);
+    // If the number of bytes produced by the export is lower than the desired width pad the byte
+    // array with zeroes.
+    auto diff = targetWidthBytes - bytes.size();
+    if (targetWidthBytes > bytes.size() && diff > 0UL) {
+        for (size_t i = 0; i < diff; ++i) {
+            if (padLeft) {
+                bytes.insert(bytes.begin(), 0);
+            } else {
+                bytes.push_back(0);
+            }
+        }
+    }
+    return bytes;
+}
+
+std::optional<std::string> convertToIpv4String(const std::vector<uint8_t> &byteArray) {
+    constexpr uint8_t ipv4ByteSize = 4U;
+
+    if (byteArray.size() != ipv4ByteSize) {
+        ::error("Invalid IPv4 address byte array of size %1%", byteArray.size());
+        return std::nullopt;
+    }
+
+    std::stringstream ss;
+    for (int i = 0; i < ipv4ByteSize; ++i) {
+        if (i > 0) {
+            ss << ".";
+        }
+        ss << static_cast<unsigned int>(byteArray[i]);
+    }
+    return ss.str();
+}
+
+std::optional<std::string> convertToIpv6String(const std::vector<uint8_t> &byteArray) {
+    /// Chunk size is 8 bits, i.e., a byte.
+    constexpr uint8_t chunkSize = 8U;
+    constexpr uint8_t ipv6ByteSize = 16U;
+    if (byteArray.size() != ipv6ByteSize) {
+        ::error("Invalid IPv6 address byte array of size %1%", byteArray.size());
+        return std::nullopt;
+    }
+
+    std::stringstream ss;
+    for (int i = 0; i < ipv6ByteSize; i += 2) {
+        if (i > 0) {
+            ss << ":";
+        }
+
+        uint16_t segment = (static_cast<uint16_t>(byteArray[i]) << chunkSize) | byteArray[i + 1];
+        ss << std::hex << std::setw(4) << std::setfill('0') << segment;
+    }
+    return ss.str();
+}
+
+std::optional<std::string> convertToMacString(const std::vector<uint8_t> &byteArray) {
+    constexpr uint8_t macByteSize = 6U;
+    if (byteArray.size() != macByteSize) {
+        ::error("Invalid MAC address byte array of size %1%", byteArray.size());
+        return std::nullopt;
+    }
+
+    std::stringstream ss;
+    for (int i = 0; i < macByteSize; ++i) {
+        if (i > 0) {
+            ss << ":";
+        }
+        ss << std::hex << std::setw(2) << std::setfill('0') << static_cast<unsigned>(byteArray[i]);
+    }
+    return ss.str();
+}
 }  // namespace P4Tools

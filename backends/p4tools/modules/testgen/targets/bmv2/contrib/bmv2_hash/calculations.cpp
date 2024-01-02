@@ -91,7 +91,7 @@ static uint32_t table_crc32[256] = {
     0x89B8FD09, 0x8D79E0BE, 0x803AC667, 0x84FBDBD0, 0x9ABC8BD5, 0x9E7D9662, 0x933EB0BB, 0x97FFAD0C,
     0xAFB010B1, 0xAB710D06, 0xA6322BDF, 0xA2F33668, 0xBCB4666D, 0xB8757BDA, 0xB5365D03, 0xB1F740B4};
 
-uint16_t BMv2Hash::crc16(const char *buf, size_t len) {
+uint16_t BMv2Hash::crc16(const uint8_t *buf, size_t len) {
     uint16_t remainder = 0x0000;
     uint16_t final_xor_value = 0x0000;
     for (unsigned int byte = 0; byte < len; byte++) {
@@ -101,7 +101,7 @@ uint16_t BMv2Hash::crc16(const char *buf, size_t len) {
     return reflect<uint16_t>(remainder, 16) ^ final_xor_value;
 }
 
-uint32_t BMv2Hash::crc32(const char *buf, size_t len) {
+uint32_t BMv2Hash::crc32(const uint8_t *buf, size_t len) {
     uint32_t remainder = 0xFFFFFFFF;
     uint32_t final_xor_value = 0xFFFFFFFF;
     for (unsigned int byte = 0; byte < len; byte++) {
@@ -111,17 +111,17 @@ uint32_t BMv2Hash::crc32(const char *buf, size_t len) {
     return reflect<uint32_t>(remainder, 32) ^ final_xor_value;
 }
 
-uint16_t BMv2Hash::crcCCITT(const char *buf, size_t len) {
+uint16_t BMv2Hash::crcCCITT(const uint8_t *buf, size_t len) {
     uint16_t remainder = 0xFFFF;
     uint16_t final_xor_value = 0x0000;
     for (unsigned int byte = 0; byte < len; byte++) {
-        int data = static_cast<unsigned char>(buf[byte]) ^ (remainder >> 8);
+        int data = static_cast<uint8_t>(buf[byte]) ^ (remainder >> 8);
         remainder = table_crcCCITT[data] ^ (remainder << 8);
     }
     return remainder ^ final_xor_value;
 }
 
-uint16_t BMv2Hash::csum16(const char *buf, size_t len) {
+uint16_t BMv2Hash::csum16(const uint8_t *buf, size_t len) {
     uint64_t sum = 0;
     const uint64_t *b = reinterpret_cast<const uint64_t *>(buf);
     uint32_t t1, t2;
@@ -165,7 +165,7 @@ uint16_t BMv2Hash::csum16(const char *buf, size_t len) {
     return ntohs(~t3);
 }
 
-uint16_t BMv2Hash::xor16(const char *buf, size_t len) {
+uint16_t BMv2Hash::xor16(const uint8_t *buf, size_t len) {
     uint16_t mask = 0x00ff;
     uint16_t final_xor_value = 0x0000;
     unsigned int byte = 0;
@@ -185,7 +185,7 @@ uint16_t BMv2Hash::xor16(const char *buf, size_t len) {
     return final_xor_value;
 }
 
-uint64_t BMv2Hash::identity(const char *buf, size_t len) {
+uint64_t BMv2Hash::identity(const uint8_t *buf, size_t len) {
     uint64_t res = 0ULL;
     for (size_t i = 0; i < std::min(sizeof(res), len); i++) {
         if (i > 0) res <<= 8;
