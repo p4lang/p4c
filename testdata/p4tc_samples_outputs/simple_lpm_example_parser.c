@@ -1,8 +1,4 @@
-
 #include "simple_lpm_example_parser.h"
-#include <stdbool.h>
-#include <linux/if_ether.h>
-#include "pna.h"
 
 REGISTER_START()
 REGISTER_TABLE(hdr_md_cpumap, BPF_MAP_TYPE_PERCPU_ARRAY, u32, struct hdr_md, 2)
@@ -12,7 +8,7 @@ REGISTER_END()
 static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_headers_t *hdr, struct pna_global_metadata *compiler_meta__)
 {
     struct hdr_md *hdrMd;
-    unsigned ebpf_packetOffsetInBits = 0;
+
     unsigned ebpf_packetOffsetInBits_save = 0;
     ParserError_t ebpf_errorCode = NoError;
     void* pkt = ((void*)(long)skb->data);
@@ -29,6 +25,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
         return TC_ACT_SHOT;
     __builtin_memset(hdrMd, 0, sizeof(struct hdr_md));
 
+    unsigned ebpf_packetOffsetInBits = 0;
     hdr = &(hdrMd->cpumap_hdr);
     meta = &(hdrMd->cpumap_usermeta);
     {

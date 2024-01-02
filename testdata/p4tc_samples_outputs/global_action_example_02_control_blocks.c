@@ -1,12 +1,7 @@
-
 #include "global_action_example_02_parser.h"
-#include <stdbool.h>
-#include <linux/if_ether.h>
-#include "pna.h"
 struct internal_metadata {
     __u16 pkt_ether_type;
 } __attribute__((aligned(4)));
-
 
 struct __attribute__((__packed__)) ingress_nh_table2_key {
     u32 keysz;
@@ -88,7 +83,7 @@ int xdp_func(struct xdp_md *skb) {
 static __always_inline int process(struct __sk_buff *skb, struct my_ingress_headers_t *hdr, struct pna_global_metadata *compiler_meta__)
 {
     struct hdr_md *hdrMd;
-    unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
+
     unsigned ebpf_packetOffsetInBits_save = 0;
     ParserError_t ebpf_errorCode = NoError;
     void* pkt = ((void*)(long)skb->data);
@@ -102,6 +97,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
     hdrMd = BPF_MAP_LOOKUP_ELEM(hdr_md_cpumap, &ebpf_zero);
     if (!hdrMd)
         return TC_ACT_SHOT;
+    unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
     hdr = &(hdrMd->cpumap_hdr);
     meta = &(hdrMd->cpumap_usermeta);
 {
@@ -151,8 +147,8 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                             return TC_ACT_SHOT;
                     }
                 } else {
-                    return TC_ACT_SHOT;
-;
+/* drop_packet() */
+                    drop_packet();
                 }
             }
 ;
@@ -200,8 +196,8 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                             return TC_ACT_SHOT;
                     }
                 } else {
-                    return TC_ACT_SHOT;
-;
+/* drop_packet() */
+                    drop_packet();
                 }
             }
 ;
@@ -223,7 +219,16 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
 ;        if (hdr->ipv4.ebpf_valid) {
             outHeaderLength += 160;
         }
-;        pkt = ((void*)(long)skb->data);
+;
+        int outHeaderOffset = BYTES(outHeaderLength) - BYTES(ebpf_packetOffsetInBits);
+        if (outHeaderOffset != 0) {
+            int returnCode = 0;
+            returnCode = bpf_skb_adjust_room(skb, outHeaderOffset, 1, 0);
+            if (returnCode) {
+                return TC_ACT_SHOT;
+            }
+        }
+        pkt = ((void*)(long)skb->data);
         ebpf_packetEnd = ((void*)(long)skb->data_end);
         ebpf_packetOffsetInBits = 0;
         if (hdr->ethernet.ebpf_valid) {
