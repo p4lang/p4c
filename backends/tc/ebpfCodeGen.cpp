@@ -914,7 +914,7 @@ void EBPFTablePNA::emitDefaultAction(EBPF::CodeBuilder *builder, cstring valueNa
             default_action = mc->method;
         }
         auto path = default_action->to<IR::PathExpression>();
-        BUG_CHECK(path, "Default action path %s cannot be found", default_action);
+        BUG_CHECK(path, "Default action path %1% cannot be found", default_action);
         if (auto defaultActionDecl =
                 program->refMap->getDeclaration(path->path)->to<IR::P4Action>()) {
             if (defaultActionDecl->name.originalName != "NoAction") {
