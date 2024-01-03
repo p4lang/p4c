@@ -184,7 +184,6 @@ const IR::Expression *TableStepper::evalTableConstEntries() {
         const auto *actionType = stepper->state.getP4Action(tableAction);
         auto &nextState = stepper->state.clone();
         nextState.markVisited(entry);
-        nextState.markVisited(actionType);
         // Compute the table key for a constant entry
         const auto *hitCondition = TableUtils::computeEntryMatch(*table, *entry, *key);
 
