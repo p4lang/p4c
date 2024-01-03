@@ -32,6 +32,9 @@ class EBPFProgramInfo : public ProgramInfo {
     EBPFProgramInfo(const IR::P4Program *program,
                     ordered_map<cstring, const IR::Type_Declaration *> inputBlocks);
 
+    /// @see ProgramInfo::getArchSpec
+    [[nodiscard]] const ArchSpec &getArchSpec() const override;
+
     /// @returns the programmable blocks of the program. Should be 6.
     [[nodiscard]] const ordered_map<cstring, const IR::Type_Declaration *> *getProgrammableBlocks()
         const;
@@ -43,6 +46,9 @@ class EBPFProgramInfo : public ProgramInfo {
     [[nodiscard]] const IR::Expression *dropIsActive() const override;
 
     [[nodiscard]] const IR::Type_Bits *getParserErrorType() const override;
+
+    /// @see ProgramInfo::getArchSpec
+    static const ArchSpec ARCH_SPEC;
 };
 
 }  // namespace P4Tools::P4Testgen::EBPF

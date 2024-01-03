@@ -160,8 +160,7 @@ void Bmv2V1ModelExprStepper::processClone(const ExecutionState &state,
         const auto *applyBlock = typeDecl->checkedTo<IR::P4Control>();
         const auto *params = applyBlock->getApplyParameters();
         auto blockIndex = 2;
-        const auto *archSpec = TestgenTarget::getArchSpec();
-        const auto *archMember = archSpec->getArchMember(blockIndex);
+        const auto *archMember = progInfo->getArchSpec().getArchMember(blockIndex);
         for (size_t paramIdx = 0; paramIdx < params->size(); ++paramIdx) {
             const auto *param = params->getParameter(paramIdx);
             const auto &archRef = archMember->blockParams.at(paramIdx);

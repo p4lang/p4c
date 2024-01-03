@@ -44,13 +44,6 @@ class TestgenTarget : public Target {
     static ExprStepper *getExprStepper(ExecutionState &state, AbstractSolver &solver,
                                        const ProgramInfo &programInfo);
 
-    /// A vector that maps the architecture parameters of each pipe to the corresponding
-    /// global architecture variables. For example, this map specifies which parameter of each pipe
-    /// refers to the input header.
-    // The arch map needs to be public to be subclassed.
-    /// @returns a reference to the architecture map defined in this target
-    static const ArchSpec *getArchSpec();
-
  protected:
     /// @see @initProgram.
     const ProgramInfo *initProgramImpl(const IR::P4Program *program) const;
@@ -71,9 +64,6 @@ class TestgenTarget : public Target {
     /// @see getExprStepper.
     virtual ExprStepper *getExprStepperImpl(ExecutionState &state, AbstractSolver &solver,
                                             const ProgramInfo &programInfo) const = 0;
-
-    /// @see getArchSpec
-    [[nodiscard]] virtual const ArchSpec *getArchSpecImpl() const = 0;
 
     explicit TestgenTarget(std::string deviceName, std::string archName);
 };
