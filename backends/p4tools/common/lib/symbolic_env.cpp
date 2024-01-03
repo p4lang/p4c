@@ -33,14 +33,15 @@ bool SymbolicEnv::exists(const IR::StateVariable &var) const { return map.find(v
 /// 0 ++ and makes it into Extracted_Varbit type.
 /// TODO: Maybe we can just get rid of Extracted_Varbit and use bit it its place everywhere.
 static bool typeEquivSansVarbit(const IR::Type *a, const IR::Type *b) {
-    if (a->equiv(*b))
+    if (a->equiv(*b)) {
         return true;
+    }
     const auto *abit = a->to<IR::Type_Bits>();
     const auto *avar = a->to<IR::Extracted_Varbits>();
     const auto *bbit = b->to<IR::Type_Bits>();
     const auto *bvar = b->to<IR::Extracted_Varbits>();
-    return (abit && bvar && abit->width_bits() == bvar->width_bits())
-            || (avar && bbit && avar->width_bits() == bbit->width_bits());
+    return (abit && bvar && abit->width_bits() == bvar->width_bits()) ||
+           (avar && bbit && avar->width_bits() == bbit->width_bits());
 }
 
 void SymbolicEnv::set(const IR::StateVariable &var, const IR::Expression *value) {
