@@ -23,6 +23,12 @@ class PnaDpdkProgramInfo : public SharedPnaProgramInfo {
  public:
     PnaDpdkProgramInfo(const IR::P4Program *program,
                        ordered_map<cstring, const IR::Type_Declaration *> inputBlocks);
+
+    /// @see ProgramInfo::getArchSpec
+    const ArchSpec &getArchSpec() const override;
+
+    /// @see ProgramInfo::getArchSpec
+    static const ArchSpec ARCH_SPEC;
 };
 
 }  // namespace P4Tools::P4Testgen::Pna

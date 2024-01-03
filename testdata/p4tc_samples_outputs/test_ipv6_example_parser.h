@@ -1,5 +1,8 @@
 #include "ebpf_kernel.h"
 
+#include <stdbool.h>
+#include <linux/if_ether.h>
+#include "pna.h"
 
 #define EBPF_MASK(t, w) ((((t)(1)) << (w)) - (t)1)
 #define BYTES(w) ((w) / 8)
@@ -46,6 +49,7 @@ struct headers_t {
     struct ethernet_t ethernet; /* ethernet_t */
     struct ipv6_t ipv6; /* ipv6_t */
 };
+
 struct hdr_md {
     struct headers_t cpumap_hdr;
     struct main_metadata_t cpumap_usermeta;

@@ -45,6 +45,9 @@ class Bmv2V1ModelProgramInfo : public ProgramInfo {
     /// @returns the table associated with the direct extern
     const IR::P4Table *getTableofDirectExtern(const IR::IDeclaration *directExternDecl) const;
 
+    /// @see ProgramInfo::getArchSpec
+    [[nodiscard]] const ArchSpec &getArchSpec() const override;
+
     /// @returns the programmable blocks of the program. Should be 6.
     [[nodiscard]] const ordered_map<cstring, const IR::Type_Declaration *> *getProgrammableBlocks()
         const;
@@ -74,6 +77,9 @@ class Bmv2V1ModelProgramInfo : public ProgramInfo {
     /// variable.
     static const IR::Member *getParserParamVar(const IR::P4Parser *parser, const IR::Type *type,
                                                size_t paramIndex, cstring paramLabel);
+
+    /// @see ProgramInfo::getArchSpec
+    static const ArchSpec ARCH_SPEC;
 };
 
 }  // namespace P4Tools::P4Testgen::Bmv2

@@ -49,10 +49,10 @@ Bmv2V1ModelProgramInfo::Bmv2V1ModelProgramInfo(
 
     // Just concatenate everything together.
     // Iterate through the (ordered) pipes of the target architecture.
-    const auto *archSpec = TestgenTarget::getArchSpec();
-    BUG_CHECK(archSpec->getArchVectorSize() == programmableBlocks.size(),
+    const auto &archSpec = getArchSpec();
+    BUG_CHECK(archSpec.getArchVectorSize() == programmableBlocks.size(),
               "The BMV2 architecture requires %1% pipes (provided %2% pipes).",
-              archSpec->getArchVectorSize(), programmableBlocks.size());
+              archSpec.getArchVectorSize(), programmableBlocks.size());
 
     /// Compute the series of nodes corresponding to the in-order execution of top-level
     /// pipeline-component instantiations. For a standard v1model, this produces
@@ -112,6 +112,8 @@ const IR::P4Table *Bmv2V1ModelProgramInfo::getTableofDirectExtern(
     return it->second;
 }
 
+const ArchSpec &Bmv2V1ModelProgramInfo::getArchSpec() const { return ARCH_SPEC; }
+
 const ordered_map<cstring, const IR::Type_Declaration *>
     *Bmv2V1ModelProgramInfo::getProgrammableBlocks() const {
     return &programmableBlocks;
@@ -123,8 +125,6 @@ int Bmv2V1ModelProgramInfo::getGress(const IR::Type_Declaration *decl) const {
 
 std::vector<Continuation::Command> Bmv2V1ModelProgramInfo::processDeclaration(
     const IR::Type_Declaration *typeDecl, size_t blockIdx) const {
-    // Get the architecture specification for this target.
-    const auto *archSpec = TestgenTarget::getArchSpec();
     const auto &options = TestgenOptions::get();
     // Collect parameters.
     const auto *applyBlock = typeDecl->to<IR::IApply>();
@@ -133,7 +133,7 @@ std::vector<Continuation::Command> Bmv2V1ModelProgramInfo::processDeclaration(
                               typeDecl->node_type_name());
     }
     // Retrieve the current canonical pipe in the architecture spec using the pipe index.
-    const auto *archMember = archSpec->getArchMember(blockIdx);
+    const auto *archMember = getArchSpec().getArchMember(blockIdx);
 
     std::vector<Continuation::Command> cmds;
     // Copy-in.
@@ -238,9 +238,9 @@ const IR::PathExpression *Bmv2V1ModelProgramInfo::getBlockParam(cstring blockLab
         paramType = resolveProgramType(program, tn);
     }
 
-    const auto *archSpec = TestgenTarget::getArchSpec();
-    auto archIndex = archSpec->getBlockIndex(blockLabel);
-    auto archRef = archSpec->getParamName(archIndex, paramIndex);
+    const auto &archSpec = getArchSpec();
+    auto archIndex = archSpec.getBlockIndex(blockLabel);
+    auto archRef = archSpec.getParamName(archIndex, paramIndex);
     return new IR::PathExpression(paramType, new IR::Path(archRef));
 }
 
@@ -255,10 +255,32 @@ const IR::Member *Bmv2V1ModelProgramInfo::getParserParamVar(const IR::P4Parser *
         const auto *paramString = parser->getApplyParameters()->parameters.at(paramIndex);
         structLabel = paramString->name;
     } else {
-        const auto *archSpec = TestgenTarget::getArchSpec();
-        structLabel = archSpec->getParamName("Parser", paramIndex);
+        structLabel = ARCH_SPEC.getParamName("Parser", paramIndex);
     }
     return new IR::Member(type, new IR::PathExpression(structLabel), paramLabel);
 }
+
+const ArchSpec Bmv2V1ModelProgramInfo::ARCH_SPEC =
+    ArchSpec("V1Switch", {// parser Parser<H, M>(packet_in b,
+                          //                     out H parsedHdr,
+                          //                     inout M meta,
+                          //                     inout standard_metadata_t standard_metadata);
+                          {"Parser", {nullptr, "*hdr", "*meta", "*standard_metadata"}},
+                          // control VerifyChecksum<H, M>(inout H hdr,
+                          //                              inout M meta);
+                          {"VerifyChecksum", {"*hdr", "*meta"}},
+                          // control Ingress<H, M>(inout H hdr,
+                          //                       inout M meta,
+                          //                       inout standard_metadata_t standard_metadata);
+                          {"Ingress", {"*hdr", "*meta", "*standard_metadata"}},
+                          // control Egress<H, M>(inout H hdr,
+                          //            inout M meta,
+                          //            inout standard_metadata_t standard_metadata);
+                          {"Egress", {"*hdr", "*meta", "*standard_metadata"}},
+                          // control ComputeChecksum<H, M>(inout H hdr,
+                          //                       inout M meta);
+                          {"ComputeChecksum", {"*hdr", "*meta"}},
+                          // control Deparser<H>(packet_out b, in H hdr);
+                          {"Deparser", {nullptr, "*hdr"}}});
 
 }  // namespace P4Tools::P4Testgen::Bmv2

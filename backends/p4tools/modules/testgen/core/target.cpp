@@ -47,8 +47,6 @@ const ProgramInfo *TestgenTarget::initProgram(const IR::P4Program *program) {
     return get().initProgramImpl(program);
 }
 
-const ArchSpec *TestgenTarget::getArchSpec() { return get().getArchSpecImpl(); }
-
 ExprStepper *TestgenTarget::getExprStepper(ExecutionState &state, AbstractSolver &solver,
                                            const ProgramInfo &programInfo) {
     return get().getExprStepperImpl(state, solver, programInfo);

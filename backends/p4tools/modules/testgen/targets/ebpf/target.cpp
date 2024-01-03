@@ -51,7 +51,7 @@ const EBPFProgramInfo *EBPFTestgenTarget::initProgramImpl(
     ordered_map<cstring, const IR::Type_Declaration *> programmableBlocks;
     for (size_t idx = 0; idx < blocks.size(); ++idx) {
         const auto *declType = blocks.at(idx);
-        auto canonicalName = archSpec.getArchMember(idx)->blockName;
+        auto canonicalName = EBPFProgramInfo::ARCH_SPEC.getArchMember(idx)->blockName;
         programmableBlocks.emplace(canonicalName, declType);
     }
 
@@ -83,13 +83,5 @@ EBPFExprStepper *EBPFTestgenTarget::getExprStepperImpl(ExecutionState &state,
                                                        const ProgramInfo &programInfo) const {
     return new EBPFExprStepper(state, solver, programInfo);
 }
-
-const ArchSpec EBPFTestgenTarget::archSpec =
-    ArchSpec("ebpfFilter", {// parser parse<H>(packet_in packet, out H headers);
-                            {"parse", {nullptr, "*hdr"}},
-                            // control filter<H>(inout H headers, out bool accept);
-                            {"filter", {"*hdr", "*accept"}}});
-
-const ArchSpec *EBPFTestgenTarget::getArchSpecImpl() const { return &archSpec; }
 
 }  // namespace P4Tools::P4Testgen::EBPF

@@ -50,7 +50,7 @@ const PnaDpdkProgramInfo *PnaDpdkTestgenTarget::initProgramImpl(
     for (size_t idx = 0; idx < blocks.size(); ++idx) {
         const auto *declType = blocks.at(idx);
 
-        auto canonicalName = getArchSpec()->getArchMember(idx)->blockName;
+        auto canonicalName = PnaDpdkProgramInfo::ARCH_SPEC.getArchMember(idx)->blockName;
         programmableBlocks.emplace(canonicalName, declType);
     }
 
@@ -74,37 +74,5 @@ PnaDpdkExprStepper *PnaDpdkTestgenTarget::getExprStepperImpl(ExecutionState &sta
                                                              const ProgramInfo &programInfo) const {
     return new PnaDpdkExprStepper(state, solver, programInfo);
 }
-
-const ArchSpec PnaDpdkTestgenTarget::ARCH_SPEC = ArchSpec(
-    "PNA_NIC", {
-                   // parser MainParserT<MH, MM>(
-                   //     packet_in pkt,
-                   //     //in    PM pre_user_meta,
-                   //     out   MH main_hdr,
-                   //     inout MM main_user_meta,
-                   //     in    pna_main_parser_input_metadata_t istd);
-                   {"MainParserT", {nullptr, "*main_hdr", "*main_user_meta", "*parser_istd"}},
-                   // control PreControlT<PH, PM>(
-                   //     in    PH pre_hdr,
-                   //     inout PM pre_user_meta,
-                   //     in    pna_pre_input_metadata_t  istd,
-                   //     inout pna_pre_output_metadata_t ostd);
-                   {"PreControlT", {"*main_hdr", "*main_user_meta", "*pre_istd", "*pre_ostd"}},
-                   // control MainControlT<MH, MM>(
-                   //     //in    PM pre_user_meta,
-                   //     inout MH main_hdr,
-                   //     inout MM main_user_meta,
-                   //     in    pna_main_input_metadata_t  istd,
-                   //     inout pna_main_output_metadata_t ostd);
-                   {"MainControlT", {"*main_hdr", "*main_user_meta", "*main_istd", "*ostd"}},
-                   // control MainDeparserT<MH, MM>(
-                   //     packet_out pkt,
-                   //     in    MH main_hdr,
-                   //     in    MM main_user_meta,
-                   //     in    pna_main_output_metadata_t ostd);
-                   {"MainDeparserT", {nullptr, "*main_hdr", "*main_user_meta", "*ostd"}},
-               });
-
-const ArchSpec *PnaDpdkTestgenTarget::getArchSpecImpl() const { return &ARCH_SPEC; }
 
 }  // namespace P4Tools::P4Testgen::Pna
