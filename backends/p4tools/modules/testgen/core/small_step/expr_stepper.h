@@ -103,7 +103,8 @@ class ExprStepper : public AbstractStepper {
                                               const IR::Vector<IR::Argument> *args,
                                               const ExecutionState &state);
 
-    /// Evaluates a call to an action. This usually only happens when a table is invoked.
+    /// Evaluates a call to an action. This usually only happens when a table is invoked or when
+    /// action is directly invoked from a control.
     /// In other cases, actions should be inlined. When the action call is evaluated, we use
     /// symbolic variables to pass arguments across execution boundaries. These variables persist
     /// until the end of program execution.
