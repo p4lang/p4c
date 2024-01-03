@@ -73,6 +73,11 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t s) {
         }
     }
 
+    action free_a0() { /* empty */ }
+    action free_a1() { /* empty */ }
+    action free_nested() { /* empty */ }
+    action free_a2() { h.h.a = h.h.a + 11; free_nested(); }
+
     apply {
         if (h.h.isValid()) {
             // check action coverage tracking on default actions
@@ -81,6 +86,14 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t s) {
             t1.apply();
             // check action coverage tracking on const entries
             t2.apply();
+            // check action coverage on freestanding actions
+            if (h.h.a > 8) {
+                free_a0();
+            } else if (h.h.b > 8) {
+                free_a1();
+            } else {
+                free_a2();
+            }
         }
     }
 }
