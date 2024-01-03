@@ -51,8 +51,8 @@ set (P4RUNTIME_GEN_PYTHON "control-plane")
 add_custom_target (mkP4configdir
   ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/p4/config)
 add_custom_command(OUTPUT ${P4RUNTIME_GEN_SRCS} ${P4RUNTIME_GEN_HDRS}
-  COMMAND ${PROTOBUF_PROTOC_EXECUTABLE}
-          -I ${P4RUNTIME_STD_DIR} -I${CMAKE_CURRENT_SOURCE_DIR}
+  COMMAND ${Protobuf_PROTOC_EXECUTABLE}
+          -I${P4RUNTIME_STD_DIR} -I${CMAKE_CURRENT_SOURCE_DIR} -I${Protobuf_INCLUDE_DIR}
           --cpp_out ${CMAKE_CURRENT_BINARY_DIR}
           --python_out ${CMAKE_CURRENT_BINARY_DIR}
           --experimental_allow_proto3_optional
@@ -96,7 +96,7 @@ add_library(controlplane-gen OBJECT ${P4RUNTIME_GEN_SRCS})
 target_include_directories(controlplane-gen
   SYSTEM BEFORE PUBLIC ${Protobuf_INCLUDE_DIR}
 )
-target_link_libraries (controlplane-gen PUBLIC ${PROTOBUF_LIBRARY})
+target_link_libraries (controlplane-gen PUBLIC ${Protobuf_LIBRARY})
 # Needed for the correct import of google/status.pb.cc
 target_include_directories(
   controlplane-gen PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}
