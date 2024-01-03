@@ -28,7 +28,7 @@
             {
               "id" : 1,
               "name" : "addr6",
-              "type" : "bit",
+              "type" : "bit128",
               "bitwidth" : 128
             }
           ],

@@ -35,7 +35,7 @@
             {
               "id" : 1,
               "name" : "vport",
-              "type" : "bit",
+              "type" : "bit32",
               "bitwidth" : 32
             }
           ],
@@ -92,7 +92,7 @@
             {
               "id" : 1,
               "name" : "vport",
-              "type" : "bit",
+              "type" : "bit32",
               "bitwidth" : 32
             }
           ],
