@@ -283,7 +283,7 @@ TestgenOptions::TestgenOptions()
         },
         "Specifies, which IR nodes to track for coverage in the targeted P4 program. Multiple "
         "options are possible: Currently supported: STATEMENTS, TABLE_ENTRIES (table rules encoded "
-        "in the table entries in P4), ACTIONS (actions invoked by tables). "
+        "in the table entries in P4), ACTIONS (actions invoked, directly or by tables). "
         "Defaults to no coverage.");
 
     registerOption(

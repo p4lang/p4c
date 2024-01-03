@@ -249,7 +249,6 @@ void TableStepper::setTableDefaultEntries(
 
         auto &nextState = stepper->state.clone();
 
-        nextState.markVisited(actionType);
         // We get the control plane name of the action we are calling.
         cstring actionName = actionType->controlPlaneName();
         // Synthesize arguments for the call based on the action parameters.
@@ -321,7 +320,6 @@ void TableStepper::evalTableControlEntries(
         // Try to find the action declaration corresponding to the path reference in the table.
         const auto *actionType = stepper->state.getP4Action(tableAction);
 
-        nextState.markVisited(actionType);
         // We get the control plane name of the action we are calling.
         cstring actionName = actionType->controlPlaneName();
         // Synthesize arguments for the call based on the action parameters.
@@ -511,7 +509,6 @@ void TableStepper::addDefaultAction(std::optional<const IR::Expression *> tableM
     std::stringstream tableStream;
     tableStream << "Table Branch: " << properties.tableName;
     tableStream << " Choosing default action: " << actionPath;
-    nextState.markVisited(actionType);
     nextState.add(*new TraceEvents::Generic(tableStream.str()));
     replacements.emplace_back(new IR::MethodCallStatement(Util::SourceInfo(), tableAction));
     // Some path selection strategies depend on looking ahead and collecting potential
