@@ -271,6 +271,45 @@ void ConvertToBackendIR::postorder(const IR::P4Action *action) {
     }
 }
 
+void ConvertToBackendIR::updateConstEntries(const IR::P4Table *t, IR::TCTable *tabledef) {
+    // Check if there are const entries.
+    auto entriesList = t->getEntries();
+    if (entriesList == nullptr) return;
+    auto keys = t->getKey();
+    for (auto e : entriesList->entries) {
+        if (keys == nullptr) {
+            return;
+        }
+        auto keyset = e->getKeys();
+        if (keyset->components.size() != keys->keyElements.size()) {
+            ::error("No of keys in const_entries should be same as no of keys in the table.");
+            return;
+        }
+        ordered_map<cstring, cstring> keyList;
+        for (size_t itr = 0; itr < keyset->components.size(); itr++) {
+            auto keyElement = keys->keyElements.at(itr);
+            auto keyString = keyElement->expression->toString();
+            auto annotations = keyElement->getAnnotations();
+            if (annotations) {
+                if (auto anno = annotations->getSingle("name")) {
+                    keyString = anno->expr.at(0)->to<IR::StringLiteral>()->value;
+                }
+            }
+            auto keySetElement = keyset->components.at(itr);
+            // std::stringstream value;
+            // if(keySetElement->is<IR::Constant>()) {
+            //     value << keySetElement->to<IR::Constant>()->value;
+            // } else if (keySetElement->is<IR::BoolLiteral>()) {
+            //     value << keySetElement->to<IR::BoolLiteral>()->value ? 1 : 0;
+            // } else if (keySetElement->is<IR::DefaultExpression>()) {
+            //     value << 0;
+            // }
+            keyList.emplace(keyString, keySetElement->toString());
+        }
+        tabledef->addConstEntries(e->action->toString(), keyList);
+    }
+}
+
 void ConvertToBackendIR::updateDefaultMissAction(const IR::P4Table *t, IR::TCTable *tabledef) {
     auto defaultAction = t->getDefaultAction();
     if (defaultAction == nullptr || !defaultAction->is<IR::MethodCallExpression>()) return;
@@ -450,6 +489,7 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
         updateDefaultHitAction(t, tableDefinition);
         updateDefaultMissAction(t, tableDefinition);
         updateMatchType(t, tableDefinition);
+        updateConstEntries(t, tableDefinition);
         tcPipeline->addTableDefinition(tableDefinition);
     }
 }

@@ -73,6 +73,7 @@ class ConvertToBackendIR : public Inspector {
     bool isDuplicateOrNoAction(const IR::P4Action *action);
     void updateDefaultHitAction(const IR::P4Table *t, IR::TCTable *tdef);
     void updateDefaultMissAction(const IR::P4Table *t, IR::TCTable *tdef);
+    void updateConstEntries(const IR::P4Table *t, IR::TCTable *tdef);
     void updateMatchType(const IR::P4Table *t, IR::TCTable *tabledef);
     bool isPnaParserMeta(const IR::Member *mem);
     bool isPnaMainInputMeta(const IR::Member *mem);

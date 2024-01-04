@@ -167,6 +167,7 @@ class TCTable {
     TCAction defaultMissAction;
     bool isDefaultMissConst;
     ordered_map<TCAction, unsigned> actionList;
+    ordered_map<cstring, ordered_map<cstring, cstring>> const_entries;
     void setKeySize(unsigned k) {
         keySize = k;
     }
@@ -199,6 +200,9 @@ class TCTable {
     }
     void addAction(TCAction action, unsigned flag) {
         actionList.emplace(action, flag);
+    }
+    void addConstEntries(cstring action, ordered_map<cstring, cstring> keys) {
+        const_entries.emplace(action, keys);
     }
     cstring printMatchType(unsigned matchType) const {
         cstring matchTypeString = "";
@@ -287,6 +291,18 @@ class TCTable {
                 tcTable += " permissions 0x1024";
             }
             tcTable += " action " + defaultMissAction->getName();
+        }
+        if (const_entries.size() != 0) {
+            for (auto entry : const_entries) {
+                tcTable += "\n$TC p4template update table/" + pipelineName
+                      + "/" + controlName + "/" + tableName
+                      + " entry ";
+                for(auto k : entry.second) {
+                    tcTable += k.first + " " + k.second;
+                }
+                tcTable += " action " + pipelineName
+                      + "/" + controlName + "/" + entry.first;
+            }
         }
         return tcTable;
     }
