@@ -169,6 +169,10 @@ void ExecutionState::markVisited(const IR::Node *node) {
     if (node->is<IR::Entry>() && !coverageOptions.coverTableEntries) {
         return;
     }
+    // Do not add actions, if coverActions is not toggled.
+    if (node->is<IR::P4Action>() && !coverageOptions.coverActions) {
+        return;
+    }
     visitedNodes.emplace(node);
 }
 

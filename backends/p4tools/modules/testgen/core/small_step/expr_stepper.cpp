@@ -96,6 +96,7 @@ bool ExprStepper::preorder(const IR::ArrayIndex *arrIndex) {
 }
 
 void ExprStepper::evalActionCall(const IR::P4Action *action, const IR::MethodCallExpression *call) {
+    state.markVisited(action);
     const auto *actionNameSpace = action->to<IR::INamespace>();
     BUG_CHECK(actionNameSpace, "Does not instantiate an INamespace: %1%", actionNameSpace);
     // If the action has arguments, these are usually directionless control plane input.

@@ -48,6 +48,14 @@ bool CollectNodes::preorder(const IR::ExitStatement *stmt) {
     return true;
 }
 
+bool CollectNodes::preorder(const IR::P4Action *act) {
+    // Only track actions, which have a valid source position in the P4 program.
+    if (coverageOptions.coverActions && act->getSourceInfo().isValid()) {
+        coverableNodes.insert(act);
+    }
+    return true;
+}
+
 void printCoverageReport(const CoverageSet &all, const CoverageSet &visited) {
     if (all.empty()) {
         return;
