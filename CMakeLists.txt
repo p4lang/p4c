@@ -121,6 +121,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # Set the required options for a (mostly) static release build.
 if(BUILD_STATIC_RELEASE_SANS_GLIBC)
   message(STATUS "Building static release binaries")
+  message(WARNING "glibc is linked dynamically in current static builds.")
   set(BUILD_SHARED_LIBS OFF)
   set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
   # Link Boost statically

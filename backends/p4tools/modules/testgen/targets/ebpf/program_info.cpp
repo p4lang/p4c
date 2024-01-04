@@ -38,10 +38,10 @@ EBPFProgramInfo::EBPFProgramInfo(const IR::P4Program *program,
 
     // Just concatenate everything together.
     // Iterate through the (ordered) pipes of the target architecture.
-    const auto *archSpec = TestgenTarget::getArchSpec();
-    BUG_CHECK(archSpec->getArchVectorSize() == programmableBlocks.size(),
+    const auto &archSpec = getArchSpec();
+    BUG_CHECK(archSpec.getArchVectorSize() == programmableBlocks.size(),
               "The eBPF architecture requires %1% pipes (provided %2% pipes).",
-              archSpec->getArchVectorSize(), programmableBlocks.size());
+              archSpec.getArchVectorSize(), programmableBlocks.size());
 
     /// Compute the series of nodes corresponding to the in-order execution of top-level
     /// pipeline-component instantiations. For a standard ebpf_model, this produces
@@ -62,6 +62,8 @@ EBPFProgramInfo::EBPFProgramInfo(const IR::P4Program *program,
                     IR::getConstant(&PacketVars::PACKET_SIZE_VAR_TYPE, 0));
 }
 
+const ArchSpec &EBPFProgramInfo::getArchSpec() const { return ARCH_SPEC; }
+
 const ordered_map<cstring, const IR::Type_Declaration *> *EBPFProgramInfo::getProgrammableBlocks()
     const {
     return &programmableBlocks;
@@ -69,9 +71,6 @@ const ordered_map<cstring, const IR::Type_Declaration *> *EBPFProgramInfo::getPr
 
 std::vector<Continuation::Command> EBPFProgramInfo::processDeclaration(
     const IR::Type_Declaration *typeDecl, size_t blockIdx) const {
-    // Get the architecture specification for this target.
-    const auto *archSpec = TestgenTarget::getArchSpec();
-
     // Collect parameters.
     const auto *applyBlock = typeDecl->to<IR::IApply>();
     if (applyBlock == nullptr) {
@@ -79,7 +78,7 @@ std::vector<Continuation::Command> EBPFProgramInfo::processDeclaration(
                               typeDecl->node_type_name());
     }
     // Retrieve the current canonical pipe in the architecture spec using the pipe index.
-    const auto *archMember = archSpec->getArchMember(blockIdx);
+    const auto *archMember = getArchSpec().getArchMember(blockIdx);
 
     std::vector<Continuation::Command> cmds;
 
@@ -124,5 +123,11 @@ const IR::Expression *EBPFProgramInfo::dropIsActive() const {
 }
 
 const IR::Type_Bits *EBPFProgramInfo::getParserErrorType() const { return &PARSER_ERR_BITS; }
+
+const ArchSpec EBPFProgramInfo::ARCH_SPEC =
+    ArchSpec("ebpfFilter", {// parser parse<H>(packet_in packet, out H headers);
+                            {"parse", {nullptr, "*hdr"}},
+                            // control filter<H>(inout H headers, out bool accept);
+                            {"filter", {"*hdr", "*accept"}}});
 
 }  // namespace P4Tools::P4Testgen::EBPF

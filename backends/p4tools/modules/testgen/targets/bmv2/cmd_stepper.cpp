@@ -63,8 +63,7 @@ void Bmv2V1ModelCmdStepper::initializeTargetEnvironment(ExecutionState &nextStat
     // error parser_error;
     // bit<3> priority;
 
-    auto programInfo = getProgramInfo();
-    const auto *archSpec = TestgenTarget::getArchSpec();
+    const auto &programInfo = getProgramInfo();
     const auto &target = TestgenTarget::get();
     const auto *programmableBlocks = programInfo.getProgrammableBlocks();
 
@@ -73,7 +72,7 @@ void Bmv2V1ModelCmdStepper::initializeTargetEnvironment(ExecutionState &nextStat
     size_t blockIdx = 0;
     for (const auto &blockTuple : *programmableBlocks) {
         const auto *typeDecl = blockTuple.second;
-        const auto *archMember = archSpec->getArchMember(blockIdx);
+        const auto *archMember = programInfo.getArchSpec().getArchMember(blockIdx);
         nextState.initializeBlockParams(target, typeDecl, &archMember->blockParams);
         blockIdx++;
     }

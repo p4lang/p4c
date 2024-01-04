@@ -38,12 +38,8 @@ class Bmv2V1ModelTestgenTarget : public TestgenTarget {
     Bmv2V1ModelExprStepper *getExprStepperImpl(ExecutionState &state, AbstractSolver &solver,
                                                const ProgramInfo &programInfo) const override;
 
-    [[nodiscard]] const ArchSpec *getArchSpecImpl() const override;
-
  private:
     Bmv2V1ModelTestgenTarget();
-
-    static const ArchSpec ARCH_SPEC;
 };
 
 }  // namespace P4Tools::P4Testgen::Bmv2

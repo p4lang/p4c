@@ -38,12 +38,8 @@ class EBPFTestgenTarget : public TestgenTarget {
     EBPFExprStepper *getExprStepperImpl(ExecutionState &state, AbstractSolver &solver,
                                         const ProgramInfo &programInfo) const override;
 
-    const ArchSpec *getArchSpecImpl() const override;
-
  private:
     EBPFTestgenTarget();
-
-    static const ArchSpec archSpec;
 };
 
 }  // namespace P4Tools::P4Testgen::EBPF
