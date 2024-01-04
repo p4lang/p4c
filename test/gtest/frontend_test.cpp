@@ -2,6 +2,7 @@
 #include "frontends/common/parseInput.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "gtest/gtest.h"
 #include "helpers.h"
@@ -166,6 +167,37 @@ TEST_F(P4CFrontendEnumValidation, InvalidType) {
     ASSERT_EQ(::errorCount(), 1);
     ASSERT_TRUE(errors.contains("Illegal type for enum;"));
     ASSERT_TRUE(errors.contains("type-declared types"));
+}
+
+// Tests for MoveInitializers
+struct P4CFrontendMoveInitializers : P4CFrontend {
+    P4CFrontendMoveInitializers() {
+        addPasses({new P4::ResolveReferences(&refMap), new P4::MoveInitializers(&refMap)});
+    }
+
+    P4::ReferenceMap refMap;
+};
+
+TEST_F(P4CFrontendMoveInitializers, P4ControlSrcInfo) {
+    std::string program = P4_SOURCE(R"(
+        control m() {
+            bool blah = false;
+            apply{}
+        }
+    )");
+    const auto *prog = parseAndProcess(program);
+    ASSERT_TRUE(prog);
+    ASSERT_EQ(::errorCount(), 0);
+
+    // The P4Control->body should have a valid srcInfo if the information
+    // is correctly maintained by MoveInitializers.
+    const auto *p4prog = prog->to<IR::P4Program>();
+    ASSERT_TRUE(p4prog);
+    for (const auto *node : p4prog->objects) {
+        if (const auto *control = node->to<IR::P4Control>()) {
+            ASSERT_TRUE(control->body->srcInfo.isValid());
+        }
+    }
 }
 
 }  // namespace Test
