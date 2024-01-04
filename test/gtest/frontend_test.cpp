@@ -172,8 +172,7 @@ TEST_F(P4CFrontendEnumValidation, InvalidType) {
 // Tests for MoveInitializers
 struct P4CFrontendMoveInitializers : P4CFrontend {
     P4CFrontendMoveInitializers() {
-        addPasses({new P4::ResolveReferences(&refMap),
-                   new P4::MoveInitializers(&refMap)});
+        addPasses({new P4::ResolveReferences(&refMap), new P4::MoveInitializers(&refMap)});
     }
 
     P4::ReferenceMap refMap;
@@ -194,14 +193,13 @@ TEST_F(P4CFrontendMoveInitializers, P4ControlSrcInfo) {
 
     // The P4Control->body should have a valid srcInfo if the information
     // is correctly maintained by MoveInitializers.
-    const auto* p4prog = prog->to<IR::P4Program>();
+    const auto *p4prog = prog->to<IR::P4Program>();
     ASSERT_TRUE(p4prog);
-    for (const auto* node : p4prog->objects) {
-        if (const auto* control = node->to<IR::P4Control>()) {
+    for (const auto *node : p4prog->objects) {
+        if (const auto *control = node->to<IR::P4Control>()) {
             ASSERT_TRUE(control->body->srcInfo.isValid());
         }
     }
 }
-
 
 }  // namespace Test
