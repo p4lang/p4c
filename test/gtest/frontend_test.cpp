@@ -185,9 +185,7 @@ TEST_F(P4CFrontendMoveInitializers, P4ControlSrcInfo) {
             apply{}
         }
     )");
-    RedirectStderr errors;
     const auto *prog = parseAndProcess(program);
-    errors.dumpAndReset();
     ASSERT_TRUE(prog);
     ASSERT_EQ(::errorCount(), 0);
 
