@@ -8,7 +8,6 @@
 #include <boost/container/vector.hpp>
 
 #include "backends/p4tools/common/lib/model.h"
-#include "frontends/p4/optimizeExpressions.h"
 #include "ir/indexed_vector.h"
 #include "ir/vector.h"
 #include "ir/visitor.h"
@@ -27,33 +26,7 @@ const IR::Expression *SymbolicEnv::get(const IR::StateVariable &var) const {
 
 bool SymbolicEnv::exists(const IR::StateVariable &var) const { return map.find(var) != map.end(); }
 
-/// Compare types, considering Extracted_Varbit and bits equal if the (real/extracted) sizes are
-/// equal. This is because the packet expression can be something like 0 ++
-/// (Extracted_Varbit<N>)pkt_var. This expression is typed as bit<N>, but the optimizer removes the
-/// 0 ++ and makes it into Extracted_Varbit type.
-/// TODO: Maybe we can just get rid of Extracted_Varbit and use bit it its place everywhere.
-static bool typeEquivSansVarbit(const IR::Type *a, const IR::Type *b) {
-    if (a->equiv(*b)) {
-        return true;
-    }
-    const auto *abit = a->to<IR::Type_Bits>();
-    const auto *avar = a->to<IR::Extracted_Varbits>();
-    const auto *bbit = b->to<IR::Type_Bits>();
-    const auto *bvar = b->to<IR::Extracted_Varbits>();
-    return (abit && bvar && abit->width_bits() == bvar->width_bits()) ||
-           (avar && bbit && avar->width_bits() == bbit->width_bits());
-}
-
 void SymbolicEnv::set(const IR::StateVariable &var, const IR::Expression *value) {
-    const auto *type = value->type;
-    BUG_CHECK(type && !type->is<IR::Type_Unknown>(), "Cannot set value with unspecified type: %1%",
-              value);
-    value = P4::optimizeExpression(value);
-    BUG_CHECK(value->type && !value->type->is<IR::Type_Unknown>(),
-              "The P4 expression optimizer stripped a type of %1% (was %2%)", value, type);
-    BUG_CHECK(typeEquivSansVarbit(type, value->type),
-              "The P4 expression optimizer had changed type of %1% (%2% -> %3%)", value, type,
-              value->type);
     map[var] = value;
 }
 
