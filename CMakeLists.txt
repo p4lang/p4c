@@ -42,12 +42,19 @@ OPTION (ENABLE_P4C_GRAPHS "Build the p4c-graphs backend" ON)
 OPTION (ENABLE_PROTOBUF_STATIC "Link against Protobuf statically" ON)
 OPTION (ENABLE_GC "Use libgc" ON)
 OPTION (ENABLE_MULTITHREAD "Use multithreading" OFF)
-OPTION (ENABLE_LTO "Enable Link Time Optimization (LTO)" OFF)
 OPTION (ENABLE_WERROR "Treat warnings as errors" OFF)
 OPTION (ENABLE_SANITIZERS "Enable sanitizers" OFF)
-option(BUILD_STATIC_RELEASE_SANS_GLIBC
+OPTION (BUILD_STATIC_RELEASE_SANS_GLIBC
        "Build a (mostly) statically linked release binary. Glibc is linked dynamically." OFF
 )
+if (BUILD_STATIC_RELEASE_SANS_GLIBC)
+    # We want to optimize the binary size for a static release binary by default.
+    set (_ENABLE_LTO_DEFAULT ON)
+else()
+    set (_ENABLE_LTO_DEFAULT OFF)
+endif()
+OPTION (ENABLE_LTO "Enable Link Time Optimization (LTO)" ${_ENABLE_LTO_DEFAULT})
+
 OPTION (BUILD_AUTO_VAR_INIT_PATTERN "Initialize variables with pattern during build" OFF)
 OPTION (ENABLE_IWYU "Enable checking includes with IWYU" OFF)
 # Support a legacy option. TODO: Remove?
@@ -282,19 +289,15 @@ if (ENABLE_LTO AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     message(WARNING "LLD does not work with GCC's LTO object format, switching to Gold.")
     set(BUILD_LINK_WITH_LLD OFF)
   endif ()
-  add_cxx_compiler_option  ("-flto")
+  if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 8.0)
+    message(WARNING "GCC < 8.0 does not support LTO, disabling LTO")
+    set(ENABLE_LTO OFF)
+  else()
+    add_cxx_compiler_option("-flto")
+  endif()
 endif ()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    # We want to optimize the binary size for a static release binary.
-    # This only works with modern versions of GCC.
-    if (BUILD_STATIC_RELEASE_SANS_GLIBC AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)
-        if (BUILD_LINK_WITH_LLD)
-          message(WARNING "LLD does not work with GCC's LTO object format, switching to Gold.")
-          set(BUILD_LINK_WITH_LLD OFF)
-        endif ()
-        add_cxx_compiler_option ("-flto")
-    endif ()
     set(_LD_USED "default system")
     set(_LD_OPT_USED "")
     macro(check_linker BUILD_LINK_WITH_VAR LINKER_OPT LINKER_NAME)
