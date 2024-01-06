@@ -11,6 +11,7 @@ macro(p4c_obtain_protobuf)
       set(SAVED_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
       set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
     endif()
+    set(protobuf_MODULE_COMPATIBLE TRUE)
     find_package(Protobuf CONFIG)
     if(NOT Protobuf_FOUND)
       find_package(Protobuf REQUIRED)
@@ -24,6 +25,10 @@ macro(p4c_obtain_protobuf)
     if(ENABLE_PROTOBUF_STATIC)
       set(CMAKE_FIND_LIBRARY_SUFFIXES ${SAVED_CMAKE_FIND_LIBRARY_SUFFIXES})
     endif()
+    # While Protobuf_LIBRARY is already defined by find_package(Protobuf) because we set protobuf_MODULE_COMPATIBLE,
+    # it only contains the path to the protobuf shared object, not libraries Protobuf depends on, such as abseil for Protobuf >= 22.
+    # See https://github.com/p4lang/p4c/issues/4316
+    set(Protobuf_LIBRARY "protobuf::libprotobuf")
   else()
     # Google introduced another breaking change with protobuf 22.x by adding abseil as a new
     # dependency. https://protobuf.dev/news/2022-08-03/#abseil-dep We do not want abseil, so we stay
