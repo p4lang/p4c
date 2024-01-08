@@ -27,6 +27,8 @@ const IR::Expression *SymbolicEnv::get(const IR::StateVariable &var) const {
 bool SymbolicEnv::exists(const IR::StateVariable &var) const { return map.find(var) != map.end(); }
 
 void SymbolicEnv::set(const IR::StateVariable &var, const IR::Expression *value) {
+    BUG_CHECK(value->type && !value->type->is<IR::Type_Unknown>(),
+              "Cannot set value with unspecified type: %1%", value);
     map[var] = value;
 }
 
