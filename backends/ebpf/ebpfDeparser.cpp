@@ -288,9 +288,6 @@ void DeparserHdrEmitTranslator::emitField(CodeBuilder *builder, cstring field,
         }
         alignment = (alignment + bitsToWrite) % 8;
     }
-    builder->emitIndent();
-    builder->appendFormat("%s += %d", program->offsetVar.c_str(), widthToEmit);
-    builder->endOfStatement(true);
     builder->newline();
 }
 
@@ -383,10 +380,6 @@ void EBPFDeparser::emit(CodeBuilder *builder) {
     builder->appendFormat("%s = %s;", program->packetEndVar,
                           builder->target->dataEnd(program->model.CPacketName.str()));
     builder->newline();
-
-    builder->emitIndent();
-    builder->appendFormat("%s = 0", program->offsetVar.c_str());
-    builder->endOfStatement(true);
 
     // emit headers
     auto hdrEmitTranslator = new DeparserHdrEmitTranslator(this);

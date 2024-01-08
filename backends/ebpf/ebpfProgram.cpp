@@ -231,6 +231,7 @@ void EBPFProgram::emitCommonPreamble(CodeBuilder *builder) {
         "#define write_byte(base, offset, v) do { "
         "*(u8*)((base) + (offset)) = (v); "
         "} while (0)");
+    builder->appendLine("#define PTR_DIFF_BYTES(b, o) (ssize_t)((u8*)(b) - (u8*)(o))");
 }
 
 void EBPFProgram::emitPreamble(CodeBuilder *builder) {
@@ -254,11 +255,6 @@ void EBPFProgram::emitPreamble(CodeBuilder *builder) {
 }
 
 void EBPFProgram::emitLocalVariables(CodeBuilder *builder) {
-    builder->emitIndent();
-    builder->appendFormat("unsigned %s = 0;", offsetVar.c_str());
-    builder->appendFormat("unsigned %s_save = 0;", offsetVar.c_str());
-    builder->newline();
-
     builder->emitIndent();
     builder->appendFormat("enum %s %s = %s;", errorEnum.c_str(), errorVar.c_str(),
                           P4::P4CoreLibrary::instance().noError.str());

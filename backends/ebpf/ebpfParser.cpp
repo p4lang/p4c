@@ -70,11 +70,6 @@ void StateTranslationVisitor::compileAdvance(const P4::ExternMethod *extMethod) 
     }
 
     builder->emitIndent();
-    builder->appendFormat("%s += ", state->parser->program->offsetVar.c_str());
-    visit(argExpr);
-    builder->endOfStatement(true);
-
-    builder->emitIndent();
     builder->appendFormat("%s += BYTES(", state->parser->program->headerStartVar.c_str());
     visit(argExpr);
     builder->append(")");
@@ -163,9 +158,8 @@ bool StateTranslationVisitor::preorder(const IR::ParserState *parserState) {
 
     cstring msgStr =
         Util::printf_format("Parser: state %s (curr_offset=%%d)", parserState->name.name);
-    cstring offsetStr =
-        Util::printf_format("%s - (u8*)%s", state->parser->program->headerStartVar,
-                            state->parser->program->packetStartVar);
+    cstring offsetStr = Util::printf_format("%s - (u8*)%s", state->parser->program->headerStartVar,
+                                            state->parser->program->packetStartVar);
     builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, offsetStr.c_str());
 
     visit(parserState->components, "components");
@@ -383,10 +377,6 @@ void StateTranslationVisitor::compileExtractField(const IR::Expression *expr,
             builder->endOfStatement(true);
         }
     }
-
-    builder->emitIndent();
-    builder->appendFormat("%s += %d", program->offsetVar.c_str(), widthToExtract);
-    builder->endOfStatement(true);
 
     // eBPF can pass 64 bits of data as one argument passed in 64 bit register,
     // so value of the field is printed only when it fits into that register

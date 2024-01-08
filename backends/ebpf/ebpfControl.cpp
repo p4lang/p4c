@@ -212,10 +212,6 @@ void ControlBodyTranslator::compileEmitField(const IR::Expression *expr, cstring
         alignment = (alignment + bitsToWrite) % 8;
         bitsInCurrentByte = left >= 8 ? 8 : left;
     }
-
-    builder->emitIndent();
-    builder->appendFormat("%s += %d", program->offsetVar.c_str(), widthToEmit);
-    builder->endOfStatement(true);
 }
 
 void ControlBodyTranslator::compileEmit(const IR::Vector<IR::Argument> *args) {

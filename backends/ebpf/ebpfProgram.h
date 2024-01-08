@@ -74,6 +74,7 @@ class EBPFProgram : public EBPFObject {
           control(nullptr),
           model(EBPFModel::instance),
           deparser(nullptr) {
+        // NB: offsetVar not used in eBPF backend - uBPF and TC only
         offsetVar = EBPFModel::reserved("packetOffsetInBits");
         zeroKey = EBPFModel::reserved("zero");
         functionName = EBPFModel::reserved("filter");
