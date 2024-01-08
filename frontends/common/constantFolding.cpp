@@ -425,9 +425,9 @@ const IR::Node *DoConstantFolding::compare(const IR::Operation_Binary *e) {
                 auto ri = rlist->components.at(i);
                 const IR::Operation_Binary *tmp;
                 if (eqTest)
-                    tmp = new IR::Equ(li, ri);
+                    tmp = new IR::Equ(IR::Type_Boolean::get(), li, ri);
                 else
-                    tmp = new IR::Neq(li, ri);
+                    tmp = new IR::Neq(IR::Type_Boolean::get(), li, ri);
                 auto cmp = compare(tmp);
                 auto boolLit = cmp->to<IR::BoolLiteral>();
                 if (boolLit == nullptr) return e;
@@ -960,7 +960,8 @@ const IR::Node *DoConstantFolding::postorder(IR::SelectExpression *expression) {
             finished = true;
             if (someUnknown) {
                 if (!c->keyset->is<IR::DefaultExpression>()) changes = true;
-                auto newc = new IR::SelectCase(c->srcInfo, new IR::DefaultExpression(), c->state);
+                auto newc = new IR::SelectCase(
+                    c->srcInfo, new IR::DefaultExpression(expression->select->type), c->state);
                 cases.push_back(newc);
             } else {
                 // This is the result.

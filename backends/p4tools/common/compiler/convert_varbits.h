@@ -10,8 +10,8 @@
 
 namespace P4Tools {
 
-/// Converts all existing Type_Varbit types in the program into a custom Size_Type_Varbit type.
-/// Sized_Type_Varbit also contains information about the width that was assigned to the type by
+/// Converts all existing Type_Varbit types in the program into a custom Extracted_Varbit type.
+/// Extracted_Varbit also contains information about the width that was assigned to the type by
 /// the extract call.
 class ConvertVarbits : public Transform {
  public:

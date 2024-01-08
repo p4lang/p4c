@@ -149,7 +149,7 @@ const IR::Expression *TableStepper::computeHit(TableMatchMap *matches) {
 const IR::StringLiteral *TableStepper::getTableActionString(
     const IR::MethodCallExpression *actionCall) {
     cstring actionName = actionCall->method->toString();
-    return new IR::StringLiteral(actionName);
+    return new IR::StringLiteral(IR::Type_String::get(), actionName);
 }
 
 const IR::Expression *TableStepper::evalTableConstEntries() {
