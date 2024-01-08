@@ -48,7 +48,7 @@ def parse_args():
         "-bd",
         "--buildir",
         dest="builddir",
-        help="The path to the compiler build directory, default is \"build\".",
+        help="The path to the compiler build directory, default is current directory.",
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="verbose operation")
     parser.add_argument(
@@ -346,11 +346,11 @@ if __name__ == "__main__":
     options.p4filename = check_if_file(args.p4filename).as_posix()
     options.compilerSrcDir = check_if_dir(args.rootdir).as_posix()
 
-    # If no build directory is provided, append build to the compiler src dir.
+    # If no build directory is provided, use current working directory
     if args.builddir:
         options.compilerBuildDir = args.builddir
     else:
-        options.compilerBuildDir = options.compilerSrcDir + "/build"
+        options.compilerBuildDir = "."
     options.verbose = args.verbose
     options.replace = args.replace
     options.cleanupTmp = args.nocleanup
