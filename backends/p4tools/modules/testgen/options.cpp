@@ -181,10 +181,10 @@ TestgenOptions::TestgenOptions()
             selectedBranches = arg;
             // These options are mutually exclusive.
             if (trackBranches) {
-                std::cerr << "--input-branches and --track-branches are mutually exclusive. Choose "
-                             "one or the other."
-                          << std::endl;
-                exit(1);
+                ::error(
+                    "--input-branches and --track-branches are mutually exclusive. Choose "
+                    "one or the other.");
+                return false;
             }
             return true;
         },
@@ -196,10 +196,10 @@ TestgenOptions::TestgenOptions()
             trackBranches = true;
             // These options are mutually exclusive.
             if (!selectedBranches.empty()) {
-                std::cerr << "--input-branches and --track-branches are mutually exclusive. Choose "
-                             "one or the other."
-                          << std::endl;
-                exit(1);
+                ::error(
+                    "--input-branches and --track-branches are mutually exclusive. Choose "
+                    "one or the other.");
+                return false;
             }
             return true;
         },
@@ -207,14 +207,14 @@ TestgenOptions::TestgenOptions()
         "used for deterministic replay.");
 
     registerOption(
-        "--with-output-packet", nullptr,
+        "--output-packet-only", nullptr,
         [this](const char *) {
-            withOutputPacket = true;
+            outputPacketOnly = true;
             if (!selectedBranches.empty()) {
-                std::cerr << "--input-branches cannot guarantee --with-output-packet."
-                             " Aborting."
-                          << std::endl;
-                exit(1);
+                ::error(
+                    "--input-branches cannot guarantee --output-packet-only."
+                    " Aborting.");
+                return false;
             }
             return true;
         },
