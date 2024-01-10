@@ -38,6 +38,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
     unsigned ebpf_packetOffsetInBits_save = 0;
     ParserError_t ebpf_errorCode = NoError;
     void* pkt = ((void*)(long)skb->data);
+    u8* hdr_start = pkt;
     void* ebpf_packetEnd = ((void*)(long)skb->data_end);
     u32 ebpf_zero = 0;
     u32 ebpf_one = 1;
@@ -123,7 +124,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
             outHeaderLength += 160;
         }
 ;
-        int outHeaderOffset = BYTES(outHeaderLength) - BYTES(ebpf_packetOffsetInBits);
+        int outHeaderOffset = BYTES(outHeaderLength) - (hdr_start - (u8*)pkt);
         if (outHeaderOffset != 0) {
             int returnCode = 0;
             returnCode = bpf_skb_adjust_room(skb, outHeaderOffset, 1, 0);
