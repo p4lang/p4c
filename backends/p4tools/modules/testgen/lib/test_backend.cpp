@@ -37,9 +37,9 @@ bool TestBackEnd::run(const FinalState &state) {
         const auto *programTraces = state.getTraces();
         const auto &testgenOptions = TestgenOptions::get();
 
-        // Don't increase the test count if --with-output-packet is enabled and we don't
+        // Don't increase the test count if --output-packet-only is enabled and we don't
         // produce a test with an output packet.
-        if (testgenOptions.withOutputPacket) {
+        if (testgenOptions.outputPacketOnly) {
             auto outputPacketSize = executionState->getPacketBufferSize();
             bool packetIsDropped = executionState->getProperty<bool>("drop");
             if (outputPacketSize <= 0 || packetIsDropped) {

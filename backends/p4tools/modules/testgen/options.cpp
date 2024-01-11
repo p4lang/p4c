@@ -181,10 +181,10 @@ TestgenOptions::TestgenOptions()
             selectedBranches = arg;
             // These options are mutually exclusive.
             if (trackBranches) {
-                std::cerr << "--input-branches and --track-branches are mutually exclusive. Choose "
-                             "one or the other."
-                          << std::endl;
-                exit(1);
+                ::error(
+                    "--input-branches and --track-branches are mutually exclusive. Choose "
+                    "one or the other.");
+                return false;
             }
             return true;
         },
@@ -196,10 +196,10 @@ TestgenOptions::TestgenOptions()
             trackBranches = true;
             // These options are mutually exclusive.
             if (!selectedBranches.empty()) {
-                std::cerr << "--input-branches and --track-branches are mutually exclusive. Choose "
-                             "one or the other."
-                          << std::endl;
-                exit(1);
+                ::error(
+                    "--input-branches and --track-branches are mutually exclusive. Choose "
+                    "one or the other.");
+                return false;
             }
             return true;
         },
@@ -207,14 +207,14 @@ TestgenOptions::TestgenOptions()
         "used for deterministic replay.");
 
     registerOption(
-        "--with-output-packet", nullptr,
+        "--output-packet-only", nullptr,
         [this](const char *) {
-            withOutputPacket = true;
+            outputPacketOnly = true;
             if (!selectedBranches.empty()) {
-                std::cerr << "--input-branches cannot guarantee --with-output-packet."
-                             " Aborting."
-                          << std::endl;
-                exit(1);
+                ::error(
+                    "--input-branches cannot guarantee --output-packet-only."
+                    " Aborting.");
+                return false;
             }
             return true;
         },
@@ -255,10 +255,8 @@ TestgenOptions::TestgenOptions()
     registerOption(
         "--track-coverage", "coverageItem",
         [this](const char *arg) {
-            static std::set<cstring> const COVERAGE_OPTIONS = {
-                "STATEMENTS",
-                "TABLE_ENTRIES",
-            };
+            static std::set<cstring> const COVERAGE_OPTIONS = {"STATEMENTS", "TABLE_ENTRIES",
+                                                               "ACTIONS"};
             hasCoverageTracking = true;
             auto selectionString = cstring(arg).toUpper();
             auto it = COVERAGE_OPTIONS.find(selectionString);
@@ -271,6 +269,10 @@ TestgenOptions::TestgenOptions()
                     coverageOptions.coverTableEntries = true;
                     return true;
                 }
+                if (selectionString == "ACTIONS") {
+                    coverageOptions.coverActions = true;
+                    return true;
+                }
             }
             ::error(
                 "Coverage tracking for label %1% not supported. Supported coverage tracking "
@@ -280,7 +282,8 @@ TestgenOptions::TestgenOptions()
             return false;
         },
         "Specifies, which IR nodes to track for coverage in the targeted P4 program. Multiple "
-        "options are possible: Currently supported: STATEMENTS, TABLE_ENTRIES "
+        "options are possible: Currently supported: STATEMENTS, TABLE_ENTRIES (table rules encoded "
+        "in the table entries in P4), ACTIONS (actions invoked, directly or by tables). "
         "Defaults to no coverage.");
 
     registerOption(

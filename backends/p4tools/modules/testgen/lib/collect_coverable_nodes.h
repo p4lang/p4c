@@ -39,6 +39,9 @@ class CoverableNodesScanner : public Inspector {
     bool preorder(const IR::ExitStatement *stmt) override;
     bool preorder(const IR::MethodCallExpression *call) override;
 
+    /// Actions coverage.
+    bool preorder(const IR::P4Action *act) override;
+
  public:
     explicit CoverableNodesScanner(const ExecutionState &state);
 
