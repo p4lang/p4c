@@ -1,29 +1,8 @@
-#include "send_to_port_example_parser.h"
+#include "hash1_parser.h"
 struct internal_metadata {
     __u16 pkt_ether_type;
 } __attribute__((aligned(4)));
 
-struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_key {
-    u32 keysz;
-    u32 maskid;
-    u32 field0; /* hdr.ipv4.dstAddr */
-    u32 field1; /* hdr.ipv4.srcAddr */
-    u8 field2; /* hdr.ipv4.protocol */
-} __attribute__((aligned(4)));
-#define MAINCONTROLIMPL_IPV4_TBL_ACT_MAINCONTROLIMPL_NEXT_HOP 1
-#define MAINCONTROLIMPL_IPV4_TBL_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP 2
-struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_value {
-    unsigned int action;
-    union {
-        struct {
-        } _NoAction;
-        struct __attribute__((__packed__)) {
-            u32 vport;
-        } MainControlImpl_next_hop;
-        struct {
-        } MainControlImpl_default_route_drop;
-    } u;
-};
 
 SEC("xdp/xdp-ingress")
 int xdp_func(struct xdp_md *skb) {
@@ -54,7 +33,7 @@ int xdp_func(struct xdp_md *skb) {
 
     return XDP_PASS;
 }
-static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr, struct pna_global_metadata *compiler_meta__)
+static __always_inline int process(struct __sk_buff *skb, struct my_ingress_headers_t *hdr, struct pna_global_metadata *compiler_meta__)
 {
     struct hdr_md *hdrMd;
 
@@ -67,68 +46,27 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
     unsigned char ebpf_byte;
     u32 pkt_len = skb->len;
 
-    struct main_metadata_t *user_meta;
+    struct my_ingress_metadata_t *meta;
     hdrMd = BPF_MAP_LOOKUP_ELEM(hdr_md_cpumap, &ebpf_zero);
     if (!hdrMd)
         return TC_ACT_SHOT;
     unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
     hdr = &(hdrMd->cpumap_hdr);
-    user_meta = &(hdrMd->cpumap_usermeta);
+    meta = &(hdrMd->cpumap_usermeta);
 {
+        u16 ingress_h_reg = 0;
         u8 hit;
         {
-if (/* hdr->ipv4.isValid() */
-            hdr->ipv4.ebpf_valid) {
-/* ipv4_tbl_0.apply() */
-                {
-                    /* construct key */
-                    struct p4tc_table_entry_act_bpf_params__local params = {
-                        .pipeid = 1,
-                        .tblid = 1
-                    };
-                    struct MainControlImpl_ipv4_tbl_key key = {};
-                    key.keysz = 72;
-                    key.field0 = hdr->ipv4.dstAddr;
-                    key.field1 = hdr->ipv4.srcAddr;
-                    key.field2 = hdr->ipv4.protocol;
-                    struct p4tc_table_entry_act_bpf *act_bpf;
-                    /* value */
-                    struct MainControlImpl_ipv4_tbl_value *value = NULL;
-                    /* perform lookup */
-                    act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
-                    value = (struct MainControlImpl_ipv4_tbl_value *)act_bpf;
-                    if (value == NULL) {
-                        /* miss; find default action */
-                        hit = 0;
-                    } else {
-                        hit = 1;
-                    }
-                    if (value != NULL) {
-                        /* run action */
-                        switch (value->action) {
-                            case MAINCONTROLIMPL_IPV4_TBL_ACT_MAINCONTROLIMPL_NEXT_HOP: 
-                                {
-/* send_to_port(value->u.MainControlImpl_next_hop.vport) */
-                                    compiler_meta__->drop = false;
-                                    send_to_port(value->u.MainControlImpl_next_hop.vport);
-                                }
-                                break;
-                            case MAINCONTROLIMPL_IPV4_TBL_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP: 
-                                {
-/* drop_packet() */
-                                    drop_packet();
-                                }
-                                break;
-                            default:
-                                return TC_ACT_SHOT;
-                        }
-                    } else {
-/* drop_packet() */
-                        drop_packet();
-                    }
-                }
-;            }
-
+            ingress_h_reg = 0;
+            {
+                u8 ingress_h_tmp = 0;
+                ingress_h_tmp = (hdr->crc.f1 << 4) | (hdr->crc.f2 << 0);
+                crc16_update(&ingress_h_reg, &ingress_h_tmp, 1, 0xA001);
+                crc16_update(&ingress_h_reg, (u8 *) &(hdr->crc.f3), 4, 0xA001);
+                crc16_update(&ingress_h_reg, (u8 *) &(hdr->crc.f4), 4, 0xA001);
+            }
+                        hdr->crc.crc = /* h_0.get_hash({hdr->crc.f1, hdr->crc.f2, hdr->crc.f3, hdr->crc.f4}) */
+crc16_finalize(ingress_h_reg);
         }
     }
     {
@@ -144,8 +82,8 @@ if (/* hdr->ipv4.isValid() */
         if (hdr->ethernet.ebpf_valid) {
             outHeaderLength += 112;
         }
-;        if (hdr->ipv4.ebpf_valid) {
-            outHeaderLength += 160;
+;        if (hdr->crc.ebpf_valid) {
+            outHeaderLength += 88;
         }
 ;
         int outHeaderOffset = BYTES(outHeaderLength) - BYTES(ebpf_packetOffsetInBits);
@@ -164,7 +102,6 @@ if (/* hdr->ipv4.isValid() */
                 return TC_ACT_SHOT;
             }
             
-            hdr->ethernet.dstAddr = htonll(hdr->ethernet.dstAddr << 16);
             ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[1];
@@ -179,7 +116,6 @@ if (/* hdr->ipv4.isValid() */
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
-            hdr->ethernet.srcAddr = htonll(hdr->ethernet.srcAddr << 16);
             ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[1];
@@ -202,83 +138,47 @@ if (/* hdr->ipv4.isValid() */
             ebpf_packetOffsetInBits += 16;
 
         }
-;        if (hdr->ipv4.ebpf_valid) {
-            if (ebpf_packetEnd < pkt + BYTES(ebpf_packetOffsetInBits + 160)) {
+;        if (hdr->crc.ebpf_valid) {
+            if (ebpf_packetEnd < pkt + BYTES(ebpf_packetOffsetInBits + 88)) {
                 return TC_ACT_SHOT;
             }
             
-            ebpf_byte = ((char*)(&hdr->ipv4.version))[0];
+            ebpf_byte = ((char*)(&hdr->crc.f1))[0];
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 4, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 4;
 
-            ebpf_byte = ((char*)(&hdr->ipv4.ihl))[0];
+            ebpf_byte = ((char*)(&hdr->crc.f2))[0];
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 4;
 
-            ebpf_byte = ((char*)(&hdr->ipv4.diffserv))[0];
+            hdr->crc.f3 = htonl(hdr->crc.f3);
+            ebpf_byte = ((char*)(&hdr->crc.f3))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_packetOffsetInBits += 8;
-
-            hdr->ipv4.totalLen = bpf_htons(hdr->ipv4.totalLen);
-            ebpf_byte = ((char*)(&hdr->ipv4.totalLen))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv4.totalLen))[1];
+            ebpf_byte = ((char*)(&hdr->crc.f3))[1];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_packetOffsetInBits += 16;
-
-            hdr->ipv4.identification = bpf_htons(hdr->ipv4.identification);
-            ebpf_byte = ((char*)(&hdr->ipv4.identification))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv4.identification))[1];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_packetOffsetInBits += 16;
-
-            ebpf_byte = ((char*)(&hdr->ipv4.flags))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 3, 5, (ebpf_byte >> 0));
-            ebpf_packetOffsetInBits += 3;
-
-            hdr->ipv4.fragOffset = bpf_htons(hdr->ipv4.fragOffset << 3);
-            ebpf_byte = ((char*)(&hdr->ipv4.fragOffset))[0];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 5, 0, (ebpf_byte >> 3));
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0 + 1, 3, 5, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv4.fragOffset))[1];
-            write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 1, 5, 0, (ebpf_byte >> 3));
-            ebpf_packetOffsetInBits += 13;
-
-            ebpf_byte = ((char*)(&hdr->ipv4.ttl))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_packetOffsetInBits += 8;
-
-            ebpf_byte = ((char*)(&hdr->ipv4.protocol))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_packetOffsetInBits += 8;
-
-            hdr->ipv4.hdrChecksum = bpf_htons(hdr->ipv4.hdrChecksum);
-            ebpf_byte = ((char*)(&hdr->ipv4.hdrChecksum))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv4.hdrChecksum))[1];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_packetOffsetInBits += 16;
-
-            ebpf_byte = ((char*)(&hdr->ipv4.srcAddr))[0];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv4.srcAddr))[1];
-            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv4.srcAddr))[2];
+            ebpf_byte = ((char*)(&hdr->crc.f3))[2];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv4.srcAddr))[3];
+            ebpf_byte = ((char*)(&hdr->crc.f3))[3];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
             ebpf_packetOffsetInBits += 32;
 
-            ebpf_byte = ((char*)(&hdr->ipv4.dstAddr))[0];
+            hdr->crc.f4 = htonl(hdr->crc.f4);
+            ebpf_byte = ((char*)(&hdr->crc.f4))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv4.dstAddr))[1];
+            ebpf_byte = ((char*)(&hdr->crc.f4))[1];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv4.dstAddr))[2];
+            ebpf_byte = ((char*)(&hdr->crc.f4))[2];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
-            ebpf_byte = ((char*)(&hdr->ipv4.dstAddr))[3];
+            ebpf_byte = ((char*)(&hdr->crc.f4))[3];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
             ebpf_packetOffsetInBits += 32;
+
+            hdr->crc.crc = bpf_htons(hdr->crc.crc);
+            ebpf_byte = ((char*)(&hdr->crc.crc))[0];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->crc.crc))[1];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_packetOffsetInBits += 16;
 
         }
 ;
@@ -301,9 +201,9 @@ int tc_ingress_func(struct __sk_buff *skb) {
         }
     }
     struct hdr_md *hdrMd;
-    struct headers_t *hdr;
+    struct my_ingress_headers_t *hdr;
     int ret = -1;
-    ret = process(skb, (struct headers_t *) hdr, compiler_meta__);
+    ret = process(skb, (struct my_ingress_headers_t *) hdr, compiler_meta__);
     if (ret != -1) {
         return ret;
     }

@@ -1,4 +1,4 @@
-#include "global_action_example_02_parser.h"
+#include "hash1_parser.h"
 
 static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_headers_t *hdr, struct pna_global_metadata *compiler_meta__)
 {
@@ -26,49 +26,28 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
     {
         goto start;
         parse_ipv4: {
-/* extract(hdr->ipv4) */
-            if (ebpf_packetEnd < pkt + BYTES(ebpf_packetOffsetInBits + 160 + 0)) {
+/* extract(hdr->crc) */
+            if (ebpf_packetEnd < pkt + BYTES(ebpf_packetOffsetInBits + 88 + 0)) {
                 ebpf_errorCode = PacketTooShort;
                 goto reject;
             }
 
-            hdr->ipv4.version = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits)) >> 4) & EBPF_MASK(u8, 4));
+            hdr->crc.f1 = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits)) >> 4) & EBPF_MASK(u8, 4));
             ebpf_packetOffsetInBits += 4;
 
-            hdr->ipv4.ihl = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))) & EBPF_MASK(u8, 4));
+            hdr->crc.f2 = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))) & EBPF_MASK(u8, 4));
             ebpf_packetOffsetInBits += 4;
 
-            hdr->ipv4.diffserv = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
-            ebpf_packetOffsetInBits += 8;
-
-            hdr->ipv4.totalLen = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
-            ebpf_packetOffsetInBits += 16;
-
-            hdr->ipv4.identification = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
-            ebpf_packetOffsetInBits += 16;
-
-            hdr->ipv4.flags = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits)) >> 5) & EBPF_MASK(u8, 3));
-            ebpf_packetOffsetInBits += 3;
-
-            hdr->ipv4.fragOffset = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))) & EBPF_MASK(u16, 13));
-            ebpf_packetOffsetInBits += 13;
-
-            hdr->ipv4.ttl = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
-            ebpf_packetOffsetInBits += 8;
-
-            hdr->ipv4.protocol = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
-            ebpf_packetOffsetInBits += 8;
-
-            hdr->ipv4.hdrChecksum = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
-            ebpf_packetOffsetInBits += 16;
-
-            __builtin_memcpy(&hdr->ipv4.srcAddr, pkt + BYTES(ebpf_packetOffsetInBits), 4);
+            hdr->crc.f3 = (u32)((load_word(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 32;
 
-            __builtin_memcpy(&hdr->ipv4.dstAddr, pkt + BYTES(ebpf_packetOffsetInBits), 4);
+            hdr->crc.f4 = (u32)((load_word(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 32;
 
-            hdr->ipv4.ebpf_valid = 1;
+            hdr->crc.crc = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
+            ebpf_packetOffsetInBits += 16;
+
+            hdr->crc.ebpf_valid = 1;
 
 ;
              goto accept;

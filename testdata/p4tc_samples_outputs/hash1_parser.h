@@ -12,8 +12,8 @@
 
 
 struct ethernet_t {
-    u64 dstAddr; /* EthernetAddress */
-    u64 srcAddr; /* EthernetAddress */
+    u64 dstAddr; /* bit<48> */
+    u64 srcAddr; /* bit<48> */
     u16 etherType; /* bit<16> */
     u8 ebpf_valid;
 };
@@ -28,34 +28,37 @@ struct ipv4_t {
     u8 ttl; /* bit<8> */
     u8 protocol; /* bit<8> */
     u16 hdrChecksum; /* bit<16> */
-    u32 srcAddr; /* IPv4Address */
-    u32 dstAddr; /* IPv4Address */
+    u32 srcAddr; /* bit<32> */
+    u32 dstAddr; /* bit<32> */
     u8 ebpf_valid;
 };
-struct tcp_t {
-    u16 srcPort; /* bit<16> */
-    u16 dstPort; /* bit<16> */
-    u32 seqNo; /* bit<32> */
-    u32 ackNo; /* bit<32> */
-    u8 dataOffset; /* bit<4> */
-    u8 res; /* bit<4> */
-    u8 flags; /* bit<8> */
-    u16 window; /* bit<16> */
-    u16 checksum; /* bit<16> */
-    u16 urgentPtr; /* bit<16> */
+struct crc_t {
+    u8 f1; /* bit<4> */
+    u8 f2; /* bit<4> */
+    u32 f3; /* bit<32> */
+    u32 f4; /* bit<32> */
+    u16 crc; /* bit<16> */
     u8 ebpf_valid;
 };
-struct metadata_t {
-};
-struct headers_t {
-    struct ethernet_t eth; /* ethernet_t */
+struct my_ingress_headers_t {
+    struct ethernet_t ethernet; /* ethernet_t */
     struct ipv4_t ipv4; /* ipv4_t */
-    struct tcp_t tcp; /* tcp_t */
+    struct crc_t crc; /* crc_t */
+};
+struct my_ingress_metadata_t {
+};
+struct empty_metadata_t {
+};
+struct tuple_0 {
+    u8 f0; /* bit<4> */
+    u8 f1; /* bit<4> */
+    u32 f2; /* bit<32> */
+    u32 f3; /* bit<32> */
 };
 
 struct hdr_md {
-    struct headers_t cpumap_hdr;
-    struct metadata_t cpumap_usermeta;
+    struct my_ingress_headers_t cpumap_hdr;
+    struct my_ingress_metadata_t cpumap_usermeta;
     unsigned ebpf_packetOffsetInBits;
     __u8 __hook;
 };

@@ -1,27 +1,27 @@
-#include "send_to_port_example_parser.h"
+#include "checksum_parser.h"
 struct internal_metadata {
     __u16 pkt_ether_type;
 } __attribute__((aligned(4)));
 
-struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_key {
+struct __attribute__((__packed__)) ingress_nh_table_key {
     u32 keysz;
     u32 maskid;
-    u32 field0; /* hdr.ipv4.dstAddr */
-    u32 field1; /* hdr.ipv4.srcAddr */
-    u8 field2; /* hdr.ipv4.protocol */
+    u32 field0; /* hdr.ipv4.srcAddr */
 } __attribute__((aligned(4)));
-#define MAINCONTROLIMPL_IPV4_TBL_ACT_MAINCONTROLIMPL_NEXT_HOP 1
-#define MAINCONTROLIMPL_IPV4_TBL_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP 2
-struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_value {
+#define INGRESS_NH_TABLE_ACT_INGRESS_SEND_NH 1
+#define INGRESS_NH_TABLE_ACT_INGRESS_DROP 2
+struct __attribute__((__packed__)) ingress_nh_table_value {
     unsigned int action;
     union {
         struct {
         } _NoAction;
         struct __attribute__((__packed__)) {
-            u32 vport;
-        } MainControlImpl_next_hop;
+            u32 port_id;
+            u64 dmac;
+            u64 smac;
+        } ingress_send_nh;
         struct {
-        } MainControlImpl_default_route_drop;
+        } ingress_drop;
     } u;
 };
 
@@ -54,7 +54,7 @@ int xdp_func(struct xdp_md *skb) {
 
     return XDP_PASS;
 }
-static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr, struct pna_global_metadata *compiler_meta__)
+static __always_inline int process(struct __sk_buff *skb, struct my_ingress_headers_t *hdr, struct pna_global_metadata *compiler_meta__)
 {
     struct hdr_md *hdrMd;
 
@@ -67,68 +67,65 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
     unsigned char ebpf_byte;
     u32 pkt_len = skb->len;
 
-    struct main_metadata_t *user_meta;
+    struct my_ingress_metadata_t *meta;
     hdrMd = BPF_MAP_LOOKUP_ELEM(hdr_md_cpumap, &ebpf_zero);
     if (!hdrMd)
         return TC_ACT_SHOT;
     unsigned ebpf_packetOffsetInBits = hdrMd->ebpf_packetOffsetInBits;
     hdr = &(hdrMd->cpumap_hdr);
-    user_meta = &(hdrMd->cpumap_usermeta);
+    meta = &(hdrMd->cpumap_usermeta);
 {
         u8 hit;
         {
-if (/* hdr->ipv4.isValid() */
-            hdr->ipv4.ebpf_valid) {
-/* ipv4_tbl_0.apply() */
-                {
-                    /* construct key */
-                    struct p4tc_table_entry_act_bpf_params__local params = {
-                        .pipeid = 1,
-                        .tblid = 1
-                    };
-                    struct MainControlImpl_ipv4_tbl_key key = {};
-                    key.keysz = 72;
-                    key.field0 = hdr->ipv4.dstAddr;
-                    key.field1 = hdr->ipv4.srcAddr;
-                    key.field2 = hdr->ipv4.protocol;
-                    struct p4tc_table_entry_act_bpf *act_bpf;
-                    /* value */
-                    struct MainControlImpl_ipv4_tbl_value *value = NULL;
-                    /* perform lookup */
-                    act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
-                    value = (struct MainControlImpl_ipv4_tbl_value *)act_bpf;
-                    if (value == NULL) {
-                        /* miss; find default action */
-                        hit = 0;
-                    } else {
-                        hit = 1;
-                    }
-                    if (value != NULL) {
-                        /* run action */
-                        switch (value->action) {
-                            case MAINCONTROLIMPL_IPV4_TBL_ACT_MAINCONTROLIMPL_NEXT_HOP: 
-                                {
-/* send_to_port(value->u.MainControlImpl_next_hop.vport) */
-                                    compiler_meta__->drop = false;
-                                    send_to_port(value->u.MainControlImpl_next_hop.vport);
-                                }
-                                break;
-                            case MAINCONTROLIMPL_IPV4_TBL_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP: 
-                                {
-/* drop_packet() */
-                                    drop_packet();
-                                }
-                                break;
-                            default:
-                                return TC_ACT_SHOT;
-                        }
-                    } else {
-/* drop_packet() */
-                        drop_packet();
-                    }
+/* nh_table_0.apply() */
+            {
+                /* construct key */
+                struct p4tc_table_entry_act_bpf_params__local params = {
+                    .pipeid = 1,
+                    .tblid = 1
+                };
+                struct ingress_nh_table_key key = {};
+                key.keysz = 32;
+                key.field0 = hdr->ipv4.srcAddr;
+                struct p4tc_table_entry_act_bpf *act_bpf;
+                /* value */
+                struct ingress_nh_table_value *value = NULL;
+                /* perform lookup */
+                act_bpf = bpf_p4tc_tbl_read(skb, &params, &key, sizeof(key));
+                value = (struct ingress_nh_table_value *)act_bpf;
+                if (value == NULL) {
+                    /* miss; find default action */
+                    hit = 0;
+                } else {
+                    hit = 1;
                 }
-;            }
-
+                if (value != NULL) {
+                    /* run action */
+                    switch (value->action) {
+                        case INGRESS_NH_TABLE_ACT_INGRESS_SEND_NH: 
+                            {
+                                hdr->ethernet.srcAddr = value->u.ingress_send_nh.smac;
+                                                                hdr->ethernet.dstAddr = value->u.ingress_send_nh.dmac;
+                                /* send_to_port(value->u.ingress_send_nh.port_id) */
+                                compiler_meta__->drop = false;
+                                send_to_port(value->u.ingress_send_nh.port_id);
+                            }
+                            break;
+                        case INGRESS_NH_TABLE_ACT_INGRESS_DROP: 
+                            {
+/* drop_packet() */
+                                drop_packet();
+                            }
+                            break;
+                        default:
+                            return TC_ACT_SHOT;
+                    }
+                } else {
+/* drop_packet() */
+                    drop_packet();
+                }
+            }
+;
         }
     }
     {
@@ -164,7 +161,6 @@ if (/* hdr->ipv4.isValid() */
                 return TC_ACT_SHOT;
             }
             
-            hdr->ethernet.dstAddr = htonll(hdr->ethernet.dstAddr << 16);
             ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[1];
@@ -179,7 +175,6 @@ if (/* hdr->ipv4.isValid() */
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
-            hdr->ethernet.srcAddr = htonll(hdr->ethernet.srcAddr << 16);
             ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[1];
@@ -301,9 +296,9 @@ int tc_ingress_func(struct __sk_buff *skb) {
         }
     }
     struct hdr_md *hdrMd;
-    struct headers_t *hdr;
+    struct my_ingress_headers_t *hdr;
     int ret = -1;
-    ret = process(skb, (struct headers_t *) hdr, compiler_meta__);
+    ret = process(skb, (struct my_ingress_headers_t *) hdr, compiler_meta__);
     if (ret != -1) {
         return ret;
     }
