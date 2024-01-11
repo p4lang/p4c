@@ -46,6 +46,9 @@ class PNAEbpfGenerator : public EBPF::EbpfCodeGenerator {
     void emitGlobalHeadersMetadata(EBPF::CodeBuilder *builder) const override;
     void emitPipelineInstances(EBPF::CodeBuilder *builder) const override;
     cstring getProgramName() const;
+
+    void emitCRC32LookupTableTypes(EBPF::CodeBuilder *builder) const;
+    void emitCRC32LookupTableInstance(EBPF::CodeBuilder *builder) const;
 };
 
 // Similar to class PSAErrorCodesGen in backends/ebpf/psa/ebpfPsaGen.cpp
