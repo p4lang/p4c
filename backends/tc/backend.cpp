@@ -296,14 +296,6 @@ void ConvertToBackendIR::updateConstEntries(const IR::P4Table *t, IR::TCTable *t
                 }
             }
             auto keySetElement = keyset->components.at(itr);
-            // std::stringstream value;
-            // if(keySetElement->is<IR::Constant>()) {
-            //     value << keySetElement->to<IR::Constant>()->value;
-            // } else if (keySetElement->is<IR::BoolLiteral>()) {
-            //     value << keySetElement->to<IR::BoolLiteral>()->value ? 1 : 0;
-            // } else if (keySetElement->is<IR::DefaultExpression>()) {
-            //     value << 0;
-            // }
             keyList.emplace(keyString, keySetElement->toString());
         }
         tabledef->addConstEntries(e->action->toString(), keyList);
