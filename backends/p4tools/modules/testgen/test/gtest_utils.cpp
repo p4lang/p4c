@@ -31,7 +31,7 @@ std::optional<const P4ToolsTestCase> P4ToolsTestCase::create(
     if (!compilerResults.has_value()) {
         return std::nullopt;
     }
-    return P4ToolsTestCase{compilerResults.value()->getProgram()};
+    return P4ToolsTestCase(compilerResults.value().get().getProgram());
 }
 
 const IR::P4Program &P4ToolsTestCase::getProgram() const { return program.get(); }

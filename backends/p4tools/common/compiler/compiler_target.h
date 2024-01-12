@@ -31,6 +31,10 @@ class CompilerResult : public ICastable {
     [[nodiscard]] const IR::P4Program &getProgram() const;
 };
 
+/// P4Tools compilers may return an error instead of a compiler result.
+/// This is a convenience definition for the return value.
+using CompilerResultOrError = std::optional<std::reference_wrapper<const CompilerResult>>;
+
 /// Encapsulates the details of invoking the P4 compiler for a target device and architecture.
 class CompilerTarget : public Target {
  public:
@@ -46,25 +50,25 @@ class CompilerTarget : public Target {
     /// program.
     ///
     /// @returns std::nullopt if an error occurs during compilation.
-    static std::optional<const CompilerResult *> runCompiler();
+    static CompilerResultOrError runCompiler();
 
     /// Runs the P4 compiler to produce an IR and other information for the given source code.
     ///
     /// @returns std::nullopt if an error occurs during compilation.
-    static std::optional<const CompilerResult *> runCompiler(const std::string &source);
+    static CompilerResultOrError runCompiler(const std::string &source);
 
  private:
     /// Runs the front and mid ends on the given parsed program.
     ///
     /// @returns std::nullopt if an error occurs during compilation.
-    static std::optional<const CompilerResult *> runCompiler(const IR::P4Program *);
+    static CompilerResultOrError runCompiler(const IR::P4Program *);
 
  protected:
     /// @see @makeContext.
     [[nodiscard]] virtual ICompileContext *makeContextImpl() const;
 
     /// @see runCompiler.
-    virtual std::optional<const CompilerResult *> runCompilerImpl(const IR::P4Program *) const;
+    virtual CompilerResultOrError runCompilerImpl(const IR::P4Program *) const;
 
     /// This implementation just forwards the given arguments to the compiler.
     ///

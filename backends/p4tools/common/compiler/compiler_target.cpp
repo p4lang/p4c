@@ -1,5 +1,6 @@
 #include "backends/p4tools/common/compiler/compiler_target.h"
 
+#include <functional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -27,7 +28,7 @@ std::vector<const char *> *CompilerTarget::initCompiler(int argc, char **argv) {
     return get().initCompilerImpl(argc, argv);
 }
 
-std::optional<const CompilerResult *> CompilerTarget::runCompiler() {
+CompilerResultOrError CompilerTarget::runCompiler() {
     const auto *program = P4Tools::CompilerTarget::runParser();
     if (program == nullptr) {
         return std::nullopt;
@@ -36,7 +37,7 @@ std::optional<const CompilerResult *> CompilerTarget::runCompiler() {
     return runCompiler(program);
 }
 
-std::optional<const CompilerResult *> CompilerTarget::runCompiler(const std::string &source) {
+CompilerResultOrError CompilerTarget::runCompiler(const std::string &source) {
     const auto *program = P4::parseP4String(source, P4CContext::get().options().langVersion);
     if (program == nullptr) {
         return std::nullopt;
@@ -45,12 +46,11 @@ std::optional<const CompilerResult *> CompilerTarget::runCompiler(const std::str
     return runCompiler(program);
 }
 
-std::optional<const CompilerResult *> CompilerTarget::runCompiler(const IR::P4Program *program) {
+CompilerResultOrError CompilerTarget::runCompiler(const IR::P4Program *program) {
     return get().runCompilerImpl(program);
 }
 
-std::optional<const CompilerResult *> CompilerTarget::runCompilerImpl(
-    const IR::P4Program *program) const {
+CompilerResultOrError CompilerTarget::runCompilerImpl(const IR::P4Program *program) const {
     const auto &self = get();
 
     program = self.runFrontend(program);
@@ -63,7 +63,7 @@ std::optional<const CompilerResult *> CompilerTarget::runCompilerImpl(
         return std::nullopt;
     }
 
-    return new CompilerResult(*program);
+    return *new CompilerResult(*program);
 }
 
 ICompileContext *CompilerTarget::makeContextImpl() const {
