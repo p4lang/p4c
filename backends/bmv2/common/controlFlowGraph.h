@@ -72,10 +72,12 @@ class CFG final : public IHasDbPrint {
         const cstring name;
         EdgeSet successors;
 
-        void dbprint(std::ostream &out) const;
+        void dbprint(std::ostream &out) const override;
         void addPredecessors(const EdgeSet *set);
         void computeSuccessors();
         cstring toString() const { return name; }
+
+      DECLARE_TYPEINFO(Node);
     };
 
  public:
@@ -88,6 +90,8 @@ class CFG final : public IHasDbPrint {
             CHECK_NULL(table);
             CHECK_NULL(invocation);
         }
+
+        DECLARE_TYPEINFO(TableNode, Node);
     };
 
     class IfNode final : public Node {
@@ -96,11 +100,15 @@ class CFG final : public IHasDbPrint {
         explicit IfNode(const IR::IfStatement *statement) : statement(statement) {
             CHECK_NULL(statement);
         }
+
+        DECLARE_TYPEINFO(IfNode, Node);
     };
 
     class DummyNode final : public Node {
      public:
         explicit DummyNode(cstring name) : Node(name) {}
+
+        DECLARE_TYPEINFO(DummyNode, Node);
     };
 
  protected:

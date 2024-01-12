@@ -729,6 +729,8 @@ class Backtrack : public virtual Visitor {
         // must call this from the constructor if a trigger subclass contains pointers
         // or references to GC objects
         void register_for_gc(size_t);
+
+        DECLARE_TYPEINFO(trigger);
     };
     virtual bool backtrack(trigger &trig) = 0;
     virtual bool never_backtracks() { return false; }  // generally not overridden

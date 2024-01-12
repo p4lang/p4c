@@ -149,6 +149,8 @@ class EBPFPipeline : public EBPFProgram {
      * if the timestamp field is not used within a pipeline.
      */
     bool shouldEmitTimestamp() const { return hasAnyMeter() || control->timestampIsUsed; }
+
+    DECLARE_TYPEINFO(EBPFPipeline, EBPFProgram);
 };
 
 /*
@@ -177,6 +179,8 @@ class EBPFIngressPipeline : public EBPFPipeline {
     void emit(CodeBuilder *builder) override;
     void emitPSAControlInputMetadata(CodeBuilder *builder) override;
     void emitPSAControlOutputMetadata(CodeBuilder *builder) override;
+
+    DECLARE_TYPEINFO(EBPFIngressPipeline, EBPFPipeline);
 };
 
 /*
@@ -195,6 +199,8 @@ class EBPFEgressPipeline : public EBPFPipeline {
     void emitCPUMAPLookup(CodeBuilder *builder) override;
 
     virtual void emitCheckPacketMarkMetadata(CodeBuilder *builder) = 0;
+
+    DECLARE_TYPEINFO(EBPFEgressPipeline, EBPFPipeline);
 };
 
 class TCIngressPipeline : public EBPFIngressPipeline {
@@ -210,6 +216,8 @@ class TCIngressPipeline : public EBPFIngressPipeline {
     void emitTCWorkaroundUsingMeta(CodeBuilder *builder);
     void emitTCWorkaroundUsingHead(CodeBuilder *builder);
     void emitTCWorkaroundUsingCPUMAP(CodeBuilder *builder);
+
+    DECLARE_TYPEINFO(TCIngressPipeline, EBPFIngressPipeline);
 };
 
 class TCEgressPipeline : public EBPFEgressPipeline {
@@ -220,6 +228,8 @@ class TCEgressPipeline : public EBPFEgressPipeline {
 
     void emitTrafficManager(CodeBuilder *builder) override;
     void emitCheckPacketMarkMetadata(CodeBuilder *builder) override;
+
+    DECLARE_TYPEINFO(TCEgressPipeline, EBPFEgressPipeline);
 };
 
 class XDPIngressPipeline : public EBPFIngressPipeline {
@@ -235,6 +245,8 @@ class XDPIngressPipeline : public EBPFIngressPipeline {
 
     void emitGlobalMetadataInitializer(CodeBuilder *builder) override;
     void emitTrafficManager(CodeBuilder *builder) override;
+
+    DECLARE_TYPEINFO(XDPIngressPipeline, EBPFIngressPipeline);
 };
 
 class XDPEgressPipeline : public EBPFEgressPipeline {
@@ -254,6 +266,8 @@ class XDPEgressPipeline : public EBPFEgressPipeline {
     void emitGlobalMetadataInitializer(CodeBuilder *builder) override;
     void emitTrafficManager(CodeBuilder *builder) override;
     void emitCheckPacketMarkMetadata(CodeBuilder *builder) override;
+
+    DECLARE_TYPEINFO(XDPEgressPipeline, EBPFEgressPipeline);
 };
 
 class TCTrafficManagerForXDP : public TCIngressPipeline {
@@ -268,6 +282,8 @@ class TCTrafficManagerForXDP : public TCIngressPipeline {
  private:
     void emitReadXDP2TCMetadataFromHead(CodeBuilder *builder);
     void emitReadXDP2TCMetadataFromCPUMAP(CodeBuilder *builder);
+
+    DECLARE_TYPEINFO(TCTrafficManagerForXDP, TCIngressPipeline);
 };
 
 }  // namespace EBPF

@@ -54,6 +54,8 @@ class EBPFObject : public ICastable {
 
         return nullptr;
     }
+
+    DECLARE_TYPEINFO(EBPFObject);
 };
 
 }  // namespace EBPF

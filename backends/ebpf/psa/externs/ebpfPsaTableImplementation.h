@@ -49,6 +49,8 @@ class EBPFTableImplementationPSA : public EBPFTablePSA {
     void verifyTableNoEntries(const EBPFTablePSA *instance);
 
     unsigned getUintFromExpression(const IR::Expression *expr, unsigned defaultValue);
+
+    DECLARE_TYPEINFO(EBPFTableImplementationPSA, EBPFTablePSA);
 };
 
 class EBPFActionProfilePSA : public EBPFTableImplementationPSA {
@@ -59,6 +61,8 @@ class EBPFActionProfilePSA : public EBPFTableImplementationPSA {
     void emitInstance(CodeBuilder *builder) override;
     void applyImplementation(CodeBuilder *builder, cstring tableValueName,
                              cstring actionRunVariable) override;
+
+    DECLARE_TYPEINFO(EBPFActionProfilePSA, EBPFTableImplementationPSA);
 };
 
 class EBPFActionSelectorPSA : public EBPFTableImplementationPSA {
@@ -101,6 +105,8 @@ class EBPFActionSelectorPSA : public EBPFTableImplementationPSA {
 
     void verifyTableSelectorKeySet(const EBPFTablePSA *instance);
     void verifyTableEmptyGroupAction(const EBPFTablePSA *instance);
+
+    DECLARE_TYPEINFO(EBPFActionSelectorPSA, EBPFTableImplementationPSA);
 };
 
 }  // namespace EBPF

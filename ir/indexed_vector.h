@@ -212,6 +212,10 @@ class IndexedVector : public Vector<T> {
                       "invalid element %1%", el);
         }
     }
+
+    DECLARE_TYPEINFO_WITH_NESTED_TYPEID(IndexedVector<T>,
+                                        NK_IndexedVectorT, T::static_typeId(),
+                                        Vector<T>);
 };
 
 }  // namespace IR

@@ -17,6 +17,7 @@
 #include "ir/ir.h"
 #include "ir/vector.h"
 #include "lib/exceptions.h"
+#include "lib/rtti.h"
 
 namespace IR {
 
@@ -46,10 +47,10 @@ const Constant *getConstant(const Type *type, big_int v, const Util::SourceInfo 
         return new Constant(srcInfo, type, v);
     }
     // Constants are interned. Keys in the intern map are pairs of types and values.
-    using key_t = std::tuple<int, std::type_index, bool, big_int>;
+    using key_t = std::tuple<int, RTTI::TypeId, bool, big_int>;
     static std::map<key_t, const Constant *> CONSTANTS;
 
-    auto *&result = CONSTANTS[{tb->width_bits(), typeid(*type), tb->isSigned, v}];
+    auto *&result = CONSTANTS[{tb->width_bits(), type->typeId(), tb->isSigned, v}];
     if (result == nullptr) {
         result = new Constant(srcInfo, tb, v);
     }

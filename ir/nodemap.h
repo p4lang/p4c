@@ -77,7 +77,7 @@ class NodeMap : public Node {
     bool operator==(const NodeMap &a) const { return symbols == a.symbols; }
     bool equiv(const Node &a_) const override {
         if (static_cast<const Node *>(this) == &a_) return true;
-        if (typeid(*this) != typeid(a_)) return false;
+        if (this->typeId() != a_.typeId()) return false;
         auto &a = static_cast<const NodeMap<KEY, VALUE, MAP, COMP, ALLOC> &>(a_);
         if (size() != a.size()) return false;
         auto it = a.begin();
@@ -93,6 +93,8 @@ class NodeMap : public Node {
     }
     void visit_children(Visitor &v) override;
     void visit_children(Visitor &v) const override;
+
+    DECLARE_TYPEINFO(NodeMap, Node);
 };
 
 }  // namespace IR

@@ -65,8 +65,6 @@ class INode : public Util::IHasSourceInfo, public IHasDbPrint, public ICastable 
     virtual ~INode() {}
     virtual const Node *getNode() const = 0;
     virtual Node *getNode() = 0;
-    virtual void dbprint(std::ostream &out) const = 0;  // for debugging
-    virtual cstring toString() const = 0;               // for user consumption
     virtual void toJSON(JSONGenerator &) const = 0;
     virtual cstring node_type_name() const = 0;
     virtual void validate() const {}
@@ -87,6 +85,8 @@ class INode : public Util::IHasSourceInfo, public IHasDbPrint, public ICastable 
                   T::static_type_name());
         return result;
     }
+
+    DECLARE_TYPEINFO_WITH_TYPEID(INode, NK_INode);
 };
 
 class Node : public virtual INode {
@@ -151,16 +151,18 @@ class Node : public virtual INode {
     Util::JsonObject *sourceInfoJsonObj() const;
     /* operator== does a 'shallow' comparison, comparing two Node subclass objects for equality,
      * and comparing pointers in the Node directly for equality */
-    virtual bool operator==(const Node &a) const { return typeid(*this) == typeid(a); }
+    virtual bool operator==(const Node &a) const { return this->typeId() == a.typeId(); }
     /* 'equiv' does a deep-equals comparison, comparing all non-pointer fields and recursing
      * though all Node subclass pointers to compare them with 'equiv' as well. */
-    virtual bool equiv(const Node &a) const { return typeid(*this) == typeid(a); }
+    virtual bool equiv(const Node &a) const { return this->typeId() == a.typeId(); }
 #define DEFINE_OPEQ_FUNC(CLASS, BASE) \
     virtual bool operator==(const CLASS &) const { return false; }
     IRNODE_ALL_SUBCLASSES(DEFINE_OPEQ_FUNC)
 #undef DEFINE_OPEQ_FUNC
 
     bool operator!=(const Node &n) const { return !operator==(n); }
+
+    DECLARE_TYPEINFO_WITH_TYPEID(Node, NK_Node, INode);
 };
 
 // simple version of dbprint

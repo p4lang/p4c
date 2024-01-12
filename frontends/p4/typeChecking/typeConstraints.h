@@ -165,6 +165,8 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
     }
     // Default error message; returns 'false'
     virtual bool reportError(const TypeVariableSubstitution *subst) const = 0;
+
+    DECLARE_TYPEINFO(TypeConstraint);
 };
 
 /// Base class for EqualityConstraint and CanBeImplicitlyCastConstraint
@@ -190,8 +192,9 @@ class BinaryConstraint : public TypeConstraint {
     }
 
  public:
-    virtual void dbprint(std::ostream &out) const = 0;
     virtual BinaryConstraint *create(const IR::Type *left, const IR::Type *right) const = 0;
+
+    DECLARE_TYPEINFO(BinaryConstraint, TypeConstraint);
 };
 
 /// Requires two types to be equal.
@@ -212,6 +215,8 @@ class EqualityConstraint : public BinaryConstraint {
     BinaryConstraint *create(const IR::Type *left, const IR::Type *right) const override {
         return new EqualityConstraint(left, right, this);
     }
+
+    DECLARE_TYPEINFO(EqualityConstraint, BinaryConstraint);
 };
 
 /// The right type can be implicitly cast to the left type.
@@ -233,6 +238,8 @@ class CanBeImplicitlyCastConstraint : public BinaryConstraint {
     BinaryConstraint *create(const IR::Type *left, const IR::Type *right) const override {
         return new CanBeImplicitlyCastConstraint(left, right, this);
     }
+
+    DECLARE_TYPEINFO(CanBeImplicitlyCastConstraint, BinaryConstraint);
 };
 
 // A list of equality constraints on types.

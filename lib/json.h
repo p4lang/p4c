@@ -42,6 +42,8 @@ class IJson : public ICastable {
     virtual void serialize(std::ostream &out) const = 0;
     cstring toString() const;
     void dump() const;
+
+    DECLARE_TYPEINFO(IJson);
 };
 
 class JsonValue final : public IJson {
@@ -104,6 +106,8 @@ class JsonValue final : public IJson {
     const Kind tag;
     const big_int value = 0;
     const cstring str = nullptr;
+
+    DECLARE_TYPEINFO(JsonValue, IJson);
 };
 
 class JsonArray final : public IJson, public std::vector<IJson *> {
@@ -149,6 +153,8 @@ class JsonArray final : public IJson, public std::vector<IJson *> {
     JsonArray(std::initializer_list<IJson *> data) : std::vector<IJson *>(data) {}  // NOLINT
     JsonArray() = default;
     JsonArray(std::vector<IJson *> &data) : std::vector<IJson *>(data) {}  // NOLINT
+
+    DECLARE_TYPEINFO(JsonArray, IJson);
 };
 
 class JsonObject final : public IJson, public ordered_map<cstring, IJson *> {
@@ -185,6 +191,8 @@ class JsonObject final : public IJson, public ordered_map<cstring, IJson *> {
         return this;
     }
     IJson *get(cstring label) const { return ::get(*this, label); }
+
+    DECLARE_TYPEINFO(JsonObject, IJson);
 };
 
 }  // namespace Util
