@@ -21,11 +21,11 @@ TEST_F(SmallStepTest, Value01) {
     const auto test = createSmallStepExprTest("bit<8> f;", "8w42");
     ASSERT_TRUE(test);
 
-    const auto *opValue = extractExpr<IR::Constant>(test->program);
+    const auto *opValue = extractExpr<IR::Constant>(test->getProgram());
     ASSERT_TRUE(opValue);
 
     // Step on the value and examine the resulting state.
-    stepAndExamineValue(opValue, test->program);
+    stepAndExamineValue(opValue, test->getProgram());
 }
 
 /// Test the step function for a bool value.
@@ -33,11 +33,11 @@ TEST_F(SmallStepTest, Value02) {
     const auto test = createSmallStepExprTest("bit<1> f;", "true");
     ASSERT_TRUE(test);
 
-    const auto *opValue = extractExpr<IR::BoolLiteral>(test->program);
+    const auto *opValue = extractExpr<IR::BoolLiteral>(test->getProgram());
     ASSERT_TRUE(opValue);
 
     // Step on the value and examine the resulting state.
-    stepAndExamineValue(opValue, test->program);
+    stepAndExamineValue(opValue, test->getProgram());
 }
 
 }  // anonymous namespace

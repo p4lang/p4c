@@ -8,7 +8,6 @@
 #include <stack>
 #include <string>
 #include <utility>
-#include <variant>
 #include <vector>
 
 #include "backends/p4tools/common/core/z3_solver.h"
@@ -53,9 +52,9 @@ std::optional<const P4ToolsTestCase> createSmallStepExprTest(const std::string &
 
 /// Extract the expression from the P4Program.
 template <class T>
-const T *extractExpr(const IR::P4Program *program) {
+const T *extractExpr(const IR::P4Program &program) {
     // Get the mau declarations in the P4Program.
-    const auto *decls = program->getDeclsByName("mau")->toVector();
+    const auto *decls = program.getDeclsByName("mau")->toVector();
     if (decls->size() != 1) {
         return nullptr;
     }
@@ -83,9 +82,9 @@ const T *extractExpr(const IR::P4Program *program) {
 
 /// Step on the @value, and examine the resulting state in the @program.
 template <class T>
-void stepAndExamineValue(const T *value, const IR::P4Program *program) {
+void stepAndExamineValue(const T *value, const IR::P4Program &program) {
     // Produce a ProgramInfo, which is needed to create a SmallStepEvaluator.
-    const auto *progInfo = TestgenTarget::initProgram(program);
+    const auto *progInfo = TestgenTarget::initProgram(&program);
     ASSERT_TRUE(progInfo);
 
     // Create a base state with a parameter continuation to apply the value on.
@@ -127,10 +126,10 @@ void stepAndExamineValue(const T *value, const IR::P4Program *program) {
 ///     Rebuilds the pushed continuation body with the given parameter.
 template <class T>
 void stepAndExamineOp(
-    const T *op, const IR::Expression *subexpr, const IR::P4Program *program,
+    const T *op, const IR::Expression *subexpr, const IR::P4Program &program,
     std::function<const IR::Expression *(const IR::PathExpression *)> rebuildNode) {
     // Produce a ProgramInfo, which is needed to create a SmallStepEvaluator.
-    const auto *progInfo = TestgenTarget::initProgram(program);
+    const auto *progInfo = TestgenTarget::initProgram(&program);
     ASSERT_TRUE(progInfo);
 
     // Step on the operation.

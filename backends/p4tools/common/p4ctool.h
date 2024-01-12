@@ -1,11 +1,10 @@
 #ifndef BACKENDS_P4TOOLS_COMMON_P4CTOOL_H_
 #define BACKENDS_P4TOOLS_COMMON_P4CTOOL_H_
 
+#include <cstdlib>
 #include <vector>
 
 #include "backends/p4tools/common/compiler/compiler_target.h"
-#include "backends/p4tools/common/core/target.h"
-#include "ir/ir.h"
 
 namespace P4Tools {
 
@@ -19,7 +18,7 @@ class AbstractP4cTool {
     /// Provides the implementation of the tool.
     ///
     /// @param program The P4 program after mid-end processing.
-    virtual int mainImpl(const IR::P4Program *program) = 0;
+    virtual int mainImpl(const CompilerResult &compilerResult) = 0;
 
     virtual void registerTarget() = 0;
 
@@ -41,11 +40,11 @@ class AbstractP4cTool {
         AutoCompileContext autoContext(*compileContext);
 
         // Run the compiler to get an IR and invoke the tool.
-        const auto program = P4Tools::CompilerTarget::runCompiler();
-        if (!program) {
-            return 1;
+        const auto compilerResult = P4Tools::CompilerTarget::runCompiler();
+        if (!compilerResult.has_value()) {
+            return EXIT_FAILURE;
         }
-        return mainImpl(*program);
+        return mainImpl(compilerResult.value());
     }
 };
 
