@@ -16,10 +16,9 @@ macro(p4c_obtain_protobuf)
     if(NOT Protobuf_FOUND)
       find_package(Protobuf REQUIRED)
     endif()
-    # Protobuf sets the protoc binary to a generator expression, which are problematic.
-    # They are problematic because they are only evaluated at build time.
-    # However, we may have scripts that depend on the actual build time during the configure phase.
-    # Hard code a custom binary instead.
+    # Protobuf sets the protoc binary to a generator expression, which are problematic. They are
+    # problematic because they are only evaluated at build time. However, we may have scripts that
+    # depend on the actual build time during the configure phase. Hard code a custom binary instead.
     find_program(PROTOC_BINARY protoc)
 
     if(ENABLE_PROTOBUF_STATIC)
@@ -76,12 +75,13 @@ macro(p4c_obtain_protobuf)
     set(Protobuf_LIBRARY "protobuf::libprotobuf")
     set(Protobuf_PROTOC_LIBRARY "protobuf::libprotoc")
     set(Protobuf_PROTOC_EXECUTABLE $<TARGET_FILE:protoc>)
-    # Protobuf sets the protoc binary to a generator expression, which are problematic.
-    # They are problematic because they are only evaluated at build time.
-    # However, we may have scripts that depend on the actual build time during the configure phase.
-    # Hard code a custom binary which we can use in addition to the generator expression.
+    # Protobuf sets the protoc binary to a generator expression, which are problematic. They are
+    # problematic because they are only evaluated at build time. However, we may have scripts that
+    # depend on the actual build time during the configure phase. Hard code a custom binary which we
+    # can use in addition to the generator expression.
+    # TODO: Maybe we can improve these scripts somehow?
     set(PROTOC_BINARY ${protobuf_BINARY_DIR}/protoc)
-    set(Protobuf_INCLUDE_DIR "${protobuf_SOURCE_DIR}/src/")
+    list(APPEND Protobuf_INCLUDE_DIRS "${protobuf_SOURCE_DIR}/src/")
 
     # Reset temporary variable modifications.
     set(CMAKE_UNITY_BUILD ${CMAKE_UNITY_BUILD_PREV})
@@ -89,6 +89,13 @@ macro(p4c_obtain_protobuf)
     set(CMAKE_POSITION_INDEPENDENT_CODE ${CMAKE_POSITION_INDEPENDENT_CODE_PREV})
   endif()
 
+  # Protobuf does not seem to set Protobuf_INCLUDE_DIR correctly, but we need this variable for
+  # generating code with protoc. Instead, we rely on Protobuf_INCLUDE_DIRS and generate a custom
+  # utility variable for includes.
+  set(PROTOBUF_PROTOC_INCLUDES)
+  foreach(dir ${Protobuf_INCLUDE_DIRS})
+    list(APPEND PROTOBUF_PROTOC_INCLUDES "-I${dir}")
+  endforeach()
 
   message("Done with setting up Protobuf for P4C.")
 endmacro(p4c_obtain_protobuf)
