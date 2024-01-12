@@ -163,6 +163,7 @@ class cstring {
 
     char get(unsigned index) const { return (index < size()) ? str[index] : 0; }
     const char *c_str() const { return str; }
+    const char *data() const { return str; }
     operator const char *() const { return str; }
 
     // Size tests. Constant time except for size(), which is linear time.
