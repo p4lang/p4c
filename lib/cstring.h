@@ -210,6 +210,9 @@ class cstring {
     bool operator>(const std::string &a) const { return *this > a.c_str(); }
     bool operator>=(const std::string &a) const { return *this >= a.c_str(); }
 
+    /// implicit cast to std::string_view, similar to what std::string has
+    operator std::string_view() const { return std::string_view(data(), size()); }
+
     bool startsWith(const cstring &prefix) const;
     bool endsWith(const cstring &suffix) const;
 
