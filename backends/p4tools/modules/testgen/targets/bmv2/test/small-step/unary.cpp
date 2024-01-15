@@ -26,7 +26,7 @@ TEST_F(SmallStepTest, Unary01) {
 
     // Step on the unary operation and examine the resulting continuation
     // to include the rebuilt IR::Neg node.
-    stepAndExamineOp(opUn, opUn->expr, test->getProgram(),
+    stepAndExamineOp(opUn, opUn->expr, test->getCompilerResult(),
                      [](const IR::PathExpression *expr) { return new IR::Neg(expr); });
 }
 
@@ -40,9 +40,9 @@ TEST_F(SmallStepTest, Unary02) {
 
     // Step on the unary operation and examine the resulting continuation
     // to include the rebuilt IR::LNot node.
-    stepAndExamineOp(opUn, opUn->expr, test->getProgram(), [](const IR::PathExpression *expr) {
-        return new IR::LNot(IR::Type_Boolean::get(), expr);
-    });
+    stepAndExamineOp(
+        opUn, opUn->expr, test->getCompilerResult(),
+        [](const IR::PathExpression *expr) { return new IR::LNot(IR::Type_Boolean::get(), expr); });
 }
 
 /// Test the step function for ~(v) unary operation.
@@ -55,7 +55,7 @@ TEST_F(SmallStepTest, Unary03) {
 
     // Step on the unary operation and examine the resulting continuation
     // to include the rebuilt IR::Cmpl node.
-    stepAndExamineOp(opUn, opUn->expr, test->getProgram(),
+    stepAndExamineOp(opUn, opUn->expr, test->getCompilerResult(),
                      [](const IR::PathExpression *expr) { return new IR::Cmpl(expr); });
 }
 

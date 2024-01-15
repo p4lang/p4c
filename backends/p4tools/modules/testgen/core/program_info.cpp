@@ -1,5 +1,6 @@
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 
+#include "backends/p4tools/common/compiler/compiler_target.h"
 #include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/lib/arch_spec.h"
 #include "backends/p4tools/common/lib/util.h"
@@ -7,7 +8,6 @@
 #include "ir/id.h"
 #include "ir/irutils.h"
 #include "lib/cstring.h"
-#include "lib/enumerator.h"
 #include "lib/exceptions.h"
 #include "midend/coverage.h"
 
@@ -17,18 +17,19 @@
 
 namespace P4Tools::P4Testgen {
 
-ProgramInfo::ProgramInfo(const IR::P4Program *program) : concolicMethodImpls({}), program(program) {
+ProgramInfo::ProgramInfo(const CompilerResult &compilerResult)
+    : compilerResult(compilerResult), concolicMethodImpls({}) {
     concolicMethodImpls.add(*Concolic::getCoreConcolicMethodImpls());
     if (TestgenOptions::get().dcg || !TestgenOptions::get().pattern.empty()) {
         // Create DCG.
         auto *currentDCG = new NodesCallGraph("NodesCallGraph");
         P4ProgramDCGCreator dcgCreator(currentDCG);
-        program->apply(dcgCreator);
+        compilerResult.getProgram().apply(dcgCreator);
         dcg = currentDCG;
     }
     /// Collect coverage information about the program.
     auto coverage = P4::Coverage::CollectNodes(TestgenOptions::get().coverageOptions);
-    program->apply(coverage);
+    compilerResult.getProgram().apply(coverage);
     auto coveredNodes = coverage.getCoverableNodes();
     coverableNodes.insert(coveredNodes.begin(), coveredNodes.end());
 }
@@ -74,7 +75,7 @@ void ProgramInfo::produceCopyInOutCall(const IR::Parameter *param, size_t paramI
     const auto *paramType = param->type;
     // We need to resolve type names.
     if (const auto *tn = paramType->to<IR::Type_Name>()) {
-        paramType = resolveProgramType(program, tn);
+        paramType = resolveProgramType(&getP4Program(), tn);
     }
     // Retrieve the identifier of the global architecture map using the parameter
     // index.
@@ -100,5 +101,9 @@ void ProgramInfo::produceCopyInOutCall(const IR::Parameter *param, size_t paramI
         copyOuts->emplace_back(copyOutCall);
     }
 }
+
+const CompilerResult &ProgramInfo::getCompilerResult() const { return compilerResult.get(); }
+
+const IR::P4Program &ProgramInfo::getP4Program() const { return getCompilerResult().getProgram(); }
 
 }  // namespace P4Tools::P4Testgen

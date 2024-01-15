@@ -35,7 +35,7 @@ class Bmv2V1ModelProgramInfo : public ProgramInfo {
     std::map<const IR::IDeclaration *, const IR::P4Table *> directExternMap;
 
  public:
-    Bmv2V1ModelProgramInfo(const IR::P4Program *program,
+    Bmv2V1ModelProgramInfo(const CompilerResult &compilerResult,
                            ordered_map<cstring, const IR::Type_Declaration *> inputBlocks,
                            std::map<int, int> declIdToGress);
 

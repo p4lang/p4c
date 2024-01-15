@@ -14,6 +14,12 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
+BMv2V1ModelCompilerResult::BMv2V1ModelCompilerResult(const IR::P4Program &program,
+                                                     P4::P4RuntimeAPI p4runtimeApi)
+    : CompilerResult(program), p4runtimeApi(p4runtimeApi) {}
+
+const P4::P4RuntimeAPI &BMv2V1ModelCompilerResult::getP4RuntimeApi() const { return p4runtimeApi; }
+
 Bmv2V1ModelCompilerTarget::Bmv2V1ModelCompilerTarget() : CompilerTarget("bmv2", "v1model") {}
 
 void Bmv2V1ModelCompilerTarget::make() {
@@ -21,6 +27,23 @@ void Bmv2V1ModelCompilerTarget::make() {
     if (INSTANCE == nullptr) {
         INSTANCE = new Bmv2V1ModelCompilerTarget();
     }
+}
+
+CompilerResultOrError Bmv2V1ModelCompilerTarget::runCompilerImpl(
+    const IR::P4Program *program) const {
+    program = runFrontend(program);
+    if (program == nullptr) {
+        return std::nullopt;
+    }
+    /// After the front end, get the P4Runtime API for the V1model architecture.
+    auto p4runtimeApi = P4::P4RuntimeSerializer::get()->generateP4Runtime(program, "v1model");
+
+    program = runMidEnd(program);
+    if (program == nullptr) {
+        return std::nullopt;
+    }
+
+    return {*new BMv2V1ModelCompilerResult{*program, p4runtimeApi}};
 }
 
 MidEnd Bmv2V1ModelCompilerTarget::mkMidEnd(const CompilerOptions &options) const {

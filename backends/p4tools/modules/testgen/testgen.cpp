@@ -95,7 +95,7 @@ int Testgen::mainImpl(const CompilerResult &compilerResult) {
     // These are discovered by CMAKE, which fills out the register.h.in file.
     registerTestgenTargets();
 
-    const auto *programInfo = TestgenTarget::initProgram(&compilerResult.getProgram());
+    const auto *programInfo = TestgenTarget::produceProgramInfo(compilerResult);
     if (programInfo == nullptr) {
         ::error("Program not supported by target device and architecture.");
         return EXIT_FAILURE;

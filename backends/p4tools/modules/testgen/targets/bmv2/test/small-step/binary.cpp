@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-#include <memory>
 #include <optional>
 
 #include "ir/ir.h"
@@ -27,7 +26,7 @@ TEST_F(SmallStepTest, Binary01) {
     // Step on the binary operation and examine the resulting continuation
     // to include the rebuilt IR::Add node.
     stepAndExamineOp(
-        opBin, opBin->right, test->getProgram(),
+        opBin, opBin->right, test->getCompilerResult(),
         [opBin](const IR::PathExpression *expr) { return new IR::Add(opBin->left, expr); });
 }
 
@@ -45,7 +44,7 @@ TEST_F(SmallStepTest, Binary02) {
     // Step on the binary operation and examine the resulting continuation
     // to include the rebuilt IR::Add node.
     stepAndExamineOp(
-        opBin, opBin->left, test->getProgram(),
+        opBin, opBin->left, test->getCompilerResult(),
         [opBin](const IR::PathExpression *expr) { return new IR::Add(expr, opBin->right); });
 }
 
@@ -60,7 +59,7 @@ TEST_F(SmallStepTest, Binary03) {
     // Step on the binary operation and examine the resulting continuation
     // to include the rebuilt IR::Equ node.
     stepAndExamineOp(
-        opBin, opBin->left, test->getProgram(),
+        opBin, opBin->left, test->getCompilerResult(),
         [opBin](const IR::PathExpression *expr) { return new IR::Equ(expr, opBin->right); });
 }
 
@@ -75,7 +74,7 @@ TEST_F(SmallStepTest, Binary04) {
     // Step on the binary operation and examine the resulting continuation
     // to include the rebuilt IR::Concat node.
     stepAndExamineOp(
-        opBin, opBin->right, test->getProgram(),
+        opBin, opBin->right, test->getCompilerResult(),
         [opBin](const IR::PathExpression *expr) { return new IR::Concat(opBin->left, expr); });
 }
 

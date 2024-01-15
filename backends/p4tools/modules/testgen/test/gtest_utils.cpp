@@ -4,6 +4,7 @@
 
 #include "backends/p4tools/common/compiler/compiler_target.h"
 #include "backends/p4tools/common/core/target.h"
+#include "backends/p4tools/common/lib/variables.h"
 #include "frontends/common/options.h"
 #include "frontends/common/parser_options.h"
 #include "lib/compile_context.h"
@@ -13,7 +14,8 @@
 
 namespace Test {
 
-P4ToolsTestCase::P4ToolsTestCase(const IR::P4Program &program) : program(program) {}
+P4ToolsTestCase::P4ToolsTestCase(const P4Tools::CompilerResult &compilerResults)
+    : compilerResults(compilerResults) {}
 
 std::optional<const P4ToolsTestCase> P4ToolsTestCase::create(
     std::string deviceName, std::string archName, CompilerOptions::FrontendVersion langVersion,
@@ -31,10 +33,16 @@ std::optional<const P4ToolsTestCase> P4ToolsTestCase::create(
     if (!compilerResults.has_value()) {
         return std::nullopt;
     }
-    return P4ToolsTestCase(compilerResults.value().get().getProgram());
+    return P4ToolsTestCase(compilerResults.value());
 }
 
-const IR::P4Program &P4ToolsTestCase::getProgram() const { return program.get(); }
+const IR::P4Program &P4ToolsTestCase::getProgram() const {
+    return getCompilerResult().getProgram();
+}
+
+const P4Tools::CompilerResult &P4ToolsTestCase::getCompilerResult() const {
+    return compilerResults;
+}
 
 std::optional<const P4ToolsTestCase> P4ToolsTestCase::create_14(std::string deviceName,
                                                                 std::string archName,
