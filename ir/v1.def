@@ -231,10 +231,11 @@ class CalculatedField : IAnnotated {
         ID                      name;
         Expression              cond;
         update_or_verify() { }  // FIXME -- needed by umpack_json(safe_vector) -- should not be
-        bool operator<(update_or_verify const & a) const {
+        // update_or_verify is not an IR node, we have to implement our own comparator.
+        bool isSemanticallyLess(update_or_verify const & a) const {
             return update < a.update
             || name < a.name
-            || (cond != nullptr ? a.cond != nullptr ? cond->operator<(*a.cond) : false : a.cond != nullptr);
+            || (cond != nullptr ? a.cond != nullptr ? cond->isSemanticallyLess(*a.cond) : false : a.cond != nullptr);
         }
     }
     safe_vector<update_or_verify> specs = {};
@@ -244,6 +245,14 @@ class CalculatedField : IAnnotated {
         v.visit(field, "field");
         for (auto &s : specs) v.visit(s.cond, s.name.name);
         v.visit(annotations, "annotations"); }
+     isSemanticallyLess {
+            if (static_cast<const Node *>(this) == &a_) return false;
+            if (node_type_name() != a_.node_type_name()) return node_type_name() < a_.node_type_name();
+            auto &a = static_cast<const CalculatedField &>(a_);
+            return (field != nullptr ? a.field != nullptr ? field->isSemanticallyLess(*a.field) : false : a.field != nullptr)
+            || std::lexicographical_compare(specs.begin(), specs.end(), a.specs.begin(), a.specs.end(), [](const update_or_verify &a, const update_or_verify &b) { return a.isSemanticallyLess(b); })
+            || (annotations != nullptr ? a.annotations != nullptr ? annotations->isSemanticallyLess(*a.annotations) : false : a.annotations != nullptr);
+    }
 }
 
 class ParserValueSet : IAnnotated {

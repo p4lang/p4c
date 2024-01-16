@@ -27,7 +27,7 @@ namespace P4Tools::P4Testgen {
 /// they actually are present, but not expressions. The reason expressions need to be keys is
 /// that sometimes entire expressions are mapped to a particular constant.
 using ConcolicVariableMap = ordered_map<std::reference_wrapper<const IR::Expression>,
-                                        const IR::Expression *, std::less<const IR::Expression>>;
+                                        const IR::Expression *, IR::IsSemanticallyLessComparator>;
 
 /// Encapsulates a set of concolic method implementations.
 class ConcolicMethodImpls {

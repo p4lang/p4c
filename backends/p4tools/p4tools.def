@@ -28,7 +28,7 @@ class StateVariable : Expression {
         return *ref == *other.ref;
     }
 
-    operator< {
+    isSemanticallyLess {
         if (static_cast<const Node *>(this) == &a_) return false;
         if (node_type_name() != a_.node_type_name()) return node_type_name() < a_.node_type_name();
         auto &a = static_cast<const StateVariable &>(a_);
@@ -135,7 +135,7 @@ class TaintExpression : Expression {
 class SymbolicVariable : Expression {
 #noconstructor
 
-    operator< {
+    isSemanticallyLess {
         if (static_cast<const Node *>(this) == &a_) return false;
         if (node_type_name() !=  a_.node_type_name()) return node_type_name() <  a_.node_type_name();
         auto &a = static_cast<const SymbolicVariable &>(a_);
@@ -224,7 +224,7 @@ public:
         out << "Concolic_" << label << "(" << arguments << ")";
     }
 
-    operator< {
+    isSemanticallyLess {
         if (static_cast<const Node *>(this) == &a_) return false;
         if (node_type_name() !=  a_.node_type_name()) return node_type_name() <  a_.node_type_name();
         auto &a = static_cast<const ConcolicVariable &>(a_);

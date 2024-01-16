@@ -154,8 +154,10 @@ class Node : public virtual INode {
     virtual bool operator==(const Node &a) const { return this->typeId() == a.typeId(); }
     /* 'equiv' does a deep-equals comparison, comparing all non-pointer fields and recursing
      * though all Node subclass pointers to compare them with 'equiv' as well. */
-    virtual bool equiv(const Node &a) const { return this->typeId() == a.typeId(); }
-    virtual bool operator<(const Node &a) const { return node_type_name() < a.node_type_name(); }
+    [[nodiscard]] virtual bool equiv(const Node &a) const { return this->typeId() == a.typeId(); }
+    [[nodiscard]] virtual bool isSemanticallyLess(const Node &a) const {
+        return node_type_name() < a.node_type_name();
+    }
 #define DEFINE_OPEQ_FUNC(CLASS, BASE) \
     virtual bool operator==(const CLASS &) const { return false; }
     IRNODE_ALL_SUBCLASSES(DEFINE_OPEQ_FUNC)
@@ -174,9 +176,18 @@ inline bool equal(const INode *a, const INode *b) {
     return a == b || (a && b && *a->getNode() == *b->getNode());
 }
 inline bool equiv(const Node *a, const Node *b) { return a == b || (a && b && a->equiv(*b)); }
+
 inline bool equiv(const INode *a, const INode *b) {
     return a == b || (a && b && a->getNode()->equiv(*b->getNode()));
 }
+struct IsSemanticallyLessComparator {
+    bool operator()(const IR::Node *s1, const IR::Node *s2) const {
+        return s1->isSemanticallyLess(*s2);
+    }
+    bool operator()(const IR::Node &s1, const IR::Node &s2) const {
+        return s1.isSemanticallyLess(s2);
+    }
+};
 // NOLINTBEGIN(bugprone-macro-parentheses)
 /* common things that ALL Node subclasses must define */
 #define IRNODE_SUBCLASS(T)                             \

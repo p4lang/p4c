@@ -21,7 +21,7 @@ limitations under the License.
 #include "ir/visitor.h"
 
 static inline bool isSemanticallyLess(const IR::Node &a, const IR::Node &b) {
-    return a.operator<(b);
+    return a.isSemanticallyLess(b);
 }
 
 #define EXECUTE_FUNCTION_FOR_P4C_NODE(BASE_TYPE, a, b, function)                       \

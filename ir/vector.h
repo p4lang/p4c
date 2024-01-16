@@ -200,17 +200,17 @@ class Vector : public VectorBase {
         }
         return true;
     }
-    bool operator<(const Node &a_) const override {
+    bool isSemanticallyLess(const Node &a_) const override {
         if (static_cast<const Node *>(this) == &a_) {
             return false;
         }
-        if (VectorBase::operator<(a_)) {
+        if (VectorBase::isSemanticallyLess(a_)) {
             return true;
         }
         auto &a = static_cast<const Vector<T> &>(a_);
         return std::lexicographical_compare(
             vec.begin(), vec.end(), a.vec.begin(), a.vec.end(),
-            [](const T *a, const T *b) { return a->operator<(*b); });
+            [](const T *a, const T *b) { return a->isSemanticallyLess(*b); });
     }
     cstring node_type_name() const override { return "Vector<" + T::static_type_name() + ">"; }
     static cstring static_type_name() { return "Vector<" + T::static_type_name() + ">"; }

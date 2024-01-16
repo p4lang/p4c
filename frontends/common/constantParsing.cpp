@@ -27,6 +27,10 @@ std::ostream &operator<<(std::ostream &out, const UnparsedConstant &constant) {
     return out;
 }
 
+bool operator<(const UnparsedConstant &a, const UnparsedConstant &b) {
+    return a.text < b.text || a.skip < b.skip || a.base < b.base || a.hasWidth < b.hasWidth;
+}
+
 /// A helper to parse constants which have an explicit width;
 /// @see UnparsedConstant for an explanation of the parameters.
 static IR::Constant *parseConstantWithWidth(Util::SourceInfo srcInfo, const char *text,

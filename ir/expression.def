@@ -252,10 +252,10 @@ class Constant : Literal {
         return Util::toString(value, width, sign, base);
     }
     visit_children { v.visit(type, "type"); }
-    operator< {
+    isSemanticallyLess {
         if (static_cast<const Node *>(this) == &a_) return false;
         if (node_type_name() != a_.node_type_name()) return node_type_name() < a_.node_type_name();
-        if (Literal::operator<(a_)) return true;
+        if (Literal::isSemanticallyLess(a_)) return true;
         auto &a = static_cast<const Constant &>(a_);
         return value < a.value; /* ignore base */
     }

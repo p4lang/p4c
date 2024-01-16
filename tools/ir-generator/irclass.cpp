@@ -113,6 +113,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
          << "#include \"ir/ir-inline.h\"       // IWYU pragma: keep\n"
          << "#include \"ir/json_generator.h\"  // IWYU pragma: keep\n"
          << "#include \"ir/json_loader.h\"     // IWYU pragma: keep\n"
+         << "#include \"ir/semantic_less.h\"   // IWYU pragma: keep\n"
          << "#include \"ir/visitor.h\"         // IWYU pragma: keep\n"
          << "#include \"lib/algorithm.h\"      // IWYU pragma: keep\n"
          << "#include \"lib/log.h\"            // IWYU pragma: keep\n"

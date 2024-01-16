@@ -17,6 +17,10 @@ enum class Direction {
     InOut
 };
 
+inline bool isSemanticallyLess(const IR::Direction &a, const IR::Direction &b) {
+    return a < b;
+}
+
 inline cstring directionToString(IR::Direction direction) {
     switch (direction) {
         case IR::Direction::None:
@@ -82,9 +86,9 @@ class Type_Any : Type, ITypeVar {
         (void)a;  // silence unused warning
         return true; /* ignore declid */
     }
-    operator< {
+    isSemanticallyLess {
         if (static_cast<const Node *>(this) == &a_) return false;
-        if (Type::operator<(a_)) return true;
+        if (Type::isSemanticallyLess(a_)) return true;
         return node_type_name() < a_.node_type_name(); /* ignore declid */
     }
 }
@@ -233,9 +237,9 @@ class Type_InfInt : Type, ITypeVar {
         (void)a;  // silence unused warning
         return true; /* ignore declid */
     }
-    operator< {
+    isSemanticallyLess {
         if (static_cast<const Node *>(this) == &a_) return false;
-        if (Type::operator<(a_)) return true;
+        if (Type::isSemanticallyLess(a_)) return true;
         return node_type_name() < a_.node_type_name(); /* ignore declid */
     }
     const Type* getP4Type() const override { return this; }

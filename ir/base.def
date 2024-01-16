@@ -133,9 +133,9 @@ abstract Declaration : StatOrDecl, IDeclaration {
     long declid = nextId++;
     ID getName() const override { return name; }
     equiv { return name == a.name; /* ignore declid */ }
-    operator< {
+    isSemanticallyLess {
         if (static_cast<const Node *>(this) == &a_) return false;
-        if (StatOrDecl::operator<(a_)) return true;
+        if (StatOrDecl::isSemanticallyLess(a_)) return true;
         auto &a = static_cast<const Declaration &>(a_);
         return name < a.name;  /* ignore declid */
     }
@@ -155,9 +155,9 @@ abstract Type_Declaration : Type, IDeclaration {
     long declid = nextId++;
     ID getName() const override { return name; }
     equiv { return name == a.name; /* ignore declid */ }
-    operator< {
+    isSemanticallyLess {
         if (static_cast<const Node *>(this) == &a_) return false;
-        if (Type::operator<(a_)) return true;
+        if (Type::isSemanticallyLess(a_)) return true;
         auto &a = static_cast<const Declaration &>(a_);
         return name < a.name;  /* ignore declid */
     }
@@ -228,6 +228,14 @@ class AnnotationToken {
     cstring text;
     optional NullOK UnparsedConstant* constInfo = nullptr;
     dbprint { out << text; }
+    isSemanticallyLess {
+        if (static_cast<const Node *>(this) == &a_) return false;
+        if (node_type_name() != a_.node_type_name()) return node_type_name() < a_.node_type_name();
+        auto &a = static_cast<const AnnotationToken &>(a_);
+        return IR::isSemanticallyLess(token_type, a.token_type)
+        || IR::isSemanticallyLess(text, a.text)
+        || IR::isSemanticallyLess(*constInfo, *a.constInfo);
+    }
 }
 
 /// Annotations are used to provide additional information to the compiler

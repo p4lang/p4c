@@ -125,7 +125,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
           buf << cl->indent << "}";
           return buf.str();
       }}},
-    {"operator<",
+    {"isSemanticallyLess",
      {&NamedType::Bool(),
       {new IrField(new ReferenceType(new NamedType(IrClass::nodeClass()), true), "a_")},
       CONST + IN_IMPL + OVERRIDE,
@@ -141,7 +141,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
               if (parent->name != "Node") {
                   buf << cl->indent << cl->indent << "if ("
                       << parent->qualified_name(cl->containedIn)
-                      << "::operator<(a_)) return true;\n";
+                      << "::isSemanticallyLess(a_)) return true;\n";
               }
           }
           if (body) {
@@ -163,12 +163,12 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
                   }
                   if (f->type->resolve(cl->containedIn) == nullptr) {
                       // This is not an IR pointer
-                      buf << f->name << " < a." << f->name;
+                      buf << "IR::isSemanticallyLess(" << f->name << ", a." << f->name << ")";
                   } else if (f->isInline) {
-                      buf << f->name << ".operator<(a." << f->name << ")";
+                      buf << f->name << ".isSemanticallyLess(a." << f->name << ")";
                   } else {
                       buf << "(" << f->name << " != nullptr ? a." << f->name << " != nullptr ? "
-                          << f->name << "->operator<(*a." << f->name << ")"
+                          << f->name << "->isSemanticallyLess(*a." << f->name << ")"
                           << " : false : a." << f->name << " != nullptr)";
                   }
               }
