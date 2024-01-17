@@ -26,6 +26,7 @@ and limitations under the License.
 #include "ir/ir.h"
 #include "lib/error.h"
 #include "lib/nullstream.h"
+#include "lib/stringify.h"
 #include "options.h"
 #include "pnaProgramStructure.h"
 #include "tcAnnotations.h"

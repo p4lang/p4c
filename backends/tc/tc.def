@@ -294,14 +294,15 @@ class TCTable {
         }
         if (const_entries.size() != 0) {
             for (auto entry : const_entries) {
-                tcTable += "\n$TC p4template update table/" + pipelineName
+                tcTable += "\n$TC p4template create table/" + pipelineName
                       + "/" + controlName + "/" + tableName
-                      + " entry ";
+                      + " entry";
                 for(auto k : entry.second) {
-                    tcTable += k.first + " " + k.second;
+                    tcTable += " " + k.first + " " + k.second;
                 }
                 tcTable += " action " + pipelineName
                       + "/" + controlName + "/" + entry.first;
+                tcTable += " permissions 0x1024";
             }
         }
         return tcTable;
