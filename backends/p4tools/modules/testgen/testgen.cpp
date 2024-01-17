@@ -2,7 +2,6 @@
 
 #include <cstdlib>
 #include <filesystem>
-#include <iostream>
 #include <optional>
 #include <string>
 #include <utility>
@@ -91,12 +90,12 @@ int generateAbstractTests(const TestgenOptions &testgenOptions, const ProgramInf
     return ::errorCount() == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
-int Testgen::mainImpl(const IR::P4Program *program) {
+int Testgen::mainImpl(const CompilerResult &compilerResult) {
     // Register all available testgen targets.
     // These are discovered by CMAKE, which fills out the register.h.in file.
     registerTestgenTargets();
 
-    const auto *programInfo = TestgenTarget::initProgram(program);
+    const auto *programInfo = TestgenTarget::produceProgramInfo(compilerResult);
     if (programInfo == nullptr) {
         ::error("Program not supported by target device and architecture.");
         return EXIT_FAILURE;

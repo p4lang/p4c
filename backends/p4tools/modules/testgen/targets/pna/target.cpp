@@ -34,12 +34,13 @@ void PnaDpdkTestgenTarget::make() {
     }
 }
 
-const PnaDpdkProgramInfo *PnaDpdkTestgenTarget::initProgramImpl(
-    const IR::P4Program *program, const IR::Declaration_Instance *mainDecl) const {
+const PnaDpdkProgramInfo *PnaDpdkTestgenTarget::produceProgramInfoImpl(
+    const CompilerResult &compilerResult, const IR::Declaration_Instance *mainDecl) const {
     // The blocks in the main declaration are just the arguments in the constructor call.
     // Convert mainDecl->arguments into a vector of blocks, represented as constructor-call
     // expressions.
-    const auto blocks = argumentsToTypeDeclarations(program, mainDecl->arguments);
+    const auto blocks =
+        argumentsToTypeDeclarations(&compilerResult.getProgram(), mainDecl->arguments);
 
     // We should have six arguments.
     BUG_CHECK(blocks.size() == 4, "%1%: The PNA architecture requires 4 pipes. Received %2%.",
@@ -54,7 +55,7 @@ const PnaDpdkProgramInfo *PnaDpdkTestgenTarget::initProgramImpl(
         programmableBlocks.emplace(canonicalName, declType);
     }
 
-    return new PnaDpdkProgramInfo(program, programmableBlocks);
+    return new PnaDpdkProgramInfo(compilerResult, programmableBlocks);
 }
 
 PnaTestBackend *PnaDpdkTestgenTarget::getTestBackendImpl(

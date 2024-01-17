@@ -808,6 +808,16 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
         } else {
             return e;
         }
+    } else if (etype->is<IR::Type_InfInt>()) {
+        if (const auto *constant = expr->to<IR::Constant>()) {
+            const auto *ctype = constant->type;
+            if (!ctype->is<IR::Type_Bits>() && !ctype->is<IR::Type_InfInt>()) {
+                ::error(ErrorType::ERR_INVALID, "%1%: Cannot cast %1% to arbitrary presion integer",
+                        ctype);
+                return e;
+            }
+            return new IR::Constant(e->srcInfo, etype, constant->value, constant->base);
+        }
     } else if (etype->is<IR::Type_Boolean>()) {
         if (expr->is<IR::BoolLiteral>()) return expr;
         if (expr->is<IR::Constant>()) {

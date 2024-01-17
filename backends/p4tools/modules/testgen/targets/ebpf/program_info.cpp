@@ -31,9 +31,9 @@ namespace P4Tools::P4Testgen::EBPF {
 
 const IR::Type_Bits EBPFProgramInfo::PARSER_ERR_BITS = IR::Type_Bits(32, false);
 
-EBPFProgramInfo::EBPFProgramInfo(const IR::P4Program *program,
+EBPFProgramInfo::EBPFProgramInfo(const CompilerResult &compilerResult,
                                  ordered_map<cstring, const IR::Type_Declaration *> inputBlocks)
-    : ProgramInfo(program), programmableBlocks(std::move(inputBlocks)) {
+    : ProgramInfo(compilerResult), programmableBlocks(std::move(inputBlocks)) {
     concolicMethodImpls.add(*EBPFConcolic::getEBPFConcolicMethodImpls());
 
     // Just concatenate everything together.

@@ -21,8 +21,9 @@ namespace P4Tools::P4Testgen::Pna {
 const IR::Type_Bits SharedPnaProgramInfo::PARSER_ERR_BITS = IR::Type_Bits(32, false);
 
 SharedPnaProgramInfo::SharedPnaProgramInfo(
-    const IR::P4Program *program, ordered_map<cstring, const IR::Type_Declaration *> inputBlocks)
-    : ProgramInfo(program), programmableBlocks(std::move(inputBlocks)) {
+    const CompilerResult &compilerResult,
+    ordered_map<cstring, const IR::Type_Declaration *> inputBlocks)
+    : ProgramInfo(compilerResult), programmableBlocks(std::move(inputBlocks)) {
     concolicMethodImpls.add(*PnaDpdkConcolic::getPnaDpdkConcolicMethodImpls());
 }
 
@@ -59,7 +60,7 @@ const IR::PathExpression *SharedPnaProgramInfo::getBlockParam(cstring blockLabel
     const auto *paramType = param->type;
     // For convenience, resolve type names.
     if (const auto *tn = paramType->to<IR::Type_Name>()) {
-        paramType = resolveProgramType(program, tn);
+        paramType = resolveProgramType(&getP4Program(), tn);
     }
 
     const auto &archSpec = getArchSpec();

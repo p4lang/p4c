@@ -1,17 +1,14 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_TARGET_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_CORE_TARGET_H_
 
-#include <cstdint>
 #include <filesystem>
-#include <optional>
 #include <string>
-#include <vector>
 
+#include "backends/p4tools/common/compiler/compiler_target.h"
 #include "backends/p4tools/common/core/target.h"
 #include "backends/p4tools/common/lib/arch_spec.h"
 #include "ir/ir.h"
 #include "ir/solver.h"
-#include "ir/vector.h"
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/small_step/cmd_stepper.h"
@@ -30,7 +27,7 @@ class TestgenTarget : public Target {
     /// Produces a @ProgramInfo for the given P4 program.
     ///
     /// @returns nullptr if the program is not supported by this target.
-    static const ProgramInfo *initProgram(const IR::P4Program *program);
+    static const ProgramInfo *produceProgramInfo(const CompilerResult &compilerResult);
 
     /// Returns the test back end associated with this P4Testgen target.
     static TestBackEnd *getTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
@@ -45,12 +42,13 @@ class TestgenTarget : public Target {
                                        const ProgramInfo &programInfo);
 
  protected:
-    /// @see @initProgram.
-    const ProgramInfo *initProgramImpl(const IR::P4Program *program) const;
+    /// @see @produceProgramInfo.
+    [[nodiscard]] const ProgramInfo *produceProgramInfoImpl(
+        const CompilerResult &compilerResult) const;
 
-    /// @see @initProgram.
-    virtual const ProgramInfo *initProgramImpl(const IR::P4Program *program,
-                                               const IR::Declaration_Instance *mainDecl) const = 0;
+    /// @see @produceProgramInfo.
+    virtual const ProgramInfo *produceProgramInfoImpl(
+        const CompilerResult &compilerResult, const IR::Declaration_Instance *mainDecl) const = 0;
 
     /// @see getTestBackend.
     virtual TestBackEnd *getTestBackendImpl(const ProgramInfo &programInfo,

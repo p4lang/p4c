@@ -26,8 +26,9 @@ class EBPFTestgenTarget : public TestgenTarget {
     static void make();
 
  protected:
-    const EBPFProgramInfo *initProgramImpl(const IR::P4Program *program,
-                                           const IR::Declaration_Instance *mainDecl) const override;
+    const EBPFProgramInfo *produceProgramInfoImpl(
+        const CompilerResult &compilerResult,
+        const IR::Declaration_Instance *mainDecl) const override;
 
     EBPFTestBackend *getTestBackendImpl(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
                                         const std::filesystem::path &testPath) const override;

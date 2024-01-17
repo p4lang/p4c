@@ -3,7 +3,6 @@
 #include <vector>
 
 #include "lib/crash.h"
-#include "lib/exceptions.h"
 
 #include "backends/p4tools/modules/testgen/testgen.h"
 

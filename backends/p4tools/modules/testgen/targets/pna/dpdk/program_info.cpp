@@ -22,8 +22,9 @@
 namespace P4Tools::P4Testgen::Pna {
 
 PnaDpdkProgramInfo::PnaDpdkProgramInfo(
-    const IR::P4Program *program, ordered_map<cstring, const IR::Type_Declaration *> inputBlocks)
-    : SharedPnaProgramInfo(program, std::move(inputBlocks)) {
+    const CompilerResult &compilerResult,
+    ordered_map<cstring, const IR::Type_Declaration *> inputBlocks)
+    : SharedPnaProgramInfo(compilerResult, std::move(inputBlocks)) {
     concolicMethodImpls.add(*PnaDpdkConcolic::getPnaDpdkConcolicMethodImpls());
 
     // Just concatenate everything together.
