@@ -378,13 +378,6 @@ void CodeGenInspector::emitAssignStatement(const IR::Type *ltype, const IR::Expr
 
 bool CodeGenInspector::preorder(const IR::AssignmentStatement *a) {
     auto ltype = typeMap->getType(a->left);
-    // if (auto rpath = a->right->to<IR::PathExpression>()) {
-    //     if (isPointerVariable(rpath->path->name)) {
-    //         if (auto lpath = a->left->to<IR::PathExpression>()) {
-    //             useAsPointerVariable(lpath->path->name.name);
-    //         }
-    //     }
-    // }
     emitAssignStatement(ltype, a->left, nullptr, a->right);
     return false;
 }
