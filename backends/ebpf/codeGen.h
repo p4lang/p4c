@@ -126,6 +126,7 @@ class CodeGenInspector : public Inspector {
     bool preorder(const IR::IfStatement *s) override;
 
     void widthCheck(const IR::Node *node) const;
+    void isPointerAssignment(const IR::Expression *expr);
 };
 
 class EBPFInitializerUtils {

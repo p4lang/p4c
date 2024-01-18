@@ -328,6 +328,14 @@ bool CodeGenInspector::preorder(const IR::Type_Enum *type) {
     return false;
 }
 
+void CodeGenInspector::isPointerAssignment(const IR::Expression *expr) {
+    if (auto rpath = expr->to<IR::PathExpression>()) {
+        if (isPointerVariable(rpath->path->name)) {
+            builder->append("*");
+        }
+    }
+}
+
 void CodeGenInspector::emitAssignStatement(const IR::Type *ltype, const IR::Expression *lexpr,
                                            cstring lpath, const IR::Expression *rexpr) {
     auto ebpfType = EBPFTypeFactory::instance->create(ltype);
@@ -356,11 +364,13 @@ void CodeGenInspector::emitAssignStatement(const IR::Type *ltype, const IR::Expr
         builder->appendFormat(", %d)", scalar->bytesRequired());
     } else {
         if (lexpr != nullptr) {
+            isPointerAssignment(lexpr);
             visit(lexpr);
         } else {
             builder->append(lpath);
         }
         builder->append(" = ");
+        isPointerAssignment(rexpr);
         visit(rexpr);
     }
     builder->endOfStatement();
@@ -368,6 +378,13 @@ void CodeGenInspector::emitAssignStatement(const IR::Type *ltype, const IR::Expr
 
 bool CodeGenInspector::preorder(const IR::AssignmentStatement *a) {
     auto ltype = typeMap->getType(a->left);
+    // if (auto rpath = a->right->to<IR::PathExpression>()) {
+    //     if (isPointerVariable(rpath->path->name)) {
+    //         if (auto lpath = a->left->to<IR::PathExpression>()) {
+    //             useAsPointerVariable(lpath->path->name.name);
+    //         }
+    //     }
+    // }
     emitAssignStatement(ltype, a->left, nullptr, a->right);
     return false;
 }
