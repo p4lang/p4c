@@ -168,7 +168,7 @@ entities {
 
 std::string ProtobufIr::formatNetworkValue(const std::string &type, const IR::Expression *value) {
     if (type == "hex_str") {
-        return formatHexExpr(value);
+        return formatHexExpr(value, {false, true, false, false});
     }
     // At this point, any value must be a constant.
     const auto *constant = value->checkedTo<IR::Constant>();
