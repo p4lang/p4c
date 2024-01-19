@@ -156,24 +156,22 @@ if (/* hdr->outer.isValid() */
         }
     }
     {
-        struct headers_t hdr_1;
-        __builtin_memset((void *) &hdr_1, 0, sizeof(struct headers_t ));
-        struct metadata_t meta_1;
-        __builtin_memset((void *) &meta_1, 0, sizeof(struct metadata_t ));
+        struct headers_t *hdr_1;
+        struct metadata_t *meta_1;
 {
 ;
             if (meta->push && /* hdr->outer.isValid() */
             hdr->outer.ebpf_valid) {
-                hdr_1 = *hdr;
-                                meta_1 = *meta;
-                                hdr_1.inner = hdr_1.outer;
-                                hdr_1.outer.srcAddr = meta_1.src;
-                                hdr_1.outer.dstAddr = meta_1.dst;
-                                hdr_1.outer.ttl = 64;
-                                hdr_1.outer.protocol = 4;
-                                hdr_1.outer.totalLen = (hdr_1.outer.totalLen + 20);
-                                hdr_1.outer.hdrChecksum = 0;
-                                *hdr = hdr_1;
+                hdr_1 = hdr;
+                                meta_1 = meta;
+                                hdr_1->inner = hdr_1->outer;
+                                hdr_1->outer.srcAddr = meta_1->src;
+                                hdr_1->outer.dstAddr = meta_1->dst;
+                                hdr_1->outer.ttl = 64;
+                                hdr_1->outer.protocol = 4;
+                                hdr_1->outer.totalLen = (hdr_1->outer.totalLen + 20);
+                                hdr_1->outer.hdrChecksum = 0;
+                                hdr = hdr_1;
             }
             ;
             ;
