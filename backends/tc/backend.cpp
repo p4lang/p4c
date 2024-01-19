@@ -311,6 +311,16 @@ void ConvertToBackendIR::updateConstEntries(const IR::P4Table *t, IR::TCTable *t
                 } while (kValue > 0);
                 for (auto ch : buf) value << ch;
                 key = value.str().c_str();
+            } else if (keySetElement->is<IR::Range>()) {
+                auto left = keySetElement->to<IR::Range>()->left;
+                auto right = keySetElement->to<IR::Range>()->right;
+                auto operand = keySetElement->to<IR::Range>()->getStringOp();
+                key = left->toString() + operand + right->toString();
+            } else if (keySetElement->is<IR::Mask>()) {
+                auto left = keySetElement->to<IR::Mask>()->left;
+                auto right = keySetElement->to<IR::Mask>()->right;
+                auto operand = keySetElement->to<IR::Mask>()->getStringOp();
+                key = left->toString() + operand + right->toString();
             }
             keyList.emplace(keyString, key);
         }

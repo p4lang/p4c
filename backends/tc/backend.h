@@ -17,6 +17,8 @@ and limitations under the License.
 #ifndef BACKENDS_TC_BACKEND_H_
 #define BACKENDS_TC_BACKEND_H_
 
+#include <deque>
+
 #include "backends/ebpf/psa/ebpfPsaGen.h"
 #include "ebpfCodeGen.h"
 #include "frontends/p4/evaluator/evaluator.h"

@@ -178,7 +178,6 @@ void PNAArchTC::emitParser(EBPF::CodeBuilder *builder) const {
     builder->newline();
     builder->newline();
     emitInstances(builder);
-    // EBPF::EBPFHashAlgorithmTypeFactoryPSA::instance()->emitGlobals(builder);
     pipeline->name = "tc-parse";
     pipeline->sectionName = "classifier/" + pipeline->name;
     pipeline->functionName = pipeline->name.replace("-", "_") + "_func";
