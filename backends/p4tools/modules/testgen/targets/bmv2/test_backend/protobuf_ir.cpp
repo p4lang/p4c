@@ -27,17 +27,19 @@ std::string ProtobufIr::getFormatOfNode(const IR::IAnnotated *node) {
     if (formatAnnotation != nullptr) {
         BUG_CHECK(formatAnnotation->body.size() == 1,
                   "@format annotation can only have one member.");
-        auto formatString = formatAnnotation->body.at(0)->text;
-        if (formatString == "IPV4_ADDRESS") {
+        auto annotationFormatString = formatAnnotation->body.at(0)->text;
+        if (annotationFormatString == "IPV4_ADDRESS") {
             formatString = "ipv4";
-        } else if (formatString == "IPV6_ADDRESS") {
+        } else if (annotationFormatString == "IPV6_ADDRESS") {
             formatString = "ipv6";
-        } else if (formatString == "MAC_ADDRESS") {
+        } else if (annotationFormatString == "MAC_ADDRESS") {
             formatString = "mac";
-        } else if (formatString == "HEX_STR") {
+        } else if (annotationFormatString == "HEX_STR") {
             formatString = "hex_str";
+        } else if (annotationFormatString == "STRING") {
+            formatString = "str";
         } else {
-            TESTGEN_UNIMPLEMENTED("Unsupported @format string %1%", formatString);
+            TESTGEN_UNIMPLEMENTED("Unsupported @format string %1%", annotationFormatString);
         }
     }
     return formatString;
@@ -170,6 +172,20 @@ std::string ProtobufIr::formatNetworkValue(const std::string &type, const IR::Ex
     if (type == "hex_str") {
         return formatHexExpr(value, {false, true, false, false});
     }
+    // Assume that any string format can be converted from a string literal, bool literal, or
+    // constant.
+    if (type == "str") {
+        if (const auto *constant = value->to<IR::Constant>()) {
+            return constant->value.str();
+        }
+        if (const auto *literal = value->to<IR::StringLiteral>()) {
+            return literal->value.c_str();
+        }
+        if (const auto *boolValue = value->to<IR::BoolLiteral>()) {
+            return boolValue->value ? "true" : "false";
+        }
+        TESTGEN_UNIMPLEMENTED("Unsupported string format value \"%1%\".", value);
+    }
     // At this point, any value must be a constant.
     const auto *constant = value->checkedTo<IR::Constant>();
     if (type == "ipv4") {
@@ -210,11 +226,15 @@ void ProtobufIr::createKeyMatch(cstring fieldName, const TableMatch &fieldMatch,
         j["hi"] = formatNetworkValue(j["format"], elem->getEvaluatedHigh()).c_str();
         rulesJson["range_matches"].push_back(j);
     } else if (const auto *elem = fieldMatch.to<Ternary>()) {
+        // If the rule has a ternary match we need to add the priority.
+        rulesJson["needs_priority"] = true;
+        // Skip any ternary match where the mask is all zeroes.
+        if (elem->getEvaluatedMask()->value == 0) {
+            return;
+        }
         j["value"] = formatNetworkValue(j["format"], elem->getEvaluatedValue()).c_str();
         j["mask"] = formatNetworkValue(j["format"], elem->getEvaluatedMask()).c_str();
         rulesJson["ternary_matches"].push_back(j);
-        // If the rule has a ternary match we need to add the priority.
-        rulesJson["needs_priority"] = true;
     } else if (const auto *elem = fieldMatch.to<LPM>()) {
         j["value"] = formatNetworkValue(j["format"], elem->getEvaluatedValue()).c_str();
         j["prefix_len"] = elem->getEvaluatedPrefixLength()->value.str();
@@ -286,8 +306,8 @@ void ProtobufIr::emitTestcase(const TestSpec *testSpec, cstring selectedBranches
     dataJson["coverage"] = coverageStr.str();
 
     // Check whether this test has a clone configuration.
-    // These are special because they require additional instrumentation and produce two output
-    // packets.
+    // These are special because they require additional instrumentation and
+    // produce two output packets.
     auto cloneSpecs = testSpec->getTestObjectCategory("clone_specs");
     if (!cloneSpecs.empty()) {
         dataJson["clone_specs"] = getClone(cloneSpecs);
