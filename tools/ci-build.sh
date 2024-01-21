@@ -132,7 +132,7 @@ function build_bmv2() {
 
   # Install add-ons to communicate with simple_switch_grpc via P4Runtime.
   # These packages are necessary because of a protobuf version mismatch in more recent Ubuntu distributions.
-  if [[ "${DISTRIB_RELEASE}" == "22.04" ]] ; then
+  if [[ "${DISTRIB_RELEASE}" == "20.04" -o "${DISTRIB_RELEASE}" == "22.04" ]] ; then
     sudo pip3 install --upgrade protobuf==3.20.1
     sudo pip3 install --upgrade googleapis-common-protos==1.50.0
     sudo pip3 install --upgrade grpcio==1.51.1
