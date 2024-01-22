@@ -368,7 +368,7 @@ namespace P4::literals {
 inline cstring operator ""_cs(const char *str, std::size_t len) {
     return cstring(str, len);
 }
-} // namespace P4::literals
+}  // namespace P4::literals
 
 namespace std {
 template <>
