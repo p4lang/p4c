@@ -17,9 +17,9 @@ limitations under the License.
 #include "cstring.h"
 
 #include <algorithm>
+#include <cctype>
 #include <ios>
 #include <string>
-#include <cctype>
 #include <unordered_set>
 
 #include "hash.h"
