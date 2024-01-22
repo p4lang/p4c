@@ -3,39 +3,39 @@ name: "validate-p4c"
 on:
   schedule:
     # Every day on midnight UTC
-    - cron: '0 0 * * *'
-
-# Cancel any preceding run on the pull request.
-concurrency:
-  group: validation-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+    - cron: "0 0 * * *"
+  pull_request:
+    branches:
+      - main
 
 jobs:
   # We run validation in parallel with the normal tests.
   # Validation ensures that P4C compiles P4-16 programs correctly.
   # We only test the front end and some mid end passes for now.
   validate:
+    # Only run on pull requests with the "run-validation" label.
+    if: contains(github.event.pull_request.labels.*.name, 'run-validation')
     env:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
       VALIDATION: ON
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: recursive
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
-    - name: ccache
-      uses: hendrikmuhs/ccache-action@v1
-      with:
-        key: validation-${{ runner.os }}
-        max-size: 1000M
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: validation-${{ runner.os }}
+          max-size: 1000M
 
-    - name: Build (Ubuntu 20.04)
-      run: |
-        tools/ci-build.sh
+      - name: Build (Ubuntu 20.04)
+        run: |
+          tools/ci-build.sh
 
-    - name: Validate
-      run: |
+      - name: Validate
+        run: |
           ctest  -R toz3-validate-p4c --output-on-failure --schedule-random
-      working-directory: ./build
+        working-directory: ./build
