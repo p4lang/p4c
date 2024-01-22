@@ -358,6 +358,18 @@ inline std::ostream &operator<<(std::ostream &out, cstring s) {
     return out << (s ? s.c_str() : "<null>");
 }
 
+/// Let's prevent literal clashes. A user wishing to use the literal can do using namespace
+/// P4::literals, similarly as they can do using namespace std::literals for the standard once.
+namespace P4::literals {
+
+/// A user-provided literal to allow creation of cstring from constants: "foo"_cs.
+/// Note the C++ standard mandates that all user-defined literals defined outside of the standard
+/// library must start with underscore.
+cstring operator""_cs(const char *str, std::size_t len) {
+    return cstring(str, len);
+}
+} // namespace P4::literals
+
 namespace std {
 template <>
 struct hash<cstring> {
