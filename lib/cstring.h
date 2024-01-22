@@ -365,7 +365,7 @@ namespace P4::literals {
 /// A user-provided literal to allow creation of cstring from constants: "foo"_cs.
 /// Note the C++ standard mandates that all user-defined literals defined outside of the standard
 /// library must start with underscore.
-cstring operator""_cs(const char *str, std::size_t len) {
+inline cstring operator ""_cs(const char *str, std::size_t len) {
     return cstring(str, len);
 }
 } // namespace P4::literals
