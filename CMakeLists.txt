@@ -242,8 +242,8 @@ enable_testing ()
 #   set (CPACK_PACKAGE_VERSION_PATCH ${CPACK_PACKAGE_VERSION_PATCH}-${__P4C_VERSION_RC})
 # endif ()
 
-# set (CMAKE_CXX_EXTENSIONS OFF) # prefer using -std=c++17 rather than -std=gnu++17
-set (CMAKE_CXX_STANDARD 17)
+# set (CMAKE_CXX_EXTENSIONS OFF) # prefer using -std=c++20 rather than -std=gnu++20
+set (CMAKE_CXX_STANDARD 20)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_cxx_compiler_option ("-Wall")
