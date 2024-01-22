@@ -52,13 +52,27 @@ TEST(cstring, construct) {
 }
 
 TEST(cstring, toupper) {
-    cstring c = "simple";
+    cstring c = "simple tEst";
     cstring c1 = "";
 
-    EXPECT_EQ(c.toUpper(), "SIMPLE");
+    EXPECT_EQ(c.toUpper(), "SIMPLE TEST");
     EXPECT_EQ(c1.toUpper(), "");
-    EXPECT_EQ(c.capitalize(), "Simple");
+}
+
+TEST(cstring, capitalize) {
+    cstring c = "simple tEst";
+    cstring c1 = "";
+
+    EXPECT_EQ(c.capitalize(), "Simple tEst");
     EXPECT_EQ(c1.capitalize(), "");
+}
+
+TEST(cstring, tolower) {
+    cstring c = "SIMple tEsT";
+    cstring c1 = "";
+
+    EXPECT_EQ(c.toLower(), "simple test");
+    EXPECT_EQ(c1.toLower(), "");
 }
 
 TEST(cstring, compare) {
@@ -119,6 +133,13 @@ TEST(cstring, replace) {
     EXPECT_EQ(c.replace("", "out"), c);
     EXPECT_EQ(c.replace("i", "o"), "Orogonal");
     EXPECT_EQ(c.replace("i", ""), "Orgnal");
+}
+
+TEST(cstring, literalSuffix) {
+    using namespace P4::literals;
+    cstring c = "test";
+    EXPECT_EQ(c, "test"_cs);
+    EXPECT_TRUE((std::is_same_v<cstring, decltype(""_cs)>));
 }
 
 }  // namespace Test
