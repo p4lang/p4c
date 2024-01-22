@@ -55,10 +55,9 @@ Bmv2TestBackend::Bmv2TestBackend(const Bmv2V1ModelProgramInfo &programInfo,
     } else if (testBackendString == "STF") {
         testWriter = new STF(testBackendConfiguration);
     } else if (testBackendString == "PROTOBUF") {
-        auto p4RuntimeAPI = programInfo.getP4RuntimeAPI();
-        testWriter = new Protobuf(testBackendConfiguration, p4RuntimeAPI);
+        testWriter = new Protobuf(testBackendConfiguration, programInfo.getP4RuntimeAPI());
     } else if (testBackendString == "PROTOBUF_IR") {
-        testWriter = new ProtobufIr(testBackendConfiguration);
+        testWriter = new ProtobufIr(testBackendConfiguration, programInfo.getP4RuntimeAPI());
     } else if (testBackendString == "METADATA") {
         testWriter = new Metadata(testBackendConfiguration);
     } else {

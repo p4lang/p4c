@@ -19,17 +19,20 @@ class Bmv2TestFramework : public TestFramework {
     explicit Bmv2TestFramework(const TestBackendConfiguration &testBackendConfiguration);
 
  protected:
+
     /// Converts all the control plane objects into Inja format.
     virtual inja::json getControlPlane(const TestSpec *testSpec) const;
 
     /// Returns the configuration for a cloned packet configuration.
-    virtual inja::json getClone(const TestObjectMap &cloneSpecs) const;
+    [[nodiscard]] virtual inja::json getClone(const TestObjectMap &cloneSpecs) const;
 
     /// @returns the configuration for a meter call (may set the meter to GREEN, YELLOW, or RED)
-    virtual inja::json::array_t getMeter(const TestObjectMap &meterValues) const;
+    [[nodiscard]] virtual inja::json::array_t getMeter(const TestObjectMap &meterValues) const;
+    /// Converts a table configuration into Inja format.
+    [[nodiscard]] virtual inja::json getControlPlaneTable(const TableConfig &tblConfig) const;
 
     /// Helper function for the control plane table inja objects.
-    virtual inja::json getControlPlaneForTable(const TableMatchMap &matches,
+    [[nodiscard]] virtual inja::json getControlPlaneForTable(const TableMatchMap &matches,
                                                const std::vector<ActionArg> &args) const;
 
     /// Converts the input packet and port into Inja format.
