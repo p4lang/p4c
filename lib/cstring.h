@@ -362,9 +362,9 @@ inline std::ostream &operator<<(std::ostream &out, cstring s) {
 /// P4::literals, similarly as they can do using namespace std::literals for the standard once.
 namespace P4::literals {
 
-/// A user-provided literal to allow creation of cstring from constants: "foo"_cs.
-/// Note the C++ standard mandates that all user-defined literals defined outside of the standard
-/// library must start with underscore.
+/// A user-provided literal suffix to allow creation of cstring from literals: "foo"_cs.
+/// Note that the C++ standard mandates that all user-defined literal suffixes defined outside of
+/// the standard library must start with underscore.
 inline cstring operator""_cs(const char *str, std::size_t len) { return cstring(str, len); }
 }  // namespace P4::literals
 
