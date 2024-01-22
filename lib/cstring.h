@@ -265,9 +265,11 @@ class cstring {
     /// to the total number of interned strings.
     static size_t cache_size(size_t &count);
 
-    /// convert the cstring to upper case
+    /// Convert the cstring to uppercase.
     cstring toUpper() const;
-    /// capitalize the first symbol
+    /// Convert the cstring to lowercase.
+    cstring toLower() const;
+    /// Capitalize the first symbol.
     cstring capitalize() const;
     /// Append this many spaces after each newline (and before the first string).
     cstring indent(size_t amount) const;
