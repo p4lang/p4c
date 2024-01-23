@@ -1,0 +1,59 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "ubpf"
+}
+actions {
+  preamble {
+    id: 28069536
+    name: "pipe.update_conn_state"
+    alias: "update_conn_state"
+  }
+}
+actions {
+  preamble {
+    id: 21918628
+    name: "pipe.update_conn_info"
+    alias: "update_conn_info"
+  }
+}
+actions {
+  preamble {
+    id: 30647342
+    name: "pipe._drop"
+    alias: "_drop"
+  }
+}
+registers {
+  preamble {
+    id: 371662957
+    name: "pipe.conn_state"
+    alias: "conn_state"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 65536
+}
+registers {
+  preamble {
+    id: 371315315
+    name: "pipe.conn_srv_addr"
+    alias: "conn_srv_addr"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 65536
+}
+type_info {
+}

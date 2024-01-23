@@ -1,0 +1,88 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 46138463
+    name: "ingress.tns"
+    alias: "tns"
+  }
+  match_fields {
+    id: 1
+    name: "h.eth_hdr.eth_type"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 22708368
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+  is_const_table: true
+  has_initial_entries: true
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 22708368
+    name: "ingress.do_act"
+    alias: "do_act"
+  }
+  params {
+    id: 1
+    name: "type"
+    bitwidth: 32
+  }
+}
+type_info {
+  serializable_enums {
+    key: "EthTypes"
+    value {
+      underlying_type {
+        bitwidth: 16
+      }
+      members {
+        name: "IPv4"
+        value: "\010\000"
+      }
+      members {
+        name: "ARP"
+        value: "\010\006"
+      }
+      members {
+        name: "RARP"
+        value: "\2005"
+      }
+      members {
+        name: "EtherTalk"
+        value: "\200\233"
+      }
+      members {
+        name: "VLAN"
+        value: "\201\000"
+      }
+      members {
+        name: "IPX"
+        value: "\2017"
+      }
+      members {
+        name: "IPv6"
+        value: "\206\335"
+      }
+    }
+  }
+}

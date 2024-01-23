@@ -1,0 +1,123 @@
+# proto-file: p4/v1/p4runtime.proto
+# proto-message: p4.v1.WriteRequest
+
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 35792087
+      match {
+        field_id: 1
+        exact {
+          value: "+"
+        }
+      }
+      action {
+        action {
+          action_id: 24785092
+        }
+      }
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 35792087
+      match {
+        field_id: 1
+        exact {
+          value: "-"
+        }
+      }
+      action {
+        action {
+          action_id: 22867470
+        }
+      }
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 35792087
+      match {
+        field_id: 1
+        exact {
+          value: "&"
+        }
+      }
+      action {
+        action {
+          action_id: 32601303
+        }
+      }
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 35792087
+      match {
+        field_id: 1
+        exact {
+          value: "|"
+        }
+      }
+      action {
+        action {
+          action_id: 17405675
+        }
+      }
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 35792087
+      match {
+        field_id: 1
+        exact {
+          value: "^"
+        }
+      }
+      action {
+        action {
+          action_id: 31935968
+        }
+      }
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 35792087
+      match {
+        field_id: 1
+        exact {
+          value: ">"
+        }
+      }
+      action {
+        action {
+          action_id: 24997060
+        }
+      }
+      is_const: true
+    }
+  }
+}

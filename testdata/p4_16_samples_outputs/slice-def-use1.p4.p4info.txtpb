@@ -1,0 +1,42 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 35196712
+    name: "Ing.tbl_act"
+    alias: "tbl_act"
+  }
+  action_refs {
+    id: 30218393
+  }
+  const_default_action_id: 30218393
+  size: 1024
+}
+actions {
+  preamble {
+    id: 30218393
+    name: "Ing.act"
+    alias: "act"
+  }
+}
+registers {
+  preamble {
+    id: 376440781
+    name: "Ing.debug"
+    alias: "debug"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 8
+      }
+    }
+  }
+  size: 2
+}
+type_info {
+}

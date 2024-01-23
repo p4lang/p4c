@@ -1,0 +1,99 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 35996228
+    name: "ingress.ipv4_da_lpm"
+    alias: "ipv4_da_lpm"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4.dstAddr"
+    bitwidth: 32
+    match_type: LPM
+  }
+  action_refs {
+    id: 27207020
+  }
+  action_refs {
+    id: 25648360
+  }
+  direct_resource_ids: 332805598
+  size: 1024
+}
+actions {
+  preamble {
+    id: 27207020
+    name: "ingress.next_hop"
+    alias: "next_hop"
+  }
+  params {
+    id: 1
+    name: "oport"
+    bitwidth: 32
+    type_name {
+      name: "PortId_t"
+    }
+  }
+}
+actions {
+  preamble {
+    id: 25648360
+    name: "ingress.default_route_drop"
+    alias: "default_route_drop"
+  }
+}
+counters {
+  preamble {
+    id: 306657404
+    name: "ingress.port_bytes_in"
+    alias: "port_bytes_in"
+  }
+  spec {
+    unit: BYTES
+  }
+  size: 512
+  index_type_name {
+    name: "PortId_t"
+  }
+}
+counters {
+  preamble {
+    id: 309984546
+    name: "egress.port_bytes_out"
+    alias: "port_bytes_out"
+  }
+  spec {
+    unit: BYTES
+  }
+  size: 512
+  index_type_name {
+    name: "PortId_t"
+  }
+}
+direct_counters {
+  preamble {
+    id: 332805598
+    name: "ingress.per_prefix_pkt_byte_count"
+    alias: "per_prefix_pkt_byte_count"
+  }
+  spec {
+    unit: BOTH
+  }
+  direct_table_id: 35996228
+}
+type_info {
+  new_types {
+    key: "PortId_t"
+    value {
+      translated_type {
+        uri: "p4.org/psa/v1/PortId_t"
+        sdn_bitwidth: 32
+      }
+    }
+  }
+}

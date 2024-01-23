@@ -1,0 +1,23 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "psa"
+}
+registers {
+  preamble {
+    id: 369999048
+    name: "cEgress.egress_pkt_seen"
+    alias: "egress_pkt_seen"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 16
+      }
+    }
+  }
+  size: 256
+}
+type_info {
+}

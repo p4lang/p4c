@@ -1,0 +1,76 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 44788207
+    name: "ingress.round_tbl"
+    alias: "round_tbl"
+  }
+  action_refs {
+    id: 28773984
+  }
+  size: 8
+}
+tables {
+  preamble {
+    id: 39880927
+    name: "egress.drop_tbl"
+    alias: "drop_tbl"
+  }
+  match_fields {
+    id: 1
+    name: "meta.ingress_metadata.set_drop"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 25850727
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 2
+}
+actions {
+  preamble {
+    id: 28773984
+    name: "ingress.read_round"
+    alias: "read_round"
+  }
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 25850727
+    name: "egress._drop"
+    alias: "_drop"
+  }
+}
+registers {
+  preamble {
+    id: 373634406
+    name: "ingress.registerRound"
+    alias: "registerRound"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 16
+      }
+    }
+  }
+  size: 65536
+}
+type_info {
+}

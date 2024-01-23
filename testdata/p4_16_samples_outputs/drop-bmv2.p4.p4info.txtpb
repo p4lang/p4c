@@ -1,0 +1,27 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 47103791
+    name: "IngressI.forward"
+    alias: "forward"
+  }
+  action_refs {
+    id: 18759588
+  }
+  const_default_action_id: 18759588
+  size: 1024
+}
+actions {
+  preamble {
+    id: 18759588
+    name: "drop"
+    alias: "drop"
+  }
+}
+type_info {
+}

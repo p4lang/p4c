@@ -1,0 +1,1630 @@
+# proto-file: p4/v1/p4runtime.proto
+# proto-message: p4.v1.WriteRequest
+
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 49173205
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\001"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\000\001"
+          mask: "\000\017"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\001"
+          }
+        }
+      }
+      priority: 10
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 49173205
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\002"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\021\201"
+          mask: "\377\377"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\002"
+          }
+        }
+      }
+      priority: 20
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 49173205
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\003"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\020\000"
+          mask: "\360\000"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\003"
+          }
+        }
+      }
+      priority: 30
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 49173205
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\004"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\002\020"
+          mask: "\002\360"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\004"
+          }
+        }
+      }
+      priority: 40
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 49173205
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\004"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\000\020"
+          mask: "\002\360"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\005"
+          }
+        }
+      }
+      priority: 40
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 49173205
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\006"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\006"
+          }
+        }
+      }
+      priority: 50
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 40845583
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\001"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\000\001"
+          mask: "\000\017"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\001"
+          }
+        }
+      }
+      priority: 10
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 40845583
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\002"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\021\201"
+          mask: "\377\377"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\002"
+          }
+        }
+      }
+      priority: 20
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 40845583
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\003"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\020\000"
+          mask: "\360\000"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\003"
+          }
+        }
+      }
+      priority: 30
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 40845583
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\004"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\002\020"
+          mask: "\002\360"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\004"
+          }
+        }
+      }
+      priority: 40
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 40845583
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\004"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\000\020"
+          mask: "\002\360"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\005"
+          }
+        }
+      }
+      priority: 40
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 40845583
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\006"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\006"
+          }
+        }
+      }
+      priority: 50
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 35926338
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\001"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\000\001"
+          mask: "\000\017"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\001"
+          }
+        }
+      }
+      priority: 11
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 35926338
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\002"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\021\201"
+          mask: "\377\377"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\002"
+          }
+        }
+      }
+      priority: 21
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 35926338
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\003"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\020\000"
+          mask: "\360\000"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\003"
+          }
+        }
+      }
+      priority: 31
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 35926338
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\004"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\002\020"
+          mask: "\002\360"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\004"
+          }
+        }
+      }
+      priority: 41
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 35926338
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\004"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\000\020"
+          mask: "\002\360"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\005"
+          }
+        }
+      }
+      priority: 40
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 35926338
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\006"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\006"
+          }
+        }
+      }
+      priority: 50
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 37653272
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\001"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\000\001"
+          mask: "\000\017"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\001"
+          }
+        }
+      }
+      priority: 11
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 37653272
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\002"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\021\201"
+          mask: "\377\377"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\002"
+          }
+        }
+      }
+      priority: 21
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 37653272
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\003"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\020\000"
+          mask: "\360\000"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\003"
+          }
+        }
+      }
+      priority: 31
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 37653272
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\004"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\002\020"
+          mask: "\002\360"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\004"
+          }
+        }
+      }
+      priority: 41
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 37653272
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\004"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\000\020"
+          mask: "\002\360"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\005"
+          }
+        }
+      }
+      priority: 40
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 37653272
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\006"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\006"
+          }
+        }
+      }
+      priority: 50
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 38935454
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\001"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\000\001"
+          mask: "\000\017"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\001"
+          }
+        }
+      }
+      priority: 11
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 38935454
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\002"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\021\201"
+          mask: "\377\377"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\002"
+          }
+        }
+      }
+      priority: 12
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 38935454
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\003"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\020\000"
+          mask: "\360\000"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\003"
+          }
+        }
+      }
+      priority: 13
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 38935454
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\004"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\002\020"
+          mask: "\002\360"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\004"
+          }
+        }
+      }
+      priority: 14
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 38935454
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\004"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\000\020"
+          mask: "\002\360"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\005"
+          }
+        }
+      }
+      priority: 13
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 38935454
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\006"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\006"
+          }
+        }
+      }
+      priority: 14
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 46791685
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\001"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\000\001"
+          mask: "\000\017"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\001"
+          }
+        }
+      }
+      priority: 11
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 46791685
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\002"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\021\201"
+          mask: "\377\377"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\002"
+          }
+        }
+      }
+      priority: 12
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 46791685
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\003"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\020\000"
+          mask: "\360\000"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\003"
+          }
+        }
+      }
+      priority: 13
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 46791685
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\004"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\002\020"
+          mask: "\002\360"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\004"
+          }
+        }
+      }
+      priority: 14
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 46791685
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\004"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\000\020"
+          mask: "\002\360"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\005"
+          }
+        }
+      }
+      priority: 13
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 46791685
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\006"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\006"
+          }
+        }
+      }
+      priority: 14
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 43122205
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\001"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\000\001"
+          mask: "\000\017"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\001"
+          }
+        }
+      }
+      priority: 2001
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 43122205
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\002"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\021\201"
+          mask: "\377\377"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\002"
+          }
+        }
+      }
+      priority: 2001
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 43122205
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\003"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\020\000"
+          mask: "\360\000"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\003"
+          }
+        }
+      }
+      priority: 2001
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 43122205
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\004"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\002\020"
+          mask: "\002\360"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\004"
+          }
+        }
+      }
+      priority: 2001
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 43122205
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\004"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\000\020"
+          mask: "\002\360"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\005"
+          }
+        }
+      }
+      priority: 2001
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 43122205
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\006"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\006"
+          }
+        }
+      }
+      priority: 2001
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 47394566
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\001"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\000\001"
+          mask: "\000\017"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\001"
+          }
+        }
+      }
+      priority: 2001
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 47394566
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\002"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\021\201"
+          mask: "\377\377"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\002"
+          }
+        }
+      }
+      priority: 2001
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 47394566
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\003"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\020\000"
+          mask: "\360\000"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\003"
+          }
+        }
+      }
+      priority: 2001
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 47394566
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\004"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\002\020"
+          mask: "\002\360"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\004"
+          }
+        }
+      }
+      priority: 2001
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 47394566
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\004"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\000\020"
+          mask: "\002\360"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\005"
+          }
+        }
+      }
+      priority: 2001
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 47394566
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\006"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\006"
+          }
+        }
+      }
+      priority: 2001
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 47497379
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\001"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\000\001"
+          mask: "\000\017"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\001"
+          }
+        }
+      }
+      priority: 1000
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 47497379
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\002"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\021\201"
+          mask: "\377\377"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\002"
+          }
+        }
+      }
+      priority: 900
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 47497379
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\003"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\020\000"
+          mask: "\360\000"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\003"
+          }
+        }
+      }
+      priority: 800
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 47497379
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\004"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\002\020"
+          mask: "\002\360"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\004"
+          }
+        }
+      }
+      priority: 700
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 47497379
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\004"
+        }
+      }
+      match {
+        field_id: 2
+        ternary {
+          value: "\000\020"
+          mask: "\002\360"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\005"
+          }
+        }
+      }
+      priority: 901
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 47497379
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\006"
+        }
+      }
+      action {
+        action {
+          action_id: 26776898
+          params {
+            param_id: 1
+            value: "\000\000\000\006"
+          }
+        }
+      }
+      priority: 801
+    }
+  }
+}

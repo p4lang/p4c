@@ -1,0 +1,47 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 39755323
+    name: "ingress.t1"
+    alias: "t1"
+  }
+  action_refs {
+    id: 21257015
+  }
+  const_default_action_id: 21257015
+  size: 3
+}
+tables {
+  preamble {
+    id: 42400396
+    name: "ingress.t2"
+    alias: "t2"
+  }
+  match_fields {
+    id: 1
+    name: "sm.ingress_port"
+    bitwidth: 9
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 10
+  is_const_table: true
+  has_initial_entries: true
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+type_info {
+}

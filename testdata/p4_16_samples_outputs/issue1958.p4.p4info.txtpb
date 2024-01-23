@@ -1,0 +1,58 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 34768437
+    name: "ingressImpl.foo2_inst.foo2_table"
+    alias: "foo2_table"
+  }
+  match_fields {
+    id: 1
+    name: "my_headers.ethernet.srcAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 31043630
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 31043630
+    name: "ingressImpl.foo2_inst.foo2_action"
+    alias: "foo2_action"
+  }
+}
+registers {
+  preamble {
+    id: 370394577
+    name: "ingressImpl.reg1"
+    alias: "reg1"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 8
+      }
+    }
+  }
+  size: 256
+}
+type_info {
+}

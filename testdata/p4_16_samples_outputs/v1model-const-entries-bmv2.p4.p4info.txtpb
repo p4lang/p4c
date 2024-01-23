@@ -1,0 +1,50 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 48301431
+    name: "ingressImpl.lpm1"
+    alias: "lpm1"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.dstAddr"
+    bitwidth: 48
+    match_type: LPM
+  }
+  action_refs {
+    id: 30352513
+  }
+  action_refs {
+    id: 28447573
+  }
+  const_default_action_id: 30352513
+  size: 1024
+  is_const_table: true
+  has_initial_entries: true
+}
+actions {
+  preamble {
+    id: 30352513
+    name: "ingressImpl.act_miss"
+    alias: "act_miss"
+  }
+}
+actions {
+  preamble {
+    id: 28447573
+    name: "ingressImpl.act_hit"
+    alias: "act_hit"
+  }
+  params {
+    id: 1
+    name: "x"
+    bitwidth: 48
+  }
+}
+type_info {
+}

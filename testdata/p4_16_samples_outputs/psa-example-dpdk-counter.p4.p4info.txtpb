@@ -1,0 +1,41 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "psa"
+}
+counters {
+  preamble {
+    id: 303203245
+    name: "MyIC.counter0"
+    alias: "counter0"
+  }
+  spec {
+    unit: BOTH
+  }
+  size: 1024
+}
+counters {
+  preamble {
+    id: 305966593
+    name: "MyIC.counter1"
+    alias: "counter1"
+  }
+  spec {
+    unit: PACKETS
+  }
+  size: 1024
+}
+counters {
+  preamble {
+    id: 318550906
+    name: "MyIC.counter2"
+    alias: "counter2"
+  }
+  spec {
+    unit: BYTES
+  }
+  size: 1024
+}
+type_info {
+}

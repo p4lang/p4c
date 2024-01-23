@@ -1,0 +1,13 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+actions {
+  preamble {
+    id: 22648003
+    name: "MyIngress.do_n_rounds"
+    alias: "do_n_rounds"
+  }
+}

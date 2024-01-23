@@ -1,0 +1,73 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 39254368
+    name: "cIngress.t1"
+    alias: "t1"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.dstAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21211318
+  }
+  action_refs {
+    id: 17087019
+  }
+  action_refs {
+    id: 20586134
+  }
+  action_refs {
+    id: 26367828
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 21211318
+    name: "cIngress.a1"
+    alias: "a1"
+  }
+}
+actions {
+  preamble {
+    id: 17087019
+    name: "cIngress.a2"
+    alias: "a2"
+  }
+}
+actions {
+  preamble {
+    id: 20586134
+    name: "cIngress.a3"
+    alias: "a3"
+  }
+}
+actions {
+  preamble {
+    id: 26367828
+    name: "cIngress.a4"
+    alias: "a4"
+  }
+}
+type_info {
+}

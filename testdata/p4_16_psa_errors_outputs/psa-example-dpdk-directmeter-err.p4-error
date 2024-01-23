@@ -1,3 +1,0 @@
-psa.p4(670): [--Werror=unexpected] error: dpdk_execute method of meter0 extern can only be invoked from within action of ownertable
-  PSA_MeterColor_t dpdk_execute(in bit<32> pkt_len);
-                   ^^^^^^^^^^^^
