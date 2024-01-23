@@ -148,20 +148,24 @@ IR::Constant IR::Constant::GetMask(unsigned width) {
 
 cstring IR::BaseListExpression::toString() const {
     cstring str = "{";
-    if (!components.empty())
+    if (!components.empty()) {
         str += " " + components.at(0)->toString();
-    for (unsigned i = 1; i < size(); i++)
+    }
+    for (unsigned i = 1; i < size(); i++) {
         str += ", " + components.at(i)->toString();
+    }
     return str + " }";
 }
 
 cstring IR::StructExpression::toString() const {
     cstring str = "{";
-    if (!components.empty())
+    if (!components.empty()) {
         str += " " + components.at(0)->toString()
             + " = " + components.at(0)->expression->toString();
-    for (unsigned i = 1; i < size(); i++)
+    }
+    for (unsigned i = 1; i < size(); i++) {
         str += ", " + components.at(i)->toString()
             + " = " + components.at(i)->expression->toString();
+    }
     return str + " }";
 }
