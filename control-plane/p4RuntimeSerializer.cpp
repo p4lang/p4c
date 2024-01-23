@@ -152,7 +152,9 @@ static bool writeTextTo(const Message &message, std::ostream *destination) {
     google::protobuf::TextFormat::Printer textPrinter;
     // set to expand google.protobuf.Any payloads
     textPrinter.SetExpandAny(true);
-    if (textPrinter.PrintToString(message, &output) == false) {
+    *destination << "# proto-file: " << message.GetDescriptor()->file()->name() << "\n";
+    *destination << "# proto-message: " << message.GetTypeName() << "\n\n";
+    if (!textPrinter.PrintToString(message, &output)) {
         ::error(ErrorType::ERR_IO, "Failed to serialize protobuf message to text");
         return false;
     }
