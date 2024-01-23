@@ -160,12 +160,12 @@ cstring IR::BaseListExpression::toString() const {
 cstring IR::StructExpression::toString() const {
     cstring str = "{";
     if (!components.empty()) {
-        str += " " + components.at(0)->toString()
-            + " = " + components.at(0)->expression->toString();
+        str += " " + components.at(0)->toString() +
+            " = " + components.at(0)->expression->toString();
     }
     for (unsigned i = 1; i < size(); i++) {
-        str += ", " + components.at(i)->toString()
-            + " = " + components.at(i)->expression->toString();
+        str += ", " + components.at(i)->toString() +
+            " = " + components.at(i)->expression->toString();
     }
     return str + " }";
 }
