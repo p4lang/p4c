@@ -366,7 +366,7 @@ class PacketInAdvancePSATest(P4EbpfTest):
 
 class DigestPSATest(P4EbpfTest):
     p4_file_path = "p4testdata/digest.p4"
-    p4info_reference_file_path = "p4testdata/digest.p4info.txt"
+    p4info_reference_file_path = "p4testdata/digest.p4info.txtpb"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet(eth_src="fa:fb:fc:fd:fe:f0")
@@ -409,7 +409,7 @@ class WideFieldDigest(P4EbpfTest):
 
 class CountersPSATest(P4EbpfTest):
     p4_file_path = "p4testdata/counters.p4"
-    p4info_reference_file_path = "p4testdata/counters.p4info.txt"
+    p4info_reference_file_path = "p4testdata/counters.p4info.txtpb"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet(
@@ -481,7 +481,7 @@ class ParserValueSetPSATest(P4EbpfTest):
     """
 
     p4_file_path = "p4testdata/pvs.p4"
-    p4info_reference_file_path = "p4testdata/pvs.p4info.txt"
+    p4info_reference_file_path = "p4testdata/pvs.p4info.txtpb"
 
     def runTest(self):
         pkt = testutils.simple_udp_packet(ip_dst="10.0.0.1", udp_dport=80)

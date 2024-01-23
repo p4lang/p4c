@@ -130,7 +130,7 @@ class P4EbpfTest(BaseTest):
             p4args += " --xdp"
 
         if self.p4info_reference_file_path:
-            self.p4info_p4c_generated = os.path.join("ptf_out", filename + ".p4info.txt")
+            self.p4info_p4c_generated = os.path.join("ptf_out", filename + ".p4info.txtpb")
             p4args += " --p4runtime-files {}".format(self.p4info_p4c_generated)
 
         p4args = p4args + " " + self.p4c_additional_args

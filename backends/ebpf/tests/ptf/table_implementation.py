@@ -54,7 +54,7 @@ class ActionProfileTwoTablesSameInstancePSATest(P4EbpfTest):
     """
 
     p4_file_path = "p4testdata/action-profile2.p4"
-    p4info_reference_file_path = "p4testdata/action-profile2.p4info.txt"
+    p4info_reference_file_path = "p4testdata/action-profile2.p4info.txtpb"
 
     def runTest(self):
         ref = self.action_profile_add_action(ap="MyIC_ap", action=2, data=[0x1122])
@@ -236,7 +236,7 @@ class ActionSelectorTwoTablesSameInstancePSATest(ActionSelectorTest):
     """
 
     p4_file_path = "p4testdata/action-selector2.p4"
-    p4info_reference_file_path = "p4testdata/action-selector2.p4info.txt"
+    p4info_reference_file_path = "p4testdata/action-selector2.p4info.txtpb"
 
     def runTest(self):
         self.create_default_rule_set(table="MyIC_tbl", selector="MyIC_as")
