@@ -97,7 +97,7 @@ class DoConstantFolding : public Transform {
     Result setContains(const IR::Expression *keySet, const IR::Expression *constant) const;
 
  public:
-    DoConstantFolding(const ReferenceMap *refMap, TypeMap *typeMap, bool warnings = true)
+    DoConstantFolding(const ReferenceMap *refMap, const TypeMap *typeMap, bool warnings = true)
         : refMap(refMap), typeMap(typeMap), typesKnown(typeMap != nullptr), warnings(warnings) {
         visitDagOnce = true;
         setName("DoConstantFolding");
