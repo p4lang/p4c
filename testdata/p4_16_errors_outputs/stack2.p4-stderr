@@ -1,4 +1,4 @@
-stack2.p4(24): [--Werror=type-error] error: AssignmentStatement
+stack2.p4(24): [--Werror=type-error] error: stack1 = stack2
         stack1 = stack2; // assignment between different stacks
                ^
   ---- Actual error:

@@ -1,4 +1,4 @@
-newtype-err.p4(10): [--Werror=type-error] error: AssignmentStatement
+newtype-err.p4(10): [--Werror=type-error] error: n = b + b
         n = b + b;
           ^
   ---- Actual error:
@@ -15,7 +15,7 @@ newtype-err.p4(2)
 newtype-err.p4(11): [--Werror=type-error] error: +: cannot be applied to expression 'n' with type 'N32'
         n1 = n + 0;
              ^
-newtype-err.p4(12): [--Werror=type-error] error: AssignmentStatement
+newtype-err.p4(12): [--Werror=type-error] error: x = n
         x = n;
           ^
   ---- Actual error:
