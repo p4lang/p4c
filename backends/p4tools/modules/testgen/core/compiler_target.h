@@ -13,7 +13,7 @@ class TestgenCompilerResult : public CompilerResult {
     /// The coverabled Nodes in the analyzed P4 program.
     P4::Coverage::CoverageSet coverableNodes;
 
-    /// The call graph of the analyzed P4 program.
+    /// The call graph of the analyzed P4 program, if flag --dcg is set.
     const NodesCallGraph *callGraph;
 
  public:
@@ -21,7 +21,9 @@ class TestgenCompilerResult : public CompilerResult {
                                    P4::Coverage::CoverageSet coverableNodes,
                                    const NodesCallGraph *callGraph = nullptr);
 
-    /// @returns the call graph of the analyzed P4 program.
+    /// @returns the call graph of the analyzed P4 program, if flag --dcg is set.
+    /// If this function is called when the call graph is not set, if will throw an exception.
+    /// TODO: Replace this with std::nullopt?
     [[nodiscard]] const NodesCallGraph &getCallGraph() const;
 
     /// @returns the coverable nodes in the analyzed P4 program.

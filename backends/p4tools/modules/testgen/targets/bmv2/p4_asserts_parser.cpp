@@ -16,7 +16,7 @@
 #include "lib/error.h"
 #include "lib/exceptions.h"
 
-namespace P4Tools::AssertsParser {
+namespace P4Tools::P4Testgen::Bmv2 {
 
 static const std::vector<std::string> NAMES{
     "Priority",    "Text",           "True",         "False",       "LineStatementClose",
@@ -28,8 +28,7 @@ static const std::vector<std::string> NAMES{
     "Mul",         "Comment",        "Unknown",      "EndString",   "End",
 };
 
-AssertsParser::AssertsParser(std::vector<std::vector<const IR::Expression *>> &output)
-    : restrictionsVec(output) {
+AssertsParser::AssertsParser(P4ConstraintsVector &output) : restrictionsVec(output) {
     setName("Restrictions");
 }
 
@@ -655,4 +654,4 @@ Token Lexer::next() noexcept {
             return atom(Token::Kind::Mul);
     }
 }
-}  // namespace P4Tools::AssertsParser
+}  // namespace P4Tools::P4Testgen::Bmv2

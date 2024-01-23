@@ -6,6 +6,8 @@
 #include "frontends/common/options.h"
 
 #include "backends/p4tools/modules/testgen/core/compiler_target.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/map_direct_externs.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/p4_asserts_parser.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
@@ -16,29 +18,27 @@ class BMv2V1ModelCompilerResult : public TestgenCompilerResult {
     P4::P4RuntimeAPI p4runtimeApi;
 
     /// Map of direct extern declarations which are attached to a table.
-    std::map<const IR::IDeclaration *, const IR::P4Table *> directExternMap;
+    DirectExternMap directExternMap;
 
-    // Vector containing pairs of P4Constraints restrictions and nodes to which these restrictions
+    // Vector containing vectors of P4Constraints restrictions and nodes to which these restrictions
     // apply.
-    std::vector<std::vector<const IR::Expression *>> p4ConstraintsRestrictions;
+    P4ConstraintsVector p4ConstraintsRestrictions;
 
  public:
-    explicit BMv2V1ModelCompilerResult(
-        TestgenCompilerResult compilerResult, P4::P4RuntimeAPI p4runtimeApi,
-        std::map<const IR::IDeclaration *, const IR::P4Table *> directExternMap,
-        std::vector<std::vector<const IR::Expression *>> p4ConstraintsRestrictions);
+    explicit BMv2V1ModelCompilerResult(TestgenCompilerResult compilerResult,
+                                       P4::P4RuntimeAPI p4runtimeApi,
+                                       DirectExternMap directExternMap,
+                                       P4ConstraintsVector p4ConstraintsRestrictions);
 
     /// @returns the P4RuntimeAPI inferred from this particular BMv2 V1Model P4 program.
     [[nodiscard]] const P4::P4RuntimeAPI &getP4RuntimeApi() const;
 
     /// @returns the vector of pairs of P4Constraints restrictions and nodes to which these
     // apply.
-    [[nodiscard]] std::vector<std::vector<const IR::Expression *>> getP4ConstraintsRestrictions()
-        const;
+    [[nodiscard]] P4ConstraintsVector getP4ConstraintsRestrictions() const;
 
     /// @returns the map of direct extern declarations which are attached to a table.
-    [[nodiscard]] const std::map<const IR::IDeclaration *, const IR::P4Table *>
-        &getDirectExternMap() const;
+    [[nodiscard]] const DirectExternMap &getDirectExternMap() const;
 };
 
 class Bmv2V1ModelCompilerTarget : public TestgenCompilerTarget {

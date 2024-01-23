@@ -6,7 +6,7 @@
 #include "ir/ir.h"
 #include "ir/visitor.h"
 
-namespace P4Tools::RefersToParser {
+namespace P4Tools::P4Testgen::Bmv2 {
 
 class RefersToParser : public Inspector {
     std::vector<std::vector<const IR::Expression *>> &restrictionsVec;
@@ -24,6 +24,6 @@ class RefersToParser : public Inspector {
     explicit RefersToParser(std::vector<std::vector<const IR::Expression *>> &output);
 };
 
-}  // namespace P4Tools::RefersToParser
+}  // namespace P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_P4_REFERS_TO_PARSER_H_ */

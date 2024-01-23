@@ -19,10 +19,10 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-BMv2V1ModelCompilerResult::BMv2V1ModelCompilerResult(
-    TestgenCompilerResult compilerResult, P4::P4RuntimeAPI p4runtimeApi,
-    std::map<const IR::IDeclaration *, const IR::P4Table *> directExternMap,
-    std::vector<std::vector<const IR::Expression *>> p4ConstraintsRestrictions)
+BMv2V1ModelCompilerResult::BMv2V1ModelCompilerResult(TestgenCompilerResult compilerResult,
+                                                     P4::P4RuntimeAPI p4runtimeApi,
+                                                     DirectExternMap directExternMap,
+                                                     P4ConstraintsVector p4ConstraintsRestrictions)
     : TestgenCompilerResult(std::move(compilerResult)),
       p4runtimeApi(p4runtimeApi),
       directExternMap(std::move(directExternMap)),
@@ -30,13 +30,11 @@ BMv2V1ModelCompilerResult::BMv2V1ModelCompilerResult(
 
 const P4::P4RuntimeAPI &BMv2V1ModelCompilerResult::getP4RuntimeApi() const { return p4runtimeApi; }
 
-std::vector<std::vector<const IR::Expression *>>
-BMv2V1ModelCompilerResult::getP4ConstraintsRestrictions() const {
+P4ConstraintsVector BMv2V1ModelCompilerResult::getP4ConstraintsRestrictions() const {
     return p4ConstraintsRestrictions;
 }
 
-const std::map<const IR::IDeclaration *, const IR::P4Table *>
-    &BMv2V1ModelCompilerResult::getDirectExternMap() const {
+const DirectExternMap &BMv2V1ModelCompilerResult::getDirectExternMap() const {
     return directExternMap;
 }
 
@@ -82,16 +80,16 @@ CompilerResultOrError Bmv2V1ModelCompilerTarget::runCompilerImpl(
     }
 
     // Vector containing pairs of restrictions and nodes to which these restrictions apply.
-    std::vector<std::vector<const IR::Expression *>> p4ConstraintsRestrictions;
+    P4ConstraintsVector p4ConstraintsRestrictions;
     // Defines all "entry_restriction" and then converts restrictions from string to IR
     // expressions, and stores them in p4ConstraintsRestrictions to move targetConstraints further.
-    program->apply(AssertsParser::AssertsParser(p4ConstraintsRestrictions));
+    program->apply(AssertsParser(p4ConstraintsRestrictions));
     if (::errorCount() > 0) {
         return std::nullopt;
     }
     // Defines all "refers_to" and then converts restrictions from string to IR expressions,
     // and stores them in p4ConstraintsRestrictions to move targetConstraints further.
-    program->apply(RefersToParser::RefersToParser(p4ConstraintsRestrictions));
+    program->apply(RefersToParser(p4ConstraintsRestrictions));
     if (::errorCount() > 0) {
         return std::nullopt;
     }

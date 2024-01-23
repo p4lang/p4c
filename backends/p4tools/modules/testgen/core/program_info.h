@@ -101,7 +101,7 @@ class ProgramInfo : public ICastable {
     /// @returns the P4 program associated with this ProgramInfo.
     [[nodiscard]] const IR::P4Program &getP4Program() const;
 
-    /// @returns the call graph associated with this ProgramInfo..
+    /// @returns the call graph associated with this ProgramInfo.
     [[nodiscard]] const NodesCallGraph &getCallGraph() const;
 
     /// Helper function to produce copy-in and copy-out helper calls.

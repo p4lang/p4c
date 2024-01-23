@@ -14,7 +14,7 @@
 #include "lib/exceptions.h"
 #include "lib/null.h"
 
-namespace P4Tools::RefersToParser {
+namespace P4Tools::P4Testgen::Bmv2 {
 
 RefersToParser::RefersToParser(std::vector<std::vector<const IR::Expression *>> &output)
     : restrictionsVec(output) {
@@ -120,4 +120,4 @@ bool RefersToParser::preorder(const IR::P4Table *table) {
     return false;
 }
 
-}  // namespace P4Tools::RefersToParser
+}  // namespace P4Tools::P4Testgen::Bmv2

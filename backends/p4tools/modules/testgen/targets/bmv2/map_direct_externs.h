@@ -8,6 +8,9 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
+/// A map of direct extern declarations which are attached to a table.
+using DirectExternMap = std::map<const IR::IDeclaration *, const IR::P4Table *>;
+
 /// A lightweight visitor, which collects all the declarations in the program then checks whether a
 /// table is referencing the declaration as an direct extern. The direct externs are collected in a
 /// map. Currently checks for "counters" or "meters" properties in the table.
@@ -17,7 +20,7 @@ class MapDirectExterns : public Inspector {
     std::map<cstring, const IR::Declaration_Instance *> declaredExterns;
 
     /// Maps direct extern declarations to the table they are attached to.
-    std::map<const IR::IDeclaration *, const IR::P4Table *> directExternMap;
+    DirectExternMap directExternMap;
 
  public:
     bool preorder(const IR::Declaration_Instance *declInstance) override;
