@@ -12,6 +12,7 @@ import time
 from collections import Counter
 from functools import partialmethod, wraps
 from pathlib import Path
+from typing import List, Tuple
 
 import google.protobuf.text_format
 import grpc
@@ -774,7 +775,11 @@ class P4RuntimeTest(BaseTest):
         assert len(action_name_and_params) == 2
 
     def make_table_entry(
-        self, table_name_and_key, action_name_and_params, priority=None, options=None
+        self,
+        table_name_and_key: Tuple[str, List[MF]],
+        action_name_and_params,
+        priority=None,
+        options=None,
     ):
         self.check_table_name_and_key(table_name_and_key)
         table_name = table_name_and_key[0]
@@ -808,7 +813,13 @@ class P4RuntimeTest(BaseTest):
     # bundles up table name and key into one tuple, and action name
     # and params into another tuple, for the convenience of the caller
     # using some helper functions that create these tuples.
-    def table_add(self, table_name_and_key, action_name_and_params, priority=None, options=None):
+    def table_add(
+        self,
+        table_name_and_key: Tuple[str, List[MF]],
+        action_name_and_params,
+        priority=None,
+        options=None,
+    ):
         table_entry = self.make_table_entry(
             table_name_and_key, action_name_and_params, priority, options
         )
@@ -916,6 +927,16 @@ class P4RuntimeTest(BaseTest):
                     entry = entity.counter_entry
                 counter_entries.append(entry)
         return counter_entries
+
+    def delete_table_entry(self, table_entry):
+        req = p4runtime_pb2.WriteRequest()
+        req.device_id = self.device_id
+        req.election_id.low = 1
+        update = req.updates.add()
+        # Assign DELETE Type for it
+        update.type = p4runtime_pb2.Update.DELETE
+        update.entity.table_entry.CopyFrom(table_entry)
+        return req, self.write_request(req)
 
     def meter_write(self, meter_name, index, meter_config):
         req = self.get_new_write_request()

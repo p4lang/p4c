@@ -4,10 +4,9 @@
 from enum import Enum
 from pathlib import Path
 
-from ptf.mask import Mask
-
-from ptf.packet import *
 from ptf import testutils as ptfutils
+from ptf.mask import Mask
+from ptf.packet import *
 
 # The base_test.py path is relative to the test file, this should be improved
 FILE_DIR = Path(__file__).resolve().parent
@@ -17,6 +16,7 @@ import base_test as bt
 
 # This global variable ensure that the forwarding pipeline will only be pushed once in one tes
 pipeline_pushed = False
+
 
 class AbstractTest(bt.P4RuntimeTest):
     EnumColor = Enum("EnumColor", ["GREEN", "YELLOW", "RED"], start=0)
@@ -33,7 +33,6 @@ class AbstractTest(bt.P4RuntimeTest):
             self.packet_wait_time = 0.1
         else:
             self.packet_wait_time = float(packet_wait_time)
-
 
     def tearDown(self):
         bt.P4RuntimeTest.tearDown(self)
@@ -54,6 +53,7 @@ class AbstractTest(bt.P4RuntimeTest):
         self.sendPacket()
         bt.testutils.log.info("Verifying Packet ...")
         self.verifyPackets()
+
 
 class Test0(AbstractTest):
     # Date generated: 2023-08-28-12:04:22.715
@@ -81,18 +81,20 @@ class Test0(AbstractTest):
         # Simple noop that is always called as filler.
         pass
         self.table_add(
-            ('MainControlImpl.ipv4_da',
-             [
-                 self.Exact('hdr.ipv4.dstAddr', 0x00000000),
-             ]),
-            ('MainControlImpl.next_hop',
-             [
-                 ('vport', 0x00000000),
-             ])
-            , None
-
+            (
+                'MainControlImpl.ipv4_da',
+                [
+                    self.Exact('hdr.ipv4.dstAddr', 0x00000000),
+                ],
+            ),
+            (
+                'MainControlImpl.next_hop',
+                [
+                    ('vport', 0x00000000),
+                ],
+            ),
+            None,
         )
-
 
     def sendPacket(self):
         ig_port = 0
@@ -101,14 +103,17 @@ class Test0(AbstractTest):
 
     def verifyPackets(self):
         eg_port = 0
-        exp_pkt = Mask(b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+        exp_pkt = Mask(
+            b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+        )
         ptfutils.verify_packet(self, exp_pkt, eg_port)
         bt.testutils.log.info("Verifying no other packets ...")
         ptfutils.verify_no_other_packets(self, self.device_id, timeout=self.packet_wait_time)
 
     def runTest(self):
         self.runTestImpl()
-     
+
+
 class Test1(AbstractTest):
     # Date generated: 2023-08-28-12:04:22.715
     '''
@@ -135,18 +140,20 @@ class Test1(AbstractTest):
         # Simple noop that is always called as filler.
         pass
         self.table_add(
-            ('MainControlImpl.ipv4_da',
-             [
-                 self.Exact('hdr.ipv4.dstAddr', 0x00000000),
-             ]),
-            ('MainControlImpl.next_hop',
-             [
-                 ('vport', 0x00000000),
-             ])
-            , None
-
+            (
+                'MainControlImpl.ipv4_da',
+                [
+                    self.Exact('hdr.ipv4.dstAddr', 0x00000000),
+                ],
+            ),
+            (
+                'MainControlImpl.next_hop',
+                [
+                    ('vport', 0x00000000),
+                ],
+            ),
+            None,
         )
-
 
     def sendPacket(self):
         ig_port = 0
@@ -155,14 +162,17 @@ class Test1(AbstractTest):
 
     def verifyPackets(self):
         eg_port = 0
-        exp_pkt = Mask(b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+        exp_pkt = Mask(
+            b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+        )
         ptfutils.verify_packet(self, exp_pkt, eg_port)
         bt.testutils.log.info("Verifying no other packets ...")
         ptfutils.verify_no_other_packets(self, self.device_id, timeout=self.packet_wait_time)
 
     def runTest(self):
         self.runTestImpl()
-        
+
+
 class Test2(AbstractTest):
     # Date generated: 2023-08-28-12:04:22.715
     '''
@@ -189,18 +199,20 @@ class Test2(AbstractTest):
         # Simple noop that is always called as filler.
         pass
         self.table_add(
-            ('MainControlImpl.ipv4_da',
-             [
-                 self.Exact('hdr.ipv4.dstAddr', 0x00000000),
-             ]),
-            ('MainControlImpl.next_hop',
-             [
-                 ('vport', 0x00000000),
-             ])
-            , None
-
+            (
+                'MainControlImpl.ipv4_da',
+                [
+                    self.Exact('hdr.ipv4.dstAddr', 0x00000000),
+                ],
+            ),
+            (
+                'MainControlImpl.next_hop',
+                [
+                    ('vport', 0x00000000),
+                ],
+            ),
+            None,
         )
-
 
     def sendPacket(self):
         ig_port = 0
@@ -209,14 +221,17 @@ class Test2(AbstractTest):
 
     def verifyPackets(self):
         eg_port = 0
-        exp_pkt = Mask(b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+        exp_pkt = Mask(
+            b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+        )
         ptfutils.verify_packet(self, exp_pkt, eg_port)
         bt.testutils.log.info("Verifying no other packets ...")
         ptfutils.verify_no_other_packets(self, self.device_id, timeout=self.packet_wait_time)
 
     def runTest(self):
         self.runTestImpl()
-     
+
+
 class Test3(AbstractTest):
     # Date generated: 2023-08-28-12:04:22.715
     '''
@@ -243,18 +258,20 @@ class Test3(AbstractTest):
         # Simple noop that is always called as filler.
         pass
         self.table_add(
-            ('MainControlImpl.ipv4_da',
-             [
-                 self.Exact('hdr.ipv4.dstAddr', 0x00000000),
-             ]),
-            ('MainControlImpl.next_hop',
-             [
-                 ('vport', 0x00000000),
-             ])
-            , None
-
+            (
+                'MainControlImpl.ipv4_da',
+                [
+                    self.Exact('hdr.ipv4.dstAddr', 0x00000000),
+                ],
+            ),
+            (
+                'MainControlImpl.next_hop',
+                [
+                    ('vport', 0x00000000),
+                ],
+            ),
+            None,
         )
-
 
     def sendPacket(self):
         ig_port = 0
@@ -263,14 +280,17 @@ class Test3(AbstractTest):
 
     def verifyPackets(self):
         eg_port = 0
-        exp_pkt = Mask(b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+        exp_pkt = Mask(
+            b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+        )
         ptfutils.verify_packet(self, exp_pkt, eg_port)
         bt.testutils.log.info("Verifying no other packets ...")
         ptfutils.verify_no_other_packets(self, self.device_id, timeout=self.packet_wait_time)
 
     def runTest(self):
         self.runTestImpl()
-        
+
+
 class Test4(AbstractTest):
     # Date generated: 2023-08-28-12:04:22.715
     '''
@@ -297,18 +317,20 @@ class Test4(AbstractTest):
         # Simple noop that is always called as filler.
         pass
         self.table_add(
-            ('MainControlImpl.ipv4_da',
-             [
-                 self.Exact('hdr.ipv4.dstAddr', 0x00000000),
-             ]),
-            ('MainControlImpl.next_hop',
-             [
-                 ('vport', 0x00000000),
-             ])
-            , None
-
+            (
+                'MainControlImpl.ipv4_da',
+                [
+                    self.Exact('hdr.ipv4.dstAddr', 0x00000000),
+                ],
+            ),
+            (
+                'MainControlImpl.next_hop',
+                [
+                    ('vport', 0x00000000),
+                ],
+            ),
+            None,
         )
-
 
     def sendPacket(self):
         ig_port = 0
@@ -317,15 +339,17 @@ class Test4(AbstractTest):
 
     def verifyPackets(self):
         eg_port = 0
-        exp_pkt = Mask(b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+        exp_pkt = Mask(
+            b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+        )
         ptfutils.verify_packet(self, exp_pkt, eg_port)
         bt.testutils.log.info("Verifying no other packets ...")
         ptfutils.verify_no_other_packets(self, self.device_id, timeout=self.packet_wait_time)
 
     def runTest(self):
         self.runTestImpl()
-        
-        
+
+
 class Test5(AbstractTest):
     # Date generated: 2023-08-28-12:04:22.715
     '''
@@ -352,18 +376,20 @@ class Test5(AbstractTest):
         # Simple noop that is always called as filler.
         pass
         self.table_add(
-            ('MainControlImpl.ipv4_da',
-             [
-                 self.Exact('hdr.ipv4.dstAddr', 0x00000000),
-             ]),
-            ('MainControlImpl.next_hop',
-             [
-                 ('vport', 0x00000000),
-             ])
-            , None
-
+            (
+                'MainControlImpl.ipv4_da',
+                [
+                    self.Exact('hdr.ipv4.dstAddr', 0x00000000),
+                ],
+            ),
+            (
+                'MainControlImpl.next_hop',
+                [
+                    ('vport', 0x00000000),
+                ],
+            ),
+            None,
         )
-
 
     def sendPacket(self):
         ig_port = 0
@@ -372,7 +398,9 @@ class Test5(AbstractTest):
 
     def verifyPackets(self):
         eg_port = 0
-        exp_pkt = Mask(b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00')
+        exp_pkt = Mask(
+            b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+        )
         ptfutils.verify_packet(self, exp_pkt, eg_port)
         bt.testutils.log.info("Verifying no other packets ...")
         ptfutils.verify_no_other_packets(self, self.device_id, timeout=self.packet_wait_time)
