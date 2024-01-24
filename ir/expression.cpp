@@ -145,16 +145,3 @@ IR::Constant IR::Constant::operator-() const { return IR::Constant(-value); }
 IR::Constant IR::Constant::GetMask(unsigned width) {
     return (IR::Constant(1) << width) - IR::Constant(1);
 }
-
-cstring IR::StructExpression::toString() const {
-    cstring str = "{";
-    if (!components.empty()) {
-        cstring exprStr = components.at(0)->expression->toString();
-        str += " " + components.at(0)->toString() + " = " + exprStr;
-    }
-    for (unsigned i = 1; i < size(); i++) {
-        cstring exprStr = components.at(i)->expression->toString();
-        str += ", " + components.at(i)->toString() + " = " + exprStr;
-    }
-    return str + " }";
-}
