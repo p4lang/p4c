@@ -7,6 +7,10 @@ scapy==2.4.5
 clang-format==15.0.6
 black==22.3.0
 isort==5.10.0
-protobuf==3.20.1
-googleapis-common-protos==1.50.0
-grpcio==1.51.1
+protobuf==3.20.2; python_version > '3.6'
+grpcio==1.51.1; python_version > '3.6'
+googleapis-common-protos==1.53.0; python_version > '3.6'
+# Ubuntu 18.04 uses Python 3.6, which is not supported by recent versions of Protobuf.
+protobuf==3.19.2; python_version <= '3.6'
+googleapis-common-protos==1.53.0; python_version <= '3.6'
+grpcio==1.48.2; python_version <= '3.6'

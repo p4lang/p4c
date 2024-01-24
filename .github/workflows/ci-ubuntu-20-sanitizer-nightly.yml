@@ -3,16 +3,16 @@ name: "test-p4c-ubuntu-20.04-sanitizers"
 on:
   schedule:
     # Every day on midnight UTC
-    - cron: '0 0 * * *'
-
-# Cancel any preceding run on the pull request.
-concurrency:
-  group: test-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+    - cron: "0 0 * * *"
+  pull_request:
+    branches:
+      - main
 
 jobs:
   # Build with clang and test p4c on Ubuntu 20.04.
   test-ubuntu20-clang-sanitizers:
+    # Only run on pull requests with the "run-sanitizer" label.
+    if: contains(github.event.pull_request.labels.*.name, 'run-sanitizer')
     strategy:
       fail-fast: false
     runs-on: ubuntu-20.04
@@ -25,21 +25,21 @@ jobs:
       UBSAN_OPTIONS: print_stacktrace=1
       ASAN_OPTIONS: print_stacktrace=1:detect_leaks=0
     steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: recursive
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
 
-    - name: ccache
-      uses: hendrikmuhs/ccache-action@v1
-      with:
-        key: test-${{ runner.os }}-clang
-        max-size: 1000M
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: test-${{ runner.os }}-clang
+          max-size: 1000M
 
-    - name: Build (Ubuntu 20.04, Clang, Sanitizers)
-      run: |
-        tools/ci-build.sh
+      - name: Build (Ubuntu 20.04, Clang, Sanitizers)
+        run: |
+          tools/ci-build.sh
 
-    - name: Run tests (Ubuntu 20.04)
-      # Need to use sudo for the eBPF kernel tests.
-      run: sudo -E ctest --output-on-failure --schedule-random
-      working-directory: ./build
+      - name: Run tests (Ubuntu 20.04)
+        # Need to use sudo for the eBPF kernel tests.
+        run: sudo -E ctest --output-on-failure --schedule-random
+        working-directory: ./build
