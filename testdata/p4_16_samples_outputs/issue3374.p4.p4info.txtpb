@@ -1,0 +1,58 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 40816781
+    name: "ingressImpl.stub"
+    alias: "stub"
+  }
+  match_fields {
+    id: 1
+    name: "hdrs.vlan_tag[meta.depth].vid"
+    bitwidth: 12
+    match_type: EXACT
+  }
+  action_refs {
+    id: 18712486
+  }
+  const_default_action_id: 18712486
+  size: 1000000
+}
+tables {
+  preamble {
+    id: 45677008
+    name: "ingressImpl.stub1"
+    alias: "stub1"
+  }
+  match_fields {
+    id: 1
+    name: "hdrs.ethernet.etherType"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 32723879
+  }
+  const_default_action_id: 32723879
+  size: 1000000
+}
+actions {
+  preamble {
+    id: 18712486
+    name: "ingressImpl.execute"
+    alias: "execute"
+  }
+}
+actions {
+  preamble {
+    id: 32723879
+    name: "ingressImpl.execute_1"
+    alias: "execute_1"
+  }
+}
+type_info {
+}

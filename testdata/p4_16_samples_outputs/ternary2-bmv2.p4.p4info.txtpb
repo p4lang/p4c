@@ -1,0 +1,189 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 36962230
+    name: "ingress.test1"
+    alias: "test1"
+  }
+  match_fields {
+    id: 1
+    name: "hdrs.data.f1"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 28312989
+  }
+  action_refs {
+    id: 27489497
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 38325502
+    name: "ingress.ex1"
+    alias: "ex1"
+  }
+  match_fields {
+    id: 1
+    name: "hdrs.extra[0].h"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 23207676
+  }
+  action_refs {
+    id: 17753546
+  }
+  action_refs {
+    id: 29844785
+  }
+  action_refs {
+    id: 17613244
+  }
+  action_refs {
+    id: 27489497
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33873526
+    name: "ingress.tbl1"
+    alias: "tbl1"
+  }
+  match_fields {
+    id: 1
+    name: "hdrs.data.f2"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 23207676
+  }
+  action_refs {
+    id: 27489497
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 36715213
+    name: "ingress.tbl2"
+    alias: "tbl2"
+  }
+  match_fields {
+    id: 1
+    name: "hdrs.data.f2"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 23207676
+  }
+  action_refs {
+    id: 27489497
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 41523041
+    name: "ingress.tbl3"
+    alias: "tbl3"
+  }
+  match_fields {
+    id: 1
+    name: "hdrs.data.f2"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 23207676
+  }
+  action_refs {
+    id: 27489497
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 28312989
+    name: "ingress.setb1"
+    alias: "setb1"
+  }
+  params {
+    id: 1
+    name: "port"
+    bitwidth: 9
+  }
+  params {
+    id: 2
+    name: "val"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 27489497
+    name: "ingress.noop"
+    alias: "noop"
+  }
+}
+actions {
+  preamble {
+    id: 23207676
+    name: "ingress.setbyte"
+    alias: "setbyte"
+  }
+  params {
+    id: 1
+    name: "val"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 17753546
+    name: "ingress.act1"
+    alias: "act1"
+  }
+  params {
+    id: 1
+    name: "val"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 29844785
+    name: "ingress.act2"
+    alias: "act2"
+  }
+  params {
+    id: 1
+    name: "val"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 17613244
+    name: "ingress.act3"
+    alias: "act3"
+  }
+  params {
+    id: 1
+    name: "val"
+    bitwidth: 8
+  }
+}
+type_info {
+}

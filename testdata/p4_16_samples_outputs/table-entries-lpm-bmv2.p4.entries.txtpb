@@ -1,0 +1,71 @@
+# proto-file: p4/v1/p4runtime.proto
+# proto-message: p4.v1.WriteRequest
+
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 42140569
+      match {
+        field_id: 1
+        lpm {
+          value: "\020"
+          prefix_len: 4
+        }
+      }
+      action {
+        action {
+          action_id: 17165658
+          params {
+            param_id: 1
+            value: "\000\013"
+          }
+        }
+      }
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 42140569
+      match {
+        field_id: 1
+        lpm {
+          value: "\022"
+          prefix_len: 8
+        }
+      }
+      action {
+        action {
+          action_id: 17165658
+          params {
+            param_id: 1
+            value: "\000\014"
+          }
+        }
+      }
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 42140569
+      action {
+        action {
+          action_id: 17165658
+          params {
+            param_id: 1
+            value: "\000\r"
+          }
+        }
+      }
+      is_const: true
+    }
+  }
+}

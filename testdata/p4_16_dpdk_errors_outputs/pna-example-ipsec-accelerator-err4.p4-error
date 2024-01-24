@@ -1,3 +1,0 @@
-pna-example-ipsec-accelerator-err4.p4(141): [--Werror=unexpected] error: Unexpected width type metadata_t for sa_index
-  ipsec.set_sa_index<metadata_t>(meta);
-                     ^^^^^^^^^^

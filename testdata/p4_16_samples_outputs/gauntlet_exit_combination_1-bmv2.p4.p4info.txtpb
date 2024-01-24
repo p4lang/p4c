@@ -1,0 +1,50 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 39789425
+    name: "ingress.simple_table"
+    alias: "simple_table"
+  }
+  match_fields {
+    id: 1
+    name: "akSTMF"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 18214157
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 18214157
+    name: "ingress.dummy"
+    alias: "dummy"
+  }
+}
+actions {
+  preamble {
+    id: 21566949
+    name: "ingress.do_action"
+    alias: "do_action"
+  }
+}
+type_info {
+}

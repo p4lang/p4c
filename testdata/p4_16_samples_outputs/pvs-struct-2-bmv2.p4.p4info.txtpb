@@ -1,0 +1,65 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 44621953
+    name: "MyIngress.t"
+    alias: "t"
+  }
+  match_fields {
+    id: 1
+    name: "meta.data[0].da"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 29884806
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 29884806
+    name: "MyIngress.set_data"
+    alias: "set_data"
+  }
+}
+value_sets {
+  preamble {
+    id: 56033750
+    name: "MyParser.pvs"
+    alias: "pvs"
+  }
+  match {
+    id: 1
+    name: "field"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match {
+    id: 2
+    name: "field2"
+    bitwidth: 3
+    match_type: EXACT
+  }
+  size: 4
+}
+type_info {
+}

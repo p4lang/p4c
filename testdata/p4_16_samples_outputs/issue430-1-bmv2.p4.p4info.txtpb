@@ -1,0 +1,26 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+digests {
+  preamble {
+    id: 401776493
+    name: "digest_0"
+    alias: "digest_0"
+  }
+  type_spec {
+    tuple {
+      members {
+        bitstring {
+          bit {
+            bitwidth: 48
+          }
+        }
+      }
+    }
+  }
+}
+type_info {
+}

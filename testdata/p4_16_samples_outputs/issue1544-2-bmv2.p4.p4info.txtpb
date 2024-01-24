@@ -1,0 +1,47 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 43424410
+    name: "ingress.mac_da"
+    alias: "mac_da"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.dstAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 29666769
+  }
+  action_refs {
+    id: 32609675
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 32609675
+    name: "my_drop"
+    alias: "my_drop"
+  }
+}
+actions {
+  preamble {
+    id: 29666769
+    name: "ingress.set_port"
+    alias: "set_port"
+  }
+  params {
+    id: 1
+    name: "output_port"
+    bitwidth: 9
+  }
+}
+type_info {
+}

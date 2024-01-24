@@ -1,0 +1,45 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 44509340
+    name: "MyIngressControl.MyIngressControl.stub"
+    alias: "stub"
+  }
+  match_fields {
+    id: 1
+    name: "m.k1"
+    bitwidth: 128
+    match_type: EXACT
+  }
+  action_refs {
+    id: 17706690
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1000000
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 17706690
+    name: "MyIngressControl.MyIngressControl.macswp"
+    alias: "macswp"
+  }
+}
+type_info {
+}

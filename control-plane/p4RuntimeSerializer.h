@@ -42,7 +42,7 @@ class CompilerOptions;
 namespace P4 {
 
 /// P4Runtime serialization formats.
-enum class P4RuntimeFormat { BINARY, JSON, TEXT };
+enum class P4RuntimeFormat { BINARY, JSON, TEXT, TEXT_PROTOBUF };
 
 /// A P4 program's control-plane API, represented in terms of P4Runtime's data
 /// structures. Can be inspected or serialized.

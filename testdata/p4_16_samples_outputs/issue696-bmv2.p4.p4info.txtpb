@@ -1,0 +1,45 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+actions {
+  preamble {
+    id: 17055359
+    name: "Eg.test"
+    alias: "test"
+  }
+}
+registers {
+  preamble {
+    id: 383637836
+    name: "debug"
+    alias: "debug"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 100
+}
+registers {
+  preamble {
+    id: 380140730
+    name: "reg"
+    alias: "reg"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 1
+}
+type_info {
+}

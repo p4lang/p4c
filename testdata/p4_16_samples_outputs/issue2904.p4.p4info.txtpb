@@ -1,0 +1,68 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 46966664
+    name: "ingress.X"
+    alias: "X"
+  }
+  match_fields {
+    id: 1
+    name: "y"
+    bitwidth: 4
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 28988252
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+  is_const_table: true
+  has_initial_entries: true
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 28988252
+    name: "ingress.A"
+    alias: "A"
+  }
+  params {
+    id: 1
+    name: "t"
+    bitwidth: 5
+  }
+}
+type_info {
+  serializable_enums {
+    key: "TableType"
+    value {
+      underlying_type {
+        bitwidth: 5
+      }
+      members {
+        name: "TT_ACL"
+        value: "\000"
+      }
+      members {
+        name: "TT_FWD"
+        value: "\001"
+      }
+    }
+  }
+}

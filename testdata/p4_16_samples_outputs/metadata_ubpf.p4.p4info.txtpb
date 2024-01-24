@@ -1,0 +1,70 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "ubpf"
+}
+tables {
+  preamble {
+    id: 38168442
+    name: "pipe.tbl"
+    alias: "tbl"
+  }
+  match_fields {
+    id: 1
+    name: "headers.ethernet.etherType"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21382760
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 41201237
+    name: "pipe.meta_based_tbl"
+    alias: "meta_based_tbl"
+  }
+  match_fields {
+    id: 1
+    name: "meta.etherType"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 22219300
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 21382760
+    name: "pipe.fill_metadata"
+    alias: "fill_metadata"
+  }
+}
+actions {
+  preamble {
+    id: 22219300
+    name: "pipe.change_etherType"
+    alias: "change_etherType"
+  }
+}
+type_info {
+}

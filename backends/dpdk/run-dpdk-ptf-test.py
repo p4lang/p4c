@@ -288,7 +288,7 @@ def run_test(options: Options) -> int:
 
     # Define the test environment and compile the P4 target
     test_name = Path(options.p4_file.name)
-    info_name = options.testdir.joinpath("p4Info.txt")
+    info_name = options.testdir.joinpath("p4Info.txtpb")
     bf_rt_schema = options.testdir.joinpath("bf-rt.json")
     conf_bin = options.testdir.joinpath(test_name.with_suffix(".pb.bin"))
     # Files needed by the pipeline

@@ -1,0 +1,118 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 49173205
+    name: "ingressImpl.t1"
+    alias: "t1"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.andycustom.srcAddr"
+    bitwidth: 32
+    match_type: EXACT
+    type_name {
+      name: "CustomAddr_t"
+    }
+  }
+  action_refs {
+    id: 23315944
+  }
+  action_refs {
+    id: 32254556
+  }
+  action_refs {
+    id: 21257015
+  }
+  const_default_action_id: 21257015
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 32254556
+    name: "ingressImpl.my_drop"
+    alias: "my_drop"
+  }
+}
+actions {
+  preamble {
+    id: 23315944
+    name: "ingressImpl.set_addr"
+    alias: "set_addr"
+  }
+  params {
+    id: 1
+    name: "new_dstAddr"
+    bitwidth: 32
+    type_name {
+      name: "IPv4Addr_t"
+    }
+  }
+}
+controller_packet_metadata {
+  preamble {
+    id: 75327753
+    name: "packet_out"
+    alias: "packet_out"
+    annotations: "@controller_header(\"packet_out\")"
+  }
+  metadata {
+    id: 1
+    name: "egress_port"
+    bitwidth: 9
+  }
+  metadata {
+    id: 2
+    name: "queue_id"
+    bitwidth: 8
+  }
+  metadata {
+    id: 3
+    name: "not_actually_useful"
+    bitwidth: 32
+    type_name {
+      name: "EthernetAddr_t"
+    }
+  }
+}
+type_info {
+  new_types {
+    key: "CustomAddr_t"
+    value {
+      translated_type {
+        uri: "com.fingerhutpress/andysp4arch/v1/CustomAddr_t"
+        sdn_bitwidth: 32
+      }
+    }
+  }
+  new_types {
+    key: "EthernetAddr_t"
+    value {
+      translated_type {
+        uri: "com.fingerhutpress/andysp4arch/v1/EthernetAddr_t"
+        sdn_bitwidth: 32
+      }
+    }
+  }
+  new_types {
+    key: "IPv4Addr_t"
+    value {
+      translated_type {
+        uri: "com.fingerhutpress/andysp4arch/v1/IPv4Addr_t"
+        sdn_bitwidth: 32
+      }
+    }
+  }
+}

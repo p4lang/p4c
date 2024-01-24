@@ -1,0 +1,201 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 47392102
+    name: "ingress.learned_sources"
+    alias: "learned_sources"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.srcAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21257015
+  }
+  action_refs {
+    id: 26564927
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 41262190
+    name: "ingress.l2_tbl"
+    alias: "l2_tbl"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.dstAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 31052161
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 36288301
+    name: "ingress.tst_tbl"
+    alias: "tst_tbl"
+  }
+  match_fields {
+    id: 1
+    name: "meta.mac_learn_msg.ingress_port"
+    bitwidth: 32
+    match_type: EXACT
+    type_name {
+      name: "PortId_t"
+    }
+  }
+  action_refs {
+    id: 29249116
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 26564927
+    name: "ingress.unknown_source"
+    alias: "unknown_source"
+  }
+}
+actions {
+  preamble {
+    id: 31052161
+    name: "ingress.do_L2_forward"
+    alias: "do_L2_forward"
+  }
+  params {
+    id: 1
+    name: "egress_port"
+    bitwidth: 32
+    type_name {
+      name: "PortId_t"
+    }
+  }
+}
+actions {
+  preamble {
+    id: 29249116
+    name: "ingress.do_tst"
+    alias: "do_tst"
+  }
+  params {
+    id: 1
+    name: "egress_port"
+    bitwidth: 32
+    type_name {
+      name: "PortId_t"
+    }
+  }
+  params {
+    id: 2
+    name: "serEnumT"
+    bitwidth: 16
+  }
+}
+digests {
+  preamble {
+    id: 401112174
+    name: "IngressDeparserImpl.mac_learn_digest"
+    alias: "mac_learn_digest"
+  }
+  type_spec {
+    struct {
+      name: "mac_learn_digest_t"
+    }
+  }
+}
+type_info {
+  structs {
+    key: "mac_learn_digest_t"
+    value {
+      members {
+        name: "srcAddr"
+        type_spec {
+          bitstring {
+            bit {
+              bitwidth: 48
+            }
+          }
+        }
+      }
+      members {
+        name: "ingress_port"
+        type_spec {
+          new_type {
+            name: "PortId_t"
+          }
+        }
+      }
+    }
+  }
+  serializable_enums {
+    key: "EthTypes"
+    value {
+      underlying_type {
+        bitwidth: 16
+      }
+      members {
+        name: "IPv4"
+        value: "\010\000"
+      }
+      members {
+        name: "ARP"
+        value: "\010\006"
+      }
+      members {
+        name: "RARP"
+        value: "\2005"
+      }
+      members {
+        name: "EtherTalk"
+        value: "\200\233"
+      }
+      members {
+        name: "VLAN"
+        value: "\201\000"
+      }
+      members {
+        name: "IPX"
+        value: "\2017"
+      }
+      members {
+        name: "IPv6"
+        value: "\206\335"
+      }
+    }
+  }
+  new_types {
+    key: "PortId_t"
+    value {
+      translated_type {
+        uri: "p4.org/psa/v1/PortId_t"
+        sdn_bitwidth: 32
+      }
+    }
+  }
+}
