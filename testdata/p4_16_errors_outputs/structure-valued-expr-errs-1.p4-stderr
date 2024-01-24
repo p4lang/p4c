@@ -169,7 +169,7 @@ structure-valued-expr-errs-1.p4(31)
   header h1_t {
          ^^^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(112): Source expression 'StructExpression' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'header h1_t'
+structure-valued-expr-errs-1.p4(112): Source expression '{ f2 = 5, f1 = 2 }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'header h1_t'
               hdr.h1 = {f2=5, f1=2};
                        ^^^^^^^^^^^^
 structure-valued-expr-errs-1.p4(112)
@@ -186,7 +186,7 @@ structure-valued-expr-errs-1.p4(32): No initializer for field f1
       bit<8> f1;
              ^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(113): Source expression 'StructExpression' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'header h1_t'
+structure-valued-expr-errs-1.p4(113): Source expression '{ f2 = 5 }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'header h1_t'
               hdr.h1 = {f2=5};
                        ^^^^^^
 structure-valued-expr-errs-1.p4(113)
@@ -206,7 +206,7 @@ structure-valued-expr-errs-1.p4(43)
   struct s1_t {
          ^^^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(114): Source expression 'StructExpression' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'struct s1_t'
+structure-valued-expr-errs-1.p4(114): Source expression '{ f2 = 5, f1 = 2 }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'struct s1_t'
               hdr.hstructs.s1 = {f2=5, f1=2};
                                 ^^^^^^^^^^^^
 structure-valued-expr-errs-1.p4(114)
@@ -223,7 +223,7 @@ structure-valued-expr-errs-1.p4(44): No initializer for field f1
       bit<8> f1;
              ^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(115): Source expression 'StructExpression' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'struct s1_t'
+structure-valued-expr-errs-1.p4(115): Source expression '{ f2 = 5 }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'struct s1_t'
               hdr.hstructs.s1 = {f2=5};
                                 ^^^^^^
 structure-valued-expr-errs-1.p4(115)
@@ -243,7 +243,7 @@ structure-valued-expr-errs-1.p4(35)
   header h2_t {
          ^^^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(120): Source expression 'StructExpression' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'header h2_t'
+structure-valued-expr-errs-1.p4(120): Source expression '{ f2 = 5 }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'header h2_t'
               hdr.h2 = {f2=5};
                        ^^^^^^
 structure-valued-expr-errs-1.p4(120)
@@ -263,7 +263,7 @@ structure-valued-expr-errs-1.p4(47)
   struct s2_t {
          ^^^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(121): Source expression 'StructExpression' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'struct s2_t'
+structure-valued-expr-errs-1.p4(121): Source expression '{ f2 = 5 }' produces a result of type 'unknown struct' which cannot be assigned to a left-value with type 'struct s2_t'
               hdr.hstructs.s2 = {f2=5};
                                 ^^^^^^
 structure-valued-expr-errs-1.p4(121)

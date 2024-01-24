@@ -482,6 +482,7 @@ class StructExpression : Expression {
         size_t size = components.size();
         return components.at(size - 1)->is<IR::NamedDots>();
     }
+    cstring toString() const;
 }
 
 /// Can be an invalid header or header_union
