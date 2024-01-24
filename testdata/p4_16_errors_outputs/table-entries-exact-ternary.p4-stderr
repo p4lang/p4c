@@ -1,6 +1,6 @@
-table-entries-exact-ternary.p4(74): [--Werror=type-error] error: ListExpression: Size of entry keyset must match the table key set size
+table-entries-exact-ternary.p4(74): [--Werror=type-error] error: { 4369 &&& 15 }: Size of entry keyset must match the table key set size
             (0x1111 &&& 0xF ) : a(); // invalid exact key
             ^^^^^^^^^^^^^^^^^
-table-entries-exact-ternary.p4(75): [--Werror=type-error] error: ListExpression: Size of entry keyset must match the table key set size
+table-entries-exact-ternary.p4(75): [--Werror=type-error] error: { 0x1 }: Size of entry keyset must match the table key set size
             0x1 : a(); // invalid keyset
             ^^^

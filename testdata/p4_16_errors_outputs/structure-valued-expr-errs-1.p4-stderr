@@ -9,7 +9,7 @@ structure-valued-expr-errs-1.p4(31)
   header h1_t {
          ^^^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(100): Source expression 'ListExpression' produces a result of type 'tuple<>' which cannot be assigned to a left-value with type 'header h1_t'
+structure-valued-expr-errs-1.p4(100): Source expression '{ }' produces a result of type 'tuple<>' which cannot be assigned to a left-value with type 'header h1_t'
               hdr.h1 = {};
                        ^^
 structure-valued-expr-errs-1.p4(100)
@@ -29,7 +29,7 @@ structure-valued-expr-errs-1.p4(35)
   header h2_t {
          ^^^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(101): Source expression 'ListExpression' produces a result of type 'tuple<>' which cannot be assigned to a left-value with type 'header h2_t'
+structure-valued-expr-errs-1.p4(101): Source expression '{ }' produces a result of type 'tuple<>' which cannot be assigned to a left-value with type 'header h2_t'
               hdr.h2 = {};
                        ^^
 structure-valued-expr-errs-1.p4(100)
@@ -49,7 +49,7 @@ structure-valued-expr-errs-1.p4(28)
   header h0_t {
          ^^^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(102): Source expression 'ListExpression' produces a result of type 'tuple<int>' which cannot be assigned to a left-value with type 'header h0_t'
+structure-valued-expr-errs-1.p4(102): Source expression '{ 4 }' produces a result of type 'tuple<int>' which cannot be assigned to a left-value with type 'header h0_t'
               hdr.h0 = {4};
                        ^^^
 structure-valued-expr-errs-1.p4(102)
@@ -69,7 +69,7 @@ structure-valued-expr-errs-1.p4(31)
   header h1_t {
          ^^^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(103): Source expression 'ListExpression' produces a result of type 'tuple<int, int>' which cannot be assigned to a left-value with type 'header h1_t'
+structure-valued-expr-errs-1.p4(103): Source expression '{ 1, 2 }' produces a result of type 'tuple<int, int>' which cannot be assigned to a left-value with type 'header h1_t'
               hdr.h1 = {1, 2};
                        ^^^^^^
 structure-valued-expr-errs-1.p4(103)
@@ -89,7 +89,7 @@ structure-valued-expr-errs-1.p4(35)
   header h2_t {
          ^^^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(104): Source expression 'ListExpression' produces a result of type 'tuple<int>' which cannot be assigned to a left-value with type 'header h2_t'
+structure-valued-expr-errs-1.p4(104): Source expression '{ 3 }' produces a result of type 'tuple<int>' which cannot be assigned to a left-value with type 'header h2_t'
               hdr.h2 = {3};
                        ^^^
 structure-valued-expr-errs-1.p4(104)
@@ -109,7 +109,7 @@ structure-valued-expr-errs-1.p4(40)
   struct s0_t {
          ^^^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(105): Source expression 'ListExpression' produces a result of type 'tuple<int>' which cannot be assigned to a left-value with type 'struct s0_t'
+structure-valued-expr-errs-1.p4(105): Source expression '{ 1 }' produces a result of type 'tuple<int>' which cannot be assigned to a left-value with type 'struct s0_t'
               hdr.hstructs.s0 = {1};
                                 ^^^
 structure-valued-expr-errs-1.p4(105)
@@ -129,7 +129,7 @@ structure-valued-expr-errs-1.p4(43)
   struct s1_t {
          ^^^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(106): Source expression 'ListExpression' produces a result of type 'tuple<int, int>' which cannot be assigned to a left-value with type 'struct s1_t'
+structure-valued-expr-errs-1.p4(106): Source expression '{ 1, 2 }' produces a result of type 'tuple<int, int>' which cannot be assigned to a left-value with type 'struct s1_t'
               hdr.hstructs.s1 = {1, 2};
                                 ^^^^^^
 structure-valued-expr-errs-1.p4(106)
@@ -149,7 +149,7 @@ structure-valued-expr-errs-1.p4(47)
   struct s2_t {
          ^^^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(107): Source expression 'ListExpression' produces a result of type 'tuple<int>' which cannot be assigned to a left-value with type 'struct s2_t'
+structure-valued-expr-errs-1.p4(107): Source expression '{ 3 }' produces a result of type 'tuple<int>' which cannot be assigned to a left-value with type 'struct s2_t'
               hdr.hstructs.s2 = {3};
                                 ^^^
 structure-valued-expr-errs-1.p4(107)
