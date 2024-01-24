@@ -164,6 +164,8 @@ const char *save_to_cache(const char *string, std::size_t length, table_entry_fl
 
 }  // namespace
 
+cstring::cstring() : str(cstring::empty) {}
+
 void cstring::construct_from_shared(const char *string, std::size_t length) {
     str = save_to_cache(string, length, table_entry_flags::none);
 }

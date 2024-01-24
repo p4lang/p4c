@@ -72,7 +72,7 @@ class cstring {
     const char *str = nullptr;
 
  public:
-    cstring() = default;
+    cstring();
     // TODO (DanilLutsenko): Enable when initialization with 0 will be eliminated
     // cstring(std::nullptr_t) {} // NOLINT(runtime/explicit)
 
