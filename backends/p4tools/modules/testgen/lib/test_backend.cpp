@@ -207,7 +207,7 @@ bool TestBackEnd::printTestInfo(const ExecutionState * /*executionState*/, const
 
     printTraces("=======================================");
     printTraces("============ Input packet for Test %1% ============", testCount);
-    printTraces(formatHexExpr(testInfo.inputPacket, false, true, false));
+    printTraces(formatHexExpr(testInfo.inputPacket, {false, true, false}));
     printTraces("=======================================");
     // We have no control over the test, if the output port is tainted. So we abort.
     if (Taint::hasTaint(outputPortExpr)) {
@@ -229,12 +229,12 @@ bool TestBackEnd::printTestInfo(const ExecutionState * /*executionState*/, const
     BUG_CHECK(outputPacketSize >= 0, "Invalid out packet size (%1% bits) calculated!",
               outputPacketSize);
     printTraces("============ Output packet for Test %1% ============", testCount);
-    printTraces(formatHexExpr(testInfo.outputPacket, false, true, false));
+    printTraces(formatHexExpr(testInfo.outputPacket, {false, true, false}));
     printTraces("=======================================");
     printTraces("Output packet size: %1% ", outputPacketSize);
     printTraces("=======================================");
     printTraces("============ Output mask Test %1% ============", testCount);
-    printTraces(formatHexExpr(testInfo.packetTaintMask, false, true, false));
+    printTraces(formatHexExpr(testInfo.packetTaintMask, {false, true, false}));
     printTraces("=======================================");
     printTraces("Output port: %1%\n", testInfo.outputPort);
     printTraces("=======================================");

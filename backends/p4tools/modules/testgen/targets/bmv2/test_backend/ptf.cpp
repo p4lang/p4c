@@ -25,7 +25,7 @@ std::vector<std::pair<size_t, size_t>> PTF::getIgnoreMasks(const IR::Constant *m
     if (mask == nullptr) {
         return ignoreMasks;
     }
-    auto maskBinStr = formatBinExpr(mask, false, true, false);
+    auto maskBinStr = formatBinExpr(mask, {false, true, false});
     int countZeroes = 0;
     size_t offset = 0;
     for (; offset < maskBinStr.size(); ++offset) {
@@ -54,7 +54,7 @@ inja::json PTF::getExpectedPacket(const TestSpec *testSpec) const {
         const auto *payloadMask = packet->getEvaluatedPayloadMask();
         verifyData["ignore_masks"] = getIgnoreMasks(payloadMask);
 
-        auto dataStr = formatHexExpr(payload, false, true, false);
+        auto dataStr = formatHexExpr(payload, {false, true, false});
         verifyData["exp_pkt"] = insertHexSeparators(dataStr);
     }
     return verifyData;
