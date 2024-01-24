@@ -437,7 +437,16 @@ class BaseListExpression : Expression {
         size_t size = components.size();
         return components.at(size - 1)->is<IR::Dots>();
     }
-    cstring toString() const;
+    toString {
+        cstring str = "{";
+        if (!components.empty()) {
+            str += " " + components.at(0)->toString();
+        }
+        for (unsigned i = 1; i < size(); i++) {
+            str += ", " + components.at(i)->toString();
+        }
+        return str + " }";
+    }
 #nodbprint
 }
 
