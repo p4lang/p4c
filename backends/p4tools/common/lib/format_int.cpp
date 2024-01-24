@@ -37,14 +37,14 @@ std::string formatBin(const big_int &value, int width, const FormatOptions &form
         out << static_cast<int>(boost::multiprecision::bit_test(tmpVal, 0));
     } while (tmpVal >>= 1);
 
-    if (formatOptions.pad && width > out.tellp()) {
+    if (formatOptions.padOutput && width > out.tellp()) {
         out << std::string(width - out.tellp(), '0');
     }
     auto returnString = out.str();
     // Use big-endian ordering.
     std::reverse(returnString.begin(), returnString.end());
 
-    if (formatOptions.useSep) {
+    if (formatOptions.useSeparator) {
         returnString = insertSeparators(returnString, "_", 4, true);
     }
 
@@ -73,12 +73,12 @@ std::string formatOctal(const big_int &value, int width, const FormatOptions &fo
     // Widen to 4 bit.
     width = ((width + 1) / 2);
 
-    if (formatOptions.pad) {
+    if (formatOptions.padOutput) {
         out << std::setfill('0') << std::setw(width);
     }
     out << value;
     auto returnString = out.str();
-    if (formatOptions.useSep) {
+    if (formatOptions.useSeparator) {
         returnString = insertSeparators(returnString, "_", 4, true);
     }
 
@@ -104,7 +104,7 @@ std::string formatHex(const big_int &value, int width, const FormatOptions &form
 
     // Use hex printing format
     out << std::hex;
-    if (formatOptions.writeUpperCaseHex) {
+    if (formatOptions.useUpperCaseHex) {
         //. Use uppercase format.
         out << std::uppercase;
     }
@@ -112,12 +112,12 @@ std::string formatHex(const big_int &value, int width, const FormatOptions &form
     // Widen to a whole nibble.
     width = ((width + 3) / 4);
 
-    if (formatOptions.pad) {
+    if (formatOptions.padOutput) {
         out << std::setfill('0') << std::setw(width);
     }
     out << value;
     auto returnString = out.str();
-    if (formatOptions.useSep) {
+    if (formatOptions.useSeparator) {
         returnString = insertSeparators(returnString, "_", 4, true);
     }
 
