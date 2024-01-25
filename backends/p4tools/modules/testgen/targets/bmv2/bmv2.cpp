@@ -1,5 +1,6 @@
 #include "backends/p4tools/modules/testgen/targets/bmv2/bmv2.h"
 
+#include <optional>
 #include <string>
 #include <utility>
 
@@ -7,13 +8,19 @@
 #include "backends/p4tools/common/compiler/compiler_target.h"
 #include "backends/p4tools/common/compiler/midend.h"
 #include "frontends/common/options.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/typeMap.h"
 #include "lib/cstring.h"
+#include "lib/error.h"
+#include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/core/compiler_target.h"
 #include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/map_direct_externs.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_asserts_parser.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/p4_refers_to_parser.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/p4runtime_translation.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
@@ -111,9 +118,13 @@ CompilerResultOrError Bmv2V1ModelCompilerTarget::runCompilerImpl(
 
 MidEnd Bmv2V1ModelCompilerTarget::mkMidEnd(const CompilerOptions &options) const {
     MidEnd midEnd(options);
+    auto *refMap = midEnd.getRefMap();
+    auto *typeMap = midEnd.getTypeMap();
     midEnd.addPasses({
         // Parse BMv2-specific annotations.
         new BMV2::ParseAnnotations(),
+        new P4::TypeChecking(refMap, typeMap, true),
+        new PropagateP4RuntimeTranslation(*typeMap),
     });
     midEnd.addDefaultPasses();
 

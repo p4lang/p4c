@@ -29,8 +29,14 @@ class ParseAnnotations : public P4::ParseAnnotations {
  public:
     ParseAnnotations()
         : P4::ParseAnnotations("BMV2", false,
-                               {PARSE_EMPTY("metadata"), PARSE_EXPRESSION_LIST("field_list"),
-                                PARSE("alias", StringLiteral), PARSE("priority", Constant)}) {}
+                               {
+                                   PARSE_EMPTY("metadata"),
+                                   PARSE_EXPRESSION_LIST("field_list"),
+                                   PARSE("alias", StringLiteral),
+                                   PARSE("priority", Constant),
+                                   PARSE_EXPRESSION_LIST("p4runtime_translation_mappings"),
+                                   PARSE_P4RUNTIME_TRANSLATION("p4runtime_translation"),
+                               }) {}
 };
 
 }  // namespace BMV2
