@@ -20,8 +20,8 @@ header ipv4_t {
     bit<8>  ttl;
     bit<8>  protocol;
     bit<16> hdrChecksum;
-    @tc_type ("ipv4") bit<32> srcAddr;
-    @tc_type ("ipv4") bit<32> dstAddr;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
 }
 
 header ipv6_t {
@@ -31,8 +31,8 @@ header ipv6_t {
     bit<16>  payloadLength;
     bit<8>   nextHeader;
     bit<8>   hopLimit;
-    @tc_type ("ipv6") bit<128> srcAddr;
-    @tc_type ("ipv6") bit<128> dstAddr;
+    bit<128> srcAddr;
+    bit<128> dstAddr;
 }
 
 //////////////////////////////////////////////////////////////////////

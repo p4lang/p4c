@@ -30,6 +30,11 @@ class ReferenceMap;
 
 namespace EBPF {
 
+#define IsSlice(a) (a->is<IR::Slice>())
+#define ToSlice(a) (a->to<IR::Slice>())
+#define IsMem(a) (a->is<IR::Member>())
+#define ToMem(a) (a->to<IR::Member>())
+
 class CodeBuilder : public Util::SourceCodeBuilder {
  public:
     const Target *target;
@@ -126,6 +131,11 @@ class CodeGenInspector : public Inspector {
     bool preorder(const IR::IfStatement *s) override;
 
     void widthCheck(const IR::Node *node) const;
+    void convertByteOrder(const IR::Expression *expr, cstring byte_order);
+    void emitTCBinaryOperation(const IR::Expression *lexpr, const IR::Expression *rexpr,
+                               cstring stringop, bool isScalar);
+    void emitTCAssignmentEndianessConversion(const IR::Expression *lexpr,
+                                             const IR::Expression *rexpr);
 };
 
 class EBPFInitializerUtils {
@@ -135,6 +145,11 @@ class EBPFInitializerUtils {
 
     // Generate hex string and prepend it with zeroes when shorter than required width
     static cstring genHexStr(const big_int &value, unsigned width, const IR::Expression *expr);
+    static const IR::Expression *ExtractExpFromCast(const IR::Expression *exp);
+    static const IR::Expression *ExtractSliceFromExp(const IR::Expression *exp);
+    static bool IsTypeHeaderOrUnion(const P4::TypeMap *typemap, const IR::Expression *exp);
+    static bool IsTypeArrayHeader(const P4::TypeMap *typemap, const IR::Expression *exp);
+    static bool IsHeaderField(const P4::TypeMap *typemap, const IR::Expression *exp);
 };
 
 }  // namespace EBPF

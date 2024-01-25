@@ -185,7 +185,6 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
-            hdr->ethernet.etherType = bpf_htons(hdr->ethernet.etherType);
             ebpf_byte = ((char*)(&hdr->ethernet.etherType))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.etherType))[1];
@@ -207,7 +206,6 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0 + 1, 4, 4, (ebpf_byte));
             ebpf_packetOffsetInBits += 8;
 
-            hdr->ipv6.flowLabel = htonl(hdr->ipv6.flowLabel << 12);
             ebpf_byte = ((char*)(&hdr->ipv6.flowLabel))[0];
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 4));
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0 + 1, 4, 4, (ebpf_byte));
@@ -218,7 +216,6 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 2, 4, 0, (ebpf_byte >> 4));
             ebpf_packetOffsetInBits += 20;
 
-            hdr->ipv6.payloadLength = bpf_htons(hdr->ipv6.payloadLength);
             ebpf_byte = ((char*)(&hdr->ipv6.payloadLength))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ipv6.payloadLength))[1];

@@ -196,6 +196,11 @@ class KernelSamplesTarget : public Target {
                               cstring valueType) const;
 };
 
+class P4TCTarget : public KernelSamplesTarget {
+ public:
+    explicit P4TCTarget(bool emitTrace) : KernelSamplesTarget(emitTrace, "P4TC") {}
+};
+
 // Target XDP
 class XdpTarget : public KernelSamplesTarget {
  public:

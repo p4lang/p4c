@@ -188,7 +188,7 @@ bool StateTranslationVisitor::preorder(const IR::SelectExpression *expression) {
     etype->declare(builder, selectValue, false);
     builder->endOfStatement(true);
 
-    emitAssignStatement(type, nullptr, selectValue, expression->select);
+    emitAssignStatement(type, nullptr, selectValue, expression->select->components.at(0));
     builder->newline();
 
     // Init value_sets

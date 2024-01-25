@@ -80,12 +80,16 @@ bool CodeGenInspector::preorder(const IR::Operation_Binary *b) {
     bool useParens = getParent<IR::IfStatement>() == nullptr || mask != "";
     if (mask != "") builder->append("(");
     if (useParens) builder->append("(");
-    visit(b->left);
-    builder->spc();
-    builder->append(b->getStringOp());
-    builder->spc();
+    if (builder->target->name == "P4TC") {
+        emitTCBinaryOperation(b->left, b->right, b->getStringOp(), true);
+    } else {
+        visit(b->left);
+        builder->spc();
+        builder->append(b->getStringOp());
+        builder->spc();
+        visit(b->right);
+    }
     expressionPrecedence = b->getPrecedence() + 1;
-    visit(b->right);
     if (useParens) builder->append(")");
     builder->append(mask);
     expressionPrecedence = prec;
@@ -104,20 +108,28 @@ bool CodeGenInspector::comparison(const IR::Operation_Relation *b) {
         int prec = expressionPrecedence;
         bool useParens = prec > b->getPrecedence();
         if (useParens) builder->append("(");
-        visit(b->left);
-        builder->spc();
-        builder->append(b->getStringOp());
-        builder->spc();
-        visit(b->right);
+        if (builder->target->name == "P4TC") {
+            emitTCBinaryOperation(b->left, b->right, b->getStringOp(), scalar);
+        } else {
+            visit(b->left);
+            builder->spc();
+            builder->append(b->getStringOp());
+            builder->spc();
+            visit(b->right);
+        }
         if (useParens) builder->append(")");
     } else {
         if (!et->is<IHasWidth>())
             BUG("%1%: Comparisons for type %2% not yet implemented", b->left, type);
         unsigned width = et->to<IHasWidth>()->implementationWidthInBits();
         builder->append("memcmp(&");
-        visit(b->left);
-        builder->append(", &");
-        visit(b->right);
+        if (builder->target->name == "P4TC") {
+            emitTCBinaryOperation(b->left, b->right, b->getStringOp(), scalar);
+        } else {
+            visit(b->left);
+            builder->append(", &");
+            visit(b->right);
+        }
         builder->appendFormat(", %d)", width / 8);
     }
     return false;
@@ -361,7 +373,11 @@ void CodeGenInspector::emitAssignStatement(const IR::Type *ltype, const IR::Expr
             builder->append(lpath);
         }
         builder->append(" = ");
-        visit(rexpr);
+        if (builder->target->name == "P4TC") {
+            emitTCAssignmentEndianessConversion(lexpr, rexpr);
+        } else {
+            visit(rexpr);
+        }
     }
     builder->endOfStatement();
 }
@@ -458,6 +474,111 @@ void CodeGenInspector::widthCheck(const IR::Node *node) const {
             node, tb->size);
 }
 
+void CodeGenInspector::convertByteOrder(const IR::Expression *expr, cstring byte_order) {
+    auto ftype = typeMap->getType(expr);
+    auto et = EBPFTypeFactory::instance->create(ftype);
+    unsigned widthToEmit = dynamic_cast<IHasWidth *>(et)->widthInBits();
+    cstring emit = "";
+    unsigned loadSize = 64;
+    if (widthToEmit <= 16) {
+        emit = byte_order == "HOST" ? "bpf_ntohs" : "bpf_htons";
+        loadSize = 16;
+    } else if (widthToEmit <= 32) {
+        emit = byte_order == "HOST" ? "bpf_ntohl" : "bpf_htonl";
+        loadSize = 32;
+    } else if (widthToEmit <= 64) {
+        emit = byte_order == "HOST" ? "ntohll" : "bpf_cpu_to_be64";
+        loadSize = 64;
+    }
+    unsigned shift = loadSize - widthToEmit;
+    builder->appendFormat("%s(", emit);
+    visit(expr);
+    if (shift != 0) builder->appendFormat(" >> %d", shift);
+    builder->append(")");
+}
+
+void CodeGenInspector::emitTCBinaryOperation(const IR::Expression *lexpr,
+                                             const IR::Expression *rexpr, cstring stringop,
+                                             bool isScalar) {
+    bool left = EBPFInitializerUtils::IsHeaderField(typeMap, lexpr);
+    bool right = EBPFInitializerUtils::IsHeaderField(typeMap, rexpr);
+    if (left == right) {
+        visit(lexpr);
+        if (isScalar) {
+            builder->spc();
+            builder->append(stringop);
+            builder->spc();
+        } else {
+            builder->append(", &");
+        }
+        visit(rexpr);
+        return;
+    }
+    if (left == false) {
+        // ConvertLeft
+        auto ftype = typeMap->getType(lexpr);
+        auto et = EBPFTypeFactory::instance->create(ftype);
+        unsigned width = dynamic_cast<IHasWidth *>(et)->widthInBits();
+        if (width <= 8) {
+            visit(lexpr);
+        } else {
+            convertByteOrder(lexpr, "NETWORK");
+        }
+        if (isScalar) {
+            builder->spc();
+            builder->append(stringop);
+            builder->spc();
+        } else {
+            builder->append(", &");
+        }
+        visit(rexpr);
+        return;
+    } else {
+        // ConvertRight
+        auto ftype = typeMap->getType(rexpr);
+        auto et = EBPFTypeFactory::instance->create(ftype);
+        unsigned width = dynamic_cast<IHasWidth *>(et)->widthInBits();
+        visit(lexpr);
+        if (isScalar) {
+            builder->spc();
+            builder->append(stringop);
+            builder->spc();
+        } else {
+            builder->append(", &");
+        }
+        if (width <= 8) {
+            visit(rexpr);
+        } else {
+            convertByteOrder(rexpr, "NETWORK");
+        }
+    }
+    return;
+}
+
+void CodeGenInspector::emitTCAssignmentEndianessConversion(const IR::Expression *lexpr,
+                                                           const IR::Expression *rexpr) {
+    auto left = EBPFInitializerUtils::IsHeaderField(typeMap, lexpr);
+    auto right = EBPFInitializerUtils::IsHeaderField(typeMap, rexpr);
+    if (left == right) {
+        visit(rexpr);
+        return;
+    }
+    auto ftype = typeMap->getType(rexpr);
+    auto et = EBPFTypeFactory::instance->create(ftype);
+    unsigned width = dynamic_cast<IHasWidth *>(et)->widthInBits();
+    if (width <= 8) {
+        visit(rexpr);
+        return;
+    }
+    if (right == true) {
+        convertByteOrder(rexpr, "HOST");
+    } else {
+        // Todo
+        visit(rexpr);
+    }
+    return;
+}
+
 unsigned EBPFInitializerUtils::ebpfTypeWidth(P4::TypeMap *typeMap, const IR::Expression *expr) {
     auto type = typeMap->getType(expr);
     if (type == nullptr) type = expr->type;
@@ -485,6 +606,91 @@ cstring EBPFInitializerUtils::genHexStr(const big_int &value, unsigned width,
     if (str.size() < nibbles) str = std::string(nibbles - str.size(), '0') + str;
     BUG_CHECK(str.size() == nibbles, "%1%: value size does not match %2% bits", expr, width);
     return str;
+}
+
+const IR::Expression *EBPFInitializerUtils::ExtractExpFromCast(const IR::Expression *exp) {
+    const IR::Expression *castexp = exp;
+    while (castexp->is<IR::Cast>()) {
+        castexp = castexp->to<IR::Cast>()->expr;
+    }
+    return castexp;
+}
+
+const IR::Expression *EBPFInitializerUtils::ExtractSliceFromExp(const IR::Expression *exp) {
+    auto baseexp = exp;
+    if (baseexp->is<IR::Slice>()) {
+        baseexp = baseexp->to<IR::Slice>()->e0;
+    }
+    return baseexp;
+}
+
+// return true if an expression is header or header union
+bool EBPFInitializerUtils::IsTypeHeaderOrUnion(const P4::TypeMap *typemap,
+                                               const IR::Expression *exp) {
+    if (!exp) return false;
+    auto tempexp = ExtractExpFromCast(exp);
+    if (IsSlice(tempexp)) {
+        tempexp = ToSlice(tempexp)->e0;
+    }
+    auto memexp = tempexp;
+    if (IsMem(tempexp) && tempexp->type->is<IR::Type_Bits>()) {
+        memexp = tempexp->to<IR::Member>()->expr;
+    }
+    if (memexp->is<IR::ArrayIndex>()) {
+        memexp = memexp->to<IR::ArrayIndex>()->left;
+    }
+    if (!memexp) return false;
+    if (!memexp->is<IR::Member>()) return false;
+    auto type = typemap->getType(memexp);
+    if (type == nullptr && memexp->type != nullptr) {
+        type = memexp->type;
+    }
+    if (type && type->is<IR::Type_Stack>()) {
+        type = type->to<IR::Type_Stack>()->elementType;
+    }
+    if (type && (type->is<IR::Type_Header>() || type->is<IR::Type_HeaderUnion>())) return true;
+    return false;
+}
+
+// return true if an expression is array of header or array of hader union
+// example: hdrs.mpls[] type
+bool EBPFInitializerUtils::IsTypeArrayHeader(const P4::TypeMap *typemap,
+                                             const IR::Expression *exp) {
+    if (!exp) return false;
+    if (!exp->is<IR::Member>()) return false;
+    auto memexp = exp->to<IR::Member>()->expr;
+    if (!memexp) return false;
+    if (!memexp->is<IR::ArrayIndex>()) return false;
+    auto leftexp = memexp->to<IR::ArrayIndex>()->left;
+    auto rightexp = memexp->to<IR::ArrayIndex>()->right;
+    if (!leftexp) return false;
+    if (!leftexp->is<IR::Member>()) return false;
+    if (!rightexp) return false;
+    auto type = typemap->getType(memexp);
+    if (type == nullptr && memexp->type) {
+        type = memexp->type;
+    }
+    if (!type) return false;
+    if (type->is<IR::Type_Header>() || type->is<IR::Type_HeaderUnion>()) {
+        return true;
+    }
+    return false;
+}
+
+bool EBPFInitializerUtils::IsHeaderField(const P4::TypeMap *typemap, const IR::Expression *exp) {
+    if (exp == nullptr) {
+        return false;
+    }
+    if (exp->is<IR::Constant>()) return false;
+    auto exp1 = exp;
+    // remove cast from the expression IR
+    exp1 = ExtractExpFromCast(exp1);
+    // get slice expression if it is slice
+    exp1 = ExtractSliceFromExp(exp1);
+    if (IsTypeHeaderOrUnion(typemap, exp1) || IsTypeArrayHeader(typemap, exp1)) {
+        return true;
+    }
+    return false;
 }
 
 }  // namespace EBPF

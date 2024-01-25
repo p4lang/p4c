@@ -46,16 +46,16 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
             hdr->ipv4.diffserv = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 8;
 
-            hdr->ipv4.totalLen = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
+            hdr->ipv4.totalLen = (u16)((load_half_ne(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 16;
 
-            hdr->ipv4.identification = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
+            hdr->ipv4.identification = (u16)((load_half_ne(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 16;
 
             hdr->ipv4.flags = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits)) >> 5) & EBPF_MASK(u8, 3));
             ebpf_packetOffsetInBits += 3;
 
-            hdr->ipv4.fragOffset = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))) & EBPF_MASK(u16, 13));
+            hdr->ipv4.fragOffset = (u16)((load_half_ne(pkt, BYTES(ebpf_packetOffsetInBits))) & EBPF_MASK(u16, 13));
             ebpf_packetOffsetInBits += 13;
 
             hdr->ipv4.ttl = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
@@ -64,13 +64,13 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
             hdr->ipv4.protocol = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 8;
 
-            hdr->ipv4.hdrChecksum = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
+            hdr->ipv4.hdrChecksum = (u16)((load_half_ne(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 16;
 
-            __builtin_memcpy(&hdr->ipv4.srcAddr, pkt + BYTES(ebpf_packetOffsetInBits), 4);
+            hdr->ipv4.srcAddr = (u32)((load_word_ne(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 32;
 
-            __builtin_memcpy(&hdr->ipv4.dstAddr, pkt + BYTES(ebpf_packetOffsetInBits), 4);
+            hdr->ipv4.dstAddr = (u32)((load_word_ne(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 32;
 
             hdr->ipv4.ebpf_valid = 1;
@@ -82,16 +82,16 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
                 goto reject;
             }
 
-            hdr->udp.src_port = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
+            hdr->udp.src_port = (u16)((load_half_ne(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 16;
 
-            hdr->udp.dst_port = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
+            hdr->udp.dst_port = (u16)((load_half_ne(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 16;
 
-            hdr->udp.length = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
+            hdr->udp.length = (u16)((load_half_ne(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 16;
 
-            hdr->udp.checksum = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
+            hdr->udp.checksum = (u16)((load_half_ne(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 16;
 
             hdr->udp.ebpf_valid = 1;
@@ -106,20 +106,20 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
                 goto reject;
             }
 
-            hdr->ethernet.dstAddr = (u64)((load_dword(pkt, BYTES(ebpf_packetOffsetInBits)) >> 16) & EBPF_MASK(u64, 48));
+            hdr->ethernet.dstAddr = (u64)((load_dword_ne(pkt, BYTES(ebpf_packetOffsetInBits)) >> 16) & EBPF_MASK(u64, 48));
             ebpf_packetOffsetInBits += 48;
 
-            hdr->ethernet.srcAddr = (u64)((load_dword(pkt, BYTES(ebpf_packetOffsetInBits)) >> 16) & EBPF_MASK(u64, 48));
+            hdr->ethernet.srcAddr = (u64)((load_dword_ne(pkt, BYTES(ebpf_packetOffsetInBits)) >> 16) & EBPF_MASK(u64, 48));
             ebpf_packetOffsetInBits += 48;
 
-            hdr->ethernet.etherType = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
+            hdr->ethernet.etherType = (u16)((load_half_ne(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 16;
 
             hdr->ethernet.ebpf_valid = 1;
 
 ;
             u16 select_0;
-            select_0 = hdr->ethernet.etherType;
+            select_0 = bpf_ntohs(hdr->ethernet.etherType);
             if (select_0 == 0x800)goto parse_ipv4;
             if ((select_0 & 0x0) == (0x0 & 0x0))goto accept;
             else goto reject;

@@ -515,19 +515,6 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
     cstring msgStr;
     cstring fieldName = field->name.name;
 
-    bool noEndiannessConversion = false;
-    auto annolist = field->getAnnotations()->annotations;
-    for (auto anno : annolist) {
-        if (anno->name != ParseTCAnnotations::tcType) continue;
-        auto annoBody = anno->body;
-        for (auto annoVal : annoBody) {
-            if (annoVal->text == "macaddr" || annoVal->text == "ipv4" || annoVal->text == "ipv6") {
-                noEndiannessConversion = true;
-                break;
-            }
-        }
-    }
-
     msgStr = Util::printf_format("Parser: extracting field %s", fieldName);
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 
@@ -542,40 +529,32 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
             helper = "load_byte";
             loadSize = 8;
         } else if (wordsToRead <= 2) {
-            helper = "load_half";
+            helper = "load_half_ne";
             loadSize = 16;
         } else if (wordsToRead <= 4) {
-            helper = "load_word";
+            helper = "load_word_ne";
             loadSize = 32;
         } else {
             if (wordsToRead > 64) BUG("Unexpected width %d", widthToExtract);
-            helper = "load_dword";
+            helper = "load_dword_ne";
             loadSize = 64;
         }
 
         unsigned shift = loadSize - alignment - widthToExtract;
         builder->emitIndent();
-        if (noEndiannessConversion) {
-            builder->appendFormat("__builtin_memcpy(&");
-            visit(expr);
-            builder->appendFormat(".%s, %s + BYTES(%s), %d)", fieldName,
-                                  program->packetStartVar.c_str(), program->offsetVar.c_str(),
-                                  widthToExtract / 8);
-        } else {
-            visit(expr);
-            builder->appendFormat(".%s = (", fieldName);
+        visit(expr);
+        builder->appendFormat(".%s = (", fieldName);
+        type->emit(builder);
+        builder->appendFormat(")((%s(%s, BYTES(%s))", helper, program->packetStartVar.c_str(),
+                              program->offsetVar.c_str());
+        if (shift != 0) builder->appendFormat(" >> %d", shift);
+        builder->append(")");
+        if (widthToExtract != loadSize) {
+            builder->append(" & EBPF_MASK(");
             type->emit(builder);
-            builder->appendFormat(")((%s(%s, BYTES(%s))", helper, program->packetStartVar.c_str(),
-                                  program->offsetVar.c_str());
-            if (shift != 0) builder->appendFormat(" >> %d", shift);
-            builder->append(")");
-            if (widthToExtract != loadSize) {
-                builder->append(" & EBPF_MASK(");
-                type->emit(builder);
-                builder->appendFormat(", %d)", widthToExtract);
-            }
-            builder->append(")");
+            builder->appendFormat(", %d)", widthToExtract);
         }
+        builder->append(")");
         builder->endOfStatement(true);
     } else {
         if (program->options.arch == "psa" && widthToExtract % 8 != 0) {
@@ -606,7 +585,7 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
         if (shift == 0)
             helper = "load_byte";
         else
-            helper = "load_half";
+            helper = "load_half_ne";
         auto bt = EBPF::EBPFTypeFactory::instance->create(IR::Type_Bits::get(8));
         unsigned bytes = ROUNDUP(widthToExtract, 8);
         for (unsigned i = 0; i < bytes; i++) {
@@ -1428,6 +1407,7 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
                 unsigned width = scalar->implementationWidthInBits();
                 memcpy = !EBPF::EBPFScalarType::generatesScalar(width);
 
+                // Todo - Issue 23
                 if (isLPMKeyBigEndian) {
                     if (width <= 8) {
                         swap = "";  // single byte, nothing to swap
@@ -1649,19 +1629,7 @@ void DeparserHdrEmitTranslatorPNA::processMethod(const P4::ExternMethod *method)
                             "Only headers with fixed widths supported %1%", f);
                     return;
                 }
-                bool noEndiannessConversion = false;
-                auto annotations = f->getAnnotations()->annotations;
-                for (auto anno : annotations) {
-                    if (anno->name != ParseTCAnnotations::tcType) continue;
-                    for (auto annoVal : anno->body) {
-                        if (annoVal->text == "macaddr" || annoVal->text == "ipv4" ||
-                            annoVal->text == "ipv6") {
-                            noEndiannessConversion = true;
-                            break;
-                        }
-                    }
-                }
-                emitField(builder, f->name, expr, alignment, etype, noEndiannessConversion);
+                emitField(builder, f->name, expr, alignment, etype);
                 alignment += et->widthInBits();
                 alignment %= 8;
             }
@@ -1674,7 +1642,7 @@ void DeparserHdrEmitTranslatorPNA::processMethod(const P4::ExternMethod *method)
 
 void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring field,
                                              const IR::Expression *hdrExpr, unsigned int alignment,
-                                             EBPF::EBPFType *type, bool noEndiannessConversion) {
+                                             EBPF::EBPFType *type) {
     auto program = deparser->program;
 
     auto et = dynamic_cast<EBPF::IHasWidth *>(type);
@@ -1685,7 +1653,7 @@ void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring
     }
     unsigned widthToEmit = et->widthInBits();
     unsigned emitSize = 0;
-    cstring swap = "", msgStr;
+    cstring msgStr;
 
     if (widthToEmit <= 64) {
         if (program->options.emitTraceMessages) {
@@ -1709,28 +1677,14 @@ void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring
     if (widthToEmit <= 8) {
         emitSize = 8;
     } else if (widthToEmit <= 16) {
-        swap = "bpf_htons";
         emitSize = 16;
     } else if (widthToEmit <= 32) {
-        swap = "htonl";
         emitSize = 32;
     } else if (widthToEmit <= 64) {
-        swap = "htonll";
         emitSize = 64;
     }
-    unsigned shift =
-        widthToEmit < 8 ? (emitSize - alignment - widthToEmit) : (emitSize - widthToEmit);
 
-    if (!swap.isNullOrEmpty() && !noEndiannessConversion) {
-        builder->emitIndent();
-        visit(hdrExpr);
-        builder->appendFormat(".%s = %s(", field, swap);
-        visit(hdrExpr);
-        builder->appendFormat(".%s", field);
-        if (shift != 0) builder->appendFormat(" << %d", shift);
-        builder->append(")");
-        builder->endOfStatement(true);
-    }
+    unsigned shift;
     unsigned bitsInFirstByte = widthToEmit % 8;
     if (bitsInFirstByte == 0) bitsInFirstByte = 8;
     unsigned bitsInCurrentByte = bitsInFirstByte;

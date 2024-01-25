@@ -166,7 +166,6 @@ if (/* hdr->ipv4.isValid() */
                 return TC_ACT_SHOT;
             }
             
-            hdr->eth.dstAddr = htonll(hdr->eth.dstAddr << 16);
             ebpf_byte = ((char*)(&hdr->eth.dstAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->eth.dstAddr))[1];
@@ -181,7 +180,6 @@ if (/* hdr->ipv4.isValid() */
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
-            hdr->eth.srcAddr = htonll(hdr->eth.srcAddr << 16);
             ebpf_byte = ((char*)(&hdr->eth.srcAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->eth.srcAddr))[1];
@@ -196,7 +194,6 @@ if (/* hdr->ipv4.isValid() */
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
-            hdr->eth.etherType = bpf_htons(hdr->eth.etherType);
             ebpf_byte = ((char*)(&hdr->eth.etherType))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->eth.etherType))[1];

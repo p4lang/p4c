@@ -20,8 +20,8 @@ header ipv4_t {
     bit<8>  ttl;
     bit<8>  protocol;
     bit<16> hdrChecksum;
-    @tc_type ("ipv4") bit<32> srcAddr;
-    @tc_type ("ipv4") bit<32> dstAddr;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
 }
 
 //////////////////////////////////////////////////////////////////////
