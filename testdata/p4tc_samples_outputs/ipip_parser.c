@@ -46,16 +46,16 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
             hdr->outer.diffserv = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 8;
 
-            hdr->outer.totalLen = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
+            hdr->outer.totalLen = (u16)((load_half_ne(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 16;
 
-            hdr->outer.identification = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
+            hdr->outer.identification = (u16)((load_half_ne(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 16;
 
             hdr->outer.flags = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits)) >> 5) & EBPF_MASK(u8, 3));
             ebpf_packetOffsetInBits += 3;
 
-            hdr->outer.fragOffset = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))) & EBPF_MASK(u16, 13));
+            hdr->outer.fragOffset = (u16)((load_half_ne(pkt, BYTES(ebpf_packetOffsetInBits))) & EBPF_MASK(u16, 13));
             ebpf_packetOffsetInBits += 13;
 
             hdr->outer.ttl = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
@@ -64,13 +64,13 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
             hdr->outer.protocol = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 8;
 
-            hdr->outer.hdrChecksum = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
+            hdr->outer.hdrChecksum = (u16)((load_half_ne(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 16;
 
-            hdr->outer.srcAddr = (u32)((load_word(pkt, BYTES(ebpf_packetOffsetInBits))));
+            hdr->outer.srcAddr = (u32)((load_word_ne(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 32;
 
-            hdr->outer.dstAddr = (u32)((load_word(pkt, BYTES(ebpf_packetOffsetInBits))));
+            hdr->outer.dstAddr = (u32)((load_word_ne(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 32;
 
             hdr->outer.ebpf_valid = 1;
@@ -98,16 +98,16 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
             hdr->inner.diffserv = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 8;
 
-            hdr->inner.totalLen = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
+            hdr->inner.totalLen = (u16)((load_half_ne(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 16;
 
-            hdr->inner.identification = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
+            hdr->inner.identification = (u16)((load_half_ne(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 16;
 
             hdr->inner.flags = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits)) >> 5) & EBPF_MASK(u8, 3));
             ebpf_packetOffsetInBits += 3;
 
-            hdr->inner.fragOffset = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))) & EBPF_MASK(u16, 13));
+            hdr->inner.fragOffset = (u16)((load_half_ne(pkt, BYTES(ebpf_packetOffsetInBits))) & EBPF_MASK(u16, 13));
             ebpf_packetOffsetInBits += 13;
 
             hdr->inner.ttl = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
@@ -116,13 +116,13 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
             hdr->inner.protocol = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 8;
 
-            hdr->inner.hdrChecksum = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
+            hdr->inner.hdrChecksum = (u16)((load_half_ne(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 16;
 
-            hdr->inner.srcAddr = (u32)((load_word(pkt, BYTES(ebpf_packetOffsetInBits))));
+            hdr->inner.srcAddr = (u32)((load_word_ne(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 32;
 
-            hdr->inner.dstAddr = (u32)((load_word(pkt, BYTES(ebpf_packetOffsetInBits))));
+            hdr->inner.dstAddr = (u32)((load_word_ne(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 32;
 
             hdr->inner.ebpf_valid = 1;
@@ -137,20 +137,20 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
                 goto reject;
             }
 
-            hdr->ethernet.dstAddr = (u64)((load_dword(pkt, BYTES(ebpf_packetOffsetInBits)) >> 16) & EBPF_MASK(u64, 48));
+            hdr->ethernet.dstAddr = (u64)((load_dword_ne(pkt, BYTES(ebpf_packetOffsetInBits)) >> 16) & EBPF_MASK(u64, 48));
             ebpf_packetOffsetInBits += 48;
 
-            hdr->ethernet.srcAddr = (u64)((load_dword(pkt, BYTES(ebpf_packetOffsetInBits)) >> 16) & EBPF_MASK(u64, 48));
+            hdr->ethernet.srcAddr = (u64)((load_dword_ne(pkt, BYTES(ebpf_packetOffsetInBits)) >> 16) & EBPF_MASK(u64, 48));
             ebpf_packetOffsetInBits += 48;
 
-            hdr->ethernet.etherType = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
+            hdr->ethernet.etherType = (u16)((load_half_ne(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 16;
 
             hdr->ethernet.ebpf_valid = 1;
 
 ;
             u16 select_1;
-            select_1 = hdr->ethernet.etherType;
+            select_1 = bpf_ntohs(hdr->ethernet.etherType);
             if (select_1 == 0x800)goto parse_ipv4;
             if ((select_1 & 0x0) == (0x0 & 0x0))goto reject;
             else goto reject;

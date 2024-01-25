@@ -169,7 +169,7 @@ if (/* hdr->outer.isValid() */
                                 hdr_1->outer.dstAddr = meta_1->dst;
                                 hdr_1->outer.ttl = 64;
                                 hdr_1->outer.protocol = 4;
-                                hdr_1->outer.totalLen = (hdr_1->outer.totalLen + 20);
+                                hdr_1->outer.totalLen = (hdr_1->outer.totalLen + bpf_htons(20));
                                 hdr_1->outer.hdrChecksum = 0;
                                 hdr = hdr_1;
             }
@@ -207,7 +207,6 @@ if (/* hdr->outer.isValid() */
                 return TC_ACT_SHOT;
             }
             
-            hdr->ethernet.dstAddr = htonll(hdr->ethernet.dstAddr << 16);
             ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[1];
@@ -222,7 +221,6 @@ if (/* hdr->outer.isValid() */
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
-            hdr->ethernet.srcAddr = htonll(hdr->ethernet.srcAddr << 16);
             ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[1];
@@ -237,7 +235,6 @@ if (/* hdr->outer.isValid() */
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
-            hdr->ethernet.etherType = bpf_htons(hdr->ethernet.etherType);
             ebpf_byte = ((char*)(&hdr->ethernet.etherType))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.etherType))[1];
@@ -262,14 +259,12 @@ if (/* hdr->outer.isValid() */
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 8;
 
-            hdr->outer.totalLen = bpf_htons(hdr->outer.totalLen);
             ebpf_byte = ((char*)(&hdr->outer.totalLen))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->outer.totalLen))[1];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
             ebpf_packetOffsetInBits += 16;
 
-            hdr->outer.identification = bpf_htons(hdr->outer.identification);
             ebpf_byte = ((char*)(&hdr->outer.identification))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->outer.identification))[1];
@@ -280,7 +275,6 @@ if (/* hdr->outer.isValid() */
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 3, 5, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 3;
 
-            hdr->outer.fragOffset = bpf_htons(hdr->outer.fragOffset << 3);
             ebpf_byte = ((char*)(&hdr->outer.fragOffset))[0];
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 5, 0, (ebpf_byte >> 3));
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0 + 1, 3, 5, (ebpf_byte));
@@ -296,14 +290,12 @@ if (/* hdr->outer.isValid() */
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 8;
 
-            hdr->outer.hdrChecksum = bpf_htons(hdr->outer.hdrChecksum);
             ebpf_byte = ((char*)(&hdr->outer.hdrChecksum))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->outer.hdrChecksum))[1];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
             ebpf_packetOffsetInBits += 16;
 
-            hdr->outer.srcAddr = htonl(hdr->outer.srcAddr);
             ebpf_byte = ((char*)(&hdr->outer.srcAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->outer.srcAddr))[1];
@@ -314,7 +306,6 @@ if (/* hdr->outer.isValid() */
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
             ebpf_packetOffsetInBits += 32;
 
-            hdr->outer.dstAddr = htonl(hdr->outer.dstAddr);
             ebpf_byte = ((char*)(&hdr->outer.dstAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->outer.dstAddr))[1];
@@ -343,14 +334,12 @@ if (/* hdr->outer.isValid() */
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 8;
 
-            hdr->inner.totalLen = bpf_htons(hdr->inner.totalLen);
             ebpf_byte = ((char*)(&hdr->inner.totalLen))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->inner.totalLen))[1];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
             ebpf_packetOffsetInBits += 16;
 
-            hdr->inner.identification = bpf_htons(hdr->inner.identification);
             ebpf_byte = ((char*)(&hdr->inner.identification))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->inner.identification))[1];
@@ -361,7 +350,6 @@ if (/* hdr->outer.isValid() */
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 3, 5, (ebpf_byte >> 0));
             ebpf_packetOffsetInBits += 3;
 
-            hdr->inner.fragOffset = bpf_htons(hdr->inner.fragOffset << 3);
             ebpf_byte = ((char*)(&hdr->inner.fragOffset))[0];
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 5, 0, (ebpf_byte >> 3));
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0 + 1, 3, 5, (ebpf_byte));
@@ -377,14 +365,12 @@ if (/* hdr->outer.isValid() */
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_packetOffsetInBits += 8;
 
-            hdr->inner.hdrChecksum = bpf_htons(hdr->inner.hdrChecksum);
             ebpf_byte = ((char*)(&hdr->inner.hdrChecksum))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->inner.hdrChecksum))[1];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
             ebpf_packetOffsetInBits += 16;
 
-            hdr->inner.srcAddr = htonl(hdr->inner.srcAddr);
             ebpf_byte = ((char*)(&hdr->inner.srcAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->inner.srcAddr))[1];
@@ -395,7 +381,6 @@ if (/* hdr->outer.isValid() */
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
             ebpf_packetOffsetInBits += 32;
 
-            hdr->inner.dstAddr = htonl(hdr->inner.dstAddr);
             ebpf_byte = ((char*)(&hdr->inner.dstAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->inner.dstAddr))[1];
