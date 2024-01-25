@@ -10,6 +10,7 @@
 #include "lib/exceptions.h"
 #include "lib/ordered_map.h"
 
+#include "backends/p4tools/modules/testgen/core/compiler_target.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
@@ -55,7 +56,8 @@ const PnaDpdkProgramInfo *PnaDpdkTestgenTarget::produceProgramInfoImpl(
         programmableBlocks.emplace(canonicalName, declType);
     }
 
-    return new PnaDpdkProgramInfo(compilerResult, programmableBlocks);
+    return new PnaDpdkProgramInfo(*compilerResult.checkedTo<TestgenCompilerResult>(),
+                                  programmableBlocks);
 }
 
 PnaTestBackend *PnaDpdkTestgenTarget::getTestBackendImpl(

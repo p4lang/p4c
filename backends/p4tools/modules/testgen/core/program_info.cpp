@@ -1,7 +1,5 @@
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 
-#include "backends/p4tools/common/compiler/compiler_target.h"
-#include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/lib/arch_spec.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "backends/p4tools/common/lib/variables.h"
@@ -11,27 +9,15 @@
 #include "lib/exceptions.h"
 #include "midend/coverage.h"
 
+#include "backends/p4tools/modules/testgen/core/compiler_target.h"
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
-#include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4Tools::P4Testgen {
 
-ProgramInfo::ProgramInfo(const CompilerResult &compilerResult)
+ProgramInfo::ProgramInfo(const TestgenCompilerResult &compilerResult)
     : compilerResult(compilerResult), concolicMethodImpls({}) {
     concolicMethodImpls.add(*Concolic::getCoreConcolicMethodImpls());
-    if (TestgenOptions::get().dcg || !TestgenOptions::get().pattern.empty()) {
-        // Create DCG.
-        auto *currentDCG = new NodesCallGraph("NodesCallGraph");
-        P4ProgramDCGCreator dcgCreator(currentDCG);
-        compilerResult.getProgram().apply(dcgCreator);
-        dcg = currentDCG;
-    }
-    /// Collect coverage information about the program.
-    auto coverage = P4::Coverage::CollectNodes(TestgenOptions::get().coverageOptions);
-    compilerResult.getProgram().apply(coverage);
-    auto coveredNodes = coverage.getCoverableNodes();
-    coverableNodes.insert(coveredNodes.begin(), coveredNodes.end());
 }
 
 const IR::Expression *ProgramInfo::createTargetUninitialized(const IR::Type *type,
@@ -46,7 +32,17 @@ const IR::Expression *ProgramInfo::createTargetUninitialized(const IR::Type *typ
  *  Getters
  * ============================================================================================= */
 
-const P4::Coverage::CoverageSet &ProgramInfo::getCoverableNodes() const { return coverableNodes; }
+const P4::Coverage::CoverageSet &ProgramInfo::getCoverableNodes() const {
+    return getCompilerResult().getCoverableNodes();
+}
+
+const TestgenCompilerResult &ProgramInfo::getCompilerResult() const { return compilerResult.get(); }
+
+const IR::P4Program &ProgramInfo::getP4Program() const { return getCompilerResult().getProgram(); }
+
+const NodesCallGraph &ProgramInfo::getCallGraph() const {
+    return getCompilerResult().getCallGraph();
+}
 
 const ConcolicMethodImpls *ProgramInfo::getConcolicMethodImpls() const {
     return &concolicMethodImpls;
@@ -101,9 +97,5 @@ void ProgramInfo::produceCopyInOutCall(const IR::Parameter *param, size_t paramI
         copyOuts->emplace_back(copyOutCall);
     }
 }
-
-const CompilerResult &ProgramInfo::getCompilerResult() const { return compilerResult.get(); }
-
-const IR::P4Program &ProgramInfo::getP4Program() const { return getCompilerResult().getProgram(); }
 
 }  // namespace P4Tools::P4Testgen

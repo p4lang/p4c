@@ -41,9 +41,6 @@ bool MapDirectExterns::preorder(const IR::P4Table *table) {
     return true;
 }
 
-const std::map<const IR::IDeclaration *, const IR::P4Table *>
-    &MapDirectExterns::getdirectExternMap() {
-    return directExternMap;
-}
+const DirectExternMap &MapDirectExterns::getdirectExternMap() { return directExternMap; }
 
 }  // namespace P4Tools::P4Testgen::Bmv2

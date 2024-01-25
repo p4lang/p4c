@@ -14,6 +14,7 @@ set(
   options.cpp
   testgen.cpp
 
+  core/compiler_target.cpp
   core/externs.cpp
   core/program_info.cpp
   core/small_step/abstract_stepper.cpp

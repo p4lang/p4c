@@ -21,7 +21,7 @@ namespace P4Tools::P4Testgen::Pna {
 const IR::Type_Bits SharedPnaProgramInfo::PARSER_ERR_BITS = IR::Type_Bits(32, false);
 
 SharedPnaProgramInfo::SharedPnaProgramInfo(
-    const CompilerResult &compilerResult,
+    const TestgenCompilerResult &compilerResult,
     ordered_map<cstring, const IR::Type_Declaration *> inputBlocks)
     : ProgramInfo(compilerResult), programmableBlocks(std::move(inputBlocks)) {
     concolicMethodImpls.add(*PnaDpdkConcolic::getPnaDpdkConcolicMethodImpls());
