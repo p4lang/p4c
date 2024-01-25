@@ -208,7 +208,7 @@ public:
     inline cstring concolicMethodName = "";
 
     toString {
-        cstring argumentStr;
+        cstring argumentStr = "";
         cstring sep = "";
         for (const auto *arg : *arguments) {
             argumentStr += sep + arg->toString();
