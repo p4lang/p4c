@@ -1,0 +1,270 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 49173205
+    name: "ingressImpl.t1"
+    alias: "t1"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.src_addr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "hdr.ethernet.ether_type"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 25218163
+  }
+  action_refs {
+    id: 26776898
+  }
+  size: 1024
+  has_initial_entries: true
+}
+tables {
+  preamble {
+    id: 40845583
+    name: "ingressImpl.t1b"
+    alias: "t1b"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.src_addr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "hdr.ethernet.ether_type"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 25218163
+  }
+  action_refs {
+    id: 26776898
+  }
+  size: 1024
+  has_initial_entries: true
+}
+tables {
+  preamble {
+    id: 35926338
+    name: "ingressImpl.t2"
+    alias: "t2"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.src_addr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "hdr.ethernet.ether_type"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 25218163
+  }
+  action_refs {
+    id: 26776898
+  }
+  size: 1024
+  has_initial_entries: true
+}
+tables {
+  preamble {
+    id: 37653272
+    name: "ingressImpl.t2b"
+    alias: "t2b"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.src_addr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "hdr.ethernet.ether_type"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 25218163
+  }
+  action_refs {
+    id: 26776898
+  }
+  size: 1024
+  has_initial_entries: true
+}
+tables {
+  preamble {
+    id: 38935454
+    name: "ingressImpl.t3"
+    alias: "t3"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.src_addr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "hdr.ethernet.ether_type"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 25218163
+  }
+  action_refs {
+    id: 26776898
+  }
+  size: 1024
+  has_initial_entries: true
+}
+tables {
+  preamble {
+    id: 46791685
+    name: "ingressImpl.t3b"
+    alias: "t3b"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.src_addr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "hdr.ethernet.ether_type"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 25218163
+  }
+  action_refs {
+    id: 26776898
+  }
+  size: 1024
+  has_initial_entries: true
+}
+tables {
+  preamble {
+    id: 43122205
+    name: "ingressImpl.t4"
+    alias: "t4"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.src_addr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "hdr.ethernet.ether_type"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 25218163
+  }
+  action_refs {
+    id: 26776898
+  }
+  size: 1024
+  has_initial_entries: true
+}
+tables {
+  preamble {
+    id: 47394566
+    name: "ingressImpl.t4b"
+    alias: "t4b"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.src_addr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "hdr.ethernet.ether_type"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 25218163
+  }
+  action_refs {
+    id: 26776898
+  }
+  size: 1024
+  has_initial_entries: true
+}
+tables {
+  preamble {
+    id: 47497379
+    name: "ingressImpl.t5"
+    alias: "t5"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.src_addr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "hdr.ethernet.ether_type"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 25218163
+  }
+  action_refs {
+    id: 26776898
+  }
+  size: 1024
+  has_initial_entries: true
+}
+actions {
+  preamble {
+    id: 25218163
+    name: "ingressImpl.a"
+    alias: "a"
+  }
+}
+actions {
+  preamble {
+    id: 26776898
+    name: "ingressImpl.a_params"
+    alias: "a_params"
+  }
+  params {
+    id: 1
+    name: "param"
+    bitwidth: 32
+  }
+}
+type_info {
+}

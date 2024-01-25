@@ -1,0 +1,53 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 38023373
+    name: "ingress.table1"
+    alias: "table1"
+  }
+  match_fields {
+    id: 1
+    name: "headers.ethernet.dst_addr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 25703749
+  }
+  action_refs {
+    id: 33281717
+  }
+  const_default_action_id: 33281717
+  size: 1048576
+}
+actions {
+  preamble {
+    id: 25703749
+    name: "ingress.action1"
+    alias: "action1"
+  }
+  params {
+    id: 1
+    name: "field"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "field1"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 33281717
+    name: "ingress.drop"
+    alias: "drop"
+  }
+}
+type_info {
+}

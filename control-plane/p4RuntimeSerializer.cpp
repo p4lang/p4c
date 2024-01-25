@@ -22,15 +22,15 @@ limitations under the License.
 #include <google/protobuf/util/json_util.h>
 #pragma GCC diagnostic pop
 
-#include <algorithm>
 #include <iostream>
 #include <iterator>
 #include <optional>
 #include <set>
-#include <typeinfo>
 #include <unordered_map>
 #include <utility>
 #include <vector>
+
+#include "lib/error.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -53,14 +53,11 @@ limitations under the License.
 #include "frontends/p4/externInstance.h"
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/methodInstance.h"
-#include "frontends/p4/parseAnnotations.h"
-#include "frontends/p4/simplify.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 #include "lib/log.h"
 #include "lib/nullstream.h"
-#include "lib/ordered_set.h"
 #include "p4RuntimeAnnotations.h"
 #include "p4RuntimeArchHandler.h"
 #include "p4RuntimeArchStandard.h"
@@ -152,7 +149,9 @@ static bool writeTextTo(const Message &message, std::ostream *destination) {
     google::protobuf::TextFormat::Printer textPrinter;
     // set to expand google.protobuf.Any payloads
     textPrinter.SetExpandAny(true);
-    if (textPrinter.PrintToString(message, &output) == false) {
+    *destination << "# proto-file: " << message.GetDescriptor()->file()->name() << "\n";
+    *destination << "# proto-message: " << message.GetTypeName() << "\n\n";
+    if (!textPrinter.PrintToString(message, &output)) {
         ::error(ErrorType::ERR_IO, "Failed to serialize protobuf message to text");
         return false;
     }
@@ -1467,6 +1466,7 @@ void P4RuntimeAPI::serializeP4InfoTo(std::ostream *destination, P4RuntimeFormat 
         case P4RuntimeFormat::JSON:
             success = writers::writeJsonTo(*p4Info, destination);
             break;
+        case P4RuntimeFormat::TEXT_PROTOBUF:
         case P4RuntimeFormat::TEXT:
             success = writers::writeTextTo(*p4Info, destination);
             break;
@@ -1486,6 +1486,7 @@ void P4RuntimeAPI::serializeEntriesTo(std::ostream *destination, P4RuntimeFormat
         case P4RuntimeFormat::JSON:
             success = writers::writeJsonTo(*entries, destination);
             break;
+        case P4RuntimeFormat::TEXT_PROTOBUF:
         case P4RuntimeFormat::TEXT:
             success = writers::writeTextTo(*entries, destination);
             break;
@@ -1513,7 +1514,11 @@ static bool parseFileNames(cstring fileNameVector, std::vector<cstring> &files,
                 formats.push_back(P4::P4RuntimeFormat::JSON);
             } else if (suffix == ".bin") {
                 formats.push_back(P4::P4RuntimeFormat::BINARY);
+            } else if (suffix == ".txtpb") {
+                formats.push_back(P4::P4RuntimeFormat::TEXT_PROTOBUF);
             } else if (suffix == ".txt") {
+                ::warning(ErrorType::WARN_DEPRECATED,
+                          ".txt format is being deprecated; use .txtpb instead");
                 formats.push_back(P4::P4RuntimeFormat::TEXT);
             } else {
                 ::error(ErrorType::ERR_UNKNOWN,
@@ -1523,7 +1528,8 @@ static bool parseFileNames(cstring fileNameVector, std::vector<cstring> &files,
             }
         } else {
             ::error(ErrorType::ERR_UNKNOWN,
-                    "%1%: unknown file kind; known suffixes are .bin, .txt, .json", name);
+                    "%1%: unknown file kind; known suffixes are .bin, .txt, .json, and .txtpb",
+                    name);
             return false;
         }
     }

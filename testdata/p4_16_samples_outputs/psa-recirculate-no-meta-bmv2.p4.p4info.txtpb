@@ -1,0 +1,41 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 43367957
+    name: "cEgress.e"
+    alias: "e"
+  }
+  action_refs {
+    id: 25218586
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 27646489
+    name: "send_to_port"
+    alias: "send_to_port"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 20711895
+    name: "cIngress.record_ingress_ports_in_pkt"
+    alias: "record_ingress_ports_in_pkt"
+  }
+}
+actions {
+  preamble {
+    id: 25218586
+    name: "cEgress.add"
+    alias: "add"
+  }
+}
+type_info {
+}

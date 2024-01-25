@@ -1,0 +1,81 @@
+# proto-file: p4/v1/p4runtime.proto
+# proto-message: p4.v1.WriteRequest
+
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 44370079
+      match {
+        field_id: 1
+        ternary {
+          value: "\000\001"
+          mask: "\000\017"
+        }
+      }
+      action {
+        action {
+          action_id: 17165658
+          params {
+            param_id: 1
+            value: "\000\001"
+          }
+        }
+      }
+      priority: 3
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 44370079
+      match {
+        field_id: 1
+        ternary {
+          value: "\021\201"
+          mask: "\377\377"
+        }
+      }
+      action {
+        action {
+          action_id: 17165658
+          params {
+            param_id: 1
+            value: "\000\002"
+          }
+        }
+      }
+      priority: 2
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 44370079
+      match {
+        field_id: 1
+        ternary {
+          value: "\020\001"
+          mask: "\360\017"
+        }
+      }
+      action {
+        action {
+          action_id: 17165658
+          params {
+            param_id: 1
+            value: "\000\003"
+          }
+        }
+      }
+      priority: 1
+      is_const: true
+    }
+  }
+}

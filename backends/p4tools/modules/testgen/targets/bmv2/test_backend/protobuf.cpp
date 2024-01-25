@@ -33,7 +33,7 @@ namespace P4Tools::P4Testgen::Bmv2 {
 
 /// Wrapper helper function that automatically inserts separators for hex strings.
 std::string formatHexExprWithSep(const IR::Expression *expr) {
-    return insertHexSeparators(formatHexExpr(expr, false, true, false));
+    return insertHexSeparators(formatHexExpr(expr, {false, true, false}));
 }
 
 Protobuf::Protobuf(std::filesystem::path basePath, std::optional<unsigned int> seed)

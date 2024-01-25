@@ -123,7 +123,7 @@ class MeterPSATest(P4EbpfTest):
     """
 
     p4_file_path = "p4testdata/meters.p4"
-    p4info_reference_file_path = "p4testdata/meters.p4info.txt"
+    p4info_reference_file_path = "p4testdata/meters.p4info.txtpb"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()
@@ -237,7 +237,7 @@ class DirectMeterPSATest(P4EbpfTest):
     """
 
     p4_file_path = "p4testdata/meters-direct.p4"
-    p4info_reference_file_path = "p4testdata/meters-direct.p4info.txt"
+    p4info_reference_file_path = "p4testdata/meters-direct.p4info.txtpb"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()

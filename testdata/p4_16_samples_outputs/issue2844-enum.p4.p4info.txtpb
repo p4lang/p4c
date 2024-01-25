@@ -1,0 +1,19 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+counters {
+  preamble {
+    id: 314274935
+    name: "cIngress.E.c1.stats"
+    alias: "stats"
+  }
+  spec {
+    unit: PACKETS
+  }
+  size: 1024
+}
+type_info {
+}

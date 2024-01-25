@@ -265,9 +265,11 @@ class cstring {
     /// to the total number of interned strings.
     static size_t cache_size(size_t &count);
 
-    /// convert the cstring to upper case
+    /// Convert the cstring to uppercase.
     cstring toUpper() const;
-    /// capitalize the first symbol
+    /// Convert the cstring to lowercase.
+    cstring toLower() const;
+    /// Capitalize the first symbol.
     cstring capitalize() const;
     /// Append this many spaces after each newline (and before the first string).
     cstring indent(size_t amount) const;
@@ -355,6 +357,16 @@ cstring cstring::make_unique(const T &inuse, cstring base, char sep) {
 inline std::ostream &operator<<(std::ostream &out, cstring s) {
     return out << (s ? s.c_str() : "<null>");
 }
+
+/// Let's prevent literal clashes. A user wishing to use the literal can do using namespace
+/// P4::literals, similarly as they can do using namespace std::literals for the standard once.
+namespace P4::literals {
+
+/// A user-provided literal suffix to allow creation of cstring from literals: "foo"_cs.
+/// Note that the C++ standard mandates that all user-defined literal suffixes defined outside of
+/// the standard library must start with underscore.
+inline cstring operator""_cs(const char *str, std::size_t len) { return cstring(str, len); }
+}  // namespace P4::literals
 
 namespace std {
 template <>

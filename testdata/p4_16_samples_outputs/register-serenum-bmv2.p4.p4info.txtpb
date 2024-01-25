@@ -1,0 +1,57 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+registers {
+  preamble {
+    id: 382856063
+    name: "ingress.reg"
+    alias: "reg"
+  }
+  type_spec {
+    serializable_enum {
+      name: "EthTypes"
+    }
+  }
+  size: 1
+}
+type_info {
+  serializable_enums {
+    key: "EthTypes"
+    value {
+      underlying_type {
+        bitwidth: 16
+      }
+      members {
+        name: "IPv4"
+        value: "\010\000"
+      }
+      members {
+        name: "ARP"
+        value: "\010\006"
+      }
+      members {
+        name: "RARP"
+        value: "\2005"
+      }
+      members {
+        name: "EtherTalk"
+        value: "\200\233"
+      }
+      members {
+        name: "VLAN"
+        value: "\201\000"
+      }
+      members {
+        name: "IPX"
+        value: "\2017"
+      }
+      members {
+        name: "IPv6"
+        value: "\206\335"
+      }
+    }
+  }
+}

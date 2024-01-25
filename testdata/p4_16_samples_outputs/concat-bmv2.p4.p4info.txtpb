@@ -1,0 +1,27 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 34728461
+    name: "ingress.t"
+    alias: "t"
+  }
+  action_refs {
+    id: 30378945
+  }
+  const_default_action_id: 30378945
+  size: 1024
+}
+actions {
+  preamble {
+    id: 30378945
+    name: "ingress.concat"
+    alias: "concat"
+  }
+}
+type_info {
+}

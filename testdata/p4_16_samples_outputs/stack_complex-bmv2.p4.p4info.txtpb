@@ -1,0 +1,27 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 34728461
+    name: "ingress.t"
+    alias: "t"
+  }
+  action_refs {
+    id: 29666769
+  }
+  const_default_action_id: 29666769
+  size: 1024
+}
+actions {
+  preamble {
+    id: 29666769
+    name: "ingress.set_port"
+    alias: "set_port"
+  }
+}
+type_info {
+}

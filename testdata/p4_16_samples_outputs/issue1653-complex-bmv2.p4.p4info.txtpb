@@ -1,0 +1,51 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 46138463
+    name: "ingress.tns"
+    alias: "tns"
+  }
+  match_fields {
+    id: 1
+    name: "h.bvh1.row.alt1.valid"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "local_metadata.row0.alt0.valid"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 22708368
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 22708368
+    name: "ingress.do_act"
+    alias: "do_act"
+  }
+}
+type_info {
+}

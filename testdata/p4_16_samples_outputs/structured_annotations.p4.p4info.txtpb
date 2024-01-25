@@ -1,0 +1,106 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 48995541
+    name: "ingressImpl.t"
+    alias: "t"
+    structured_annotations {
+      name: "MixedExprList"
+      expression_list {
+        expressions {
+          int64_value: 1
+        }
+        expressions {
+          string_value: "hello"
+        }
+        expressions {
+          bool_value: true
+        }
+        expressions {
+          bool_value: false
+        }
+        expressions {
+          int64_value: 11
+        }
+      }
+    }
+    structured_annotations {
+      name: "MixedKV"
+      kv_pair_list {
+        kv_pairs {
+          key: "label"
+          value {
+            string_value: "text"
+          }
+        }
+        kv_pairs {
+          key: "my_bool"
+          value {
+            bool_value: true
+          }
+        }
+        kv_pairs {
+          key: "int_val"
+          value {
+            int64_value: 6
+          }
+        }
+      }
+    }
+  }
+  action_refs {
+    id: 30646950
+    structured_annotations {
+      name: "myid"
+      expression_list {
+        expressions {
+          int64_value: 1
+        }
+      }
+    }
+  }
+  action_refs {
+    id: 32254556
+    structured_annotations {
+      name: "myid"
+      expression_list {
+        expressions {
+          int64_value: 2
+        }
+      }
+    }
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 32254556
+    name: "ingressImpl.my_drop"
+    alias: "my_drop"
+  }
+}
+actions {
+  preamble {
+    id: 30646950
+    name: "ingressImpl.redirect"
+    alias: "redirect"
+  }
+}
+type_info {
+}

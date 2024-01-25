@@ -12,6 +12,7 @@ import time
 from collections import Counter
 from functools import partialmethod, wraps
 from pathlib import Path
+from typing import List, Tuple
 
 import google.protobuf.text_format
 import grpc
@@ -225,7 +226,7 @@ class P4RuntimeTest(BaseTest):
         testutils.log.info(f"Reading p4info from {proto_txt_path}")
         self.p4info = p4info_pb2.P4Info()
         with open(proto_txt_path, "rb") as fin:
-            google.protobuf.text_format.Merge(fin.read(), self.p4info)
+            google.protobuf.text_format.Merge(fin.read(), self.p4info, allow_unknown_field=True)
 
         self.import_p4info_names()
 
@@ -256,7 +257,7 @@ class P4RuntimeTest(BaseTest):
         # config.p4info = self.p4info
         proto_txt_path = ptfutils.test_param_get("p4info")
         with open(proto_txt_path, "r", encoding="utf-8") as fin:
-            google.protobuf.text_format.Merge(fin.read(), config.p4info)
+            google.protobuf.text_format.Merge(fin.read(), config.p4info, allow_unknown_field=True)
         config_path = ptfutils.test_param_get("config")
         testutils.log.info(f"Reading config (compiled P4 program) from {config_path}")
         with open(config_path, "rb") as config_f:
@@ -774,7 +775,11 @@ class P4RuntimeTest(BaseTest):
         assert len(action_name_and_params) == 2
 
     def make_table_entry(
-        self, table_name_and_key, action_name_and_params, priority=None, options=None
+        self,
+        table_name_and_key: Tuple[str, List[MF]],
+        action_name_and_params,
+        priority=None,
+        options=None,
     ):
         self.check_table_name_and_key(table_name_and_key)
         table_name = table_name_and_key[0]
@@ -808,7 +813,13 @@ class P4RuntimeTest(BaseTest):
     # bundles up table name and key into one tuple, and action name
     # and params into another tuple, for the convenience of the caller
     # using some helper functions that create these tuples.
-    def table_add(self, table_name_and_key, action_name_and_params, priority=None, options=None):
+    def table_add(
+        self,
+        table_name_and_key: Tuple[str, List[MF]],
+        action_name_and_params,
+        priority=None,
+        options=None,
+    ):
         table_entry = self.make_table_entry(
             table_name_and_key, action_name_and_params, priority, options
         )
@@ -916,6 +927,16 @@ class P4RuntimeTest(BaseTest):
                     entry = entity.counter_entry
                 counter_entries.append(entry)
         return counter_entries
+
+    def delete_table_entry(self, table_entry):
+        req = p4runtime_pb2.WriteRequest()
+        req.device_id = self.device_id
+        req.election_id.low = 1
+        update = req.updates.add()
+        # Assign DELETE Type for it
+        update.type = p4runtime_pb2.Update.DELETE
+        update.entity.table_entry.CopyFrom(table_entry)
+        return req, self.write_request(req)
 
     def meter_write(self, meter_name, index, meter_config):
         req = self.get_new_write_request()
@@ -1132,7 +1153,7 @@ def update_config(config_path, p4info_path, grpc_addr, device_id):
     request.device_id = device_id
     config = request.config
     with open(p4info_path, "r", encoding="utf-8") as p4info_f:
-        google.protobuf.text_format.Merge(p4info_f.read(), config.p4info)
+        google.protobuf.text_format.Merge(p4info_f.read(), config.p4info, allow_unknown_field=True)
     with open(config_path, "rb") as config_f:
         config.p4_device_config = config_f.read()
     request.action = p4runtime_pb2.SetForwardingPipelineConfigRequest.VERIFY_AND_COMMIT

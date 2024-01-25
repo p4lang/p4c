@@ -1,0 +1,33 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 43802445
+    name: "ingressImpl.mac_da"
+    alias: "mac_da"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.dstAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 23080345
+  }
+  const_default_action_id: 23080345
+  size: 1024
+}
+actions {
+  preamble {
+    id: 23080345
+    name: "ingressImpl.do_meter"
+    alias: "do_meter"
+  }
+}
+type_info {
+}

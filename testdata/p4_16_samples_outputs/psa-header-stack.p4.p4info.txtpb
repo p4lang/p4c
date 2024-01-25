@@ -1,0 +1,59 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 39967501
+    name: "MyIC.tbl"
+    alias: "tbl"
+  }
+  match_fields {
+    id: 1
+    name: "a.ethernet.srcAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "a.vlan_tag[0].ether_type"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+type_info {
+  serializable_enums {
+    key: "ether_type_t"
+    value {
+      underlying_type {
+        bitwidth: 16
+      }
+      members {
+        name: "TPID"
+        value: "\201\000"
+      }
+      members {
+        name: "IPV4"
+        value: "\010\000"
+      }
+      members {
+        name: "IPV6"
+        value: "\206\335"
+      }
+    }
+  }
+}

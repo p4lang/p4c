@@ -1,0 +1,17 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+action_profiles {
+  preamble {
+    id: 291652621
+    name: "IngressI.as"
+    alias: "as"
+  }
+  with_selector: true
+  size: 1024
+}
+type_info {
+}
