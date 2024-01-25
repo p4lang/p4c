@@ -1,4 +1,4 @@
-structure-valued-expr-errs-1.p4(100): [--Werror=type-error] error: AssignmentStatement
+structure-valued-expr-errs-1.p4(100): [--Werror=type-error] error: 'hdr.h1 = { }'
             hdr.h1 = {};
                    ^
   ---- Actual error:
@@ -18,7 +18,7 @@ structure-valued-expr-errs-1.p4(100)
 structure-valued-expr-errs-1.p4(31)
   header h1_t {
          ^^^^
-structure-valued-expr-errs-1.p4(101): [--Werror=type-error] error: AssignmentStatement
+structure-valued-expr-errs-1.p4(101): [--Werror=type-error] error: 'hdr.h2 = { }'
             hdr.h2 = {};
                    ^
   ---- Actual error:
@@ -38,7 +38,7 @@ structure-valued-expr-errs-1.p4(100)
 structure-valued-expr-errs-1.p4(35)
   header h2_t {
          ^^^^
-structure-valued-expr-errs-1.p4(102): [--Werror=type-error] error: AssignmentStatement
+structure-valued-expr-errs-1.p4(102): [--Werror=type-error] error: 'hdr.h0 = { 4 }'
             hdr.h0 = {4};
                    ^
   ---- Actual error:
@@ -58,7 +58,7 @@ structure-valued-expr-errs-1.p4(102)
 structure-valued-expr-errs-1.p4(28)
   header h0_t {
          ^^^^
-structure-valued-expr-errs-1.p4(103): [--Werror=type-error] error: AssignmentStatement
+structure-valued-expr-errs-1.p4(103): [--Werror=type-error] error: 'hdr.h1 = { 1, 2 }'
             hdr.h1 = {1, 2};
                    ^
   ---- Actual error:
@@ -78,7 +78,7 @@ structure-valued-expr-errs-1.p4(103)
 structure-valued-expr-errs-1.p4(31)
   header h1_t {
          ^^^^
-structure-valued-expr-errs-1.p4(104): [--Werror=type-error] error: AssignmentStatement
+structure-valued-expr-errs-1.p4(104): [--Werror=type-error] error: 'hdr.h2 = { 3 }'
             hdr.h2 = {3};
                    ^
   ---- Actual error:
@@ -98,7 +98,7 @@ structure-valued-expr-errs-1.p4(104)
 structure-valued-expr-errs-1.p4(35)
   header h2_t {
          ^^^^
-structure-valued-expr-errs-1.p4(105): [--Werror=type-error] error: AssignmentStatement
+structure-valued-expr-errs-1.p4(105): [--Werror=type-error] error: 'hdr.hstructs.s0 = { 1 }'
             hdr.hstructs.s0 = {1};
                             ^
   ---- Actual error:
@@ -118,7 +118,7 @@ structure-valued-expr-errs-1.p4(105)
 structure-valued-expr-errs-1.p4(40)
   struct s0_t {
          ^^^^
-structure-valued-expr-errs-1.p4(106): [--Werror=type-error] error: AssignmentStatement
+structure-valued-expr-errs-1.p4(106): [--Werror=type-error] error: 'hdr.hstructs.s1 = { 1, 2 }'
             hdr.hstructs.s1 = {1, 2};
                             ^
   ---- Actual error:
@@ -138,7 +138,7 @@ structure-valued-expr-errs-1.p4(106)
 structure-valued-expr-errs-1.p4(43)
   struct s1_t {
          ^^^^
-structure-valued-expr-errs-1.p4(107): [--Werror=type-error] error: AssignmentStatement
+structure-valued-expr-errs-1.p4(107): [--Werror=type-error] error: 'hdr.hstructs.s2 = { 3 }'
             hdr.hstructs.s2 = {3};
                             ^
   ---- Actual error:
@@ -158,7 +158,7 @@ structure-valued-expr-errs-1.p4(107)
 structure-valued-expr-errs-1.p4(47)
   struct s2_t {
          ^^^^
-structure-valued-expr-errs-1.p4(112): [--Werror=type-error] error: AssignmentStatement
+structure-valued-expr-errs-1.p4(112): [--Werror=type-error] error: 'hdr.h1 = { f2 = 5, f1 = 2 }'
             hdr.h1 = {f2=5, f1=2};
                    ^
   ---- Actual error:
@@ -178,7 +178,7 @@ structure-valued-expr-errs-1.p4(112)
 structure-valued-expr-errs-1.p4(31)
   header h1_t {
          ^^^^
-structure-valued-expr-errs-1.p4(113): [--Werror=type-error] error: AssignmentStatement
+structure-valued-expr-errs-1.p4(113): [--Werror=type-error] error: 'hdr.h1 = { f2 = 5 }'
             hdr.h1 = {f2=5};
                    ^
   ---- Actual error:
@@ -195,7 +195,7 @@ structure-valued-expr-errs-1.p4(113)
 structure-valued-expr-errs-1.p4(31)
   header h1_t {
          ^^^^
-structure-valued-expr-errs-1.p4(114): [--Werror=type-error] error: AssignmentStatement
+structure-valued-expr-errs-1.p4(114): [--Werror=type-error] error: 'hdr.hstructs.s1 = { f2 = 5, f1 = 2 }'
             hdr.hstructs.s1 = {f2=5, f1=2};
                             ^
   ---- Actual error:
@@ -215,7 +215,7 @@ structure-valued-expr-errs-1.p4(114)
 structure-valued-expr-errs-1.p4(43)
   struct s1_t {
          ^^^^
-structure-valued-expr-errs-1.p4(115): [--Werror=type-error] error: AssignmentStatement
+structure-valued-expr-errs-1.p4(115): [--Werror=type-error] error: 'hdr.hstructs.s1 = { f2 = 5 }'
             hdr.hstructs.s1 = {f2=5};
                             ^
   ---- Actual error:
@@ -232,7 +232,7 @@ structure-valued-expr-errs-1.p4(115)
 structure-valued-expr-errs-1.p4(43)
   struct s1_t {
          ^^^^
-structure-valued-expr-errs-1.p4(120): [--Werror=type-error] error: AssignmentStatement
+structure-valued-expr-errs-1.p4(120): [--Werror=type-error] error: 'hdr.h2 = { f2 = 5 }'
             hdr.h2 = {f2=5};
                    ^
   ---- Actual error:
@@ -252,7 +252,7 @@ structure-valued-expr-errs-1.p4(120)
 structure-valued-expr-errs-1.p4(35)
   header h2_t {
          ^^^^
-structure-valued-expr-errs-1.p4(121): [--Werror=type-error] error: AssignmentStatement
+structure-valued-expr-errs-1.p4(121): [--Werror=type-error] error: 'hdr.hstructs.s2 = { f2 = 5 }'
             hdr.hstructs.s2 = {f2=5};
                             ^
   ---- Actual error:

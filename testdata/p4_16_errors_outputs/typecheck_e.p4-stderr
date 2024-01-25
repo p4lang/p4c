@@ -1,4 +1,4 @@
-typecheck_e.p4(21): [--Werror=type-error] error: f
+typecheck_e.p4(21): [--Werror=type-error] error: 'f'
         f(x);
         ^^^^
   ---- Actual error:

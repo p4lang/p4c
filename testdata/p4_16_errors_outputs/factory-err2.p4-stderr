@@ -1,4 +1,4 @@
-factory-err2.p4(31): [--Werror=type-error] error: createWidget
+factory-err2.p4(31): [--Werror=type-error] error: 'createWidget'
     c1<bit<16>>(createWidget(hdr.f1, hdr.f2)) c; // factory args must be constants
                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   ---- Actual error:

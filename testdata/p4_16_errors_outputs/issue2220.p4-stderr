@@ -1,4 +1,4 @@
-issue2220.p4(11): [--Werror=type-error] error: { val = 8w0 }: values of type 'bit<8>' cannot be implicitly cast to type 'myEnum'
+issue2220.p4(11): [--Werror=type-error] error: '{ val = 8w0 }': values of type 'bit<8>' cannot be implicitly cast to type 'myEnum'
  S s1 = { val = (bit<8>)0 };
         ^^^^^^^^^^^^^^^^^^^
 issue2220.p4(3)

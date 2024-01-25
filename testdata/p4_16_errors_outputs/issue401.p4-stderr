@@ -1,4 +1,4 @@
-issue401.p4(42): [--Werror=type-error] error: (bit<1>){ 0 }
+issue401.p4(42): [--Werror=type-error] error: '(bit<1>){ 0 }'
     bit<1> b = (bit<1>) { 0 };
                ^^^^^^^^^^^^^^
   ---- Actual error:

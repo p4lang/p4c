@@ -1,4 +1,4 @@
-virtual1.p4(24): [--Werror=type-error] error: return ix + 1
+virtual1.p4(24): [--Werror=type-error] error: 'return ix + 1'
             return (ix + 1);
             ^^^^^^
   ---- Actual error:
@@ -12,7 +12,7 @@ virtual1.p4(24): Source expression 'ix + 1' produces a result of type 'bit<16>' 
 virtual1.p4(23)
           bool f(in bit<16> ix) {
           ^^^^
-virtual1.p4(22): [--Werror=type-error] error: cntr
+virtual1.p4(22): [--Werror=type-error] error: 'cntr'
     Virtual() cntr = {
               ^^^^
   ---- Actual error:
