@@ -1,4 +1,4 @@
-pna-example-mirror-packet-error2.p4(83): [--Werror=type-error] error: 'mirror_packet'
+pna-example-mirror-packet-error2.p4(83): [--Werror=type-error] error: 'mirror_packet(mirror_slot, mirror_session)'
  mirror_packet(mirror_slot, mirror_session);
  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   ---- Actual error:
@@ -15,7 +15,7 @@ pna.p4(582): Function type 'mirror_packet' does not match invocation type '<Meth
 pna-example-mirror-packet-error2.p4(83)
    mirror_packet(mirror_slot, mirror_session);
    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-pna-example-mirror-packet-error2.p4(88): [--Werror=type-error] error: 'mirror_packet'
+pna-example-mirror-packet-error2.p4(88): [--Werror=type-error] error: 'mirror_packet(mirror_slot, mirror_session)'
  mirror_packet(mirror_slot, mirror_session);
  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   ---- Actual error:

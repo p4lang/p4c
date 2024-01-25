@@ -1,4 +1,4 @@
-issue2545.p4(17): [--Werror=target-error] error: call_extern: extern functions with 'out' nested struct argument (val) not supported
+issue2545.p4(17): [--Werror=target-error] error: call_extern({ eth_hdr = tmp_0_eth_hdr }): extern functions with 'out' nested struct argument (val) not supported
         call_extern(tmp);
         ^^^^^^^^^^^^^^^^
 issue2545.p4(12)

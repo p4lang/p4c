@@ -35,7 +35,7 @@ struct main_metadata_t {
 	bit<32> MainControlImpl_ipv4_da_ipv4_srcAddr
 	bit<32> MainControlImpl_ipv4_da_ipv4_dstAddr
 	bit<32> MainControlImpl_ipv4_da_local_metadata_meta
-	bit<8> MainControlImpl_ipv4_da_ethernet_isValid
+	bit<8> MainControlImpl_ipv4_da_ethernet_isValid()
 	bit<32> MainControlT_tmp
 	bit<32> MainControlT_tmp_0
 	bit<32> learnArg
@@ -75,7 +75,7 @@ learner ipv4_da {
 		m.MainControlImpl_ipv4_da_ipv4_srcAddr
 		m.MainControlImpl_ipv4_da_ipv4_dstAddr
 		m.MainControlImpl_ipv4_da_local_metadata_meta
-		m.MainControlImpl_ipv4_da_ethernet_isValid
+		m.MainControlImpl_ipv4_da_ethernet_isValid()
 	}
 	actions {
 		next_hop @tableonly
@@ -129,9 +129,9 @@ apply {
 	mov m.MainControlImpl_ipv4_da_ipv4_srcAddr h.ipv4.srcAddr
 	mov m.MainControlImpl_ipv4_da_ipv4_dstAddr h.ipv4.dstAddr
 	mov m.MainControlImpl_ipv4_da_local_metadata_meta m.local_metadata_meta
-	mov m.MainControlImpl_ipv4_da_ethernet_isValid 1
+	mov m.MainControlImpl_ipv4_da_ethernet_isValid() 1
 	jmpv LABEL_END_0 h.ethernet
-	mov m.MainControlImpl_ipv4_da_ethernet_isValid 0
+	mov m.MainControlImpl_ipv4_da_ethernet_isValid() 0
 	LABEL_END_0 :	table ipv4_da
 	table ipv4_da2
 	LABEL_END :	emit h.ethernet

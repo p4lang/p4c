@@ -1,4 +1,4 @@
-issue2230-1-bmv2.p4(115): [--Werror=type-error] error: 'c1.apply'
+issue2230-1-bmv2.p4(115): [--Werror=type-error] error: 'c1.apply(hdr.h1, s1)'
         c1.apply(hdr.h1, s1);
         ^^^^^^^^^^^^^^^^^^^^
   ---- Actual error:
@@ -25,7 +25,7 @@ issue2230-1-bmv2.p4(43)
 issue2230-1-bmv2.p4(115): Function type 'myCtrl' does not match invocation type '<Method call>'
           c1.apply(hdr.h1, s1);
           ^^^^^^^^^^^^^^^^^^^^
-issue2230-1-bmv2.p4(137): [--Werror=type-error] error: 'funky_swap'
+issue2230-1-bmv2.p4(137): [--Werror=type-error] error: 'funky_swap(s1)'
         s1 = funky_swap(s1);
              ^^^^^^^^^^^^^^
   ---- Actual error:
