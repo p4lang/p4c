@@ -1,4 +1,4 @@
-issue561-1.p4(29): [--Werror=type-error] error: u
+issue561-1.p4(29): [--Werror=type-error] error: 'u'
         U u = { { 10 }, { 20 } }; // illegal to initialize unions
         ^^^^^^^^^^^^^^^^^^^^^^^^^
   ---- Actual error:

@@ -1,4 +1,4 @@
-tuple-to-header.p4(23): [--Werror=type-error] error: AssignmentStatement
+tuple-to-header.p4(23): [--Werror=type-error] error: 'h = t'
         h = t; // illegal assignment between tuple and header
           ^
   ---- Actual error:

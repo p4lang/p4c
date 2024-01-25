@@ -1,4 +1,4 @@
-issue2230.p4(70): [--Werror=type-error] error: AssignmentStatement
+issue2230.p4(70): [--Werror=type-error] error: 'hdr.h2 = hdr.h1'
         hdr.h2 = hdr.h1;
                ^
   ---- Actual error:
@@ -18,7 +18,7 @@ issue2230.p4(28)
 issue2230.p4(33)
   header h2_t {
          ^^^^
-issue2230.p4(74): [--Werror=type-error] error: AssignmentStatement
+issue2230.p4(74): [--Werror=type-error] error: 'hdr.h1b = s1'
         hdr.h1b = s1;
                 ^
   ---- Actual error:
@@ -38,7 +38,7 @@ issue2230.p4(38)
 issue2230.p4(28)
   header h1_t {
          ^^^^
-issue2230.p4(80): [--Werror=type-error] error: AssignmentStatement
+issue2230.p4(80): [--Werror=type-error] error: 's1 = hdr.h1'
         s1 = hdr.h1;
            ^
   ---- Actual error:

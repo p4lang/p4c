@@ -1,7 +1,7 @@
 virtual2.p4(24): [--Werror=type-error] error: return ix + 1: return expression in function with void return
             return (ix + 1);
             ^^^^^^
-virtual2.p4(22): [--Werror=type-error] error: cntr
+virtual2.p4(22): [--Werror=type-error] error: 'cntr'
     Virtual() cntr = {
               ^^^^
   ---- Actual error:

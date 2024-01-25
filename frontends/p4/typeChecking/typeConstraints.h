@@ -160,7 +160,7 @@ class TypeConstraint : public IHasDbPrint, public ICastable {
         if (lastIsEmpty) message += "\n";
 
         CHECK_NULL(o);
-        ::errorWithSuffix(ErrorType::ERR_TYPE_ERROR, "%1%", message.c_str(), o);
+        ::errorWithSuffix(ErrorType::ERR_TYPE_ERROR, "'%1%'", message.c_str(), o);
         return false;
     }
     // Default error message; returns 'false'

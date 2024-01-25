@@ -1,4 +1,4 @@
-table-entries-exact.p4(72): [--Werror=type-error] error: Entry
+table-entries-exact.p4(72): [--Werror=type-error] error: 'Entry'
             (0x1111 &&& 0xF, 0x1 ) : a(); // invalid exact key
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   ---- Actual error:

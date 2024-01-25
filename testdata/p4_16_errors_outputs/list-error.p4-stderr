@@ -1,4 +1,4 @@
-list-error.p4(9): [--Werror=type-error] error: e
+list-error.p4(9): [--Werror=type-error] error: 'e'
     E((list<bit<16>>){2, 3, 4}) e;
                                 ^
   ---- Actual error:
