@@ -203,7 +203,8 @@ bool TypeSpecConverter::preorder(const IR::Type_Newtype *type) {
                 } else if (ann.controller_type.type == ControllerType::kBit) {
                     translatedType->set_sdn_bitwidth(ann.controller_type.width);
                 } else {
-                    BUG("Unexpected controller type: %1%", ann.controller_type.type);
+                    BUG("Unexpected controller type: %1%",
+                        std::to_string(ann.controller_type.type));
                 }
             } else {
                 newTypeSpec->mutable_original_type()->CopyFrom(*typeSpec);

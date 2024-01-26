@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "backends/p4tools/common/lib/model.h"
+#include "backends/p4tools/common/lib/util.h"
 #include "ir/id.h"
 #include "lib/exceptions.h"
 #include "lib/null.h"
@@ -84,7 +85,7 @@ void ConcolicMethodImpls::add(const ImplList &inputImplList) {
         // overloads to be small in practice.
         for (auto &pair : tmpImplList) {
             BUG_CHECK(pair.first != paramNames, "Multiple implementations of %1%(%2%)", name,
-                      paramNames);
+                      Utils::containerToString(paramNames));
         }
 
         tmpImplList.emplace_back(paramNames, impl);

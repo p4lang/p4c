@@ -256,7 +256,7 @@ class EBPFTablePSAInitializerCodeGen : public CodeGenInspector {
     bool preorder(const IR::MethodCallExpression *mce) override {
         auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
         auto ac = mi->to<P4::ActionCall>();
-        BUG_CHECK(ac != nullptr, "%1%: expected an action call", mi);
+        BUG_CHECK(ac != nullptr, "%1%: expected an action call", mi->expr);
         cstring actionName = EBPFObject::externalName(ac->action);
         cstring fullActionName = table->p4ActionToActionIDName(ac->action);
 

@@ -91,7 +91,7 @@ class EBPFStackType : public EBPFType, public IHasWidth {
         : EBPFType(type), elementType(elementType), size(type->getSize()) {
         CHECK_NULL(type);
         CHECK_NULL(elementType);
-        BUG_CHECK(elementType->is<IHasWidth>(), "Unexpected element type %1%", elementType);
+        BUG_CHECK(elementType->is<IHasWidth>(), "Unexpected element type");
     }
     void emit(CodeBuilder *) override {}
     void declare(CodeBuilder *builder, cstring id, bool asPointer) override;

@@ -1,12 +1,13 @@
 #include "parserDriver.h"
 
+#include <fmt/printf.h>
+
 #include <cerrno>
 #include <cstdio>
 #include <iostream>
 #include <sstream>
 
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/format.hpp>
 
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/options.h"
@@ -104,7 +105,8 @@ void AbstractParserDriver::onParseError(const Util::SourceInfo &location,
     auto &context = BaseCompileContext::get();
     if (boost::equal(message, unexpectedIdentifierError)) {
         context.errorReporter().parser_error(
-            location, boost::format("%s \"%s\"") % unexpectedIdentifierError % lastIdentifier);
+            location,
+            fmt::sprintf("%s \"%s\"", unexpectedIdentifierError.c_str(), lastIdentifier.c_str()));
     } else {
         context.errorReporter().parser_error(location, message);
     }

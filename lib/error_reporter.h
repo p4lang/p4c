@@ -31,7 +31,7 @@ enum class DiagnosticAction {
 
 // Keeps track of compilation errors.
 // Errors are specified using the error() and warning() methods,
-// that use boost::format format strings, i.e.,
+// that use FmtFormatter format strings, i.e.,
 // %1%, %2%, etc (starting at 1, not at 0).
 // Some compatibility for printf-style arguments is also supported.
 class ErrorReporter {
@@ -86,14 +86,14 @@ class ErrorReporter {
     // error message for a bug
     template <typename... T>
     std::string bug_message(const char *format, T... args) {
-        boost::format fmt(format);
+        FmtFormatter fmt(format);
         std::string message = ::bug_helper(fmt, "", "", "", args...);
         return message;
     }
 
     template <typename... T>
     std::string format_message(const char *format, T... args) {
-        boost::format fmt(format);
+        FmtFormatter fmt(format);
         std::string message = ::error_helper(fmt, args...).toString();
         return message;
     }
@@ -161,7 +161,7 @@ class ErrorReporter {
             msgType = ErrorMessage::MessageType::Error;
         }
 
-        boost::format fmt(format);
+        FmtFormatter fmt(format);
         ErrorMessage msg(msgType, diagnosticName ? diagnosticName : "", suffix);
         msg = ::error_helper(fmt, msg, args...);
         emit_message(msg);

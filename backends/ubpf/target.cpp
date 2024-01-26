@@ -65,7 +65,7 @@ void UbpfTarget::emitTableDecl(Util::SourceCodeBuilder *builder, cstring tblName
     } else if (tableKind == EBPF::TableLPMTrie) {
         type = "UBPF_MAP_TYPE_LPM_TRIE";
     } else {
-        BUG("%1%: unsupported table kind", tableKind);
+        BUG("unsupported table kind");
     }
 
     builder->emitIndent();

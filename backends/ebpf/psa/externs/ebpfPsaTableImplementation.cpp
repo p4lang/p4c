@@ -97,7 +97,7 @@ void EBPFTableImplementationPSA::verifyTableNoDefaultAction(const EBPFTablePSA *
     auto mi = P4::MethodInstance::resolve(defaultAction->to<IR::MethodCallExpression>(),
                                           program->refMap, program->typeMap);
     auto ac = mi->to<P4::ActionCall>();
-    BUG_CHECK(ac != nullptr, "%1%: expected an action call", mi);
+    BUG_CHECK(ac != nullptr, "%1%: expected an action call", mi->expr);
 
     if (ac->action->name.originalName != P4::P4CoreLibrary::instance().noAction.name) {
         ::error(ErrorType::ERR_UNSUPPORTED,

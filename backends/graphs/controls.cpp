@@ -217,7 +217,7 @@ bool ControlGraphs::preorder(const IR::MethodCallStatement *statement) {
                 visit(decl->to<IR::P4Control>());
             }
         } else {
-            BUG("Unsupported apply method: %1%", instance);
+            BUG("Unsupported apply method: %1%", instance->expr);
         }
     } else {
         statementsStack.push_back(statement);

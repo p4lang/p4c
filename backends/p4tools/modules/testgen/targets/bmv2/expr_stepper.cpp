@@ -216,7 +216,7 @@ void Bmv2V1ModelExprStepper::processClone(const ExecutionState &state,
         }
         cmds.insert(cmds.begin(), topLevelBlocks->begin() + egressDelim - 2, topLevelBlocks->end());
     } else {
-        TESTGEN_UNIMPLEMENTED("Unsupported clone type %1%.", cloneType);
+        TESTGEN_UNIMPLEMENTED("Unsupported clone type.");
     }
     // Attach the clone specification for test generation.
     cloneState->addTestObject("clone_specs", "clone_spec",

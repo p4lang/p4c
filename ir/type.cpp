@@ -20,8 +20,6 @@ limitations under the License.
 #include <utility>
 #include <vector>
 
-#include <boost/format.hpp>
-
 #include "frontends/common/parser_options.h"
 #include "ir/configuration.h"
 #include "ir/id.h"

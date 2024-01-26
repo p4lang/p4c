@@ -44,4 +44,4 @@ add_executable (irgenerator ${IRGENERATOR_SRCS} ${IRGENERATOR_GEN_SRCS})
 # The generator expression $<BOOL:1> prevents IDE generators like Xcode
 # from appending a per-configuration subdirectory to the specified path.
 set_property(TARGET irgenerator PROPERTY RUNTIME_OUTPUT_DIRECTORY $<$<BOOL:1>:${IR_GENERATOR_DIRECTORY}>)
-target_link_libraries (irgenerator p4ctoolkit ${P4C_LIB_DEPS} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries (irgenerator fmt p4ctoolkit ${P4C_LIB_DEPS} ${CMAKE_THREAD_LIBS_INIT})

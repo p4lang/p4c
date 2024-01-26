@@ -351,7 +351,7 @@ const SymbolicMapping &Z3Solver::getSymbolicMapping() const {
             // Convert to a symbolic variable and value.
             auto exprId = z3Expr.id();
             BUG_CHECK(declaredVars.count(exprId) > 0, "Z3Solver: unknown variable declaration: %1%",
-                      z3Expr);
+                      z3Expr.to_string());
             const auto *symbolicVar = declaredVars.at(exprId);
             const auto *value = toLiteral(z3Value, symbolicVar->type);
             result->emplace(symbolicVar, value);
@@ -369,14 +369,14 @@ const SymbolicMapping &Z3Solver::getSymbolicMapping() const {
 const IR::Literal *Z3Solver::toLiteral(const z3::expr &e, const IR::Type *type) {
     // Handle booleans.
     if (type->is<IR::Type::Boolean>()) {
-        BUG_CHECK(e.is_bool(), "Expected a boolean value: %1%", e);
+        BUG_CHECK(e.is_bool(), "Expected a boolean value: %1%", e.to_string());
         return new IR::BoolLiteral(type, e.is_true());
     }
 
     // Handle bit vectors.
     const auto *bitsType = type->to<IR::Type::Bits>();
     BUG_CHECK(bitsType, "Type %1% is not bit<n>", type);
-    BUG_CHECK(e.is_bv(), "Expected a bit vector: %1%", e);
+    BUG_CHECK(e.is_bv(), "Expected a bit vector: %1%", e.to_string());
     std::string strNum = toString(z3::bv2int(e, bitsType->isSigned).simplify());
     // Z3 prints negative numbers in the following syntax: (- number).
     // For big_int constructor brackets and spaces should be eliminated.
@@ -498,7 +498,7 @@ bool Z3Translator::preorder(const IR::Cast *cast) {
             if (exprType->width_bits() == 1) {
                 castExpr = z3::operator==(castExpr, solver.ctx().bv_val(1, 1));
             } else {
-                BUG("Cast expression type %1% is not bit<1> : %2%", exprType, castExpr);
+                BUG("Cast expression type %1% is not bit<1> : %2%", exprType, castExpr.to_string());
             }
         } else if (castExtrType->is<IR::Type_Boolean>()) {
             result = castExpr;
