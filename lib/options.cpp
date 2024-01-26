@@ -67,7 +67,7 @@ std::vector<const char *> *Util::Options::process(int argc, char *const argv[]) 
                 usage();
                 return nullptr;
             }
-        } else if (opt.startsWith("-")) {
+        } else if (opt.startsWith("-") && opt.size() > 1) {
             // Support GCC-style long options that begin with a single '-'.
             option = get(options, opt);
 
