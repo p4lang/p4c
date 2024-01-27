@@ -1347,9 +1347,9 @@ bool ControlBodyTranslatorPNA::checkPnaPortMem(const IR::Member *m) {
 }
 
 void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *function) {
-    if (function->expr->toString() == "send_to_port" ||
-        function->expr->toString() == "drop_packet") {
-        if (function->expr->toString() != "drop_packet") {
+    if (function->expr->method->toString() == "send_to_port" ||
+        function->expr->method->toString() == "drop_packet") {
+        if (function->expr->method->toString() != "drop_packet") {
             builder->emitIndent();
             builder->appendLine("compiler_meta__->drop = false;");
         }
@@ -1369,7 +1369,7 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
         }
         builder->append(")");
         return;
-    } else if (function->expr->toString() == "set_entry_expire_time") {
+    } else if (function->expr->method->toString() == "set_entry_expire_time") {
         if (table) {
             builder->emitIndent();
             builder->appendLine("/* construct key */");
