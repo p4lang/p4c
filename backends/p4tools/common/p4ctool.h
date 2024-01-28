@@ -2,9 +2,12 @@
 #define BACKENDS_P4TOOLS_COMMON_P4CTOOL_H_
 
 #include <cstdlib>
+#include <type_traits>
 #include <vector>
 
 #include "backends/p4tools/common/compiler/compiler_target.h"
+#include "backends/p4tools/common/lib/logging.h"
+#include "backends/p4tools/common/options.h"
 
 namespace P4Tools {
 
@@ -12,7 +15,8 @@ namespace P4Tools {
 /// on a subclass of AbstractP4cToolOptions.
 //
 // Because of limitations of templates, method implementations must be inlined here.
-template <class Options>
+template <class Options,
+          typename = std::enable_if_t<std::is_base_of_v<AbstractP4cToolOptions, Options>>>
 class AbstractP4cTool {
  protected:
     /// Provides the implementation of the tool.
@@ -31,13 +35,19 @@ class AbstractP4cTool {
         registerTarget();
 
         // Process command-line options.
-        auto compileContext = Options::get().process(args);
+        auto &toolOptions = Options::get();
+        auto compileContext = toolOptions.process(args);
         if (!compileContext) {
             return 1;
         }
 
         // Set up the compilation context.
         AutoCompileContext autoContext(*compileContext);
+
+        // If not explicitly disabled, print basic information to standard output.
+        if (!toolOptions.disableInformationLogging) {
+            enableInformationLogging();
+        }
 
         // Run the compiler to get an IR and invoke the tool.
         const auto compilerResult = P4Tools::CompilerTarget::runCompiler();

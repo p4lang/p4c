@@ -22,8 +22,6 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/selected_branches.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
-#include "backends/p4tools/modules/testgen/lib/logging.h"
-#include "backends/p4tools/modules/testgen/lib/test_backend.h"
 #include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/register.h"
 
@@ -81,9 +79,6 @@ int generateAbstractTests(const TestgenOptions &testgenOptions, const ProgramInf
 
     symbex.run(callBack);
 
-    // Emit a performance report, if desired.
-    printPerformanceReport(testPath);
-
     // Do not print this warning if assertion mode is enabled.
     if (testBackend->getTestCount() == 0 && !testgenOptions.assertionModeEnabled) {
         ::warning(
@@ -115,9 +110,6 @@ int Testgen::mainImpl(const CompilerResult &compilerResult) {
         ::error("Testgen: Encountered errors during preprocessing. Exiting");
         return EXIT_FAILURE;
     }
-
-    // Print basic information for each test.
-    enableInformationLogging();
 
     // Get the options and the seed.
     const auto &testgenOptions = TestgenOptions::get();

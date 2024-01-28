@@ -21,6 +21,9 @@ class AbstractP4cToolOptions : protected Util::Options {
     /// A seed for the PRNG.
     std::optional<uint32_t> seed = std::nullopt;
 
+    /// Disable information logging.
+    bool disableInformationLogging = false;
+
     /// Processes options.
     ///
     /// @returns a compilation context on success, std::nullopt on error.
