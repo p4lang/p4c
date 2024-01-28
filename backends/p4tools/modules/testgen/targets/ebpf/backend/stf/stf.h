@@ -26,8 +26,8 @@ class STF : public TestFramework {
     explicit STF(const TestBackendConfiguration &testBackendConfiguration);
 
     /// Produce an STF test.
-    void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testId,
-                    float currentCoverage) override;
+    void writeTestToFile(const TestSpec *spec, cstring selectedBranches, size_t testId,
+                         float currentCoverage) override;
 
  private:
     /// Emits a test case.

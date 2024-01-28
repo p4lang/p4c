@@ -48,6 +48,9 @@ class TestBackEnd {
     /// The accumulated coverage of all finished test cases. Number in range [0, 1].
     float coverage = 0;
 
+    /// The list of tests accumulated in the test back end.
+    AbstractTestList tests;
+
     explicit TestBackEnd(const ProgramInfo &programInfo,
                          const TestBackendConfiguration &testBackendConfiguration,
                          SymbolicExecutor &symbex)
@@ -133,6 +136,10 @@ class TestBackEnd {
 
     /// Returns the configuration options for the test back end.
     [[nodiscard]] const TestBackendConfiguration &getTestBackendConfiguration() const;
+
+    /// Returns the list of tests accumulated in the test back end.
+    /// If the test write is in file mode this list will be empty.
+    [[nodiscard]] const AbstractTestList &getTests() const { return tests; }
 };
 
 }  // namespace P4Tools::P4Testgen

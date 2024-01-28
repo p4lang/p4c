@@ -32,6 +32,7 @@ set(TESTGEN_SOURCES
 
 set(TESTGEN_GTEST_SOURCES
   ${TESTGEN_GTEST_SOURCES}
+  ${CMAKE_CURRENT_SOURCE_DIR}/test/testgen_api/api_test.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test/test_backend/ptf.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test/test_backend/stf.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test/small-step/binary.cpp

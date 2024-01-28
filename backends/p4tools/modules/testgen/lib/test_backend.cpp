@@ -140,7 +140,16 @@ bool TestBackEnd::run(const FinalState &state) {
 
         // Output the test.
         Util::withTimer("backend", [this, &testSpec, &selectedBranches] {
-            testWriter->outputTest(testSpec, selectedBranches, testCount, coverage);
+            if (testWriter->isInFileMode()) {
+                testWriter->writeTestToFile(testSpec, selectedBranches, testCount, coverage);
+            } else {
+                auto testOpt =
+                    testWriter->produceTest(testSpec, selectedBranches, testCount, coverage);
+                if (!testOpt.has_value()) {
+                    BUG("Failed to produce test.");
+                }
+                tests.push_back(testOpt.value());
+            }
         });
 
         printTraces("============ End Test %1% ============\n", testCount);

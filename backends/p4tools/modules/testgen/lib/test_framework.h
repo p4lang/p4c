@@ -2,8 +2,11 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TEST_FRAMEWORK_H_
 
 #include <cstddef>
+#include <filesystem>
+#include <functional>
 #include <iosfwd>
 #include <map>
+#include <optional>
 #include <string>
 #include <utility>
 
@@ -11,6 +14,7 @@
 
 #include "backends/p4tools/common/lib/format_int.h"
 #include "backends/p4tools/common/lib/trace_event.h"
+#include "lib/castable.h"
 #include "lib/cstring.h"
 
 #include "backends/p4tools/modules/testgen/lib/test_backend_configuration.h"
@@ -18,6 +22,18 @@
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 
 namespace P4Tools::P4Testgen {
+
+/// Type definitions for abstract tests.
+struct AbstractTest : ICastable {};
+/// TODO: It would be nice if this were a reference to signal non-nullness.
+/// Consider using an optional_ref implementation.
+using AbstractTestReference = const AbstractTest *;
+using AbstractTestReferenceOrError = std::optional<AbstractTestReference>;
+using AbstractTestList = std::vector<AbstractTestReference>;
+
+/// An file path which may or may not be set. Can influence the execution behavior the test
+/// framework.
+using OptionalFilePath = std::optional<std::filesystem::path>;
 
 /// THe default base class for the various test frameworks. Every test framework has a test
 /// name and a seed associated with it. Also contains a variety of common utility functions.
@@ -136,13 +152,25 @@ class TestFramework {
 
     /// The method used to output the test case to be implemented by
     /// all the test frameworks (eg. STF, PTF, etc.).
-    /// @param spec the testcase specification to be outputted
-    /// @param selectedBranches string describing branches selected for this testcase
-    /// @param testIdx testcase unique number identifier
+    /// @param spec the testcase specification to be outputted.
+    /// @param selectedBranches string describing branches selected for this testcase.
+    /// @param testIdx testcase unique number identifier. TODO: Make this a member?
     /// @param currentCoverage current coverage ratio (between 0.0 and 1.0)
-    // attaches arbitrary string data to the test preamble.
-    virtual void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testIdx,
-                            float currentCoverage) = 0;
+    /// TODO (https://github.com/p4lang/p4c/issues/4403): This should not return void but instead a
+    /// status.
+    virtual void writeTestToFile(const TestSpec *spec, cstring selectedBranches, size_t testIdx,
+                                 float currentCoverage) = 0;
+
+    /// The method used to return the test case. This method is optional to each test framework.
+    /// @param spec the testcase specification to be outputted.
+    /// @param selectedBranches string describing branches selected for this testcase.
+    /// @param testIdx testcase unique number identifier. TODO: Make this a member?
+    /// @param currentCoverage current coverage ratio (between 0.0 and 1.0).
+    virtual AbstractTestReferenceOrError produceTest(const TestSpec *spec, cstring selectedBranches,
+                                                     size_t testIdx, float currentCoverage);
+
+    /// @Returns true if the test framework is configured to write to a file.
+    [[nodiscard]] bool isInFileMode() const;
 };
 
 }  // namespace P4Tools::P4Testgen

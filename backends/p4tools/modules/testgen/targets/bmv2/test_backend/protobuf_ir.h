@@ -2,9 +2,8 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_BACKEND_PROTOBUF_IR_H_
 
 #include <cstddef>
-#include <filesystem>
-#include <optional>
 #include <string>
+#include <utility>
 
 #include <inja/inja.hpp>
 
@@ -15,20 +14,38 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
+struct ProtobufIrTest : public AbstractTest {
+ private:
+    /// The formatted test. TODO: This should be a Protobuf object.
+    std::string formattedTest_;
+
+ public:
+    explicit ProtobufIrTest(std::string formattedTest) : formattedTest_(std::move(formattedTest)) {}
+
+    /// @return the formatted test.
+    [[nodiscard]] const std::string &getFormattedTest() const { return formattedTest_; }
+
+    DECLARE_TYPEINFO(ProtobufIrTest);
+};
+
 /// Extracts information from the @testSpec to emit a Protobuf IR test case.
 class ProtobufIr : public Bmv2TestFramework {
  public:
     explicit ProtobufIr(const TestBackendConfiguration &testBackendConfiguration);
 
-    virtual ~ProtobufIr() = default;
+    ~ProtobufIr() override = default;
     ProtobufIr(const ProtobufIr &) = default;
     ProtobufIr(ProtobufIr &&) = default;
     ProtobufIr &operator=(const ProtobufIr &) = default;
     ProtobufIr &operator=(ProtobufIr &&) = default;
 
-    void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testId,
-                    float currentCoverage) override;
+    void writeTestToFile(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
+                         float currentCoverage) override;
 
+    AbstractTestReferenceOrError produceTest(const TestSpec *testSpec, cstring selectedBranches,
+                                             size_t testIdx, float currentCoverage) override;
+
+ private:
     [[nodiscard]] inja::json getControlPlaneForTable(
         const TableMatchMap &matches, const std::vector<ActionArg> &args) const override;
 
@@ -36,14 +53,13 @@ class ProtobufIr : public Bmv2TestFramework {
 
     [[nodiscard]] inja::json getExpectedPacket(const TestSpec *testSpec) const override;
 
- private:
-    /// Emits a test case.
-    /// @param testId specifies the test name.
+    /// Generates a test case.
     /// @param selectedBranches enumerates the choices the interpreter made for this path.
+    /// @param testId specifies the test name.
     /// @param currentCoverage contains statistics  about the current coverage of this test and its
     /// preceding tests.
-    void emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
-                      const std::string &testCase, float currentCoverage);
+    inja::json produceTestCase(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
+                               float currentCoverage) const;
 
     /// @returns the inja test case template as a string.
     static std::string getTestCaseTemplate();

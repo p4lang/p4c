@@ -88,9 +88,6 @@ TestBackEnd::TestInfo Bmv2TestBackend::produceTestInfo(
 
 const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionState,
                                                 const Model *finalModel, const TestInfo &testInfo) {
-    // Create a testSpec.
-    TestSpec *testSpec = nullptr;
-
     const auto *ingressPayload = testInfo.inputPacket;
     const auto *ingressPayloadMask = IR::getConstant(IR::getBitType(1), 1);
     const auto ingressPacket = Packet(testInfo.inputPort, ingressPayload, ingressPayloadMask);
@@ -99,7 +96,8 @@ const TestSpec *Bmv2TestBackend::createTestSpec(const ExecutionState *executionS
     if (!testInfo.packetIsDropped) {
         egressPacket = Packet(testInfo.outputPort, testInfo.outputPacket, testInfo.packetTaintMask);
     }
-    testSpec = new TestSpec(ingressPacket, egressPacket, testInfo.programTraces);
+    // Create a testSpec.
+    auto *testSpec = new TestSpec(ingressPacket, egressPacket, testInfo.programTraces);
 
     // If metadata mode is enabled, gather the user metadata variable form the parser.
     // Save the values of all the fields in it and return.

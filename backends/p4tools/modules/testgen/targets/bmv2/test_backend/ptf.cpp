@@ -12,8 +12,11 @@
 #include "backends/p4tools/common/lib/format_int.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "ir/ir.h"
+#include "lib/exceptions.h"
 #include "lib/log.h"
 #include "nlohmann/json.hpp"
+
+#include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
@@ -301,8 +304,8 @@ void PTF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
     ptfFileStream.flush();
 }
 
-void PTF::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
-                     float currentCoverage) {
+void PTF::writeTestToFile(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
+                          float currentCoverage) {
     std::string testCase = getTestCaseTemplate();
     emitTestcase(testSpec, selectedBranches, testId, testCase, currentCoverage);
 }

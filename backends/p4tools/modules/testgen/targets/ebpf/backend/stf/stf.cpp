@@ -254,8 +254,8 @@ void STF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
     stfFileStream.flush();
 }
 
-void STF::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
-                     float currentCoverage) {
+void STF::writeTestToFile(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
+                          float currentCoverage) {
     std::string testCase = getTestCaseTemplate();
     emitTestcase(testSpec, selectedBranches, testId, testCase, currentCoverage);
 }
