@@ -78,6 +78,10 @@ class Type_Any : Type, ITypeVar {
     operator== { return declid == a.declid; }
     static Type_Any get();
     const Type* getP4Type() const override { return nullptr; }
+    equiv {
+        (void)a;  // silence unused warning
+        return true; /* ignore declid */
+    }
 }
 
 /// This type is a fragment of another type.
