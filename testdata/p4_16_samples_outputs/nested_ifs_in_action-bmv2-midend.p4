@@ -59,20 +59,20 @@ control MyIngress(inout headers hdr, inout metadata_t meta, inout standard_metad
             }
         }
     }
-    @hidden action nested_ifs_in_actionbmv2l61() {
+    @hidden action nested_ifs_in_actionbmv2l67() {
         x_0 = 8w0;
     }
-    @hidden action nested_ifs_in_actionbmv2l63() {
+    @hidden action nested_ifs_in_actionbmv2l69() {
         hdr.ethernet._etherType12[7:0] = x_0;
     }
-    @hidden action nested_ifs_in_actionbmv2l65() {
+    @hidden action nested_ifs_in_actionbmv2l71() {
         standard_metadata.egress_spec = 9w1;
     }
-    @hidden table tbl_nested_ifs_in_actionbmv2l61 {
+    @hidden table tbl_nested_ifs_in_actionbmv2l67 {
         actions = {
-            nested_ifs_in_actionbmv2l61();
+            nested_ifs_in_actionbmv2l67();
         }
-        const default_action = nested_ifs_in_actionbmv2l61();
+        const default_action = nested_ifs_in_actionbmv2l67();
     }
     @hidden table tbl_barc {
         actions = {
@@ -80,25 +80,25 @@ control MyIngress(inout headers hdr, inout metadata_t meta, inout standard_metad
         }
         const default_action = barc();
     }
-    @hidden table tbl_nested_ifs_in_actionbmv2l63 {
+    @hidden table tbl_nested_ifs_in_actionbmv2l69 {
         actions = {
-            nested_ifs_in_actionbmv2l63();
+            nested_ifs_in_actionbmv2l69();
         }
-        const default_action = nested_ifs_in_actionbmv2l63();
+        const default_action = nested_ifs_in_actionbmv2l69();
     }
-    @hidden table tbl_nested_ifs_in_actionbmv2l65 {
+    @hidden table tbl_nested_ifs_in_actionbmv2l71 {
         actions = {
-            nested_ifs_in_actionbmv2l65();
+            nested_ifs_in_actionbmv2l71();
         }
-        const default_action = nested_ifs_in_actionbmv2l65();
+        const default_action = nested_ifs_in_actionbmv2l71();
     }
     apply {
         if (hdr.ethernet._etherType12 == 16w0x22f0) {
-            tbl_nested_ifs_in_actionbmv2l61.apply();
+            tbl_nested_ifs_in_actionbmv2l67.apply();
             tbl_barc.apply();
-            tbl_nested_ifs_in_actionbmv2l63.apply();
+            tbl_nested_ifs_in_actionbmv2l69.apply();
         }
-        tbl_nested_ifs_in_actionbmv2l65.apply();
+        tbl_nested_ifs_in_actionbmv2l71.apply();
     }
 }
 
