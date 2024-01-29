@@ -28,10 +28,16 @@ class ICastable : public virtual RTTI::Base {
     virtual ~ICastable() = default;
 
     /// Tries to convert the class to type T. A BUG occurs if the cast fails.
-    template<typename T> const T &as() const { return *checkedTo<T>(); }
+    template <typename T>
+    const T &as() const {
+        return *checkedTo<T>();
+    }
 
     /// Tries to convert the class to type T. A BUG occurs if the cast fails.
-    template<typename T> T &as() { return *checkedTo<T>(); }
+    template <typename T>
+    T &as() {
+        return *checkedTo<T>();
+    }
 
     /// Performs a checked cast. A BUG occurs if the cast fails.
     template <typename T>

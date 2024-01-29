@@ -1129,7 +1129,7 @@ const IR::Expression *ProgramStructure::convertHashAlgorithms(const IR::NameList
 static bool sameBitsType(const IR::Node *errorPosition, const IR::Type *left,
                          const IR::Type *right) {
     if (left->typeId() != right->typeId()) return false;
-    if (const auto* leftBitsType = left->to<IR::Type_Bits>())
+    if (const auto *leftBitsType = left->to<IR::Type_Bits>())
         return leftBitsType->operator==(right->as<IR::Type_Bits>());
     ::error(ErrorType::ERR_TYPE_ERROR, "%1%: operation only defined for bit/int types",
             errorPosition);

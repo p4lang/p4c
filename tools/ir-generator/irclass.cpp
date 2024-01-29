@@ -215,8 +215,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
       << "  NK_Node = 2,\n";
 
     unsigned nkId = 3;
-    for (auto cls : *getClasses())
-        t << "  NK_" << cls->name << " = " << nkId++ << ",\n";
+    for (auto cls : *getClasses()) t << "  NK_" << cls->name << " = " << nkId++ << ",\n";
 
     // Add some specials:
     t << "  NK_IDeclaration = " << nkId++ << ",\n";
@@ -397,10 +396,8 @@ void IrClass::generate_hdr(std::ostream &out) const {
 
     if (kind != NodeKind::Nested) {
         out << indent << "DECLARE_TYPEINFO_WITH_TYPEID(" << name << ", NK_" << name;
-        if (!concreteParent)
-            out << ", " << (kind != NodeKind::Interface ? "Node" : "INode");
-        for (const auto *p : parentClasses)
-            out << ", " << p->qualified_name(containedIn);
+        if (!concreteParent) out << ", " << (kind != NodeKind::Interface ? "Node" : "INode");
+        for (const auto *p : parentClasses) out << ", " << p->qualified_name(containedIn);
         out << ");" << std::endl;
     }
 

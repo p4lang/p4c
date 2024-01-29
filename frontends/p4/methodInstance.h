@@ -35,7 +35,7 @@ class InstanceBase : public ICastable {
     /// This may not be filled in if we resolved with 'incomplete'
     TypeVariableSubstitution typeSubstitution;
 
-  DECLARE_TYPEINFO(InstanceBase);
+    DECLARE_TYPEINFO(InstanceBase);
 };
 
 /**

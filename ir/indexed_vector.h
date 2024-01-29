@@ -213,8 +213,7 @@ class IndexedVector : public Vector<T> {
         }
     }
 
-    DECLARE_TYPEINFO_WITH_NESTED_TYPEID(IndexedVector<T>,
-                                        NK_IndexedVectorT, T::static_typeId(),
+    DECLARE_TYPEINFO_WITH_NESTED_TYPEID(IndexedVector<T>, NK_IndexedVectorT, T::static_typeId(),
                                         Vector<T>);
 };
 

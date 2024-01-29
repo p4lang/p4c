@@ -66,7 +66,7 @@ class EBPFTableBase : public EBPFObject {
         dataMapName = instanceName;
     }
 
-  DECLARE_TYPEINFO(EBPFTableBase, EBPFObject);
+    DECLARE_TYPEINFO(EBPFTableBase, EBPFObject);
 };
 
 class EBPFTable : public EBPFTableBase {

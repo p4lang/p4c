@@ -77,7 +77,7 @@ class CFG final : public IHasDbPrint {
         void computeSuccessors();
         cstring toString() const { return name; }
 
-      DECLARE_TYPEINFO(Node);
+        DECLARE_TYPEINFO(Node);
     };
 
  public:
