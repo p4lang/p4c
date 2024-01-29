@@ -85,50 +85,49 @@ unsigned InputSources::lineCount() const {
 }
 
 // Append this text to the last line
-void InputSources::appendToLastLine(StringRef text) {
+void InputSources::appendToLastLine(std::string_view text) {
     if (sealed) BUG("Appending to sealed InputSources");
     // Text should not contain any newline characters
-    for (size_t i = 0; i < text.len; i++) {
+    for (size_t i = 0; i < text.length(); i++) {
         char c = text[i];
         if (c == '\n') BUG("Text contains newlines");
     }
-    contents.back() += text.toString();
+    contents.back() += text;
 }
 
 // Append a newline and start a new line
-void InputSources::appendNewline(StringRef newline) {
+void InputSources::appendNewline(std::string_view newline) {
     if (sealed) BUG("Appending to sealed InputSources");
-    contents.back() += newline.toString();
+    contents.back() += newline;
     contents.push_back("");  // start a new line
 }
 
 void InputSources::appendText(const char *text) {
     if (text == nullptr) BUG("Null text being appended");
-    StringRef ref = text;
+    std::string_view ref = text;
 
-    while (ref.len > 0) {
-        const char *nl = ref.find("\r\n");
-        if (nl == nullptr) {
+    while (ref.length() > 0) {
+        auto toCut = ref.find_first_of("\r\n");
+        if (toCut == std::string_view::npos) {
             appendToLastLine(ref);
             break;
         }
 
-        size_t toCut = nl - ref.p;
         if (toCut != 0) {
-            StringRef nonnl(ref.p, toCut);
+            std::string_view nonnl = ref.substr(0, toCut);
             appendToLastLine(nonnl);
-            ref += toCut;
+            ref.remove_prefix(toCut);
         } else {
             if (ref[0] == '\n') {
                 appendNewline("\n");
-                ref += 1;
-            } else if (ref.len > 2 && ref[0] == '\r' && ref[1] == '\n') {
+                ref.remove_prefix(1);
+            } else if (ref.length() > 2 && ref[0] == '\r' && ref[1] == '\n') {
                 appendNewline("\r\n");
-                ref += 2;
+                ref.remove_prefix(2);
             } else {
                 // Just \r
                 appendToLastLine(ref.substr(0, 1));
-                ref += 1;
+                ref.remove_prefix(1);
             }
         }
     }

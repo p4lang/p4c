@@ -18,7 +18,6 @@ limitations under the License.
 
 #include "gtest/gtest.h"
 #include "lib/exceptions.h"
-#include "lib/stringref.h"
 
 namespace Util {
 
@@ -29,14 +28,14 @@ TEST(Util, PathName) {
 
     {
         PathName path = "/usr/local/bin/file.exe";
-        StringRef ext = path.getExtension();
-        EXPECT_EQ(StringRef("exe"), ext);
+        std::string_view ext = path.getExtension();
+        EXPECT_EQ(std::string_view("exe"), ext);
 
         PathName file = path.getFilename();
         EXPECT_EQ("file.exe", file.toString());
 
-        StringRef base = path.getBasename();
-        EXPECT_EQ(StringRef("file"), base);
+        std::string_view base = path.getBasename();
+        EXPECT_EQ(std::string_view("file"), base);
 
         PathName folder = path.getFolder();
         EXPECT_EQ("/usr/local/bin", folder.toString());
@@ -44,13 +43,13 @@ TEST(Util, PathName) {
 
     {
         PathName path = "/usr/local/bin/";
-        StringRef ext = path.getExtension();
+        std::string_view ext = path.getExtension();
         EXPECT_EQ("", ext);
 
         PathName file = path.getFilename();
         EXPECT_EQ("", file.toString());
 
-        StringRef base = path.getBasename();
+        std::string_view base = path.getBasename();
         EXPECT_EQ("", base);
 
         PathName folder = path.getFolder();
@@ -59,14 +58,14 @@ TEST(Util, PathName) {
 
     {
         PathName path = "file.exe";
-        StringRef ext = path.getExtension();
-        EXPECT_EQ(StringRef("exe"), ext);
+        std::string_view ext = path.getExtension();
+        EXPECT_EQ(std::string_view("exe"), ext);
 
         PathName file = path.getFilename();
         EXPECT_EQ("file.exe", file.toString());
 
-        StringRef base = path.getBasename();
-        EXPECT_EQ(StringRef("file"), base);
+        std::string_view base = path.getBasename();
+        EXPECT_EQ(std::string_view("file"), base);
 
         PathName folder = path.getFolder();
         EXPECT_EQ("", folder.toString());

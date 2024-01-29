@@ -21,11 +21,12 @@ limitations under the License.
 #ifndef LIB_SOURCE_FILE_H_
 #define LIB_SOURCE_FILE_H_
 
+#include <iostream>
+#include <string_view>
 #include <vector>
 
 #include "cstring.h"
 #include "map.h"
-#include "stringref.h"
 
 // GTest
 #ifdef P4C_GTEST_ENABLED
@@ -302,9 +303,9 @@ class InputSources final {
 
  private:
     /// Append this text to the last line; must not contain newlines
-    void appendToLastLine(StringRef text);
+    void appendToLastLine(std::string_view text);
     /// Append a newline and start a new line
-    void appendNewline(StringRef newline);
+    void appendNewline(std::string_view newline);
 
     /// Input program that is being currently compiled; there can be only one.
     bool sealed;

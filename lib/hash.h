@@ -4,40 +4,62 @@
 #include <cstddef>
 #include <type_traits>
 
-namespace Util {
-namespace Hash {
-std::size_t fnv1a(const void *data, std::size_t size);
+namespace Util::Hash {
 
-// returns fnv1a hash sum for object with public methods size() and data()
+namespace helper_ {
+// If called with 0, this overload will be preferred -- so if both are enabled, this one will be
+// used.  It is preferred becuase there will be no cast.
 template <typename T>
-auto fnv1a(const T &obj) -> decltype(fnv1a(obj.data(), obj.size())) {
-    return fnv1a(obj.data(), obj.size());
+constexpr auto has_data_and_size(int)
+    -> decltype(std::declval<T>().data(), std::declval<T>().size(), bool()) {
+    return true;
 }
 
-// returns fnv1a hash sum for object with standard layout
+// This one is not preferred, it is only called if the other is not available
 template <typename T>
-auto fnv1a(const T &obj, typename std::enable_if<std::is_standard_layout<T>::value &&
-                                                 !std::is_pointer<T>::value>::type * = nullptr)
-    -> decltype(fnv1a(reinterpret_cast<const void *>(&obj), sizeof(T))) {
-    return fnv1a(reinterpret_cast<const void *>(&obj), sizeof(T));
+constexpr auto has_data_and_size(short) -> bool {
+    return false;
+}
+}  // namespace helper_
+
+/// A trait for types that can be trivially hashed by their memory representation. Must be standard
+/// layout, trivially copyable and not a pointer.
+template <typename T>
+constexpr bool trivially_hashable =
+    std::is_standard_layout_v<T> && !std::is_pointer_v<T> && std::is_trivially_copyable_v<T>;
+
+/// A trait for hashable types. Either trivially_hashable, or has data() and size() public members.
+template <typename T>
+constexpr bool hashable = trivially_hashable<T> || helper_::has_data_and_size<T>(0);
+
+std::size_t fnv1a(const void *data, std::size_t size);
+
+/// If the object has public size() and data() forwards these to \ref vnv1a(const void *, size_t).
+/// Otherwise if the object is trivally hashable hashes the memory representation of the object.
+template <typename T>
+auto fnv1a(const T &obj) -> std::enable_if_t<hashable<T>, std::size_t> {
+    if constexpr (trivially_hashable<T>) {
+        return fnv1a(reinterpret_cast<const void *>(&obj), sizeof(T));
+    }
+    if constexpr (helper_::has_data_and_size<T>(0)) {
+        return fnv1a(obj.data(), obj.size());
+    }
 }
 
 std::size_t murmur(const void *data, std::size_t size);
 
-// returns Murmur hash sum for object with public methods size() and data()
+/// If the object has public size() and data() forwards these to \ref murmur(const void *, size_t).
+/// Otherwise if the object is trivally hashable hashes the memory representation of the object.
 template <typename T>
-auto murmur(const T &obj) -> decltype(murmur(obj.data(), obj.size())) {
-    return murmur(obj.data(), obj.size());
+auto murmur(const T &obj) -> std::enable_if_t<hashable<T>, std::size_t> {
+    if constexpr (trivially_hashable<T>) {
+        return murmur(reinterpret_cast<const void *>(&obj), sizeof(T));
+    }
+    if constexpr (helper_::has_data_and_size<T>(0)) {
+        return murmur(obj.data(), obj.size());
+    }
 }
 
-// returns fnv1a hash sum for object with standard layout
-template <typename T>
-auto murmur(const T &obj, typename std::enable_if<std::is_standard_layout<T>::value &&
-                                                  !std::is_pointer<T>::value>::type * = nullptr)
-    -> decltype(murmur(reinterpret_cast<const void *>(&obj), sizeof(T))) {
-    return murmur(reinterpret_cast<const void *>(&obj), sizeof(T));
-}
-}  // namespace Hash
-}  // namespace Util
+}  // namespace Util::Hash
 
 #endif /* LIB_HASH_H_ */

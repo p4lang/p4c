@@ -156,6 +156,7 @@ class cstring {
 
     char get(unsigned index) const { return (index < size()) ? str[index] : 0; }
     const char *c_str() const { return str; }
+    const char *data() const { return str; }
     operator const char *() const { return str; }
 
     // Size tests. Constant time except for size(), which is linear time.
@@ -201,6 +202,9 @@ class cstring {
     bool operator<=(const std::string &a) const { return *this <= a.c_str(); }
     bool operator>(const std::string &a) const { return *this > a.c_str(); }
     bool operator>=(const std::string &a) const { return *this >= a.c_str(); }
+
+    /// implicit cast to std::string_view, similar to what std::string has
+    operator std::string_view() const { return std::string_view(data(), size()); }
 
     bool startsWith(const cstring &prefix) const;
     bool endsWith(const cstring &suffix) const;
@@ -277,6 +281,8 @@ class cstring {
 
 inline bool operator==(const char *a, cstring b) { return b == a; }
 inline bool operator!=(const char *a, cstring b) { return b != a; }
+inline bool operator==(const std::string a, cstring b) { return b == a; }
+inline bool operator!=(const std::string &a, cstring b) { return b != a; }
 
 inline std::string operator+(cstring a, cstring b) {
     std::string rv(a);
