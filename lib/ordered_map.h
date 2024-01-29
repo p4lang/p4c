@@ -66,7 +66,7 @@ class ordered_map {
         COMP comp;
         bool operator()(const K *a, const K *b) const { return comp(*a, *b); }
     };
-    using map_alloc = std::allocator_traits<ALLOC>::template rebind_alloc<
+    using map_alloc = typename std::allocator_traits<ALLOC>::template rebind_alloc<
         std::pair<const K *const, list_iterator>>;
     using map_type = std::map<const K *, list_iterator, mapcmp, map_alloc>;
     map_type data_map;
