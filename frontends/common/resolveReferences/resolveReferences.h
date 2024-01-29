@@ -29,6 +29,12 @@ enum class ResolutionType { Any, Type, TypeVariable };
 
 /// Visitor mixin for looking up names in enclosing scopes from the Visitor::Context
 class ResolutionContext : virtual public Visitor, public DeclarationLookup {
+    mutable std::unordered_map<const IR::INamespace*,
+                               std::vector<const IR::IDeclaration*>*> namespaceDecls;
+    mutable std::unordered_map<const IR::INamespace*,
+                               std::unordered_multimap<cstring,
+                                                       const IR::IDeclaration *>> declNames;
+
  protected:
     // Note that all errors have been merged by the parser into
     // a single error { } namespace.
@@ -70,6 +76,12 @@ class ResolutionContext : virtual public Visitor, public DeclarationLookup {
 
     const IR::IDeclaration *getDeclaration(const IR::Path *path, bool notNull = false) const;
     const IR::IDeclaration *getDeclaration(const IR::This *, bool notNull = false) const;
+
+    Util::Enumerator<const IR::IDeclaration*>* getDeclarations(const IR::INamespace *ns) const;
+    std::vector<const IR::IDeclaration*>* memoizeDeclarations(const IR::INamespace* ns) const;
+
+    Util::Enumerator<const IR::IDeclaration*>* getDeclsByName(const IR::INamespace *ns,
+                                                              cstring name) const;
 };
 
 /** Inspector that computes `refMap`: a map from paths to declarations.

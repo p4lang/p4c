@@ -560,5 +560,10 @@ bool EnumeratorHandle<T>::operator!=(const EnumeratorHandle<T> &other) const {
     return this->enumerator->state == EnumeratorState::Valid;
 }
 
+template <typename Iter>
+auto* enumerate(Iter begin, Iter end) {
+    return Enumerator<typename Iter::value_type>::createEnumerator(begin, end);
+}
+
 }  // namespace Util
 #endif /* LIB_ENUMERATOR_H_ */
