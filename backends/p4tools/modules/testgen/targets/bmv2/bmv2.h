@@ -40,6 +40,8 @@ class BMv2V1ModelCompilerResult : public TestgenCompilerResult {
 
     /// @returns the map of direct extern declarations which are attached to a table.
     [[nodiscard]] const DirectExternMap &getDirectExternMap() const;
+
+    DECLARE_TYPEINFO(BMv2V1ModelCompilerResult, TestgenCompilerResult);
 };
 
 class Bmv2V1ModelCompilerTarget : public TestgenCompilerTarget {

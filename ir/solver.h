@@ -62,6 +62,8 @@ class AbstractSolver : public ICastable {
 
     /// @returns whether this solver is incremental.
     [[nodiscard]] virtual bool isInIncrementalMode() const = 0;
+
+    DECLARE_TYPEINFO(AbstractSolver);
 };
 
 #endif /* IR_SOLVER_H_ */

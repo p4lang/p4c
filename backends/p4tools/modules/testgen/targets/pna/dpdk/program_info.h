@@ -29,6 +29,8 @@ class PnaDpdkProgramInfo : public SharedPnaProgramInfo {
 
     /// @see ProgramInfo::getArchSpec
     static const ArchSpec ARCH_SPEC;
+
+    DECLARE_TYPEINFO(PnaDpdkProgramInfo, SharedPnaProgramInfo);
 };
 
 }  // namespace P4Tools::P4Testgen::Pna

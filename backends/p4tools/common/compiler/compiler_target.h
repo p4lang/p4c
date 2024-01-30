@@ -29,6 +29,8 @@ class CompilerResult : public ICastable {
     /// @returns the reference to the input P4 program, after it has been transformed by the
     /// compiler.
     [[nodiscard]] const IR::P4Program &getProgram() const;
+
+    DECLARE_TYPEINFO(CompilerResult);
 };
 
 /// P4Tools compilers may return an error instead of a compiler result.
