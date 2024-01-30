@@ -26,8 +26,9 @@ class PnaDpdkTestgenTarget : public TestgenTarget {
     static void make();
 
  protected:
-    const PnaDpdkProgramInfo *initProgramImpl(
-        const IR::P4Program *program, const IR::Declaration_Instance *mainDecl) const override;
+    const PnaDpdkProgramInfo *produceProgramInfoImpl(
+        const CompilerResult &compilerResult,
+        const IR::Declaration_Instance *mainDecl) const override;
 
     PnaTestBackend *getTestBackendImpl(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
                                        const std::filesystem::path &testPath) const override;

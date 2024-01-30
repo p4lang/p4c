@@ -326,7 +326,7 @@ void StateTranslationVisitor::compileExtractField(const IR::Expression *expr,
             //   0x112233445566778809
             //   0x112233445566778890
             // To correctly insert that padding, the length of field must be known, but tools like
-            // nikss-ctl (and the nikss library) don't consume P4info.txt to have such knowledge.
+            // nikss-ctl (and the nikss library) don't consume P4info.txtpb to have such knowledge.
             // There is also a bug in (de)parser causing such fields to be deparsed incorrectly.
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                     "%1%: fields wider than 64 bits must have a size multiple of 8 bits (1 byte) "

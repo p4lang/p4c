@@ -7,11 +7,11 @@
 
 #include "backends/p4tools/common/compiler/reachability.h"
 #include "backends/p4tools/common/lib/arch_spec.h"
-#include "ir/declaration.h"
 #include "ir/ir.h"
 #include "lib/castable.h"
 #include "midend/coverage.h"
 
+#include "backends/p4tools/modules/testgen/core/compiler_target.h"
 #include "backends/p4tools/modules/testgen/lib/concolic.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
 
@@ -19,15 +19,17 @@ namespace P4Tools::P4Testgen {
 
 /// Stores target-specific information about a P4 program.
 class ProgramInfo : public ICastable {
+ private:
+    /// The program info object stores the results of the compilation, which includes the P4 program
+    /// and any information extracted from the program using static analysis.
+    std::reference_wrapper<const TestgenCompilerResult> compilerResult;
+
  protected:
-    explicit ProgramInfo(const IR::P4Program *program);
+    explicit ProgramInfo(const TestgenCompilerResult &compilerResult);
 
     /// The list of concolic methods implemented by the target. This list is assembled during
     /// initialization.
     ConcolicMethodImpls concolicMethodImpls;
-
-    /// Set of all visitable nodes in the input P4 program.
-    P4::Coverage::CoverageSet coverableNodes;
 
     /// The execution sequence of the P4 program.
     std::vector<Continuation::Command> pipelineSequence;
@@ -48,12 +50,6 @@ class ProgramInfo : public ICastable {
     ProgramInfo &operator=(ProgramInfo &&) = default;
 
     ~ProgramInfo() override = default;
-
-    /// The P4 program from which this object is derived.
-    const IR::P4Program *program;
-
-    /// The generated dcg.
-    const NodesCallGraph *dcg = nullptr;
 
     /// A vector that maps the architecture parameters of each pipe to the corresponding
     /// global architecture variables. For example, this map specifies which parameter of each pipe
@@ -97,6 +93,16 @@ class ProgramInfo : public ICastable {
     /// @returns the canonical name of the program block that is passed in.
     /// Throws a BUG, if the name can not be found.
     [[nodiscard]] cstring getCanonicalBlockName(cstring programBlockName) const;
+
+    /// @returns a reference to the compiler result that this program info object was initialized
+    /// with.
+    [[nodiscard]] virtual const TestgenCompilerResult &getCompilerResult() const;
+
+    /// @returns the P4 program associated with this ProgramInfo.
+    [[nodiscard]] const IR::P4Program &getP4Program() const;
+
+    /// @returns the call graph associated with this ProgramInfo.
+    [[nodiscard]] const NodesCallGraph &getCallGraph() const;
 
     /// Helper function to produce copy-in and copy-out helper calls.
     /// Copy-in and copy-out is needed to correctly model the value changes of data when it is

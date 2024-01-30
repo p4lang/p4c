@@ -66,7 +66,7 @@ class RegisterApplyPSATest(P4EbpfTest):
     """
 
     p4_file_path = "p4testdata/register-apply.p4"
-    p4info_reference_file_path = "p4testdata/register-apply.p4info.txt"
+    p4info_reference_file_path = "p4testdata/register-apply.p4info.txtpb"
 
     def runTest(self):
         pkt = testutils.simple_ip_packet()

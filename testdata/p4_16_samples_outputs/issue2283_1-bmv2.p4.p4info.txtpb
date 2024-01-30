@@ -1,0 +1,81 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 34728461
+    name: "ingress.t"
+    alias: "t"
+  }
+  match_fields {
+    id: 1
+    name: "h.ports.port1"
+    bitwidth: 32
+    match_type: EXACT
+    type_name {
+      name: "PortId1_t"
+    }
+  }
+  match_fields {
+    id: 2
+    name: "h.ports.port2"
+    bitwidth: 32
+    match_type: EXACT
+    type_name {
+      name: "PortId2_t"
+    }
+  }
+  match_fields {
+    id: 3
+    name: "h.ports.port3"
+    match_type: EXACT
+    type_name {
+      name: "PortId3_t"
+    }
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+type_info {
+  new_types {
+    key: "PortId1_t"
+    value {
+      translated_type {
+        uri: "p4.org/psa/v1/PortId1_t"
+        sdn_bitwidth: 32
+      }
+    }
+  }
+  new_types {
+    key: "PortId2_t"
+    value {
+      translated_type {
+        uri: "p4.org/psa/v1/PortId2_t"
+        sdn_bitwidth: 32
+      }
+    }
+  }
+  new_types {
+    key: "PortId3_t"
+    value {
+      translated_type {
+        uri: "p4.org/psa/v1/PortId3_t"
+        sdn_string {
+        }
+      }
+    }
+  }
+}

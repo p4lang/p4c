@@ -1,0 +1,32 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 48165785
+    name: "cIngress.guh"
+    alias: "guh"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.srcAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 25131402
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 25131402
+    name: "cIngress.foo"
+    alias: "foo"
+  }
+}
+type_info {
+}

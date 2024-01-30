@@ -1,0 +1,52 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 39967805
+    name: "IngressImpl.test_table"
+    alias: "test_table"
+  }
+  match_fields {
+    id: 1
+    name: "meta.test"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  action_refs {
+    id: 30009676
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+  is_const_table: true
+  has_initial_entries: true
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 30009676
+    name: "IngressImpl.act"
+    alias: "act"
+  }
+  params {
+    id: 1
+    name: "a"
+    bitwidth: 8
+  }
+}
+type_info {
+}

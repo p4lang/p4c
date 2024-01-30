@@ -259,8 +259,8 @@ def process_file(options, argv):
     ppfile = tmpdir + "/" + basename  # after parsing
     referenceOutputs = ",".join(list(rename.keys()))
     stderr = tmpdir + "/" + basename + "-stderr"
-    p4runtimeFile = tmpdir + "/" + basename + ".p4info.txt"
-    p4runtimeEntriesFile = tmpdir + "/" + basename + ".entries.txt"
+    p4runtimeFile = tmpdir + "/" + basename + ".p4info.txtpb"
+    p4runtimeEntriesFile = tmpdir + "/" + basename + ".entries.txtpb"
 
     # Create the `json_outputs` directory if it doesn't already exist. There's a
     # race here since multiple tests may run this code in parallel, so we can't

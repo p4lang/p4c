@@ -151,6 +151,22 @@ class TCAction {
     dbprint { out << toString(); }
 }
 
+class TCEntry {
+    cstring action;
+    ordered_map<cstring,cstring> keys;
+    cstring getActionName() const {
+        return action;
+    }
+    toString {
+        std::string tcEntry = "";
+        for(auto k : keys) {
+            tcEntry += " " + k.first + " " + k.second;
+        }
+        return tcEntry;
+    }
+    dbprint { out << toString(); }
+}
+
 class TCTable {
     unsigned tableID;
     cstring tableName;
@@ -167,6 +183,8 @@ class TCTable {
     TCAction defaultMissAction;
     bool isDefaultMissConst;
     ordered_map<TCAction, unsigned> actionList;
+    safe_vector<TCEntry> const_entries;
+
     void setKeySize(unsigned k) {
         keySize = k;
     }
@@ -199,6 +217,9 @@ class TCTable {
     }
     void addAction(TCAction action, unsigned flag) {
         actionList.emplace(action, flag);
+    }
+    void addConstEntries(TCEntry entry) {
+        const_entries.push_back(entry);
     }
     cstring printMatchType(unsigned matchType) const {
         cstring matchTypeString = "";
@@ -287,6 +308,16 @@ class TCTable {
                 tcTable += " permissions 0x1024";
             }
             tcTable += " action " + defaultMissAction->getName();
+        }
+        if (const_entries.size() != 0) {
+            for (auto entry : const_entries) {
+                tcTable += "\n$TC p4template create table/" + pipelineName
+                            + "/" + controlName + "/" + tableName
+                            + " entry" + entry->toString();
+                tcTable += " action " + pipelineName
+                            + "/" + controlName + "/" + entry->getActionName();
+                tcTable += " permissions 0x1024";
+            }
         }
         return tcTable;
     }

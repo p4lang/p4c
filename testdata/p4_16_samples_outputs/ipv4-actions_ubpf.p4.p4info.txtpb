@@ -1,0 +1,293 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "ubpf"
+}
+tables {
+  preamble {
+    id: 34660133
+    name: "pipe.filter_tbl"
+    alias: "filter_tbl"
+  }
+  match_fields {
+    id: 1
+    name: "headers.ipv4.srcAddr"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 22459262
+  }
+  action_refs {
+    id: 25901177
+  }
+  action_refs {
+    id: 28593466
+  }
+  action_refs {
+    id: 23020487
+  }
+  action_refs {
+    id: 22607454
+  }
+  action_refs {
+    id: 22035671
+  }
+  action_refs {
+    id: 29816553
+  }
+  action_refs {
+    id: 17848524
+  }
+  action_refs {
+    id: 17633771
+  }
+  action_refs {
+    id: 27703701
+  }
+  action_refs {
+    id: 24523917
+  }
+  action_refs {
+    id: 23198765
+  }
+  action_refs {
+    id: 19626680
+  }
+  action_refs {
+    id: 30994171
+  }
+  action_refs {
+    id: 26908305
+  }
+  action_refs {
+    id: 18876683
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 18876683
+    name: "pipe.Reject"
+    alias: "Reject"
+  }
+}
+actions {
+  preamble {
+    id: 22459262
+    name: "pipe.set_ipv4_version"
+    alias: "set_ipv4_version"
+  }
+  params {
+    id: 1
+    name: "version"
+    bitwidth: 4
+  }
+}
+actions {
+  preamble {
+    id: 25901177
+    name: "pipe.set_ihl"
+    alias: "set_ihl"
+  }
+  params {
+    id: 1
+    name: "ihl"
+    bitwidth: 4
+  }
+}
+actions {
+  preamble {
+    id: 28593466
+    name: "pipe.set_diffserv"
+    alias: "set_diffserv"
+  }
+  params {
+    id: 1
+    name: "diffserv"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 23020487
+    name: "pipe.set_identification"
+    alias: "set_identification"
+  }
+  params {
+    id: 1
+    name: "identification"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 22607454
+    name: "pipe.set_flags"
+    alias: "set_flags"
+  }
+  params {
+    id: 1
+    name: "flags"
+    bitwidth: 3
+  }
+}
+actions {
+  preamble {
+    id: 22035671
+    name: "pipe.set_fragOffset"
+    alias: "set_fragOffset"
+  }
+  params {
+    id: 1
+    name: "fragOffset"
+    bitwidth: 13
+  }
+}
+actions {
+  preamble {
+    id: 29816553
+    name: "pipe.set_ttl"
+    alias: "set_ttl"
+  }
+  params {
+    id: 1
+    name: "ttl"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 17848524
+    name: "pipe.set_protocol"
+    alias: "set_protocol"
+  }
+  params {
+    id: 1
+    name: "protocol"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 17633771
+    name: "pipe.set_srcAddr"
+    alias: "set_srcAddr"
+  }
+  params {
+    id: 1
+    name: "srcAddr"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 27703701
+    name: "pipe.set_dstAddr"
+    alias: "set_dstAddr"
+  }
+  params {
+    id: 1
+    name: "dstAddr"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 24523917
+    name: "pipe.set_srcAddr_dstAddr"
+    alias: "set_srcAddr_dstAddr"
+  }
+  params {
+    id: 1
+    name: "srcAddr"
+    bitwidth: 32
+  }
+  params {
+    id: 2
+    name: "dstAddr"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 23198765
+    name: "pipe.set_ihl_diffserv"
+    alias: "set_ihl_diffserv"
+  }
+  params {
+    id: 1
+    name: "ihl"
+    bitwidth: 4
+  }
+  params {
+    id: 2
+    name: "diffserv"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 19626680
+    name: "pipe.set_fragOffset_flags"
+    alias: "set_fragOffset_flags"
+  }
+  params {
+    id: 1
+    name: "fragOffset"
+    bitwidth: 13
+  }
+  params {
+    id: 2
+    name: "flags"
+    bitwidth: 3
+  }
+}
+actions {
+  preamble {
+    id: 30994171
+    name: "pipe.set_flags_ttl"
+    alias: "set_flags_ttl"
+  }
+  params {
+    id: 1
+    name: "flags"
+    bitwidth: 3
+  }
+  params {
+    id: 2
+    name: "ttl"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 26908305
+    name: "pipe.set_fragOffset_srcAddr"
+    alias: "set_fragOffset_srcAddr"
+  }
+  params {
+    id: 1
+    name: "fragOffset"
+    bitwidth: 13
+  }
+  params {
+    id: 2
+    name: "srcAddr"
+    bitwidth: 32
+  }
+}
+type_info {
+}

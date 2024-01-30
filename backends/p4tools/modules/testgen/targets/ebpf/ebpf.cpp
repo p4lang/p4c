@@ -2,13 +2,12 @@
 
 #include <string>
 
-#include "backends/p4tools/common/compiler/compiler_target.h"
 #include "backends/p4tools/common/compiler/midend.h"
 #include "frontends/common/options.h"
 
 namespace P4Tools::P4Testgen::EBPF {
 
-EBPFCompilerTarget::EBPFCompilerTarget() : CompilerTarget("ebpf", "ebpf") {}
+EBPFCompilerTarget::EBPFCompilerTarget() : TestgenCompilerTarget("ebpf", "ebpf") {}
 
 void EBPFCompilerTarget::make() {
     static EBPFCompilerTarget *INSTANCE = nullptr;

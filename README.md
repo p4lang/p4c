@@ -1,6 +1,7 @@
 [![Main Build](https://github.com/p4lang/p4c/actions/workflows/ci-test.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-test.yml)
 [![Bazel Build](https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml)
-[![Validation](https://github.com/p4lang/p4c/actions/workflows/ci-validation.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-validation.yml)
+[![Validation](https://github.com/p4lang/p4c/actions/workflows/ci-validation-nightly.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-validation-nightly.yml)
+[![Docker Container](https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml)
 
 # p4c
 
@@ -23,8 +24,9 @@ The code contains seven sample backends:
 * p4c-dpdk: can be used to target the DPDK software switch (SWX) pipeline
   https://doc.dpdk.org/guides/rel_notes/release_20_11.html,
 * p4c-ebpf: can be used to generate C code which can be compiled to [eBPF](https://en.wikipedia.org/wiki/Berkeley_Packet_Filter)
-  and then loaded in the Linux kernel. The eBPF backend currently implements two architecture models:
-  [ebpf_model.p4 for packet filtering](./backends/ebpf/README.md) and [the fully-featured PSA (Portable Switch Architecture) model](./backends/ebpf/psa/README.md).
+  and then loaded in the Linux kernel. The eBPF backend currently implements three architecture models:
+  [ebpf_model.p4 for packet filtering, xdp_model.p4 for XDP](./backends/ebpf/README.md) and
+  [the fully-featured PSA (Portable Switch Architecture) model](./backends/ebpf/psa/README.md).
 * p4test: a source-to-source P4 translator which can be used for
   testing, learning compiler internals and debugging,
 * p4c-graphs: can be used to generate visual representations of a P4 program;
@@ -323,6 +325,10 @@ Installing on macOS:
 - Install dependencies using Homebrew:
   ```
   brew install autoconf automake libtool bdw-gc boost bison pkg-config
+  ```
+  or with MacPorts
+  ```
+  sudo port install autoconf automake coreutils libtool boehmgc boost bison pkg-config
   ```
 
   By default, Homebrew doesn't link programs into `/usr/local/bin` if

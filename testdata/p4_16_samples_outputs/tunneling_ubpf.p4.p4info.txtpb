@@ -1,0 +1,70 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "ubpf"
+}
+tables {
+  preamble {
+    id: 40786579
+    name: "pipe.upstream_tbl"
+    alias: "upstream_tbl"
+  }
+  match_fields {
+    id: 1
+    name: "headers.mpls.label"
+    bitwidth: 20
+    match_type: EXACT
+  }
+  action_refs {
+    id: 29015996
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 42073487
+    name: "pipe.downstream_tbl"
+    alias: "downstream_tbl"
+  }
+  match_fields {
+    id: 1
+    name: "headers.ipv4.dstAddr"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 28213423
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 28213423
+    name: "pipe.mpls_encap"
+    alias: "mpls_encap"
+  }
+}
+actions {
+  preamble {
+    id: 29015996
+    name: "pipe.mpls_decap"
+    alias: "mpls_decap"
+  }
+}
+type_info {
+}

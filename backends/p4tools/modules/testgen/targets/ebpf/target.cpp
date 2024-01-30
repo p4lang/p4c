@@ -12,6 +12,7 @@
 #include "lib/exceptions.h"
 #include "lib/ordered_map.h"
 
+#include "backends/p4tools/modules/testgen/core/compiler_target.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
@@ -37,12 +38,13 @@ void EBPFTestgenTarget::make() {
     }
 }
 
-const EBPFProgramInfo *EBPFTestgenTarget::initProgramImpl(
-    const IR::P4Program *program, const IR::Declaration_Instance *mainDecl) const {
+const EBPFProgramInfo *EBPFTestgenTarget::produceProgramInfoImpl(
+    const CompilerResult &compilerResult, const IR::Declaration_Instance *mainDecl) const {
     // The blocks in the main declaration are just the arguments in the constructor call.
     // Convert mainDecl->arguments into a vector of blocks, represented as constructor-call
     // expressions.
-    const auto blocks = argumentsToTypeDeclarations(program, mainDecl->arguments);
+    const auto blocks =
+        argumentsToTypeDeclarations(&compilerResult.getProgram(), mainDecl->arguments);
 
     // We should have six arguments.
     BUG_CHECK(blocks.size() == 2, "%1%: The EBPF architecture requires 2 blocks. Received %2%.",
@@ -64,7 +66,8 @@ const EBPFProgramInfo *EBPFTestgenTarget::initProgramImpl(
         testgenOptions.maxPktSize = 12000;
     }
 
-    return new EBPFProgramInfo(program, programmableBlocks);
+    return new EBPFProgramInfo(*compilerResult.checkedTo<TestgenCompilerResult>(),
+                               programmableBlocks);
 }
 
 EBPFTestBackend *EBPFTestgenTarget::getTestBackendImpl(

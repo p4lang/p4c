@@ -1,0 +1,64 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 49173205
+    name: "ingressImpl.t1"
+    alias: "t1"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.srcAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 18992955
+  }
+  action_refs {
+    id: 31699133
+  }
+  action_refs {
+    id: 32254556
+  }
+  action_refs {
+    id: 21257015
+  }
+  const_default_action_id: 21257015
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 32254556
+    name: "ingressImpl.my_drop"
+    alias: "my_drop"
+  }
+}
+actions {
+  preamble {
+    id: 18992955
+    name: "ingressImpl.a1"
+    alias: "a1"
+  }
+}
+actions {
+  preamble {
+    id: 31699133
+    name: "ingressImpl.a2"
+    alias: "a2"
+  }
+}
+type_info {
+}

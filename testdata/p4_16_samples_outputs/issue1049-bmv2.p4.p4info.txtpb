@@ -1,0 +1,63 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 48165785
+    name: "cIngress.guh"
+    alias: "guh"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4.dstAddr"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 28550627
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 43025017
+    name: "cIngress.debug_table"
+    alias: "debug_table"
+  }
+  match_fields {
+    id: 1
+    name: "meta.mystruct1.hash1"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "meta.mystruct1.hash_drop"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 28550627
+    name: "cIngress.hash_drop_decision"
+    alias: "hash_drop_decision"
+  }
+}
+type_info {
+}

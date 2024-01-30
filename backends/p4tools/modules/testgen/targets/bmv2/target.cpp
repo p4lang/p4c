@@ -15,6 +15,7 @@
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/bmv2.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/cmd_stepper.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/constants.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/expr_stepper.h"
@@ -36,12 +37,13 @@ void Bmv2V1ModelTestgenTarget::make() {
     }
 }
 
-const Bmv2V1ModelProgramInfo *Bmv2V1ModelTestgenTarget::initProgramImpl(
-    const IR::P4Program *program, const IR::Declaration_Instance *mainDecl) const {
+const Bmv2V1ModelProgramInfo *Bmv2V1ModelTestgenTarget::produceProgramInfoImpl(
+    const CompilerResult &compilerResult, const IR::Declaration_Instance *mainDecl) const {
     // The blocks in the main declaration are just the arguments in the constructor call.
     // Convert mainDecl->arguments into a vector of blocks, represented as constructor-call
     // expressions.
-    const auto blocks = argumentsToTypeDeclarations(program, mainDecl->arguments);
+    const auto blocks =
+        argumentsToTypeDeclarations(&compilerResult.getProgram(), mainDecl->arguments);
 
     // We should have six arguments.
     BUG_CHECK(blocks.size() == 6, "%1%: The BMV2 architecture requires 6 pipes. Received %2%.",
@@ -64,7 +66,8 @@ const Bmv2V1ModelProgramInfo *Bmv2V1ModelTestgenTarget::initProgramImpl(
         }
     }
 
-    return new Bmv2V1ModelProgramInfo(program, programmableBlocks, declIdToGress);
+    return new Bmv2V1ModelProgramInfo(*compilerResult.checkedTo<BMv2V1ModelCompilerResult>(),
+                                      programmableBlocks, declIdToGress);
 }
 
 Bmv2TestBackend *Bmv2V1ModelTestgenTarget::getTestBackendImpl(

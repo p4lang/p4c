@@ -11,6 +11,7 @@
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/lib/continuation.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/bmv2.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
@@ -31,11 +32,8 @@ class Bmv2V1ModelProgramInfo : public ProgramInfo {
     std::vector<Continuation::Command> processDeclaration(const IR::Type_Declaration *typeDecl,
                                                           size_t blockIdx) const;
 
-    /// Map of direct extern declarations which are attached to a table.
-    std::map<const IR::IDeclaration *, const IR::P4Table *> directExternMap;
-
  public:
-    Bmv2V1ModelProgramInfo(const IR::P4Program *program,
+    Bmv2V1ModelProgramInfo(const BMv2V1ModelCompilerResult &compilerResult,
                            ordered_map<cstring, const IR::Type_Declaration *> inputBlocks,
                            std::map<int, int> declIdToGress);
 
@@ -69,6 +67,8 @@ class Bmv2V1ModelProgramInfo : public ProgramInfo {
     [[nodiscard]] const IR::Expression *dropIsActive() const override;
 
     [[nodiscard]] const IR::Type_Bits *getParserErrorType() const override;
+
+    [[nodiscard]] const BMv2V1ModelCompilerResult &getCompilerResult() const override;
 
     /// @returns the Member variable corresponding to the parameter index for the given parameter.
     /// The Member variable uses the parameter struct label as parent and the @param paramLabel as

@@ -1,0 +1,57 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 39967501
+    name: "MyIC.tbl"
+    alias: "tbl"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.srcAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21257015
+  }
+  action_refs {
+    id: 21620615
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 21620615
+    name: "MyIC.remove_header"
+    alias: "remove_header"
+  }
+}
+actions {
+  preamble {
+    id: 33059780
+    name: "MyIC.ifHit"
+    alias: "ifHit"
+  }
+}
+actions {
+  preamble {
+    id: 28875613
+    name: "MyIC.ifMiss"
+    alias: "ifMiss"
+  }
+}
+type_info {
+}

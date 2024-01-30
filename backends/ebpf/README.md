@@ -1,16 +1,26 @@
 # eBPF Backend
 
-The back-end accepts only P4_16 code written for the `ebpf_model.p4`
-filter model.  It generates C code that can be afterwards compiled
-into eBPF (extended Berkeley Packet Filters
-https://en.wikipedia.org/wiki/Berkeley_Packet_Filter) using clang/llvm
-or bcc (https://github.com/iovisor/bcc.git).
+The back-end accepts only P4_16 code written for the `ebpf_model.p4` or
+`xdp_model.p4` filter models.  It generates C code that can be afterwards
+compiled into eBPF (extended Berkeley Packet Filters
+https://en.wikipedia.org/wiki/Berkeley_Packet_Filter) using clang/llvm or
+bcc (https://github.com/iovisor/bcc.git).
 
 An older version of this compiler for compiling P4_14 is available at
 https://github.com/iovisor/bcc/tree/master/src/cc/frontends/p4
 
 Identifiers starting with ebpf_ are reserved in P4 programs, including
 for structure field names.
+
+## Target architectures
+
+The `ebpf_model.p4` target is a classifier-only: the program returns a
+boolean which controls whether the packet is passed or dropped. In P4
+terms, this means there is no deparser.
+
+The `xdp_model.p4` target adds packet editing support, and is meant to
+replicate the capabilities of the Linux kernel's XDP environment. It
+can be viewed as an extension of the previous model which adds a deparser.
 
 ## Background
 
@@ -229,10 +239,6 @@ that the compiler's capabilities will improve gradually.
 
 Here are some limitations imposed on the P4 programs:
 
-* this architecture only supports packet filters: the control block
-  returns a boolean value which indicates whether a packet is
-  forwarded or dropped
-
 * arbitrary parsers can be compiled, but the BCC compiler will reject
   parsers that contain cycles
 
@@ -277,6 +283,7 @@ The C code can be generated using the following command:
 `p4c-ebpf PROGRAM.p4 -o out.c`
 
 This will generate the C-file and its corresponding header.
+The architecture (ebpf\_model or xdp\_model) is auto-detected.
 
 #### Using the generated code
 

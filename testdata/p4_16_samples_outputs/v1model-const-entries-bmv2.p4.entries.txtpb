@@ -1,0 +1,71 @@
+# proto-file: p4/v1/p4runtime.proto
+# proto-message: p4.v1.WriteRequest
+
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 48301431
+      match {
+        field_id: 1
+        lpm {
+          value: "\n\001\002\003\000\000"
+          prefix_len: 48
+        }
+      }
+      action {
+        action {
+          action_id: 28447573
+          params {
+            param_id: 1
+            value: "\000\000\000\000\000\001"
+          }
+        }
+      }
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 48301431
+      match {
+        field_id: 1
+        lpm {
+          value: "\n\000\000\000\000\000"
+          prefix_len: 8
+        }
+      }
+      action {
+        action {
+          action_id: 28447573
+          params {
+            param_id: 1
+            value: "\000\000\000\000\000\002"
+          }
+        }
+      }
+      is_const: true
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 48301431
+      action {
+        action {
+          action_id: 28447573
+          params {
+            param_id: 1
+            value: "\000\000\000\000\000\003"
+          }
+        }
+      }
+      is_const: true
+    }
+  }
+}

@@ -1,0 +1,148 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "ubpf"
+}
+tables {
+  preamble {
+    id: 34660133
+    name: "pipe.filter_tbl"
+    alias: "filter_tbl"
+  }
+  match_fields {
+    id: 1
+    name: "headers.ipv6.srcAddr"
+    bitwidth: 128
+    match_type: EXACT
+  }
+  action_refs {
+    id: 24270128
+  }
+  action_refs {
+    id: 20492649
+  }
+  action_refs {
+    id: 20189377
+  }
+  action_refs {
+    id: 20780797
+  }
+  action_refs {
+    id: 33293880
+  }
+  action_refs {
+    id: 27915362
+  }
+  action_refs {
+    id: 25251608
+  }
+  action_refs {
+    id: 18876683
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 18876683
+    name: "pipe.Reject"
+    alias: "Reject"
+  }
+}
+actions {
+  preamble {
+    id: 24270128
+    name: "pipe.ipv6_modify_dstAddr"
+    alias: "ipv6_modify_dstAddr"
+  }
+  params {
+    id: 1
+    name: "dstAddr"
+    bitwidth: 128
+  }
+}
+actions {
+  preamble {
+    id: 20492649
+    name: "pipe.ipv6_swap_addr"
+    alias: "ipv6_swap_addr"
+  }
+}
+actions {
+  preamble {
+    id: 20189377
+    name: "pipe.set_flowlabel"
+    alias: "set_flowlabel"
+  }
+  params {
+    id: 1
+    name: "label"
+    bitwidth: 20
+  }
+}
+actions {
+  preamble {
+    id: 20780797
+    name: "pipe.set_traffic_class_flow_label"
+    alias: "set_traffic_class_flow_label"
+  }
+  params {
+    id: 1
+    name: "trafficClass"
+    bitwidth: 8
+  }
+  params {
+    id: 2
+    name: "label"
+    bitwidth: 20
+  }
+}
+actions {
+  preamble {
+    id: 33293880
+    name: "pipe.set_ipv6_version"
+    alias: "set_ipv6_version"
+  }
+  params {
+    id: 1
+    name: "version"
+    bitwidth: 4
+  }
+}
+actions {
+  preamble {
+    id: 27915362
+    name: "pipe.set_next_hdr"
+    alias: "set_next_hdr"
+  }
+  params {
+    id: 1
+    name: "nextHdr"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 25251608
+    name: "pipe.set_hop_limit"
+    alias: "set_hop_limit"
+  }
+  params {
+    id: 1
+    name: "hopLimit"
+    bitwidth: 8
+  }
+}
+type_info {
+}

@@ -864,7 +864,7 @@ control MainControlT<MH, MM>(
 
 control MainDeparserT<MH, MM>(
     packet_out pkt,
-    in    MH main_hdr,
+    inout    MH main_hdr,
     in    MM main_user_meta,
     in    pna_main_output_metadata_t ostd);
 

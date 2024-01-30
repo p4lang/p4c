@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-#include <algorithm>
 #include <optional>
 #include <string>
 #include <vector>
@@ -13,13 +12,11 @@
 #include "backends/p4tools/common/core/z3_solver.h"
 #include "backends/p4tools/common/lib/model.h"
 #include "ir/declaration.h"
-#include "ir/indexed_vector.h"
 #include "ir/ir.h"
 #include "lib/big_int_util.h"
 #include "lib/cstring.h"
 #include "lib/enumerator.h"
 #include "lib/exceptions.h"
-#include "lib/log.h"
 #include "test/gtest/helpers.h"
 
 #include "backends/p4tools/modules/testgen/core/target.h"
@@ -90,13 +87,13 @@ class Z3SolverTest : public P4ToolsTest {
         }
 
         // Produce a ProgramInfo, which is needed to create a SmallStepEvaluator.
-        const auto *progInfo = TestgenTarget::initProgram(test->program);
+        const auto *progInfo = TestgenTarget::produceProgramInfo(test->getCompilerResult());
         if (progInfo == nullptr) {
             return;
         }
 
         // Extract the binary operation from the P4Program
-        auto *const declVector = test->program->getDeclsByName("mau")->toVector();
+        auto *const declVector = test->getProgram().getDeclsByName("mau")->toVector();
         const auto *decl = (*declVector)[0];
         const auto *control = decl->to<IR::P4Control>();
         SymbolicConverter converter;

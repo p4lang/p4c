@@ -88,6 +88,12 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-protobuf-ir"
+  "Unsupported type argument for Value Set"
+  pvs-nested-struct.p4
+)
+
+p4tools_add_xfail_reason(
+  "testgen-p4c-bmv2-protobuf-ir"
   "Computations are not supported in update_checksum"
 )
 

@@ -41,7 +41,7 @@ add_dependencies(dpdk_runtime_dir controlplane)
 
 add_library(dpdk_runtime STATIC ${DPDK_P4RUNTIME_INFO_GEN_SRCS})
 target_include_directories(dpdk_runtime
-  SYSTEM BEFORE PUBLIC ${Protobuf_INCLUDE_DIR}
+  SYSTEM BEFORE PUBLIC ${Protobuf_INCLUDE_DIRS}
 )
 
 # Silence various warnings as the root issue is out of our control, example https://github.com/protocolbuffers/protobuf/issues/7140
@@ -128,7 +128,11 @@ set (P4_16_SUITES
 
 #### DPDK-PTF Tests
 # PTF tests for DPDK are only enabled when both infrap4d and dpdk-target are installed.
-set(DPDK_PTF_TEST_SUITES "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-dpdk-add_on_miss0.p4")
+set(DPDK_PTF_TEST_SUITES
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-dpdk-add_on_miss0.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-dpdk-small_sample.p4"
+)
+
 # Check for infrap4d.
 find_program(INFRAP4D infrap4d PATHS ${IPDK_INSTALL_DIR}/sbin)
 # DPDK_SDK_INSTALL is the path to the dpdk-target install directory

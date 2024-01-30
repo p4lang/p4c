@@ -1,0 +1,27 @@
+# proto-file: p4/v1/p4runtime.proto
+# proto-message: p4.v1.WriteRequest
+
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 39967805
+      match {
+        field_id: 1
+        exact {
+          value: "\001"
+        }
+      }
+      action {
+        action {
+          action_id: 30009676
+          params {
+            param_id: 1
+            value: "\001"
+          }
+        }
+      }
+      is_const: true
+    }
+  }
+}

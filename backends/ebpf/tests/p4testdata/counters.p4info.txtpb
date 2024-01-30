@@ -1,0 +1,125 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 37391034
+    name: "ingress.tbl_fwd"
+    alias: "tbl_fwd"
+  }
+  match_fields {
+    id: 1
+    name: "istd.ingress_port"
+    bitwidth: 32
+    match_type: EXACT
+    type_name {
+      name: "PortId_t"
+    }
+  }
+  action_refs {
+    id: 30696436
+  }
+  action_refs {
+    id: 17328525
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 100
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 30696436
+    name: "ingress.do_forward"
+    alias: "do_forward"
+  }
+  params {
+    id: 1
+    name: "egress_port"
+    bitwidth: 32
+    type_name {
+      name: "PortId_t"
+    }
+  }
+}
+actions {
+  preamble {
+    id: 17328525
+    name: "ingress.do_forward_2"
+    alias: "do_forward_2"
+  }
+  params {
+    id: 1
+    name: "egress_port"
+    bitwidth: 32
+    type_name {
+      name: "PortId_t"
+    }
+  }
+}
+counters {
+  preamble {
+    id: 302841553
+    name: "ingress.test1_cnt"
+    alias: "test1_cnt"
+  }
+  spec {
+    unit: BYTES
+  }
+  size: 1024
+}
+counters {
+  preamble {
+    id: 308452316
+    name: "ingress.test2_cnt"
+    alias: "test2_cnt"
+  }
+  spec {
+    unit: PACKETS
+  }
+  size: 1024
+}
+counters {
+  preamble {
+    id: 310846522
+    name: "ingress.test3_cnt"
+    alias: "test3_cnt"
+  }
+  spec {
+    unit: BOTH
+  }
+  size: 1024
+}
+counters {
+  preamble {
+    id: 304574509
+    name: "ingress.action_cnt"
+    alias: "action_cnt"
+  }
+  spec {
+    unit: BOTH
+  }
+  size: 1024
+}
+type_info {
+  new_types {
+    key: "PortId_t"
+    value {
+      translated_type {
+        uri: "p4.org/psa/v1/PortId_t"
+        sdn_bitwidth: 32
+      }
+    }
+  }
+}

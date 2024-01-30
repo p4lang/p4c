@@ -1,0 +1,147 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 43864660
+    name: "test_ingress.pre_tbl1"
+    alias: "pre_tbl1"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4.dst_addr"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 20002082
+  }
+  action_refs {
+    id: 22581617
+  }
+  action_refs {
+    id: 23788437
+  }
+  action_refs {
+    id: 18870058
+    annotations: "@defaut_only"
+  }
+  const_default_action_id: 18870058
+  size: 1024
+}
+tables {
+  preamble {
+    id: 40359168
+    name: "test_ingress.in_tbl2"
+    alias: "in_tbl2"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4.protocol"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  action_refs {
+    id: 28661802
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 35182163
+    name: "test_ingress.post_tbl3"
+    alias: "post_tbl3"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4.src_addr"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 17737436
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 23338443
+    name: "test_ingress.drop_action"
+    alias: "drop_action"
+  }
+}
+actions {
+  preamble {
+    id: 23788437
+    name: "test_ingress.action3"
+    alias: "action3"
+  }
+}
+actions {
+  preamble {
+    id: 22581617
+    name: "test_ingress.action2"
+    alias: "action2"
+  }
+}
+actions {
+  preamble {
+    id: 20002082
+    name: "test_ingress.action1"
+    alias: "action1"
+  }
+}
+actions {
+  preamble {
+    id: 18870058
+    name: "test_ingress.send_to_port"
+    alias: "send_to_port"
+  }
+  params {
+    id: 1
+    name: "p"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 28661802
+    name: "test_ingress.action4"
+    alias: "action4"
+  }
+}
+actions {
+  preamble {
+    id: 17737436
+    name: "test_ingress.action5"
+    alias: "action5"
+  }
+  params {
+    id: 1
+    name: "neighbor_mac"
+    bitwidth: 48
+  }
+}
+type_info {
+}

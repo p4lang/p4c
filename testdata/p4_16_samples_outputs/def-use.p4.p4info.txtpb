@@ -1,0 +1,26 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 45349674
+    name: "EgressI.t"
+    alias: "t"
+  }
+  action_refs {
+    id: 21913698
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21913698
+    name: "EgressI.a"
+    alias: "a"
+  }
+}
+type_info {
+}

@@ -437,6 +437,16 @@ class BaseListExpression : Expression {
         size_t size = components.size();
         return components.at(size - 1)->is<IR::Dots>();
     }
+    toString {
+        cstring str = "{";
+        if (!components.empty()) {
+            str += " " + components.at(0)->toString();
+        }
+        for (unsigned i = 1; i < size(); i++) {
+            str += ", " + components.at(i)->toString();
+        }
+        return str + " }";
+    }
 #nodbprint
 }
 
@@ -481,6 +491,18 @@ class StructExpression : Expression {
             return false;
         size_t size = components.size();
         return components.at(size - 1)->is<IR::NamedDots>();
+    }
+    toString {
+        cstring str = "{";
+        if (!components.empty()) {
+            cstring exprStr = components.at(0)->expression->toString();
+            str += " " + components.at(0)->toString() + " = " + exprStr;
+        }
+        for (unsigned i = 1; i < size(); i++) {
+            cstring exprStr = components.at(i)->expression->toString();
+            str += ", " + components.at(i)->toString() + " = " + exprStr;
+        }
+        return str + " }";
     }
 }
 

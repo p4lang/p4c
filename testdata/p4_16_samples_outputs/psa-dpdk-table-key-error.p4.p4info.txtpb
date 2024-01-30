@@ -1,0 +1,61 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 44506256
+    name: "ingress.tbl"
+    alias: "tbl"
+  }
+  match_fields {
+    id: 1
+    name: "user_meta.data1"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "hdr.ethernet.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "hdr.tcp.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 4
+    name: "hdr.ipv4.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21257015
+  }
+  action_refs {
+    id: 29480552
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 29480552
+    name: "ingress.execute"
+    alias: "execute"
+  }
+}
+type_info {
+}

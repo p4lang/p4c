@@ -82,13 +82,13 @@ class Z3SolverSatTests : public ::testing::Test {
         }
 
         // Produce a ProgramInfo, which is needed to create a SmallStepEvaluator.
-        const auto *progInfo = TestgenTarget::initProgram(test->program);
+        const auto *progInfo = TestgenTarget::produceProgramInfo(test->getCompilerResult());
         if (progInfo == nullptr) {
             return;
         }
 
         // Extract the binary operation from the P4Program
-        auto *const declVector = test->program->getDeclsByName("mau")->toVector();
+        auto *const declVector = test->getProgram().getDeclsByName("mau")->toVector();
         const auto *decl = (*declVector)[0];
         const auto *control = decl->to<IR::P4Control>();
         for (const auto *st : control->body->components) {

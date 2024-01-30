@@ -1,4 +1,4 @@
-issue803-1.p4(3): [--Werror=type-error] error: package Ingress
+issue803-1.p4(3): [--Werror=type-error] error: 'package Ingress'
 package Ingress<IH>();
         ^^^^^^^
   ---- Actual error:

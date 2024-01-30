@@ -1,0 +1,97 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 34728461
+    name: "ingress.t"
+    alias: "t"
+  }
+  action_refs {
+    id: 25451019
+  }
+  action_refs {
+    id: 22181799
+  }
+  action_refs {
+    id: 23335884
+  }
+  action_refs {
+    id: 27086398
+  }
+  action_refs {
+    id: 32959729
+  }
+  action_refs {
+    id: 21235605
+  }
+  action_refs {
+    id: 23635422
+  }
+  action_refs {
+    id: 19874155
+  }
+  const_default_action_id: 25451019
+  size: 1024
+}
+actions {
+  preamble {
+    id: 25451019
+    name: "ingress.case0"
+    alias: "case0"
+  }
+}
+actions {
+  preamble {
+    id: 22181799
+    name: "ingress.case1"
+    alias: "case1"
+  }
+}
+actions {
+  preamble {
+    id: 23335884
+    name: "ingress.case2"
+    alias: "case2"
+  }
+}
+actions {
+  preamble {
+    id: 27086398
+    name: "ingress.case3"
+    alias: "case3"
+  }
+}
+actions {
+  preamble {
+    id: 32959729
+    name: "ingress.case4"
+    alias: "case4"
+  }
+}
+actions {
+  preamble {
+    id: 21235605
+    name: "ingress.case5"
+    alias: "case5"
+  }
+}
+actions {
+  preamble {
+    id: 23635422
+    name: "ingress.case6"
+    alias: "case6"
+  }
+}
+actions {
+  preamble {
+    id: 19874155
+    name: "ingress.case7"
+    alias: "case7"
+  }
+}
+type_info {
+}

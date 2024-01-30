@@ -1,4 +1,4 @@
-module_e.p4(18): [--Werror=type-error] error: package top
+module_e.p4(18): [--Werror=type-error] error: 'package top'
 package top(Filter f);
         ^^^
   ---- Actual error:

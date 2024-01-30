@@ -1,0 +1,93 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 39967501
+    name: "MyIC.tbl"
+    alias: "tbl"
+  }
+  match_fields {
+    id: 1
+    name: "a.eth.srcAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21257015
+  }
+  action_refs {
+    id: 30183046
+  }
+  implementation_id: 294316857
+  size: 1024
+}
+tables {
+  preamble {
+    id: 47318070
+    name: "MyIC.tbl2"
+    alias: "tbl2"
+  }
+  match_fields {
+    id: 1
+    name: "a.eth.etherType"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21257015
+  }
+  action_refs {
+    id: 30183046
+  }
+  implementation_id: 294316857
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 30183046
+    name: "MyIC.fwd"
+    alias: "fwd"
+  }
+  params {
+    id: 1
+    name: "port"
+    bitwidth: 32
+    type_name {
+      name: "PortId_t"
+    }
+  }
+}
+action_profiles {
+  preamble {
+    id: 294316857
+    name: "MyIC.as"
+    alias: "as"
+  }
+  table_ids: 39967501
+  table_ids: 47318070
+  with_selector: true
+  size: 1024
+}
+type_info {
+  new_types {
+    key: "PortId_t"
+    value {
+      translated_type {
+        uri: "p4.org/psa/v1/PortId_t"
+        sdn_bitwidth: 32
+      }
+    }
+  }
+}
