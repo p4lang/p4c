@@ -55,3 +55,18 @@ target_include_directories(
 )
 
 add_dependencies(p4tools-common ir-generated frontend)
+
+set(
+  P4C_TOOLS_CONTROL_PLANE_SOURCES
+  control_plane/p4runtime_api.cpp
+)
+
+add_p4tools_library(p4tools-control-plane ${P4C_TOOLS_CONTROL_PLANE_SOURCES})
+
+target_include_directories(
+  p4tools-control-plane
+  SYSTEM BEFORE PUBLIC ${Protobuf_INCLUDE_DIRS}
+)
+
+add_dependencies(p4tools-control-plane controlplane)
+

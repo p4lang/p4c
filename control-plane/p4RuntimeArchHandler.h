@@ -73,6 +73,10 @@ class P4RuntimeSymbolType {
         return P4RuntimeSymbolType(::p4::config::v1::P4Ids::CONTROLLER_HEADER);
     }
 
+    static P4RuntimeSymbolType P4RT_OTHER_EXTERNS_START() {
+        return P4RuntimeSymbolType(::p4::config::v1::P4Ids::OTHER_EXTERNS_START);
+    }
+
     bool operator==(const P4RuntimeSymbolType &other) const { return id == other.id; }
 
     bool operator!=(const P4RuntimeSymbolType &other) const { return !(*this == other); }
