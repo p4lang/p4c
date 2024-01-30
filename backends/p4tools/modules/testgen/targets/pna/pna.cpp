@@ -2,13 +2,12 @@
 
 #include <string>
 
-#include "backends/p4tools/common/compiler/compiler_target.h"
 #include "backends/p4tools/common/compiler/midend.h"
 #include "frontends/common/options.h"
 
 namespace P4Tools::P4Testgen::Pna {
 
-PnaDpdkCompilerTarget::PnaDpdkCompilerTarget() : CompilerTarget("dpdk", "pna") {}
+PnaDpdkCompilerTarget::PnaDpdkCompilerTarget() : TestgenCompilerTarget("dpdk", "pna") {}
 
 void PnaDpdkCompilerTarget::make() {
     static PnaDpdkCompilerTarget *INSTANCE = nullptr;

@@ -34,6 +34,6 @@ pna-dpdk-header-union-stack1.p4(83): [--Wwarn=invalid_header] warning: accessing
 pna-dpdk-header-union-stack1.p4(84): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.u[0].h3
         hdr.u[0].h3.data = 1;
         ^^^^^^^^^^^
-pna-dpdk-header-union-stack1.p4(37): [--Wwarn=ignore-prop] warning: Result of AssignmentStatement is not defined: Error: Reading field from invalid header
+pna-dpdk-header-union-stack1.p4(37): [--Wwarn=ignore-prop] warning: Result of 'hdr.h2[0].data = 16w1' is not defined: Error: Reading field from invalid header
         hdr.h2[0].data = 1;
                        ^
