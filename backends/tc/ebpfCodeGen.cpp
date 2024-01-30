@@ -105,6 +105,21 @@ void PNAEbpfGenerator::emitPipelineInstances(EBPF::CodeBuilder *builder) const {
                                    "struct hdr_md", 2);
 }
 
+void PNAEbpfGenerator::emitCRC32LookupTableInstance(EBPF::CodeBuilder *builder) const {
+    builder->target->emitTableDecl(builder, cstring("crc_lookup_tbl"), EBPF::TableArray, "u32",
+                                   cstring("struct lookup_tbl_val"), 1);
+}
+
+void PNAEbpfGenerator::emitCRC32LookupTableTypes(EBPF::CodeBuilder *builder) const {
+    builder->append("struct lookup_tbl_val ");
+    builder->blockStart();
+    builder->emitIndent();
+    builder->append("u32 table[2048]");
+    builder->endOfStatement(true);
+    builder->blockEnd(false);
+    builder->endOfStatement(true);
+}
+
 // =====================PNAArchTC=============================
 void PNAArchTC::emit(EBPF::CodeBuilder *builder) const {
     /**
@@ -134,17 +149,12 @@ void PNAArchTC::emit(EBPF::CodeBuilder *builder) const {
     emitTypes(builder);
 
     /*
-     * 4. BPF map definitions.
-     */
-    emitInstances(builder);
-
-    /*
-     * 5. XDP helper program.
+     * 4. XDP helper program.
      */
     xdp->emit(builder);
 
     /*
-     * 6. TC Pipeline program for post-parser.
+     * 5. TC Pipeline program for post-parser.
      */
     pipeline->emit(builder);
 
@@ -160,6 +170,7 @@ void PNAArchTC::emitInstances(EBPF::CodeBuilder *builder) const {
     }
 
     emitPipelineInstances(builder);
+    emitCRC32LookupTableInstance(builder);
     builder->appendLine("REGISTER_END()");
     builder->newline();
 }
@@ -177,7 +188,6 @@ void PNAArchTC::emitParser(EBPF::CodeBuilder *builder) const {
     builder->appendFormat("#include \"%s\"", headerFile);
     builder->newline();
     builder->newline();
-    emitInstances(builder);
     pipeline->name = "tc-parse";
     pipeline->sectionName = "classifier/" + pipeline->name;
     pipeline->functionName = pipeline->name.replace("-", "_") + "_func";
@@ -196,6 +206,11 @@ void PNAArchTC::emitHeader(EBPF::CodeBuilder *builder) const {
     PNAErrorCodesGen errorGen(builder);
     pipeline->program->apply(errorGen);
     emitGlobalHeadersMetadata(builder);
+    builder->newline();
+    emitCRC32LookupTableTypes(builder);
+    //  BPF map definitions.
+    emitInstances(builder);
+    EBPF::EBPFHashAlgorithmTypeFactoryPSA::instance()->emitGlobals(builder);
 }
 
 // =====================TCIngressPipelinePNA=============================
@@ -1252,6 +1267,22 @@ bool ConvertToEBPFControlPNA::preorder(const IR::Declaration_Variable *decl) {
     return true;
 }
 
+bool ConvertToEBPFControlPNA::preorder(const IR::ExternBlock *instance) {
+    auto di = instance->node->to<IR::Declaration_Instance>();
+    if (di == nullptr) return false;
+    cstring name = EBPF::EBPFObject::externalName(di);
+    cstring typeName = instance->type->getName().name;
+
+    if (typeName == "Hash") {
+        auto hash = new EBPF::EBPFHashPSA(program, di, name);
+        control->hashes.emplace(name, hash);
+    } else {
+        ::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control", instance);
+    }
+
+    return false;
+}
+
 // =====================ConvertToEBPFDeparserPNA=============================
 bool ConvertToEBPFDeparserPNA::preorder(const IR::ControlBlock *ctrl) {
     deparser = new IngressDeparserPNA(program, ctrl, parserHeaders, istd);
@@ -1539,6 +1570,41 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 }
 
+void ControlBodyTranslatorPNA::processMethod(const P4::ExternMethod *method) {
+    auto decl = method->object;
+    auto declType = method->originalExternType;
+    cstring name = EBPF::EBPFObject::externalName(decl);
+
+    if (declType->name.name == "Hash") {
+        auto hash = control->to<EBPF::EBPFControlPSA>()->getHash(name);
+        hash->processMethod(builder, method->method->name.name, method->expr, this);
+        return;
+    } else {
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: Unexpected method call", method->expr);
+    }
+}
+
+bool ControlBodyTranslatorPNA::preorder(const IR::AssignmentStatement *a) {
+    if (auto methodCallExpr = a->right->to<IR::MethodCallExpression>()) {
+        auto mi = P4::MethodInstance::resolve(methodCallExpr, control->program->refMap,
+                                              control->program->typeMap);
+        auto ext = mi->to<P4::ExternMethod>();
+        if (ext == nullptr) {
+            return false;
+        }
+
+        if (ext->originalExternType->name.name == "Hash") {
+            cstring name = EBPF::EBPFObject::externalName(ext->object);
+            auto hash = control->to<EBPF::EBPFControlPSA>()->getHash(name);
+            // Before assigning a value to a left expression we have to calculate a hash.
+            // Then the hash value is stored in a registerVar variable.
+            hash->calculateHash(builder, ext->expr, this);
+            builder->emitIndent();
+        }
+    }
+
+    return EBPF::CodeGenInspector::preorder(a);
+}
 // =====================ActionTranslationVisitorPNA=============================
 ActionTranslationVisitorPNA::ActionTranslationVisitorPNA(const EBPF::EBPFProgram *program,
                                                          cstring valueName,

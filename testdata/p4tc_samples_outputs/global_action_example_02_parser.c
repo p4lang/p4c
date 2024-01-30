@@ -1,10 +1,5 @@
 #include "global_action_example_02_parser.h"
 
-REGISTER_START()
-REGISTER_TABLE(hdr_md_cpumap, BPF_MAP_TYPE_PERCPU_ARRAY, u32, struct hdr_md, 2)
-BPF_ANNOTATE_KV_PAIR(hdr_md_cpumap, u32, struct hdr_md)
-REGISTER_END()
-
 static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_headers_t *hdr, struct pna_global_metadata *compiler_meta__)
 {
     struct hdr_md *hdrMd;
