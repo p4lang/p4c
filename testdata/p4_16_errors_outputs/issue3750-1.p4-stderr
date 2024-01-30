@@ -1,6 +1,12 @@
-issue3750-1.p4(9): [--Werror=type-error] error: ct: not supported as a tuple field
-void f(tuple<ct> t)
-             ^^
-issue3750-1.p4(14): [--Werror=type-error] error: E<bit<32>>: not supported as a tuple field
+issue3750-1.p4(1): [--Werror=type-error] error: Field '0' of 'tuple<ct>' cannot have type 'ct'
+extern ct {
+       ^^
+issue3750-1.p4(1): [--Werror=type-error] error: Field '0' of 'tuple<ct>' cannot have type 'ct'
+extern ct {
+       ^^
+issue3750-1.p4(14): [--Werror=type-error] error: Field '0' of 'tuple<E<bit<32>>>' cannot have type 'E<...>'
+void g(tuple<E<bit<32>>> t)
+             ^^^^^^^^^^
+issue3750-1.p4(14): [--Werror=type-error] error: Field '0' of 'tuple<E<bit<32>>>' cannot have type 'E<...>'
 void g(tuple<E<bit<32>>> t)
              ^^^^^^^^^^

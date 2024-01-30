@@ -1,3 +1,6 @@
-issue3750.p4(2): [--Werror=type-error] error: ct: not supported as a tuple field
-void f(tuple<ct> t)
-             ^^
+issue3750.p4(1): [--Werror=type-error] error: Field '0' of 'tuple<ct>' cannot have type 'control ct'
+control ct();
+        ^^
+issue3750.p4(1): [--Werror=type-error] error: Field '0' of 'tuple<ct>' cannot have type 'control ct'
+control ct();
+        ^^

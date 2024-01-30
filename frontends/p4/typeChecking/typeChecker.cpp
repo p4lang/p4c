@@ -1480,20 +1480,6 @@ const IR::Node *TypeInference::postorder(IR::Type_List *type) {
     return type;
 }
 
-const IR::Node *TypeInference::postorder(IR::Type_Tuple *type) {
-    for (auto field : type->components) {
-        auto fieldType = getTypeType(field);
-        if (auto spec = fieldType->to<IR::Type_SpecializedCanonical>()) fieldType = spec->baseType;
-        if (fieldType->is<IR::IContainer>() || fieldType->is<IR::Type_ArchBlock>() ||
-            fieldType->is<IR::Type_Extern>()) {
-            typeError("%1%: not supported as a tuple field", field);
-            return type;
-        }
-    }
-    (void)setTypeType(type);
-    return type;
-}
-
 const IR::Node *TypeInference::postorder(IR::Type_P4List *type) {
     (void)setTypeType(type);
     return type;
@@ -1705,11 +1691,18 @@ const IR::Node *TypeInference::postorder(IR::Type_Stack *type) {
     return type;
 }
 
-/// Validate the fields of a struct type using the supplied checker.
-/// The checker returns "false" when a field is invalid.
-/// Return true on success
-bool TypeInference::validateFields(const IR::Type *type,
-                                   std::function<bool(const IR::Type *)> checker) const {
+bool TypeInference::isStructTupleField(const IR::Type *t) {
+    if (auto spec = t->to<IR::Type_SpecializedCanonical>()) t = spec->baseType;
+    return t->is<IR::Type_Struct>() || t->is<IR::Type_Bits>() || t->is<IR::Type_Header>() ||
+           t->is<IR::Type_HeaderUnion>() || t->is<IR::Type_Enum>() || t->is<IR::Type_Error>() ||
+           t->is<IR::Type_Boolean>() || t->is<IR::Type_Stack>() || t->is<IR::Type_Varbits>() ||
+           t->is<IR::Type_ActionEnum>() || t->is<IR::Type_Tuple>() || t->is<IR::Type_SerEnum>() ||
+           t->is<IR::Type_Var>() || t->is<IR::Type_SpecializedCanonical>() ||
+           t->is<IR::Type_MatchKind>();
+}
+
+bool TypeInference::validateStructLikeFields(const IR::Type *type,
+                                             std::function<bool(const IR::Type *)> checker) const {
     if (type == nullptr) return false;
     BUG_CHECK(type->is<IR::Type_StructLike>(), "%1%; expected a Struct-like", type);
     auto strct = type->to<IR::Type_StructLike>();
@@ -1720,6 +1713,23 @@ bool TypeInference::validateFields(const IR::Type *type,
         if (!checker(ftype)) {
             typeError("Field '%1%' of '%2%' cannot have type '%3%'", field, type->toString(),
                       field->type);
+            err = true;
+        }
+    }
+    return !err;
+}
+
+bool TypeInference::validateIndexedFields(const IR::Type *type,
+                                          std::function<bool(const IR::Type *)> checker) const {
+    if (type == nullptr) return false;
+    BUG_CHECK(type->is<IR::Type_Indexed>(), "%1%; expected Type_Indexed", type);
+    auto indexed = type->to<IR::Type_Indexed>();
+    bool err = false;
+    for (size_t i = 0; i < indexed->getSize(); i++) {
+        auto ftype = indexed->at(i);
+        if (ftype == nullptr) return false;
+        if (!checker(ftype)) {
+            typeError("Field '%1%' of '%2%' cannot have type '%3%'", i, type->toString(), ftype);
             err = true;
         }
     }
@@ -1745,7 +1755,7 @@ const IR::Node *TypeInference::postorder(IR::Type_Header *type) {
                t->is<IR::Type_Boolean>() || t->is<IR::Type_Var>() ||
                t->is<IR::Type_SpecializedCanonical>();
     };
-    validateFields(canon, validator);
+    (void)validateStructLikeFields(canon, validator);
     return type;
 }
 
@@ -1753,14 +1763,20 @@ const IR::Node *TypeInference::postorder(IR::Type_Struct *type) {
     auto canon = setTypeType(type);
     auto validator = [this](const IR::Type *t) {
         while (t->is<IR::Type_Newtype>()) t = getTypeType(t->to<IR::Type_Newtype>()->type);
-        return t->is<IR::Type_Struct>() || t->is<IR::Type_Bits>() || t->is<IR::Type_Header>() ||
-               t->is<IR::Type_HeaderUnion>() || t->is<IR::Type_Enum>() || t->is<IR::Type_Error>() ||
-               t->is<IR::Type_Boolean>() || t->is<IR::Type_Stack>() || t->is<IR::Type_Varbits>() ||
-               t->is<IR::Type_ActionEnum>() || t->is<IR::Type_Tuple>() ||
-               t->is<IR::Type_SerEnum>() || t->is<IR::Type_Var>() ||
-               t->is<IR::Type_SpecializedCanonical>() || t->is<IR::Type_MatchKind>();
+        return isStructTupleField(t);
     };
-    (void)validateFields(canon, validator);
+    (void)validateStructLikeFields(canon, validator);
+    return type;
+}
+
+const IR::Node *TypeInference::postorder(IR::Type_Tuple *type) {
+    auto validator = [this](const IR::Type *t) {
+        while (t->is<IR::Type_Newtype>()) t = getTypeType(t->to<IR::Type_Newtype>()->type);
+        return isStructTupleField(t);
+    };
+    // Call setTypeType only after a successful call to validateIndexedFields.
+    // It prevents further bugs to show up when maxErrorCount > 1.
+    if (validateIndexedFields(type, validator)) (void)setTypeType(type);
     return type;
 }
 
@@ -1770,7 +1786,7 @@ const IR::Node *TypeInference::postorder(IR::Type_HeaderUnion *type) {
         return t->is<IR::Type_Header>() || t->is<IR::Type_Var>() ||
                t->is<IR::Type_SpecializedCanonical>();
     };
-    (void)validateFields(canon, validator);
+    (void)validateStructLikeFields(canon, validator);
     return type;
 }
 

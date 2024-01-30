@@ -1,6 +1,6 @@
 #include <core.p4>
 
-typedef int EntryPriority_t;
+typedef int<8> EntryPriority_t;
 
 extern E<K, V> {
     E(list<tuple<EntryPriority_t, tuple<K, K>, V>> data);
@@ -9,7 +9,7 @@ extern E<K, V> {
 
 control c() {
     E<bit<32>, bit<16>>(
-        (list<tuple<int, tuple<bit<32>, bit<32>>, bit<16>>>)
+        (list<tuple<int<8>, tuple<bit<32>, bit<32>>, bit<16>>>)
         {
             {10, {2, 0xf}, 3},
             {5, {0xdeadbeef, 0xff00ffff}, 5}

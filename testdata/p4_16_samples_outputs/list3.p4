@@ -1,6 +1,6 @@
 #include <core.p4>
 
-typedef int EntryPriority_t;
+typedef int<8> EntryPriority_t;
 extern E<K, V> {
     E(list<tuple<EntryPriority_t, tuple<K, K>, V>> data);
     void run();
