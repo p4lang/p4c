@@ -326,6 +326,10 @@ Installing on macOS:
   ```
   brew install autoconf automake libtool bdw-gc boost bison pkg-config
   ```
+  or with MacPorts
+  ```
+  sudo port install autoconf automake coreutils libtool boehmgc boost bison pkg-config
+  ```
 
   By default, Homebrew doesn't link programs into `/usr/local/bin` if
   they would conflict with a version provided by the base system. This
