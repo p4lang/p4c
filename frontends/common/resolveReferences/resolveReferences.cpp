@@ -28,32 +28,31 @@ static const std::vector<const IR::IDeclaration *> empty;
 
 ResolutionContext::ResolutionContext() { anyOrder = P4CContext::get().options().isv1(); }
 
-Util::Enumerator<const IR::IDeclaration*>*
-ResolutionContext::getDeclarations(const IR::INamespace *ns) const {
+Util::Enumerator<const IR::IDeclaration *> *ResolutionContext::getDeclarations(
+    const IR::INamespace *ns) const {
     auto nsIt = namespaceDecls.find(ns);
     auto *declVec = nsIt != namespaceDecls.end() ? nsIt->second : memoizeDeclarations(ns);
-    return Util::Enumerator<const IR::IDeclaration*>::createEnumerator(*declVec);
+    return Util::Enumerator<const IR::IDeclaration *>::createEnumerator(*declVec);
 }
 
-std::vector<const IR::IDeclaration*>*
-ResolutionContext::memoizeDeclarations(const IR::INamespace* ns) const {
+std::vector<const IR::IDeclaration *> *ResolutionContext::memoizeDeclarations(
+    const IR::INamespace *ns) const {
     auto decls = ns->getDeclarations();
     if (auto nest = ns->to<IR::INestedNamespace>()) {
         // boost bug -- trying to iterate with an adaptor over an unnamed temp crashes
         auto temp = nest->getNestedNamespaces();
-        for (auto nn : boost::adaptors::reverse(temp))
-            decls = nn->getDeclarations()->concat(decls);
+        for (auto nn : boost::adaptors::reverse(temp)) decls = nn->getDeclarations()->concat(decls);
     }
 
     return (namespaceDecls[ns] = decls->toVector());
 }
 
-Util::Enumerator<const IR::IDeclaration*>*
-ResolutionContext::getDeclsByName(const IR::INamespace *ns, cstring name) const {
+Util::Enumerator<const IR::IDeclaration *> *ResolutionContext::getDeclsByName(
+    const IR::INamespace *ns, cstring name) const {
     auto nsIt = declNames.find(ns);
-    std::function<const IR::IDeclaration*(const std::pair<const cstring,
-                                          const IR::IDeclaration *> &)> second =
-        [](const std::pair<const cstring, const IR::IDeclaration *> &entry){
+    std::function<const IR::IDeclaration *(
+        const std::pair<const cstring, const IR::IDeclaration *> &)>
+        second = [](const std::pair<const cstring, const IR::IDeclaration *> &entry) {
             return entry.second;
         };
 
@@ -62,8 +61,7 @@ ResolutionContext::getDeclsByName(const IR::INamespace *ns, cstring name) const 
         return Util::enumerate(range.first, range.second)->map(second);
     }
 
-    for (auto *d : *getDeclarations(ns))
-        declNames[ns].emplace(d->getName().name, d);
+    for (auto *d : *getDeclarations(ns)) declNames[ns].emplace(d->getName().name, d);
 
     auto range = declNames[ns].equal_range(name);
     return Util::enumerate(range.first, range.second)->map(second);

@@ -561,7 +561,7 @@ bool EnumeratorHandle<T>::operator!=(const EnumeratorHandle<T> &other) const {
 }
 
 template <typename Iter>
-auto* enumerate(Iter begin, Iter end) {
+auto *enumerate(Iter begin, Iter end) {
     return Enumerator<typename Iter::value_type>::createEnumerator(begin, end);
 }
 
