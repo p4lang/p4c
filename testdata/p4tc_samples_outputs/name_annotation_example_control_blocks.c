@@ -44,11 +44,6 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_value {
     } u;
 };
 
-REGISTER_START()
-REGISTER_TABLE(hdr_md_cpumap, BPF_MAP_TYPE_PERCPU_ARRAY, u32, struct hdr_md, 2)
-BPF_ANNOTATE_KV_PAIR(hdr_md_cpumap, u32, struct hdr_md)
-REGISTER_END()
-
 SEC("xdp/xdp-ingress")
 int xdp_func(struct xdp_md *skb) {
         void *data_end = (void *)(long)skb->data_end;
