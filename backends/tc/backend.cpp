@@ -276,13 +276,14 @@ void ConvertToBackendIR::updateConstEntries(const IR::P4Table *t, IR::TCTable *t
     auto entriesList = t->getEntries();
     if (entriesList == nullptr) return;
     auto keys = t->getKey();
+    if (keys == nullptr) {
+        return;
+    }
     for (auto e : entriesList->entries) {
-        if (keys == nullptr) {
-            return;
-        }
         auto keyset = e->getKeys();
         if (keyset->components.size() != keys->keyElements.size()) {
-            ::error("No of keys in const_entries should be same as no of keys in the table.");
+            ::error(ErrorType::ERR_INVALID,
+                    "No of keys in const_entries should be same as no of keys in the table.");
             return;
         }
         ordered_map<cstring, cstring> keyList;

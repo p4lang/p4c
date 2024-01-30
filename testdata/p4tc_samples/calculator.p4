@@ -219,7 +219,7 @@ control MainControlImpl(
  *************************************************************************/
 control MainDeparserImpl(
     packet_out pkt,
-    in    headers_t hdr,
+    inout    headers_t hdr,
     in    metadata_t meta,
     in    pna_main_output_metadata_t ostd)
 {
