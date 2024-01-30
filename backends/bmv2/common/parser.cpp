@@ -25,7 +25,40 @@ limitations under the License.
 
 namespace BMV2 {
 
-cstring ParserConverter::jsonAssignment(const IR::Type *type) {
+/*
+Determines whether an lvalue is also a field expr.
+
+In BMv2 JSON, field expr will be converted to type "field" instead of "expression".
+
+Production rule for lvalue in P4:
+
+lvalue
+    : prefixedNonTypeName                { $$ = new IR::PathExpression($1); }
+    | THIS                               { $$ = new IR::This(@1); }
+    | lvalue dot_name %prec DOT          { $$ = new IR::Member(@1 + @2, $1, *$2); }
+    | lvalue "[" expression "]"          { $$ = new IR::ArrayIndex(@1 + @4, $1, $3); }
+    | lvalue "[" expression ":" expression "]" { $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
+    ;
+
+To determine a field expr, we assume it corresponds to the following production rule:
+
+field_expr
+    : prefixedNonTypeName
+    | field_expr dot_name
+    | field_expr "[" constant "]"
+*/
+bool ParserConverter::isFieldExpr(const IR::Expression *expr) {
+    if (expr->is<IR::PathExpression>()) return true;
+    if (auto member = expr->to<IR::Member>()) {
+        return isFieldExpr(member->expr);
+    }
+    if (auto array_index = expr->to<IR::ArrayIndex>()) {
+        return isFieldExpr(array_index->left) && array_index->right->is<IR::Constant>();
+    }
+    return false;
+}
+
+cstring ParserConverter::jsonAssignment(const IR::Type *type, const IR::Expression *expr) {
     if (type->is<IR::Type_HeaderUnion>()) return "assign_union";
     if (type->is<IR::Type_Header>() || type->is<IR::Type_Struct>()) return "assign_header";
     if (auto ts = type->to<IR::Type_Stack>()) {
@@ -35,9 +68,17 @@ cstring ParserConverter::jsonAssignment(const IR::Type *type) {
         else
             return "assign_header_stack";
     }
-    // Unfortunately set can do some things that assign cannot, e.g., handle
-    // lookahead on the RHS.
-    return "set";
+    if (isFieldExpr(expr))
+        // Unlike "assign", "set" is implemented more efficiently in bmv2, and can handle a
+        // lookahead expression as the RHS. However, "set" requires its LHS to be a field
+        // expression.
+        // The RemoveComplexExpressions pass guarantees that all lookahead() expressions are lifted
+        // into tmp = lookahead(). Therefore, we are guaranteed that anytime the RHS includes a
+        // lookahead, it will be a bare lookahead call and the LHS will be a simple field
+        // expression. These assignments will be handled by this if branch, using "set".
+        return "set";
+    else
+        return "assign";
 }
 
 Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat) {
@@ -102,11 +143,20 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
     }
     if (stat->is<IR::AssignmentStatement>()) {
         auto assign = stat->to<IR::AssignmentStatement>();
-        auto type = ctxt->typeMap->getType(assign->left, true);
-        cstring operation = jsonAssignment(type);
+        auto expr = assign->left;
+        auto type = ctxt->typeMap->getType(expr, true);
+        cstring operation = jsonAssignment(type, expr);
         result->emplace("op", operation);
-        auto l = ctxt->conv->convertLeftValue(assign->left);
         bool convertBool = type->is<IR::Type_Boolean>();
+        Util::IJson *l;
+        if (ctxt->conv->isArrayIndexRuntime(assign->left)) {
+            // This is needed to deal with the case when a runtime index is a left value and is
+            // the only expression in JSON (without any other arithmetic operations). The JSON
+            // format needs an extra wrapping "type": "expression".
+            l = ctxt->conv->convert(assign->left, true, true, convertBool);
+        } else {
+            l = ctxt->conv->convertLeftValue(assign->left);
+        }
         auto r = ctxt->conv->convert(assign->right, true, true, convertBool);
         params->append(l);
         params->append(r);
