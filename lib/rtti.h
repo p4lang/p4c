@@ -30,7 +30,7 @@ namespace detail {
 // for gcc < 13
 struct TypeNameHolder {
     template <size_t N>
-    constexpr TypeNameHolder(const char (&str)[N]) : str(&str[0]), length(N - 1) {} // NOLINT(runtime/explicit)
+    constexpr TypeNameHolder(const char (&str)[N]) : str(&str[0]), length(N - 1) {}  // NOLINT
 
     const char *str;
     size_t length;
