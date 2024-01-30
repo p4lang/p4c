@@ -92,6 +92,7 @@ endif()
 file(
   GLOB_RECURSE P4C_PYTHON_LINT_LIST  FOLLOW_SYMLINKS
   backends/*.py
+  testdata/*.py
   tools/*.py
 )
 list(FILTER P4C_PYTHON_LINT_LIST EXCLUDE REGEX "backends/p4tools/submodules")

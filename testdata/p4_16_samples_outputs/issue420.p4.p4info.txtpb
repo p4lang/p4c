@@ -1,0 +1,42 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 46298898
+    name: "cIngress.tbl1"
+    alias: "tbl1"
+  }
+  action_refs {
+    id: 25131402
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 25131402
+    name: "cIngress.foo"
+    alias: "foo"
+  }
+  params {
+    id: 1
+    name: "bar"
+    bitwidth: 16
+  }
+}
+type_info {
+}

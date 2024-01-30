@@ -1,0 +1,135 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "psa"
+}
+digests {
+  preamble {
+    id: 387633770
+    name: "MyID.digest"
+    alias: "digest"
+  }
+  type_spec {
+    struct {
+      name: "digest_t"
+    }
+  }
+}
+type_info {
+  structs {
+    key: "digest_t"
+    value {
+      members {
+        name: "h"
+        type_spec {
+          header {
+            name: "h_t"
+          }
+        }
+      }
+      members {
+        name: "port"
+        type_spec {
+          new_type {
+            name: "PortId_t"
+          }
+        }
+      }
+      members {
+        name: "s2"
+        type_spec {
+          struct {
+            name: "s2_t_0"
+          }
+        }
+      }
+      members {
+        name: "s3"
+        type_spec {
+          struct {
+            name: "s3_t"
+          }
+        }
+      }
+    }
+  }
+  structs {
+    key: "s2_t_0"
+    value {
+      members {
+        name: "f16"
+        type_spec {
+          bitstring {
+            bit {
+              bitwidth: 16
+            }
+          }
+        }
+      }
+      members {
+        name: "f"
+        type_spec {
+          bitstring {
+            bit {
+              bitwidth: 32
+            }
+          }
+        }
+      }
+    }
+  }
+  structs {
+    key: "s3_t"
+    value {
+      members {
+        name: "f"
+        type_spec {
+          bitstring {
+            bit {
+              bitwidth: 64
+            }
+          }
+        }
+      }
+    }
+  }
+  headers {
+    key: "h_t"
+    value {
+      members {
+        name: "s.f8"
+        type_spec {
+          bit {
+            bitwidth: 8
+          }
+        }
+      }
+      members {
+        name: "s.f16"
+        type_spec {
+          bit {
+            bitwidth: 16
+          }
+        }
+      }
+      members {
+        name: "f32"
+        type_spec {
+          bit {
+            bitwidth: 32
+          }
+        }
+      }
+    }
+  }
+  new_types {
+    key: "PortId_t"
+    value {
+      translated_type {
+        uri: "p4.org/psa/v1/PortId_t"
+        sdn_bitwidth: 32
+      }
+    }
+  }
+}

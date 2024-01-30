@@ -250,19 +250,6 @@ class PTFTestEnv:
             testutils.log.error("Failed to build pipeline")
             return returncode
 
-        # Load pipeline.
-        # NOTE: in generated PTF tests, the pipelines are loaded in individual test cases.
-        # This should be commented when working with Testgen.
-        # command = (
-        #     f"{self.options.ipdk_install_dir}/bin/p4rt-ctl "
-        #     "set-pipe br0 "
-        #     f"{conf_bin} "
-        #     f"{info_name} "
-        # )
-        # returncode = self.bridge.ns_exec(command, timeout=30)
-        # if returncode != testutils.SUCCESS:
-        #     testutils.log.error("Failed to load pipeline")
-        #     return returncode
         return testutils.SUCCESS
 
     def run_ptf(self, P4RUNTIME_PORT: int, info_name, conf_bin) -> int:
@@ -301,7 +288,7 @@ def run_test(options: Options) -> int:
 
     # Define the test environment and compile the P4 target
     test_name = Path(options.p4_file.name)
-    info_name = options.testdir.joinpath("p4Info.txt")
+    info_name = options.testdir.joinpath("p4Info.txtpb")
     bf_rt_schema = options.testdir.joinpath("bf-rt.json")
     conf_bin = options.testdir.joinpath(test_name.with_suffix(".pb.bin"))
     # Files needed by the pipeline

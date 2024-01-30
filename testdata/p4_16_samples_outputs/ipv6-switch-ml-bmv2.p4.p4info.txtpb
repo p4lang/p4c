@@ -1,0 +1,134 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 45337246
+    name: "ingress.ipv6_tbl"
+    alias: "ipv6_tbl"
+  }
+  match_fields {
+    id: 1
+    name: "mcast_key"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21164525
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 34324521
+    name: "egress.get_multicast_copy_out_bd"
+    alias: "get_multicast_copy_out_bd"
+  }
+  match_fields {
+    id: 1
+    name: "standard_metadata.mcast_grp"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "standard_metadata.egress_rid"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 22004009
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 49367184
+    name: "egress.send_frame"
+    alias: "send_frame"
+  }
+  match_fields {
+    id: 1
+    name: "meta.fwd.out_bd"
+    bitwidth: 24
+    match_type: EXACT
+  }
+  action_refs {
+    id: 23531945
+  }
+  action_refs {
+    id: 20119496
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 21164525
+    name: "ingress.set_mcast_grp"
+    alias: "set_mcast_grp"
+  }
+  params {
+    id: 1
+    name: "mcast_grp"
+    bitwidth: 16
+  }
+  params {
+    id: 2
+    name: "port"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 22004009
+    name: "egress.set_out_bd"
+    alias: "set_out_bd"
+  }
+  params {
+    id: 1
+    name: "bd"
+    bitwidth: 24
+  }
+}
+actions {
+  preamble {
+    id: 20119496
+    name: "egress.drop"
+    alias: "drop"
+  }
+}
+actions {
+  preamble {
+    id: 23531945
+    name: "egress.rewrite_mac"
+    alias: "rewrite_mac"
+  }
+  params {
+    id: 1
+    name: "smac"
+    bitwidth: 48
+  }
+}
+type_info {
+}

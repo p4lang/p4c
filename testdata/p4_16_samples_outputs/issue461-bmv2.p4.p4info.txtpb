@@ -1,0 +1,140 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 35996228
+    name: "ingress.ipv4_da_lpm"
+    alias: "ipv4_da_lpm"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4.dstAddr"
+    bitwidth: 32
+    match_type: LPM
+  }
+  action_refs {
+    id: 26563711
+  }
+  action_refs {
+    id: 20279829
+  }
+  direct_resource_ids: 323801931
+  size: 1024
+}
+tables {
+  preamble {
+    id: 43424410
+    name: "ingress.mac_da"
+    alias: "mac_da"
+  }
+  match_fields {
+    id: 1
+    name: "meta.fwd_metadata.l2ptr"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 28039253
+  }
+  action_refs {
+    id: 32609675
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 49367184
+    name: "egress.send_frame"
+    alias: "send_frame"
+  }
+  match_fields {
+    id: 1
+    name: "meta.fwd_metadata.out_bd"
+    bitwidth: 24
+    match_type: EXACT
+  }
+  action_refs {
+    id: 23531945
+  }
+  action_refs {
+    id: 32609675
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 32609675
+    name: "my_drop"
+    alias: "my_drop"
+  }
+}
+actions {
+  preamble {
+    id: 26563711
+    name: "ingress.set_l2ptr"
+    alias: "set_l2ptr"
+  }
+  params {
+    id: 1
+    name: "l2ptr"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 20279829
+    name: "ingress.drop_with_count"
+    alias: "drop_with_count"
+  }
+}
+actions {
+  preamble {
+    id: 28039253
+    name: "ingress.set_bd_dmac_intf"
+    alias: "set_bd_dmac_intf"
+  }
+  params {
+    id: 1
+    name: "bd"
+    bitwidth: 24
+  }
+  params {
+    id: 2
+    name: "dmac"
+    bitwidth: 48
+  }
+  params {
+    id: 3
+    name: "intf"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 23531945
+    name: "egress.rewrite_mac"
+    alias: "rewrite_mac"
+  }
+  params {
+    id: 1
+    name: "smac"
+    bitwidth: 48
+  }
+}
+direct_counters {
+  preamble {
+    id: 323801931
+    name: "ingress.ipv4_da_lpm_stats"
+    alias: "ipv4_da_lpm_stats"
+  }
+  spec {
+    unit: PACKETS
+  }
+  direct_table_id: 35996228
+}
+type_info {
+}

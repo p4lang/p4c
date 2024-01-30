@@ -1,0 +1,115 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 34391244
+    name: "cIngress.t0"
+    alias: "t0"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.tcp.dstPort"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 32211572
+  }
+  action_refs {
+    id: 18753241
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 8
+}
+tables {
+  preamble {
+    id: 39254368
+    name: "cIngress.t1"
+    alias: "t1"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.tcp.dstPort"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 32211572
+  }
+  action_refs {
+    id: 18753241
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 8
+}
+tables {
+  preamble {
+    id: 47468127
+    name: "cIngress.t2"
+    alias: "t2"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.tcp.srcPort"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 32211572
+  }
+  action_refs {
+    id: 18753241
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 16
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 32211572
+    name: "cIngress.foo1"
+    alias: "foo1"
+  }
+  params {
+    id: 1
+    name: "dstAddr"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 18753241
+    name: "cIngress.foo2"
+    alias: "foo2"
+  }
+  params {
+    id: 1
+    name: "srcAddr"
+    bitwidth: 32
+  }
+}
+type_info {
+}

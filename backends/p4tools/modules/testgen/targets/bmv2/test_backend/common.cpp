@@ -174,7 +174,7 @@ inja::json Bmv2TestFramework::getSend(const TestSpec *testSpec) const {
     const auto *payload = iPacket->getEvaluatedPayload();
     inja::json sendJson;
     sendJson["ig_port"] = iPacket->getPort();
-    auto dataStr = formatHexExpr(payload, false, true, false);
+    auto dataStr = formatHexExpr(payload, {false, true, false});
     sendJson["pkt"] = insertHexSeparators(dataStr);
     sendJson["pkt_size"] = payload->type->width_bits();
     return sendJson;

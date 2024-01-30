@@ -109,5 +109,5 @@ jobs:
       - name: Run DPDK PTF tests using P4Testgen
         working-directory: p4c/build
         run: |
-          sudo $IPDK_INSTALL_DIR/sbin/set_hugepages.sh
-          sudo -E ctest -j1 --output-on-failure --schedule-random -R testgen-p4c-pna-ptf
+             sudo $IPDK_INSTALL_DIR/sbin/set_hugepages.sh
+             sudo -E ctest -j1 --output-on-failure --schedule-random -R "testgen-p4c-pna-ptf|dpdk-ptf"

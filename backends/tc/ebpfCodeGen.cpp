@@ -986,7 +986,17 @@ void IngressDeparserPNA::emitPreDeparser(EBPF::CodeBuilder *builder) {
 void IngressDeparserPNA::emit(EBPF::CodeBuilder *builder) {
     codeGen->setBuilder(builder);
 
-    for (auto a : controlBlock->container->controlLocals) emitDeclaration(builder, a);
+    for (auto a : controlBlock->container->controlLocals) {
+        if (a->is<IR::Declaration_Variable>()) {
+            auto vd = a->to<IR::Declaration_Variable>();
+            if (vd->type->toString() == headers->type->toString() ||
+                vd->type->toString() == user_metadata->type->toString()) {
+                codeGen->isPointerVariable(a->name.name);
+                codeGen->useAsPointerVariable(vd->name);
+            }
+        }
+        emitDeclaration(builder, a);
+    }
 
     emitDeparserExternCalls(builder);
     builder->newline();

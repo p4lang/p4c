@@ -1,0 +1,31 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "ubpf"
+}
+tables {
+  preamble {
+    id: 49639434
+    name: "pipe.tbl_a"
+    alias: "tbl_a"
+  }
+  action_refs {
+    id: 23144899
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 23144899
+    name: "pipe.add"
+    alias: "add"
+  }
+  params {
+    id: 1
+    name: "data"
+    bitwidth: 32
+  }
+}
+type_info {
+}

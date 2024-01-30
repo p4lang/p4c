@@ -58,7 +58,7 @@ const Expression *Expression::evaluate(const Model &model, bool doComplete) cons
 
 void Expression::print(std::ostream &os) const {
     Generic::print(os);
-    os << ": " << formatHexExpr(value, true);
+    os << ": " << formatHexExpr(value, {true});
 }
 
 /* =============================================================================================
@@ -236,7 +236,7 @@ void ExtractSuccess::print(std::ostream &os) const {
        << " | Condition: " << condition
        << " | Extract Size: " << extractedHeader->type->width_bits() << " -> ";
     for (const auto &field : fields) {
-        os << field.first->toString() << " = " << formatHexExpr(field.second, true);
+        os << field.first->toString() << " = " << formatHexExpr(field.second, {true});
         if (field != fields.back()) {
             os << " | ";
         }
@@ -316,7 +316,7 @@ const Packet *Packet::evaluate(const Model &model, bool doComplete) const {
 }
 
 void Packet::print(std::ostream &os) const {
-    os << "[Packet " << direction << "] " << formatHexExpr(packetValue, true);
+    os << "[Packet " << direction << "] " << formatHexExpr(packetValue, {true});
 }
 
 std::ostream &operator<<(std::ostream &os, const Packet::Direction &direction) {

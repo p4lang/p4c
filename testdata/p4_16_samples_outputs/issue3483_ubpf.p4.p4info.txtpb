@@ -1,0 +1,48 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "ubpf"
+}
+tables {
+  preamble {
+    id: 43471039
+    name: "pipe.Check_src_ip"
+    alias: "Check_src_ip"
+  }
+  match_fields {
+    id: 1
+    name: "headers.ipv4.srcAddr"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 18876683
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 18876683
+    name: "pipe.Reject"
+    alias: "Reject"
+  }
+  params {
+    id: 1
+    name: "add"
+    bitwidth: 32
+  }
+}
+type_info {
+}

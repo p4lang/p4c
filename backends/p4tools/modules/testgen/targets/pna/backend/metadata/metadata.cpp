@@ -32,7 +32,7 @@ std::vector<std::pair<size_t, size_t>> Metadata::getIgnoreMasks(const IR::Consta
     if (mask == nullptr) {
         return ignoreMasks;
     }
-    auto maskBinStr = formatBinExpr(mask, false, true, false);
+    auto maskBinStr = formatBinExpr(mask, {false, true, false});
     int countZeroes = 0;
     size_t offset = 0;
     for (; offset < maskBinStr.size(); ++offset) {

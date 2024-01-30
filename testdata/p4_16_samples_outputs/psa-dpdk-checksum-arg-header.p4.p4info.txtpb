@@ -1,0 +1,148 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 33686666
+    name: "ingress.vxlan"
+    alias: "vxlan"
+  }
+  match_fields {
+    id: 1
+    name: "headers.ethernet.dst_addr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 32131245
+  }
+  action_refs {
+    id: 33281717
+  }
+  const_default_action_id: 33281717
+  size: 1048576
+}
+actions {
+  preamble {
+    id: 32131245
+    name: "ingress.vxlan_encap"
+    alias: "vxlan_encap"
+  }
+  params {
+    id: 1
+    name: "ethernet_dst_addr"
+    bitwidth: 48
+  }
+  params {
+    id: 2
+    name: "ethernet_src_addr"
+    bitwidth: 48
+  }
+  params {
+    id: 3
+    name: "ethernet_ether_type"
+    bitwidth: 16
+  }
+  params {
+    id: 4
+    name: "ipv4_diffserv"
+    bitwidth: 8
+  }
+  params {
+    id: 5
+    name: "ipv4_total_len"
+    bitwidth: 16
+  }
+  params {
+    id: 6
+    name: "ipv4_identification"
+    bitwidth: 16
+  }
+  params {
+    id: 7
+    name: "ipv4_flags_offset"
+    bitwidth: 16
+  }
+  params {
+    id: 8
+    name: "ipv4_ttl"
+    bitwidth: 8
+  }
+  params {
+    id: 9
+    name: "ipv4_protocol"
+    bitwidth: 8
+  }
+  params {
+    id: 10
+    name: "ipv4_hdr_checksum"
+    bitwidth: 16
+  }
+  params {
+    id: 11
+    name: "ipv4_src_addr"
+    bitwidth: 32
+  }
+  params {
+    id: 12
+    name: "ipv4_dst_addr"
+    bitwidth: 32
+  }
+  params {
+    id: 13
+    name: "udp_src_port"
+    bitwidth: 16
+  }
+  params {
+    id: 14
+    name: "udp_dst_port"
+    bitwidth: 16
+  }
+  params {
+    id: 15
+    name: "udp_length"
+    bitwidth: 16
+  }
+  params {
+    id: 16
+    name: "udp_checksum"
+    bitwidth: 16
+  }
+  params {
+    id: 17
+    name: "vxlan_flags"
+    bitwidth: 8
+  }
+  params {
+    id: 18
+    name: "vxlan_reserved"
+    bitwidth: 24
+  }
+  params {
+    id: 19
+    name: "vxlan_vni"
+    bitwidth: 24
+  }
+  params {
+    id: 20
+    name: "vxlan_reserved2"
+    bitwidth: 8
+  }
+  params {
+    id: 21
+    name: "port_out"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 33281717
+    name: "ingress.drop"
+    alias: "drop"
+  }
+}
+type_info {
+}

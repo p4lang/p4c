@@ -38,7 +38,7 @@ def pkt_add_vlan(pkt, vlan_vid=10, vlan_pcp=0, dl_vlan_cfi=0):
 
 class L2L3SwitchTest(P4EbpfTest):
     p4_file_path = "../psa/examples/l2l3-acl.p4"
-    p4info_reference_file_path = "../psa/examples/l2l3-acl.p4info.txt"
+    p4info_reference_file_path = "../psa/examples/l2l3-acl.p4info.txtpb"
 
     def configure_port(self, port_id, vlan_id=None):
         if vlan_id is None:

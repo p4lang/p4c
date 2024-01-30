@@ -1,0 +1,45 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 44506256
+    name: "ingress.tbl"
+    alias: "tbl"
+  }
+  match_fields {
+    id: 1
+    name: "fbgPij"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 28337798
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 28337798
+    name: "ingress.exit_action"
+    alias: "exit_action"
+  }
+}
+type_info {
+}

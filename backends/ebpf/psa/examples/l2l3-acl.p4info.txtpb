@@ -1,0 +1,412 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 44402382
+    name: "ingress.tbl_ingress_vlan"
+    alias: "tbl_ingress_vlan"
+  }
+  match_fields {
+    id: 1
+    name: "standard_metadata.ingress_port"
+    bitwidth: 32
+    match_type: EXACT
+    type_name {
+      name: "PortId_t"
+    }
+  }
+  match_fields {
+    id: 2
+    name: "headers.vlan_tag.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 26602363
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 36329505
+    name: "ingress.tbl_mac_learning"
+    alias: "tbl_mac_learning"
+  }
+  match_fields {
+    id: 1
+    name: "headers.ethernet.src_addr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 24963522
+  }
+  action_refs {
+    id: 21257015
+  }
+  const_default_action_id: 24963522
+  size: 1024
+}
+tables {
+  preamble {
+    id: 47124605
+    name: "ingress.tbl_routable"
+    alias: "tbl_routable"
+  }
+  match_fields {
+    id: 1
+    name: "headers.ethernet.dst_addr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "headers.vlan_tag.vlan_id"
+    bitwidth: 12
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21257015
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 36764017
+    name: "ingress.tbl_routing"
+    alias: "tbl_routing"
+  }
+  match_fields {
+    id: 1
+    name: "headers.ipv4.dst_addr"
+    bitwidth: 32
+    match_type: LPM
+  }
+  action_refs {
+    id: 32416464
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  implementation_id: 286177969
+  size: 1024
+}
+tables {
+  preamble {
+    id: 49220983
+    name: "ingress.tbl_switching"
+    alias: "tbl_switching"
+  }
+  match_fields {
+    id: 1
+    name: "headers.ethernet.dst_addr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "headers.vlan_tag.vlan_id"
+    bitwidth: 12
+    match_type: EXACT
+  }
+  action_refs {
+    id: 26512162
+  }
+  action_refs {
+    id: 33500236
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 41681420
+    name: "ingress.tbl_acl"
+    alias: "tbl_acl"
+  }
+  match_fields {
+    id: 1
+    name: "headers.ipv4.src_addr"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "headers.ipv4.dst_addr"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "headers.ipv4.protocol"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  match_fields {
+    id: 4
+    name: "local_metadata.l4_sport"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 5
+    name: "local_metadata.l4_dport"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 33281717
+  }
+  action_refs {
+    id: 21257015
+  }
+  const_default_action_id: 21257015
+  size: 1024
+}
+tables {
+  preamble {
+    id: 39854909
+    name: "egress.tbl_vlan_egress"
+    alias: "tbl_vlan_egress"
+  }
+  match_fields {
+    id: 1
+    name: "istd.egress_port"
+    bitwidth: 32
+    match_type: EXACT
+    type_name {
+      name: "PortId_t"
+    }
+  }
+  action_refs {
+    id: 17271484
+  }
+  action_refs {
+    id: 23028825
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  direct_resource_ids: 330499363
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 26602363
+    name: "ingress.push_vlan"
+    alias: "push_vlan"
+  }
+}
+actions {
+  preamble {
+    id: 24963522
+    name: "ingress.mac_learn"
+    alias: "mac_learn"
+  }
+}
+actions {
+  preamble {
+    id: 33281717
+    name: "ingress.drop"
+    alias: "drop"
+  }
+}
+actions {
+  preamble {
+    id: 32416464
+    name: "ingress.set_nexthop"
+    alias: "set_nexthop"
+  }
+  params {
+    id: 1
+    name: "smac"
+    bitwidth: 48
+  }
+  params {
+    id: 2
+    name: "dmac"
+    bitwidth: 48
+  }
+  params {
+    id: 3
+    name: "vlan_id"
+    bitwidth: 12
+  }
+}
+actions {
+  preamble {
+    id: 26512162
+    name: "ingress.forward"
+    alias: "forward"
+  }
+  params {
+    id: 1
+    name: "output_port"
+    bitwidth: 32
+    type_name {
+      name: "PortId_t"
+    }
+  }
+}
+actions {
+  preamble {
+    id: 33500236
+    name: "ingress.broadcast"
+    alias: "broadcast"
+  }
+  params {
+    id: 1
+    name: "grp_id"
+    bitwidth: 32
+    type_name {
+      name: "MulticastGroup_t"
+    }
+  }
+}
+actions {
+  preamble {
+    id: 21538986
+    name: "egress_drop"
+    alias: "egress_drop"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 17271484
+    name: "egress.strip_vlan"
+    alias: "strip_vlan"
+  }
+}
+actions {
+  preamble {
+    id: 23028825
+    name: "egress.mod_vlan"
+    alias: "mod_vlan"
+  }
+  params {
+    id: 1
+    name: "vlan_id"
+    bitwidth: 12
+  }
+}
+action_profiles {
+  preamble {
+    id: 286177969
+    name: "ingress.as"
+    alias: "as"
+  }
+  table_ids: 36764017
+  with_selector: true
+  size: 1024
+}
+counters {
+  preamble {
+    id: 302795906
+    name: "ingress.in_pkts"
+    alias: "in_pkts"
+  }
+  spec {
+    unit: BOTH
+  }
+  size: 100
+}
+direct_counters {
+  preamble {
+    id: 330499363
+    name: "egress.out_pkts"
+    alias: "out_pkts"
+  }
+  spec {
+    unit: BOTH
+  }
+  direct_table_id: 39854909
+}
+digests {
+  preamble {
+    id: 393026453
+    name: "packet_deparser.mac_learn_digest"
+    alias: "mac_learn_digest"
+  }
+  type_spec {
+    struct {
+      name: "mac_learn_digest_t"
+    }
+  }
+}
+type_info {
+  structs {
+    key: "mac_learn_digest_t"
+    value {
+      members {
+        name: "mac_addr"
+        type_spec {
+          bitstring {
+            bit {
+              bitwidth: 48
+            }
+          }
+        }
+      }
+      members {
+        name: "port"
+        type_spec {
+          new_type {
+            name: "PortId_t"
+          }
+        }
+      }
+      members {
+        name: "vlan_id"
+        type_spec {
+          bitstring {
+            bit {
+              bitwidth: 12
+            }
+          }
+        }
+      }
+    }
+  }
+  new_types {
+    key: "MulticastGroup_t"
+    value {
+      translated_type {
+        uri: "p4.org/psa/v1/MulticastGroup_t"
+        sdn_bitwidth: 32
+      }
+    }
+  }
+  new_types {
+    key: "PortId_t"
+    value {
+      translated_type {
+        uri: "p4.org/psa/v1/PortId_t"
+        sdn_bitwidth: 32
+      }
+    }
+  }
+}

@@ -1,0 +1,27 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+actions {
+  preamble {
+    id: 22733763
+    name: "IngressI.validateHeader"
+    alias: "validateHeader"
+  }
+}
+actions {
+  preamble {
+    id: 19774285
+    name: "IngressI.invalidateHeader"
+    alias: "invalidateHeader"
+  }
+}
+actions {
+  preamble {
+    id: 26792443
+    name: "IngressI.invalidateStack"
+    alias: "invalidateStack"
+  }
+}

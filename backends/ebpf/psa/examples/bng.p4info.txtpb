@@ -1,0 +1,637 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 44961932
+    name: "ingress.ingress_port_vlan"
+    alias: "ingress_port_vlan"
+  }
+  match_fields {
+    id: 1
+    name: "ig_port"
+    bitwidth: 32
+    match_type: EXACT
+    type_name {
+      name: "PortId_t"
+    }
+  }
+  match_fields {
+    id: 2
+    name: "vlan_id"
+    bitwidth: 12
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 3
+    name: "inner_vlan_id"
+    bitwidth: 12
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
+    name: "vlan_is_valid"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 28724955
+  }
+  action_refs {
+    id: 22692352
+  }
+  action_refs {
+    id: 17049673
+  }
+  const_default_action_id: 28724955
+  size: 8192
+}
+tables {
+  preamble {
+    id: 48128582
+    name: "ingress.fwd_classifier"
+    alias: "fwd_classifier"
+  }
+  match_fields {
+    id: 1
+    name: "eth_dst"
+    bitwidth: 48
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "ig_port"
+    bitwidth: 32
+    match_type: EXACT
+    type_name {
+      name: "PortId_t"
+    }
+  }
+  match_fields {
+    id: 3
+    name: "eth_type"
+    bitwidth: 16
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
+    name: "ip_eth_type"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 17126659
+  }
+  const_default_action_id: 17126659
+  size: 1024
+}
+tables {
+  preamble {
+    id: 39559972
+    name: "ingress.routing_v4"
+    alias: "routing_v4"
+  }
+  match_fields {
+    id: 1
+    name: "ipv4_dst"
+    bitwidth: 32
+    match_type: LPM
+  }
+  action_refs {
+    id: 23773064
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 46108324
+    name: "ingress.next_vlan"
+    alias: "next_vlan"
+  }
+  match_fields {
+    id: 1
+    name: "egress_port"
+    bitwidth: 32
+    match_type: EXACT
+    type_name {
+      name: "PortId_t"
+    }
+  }
+  action_refs {
+    id: 24264530
+  }
+  action_refs {
+    id: 25482061
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  const_default_action_id: 21257015
+  size: 1024
+}
+tables {
+  preamble {
+    id: 39700076
+    name: "ingress.t_line_map"
+    alias: "t_line_map"
+  }
+  match_fields {
+    id: 1
+    name: "s_tag"
+    bitwidth: 12
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "c_tag"
+    bitwidth: 12
+    match_type: EXACT
+  }
+  action_refs {
+    id: 27019812
+  }
+  const_default_action_id: 27019812
+  size: 8192
+}
+tables {
+  preamble {
+    id: 44043720
+    name: "ingress.t_pppoe_cp"
+    alias: "t_pppoe_cp"
+  }
+  match_fields {
+    id: 1
+    name: "pppoe_code"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  action_refs {
+    id: 24273938
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  const_default_action_id: 21257015
+  size: 16
+}
+tables {
+  preamble {
+    id: 44640033
+    name: "ingress.t_pppoe_term_v4"
+    alias: "t_pppoe_term_v4"
+  }
+  match_fields {
+    id: 1
+    name: "line_id"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "ipv4_src"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "pppoe_session_id"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 27546548
+  }
+  action_refs {
+    id: 21552277
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  const_default_action_id: 21552277
+  size: 32768
+}
+tables {
+  preamble {
+    id: 35352298
+    name: "ingress.t_line_session_map"
+    alias: "t_line_session_map"
+  }
+  match_fields {
+    id: 1
+    name: "line_id"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  action_refs {
+    id: 23290668
+  }
+  action_refs {
+    id: 33281717
+  }
+  const_default_action_id: 21257015
+  size: 8192
+}
+tables {
+  preamble {
+    id: 43257449
+    name: "ingress.t_qos_v4"
+    alias: "t_qos_v4"
+  }
+  match_fields {
+    id: 1
+    name: "line_id"
+    bitwidth: 32
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 2
+    name: "ipv4_src"
+    bitwidth: 32
+    match_type: LPM
+  }
+  match_fields {
+    id: 3
+    name: "ipv4_dscp"
+    bitwidth: 6
+    match_type: TERNARY
+  }
+  match_fields {
+    id: 4
+    name: "ipv4_ecn"
+    bitwidth: 2
+    match_type: TERNARY
+  }
+  action_refs {
+    id: 25481605
+  }
+  action_refs {
+    id: 23799701
+  }
+  const_default_action_id: 23799701
+  size: 256
+}
+tables {
+  preamble {
+    id: 40343816
+    name: "egress.egress_vlan"
+    alias: "egress_vlan"
+  }
+  match_fields {
+    id: 1
+    name: "vlan_id"
+    bitwidth: 12
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "eg_port"
+    bitwidth: 32
+    match_type: EXACT
+    type_name {
+      name: "PortId_t"
+    }
+  }
+  action_refs {
+    id: 18121475
+  }
+  action_refs {
+    id: 27953516
+  }
+  action_refs {
+    id: 20119496
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  const_default_action_id: 20119496
+  size: 1024
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 28724955
+    name: "ingress.deny"
+    alias: "deny"
+  }
+}
+actions {
+  preamble {
+    id: 22692352
+    name: "ingress.permit"
+    alias: "permit"
+  }
+  params {
+    id: 1
+    name: "port_type"
+    bitwidth: 2
+  }
+}
+actions {
+  preamble {
+    id: 17049673
+    name: "ingress.permit_with_internal_vlan"
+    alias: "permit_with_internal_vlan"
+  }
+  params {
+    id: 1
+    name: "vlan_id"
+    bitwidth: 12
+  }
+  params {
+    id: 2
+    name: "port_type"
+    bitwidth: 2
+  }
+}
+actions {
+  preamble {
+    id: 17126659
+    name: "ingress.set_forwarding_type"
+    alias: "set_forwarding_type"
+  }
+  params {
+    id: 1
+    name: "fwd_type"
+    bitwidth: 3
+  }
+}
+actions {
+  preamble {
+    id: 23773064
+    name: "ingress.route"
+    alias: "route"
+  }
+  params {
+    id: 1
+    name: "port_num"
+    bitwidth: 32
+    type_name {
+      name: "PortId_t"
+    }
+  }
+  params {
+    id: 2
+    name: "smac"
+    bitwidth: 48
+  }
+  params {
+    id: 3
+    name: "dmac"
+    bitwidth: 48
+  }
+}
+actions {
+  preamble {
+    id: 24264530
+    name: "ingress.set_vlan"
+    alias: "set_vlan"
+  }
+  params {
+    id: 1
+    name: "vlan_id"
+    bitwidth: 12
+  }
+}
+actions {
+  preamble {
+    id: 25482061
+    name: "ingress.set_double_vlan"
+    alias: "set_double_vlan"
+  }
+  params {
+    id: 1
+    name: "outer_vlan_id"
+    bitwidth: 12
+  }
+  params {
+    id: 2
+    name: "inner_vlan_id"
+    bitwidth: 12
+  }
+}
+actions {
+  preamble {
+    id: 27019812
+    name: "ingress.set_line"
+    alias: "set_line"
+  }
+  params {
+    id: 1
+    name: "line_id"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 24273938
+    name: "ingress.punt_to_cpu"
+    alias: "punt_to_cpu"
+  }
+}
+actions {
+  preamble {
+    id: 21552277
+    name: "ingress.term_disabled"
+    alias: "term_disabled"
+  }
+}
+actions {
+  preamble {
+    id: 27546548
+    name: "ingress.term_enabled_v4"
+    alias: "term_enabled_v4"
+  }
+}
+actions {
+  preamble {
+    id: 23290668
+    name: "ingress.set_session"
+    alias: "set_session"
+  }
+  params {
+    id: 1
+    name: "pppoe_session_id"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 33281717
+    name: "ingress.drop"
+    alias: "ingress.drop"
+  }
+}
+actions {
+  preamble {
+    id: 25481605
+    name: "ingress.qos_prio"
+    alias: "qos_prio"
+  }
+}
+actions {
+  preamble {
+    id: 23799701
+    name: "ingress.qos_besteff"
+    alias: "qos_besteff"
+  }
+}
+actions {
+  preamble {
+    id: 21538986
+    name: "egress_drop"
+    alias: "egress_drop"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 25379917
+    name: "egress.push_outer_vlan"
+    alias: "push_outer_vlan"
+  }
+}
+actions {
+  preamble {
+    id: 31322955
+    name: "egress.push_inner_vlan"
+    alias: "push_inner_vlan"
+  }
+}
+actions {
+  preamble {
+    id: 18121475
+    name: "egress.push_vlan"
+    alias: "push_vlan"
+  }
+}
+actions {
+  preamble {
+    id: 27953516
+    name: "egress.pop_vlan"
+    alias: "pop_vlan"
+  }
+}
+actions {
+  preamble {
+    id: 20119496
+    name: "egress.drop"
+    alias: "egress.drop"
+  }
+}
+actions {
+  preamble {
+    id: 22074232
+    name: "egress.encap_v4"
+    alias: "encap_v4"
+  }
+}
+counters {
+  preamble {
+    id: 311360029
+    name: "ingress.c_line_rx"
+    alias: "c_line_rx"
+  }
+  spec {
+    unit: BYTES
+  }
+  size: 8192
+}
+counters {
+  preamble {
+    id: 310227288
+    name: "ingress.c_terminated"
+    alias: "c_terminated"
+  }
+  spec {
+    unit: BYTES
+  }
+  size: 8192
+}
+counters {
+  preamble {
+    id: 304818642
+    name: "ingress.c_dropped"
+    alias: "c_dropped"
+  }
+  spec {
+    unit: BYTES
+  }
+  size: 8192
+}
+counters {
+  preamble {
+    id: 303724639
+    name: "ingress.c_control"
+    alias: "c_control"
+  }
+  spec {
+    unit: PACKETS
+  }
+  size: 8192
+}
+counters {
+  preamble {
+    id: 304907518
+    name: "egress.c_line_tx"
+    alias: "c_line_tx"
+  }
+  spec {
+    unit: BYTES
+  }
+  size: 8192
+}
+meters {
+  preamble {
+    id: 339043923
+    name: "ingress.m_besteff"
+    alias: "m_besteff"
+  }
+  spec {
+    unit: BYTES
+  }
+  size: 8192
+}
+meters {
+  preamble {
+    id: 349736854
+    name: "ingress.m_prio"
+    alias: "m_prio"
+  }
+  spec {
+    unit: BYTES
+  }
+  size: 8192
+}
+type_info {
+  new_types {
+    key: "PortId_t"
+    value {
+      translated_type {
+        uri: "p4.org/psa/v1/PortId_t"
+        sdn_bitwidth: 32
+      }
+    }
+  }
+}

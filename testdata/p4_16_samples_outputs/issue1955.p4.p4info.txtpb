@@ -1,0 +1,32 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+value_sets {
+  preamble {
+    id: 59321522
+    name: "parserImpl.p1.ipv4_ethertypes"
+    alias: "p1.ipv4_ethertypes"
+  }
+  match {
+    id: 1
+    bitwidth: 16
+    match_type: EXACT
+  }
+  size: 8
+}
+value_sets {
+  preamble {
+    id: 55724863
+    name: "parserImpl.p2.ipv4_ethertypes"
+    alias: "p2.ipv4_ethertypes"
+  }
+  match {
+    id: 1
+    bitwidth: 16
+    match_type: EXACT
+  }
+  size: 8
+}

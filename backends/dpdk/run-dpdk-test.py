@@ -281,8 +281,8 @@ def process_file(options, argv):
         print("Writing temporary files into ", tmpdir)
     stderr = os.path.join(tmpdir, basename + "-error")
     spec = os.path.join(tmpdir, basename + ".spec")
-    p4runtimeFile = os.path.join(tmpdir, basename + ".p4info.txt")
-    p4runtimeEntriesFile = os.path.join(tmpdir, basename + ".entries.txt")
+    p4runtimeFile = os.path.join(tmpdir, basename + ".p4info.txtpb")
+    p4runtimeEntriesFile = os.path.join(tmpdir, basename + ".entries.txtpb")
     bfRtSchemaFile = os.path.join(tmpdir, basename + ".bfrt.json")
 
     def getArch(path):

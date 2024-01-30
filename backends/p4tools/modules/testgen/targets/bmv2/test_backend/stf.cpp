@@ -34,7 +34,7 @@ inja::json STF::getSend(const TestSpec *testSpec) const {
     const auto *payload = iPacket->getEvaluatedPayload();
     inja::json sendJson;
     sendJson["ig_port"] = iPacket->getPort();
-    sendJson["pkt"] = formatHexExpr(payload, false, true, false);
+    sendJson["pkt"] = formatHexExpr(payload, {false, true, false});
     sendJson["pkt_size"] = payload->type->width_bits();
     return sendJson;
 }
@@ -46,11 +46,11 @@ inja::json STF::getExpectedPacket(const TestSpec *testSpec) const {
         verifyData["eg_port"] = packet.getPort();
         const auto *payload = packet.getEvaluatedPayload();
         const auto *payloadMask = packet.getEvaluatedPayloadMask();
-        auto dataStr = formatHexExpr(payload, false, true, false);
+        auto dataStr = formatHexExpr(payload, {false, true, false});
         if (payloadMask != nullptr) {
             // If a mask is present, construct the packet data  with wildcard `*` where there are
             // non zero nibbles
-            auto maskStr = formatHexExpr(payloadMask, false, true, false);
+            auto maskStr = formatHexExpr(payloadMask, {false, true, false});
             std::string packetData;
             for (size_t dataPos = 0; dataPos < dataStr.size(); ++dataPos) {
                 if (maskStr.at(dataPos) != 'F') {
@@ -92,8 +92,8 @@ inja::json STF::getControlPlaneForTable(const TableMatchMap &matches,
             BUG_CHECK(dataValue->type->width_bits() == maskField->type->width_bits(),
                       "Data value and its mask should have the same bit width.");
             // Using the width from mask - should be same as data
-            auto dataStr = formatBinExpr(dataValue, false, true, false);
-            auto maskStr = formatBinExpr(maskField, false, true, false);
+            auto dataStr = formatBinExpr(dataValue, {false, true, false});
+            auto maskStr = formatBinExpr(maskField, {false, true, false});
             std::string data = "0b";
             for (size_t dataPos = 0; dataPos < dataStr.size(); ++dataPos) {
                 if (maskStr.at(dataPos) == '0') {
@@ -115,8 +115,8 @@ inja::json STF::getControlPlaneForTable(const TableMatchMap &matches,
             BUG_CHECK(dataValue->type->width_bits() == maskField->type->width_bits(),
                       "Data value and its mask should have the same bit width.");
             // Using the width from mask - should be same as data
-            auto dataStr = formatBinExpr(dataValue, false, true, false);
-            auto maskStr = formatBinExpr(maskField, false, true, false);
+            auto dataStr = formatBinExpr(dataValue, {false, true, false});
+            auto maskStr = formatBinExpr(maskField, {false, true, false});
             std::string data = "0b";
             for (size_t dataPos = 0; dataPos < dataStr.size(); ++dataPos) {
                 if (maskStr.at(dataPos) == '0') {
