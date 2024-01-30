@@ -51,6 +51,7 @@ set(
 
   test/gtest_utils.cpp
   test/lib/format_int.cpp
+  test/lib/p4info_api.cpp
   test/lib/taint.cpp
   test/small-step/util.cpp
   test/z3-solver/constraints.cpp
@@ -71,6 +72,7 @@ fetchcontent_makeavailable_but_exclude_install(inja)
 set(
   TESTGEN_LIBS
   PRIVATE p4tools-common
+  PRIVATE p4tools-control-plane
   PUBLIC inja
 )
 set(TESTGEN_INCLUDES)

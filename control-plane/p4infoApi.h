@@ -1,58 +1,49 @@
-#ifndef BACKENDS_P4TOOLS_COMMON_CONTROL_PLANE_P4RUNTIME_API_H_
-#define BACKENDS_P4TOOLS_COMMON_CONTROL_PLANE_P4RUNTIME_API_H_
-#include <map>
+#ifndef CONTROL_PLANE_P4INFOAPI_H_
+#define CONTROL_PLANE_P4INFOAPI_H_
+
 #include <optional>
 
 #include "control-plane/p4RuntimeArchHandler.h"
 #include "control-plane/p4RuntimeSerializer.h"
 #include "lib/cstring.h"
-#include "p4/config/v1/p4info.pb.h"
 
-/// TODO: Consider migrating this API to the top-level control-plane folder.
-/// The reason we have not already done this is because that folder already provides similar utility
-/// functions. However, these functions are tied to the P4RuntimeTableIface, which is fairly
-/// inflexible. We just need an API that can perform lookup operations on a P4Info or P4RuntimeAPI
-/// object.
-/// TODO: Also consider how to make this API target-specific. Not all these functions are available
-/// in all targets.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wpedantic"
+#include "p4/config/v1/p4info.pb.h"
+#pragma GCC diagnostic pop
+
 namespace P4::ControlPlaneAPI {
 
-/// Computes a unique pairing of two input numbers. We use this to generate unique P4Runtime IDs
-/// for combinations of tables and key elements, or actions and parameters.
-/// https://en.wikipedia.org/wiki/Pairing_function#Other_pairing_functions
-p4rt_id_t szudzikPairing(p4rt_id_t x, p4rt_id_t y);
+/// Generic meta function which searches an object by @name in the given range
+/// and @returns the P4Runtime representation, or std::nullopt if none is found.
+/// TODO: Should this return a const reference?
+template <typename It>
+auto findP4InfoObject(const It &first, const It &last, cstring controlPlaneName)
+    -> std::optional<typename std::iterator_traits<It>::value_type> {
+    using T = typename std::iterator_traits<It>::value_type;
+    auto desiredObject = std::find_if(
+        first, last, [&](const T &object) { return object.preamble().name() == controlPlaneName; });
+    if (desiredObject == last) {
+        return std::nullopt;
+    }
+    return *desiredObject;
+}
 
-class P4RuntimeMaps {
-    /// Type definitions for convenience.
-    using P4RuntimeIdToControlPlaneNameMap = std::map<p4rt_id_t, cstring>;
-    using ControlPlaneNameToP4RuntimeIdMap = std::map<cstring, p4rt_id_t>;
-
- private:
-    /// Maps P4Runtime IDs to control plane names.
-    P4RuntimeIdToControlPlaneNameMap idToNameMap;
-
-    /// Maps control plane names to P4Runtime IDs.
-    ControlPlaneNameToP4RuntimeIdMap nameToIdMap;
-
-    /// Iterate over the P4Info object and build a mapping from P4 control plane names to their ids.
-    virtual void buildP4RuntimeMaps(const p4::config::v1::P4Info &p4Info);
-
- public:
-    explicit P4RuntimeMaps(const p4::config::v1::P4Info &p4Info);
-    P4RuntimeMaps(const P4RuntimeMaps &) = default;
-    P4RuntimeMaps(P4RuntimeMaps &&) = default;
-    P4RuntimeMaps &operator=(const P4RuntimeMaps &) = default;
-    P4RuntimeMaps &operator=(P4RuntimeMaps &&) = default;
-    virtual ~P4RuntimeMaps() = default;
-
-    /// Looks up the P4Runtime id for the given control plane name in the pre-computed P4Runtime-ID
-    /// map. @returns std::nullopt if the name is not in the map.
-    [[nodiscard]] std::optional<p4rt_id_t> lookupP4RuntimeId(cstring controlPlaneName) const;
-
-    /// Looks up the control plane name for the given P4Runtime id in the pre-computed P4Runtime-ID
-    /// map. @returns std::nullopt if the id is not in the map.
-    [[nodiscard]] std::optional<cstring> lookupControlPlaneName(p4rt_id_t id) const;
-};
+/// Generic meta function which searches an object by @id in the given range
+/// and @returns the P4Runtime representation, or std::nullopt if none is found.
+/// TODO: Should this return a const reference?
+template <typename It>
+auto findP4InfoObject(const It &first, const It &last, p4rt_id_t id)
+    -> std::optional<typename std::iterator_traits<It>::value_type> {
+    using T = typename std::iterator_traits<It>::value_type;
+    auto desiredObject =
+        std::find_if(first, last, [&](const T &object) { return object.preamble().id() == id; });
+    if (desiredObject == last) {
+        return std::nullopt;
+    }
+    return *desiredObject;
+}
 
 /// Try to find the P4Info description for the given table. @return std::nullopt if the table is not
 /// is not present in the P4Info object.
@@ -191,4 +182,4 @@ std::optional<p4rt_id_t> getP4RuntimeId(const p4::config::v1::P4Info &p4Info,
 
 }  // namespace P4::ControlPlaneAPI
 
-#endif /* BACKENDS_P4TOOLS_COMMON_CONTROL_PLANE_P4RUNTIME_API_H_ */
+#endif /* CONTROL_PLANE_P4INFOAPI_H_ */
