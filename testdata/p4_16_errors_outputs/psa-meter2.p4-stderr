@@ -1,4 +1,4 @@
-psa-meter2.p4(57): [--Werror=type-error] error: (bit<16>)meter0.execute
+psa-meter2.p4(57): [--Werror=type-error] error: '(bit<16>)meter0.execute'
         b.data = (bit<16>)meter0.execute(index, PSA_MeterColor_t.GREEN);
                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   ---- Actual error:

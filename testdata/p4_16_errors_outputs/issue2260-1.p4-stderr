@@ -1,4 +1,4 @@
-issue2260-1.p4(8): [--Werror=type-error] error: f
+issue2260-1.p4(8): [--Werror=type-error] error: 'f'
         bit<8> y = f(255);
                    ^^^^^^
   ---- Actual error:

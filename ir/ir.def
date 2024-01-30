@@ -442,6 +442,7 @@ class EmptyStatement : Statement {
 class AssignmentStatement : Statement {
     Expression left;
     Expression right;
+    toString{ return left->toString() + " = " + right->toString(); }
 }
 
 class IfStatement : Statement {

@@ -13,6 +13,7 @@
 #include "lib/cstring.h"
 #include "lib/error.h"
 
+#include "backends/p4tools/modules/testgen/core/compiler_target.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/depth_first.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/greedy_node_cov.h"
@@ -95,7 +96,10 @@ int Testgen::mainImpl(const CompilerResult &compilerResult) {
     // These are discovered by CMAKE, which fills out the register.h.in file.
     registerTestgenTargets();
 
-    const auto *programInfo = TestgenTarget::produceProgramInfo(compilerResult);
+    // Make sure the input result corresponds to the result we expect.
+    const auto *testgenCompilerResult = compilerResult.checkedTo<TestgenCompilerResult>();
+
+    const auto *programInfo = TestgenTarget::produceProgramInfo(*testgenCompilerResult);
     if (programInfo == nullptr) {
         ::error("Program not supported by target device and architecture.");
         return EXIT_FAILURE;

@@ -749,7 +749,7 @@ const IR::Expression *TypeInference::assignment(const IR::Node *errorPosition,
     }
     if (destType->is<IR::Type_SerEnum>() && !typeMap->equivalent(destType, initType) &&
         !initType->is<IR::Type_Any>()) {
-        typeError("%1%: values of type '%2%' cannot be implicitly cast to type '%3%'",
+        typeError("'%1%': values of type '%2%' cannot be implicitly cast to type '%3%'",
                   errorPosition, initType, destType);
         return sourceExpression;
     }

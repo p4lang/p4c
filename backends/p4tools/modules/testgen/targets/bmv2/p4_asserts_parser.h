@@ -12,13 +12,15 @@
 #include "ir/visitor.h"
 #include "lib/cstring.h"
 
-namespace P4Tools::AssertsParser {
+namespace P4Tools::P4Testgen::Bmv2 {
+
+using P4ConstraintsVector = std::vector<std::vector<const IR::Expression *>>;
 
 class AssertsParser : public Transform {
-    std::vector<std::vector<const IR::Expression *>> &restrictionsVec;
+    P4ConstraintsVector &restrictionsVec;
 
  public:
-    explicit AssertsParser(std::vector<std::vector<const IR::Expression *>> &output);
+    explicit AssertsParser(P4ConstraintsVector &output);
     /// A function that calls the beginning of the transformation of restrictions from a string into
     /// an IR::Expression. Internally calls all other necessary functions, for example
     /// combineTokensToNames and the like, to eventually get an IR expression that meets the string
@@ -112,6 +114,6 @@ class Lexer {
     char prev() noexcept;
     char get() noexcept;
 };
-}  // namespace P4Tools::AssertsParser
+}  // namespace P4Tools::P4Testgen::Bmv2
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_P4_ASSERTS_PARSER_H_ */

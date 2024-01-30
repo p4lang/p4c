@@ -20,7 +20,7 @@ class SharedPnaProgramInfo : public ProgramInfo {
     static const IR::Type_Bits PARSER_ERR_BITS;
 
  public:
-    SharedPnaProgramInfo(const CompilerResult &compilerResult,
+    SharedPnaProgramInfo(const TestgenCompilerResult &compilerResult,
                          ordered_map<cstring, const IR::Type_Declaration *> inputBlocks);
 
     /// @returns the programmable blocks of the program.

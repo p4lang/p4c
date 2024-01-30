@@ -12,6 +12,7 @@
 #include "lib/exceptions.h"
 #include "lib/ordered_map.h"
 
+#include "backends/p4tools/modules/testgen/core/compiler_target.h"
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/core/target.h"
@@ -65,7 +66,8 @@ const EBPFProgramInfo *EBPFTestgenTarget::produceProgramInfoImpl(
         testgenOptions.maxPktSize = 12000;
     }
 
-    return new EBPFProgramInfo(compilerResult, programmableBlocks);
+    return new EBPFProgramInfo(*compilerResult.checkedTo<TestgenCompilerResult>(),
+                               programmableBlocks);
 }
 
 EBPFTestBackend *EBPFTestgenTarget::getTestBackendImpl(

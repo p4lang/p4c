@@ -1,4 +1,4 @@
-function_e.p4(22): [--Werror=type-error] error: f
+function_e.p4(22): [--Werror=type-error] error: 'f'
         f(); // not enough arguments
         ^^^
   ---- Actual error:
@@ -12,7 +12,7 @@ function_e.p4(16): Function type 'f' does not match invocation type '<Method cal
 function_e.p4(22)
           f(); // not enough arguments
           ^^^
-function_e.p4(23): [--Werror=type-error] error: f
+function_e.p4(23): [--Werror=type-error] error: 'f'
         f(1w1, 1w0); // too many arguments
         ^^^^^^^^^^^
   ---- Actual error:
@@ -26,7 +26,7 @@ function_e.p4(16): Function type 'f' does not match invocation type '<Method cal
 function_e.p4(23)
           f(1w1, 1w0); // too many arguments
           ^^^^^^^^^^^
-function_e.p4(24): [--Werror=type-error] error: f
+function_e.p4(24): [--Werror=type-error] error: 'f'
         f<bit>(1w0); // too many type arguments
         ^^^^^^^^^^^
   ---- Actual error:
@@ -40,7 +40,7 @@ function_e.p4(16): Function type 'f' does not match invocation type '<Method cal
 function_e.p4(24)
           f<bit>(1w0); // too many type arguments
           ^^^^^^^^^^^
-function_e.p4(25): [--Werror=type-error] error: g
+function_e.p4(25): [--Werror=type-error] error: 'g'
         g<bit, bit>(); // too many type arguments
         ^^^^^^^^^^^^^
   ---- Actual error:

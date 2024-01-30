@@ -1,4 +1,4 @@
-issue345.p4(19): [--Werror=type-error] error: h
+issue345.p4(19): [--Werror=type-error] error: 'h'
         H h = 0;
         ^^^^^^^^
   ---- Actual error:
