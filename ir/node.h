@@ -50,6 +50,14 @@ class IndexedVector;  // IWYU pragma: keep
 
 // node interface
 class INode : public Util::IHasSourceInfo, public IHasDbPrint, public ICastable {
+ private:
+    template <class, class = void>
+    struct has_static_type_name : std::false_type {};
+
+    template <class T>
+    struct has_static_type_name<T, std::void_t<decltype(T::static_type_name())>> : std::true_type {
+    };
+
  public:
     virtual ~INode() {}
     virtual const Node *getNode() const = 0;
@@ -60,6 +68,24 @@ class INode : public Util::IHasSourceInfo, public IHasDbPrint, public ICastable 
     virtual cstring node_type_name() const = 0;
     virtual void validate() const {}
     virtual const Annotation *getAnnotation(cstring) const { return nullptr; }
+
+    // default checkedTo implementation for nodes: just fallback to generic ICastable method
+    template <typename T>
+    const T *checkedTo(
+        typename std::enable_if_t<!has_static_type_name<T>::value> * = nullptr) const {
+        return ICastable::checkedTo<T>();
+    }
+
+    // alternative checkedTo implementation to produces slightly better error message
+    // due to node_type_name() / static_type_name() being available
+    template <typename T>
+    const T *checkedTo(
+        typename std::enable_if_t<has_static_type_name<T>::value> * = nullptr) const {
+        const auto *result = to<T>();
+        BUG_CHECK(result, "Cast failed: %1% with type %2% is not a %3%.", this, node_type_name(),
+                  T::static_type_name());
+        return result;
+    }
 };
 
 class Node : public virtual INode {
