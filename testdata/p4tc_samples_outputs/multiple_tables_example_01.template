@@ -84,4 +84,10 @@ $TC p4template create table/multiple_tables_example_01/MainControlImpl/set_all_o
 	act name multiple_tables_example_01/MainControlImpl/sendtoport \
 	act name multiple_tables_example_01/MainControlImpl/drop
 $TC p4template update table/multiple_tables_example_01/MainControlImpl/set_all_options default_miss_action permissions 0x1024 action multiple_tables_example_01/MainControlImpl/drop
+$TC p4template create table/multiple_tables_example_01/MainControlImpl/set_all_options entry hdr.ipv4.srcAddr 1000 hdr.tcp.srcPort 10 hdr.ipv4.fragOffset 10 hdr.ipv4.flags 1 action multiple_tables_example_01/MainControlImpl/tcp_syn_packet permissions 0x1024
+$TC p4template create table/multiple_tables_example_01/MainControlImpl/set_all_options entry hdr.ipv4.srcAddr 2000 hdr.tcp.srcPort 20 hdr.ipv4.fragOffset 20 hdr.ipv4.flags 2 action multiple_tables_example_01/MainControlImpl/tcp_fin_or_rst_packet permissions 0x1024
+$TC p4template create table/multiple_tables_example_01/MainControlImpl/set_all_options entry hdr.ipv4.srcAddr 3000 hdr.tcp.srcPort 30 hdr.ipv4.fragOffset 30 hdr.ipv4.flags 3 action multiple_tables_example_01/MainControlImpl/tcp_fin_or_rst_packet permissions 0x1024
+$TC p4template create table/multiple_tables_example_01/MainControlImpl/set_all_options entry hdr.ipv4.srcAddr 4000 hdr.tcp.srcPort 40 hdr.ipv4.fragOffset 40 hdr.ipv4.flags 4 action multiple_tables_example_01/MainControlImpl/default_route_drop permissions 0x1024
+$TC p4template create table/multiple_tables_example_01/MainControlImpl/set_all_options entry hdr.ipv4.srcAddr 5000 hdr.tcp.srcPort 50 hdr.ipv4.fragOffset 50 hdr.ipv4.flags 5 action multiple_tables_example_01/MainControlImpl/next_hop permissions 0x1024
+$TC p4template create table/multiple_tables_example_01/MainControlImpl/set_all_options entry hdr.ipv4.srcAddr 6000 hdr.tcp.srcPort 60 hdr.ipv4.fragOffset 60 hdr.ipv4.flags 6 action multiple_tables_example_01/MainControlImpl/sendtoport permissions 0x1024
 $TC p4template update pipeline/multiple_tables_example_01 state ready

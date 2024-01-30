@@ -17,6 +17,8 @@ and limitations under the License.
 #ifndef BACKENDS_TC_BACKEND_H_
 #define BACKENDS_TC_BACKEND_H_
 
+#include <deque>
+
 #include "backends/ebpf/psa/ebpfPsaGen.h"
 #include "ebpfCodeGen.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -26,6 +28,7 @@ and limitations under the License.
 #include "ir/ir.h"
 #include "lib/error.h"
 #include "lib/nullstream.h"
+#include "lib/stringify.h"
 #include "options.h"
 #include "pnaProgramStructure.h"
 #include "tcAnnotations.h"
@@ -73,6 +76,7 @@ class ConvertToBackendIR : public Inspector {
     bool isDuplicateOrNoAction(const IR::P4Action *action);
     void updateDefaultHitAction(const IR::P4Table *t, IR::TCTable *tdef);
     void updateDefaultMissAction(const IR::P4Table *t, IR::TCTable *tdef);
+    void updateConstEntries(const IR::P4Table *t, IR::TCTable *tdef);
     void updateMatchType(const IR::P4Table *t, IR::TCTable *tabledef);
     bool isPnaParserMeta(const IR::Member *mem);
     bool isPnaMainInputMeta(const IR::Member *mem);
