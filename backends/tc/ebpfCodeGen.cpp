@@ -127,9 +127,7 @@ void PNAArchTC::emit(EBPF::CodeBuilder *builder) const {
      * 1. Automatically generated comment
      * 2. Includes
      * 3. Headers, structs
-     * 4. BPF map definitions.
-     * 5. XDP helper program.
-     * 6. TC Pipeline program for post-parser.
+     * 4. TC Pipeline program for post-parser.
      */
 
     // 1. Automatically generated comment.
@@ -149,12 +147,7 @@ void PNAArchTC::emit(EBPF::CodeBuilder *builder) const {
     emitTypes(builder);
 
     /*
-     * 4. XDP helper program.
-     */
-    xdp->emit(builder);
-
-    /*
-     * 5. TC Pipeline program for post-parser.
+     * 4. TC Pipeline program for post-parser.
      */
     pipeline->emit(builder);
 
