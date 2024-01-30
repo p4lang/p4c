@@ -28,18 +28,11 @@ static const std::vector<const IR::IDeclaration *> empty;
 
 ResolutionContext::ResolutionContext() { anyOrder = P4CContext::get().options().isv1(); }
 
-Util::Enumerator<const IR::IDeclaration *> *ResolutionContext::getDeclarations(
-    const IR::INamespace *ns) const {
-    auto nsIt = namespaceDecls.find(ns);
-    auto *declVec = nsIt != namespaceDecls.end() ? nsIt->second : memoizeDeclarations(ns);
-    return Util::Enumerator<const IR::IDeclaration *>::createEnumerator(*declVec);
-}
-
 std::vector<const IR::IDeclaration *> *ResolutionContext::memoizeDeclarations(
     const IR::INamespace *ns) const {
     auto decls = ns->getDeclarations();
     if (auto nest = ns->to<IR::INestedNamespace>()) {
-        // boost bug -- trying to iterate with an adaptor over an unnamed temp crashes
+        // boost::adaptors::reverse expects a reference
         auto temp = nest->getNestedNamespaces();
         for (auto nn : boost::adaptors::reverse(temp)) decls = nn->getDeclarations()->concat(decls);
     }
@@ -47,21 +40,30 @@ std::vector<const IR::IDeclaration *> *ResolutionContext::memoizeDeclarations(
     return (namespaceDecls[ns] = decls->toVector());
 }
 
+Util::Enumerator<const IR::IDeclaration *> *ResolutionContext::getDeclarations(
+    const IR::INamespace *ns) const {
+    auto nsIt = namespaceDecls.find(ns);
+    auto *declVec = nsIt != namespaceDecls.end() ? nsIt->second : memoizeDeclarations(ns);
+    return Util::Enumerator<const IR::IDeclaration *>::createEnumerator(*declVec);
+}
+
+std::unordered_multimap<cstring, const IR::IDeclaration *> &ResolutionContext::memoizeDeclsByName(
+    const IR::INamespace *ns) const {
+    auto &namesToDecls = namespaceDeclNames[ns];
+    for (auto *d : *getDeclarations(ns)) namesToDecls.emplace(d->getName().name, d);
+    return namesToDecls;
+}
+
 Util::Enumerator<const IR::IDeclaration *> *ResolutionContext::getDeclsByName(
     const IR::INamespace *ns, cstring name) const {
-    auto nsIt = declNames.find(ns);
     std::function<const IR::IDeclaration *(
         const std::pair<const cstring, const IR::IDeclaration *> &)>
         second = [](const auto &entry) { return entry.second; };
 
-    if (nsIt != declNames.end()) {
-        auto range = nsIt->second.equal_range(name);
-        return Util::enumerate(range.first, range.second)->map(second);
-    }
+    auto nsIt = namespaceDeclNames.find(ns);
+    auto &namesToDecls = nsIt != namespaceDeclNames.end() ? nsIt->second : memoizeDeclsByName(ns);
 
-    for (auto *d : *getDeclarations(ns)) declNames[ns].emplace(d->getName().name, d);
-
-    auto range = declNames[ns].equal_range(name);
+    auto range = namesToDecls.equal_range(name);
     return Util::enumerate(range.first, range.second)->map(second);
 }
 
@@ -185,7 +187,7 @@ const std::vector<const IR::IDeclaration *> *ResolutionContext::lookup(
                   current->node_type_name());
     }
     if (auto nested = current->to<IR::INestedNamespace>()) {
-        // boost bug -- trying to iterate with an adaptor over an unnamed temp crashes
+        // boost::adaptors::reverse expects a reference
         auto temp = nested->getNestedNamespaces();
         for (auto nn : boost::adaptors::reverse(temp)) {
             auto rv = lookup(nn, name, type);

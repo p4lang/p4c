@@ -29,11 +29,21 @@ enum class ResolutionType { Any, Type, TypeVariable };
 
 /// Visitor mixin for looking up names in enclosing scopes from the Visitor::Context
 class ResolutionContext : virtual public Visitor, public DeclarationLookup {
+ private:
+    // Returns a vector of the decls that exist in the given namespace, and caches the result
+    // for future lookups.
+    std::vector<const IR::IDeclaration *> *memoizeDeclarations(const IR::INamespace *ns) const;
+
+    // Returns a mapping from name -> decl for the given namespace, and caches the result for
+    // future lookups.
+    std::unordered_multimap<cstring, const IR::IDeclaration *> &memoizeDeclsByName(
+        const IR::INamespace *ns) const;
+
     mutable std::unordered_map<const IR::INamespace *, std::vector<const IR::IDeclaration *> *>
         namespaceDecls;
     mutable std::unordered_map<const IR::INamespace *,
                                std::unordered_multimap<cstring, const IR::IDeclaration *>>
-        declNames;
+        namespaceDeclNames;
 
  protected:
     // Note that all errors have been merged by the parser into
@@ -71,15 +81,16 @@ class ResolutionContext : virtual public Visitor, public DeclarationLookup {
     /// only return type nodes.
     virtual const IR::IDeclaration *resolvePath(const IR::Path *path, bool isType) const;
 
-    // Resolve a refrence to a type @p type.
+    /// Resolve a refrence to a type @p type.
     const IR::Type *resolveType(const IR::Type *type) const;
 
     const IR::IDeclaration *getDeclaration(const IR::Path *path, bool notNull = false) const;
     const IR::IDeclaration *getDeclaration(const IR::This *, bool notNull = false) const;
 
+    /// Returns the set of decls that exist in the given namespace.
     Util::Enumerator<const IR::IDeclaration *> *getDeclarations(const IR::INamespace *ns) const;
-    std::vector<const IR::IDeclaration *> *memoizeDeclarations(const IR::INamespace *ns) const;
 
+    /// Returns the set of decls with the given name that exist in the given namespace.
     Util::Enumerator<const IR::IDeclaration *> *getDeclsByName(const IR::INamespace *ns,
                                                                cstring name) const;
 };
