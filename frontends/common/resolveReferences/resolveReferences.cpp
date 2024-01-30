@@ -52,9 +52,7 @@ Util::Enumerator<const IR::IDeclaration *> *ResolutionContext::getDeclsByName(
     auto nsIt = declNames.find(ns);
     std::function<const IR::IDeclaration *(
         const std::pair<const cstring, const IR::IDeclaration *> &)>
-        second = [](const std::pair<const cstring, const IR::IDeclaration *> &entry) {
-            return entry.second;
-        };
+        second = [](const auto &entry) { return entry.second; };
 
     if (nsIt != declNames.end()) {
         auto range = nsIt->second.equal_range(name);
