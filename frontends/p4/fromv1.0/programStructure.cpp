@@ -1139,7 +1139,7 @@ static bool sameBitsType(const IR::Node *errorPosition, const IR::Type *left,
 static bool isSaturatedField(const IR::Expression *expr) {
     auto member = expr->to<IR::Member>();
     if (!member) return false;
-    auto header_type = dynamic_cast<const IR::Type_StructLike *>(member->expr->type);
+    auto header_type = member->expr->type->to<IR::Type_StructLike>();
     if (!header_type) return false;
     auto field = header_type->getField(member->member.name);
     if (field && field->getAnnotation("saturating")) {

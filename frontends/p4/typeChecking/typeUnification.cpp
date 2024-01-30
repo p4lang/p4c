@@ -450,9 +450,8 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
         }
         return constraint->reportError(constraints->getCurrentSubstitution());
     } else if (dest->is<IR::Type_Declaration>() && src->is<IR::Type_Declaration>()) {
-        bool canUnify = typeid(dest) == typeid(src) && dest->to<IR::Type_Declaration>()->name ==
-                                                           src->to<IR::Type_Declaration>()->name;
-        if (!canUnify) return constraint->reportError(constraints->getCurrentSubstitution());
+        if (dest->to<IR::Type_Declaration>()->name != src->to<IR::Type_Declaration>()->name)
+            return constraint->reportError(constraints->getCurrentSubstitution());
         return true;
     } else if (auto dstack = dest->to<IR::Type_Stack>()) {
         if (auto sstack = src->to<IR::Type_Stack>()) {

@@ -192,7 +192,7 @@ bool UBPFStateTranslationVisitor::preorder(const IR::Member *expression) {
 void UBPFStateTranslationVisitor::compileExtractField(const IR::Expression *expr, cstring field,
                                                       unsigned alignment, EBPF::EBPFType *type,
                                                       bool advanceCursor) {
-    unsigned widthToExtract = dynamic_cast<EBPF::IHasWidth *>(type)->widthInBits();
+    unsigned widthToExtract = type->as<EBPF::IHasWidth>().widthInBits();
     auto program = state->parser->program;
 
     if (widthToExtract <= 64) {
@@ -298,7 +298,7 @@ void UBPFStateTranslationVisitor::compileExtract(const IR::Expression *destinati
     for (auto f : ht->fields) {
         auto ftype = state->parser->typeMap->getType(f);
         auto etype = UBPFTypeFactory::instance->create(ftype);
-        auto et = dynamic_cast<EBPF::IHasWidth *>(etype);
+        auto et = etype->to<EBPF::IHasWidth>();
         if (et == nullptr) {
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                     "Only headers with fixed widths supported %1%", f);
@@ -323,7 +323,7 @@ void UBPFStateTranslationVisitor::compileLookahead(const IR::Expression *destina
     if (type->to<IR::Type_Bits>() == nullptr)
         BUG("lookahead<%1%>(): only bit type is supported yet", type);
 
-    unsigned width = dynamic_cast<EBPF::IHasWidth *>(etype)->widthInBits();
+    unsigned width = etype->as<EBPF::IHasWidth>().widthInBits();
     if (width > 64) BUG("lookahead<%1%>(): more than 64 bits not supported yet", type);
 
     // check packet's length

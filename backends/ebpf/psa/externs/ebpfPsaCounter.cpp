@@ -196,7 +196,7 @@ void EBPFCounterPSA::emitDirectMethodInvocation(CodeBuilder *builder,
     BUG_CHECK(method->expr->arguments->size() == 0, "Expected no arguments for %1%", method->expr);
 
     cstring target = valuePtr + "->" + instanceName;
-    auto pipeline = dynamic_cast<const EBPFPipeline *>(program);
+    auto pipeline = program->to<EBPFPipeline>();
     CHECK_NULL(pipeline);
 
     cstring msgStr =

@@ -84,24 +84,23 @@ class SimpleSwitchExpressionConverter : public ExpressionConverter {
     }
 
     bool isStandardMetadataParameter(const IR::Parameter *param) {
-        auto st = dynamic_cast<V1ProgramStructure *>(structure);
-        auto params = st->parser->getApplyParameters();
+        auto params = structure->parser->getApplyParameters();
         if (params->size() != 4) {
-            modelError("%1%: Expected 4 parameter for parser", st->parser);
+            modelError("%1%: Expected 4 parameter for parser", structure->parser);
             return false;
         }
         if (params->parameters.at(3) == param) return true;
 
-        params = st->ingress->getApplyParameters();
+        params = structure->ingress->getApplyParameters();
         if (params->size() != 3) {
-            modelError("%1%: Expected 3 parameter for ingress", st->ingress);
+            modelError("%1%: Expected 3 parameter for ingress", structure->ingress);
             return false;
         }
         if (params->parameters.at(2) == param) return true;
 
-        params = st->egress->getApplyParameters();
+        params = structure->egress->getApplyParameters();
         if (params->size() != 3) {
-            modelError("%1%: Expected 3 parameter for egress", st->egress);
+            modelError("%1%: Expected 3 parameter for egress", structure->egress);
             return false;
         }
         if (params->parameters.at(2) == param) return true;

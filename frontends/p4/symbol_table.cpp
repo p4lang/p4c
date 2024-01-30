@@ -24,7 +24,7 @@ limitations under the License.
 
 namespace Util {
 
-class NamedSymbol {
+class NamedSymbol : public ICastable {
  protected:
     Util::SourceInfo sourceInfo;
     Namespace *parent;
@@ -187,7 +187,8 @@ void ProgramStructure::declareObject(IR::ID id, cstring type) {
     LOG3("ProgramStructure: adding object " << id << " with type " << type);
     auto type_sym = lookup(type);
     auto o = new Object(id.name, id.srcInfo);
-    if (auto tns = dynamic_cast<const Namespace *>(type_sym)) o->setNamespace(tns);
+    if (type_sym)
+        if (auto tns = type_sym->to<Namespace>()) o->setNamespace(tns);
     currentNamespace->declare(o);
 }
 
@@ -235,12 +236,12 @@ NamedSymbol *ProgramStructure::lookup(cstring identifier) {
 
 ProgramStructure::SymbolKind ProgramStructure::lookupIdentifier(cstring identifier) {
     NamedSymbol *ns = lookup(identifier);
-    if (ns == nullptr || dynamic_cast<Object *>(ns) != nullptr) {
+    if (ns == nullptr || ns->is<Object>()) {
         LOG2("Identifier " << identifier);
         if (ns && ns->template_args) return ProgramStructure::SymbolKind::TemplateIdentifier;
         return ProgramStructure::SymbolKind::Identifier;
     }
-    if (dynamic_cast<SimpleType *>(ns) != nullptr || dynamic_cast<ContainerType *>(ns) != nullptr) {
+    if (ns->is<SimpleType>() || ns->is<ContainerType>()) {
         if (ns && ns->template_args) return ProgramStructure::SymbolKind::TemplateType;
         return ProgramStructure::SymbolKind::Type;
         LOG2("Type " << identifier);

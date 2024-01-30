@@ -40,6 +40,12 @@ class ICastable {
 
     /// Tries to convert the class to type T. Returns a nullptr if the cast fails.
     template <typename T>
+    T &as() {
+        return dynamic_cast<T &>(*this);
+    }
+
+    /// Tries to convert the class to type T. Returns a nullptr if the cast fails.
+    template <typename T>
     T *to() {
         return dynamic_cast<T *>(this);
     }

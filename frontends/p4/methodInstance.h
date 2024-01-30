@@ -130,7 +130,7 @@ class ApplyMethod final : public MethodInstance {
 
  public:
     const IR::IApply *applyObject;
-    bool isApply() const { return true; }
+    bool isApply() const override { return true; }
     bool isTableApply() const { return object->is<IR::P4Table>(); }
 };
 

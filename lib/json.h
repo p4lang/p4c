@@ -65,7 +65,7 @@ class JsonValue final : public IJson {
     JsonValue(cstring s) : tag(Kind::String), str(s) {}             // NOLINT
     JsonValue(const std::string &s) : tag(Kind::String), str(s) {}  // NOLINT
     JsonValue(const char *s) : tag(Kind::String), str(s) {}         // NOLINT
-    void serialize(std::ostream &out) const;
+    void serialize(std::ostream &out) const override;
 
     bool operator==(const big_int &v) const;
     // is_integral is true for bool
@@ -110,7 +110,7 @@ class JsonArray final : public IJson, public std::vector<IJson *> {
     friend class Test::TestJson;
 
  public:
-    void serialize(std::ostream &out) const;
+    void serialize(std::ostream &out) const override;
     JsonArray *clone() const { return new JsonArray(*this); }
     JsonArray *append(IJson *value);
     JsonArray *append(big_int v) {
@@ -156,7 +156,7 @@ class JsonObject final : public IJson, public ordered_map<cstring, IJson *> {
 
  public:
     JsonObject() = default;
-    void serialize(std::ostream &out) const;
+    void serialize(std::ostream &out) const override;
     JsonObject *emplace(cstring label, IJson *value);
     JsonObject *emplace_non_null(cstring label, IJson *value);
     JsonObject *emplace(cstring label, big_int v) {

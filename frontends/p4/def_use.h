@@ -32,7 +32,7 @@ class StorageFactory;
 class LocationSet;
 
 /// Abstraction for something that is has a left value (variable, parameter)
-class StorageLocation : public IHasDbPrint {
+class StorageLocation : public IHasDbPrint, public ICastable {
     static unsigned crtid;
 
  public:
@@ -42,16 +42,6 @@ class StorageLocation : public IHasDbPrint {
     const cstring name;
     StorageLocation(const IR::Type *type, cstring name) : id(crtid++), type(type), name(name) {
         CHECK_NULL(type);
-    }
-    template <class T>
-    const T *to() const {
-        auto result = dynamic_cast<const T *>(this);
-        return result;
-    }
-    template <class T>
-    bool is() const {
-        auto result = dynamic_cast<const T *>(this);
-        return result != nullptr;
     }
     void dbprint(std::ostream &out) const override { out << id << " " << name; }
     cstring toString() const { return name; }

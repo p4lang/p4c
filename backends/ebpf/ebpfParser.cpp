@@ -267,7 +267,7 @@ bool StateTranslationVisitor::preorder(const IR::SelectCase *selectCase) {
 void StateTranslationVisitor::compileExtractField(const IR::Expression *expr,
                                                   const IR::StructField *field, unsigned alignment,
                                                   EBPFType *type) {
-    unsigned widthToExtract = dynamic_cast<IHasWidth *>(type)->widthInBits();
+    unsigned widthToExtract = type->as<IHasWidth>().widthInBits();
     auto program = state->parser->program;
     cstring msgStr;
     cstring fieldName = field->name.name;
@@ -470,7 +470,7 @@ void StateTranslationVisitor::compileExtract(const IR::Expression *destination) 
     for (auto f : ht->fields) {
         auto ftype = state->parser->typeMap->getType(f);
         auto etype = EBPFTypeFactory::instance->create(ftype);
-        auto et = dynamic_cast<IHasWidth *>(etype);
+        auto et = etype->to<IHasWidth>();
         if (et == nullptr) {
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                     "Only headers with fixed widths supported %1%", f);

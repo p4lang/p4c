@@ -219,8 +219,8 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
         "int %s(%s *%s, %s %s *%s, "
         "struct pna_global_metadata *%s",
         func_name, builder->target->packetDescriptorType(), model.CPacketName.str(),
-        parser->headerType->to<EBPF::EBPFStructType>()->kind,
-        parser->headerType->to<EBPF::EBPFStructType>()->name, parser->headers->name.name,
+        parser->headerType->as<EBPF::EBPFStructType>().kind,
+        parser->headerType->as<EBPF::EBPFStructType>().name, parser->headers->name.name,
         compilerGlobalMetadata);
 
     builder->append(")");
@@ -328,8 +328,8 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
         builder->appendFormat("ret = %s(skb, ", func_name);
 
         builder->appendFormat("(%s %s *) %s, %s);",
-                              parser->headerType->to<EBPF::EBPFStructType>()->kind,
-                              parser->headerType->to<EBPF::EBPFStructType>()->name,
+                              parser->headerType->as<EBPF::EBPFStructType>().kind,
+                              parser->headerType->as<EBPF::EBPFStructType>().name,
                               parser->headers->name.name, compilerGlobalMetadata);
 
         builder->newline();
@@ -370,8 +370,8 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
         builder->appendFormat("ret = %s(skb, ", func_name);
 
         builder->appendFormat("(%s %s *) %s, %s);",
-                              parser->headerType->to<EBPF::EBPFStructType>()->kind,
-                              parser->headerType->to<EBPF::EBPFStructType>()->name,
+                              parser->headerType->as<EBPF::EBPFStructType>().kind,
+                              parser->headerType->as<EBPF::EBPFStructType>().name,
                               parser->headers->name.name, compilerGlobalMetadata);
 
         builder->newline();
@@ -516,7 +516,7 @@ void EBPFPnaParser::emit(EBPF::CodeBuilder *builder) {
 void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
                                                      const IR::StructField *field,
                                                      unsigned alignment, EBPF::EBPFType *type) {
-    auto width = dynamic_cast<EBPF::IHasWidth *>(type);
+    auto width = type->to<EBPF::IHasWidth>();
     if (width == nullptr) return;
     unsigned widthToExtract = width->widthInBits();
     auto program = state->parser->program;
@@ -684,7 +684,7 @@ void EBPFTablePNA::emitKeyType(EBPF::CodeBuilder *builder) {
     if (keyGenerator != nullptr) {
         for (auto c : keyGenerator->keyElements) {
             auto mtdecl = program->refMap->getDeclaration(c->matchType->path, true);
-            auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
+            auto matchType = mtdecl->getNode()->checkedTo<IR::Declaration_ID>();
 
             if (!isMatchTypeSupported(matchType)) {
                 ::error(ErrorType::ERR_UNSUPPORTED, "Match of type %1% not supported",
@@ -695,7 +695,7 @@ void EBPFTablePNA::emitKeyType(EBPF::CodeBuilder *builder) {
             cstring fieldName = ::get(keyFieldNames, c);
 
             if (ebpfType->is<EBPF::EBPFScalarType>() &&
-                ebpfType->to<EBPF::EBPFScalarType>()->alignment() > structAlignment) {
+                ebpfType->as<EBPF::EBPFScalarType>().alignment() > structAlignment) {
                 structAlignment = 8;
             }
 
@@ -773,7 +773,7 @@ void EBPFTablePNA::emitValueStructStructure(EBPF::CodeBuilder *builder) {
 
     for (auto a : actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
-        auto action = adecl->getNode()->to<IR::P4Action>();
+        auto action = adecl->getNode()->checkedTo<IR::P4Action>();
         if (action->name.originalName == P4::P4CoreLibrary::instance().noAction.name) continue;
         cstring name = EBPF::EBPFObject::externalName(action);
         emitActionArguments(builder, action, name);
@@ -823,7 +823,7 @@ void EBPFTablePNA::emitAction(EBPF::CodeBuilder *builder, cstring valueName,
 
     for (auto a : actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
-        auto action = adecl->getNode()->to<IR::P4Action>();
+        auto action = adecl->getNode()->checkedTo<IR::P4Action>();
         cstring name = EBPF::EBPFObject::externalName(action), msgStr, convStr;
         builder->emitIndent();
         cstring actionName = p4ActionToActionIDName(action);
@@ -835,7 +835,7 @@ void EBPFTablePNA::emitAction(EBPF::CodeBuilder *builder, cstring valueName,
         builder->target->emitTraceMessage(builder, msgStr.c_str());
         for (auto param : *(action->parameters)) {
             auto etype = EBPF::EBPFTypeFactory::instance->create(param->type);
-            unsigned width = dynamic_cast<EBPF::IHasWidth *>(etype)->widthInBits();
+            unsigned width = etype->as<EBPF::IHasWidth>().widthInBits();
 
             if (width <= 64) {
                 convStr = Util::printf_format("(unsigned long long) (%s->u.%s.%s)", valueName, name,
@@ -947,7 +947,7 @@ void EBPFTablePNA::emitValueActionIDNames(EBPF::CodeBuilder *builder) {
     builder->emitIndent();
     for (auto a : actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
-        auto action = adecl->getNode()->to<IR::P4Action>();
+        auto action = adecl->getNode()->checkedTo<IR::P4Action>();
         unsigned int action_idx = tcIR->getActionId(tcIR->externalName(action));
         builder->emitIndent();
         builder->appendFormat("#define %s %d", p4ActionToActionIDName(action), action_idx);
@@ -982,7 +982,7 @@ bool IngressDeparserPNA::build() {
 void IngressDeparserPNA::emitPreDeparser(EBPF::CodeBuilder *builder) {
     builder->emitIndent();
     CHECK_NULL(program);
-    auto pipeline = dynamic_cast<const EBPF::EBPFPipeline *>(program);
+    auto pipeline = program->checkedTo<EBPF::EBPFPipeline>();
     builder->appendFormat("if (%s->drop) ", pipeline->compilerGlobalMetadata);
     builder->blockStart();
     builder->target->emitTraceMessage(builder, "PreDeparser: dropping packet..");
@@ -1072,7 +1072,7 @@ const PNAEbpfGenerator *ConvertToEbpfPNA::build(const IR::ToplevelBlock *tlb) {
     /*
      * PIPELINE
      */
-    auto pipeline = tlb->getMain()->to<IR::PackageBlock>();
+    auto pipeline = tlb->getMain()->checkedTo<IR::PackageBlock>();
     auto pipelineParser = pipeline->getParameterValue("main_parser");
     BUG_CHECK(pipelineParser != nullptr, "No parser block found");
     auto pipelineControl = pipeline->getParameterValue("main_control");
@@ -1083,9 +1083,9 @@ const PNAEbpfGenerator *ConvertToEbpfPNA::build(const IR::ToplevelBlock *tlb) {
     auto xdp = new EBPF::XDPHelpProgram(options);
 
     auto pipeline_converter = new ConvertToEbpfPipelineTC(
-        "tc-ingress", EBPF::TC_INGRESS, options, pipelineParser->to<IR::ParserBlock>(),
-        pipelineControl->to<IR::ControlBlock>(), pipelineDeparser->to<IR::ControlBlock>(), refmap,
-        typemap, tcIR);
+        "tc-ingress", EBPF::TC_INGRESS, options, pipelineParser->checkedTo<IR::ParserBlock>(),
+        pipelineControl->checkedTo<IR::ControlBlock>(),
+        pipelineDeparser->checkedTo<IR::ControlBlock>(), refmap, typemap, tcIR);
     pipeline->apply(*pipeline_converter);
     tlb->getProgram()->apply(*pipeline_converter);
     auto tcIngress = pipeline_converter->getEbpfPipeline();
@@ -1173,7 +1173,7 @@ bool ConvertToEBPFParserPNA::preorder(const IR::P4ValueSet *pvs) {
 bool ConvertToEBPFControlPNA::preorder(const IR::ControlBlock *ctrl) {
     control = new EBPF::EBPFControlPSA(program, ctrl, parserHeaders);
     program->control = control;
-    program->to<EBPF::EBPFPipeline>()->control = control;
+    program->as<EBPF::EBPFPipeline>().control = control;
     control->hitVariable = refmap->newName("hit");
     auto pl = ctrl->container->type->applyParams;
     unsigned numOfParams = 4;
@@ -1205,8 +1205,8 @@ bool ConvertToEBPFControlPNA::preorder(const IR::ControlBlock *ctrl) {
 
     for (auto a : ctrl->constantValue) {
         auto b = a.second;
-        if (b->is<IR::Block>()) {
-            this->visit(b->to<IR::Block>());
+        if (auto *block = b->to<IR::Block>()) {
+            this->visit(block);
         }
     }
     return true;
@@ -1605,7 +1605,7 @@ ActionTranslationVisitorPNA::ActionTranslationVisitorPNA(const EBPF::EBPFProgram
                                                          const ConvertToBackendIR *tcIR)
     : EBPF::CodeGenInspector(program->refMap, program->typeMap),
       EBPF::ActionTranslationVisitor(valueName, program),
-      ControlBodyTranslatorPNA(program->to<EBPF::EBPFPipeline>()->control, tcIR, table),
+      ControlBodyTranslatorPNA(program->as<EBPF::EBPFPipeline>().control, tcIR, table),
       table(table) {}
 
 bool ActionTranslationVisitorPNA::preorder(const IR::PathExpression *pe) {
@@ -1639,8 +1639,8 @@ cstring ActionTranslationVisitorPNA::getParamName(const IR::PathExpression *expr
 
 EBPF::ActionTranslationVisitor *EBPFTablePNA::createActionTranslationVisitor(
     cstring valueName, const EBPF::EBPFProgram *program) const {
-    return new ActionTranslationVisitorPNA(program->to<EBPF::EBPFPipeline>(), valueName, this,
-                                           tcIR);
+    return new ActionTranslationVisitorPNA(program->checkedTo<EBPF::EBPFPipeline>(), valueName,
+                                           this, tcIR);
 }
 
 void EBPFTablePNA::validateKeys() const {
@@ -1651,7 +1651,7 @@ void EBPFTablePNA::validateKeys() const {
         [](const IR::KeyElement *key) { return key->matchType->path->name.name != "selector"; });
     for (auto it : keyGenerator->keyElements) {
         auto mtdecl = program->refMap->getDeclaration(it->matchType->path, true);
-        auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
+        auto matchType = mtdecl->getNode()->checkedTo<IR::Declaration_ID>();
         if (matchType->name.name == P4::P4CoreLibrary::instance().lpmMatch.name) {
             if (it != *lastKey) {
                 ::error(ErrorType::ERR_UNSUPPORTED, "%1% field key must be at the end of whole key",
@@ -1712,7 +1712,7 @@ void DeparserHdrEmitTranslatorPNA::processMethod(const P4::ExternMethod *method)
             for (auto f : headerToEmit->fields) {
                 auto ftype = deparser->program->typeMap->getType(f);
                 auto etype = EBPF::EBPFTypeFactory::instance->create(ftype);
-                auto et = dynamic_cast<EBPF::IHasWidth *>(etype);
+                auto et = etype->to<EBPF::IHasWidth>();
                 if (et == nullptr) {
                     ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                             "Only headers with fixed widths supported %1%", f);
@@ -1746,7 +1746,7 @@ void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring
                                              EBPF::EBPFType *type, bool noEndiannessConversion) {
     auto program = deparser->program;
 
-    auto et = dynamic_cast<EBPF::IHasWidth *>(type);
+    auto et = type->to<EBPF::IHasWidth>();
     if (et == nullptr) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                 "Only headers with fixed widths supported %1%", hdrExpr);

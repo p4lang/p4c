@@ -149,7 +149,7 @@ void DeparserHdrEmitTranslator::processMethod(const P4::ExternMethod *method) {
             for (auto f : headerToEmit->fields) {
                 auto ftype = deparser->program->typeMap->getType(f);
                 auto etype = EBPFTypeFactory::instance->create(ftype);
-                auto et = dynamic_cast<EBPF::IHasWidth *>(etype);
+                auto et = etype->to<IHasWidth>();
                 if (et == nullptr) {
                     ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                             "Only headers with fixed widths supported %1%", f);
@@ -171,7 +171,7 @@ void DeparserHdrEmitTranslator::emitField(CodeBuilder *builder, cstring field,
                                           EBPF::EBPFType *type) {
     auto program = deparser->program;
 
-    auto et = dynamic_cast<EBPF::IHasWidth *>(type);
+    auto et = type->to<IHasWidth>();
     if (et == nullptr) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                 "Only headers with fixed widths supported %1%", hdrExpr);

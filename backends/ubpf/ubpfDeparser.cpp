@@ -110,7 +110,7 @@ UBPFDeparserTranslationVisitor::UBPFDeparserTranslationVisitor(const UBPFDeparse
 
 void UBPFDeparserTranslationVisitor::compileEmitField(const IR::Expression *expr, cstring field,
                                                       unsigned alignment, EBPF::EBPFType *type) {
-    auto et = dynamic_cast<EBPF::IHasWidth *>(type);
+    auto et = type->to<EBPF::IHasWidth>();
     if (et == nullptr) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                 "Only headers with fixed widths supported %1%", expr);
@@ -249,7 +249,7 @@ void UBPFDeparserTranslationVisitor::compileEmit(const IR::Vector<IR::Argument> 
     for (auto f : ht->fields) {
         auto ftype = typeMap->getType(f);
         auto etype = UBPFTypeFactory::instance->create(ftype);
-        auto et = dynamic_cast<EBPF::IHasWidth *>(etype);
+        auto et = etype->to<EBPF::IHasWidth>();
         if (et == nullptr) {
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                     "Only headers with fixed widths supported %1%", f);
