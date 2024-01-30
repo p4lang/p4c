@@ -325,7 +325,8 @@ void ConvertToBackendIR::updateConstEntries(const IR::P4Table *t, IR::TCTable *t
             }
             keyList.emplace(keyString, key);
         }
-        tabledef->addConstEntries(e->action->toString(), keyList);
+        IR::TCEntry *constEntry = new IR::TCEntry(e->action->toString(), keyList);
+        tabledef->addConstEntries(constEntry);
     }
 }
 
