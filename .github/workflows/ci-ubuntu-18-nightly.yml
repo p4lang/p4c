@@ -6,12 +6,14 @@ on:
     - cron: "0 0 * * *"
   pull_request:
     branches: [main]
+  push:
+    branches: [main]
 
 jobs:
   # Build with gcc and test p4c on Ubuntu 18.04.
   test-ubuntu18:
     # Only run on pull requests with the "run-ubuntu18" label.
-    if: contains(github.event.pull_request.labels.*.name, 'run-ubuntu18')
+    if: ${{ github.event_name == 'schedule' }} or contains(github.event.pull_request.labels.*.name, 'run-ubuntu18')
     strategy:
       fail-fast: false
     runs-on: ubuntu-latest
