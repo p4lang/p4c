@@ -1666,6 +1666,16 @@ const IR::Node *CopyMatchKeysToSingleStruct::postorder(IR::KeyElement *element) 
     }
 
     auto keyName = element->expression->toString();
+    if (auto m = element->expression->to<IR::MethodCallExpression>()) {
+        /* Moving <hdr>.isValid() used as table key to Metadata */
+        auto mi = P4::MethodInstance::resolve(m, refMap, typeMap);
+        if (auto b = mi->to<P4::BuiltInMethod>()) {
+            if (b->name == "isValid") {
+                keyName = m->method->toString();
+            }
+        }
+    }
+
     bool isHeader = false;
     /* All header fields are prefixed with "h." and metadata fields are prefixed with "m."
      * Prefix the match field with control and table name */
