@@ -3,6 +3,7 @@
 
 #include "backends/p4tools/common/compiler/compiler_target.h"
 #include "backends/p4tools/common/compiler/midend.h"
+#include "backends/p4tools/common/lib/variables.h"
 #include "frontends/common/options.h"
 
 #include "backends/p4tools/modules/testgen/core/compiler_target.h"
@@ -22,20 +23,20 @@ class BMv2V1ModelCompilerResult : public TestgenCompilerResult {
 
     // Vector containing vectors of P4Constraints restrictions and nodes to which these restrictions
     // apply.
-    P4ConstraintsVector p4ConstraintsRestrictions;
+    ConstraintsVector p4ConstraintsRestrictions;
 
  public:
     explicit BMv2V1ModelCompilerResult(TestgenCompilerResult compilerResult,
                                        P4::P4RuntimeAPI p4runtimeApi,
                                        DirectExternMap directExternMap,
-                                       P4ConstraintsVector p4ConstraintsRestrictions);
+                                       ConstraintsVector p4ConstraintsRestrictions);
 
     /// @returns the P4RuntimeAPI inferred from this particular BMv2 V1Model P4 program.
     [[nodiscard]] const P4::P4RuntimeAPI &getP4RuntimeApi() const;
 
     /// @returns the vector of pairs of P4Constraints restrictions and nodes to which these
     // apply.
-    [[nodiscard]] P4ConstraintsVector getP4ConstraintsRestrictions() const;
+    [[nodiscard]] ConstraintsVector getP4ConstraintsRestrictions() const;
 
     /// @returns the map of direct extern declarations which are attached to a table.
     [[nodiscard]] const DirectExternMap &getDirectExternMap() const;

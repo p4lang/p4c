@@ -6,6 +6,7 @@
 #include <string_view>
 #include <vector>
 
+#include "backends/p4tools/common/lib/variables.h"
 #include "ir/ir.h"
 #include "ir/node.h"
 #include "ir/vector.h"
@@ -14,13 +15,11 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-using P4ConstraintsVector = std::vector<std::vector<const IR::Expression *>>;
-
 class AssertsParser : public Transform {
-    P4ConstraintsVector &restrictionsVec;
+    ConstraintsVector &restrictionsVec;
 
  public:
-    explicit AssertsParser(P4ConstraintsVector &output);
+    explicit AssertsParser(ConstraintsVector &output);
     /// A function that calls the beginning of the transformation of restrictions from a string into
     /// an IR::Expression. Internally calls all other necessary functions, for example
     /// combineTokensToNames and the like, to eventually get an IR expression that meets the string

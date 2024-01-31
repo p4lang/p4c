@@ -1,27 +1,47 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_P4_REFERS_TO_PARSER_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_P4_REFERS_TO_PARSER_H_
 
-#include <vector>
-
+#include "backends/p4tools/common/lib/variables.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
 class RefersToParser : public Inspector {
-    std::vector<std::vector<const IR::Expression *>> &restrictionsVec;
+ private:
+    /// A vector of restrictions imposed on the control-plane.
+    ConstraintsVector restrictionsVector;
+
+    /// A lookup map for builtin table keys.
+    using RefersToBuiltinMap = std::map<cstring, std::map<cstring, IR::SymbolicVariable>>;
+    static const RefersToBuiltinMap REFERS_TO_BUILTIN_MAP;
+
+    /// Build the referenced key by concatenating all remaining tokens in the annotation.
+    static cstring assembleKeyReference(const IR::Vector<IR::AnnotationToken> &annotationList,
+                                        size_t offset);
+
+    /// Lookup the key in the builtin map and return the corresponding symbolic variable.
+    static const IR::SymbolicVariable *lookupBuiltinKey(
+        const IR::Annotation &refersAnno, const IR::Vector<IR::AnnotationToken> &annotationList);
+
+    /// Lookup the key in the table and return the corresponding symbolic variable.
+    static const IR::SymbolicVariable *lookupKeyInTable(const IR::P4Table &srcTable,
+                                                        cstring keyReference);
 
     /// Build the referred table key by looking up the table referenced in the annotation @param
     /// refersAnno in the
     /// @param ctrlContext and retrieving the appropriate type. @returns a symbolic variable
     /// corresponding to the control plane entry variable.
-    const IR::SymbolicVariable *buildReferredKey(const IR::P4Control &ctrlContext,
-                                                 const IR::Annotation &refersAnno);
+    static const IR::SymbolicVariable *buildReferredKey(const IR::P4Control &ctrlContext,
+                                                        const IR::Annotation &refersAnno);
 
     bool preorder(const IR::P4Table *table) override;
 
  public:
-    explicit RefersToParser(std::vector<std::vector<const IR::Expression *>> &output);
+    RefersToParser();
+
+    /// Returns the restrictions imposed on the control-plane.
+    [[nodiscard]] ConstraintsVector getRestrictionsVector() const;
 };
 
 }  // namespace P4Tools::P4Testgen::Bmv2

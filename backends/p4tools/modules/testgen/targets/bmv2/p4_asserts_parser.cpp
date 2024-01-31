@@ -28,7 +28,7 @@ static const std::vector<std::string> NAMES{
     "Mul",         "Comment",        "Unknown",      "EndString",   "End",
 };
 
-AssertsParser::AssertsParser(P4ConstraintsVector &output) : restrictionsVec(output) {
+AssertsParser::AssertsParser(ConstraintsVector &output) : restrictionsVec(output) {
     setName("Restrictions");
 }
 
@@ -164,7 +164,7 @@ const IR::Expression *makeConstant(Token input, const IR::Vector<IR::KeyElement>
     BUG_CHECK(result != nullptr,
               "Could not match restriction key label %s was not found in key list.",
               std::string(inputStr));
-    return nullptr;
+    return result;
 }
 
 /// Determines the right side of the expression starting from the original position and returns a
@@ -270,7 +270,7 @@ const IR::Expression *getIR(std::vector<Token> tokens,
                 idx = rightPart.second;
             }
 
-            if (idx - 2 > 0 && tokens[idx - 2].is(Token::Kind::LNot)) {
+            if (idx >= 2 && tokens[idx - 2].is(Token::Kind::LNot)) {
                 leftL = new IR::LNot(leftL);
             }
             exprVec.push_back(pickBinaryExpr(token, leftL, rightL));
@@ -356,6 +356,11 @@ std::vector<Token> combineTokensToNumbers(std::vector<Token> input) {
     cstring numb = "";
     std::vector<Token> result;
     for (uint64_t i = 0; i < input.size(); i++) {
+        if (input[i].is(Token::Kind::Minus)) {
+            numb += "-";
+            i++;
+        }
+
         if (input[i].is(Token::Kind::Text)) {
             auto str = std::string(input[i].lexeme());
 

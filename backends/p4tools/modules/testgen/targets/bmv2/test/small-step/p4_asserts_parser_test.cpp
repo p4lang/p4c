@@ -75,13 +75,14 @@ Restrictions loadExample(const char *curFile, bool flag) {
     P4::TypeMap typeMap;
     P4Tools::MidEnd midEnd(options);
     program = program->apply(midEnd);
-    Restrictions result;
     if (flag) {
+        P4Tools::ConstraintsVector result;
         program->apply(P4Tools::P4Testgen::Bmv2::AssertsParser(result));
-    } else {
-        program->apply(P4Tools::P4Testgen::Bmv2::RefersToParser(result));
+        return result;
     }
-    return result;
+    P4Tools::P4Testgen::Bmv2::RefersToParser referstoParser;
+    program->apply(referstoParser);
+    return referstoParser.getRestrictionsVector();
 }
 
 TEST_F(P4AssertsParserTest, RestrictionCount) {
