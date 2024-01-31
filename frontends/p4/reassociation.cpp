@@ -25,7 +25,7 @@ const IR::Node *Reassociation::reassociate(IR::Operation_Binary *root) {
     if (!leftBin) return root;
     if (leftBin->getStringOp() != root->getStringOp()) return root;
     if (!leftBin->right->is<IR::Constant>()) return root;
-    auto c = root->clone()->to<IR::Operation_Binary>();
+    auto c = root->checkedTo<IR::Operation_Binary>()->clone();
     c->left = leftBin->right;
     c->right = root->right;
     root->left = leftBin->left;

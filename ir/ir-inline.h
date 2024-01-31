@@ -78,7 +78,7 @@ IRNODE_ALL_TEMPLATES(DEFINE_APPLY_FUNCTIONS, inline)
 template <class T>
 void IR::Vector<T>::visit_children(Visitor &v) {
     for (auto i = vec.begin(); i != vec.end();) {
-        auto n = v.apply_visitor(*i);
+        const IR::Node *n = v.apply_visitor(*i);
         if (!n && *i) {
             i = erase(i);
             continue;
@@ -88,13 +88,13 @@ void IR::Vector<T>::visit_children(Visitor &v) {
             i++;
             continue;
         }
-        if (auto l = n->template to<Vector<T>>()) {
+        if (auto l = n->to<Vector<T>>()) {
             i = erase(i);
             i = insert(i, l->vec.begin(), l->vec.end());
             i += l->vec.size();
             continue;
         }
-        if (const auto *v = n->template to<VectorBase>()) {
+        if (const auto *v = n->to<VectorBase>()) {
             if (v->empty()) {
                 i = erase(i);
             } else {
@@ -111,7 +111,7 @@ void IR::Vector<T>::visit_children(Visitor &v) {
             }
             continue;
         }
-        if (auto e = n->template to<T>()) {
+        if (auto e = n->to<T>()) {
             *i++ = e;
             continue;
         }
@@ -232,7 +232,7 @@ template <class T, template <class K, class V, class COMP, class ALLOC> class MA
 void IR::NameMap<T, MAP, COMP, ALLOC>::visit_children(Visitor &v) {
     map_t new_symbols;
     for (auto i = symbols.begin(); i != symbols.end();) {
-        auto n = v.apply_visitor(i->second, i->first);
+        const IR::Node *n = v.apply_visitor(i->second, i->first);
         if (!n && i->second) {
             i = symbols.erase(i);
             continue;
@@ -242,12 +242,12 @@ void IR::NameMap<T, MAP, COMP, ALLOC>::visit_children(Visitor &v) {
             i++;
             continue;
         }
-        if (auto m = n->template to<NameMap>()) {
+        if (auto m = n->to<NameMap>()) {
             namemap_insert_helper(i, m->symbols.begin(), m->symbols.end(), symbols, new_symbols);
             i = symbols.erase(i);
             continue;
         }
-        if (auto s = n->template to<T>()) {
+        if (auto s = n->to<T>()) {
             if (match_name(i->first, s)) {
                 i->second = s;
                 i++;
