@@ -1,18 +1,15 @@
 #include "backends/p4tools/common/lib/model.h"
 
-#include <ostream>
-#include <string>
 #include <utility>
 
 #include <boost/container/vector.hpp>
 
 #include "frontends/p4/optimizeExpressions.h"
 #include "ir/indexed_vector.h"
+#include "ir/ir.h"
 #include "ir/irutils.h"
 #include "ir/vector.h"
-#include "lib/cstring.h"
 #include "lib/exceptions.h"
-#include "lib/log.h"
 
 namespace P4Tools {
 

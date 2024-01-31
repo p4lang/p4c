@@ -2,7 +2,8 @@
 #define BACKENDS_P4TOOLS_COMMON_COMPILER_CONTEXT_H_
 
 #include "backends/p4tools/common/compiler/configuration.h"
-#include "frontends/common/options.h"
+#include "frontends/common/parser_options.h"
+#include "lib/compile_context.h"
 
 namespace P4Tools {
 

@@ -1,17 +1,20 @@
 #include "backends/p4tools/common/lib/format_int.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <iomanip>
+#include <ios>
 #include <ostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
-#include <boost/multiprecision/cpp_int.hpp>
-#include <boost/multiprecision/cpp_int/bitwise.hpp>
 #include <boost/multiprecision/detail/et_ops.hpp>
+#include <boost/multiprecision/detail/integer_ops.hpp>
 #include <boost/multiprecision/number.hpp>
-#include <boost/multiprecision/traits/explicit_conversion.hpp>
 
+#include "ir/ir.h"
+#include "lib/big_int_util.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 
@@ -153,7 +156,7 @@ std::string formatBinExpr(const IR::Expression *expr, const FormatOptions &forma
     }
 
     if (const auto *stringExpr = expr->to<IR::StringLiteral>()) {
-        // TODO: Include the quotes here?
+        // TODO(fruffy): Include the quotes here?
         return stringExpr->value.c_str();
     }
 
@@ -186,7 +189,7 @@ std::string formatOctalExpr(const IR::Expression *expr, const FormatOptions &for
     }
 
     if (const auto *stringExpr = expr->to<IR::StringLiteral>()) {
-        // TODO: Include the quotes here?
+        // TODO(fruffy): Include the quotes here?
         return stringExpr->value.c_str();
     }
 
@@ -219,7 +222,7 @@ std::string formatHexExpr(const IR::Expression *expr, const FormatOptions &forma
     }
 
     if (const auto *stringExpr = expr->to<IR::StringLiteral>()) {
-        // TODO: Include the quotes here?
+        // TODO(fruffy): Include the quotes here?
         return stringExpr->value.c_str();
     }
 

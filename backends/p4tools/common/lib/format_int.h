@@ -1,8 +1,7 @@
 #ifndef BACKENDS_P4TOOLS_COMMON_LIB_FORMAT_INT_H_
 #define BACKENDS_P4TOOLS_COMMON_LIB_FORMAT_INT_H_
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <string>
 
 #include "ir/ir.h"

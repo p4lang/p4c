@@ -1,9 +1,16 @@
 #include "backends/p4tools/common/core/abstract_execution_state.h"
 
+#include <cstddef>
+#include <ostream>
+#include <vector>
+
 #include "backends/p4tools/common/compiler/convert_hs_index.h"
 #include "backends/p4tools/common/core/target.h"
 #include "backends/p4tools/common/lib/variables.h"
+#include "ir/declaration.h"
+#include "ir/ir.h"
 #include "ir/irutils.h"
+#include "lib/exceptions.h"
 
 namespace P4Tools {
 

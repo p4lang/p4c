@@ -30,7 +30,7 @@ class NamespaceContext {
 
  public:
     /// Represents the empty namespace context.
-    static const NamespaceContext *Empty;
+    static const NamespaceContext *Empty;  // NOLINT - The unusual case style is intentional.
 
     /// @returns a new namespace context, representing the given namespace @ns pushed onto this
     /// namespace context.

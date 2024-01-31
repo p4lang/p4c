@@ -1,6 +1,12 @@
 #include "backends/p4tools/common/lib/table_utils.h"
 
+#include <cstddef>
+#include <vector>
+
+#include "ir/ir.h"
 #include "ir/irutils.h"
+#include "lib/exceptions.h"
+#include "lib/null.h"
 
 namespace P4Tools::TableUtils {
 

@@ -1,7 +1,10 @@
 #include "backends/p4tools/common/lib/arch_spec.h"
 
+#include <cstddef>
 #include <utility>
+#include <vector>
 
+#include "lib/cstring.h"
 #include "lib/exceptions.h"
 
 namespace P4Tools {

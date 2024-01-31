@@ -6,6 +6,7 @@
 
 #include "ir/ir.h"
 #include "ir/node.h"
+#include "lib/castable.h"
 #include "lib/exceptions.h"
 
 namespace P4Tools {
@@ -19,7 +20,7 @@ class AbstractRepCheckedNode : public ICastable {
     std::reference_wrapper<const Node> node;
 
     // Implicit conversions to allow implementations to be treated like a Node*.
-    operator const Node *() const { return &node.get(); }
+    explicit operator const Node *() const { return &node.get(); }
     const Node &operator*() const { return node.get(); }
     const Node *operator->() const { return &node.get(); }
 

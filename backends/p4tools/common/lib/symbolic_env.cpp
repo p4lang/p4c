@@ -1,17 +1,15 @@
 #include "backends/p4tools/common/lib/symbolic_env.h"
 
 #include <algorithm>
-#include <string>
 #include <utility>
-#include <vector>
 
 #include <boost/container/vector.hpp>
 
 #include "backends/p4tools/common/lib/model.h"
 #include "ir/indexed_vector.h"
+#include "ir/node.h"
 #include "ir/vector.h"
 #include "ir/visitor.h"
-#include "lib/cstring.h"
 #include "lib/exceptions.h"
 
 namespace P4Tools {

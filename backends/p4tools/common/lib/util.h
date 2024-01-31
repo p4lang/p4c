@@ -6,11 +6,12 @@
 #include <iterator>
 #include <optional>
 #include <ostream>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <boost/format.hpp>
+#include <boost/format/format_fwd.hpp>
 #include <boost/random/mersenne_twister.hpp>
 
 #include "ir/ir.h"
@@ -84,7 +85,7 @@ class Utils {
     /* =========================================================================================
      *  Other.
      * ========================================================================================= */
- public:
+
     /// @returns a method call to an internal extern consumed by the interpreter. The return type
     /// is typically Type_Void.
     static const IR::MethodCallExpression *generateInternalMethodCall(

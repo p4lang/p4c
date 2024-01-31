@@ -1,6 +1,7 @@
 #include "backends/p4tools/common/compiler/convert_varbits.h"
 
-#include "lib/log.h"
+#include "ir/ir.h"
+#include "ir/node.h"
 
 namespace P4Tools {
 

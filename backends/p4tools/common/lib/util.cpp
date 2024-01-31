@@ -5,17 +5,21 @@
 #include <ctime>
 #include <iomanip>
 #include <optional>
-#include <ratio>
+#include <sstream>
+#include <string>
+#include <utility>
+#include <vector>
 
-#include <boost/multiprecision/cpp_int.hpp>
-#include <boost/multiprecision/cpp_int/add.hpp>
-#include <boost/multiprecision/detail/et_ops.hpp>
 #include <boost/multiprecision/number.hpp>
+#include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
 
 #include "ir/id.h"
+#include "ir/ir.h"
 #include "ir/irutils.h"
 #include "ir/vector.h"
+#include "lib/big_int_util.h"
+#include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/null.h"
 
@@ -68,7 +72,7 @@ big_int Utils::getRandBigInt(big_int max) {
     if (!currentSeed) {
         return 0;
     }
-    boost::random::uniform_int_distribution<big_int> dist(0, max);
+    boost::random::uniform_int_distribution<big_int> dist(0, std::move(max));
     return dist(rng);
 }
 
