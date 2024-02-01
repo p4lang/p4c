@@ -11,282 +11,270 @@
 
 namespace P4::ControlPlaneAPI {
 
-std::optional<p4::config::v1::Table> findP4RuntimeTable(const p4::config::v1::P4Info &p4Info,
-                                                        cstring controlPlaneName) {
+const p4::config::v1::Table *findP4RuntimeTable(const p4::config::v1::P4Info &p4Info,
+                                                cstring controlPlaneName) {
     return findP4InfoObject(p4Info.tables().begin(), p4Info.tables().end(), controlPlaneName);
 }
 
-std::optional<p4::config::v1::Table> findP4RuntimeTable(const p4::config::v1::P4Info &p4Info,
-                                                        p4rt_id_t id) {
+const p4::config::v1::Table *findP4RuntimeTable(const p4::config::v1::P4Info &p4Info,
+                                                p4rt_id_t id) {
     return findP4InfoObject(p4Info.tables().begin(), p4Info.tables().end(), id);
 }
 
-std::optional<p4::config::v1::MatchField> findP4RuntimeMatchField(
-    const p4::config::v1::Table &p4Table, cstring controlPlaneName) {
+const p4::config::v1::MatchField *findP4RuntimeMatchField(const p4::config::v1::Table &p4Table,
+                                                          cstring controlPlaneName) {
     for (const auto &p4InfoMatchField : p4Table.match_fields()) {
         if (controlPlaneName == p4InfoMatchField.name()) {
-            return p4InfoMatchField;
+            return &p4InfoMatchField;
         }
     }
-    return std::nullopt;
+    return nullptr;
 }
 
-std::optional<p4::config::v1::MatchField> findP4RuntimeMatchField(
-    const p4::config::v1::Table &p4Table, p4rt_id_t id) {
+const p4::config::v1::MatchField *findP4RuntimeMatchField(const p4::config::v1::Table &p4Table,
+                                                          p4rt_id_t id) {
     for (const auto &p4InfoMatchField : p4Table.match_fields()) {
         if (id == p4InfoMatchField.id()) {
-            return p4InfoMatchField;
+            return &p4InfoMatchField;
         }
     }
-    return std::nullopt;
+    return nullptr;
 }
 
-std::optional<p4::config::v1::Action> findP4RuntimeAction(const p4::config::v1::P4Info &p4Info,
-                                                          cstring controlPlaneName) {
+const p4::config::v1::Action *findP4RuntimeAction(const p4::config::v1::P4Info &p4Info,
+                                                  cstring controlPlaneName) {
     return findP4InfoObject(p4Info.actions().begin(), p4Info.actions().end(), controlPlaneName);
 }
 
-std::optional<p4::config::v1::Action> findP4RuntimeAction(const p4::config::v1::P4Info &p4Info,
-                                                          p4rt_id_t id) {
+const p4::config::v1::Action *findP4RuntimeAction(const p4::config::v1::P4Info &p4Info,
+                                                  p4rt_id_t id) {
     return findP4InfoObject(p4Info.actions().begin(), p4Info.actions().end(), id);
 }
 
-std::optional<p4::config::v1::ActionProfile> findP4RuntimeActionProfile(
+const p4::config::v1::ActionProfile *findP4RuntimeActionProfile(
     const p4::config::v1::P4Info &p4Info, cstring controlPlaneName) {
     return findP4InfoObject(p4Info.action_profiles().begin(), p4Info.action_profiles().end(),
                             controlPlaneName);
 }
 
-std::optional<p4::config::v1::ActionProfile> findP4RuntimeActionProfile(
+const p4::config::v1::ActionProfile *findP4RuntimeActionProfile(
     const p4::config::v1::P4Info &p4Info, p4rt_id_t id) {
     return findP4InfoObject(p4Info.action_profiles().begin(), p4Info.action_profiles().end(), id);
 }
 
-std::optional<p4::config::v1::Counter> findP4RuntimeCounter(const p4::config::v1::P4Info &p4Info,
-                                                            cstring controlPlaneName) {
+const p4::config::v1::Counter *findP4RuntimeCounter(const p4::config::v1::P4Info &p4Info,
+                                                    cstring controlPlaneName) {
     return findP4InfoObject(p4Info.counters().begin(), p4Info.counters().end(), controlPlaneName);
 }
 
-std::optional<p4::config::v1::Counter> findP4RuntimeCounter(const p4::config::v1::P4Info &p4Info,
-                                                            p4rt_id_t id) {
+const p4::config::v1::Counter *findP4RuntimeCounter(const p4::config::v1::P4Info &p4Info,
+                                                    p4rt_id_t id) {
     return findP4InfoObject(p4Info.counters().begin(), p4Info.counters().end(), id);
 }
 
-std::optional<p4::config::v1::DirectCounter> findP4RuntimeDirectCounter(
+const p4::config::v1::DirectCounter *findP4RuntimeDirectCounter(
     const p4::config::v1::P4Info &p4Info, cstring controlPlaneName) {
     return findP4InfoObject(p4Info.direct_counters().begin(), p4Info.direct_counters().end(),
                             controlPlaneName);
 }
 
-std::optional<p4::config::v1::DirectCounter> findP4RuntimeDirectCounter(
+const p4::config::v1::DirectCounter *findP4RuntimeDirectCounter(
     const p4::config::v1::P4Info &p4Info, p4rt_id_t id) {
     return findP4InfoObject(p4Info.direct_counters().begin(), p4Info.direct_counters().end(), id);
 }
 
-std::optional<p4::config::v1::Meter> findP4RuntimeMeter(const p4::config::v1::P4Info &p4Info,
-                                                        cstring controlPlaneName) {
+const p4::config::v1::Meter *findP4RuntimeMeter(const p4::config::v1::P4Info &p4Info,
+                                                cstring controlPlaneName) {
     return findP4InfoObject(p4Info.meters().begin(), p4Info.meters().end(), controlPlaneName);
 }
 
-std::optional<p4::config::v1::Meter> findP4RuntimeMeter(const p4::config::v1::P4Info &p4Info,
-                                                        p4rt_id_t id) {
+const p4::config::v1::Meter *findP4RuntimeMeter(const p4::config::v1::P4Info &p4Info,
+                                                p4rt_id_t id) {
     return findP4InfoObject(p4Info.meters().begin(), p4Info.meters().end(), id);
 }
 
-std::optional<p4::config::v1::DirectMeter> findP4RuntimeDirectMeter(
-    const p4::config::v1::P4Info &p4Info, cstring controlPlaneName) {
+const p4::config::v1::DirectMeter *findP4RuntimeDirectMeter(const p4::config::v1::P4Info &p4Info,
+                                                            cstring controlPlaneName) {
     return findP4InfoObject(p4Info.direct_meters().begin(), p4Info.direct_meters().end(),
                             controlPlaneName);
 }
 
-std::optional<p4::config::v1::DirectMeter> findP4RuntimeDirectMeter(
-    const p4::config::v1::P4Info &p4Info, p4rt_id_t id) {
+const p4::config::v1::DirectMeter *findP4RuntimeDirectMeter(const p4::config::v1::P4Info &p4Info,
+                                                            p4rt_id_t id) {
     return findP4InfoObject(p4Info.direct_meters().begin(), p4Info.direct_meters().end(), id);
 }
 
-std::optional<p4::config::v1::ControllerPacketMetadata> findP4RuntimeControllerPacketMetadata(
+const p4::config::v1::ControllerPacketMetadata *findP4RuntimeControllerPacketMetadata(
     const p4::config::v1::P4Info &p4Info, cstring controlPlaneName) {
     return findP4InfoObject(p4Info.controller_packet_metadata().begin(),
                             p4Info.controller_packet_metadata().end(), controlPlaneName);
 }
 
-std::optional<p4::config::v1::ControllerPacketMetadata> findP4RuntimeControllerPacketMetadata(
+const p4::config::v1::ControllerPacketMetadata *findP4RuntimeControllerPacketMetadata(
     const p4::config::v1::P4Info &p4Info, p4rt_id_t id) {
     return findP4InfoObject(p4Info.controller_packet_metadata().begin(),
                             p4Info.controller_packet_metadata().end(), id);
 }
 
-std::optional<p4::config::v1::ValueSet> findP4RuntimeValueSet(const p4::config::v1::P4Info &p4Info,
-                                                              cstring controlPlaneName) {
+const p4::config::v1::ValueSet *findP4RuntimeValueSet(const p4::config::v1::P4Info &p4Info,
+                                                      cstring controlPlaneName) {
     return findP4InfoObject(p4Info.value_sets().begin(), p4Info.value_sets().end(),
                             controlPlaneName);
 }
 
-std::optional<p4::config::v1::ValueSet> findP4RuntimeValueSet(const p4::config::v1::P4Info &p4Info,
-                                                              p4rt_id_t id) {
+const p4::config::v1::ValueSet *findP4RuntimeValueSet(const p4::config::v1::P4Info &p4Info,
+                                                      p4rt_id_t id) {
     return findP4InfoObject(p4Info.value_sets().begin(), p4Info.value_sets().end(), id);
 }
 
-std::optional<p4::config::v1::Register> findP4RuntimeRegister(const p4::config::v1::P4Info &p4Info,
-                                                              cstring controlPlaneName) {
+const p4::config::v1::Register *findP4RuntimeRegister(const p4::config::v1::P4Info &p4Info,
+                                                      cstring controlPlaneName) {
     return findP4InfoObject(p4Info.registers().begin(), p4Info.registers().end(), controlPlaneName);
 }
 
-std::optional<p4::config::v1::Register> findP4RuntimeRegister(const p4::config::v1::P4Info &p4Info,
-                                                              p4rt_id_t id) {
+const p4::config::v1::Register *findP4RuntimeRegister(const p4::config::v1::P4Info &p4Info,
+                                                      p4rt_id_t id) {
     return findP4InfoObject(p4Info.registers().begin(), p4Info.registers().end(), id);
 }
 
-std::optional<p4::config::v1::Digest> findP4RuntimeDigest(const p4::config::v1::P4Info &p4Info,
-                                                          cstring controlPlaneName) {
+const p4::config::v1::Digest *findP4RuntimeDigest(const p4::config::v1::P4Info &p4Info,
+                                                  cstring controlPlaneName) {
     return findP4InfoObject(p4Info.digests().begin(), p4Info.digests().end(), controlPlaneName);
 }
 
-std::optional<p4::config::v1::Digest> findP4RuntimeDigest(const p4::config::v1::P4Info &p4Info,
-                                                          p4rt_id_t id) {
+const p4::config::v1::Digest *findP4RuntimeDigest(const p4::config::v1::P4Info &p4Info,
+                                                  p4rt_id_t id) {
     return findP4InfoObject(p4Info.digests().begin(), p4Info.digests().end(), id);
 }
 
-std::optional<p4::config::v1::Extern> findP4RuntimeExtern(const p4::config::v1::P4Info &p4Info,
-                                                          cstring controlPlaneName) {
+const p4::config::v1::Extern *findP4RuntimeExtern(const p4::config::v1::P4Info &p4Info,
+                                                  cstring controlPlaneName) {
     for (const auto &p4Extern : p4Info.externs()) {
         if (p4Extern.extern_type_name() == controlPlaneName) {
-            return p4Extern;
+            return &p4Extern;
         }
     }
-    return std::nullopt;
+    return nullptr;
 }
 
-std::optional<p4::config::v1::Extern> findP4RuntimeExtern(const p4::config::v1::P4Info &p4Info,
-                                                          p4rt_id_t id) {
+const p4::config::v1::Extern *findP4RuntimeExtern(const p4::config::v1::P4Info &p4Info,
+                                                  p4rt_id_t id) {
     for (const auto &p4Extern : p4Info.externs()) {
         if (p4Extern.extern_type_id() == id) {
-            return p4Extern;
+            return &p4Extern;
         }
     }
-    return std::nullopt;
+    return nullptr;
 }
 
 std::optional<p4rt_id_t> getP4RuntimeId(const p4::config::v1::P4Info &p4Info,
                                         const P4RuntimeSymbolType &type, cstring controlPlaneName) {
     if (type == Standard::SymbolType::P4RT_TABLE()) {
-        auto findP4RuntimeTableOpt = findP4RuntimeTable(p4Info, controlPlaneName);
-        if (!findP4RuntimeTableOpt.has_value()) {
+        auto p4RuntimeTableOpt = findP4RuntimeTable(p4Info, controlPlaneName);
+        if (p4RuntimeTableOpt == nullptr) {
             error("Unable to find P4Runtime Object for table %1%", controlPlaneName);
             return std::nullopt;
         }
-        auto p4RuntimeTable = findP4RuntimeTableOpt.value();
-        return p4RuntimeTable.preamble().id();
+        return p4RuntimeTableOpt->preamble().id();
     }
     if (type == Standard::SymbolType::P4RT_ACTION()) {
-        auto findP4RuntimeActionOpt = findP4RuntimeAction(p4Info, controlPlaneName);
-        if (!findP4RuntimeActionOpt.has_value()) {
+        auto p4RuntimeActionOpt = findP4RuntimeAction(p4Info, controlPlaneName);
+        if (p4RuntimeActionOpt == nullptr) {
             error("Unable to find P4Runtime Object for action %1%", controlPlaneName);
             return std::nullopt;
         }
-        auto p4RuntimeAction = findP4RuntimeActionOpt.value();
-        return p4RuntimeAction.preamble().id();
+        return p4RuntimeActionOpt->preamble().id();
     }
 
     if (type == Standard::SymbolType::P4RT_ACTION_PROFILE()) {
-        auto findP4RuntimeActionProfileOpt = findP4RuntimeActionProfile(p4Info, controlPlaneName);
-        if (!findP4RuntimeActionProfileOpt.has_value()) {
+        auto p4RuntimeActionProfileOpt = findP4RuntimeActionProfile(p4Info, controlPlaneName);
+        if (p4RuntimeActionProfileOpt == nullptr) {
             error("Unable to find P4Runtime Object for action profile %1%", controlPlaneName);
             return std::nullopt;
         }
-        auto p4RuntimeActionProfile = findP4RuntimeActionProfileOpt.value();
-        return p4RuntimeActionProfile.preamble().id();
+        return p4RuntimeActionProfileOpt->preamble().id();
     }
 
     if (type == Standard::SymbolType::P4RT_COUNTER()) {
-        auto findP4RuntimeCounterOpt = findP4RuntimeCounter(p4Info, controlPlaneName);
-        if (!findP4RuntimeCounterOpt.has_value()) {
+        auto p4RuntimeCounterOpt = findP4RuntimeCounter(p4Info, controlPlaneName);
+        if (p4RuntimeCounterOpt == nullptr) {
             error("Unable to find P4Runtime Object for counter %1%", controlPlaneName);
             return std::nullopt;
         }
-        auto p4RuntimeCounter = findP4RuntimeCounterOpt.value();
-        return p4RuntimeCounter.preamble().id();
+        return p4RuntimeCounterOpt->preamble().id();
     }
 
     if (type == Standard::SymbolType::P4RT_DIRECT_COUNTER()) {
-        auto findP4RuntimeDirectCounterOpt = findP4RuntimeDirectCounter(p4Info, controlPlaneName);
-        if (!findP4RuntimeDirectCounterOpt.has_value()) {
+        auto p4RuntimeDirectCounterOpt = findP4RuntimeDirectCounter(p4Info, controlPlaneName);
+        if (p4RuntimeDirectCounterOpt == nullptr) {
             error("Unable to find P4Runtime Object for direct counter %1%", controlPlaneName);
             return std::nullopt;
         }
-        auto p4RuntimeDirectCounter = findP4RuntimeDirectCounterOpt.value();
-        return p4RuntimeDirectCounter.preamble().id();
+        return p4RuntimeDirectCounterOpt->preamble().id();
     }
 
     if (type == Standard::SymbolType::P4RT_METER()) {
-        auto findP4RuntimeMeterOpt = findP4RuntimeMeter(p4Info, controlPlaneName);
-        if (!findP4RuntimeMeterOpt.has_value()) {
+        auto p4RuntimeMeterOpt = findP4RuntimeMeter(p4Info, controlPlaneName);
+        if (p4RuntimeMeterOpt == nullptr) {
             error("Unable to find P4Runtime Object for meter %1%", controlPlaneName);
             return std::nullopt;
         }
-        auto p4RuntimeMeter = findP4RuntimeMeterOpt.value();
-        return p4RuntimeMeter.preamble().id();
+        return p4RuntimeMeterOpt->preamble().id();
     }
 
     if (type == Standard::SymbolType::P4RT_DIRECT_METER()) {
-        auto findP4RuntimeDirectMeterOpt = findP4RuntimeDirectMeter(p4Info, controlPlaneName);
-        if (!findP4RuntimeDirectMeterOpt.has_value()) {
+        auto p4RuntimeDirectMeterOpt = findP4RuntimeDirectMeter(p4Info, controlPlaneName);
+        if (p4RuntimeDirectMeterOpt == nullptr) {
             error("Unable to find P4Runtime Object for direct meter %1%", controlPlaneName);
             return std::nullopt;
         }
-        auto p4RuntimeDirectMeter = findP4RuntimeDirectMeterOpt.value();
-        return p4RuntimeDirectMeter.preamble().id();
+        return p4RuntimeDirectMeterOpt->preamble().id();
     }
 
     if (type == Standard::SymbolType::P4RT_CONTROLLER_HEADER()) {
-        auto findP4RuntimeControllerMetadataOpt =
+        auto p4RuntimeControllerMetadataOpt =
             findP4RuntimeControllerPacketMetadata(p4Info, controlPlaneName);
-        if (!findP4RuntimeControllerMetadataOpt.has_value()) {
+        if (p4RuntimeControllerMetadataOpt == nullptr) {
             error("Unable to find P4Runtime Object for controller metadata %1%", controlPlaneName);
             return std::nullopt;
         }
-        auto p4RuntimeControllerMetadata = findP4RuntimeControllerMetadataOpt.value();
-        return p4RuntimeControllerMetadata.preamble().id();
+        return p4RuntimeControllerMetadataOpt->preamble().id();
     }
 
     if (type == Standard::SymbolType::P4RT_VALUE_SET()) {
-        auto findP4RuntimeValueSetOpt = findP4RuntimeValueSet(p4Info, controlPlaneName);
-        if (!findP4RuntimeValueSetOpt.has_value()) {
+        auto p4RuntimeValueSetOpt = findP4RuntimeValueSet(p4Info, controlPlaneName);
+        if (p4RuntimeValueSetOpt == nullptr) {
             error("Unable to find P4Runtime Object for value set %1%", controlPlaneName);
             return std::nullopt;
         }
-        auto p4RuntimeValueSet = findP4RuntimeValueSetOpt.value();
-        return p4RuntimeValueSet.preamble().id();
+        return p4RuntimeValueSetOpt->preamble().id();
     }
 
     if (type == Standard::SymbolType::P4RT_REGISTER()) {
-        auto findP4RuntimeRegisterOpt = findP4RuntimeRegister(p4Info, controlPlaneName);
-        if (!findP4RuntimeRegisterOpt.has_value()) {
+        auto p4RuntimeRegisterOpt = findP4RuntimeRegister(p4Info, controlPlaneName);
+        if (p4RuntimeRegisterOpt == nullptr) {
             error("Unable to find P4Runtime Object for register %1%", controlPlaneName);
             return std::nullopt;
         }
-        auto p4RuntimeRegister = findP4RuntimeRegisterOpt.value();
-        return p4RuntimeRegister.preamble().id();
+        return p4RuntimeRegisterOpt->preamble().id();
     }
 
     if (type == Standard::SymbolType::P4RT_DIGEST()) {
-        auto findP4RuntimeDigestOpt = findP4RuntimeDigest(p4Info, controlPlaneName);
-        if (!findP4RuntimeDigestOpt.has_value()) {
+        auto p4RuntimeDigestOpt = findP4RuntimeDigest(p4Info, controlPlaneName);
+        if (p4RuntimeDigestOpt == nullptr) {
             error("Unable to find P4Runtime Object for digest %1%", controlPlaneName);
             return std::nullopt;
         }
-        auto p4RuntimeDigest = findP4RuntimeDigestOpt.value();
-        return p4RuntimeDigest.preamble().id();
+        return p4RuntimeDigestOpt->preamble().id();
     }
 
     if (type == Standard::SymbolType::P4RT_OTHER_EXTERNS_START()) {
-        auto findP4RuntimeExternOpt = findP4RuntimeExtern(p4Info, controlPlaneName);
-        if (!findP4RuntimeExternOpt.has_value()) {
+        auto p4RuntimeExternOpt = findP4RuntimeExtern(p4Info, controlPlaneName);
+        if (p4RuntimeExternOpt == nullptr) {
             error("Unable to find P4Runtime Object for extern %1%", controlPlaneName);
             return std::nullopt;
         }
-        auto p4RuntimeExtern = findP4RuntimeExternOpt.value();
-        return p4RuntimeExtern.extern_type_id();
+        return p4RuntimeExternOpt->extern_type_id();
     }
 
     ::error("Unsupported P4Runtime ID type");

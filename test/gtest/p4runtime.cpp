@@ -190,7 +190,7 @@ TEST_F(P4Runtime, IdAssignment) {
     {
         // Check that 'igTable' ended up in the P4Info output.
         auto igTable = findP4RuntimeTable(*test->p4Info, "ingress.igTable");
-        ASSERT_TRUE(igTable.has_value());
+        ASSERT_TRUE(igTable != nullptr);
 
         // Check that the id indicates the correct resource type.
         EXPECT_EQ(unsigned(P4Ids::TABLE), igTable->preamble().id() >> 24);
@@ -205,9 +205,9 @@ TEST_F(P4Runtime, IdAssignment) {
         // Check that 'igTableWithName' ended up in the P4Info output under that
         // name, which is determined by its @name annotation, and *not* under
         // 'igTableWithoutName'.
-        EXPECT_TRUE(!findP4RuntimeTable(*test->p4Info, "ingress.igTableWithoutName").has_value());
+        EXPECT_TRUE(findP4RuntimeTable(*test->p4Info, "ingress.igTableWithoutName") == nullptr);
         auto igTableWithName = findP4RuntimeTable(*test->p4Info, "ingress.igTableWithName");
-        ASSERT_TRUE(igTableWithName.has_value());
+        ASSERT_TRUE(igTableWithName != nullptr);
 
         // Check that the id of 'igTableWithName' was computed based on its
         // @name annotation. (See above for caveat re: the hash algorithm.)
@@ -220,7 +220,7 @@ TEST_F(P4Runtime, IdAssignment) {
         // its id matches the one set by its @id annotation, with the required
         // 8-bit type prefix (which is 0x2 for tables).
         auto igTableWithId = findP4RuntimeTable(*test->p4Info, "ingress.igTableWithId");
-        ASSERT_TRUE(igTableWithId.has_value());
+        ASSERT_TRUE(igTableWithId != nullptr);
         auto expectedId = 1234u | (unsigned(P4Ids::TABLE) << 24);
         EXPECT_EQ(expectedId, igTableWithId->preamble().id());
     }
@@ -229,7 +229,7 @@ TEST_F(P4Runtime, IdAssignment) {
         // Same as above, but with the largest possible id (0xffffff).
         auto igTableWithLargestId =
             findP4RuntimeTable(*test->p4Info, "ingress.igTableWithLargestId");
-        ASSERT_TRUE(igTableWithLargestId.has_value());
+        ASSERT_TRUE(igTableWithLargestId != nullptr);
         auto expectedId = 0xffffffu | (unsigned(P4Ids::TABLE) << 24);
         EXPECT_EQ(expectedId, igTableWithLargestId->preamble().id());
     }
@@ -239,7 +239,7 @@ TEST_F(P4Runtime, IdAssignment) {
         // that its id matches the one set by its @id annotation.
         auto igTableWithPrefixedId =
             findP4RuntimeTable(*test->p4Info, "ingress.igTableWithPrefixedId");
-        ASSERT_TRUE(igTableWithPrefixedId.has_value());
+        ASSERT_TRUE(igTableWithPrefixedId != nullptr);
         auto expectedId = 0x02000133u;
         EXPECT_EQ(expectedId, igTableWithPrefixedId->preamble().id());
     }
@@ -248,11 +248,11 @@ TEST_F(P4Runtime, IdAssignment) {
         // Check that 'igTableWithNameAndId' ended up in the P4Info output under
         // that name, and that its id matches the one set by its @id annotation
         // - in other words, that @id takes precedence over @name.
-        EXPECT_TRUE(
-            !findP4RuntimeTable(*test->p4Info, "ingress.igTableWithoutNameAndId").has_value());
+        EXPECT_TRUE(findP4RuntimeTable(*test->p4Info, "ingress.igTableWithoutNameAndId") ==
+                    nullptr);
         auto igTableWithNameAndId =
             findP4RuntimeTable(*test->p4Info, "ingress.igTableWithNameAndId");
-        ASSERT_TRUE(igTableWithNameAndId.has_value());
+        ASSERT_TRUE(igTableWithNameAndId != nullptr);
         auto expectedId = 5678u | (unsigned(P4Ids::TABLE) << 24);
         EXPECT_EQ(expectedId, igTableWithNameAndId->preamble().id());
     }
@@ -261,9 +261,9 @@ TEST_F(P4Runtime, IdAssignment) {
         // Check that the two tables with conflicting ids are both present, and
         // that they didn't end up with the same id in the P4Info output.
         auto conflictingTableA = findP4RuntimeTable(*test->p4Info, "ingress.conflictingTableA");
-        ASSERT_TRUE(conflictingTableA.has_value());
+        ASSERT_TRUE(conflictingTableA != nullptr);
         auto conflictingTableB = findP4RuntimeTable(*test->p4Info, "ingress.conflictingTableB");
-        ASSERT_TRUE(conflictingTableB.has_value());
+        ASSERT_TRUE(conflictingTableB != nullptr);
         EXPECT_TRUE(conflictingTableA->preamble().id() == 0x02000134 ||
                     conflictingTableB->preamble().id() == 0x02000134);
         EXPECT_NE(conflictingTableA->preamble().id(), conflictingTableB->preamble().id());
@@ -361,7 +361,7 @@ TEST_F(P4Runtime, FieldIdAssignment) {
     {
         // Check the ids for igTable's match fields.
         auto igTable = findP4RuntimeTable(*test->p4Info, "ingress.igTable");
-        ASSERT_TRUE(igTable.has_value());
+        ASSERT_TRUE(igTable != nullptr);
         const auto &mf1 = igTable->match_fields(0);
         const auto &mf2 = igTable->match_fields(1);
         EXPECT_EQ(99u, mf1.id());
@@ -371,7 +371,7 @@ TEST_F(P4Runtime, FieldIdAssignment) {
     {
         // Check the ids for action a's parameters.
         auto aAction = findP4RuntimeAction(*test->p4Info, "ingress.a");
-        ASSERT_TRUE(aAction.has_value());
+        ASSERT_TRUE(aAction != nullptr);
         const auto &ap1 = aAction->params(0);
         const auto &ap2 = aAction->params(1);
         EXPECT_EQ(99u, ap1.id());
@@ -381,7 +381,7 @@ TEST_F(P4Runtime, FieldIdAssignment) {
     {
         // Check the ids for the packet-in header fields.
         auto packetInHeader = findP4RuntimeControllerPacketMetadata(*test->p4Info, "packet_in");
-        ASSERT_TRUE(packetInHeader.has_value());
+        ASSERT_TRUE(packetInHeader != nullptr);
         const auto &m1 = packetInHeader->metadata(0);
         const auto &m2 = packetInHeader->metadata(1);
         EXPECT_NE(1u, m1.id());
@@ -392,7 +392,7 @@ TEST_F(P4Runtime, FieldIdAssignment) {
         // Check the ids for igTableNoAnno's match fields. Without @id
         // annotations, the ids should be assigned sequentially, starting at 1.
         auto igTable = findP4RuntimeTable(*test->p4Info, "ingress.igTableNoAnno");
-        ASSERT_TRUE(igTable.has_value());
+        ASSERT_TRUE(igTable != nullptr);
         const auto &mf1 = igTable->match_fields(0);
         const auto &mf2 = igTable->match_fields(1);
         EXPECT_EQ(1u, mf1.id());
@@ -404,14 +404,14 @@ TEST_F(P4Runtime, FieldIdAssignment) {
         // be able to handle all unsigned 32-bit integers greater than 0,
         // including 0xffffffff.
         auto igTable = findP4RuntimeTable(*test->p4Info, "ingress.igTableLargeId");
-        ASSERT_TRUE(igTable.has_value());
+        ASSERT_TRUE(igTable != nullptr);
         const auto &mf1 = igTable->match_fields(0);
         EXPECT_EQ(0xffffffff, mf1.id());
     }
 
     {
         auto vset = findP4RuntimeValueSet(*test->p4Info, "parse.pvs");
-        ASSERT_TRUE(vset.has_value());
+        ASSERT_TRUE(vset != nullptr);
         const auto &mf1 = vset->match(0);
         const auto &mf2 = vset->match(1);
         EXPECT_EQ(33u, mf1.id());
@@ -473,25 +473,25 @@ TEST_F(P4Runtime, IdAssignmentCounters) {
     // checks that myDirectCounter1 with the right ID prefix
     {
         auto myTable1 = findP4RuntimeTable(*test->p4Info, "myTable1");
-        ASSERT_TRUE(myTable1.has_value());
+        ASSERT_TRUE(myTable1 != nullptr);
         auto myDirectCounter1 = findP4RuntimeDirectCounter(*test->p4Info, "myDirectCounter1");
-        ASSERT_TRUE(myDirectCounter1.has_value());
+        ASSERT_TRUE(myDirectCounter1 != nullptr);
         EXPECT_EQ(unsigned(P4Ids::DIRECT_COUNTER), myDirectCounter1->preamble().id() >> 24);
         EXPECT_EQ(myDirectCounter1->preamble().id(), myTable1->direct_resource_ids(0));
     }
     // checks that myDirectCounter2 with the right ID prefix
     {
         auto myTable2 = findP4RuntimeTable(*test->p4Info, "myTable2");
-        ASSERT_TRUE(myTable2.has_value());
+        ASSERT_TRUE(myTable2 != nullptr);
         auto myDirectCounter2 = findP4RuntimeDirectCounter(*test->p4Info, "myDirectCounter2");
-        ASSERT_TRUE(myDirectCounter2.has_value());
+        ASSERT_TRUE(myDirectCounter2 != nullptr);
         EXPECT_EQ(unsigned(P4Ids::DIRECT_COUNTER), myDirectCounter2->preamble().id() >> 24);
         EXPECT_EQ(myDirectCounter2->preamble().id(), myTable2->direct_resource_ids(0));
     }
     // checks that myCounter with the right ID prefix
     {
         auto myCounter = findP4RuntimeCounter(*test->p4Info, "myCounter");
-        ASSERT_TRUE(myCounter.has_value());
+        ASSERT_TRUE(myCounter != nullptr);
         EXPECT_EQ(unsigned(P4Ids::COUNTER), myCounter->preamble().id() >> 24);
     }
 }
@@ -619,7 +619,7 @@ TEST_F(P4Runtime, P4_16_MatchFields) {
     EXPECT_EQ(0u, ::diagnosticCount());
 
     auto igTable = findP4RuntimeTable(*test->p4Info, "ingress.igTable");
-    ASSERT_TRUE(igTable.has_value());
+    ASSERT_TRUE(igTable != nullptr);
     EXPECT_EQ(39, igTable->match_fields_size());
 
     std::vector<ExpectedMatchFieldP416> expected = {
@@ -732,7 +732,7 @@ TEST_F(P4Runtime, DISABLED_P4_14_MatchFields) {
     EXPECT_EQ(0u, ::diagnosticCount());
 
     auto igTable = findP4RuntimeTable(*test->p4Info, "igTable");
-    ASSERT_TRUE(igTable.has_value());
+    ASSERT_TRUE(igTable != nullptr);
     EXPECT_EQ(18, igTable->match_fields_size());
 
     std::vector<ExpectedMatchField> expected = {
@@ -811,7 +811,7 @@ TEST_F(P4Runtime, Digests) {
     // digest<T>() where T is a header.
     {
         auto digest = findP4RuntimeDigest(*test->p4Info, "Header");
-        ASSERT_TRUE(digest.has_value());
+        ASSERT_TRUE(digest != nullptr);
         EXPECT_EQ(unsigned(P4Ids::DIGEST), digest->preamble().id() >> 24);
         ASSERT_TRUE(digest->type_spec().has_header());
         EXPECT_EQ("Header", digest->type_spec().header().name());
@@ -821,7 +821,7 @@ TEST_F(P4Runtime, Digests) {
     // digest<T>() where T is a struct.
     {
         auto digest = findP4RuntimeDigest(*test->p4Info, "Metadata");
-        ASSERT_TRUE(digest.has_value());
+        ASSERT_TRUE(digest != nullptr);
         EXPECT_EQ(unsigned(P4Ids::DIGEST), digest->preamble().id() >> 24);
         ASSERT_TRUE(digest->type_spec().has_struct_());
         EXPECT_EQ("Metadata", digest->type_spec().struct_().name());
@@ -831,7 +831,7 @@ TEST_F(P4Runtime, Digests) {
     // digest<T>() where T is a tuple.
     {
         auto digest = findP4RuntimeDigest(*test->p4Info, "digest_0");
-        ASSERT_TRUE(digest.has_value());
+        ASSERT_TRUE(digest != nullptr);
         EXPECT_EQ(unsigned(P4Ids::DIGEST), digest->preamble().id() >> 24);
         ASSERT_TRUE(digest->type_spec().has_tuple());
         EXPECT_EQ(2, digest->type_spec().tuple().members_size());
@@ -933,7 +933,7 @@ TEST_F(P4Runtime, PSADigests) {
     // Digest<T> where T is a header.
     {
         auto digest = findP4RuntimeDigest(*test->p4Info, "MyIC.digest1");
-        ASSERT_TRUE(digest.has_value());
+        ASSERT_TRUE(digest != nullptr);
         EXPECT_EQ(unsigned(P4Ids::DIGEST), digest->preamble().id() >> 24);
         ASSERT_TRUE(digest->type_spec().has_header());
         EXPECT_EQ("Header", digest->type_spec().header().name());
@@ -943,7 +943,7 @@ TEST_F(P4Runtime, PSADigests) {
     // Digest<T> where T is a struct.
     {
         auto digest = findP4RuntimeDigest(*test->p4Info, "MyIC.digest2");
-        ASSERT_TRUE(digest.has_value());
+        ASSERT_TRUE(digest != nullptr);
         EXPECT_EQ(unsigned(P4Ids::DIGEST), digest->preamble().id() >> 24);
         ASSERT_TRUE(digest->type_spec().has_struct_());
         EXPECT_EQ("Metadata", digest->type_spec().struct_().name());
@@ -953,7 +953,7 @@ TEST_F(P4Runtime, PSADigests) {
     // Digest<T> where T is a tuple.
     {
         auto digest = findP4RuntimeDigest(*test->p4Info, "MyIC.digest3");
-        ASSERT_TRUE(digest.has_value());
+        ASSERT_TRUE(digest != nullptr);
         EXPECT_EQ(unsigned(P4Ids::DIGEST), digest->preamble().id() >> 24);
         ASSERT_TRUE(digest->type_spec().has_tuple());
         EXPECT_EQ(2, digest->type_spec().tuple().members_size());
@@ -1020,13 +1020,13 @@ TEST_F(P4Runtime, StaticTableEntries) {
 
     {
         auto table = findP4RuntimeTable(*test->p4Info, "ingress.t_exact_ternary");
-        ASSERT_TRUE(table.has_value());
+        ASSERT_TRUE(table != nullptr);
         EXPECT_TRUE(table->is_const_table());
         unsigned int hfAId = 1;
         unsigned int hfBId = 2;
         unsigned int xId = 1;
         auto action = findP4RuntimeAction(*test->p4Info, "ingress.a_with_control_params");
-        ASSERT_TRUE(action.has_value());
+        ASSERT_TRUE(action != nullptr);
 
         int priority = 1000;
         auto check_entry = [&](const p4v1::Update &update, const std::string &exact_v,
@@ -1073,10 +1073,10 @@ TEST_F(P4Runtime, StaticTableEntries) {
 
     {
         auto table = findP4RuntimeTable(*test->p4Info, "ingress.t_exact_valid");
-        ASSERT_TRUE(table.has_value());
+        ASSERT_TRUE(table != nullptr);
         EXPECT_TRUE(table->is_const_table());
         auto action = findP4RuntimeAction(*test->p4Info, "ingress.a_with_bool_param");
-        ASSERT_TRUE(action.has_value());
+        ASSERT_TRUE(action != nullptr);
 
         auto check_entry = [&](const p4v1::Update &update, const std::string &exact_v,
                                const std::string &param_v) {
@@ -1144,10 +1144,10 @@ TEST_F(P4Runtime, IsConstTable) {
     EXPECT_EQ(0u, ::diagnosticCount());
 
     auto table_const = findP4RuntimeTable(*test->p4Info, "ingress.t_const");
-    ASSERT_TRUE(table_const.has_value());
+    ASSERT_TRUE(table_const != nullptr);
     EXPECT_TRUE(table_const->is_const_table());
     auto table_non_const = findP4RuntimeTable(*test->p4Info, "ingress.t_non_const");
-    ASSERT_TRUE(table_non_const.has_value());
+    ASSERT_TRUE(table_non_const != nullptr);
     EXPECT_FALSE(table_non_const->is_const_table());
 }
 
@@ -1187,7 +1187,7 @@ TEST_F(P4Runtime, TableActionsAnnotations) {
     EXPECT_EQ(0u, ::diagnosticCount());
 
     auto table = findP4RuntimeTable(*test->p4Info, "ingress.t");
-    ASSERT_TRUE(table.has_value());
+    ASSERT_TRUE(table != nullptr);
 
     // finds action reference based on the action name
     // returns nullptr if something goes wrong (e.g. not a valid action name for
@@ -1250,7 +1250,7 @@ TEST_F(P4Runtime, ValueSet) {
     EXPECT_EQ(0u, ::diagnosticCount());
 
     auto vset = findP4RuntimeValueSet(*test->p4Info, "parse.pvs");
-    ASSERT_TRUE(vset.has_value());
+    ASSERT_TRUE(vset != nullptr);
     EXPECT_EQ(vset->preamble().id() >> 24, unsigned(P4Ids::VALUE_SET));
     EXPECT_EQ(vset->size(), 16);
     ASSERT_EQ(vset->match_size(), 3);
@@ -1311,7 +1311,7 @@ TEST_F(P4Runtime, Register) {
 
     {  // type parameter is tuple
         auto register_ = findP4RuntimeRegister(*test->p4Info, "ingress.my_register_1");
-        ASSERT_TRUE(register_.has_value());
+        ASSERT_TRUE(register_ != nullptr);
         EXPECT_EQ(unsigned(P4Ids::REGISTER), register_->preamble().id() >> 24);
         const auto &annotations = register_->preamble().annotations();
         ASSERT_EQ(1, annotations.size());
@@ -1323,7 +1323,7 @@ TEST_F(P4Runtime, Register) {
     }
     {  // type parameter is header
         auto register_ = findP4RuntimeRegister(*test->p4Info, "ingress.my_register_2");
-        ASSERT_TRUE(register_.has_value());
+        ASSERT_TRUE(register_ != nullptr);
         EXPECT_EQ(unsigned(P4Ids::REGISTER), register_->preamble().id() >> 24);
         EXPECT_EQ(128, register_->size());
         const auto &typeSpec = register_->type_spec();
@@ -1375,7 +1375,7 @@ TEST_F(P4Runtime, Documentation) {
 
     {
         auto table = findP4RuntimeTable(*test->p4Info, "ingress.t");
-        ASSERT_TRUE(table.has_value());
+        ASSERT_TRUE(table != nullptr);
         const auto &tDocumentation = table->preamble().doc();
         EXPECT_EQ(tDocumentation.brief(), "");
         // NOLINTNEXTLINE(whitespace/line_length)
@@ -1391,7 +1391,7 @@ TEST_F(P4Runtime, Documentation) {
 
     {
         auto noop = findP4RuntimeAction(*test->p4Info, "ingress.noop");
-        ASSERT_TRUE(noop.has_value());
+        ASSERT_TRUE(noop != nullptr);
         const auto &aDocumentation = noop->preamble().doc();
         EXPECT_EQ(aDocumentation.brief(), "This action does nothing duh!");
         EXPECT_EQ(aDocumentation.description(), "");
@@ -1399,7 +1399,7 @@ TEST_F(P4Runtime, Documentation) {
 
     {
         auto drop = findP4RuntimeAction(*test->p4Info, "ingress.drop");
-        ASSERT_TRUE(drop.has_value());
+        ASSERT_TRUE(drop != nullptr);
         EXPECT_FALSE(drop->preamble().has_doc());
     }
 }
