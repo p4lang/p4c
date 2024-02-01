@@ -32,10 +32,16 @@ class ICastable {
         return to<T>() != nullptr;
     }
 
-    /// Tries to convert the class to type T. Returns a nullptr if the cast fails.
+    /// Performs a checked cast. A BUG occurs if the cast fails.
     template <typename T>
     const T &as() const {
         return dynamic_cast<const T &>(*this);
+    }
+
+    /// Performs a checked cast. A BUG occurs if the cast fails.
+    template <typename T>
+    T &as() {
+        return dynamic_cast<T &>(*this);
     }
 
     /// Tries to convert the class to type T. Returns a nullptr if the cast fails.

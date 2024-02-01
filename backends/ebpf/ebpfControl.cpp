@@ -154,7 +154,7 @@ bool ControlBodyTranslator::preorder(const IR::MethodCallExpression *expression)
 
 void ControlBodyTranslator::compileEmitField(const IR::Expression *expr, cstring field,
                                              unsigned alignment, EBPFType *type) {
-    unsigned widthToEmit = dynamic_cast<IHasWidth *>(type)->widthInBits();
+    unsigned widthToEmit = type->as<IHasWidth>().widthInBits();
     cstring swap = "";
     if (widthToEmit == 16)
         swap = "htons";
@@ -254,7 +254,7 @@ void ControlBodyTranslator::compileEmit(const IR::Vector<IR::Argument> *args) {
     for (auto f : ht->fields) {
         auto ftype = typeMap->getType(f);
         auto etype = EBPFTypeFactory::instance->create(ftype);
-        auto et = dynamic_cast<IHasWidth *>(etype);
+        auto et = etype->to<IHasWidth>();
         if (et == nullptr) {
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                     "Only headers with fixed widths supported %1%", f);

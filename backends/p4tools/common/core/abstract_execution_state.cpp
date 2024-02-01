@@ -101,7 +101,8 @@ const IR::Expression *AbstractExecutionState::convertToComplexExpression(
         IR::Vector<IR::Expression> components;
         const auto *elementType = resolveType(ts->elementType);
         for (size_t idx = 0; idx < ts->getSize(); idx++) {
-            auto ref = new IR::ArrayIndex(elementType, parent, new IR::Constant(idx));
+            auto ref = new IR::ArrayIndex(elementType, parent,
+                                          new IR::Constant(static_cast<uint64_t>(idx)));
             if (elementType->is<IR::Type_StructLike>() || elementType->to<IR::Type_Stack>()) {
                 components.push_back(convertToComplexExpression(ref));
             } else {

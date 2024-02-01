@@ -240,15 +240,14 @@ class Constant : Literal {
     Constant operator-() const;
 #end
     toString {
-        const IR::Type_Bits* tb = dynamic_cast<const IR::Type_Bits*>(type);
         unsigned width;
         bool sign;
-        if (tb == nullptr) {
+        if (const IR::Type_Bits* tb = type->to<IR::Type_Bits>()) {
+             width = tb->size;
+             sign = tb->isSigned;
+        } else {
             width = 0;
             sign = false;
-        } else {
-            width = tb->size;
-            sign = tb->isSigned;
         }
         return Util::toString(value, width, sign, base);
     }

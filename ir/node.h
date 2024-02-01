@@ -48,6 +48,17 @@ class Vector;  // IWYU pragma: keep
 template <class T>
 class IndexedVector;  // IWYU pragma: keep
 
+/// SFINAE helper to check if given class has a `static_type_name`
+/// method. Definite node classes have them while interfaces do not
+template <class, class = void>
+struct has_static_type_name : std::false_type {};
+
+template <class T>
+struct has_static_type_name<T, std::void_t<decltype(T::static_type_name())>> : std::true_type {};
+
+template <class T>
+inline constexpr bool has_static_type_name_v = has_static_type_name<T>::value;
+
 // node interface
 class INode : public Util::IHasSourceInfo, public IHasDbPrint, public ICastable {
  public:
@@ -60,12 +71,17 @@ class INode : public Util::IHasSourceInfo, public IHasDbPrint, public ICastable 
     virtual cstring node_type_name() const = 0;
     virtual void validate() const {}
     virtual const Annotation *getAnnotation(cstring) const { return nullptr; }
-    /// A checked version of INode::to. A BUG occurs if the cast fails.
-    ///
-    /// A similar effect can be achieved with `&as<T>()`, but this method
-    /// produces a message that is easier to debug.
+
+    // default checkedTo implementation for nodes: just fallback to generic ICastable method
     template <typename T>
-    const T *checkedTo() const {
+    std::enable_if_t<!has_static_type_name_v<T>, const T *> checkedTo() const {
+        return ICastable::checkedTo<T>();
+    }
+
+    // alternative checkedTo implementation that produces slightly better error message
+    // due to node_type_name() / static_type_name() being available
+    template <typename T>
+    std::enable_if_t<has_static_type_name_v<T>, const T *> checkedTo() const {
         const auto *result = to<T>();
         BUG_CHECK(result, "Cast failed: %1% with type %2% is not a %3%.", this, node_type_name(),
                   T::static_type_name());

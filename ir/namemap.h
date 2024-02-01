@@ -97,7 +97,7 @@ class NameMap : public Node {
     template <class U>
     const U *get(cstring name) const {
         for (auto it = symbols.find(name); it != symbols.end() && it->first == name; it++)
-            if (auto rv = dynamic_cast<const U *>(it->second)) return rv;
+            if (auto rv = it->second->template to<U>()) return rv;
         return nullptr;
     }
     void add(cstring name, const T *n) {

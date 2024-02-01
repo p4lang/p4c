@@ -65,7 +65,7 @@ class NodeMap : public Node {
     template <class U>
     const U *get(const KEY *k) const {
         for (auto it = symbols.find(k); it != symbols.end() && it->first == k; it++)
-            if (auto rv = dynamic_cast<const U *>(it->second)) return rv;
+            if (auto rv = it->second->template to<U>()) return rv;
         return nullptr;
     }
     elem_ref operator[](const KEY *k) { return elem_ref(*this, k); }

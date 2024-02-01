@@ -70,21 +70,13 @@ class UBPFEnumType : public EBPF::EBPFEnumType {
 };
 
 class UBPFListType : public EBPF::EBPFType, public EBPF::IHasWidth {
-    class UBPFListElement {
+    class UBPFListElement : public ICastable {
      public:
         EBPFType *type;
         const cstring name;
 
         UBPFListElement(EBPFType *type, const cstring name) : type(type), name(name) {}
         virtual ~UBPFListElement() {}  // to make UBPFListElement polymorphic.
-        template <typename T>
-        bool is() const {
-            return dynamic_cast<const T *>(this) != nullptr;
-        }
-        template <typename T>
-        T *to() {
-            return dynamic_cast<T *>(this);
-        }
     };
 
     class Padding : public UBPFListElement {
@@ -107,8 +99,8 @@ class UBPFListType : public EBPF::EBPFType, public EBPF::IHasWidth {
     void declare(EBPF::CodeBuilder *builder, cstring id, bool asPointer) override;
     void declareInit(EBPF::CodeBuilder *builder, cstring id, bool asPointer) override;
     void emitInitializer(EBPF::CodeBuilder *builder) override;
-    unsigned widthInBits() override { return width; }
-    unsigned implementationWidthInBits() override { return implWidth; }
+    unsigned widthInBits() const override { return width; }
+    unsigned implementationWidthInBits() const override { return implWidth; }
     void emit(EBPF::CodeBuilder *builder) override;
 };
 

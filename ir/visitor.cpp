@@ -590,7 +590,7 @@ IRNODE_ALL_NON_TEMPLATE_CLASSES(DEFINE_APPLY_FUNCTIONS, , , )
 #define DEFINE_VISIT_FUNCTIONS(CLASS, BASE)                                      \
     void Visitor::visit(const IR::CLASS *&n, const char *name) {                 \
         auto t = apply_visitor(n, name);                                         \
-        n = dynamic_cast<const IR::CLASS *>(t);                                  \
+        n = (t ? t->to<IR::CLASS>() : nullptr);                                  \
         if (t && !n) BUG("visitor returned non-" #CLASS " type: %1%", t);        \
     }                                                                            \
     void Visitor::visit(const IR::CLASS *const &n, const char *name) {           \
@@ -600,7 +600,7 @@ IRNODE_ALL_NON_TEMPLATE_CLASSES(DEFINE_APPLY_FUNCTIONS, , , )
     void Visitor::visit(const IR::CLASS *&n, const char *name, int cidx) {       \
         if (ctxt) ctxt->child_index = cidx;                                      \
         auto t = apply_visitor(n, name);                                         \
-        n = dynamic_cast<const IR::CLASS *>(t);                                  \
+        n = (t ? t->to<IR::CLASS>() : nullptr);                                  \
         if (t && !n) BUG("visitor returned non-" #CLASS " type: %1%", t);        \
     }                                                                            \
     void Visitor::visit(const IR::CLASS *const &n, const char *name, int cidx) { \

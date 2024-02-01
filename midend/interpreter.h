@@ -28,7 +28,7 @@ namespace P4 {
 class SymbolicValueFactory;
 
 // Base class for all abstract values
-class SymbolicValue : public IHasDbPrint {
+class SymbolicValue : public IHasDbPrint, public ICastable {
     static unsigned crtid;
 
  protected:
@@ -39,25 +39,6 @@ class SymbolicValue : public IHasDbPrint {
     const IR::Type *type;
     virtual bool isScalar() const = 0;
     virtual void dbprint(std::ostream &out) const = 0;
-    template <typename T>
-    T *to() {
-        return dynamic_cast<T *>(this);
-    }
-    template <typename T>
-    T *checkedTo() {
-        auto result = dynamic_cast<T *>(this);
-        CHECK_NULL(result);
-        return result;
-    }
-    template <typename T>
-    const T *to() const {
-        auto result = dynamic_cast<const T *>(this);
-        return result;
-    }
-    template <typename T>
-    bool is() const {
-        return dynamic_cast<const T *>(this) != nullptr;
-    }
     virtual SymbolicValue *clone() const = 0;
     virtual void setAllUnknown() = 0;
     virtual void assign(const SymbolicValue *other) = 0;

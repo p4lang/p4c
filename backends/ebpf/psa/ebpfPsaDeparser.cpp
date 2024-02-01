@@ -170,7 +170,7 @@ void TCIngressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
                                       "skipping deparser..");
     builder->emitIndent();
     CHECK_NULL(program);
-    auto pipeline = dynamic_cast<const EBPFPipeline *>(program);
+    auto pipeline = program->checkedTo<EBPFPipeline>();
     builder->appendFormat("%s->packet_path = RESUBMIT;", pipeline->compilerGlobalMetadata);
     builder->newline();
     builder->emitIndent();
