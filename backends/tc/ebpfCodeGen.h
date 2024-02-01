@@ -346,6 +346,59 @@ class DeparserHdrEmitTranslatorPNA : public EBPF::DeparserPrepareBufferTranslato
                    unsigned alignment, EBPF::EBPFType *type, bool isMAC);
 };
 
+class CRCChecksumAlgorithmPNA : public EBPF::CRCChecksumAlgorithm {
+ public:
+    CRCChecksumAlgorithmPNA(const EBPF::EBPFProgram *program, cstring name, int width)
+        : EBPF::CRCChecksumAlgorithm(program, name, width) {}
+
+
+    static void emitUpdateMethod(EBPF::CodeBuilder *builder, int crcWidth);
+};
+
+class CRC16ChecksumAlgorithmPNA : public CRCChecksumAlgorithmPNA {
+ public:
+    CRC16ChecksumAlgorithmPNA(const EBPF::EBPFProgram *program, cstring name)
+        : CRCChecksumAlgorithmPNA(program, name, 16) {
+        initialValue = "0";
+        // We use a 0x8005 polynomial.
+        // 0xA001 comes from 0x8005 value bits reflection.
+        polynomial = "0xA001";
+        updateMethod = "crc16_update";
+        finalizeMethod = "crc16_finalize";
+    }
+
+    static void emitGlobals(EBPF::CodeBuilder *builder);
+};
+
+class CRC32ChecksumAlgorithmPNA : public CRCChecksumAlgorithmPNA {
+ public:
+    CRC32ChecksumAlgorithmPNA(const EBPF::EBPFProgram *program, cstring name)
+        : CRCChecksumAlgorithmPNA(program, name, 32) {
+        initialValue = "0xffffffff";
+        // We use a 0x04C11DB7 polynomial.
+        // 0xEDB88320 comes from 0x04C11DB7 value bits reflection.
+        polynomial = "0xEDB88320";
+        updateMethod = "crc32_update";
+        finalizeMethod = "crc32_finalize";
+    }
+
+    static void emitGlobals(EBPF::CodeBuilder *builder);
+};
+
+class EBPFHashAlgorithmTypeFactoryPNA : public EBPF::EBPFHashAlgorithmTypeFactoryPSA {
+ public:
+    static EBPFHashAlgorithmTypeFactoryPNA *instance() {
+        static EBPFHashAlgorithmTypeFactoryPNA factory;
+        return &factory;
+    }
+    void emitGlobals(EBPF::CodeBuilder *builder) {
+        CRC16ChecksumAlgorithmPNA::emitGlobals(builder);
+        CRC32ChecksumAlgorithmPNA::emitGlobals(builder);
+        EBPF::InternetChecksumAlgorithm::emitGlobals(builder);
+    }
+};
+
+
 }  // namespace TC
 
 #endif /* BACKENDS_TC_EBPFCODEGEN_H_ */

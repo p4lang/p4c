@@ -18,6 +18,7 @@ and limitations under the License.
 #define P4C_PNA_H
 
 #include <stdbool.h>
+#include "crc32.h"
 
 // pna.p4 information
 
