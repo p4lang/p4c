@@ -5,8 +5,9 @@ on:
     # Every day on midnight UTC
     - cron: "0 0 * * *"
   pull_request:
-    branches:
-      - main
+    branches: [main]
+  push:
+    branches: [main]
 
 jobs:
   # We run validation in parallel with the normal tests.
@@ -14,7 +15,7 @@ jobs:
   # We only test the front end and some mid end passes for now.
   validate:
     # Only run on pull requests with the "run-validation" label.
-    if: contains(github.event.pull_request.labels.*.name, 'run-validation')
+    if: ${{ github.event_name == 'schedule' }} or contains(github.event.pull_request.labels.*.name, 'run-validation')
     env:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test

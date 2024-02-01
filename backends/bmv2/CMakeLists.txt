@@ -120,7 +120,6 @@ add_dependencies(p4c_driver linkbmv2)
 
 
 # Tests
-
 set(BMV2_DRIVER ${CMAKE_CURRENT_SOURCE_DIR}/run-bmv2-test.py)
 set(BMV2_PTF_DRIVER "$([[ $EUID = 0 ]] || echo 'sudo -E') ${CMAKE_CURRENT_SOURCE_DIR}/run-bmv2-ptf-test.py")
 

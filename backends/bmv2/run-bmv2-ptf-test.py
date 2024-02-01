@@ -6,6 +6,7 @@ import os
 import random
 import sys
 import tempfile
+import time
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -257,7 +258,7 @@ def run_test(options: Options) -> int:
     Optional: Run the generated model"""
     test_name = Path(options.p4_file.name)
     json_name = options.testdir.joinpath(test_name.with_suffix(".json"))
-    info_name = options.testdir.joinpath(test_name.with_suffix(".p4info.txt"))
+    info_name = options.testdir.joinpath(test_name.with_suffix(".p4info.txtpb"))
     # Copy the test file into the test folder so that it can be picked up by PTF.
     testutils.copy_file(options.testfile, options.testdir)
 
@@ -277,6 +278,8 @@ def run_test(options: Options) -> int:
     switch_proc = testenv.run_simple_switch_grpc(switchlog, grpc_port)
     if switch_proc is None:
         return testutils.FAILURE
+    # Breath a little.
+    time.sleep(1)
     # Run the PTF test and retrieve the result.
     result = testenv.run_ptf(grpc_port, json_name, info_name)
     # Delete the test environment and trigger a clean up.

@@ -270,7 +270,7 @@ class ConvertToEBPFControlPNA : public Inspector {
     bool preorder(const IR::Declaration_Variable *) override;
     bool preorder(const IR::Member *m) override;
     bool preorder(const IR::IfStatement *a) override;
-    bool preorder(const IR::ExternBlock *instance);
+    bool preorder(const IR::ExternBlock *instance) override;
     bool checkPnaTimestampMem(const IR::Member *m);
     EBPF::EBPFControlPSA *getEBPFControl() { return control; }
 };
@@ -305,8 +305,8 @@ class ControlBodyTranslatorPNA : public EBPF::ControlBodyTranslator {
     explicit ControlBodyTranslatorPNA(const EBPF::EBPFControlPSA *control,
                                       const ConvertToBackendIR *tcIR,
                                       const EBPF::EBPFTablePSA *table);
-    void processFunction(const P4::ExternFunction *function);
-    void processApply(const P4::ApplyMethod *method);
+    void processFunction(const P4::ExternFunction *function) override;
+    void processApply(const P4::ApplyMethod *method) override;
     bool checkPnaPortMem(const IR::Member *m);
     virtual cstring getParamName(const IR::PathExpression *);
     bool preorder(const IR::AssignmentStatement *a) override;
