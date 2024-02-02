@@ -72,6 +72,7 @@ set (CONTROLPLANE_SRCS
   addMissingIds.cpp
   bytestrings.cpp
   flattenHeader.cpp
+  p4infoApi.cpp
   p4RuntimeArchHandler.cpp
   p4RuntimeArchStandard.cpp
   p4RuntimeSerializer.cpp
@@ -84,6 +85,7 @@ set (CONTROLPLANE_HDRS
   addMissingIds.h
   bytestrings.h
   flattenHeader.h
+  p4infoApi.h
   p4RuntimeArchHandler.h
   p4RuntimeArchStandard.h
   p4RuntimeSerializer.h
