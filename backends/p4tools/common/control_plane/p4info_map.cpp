@@ -5,6 +5,7 @@ namespace P4::ControlPlaneAPI {
 P4InfoMaps::P4InfoMaps(const p4::config::v1::P4Info &p4Info) { buildP4InfoMaps(p4Info); }
 
 uint64_t szudzikPairing(p4rt_id_t x, p4rt_id_t y) {
+    // See https://en.wikipedia.org/wiki/Pairing_function#Other_pairing_functions
     // This static assert ensures that p4rt_id_t used here is a uint32_t.
     // In case things change down the road.
     static_assert(std::is_convertible_v<p4rt_id_t, uint32_t> &&
@@ -73,7 +74,7 @@ void P4InfoMaps::buildP4InfoMaps(const p4::config::v1::P4Info &p4Info) {
     }
 }
 
-std::optional<uint64_t> P4InfoMaps::lookupP4RuntimeId(cstring controlPlaneName) const {
+std::optional<uint64_t> P4InfoMaps::lookUpP4RuntimeId(cstring controlPlaneName) const {
     auto it = nameToIdMap.find(controlPlaneName);
     if (it == nameToIdMap.end()) {
         return std::nullopt;
@@ -81,7 +82,7 @@ std::optional<uint64_t> P4InfoMaps::lookupP4RuntimeId(cstring controlPlaneName) 
     return it->second;
 }
 
-std::optional<cstring> P4InfoMaps::lookupControlPlaneName(uint64_t id) const {
+std::optional<cstring> P4InfoMaps::lookUpControlPlaneName(uint64_t id) const {
     auto it = idToNameMap.find(id);
     if (it == idToNameMap.end()) {
         return std::nullopt;

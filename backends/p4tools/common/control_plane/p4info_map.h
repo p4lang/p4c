@@ -30,6 +30,10 @@ uint64_t szudzikPairing(p4rt_id_t x, p4rt_id_t y);
 
 /// This object maps P4 control plane names to their P4Runtime IDs and vice versa.
 /// It uses the P4Info object to populate the maps.
+/// Since ids for action parameters and table keys are not unique, we use a pairing function to
+/// compute a unique identifier. This pairing function uses the id of the parent object (e.g., a
+/// table or action) and combines it with the id of the parameter or key element to create a unique
+/// identifier.
 class P4InfoMaps {
     /// Type definitions for convenience.
     using P4RuntimeIdToControlPlaneNameMap = std::map<uint64_t, cstring>;
@@ -47,19 +51,14 @@ class P4InfoMaps {
 
  public:
     explicit P4InfoMaps(const p4::config::v1::P4Info &p4Info);
-    P4InfoMaps(const P4InfoMaps &) = default;
-    P4InfoMaps(P4InfoMaps &&) = default;
-    P4InfoMaps &operator=(const P4InfoMaps &) = default;
-    P4InfoMaps &operator=(P4InfoMaps &&) = default;
-    virtual ~P4InfoMaps() = default;
 
     /// Looks up the P4Runtime id for the given control plane name in the pre-computed P4Runtime-ID
     /// map. @returns std::nullopt if the name is not in the map.
-    [[nodiscard]] std::optional<uint64_t> lookupP4RuntimeId(cstring controlPlaneName) const;
+    [[nodiscard]] std::optional<uint64_t> lookUpP4RuntimeId(cstring controlPlaneName) const;
 
     /// Looks up the control plane name for the given P4Runtime id in the pre-computed P4Runtime-ID
     /// map. @returns std::nullopt if the id is not in the map.
-    [[nodiscard]] std::optional<cstring> lookupControlPlaneName(uint64_t id) const;
+    [[nodiscard]] std::optional<cstring> lookUpControlPlaneName(uint64_t id) const;
 };
 
 }  // namespace P4::ControlPlaneAPI
