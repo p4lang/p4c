@@ -150,20 +150,22 @@ TEST(hvec_map, insert_emplace_erase) {
 }
 
 TEST(hvec_map, string_map) {
-    hvec_map<std::string, std::string> m;
+    hvec_map<std::string, std::string> m, m1;
 
     for (int i = 1; i <= 100; ++i) {
         m[std::to_string(i)] = "test";
         m[std::to_string(i)] += std::to_string(i);
     }
-    EXPECT_EQ(m.size(), 100);
-    for (int i = 1; i <= 100; i += 2) m.erase(std::to_string(i));
-    EXPECT_EQ(m.size(), 50);
-    for (int i = 102; i <= 200; i += 2) m[std::to_string(i)] = "foobar";
-    EXPECT_EQ(m.size(), 100);
+    m1 = m;
+
+    EXPECT_EQ(m1.size(), 100);
+    for (int i = 1; i <= 100; i += 2) m1.erase(std::to_string(i));
+    EXPECT_EQ(m1.size(), 50);
+    for (int i = 102; i <= 200; i += 2) m1[std::to_string(i)] = "foobar";
+    EXPECT_EQ(m1.size(), 100);
 
     int idx = 2;
-    for (auto &el : m) {
+    for (auto &el : m1) {
         EXPECT_TRUE(el.first == std::to_string(idx));
         if (idx <= 100)
             EXPECT_TRUE(el.second.c_str() + 4 == std::to_string(idx));
