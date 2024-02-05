@@ -1570,14 +1570,12 @@ const IR::Node *CopyMatchKeysToSingleStruct::preorder(IR::Key *keys) {
             keyTypeStr = keyField->expr->toString();
         } else if (auto m = key->expression->to<IR::MethodCallExpression>()) {
             /* When isValid is present as table key, it should be moved to metadata */
-            auto mi = P4::MethodInstance::resolve(m, refMap, typeMap);
-            if (auto b = mi->to<P4::BuiltInMethod>()) {
-                if (b->name == "isValid") {
-                    copyNeeded = true;
-                    break;
-                }
+            if (isValidCall(m)) {
+                copyNeeded = true;
+                break;
             }
         }
+
         if (firstKeyStr != keyTypeStr) {
             if (firstKeyHdr || keyTypeStr.startsWith("h")) {
                 copyNeeded = true;
@@ -1667,13 +1665,14 @@ const IR::Node *CopyMatchKeysToSingleStruct::postorder(IR::KeyElement *element) 
 
     auto keyName = element->expression->toString();
     if (auto m = element->expression->to<IR::MethodCallExpression>()) {
+        BUG_CHECK(isValidCall(m),
+                  "Method calls except isValid must be simplified before"
+                  " reaching here, found %1%",
+                  m->method->toString());
         /* Moving <hdr>.isValid() used as table key to Metadata */
-        auto mi = P4::MethodInstance::resolve(m, refMap, typeMap);
-        if (auto b = mi->to<P4::BuiltInMethod>()) {
-            if (b->name == "isValid") {
-                keyName = m->method->toString();
-            }
-        }
+        auto mem = m->method->to<IR::Member>();
+        CHECK_NULL(mem);
+        keyName = mem->expr->toString() + "." + IR::Type_Header::isValid;
     }
 
     bool isHeader = false;
