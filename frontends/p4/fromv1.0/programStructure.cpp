@@ -685,7 +685,7 @@ void ProgramStructure::include(cstring filename, cstring ppoptions) {
             auto code = P4::P4ParserDriver::parse(file, options.file);
             if (code && !::errorCount())
                 for (auto decl : code->objects) declarations->push_back(decl);
-            options.closeInput(file);
+            options.closePreprocessedInput(file);
         }
     }
 }

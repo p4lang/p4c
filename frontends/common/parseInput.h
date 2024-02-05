@@ -80,7 +80,11 @@ const IR::P4Program *parseP4File(ParserOptions &options) {
     auto result = options.isv1()
                       ? parseV1Program<FILE *, C>(in, options.file, 1, options.getDebugHook())
                       : P4ParserDriver::parse(in, options.file);
-    options.closeInput(in);
+    if (options.doNotPreprocess) {
+        fclose(in);
+    } else {
+        options.closePreprocessedInput(in);
+    }
 
     if (::errorCount() > 0) {
         ::error(ErrorType::ERR_OVERLIMIT, "%1% errors encountered, aborting compilation",
