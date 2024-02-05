@@ -127,6 +127,24 @@ class ErrorCatalog {
         return "--unknown--";
     }
 
+    /// return true if the given diagnostic can _only_ be an error; false otherwise
+    bool isError(cstring name) {
+        // Some diagnostics might be both errors and warning/info
+        // (e.g. "invalid" -> both ERR_INVALID and WARN_INVALID).
+        bool error = false;
+        bool otherDiagnostic = false;
+        for (const auto &pair : errorCatalog) {
+            if (pair.second == name) {
+                if (pair.first < ErrorType::ERR_MAX)
+                    error = true;
+                else
+                    otherDiagnostic = true;
+            }
+        }
+
+        return error && !otherDiagnostic;
+    }
+
  private:
     ErrorCatalog() {}
 
