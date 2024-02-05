@@ -15,7 +15,8 @@ limitations under the License.
 */
 
 #include "options.h"
-#include <lib/null.h>
+
+#include "null.h"
 
 void Util::Options::registerOption(const char *option, const char *argName,
                                    OptionProcessor processor, const char *description,
