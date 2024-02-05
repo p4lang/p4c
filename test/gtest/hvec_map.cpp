@@ -158,6 +158,8 @@ TEST(hvec_map, string_map) {
     }
     m1 = m;
 
+    hvec_map<std::string, std::string> m2(m);
+
     EXPECT_EQ(m1.size(), 100);
     for (int i = 1; i <= 100; i += 2) m1.erase(std::to_string(i));
     EXPECT_EQ(m1.size(), 50);
