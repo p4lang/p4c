@@ -48,7 +48,8 @@ void FunctionsInliner::end_apply(const IR::Node *) {
 }
 
 Visitor::profile_t FunctionsInliner::init_apply(const IR::Node *node) {
-    P4::ResolveReferences solver(refMap, true);
+    P4::ResolveReferences solver(refMap);
+    refMap->clear();
     node->apply(solver);
     LOG2("FunctionsInliner " << toInline);
     return Transform::init_apply(node);

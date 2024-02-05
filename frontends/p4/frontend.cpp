@@ -167,14 +167,14 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new ValidateParsedProgram(),
         // Synthesize some built-in constructs
         new CreateBuiltins(),
-        new ResolveReferences(&refMap, true),  // check shadowing
+        new ResolveReferences(&refMap, /* checkShadow */ true),
         // First pass of constant folding, before types are known --
         // may be needed to compute types.
         new ConstantFolding(&refMap, nullptr),
         // Desugars direct parser and control applications
         // into instantiations followed by application
         new InstantiateDirectCalls(&refMap),
-        new ResolveReferences(&refMap),  // check shadowing
+        new ResolveReferences(&refMap),
         new Deprecated(&refMap),
         new CheckNamedArgs(),
         // Type checking and type inference.  Also inserts
@@ -258,6 +258,9 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new SimplifyControlFlow(&refMap, &typeMap),
         });
     passes.addPasses({
+        // Check for shadowing after all inlining passes. We disable this
+        // check during inlining since it significantly slows compilation.
+        new ResolveReferences(&refMap, /* checkShadow */ true),
         new HierarchicalNames(),
         new FrontEndLast(),
     });

@@ -446,6 +446,7 @@ bool DiscoverInlining::preorder(const IR::ParserBlock *block) {
 Visitor::profile_t GeneralInliner::init_apply(const IR::Node *node) {
     ResolveReferences solver(refMap);
     TypeChecking typeChecker(refMap, typeMap);
+    refMap->clear();
     node->apply(solver);
     (void)node->apply(typeChecker);
     return AbstractInliner::init_apply(node);

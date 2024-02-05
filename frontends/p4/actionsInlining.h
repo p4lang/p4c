@@ -51,9 +51,7 @@ class ActionsInliner : public AbstractInliner<ActionsInlineList, AInlineWorkList
     std::map<const IR::MethodCallStatement *, const IR::P4Action *> *replMap;
 
  public:
-    explicit ActionsInliner(bool isv1) : refMap(new P4::ReferenceMap()), replMap(nullptr) {
-        refMap->setIsV1(isv1);
-    }
+    explicit ActionsInliner(P4::ReferenceMap *refMap) : refMap(refMap), replMap(nullptr) {}
     Visitor::profile_t init_apply(const IR::Node *node) override;
     const IR::Node *preorder(IR::P4Parser *cont) override {
         prune();
@@ -73,8 +71,7 @@ class InlineActions : public PassManager {
     InlineActions(ReferenceMap *refMap, TypeMap *typeMap) {
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new DiscoverActionsInlining(&actionsToInline, refMap, typeMap));
-        passes.push_back(
-            new InlineActionsDriver(&actionsToInline, new ActionsInliner(refMap->isV1())));
+        passes.push_back(new InlineActionsDriver(&actionsToInline, new ActionsInliner(refMap)));
         passes.push_back(new RemoveAllUnusedDeclarations(refMap));
         setName("InlineActions");
     }

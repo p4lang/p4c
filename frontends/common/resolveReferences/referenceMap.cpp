@@ -32,6 +32,7 @@ void ReferenceMap::clear() {
     LOG2("Clearing reference map");
     pathToDeclaration.clear();
     usedNames.clear();
+    program = nullptr;
     used.clear();
     thisToDeclaration.clear();
     for (auto &reserved : P4::reservedWords) usedNames.insert({reserved, 0});
