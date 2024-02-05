@@ -3081,8 +3081,10 @@ const IR::Node *TypeInference::postorder(IR::Slice *expression) {
         auto ei = EnumInstance::resolve(expression->e1, typeMap);
         CHECK_NULL(ei);
         auto sei = ei->to<SerEnumInstance>();
-        if (sei == nullptr)
+        if (sei == nullptr) {
             typeError("%1%: slice bit index values must be constants", expression->e1);
+            return expression;
+        }
         expression->e1 = sei->value;
     }
     auto e2type = getType(expression->e2);
@@ -3090,8 +3092,10 @@ const IR::Node *TypeInference::postorder(IR::Slice *expression) {
         auto ei = EnumInstance::resolve(expression->e2, typeMap);
         CHECK_NULL(ei);
         auto sei = ei->to<SerEnumInstance>();
-        if (sei == nullptr)
+        if (sei == nullptr) {
             typeError("%1%: slice bit index values must be constants", expression->e2);
+            return expression;
+        }
         expression->e2 = sei->value;
     }
 
@@ -3430,8 +3434,11 @@ const IR::Expression *TypeInference::actionCall(bool inActionList,
     }
     auto method = actionCall->method;
     auto methodType = getType(method);
-    if (!methodType->is<IR::Type_Action>()) typeError("%1%: must be an action", method);
     auto baseType = methodType->to<IR::Type_Action>();
+    if (!baseType) {
+        typeError("%1%: must be an action", method);
+        return actionCall;
+    }
     LOG2("Action type " << baseType);
     BUG_CHECK(method->is<IR::PathExpression>(), "%1%: unexpected call", method);
     BUG_CHECK(baseType->returnType == nullptr, "%1%: action with return type?",
