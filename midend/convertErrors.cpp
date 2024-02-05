@@ -50,13 +50,12 @@ const IR::Node *DoConvertErrors::postorder(IR::Type_Name *type) {
 }
 
 const IR::Node *DoConvertErrors::postorder(IR::Member *member) {
-    if (!member->type->is<IR::Type_Error>()) {
+    const auto *typeErr = member->type->to<IR::Type_Error>();
+    if (!typeErr) {
         return member;
     }
-    if (!member->type->is<IR::Type_Error>()) {
-        return member;
-    }
-    auto *r = ::get(repr, member->type->to<IR::Type_Error>()->name);
+    auto *r = ::get(repr, typeErr->name);
+    CHECK_NULL(r);
     if (!member->expr->is<IR::TypeNameExpression>()) {
         // variable
         auto *newMember = member->clone();
