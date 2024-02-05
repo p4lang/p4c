@@ -170,7 +170,7 @@ if (((u32)istd.input_port == 2 && /* hdr->ipv4.isValid() */
     }
     return -1;
 }
-SEC("classifier/tc-ingress")
+SEC("p4tc/main")
 int tc_ingress_func(struct __sk_buff *skb) {
     struct pna_global_metadata *compiler_meta__ = (struct pna_global_metadata *) skb->cb;
     if (compiler_meta__->pass_to_kernel == true) return TC_ACT_OK;

@@ -157,7 +157,7 @@ crc16_finalize(ingress_h_reg);
     }
     return -1;
 }
-SEC("classifier/tc-ingress")
+SEC("p4tc/main")
 int tc_ingress_func(struct __sk_buff *skb) {
     struct pna_global_metadata *compiler_meta__ = (struct pna_global_metadata *) skb->cb;
     if (compiler_meta__->pass_to_kernel == true) return TC_ACT_OK;

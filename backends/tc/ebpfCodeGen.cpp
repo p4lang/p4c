@@ -182,7 +182,7 @@ void PNAArchTC::emitParser(EBPF::CodeBuilder *builder) const {
     builder->newline();
     builder->newline();
     pipeline->name = "tc-parse";
-    pipeline->sectionName = "classifier/" + pipeline->name;
+    pipeline->sectionName = "p4tc/parse";
     pipeline->functionName = pipeline->name.replace("-", "_") + "_func";
     pipeline->emit(builder);
     builder->target->emitLicense(builder, pipeline->license);
@@ -1108,6 +1108,7 @@ bool ConvertToEbpfPipelineTC::preorder(const IR::PackageBlock *block) {
     (void)block;
 
     pipeline = new TCIngressPipelinePNA(name, options, refmap, typemap);
+    pipeline->sectionName = "p4tc/main";
     auto parser_converter = new ConvertToEBPFParserPNA(pipeline, typemap);
     parserBlock->apply(*parser_converter);
     pipeline->parser = parser_converter->getEBPFParser();
