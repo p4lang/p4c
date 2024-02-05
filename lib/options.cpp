@@ -125,7 +125,7 @@ void Util::Options::usage() {
     }
 
     labelLen += 3;
-    for (auto o : optionOrder) {
+    for (const auto &o : optionOrder) {
         auto option = get(options, o);
         CHECK_NULL(option);
         size_t len = strlen(o);
