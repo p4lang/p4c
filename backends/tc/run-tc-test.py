@@ -96,12 +96,6 @@ timeout = 10 * 60
 
 
 def compare_files(options, produced, expected):
-    if options.replace:
-        if options.verbose:
-            print("Saving new version of ", expected)
-        shutil.copy2(produced, expected)
-        return SUCCESS
-
     if options.verbose:
         print("Comparing ", produced, " and ", expected)
     if produced.endswith(".c"):
@@ -112,6 +106,13 @@ def compare_files(options, produced, expected):
         call(sedcommand, shell=True)
     sedcommand = "sed -i -e 's/[a-zA-Z0-9_\/\-]*testdata\///g' " + produced
     call(sedcommand, shell=True)
+
+    if options.replace:
+        if options.verbose:
+            print("Saving new version of ", expected)
+        shutil.copy2(produced, expected)
+        return SUCCESS
+
     diff = difflib.Differ().compare(open(produced).readlines(), open(expected).readlines())
     result = SUCCESS
 
@@ -229,6 +230,9 @@ def main(argv):
             print("Unknown option ", argv[0], file=sys.stderr)
             usage(options)
         argv = argv[1:]
+
+    if "P4TEST_REPLACE" in os.environ:
+        options.replace = True
 
     options.p4filename = argv[-1]
     options.testName = None
