@@ -120,7 +120,7 @@ class PnaStateTranslationVisitor : public EBPF::PsaStateTranslationVisitor {
 
  protected:
     void compileExtractField(const IR::Expression *expr, const IR::StructField *field,
-                             unsigned alignment, EBPF::EBPFType *type) override;
+                             unsigned hdrOffsetBits, EBPF::EBPFType *type) override;
 };
 
 class EBPFPnaParser : public EBPF::EBPFPsaParser {

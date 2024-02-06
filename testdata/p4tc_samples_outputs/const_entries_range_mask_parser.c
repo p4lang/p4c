@@ -7,6 +7,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct Header_t *h,
     unsigned ebpf_packetOffsetInBits_save = 0;
     ParserError_t ebpf_errorCode = NoError;
     void* pkt = ((void*)(long)skb->data);
+    u8* hdr_start = pkt;
     void* ebpf_packetEnd = ((void*)(long)skb->data_end);
     u32 ebpf_zero = 0;
     u32 ebpf_one = 1;
@@ -27,7 +28,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct Header_t *h,
         goto start;
         start: {
 /* extract(h->h) */
-            if (ebpf_packetEnd < pkt + BYTES(ebpf_packetOffsetInBits + 48 + 0)) {
+            if ((u8*)ebpf_packetEnd < hdr_start + BYTES(48 + 0)) {
                 ebpf_errorCode = PacketTooShort;
                 goto reject;
             }
@@ -47,7 +48,9 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct Header_t *h,
             h->h.v = (u8)((load_byte(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 8;
 
+
             h->h.ebpf_valid = 1;
+            hdr_start += BYTES(48);
 
 ;
              goto accept;

@@ -66,6 +66,7 @@ class EBPFPipeline : public EBPFProgram {
         functionName = name.replace("-", "_") + "_func";
         errorEnum = "ParserError_t";
         packetStartVar = cstring("pkt");
+        headerStartVar = cstring("hdr_start");
         contextVar = cstring("skb");
         lengthVar = cstring("pkt_len");
         endLabel = cstring("deparser");

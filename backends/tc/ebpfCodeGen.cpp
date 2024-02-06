@@ -471,6 +471,9 @@ void TCIngressPipelinePNA::emitLocalVariables(EBPF::CodeBuilder *builder) {
                           builder->target->dataOffset(model.CPacketName.str()).c_str());
     builder->newline();
     builder->emitIndent();
+    builder->appendFormat("u8* %s = %s;", headerStartVar.c_str(), packetStartVar.c_str());
+    builder->newline();
+    builder->emitIndent();
     builder->appendFormat("void* %s = %s;", packetEndVar.c_str(),
                           builder->target->dataEnd(model.CPacketName.str()).c_str());
     builder->newline();
@@ -515,7 +518,8 @@ void EBPFPnaParser::emit(EBPF::CodeBuilder *builder) {
 //  Handled TC "macaddr" annotation.
 void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
                                                      const IR::StructField *field,
-                                                     unsigned alignment, EBPF::EBPFType *type) {
+                                                     unsigned hdrOffsetBits, EBPF::EBPFType *type) {
+    unsigned alignment = hdrOffsetBits % 8;
     auto width = type->to<EBPF::IHasWidth>();
     if (width == nullptr) return;
     unsigned widthToExtract = width->widthInBits();
