@@ -56,17 +56,8 @@ target_include_directories(
 
 add_dependencies(p4tools-common ir-generated frontend)
 
-set(
-  P4C_TOOLS_CONTROL_PLANE_SOURCES
-  control_plane/p4info_map.cpp
-)
-
-add_p4tools_library(p4tools-control-plane ${P4C_TOOLS_CONTROL_PLANE_SOURCES})
-
-target_include_directories(
-  p4tools-control-plane
-  SYSTEM BEFORE PUBLIC ${Protobuf_INCLUDE_DIRS}
-)
+# Add control-plane-specific extensions.
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/control_plane)
 
 add_dependencies(p4tools-control-plane controlplane)
 
