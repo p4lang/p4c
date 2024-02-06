@@ -75,10 +75,8 @@ Bmv2V1ModelProgramInfo::Bmv2V1ModelProgramInfo(
         new IR::Grt(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
                     IR::getConstant(&PacketVars::PACKET_SIZE_VAR_TYPE, minPktSize));
 
-    for (const auto &element : compilerResult.getP4ConstraintsRestrictions()) {
-        for (const auto *restriction : element) {
-            constraint = new IR::LAnd(constraint, restriction);
-        }
+    for (const auto &restriction : compilerResult.getP4ConstraintsRestrictions()) {
+        constraint = new IR::LAnd(constraint, restriction);
     }
 
     /// Finally, set the target constraints.
