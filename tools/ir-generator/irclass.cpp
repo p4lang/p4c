@@ -229,7 +229,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
       << "  NodeT = UINT64_C(1),\n"
       << "  VectorT = UINT64_C(1),\n"
       << "  IndexedVectorT = UINT64_C(2),\n"
-      << "  FirstAuto = UINT64_C(0xFF)\n"
+      << "  Auto = UINT64_C(0xFF)\n"
       << "};\n"
       << " inline bool operator==(RTTI::TypeId lhs, NodeKind rhs) { return lhs == "
          "RTTI::TypeId(rhs); }\n"

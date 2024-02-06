@@ -29,7 +29,7 @@ limitations under the License.
 /// There is no DECLARE_TYPEINFO for ICastable itself as we are not expecting
 /// pointers neither to ICastable nor to RTTI::Base to appear within the codebase.
 /// As the same time, one should not cast to ICastable as well (via e.g.
-/// `-to<ICastable>()`. Use DECLARE_TYPEINFO without bases to specify the base class
+/// `->to<ICastable>()`. Use DECLARE_TYPEINFO without bases to specify the base class
 /// for a given herarchy.
 class ICastable : public virtual RTTI::Base {
  public:

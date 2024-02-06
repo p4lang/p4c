@@ -31,3 +31,4 @@ Important notes:
   * In order for RTTI to work all class hierarchy should be annotated using `DECLARE_TYPEINFO` macro. Static assert would fire if something is missed.
   * One need to correctly specify all direct bases for the given `Class` including virtual ones. Otherwise upcasts and downcasts will not work via missed bases.
   * The typeid values are unique only for the given class hierarchy, they are not intended to be compared across different class hierarchies (although this is always something questionable).
+  * `DECLARE_TYPEINFO` should likely be the last in the class as it expands to a series or private and public fields. Alternatively, a visibility must be explicitly specified after `DECLARE_TYPEINFO`.
