@@ -48,7 +48,7 @@ class IDeclaration : public virtual INode {
 
     virtual ~IDeclaration() {}
 
-    DECLARE_TYPEINFO_WITH_TYPEID(IDeclaration, NK_IDeclaration, INode);
+    DECLARE_TYPEINFO_WITH_TYPEID(IDeclaration, NodeKind::IDeclaration, INode);
 };
 
 }  // namespace IR

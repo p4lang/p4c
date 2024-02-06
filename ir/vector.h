@@ -48,7 +48,7 @@ class VectorBase : public Node {
  protected:
     explicit VectorBase(JSONLoader &json) : Node(json) {}
 
-    DECLARE_TYPEINFO_WITH_TYPEID(VectorBase, NK_VectorBase, Node);
+    DECLARE_TYPEINFO_WITH_TYPEID(VectorBase, NodeKind::VectorBase, Node);
 };
 
 // This class should only be used in the IR.
@@ -209,7 +209,8 @@ class Vector : public VectorBase {
         return getEnumerator()->where(filter)->template as<const S *>();
     }
 
-    DECLARE_TYPEINFO_WITH_NESTED_TYPEID(Vector<T>, NK_VectorT, T::static_typeId(), VectorBase);
+    DECLARE_TYPEINFO_WITH_NESTED_TYPEID(Vector<T>, NodeKind::VectorT, T::static_typeId(),
+                                        VectorBase);
 };
 
 }  // namespace IR

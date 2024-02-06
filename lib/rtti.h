@@ -263,9 +263,9 @@ struct Base {
 ///   ...
 ///   DECLARE_TYPEINFO_WITH_TYPEID(Base, 42);
 /// };
-#define DECLARE_TYPEINFO_WITH_TYPEID(T, Id, ...)                 \
- public:                                                         \
-    static constexpr RTTI::TypeId static_typeId() { return Id; } \
+#define DECLARE_TYPEINFO_WITH_TYPEID(T, Id, ...)                               \
+ public:                                                                       \
+    static constexpr RTTI::TypeId static_typeId() { return RTTI::TypeId(Id); } \
     DECLARE_TYPEINFO_COMMON(T, ##__VA_ARGS__)
 
 /// Combine several typeids together.
@@ -273,9 +273,11 @@ struct Base {
 /// performed. Typically is used to inject a non-zero discriminator (`OuterId`)
 /// with explicitly-defined inner `Id`. Examples of usage include `Vector<T>`
 /// and `IndexedVector<T>`.
-#define DECLARE_TYPEINFO_WITH_NESTED_TYPEID(T, OuterId, Id, ...)            \
- public:                                                                    \
-    static constexpr RTTI::TypeId static_typeId() { return OuterId | Id; }; \
+#define DECLARE_TYPEINFO_WITH_NESTED_TYPEID(T, OuterId, Id, ...) \
+ public:                                                         \
+    static constexpr RTTI::TypeId static_typeId() {              \
+        return RTTI::TypeId(OuterId) | RTTI::TypeId(Id);         \
+    };                                                           \
     DECLARE_TYPEINFO_COMMON(T, ##__VA_ARGS__)
 
 #define DECLARE_TYPEINFO_COMMON(T, ...)                                                    \

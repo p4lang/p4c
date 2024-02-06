@@ -86,7 +86,7 @@ class INode : public Util::IHasSourceInfo, public IHasDbPrint, public ICastable 
         return result;
     }
 
-    DECLARE_TYPEINFO_WITH_TYPEID(INode, NK_INode);
+    DECLARE_TYPEINFO_WITH_TYPEID(INode, NodeKind::INode);
 };
 
 class Node : public virtual INode {
@@ -162,7 +162,7 @@ class Node : public virtual INode {
 
     bool operator!=(const Node &n) const { return !operator==(n); }
 
-    DECLARE_TYPEINFO_WITH_TYPEID(Node, NK_Node, INode);
+    DECLARE_TYPEINFO_WITH_TYPEID(Node, NodeKind::Node, INode);
 };
 
 // simple version of dbprint

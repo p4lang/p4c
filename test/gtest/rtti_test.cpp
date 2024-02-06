@@ -26,12 +26,12 @@ TEST(RTTI, TypeId) {
     auto *c = new IR::Constant(2);
     IR::Expression *e1 = new IR::Add(Util::SourceInfo(), c, c);
 
-    EXPECT_EQ(c->typeId(), IR::NK_Constant);
-    EXPECT_EQ(e1->typeId(), IR::NK_Add);
-    EXPECT_NE(e1->typeId(), IR::NK_Expression);
+    EXPECT_EQ(c->typeId(), IR::NodeKind::Constant);
+    EXPECT_EQ(e1->typeId(), IR::NodeKind::Add);
+    EXPECT_NE(e1->typeId(), IR::NodeKind::Expression);
 
     auto *v = new IR::Vector<IR::Type>();
-    EXPECT_EQ(v->typeId(), IR::NK_VectorT | IR::Type::static_typeId());
+    EXPECT_EQ(v->typeId(), uint64_t(IR::NodeKind::VectorT) | IR::Type::static_typeId());
 }
 
 TEST(RTTI, Is) {
@@ -74,7 +74,7 @@ TEST(RTTI, JsonRestore) {
     const IR::Node *e2 = nullptr;
     loader >> e2;
 
-    EXPECT_EQ(e2->typeId(), IR::NK_Add);
+    EXPECT_EQ(e2->typeId(), IR::NodeKind::Add);
 }
 
 }  // namespace Test
