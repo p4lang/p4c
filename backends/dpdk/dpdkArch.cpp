@@ -1647,7 +1647,6 @@ const IR::Node *CopyMatchKeysToSingleStruct::preorder(IR::Key *keys) {
     }
     return keys;
 }
-
 const IR::Node *CopyMatchKeysToSingleStruct::postorder(IR::KeyElement *element) {
     // If we got here we need to put the key element in metadata.
     LOG3("Extracting key element " << element);
@@ -1663,33 +1662,56 @@ const IR::Node *CopyMatchKeysToSingleStruct::postorder(IR::KeyElement *element) 
         insertions = it->second;
     }
 
-    auto keyName = element->expression->toString();
-    if (auto m = element->expression->to<IR::MethodCallExpression>()) {
+    cstring keyName;
+    if (auto pe = element->expression->to<IR::PathExpression>()) {
+        keyName = pe->path->name;
+    } else if (auto mem = element->expression->to<IR::Member>()) {
+        /* We expect all nested structures are flattened and only
+         * expected expressions are 'h.<hdrname>.<fieldname> or m.<fieldname> */
+        if (auto mexpr = mem->expr->to<IR::Member>()) {
+            auto pe = mexpr->expr->to<IR::PathExpression>();
+            CHECK_NULL(pe);
+            BUG_CHECK(pe->path->name == "h",
+                      "Expected Member expressions of the form 'h.<hdrname>.<fieldname>");
+            keyName = "h." + mexpr->member + "." + mem->member;
+        } else if (auto mexpr = mem->expr->to<IR::PathExpression>()) {
+            BUG_CHECK(mexpr->path->name == "m",
+                      "Expected Member expressions of the form 'm.<fieldname>");
+            keyName = "m." + mem->member;
+        } else {
+            ::error(ErrorType::ERR_INVALID, "Invalid member expression '%1%' used as table key",
+                    mem);
+        }
+    } else if (auto m = element->expression->to<IR::MethodCallExpression>()) {
         BUG_CHECK(isValidCall(m),
                   "Method calls except isValid must be simplified before"
                   " reaching here, found %1%",
-                  m->method->toString());
-        /* Moving <hdr>.isValid() used as table key to Metadata */
+                  m->method);
+        /* Moving h.<hdr>.isValid() used as table key to Metadata */
         auto mem = m->method->to<IR::Member>();
         CHECK_NULL(mem);
-        keyName = mem->expr->toString() + "." + IR::Type_Header::isValid;
+        keyName = "h." + mem->expr->to<IR::Member>()->member + "." + IR::Type_Header::isValid;
+    } else {
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Unsupported key expression %1%",
+                element->expression->toString());
     }
 
+    if (keyName.isNullOrEmpty()) return element;
     bool isHeader = false;
     /* All header fields are prefixed with "h." and metadata fields are prefixed with "m."
      * Prefix the match field with control and table name */
     if (keyName.startsWith("h.")) {
         isHeader = true;
         keyName = keyName.replace('.', '_');
-        keyName =
-            keyName.replace("h_", control->name.toString() + "_" + table->name.toString() + "_");
+        keyName = keyName.replace(
+            "h_", control->name.originalName + "_" + table->name.originalName + "_");
     } else if (metaCopyNeeded) {
         if (keyName.startsWith("m.")) {
             keyName = keyName.replace('.', '_');
             keyName = keyName.replace(
-                "m_", control->name.toString() + "_" + table->name.toString() + "_");
+                "m_", control->name.originalName + "_" + table->name.originalName + "_");
         } else {
-            keyName = control->name.toString() + "_" + table->name.toString() + "_" + keyName;
+            keyName = control->name.originalName + "_" + table->name.originalName + "_" + keyName;
         }
     }
 
