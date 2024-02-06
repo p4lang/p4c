@@ -83,7 +83,7 @@ struct TypeNameHolder {
 // string should be available in constexpr context.
 // TODO: Probably use std::source_location::function_name with C++20
 template <typename T>
-constexpr TypeNameHolder TypeNameProxy() {
+constexpr TypeNameHolder typeNameProxy() {
 #ifdef __clang__
     return __PRETTY_FUNCTION__;
 #elif defined(__GNUC__)
@@ -124,7 +124,7 @@ template <typename T, typename = void>
 struct TypeIdResolver {
     static constexpr TypeId resolve() noexcept {
         // Get original 64-bit hash
-        uint64_t hash = FNV1a(TypeNameProxy<T>());
+        uint64_t hash = FNV1a(typeNameProxy<T>());
         // Xor-fold to obtain 56-bit value
         hash = (hash >> 56) ^ (hash & ((UINT64_C(1) << 56) - 1));
         return (UINT64_C(0xFF) << 56) | hash;
