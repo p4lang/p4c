@@ -16,6 +16,8 @@ limitations under the License.
 
 #include "options.h"
 
+#include "lib/null.h"
+
 void Util::Options::registerOption(const char *option, const char *argName,
                                    OptionProcessor processor, const char *description,
                                    OptionFlags flags /* = OptionFlags::Default */) {
@@ -114,16 +116,18 @@ void Util::Options::usage() {
     *outStream << binaryName << ": " << message << std::endl;
 
     size_t labelLen = 0;
-    for (auto o : optionOrder) {
+    for (const auto &o : optionOrder) {
         size_t len = o.size();
         auto option = get(options, o);
+        CHECK_NULL(option);
         if (option->argName != nullptr) len += 1 + strlen(option->argName);
         if (labelLen < len) labelLen = len;
     }
 
     labelLen += 3;
-    for (auto o : optionOrder) {
+    for (const auto &o : optionOrder) {
         auto option = get(options, o);
+        CHECK_NULL(option);
         size_t len = strlen(o);
         if (option->flags & OptionFlags::Hide) continue;
         *outStream << option->option;

@@ -34,7 +34,7 @@ static IR::Constant *parseConstantWithWidth(Util::SourceInfo srcInfo, const char
     char *sep;
     auto size = strtol(text, &sep, 10);
     sep += strspn(sep, " \t\r\n");
-    if (sep == nullptr || !*sep) BUG("Expected to find separator %1%", text);
+    if (!*sep) BUG("Expected to find separator %1%", text);
     if (size < 0) {
         ::error(ErrorType::ERR_INVALID, "%1%: invalid width; %2% must be positive", srcInfo, size);
         return nullptr;

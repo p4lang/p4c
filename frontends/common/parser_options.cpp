@@ -425,13 +425,13 @@ FILE *ParserOptions::preprocess() {
         ssize_t read;
 
         while ((read = getline(&line, &len, in)) != -1) printf("%s", line);
-        closeInput(in);
+        closePreprocessedInput(in);
         return nullptr;
     }
     return in;
 }
 
-void ParserOptions::closeInput(FILE *inputStream) const {
+void ParserOptions::closePreprocessedInput(FILE *inputStream) const {
     if (close_input) {
         int exitCode = pclose(inputStream);
         if (WIFEXITED(exitCode) && WEXITSTATUS(exitCode) == 4)

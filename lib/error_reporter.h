@@ -104,7 +104,7 @@ class ErrorReporter {
         typename... Args>
     void diagnose(DiagnosticAction action, const int errorCode, const char *format,
                   const char *suffix, const T *node, Args... args) {
-        if (!error_reported(errorCode, node->getSourceInfo())) {
+        if (node && !error_reported(errorCode, node->getSourceInfo())) {
             const char *name = get_error_name(errorCode);
             auto da = getDiagnosticAction(name, action);
             if (name)
