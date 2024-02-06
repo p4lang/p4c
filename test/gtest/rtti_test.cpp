@@ -36,6 +36,8 @@ TEST(RTTI, TypeId) {
     EXPECT_EQ(v->typeId(),
               RTTI::combineTypeIdWithDiscriminator(RTTI::TypeId(IR::NodeDiscriminator::VectorT),
                                                    RTTI::TypeId(IR::NodeKind::Type)));
+    auto *v2 = new IR::Vector<IR::Parameter>();
+    EXPECT_NE(v2->typeId(), v->typeId());
 }
 
 TEST(RTTI, Is) {
@@ -47,23 +49,39 @@ TEST(RTTI, Is) {
     EXPECT_FALSE(c->is<IR::Declaration>());
 
     IR::Node *v = new IR::Vector<IR::Type>();
+    IR::Node *v2 = new IR::Vector<IR::Parameter>();
     EXPECT_TRUE(v->is<IR::VectorBase>());
+    EXPECT_FALSE(v->is<IR::Type>());
+    EXPECT_FALSE(v2->is<IR::Vector<IR::Type>>());
+    EXPECT_FALSE(v2->isA(v->typeId()));
 
     IR::Node *iv = new IR::IndexedVector<IR::Parameter>();
     EXPECT_TRUE(iv->is<IR::Vector<IR::Parameter>>());
+    EXPECT_FALSE(v2->is<IR::IndexedVector<IR::Parameter>>());
 }
 
 TEST(RTTI, Casts) {
     auto *c = new IR::Constant(2);
-    IR::Expression *e1 = new IR::Add(Util::SourceInfo(), c, c);
+    IR::Expression *e1 = new IR::Add(c, c);
+    IR::Node *decl = new IR::NamedExpression("foo", e1);
 
     EXPECT_NE(c->to<IR::Literal>(), nullptr);
     EXPECT_NE(e1->to<IR::Operation_Binary>(), nullptr);
     EXPECT_EQ(e1->to<IR::Declaration>(), nullptr);
+    EXPECT_NE(decl->to<IR::Declaration>(), nullptr);
+    EXPECT_NE(decl->to<IR::IDeclaration>(), nullptr);
 
     IR::Node *iv = new IR::IndexedVector<IR::Parameter>();
     EXPECT_NE(iv->to<IR::Vector<IR::Parameter>>(), nullptr);
     EXPECT_EQ(c->to<IR::Vector<IR::Parameter>>(), nullptr);
+
+    EXPECT_EQ(c->to<IR::Literal>(), dynamic_cast<IR::Literal *>(c));
+    EXPECT_EQ(decl->to<IR::Declaration>(), dynamic_cast<IR::Declaration *>(decl));
+    EXPECT_EQ(decl->to<IR::IDeclaration>(), dynamic_cast<IR::IDeclaration *>(decl));
+    auto *id = decl->to<IR::IDeclaration>();
+    EXPECT_EQ(id->to<IR::Declaration>(), dynamic_cast<IR::Declaration *>(id));
+    EXPECT_EQ(id->to<IR::NamedExpression>(), dynamic_cast<IR::NamedExpression *>(id));
+    EXPECT_EQ(id->to<IR::NamedExpression>(), decl);
 }
 
 TEST(RTTI, JsonRestore) {
