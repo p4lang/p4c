@@ -95,7 +95,7 @@ TEST_F(P4AssertsParserTest, Restrictions) {
     ConstraintsVector parsingResult = loadExample(
         "backends/p4tools/modules/testgen/targets/bmv2/test/p4-programs/bmv2_restrictions_1.p4",
         true);
-    ASSERT_EQ(parsingResult.size(), (unsigned long)1);
+    ASSERT_EQ(parsingResult.size(), (unsigned long)3);
     {
         const auto &expr1 = P4Tools::ToolsVariables::getSymbolicVariable(
             IR::Type_Bits::get(8), "ingress.ternary_table_mask_h.h.a1");
