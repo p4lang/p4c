@@ -209,8 +209,7 @@ class Vector : public VectorBase {
         return getEnumerator()->where(filter)->template as<const S *>();
     }
 
-    DECLARE_TYPEINFO_WITH_NESTED_TYPEID(Vector<T>, NodeKind::VectorT, T::static_typeId(),
-                                        VectorBase);
+    DECLARE_TYPEINFO_WITH_DISCRIMINATOR(Vector<T>, NodeDiscriminator::VectorT, T, VectorBase);
 };
 
 }  // namespace IR

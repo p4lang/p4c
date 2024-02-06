@@ -31,7 +31,11 @@ TEST(RTTI, TypeId) {
     EXPECT_NE(e1->typeId(), IR::NodeKind::Expression);
 
     auto *v = new IR::Vector<IR::Type>();
-    EXPECT_EQ(v->typeId(), uint64_t(IR::NodeKind::VectorT) | IR::Type::static_typeId());
+    EXPECT_EQ(RTTI::typeidDiscriminator(v->typeId()), IR::NodeDiscriminator::VectorT);
+    EXPECT_EQ(RTTI::innerTypeId(v->typeId()), IR::NodeKind::Type);
+    EXPECT_EQ(v->typeId(),
+              RTTI::combineTypeIdWithDiscriminator(RTTI::TypeId(IR::NodeDiscriminator::VectorT),
+                                                   RTTI::TypeId(IR::NodeKind::Type)));
 }
 
 TEST(RTTI, Is) {

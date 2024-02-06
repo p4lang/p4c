@@ -213,8 +213,8 @@ class IndexedVector : public Vector<T> {
         }
     }
 
-    DECLARE_TYPEINFO_WITH_NESTED_TYPEID(IndexedVector<T>, NodeKind::IndexedVectorT,
-                                        T::static_typeId(), Vector<T>);
+    DECLARE_TYPEINFO_WITH_DISCRIMINATOR(IndexedVector<T>, NodeDiscriminator::IndexedVectorT, T,
+                                        Vector<T>);
 };
 
 }  // namespace IR
