@@ -9,8 +9,10 @@
 /// variables are also used for SMT solvers as symbolic variables.
 namespace P4Tools {
 
-/// A list of constraints containing symbolic variables.
-using ConstraintsVector = std::vector<std::vector<const IR::Expression *>>;
+/// A list of constraints. These constraints may take the form of "x == 8w1","x != y", where "x" and
+/// "y" are symbolic variables. They are expressed in P4C IR form and may be consumed by SMT or
+/// similar solvers.
+using ConstraintsVector = std::vector<const IR::Expression *>;
 
 namespace ToolsVariables {
 

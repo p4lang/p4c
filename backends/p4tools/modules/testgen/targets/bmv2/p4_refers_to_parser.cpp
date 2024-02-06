@@ -21,10 +21,20 @@ RefersToParser::RefersToParser() { setName("RefersToParser"); }
 
 const RefersToParser::RefersToBuiltinMap RefersToParser::REFERS_TO_BUILTIN_MAP = {{
     "multicast_group_table",
-    {{
-        "multicast_group_id",
-        IR::SymbolicVariable(IR::getBitType(16), "refers_to_multicast_group_id"),
-    }},
+    {
+        {
+            "multicast_group_id",
+            IR::SymbolicVariable(IR::getBitType(16), "refers_to_multicast_group_id"),
+        },
+        {
+            "replica.port",
+            IR::SymbolicVariable(IR::getBitType(9), "refers_to_replica.port"),
+        },
+        {
+            "replica.instance",
+            IR::SymbolicVariable(IR::getBitType(16), "refers_to_replica.instance"),
+        },
+    },
 }};
 
 cstring RefersToParser::assembleKeyReference(const IR::Vector<IR::AnnotationToken> &annotationList,
@@ -37,7 +47,7 @@ cstring RefersToParser::assembleKeyReference(const IR::Vector<IR::AnnotationToke
     return keyReference;
 }
 
-const IR::SymbolicVariable *RefersToParser::lookupBuiltinKey(
+const IR::SymbolicVariable *RefersToParser::lookUpBuiltinKey(
     const IR::Annotation &refersAnno, const IR::Vector<IR::AnnotationToken> &annotationList) {
     BUG_CHECK(
         annotationList.size() > 3,
@@ -65,7 +75,7 @@ const IR::SymbolicVariable *RefersToParser::lookupBuiltinKey(
     return &referredKey->second;
 }
 
-const IR::SymbolicVariable *RefersToParser::lookupKeyInTable(const IR::P4Table &srcTable,
+const IR::SymbolicVariable *RefersToParser::lookUpKeyInTable(const IR::P4Table &srcTable,
                                                              cstring keyReference) {
     const auto *key = srcTable.getKey();
     BUG_CHECK(key != nullptr, "Table %1% does not have any keys.", srcTable);
@@ -84,7 +94,7 @@ const IR::SymbolicVariable *RefersToParser::lookupKeyInTable(const IR::P4Table &
     BUG("Did not find a matching key in table %1%. ", srcTable);
 }
 
-const IR::SymbolicVariable *RefersToParser::buildReferredKey(const IR::P4Control &ctrlContext,
+const IR::SymbolicVariable *RefersToParser::getReferencedKey(const IR::P4Control &ctrlContext,
                                                              const IR::Annotation &refersAnno) {
     const auto &annotationList = refersAnno.body;
     BUG_CHECK(annotationList.size() > 2,
@@ -92,13 +102,13 @@ const IR::SymbolicVariable *RefersToParser::buildReferredKey(const IR::P4Control
 
     auto tableReference = annotationList.at(0)->text;
     if (tableReference == "builtin") {
-        return lookupBuiltinKey(refersAnno, annotationList);
+        return lookUpBuiltinKey(refersAnno, annotationList);
     }
     BUG_CHECK(annotationList.at(1)->text == ",",
               "'@refers_to' annotation %1% does not have the correct format.", refersAnno);
 
     // Try to find the table the control declarations.
-    // TODO: Currently this lookup does not support aliasing and simply tries to find the first
+    // TODO: Currently this lookUp does not support aliasing and simply tries to find the first
     // occurrence of a table where the suffix matches.
     // Ideally, we would use originalName, but originalName currently is not preserved correctly.
     const IR::IDeclaration *tableDeclaration = nullptr;
@@ -113,41 +123,40 @@ const IR::SymbolicVariable *RefersToParser::buildReferredKey(const IR::P4Control
     const auto *srcTable = tableDeclaration->checkedTo<IR::P4Table>();
 
     cstring keyReference = assembleKeyReference(annotationList, 2);
-    return lookupKeyInTable(*srcTable, keyReference);
+    return lookUpKeyInTable(*srcTable, keyReference);
 }
 
-bool RefersToParser::preorder(const IR::P4Table *table) {
-    const auto *key = table->getKey();
+bool RefersToParser::preorder(const IR::P4Table *tableContext) {
+    const auto *key = tableContext->getKey();
     if (key == nullptr) {
         return false;
     }
-    const auto *ctrl = findOrigCtxt<IR::P4Control>();
-    CHECK_NULL(ctrl);
+    const auto *controlContext = findOrigCtxt<IR::P4Control>();
+    CHECK_NULL(controlContext);
 
     for (const auto *keyElement : key->keyElements) {
         auto annotations = keyElement->annotations->annotations;
         for (const auto *annotation : annotations) {
-            if (annotation->name.name == "refers_to") {
+            if (annotation->name.name == "refers_to" || annotation->name.name == "referenced_by") {
                 const auto *nameAnnot = keyElement->getAnnotation("name");
-                BUG_CHECK(nameAnnot != nullptr, "refers_to table key without a name annotation");
-                const auto *referredKey = buildReferredKey(*ctrl, *annotation);
-                auto srcKeyName = table->controlPlaneName() + "_key_" + nameAnnot->getName();
+                BUG_CHECK(nameAnnot != nullptr, "%1% table key without a name annotation",
+                          annotation->name.name);
+                // TODO: Move this assembly into a library.
+                auto srcKeyName = tableContext->controlPlaneName() + "_key_" + nameAnnot->getName();
                 const auto *srcKey =
                     ToolsVariables::getSymbolicVariable(keyElement->expression->type, srcKeyName);
-                auto *expr = new IR::Equ(srcKey, referredKey);
-                std::vector<const IR::Expression *> constraint;
-                constraint.push_back(expr);
-                restrictionsVector.push_back(constraint);
+                const auto *referredKey = getReferencedKey(*controlContext, *annotation);
+                restrictionsVector.push_back(new IR::Equ(srcKey, referredKey));
             }
         }
     }
 
-    const auto *actionList = table->getActionList();
+    const auto *actionList = tableContext->getActionList();
     if (actionList == nullptr) {
         return false;
     }
     for (const auto *action : actionList->actionList) {
-        const auto *decl = ctrl->getDeclByName(action->getName().name);
+        const auto *decl = controlContext->getDeclByName(action->getName().name);
         if (decl == nullptr) {
             return false;
         }
@@ -160,15 +169,15 @@ bool RefersToParser::preorder(const IR::P4Table *table) {
             const auto *parameter = params->parameters.at(idx);
             auto annotations = parameter->annotations->annotations;
             for (const auto *annotation : annotations) {
-                if (annotation->name.name == "refers_to") {
-                    const auto *referredKey = buildReferredKey(*ctrl, *annotation);
-                    auto srcParamName = table->controlPlaneName() + "_arg_" +
+                if (annotation->name.name == "refers_to" ||
+                    annotation->name.name == "referenced_by") {
+                    const auto *referredKey = getReferencedKey(*controlContext, *annotation);
+                    // TODO: Move this assembly into a library.
+                    auto srcParamName = tableContext->controlPlaneName() + "_arg_" +
                                         actionCall->controlPlaneName() + std::to_string(idx);
                     const auto *srcKey =
                         ToolsVariables::getSymbolicVariable(parameter->type, srcParamName);
-                    auto *expr = new IR::Equ(srcKey, referredKey);
-                    std::vector<const IR::Expression *> constraint;
-                    constraint.push_back(expr);
+                    auto *constraint = new IR::Equ(srcKey, referredKey);
                     restrictionsVector.push_back(constraint);
                 }
             }

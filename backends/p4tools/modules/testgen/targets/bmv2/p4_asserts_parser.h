@@ -15,7 +15,12 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
+/// Maps control plane identifiers to their corresponding IR type.
+/// Once we have resolved the tokens in the annotation, we can then lookup the corresponding type.
+using IdenitifierTypeMap = std::map<cstring, const IR::Type *>;
+
 class AssertsParser : public Transform {
+    /// A vector of restrictions imposed on the control-plane.
     ConstraintsVector &restrictionsVec;
 
  public:
@@ -24,10 +29,11 @@ class AssertsParser : public Transform {
     /// an IR::Expression. Internally calls all other necessary functions, for example
     /// combineTokensToNames and the like, to eventually get an IR expression that meets the string
     /// constraint
-    static std::vector<const IR::Expression *> genIRStructs(
-        cstring tableName, cstring restrictionString,
-        const IR::Vector<IR::KeyElement> &keyElements);
-    const IR::Node *postorder(IR::P4Table *node) override;
+    static std::vector<const IR::Expression *> genIRStructs(cstring tableName,
+                                                            cstring restrictionString,
+                                                            const IdenitifierTypeMap &typeMap);
+    const IR::Node *postorder(IR::P4Action *actionContext) override;
+    const IR::Node *postorder(IR::P4Table *tableContext) override;
 };
 
 class Token {

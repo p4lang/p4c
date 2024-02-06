@@ -16,23 +16,24 @@ class RefersToParser : public Inspector {
     using RefersToBuiltinMap = std::map<cstring, std::map<cstring, IR::SymbolicVariable>>;
     static const RefersToBuiltinMap REFERS_TO_BUILTIN_MAP;
 
-    /// Build the referenced key by concatenating all remaining tokens in the annotation.
+    /// Assemble the referenced key by concatenating all remaining tokens in the annotation.
+    /// TODO: We should use the annotation parser for this.
     static cstring assembleKeyReference(const IR::Vector<IR::AnnotationToken> &annotationList,
                                         size_t offset);
 
     /// Lookup the key in the builtin map and return the corresponding symbolic variable.
-    static const IR::SymbolicVariable *lookupBuiltinKey(
+    static const IR::SymbolicVariable *lookUpBuiltinKey(
         const IR::Annotation &refersAnno, const IR::Vector<IR::AnnotationToken> &annotationList);
 
     /// Lookup the key in the table and return the corresponding symbolic variable.
-    static const IR::SymbolicVariable *lookupKeyInTable(const IR::P4Table &srcTable,
+    static const IR::SymbolicVariable *lookUpKeyInTable(const IR::P4Table &srcTable,
                                                         cstring keyReference);
 
-    /// Build the referred table key by looking up the table referenced in the annotation @param
+    /// Get the referred table key by looking up the table referenced in the annotation @param
     /// refersAnno in the
     /// @param ctrlContext and retrieving the appropriate type. @returns a symbolic variable
     /// corresponding to the control plane entry variable.
-    static const IR::SymbolicVariable *buildReferredKey(const IR::P4Control &ctrlContext,
+    static const IR::SymbolicVariable *getReferencedKey(const IR::P4Control &ctrlContext,
                                                         const IR::Annotation &refersAnno);
 
     bool preorder(const IR::P4Table *table) override;
