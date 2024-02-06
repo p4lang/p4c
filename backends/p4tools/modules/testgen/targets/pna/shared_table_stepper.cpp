@@ -1,23 +1,19 @@
 #include "backends/p4tools/modules/testgen/targets/pna/shared_table_stepper.h"
 
-#include <cstddef>
 #include <optional>
 #include <ostream>
-#include <string>
 #include <vector>
 
 #include <boost/multiprecision/cpp_int.hpp>
 
+#include "backends/p4tools/common/control_plane/symbolic_variables.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
-#include "backends/p4tools/common/lib/variables.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
 #include "ir/irutils.h"
 #include "ir/vector.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
-#include "lib/log.h"
-#include "lib/null.h"
 #include "lib/source_file.h"
 #include "midend/coverage.h"
 
@@ -45,8 +41,8 @@ const IR::Expression *SharedPnaTableStepper::computeTargetMatchType(
     if (keyProperties.matchType == PnaConstants::MATCH_KIND_OPT) {
         // We can recover from taint by simply not adding the optional match.
         // Create a new symbolic variable that corresponds to the key expression.
-        cstring keyName = properties.tableName + "_key_" + keyProperties.name;
-        const auto *ctrlPlaneKey = ToolsVariables::getSymbolicVariable(keyExpr->type, keyName);
+        const auto *ctrlPlaneKey =
+            ControlPlaneState::getTableKey(properties.tableName, keyProperties.name, keyExpr->type);
         if (keyProperties.isTainted) {
             matches->emplace(keyProperties.name,
                              new Optional(keyProperties.key, ctrlPlaneKey, false));
@@ -66,8 +62,6 @@ const IR::Expression *SharedPnaTableStepper::computeTargetMatchType(
     // Ranges are not yet implemented for Pna STF tests.
     if (keyProperties.matchType == PnaConstants::MATCH_KIND_RANGE &&
         TestgenOptions::get().testBackend != "STF") {
-        cstring minName = properties.tableName + "_range_min_" + keyProperties.name;
-        cstring maxName = properties.tableName + "_range_max_" + keyProperties.name;
         // We can recover from taint by matching on the entire possible range.
         const IR::Expression *minKey = nullptr;
         const IR::Expression *maxKey = nullptr;
@@ -76,8 +70,10 @@ const IR::Expression *SharedPnaTableStepper::computeTargetMatchType(
             maxKey = IR::getConstant(keyExpr->type, IR::getMaxBvVal(keyExpr->type));
             keyExpr = minKey;
         } else {
-            minKey = ToolsVariables::getSymbolicVariable(keyExpr->type, minName);
-            maxKey = ToolsVariables::getSymbolicVariable(keyExpr->type, maxName);
+            auto symbolicTableRange = Bmv2ControlPlaneState::getTableRange(
+                properties.tableName, keyProperties.name, keyExpr->type);
+            minKey = symbolicTableRange.first;
+            maxKey = symbolicTableRange.second;
         }
         matches->emplace(keyProperties.name, new Range(keyProperties.key, minKey, maxKey));
         return new IR::LAnd(hitCondition, new IR::LAnd(new IR::LAnd(new IR::Lss(minKey, maxKey),
@@ -112,13 +108,10 @@ void SharedPnaTableStepper::evalTableActionProfile(
         const auto &parameters = actionType->parameters;
         auto *arguments = new IR::Vector<IR::Argument>();
         std::vector<ActionArg> ctrlPlaneArgs;
-        for (size_t argIdx = 0; argIdx < parameters->size(); ++argIdx) {
-            const auto *parameter = parameters->getParameter(argIdx);
+        for (const auto *parameter : parameters->parameters) {
             // Synthesize a symbolic variable here that corresponds to a control plane argument.
-            // We get the unique name of the table coupled with the unique name of the action.
-            // Getting the unique name is needed to avoid generating duplicate arguments.
-            cstring keyName = properties.tableName + "_arg_" + actionName + std::to_string(argIdx);
-            const auto &actionArg = ToolsVariables::getSymbolicVariable(parameter->type, keyName);
+            const auto &actionArg = ControlPlaneState::getTableActionArgument(
+                properties.tableName, actionName, parameter->name, parameter->type);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
             // Note how we use the control plane name for the parameter here.
@@ -194,13 +187,10 @@ void SharedPnaTableStepper::evalTableActionSelector(
         const auto &parameters = actionType->parameters;
         auto *arguments = new IR::Vector<IR::Argument>();
         std::vector<ActionArg> ctrlPlaneArgs;
-        for (size_t argIdx = 0; argIdx < parameters->size(); ++argIdx) {
-            const auto *parameter = parameters->getParameter(argIdx);
+        for (const auto *parameter : parameters->parameters) {
             // Synthesize a symbolic variable here that corresponds to a control plane argument.
-            // We get the unique name of the table coupled with the unique name of the action.
-            // Getting the unique name is needed to avoid generating duplicate arguments.
-            cstring keyName = properties.tableName + "_arg_" + actionName + std::to_string(argIdx);
-            const auto &actionArg = ToolsVariables::getSymbolicVariable(parameter->type, keyName);
+            const auto &actionArg = ControlPlaneState::getTableActionArgument(
+                properties.tableName, actionName, parameter->name, parameter->type);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
             // Note how we use the control plane name for the parameter here.

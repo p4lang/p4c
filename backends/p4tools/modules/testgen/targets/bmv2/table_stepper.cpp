@@ -3,22 +3,19 @@
 #include <cstddef>
 #include <optional>
 #include <ostream>
-#include <string>
 #include <vector>
 
 #include <boost/multiprecision/cpp_int.hpp>
 
+#include "backends/p4tools/common/control_plane/symbolic_variables.h"
 #include "backends/p4tools/common/lib/constants.h"
 #include "backends/p4tools/common/lib/trace_event_types.h"
-#include "backends/p4tools/common/lib/variables.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
 #include "ir/irutils.h"
 #include "ir/vector.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
-#include "lib/log.h"
-#include "lib/null.h"
 #include "lib/source_file.h"
 #include "midend/coverage.h"
 
@@ -45,8 +42,8 @@ const IR::Expression *Bmv2V1ModelTableStepper::computeTargetMatchType(
 
     if (keyProperties.matchType == BMv2Constants::MATCH_KIND_OPT ||
         keyProperties.matchType == P4Constants::MATCH_KIND_TERNARY) {
-        cstring keyName = properties.tableName + "_key_" + keyProperties.name;
-        const auto *ctrlPlaneKey = ToolsVariables::getSymbolicVariable(keyExpr->type, keyName);
+        const auto *ctrlPlaneKey =
+            ControlPlaneState::getTableKey(properties.tableName, keyProperties.name, keyExpr->type);
         // We can recover from taint by simply not adding the optional match.
         // Create a new symbolic variable that corresponds to the key expression.
         // We can recover from taint by inserting a ternary match that is 0.
@@ -59,8 +56,8 @@ const IR::Expression *Bmv2V1ModelTableStepper::computeTargetMatchType(
         matches->emplace(keyProperties.name,
                          new Ternary(keyProperties.key, ctrlPlaneKey, wildCard));
         // Calculate the conditions for the ternary or optional match.
-        const auto *ternaryMask = ToolsVariables::getSymbolicVariable(
-            keyExpr->type, properties.tableName + "_mask_" + keyProperties.name);
+        const auto *ternaryMask = ControlPlaneState::getTableTernaryMask(
+            properties.tableName, keyProperties.name, keyExpr->type);
         // Encode P4Runtime constraints for PTF and Protobuf tests.
         // (https://p4.org/p4-spec/docs/p4runtime-spec-working-draft-html-version.html#sec-match-format)
         if (testgenOptions.testBackend == "PTF" || testgenOptions.testBackend == "PROTOBUF" ||
@@ -86,8 +83,6 @@ const IR::Expression *Bmv2V1ModelTableStepper::computeTargetMatchType(
     // Ranges are not yet implemented for BMv2 STF tests.
     if (keyProperties.matchType == BMv2Constants::MATCH_KIND_RANGE &&
         testgenOptions.testBackend != "STF") {
-        cstring minName = properties.tableName + "_range_min_" + keyProperties.name;
-        cstring maxName = properties.tableName + "_range_max_" + keyProperties.name;
         // We can recover from taint by matching on the entire possible range.
         const IR::Expression *minKey = nullptr;
         const IR::Expression *maxKey = nullptr;
@@ -96,8 +91,10 @@ const IR::Expression *Bmv2V1ModelTableStepper::computeTargetMatchType(
             maxKey = IR::getConstant(keyExpr->type, IR::getMaxBvVal(keyExpr->type));
             keyExpr = minKey;
         } else {
-            minKey = ToolsVariables::getSymbolicVariable(keyExpr->type, minName);
-            maxKey = ToolsVariables::getSymbolicVariable(keyExpr->type, maxName);
+            auto symbolicTableRange = Bmv2ControlPlaneState::getTableRange(
+                properties.tableName, keyProperties.name, keyExpr->type);
+            minKey = symbolicTableRange.first;
+            maxKey = symbolicTableRange.second;
         }
         matches->emplace(keyProperties.name, new Range(keyProperties.key, minKey, maxKey));
         return new IR::LAnd(hitCondition, new IR::LAnd(new IR::LAnd(new IR::Lss(minKey, maxKey),
@@ -132,13 +129,10 @@ void Bmv2V1ModelTableStepper::evalTableActionProfile(
         const auto &parameters = actionType->parameters;
         auto *arguments = new IR::Vector<IR::Argument>();
         std::vector<ActionArg> ctrlPlaneArgs;
-        for (size_t argIdx = 0; argIdx < parameters->size(); ++argIdx) {
-            const auto *parameter = parameters->getParameter(argIdx);
+        for (const auto *parameter : parameters->parameters) {
             // Synthesize a symbolic variable here that corresponds to a control plane argument.
-            // We get the unique name of the table coupled with the unique name of the action.
-            // Getting the unique name is needed to avoid generating duplicate arguments.
-            cstring keyName = properties.tableName + "_arg_" + actionName + std::to_string(argIdx);
-            const auto &actionArg = ToolsVariables::getSymbolicVariable(parameter->type, keyName);
+            const auto &actionArg = ControlPlaneState::getTableActionArgument(
+                properties.tableName, actionName, parameter->name, parameter->type);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
             // Note how we use the control plane name for the parameter here.
@@ -206,7 +200,6 @@ void Bmv2V1ModelTableStepper::evalTableActionSelector(
         auto &nextState = state->clone();
         // We get the control plane name of the action we are calling.
         cstring actionName = actionType->controlPlaneName();
-
         // Copy the previous action profile.
         auto *actionProfile = new Bmv2V1ModelActionProfile(
             bmv2V1ModelProperties.actionSelector->getActionProfile()->getProfileDecl());
@@ -214,13 +207,10 @@ void Bmv2V1ModelTableStepper::evalTableActionSelector(
         const auto &parameters = actionType->parameters;
         auto *arguments = new IR::Vector<IR::Argument>();
         std::vector<ActionArg> ctrlPlaneArgs;
-        for (size_t argIdx = 0; argIdx < parameters->size(); ++argIdx) {
-            const auto *parameter = parameters->getParameter(argIdx);
+        for (const auto *parameter : parameters->parameters) {
             // Synthesize a symbolic variable here that corresponds to a control plane argument.
-            // We get the unique name of the table coupled with the unique name of the action.
-            // Getting the unique name is needed to avoid generating duplicate arguments.
-            cstring keyName = properties.tableName + "_arg_" + actionName + std::to_string(argIdx);
-            const auto &actionArg = ToolsVariables::getSymbolicVariable(parameter->type, keyName);
+            const auto &actionArg = ControlPlaneState::getTableActionArgument(
+                properties.tableName, actionName, parameter->name, parameter->type);
             arguments->push_back(new IR::Argument(actionArg));
             // We also track the argument we synthesize for the control plane.
             // Note how we use the control plane name for the parameter here.
