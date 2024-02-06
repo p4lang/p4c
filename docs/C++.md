@@ -22,10 +22,12 @@ IR nodes and their handling code (e.g. Visitors) make extensive use of RTTI to p
 #### Using lightweight RTTI for other class hierarchies
 Other class hierarchies besides `IR::Node` descendants could also benefit from lightweight RTTI functionality. In order to use it one needs to annotate the intended class hierarchy as follows:
   * Derive from `IR::Castable` (or lower-level `RTTI::Base`)
-  * Use `DECLARE_TYPEINFO(Class, Bases..)` variadic macro to define necessary boilerplate. Here typeid will generated during the compile time. Should necessary, explicit typeid could be specified by `DECLARE_TYPEINFO(Class, TypeId, Bases...)`
+  * Use `DECLARE_TYPEINFO(Class, Bases..)` macro call inside class to generate necessary boilerplate. Here typeid for `Class` will automatically be generated at compile time from the type name. Should necessary, explicit typeid could be specified by `DECLARE_TYPEINFO(Class, TypeId, Bases...)`.
+  * `DECLARE_TYPEINFO` with no bases could be used to indicate the base class for the given hierarchy (e.g. `DECLARE_TYPEINFO(Class)`) and separate different class hierarchies from each other.
 
 One example of custom hierarchy using this RTTI implementation could be seen in `frontends/p4/typeChecking/typeConstraints.h`.
 
 Important notes:
-  * In order for RTTI to work all class hierarchy should be annotated using `DECLARE_TYPEINFO` macro.
+  * In order for RTTI to work all class hierarchy should be annotated using `DECLARE_TYPEINFO` macro. Static assert would fire if something is missed.
+  * One need to correctly specify all direct bases for the given `Class` including virtual ones. Otherwise upcasts and downcasts will not work via missed bases.
   * The typeid values are unique only for the given class hierarchy, they are not intended to be compared across different class hierarchies (although this is always something questionable).
