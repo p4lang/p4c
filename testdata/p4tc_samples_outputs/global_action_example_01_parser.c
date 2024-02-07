@@ -118,7 +118,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
     return -1;
 }
 
-SEC("classifier/tc-parse")
+SEC("p4tc/parse")
 int tc_parse_func(struct __sk_buff *skb) {
     struct pna_global_metadata *compiler_meta__ = (struct pna_global_metadata *) skb->cb;
     struct hdr_md *hdrMd;
