@@ -132,17 +132,15 @@ class ErrorCatalog {
         // Some diagnostics might be both errors and warning/info
         // (e.g. "invalid" -> both ERR_INVALID and WARN_INVALID).
         bool error = false;
-        bool otherDiagnostic = false;
         for (const auto &pair : errorCatalog) {
             if (pair.second == name) {
-                if (pair.first < ErrorType::ERR_MAX)
-                    error = true;
-                else
-                    otherDiagnostic = true;
+                if (pair.first < ErrorType::LEGACY_ERROR || pair.first > ErrorType::ERR_MAX)
+                    return false;
+                error = true;
             }
         }
 
-        return error && !otherDiagnostic;
+        return error;
     }
 
  private:
