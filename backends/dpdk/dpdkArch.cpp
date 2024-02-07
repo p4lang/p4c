@@ -1542,6 +1542,39 @@ struct keyInfo *CopyMatchKeysToSingleStruct::getKeyInfo(IR::Key *keys) {
     return oneKey;
 }
 
+cstring CopyMatchKeysToSingleStruct::getTableKeyName(const IR::Expression *e) {
+    cstring keyName;
+    if (auto pe = e->to<IR::PathExpression>()) {
+        keyName = pe->path->name;
+    } else if (auto mem = e->to<IR::Member>()) {
+        /* We expect all nested structures are flattened and only
+         * expected expressions are 'h.<hdrname>.<fieldname> or m.<fieldname> */
+        if (isValidMemberField(mem)) {
+            if (auto mexpr = mem->expr->to<IR::Member>()) {
+                keyName = "h." + mexpr->member + "." + mem->member;
+            } else if (mem->expr->is<IR::PathExpression>()) {
+                keyName = "m." + mem->member;
+            }
+        } else {
+            ::error(ErrorType::ERR_INVALID, "Invalid member expression '%1%' used as table key",
+                    mem);
+        }
+    } else if (auto m = e->to<IR::MethodCallExpression>()) {
+        BUG_CHECK(isValidCall(m),
+                  "Method calls except isValid must be simplified before"
+                  " reaching here, found %1%",
+                  m->method);
+        /* Moving h.<hdr>.isValid() used as table key to Metadata */
+        auto mem = m->method->to<IR::Member>();
+        CHECK_NULL(mem);
+        keyName = "h." + mem->expr->to<IR::Member>()->member + "." + IR::Type_Header::isValid;
+    } else {
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Unsupported key expression %1%",
+                e->toString());
+    }
+    return keyName;
+}
+
 const IR::Node *CopyMatchKeysToSingleStruct::preorder(IR::Key *keys) {
     // If any key field is from different structure, put all keys in metadata
     LOG3("Visiting " << keys);
@@ -1662,40 +1695,7 @@ const IR::Node *CopyMatchKeysToSingleStruct::postorder(IR::KeyElement *element) 
         insertions = it->second;
     }
 
-    cstring keyName;
-    if (auto pe = element->expression->to<IR::PathExpression>()) {
-        keyName = pe->path->name;
-    } else if (auto mem = element->expression->to<IR::Member>()) {
-        /* We expect all nested structures are flattened and only
-         * expected expressions are 'h.<hdrname>.<fieldname> or m.<fieldname> */
-        if (auto mexpr = mem->expr->to<IR::Member>()) {
-            auto pe = mexpr->expr->to<IR::PathExpression>();
-            CHECK_NULL(pe);
-            BUG_CHECK(pe->path->name == "h",
-                      "Expected Member expressions of the form 'h.<hdrname>.<fieldname>");
-            keyName = "h." + mexpr->member + "." + mem->member;
-        } else if (auto mexpr = mem->expr->to<IR::PathExpression>()) {
-            BUG_CHECK(mexpr->path->name == "m",
-                      "Expected Member expressions of the form 'm.<fieldname>");
-            keyName = "m." + mem->member;
-        } else {
-            ::error(ErrorType::ERR_INVALID, "Invalid member expression '%1%' used as table key",
-                    mem);
-        }
-    } else if (auto m = element->expression->to<IR::MethodCallExpression>()) {
-        BUG_CHECK(isValidCall(m),
-                  "Method calls except isValid must be simplified before"
-                  " reaching here, found %1%",
-                  m->method);
-        /* Moving h.<hdr>.isValid() used as table key to Metadata */
-        auto mem = m->method->to<IR::Member>();
-        CHECK_NULL(mem);
-        keyName = "h." + mem->expr->to<IR::Member>()->member + "." + IR::Type_Header::isValid;
-    } else {
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Unsupported key expression %1%",
-                element->expression->toString());
-    }
-
+    cstring keyName = getTableKeyName(element->expression);
     if (keyName.isNullOrEmpty()) return element;
     bool isHeader = false;
     /* All header fields are prefixed with "h." and metadata fields are prefixed with "m."
@@ -1703,15 +1703,15 @@ const IR::Node *CopyMatchKeysToSingleStruct::postorder(IR::KeyElement *element) 
     if (keyName.startsWith("h.")) {
         isHeader = true;
         keyName = keyName.replace('.', '_');
-        keyName = keyName.replace(
-            "h_", control->name.originalName + "_" + table->name.originalName + "_");
+        keyName =
+            keyName.replace("h_", control->name.toString() + "_" + table->name.toString() + "_");
     } else if (metaCopyNeeded) {
         if (keyName.startsWith("m.")) {
             keyName = keyName.replace('.', '_');
             keyName = keyName.replace(
-                "m_", control->name.originalName + "_" + table->name.originalName + "_");
+                "m_", control->name.toString() + "_" + table->name.toString() + "_");
         } else {
-            keyName = control->name.originalName + "_" + table->name.originalName + "_" + keyName;
+            keyName = control->name.toString() + "_" + table->name.toString() + "_" + keyName;
         }
     }
 

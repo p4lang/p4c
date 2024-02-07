@@ -32,6 +32,7 @@ bool isHeadersStruct(const IR::Type_Struct *st);
 bool isLargeFieldOperand(const IR::Expression *e);
 bool isInsideHeader(const IR::Expression *e);
 bool isValidCall(const IR::MethodCallExpression *m);
+bool isValidMemberField(const IR::Member *mem);
 int getMetadataFieldWidth(int width);
 const IR::Type_Bits *getEightBitAlignedType(const IR::Type_Bits *tb);
 

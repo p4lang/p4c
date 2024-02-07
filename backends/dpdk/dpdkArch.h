@@ -841,6 +841,7 @@ class CopyMatchKeysToSingleStruct : public P4::KeySideEffect {
     const IR::Node *doStatement(const IR::Statement *statement,
                                 const IR::Expression *expression) override;
     struct keyInfo *getKeyInfo(IR::Key *keys);
+    cstring getTableKeyName(const IR::Expression *e);
     int getFieldSizeBits(const IR::Type *field_type);
     bool isLearnerTable(const IR::P4Table *t);
 };

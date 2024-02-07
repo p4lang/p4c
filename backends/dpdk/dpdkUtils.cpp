@@ -103,6 +103,17 @@ bool isValidCall(const IR::MethodCallExpression *m) {
     return false;
 }
 
+bool isValidMemberField(const IR::Member *mem) {
+    if (auto mexpr = mem->expr->to<IR::Member>()) {
+        auto pe = mexpr->expr->to<IR::PathExpression>();
+        CHECK_NULL(pe);
+        if (pe->path->name == "h") return true;
+    } else if (auto mexpr = mem->expr->to<IR::PathExpression>()) {
+        if (mexpr->path->name == "m") return true;
+    }
+    return false;
+}
+
 const IR::Type_Bits *getEightBitAlignedType(const IR::Type_Bits *tb) {
     auto width = (tb->width_bits() + 7) & (~7);
     return IR::Type_Bits::get(width);
