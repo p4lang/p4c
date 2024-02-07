@@ -19,9 +19,9 @@ $TC p4template create table/const_entries_range_mask/MainControlImpl/t_range \
 	table_acts act name const_entries_range_mask/MainControlImpl/a \
 	act name const_entries_range_mask/MainControlImpl/a_with_control_params
 $TC p4template update table/const_entries_range_mask/MainControlImpl/t_range default_miss_action action const_entries_range_mask/MainControlImpl/a
-$TC p4template create table/const_entries_range_mask/MainControlImpl/t_range entry h.h.r 1 action const_entries_range_mask/MainControlImpl/a_with_control_params(16w21) permissions 0x1024
-$TC p4template create table/const_entries_range_mask/MainControlImpl/t_range entry h.h.r 6 action const_entries_range_mask/MainControlImpl/a_with_control_params(16w22) permissions 0x1024
-$TC p4template create table/const_entries_range_mask/MainControlImpl/t_range entry h.h.r 15 action const_entries_range_mask/MainControlImpl/a_with_control_params(16w24) permissions 0x1024
-$TC p4template create table/const_entries_range_mask/MainControlImpl/t_range entry h.h.r 8w1..8w8 action const_entries_range_mask/MainControlImpl/a_with_control_params(16w23) permissions 0x1024
-$TC p4template create table/const_entries_range_mask/MainControlImpl/t_range entry h.h.r 8w1&&&8w2 action const_entries_range_mask/MainControlImpl/a_with_control_params(16w26) permissions 0x1024
+$TC p4template create table/const_entries_range_mask/MainControlImpl/t_range entry h.h.r 1 action const_entries_range_mask/MainControlImpl/a_with_control_params permissions 0x1024
+$TC p4template create table/const_entries_range_mask/MainControlImpl/t_range entry h.h.r 6 action const_entries_range_mask/MainControlImpl/a_with_control_params permissions 0x1024
+$TC p4template create table/const_entries_range_mask/MainControlImpl/t_range entry h.h.r 15 action const_entries_range_mask/MainControlImpl/a_with_control_params permissions 0x1024
+$TC p4template create table/const_entries_range_mask/MainControlImpl/t_range entry h.h.r 8w1..8w8 action const_entries_range_mask/MainControlImpl/a_with_control_params permissions 0x1024
+$TC p4template create table/const_entries_range_mask/MainControlImpl/t_range entry h.h.r 8w1&&&8w2 action const_entries_range_mask/MainControlImpl/a_with_control_params permissions 0x1024
 $TC p4template update pipeline/const_entries_range_mask state ready
