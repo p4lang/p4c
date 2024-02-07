@@ -286,10 +286,10 @@ def process_file(options, argv):
     bfRtSchemaFile = os.path.join(tmpdir, basename + ".bfrt.json")
 
     def getArch(path):
-        v1Pattern = re.compile("include.*v1model\.p4")
-        pnaPattern = re.compile("include.*pna\.p4")
-        psaPattern = re.compile("include.*psa\.p4")
-        ubpfPattern = re.compile("include.*ubpf_model\.p4")
+        v1Pattern = re.compile("include.*v1model\\.p4")
+        pnaPattern = re.compile("include.*pna\\.p4")
+        psaPattern = re.compile("include.*psa\\.p4")
+        ubpfPattern = re.compile("include.*ubpf_model\\.p4")
         with open(path, "r", encoding="utf-8") as f:
             for line in f:
                 if v1Pattern.search(line):
