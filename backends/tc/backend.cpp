@@ -325,14 +325,14 @@ void ConvertToBackendIR::updateConstEntries(const IR::P4Table *t, IR::TCTable *t
             }
             keyList.emplace(keyString, key);
         }
-        cstring actionStr;
+        cstring actionName;
         if (const auto *path = e->action->to<IR::PathExpression>())
-            actionStr = path->toString();
+            actionName = path->toString();
         else if (const auto *mce = e->action->to<IR::MethodCallExpression>())
-            actionStr = mce->method->toString();
+            actionName = mce->method->toString();
         else
             BUG("Unexpected entry action type.");
-        IR::TCEntry *constEntry = new IR::TCEntry(actionStr, keyList);
+        IR::TCEntry *constEntry = new IR::TCEntry(actionName, keyList);
         tabledef->addConstEntries(constEntry);
     }
 }
