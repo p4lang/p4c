@@ -33,6 +33,10 @@ class ProtobufIr : public Bmv2TestFramework {
     [[nodiscard]] inja::json getControlPlaneForTable(
         const TableMatchMap &matches, const std::vector<ActionArg> &args) const override;
 
+    [[nodiscard]] inja::json getSend(const TestSpec *testSpec) const override;
+
+    [[nodiscard]] inja::json getExpectedPacket(const TestSpec *testSpec) const override;
+
  private:
     /// Emits a test case.
     /// @param testId specifies the test name.
