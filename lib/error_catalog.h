@@ -127,21 +127,20 @@ class ErrorCatalog {
         return "--unknown--";
     }
 
-    /// retrieve the code for name
-    int getCode(cstring name) {
-        auto it =
-            std::find_if(errorCatalog.begin(), errorCatalog.end(),
-                         [name](const std::pair<int, cstring> &p) { return p.second == name; });
-        if (it != errorCatalog.end()) return it->first;
-        return -1;
-    }
-
-    /// return true if the name is an error; false otherwise
+    /// return true if the given diagnostic can _only_ be an error; false otherwise
     bool isError(cstring name) {
-        int code = getCode(name);
-        if (code == -1) return false;
-        if (code > ErrorType::ERR_MAX) return false;
-        return true;
+        // Some diagnostics might be both errors and warning/info
+        // (e.g. "invalid" -> both ERR_INVALID and WARN_INVALID).
+        bool error = false;
+        for (const auto &pair : errorCatalog) {
+            if (pair.second == name) {
+                if (pair.first < ErrorType::LEGACY_ERROR || pair.first > ErrorType::ERR_MAX)
+                    return false;
+                error = true;
+            }
+        }
+
+        return error;
     }
 
  private:

@@ -192,6 +192,10 @@ ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
         "--Wdisable", "diagnostic",
         [](const char *diagnostic) {
             if (diagnostic) {
+                if (ErrorCatalog::getCatalog().isError(diagnostic)) {
+                    ::error(ErrorType::ERR_INVALID, "Error %1% cannot be demoted.", diagnostic);
+                    return false;
+                }
                 P4CContext::get().setDiagnosticAction(diagnostic, DiagnosticAction::Ignore);
             } else {
                 auto action = DiagnosticAction::Ignore;
@@ -207,7 +211,7 @@ ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
         [](const char *diagnostic) {
             if (diagnostic) {
                 if (ErrorCatalog::getCatalog().isError(diagnostic)) {
-                    ::error(ErrorType::ERR_INVALID, "Error %1% cannot be demoted", diagnostic);
+                    ::error(ErrorType::ERR_INVALID, "Error %1% cannot be demoted.", diagnostic);
                     return false;
                 }
                 P4CContext::get().setDiagnosticAction(diagnostic, DiagnosticAction::Info);
@@ -219,6 +223,10 @@ ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
         "--Wwarn", "diagnostic",
         [](const char *diagnostic) {
             if (diagnostic) {
+                if (ErrorCatalog::getCatalog().isError(diagnostic)) {
+                    ::error(ErrorType::ERR_INVALID, "Error %1% cannot be demoted.", diagnostic);
+                    return false;
+                }
                 P4CContext::get().setDiagnosticAction(diagnostic, DiagnosticAction::Warn);
             } else {
                 auto action = DiagnosticAction::Warn;
