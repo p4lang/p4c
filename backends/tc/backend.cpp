@@ -326,9 +326,9 @@ void ConvertToBackendIR::updateConstEntries(const IR::P4Table *t, IR::TCTable *t
             keyList.emplace(keyString, key);
         }
         cstring actionStr;
-        if (const auto* path = e->action->to<IR::PathExpression>())
+        if (const auto *path = e->action->to<IR::PathExpression>())
             actionStr = path->toString();
-        else if (const auto* mce = e->action->to<IR::MethodCallExpression>())
+        else if (const auto *mce = e->action->to<IR::MethodCallExpression>())
             actionStr = mce->method->toString();
         else
             BUG("Unexpected entry action type.");
