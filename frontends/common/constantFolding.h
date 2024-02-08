@@ -168,8 +168,7 @@ class ConstantFolding : public PassManager {
      * Function should return nullptr to process the Expression, or a non-null pointer
      * to bypass processing. Returned value will be returned by the postorder function.
      */
-    typedef std::function<const IR::Expression *(Visitor *, const IR::Expression *)>
-        filter_hook_t;
+    typedef std::function<const IR::Expression *(Visitor *, const IR::Expression *)> filter_hook_t;
 
     /** Active hook to filter which PathExpression objects are processed */
     static filter_hook_t filter_hook;
