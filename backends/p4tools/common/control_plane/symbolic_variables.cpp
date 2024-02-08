@@ -49,7 +49,7 @@ const IR::SymbolicVariable *getCloneActive() {
     return ToolsVariables::getSymbolicVariable(IR::Type_Boolean::get(), "clone_session_active");
 }
 
-const IR::SymbolicVariable *getSessionId(const IR::Type *type) {
+const IR::SymbolicVariable *getCloneSessionId(const IR::Type *type) {
     return ToolsVariables::getSymbolicVariable(type, "clone_session_id");
 }
 
