@@ -23,24 +23,27 @@ ProtobufIr::ProtobufIr(std::filesystem::path basePath, std::optional<unsigned in
 
 std::string ProtobufIr::getFormatOfNode(const IR::IAnnotated *node) {
     const auto *formatAnnotation = node->getAnnotation("format");
-    std::string formatString = "hex_str";
-    if (formatAnnotation != nullptr) {
-        BUG_CHECK(formatAnnotation->body.size() == 1,
-                  "@format annotation can only have one member.");
-        auto formatString = formatAnnotation->body.at(0)->text;
-        if (formatString == "IPV4_ADDRESS") {
-            formatString = "ipv4";
-        } else if (formatString == "IPV6_ADDRESS") {
-            formatString = "ipv6";
-        } else if (formatString == "MAC_ADDRESS") {
-            formatString = "mac";
-        } else if (formatString == "HEX_STR") {
-            formatString = "hex_str";
-        } else {
-            TESTGEN_UNIMPLEMENTED("Unsupported @format string %1%", formatString);
-        }
+    if (formatAnnotation == nullptr) {
+        return "hex_str";
     }
-    return formatString;
+    BUG_CHECK(formatAnnotation->body.size() == 1, "@format annotation can only have one member.");
+    auto annotationFormatString = formatAnnotation->body.at(0)->text;
+    if (annotationFormatString == "IPV4_ADDRESS") {
+        return "ipv4";
+    }
+    if (annotationFormatString == "IPV6_ADDRESS") {
+        return "ipv6";
+    }
+    if (annotationFormatString == "MAC_ADDRESS") {
+        return "mac";
+    }
+    if (annotationFormatString == "HEX_STR") {
+        return "hex_str";
+    }
+    if (annotationFormatString == "STRING") {
+        return "str";
+    }
+    TESTGEN_UNIMPLEMENTED("Unsupported @format string %1%", annotationFormatString);
 }
 
 std::string ProtobufIr::getTestCaseTemplate() {
@@ -168,7 +171,22 @@ entities {
 
 std::string ProtobufIr::formatNetworkValue(const std::string &type, const IR::Expression *value) {
     if (type == "hex_str") {
-        return formatHexExpr(value, {false, true, false, false});
+        return formatHexExpr(value, {false, true, true, false});
+    }
+    // Assume that any string format can be converted from a string literal, bool
+    // literal, or constant.
+    // TODO: Extract this into a helper function once the Protobuf IR back end is stable.
+    if (type == "str") {
+        if (const auto *constant = value->to<IR::Constant>()) {
+            return constant->value.str();
+        }
+        if (const auto *literal = value->to<IR::StringLiteral>()) {
+            return literal->value.c_str();
+        }
+        if (const auto *boolValue = value->to<IR::BoolLiteral>()) {
+            return boolValue->value ? "true" : "false";
+        }
+        TESTGEN_UNIMPLEMENTED("Unsupported string format value \"%1%\".", value);
     }
     // At this point, any value must be a constant.
     const auto *constant = value->checkedTo<IR::Constant>();
@@ -263,6 +281,30 @@ inja::json ProtobufIr::getControlPlaneForTable(const TableMatchMap &matches,
     }
 
     return rulesJson;
+}
+
+inja::json ProtobufIr::getSend(const TestSpec *testSpec) const {
+    const auto *iPacket = testSpec->getIngressPacket();
+    const auto *payload = iPacket->getEvaluatedPayload();
+    inja::json sendJson;
+    sendJson["ig_port"] = iPacket->getPort();
+    sendJson["pkt"] = formatHexExpressionWithSeparators(*payload);
+    sendJson["pkt_size"] = payload->type->width_bits();
+    return sendJson;
+}
+
+inja::json ProtobufIr::getExpectedPacket(const TestSpec *testSpec) const {
+    inja::json verifyData = inja::json::object();
+    auto egressPacket = testSpec->getEgressPacket();
+    if (egressPacket.has_value()) {
+        const auto *packet = egressPacket.value();
+        verifyData["eg_port"] = packet->getPort();
+        const auto *payload = packet->getEvaluatedPayload();
+        const auto *mask = packet->getEvaluatedPayloadMask();
+        verifyData["ignore_mask"] = formatHexExpressionWithSeparators(*mask);
+        verifyData["exp_pkt"] = formatHexExpressionWithSeparators(*payload);
+    }
+    return verifyData;
 }
 
 void ProtobufIr::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testId,

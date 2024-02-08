@@ -27,10 +27,6 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-std::string Protobuf::formatHexExprWithSep(const IR::Expression *expr) {
-    return insertHexSeparators(formatHexExpr(expr, {false, true, false}));
-}
-
 Protobuf::Protobuf(std::filesystem::path basePath, P4::P4RuntimeAPI p4RuntimeApi,
                    std::optional<unsigned int> seed)
     : Bmv2TestFramework(std::move(basePath), seed),
@@ -120,22 +116,22 @@ inja::json Protobuf::getControlPlaneForTable(cstring tableName, cstring actionNa
 
         // Iterate over the match fields and segregate them.
         if (const auto *elem = fieldMatch->to<Exact>()) {
-            j["value"] = formatHexExprWithSep(elem->getEvaluatedValue());
+            j["value"] = formatHexExpressionWithSeparators(*elem->getEvaluatedValue());
             rulesJson["single_exact_matches"].push_back(j);
         } else if (const auto *elem = fieldMatch->to<Range>()) {
-            j["lo"] = formatHexExprWithSep(elem->getEvaluatedLow());
-            j["hi"] = formatHexExprWithSep(elem->getEvaluatedHigh());
+            j["lo"] = formatHexExpressionWithSeparators(*elem->getEvaluatedLow());
+            j["hi"] = formatHexExpressionWithSeparators(*elem->getEvaluatedHigh());
             rulesJson["range_matches"].push_back(j);
             // If the rule has a range match we need to add the priority.
             rulesJson["needs_priority"] = true;
         } else if (const auto *elem = fieldMatch->to<Ternary>()) {
-            j["value"] = formatHexExprWithSep(elem->getEvaluatedValue());
-            j["mask"] = formatHexExprWithSep(elem->getEvaluatedMask());
+            j["value"] = formatHexExpressionWithSeparators(*elem->getEvaluatedValue());
+            j["mask"] = formatHexExpressionWithSeparators(*elem->getEvaluatedMask());
             rulesJson["ternary_matches"].push_back(j);
             // If the rule has a range match we need to add the priority.
             rulesJson["needs_priority"] = true;
         } else if (const auto *elem = fieldMatch->to<LPM>()) {
-            j["value"] = formatHexExprWithSep(elem->getEvaluatedValue());
+            j["value"] = formatHexExpressionWithSeparators(*elem->getEvaluatedValue());
             j["prefix_len"] = elem->getEvaluatedPrefixLength()->value.str();
             rulesJson["lpm_matches"].push_back(j);
         } else if (const auto *elem = fieldMatch->to<Optional>()) {
@@ -151,7 +147,7 @@ inja::json Protobuf::getControlPlaneForTable(cstring tableName, cstring actionNa
     for (const auto &actArg : args) {
         inja::json j;
         j["param"] = actArg.getActionParamName().c_str();
-        j["value"] = formatHexExprWithSep(actArg.getEvaluatedValue());
+        j["value"] = formatHexExpressionWithSeparators(*actArg.getEvaluatedValue());
         auto combinedParamName = actionName + "_" + actArg.getActionParamName();
         auto p4RuntimeId = p4InfoMaps.lookUpP4RuntimeId(combinedParamName);
         BUG_CHECK(p4RuntimeId.has_value(), "Id not present for parameter. Can not generate test.");
@@ -169,8 +165,8 @@ inja::json Protobuf::getExpectedPacket(const TestSpec *testSpec) const {
         verifyData["eg_port"] = packet.getPort();
         const auto *payload = packet.getEvaluatedPayload();
         const auto *payloadMask = packet.getEvaluatedPayloadMask();
-        verifyData["ignore_mask"] = formatHexExprWithSep(payloadMask);
-        verifyData["exp_pkt"] = formatHexExprWithSep(payload);
+        verifyData["ignore_mask"] = formatHexExpressionWithSeparators(*payloadMask);
+        verifyData["exp_pkt"] = formatHexExpressionWithSeparators(*payload);
     }
     return verifyData;
 }
