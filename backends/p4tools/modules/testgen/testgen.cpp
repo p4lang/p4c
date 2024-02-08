@@ -53,9 +53,11 @@ SymbolicExecutor *pickExecutionEngine(const TestgenOptions &testgenOptions,
 
 int generateAbstractTests(const TestgenOptions &testgenOptions, const ProgramInfo *programInfo,
                           SymbolicExecutor &symbex) {
-    // Get the filename of the input file and remove the extension
-    // This assumes that inputFile is not null.
-    auto const inputFile = P4CContext::get().options().file;
+    cstring inputFile = P4CContext::get().options().file;
+    if (inputFile == nullptr) {
+        ::error("No input file provided.");
+        return EXIT_FAILURE;
+    }
     auto testPath = std::filesystem::path(inputFile.c_str()).stem();
     // Create the directory, if the directory string is valid and if it does not exist.
     cstring testDirStr = testgenOptions.outputDir;
@@ -64,8 +66,13 @@ int generateAbstractTests(const TestgenOptions &testgenOptions, const ProgramInf
         std::filesystem::create_directories(testDir);
         testPath = testDir / testPath;
     }
+
     // Each test back end has a different run function.
-    auto *testBackend = TestgenTarget::getTestBackend(*programInfo, symbex, testPath);
+    // The test name is the stem of the output base path.
+    TestBackendConfiguration testBackendConfiguration{testPath.c_str(), testgenOptions.maxTests,
+                                                      testPath, testgenOptions.seed};
+    auto *testBackend =
+        TestgenTarget::getTestBackend(*programInfo, testBackendConfiguration, symbex);
     // Define how to handle the final state for each test. This is target defined.
     // We delegate execution to the symbolic executor.
     auto callBack = [testBackend](auto &&finalState) {

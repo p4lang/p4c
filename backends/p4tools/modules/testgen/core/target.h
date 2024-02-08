@@ -30,8 +30,9 @@ class TestgenTarget : public Target {
     static const ProgramInfo *produceProgramInfo(const CompilerResult &compilerResult);
 
     /// Returns the test back end associated with this P4Testgen target.
-    static TestBackEnd *getTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                                       const std::filesystem::path &testPath);
+    static TestBackEnd *getTestBackend(const ProgramInfo &programInfo,
+                                       const TestBackendConfiguration &testBackendConfiguration,
+                                       SymbolicExecutor &symbex);
 
     /// Provides a CmdStepper implementation for this target.
     static CmdStepper *getCmdStepper(ExecutionState &state, AbstractSolver &solver,
@@ -51,9 +52,9 @@ class TestgenTarget : public Target {
         const CompilerResult &compilerResult, const IR::Declaration_Instance *mainDecl) const = 0;
 
     /// @see getTestBackend.
-    virtual TestBackEnd *getTestBackendImpl(const ProgramInfo &programInfo,
-                                            SymbolicExecutor &symbex,
-                                            const std::filesystem::path &testPath) const = 0;
+    virtual TestBackEnd *getTestBackendImpl(
+        const ProgramInfo &programInfo, const TestBackendConfiguration &testBackendConfiguration,
+        SymbolicExecutor &symbex) const = 0;
 
     /// @see getCmdStepper.
     virtual CmdStepper *getCmdStepperImpl(ExecutionState &state, AbstractSolver &solver,

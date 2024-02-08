@@ -19,8 +19,7 @@ namespace P4Tools::P4Testgen::Bmv2 {
 /// Extracts information from the @testSpec to emit a Metadata test case.
 class Metadata : public Bmv2TestFramework {
  public:
-    explicit Metadata(std::filesystem::path basePath,
-                      std::optional<unsigned int> seed = std::nullopt);
+    explicit Metadata(const TestBackendConfiguration &testBackendConfiguration);
 
     /// Produce a Metadata test.
     void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testId,

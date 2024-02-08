@@ -30,17 +30,13 @@ class PTF : public TestFramework {
     std::ofstream ptfFileStream;
 
  public:
-    virtual ~PTF() = default;
-
+    ~PTF() override = default;
     PTF(const PTF &) = delete;
-
     PTF(PTF &&) = delete;
-
     PTF &operator=(const PTF &) = delete;
-
     PTF &operator=(PTF &&) = delete;
 
-    PTF(std::filesystem::path basePath, std::optional<unsigned int> seed);
+    explicit PTF(const TestBackendConfiguration &testBackendConfiguration);
 
     /// Produce a PTF test.
     void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testId,

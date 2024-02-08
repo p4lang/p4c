@@ -28,15 +28,18 @@ class TestBackEnd {
     /// Indicates the number of generated tests after which we reset memory.
     static const int64_t RESET_THRESHOLD = 10000;
 
- protected:
     /// ProgramInfo is used to access some target specific information for test generation.
-    const ProgramInfo &programInfo;
+    std::reference_wrapper<const ProgramInfo> programInfo;
 
+    /// Configuration options for the test back end.
+    std::reference_wrapper<const TestBackendConfiguration> testBackendConfiguration;
+
+ protected:
     /// Writes the tests out to a file.
     TestFramework *testWriter = nullptr;
 
     /// Pointer to the symbolic executor.
-    /// TODO: Remove this.
+    /// TODO: Remove this. We only need to update coverage tracking.
     SymbolicExecutor &symbex;
 
     /// Test maximum number of tests that are to be produced.
@@ -45,8 +48,13 @@ class TestBackEnd {
     /// The accumulated coverage of all finished test cases. Number in range [0, 1].
     float coverage = 0;
 
-    explicit TestBackEnd(const ProgramInfo &programInfo, SymbolicExecutor &symbex)
-        : programInfo(programInfo), symbex(symbex), maxTests(TestgenOptions::get().maxTests) {
+    explicit TestBackEnd(const ProgramInfo &programInfo,
+                         const TestBackendConfiguration &testBackendConfiguration,
+                         SymbolicExecutor &symbex)
+        : programInfo(programInfo),
+          testBackendConfiguration(testBackendConfiguration),
+          symbex(symbex),
+          maxTests(TestgenOptions::get().maxTests) {
         // If we select a specific branch, the number of tests should be 1.
         if (!TestgenOptions::get().selectedBranches.empty()) {
             maxTests = 1;
@@ -119,6 +127,12 @@ class TestBackEnd {
 
     /// Returns coverage achieved by all the processed tests.
     [[nodiscard]] float getCoverage() const;
+
+    /// Returns the program info.
+    [[nodiscard]] const ProgramInfo &getProgramInfo() const;
+
+    /// Returns the configuration options for the test back end.
+    [[nodiscard]] const TestBackendConfiguration &getTestBackendConfiguration() const;
 };
 
 }  // namespace P4Tools::P4Testgen

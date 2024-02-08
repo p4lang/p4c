@@ -19,9 +19,8 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-Bmv2TestFramework::Bmv2TestFramework(std::filesystem::path basePath,
-                                     std::optional<unsigned int> seed)
-    : TestFramework(std::move(basePath), seed) {}
+Bmv2TestFramework::Bmv2TestFramework(const TestBackendConfiguration &testBackendConfiguration)
+    : TestFramework(testBackendConfiguration) {}
 
 std::string Bmv2TestFramework::formatHexExpressionWithSeparators(const IR::Expression &expr) {
     return insertHexSeparators(formatHexExpr(&expr, {false, true, false}));

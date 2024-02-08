@@ -18,8 +18,8 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-ProtobufIr::ProtobufIr(std::filesystem::path basePath, std::optional<unsigned int> seed)
-    : Bmv2TestFramework(std::move(basePath), seed) {}
+ProtobufIr::ProtobufIr(const TestBackendConfiguration &testBackendConfiguration)
+    : Bmv2TestFramework(testBackendConfiguration) {}
 
 std::string ProtobufIr::getFormatOfNode(const IR::IAnnotated *node) {
     const auto *formatAnnotation = node->getAnnotation("format");
@@ -313,10 +313,12 @@ void ProtobufIr::emitTestcase(const TestSpec *testSpec, cstring selectedBranches
     if (selectedBranches != nullptr) {
         dataJson["selected_branches"] = selectedBranches.c_str();
     }
-    if (seed) {
-        dataJson["seed"] = *seed;
+
+    auto optSeed = getTestBackendConfiguration().seed;
+    if (optSeed.has_value()) {
+        dataJson["seed"] = optSeed.value();
     }
-    dataJson["test_name"] = basePath.stem();
+    dataJson["test_name"] = getTestBackendConfiguration().testName;
     dataJson["test_id"] = testId;
     dataJson["trace"] = getTrace(testSpec);
     dataJson["control_plane"] = getControlPlane(testSpec);
@@ -338,7 +340,10 @@ void ProtobufIr::emitTestcase(const TestSpec *testSpec, cstring selectedBranches
     dataJson["meter_values"] = getMeter(meterValues);
 
     LOG5("ProtobufIR test back end: emitting testcase:" << std::setw(4) << dataJson);
-    auto incrementedbasePath = basePath;
+
+    auto optBasePath = getTestBackendConfiguration().fileBasePath;
+    BUG_CHECK(optBasePath.has_value(), "Base path is not set.");
+    auto incrementedbasePath = optBasePath.value();
     incrementedbasePath.concat("_" + std::to_string(testId));
     incrementedbasePath.replace_extension(".txtpb");
     auto protobufFileStream = std::ofstream(incrementedbasePath);

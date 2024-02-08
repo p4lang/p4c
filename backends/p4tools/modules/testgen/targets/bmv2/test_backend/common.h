@@ -16,8 +16,7 @@ namespace P4Tools::P4Testgen::Bmv2 {
 /// Bmv2TestFramework provides common utility functions for BMv2-style test frameworks.
 class Bmv2TestFramework : public TestFramework {
  public:
-    explicit Bmv2TestFramework(std::filesystem::path basePath,
-                               std::optional<unsigned int> seed = std::nullopt);
+    explicit Bmv2TestFramework(const TestBackendConfiguration &testBackendConfiguration);
 
  protected:
     /// Wrapper helper function that automatically inserts separators for hex strings.
