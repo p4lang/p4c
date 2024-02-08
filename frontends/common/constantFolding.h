@@ -163,10 +163,21 @@ class ConstantFolding : public PassManager {
         setName("ConstantFolding");
     }
 
+    /** Function definition for hook to filter which Expression objects are processed.
+     *
+     * Function should return nullptr to process the Expression, or a non-null pointer
+     * to bypass processing. Returned value will be returned by the postorder function.
+     */
     typedef std::function<const IR::Expression *(Visitor *, const IR::Expression *)>
         filter_hook_t;
+
+    /** Active hook to filter which PathExpression objects are processed */
     static filter_hook_t filter_hook;
+
+    /** Set the filter hook to programatically skip processing of select expressions */
     static void setFilterHook(filter_hook_t filter) { filter_hook = filter; }
+
+    /** Clear the filter hook (process all expressions) */
     static void unsetFilterHook() { filter_hook = filter_hook_t(); }
 };
 
