@@ -282,7 +282,7 @@ class AbstractTest(bt.P4RuntimeTest):
 )""");
 
     inja::json dataJson;
-    dataJson["test_name"] = getTestBackendConfiguration().testName;
+    dataJson["test_name"] = getTestBackendConfiguration().testBaseName;
     auto optSeed = getTestBackendConfiguration().seed;
     if (optSeed.has_value()) {
         dataJson["seed"] = optSeed.value();

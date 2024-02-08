@@ -56,7 +56,13 @@ int generateAbstractTests(const TestgenOptions &testgenOptions, const ProgramInf
         ::error("No input file provided.");
         return EXIT_FAILURE;
     }
+
+    /// If the test name is not provided, use the steam of the input file name as test name.
     auto testPath = std::filesystem::path(inputFile.c_str()).stem();
+    if (testgenOptions.testBaseName.has_value()) {
+        testPath = testPath.replace_filename(testgenOptions.testBaseName.value().c_str());
+    }
+
     // Create the directory, if the directory string is valid and if it does not exist.
     cstring testDirStr = testgenOptions.outputDir;
     if (!testDirStr.isNullOrEmpty()) {

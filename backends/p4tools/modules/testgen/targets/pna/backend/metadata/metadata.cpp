@@ -145,7 +145,7 @@ void Metadata::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
     if (optSeed.has_value()) {
         dataJson["seed"] = optSeed.value();
     }
-    dataJson["test_name"] = getTestBackendConfiguration().testName;
+    dataJson["test_name"] = getTestBackendConfiguration().testBaseName;
     dataJson["test_id"] = testId;
     computeTraceData(testSpec, dataJson);
 
