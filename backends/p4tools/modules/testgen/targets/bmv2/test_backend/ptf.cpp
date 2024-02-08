@@ -17,8 +17,8 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-PTF::PTF(std::filesystem::path basePath, std::optional<unsigned int> seed)
-    : Bmv2TestFramework(std::move(basePath), seed) {}
+PTF::PTF(const TestBackendConfiguration &testBackendConfiguration)
+    : Bmv2TestFramework(testBackendConfiguration) {}
 
 std::vector<std::pair<size_t, size_t>> PTF::getIgnoreMasks(const IR::Constant *mask) {
     std::vector<std::pair<size_t, size_t>> ignoreMasks;
@@ -146,9 +146,10 @@ class AbstractTest(bt.P4RuntimeTest):
 )""");
 
     inja::json dataJson;
-    dataJson["test_name"] = basePath.stem();
-    if (seed) {
-        dataJson["seed"] = *seed;
+    dataJson["test_name"] = getTestBackendConfiguration().testName;
+    auto optSeed = getTestBackendConfiguration().seed;
+    if (optSeed.has_value()) {
+        dataJson["seed"] = optSeed.value();
     }
 
     inja::render_to(ptfFileStream, PREAMBLE, dataJson);
@@ -288,19 +289,20 @@ void PTF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
 
     LOG5("PTF backend: emitting testcase:" << std::setw(4) << dataJson);
 
+    if (!preambleEmitted) {
+        BUG_CHECK(getTestBackendConfiguration().fileBasePath.has_value(), "Base path is not set.");
+        auto ptfFile = getTestBackendConfiguration().fileBasePath.value();
+        ptfFile.replace_extension(".py");
+        ptfFileStream = std::ofstream(ptfFile);
+        emitPreamble();
+        preambleEmitted = true;
+    }
     inja::render_to(ptfFileStream, testCase, dataJson);
     ptfFileStream.flush();
 }
 
 void PTF::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
                      float currentCoverage) {
-    if (!preambleEmitted) {
-        auto ptfFile = basePath;
-        ptfFile.replace_extension(".py");
-        ptfFileStream = std::ofstream(ptfFile);
-        emitPreamble();
-        preambleEmitted = true;
-    }
     std::string testCase = getTestCaseTemplate();
     emitTestcase(testSpec, selectedBranches, testId, testCase, currentCoverage);
 }

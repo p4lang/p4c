@@ -1,10 +1,7 @@
 #ifndef BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_BACKEND_H_
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_BMV2_TEST_BACKEND_H_
 
-#include <cstdint>
-#include <filesystem>
 #include <functional>
-#include <optional>
 #include <set>
 #include <string>
 #include <vector>
@@ -14,7 +11,6 @@
 #include "ir/ir.h"
 #include "lib/big_int_util.h"
 
-#include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/test_backend.h"
@@ -36,8 +32,9 @@ class Bmv2TestBackend : public TestBackEnd {
     static const std::set<std::string> SUPPORTED_BACKENDS;
 
  public:
-    explicit Bmv2TestBackend(const Bmv2V1ModelProgramInfo &programInfo, SymbolicExecutor &symbex,
-                             const std::filesystem::path &testPath);
+    explicit Bmv2TestBackend(const Bmv2V1ModelProgramInfo &programInfo,
+                             const TestBackendConfiguration &testBackendConfiguration,
+                             SymbolicExecutor &symbex);
 
     TestBackEnd::TestInfo produceTestInfo(
         const ExecutionState *executionState, const Model *finalModel,

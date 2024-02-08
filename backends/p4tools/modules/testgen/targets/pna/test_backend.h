@@ -27,8 +27,9 @@ class PnaTestBackend : public TestBackEnd {
     static const std::set<std::string> SUPPORTED_BACKENDS;
 
  public:
-    explicit PnaTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                            const std::filesystem::path &testPath);
+    explicit PnaTestBackend(const ProgramInfo &programInfo,
+                            const TestBackendConfiguration &testBackendConfiguration,
+                            SymbolicExecutor &symbex);
 
     TestBackEnd::TestInfo produceTestInfo(
         const ExecutionState *executionState, const Model *finalModel,

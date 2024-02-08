@@ -32,8 +32,8 @@ bool TestBackEnd::run(const FinalState &state) {
         // Evaluate the model and extract the input and output packets.
         const auto *executionState = state.getExecutionState();
         const auto *outputPacketExpr = executionState->getPacketBuffer();
-        const auto *outputPortExpr = executionState->get(programInfo.getTargetOutputPortVar());
-        const auto &coverableNodes = programInfo.getCoverableNodes();
+        const auto *outputPortExpr = executionState->get(getProgramInfo().getTargetOutputPortVar());
+        const auto &coverableNodes = getProgramInfo().getCoverableNodes();
         const auto *programTraces = state.getTraces();
         const auto &testgenOptions = TestgenOptions::get();
 
@@ -69,7 +69,7 @@ bool TestBackEnd::run(const FinalState &state) {
         // Execute concolic functions that may occur in the output packet, the output port,
         // or any path conditions.
         auto concolicResolver = ConcolicResolver(state.getFinalModel(), *executionState,
-                                                 *programInfo.getConcolicMethodImpls());
+                                                 *getProgramInfo().getConcolicMethodImpls());
 
         outputPacketExpr->apply(concolicResolver);
         outputPortExpr->apply(concolicResolver);
@@ -91,7 +91,7 @@ bool TestBackEnd::run(const FinalState &state) {
         executionState = replacedState.getExecutionState();
         outputPacketExpr = executionState->getPacketBuffer();
         const auto &finalModel = replacedState.getFinalModel();
-        outputPortExpr = executionState->get(programInfo.getTargetOutputPortVar());
+        outputPortExpr = executionState->get(getProgramInfo().getTargetOutputPortVar());
 
         auto testInfo = produceTestInfo(executionState, &finalModel, outputPacketExpr,
                                         outputPortExpr, programTraces);
@@ -178,7 +178,7 @@ TestBackEnd::TestInfo TestBackEnd::produceTestInfo(
     const auto *inputPacket = finalModel->evaluate(inputPacketExpr, true);
     const auto *outputPacket = finalModel->evaluate(outputPacketExpr, true);
     const auto *inputPort =
-        finalModel->evaluate(executionState->get(programInfo.getTargetInputPortVar()), true);
+        finalModel->evaluate(executionState->get(getProgramInfo().getTargetInputPortVar()), true);
 
     const auto *outputPortVar = finalModel->evaluate(outputPortExpr, true);
     // Build the taint mask by dissecting the program packet variable
@@ -245,5 +245,11 @@ bool TestBackEnd::printTestInfo(const ExecutionState * /*executionState*/, const
 int64_t TestBackEnd::getTestCount() const { return testCount; }
 
 float TestBackEnd::getCoverage() const { return coverage; }
+
+const ProgramInfo &TestBackEnd::getProgramInfo() const { return programInfo; }
+
+const TestBackendConfiguration &TestBackEnd::getTestBackendConfiguration() const {
+    return testBackendConfiguration;
+}
 
 }  // namespace P4Tools::P4Testgen

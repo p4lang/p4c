@@ -310,7 +310,7 @@ MetadataCollection::MetadataCollection() = default;
 cstring MetadataCollection::getObjectName() const { return "MetadataCollection"; }
 
 const MetadataCollection *MetadataCollection::evaluate(const Model & /*model*/,
-                                                       bool /*completedModel*/) const {
+                                                       bool /*finalModel*/) const {
     P4C_UNIMPLEMENTED("%1% has no implementation for \"evaluate\".", getObjectName());
 }
 

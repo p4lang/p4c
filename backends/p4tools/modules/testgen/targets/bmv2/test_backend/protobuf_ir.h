@@ -18,8 +18,7 @@ namespace P4Tools::P4Testgen::Bmv2 {
 /// Extracts information from the @testSpec to emit a Protobuf IR test case.
 class ProtobufIr : public Bmv2TestFramework {
  public:
-    explicit ProtobufIr(std::filesystem::path basePath,
-                        std::optional<unsigned int> seed = std::nullopt);
+    explicit ProtobufIr(const TestBackendConfiguration &testBackendConfiguration);
 
     virtual ~ProtobufIr() = default;
     ProtobufIr(const ProtobufIr &) = default;

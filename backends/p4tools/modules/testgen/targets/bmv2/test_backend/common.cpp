@@ -19,9 +19,8 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-Bmv2TestFramework::Bmv2TestFramework(std::filesystem::path basePath,
-                                     std::optional<unsigned int> seed)
-    : TestFramework(std::move(basePath), seed) {}
+Bmv2TestFramework::Bmv2TestFramework(const TestBackendConfiguration &testBackendConfiguration)
+    : TestFramework(testBackendConfiguration) {}
 
 inja::json Bmv2TestFramework::getClone(const TestObjectMap &cloneSpecs) const {
     auto cloneSpec = inja::json::object();
