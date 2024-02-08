@@ -1,4 +1,4 @@
-issue3045-2.p4(16): [--Werror=type-error] error: 'f'
+issue3045-2.p4(16): [--Werror=type-error] error: 'f(r, exact)'
         f(r, exact);
         ^^^^^^^^^^^
   ---- Actual error:

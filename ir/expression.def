@@ -401,7 +401,16 @@ class MethodCallExpression : Expression {
     Expression                  method;
     optional Vector<Type>       typeArguments = new Vector<Type>;
     optional Vector<Argument>   arguments = new Vector<Argument>;
-    toString{ return method->toString(); }
+    toString {
+        cstring str = method->toString() + "(";
+        if (!arguments->empty()) {
+            str += arguments->at(0)->toString();
+        }
+        for (unsigned i = 1; i < arguments->size(); i++) {
+            str += ", " + arguments->at(i)->toString();
+        }
+        return str + ")";
+    }
     validate{ typeArguments->check_null(); arguments->check_null(); }
     MethodCallExpression(Util::SourceInfo si, IR::ID m, const std::initializer_list<Argument> &a)
             : Expression(si), method(new PathExpression(m)), arguments(new Vector<Argument>(a)) {}

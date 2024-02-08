@@ -1,4 +1,4 @@
-pna-example-mirror-packet-error3.p4(79): [--Werror=type-error] error: 'mirror_packet'
+pna-example-mirror-packet-error3.p4(79): [--Werror=type-error] error: 'mirror_packet(MIRROR_SLOT_ID)'
  mirror_packet(MIRROR_SLOT_ID);
  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   ---- Actual error:
