@@ -30,8 +30,9 @@ class EBPFTestgenTarget : public TestgenTarget {
         const CompilerResult &compilerResult,
         const IR::Declaration_Instance *mainDecl) const override;
 
-    EBPFTestBackend *getTestBackendImpl(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                                        const std::filesystem::path &testPath) const override;
+    EBPFTestBackend *getTestBackendImpl(const ProgramInfo &programInfo,
+                                        const TestBackendConfiguration &testBackendConfiguration,
+                                        SymbolicExecutor &symbex) const override;
 
     EBPFCmdStepper *getCmdStepperImpl(ExecutionState &state, AbstractSolver &solver,
                                       const ProgramInfo &programInfo) const override;

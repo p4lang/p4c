@@ -2,10 +2,8 @@
 #define BACKENDS_P4TOOLS_MODULES_TESTGEN_LIB_TEST_FRAMEWORK_H_
 
 #include <cstddef>
-#include <filesystem>
 #include <iosfwd>
 #include <map>
-#include <optional>
 #include <string>
 #include <utility>
 
@@ -15,6 +13,7 @@
 #include "backends/p4tools/common/lib/trace_event.h"
 #include "lib/cstring.h"
 
+#include "backends/p4tools/modules/testgen/lib/test_backend_configuration.h"
 #include "backends/p4tools/modules/testgen/lib/test_object.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
 
@@ -23,15 +22,13 @@ namespace P4Tools::P4Testgen {
 /// THe default base class for the various test frameworks. Every test framework has a test
 /// name and a seed associated with it. Also contains a variety of common utility functions.
 class TestFramework {
+ private:
+    /// Configuration options for the test back end.
+    std::reference_wrapper<const TestBackendConfiguration> testBackendConfiguration;
+
  protected:
-    /// The @basePath to be used in test case generation.
-    std::filesystem::path basePath;
-
-    /// The seed used by the testgen.
-    std::optional<unsigned int> seed;
-
     /// Creates a generic test framework.
-    TestFramework(std::filesystem::path basePath, std::optional<unsigned int> seed);
+    explicit TestFramework(const TestBackendConfiguration &testBackendConfiguration);
 
     /// Converts the traces of this test into a string representation and Inja object.
     static inja::json getTrace(const TestSpec *testSpec) {
@@ -131,7 +128,12 @@ class TestFramework {
         }
     }
 
+    /// Returns the configuration options for the test back end.
+    [[nodiscard]] const TestBackendConfiguration &getTestBackendConfiguration() const;
+
  public:
+    virtual ~TestFramework() = default;
+
     /// The method used to output the test case to be implemented by
     /// all the test frameworks (eg. STF, PTF, etc.).
     /// @param spec the testcase specification to be outputted

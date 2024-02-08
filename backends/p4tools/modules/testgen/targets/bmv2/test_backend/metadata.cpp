@@ -23,8 +23,8 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-Metadata::Metadata(std::filesystem::path basePath, std::optional<unsigned int> seed)
-    : Bmv2TestFramework(std::move(basePath), seed) {}
+Metadata::Metadata(const TestBackendConfiguration &testBackendConfiguration)
+    : Bmv2TestFramework(testBackendConfiguration) {}
 
 std::string Metadata::getTestCaseTemplate() {
     static std::string TEST_CASE(
@@ -93,10 +93,11 @@ void Metadata::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
     if (selectedBranches != nullptr) {
         dataJson["selected_branches"] = selectedBranches.c_str();
     }
-    if (seed) {
-        dataJson["seed"] = *seed;
+    auto optSeed = getTestBackendConfiguration().seed;
+    if (optSeed.has_value()) {
+        dataJson["seed"] = optSeed.value();
     }
-    dataJson["test_name"] = basePath.stem();
+    dataJson["test_name"] = getTestBackendConfiguration().testName;
     dataJson["test_id"] = testId;
     computeTraceData(testSpec, dataJson);
 
@@ -123,16 +124,18 @@ void Metadata::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
 
     LOG5("Metadata back end: emitting testcase:" << std::setw(4) << dataJson);
 
+    auto optBasePath = getTestBackendConfiguration().fileBasePath;
+    BUG_CHECK(optBasePath.has_value(), "Base path is not set.");
+    auto incrementedbasePath = optBasePath.value();
+    incrementedbasePath.concat("_" + std::to_string(testId));
+    incrementedbasePath.replace_extension(".yml");
+    metadataFile = std::ofstream(incrementedbasePath);
     inja::render_to(metadataFile, testCase, dataJson);
     metadataFile.flush();
 }
 
 void Metadata::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
                           float currentCoverage) {
-    auto incrementedbasePath = basePath;
-    incrementedbasePath.concat("_" + std::to_string(testId));
-    incrementedbasePath.replace_extension(".yml");
-    metadataFile = std::ofstream(incrementedbasePath);
     std::string testCase = getTestCaseTemplate();
     emitTestcase(testSpec, selectedBranches, testId, testCase, currentCoverage);
 }

@@ -61,9 +61,9 @@ const PnaDpdkProgramInfo *PnaDpdkTestgenTarget::produceProgramInfoImpl(
 }
 
 PnaTestBackend *PnaDpdkTestgenTarget::getTestBackendImpl(
-    const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-    const std::filesystem::path &testPath) const {
-    return new PnaTestBackend(programInfo, symbex, testPath);
+    const ProgramInfo &programInfo, const TestBackendConfiguration &testBackendConfiguration,
+    SymbolicExecutor &symbex) const {
+    return new PnaTestBackend(programInfo, testBackendConfiguration, symbex);
 }
 
 PnaDpdkCmdStepper *PnaDpdkTestgenTarget::getCmdStepperImpl(ExecutionState &state,

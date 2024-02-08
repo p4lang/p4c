@@ -6,6 +6,7 @@
 
 namespace Test {
 
+using TestBackendConfiguration = P4Tools::P4Testgen::TestBackendConfiguration;
 using Packet = P4Tools::P4Testgen::Packet;
 using ActionArg = P4Tools::P4Testgen::ActionArg;
 using ActionCall = P4Tools::P4Testgen::ActionCall;
