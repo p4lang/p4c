@@ -4,11 +4,11 @@
 #include "ir/ir.h"
 #include "ir/irutils.h"
 
+namespace P4Tools {
+
 /// Defines accessors and utility functions for state that is managed by the control plane.
 /// This class can be extended by targets to customize initialization behavior and add
 /// target-specific utility functions.
-namespace P4Tools {
-
 namespace ControlPlaneState {
 
 /// @returns the symbolic boolean variable describing whether a table is configured by the
@@ -20,18 +20,22 @@ const IR::SymbolicVariable *getTableActive(cstring tableName);
 const IR::SymbolicVariable *getTableKey(cstring tableName, cstring keyFieldName,
                                         const IR::Type *type);
 
-/// @returns the symbolic variable describing a table ternary mask.
+/// @returns the symbolic variable representing the mask for a table ternary match.
+/// The symbolic mask may be applied to the left and right-hand side of a key match
+/// (|x| & |mask|== |y| & |mask|).
 /// The table and field name are needed to generate a unique variable.
 const IR::SymbolicVariable *getTableTernaryMask(cstring tableName, cstring keyFieldName,
                                                 const IR::Type *type);
 
 /// @returns the symbolic variable describing a table LPM prefix match.
+/// The symbolic prefix may be applied to the left and right-hand side of a key match
+/// (|x| << |lpm_prefix| == |y| << |lpm_prefix|).
 /// The table and field name are needed to generate a unique variable.
 const IR::SymbolicVariable *getTableMatchLpmPrefix(cstring tableName, cstring keyFieldName,
                                                    const IR::Type *type);
 
 /// @returns the symbolic variable describing an action argument as part of a match-action call. The
-/// table and action name are needed to generate a unique variable.
+/// table, action and argument name are needed to generate a unique variable.
 const IR::SymbolicVariable *getTableActionArgument(cstring tableName, cstring actionName,
                                                    cstring parameterName, const IR::Type *type);
 
@@ -46,9 +50,13 @@ namespace Bmv2ControlPlaneState {
 /// is active in the program.
 const IR::SymbolicVariable *getCloneActive();
 
-/// @returns the symbolic session id variable.
-const IR::SymbolicVariable *getSessionId(const IR::Type *type);
+/// @returns the symbolic clone session id variable.
+/// See also https://p4.org/p4-spec/p4runtime/main/P4Runtime-Spec.html#sec-clonesessionentry
+const IR::SymbolicVariable *getCloneSessionId(const IR::Type *type);
 
+/// @returns the symbolic variable describing a table Range match.
+/// The table and field name are needed to generate a unique variable.
+/// See also https://github.com/p4lang/behavioral-model/blob/main/docs/simple_switch.md#range-tables
 std::pair<const IR::SymbolicVariable *, const IR::SymbolicVariable *> getTableRange(
     cstring tableName, cstring keyFieldName, const IR::Type *type);
 
