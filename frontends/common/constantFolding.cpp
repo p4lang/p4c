@@ -87,6 +87,7 @@ const IR::Expression *DoConstantFolding::getConstant(const IR::Expression *expr)
 }
 
 const IR::Node *DoConstantFolding::postorder(IR::PathExpression *e) {
+    if (auto *r = policy->hook(*this, e)) return r;
     if (refMap == nullptr || assignmentTarget) return e;
     auto decl = refMap->getDeclaration(e->path);
     if (decl == nullptr) return e;
