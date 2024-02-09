@@ -368,6 +368,14 @@ TestgenOptions::TestgenOptions()
         "List of the selected branches which should be chosen for selection.");
 
     registerOption(
+        "--test-name", "testBaseName",
+        [this](const char *arg) {
+            testBaseName = arg;
+            return true;
+        },
+        "The base name of the tests which are generated.");
+
+    registerOption(
         "--disable-assumption-mode", nullptr,
         [this](const char * /*arg*/) {
             enforceAssumptions = false;

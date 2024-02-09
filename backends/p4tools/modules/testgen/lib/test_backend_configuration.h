@@ -15,7 +15,7 @@ using OptionalFilePath = std::optional<std::filesystem::path>;
 /// These parameters may influence how tests are generated.
 struct TestBackendConfiguration {
     /// The base name of the test.
-    cstring testName;
+    cstring testBaseName;
 
     /// The maximum number of tests to produce. Defaults to one test.
     int64_t maxTests = 1;
