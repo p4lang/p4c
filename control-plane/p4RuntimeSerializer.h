@@ -17,15 +17,14 @@ limitations under the License.
 #ifndef CONTROL_PLANE_P4RUNTIMESERIALIZER_H_
 #define CONTROL_PLANE_P4RUNTIMESERIALIZER_H_
 
-#include <iosfwd>
-#include <unordered_map>
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wpedantic"
-#include <google/protobuf/text_format.h>
 #include <google/protobuf/util/json_util.h>
 #pragma GCC diagnostic pop
+
+#include <iosfwd>
+#include <unordered_map>
 
 #include "lib/cstring.h"
 
