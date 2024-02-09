@@ -112,7 +112,7 @@ class DoConstantFolding : public Transform {
 
  public:
     DoConstantFolding(const ReferenceMap *refMap, const TypeMap *typeMap, bool warnings = true,
-        ConstantFoldingPolicy *policy = nullptr)
+                      ConstantFoldingPolicy *policy = nullptr)
         : refMap(refMap), typeMap(typeMap), typesKnown(typeMap != nullptr), warnings(warnings) {
         if (policy) {
             this->policy = policy;
@@ -174,8 +174,7 @@ class DoConstantFolding : public Transform {
 class ConstantFolding : public PassManager {
  public:
     ConstantFolding(ReferenceMap *refMap, TypeMap *typeMap, bool warnings = true,
-                    TypeChecking *typeChecking = nullptr,
-                    ConstantFoldingPolicy *policy = nullptr) {
+                    TypeChecking *typeChecking = nullptr, ConstantFoldingPolicy *policy = nullptr) {
         if (typeMap != nullptr) {
             if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
             passes.push_back(typeChecking);

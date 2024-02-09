@@ -23,7 +23,7 @@ limitations under the License.
 
 namespace P4 {
 
-class ConstantFoldingPolicy; // forward declare to avoid having to include
+class ConstantFoldingPolicy;  // forward declare to avoid having to include
 
 /// A customization point for frotend. The each tool can provide their own implementation of the
 /// policy that customazes its behaviour, or use instance of this class directly to provide the
@@ -50,7 +50,9 @@ class FrontEndPolicy {
     /// etc.).
     /// @returns default to enabled optimizations unless -O0 was given in the options (i.e. enabled
     /// unless options.optimizationLevel == 0).
-    virtual bool optimize(const CompilerOptions &options) const { return options.optimizationLevel > 0; }
+    virtual bool optimize(const CompilerOptions &options) const {
+        return options.optimizationLevel > 0;
+    }
 
     /// Get policy for the constant folding pass. @see ConstantFoldingPolicy
     /// @returns Defaults to nullptr, which causes constant folding to use the default policy, which
