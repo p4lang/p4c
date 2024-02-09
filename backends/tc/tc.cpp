@@ -55,7 +55,8 @@ int main(int argc, char *const argv[]) {
     try {
         P4::P4COptionPragmaParser optionsPragmaParser;
         program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
-        P4::FrontEnd frontend(hook);
+        P4::FrontEnd frontend;
+        frontend.addDebugHook(hook);
         program = frontend.run(options, program);
     } catch (const Util::P4CExceptionBase &bug) {
         std::cerr << bug.what() << std::endl;
