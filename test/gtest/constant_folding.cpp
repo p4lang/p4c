@@ -69,26 +69,30 @@ const IR::StructField *getStructField(const IR::P4Program *program, cstring stru
     return nullptr;
 }
 
-std::string constantFoldFilterCode = P4_SOURCE(R"(
-const bit<16> CONST_1 = 3;
-const bit<16> CONST_2 = 4;
+const std::string constantFoldFilterCode() {
+    static const std::string code = P4_SOURCE(R"(
+    const bit<16> CONST_1 = 3;
+    const bit<16> CONST_2 = 4;
 
-header my_hdr_t {
-    bit<16>   field;
-}
+    header my_hdr_t {
+        bit<16>   field;
+    }
 
-struct my_hdr_stack_1_t {
-    my_hdr_t[CONST_1]    hdr;
-}
+    struct my_hdr_stack_1_t {
+        my_hdr_t[CONST_1]    hdr;
+    }
 
-struct my_hdr_stack_2_t {
-    my_hdr_t[CONST_2]    hdr;
+    struct my_hdr_stack_2_t {
+        my_hdr_t[CONST_2]    hdr;
+    }
+    )");
+
+    return code;
 }
-)");
 
 // Constant folding without any filter
 TEST_F(P4CConstantFoldingValidation, no_filter) {
-    auto *program = parseAndProcess(constantFoldFilterCode)->to<IR::P4Program>();
+    auto *program = parseAndProcess(constantFoldFilterCode())->to<IR::P4Program>();
     ASSERT_TRUE(program);
 
     // my_hdr_stack_1_t.hdr should be a Constant
@@ -109,7 +113,7 @@ TEST_F(P4CConstantFoldingValidation, filter) {
     // Add a filter to skip processing of some structs
     P4::ConstantFolding::setFilterHook(ConstantFoldFilter());
 
-    auto *program = parseAndProcess(constantFoldFilterCode)->to<IR::P4Program>();
+    auto *program = parseAndProcess(constantFoldFilterCode())->to<IR::P4Program>();
     ASSERT_TRUE(program);
 
     // my_hdr_stack_1_t.hdr should be a PathExpression, *not* a Constant
