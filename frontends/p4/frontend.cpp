@@ -149,7 +149,7 @@ class SetStrictStruct : public NoVisit {
 
 // TODO: remove skipSideEffectOrdering flag
 const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4Program *program,
-                                   bool skipSideEffectOrdering, std::ostream *outStream) {
+                                   std::ostream *outStream) {
     if (program == nullptr && options.listFrontendPasses == 0) return nullptr;
 
     bool isv1 = options.isv1();
@@ -157,11 +157,16 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     TypeMap typeMap;
     refMap.setIsV1(isv1);
 
+    ParseAnnotations *parseAnnotations = policy->getParseAnnotations();
+    if (!parseAnnotations) parseAnnotations = new ParseAnnotations();
+
+    ConstantFoldingPolicy *constantFoldingPolicy = policy->getConstantFoldingPolicy();
+
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     PassManager passes({
         new P4V1::getV1ModelVersion,
         // Parse annotations
-        new ParseAnnotationBodies(&parseAnnotations, &typeMap),
+        new ParseAnnotationBodies(parseAnnotations, &typeMap),
         new PrettyPrint(options),
         // Simple checks on parsed program
         new ValidateParsedProgram(),
@@ -170,7 +175,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new ResolveReferences(&refMap, /* checkShadow */ true),
         // First pass of constant folding, before types are known --
         // may be needed to compute types.
-        new ConstantFolding(&refMap, nullptr),
+        new ConstantFolding(&refMap, nullptr, constantFoldingPolicy),
         // Desugars direct parser and control applications
         // into instantiations followed by application
         new InstantiateDirectCalls(&refMap),
@@ -202,7 +207,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new StructInitializers(&refMap, &typeMap),
         new TableKeyNames(&refMap, &typeMap),
         new PassRepeated({
-            new ConstantFolding(&refMap, &typeMap),
+            new ConstantFolding(&refMap, &typeMap, constantFoldingPolicy),
             new StrengthReduction(&refMap, &typeMap),
             new Reassociation(),
             new UselessCasts(&refMap, &typeMap),
@@ -216,7 +221,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new UniqueNames(&refMap),  // Give each local declaration a unique internal name
         new MoveDeclarations(),    // Move all local declarations to the beginning
         new MoveInitializers(&refMap),
-        new SideEffectOrdering(&refMap, &typeMap, skipSideEffectOrdering),
+        new SideEffectOrdering(&refMap, &typeMap, policy->skipSideEffectOrdering()),
         new SimplifyControlFlow(&refMap, &typeMap),
         new SimplifySwitch(&refMap, &typeMap),
         new MoveDeclarations(),  // Move all local declarations to the beginning
@@ -233,7 +238,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new ClearTypeMap(&typeMap),
         evaluator,
     });
-    if (options.optimizationLevel > 0)
+    if (policy->optimize(options))
         passes.addPasses({
             new Inline(&refMap, &typeMap, evaluator, options.optimizeParserInlining),
             new InlineActions(&refMap, &typeMap),
