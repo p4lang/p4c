@@ -1423,6 +1423,59 @@ TEST_F(P4Runtime, Documentation) {
     }
 }
 
+TEST_F(P4Runtime, JsonSerializationPrintOptions) {
+    auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
+        struct Headers { }
+        struct Metadata { }
+        parser parse(packet_in p, out Headers h, inout Metadata m,
+                     inout standard_metadata_t sm) {
+            state start { transition accept; } }
+        control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control egress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) { apply { } }
+        control computeChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control deparse(packet_out p, in Headers h) { apply { } }
+
+        control ingress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) {
+            action noop() { }
+
+            action drop() { mark_to_drop(sm); }
+
+            table t {
+                key = { sm.ingress_port : exact; }
+                actions = { noop; drop; }
+                default_action = noop;
+            }
+
+            apply {
+                t.apply();
+            }
+        }
+
+        V1Switch(parse(), verifyChecksum(), ingress(), egress(),
+                 computeChecksum(), deparse()) main;
+    )"));
+
+    ASSERT_TRUE(test);
+    EXPECT_EQ(0U, ::diagnosticCount());
+
+    {
+        // Default options: expect whitespace
+        std::ostringstream json_output;
+        test->serializeP4InfoTo(&json_output, P4::P4RuntimeFormat::JSON);
+        EXPECT_NE(json_output.str().find(' '), std::string::npos);
+    }
+
+    {
+        // Disable adding whitespace: json should not contain whitespace
+        std::ostringstream json_output;
+        test->jsonPrintOptions.add_whitespace = false;
+        test->serializeP4InfoTo(&json_output, P4::P4RuntimeFormat::JSON);
+        EXPECT_EQ(json_output.str().find(' '), std::string::npos);
+    }
+}
+
 class P4RuntimePkgInfo : public P4CTest {
  protected:
     static std::optional<P4::P4RuntimeAPI> createTestCase(const char *annotations);

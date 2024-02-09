@@ -101,6 +101,7 @@ static std::optional<cstring> explicitNameAnnotation(const IR::IAnnotated *item)
 namespace writers {
 
 using google::protobuf::Message;
+using google::protobuf::util::JsonPrintOptions;
 
 /// Serialize the protobuf @message to @destination in the binary protocol
 /// buffers format.
@@ -113,13 +114,10 @@ static bool writeTo(const Message &message, std::ostream *destination) {
 
 /// Serialize the protobuf @message to @destination in the JSON protocol buffers
 /// format. This is intended for debugging and testing.
-static bool writeJsonTo(const Message &message, std::ostream *destination) {
+static bool writeJsonTo(const Message &message, std::ostream *destination,
+                        const JsonPrintOptions &options) {
     using namespace google::protobuf::util;
     CHECK_NULL(destination);
-
-    // Serialize the JSON in a human-readable format.
-    JsonPrintOptions options;
-    options.add_whitespace = true;
 
     std::string output;
     if (!MessageToJsonString(message, &output, options).ok()) {
@@ -1413,7 +1411,7 @@ class P4RuntimeEntriesConverter {
 
     auto *p4Info = analyzer.getP4Info();
     auto *p4Entries = entriesConverter.getEntries();
-    return P4RuntimeAPI{p4Info, p4Entries};
+    return P4RuntimeAPI{p4Info, p4Entries, archHandler->getJsonPrintOptions()};
 }
 
 }  // namespace ControlPlaneAPI
@@ -1464,7 +1462,7 @@ void P4RuntimeAPI::serializeP4InfoTo(std::ostream *destination, P4RuntimeFormat 
             success = writers::writeTo(*p4Info, destination);
             break;
         case P4RuntimeFormat::JSON:
-            success = writers::writeJsonTo(*p4Info, destination);
+            success = writers::writeJsonTo(*p4Info, destination, jsonPrintOptions);
             break;
         case P4RuntimeFormat::TEXT_PROTOBUF:
         case P4RuntimeFormat::TEXT:
@@ -1484,7 +1482,7 @@ void P4RuntimeAPI::serializeEntriesTo(std::ostream *destination, P4RuntimeFormat
             success = writers::writeTo(*entries, destination);
             break;
         case P4RuntimeFormat::JSON:
-            success = writers::writeJsonTo(*entries, destination);
+            success = writers::writeJsonTo(*entries, destination, jsonPrintOptions);
             break;
         case P4RuntimeFormat::TEXT_PROTOBUF:
         case P4RuntimeFormat::TEXT:

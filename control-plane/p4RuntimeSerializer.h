@@ -20,6 +20,13 @@ limitations under the License.
 #include <iosfwd>
 #include <unordered_map>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wpedantic"
+#include <google/protobuf/text_format.h>
+#include <google/protobuf/util/json_util.h>
+#pragma GCC diagnostic pop
+
 #include "lib/cstring.h"
 
 namespace p4 {
@@ -60,6 +67,18 @@ struct P4RuntimeAPI {
     /// All static table entries as one P4Runtime WriteRequest object. Never
     /// null.
     const ::p4::v1::WriteRequest *entries;
+
+    // Print options to use while outputting JSON.
+    google::protobuf::util::JsonPrintOptions jsonPrintOptions;
+
+    P4RuntimeAPI(const ::p4::config::v1::P4Info *p4Info, const ::p4::v1::WriteRequest *entries)
+        : p4Info(p4Info), entries(entries) {
+        jsonPrintOptions.add_whitespace = true;
+    }
+
+    P4RuntimeAPI(const ::p4::config::v1::P4Info *p4Info, const ::p4::v1::WriteRequest *entries,
+                 google::protobuf::util::JsonPrintOptions jsonPrintOptions)
+        : p4Info(p4Info), entries(entries), jsonPrintOptions(jsonPrintOptions) {}
 };
 
 namespace ControlPlaneAPI {

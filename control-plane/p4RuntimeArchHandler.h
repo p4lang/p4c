@@ -23,6 +23,8 @@ limitations under the License.
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wpedantic"
+#include <google/protobuf/util/json_util.h>
+
 #include "p4/config/v1/p4info.pb.h"
 #include "p4/v1/p4runtime.pb.h"
 #pragma GCC diagnostic pop
@@ -184,6 +186,9 @@ class P4RuntimeArchHandlerIface {
                                   const IR::ExternBlock *externBlock) = 0;
     /// called when processing annotations via setPreamble
     virtual bool filterAnnotations(cstring anno) = 0;
+
+    /// Control how JSON is output
+    virtual google::protobuf::util::JsonPrintOptions getJsonPrintOptions() = 0;
 };
 
 /// A functor interface that needs to be implemented for each
