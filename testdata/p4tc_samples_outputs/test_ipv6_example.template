@@ -14,5 +14,5 @@ $TC p4template create table/test_ipv6_example/MainControlImpl/tbl_default \
 	type exact \
 	keysz 128 nummasks 8 tentries 100 \
 	table_acts act name test_ipv6_example/MainControlImpl/set_dst
-$TC p4template update table/test_ipv6_example/MainControlImpl/tbl_default default_miss_action action test_ipv6_example/MainControlImpl/set_dst
+$TC p4template update table/test_ipv6_example/MainControlImpl/tbl_default default_miss_action action test_ipv6_example/MainControlImpl/set_dst param addr6 0xffff111122223333444455556666aaaa
 $TC p4template update pipeline/test_ipv6_example state ready

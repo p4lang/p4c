@@ -17,6 +17,7 @@ struct MainControlImpl_set_ct_options_key_mask {
 #define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_MAINCONTROLIMPL_TCP_SYN_PACKET 1
 #define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_MAINCONTROLIMPL_TCP_FIN_OR_RST_PACKET 2
 #define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_MAINCONTROLIMPL_TCP_OTHER_PACKETS 3
+#define MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_set_ct_options_value {
     unsigned int action;
     __u32 priority;
@@ -96,8 +97,10 @@ if (/* hdr->ipv4.isValid() */
                                 {
                                 }
                                 break;
-                            default:
-                                return TC_ACT_SHOT;
+                            case MAINCONTROLIMPL_SET_CT_OPTIONS_ACT_NOACTION: 
+                                {
+                                }
+                                break;
                         }
                     } else {
                     }

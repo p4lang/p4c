@@ -160,7 +160,6 @@ class EBPFTablePNA : public EBPF::EBPFTablePSA {
     void emitAction(EBPF::CodeBuilder *builder, cstring valueName,
                     cstring actionRunVariable) override;
     void emitValueActionIDNames(EBPF::CodeBuilder *builder) override;
-    void emitDefaultAction(EBPF::CodeBuilder *builder, cstring valueName);
     cstring p4ActionToActionIDName(const IR::P4Action *action) const;
 
     DECLARE_TYPEINFO(EBPFTablePNA, EBPF::EBPFTablePSA);

@@ -16,6 +16,7 @@ struct __attribute__((__packed__)) MainControlImpl_calculate_key {
 #define MAINCONTROLIMPL_CALCULATE_ACT_MAINCONTROLIMPL_OPERATION_OR 4
 #define MAINCONTROLIMPL_CALCULATE_ACT_MAINCONTROLIMPL_OPERATION_XOR 5
 #define MAINCONTROLIMPL_CALCULATE_ACT_MAINCONTROLIMPL_OPERATION_DROP 6
+#define MAINCONTROLIMPL_CALCULATE_ACT_NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_calculate_value {
     unsigned int action;
     union {
@@ -149,12 +150,12 @@ if (/* hdr->p4calc.isValid() */
                                     drop_packet();
                                 }
                                 break;
-                            default:
-                                return TC_ACT_SHOT;
+                            case MAINCONTROLIMPL_CALCULATE_ACT_NOACTION: 
+                                {
+                                }
+                                break;
                         }
                     } else {
-/* drop_packet() */
-                        drop_packet();
                     }
                 }
 ;            }

@@ -860,10 +860,13 @@ void EBPFTablePNA::emitAction(EBPF::CodeBuilder *builder, cstring valueName,
     builder->emitIndent();
     builder->appendFormat("switch (%s->action) ", valueName.c_str());
     builder->blockStart();
+    bool noActionGenerated = false;
 
     for (auto a : actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->checkedTo<IR::P4Action>();
+        if (action->name.originalName == P4::P4CoreLibrary::instance().noAction.name)
+            noActionGenerated = true;
         cstring name = EBPF::EBPFObject::externalName(action), msgStr, convStr;
         builder->emitIndent();
         cstring actionName = p4ActionToActionIDName(action);
@@ -903,16 +906,22 @@ void EBPFTablePNA::emitAction(EBPF::CodeBuilder *builder, cstring valueName,
         builder->appendLine("break;");
         builder->decreaseIndent();
     }
-
-    builder->emitIndent();
-    builder->appendLine("default:");
-    builder->increaseIndent();
-    builder->target->emitTraceMessage(builder, "Control: Invalid action type, aborting");
-
-    builder->emitIndent();
-    builder->appendFormat("return %s", builder->target->abortReturnCode().c_str());
-    builder->endOfStatement(true);
-    builder->decreaseIndent();
+    if (!noActionGenerated) {
+        cstring noActionName = P4::P4CoreLibrary::instance().noAction.name;
+        cstring tableInstance = dataMapName;
+        cstring actionName =
+            Util::printf_format("%s_ACT_%s", tableInstance.toUpper(), noActionName.toUpper());
+        builder->emitIndent();
+        builder->appendFormat("case %s: ", actionName);
+        builder->newline();
+        builder->increaseIndent();
+        builder->emitIndent();
+        builder->blockStart();
+        builder->blockEnd(true);
+        builder->emitIndent();
+        builder->appendLine("break;");
+        builder->decreaseIndent();
+    }
 
     builder->blockEnd(true);
 
@@ -924,13 +933,8 @@ void EBPFTablePNA::emitAction(EBPF::CodeBuilder *builder, cstring valueName,
 
     builder->blockEnd(false);
     builder->appendFormat(" else ");
-    if (dropOnNoMatchingEntryFound()) {
-        builder->target->emitTraceMessage(builder, "Control: Entry not found, aborting");
-        emitDefaultAction(builder, valueName);
-    } else {
-        builder->target->emitTraceMessage(builder,
-                                          "Control: Entry not found, executing implicit NoAction");
-    }
+    builder->blockStart();
+    builder->blockEnd(true);
 }
 
 void EBPFTablePNA::emitInitializer(EBPF::CodeBuilder *builder) {
@@ -953,44 +957,28 @@ void EBPFTablePNA::emitDefaultActionStruct(EBPF::CodeBuilder *builder) {
     }
 }
 
-void EBPFTablePNA::emitDefaultAction(EBPF::CodeBuilder *builder, cstring valueName) {
-    const IR::P4Table *t = table->container;
-    const IR::Expression *default_action = t->getDefaultAction();
-    bool visitDefaultAction = false;
-    if (default_action) {
-        if (auto mc = default_action->to<IR::MethodCallExpression>()) {
-            default_action = mc->method;
-        }
-        auto path = default_action->to<IR::PathExpression>();
-        BUG_CHECK(path, "Default action path %1% cannot be found", default_action);
-        if (auto defaultActionDecl =
-                program->refMap->getDeclaration(path->path)->to<IR::P4Action>()) {
-            if (defaultActionDecl->name.originalName != "NoAction") {
-                visitDefaultAction = true;
-                auto visitor = createActionTranslationVisitor(valueName, program);
-                visitor->setBuilder(builder);
-                visitor->copySubstitutions(codeGen);
-                visitor->copyPointerVariables(codeGen);
-                defaultActionDecl->apply(*visitor);
-                builder->newline();
-            }
-        }
-    }
-    if (visitDefaultAction == false) {
-        builder->blockStart();
-        builder->blockEnd(true);
-    }
-}
-
 void EBPFTablePNA::emitValueActionIDNames(EBPF::CodeBuilder *builder) {
     // create type definition for action
     builder->emitIndent();
+    bool noActionGenerated = false;
     for (auto a : actionList->actionList) {
         auto adecl = program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->checkedTo<IR::P4Action>();
+        if (action->name.originalName == P4::P4CoreLibrary::instance().noAction.name)
+            noActionGenerated = true;
         unsigned int action_idx = tcIR->getActionId(tcIR->externalName(action));
         builder->emitIndent();
         builder->appendFormat("#define %s %d", p4ActionToActionIDName(action), action_idx);
+        builder->newline();
+    }
+    if (!noActionGenerated) {
+        cstring noActionName = P4::P4CoreLibrary::instance().noAction.name;
+        cstring tableInstance = dataMapName;
+        cstring actionName =
+            Util::printf_format("%s_ACT_%s", tableInstance.toUpper(), noActionName.toUpper());
+        unsigned int action_idx = tcIR->getActionId(noActionName);
+        builder->emitIndent();
+        builder->appendFormat("#define %s %d", actionName, action_idx);
         builder->newline();
     }
     builder->emitIndent();

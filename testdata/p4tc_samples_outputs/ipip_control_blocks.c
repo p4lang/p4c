@@ -13,6 +13,7 @@ struct __attribute__((__packed__)) Main_fwd_table_key {
 #define MAIN_FWD_TABLE_ACT_MAIN_SET_IPIP 1
 #define MAIN_FWD_TABLE_ACT_MAIN_SET_NH 2
 #define MAIN_FWD_TABLE_ACT_MAIN_DROP 3
+#define MAIN_FWD_TABLE_ACT_NOACTION 0
 struct __attribute__((__packed__)) Main_fwd_table_value {
     unsigned int action;
     union {
@@ -107,12 +108,12 @@ if (/* hdr->outer.isValid() */
                                     drop_packet();
                                 }
                                 break;
-                            default:
-                                return TC_ACT_SHOT;
+                            case MAIN_FWD_TABLE_ACT_NOACTION: 
+                                {
+                                }
+                                break;
                         }
                     } else {
-/* drop_packet() */
-                        drop_packet();
                     }
                 }
 ;
