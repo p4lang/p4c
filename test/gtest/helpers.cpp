@@ -155,7 +155,8 @@ struct FrontEndAnnoPolicy : P4::FrontEndPolicy {
 
     /// Pass given ParseAnnotations instance to frontend. The parameter can be null to indicate to
     /// use the default.
-    explicit FrontEndAnnoPolicy(P4::ParseAnnotations *parseAnnotations) : parseAnnotations(parseAnnotations) {}
+    explicit FrontEndAnnoPolicy(P4::ParseAnnotations *parseAnnotations)
+        : parseAnnotations(parseAnnotations) {}
 
     P4::ParseAnnotations *getParseAnnotations() const override { return parseAnnotations; }
 };
