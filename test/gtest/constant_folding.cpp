@@ -29,7 +29,7 @@ struct P4CFrontend : P4CTest {
 };
 
 struct P4CConstantFoldingValidation : P4CFrontend {
-    P4CConstantFoldingValidation () {
+    P4CConstantFoldingValidation() {
         addPasses({
             new P4::ResolveReferences(&refMap),
             new P4::ConstantFolding(&refMap, nullptr),
@@ -44,13 +44,13 @@ struct P4CConstantFoldingValidation : P4CFrontend {
  */
 class ConstantFoldFilter {
  public:
-     const IR::Expression *operator()(Visitor *v, const IR::Expression *e) {
-         auto ts = v->findContext<IR::Type_Struct>();
-         if (ts && ts->name == "my_hdr_stack_1_t") {
-             return e;
-         }
-         return nullptr;
-     }
+    const IR::Expression *operator()(Visitor *v, const IR::Expression *e) {
+        auto ts = v->findContext<IR::Type_Struct>();
+        if (ts && ts->name == "my_hdr_stack_1_t") {
+            return e;
+        }
+        return nullptr;
+    }
 };
 
 const IR::StructField *getStructField(const IR::P4Program *program, cstring struct_name,
@@ -88,7 +88,7 @@ struct my_hdr_stack_2_t {
 
 // Constant folding without any filter
 TEST_F(P4CConstantFoldingValidation, no_filter) {
-    auto *program = parseAndProcess(constantFoldFilterCode)->to<IR::P4Program>();;
+    auto *program = parseAndProcess(constantFoldFilterCode)->to<IR::P4Program>();
     ASSERT_TRUE(program);
 
     // my_hdr_stack_1_t.hdr should be a Constant
@@ -102,7 +102,6 @@ TEST_F(P4CConstantFoldingValidation, no_filter) {
     ASSERT_TRUE(sf_2);
     auto *ts_2 = sf_2->type->to<IR::Type_Stack>();
     ASSERT_TRUE(ts_2->size->is<IR::Constant>());
-
 }
 
 // Constant folding with filtering active
@@ -110,10 +109,10 @@ TEST_F(P4CConstantFoldingValidation, filter) {
     // Add a filter to skip processing of some structs
     P4::ConstantFolding::setFilterHook(ConstantFoldFilter());
 
-    auto *program = parseAndProcess(constantFoldFilterCode)->to<IR::P4Program>();;
+    auto *program = parseAndProcess(constantFoldFilterCode)->to<IR::P4Program>();
     ASSERT_TRUE(program);
 
-    // my_hdr_stack_1_t.hdr should be a Constant
+    // my_hdr_stack_1_t.hdr should be a PathExpression, *not* a Constant
     auto *sf_1 = getStructField(program, "my_hdr_stack_1_t", "hdr");
     ASSERT_TRUE(sf_1);
     auto *ts_1 = sf_1->type->to<IR::Type_Stack>();
