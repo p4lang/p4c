@@ -76,14 +76,14 @@ std::optional<P4::P4RuntimeAPI> createP4RuntimeTestCase(
     const std::string &source,
     CompilerOptions::FrontendVersion langVersion = FrontendTestCase::defaultVersion,
     const cstring arch = defaultArch,
-    P4::ParseAnnotations parseAnnotations = P4::ParseAnnotations()) {
+    P4::ParseAnnotations *parseAnnotations = new P4::ParseAnnotations()) {
     auto frontendTestCase = FrontendTestCase::create(source, langVersion, parseAnnotations);
     if (!frontendTestCase) return std::nullopt;
     return P4::generateP4Runtime(frontendTestCase->program, arch);
 }
 
 std::optional<P4::P4RuntimeAPI> createP4RuntimeTestCase(const std::string &source,
-                                                        P4::ParseAnnotations parseAnnotations) {
+                                                        P4::ParseAnnotations *parseAnnotations) {
     return createP4RuntimeTestCase(source, FrontendTestCase::defaultVersion, defaultArch,
                                    parseAnnotations);
 }
@@ -1251,7 +1251,7 @@ TEST_F(P4Runtime, ValueSet) {
         V1Switch(parse(), verifyChecksum(), ingress(), egress(),
                  computeChecksum(), deparse()) main;
     )"),
-                                        ParseAnnotations());
+                                        new ParseAnnotations());
 
     ASSERT_TRUE(test);
     EXPECT_EQ(0U, ::diagnosticCount());
@@ -1312,7 +1312,7 @@ TEST_F(P4Runtime, Register) {
         V1Switch(parse(), verifyChecksum(), ingress(), egress(),
                  computeChecksum(), deparse()) main;
     )"),
-                                        ParseAnnotations());
+                                        new ParseAnnotations());
 
     ASSERT_TRUE(test);
     EXPECT_EQ(0U, ::diagnosticCount());

@@ -117,10 +117,10 @@ struct FrontendTestCase {
     /// Create a test case that only requires the frontend to run.
     static std::optional<FrontendTestCase> create(
         const std::string &source, CompilerOptions::FrontendVersion langVersion = defaultVersion,
-        const P4::ParseAnnotations &parseAnnotations = P4::ParseAnnotations());
+        P4::ParseAnnotations *parseAnnotations = nullptr);
 
     static std::optional<FrontendTestCase> create(const std::string &source,
-                                                  const P4::ParseAnnotations &parseAnnotations) {
+                                                  P4::ParseAnnotations *parseAnnotations) {
         return create(source, defaultVersion, parseAnnotations);
     }
 
