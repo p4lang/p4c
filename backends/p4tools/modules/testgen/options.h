@@ -70,6 +70,9 @@ class TestgenOptions : public AbstractP4cToolOptions {
     /// TestGen will consider these when choosing input and output ports.
     std::vector<std::pair<int, int>> permittedPortRanges;
 
+    /// Skip generating a control plane entry for the entities in this list.
+    std::set<cstring> skippedControlPlaneEntities;
+
     /// Enforces the test generation of tests with mandatory output packet.
     bool outputPacketOnly = false;
 
