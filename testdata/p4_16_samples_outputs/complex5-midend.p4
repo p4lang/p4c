@@ -7,14 +7,14 @@ control c(inout bit<32> r) {
     @hidden action complex5l15() {
         r = 32w2;
     }
-    @hidden action act() {
+    @hidden action complex5l12() {
         tmp = f(32w2);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_complex5l12 {
         actions = {
-            act();
+            complex5l12();
         }
-        const default_action = act();
+        const default_action = complex5l12();
     }
     @hidden table tbl_complex5l13 {
         actions = {
@@ -29,7 +29,7 @@ control c(inout bit<32> r) {
         const default_action = complex5l15();
     }
     apply {
-        tbl_act.apply();
+        tbl_complex5l12.apply();
         if (tmp > 32w0) {
             tbl_complex5l13.apply();
         } else {

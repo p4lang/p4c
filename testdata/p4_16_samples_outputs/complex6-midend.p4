@@ -8,26 +8,26 @@ control c(inout bit<32> r) {
     @hidden action complex6l16() {
         r = 32w3;
     }
-    @hidden action act() {
+    @hidden action complex6l13() {
         tmp_1 = f(32w2);
     }
     @hidden action complex6l18() {
         r = 32w2;
     }
-    @hidden action act_0() {
+    @hidden action complex6l12() {
         tmp = f(32w2);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_complex6l12 {
         actions = {
-            act_0();
+            complex6l12();
         }
-        const default_action = act_0();
+        const default_action = complex6l12();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_complex6l13 {
         actions = {
-            act();
+            complex6l13();
         }
-        const default_action = act();
+        const default_action = complex6l13();
     }
     @hidden table tbl_complex6l14 {
         actions = {
@@ -48,9 +48,9 @@ control c(inout bit<32> r) {
         const default_action = complex6l18();
     }
     apply {
-        tbl_act.apply();
+        tbl_complex6l12.apply();
         if (tmp > 32w0) {
-            tbl_act_0.apply();
+            tbl_complex6l13.apply();
             if (tmp_1 < 32w2) {
                 tbl_complex6l14.apply();
             } else {

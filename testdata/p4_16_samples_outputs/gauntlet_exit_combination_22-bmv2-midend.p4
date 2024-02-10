@@ -42,48 +42,36 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_1();
     }
-    @hidden action act() {
+    @hidden action gauntlet_exit_combination_22bmv2l46() {
         tmp_0 = true;
     }
-    @hidden action act_0() {
+    @hidden action gauntlet_exit_combination_22bmv2l46_0() {
         tmp_0 = false;
     }
-    @hidden action gauntlet_exit_combination_22bmv2l46() {
+    @hidden action gauntlet_exit_combination_22bmv2l46_1() {
         tmp_1 = 16w1;
     }
-    @hidden action gauntlet_exit_combination_22bmv2l46_0() {
+    @hidden action gauntlet_exit_combination_22bmv2l46_2() {
         tmp_1 = 16w2;
     }
-    @hidden action gauntlet_exit_combination_22bmv2l46_1() {
+    @hidden action gauntlet_exit_combination_22bmv2l46_3() {
         tmp = tmp_1;
     }
-    @hidden action gauntlet_exit_combination_22bmv2l46_2() {
+    @hidden action gauntlet_exit_combination_22bmv2l46_4() {
         tmp = 16w3;
     }
-    @hidden action act_1() {
+    @hidden action act() {
         hasExited = false;
     }
-    @hidden action gauntlet_exit_combination_22bmv2l46_3() {
+    @hidden action gauntlet_exit_combination_22bmv2l46_5() {
         h.eth_hdr.eth_type = tmp;
         hasExited = true;
     }
     @hidden table tbl_act {
         actions = {
-            act_1();
-        }
-        const default_action = act_1();
-    }
-    @hidden table tbl_act_0 {
-        actions = {
             act();
         }
         const default_action = act();
-    }
-    @hidden table tbl_act_1 {
-        actions = {
-            act_0();
-        }
-        const default_action = act_0();
     }
     @hidden table tbl_gauntlet_exit_combination_22bmv2l46 {
         actions = {
@@ -115,31 +103,43 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = gauntlet_exit_combination_22bmv2l46_3();
     }
+    @hidden table tbl_gauntlet_exit_combination_22bmv2l46_4 {
+        actions = {
+            gauntlet_exit_combination_22bmv2l46_4();
+        }
+        const default_action = gauntlet_exit_combination_22bmv2l46_4();
+    }
+    @hidden table tbl_gauntlet_exit_combination_22bmv2l46_5 {
+        actions = {
+            gauntlet_exit_combination_22bmv2l46_5();
+        }
+        const default_action = gauntlet_exit_combination_22bmv2l46_5();
+    }
     apply {
         tbl_act.apply();
         if (h.eth_hdr.eth_type == 16w4) {
             if (tbl_0.apply().hit) {
-                tbl_act_0.apply();
+                tbl_gauntlet_exit_combination_22bmv2l46.apply();
             } else {
-                tbl_act_1.apply();
+                tbl_gauntlet_exit_combination_22bmv2l46_0.apply();
             }
             if (hasExited) {
                 ;
             } else {
                 if (tmp_0) {
-                    tbl_gauntlet_exit_combination_22bmv2l46.apply();
+                    tbl_gauntlet_exit_combination_22bmv2l46_1.apply();
                 } else {
-                    tbl_gauntlet_exit_combination_22bmv2l46_0.apply();
+                    tbl_gauntlet_exit_combination_22bmv2l46_2.apply();
                 }
-                tbl_gauntlet_exit_combination_22bmv2l46_1.apply();
+                tbl_gauntlet_exit_combination_22bmv2l46_3.apply();
             }
         } else {
-            tbl_gauntlet_exit_combination_22bmv2l46_2.apply();
+            tbl_gauntlet_exit_combination_22bmv2l46_4.apply();
         }
         if (hasExited) {
             ;
         } else {
-            tbl_gauntlet_exit_combination_22bmv2l46_3.apply();
+            tbl_gauntlet_exit_combination_22bmv2l46_5.apply();
         }
     }
 }

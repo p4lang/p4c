@@ -4,18 +4,18 @@ struct Headers {
 }
 
 control ingress(inout Headers h) {
-    @hidden action act() {
+    @hidden action issue22882l23() {
         h.a = 8w3;
         h.a = 8w3;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue22882l23 {
         actions = {
-            act();
+            issue22882l23();
         }
-        const default_action = act();
+        const default_action = issue22882l23();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue22882l23.apply();
     }
 }
 
