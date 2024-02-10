@@ -22,13 +22,12 @@ gauntlet_infinite_loop.p4(29): [--Wwarn=uninitialized-use] warning: padding.p ma
 gauntlet_infinite_loop.p4(29): [--Wwarn=invalid-header] warning: accessing a field of an invalid header padding
         transition select(padding.p) {
                           ^^^^^^^
-[--Wwarn=uninitialized-use] warning: tmp.nop may be uninitialized
-[--Wwarn=uninitialized-use] warning: tmp.p may be uninitialized
-[--Wwarn=uninitialized-use] warning: tmp_0.p may be uninitialized
-[--Wwarn=uninitialized-use] warning: tmp.nop may be uninitialized
-[--Wwarn=uninitialized-use] warning: tmp.p may be uninitialized
-[--Wwarn=uninitialized-use] warning: tmp_0.p may be uninitialized
-[--Wwarn=invalid-header] warning: accessing a field of an invalid header tmp_0
-[--Wwarn=uninitialized-use] warning: tmp.nop may be uninitialized
-[--Wwarn=uninitialized-use] warning: tmp.p may be uninitialized
-[--Wwarn=uninitialized-use] warning: tmp_0.p may be uninitialized
+gauntlet_infinite_loop.p4(43): [--Wwarn=uninitialized-use] warning: tmp.nop may be uninitialized
+        sub_parser.apply(packet, hdr, hdr.p);
+                                 ^^^
+gauntlet_infinite_loop.p4(43): [--Wwarn=uninitialized-use] warning: tmp_0.p may be uninitialized
+        sub_parser.apply(packet, hdr, hdr.p);
+                                      ^^^^^
+gauntlet_infinite_loop.p4(43): [--Wwarn=invalid-header] warning: accessing a field of an invalid header tmp_0
+        sub_parser.apply(packet, hdr, hdr.p);
+                                      ^^^^^
