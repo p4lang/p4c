@@ -134,10 +134,10 @@ cc_library(
         ":ir_generator_lex",
         ":ir_generator_yacc",
     ],
+    visibility = ["//visibility:private"],
     deps = [
         ":lib",
     ],
-    visibility = ["//visibility:private"],
 )
 
 # The next rule builds the ir-generator tool binary.
@@ -206,6 +206,13 @@ cc_library(
         "backends/dpdk/dbprint-dpdk.cpp",
         "backends/dpdk/printUtils.cpp",
     ],
+    copts = [
+        # Where p4c should look for p4include at runtime.
+        ("-DCONFIG_PKGDATADIR=\\\"external/%s\\\"" % repository_name()),
+        # This will work only if the binary is executed by Bazel. For a general
+        # solution, we would need to make p4c aware of Bazel, specifically:
+        # https://github.com/bazelbuild/bazel/blob/master/tools/cpp/runfiles/runfiles_src.h
+    ],
     textual_hdrs = glob([
         "ir/**/*.h",
         "frontends/**/*.h",
@@ -231,13 +238,6 @@ cc_library(
         "@com_github_p4lang_p4runtime//:p4types_cc_proto",
         "@com_google_protobuf//:protobuf",
     ],
-    copts = [
-        # Where p4c should look for p4include at runtime.
-        ("-DCONFIG_PKGDATADIR=\\\"external/%s\\\"" % repository_name()),
-        # This will work only if the binary is executed by Bazel. For a general
-        # solution, we would need to make p4c aware of Bazel, specifically:
-        # https://github.com/bazelbuild/bazel/blob/master/tools/cpp/runfiles/runfiles_src.h
-    ],
 )
 
 cc_library(
@@ -258,9 +258,9 @@ cc_library(
     ),
     hdrs = glob(["backends/bmv2/simple_switch/*.h"]),
     deps = [
-        ":p4c_bmv2_common_lib",
         ":ir_frontend_midend_control_plane",
         ":lib",
+        ":p4c_bmv2_common_lib",
     ],
 )
 
@@ -278,13 +278,13 @@ cc_binary(
         "backends/bmv2/simple_switch/main.cpp",
         "backends/bmv2/simple_switch/version.h",
     ],
+    data = [":p4include"],
     deps = [
-        ":p4c_bmv2_common_lib",
-        ":p4c_bmv2_simple_lib",
         ":ir_frontend_midend_control_plane",
         ":lib",
+        ":p4c_bmv2_common_lib",
+        ":p4c_bmv2_simple_lib",
     ],
-    data = [":p4include"],
 )
 
 # dpdk backend
@@ -349,14 +349,13 @@ cc_binary(
         "backends/dpdk/main.cpp",
         "backends/dpdk/version.h",
     ],
+    data = [":p4include"],
     deps = [
-        ":p4c_dpdk_lib",
         ":ir_frontend_midend_control_plane",
         ":lib",
+        ":p4c_dpdk_lib",
     ],
-    data = [":p4include"],
 )
-
 
 # This builds the p4test backend.
 cc_binary(
@@ -421,15 +420,15 @@ cc_library(
     name = "p4c_backend_graphs_lib",
     srcs = [
         "backends/graphs/controls.cpp",
-        "backends/graphs/graphs.cpp",
         "backends/graphs/graph_visitor.cpp",
+        "backends/graphs/graphs.cpp",
         "backends/graphs/p4c-graphs.cpp",
         "backends/graphs/parsers.cpp",
     ],
     hdrs = [
         "backends/graphs/controls.h",
-        "backends/graphs/graphs.h",
         "backends/graphs/graph_visitor.h",
+        "backends/graphs/graphs.h",
         "backends/graphs/parsers.h",
         "backends/graphs/version.h",
     ],
