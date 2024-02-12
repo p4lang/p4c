@@ -2,9 +2,12 @@
 #define IR_IRUTILS_H_
 
 #include <vector>
+#include <initializer_list>
 
 #include "lib/big_int_util.h"
 #include "lib/source_file.h"
+
+class Transform;
 
 namespace IR {
 
@@ -14,9 +17,12 @@ class Constant;
 class Expression;
 class BaseListExpression;
 class Literal;
+class Node;
+class StatOrDecl;
 class StructExpression;
 class Type;
 class Type_Bits;
+template<typename T> class IndexedVector;
 
 /// Utility functions for generating IR nodes.
 //
@@ -107,6 +113,27 @@ big_int getMaxBvVal(int bitWidth);
 /// @returns the minimum value that can fit into this type.
 // This is 0 for unsigned and -(2^(t->size - 1)) for signed.
 big_int getMinBvVal(const Type *t);
+
+/// A helper useful when returning multiple statmenets out of a Transform's function that should
+/// return a statement. While an IR::BlockStatement can accept a vector of statements for each of
+/// its child statements, some other places (namely IR::IfStatmenent,
+/// IR::SwitchStatement/IR::SwitchCase) only accept statement. In these case, the visitor will fail
+/// with a BUG if the returned value is not IR::StatOrDecl. Passing the arguments through this
+/// function (or one of its overloads) works around this by wrapping the statements into a
+/// BlockStatement if the parent node cannot accept them directly.
+///
+/// This would be usually used as follows
+/// const IR::Node *preorder(IR::SomeStatement *stmt) {
+///      ...
+///      return IR::inlineBlock(*this, {a, b, c});
+/// }
+///
+/// @returns IR::IndexedVector<IR::StatOrDecl> * containing the values if the parent is
+/// IR::BlockStatement, and IR::BlockStatement * containing the values otherwise. As a special case,
+/// returns the sole statement if there is just one passed to the function.
+const IR::Node *inlineBlock(const Transform &, std::initializer_list<const IR::StatOrDecl *>);
+const IR::Node *inlineBlock(const Transform &, const IR::IndexedVector<IR::StatOrDecl> &);
+const IR::Node *inlineBlock(const Transform &, IR::IndexedVector<IR::StatOrDecl> &&);
 
 }  // namespace IR
 
