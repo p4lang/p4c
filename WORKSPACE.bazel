@@ -1,5 +1,34 @@
 workspace(name = "com_github_p4lang_p4c")
 
+# -- Load Buildifier  -----------------------------------------------------
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+# buildifier is written in Go and hence needs rules_go to be built.
+# See https://github.com/bazelbuild/rules_go for the up to date setup instructions.
+http_archive(
+    name = "io_bazel_rules_go",
+    sha256 = "6dc2da7ab4cf5d7bfc7c949776b1b7c733f05e56edc4bcd9022bb249d2e2a996",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.39.1/rules_go-v0.39.1.zip",
+        "https://github.com/bazelbuild/rules_go/releases/download/v0.39.1/rules_go-v0.39.1.zip",
+    ],
+)
+
+load("@io_bazel_rules_go//go:deps.bzl", "go_rules_dependencies")
+
+go_rules_dependencies()
+
+load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains")
+
+http_archive(
+    name = "com_github_bazelbuild_buildtools",
+    sha256 = "ae34c344514e08c23e90da0e2d6cb700fcd28e80c02e23e4d5715dddcb42f7b3",
+    strip_prefix = "buildtools-4.2.2",
+    urls = [
+        "https://github.com/bazelbuild/buildtools/archive/refs/tags/4.2.2.tar.gz",
+    ],
+)
+
 # -- Direct dependencies. ------------------------------------------------------
 
 load("//:bazel/p4c_deps.bzl", "p4c_deps")
@@ -26,8 +55,8 @@ load("@com_google_googleapis//:repository_rules.bzl", "switched_rules_by_languag
 
 switched_rules_by_language(
     name = "com_google_googleapis_imports",
-    grpc = True,
     cc = True,
+    grpc = True,
 )
 
 load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
