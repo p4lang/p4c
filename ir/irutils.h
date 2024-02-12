@@ -115,13 +115,13 @@ big_int getMaxBvVal(int bitWidth);
 // This is 0 for unsigned and -(2^(t->size - 1)) for signed.
 big_int getMinBvVal(const Type *t);
 
-/// A helper useful when returning multiple statmenets out of a Transform's function that should
+/// A helper useful when returning multiple statemenets out of a Transform's function that should
 /// return a statement. While an IR::BlockStatement can accept a vector of statements for each of
-/// its child statements, some other places (namely IR::IfStatmenent,
-/// IR::SwitchStatement/IR::SwitchCase) only accept statement. In these case, the visitor will fail
-/// with a BUG if the returned value is not IR::StatOrDecl. Passing the arguments through this
-/// function (or one of its overloads) works around this by wrapping the statements into a
-/// BlockStatement if the parent node cannot accept them directly.
+/// its child statements, some other places (namely IR::IfStatmenent, IR::SwitchStatement /
+/// IR::SwitchCase) only accept a statement. In these case, the visitor will fail with a BUG if the
+/// returned value is not IR::StatOrDecl. Passing the arguments through this function (or one of its
+/// overloads) works around this by wrapping the statements into a BlockStatement if the parent node
+/// cannot accept them directly.
 ///
 /// This would be usually used as follows
 /// const IR::Node *preorder(IR::SomeStatement *stmt) {
