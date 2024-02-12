@@ -17,8 +17,8 @@ limitations under the License.
 #include "gtest/gtest.h"
 #include "helpers.h"
 #include "ir/ir.h"
-#include "ir/visitor.h"
 #include "ir/irutils.h"
+#include "ir/visitor.h"
 #include "lib/source_file.h"
 
 namespace Test {
@@ -59,14 +59,11 @@ TEST_F(P4C_IR, InlineBlock) {
     const auto *c2 = new IR::Constant(2);
     const auto *c4 = new IR::Constant(4);
     const auto *pe = new IR::PathExpression(new IR::Path("foo"));
-    const auto *stmt = new IR::BlockStatement(IR::IndexedVector<IR::StatOrDecl>({
-        new IR::AssignmentStatement(pe, c2),
-        new IR::IfStatement(IR::getBoolLiteral(true),
-            new IR::AssignmentStatement(pe, c2),
-            new IR::BlockStatement(IR::IndexedVector<IR::StatOrDecl>({
-                new IR::AssignmentStatement(pe, c2)
-            })))
-    }));
+    const auto *stmt = new IR::BlockStatement(IR::IndexedVector<IR::StatOrDecl>(
+        {new IR::AssignmentStatement(pe, c2),
+         new IR::IfStatement(IR::getBoolLiteral(true), new IR::AssignmentStatement(pe, c2),
+                             new IR::BlockStatement(IR::IndexedVector<IR::StatOrDecl>(
+                                 {new IR::AssignmentStatement(pe, c2)})))}));
 
     const auto *n = stmt->apply(TestTrans(c4));
     ASSERT_TRUE(n);
@@ -80,6 +77,5 @@ TEST_F(P4C_IR, InlineBlock) {
     EXPECT_TRUE(ifs->ifTrue->is<IR::BlockStatement>());
     EXPECT_TRUE(ifs->ifFalse->is<IR::BlockStatement>());
 }
-
 
 }  // namespace Test
