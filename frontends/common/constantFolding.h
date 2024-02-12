@@ -173,6 +173,9 @@ class DoConstantFolding : public Transform {
  */
 class ConstantFolding : public PassManager {
  public:
+    ConstantFolding(ReferenceMap *refMap, TypeMap *typeMap, ConstantFoldingPolicy *policy)
+        : ConstantFolding(refMap, typeMap, true, nullptr, policy) {}
+
     ConstantFolding(ReferenceMap *refMap, TypeMap *typeMap, bool warnings = true,
                     TypeChecking *typeChecking = nullptr, ConstantFoldingPolicy *policy = nullptr) {
         if (typeMap != nullptr) {
