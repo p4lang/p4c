@@ -277,7 +277,10 @@ std::vector<const Expression *> flattenListOrStructExpression(const Expression *
 template <typename Stmts>
 const IR::Node *inlineBlockImpl(const Transform &t, Stmts &&stmts) {
     if (stmts.size() == 1) {
-        return *stmts.begin();
+        // it could also be a declaration, and it that case, we need to wrap it in a block anyway
+        if (auto *stmt = (*stmts.begin())->template to<IR::Statement>()) {
+            return stmt;
+        }
     }
     if (t.getParent<const IR::Node>()->is<IR::BlockStatement>()) {
         return new IR::IndexedVector<IR::StatOrDecl>(std::forward<Stmts>(stmts));
