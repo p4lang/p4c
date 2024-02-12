@@ -45,7 +45,8 @@ void DiscoverActionsInlining::postorder(const IR::MethodCallStatement *mcs) {
 }
 
 Visitor::profile_t ActionsInliner::init_apply(const IR::Node *node) {
-    P4::ResolveReferences solver(refMap, true);
+    P4::ResolveReferences solver(refMap);
+    refMap->clear();
     node->apply(solver);
     LOG2("ActionsInliner " << toInline);
     return Transform::init_apply(node);
