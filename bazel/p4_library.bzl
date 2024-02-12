@@ -25,12 +25,12 @@ def _extract_p4c_inputs(ctx):
     return ctx.files._p4include + ctx.files.deps + [ctx.file.src]
 
 def _run_shell_cmd_with_p4c(ctx, command, **run_shell_kwargs):
-    """Run given shell command using `run_shell` action after setting up
-       the C compiler toolchain.
+    """Run given shell command using the `run_shell` action.
 
-       This function also sets up the `tools` parameter for `run_shell` to
-       set up p4c and the cpp toolchain, and `kwargs` is passed to
-       `run_shell`.
+    This is done after setting up the C compiler toolchain.
+    This function also sets up the `tools` parameter for `run_shell` to
+    set up p4c and the cpp toolchain, and `kwargs` is passed to
+    `run_shell`.
     """
 
     if not hasattr(ctx.executable, "p4c_backend"):

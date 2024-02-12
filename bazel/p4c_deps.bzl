@@ -3,15 +3,19 @@
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-def p4c_deps():
-    """Loads dependencies need to compile p4c."""
-    # Third party projects can define the target
-    # @com_github_p4lang_p4c_extension:ir_extension with a `filegroup`
-    # containing their custom .def files.
+def p4c_deps(name = "com_github_p4lang_p4c_extension"):
+    """Loads dependencies need to compile p4c.
+
+    Args:
+        name: The name of the repository.
+    Third party projects can define the target
+    @com_github_p4lang_p4c_extension:ir_extension with a `filegroup`
+    containing their custom .def files.
+    """
     if not native.existing_rule("com_github_p4lang_p4c_extension"):
         # By default, no IR extensions.
         native.new_local_repository(
-            name = "com_github_p4lang_p4c_extension",
+            name = name,
             path = ".",
             build_file_content = """
 filegroup(
@@ -106,4 +110,3 @@ filegroup(
             sha256 = "95651d7d1fcf2e5c3163c3d37df6d6b3e9e5027299e6bd050d157322ceda9ac9",
             build_file = "@//:bazel/BUILD.json.bazel",
         )
-
