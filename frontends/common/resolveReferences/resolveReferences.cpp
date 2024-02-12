@@ -28,6 +28,45 @@ static const std::vector<const IR::IDeclaration *> empty;
 
 ResolutionContext::ResolutionContext() { anyOrder = P4CContext::get().options().isv1(); }
 
+std::vector<const IR::IDeclaration *> *ResolutionContext::memoizeDeclarations(
+    const IR::INamespace *ns) const {
+    auto decls = ns->getDeclarations();
+    if (auto nest = ns->to<IR::INestedNamespace>()) {
+        // boost::adaptors::reverse expects a reference
+        auto temp = nest->getNestedNamespaces();
+        for (auto nn : boost::adaptors::reverse(temp)) decls = nn->getDeclarations()->concat(decls);
+    }
+
+    return (namespaceDecls[ns] = decls->toVector());
+}
+
+Util::Enumerator<const IR::IDeclaration *> *ResolutionContext::getDeclarations(
+    const IR::INamespace *ns) const {
+    auto nsIt = namespaceDecls.find(ns);
+    auto *declVec = nsIt != namespaceDecls.end() ? nsIt->second : memoizeDeclarations(ns);
+    return Util::Enumerator<const IR::IDeclaration *>::createEnumerator(*declVec);
+}
+
+std::unordered_multimap<cstring, const IR::IDeclaration *> &ResolutionContext::memoizeDeclsByName(
+    const IR::INamespace *ns) const {
+    auto &namesToDecls = namespaceDeclNames[ns];
+    for (auto *d : *getDeclarations(ns)) namesToDecls.emplace(d->getName().name, d);
+    return namesToDecls;
+}
+
+Util::Enumerator<const IR::IDeclaration *> *ResolutionContext::getDeclsByName(
+    const IR::INamespace *ns, cstring name) const {
+    std::function<const IR::IDeclaration *(
+        const std::pair<const cstring, const IR::IDeclaration *> &)>
+        second = [](const auto &entry) { return entry.second; };
+
+    auto nsIt = namespaceDeclNames.find(ns);
+    auto &namesToDecls = nsIt != namespaceDeclNames.end() ? nsIt->second : memoizeDeclsByName(ns);
+
+    auto range = namesToDecls.equal_range(name);
+    return Util::enumerate(range.first, range.second)->map(second);
+}
+
 const std::vector<const IR::IDeclaration *> *ResolutionContext::resolve(
     IR::ID name, P4::ResolutionType type) const {
     const Context *ctxt = nullptr;
@@ -44,7 +83,7 @@ const std::vector<const IR::IDeclaration *> *ResolutionContext::lookup(
     LOG2("Trying to resolve in " << current->toString());
 
     if (auto gen = current->to<IR::IGeneralNamespace>()) {
-        Util::Enumerator<const IR::IDeclaration *> *decls = gen->getDeclsByName(name);
+        Util::Enumerator<const IR::IDeclaration *> *decls = getDeclsByName(gen, name);
         switch (type) {
             case P4::ResolutionType::Any:
                 break;
@@ -148,7 +187,7 @@ const std::vector<const IR::IDeclaration *> *ResolutionContext::lookup(
                   current->node_type_name());
     }
     if (auto nested = current->to<IR::INestedNamespace>()) {
-        // boost bug -- trying to iterate with an adaptor over an unnamed temp crashes
+        // boost::adaptors::reverse expects a reference
         auto temp = nested->getNestedNamespaces();
         for (auto nn : boost::adaptors::reverse(temp)) {
             auto rv = lookup(nn, name, type);
@@ -297,12 +336,7 @@ const IR::IDeclaration *ResolveReferences::resolvePath(const IR::Path *path, boo
 void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
     if (!checkShadow) return;
     std::map<cstring, const IR::Node *> prev_in_scope;  // check for shadowing within a scope
-    auto decls = ns->getDeclarations();
-    if (auto nest = ns->to<IR::INestedNamespace>()) {
-        // boost bug -- trying to iterate with an adaptor over an unnamed temp crashes
-        auto temp = nest->getNestedNamespaces();
-        for (auto nn : boost::adaptors::reverse(temp)) decls = nn->getDeclarations()->concat(decls);
-    }
+    auto decls = getDeclarations(ns);
     for (auto *decl : *decls) {
         const IR::Node *node = decl->getNode();
         if (node->is<IR::StructField>()) continue;
