@@ -32,7 +32,7 @@ namespace P4 {
 class ConstantFoldingPolicy {
  public:
     /// The default hook does not modify anything.
-    virtual IR::Node *hook(Visitor &, IR::PathExpression *) { return nullptr; }
+    virtual const IR::Node *hook(Visitor &, IR::PathExpression *) { return nullptr; }
 };
 
 /** @brief statically evaluates many constant expressions.
