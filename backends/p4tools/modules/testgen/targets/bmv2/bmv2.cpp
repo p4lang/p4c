@@ -55,6 +55,10 @@ CompilerResultOrError Bmv2V1ModelCompilerTarget::runCompilerImpl(
     /// After the front end, get the P4Runtime API for the V1model architecture.
     auto p4runtimeApi = P4::P4RuntimeSerializer::get()->generateP4Runtime(program, "v1model");
 
+    if (::errorCount() > 0) {
+        return std::nullopt;
+    }
+
     program = runMidEnd(program);
     if (program == nullptr) {
         return std::nullopt;
