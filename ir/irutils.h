@@ -1,8 +1,8 @@
 #ifndef IR_IRUTILS_H_
 #define IR_IRUTILS_H_
 
-#include <vector>
 #include <initializer_list>
+#include <vector>
 
 #include "lib/big_int_util.h"
 #include "lib/source_file.h"
@@ -22,7 +22,8 @@ class StatOrDecl;
 class StructExpression;
 class Type;
 class Type_Bits;
-template<typename T> class IndexedVector;
+template <typename T>
+class IndexedVector;
 
 /// Utility functions for generating IR nodes.
 //
