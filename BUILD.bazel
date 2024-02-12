@@ -1,6 +1,7 @@
 load("@rules_license//rules:license.bzl", "license")
 load("//:bazel/flex.bzl", "genlex")
 load("//:bazel/bison.bzl", "genyacc")
+load("@com_github_bazelbuild_buildtools//buildifier:def.bzl", "buildifier")
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -445,8 +446,20 @@ cc_library(
     ],
 )
 
-load("@com_github_bazelbuild_buildtools//buildifier:def.bzl", "buildifier")
+buildifier(
+    name = "buildifier_check",
+    diff_command = "diff -u",
+    exclude_patterns = [
+        "./build/*",
+    ],
+    lint_mode = "warn",
+    mode = "diff",
+)
 
 buildifier(
-    name = "buildifier",
+    name = "buildifier_fix",
+    exclude_patterns = [
+        "./build/*",
+    ],
+    lint_mode = "fix",
 )
