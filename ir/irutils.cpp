@@ -282,7 +282,7 @@ const IR::Node *inlineBlockImpl(const Transform &t, Stmts &&stmts) {
             return stmt;
         }
     }
-    if (t.getParent<const IR::Node>()->is<IR::BlockStatement>()) {
+    if (t.getParent<IR::BlockStatement>()) {
         return new IR::IndexedVector<IR::StatOrDecl>(std::forward<Stmts>(stmts));
     }
     Util::SourceInfo srcInfo;
