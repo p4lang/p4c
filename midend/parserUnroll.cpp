@@ -33,19 +33,21 @@ bool StackVariable::operator==(const StackVariable &other) const {
 size_t StackVariableHash::operator()(const StackVariable &var) const {
     // hash for path expression.
     if (const auto *path = var.variable->to<IR::PathExpression>()) {
-        return Util::Hash::fnv1a<const cstring>(path->path->name.name);
+        return std::hash<cstring>()(path->path->name.name);
     }
     const IR::Member *curMember = var.variable->to<IR::Member>();
+    // FIXME: Implement sane hash combining, there is no need to have
+    // vector here
     std::vector<size_t> h;
     while (curMember) {
-        h.push_back(Util::Hash::fnv1a<const cstring>(curMember->member.name));
+      h.push_back(std::hash<cstring>()(curMember->member.name));
         if (auto *path = curMember->expr->to<IR::PathExpression>()) {
-            h.push_back(Util::Hash::fnv1a<const cstring>(path->path->name));
+          h.push_back(std::hash<cstring>()(path->path->name));
             break;
         }
         curMember = curMember->expr->checkedTo<IR::Member>();
     }
-    return Util::Hash::fnv1a(h.data(), sizeof(size_t) * h.size());
+    return Util::Hash::murmur(h.data(), sizeof(size_t) * h.size());
 }
 
 /// The main class for parsers' states key for visited checking.
