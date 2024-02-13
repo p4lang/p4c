@@ -115,7 +115,7 @@ big_int getMaxBvVal(int bitWidth);
 // This is 0 for unsigned and -(2^(t->size - 1)) for signed.
 big_int getMinBvVal(const Type *t);
 
-/// A helper useful when returning multiple statemenets out of a Transform's function that should
+/// A helper useful when returning multiple statements out of a Transform's function that should
 /// return a statement. While an IR::BlockStatement can accept a vector of statements for each of
 /// its child statements, some other places (namely IR::IfStatmenent, IR::SwitchStatement /
 /// IR::SwitchCase) only accept a statement. In these case, the visitor will fail with a BUG if the
