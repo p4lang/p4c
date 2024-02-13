@@ -3052,6 +3052,9 @@ const IR::Node *TypeInference::postorder(IR::PathExpression *expression) {
         if (type != nullptr)
             // may be nullptr because typechecking may have failed
             type = cloneWithFreshTypeVariables(type->to<IR::Type_MethodBase>());
+    } else if (decl->is<IR::Type_Declaration>()) {
+        typeError("%1%: Type cannot be used here, expecting an expression.", expression);
+        return expression;
     }
 
     if (type == nullptr) {
