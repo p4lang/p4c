@@ -17,12 +17,13 @@ limitations under the License.
 #ifndef TEST_GTEST_HELPERS_H_
 #define TEST_GTEST_HELPERS_H_
 
+#include <gtest/gtest.h>
+
 #include <optional>
 #include <string>
 
 #include "frontends/common/options.h"
 #include "frontends/p4/parseAnnotations.h"
-#include "gtest/gtest.h"
 
 namespace IR {
 class P4Program;

@@ -242,6 +242,17 @@ cc_library(
 )
 
 cc_library(
+    name = "test_helpers",
+    srcs = ["test/gtest/helpers.cpp"],
+    hdrs = ["test/gtest/helpers.h"],
+    data = ["test"],
+    deps = [
+        ":ir_frontend_midend_control_plane",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+cc_library(
     name = "p4c_bmv2_common_lib",
     srcs = glob(["backends/bmv2/common/*.cpp"]),
     hdrs = glob(["backends/bmv2/common/*.h"]),

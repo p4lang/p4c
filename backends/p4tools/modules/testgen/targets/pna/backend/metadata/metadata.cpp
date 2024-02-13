@@ -18,6 +18,7 @@
 
 #include "backends/p4tools/modules/testgen/lib/test_framework.h"
 #include "backends/p4tools/modules/testgen/lib/test_object.h"
+#include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/pna/test_spec.h"
 
 namespace P4Tools::P4Testgen::Pna {
@@ -182,8 +183,8 @@ void Metadata::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
     metadataFile.flush();
 }
 
-void Metadata::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
-                          float currentCoverage) {
+void Metadata::writeTestToFile(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
+                               float currentCoverage) {
     std::string testCase = getTestCaseTemplate();
     emitTestcase(testSpec, selectedBranches, testId, testCase, currentCoverage);
 }

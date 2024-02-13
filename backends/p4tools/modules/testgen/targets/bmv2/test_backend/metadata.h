@@ -22,8 +22,8 @@ class Metadata : public Bmv2TestFramework {
     explicit Metadata(const TestBackendConfiguration &testBackendConfiguration);
 
     /// Produce a Metadata test.
-    void outputTest(const TestSpec *spec, cstring selectedBranches, size_t testId,
-                    float currentCoverage) override;
+    void writeTestToFile(const TestSpec *spec, cstring selectedBranches, size_t testId,
+                         float currentCoverage) override;
 
  private:
     /// The output file.

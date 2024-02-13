@@ -23,6 +23,7 @@
 
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
 #include "backends/p4tools/modules/testgen/lib/test_object.h"
+#include "backends/p4tools/modules/testgen/options.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
@@ -158,14 +159,25 @@ inja::json Protobuf::getControlPlaneForTable(cstring tableName, cstring actionNa
     return rulesJson;
 }
 
+inja::json Protobuf::getSend(const TestSpec *testSpec) const {
+    const auto *iPacket = testSpec->getIngressPacket();
+    const auto *payload = iPacket->getEvaluatedPayload();
+    inja::json sendJson;
+    sendJson["ig_port"] = iPacket->getPort();
+    sendJson["pkt"] = formatHexExpressionWithSeparators(*payload);
+    sendJson["pkt_size"] = payload->type->width_bits();
+    return sendJson;
+}
+
 inja::json Protobuf::getExpectedPacket(const TestSpec *testSpec) const {
     inja::json verifyData = inja::json::object();
-    if (testSpec->getEgressPacket() != std::nullopt) {
-        const auto &packet = **testSpec->getEgressPacket();
-        verifyData["eg_port"] = packet.getPort();
-        const auto *payload = packet.getEvaluatedPayload();
-        const auto *payloadMask = packet.getEvaluatedPayloadMask();
-        verifyData["ignore_mask"] = formatHexExpressionWithSeparators(*payloadMask);
+    auto egressPacket = testSpec->getEgressPacket();
+    if (egressPacket.has_value()) {
+        const auto *packet = egressPacket.value();
+        verifyData["eg_port"] = packet->getPort();
+        const auto *payload = packet->getEvaluatedPayload();
+        const auto *mask = packet->getEvaluatedPayloadMask();
+        verifyData["ignore_mask"] = formatHexExpressionWithSeparators(*mask);
         verifyData["exp_pkt"] = formatHexExpressionWithSeparators(*payload);
     }
     return verifyData;
@@ -298,12 +310,13 @@ entities {
     return TEST_CASE;
 }
 
-void Protobuf::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
-                            const std::string &testCase, float currentCoverage) {
+inja::json Protobuf::produceTestCase(const TestSpec *testSpec, cstring selectedBranches,
+                                     size_t testId, float currentCoverage) const {
     inja::json dataJson;
     if (selectedBranches != nullptr) {
         dataJson["selected_branches"] = selectedBranches.c_str();
     }
+
     auto optSeed = getTestBackendConfiguration().seed;
     if (optSeed.has_value()) {
         dataJson["seed"] = optSeed.value();
@@ -319,6 +332,22 @@ void Protobuf::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
     coverageStr << std::setprecision(2) << currentCoverage;
     dataJson["coverage"] = coverageStr.str();
 
+    // Check whether this test has a clone configuration.
+    // These are special because they require additional instrumentation and produce two output
+    // packets.
+    auto cloneSpecs = testSpec->getTestObjectCategory("clone_specs");
+    if (!cloneSpecs.empty()) {
+        dataJson["clone_specs"] = getClone(cloneSpecs);
+    }
+    auto meterValues = testSpec->getTestObjectCategory("meter_values");
+    dataJson["meter_values"] = getMeter(meterValues);
+
+    return dataJson;
+}
+
+void Protobuf::writeTestToFile(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
+                               float currentCoverage) {
+    inja::json dataJson = produceTestCase(testSpec, selectedBranches, testId, currentCoverage);
     LOG5("Protobuf test back end: emitting testcase:" << std::setw(4) << dataJson);
 
     auto optBasePath = getTestBackendConfiguration().fileBasePath;
@@ -327,14 +356,17 @@ void Protobuf::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, 
     incrementedbasePath.concat("_" + std::to_string(testId));
     incrementedbasePath.replace_extension(".txtpb");
     auto protobufFileStream = std::ofstream(incrementedbasePath);
-    inja::render_to(protobufFileStream, testCase, dataJson);
+    inja::render_to(protobufFileStream, getTestCaseTemplate(), dataJson);
     protobufFileStream.flush();
 }
 
-void Protobuf::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
-                          float currentCoverage) {
-    std::string testCase = getTestCaseTemplate();
-    emitTestcase(testSpec, selectedBranches, testId, testCase, currentCoverage);
+AbstractTestReferenceOrError Protobuf::produceTest(const TestSpec *testSpec,
+                                                   cstring selectedBranches, size_t testId,
+                                                   float currentCoverage) {
+    inja::json dataJson = produceTestCase(testSpec, selectedBranches, testId, currentCoverage);
+    LOG5("ProtobufIR test back end: generated testcase:" << std::setw(4) << dataJson);
+
+    return new ProtobufTest(inja::render(getTestCaseTemplate(), dataJson));
 }
 
 }  // namespace P4Tools::P4Testgen::Bmv2

@@ -139,7 +139,7 @@ std::string P4CTestEnvironment::readHeader(const char *filename, bool preprocess
 P4CTestEnvironment::P4CTestEnvironment() {
     // Locate the headers based on the relative path of the file.
     std::filesystem::path srcFilePath{__FILE__};
-    auto srcFileDir = srcFilePath.parent_path();
+    auto srcFileDir = std::filesystem::absolute(srcFilePath.parent_path());
     auto corePath = srcFileDir / "../../p4include/core.p4";
     auto v1modelPath = srcFileDir / "../../p4include/v1model.p4";
     auto psaPath = srcFileDir / "../../p4include/bmv2/psa.p4";

@@ -14,6 +14,7 @@
 #include "nlohmann/json.hpp"
 
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
+#include "backends/p4tools/modules/testgen/lib/test_framework.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
@@ -307,8 +308,8 @@ inja::json ProtobufIr::getExpectedPacket(const TestSpec *testSpec) const {
     return verifyData;
 }
 
-void ProtobufIr::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
-                              const std::string &testCase, float currentCoverage) {
+inja::json ProtobufIr::produceTestCase(const TestSpec *testSpec, cstring selectedBranches,
+                                       size_t testId, float currentCoverage) const {
     inja::json dataJson;
     if (selectedBranches != nullptr) {
         dataJson["selected_branches"] = selectedBranches.c_str();
@@ -339,6 +340,12 @@ void ProtobufIr::emitTestcase(const TestSpec *testSpec, cstring selectedBranches
     auto meterValues = testSpec->getTestObjectCategory("meter_values");
     dataJson["meter_values"] = getMeter(meterValues);
 
+    return dataJson;
+}
+
+void ProtobufIr::writeTestToFile(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
+                                 float currentCoverage) {
+    inja::json dataJson = produceTestCase(testSpec, selectedBranches, testId, currentCoverage);
     LOG5("ProtobufIR test back end: emitting testcase:" << std::setw(4) << dataJson);
 
     auto optBasePath = getTestBackendConfiguration().fileBasePath;
@@ -347,14 +354,17 @@ void ProtobufIr::emitTestcase(const TestSpec *testSpec, cstring selectedBranches
     incrementedbasePath.concat("_" + std::to_string(testId));
     incrementedbasePath.replace_extension(".txtpb");
     auto protobufFileStream = std::ofstream(incrementedbasePath);
-    inja::render_to(protobufFileStream, testCase, dataJson);
+    inja::render_to(protobufFileStream, getTestCaseTemplate(), dataJson);
     protobufFileStream.flush();
 }
 
-void ProtobufIr::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
-                            float currentCoverage) {
-    std::string testCase = getTestCaseTemplate();
-    emitTestcase(testSpec, selectedBranches, testId, testCase, currentCoverage);
+AbstractTestReferenceOrError ProtobufIr::produceTest(const TestSpec *testSpec,
+                                                     cstring selectedBranches, size_t testId,
+                                                     float currentCoverage) {
+    inja::json dataJson = produceTestCase(testSpec, selectedBranches, testId, currentCoverage);
+    LOG5("ProtobufIR test back end: generated testcase:" << std::setw(4) << dataJson);
+
+    return new ProtobufIrTest(inja::render(getTestCaseTemplate(), dataJson));
 }
 
 }  // namespace P4Tools::P4Testgen::Bmv2
