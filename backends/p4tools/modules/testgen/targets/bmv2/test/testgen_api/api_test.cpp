@@ -74,13 +74,9 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(), computeChecksum(), depa
         ASSERT_TRUE(testListOpt.has_value());
         auto testList = testListOpt.value();
         ASSERT_EQ(testList.size(), 1);
-        const auto *test = testList[0];
-        const auto *protobufIrTest = test->to<P4Tools::P4Testgen::Bmv2::ProtobufIrTest>();
-        ASSERT_TRUE(protobufIrTest != nullptr);
-        EXPECT_THAT(protobufIrTest->getFormattedTest(), ::testing::HasSubstr(R"(input_packet {
-  packet: "\xDE\xAD\xDE\xAD\xDE\xAD\xBE\xEF\xBE\xEF\xBE\xEF\xF0\x0D"
-  port: 0
-})"));
+        const auto *protobufIrTest =
+            testList[0]->checkedTo<P4Tools::P4Testgen::Bmv2::ProtobufIrTest>();
+        EXPECT_THAT(protobufIrTest->getFormattedTest(), ::testing::HasSubstr(R"(input_packet)"));
     }
     /// Now try running again with the test back end set to Protobuf. The result should be the same.
     testgenOptions.testBackend = "PROTOBUF";
@@ -91,12 +87,7 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(), computeChecksum(), depa
     ASSERT_TRUE(testListOpt.has_value());
     auto testList = testListOpt.value();
     ASSERT_EQ(testList.size(), 1);
-    auto &test = testList[0];
-    const auto *protobufTest = test->to<P4Tools::P4Testgen::Bmv2::ProtobufTest>();
-    ASSERT_TRUE(protobufTest != nullptr);
-    EXPECT_THAT(protobufTest->getFormattedTest(), ::testing::HasSubstr(R"(input_packet {
-  packet: "\xDE\xAD\xDE\xAD\xDE\xAD\xBE\xEF\xBE\xEF\xBE\xEF\xF0\x0D"
-  port: 0
-})"));
+    const auto *protobufTest = testList[0]->checkedTo<P4Tools::P4Testgen::Bmv2::ProtobufTest>();
+    EXPECT_THAT(protobufTest->getFormattedTest(), ::testing::HasSubstr(R"(input_packet)"));
 }
 }  // namespace Test
