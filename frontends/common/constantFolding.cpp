@@ -798,6 +798,9 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
         if (auto arg = expr->to<IR::Constant>()) {
             return cast(arg, arg->base, type);
         } else if (auto arg = expr->to<IR::BoolLiteral>()) {
+            if (type->isSigned || type->size != 1)
+                error(ErrorType::ERR_INVALID, "%1%: Cannot cast %1% directly to %2% (use bit<1>)",
+                      arg, type);
             int v = arg->value ? 1 : 0;
             return new IR::Constant(e->srcInfo, type, v, 10);
         } else if (expr->is<IR::Member>()) {
