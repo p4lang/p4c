@@ -6,6 +6,8 @@
 namespace Util {
 
 namespace {
+using namespace Detail;
+
 constexpr size_t XXH3_SECRETSIZE_MIN = 136;
 constexpr size_t XXH_SECRET_DEFAULT_SIZE = 192;
 
@@ -26,9 +28,6 @@ constexpr uint8_t kSecret[XXH_SECRET_DEFAULT_SIZE] = {
     0x45, 0xcb, 0x3a, 0x8f, 0x95, 0x16, 0x04, 0x28, 0xaf, 0xd7, 0xfb, 0xca, 0xbb, 0x4b, 0x40, 0x7e,
 };
 // clang-format on
-
-constexpr uint64_t PRIME_MX1 = UINT64_C(0x165667919E3779F9);
-constexpr uint64_t PRIME_MX2 = UINT64_C(0x9FB21C651E98DF25);
 
 #if defined(_WIN32) /* Windows is always little endian */ \
     || defined(__LITTLE_ENDIAN__) ||                      \
@@ -126,40 +125,15 @@ constexpr size_t XXH_STRIPE_LEN = 64;
 constexpr size_t XXH_SECRET_CONSUME_RATE = 8;
 constexpr size_t XXH_ACC_NB = XXH_STRIPE_LEN / sizeof(uint64_t);
 
-static uint64_t rotl64(uint64_t X, size_t R) { return (X << R) | (X >> (64 - R)); }
-
 constexpr uint32_t PRIME32_1 = UINT32_C(0x9E3779B1);
 constexpr uint32_t PRIME32_2 = UINT32_C(0x85EBCA77);
 constexpr uint32_t PRIME32_3 = UINT32_C(0xC2B2AE3D);
-
-static const uint64_t PRIME64_1 = UINT64_C(11400714785074694791);
-static const uint64_t PRIME64_2 = UINT64_C(14029467366897019727);
-static const uint64_t PRIME64_3 = UINT64_C(1609587929392839161);
-static const uint64_t PRIME64_4 = UINT64_C(9650029242287828579);
-static const uint64_t PRIME64_5 = UINT64_C(2870177450012600261);
-
-static uint64_t XXH64_avalanche(uint64_t hash) {
-    hash ^= hash >> 33;
-    hash *= PRIME64_2;
-    hash ^= hash >> 29;
-    hash *= PRIME64_3;
-    hash ^= hash >> 32;
-    return hash;
-}
 
 static uint64_t XXH3_avalanche(uint64_t hash) {
     hash ^= hash >> 37;
     hash *= PRIME_MX1;
     hash ^= hash >> 32;
     return hash;
-}
-
-static uint64_t XXH3_rrmxmx(uint64_t acc, uint64_t len) {
-    acc ^= rotl64(acc, 49) ^ rotl64(acc, 24);
-    acc *= PRIME_MX2;
-    acc ^= (acc >> 35) + len;
-    acc *= PRIME_MX2;
-    return acc ^ (acc >> 28);
 }
 
 static uint64_t XXH3_len_1to3_64b(const uint8_t *input, size_t len, const uint8_t *secret,
