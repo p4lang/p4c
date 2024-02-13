@@ -5,23 +5,14 @@
 #include <type_traits>
 
 namespace Util {
-namespace Hash {
-std::size_t murmur(const void *data, std::size_t size);
+uint64_t hash(const void *data, std::size_t size);
 
-// returns Murmur hash sum for object with public methods size() and data()
 template <typename T>
-auto murmur(const T &obj) -> decltype(murmur(obj.data(), obj.size())) {
-    return murmur(obj.data(), obj.size());
+auto hash(
+    const T &obj,
+    typename std::enable_if_t<std::is_standard_layout_v<T> && !std::is_pointer_v<T>> * = nullptr) {
+    return hash(reinterpret_cast<const void *>(&obj), sizeof(T));
 }
-
-// returns fnv1a hash sum for object with standard layout
-template <typename T>
-auto murmur(const T &obj, typename std::enable_if<std::is_standard_layout<T>::value &&
-                                                  !std::is_pointer<T>::value>::type * = nullptr)
-    -> decltype(murmur(reinterpret_cast<const void *>(&obj), sizeof(T))) {
-    return murmur(reinterpret_cast<const void *>(&obj), sizeof(T));
-}
-}  // namespace Hash
 }  // namespace Util
 
 #endif /* LIB_HASH_H_ */

@@ -47,7 +47,7 @@ size_t StackVariableHash::operator()(const StackVariable &var) const {
         }
         curMember = curMember->expr->checkedTo<IR::Member>();
     }
-    return Util::Hash::murmur(h.data(), sizeof(size_t) * h.size());
+    return Util::hash(h.data(), sizeof(size_t) * h.size());
 }
 
 /// The main class for parsers' states key for visited checking.
