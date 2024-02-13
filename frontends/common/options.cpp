@@ -34,7 +34,7 @@ CompilerOptions::CompilerOptions() : ParserOptions() {
         [this](const char *) {
             listFrontendPasses = true;
             P4::FrontEnd frontend;
-            frontend.run(*this, nullptr, false, outStream);
+            frontend.run(*this, nullptr, outStream);
             exit(0);
             return false;
         },
