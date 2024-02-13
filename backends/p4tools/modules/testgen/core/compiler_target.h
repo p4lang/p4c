@@ -28,6 +28,8 @@ class TestgenCompilerResult : public CompilerResult {
 
     /// @returns the coverable nodes in the analyzed P4 program.
     [[nodiscard]] const P4::Coverage::CoverageSet &getCoverableNodes() const;
+
+    DECLARE_TYPEINFO(TestgenCompilerResult, CompilerResult);
 };
 
 class TestgenCompilerTarget : public CompilerTarget {

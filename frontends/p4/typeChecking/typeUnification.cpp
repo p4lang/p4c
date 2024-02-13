@@ -205,7 +205,7 @@ bool TypeUnification::unifyBlocks(const BinaryConstraint *constraint) {
     CHECK_NULL(dest);
     CHECK_NULL(src);
     LOG3("Unifying blocks " << dest << " with " << src);
-    if (typeid(*dest) != typeid(*src))
+    if (dest->typeId() != src->typeId())
         return constraint->reportError(constraints->getCurrentSubstitution());
     for (auto tv : dest->typeParameters->parameters) constraints->addUnifiableTypeVariable(tv);
     for (auto tv : src->typeParameters->parameters) constraints->addUnifiableTypeVariable(tv);

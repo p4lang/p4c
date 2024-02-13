@@ -20,6 +20,7 @@ limitations under the License.
 #include "ebpfObject.h"
 #include "ir/ir.h"
 #include "lib/algorithm.h"
+#include "lib/rtti.h"
 #include "lib/sourceCodeBuilder.h"
 
 namespace EBPF {
@@ -38,6 +39,8 @@ class EBPFType : public EBPFObject {
     virtual void declareArray(CodeBuilder * /*builder*/, cstring /*id*/, unsigned /*size*/) {
         BUG("%1%: unsupported array", type);
     }
+
+    DECLARE_TYPEINFO(EBPFType, EBPFObject);
 };
 
 class IHasWidth : public ICastable {
@@ -48,6 +51,8 @@ class IHasWidth : public ICastable {
     // Width in the target implementation.
     // Currently a multiple of 8.
     virtual unsigned implementationWidthInBits() const = 0;
+
+    DECLARE_TYPEINFO(IHasWidth);
 };
 
 class EBPFTypeFactory {
@@ -72,6 +77,8 @@ class EBPFBoolType : public EBPFType, public IHasWidth {
     void emitInitializer(CodeBuilder *builder) override { builder->append("0"); }
     unsigned widthInBits() const override { return 1; }
     unsigned implementationWidthInBits() const override { return 8; }
+
+    DECLARE_TYPEINFO(EBPFBoolType, EBPFType, IHasWidth);
 };
 
 class EBPFStackType : public EBPFType, public IHasWidth {
@@ -83,7 +90,8 @@ class EBPFStackType : public EBPFType, public IHasWidth {
         : EBPFType(type), elementType(elementType), size(type->getSize()) {
         CHECK_NULL(type);
         CHECK_NULL(elementType);
-        BUG_CHECK(elementType->is<IHasWidth>(), "Unexpected element type %1%", elementType);
+        BUG_CHECK(elementType->is<IHasWidth>(), "Unexpected element type %1%",
+                  typeid(*elementType).name());
     }
     void emit(CodeBuilder *) override {}
     void declare(CodeBuilder *builder, cstring id, bool asPointer) override;
@@ -91,6 +99,8 @@ class EBPFStackType : public EBPFType, public IHasWidth {
     void emitInitializer(CodeBuilder *builder) override;
     unsigned widthInBits() const override;
     unsigned implementationWidthInBits() const override;
+
+    DECLARE_TYPEINFO(EBPFStackType, EBPFType, IHasWidth);
 };
 
 class EBPFScalarType : public EBPFType, public IHasWidth {
@@ -111,6 +121,8 @@ class EBPFScalarType : public EBPFType, public IHasWidth {
     unsigned implementationWidthInBits() const override { return bytesRequired() * 8; }
     // True if this width is small enough to store in a machine scalar
     static bool generatesScalar(unsigned width) { return width <= 64; }
+
+    DECLARE_TYPEINFO(EBPFScalarType, EBPFType, IHasWidth);
 };
 
 // This should not always implement IHasWidth, but it may...
@@ -133,6 +145,8 @@ class EBPFTypeName : public EBPFType, public IHasWidth {
     bool canonicalTypeIs() const {
         return this->canonical->is<T>();
     }
+
+    DECLARE_TYPEINFO(EBPFTypeName, EBPFType, IHasWidth);
 };
 
 // Also represents headers and unions
@@ -162,6 +176,8 @@ class EBPFStructType : public EBPFType, public IHasWidth {
     unsigned implementationWidthInBits() const override { return implWidth; }
     void emit(CodeBuilder *builder) override;
     void declareArray(CodeBuilder *builder, cstring id, unsigned size) override;
+
+    DECLARE_TYPEINFO(EBPFStructType, EBPFType, IHasWidth);
 };
 
 class EBPFEnumType : public EBPFType, public EBPF::IHasWidth {
@@ -174,6 +190,8 @@ class EBPFEnumType : public EBPFType, public EBPF::IHasWidth {
     unsigned widthInBits() const override { return 32; }
     unsigned implementationWidthInBits() const override { return 32; }
     const IR::Type_Enum *getType() const { return type->to<IR::Type_Enum>(); }
+
+    DECLARE_TYPEINFO(EBPFEnumType, EBPFType, IHasWidth);
 };
 
 }  // namespace EBPF

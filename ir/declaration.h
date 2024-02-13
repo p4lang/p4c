@@ -47,6 +47,8 @@ class IDeclaration : public virtual INode {
     cstring controlPlaneName(cstring replace = cstring()) const;
 
     virtual ~IDeclaration() {}
+
+    DECLARE_TYPEINFO_WITH_TYPEID(IDeclaration, NodeKind::IDeclaration, INode);
 };
 
 }  // namespace IR

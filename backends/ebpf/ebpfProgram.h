@@ -100,6 +100,8 @@ class EBPFProgram : public EBPFObject {
     virtual void emitGeneratedComment(CodeBuilder *builder);
     virtual void emitH(CodeBuilder *builder, cstring headerFile);  // emits C headers
     virtual void emitC(CodeBuilder *builder, cstring headerFile);  // emits C program
+
+    DECLARE_TYPEINFO(EBPFProgram, EBPFObject);
 };
 
 }  // namespace EBPF

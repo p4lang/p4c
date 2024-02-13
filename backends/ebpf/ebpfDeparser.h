@@ -87,6 +87,8 @@ class EBPFDeparser : public EBPFControl {
     virtual void emitDeparserExternCalls(CodeBuilder *builder) { (void)builder; }
 
     void emitBufferAdjusts(CodeBuilder *builder) const;
+
+    DECLARE_TYPEINFO(EBPFDeparser, EBPFControl);
 };
 
 }  // namespace EBPF

@@ -53,6 +53,8 @@ class NamedSymbol : public ICastable {
     virtual const Namespace *symNamespace() const;
 
     bool template_args = false;  // does the symbol expect template args
+
+    DECLARE_TYPEINFO(NamedSymbol);
 };
 
 class Namespace : public NamedSymbol {
@@ -102,6 +104,8 @@ class Namespace : public NamedSymbol {
     }
     void clear() { contents.clear(); }
     static const Namespace empty;
+
+    DECLARE_TYPEINFO(Namespace, NamedSymbol);
 };
 
 const Namespace Namespace::empty("<empty>", Util::SourceInfo(), false);
@@ -115,12 +119,16 @@ class Object : public NamedSymbol {
     cstring toString() const override { return cstring("Object ") + getName(); }
     const Namespace *symNamespace() const override { return typeNamespace; }
     void setNamespace(const Namespace *ns) { typeNamespace = ns; }
+
+    DECLARE_TYPEINFO(Object, NamedSymbol);
 };
 
 class SimpleType : public NamedSymbol {
  public:
     SimpleType(cstring name, Util::SourceInfo si) : NamedSymbol(name, si) {}
-    cstring toString() const { return cstring("SimpleType ") + getName(); }
+    cstring toString() const override { return cstring("SimpleType ") + getName(); }
+
+    DECLARE_TYPEINFO(SimpleType, NamedSymbol);
 };
 
 // A Type that is also a namespace (e.g., a parser)
@@ -128,7 +136,9 @@ class ContainerType : public Namespace {
  public:
     ContainerType(cstring name, Util::SourceInfo si, bool allowDuplicates)
         : Namespace(name, si, allowDuplicates) {}
-    cstring toString() const { return cstring("ContainerType ") + getName(); }
+    cstring toString() const override { return cstring("ContainerType ") + getName(); }
+
+    DECLARE_TYPEINFO(ContainerType, Namespace);
 };
 
 /////////////////////////////////////////////////

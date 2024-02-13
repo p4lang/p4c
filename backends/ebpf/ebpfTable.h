@@ -65,6 +65,8 @@ class EBPFTableBase : public EBPFObject {
         valueTypeName = instanceName + "_value";
         dataMapName = instanceName;
     }
+
+    DECLARE_TYPEINFO(EBPFTableBase, EBPFObject);
 };
 
 class EBPFTable : public EBPFTableBase {
@@ -141,6 +143,8 @@ class EBPFTable : public EBPFTableBase {
         (void)key;
         (void)value;
     }
+
+    DECLARE_TYPEINFO(EBPFTable, EBPFTableBase);
 };
 
 class EBPFCounterTable : public EBPFTableBase {
@@ -160,6 +164,8 @@ class EBPFCounterTable : public EBPFTableBase {
                                       const IR::MethodCallExpression *expression);
     virtual void emitCounterAdd(CodeBuilder *builder, const IR::MethodCallExpression *expression);
     virtual void emitMethodInvocation(CodeBuilder *builder, const P4::ExternMethod *method);
+
+    DECLARE_TYPEINFO(EBPFCounterTable, EBPFTableBase);
 };
 
 class EBPFValueSet : public EBPFTableBase {
@@ -178,6 +184,8 @@ class EBPFValueSet : public EBPFTableBase {
     void emitKeyInitializer(CodeBuilder *builder, const IR::SelectExpression *expression,
                             cstring varName);
     void emitLookup(CodeBuilder *builder);
+
+    DECLARE_TYPEINFO(EBPFValueSet, EBPFTableBase);
 };
 
 }  // namespace EBPF

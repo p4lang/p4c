@@ -40,6 +40,8 @@ class EnumInstance : public InstanceBase {
     bool equals(const EnumInstance *other) const {
         return typeMap->equivalent(type, other->type) && name.name == other->name.name;
     }
+
+    DECLARE_TYPEINFO(EnumInstance, InstanceBase);
 };
 
 /// An instance of a simple enum, e.g., X.A from enum X { A, B }
@@ -47,6 +49,8 @@ class SimpleEnumInstance : public EnumInstance {
  public:
     SimpleEnumInstance(const IR::Type_Enum *type, const IR::ID name, const P4::TypeMap *typeMap)
         : EnumInstance(name, type, typeMap) {}
+
+    DECLARE_TYPEINFO(SimpleEnumInstance, EnumInstance);
 };
 
 /// An instance of a serializable enum, e.g.,
@@ -57,6 +61,8 @@ class SerEnumInstance : public EnumInstance {
     SerEnumInstance(const IR::Type_SerEnum *type, const IR::ID name, const IR::Expression *value,
                     const P4::TypeMap *typeMap)
         : EnumInstance(name, type, typeMap), value(value) {}
+
+    DECLARE_TYPEINFO(SerEnumInstance, EnumInstance);
 };
 
 }  // namespace P4

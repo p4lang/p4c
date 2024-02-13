@@ -110,6 +110,8 @@ class TCIngressPipelinePNA : public EBPF::TCIngressPipeline {
     void emitLocalVariables(EBPF::CodeBuilder *builder) override;
     void emitGlobalMetadataInitializer(EBPF::CodeBuilder *builder) override;
     void emitTrafficManager(EBPF::CodeBuilder *builder) override;
+
+    DECLARE_TYPEINFO(TCIngressPipelinePNA, EBPF::TCIngressPipeline);
 };
 
 class PnaStateTranslationVisitor : public EBPF::PsaStateTranslationVisitor {
@@ -128,6 +130,8 @@ class EBPFPnaParser : public EBPF::EBPFPsaParser {
     EBPFPnaParser(const EBPF::EBPFProgram *program, const IR::ParserBlock *block,
                   const P4::TypeMap *typeMap);
     void emit(EBPF::CodeBuilder *builder) override;
+
+    DECLARE_TYPEINFO(EBPFPnaParser, EBPF::EBPFPsaParser);
 };
 
 class EBPFTablePNA : public EBPF::EBPFTablePSA {
@@ -159,6 +163,8 @@ class EBPFTablePNA : public EBPF::EBPFTablePSA {
     void emitValueActionIDNames(EBPF::CodeBuilder *builder) override;
     void emitDefaultAction(EBPF::CodeBuilder *builder, cstring valueName);
     cstring p4ActionToActionIDName(const IR::P4Action *action) const;
+
+    DECLARE_TYPEINFO(EBPFTablePNA, EBPF::EBPFTablePSA);
 };
 
 class IngressDeparserPNA : public EBPF::EBPFDeparserPSA {
@@ -170,6 +176,8 @@ class IngressDeparserPNA : public EBPF::EBPFDeparserPSA {
     bool build() override;
     void emit(EBPF::CodeBuilder *builder) override;
     void emitPreDeparser(EBPF::CodeBuilder *builder) override;
+
+    DECLARE_TYPEINFO(IngressDeparserPNA, EBPF::EBPFDeparserPSA);
 };
 
 // Similar to class ConvertToEbpfPSA in backends/ebpf/psa/ebpfPsaGen.h

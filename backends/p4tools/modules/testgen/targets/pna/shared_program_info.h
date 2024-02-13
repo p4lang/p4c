@@ -39,6 +39,8 @@ class SharedPnaProgramInfo : public ProgramInfo {
     /// index. This is the name of the parameter that is used in the P4 program.
     [[nodiscard]] const IR::PathExpression *getBlockParam(cstring blockLabel,
                                                           size_t paramIndex) const;
+
+    DECLARE_TYPEINFO(SharedPnaProgramInfo, ProgramInfo);
 };
 
 }  // namespace P4Tools::P4Testgen::Pna

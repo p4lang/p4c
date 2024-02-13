@@ -84,6 +84,8 @@ class Bmv2V1ModelProgramInfo : public ProgramInfo {
 
     /// @see ProgramInfo::getArchSpec
     static const ArchSpec ARCH_SPEC;
+
+    DECLARE_TYPEINFO(Bmv2V1ModelProgramInfo, ProgramInfo);
 };
 
 }  // namespace P4Tools::P4Testgen::Bmv2
