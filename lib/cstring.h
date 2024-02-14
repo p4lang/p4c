@@ -381,4 +381,12 @@ struct hash<cstring> {
 };
 }  // namespace std
 
+namespace Util {
+template <>
+struct Hasher<cstring> {
+    size_t operator()(const cstring &c) const { return Util::Hash{}(c.c_str()); }
+};
+
+}  // namespace Util
+
 #endif /* LIB_CSTRING_H_ */

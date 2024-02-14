@@ -33,14 +33,14 @@ bool StackVariable::operator==(const StackVariable &other) const {
 size_t StackVariableHash::operator()(const StackVariable &var) const {
     // hash for path expression.
     if (const auto *path = var.variable->to<IR::PathExpression>()) {
-        return std::hash<cstring>()(path->path->name.name);
+        return Util::Hash{}(path->path->name.name);
     }
     const IR::Member *curMember = var.variable->to<IR::Member>();
     uint64_t hash = UINT64_C(0xDEADBEEF);
     while (curMember) {
-        hash = Util::hash_combine(hash, std::hash<cstring>()(curMember->member.name));
+        hash = Util::hash_combine(hash, curMember->member.name);
         if (auto *path = curMember->expr->to<IR::PathExpression>()) {
-            hash = Util::hash_combine(hash, std::hash<cstring>()(path->path->name));
+            hash = Util::hash_combine(hash, path->path->name.name);
             break;
         }
         curMember = curMember->expr->checkedTo<IR::Member>();
