@@ -168,8 +168,10 @@ void ExprStepper::evalInternalExternMethodCall(const IR::MethodCallExpression *c
              // Prepend the field to the packet buffer.
              if (const auto *structExpr = prependVar->to<IR::StructExpression>()) {
                  auto exprList = IR::flattenStructExpression(structExpr);
-                 for (const auto *expr : exprList) {
-                     nextState.prependToPacketBuffer(expr);
+                 // We need to prepend in reverse order since we are prepending to the input
+                 // packet.
+                 for (auto fieldIt = exprList.rbegin(); fieldIt != exprList.rend(); ++fieldIt) {
+                     nextState.prependToPacketBuffer(*fieldIt);
                  }
              } else if (prependType->is<IR::Type_Bits>()) {
                  nextState.prependToPacketBuffer(prependVar);
