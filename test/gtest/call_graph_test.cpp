@@ -14,10 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <gtest/gtest.h>
+
 #include <vector>
 
 #include "frontends/p4/callGraph.h"
-#include "gtest/gtest.h"
 
 namespace Test {
 
