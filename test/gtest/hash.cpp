@@ -40,8 +40,8 @@ TEST(Hash, XXHash) {
     EXPECT_EQ(Util::hash(s3), s1_hash);
 }
 
-TEST(Hash, hasher) {
-    std::unordered_map<int32_t, int32_t, Util::hasher<int32_t>> m;
+TEST(Hash, Hasher) {
+    std::unordered_map<int32_t, int32_t, Util::Hasher<int32_t>> m;
     m.emplace(123, 42);
     EXPECT_EQ(m.at(123), 42);
 }
@@ -84,7 +84,7 @@ TEST(Hash, IntegerTypes) {
 }
 
 TEST(Hash, IntegerConversion) {
-    Util::hasher<uint64_t> h;
+    Util::Hasher<uint64_t> h;
     uint64_t k = 10;
     EXPECT_EQ(h(k), h(10));
 }
@@ -201,7 +201,7 @@ TEST(Hash, EmptyStdTuple) {
     m[{}] = "foo";
     EXPECT_EQ(m[{}], "foo");
 
-    Util::hasher<std::tuple<>> h;
+    Util::Hasher<std::tuple<>> h;
     EXPECT_EQ(h({}), 0);
 }
 

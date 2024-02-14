@@ -107,12 +107,12 @@ auto hash(const T &obj) -> decltype(hash(obj.data(), obj.size())) {
 }
 
 template <class Key, class Enable = void>
-struct hasher;
+struct Hasher;
 
 struct Hash {
     template <class T>
-    constexpr size_t operator()(const T &v) const noexcept(noexcept(hasher<T>()(v))) {
-        return hasher<T>()(v);
+    constexpr size_t operator()(const T &v) const noexcept(noexcept(Hasher<T>()(v))) {
+        return Hasher<T>()(v);
     }
 
     template <class T, class... Types>
@@ -124,79 +124,79 @@ struct Hash {
 };
 
 template <>
-struct hasher<bool> {
+struct Hasher<bool> {
     constexpr size_t operator()(bool val) const noexcept {
         return val ? std::numeric_limits<size_t>::max() : 0;
     }
 };
 
 template <>
-struct hasher<unsigned long long> : Detail::IntegerHasher<unsigned long long> {};
+struct Hasher<unsigned long long> : Detail::IntegerHasher<unsigned long long> {};
 
 template <>
-struct hasher<signed long long> : Detail::IntegerHasher<signed long long> {};
+struct Hasher<signed long long> : Detail::IntegerHasher<signed long long> {};
 
 template <>
-struct hasher<unsigned long> : Detail::IntegerHasher<unsigned long> {};
+struct Hasher<unsigned long> : Detail::IntegerHasher<unsigned long> {};
 
 template <>
-struct hasher<signed long> : Detail::IntegerHasher<signed long> {};
+struct Hasher<signed long> : Detail::IntegerHasher<signed long> {};
 
 template <>
-struct hasher<unsigned int> : Detail::IntegerHasher<unsigned int> {};
+struct Hasher<unsigned int> : Detail::IntegerHasher<unsigned int> {};
 
 template <>
-struct hasher<signed int> : Detail::IntegerHasher<signed int> {};
+struct Hasher<signed int> : Detail::IntegerHasher<signed int> {};
 
 template <>
-struct hasher<unsigned short> : Detail::IntegerHasher<unsigned short> {};
+struct Hasher<unsigned short> : Detail::IntegerHasher<unsigned short> {};
 
 template <>
-struct hasher<signed short> : Detail::IntegerHasher<signed short> {};
+struct Hasher<signed short> : Detail::IntegerHasher<signed short> {};
 
 template <>
-struct hasher<unsigned char> : Detail::IntegerHasher<unsigned char> {};
+struct Hasher<unsigned char> : Detail::IntegerHasher<unsigned char> {};
 
 template <>
-struct hasher<signed char> : Detail::IntegerHasher<signed char> {};
+struct Hasher<signed char> : Detail::IntegerHasher<signed char> {};
 
 template <>
-struct hasher<char> : Detail::IntegerHasher<char> {};
+struct Hasher<char> : Detail::IntegerHasher<char> {};
 
 #if defined(__SIZEOF_INT128__) || (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS >= 128)
 template <>
-struct hasher<signed __int128> : Detail::IntegerHasher<signed __int128> {};
+struct Hasher<signed __int128> : Detail::IntegerHasher<signed __int128> {};
 
 template <>
-struct hasher<unsigned __int128> : Detail::IntegerHasher<unsigned __int128> {};
+struct Hasher<unsigned __int128> : Detail::IntegerHasher<unsigned __int128> {};
 #endif
 
 template <>
-struct hasher<float> : Detail::FloatHasher<float> {};
+struct Hasher<float> : Detail::FloatHasher<float> {};
 
 template <>
-struct hasher<double> : Detail::FloatHasher<double> {};
+struct Hasher<double> : Detail::FloatHasher<double> {};
 
 template <>
-struct hasher<std::string> {
+struct Hasher<std::string> {
     size_t operator()(const std::string &val) const {
         return static_cast<size_t>(hash(val.data(), val.size()));
     }
 };
 
 template <>
-struct hasher<std::string_view> {
+struct Hasher<std::string_view> {
     size_t operator()(const std::string_view &val) const {
         return static_cast<size_t>(hash(val.data(), val.size()));
     }
 };
 
 template <typename T1, typename T2>
-struct hasher<std::pair<T1, T2>> {
+struct Hasher<std::pair<T1, T2>> {
     size_t operator()(const std::pair<T1, T2> &val) const { return Hash()(val.first, val.second); }
 };
 template <typename... Types>
-struct hasher<std::tuple<Types...>> {
+struct Hasher<std::tuple<Types...>> {
     size_t operator()(const std::tuple<Types...> &val) const { return apply(Hash(), val); }
 };
 
@@ -205,24 +205,24 @@ struct hasher<std::tuple<Types...>> {
 // enough entropy as addresses come from some common pool. To solve this problem
 // we just use a single iteration of hash_avalanche to improve mixing.
 template <typename T>
-struct hasher<T *> {
+struct Hasher<T *> {
     // FIXME: better use std::bit_cast from C++20
     size_t operator()(T *val) const { return Hash()(reinterpret_cast<std::uintptr_t>(val)); }
 };
 
 template <typename T>
-struct hasher<std::unique_ptr<T>> {
+struct Hasher<std::unique_ptr<T>> {
     size_t operator()(const std::unique_ptr<T> &val) const { return Hash()(val.get()); }
 };
 
 template <typename T>
-struct hasher<std::shared_ptr<T>> {
+struct Hasher<std::shared_ptr<T>> {
     size_t operator()(const std::shared_ptr<T> &val) const { return Hash()(val.get()); }
 };
 
 template <class Iter, class Hash = std::hash<typename std::iterator_traits<Iter>::value_type>>
-uint64_t hash_range(Iter begin, Iter end, uint64_t hash = 0, Hash hasher = Hash()) {
-    for (; begin != end; ++begin) hash = hash_combine(hash, hasher(*begin));
+uint64_t hash_range(Iter begin, Iter end, uint64_t hash = 0, Hash Hasher = Hash()) {
+    for (; begin != end; ++begin) hash = hash_combine(hash, Hasher(*begin));
 
     return hash;
 }
