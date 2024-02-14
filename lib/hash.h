@@ -206,9 +206,10 @@ struct Hasher<std::tuple<Types...>> {
 };
 
 /// In general, pointers are bad hashes: their low 2-3 bits are zero, likewise
-/// for the upper bits depending on the ABI. Also, the middle bits might not have
-/// enough entropy as addresses come from some common pool. To solve this problem
-/// we just use a single iteration of hash_avalanche to improve mixing.
+/// for the upper bits depending on the ABI. Also, the middle bits might not
+/// have enough entropy as addresses come from some common pool. To solve this
+/// problem we just use a single iteration of hash_avalanche to improve mixing
+/// (see Detail::IntegerHasher).
 template <typename T>
 struct Hasher<T *> {
     // FIXME: better use std::bit_cast from C++20
