@@ -7,6 +7,7 @@
 #include <string_view>
 #include <tuple>
 #include <type_traits>
+#include <memory>
 
 namespace Util {
 

@@ -36,6 +36,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <cassert>
 
 namespace Util {
 
