@@ -36,18 +36,16 @@ size_t StackVariableHash::operator()(const StackVariable &var) const {
         return std::hash<cstring>()(path->path->name.name);
     }
     const IR::Member *curMember = var.variable->to<IR::Member>();
-    // FIXME: Implement sane hash combining, there is no need to have
-    // vector here
-    std::vector<size_t> h;
+    uint64_t hash = UINT64_C(0xDEADBEEF);
     while (curMember) {
-      h.push_back(std::hash<cstring>()(curMember->member.name));
+        hash = Util::hash_combine(hash, std::hash<cstring>()(curMember->member.name));
         if (auto *path = curMember->expr->to<IR::PathExpression>()) {
-          h.push_back(std::hash<cstring>()(path->path->name));
+            hash = Util::hash_combine(hash, std::hash<cstring>()(path->path->name));
             break;
         }
         curMember = curMember->expr->checkedTo<IR::Member>();
     }
-    return Util::hash(h.data(), sizeof(size_t) * h.size());
+    return hash;
 }
 
 /// The main class for parsers' states key for visited checking.
