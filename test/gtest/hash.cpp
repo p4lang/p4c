@@ -184,7 +184,35 @@ TEST(Hash, HashCombine10Bool) {
             }
         }
     }
-    EXPECT_EQ(values.size(), 1U << 10);
+    EXPECT_EQ(values.size(), 1U << 10); // All hash values must be distinct
+}
+
+TEST(Hash, HashCombine10Int) {
+    const auto hash = Util::Hash();
+    std::set<size_t> values;
+    for (int i1 : {1, 2, 3}) {
+        for (int i2 : {1, 2, 3}) {
+            for (int i3 : {1, 2, 3}) {
+                for (int i4 : {1, 2, 3}) {
+                    for (int i5 : {1, 2, 3}) {
+                        for (int i6 : {1, 2, 3}) {
+                            for (int i7 : {1, 2, 3}) {
+                                for (int i8 : {1, 2, 3}) {
+                                    for (int i9 : {1, 2, 3}) {
+                                        for (int i10 : {1, 2, 3}) {
+                                            values.insert(
+                                                hash(i1, i2, i3, i4, i5, i6, i7, i8, i9, i10));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    EXPECT_EQ(values.size(), 59049); // All hash values must be distinct
 }
 
 TEST(Hash, StdTuple) {
