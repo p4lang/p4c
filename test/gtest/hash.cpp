@@ -184,7 +184,7 @@ TEST(Hash, HashCombine10Bool) {
             }
         }
     }
-    EXPECT_EQ(values.size(), 1U << 10); // All hash values must be distinct
+    EXPECT_EQ(values.size(), 1U << 10);  // All hash values must be distinct
 }
 
 TEST(Hash, HashCombine10Int) {
@@ -212,7 +212,7 @@ TEST(Hash, HashCombine10Int) {
             }
         }
     }
-    EXPECT_EQ(values.size(), 59049); // All hash values must be distinct
+    EXPECT_EQ(values.size(), 59049);  // All hash values must be distinct
 }
 
 TEST(Hash, StdTuple) {
