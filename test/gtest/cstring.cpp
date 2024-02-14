@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "lib/cstring.h"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 namespace Test {
 

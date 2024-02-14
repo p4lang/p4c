@@ -16,9 +16,9 @@ limitations under the License.
 
 #include "lib/ordered_set.h"
 
-#include <algorithm>
+#include <gtest/gtest.h>
 
-#include "gtest/gtest.h"
+#include <algorithm>
 
 namespace Test {
 

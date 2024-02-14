@@ -16,10 +16,10 @@ limitations under the License.
 
 #include "lib/enumerator.h"
 
+#include <gtest/gtest.h>
+
 #include <exception>
 #include <vector>
-
-#include "gtest/gtest.h"
 
 namespace Util {
 

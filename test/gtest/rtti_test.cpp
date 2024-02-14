@@ -12,9 +12,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <gtest/gtest.h>
+
 #include <sstream>
 
-#include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "ir/json_loader.h"
 #include "ir/node.h"

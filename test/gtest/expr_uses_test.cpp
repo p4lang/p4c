@@ -16,7 +16,8 @@ limitations under the License.
 
 #include "midend/expr_uses.h"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
+
 #include "ir/ir.h"
 #include "ir/visitor.h"
 #include "lib/exceptions.h"

@@ -14,13 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <gtest/gtest.h>
+
 #include <optional>
 #include <vector>
 
 #include <boost/algorithm/string/replace.hpp>
 
 #include "frontends/common/applyOptionsPragmas.h"
-#include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "test/gtest/helpers.h"
 
