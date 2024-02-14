@@ -14,10 +14,11 @@ limitations under the License.
 
 #include "lib/hash.h"
 
+#include <gtest/gtest.h>
+
 #include <unordered_map>
 #include <unordered_set>
 
-#include "gtest/gtest.h"
 #include "lib/cstring.h"
 
 namespace Test {
