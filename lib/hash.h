@@ -2,12 +2,14 @@
 #define LIB_HASH_H_
 
 #include <cstddef>
+#include <cstdint>
+#include <cstring>
 #include <limits>
+#include <memory>
 #include <string>
 #include <string_view>
 #include <tuple>
 #include <type_traits>
-#include <memory>
 
 namespace Util {
 
@@ -163,14 +165,6 @@ struct Hasher<signed char> : Detail::IntegerHasher<signed char> {};
 
 template <>
 struct Hasher<char> : Detail::IntegerHasher<char> {};
-
-#if defined(__SIZEOF_INT128__) || (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS >= 128)
-template <>
-struct Hasher<signed __int128> : Detail::IntegerHasher<signed __int128> {};
-
-template <>
-struct Hasher<unsigned __int128> : Detail::IntegerHasher<unsigned __int128> {};
-#endif
 
 template <>
 struct Hasher<float> : Detail::FloatHasher<float> {};

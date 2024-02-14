@@ -75,11 +75,6 @@ TEST(Hash, IntegerTypes) {
     hashes.insert(hasher((size_t)24));
 
     size_t hashesSize = 24;
-#if defined(__SIZEOF_INT128__) || (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS >= 128)
-    hashes.insert(hasher((__int128_t)25));
-    hashes.insert(hasher((__uint128_t)26));
-    hashesSize += 2;
-#endif
     EXPECT_EQ(hashesSize, hashes.size());
 }
 
@@ -88,20 +83,6 @@ TEST(Hash, IntegerConversion) {
     uint64_t k = 10;
     EXPECT_EQ(h(k), h(10));
 }
-
-#if defined(__SIZEOF_INT128__) || (defined(_INTEGRAL_MAX_BITS) && _INTEGRAL_MAX_BITS >= 128)
-TEST(Hash, Int128StdHash) {
-    std::unordered_set<__int128> hs;
-    hs.insert(__int128_t{1});
-    hs.insert(__int128_t{2});
-    EXPECT_EQ(2, hs.size());
-
-    std::set<unsigned __int128> s;
-    s.insert(static_cast<unsigned __int128>(1));
-    s.insert(static_cast<unsigned __int128>(2));
-    EXPECT_EQ(2, s.size());
-}
-#endif
 
 TEST(Hash, FloatTypes) {
     Util::Hash hasher;

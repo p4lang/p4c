@@ -34,9 +34,9 @@
 
 #include "hash.h"
 
+#include <cassert>
 #include <cstdint>
 #include <cstring>
-#include <cassert>
 
 namespace Util {
 
