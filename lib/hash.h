@@ -109,6 +109,16 @@ auto hash(const T &obj) -> decltype(hash(obj.data(), obj.size())) {
     return hash(obj.data(), obj.size());
 }
 
+/// The implementation below decouples generic hash interface provider from a
+/// particular implementation for a given class `T`.  One should
+/// partially-specialize Util::Hasher<T> to provide a hash value for
+/// `T`. Util::Hash is intended to be used instead of std::hash<T> in various
+/// associative containers. For example `std::unordered_set<K, Util::Hash>`
+/// would work as soon as there is an implementation of Util::Hasher<K>.  The
+/// code below provides some default specializations for certain built-in types
+/// and theirs combinations (pairs and tuples). Additionally, hashes could be
+/// combined either directly (Hash::operator() is variadic) or via dedicated
+/// `hash_combine` / `hash_combine_generic` functions.
 template <class Key, class Enable = void>
 struct Hasher;
 
@@ -195,10 +205,10 @@ struct Hasher<std::tuple<Types...>> {
     size_t operator()(const std::tuple<Types...> &val) const { return apply(Hash(), val); }
 };
 
-// In general, pointers are bad hashes: their low 2-3 bits are zero, likewise
-// for the upper bits depending on the ABI. Also, the middle bits might not have
-// enough entropy as addresses come from some common pool. To solve this problem
-// we just use a single iteration of hash_avalanche to improve mixing.
+/// In general, pointers are bad hashes: their low 2-3 bits are zero, likewise
+/// for the upper bits depending on the ABI. Also, the middle bits might not have
+/// enough entropy as addresses come from some common pool. To solve this problem
+/// we just use a single iteration of hash_avalanche to improve mixing.
 template <typename T>
 struct Hasher<T *> {
     // FIXME: better use std::bit_cast from C++20
@@ -214,6 +224,13 @@ template <typename T>
 struct Hasher<std::shared_ptr<T>> {
     size_t operator()(const std::shared_ptr<T> &val) const { return Hash()(val.get()); }
 };
+
+/// A generic way to create a single hash from multiple hashable
+/// objects. hash_combine_generic takes a class Hasher<T> that provides hash
+/// value via operator(); hash_combine uses a default hasher StdHasher that uses
+/// std::hash<T>. hash_combine_generic hashes each argument and combines those
+/// hashes in an order-dependent way to yield a new hash; hash_range does so
+/// (also in an order-dependent way) for items in the range [begin, end);
 
 template <class Iter, class Hash = std::hash<typename std::iterator_traits<Iter>::value_type>>
 uint64_t hash_range(Iter begin, Iter end, uint64_t hash = 0, Hash Hasher = Hash()) {
