@@ -125,10 +125,6 @@ constexpr size_t XXH_STRIPE_LEN = 64;
 constexpr size_t XXH_SECRET_CONSUME_RATE = 8;
 constexpr size_t XXH_ACC_NB = XXH_STRIPE_LEN / sizeof(uint64_t);
 
-constexpr uint32_t PRIME32_1 = UINT32_C(0x9E3779B1);
-constexpr uint32_t PRIME32_2 = UINT32_C(0x85EBCA77);
-constexpr uint32_t PRIME32_3 = UINT32_C(0xC2B2AE3D);
-
 static uint64_t XXH3_avalanche(uint64_t hash) {
     hash ^= hash >> 37;
     hash *= PRIME_MX1;

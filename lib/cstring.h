@@ -374,12 +374,9 @@ namespace std {
 template <>
 struct hash<cstring> {
     std::size_t operator()(const cstring &c) const {
-        // cstrings are internalized, therefore their addresses are unique. Therefore we
-        // can just use their address as hash. However, pointers are bad hashes: their low 2-3 bits
-        // are zero, likewise for the upper bits depending on the ABI. Also, the middle bits might
-        // not have enough entropy as addresses come from some common pool. To solve this problem we
-        // just use a single iteration of hash_avalanche to improve mixing.
-        return Util::hash_avalanche(reinterpret_cast<uint64_t>(c.c_str()));
+        // cstrings are internalized, therefore their addresses are unique; we
+        // can just use their address to produce hash.
+        return Util::Hash{}(c.c_str());
     }
 };
 }  // namespace std
