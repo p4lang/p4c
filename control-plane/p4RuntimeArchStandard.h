@@ -44,7 +44,7 @@ namespace Standard {
 /// the Arch enum class defined below), as a convenient way to access
 /// architecture-specific names in the unified code.
 /// V1MODEL2020 is v1model with a version >= 20200408.
-enum class Arch { V1MODEL, PSA, PNA, V1MODEL2020 };
+enum class Arch { V1MODEL, PSA, PNA, V1MODEL2020, TNA };
 
 template <Arch arch>
 struct CounterExtern {};
