@@ -105,21 +105,6 @@ void PNAEbpfGenerator::emitPipelineInstances(EBPF::CodeBuilder *builder) const {
                                    "struct hdr_md", 2);
 }
 
-void PNAEbpfGenerator::emitCRC32LookupTableInstance(EBPF::CodeBuilder *builder) const {
-    builder->target->emitTableDecl(builder, cstring("crc_lookup_tbl"), EBPF::TableArray, "u32",
-                                   cstring("struct lookup_tbl_val"), 1);
-}
-
-void PNAEbpfGenerator::emitCRC32LookupTableTypes(EBPF::CodeBuilder *builder) const {
-    builder->append("struct lookup_tbl_val ");
-    builder->blockStart();
-    builder->emitIndent();
-    builder->append("u32 table[2048]");
-    builder->endOfStatement(true);
-    builder->blockEnd(false);
-    builder->endOfStatement(true);
-}
-
 // =====================PNAArchTC=============================
 void PNAArchTC::emit(EBPF::CodeBuilder *builder) const {
     /**
@@ -163,7 +148,6 @@ void PNAArchTC::emitInstances(EBPF::CodeBuilder *builder) const {
     }
 
     emitPipelineInstances(builder);
-    // emitCRC32LookupTableInstance(builder);
     builder->appendLine("REGISTER_END()");
     builder->newline();
 }
@@ -200,7 +184,6 @@ void PNAArchTC::emitHeader(EBPF::CodeBuilder *builder) const {
     pipeline->program->apply(errorGen);
     emitGlobalHeadersMetadata(builder);
     builder->newline();
-    // emitCRC32LookupTableTypes(builder);
     //  BPF map definitions.
     emitInstances(builder);
     EBPFHashAlgorithmTypeFactoryPNA::instance()->emitGlobals(builder);

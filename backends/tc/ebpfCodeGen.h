@@ -46,9 +46,6 @@ class PNAEbpfGenerator : public EBPF::EbpfCodeGenerator {
     void emitGlobalHeadersMetadata(EBPF::CodeBuilder *builder) const override;
     void emitPipelineInstances(EBPF::CodeBuilder *builder) const override;
     cstring getProgramName() const;
-
-    void emitCRC32LookupTableTypes(EBPF::CodeBuilder *builder) const;
-    void emitCRC32LookupTableInstance(EBPF::CodeBuilder *builder) const;
 };
 
 // Similar to class PSAErrorCodesGen in backends/ebpf/psa/ebpfPsaGen.cpp
@@ -359,7 +356,6 @@ class CRCChecksumAlgorithmPNA : public EBPF::CRCChecksumAlgorithm {
     CRCChecksumAlgorithmPNA(const EBPF::EBPFProgram *program, cstring name, int width)
         : EBPF::CRCChecksumAlgorithm(program, name, width) {}
 
-
     static void emitUpdateMethod(EBPF::CodeBuilder *builder, int crcWidth);
 };
 
@@ -405,7 +401,6 @@ class EBPFHashAlgorithmTypeFactoryPNA : public EBPF::EBPFHashAlgorithmTypeFactor
         EBPF::InternetChecksumAlgorithm::emitGlobals(builder);
     }
 };
-
 
 }  // namespace TC
 
