@@ -514,6 +514,24 @@ void EBPFPnaParser::emit(EBPF::CodeBuilder *builder) {
     builder->blockEnd(true);
 }
 
+void EBPFPnaParser::emitRejectState(EBPF::CodeBuilder *builder) {
+    builder->emitIndent();
+    builder->appendFormat("if (%s == 0) ", program->errorVar.c_str());
+    builder->blockStart();
+    builder->target->emitTraceMessage(
+        builder, "Parser: Explicit transition to reject state, dropping packet..");
+    builder->emitIndent();
+    builder->appendFormat("return %s", builder->target->abortReturnCode().c_str());
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
+    builder->emitIndent();
+    builder->appendFormat("compiler_meta__->parser_error = %s", program->errorVar.c_str());
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("goto %s", IR::ParserState::accept.c_str());
+    builder->endOfStatement(true);
+}
+
 //  This code is similar to compileExtractField function in PsaStateTranslationVisitor.
 //  Handled TC "macaddr" annotation.
 void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
@@ -1329,6 +1347,9 @@ bool ControlBodyTranslatorPNA::preorder(const IR::Member *m) {
             if (st->name == "pna_main_input_metadata_t") {
                 if (m->member.name == "input_port") {
                     builder->append("skb->ifindex");
+                    return false;
+                } else if (m->member.name == "parser_error") {
+                    builder->append("compiler_meta__->parser_error");
                     return false;
                 } else {
                     ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,

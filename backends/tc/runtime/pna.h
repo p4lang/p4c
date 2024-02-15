@@ -78,6 +78,7 @@ struct pna_global_metadata {
     PortId_t         egress_port;
     enum MirrorType  mirror_type;
     MirrorSlotId_t   mirror_slot_id;
+    ParserError_t    parser_error;
     MirrorSessionId_t mirror_session_id;
     __u8             mark;
     bool             pass_to_kernel; // internal metadata, forces sending packet up to kernel stack
