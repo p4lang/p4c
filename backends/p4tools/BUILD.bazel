@@ -83,6 +83,7 @@ cc_library(
         "//:ir_frontend_midend_control_plane",
         "//:lib",
         "@boost//:multiprecision",
+        "@com_github_p4lang_p4runtime//:p4info_cc_proto",
         "@com_github_z3prover_z3//:api",
     ],
 )
