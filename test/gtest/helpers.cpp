@@ -139,7 +139,7 @@ std::string P4CTestEnvironment::readHeader(const char *filename, bool preprocess
 P4CTestEnvironment::P4CTestEnvironment() {
     // Locate the headers based on the relative path of the file.
     std::filesystem::path srcFilePath{__FILE__};
-    auto srcFileDir = srcFilePath.parent_path();
+    auto srcFileDir = std::filesystem::absolute(srcFilePath.parent_path());
     auto corePath = srcFileDir / "../../p4include/core.p4";
     auto v1modelPath = srcFileDir / "../../p4include/v1model.p4";
     auto psaPath = srcFileDir / "../../p4include/bmv2/psa.p4";
@@ -150,12 +150,23 @@ P4CTestEnvironment::P4CTestEnvironment() {
 
 namespace Test {
 
+struct FrontEndAnnoPolicy : P4::FrontEndPolicy {
+    P4::ParseAnnotations *parseAnnotations;
+
+    /// Pass given ParseAnnotations instance to frontend. The parameter can be null to indicate to
+    /// use the default.
+    explicit FrontEndAnnoPolicy(P4::ParseAnnotations *parseAnnotations)
+        : parseAnnotations(parseAnnotations) {}
+
+    P4::ParseAnnotations *getParseAnnotations() const override { return parseAnnotations; }
+};
+
 /* static */ std::optional<FrontendTestCase> FrontendTestCase::create(
     const std::string &source,
     CompilerOptions::FrontendVersion langVersion
     /* = CompilerOptions::FrontendVersion::P4_16 */,
-    const P4::ParseAnnotations &parseAnnotations
-    /* = P4::ParseAnnotations() */) {
+    P4::ParseAnnotations *parseAnnotations
+    /* = nullptr */) {
     auto *program = P4::parseP4String(source, langVersion);
     if (program == nullptr) {
         std::cerr << "Couldn't parse test case source" << std::endl;
@@ -177,7 +188,7 @@ namespace Test {
 
     CompilerOptions options;
     options.langVersion = langVersion;
-    program = P4::FrontEnd(parseAnnotations).run(options, program, true);
+    program = P4::FrontEnd(new FrontEndAnnoPolicy(parseAnnotations)).run(options, program);
     if (program == nullptr) {
         std::cerr << "Frontend failed" << std::endl;
         return std::nullopt;

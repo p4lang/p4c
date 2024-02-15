@@ -82,8 +82,8 @@ StorageLocation *StorageFactory::create(const IR::Type *type, cstring name) cons
             cstring fieldName = name + "." + f->name;
             auto sl = create(f->type, fieldName);
             if (globalValid != nullptr)
-                dynamic_cast<StructLocation *>(sl)->replaceField(fieldName + "." + validFieldName,
-                                                                 globalValid);
+                sl->as<StructLocation>().replaceField(fieldName + "." + validFieldName,
+                                                      globalValid);
             result->createField(f->name.name, sl);
         }
         if (st->is<IR::Type_Header>()) {

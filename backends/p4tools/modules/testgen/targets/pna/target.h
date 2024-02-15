@@ -30,8 +30,9 @@ class PnaDpdkTestgenTarget : public TestgenTarget {
         const CompilerResult &compilerResult,
         const IR::Declaration_Instance *mainDecl) const override;
 
-    PnaTestBackend *getTestBackendImpl(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                                       const std::filesystem::path &testPath) const override;
+    PnaTestBackend *getTestBackendImpl(const ProgramInfo &programInfo,
+                                       const TestBackendConfiguration &testBackendConfiguration,
+                                       SymbolicExecutor &symbex) const override;
 
     PnaDpdkCmdStepper *getCmdStepperImpl(ExecutionState &state, AbstractSolver &solver,
                                          const ProgramInfo &programInfo) const override;

@@ -7,6 +7,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
     unsigned ebpf_packetOffsetInBits_save = 0;
     ParserError_t ebpf_errorCode = NoError;
     void* pkt = ((void*)(long)skb->data);
+    u8* hdr_start = pkt;
     void* ebpf_packetEnd = ((void*)(long)skb->data_end);
     u32 ebpf_zero = 0;
     u32 ebpf_one = 1;
@@ -27,7 +28,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
         goto start;
         parse_ipv4: {
 /* extract(hdr->ipv4) */
-            if (ebpf_packetEnd < pkt + BYTES(ebpf_packetOffsetInBits + 160 + 0)) {
+            if ((u8*)ebpf_packetEnd < hdr_start + BYTES(160 + 0)) {
                 ebpf_errorCode = PacketTooShort;
                 goto reject;
             }
@@ -68,14 +69,16 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
             __builtin_memcpy(&hdr->ipv4.dstAddr, pkt + BYTES(ebpf_packetOffsetInBits), 4);
             ebpf_packetOffsetInBits += 32;
 
+
             hdr->ipv4.ebpf_valid = 1;
+            hdr_start += BYTES(160);
 
 ;
              goto accept;
         }
         start: {
 /* extract(hdr->ethernet) */
-            if (ebpf_packetEnd < pkt + BYTES(ebpf_packetOffsetInBits + 112 + 0)) {
+            if ((u8*)ebpf_packetEnd < hdr_start + BYTES(112 + 0)) {
                 ebpf_errorCode = PacketTooShort;
                 goto reject;
             }
@@ -89,7 +92,9 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
             hdr->ethernet.etherType = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
             ebpf_packetOffsetInBits += 16;
 
+
             hdr->ethernet.ebpf_valid = 1;
+            hdr_start += BYTES(112);
 
 ;
             u16 select_0;
@@ -113,7 +118,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct my_ingress_h
     return -1;
 }
 
-SEC("classifier/tc-parse")
+SEC("p4tc/parse")
 int tc_parse_func(struct __sk_buff *skb) {
     struct pna_global_metadata *compiler_meta__ = (struct pna_global_metadata *) skb->cb;
     struct hdr_md *hdrMd;

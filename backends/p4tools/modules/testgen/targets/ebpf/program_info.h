@@ -47,6 +47,8 @@ class EBPFProgramInfo : public ProgramInfo {
 
     /// @see ProgramInfo::getArchSpec
     static const ArchSpec ARCH_SPEC;
+
+    DECLARE_TYPEINFO(EBPFProgramInfo, ProgramInfo);
 };
 
 }  // namespace P4Tools::P4Testgen::EBPF

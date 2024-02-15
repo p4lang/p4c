@@ -9,6 +9,7 @@
 #include "backends/p4tools/common/lib/arch_spec.h"
 #include "ir/ir.h"
 #include "lib/castable.h"
+#include "lib/rtti.h"
 #include "midend/coverage.h"
 
 #include "backends/p4tools/modules/testgen/core/compiler_target.h"
@@ -114,6 +115,8 @@ class ProgramInfo : public ICastable {
                               const ArchSpec::ArchMember *archMember,
                               std::vector<Continuation::Command> *copyIns,
                               std::vector<Continuation::Command> *copyOuts) const;
+
+    DECLARE_TYPEINFO(ProgramInfo);
 };
 
 }  // namespace P4Tools::P4Testgen

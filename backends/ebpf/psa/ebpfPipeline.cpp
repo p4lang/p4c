@@ -49,18 +49,15 @@ bool EBPFPipeline::isEmpty() const {
 
 void EBPFPipeline::emitLocalVariables(CodeBuilder *builder) {
     builder->emitIndent();
-    builder->appendFormat("unsigned %s = 0;", offsetVar.c_str());
-    builder->newline();
-    builder->emitIndent();
-    builder->appendFormat("unsigned %s_save = 0;", offsetVar.c_str());
-    builder->newline();
-    builder->emitIndent();
     builder->appendFormat("%s %s = %s;", errorEnum.c_str(), errorVar.c_str(),
                           P4::P4CoreLibrary::instance().noError.str());
     builder->newline();
     builder->emitIndent();
     builder->appendFormat("void* %s = %s;", packetStartVar.c_str(),
                           builder->target->dataOffset(model.CPacketName.str()).c_str());
+    builder->newline();
+    builder->emitIndent();
+    builder->appendFormat("u8* %s = %s;", headerStartVar.c_str(), packetStartVar.c_str());
     builder->newline();
     builder->emitIndent();
     builder->appendFormat("void* %s = %s;", packetEndVar.c_str(),
@@ -839,7 +836,8 @@ void TCTrafficManagerForXDP::emitReadXDP2TCMetadataFromHead(CodeBuilder *builder
     builder->newline();
 
     builder->emitIndent();
-    builder->appendFormat("%s = xdp2tc_md.packetOffsetInBits;", offsetVar.c_str());
+    builder->appendFormat("%s = (u8*)%s + BYTES(xdp2tc_md.packetOffsetInBits);",
+                          headerStartVar.c_str(), packetStartVar.c_str());
 
     builder->newline();
     builder->emitIndent();
@@ -881,7 +879,8 @@ void TCTrafficManagerForXDP::emitReadXDP2TCMetadataFromCPUMAP(CodeBuilder *build
                           this->control->outputStandardMetadata->name.name);
     builder->newline();
     builder->emitIndent();
-    builder->appendFormat("%s = md->packetOffsetInBits;", offsetVar.c_str());
+    builder->appendFormat("%s = (u8*)%s + BYTES(md->packetOffsetInBits);", headerStartVar.c_str(),
+                          packetStartVar.c_str());
 
     builder->emitIndent();
     builder->append(

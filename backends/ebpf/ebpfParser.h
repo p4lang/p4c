@@ -37,7 +37,7 @@ class StateTranslationVisitor : public CodeGenInspector {
     const EBPFParserState *state;
 
     virtual void compileExtractField(const IR::Expression *expr, const IR::StructField *field,
-                                     unsigned alignment, EBPFType *type);
+                                     unsigned hdrOffsetBits, EBPFType *type);
     virtual void compileExtract(const IR::Expression *destination);
     void compileLookahead(const IR::Expression *destination);
     void compileAdvance(const P4::ExternMethod *ext);
@@ -72,6 +72,8 @@ class EBPFParserState : public EBPFObject {
     EBPFParserState(const IR::ParserState *state, EBPFParser *parser)
         : state(state), parser(parser) {}
     void emit(CodeBuilder *builder);
+
+    DECLARE_TYPEINFO(EBPFParserState, EBPFObject);
 };
 
 class EBPFParser : public EBPFObject {
@@ -100,6 +102,8 @@ class EBPFParser : public EBPFObject {
     virtual void emitRejectState(CodeBuilder *builder);
 
     EBPFValueSet *getValueSet(cstring name) const { return ::get(valueSets, name); }
+
+    DECLARE_TYPEINFO(EBPFParser, EBPFObject);
 };
 
 }  // namespace EBPF

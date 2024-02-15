@@ -20,34 +20,31 @@ limitations under the License.
 #include <typeinfo>
 
 #include "lib/exceptions.h"
+#include "lib/rtti.h"
 
 /// Handy type conversion methods that can be inherited by various base classes.
-class ICastable {
+/// In order to use ICastable one also need to provide intrusive lightweight RTTI
+/// metadata for the given class hierarchy. See `docs/C++.md` for more information,
+/// but in short, one need to use DECLARE_TYPEINFO() macro for this.
+/// There is no DECLARE_TYPEINFO for ICastable itself as we are not expecting
+/// pointers neither to ICastable nor to RTTI::Base to appear within the codebase.
+/// As the same time, one should not cast to ICastable as well (via e.g.
+/// `->to<ICastable>()`. Use DECLARE_TYPEINFO without bases to specify the base class
+/// for a given herarchy.
+class ICastable : public virtual RTTI::Base {
  public:
     virtual ~ICastable() = default;
 
-    /// Checks whether the class is of type T. Returns true if this is the case.
-    template <typename T>
-    bool is() const {
-        return to<T>() != nullptr;
-    }
-
-    /// Tries to convert the class to type T. Returns a nullptr if the cast fails.
+    /// Tries to convert the class to type T. A BUG occurs if the cast fails.
     template <typename T>
     const T &as() const {
-        return dynamic_cast<const T &>(*this);
+        return *checkedTo<T>();
     }
 
-    /// Tries to convert the class to type T. Returns a nullptr if the cast fails.
+    /// Tries to convert the class to type T. A BUG occurs if the cast fails.
     template <typename T>
-    T *to() {
-        return dynamic_cast<T *>(this);
-    }
-
-    /// Tries to convert the class to type T. Returns a nullptr if the cast fails.
-    template <typename T>
-    const T *to() const {
-        return dynamic_cast<const T *>(this);
+    T &as() {
+        return *checkedTo<T>();
     }
 
     /// Performs a checked cast. A BUG occurs if the cast fails.

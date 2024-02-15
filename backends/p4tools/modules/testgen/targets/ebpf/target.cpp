@@ -1,7 +1,6 @@
 #include "backends/p4tools/modules/testgen/targets/ebpf/target.h"
 
-#include <stddef.h>
-
+#include <cstddef>
 #include <vector>
 
 #include "backends/p4tools/common/lib/util.h"
@@ -71,9 +70,9 @@ const EBPFProgramInfo *EBPFTestgenTarget::produceProgramInfoImpl(
 }
 
 EBPFTestBackend *EBPFTestgenTarget::getTestBackendImpl(
-    const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-    const std::filesystem::path &testPath) const {
-    return new EBPFTestBackend(programInfo, symbex, testPath);
+    const ProgramInfo &programInfo, const TestBackendConfiguration &testBackendConfiguration,
+    SymbolicExecutor &symbex) const {
+    return new EBPFTestBackend(programInfo, testBackendConfiguration, symbex);
 }
 
 EBPFCmdStepper *EBPFTestgenTarget::getCmdStepperImpl(ExecutionState &state, AbstractSolver &solver,

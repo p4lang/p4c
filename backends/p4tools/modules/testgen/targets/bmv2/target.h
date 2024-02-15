@@ -30,8 +30,9 @@ class Bmv2V1ModelTestgenTarget : public TestgenTarget {
         const CompilerResult &compilerResult,
         const IR::Declaration_Instance *mainDecl) const override;
 
-    Bmv2TestBackend *getTestBackendImpl(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                                        const std::filesystem::path &testPath) const override;
+    Bmv2TestBackend *getTestBackendImpl(const ProgramInfo &programInfo,
+                                        const TestBackendConfiguration &testBackendConfiguration,
+                                        SymbolicExecutor &symbex) const override;
 
     Bmv2V1ModelCmdStepper *getCmdStepperImpl(ExecutionState &state, AbstractSolver &solver,
                                              const ProgramInfo &programInfo) const override;

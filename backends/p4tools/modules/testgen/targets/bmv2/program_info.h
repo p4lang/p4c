@@ -5,6 +5,7 @@
 #include <map>
 #include <vector>
 
+#include "control-plane/p4RuntimeSerializer.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/ordered_map.h"
@@ -39,6 +40,9 @@ class Bmv2V1ModelProgramInfo : public ProgramInfo {
 
     /// @returns the gress associated with the given parser.
     int getGress(const IR::Type_Declaration *) const;
+
+    /// @returns the P4Runtime API produced by the compiler.
+    [[nodiscard]] P4::P4RuntimeAPI getP4RuntimeAPI() const;
 
     /// @returns the table associated with the direct extern
     const IR::P4Table *getTableofDirectExtern(const IR::IDeclaration *directExternDecl) const;
@@ -80,6 +84,8 @@ class Bmv2V1ModelProgramInfo : public ProgramInfo {
 
     /// @see ProgramInfo::getArchSpec
     static const ArchSpec ARCH_SPEC;
+
+    DECLARE_TYPEINFO(Bmv2V1ModelProgramInfo, ProgramInfo);
 };
 
 }  // namespace P4Tools::P4Testgen::Bmv2

@@ -31,8 +31,8 @@
 
 namespace P4Tools::P4Testgen::EBPF {
 
-STF::STF(std::filesystem::path basePath, std::optional<unsigned int> seed = std::nullopt)
-    : TestFramework(std::move(basePath), seed) {}
+STF::STF(const TestBackendConfiguration &testBackendConfiguration)
+    : TestFramework(testBackendConfiguration) {}
 
 inja::json STF::getControlPlane(const TestSpec *testSpec) {
     inja::json controlPlaneJson = inja::json::object();
@@ -228,10 +228,11 @@ void STF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
     if (selectedBranches != nullptr) {
         dataJson["selected_branches"] = selectedBranches.c_str();
     }
-    if (seed) {
-        dataJson["seed"] = *seed;
-    }
 
+    auto optSeed = getTestBackendConfiguration().seed;
+    if (optSeed.has_value()) {
+        dataJson["seed"] = optSeed.value();
+    }
     dataJson["test_id"] = testId;
     dataJson["trace"] = getTrace(testSpec);
     dataJson["control_plane"] = getControlPlane(testSpec);
@@ -243,7 +244,9 @@ void STF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
     dataJson["coverage"] = coverageStr.str();
 
     LOG5("STF test back end: emitting testcase:" << std::setw(4) << dataJson);
-    auto incrementedbasePath = basePath;
+    auto optBasePath = getTestBackendConfiguration().fileBasePath;
+    BUG_CHECK(optBasePath.has_value(), "Base path is not set.");
+    auto incrementedbasePath = optBasePath.value();
     incrementedbasePath.concat("_" + std::to_string(testId));
     incrementedbasePath.replace_extension(".stf");
     auto stfFileStream = std::ofstream(incrementedbasePath);
@@ -251,8 +254,8 @@ void STF::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_
     stfFileStream.flush();
 }
 
-void STF::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
-                     float currentCoverage) {
+void STF::writeTestToFile(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
+                          float currentCoverage) {
     std::string testCase = getTestCaseTemplate();
     emitTestcase(testSpec, selectedBranches, testId, testCase, currentCoverage);
 }

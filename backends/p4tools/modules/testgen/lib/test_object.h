@@ -27,6 +27,8 @@ class TestObject : public ICastable {
     /// @returns a version of the test object where all expressions are resolved and symbolic
     /// variables are substituted according to the mapping present in the @param model.
     [[nodiscard]] virtual const TestObject *evaluate(const Model &model, bool doComplete) const = 0;
+
+    DECLARE_TYPEINFO(TestObject);
 };
 
 /// A map of test objects.

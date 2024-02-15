@@ -1,4 +1,4 @@
-issue2036-1.p4(10): [--Werror=type-error] error: 'f'
+issue2036-1.p4(10): [--Werror=type-error] error: 'f(b)'
         f(b);
         ^^^^
   ---- Actual error:

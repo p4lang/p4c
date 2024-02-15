@@ -117,6 +117,8 @@ class EBPFTablePSA : public EBPFTable {
     bool isMatchTypeSupported(const IR::Declaration_ID *matchType) override {
         return EBPFTable::isMatchTypeSupported(matchType) || matchType->name.name == "selector";
     }
+
+    DECLARE_TYPEINFO(EBPFTablePSA, EBPFTable);
 };
 
 }  // namespace EBPF

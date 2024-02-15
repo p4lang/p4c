@@ -4,7 +4,7 @@ issue1557-bmv2.p4(17): [--Werror=type-error] error: Field drop is not a member o
 v1model.p4(64)
 struct standard_metadata_t {
        ^^^^^^^^^^^^^^^^^^^
-issue1557-bmv2.p4(19): [--Werror=type-error] error: idx: parameter should be assigned in call rewrite
+issue1557-bmv2.p4(19): [--Werror=type-error] error: idx: parameter should be assigned in call rewrite()
     action rewrite(bit<16> idx) { meta.idx = idx; }
                            ^^^
 issue1557-bmv2.p4(24)

@@ -1,18 +1,18 @@
 filegroup(
-  name = "ir_extension",
-  srcs = glob(["*.def"]),
-  visibility = ["//visibility:public"],  # So p4c can compile these.
+    name = "ir_extension",
+    srcs = glob(["*.def"]),
+    visibility = ["//visibility:public"],  # So p4c can compile these.
 )
 
 cc_binary(
-  name = "main",
-  srcs = ["main.cc"],
-  data = ["//p4:program.p4info.txt"],
-  deps = [
-    "@com_github_p4lang_p4c//:ir_frontend_midend_control_plane",
-    "@com_github_p4lang_p4runtime//:p4info_cc_proto",
-    "@com_google_protobuf//:protobuf",
-  ],
-  linkopts = [
-  ],
+    name = "main",
+    srcs = ["main.cc"],
+    data = ["//p4:program.p4info.txt"],
+    linkopts = [
+    ],
+    deps = [
+        "@com_github_p4lang_p4c//:ir_frontend_midend_control_plane",
+        "@com_github_p4lang_p4runtime//:p4info_cc_proto",
+        "@com_google_protobuf//:protobuf",
+    ],
 )

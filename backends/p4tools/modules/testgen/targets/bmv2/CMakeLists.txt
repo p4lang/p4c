@@ -5,8 +5,7 @@ if(ENABLE_TESTING)
 endif()
 
 # Source files for p4testgen.
-set(
-  TESTGEN_SOURCES
+set(TESTGEN_SOURCES
   ${TESTGEN_SOURCES}
   ${CMAKE_CURRENT_SOURCE_DIR}/test_backend/common.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test_backend/protobuf.cpp
@@ -31,9 +30,9 @@ set(
   PARENT_SCOPE
 )
 
-set(
-  TESTGEN_GTEST_SOURCES
+set(TESTGEN_GTEST_SOURCES
   ${TESTGEN_GTEST_SOURCES}
+  ${CMAKE_CURRENT_SOURCE_DIR}/test/testgen_api/api_test.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test/test_backend/ptf.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test/test_backend/stf.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/test/small-step/binary.cpp

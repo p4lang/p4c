@@ -16,7 +16,8 @@ limitations under the License.
 
 #include "lib/path.h"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
+
 #include "lib/exceptions.h"
 #include "lib/stringref.h"
 

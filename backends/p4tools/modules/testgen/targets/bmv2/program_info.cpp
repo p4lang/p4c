@@ -75,10 +75,8 @@ Bmv2V1ModelProgramInfo::Bmv2V1ModelProgramInfo(
         new IR::Grt(IR::Type::Boolean::get(), ExecutionState::getInputPacketSizeVar(),
                     IR::getConstant(&PacketVars::PACKET_SIZE_VAR_TYPE, minPktSize));
 
-    for (const auto &element : compilerResult.getP4ConstraintsRestrictions()) {
-        for (const auto *restriction : element) {
-            constraint = new IR::LAnd(constraint, restriction);
-        }
+    for (const auto &restriction : compilerResult.getP4ConstraintsRestrictions()) {
+        constraint = new IR::LAnd(constraint, restriction);
     }
 
     /// Finally, set the target constraints.
@@ -230,6 +228,10 @@ const IR::PathExpression *Bmv2V1ModelProgramInfo::getBlockParam(cstring blockLab
 
 const BMv2V1ModelCompilerResult &Bmv2V1ModelProgramInfo::getCompilerResult() const {
     return *ProgramInfo::getCompilerResult().checkedTo<BMv2V1ModelCompilerResult>();
+}
+
+P4::P4RuntimeAPI Bmv2V1ModelProgramInfo::getP4RuntimeAPI() const {
+    return getCompilerResult().getP4RuntimeApi();
 }
 
 const IR::Member *Bmv2V1ModelProgramInfo::getParserParamVar(const IR::P4Parser *parser,

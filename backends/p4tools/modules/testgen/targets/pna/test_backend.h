@@ -15,6 +15,7 @@
 
 #include "backends/p4tools/modules/testgen/core/program_info.h"
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/symbolic_executor.h"
+#include "backends/p4tools/modules/testgen/core/target.h"
 #include "backends/p4tools/modules/testgen/lib/execution_state.h"
 #include "backends/p4tools/modules/testgen/lib/test_backend.h"
 #include "backends/p4tools/modules/testgen/lib/test_spec.h"
@@ -27,8 +28,9 @@ class PnaTestBackend : public TestBackEnd {
     static const std::set<std::string> SUPPORTED_BACKENDS;
 
  public:
-    explicit PnaTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                            const std::filesystem::path &testPath);
+    explicit PnaTestBackend(const ProgramInfo &programInfo,
+                            const TestBackendConfiguration &testBackendConfiguration,
+                            SymbolicExecutor &symbex);
 
     TestBackEnd::TestInfo produceTestInfo(
         const ExecutionState *executionState, const Model *finalModel,

@@ -1,4 +1,4 @@
-issue774-2.p4(11): [--Werror=type-error] error: b.extract: could not infer a type for variable T
+issue774-2.p4(11): [--Werror=type-error] error: b.extract(DefaultExpression): could not infer a type for variable T
         b.extract(_);
         ^^^^^^^^^^^^
 core.p4(38)

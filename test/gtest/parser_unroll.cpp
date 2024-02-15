@@ -1,3 +1,5 @@
+#include <gtest/gtest.h>
+
 #include <cstdlib>
 #include <fstream>
 
@@ -16,7 +18,6 @@
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/uniqueNames.h"
 #include "frontends/p4/unusedDeclarations.h"
-#include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "lib/log.h"
 #include "midend/actionSynthesis.h"

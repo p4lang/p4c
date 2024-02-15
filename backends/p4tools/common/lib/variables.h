@@ -7,7 +7,14 @@
 /// Variables internal to P4Tools. These variables do not exist in the P4
 /// program itself, but are generated and added to the environment by the P4Tools tooling. These
 /// variables are also used for SMT solvers as symbolic variables.
-namespace P4Tools::ToolsVariables {
+namespace P4Tools {
+
+/// A list of constraints. These constraints may take the form of "x == 8w1","x != y", where "x" and
+/// "y" are symbolic variables. They are expressed in P4C IR form and may be consumed by SMT or
+/// similar solvers.
+using ConstraintsVector = std::vector<const IR::Expression *>;
+
+namespace ToolsVariables {
 
 /// To represent header validity, we pretend that every header has a field that reflects the
 /// header's validity state. This is the name of that field. This is not a valid P4 identifier,
@@ -41,6 +48,8 @@ IR::StateVariable getHeaderValidity(const IR::Expression *headerRef);
 /// and IR::Member can be converted into a state variable.
 IR::StateVariable convertReference(const IR::Expression *ref);
 
-}  // namespace P4Tools::ToolsVariables
+}  // namespace ToolsVariables
+
+}  // namespace P4Tools
 
 #endif /* BACKENDS_P4TOOLS_COMMON_LIB_VARIABLES_H_ */

@@ -80,7 +80,7 @@ interface IGeneralNamespace : INamespace {
 // Note that it might also contain a Simple or General namespace nested in these
 interface INestedNamespace : INamespace {
     virtual std::vector<INamespace> getNestedNamespaces() const = 0;
-    Util::Enumerator<IDeclaration> *getDeclarations() const;
+    Util::Enumerator<IDeclaration> *getDeclarations() const override;
 }
 
 /// Interface implemented by something that can be called
@@ -107,7 +107,7 @@ interface IContainer : IMayBeGenericType, IDeclaration, IFunctional {
     virtual Type_Method getConstructorMethodType() const = 0;
     virtual ParameterList getConstructorParameters() const = 0;
     // The IFunctional interface
-    ParameterList getParameters() const { return getConstructorParameters(); }
+    ParameterList getParameters() const override { return getConstructorParameters(); }
 }
 
 /// This represents a primitive type

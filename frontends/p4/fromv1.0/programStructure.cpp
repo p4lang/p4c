@@ -685,7 +685,7 @@ void ProgramStructure::include(cstring filename, cstring ppoptions) {
             auto code = P4::P4ParserDriver::parse(file, options.file);
             if (code && !::errorCount())
                 for (auto decl : code->objects) declarations->push_back(decl);
-            options.closeInput(file);
+            options.closePreprocessedInput(file);
         }
     }
 }
@@ -1128,9 +1128,9 @@ const IR::Expression *ProgramStructure::convertHashAlgorithms(const IR::NameList
 
 static bool sameBitsType(const IR::Node *errorPosition, const IR::Type *left,
                          const IR::Type *right) {
-    if (typeid(*left) != typeid(*right)) return false;
-    if (left->is<IR::Type_Bits>())
-        return left->to<IR::Type_Bits>()->operator==(*right->to<IR::Type_Bits>());
+    if (left->typeId() != right->typeId()) return false;
+    if (const auto *leftBitsType = left->to<IR::Type_Bits>())
+        return leftBitsType->operator==(right->as<IR::Type_Bits>());
     ::error(ErrorType::ERR_TYPE_ERROR, "%1%: operation only defined for bit/int types",
             errorPosition);
     return true;  // to prevent inserting a cast
@@ -1139,7 +1139,7 @@ static bool sameBitsType(const IR::Node *errorPosition, const IR::Type *left,
 static bool isSaturatedField(const IR::Expression *expr) {
     auto member = expr->to<IR::Member>();
     if (!member) return false;
-    auto header_type = dynamic_cast<const IR::Type_StructLike *>(member->expr->type);
+    auto header_type = member->expr->type->to<IR::Type_StructLike>();
     if (!header_type) return false;
     auto field = header_type->getField(member->member.name);
     if (field && field->getAnnotation("saturating")) {

@@ -104,7 +104,7 @@ const IR::Vector<IR::Expression> *RemoveComplexExpressions::simplifyExpressions(
     // of the list.  Otherwise we simplify the argument itself.
     // This is mostly for functions that take FieldLists - these
     // should still take a list as argument.
-    bool changes = true;
+    bool changes = false;
     auto result = new IR::Vector<IR::Expression>();
     for (auto e : *vec) {
         auto r = simplifyExpression(e, force);

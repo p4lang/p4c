@@ -40,9 +40,10 @@ const ProgramInfo *TestgenTarget::produceProgramInfoImpl(
 
 const TestgenTarget &TestgenTarget::get() { return Target::get<TestgenTarget>("testgen"); }
 
-TestBackEnd *TestgenTarget::getTestBackend(const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-                                           const std::filesystem::path &testPath) {
-    return get().getTestBackendImpl(programInfo, symbex, testPath);
+TestBackEnd *TestgenTarget::getTestBackend(const ProgramInfo &programInfo,
+                                           const TestBackendConfiguration &testBackendConfiguration,
+                                           SymbolicExecutor &symbex) {
+    return get().getTestBackendImpl(programInfo, testBackendConfiguration, symbex);
 }
 
 const ProgramInfo *TestgenTarget::produceProgramInfo(const CompilerResult &compilerResult) {

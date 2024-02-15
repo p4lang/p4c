@@ -55,6 +55,8 @@ class EBPFPsaParser : public EBPFParser {
         BUG_CHECK(result != nullptr, "No checksum named %1%", name);
         return result;
     }
+
+    DECLARE_TYPEINFO(EBPFPsaParser, EBPFParser);
 };
 
 }  // namespace EBPF

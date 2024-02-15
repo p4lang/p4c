@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef LIB_HVEC_MAP_H_
 #define LIB_HVEC_MAP_H_
 
+#include <initializer_list>
 #include <tuple>
 #include <vector>
 
@@ -52,7 +53,18 @@ class hvec_map : hash_vector_base {
     }
     hvec_map(const hvec_map &) = default;
     hvec_map(hvec_map &&) = default;
-    hvec_map &operator=(const hvec_map &) = default;
+    hvec_map &operator=(const hvec_map &that) {
+        if (this != std::addressof(that)) {
+            clear();
+            hf = that.hf;
+            eql = that.eql;
+
+            data.reserve(that.size());
+            insert(that.begin(), that.end());
+        }
+
+        return *this;
+    }
     hvec_map &operator=(hvec_map &&) = default;
     ~hvec_map() = default;
     template <class ITER>
@@ -247,6 +259,11 @@ class hvec_map : hash_vector_base {
         }
         return std::make_pair(iterator(*this, idx), new_key);
     }
+    template <typename InputIterator>
+    void insert(InputIterator first, InputIterator last) {
+        for (; first != last; ++first) insert(*first);
+    }
+    void insert(std::initializer_list<value_type> vl) { return insert(vl.begin(), vl.end()); }
     template <class HVM, class VT>
     _iter<HVM, VT> erase(_iter<HVM, VT> it) {
         BUG_CHECK(this == it.self, "incorrect iterator for hvec_map::erase");

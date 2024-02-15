@@ -80,9 +80,9 @@ cc_library(
     ],
     features = ["-use_header_modules"],
     deps = [
-        "@boost//:multiprecision",
         "//:ir_frontend_midend_control_plane",
         "//:lib",
+        "@boost//:multiprecision",
         "@com_github_z3prover_z3//:api",
     ],
 )
@@ -125,35 +125,44 @@ filegroup(
 cc_library(
     name = "testgen_lib",
     srcs = glob([
-        "modules/testgen/core/**/*.h",
-        "modules/testgen/lib/*.h",
-        "modules/testgen/*.h",
-    ]) + glob([
         "modules/testgen/core/*.cpp",
         "modules/testgen/core/small_step/*.cpp",
         "modules/testgen/core/symbolic_executor/*.cpp",
         "modules/testgen/lib/*.cpp",
+    ]) + glob([
+        "modules/testgen/core/*.h",
+        "modules/testgen/core/small_step/*.h",
+        "modules/testgen/core/symbolic_executor/*.h",
+        "modules/testgen/lib/*.h",
     ]) + [
-        "common/options.h",
         "modules/testgen/options.cpp",
         "modules/testgen/testgen.cpp",
         ":register_testgen_targets",
         ":target_register_headers",
         ":testgen_targets_src",
     ],
+    # We onlu make top-level, library, and test backend header files visible to other targets.
+    hdrs = ["common/options.h"] + glob([
+        "modules/testgen/lib/*.h",
+        "modules/testgen/*.h",
+    ]) + glob(
+        ["modules/testgen/targets/%s/test_backend/*.h" % target for target in TESTGEN_TARGETS],
+    ),
     copts = [
         "-fexceptions",
         "-w",
     ],
     features = ["-use_header_modules"],
+    # Needs to be accessible by other targets.
+    visibility = ["//visibility:public"],
     deps = [
         ":common",
         ":register_testgen_targets",
+        "//:ir_frontend_midend_control_plane",
+        "//:lib",
         "@boost//:multiprecision",
         "@com_github_pantor_inja//:inja",
         "@nlohmann_json//:json",
-        "//:ir_frontend_midend_control_plane",
-        "//:lib",
     ],
 )
 
@@ -170,9 +179,9 @@ cc_binary(
     visibility = ["//visibility:public"],
     deps = [
         ":testgen_lib",
-        "@boost//:multiprecision",
-        "@boost//:filesystem",
         "//:lib",
+        "@boost//:filesystem",
+        "@boost//:multiprecision",
     ],
 )
 
@@ -180,5 +189,21 @@ build_test(
     name = "p4testgen_build_test",
     targets = [
         ":p4testgen",
+    ],
+)
+
+cc_test(
+    name = "p4testgen_api_test",
+    srcs = [
+        "modules/testgen/targets/bmv2/test/testgen_api/api_test.cpp",
+    ],
+    copts = [
+        "-fexceptions",
+        "-w",
+    ],
+    deps = [
+        ":testgen_lib",
+        "//:test_helpers",
+        "@com_google_googletest//:gtest_main",
     ],
 )

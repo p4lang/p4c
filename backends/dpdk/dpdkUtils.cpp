@@ -93,6 +93,27 @@ bool isInsideHeader(const IR::Expression *expr) {
     return false;
 }
 
+bool isValidCall(const IR::MethodCallExpression *m) {
+    CHECK_NULL(m->method);
+    if (auto mc = m->method->to<IR::Member>()) {
+        if (mc->member.name == IR::Type_Header::isValid) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool isValidMemberField(const IR::Member *mem) {
+    if (auto mexpr = mem->expr->to<IR::Member>()) {
+        auto pe = mexpr->expr->to<IR::PathExpression>();
+        CHECK_NULL(pe);
+        if (pe->path->name == "h") return true;
+    } else if (auto mexpr = mem->expr->to<IR::PathExpression>()) {
+        if (mexpr->path->name == "m") return true;
+    }
+    return false;
+}
+
 const IR::Type_Bits *getEightBitAlignedType(const IR::Type_Bits *tb) {
     auto width = (tb->width_bits() + 7) & (~7);
     return IR::Type_Bits::get(width);

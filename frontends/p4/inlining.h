@@ -402,13 +402,12 @@ class GeneralInliner : public AbstractInliner<InlineList, InlineSummary> {
     bool optimizeParserInlining;
 
  public:
-    explicit GeneralInliner(bool isv1, bool _optimizeParserInlining)
-        : refMap(new ReferenceMap()),
+    explicit GeneralInliner(ReferenceMap *refMap, bool _optimizeParserInlining)
+        : refMap(refMap),
           typeMap(new TypeMap()),
           workToDo(nullptr),
           optimizeParserInlining(_optimizeParserInlining) {
         setName("GeneralInliner");
-        refMap->setIsV1(isv1);
         visitDagOnce = false;
     }
     // controlled visiting order
@@ -436,7 +435,7 @@ class InlinePass : public PassManager {
         : PassManager({new TypeChecking(refMap, typeMap),
                        new DiscoverInlining(&toInline, refMap, typeMap, evaluator),
                        new InlineDriver<InlineList, InlineSummary>(
-                           &toInline, new GeneralInliner(refMap->isV1(), optimizeParserInlining)),
+                           &toInline, new GeneralInliner(refMap, optimizeParserInlining)),
                        new RemoveAllUnusedDeclarations(refMap)}) {
         setName("InlinePass");
     }

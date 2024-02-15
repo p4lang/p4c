@@ -14,6 +14,7 @@
 #include "ir/solver.h"
 #include "lib/cstring.h"
 #include "lib/ordered_map.h"
+#include "lib/rtti.h"
 #include "lib/safe_vector.h"
 
 namespace P4Tools {
@@ -127,6 +128,8 @@ class Z3Solver : public AbstractSolver {
 
     /// Stores the timeout, as last set by @ref timeout.
     std::optional<unsigned> timeout_;
+
+    DECLARE_TYPEINFO(Z3Solver, AbstractSolver);
 };
 
 }  // namespace P4Tools

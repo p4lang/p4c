@@ -38,6 +38,9 @@ jobs:
         chmod +x $BAZEL
         sudo mv $BAZEL /usr/local/bin/bazel
 
+    - name: First, pass the lint test
+      run: bazel run //:buildifier_check
+
     - name: Install Flex and Bison
       run: sudo apt-get update && sudo apt-get install bison flex libfl-dev
 
@@ -63,6 +66,9 @@ jobs:
         key: ${{ runner.os }}-build-indirect-${{ github.sha }}
         restore-keys: |
           ${{ runner.os }}-build-indirect-
+
+    - name: First, pass the lint test
+      run: bazel run //:buildifier_check
 
     - name: Install bazelisk
       run: |

@@ -6,8 +6,6 @@
 #include "backends/bmv2/common/annotations.h"
 #include "backends/p4tools/common/compiler/compiler_target.h"
 #include "backends/p4tools/common/compiler/midend.h"
-#include "control-plane/addMissingIds.h"
-#include "control-plane/p4RuntimeArchStandard.h"
 #include "frontends/common/options.h"
 #include "lib/cstring.h"
 
@@ -22,7 +20,7 @@ namespace P4Tools::P4Testgen::Bmv2 {
 BMv2V1ModelCompilerResult::BMv2V1ModelCompilerResult(TestgenCompilerResult compilerResult,
                                                      P4::P4RuntimeAPI p4runtimeApi,
                                                      DirectExternMap directExternMap,
-                                                     P4ConstraintsVector p4ConstraintsRestrictions)
+                                                     ConstraintsVector p4ConstraintsRestrictions)
     : TestgenCompilerResult(std::move(compilerResult)),
       p4runtimeApi(p4runtimeApi),
       directExternMap(std::move(directExternMap)),
@@ -30,7 +28,7 @@ BMv2V1ModelCompilerResult::BMv2V1ModelCompilerResult(TestgenCompilerResult compi
 
 const P4::P4RuntimeAPI &BMv2V1ModelCompilerResult::getP4RuntimeApi() const { return p4runtimeApi; }
 
-P4ConstraintsVector BMv2V1ModelCompilerResult::getP4ConstraintsRestrictions() const {
+ConstraintsVector BMv2V1ModelCompilerResult::getP4ConstraintsRestrictions() const {
     return p4ConstraintsRestrictions;
 }
 
@@ -57,6 +55,10 @@ CompilerResultOrError Bmv2V1ModelCompilerTarget::runCompilerImpl(
     /// After the front end, get the P4Runtime API for the V1model architecture.
     auto p4runtimeApi = P4::P4RuntimeSerializer::get()->generateP4Runtime(program, "v1model");
 
+    if (::errorCount() > 0) {
+        return std::nullopt;
+    }
+
     program = runMidEnd(program);
     if (program == nullptr) {
         return std::nullopt;
@@ -79,17 +81,18 @@ CompilerResultOrError Bmv2V1ModelCompilerTarget::runCompilerImpl(
         return std::nullopt;
     }
 
-    // Vector containing pairs of restrictions and nodes to which these restrictions apply.
-    P4ConstraintsVector p4ConstraintsRestrictions;
-    // Defines all "entry_restriction" and then converts restrictions from string to IR
-    // expressions, and stores them in p4ConstraintsRestrictions to move targetConstraints further.
-    program->apply(AssertsParser(p4ConstraintsRestrictions));
+    // Parses any @refers_to annotations and converts them into a vector of restrictions.
+    auto refersToParser = RefersToParser();
+    program->apply(refersToParser);
     if (::errorCount() > 0) {
         return std::nullopt;
     }
-    // Defines all "refers_to" and then converts restrictions from string to IR expressions,
-    // and stores them in p4ConstraintsRestrictions to move targetConstraints further.
-    program->apply(RefersToParser(p4ConstraintsRestrictions));
+    ConstraintsVector p4ConstraintsRestrictions = refersToParser.getRestrictionsVector();
+
+    // Defines all "entry_restriction" and then converts restrictions from string to IR
+    // expressions, and stores them in p4ConstraintsRestrictions to move targetConstraints
+    // further.
+    program->apply(AssertsParser(p4ConstraintsRestrictions));
     if (::errorCount() > 0) {
         return std::nullopt;
     }
@@ -108,17 +111,9 @@ CompilerResultOrError Bmv2V1ModelCompilerTarget::runCompilerImpl(
 
 MidEnd Bmv2V1ModelCompilerTarget::mkMidEnd(const CompilerOptions &options) const {
     MidEnd midEnd(options);
-    auto *refMap = midEnd.getRefMap();
-    auto *typeMap = midEnd.getTypeMap();
     midEnd.addPasses({
         // Parse BMv2-specific annotations.
         new BMV2::ParseAnnotations(),
-        // Parse P4Runtime-specific annotations and insert missing IDs.
-        // Only do this for the protobuf back end.
-        TestgenOptions::get().testBackend == "PROTOBUF"
-            ? new P4::AddMissingIdAnnotations(
-                  refMap, typeMap, new P4::ControlPlaneAPI::Standard::V1ModelArchHandlerBuilder())
-            : nullptr,
     });
     midEnd.addDefaultPasses();
 

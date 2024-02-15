@@ -80,7 +80,7 @@ class ParserOptions : public Util::Options {
     // Returns the output of the preprocessor.
     FILE *preprocess();
     // Closes the input stream returned by preprocess.
-    void closeInput(FILE *input) const;
+    void closePreprocessedInput(FILE *input) const;
     // True if we are compiling a P4 v1.0 or v1.1 program
     bool isv1() const;
     // Get a debug hook function suitable for insertion

@@ -54,6 +54,8 @@ class Packet : public TestObject {
     /// is ignored.
     /// A BUG is thrown otherwise.
     [[nodiscard]] const IR::Constant *getEvaluatedPayloadMask() const;
+
+    DECLARE_TYPEINFO(Packet, TestObject);
 };
 
 /* =========================================================================================
@@ -84,6 +86,8 @@ class ActionArg : public TestObject {
     /// If the value is a bool, it is converted into a constant.
     /// A BUG is thrown otherwise.
     [[nodiscard]] const IR::Constant *getEvaluatedValue() const;
+
+    DECLARE_TYPEINFO(ActionArg, TestObject);
 };
 
 class ActionCall : public TestObject {
@@ -115,6 +119,8 @@ class ActionCall : public TestObject {
 
     /// @returns the arguments of this particular call.
     [[nodiscard]] const std::vector<ActionArg> *getArgs() const;
+
+    DECLARE_TYPEINFO(ActionCall, TestObject);
 };
 
 class TableMatch : public TestObject {
@@ -127,6 +133,8 @@ class TableMatch : public TestObject {
 
     /// @returns the key associated with this object.
     [[nodiscard]] const IR::KeyElement *getKey() const;
+
+    DECLARE_TYPEINFO(TableMatch, TestObject);
 };
 
 using TableMatchMap = std::map<cstring, const TableMatch *>;
@@ -156,6 +164,8 @@ class Ternary : public TableMatch {
     /// value needs to be a constant.
     /// A BUG is thrown otherwise.
     [[nodiscard]] const IR::Constant *getEvaluatedMask() const;
+
+    DECLARE_TYPEINFO(Ternary, TableMatch);
 };
 
 class LPM : public TableMatch {
@@ -183,6 +193,8 @@ class LPM : public TableMatch {
     /// point the prefix is expected to be a constant.
     /// A BUG is thrown otherwise.
     [[nodiscard]] const IR::Constant *getEvaluatedPrefixLength() const;
+
+    DECLARE_TYPEINFO(LPM, TableMatch);
 };
 
 class Exact : public TableMatch {
@@ -200,6 +212,8 @@ class Exact : public TableMatch {
     /// @returns the match value. It is expected to be a constant at this point.
     /// A BUG is thrown otherwise.
     [[nodiscard]] const IR::Constant *getEvaluatedValue() const;
+
+    DECLARE_TYPEINFO(Exact, TableMatch);
 };
 
 class TableRule : public TestObject {
@@ -232,6 +246,8 @@ class TableRule : public TestObject {
 
     /// @returns the time-to-live of this particular entry.
     [[nodiscard]] int getTTL() const;
+
+    DECLARE_TYPEINFO(TableRule, TestObject);
 };
 
 class TableConfig : public TestObject {
@@ -269,6 +285,8 @@ class TableConfig : public TestObject {
 
     /// Add a table property to the table.
     void addTableProperty(cstring propertyName, const TestObject *property);
+
+    DECLARE_TYPEINFO(TableConfig, TestObject);
 };
 
 /* =========================================================================================

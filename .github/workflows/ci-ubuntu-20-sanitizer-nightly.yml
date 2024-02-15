@@ -13,7 +13,7 @@ jobs:
   # Build with clang and test p4c on Ubuntu 20.04.
   test-ubuntu20-clang-sanitizers:
     # Only run on pull requests with the "run-sanitizer" label.
-    if: ${{ github.event_name == 'schedule' }} or contains(github.event.pull_request.labels.*.name, 'run-sanitizer')
+    if: ${{ github.event_name == 'schedule' || contains(github.event.pull_request.labels.*.name, 'run-sanitizer') }}
     strategy:
       fail-fast: false
     runs-on: ubuntu-20.04

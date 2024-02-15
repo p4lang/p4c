@@ -15,9 +15,10 @@ limitations under the License.
 */
 #include "lib/stringify.h"
 
+#include <gtest/gtest.h>
+
 #include <cstdarg>
 
-#include "gtest/gtest.h"
 #include "lib/cstring.h"
 
 namespace Test {

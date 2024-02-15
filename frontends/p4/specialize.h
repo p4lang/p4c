@@ -210,7 +210,8 @@ class SpecializeAll : public PassRepeated {
     SpecializationMap specMap;
 
  public:
-    SpecializeAll(ReferenceMap *refMap, TypeMap *typeMap);
+    SpecializeAll(ReferenceMap *refMap, TypeMap *typeMap,
+                  ConstantFoldingPolicy *constantFoldingPolicy);
 };
 
 }  // namespace P4

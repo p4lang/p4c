@@ -170,7 +170,7 @@ void TCIngressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
                                       "skipping deparser..");
     builder->emitIndent();
     CHECK_NULL(program);
-    auto pipeline = dynamic_cast<const EBPFPipeline *>(program);
+    auto pipeline = program->checkedTo<EBPFPipeline>();
     builder->appendFormat("%s->packet_path = RESUBMIT;", pipeline->compilerGlobalMetadata);
     builder->newline();
     builder->emitIndent();
@@ -216,7 +216,8 @@ void XDPIngressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
     builder->appendFormat("xdp2tc_md.ostd = *%s", this->istd->name.name);
     builder->endOfStatement(true);
     builder->emitIndent();
-    builder->appendFormat("xdp2tc_md.packetOffsetInBits = %s", this->program->offsetVar);
+    builder->appendFormat("xdp2tc_md.packetOffsetInBits = 8 * PTR_DIFF_BYTES(%s, %s)",
+                          this->program->headerStartVar, this->program->packetStartVar);
     builder->endOfStatement(true);
     builder->append(
         "    void *data = (void *)(long)skb->data;\n"

@@ -42,6 +42,8 @@ class PnaDpdkRegisterCondition : public TestObject {
                                                            bool doComplete) const override;
 
     [[nodiscard]] cstring getObjectName() const override;
+
+    DECLARE_TYPEINFO(PnaDpdkRegisterCondition, TestObject);
 };
 
 /// This object tracks the list of writes that have been performed to a particular register. The
@@ -82,6 +84,8 @@ class PnaDpdkRegisterValue : public TestObject {
 
     [[nodiscard]] const PnaDpdkRegisterValue *evaluate(const Model &model,
                                                        bool doComplete) const override;
+
+    DECLARE_TYPEINFO(PnaDpdkRegisterValue, TestObject);
 };
 
 /* =========================================================================================
@@ -114,6 +118,8 @@ class PnaDpdkActionProfile : public TestObject {
 
     [[nodiscard]] const PnaDpdkActionProfile *evaluate(const Model &model,
                                                        bool doComplete) const override;
+
+    DECLARE_TYPEINFO(PnaDpdkActionProfile, TestObject);
 };
 
 /* =========================================================================================
@@ -141,6 +147,8 @@ class PnaDpdkActionSelector : public TestObject {
 
     [[nodiscard]] const PnaDpdkActionSelector *evaluate(const Model &model,
                                                         bool doComplete) const override;
+
+    DECLARE_TYPEINFO(PnaDpdkActionSelector, TestObject);
 };
 
 /* =========================================================================================
@@ -164,6 +172,8 @@ class MetadataCollection : public TestObject {
     void addMetaDataField(cstring name, const IR::Literal *metadataField);
 
     const IR::Literal *getMetadataField(cstring name);
+
+    DECLARE_TYPEINFO(MetadataCollection, TestObject);
 };
 
 /* =========================================================================================
@@ -191,6 +201,8 @@ class Optional : public TableMatch {
 
     /// @returns whether to add this optional match as an exact match.
     bool addAsExactMatch() const;
+
+    DECLARE_TYPEINFO(Optional, TableMatch);
 };
 
 class Range : public TableMatch {
@@ -216,6 +228,8 @@ class Range : public TableMatch {
     /// @returns the inclusive end of the range. It is expected to be a constant at this point.
     /// A BUG is thrown otherwise.
     const IR::Constant *getEvaluatedHigh() const;
+
+    DECLARE_TYPEINFO(Range, TableMatch);
 };
 
 }  // namespace P4Tools::P4Testgen::Pna

@@ -17,12 +17,13 @@ limitations under the License.
 #ifndef TEST_GTEST_HELPERS_H_
 #define TEST_GTEST_HELPERS_H_
 
+#include <gtest/gtest.h>
+
 #include <optional>
 #include <string>
 
 #include "frontends/common/options.h"
 #include "frontends/p4/parseAnnotations.h"
-#include "gtest/gtest.h"
 
 namespace IR {
 class P4Program;
@@ -116,10 +117,10 @@ struct FrontendTestCase {
     /// Create a test case that only requires the frontend to run.
     static std::optional<FrontendTestCase> create(
         const std::string &source, CompilerOptions::FrontendVersion langVersion = defaultVersion,
-        const P4::ParseAnnotations &parseAnnotations = P4::ParseAnnotations());
+        P4::ParseAnnotations *parseAnnotations = nullptr);
 
     static std::optional<FrontendTestCase> create(const std::string &source,
-                                                  const P4::ParseAnnotations &parseAnnotations) {
+                                                  P4::ParseAnnotations *parseAnnotations) {
         return create(source, defaultVersion, parseAnnotations);
     }
 

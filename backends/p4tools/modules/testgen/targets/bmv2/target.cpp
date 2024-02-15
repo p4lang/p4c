@@ -71,9 +71,10 @@ const Bmv2V1ModelProgramInfo *Bmv2V1ModelTestgenTarget::produceProgramInfoImpl(
 }
 
 Bmv2TestBackend *Bmv2V1ModelTestgenTarget::getTestBackendImpl(
-    const ProgramInfo &programInfo, SymbolicExecutor &symbex,
-    const std::filesystem::path &testPath) const {
-    return new Bmv2TestBackend(programInfo, symbex, testPath);
+    const ProgramInfo &programInfo, const TestBackendConfiguration &testBackendConfiguration,
+    SymbolicExecutor &symbex) const {
+    return new Bmv2TestBackend(*programInfo.checkedTo<Bmv2V1ModelProgramInfo>(),
+                               testBackendConfiguration, symbex);
 }
 
 Bmv2V1ModelCmdStepper *Bmv2V1ModelTestgenTarget::getCmdStepperImpl(

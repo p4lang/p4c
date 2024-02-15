@@ -17,6 +17,7 @@ limitations under the License.
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <google/protobuf/util/message_differencer.h>
+#include <gtest/gtest.h>
 
 #include <iterator>
 #include <optional>
@@ -27,11 +28,11 @@ limitations under the License.
 
 #include "control-plane/p4/config/v1/p4types.pb.h"
 #include "control-plane/p4/v1/p4runtime.pb.h"
-#include "gtest/gtest.h"
 #include "p4/config/v1/p4info.pb.h"
 #pragma GCC diagnostic pop
 
 #include "control-plane/p4RuntimeSerializer.h"
+#include "control-plane/p4infoApi.h"
 #include "control-plane/typeSpecConverter.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
@@ -52,6 +53,15 @@ namespace {
 
 using P4Ids = p4configv1::P4Ids;
 
+using P4::ControlPlaneAPI::findP4RuntimeAction;
+using P4::ControlPlaneAPI::findP4RuntimeControllerPacketMetadata;
+using P4::ControlPlaneAPI::findP4RuntimeCounter;
+using P4::ControlPlaneAPI::findP4RuntimeDigest;
+using P4::ControlPlaneAPI::findP4RuntimeDirectCounter;
+using P4::ControlPlaneAPI::findP4RuntimeRegister;
+using P4::ControlPlaneAPI::findP4RuntimeTable;
+using P4::ControlPlaneAPI::findP4RuntimeValueSet;
+
 using google::protobuf::util::MessageDifferencer;
 
 const cstring defaultArch = "v1model";
@@ -66,88 +76,16 @@ std::optional<P4::P4RuntimeAPI> createP4RuntimeTestCase(
     const std::string &source,
     CompilerOptions::FrontendVersion langVersion = FrontendTestCase::defaultVersion,
     const cstring arch = defaultArch,
-    P4::ParseAnnotations parseAnnotations = P4::ParseAnnotations()) {
+    P4::ParseAnnotations *parseAnnotations = new P4::ParseAnnotations()) {
     auto frontendTestCase = FrontendTestCase::create(source, langVersion, parseAnnotations);
     if (!frontendTestCase) return std::nullopt;
     return P4::generateP4Runtime(frontendTestCase->program, arch);
 }
 
 std::optional<P4::P4RuntimeAPI> createP4RuntimeTestCase(const std::string &source,
-                                                        P4::ParseAnnotations parseAnnotations) {
+                                                        P4::ParseAnnotations *parseAnnotations) {
     return createP4RuntimeTestCase(source, FrontendTestCase::defaultVersion, defaultArch,
                                    parseAnnotations);
-}
-
-/// Generic meta function which searches an object by @name in the given range
-/// and @returns the P4Runtime representation, or null if none is found.
-template <typename It>
-auto findP4InfoObject(const It &first, const It &last, const std::string &name) -> const
-    typename std::iterator_traits<It>::value_type * {
-    using T = typename std::iterator_traits<It>::value_type;
-    auto desiredObject = std::find_if(
-        first, last, [&](const T &object) { return object.preamble().name() == name; });
-    if (desiredObject == last) return nullptr;
-    return &*desiredObject;
-}
-
-/// @return the P4Runtime representation of the table with the given name, or
-/// null if none is found.
-const p4configv1::Table *findTable(const P4::P4RuntimeAPI &analysis, const std::string &name) {
-    auto &tables = analysis.p4Info->tables();
-    return findP4InfoObject(tables.begin(), tables.end(), name);
-}
-
-/// @return the P4Runtime representation of the action with the given name, or
-/// null if none is found.
-const p4configv1::Action *findAction(const P4::P4RuntimeAPI &analysis, const std::string &name) {
-    auto &actions = analysis.p4Info->actions();
-    return findP4InfoObject(actions.begin(), actions.end(), name);
-}
-
-/// @return the P4Runtime representation of the value set with the given name,
-/// or null if none is found.
-const p4configv1::ValueSet *findValueSet(const P4::P4RuntimeAPI &analysis,
-                                         const std::string &name) {
-    auto &vsets = analysis.p4Info->value_sets();
-    return findP4InfoObject(vsets.begin(), vsets.end(), name);
-}
-
-/// @return the P4Runtime representation of the register with the given name, or
-/// null if none is found.
-const p4configv1::Register *findRegister(const P4::P4RuntimeAPI &analysis,
-                                         const std::string &name) {
-    auto &registers = analysis.p4Info->registers();
-    return findP4InfoObject(registers.begin(), registers.end(), name);
-}
-
-/// @return the P4Runtime representation of the counter with the given name, or
-/// null if none is found.
-const p4configv1::Counter *findCounter(const P4::P4RuntimeAPI &analysis, const std::string &name) {
-    auto &counters = analysis.p4Info->counters();
-    return findP4InfoObject(counters.begin(), counters.end(), name);
-}
-
-/// @return the P4Runtime representation of the direct counter with the given
-/// name, or null if none is found.
-const p4configv1::DirectCounter *findDirectCounter(const P4::P4RuntimeAPI &analysis,
-                                                   const std::string &name) {
-    auto &counters = analysis.p4Info->direct_counters();
-    return findP4InfoObject(counters.begin(), counters.end(), name);
-}
-
-/// @return the P4Runtime representation of the digest with the given name, or
-/// null if none is found.
-const p4configv1::Digest *findDigest(const P4::P4RuntimeAPI &analysis, const std::string &name) {
-    auto &digests = analysis.p4Info->digests();
-    return findP4InfoObject(digests.begin(), digests.end(), name);
-}
-
-/// @return the P4Runtime representation of the "controller header" with the
-/// given name, or null if none is found.
-const p4configv1::ControllerPacketMetadata *findControllerHeader(const P4::P4RuntimeAPI &analysis,
-                                                                 const std::string &name) {
-    auto &headers = analysis.p4Info->controller_packet_metadata();
-    return findP4InfoObject(headers.begin(), headers.end(), name);
 }
 
 }  // namespace
@@ -251,7 +189,7 @@ TEST_F(P4Runtime, IdAssignment) {
 
     {
         // Check that 'igTable' ended up in the P4Info output.
-        auto *igTable = findTable(*test, "ingress.igTable");
+        const auto *igTable = findP4RuntimeTable(*test->p4Info, "ingress.igTable");
         ASSERT_TRUE(igTable != nullptr);
 
         // Check that the id indicates the correct resource type.
@@ -260,47 +198,49 @@ TEST_F(P4Runtime, IdAssignment) {
         // Check that the rest of the id matches the hash value that we expect.
         // (If we were to ever change the hash algorithm we use when mapping P4
         // names to P4Runtime ids, we'd need to change this test.)
-        EXPECT_EQ(14761719u, igTable->preamble().id() & 0x00ffffff);
+        EXPECT_EQ(14761719U, igTable->preamble().id() & 0x00ffffff);
     }
 
     {
         // Check that 'igTableWithName' ended up in the P4Info output under that
         // name, which is determined by its @name annotation, and *not* under
         // 'igTableWithoutName'.
-        EXPECT_TRUE(findTable(*test, "ingress.igTableWithoutName") == nullptr);
-        auto *igTableWithName = findTable(*test, "ingress.igTableWithName");
+        EXPECT_TRUE(findP4RuntimeTable(*test->p4Info, "ingress.igTableWithoutName") == nullptr);
+        const auto *igTableWithName = findP4RuntimeTable(*test->p4Info, "ingress.igTableWithName");
         ASSERT_TRUE(igTableWithName != nullptr);
 
         // Check that the id of 'igTableWithName' was computed based on its
         // @name annotation. (See above for caveat re: the hash algorithm.)
         EXPECT_EQ(unsigned(P4Ids::TABLE), igTableWithName->preamble().id() >> 24);
-        EXPECT_EQ(1108382u, igTableWithName->preamble().id() & 0x00ffffff);
+        EXPECT_EQ(1108382U, igTableWithName->preamble().id() & 0x00ffffff);
     }
 
     {
         // Check that 'igTableWithId' ended up in the P4Info output, and that
         // its id matches the one set by its @id annotation, with the required
         // 8-bit type prefix (which is 0x2 for tables).
-        auto *igTableWithId = findTable(*test, "ingress.igTableWithId");
+        const auto *igTableWithId = findP4RuntimeTable(*test->p4Info, "ingress.igTableWithId");
         ASSERT_TRUE(igTableWithId != nullptr);
-        auto expectedId = 1234u | (unsigned(P4Ids::TABLE) << 24);
+        auto expectedId = 1234U | (unsigned(P4Ids::TABLE) << 24);
         EXPECT_EQ(expectedId, igTableWithId->preamble().id());
     }
 
     {
         // Same as above, but with the largest possible id (0xffffff).
-        auto *igTableWithLargestId = findTable(*test, "ingress.igTableWithLargestId");
+        const auto *igTableWithLargestId =
+            findP4RuntimeTable(*test->p4Info, "ingress.igTableWithLargestId");
         ASSERT_TRUE(igTableWithLargestId != nullptr);
-        auto expectedId = 0xffffffu | (unsigned(P4Ids::TABLE) << 24);
+        auto expectedId = 0xffffffU | (static_cast<unsigned>(P4Ids::TABLE) << 24);
         EXPECT_EQ(expectedId, igTableWithLargestId->preamble().id());
     }
 
     {
         // Check that 'igTableWithPrefixedId' ended up in the P4Info output, and
         // that its id matches the one set by its @id annotation.
-        auto *igTableWithPrefixedId = findTable(*test, "ingress.igTableWithPrefixedId");
+        const auto *igTableWithPrefixedId =
+            findP4RuntimeTable(*test->p4Info, "ingress.igTableWithPrefixedId");
         ASSERT_TRUE(igTableWithPrefixedId != nullptr);
-        auto expectedId = 0x02000133u;
+        auto expectedId = 0x02000133U;
         EXPECT_EQ(expectedId, igTableWithPrefixedId->preamble().id());
     }
 
@@ -308,19 +248,23 @@ TEST_F(P4Runtime, IdAssignment) {
         // Check that 'igTableWithNameAndId' ended up in the P4Info output under
         // that name, and that its id matches the one set by its @id annotation
         // - in other words, that @id takes precedence over @name.
-        EXPECT_TRUE(findTable(*test, "ingress.igTableWithoutNameAndId") == nullptr);
-        auto *igTableWithNameAndId = findTable(*test, "ingress.igTableWithNameAndId");
+        EXPECT_TRUE(findP4RuntimeTable(*test->p4Info, "ingress.igTableWithoutNameAndId") ==
+                    nullptr);
+        const auto *igTableWithNameAndId =
+            findP4RuntimeTable(*test->p4Info, "ingress.igTableWithNameAndId");
         ASSERT_TRUE(igTableWithNameAndId != nullptr);
-        auto expectedId = 5678u | (unsigned(P4Ids::TABLE) << 24);
+        auto expectedId = 5678U | (static_cast<unsigned>(P4Ids::TABLE) << 24);
         EXPECT_EQ(expectedId, igTableWithNameAndId->preamble().id());
     }
 
     {
         // Check that the two tables with conflicting ids are both present, and
         // that they didn't end up with the same id in the P4Info output.
-        auto *conflictingTableA = findTable(*test, "ingress.conflictingTableA");
+        const auto *conflictingTableA =
+            findP4RuntimeTable(*test->p4Info, "ingress.conflictingTableA");
         ASSERT_TRUE(conflictingTableA != nullptr);
-        auto *conflictingTableB = findTable(*test, "ingress.conflictingTableB");
+        const p4::config::v1::Table *conflictingTableB =
+            findP4RuntimeTable(*test->p4Info, "ingress.conflictingTableB");
         ASSERT_TRUE(conflictingTableB != nullptr);
         EXPECT_TRUE(conflictingTableA->preamble().id() == 0x02000134 ||
                     conflictingTableB->preamble().id() == 0x02000134);
@@ -418,7 +362,7 @@ TEST_F(P4Runtime, FieldIdAssignment) {
 
     {
         // Check the ids for igTable's match fields.
-        auto *igTable = findTable(*test, "ingress.igTable");
+        const auto *igTable = findP4RuntimeTable(*test->p4Info, "ingress.igTable");
         ASSERT_TRUE(igTable != nullptr);
         const auto &mf1 = igTable->match_fields(0);
         const auto &mf2 = igTable->match_fields(1);
@@ -428,7 +372,7 @@ TEST_F(P4Runtime, FieldIdAssignment) {
 
     {
         // Check the ids for action a's parameters.
-        auto *aAction = findAction(*test, "ingress.a");
+        const auto *aAction = findP4RuntimeAction(*test->p4Info, "ingress.a");
         ASSERT_TRUE(aAction != nullptr);
         const auto &ap1 = aAction->params(0);
         const auto &ap2 = aAction->params(1);
@@ -438,7 +382,8 @@ TEST_F(P4Runtime, FieldIdAssignment) {
 
     {
         // Check the ids for the packet-in header fields.
-        auto *packetInHeader = findControllerHeader(*test, "packet_in");
+        const auto *packetInHeader =
+            findP4RuntimeControllerPacketMetadata(*test->p4Info, "packet_in");
         ASSERT_TRUE(packetInHeader != nullptr);
         const auto &m1 = packetInHeader->metadata(0);
         const auto &m2 = packetInHeader->metadata(1);
@@ -449,31 +394,31 @@ TEST_F(P4Runtime, FieldIdAssignment) {
     {
         // Check the ids for igTableNoAnno's match fields. Without @id
         // annotations, the ids should be assigned sequentially, starting at 1.
-        auto *igTable = findTable(*test, "ingress.igTableNoAnno");
+        const auto *igTable = findP4RuntimeTable(*test->p4Info, "ingress.igTableNoAnno");
         ASSERT_TRUE(igTable != nullptr);
         const auto &mf1 = igTable->match_fields(0);
         const auto &mf2 = igTable->match_fields(1);
-        EXPECT_EQ(1u, mf1.id());
-        EXPECT_EQ(2u, mf2.id());
+        EXPECT_EQ(1U, mf1.id());
+        EXPECT_EQ(2U, mf2.id());
     }
 
     {
         // Check the ids for igTableLargeId's match fields. The compiler should
         // be able to handle all unsigned 32-bit integers greater than 0,
         // including 0xffffffff.
-        auto *igTable = findTable(*test, "ingress.igTableLargeId");
+        const auto *igTable = findP4RuntimeTable(*test->p4Info, "ingress.igTableLargeId");
         ASSERT_TRUE(igTable != nullptr);
         const auto &mf1 = igTable->match_fields(0);
         EXPECT_EQ(0xffffffff, mf1.id());
     }
 
     {
-        auto vset = findValueSet(*test, "parse.pvs");
+        const auto *vset = findP4RuntimeValueSet(*test->p4Info, "parse.pvs");
         ASSERT_TRUE(vset != nullptr);
         const auto &mf1 = vset->match(0);
         const auto &mf2 = vset->match(1);
-        EXPECT_EQ(33u, mf1.id());
-        EXPECT_NE(33u, mf2.id());
+        EXPECT_EQ(33U, mf1.id());
+        EXPECT_NE(33U, mf2.id());
     }
 }
 
@@ -526,29 +471,31 @@ TEST_F(P4Runtime, IdAssignmentCounters) {
     )"));
 
     ASSERT_TRUE(test);
-    EXPECT_EQ(0u, ::diagnosticCount());
+    EXPECT_EQ(0U, ::diagnosticCount());
 
     // checks that myDirectCounter1 with the right ID prefix
     {
-        auto *myTable1 = findTable(*test, "myTable1");
+        const auto *myTable1 = findP4RuntimeTable(*test->p4Info, "myTable1");
         ASSERT_TRUE(myTable1 != nullptr);
-        auto *myDirectCounter1 = findDirectCounter(*test, "myDirectCounter1");
+        const auto *myDirectCounter1 =
+            findP4RuntimeDirectCounter(*test->p4Info, "myDirectCounter1");
         ASSERT_TRUE(myDirectCounter1 != nullptr);
         EXPECT_EQ(unsigned(P4Ids::DIRECT_COUNTER), myDirectCounter1->preamble().id() >> 24);
         EXPECT_EQ(myDirectCounter1->preamble().id(), myTable1->direct_resource_ids(0));
     }
     // checks that myDirectCounter2 with the right ID prefix
     {
-        auto *myTable2 = findTable(*test, "myTable2");
+        const auto *myTable2 = findP4RuntimeTable(*test->p4Info, "myTable2");
         ASSERT_TRUE(myTable2 != nullptr);
-        auto *myDirectCounter2 = findDirectCounter(*test, "myDirectCounter2");
+        const auto *myDirectCounter2 =
+            findP4RuntimeDirectCounter(*test->p4Info, "myDirectCounter2");
         ASSERT_TRUE(myDirectCounter2 != nullptr);
         EXPECT_EQ(unsigned(P4Ids::DIRECT_COUNTER), myDirectCounter2->preamble().id() >> 24);
         EXPECT_EQ(myDirectCounter2->preamble().id(), myTable2->direct_resource_ids(0));
     }
     // checks that myCounter with the right ID prefix
     {
-        auto *myCounter = findCounter(*test, "myCounter");
+        const auto *myCounter = findP4RuntimeCounter(*test->p4Info, "myCounter");
         ASSERT_TRUE(myCounter != nullptr);
         EXPECT_EQ(unsigned(P4Ids::COUNTER), myCounter->preamble().id() >> 24);
     }
@@ -575,7 +522,7 @@ struct ExpectedMatchFieldP416 {
 
 }  // namespace
 
-TEST_F(P4Runtime, P4_16_MatchFields) {
+TEST_F(P4Runtime, P416MatchFields) {
     using MatchField = p4configv1::MatchField;
 
     auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
@@ -676,7 +623,7 @@ TEST_F(P4Runtime, P4_16_MatchFields) {
     ASSERT_TRUE(test);
     EXPECT_EQ(0u, ::diagnosticCount());
 
-    auto *igTable = findTable(*test, "ingress.igTable");
+    const auto *igTable = findP4RuntimeTable(*test->p4Info, "ingress.igTable");
     ASSERT_TRUE(igTable != nullptr);
     EXPECT_EQ(39, igTable->match_fields_size());
 
@@ -732,7 +679,7 @@ TEST_F(P4Runtime, P4_16_MatchFields) {
     }
 }
 
-TEST_F(P4Runtime, DISABLED_P4_14_MatchFields) {
+TEST_F(P4Runtime, DISABLEDP414MatchFields) {
     using MatchField = p4configv1::MatchField;
 
     auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::NONE, R"(
@@ -787,9 +734,9 @@ TEST_F(P4Runtime, DISABLED_P4_14_MatchFields) {
                                         CompilerOptions::FrontendVersion::P4_14);
 
     ASSERT_TRUE(test);
-    EXPECT_EQ(0u, ::diagnosticCount());
+    EXPECT_EQ(0U, ::diagnosticCount());
 
-    auto *igTable = findTable(*test, "igTable");
+    const auto *igTable = findP4RuntimeTable(*test->p4Info, "igTable");
     ASSERT_TRUE(igTable != nullptr);
     EXPECT_EQ(18, igTable->match_fields_size());
 
@@ -860,7 +807,7 @@ TEST_F(P4Runtime, Digests) {
     ASSERT_TRUE(test);
     // we expect one warning for the third digest, for which T is a tuple and we
     // have to auto-generate a name for the digest.
-    EXPECT_EQ(1u, ::diagnosticCount());
+    EXPECT_EQ(1U, ::diagnosticCount());
     const auto &typeInfo = test->p4Info->type_info();
 
     // Verify that that the digest() instances match the ones we expect from the
@@ -868,7 +815,7 @@ TEST_F(P4Runtime, Digests) {
 
     // digest<T>() where T is a header.
     {
-        auto digest = findDigest(*test, "Header");
+        const auto *digest = findP4RuntimeDigest(*test->p4Info, "Header");
         ASSERT_TRUE(digest != nullptr);
         EXPECT_EQ(unsigned(P4Ids::DIGEST), digest->preamble().id() >> 24);
         ASSERT_TRUE(digest->type_spec().has_header());
@@ -878,7 +825,7 @@ TEST_F(P4Runtime, Digests) {
 
     // digest<T>() where T is a struct.
     {
-        auto digest = findDigest(*test, "Metadata");
+        const auto *digest = findP4RuntimeDigest(*test->p4Info, "Metadata");
         ASSERT_TRUE(digest != nullptr);
         EXPECT_EQ(unsigned(P4Ids::DIGEST), digest->preamble().id() >> 24);
         ASSERT_TRUE(digest->type_spec().has_struct_());
@@ -888,7 +835,7 @@ TEST_F(P4Runtime, Digests) {
 
     // digest<T>() where T is a tuple.
     {
-        auto digest = findDigest(*test, "digest_0");
+        const auto *digest = findP4RuntimeDigest(*test->p4Info, "digest_0");
         ASSERT_TRUE(digest != nullptr);
         EXPECT_EQ(unsigned(P4Ids::DIGEST), digest->preamble().id() >> 24);
         ASSERT_TRUE(digest->type_spec().has_tuple());
@@ -982,7 +929,7 @@ TEST_F(P4Runtime, PSADigests) {
 
     ASSERT_TRUE(test);
     // 0 warnings
-    EXPECT_EQ(0u, ::diagnosticCount());
+    EXPECT_EQ(0U, ::diagnosticCount());
     const auto &typeInfo = test->p4Info->type_info();
 
     // Verify that that the digest() instances match the ones we expect from the
@@ -990,7 +937,7 @@ TEST_F(P4Runtime, PSADigests) {
 
     // Digest<T> where T is a header.
     {
-        auto digest = findDigest(*test, "MyIC.digest1");
+        const auto *digest = findP4RuntimeDigest(*test->p4Info, "MyIC.digest1");
         ASSERT_TRUE(digest != nullptr);
         EXPECT_EQ(unsigned(P4Ids::DIGEST), digest->preamble().id() >> 24);
         ASSERT_TRUE(digest->type_spec().has_header());
@@ -1000,7 +947,7 @@ TEST_F(P4Runtime, PSADigests) {
 
     // Digest<T> where T is a struct.
     {
-        auto digest = findDigest(*test, "MyIC.digest2");
+        const auto *digest = findP4RuntimeDigest(*test->p4Info, "MyIC.digest2");
         ASSERT_TRUE(digest != nullptr);
         EXPECT_EQ(unsigned(P4Ids::DIGEST), digest->preamble().id() >> 24);
         ASSERT_TRUE(digest->type_spec().has_struct_());
@@ -1010,7 +957,7 @@ TEST_F(P4Runtime, PSADigests) {
 
     // Digest<T> where T is a tuple.
     {
-        auto digest = findDigest(*test, "MyIC.digest3");
+        const auto *digest = findP4RuntimeDigest(*test->p4Info, "MyIC.digest3");
         ASSERT_TRUE(digest != nullptr);
         EXPECT_EQ(unsigned(P4Ids::DIGEST), digest->preamble().id() >> 24);
         ASSERT_TRUE(digest->type_spec().has_tuple());
@@ -1070,27 +1017,27 @@ TEST_F(P4Runtime, StaticTableEntries) {
     ASSERT_TRUE(test);
     // we expect one warning for 0x1111 &&& 0xF (the match will be re-written
     // as 0x0001 &&& 0xF to conform to the P4Runtime spec)
-    EXPECT_EQ(1u, ::diagnosticCount());
+    EXPECT_EQ(1U, ::diagnosticCount());
 
-    auto entries = test->entries;
+    const auto *entries = test->entries;
     const auto &updates = entries->updates();
     ASSERT_EQ(6, updates.size());
 
     {
-        auto table = findTable(*test, "ingress.t_exact_ternary");
+        const auto *table = findP4RuntimeTable(*test->p4Info, "ingress.t_exact_ternary");
         ASSERT_TRUE(table != nullptr);
         EXPECT_TRUE(table->is_const_table());
         unsigned int hfAId = 1;
         unsigned int hfBId = 2;
         unsigned int xId = 1;
-        auto action = findAction(*test, "ingress.a_with_control_params");
+        const auto *action = findP4RuntimeAction(*test->p4Info, "ingress.a_with_control_params");
         ASSERT_TRUE(action != nullptr);
 
         int priority = 1000;
-        auto check_entry = [&](const p4v1::Update &update, const std::string &exact_v,
-                               const std::optional<std::string> &ternary_v,
-                               const std::optional<std::string> &ternary_mask,
-                               const std::string &param_v) {
+        auto checkEntry = [&](const p4v1::Update &update, const std::string &exact_v,
+                              const std::optional<std::string> &ternary_v,
+                              const std::optional<std::string> &ternary_mask,
+                              const std::string &param_v) {
             EXPECT_EQ(p4v1::Update::INSERT, update.type());
             const auto &protoEntry = update.entity().table_entry();
             EXPECT_EQ(table->preamble().id(), protoEntry.table_id());
@@ -1119,25 +1066,25 @@ TEST_F(P4Runtime, StaticTableEntries) {
         };
         // We assume that the entries are generated in the same order as they
         // appear in the P4 program
-        check_entry(updates.Get(0), "\x01", std::string("\x00\x01", 2), std::string("\x00\x0f", 2),
-                    std::string("\x00\x01", 2));
-        check_entry(updates.Get(1), "\x02", std::string("\x11\x81"), std::string("\xff\xff"),
-                    std::string("\x00\x02", 2));
-        check_entry(updates.Get(2), "\x03", std::string("\x10\x00", 2), std::string("\xf0\x00", 2),
-                    std::string("\x00\x03", 2));
-        check_entry(updates.Get(3), "\x04", std::nullopt, std::nullopt,  // don't care match
-                    std::string("\x00\x04", 2));
+        checkEntry(updates.Get(0), "\x01", std::string("\x00\x01", 2), std::string("\x00\x0f", 2),
+                   std::string("\x00\x01", 2));
+        checkEntry(updates.Get(1), "\x02", std::string("\x11\x81"), std::string("\xff\xff"),
+                   std::string("\x00\x02", 2));
+        checkEntry(updates.Get(2), "\x03", std::string("\x10\x00", 2), std::string("\xf0\x00", 2),
+                   std::string("\x00\x03", 2));
+        checkEntry(updates.Get(3), "\x04", std::nullopt, std::nullopt,  // don't care match
+                   std::string("\x00\x04", 2));
     }
 
     {
-        auto table = findTable(*test, "ingress.t_exact_valid");
+        const auto *table = findP4RuntimeTable(*test->p4Info, "ingress.t_exact_valid");
         ASSERT_TRUE(table != nullptr);
         EXPECT_TRUE(table->is_const_table());
-        auto action = findAction(*test, "ingress.a_with_bool_param");
+        const auto *action = findP4RuntimeAction(*test->p4Info, "ingress.a_with_bool_param");
         ASSERT_TRUE(action != nullptr);
 
-        auto check_entry = [&](const p4v1::Update &update, const std::string &exact_v,
-                               const std::string &param_v) {
+        auto checkEntry = [&](const p4v1::Update &update, const std::string &exact_v,
+                              const std::string &param_v) {
             EXPECT_EQ(p4v1::Update::INSERT, update.type());
             const auto &protoEntry = update.entity().table_entry();
             EXPECT_EQ(table->preamble().id(), protoEntry.table_id());
@@ -1154,8 +1101,8 @@ TEST_F(P4Runtime, StaticTableEntries) {
         };
         // We assume that the entries are generated in the same order as they
         // appear in the P4 program
-        check_entry(updates.Get(4), "\x01", "\x01");
-        check_entry(updates.Get(5), std::string("\x00", 1), std::string("\x00", 1));
+        checkEntry(updates.Get(4), "\x01", "\x01");
+        checkEntry(updates.Get(5), std::string("\x00", 1), std::string("\x00", 1));
     }
 }
 
@@ -1199,14 +1146,14 @@ TEST_F(P4Runtime, IsConstTable) {
     )"));
 
     ASSERT_TRUE(test);
-    EXPECT_EQ(0u, ::diagnosticCount());
+    EXPECT_EQ(0U, ::diagnosticCount());
 
-    auto table_const = findTable(*test, "ingress.t_const");
-    ASSERT_TRUE(table_const != nullptr);
-    EXPECT_TRUE(table_const->is_const_table());
-    auto table_non_const = findTable(*test, "ingress.t_non_const");
-    ASSERT_TRUE(table_non_const != nullptr);
-    EXPECT_FALSE(table_non_const->is_const_table());
+    const auto *tableConst = findP4RuntimeTable(*test->p4Info, "ingress.t_const");
+    ASSERT_TRUE(tableConst != nullptr);
+    EXPECT_TRUE(tableConst->is_const_table());
+    const auto *tableNonConst = findP4RuntimeTable(*test->p4Info, "ingress.t_non_const");
+    ASSERT_TRUE(tableNonConst != nullptr);
+    EXPECT_FALSE(tableNonConst->is_const_table());
 }
 
 TEST_F(P4Runtime, TableActionsAnnotations) {
@@ -1242,30 +1189,32 @@ TEST_F(P4Runtime, TableActionsAnnotations) {
     )"));
 
     ASSERT_TRUE(test);
-    EXPECT_EQ(0u, ::diagnosticCount());
+    EXPECT_EQ(0U, ::diagnosticCount());
 
-    auto table = findTable(*test, "ingress.t");
+    const auto *table = findP4RuntimeTable(*test->p4Info, "ingress.t");
     ASSERT_TRUE(table != nullptr);
 
     // finds action reference based on the action name
     // returns nullptr if something goes wrong (e.g. not a valid action name for
     // this table)
     auto findActionRef = [test, table](const std::string &name) -> const p4configv1::ActionRef * {
-        auto action = findAction(*test, name);
-        if (!action) return nullptr;
-        auto find_it = std::find_if(table->action_refs().begin(), table->action_refs().end(),
-                                    [action](const p4configv1::ActionRef &ref) {
-                                        return ref.id() == action->preamble().id();
-                                    });
-        return (find_it != table->action_refs().end()) ? &*find_it : nullptr;
+        const auto *action = findP4RuntimeAction(*test->p4Info, name);
+        if (action == nullptr) {
+            return nullptr;
+        }
+        auto findIt = std::find_if(table->action_refs().begin(), table->action_refs().end(),
+                                   [action](const p4configv1::ActionRef &ref) {
+                                       return ref.id() == action->preamble().id();
+                                   });
+        return (findIt != table->action_refs().end()) ? &*findIt : nullptr;
     };
-    auto actionRefA = findActionRef("ingress.a");
+    const auto *actionRefA = findActionRef("ingress.a");
     ASSERT_TRUE(actionRefA != nullptr);
     EXPECT_EQ(actionRefA->scope(), p4configv1::ActionRef::DEFAULT_ONLY);
-    auto actionRefB = findActionRef("ingress.b");
+    const auto *actionRefB = findActionRef("ingress.b");
     ASSERT_TRUE(actionRefB != nullptr);
     EXPECT_EQ(actionRefB->scope(), p4configv1::ActionRef::TABLE_ONLY);
-    auto actionRefC = findActionRef("ingress.c");
+    const auto *actionRefC = findActionRef("ingress.c");
     ASSERT_TRUE(actionRefC != nullptr);
     EXPECT_EQ(actionRefC->scope(), p4configv1::ActionRef::TABLE_AND_DEFAULT);
 }
@@ -1302,12 +1251,12 @@ TEST_F(P4Runtime, ValueSet) {
         V1Switch(parse(), verifyChecksum(), ingress(), egress(),
                  computeChecksum(), deparse()) main;
     )"),
-                                        ParseAnnotations());
+                                        new ParseAnnotations());
 
     ASSERT_TRUE(test);
-    EXPECT_EQ(0u, ::diagnosticCount());
+    EXPECT_EQ(0U, ::diagnosticCount());
 
-    auto vset = findValueSet(*test, "parse.pvs");
+    const auto *vset = findP4RuntimeValueSet(*test->p4Info, "parse.pvs");
     ASSERT_TRUE(vset != nullptr);
     EXPECT_EQ(vset->preamble().id() >> 24, unsigned(P4Ids::VALUE_SET));
     EXPECT_EQ(vset->size(), 16);
@@ -1315,14 +1264,15 @@ TEST_F(P4Runtime, ValueSet) {
 
     using MatchField = p4configv1::MatchField;
     auto checkMatchField = [](const p4configv1::MatchField &mf, unsigned int id, cstring name,
-                              const std::vector<cstring> annotations, int bitwidth,
+                              const std::vector<cstring> &annotations, int bitwidth,
                               std::optional<MatchField::MatchType> matchType,
                               std::optional<cstring> otherMatchType) {
         EXPECT_EQ(mf.id(), id);
         EXPECT_EQ(mf.name(), name);
         ASSERT_EQ(static_cast<size_t>(mf.annotations_size()), annotations.size());
-        for (int i = 0; i < mf.annotations_size(); i++)
+        for (int i = 0; i < mf.annotations_size(); i++) {
             EXPECT_EQ(mf.annotations(i), annotations.at(i));
+        }
         EXPECT_EQ(mf.bitwidth(), bitwidth);
         if (matchType) {
             EXPECT_EQ(mf.match_type(), *matchType);
@@ -1362,13 +1312,13 @@ TEST_F(P4Runtime, Register) {
         V1Switch(parse(), verifyChecksum(), ingress(), egress(),
                  computeChecksum(), deparse()) main;
     )"),
-                                        ParseAnnotations());
+                                        new ParseAnnotations());
 
     ASSERT_TRUE(test);
-    EXPECT_EQ(0u, ::diagnosticCount());
+    EXPECT_EQ(0U, ::diagnosticCount());
 
     {  // type parameter is tuple
-        auto register_ = findRegister(*test, "ingress.my_register_1");
+        const auto *register_ = findP4RuntimeRegister(*test->p4Info, "ingress.my_register_1");
         ASSERT_TRUE(register_ != nullptr);
         EXPECT_EQ(unsigned(P4Ids::REGISTER), register_->preamble().id() >> 24);
         const auto &annotations = register_->preamble().annotations();
@@ -1380,7 +1330,7 @@ TEST_F(P4Runtime, Register) {
         EXPECT_EQ(2, typeSpec.tuple().members_size());
     }
     {  // type parameter is header
-        auto register_ = findRegister(*test, "ingress.my_register_2");
+        const auto *register_ = findP4RuntimeRegister(*test->p4Info, "ingress.my_register_2");
         ASSERT_TRUE(register_ != nullptr);
         EXPECT_EQ(unsigned(P4Ids::REGISTER), register_->preamble().id() >> 24);
         EXPECT_EQ(128, register_->size());
@@ -1429,10 +1379,10 @@ TEST_F(P4Runtime, Documentation) {
     )"));
 
     ASSERT_TRUE(test);
-    EXPECT_EQ(0u, ::diagnosticCount());
+    EXPECT_EQ(0U, ::diagnosticCount());
 
     {
-        auto table = findTable(*test, "ingress.t");
+        const auto *table = findP4RuntimeTable(*test->p4Info, "ingress.t");
         ASSERT_TRUE(table != nullptr);
         const auto &tDocumentation = table->preamble().doc();
         EXPECT_EQ(tDocumentation.brief(), "");
@@ -1448,7 +1398,7 @@ TEST_F(P4Runtime, Documentation) {
     }
 
     {
-        auto noop = findAction(*test, "ingress.noop");
+        const auto *noop = findP4RuntimeAction(*test->p4Info, "ingress.noop");
         ASSERT_TRUE(noop != nullptr);
         const auto &aDocumentation = noop->preamble().doc();
         EXPECT_EQ(aDocumentation.brief(), "This action does nothing duh!");
@@ -1456,7 +1406,7 @@ TEST_F(P4Runtime, Documentation) {
     }
 
     {
-        auto drop = findAction(*test, "ingress.drop");
+        const auto *drop = findP4RuntimeAction(*test->p4Info, "ingress.drop");
         ASSERT_TRUE(drop != nullptr);
         EXPECT_FALSE(drop->preamble().has_doc());
     }
@@ -1494,7 +1444,7 @@ std::optional<P4::P4RuntimeAPI> P4RuntimePkgInfo::createTestCase(const char *ann
 TEST_F(P4RuntimePkgInfo, NoAnnotations) {
     auto test = createTestCase("");
     ASSERT_TRUE(test);
-    EXPECT_EQ(0u, ::diagnosticCount());
+    EXPECT_EQ(0U, ::diagnosticCount());
     const auto &pkgInfo = test->p4Info->pkg_info();
     EXPECT_EQ(pkgInfo.arch(), "v1model");
 }
@@ -1505,7 +1455,7 @@ TEST_F(P4RuntimePkgInfo, GeneralCase) {
         @pkginfo(contact="p4-dev@lists.p4.org")
         @brief("This is a P4 program"))");
     ASSERT_TRUE(test);
-    EXPECT_EQ(0u, ::diagnosticCount());
+    EXPECT_EQ(0U, ::diagnosticCount());
     const auto &pkgInfo = test->p4Info->pkg_info();
     EXPECT_EQ(pkgInfo.arch(), "v1model");
     EXPECT_EQ(pkgInfo.name(), "prog.p4");
@@ -1517,7 +1467,7 @@ TEST_F(P4RuntimePkgInfo, OverrideArch) {
     auto test = createTestCase(R"(@pkginfo(arch="v1"))");
     ASSERT_TRUE(test);
     // we expect 1 warning for overriding the architecture
-    EXPECT_EQ(1u, ::diagnosticCount());
+    EXPECT_EQ(1U, ::diagnosticCount());
     const auto &pkgInfo = test->p4Info->pkg_info();
     EXPECT_EQ(pkgInfo.arch(), "v1");
 }
@@ -1526,7 +1476,7 @@ TEST_F(P4RuntimePkgInfo, ValueNotAString) {
     auto test = createTestCase(R"(@pkginfo(name=77))");
     ASSERT_TRUE(test);
     // we expect 1 error message
-    EXPECT_EQ(1u, ::diagnosticCount());
+    EXPECT_EQ(1U, ::diagnosticCount());
     const auto &pkgInfo = test->p4Info->pkg_info();
     EXPECT_EQ(pkgInfo.name(), "");
 }
@@ -1544,7 +1494,7 @@ TEST_F(P4RuntimePkgInfo, UnknownAnnotations) {
         @my_annotation_3(test)
         @my_annotation_4("test"))");
     ASSERT_TRUE(test);
-    EXPECT_EQ(0u, ::diagnosticCount());
+    EXPECT_EQ(0U, ::diagnosticCount());
     const auto &pkgInfo = test->p4Info->pkg_info();
     const auto &annotations = pkgInfo.annotations();
     ASSERT_EQ(annotations.size(), 4);
@@ -1563,7 +1513,7 @@ TEST_F(P4RuntimePkgInfo, UnknownStructuredAnnotations) {
         @my_annotation_2[1,"hello",true,1==2,5+6]
         @my_annotation_3[label="text", my_bool=true, int_val=2*3])");
     ASSERT_TRUE(test);
-    EXPECT_EQ(0u, ::diagnosticCount());
+    EXPECT_EQ(0U, ::diagnosticCount());
     const auto &pkgInfo = test->p4Info->pkg_info();
     const auto &annotations = pkgInfo.structured_annotations();
     ASSERT_EQ(annotations.size(), 3);
@@ -1633,8 +1583,10 @@ TEST_F(P4RuntimePkgInfo, StructuredAnnotationLargeInt) {
 class P4RuntimeDataTypeSpec : public P4Runtime {
  protected:
     const IR::P4Program *getProgram(const std::string &programStr) {
-        auto pgm = P4::parseP4String(programStr, CompilerOptions::FrontendVersion::P4_16);
-        if (pgm == nullptr) return nullptr;
+        const auto *pgm = P4::parseP4String(programStr, CompilerOptions::FrontendVersion::P4_16);
+        if (pgm == nullptr) {
+            return nullptr;
+        }
         PassManager passes(
             {new P4::ParseAnnotations("P4RuntimeDataTypeSpecTest", false,
                                       {
@@ -1650,7 +1602,9 @@ class P4RuntimeDataTypeSpec : public P4Runtime {
     const T *findExternTypeParameterName(const IR::P4Program *program, cstring externName) const {
         const T *type = nullptr;
         forAllMatching<IR::Type_Specialized>(program, [&](const IR::Type_Specialized *ts) {
-            if (ts->baseType->toString() != externName) return;
+            if (ts->baseType->toString() != externName) {
+                return;
+            }
             ASSERT_TRUE(type == nullptr);
             ASSERT_TRUE(ts->arguments->at(0)->is<T>());
             type = ts->arguments->at(0)->to<T>();
@@ -1666,8 +1620,8 @@ class P4RuntimeDataTypeSpec : public P4Runtime {
 TEST_F(P4RuntimeDataTypeSpec, Bits) {
     int size(9);
     bool isSigned(true);
-    auto type = new IR::Type_Bits(size, isSigned);
-    auto typeSpec =
+    auto *type = new IR::Type_Bits(size, isSigned);
+    const auto *typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_bitstring());
     const auto &bitstringTypeSpec = typeSpec->bitstring();
@@ -1677,8 +1631,8 @@ TEST_F(P4RuntimeDataTypeSpec, Bits) {
 
 TEST_F(P4RuntimeDataTypeSpec, Varbits) {
     int size(64);
-    auto type = new IR::Type_Varbits(size);
-    auto typeSpec =
+    auto *type = new IR::Type_Varbits(size);
+    const auto *typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_bitstring());
     const auto &bitstringTypeSpec = typeSpec->bitstring();
@@ -1687,30 +1641,30 @@ TEST_F(P4RuntimeDataTypeSpec, Varbits) {
 }
 
 TEST_F(P4RuntimeDataTypeSpec, Boolean) {
-    auto type = new IR::Type_Boolean();
-    auto typeSpec =
+    auto *type = new IR::Type_Boolean();
+    const auto *typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     EXPECT_TRUE(typeSpec->has_bool_());
 }
 
 TEST_F(P4RuntimeDataTypeSpec, Tuple) {
-    auto typeMember1 = new IR::Type_Bits(1, false);
-    auto typeMember2 = new IR::Type_Bits(2, false);
+    auto *typeMember1 = new IR::Type_Bits(1, false);
+    auto *typeMember2 = new IR::Type_Bits(2, false);
     IR::Vector<IR::Type> components = {typeMember1, typeMember2};
-    auto type = new IR::Type_Tuple(std::move(components));
-    auto typeSpec =
+    auto *type = new IR::Type_Tuple(std::move(components));
+    const auto *typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_tuple());
     const auto &tupleTypeSpec = typeSpec->tuple();
     ASSERT_EQ(2, tupleTypeSpec.members_size());
     {
-        auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap,
-                                                                        typeMember1, nullptr);
+        const auto *typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+            &refMap, &typeMap, typeMember1, nullptr);
         EXPECT_TRUE(MessageDifferencer::Equals(*typeSpec, tupleTypeSpec.members(0)));
     }
     {
-        auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap,
-                                                                        typeMember2, nullptr);
+        const auto *typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+            &refMap, &typeMap, typeMember2, nullptr);
         EXPECT_TRUE(MessageDifferencer::Equals(*typeSpec, tupleTypeSpec.members(1)));
     }
 }
@@ -1721,12 +1675,12 @@ TEST_F(P4RuntimeDataTypeSpec, Struct) {
         extern my_extern_t<T> { my_extern_t(bit<32> v); }
         my_extern_t<my_struct>(32w1024) my_extern;
     )");
-    auto pgm = getProgram(program);
+    const auto *pgm = getProgram(program);
     ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
-    auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
+    const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
     ASSERT_TRUE(type != nullptr);
-    auto typeSpec =
+    const auto *typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_struct_());
     EXPECT_EQ("my_struct", typeSpec->struct_().name());
@@ -1747,12 +1701,12 @@ TEST_F(P4RuntimeDataTypeSpec, Header) {
         extern my_extern_t<T> { my_extern_t(bit<32> v); }
         my_extern_t<my_header>(32w1024) my_extern;
     )");
-    auto pgm = getProgram(program);
+    const auto *pgm = getProgram(program);
     ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
-    auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
+    const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
     ASSERT_TRUE(type != nullptr);
-    auto typeSpec =
+    const auto *typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_header());
     EXPECT_EQ("my_header", typeSpec->header().name());
@@ -1773,12 +1727,12 @@ TEST_F(P4RuntimeDataTypeSpec, HeaderWithFlattening) {
         extern my_extern_t<T> { my_extern_t(bit<32> v); }
         my_extern_t<my_header>(32w1024) my_extern;
     )");
-    auto pgm = getProgram(program);
+    const auto *pgm = getProgram(program);
     ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
-    auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
+    const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
     ASSERT_TRUE(type != nullptr);
-    auto typeSpec =
+    const auto *typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_header());
     EXPECT_EQ("my_header", typeSpec->header().name());
@@ -1802,12 +1756,12 @@ TEST_F(P4RuntimeDataTypeSpec, HeaderUnion) {
         extern my_extern_t<T> { my_extern_t(bit<32> v); }
         my_extern_t<my_header_union>(32w1024) my_extern;
     )");
-    auto pgm = getProgram(program);
+    const auto *pgm = getProgram(program);
     ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
-    auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
+    const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
     ASSERT_TRUE(type != nullptr);
-    auto typeSpec =
+    const auto *typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_header_union());
     EXPECT_EQ("my_header_union", typeSpec->header_union().name());
@@ -1832,12 +1786,12 @@ TEST_F(P4RuntimeDataTypeSpec, HeaderStack) {
         extern my_extern_t<T> { my_extern_t(bit<32> v); }
         my_extern_t<my_header[3]>(32w1024) my_extern;
     )");
-    auto pgm = getProgram(program);
+    const auto *pgm = getProgram(program);
     ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
-    auto type = findExternTypeParameterName<IR::Type_Stack>(pgm, "my_extern_t");
+    const auto *type = findExternTypeParameterName<IR::Type_Stack>(pgm, "my_extern_t");
     ASSERT_TRUE(type != nullptr);
-    auto typeSpec =
+    const auto *typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_header_stack());
     EXPECT_EQ("my_header", typeSpec->header_stack().header().name());
@@ -1876,12 +1830,12 @@ TEST_F(P4RuntimeDataTypeSpec, Enum) {
         extern my_extern_t<T> { my_extern_t(bit<32> v); }
         my_extern_t<my_enum>(32w1024) my_extern;
     )");
-    auto pgm = getProgram(program);
+    const auto *pgm = getProgram(program);
     ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
-    auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
+    const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
     ASSERT_TRUE(type != nullptr);
-    auto typeSpec =
+    const auto *typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_enum_());
     EXPECT_EQ("my_enum", typeSpec->enum_().name());
@@ -1899,12 +1853,12 @@ TEST_F(P4RuntimeDataTypeSpec, SerEnum) {
         extern my_extern_t<T> { my_extern_t(bit<32> v); }
         my_extern_t<my_enum>(32w1024) my_extern;
     )");
-    auto pgm = getProgram(program);
+    const auto *pgm = getProgram(program);
     ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
-    auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
+    const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
     ASSERT_TRUE(type != nullptr);
-    auto typeSpec =
+    const auto *typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_serializable_enum());
     EXPECT_EQ("my_enum", typeSpec->serializable_enum().name());
@@ -1924,12 +1878,12 @@ TEST_F(P4RuntimeDataTypeSpec, Error) {
         extern my_extern_t<T> { my_extern_t(bit<32> v); }
         my_extern_t<error>(32w1024) my_extern;
     )");
-    auto pgm = getProgram(program);
+    const auto *pgm = getProgram(program);
     ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
-    auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
+    const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
     ASSERT_TRUE(type != nullptr);
-    auto typeSpec =
+    const auto *typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_error());
 
@@ -1946,12 +1900,12 @@ TEST_F(P4RuntimeDataTypeSpec, StructWithTypedef) {
         extern my_extern_t<T> { my_extern_t(bit<32> v); }
         my_extern_t<my_struct>(32w1024) my_extern;
     )");
-    auto pgm = getProgram(program);
+    const auto *pgm = getProgram(program);
     ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
-    auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
+    const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
     ASSERT_TRUE(type != nullptr);
-    auto typeSpec =
+    const auto *typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_struct_());
     EXPECT_EQ("my_struct", typeSpec->struct_().name());
@@ -1959,15 +1913,15 @@ TEST_F(P4RuntimeDataTypeSpec, StructWithTypedef) {
     auto it = typeInfo.structs().find("my_struct");
     ASSERT_TRUE(it != typeInfo.structs().end());
     ASSERT_EQ(2, it->second.members_size());
-    auto check_member = [&](cstring name, int index) {
+    auto checkMember = [&](cstring name, int index) {
         EXPECT_EQ(name, it->second.members(index).name());
         const auto &memberTypeSpec = it->second.members(index).type_spec();
         ASSERT_TRUE(memberTypeSpec.has_bitstring());
         ASSERT_TRUE(memberTypeSpec.bitstring().has_bit());
         EXPECT_EQ(8, memberTypeSpec.bitstring().bit().bitwidth());
     };
-    check_member("f", 0);
-    check_member("f2", 1);
+    checkMember("f", 0);
+    checkMember("f2", 1);
 }
 
 TEST_F(P4RuntimeDataTypeSpec, NewType) {
@@ -1979,12 +1933,12 @@ TEST_F(P4RuntimeDataTypeSpec, NewType) {
         extern my_extern_t<T> { my_extern_t(bit<32> v); }
         my_extern_t<my_struct>(32w1024) my_extern;
     )");
-    auto pgm = getProgram(program);
+    const auto *pgm = getProgram(program);
     ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
-    auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
+    const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
     ASSERT_TRUE(type != nullptr);
-    auto typeSpec =
+    const auto *typeSpec =
         P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
     ASSERT_TRUE(typeSpec->has_struct_());
     EXPECT_EQ("my_struct", typeSpec->struct_().name());
@@ -1993,14 +1947,14 @@ TEST_F(P4RuntimeDataTypeSpec, NewType) {
     ASSERT_TRUE(it != typeInfo.structs().end());
     ASSERT_EQ(2, it->second.members_size());
 
-    auto check_member = [&](cstring memberName, int index, cstring newTypeName) {
+    auto checkMember = [&](cstring memberName, int index, cstring newTypeName) {
         EXPECT_EQ(memberName, it->second.members(index).name());
         const auto &memberTypeSpec = it->second.members(index).type_spec();
         ASSERT_TRUE(memberTypeSpec.has_new_type());
         EXPECT_EQ(newTypeName, memberTypeSpec.new_type().name());
     };
-    check_member("f", 0, "my_type_t");
-    check_member("f2", 1, "my_type2_t");
+    checkMember("f", 0, "my_type_t");
+    checkMember("f2", 1, "my_type2_t");
 
     // non-translated
     {
@@ -2041,7 +1995,7 @@ TEST_F(P4RuntimeDataTypeSpec, NewTypeInvalidTranslationAnnotations) {
         type bit<8> my_type5_t;
     )");
     getProgram(program);
-    ASSERT_EQ(::errorCount(), 5u);
+    ASSERT_EQ(::errorCount(), 5U);
 }
 
 TEST_F(P4RuntimeDataTypeSpec, NewTypeIllegalTranslationAnnotations) {
@@ -2053,14 +2007,14 @@ TEST_F(P4RuntimeDataTypeSpec, NewTypeIllegalTranslationAnnotations) {
         extern my_extern_t<T> { my_extern_t(bit<32> v); }
         my_extern_t<my_struct>(32w1024) my_extern;
     )");
-    auto pgm = getProgram(program);
+    const auto *pgm = getProgram(program);
     ASSERT_TRUE(pgm != nullptr);
-    ASSERT_EQ(::errorCount(), 0u);  // No syntax error.
+    ASSERT_EQ(::errorCount(), 0U);  // No syntax error.
 
-    auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
+    const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
     ASSERT_TRUE(type != nullptr);
     P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
-    EXPECT_EQ(1u, ::errorCount());  // But a type error.
+    EXPECT_EQ(1U, ::errorCount());  // But a type error.
 }
 
 TEST_F(P4RuntimeDataTypeSpec, NewTypeValidTranslationAnnotations) {
@@ -2079,10 +2033,10 @@ TEST_F(P4RuntimeDataTypeSpec, NewTypeValidTranslationAnnotations) {
         extern my_extern_t<T> { my_extern_t(bit<32> v); }
         my_extern_t<my_struct>(32w1024) my_extern;
     )");
-    auto pgm = getProgram(program);
+    const auto *pgm = getProgram(program);
     ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
-    auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
+    const auto *type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
     ASSERT_TRUE(type != nullptr);
     P4::ControlPlaneAPI::TypeSpecConverter::convert(&refMap, &typeMap, type, &typeInfo);
 

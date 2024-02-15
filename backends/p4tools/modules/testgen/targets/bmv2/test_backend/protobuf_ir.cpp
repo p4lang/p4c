@@ -14,33 +14,37 @@
 #include "nlohmann/json.hpp"
 
 #include "backends/p4tools/modules/testgen/lib/exceptions.h"
+#include "backends/p4tools/modules/testgen/lib/test_framework.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_spec.h"
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-ProtobufIr::ProtobufIr(std::filesystem::path basePath, std::optional<unsigned int> seed)
-    : Bmv2TestFramework(std::move(basePath), seed) {}
+ProtobufIr::ProtobufIr(const TestBackendConfiguration &testBackendConfiguration)
+    : Bmv2TestFramework(testBackendConfiguration) {}
 
 std::string ProtobufIr::getFormatOfNode(const IR::IAnnotated *node) {
     const auto *formatAnnotation = node->getAnnotation("format");
-    std::string formatString = "hex_str";
-    if (formatAnnotation != nullptr) {
-        BUG_CHECK(formatAnnotation->body.size() == 1,
-                  "@format annotation can only have one member.");
-        auto formatString = formatAnnotation->body.at(0)->text;
-        if (formatString == "IPV4_ADDRESS") {
-            formatString = "ipv4";
-        } else if (formatString == "IPV6_ADDRESS") {
-            formatString = "ipv6";
-        } else if (formatString == "MAC_ADDRESS") {
-            formatString = "mac";
-        } else if (formatString == "HEX_STR") {
-            formatString = "hex_str";
-        } else {
-            TESTGEN_UNIMPLEMENTED("Unsupported @format string %1%", formatString);
-        }
+    if (formatAnnotation == nullptr) {
+        return "hex_str";
     }
-    return formatString;
+    BUG_CHECK(formatAnnotation->body.size() == 1, "@format annotation can only have one member.");
+    auto annotationFormatString = formatAnnotation->body.at(0)->text;
+    if (annotationFormatString == "IPV4_ADDRESS") {
+        return "ipv4";
+    }
+    if (annotationFormatString == "IPV6_ADDRESS") {
+        return "ipv6";
+    }
+    if (annotationFormatString == "MAC_ADDRESS") {
+        return "mac";
+    }
+    if (annotationFormatString == "HEX_STR") {
+        return "hex_str";
+    }
+    if (annotationFormatString == "STRING") {
+        return "str";
+    }
+    TESTGEN_UNIMPLEMENTED("Unsupported @format string %1%", annotationFormatString);
 }
 
 std::string ProtobufIr::getTestCaseTemplate() {
@@ -168,7 +172,22 @@ entities {
 
 std::string ProtobufIr::formatNetworkValue(const std::string &type, const IR::Expression *value) {
     if (type == "hex_str") {
-        return formatHexExpr(value, {false, true, false, false});
+        return formatHexExpr(value, {false, true, true, false});
+    }
+    // Assume that any string format can be converted from a string literal, bool
+    // literal, or constant.
+    // TODO: Extract this into a helper function once the Protobuf IR back end is stable.
+    if (type == "str") {
+        if (const auto *constant = value->to<IR::Constant>()) {
+            return constant->value.str();
+        }
+        if (const auto *literal = value->to<IR::StringLiteral>()) {
+            return literal->value.c_str();
+        }
+        if (const auto *boolValue = value->to<IR::BoolLiteral>()) {
+            return boolValue->value ? "true" : "false";
+        }
+        TESTGEN_UNIMPLEMENTED("Unsupported string format value \"%1%\".", value);
     }
     // At this point, any value must be a constant.
     const auto *constant = value->checkedTo<IR::Constant>();
@@ -265,16 +284,42 @@ inja::json ProtobufIr::getControlPlaneForTable(const TableMatchMap &matches,
     return rulesJson;
 }
 
-void ProtobufIr::emitTestcase(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
-                              const std::string &testCase, float currentCoverage) {
+inja::json ProtobufIr::getSend(const TestSpec *testSpec) const {
+    const auto *iPacket = testSpec->getIngressPacket();
+    const auto *payload = iPacket->getEvaluatedPayload();
+    inja::json sendJson;
+    sendJson["ig_port"] = iPacket->getPort();
+    sendJson["pkt"] = formatHexExpressionWithSeparators(*payload);
+    sendJson["pkt_size"] = payload->type->width_bits();
+    return sendJson;
+}
+
+inja::json ProtobufIr::getExpectedPacket(const TestSpec *testSpec) const {
+    inja::json verifyData = inja::json::object();
+    auto egressPacket = testSpec->getEgressPacket();
+    if (egressPacket.has_value()) {
+        const auto *packet = egressPacket.value();
+        verifyData["eg_port"] = packet->getPort();
+        const auto *payload = packet->getEvaluatedPayload();
+        const auto *mask = packet->getEvaluatedPayloadMask();
+        verifyData["ignore_mask"] = formatHexExpressionWithSeparators(*mask);
+        verifyData["exp_pkt"] = formatHexExpressionWithSeparators(*payload);
+    }
+    return verifyData;
+}
+
+inja::json ProtobufIr::produceTestCase(const TestSpec *testSpec, cstring selectedBranches,
+                                       size_t testId, float currentCoverage) const {
     inja::json dataJson;
     if (selectedBranches != nullptr) {
         dataJson["selected_branches"] = selectedBranches.c_str();
     }
-    if (seed) {
-        dataJson["seed"] = *seed;
+
+    auto optSeed = getTestBackendConfiguration().seed;
+    if (optSeed.has_value()) {
+        dataJson["seed"] = optSeed.value();
     }
-    dataJson["test_name"] = basePath.stem();
+    dataJson["test_name"] = getTestBackendConfiguration().testBaseName;
     dataJson["test_id"] = testId;
     dataJson["trace"] = getTrace(testSpec);
     dataJson["control_plane"] = getControlPlane(testSpec);
@@ -295,19 +340,31 @@ void ProtobufIr::emitTestcase(const TestSpec *testSpec, cstring selectedBranches
     auto meterValues = testSpec->getTestObjectCategory("meter_values");
     dataJson["meter_values"] = getMeter(meterValues);
 
+    return dataJson;
+}
+
+void ProtobufIr::writeTestToFile(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
+                                 float currentCoverage) {
+    inja::json dataJson = produceTestCase(testSpec, selectedBranches, testId, currentCoverage);
     LOG5("ProtobufIR test back end: emitting testcase:" << std::setw(4) << dataJson);
-    auto incrementedbasePath = basePath;
+
+    auto optBasePath = getTestBackendConfiguration().fileBasePath;
+    BUG_CHECK(optBasePath.has_value(), "Base path is not set.");
+    auto incrementedbasePath = optBasePath.value();
     incrementedbasePath.concat("_" + std::to_string(testId));
     incrementedbasePath.replace_extension(".txtpb");
     auto protobufFileStream = std::ofstream(incrementedbasePath);
-    inja::render_to(protobufFileStream, testCase, dataJson);
+    inja::render_to(protobufFileStream, getTestCaseTemplate(), dataJson);
     protobufFileStream.flush();
 }
 
-void ProtobufIr::outputTest(const TestSpec *testSpec, cstring selectedBranches, size_t testId,
-                            float currentCoverage) {
-    std::string testCase = getTestCaseTemplate();
-    emitTestcase(testSpec, selectedBranches, testId, testCase, currentCoverage);
+AbstractTestReferenceOrError ProtobufIr::produceTest(const TestSpec *testSpec,
+                                                     cstring selectedBranches, size_t testId,
+                                                     float currentCoverage) {
+    inja::json dataJson = produceTestCase(testSpec, selectedBranches, testId, currentCoverage);
+    LOG5("ProtobufIR test back end: generated testcase:" << std::setw(4) << dataJson);
+
+    return new ProtobufIrTest(inja::render(getTestCaseTemplate(), dataJson));
 }
 
 }  // namespace P4Tools::P4Testgen::Bmv2

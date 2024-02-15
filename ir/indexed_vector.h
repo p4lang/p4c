@@ -212,6 +212,9 @@ class IndexedVector : public Vector<T> {
                       "invalid element %1%", el);
         }
     }
+
+    DECLARE_TYPEINFO_WITH_DISCRIMINATOR(IndexedVector<T>, NodeDiscriminator::IndexedVectorT, T,
+                                        Vector<T>);
 };
 
 }  // namespace IR

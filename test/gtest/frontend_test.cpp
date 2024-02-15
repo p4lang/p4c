@@ -1,10 +1,11 @@
+#include <gtest/gtest.h>
+
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
-#include "gtest/gtest.h"
 #include "helpers.h"
 #include "ir/ir.h"
 #include "ir/pass_manager.h"

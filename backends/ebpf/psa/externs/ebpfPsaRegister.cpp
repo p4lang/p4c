@@ -64,7 +64,7 @@ EBPFRegisterPSA::EBPFRegisterPSA(const EBPFProgram *program, cstring instanceNam
 
 bool EBPFRegisterPSA::shouldUseArrayMap() {
     CHECK_NULL(this->keyType);
-    if (auto wt = dynamic_cast<IHasWidth *>(this->keyType)) {
+    if (auto wt = this->keyType->to<IHasWidth>()) {
         unsigned keyWidth = wt->widthInBits();
         // For keys <= 32 bit register is based on array map,
         // otherwise we use hash map
