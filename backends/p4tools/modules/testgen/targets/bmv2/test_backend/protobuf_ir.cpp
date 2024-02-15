@@ -7,6 +7,7 @@
 
 #include <inja/inja.hpp>
 
+#include "backends/p4tools/common/lib/format_int.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "control-plane/p4infoApi.h"
 #include "lib/exceptions.h"
@@ -23,7 +24,54 @@ ProtobufIr::ProtobufIr(const TestBackendConfiguration &testBackendConfiguration,
                        P4::P4RuntimeAPI p4RuntimeApi)
     : Bmv2TestFramework(testBackendConfiguration), p4RuntimeApi(p4RuntimeApi) {}
 
+std::optional<std::string> ProtobufIr::checkForP4RuntimeTranslationAnnotation(
+    const IR::IAnnotated *node) {
+    const auto *p4RuntimeTranslationAnnotation = node->getAnnotation("p4runtime_translation");
+    if (p4RuntimeTranslationAnnotation == nullptr) {
+        return std::nullopt;
+    }
+    auto annotationVector = p4RuntimeTranslationAnnotation->expr;
+    BUG_CHECK(annotationVector.size() == 2, "Expected size of %1% to be 2. ", annotationVector);
+    const auto *targetValue = annotationVector.at(1);
+    if (targetValue->is<IR::StringLiteral>()) {
+        return "str";
+    }
+    // An integer technically specifies a width but that is not (yet) of any concern to us.
+    if (targetValue->is<IR::Constant>()) {
+        return "hex_str";
+    }
+    TESTGEN_UNIMPLEMENTED("Unsupported @p4runtime_translation token %1%", targetValue);
+}
+
+std::map<cstring, cstring> ProtobufIr::getP4RuntimeTranslationMappings(const IR::IAnnotated *node) {
+    std::map<cstring, cstring> p4RuntimeTranslationMappings;
+    const auto *p4RuntimeTranslationMappingAnnotation =
+        node->getAnnotation("p4runtime_translation_mappings");
+    if (p4RuntimeTranslationMappingAnnotation == nullptr) {
+        return p4RuntimeTranslationMappings;
+    }
+    BUG_CHECK(!p4RuntimeTranslationMappingAnnotation->needsParsing,
+              "The @p4runtime_translation_mappings annotation should have been parsed already.");
+    auto annotationExpr = p4RuntimeTranslationMappingAnnotation->expr;
+    BUG_CHECK(annotationExpr.size() == 1, "Expected size of %1% to be 1. ", annotationExpr);
+    const auto *exprList = annotationExpr.at(0)->checkedTo<IR::ListExpression>();
+    for (const auto *expr : exprList->components) {
+        const auto *exprTuple = expr->checkedTo<IR::ListExpression>();
+        const auto &components = exprTuple->components;
+        auto left = components.at(0)->checkedTo<IR::StringLiteral>()->value;
+        auto right = components.at(1)->checkedTo<IR::Constant>()->value;
+        p4RuntimeTranslationMappings.emplace(right.str().c_str(), left);
+    }
+
+    return p4RuntimeTranslationMappings;
+}
+
 std::string ProtobufIr::getFormatOfNode(const IR::IAnnotated *node) {
+    auto p4RuntimeTranslationFormat = checkForP4RuntimeTranslationAnnotation(node);
+    if (p4RuntimeTranslationFormat.has_value()) {
+        return p4RuntimeTranslationFormat.value();
+    }
+
     const auto *formatAnnotation = node->getAnnotation("format");
     if (formatAnnotation == nullptr) {
         return "hex_str";
@@ -216,31 +264,49 @@ std::string ProtobufIr::formatNetworkValue(const std::string &type, const IR::Ex
     TESTGEN_UNIMPLEMENTED("Unsupported network value type %1%", type);
 }
 
+std::string ProtobufIr::formatNetworkValue(const IR::IAnnotated *node, const std::string &type,
+                                           const IR::Expression *value) {
+    auto p4RuntimeTranslationMappings = getP4RuntimeTranslationMappings(node);
+    auto formattedNetworkValue = formatNetworkValue(type, value);
+
+    auto it = p4RuntimeTranslationMappings.find(formattedNetworkValue);
+    if (it != p4RuntimeTranslationMappings.end()) {
+        return (*it).second.c_str();
+    }
+
+    return formattedNetworkValue;
+}
+
 void ProtobufIr::createKeyMatch(cstring fieldName, const TableMatch &fieldMatch,
                                 inja::json &rulesJson) {
     inja::json j;
     j["field_name"] = fieldName;
-    j["format"] = getFormatOfNode(fieldMatch.getKey());
+    const auto *keyElement = fieldMatch.getKey();
+    j["format"] = getFormatOfNode(keyElement);
 
     if (const auto *elem = fieldMatch.to<Exact>()) {
-        j["value"] = formatNetworkValue(j["format"], elem->getEvaluatedValue()).c_str();
+        j["value"] = formatNetworkValue(keyElement, j["format"], elem->getEvaluatedValue()).c_str();
         rulesJson["single_exact_matches"].push_back(j);
     } else if (const auto *elem = fieldMatch.to<Range>()) {
-        j["lo"] = formatNetworkValue(j["format"], elem->getEvaluatedLow()).c_str();
-        j["hi"] = formatNetworkValue(j["format"], elem->getEvaluatedHigh()).c_str();
+        j["lo"] = formatNetworkValue(keyElement, j["format"], elem->getEvaluatedLow()).c_str();
+        j["hi"] = formatNetworkValue(keyElement, j["format"], elem->getEvaluatedHigh()).c_str();
         rulesJson["range_matches"].push_back(j);
     } else if (const auto *elem = fieldMatch.to<Ternary>()) {
-        j["value"] = formatNetworkValue(j["format"], elem->getEvaluatedValue()).c_str();
-        j["mask"] = formatNetworkValue(j["format"], elem->getEvaluatedMask()).c_str();
-        rulesJson["ternary_matches"].push_back(j);
         // If the rule has a ternary match we need to add the priority.
         rulesJson["needs_priority"] = true;
+        // Skip any ternary match where the mask is all zeroes.
+        if (elem->getEvaluatedMask()->value == 0) {
+            return;
+        }
+        j["value"] = formatNetworkValue(keyElement, j["format"], elem->getEvaluatedValue()).c_str();
+        j["mask"] = formatNetworkValue(keyElement, j["format"], elem->getEvaluatedMask()).c_str();
+        rulesJson["ternary_matches"].push_back(j);
     } else if (const auto *elem = fieldMatch.to<LPM>()) {
-        j["value"] = formatNetworkValue(j["format"], elem->getEvaluatedValue()).c_str();
+        j["value"] = formatNetworkValue(keyElement, j["format"], elem->getEvaluatedValue()).c_str();
         j["prefix_len"] = elem->getEvaluatedPrefixLength()->value.str();
         rulesJson["lpm_matches"].push_back(j);
     } else if (const auto *elem = fieldMatch.to<Optional>()) {
-        j["value"] = formatNetworkValue(j["format"], elem->getEvaluatedValue()).c_str();
+        j["value"] = formatNetworkValue(keyElement, j["format"], elem->getEvaluatedValue()).c_str();
         if (elem->addAsExactMatch()) {
             j["use_exact"] = "True";
         } else {
@@ -301,10 +367,12 @@ inja::json ProtobufIr::getControlPlaneForTable(const TableMatchMap &matches,
 
     for (const auto &actArg : args) {
         inja::json j;
-        j["format"] = getFormatOfNode(actArg.getActionParam());
+        const auto *actionParameter = actArg.getActionParam();
+        j["format"] = getFormatOfNode(actionParameter);
 
         j["param"] = actArg.getActionParamName().c_str();
-        j["value"] = formatNetworkValue(j["format"], actArg.getEvaluatedValue()).c_str();
+        j["value"] =
+            formatNetworkValue(actionParameter, j["format"], actArg.getEvaluatedValue()).c_str();
         rulesJson["act_args"].push_back(j);
     }
 

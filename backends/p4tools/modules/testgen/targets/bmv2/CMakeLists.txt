@@ -22,6 +22,7 @@ set(TESTGEN_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/map_direct_externs.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/p4_asserts_parser.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/p4_refers_to_parser.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/p4runtime_translation.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/program_info.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/table_stepper.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/target.cpp

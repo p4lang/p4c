@@ -72,12 +72,25 @@ class ProtobufIr : public Bmv2TestFramework {
     /// @returns the inja test case template as a string.
     static std::string getTestCaseTemplate();
 
-    /// Tries to find the @format annotation of a node and, if present, returns the format specified
-    /// in this annotation. Returns "hex" by default.
+    /// Checks whether the node has a `@p4runtime_translation` attached to it. If that is the case,
+    /// returns the name of the translated type contained within the annotation.
+    static std::optional<std::string> checkForP4RuntimeTranslationAnnotation(
+        const IR::IAnnotated *node);
+
+    /// Looks up annotations for the given node and returns the P4RuntimeTranslationMappings, if
+    /// they exist. Currently, this map is a pure cstring map.
+    static std::map<cstring, cstring> getP4RuntimeTranslationMappings(const IR::IAnnotated *node);
+
+    /// Tries to find the @format annotation of a node and, if present, returns  the format
+    /// specified in this annotation. Returns "hex" by default.
     static std::string getFormatOfNode(const IR::IAnnotated *node);
 
     /// Converts an IR::Expression into a formatted string value. The format depends on @param type.
     static std::string formatNetworkValue(const std::string &type, const IR::Expression *value);
+
+    /// see @formatNetworkValue. The node may have annotations which influence the format.
+    static std::string formatNetworkValue(const IR::IAnnotated *node, const std::string &type,
+                                          const IR::Expression *value);
 
     /// Fill in @param rulesJson by iterating over @param fieldMatch and creating the appropriate
     /// match key.
