@@ -53,18 +53,9 @@ class TestBackEnd {
 
     explicit TestBackEnd(const ProgramInfo &programInfo,
                          const TestBackendConfiguration &testBackendConfiguration,
-                         SymbolicExecutor &symbex)
-        : programInfo(programInfo),
-          testBackendConfiguration(testBackendConfiguration),
-          symbex(symbex),
-          maxTests(TestgenOptions::get().maxTests) {
-        // If we select a specific branch, the number of tests should be 1.
-        if (!TestgenOptions::get().selectedBranches.empty()) {
-            maxTests = 1;
-        }
-    }
+                         SymbolicExecutor &symbex);
 
-    [[nodiscard]] bool needsToTerminate(int64_t testCount) const { return testCount == maxTests; }
+    [[nodiscard]] bool needsToTerminate(int64_t testCount) const;
 
  public:
     TestBackEnd(const TestBackEnd &) = default;

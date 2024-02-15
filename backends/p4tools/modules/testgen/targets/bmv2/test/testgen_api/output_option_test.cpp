@@ -4,13 +4,12 @@
 #include "test/gtest/helpers.h"
 
 #include "backends/p4tools/modules/testgen/options.h"
-#include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/protobuf.h"
 #include "backends/p4tools/modules/testgen/targets/bmv2/test_backend/protobuf_ir.h"
 #include "backends/p4tools/modules/testgen/testgen.h"
 
 namespace Test {
 
-TEST(P4TestgenLibrary, GeneratesCorrectProtobufIrTest) {
+TEST(P4TestgenOutputOptionTest, GenerateOuputsCorrectly) {
     std::stringstream streamTest;
     streamTest << R"p4(
 header ethernet_t {
@@ -61,13 +60,16 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(), computeChecksum(), depa
     auto &testgenOptions = P4Tools::P4Testgen::TestgenOptions::get();
     testgenOptions.testBackend = "PROTOBUF_IR";
     testgenOptions.testBaseName = "dummy";
+    testgenOptions.seed = 1;
+    testgenOptions.maxTests = 0;
     // Create a bespoke packet for the Ethernet extract call.
     testgenOptions.minPktSize = 112;
     testgenOptions.maxPktSize = 112;
-    // Only generate one test.
-    testgenOptions.maxTests = 1;
 
+    // In this test we only generate tests with dropped packets.
     {
+        testgenOptions.droppedPacketOnly = true;
+
         auto testListOpt =
             P4Tools::P4Testgen::Testgen::generateTests(source, compilerOptions, testgenOptions);
 
@@ -76,18 +78,26 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(), computeChecksum(), depa
         ASSERT_EQ(testList.size(), 1);
         const auto *protobufIrTest =
             testList[0]->checkedTo<P4Tools::P4Testgen::Bmv2::ProtobufIrTest>();
-        EXPECT_THAT(protobufIrTest->getFormattedTest(), ::testing::HasSubstr(R"(input_packet)"));
+        EXPECT_THAT(protobufIrTest->getFormattedTest(),
+                    testing::Not(testing::HasSubstr(R"(expected_output_packet)")));
     }
-    /// Now try running again with the test back end set to Protobuf. The result should be the same.
-    testgenOptions.testBackend = "PROTOBUF";
 
-    auto testListOpt =
-        P4Tools::P4Testgen::Testgen::generateTests(source, compilerOptions, testgenOptions);
+    // Here we flip the option and only generate tests with forwarded packets.
+    {
+        testgenOptions.droppedPacketOnly = false;
+        testgenOptions.outputPacketOnly = true;
 
-    ASSERT_TRUE(testListOpt.has_value());
-    auto testList = testListOpt.value();
-    ASSERT_EQ(testList.size(), 1);
-    const auto *protobufTest = testList[0]->checkedTo<P4Tools::P4Testgen::Bmv2::ProtobufTest>();
-    EXPECT_THAT(protobufTest->getFormattedTest(), ::testing::HasSubstr(R"(input_packet)"));
+        auto testListOpt =
+            P4Tools::P4Testgen::Testgen::generateTests(source, compilerOptions, testgenOptions);
+
+        ASSERT_TRUE(testListOpt.has_value());
+        auto testList = testListOpt.value();
+        ASSERT_EQ(testList.size(), 1);
+        const auto *protobufIrTest =
+            testList[0]->checkedTo<P4Tools::P4Testgen::Bmv2::ProtobufIrTest>();
+        EXPECT_THAT(protobufIrTest->getFormattedTest(),
+                    testing::HasSubstr(R"(expected_output_packet)"));
+    }
 }
+
 }  // namespace Test

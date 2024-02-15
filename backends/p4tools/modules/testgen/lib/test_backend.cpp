@@ -27,6 +27,19 @@
 
 namespace P4Tools::P4Testgen {
 
+TestBackEnd::TestBackEnd(const ProgramInfo &programInfo,
+                         const TestBackendConfiguration &testBackendConfiguration,
+                         SymbolicExecutor &symbex)
+    : programInfo(programInfo),
+      testBackendConfiguration(testBackendConfiguration),
+      symbex(symbex),
+      maxTests(TestgenOptions::get().maxTests) {
+    // If we select a specific branch, the number of tests should be 1.
+    if (!TestgenOptions::get().selectedBranches.empty()) {
+        maxTests = 1;
+    }
+}
+
 bool TestBackEnd::run(const FinalState &state) {
     {
         // Evaluate the model and extract the input and output packets.
@@ -40,9 +53,16 @@ bool TestBackEnd::run(const FinalState &state) {
         // Don't increase the test count if --output-packet-only is enabled and we don't
         // produce a test with an output packet.
         if (testgenOptions.outputPacketOnly) {
-            auto outputPacketSize = executionState->getPacketBufferSize();
-            bool packetIsDropped = executionState->getProperty<bool>("drop");
-            if (outputPacketSize <= 0 || packetIsDropped) {
+            if (executionState->getPacketBufferSize() <= 0 ||
+                executionState->getProperty<bool>("drop")) {
+                return needsToTerminate(testCount);
+            }
+        }
+
+        // Don't increase the test count if --dropped-packet-only is enabled and we produce a test
+        // with an output packet.
+        if (testgenOptions.droppedPacketOnly) {
+            if (!executionState->getProperty<bool>("drop")) {
                 return needsToTerminate(testCount);
             }
         }
@@ -121,6 +141,7 @@ bool TestBackEnd::run(const FinalState &state) {
             return needsToTerminate(testCount);
         }
 
+        testCount++;
         const P4::Coverage::CoverageSet &visitedNodes = symbex.getVisitedNodes();
         if (!testgenOptions.hasCoverageTracking) {
             printFeature("test_info", 4, "============ Test %1% ============", testCount);
@@ -153,7 +174,6 @@ bool TestBackEnd::run(const FinalState &state) {
         });
 
         printTraces("============ End Test %1% ============\n", testCount);
-        testCount++;
         P4::Coverage::printCoverageReport(coverableNodes, visitedNodes);
         printPerformanceReport(std::nullopt);
 
@@ -261,4 +281,9 @@ const TestBackendConfiguration &TestBackEnd::getTestBackendConfiguration() const
     return testBackendConfiguration;
 }
 
+bool TestBackEnd::needsToTerminate(int64_t testCount) const {
+    // If maxTests is 0, we never "need" to terminate because we want to produce as many tests as
+    // possible.
+    return maxTests != 0 && testCount >= maxTests;
+}
 }  // namespace P4Tools::P4Testgen
