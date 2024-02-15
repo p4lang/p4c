@@ -7,7 +7,7 @@ struct __attribute__((__packed__)) Main_fwd_table_key {
     u32 keysz;
     u32 maskid;
     u32 field0; /* istd.input_port */
-} __attribute__((aligned(4)));
+} __attribute__((aligned(8)));
 #define MAIN_FWD_TABLE_ACT_MAIN_SET_IPIP 1
 #define MAIN_FWD_TABLE_ACT_MAIN_SET_NH 2
 #define MAIN_FWD_TABLE_ACT_MAIN_DROP 3

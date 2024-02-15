@@ -8,11 +8,11 @@ struct __attribute__((__packed__)) ingress_nh_table_key {
     u32 maskid;
     u32 field0; /* hdr.ipv4.srcAddr */
     u32 field1; /* hdr.ipv4.dstAddr */
-} __attribute__((aligned(4)));
+} __attribute__((aligned(8)));
 #define MAX_INGRESS_NH_TABLE_KEY_MASKS 128
 struct ingress_nh_table_key_mask {
     __u8 mask[sizeof(struct ingress_nh_table_key)];
-} __attribute__((aligned(4)));
+} __attribute__((aligned(8)));
 #define INGRESS_NH_TABLE_ACT_INGRESS_SEND_NH 1
 #define INGRESS_NH_TABLE_ACT_INGRESS_DROP 2
 struct __attribute__((__packed__)) ingress_nh_table_value {

@@ -7,7 +7,7 @@ struct __attribute__((__packed__)) ingress_nh_table2_key {
     u32 keysz;
     u32 maskid;
     u32 field0; /* hdr.ipv4.srcAddr */
-} __attribute__((aligned(4)));
+} __attribute__((aligned(8)));
 #define INGRESS_NH_TABLE2_ACT_INGRESS_SEND_NH 2
 #define INGRESS_NH_TABLE2_ACT_INGRESS_DROP 3
 struct __attribute__((__packed__)) ingress_nh_table2_value {
@@ -28,7 +28,7 @@ struct __attribute__((__packed__)) ingress_nh_table_key {
     u32 keysz;
     u32 maskid;
     u32 field0; /* hdr.ipv4.srcAddr */
-} __attribute__((aligned(4)));
+} __attribute__((aligned(8)));
 #define INGRESS_NH_TABLE_ACT_INGRESS_SEND_NH 2
 #define INGRESS_NH_TABLE_ACT__DROP 1
 struct __attribute__((__packed__)) ingress_nh_table_value {

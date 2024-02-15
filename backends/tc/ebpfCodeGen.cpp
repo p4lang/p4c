@@ -661,7 +661,7 @@ void EBPFTablePNA::emitKeyType(EBPF::CodeBuilder *builder) {
     EBPF::CodeGenInspector commentGen(program->refMap, program->typeMap);
     commentGen.setBuilder(builder);
 
-    unsigned int structAlignment = 4;  // 4 by default
+    unsigned int structAlignment = 8;  // by default
 
     builder->emitIndent();
     builder->appendLine("u32 keysz;");

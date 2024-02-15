@@ -7,7 +7,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_key {
     u32 keysz;
     u32 maskid;
     u32 field0; /* hdr.ipv4.dstAddr */
-} __attribute__((aligned(4)));
+} __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_NEXT_HOP 1
 #define MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DEFAULT_ROUTE_DROP 2
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_value {
@@ -26,7 +26,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_key {
     u32 keysz;
     u32 maskid;
     u8 field0; /* hdr.ipv4.flags */
-} __attribute__((aligned(4)));
+} __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_IPV4_TBL_2_ACT__NOACTION 0
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_value {
     unsigned int action;

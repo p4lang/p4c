@@ -7,7 +7,7 @@ struct __attribute__((__packed__)) MainControlImpl_t_range_key {
     u32 keysz;
     u32 maskid;
     u8 field0; /* h.h.r */
-} __attribute__((aligned(4)));
+} __attribute__((aligned(8)));
 #define MAINCONTROLIMPL_T_RANGE_ACT_MAINCONTROLIMPL_A 1
 #define MAINCONTROLIMPL_T_RANGE_ACT_MAINCONTROLIMPL_A_WITH_CONTROL_PARAMS 2
 struct __attribute__((__packed__)) MainControlImpl_t_range_value {
