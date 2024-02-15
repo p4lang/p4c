@@ -16,55 +16,51 @@ limitations under the License.
 
 #include "resolveReferences.h"
 
-#include <sstream>
-
-#include <boost/range/adaptor/reversed.hpp>
-
-#include "frontends/common/options.h"
-
 namespace P4 {
 
 static const std::vector<const IR::IDeclaration *> empty;
 
 ResolutionContext::ResolutionContext() { anyOrder = P4CContext::get().options().isv1(); }
 
-std::vector<const IR::IDeclaration *> *ResolutionContext::memoizeDeclarations(
+const std::vector<const IR::IDeclaration *> &ResolutionContext::memoizeDeclarations(
     const IR::INamespace *ns) const {
-    auto decls = ns->getDeclarations();
+    std::vector<const IR::IDeclaration *> decls;
     if (auto nest = ns->to<IR::INestedNamespace>()) {
-        // boost::adaptors::reverse expects a reference
-        auto temp = nest->getNestedNamespaces();
-        for (auto nn : boost::adaptors::reverse(temp)) decls = nn->getDeclarations()->concat(decls);
+        for (const auto *nn : nest->getNestedNamespaces()) {
+            auto nnDecls = nn->getDeclarations();
+            // FIXME: should just insert insert()
+            for (const auto *decl : *nnDecls) decls.push_back(decl);
+        }
     }
 
-    return (namespaceDecls[ns] = decls->toVector());
+    auto *nsDecls = ns->getDeclarations();
+    // FIXME: should just insert insert()
+    for (const auto *decl : *nsDecls) decls.push_back(decl);
+
+    return (namespaceDecls[ns] = std::move(decls));
 }
 
 Util::Enumerator<const IR::IDeclaration *> *ResolutionContext::getDeclarations(
     const IR::INamespace *ns) const {
     auto nsIt = namespaceDecls.find(ns);
-    auto *declVec = nsIt != namespaceDecls.end() ? nsIt->second : memoizeDeclarations(ns);
-    return Util::Enumerator<const IR::IDeclaration *>::createEnumerator(*declVec);
+    const auto &declVec = nsIt != namespaceDecls.end() ? nsIt->second : memoizeDeclarations(ns);
+    return Util::Enumerator<const IR::IDeclaration *>::createEnumerator(declVec);
 }
 
 std::unordered_multimap<cstring, const IR::IDeclaration *> &ResolutionContext::memoizeDeclsByName(
     const IR::INamespace *ns) const {
     auto &namesToDecls = namespaceDeclNames[ns];
-    for (auto *d : *getDeclarations(ns)) namesToDecls.emplace(d->getName().name, d);
+    for (const auto *d : *getDeclarations(ns)) namesToDecls.emplace(d->getName().name, d);
     return namesToDecls;
 }
 
 Util::Enumerator<const IR::IDeclaration *> *ResolutionContext::getDeclsByName(
     const IR::INamespace *ns, cstring name) const {
-    std::function<const IR::IDeclaration *(
-        const std::pair<const cstring, const IR::IDeclaration *> &)>
-        second = [](const auto &entry) { return entry.second; };
-
     auto nsIt = namespaceDeclNames.find(ns);
     auto &namesToDecls = nsIt != namespaceDeclNames.end() ? nsIt->second : memoizeDeclsByName(ns);
 
-    auto range = namesToDecls.equal_range(name);
-    return Util::enumerate(range.first, range.second)->map(second);
+    auto decls = Values(namesToDecls.equal_range(name));
+    return Util::enumerate(decls.begin(), decls.end());
 }
 
 const std::vector<const IR::IDeclaration *> *ResolutionContext::resolve(
@@ -187,10 +183,9 @@ const std::vector<const IR::IDeclaration *> *ResolutionContext::lookup(
                   current->node_type_name());
     }
     if (auto nested = current->to<IR::INestedNamespace>()) {
-        // boost::adaptors::reverse expects a reference
         auto temp = nested->getNestedNamespaces();
-        for (auto nn : boost::adaptors::reverse(temp)) {
-            auto rv = lookup(nn, name, type);
+        for (auto it = temp.rbegin(); it != temp.rend(); ++it) {
+            const auto *rv = lookup(*it, name, type);
             if (!rv->empty()) return rv;
         }
     }

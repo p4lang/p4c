@@ -32,14 +32,15 @@ class ResolutionContext : virtual public Visitor, public DeclarationLookup {
  private:
     // Returns a vector of the decls that exist in the given namespace, and caches the result
     // for future lookups.
-    std::vector<const IR::IDeclaration *> *memoizeDeclarations(const IR::INamespace *ns) const;
+    const std::vector<const IR::IDeclaration *> &memoizeDeclarations(
+        const IR::INamespace *ns) const;
 
     // Returns a mapping from name -> decl for the given namespace, and caches the result for
     // future lookups.
     std::unordered_multimap<cstring, const IR::IDeclaration *> &memoizeDeclsByName(
         const IR::INamespace *ns) const;
 
-    mutable std::unordered_map<const IR::INamespace *, std::vector<const IR::IDeclaration *> *>
+    mutable std::unordered_map<const IR::INamespace *, std::vector<const IR::IDeclaration *>>
         namespaceDecls;
     mutable std::unordered_map<const IR::INamespace *,
                                std::unordered_multimap<cstring, const IR::IDeclaration *>>
