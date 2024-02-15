@@ -4,11 +4,11 @@
 #include <iomanip>
 #include <optional>
 #include <string>
-#include <utility>
 
 #include <inja/inja.hpp>
 
 #include "backends/p4tools/common/lib/util.h"
+#include "control-plane/p4infoApi.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"
 #include "nlohmann/json.hpp"
@@ -19,8 +19,9 @@
 
 namespace P4Tools::P4Testgen::Bmv2 {
 
-ProtobufIr::ProtobufIr(const TestBackendConfiguration &testBackendConfiguration)
-    : Bmv2TestFramework(testBackendConfiguration) {}
+ProtobufIr::ProtobufIr(const TestBackendConfiguration &testBackendConfiguration,
+                       P4::P4RuntimeAPI p4RuntimeApi)
+    : Bmv2TestFramework(testBackendConfiguration), p4RuntimeApi(p4RuntimeApi) {}
 
 std::string ProtobufIr::getFormatOfNode(const IR::IAnnotated *node) {
     const auto *formatAnnotation = node->getAnnotation("format");
@@ -251,6 +252,32 @@ void ProtobufIr::createKeyMatch(cstring fieldName, const TableMatch &fieldMatch,
         TESTGEN_UNIMPLEMENTED("Unsupported table key match type \"%1%\"",
                               fieldMatch.getObjectName());
     }
+}
+
+inja::json ProtobufIr::getControlPlaneTable(const TableConfig &tblConfig) const {
+    inja::json tblJson;
+    const auto *p4RuntimeTableOpt = P4::ControlPlaneAPI::findP4RuntimeTable(
+        *p4RuntimeApi.p4Info, tblConfig.getTable()->controlPlaneName());
+    BUG_CHECK(p4RuntimeTableOpt != nullptr, "Table not found in the P4Info file.");
+    tblJson["table_name"] = p4RuntimeTableOpt->preamble().alias();
+
+    const auto *tblRules = tblConfig.getRules();
+    tblJson["rules"] = inja::json::array();
+    for (const auto &tblRule : *tblRules) {
+        inja::json rule;
+        const auto *matches = tblRule.getMatches();
+        const auto *actionCall = tblRule.getActionCall();
+        const auto *actionArgs = actionCall->getArgs();
+        const auto *p4RuntimeActionOpt = P4::ControlPlaneAPI::findP4RuntimeAction(
+            *p4RuntimeApi.p4Info, actionCall->getAction()->controlPlaneName());
+        BUG_CHECK(p4RuntimeActionOpt != nullptr, "Action not found in the P4Info file.");
+        rule["action_name"] = p4RuntimeActionOpt->preamble().alias();
+        auto j = getControlPlaneForTable(*matches, *actionArgs);
+        rule["rules"] = std::move(j);
+        rule["priority"] = tblRule.getPriority();
+        tblJson["rules"].push_back(rule);
+    }
+    return tblJson;
 }
 
 inja::json ProtobufIr::getControlPlaneForTable(const TableMatchMap &matches,
