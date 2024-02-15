@@ -1323,6 +1323,23 @@ ControlBodyTranslatorPNA::ControlBodyTranslatorPNA(const EBPF::EBPFControlPSA *c
       EBPF::ControlBodyTranslator(control),
       tcIR(tcIR) {}
 
+bool ControlBodyTranslatorPNA::preorder(const IR::Member *m) {
+    if ((m->expr != nullptr) && (m->expr->type != nullptr)) {
+        if (auto st = m->expr->type->to<IR::Type_Struct>()) {
+            if (st->name == "pna_main_input_metadata_t") {
+                if (m->member.name == "input_port") {
+                    builder->append("skb->ifindex");
+                    return false;
+                } else {
+                    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                            "%1%: this metadata field is not supported", m);
+                }
+            }
+        }
+    }
+    return CodeGenInspector::preorder(m);
+}
+
 ControlBodyTranslatorPNA::ControlBodyTranslatorPNA(const EBPF::EBPFControlPSA *control,
                                                    const ConvertToBackendIR *tcIR,
                                                    const EBPF::EBPFTablePSA *table)
@@ -1333,17 +1350,6 @@ ControlBodyTranslatorPNA::ControlBodyTranslatorPNA(const EBPF::EBPFControlPSA *c
 
 cstring ControlBodyTranslatorPNA::getParamName(const IR::PathExpression *expr) {
     return expr->path->name.name;
-}
-
-bool ControlBodyTranslatorPNA::checkPnaPortMem(const IR::Member *m) {
-    if (m->expr != nullptr && m->expr->type != nullptr) {
-        if (auto str_type = m->expr->type->to<IR::Type_Struct>()) {
-            if (str_type->name == "pna_main_input_metadata_t" && m->member.name == "input_port") {
-                return true;
-            }
-        }
-    }
-    return false;
 }
 
 void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *function) {
@@ -1360,12 +1366,7 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
         for (auto a : *function->expr->arguments) {
             if (!first) builder->append(", ");
             first = false;
-            if (a->expression->is<IR::Member>() &&
-                checkPnaPortMem(a->expression->to<IR::Member>())) {
-                builder->append("skb->ifindex");
-            } else {
-                visit(a);
-            }
+            visit(a);
         }
         builder->append(")");
         return;
@@ -1482,16 +1483,12 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
                 }
             }
 
-            auto mem = c->expression->to<IR::Member>();
             builder->emitIndent();
             if (memcpy) {
                 builder->appendFormat("__builtin_memcpy(&(%s.%s[0]), &(", keyname.c_str(),
                                       fieldName.c_str());
                 table->codeGen->visit(c->expression);
                 builder->appendFormat("[0]), %d)", scalar->bytesRequired());
-            } else if (mem && checkPnaPortMem(mem)) {
-                builder->appendFormat("%s.%s = ", keyname.c_str(), fieldName.c_str());
-                builder->append("skb->ifindex");
             } else {
                 builder->appendFormat("%s.%s = ", keyname.c_str(), fieldName.c_str());
                 if (isLPMKeyBigEndian) builder->appendFormat("%s(", swap.c_str());

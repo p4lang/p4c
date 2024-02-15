@@ -319,6 +319,7 @@ class ControlBodyTranslatorPNA : public EBPF::ControlBodyTranslator {
     virtual cstring getParamName(const IR::PathExpression *);
     bool preorder(const IR::AssignmentStatement *a) override;
     void processMethod(const P4::ExternMethod *method) override;
+    bool preorder(const IR::Member *) override;
 };
 
 // Similar to class ActionTranslationVisitorPSA in backends/ebpf/psa/ebpfPsaControl.h
