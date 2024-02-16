@@ -534,7 +534,9 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
 
     P4RuntimeArchHandlerCommon(ReferenceMap *refMap, TypeMap *typeMap,
                                const IR::ToplevelBlock *evaluatedProgram)
-        : refMap(refMap), typeMap(typeMap), evaluatedProgram(evaluatedProgram) {}
+        : refMap(refMap), typeMap(typeMap), evaluatedProgram(evaluatedProgram) {
+        jsonPrintOptions.add_whitespace = true;
+    }
 
     void collectTableProperties(P4RuntimeSymbolTableIface *symbols,
                                 const IR::TableBlock *tableBlock) override {
@@ -707,6 +709,10 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
     void addExternEntries(const p4::v1::WriteRequest *, const P4RuntimeSymbolTableIface &,
                           const IR::ExternBlock *) override {}
     bool filterAnnotations(cstring) override { return false; }
+
+    google::protobuf::util::JsonPrintOptions getJsonPrintOptions() override {
+        return jsonPrintOptions;
+    }
 
     static std::optional<ActionProfile> getActionProfile(cstring name, const IR::Type_Extern *type,
                                                          int64_t size,
@@ -924,6 +930,9 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
 
     /// The extern instances we've serialized so far. Used for deduplication.
     std::set<p4rt_id_t> serializedInstances;
+
+    // JSON printing options for serialization
+    google::protobuf::util::JsonPrintOptions jsonPrintOptions;
 };
 
 /// Implements  a common @ref P4RuntimeArchHandlerIface for the PSA and PNA architecture. The
