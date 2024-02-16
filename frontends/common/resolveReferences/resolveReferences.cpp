@@ -16,6 +16,8 @@ limitations under the License.
 
 #include "resolveReferences.h"
 
+#include "frontends/common/parser_options.h"
+
 namespace P4 {
 
 ResolutionContext::ResolutionContext() { anyOrder = P4CContext::get().options().isv1(); }
