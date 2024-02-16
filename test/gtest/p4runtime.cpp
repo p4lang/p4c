@@ -72,10 +72,11 @@ class ParseAnnotations : public P4::ParseAnnotations {
         : P4::ParseAnnotations("FrontendTest", true, {PARSE("my_anno", StringLiteral)}) {}
 };
 
-struct AnnoFEP : P4::FrontEndPolicy {
+struct AnnotationParsingPolicy : P4::FrontEndPolicy {
     P4::ParseAnnotations *getParseAnnotations() const override { return pars; }
 
-    explicit AnnoFEP(P4::ParseAnnotations *parseAnnotations) : pars(parseAnnotations) {}
+    explicit AnnotationParsingPolicy(P4::ParseAnnotations *parseAnnotations)
+        : pars(parseAnnotations) {}
 
  private:
     P4::ParseAnnotations *pars;
@@ -86,8 +87,8 @@ std::optional<P4::P4RuntimeAPI> createP4RuntimeTestCase(
     CompilerOptions::FrontendVersion langVersion = FrontendTestCase::defaultVersion,
     const cstring arch = defaultArch,
     P4::ParseAnnotations *parseAnnotations = new P4::ParseAnnotations()) {
-    auto frontendTestCase =
-        FrontendTestCase::create(source, langVersion, new AnnoFEP(parseAnnotations));
+    auto frontendTestCase = FrontendTestCase::create(source, langVersion,
+                                                     new AnnotationParsingPolicy(parseAnnotations));
     if (!frontendTestCase) return std::nullopt;
     return P4::generateP4Runtime(frontendTestCase->program, arch);
 }
